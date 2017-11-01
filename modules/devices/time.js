@@ -157,49 +157,6 @@ class Time extends Control {
     }
 
     /**
-     * getCycles(fScaled)
-     *
-     * getCycles() returns the number of cycles executed so far.  Note that we can be called after
-     * run() OR during run(), perhaps from a handler triggered during the current run's step(),
-     * so nCyclesRun must always be adjusted by number of cycles step() was asked to run (nCyclesBurst),
-     * less the number of cycles it has yet to run (nCyclesRemain).
-     *
-     * nCyclesRun is zeroed whenever Time is halted or the speed is changed, which is why we also
-     * have nCyclesTotal, which accumulates all nCyclesRun before we zero it.  However, nCyclesRun and
-     * nCyclesTotal eventually get reset by calcSpeed(), to avoid overflow, so components that rely on
-     * getCycles() returning steadily increasing values should also be prepared for a reset at any time.
-     *
-     * @this {Time}
-     * @param {boolean} [fScaled] is true if the caller wants a cycle count relative to a multiplier of 1
-     * @return {number}
-     */
-    getCycles(fScaled)
-    {
-        let nCycles = this.nCyclesTotal + this.nCyclesRun + this.nCyclesBurst - this.nCyclesRemain;
-        if (fScaled && this.nTargetMultiplier > 1 && this.mhzCurrent > this.mhzBase) {
-            /*
-             * We could scale the current cycle count by the current speed (this.mhzCurrent); eg:
-             *
-             *      nCycles = Math.round(nCycles / (this.mhzCurrent / this.mhzBase));
-             *
-             * but that speed will fluctuate somewhat: large fluctuations at first, but increasingly smaller
-             * fluctuations after each burst of instructions that doBurst() executes.
-             *
-             * Alternatively, we can scale the cycle count by the multiplier, which is good in that the
-             * multiplier doesn't vary once the user changes it, but a potential downside is that the
-             * multiplier might be set too high, resulting in a target speed that's higher than the effective
-             * speed is able to reach.
-             *
-             * Also, if multipliers were always limited to a power-of-two, then this could be calculated
-             * with a simple shift.  However, only the "setSpeed" UI binding limits it that way; the Debugger
-             * interface allows any value, as does the Time "multiplier" config property.
-             */
-            nCycles = Math.round(nCycles / this.nTargetMultiplier);
-        }
-        return nCycles;
-    }
-
-    /**
      * getCurrentCyclesPerSecond()
      *
      * This returns the current speed (ie, the actual cycles per second, according the current multiplier)
@@ -295,7 +252,7 @@ class Time extends Control {
      */
     resetSpeed()
     {
-        this.nCyclesTotal = this.nCyclesRun = this.nCyclesBurst = this.nCyclesRemain = 0;
+        this.nCyclesRun = this.nCyclesBurst = this.nCyclesRemain = 0;
         this.setSpeed(this.nBaseMultiplier);
     }
 
@@ -310,10 +267,6 @@ class Time extends Control {
     {
         if (msElapsed) {
             this.mhzCurrent = Math.round(nCycles / (msElapsed * 10)) / 100;
-            if (msElapsed >= 86400000) {
-                this.nCyclesTotal = 0;
-                this.setSpeed();        // reset all counters once per day so that we never have to worry about overflow
-            }
         }
     }
 
@@ -641,10 +594,7 @@ class Time extends Control {
         this.nCyclesBurst = this.nCyclesRemain = 0;
         this.nCyclesThisRun += nCycles;
         this.nCyclesRun += nCycles;
-        if (!this.fRunning) {
-            this.nCyclesTotal += this.nCyclesRun;
-            this.nCyclesRun = 0;
-        }
+        if (!this.fRunning) this.nCyclesRun = 0;
         return nCycles;
     }
 

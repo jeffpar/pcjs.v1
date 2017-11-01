@@ -29,12 +29,40 @@
 "use strict";
 
 /**
+ * 64-bit Register
+ *
+ * @class {Reg64}
+ * @unrestricted
+ */
+class Reg64 extends Control {
+    /**
+     * Reg64(idMachine, idControl, config)
+     *
+     * @this {Reg64}
+     * @param {string} idMachine
+     * @param {string} [idControl]
+     * @param {Object} [config]
+     */
+    constructor(idMachine, idControl, config) {
+        super(idMachine, idControl, config);
+        /*
+         * Each Reg64 register contains 16 BCD/Hex digits, which we store as 16 independent 4-bit numbers.
+         */
+        this.digits = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    }
+}
+
+/**
+ * TMS-1500 Calculator Chip
+ *
  * @class {Chip}
  * @unrestricted
  */
 class Chip extends Control {
     /**
      * Chip(idMachine, idControl, config)
+     *
+     * Defines the basic components of the TMS-1500 chip, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
      *
      * @this {Chip}
      * @param {string} idMachine
@@ -44,5 +72,92 @@ class Chip extends Control {
     constructor(idMachine, idControl, config)
     {
         super(idMachine, idControl, config);
+        /*
+         * Four (4) Operational Registers: A-D
+         */
+        this.regsO = new Array(4);
+        for (let i = 0; i < 4; i++) {
+            this.regsO[i] = new Reg64(idMachine, "Register " + String.fromCharCode(0x41+i));
+        }
+        /*
+         * Eight (8) Storage Registers: X0-X7
+         */
+        this.regsX = new Array(8);
+        for (let i = 0; i < 8; i++) {
+            this.regsX[i] = new Reg64(idMachine, "Register X" + String.fromCharCode(0x30+i));
+        }
+        /*
+         * Eight (8) Storage Registers: Y0-Y7
+         */
+        this.regsY = new Array(8);
+        for (let i = 0; i < 8; i++) {
+            this.regsY[i] = new Reg64(idMachine, "Register Y" + String.fromCharCode(0x30+i));
+        }
+        /*
+         * RAB (Register Address Buffer) is a 3-bit register "selectively loadable by the I4-I6 bits of an
+         * instruction word" and "also selectively loadable from the three least significant bits of the number
+         * stored in R5 register".
+         */
+        this.regRAB = 0;
+        /*
+         * R5 is "an eight bit shift register which may be selectively loaded from either the serial output from
+         * arithmetic unit" or "may be loaded on lines KR1-3 and KR5-7 via gates from keyboard logic (at which
+         * times the MSB of each digit in Register R5 is loaded with a zero via gates according to the keyboard code
+         * code indicated in Table II)".
+         */
+        this.regR5 = 0;
+        /*
+         * The "Output Register" is twelve bit register, one bit for each digit of the display.  This essentially
+         * provides column information for the LED display, while the next register (regSGC) provides row information.
+         *
+         * Refer to patent Fig. 11c (p. 28)
+         */
+        this.regOut = 0;
+        /*
+         * The "Scan Generator Counter" is a 3-bit register.  It is updated once each instruction cycle.
+         * "[It] does not "count" sequentially, but during eight instruction cycle provides the three bit binary
+         * representations of zero through seven."  Here's the sequence from "Reference A" of Fig. 11e:
+         *
+         *                 DECODE    DISP     KBD
+         *      W   V   U     SEG     SEG    SCAN    HOLD
+         *      ---------  ------    ----    ----    ----
+         *      1   1   1       D       -       -       1
+         *      1   1   0       A       D     KS6       1
+         *      1   0   1       B       A     KS5       1
+         *      0   1   0       C       B     KS2       1
+         *      1   0   0       E       C     KS4       1
+         *      0   0   0       F       E     KS0       1
+         *      0   0   1       G       F     KS1       1
+         *      0   1   1       P       G     KS3       0
+         *      ---------  ------    ----    ----    ----
+         *      1   1   1       D       P     KS7       1
+         *      1   1   0       A       D     KS6       1
+         *      ...
+         *
+         * Refer to patent Fig. 11e (p. 30)
+         */
+        this.regScanGenCount = 0;
+        /*
+         * The "Segment/Keyboard Scan" is an 8-bit register "arranged as a ring counter for shifting a logical zero
+         * to a different stage during each instruction cycle....  [It is] further interconnected with the RESET signal
+         * for inserting a logical one into all stages of the counter."  The outputs from the stages are connected to
+         * SEG D, followed by SEG A, SEG B, SEG C, SEG E, SEG F, SEG G, and SEG P.
+         *
+         * Refer to patent Fig. 11b (p. 27)
+         */
+        this.regSegKbdScan = 0xff;
+        /*
+         * The "Program Counter"
+         */
+        this.regPC = 0;
+        /*
+         * The "Subroutine Stack".  "When an unconditional branch instruction is decoded by branch logic 32b, the
+         * CALL signal goes to zero permitting the present ROM address plus one to be loaded into subroutine stack
+         * register 33a....  Addresses previously loaded into subroutine stack/registers 33a and 33b are shifted
+         * to registers 33b and 33c."
+         *
+         * Refer to patent Fig. 7a (p. 9)
+         */
+        this.regPCStack = [0,0,0];
     }
 }
