@@ -5,7 +5,7 @@ in the Front Matter of our Markdown documents, for compatibility with the Jekyll
 
     'id' (eg: ibm5150)
     'name' (eg: "IBM PC (Model 5150) with Monochrome Display")
-    'type' (eg: c1p, pcx86, pc8080, pdp10, pdp11)
+    'type' (eg: c1p, pcx86, pc8080, pdp10, pdp11, ti57)
     'debugger' (default: false)
     'config' (default: machine.xml)
     'template' (default: machine.xsl)
@@ -110,18 +110,29 @@ The following optional machine properties will be added to the 'parms' property:
       {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/components.xsl{% endcapture %}
     {% endif %}
   {% else %}
-    {% capture machine_file_uncompiled %}{{ machine_file | remove:"-dbg" | append:"-uncompiled" }}{% endcapture %}
-    {% capture page_script %}
+    {% if machine_type == "TI57" %}
+      {% assign array_scripts = site.pcjs.ti57_scripts %}
+      {% for script in array_scripts %}
+        {% capture page_script %}<script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>{% endcapture %}
+        {% unless page_scripts contains page_script %}
+          {{ page_script }}
+        {% endunless %}
+        {% capture page_scripts %}{{ page_scripts }}{{ page_script }}{% endcapture %}
+      {% endfor %}
+    {% else %}
+      {% capture machine_file_uncompiled %}{{ machine_file | remove:"-dbg" | append:"-uncompiled" }}{% endcapture %}
+      {% capture page_script %}
       <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/{{ machine_file_uncompiled }}.js"></script>{% endcapture %}
-    {% unless page_scripts contains page_script %}
-      {{ page_script }}
-    {% endunless %}
-    {% capture page_scripts %}{{ page_scripts }}{{ page_script }}{% endcapture %}
-    {% if machine_template == "" %}
-      {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/components.xsl{% endcapture %}
+      {% unless page_scripts contains page_script %}
+        {{ page_script }}
+      {% endunless %}
+      {% capture page_scripts %}{{ page_scripts }}{{ page_script }}{% endcapture %}
+      {% if machine_template == "" %}
+        {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/components.xsl{% endcapture %}
+      {% endif %}
     {% endif %}
-    {% comment %}
 
+    {% comment %}
       The following approach worked well before we converted most of the code to ES6 classes.  Unfortunately, ES6 classes
       don't coexist well with the conditional Node require() statements inside the individual scripts.  Since we were already
       stripping all the Node-related code from the scripts to build monolithic scripts that we could feed into the Closure
