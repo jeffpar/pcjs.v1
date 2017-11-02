@@ -1,5 +1,5 @@
 /**
- * @fileoverview Simulates ROMs
+ * @fileoverview Simulates ROM
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *

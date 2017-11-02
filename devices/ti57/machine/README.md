@@ -1,6 +1,6 @@
 ---
 layout: page
-title: TI-57 Test Machine
+title: TI-57 Programmable Calculator: Test Machine
 permalink: /devices/ti57/machine/
 machines:
   - id: ti57
@@ -11,7 +11,7 @@ machines:
         "ti57": {
           "class": "Machine",
           "type": "TI57",
-          "name": "TI-57 Programmable Calculator Emulator",
+          "name": "TI-57 Emulator",
           "bindings": {
             "print": "printTI57"
           }
@@ -212,10 +212,18 @@ styles:
     font-family: Monaco,"Lucida Console",monospace;
 ---
 
-TI-57 Test Machine
-------------------
+TI-57 Programmable Calculator
+-----------------------------
 
 {% include machine.html id="ti57" %}
+
+This is a work-in-progress.  The emulator is not operational, but lots of pieces are in place.
+
+The [Time](/modules/devices/time.js) device can be started and stopped, and it will clock the
+[TMS-1500](/modules/devices/tms1500.js) chip at the appropriate rate, but no instructions are being decoded yet.
+
+There are also [Input](/modules/devices/input.js), [LED](/modules/devices/led.js), and
+[ROM](/modules/devices/rom.js) devices, as well as a [Machine](/modules/devices/machine.js) device to manage them.
 
 <div id="ti57"">
   <img id="imageTI57" src="../images/TI-57-640.png"/>

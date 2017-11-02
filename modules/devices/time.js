@@ -1,5 +1,5 @@
 /**
- * @fileoverview Simulates time
+ * @fileoverview Provides support for both time-based and cycle-based callbacks
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -31,16 +31,18 @@
 /**
  * Timer objects
  *
- * Operations that are cycle-driven (ie, that need to be "clocked") should define a clocker() function
- * and install it with addClocker(); that's not what Timers are for.  Timers are used for operations that
- * are supposed to occur after a certain amount of "real time" has elapsed (eg, key/button events that
- * need to be timed-out after a predefined period, display refreshes that need to occur every 60hz, periodic
- * yields to ensure that the browser remains responsive, etc).
+ * addTimer() and setTimer() create and manage Timer objects that are used for operations that must
+ * occur after a certain amount of "real time" has elapsed (eg, key/button events that need to be timed-out
+ * after a predefined period, display refreshes that need to occur every 60hz, periodic yields to ensure
+ * that the browser remains responsive, etc).
  *
- * setTimer() is preferred over JavaScript's setTimeout(), because all our timers convert "real time" into
- * cycle countdowns, which are effectively paused whenever cycle generation is paused (eg, when the Debugger
- * halts execution).  Moreover, setTimeout() handlers only run after run() yields, which is far too granular
- * for some devices (eg, when a serial port tries to simulate interrupts at 9600 baud).
+ * These functions are preferred over JavaScript's setTimeout(), because our timers convert "real time"
+ * into cycle countdowns, which are effectively paused whenever cycle generation is paused (eg, when the
+ * Debugger halts execution).  Moreover, setTimeout() handlers only run after run() yields, which is far too
+ * granular for some devices (eg, when a serial port tries to simulate interrupts at 9600 baud).
+ *
+ * addClocker() should be used for devices that are cycle-driven (ie, that need to be "clocked") rather than
+ * time-driven; they must define a clocker() function and install it with addClocker().
  *
  * @typedef {Object} Timer
  * @property {string} id

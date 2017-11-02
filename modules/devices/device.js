@@ -1,5 +1,5 @@
 /**
- * @fileoverview Base class for all generic devices
+ * @fileoverview Base class for devices, with assorted handy services
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
