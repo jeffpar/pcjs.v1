@@ -1,0 +1,9 @@
+{% if page.styles != nil %}
+  <style type="text/css">
+  {% for id in page.styles %}
+    #{{ id[0] }} {
+      {% for style in id[1] %}{{ style[0] }}: {{ style[1] }}{% endfor %}
+    }
+  {% endfor %}
+  </style>
+{% endif %}

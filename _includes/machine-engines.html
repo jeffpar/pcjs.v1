@@ -110,7 +110,7 @@ The following optional machine properties will be added to the 'parms' property:
       {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/components.xsl{% endcapture %}
     {% endif %}
   {% else %}
-    {% if machine_type == "TI57" %}
+    {% if machine_type == "ti57" %}
       {% assign array_scripts = site.pcjs.ti57_scripts %}
       {% for script in array_scripts %}
         {% capture page_script %}<script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>{% endcapture %}
@@ -177,7 +177,11 @@ The following optional machine properties will be added to the 'parms' property:
       {% endif %}
   {% endcomment %}
   {% endif %}
-  <script type="text/javascript">{{ machine_embed }}('{{ machine.id }}','{{ machine_config }}','{{ machine_template }}','{{ machine_parms }}');</script>
+  {% if machine_type == "ti57" %}
+    <script type="text/javascript">new Machine('{{ machine.id }}','{{ machine_config | strip_newlines }}');</script>
+  {% else %}
+    <script type="text/javascript">{{ machine_embed }}('{{ machine.id }}','{{ machine_config }}','{{ machine_template }}','{{ machine_parms }}');</script>
+  {% endif %}
   {% if machine.sticky == "top" %}
     <script type="text/javascript" src="{{ site.baseurl }}/modules/shared/lib/sticky.js"></script>
     <script type="text/javascript">addStickyMachine('{{ machine.id }}');</script>

@@ -1254,7 +1254,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * Before we start looking for Markdown-style machine links, see if there are any Liquid-style machines,
      * (in case this Markdown file is part of a Jekyll installation) and convert them to Markdown-style links.
      */
-    var reIncludes = /(.){%\s*include\s+machine\.html\s+id=(["'])(.*?)\2\s*%}/g;
+    var reIncludes = /(.){%\s*include\s+machine\.html\s+id=(["'])(.*?)\2.*?%}/g;
 
     while ((aMatch = reIncludes.exec(sBlock))) {
         if (aMatch[1] == '\t') continue;
