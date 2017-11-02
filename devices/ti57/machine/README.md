@@ -11,7 +11,7 @@ machines:
         "ti57": {
           "class": "Machine",
           "type": "TI57",
-          "name": "TI-57 Programmable Calculator Simulation",
+          "name": "TI-57 Programmable Calculator Emulator",
           "bindings": {
             "print": "printTI57"
           }
@@ -223,7 +223,7 @@ TI-57 Test Page
 </div>
 <div style="float:left;">
   <div style="width:100%;">
-    <p>Status Window</p>
+    <p>Diagnostics</p>
     <textarea id="printTI57" cols="80" rows="10"></textarea>
   </div>
   <button id="runTI57">Run</button><span id="speedTI57">Stopped</span>

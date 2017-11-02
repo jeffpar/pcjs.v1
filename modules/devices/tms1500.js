@@ -215,7 +215,7 @@ class Chip extends Device {
         // this.states[29][2] = function getROMData() {    // S29.Φ2
         //     chip.regIW = chip.rom.getData();
         //     chip.time.doOutside(function() {
-        //         chip.println(chip.disassembleIW(chip.regIW, chip.regPC));
+        //         chip.println(chip.disassemble(chip.regIW, chip.regPC));
         //         chip.stop();
         //     });
         // };
@@ -225,24 +225,25 @@ class Chip extends Device {
         // if (DEBUG) {
         //     for (let addr = 0; addr < 0x800; addr++) {
         //         let w = this.rom.getData(addr);
-        //         this.println(this.disassembleIW(w, addr));
+        //         this.println(this.disassemble(w, addr));
         //     }
         // }
+        this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
     }
 
     /**
-     * decodeIW()
+     * decode()
      *
      * @this {Chip}
      */
-    decodeIW()
+    decode()
     {
         if (this.regIW > 0) {
         }
     }
 
     /**
-     * disassembleIW(w, addr)
+     * disassemble(w, addr)
      *
      * Returns a string representation of the selected instruction.
      *
@@ -250,7 +251,7 @@ class Chip extends Device {
      * @param {number} addr
      * @returns {string}
      */
-    disassembleIW(w, addr)
+    disassemble(w, addr)
     {
         let sOp = "???";
         let sOperands = "";
@@ -334,12 +335,17 @@ class Chip extends Device {
                 sOperands += ':' + (((w & (Chip.IW_FF.D_MASK | Chip.IW_FF.B_MASK)) >> Chip.IW_FF.B_SHIFT) + 48);
                 break;
             case Chip.IW_MF.D13:    // 0x0d00: (D13)
+                sMask = "0x00F0000000000000";
                 break;
             case Chip.IW_MF.PF:     // 0x0e00: (used for misc operations)
                 switch(w & Chip.IW_PF.MASK) {
-                case Chip.IW_PF.STYA:   // 0x0001: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
+                case Chip.IW_PF.STYA:   // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
                     sOp = "LOAD";
                     sOperands = "A,Y[RAB]";
+                    break;
+                case Chip.IW_PF.NAB:    // 0x0001: Bits 4-6 of instruction are stored in RAB
+                    sOp = "NAB";
+                    sOperands = "RAB," + ((w & 0xF0) >> 4);
                     break;
                 case Chip.IW_PF.BRR5:   // 0x0002: Branch to R5
                     sOp = "BR";
@@ -378,6 +384,7 @@ class Chip extends Device {
                 }
                 break;
             case Chip.IW_MF.D15:    // 0x0f00: (D15)
+                sMask = "0xF000000000000000";
                 break;
             }
             if (sMask) {
@@ -422,7 +429,40 @@ class Chip extends Device {
                 sOperands += "," + sMask;
             }
         }
-        return this.sprintf("0x%04x: 0x%04x  %-8s%s", addr, w, sOp, sOperands);
+        return this.sprintf("0x%04x: 0x%04x  %-8s%s\n", addr, w, sOp, sOperands);
+    }
+
+    /**
+     * onCommand(sCommand)
+     *
+     * @param {string} sCommand
+     * @returns {boolean} (true if processed, false if not)
+     */
+    onCommand(sCommand)
+    {
+        let addr, n = 8, sResult = "";
+        let aCommands = sCommand.split(' ');
+        switch(aCommands[0]) {
+        case "u":
+            addr = aCommands[1]? (Number.parseInt(aCommands[1], 16) || 0) : this.regPC;
+            while (n--) {
+                sResult += this.disassemble(this.rom.getData(addr), addr++);
+            }
+            break;
+        case "":
+            return true;
+        case "help":
+        case "?":
+            sResult = "supported commands:\nu [addr]";
+            break;
+        default:
+            break;
+        }
+        if (!sResult) {
+            sResult = "unsupported command: " + sCommand;
+        }
+        this.println(sResult.trim());
+        return true;
     }
 
     /**
@@ -507,7 +547,8 @@ Chip.IW_FF = {          // Instruction Word F (Flag) Field (used when the Mask F
 
 Chip.IW_PF = {          // Instruction Word P (Misc) Field (used when the Mask Field is PF)
     MASK:   0x000F,
-    STYA:   0x0001,     // Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
+    STYA:   0x0000,     // Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
+    NAB:    0x0001,     // Bits 4-6 of instruction are stored in RAB
     BRR5:   0x0002,     // Branch to R5
     RET:    0x0003,     // Return
     STAX:   0x0004,     // Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)

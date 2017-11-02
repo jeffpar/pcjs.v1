@@ -114,7 +114,44 @@ class Device {
                         event = event || window.event;
                         let keyCode = event.which || event.keyCode;
                         if (keyCode) {
+                            /*
+                             * Move the caret to the end of any text in the textarea.
+                             */
+                            let sText = elementTextArea.value;
+                            elementTextArea.setSelectionRange(sText.length, sText.length);
+
+                            /*
+                             * Don't let the Input device's document-based keypress handler see any key presses
+                             * that came to this element first.
+                             */
                             event.stopPropagation();
+
+                            /*
+                             * On the ENTER key, look for any COMMAND handlers and invoke them until one of them
+                             * returns true.
+                             */
+                            if (keyCode == 13) {
+                                let afn = device.findHandlers(Device.HANDLER.COMMAND);
+                                if (afn) {
+                                    /*
+                                     * At the time we call any command handlers, a linefeed will not yet have been
+                                     * appended to the text, so for consistency, we prevent the default behavior and
+                                     * add the linefeed ourselves.  Unfortunately, one side-effect is that we must
+                                     * go to some extra effort to ensure the cursor remains in view; hence the stupid
+                                     * blur() and focus() calls.
+                                     */
+                                    event.preventDefault();
+                                    sText = (elementTextArea.value += '\n');
+                                    elementTextArea.blur();
+                                    elementTextArea.focus();
+
+                                    let i = sText.lastIndexOf('\n', sText.length - 2);
+                                    let sCommand = sText.slice(i+1, -1);
+                                    for (let i = 0; i < afn.length; i++) {
+                                        if (afn[i](sCommand)) break;
+                                    }
+                                }
+                            }
                         }
                     }
                 );
@@ -156,6 +193,20 @@ class Device {
     {
         if (!Device.Machines[this.idMachine]) Device.Machines[this.idMachine] = [];
         Device.Machines[this.idMachine].push(this);
+    }
+
+    /**
+     * addHandler(sType, fn)
+     *
+     * @this {Device}
+     * @param {string} sType
+     * @param {function(string)} fn
+     */
+    addHandler(sType, fn)
+    {
+        if (!Device.Handlers[this.idMachine]) Device.Handlers[this.idMachine] = {};
+        if (!Device.Handlers[this.idMachine][sType]) Device.Handlers[this.idMachine][sType] = [];
+        Device.Handlers[this.idMachine][sType].push(fn);
     }
 
     /**
@@ -249,6 +300,18 @@ class Device {
             }
         }
         return device;
+    }
+
+    /**
+     * findHandlers(sType)
+     *
+     * @this {Device}
+     * @param {string} sType
+     * @returns {Array.<function()>|undefined}
+     */
+    findHandlers(sType)
+    {
+        return Device.Handlers[this.idMachine] && Device.Handlers[this.idMachine][sType];
     }
 
     /**
@@ -427,6 +490,18 @@ Device.BINDING = {
 Device.CATEGORY = {
     TIME:   "time"
 };
+
+Device.HANDLER = {
+    COMMAND: "command"
+};
+
+/**
+ * Handlers is a global object whose properties are machine IDs, each of which contains zero or more
+ * handler IDs, each of which contains an arrays of functions.
+ *
+ * @type {Object}
+ */
+Device.Handlers = {};
 
 /**
  * Machines is a global object whose properties are machine IDs and whose values are arrays of Devices.
