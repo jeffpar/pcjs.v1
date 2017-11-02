@@ -1,6 +1,6 @@
 ---
 layout: page
-title: TI-57 Programmable Calculator: Test Machine
+title: TI-57 Test Machine
 permalink: /devices/ti57/machine/
 machines:
   - id: ti57
@@ -212,8 +212,8 @@ styles:
     font-family: Monaco,"Lucida Console",monospace;
 ---
 
-TI-57 Programmable Calculator
------------------------------
+TI-57 Test Machine
+------------------
 
 {% include machine.html id="ti57" %}
 
