@@ -14,7 +14,7 @@ Additional resources include:
 
 - [TI-57 Patents](patents/)
 - [TI-57 ROM](rom/)
-- [TI-57 Test Machine](machine/)
+- [TI-57 Test Page](machine/)
 
 Below, you can see that mine was technically a Radio Shack EC-4000, but that was just rebranding.  I have a
 hunch that if I peeled off the Radio Shack sticker on the back (underneath my custom Dymo label), it would say

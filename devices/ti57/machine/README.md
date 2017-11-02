@@ -1,6 +1,6 @@
 ---
 layout: page
-title: TI-57 Test Machine
+title: TI-57 Test Page
 permalink: /devices/ti57/machine/
 machines:
   - id: ti57
@@ -220,20 +220,18 @@ styles:
     font-family: Monaco,"Lucida Console",monospace;
 ---
 
-TI-57 Test Machine
-------------------
-
-{% include machine.html id="ti57" %}
+TI-57 Test Page
+---------------
 
 This is a work-in-progress.  The emulator is not operational, but lots of pieces are in place.
-
 The [Time](/modules/devices/time.js) device can be started and stopped, and it will clock the
 [TMS-1500](/modules/devices/tms1500.js) chip at the appropriate rate, but no instructions are being decoded yet.
-
 There are also [Input](/modules/devices/input.js), [LED](/modules/devices/led.js), and
 [ROM](/modules/devices/rom.js) devices, as well as a [Machine](/modules/devices/machine.js) device to manage them.
 
-<div id="ti57"">
+{% include machine.html id="ti57" config="json" %}
+
+<div id="ti57">
   <img id="imageTI57" src="../images/TI-57-640.png"/>
   <div id="displayTI57"></div>
   <button id="powerTI57">Power</button>
