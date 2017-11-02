@@ -1,6 +1,6 @@
 ---
 layout: page
-title: TI-57 Test Page
+title: TI-57 Test Machine
 permalink: /devices/ti57/machine/
 machines:
   - id: ti57
@@ -212,8 +212,8 @@ styles:
     font-family: Monaco,"Lucida Console",monospace;
 ---
 
-TI-57 Test Page
----------------
+TI-57 Test Machine
+------------------
 
 {% include machine.html id="ti57" %}
 
@@ -224,7 +224,7 @@ TI-57 Test Page
 <div style="float:left;">
   <div style="width:100%;">
     <p>Diagnostics</p>
-    <textarea id="printTI57" cols="80" rows="10"></textarea>
+    <textarea id="printTI57" cols="80" rows="16"></textarea>
   </div>
   <button id="runTI57">Run</button><span id="speedTI57">Stopped</span>
 </div>

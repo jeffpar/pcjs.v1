@@ -10,10 +10,11 @@ TI-57 Programmable Calculator
 This was my first programmable device.  I obtained mine (serial no. 9604427) on October 7, 1978, more than
 two months before getting my first personal computer, the 6502-based [Challenger 1P](/devices/c1p/).
 
-Additional information is available on:
+Additional resources include:
 
 - [TI-57 Patents](patents/)
 - [TI-57 ROM](rom/)
+- [TI-57 Test Machine](machine/)
 
 Below, you can see that mine was technically a Radio Shack EC-4000, but that was just rebranding.  I have a
 hunch that if I peeled off the Radio Shack sticker on the back (underneath my custom Dymo label), it would say
