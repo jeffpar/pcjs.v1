@@ -29,8 +29,22 @@
 "use strict";
 
 /**
+ * @typedef {Object} ROMConfig
+ * @property {string} class
+ * @property {number} wordSize
+ * @property {number} valueSize
+ * @property {number} valueTotal
+ * @property {boolean} littleEndian
+ * @property {string} file
+ * @property {string} reference
+ * @property {Array.<number>} values
+ */
+
+/**
  * @class {ROM}
  * @unrestricted
+ * @property {ROMConfig} config
+ * @property {Array.<number>} data
  */
 class ROM extends Device {
     /**
@@ -53,10 +67,68 @@ class ROM extends Device {
      * @this {ROM}
      * @param {string} idMachine
      * @param {string} [idDevice]
-     * @param {Object} [config]
+     * @param {ROMConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
+        this.addr = 0;
+        this.data = config.values;
+    }
+
+    /**
+     * setAddr(addr)
+     *
+     * Selects a word.
+     *
+     * @param {number} addr
+     */
+    setAddr(addr)
+    {
+        this.addr = addr;
+    }
+
+    /**
+     * getData()
+     *
+     * Returns the selected word.
+     *
+     * @returns {number}
+     */
+    getData()
+    {
+        return this.data[this.addr];
+    }
+
+    /**
+     * getString()
+     *
+     * Returns a string representation of the selected word.
+     *
+     * @returns {string}
+     */
+    getString()
+    {
+        let sOp = "???";
+        let sOperand = "", v;
+        let w = this.data[this.addr];
+        if (w & 0x1000) {
+            if (w & 0x0800) {
+                sOp = "BR";
+                if (w & 0x0400) {
+                    sOp += "C";
+                } else {
+                    sOp += "NC";
+                }
+                v = (this.addr & 0x0400) | (w & 0x03FF);
+            } else {
+                sOp = "CALL";
+                v = w & 0x07FF;
+            }
+            sOperand = this.sprintf("0x%04x", v);
+        } else {
+
+        }
+        return this.sprintf("0x%04x: 0x%04x  %-8s%s", this.addr, w, sOp, sOperand);
     }
 }

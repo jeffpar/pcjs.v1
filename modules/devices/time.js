@@ -219,10 +219,19 @@ class Time extends Device {
     doBurst(nCycles)
     {
         this.nCyclesBurst = this.nCyclesRemain = nCycles;
+        if (!this.aClockers.length) {
+            this.nCyclesRemain = 0;
+            return this.nCyclesBurst;
+        }
+        let iClocker = 0;
         while (this.nCyclesRemain > 0) {
-            for (let i = 0; i < this.aClockers.length; i++) {
-                this.nCyclesRemain -= (this.aClockers[i]() || 1);
+            let nCycles = 0;
+            if (iClocker < this.aClockers.length) {
+                nCycles = this.aClockers[iClocker++]() || 1;
+            } else {
+                iClocker = 0;
             }
+            this.nCyclesRemain -= nCycles;
         }
         return this.nCyclesBurst - this.nCyclesRemain;
     }
@@ -624,7 +633,7 @@ class Time extends Device {
      * Used for both periodic status updates and forced updates (eg, on start() and stop() calls)
      *
      * @this {Time}
-     * @param {boolean} fForced
+     * @param {boolean} [fForced]
      */
     updateStatus(fForced)
     {

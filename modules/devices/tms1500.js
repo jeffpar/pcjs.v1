@@ -152,7 +152,7 @@ class Chip extends Device {
          *
          * Refer to patent Fig. 11e (p. 30)
          */
-        this.regScanGenCount = 0;
+        this.regScanGen = 0;
 
         /*
          * The "Segment/Keyboard Scan" is an 8-bit register "arranged as a ring counter for shifting a logical zero
@@ -165,10 +165,22 @@ class Chip extends Device {
         this.regSegKbdScan = 0xff;
 
         /*
-         * The "Program Counter" is an 11-bit register that automatically increments unless a HOLD signal is
-         * applied, effectively locking execution on a single instruction.
+         * The "State Time Generator" is represented by a 5-bit register that contains values 00000b through 11111b
+         * for each of the 32 state times that occur during a single instruction cycle.  And since each "state time"
+         * consists of four clock pulses, designated Φ1, P1, Φ2, and P2, we keep track of which pulse we're on, too.
+         *
+         * Refer to patent Fig. 11f (p. 31)
+         */
+        this.regStateTime = 0;
+        this.regPulseTime = 0;
+
+        /*
+         * The "Program Counter" (regPC) is an 11-bit register that automatically increments unless a HOLD signal
+         * is applied, effectively locking execution on a single instruction.  The next 13-bit instruction fetched
+         * from ROM is stored in regIns.
          */
         this.regPC = 0;
+        this.regIns = -1;
 
         /*
          * The "Subroutine Stack".  "When an unconditional branch instruction is decoded by branch logic 32b, the
@@ -189,30 +201,82 @@ class Chip extends Device {
          * Get access to the Time device, so we can give it our clocker() function.
          */
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
-        if (this.time) {
-            this.time.addClocker(this.clocker);
+        this.time.addClocker(this.clocker.bind(this));
+
+        let chip = this;
+        this.states = new Array(32);
+        for (let i = 0; i < this.states.length; i++) {
+            this.states[i] = new Array(4);
+        }
+        this.states[0][0] = chip.decodeIns.bind(this);  // S01.Φ1
+        this.states[22][0] = function setROMAddr() {    // S22.Φ1
+            chip.rom.setAddr(chip.regPC);
+        };
+        this.states[29][2] = function getROMData() {    // S29.Φ2
+            chip.regIns = chip.rom.getData();
+            chip.time.doOutside(function() {
+                chip.println(chip.rom.getString());
+                chip.stop();
+            });
+        };
+        this.fStop = false;
+    }
+
+    /**
+     * decodeIns()
+     *
+     * @this {Chip}
+     */
+    decodeIns()
+    {
+        if (this.regIns > 0) {
         }
     }
 
     /**
-     * clocker()
+     * stop()
+     *
+     * @this {Chip}
+     */
+    stop()
+    {
+        this.time.stop();
+        this.fStop = true;
+    }
+
+    /**
+     * clocker(fStep)
      *
      * The TI-57 has a standard cycle time of 0.625us, which translates to 1,600,000 cycles per second.
      *
      * Every set of four cycles is designated a "state time".  Within a single state time (2.5us), the four cycles
-     * are designated O1, P1, O2, and P2.  Moreover, one state time is required to transfer 2 bits from a data word
-     * register.  Since a data word consists of 16 BCD digits, that's 64 bits, or 32 state times, or 80us.  That being
-     * the longest operation an instruction may perform, one instruction is typically 80us.  Exceptions include display
-     * instructions, which slow the delivery of cycles, such that one state time is 10us instead of 2.5us, and
-     * therefore the instruction takes 320us instead of 80us.
+     * are designated Φ1, P1, Φ2, and P2.  Moreover, one state time is required to transfer 2 bits from a data word
+     * register.  Since a data word consists of 16 BCD digits (ie, 64 bits), 32 state times (80us) are required to
+     * "clock" all the bits from one register to another.  This total time is referred to as an instruction cycle.
+     *
+     * Note that some instructions (ie, display instructions) slow the delivery of cycles, such that one state time
+     * is 10us instead of 2.5us, and therefore the entire instruction cycle will take 320us instead of 80us.
      *
      * I'll start with the assumption that simulating a full 32 "state times", or 128 cycles, per call makes the most
      * sense.  So that's what we'll do.
      *
+     * @this {Chip}
+     * @param {boolean} [fStep] (default is false)
      * @returns {number}
      */
-    clocker()
+    clocker(fStep = false)
     {
-        return 128;
+        let nCycles = 0;
+        this.fStop = fStep;
+        do {
+            let fn = this.states[this.regStateTime][this.regPulseTime];
+            if (fn) fn();
+            nCycles++;
+            this.regPulseTime = (this.regPulseTime + 1) & 0x3;
+            if (!this.regPulseTime) {
+                this.regStateTime = (this.regStateTime + 1) & 0x1f;
+            }
+        } while ((this.regPulseTime || this.regStateTime) && !this.fStop);
+        return nCycles;
     }
 }

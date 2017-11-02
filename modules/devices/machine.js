@@ -123,37 +123,43 @@ class Machine extends Device {
      */
     initDevices()
     {
+        let idDevice, sClass, device;
         for (let iClass = 0; iClass < Machine.CLASSORDER.length; iClass++) {
-            for (let idDevice in this.config) {
-                let config = this.config[idDevice];
-                let sClass = config['class'], device;
-                if (sClass != Machine.CLASSORDER[iClass]) continue;
-                switch (sClass) {
-                case Machine.CLASS.CHIP:
-                    device = new Chip(this.idMachine, idDevice, config);
-                    break;
-                case Machine.CLASS.INPUT:
-                    device = new Input(this.idMachine, idDevice, config);
-                    break;
-                case Machine.CLASS.LED:
-                    device = new LED(this.idMachine, idDevice, config);
-                    break;
-                case Machine.CLASS.ROM:
-                    device = new ROM(this.idMachine, idDevice, config);
-                    break;
-                case Machine.CLASS.TIME:
-                    device = new Time(this.idMachine, idDevice, config);
-                    break;
-                case Machine.CLASS.MACHINE:
-                    this.println(config.name);
-                    this.println(Machine.COPYRIGHT);
-                    this.println(Machine.LICENSE);
-                    continue;
-                default:
-                    this.println("unrecognized device class: " + sClass);
-                    continue;
+            for (idDevice in this.config) {
+                try {
+                    let config = this.config[idDevice];
+                    sClass = config['class'];
+                    if (sClass != Machine.CLASSORDER[iClass]) continue;
+                    switch (sClass) {
+                    case Machine.CLASS.CHIP:
+                        device = new Chip(this.idMachine, idDevice, config);
+                        break;
+                    case Machine.CLASS.INPUT:
+                        device = new Input(this.idMachine, idDevice, config);
+                        break;
+                    case Machine.CLASS.LED:
+                        device = new LED(this.idMachine, idDevice, config);
+                        break;
+                    case Machine.CLASS.ROM:
+                        device = new ROM(this.idMachine, idDevice, config);
+                        break;
+                    case Machine.CLASS.TIME:
+                        device = new Time(this.idMachine, idDevice, config);
+                        break;
+                    case Machine.CLASS.MACHINE:
+                        this.println(config.name);
+                        this.println(Machine.COPYRIGHT);
+                        this.println(Machine.LICENSE);
+                        continue;
+                    default:
+                        this.println("unrecognized device class: " + sClass);
+                        continue;
+                    }
+                    this.println(sClass + " device initialized");
                 }
-                this.println(sClass + " device initialized");
+                catch(err) {
+                    this.println("error initializing device " + idDevice + ": " + err.message);
+                }
             }
         }
     }

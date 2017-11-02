@@ -291,7 +291,7 @@ class Device {
      *
      * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
      *
-     * Far from complete let alone sprintf-compatible, but it's a start.
+     * Far from complete, let alone sprintf-compatible, but it's a start.
      *
      * @this {Device}
      * @param {string} format
@@ -305,8 +305,8 @@ class Device {
         let partIndex = 0;
         for (let i = 0; i < args.length; i++) {
 
-            let arg = args[i], d, s;
             buffer += parts[partIndex++];
+            let arg = args[i], ach = null, s;
             let flags = parts[partIndex];
             let minimum = +parts[partIndex+1] || 0;
             let precision = +parts[partIndex+3] || 0;
@@ -314,30 +314,58 @@ class Device {
 
             switch(conversion) {
             case 'd':
+                /*
+                 * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
+                 */
+                arg = Math.trunc(arg);
+                /* falls through */
+
             case 'f':
-                d = Math.trunc(arg);
-                s = d + "";
+                s = arg + "";
                 if (precision) {
                     minimum -= (precision + 1);
                 }
                 if (s.length < minimum) {
                     if (flags == '0') {
-                        if (d < 0) minimum--;
-                        s = ("0000000000" + Math.abs(d)).slice(-minimum);
-                        if (d < 0) s = '-' + s;
+                        if (arg < 0) minimum--;
+                        s = ("0000000000" + Math.abs(arg)).slice(-minimum);
+                        if (arg < 0) s = '-' + s;
                     } else {
                         s = ("          " + s).slice(-minimum);
                     }
                 }
                 if (precision) {
-                    d = Math.trunc((arg - Math.trunc(arg)) * Math.pow(10, precision));
-                    s += '.' + ("0000000000" + Math.abs(d)).slice(-precision);
+                    arg = Math.trunc((arg - Math.trunc(arg)) * Math.pow(10, precision));
+                    s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
                 }
                 buffer += s;
                 break;
+
             case 's':
+                while (arg.length < minimum) {
+                    if (flags == '-') {
+                        arg += ' ';
+                    } else {
+                        arg = ' ' + arg;
+                    }
+                }
                 buffer += arg;
                 break;
+
+            case 'X':
+                ach = "0123456789ABCDEF";
+                /* falls through */
+
+            case 'x':
+                if (!ach) ach = "0123456789abcdef";
+                s = "";
+                do {
+                    s = ach[arg & 0xf] + s;
+                    arg >>>= 4;
+                } while (--minimum > 0 || arg);
+                buffer += s;
+                break;
+
             default:
                 /*
                  * The supported ANSI C set of conversions: "dioxXucsfeEgGpn%"
