@@ -53,7 +53,8 @@ machines:
           ],
           "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
           "bindings": {
-            "surface": "imageTI57"
+            "surface": "imageTI57",
+            "power": "runTI57"
           }
         },
         "rom": {

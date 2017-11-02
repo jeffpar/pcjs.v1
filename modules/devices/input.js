@@ -18,7 +18,7 @@
  *
  * You are required to include the above copyright notice in every modified copy of this work
  * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <http://pcjs.org/modules/shared/lib/defines.js>.
+ * <http://pcjs.org/modules/devices/machine.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -129,6 +129,9 @@ class Input extends Device {
              */
             this.xStart = this.yStart = -1;
 
+            this.captureMouse(element);
+            this.captureTouch(element);
+
             let input = this;
             this.time = this.findDeviceByClass(Machine.CLASS.TIME);
             if (this.time) {
@@ -137,14 +140,18 @@ class Input extends Device {
                 });
                 this.keyPressed = null;
                 /*
-                 * For 'keypress' events, I must use the document object, since image elements are not
-                 * a traditional keyboard input source.
+                 * I'm attaching my 'keypress' handlers to the document object, since image elements
+                 * are not focusable.  I'm disinclined to do what I've done with other machines (ie,
+                 * create an invisible <textarea> overlay), because in this case, I don't really want
+                 * a soft keyboard popping up and obscuring part of the display.
+                 *
+                 * A side-effect, however, is that if the user attempts to explicitly give the image
+                 * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
+                 * by redirecting focus to the 'Power' button, if any, not because we want that or any other
+                 * button to have focus, but simply to remove focus from any other input element on the page.
                  */
                 this.captureKbd(document);
             }
-
-            this.captureMouse(element);
-            this.captureTouch(element);
 
             /*
              * Finally, the active input state.  If there is no active input, col and row are -1.  After
@@ -160,8 +167,10 @@ class Input extends Device {
      * @this {Input}
      * @param {HTMLDocument|HTMLElement} element
      */
-    captureKbd(element) {
+    captureKbd(element)
+    {
         let input = this;
+
         element.addEventListener(
             'keypress',
             function onKeyPress(event) {
@@ -219,14 +228,24 @@ class Input extends Device {
     captureMouse(element)
     {
         let input = this;
+
         element.addEventListener(
             'mousedown',
             function onMouseDown(event) {
+                /*
+                 * If there are any text input elements on the page that might currently have focus,
+                 * this is a good time to divert focus to a focusable element of our own (eg, a 'Power'
+                 * button).  Otherwise, key presses could be confusingly processed in two places.
+                 */
+                if (input.bindings.power) {
+                    input.bindings.power.focus();
+                }
                 if (!event.button) {
                     input.processEvent(element, Input.ACTION.PRESS, event);
                 }
             }
         );
+
         element.addEventListener(
             'mousemove',
             function onMouseMove(event) {
@@ -241,6 +260,7 @@ class Input extends Device {
                 }
             }
         );
+
         element.addEventListener(
             'mouseup',
             function onMouseUp(event) {
@@ -249,6 +269,7 @@ class Input extends Device {
                 }
             }
         );
+
         element.addEventListener(
             'mouseout',
             function onMouseUp(event) {
@@ -268,6 +289,7 @@ class Input extends Device {
     captureTouch(element)
     {
         let input = this;
+
         /*
          * NOTE: The mouse event handlers below deal only with events where the left button is involved
          * (ie, left button is pressed, down, or released).
@@ -278,12 +300,14 @@ class Input extends Device {
                 input.processEvent(element, Input.ACTION.PRESS, event);
             }
         );
+
         element.addEventListener(
             'touchmove',
             function onTouchMove(event) {
                 input.processEvent(element, Input.ACTION.MOVE, event);
             }
         );
+
         element.addEventListener(
             'touchend',
             function onTouchEnd(event) {

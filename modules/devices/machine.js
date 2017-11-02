@@ -18,7 +18,7 @@
  *
  * You are required to include the above copyright notice in every modified copy of this work
  * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <http://pcjs.org/modules/shared/lib/defines.js>.
+ * <http://pcjs.org/modules/devices/machine.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -105,11 +105,12 @@ class Machine extends Device {
          * Device initialization is now deferred until after the page is fully loaded, for the benefit
          * of devices (eg, Input) that may be dependent on page resources.
          *
-         * Strangely, for 'load' events, I must use the window object (not document).
+         * Strangely, for the 'load' event, I must use the window object; the document object doesn't support it.
          */
         let machine = this;
         window.addEventListener('load', function onLoad(event) {
             machine.initDevices();
+            machine.println("Note: still under development (buttons only display row and col)")
         });
     }
 

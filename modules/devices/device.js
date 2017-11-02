@@ -18,7 +18,7 @@
  *
  * You are required to include the above copyright notice in every modified copy of this work
  * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <http://pcjs.org/modules/shared/lib/defines.js>.
+ * <http://pcjs.org/modules/devices/machine.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -32,7 +32,7 @@ var DEBUG = true;
 
 /**
  * The following properties are the minimum set of properties we expect a Device's config object to
- * contain.  Classes will generally define their own extended version (eg, LEDConfig, InputConfig, etc).
+ * contain.  Classes will generally define their own extended versions (eg, LEDConfig, InputConfig, etc).
  *
  * @typedef {Object} Config
  * @property {string} class
@@ -72,8 +72,14 @@ class Device {
         this.idMachine = idMachine;
         this.idDevice = idDevice || idMachine;
         this.printCategory = "";
+        /*
+         * Add this Device to the global set of Devices, so that findDevice(), findBinding(), etc, will work.
+         */
         this.addDevice();
-        this.addBindings();
+        /*
+         * Build the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config.bindings)
+         */
+        this.addBindings(this.config.bindings);
     }
 
     /**
@@ -85,7 +91,10 @@ class Device {
      */
     addBinding(binding, element)
     {
+        let device = this;
+
         switch(binding) {
+
         case Device.BINDING.PRINT:
             if (!this.bindings[binding]) {
                 let elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
@@ -94,8 +103,24 @@ class Device {
                  * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
                  */
                 elementTextArea.value = "";
+                /*
+                 * An onKeyPress handler has been added to this element simply to stop event propagation, so that if the
+                 * element has been explicitly given focus, any key presses won't be picked up by the Input device (which,
+                 * as that device's constructor explains, is monitoring key presses for the entire document).
+                 */
+                elementTextArea.addEventListener(
+                    'keypress',
+                    function onKeyPress(event) {
+                        event = event || window.event;
+                        let keyCode = event.which || event.keyCode;
+                        if (keyCode) {
+                            event.stopPropagation();
+                        }
+                    }
+                );
             }
             break;
+
         default:
             if (!this.bindings[binding]) this.bindings[binding] = element;
             break;
@@ -106,12 +131,11 @@ class Device {
      * addBindings(bindings)
      *
      * @this {Device}
-     * @param {Object} [bindings]
+     * @param {Object} bindings
      */
     addBindings(bindings)
     {
         this.bindings = {};
-        bindings = bindings || this.config.bindings;
         for (let binding in bindings) {
             let id = bindings[binding];
             let element = document.getElementById(id);
@@ -247,7 +271,9 @@ class Device {
                 /*
                  * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
                  */
-                if (element.value.length > 8192) element.value = element.value.substr(element.value.length - 4096);
+                if (!DEBUG && element.value.length > 8192) {
+                    element.value = element.value.substr(element.value.length - 4096);
+                }
                 element.scrollTop = element.scrollHeight;
             }
             else {

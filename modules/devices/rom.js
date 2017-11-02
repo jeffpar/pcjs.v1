@@ -18,7 +18,7 @@
  *
  * You are required to include the above copyright notice in every modified copy of this work
  * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <http://pcjs.org/modules/shared/lib/defines.js>.
+ * <http://pcjs.org/modules/devices/machine.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -72,63 +72,17 @@ class ROM extends Device {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        this.addr = 0;
         this.data = config.values;
     }
 
     /**
-     * setAddr(addr)
-     *
-     * Selects a word.
+     * getData(addr)
      *
      * @param {number} addr
-     */
-    setAddr(addr)
-    {
-        this.addr = addr;
-    }
-
-    /**
-     * getData()
-     *
-     * Returns the selected word.
-     *
      * @returns {number}
      */
-    getData()
+    getData(addr)
     {
-        return this.data[this.addr];
-    }
-
-    /**
-     * getString()
-     *
-     * Returns a string representation of the selected word.
-     *
-     * @returns {string}
-     */
-    getString()
-    {
-        let sOp = "???";
-        let sOperand = "", v;
-        let w = this.data[this.addr];
-        if (w & 0x1000) {
-            if (w & 0x0800) {
-                sOp = "BR";
-                if (w & 0x0400) {
-                    sOp += "C";
-                } else {
-                    sOp += "NC";
-                }
-                v = (this.addr & 0x0400) | (w & 0x03FF);
-            } else {
-                sOp = "CALL";
-                v = w & 0x07FF;
-            }
-            sOperand = this.sprintf("0x%04x", v);
-        } else {
-
-        }
-        return this.sprintf("0x%04x: 0x%04x  %-8s%s", this.addr, w, sOp, sOperand);
+        return this.data[addr];
     }
 }
