@@ -4,7 +4,7 @@ title: TI-57 Test Machine
 permalink: /devices/ti57/machine/
 machines:
   - id: ti57
-    type: TI57
+    type: ti57
     name: TI-57 Programmable Calculator
     uncompiled: true
     config: |
@@ -55,7 +55,7 @@ machines:
           "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
           "bindings": {
             "surface": "imageTI57",
-            "power": "runTI57"
+            "power": "powerTI57"
           }
         },
         "rom": {
@@ -209,6 +209,13 @@ styles:
     left: 24%;
     width: 53%;
     height: 4%;
+  powerTI57:
+    position: absolute;
+    top: 180px;
+    left: 418px;
+    width: 75px;
+    height: 36px;
+    opacity: 0;
   printTI57:
     font-family: Monaco,"Lucida Console",monospace;
 ---
@@ -229,6 +236,7 @@ There are also [Input](/modules/devices/input.js), [LED](/modules/devices/led.js
 <div id="ti57"">
   <img id="imageTI57" src="../images/TI-57-640.png"/>
   <div id="displayTI57"></div>
+  <button id="powerTI57">Power</button>
 </div>
 <div style="float:left;">
   <div style="width:100%;">

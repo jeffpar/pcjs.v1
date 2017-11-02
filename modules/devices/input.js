@@ -65,9 +65,15 @@ class Input extends Device {
      *        ],
      *        "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
      *        "bindings": {
-     *          "surface": "imageTI57"
+     *          "surface": "imageTI57",
+     *          "power": "powerTI57"
      *        }
      *      }
+     *
+     * A word about the "power" button: the page will likely use absolute positioning to overlay the HTML button
+     * onto the image of the physical button, and the temptation might be to use the style "display:none" to hide
+     * it, but "opacity:0" should be used instead, because otherwise our efforts to use it as focusable element
+     * will fail.
      *
      * @this {Input}
      * @param {string} idMachine
@@ -147,7 +153,7 @@ class Input extends Device {
                  *
                  * A side-effect, however, is that if the user attempts to explicitly give the image
                  * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
-                 * by redirecting focus to the 'Power' button, if any, not because we want that or any other
+                 * by redirecting focus to the "power" button, if any, not because we want that or any other
                  * button to have focus, but simply to remove focus from any other input element on the page.
                  */
                 this.captureKbd(document);
@@ -234,11 +240,16 @@ class Input extends Device {
             function onMouseDown(event) {
                 /*
                  * If there are any text input elements on the page that might currently have focus,
-                 * this is a good time to divert focus to a focusable element of our own (eg, a 'Power'
+                 * this is a good time to divert focus to a focusable element of our own (eg, a "power"
                  * button).  Otherwise, key presses could be confusingly processed in two places.
+                 *
+                 * Unfortunately, setting focus on an element can cause the browser to scroll the element
+                 * into view, so to avoid that, we use the following scrollTo() work-around.
                  */
                 if (input.bindings.power) {
+                    let x = window.scrollX, y = window.scrollY;
                     input.bindings.power.focus();
+                    window.scrollTo(x, y);
                 }
                 if (!event.button) {
                     input.processEvent(element, Input.ACTION.PRESS, event);

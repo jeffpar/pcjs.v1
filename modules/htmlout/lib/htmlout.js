@@ -169,7 +169,7 @@ var sManifestXMLFile = "manifest.xml";
 var aMachineFiles = {
     'C1P':      pkg.C1PCSS.concat(pkg.C1PFiles),        // will be deprecated when PC6502 becomes available
     'PC':       pkg.PCCSS.concat(pkg.PCx86Files),       // deprecated (same as PCx86)
-    'PCx86':    pkg.PCCSS.concat(pkg.PCx86Files),
+    'PCX86':    pkg.PCCSS.concat(pkg.PCx86Files),
     'PC8080':   pkg.PCCSS.concat(pkg.PC8080Files),
     'PDP10':    pkg.PCCSS.concat(pkg.PDP10Files),
     'PDP11':    pkg.PCCSS.concat(pkg.PDP11Files),
@@ -1959,7 +1959,7 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
             asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/components.css");
             asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/" + sScriptFile);
         }
-        else if (asFiles = aMachineFiles[sType]) {
+        else if (asFiles = aMachineFiles[sType.toUpperCase()]) {
             /*
              * SIDEBAR: Why the "slice()"?  It's a handy way to create a copy of the array, and we need a copy,
              * because if it turns out we need to "cut out" some of the files below (using splice), we don't want that
