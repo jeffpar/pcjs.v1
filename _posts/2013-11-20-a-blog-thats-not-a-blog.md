@@ -6,8 +6,7 @@ category: News
 permalink: /blog/2013/11/20/
 ---
 
-As you may have noticed (or not), the [JSMachines](http://jsmachines.net/) website had a very modest makeover
-recently.
+As you may have noticed (or not), the website had a very modest makeover recently.
 
 Originally, the site was a smattering of HTML files, along with some XML files that I was rendering as HTML
 using some simple XSL stylesheets.  However, I was tired of having one set of files for the website to explain

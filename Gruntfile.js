@@ -103,7 +103,7 @@ module.exports = function(grunt) {
      *      "<%= pkg.name %>"
      *
      * which would be fine for most of my needs, but some of the information I need
-     * from the package.json is not in string form (eg, pcX86Files, which is an array of
+     * from the package.json is not in string form (eg, PCx86Files, which is an array of
      * file names).  So I create a "pkg" variable first, which allows me to do both.
      */
 
@@ -111,16 +111,17 @@ module.exports = function(grunt) {
      * @class
      * @property {string} name
      * @property {string} version
-     * @property {Array.<string>} c1pJSFiles
-     * @property {Array.<string>} pcX86Files
-     * @property {Array.<string>} pc8080Files
-     * @property {Array.<string>} pdp10Files
-     * @property {Array.<string>} pdp11Files
+     * @property {Array.<string>} C1PFiles
+     * @property {Array.<string>} PCx86Files
+     * @property {Array.<string>} PC8080Files
+     * @property {Array.<string>} PDP10Files
+     * @property {Array.<string>} PDP11Files
+     * @property {Array.<string>} TI57Files
      * @property {Array.<string>} closureCompilerExterns
      */
     var pkg = grunt.file.readJSON("package.json");
 
-    var tmpC1Pjs  = "./versions/c1pjs/"  + pkg.version + "/c1p-uncompiled.js";
+    var tmpC1P    = "./versions/c1pjs/"  + pkg.version + "/c1p-uncompiled.js";
     var tmpPCx86  = "./versions/pcx86/"  + pkg.version + "/pcx86-uncompiled.js";
     var tmpPC8080 = "./versions/pc8080/" + pkg.version + "/pc8080-uncompiled.js";
     var tmpPDP10  = "./versions/pdpjs/"  + pkg.version + "/pdp10-uncompiled.js";
@@ -140,7 +141,7 @@ module.exports = function(grunt) {
                 // separator: ';'
             },
             "c1p.js": {
-                src: pkg.c1pJSFiles,
+                src: pkg.C1PFiles,
                 dest: "./versions/c1pjs/" + pkg.version + "/c1p.js",
                 options: {
                     process: function(src, filepath) {
@@ -149,11 +150,11 @@ module.exports = function(grunt) {
                 }
             },
             "c1p-dbg.js": {
-                src: pkg.c1pJSFiles,
+                src: pkg.C1PFiles,
                 dest: "./versions/c1pjs/" + pkg.version + "/c1p-dbg.js"
             },
             "pcx86.js": {
-                src: pkg.pcX86Files,
+                src: pkg.PCx86Files,
                 dest: "./versions/pcx86/" + pkg.version + "/pcx86.js",
                 options: {
                     process: function(src, filepath) {
@@ -162,11 +163,11 @@ module.exports = function(grunt) {
                 }
             },
             "pcx86-dbg.js": {
-                src: pkg.pcX86Files,
+                src: pkg.PCx86Files,
                 dest: "./versions/pcx86/" + pkg.version + "/pcx86-dbg.js"
             },
             "pc8080.js": {
-                src: pkg.pc8080Files,
+                src: pkg.PC8080Files,
                 dest: "./versions/pc8080/" + pkg.version + "/pc8080.js",
                 options: {
                     process: function(src, filepath) {
@@ -175,11 +176,11 @@ module.exports = function(grunt) {
                 }
             },
             "pc8080-dbg.js": {
-                src: pkg.pc8080Files,
+                src: pkg.PC8080Files,
                 dest: "./versions/pc8080/" + pkg.version + "/pc8080-dbg.js"
             },
             "pdp10.js": {
-                src: pkg.pdp10Files,
+                src: pkg.PDP10Files,
                 dest: "./versions/pdpjs/" + pkg.version + "/pdp10.js",
                 options: {
                     process: function(src, filepath) {
@@ -188,11 +189,11 @@ module.exports = function(grunt) {
                 }
             },
             "pdp10-dbg.js": {
-                src: pkg.pdp10Files,
+                src: pkg.PDP10Files,
                 dest: "./versions/pdpjs/" + pkg.version + "/pdp10-dbg.js"
             },
             "pdp11.js": {
-                src: pkg.pdp11Files,
+                src: pkg.PDP11Files,
                 dest: "./versions/pdpjs/" + pkg.version + "/pdp11.js",
                 options: {
                     process: function(src, filepath) {
@@ -201,12 +202,12 @@ module.exports = function(grunt) {
                 }
             },
             "pdp11-dbg.js": {
-                src: pkg.pdp11Files,
+                src: pkg.PDP11Files,
                 dest: "./versions/pdpjs/" + pkg.version + "/pdp11-dbg.js"
             },
             "tmp-c1pjs": {
-                src: pkg.c1pJSFiles,
-                dest: tmpC1Pjs,
+                src: pkg.C1PFiles,
+                dest: tmpC1P,
                 options: {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
@@ -223,7 +224,7 @@ module.exports = function(grunt) {
                 }
             },
             "tmp-pcx86": {
-                src: pkg.pcX86Files,
+                src: pkg.PCx86Files,
                 dest: tmpPCx86,
                 options: {
                     banner: '"use strict";\n\n',
@@ -241,7 +242,7 @@ module.exports = function(grunt) {
                 }
             },
             "tmp-pc8080": {
-                src: pkg.pc8080Files,
+                src: pkg.PC8080Files,
                 dest: tmpPC8080,
                 options: {
                     banner: '"use strict";\n\n',
@@ -259,7 +260,7 @@ module.exports = function(grunt) {
                 }
             },
             "tmp-pdp10": {
-                src: pkg.pdp10Files,
+                src: pkg.PDP10Files,
                 dest: tmpPDP10,
                 options: {
                     banner: '"use strict";\n\n',
@@ -277,7 +278,7 @@ module.exports = function(grunt) {
                 }
             },
             "tmp-pdp11": {
-                src: pkg.pdp11Files,
+                src: pkg.PDP11Files,
                 dest: tmpPDP11,
                 options: {
                     banner: '"use strict";\n\n',
@@ -303,23 +304,23 @@ module.exports = function(grunt) {
             },
             "c1p.js": {
                 includeObjectConstants: true,
-                src: pkg.c1pJSFiles,
-                dest: tmpC1Pjs
+                src: pkg.C1PFiles,
+                dest: tmpC1P
             },
             "pcx86.js": {
-                src: pkg.pcX86Files,
+                src: pkg.PCx86Files,
                 dest: tmpPCx86
             },
             "pc8080.js": {
-                src: pkg.pc8080Files,
+                src: pkg.PC8080Files,
                 dest: tmpPC8080
             },
             "pdp10.js": {
-                src: pkg.pdp10Files,
+                src: pkg.PDP10Files,
                 dest: tmpPDP10
             },
             "pdp11.js": {
-                src: pkg.pdp11Files,
+                src: pkg.PDP11Files,
                 dest: tmpPDP11
             }
         },
@@ -386,8 +387,8 @@ module.exports = function(grunt) {
                     output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/c1pjs/" + pkg.version + "/c1p.map\""
                  // output_wrapper: "\"(function(){%output%})();\""
                 },
-                // src: pkg.c1pJSFiles,
-                src: tmpC1Pjs,
+                // src: pkg.C1PFiles,
+                src: tmpC1P,
                 dest: "./versions/c1pjs/"  + pkg.version + "/c1p.js"
             },
             "c1p-dbg.js": {
@@ -398,8 +399,8 @@ module.exports = function(grunt) {
                     output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/c1pjs/" + pkg.version + "/c1p-dbg.map\""
                  // output_wrapper: "\"(function(){%output%})();\""
                 },
-                // src: pkg.c1pJSFiles,
-                src: tmpC1Pjs,
+                // src: pkg.C1PFiles,
+                src: tmpC1P,
                 dest: "./versions/c1pjs/"  + pkg.version + "/c1p-dbg.js"
             },
             "pcx86.js": {
@@ -410,7 +411,7 @@ module.exports = function(grunt) {
                     output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pcx86/" + pkg.version + "/pcx86.map\""
                  // output_wrapper: "\"(function(){%output%})();\""
                 },
-                // src: pkg.pcX86Files,
+                // src: pkg.PCx86Files,
                 src: tmpPCx86,
                 dest: "./versions/pcx86/" + pkg.version + "/pcx86.js"
             },
@@ -425,7 +426,7 @@ module.exports = function(grunt) {
                     output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pcx86/" + pkg.version + "/pcx86-dbg.map\""
                  // output_wrapper: "\"(function(){%output%})();\""
                 },
-                // src: pkg.pcX86Files,
+                // src: pkg.PCx86Files,
                 src: tmpPCx86,
                 dest: "./versions/pcx86/" + pkg.version + "/pcx86-dbg.js"
             },
@@ -437,7 +438,7 @@ module.exports = function(grunt) {
                     output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pc8080/" + pkg.version + "/pc8080.map\""
                  // output_wrapper: "\"(function(){%output%})();\""
                 },
-                // src: pkg.pc8080Files,
+                // src: pkg.PC8080Files,
                 src: tmpPC8080,
                 dest: "./versions/pc8080/" + pkg.version + "/pc8080.js"
             },
@@ -452,7 +453,7 @@ module.exports = function(grunt) {
                     output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pc8080/" + pkg.version + "/pc8080-dbg.map\""
                  // output_wrapper: "\"(function(){%output%})();\""
                 },
-                // src: pkg.pc8080Files,
+                // src: pkg.PC8080Files,
                 src: tmpPC8080,
                 dest: "./versions/pc8080/" + pkg.version + "/pc8080-dbg.js"
             },
@@ -464,7 +465,7 @@ module.exports = function(grunt) {
                     output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pdpjs/" + pkg.version + "/pdp10.map\""
                  // output_wrapper: "\"(function(){%output%})();\""
                 },
-                // src: pkg.pdp10Files,
+                // src: pkg.PDP10Files,
                 src: tmpPDP10,
                 dest: "./versions/pdpjs/" + pkg.version + "/pdp10.js"
             },
@@ -479,7 +480,7 @@ module.exports = function(grunt) {
                     output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pdpjs/" + pkg.version + "/pdp10-dbg.map\""
                  // output_wrapper: "\"(function(){%output%})();\""
                 },
-                // src: pkg.pdp10Files,
+                // src: pkg.PDP10Files,
                 src: tmpPDP10,
                 dest: "./versions/pdpjs/" + pkg.version + "/pdp10-dbg.js"
             },
@@ -491,7 +492,7 @@ module.exports = function(grunt) {
                     output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pdpjs/" + pkg.version + "/pdp11.map\""
                  // output_wrapper: "\"(function(){%output%})();\""
                 },
-                // src: pkg.pdp11Files,
+                // src: pkg.PDP11Files,
                 src: tmpPDP11,
                 dest: "./versions/pdpjs/" + pkg.version + "/pdp11.js"
             },
@@ -506,7 +507,7 @@ module.exports = function(grunt) {
                     output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pdpjs/" + pkg.version + "/pdp11-dbg.map\""
                  // output_wrapper: "\"(function(){%output%})();\""
                 },
-                // src: pkg.pdp11Files,
+                // src: pkg.PDP11Files,
                 src: tmpPDP11,
                 dest: "./versions/pdpjs/" + pkg.version + "/pdp11-dbg.js"
             }

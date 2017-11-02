@@ -72,10 +72,10 @@
   "closureCompilerExterns": [
     "./modules/shared/lib/externs.js"
   ],
-  "c1pCSSFiles": [
+  "C1PCSS": [
     "./modules/c1pjs/templates/components.css"
   ],
-  "c1pJSFiles": [
+  "C1PFiles": [
     "./modules/shared/lib/defines.js",
     "./modules/shared/lib/dumpapi.js",
     "./modules/shared/lib/reportapi.js",
@@ -96,10 +96,10 @@
     "./modules/c1pjs/lib/computer.js",
     "./modules/shared/lib/embed.js"
   ],
-  "pcCSSFiles": [
+  "PCCSS": [
     "./modules/shared/templates/components.css"
   ],
-  "pcX86Files": [
+  "PCx86Files": [
     "./modules/shared/lib/defines.js",
     "./modules/shared/lib/diskapi.js",
     "./modules/shared/lib/dumpapi.js",
@@ -144,7 +144,7 @@
     "./modules/shared/lib/embed.js",
     "./modules/shared/lib/save.js"
   ],
-  "pc8080Files": [
+  "PC8080Files": [
     "./modules/shared/lib/defines.js",
     "./modules/shared/lib/dumpapi.js",
     "./modules/shared/lib/reportapi.js",
@@ -175,7 +175,7 @@
     "./modules/shared/lib/state.js",
     "./modules/shared/lib/embed.js"
   ],
-  "pdp10Files": [
+  "PDP10Files": [
     "./modules/shared/lib/defines.js",
     "./modules/shared/lib/dumpapi.js",
     "./modules/shared/lib/reportapi.js",
@@ -204,7 +204,7 @@
     "./modules/shared/lib/state.js",
     "./modules/shared/lib/embed.js"
   ],
-  "pdp11Files": [
+  "PDP11Files": [
     "./modules/shared/lib/defines.js",
     "./modules/shared/lib/diskapi.js",
     "./modules/shared/lib/dumpapi.js",
@@ -239,5 +239,14 @@
     "./modules/pdp11/lib/computer.js",
     "./modules/shared/lib/state.js",
     "./modules/shared/lib/embed.js"
+  ],
+  "TI57Files": [
+    "./modules/devices/device.js",
+    "./modules/devices/input.js",
+    "./modules/devices/led.js",
+    "./modules/devices/rom.js",
+    "./modules/devices/time.js",
+    "./modules/devices/tms1500.js",
+    "./modules/devices/machine.js"
   ]
 }

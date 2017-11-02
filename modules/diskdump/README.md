@@ -35,4 +35,4 @@ The equivalent web server API request would look like:
 
 	http://localhost:8088/api/v1/dump?path=/apps/pcx86/1981/visicalc/vc.com;README.md&format=img
 	
-DiskDump is a port of the original [JavaScript Machines](http://jsmachines.net/) **convdisk.php** utility.
+DiskDump is a port of the original **convdisk.php** utility.

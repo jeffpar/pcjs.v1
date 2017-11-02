@@ -5,7 +5,7 @@ permalink: /devices/c1p/
 ---
 
 Challenger 1P Device Configurations
----
+-----------------------------------
 
 All our [Challenger 1P Machines](machine/) are built from a collection of devices, including:
 

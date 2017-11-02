@@ -1246,7 +1246,7 @@ class Str {
              * escaped.  And in fact, if you ensure that the closing bracket is first, the caret is not first,
              * and the hyphen is last, you can avoid escaping those as well.
              */
-            k = k.replace(/([\\[\]*{}().+?])/g, "\\$1");
+            k = k.replace(/([\\[\]*{}().+?|])/g, "\\$1");
             sMatch += (sMatch? '|' : '') + k;
         }
         return s.replace(new RegExp('(' + sMatch + ')', "g"), function(m)
@@ -1272,7 +1272,7 @@ class Str {
     }
 
     /**
-     * sprintf(format, ...)
+     * sprintf(format, ...args)
      *
      * Copied from the CCjs project (/ccjs/lib/stdio.js) and extended.  Far from complete let alone sprintf-compatible,
      * but it's a start.
@@ -75356,7 +75356,7 @@ if (DEBUGGER) {
  * BUILD INSTRUCTIONS
  *
  * To build PCx86 (pcx86.js), run Google's Closure Compiler, replacing "*.js" with the input file sequence defined
- * by the "pcX86Files" property in package.json:
+ * by the "PCx86Files" property in package.json:
  *
  *      java -jar compiler.jar
  *          --compilation_level ADVANCED_OPTIMIZATIONS

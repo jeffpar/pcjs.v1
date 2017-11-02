@@ -114,7 +114,8 @@ function MarkOut(sMD, sIndent, req, aParms, fDebug, sMachineFile, fAutoHeading)
     this.aMachines = [];    // this keeps track of embedded machines on the page
     this.buildOptions = {}; // this keeps track of any build options specified on the page
     this.aMachineDefs = {}; // this keeps track of any machine definitions at the top of the file (as part of any Jekyll "Front Matter")
-    this.aScriptDefs = {};  // this keeps track of any script definitions at the top of the file (as part of any Jekyll "Front Matter")
+    this.aScriptDefs = {};  // ditto for any script definitions
+    this.aStyleDefs = {};   // ditto for any style definitions
 }
 
 /*
@@ -261,6 +262,17 @@ MarkOut.prototype.addMachine = function(infoMachine)
 MarkOut.prototype.getMachines = function()
 {
     return this.aMachines;
+};
+
+/**
+ * getStyles()
+ *
+ * @this {MarkOut}
+ * @return {Object}
+ */
+MarkOut.prototype.getStyles = function()
+{
+    return this.aStyleDefs;
 };
 
 /**
@@ -440,6 +452,22 @@ MarkOut.prototype.convertMD = function(sIndent)
             sMD = sMD.replace(aMatch[0], "");
 
             /*
+             * Extract style definitions, if any, from the Front Matter.
+             */
+            var aStyleDefs = aMatch[1].match(/\nstyles:([\s\S]*?)\n([^\s]|$)/);
+            if (aStyleDefs) {
+                var reStyle = /\n  ([a-z][a-z0-9-]*):\n/gi;
+                var aStyles = aStyleDefs[1].split(reStyle);
+                /*
+                 * Since the preceding RegExp contains a capture group (representing the ID for the style),
+                 * it will be "spliced" into the split results.
+                 */
+                for (var iStyle = 1; iStyle < aStyles.length; iStyle += 2) {
+                    this.aStyleDefs[aStyles[iStyle]] = aStyles[iStyle+1];
+                }
+            }
+
+            /*
              * Extract script definitions first, if any, from the Front Matter.
              */
             var aScriptDefs = aMatch[1].match(/\nmachineScripts:([\s\S]*?)\n([^\s]|$)/);
@@ -468,6 +496,20 @@ MarkOut.prototype.convertMD = function(sIndent)
                     if (!asMachines[iMachine]) continue;
                     var id = null, iProp, sProp, sValue;
                     var aOptions, aaOptions = [], machine = {};
+                    /*
+                     * Before we look for simple name/value pairs, let's look for any multi-line sequences,
+                     * extract them, and then remove them, to avoid any confusion later.
+                     */
+                    var reMulti = /([ \t]*)([^\s]+): \|\n((?:\1 +[^\n]*\n?)*)/g;
+                    while (aOptions = reMulti.exec(asMachines[iMachine])) {
+                        /*
+                         * I would also like to "auto-quote" any unquoted property name at the start of any line.
+                         */
+                        aOptions[3] = aOptions[3].replace(/^(\s+)([^":\s]+):/gm, '$1"$2":');
+                        aaOptions.push(aOptions);
+                        asMachines[iMachine] = asMachines[iMachine].replace(aOptions[0], "");
+                        reMulti.lastIndex = 0;
+                    }
                     var reOption = /([ \t]*)([^\s]+):[ \t]*([^\n]*)/g;
                     while (aOptions = reOption.exec(asMachines[iMachine])) {
                         aaOptions.push(aOptions);
@@ -1222,6 +1264,10 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             machine = this.aMachineDefs[sMachineID];
             sMachineType = machine['type'] || "PCx86";
             sMachineXMLFile = machine['config'] || this.sMachineFile || "machine.xml";
+            if (sMachineXMLFile.match(/^\s*{/)) {
+                sMachineXMLFile = "{}";
+                machine['parms'] = "";
+            }
             if (sMachineXMLFile.indexOf("debugger") >= 0) machine['debugger'] = "true";
             sMachineOptions = ((sMachineType.indexOf("-dbg") > 0 || machine['debugger'] == "true")? "debugger" : "");
             if (machine['sticky']) sMachineOptions += (sMachineOptions? "," : "") + "sticky";
@@ -1245,15 +1291,23 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * Start looking for Markdown-style machine links now...
      */
     var cMatches = 0;
-    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P|PDP)([^:!|]*)([:!|])(.*?)"\)/gi;
+    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P|PDP|TI57)([^:!|]*)([:!|])(.*?)"\)/gi;
 
     while ((aMatch = reMachines.exec(sBlock))) {
 
+        var sMachineFunc;
         sMachineXMLFile = aMatch[2];
         if (sMachineXMLFile.slice(-1) == "/") sMachineXMLFile += "machine.xml";
 
-        sMachineType = aMatch[3].toUpperCase() + (aMatch[4] != "js"? aMatch[4] : "");
-        var sMachineFunc = "embed" + sMachineType;
+        sMachineType = aMatch[3];
+        if (sMachineXMLFile == "{}") {
+            sMachineFunc = "new Machine";
+        } else {
+            sMachineType = sMachineType.toUpperCase();
+            sMachineType += (aMatch[4] != "js"? aMatch[4] : "");
+            sMachineFunc = "embed" + sMachineType;
+        }
+
         var aMachineParms = aMatch[6].split(aMatch[5]);
         var sMachineMessage = "Waiting for " + sMachineType + " to load";
 
@@ -1266,10 +1320,20 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         var fDebugger = (aMachineOptions.indexOf("debugger") >= 0);
         var fSticky = (aMachineOptions.indexOf("sticky") >= 0);
 
-        /*
-         * TODO: Consider validating the existence of this XML file and generating a more meaningful error if not found
-         */
-        sReplacement = '<div id="' + sMachineID + '" class="machine-placeholder"><p>' + aMatch[1] + '</p><p class="machine-warning">' + sMachineMessage + '</p></div>\n';
+        if (sMachineXMLFile == "{}") {
+            /*
+             * For machines using JSON configurations rather than XML files; XML files were handy
+             * because they are easily transformed into XHTML which can then be inserted into the <div> below,
+             * but since JSON isn't well-suited for that, it will be up to the page to supply its own HTML layout
+             * for the machine's visual elements.
+             */
+            sReplacement = "";
+        } else {
+            /*
+             * TODO: Consider validating the existence of this XML file and generating a more meaningful error if not found
+             */
+            sReplacement = '<div id="' + sMachineID + '" class="machine-placeholder"><p>' + aMatch[1] + '</p><p class="machine-warning">' + sMachineMessage + '</p></div>\n';
+        }
 
         /*
          * The embedXXX() functions take an XSL file as the 3rd parameter, which defaults to:
@@ -1280,7 +1344,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
          * "production" version.
          */
         if (!sMachineXSLFile || sMachineXSLFile.indexOf("components.xsl") >= 0) {
-            if (this.fDebug) {
+            if (this.fDebug && sMachineXMLFile != "{}") {
                 if (sMachineType == "C1P") {
                     sMachineXSLFile = "/modules/c1pjs/templates/components.xsl";
                 } else {
@@ -1304,6 +1368,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             'type':     sMachineType,   // eg, a machine type, such as "PCx86" or "C1P"
             'func':     sMachineFunc,
             'id':       sMachineID,
+            'config':   this.aMachineDefs[sMachineID] && this.aMachineDefs[sMachineID]['config'],
             'xml':      sMachineXMLFile,
             'xsl':      sMachineXSLFile,
             'version':  sMachineVersion,// eg, "1.10", "*" to select the current version, or "uncompiled"; "*" is the default

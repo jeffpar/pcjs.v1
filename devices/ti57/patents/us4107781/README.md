@@ -1,3 +1,9 @@
+---
+layout: page
+title: Texas Instruments TI-57 U.S. Patent No. 4,107,781
+permalink: /devices/ti57/rom/
+---
+
 ## [US4107781](https://patents.google.com/patent/US4107781A/en)
 
 Description
