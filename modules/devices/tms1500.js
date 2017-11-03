@@ -222,12 +222,12 @@ class Chip extends Device {
 
         this.fStop = false;
 
-        if (DEBUG) {
-            for (let addr = 0; addr < 0x800; addr++) {
-                let w = this.rom.getData(addr);
-                console.log(this.disassemble(w, addr).trim());
-            }
-        }
+        // if (DEBUG) {
+        //     for (let addr = 0; addr < 0x800; addr++) {
+        //         let w = this.rom.getData(addr);
+        //         console.log(this.disassemble(w, addr).trim());
+        //     }
+        // }
 
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
     }
@@ -464,6 +464,18 @@ class Chip extends Device {
     }
 
     /**
+     * dumpRegs()
+     *
+     * @returns {string}
+     */
+    dumpRegs()
+    {
+        let sResult = "";
+        sResult += this.disassemble(this.rom.getData(this.regPC), this.regPC);
+        return sResult.trim();
+    }
+
+    /**
      * onCommand(sCommand)
      *
      * @param {string} sCommand
@@ -474,6 +486,9 @@ class Chip extends Device {
         let addr, n = 8, sResult = "";
         let aCommands = sCommand.split(' ');
         switch(aCommands[0]) {
+        case "r":
+            sResult += this.dumpRegs();
+            break;
         case "u":
             addr = aCommands[1]? (Number.parseInt(aCommands[1], 16) || 0) : this.regPC;
             while (n--) {
@@ -484,7 +499,7 @@ class Chip extends Device {
             return true;
         case "help":
         case "?":
-            sResult = "supported commands:\nu [addr]";
+            sResult = "supported commands:\nr\t\tdump registers\nu [addr]\tdisassemble code";
             break;
         default:
             break;
@@ -530,7 +545,9 @@ class Chip extends Device {
     clocker(fStep = false)
     {
         let nCycles = 128;
-
+        if (fStep) {
+            this.println(this.dumpRegs());
+        }
         return nCycles;
     }
 }

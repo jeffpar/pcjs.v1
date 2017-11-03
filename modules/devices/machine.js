@@ -56,7 +56,8 @@ class Machine extends Device {
      *        "cyclesPerSecond": 1600000
      *        "bindings": {
      *          "run": "runTI57",
-     *          "speed": "speedTI57"
+     *          "speed": "speedTI57",
+     *          "step": "stepTI57"
      *        }
      *      },
      *      "display": {

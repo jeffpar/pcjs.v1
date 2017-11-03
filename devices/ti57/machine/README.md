@@ -26,7 +26,8 @@ machines:
           "cyclesPerSecond": 1600000,
           "bindings": {
             "run": "runTI57",
-            "speed": "speedTI57"
+            "speed": "speedTI57",
+            "step": "stepTI57"
           }
         },
         "display": {
@@ -241,5 +242,6 @@ There are also [Input](/modules/devices/input.js), [LED](/modules/devices/led.js
     <p>Diagnostics</p>
     <textarea id="printTI57" cols="80" rows="16"></textarea>
   </div>
-  <button id="runTI57">Run</button><span id="speedTI57">Stopped</span>
+  <button id="runTI57">Run</button>
+  <button id="stepTI57">Step</button><span id="speedTI57">Stopped</span>
 </div>
