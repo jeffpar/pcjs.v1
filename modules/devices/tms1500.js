@@ -222,12 +222,13 @@ class Chip extends Device {
 
         this.fStop = false;
 
-        // if (DEBUG) {
-        //     for (let addr = 0; addr < 0x800; addr++) {
-        //         let w = this.rom.getData(addr);
-        //         this.println(this.disassemble(w, addr));
-        //     }
-        // }
+        if (DEBUG) {
+            for (let addr = 0; addr < 0x800; addr++) {
+                let w = this.rom.getData(addr);
+                console.log(this.disassemble(w, addr).trim());
+            }
+        }
+
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
     }
 
@@ -253,8 +254,7 @@ class Chip extends Device {
      */
     disassemble(w, addr)
     {
-        let sOp = "???";
-        let sOperands = "";
+        let sOp = "???", sOperands = "";
 
         if (w & 0x1000) {
             let v;
@@ -273,7 +273,7 @@ class Chip extends Device {
             sOperands = this.sprintf("0x%04x", v);
         }
         else {
-            let sMask = "";
+            let sMask = "", v;
             switch(w & Chip.IW_MF.MASK) {
             case Chip.IW_MF.MMSD:   // 0x0000: Mantissa Most Significant Digit (D12)
                 sMask = "0x000F000000000000";
@@ -315,10 +315,10 @@ class Chip extends Device {
                     sOp = "SET";
                     break;
                 case Chip.IW_FF.RESET:
-                    sOp = "CLEAR";
+                    sOp = "CLR";
                     break;
                 case Chip.IW_FF.TEST:
-                    sOp = "TEST";
+                    sOp = "TST";
                     break;
                 case Chip.IW_FF.TOGGLE:
                     sOp = "NOT";
@@ -327,12 +327,14 @@ class Chip extends Device {
                 sOperands = Chip.OP_REGS[(w & Chip.IW_FF.J_MASK) >> Chip.IW_FF.J_SHIFT];
                 /*
                  * We can represent the bit address as either "register:digit:bit" (ie, [A-D]:[D13-D15]:[0-3])
-                 * or "register:bit" ([A-D]:[52-63]); let's try the latter.
+                 * or "register:bit" ([A-D]:[52-63]); let's go with the latter.
                  *
+                 *      Chip.D_VALS = ["?","D13","D14","D15"];
                  *      sOperands += ':' + Chip.D_VALS[(w & Chip.IW_FF.D_MASK) >> Chip.IW_FF.D_SHIFT];
                  *      sOperands += ':' + ((w & Chip.IW_FF.B_MASK) >> Chip.IW_FF.B_SHIFT);
                  */
-                sOperands += ':' + (((w & (Chip.IW_FF.D_MASK | Chip.IW_FF.B_MASK)) >> Chip.IW_FF.B_SHIFT) + 48);
+                v = ((w & (Chip.IW_FF.D_MASK | Chip.IW_FF.B_MASK)) >> Chip.IW_FF.B_SHIFT) + 48;
+                sOperands += ':' + (v < 52? "?" : v);
                 break;
             case Chip.IW_MF.D13:    // 0x0d00: (D13)
                 sMask = "0x00F0000000000000";
@@ -343,9 +345,9 @@ class Chip extends Device {
                     sOp = "LOAD";
                     sOperands = "A,Y[RAB]";
                     break;
-                case Chip.IW_PF.NAB:    // 0x0001: Bits 4-6 of instruction are stored in RAB
-                    sOp = "NAB";
-                    sOperands = "RAB," + ((w & 0xF0) >> 4);
+                case Chip.IW_PF.RABI:   // 0x0001: Bits 4-6 of instruction are stored in RAB
+                    sOp = "LOAD";
+                    sOperands = "RAB," + ((w & 0x70) >> 4);
                     break;
                 case Chip.IW_PF.BRR5:   // 0x0002: Branch to R5
                     sOp = "BR";
@@ -375,11 +377,22 @@ class Chip extends Device {
                 case Chip.IW_PF.BCDR:   // 0x0009: BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
                     sOp = "BCDR";
                     break;
-                case Chip.IW_PF.RAB:    // 0x000A: LSD of R5 (3 bits) is stored in RAB
+                case Chip.IW_PF.RABR5:  // 0x000A: LSD of R5 (3 bits) is stored in RAB
                     sOp = "LOAD";
-                    sOperands = "RAB,R5";
+                    sOperands = "RAB,R5L";
                     break;
                 default:
+                    /*
+                     * The "Hrast" emulator defines some additional opcodes at this point, without (as usual) any explanation;
+                     * ie, are these pseudo-opcodes (which ?KEY almost certainly is) or are these undocumented opcodes that showed
+                     * up in one or more of the patent listings and whose operation was inferred or deduced?
+                     *
+                     *      0x000B: POWOFF
+                     *      0x000C: STAX MAEX (a special version of STAX)
+                     *      0x000D: ?KEY (used in lieu of a second DISP instruction)
+                     *      0x000E: STAY MAEX (a special version of STAY)
+                     *      0x0EFF: NOP
+                     */
                     break;
                 }
                 break;
@@ -388,45 +401,63 @@ class Chip extends Device {
                 break;
             }
             if (sMask) {
-                let sOpReg;
                 let j = (w & Chip.IW_MF.J_MASK) >> Chip.IW_MF.J_SHIFT;
                 let k = (w & Chip.IW_MF.K_MASK) >> Chip.IW_MF.K_SHIFT;
                 let l = (w & Chip.IW_MF.L_MASK) >> Chip.IW_MF.L_SHIFT;
                 let n = (w & Chip.IW_MF.N_MASK);
+
+                sOp = "LOAD";
+                let sOperator = "";
+                let sDst = "?", sSrc = "?";
                 if (!n) {
-                    sOp = (k == 5? "SHL" : "ADD");
+                    sOperator = (k == 5? "<<" : "+");
                 } else {
-                    sOp = (k == 5? "SHR" : "SUB");
+                    sOperator = (k == 5? ">>" : "-");
                 }
-                sOpReg = Chip.OP_REGS[j];
-                if (l == 1) {
-                    if (k < 4) sOpReg = Chip.OP_REGS[k];
-                } else if (l == 3) {
+
+                switch(l) {
+                case 0:
+                    sDst = Chip.OP_REGS[j];
+                    break;
+                case 1:
+                    if (k < 4) sDst = Chip.OP_REGS[k];
+                    break;
+                case 2:
+                    if (k < 6) sDst = "NUL";            // "suppressed" operation
+                    break;
+                case 3:
                     if (!n) {
                         sOp = "XCHG";
+                        if (!j) sDst = "A";             // NOTE j != 0 or k >= 4 is invalid
+                        if (k < 4) sSrc = Chip.OP_REGS[k];
                     } else {
-                        sOp = "LOAD";
+                        sOp = "MOVE";
+                        sDst = Chip.OP_REGS[j];
+                        sSrc = Chip.OP_REGS[k];         // NOTE: k == 5 is invalid
                     }
+                    k = -1;
+                    break;
                 }
+
                 switch(k) {
                 case 0:
                 case 1:
                 case 2:
                 case 3:
-                    sOperands = sOpReg + "," + Chip.OP_REGS[k];
+                    sSrc = Chip.OP_REGS[j] + sOperator + Chip.OP_REGS[k];
                     break;
                 case 4:
                 case 5:
-                    sOperands = sOpReg + ",1";
+                    sSrc = Chip.OP_REGS[j] + sOperator + "1";
                     break;
                 case 6:
-                    sOperands = sOpReg + ",R5:D0";
+                    sSrc = Chip.OP_REGS[j] + sOperator + "R5L";
                     break;
                 case 7:
-                    sOperands = sOpReg + ",R5";
+                    sSrc = Chip.OP_REGS[j] + sOperator + "R5";
                     break;
                 }
-                sOperands += "," + sMask;
+                sOperands = sDst + "," + sSrc + "," + sMask;
             }
         }
         return this.sprintf("0x%04x: 0x%04x  %-8s%s\n", addr, w, sOp, sOperands);
@@ -548,7 +579,7 @@ Chip.IW_FF = {          // Instruction Word F (Flag) Field (used when the Mask F
 Chip.IW_PF = {          // Instruction Word P (Misc) Field (used when the Mask Field is PF)
     MASK:   0x000F,
     STYA:   0x0000,     // Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
-    NAB:    0x0001,     // Bits 4-6 of instruction are stored in RAB
+    RABI:   0x0001,     // Bits 4-6 of instruction are stored in RAB
     BRR5:   0x0002,     // Branch to R5
     RET:    0x0003,     // Return
     STAX:   0x0004,     // Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
@@ -557,7 +588,7 @@ Chip.IW_PF = {          // Instruction Word P (Misc) Field (used when the Mask F
     DISP:   0x0007,     // registers A and B are output to the Display Decoder and the Keyboard is scanned
     BCDS:   0x0008,     // BCD set: enables BCD corrector in arithmetic unit
     BCDR:   0x0009,     // BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
-    RAB:    0x000A,     // LSD of R5 (3 bits) is stored in RAB
+    RABR5:  0x000A,     // LSD of R5 (3 bits) is stored in RAB
     RES1:   0x000B,     // (reserved)
     RES2:   0x000C,     // (reserved)
     RES3:   0x000D,     // (reserved)
@@ -565,5 +596,4 @@ Chip.IW_PF = {          // Instruction Word P (Misc) Field (used when the Mask F
     RES5:   0x000F      // (reserved)
 };
 
-Chip.OP_REGS = ["A","B","C","D"];
-Chip.D_VALS = ["?","D13","D14","D15"];
+Chip.OP_REGS = ["A","B","C","D","1","?","R5L","R5"];

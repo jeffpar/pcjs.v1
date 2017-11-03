@@ -159,7 +159,7 @@ class Machine extends Device {
                     this.println(sClass + " device initialized");
                 }
                 catch(err) {
-                    this.println("error initializing device " + idDevice + ": " + err.message);
+                    this.println("error initializing " + sClass + " device '" + idDevice + "': " + err.message);
                 }
             }
         }
