@@ -36,16 +36,16 @@
  */
 class Reg64 extends Device {
     /**
-     * Reg64(idMachine, idDevice, config)
+     * Reg64(chip, id)
      *
      * @this {Reg64}
-     * @param {string} idMachine
-     * @param {string} [idDevice]
-     * @param {Object} [config]
+     * @param {Chip} chip
+     * @param {string} [id]
      */
-    constructor(idMachine, idDevice, config)
+    constructor(chip, id)
     {
-        super(idMachine, idDevice, config);
+        super(chip.idMachine, id);
+        this.chip = chip;
         /*
          * Each Reg64 register contains 16 BCD/Hex digits, which we store as 16 independent 4-bit numbers,
          * where [0] is D0, aka DIGIT 0, and [15] is D15, aka DIGIT 15.
@@ -97,7 +97,7 @@ class Chip extends Device {
          */
         this.regsO = new Array(4);
         for (let i = 0; i < 4; i++) {
-            this.regsO[i] = new Reg64(idMachine, String.fromCharCode(0x41+i));
+            this.regsO[i] = new Reg64(this, String.fromCharCode(0x41+i));
         }
 
         /*
@@ -105,7 +105,7 @@ class Chip extends Device {
          */
         this.regsX = new Array(8);
         for (let i = 0; i < 8; i++) {
-            this.regsX[i] = new Reg64(idMachine, "X" + i);
+            this.regsX[i] = new Reg64(this, "X" + i);
         }
 
         /*
@@ -113,8 +113,10 @@ class Chip extends Device {
          */
         this.regsY = new Array(8);
         for (let i = 0; i < 8; i++) {
-            this.regsY[i] = new Reg64(idMachine, "Y" + i);
+            this.regsY[i] = new Reg64(this, "Y" + i);
         }
+
+        this.fBCD = true;
 
         /*
          * RAB (Register Address Buffer) is a 3-bit register "selectively loadable by the I4-I6 bits of an
@@ -517,11 +519,11 @@ class Chip extends Device {
             return true;
         case "help":
         case "?":
-            sResult = "supported commands:";
+            sResult = "available commands:";
             Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd});
             break;
         default:
-            sResult = "unsupported command: " + sCommand;
+            sResult = "unrecognized command: " + sCommand + " (try help)";
             break;
         }
         if (sResult) this.println(sResult.trim());
