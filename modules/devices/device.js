@@ -442,11 +442,11 @@ class Device {
                 break;
 
             case 'X':
-                ach = "0123456789ABCDEF";
+                ach = Device.HexUpperCase;
                 /* falls through */
 
             case 'x':
-                if (!ach) ach = "0123456789abcdef";
+                if (!ach) ach = Device.HexLowerCase;
                 s = "";
                 do {
                     s = ach[arg & 0xf] + s;
@@ -516,3 +516,9 @@ Device.Machines = {};
  * @type {string}
  */
 Device.PrintBuffer = "";
+
+/*
+ * Handy global constants
+ */
+Device.HexLowerCase = "0123456789abcdef";
+Device.HexUpperCase = "0123456789ABCDEF";

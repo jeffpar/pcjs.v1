@@ -141,7 +141,9 @@ class Time extends Device {
         case Time.BINDING.STEP:
             this.bindings[binding] = element;
             element.onclick = function onClickStep() {
-                time.step();
+                if (!time.step()) {
+                    time.println("already running");
+                }
             };
             break;
 

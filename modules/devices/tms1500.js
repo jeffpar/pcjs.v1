@@ -47,9 +47,19 @@ class Reg64 extends Device {
     {
         super(idMachine, idDevice, config);
         /*
-         * Each Reg64 register contains 16 BCD/Hex digits, which we store as 16 independent 4-bit numbers.
+         * Each Reg64 register contains 16 BCD/Hex digits, which we store as 16 independent 4-bit numbers,
+         * where [0] is D0, aka DIGIT 0, and [15] is D15, aka DIGIT 15.
          */
         this.digits = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    }
+
+    toString()
+    {
+        let s = this.idDevice + '=';
+        for (let i = this.digits.length - 1; i >= 0; i--) {
+            s += Device.HexLowerCase[this.digits[i]];
+        }
+        return s;
     }
 }
 
@@ -87,7 +97,7 @@ class Chip extends Device {
          */
         this.regsO = new Array(4);
         for (let i = 0; i < 4; i++) {
-            this.regsO[i] = new Reg64(idMachine, "Register " + String.fromCharCode(0x41+i));
+            this.regsO[i] = new Reg64(idMachine, String.fromCharCode(0x41+i));
         }
 
         /*
@@ -95,7 +105,7 @@ class Chip extends Device {
          */
         this.regsX = new Array(8);
         for (let i = 0; i < 8; i++) {
-            this.regsX[i] = new Reg64(idMachine, "Register X" + String.fromCharCode(0x30+i));
+            this.regsX[i] = new Reg64(idMachine, "X" + i);
         }
 
         /*
@@ -103,7 +113,7 @@ class Chip extends Device {
          */
         this.regsY = new Array(8);
         for (let i = 0; i < 8; i++) {
-            this.regsY[i] = new Reg64(idMachine, "Register Y" + String.fromCharCode(0x30+i));
+            this.regsY[i] = new Reg64(idMachine, "Y" + i);
         }
 
         /*
@@ -219,8 +229,6 @@ class Chip extends Device {
         //         chip.stop();
         //     });
         // };
-
-        this.fStop = false;
 
         // if (DEBUG) {
         //     for (let addr = 0; addr < 0x800; addr++) {
@@ -471,7 +479,8 @@ class Chip extends Device {
     dumpRegs()
     {
         let sResult = "";
-        sResult += this.disassemble(this.rom.getData(this.regPC), this.regPC);
+        this.regsO.forEach(reg => {sResult += reg.toString() + ' '});
+        sResult += '\n' + this.disassemble(this.rom.getData(this.regPC), this.regPC);
         return sResult.trim();
     }
 
@@ -486,6 +495,15 @@ class Chip extends Device {
         let addr, n = 8, sResult = "";
         let aCommands = sCommand.split(' ');
         switch(aCommands[0]) {
+        case "g":
+            if (!this.time.start()) sResult = "already started";
+            break;
+        case "h":
+            if (!this.time.stop()) sResult = "already stopped";
+            break;
+        case "t":
+            if (!this.time.step()) sResult = "already running";
+            break;
         case "r":
             sResult += this.dumpRegs();
             break;
@@ -499,27 +517,15 @@ class Chip extends Device {
             return true;
         case "help":
         case "?":
-            sResult = "supported commands:\nr\t\tdump registers\nu [addr]\tdisassemble code";
+            sResult = "supported commands:";
+            Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd});
             break;
         default:
+            sResult = "unsupported command: " + sCommand;
             break;
         }
-        if (!sResult) {
-            sResult = "unsupported command: " + sCommand;
-        }
-        this.println(sResult.trim());
+        if (sResult) this.println(sResult.trim());
         return true;
-    }
-
-    /**
-     * stop()
-     *
-     * @this {Chip}
-     */
-    stop()
-    {
-        this.time.stop();
-        this.fStop = true;
     }
 
     /**
@@ -579,7 +585,7 @@ Chip.IW_MF = {          // Instruction Word Mask Field
     N_MASK: 0x0001
 };
 
-Chip.IW_FF = {          // Instruction Word F (Flag) Field (used when the Mask Field is FF)
+Chip.IW_FF = {          // Instruction Word Flag Field (used when the Mask Field is FF)
     MASK:   0x0003,
     SET:    0x0000,
     RESET:  0x0001,
@@ -593,7 +599,7 @@ Chip.IW_FF = {          // Instruction Word F (Flag) Field (used when the Mask F
     B_SHIFT:     2,
 };
 
-Chip.IW_PF = {          // Instruction Word P (Misc) Field (used when the Mask Field is PF)
+Chip.IW_PF = {          // Instruction Word Misc Field (used when the Mask Field is PF)
     MASK:   0x000F,
     STYA:   0x0000,     // Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
     RABI:   0x0001,     // Bits 4-6 of instruction are stored in RAB
@@ -614,3 +620,11 @@ Chip.IW_PF = {          // Instruction Word P (Misc) Field (used when the Mask F
 };
 
 Chip.OP_REGS = ["A","B","C","D","1","?","R5L","R5"];
+
+Chip.COMMANDS = [
+    "g\t\trun",
+    "h\t\thalt",
+    "r\t\tdump registers",
+    "t\t\tstep",
+    "u [addr]\tdisassemble code"
+];
