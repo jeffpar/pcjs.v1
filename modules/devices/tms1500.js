@@ -54,6 +54,26 @@ class Reg64 extends Device {
     }
 
     /**
+     * init(value, range)
+     *
+     * @this {Reg64}
+     * @param {number} value
+     * @param {Array.<number>} range
+     * @returns {Reg64}
+     */
+    init(value, range = [0,15])
+    {
+        for (let i = 0; i < this.digits.length; i++) {
+            this.digits[i] = 0;
+        }
+        for (let i = range[0], j = range[1]; i <= j; i++) {
+            this.digits[i] = value & 0xf;
+            value >>>= 4;
+        }
+        return this;
+    }
+
+    /**
      * toString()
      *
      * @this {Reg64}
@@ -64,13 +84,39 @@ class Reg64 extends Device {
         let s = this.idDevice + '=';
         for (let i = this.digits.length - 1; i >= 0; i--) {
             s += Device.HexLowerCase[this.digits[i]];
+            if (!(i % 4)) s += ' ';
         }
         return s;
     }
 
     /**
+     * add(reg, regSrc, range, base)
+     *
+     * @this {Reg64}
+     * @param {Reg64} reg
+     * @param {Reg64} regSrc
+     * @param {Array.<number>} range
+     * @param {number} base
+     */
+    add(reg, regSrc, range, base)
+    {
+        let carry = 0;
+        for (let i = range[0], j = range[1]; i <= j; i++) {
+            this.digits[i] = reg.digits[i] + regSrc.digits[i] + carry;
+            carry = 0;
+            if (this.digits[i] >= base) {
+                this.digits[i] -= base;
+                carry = 1;
+            }
+        }
+        if (carry) this.chip.fCOND = true;
+        this.updateR5(range);
+    }
+
+    /**
      * move(regSrc, range)
      *
+     * @this {Reg64}
      * @param {Reg64} regSrc
      * @param {Array.<number>} range
      */
@@ -79,11 +125,71 @@ class Reg64 extends Device {
         for (let i = range[0], j = range[1]; i <= j; i++) {
             this.digits[i] = regSrc.digits[i];
         }
+        regSrc.updateR5(range);
+    }
+
+    /**
+     * shl(reg, range)
+     *
+     * @this {Reg64}
+     * @param {Reg64} reg
+     * @param {Array.<number>} range
+     */
+    shl(reg, range)
+    {
+        let i, j;
+        for (i = range[1], j = range[0]; i > j; i--) {
+            this.digits[i] = reg.digits[i-1];
+        }
+        this.digits[i] = 0;
+        this.updateR5(range);
+    }
+
+    /**
+     * shr(reg, range)
+     *
+     * @this {Reg64}
+     * @param {Reg64} reg
+     * @param {Array.<number>} range
+     */
+    shr(reg, range)
+    {
+        let i, j;
+        for (i = range[0], j = range[1]; i < j; i++) {
+            this.digits[i] = reg.digits[i+1];
+        }
+        this.digits[i] = 0;
+        this.updateR5(range);
+    }
+
+    /**
+     * sub(reg, regSrc, range, base)
+     *
+     * @this {Reg64}
+     * @param {Reg64} reg
+     * @param {Reg64} regSrc
+     * @param {Array.<number>} range
+     * @param {number} base
+     */
+    sub(reg, regSrc, range, base)
+    {
+        let carry = 0;
+        for (let i = range[0], j = range[1]; i <= j; i++) {
+            this.digits[i] = reg.digits[i] - regSrc.digits[i] - carry;
+            carry = 0;
+            if (this.digits[i] < 0) {
+                this.digits[i] += base;
+                carry = 1;
+            }
+        }
+        if (carry) this.chip.fCOND = true;
+        this.updateR5(range);
     }
 
     /**
      * xchg(regSrc, range)
      *
+     * @this {Reg64}
      * @param {Reg64} regSrc
      * @param {Array.<number>} range
      */
@@ -93,6 +199,22 @@ class Reg64 extends Device {
             let d = this.digits[i];
             this.digits[i] = regSrc.digits[i];
             regSrc.digits[i] = d;
+        }
+        regSrc.updateR5(range);
+    }
+
+    /**
+     * updateR5(range)
+     *
+     * @this {Reg64}
+     */
+    updateR5(range)
+    {
+        this.chip.regR5 = this.digits[range[0]];
+        this.assert(!(this.chip.regR5 & ~0xf));
+        if (range[1] > range[0]) {
+            this.chip.regR5 |= this.digits[range[1]] << 4;
+            this.assert(!(this.chip.regR5 & ~0xff));
         }
     }
 }
@@ -136,6 +258,9 @@ class Chip extends Device {
             this.regs[i] = new Reg64(this, String.fromCharCode(0x41+i));
         }
 
+        this.regTmp = new Reg64(this, "Tmp");
+        this.regSuppress = new Reg64(this, "Suppress");
+
         /*
          * Eight (8) Storage Registers: X0-X7
          */
@@ -152,7 +277,7 @@ class Chip extends Device {
             this.regsY[i] = new Reg64(this, "Y" + i);
         }
 
-        this.fBCD = false;
+        this.base = 10;
         this.fCOND = false;
 
         /*
@@ -291,13 +416,13 @@ class Chip extends Device {
                 this.regPC = addr;
                 this.time.stop();
                 this.println("unimplemented opcode");
-                nCyclesTarget = 0;      // this is simply to trigger dumpRegs() below
+                nCyclesTarget = 0;      // this is simply to trigger toRegString() below
                 break;
             }
             nCyclesClocked += 128;
         } while (nCyclesClocked < nCyclesTarget);
         if (!nCyclesTarget) {
-            this.println(this.dumpRegs());
+            this.println(this.toRegString());
         }
         return nCyclesClocked;
     }
@@ -331,49 +456,70 @@ class Chip extends Device {
             let l = (w & Chip.IW_MF.L_MASK) >> Chip.IW_MF.L_SHIFT;
             let n = (w & Chip.IW_MF.N_MASK);
 
-            let iDst = -1, iSrc = -1;
-            let iOp = (k == 5? (n? Chip.OP.SHR : Chip.OP.SHL) : (n? Chip.OP.SUB : Chip.OP.ADD));
+            let iOp = (n? Chip.OP.SUB : Chip.OP.ADD), regSrc;
 
+            switch(k) {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+                regSrc = this.regs[k];
+                break;
+            case 4:
+                regSrc = this.regTmp.init(1, range);
+                break;
+            case 5:
+                iOp = (n? Chip.OP.SHR : Chip.OP.SHL);
+                break;
+            case 6:
+                regSrc = this.regTmp.init(this.regR5 & 0xf, range);
+                break;
+            case 7:
+                regSrc = this.regTmp.init(this.regR5 & 0xff, range);
+                break;
+            }
+
+            let regResult;
             switch(l) {
             case 0:
-                iDst = j;
+                regResult = this.regs[j];
                 break;
             case 1:
-                if (k < 4) iDst = k;
+                regResult = (k < 4? this.regs[k] : undefined);
                 break;
-            case 2:             // "suppressed" operation
+            case 2:
+                regResult = (k < 5? this.regSuppress : (k == 5? this.regs[j] : undefined));
                 break;
             case 3:
-                if (!n) {       // XCHG
+                if (!n) {
                     this.assert(!j && k < 4);
-                    this.regs[0].xchg(this.regs[k], range);
-                } else {        // MOVE
+                    this.regs[0].xchg(regSrc, range);
+                } else {
                     this.assert(k != 5);
-                    this.regs[j].move(this.regs[k], range);
+                    this.regs[j].move(regSrc, range);
                 }
                 return true;
             }
 
-            // switch(k) {
-            // case 0:
-            // case 1:
-            // case 2:
-            // case 3:
-            //     sSrc = Chip.OP_REGS[j] + sOperator + Chip.OP_REGS[k];
-            //     break;
-            // case 4:
-            // case 5:
-            //     sSrc = Chip.OP_REGS[j] + sOperator + "1";
-            //     break;
-            // case 6:
-            //     sSrc = Chip.OP_REGS[j] + sOperator + "R5L";
-            //     break;
-            // case 7:
-            //     sSrc = Chip.OP_REGS[j] + sOperator + "R5";
-            //     break;
-            // }
+            if (!regResult) return false;
 
-            // sOperands = sDst + "," + sSrc + "," + sMask;
+            let base = (w >= Chip.IW_MF.D14? 16 : this.base);
+
+            switch(iOp) {
+            case Chip.OP.ADD:
+                regResult.add(this.regs[j], regSrc, range, base);
+                break;
+            case Chip.OP.SUB:
+                regResult.sub(this.regs[j], regSrc, range, base);
+                break;
+            case Chip.OP.SHL:
+                regResult.shl(this.regs[j], range);
+                break;
+            case Chip.OP.SHR:
+                regResult.shr(this.regs[j], range);
+                break;
+            }
+            return true;
         }
 
         return false;
@@ -408,39 +554,23 @@ class Chip extends Device {
             sOperands = this.sprintf("0x%04x", v);
         }
         else {
-            let sMask = "", v;
-            switch(w & Chip.IW_MF.MASK) {
+            let mask = w & Chip.IW_MF.MASK, sMask = "", v;
+            switch(mask) {
             case Chip.IW_MF.MMSD:   // 0x0000: Mantissa Most Significant Digit (D12)
-                sMask = "0x000F000000000000";
-                break;
             case Chip.IW_MF.ALL:    // 0x0100: (D0-D15)
-                sMask = "0xFFFFFFFFFFFFFFFF";
-                break;
             case Chip.IW_MF.MANT:   // 0x0200: Mantissa (D2-D12)
-                sMask = "0x000FFFFFFFFFFF00";
-                break;
             case Chip.IW_MF.MAEX:   // 0x0300: Mantissa and Exponent (D0-D12)
-                sMask = "0x000FFFFFFFFFFFFF";
-                break;
             case Chip.IW_MF.LLSD:   // 0x0400: Mantissa Least Significant Digit (D2)
-                sMask = "0x0000000000000F00";
-                break;
             case Chip.IW_MF.EXP:    // 0x0500: Exponent (D0-D1)
-                sMask = "0x00000000000000FF";
+            case Chip.IW_MF.FMAEX:  // 0x0700: Flag and Mantissa and Exponent (D0-D13)
+            case Chip.IW_MF.D14:    // 0x0800: (D14)
+            case Chip.IW_MF.FLAG:   // 0x0900: (D13-D15)
+            case Chip.IW_MF.DIGIT:  // 0x0a00: (D14-D15)
+            case Chip.IW_MF.D13:    // 0x0d00: (D13)
+            case Chip.IW_MF.D15:    // 0x0f00: (D15)
+                sMask = this.toMaskString(mask);
                 break;
             case Chip.IW_MF.RES1:   // 0x0600: (reserved)
-                break;
-            case Chip.IW_MF.FMAEX:  // 0x0700: Flag and Mantissa and Exponent (D0-D13)
-                sMask = "0x00FFFFFFFFFFFFFF";
-                break;
-            case Chip.IW_MF.D14:    // 0x0800: (D14)
-                sMask = "0x0F00000000000000";
-                break;
-            case Chip.IW_MF.FLAG:   // 0x0900: (D13-D15)
-                sMask = "0xFFF0000000000000";
-                break;
-            case Chip.IW_MF.DIGIT:  // 0x0a00: (D14-D15)
-                sMask = "0xFF00000000000000";
                 break;
             case Chip.IW_MF.RES2:   // 0x0b00: (reserved)
                 break;
@@ -470,9 +600,6 @@ class Chip extends Device {
                  */
                 v = ((w & (Chip.IW_FF.D_MASK | Chip.IW_FF.B_MASK)) >> Chip.IW_FF.B_SHIFT) + 48;
                 sOperands += ':' + (v < 52? "?" : v);
-                break;
-            case Chip.IW_MF.D13:    // 0x0d00: (D13)
-                sMask = "0x00F0000000000000";
                 break;
             case Chip.IW_MF.PF:     // 0x0e00: (used for misc operations)
                 switch(w & Chip.IW_PF.MASK) {
@@ -518,9 +645,8 @@ class Chip extends Device {
                     break;
                 default:
                     /*
-                     * The "Hrast" emulator defines some additional opcodes at this point, without (as usual) any explanation;
-                     * ie, are these pseudo-opcodes (which ?KEY almost certainly is) or are these undocumented opcodes that showed
-                     * up in one or more of the patent listings and whose operation was inferred or deduced?
+                     * The "Hrast" emulator defines some additional opcodes at this point, without any explanation;
+                     * the purpose of some are clear (like "?KEY"), but others are less clear.
                      *
                      *      0x000B: POWOFF
                      *      0x000C: STAX MAEX (a special version of STAX)
@@ -530,9 +656,6 @@ class Chip extends Device {
                      */
                     break;
                 }
-                break;
-            case Chip.IW_MF.D15:    // 0x0f00: (D15)
-                sMask = "0xF000000000000000";
                 break;
             }
 
@@ -601,20 +724,6 @@ class Chip extends Device {
     }
 
     /**
-     * dumpRegs()
-     *
-     * @returns {string}
-     */
-    dumpRegs()
-    {
-        let sResult = "";
-        this.regs.forEach((reg, i) => {sResult += reg.toString() + ((i & 1)? '\n' : ' ');});
-        this.stack.forEach((addr, i) => {sResult += this.sprintf("ST%d=0x%04x ", i, addr);});
-        sResult += '\n' + this.disassemble(this.rom.getData(this.regPC), this.regPC);
-        return sResult.trim();
-    }
-
-    /**
      * onCommand(sCommand)
      *
      * @param {string} sCommand
@@ -635,7 +744,7 @@ class Chip extends Device {
             if (!this.time.step()) sResult = "already running";
             break;
         case "r":
-            sResult += this.dumpRegs();
+            sResult += this.toRegString();
             break;
         case "u":
             addr = aCommands[1]? (Number.parseInt(aCommands[1], 16) || 0) : this.regPC;
@@ -684,6 +793,39 @@ class Chip extends Device {
     {
         this.stack.unshift(addr);
         this.stack.length = 3;
+    }
+
+    /**
+     * toMaskString(mask)
+     *
+     * @this {Chip}
+     * @param {number} mask
+     * @returns {string}
+     */
+    toMaskString(mask)
+    {
+        let s = "";
+        let range = Chip.RANGE[mask];
+        for (let i = 0; i < 16; i++) {
+            if (!(i % 4)) s = ' ' + s;
+            s = (range? (i >= range[0] && i <= range[1]? 'F' : '0') : '?') + s;
+        }
+        return s;
+    }
+
+    /**
+     * toRegString()
+     *
+     * @returns {string}
+     */
+    toRegString()
+    {
+        let s = "";
+        this.regs.forEach((reg, i) => {s += reg.toString() + ((i & 1)? '\n' : '  ');});
+        s += "COND=" + (this.fCOND? 1 : 0) + " BASE=" + this.base + " R5=" + this.sprintf("0x%02x", this.regR5) + " RAB=" + this.regRAB + ' ';
+        this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=0x%04x ", i, addr);});
+        s += '\n' + this.disassemble(this.rom.getData(this.regPC), this.regPC);
+        return s.trim();
     }
 }
 
