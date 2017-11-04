@@ -111,7 +111,6 @@ class Machine extends Device {
         let machine = this;
         window.addEventListener('load', function onLoad(event) {
             machine.initDevices();
-            machine.println("Note: still under development (buttons only display row and col)")
         });
     }
 

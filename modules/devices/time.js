@@ -157,7 +157,7 @@ class Time extends Device {
      * addClocker(clocker)
      *
      * @this {Time}
-     * @param {function(boolean)} clocker
+     * @param {function(number)} clocker
      */
     addClocker(clocker)
     {
@@ -238,11 +238,10 @@ class Time extends Device {
         }
         let iClocker = 0;
         while (this.nCyclesRemain > 0) {
-            let nCycles = 0;
             if (iClocker < this.aClockers.length) {
-                nCycles = this.aClockers[iClocker++](fStep) || 1;
+                nCycles = this.aClockers[iClocker++](fStep? 0 : nCycles) || 1;
             } else {
-                iClocker = 0;
+                iClocker = nCycles = 0;
             }
             this.nCyclesRemain -= nCycles;
         }

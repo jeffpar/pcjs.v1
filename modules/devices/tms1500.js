@@ -1,5 +1,5 @@
 /**
- * @fileoverview Simulates a TMS-1500 Chip
+ * @fileoverview Simulates the instructions of a TMS-1500 chip
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -53,6 +53,12 @@ class Reg64 extends Device {
         this.digits = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
     }
 
+    /**
+     * toString()
+     *
+     * @this {Reg64}
+     * @returns {string}
+     */
     toString()
     {
         let s = this.idDevice + '=';
@@ -60,6 +66,34 @@ class Reg64 extends Device {
             s += Device.HexLowerCase[this.digits[i]];
         }
         return s;
+    }
+
+    /**
+     * move(regSrc, range)
+     *
+     * @param {Reg64} regSrc
+     * @param {Array.<number>} range
+     */
+    move(regSrc, range)
+    {
+        for (let i = range[0], j = range[1]; i <= j; i++) {
+            this.digits[i] = regSrc.digits[i];
+        }
+    }
+
+    /**
+     * xchg(regSrc, range)
+     *
+     * @param {Reg64} regSrc
+     * @param {Array.<number>} range
+     */
+    xchg(regSrc, range)
+    {
+        for (let i = range[0], j = range[1]; i <= j; i++) {
+            let d = this.digits[i];
+            this.digits[i] = regSrc.digits[i];
+            regSrc.digits[i] = d;
+        }
     }
 }
 
@@ -76,6 +110,8 @@ class Reg64 extends Device {
  *
  * @class {Chip}
  * @unrestricted
+ * @property {boolean} fBCD
+ * @property {boolean} fCOND
  */
 class Chip extends Device {
     /**
@@ -95,9 +131,9 @@ class Chip extends Device {
         /*
          * Four (4) Operational Registers: A-D
          */
-        this.regsO = new Array(4);
+        this.regs = new Array(4);
         for (let i = 0; i < 4; i++) {
-            this.regsO[i] = new Reg64(this, String.fromCharCode(0x41+i));
+            this.regs[i] = new Reg64(this, String.fromCharCode(0x41+i));
         }
 
         /*
@@ -116,7 +152,8 @@ class Chip extends Device {
             this.regsY[i] = new Reg64(this, "Y" + i);
         }
 
-        this.fBCD = true;
+        this.fBCD = false;
+        this.fCOND = false;
 
         /*
          * RAB (Register Address Buffer) is a 3-bit register "selectively loadable by the I4-I6 bits of an
@@ -188,11 +225,9 @@ class Chip extends Device {
 
         /*
          * The "Program Counter" (regPC) is an 11-bit register that automatically increments unless a HOLD signal
-         * is applied, effectively locking execution on a single instruction.  The next 13-bit instruction word
-         * fetched from ROM is stored in regIW.
+         * is applied, effectively locking execution on a single instruction.
          */
         this.regPC = 0;
-        this.regIW = -1;
 
         /*
          * The "Subroutine Stack".  "When an unconditional branch instruction is decoded by branch logic 32b, the
@@ -202,7 +237,7 @@ class Chip extends Device {
          *
          * Refer to patent Fig. 7a (p. 9)
          */
-        this.regPCStack = [0,0,0];
+        this.stack = [0,0,0];
 
         /*
          * Get access to the ROM device.
@@ -215,23 +250,6 @@ class Chip extends Device {
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         this.time.addClocker(this.clocker.bind(this));
 
-        // let chip = this;
-        // this.states = new Array(32);
-        // for (let i = 0; i < this.states.length; i++) {
-        //     this.states[i] = new Array(4);
-        // }
-        // this.states[0][0] = chip.decodeIW.bind(this);   // S01.Φ1
-        // this.states[22][0] = function setROMAddr() {    // S22.Φ1
-        //     chip.rom.setAddr(chip.regPC);
-        // };
-        // this.states[29][2] = function getROMData() {    // S29.Φ2
-        //     chip.regIW = chip.rom.getData();
-        //     chip.time.doOutside(function() {
-        //         chip.println(chip.disassemble(chip.regIW, chip.regPC));
-        //         chip.stop();
-        //     });
-        // };
-
         // if (DEBUG) {
         //     for (let addr = 0; addr < 0x800; addr++) {
         //         let w = this.rom.getData(addr);
@@ -243,14 +261,122 @@ class Chip extends Device {
     }
 
     /**
-     * decode()
+     * clocker(nCyclesTarget)
+     *
+     * The TI-57 has a standard cycle time of 0.625us, which translates to 1,600,000 cycles per second.
+     *
+     * Every set of four cycles is designated a "state time".  Within a single state time (2.5us), the four cycles
+     * are designated Φ1, P1, Φ2, and P2.  Moreover, one state time is required to transfer 2 bits from a data word
+     * register.  Since a data word consists of 16 BCD digits (ie, 64 bits), 32 state times (80us) are required to
+     * "clock" all the bits from one register to another.  This total time is referred to as an instruction cycle.
+     *
+     * Note that some instructions (ie, display instructions) slow the delivery of cycles, such that one state time
+     * is 10us instead of 2.5us, and therefore the entire instruction cycle will take 320us instead of 80us.
+     *
+     * I'll start with the assumption that simulating a full 32 "state times", or 128 cycles, per call makes the most
+     * sense.  So that's what we'll do.
      *
      * @this {Chip}
+     * @param {number} nCyclesTarget (0 to single-step)
+     * @returns {number} (number of cycles actually "clocked")
      */
-    decode()
+    clocker(nCyclesTarget = 0)
     {
-        if (this.regIW > 0) {
+        let nCyclesClocked = 0;
+        do {
+            let w = this.rom.getData(this.regPC);
+            let addr = this.regPC;
+            this.regPC = (addr + 1) & this.rom.addrMask;
+            if (!this.decode(w, addr)) {
+                this.regPC = addr;
+                this.time.stop();
+                this.println("unimplemented opcode");
+                nCyclesTarget = 0;      // this is simply to trigger dumpRegs() below
+                break;
+            }
+            nCyclesClocked += 128;
+        } while (nCyclesClocked < nCyclesTarget);
+        if (!nCyclesTarget) {
+            this.println(this.dumpRegs());
         }
+        return nCyclesClocked;
+    }
+
+    /**
+     * decode(w, addr)
+     *
+     * @this {Chip}
+     * @param {number} w
+     * @param {number} addr
+     * @returns {boolean}
+     */
+    decode(w, addr)
+    {
+        if (w & 0x1000) {
+            if (w & 0x0800) {   // BRC/BRNC
+                if (!!(w & 0x0400) == this.fCOND) {
+                    this.regPC = (addr & 0x0400) | (w & 0x03FF);
+                }
+            } else {            // CALL
+                this.push(this.regPC);
+                this.regPC = w & 0x07FF;
+            }
+            return true;
+        }
+
+        let range = Chip.RANGE[w & Chip.IW_MF.MASK];
+        if (range) {
+            let j = (w & Chip.IW_MF.J_MASK) >> Chip.IW_MF.J_SHIFT;
+            let k = (w & Chip.IW_MF.K_MASK) >> Chip.IW_MF.K_SHIFT;
+            let l = (w & Chip.IW_MF.L_MASK) >> Chip.IW_MF.L_SHIFT;
+            let n = (w & Chip.IW_MF.N_MASK);
+
+            let iDst = -1, iSrc = -1;
+            let iOp = (k == 5? (n? Chip.OP.SHR : Chip.OP.SHL) : (n? Chip.OP.SUB : Chip.OP.ADD));
+
+            switch(l) {
+            case 0:
+                iDst = j;
+                break;
+            case 1:
+                if (k < 4) iDst = k;
+                break;
+            case 2:             // "suppressed" operation
+                break;
+            case 3:
+                if (!n) {       // XCHG
+                    this.assert(!j && k < 4);
+                    this.regs[0].xchg(this.regs[k], range);
+                } else {        // MOVE
+                    this.assert(k != 5);
+                    this.regs[j].move(this.regs[k], range);
+                }
+                return true;
+            }
+
+            // switch(k) {
+            // case 0:
+            // case 1:
+            // case 2:
+            // case 3:
+            //     sSrc = Chip.OP_REGS[j] + sOperator + Chip.OP_REGS[k];
+            //     break;
+            // case 4:
+            // case 5:
+            //     sSrc = Chip.OP_REGS[j] + sOperator + "1";
+            //     break;
+            // case 6:
+            //     sSrc = Chip.OP_REGS[j] + sOperator + "R5L";
+            //     break;
+            // case 7:
+            //     sSrc = Chip.OP_REGS[j] + sOperator + "R5";
+            //     break;
+            // }
+
+            // sOperands = sDst + "," + sSrc + "," + sMask;
+        }
+
+        return false;
     }
 
     /**
@@ -265,7 +391,6 @@ class Chip extends Device {
     disassemble(w, addr)
     {
         let sOp = "???", sOperands = "";
-
         if (w & 0x1000) {
             let v;
             if (w & 0x0800) {
@@ -410,6 +535,7 @@ class Chip extends Device {
                 sMask = "0xF000000000000000";
                 break;
             }
+
             if (sMask) {
                 let j = (w & Chip.IW_MF.J_MASK) >> Chip.IW_MF.J_SHIFT;
                 let k = (w & Chip.IW_MF.K_MASK) >> Chip.IW_MF.K_SHIFT;
@@ -419,6 +545,7 @@ class Chip extends Device {
                 sOp = "LOAD";
                 let sOperator = "";
                 let sDst = "?", sSrc = "?";
+
                 if (!n) {
                     sOperator = (k == 5? "<<" : "+");
                 } else {
@@ -481,7 +608,8 @@ class Chip extends Device {
     dumpRegs()
     {
         let sResult = "";
-        this.regsO.forEach(reg => {sResult += reg.toString() + ' '});
+        this.regs.forEach((reg, i) => {sResult += reg.toString() + ((i & 1)? '\n' : ' ');});
+        this.stack.forEach((addr, i) => {sResult += this.sprintf("ST%d=0x%04x ", i, addr);});
         sResult += '\n' + this.disassemble(this.rom.getData(this.regPC), this.regPC);
         return sResult.trim();
     }
@@ -494,7 +622,7 @@ class Chip extends Device {
      */
     onCommand(sCommand)
     {
-        let addr, n = 8, sResult = "";
+        let addr, n, sResult = "";
         let aCommands = sCommand.split(' ');
         switch(aCommands[0]) {
         case "g":
@@ -511,8 +639,11 @@ class Chip extends Device {
             break;
         case "u":
             addr = aCommands[1]? (Number.parseInt(aCommands[1], 16) || 0) : this.regPC;
+            n = Number.parseInt(aCommands[2], 10) || 8;
             while (n--) {
-                sResult += this.disassemble(this.rom.getData(addr), addr++);
+                let w = this.rom.getData(addr);
+                if (w == undefined) break;
+                sResult += this.disassemble(w, addr++);
             }
             break;
         case "":
@@ -520,7 +651,7 @@ class Chip extends Device {
         case "help":
         case "?":
             sResult = "available commands:";
-            Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd});
+            Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
             break;
         default:
             sResult = "unrecognized command: " + sCommand + " (try help)";
@@ -531,32 +662,28 @@ class Chip extends Device {
     }
 
     /**
-     * clocker(fStep)
-     *
-     * The TI-57 has a standard cycle time of 0.625us, which translates to 1,600,000 cycles per second.
-     *
-     * Every set of four cycles is designated a "state time".  Within a single state time (2.5us), the four cycles
-     * are designated Φ1, P1, Φ2, and P2.  Moreover, one state time is required to transfer 2 bits from a data word
-     * register.  Since a data word consists of 16 BCD digits (ie, 64 bits), 32 state times (80us) are required to
-     * "clock" all the bits from one register to another.  This total time is referred to as an instruction cycle.
-     *
-     * Note that some instructions (ie, display instructions) slow the delivery of cycles, such that one state time
-     * is 10us instead of 2.5us, and therefore the entire instruction cycle will take 320us instead of 80us.
-     *
-     * I'll start with the assumption that simulating a full 32 "state times", or 128 cycles, per call makes the most
-     * sense.  So that's what we'll do.
+     * pop()
      *
      * @this {Chip}
-     * @param {boolean} [fStep] (default is false)
      * @returns {number}
      */
-    clocker(fStep = false)
+    pop()
     {
-        let nCycles = 128;
-        if (fStep) {
-            this.println(this.dumpRegs());
-        }
-        return nCycles;
+        let addr = this.stack.shift();
+        this.stack.length = 3;
+        return addr;
+    }
+
+    /**
+     * push(addr)
+     *
+     * @this {Chip}
+     * @param {number} addr
+     */
+    push(addr)
+    {
+        this.stack.unshift(addr);
+        this.stack.length = 3;
     }
 }
 
@@ -619,6 +746,26 @@ Chip.IW_PF = {          // Instruction Word Misc Field (used when the Mask Field
     RES3:   0x000D,     // (reserved)
     RES4:   0x000E,     // (reserved)
     RES5:   0x000F      // (reserved)
+};
+
+Chip.RANGE = {
+    [Chip.IW_MF.MMSD]:  [12,12],        // 0x0000: Mantissa Most Significant Digit (D12)
+    [Chip.IW_MF.ALL]:   [0,15],         // 0x0100: (D0-D15)
+    [Chip.IW_MF.MANT]:  [2,12],         // 0x0200: Mantissa (D2-D12)
+    [Chip.IW_MF.MAEX]:  [0,12],         // 0x0300: Mantissa and Exponent (D0-D12)
+    [Chip.IW_MF.LLSD]:  [2,2],          // 0x0400: Mantissa Least Significant Digit (D2)
+    [Chip.IW_MF.EXP]:   [0,1],          // 0x0500: Exponent (D0-D1)
+    [Chip.IW_MF.FMAEX]: [0,13],         // 0x0700: Flag and Mantissa and Exponent (D0-D13)
+    [Chip.IW_MF.D14]:   [14,14],        // 0x0800: (D14)
+    [Chip.IW_MF.FLAG]:  [13,15],        // 0x0900: (D13-D15)
+    [Chip.IW_MF.DIGIT]: [14,15],        // 0x0a00: (D14-D15)
+};
+
+Chip.OP = {
+    ADD:    0,
+    SUB:    1,
+    SHL:    2,
+    SHR:    3
 };
 
 Chip.OP_REGS = ["A","B","C","D","1","?","R5L","R5"];

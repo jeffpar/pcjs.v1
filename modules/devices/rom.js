@@ -45,6 +45,7 @@
  * @unrestricted
  * @property {ROMConfig} config
  * @property {Array.<number>} data
+ * @property {number} addrMask
  */
 class ROM extends Device {
     /**
@@ -73,13 +74,18 @@ class ROM extends Device {
     {
         super(idMachine, idDevice, config);
         this.data = config.values;
+        /*
+         * WARNING: This assumes that the data array length is a power-of-two (which we assert below).
+         */
+        this.addrMask = this.data.length - 1;
+        this.assert(!((this.addrMask + 1) & this.addrMask));
     }
 
     /**
      * getData(addr)
      *
      * @param {number} addr
-     * @returns {number}
+     * @returns {number|undefined}
      */
     getData(addr)
     {
