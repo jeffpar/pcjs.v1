@@ -145,15 +145,24 @@ class Input extends Device {
             this.captureTouch(element);
 
             if (this.time) {
-                this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function() {
-                    input.onKeyRelease();
+                this.timerKbd = this.time.addTimer("timerKbd", function() {
+                    input.onKeyTimer();
                 });
-                this.keyPressed = null;
                 /*
-                 * I'm attaching my 'keypress' handlers to the document object, since image elements
-                 * are not focusable.  I'm disinclined to do what I've done with other machines (ie,
-                 * create an invisible <textarea> overlay), because in this case, I don't really want
-                 * a soft keyboard popping up and obscuring part of the display.
+                 * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
+                 * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
+                 * delay between release and the next press -- probably for de-bouncing purposes.  So we
+                 * maintain a key state: 0 means no key has gone down or up recently, 1 means a key just went
+                 * down, and 2 means a key just went up.  keysPressed maintains a queue of keys (up to 16)
+                 * received while key state is non-zero.
+                 */
+                this.keyState = 0;
+                this.keysPressed = [];
+                /*
+                 * I'm attaching my 'keypress' handlers to the document object, since image elements are
+                 * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
+                 * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
+                 * popping up and obscuring part of the display.
                  *
                  * A side-effect, however, is that if the user attempts to explicitly give the image
                  * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
@@ -198,7 +207,6 @@ class Input extends Device {
     captureKbd(element)
     {
         let input = this;
-
         element.addEventListener(
             'keypress',
             function onKeyPress(event) {
@@ -219,14 +227,19 @@ class Input extends Device {
      */
     onKeyPress(ch)
     {
-        this.onKeyRelease();
+        if (this.keyState) {
+            if (this.keysPressed.length < 16) {
+                this.keysPressed.push(ch);
+            }
+            return;
+        }
         for (let row = 0; row < this.config.map.length; row++) {
             let rowMap = this.config.map[row];
             for (let col = 0; col < rowMap.length; col++) {
                 if (ch == rowMap[col]) {
-                    this.keyPressed = ch;
+                    this.keyState = 1;
                     this.setPosition(col, row);
-                    this.time.setTimer(this.timerKeyRelease, Input.AUTORELEASE);
+                    this.time.setTimer(this.timerKbd, Input.KBD_DELAY);
                     return;
                 }
             }
@@ -235,15 +248,22 @@ class Input extends Device {
     }
 
     /**
-     * onKeyRelease()
+     * onKeyTimer()
      *
      * @this {Input}
      */
-    onKeyRelease()
+    onKeyTimer()
     {
-        if (this.keyPressed) {
-            this.keyPressed = null;
+        this.assert(this.keyState);
+        if (this.keyState == 1) {
+            this.keyState++;
             this.setPosition(-1, -1);
+            this.time.setTimer(this.timerKbd, Input.KBD_DELAY);
+        } else {
+            this.keyState = 0;
+            if (this.keysPressed.length) {
+                this.onKeyPress(this.keysPressed.shift());
+            }
         }
     }
 
@@ -521,4 +541,4 @@ Input.BINDING = {
     SURFACE:    "surface"
 };
 
-Input.AUTORELEASE = 200;        // number of milliseconds to simulate the automatic release of a keyPress
+Input.KBD_DELAY = 50;           // minimum number of milliseconds to ensure between key presses and releases

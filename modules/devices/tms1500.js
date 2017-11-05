@@ -1020,23 +1020,24 @@ class Chip extends Device {
                 s += '.';
             }
         }
+
         if (this.regA.digits[14] == 0x0E) {
             s = 'E' + s;
         }
+
+        this.led.drawString(s);
+
+        /*
+         * The DISP operation slows the clock by a factor of 4; to simulate that additional overhead, we bump
+         * nCyclesClocked by three more OP_CYCLES, in addition to the OP_CYCLES that clocker() already accounts for.
+         */
+        this.nCyclesClocked += Chip.OP_CYCLES * 3;
+
         if (this.regKey) {
             this.regR5 = this.regKey;
             this.fCOND = 1;
         }
-        this.led.drawString(s);
 
-        // if (DEBUG) this.printf("display: \"%s\"  key: 0x%02x\n", s, this.regKey);
-        // this.time.stop();
-
-        /*
-         * The DISP operation slows the clock by a factor of 4; to simulate that additional overhead, we simply
-         * bump nCyclesClocked by three more OP_CYCLES, in addition to the OP_CYCLES that clocker() already incurs.
-         */
-        this.nCyclesClocked += Chip.OP_CYCLES * 3;
         return true;
     }
 
@@ -1048,8 +1049,13 @@ class Chip extends Device {
      */
     pop()
     {
-        let addr = this.stack.shift();      // remove the first element
-        this.stack.push(-1);                // and append a new "guard value" at the end
+        /*
+         * Normally, you would simply decrement a stack pointer, but that's not how this stack was implemented.
+         */
+        let addr = this.stack[0];
+        let i = 0, j = this.stack.length - 1;
+        while (i < j) this.stack[i] = this.stack[++i];
+        this.stack[i] = -1;
         this.assert(addr >= 0, "stack underflow");
         return addr;
     }
@@ -1062,9 +1068,17 @@ class Chip extends Device {
      */
     push(addr)
     {
-        this.stack.unshift(addr);           // insert a new first element
-        addr = this.stack.pop();            // and remove the element falling off the end
-        this.assert(addr < 0, "stack overflow");
+        /*
+         * Normally, you would simply increment a stack pointer, but that's not how this stack was implemented.
+         */
+        let i = this.stack.length - 1;
+        /*
+         * Apparently, legitimate values are allowed to fall off the end of the stack, so we can't assert overflow.
+         *
+         *      this.assert(this.stack[i] < 0, "stack overflow");
+         */
+        while (i > 0) this.stack[i] = this.stack[--i];
+        this.stack[0] = addr;
     }
 
     /**

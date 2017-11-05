@@ -222,7 +222,11 @@ class LED extends Device {
     {
         this.clearGrid();
         for (let i = 0, col = 0, row = 0; i < s.length; i++, col++) {
-            this.drawSymbol(s[i], col, row);
+            let ch = s[i];
+            if (ch == '.') {
+                if (col) col--;
+            }
+            this.drawSymbol(ch, col, row);
         }
         this.drawGrid();
     }
@@ -301,5 +305,6 @@ LED.SYMBOLS = {
     "8":        ["A","B","C","D","E","F","G"],
     "9":        ["A","B","C","D","F","G"],
     "-":        ["G"],
-    "E":        ["G"]
+    "E":        ["A","D","E","F","G"],
+    ".":        ["P"]
 };
