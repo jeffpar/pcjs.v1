@@ -83,7 +83,11 @@ class Input extends Device {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        let element = this.bindings.surface;
+
+        let input = this;
+        this.time = this.findDeviceByClass(Machine.CLASS.TIME);
+
+        let element = this.bindings[Input.BINDING.SURFACE];
         if (element) {
             /*
              * The location array, eg:
@@ -138,8 +142,6 @@ class Input extends Device {
             this.captureMouse(element);
             this.captureTouch(element);
 
-            let input = this;
-            this.time = this.findDeviceByClass(Machine.CLASS.TIME);
             if (this.time) {
                 this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function() {
                     input.onKeyRelease();
@@ -164,6 +166,13 @@ class Input extends Device {
              * this point, these variables will be updated by setInput().
              */
             this.col = this.row = -1;
+        }
+
+        element = this.bindings[Input.BINDING.POWER];
+        if (element && this.time) {
+            element.onclick = function onClickPower() {
+                if (input.time) input.time.togglePower();
+            };
         }
     }
 
@@ -246,9 +255,10 @@ class Input extends Device {
                  * Unfortunately, setting focus on an element can cause the browser to scroll the element
                  * into view, so to avoid that, we use the following scrollTo() work-around.
                  */
-                if (input.bindings.power) {
+                let button = input.bindings[Input.BINDING.POWER];
+                if (button) {
                     let x = window.scrollX, y = window.scrollY;
-                    input.bindings.power.focus();
+                    button.focus();
                     window.scrollTo(x, y);
                 }
                 if (!event.button) {
@@ -477,6 +487,11 @@ Input.ACTION = {
     PRESS:      1,              // eg, an action triggered by a 'mousedown' or 'touchstart' event
     MOVE:       2,              // eg, an action triggered by a 'mousemove' or 'touchmove' event
     RELEASE:    3               // eg, an action triggered by a 'mouseup' (or 'mouseout') or 'touchend' event
+};
+
+Input.BINDING = {
+    POWER:      "power",
+    SURFACE:    "surface"
 };
 
 Input.AUTORELEASE = 200;        // number of milliseconds to simulate the automatic release of a keyPress

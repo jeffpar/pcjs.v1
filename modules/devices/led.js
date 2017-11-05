@@ -105,7 +105,8 @@ class LED extends Device {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        let container = this.bindings.container;
+
+        let container = this.bindings[LED.BINDING.CONTAINER];
         if (container) {
             let canvasView = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
             if (canvasView == undefined || !canvasView.getContext) {
@@ -234,6 +235,10 @@ LED.TYPE = {
     SINGLE: 1,
     ARRAY:  2,
     DIGITS: 3
+};
+
+LED.BINDING = {
+    CONTAINER:  "container"
 };
 
 /*

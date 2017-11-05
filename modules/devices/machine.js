@@ -110,7 +110,10 @@ class Machine extends Device {
          */
         let machine = this;
         window.addEventListener('load', function onLoad(event) {
-            machine.initDevices();
+            let chip = machine.initDevices();
+            if (chip) {
+                chip.status();
+            }
         });
     }
 
@@ -121,10 +124,11 @@ class Machine extends Device {
      * to ensure that their timer services are available to other devices.
      *
      * @this {Machine}
+     * @returns {Chip|undefined}
      */
     initDevices()
     {
-        let idDevice, sClass, device;
+        let idDevice, sClass, device, chip;
         for (let iClass = 0; iClass < Machine.CLASSORDER.length; iClass++) {
             for (idDevice in this.config) {
                 try {
@@ -134,6 +138,7 @@ class Machine extends Device {
                     switch (sClass) {
                     case Machine.CLASS.CHIP:
                         device = new Chip(this.idMachine, idDevice, config);
+                        chip = device;
                         break;
                     case Machine.CLASS.INPUT:
                         device = new Input(this.idMachine, idDevice, config);
@@ -163,6 +168,7 @@ class Machine extends Device {
                 }
             }
         }
+        return chip;
     }
 }
 

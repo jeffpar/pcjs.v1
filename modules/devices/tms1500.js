@@ -360,9 +360,12 @@ class Chip extends Device {
          * register 33a....  Addresses previously loaded into subroutine stack/registers 33a and 33b are shifted
          * to registers 33b and 33c."
          *
+         * We initialize it with "guard values" (-1) to help detect the presence of invalid data, and to catch stack
+         * overflow/underflow errors.
+         *
          * Refer to patent Fig. 7a (p. 9)
          */
-        this.stack = [0,0,0];
+        this.stack = [-1, -1, -1];
 
         /*
          * Get access to the ROM device.
@@ -374,13 +377,6 @@ class Chip extends Device {
          */
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         this.time.addClocker(this.clocker.bind(this));
-
-        // if (DEBUG) {
-        //     for (let addr = 0; addr < 0x800; addr++) {
-        //         let w = this.rom.getData(addr);
-        //         console.log(this.disassemble(w, addr).trim());
-        //     }
-        // }
 
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
     }
@@ -530,6 +526,7 @@ class Chip extends Device {
      *
      * Returns a string representation of the selected instruction.
      *
+     * @this {Chip}
      * @param {number} w
      * @param {number} addr
      * @returns {string}
@@ -726,6 +723,7 @@ class Chip extends Device {
     /**
      * onCommand(sCommand)
      *
+     * @this {Chip}
      * @param {string} sCommand
      * @returns {boolean} (true if processed, false if not)
      */
@@ -778,8 +776,9 @@ class Chip extends Device {
      */
     pop()
     {
-        let addr = this.stack.shift();
-        this.stack.length = 3;
+        let addr = this.stack.shift();      // remove the first element
+        this.stack.push(-1);                // and append a new "guard value" at the end
+        this.assert(addr >= 0, "stack underflow");
         return addr;
     }
 
@@ -791,8 +790,19 @@ class Chip extends Device {
      */
     push(addr)
     {
-        this.stack.unshift(addr);
-        this.stack.length = 3;
+        this.stack.unshift(addr);           // insert a new first element
+        addr = this.stack.pop();            // and remove the element falling off the end
+        this.assert(addr < 0, "stack overflow");
+    }
+
+    /**
+     * status()
+     *
+     * @this {Chip}
+     */
+    status()
+    {
+        this.println(this.toRegString());
     }
 
     /**
@@ -816,6 +826,7 @@ class Chip extends Device {
     /**
      * toRegString()
      *
+     * @this {Chip}
      * @returns {string}
      */
     toRegString()
@@ -823,7 +834,7 @@ class Chip extends Device {
         let s = "";
         this.regs.forEach((reg, i) => {s += reg.toString() + ((i & 1)? '\n' : '  ');});
         s += "COND=" + (this.fCOND? 1 : 0) + " BASE=" + this.base + " R5=" + this.sprintf("0x%02x", this.regR5) + " RAB=" + this.regRAB + ' ';
-        this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=0x%04x ", i, addr);});
+        this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=0x%04x ", i, addr & 0xffff);});
         s += '\n' + this.disassemble(this.rom.getData(this.regPC), this.regPC);
         return s.trim();
     }

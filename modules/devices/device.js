@@ -218,7 +218,7 @@ class Device {
      * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
      *
      * @this {Device}
-     * @param {boolean} f is the expression we are asserting to be true
+     * @param {boolean} f is the expression asserted to be true
      * @param {string} [s] is description of the assertion on failure
      */
     assert(f, s)

@@ -118,11 +118,7 @@ class Time extends Device {
         case Time.BINDING.RUN:
             this.bindings[binding] = element;
             element.onclick = function onClickRun() {
-                if (!time.fRunning) {
-                    time.start();
-                } else {
-                    time.stop();
-                }
+                time.togglePower();
             };
             break;
 
@@ -653,6 +649,23 @@ class Time extends Device {
             return true;
         }
         return false;
+    }
+
+    /**
+     * togglePower()
+     *
+     * This handles both a "run" button, if any, attached to the Time device, as well as
+     * a "power" button, if any, attached to the Input device.  Both serve the same purpose.
+     *
+     * @this {Time}
+     */
+    togglePower()
+    {
+        if (!this.fRunning) {
+            this.start();
+        } else {
+            this.stop();
+        }
     }
 
     /**
