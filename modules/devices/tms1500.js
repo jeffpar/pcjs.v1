@@ -601,7 +601,7 @@ class Chip extends Device {
                 this.regs[j][d] ^= b;
                 break;
             }
-            break;
+            return true;
 
         case Chip.IW_MF.PF:     // 0x0e00: (used for misc operations)
             switch(w & Chip.IW_PF.MASK) {
