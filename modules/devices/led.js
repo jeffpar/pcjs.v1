@@ -144,9 +144,9 @@ class LED extends Device {
                 }
 
                 /*
-                 * Test code
+                 * Test code to draw all segments of all digits.
                  */
-                if (DEBUG) {
+                if (TEST) {
                     this.clearGrid();
                     for (let iCol = 0; iCol < this.cols; iCol++) {
                         for (let idSeg in LED.SEGMENT) {

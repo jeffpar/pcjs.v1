@@ -29,6 +29,7 @@
 "use strict";
 
 var DEBUG = true;
+var TEST = false;
 
 /**
  * The following properties are the minimum set of properties we expect a Device's config object to

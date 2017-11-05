@@ -469,7 +469,7 @@ class Input extends Device {
         if (col != this.col || row != this.row) {
             this.row = row;
             this.col = col;
-            if (DEBUG) {
+            if (TEST) {
                 // this.println("input: col=" + col + ", row=" + row);
                 let led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
                 if (led) {

@@ -224,11 +224,13 @@ styles:
 TI-57 Test Page
 ---------------
 
-This is a work-in-progress.  The emulator is not operational, but lots of pieces are in place.
-The [Time](/modules/devices/time.js) device can be started and stopped, and it will clock the
-[TMS-1500](/modules/devices/tms1500.js) chip at the appropriate rate, but no instructions are being decoded yet.
-There are also [Input](/modules/devices/input.js), [LED](/modules/devices/led.js), and
-[ROM](/modules/devices/rom.js) devices, as well as a [Machine](/modules/devices/machine.js) device to manage them.
+This is a work-in-progress.  The [Time](/modules/devices/time.js) device can be started and stopped,
+and it will clock the [TMS-1500](/modules/devices/tms1500.js) chip at the appropriate rate.  There are
+also [Input](/modules/devices/input.js), [LED](/modules/devices/led.js), and [ROM](/modules/devices/rom.js) devices,
+as well as a [Machine](/modules/devices/machine.js) device to manage them.
+
+If any errors occur during operation, the Diagnostics window will display the last instruction decoded.
+The window also accepts a few debugging commands.  Use '?' for help.
 
 {% include machine.html id="ti57" config="json" %}
 
