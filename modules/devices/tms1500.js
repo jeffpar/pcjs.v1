@@ -33,6 +33,8 @@
  *
  * @class {Reg64}
  * @unrestricted
+ * @property {Chip} chip
+ * @property {Array.<number>} digits
  */
 class Reg64 extends Device {
     /**
@@ -166,6 +168,8 @@ class Reg64 extends Device {
     /**
      * store(reg)
      *
+     * STORE is similar to MOVE, but all digits are stored (ie, no mask is involved), and R5 is not affected.
+     *
      * @this {Reg64}
      * @param {Reg64} reg
      */
@@ -246,8 +250,19 @@ class Reg64 extends Device {
  *
  * @class {Chip}
  * @unrestricted
- * @property {boolean} fBCD
- * @property {boolean} fCOND
+ * @property {Array.<Reg64>} regs (operational registers A-D)
+ * @property {Array.<Reg64>} regsX (storage registers X0-X7)
+ * @property {Array.<Reg64>} regsY (storage registers Y0-Y7)
+ * @property {Reg64} regSupp (alternate register used when the destination must be suppressed)
+ * @property {Reg64} regTemp (temporary register used to supply constants or other internal values)
+ * @property {number} base (10 or 16)
+ * @property {boolean} fCOND (true when a carry has been detected)
+ * @property {number} regRAB
+ * @property {number} regR5
+ * @property {number} regOut
+ * @property {number} regPC (program counter: address of next instruction to decode)
+ * @property {Array.<number>} stack (3-level address stack; managed by push() and pop())
+ * @property {number} addrBreak
  */
 class Chip extends Device {
     /**
@@ -272,9 +287,6 @@ class Chip extends Device {
             this.regs[i] = new Reg64(this, String.fromCharCode(0x41+i));
         }
 
-        this.regTmp = new Reg64(this, "Tmp");
-        this.regSuppress = new Reg64(this, "Suppress");
-
         /*
          * Eight (8) Storage Registers: X0-X7
          */
@@ -290,6 +302,9 @@ class Chip extends Device {
         for (let i = 0; i < 8; i++) {
             this.regsY[i] = new Reg64(this, "Y" + i);
         }
+
+        this.regSupp = new Reg64(this, "Supp");
+        this.regTemp = new Reg64(this, "Temp");
 
         this.base = 10;
         this.fCOND = false;
@@ -392,6 +407,7 @@ class Chip extends Device {
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         this.time.addClocker(this.clocker.bind(this));
 
+        this.addrBreak = -1;
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
     }
 
@@ -419,6 +435,13 @@ class Chip extends Device {
     {
         let nCyclesClocked = 0;
         do {
+            if (this.addrBreak == this.regPC) {
+                this.addrBreak = -1;
+                this.println("break");
+                this.time.stop();
+                nCyclesTarget = 0;      // this is simply to trigger toString() below
+                break;
+            }
             let w = this.rom.getData(this.regPC);
             let addr = this.regPC;
             this.regPC = (addr + 1) & this.rom.addrMask;
@@ -493,16 +516,16 @@ class Chip extends Device {
                 regSrc = this.regs[k];
                 break;
             case 4:
-                regSrc = this.regTmp.init(1, range);
+                regSrc = this.regTemp.init(1, range);
                 break;
             case 5:
                 iOp = (n? Chip.OP.SHR : Chip.OP.SHL);
                 break;
             case 6:
-                regSrc = this.regTmp.init(this.regR5 & 0xf, range);
+                regSrc = this.regTemp.init(this.regR5 & 0xf, range);
                 break;
             case 7:
-                regSrc = this.regTmp.init(this.regR5 & 0xff, range);
+                regSrc = this.regTemp.init(this.regR5 & 0xff, range);
                 break;
             }
 
@@ -514,7 +537,7 @@ class Chip extends Device {
                 regResult = (k < 4? this.regs[k] : undefined);
                 break;
             case 2:
-                regResult = (k < 5? this.regSuppress : (k == 5? this.regs[j] : undefined));
+                regResult = (k < 5? this.regSupp : (k == 5? this.regs[j] : undefined));
                 break;
             case 3:
                 if (!n) {
@@ -559,18 +582,23 @@ class Chip extends Device {
             b = 1 << ((w & Chip.IW_FF.B_MASK) >> Chip.IW_FF.B_SHIFT);
             if (!d) return false;
             d += 12;
+            /*
+             * For the following bit operations (SET, RESET, TEST, and TOGGLE, displayed by disassemble()
+             * as "SET", "CLR", "TST", and "NOT") are rather trivial, so I didn't bother adding Reg64 methods
+             * for them (eg, setBit, resetBit, testBit, toggleBit).
+             */
             switch(w & Chip.IW_FF.MASK) {
             case Chip.IW_FF.SET:
-                this.regs[d] |= b;
+                this.regs[j][d] |= b;
                 break;
             case Chip.IW_FF.RESET:
-                this.regs[d] &= ~b;
+                this.regs[j][d] &= ~b;
                 break;
             case Chip.IW_FF.TEST:
-                if (this.regs[d] & b) this.fCOND = true;
+                if (this.regs[j][d] & b) this.fCOND = true;
                 break;
             case Chip.IW_FF.TOGGLE:
-                this.regs[d] ^= b;
+                this.regs[j][d] ^= b;
                 break;
             }
             break;
@@ -624,6 +652,25 @@ class Chip extends Device {
      * disassemble(w, addr)
      *
      * Returns a string representation of the selected instruction.
+     *
+     * The TI-57 patents suggest mnemonics for some of the instructions, but not all, so I've taken
+     * some liberties in the interests of clarity and familiarity.  Special-purpose instructions like
+     * "BCDS" and "BCDR" are displayed as-is, but for more general-purpose instructions, I've adopted
+     * the following format:
+     *
+     *      operation   destination,input(s)[,mask]
+     *
+     * Instructions that the patent refers to as "STYA", "STAY", "STXA", and "STAX" are all displayed
+     * as "STORE" instructions; eg, instead of "STAX", I use:
+     *
+     *      STORE       X[RAB],A
+     *
+     * Instructions that use masks are displayed as either "LOAD", "MOVE", or "XCHG".  If the result
+     * of the operation is suppressed, the destination will be displayed as "NUL" instead of a register.
+     * And if the inputs are being added, subtracted, shifted left, or shifted right, they will be
+     * displayed with "+", "-", "<", or ">", respectively.  Finally, the 16-digit mask is displayed,
+     * as a series of hex digits rather than the unmemorable names used in the patents (eg, MMSD, FMAEX,
+     * etc).  I do use the patent nomenclature internally, just not for display purposes.
      *
      * @this {Chip}
      * @param {number} w
@@ -825,12 +872,18 @@ class Chip extends Device {
      */
     onCommand(sCommand)
     {
-        let addr, n, sResult = "";
+        let sResult = "";
         let aCommands = sCommand.split(' ');
         let s = aCommands[0];
+        let addr = Number.parseInt(aCommands[1], 16) || -1;
+        let nLines = Number.parseInt(aCommands[2], 10) || 8;
         switch(s[0]) {
         case "g":
-            if (!this.time.start()) sResult = "already started";
+            if (this.time.start()) {
+                this.addrBreak = addr;
+            } else {
+                sResult = "already started";
+            }
             break;
         case "h":
             if (!this.time.stop()) sResult = "already stopped";
@@ -842,9 +895,8 @@ class Chip extends Device {
             sResult += this.toString(s[1]);
             break;
         case "u":
-            addr = aCommands[1]? (Number.parseInt(aCommands[1], 16) || 0) : this.regPC;
-            n = Number.parseInt(aCommands[2], 10) || 8;
-            while (n--) {
+            addr = (addr >= 0? addr : this.regPC);
+            while (nLines--) {
                 let w = this.rom.getData(addr);
                 if (w == undefined) break;
                 sResult += this.disassemble(w, addr++);
@@ -1034,9 +1086,9 @@ Chip.OP = {
 Chip.OP_REGS = ["A","B","C","D","1","?","R5L","R5"];
 
 Chip.COMMANDS = [
-    "g\t\trun",
+    "g [addr]\trun (to addr)",
     "h\t\thalt",
     "r[a]\t\tdump registers",
     "t\t\tstep",
-    "u [addr]\tdisassemble code"
+    "u [addr] [n]\tdisassemble (at addr)"
 ];
