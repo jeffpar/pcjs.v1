@@ -85,6 +85,7 @@ class Input extends Device {
         super(idMachine, idDevice, config);
 
         this.aClickers = [];
+        this.power = null;
 
         let input = this;
         this.time = this.findDeviceByClass(Machine.CLASS.TIME);
@@ -182,20 +183,22 @@ class Input extends Device {
         element = this.bindings[Input.BINDING.POWER];
         if (element && this.time) {
             element.onclick = function onClickPower() {
-                if (input.time) input.time.togglePower();
+                if (input.power) input.power();
             };
         }
     }
 
     /**
-     * addClicker(clicker)
+     * addClicker(clicker, power)
      *
      * @this {Input}
      * @param {function(number)} clicker
+     * @param {function()} power (called when the "power" button, if any, is clicked)
      */
-    addClicker(clicker)
+    addClicker(clicker, power)
     {
         this.aClickers.push(clicker);
+        this.power = power;
     }
 
     /**

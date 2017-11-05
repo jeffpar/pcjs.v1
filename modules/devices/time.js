@@ -118,7 +118,7 @@ class Time extends Device {
         case Time.BINDING.RUN:
             this.bindings[binding] = element;
             element.onclick = function onClickRun() {
-                time.togglePower();
+                time.toggle();
             };
             break;
 
@@ -638,7 +638,7 @@ class Time extends Device {
      * stop()
      *
      * @this {Time}
-     * @returns {boolean} true if successful, false if already stopped
+     * @returns {boolean} false
      */
     stop()
     {
@@ -646,26 +646,25 @@ class Time extends Device {
             this.fRunning = false;
             this.endBurst();
             this.updateStatus(true);
-            return true;
         }
         return false;
     }
 
     /**
-     * togglePower()
+     * toggle()
      *
-     * This handles both a "run" button, if any, attached to the Time device, as well as
-     * a "power" button, if any, attached to the Input device.  Both serve the same purpose.
+     * This handles both a "run" button, if any, attached to the Time device.
+     *
+     * Note that this serves a different purpose than the "power" button that's managed
+     * by the Input device, because toggling power also requires resetting the program counter
+     * prior to start() OR clearing the display after stop().  See the Chip's setPower()
+     * function for details.
      *
      * @this {Time}
      */
-    togglePower()
+    toggle()
     {
-        if (!this.fRunning) {
-            this.start();
-        } else {
-            this.stop();
-        }
+        return this.fRunning? this.stop() : this.start();
     }
 
     /**

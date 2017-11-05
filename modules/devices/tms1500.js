@@ -426,11 +426,11 @@ class Chip extends Device {
         this.stack = [-1, -1, -1];
 
         /*
-         * Get access to the Input device, so we can add our clicker function.
+         * Get access to the Input device, so we can add our clicker functions.
          */
         this.regKey = 0;
         this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-        this.input.addClicker(this.setKey.bind(this));
+        this.input.addClicker(this.setKey.bind(this), this.setPower.bind(this));
 
         /*
          * Get access to the LED device, so we can draw symbols.
@@ -1084,6 +1084,8 @@ class Chip extends Device {
     /**
      * setKey(col, row)
      *
+     * Called by the Input device to provide notification of key presses and releases.
+     *
      * Converts a logical (col,row), where the top left keyboard position is (0,0), into an 8-bit physical
      * location value, where bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).  Moreover,
      * if either col or row is negative, then all bits are cleared.
@@ -1103,7 +1105,35 @@ class Chip extends Device {
     }
 
     /**
+     * setPower(fOn)
+     *
+     * Called by the Input device to provide notification of a power event.
+     *
+     * @this {Chip}
+     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     */
+    setPower(fOn)
+    {
+        if (fOn == undefined) {
+            fOn = !this.time.fRunning;
+        }
+        if (fOn) {
+            if (!this.time.fRunning) {
+                this.regPC = 0;
+                this.time.start();
+            }
+        } else {
+            if (this.time.fRunning) {
+                this.time.stop();
+                this.led.drawString("");
+            }
+        }
+    }
+
+    /**
      * status()
+     *
+     * This is called by the Machine after all the individual devices have been initialized.
      *
      * @this {Chip}
      */
