@@ -678,7 +678,16 @@ class Time extends Device {
      */
     updateStatus(fForced)
     {
-        if (fForced) this.println(this.fRunning? ("starting (target speed: " + this.getSpeedTarget() + ")") : "stopping");
+        if (fForced) {
+            if (this.fRunning) {
+                this.println("starting (target speed: " + this.getSpeedTarget() + ")");
+            } else {
+                this.println("stopping");
+                for (let i = 0; i < this.aClockers.length; i++) {
+                    this.aClockers[i](-1);
+                }
+            }
+        }
         this.updateBindingText(Time.BINDING.RUN, this.fRunning? "Halt" : "Run");
         this.updateBindingText(Time.BINDING.SPEED, this.getSpeedCurrent());
     }

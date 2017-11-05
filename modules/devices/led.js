@@ -184,7 +184,7 @@ class LED extends Device {
      * drawGridSegment(idSeg, col, row)
      *
      * @this {LED}
-     * @param {string} idSeg (eg, "SA")
+     * @param {string} idSeg (eg, "A")
      * @param {number} [col] (default is zero)
      * @param {number} [row] (default is zero)
      */
@@ -210,6 +210,21 @@ class LED extends Device {
             this.contextGrid.closePath();
             this.contextGrid.fill();
         }
+    }
+
+    /**
+     * drawString(s)
+     *
+     * @this {LED}
+     * @param {string} s
+     */
+    drawString(s)
+    {
+        this.clearGrid();
+        for (let i = 0, col = 0, row = 0; i < s.length; i++, col++) {
+            this.drawSymbol(s[i], col, row);
+        }
+        this.drawGrid();
     }
 
     /**
@@ -249,31 +264,42 @@ LED.CELL = {
     HEIGHT:     128
 };
 
+/*
+ * The segments are arranged as follows:
+ *
+ *      AAAA
+ *     F    B
+ *     F    B
+ *      GGGG
+ *     E    C
+ *     E    C
+ *      DDDD P
+ */
 LED.SEGMENT = {
-    "SA":       [30,  8, 79,  8, 67, 19, 37, 19],
-    "SB":       [83, 10, 77, 52, 67, 46, 70, 22],
-    "SC":       [77, 59, 71,100, 61, 89, 64, 64],
-    "SD":       [28, 91, 58, 91, 69,104, 15,104],
-    "SE":       [18, 59, 28, 64, 25, 88, 12,100],
-    "SF":       [24, 10, 34, 21, 31, 47, 18, 52],
-    "SG":       [24, 56, 34, 50, 60, 50, 71, 56, 61, 61, 33, 61],
-    "SP":       [80,102, 8]
+    "A":        [30,  8, 79,  8, 67, 19, 37, 19],
+    "B":        [83, 10, 77, 52, 67, 46, 70, 22],
+    "C":        [77, 59, 71,100, 61, 89, 64, 64],
+    "D":        [28, 91, 58, 91, 69,104, 15,104],
+    "E":        [18, 59, 28, 64, 25, 88, 12,100],
+    "F":        [24, 10, 34, 21, 31, 47, 18, 52],
+    "G":        [24, 56, 34, 50, 60, 50, 71, 56, 61, 61, 33, 61],
+    "P":        [80,102, 8]
 };
 
 /*
- * Normally, the construction of digits (or any other symbol) will be determined by the machine itself, but
- * for diagnostic purposes, it's handy to have our own symbol to segment map.
+ * Symbols are formed with the following segments.
  */
 LED.SYMBOLS = {
-    "0":        ["SA","SB","SC","SD","SE","SF"],
-    "1":        ["SB","SC"],
-    "2":        ["SA","SB","SD","SE","SG"],
-    "3":        ["SA","SB","SC","SD","SG"],
-    "4":        ["SB","SC","SF","SG"],
-    "5":        ["SA","SC","SD","SF","SG"],
-    "6":        ["SA","SC","SD","SE","SF","SG"],
-    "7":        ["SA","SB","SC"],
-    "8":        ["SA","SB","SC","SD","SE","SF","SG"],
-    "9":        ["SA","SB","SC","SD","SF","SG"],
-    "-":        ["SG"]
+    "0":        ["A","B","C","D","E","F"],
+    "1":        ["B","C"],
+    "2":        ["A","B","D","E","G"],
+    "3":        ["A","B","C","D","G"],
+    "4":        ["B","C","F","G"],
+    "5":        ["A","C","D","F","G"],
+    "6":        ["A","C","D","E","F","G"],
+    "7":        ["A","B","C"],
+    "8":        ["A","B","C","D","E","F","G"],
+    "9":        ["A","B","C","D","F","G"],
+    "-":        ["G"],
+    "E":        ["G"]
 };

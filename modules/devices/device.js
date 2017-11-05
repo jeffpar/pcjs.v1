@@ -373,7 +373,7 @@ class Device {
      */
     printf(format, ...args)
     {
-        this.print(this.sprintf(format, args));
+        this.print(this.sprintf(format, ...args));
     }
 
     /**

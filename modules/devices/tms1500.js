@@ -48,6 +48,7 @@ class Reg64 extends Device {
     {
         super(chip.idMachine, id);
         this.chip = chip;
+        this.name = id;
         /*
          * Each Reg64 register contains 16 BCD/Hex digits, which we store as 16 independent 4-bit numbers,
          * where [0] is D0, aka DIGIT 0, and [15] is D15, aka DIGIT 15.
@@ -262,6 +263,7 @@ class Reg64 extends Device {
  * @property {number} regOut
  * @property {number} regPC (program counter: address of next instruction to decode)
  * @property {Array.<number>} stack (3-level address stack; managed by push() and pop())
+ * @property {number} regKey (current key status, propagated to regR5 at appropriate intervals)
  * @property {number} addrBreak
  */
 class Chip extends Device {
@@ -280,15 +282,24 @@ class Chip extends Device {
         super(idMachine, idDevice, config);
 
         /*
-         * Four (4) Operational Registers: A-D
+         * Four (4) Operational Registers (A-D)
          */
-        this.regs = new Array(4);
+        this.regsABCD = new Array(4);
         for (let i = 0; i < 4; i++) {
-            this.regs[i] = new Reg64(this, String.fromCharCode(0x41+i));
+            this.regsABCD[i] = new Reg64(this, String.fromCharCode(0x41+i));
         }
 
         /*
-         * Eight (8) Storage Registers: X0-X7
+         * Aliases for each of the Operational Registers, since some instructions use hard-coded registers,
+         * rather than calculating a register index (0-3).
+         */
+        this.regA = this.regsABCD[0];
+        this.regB = this.regsABCD[1];
+        this.regC = this.regsABCD[2];
+        this.regD = this.regsABCD[3];
+
+        /*
+         * Eight (8) Storage Registers (X0-X7)
          */
         this.regsX = new Array(8);
         for (let i = 0; i < 8; i++) {
@@ -296,7 +307,7 @@ class Chip extends Device {
         }
 
         /*
-         * Eight (8) Storage Registers: Y0-Y7
+         * Eight (8) Storage Registers (Y0-Y7)
          */
         this.regsY = new Array(8);
         for (let i = 0; i < 8; i++) {
@@ -328,6 +339,9 @@ class Chip extends Device {
          * The "Output Register" is twelve bit register, one bit for each digit of the display.  This essentially
          * provides column information for the LED display, while the next register (regSGC) provides row information.
          *
+         * However, this is only necessary if we decide to simulate the internal operation of the Display Decoder
+         * and Keyboard Scanner.
+         *
          * Refer to patent Fig. 11c (p. 28)
          */
         this.regOut = 0;
@@ -353,6 +367,9 @@ class Chip extends Device {
          *      1   1   0       A       D     KS6       1
          *      ...
          *
+         * However, this is only necessary if we decide to simulate the internal operation of the Display Decoder
+         * and Keyboard Scanner.
+         *
          * Refer to patent Fig. 11e (p. 30)
          */
         this.regScanGen = 0;
@@ -363,6 +380,9 @@ class Chip extends Device {
          * for inserting a logical one into all stages of the counter."  The outputs from the stages are connected to
          * SEG D, followed by SEG A, SEG B, SEG C, SEG E, SEG F, SEG G, and SEG P.
          *
+         * However, this is only necessary if we decide to simulate the internal operation of the Display Decoder
+         * and Keyboard Scanner.
+         *
          * Refer to patent Fig. 11b (p. 27)
          */
         this.regSegKbdScan = 0xff;
@@ -372,10 +392,19 @@ class Chip extends Device {
          * for each of the 32 state times that occur during a single instruction cycle.  And since each "state time"
          * consists of four clock pulses, designated Φ1, P1, Φ2, and P2, we keep track of which pulse we're on, too.
          *
+         * However, these are only necessary if we decide to simulate the internal operation of the Display Decoder
+         * and Keyboard Scanner.
+         *
          * Refer to patent Fig. 11f (p. 31)
          */
         this.regStateTime = 0;
         this.regPulseTime = 0;
+
+        /*
+         * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions
+         * that need to consume a few extra cycles to bump this count upward as needed.
+         */
+        this.nCyclesClocked = 0;
 
         /*
          * The "Program Counter" (regPC) is an 11-bit register that automatically increments unless a HOLD signal
@@ -395,6 +424,18 @@ class Chip extends Device {
          * Refer to patent Fig. 7a (p. 9)
          */
         this.stack = [-1, -1, -1];
+
+        /*
+         * Get access to the Input device, so we can add our clicker function.
+         */
+        this.regKey = 0;
+        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+        this.input.addClicker(this.setKey.bind(this));
+
+        /*
+         * Get access to the LED device, so we can draw symbols.
+         */
+        this.led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
 
         /*
          * Get access to the ROM device.
@@ -424,16 +465,17 @@ class Chip extends Device {
      * Note that some instructions (ie, display instructions) slow the delivery of cycles, such that one state time
      * is 10us instead of 2.5us, and therefore the entire instruction cycle will take 320us instead of 80us.
      *
-     * I'll start with the assumption that simulating a full 32 "state times", or 128 cycles, per call makes the most
-     * sense.  So that's what we'll do.
+     * We're currently simulating a full 32 "state times" (128 cycles aka Chip.OP_CYCLES) per operation, since
+     * we don't perform discrete simulation of the Display Decoder/Keyboard Scanner circuitry.  See opDISP() for
+     * an example of an operation that imposes additional cycle overhead.
      *
      * @this {Chip}
-     * @param {number} nCyclesTarget (0 to single-step)
+     * @param {number} nCyclesTarget (0 to single-step, -1 to display status only)
      * @returns {number} (number of cycles actually "clocked")
      */
     clocker(nCyclesTarget = 0)
     {
-        let nCyclesClocked = 0;
+        this.nCyclesClocked = 0;
         do {
             if (this.addrBreak == this.regPC) {
                 this.addrBreak = -1;
@@ -442,49 +484,55 @@ class Chip extends Device {
                 nCyclesTarget = 0;      // this is simply to trigger toString() below
                 break;
             }
-            let w = this.rom.getData(this.regPC);
+            let opCode = this.rom.getData(this.regPC);
             let addr = this.regPC;
             this.regPC = (addr + 1) & this.rom.addrMask;
-            if (!this.decode(w, addr)) {
+            if (!this.decode(opCode, addr)) {
                 this.regPC = addr;
                 this.time.stop();
                 this.println("unimplemented opcode");
                 nCyclesTarget = 0;      // this is simply to trigger toString() below
                 break;
             }
-            nCyclesClocked += 128;
-        } while (nCyclesClocked < nCyclesTarget);
-        if (!nCyclesTarget) {
+            this.nCyclesClocked += Chip.OP_CYCLES;
+        } while (this.nCyclesClocked < nCyclesTarget);
+        if (nCyclesTarget <= 0) {
             this.println(this.toString());
         }
-        return nCyclesClocked;
+        return this.nCyclesClocked;
     }
 
     /**
-     * decode(w, addr)
+     * decode(opCode, addr)
+     *
+     * Most operations are performed inline, since this isn't a super complex instruction set, but
+     * a few are separated into their own handlers (eg, opDISP).
      *
      * @this {Chip}
-     * @param {number} w
-     * @param {number} addr
-     * @returns {boolean}
+     * @param {number} opCode (opcode)
+     * @param {number} addr (of the opcode)
+     * @returns {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
      */
-    decode(w, addr)
+    decode(opCode, addr)
     {
-        if (w & 0x1000) {
-            if (w & 0x0800) {   // BRC/BRNC
-                if (!!(w & 0x0400) == this.fCOND) {
-                    this.regPC = (addr & 0x0400) | (w & 0x03FF);
+        if (opCode & 0x1000) {
+            if (opCode & 0x0800) {  // BRC/BRNC
+                if (!!(opCode & 0x0400) == this.fCOND) {
+                    /*
+                     * TODO: Determine whether to use bit 10 from the original PC (addr) or the incremented PC (regPC)
+                     */
+                    this.regPC = (addr & 0x0400) | (opCode & 0x03FF);
                 }
-            } else {            // CALL
+            } else {                // CALL
                 this.push(this.regPC);
-                this.regPC = w & 0x07FF;
+                this.regPC = opCode & 0x07FF;
             }
             this.fCOND = false;
             return true;
         }
 
         let range, regSrc, regResult, iOp, base;
-        let j, k, l, n, d, b, mask = w & Chip.IW_MF.MASK;
+        let j, k, l, n, d, b, mask = opCode & Chip.IW_MF.MASK;
 
         switch(mask) {
         case Chip.IW_MF.MMSD:   // 0x0000: Mantissa Most Significant Digit (D12)
@@ -502,10 +550,10 @@ class Chip extends Device {
             range = Chip.RANGE[mask];
             this.assert(range);
 
-            j = (w & Chip.IW_MF.J_MASK) >> Chip.IW_MF.J_SHIFT;
-            k = (w & Chip.IW_MF.K_MASK) >> Chip.IW_MF.K_SHIFT;
-            l = (w & Chip.IW_MF.L_MASK) >> Chip.IW_MF.L_SHIFT;
-            n = (w & Chip.IW_MF.N_MASK);
+            j = (opCode & Chip.IW_MF.J_MASK) >> Chip.IW_MF.J_SHIFT;
+            k = (opCode & Chip.IW_MF.K_MASK) >> Chip.IW_MF.K_SHIFT;
+            l = (opCode & Chip.IW_MF.L_MASK) >> Chip.IW_MF.L_SHIFT;
+            n = (opCode & Chip.IW_MF.N_MASK);
             iOp = (n? Chip.OP.SUB : Chip.OP.ADD);
 
             switch(k) {
@@ -513,7 +561,7 @@ class Chip extends Device {
             case 1:
             case 2:
             case 3:
-                regSrc = this.regs[k];
+                regSrc = this.regsABCD[k];
                 break;
             case 4:
                 regSrc = this.regTemp.init(1, range);
@@ -531,125 +579,125 @@ class Chip extends Device {
 
             switch(l) {
             case 0:
-                regResult = this.regs[j];
+                regResult = this.regsABCD[j];
                 break;
             case 1:
-                regResult = (k < 4? this.regs[k] : undefined);
+                regResult = (k < 4? this.regsABCD[k] : undefined);
                 break;
             case 2:
-                regResult = (k < 5? this.regSupp : (k == 5? this.regs[j] : undefined));
+                regResult = (k < 5? this.regSupp : (k == 5? this.regsABCD[j] : undefined));
                 break;
             case 3:
                 if (!n) {
                     this.assert(!j && k < 4);
-                    this.regs[0].xchg(regSrc, range);
+                    this.regA.xchg(regSrc, range);
                 } else {
                     this.assert(k != 5);
-                    this.regs[j].move(regSrc, range);
+                    this.regsABCD[j].move(regSrc, range);
                 }
                 return true;
             }
 
-            if (!regResult) return false;
+            if (!regResult) break;
 
-            base = (w >= Chip.IW_MF.D14? 16 : this.base);
+            base = (opCode >= Chip.IW_MF.D14? 16 : this.base);
 
             switch(iOp) {
             case Chip.OP.ADD:
-                regResult.add(this.regs[j], regSrc, range, base);
+                regResult.add(this.regsABCD[j], regSrc, range, base);
                 break;
             case Chip.OP.SUB:
-                regResult.sub(this.regs[j], regSrc, range, base);
+                regResult.sub(this.regsABCD[j], regSrc, range, base);
                 break;
             case Chip.OP.SHL:
-                regResult.shl(this.regs[j], range);
+                regResult.shl(this.regsABCD[j], range);
                 break;
             case Chip.OP.SHR:
-                regResult.shr(this.regs[j], range);
+                regResult.shr(this.regsABCD[j], range);
                 break;
             }
             return true;
 
-        case Chip.IW_MF.RES1:   // 0x0600: (reserved)
-            break;
-
-        case Chip.IW_MF.RES2:   // 0x0b00: (reserved)
-            break;
-
         case Chip.IW_MF.FF:     // 0x0c00: (used for flag operations)
-            j = (w & Chip.IW_FF.J_MASK) >> Chip.IW_FF.J_SHIFT;
-            d = (w & Chip.IW_FF.D_MASK) >> Chip.IW_FF.D_SHIFT;
-            b = 1 << ((w & Chip.IW_FF.B_MASK) >> Chip.IW_FF.B_SHIFT);
-            if (!d) return false;
+            j = (opCode & Chip.IW_FF.J_MASK) >> Chip.IW_FF.J_SHIFT;
+            d = (opCode & Chip.IW_FF.D_MASK) >> Chip.IW_FF.D_SHIFT;
+            b = 1 << ((opCode & Chip.IW_FF.B_MASK) >> Chip.IW_FF.B_SHIFT);
+            if (!d) break;
             d += 12;
             /*
              * For the following bit operations (SET, RESET, TEST, and TOGGLE, displayed by disassemble()
              * as "SET", "CLR", "TST", and "NOT") are rather trivial, so I didn't bother adding Reg64 methods
              * for them (eg, setBit, resetBit, testBit, toggleBit).
              */
-            switch(w & Chip.IW_FF.MASK) {
+            switch(opCode & Chip.IW_FF.MASK) {
             case Chip.IW_FF.SET:
-                this.regs[j][d] |= b;
+                this.regsABCD[j].digits[d] |= b;
                 break;
             case Chip.IW_FF.RESET:
-                this.regs[j][d] &= ~b;
+                this.regsABCD[j].digits[d] &= ~b;
                 break;
             case Chip.IW_FF.TEST:
-                if (this.regs[j][d] & b) this.fCOND = true;
+                if (this.regsABCD[j].digits[d] & b) this.fCOND = true;
                 break;
             case Chip.IW_FF.TOGGLE:
-                this.regs[j][d] ^= b;
+                this.regsABCD[j].digits[d] ^= b;
                 break;
             }
             return true;
 
         case Chip.IW_MF.PF:     // 0x0e00: (used for misc operations)
-            switch(w & Chip.IW_PF.MASK) {
-            case Chip.IW_PF.STYA:   // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
-                this.regs[0].store(this.regsY[this.regRAB]);
+            switch(opCode & Chip.IW_PF.MASK) {
+            case Chip.IW_PF.STYA:       // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
+                this.regA.store(this.regsY[this.regRAB]);
                 break;
-            case Chip.IW_PF.RABI:   // 0x0001: Bits 4-6 of instruction are stored in RAB
-                this.regRAB = (w >> 4) & 0x7;
+            case Chip.IW_PF.RABI:       // 0x0001: Bits 4-6 of instruction are stored in RAB
+                this.regRAB = (opCode >> 4) & 0x7;
                 break;
-            case Chip.IW_PF.BRR5:   // 0x0002: Branch to R5
-                // TODO: Verify: this.fCOND = false;
+            case Chip.IW_PF.BRR5:       // 0x0002: Branch to R5
+                /*
+                 * TODO: Determine whether this type of BRANCH should set fCOND to false like other branches do
+                 */
                 this.regPC = this.regR5;
                 break;
-            case Chip.IW_PF.RET:    // 0x0003: Return
+            case Chip.IW_PF.RET:        // 0x0003: Return
                 this.fCOND = false;
                 this.regPC = this.pop();
                 break;
-            case Chip.IW_PF.STAX:   // 0x0004: Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
-                this.regsX[this.regRAB].store(this.regs[0]);
+            case Chip.IW_PF.STAX:       // 0x0004: Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
+                this.regsX[this.regRAB].store(this.regA);
                 break;
-            case Chip.IW_PF.STXA:   // 0x0005: Contents of storage register X defined by RAB loaded into operational register A (Xn -> A)
-                this.regs[0].store(this.regsX[this.regRAB]);
+            case Chip.IW_PF.STXA:       // 0x0005: Contents of storage register X defined by RAB loaded into operational register A (Xn -> A)
+                this.regA.store(this.regsX[this.regRAB]);
                 break;
-            case Chip.IW_PF.STAY:   // 0x0006: Contents of operational register A loaded into storage register Y defined by RAB (A -> Yn)
-                this.regsY[this.regRAB].store(this.regs[0]);
+            case Chip.IW_PF.STAY:       // 0x0006: Contents of operational register A loaded into storage register Y defined by RAB (A -> Yn)
+                this.regsY[this.regRAB].store(this.regA);
                 break;
-            case Chip.IW_PF.DISP:   // 0x0007: registers A and B are output to the Display Decoder and the Keyboard is scanned
-                return false;
-            case Chip.IW_PF.BCDS:   // 0x0008: BCD set: enables BCD corrector in arithmetic unit
+            case Chip.IW_PF.DISP:       // 0x0007: registers A and B are output to the Display Decoder and the Keyboard is scanned
+                return this.opDISP();
+            case Chip.IW_PF.BCDS:       // 0x0008: BCD set: enables BCD corrector in arithmetic unit
                 this.base = 10;
                 break;
-            case Chip.IW_PF.BCDR:   // 0x0009: BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
+            case Chip.IW_PF.BCDR:       // 0x0009: BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
                 this.base = 16;
                 break;
-            case Chip.IW_PF.RABR5:  // 0x000A: LSD of R5 (3 bits) is stored in RAB
+            case Chip.IW_PF.RABR5:      // 0x000A: LSD of R5 (3 bits) is stored in RAB
                 this.regRAB = this.regR5 & 0x7;
                 break;
             default:
                 return false;
             }
             return true;
-        }
 
+        case Chip.IW_MF.RES1:   // 0x0600: (reserved)
+        case Chip.IW_MF.RES2:   // 0x0b00: (reserved)
+        default:
+            break;
+        }
         return false;
     }
 
     /**
-     * disassemble(w, addr)
+     * disassemble(opCode, addr)
      *
      * Returns a string representation of the selected instruction.
      *
@@ -673,32 +721,32 @@ class Chip extends Device {
      * etc).  I do use the patent nomenclature internally, just not for display purposes.
      *
      * @this {Chip}
-     * @param {number} w
+     * @param {number} opCode
      * @param {number} addr
      * @returns {string}
      */
-    disassemble(w, addr)
+    disassemble(opCode, addr)
     {
         let sOp = "???", sOperands = "";
 
-        if (w & 0x1000) {
+        if (opCode & 0x1000) {
             let v;
-            if (w & 0x0800) {
+            if (opCode & 0x0800) {
                 sOp = "BR";
-                if (w & 0x0400) {
+                if (opCode & 0x0400) {
                     sOp += "C";
                 } else {
                     sOp += "NC";
                 }
-                v = (addr & 0x0400) | (w & 0x03FF);
+                v = (addr & 0x0400) | (opCode & 0x03FF);
             } else {
                 sOp = "CALL";
-                v = w & 0x07FF;
+                v = opCode & 0x07FF;
             }
             sOperands = this.sprintf("0x%04x", v);
         }
         else {
-            let mask = w & Chip.IW_MF.MASK;
+            let mask = opCode & Chip.IW_MF.MASK;
 
             switch(mask) {
             case Chip.IW_MF.MMSD:   // 0x0000: Mantissa Most Significant Digit (D12)
@@ -714,10 +762,10 @@ class Chip extends Device {
             case Chip.IW_MF.D13:    // 0x0d00: (D13)
             case Chip.IW_MF.D15:    // 0x0f00: (D15)
                 let sMask = this.toStringMask(mask);
-                let j = (w & Chip.IW_MF.J_MASK) >> Chip.IW_MF.J_SHIFT;
-                let k = (w & Chip.IW_MF.K_MASK) >> Chip.IW_MF.K_SHIFT;
-                let l = (w & Chip.IW_MF.L_MASK) >> Chip.IW_MF.L_SHIFT;
-                let n = (w & Chip.IW_MF.N_MASK);
+                let j = (opCode & Chip.IW_MF.J_MASK) >> Chip.IW_MF.J_SHIFT;
+                let k = (opCode & Chip.IW_MF.K_MASK) >> Chip.IW_MF.K_SHIFT;
+                let l = (opCode & Chip.IW_MF.L_MASK) >> Chip.IW_MF.L_SHIFT;
+                let n = (opCode & Chip.IW_MF.N_MASK);
 
                 sOp = "LOAD";
                 let sOperator = "";
@@ -731,23 +779,23 @@ class Chip extends Device {
 
                 switch(l) {
                 case 0:
-                    sDst = Chip.OP_REGS[j];
+                    sDst = Chip.OP_INPUTS[j];
                     break;
                 case 1:
-                    if (k < 4) sDst = Chip.OP_REGS[k];
+                    if (k < 4) sDst = Chip.OP_INPUTS[k];
                     break;
                 case 2:
-                    if (k < 6) sDst = "NUL";            // "suppressed" operation
+                    if (k < 6) sDst = "NUL";    // "suppressed" operation
                     break;
                 case 3:
                     if (!n) {
                         sOp = "XCHG";
-                        if (!j) sDst = "A";             // NOTE j != 0 or k >= 4 is invalid
-                        if (k < 4) sSrc = Chip.OP_REGS[k];
+                        if (!j) sDst = "A";     // j != 0 or k >= 4 is invalid
+                        if (k < 4) sSrc = Chip.OP_INPUTS[k];
                     } else {
                         sOp = "MOVE";
-                        sDst = Chip.OP_REGS[j];
-                        sSrc = Chip.OP_REGS[k];         // NOTE: k == 5 is invalid
+                        sDst = Chip.OP_INPUTS[j];
+                        sSrc = Chip.OP_INPUTS[k]; // k == 5 is invalid
                     }
                     k = -1;
                     break;
@@ -758,30 +806,24 @@ class Chip extends Device {
                 case 1:
                 case 2:
                 case 3:
-                    sSrc = Chip.OP_REGS[j] + sOperator + Chip.OP_REGS[k];
+                    sSrc = Chip.OP_INPUTS[j] + sOperator + Chip.OP_INPUTS[k];
                     break;
                 case 4:
                 case 5:
-                    sSrc = Chip.OP_REGS[j] + sOperator + "1";
+                    sSrc = Chip.OP_INPUTS[j] + sOperator + "1";
                     break;
                 case 6:
-                    sSrc = Chip.OP_REGS[j] + sOperator + "R5L";
+                    sSrc = Chip.OP_INPUTS[j] + sOperator + "R5L";
                     break;
                 case 7:
-                    sSrc = Chip.OP_REGS[j] + sOperator + "R5";
+                    sSrc = Chip.OP_INPUTS[j] + sOperator + "R5";
                     break;
                 }
                 sOperands = sDst + "," + sSrc + "," + sMask;
                 break;
 
-            case Chip.IW_MF.RES1:   // 0x0600: (reserved)
-                break;
-
-            case Chip.IW_MF.RES2:   // 0x0b00: (reserved)
-                break;
-
             case Chip.IW_MF.FF:     // 0x0c00: (used for flag operations)
-                switch(w & Chip.IW_FF.MASK) {
+                switch(opCode & Chip.IW_FF.MASK) {
                 case Chip.IW_FF.SET:
                     sOp = "SET";
                     break;
@@ -795,22 +837,22 @@ class Chip extends Device {
                     sOp = "NOT";
                     break;
                 }
-                sOperands = Chip.OP_REGS[(w & Chip.IW_FF.J_MASK) >> Chip.IW_FF.J_SHIFT];
-                let d = ((w & Chip.IW_FF.D_MASK) >> Chip.IW_FF.D_SHIFT);
+                sOperands = this.regsABCD[(opCode & Chip.IW_FF.J_MASK) >> Chip.IW_FF.J_SHIFT].name;
+                let d = ((opCode & Chip.IW_FF.D_MASK) >> Chip.IW_FF.D_SHIFT);
                 sOperands += '[' + (d? (d + 12) : '?') + ']';
-                sOperands += ':' + ((w & Chip.IW_FF.B_MASK) >> Chip.IW_FF.B_SHIFT);
+                sOperands += ':' + ((opCode & Chip.IW_FF.B_MASK) >> Chip.IW_FF.B_SHIFT);
                 break;
 
             case Chip.IW_MF.PF:     // 0x0e00: (used for misc operations)
                 let sStore = "STORE";
-                switch(w & Chip.IW_PF.MASK) {
+                switch(opCode & Chip.IW_PF.MASK) {
                 case Chip.IW_PF.STYA:   // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
                     sOp = sStore;
                     sOperands = "A,Y[RAB]";
                     break;
                 case Chip.IW_PF.RABI:   // 0x0001: Bits 4-6 of instruction are stored in RAB
                     sOp = sStore;
-                    sOperands = "RAB," + ((w & 0x70) >> 4);
+                    sOperands = "RAB," + ((opCode & 0x70) >> 4);
                     break;
                 case Chip.IW_PF.BRR5:   // 0x0002: Branch to R5
                     sOp = "BR";
@@ -845,22 +887,17 @@ class Chip extends Device {
                     sOperands = "RAB,R5L";
                     break;
                 default:
-                    /*
-                     * The "Hrast" emulator defines some additional opcodes at this point, without any explanation;
-                     * the purpose of some are clear (like "POWOFF" and "?KEY"), but others are less clear.
-                     *
-                     *      0x000B: POWOFF
-                     *      0x000C: STAX MAEX (a special version of STAX)
-                     *      0x000D: ?KEY (used in lieu of a second DISP instruction)
-                     *      0x000E: STAY MAEX (a special version of STAY)
-                     *      0x0EFF: NOP
-                     */
                     break;
                 }
                 break;
+
+            case Chip.IW_MF.RES1:   // 0x0600: (reserved)
+            case Chip.IW_MF.RES2:   // 0x0b00: (reserved)
+            default:
+                break;
             }
         }
-        return this.sprintf("0x%04x: 0x%04x  %-8s%s\n", addr, w, sOp, sOperands);
+        return this.sprintf("0x%04x: 0x%04x  %-8s%s\n", addr, opCode, sOp, sOperands);
     }
 
     /**
@@ -897,9 +934,9 @@ class Chip extends Device {
         case "u":
             addr = (addr >= 0? addr : this.regPC);
             while (nLines--) {
-                let w = this.rom.getData(addr);
-                if (w == undefined) break;
-                sResult += this.disassemble(w, addr++);
+                let opCode = this.rom.getData(addr);
+                if (opCode == undefined) break;
+                sResult += this.disassemble(opCode, addr++);
             }
             break;
         case "?":
@@ -913,6 +950,93 @@ class Chip extends Device {
             break;
         }
         if (sResult) this.println(sResult.trim());
+        return true;
+    }
+
+    /**
+     * opDISP()
+     *
+     * Handles the DISP opcode.  The following details/tables are from the TI patents:
+     *
+     *      Register A and Register B are outputted to the display decoder and the keyboard is scanned.
+     *      A closed keyboard switch loads K5 and sets condition latch.
+     *
+     *      Display decoder receives a data representing numerals to be displayed from operational register A.
+     *
+     *      Display decoder is also responsive to the data from operational register B, which indicates where
+     *      the decimal point is to be displayed among the numerals, whether minus signs are to be provided,
+     *      and which digits are to be blanked, according to the codes listed in Table III.
+     *
+     *      TABLE II
+     *
+     *          Register R5
+     *          --------------------------------
+     *             7   6   5   4   3   2   1   0
+     *           KR8 KR7 KR6 KR5 KR4 KR3 KR2 KR1
+     *
+     *            K             KS (Keyboard Line Actuated)
+     *          -------------------------------------------
+     *           001            K1
+     *           010            K2
+     *           011            K3
+     *           100            K4
+     *           101            K5
+     *
+     *            K             KS (Segment Scan Line Actuated)
+     *          -----------------------------------------------
+     *           000            KS0     (SEG E)
+     *           001            KS1     (SEG F)
+     *           010            KS2     (SEG B)
+     *           011            KS3     (SEG G)
+     *           100            KS4     (SEG C)
+     *           101            KS5     (SEG A)
+     *           110            KS6     (SEG D/D12)
+     *
+     *      TABLE III
+     *
+     *          Register B
+     *          Digit Control Code  Function
+     *          ------------------  -----------------------------------------------------
+     *              1XXX            Display digit is blanked in the corresponding digit position
+     *              0XX1            Turns on minus sign (Segment G) in corresponding digit position
+     *              XX1X            Turns on decimal point and digit specified by register A in corresponding digit position
+     *              0XX0            Turns on digit specified by Register A in corresponding digit position
+     *
+     * @this {Chip}
+     * @returns {boolean} (true to indicate the opcode was successfully decoded)
+     */
+    opDISP()
+    {
+        let s = "";
+        for (let i = 11; i >= 0; i--) {
+            if (this.regB.digits[i] & 0x8) {
+                s += ' ';
+            } else if (this.regB.digits[i] & 0x1) {
+                s += '-';
+            } else {
+                s += Device.HexUpperCase[this.regA.digits[i]];
+            }
+            if (this.regB.digits[i] & 0x2) {
+                s += '.';
+            }
+        }
+        if (this.regA.digits[14] == 0x0E) {
+            s = 'E' + s;
+        }
+        if (this.regKey) {
+            this.regR5 = this.regKey;
+            this.fCOND = 1;
+        }
+        this.led.drawString(s);
+
+        // if (DEBUG) this.printf("display: \"%s\"  key: 0x%02x\n", s, this.regKey);
+        // this.time.stop();
+
+        /*
+         * The DISP operation slows the clock by a factor of 4; to simulate that additional overhead, we simply
+         * bump nCyclesClocked by three more OP_CYCLES, in addition to the OP_CYCLES that clocker() already incurs.
+         */
+        this.nCyclesClocked += Chip.OP_CYCLES * 3;
         return true;
     }
 
@@ -944,6 +1068,27 @@ class Chip extends Device {
     }
 
     /**
+     * setKey(col, row)
+     *
+     * Converts a logical (col,row), where the top left keyboard position is (0,0), into an 8-bit physical
+     * location value, where bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).  Moreover,
+     * if either col or row is negative, then all bits are cleared.
+     *
+     * @this {Chip}
+     * @param {number} col
+     * @param {number} row
+     */
+    setKey(col, row)
+    {
+        let b = 0;
+        if (col >= 0 && row >= 0) {
+            this.assert(col < 5 && row < 8);
+            b = row | ((col + 1) << 4);
+        }
+        this.regKey = b;
+    }
+
+    /**
      * status()
      *
      * @this {Chip}
@@ -970,7 +1115,7 @@ class Chip extends Device {
             }
             return s;
         }
-        s += this.toString(options, this.regs);
+        s += this.toString(options, this.regsABCD);
         if (options.indexOf('a') >= 0) {
             s += this.toString(options, this.regsX);
             s += this.toString(options, this.regsY);
@@ -1076,14 +1221,24 @@ Chip.RANGE = {
     [Chip.IW_MF.D15]:   [15,15],        // 0x0f00: (D15)
 };
 
+Chip.OP_CYCLES = 128;                   // default number of cycles per operation
+
+/*
+ * Table of operations used by the disassembler for "masked" operations
+ */
 Chip.OP = {
     ADD:    0,
     SUB:    1,
     SHL:    2,
-    SHR:    3
+    SHR:    3,
+    XCHG:   4,
+    MOVE:   5
 };
 
-Chip.OP_REGS = ["A","B","C","D","1","?","R5L","R5"];
+/*
+ * Table of operational inputs used by the disassembler for "masked" operations
+ */
+Chip.OP_INPUTS = ["A","B","C","D","1","?","R5L","R5"];
 
 Chip.COMMANDS = [
     "g [addr]\trun (to addr)",

@@ -84,6 +84,8 @@ class Input extends Device {
     {
         super(idMachine, idDevice, config);
 
+        this.aClickers = [];
+
         let input = this;
         this.time = this.findDeviceByClass(Machine.CLASS.TIME);
 
@@ -163,7 +165,7 @@ class Input extends Device {
 
             /*
              * Finally, the active input state.  If there is no active input, col and row are -1.  After
-             * this point, these variables will be updated by setInput().
+             * this point, these variables will be updated by setPosition().
              */
             this.col = this.row = -1;
         }
@@ -174,6 +176,17 @@ class Input extends Device {
                 if (input.time) input.time.togglePower();
             };
         }
+    }
+
+    /**
+     * addClicker(clicker)
+     *
+     * @this {Input}
+     * @param {function(number)} clicker
+     */
+    addClicker(clicker)
+    {
+        this.aClickers.push(clicker);
     }
 
     /**
@@ -212,7 +225,7 @@ class Input extends Device {
             for (let col = 0; col < rowMap.length; col++) {
                 if (ch == rowMap[col]) {
                     this.keyPressed = ch;
-                    this.setInput(col, row);
+                    this.setPosition(col, row);
                     this.time.setTimer(this.timerKeyRelease, Input.AUTORELEASE);
                     return;
                 }
@@ -230,7 +243,7 @@ class Input extends Device {
     {
         if (this.keyPressed) {
             this.keyPressed = null;
-            this.setInput(-1, -1);
+            this.setPosition(-1, -1);
         }
     }
 
@@ -439,7 +452,7 @@ class Input extends Device {
             this.xStart = x;
             this.yStart = y;
             if (fInput) {
-                this.setInput(col, row);
+                this.setPosition(col, row);
             }
         }
         else if (action == Input.ACTION.MOVE) {
@@ -449,7 +462,7 @@ class Input extends Device {
              */
         }
         else if (action == Input.ACTION.RELEASE) {
-            this.setInput(-1, -1);
+            this.setPosition(-1, -1);
             this.xStart = this.yStart = -1;
         }
         else {
@@ -458,17 +471,18 @@ class Input extends Device {
     }
 
     /**
-     * setInput(col, row)
+     * setPosition(col, row)
      *
      * @this {Input}
      * @param {number} col
      * @param {number} row
      */
-    setInput(col, row)
+    setPosition(col, row)
     {
         if (col != this.col || row != this.row) {
-            this.row = row;
             this.col = col;
+            this.row = row;
+            this.updateClickers(col, row);
             if (TEST) {
                 // this.println("input: col=" + col + ", row=" + row);
                 let led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
@@ -479,6 +493,19 @@ class Input extends Device {
                     led.drawGrid();
                 }
             }
+        }
+    }
+
+    /**
+     * updateClickers(col, row)
+     *
+     * @param {number} col
+     * @param {number} row
+     */
+    updateClickers(col, row)
+    {
+        for (let i = 0; i < this.aClickers.length; i++) {
+            this.aClickers[i](col, row);
         }
     }
 }
