@@ -430,7 +430,7 @@ class Chip extends Device {
          */
         this.regKey = 0;
         this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-        this.input.addClicker(this.setKey.bind(this), this.setPower.bind(this));
+        this.input.addClicker(this.setKey.bind(this), this.setPower.bind(this), this.reset.bind(this));
 
         /*
          * Get access to the LED device, so we can draw symbols.
@@ -912,7 +912,8 @@ class Chip extends Device {
         let sResult = "";
         let aCommands = sCommand.split(' ');
         let s = aCommands[0];
-        let addr = Number.parseInt(aCommands[1], 16) || -1;
+        let addr = Number.parseInt(aCommands[1], 16);
+        if (isNaN(addr)) addr = -1;
         let nLines = Number.parseInt(aCommands[2], 10) || 8;
         switch(s[0]) {
         case "g":
@@ -929,6 +930,7 @@ class Chip extends Device {
             if (!this.time.step()) sResult = "already running";
             break;
         case "r":
+            this.updateRegister(s.substr(1), addr);
             sResult += this.toString(s[1]);
             break;
         case "u":
@@ -1082,6 +1084,22 @@ class Chip extends Device {
     }
 
     /**
+     * reset()
+     *
+     * Called by the Input device to provide notification of a reset event.
+     *
+     * @this {Chip}
+     */
+    reset()
+    {
+        this.println("reset");
+        this.regPC = 0;
+        if (!this.time.fRunning) {
+            this.status();
+        }
+    }
+
+    /**
      * setKey(col, row)
      *
      * Called by the Input device to provide notification of key presses and releases.
@@ -1186,6 +1204,25 @@ class Chip extends Device {
             s = (range? (i >= range[0] && i <= range[1]? 'F' : '0') : '?') + s;
         }
         return s;
+    }
+
+    /**
+     * updateRegister(name, value)
+     *
+     * @param {string} name
+     * @param {number} value
+     */
+    updateRegister(name, value)
+    {
+        if (!name || value < 0) return;
+        switch(name) {
+        case "pc":
+            this.regPC = value & this.rom.addrMask;
+            break;
+        default:
+            this.println("unrecognized register: " + name);
+            break;
+        }
     }
 }
 

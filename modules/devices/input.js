@@ -28,6 +28,10 @@
 
 "use strict";
 
+if (typeof module !== "undefined") {
+    var Device = require("device");
+}
+
 /**
  * @typedef {Object} InputConfig
  * @property {string} class
@@ -180,25 +184,44 @@ class Input extends Device {
             this.col = this.row = -1;
         }
 
+        element = this.bindings[Input.BINDING.CLEAR];
+        if (element) {
+            element.onclick = function onClickClear() {
+                let printElement = input.findBinding(Device.BINDING.PRINT, true);
+                if (printElement) printElement.value = "";
+            };
+        }
+
         element = this.bindings[Input.BINDING.POWER];
-        if (element && this.time) {
+        if (element) {
             element.onclick = function onClickPower() {
                 if (input.power) input.power();
+            };
+        }
+
+        element = this.bindings[Input.BINDING.RESET];
+        if (element) {
+            element.onclick = function onClickReset() {
+                if (input.reset) input.reset();
             };
         }
     }
 
     /**
-     * addClicker(clicker, power)
+     * addClicker(clicker, power, reset)
+     *
+     * Called by the Chip device to setup keyboard and power click notifications.
      *
      * @this {Input}
      * @param {function(number)} clicker
      * @param {function()} power (called when the "power" button, if any, is clicked)
+     * @param {function()} reset (called when the "reset" button, if any, is clicked)
      */
-    addClicker(clicker, power)
+    addClicker(clicker, power, reset)
     {
         this.aClickers.push(clicker);
         this.power = power;
+        this.reset = reset;
     }
 
     /**
@@ -540,7 +563,9 @@ Input.ACTION = {
 };
 
 Input.BINDING = {
+    CLEAR:      "clear",
     POWER:      "power",
+    RESET:      "reset",
     SURFACE:    "surface"
 };
 

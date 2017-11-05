@@ -638,7 +638,7 @@ class Time extends Device {
      * stop()
      *
      * @this {Time}
-     * @returns {boolean} false
+     * @returns {boolean} true if successful, false if already stopped
      */
     stop()
     {
@@ -646,6 +646,7 @@ class Time extends Device {
             this.fRunning = false;
             this.endBurst();
             this.updateStatus(true);
+            return true;
         }
         return false;
     }
@@ -664,7 +665,11 @@ class Time extends Device {
      */
     toggle()
     {
-        return this.fRunning? this.stop() : this.start();
+        if (this.fRunning) {
+            this.stop();
+        } else {
+            this.start();
+        }
     }
 
     /**

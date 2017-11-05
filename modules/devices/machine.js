@@ -112,7 +112,7 @@ class Machine extends Device {
         window.addEventListener('load', function onLoad(event) {
             let chip = machine.initDevices();
             if (chip) {
-                chip.status();
+                chip.setPower(true);
             }
         });
     }

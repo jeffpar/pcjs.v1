@@ -56,7 +56,9 @@ machines:
           "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
           "bindings": {
             "surface": "imageTI57",
-            "power": "powerTI57"
+            "power": "powerTI57",
+            "reset": "resetTI57",
+            "clear": "clearTI57"
           }
         },
         "rom": {
@@ -246,4 +248,6 @@ The window also accepts a few debugging commands.  Use '?' for help.
   </div>
   <button id="runTI57">Run</button>
   <button id="stepTI57">Step</button><span id="speedTI57">Stopped</span>
+  <button id="resetTI57">Reset</button>
+  <button id="clearTI57">Clear</button>
 </div>
