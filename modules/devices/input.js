@@ -28,10 +28,6 @@
 
 "use strict";
 
-if (typeof module !== "undefined") {
-    var Device = require("device");
-}
-
 /**
  * @typedef {Object} InputConfig
  * @property {string} class

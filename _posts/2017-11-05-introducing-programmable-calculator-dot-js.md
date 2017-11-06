@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Introducing Programmable Calculator dot JS
+title: Introducing Programmable Calculator JS
 date: 2017-11-05 15:00:00
 permalink: /blog/2017/11/05/
 machines:
@@ -224,21 +224,21 @@ styles:
     font-family: Monaco,"Lucida Console",monospace;
 ---
 
-For years, we all assumed that **PCjs** meant "Personal Computers in JavaScript".  Even I thought that.  But now
-it turns out that it is also stands for "Programmable Calculators in JavaScript".  Who knew?
+For years, we all assumed that **PCjs** meant "**Personal Computers in JavaScript**".  Even I thought that.  But now
+it turns out that it also stands for "**Programmable Calculators in JavaScript**".  Who knew?
 
-Back in 1978, I acquired my first programmable device: a TI-57 Programmable Calculator.  I (or more likely my dad)
+My first programmable device was a TI-57 Programmable Calculator, purchased in 1978.  I (more likely my dad)
 bought it at Radio Shack, so it was actually an EC-4000, but as I explain on the [TI-57 Device](/devices/ti57/) page,
 the EC-4000 was just a rebranded TI-57.  I'm not sure why we bought it at Radio Shack.  Maybe they were having a sale,
-or maybe we got a bunch of free punches on our Radio Shack Battery Cards.  I'm sure there was *some* incentive.
+or maybe we got a bunch of free punches on our Radio Shack Battery Cards.
 
-I loved the device and wrote [all sorts of programs](/devices/ti57/docs/EC-4000_Programs_1978-1979_By_Jeff_Parsons.pdf)
-for it, and although my fascination with it was quickly superseded by the [Challenger 1P](/devices/c1p/), I still have
-fond memories using it.
+It was a great device and I wrote [all sorts of programs](/devices/ti57/docs/EC-4000_Programs_1978-1979_By_Jeff_Parsons.pdf)
+for it, although my fascination with it was eventually superseded by the [Challenger 1P](/devices/c1p/) I got later
+that year.
 
 I recently unearthed my TI-57 from storage, and after retro-fitting it with a 9V battery, I was happy to see that it
 still mostly worked, except for a few unresponsive buttons.  I immediately started wondering how much work it would be
-to write a TI-57 emulator, and sidestep these annoying problems with fussy old hardware.
+to write a TI-57 emulator, to sidestep these annoying problems with fussy old hardware.
 
 It wasn't much of a surprise to discover that several other people had had the same idea, long before I did.  However,
 as far as I could tell, only one person, who goes by the name "[HrastProgrammer](http://www.hrastprogrammer.com/)",
@@ -251,16 +251,34 @@ And excruciating is the right word, because while a hard-core chip designer may 
 pages of how `OR gate 515 is responsive to the DISP and REL HOLD signals` or how `NAND gate 468 is responsive to the MSKΦ
 signal from gates 220 received via inverter 434`, my eyes would quickly glaze over while reading much of that material.
 
-Fortunately, the patents were also filled with lots of useful diagrams, instruction decoding tables, and even object
-code listings of the chip's entire 2K ROM.  Unfortunately, as several people before me had found, the ROM listings in
-nearly every one of the *nine* patents were all slightly different, no doubt because they had all been typed by hand
-(with [one possible exception](/devices/ti57/rom/#dump-of-rom-generated-from-us-pat-no-4125867)).  Given all the
-obvious errors (invalid digits, excessive digits, and missing digits), it was all but certain that the listings also
-contained numerous non-obvious errors.
+Sadly, HrastProgrammer's work is closed-source.  His [FAQ](http://www.hrastprogrammer.com/faq.htm) summarizes his
+opinion of open-source projects:
 
-One enterprising person, [Sean Riddle](http://seanriddle.com/tms1500.html), had carefully scrutinized the ROM portion
-of a [Decapped TMS-1500 Chip](/devices/ti57/images/TI-57-ROM.png) and created a "transcript" of all the ROM bits.
-To get some idea of how tedious that process is, here's a fragment of the ROM image:
+	Yes, what about it? From time to time, I receive a request to release them as open-source. Sometimes it sounds
+	like I SHOULD DO THIS because it is to be expected. Well, I SHOULD do only what I WANT to do. And I DON'T WANT to
+	release anything as open-source because I have no reason to do this. Except in a few rare cases, I don't like this
+	open-source concept at all so I will not participate. All my emulators will be closed-source forever. Don't waste
+	your and my time asking such questions.
+
+We know from a handful of blog posts that HrastProgrammer originally decided to use a hand-edited version of the
+TI-57 ROM, extracted from one or more of the TI-57 patents, and that he probably made a number of useful corrections
+which we'll never know about.  In the most recent version of his [TI-57E](http://www.hrastprogrammer.com/ti57e/index.htm)
+emulator, he probably switched to the transcribed ROM that Sean Riddle originally produced (see below), but we know
+that that ROM had at least 4 errors.  Did HrastProgrammer find those errors and silently correct them?  The bottom line
+is that, while the HrastProgrammer emulator appears to work fine, its history, overall accuracy, and most importantly,
+its contribution to a greater understanding of TI-57 hardware, is murky at best.
+
+My only choice was to go down the same road that HrastProgrammer travelled and pore over those TI patents.  They are
+definitely valuable historical documents, filled with detailed diagrams, instruction decoding tables, and object code
+listings of the chip's entire 2K ROM.  Unfortunately, as several people before me had found, the ROM listings in nearly
+every one of the *nine* patents were all slightly different, no doubt because they had all been typed by hand (with
+[one possible exception](/devices/ti57/rom/#dump-of-rom-generated-from-us-pat-no-4125867)).  Given all the obvious
+errors (invalid digits, excessive digits, and missing digits), it was all but certain that the listings also contained
+numerous non-obvious errors.
+
+One enterprising person, [Sean Riddle](http://seanriddle.com/tms1500.html), had carefully scrutinized the ROM circuits
+of a [Decapped TMS-1500 Chip](http://seanriddle.com/ti57rombits.jpg) and created a "transcript" of all the ROM bits.
+To get some idea of how tedious that process is, here's a small section of that ROM image:
 
 ![TI-57 ROM Image](/devices/ti57/images/TI-57-ROM.png)
 
@@ -279,14 +297,15 @@ ones and zeros, and then compare the results:
 ....
 ```
 
-As my [TI-57 ROM](/devices/ti57/rom/) page explains, I found 4 bits that differed.  I passed the corrections on to Sean,
-and then decided to go with this new transcribed ROM as the basis for my own emulator.
+As my [TI-57 ROM](/devices/ti57/rom/) page explains, I found 4 bits that differed.  I passed the corrections on to
+Sean, and then decided to go with this new transcribed ROM as the basis for my own emulator.
 
 What you see below is the current state of the PCjs TI-57 emulator.  Just today, I finished "wiring" up the
 [LED](/modules/devices/led.js) and [Keyboard](/modules/devices/input.js) devices to the
-[TMS-1500 Chip](/modules/devices/tms1500.js) device, and so far, things are looking pretty good.  I've not pounded
-on it much, so it may crash rather easily.  But if it does, there's a handy "Diagnostics" window attached to it that
-should display useful information about what went wrong.  It even includes a "mini-debugger".
+[TMS-1500 Chip](/modules/devices/tms1500.js) device, and so far, basic arithmetic operations look good.  I've not
+exercised it much beyond that, because I'm not ready to go down more debugging rabbit holes just yet.  But if it does
+crash, there's a handy "Diagnostics" window attached to it that should display useful information about what went wrong,
+and it even includes a "mini-debugger".
 
 With the PCjs [TI-57](/devices/ti57/) emulator, I also decided to take a fresh approach.  Instead of using
 the same old ES5-based PCjs [shared modules](/modules/shared/lib), the TI-57 emulator is built with a new set of
@@ -301,9 +320,12 @@ ES6-based [Device modules](/modules/devices/), including:
 * [Machine](/modules/devices/machine.js)
 
 Since I'm not currently "compiling/transpiling" any of that code to ES5 (as I've done with every other PCjs machine
-to date), you'll have to be running a modern web-browser.  I'll probably add an ES5 fall-back mechanism eventually, but
+to date), you have to be running a modern web-browser.  I'll probably add an ES5 fall-back mechanism eventually, but
 for now, it's rather refreshing to be using modern JavaScript language features and not constantly worrying about
 backward-compatibility. 
+
+*[@jeffpar](http://twitter.com/jeffpar)*  
+*Nov 5, 2017*
 
 {% include machine.html id="ti57" config="json" %}
 
@@ -322,6 +344,3 @@ backward-compatibility.
   <button id="resetTI57">Reset</button>
   <button id="clearTI57">Clear</button>
 </div>
-
-*[@jeffpar](http://twitter.com/jeffpar)*  
-*Nov 5, 2017*
