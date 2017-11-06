@@ -1086,9 +1086,6 @@ class Chip extends Device {
                 s += '.';
             }
         }
-        // if (this.regA.digits[14] == 0xE) {
-        //     s = 'E' + s;
-        // }
 
         this.led.setDisplay(s);
 
