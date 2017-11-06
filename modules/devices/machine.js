@@ -53,7 +53,7 @@ class Machine extends Device {
      *      },
      *      "clock": {
      *        "class": "Time",
-     *        "cyclesPerSecond": 1600000
+     *        "cyclesPerSecond": 200000
      *        "bindings": {
      *          "run": "runTI57",
      *          "speed": "speedTI57",
@@ -111,9 +111,7 @@ class Machine extends Device {
         let machine = this;
         window.addEventListener('load', function onLoad(event) {
             let chip = machine.initDevices();
-            if (chip) {
-                chip.setPower(true);
-            }
+            if (chip) chip.onPower(true);
         });
     }
 

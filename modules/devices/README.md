@@ -7,21 +7,20 @@ permalink: /modules/devices/
 PCjs Device Classes
 ===================
 
-In the spirit of [Vanilla JS](http://vanilla-js.com/), the following ES2015 (aka ES6) JavaScript files are *all*
-you need to create any of the new-for-2017 PCjs machines; specifically, the [TI-57](/devices/ti57/machine/).
+In the spirit of [Vanilla JS](http://vanilla-js.com/), the following ES2015 (aka ES6) JavaScript classes are
+all you need to create any of our newer (late 2017) PCjs machines, starting with the [TI-57](/devices/ti57/machine/).
 
 * [Device](device.js)
 * [Input](input.js)
 * [LED](led.js)
 * [ROM](rom.js)
 * [Time](time.js)
-* [TMS1500](tms1500.js)
+* [TMS-1500](tms1500.js)
 * [Machine](machine.js)
 
 The [Markdown](https://raw.githubusercontent.com/jeffpar/pcjs/master/devices/ti57/machine/README.md) file in
-the [TI-57](/devices/ti57/machine/) directory contains everything needed to create the machine.
-
-First, you need a blob of JSON like you see below under the `config` property:
+the [TI-57](/devices/ti57/machine/) directory is a good example.  First, you need a blob of JSON, like you see below
+under the `config` property, which configures all the devices and includes any resources that they might also need:
 
 	machines:
 	  - id: ti57
@@ -44,7 +43,7 @@ First, you need a blob of JSON like you see below under the `config` property:
 	        },
 	        "clock": {
 	          "class": "Time",
-	          "cyclesPerSecond": 1600000,
+	          "cyclesPerSecond": 200000,
 	          "bindings": {
 	            "run": "runTI57",
 	            "speed": "speedTI57",
@@ -74,7 +73,7 @@ First, you need a blob of JSON like you see below under the `config` property:
 	            ["rst",  "1",    "2",    "3",    "+"],
 	            ["r/s",  "0",    ".",    "+/-",  "="]
 	          ],
-	          "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
+	          "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 418, 180, 75, 36],
 	          "bindings": {
 	            "surface": "imageTI57",
 	            "power": "powerTI57",
@@ -235,8 +234,8 @@ First, you need a blob of JSON like you see below under the `config` property:
 	    height: 4%;
 	  powerTI57:
 	    position: absolute;
-	    top: 180px;
 	    left: 418px;
+	    top: 180px;
 	    width: 75px;
 	    height: 36px;
 	    opacity: 0;
@@ -261,7 +260,7 @@ and then you need some HTML markup:
 	  <button id="clearTI57">Clear</button>
 	</div>
 
-and then you need to add the scripts, preferably in the order shown above:
+and then you need to add the new scripts, preferably in the order shown above:
 
 	<script type="text/javascript" src="/modules/devices/device.js"></script>
 	<script type="text/javascript" src="/modules/devices/input.js"></script>

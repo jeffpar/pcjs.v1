@@ -33,16 +33,21 @@
  *
  * addTimer() and setTimer() create and manage Timer objects that are used for operations that must
  * occur after a certain amount of "real time" has elapsed (eg, key/button events that need to be timed-out
- * after a predefined period, display refreshes that need to occur every 60hz, periodic yields to ensure
- * that the browser remains responsive, etc).
+ * after a predefined period).
  *
  * These functions are preferred over JavaScript's setTimeout(), because our timers convert "real time"
  * into cycle countdowns, which are effectively paused whenever cycle generation is paused (eg, when the
- * Debugger halts execution).  Moreover, setTimeout() handlers only run after run() yields, which is far too
- * granular for some devices (eg, when a serial port tries to simulate interrupts at 9600 baud).
+ * Debugger halts execution).  Moreover, setTimeout() handlers only run after run() yields, which is too
+ * granular for high-speed devices (eg, when a serial port tries to simulate interrupts at 9600 baud).
  *
  * addClocker() should be used for devices that are cycle-driven (ie, that need to be "clocked") rather than
  * time-driven; they must define a clocker() function and install it with addClocker().
+ *
+ * Finally, addYield() should be used by any device that wants to update its state YIELDS_PER_SECOND
+ * (normally 60Hz); for example, the LED device uses this to cap display updates at 60Hz.  A separate 60Hz
+ * timer could be used as well, but using an addYield() callback imposes slightly less overhead, since the
+ * duration is fixed.  Also, certain types of updates may benefit from the subsequent yield (eg, DOM updates),
+ * but you should avoid making expensive updates at such a high frequency.
  *
  * @typedef {Object} Timer
  * @property {string} id
@@ -52,8 +57,16 @@
  */
 
 /**
+ * @typedef {Object} TimeConfig
+ * @property {string} class
+ * @property {Object} bindings
+ * @property {number} cyclesPerSecond
+ */
+
+/**
  * @class {Time}
  * @unrestricted
+ * @property {TimeConfig} config
  * @property {number} nCyclesPerSecond
  */
 class Time extends Device {
@@ -64,7 +77,7 @@ class Time extends Device {
      *
      *      "clock": {
      *        "class": "Time",
-     *        "cyclesPerSecond": 1600000,
+     *        "cyclesPerSecond": 200000,
      *        "bindings": {
      *          "run": "runTI57",
      *          "speed": "speedTI57",
@@ -75,22 +88,33 @@ class Time extends Device {
      * @this {Time}
      * @param {string} idMachine
      * @param {string} [idDevice]
-     * @param {Object} [config]
+     * @param {TimeConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        this.nCyclesPerSecond = config['cyclesPerSecond'] || 1600000;
+
+        /*
+         * NOTE: The default speed of 200,000Hz (0.2Mhz) is a crude approximation based on actual
+         * TI-57 device timings.  I had originally calculated the speed as 1,600,000Hz (1.6Mhz) based
+         * on timing information in TI's patents, but in hindsight, that speed seems rather high for
+         * a mid-1970's device.  OTOH, the TMS-1500 does burn through a lot of cycles (minimum of 128)
+         * per instruction.
+         */
+        this.nCyclesPerSecond = this.config['cyclesPerSecond'] || 200000;
+        if (this.nCyclesPerSecond < 1000) this.nCyclesPerSecond = 1000;
         this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
         this.mhzBase = Math.round(this.nCyclesPerSecond / 10000) / 100;
         this.mhzCurrent = this.mhzTarget = this.mhzBase * this.nTargetMultiplier;
         this.nYields = 0;
         this.msYield = Math.round(1000 / Time.YIELDS_PER_SECOND);
+        this.aYields = [];
         this.aTimers = [];
         this.aClockers = [];
         this.fRunning = this.fYield = false;
         this.idRunTimeout = 0;
         this.onRunTimeout = this.run.bind(this);
+
         let time = this;
         this.timerYield = this.addTimer("timerYield", function() {
             time.fYield = true;
@@ -99,6 +123,7 @@ class Time extends Device {
                 time.updateStatus();
             }
         }, this.msYield);
+
         this.resetSpeed();
     }
 
@@ -150,14 +175,14 @@ class Time extends Device {
     }
 
     /**
-     * addClocker(clocker)
+     * addClocker(callBack)
      *
      * @this {Time}
-     * @param {function(number)} clocker
+     * @param {function(number)} callBack
      */
-    addClocker(clocker)
+    addClocker(callBack)
     {
-        this.aClockers.push(clocker);
+        this.aClockers.push(callBack);
     }
 
     /**
@@ -184,6 +209,17 @@ class Time extends Device {
         this.aTimers.push({id, callBack, msAuto, nCyclesLeft});
         if (msAuto >= 0) this.setTimer(iTimer, msAuto);
         return iTimer;
+    }
+
+    /**
+     * addYield(callBack)
+     *
+     * @this {Time}
+     * @param {function()} callBack
+     */
+    addYield(callBack)
+    {
+        this.aYields.push(callBack);
     }
 
     /**
@@ -409,6 +445,7 @@ class Time extends Device {
             this.assert(!this.idRunTimeout);
             this.idRunTimeout = setTimeout(this.onRunTimeout, this.snapStop());
         }
+        for (let i = 0; i < this.aYields.length; i++) this.aYields[i]();
     }
 
     /**
@@ -731,4 +768,4 @@ Time.BINDING = {
     STEP:       "step"
 };
 
-Time.YIELDS_PER_SECOND = 30;
+Time.YIELDS_PER_SECOND = 60;

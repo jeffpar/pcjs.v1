@@ -31,6 +31,7 @@
 /**
  * @typedef {Object} LEDConfig
  * @property {string} class
+ * @property {Object} bindings
  * @property {number} type
  * @property {number} width
  * @property {number} height
@@ -39,7 +40,6 @@
  * @property {string} color
  * @property {string} backgroundColor
  * @property {string} fixedSize
- * @property {Object} bindings
  */
 
 /**
@@ -78,6 +78,8 @@
  * @property {{
  *  container: HTMLElement|undefined
  * }} bindings
+ * @property {string|null} stateNext
+ * @property {string|null} stateCurrent
  */
 class LED extends Device {
     /**
@@ -106,6 +108,13 @@ class LED extends Device {
     {
         super(idMachine, idDevice, config);
 
+        this.stateCurrent = this.stateNext = "";
+
+        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        if (this.time) {
+            this.time.addYield(this.updateDisplay.bind(this));
+        }
+
         let container = this.bindings[LED.BINDING.CONTAINER];
         if (container) {
             let canvasView = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
@@ -114,17 +123,17 @@ class LED extends Device {
             } else {
                 this.canvasView = canvasView;
 
-                this.type = config.type;
-                this.width = config.width || 96;
-                this.height = config.height || 128;
-                this.cols = config.cols || 1;
-                this.rows = config.rows || 1;
+                this.type = this.config['type'];
+                this.width = this.config['width'] || 96;
+                this.height = this.config['height'] || 128;
+                this.cols = this.config['cols'] || 1;
+                this.rows = this.config['rows'] || 1;
                 this.widthView = this.width * this.cols;
                 this.heightView = this.height * this.rows;
-                this.color = (config.color || "red");
+                this.color = (this.config['color'] || "red");
                 this.backgroundColor = (this.backgroundColor || "black");
 
-                if (!config.fixedSize) {
+                if (!this.config['fixedSize']) {
                     canvasView.setAttribute("class", "pcjs-canvas");
                 }
                 canvasView.setAttribute("width", this.widthView.toString());
@@ -248,12 +257,38 @@ class LED extends Device {
             }
         }
     }
+
+    /**
+     * setDisplay(s, fForced)
+     *
+     * @this {LED}
+     * @param {string} s
+     * @param {boolean} [fForced]
+     */
+    setDisplay(s, fForced)
+    {
+        this.stateNext = s;
+        if (fForced) this.updateDisplay();
+    }
+
+    /**
+     * updateDisplay()
+     *
+     * @this {LED}
+     */
+    updateDisplay()
+    {
+        if (this.stateCurrent != this.stateNext) {
+            this.stateCurrent = this.stateNext;
+            this.drawString(this.stateCurrent);
+        }
+    }
 }
 
 LED.TYPE = {
-    SINGLE: 1,
-    ARRAY:  2,
-    DIGITS: 3
+    SINGLE:     1,
+    ARRAY:      2,
+    DIGITS:     3
 };
 
 LED.BINDING = {

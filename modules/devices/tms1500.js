@@ -260,7 +260,6 @@ class Reg64 extends Device {
  * @property {boolean} fCOND (true when a carry has been detected)
  * @property {number} regRAB
  * @property {number} regR5
- * @property {number} regOut
  * @property {number} regPC (program counter: address of next instruction to decode)
  * @property {Array.<number>} stack (3-level address stack; managed by push() and pop())
  * @property {number} regKey (current key status, propagated to regR5 at appropriate intervals)
@@ -344,7 +343,7 @@ class Chip extends Device {
          *
          * Refer to patent Fig. 11c (p. 28)
          */
-        this.regOut = 0;
+        // this.regOut = 0;
 
         /*
          * The "Scan Generator Counter" is a 3-bit register.  It is updated once each instruction cycle.
@@ -372,7 +371,7 @@ class Chip extends Device {
          *
          * Refer to patent Fig. 11e (p. 30)
          */
-        this.regScanGen = 0;
+        // this.regScanGen = 0;
 
         /*
          * The "Segment/Keyboard Scan" is an 8-bit register "arranged as a ring counter for shifting a logical zero
@@ -385,7 +384,7 @@ class Chip extends Device {
          *
          * Refer to patent Fig. 11b (p. 27)
          */
-        this.regSegKbdScan = 0xff;
+        // this.regSegKbdScan = 0xff;
 
         /*
          * The "State Time Generator" is represented by a 5-bit register that contains values 00000b through 11111b
@@ -397,8 +396,8 @@ class Chip extends Device {
          *
          * Refer to patent Fig. 11f (p. 31)
          */
-        this.regStateTime = 0;
-        this.regPulseTime = 0;
+        // this.regStateTime = 0;
+        // this.regPulseTime = 0;
 
         /*
          * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions
@@ -430,10 +429,10 @@ class Chip extends Device {
          */
         this.regKey = 0;
         this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-        this.input.addClicker(this.setKey.bind(this), this.setPower.bind(this), this.reset.bind(this));
+        this.input.addClicker(this.onKey.bind(this), this.onPower.bind(this), this.onReset.bind(this));
 
         /*
-         * Get access to the LED device, so we can draw symbols.
+         * Get access to the LED device, so we can update its display.
          */
         this.led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
 
@@ -956,6 +955,71 @@ class Chip extends Device {
     }
 
     /**
+     * onKey(col, row)
+     *
+     * Called by the Input device to provide notification of key presses and releases.
+     *
+     * Converts a logical (col,row), where the top left keyboard position is (0,0), into an 8-bit physical
+     * location value, where bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).  Moreover,
+     * if either col or row is negative, then all bits are cleared.
+     *
+     * @this {Chip}
+     * @param {number} col
+     * @param {number} row
+     */
+    onKey(col, row)
+    {
+        let b = 0;
+        if (col >= 0 && row >= 0) {
+            this.assert(col < 5 && row < 8);
+            b = row | ((col + 1) << 4);
+        }
+        this.regKey = b;
+    }
+
+    /**
+     * onPower(fOn)
+     *
+     * Called by the Input device to provide notification of a power event.
+     *
+     * @this {Chip}
+     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     */
+    onPower(fOn)
+    {
+        if (fOn == undefined) {
+            fOn = !this.time.fRunning;
+        }
+        if (fOn) {
+            if (!this.time.fRunning) {
+                this.regPC = 0;
+                this.time.start();
+            }
+        } else {
+            if (this.time.fRunning) {
+                this.time.stop();
+                this.led.setDisplay("", true);
+            }
+        }
+    }
+
+    /**
+     * onReset()
+     *
+     * Called by the Input device to provide notification of a reset event.
+     *
+     * @this {Chip}
+     */
+    onReset()
+    {
+        this.println("reset");
+        this.regPC = 0;
+        if (!this.time.fRunning) {
+            this.status();
+        }
+    }
+
+    /**
      * opDISP()
      *
      * Handles the DISP opcode.  The following details/tables are from the TI patents:
@@ -1023,11 +1087,7 @@ class Chip extends Device {
             }
         }
 
-        if (this.regA.digits[14] == 0x0E) {
-            s = 'E' + s;
-        }
-
-        this.led.drawString(s);
+        this.led.setDisplay(s);
 
         /*
          * The DISP operation slows the clock by a factor of 4; to simulate that additional overhead, we bump
@@ -1081,71 +1141,6 @@ class Chip extends Device {
          */
         while (i > 0) this.stack[i] = this.stack[--i];
         this.stack[0] = addr;
-    }
-
-    /**
-     * reset()
-     *
-     * Called by the Input device to provide notification of a reset event.
-     *
-     * @this {Chip}
-     */
-    reset()
-    {
-        this.println("reset");
-        this.regPC = 0;
-        if (!this.time.fRunning) {
-            this.status();
-        }
-    }
-
-    /**
-     * setKey(col, row)
-     *
-     * Called by the Input device to provide notification of key presses and releases.
-     *
-     * Converts a logical (col,row), where the top left keyboard position is (0,0), into an 8-bit physical
-     * location value, where bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).  Moreover,
-     * if either col or row is negative, then all bits are cleared.
-     *
-     * @this {Chip}
-     * @param {number} col
-     * @param {number} row
-     */
-    setKey(col, row)
-    {
-        let b = 0;
-        if (col >= 0 && row >= 0) {
-            this.assert(col < 5 && row < 8);
-            b = row | ((col + 1) << 4);
-        }
-        this.regKey = b;
-    }
-
-    /**
-     * setPower(fOn)
-     *
-     * Called by the Input device to provide notification of a power event.
-     *
-     * @this {Chip}
-     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
-     */
-    setPower(fOn)
-    {
-        if (fOn == undefined) {
-            fOn = !this.time.fRunning;
-        }
-        if (fOn) {
-            if (!this.time.fRunning) {
-                this.regPC = 0;
-                this.time.start();
-            }
-        } else {
-            if (this.time.fRunning) {
-                this.time.stop();
-                this.led.drawString("");
-            }
-        }
     }
 
     /**
@@ -1302,7 +1297,7 @@ Chip.RANGE = {
     [Chip.IW_MF.D15]:   [15,15],        // 0x0f00: (D15)
 };
 
-Chip.OP_CYCLES = 128;                   // default number of cycles per operation
+Chip.OP_CYCLES = 128;                   // default number of cycles per instruction
 
 /*
  * Table of operations used by the disassembler for "masked" operations
