@@ -84,11 +84,11 @@ class Input extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.aClickers = [];
-        this.power = null;
+        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
 
-        let input = this;
-        this.time = this.findDeviceByClass(Machine.CLASS.TIME);
+        this.onKey = null;
+        this.onPower = null;
+        this.onReset = null;
 
         let element = this.bindings[Input.BINDING.SURFACE];
         if (element) {
@@ -180,44 +180,45 @@ class Input extends Device {
             this.col = this.row = -1;
         }
 
+        let input = this;
+
         element = this.bindings[Input.BINDING.CLEAR];
         if (element) {
             element.onclick = function onClickClear() {
-                let printElement = input.findBinding(Device.BINDING.PRINT, true);
-                if (printElement) printElement.value = "";
+                this.clear();
             };
         }
 
         element = this.bindings[Input.BINDING.POWER];
         if (element) {
             element.onclick = function onClickPower() {
-                if (input.power) input.power();
+                if (input.onPower) input.onPower();
             };
         }
 
         element = this.bindings[Input.BINDING.RESET];
         if (element) {
             element.onclick = function onClickReset() {
-                if (input.reset) input.reset();
+                if (input.onReset) input.onReset();
             };
         }
     }
 
     /**
-     * addClicker(clicker, power, reset)
+     * addClicker(onKey, onPower, onReset)
      *
-     * Called by the Chip device to setup keyboard and power click notifications.
+     * Called by the Chip device to setup keyboard, power, and reset notifications.
      *
      * @this {Input}
-     * @param {function(number)} clicker
-     * @param {function()} power (called when the "power" button, if any, is clicked)
-     * @param {function()} reset (called when the "reset" button, if any, is clicked)
+     * @param {function(number,number)} onKey
+     * @param {function()} onPower (called when the "power" button, if any, is clicked)
+     * @param {function()} onReset (called when the "reset" button, if any, is clicked)
      */
-    addClicker(clicker, power, reset)
+    addClicker(onKey, onPower, onReset)
     {
-        this.aClickers.push(clicker);
-        this.power = power;
-        this.reset = reset;
+        this.onKey = onKey;
+        this.onPower = onPower;
+        this.onReset = onReset;
     }
 
     /**
@@ -524,7 +525,7 @@ class Input extends Device {
         if (col != this.col || row != this.row) {
             this.col = col;
             this.row = row;
-            this.updateClickers(col, row);
+            if (this.onKey) this.onKey(col, row);
             if (TEST) {
                 // this.println("input: col=" + col + ", row=" + row);
                 let led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
@@ -535,19 +536,6 @@ class Input extends Device {
                     led.drawGrid();
                 }
             }
-        }
-    }
-
-    /**
-     * updateClickers(col, row)
-     *
-     * @param {number} col
-     * @param {number} row
-     */
-    updateClickers(col, row)
-    {
-        for (let i = 0; i < this.aClickers.length; i++) {
-            this.aClickers[i](col, row);
         }
     }
 }

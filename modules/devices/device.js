@@ -232,6 +232,17 @@ class Device {
     }
 
     /**
+     * clear()
+     *
+     * @this {Device}
+     */
+    clear()
+    {
+        let element = this.findBinding(Device.BINDING.PRINT, true);
+        if (element) element.value = "";
+    }
+
+    /**
      * findBinding(name, fAll)
      *
      * This will search the current device's bindings, and optionally all the device bindings within the

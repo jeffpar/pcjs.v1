@@ -78,6 +78,8 @@
  * @property {{
  *  container: HTMLElement|undefined
  * }} bindings
+ * @property {string|null} stateNext
+ * @property {string|null} stateCurrent
  */
 class LED extends Device {
     /**
@@ -105,6 +107,14 @@ class LED extends Device {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
+
+        this.stateNext = null;
+        this.stateCurrent = null;
+
+        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        if (this.time) {
+            this.time.addYield(this.updateDisplay.bind(this));
+        }
 
         let container = this.bindings[LED.BINDING.CONTAINER];
         if (container) {
@@ -248,12 +258,36 @@ class LED extends Device {
             }
         }
     }
+
+    /**
+     * setDisplay(s)
+     *
+     * @this {LED}
+     * @param {string} s
+     */
+    setDisplay(s)
+    {
+        this.stateNext = s;
+    }
+
+    /**
+     * updateDisplay()
+     *
+     * @this {LED}
+     */
+    updateDisplay()
+    {
+        if (this.stateCurrent != this.stateNext) {
+            this.stateCurrent = this.stateNext;
+            this.drawString(this.stateCurrent);
+        }
+    }
 }
 
 LED.TYPE = {
-    SINGLE: 1,
-    ARRAY:  2,
-    DIGITS: 3
+    SINGLE:     1,
+    ARRAY:      2,
+    DIGITS:     3
 };
 
 LED.BINDING = {

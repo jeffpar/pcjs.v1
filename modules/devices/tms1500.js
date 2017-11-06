@@ -429,13 +429,12 @@ class Chip extends Device {
          */
         this.regKey = 0;
         this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-        this.input.addClicker(this.setKey.bind(this), this.setPower.bind(this), this.reset.bind(this));
+        this.input.addClicker(this.onKey.bind(this), this.onPower.bind(this), this.onReset.bind(this));
 
         /*
-         * Get access to the LED device, so we can draw symbols.
+         * Get access to the LED device, so we can update its display.
          */
         this.led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
-        this.prevLEDString = null;      // cache the previous string we sent to the LED device
 
         /*
          * Get access to the ROM device.
@@ -956,6 +955,70 @@ class Chip extends Device {
     }
 
     /**
+     * onKey(col, row)
+     *
+     * Called by the Input device to provide notification of key presses and releases.
+     *
+     * Converts a logical (col,row), where the top left keyboard position is (0,0), into an 8-bit physical
+     * location value, where bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).  Moreover,
+     * if either col or row is negative, then all bits are cleared.
+     *
+     * @this {Chip}
+     * @param {number} col
+     * @param {number} row
+     */
+    onKey(col, row)
+    {
+        let b = 0;
+        if (col >= 0 && row >= 0) {
+            this.assert(col < 5 && row < 8);
+            b = row | ((col + 1) << 4);
+        }
+        this.regKey = b;
+    }
+
+    /**
+     * onPower(fOn)
+     *
+     * Called by the Input device to provide notification of a power event.
+     *
+     * @this {Chip}
+     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     */
+    onPower(fOn)
+    {
+        if (fOn == undefined) {
+            fOn = !this.time.fRunning;
+        }
+        if (fOn) {
+            if (!this.time.fRunning) {
+                this.regPC = 0;
+                this.time.start();
+            }
+        } else {
+            if (this.time.fRunning) {
+                this.time.stop();
+            }
+        }
+    }
+
+    /**
+     * onReset()
+     *
+     * Called by the Input device to provide notification of a reset event.
+     *
+     * @this {Chip}
+     */
+    onReset()
+    {
+        this.println("reset");
+        this.regPC = 0;
+        if (!this.time.fRunning) {
+            this.status();
+        }
+    }
+
+    /**
      * opDISP()
      *
      * Handles the DISP opcode.  The following details/tables are from the TI patents:
@@ -1026,10 +1089,7 @@ class Chip extends Device {
             s = 'E' + s;
         }
 
-        if (this.prevLEDString != s) {
-            this.prevLEDString = s;
-            this.led.drawString(s);
-        }
+        this.led.setDisplay(s);
 
         /*
          * The DISP operation slows the clock by a factor of 4; to simulate that additional overhead, we bump
@@ -1083,71 +1143,6 @@ class Chip extends Device {
          */
         while (i > 0) this.stack[i] = this.stack[--i];
         this.stack[0] = addr;
-    }
-
-    /**
-     * reset()
-     *
-     * Called by the Input device to provide notification of a reset event.
-     *
-     * @this {Chip}
-     */
-    reset()
-    {
-        this.println("reset");
-        this.regPC = 0;
-        if (!this.time.fRunning) {
-            this.status();
-        }
-    }
-
-    /**
-     * setKey(col, row)
-     *
-     * Called by the Input device to provide notification of key presses and releases.
-     *
-     * Converts a logical (col,row), where the top left keyboard position is (0,0), into an 8-bit physical
-     * location value, where bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).  Moreover,
-     * if either col or row is negative, then all bits are cleared.
-     *
-     * @this {Chip}
-     * @param {number} col
-     * @param {number} row
-     */
-    setKey(col, row)
-    {
-        let b = 0;
-        if (col >= 0 && row >= 0) {
-            this.assert(col < 5 && row < 8);
-            b = row | ((col + 1) << 4);
-        }
-        this.regKey = b;
-    }
-
-    /**
-     * setPower(fOn)
-     *
-     * Called by the Input device to provide notification of a power event.
-     *
-     * @this {Chip}
-     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
-     */
-    setPower(fOn)
-    {
-        if (fOn == undefined) {
-            fOn = !this.time.fRunning;
-        }
-        if (fOn) {
-            if (!this.time.fRunning) {
-                this.regPC = 0;
-                this.time.start();
-            }
-        } else {
-            if (this.time.fRunning) {
-                this.time.stop();
-                this.led.drawString("");
-            }
-        }
     }
 
     /**
