@@ -316,7 +316,7 @@ ES6-based [Device modules](/modules/devices/), including:
 * [LED](/modules/devices/led.js)
 * [ROM](/modules/devices/rom.js)
 * [Time](/modules/devices/time.js)
-* [TMS1500](/modules/devices/tms1500.js)
+* [TMS-1500](/modules/devices/tms1500.js)
 * [Machine](/modules/devices/machine.js)
 
 Since I'm not currently "compiling/transpiling" any of that code to ES5 (as I've done with every other PCjs machine
