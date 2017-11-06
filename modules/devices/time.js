@@ -57,8 +57,16 @@
  */
 
 /**
+ * @typedef {Object} TimeConfig
+ * @property {string} class
+ * @property {Object} bindings
+ * @property {number} cyclesPerSecond
+ */
+
+/**
  * @class {Time}
  * @unrestricted
+ * @property {TimeConfig} config
  * @property {number} nCyclesPerSecond
  */
 class Time extends Device {
@@ -69,7 +77,7 @@ class Time extends Device {
      *
      *      "clock": {
      *        "class": "Time",
-     *        "cyclesPerSecond": 1600000,
+     *        "cyclesPerSecond": 200000,
      *        "bindings": {
      *          "run": "runTI57",
      *          "speed": "speedTI57",
@@ -80,13 +88,21 @@ class Time extends Device {
      * @this {Time}
      * @param {string} idMachine
      * @param {string} [idDevice]
-     * @param {Object} [config]
+     * @param {TimeConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
 
-        this.nCyclesPerSecond = config['cyclesPerSecond'] || 1600000;
+        /*
+         * NOTE: The default speed of 200,000Hz (0.2Mhz) is a crude approximation based on actual
+         * TI-57 device timings.  I had originally calculated the speed as 1,600,000Hz (1.6Mhz) based
+         * on timing information in TI's patents, but in hindsight, that speed seems rather high for
+         * a mid-1970's device.  OTOH, the TMS-1500 does burn through a lot of cycles (minimum of 128)
+         * per instruction.
+         */
+        this.nCyclesPerSecond = this.config['cyclesPerSecond'] || 200000;
+        if (this.nCyclesPerSecond < 1000) this.nCyclesPerSecond = 1000;
         this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
         this.mhzBase = Math.round(this.nCyclesPerSecond / 10000) / 100;
         this.mhzCurrent = this.mhzTarget = this.mhzBase * this.nTargetMultiplier;

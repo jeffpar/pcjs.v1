@@ -31,6 +31,7 @@
 /**
  * @typedef {Object} LEDConfig
  * @property {string} class
+ * @property {Object} bindings
  * @property {number} type
  * @property {number} width
  * @property {number} height
@@ -39,7 +40,6 @@
  * @property {string} color
  * @property {string} backgroundColor
  * @property {string} fixedSize
- * @property {Object} bindings
  */
 
 /**
@@ -123,17 +123,17 @@ class LED extends Device {
             } else {
                 this.canvasView = canvasView;
 
-                this.type = config.type;
-                this.width = config.width || 96;
-                this.height = config.height || 128;
-                this.cols = config.cols || 1;
-                this.rows = config.rows || 1;
+                this.type = this.config['type'];
+                this.width = this.config['width'] || 96;
+                this.height = this.config['height'] || 128;
+                this.cols = this.config['cols'] || 1;
+                this.rows = this.config['rows'] || 1;
                 this.widthView = this.width * this.cols;
                 this.heightView = this.height * this.rows;
-                this.color = (config.color || "red");
+                this.color = (this.config['color'] || "red");
                 this.backgroundColor = (this.backgroundColor || "black");
 
-                if (!config.fixedSize) {
+                if (!this.config['fixedSize']) {
                     canvasView.setAttribute("class", "pcjs-canvas");
                 }
                 canvasView.setAttribute("width", this.widthView.toString());

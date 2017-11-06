@@ -31,14 +31,15 @@
 /**
  * @typedef {Object} InputConfig
  * @property {string} class
+ * @property {Object} bindings
  * @property {Array.<Array.<number>>} map
  * @property {Array.<number>} location
- * @property {Object} bindings
  */
 
 /**
  * @class {Input}
  * @unrestricted
+ * @property {InputConfig} config
  * @property {Array.<Array.<number>>} map
  * @property {Array.<number>} location
  * @property {{
@@ -78,7 +79,7 @@ class Input extends Device {
      * @this {Input}
      * @param {string} idMachine
      * @param {string} [idDevice]
-     * @param {LEDConfig} [config]
+     * @param {InputConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
@@ -109,16 +110,18 @@ class Input extends Device {
              * be available if our constructor is called before the page's onload event has fired,
              * so we allow them to be stored in the location array, too.
              */
-            this.xInput = this.config.location[0];
-            this.yInput = this.config.location[1];
-            this.cxInput = this.config.location[2];
-            this.cyInput = this.config.location[3];
-            this.hGap = this.config.location[4] || 1.0;
-            this.vGap = this.config.location[5] || 1.0;
-            this.cxSurface = this.config.location[6] || element.naturalWidth;
-            this.cySurface = this.config.location[7] || element.naturalHeight;
-            this.nRows = this.config.map.length;
-            this.nCols = this.config.map[0].length;
+            let location = this.config['location'];
+            this.xInput = location[0];
+            this.yInput = location[1];
+            this.cxInput = location[2];
+            this.cyInput = location[3];
+            this.hGap = location[4] || 1.0;
+            this.vGap = location[5] || 1.0;
+            this.cxSurface = location[6] || element.naturalWidth;
+            this.cySurface = location[7] || element.naturalHeight;
+            this.map = this.config['map'];
+            this.nRows = this.map.length;
+            this.nCols = this.map[0].length;
 
             /*
              * To calculate the average button width (cxButton), we know that the overall width
@@ -256,8 +259,8 @@ class Input extends Device {
             }
             return;
         }
-        for (let row = 0; row < this.config.map.length; row++) {
-            let rowMap = this.config.map[row];
+        for (let row = 0; row < this.map.length; row++) {
+            let rowMap = this.map[row];
             for (let col = 0; col < rowMap.length; col++) {
                 if (ch == rowMap[col]) {
                     this.keyState = 1;

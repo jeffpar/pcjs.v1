@@ -31,6 +31,7 @@
 /**
  * @typedef {Object} ROMConfig
  * @property {string} class
+ * @property {Object} bindings
  * @property {number} wordSize
  * @property {number} valueSize
  * @property {number} valueTotal
@@ -73,7 +74,10 @@ class ROM extends Device {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        this.data = config.values;
+
+        // noinspection Annotator
+        this.data = this.config['values'];
+
         /*
          * WARNING: This assumes that the data array length is a power-of-two (which we assert below).
          */

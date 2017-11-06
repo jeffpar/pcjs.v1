@@ -23,7 +23,7 @@ machines:
         },
         "clock": {
           "class": "Time",
-          "cyclesPerSecond": 1600000,
+          "cyclesPerSecond": 200000,
           "bindings": {
             "run": "runTI57",
             "speed": "speedTI57",

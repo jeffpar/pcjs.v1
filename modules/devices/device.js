@@ -46,8 +46,8 @@ var TEST = false;
  * @property {string} idMachine
  * @property {string} idDevice
  * @property {Config} config
- * @property {string} printCategory
  * @property {Object} bindings [added by addBindings()]
+ * @property {string} sCategories
  */
 class Device {
     /**
@@ -59,28 +59,63 @@ class Device {
      *      of a element, and value is the ID of the DOM element that should be mapped to it
      *
      * The properties in the "bindings" object are copied to our own bindings object in addBindings(),
-     * but only for DOM elements that actually exist, and it is the elements themselves (rather than their IDs)
-     * that we store.
+     * but only for DOM elements that actually exist, and it is the elements themselves (rather than
+     * their IDs) that we store.
+     *
+     * Also, URL parameters can be used to override config properties.  For example, the URL:
+     *
+     *      http://pcjs:8088/devices/ti57/machine/?cyclesPerSecond=100000
+     *
+     * will set the Time device's cyclesPerSecond config property to 100000.  In general, the values
+     * will be treated as strings, unless they contain all digits (number) or equal "true" or "false"
+     * (boolean).
      *
      * @this {Device}
      * @param {string} idMachine
      * @param {string} [idDevice]
-     * @param {Object} [config]
+     * @param {Config} [config]
      */
     constructor(idMachine, idDevice, config)
     {
         this.config = config || {};
         this.idMachine = idMachine;
         this.idDevice = idDevice || idMachine;
-        this.printCategory = "";
+        this.sCategories = "";
+
         /*
          * Add this Device to the global set of Devices, so that findDevice(), findBinding(), etc, will work.
          */
         this.addDevice();
+
         /*
          * Build the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config.bindings)
          */
         this.addBindings(this.config.bindings);
+
+        let parms = Device.parseURLParms();
+        for (let prop in parms) {
+            if (this.config[prop] !== undefined) {
+                let value;
+                let s = parms[prop];
+                /*
+                 * You might think we could simply call parseInt() and check isNaN(), but parseInt() has
+                 * some annoying quirks, like stopping at the first non-numeric character.  If the ENTIRE
+                 * string isn't a number, then we don't want to treat ANY part of it as a number.
+                 */
+                if (s.match(/^[+-]?[0-9.]+$/)) {
+                    value = Number.parseInt(s, 10);
+                } else if (s == "true") {
+                    value = true;
+                } else if (s == "false") {
+                    value = false;
+                } else {
+                    value = s;
+                    s = '"' + s + '"';
+                }
+                this.config[prop] = value;
+                this.println("overriding " + idDevice + " property '" + prop + "' with " + s);
+            }
+        }
     }
 
     /**
@@ -325,52 +360,59 @@ class Device {
     }
 
     /**
-     * print(s, category)
+     * isCategoryOn(category)
      *
-     * Both print() and println() support an optional category parameter, which if set, should be one
-     * of the values defined in Device.CATEGORY, and will suppress the print operation if the specified
-     * category isn't an active category.
+     * Use this function to enable/disable any calls (eg, print() calls) based on
+     * 1) whether specific categories are required, and 2) whether the specified category
+     * is one of them.
+     *
+     * @this {Device}
+     * @param {string} category
+     */
+    isCategoryOn(category)
+    {
+        return (!this.sCategories || this.sCategories.indexOf(category) >= 0);
+    }
+
+    /**
+     * print(s)
      *
      * @this {Device}
      * @param {string} s
-     * @param {string} [category]
      */
-    print(s, category)
+    print(s)
     {
-        if (!category || !this.printCategory || this.printCategory.indexOf(category) >= 0) {
-            let element = this.findBinding(Device.BINDING.PRINT, true);
-            if (element) {
-                element.value += s;
-                /*
-                 * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-                 */
-                if (!DEBUG && element.value.length > 8192) {
-                    element.value = element.value.substr(element.value.length - 4096);
-                }
-                element.scrollTop = element.scrollHeight;
+        let element = this.findBinding(Device.BINDING.PRINT, true);
+        if (element) {
+            element.value += s;
+            /*
+             * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+             */
+            if (!DEBUG && element.value.length > 8192) {
+                element.value = element.value.substr(element.value.length - 4096);
             }
-            else {
-                let i = s.lastIndexOf('\n');
-                if (i >= 0) {
-                    console.log(Device.PrintBuffer + s.substr(0, i));
-                    Device.PrintBuffer = "";
-                    s = s.substr(i + 1);
-                }
-                Device.PrintBuffer += s;
+            element.scrollTop = element.scrollHeight;
+        }
+        else {
+            let i = s.lastIndexOf('\n');
+            if (i >= 0) {
+                console.log(Device.PrintBuffer + s.substr(0, i));
+                Device.PrintBuffer = "";
+                s = s.substr(i + 1);
             }
+            Device.PrintBuffer += s;
         }
     }
 
     /**
-     * println(s, category)
+     * println(s)
      *
      * @this {Device}
      * @param {string} s
-     * @param {string} [category]
      */
-    println(s, category)
+    println(s)
     {
-        this.print(s + '\n', category);
+        this.print(s + '\n');
     }
 
     /**
@@ -491,6 +533,41 @@ class Device {
         let element = this.bindings[name];
         if (element) element.textContent = text;
     }
+
+    /**
+     * parseURLParms(sParms)
+     *
+     * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
+     * @returns {Object} containing properties for each parameter found
+     */
+    static parseURLParms(sParms)
+    {
+        let parms = Device.URLParms;
+        if (!parms) {
+            parms = {};
+            if (window) {
+                if (!sParms) {
+                    /*
+                     * Note that window.location.href returns the entire URL, whereas window.location.search
+                     * returns only the parameters, if any (starting with the '?', which we skip over with a substr() call).
+                     */
+                    sParms = window.location.search.substr(1);
+                }
+                let match;
+                let pl = /\+/g; // RegExp for replacing addition symbol with a space
+                let search = /([^&=]+)=?([^&]*)/g;
+                let decode = function(s) {
+                    return decodeURIComponent(s.replace(pl, " ")).trim();
+                };
+
+                while ((match = search.exec(sParms))) {
+                    parms[decode(match[1])] = decode(match[2]);
+                }
+            }
+            Device.URLParms = parms;
+        }
+        return parms;
+    }
 }
 
 Device.BINDING = {
@@ -498,7 +575,8 @@ Device.BINDING = {
 };
 
 Device.CATEGORY = {
-    TIME:   "time"
+    TIME:   "time",
+    BUFFER: "buffer"
 };
 
 Device.HANDLER = {

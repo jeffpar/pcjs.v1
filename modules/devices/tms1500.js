@@ -1086,9 +1086,9 @@ class Chip extends Device {
                 s += '.';
             }
         }
-        if (this.regA.digits[14] == 0xE) {
-            s = 'E' + s;
-        }
+        // if (this.regA.digits[14] == 0xE) {
+        //     s = 'E' + s;
+        // }
 
         this.led.setDisplay(s);
 
@@ -1300,7 +1300,7 @@ Chip.RANGE = {
     [Chip.IW_MF.D15]:   [15,15],        // 0x0f00: (D15)
 };
 
-Chip.OP_CYCLES = 128;                   // default number of cycles per operation
+Chip.OP_CYCLES = 128;                   // default number of cycles per instruction
 
 /*
  * Table of operations used by the disassembler for "masked" operations
