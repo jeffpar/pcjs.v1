@@ -64,10 +64,11 @@ class Time extends Device {
      *
      *      "clock": {
      *        "class": "Time",
-     *        "cyclesPerSecond": 1600000,       // number of cycles per second
+     *        "cyclesPerSecond": 1600000,
      *        "bindings": {
      *          "run": "runTI57",
-     *          "print": "printTI57"
+     *          "speed": "speedTI57",
+     *          "step": "stepTI57"
      *        }
      *      }
      *
@@ -117,11 +118,7 @@ class Time extends Device {
         case Time.BINDING.RUN:
             this.bindings[binding] = element;
             element.onclick = function onClickRun() {
-                if (!time.fRunning) {
-                    time.start();
-                } else {
-                    time.stop();
-                }
+                time.toggle();
             };
             break;
 
@@ -137,6 +134,15 @@ class Time extends Device {
             this.updateBindingText(binding, this.getSpeedTarget());
             break;
 
+        case Time.BINDING.STEP:
+            this.bindings[binding] = element;
+            element.onclick = function onClickStep() {
+                if (!time.step()) {
+                    time.println("already running");
+                }
+            };
+            break;
+
         default:
             super.addBinding(binding, element);
             break;
@@ -147,7 +153,7 @@ class Time extends Device {
      * addClocker(clocker)
      *
      * @this {Time}
-     * @param {function()} clocker
+     * @param {function(number)} clocker
      */
     addClocker(clocker)
     {
@@ -212,13 +218,14 @@ class Time extends Device {
     }
 
     /**
-     * doBurst()
+     * doBurst(nCycles, fStep)
      *
      * @this {Time}
      * @param {number} nCycles
+     * @param {boolean} [fStep]
      * @returns {number} (number of cycles actually executed)
      */
-    doBurst(nCycles)
+    doBurst(nCycles, fStep)
     {
         this.nCyclesBurst = this.nCyclesRemain = nCycles;
         if (!this.aClockers.length) {
@@ -227,11 +234,10 @@ class Time extends Device {
         }
         let iClocker = 0;
         while (this.nCyclesRemain > 0) {
-            let nCycles = 0;
             if (iClocker < this.aClockers.length) {
-                nCycles = this.aClockers[iClocker++]() || 1;
+                nCycles = this.aClockers[iClocker++](fStep? 0 : nCycles) || 1;
             } else {
-                iClocker = 0;
+                iClocker = nCycles = 0;
             }
             this.nCyclesRemain -= nCycles;
         }
@@ -260,14 +266,14 @@ class Time extends Device {
     }
 
     /**
-     * endBurst()
+     * endBurst(nCycles)
      *
      * @this {Time}
+     * @param {number} [nCycles]
      * @returns {number} (number of cycles executed in burst)
      */
-    endBurst()
+    endBurst(nCycles = this.nCyclesBurst - this.nCyclesRemain)
     {
-        let nCycles = this.nCyclesBurst - this.nCyclesRemain;
         this.nCyclesBurst = this.nCyclesRemain = 0;
         this.nCyclesThisRun += nCycles;
         this.nCyclesRun += nCycles;
@@ -390,8 +396,7 @@ class Time extends Device {
                 /*
                  * Execute the burst and then update all timers.
                  */
-                this.doBurst(this.getCyclesPerBurst());
-                this.updateTimers(this.endBurst());
+                this.updateTimers(this.endBurst(this.doBurst(this.getCyclesPerBurst())));
 
             } while (this.fRunning && !this.fYield);
         }
@@ -596,7 +601,6 @@ class Time extends Device {
     start()
     {
         if (this.fRunning) {
-            // this.println(this.toString() + " busy");
             return false;
         }
         if (this.idRunTimeout) {
@@ -612,6 +616,25 @@ class Time extends Device {
     }
 
     /**
+     * step()
+     *
+     * @this {Time}
+     * @returns {boolean} true if successful, false if already running
+     */
+    step()
+    {
+        if (!this.fRunning) {
+            /*
+             * Execute a minimum-cycle burst and then update all timers.
+             */
+            this.updateTimers(this.endBurst(this.doBurst(1, true)));
+            this.updateStatus();
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * stop()
      *
      * @this {Time}
@@ -619,14 +642,34 @@ class Time extends Device {
      */
     stop()
     {
-        let fStopped = false;
         if (this.fRunning) {
             this.fRunning = false;
             this.endBurst();
             this.updateStatus(true);
-            fStopped = true;
+            return true;
         }
-        return fStopped;
+        return false;
+    }
+
+    /**
+     * toggle()
+     *
+     * This handles both a "run" button, if any, attached to the Time device.
+     *
+     * Note that this serves a different purpose than the "power" button that's managed
+     * by the Input device, because toggling power also requires resetting the program counter
+     * prior to start() OR clearing the display after stop().  See the Chip's setPower()
+     * function for details.
+     *
+     * @this {Time}
+     */
+    toggle()
+    {
+        if (this.fRunning) {
+            this.stop();
+        } else {
+            this.start();
+        }
     }
 
     /**
@@ -639,7 +682,16 @@ class Time extends Device {
      */
     updateStatus(fForced)
     {
-        if (fForced) this.println(this.fRunning? ("starting (target speed: " + this.getSpeedTarget() + ")") : "stopping");
+        if (fForced) {
+            if (this.fRunning) {
+                this.println("starting (target speed: " + this.getSpeedTarget() + ")");
+            } else {
+                this.println("stopping");
+                for (let i = 0; i < this.aClockers.length; i++) {
+                    this.aClockers[i](-1);
+                }
+            }
+        }
         this.updateBindingText(Time.BINDING.RUN, this.fRunning? "Halt" : "Run");
         this.updateBindingText(Time.BINDING.SPEED, this.getSpeedCurrent());
     }
@@ -675,7 +727,8 @@ class Time extends Device {
 Time.BINDING = {
     RUN:        "run",
     SETSPEED:   "setSpeed",
-    SPEED:      "speed"
+    SPEED:      "speed",
+    STEP:       "step"
 };
 
 Time.YIELDS_PER_SECOND = 30;

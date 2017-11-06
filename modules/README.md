@@ -24,5 +24,10 @@ along with variety of Node support modules, such as:
 * [HTMLOut](htmlout/)
 * [MarkOut](markout/)
 
+Also, new for 2017, we have set of stand-alone ES6 Device classes that were used to create the [TI-57](/devices/ti57/)
+emulator:
+
+* [PCjs Device Classes](/modules/devices/)
+
 Only private Node modules are checked into the project.  If any of these modules are later published on
 [npmjs.org](http://npmjs.org), then they will be moved to **node_modules** and removed from this folder.

@@ -29,6 +29,7 @@
 "use strict";
 
 var DEBUG = true;
+var TEST = false;
 
 /**
  * The following properties are the minimum set of properties we expect a Device's config object to
@@ -218,16 +219,14 @@ class Device {
      * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
      *
      * @this {Device}
-     * @param {boolean} f is the expression we are asserting to be true
+     * @param {*} f is the expression asserted to be true
      * @param {string} [s] is description of the assertion on failure
      */
     assert(f, s)
     {
         if (DEBUG) {
             if (!f) {
-                if (!s) s = "assertion failure";
-                this.println(s);
-                throw new Error(s);
+                throw new Error(s || "assertion failure");
             }
         }
     }
@@ -372,7 +371,7 @@ class Device {
      */
     printf(format, ...args)
     {
-        this.print(this.sprintf(format, args));
+        this.print(this.sprintf(format, ...args));
     }
 
     /**
@@ -442,11 +441,11 @@ class Device {
                 break;
 
             case 'X':
-                ach = "0123456789ABCDEF";
+                ach = Device.HexUpperCase;
                 /* falls through */
 
             case 'x':
-                if (!ach) ach = "0123456789abcdef";
+                if (!ach) ach = Device.HexLowerCase;
                 s = "";
                 do {
                     s = ach[arg & 0xf] + s;
@@ -516,3 +515,9 @@ Device.Machines = {};
  * @type {string}
  */
 Device.PrintBuffer = "";
+
+/*
+ * Handy global constants
+ */
+Device.HexLowerCase = "0123456789abcdef";
+Device.HexUpperCase = "0123456789ABCDEF";

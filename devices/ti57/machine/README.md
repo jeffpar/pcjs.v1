@@ -26,7 +26,8 @@ machines:
           "cyclesPerSecond": 1600000,
           "bindings": {
             "run": "runTI57",
-            "speed": "speedTI57"
+            "speed": "speedTI57",
+            "step": "stepTI57"
           }
         },
         "display": {
@@ -55,7 +56,9 @@ machines:
           "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
           "bindings": {
             "surface": "imageTI57",
-            "power": "powerTI57"
+            "power": "powerTI57",
+            "reset": "resetTI57",
+            "clear": "clearTI57"
           }
         },
         "rom": {
@@ -223,11 +226,13 @@ styles:
 TI-57 Test Page
 ---------------
 
-This is a work-in-progress.  The emulator is not operational, but lots of pieces are in place.
-The [Time](/modules/devices/time.js) device can be started and stopped, and it will clock the
-[TMS-1500](/modules/devices/tms1500.js) chip at the appropriate rate, but no instructions are being decoded yet.
-There are also [Input](/modules/devices/input.js), [LED](/modules/devices/led.js), and
-[ROM](/modules/devices/rom.js) devices, as well as a [Machine](/modules/devices/machine.js) device to manage them.
+This is a work-in-progress.  The [Time](/modules/devices/time.js) device can be started and stopped,
+and it will clock the [TMS-1500](/modules/devices/tms1500.js) chip at the appropriate rate.  There are
+also [Input](/modules/devices/input.js), [LED](/modules/devices/led.js), and [ROM](/modules/devices/rom.js) devices,
+as well as a [Machine](/modules/devices/machine.js) device to manage them.
+
+If any errors occur during operation, the Diagnostics window will display the last instruction decoded.
+The window also accepts a few debugging commands.  Use '?' for help.
 
 {% include machine.html id="ti57" config="json" %}
 
@@ -239,7 +244,10 @@ There are also [Input](/modules/devices/input.js), [LED](/modules/devices/led.js
 <div style="float:left;">
   <div style="width:100%;">
     <p>Diagnostics</p>
-    <textarea id="printTI57" cols="80" rows="16"></textarea>
+    <textarea id="printTI57" cols="72" rows="16"></textarea>
   </div>
-  <button id="runTI57">Run</button><span id="speedTI57">Stopped</span>
+  <button id="runTI57">Run</button>
+  <button id="stepTI57">Step</button><span id="speedTI57">Stopped</span>
+  <button id="resetTI57">Reset</button>
+  <button id="clearTI57">Clear</button>
 </div>

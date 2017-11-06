@@ -28,6 +28,10 @@
 
 "use strict";
 
+if (typeof module !== "undefined") {
+    var Device = require("device");
+}
+
 /**
  * @typedef {Object} InputConfig
  * @property {string} class
@@ -83,7 +87,14 @@ class Input extends Device {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        let element = this.bindings.surface;
+
+        this.aClickers = [];
+        this.power = null;
+
+        let input = this;
+        this.time = this.findDeviceByClass(Machine.CLASS.TIME);
+
+        let element = this.bindings[Input.BINDING.SURFACE];
         if (element) {
             /*
              * The location array, eg:
@@ -138,18 +149,25 @@ class Input extends Device {
             this.captureMouse(element);
             this.captureTouch(element);
 
-            let input = this;
-            this.time = this.findDeviceByClass(Machine.CLASS.TIME);
             if (this.time) {
-                this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function() {
-                    input.onKeyRelease();
+                this.timerKbd = this.time.addTimer("timerKbd", function() {
+                    input.onKeyTimer();
                 });
-                this.keyPressed = null;
                 /*
-                 * I'm attaching my 'keypress' handlers to the document object, since image elements
-                 * are not focusable.  I'm disinclined to do what I've done with other machines (ie,
-                 * create an invisible <textarea> overlay), because in this case, I don't really want
-                 * a soft keyboard popping up and obscuring part of the display.
+                 * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
+                 * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
+                 * delay between release and the next press -- probably for de-bouncing purposes.  So we
+                 * maintain a key state: 0 means no key has gone down or up recently, 1 means a key just went
+                 * down, and 2 means a key just went up.  keysPressed maintains a queue of keys (up to 16)
+                 * received while key state is non-zero.
+                 */
+                this.keyState = 0;
+                this.keysPressed = [];
+                /*
+                 * I'm attaching my 'keypress' handlers to the document object, since image elements are
+                 * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
+                 * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
+                 * popping up and obscuring part of the display.
                  *
                  * A side-effect, however, is that if the user attempts to explicitly give the image
                  * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
@@ -161,10 +179,49 @@ class Input extends Device {
 
             /*
              * Finally, the active input state.  If there is no active input, col and row are -1.  After
-             * this point, these variables will be updated by setInput().
+             * this point, these variables will be updated by setPosition().
              */
             this.col = this.row = -1;
         }
+
+        element = this.bindings[Input.BINDING.CLEAR];
+        if (element) {
+            element.onclick = function onClickClear() {
+                let printElement = input.findBinding(Device.BINDING.PRINT, true);
+                if (printElement) printElement.value = "";
+            };
+        }
+
+        element = this.bindings[Input.BINDING.POWER];
+        if (element) {
+            element.onclick = function onClickPower() {
+                if (input.power) input.power();
+            };
+        }
+
+        element = this.bindings[Input.BINDING.RESET];
+        if (element) {
+            element.onclick = function onClickReset() {
+                if (input.reset) input.reset();
+            };
+        }
+    }
+
+    /**
+     * addClicker(clicker, power, reset)
+     *
+     * Called by the Chip device to setup keyboard and power click notifications.
+     *
+     * @this {Input}
+     * @param {function(number)} clicker
+     * @param {function()} power (called when the "power" button, if any, is clicked)
+     * @param {function()} reset (called when the "reset" button, if any, is clicked)
+     */
+    addClicker(clicker, power, reset)
+    {
+        this.aClickers.push(clicker);
+        this.power = power;
+        this.reset = reset;
     }
 
     /**
@@ -176,7 +233,6 @@ class Input extends Device {
     captureKbd(element)
     {
         let input = this;
-
         element.addEventListener(
             'keypress',
             function onKeyPress(event) {
@@ -197,14 +253,19 @@ class Input extends Device {
      */
     onKeyPress(ch)
     {
-        this.onKeyRelease();
+        if (this.keyState) {
+            if (this.keysPressed.length < 16) {
+                this.keysPressed.push(ch);
+            }
+            return;
+        }
         for (let row = 0; row < this.config.map.length; row++) {
             let rowMap = this.config.map[row];
             for (let col = 0; col < rowMap.length; col++) {
                 if (ch == rowMap[col]) {
-                    this.keyPressed = ch;
-                    this.setInput(col, row);
-                    this.time.setTimer(this.timerKeyRelease, Input.AUTORELEASE);
+                    this.keyState = 1;
+                    this.setPosition(col, row);
+                    this.time.setTimer(this.timerKbd, Input.KBD_DELAY);
                     return;
                 }
             }
@@ -213,15 +274,22 @@ class Input extends Device {
     }
 
     /**
-     * onKeyRelease()
+     * onKeyTimer()
      *
      * @this {Input}
      */
-    onKeyRelease()
+    onKeyTimer()
     {
-        if (this.keyPressed) {
-            this.keyPressed = null;
-            this.setInput(-1, -1);
+        this.assert(this.keyState);
+        if (this.keyState == 1) {
+            this.keyState++;
+            this.setPosition(-1, -1);
+            this.time.setTimer(this.timerKbd, Input.KBD_DELAY);
+        } else {
+            this.keyState = 0;
+            if (this.keysPressed.length) {
+                this.onKeyPress(this.keysPressed.shift());
+            }
         }
     }
 
@@ -246,9 +314,10 @@ class Input extends Device {
                  * Unfortunately, setting focus on an element can cause the browser to scroll the element
                  * into view, so to avoid that, we use the following scrollTo() work-around.
                  */
-                if (input.bindings.power) {
+                let button = input.bindings[Input.BINDING.POWER];
+                if (button) {
                     let x = window.scrollX, y = window.scrollY;
-                    input.bindings.power.focus();
+                    button.focus();
                     window.scrollTo(x, y);
                 }
                 if (!event.button) {
@@ -429,7 +498,7 @@ class Input extends Device {
             this.xStart = x;
             this.yStart = y;
             if (fInput) {
-                this.setInput(col, row);
+                this.setPosition(col, row);
             }
         }
         else if (action == Input.ACTION.MOVE) {
@@ -439,7 +508,7 @@ class Input extends Device {
              */
         }
         else if (action == Input.ACTION.RELEASE) {
-            this.setInput(-1, -1);
+            this.setPosition(-1, -1);
             this.xStart = this.yStart = -1;
         }
         else {
@@ -448,18 +517,19 @@ class Input extends Device {
     }
 
     /**
-     * setInput(col, row)
+     * setPosition(col, row)
      *
      * @this {Input}
      * @param {number} col
      * @param {number} row
      */
-    setInput(col, row)
+    setPosition(col, row)
     {
         if (col != this.col || row != this.row) {
-            this.row = row;
             this.col = col;
-            if (DEBUG) {
+            this.row = row;
+            this.updateClickers(col, row);
+            if (TEST) {
                 // this.println("input: col=" + col + ", row=" + row);
                 let led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
                 if (led) {
@@ -471,6 +541,19 @@ class Input extends Device {
             }
         }
     }
+
+    /**
+     * updateClickers(col, row)
+     *
+     * @param {number} col
+     * @param {number} row
+     */
+    updateClickers(col, row)
+    {
+        for (let i = 0; i < this.aClickers.length; i++) {
+            this.aClickers[i](col, row);
+        }
+    }
 }
 
 Input.ACTION = {
@@ -479,4 +562,11 @@ Input.ACTION = {
     RELEASE:    3               // eg, an action triggered by a 'mouseup' (or 'mouseout') or 'touchend' event
 };
 
-Input.AUTORELEASE = 200;        // number of milliseconds to simulate the automatic release of a keyPress
+Input.BINDING = {
+    CLEAR:      "clear",
+    POWER:      "power",
+    RESET:      "reset",
+    SURFACE:    "surface"
+};
+
+Input.KBD_DELAY = 50;           // minimum number of milliseconds to ensure between key presses and releases
