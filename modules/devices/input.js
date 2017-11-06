@@ -185,7 +185,7 @@ class Input extends Device {
         element = this.bindings[Input.BINDING.CLEAR];
         if (element) {
             element.onclick = function onClickClear() {
-                this.clear();
+                input.clear();
             };
         }
 
