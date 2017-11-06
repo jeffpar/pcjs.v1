@@ -998,6 +998,7 @@ class Chip extends Device {
         } else {
             if (this.time.fRunning) {
                 this.time.stop();
+                this.led.setDisplay("", true);
             }
         }
     }

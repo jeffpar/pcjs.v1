@@ -108,8 +108,7 @@ class LED extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.stateNext = null;
-        this.stateCurrent = null;
+        this.stateCurrent = this.stateNext = "";
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
@@ -260,14 +259,16 @@ class LED extends Device {
     }
 
     /**
-     * setDisplay(s)
+     * setDisplay(s, fForced)
      *
      * @this {LED}
      * @param {string} s
+     * @param {boolean} [fForced]
      */
-    setDisplay(s)
+    setDisplay(s, fForced)
     {
         this.stateNext = s;
+        if (fForced) this.updateDisplay();
     }
 
     /**
