@@ -393,7 +393,7 @@ class Device {
             }
             element.scrollTop = element.scrollHeight;
         }
-        else {
+        if (DEBUG || !element) {
             let i = s.lastIndexOf('\n');
             if (i >= 0) {
                 console.log(Device.PrintBuffer + s.substr(0, i));

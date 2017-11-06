@@ -53,7 +53,7 @@ machines:
             ["rst",  "1",    "2",    "3",    "+"],
             ["r/s",  "0",    ".",    "+/-",  "="]
           ],
-          "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
+          "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 418, 180, 75, 36],
           "bindings": {
             "surface": "imageTI57",
             "power": "powerTI57",
@@ -214,8 +214,8 @@ styles:
     height: 4%;
   powerTI57:
     position: absolute;
-    top: 180px;
     left: 418px;
+    top: 180px;
     width: 75px;
     height: 36px;
     opacity: 0;

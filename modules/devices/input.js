@@ -96,19 +96,25 @@ class Input extends Device {
             /*
              * The location array, eg:
              *
-             *      "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
+             *      "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 180, 418, 75, 36],
              *
              * contains the top left corner (xInput, yInput) and dimensions (cxInput, cyInput)
              * of the input rectangle where the buttons described in the map are located, relative
              * to the surface image.  It also describes the average amount of horizontal and vertical
              * space between buttons, as fractions of the average button width and height (hGap, vGap).
-             * And finally, we store the dimensions of the surface image (cxSurface, cySurface).
-             * With all that, we can now calculate the center lines for each column and row.
+             *
+             * With all that, we can now calculate the center lines for each column and row.  This
+             * obviously assumes that all the buttons are evenly laid out in a perfect grid.  For
+             * devices that don't have such a nice layout, a different location array format will
+             * have to be defined.
              *
              * NOTE: While element.naturalWidth and element.naturalHeight should, for all modern
              * browsers, contain the surface image's dimensions as well, those values still might not
              * be available if our constructor is called before the page's onload event has fired,
-             * so we allow them to be stored in the location array, too.
+             * so we allow them to be stored in the next two elements of the location array, too.
+             *
+             * Finally, the position and size of the device's power button may be stored in the array
+             * as well, in case some devices refuse to generate onClickPower() events.
              */
             let location = this.config['location'];
             this.xInput = location[0];
@@ -119,6 +125,10 @@ class Input extends Device {
             this.vGap = location[5] || 1.0;
             this.cxSurface = location[6] || element.naturalWidth;
             this.cySurface = location[7] || element.naturalHeight;
+            this.xPower = location[8] || 0;
+            this.yPower = location[9] || 0;
+            this.cxPower = location[10] || 0;
+            this.cyPower = location[11] || 0;
             this.map = this.config['map'];
             this.nRows = this.map.length;
             this.nCols = this.map[0].length;
@@ -406,7 +416,7 @@ class Input extends Device {
      */
     processEvent(element, action, event)
     {
-        let x, y, xInput, yInput, col, row, fInput;
+        let x, y, xInput, yInput, col, row, fInput, fPower;
 
         if (action < Input.ACTION.RELEASE) {
             /**
@@ -451,33 +461,15 @@ class Input extends Device {
 
             xInput = x - this.xInput;
             yInput = y - this.yInput;
-            if (xInput >= 0 && xInput < this.cxInput && yInput >= 0 && yInput < this.cyInput) {
-                fInput = true;
-                /*
-                 * The width and height of each column and row could be determined by computing cxGap + cxButton
-                 * and cyGap + cyButton, respectively, but those gap and button sizes are merely estimates, and should
-                 * only be used to help with the final button coordinate checks farther down.
-                 */
-                let cxCol = (this.cxInput / this.nCols)|0;
-                let cyCol = (this.cyInput / this.nRows)|0;
-                let colInput = (xInput / cxCol)|0;
-                let rowInput = (yInput / cyCol)|0;
 
-                /*
-                 * (xCol,yCol) will be the top left corner of the button closest to the point of input.  However, that's
-                 * based on our gap estimate.  If things seem "too tight", shrink the gap estimates, which will automatically
-                 * increase the button size estimates.
-                 */
-                let xCol = colInput * cxCol + (this.cxGap >> 1);
-                let yCol = rowInput * cyCol + (this.cyGap >> 1);
+            fPower = (x >= this.xPower && x < this.xPower + this.cxPower && y >= this.yPower && y < this.yPower + this.cyPower);
 
-                xInput -= xCol;
-                yInput -= yCol;
-                col = row = -1;
-                if (xInput >= 0 && xInput < this.cxButton && yInput >= 0 && yInput < this.cyButton) {
-                    col = colInput;
-                    row = rowInput;
-                }
+            /*
+             * I use the top of the input region, less some gap, to calculate a dividing line, above which
+             * default actions should be allowed, and below which they should not.  Ditto for any event inside
+             * the power button.
+             */
+            if (yInput + this.cyGap >= 0 || fPower) {
                 /*
                  * If we allow touch events to be processed, they will generate mouse events as well, causing
                  * confusion and delays.  We can sidestep that problem by preventing default actions on any event
@@ -487,6 +479,35 @@ class Input extends Device {
                  * want to move or zoom the device, the solution is simple: touch *outside* the input region.
                  */
                 event.preventDefault();
+
+                if (xInput >= 0 && xInput < this.cxInput && yInput >= 0 && yInput < this.cyInput) {
+                    fInput = true;
+                    /*
+                     * The width and height of each column and row could be determined by computing cxGap + cxButton
+                     * and cyGap + cyButton, respectively, but those gap and button sizes are merely estimates, and should
+                     * only be used to help with the final button coordinate checks farther down.
+                     */
+                    let cxCol = (this.cxInput / this.nCols) | 0;
+                    let cyCol = (this.cyInput / this.nRows) | 0;
+                    let colInput = (xInput / cxCol) | 0;
+                    let rowInput = (yInput / cyCol) | 0;
+
+                    /*
+                     * (xCol,yCol) will be the top left corner of the button closest to the point of input.  However, that's
+                     * based on our gap estimate.  If things seem "too tight", shrink the gap estimates, which will automatically
+                     * increase the button size estimates.
+                     */
+                    let xCol = colInput * cxCol + (this.cxGap >> 1);
+                    let yCol = rowInput * cyCol + (this.cyGap >> 1);
+
+                    xInput -= xCol;
+                    yInput -= yCol;
+                    col = row = -1;
+                    if (xInput >= 0 && xInput < this.cxButton && yInput >= 0 && yInput < this.cyButton) {
+                        col = colInput;
+                        row = rowInput;
+                    }
+                }
             }
         }
 
@@ -499,6 +520,8 @@ class Input extends Device {
             this.yStart = y;
             if (fInput) {
                 this.setPosition(col, row);
+            } else if (fPower) {
+                if (this.onPower) this.onPower();
             }
         }
         else if (action == Input.ACTION.MOVE) {
@@ -530,7 +553,6 @@ class Input extends Device {
             this.row = row;
             if (this.onKey) this.onKey(col, row);
             if (TEST) {
-                // this.println("input: col=" + col + ", row=" + row);
                 let led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
                 if (led) {
                     led.clearGrid();

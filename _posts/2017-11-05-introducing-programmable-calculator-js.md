@@ -54,7 +54,7 @@ machines:
             ["rst",  "1",    "2",    "3",    "+"],
             ["r/s",  "0",    ".",    "+/-",  "="]
           ],
-          "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
+          "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 418, 180, 75, 36],
           "bindings": {
             "surface": "imageTI57",
             "power": "powerTI57",
@@ -215,8 +215,8 @@ styles:
     height: 4%;
   powerTI57:
     position: absolute;
-    top: 180px;
     left: 418px;
+    top: 180px;
     width: 75px;
     height: 36px;
     opacity: 0;
@@ -232,9 +232,8 @@ bought it at Radio Shack, so it was actually an EC-4000, but as I explain on the
 the EC-4000 was just a rebranded TI-57.  I'm not sure why we bought it at Radio Shack.  Maybe they were having a sale,
 or maybe we got a bunch of free punches on our Radio Shack Battery Cards.
 
-It was a great device and I wrote [all sorts of programs](/devices/ti57/docs/EC-4000_Programs_1978-1979_By_Jeff_Parsons.pdf)
-for it, although my fascination with it was eventually superseded by the [Challenger 1P](/devices/c1p/) I got later
-that year.
+It was a great device and I wrote [all sorts of programs](/devices/ti57/docs/) for it, although my fascination
+with it was eventually superseded by the [Challenger 1P](/devices/c1p/) I got later that year.
 
 I recently unearthed my TI-57 from storage, and after retro-fitting it with a 9V battery, I was happy to see that it
 still mostly worked, except for a few unresponsive buttons.  I immediately started wondering how much work it would be
@@ -254,11 +253,12 @@ signal from gates 220 received via inverter 434`, my eyes would quickly glaze ov
 Sadly, HrastProgrammer's work is closed-source.  His [FAQ](http://www.hrastprogrammer.com/faq.htm) summarizes his
 opinion of open-source projects:
 
-	Yes, what about it? From time to time, I receive a request to release them as open-source. Sometimes it sounds
-	like I SHOULD DO THIS because it is to be expected. Well, I SHOULD do only what I WANT to do. And I DON'T WANT to
-	release anything as open-source because I have no reason to do this. Except in a few rare cases, I don't like this
-	open-source concept at all so I will not participate. All my emulators will be closed-source forever. Don't waste
-	your and my time asking such questions.
+	Yes, what about it? From time to time, I receive a request to release them as open-source.
+	Sometimes it sounds	like I SHOULD DO THIS because it is to be expected. Well, I SHOULD do
+	only what I WANT to do. And I DON'T WANT to	release anything as open-source because I have
+	no reason to do this. Except in a few rare cases, I don't like this	open-source concept at all
+	so I will not participate. All my emulators will be closed-source forever. Don't waste your
+	and my time asking such questions.
 
 We know from a handful of blog posts that HrastProgrammer originally decided to use a hand-edited version of the
 TI-57 ROM, extracted from one or more of the TI-57 patents, and that he probably made a number of useful corrections
