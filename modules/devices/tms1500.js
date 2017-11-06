@@ -260,7 +260,6 @@ class Reg64 extends Device {
  * @property {boolean} fCOND (true when a carry has been detected)
  * @property {number} regRAB
  * @property {number} regR5
- * @property {number} regOut
  * @property {number} regPC (program counter: address of next instruction to decode)
  * @property {Array.<number>} stack (3-level address stack; managed by push() and pop())
  * @property {number} regKey (current key status, propagated to regR5 at appropriate intervals)
@@ -344,7 +343,7 @@ class Chip extends Device {
          *
          * Refer to patent Fig. 11c (p. 28)
          */
-        this.regOut = 0;
+        // this.regOut = 0;
 
         /*
          * The "Scan Generator Counter" is a 3-bit register.  It is updated once each instruction cycle.
@@ -372,7 +371,7 @@ class Chip extends Device {
          *
          * Refer to patent Fig. 11e (p. 30)
          */
-        this.regScanGen = 0;
+        // this.regScanGen = 0;
 
         /*
          * The "Segment/Keyboard Scan" is an 8-bit register "arranged as a ring counter for shifting a logical zero
@@ -385,7 +384,7 @@ class Chip extends Device {
          *
          * Refer to patent Fig. 11b (p. 27)
          */
-        this.regSegKbdScan = 0xff;
+        // this.regSegKbdScan = 0xff;
 
         /*
          * The "State Time Generator" is represented by a 5-bit register that contains values 00000b through 11111b
@@ -397,8 +396,8 @@ class Chip extends Device {
          *
          * Refer to patent Fig. 11f (p. 31)
          */
-        this.regStateTime = 0;
-        this.regPulseTime = 0;
+        // this.regStateTime = 0;
+        // this.regPulseTime = 0;
 
         /*
          * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions
@@ -436,6 +435,7 @@ class Chip extends Device {
          * Get access to the LED device, so we can draw symbols.
          */
         this.led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
+        this.prevLEDString = null;      // cache the previous string we sent to the LED device
 
         /*
          * Get access to the ROM device.
@@ -1022,12 +1022,14 @@ class Chip extends Device {
                 s += '.';
             }
         }
-
-        if (this.regA.digits[14] == 0x0E) {
+        if (this.regA.digits[14] == 0xE) {
             s = 'E' + s;
         }
 
-        this.led.drawString(s);
+        if (this.prevLEDString != s) {
+            this.prevLEDString = s;
+            this.led.drawString(s);
+        }
 
         /*
          * The DISP operation slows the clock by a factor of 4; to simulate that additional overhead, we bump
