@@ -254,9 +254,9 @@ Sadly, HrastProgrammer's work is closed-source.  His [FAQ](http://www.hrastprogr
 opinion of open-source projects:
 
 	Yes, what about it? From time to time, I receive a request to release them as open-source.
-	Sometimes it sounds	like I SHOULD DO THIS because it is to be expected. Well, I SHOULD do
-	only what I WANT to do. And I DON'T WANT to	release anything as open-source because I have
-	no reason to do this. Except in a few rare cases, I don't like this	open-source concept at all
+	Sometimes it sounds like I SHOULD DO THIS because it is to be expected. Well, I SHOULD do
+	only what I WANT to do. And I DON'T WANT to release anything as open-source because I have
+	no reason to do this. Except in a few rare cases, I don't like this open-source concept at all
 	so I will not participate. All my emulators will be closed-source forever. Don't waste your
 	and my time asking such questions.
 

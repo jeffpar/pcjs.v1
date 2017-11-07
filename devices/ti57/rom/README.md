@@ -14,7 +14,12 @@ Sean's [TMS-1500](http://seanriddle.com/tms1500.html) page provides multiple TI-
 - [Cooked ROM (Big-endian)](ti57be.bin)
 - [Patent ROM (Big-endian)](ti57patbe.bin) (ie, [4,078,251](../patents/us4078251), [4,079,459](../patents/us4079459), [4,100,600](../patents/us4100600), [4,107,781](../patents/us4107781), [4,125,901](../patents/us4125901), [4,164,037](../patents/us4164037))
 
-Regarding the "patent" version, I should add that there are ROM object code dumps in these patents as well:
+If you want to skip ahead to the ROM that the [PCjs TI-57 Emulator](/devices/ti57/machine/) is actually using,
+see [Disassembled Listing of Original TI-57 ROM](#disassembled-listing-of-original-ti-57-rom).  Otherwise, feel free
+to continue reading this short, boring history of the many flavors of TI-57 ROMs.
+
+Regarding the "patent" version that Sean created for comparison purposes, it's worth noting that there are ROM
+object code dumps in three other TI-57 patents as well:
  
 - [4,125,867](../patents/us4125867) (see also: [Dump of ROM Generated from U.S. Pat. No. 4,125,867](#dump-of-rom-generated-from-us-pat-no-4125867))
 - [4,146,928](../patents/us4146928)
@@ -126,9 +131,9 @@ which displays the first 10 16-bit groups of raw ROM data:
 ### Dump of the "Hrast ROM"
  
 In the interests of completeness, I've archived another TI-57 ROM that I'll call the "[Hrast ROM](ti57hrast.bin)",
-obtained from the [PockEmul](https://github.com/pockemul/PockEmul) project on GitHub.  I assume both the ROM
-and the source code originally came from [HrastProgrammer](http://www.hrastprogrammer.com/), based on an
-attribution in the PockEmul [source code](https://github.com/pockemul/PockEmul/blob/master/src/cpu/ti57cpu.cpp).
+obtained from the [PockEmul](https://github.com/pockemul/PockEmul) project on GitHub.  I assume the ROM originally
+came from "[HrastProgrammer](http://www.hrastprogrammer.com/)", based on an attribution in the PockEmul
+[source code](https://github.com/pockemul/PockEmul/blob/master/src/cpu/ti57cpu.cpp).
 
 However, the current version of [HrastProgrammer's](http://www.hrastprogrammer.com/)
 Windows-based [TI-57 emulator](http://www.hrastprogrammer.com/ti57e/) appears to instead be
@@ -182,3 +187,13 @@ Interestingly, the final result of my very careful transcription of U.S. Patent 
 a ROM that, of all the patent ROM listings available, is *closest* to the [Dump of the "Hrast ROM"](#dump-of-the-hrast-rom).   
 
 {% include_relative ti57pat867.txt %}
+
+### Disassembled Listing of Original TI-57 ROM 
+
+The ROM that the [PCjs TI-57 Emulator](/devices/ti57/machine/) is using is believed to be a perfect copy
+of an actual TI-57 production ROM.  It's basically Sean's [Cooked ROM (Big-endian)](ti57be.bin), with all
+the errors discussed above corrected, and then converted to a [Little-endian ROM](ti57le.bin).
+
+Using the [PCjs TI-57 Emulator's](/devices/ti57/machine/) built-in disassembler, here's a listing of that ROM.
+
+{% include_relative ti57le.asm.txt %}
