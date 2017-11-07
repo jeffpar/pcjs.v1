@@ -260,13 +260,13 @@ opinion of open-source projects:
 	so I will not participate. All my emulators will be closed-source forever. Don't waste your
 	and my time asking such questions.
 
-We know from a handful of blog posts that HrastProgrammer originally decided to use a hand-edited version of the
-TI-57 ROM, extracted from one or more of the TI-57 patents, and that he probably made a number of useful corrections
-which we'll never know about.  In the most recent version of his [TI-57E](http://www.hrastprogrammer.com/ti57e/index.htm)
-emulator, he probably switched to the transcribed ROM that Sean Riddle originally produced (see below), but we know
-that that ROM had at least 4 errors.  Did HrastProgrammer find those errors and silently correct them?  The bottom line
-is that, while the HrastProgrammer emulator appears to work fine, its history, overall accuracy, and most importantly,
-its contribution to a greater understanding of TI-57 hardware, is murky at best.
+We know from a handful of [blog posts](http://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/archv015.cgi?read=84950)
+that HrastProgrammer originally decided to use a hand-edited version of the TI-57 ROM, extracted from six TI patents,
+and that he probably made a number of useful corrections and discoveries along the way.  In the most recent version
+of his [TI-57E](http://www.hrastprogrammer.com/ti57e/index.htm) emulator, he uses an electronic dump of a production
+TI-57 ROM, reportedly obtained from a friend and which he claims he cannot distribute.  So, while the HrastProgrammer
+emulator appears to work fine, its history, overall accuracy, and most importantly, its contribution to a greater
+understanding of TI-57 hardware, is murky at best.
 
 My only choice was to go down the same road that HrastProgrammer travelled and pore over those TI patents.  They are
 definitely valuable historical documents, filled with detailed diagrams, instruction decoding tables, and object code

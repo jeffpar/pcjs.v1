@@ -14,7 +14,7 @@ Additional resources include:
 
 - [TI-57 Documents](docs/)
 - [TI-57 Patents](patents/)
-- [TI-57 ROM](rom/)
+- [TI-57 ROMs](rom/)
 - [TI-57 Test Page](machine/)
 
 Below, you can see that mine was technically a Radio Shack EC-4000, but that was just rebranding.  I have a

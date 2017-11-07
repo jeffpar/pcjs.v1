@@ -1,32 +1,38 @@
 ---
 layout: page
-title: Texas Instruments TI-57 ROM
+title: Texas Instruments TI-57 ROMs
 permalink: /devices/ti57/rom/
 ---
 
-TI-57 ROM
----------
+TI-57 ROMs
+----------
 
-Thanks to work by [Sean Riddle](http://seanriddle.com/tms1500.html) and [John McMaster](http://uvicrec.blogspot.com),
-Sean's [TMS-1500](http://seanriddle.com/tms1500.html) page provides multiple TI-57 ROM resources to start with:
+TI-57 ROM images come in two flavors, [Production ROMs](#production-roms) and [Patent ROMs](#patent-roms),
+which are discussed in detail below.
+
+If you want to skip ahead to the production ROM that the [PCjs TI-57 Emulator](/devices/ti57/machine/)
+is actually using, see [Listing of Original TI-57 ROM](#listing-of-original-ti-57-rom).
+
+### Production ROMs
+
+For a long time, all we had were [Patent ROM](#patent-roms) object code listings which, with
+[one possible exception](#dump-of-rom-generated-from-us-pat-no-4125867), suffered from numerous typos.
+
+Fortunately, thanks to efforts by [Sean Riddle](http://seanriddle.com/tms1500.html), who in turn relied on
+imaging work by [John McMaster](http://uvicrec.blogspot.com), a viable copy of an actual TI-57 production ROM
+was created, by carefully examining an image of the ROM array.  Here's what a section of that array looks like:
+
+![TI-57 ROM Section](/devices/ti57/images/TI-57-ROM.png)
+
+Using the entire [ROM Array Image](http://seanriddle.com/ti57rombits.jpg), and using the TI patents for comparison
+purposes, Sean created the following resources: 
 
 - [Raw ROM](ti57raw.bin) (from [siliconpr0n](http://siliconpr0n.org) [photo](http://siliconpr0n.org/archive/doku.php?id=mcmaster:ti:tmc1501nc))
-- [Cooked ROM (Big-endian)](ti57be.bin)
-- [Patent ROM (Big-endian)](ti57patbe.bin) (ie, [4,078,251](../patents/us4078251), [4,079,459](../patents/us4079459), [4,100,600](../patents/us4100600), [4,107,781](../patents/us4107781), [4,125,901](../patents/us4125901), [4,164,037](../patents/us4164037))
+- [Cooked ROM (Big-endian)](ti57be.bin) (with bits reordered into instructions)
+- [Patent ROM (Big-endian)](ti57patbe.bin) (transcribed from various TI patents)
 
-If you want to skip ahead to the ROM that the [PCjs TI-57 Emulator](/devices/ti57/machine/) is actually using,
-see [Disassembled Listing of Original TI-57 ROM](#disassembled-listing-of-original-ti-57-rom).  Otherwise, feel free
-to continue reading this short, boring history of the many flavors of TI-57 ROMs.
-
-Regarding the "patent" version that Sean created for comparison purposes, it's worth noting that there are ROM
-object code dumps in three other TI-57 patents as well:
- 
-- [4,125,867](../patents/us4125867) (see also: [Dump of ROM Generated from U.S. Pat. No. 4,125,867](#dump-of-rom-generated-from-us-pat-no-4125867))
-- [4,146,928](../patents/us4146928)
-- [4,277,675](../patents/us4277675) (not very readable)
-
-Looking at Sean's [ROM Array Image](http://seanriddle.com/ti57rombits.jpg), I counted 215 columns and 128 rows,
-for a total of 27520 bits.  Divide that by 13 and you get 2116 13-bit words -- just enough room for 2K words.
+Looking at that ROM array image, I counted 215 columns and 128 rows, for a total of 27520 bits.  Divide that by 13
+and you get 2116 13-bit words -- just enough room for 2K words.
 
 The TI-57 patents describe the operation of the ROM to some extent:
 
@@ -128,6 +134,33 @@ which displays the first 10 16-bit groups of raw ROM data:
 	0001010000110001
 	1000010100100101
 
+### Patent ROMs
+
+The [Patent ROM (Big-endian)](ti57patbe.bin) that Sean created, to help verify the correctness of his
+[Cooked ROM (Big-endian)](ti57be.bin), was generated from ROM object code listings in the following patents:
+
+- [4,078,251](../patents/us4078251)
+- [4,079,459](../patents/us4079459)
+- [4,100,600](../patents/us4100600)
+- [4,107,781](../patents/us4107781)
+- [4,125,901](../patents/us4125901)
+- [4,164,037](../patents/us4164037))
+
+Note that TI-57 ROM listings were also provided in three other TI patents as well:
+ 
+- [4,125,867](../patents/us4125867) (see also: [Dump of ROM Generated from U.S. Pat. No. 4,125,867](#dump-of-rom-generated-from-us-pat-no-4125867))
+- [4,146,928](../patents/us4146928)
+- [4,277,675](../patents/us4277675) (not very readable)
+
+### Dump of the "Patent ROM"
+ 
+Since all the patent object code listings assume little-endian, I created [Patent ROM (Little-endian)](ti57patle.bin)
+from Sean's [Patent ROM (Big-endian)](ti57patbe.bin) and generated a [dump](ti57patle.txt) below, for comparison purposes. 
+
+	node be2le.js ti57patbe.bin ti57patle.bin
+
+{% include_relative ti57patle.txt %}
+
 ### Dump of the "Hrast ROM"
  
 In the interests of completeness, I've archived another TI-57 ROM that I'll call the "[Hrast ROM](ti57hrast.bin)",
@@ -135,23 +168,17 @@ obtained from the [PockEmul](https://github.com/pockemul/PockEmul) project on Gi
 came from "[HrastProgrammer](http://www.hrastprogrammer.com/)", based on an attribution in the PockEmul
 [source code](https://github.com/pockemul/PockEmul/blob/master/src/cpu/ti57cpu.cpp).
 
-However, the current version of [HrastProgrammer's](http://www.hrastprogrammer.com/)
-Windows-based [TI-57 emulator](http://www.hrastprogrammer.com/ti57e/) appears to instead be
-using a slightly modified version of the **Cooked ROM** that Sean originally generated from the
-[ROM Array Image](http://seanriddle.com/ti57rombits.jpg), whereas the "Hrast ROM" [dump](ti57hrast.txt) is actually
-closer to the [Dump of ROM Generated from U.S. Pat. No. 4,125,867](#dump-of-rom-generated-from-us-pat-no-4125867).
+The "Hrast ROM" [dump](ti57hrast.txt) appears to be very similar to the
+[Dump of ROM Generated from U.S. Pat. No. 4,125,867](#dump-of-rom-generated-from-us-pat-no-4125867).
+And as I discussed [on my blog](/blog/2017/11/05/), we know from HrastProgrammer's own
+[comments](http://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/archv015.cgi?read=84950) that he originally
+created his ROM image using object code dumps from six different TI patents.
+
+However, the current version of HrastProgrammer's Windows-based [TI-57 emulator](http://www.hrastprogrammer.com/ti57e/)
+now uses an electronic dump of a production TI-57 ROM.  Unfortunately, HrastProgrammer has declined to share this newer
+ROM (or even a list of corrections) with anyone, even people who freely shared their work with him (ie, Sean).
 
 {% include_relative ti57hrast.txt %}
-
-### Dump of Sean Riddle's "Patent ROM"
- 
-Since the "Hrast ROM" was initially generated from object code dumps in the various TI-57 patents,
-I generated [Patent ROM (Little-endian)](ti57patle.bin) from Sean's [Patent ROM (Big-endian)](ti57patbe.bin)
-for comparison purposes and generated a [dump](ti57patle.txt) below.
-
-	node be2le.js ti57patbe.bin ti57patle.bin
-
-{% include_relative ti57patle.txt %}
 
 ### Dump of ROM Generated from U.S. Pat. No. 4,125,901
  
@@ -188,7 +215,7 @@ a ROM that, of all the patent ROM listings available, is *closest* to the [Dump 
 
 {% include_relative ti57pat867.txt %}
 
-### Disassembled Listing of Original TI-57 ROM 
+### Listing of Original TI-57 ROM 
 
 The ROM that the [PCjs TI-57 Emulator](/devices/ti57/machine/) is using is believed to be a perfect copy
 of an actual TI-57 production ROM.  It's basically Sean's [Cooked ROM (Big-endian)](ti57be.bin), with all
