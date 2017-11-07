@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Texas Instruments TI-57 U.S. Patent No. 4,146,928
-permalink: /devices/ti57/rom/
+permalink: /devices/ti57/patents/us4146928//
 ---
 
 ## [US4146928](https://patents.google.com/patent/US4146928A/en)
