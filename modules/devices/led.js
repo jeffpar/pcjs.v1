@@ -168,19 +168,6 @@ class LED extends Device {
                  * fTickled hasn't been "tickled", and automatically blank the screen.
                  */
                 this.fBufferModified = this.fTickled = false;
-
-                /*
-                 * Test code to draw all segments of all digits.
-                 */
-                if (TEST) {
-                    this.clearGrid();
-                    for (let iCol = 0; iCol < this.cols; iCol++) {
-                        for (let idSeg in LED.SEGMENT) {
-                            this.drawGridSegment(idSeg, iCol, 0);
-                        }
-                    }
-                    this.drawGrid();
-                }
             }
         }
     }

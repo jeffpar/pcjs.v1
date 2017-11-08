@@ -28,8 +28,7 @@
 
 "use strict";
 
-var DEBUG = true;
-var TEST = false;
+var DEBUG = (window.location.hostname == "pcjs");
 
 /**
  * The following properties are the minimum set of properties we expect a Device's config object to

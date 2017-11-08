@@ -552,15 +552,6 @@ class Input extends Device {
             this.col = col;
             this.row = row;
             if (this.onKey) this.onKey(col, row);
-            if (TEST) {
-                let led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
-                if (led) {
-                    led.clearGrid();
-                    led.drawSymbol(col < 0? "-" : col.toString(), 9, 0);
-                    led.drawSymbol(row < 0? "-" : row.toString(), 11, 0);
-                    led.drawGrid();
-                }
-            }
         }
     }
 }
