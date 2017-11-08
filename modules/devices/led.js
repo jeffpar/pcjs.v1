@@ -78,8 +78,8 @@
  * @property {{
  *  container: HTMLElement|undefined
  * }} bindings
- * @property {string|null} stateNext
- * @property {string|null} stateCurrent
+ * @property {string|null} sDisplayNext
+ * @property {string|null} sDisplayCurrent
  */
 class LED extends Device {
     /**
@@ -108,7 +108,7 @@ class LED extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.stateCurrent = this.stateNext = "";
+        this.sDisplayCurrent = this.sDisplayNext = "";
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
@@ -267,7 +267,7 @@ class LED extends Device {
      */
     setDisplay(s, fForced)
     {
-        this.stateNext = s;
+        this.sDisplayNext = s;
         if (fForced) this.updateDisplay();
     }
 
@@ -278,9 +278,9 @@ class LED extends Device {
      */
     updateDisplay()
     {
-        if (this.stateCurrent != this.stateNext) {
-            this.stateCurrent = this.stateNext;
-            this.drawString(this.stateCurrent);
+        if (this.sDisplayCurrent != this.sDisplayNext) {
+            this.sDisplayCurrent = this.sDisplayNext;
+            this.drawString(this.sDisplayCurrent);
         }
     }
 }

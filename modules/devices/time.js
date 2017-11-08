@@ -77,7 +77,7 @@ class Time extends Device {
      *
      *      "clock": {
      *        "class": "Time",
-     *        "cyclesPerSecond": 200000,
+     *        "cyclesPerSecond": 650000,
      *        "bindings": {
      *          "run": "runTI57",
      *          "speed": "speedTI57",
@@ -95,13 +95,16 @@ class Time extends Device {
         super(idMachine, idDevice, config);
 
         /*
-         * NOTE: The default speed of 200,000Hz (0.2Mhz) is a crude approximation based on actual
+         * NOTE: The default speed of 650,000Hz (0.65Mhz) is a crude approximation based on actual
          * TI-57 device timings.  I had originally calculated the speed as 1,600,000Hz (1.6Mhz) based
          * on timing information in TI's patents, but in hindsight, that speed seems rather high for
          * a mid-1970's device.  OTOH, the TMS-1500 does burn through a lot of cycles (minimum of 128)
          * per instruction.
+         *
+         * TODO: The 650000 cyclesPerSecond setting, along with the 32x overhead on DISP operations
+         * (see opDISP()) is based on very crude eyeball timings.  Calculate more precise timings.
          */
-        this.nCyclesPerSecond = this.config['cyclesPerSecond'] || 200000;
+        this.nCyclesPerSecond = this.config['cyclesPerSecond'] || 650000;
         if (this.nCyclesPerSecond < 1000) this.nCyclesPerSecond = 1000;
         this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
         this.mhzBase = Math.round(this.nCyclesPerSecond / 10000) / 100;

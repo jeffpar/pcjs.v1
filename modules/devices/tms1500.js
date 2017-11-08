@@ -263,6 +263,7 @@ class Reg64 extends Device {
  * @property {number} regPC (program counter: address of next instruction to decode)
  * @property {Array.<number>} stack (3-level address stack; managed by push() and pop())
  * @property {number} regKey (current key status, propagated to regR5 at appropriate intervals)
+ * @property {Array.<string>} ledBuffer (24-element LED buffer, propagated to the LED device on DISP operations)
  * @property {number} addrBreak
  */
 class Chip extends Device {
@@ -435,6 +436,7 @@ class Chip extends Device {
          * Get access to the LED device, so we can update its display.
          */
         this.led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
+        this.ledBuffer = new Array(24);
 
         /*
          * Get access to the ROM device.
@@ -1061,39 +1063,66 @@ class Chip extends Device {
      *      TABLE III
      *
      *          Register B
-     *          Digit Control Code  Function
-     *          ------------------  -----------------------------------------------------
-     *              1XXX            Display digit is blanked in the corresponding digit position
-     *              0XX1            Turns on minus sign (Segment G) in corresponding digit position
-     *              XX1X            Turns on decimal point and digit specified by register A in corresponding digit position
-     *              0XX0            Turns on digit specified by Register A in corresponding digit position
+     *          Control Code    Function
+     *          ------------    ------------------------------------------------------------
+     *           1XXX           Display digit is blanked in the corresponding digit position
+     *           0XX1           Turns on minus sign (Segment G) in corresponding digit position
+     *           XX1X           Turns on decimal point and digit specified by register A in corresponding digit position
+     *           0XX0           Turns on digit specified by Register A in corresponding digit position
      *
      * @this {Chip}
      * @returns {boolean} (true to indicate the opcode was successfully decoded)
      */
     opDISP()
     {
-        let s = "";
-        for (let i = 11; i >= 0; i--) {
-            if (this.regB.digits[i] & 0x8) {
-                s += ' ';
-            } else if (this.regB.digits[i] & 0x1) {
-                s += '-';
-            } else {
-                s += Device.HexUpperCase[this.regA.digits[i]];
+        let diffs = 0;
+
+        for (let i = 0, iDigit = 11; iDigit >= 0; iDigit--) {
+            let ch;
+            if (this.regB.digits[iDigit] & 0x8) {
+                ch = ' ';
             }
-            if (this.regB.digits[i] & 0x2) {
-                s += '.';
+            else if (this.regB.digits[iDigit] & 0x1) {
+                ch = '-';
             }
+            else {
+                ch = Device.HexUpperCase[this.regA.digits[iDigit]];
+            }
+            if (this.ledBuffer[i] != ch) {
+                this.ledBuffer[i] = ch;
+                diffs++;
+            }
+            i++;
+            ch = (this.regB.digits[iDigit] & 0x2)? '.' : ' ';
+            if (this.ledBuffer[i] != ch) {
+                this.ledBuffer[i] = ch;
+                diffs++;
+            }
+            i++;
         }
 
-        this.led.setDisplay(s);
+        /*
+         * Don't build a new string or call setDisplay() unless there was a change in ledBuffer.
+         */
+        if (diffs) {
+            let s = "", i = 0;
+            while (i < this.ledBuffer.length) {
+                s += this.ledBuffer[i++];
+                if (this.ledBuffer[i++] == '.') s += '.';
+            }
+            this.led.setDisplay(s);
+        }
 
         /*
-         * The DISP operation slows the clock by a factor of 4; to simulate that additional overhead, we bump
-         * nCyclesClocked by three more OP_CYCLES, in addition to the OP_CYCLES that clocker() already accounts for.
+         * My reading of the patents suggested that DISP operations slowed the clock by a factor of 4,
+         * but after comparing emulator performance to an actual device, I had to increase that overhead
+         * to a factor of 32.  Since every instruction already accounts for OP_CYCLES once, I need to
+         * account for it here 31 more times.
+         *
+         * TODO: This 32x slowdown, along with the new 650000 cyclesPerSecond setting, is based on very
+         * crude eyeball timings.  Calculate more precise timings.
          */
-        this.nCyclesClocked += Chip.OP_CYCLES * 3;
+        this.nCyclesClocked += Chip.OP_CYCLES * 31;
 
         if (this.regKey) {
             this.regR5 = this.regKey;
