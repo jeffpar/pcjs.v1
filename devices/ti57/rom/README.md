@@ -293,8 +293,11 @@ following differences:
 	---
 	> 0000d40    0c96    1aa3    0c10    0767    0197    007f    05ad    026d
 
-At this point, I'm considering this ROM a minor revision.  It has been saved as "[Hrast ROM #2](ti57hrast2.bin)",
-and a complete dump is shown below.
+It's possible that the remaining revisions were also made by HrastProgrammer, but for now, I'm going to
+assume they represent a minor TI revision.  I'll update this page with further information once I've been
+able to examine the revisions more closely.
+
+This ROM has been saved as "[Hrast ROM #2](ti57hrast2.bin)", and a complete dump is shown below.
 
 {% include_relative ti57hrast2.txt %}
 
