@@ -947,9 +947,7 @@ class Chip extends Device {
             Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
             break;
         default:
-            if (sResult) {
-                sResult = "unrecognized command: " + sCommand + " (try help)";
-            }
+            sResult = "unrecognized command '" + sCommand + "' (try '?')";
             break;
         }
         if (sResult) this.println(sResult.trim());

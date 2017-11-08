@@ -43,7 +43,7 @@ under the `config` property, which configures all the devices and includes any r
 	        },
 	        "clock": {
 	          "class": "Time",
-	          "cyclesPerSecond": 200000,
+	          "cyclesPerSecond": 650000,
 	          "bindings": {
 	            "run": "runTI57",
 	            "speed": "speedTI57",
@@ -64,14 +64,14 @@ under the `config` property, which configures all the devices and includes any r
 	        "input": {
 	          "class": "Input",
 	          "map": [
-	            ["2nd",  "inv",  "lnx",  "ce",   "clr"],
+	            ["2nd",  "inv",  "lnx",  "\\b",  "clr"],
 	            ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
 	            ["sst",  "sto",  "rcl",  "sum",  "exp"],
 	            ["bst",  "ee",   "(",    ")",    "/"],
 	            ["gto",  "7",    "8",    "9",    "*"],
 	            ["sbr",  "4",    "5",    "6",    "-"],
 	            ["rst",  "1",    "2",    "3",    "+"],
-	            ["r/s",  "0",    ".",    "+/-",  "="]
+	            ["r/s",  "0",    ".",    "+/-",  "=|\\r"]
 	          ],
 	          "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 418, 180, 75, 36],
 	          "bindings": {
