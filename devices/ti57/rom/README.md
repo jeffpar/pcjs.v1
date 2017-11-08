@@ -147,7 +147,7 @@ The [Patent ROM (Big-endian)](ti57patbe.bin) that Sean created, to help verify t
 - [4,100,600](../patents/us4100600)
 - [4,107,781](../patents/us4107781)
 - [4,125,901](../patents/us4125901)
-- [4,164,037](../patents/us4164037))
+- [4,164,037](../patents/us4164037)
 
 Note that TI-57 ROM listings were also provided in three other TI patents as well:
  
@@ -168,7 +168,7 @@ from Sean's [Patent ROM (Big-endian)](ti57patbe.bin) and generated a [dump](ti57
 
 #### "Hrast ROM #1"
  
-In the interests of completeness, I've archived another TI-57 ROM that I'll call the "[Hrast ROM #1](ti57hrast1.bin)",
+In the interests of completeness, I've archived another TI-57 ROM that I'll call "[Hrast ROM #1](ti57hrast1.bin)",
 obtained from the [PockEmul](https://github.com/pockemul/PockEmul) project on GitHub.  I assume the ROM originally
 came from "[HrastProgrammer's](http://www.hrastprogrammer.com/)" [TI-57 emulator](http://www.hrastprogrammer.com/ti57e/),
 based on an attribution in the PockEmul [source code](https://github.com/pockemul/PockEmul/blob/master/src/cpu/ti57cpu.cpp).
