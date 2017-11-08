@@ -264,7 +264,8 @@ class Reg64 extends Device {
  * @property {Array.<number>} stack (3-level address stack; managed by push() and pop())
  * @property {number} regKey (current key status, propagated to regR5 at appropriate intervals)
  * @property {Array.<string>} ledBuffer (24-element LED buffer, propagated to the LED device on DISP operations)
- * @property {number} addrBreak
+ * @property {number} addrStop
+ * @property {Object} breakConditions
  */
 class Chip extends Device {
     /**
@@ -449,8 +450,27 @@ class Chip extends Device {
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         this.time.addClocker(this.clocker.bind(this));
 
-        this.addrBreak = -1;
+        this.addrStop = -1;
+        this.breakConditions = {};
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
+    }
+
+    /**
+     * checkBreakCondition(c)
+     *
+     * @this {Chip}
+     * @param {string} c
+     * @returns {boolean}
+     */
+    checkBreakCondition(c)
+    {
+        if (this.breakConditions[c]) {
+            this.breakConditions[c] = false;
+            this.println("break on " + Chip.BREAK[c]);
+            this.time.stop();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -478,8 +498,8 @@ class Chip extends Device {
     {
         this.nCyclesClocked = 0;
         do {
-            if (this.addrBreak == this.regPC) {
-                this.addrBreak = -1;
+            if (this.addrStop == this.regPC) {
+                this.addrStop = -1;
                 this.println("break");
                 this.time.stop();
                 nCyclesTarget = 0;      // this is simply to trigger toString() below
@@ -917,9 +937,27 @@ class Chip extends Device {
         if (isNaN(addr)) addr = -1;
         let nLines = Number.parseInt(aCommands[2], 10) || 8;
         switch(s[0]) {
+        case 'b':
+            let c = s[1];
+            let condition;
+            if (c == 'l') {
+                for (c in Chip.BREAK) {
+                    condition = Chip.BREAK[c];
+                    sResult += "break on " + condition + " (b" + c + "): " + (this.breakConditions[c] || false) + '\n';
+                }
+                break;
+            }
+            condition = Chip.BREAK[c];
+            if (condition) {
+                this.breakConditions[c] = !this.breakConditions[c];
+                sResult = "break on " + condition + " (b" + c + "): " + this.breakConditions[c];
+            } else {
+                if (c) sResult = "unrecognized break option '" + c + "'";
+            }
+            break;
         case "g":
             if (this.time.start()) {
-                this.addrBreak = addr;
+                this.addrStop = addr;
             } else {
                 sResult = "already started";
             }
@@ -947,7 +985,9 @@ class Chip extends Device {
             Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
             break;
         default:
-            sResult = "unrecognized command '" + sCommand + "' (try '?')";
+            if (sCommand) {
+                sResult = "unrecognized command '" + sCommand + "' (try '?')";
+            }
             break;
         }
         if (sResult) this.println(sResult.trim());
@@ -1084,7 +1124,9 @@ class Chip extends Device {
             else {
                 ch = Device.HexUpperCase[this.regA.digits[iDigit]];
             }
-            this.led.setBuffer(col, 0, ch, (this.regB.digits[iDigit] & 0x2)? '.' : '');
+            if (this.led.setBuffer(col, 0, ch, (this.regB.digits[iDigit] & 0x2)? '.' : '')) {
+                this.checkBreakCondition('o');
+            }
         }
 
         /*
@@ -1099,6 +1141,7 @@ class Chip extends Device {
         if (this.regKey) {
             this.regR5 = this.regKey;
             this.fCOND = 1;
+            this.checkBreakCondition('i');
         }
 
         return true;
@@ -1312,12 +1355,18 @@ Chip.OP = {
     MOVE:   5
 };
 
+Chip.BREAK = {
+    'i':    "input",
+    'o':    "output"
+};
+
 /*
  * Table of operational inputs used by the disassembler for "masked" operations
  */
 Chip.OP_INPUTS = ["A","B","C","D","1","?","R5L","R5"];
 
 Chip.COMMANDS = [
+    "b[c]\t\tbreak on condition",
     "g [addr]\trun (to addr)",
     "h\t\thalt",
     "r[a]\t\tdump registers",

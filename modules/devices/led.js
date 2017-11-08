@@ -318,17 +318,20 @@ class LED extends Device {
      * @param {number} row
      * @param {string} ch1
      * @param {string} [ch2]
+     * @returns {boolean} (true if this call modified the buffer, false if not)
      */
     setBuffer(col, row, ch1, ch2 = '')
     {
+        let fModified = false;
         let i = (row * this.cols + col) * 2;
         this.assert(row >= 0 && row < this.rows && col >= 0 && col < this.cols);
         if (this.buffer[i] !== ch1 || this.buffer[i+1] !== ch2) {
             this.buffer[i] = ch1;
             this.buffer[i+1] = ch2;
-            this.fBufferModified = true;
+            this.fBufferModified = fModified = true;
         }
         this.fTickled = true;
+        return fModified;
     }
 }
 

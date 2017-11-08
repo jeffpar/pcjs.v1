@@ -247,11 +247,13 @@ class Input extends Device {
             'keydown',
             function onKeyDown(event) {
                 event = event || window.event;
-                let keyCode = event.which || event.keyCode;
-                let ch = Input.KEYCODE[keyCode];
-                if (ch) {
-                    event.preventDefault();
-                    input.onKeyPress(ch);
+                let activeElement = document.activeElement;
+                if (activeElement == input.bindings[Input.BINDING.POWER]) {
+                    let keyCode = event.which || event.keyCode;
+                    let ch = Input.KEYCODE[keyCode];
+                    if (ch && input.onKeyPress(ch)) {
+                        event.preventDefault();
+                    }
                 }
             }
         );
@@ -261,7 +263,9 @@ class Input extends Device {
                 event = event || window.event;
                 let charCode = event.which || event.charCode;
                 let ch = String.fromCharCode(charCode);
-                if (ch) input.onKeyPress(ch);
+                if (ch && input.onKeyPress(ch)) {
+                    event.preventDefault();
+                }
             }
         );
     }
@@ -271,28 +275,30 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {string} ch
+     * @returns {boolean} (true if processed, false if not)
      */
     onKeyPress(ch)
     {
-        if (this.keyState) {
-            if (this.keysPressed.length < 16) {
-                this.keysPressed.push(ch);
-            }
-            return;
-        }
         for (let row = 0; row < this.map.length; row++) {
             let rowMap = this.map[row];
             for (let col = 0; col < rowMap.length; col++) {
                 let aParts = rowMap[col].split('|');
                 if (aParts.indexOf(ch) >= 0) {
-                    this.keyState = 1;
-                    this.setPosition(col, row);
-                    this.time.setTimer(this.timerKbd, Input.KBD_DELAY);
-                    return;
+                    if (this.keyState) {
+                        if (this.keysPressed.length < 16) {
+                            this.keysPressed.push(ch);
+                        }
+                    } else {
+                        this.keyState = 1;
+                        this.setPosition(col, row);
+                        this.time.setTimer(this.timerKbd, Input.KBD_DELAY);
+                    }
+                    return true;
                 }
             }
         }
         this.printf("unrecognized key '%s' (0x%02x)\n", ch, ch.charCodeAt(0));
+        return false;
     }
 
     /**
