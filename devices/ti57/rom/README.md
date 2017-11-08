@@ -155,9 +155,9 @@ Note that TI-57 ROM listings were also provided in three other TI patents as wel
 - [4,146,928](../patents/us4146928)
 - [4,277,675](../patents/us4277675) (not very readable)
 
-#### "Patent ROM"
+#### Patent ROM
  
-This is the essentially the ROM that Sean produced using listings from six different TI patents.
+This is the essentially the ROM that Sean produced using listings from multiple TI patents.
 
 Since all the patent object code listings assume little-endian, I created [Patent ROM (Little-endian)](ti57patle.bin)
 from Sean's [Patent ROM (Big-endian)](ti57patbe.bin) and generated a [dump](ti57patle.txt) below, for comparison purposes. 
@@ -166,18 +166,17 @@ from Sean's [Patent ROM (Big-endian)](ti57patbe.bin) and generated a [dump](ti57
 
 {% include_relative ti57patle.txt %}
 
-#### "Hrast ROM #1"
+#### Hrast ROM #1
  
-In the interests of completeness, I've archived another TI-57 ROM that I'll call "[Hrast ROM #1](ti57hrast1.bin)",
+In the interests of completeness, I've archived another TI-57 ROM that I'll call [Hrast ROM #1](ti57hrast1.bin),
 obtained from the [PockEmul](https://github.com/pockemul/PockEmul) project on GitHub.  I assume the ROM originally
 came from "[HrastProgrammer's](http://www.hrastprogrammer.com/)" [TI-57 emulator](http://www.hrastprogrammer.com/ti57e/),
 based on an attribution in the PockEmul [source code](https://github.com/pockemul/PockEmul/blob/master/src/cpu/ti57cpu.cpp).
 
-The "Hrast ROM #1" [dump](ti57hrast1.txt) appears to be very similar to the
-[ROM From U.S. Pat. No. 4,125,867](#rom-from-us-pat-no-4125867).
-And as I discussed [on my blog](/blog/2017/11/05/), we know from HrastProgrammer's own
-[comments](http://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/archv015.cgi?read=84950) that he originally
-created his ROM image using object code dumps from six different TI patents.
+Hrast ROM #1 [dump](ti57hrast1.txt) appears to be very similar to the
+[ROM From U.S. Pat. No. 4,125,867](#rom-from-us-pat-no-4125867).  As I mentioned
+[in my blog](/blog/2017/11/05/), HrastProgrammer's own [comments](http://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/archv015.cgi?read=84950)
+indicate that he originally created a working ROM image using object code dumps from multiple TI patents.
 
 {% include_relative ti57hrast1.txt %}
 
@@ -212,14 +211,14 @@ binary file.
 
 Interestingly, the final result of my very careful transcription of U.S. Patent No.
 [4,125,867](https://docs.google.com/viewer?url=patentimages.storage.googleapis.com/pdfs/US4125867.pdf) yields
-a ROM that, of all the patent ROM listings available, is *closest* to the [Dump of the "Hrast ROM"](#dump-of-the-hrast-rom).   
+a ROM that, of all the patent ROM listings available, is *closest* to the [Hrast ROM #1](#hrast-rom-1).   
 
 {% include_relative ti57pat867.txt %}
 
 TI-57 Production ROM Revisions
 ------------------------------
 
-#### "Hrast ROM #2"
+#### Hrast ROM #2
 
 The most recent version of HrastProgrammer's Windows-based [TI-57 emulator](http://www.hrastprogrammer.com/ti57e/)
 reportedly uses an electronic dump of a production TI-57 ROM.  Unfortunately, HrastProgrammer has declined to share any
@@ -268,7 +267,7 @@ results with the [Little-endian ROM](ti57le.bin) from the "TMC1501NC DI 7741" ch
 	---
 	> 0000d40    0c96    1aa3    0c10    0767    0197    007f    05ad    026d
 
-Like "Hrast ROM #1", this ROM was patched in several places to use custom opcodes that did not
+Like [Hrast ROM #1](#hrast-rom-1), this ROM was patched in several places to use custom opcodes that did not
 exist in the original hardware; specifically:
 
 - 0E0B: `POWOFF`
@@ -297,7 +296,7 @@ It's possible that the remaining revisions were also made by HrastProgrammer, bu
 assume they represent a minor TI revision.  I'll update this page with further information once I've been
 able to examine the revisions more closely.
 
-This ROM has been saved as "[Hrast ROM #2](ti57hrast2.bin)", and a complete dump is shown below.
+This ROM has been saved as [Hrast ROM #2](ti57hrast2.bin), and a complete dump is shown below.
 
 {% include_relative ti57hrast2.txt %}
 
