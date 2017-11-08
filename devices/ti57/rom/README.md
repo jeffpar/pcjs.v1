@@ -226,9 +226,9 @@ reportedly uses an electronic dump of a production TI-57 ROM.  Unfortunately, Hr
 information about this dump, including who provided it, what the chip vintage was, what the contents of the ROM were,
 or how those contents differed from previous dumps.
 
-Moreover, HrastProgrammer attempted to obscure this ROM dump within his TI57E.EXE binary, by scrambling it as a
-series of 32-bit floating-point values.  Using a debugger, I was able to isolate all 2048 entries of this floating-point
-table in memory:
+Moreover, HrastProgrammer attempted to obscure this ROM dump within his TI57E.EXE binary, by scrambling it
+as a series of 32-bit floating-point values.  Using a debugger, I was able to isolate all 2048 entries of this
+[floating-point table](ti57hrast2fp.txt) in memory:
 
 {% include_relative ti57hrast2fp.txt %}
 
@@ -268,13 +268,14 @@ results with the [Little-endian ROM](ti57le.bin) from the "TMC1501NC DI 7741" ch
 	---
 	> 0000d40    0c96    1aa3    0c10    0767    0197    007f    05ad    026d
 
-Like "Hrast ROM #1", this ROM was patched in several places to use custom opcodes; specifically:
+Like "Hrast ROM #1", this ROM was patched in several places to use custom opcodes that did not
+exist in the original hardware; specifically:
 
 - 0E0B: `POWOFF`
 - 0E0D: `?KEY`
 - 0EFF: `NOP`
 
-After restoring all three of those opcodes to their original value (presumably 0E07), that left the
+After replacing all three of those opcodes with their original value (presumably 0E07), that left the
 following differences:
 
 	118,119c118,119
@@ -292,8 +293,8 @@ following differences:
 	---
 	> 0000d40    0c96    1aa3    0c10    0767    0197    007f    05ad    026d
 
-This ROM is considered a revision and has been saved as "[Hrast ROM #2](ti57hrast2.bin)".  A complete dump
-is shown below.
+At this point, I'm considering this ROM a minor revision.  It has been saved as "[Hrast ROM #2](ti57hrast2.bin)",
+and a complete dump is shown below.
 
 {% include_relative ti57hrast2.txt %}
 
