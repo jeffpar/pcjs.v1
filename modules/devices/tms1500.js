@@ -1000,7 +1000,7 @@ class Chip extends Device {
         } else {
             if (this.time.fRunning) {
                 this.time.stop();
-                this.led.setDisplay("", true);
+                this.led.clearBuffer(true);
             }
         }
     }
@@ -1075,9 +1075,7 @@ class Chip extends Device {
      */
     opDISP()
     {
-        let diffs = 0;
-
-        for (let i = 0, iDigit = 11; iDigit >= 0; iDigit--) {
+        for (let col = 0, iDigit = 11; iDigit >= 0; col++, iDigit--) {
             let ch;
             if (this.regB.digits[iDigit] & 0x8) {
                 ch = ' ';
@@ -1088,39 +1086,15 @@ class Chip extends Device {
             else {
                 ch = Device.HexUpperCase[this.regA.digits[iDigit]];
             }
-            if (this.ledBuffer[i] != ch) {
-                this.ledBuffer[i] = ch;
-                diffs++;
-            }
-            i++;
-            ch = (this.regB.digits[iDigit] & 0x2)? '.' : ' ';
-            if (this.ledBuffer[i] != ch) {
-                this.ledBuffer[i] = ch;
-                diffs++;
-            }
-            i++;
+            this.led.setBuffer(col, 0, ch, (this.regB.digits[iDigit] & 0x2)? '.' : '');
         }
 
         /*
-         * Don't build a new string or call setDisplay() unless there was a change in ledBuffer.
-         */
-        if (diffs) {
-            let s = "", i = 0;
-            while (i < this.ledBuffer.length) {
-                s += this.ledBuffer[i++];
-                if (this.ledBuffer[i++] == '.') s += '.';
-            }
-            this.led.setDisplay(s);
-        }
-
-        /*
-         * My reading of the patents suggested that DISP operations slowed the clock by a factor of 4,
-         * but after comparing emulator performance to an actual device, I had to increase that overhead
-         * to a factor of 32.  Since every instruction already accounts for OP_CYCLES once, I need to
-         * account for it here 31 more times.
-         *
-         * TODO: This 32x slowdown, along with the new 650000 cyclesPerSecond setting, is based on very
-         * crude eyeball timings.  Calculate more precise timings.
+         * The TI patents indicate that DISP operations slow the clock by a factor of 4, and on top of
+         * that, the display scan generator uses a HOLD signal to prevent the Program Counter from being
+         * incremented while it cycles through all 8 possible segments for all digits, so the total delay
+         * imposed by DISP is a factor of 32.  Since every instruction already accounts for OP_CYCLES once,
+         * I need to account for it here 31 more times.
          */
         this.nCyclesClocked += Chip.OP_CYCLES * 31;
 

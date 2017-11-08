@@ -101,8 +101,7 @@ class Time extends Device {
          * a mid-1970's device.  OTOH, the TMS-1500 does burn through a lot of cycles (minimum of 128)
          * per instruction.
          *
-         * TODO: The 650000 cyclesPerSecond setting, along with the 32x overhead on DISP operations
-         * (see opDISP()) is based on very crude eyeball timings.  Calculate more precise timings.
+         * TODO: Calculate a more precise cyclesPerSecond (650000 is based on crude eyeball timings).
          */
         this.nCyclesPerSecond = this.config['cyclesPerSecond'] || 650000;
         if (this.nCyclesPerSecond < 1000) this.nCyclesPerSecond = 1000;
