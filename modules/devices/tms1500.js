@@ -450,8 +450,10 @@ class Chip extends Device {
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         this.time.addClocker(this.clocker.bind(this));
 
+        this.addrPrev = -1;
         this.addrStop = -1;
         this.breakConditions = {};
+        this.sCommandPrev = "";
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
     }
 
@@ -924,6 +926,10 @@ class Chip extends Device {
     /**
      * onCommand(sCommand)
      *
+     * If sCommand is blank (ie, if Enter alone was pressed), then sCommandPrev will be used,
+     * but sCommandPrev is set only for certain commands deemed "repeatable" (eg, step and dump
+     * commands).
+     *
      * @this {Chip}
      * @param {string} sCommand
      * @returns {boolean} (true if processed, false if not)
@@ -931,11 +937,18 @@ class Chip extends Device {
     onCommand(sCommand)
     {
         let sResult = "";
+
+        if (sCommand == "") {
+            sCommand = this.sCommandPrev;
+        }
+        this.sCommandPrev = "";
+
         let aCommands = sCommand.split(' ');
         let s = aCommands[0];
         let addr = Number.parseInt(aCommands[1], 16);
         if (isNaN(addr)) addr = -1;
         let nLines = Number.parseInt(aCommands[2], 10) || 8;
+
         switch(s[0]) {
         case 'b':
             let c = s[1];
@@ -966,19 +979,26 @@ class Chip extends Device {
             if (!this.time.stop()) sResult = "already stopped";
             break;
         case "t":
-            if (!this.time.step()) sResult = "already running";
+            if (!this.time.step()) {
+                sResult = "already running";
+            } else {
+                this.sCommandPrev = sCommand;
+            }
             break;
         case "r":
             this.updateRegister(s.substr(1), addr);
             sResult += this.toString(s[1]);
+            this.sCommandPrev = sCommand;
             break;
         case "u":
-            addr = (addr >= 0? addr : this.regPC);
+            addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
             while (nLines--) {
                 let opCode = this.rom.getData(addr);
                 if (opCode == undefined) break;
                 sResult += this.disassemble(opCode, addr++);
             }
+            this.addrPrev = addr;
+            this.sCommandPrev = sCommand;
             break;
         case "?":
             sResult = "available commands:";
@@ -1224,6 +1244,7 @@ class Chip extends Device {
         s += "COND=" + (this.fCOND? 1 : 0) + " BASE=" + this.base + " R5=" + this.sprintf("0x%02x", this.regR5) + " RAB=" + this.regRAB + ' ';
         this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=0x%04x ", i, addr & 0xffff);});
         s += '\n' + this.disassemble(this.rom.getData(this.regPC), this.regPC);
+        this.addrPrev = this.regPC;
         return s.trim();
     }
 
@@ -1367,6 +1388,7 @@ Chip.OP_INPUTS = ["A","B","C","D","1","?","R5L","R5"];
 
 Chip.COMMANDS = [
     "b[c]\t\tbreak on condition",
+    "bl\t\tlist break conditions",
     "g [addr]\trun (to addr)",
     "h\t\thalt",
     "r[a]\t\tdump registers",
