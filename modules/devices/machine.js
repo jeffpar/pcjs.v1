@@ -53,7 +53,7 @@ class Machine extends Device {
      *      },
      *      "clock": {
      *        "class": "Time",
-     *        "cyclesPerSecond": 200000
+     *        "cyclesPerSecond": 650000
      *        "bindings": {
      *          "run": "runTI57",
      *          "speed": "speedTI57",

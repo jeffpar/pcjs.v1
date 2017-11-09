@@ -55,14 +55,14 @@ class Input extends Device {
      *      "input": {
      *        "class": "Input",
      *        "map": [
-     *          ["2nd",  "inv",  "lnx",  "ce",   "clr"],
+     *          ["2nd",  "inv",  "lnx",  "\\b",  "clr"],
      *          ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
      *          ["sst",  "sto",  "rcl",  "sum",  "exp"],
      *          ["bst",  "ee",   "(",    ")",    "/"],
      *          ["gto",  "7",    "8",    "9",    "*"],
      *          ["sbr",  "4",    "5",    "6",    "-"],
      *          ["rst",  "1",    "2",    "3",    "+"],
-     *          ["r/s",  "0",    ".",    "+/-",  "="]
+     *          ["r/s",  "0",    ".",    "+/-",  "=|\\r"]
      *        ],
      *        "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
      *        "bindings": {
@@ -244,12 +244,27 @@ class Input extends Device {
     {
         let input = this;
         element.addEventListener(
+            'keydown',
+            function onKeyDown(event) {
+                event = event || window.event;
+                let activeElement = document.activeElement;
+                if (activeElement == input.bindings[Input.BINDING.POWER]) {
+                    let keyCode = event.which || event.keyCode;
+                    let ch = Input.KEYCODE[keyCode];
+                    if (ch && input.onKeyPress(ch)) {
+                        event.preventDefault();
+                    }
+                }
+            }
+        );
+        element.addEventListener(
             'keypress',
             function onKeyPress(event) {
                 event = event || window.event;
-                let keyCode = event.which || event.keyCode;
-                if (keyCode) {
-                    input.onKeyPress(String.fromCharCode(keyCode));
+                let charCode = event.which || event.charCode;
+                let ch = String.fromCharCode(charCode);
+                if (ch && input.onKeyPress(ch)) {
+                    event.preventDefault();
                 }
             }
         );
@@ -260,27 +275,30 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {string} ch
+     * @returns {boolean} (true if processed, false if not)
      */
     onKeyPress(ch)
     {
-        if (this.keyState) {
-            if (this.keysPressed.length < 16) {
-                this.keysPressed.push(ch);
-            }
-            return;
-        }
         for (let row = 0; row < this.map.length; row++) {
             let rowMap = this.map[row];
             for (let col = 0; col < rowMap.length; col++) {
-                if (ch == rowMap[col]) {
-                    this.keyState = 1;
-                    this.setPosition(col, row);
-                    this.time.setTimer(this.timerKbd, Input.KBD_DELAY);
-                    return;
+                let aParts = rowMap[col].split('|');
+                if (aParts.indexOf(ch) >= 0) {
+                    if (this.keyState) {
+                        if (this.keysPressed.length < 16) {
+                            this.keysPressed.push(ch);
+                        }
+                    } else {
+                        this.keyState = 1;
+                        this.setPosition(col, row);
+                        this.time.setTimer(this.timerKbd, Input.KBD_DELAY);
+                    }
+                    return true;
                 }
             }
         }
-        this.println("key not recognized: " + ch);
+        this.printf("unrecognized key '%s' (0x%02x)\n", ch, ch.charCodeAt(0));
+        return false;
     }
 
     /**
@@ -552,15 +570,6 @@ class Input extends Device {
             this.col = col;
             this.row = row;
             if (this.onKey) this.onKey(col, row);
-            if (TEST) {
-                let led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
-                if (led) {
-                    led.clearGrid();
-                    led.drawSymbol(col < 0? "-" : col.toString(), 9, 0);
-                    led.drawSymbol(row < 0? "-" : row.toString(), 11, 0);
-                    led.drawGrid();
-                }
-            }
         }
     }
 }
@@ -576,6 +585,10 @@ Input.BINDING = {
     POWER:      "power",
     RESET:      "reset",
     SURFACE:    "surface"
+};
+
+Input.KEYCODE = {               // keyCode from keydown/keyup events
+    0x08:       "\b"            // backspace
 };
 
 Input.KBD_DELAY = 50;           // minimum number of milliseconds to ensure between key presses and releases

@@ -263,7 +263,9 @@ class Reg64 extends Device {
  * @property {number} regPC (program counter: address of next instruction to decode)
  * @property {Array.<number>} stack (3-level address stack; managed by push() and pop())
  * @property {number} regKey (current key status, propagated to regR5 at appropriate intervals)
- * @property {number} addrBreak
+ * @property {Array.<string>} ledBuffer (24-element LED buffer, propagated to the LED device on DISP operations)
+ * @property {number} addrStop
+ * @property {Object} breakConditions
  */
 class Chip extends Device {
     /**
@@ -435,6 +437,7 @@ class Chip extends Device {
          * Get access to the LED device, so we can update its display.
          */
         this.led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
+        this.ledBuffer = new Array(24);
 
         /*
          * Get access to the ROM device.
@@ -447,8 +450,29 @@ class Chip extends Device {
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         this.time.addClocker(this.clocker.bind(this));
 
-        this.addrBreak = -1;
+        this.addrPrev = -1;
+        this.addrStop = -1;
+        this.breakConditions = {};
+        this.sCommandPrev = "";
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
+    }
+
+    /**
+     * checkBreakCondition(c)
+     *
+     * @this {Chip}
+     * @param {string} c
+     * @returns {boolean}
+     */
+    checkBreakCondition(c)
+    {
+        if (this.breakConditions[c]) {
+            this.breakConditions[c] = false;
+            this.println("break on " + Chip.BREAK[c]);
+            this.time.stop();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -476,8 +500,8 @@ class Chip extends Device {
     {
         this.nCyclesClocked = 0;
         do {
-            if (this.addrBreak == this.regPC) {
-                this.addrBreak = -1;
+            if (this.addrStop == this.regPC) {
+                this.addrStop = -1;
                 this.println("break");
                 this.time.stop();
                 nCyclesTarget = 0;      // this is simply to trigger toString() below
@@ -902,6 +926,10 @@ class Chip extends Device {
     /**
      * onCommand(sCommand)
      *
+     * If sCommand is blank (ie, if Enter alone was pressed), then sCommandPrev will be used,
+     * but sCommandPrev is set only for certain commands deemed "repeatable" (eg, step and dump
+     * commands).
+     *
      * @this {Chip}
      * @param {string} sCommand
      * @returns {boolean} (true if processed, false if not)
@@ -909,15 +937,40 @@ class Chip extends Device {
     onCommand(sCommand)
     {
         let sResult = "";
+
+        if (sCommand == "") {
+            sCommand = this.sCommandPrev;
+        }
+        this.sCommandPrev = "";
+
         let aCommands = sCommand.split(' ');
         let s = aCommands[0];
         let addr = Number.parseInt(aCommands[1], 16);
         if (isNaN(addr)) addr = -1;
         let nLines = Number.parseInt(aCommands[2], 10) || 8;
+
         switch(s[0]) {
+        case 'b':
+            let c = s[1];
+            let condition;
+            if (c == 'l') {
+                for (c in Chip.BREAK) {
+                    condition = Chip.BREAK[c];
+                    sResult += "break on " + condition + " (b" + c + "): " + (this.breakConditions[c] || false) + '\n';
+                }
+                break;
+            }
+            condition = Chip.BREAK[c];
+            if (condition) {
+                this.breakConditions[c] = !this.breakConditions[c];
+                sResult = "break on " + condition + " (b" + c + "): " + this.breakConditions[c];
+            } else {
+                if (c) sResult = "unrecognized break option '" + c + "'";
+            }
+            break;
         case "g":
             if (this.time.start()) {
-                this.addrBreak = addr;
+                this.addrStop = addr;
             } else {
                 sResult = "already started";
             }
@@ -926,27 +979,34 @@ class Chip extends Device {
             if (!this.time.stop()) sResult = "already stopped";
             break;
         case "t":
-            if (!this.time.step()) sResult = "already running";
+            if (!this.time.step()) {
+                sResult = "already running";
+            } else {
+                this.sCommandPrev = sCommand;
+            }
             break;
         case "r":
             this.updateRegister(s.substr(1), addr);
             sResult += this.toString(s[1]);
+            this.sCommandPrev = sCommand;
             break;
         case "u":
-            addr = (addr >= 0? addr : this.regPC);
+            addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
             while (nLines--) {
                 let opCode = this.rom.getData(addr);
                 if (opCode == undefined) break;
                 sResult += this.disassemble(opCode, addr++);
             }
+            this.addrPrev = addr;
+            this.sCommandPrev = sCommand;
             break;
         case "?":
             sResult = "available commands:";
             Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
             break;
         default:
-            if (sResult) {
-                sResult = "unrecognized command: " + sCommand + " (try help)";
+            if (sCommand) {
+                sResult = "unrecognized command '" + sCommand + "' (try '?')";
             }
             break;
         }
@@ -998,7 +1058,7 @@ class Chip extends Device {
         } else {
             if (this.time.fRunning) {
                 this.time.stop();
-                this.led.setDisplay("", true);
+                this.led.clearBuffer(true);
             }
         }
     }
@@ -1061,43 +1121,47 @@ class Chip extends Device {
      *      TABLE III
      *
      *          Register B
-     *          Digit Control Code  Function
-     *          ------------------  -----------------------------------------------------
-     *              1XXX            Display digit is blanked in the corresponding digit position
-     *              0XX1            Turns on minus sign (Segment G) in corresponding digit position
-     *              XX1X            Turns on decimal point and digit specified by register A in corresponding digit position
-     *              0XX0            Turns on digit specified by Register A in corresponding digit position
+     *          Control Code    Function
+     *          ------------    ------------------------------------------------------------
+     *           1XXX           Display digit is blanked in the corresponding digit position
+     *           0XX1           Turns on minus sign (Segment G) in corresponding digit position
+     *           XX1X           Turns on decimal point and digit specified by register A in corresponding digit position
+     *           0XX0           Turns on digit specified by Register A in corresponding digit position
      *
      * @this {Chip}
      * @returns {boolean} (true to indicate the opcode was successfully decoded)
      */
     opDISP()
     {
-        let s = "";
-        for (let i = 11; i >= 0; i--) {
-            if (this.regB.digits[i] & 0x8) {
-                s += ' ';
-            } else if (this.regB.digits[i] & 0x1) {
-                s += '-';
-            } else {
-                s += Device.HexUpperCase[this.regA.digits[i]];
+        for (let col = 0, iDigit = 11; iDigit >= 0; col++, iDigit--) {
+            let ch;
+            if (this.regB.digits[iDigit] & 0x8) {
+                ch = ' ';
             }
-            if (this.regB.digits[i] & 0x2) {
-                s += '.';
+            else if (this.regB.digits[iDigit] & 0x1) {
+                ch = '-';
+            }
+            else {
+                ch = Device.HexUpperCase[this.regA.digits[iDigit]];
+            }
+            if (this.led.setBuffer(col, 0, ch, (this.regB.digits[iDigit] & 0x2)? '.' : '')) {
+                this.checkBreakCondition('o');
             }
         }
 
-        this.led.setDisplay(s);
-
         /*
-         * The DISP operation slows the clock by a factor of 4; to simulate that additional overhead, we bump
-         * nCyclesClocked by three more OP_CYCLES, in addition to the OP_CYCLES that clocker() already accounts for.
+         * The TI patents indicate that DISP operations slow the clock by a factor of 4, and on top of
+         * that, the display scan generator uses a HOLD signal to prevent the Program Counter from being
+         * incremented while it cycles through all 8 possible segments for all digits, so the total delay
+         * imposed by DISP is a factor of 32.  Since every instruction already accounts for OP_CYCLES once,
+         * I need to account for it here 31 more times.
          */
-        this.nCyclesClocked += Chip.OP_CYCLES * 3;
+        this.nCyclesClocked += Chip.OP_CYCLES * 31;
 
         if (this.regKey) {
             this.regR5 = this.regKey;
             this.fCOND = 1;
+            this.checkBreakCondition('i');
         }
 
         return true;
@@ -1180,6 +1244,7 @@ class Chip extends Device {
         s += "COND=" + (this.fCOND? 1 : 0) + " BASE=" + this.base + " R5=" + this.sprintf("0x%02x", this.regR5) + " RAB=" + this.regRAB + ' ';
         this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=0x%04x ", i, addr & 0xffff);});
         s += '\n' + this.disassemble(this.rom.getData(this.regPC), this.regPC);
+        this.addrPrev = this.regPC;
         return s.trim();
     }
 
@@ -1311,12 +1376,19 @@ Chip.OP = {
     MOVE:   5
 };
 
+Chip.BREAK = {
+    'i':    "input",
+    'o':    "output"
+};
+
 /*
  * Table of operational inputs used by the disassembler for "masked" operations
  */
 Chip.OP_INPUTS = ["A","B","C","D","1","?","R5L","R5"];
 
 Chip.COMMANDS = [
+    "b[c]\t\tbreak on condition",
+    "bl\t\tlist break conditions",
     "g [addr]\trun (to addr)",
     "h\t\thalt",
     "r[a]\t\tdump registers",
