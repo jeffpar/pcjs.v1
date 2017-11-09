@@ -16,13 +16,12 @@ TI-57 Production ROMs
 
 For a long time, all we had were [Patent ROM](#ti-57-patent-roms) object code listings which, with
 [one possible exception](#rom-from-us-pat-no-4125867), suffered from numerous typos.
-
 Fortunately, thanks to efforts by [Sean Riddle](http://seanriddle.com/tms1500.html), who in turn relied on
 imaging work by [John McMaster](http://uvicrec.blogspot.com), a viable copy of an actual TI-57 production ROM
 was created, by carefully examining an image of the ROM array inside the chip.  That is the ROM I ultimately
 [used with the PCjs TI-57 Emulator](#ti-57-rom-used-with-pcjs). 
 
-The chip was labelled "TMC1501NC DI 7741".  Here's what a section of that ROM array looks like:
+The chip was labelled "TMC1501NC DI 7741".  Here's what a section of its ROM array looks like:
 
 ![TI-57 ROM Section](/devices/ti57/images/TI-57-ROM.png)
 
@@ -157,8 +156,7 @@ Note that TI-57 ROM listings were also provided in three other TI patents as wel
 
 #### Patent ROM
  
-This is the essentially the ROM that Sean produced using listings from multiple TI patents.
-
+This is the ROM that Sean Riddle produced using listings from multiple TI patents.
 Since all the patent object code listings assume little-endian, I created [Patent ROM (Little-endian)](ti57patle.bin)
 from Sean's [Patent ROM (Big-endian)](ti57patbe.bin) and generated a [dump](ti57patle.txt) below, for comparison purposes. 
 
