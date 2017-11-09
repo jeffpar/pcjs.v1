@@ -221,13 +221,13 @@ TI-57 Production ROM Revisions
 #### Hrast ROM #2
 
 The most recent version of HrastProgrammer's Windows-based [TI-57 emulator](http://www.hrastprogrammer.com/ti57e/)
-reportedly uses an electronic dump of a production TI-57 ROM.  Unfortunately, HrastProgrammer has declined to share any
-information about this dump, including who provided it, what the chip vintage was, what the contents of the ROM were,
+uses an electronic dump of a production TI-57 ROM.  Unfortunately, HrastProgrammer declined to share any information
+about this dump, including who provided it, what the TMS-1500 chip version was, what the contents of the ROM were,
 or how those contents differed from previous dumps.
 
-Moreover, HrastProgrammer attempted to obscure this ROM dump within his TI57E.EXE binary, by scrambling it
-as a series of 32-bit floating-point values.  Using a debugger, I was able to isolate all 2048 entries of this
-[floating-point table](ti57hrast2fp.txt) in memory:
+He also went out of his way to obscure this ROM dump within the TI57E.EXE binary.  However, by using a debugger and
+spending several hours of tedious tracing, I discovered that all 2048 words of the ROM were stored as a series of
+32-bit floating-point numbers.  Here's a dump of the [floating-point table](ti57hrast2fp.txt) from memory:
 
 {% include_relative ti57hrast2fp.txt %}
 
