@@ -114,7 +114,8 @@ class Input extends Device {
              * so we allow them to be stored in the next two elements of the location array, too.
              *
              * Finally, the position and size of the device's power button may be stored in the array
-             * as well, in case some devices refuse to generate onClickPower() events.
+             * as well, in case some browsers refuse to generate onClickPower() events (eg, if they
+             * think the button is inaccessible/not visible).
              */
             let location = this.config['location'];
             this.xInput = location[0];

@@ -66,7 +66,7 @@ class Device {
      *      http://pcjs:8088/devices/ti57/machine/?cyclesPerSecond=100000
      *
      * will set the Time device's cyclesPerSecond config property to 100000.  In general, the values
-     * will be treated as strings, unless they contain all digits (number) or equal "true" or "false"
+     * will be treated as strings, unless they contain all digits (number), or equal "true" or "false"
      * (boolean).
      *
      * @this {Device}

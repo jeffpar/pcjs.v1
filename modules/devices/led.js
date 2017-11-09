@@ -49,13 +49,30 @@
  * 2) LED Array (two-dimensional)
  * 3) LED Digits (1 or more 7-segment digits)
  *
- * The initial goal is to generate a 12-element array of 7-segment LED digits.  The default width and height
- * of 96 and 128 match our internal cell size and yield an aspect ratio of 0.75.
+ * The initial goal is to manage a 12-element array of 7-segment LED digits for the TI-57.
  *
- * We will need to create a canvas element inside the specified container element.  There must be interfaces
- * for enabling/disabling/toggling power to any combination of xSelect and ySelect.  There must also be a time
- * interface to indicate the passage of time, which should be called a minimum of every 1/60th of a second;
- * any addressable LED segment that was last toggled more than 1/60th second earlier should be blanked.
+ * We create a "view" canvas element inside the specified "container" element, along with a "grid" canvas
+ * where all the real drawing occurs; drawGrid() then renders the "grid" canvas onto the "view" canvas.
+ *
+ * Internally, our LED digits have a width and height of 96 and 128.  Those are "grid" dimensions which
+ * cannot be changed, because our table of drawing coordinates in LED.SEGMENT are hard-coded for those
+ * dimensions.  The cell width and height that are specified as part of the LEDConfig are "view" dimensions,
+ * which usually match the grid dimensions, but you're welcome to scale them up or down; the browser's
+ * drawImage() function takes care of that.
+ *
+ * There is a low-level function, drawGridSegment(), for drawing specific LED segments of specific digits;
+ * generally, you start with clearGrid(), draw all the segments for a given update, and then call drawGrid()
+ * to make them visible.
+ *
+ * However, our Chip device operates at a higher level.  We provide a "buffer" of character data representing
+ * the fully-formed characters that each of the LED cells should display, which the Chip updates by calling
+ * setBuffer().  Then at whatever display refresh rate is set (typically 60Hz), drawBuffer() is called to see
+ * if the buffer contents have been modified since the last refresh, and if so, it converts the contents of
+ * the buffer to a string and calls drawString().
+ *
+ * This buffering strategy, combined with the buffer "tickled" flag (see below), not only makes life
+ * simple for the Chip device, but also simulates how the display goes blank for short periods of time while
+ * the Chip is busy performing calculations.
  *
  * @class {LED}
  * @unrestricted
