@@ -113,7 +113,7 @@ class Time extends Device {
         this.aYields = [];
         this.aTimers = [];
         this.aClockers = [];
-        this.fRunning = this.fYield = false;
+        this.fRunning = this.fStepping = this.fYield = false;
         this.idRunTimeout = 0;
         this.onRunTimeout = this.run.bind(this);
 
@@ -164,9 +164,7 @@ class Time extends Device {
         case Time.BINDING.STEP:
             this.bindings[binding] = element;
             element.onclick = function onClickStep() {
-                if (!time.step()) {
-                    time.println("already running");
-                }
+                if (!time.step()) time.println("already running");
             };
             break;
 
@@ -639,7 +637,7 @@ class Time extends Device {
      */
     start()
     {
-        if (this.fRunning) {
+        if (this.fRunning || this.fStepping) {
             return false;
         }
         if (this.idRunTimeout) {
@@ -655,19 +653,29 @@ class Time extends Device {
     }
 
     /**
-     * step()
+     * step(nRepeat)
      *
      * @this {Time}
+     * @param {number} [nRepeat]
      * @returns {boolean} true if successful, false if already running
      */
-    step()
+    step(nRepeat = 0)
     {
         if (!this.fRunning) {
             /*
              * Execute a minimum-cycle burst and then update all timers.
              */
+            this.fStepping = true;
             this.updateTimers(this.endBurst(this.doBurst(1, true)));
             this.updateStatus();
+            if (nRepeat > 1) {
+                let time = this;
+                this.idStepTimeout = setTimeout(function() {
+                    time.step(nRepeat - 1);
+                }, 0);
+                return true;
+            }
+            this.fStepping = false;
             return true;
         }
         return false;
