@@ -440,17 +440,23 @@ class Device {
      */
     sprintf(format, ...args)
     {
-        let parts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
         let buffer = "";
-        let partIndex = 0;
-        for (let i = 0; i < args.length; i++) {
+        let aParts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
 
-            buffer += parts[partIndex++];
-            let arg = args[i], ach = null, s;
-            let flags = parts[partIndex];
-            let minimum = +parts[partIndex+1] || 0;
-            let precision = +parts[partIndex+3] || 0;
-            let conversion = parts[partIndex+5];
+        let iArg = 0, iPart;
+        for (iPart = 0; iPart < aParts.length - 7; iPart += 7) {
+
+            buffer += aParts[iPart];
+
+            let arg = args[iArg++];
+            if (arg === undefined) continue;
+
+            let flags = aParts[iPart+1];
+            let minimum = +aParts[iPart+2] || 0;
+            let precision = +aParts[iPart+4] || 0;
+            let conversion = aParts[iPart+6];
+
+            let ach = null, s;
 
             switch(conversion) {
             case 'd':
@@ -513,10 +519,9 @@ class Device {
                 buffer += "(unrecognized printf conversion %" + conversion + ")";
                 break;
             }
-
-            partIndex += 6;
         }
-        buffer += parts[partIndex];
+
+        buffer += aParts[iPart];
         return buffer;
     }
 

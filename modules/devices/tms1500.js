@@ -933,7 +933,7 @@ class Chip extends Device {
                 break;
             }
         }
-        return this.sprintf(fCompact? "%03X %04X %s %s\n" : "0x%04x: 0x%04x  %-8s%s\n", addr, opCode, sOp, sOperands);
+        return this.sprintf(fCompact? "%03X %04X\n" : "0x%04x: 0x%04x  %-8s%s\n", addr, opCode, sOp, sOperands);
     }
 
     /**
