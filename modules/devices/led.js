@@ -95,8 +95,9 @@
  * @property {{
  *  container: HTMLElement|undefined
  * }} bindings
- * @property {string|null} sDisplayNext
- * @property {string|null} sDisplayCurrent
+ * @property {Array.<string>} buffer
+ * @property {boolean} fBufferModified
+ * @property {boolean} fTickled
  */
 class LED extends Device {
     /**
