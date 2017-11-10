@@ -1,6 +1,6 @@
 ---
 layout: page
-title: TI-57 Test Page
+title: TI-57 Programmable Calculator
 permalink: /devices/ti57/machine/
 machines:
   - id: ti57
@@ -222,15 +222,24 @@ styles:
     font-family: Monaco,"Lucida Console",monospace;
 ---
 
-TI-57 Test Page
----------------
+TI-57 Programmable Calculator
+-----------------------------
 
-This is a work-in-progress.  The [Time](/modules/devices/time.js) device can be started and stopped,
-and it will clock the [TMS-1500](/modules/devices/tms1500.js) chip at the appropriate rate.  There are
-also [Input](/modules/devices/input.js), [LED](/modules/devices/led.js), and [ROM](/modules/devices/rom.js) devices,
-as well as a [Machine](/modules/devices/machine.js) device to manage them.
+Our TI-57 emulator below is one of the most faithful TI-57 emulations currently available.  It should run at
+roughly the same speed as an original device.  That includes calculation speed, display speed, and pause delays.
 
-If any errors occur during operation, the Diagnostics window will display the last instruction decoded.
+It is also using an exact copy of an original [TI-57 ROM](/devices/ti57/rom/); no instructions have been patched.
+A configuration using a [Revised ROM](rev1/) is also available.
+
+Special attention has been made to the display as well.  The shape of the digits were taken directly from TI patent
+drawings, and the digits are drawn/erased with the same frequency as a real device, so when the display goes blank for
+brief periods, you know that a lengthy calculation is being performed.
+
+The TI-57 emulator is also the first PCjs machine to use our newer (late 2017) [PCjs Device Classes](/modules/devices/),
+so it requires a modern web browser.  We'll probably add an ES5 fall-back mechanism eventually, but for now, make sure
+you're using the latest version of Chrome, Firefox, Safari, Edge, etc.
+
+If any errors occur during operation, the Diagnostics window should display the last instruction decoded.
 The window also accepts a few debugging commands.  Use '?' for help.
 
 {% include machine.html id="ti57" config="json" %}

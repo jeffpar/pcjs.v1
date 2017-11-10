@@ -110,12 +110,9 @@ To make sure I understood the above interpretation of the raw data, and to produ
 	node raw2le.js ti57raw.bin ti57le.bin
 
 I also verified that if the script was modified to output big-endian data, the result was identical
-to the original [Reordered ROM (Big-endian)](ti57be.bin).
-
-Here's a [dump](ti57le.txt) of the [Little-endian ROM](ti57le.bin), including all the corrections mentioned above,
-using `hexdump -x ti57le.bin`, with the byte offsets changed to ROM addresses:
-
-{% include_relative ti57le.txt %}
+to the original [Reordered ROM (Big-endian)](ti57be.bin).  I then saved a [dump](ti57le.txt) of the
+[Little-endian ROM](ti57le.bin), including all the corrections mentioned above, using `hexdump -x ti57le.bin`,
+with the byte offsets changed to ROM addresses.
 
 During the process of understanding the raw ROM data, it was also helpful to view the raw data file as binary,
 using this handy command:
@@ -158,11 +155,9 @@ Note that TI-57 ROM listings were also provided in three other TI patents as wel
  
 This is the ROM that Sean Riddle produced using listings from multiple TI patents.
 Since all the patent object code listings assume little-endian, I created [Patent ROM (Little-endian)](ti57patle.bin)
-from Sean's [Patent ROM (Big-endian)](ti57patbe.bin) and generated a [dump](ti57patle.txt) below, for comparison purposes. 
+from Sean's [Patent ROM (Big-endian)](ti57patbe.bin) and generated a [dump](ti57patle.txt) for comparison purposes. 
 
 	node be2le.js ti57patbe.bin ti57patle.bin
-
-{% include_relative ti57patle.txt %}
 
 #### Hrast ROM #1
  
@@ -176,13 +171,9 @@ Hrast ROM #1 [dump](ti57hrast1.txt) appears to be very similar to the
 [in my blog](/blog/2017/11/05/), HrastProgrammer's own [comments](http://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/archv015.cgi?read=84950)
 indicate that he originally created a working ROM image using object code dumps from multiple TI patents.
 
-{% include_relative ti57hrast1.txt %}
-
 #### ROM From U.S. Pat. No. 4,125,901
  
 Here's the OCR'ed object code [dump](ti57pat901.txt) from [4,125,901](../patents/us4125901), also for comparison purposes.
-
-{% include_relative ti57pat901.txt %}
 
 #### ROM From U.S. Pat. No. 4,164,037
  
@@ -192,8 +183,6 @@ NOTE: This listing is actually missing data on one of the lines; comparing the l
 makes it fairly clear that a value in the middle of the row (`0E07`) was omitted.  The listing in [4,146,928](.../patents/us4146928)
 is even worse, with four lines of missing data.
 
-{% include_relative ti57pat037.txt %}
-
 #### ROM From U.S. Pat. No. 4,125,867
 
 I was also interested in the object listing in U.S. Patent No.
@@ -201,7 +190,7 @@ I was also interested in the object listing in U.S. Patent No.
 that starts on page 54, because it *may* have been computer-generated rather than human-generated.
 It's certainly unique among all the TI-57 patent listings, albeit a little hard to read.
 
-To produce the [dump](ti57pat867.txt) below, I started with the OCR'ed text of [4,125,901](../patents/us4125901),
+To produce a [dump](ti57pat867.txt), I started with the OCR'ed text of [4,125,901](../patents/us4125901),
 and then reviewed every entry, making corrections as needed.  There were a few places where it was difficult to
 distinguish between, say, `8` and `B`, and in those cases, my tendency was to leave the value from the listing
 in patent 4,125,901 in place.  The result is [ti57pat867.bin](ti57pat867.bin), a 4096-byte 16-bit-word little-endian
@@ -210,8 +199,6 @@ binary file.
 Interestingly, the final result of my very careful transcription of U.S. Patent No.
 [4,125,867](https://docs.google.com/viewer?url=patentimages.storage.googleapis.com/pdfs/US4125867.pdf) yields
 a ROM that, of all the patent ROM listings available, is *closest* to the [Hrast ROM #1](#hrast-rom-1).   
-
-{% include_relative ti57pat867.txt %}
 
 TI-57 Production ROM Revisions
 ------------------------------
@@ -225,9 +212,7 @@ or how those contents differed from previous dumps.
 
 He also went out of his way to obscure this ROM dump within the TI57E.EXE binary.  However, by using a debugger and
 spending several hours of tedious tracing, I discovered that all 2048 words of the ROM were stored as a series of
-32-bit floating-point numbers.  Here's a dump of the [floating-point table](ti57hrast2fp.txt) from memory:
-
-{% include_relative ti57hrast2fp.txt %}
+32-bit floating-point numbers.  I've saved a dump of the [floating-point table](ti57hrast2fp.txt).
 
 I then wrote a [script](fp2le.js) to convert the 32-bit floating-point values to 16-bit words, and then diff'ed the
 results with the [Little-endian ROM](ti57le.bin) from the "TMC1501NC DI 7741" chip:
@@ -294,15 +279,14 @@ It's possible that the remaining revisions were also made by HrastProgrammer, bu
 assume they represent a minor TI revision.  I'll update this page with further information once I've been
 able to examine the revisions more closely.
 
-This ROM has been saved as [Hrast ROM #2](ti57hrast2.bin), and a complete dump is shown below.
-
-{% include_relative ti57hrast2.txt %}
+This ROM has been saved as [Hrast ROM #2](ti57hrast2.bin), along with a [complete dump](ti57hrast2.txt).
 
 TI-57 ROM Used With PCjs
 ------------------------ 
 
 The ROM that the [PCjs TI-57 Emulator](/devices/ti57/machine/) uses is the [Little-endian ROM](ti57le.bin),
 which is the fully-corrected transcribed ROM taken from the contents of chip "TMC1501NC DI 7741".  Using the
-[PCjs TI-57 Emulator's](/devices/ti57/machine/) built-in disassembler, here's a listing of that ROM.
+[PCjs TI-57 Emulator's](/devices/ti57/machine/) built-in disassembler, here's a [listing](ti57le.asm.txt)
+of that ROM.
 
 {% include_relative ti57le.asm.txt %}

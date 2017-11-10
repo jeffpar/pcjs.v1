@@ -322,7 +322,7 @@ ES6-based [Device modules](/modules/devices/), including:
 * [Machine](/modules/devices/machine.js)
 
 Since I'm not currently "compiling/transpiling" any of that code to ES5 (as I've done with every other PCjs machine
-to date), you have to be running a modern web-browser.  I'll probably add an ES5 fall-back mechanism eventually, but
+to date), you have to be running a modern web browser.  I'll probably add an ES5 fall-back mechanism eventually, but
 for now, it's rather refreshing to be using modern JavaScript language features and not constantly worrying about
 backward-compatibility. 
 
