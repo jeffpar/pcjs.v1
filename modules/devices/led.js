@@ -83,7 +83,7 @@
  * @property {number} cols (default is 1)
  * @property {number} rows (default is 1)
  * @property {string} color (default is "red")
- * @property {string} backgroundColor (default is "black")
+ * @property {string} backgroundColor (default is none; ie, transparent background)
  * @property {number} widthView (computed)
  * @property {number} heightView (computed)
  * @property {number} widthGrid (computed)
@@ -147,14 +147,14 @@ class LED extends Device {
                 this.widthView = this.width * this.cols;
                 this.heightView = this.height * this.rows;
                 this.color = (this.config['color'] || "red");
-                this.backgroundColor = (this.backgroundColor || "black");
+                this.backgroundColor = this.config['backgroundColor'];
 
                 if (!this.config['fixedSize']) {
                     canvasView.setAttribute("class", "pcjs-canvas");
                 }
                 canvasView.setAttribute("width", this.widthView.toString());
                 canvasView.setAttribute("height", this.heightView.toString());
-                canvasView.style.backgroundColor = this.backgroundColor;
+                canvasView.style.backgroundColor = (this.backgroundColor || "rgba(255, 255, 255, 0)");
                 container.appendChild(canvasView);
                 this.contextView = /** @type {CanvasRenderingContext2D} */ (canvasView.getContext("2d"));
 
@@ -214,8 +214,12 @@ class LED extends Device {
      */
     clearGrid()
     {
-        this.contextGrid.fillStyle = this.backgroundColor;
-        this.contextGrid.fillRect(0, 0, this.widthGrid, this.heightGrid);
+        if (this.backgroundColor) {
+            this.contextGrid.fillStyle = this.backgroundColor;
+            this.contextGrid.fillRect(0, 0, this.widthGrid, this.heightGrid);
+        } else {
+            this.contextGrid.clearRect(0, 0, this.widthGrid, this.heightGrid);
+        }
     }
 
     /**
@@ -254,6 +258,7 @@ class LED extends Device {
      */
     drawGrid()
     {
+        this.contextView.globalCompositeOperation = (this.backgroundColor? "source-over" : "copy");
         this.contextView.drawImage(this.canvasGrid, 0, 0, this.widthGrid, this.heightGrid, 0, 0, this.widthView, this.heightView);
     }
 

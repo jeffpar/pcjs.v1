@@ -37,7 +37,6 @@ machines:
           "cols": 12,
           "rows": 1,
           "color": "red",
-          "backgroundColor": "black",
           "bindings": {
             "container": "displayTI57"
           }
