@@ -113,8 +113,9 @@ class Time extends Device {
         this.aYields = [];
         this.aTimers = [];
         this.aClockers = [];
-        this.fRunning = this.fStepping = this.fYield = false;
-        this.idRunTimeout = 0;
+        this.fRunning = this.fYield = false;
+        this.nStepping = 0;
+        this.idRunTimeout = this.idStepTimeout = 0;
         this.onRunTimeout = this.run.bind(this);
 
         let time = this;
@@ -145,7 +146,7 @@ class Time extends Device {
         case Time.BINDING.RUN:
             this.bindings[binding] = element;
             element.onclick = function onClickRun() {
-                time.toggle();
+                time.toggleRun();
             };
             break;
 
@@ -164,7 +165,7 @@ class Time extends Device {
         case Time.BINDING.STEP:
             this.bindings[binding] = element;
             element.onclick = function onClickStep() {
-                if (!time.step()) time.println("already running");
+                time.toggleStep();
             };
             break;
 
@@ -637,7 +638,7 @@ class Time extends Device {
      */
     start()
     {
-        if (this.fRunning || this.fStepping) {
+        if (this.fRunning || this.nStepping) {
             return false;
         }
         if (this.idRunTimeout) {
@@ -659,23 +660,27 @@ class Time extends Device {
      * @param {number} [nRepeat]
      * @returns {boolean} true if successful, false if already running
      */
-    step(nRepeat = 0)
+    step(nRepeat = 1)
     {
         if (!this.fRunning) {
-            /*
-             * Execute a minimum-cycle burst and then update all timers.
-             */
-            this.fStepping = true;
-            this.updateTimers(this.endBurst(this.doBurst(1, true)));
-            this.updateStatus();
-            if (nRepeat > 1) {
-                let time = this;
-                this.idStepTimeout = setTimeout(function() {
-                    time.step(nRepeat - 1);
-                }, 0);
-                return true;
+            if (nRepeat && !this.nStepping) {
+                this.nStepping = nRepeat;
             }
-            this.fStepping = false;
+            if (this.nStepping) {
+                /*
+                 * Execute a minimum-cycle burst and then update all timers.
+                 */
+                this.nStepping--;
+                this.updateTimers(this.endBurst(this.doBurst(1, true)));
+                this.updateStatus();
+                if (this.nStepping) {
+                    let time = this;
+                    this.idStepTimeout = setTimeout(function() {
+                        time.step(0);
+                    }, 0);
+                    return true;
+                }
+            }
             return true;
         }
         return false;
@@ -699,9 +704,9 @@ class Time extends Device {
     }
 
     /**
-     * toggle()
+     * toggleRun()
      *
-     * This handles both a "run" button, if any, attached to the Time device.
+     * This handles the "run" button, if any, attached to the Time device.
      *
      * Note that this serves a different purpose than the "power" button that's managed
      * by the Input device, because toggling power also requires resetting the program counter
@@ -710,12 +715,34 @@ class Time extends Device {
      *
      * @this {Time}
      */
-    toggle()
+    toggleRun()
     {
         if (this.fRunning) {
             this.stop();
         } else {
             this.start();
+        }
+    }
+
+    /**
+     * toggleStep(nRepeat)
+     *
+     * This handles the "step" button, if any, attached to the Time device.
+     *
+     * @this {Time}
+     * @param {number} [nRepeat]
+     */
+    toggleStep(nRepeat)
+    {
+        if (!this.fRunning) {
+            if (this.nStepping) {
+                this.nStepping = 0;
+                this.updateStatus(true);
+            } else {
+                this.step(nRepeat);
+            }
+        } else {
+            this.println("already running");
         }
     }
 
@@ -740,6 +767,7 @@ class Time extends Device {
             }
         }
         this.updateBindingText(Time.BINDING.RUN, this.fRunning? "Halt" : "Run");
+        this.updateBindingText(Time.BINDING.STEP, this.nStepping? "Stop" : "Step");
         this.updateBindingText(Time.BINDING.SPEED, this.getSpeedCurrent());
     }
 

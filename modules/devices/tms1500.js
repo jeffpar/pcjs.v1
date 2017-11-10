@@ -997,12 +997,9 @@ class Chip extends Device {
             if (s[1] == 'c') {
                 this.nStringFormat = Chip.SFORMAT.COMPACT;
             }
-            nWords = Number.parseInt(aCommands[1], 10) || 0;
-            if (!this.time.step(nWords)) {
-                sResult = "already running";
-            } else {
-                this.sCommandPrev = sCommand;
-            }
+            nWords = Number.parseInt(aCommands[1], 10) || 1;
+            this.time.toggleStep(nWords);
+            this.sCommandPrev = sCommand;
             break;
         case "r":
             this.updateRegister(s.substr(1), addr);
