@@ -151,7 +151,7 @@ class Machine extends Device {
                         device = new Time(this.idMachine, idDevice, config);
                         break;
                     case Machine.CLASS.MACHINE:
-                        this.println("PCjs " + config.name + " v" + Machine.VERSION);
+                        this.printf("PCjs %s v%3.2f\n", config.name, Machine.VERSION);
                         this.println(Machine.COPYRIGHT);
                         this.println(Machine.LICENSE);
                         continue;

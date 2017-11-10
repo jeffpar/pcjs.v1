@@ -366,11 +366,26 @@ class Device {
     }
 
     /**
+     * hex(n)
+     *
+     * This is a helper function intended for use in a debugging console, allowing you to display
+     * numbers as hex by evaluating the expression "this.hex(n)".  Technically, this should be a static
+     * method, since there's nothing instance-specific about it, but "this.hex()" is easier to type than
+     * "Device.hex()".
+     *
+     * @this {Device}
+     * @param {number} n
+     */
+    hex(n)
+    {
+        return this.sprintf("%x", n);
+    }
+
+    /**
      * isCategoryOn(category)
      *
-     * Use this function to enable/disable any calls (eg, print() calls) based on
-     * 1) whether specific categories are required, and 2) whether the specified category
-     * is one of them.
+     * Use this function to enable/disable any calls (eg, print() calls) based on 1) whether specific
+     * categories are required, and 2) whether the specified category is one of them.
      *
      * @this {Device}
      * @param {string} category
@@ -399,7 +414,7 @@ class Device {
             }
             element.scrollTop = element.scrollHeight;
         }
-        if (DEBUG || !element) {
+        if (DEBUG && !element) {
             let i = s.lastIndexOf('\n');
             if (i >= 0) {
                 console.log(Device.PrintBuffer + s.substr(0, i));
@@ -438,7 +453,8 @@ class Device {
      *
      * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
      *
-     * Far from complete, let alone sprintf-compatible, but it's a start.
+     * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
+     * specifiers that I use.
      *
      * @this {Device}
      * @param {string} format
