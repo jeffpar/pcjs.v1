@@ -24,7 +24,7 @@ All PCjs machines are built from devices organized by CPU:
     - [PDP-10 (Model KA10)](pdp10/machine/ka10/)
 * [PDP-11](pdp11/)
     - [PDP-11/20](pdp11/machine/1120/), [PDP-11/45](pdp11/machine/1145/), [PDP-11/70](pdp11/machine/1170/)
-* [TI-57](ti57/)
+* [TI-57 Programmable Calculator](ti57/)
 
 These devices are user-installable components that you would typically find in a real personal computer,
 such as keyboards, disk drive controllers with one or more drives, video cards, etc.

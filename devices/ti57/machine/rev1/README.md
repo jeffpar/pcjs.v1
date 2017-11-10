@@ -1,6 +1,6 @@
 ---
 layout: page
-title: TI-57 Test Page
+title: "TI-57 Programmable Calculator (with Revised ROM)"
 permalink: /devices/ti57/machine/rev1/
 machines:
   - id: ti57
@@ -222,15 +222,14 @@ styles:
     font-family: Monaco,"Lucida Console",monospace;
 ---
 
-TI-57 Test Page (ROM Revision)
-------------------------------
+TI-57 Programmable Calculator (with Revised ROM)
+------------------------------------------------
 
-This is a work-in-progress.  The [Time](/modules/devices/time.js) device can be started and stopped,
-and it will clock the [TMS-1500](/modules/devices/tms1500.js) chip at the appropriate rate.  There are
-also [Input](/modules/devices/input.js), [LED](/modules/devices/led.js), and [ROM](/modules/devices/rom.js) devices,
-as well as a [Machine](/modules/devices/machine.js) device to manage them.
+The TI-57 configuration below is identical to our [original configuration](../), except that it is using
+a [Revised ROM](/devices/ti57/rom/#hrast-rom2).  We know that the ROM is slightly different, but beyond that,
+we don't know why the changes were made.  More study is required. 
 
-If any errors occur during operation, the Diagnostics window will display the last instruction decoded.
+If any errors occur during operation, the Diagnostics window should display the last instruction decoded.
 The window also accepts a few debugging commands.  Use '?' for help.
 
 {% include machine.html id="ti57" config="json" %}

@@ -7,8 +7,9 @@ permalink: /modules/devices/
 PCjs Device Classes
 ===================
 
-In the spirit of [Vanilla JS](http://vanilla-js.com/), the following ES2015 (aka ES6) JavaScript classes are
-all you need to create any of our newer (late 2017) PCjs machines, starting with the [TI-57](/devices/ti57/machine/).
+In the spirit of [Vanilla JS](http://vanilla-js.com/), the following ES2015 (aka ES6)
+JavaScript classes are all you need to create any of our newer (late 2017) PCjs machines,
+starting with the [TI-57 Programmable Calculator](/devices/ti57/machine/).
 
 * [Device](device.js)
 * [Input](input.js)
@@ -20,7 +21,7 @@ all you need to create any of our newer (late 2017) PCjs machines, starting with
 
 The [Markdown](https://raw.githubusercontent.com/jeffpar/pcjs/master/devices/ti57/machine/README.md) file in
 the [TI-57](/devices/ti57/machine/) directory is a good example.  First, you need a blob of JSON, like you see below
-under the `config` property, which configures all the devices and includes any resources that they might also need:
+under the `config` property, which configures all the devices, and includes any resources that they might also need:
 
 	machines:
 	  - id: ti57
@@ -252,7 +253,7 @@ and then you need some HTML markup:
 	<div style="float:left;">
 	  <div style="width:100%;">
 	    <p>Diagnostics</p>
-	    <textarea id="printTI57" cols="72" rows="16"></textarea>
+	    <textarea id="printTI57" cols="78" rows="16"></textarea>
 	  </div>
 	  <button id="runTI57">Run</button>
 	  <button id="stepTI57">Step</button><span id="speedTI57">Stopped</span>

@@ -1,31 +1,34 @@
 ---
 layout: page
-title: Texas Instruments TI-57 Programmable Calculator
+title: Texas Instruments TI-57
 permalink: /devices/ti57/
 ---
 
-TI-57 Programmable Calculator
------------------------------
+TI-57 Resources
+---------------
 
-This was my first programmable device.  I obtained mine (serial no. 9604427) on October 7, 1978, more than
-two months before getting my first personal computer, the 6502-based [Challenger 1P](/devices/c1p/).
+My first programmable device was a TI-57 Programmable Calculator (the Radio Shack EC-4000 version,
+Serial No. 9604427) purchased on October 7, 1978.
+
+PCjs TI-57 emulator configurations are now available for your programming enjoyment:
+
+- [TI-57 with Original ROM](machine/)
+- [TI-57 with Revised ROM](machine/rev1/)
 
 Additional resources include:
 
 - [TI-57 Documents](docs/)
 - [TI-57 Patents](patents/)
 - [TI-57 ROMs](rom/)
-- [TI-57 Test Page](machine/)
 
-Below, you can see that mine was technically a Radio Shack EC-4000, but that was just rebranding.  I have a
-hunch that if I peeled off the Radio Shack sticker on the back (underneath my custom Dymo label), it would say
-`Texas Instruments electronic calculator`.
+Pictures of my Radio Shack EC-4000 are below.  I have a hunch that if I peeled off the Radio Shack sticker on
+the back (underneath my custom Dymo label), it would say `Texas Instruments electronic calculator`.
 
 ![EC-4000 Front](images/EC-4000-Front.jpg)
 ![EC-4000 Back](images/EC-4000-Back.jpg)
 
-I recently acquired a Texas Instruments TI-57 as well, because while my EC-4000 still powers on, a few of the buttons
-(like `0`) don't respond, and I wanted to have an operational TI-57 before taking my own apart.
+I recently acquired an actual Texas Instruments-branded TI-57 as well, because while my EC-4000 still powers on,
+a few of the buttons (like `0`) don't respond, and I wanted to have an operational TI-57 before taking my own apart.
 
 ![TI-57 Front](images/TI-57-Front.jpg)
 ![TI-57 Back](images/TI-57-Back.jpg)
