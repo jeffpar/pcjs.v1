@@ -128,7 +128,7 @@ class LED extends Device {
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
-            this.time.addYield(this.drawBuffer.bind(this));
+            this.time.addAnimator(this.drawBuffer.bind(this));
         }
 
         let container = this.bindings[LED.BINDING.CONTAINER];

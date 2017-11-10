@@ -40,12 +40,12 @@
  * Debugger halts execution).  Moreover, setTimeout() handlers only run after run() yields, which is too
  * granular for high-speed devices (eg, when a serial port tries to simulate interrupts at 9600 baud).
  *
- * addClocker() should be used for devices that are cycle-driven (ie, that need to be "clocked") rather than
- * time-driven; they must define a clocker() function and install it with addClocker().
+ * Conversely, addClocker() should be used for devices that are cycle-driven (ie, that need to be "clocked")
+ * rather than time-driven; they must define a clocker() function and install it with addClocker().
  *
- * Finally, addYield() should be used by any device that wants to update its state YIELDS_PER_SECOND
+ * Finally, addAnimator() should be used by any device that wants to update its state YIELDS_PER_SECOND
  * (normally 60Hz); for example, the LED device uses this to cap display updates at 60Hz.  A separate 60Hz
- * timer could be used as well, but using an addYield() callback imposes slightly less overhead, since the
+ * timer could be used as well, but using an addAnimator() callback imposes slightly less overhead, since the
  * duration is fixed.  Also, certain types of updates may benefit from the subsequent yield (eg, DOM updates),
  * but you should avoid making expensive updates at such a high frequency.
  *
@@ -110,9 +110,9 @@ class Time extends Device {
         this.mhzCurrent = this.mhzTarget = this.mhzBase * this.nTargetMultiplier;
         this.nYields = 0;
         this.msYield = Math.round(1000 / Time.YIELDS_PER_SECOND);
-        this.aYields = [];
-        this.aTimers = [];
+        this.aAnimators = [];
         this.aClockers = [];
+        this.aTimers = [];
         this.fRunning = this.fYield = false;
         this.nStepping = 0;
         this.idRunTimeout = this.idStepTimeout = 0;
@@ -128,6 +128,17 @@ class Time extends Device {
         }, this.msYield);
 
         this.resetSpeed();
+    }
+
+    /**
+     * addAnimator(callBack)
+     *
+     * @this {Time}
+     * @param {function()} callBack
+     */
+    addAnimator(callBack)
+    {
+        this.aAnimators.push(callBack);
     }
 
     /**
@@ -210,17 +221,6 @@ class Time extends Device {
         this.aTimers.push({id, callBack, msAuto, nCyclesLeft});
         if (msAuto >= 0) this.setTimer(iTimer, msAuto);
         return iTimer;
-    }
-
-    /**
-     * addYield(callBack)
-     *
-     * @this {Time}
-     * @param {function()} callBack
-     */
-    addYield(callBack)
-    {
-        this.aYields.push(callBack);
     }
 
     /**
@@ -446,7 +446,7 @@ class Time extends Device {
             this.assert(!this.idRunTimeout);
             this.idRunTimeout = setTimeout(this.onRunTimeout, this.snapStop());
         }
-        for (let i = 0; i < this.aYields.length; i++) this.aYields[i]();
+        for (let i = 0; i < this.aAnimators.length; i++) this.aAnimators[i]();
     }
 
     /**
