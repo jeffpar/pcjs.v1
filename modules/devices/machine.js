@@ -90,7 +90,7 @@ class Machine extends Device {
      */
     constructor(idMachine, sConfig)
     {
-        super(idMachine);
+        super(idMachine, idMachine, Machine.VERSION);
         try {
             this.config = JSON.parse(sConfig);
             this.addBindings(this.config[idMachine].bindings);
@@ -151,7 +151,7 @@ class Machine extends Device {
                         device = new Time(this.idMachine, idDevice, config);
                         break;
                     case Machine.CLASS.MACHINE:
-                        this.println("PCjs " + config.name + " v" + Machine.VERSION);
+                        this.printf("PCjs %s v%3.2f\n", config.name, Machine.VERSION);
                         this.println(Machine.COPYRIGHT);
                         this.println(Machine.LICENSE);
                         continue;
@@ -188,6 +188,7 @@ Machine.CLASSORDER = [
     Machine.CLASS.CHIP
 ];
 
-Machine.VERSION = "1.00";
 Machine.COPYRIGHT = "Copyright © 2012-2017 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
+
+Machine.VERSION = 1.01;

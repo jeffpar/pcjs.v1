@@ -37,7 +37,6 @@ machines:
           "cols": 12,
           "rows": 1,
           "color": "red",
-          "backgroundColor": "black",
           "bindings": {
             "container": "displayTI57"
           }
@@ -340,7 +339,7 @@ backward-compatibility.
 <div style="float:left;">
   <div style="width:100%;">
     <p>Diagnostics</p>
-    <textarea id="printTI57" cols="72" rows="16"></textarea>
+    <textarea id="printTI57" cols="78" rows="16"></textarea>
   </div>
   <button id="runTI57">Run</button>
   <button id="stepTI57">Step</button><span id="speedTI57">Stopped</span>

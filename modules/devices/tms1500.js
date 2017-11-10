@@ -46,7 +46,7 @@ class Reg64 extends Device {
      */
     constructor(chip, id)
     {
-        super(chip.idMachine, id);
+        super(chip.idMachine, id, chip.version);
         this.chip = chip;
         this.name = id;
         /*
@@ -77,18 +77,22 @@ class Reg64 extends Device {
     }
 
     /**
-     * toString()
+     * toString(fCompact)
      *
      * @this {Reg64}
+     * @param {boolean} [fCompact]
      * @returns {string}
      */
-    toString()
+    toString(fCompact = false)
     {
         let s = this.idDevice + '=';
-        if (s.length < 3) s += ' ';
+        if (!fCompact && s.length < 3) s += ' ';
         for (let i = this.digits.length - 1; i >= 0; i--) {
-            s += Device.HexLowerCase[this.digits[i]];
-            if (!(i % 4)) s += ' ';
+            if (fCompact) {
+                s += Device.HexUpperCase[this.digits[i]];
+            } else {
+                s += Device.HexLowerCase[this.digits[i]] + ((i % 4)? '' : ' ');
+            }
         }
         return s;
     }
@@ -231,8 +235,8 @@ class Reg64 extends Device {
     {
         this.chip.regR5 = this.digits[range[0]];
         this.assert(!(this.chip.regR5 & ~0xf));
-        if (range[1] > range[0]) {
-            this.chip.regR5 |= this.digits[range[1]] << 4;
+        if (range[0] < range[1]) {
+            this.chip.regR5 |= this.digits[range[0]+1] << 4;
             this.assert(!(this.chip.regR5 & ~0xff));
         }
     }
@@ -251,7 +255,11 @@ class Reg64 extends Device {
  *
  * @class {Chip}
  * @unrestricted
- * @property {Array.<Reg64>} regs (operational registers A-D)
+ * @property {Array.<Reg64>} regsABCD (operational registers A-D)
+ * @property {Reg64} regA (alias for regsABCD[0])
+ * @property {Reg64} regB (alias for regsABCD[1])
+ * @property {Reg64} regC (alias for regsABCD[2])
+ * @property {Reg64} regD (alias for regsABCD[3])
  * @property {Array.<Reg64>} regsX (storage registers X0-X7)
  * @property {Array.<Reg64>} regsY (storage registers Y0-Y7)
  * @property {Reg64} regSupp (alternate register used when the destination must be suppressed)
@@ -259,13 +267,21 @@ class Reg64 extends Device {
  * @property {number} base (10 or 16)
  * @property {boolean} fCOND (true when a carry has been detected)
  * @property {number} regRAB
- * @property {number} regR5
+ * @property {number} regR5 (least significant masked digit(s) from last arithmetic result)
  * @property {number} regPC (program counter: address of next instruction to decode)
  * @property {Array.<number>} stack (3-level address stack; managed by push() and pop())
+ * @property {number} nCyclesClocked
+ * @property {Input} input
  * @property {number} regKey (current key status, propagated to regR5 at appropriate intervals)
+ * @property {LED} led
  * @property {Array.<string>} ledBuffer (24-element LED buffer, propagated to the LED device on DISP operations)
+ * @property {ROM} rom
+ * @property {Time} time
+ * @property {number} addrPrev
  * @property {number} addrStop
  * @property {Object} breakConditions
+ * @property {string} sCommandPrev
+ * @property {number} nStringFormat
  */
 class Chip extends Device {
     /**
@@ -275,12 +291,12 @@ class Chip extends Device {
      *
      * @this {Chip}
      * @param {string} idMachine
-     * @param {string} [idDevice]
+     * @param {string} idDevice
      * @param {Object} [config]
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config);
+        super(idMachine, idDevice, Chip.VERSION, config);
 
         /*
          * Four (4) Operational Registers (A-D)
@@ -402,12 +418,6 @@ class Chip extends Device {
         // this.regPulseTime = 0;
 
         /*
-         * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions
-         * that need to consume a few extra cycles to bump this count upward as needed.
-         */
-        this.nCyclesClocked = 0;
-
-        /*
          * The "Program Counter" (regPC) is an 11-bit register that automatically increments unless a HOLD signal
          * is applied, effectively locking execution on a single instruction.
          */
@@ -427,11 +437,17 @@ class Chip extends Device {
         this.stack = [-1, -1, -1];
 
         /*
+         * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions
+         * that need to consume a few extra cycles to bump this count upward as needed.
+         */
+        this.nCyclesClocked = 0;
+
+        /*
          * Get access to the Input device, so we can add our clicker functions.
          */
-        this.regKey = 0;
         this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
         this.input.addClicker(this.onKey.bind(this), this.onPower.bind(this), this.onReset.bind(this));
+        this.regKey = 0;
 
         /*
          * Get access to the LED device, so we can update its display.
@@ -454,6 +470,7 @@ class Chip extends Device {
         this.addrStop = -1;
         this.breakConditions = {};
         this.sCommandPrev = "";
+        this.nStringFormat = Chip.SFORMAT.DEFAULT;
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
     }
 
@@ -478,17 +495,21 @@ class Chip extends Device {
     /**
      * clocker(nCyclesTarget)
      *
-     * The TI-57 has a standard cycle time of 0.625us, which translates to 1,600,000 cycles per second.
+     * NOTE: TI patents imply that the TI-57 would have a standard cycle time of 0.625us, which translates to
+     * 1,600,000 cycles per second.  However, my crude tests with a real device suggest that the TI-57 actually
+     * ran at around 40% of that speed, which is why you'll see all my configuration files specifying 650,000
+     * cycles per second instead.  But, for purposes of the following discussion, we'll continue to assume a cycle
+     * time of 0.625us.
      *
      * Every set of four cycles is designated a "state time".  Within a single state time (2.5us), the four cycles
      * are designated Φ1, P1, Φ2, and P2.  Moreover, one state time is required to transfer 2 bits from a data word
      * register.  Since a data word consists of 16 BCD digits (ie, 64 bits), 32 state times (80us) are required to
      * "clock" all the bits from one register to another.  This total time is referred to as an instruction cycle.
      *
-     * Note that some instructions (ie, display instructions) slow the delivery of cycles, such that one state time
+     * Note that some instructions (ie, the DISP instruction) slow the delivery of cycles, such that one state time
      * is 10us instead of 2.5us, and therefore the entire instruction cycle will take 320us instead of 80us.
      *
-     * We're currently simulating a full 32 "state times" (128 cycles aka Chip.OP_CYCLES) per operation, since
+     * We're currently simulating a full 32 "state times" (128 cycles aka Chip.OP_CYCLES) per instruction, since
      * we don't perform discrete simulation of the Display Decoder/Keyboard Scanner circuitry.  See opDISP() for
      * an example of an operation that imposes additional cycle overhead.
      *
@@ -499,12 +520,11 @@ class Chip extends Device {
     clocker(nCyclesTarget = 0)
     {
         this.nCyclesClocked = 0;
-        do {
+        while (this.nCyclesClocked <= nCyclesTarget) {
             if (this.addrStop == this.regPC) {
                 this.addrStop = -1;
                 this.println("break");
                 this.time.stop();
-                nCyclesTarget = 0;      // this is simply to trigger toString() below
                 break;
             }
             let opCode = this.rom.getData(this.regPC);
@@ -512,15 +532,17 @@ class Chip extends Device {
             this.regPC = (addr + 1) & this.rom.addrMask;
             if (!this.decode(opCode, addr)) {
                 this.regPC = addr;
-                this.time.stop();
                 this.println("unimplemented opcode");
-                nCyclesTarget = 0;      // this is simply to trigger toString() below
+                this.time.stop();
                 break;
             }
             this.nCyclesClocked += Chip.OP_CYCLES;
-        } while (this.nCyclesClocked < nCyclesTarget);
+        }
         if (nCyclesTarget <= 0) {
-            this.println(this.toString());
+            let chip = this;
+            this.time.doOutside(function() {
+                chip.println(chip.toString());
+            });
         }
         return this.nCyclesClocked;
     }
@@ -720,7 +742,7 @@ class Chip extends Device {
     }
 
     /**
-     * disassemble(opCode, addr)
+     * disassemble(opCode, addr, fCompact)
      *
      * Returns a string representation of the selected instruction.
      *
@@ -746,9 +768,10 @@ class Chip extends Device {
      * @this {Chip}
      * @param {number} opCode
      * @param {number} addr
+     * @param {boolean} [fCompact]
      * @returns {string}
      */
-    disassemble(opCode, addr)
+    disassemble(opCode, addr, fCompact = false)
     {
         let sOp = "???", sOperands = "";
 
@@ -920,7 +943,7 @@ class Chip extends Device {
                 break;
             }
         }
-        return this.sprintf("0x%04x: 0x%04x  %-8s%s\n", addr, opCode, sOp, sOperands);
+        return this.sprintf(fCompact? "%03X %04X\n" : "0x%04x: 0x%04x  %-8s%s\n", addr, opCode, sOp, sOperands);
     }
 
     /**
@@ -942,16 +965,18 @@ class Chip extends Device {
             sCommand = this.sCommandPrev;
         }
         this.sCommandPrev = "";
+        this.nStringFormat = Chip.SFORMAT.DEFAULT;
+        sCommand = sCommand.trim();
 
         let aCommands = sCommand.split(' ');
         let s = aCommands[0];
         let addr = Number.parseInt(aCommands[1], 16);
         if (isNaN(addr)) addr = -1;
-        let nLines = Number.parseInt(aCommands[2], 10) || 8;
+        let nWords = Number.parseInt(aCommands[2], 10) || 8;
 
         switch(s[0]) {
         case 'b':
-            let c = s[1];
+            let c = s.substr(1);
             let condition;
             if (c == 'l') {
                 for (c in Chip.BREAK) {
@@ -968,31 +993,31 @@ class Chip extends Device {
                 if (c) sResult = "unrecognized break option '" + c + "'";
             }
             break;
-        case "g":
+        case 'g':
             if (this.time.start()) {
                 this.addrStop = addr;
             } else {
                 sResult = "already started";
             }
             break;
-        case "h":
+        case 'h':
             if (!this.time.stop()) sResult = "already stopped";
             break;
-        case "t":
-            if (!this.time.step()) {
-                sResult = "already running";
-            } else {
-                this.sCommandPrev = sCommand;
-            }
+        case 't':
+            if (s[1] == 'c') this.nStringFormat = Chip.SFORMAT.COMPACT;
+            nWords = Number.parseInt(aCommands[1], 10) || 1;
+            this.time.toggleStep(nWords);
+            this.sCommandPrev = sCommand;
             break;
-        case "r":
+        case 'r':
+            if (s[1] == 'c') this.nStringFormat = Chip.SFORMAT.COMPACT;
             this.updateRegister(s.substr(1), addr);
             sResult += this.toString(s[1]);
             this.sCommandPrev = sCommand;
             break;
-        case "u":
+        case 'u':
             addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
-            while (nLines--) {
+            while (nWords--) {
                 let opCode = this.rom.getData(addr);
                 if (opCode == undefined) break;
                 sResult += this.disassemble(opCode, addr++);
@@ -1000,7 +1025,7 @@ class Chip extends Device {
             this.addrPrev = addr;
             this.sCommandPrev = sCommand;
             break;
-        case "?":
+        case '?':
             sResult = "available commands:";
             Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
             break;
@@ -1133,6 +1158,8 @@ class Chip extends Device {
      */
     opDISP()
     {
+        this.checkBreakCondition('o');
+
         for (let col = 0, iDigit = 11; iDigit >= 0; col++, iDigit--) {
             let ch;
             if (this.regB.digits[iDigit] & 0x8) {
@@ -1145,7 +1172,7 @@ class Chip extends Device {
                 ch = Device.HexUpperCase[this.regA.digits[iDigit]];
             }
             if (this.led.setBuffer(col, 0, ch, (this.regB.digits[iDigit] & 0x2)? '.' : '')) {
-                this.checkBreakCondition('o');
+                this.checkBreakCondition('om');
             }
         }
 
@@ -1230,6 +1257,17 @@ class Chip extends Device {
     toString(options = "", regs = null)
     {
         let s = "";
+        if (this.nStringFormat) {
+            s += this.disassemble(this.rom.getData(this.regPC), this.regPC, true);
+            s += "  ";
+            for (let i = 0, n = this.regsABCD.length; i < n; i++) {
+                s += this.regsABCD[i].toString(true) + ' ';
+            }
+            s += '\n';
+            s += "  COND=" + (this.fCOND? 1 : 0) + " BASE=" + this.base + " R5=" + this.sprintf("%02X", this.regR5) + " RAB=" + this.regRAB + " ST=";
+            this.stack.forEach((addr, i) => {s += this.sprintf("%03X ", (addr < 0? 0 : (addr & 0xfff)));});
+            return s.trim();
+        }
         if (regs) {
             for (let i = 0, n = regs.length >> 1; i < n; i++) {
                 s += regs[i].toString() + '  ' + regs[i+n].toString() + '\n';
@@ -1378,7 +1416,13 @@ Chip.OP = {
 
 Chip.BREAK = {
     'i':    "input",
-    'o':    "output"
+    'o':    "output",
+    'om':   "output modification"
+};
+
+Chip.SFORMAT = {
+    DEFAULT:    0,
+    COMPACT:    1
 };
 
 /*
@@ -1395,3 +1439,5 @@ Chip.COMMANDS = [
     "t\t\tstep",
     "u [addr] [n]\tdisassemble (at addr)"
 ];
+
+Chip.VERSION    = 1.01;

@@ -78,12 +78,12 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {string} idMachine
-     * @param {string} [idDevice]
+     * @param {string} idDevice
      * @param {InputConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config);
+        super(idMachine, idDevice, Input.VERSION, config);
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
 
@@ -114,7 +114,8 @@ class Input extends Device {
              * so we allow them to be stored in the next two elements of the location array, too.
              *
              * Finally, the position and size of the device's power button may be stored in the array
-             * as well, in case some devices refuse to generate onClickPower() events.
+             * as well, in case some browsers refuse to generate onClickPower() events (eg, if they
+             * think the button is inaccessible/not visible).
              */
             let location = this.config['location'];
             this.xInput = location[0];
@@ -592,3 +593,5 @@ Input.KEYCODE = {               // keyCode from keydown/keyup events
 };
 
 Input.KBD_DELAY = 50;           // minimum number of milliseconds to ensure between key presses and releases
+
+Input.VERSION   = 1.01;

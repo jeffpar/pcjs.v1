@@ -40,12 +40,12 @@
  * Debugger halts execution).  Moreover, setTimeout() handlers only run after run() yields, which is too
  * granular for high-speed devices (eg, when a serial port tries to simulate interrupts at 9600 baud).
  *
- * addClocker() should be used for devices that are cycle-driven (ie, that need to be "clocked") rather than
- * time-driven; they must define a clocker() function and install it with addClocker().
+ * Conversely, addClocker() should be used for devices that are cycle-driven (ie, that need to be "clocked")
+ * rather than time-driven; they must define a clocker() function and install it with addClocker().
  *
- * Finally, addYield() should be used by any device that wants to update its state YIELDS_PER_SECOND
+ * Finally, addAnimator() should be used by any device that wants to update its state YIELDS_PER_SECOND
  * (normally 60Hz); for example, the LED device uses this to cap display updates at 60Hz.  A separate 60Hz
- * timer could be used as well, but using an addYield() callback imposes slightly less overhead, since the
+ * timer could be used as well, but using an addAnimator() callback imposes slightly less overhead, since the
  * duration is fixed.  Also, certain types of updates may benefit from the subsequent yield (eg, DOM updates),
  * but you should avoid making expensive updates at such a high frequency.
  *
@@ -87,12 +87,12 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {string} idMachine
-     * @param {string} [idDevice]
+     * @param {string} idDevice
      * @param {TimeConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config);
+        super(idMachine, idDevice, Time.VERSION, config);
 
         /*
          * NOTE: The default speed of 650,000Hz (0.65Mhz) is a crude approximation based on actual
@@ -110,11 +110,12 @@ class Time extends Device {
         this.mhzCurrent = this.mhzTarget = this.mhzBase * this.nTargetMultiplier;
         this.nYields = 0;
         this.msYield = Math.round(1000 / Time.YIELDS_PER_SECOND);
-        this.aYields = [];
-        this.aTimers = [];
+        this.aAnimators = [];
         this.aClockers = [];
+        this.aTimers = [];
         this.fRunning = this.fYield = false;
-        this.idRunTimeout = 0;
+        this.nStepping = 0;
+        this.idRunTimeout = this.idStepTimeout = 0;
         this.onRunTimeout = this.run.bind(this);
 
         let time = this;
@@ -127,6 +128,17 @@ class Time extends Device {
         }, this.msYield);
 
         this.resetSpeed();
+    }
+
+    /**
+     * addAnimator(callBack)
+     *
+     * @this {Time}
+     * @param {function()} callBack
+     */
+    addAnimator(callBack)
+    {
+        this.aAnimators.push(callBack);
     }
 
     /**
@@ -145,7 +157,7 @@ class Time extends Device {
         case Time.BINDING.RUN:
             this.bindings[binding] = element;
             element.onclick = function onClickRun() {
-                time.toggle();
+                time.toggleRun();
             };
             break;
 
@@ -164,9 +176,7 @@ class Time extends Device {
         case Time.BINDING.STEP:
             this.bindings[binding] = element;
             element.onclick = function onClickStep() {
-                if (!time.step()) {
-                    time.println("already running");
-                }
+                time.toggleStep();
             };
             break;
 
@@ -211,17 +221,6 @@ class Time extends Device {
         this.aTimers.push({id, callBack, msAuto, nCyclesLeft});
         if (msAuto >= 0) this.setTimer(iTimer, msAuto);
         return iTimer;
-    }
-
-    /**
-     * addYield(callBack)
-     *
-     * @this {Time}
-     * @param {function()} callBack
-     */
-    addYield(callBack)
-    {
-        this.aYields.push(callBack);
     }
 
     /**
@@ -447,7 +446,7 @@ class Time extends Device {
             this.assert(!this.idRunTimeout);
             this.idRunTimeout = setTimeout(this.onRunTimeout, this.snapStop());
         }
-        for (let i = 0; i < this.aYields.length; i++) this.aYields[i]();
+        for (let i = 0; i < this.aAnimators.length; i++) this.aAnimators[i]();
     }
 
     /**
@@ -639,7 +638,7 @@ class Time extends Device {
      */
     start()
     {
-        if (this.fRunning) {
+        if (this.fRunning || this.nStepping) {
             return false;
         }
         if (this.idRunTimeout) {
@@ -655,19 +654,33 @@ class Time extends Device {
     }
 
     /**
-     * step()
+     * step(nRepeat)
      *
      * @this {Time}
+     * @param {number} [nRepeat]
      * @returns {boolean} true if successful, false if already running
      */
-    step()
+    step(nRepeat = 1)
     {
         if (!this.fRunning) {
-            /*
-             * Execute a minimum-cycle burst and then update all timers.
-             */
-            this.updateTimers(this.endBurst(this.doBurst(1, true)));
-            this.updateStatus();
+            if (nRepeat && !this.nStepping) {
+                this.nStepping = nRepeat;
+            }
+            if (this.nStepping) {
+                /*
+                 * Execute a minimum-cycle burst and then update all timers.
+                 */
+                this.nStepping--;
+                this.updateTimers(this.endBurst(this.doBurst(1, true)));
+                this.updateStatus();
+                if (this.nStepping) {
+                    let time = this;
+                    this.idStepTimeout = setTimeout(function() {
+                        time.step(0);
+                    }, 0);
+                    return true;
+                }
+            }
             return true;
         }
         return false;
@@ -681,6 +694,11 @@ class Time extends Device {
      */
     stop()
     {
+        if (this.nStepping) {
+            this.nStepping = 0;
+            this.updateStatus(true);
+            return true;
+        }
         if (this.fRunning) {
             this.fRunning = false;
             this.endBurst();
@@ -691,9 +709,9 @@ class Time extends Device {
     }
 
     /**
-     * toggle()
+     * toggleRun()
      *
-     * This handles both a "run" button, if any, attached to the Time device.
+     * This handles the "run" button, if any, attached to the Time device.
      *
      * Note that this serves a different purpose than the "power" button that's managed
      * by the Input device, because toggling power also requires resetting the program counter
@@ -702,12 +720,33 @@ class Time extends Device {
      *
      * @this {Time}
      */
-    toggle()
+    toggleRun()
     {
         if (this.fRunning) {
             this.stop();
         } else {
             this.start();
+        }
+    }
+
+    /**
+     * toggleStep(nRepeat)
+     *
+     * This handles the "step" button, if any, attached to the Time device.
+     *
+     * @this {Time}
+     * @param {number} [nRepeat]
+     */
+    toggleStep(nRepeat)
+    {
+        if (!this.fRunning) {
+            if (this.nStepping) {
+                this.stop();
+            } else {
+                this.step(nRepeat);
+            }
+        } else {
+            this.println("already running");
         }
     }
 
@@ -732,6 +771,7 @@ class Time extends Device {
             }
         }
         this.updateBindingText(Time.BINDING.RUN, this.fRunning? "Halt" : "Run");
+        this.updateBindingText(Time.BINDING.STEP, this.nStepping? "Stop" : "Step");
         this.updateBindingText(Time.BINDING.SPEED, this.getSpeedCurrent());
     }
 
@@ -771,3 +811,5 @@ Time.BINDING = {
 };
 
 Time.YIELDS_PER_SECOND = 60;
+
+Time.VERSION    = 1.01;

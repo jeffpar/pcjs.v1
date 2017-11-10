@@ -68,15 +68,16 @@ class ROM extends Device {
      *
      * @this {ROM}
      * @param {string} idMachine
-     * @param {string} [idDevice]
+     * @param {string} idDevice
      * @param {ROMConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config);
+        super(idMachine, idDevice, ROM.VERSION, config);
 
-        // noinspection Annotator
-        this.data = this.config['values'];
+        // TODO: Determine why I get an inspection error if I use this.config instead of config....
+
+        this.data = config['values'];
 
         /*
          * WARNING: This assumes that the data array length is a power-of-two (which we assert below).
@@ -96,3 +97,5 @@ class ROM extends Device {
         return this.data[addr];
     }
 }
+
+ROM.VERSION     = 1.01;

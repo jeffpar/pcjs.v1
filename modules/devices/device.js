@@ -66,25 +66,32 @@ class Device {
      *      http://pcjs:8088/devices/ti57/machine/?cyclesPerSecond=100000
      *
      * will set the Time device's cyclesPerSecond config property to 100000.  In general, the values
-     * will be treated as strings, unless they contain all digits (number) or equal "true" or "false"
+     * will be treated as strings, unless they contain all digits (number), or equal "true" or "false"
      * (boolean).
      *
      * @this {Device}
      * @param {string} idMachine
-     * @param {string} [idDevice]
+     * @param {string} idDevice
+     * @param {number} version
      * @param {Config} [config]
      */
-    constructor(idMachine, idDevice, config)
+    constructor(idMachine, idDevice, version, config)
     {
         this.config = config || {};
         this.idMachine = idMachine;
-        this.idDevice = idDevice || idMachine;
+        this.idDevice = idDevice;
+        this.version = version;
         this.sCategories = "";
 
         /*
          * Add this Device to the global set of Devices, so that findDevice(), findBinding(), etc, will work.
          */
         this.addDevice();
+        let machine = this.findDevice(this.idMachine);
+        if (machine.version != this.version) {
+            let sError = this.sprintf("PCjs %s Device version (%3.2f) does not match Machine version (%3.2f)", this.config.class, this.version, machine.version);
+            alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.");
+        }
 
         /*
          * Build the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config.bindings)
@@ -359,11 +366,26 @@ class Device {
     }
 
     /**
+     * hex(n)
+     *
+     * This is a helper function intended for use in a debugging console, allowing you to display
+     * numbers as hex by evaluating the expression "this.hex(n)".  Technically, this should be a static
+     * method, since there's nothing instance-specific about it, but "this.hex()" is easier to type than
+     * "Device.hex()".
+     *
+     * @this {Device}
+     * @param {number} n
+     */
+    hex(n)
+    {
+        return this.sprintf("%x", n);
+    }
+
+    /**
      * isCategoryOn(category)
      *
-     * Use this function to enable/disable any calls (eg, print() calls) based on
-     * 1) whether specific categories are required, and 2) whether the specified category
-     * is one of them.
+     * Use this function to enable/disable any calls (eg, print() calls) based on 1) whether specific
+     * categories are required, and 2) whether the specified category is one of them.
      *
      * @this {Device}
      * @param {string} category
@@ -392,7 +414,7 @@ class Device {
             }
             element.scrollTop = element.scrollHeight;
         }
-        if (DEBUG || !element) {
+        if (DEBUG && !element) {
             let i = s.lastIndexOf('\n');
             if (i >= 0) {
                 console.log(Device.PrintBuffer + s.substr(0, i));
@@ -431,7 +453,8 @@ class Device {
      *
      * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
      *
-     * Far from complete, let alone sprintf-compatible, but it's a start.
+     * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
+     * specifiers that I use.
      *
      * @this {Device}
      * @param {string} format
@@ -440,17 +463,23 @@ class Device {
      */
     sprintf(format, ...args)
     {
-        let parts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
         let buffer = "";
-        let partIndex = 0;
-        for (let i = 0; i < args.length; i++) {
+        let aParts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
 
-            buffer += parts[partIndex++];
-            let arg = args[i], ach = null, s;
-            let flags = parts[partIndex];
-            let minimum = +parts[partIndex+1] || 0;
-            let precision = +parts[partIndex+3] || 0;
-            let conversion = parts[partIndex+5];
+        let iArg = 0, iPart;
+        for (iPart = 0; iPart < aParts.length - 7; iPart += 7) {
+
+            buffer += aParts[iPart];
+
+            let arg = args[iArg++];
+            if (arg === undefined) continue;
+
+            let flags = aParts[iPart+1];
+            let minimum = +aParts[iPart+2] || 0;
+            let precision = +aParts[iPart+4] || 0;
+            let conversion = aParts[iPart+6];
+
+            let ach = null, s;
 
             switch(conversion) {
             case 'd':
@@ -461,7 +490,7 @@ class Device {
                 /* falls through */
 
             case 'f':
-                s = arg + "";
+                s = Math.trunc(arg) + "";
                 if (precision) {
                     minimum -= (precision + 1);
                 }
@@ -513,10 +542,9 @@ class Device {
                 buffer += "(unrecognized printf conversion %" + conversion + ")";
                 break;
             }
-
-            partIndex += 6;
         }
-        buffer += parts[partIndex];
+
+        buffer += aParts[iPart];
         return buffer;
     }
 

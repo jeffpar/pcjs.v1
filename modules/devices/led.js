@@ -49,13 +49,30 @@
  * 2) LED Array (two-dimensional)
  * 3) LED Digits (1 or more 7-segment digits)
  *
- * The initial goal is to generate a 12-element array of 7-segment LED digits.  The default width and height
- * of 96 and 128 match our internal cell size and yield an aspect ratio of 0.75.
+ * The initial goal is to manage a 12-element array of 7-segment LED digits for the TI-57.
  *
- * We will need to create a canvas element inside the specified container element.  There must be interfaces
- * for enabling/disabling/toggling power to any combination of xSelect and ySelect.  There must also be a time
- * interface to indicate the passage of time, which should be called a minimum of every 1/60th of a second;
- * any addressable LED segment that was last toggled more than 1/60th second earlier should be blanked.
+ * We create a "view" canvas element inside the specified "container" element, along with a "grid" canvas
+ * where all the real drawing occurs; drawGrid() then renders the "grid" canvas onto the "view" canvas.
+ *
+ * Internally, our LED digits have a width and height of 96 and 128.  Those are "grid" dimensions which
+ * cannot be changed, because our table of drawing coordinates in LED.SEGMENT are hard-coded for those
+ * dimensions.  The cell width and height that are specified as part of the LEDConfig are "view" dimensions,
+ * which usually match the grid dimensions, but you're welcome to scale them up or down; the browser's
+ * drawImage() function takes care of that.
+ *
+ * There is a low-level function, drawGridSegment(), for drawing specific LED segments of specific digits;
+ * generally, you start with clearGrid(), draw all the segments for a given update, and then call drawGrid()
+ * to make them visible.
+ *
+ * However, our Chip device operates at a higher level.  We provide a "buffer" of character data representing
+ * the fully-formed characters that each of the LED cells should display, which the Chip updates by calling
+ * setBuffer().  Then at whatever display refresh rate is set (typically 60Hz), drawBuffer() is called to see
+ * if the buffer contents have been modified since the last refresh, and if so, it converts the contents of
+ * the buffer to a string and calls drawString().
+ *
+ * This buffering strategy, combined with the buffer "tickled" flag (see below), not only makes life
+ * simple for the Chip device, but also simulates how the display goes blank for short periods of time while
+ * the Chip is busy performing calculations.
  *
  * @class {LED}
  * @unrestricted
@@ -66,7 +83,7 @@
  * @property {number} cols (default is 1)
  * @property {number} rows (default is 1)
  * @property {string} color (default is "red")
- * @property {string} backgroundColor (default is "black")
+ * @property {string} backgroundColor (default is none; ie, transparent background)
  * @property {number} widthView (computed)
  * @property {number} heightView (computed)
  * @property {number} widthGrid (computed)
@@ -78,8 +95,9 @@
  * @property {{
  *  container: HTMLElement|undefined
  * }} bindings
- * @property {string|null} sDisplayNext
- * @property {string|null} sDisplayCurrent
+ * @property {Array.<string>} buffer
+ * @property {boolean} fBufferModified
+ * @property {boolean} fTickled
  */
 class LED extends Device {
     /**
@@ -101,16 +119,16 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {string} idMachine
-     * @param {string} [idDevice]
+     * @param {string} idDevice
      * @param {LEDConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config);
+        super(idMachine, idDevice, LED.VERSION, config);
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
-            this.time.addYield(this.drawBuffer.bind(this));
+            this.time.addAnimator(this.drawBuffer.bind(this));
         }
 
         let container = this.bindings[LED.BINDING.CONTAINER];
@@ -129,14 +147,14 @@ class LED extends Device {
                 this.widthView = this.width * this.cols;
                 this.heightView = this.height * this.rows;
                 this.color = (this.config['color'] || "red");
-                this.backgroundColor = (this.backgroundColor || "black");
+                this.backgroundColor = this.config['backgroundColor'];
 
                 if (!this.config['fixedSize']) {
                     canvasView.setAttribute("class", "pcjs-canvas");
                 }
                 canvasView.setAttribute("width", this.widthView.toString());
                 canvasView.setAttribute("height", this.heightView.toString());
-                canvasView.style.backgroundColor = this.backgroundColor;
+                canvasView.style.backgroundColor = (this.backgroundColor || "rgba(255, 255, 255, 0)");
                 container.appendChild(canvasView);
                 this.contextView = /** @type {CanvasRenderingContext2D} */ (canvasView.getContext("2d"));
 
@@ -196,8 +214,12 @@ class LED extends Device {
      */
     clearGrid()
     {
-        this.contextGrid.fillStyle = this.backgroundColor;
-        this.contextGrid.fillRect(0, 0, this.widthGrid, this.heightGrid);
+        if (this.backgroundColor) {
+            this.contextGrid.fillStyle = this.backgroundColor;
+            this.contextGrid.fillRect(0, 0, this.widthGrid, this.heightGrid);
+        } else {
+            this.contextGrid.clearRect(0, 0, this.widthGrid, this.heightGrid);
+        }
     }
 
     /**
@@ -236,6 +258,7 @@ class LED extends Device {
      */
     drawGrid()
     {
+        this.contextView.globalCompositeOperation = (this.backgroundColor? "source-over" : "copy");
         this.contextView.drawImage(this.canvasGrid, 0, 0, this.widthGrid, this.heightGrid, 0, 0, this.widthView, this.heightView);
     }
 
@@ -394,3 +417,5 @@ LED.SYMBOLS = {
     'E':        ['A','D','E','F','G'],
     '.':        ['P']
 };
+
+LED.VERSION     = 1.01;
