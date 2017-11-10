@@ -235,8 +235,8 @@ class Reg64 extends Device {
     {
         this.chip.regR5 = this.digits[range[0]];
         this.assert(!(this.chip.regR5 & ~0xf));
-        if (range[1] > range[0]) {
-            this.chip.regR5 |= this.digits[range[1]] << 4;
+        if (range[0] < range[1]) {
+            this.chip.regR5 |= this.digits[range[0]+1] << 4;
             this.assert(!(this.chip.regR5 & ~0xff));
         }
     }
@@ -255,7 +255,11 @@ class Reg64 extends Device {
  *
  * @class {Chip}
  * @unrestricted
- * @property {Array.<Reg64>} regs (operational registers A-D)
+ * @property {Array.<Reg64>} regsABCD (operational registers A-D)
+ * @property {Reg64} regA (alias for regsABCD[0])
+ * @property {Reg64} regB (alias for regsABCD[1])
+ * @property {Reg64} regC (alias for regsABCD[2])
+ * @property {Reg64} regD (alias for regsABCD[3])
  * @property {Array.<Reg64>} regsX (storage registers X0-X7)
  * @property {Array.<Reg64>} regsY (storage registers Y0-Y7)
  * @property {Reg64} regSupp (alternate register used when the destination must be suppressed)
@@ -263,13 +267,21 @@ class Reg64 extends Device {
  * @property {number} base (10 or 16)
  * @property {boolean} fCOND (true when a carry has been detected)
  * @property {number} regRAB
- * @property {number} regR5
+ * @property {number} regR5 (least significant masked digit(s) from last arithmetic result)
  * @property {number} regPC (program counter: address of next instruction to decode)
  * @property {Array.<number>} stack (3-level address stack; managed by push() and pop())
+ * @property {number} nCyclesClocked
+ * @property {Input} input
  * @property {number} regKey (current key status, propagated to regR5 at appropriate intervals)
+ * @property {LED} led
  * @property {Array.<string>} ledBuffer (24-element LED buffer, propagated to the LED device on DISP operations)
+ * @property {ROM} rom
+ * @property {Time} time
+ * @property {number} addrPrev
  * @property {number} addrStop
  * @property {Object} breakConditions
+ * @property {string} sCommandPrev
+ * @property {number} nStringFormat
  */
 class Chip extends Device {
     /**
@@ -406,12 +418,6 @@ class Chip extends Device {
         // this.regPulseTime = 0;
 
         /*
-         * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions
-         * that need to consume a few extra cycles to bump this count upward as needed.
-         */
-        this.nCyclesClocked = 0;
-
-        /*
          * The "Program Counter" (regPC) is an 11-bit register that automatically increments unless a HOLD signal
          * is applied, effectively locking execution on a single instruction.
          */
@@ -431,11 +437,17 @@ class Chip extends Device {
         this.stack = [-1, -1, -1];
 
         /*
+         * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions
+         * that need to consume a few extra cycles to bump this count upward as needed.
+         */
+        this.nCyclesClocked = 0;
+
+        /*
          * Get access to the Input device, so we can add our clicker functions.
          */
-        this.regKey = 0;
         this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
         this.input.addClicker(this.onKey.bind(this), this.onPower.bind(this), this.onReset.bind(this));
+        this.regKey = 0;
 
         /*
          * Get access to the LED device, so we can update its display.
@@ -494,7 +506,7 @@ class Chip extends Device {
      * register.  Since a data word consists of 16 BCD digits (ie, 64 bits), 32 state times (80us) are required to
      * "clock" all the bits from one register to another.  This total time is referred to as an instruction cycle.
      *
-     * Note that some instructions (ie, display instructions) slow the delivery of cycles, such that one state time
+     * Note that some instructions (ie, the DISP instruction) slow the delivery of cycles, such that one state time
      * is 10us instead of 2.5us, and therefore the entire instruction cycle will take 320us instead of 80us.
      *
      * We're currently simulating a full 32 "state times" (128 cycles aka Chip.OP_CYCLES) per instruction, since
@@ -508,12 +520,11 @@ class Chip extends Device {
     clocker(nCyclesTarget = 0)
     {
         this.nCyclesClocked = 0;
-        do {
+        while (this.nCyclesClocked <= nCyclesTarget) {
             if (this.addrStop == this.regPC) {
                 this.addrStop = -1;
                 this.println("break");
                 this.time.stop();
-                nCyclesTarget = 0;      // this is simply to trigger toString() below
                 break;
             }
             let opCode = this.rom.getData(this.regPC);
@@ -521,13 +532,12 @@ class Chip extends Device {
             this.regPC = (addr + 1) & this.rom.addrMask;
             if (!this.decode(opCode, addr)) {
                 this.regPC = addr;
-                this.time.stop();
                 this.println("unimplemented opcode");
-                nCyclesTarget = 0;      // this is simply to trigger toString() below
+                this.time.stop();
                 break;
             }
             this.nCyclesClocked += Chip.OP_CYCLES;
-        } while (this.nCyclesClocked < nCyclesTarget);
+        }
         if (nCyclesTarget <= 0) {
             let chip = this;
             this.time.doOutside(function() {
@@ -983,30 +993,29 @@ class Chip extends Device {
                 if (c) sResult = "unrecognized break option '" + c + "'";
             }
             break;
-        case "g":
+        case 'g':
             if (this.time.start()) {
                 this.addrStop = addr;
             } else {
                 sResult = "already started";
             }
             break;
-        case "h":
+        case 'h':
             if (!this.time.stop()) sResult = "already stopped";
             break;
-        case "t":
-            if (s[1] == 'c') {
-                this.nStringFormat = Chip.SFORMAT.COMPACT;
-            }
+        case 't':
+            if (s[1] == 'c') this.nStringFormat = Chip.SFORMAT.COMPACT;
             nWords = Number.parseInt(aCommands[1], 10) || 1;
             this.time.toggleStep(nWords);
             this.sCommandPrev = sCommand;
             break;
-        case "r":
+        case 'r':
+            if (s[1] == 'c') this.nStringFormat = Chip.SFORMAT.COMPACT;
             this.updateRegister(s.substr(1), addr);
             sResult += this.toString(s[1]);
             this.sCommandPrev = sCommand;
             break;
-        case "u":
+        case 'u':
             addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
             while (nWords--) {
                 let opCode = this.rom.getData(addr);
@@ -1016,7 +1025,7 @@ class Chip extends Device {
             this.addrPrev = addr;
             this.sCommandPrev = sCommand;
             break;
-        case "?":
+        case '?':
             sResult = "available commands:";
             Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
             break;

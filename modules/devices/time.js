@@ -696,6 +696,7 @@ class Time extends Device {
     {
         if (this.nStepping) {
             this.nStepping = 0;
+            this.updateStatus(true);
             return true;
         }
         if (this.fRunning) {
