@@ -87,12 +87,12 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {string} idMachine
-     * @param {string} [idDevice]
+     * @param {string} idDevice
      * @param {TimeConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config);
+        super(idMachine, idDevice, Time.VERSION, config);
 
         /*
          * NOTE: The default speed of 650,000Hz (0.65Mhz) is a crude approximation based on actual
@@ -807,3 +807,5 @@ Time.BINDING = {
 };
 
 Time.YIELDS_PER_SECOND = 60;
+
+Time.VERSION    = 1.01;

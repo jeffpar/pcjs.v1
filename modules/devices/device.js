@@ -71,20 +71,27 @@ class Device {
      *
      * @this {Device}
      * @param {string} idMachine
-     * @param {string} [idDevice]
+     * @param {string} idDevice
+     * @param {number} version
      * @param {Config} [config]
      */
-    constructor(idMachine, idDevice, config)
+    constructor(idMachine, idDevice, version, config)
     {
         this.config = config || {};
         this.idMachine = idMachine;
-        this.idDevice = idDevice || idMachine;
+        this.idDevice = idDevice;
+        this.version = version;
         this.sCategories = "";
 
         /*
          * Add this Device to the global set of Devices, so that findDevice(), findBinding(), etc, will work.
          */
         this.addDevice();
+        let machine = this.findDevice(this.idMachine);
+        if (machine.version != this.version) {
+            let sError = this.sprintf("PCjs %s Device version (%3.2f) does not match Machine version (%3.2f)", this.config.class, this.version, machine.version);
+            alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.");
+        }
 
         /*
          * Build the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config.bindings)
@@ -467,7 +474,7 @@ class Device {
                 /* falls through */
 
             case 'f':
-                s = arg + "";
+                s = Math.trunc(arg) + "";
                 if (precision) {
                     minimum -= (precision + 1);
                 }

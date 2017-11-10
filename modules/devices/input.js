@@ -78,12 +78,12 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {string} idMachine
-     * @param {string} [idDevice]
+     * @param {string} idDevice
      * @param {InputConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config);
+        super(idMachine, idDevice, Input.VERSION, config);
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
 
@@ -593,3 +593,5 @@ Input.KEYCODE = {               // keyCode from keydown/keyup events
 };
 
 Input.KBD_DELAY = 50;           // minimum number of milliseconds to ensure between key presses and releases
+
+Input.VERSION   = 1.01;

@@ -119,12 +119,12 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {string} idMachine
-     * @param {string} [idDevice]
+     * @param {string} idDevice
      * @param {LEDConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config);
+        super(idMachine, idDevice, LED.VERSION, config);
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
@@ -412,3 +412,5 @@ LED.SYMBOLS = {
     'E':        ['A','D','E','F','G'],
     '.':        ['P']
 };
+
+LED.VERSION     = 1.01;

@@ -46,7 +46,7 @@ class Reg64 extends Device {
      */
     constructor(chip, id)
     {
-        super(chip.idMachine, id);
+        super(chip.idMachine, id, chip.version);
         this.chip = chip;
         this.name = id;
         /*
@@ -279,12 +279,12 @@ class Chip extends Device {
      *
      * @this {Chip}
      * @param {string} idMachine
-     * @param {string} [idDevice]
+     * @param {string} idDevice
      * @param {Object} [config]
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config);
+        super(idMachine, idDevice, Chip.VERSION, config);
 
         /*
          * Four (4) Operational Registers (A-D)
@@ -1427,3 +1427,5 @@ Chip.COMMANDS = [
     "t\t\tstep",
     "u [addr] [n]\tdisassemble (at addr)"
 ];
+
+Chip.VERSION    = 1.01;
