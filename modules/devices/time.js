@@ -694,6 +694,10 @@ class Time extends Device {
      */
     stop()
     {
+        if (this.nStepping) {
+            this.nStepping = 0;
+            return true;
+        }
         if (this.fRunning) {
             this.fRunning = false;
             this.endBurst();
@@ -736,8 +740,7 @@ class Time extends Device {
     {
         if (!this.fRunning) {
             if (this.nStepping) {
-                this.nStepping = 0;
-                this.updateStatus(true);
+                this.stop();
             } else {
                 this.step(nRepeat);
             }

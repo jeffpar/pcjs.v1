@@ -966,7 +966,7 @@ class Chip extends Device {
 
         switch(s[0]) {
         case 'b':
-            let c = s[1];
+            let c = s.substr(1);
             let condition;
             if (c == 'l') {
                 for (c in Chip.BREAK) {
@@ -1149,6 +1149,8 @@ class Chip extends Device {
      */
     opDISP()
     {
+        this.checkBreakCondition('o');
+
         for (let col = 0, iDigit = 11; iDigit >= 0; col++, iDigit--) {
             let ch;
             if (this.regB.digits[iDigit] & 0x8) {
@@ -1161,7 +1163,7 @@ class Chip extends Device {
                 ch = Device.HexUpperCase[this.regA.digits[iDigit]];
             }
             if (this.led.setBuffer(col, 0, ch, (this.regB.digits[iDigit] & 0x2)? '.' : '')) {
-                this.checkBreakCondition('o');
+                this.checkBreakCondition('om');
             }
         }
 
@@ -1405,7 +1407,8 @@ Chip.OP = {
 
 Chip.BREAK = {
     'i':    "input",
-    'o':    "output"
+    'o':    "output",
+    'om':   "output modification"
 };
 
 Chip.SFORMAT = {
