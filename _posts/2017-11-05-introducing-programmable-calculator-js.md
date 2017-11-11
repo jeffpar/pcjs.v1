@@ -14,6 +14,7 @@ machines:
           "class": "Machine",
           "type": "TI57",
           "name": "TI-57 Emulator",
+          "version": 1.02,
           "bindings": {
             "print": "printTI57"
           }
