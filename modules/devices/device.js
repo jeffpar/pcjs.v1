@@ -28,15 +28,16 @@
 
 "use strict";
 
-var DEBUG = (window.location.hostname == "pcjs");
+var DEBUG = (window.location.hostname == "pcjs" || window.location.hostname == "jeffpar.local");
 
 /**
- * The following properties are the minimum set of properties we expect a Device's config object to
- * contain.  Classes will generally define their own extended versions (eg, LEDConfig, InputConfig, etc).
+ * The following properties are the standard set of properties a Device's config object may contain.
+ * Other devices will generally define their own extended versions (eg, LEDConfig, InputConfig, etc).
  *
  * @typedef {Object} Config
  * @property {string} class
  * @property {Object} bindings
+ * @property {number} version
  */
 
 /**
@@ -72,7 +73,7 @@ class Device {
      * @this {Device}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {number} version
+     * @param {number} [version]
      * @param {Config} [config]
      */
     constructor(idMachine, idDevice, version, config)
@@ -80,7 +81,7 @@ class Device {
         this.config = config || {};
         this.idMachine = idMachine;
         this.idDevice = idDevice;
-        this.version = version;
+        this.version = version || 0;
         this.sCategories = "";
 
         /*
@@ -93,11 +94,7 @@ class Device {
          */
         this.addBindings(this.config.bindings);
 
-        let machine = this.findDevice(this.idMachine);
-        if (machine.version != this.version) {
-            let sError = this.sprintf("%s Device version (%3.2f) does not match Machine version (%3.2f)", this.config.class, this.version, machine.version);
-            this.alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.", Device.Alerts.Version);
-        }
+        this.checkVersion(this.config);
 
         /*
          * If this device's config contains an "overrides" array, then any of the properties listed in
@@ -291,6 +288,38 @@ class Device {
         if (DEBUG) {
             if (!f) {
                 throw new Error(s || "assertion failure");
+            }
+        }
+    }
+
+    /**
+     * checkVersion(config)
+     *
+     * Verify that device's version matches the machine's version, and also that the config version stored in
+     * the JSON (if any) matches the device's version.
+     *
+     * This is normally performed by the constructor, but the Machine device cannot be fully initialized in the
+     * constructor, so it calls this separately.
+     *
+     * @this {Device}
+     * @param {Config} config
+     */
+    checkVersion(config)
+    {
+        if (this.version) {
+            let sVersion = "", version;
+            let machine = this.findDevice(this.idMachine);
+            if (machine.version != this.version) {
+                sVersion = "Machine";
+                version = machine.version;
+            }
+            else if (config.version && config.version != this.version) {
+                sVersion = "Config";
+                version = config.version;
+            }
+            if (sVersion) {
+                let sError = this.sprintf("%s Device version (%3.2f) does not match %s version (%3.2f)", config.class, this.version, sVersion, version);
+                this.alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.", Device.Alerts.Version);
             }
         }
     }
@@ -533,7 +562,7 @@ class Device {
             }
             element.scrollTop = element.scrollHeight;
         }
-        if (DEBUG && !element) {
+        if (DEBUG || !element) {
             let i = s.lastIndexOf('\n');
             if (i >= 0) {
                 console.log(Device.PrintBuffer + s.substr(0, i));

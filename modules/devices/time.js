@@ -386,6 +386,22 @@ class Time extends Device {
     }
 
     /**
+     * isTimerSet(iTimer)
+     *
+     * @this {Time}
+     * @param {number} iTimer
+     * @returns {boolean}
+     */
+    isTimerSet(iTimer)
+    {
+        if (iTimer > 0 && iTimer <= this.aTimers.length) {
+            let timer = this.aTimers[iTimer-1];
+            return (timer.nCyclesLeft >= 0);
+        }
+        return false;
+    }
+
+    /**
      * resetSpeed()
      *
      * Resets speed and cycle information as part of any reset() or restore(); this typically occurs during powerUp().

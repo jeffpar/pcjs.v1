@@ -43,6 +43,7 @@ class Machine extends Device {
      *        "class": "Machine",
      *        "type": "TI57",
      *        "name": "TI-57 Programmable Calculator Simulation",
+     *        "version": 1.02,
      *        "bindings": {
      *          "print": "printTI57"
      *        }
@@ -58,7 +59,8 @@ class Machine extends Device {
      *          "run": "runTI57",
      *          "speed": "speedTI57",
      *          "step": "stepTI57"
-     *        }
+     *        },
+     *        "overrides": ["cyclesPerSecond"]
      *      },
      *      "display": {
      *        "class": "LED",
@@ -66,10 +68,10 @@ class Machine extends Device {
      *        "cols": 12,
      *        "rows": 1,
      *        "color": "red",
-     *        "backgroundColor": "black",
      *        "bindings": {
      *          "container": "displayTI57"
-     *        }
+     *        },
+     *        "overrides": ["color","backgroundColor"]
      *      },
      *      "rom": {
      *        "class": "ROM",
@@ -94,6 +96,7 @@ class Machine extends Device {
         try {
             this.config = JSON.parse(sConfig);
             this.addBindings(this.config[idMachine].bindings);
+            this.checkVersion(this.config[idMachine]);
         } catch(err) {
             let sError = err.message;
             let match = sError.match(/position ([0-9]+)/);

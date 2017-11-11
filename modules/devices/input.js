@@ -160,8 +160,19 @@ class Input extends Device {
             this.captureTouch(element);
 
             if (this.time) {
+                /*
+                 * This auto-releases the last key reported after an appropriate delay, to ensure that
+                 * the machine had enough time to notice the corresponding button was pressed.
+                 */
                 this.timerKbd = this.time.addTimer("timerKbd", function() {
                     input.onKeyTimer();
+                });
+                /*
+                 * We use a similar timer for the touch/mouse release events, to again ensure that the machine
+                 * had enough time to notice the input before releasing it.
+                 */
+                this.timerRelease = this.time.addTimer("timerRelease", function() {
+                    input.setPosition(-1, -1);
                 });
                 /*
                  * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
@@ -292,7 +303,7 @@ class Input extends Device {
                     } else {
                         this.keyState = 1;
                         this.setPosition(col, row);
-                        this.time.setTimer(this.timerKbd, Input.KBD_DELAY);
+                        this.time.setTimer(this.timerKbd, Input.BUTTON_DELAY);
                     }
                     return true;
                 }
@@ -313,7 +324,7 @@ class Input extends Device {
         if (this.keyState == 1) {
             this.keyState++;
             this.setPosition(-1, -1);
-            this.time.setTimer(this.timerKbd, Input.KBD_DELAY);
+            this.time.setTimer(this.timerKbd, Input.BUTTON_DELAY);
         } else {
             this.keyState = 0;
             if (this.keysPressed.length) {
@@ -435,7 +446,7 @@ class Input extends Device {
      */
     processEvent(element, action, event)
     {
-        let x, y, xInput, yInput, col, row, fInput, fPower;
+        let x, y, xInput, yInput, col, row, fButton, fInput, fPower;
 
         if (action < Input.ACTION.RELEASE) {
             /**
@@ -481,6 +492,13 @@ class Input extends Device {
             xInput = x - this.xInput;
             yInput = y - this.yInput;
 
+            /*
+             * fInput is set if the event occurred somewhere within the input region (ie, the calculator keypad),
+             * either on a button or between buttons, whereas fButton is set if the event occurred squarely (rectangularly?)
+             * on a button.  fPower deals separately with the power button; it is set if the event occurred on the
+             * power button.
+             */
+            fInput = fButton = false;
             fPower = (x >= this.xPower && x < this.xPower + this.cxPower && y >= this.yPower && y < this.yPower + this.cyPower);
 
             /*
@@ -525,6 +543,7 @@ class Input extends Device {
                     if (xInput >= 0 && xInput < this.cxButton && yInput >= 0 && yInput < this.cyButton) {
                         col = colInput;
                         row = rowInput;
+                        fButton = true;
                     }
                 }
             }
@@ -532,15 +551,25 @@ class Input extends Device {
 
         if (action == Input.ACTION.PRESS) {
             /*
-             * All we do is record the position of the event, transitioning xStart and yStart
-             * from negative to non-negative values.
+             * Record the position of the event, transitioning xStart and yStart to non-negative values.
              */
             this.xStart = x;
             this.yStart = y;
             if (fInput) {
+                /*
+                 * The event occurred in the input region, so we call setPosition() regardless of whether
+                 * it hit or missed a button.
+                 */
                 this.setPosition(col, row);
-            } else if (fPower) {
-                if (this.onPower) this.onPower();
+                /*
+                 * On the other hand, if it DID hit a button, then we arm the auto-release timer, to ensure
+                 * a minimum amount of time (ie, BUTTON_DELAY).
+                 */
+                if (fButton) {
+                    this.time.setTimer(this.timerRelease, Input.BUTTON_DELAY, true);
+                }
+            } else if (fPower && this.onPower) {
+                this.onPower();
             }
         }
         else if (action == Input.ACTION.MOVE) {
@@ -550,7 +579,12 @@ class Input extends Device {
              */
         }
         else if (action == Input.ACTION.RELEASE) {
-            this.setPosition(-1, -1);
+            /*
+             * Don't immediately signal the release if the release timer is active (let the timer take care of it).
+             */
+            if (!this.time.isTimerSet(this.timerRelease)) {
+                this.setPosition(-1, -1);
+            }
             this.xStart = this.yStart = -1;
         }
         else {
@@ -592,6 +626,6 @@ Input.KEYCODE = {               // keyCode from keydown/keyup events
     0x08:       "\b"            // backspace
 };
 
-Input.KBD_DELAY = 50;           // minimum number of milliseconds to ensure between key presses and releases
+Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
 
 Input.VERSION   = 1.02;
