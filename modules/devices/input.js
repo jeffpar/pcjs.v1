@@ -172,7 +172,9 @@ class Input extends Device {
                  * had enough time to notice the input before releasing it.
                  */
                 this.timerRelease = this.time.addTimer("timerRelease", function() {
-                    input.setPosition(-1, -1);
+                    if (input.xStart < 0 && input.yStart < 0) { // auto-release ONLY if it's REALLY released
+                        input.setPosition(-1, -1);
+                    }
                 });
                 /*
                  * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
