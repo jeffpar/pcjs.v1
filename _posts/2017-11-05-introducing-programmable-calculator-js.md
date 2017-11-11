@@ -29,7 +29,8 @@ machines:
             "run": "runTI57",
             "speed": "speedTI57",
             "step": "stepTI57"
-          }
+          },
+          "overrides": ["cyclesPerSecond"]
         },
         "display": {
           "class": "LED",
@@ -39,7 +40,8 @@ machines:
           "color": "red",
           "bindings": {
             "container": "displayTI57"
-          }
+          },
+          "overrides": ["color","backgroundColor"]
         },
         "input": {
           "class": "Input",
