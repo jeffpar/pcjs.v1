@@ -210,9 +210,9 @@ uses an electronic dump of a production TI-57 ROM.  Unfortunately, HrastProgramm
 about this dump, including who provided it, what the TMS-1500 chip version was, what the contents of the ROM were,
 or how those contents differed from previous dumps.
 
-He also went out of his way to obscure this ROM dump within the TI57E.EXE binary.  However, by using a debugger and
-spending several hours of tedious tracing, I discovered that all 2048 words of the ROM were stored as a series of
-32-bit floating-point numbers.  I've saved a dump of the [floating-point table](ti57hrast2fp.txt).
+He also went out of his way to obscure the ROM dump within the TI57E.EXE binary.  However, by using a debugger and
+carefully stepping through the program, I discovered that all 2048 words of the ROM were stored as a series of 32-bit
+floating-point numbers.  I've saved a [dump](ti57hrast2fp.txt) of the floating-point data.
 
 I then wrote a [script](fp2le.js) to convert the 32-bit floating-point values to 16-bit words, and then diff'ed the
 results with the [Little-endian ROM](ti57le.bin) from the "TMC1501NC DI 7741" chip:
@@ -279,7 +279,7 @@ It's possible that the remaining revisions were also made by HrastProgrammer, bu
 assume they represent a minor TI revision.  I'll update this page with further information once I've been
 able to examine the revisions more closely.
 
-This ROM has been saved as [Hrast ROM #2](ti57hrast2.bin), along with a [complete dump](ti57hrast2.txt).
+This ROM has been saved as [Hrast ROM #2](ti57hrast2.bin), along with a [dump](ti57hrast2.txt).
 
 TI-57 ROM Used With PCjs
 ------------------------ 

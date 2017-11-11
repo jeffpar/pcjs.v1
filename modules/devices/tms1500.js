@@ -77,6 +77,29 @@ class Reg64 extends Device {
     }
 
     /**
+     * get()
+     *
+     * @this {Reg64}
+     * @returns {Array}
+     */
+    get()
+    {
+        return this.digits;
+    }
+
+    /**
+     * set(digits)
+     *
+     * @this {Reg64}
+     * @param {Array} digits
+     */
+    set(digits)
+    {
+        if (!digits || digits.length != this.digits.length) return;
+        for (let i = 0; i < this.digits.length; i++) this.digits[i] = digits[i];
+    }
+
+    /**
      * toString(fCompact)
      *
      * @this {Reg64}
@@ -243,6 +266,11 @@ class Reg64 extends Device {
 }
 
 /**
+ * @typedef {Object} State
+ * @property {Array} stateChip
+ */
+
+/**
  * TMS-1500 Calculator Chip
  *
  * This chip contains lots of small discrete devices, most of which will be emulated either within this
@@ -255,11 +283,11 @@ class Reg64 extends Device {
  *
  * @class {Chip}
  * @unrestricted
- * @property {Array.<Reg64>} regsABCD (operational registers A-D)
- * @property {Reg64} regA (alias for regsABCD[0])
- * @property {Reg64} regB (alias for regsABCD[1])
- * @property {Reg64} regC (alias for regsABCD[2])
- * @property {Reg64} regD (alias for regsABCD[3])
+ * @property {Array.<Reg64>} regsO (operational registers A-D)
+ * @property {Reg64} regA (alias for regsO[0])
+ * @property {Reg64} regB (alias for regsO[1])
+ * @property {Reg64} regC (alias for regsO[2])
+ * @property {Reg64} regD (alias for regsO[3])
  * @property {Array.<Reg64>} regsX (storage registers X0-X7)
  * @property {Array.<Reg64>} regsY (storage registers Y0-Y7)
  * @property {Reg64} regSupp (alternate register used when the destination must be suppressed)
@@ -301,19 +329,19 @@ class Chip extends Device {
         /*
          * Four (4) Operational Registers (A-D)
          */
-        this.regsABCD = new Array(4);
+        this.regsO = new Array(4);
         for (let i = 0; i < 4; i++) {
-            this.regsABCD[i] = new Reg64(this, String.fromCharCode(0x41+i));
+            this.regsO[i] = new Reg64(this, String.fromCharCode(0x41+i));
         }
 
         /*
          * Aliases for each of the Operational Registers, since some instructions use hard-coded registers,
          * rather than calculating a register index (0-3).
          */
-        this.regA = this.regsABCD[0];
-        this.regB = this.regsABCD[1];
-        this.regC = this.regsABCD[2];
-        this.regD = this.regsABCD[3];
+        this.regA = this.regsO[0];
+        this.regB = this.regsO[1];
+        this.regC = this.regsO[2];
+        this.regD = this.regsO[3];
 
         /*
          * Eight (8) Storage Registers (X0-X7)
@@ -437,8 +465,8 @@ class Chip extends Device {
         this.stack = [-1, -1, -1];
 
         /*
-         * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions
-         * that need to consume a few extra cycles to bump this count upward as needed.
+         * This internal cycle count is initialized on every clocker() invocation, enabling opcode
+         * functions that need to consume a few extra cycles to bump this count upward as needed.
          */
         this.nCyclesClocked = 0;
 
@@ -466,6 +494,9 @@ class Chip extends Device {
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         this.time.addClocker(this.clocker.bind(this));
 
+        /*
+         * The following set of properties are all debugger-related; see onCommand().
+         */
         this.addrPrev = -1;
         this.addrStop = -1;
         this.breakConditions = {};
@@ -606,7 +637,7 @@ class Chip extends Device {
             case 1:
             case 2:
             case 3:
-                regSrc = this.regsABCD[k];
+                regSrc = this.regsO[k];
                 break;
             case 4:
                 regSrc = this.regTemp.init(1, range);
@@ -624,13 +655,13 @@ class Chip extends Device {
 
             switch(l) {
             case 0:
-                regResult = this.regsABCD[j];
+                regResult = this.regsO[j];
                 break;
             case 1:
-                regResult = (k < 4? this.regsABCD[k] : undefined);
+                regResult = (k < 4? this.regsO[k] : undefined);
                 break;
             case 2:
-                regResult = (k < 5? this.regSupp : (k == 5? this.regsABCD[j] : undefined));
+                regResult = (k < 5? this.regSupp : (k == 5? this.regsO[j] : undefined));
                 break;
             case 3:
                 if (!n) {
@@ -638,7 +669,7 @@ class Chip extends Device {
                     this.regA.xchg(regSrc, range);
                 } else {
                     this.assert(k != 5);
-                    this.regsABCD[j].move(regSrc, range);
+                    this.regsO[j].move(regSrc, range);
                 }
                 return true;
             }
@@ -649,16 +680,16 @@ class Chip extends Device {
 
             switch(iOp) {
             case Chip.OP.ADD:
-                regResult.add(this.regsABCD[j], regSrc, range, base);
+                regResult.add(this.regsO[j], regSrc, range, base);
                 break;
             case Chip.OP.SUB:
-                regResult.sub(this.regsABCD[j], regSrc, range, base);
+                regResult.sub(this.regsO[j], regSrc, range, base);
                 break;
             case Chip.OP.SHL:
-                regResult.shl(this.regsABCD[j], range);
+                regResult.shl(this.regsO[j], range);
                 break;
             case Chip.OP.SHR:
-                regResult.shr(this.regsABCD[j], range);
+                regResult.shr(this.regsO[j], range);
                 break;
             }
             return true;
@@ -676,16 +707,16 @@ class Chip extends Device {
              */
             switch(opCode & Chip.IW_FF.MASK) {
             case Chip.IW_FF.SET:
-                this.regsABCD[j].digits[d] |= b;
+                this.regsO[j].digits[d] |= b;
                 break;
             case Chip.IW_FF.RESET:
-                this.regsABCD[j].digits[d] &= ~b;
+                this.regsO[j].digits[d] &= ~b;
                 break;
             case Chip.IW_FF.TEST:
-                if (this.regsABCD[j].digits[d] & b) this.fCOND = true;
+                if (this.regsO[j].digits[d] & b) this.fCOND = true;
                 break;
             case Chip.IW_FF.TOGGLE:
-                this.regsABCD[j].digits[d] ^= b;
+                this.regsO[j].digits[d] ^= b;
                 break;
             }
             return true;
@@ -883,7 +914,7 @@ class Chip extends Device {
                     sOp = "NOT";
                     break;
                 }
-                sOperands = this.regsABCD[(opCode & Chip.IW_FF.J_MASK) >> Chip.IW_FF.J_SHIFT].name;
+                sOperands = this.regsO[(opCode & Chip.IW_FF.J_MASK) >> Chip.IW_FF.J_SHIFT].name;
                 let d = ((opCode & Chip.IW_FF.D_MASK) >> Chip.IW_FF.D_SHIFT);
                 sOperands += '[' + (d? (d + 12) : '?') + ']';
                 sOperands += ':' + ((opCode & Chip.IW_FF.B_MASK) >> Chip.IW_FF.B_SHIFT);
@@ -947,7 +978,44 @@ class Chip extends Device {
     }
 
     /**
+     * loadState(state)
+     *
+     * @this {Chip}
+     * @param {State|null} state
+     */
+    loadState(state)
+    {
+        if (state) {
+            let stateChip = state.stateChip;
+            let version = stateChip.shift();
+            if (version !== Chip.VERSION) {
+                this.printf("Chip state version mismatch: %3.2f\n", version);
+                return;
+            }
+            try {
+                this.regsO.forEach(reg => reg.set(stateChip.shift()));
+                this.regsX.forEach(reg => reg.set(stateChip.shift()));
+                this.regsY.forEach(reg => reg.set(stateChip.shift()));
+                this.regSupp.set(stateChip.shift());
+                this.regTemp.set(stateChip.shift());
+                this.base = stateChip.shift();
+                this.fCOND = stateChip.shift();
+                this.regRAB = stateChip.shift();
+                this.regR5 = stateChip.shift();
+                this.regPC = stateChip.shift();
+                this.stack = stateChip.shift();
+                this.regKey = stateChip.shift();
+                this.ledBuffer = stateChip.shift();
+            } catch(err) {
+                this.println("Chip state error: " + err.message);
+            }
+        }
+    }
+
+    /**
      * onCommand(sCommand)
+     *
+     * Processes commands for our "mini-debugger".
      *
      * If sCommand is blank (ie, if Enter alone was pressed), then sCommandPrev will be used,
      * but sCommandPrev is set only for certain commands deemed "repeatable" (eg, step and dump
@@ -1072,12 +1140,18 @@ class Chip extends Device {
      */
     onPower(fOn)
     {
+        if (fOn === false) {
+            this.saveLocalStorage(this.saveState());
+        }
+        else if (fOn === true) {
+            this.loadState(this.loadLocalStorage());
+        }
         if (fOn == undefined) {
             fOn = !this.time.fRunning;
+            if (fOn) this.regPC = 0;
         }
         if (fOn) {
             if (!this.time.fRunning) {
-                this.regPC = 0;
                 this.time.start();
             }
         } else {
@@ -1235,6 +1309,35 @@ class Chip extends Device {
     }
 
     /**
+     * saveState()
+     *
+     * @this {Chip}
+     * @returns {State}
+     */
+    saveState()
+    {
+        let state = {
+            stateChip:  []
+        };
+        let stateChip = state.stateChip;
+        stateChip.push(Chip.VERSION);
+        this.regsO.forEach(reg => stateChip.push(reg.get()));
+        this.regsX.forEach(reg => stateChip.push(reg.get()));
+        this.regsY.forEach(reg => stateChip.push(reg.get()));
+        stateChip.push(this.regSupp.get());
+        stateChip.push(this.regTemp.get());
+        stateChip.push(this.base);
+        stateChip.push(this.fCOND);
+        stateChip.push(this.regRAB);
+        stateChip.push(this.regR5);
+        stateChip.push(this.regPC);
+        stateChip.push(this.stack);
+        stateChip.push(this.regKey);
+        stateChip.push(this.ledBuffer);
+        return state;
+    }
+
+    /**
      * status()
      *
      * This is called by the Machine after all the individual devices have been initialized.
@@ -1260,11 +1363,14 @@ class Chip extends Device {
         if (this.nStringFormat) {
             s += this.disassemble(this.rom.getData(this.regPC), this.regPC, true);
             s += "  ";
-            for (let i = 0, n = this.regsABCD.length; i < n; i++) {
-                s += this.regsABCD[i].toString(true) + ' ';
+            for (let i = 0, n = this.regsO.length; i < n; i++) {
+                s += this.regsO[i].toString(true) + ' ';
             }
             s += '\n';
-            s += "  COND=" + (this.fCOND? 1 : 0) + " BASE=" + this.base + " R5=" + this.sprintf("%02X", this.regR5) + " RAB=" + this.regRAB + " ST=";
+            s += "  COND=" + (this.fCOND? 1 : 0);
+            s += " BASE=" + this.base;
+            s += " R5=" + this.sprintf("%02X", this.regR5);
+            s += " RAB=" + this.regRAB + " ST=";
             this.stack.forEach((addr, i) => {s += this.sprintf("%03X ", (addr < 0? 0 : (addr & 0xfff)));});
             return s.trim();
         }
@@ -1274,12 +1380,15 @@ class Chip extends Device {
             }
             return s;
         }
-        s += this.toString(options, this.regsABCD);
+        s += this.toString(options, this.regsO);
         if (options.indexOf('a') >= 0) {
             s += this.toString(options, this.regsX);
             s += this.toString(options, this.regsY);
         }
-        s += "COND=" + (this.fCOND? 1 : 0) + " BASE=" + this.base + " R5=" + this.sprintf("0x%02x", this.regR5) + " RAB=" + this.regRAB + ' ';
+        s += "COND=" + (this.fCOND? 1 : 0);
+        s += " BASE=" + this.base;
+        s += " R5=" + this.sprintf("0x%02x", this.regR5);
+        s += " RAB=" + this.regRAB + ' ';
         this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=0x%04x ", i, addr & 0xffff);});
         s += '\n' + this.disassemble(this.rom.getData(this.regPC), this.regPC);
         this.addrPrev = this.regPC;
@@ -1440,4 +1549,4 @@ Chip.COMMANDS = [
     "u [addr] [n]\tdisassemble (at addr)"
 ];
 
-Chip.VERSION    = 1.01;
+Chip.VERSION    = 1.02;

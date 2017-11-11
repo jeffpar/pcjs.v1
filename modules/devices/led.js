@@ -418,4 +418,4 @@ LED.SYMBOLS = {
     '.':        ['P']
 };
 
-LED.VERSION     = 1.01;
+LED.VERSION     = 1.02;

@@ -87,18 +87,19 @@ class Device {
          * Add this Device to the global set of Devices, so that findDevice(), findBinding(), etc, will work.
          */
         this.addDevice();
-        let machine = this.findDevice(this.idMachine);
-        if (machine.version != this.version) {
-            let sError = this.sprintf("PCjs %s Device version (%3.2f) does not match Machine version (%3.2f)", this.config.class, this.version, machine.version);
-            alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.");
-        }
 
         /*
          * Build the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config.bindings)
          */
         this.addBindings(this.config.bindings);
 
-        let parms = Device.parseURLParms();
+        let machine = this.findDevice(this.idMachine);
+        if (machine.version != this.version) {
+            let sError = this.sprintf("%s Device version (%3.2f) does not match Machine version (%3.2f)", this.config.class, this.version, machine.version);
+            this.alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.", Device.Alerts.Version);
+        }
+
+        let parms = Device.getURLParms();
         for (let prop in parms) {
             if (this.config[prop] !== undefined) {
                 let value;
@@ -252,6 +253,21 @@ class Device {
     }
 
     /**
+     * alert(s, type)
+     *
+     * @param {string} s
+     * @param {string} [type]
+     */
+    alert(s, type)
+    {
+        if (type && Device.Alerts.list.indexOf(type) < 0) {
+            alert(s);
+            Device.Alerts.list.push(type);
+        }
+        this.println(s);
+    }
+
+    /**
      * assert(f, s)
      *
      * Verifies conditions that must be true (for DEBUG builds only).
@@ -366,6 +382,76 @@ class Device {
     }
 
     /**
+     * hasLocalStorage
+     *
+     * If localStorage support exists, is enabled, and works, return true.
+     *
+     * @returns {boolean}
+     */
+    hasLocalStorage()
+    {
+        if (Device.LocalStorage.Available == null) {
+            let f = false;
+            if (window) {
+                try {
+                    window.localStorage.setItem(Device.LocalStorage.Test, Device.LocalStorage.Test);
+                    f = (window.localStorage.getItem(Device.LocalStorage.Test) == Device.LocalStorage.Test);
+                    window.localStorage.removeItem(Device.LocalStorage.Test);
+                } catch(err) {
+                    this.println(err.message);
+                    f = false;
+                }
+            }
+            Device.LocalStorage.Available = f;
+        }
+        return Device.LocalStorage.Available;
+    }
+
+    /**
+     * loadLocalStorage()
+     *
+     * @this {Device}
+     * @returns {Object|null}
+     */
+    loadLocalStorage()
+    {
+        let state = null;
+        if (this.hasLocalStorage()) {
+            let sValue;
+            if (window) {
+                try {
+                    sValue = window.localStorage.getItem(this.idMachine);
+                    state = JSON.parse(sValue);
+                } catch (err) {
+                    this.println(err.message);
+                }
+            }
+        }
+        return state;
+    }
+
+    /**
+     * saveLocalStorage(state)
+     *
+     * @this {Device}
+     * @param {Object} state
+     * @returns {boolean} true if successful, false if error
+     */
+    saveLocalStorage(state)
+    {
+        if (this.hasLocalStorage()) {
+            let sValue = JSON.stringify(state);
+            try {
+                window.localStorage.setItem(this.idMachine, sValue);
+                return true;
+            } catch(err) {
+                this.println(err.message);
+            }
+        }
+        return false;
+    }
+
+    /**
      * hex(n)
      *
      * This is a helper function intended for use in a debugging console, allowing you to display
@@ -393,6 +479,32 @@ class Device {
     isCategoryOn(category)
     {
         return (!this.sCategories || this.sCategories.indexOf(category) >= 0);
+    }
+
+    /**
+     * isUserAgent(s)
+     *
+     * Check the browser's user-agent string for the given substring; "iOS" and "MSIE" are special values you can
+     * use that will match any iOS or MSIE browser, respectively (even IE11, in the case of "MSIE").
+     *
+     * 2013-11-06: In a questionable move, MSFT changed the user-agent reported by IE11 on Windows 8.1, eliminating
+     * the "MSIE" string (which MSDN calls a "version token"; see http://msdn.microsoft.com/library/ms537503.aspx);
+     * they say "public websites should rely on feature detection, rather than browser detection, in order to design
+     * their sites for browsers that don't support the features used by the website." So, in IE11, we get a user-agent
+     * that tries to fool apps into thinking the browser is more like WebKit or Gecko:
+     *
+     *      Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko
+     *
+     * @param {string} s is a substring to search for in the user-agent; as noted above, "iOS" and "MSIE" are special values
+     * @returns {boolean} is true if the string was found, false if not
+     */
+    isUserAgent(s)
+    {
+        if (window) {
+            let userAgent = window.navigator.userAgent;
+            return s == "iOS" && !!userAgent.match(/(iPod|iPhone|iPad)/) && !!userAgent.match(/AppleWebKit/) || s == "MSIE" && !!userAgent.match(/(MSIE|Trident)/) || (userAgent.indexOf(s) >= 0);
+        }
+        return false;
     }
 
     /**
@@ -562,12 +674,12 @@ class Device {
     }
 
     /**
-     * parseURLParms(sParms)
+     * getURLParms(sParms)
      *
      * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
      * @returns {Object} containing properties for each parameter found
      */
-    static parseURLParms(sParms)
+    static getURLParms(sParms)
     {
         let parms = Device.URLParms;
         if (!parms) {
@@ -598,16 +710,26 @@ class Device {
 }
 
 Device.BINDING = {
-    PRINT:  "print"
+    PRINT:      "print"
 };
 
 Device.CATEGORY = {
-    TIME:   "time",
-    BUFFER: "buffer"
+    TIME:       "time",
+    BUFFER:     "buffer"
 };
 
 Device.HANDLER = {
-    COMMAND: "command"
+    COMMAND:    "command"
+};
+
+Device.Alerts = {
+    list:       [],
+    Version:    "version"
+};
+
+Device.LocalStorage = {
+    Available:  undefined,
+    Test:       "PCjs.localStorage"
 };
 
 /**
