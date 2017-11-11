@@ -1540,12 +1540,12 @@ Chip.SFORMAT = {
 Chip.OP_INPUTS = ["A","B","C","D","1","?","R5L","R5"];
 
 Chip.COMMANDS = [
-    "b[c]\t\tbreak on condition",
+    "b[c]\t\tbreak on condition c",
     "bl\t\tlist break conditions",
     "g [addr]\trun (to addr)",
     "h\t\thalt",
-    "r[a]\t\tdump registers",
-    "t\t\tstep",
+    "r[a]\t\tdump (all) registers",
+    "t [n]\t\tstep (n instructions)",
     "u [addr] [n]\tdisassemble (at addr)"
 ];
 

@@ -488,7 +488,7 @@ class Input extends Device {
              * default actions should be allowed, and below which they should not.  Ditto for any event inside
              * the power button.
              */
-            if (yInput + this.cyGap >= 0 || fPower) {
+            if (xInput >= 0 && xInput < this.cxInput && yInput + this.cyGap >= 0 || fPower) {
                 /*
                  * If we allow touch events to be processed, they will generate mouse events as well, causing
                  * confusion and delays.  We can sidestep that problem by preventing default actions on any event
