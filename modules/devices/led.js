@@ -394,6 +394,10 @@ LED.CELL = {
  *     E    C
  *     E    C
  *      DDDD P
+ *
+ * The following arrays specify pairs of moveTo()/lineTo() coordinates, used by drawGridSegment().  They all
+ * assume the hard-coded LED.CELL.WIDTH and LED.CELL.HEIGHT specified above.  If there is a triplet instead of
+ * one or more pairs (eg, the 'P' or period segment), then the coordinates are treated as arc() parameters.
  */
 LED.SEGMENT = {
     'A':        [30,  8, 79,  8, 67, 19, 37, 19],
