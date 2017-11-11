@@ -594,4 +594,4 @@ Input.KEYCODE = {               // keyCode from keydown/keyup events
 
 Input.KBD_DELAY = 50;           // minimum number of milliseconds to ensure between key presses and releases
 
-Input.VERSION   = 1.01;
+Input.VERSION   = 1.02;

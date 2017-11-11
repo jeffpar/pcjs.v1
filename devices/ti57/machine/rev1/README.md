@@ -225,9 +225,8 @@ styles:
 TI-57 Programmable Calculator (with Revised ROM)
 ------------------------------------------------
 
-The TI-57 configuration below is identical to our [original configuration](../), except that it is using
-a [Revised ROM](/devices/ti57/rom/#hrast-rom2).  We know that the ROM is slightly different, but beyond that,
-we don't know why the changes were made.  More study is required. 
+The TI-57 configuration below is identical to our [Original ROM](../) configuration, except that it is
+using a [Revised ROM](/devices/ti57/rom/#hrast-rom-2).
 
 If any errors occur during operation, the Diagnostics window should display the last instruction decoded.
 The window also accepts a few debugging commands.  Use '?' for help.

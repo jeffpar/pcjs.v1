@@ -106,12 +106,16 @@ class Machine extends Device {
          * Device initialization is now deferred until after the page is fully loaded, for the benefit
          * of devices (eg, Input) that may be dependent on page resources.
          *
-         * Strangely, for the 'load' event, I must use the window object; the document object doesn't support it.
+         * Strangely, for these page events, I must use the window object rather than the document object.
          */
-        let machine = this;
+        let machine = this, chip = null;
         window.addEventListener('load', function onLoad(event) {
-            let chip = machine.initDevices();
+            chip = machine.initDevices();
             if (chip) chip.onPower(true);
+        });
+        let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : 'beforeunload');
+        window.addEventListener(sEvent, function onUnload(event) {
+            if (chip) chip.onPower(false);
         });
     }
 
@@ -191,4 +195,4 @@ Machine.CLASSORDER = [
 Machine.COPYRIGHT = "Copyright © 2012-2017 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
-Machine.VERSION = 1.01;
+Machine.VERSION = 1.02;

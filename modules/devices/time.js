@@ -812,4 +812,4 @@ Time.BINDING = {
 
 Time.YIELDS_PER_SECOND = 60;
 
-Time.VERSION    = 1.01;
+Time.VERSION    = 1.02;

@@ -267,8 +267,8 @@ TI-57 ROM, reportedly obtained from a friend and which he claims he cannot distr
 emulator appears to work fine, its history, overall accuracy, and most importantly, its contribution to a greater
 understanding of TI-57 hardware, is murky at best.
 
-UPDATE: Despite HrastProgrammer's best efforts to hide and obfuscate his electronic ROM dump, I used a debugger to
-find and extract the data.  See the [TI-57 ROM](/devices/ti57/rom/#hrast-rom-2) page for details.
+UPDATE: Although it appears that HrastProgrammer tried to obfuscate the electronic ROM dump stored inside his TI57E.EXE
+binary, I used a debugger to find and extract it.  See the [TI-57 ROM](/devices/ti57/rom/#hrast-rom-2) page for details.
 
 My only choice was to go down the same road that HrastProgrammer travelled and pore over those TI patents.  They are
 definitely valuable historical documents, filled with detailed diagrams, instruction decoding tables, and object code

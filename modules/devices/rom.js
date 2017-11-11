@@ -98,4 +98,4 @@ class ROM extends Device {
     }
 }
 
-ROM.VERSION     = 1.01;
+ROM.VERSION     = 1.02;
