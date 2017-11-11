@@ -29,7 +29,8 @@ machines:
             "run": "runTI57",
             "speed": "speedTI57",
             "step": "stepTI57"
-          }
+          },
+          "overrides": ["cyclesPerSecond"]
         },
         "display": {
           "class": "LED",
@@ -39,7 +40,8 @@ machines:
           "color": "red",
           "bindings": {
             "container": "displayTI57"
-          }
+          },
+          "overrides": ["color","backgroundColor"]
         },
         "input": {
           "class": "Input",
@@ -287,7 +289,16 @@ The LED display is configurable as well.  The default JSON properties for the LE
 	}
 
 So if you prefer *green* or *blue* digits, change the *color* property.  A *backgroundColor* property is supported,
-too, but if it's omitted, a transparent background is used. 
+too, but if it's omitted, a transparent background is used.
+
+All properties listed in a configuration's *overrides* array may be overridden with a URL parameter.  Currently,
+that includes:
+
+- *cyclesPerSecond* (default speed is 650000)
+- *color* (default LED color is red)
+- *backgroundColor* (default LED background color is none, for a transparent background)
+
+So, for example, this [URL](?color=green#pcjs-ti-57-emulator) loads the machine on this page with green LEDs.
 
 Since this emulator is still "hot off the press", don't be surprised if there are still a few lingering
 bugs.  If you run into any, or you have a browser or device where it doesn't work as expected,
@@ -295,6 +306,8 @@ bugs.  If you run into any, or you have a browser or device where it doesn't wor
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *Nov 10, 2017*
+
+## PCjs TI-57 Emulator
 
 {% include machine.html id="ti57" config="json" %}
 
