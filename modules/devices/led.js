@@ -258,11 +258,11 @@ class LED extends Device {
     drawGrid()
     {
         /*
-         * Setting the 'globalCompositeOperation' property of the "view" context is something we rarely need to
+         * Setting the 'globalCompositeOperation' property of a 2D context is something you rarely need to
          * do, because the default draw behavior ("source-over") is fine for most cases.  The only time it is NOT
          * fine is when we're using a transparent background color (ie, the backgroundColor property is not set),
          * because it doesn't copy over any transparent pixels, effectively making it impossible to "turn off" any
-         * previously drawn LED segments.  For force that behavior, we must select the "copy" behavior.
+         * previously drawn LED segments.  To force that behavior, we must select the "copy" behavior.
          *
          * Refer to: https://www.w3.org/TR/2dcontext/#dom-context-2d-globalcompositeoperation
          */
