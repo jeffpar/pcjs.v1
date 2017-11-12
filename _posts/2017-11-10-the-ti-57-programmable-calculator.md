@@ -72,6 +72,8 @@ machines:
           "littleEndian": true,
           "file": "ti57le.bin",
           "reference": "",
+          "chipID": "TMC1501NC DI 7741",
+          "revision": "0",
           "values": [
             4623,4386,5106,7051,3246,6152,5813,5628,5805,7051,4386,3246,7911,5132,1822,6798,
             2600,1497,6539,6471,6642,6462,6899,6939,6660,3246,7587,4388,6648,4386,5634,7051,
@@ -227,9 +229,10 @@ styles:
 ---
 
 The new [TI-57 Programmable Calculator](/devices/ti57/) emulator, shown below, is the latest addition to the
-PCjs Machines collection.
+PCjs Machines collection.  It emulates a TMS-1500 chip at the register level, and uses an original
+[TI-57 ROM](/devices/ti57/rom/), providing about as perfect a simulation as you can get.
 
-Even though it's our smallest JavaScript-based emulator to date, it's still packed with goodies:
+Even though it's my smallest JavaScript-based emulator to date, it's still packed with goodies:
 
 - Faithful speed and LED simulation
 - Built-in disassembler and "mini-debugger"
