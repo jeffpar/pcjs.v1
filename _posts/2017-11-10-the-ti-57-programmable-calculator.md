@@ -227,9 +227,10 @@ styles:
 ---
 
 The new [TI-57 Programmable Calculator](/devices/ti57/) emulator, shown below, is the latest addition to the
-PCjs Machines collection.
+PCjs Machines collection.  It emulates a TMS-1500 chip at the register level, and uses an original
+[TI-57 ROM](/devices/ti57/rom/), providing about as perfect a simulation as you can get.
 
-Even though it's our smallest JavaScript-based emulator to date, it's still packed with goodies:
+Even though it's my smallest JavaScript-based emulator to date, it's still packed with goodies:
 
 - Faithful speed and LED simulation
 - Built-in disassembler and "mini-debugger"
