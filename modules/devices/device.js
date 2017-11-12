@@ -28,6 +28,14 @@
 
 "use strict";
 
+/**
+ * @define {boolean}
+ */
+var COMPILED = false;
+
+/**
+ * @define {boolean}
+ */
 var DEBUG = (window.location.hostname == "pcjs" || window.location.hostname == "jeffpar.local");
 
 /**
@@ -36,8 +44,9 @@ var DEBUG = (window.location.hostname == "pcjs" || window.location.hostname == "
  *
  * @typedef {Object} Config
  * @property {string} class
- * @property {Object} bindings
- * @property {number} version
+ * @property {Object} [bindings]
+ * @property {number} [version]
+ * @property {Array.<string>} [overrides]
  */
 
 /**

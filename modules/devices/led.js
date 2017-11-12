@@ -31,7 +31,9 @@
 /**
  * @typedef {Object} LEDConfig
  * @property {string} class
- * @property {Object} bindings
+ * @property {Object} [bindings]
+ * @property {number} [version]
+ * @property {Array.<string>} [overrides]
  * @property {number} type
  * @property {number} width
  * @property {number} height

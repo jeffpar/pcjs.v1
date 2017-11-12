@@ -31,7 +31,9 @@
 /**
  * @typedef {Object} ROMConfig
  * @property {string} class
- * @property {Object} bindings
+ * @property {Object} [bindings]
+ * @property {number} [version]
+ * @property {Array.<string>} [overrides]
  * @property {number} wordSize
  * @property {number} valueSize
  * @property {number} valueTotal
