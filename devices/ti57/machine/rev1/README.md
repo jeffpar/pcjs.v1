@@ -3,13 +3,13 @@ layout: page
 title: "TI-57 Programmable Calculator (with Revised ROM)"
 permalink: /devices/ti57/machine/rev1/
 machines:
-  - id: ti57
+  - id: ti57Rev1
     type: ti57
     name: TI-57 Programmable Calculator
     uncompiled: true
     config: |
       {
-        "ti57": {
+        "ti57Rev1": {
           "class": "Machine",
           "type": "TI57",
           "name": "TI-57 Emulator",
@@ -71,6 +71,8 @@ machines:
           "littleEndian": true,
           "file": "ti57hrast2.bin",
           "reference": "",
+          "chipID": "unknown",
+          "revision": "1",
           "values": [
             4623,4386,5106,7051,3246,6152,5813,5628,5805,7051,4386,3246,7911,5132,1822,6798,
             2600,1497,6539,6471,6642,6462,6899,6939,6660,3246,7587,4388,6648,4386,5634,7051,
@@ -204,7 +206,7 @@ machines:
         }
       }
 styles:
-  ti57:
+  ti57Rev1:
     position: relative;
     display: inline-block;
     float: left;
@@ -234,9 +236,9 @@ using a [Revised ROM](/devices/ti57/rom/#hrast-rom-2).
 If any errors occur during operation, the Diagnostics window should display the last instruction decoded.
 The window also accepts a few debugging commands.  Use '?' for help.
 
-{% include machine.html id="ti57" config="json" %}
+{% include machine.html id="ti57Rev1" config="json" %}
 
-<div id="ti57">
+<div id="ti57Rev1">
   <img id="imageTI57" src="../../images/TI-57-640.png"/>
   <div id="displayTI57"></div>
   <button id="powerTI57">Power</button>

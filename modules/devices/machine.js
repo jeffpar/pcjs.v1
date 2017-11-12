@@ -137,7 +137,7 @@ class Machine extends Device {
         for (let iClass = 0; iClass < Machine.CLASSORDER.length; iClass++) {
             for (idDevice in this.config) {
                 try {
-                    let config = this.config[idDevice];
+                    let config = this.config[idDevice], sStatus = "";
                     sClass = config['class'];
                     if (sClass != Machine.CLASSORDER[iClass]) continue;
                     switch (sClass) {
@@ -153,6 +153,7 @@ class Machine extends Device {
                         break;
                     case Machine.CLASS.ROM:
                         device = new ROM(this.idMachine, idDevice, config);
+                        if (device.config.revision) sStatus = "revision " + device.config.revision;
                         break;
                     case Machine.CLASS.TIME:
                         device = new Time(this.idMachine, idDevice, config);
@@ -166,7 +167,7 @@ class Machine extends Device {
                         this.println("unrecognized device class: " + sClass);
                         continue;
                     }
-                    this.println(sClass + " device initialized");
+                    this.println(sClass + " device initialized" + (sStatus? " (" + sStatus + ")" : ""));
                 }
                 catch(err) {
                     this.println("error initializing " + sClass + " device '" + idDevice + "': " + err.message);

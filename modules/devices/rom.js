@@ -38,6 +38,8 @@
  * @property {boolean} littleEndian
  * @property {string} file
  * @property {string} reference
+ * @property {string} chipID
+ * @property {number} revision
  * @property {Array.<number>} values
  */
 
