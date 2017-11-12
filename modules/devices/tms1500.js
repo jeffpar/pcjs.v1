@@ -302,7 +302,6 @@ class Reg64 extends Device {
  * @property {Input} input
  * @property {number} regKey (current key status, propagated to regR5 at appropriate intervals)
  * @property {LED} led
- * @property {Array.<string>} ledBuffer (24-element LED buffer, propagated to the LED device on DISP operations)
  * @property {ROM} rom
  * @property {Time} time
  * @property {number} addrPrev
@@ -481,7 +480,6 @@ class Chip extends Device {
          * Get access to the LED device, so we can update its display.
          */
         this.led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
-        this.ledBuffer = new Array(24);
 
         /*
          * Get access to the ROM device.
@@ -1005,7 +1003,6 @@ class Chip extends Device {
                 this.regPC = stateChip.shift();
                 this.stack = stateChip.shift();
                 this.regKey = stateChip.shift();
-                this.ledBuffer = stateChip.shift();
             } catch(err) {
                 this.println("Chip state error: " + err.message);
             }
@@ -1333,7 +1330,6 @@ class Chip extends Device {
         stateChip.push(this.regPC);
         stateChip.push(this.stack);
         stateChip.push(this.regKey);
-        stateChip.push(this.ledBuffer);
         return state;
     }
 
@@ -1549,4 +1545,4 @@ Chip.COMMANDS = [
     "u [addr] [n]\tdisassemble (at addr)"
 ];
 
-Chip.VERSION    = 1.02;
+Chip.VERSION    = 1.03;

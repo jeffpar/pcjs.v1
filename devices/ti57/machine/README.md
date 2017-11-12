@@ -13,7 +13,7 @@ machines:
           "class": "Machine",
           "type": "TI57",
           "name": "TI-57 Emulator",
-          "version": 1.02,
+          "version": 1.03,
           "bindings": {
             "print": "printTI57"
           }
@@ -73,6 +73,9 @@ machines:
           "reference": "",
           "chipID": "TMC1501NC DI 7741",
           "revision": "0",
+          "bindings": {
+          	"grid": "romGridTI57"
+          },
           "values": [
             4623,4386,5106,7051,3246,6152,5813,5628,5805,7051,4386,3246,7911,5132,1822,6798,
             2600,1497,6539,6471,6642,6462,6899,6939,6660,3246,7587,4388,6648,4386,5634,7051,
@@ -264,3 +267,8 @@ The window also accepts a few debugging commands.  Use '?' for help.
   <button id="resetTI57">Reset</button>
   <button id="clearTI57">Clear</button>
 </div>
+<div style="float:left;">
+  <p>ROM Activity</p>
+  <div id="romGridTI57"></div>
+</div>
+

@@ -48,8 +48,7 @@
  * The ultimate goal is to provide support for a variety of LED types, such as:
  *
  * 1) LED Light (single light)
- * 2) LED Array (two-dimensional)
- * 3) LED Digits (1 or more 7-segment digits)
+ * 2) LED Digits (1 or more 7-segment digits)
  *
  * The initial goal is to manage a 12-element array of 7-segment LED digits for the TI-57.
  *
@@ -127,11 +126,6 @@ class LED extends Device {
     {
         super(idMachine, idDevice, LED.VERSION, config);
 
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
-        if (this.time) {
-            this.time.addAnimator(this.drawBuffer.bind(this));
-        }
-
         let container = this.bindings[LED.BINDING.CONTAINER];
         if (container) {
             let canvasView = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
@@ -141,8 +135,10 @@ class LED extends Device {
                 this.canvasView = canvasView;
 
                 this.type = this.config['type'];
-                this.width = this.config['width'] || 96;
-                this.height = this.config['height'] || 128;
+                this.widthCell = (this.type == LED.TYPE.DIGIT? LED.DIGIT.WIDTH : 8);
+                this.heightCell = (this.type == LED.TYPE.DIGIT? LED.DIGIT.HEIGHT : 8);
+                this.width = this.config['width'] || this.widthCell;
+                this.height = this.config['height'] || this.heightCell;
                 this.cols = this.config['cols'] || 1;
                 this.rows = this.config['rows'] || 1;
                 this.widthView = this.width * this.cols;
@@ -164,8 +160,8 @@ class LED extends Device {
                  */
                 this.canvasGrid = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
                 if (this.canvasGrid) {
-                    this.canvasGrid.width = this.widthGrid = LED.CELL.WIDTH * this.cols;
-                    this.canvasGrid.height = this.heightGrid = LED.CELL.HEIGHT * this.rows;
+                    this.canvasGrid.width = this.widthGrid = this.widthCell * this.cols;
+                    this.canvasGrid.height = this.heightGrid = this.heightCell * this.rows;
                     this.contextGrid = this.canvasGrid.getContext("2d");
                 }
 
@@ -187,6 +183,11 @@ class LED extends Device {
                  * fTickled hasn't been "tickled", and automatically blank the screen.
                  */
                 this.fBufferModified = this.fTickled = false;
+
+                this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+                if (this.time) {
+                    this.time.addAnimator(this.drawBuffer.bind(this));
+                }
             }
         }
     }
@@ -260,8 +261,8 @@ class LED extends Device {
     drawGrid()
     {
         /*
-         * Setting the 'globalCompositeOperation' property of a 2D context is something you rarely need to
-         * do, because the default draw behavior ("source-over") is fine for most cases.  The only time it is NOT
+         * Setting the 'globalCompositeOperation' property of a 2D context is something you rarely need to do,
+         * because the default draw behavior ("source-over") is fine for most cases.  One case where it is NOT
          * fine is when we're using a transparent background color (ie, the backgroundColor property is not set),
          * because it doesn't copy over any transparent pixels, effectively making it impossible to "turn off" any
          * previously drawn LED segments.  To force that behavior, we must select the "copy" behavior.
@@ -284,8 +285,8 @@ class LED extends Device {
     {
         let coords = LED.SEGMENT[idSeg];
         if (coords) {
-            let xBias = col * LED.CELL.WIDTH;
-            let yBias = row * LED.CELL.HEIGHT;
+            let xBias = col * this.widthCell;
+            let yBias = row * this.heightCell;
             this.contextGrid.fillStyle = this.color;
             this.contextGrid.beginPath();
             if (coords.length == 3) {
@@ -369,9 +370,9 @@ class LED extends Device {
 }
 
 LED.TYPE = {
-    SINGLE:     1,
-    ARRAY:      2,
-    DIGITS:     3
+    ROUND:      1,      // a single (round) LED
+    SQUARE:     2,      // a single (square) LED
+    DIGIT:      3       // a 7-segment (digit) LED, with a period as an 8th segment
 };
 
 LED.BINDING = {
@@ -379,9 +380,9 @@ LED.BINDING = {
 };
 
 /*
- * Each segment is an array containing an initial moveTo() point followed by one or more lineTo() coords.
+ * For LED.TYPE.DIGIT, each cell has the following width and height.
  */
-LED.CELL = {
+LED.DIGIT = {
     WIDTH:      96,
     HEIGHT:     128
 };
@@ -398,7 +399,7 @@ LED.CELL = {
  *      DDDD P
  *
  * The following arrays specify pairs of moveTo()/lineTo() coordinates, used by drawGridSegment().  They all
- * assume the hard-coded LED.CELL.WIDTH and LED.CELL.HEIGHT specified above.  If there is a triplet instead of
+ * assume the hard-coded LED.DIGIT.WIDTH and LED.DIGIT.HEIGHT specified above.  If there is a triplet instead of
  * one or more pairs (eg, the 'P' or period segment), then the coordinates are treated as arc() parameters.
  */
 LED.SEGMENT = {
@@ -432,4 +433,4 @@ LED.SYMBOLS = {
     '.':        ['P']
 };
 
-LED.VERSION     = 1.02;
+LED.VERSION     = 1.03;

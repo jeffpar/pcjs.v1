@@ -28,6 +28,10 @@
 
 "use strict";
 
+if (typeof module !== "undefined") {
+    var LED = require("led");
+}
+
 /**
  * @typedef {Object} ROMConfig
  * @property {string} class
@@ -66,6 +70,8 @@ class ROM extends Device {
      *        "littleEndian": true,
      *        "file": "ti57le.bin",
      *        "reference": "",
+     *        "chipID": "TMC1501NC DI 7741",
+     *        "revision": "0",
      *        "values": [
      *        ]
      *      }
@@ -79,15 +85,34 @@ class ROM extends Device {
     {
         super(idMachine, idDevice, ROM.VERSION, config);
 
-        // TODO: Determine why I get an inspection error if I use this.config instead of config....
-
         this.data = config['values'];
 
         /*
-         * WARNING: This assumes that the data array length is a power-of-two (which we assert below).
+         * This addrMask calculation assumes that the data array length is a power-of-two (which we assert).
          */
         this.addrMask = this.data.length - 1;
         this.assert(!((this.addrMask + 1) & this.addrMask));
+
+        /*
+         * If a "grid" binding has been supplied, then create an LED array sufficiently large to represent the
+         * entire ROM.  If the power-of-two is odd, then we will favor a slightly wider grid over a taller one,
+         * by virtue of using Math.ceil() for cols and Math.floor() for rows.
+         */
+        let sGrid = config.bindings && config.bindings[ROM.BINDING.GRID];
+        if (sGrid) {
+            let addrLines = Math.log2(this.data.length) / 2;
+            let configLEDs = {
+                class: "LED",
+                type: LED.TYPE.ROUND,
+                cols: Math.pow(2, Math.ceil(addrLines)),
+                rows: Math.pow(2, Math.floor(addrLines)),
+                color: "green",
+                fixedSize: true,
+                backgroundColor: "black",
+                bindings: {container: sGrid}
+            };
+            this.ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);
+        }
     }
 
     /**
@@ -102,4 +127,8 @@ class ROM extends Device {
     }
 }
 
-ROM.VERSION     = 1.02;
+ROM.BINDING = {
+    GRID:       "grid"
+};
+
+ROM.VERSION     = 1.03;

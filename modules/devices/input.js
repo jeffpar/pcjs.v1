@@ -632,4 +632,4 @@ Input.KEYCODE = {               // keyCode from keydown/keyup events
 
 Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
 
-Input.VERSION   = 1.02;
+Input.VERSION   = 1.03;
