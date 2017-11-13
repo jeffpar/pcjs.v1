@@ -241,7 +241,7 @@ class Time extends Device {
      * addUpdater(callBack)
      *
      * @this {Time}
-     * @param {function()} callback
+     * @param {function()} callBack
      */
     addUpdater(callBack)
     {

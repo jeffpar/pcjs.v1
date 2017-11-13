@@ -1,9 +1,15 @@
 {% if page.styles != nil %}
   <style type="text/css">
   {% for id in page.styles %}
-    #{{ id[0] }} {
-      {% for style in id[1] %}{{ style[0] }}: {{ style[1] }}{% endfor %}
-    }
+    {% if id[0] contains "." %}
+      {{ id[0] }} {
+        {% for style in id[1] %}{{ style[0] }}: {{ style[1] }}{% endfor %}
+      }
+    {% else %}
+      #{{ id[0] }} {
+        {% for style in id[1] %}{{ style[0] }}: {{ style[1] }}{% endfor %}
+      }
+    {% endif %}
   {% endfor %}
   </style>
 {% endif %}

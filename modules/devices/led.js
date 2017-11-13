@@ -254,7 +254,7 @@ class LED extends Device {
      * the machine must perform a DISP operation at least 30-60 times per second.
      *
      * @this {LED}
-     * @param {boolean} fForced
+     * @param {boolean} [fForced]
      */
     drawBuffer(fForced)
     {
