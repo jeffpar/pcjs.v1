@@ -1087,7 +1087,7 @@ class Chip extends Device {
         case 'u':
             addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
             while (nWords--) {
-                let opCode = this.rom && this.rom.getData(addr);
+                let opCode = this.rom && this.rom.getData(addr, true);
                 if (opCode == undefined) break;
                 sResult += this.disassemble(opCode, addr++);
             }
@@ -1367,7 +1367,7 @@ class Chip extends Device {
         let s = "";
         if (this.nStringFormat) {
             if (this.rom) {
-                s += this.disassemble(this.rom.getData(this.regPC), this.regPC, true);
+                s += this.disassemble(this.rom.getData(this.regPC, true), this.regPC, true);
             }
             s += "  ";
             for (let i = 0, n = this.regsO.length; i < n; i++) {
@@ -1398,7 +1398,7 @@ class Chip extends Device {
         s += " RAB=" + this.regRAB + ' ';
         this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=0x%04x ", i, addr & 0xffff);});
         if (this.rom) {
-            s += '\n' + this.disassemble(this.rom.getData(this.regPC), this.regPC);
+            s += '\n' + this.disassemble(this.rom.getData(this.regPC, true), this.regPC);
         }
         this.addrPrev = this.regPC;
         return s.trim();

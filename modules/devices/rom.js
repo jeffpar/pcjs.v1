@@ -152,15 +152,19 @@ class ROM extends Device {
     }
 
     /**
-     * getData(addr)
+     * getData(addr, fInternal)
+     *
+     * Set fInternal to true if an internal caller (eg, the disassembler) is accessing the ROM, to avoid touching
+     * the ledArray.
      *
      * @this {ROM}
      * @param {number} addr
+     * @param {boolean} [fInternal]
      * @returns {number|undefined}
      */
-    getData(addr)
+    getData(addr, fInternal)
     {
-        if (this.ledArray) {
+        if (this.ledArray && !fInternal) {
             this.ledArray.setBuffer(addr % this.cols, (addr / this.cols) | 0, LED.STATE.ON);
         }
         return this.data[addr];
