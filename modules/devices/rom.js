@@ -28,10 +28,6 @@
 
 "use strict";
 
-if (typeof module !== "undefined") {
-    var LED = require("led");
-}
-
 /**
  * @typedef {Object} ROMConfig
  * @property {string} class
