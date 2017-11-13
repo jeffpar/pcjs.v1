@@ -100,8 +100,7 @@ class ROM extends Device {
          * entire ROM.  If the power-of-two is odd, then we will favor a slightly wider grid over a taller one,
          * by virtue of using Math.ceil() for cols and Math.floor() for rows.
          */
-        let sGrid = config.bindings && config.bindings[ROM.BINDING.GRID];
-        if (sGrid) {
+        if (this.bindings[ROM.BINDING.GRID]) {
             let addrLines = Math.log2(this.data.length) / 2;
             this.cols = Math.pow(2, Math.ceil(addrLines));
             this.rows = Math.pow(2, Math.floor(addrLines));
@@ -114,10 +113,17 @@ class ROM extends Device {
                 fixed:           true,
                 persistent:      true,
                 backgroundColor: config['backgroundColorROM'] || "black",
-                bindings:        {container: sGrid}
+                bindings:        {container: config.bindings[ROM.BINDING.GRID]}
             };
-            this.ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);
-            this.clearArray();
+            let ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);
+            /*
+             * We can't assume success just because the constructor returned an LED object; check for a buffer
+             * to be sure it's fully initialized.  TODO: Consider having the LED constructor throw an error instead.
+             */
+            if (ledArray.buffer) {
+                this.ledArray = ledArray;
+                this.clearArray();
+            }
         }
     }
 
@@ -156,7 +162,7 @@ class ROM extends Device {
     loadState(state)
     {
         let buffer = state.shift();
-        if (buffer) {
+        if (buffer && this.ledArray) {
             this.assert(this.ledArray.buffer.length == buffer.length);
             if (this.ledArray.buffer.length == buffer.length) {
                 this.ledArray.buffer = buffer;
@@ -173,7 +179,9 @@ class ROM extends Device {
      */
     saveState(state)
     {
-        state.push(this.ledArray.buffer);
+        if (this.ledArray) {
+            state.push(this.ledArray.buffer);
+        }
     }
 }
 

@@ -257,3 +257,7 @@ The window also accepts a few debugging commands.  Use '?' for help.
   <button id="resetTI57">Reset</button>
   <button id="clearTI57">Clear</button>
 </div>
+<div style="float:left;">
+  <p>ROM Activity</p>
+  <div id="romGridTI57"></div>
+</div>
