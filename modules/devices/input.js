@@ -399,9 +399,7 @@ class Input extends Device {
                  * Instead, we'll rely on our own xStart/yStart properties, which should only
                  * be positive after 'mousedown' and before 'mouseup'.
                  */
-                //if (input.xStart >= 0) {
-                    input.processEvent(element, Input.ACTION.MOVE, event);
-                //}
+                input.processEvent(element, Input.ACTION.MOVE, event);
             }
         );
 
@@ -417,7 +415,9 @@ class Input extends Device {
         element.addEventListener(
             'mouseout',
             function onMouseUp(event) {
-                if (input.xStart >= 0) {
+                if (input.xStart < 0) {
+                    input.processEvent(element, Input.ACTION.MOVE, event);
+                } else {
                     input.processEvent(element, Input.ACTION.RELEASE, event);
                 }
             }
@@ -470,7 +470,8 @@ class Input extends Device {
      */
     processEvent(element, action, event)
     {
-        let x, y, xInput, yInput, col, row, fButton, fInput, fPower;
+        let col = -1, row = -1;
+        let x, y, xInput, yInput, fButton, fInput, fPower;
 
         if (action < Input.ACTION.RELEASE) {
             /**
@@ -563,7 +564,6 @@ class Input extends Device {
 
                     xInput -= xCol;
                     yInput -= yCol;
-                    col = row = -1;
                     if (xInput >= 0 && xInput < this.cxButton && yInput >= 0 && yInput < this.cyButton) {
                         col = colInput;
                         row = rowInput;

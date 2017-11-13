@@ -129,13 +129,17 @@ class ROM extends Device {
                 bindings:       {surface: config.bindings[ROM.BINDING.ARRAY]}
             };
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
+            this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC);
             this.ledInput.addHover(function(col, row) {
                 if (rom.chip) {
-                    let addr = row * rom.cols + col;
-                    this.assert(addr >= 0 && addr < rom.data.length);
-                    let opCode = rom.data[addr];
-                    let sDesc = rom.chip.disassemble(opCode, addr);
-                    rom.updateBindingText(ROM.BINDING.CELLDESC, sDesc);
+                    let sDesc = rom.sCellDesc;
+                    if (col >= 0 && row >= 0) {
+                        let addr = row * rom.cols + col;
+                        this.assert(addr >= 0 && addr < rom.data.length);
+                        let opCode = rom.data[addr];
+                        sDesc = rom.chip.disassemble(opCode, addr);
+                    }
+                    rom.setBindingText(ROM.BINDING.CELLDESC, sDesc);
                 }
             });
         }
@@ -144,11 +148,26 @@ class ROM extends Device {
     /**
      * clearArray()
      *
+     * This performs a combination of clearBuffer() and drawBuffer().
+     *
      * @this {ROM}
      */
     clearArray()
     {
         if (this.ledArray) this.ledArray.clearBuffer(true);
+    }
+
+    /**
+     * drawArray()
+     *
+     * This performs a simple drawBuffer(); intended for synchronous updates (eg, step operations);
+     * otherwise, you should allow the LED object's async animation handler take care of drawing updates.
+     *
+     * @this {ROM}
+     */
+    drawArray()
+    {
+        if (this.ledArray) this.ledArray.drawBuffer();
     }
 
     /**

@@ -32,7 +32,7 @@ machines:
             "speed": "speedTI57",
             "step": "stepTI57"
           },
-          "overrides": ["cyclesPerSecond"]
+          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate"]
         },
         "display": {
           "class": "LED",
@@ -232,6 +232,15 @@ styles:
     opacity: 0;
   printTI57:
     font-family: Monaco,"Lucida Console",monospace;
+  romArrayTI57:
+    display: inline-block;
+  .regRow:
+    padding-left: 1em;
+    font-family: Monaco,"Lucida Console",monospace;
+  .regLabel:
+    padding-left: 1em;
+  .regDigit:
+    border: 1px solid;
 ---
 
 TI-57 Programmable Calculator
@@ -270,10 +279,393 @@ The window also accepts a few debugging commands.  Use '?' for help.
   <button id="stepTI57">Step</button><span id="speedTI57">Stopped</span>
   <button id="resetTI57">Reset</button>
   <button id="clearTI57">Clear</button>
-</div>
-<div style="float:left;">
   <p>ROM Activity</p>
   <div id="romArrayTI57"></div>
-  <p id="romCellTI57"></p>
+  <p id="romCellTI57">[No ROM address selected]</p>
+  <p>Operational Registers</p>
+  <div>
+  	<div class="regRow">
+  	  <span class="regLabel">A</span>
+  	  <span class="regDigit" id="regA-15"></span>
+  	  <span class="regDigit" id="regA-14"></span>
+  	  <span class="regDigit" id="regA-13"></span>
+  	  <span class="regDigit" id="regA-12"></span>
+  	  <span class="regDigit" id="regA-11"></span>
+  	  <span class="regDigit" id="regA-10"></span>
+  	  <span class="regDigit" id="regA-09"></span>
+  	  <span class="regDigit" id="regA-08"></span>
+  	  <span class="regDigit" id="regA-07"></span>
+  	  <span class="regDigit" id="regA-06"></span>
+  	  <span class="regDigit" id="regA-05"></span>
+  	  <span class="regDigit" id="regA-04"></span>
+  	  <span class="regDigit" id="regA-03"></span>
+  	  <span class="regDigit" id="regA-02"></span>
+  	  <span class="regDigit" id="regA-01"></span>
+  	  <span class="regDigit" id="regA-00"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">B</span>
+  	  <span class="regDigit" id="regB-15"></span>
+  	  <span class="regDigit" id="regB-14"></span>
+  	  <span class="regDigit" id="regB-13"></span>
+  	  <span class="regDigit" id="regB-12"></span>
+  	  <span class="regDigit" id="regB-11"></span>
+  	  <span class="regDigit" id="regB-10"></span>
+  	  <span class="regDigit" id="regB-09"></span>
+  	  <span class="regDigit" id="regB-08"></span>
+  	  <span class="regDigit" id="regB-07"></span>
+  	  <span class="regDigit" id="regB-06"></span>
+  	  <span class="regDigit" id="regB-05"></span>
+  	  <span class="regDigit" id="regB-04"></span>
+  	  <span class="regDigit" id="regB-03"></span>
+  	  <span class="regDigit" id="regB-02"></span>
+  	  <span class="regDigit" id="regB-01"></span>
+  	  <span class="regDigit" id="regB-00"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">C</span>
+  	  <span class="regDigit" id="regC-15"></span>
+  	  <span class="regDigit" id="regC-14"></span>
+  	  <span class="regDigit" id="regC-13"></span>
+  	  <span class="regDigit" id="regC-12"></span>
+  	  <span class="regDigit" id="regC-11"></span>
+  	  <span class="regDigit" id="regC-10"></span>
+  	  <span class="regDigit" id="regC-09"></span>
+  	  <span class="regDigit" id="regC-08"></span>
+  	  <span class="regDigit" id="regC-07"></span>
+  	  <span class="regDigit" id="regC-06"></span>
+  	  <span class="regDigit" id="regC-05"></span>
+  	  <span class="regDigit" id="regC-04"></span>
+  	  <span class="regDigit" id="regC-03"></span>
+  	  <span class="regDigit" id="regC-02"></span>
+  	  <span class="regDigit" id="regC-01"></span>
+  	  <span class="regDigit" id="regC-00"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">D</span>
+  	  <span class="regDigit" id="regD-15"></span>
+  	  <span class="regDigit" id="regD-14"></span>
+  	  <span class="regDigit" id="regD-13"></span>
+  	  <span class="regDigit" id="regD-12"></span>
+  	  <span class="regDigit" id="regD-11"></span>
+  	  <span class="regDigit" id="regD-10"></span>
+  	  <span class="regDigit" id="regD-09"></span>
+  	  <span class="regDigit" id="regD-08"></span>
+  	  <span class="regDigit" id="regD-07"></span>
+  	  <span class="regDigit" id="regD-06"></span>
+  	  <span class="regDigit" id="regD-05"></span>
+  	  <span class="regDigit" id="regD-04"></span>
+  	  <span class="regDigit" id="regD-03"></span>
+  	  <span class="regDigit" id="regD-02"></span>
+  	  <span class="regDigit" id="regD-01"></span>
+  	  <span class="regDigit" id="regD-00"></span>
+  	</div>
+  </div>
+  <p>Storage Registers</p>
+  <div>
+  	<div class="regRow">
+  	  <span class="regLabel">X0</span>
+  	  <span class="regDigit" id="regX0-15" data-value="(0"></span>
+  	  <span class="regDigit" id="regX0-14" data-value="O0"></span>
+  	  <span class="regDigit" id="regX0-13" data-value="A0 N"></span>
+  	  <span class="regDigit" id="regX0-12" data-value="A0 M"></span>
+  	  <span class="regDigit" id="regX0-11" data-value="A0 M"></span>
+  	  <span class="regDigit" id="regX0-10" data-value="A0 M"></span>
+  	  <span class="regDigit" id="regX0-09" data-value="A0 M"></span>
+  	  <span class="regDigit" id="regX0-08" data-value="A0 M"></span>
+  	  <span class="regDigit" id="regX0-07" data-value="A0 M"></span>
+  	  <span class="regDigit" id="regX0-06" data-value="A0 M"></span>
+  	  <span class="regDigit" id="regX0-05" data-value="A0 M"></span>
+  	  <span class="regDigit" id="regX0-04" data-value="A0 M"></span>
+  	  <span class="regDigit" id="regX0-03" data-value="A0 M"></span>
+  	  <span class="regDigit" id="regX0-02" data-value="A0 M"></span>
+  	  <span class="regDigit" id="regX0-01" data-value="A0 E"></span>
+  	  <span class="regDigit" id="regX0-00" data-value="A0 E"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">X1</span>
+  	  <span class="regDigit" id="regX1-15" data-value="(1"></span>
+  	  <span class="regDigit" id="regX1-14" data-value="O1"></span>
+  	  <span class="regDigit" id="regX1-13" data-value="A1 N"></span>
+  	  <span class="regDigit" id="regX1-12" data-value="A1 M"></span>
+  	  <span class="regDigit" id="regX1-11" data-value="A1 M"></span>
+  	  <span class="regDigit" id="regX1-10" data-value="A1 M"></span>
+  	  <span class="regDigit" id="regX1-09" data-value="A1 M"></span>
+  	  <span class="regDigit" id="regX1-08" data-value="A1 M"></span>
+  	  <span class="regDigit" id="regX1-07" data-value="A1 M"></span>
+  	  <span class="regDigit" id="regX1-06" data-value="A1 M"></span>
+  	  <span class="regDigit" id="regX1-05" data-value="A1 M"></span>
+  	  <span class="regDigit" id="regX1-04" data-value="A1 M"></span>
+  	  <span class="regDigit" id="regX1-03" data-value="A1 M"></span>
+  	  <span class="regDigit" id="regX1-02" data-value="A1 M"></span>
+  	  <span class="regDigit" id="regX1-01" data-value="A1 E"></span>
+  	  <span class="regDigit" id="regX1-00" data-value="A1 E"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">X2</span>
+  	  <span class="regDigit" id="regX2-15" data-value="(2"></span>
+  	  <span class="regDigit" id="regX2-14" data-value="O2"></span>
+  	  <span class="regDigit" id="regX2-13" data-value="R6 N"></span>
+  	  <span class="regDigit" id="regX2-12" data-value="R6 M"></span>
+  	  <span class="regDigit" id="regX2-11" data-value="R6 M"></span>
+  	  <span class="regDigit" id="regX2-10" data-value="R6 M"></span>
+  	  <span class="regDigit" id="regX2-09" data-value="R6 M"></span>
+  	  <span class="regDigit" id="regX2-08" data-value="R6 M"></span>
+  	  <span class="regDigit" id="regX2-07" data-value="R6 M"></span>
+  	  <span class="regDigit" id="regX2-06" data-value="R6 M"></span>
+  	  <span class="regDigit" id="regX2-05" data-value="R6 M"></span>
+  	  <span class="regDigit" id="regX2-04" data-value="R6 M"></span>
+  	  <span class="regDigit" id="regX2-03" data-value="R6 M"></span>
+  	  <span class="regDigit" id="regX2-02" data-value="R6 M"></span>
+  	  <span class="regDigit" id="regX2-01" data-value="R6 E"></span>
+  	  <span class="regDigit" id="regX2-00" data-value="R6 E"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">X3</span>
+  	  <span class="regDigit" id="regX3-15" data-value="(3"></span>
+  	  <span class="regDigit" id="regX3-14" data-value="O3"></span>
+  	  <span class="regDigit" id="regX3-13" data-value="R5 N"></span>
+  	  <span class="regDigit" id="regX3-12" data-value="R5 M"></span>
+  	  <span class="regDigit" id="regX3-11" data-value="R5 M"></span>
+  	  <span class="regDigit" id="regX3-10" data-value="R5 M"></span>
+  	  <span class="regDigit" id="regX3-09" data-value="R5 M"></span>
+  	  <span class="regDigit" id="regX3-08" data-value="R5 M"></span>
+  	  <span class="regDigit" id="regX3-07" data-value="R5 M"></span>
+  	  <span class="regDigit" id="regX3-06" data-value="R5 M"></span>
+  	  <span class="regDigit" id="regX3-05" data-value="R5 M"></span>
+  	  <span class="regDigit" id="regX3-04" data-value="R5 M"></span>
+  	  <span class="regDigit" id="regX3-03" data-value="R5 M"></span>
+  	  <span class="regDigit" id="regX3-02" data-value="R5 M"></span>
+  	  <span class="regDigit" id="regX3-01" data-value="R5 E"></span>
+  	  <span class="regDigit" id="regX3-00" data-value="R5 E"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">X4</span>
+  	  <span class="regDigit" id="regX4-15" data-value="SC"></span>
+  	  <span class="regDigit" id="regX4-14" data-value="?"></span>
+  	  <span class="regDigit" id="regX4-13" data-value="R7 N"></span>
+  	  <span class="regDigit" id="regX4-12" data-value="R7 M"></span>
+  	  <span class="regDigit" id="regX4-11" data-value="R7 M"></span>
+  	  <span class="regDigit" id="regX4-10" data-value="R7 M"></span>
+  	  <span class="regDigit" id="regX4-09" data-value="R7 M"></span>
+  	  <span class="regDigit" id="regX4-08" data-value="R7 M"></span>
+  	  <span class="regDigit" id="regX4-07" data-value="R7 M"></span>
+  	  <span class="regDigit" id="regX4-06" data-value="R7 M"></span>
+  	  <span class="regDigit" id="regX4-05" data-value="R7 M"></span>
+  	  <span class="regDigit" id="regX4-04" data-value="R7 M"></span>
+  	  <span class="regDigit" id="regX4-03" data-value="R7 M"></span>
+  	  <span class="regDigit" id="regX4-02" data-value="R7 M"></span>
+  	  <span class="regDigit" id="regX4-01" data-value="R7 E"></span>
+  	  <span class="regDigit" id="regX4-00" data-value="R7 E"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">X5</span>
+  	  <span class="regDigit" id="regX5-15" data-value="PC H"></span>
+  	  <span class="regDigit" id="regX5-14" data-value="PC L"></span>
+  	  <span class="regDigit" id="regX5-13" data-value="R0 N"></span>
+  	  <span class="regDigit" id="regX5-12" data-value="R0 M"></span>
+  	  <span class="regDigit" id="regX5-11" data-value="R0 M"></span>
+  	  <span class="regDigit" id="regX5-10" data-value="R0 M"></span>
+  	  <span class="regDigit" id="regX5-09" data-value="R0 M"></span>
+  	  <span class="regDigit" id="regX5-08" data-value="R0 M"></span>
+  	  <span class="regDigit" id="regX5-07" data-value="R0 M"></span>
+  	  <span class="regDigit" id="regX5-06" data-value="R0 M"></span>
+  	  <span class="regDigit" id="regX5-05" data-value="R0 M"></span>
+  	  <span class="regDigit" id="regX5-04" data-value="R0 M"></span>
+  	  <span class="regDigit" id="regX5-03" data-value="R0 M"></span>
+  	  <span class="regDigit" id="regX5-02" data-value="R0 M"></span>
+  	  <span class="regDigit" id="regX5-01" data-value="R0 E"></span>
+  	  <span class="regDigit" id="regX5-00" data-value="R0 E"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">X6</span>
+  	  <span class="regDigit" id="regX6-15" data-value="S1 H"></span>
+  	  <span class="regDigit" id="regX6-14" data-value="S1 L"></span>
+  	  <span class="regDigit" id="regX6-13" data-value="R1 N"></span>
+  	  <span class="regDigit" id="regX6-12" data-value="R1 M"></span>
+  	  <span class="regDigit" id="regX6-11" data-value="R1 M"></span>
+  	  <span class="regDigit" id="regX6-10" data-value="R1 M"></span>
+  	  <span class="regDigit" id="regX6-09" data-value="R1 M"></span>
+  	  <span class="regDigit" id="regX6-08" data-value="R1 M"></span>
+  	  <span class="regDigit" id="regX6-07" data-value="R1 M"></span>
+  	  <span class="regDigit" id="regX6-06" data-value="R1 M"></span>
+  	  <span class="regDigit" id="regX6-05" data-value="R1 M"></span>
+  	  <span class="regDigit" id="regX6-04" data-value="R1 M"></span>
+  	  <span class="regDigit" id="regX6-03" data-value="R1 M"></span>
+  	  <span class="regDigit" id="regX6-02" data-value="R1 M"></span>
+  	  <span class="regDigit" id="regX6-01" data-value="R1 E"></span>
+  	  <span class="regDigit" id="regX6-00" data-value="R1 E"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">X7</span>
+  	  <span class="regDigit" id="regX7-15" data-value="S2 H"></span>
+  	  <span class="regDigit" id="regX7-14" data-value="S2 L"></span>
+  	  <span class="regDigit" id="regX7-13" data-value="R2 N"></span>
+  	  <span class="regDigit" id="regX7-12" data-value="R2 M"></span>
+  	  <span class="regDigit" id="regX7-11" data-value="R2 M"></span>
+  	  <span class="regDigit" id="regX7-10" data-value="R2 M"></span>
+  	  <span class="regDigit" id="regX7-09" data-value="R2 M"></span>
+  	  <span class="regDigit" id="regX7-08" data-value="R2 M"></span>
+  	  <span class="regDigit" id="regX7-07" data-value="R2 M"></span>
+  	  <span class="regDigit" id="regX7-06" data-value="R2 M"></span>
+  	  <span class="regDigit" id="regX7-05" data-value="R2 M"></span>
+  	  <span class="regDigit" id="regX7-04" data-value="R2 M"></span>
+  	  <span class="regDigit" id="regX7-03" data-value="R2 M"></span>
+  	  <span class="regDigit" id="regX7-02" data-value="R2 M"></span>
+  	  <span class="regDigit" id="regX7-01" data-value="R2 E"></span>
+  	  <span class="regDigit" id="regX7-00" data-value="R2 E"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">Y0</span>
+  	  <span class="regDigit" id="regY0-15" data-value="P00 H"></span>
+  	  <span class="regDigit" id="regY0-14" data-value="P00 L"></span>
+  	  <span class="regDigit" id="regY0-13" data-value="P01 H"></span>
+  	  <span class="regDigit" id="regY0-12" data-value="P01 L"></span>
+  	  <span class="regDigit" id="regY0-11" data-value="P02 H"></span>
+  	  <span class="regDigit" id="regY0-10" data-value="P02 L"></span>
+  	  <span class="regDigit" id="regY0-09" data-value="P03 H"></span>
+  	  <span class="regDigit" id="regY0-08" data-value="P03 L"></span>
+  	  <span class="regDigit" id="regY0-07" data-value="P04 H"></span>
+  	  <span class="regDigit" id="regY0-06" data-value="P04 L"></span>
+  	  <span class="regDigit" id="regY0-05" data-value="P05 H"></span>
+  	  <span class="regDigit" id="regY0-04" data-value="P05 L"></span>
+  	  <span class="regDigit" id="regY0-03" data-value="P06 H"></span>
+  	  <span class="regDigit" id="regY0-02" data-value="P06 L"></span>
+  	  <span class="regDigit" id="regY0-01" data-value="P07 H"></span>
+  	  <span class="regDigit" id="regY0-00" data-value="P07 L"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">Y1</span>
+  	  <span class="regDigit" id="regY1-15" data-value="P08 H"></span>
+  	  <span class="regDigit" id="regY1-14" data-value="P08 L"></span>
+  	  <span class="regDigit" id="regY1-13" data-value="P09 H"></span>
+  	  <span class="regDigit" id="regY1-12" data-value="P09 L"></span>
+  	  <span class="regDigit" id="regY1-11" data-value="P10 H"></span>
+  	  <span class="regDigit" id="regY1-10" data-value="P10 L"></span>
+  	  <span class="regDigit" id="regY1-09" data-value="P11 H"></span>
+  	  <span class="regDigit" id="regY1-08" data-value="P11 L"></span>
+  	  <span class="regDigit" id="regY1-07" data-value="P12 H"></span>
+  	  <span class="regDigit" id="regY1-06" data-value="P12 L"></span>
+  	  <span class="regDigit" id="regY1-05" data-value="P13 H"></span>
+  	  <span class="regDigit" id="regY1-04" data-value="P13 L"></span>
+  	  <span class="regDigit" id="regY1-03" data-value="P14 H"></span>
+  	  <span class="regDigit" id="regY1-02" data-value="P14 L"></span>
+  	  <span class="regDigit" id="regY1-01" data-value="P15 H"></span>
+  	  <span class="regDigit" id="regY1-00" data-value="P15 L"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">Y2</span>
+  	  <span class="regDigit" id="regY2-15" data-value="P16 H"></span>
+  	  <span class="regDigit" id="regY2-14" data-value="P16 L"></span>
+  	  <span class="regDigit" id="regY2-13" data-value="P17 H"></span>
+  	  <span class="regDigit" id="regY2-12" data-value="P17 L"></span>
+  	  <span class="regDigit" id="regY2-11" data-value="P18 H"></span>
+  	  <span class="regDigit" id="regY2-10" data-value="P18 L"></span>
+  	  <span class="regDigit" id="regY2-09" data-value="P19 H"></span>
+  	  <span class="regDigit" id="regY2-08" data-value="P19 L"></span>
+  	  <span class="regDigit" id="regY2-07" data-value="P20 H"></span>
+  	  <span class="regDigit" id="regY2-06" data-value="P20 L"></span>
+  	  <span class="regDigit" id="regY2-05" data-value="P21 H"></span>
+  	  <span class="regDigit" id="regY2-04" data-value="P21 L"></span>
+  	  <span class="regDigit" id="regY2-03" data-value="P22 H"></span>
+  	  <span class="regDigit" id="regY2-02" data-value="P22 L"></span>
+  	  <span class="regDigit" id="regY2-01" data-value="P23 H"></span>
+  	  <span class="regDigit" id="regY2-00" data-value="P23 L"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">Y3</span>
+  	  <span class="regDigit" id="regY3-15" data-value="P24 H"></span>
+  	  <span class="regDigit" id="regY3-14" data-value="P24 L"></span>
+  	  <span class="regDigit" id="regY3-13" data-value="P25 H"></span>
+  	  <span class="regDigit" id="regY3-12" data-value="P25 L"></span>
+  	  <span class="regDigit" id="regY3-11" data-value="P26 H"></span>
+  	  <span class="regDigit" id="regY3-10" data-value="P26 L"></span>
+  	  <span class="regDigit" id="regY3-09" data-value="P27 H"></span>
+  	  <span class="regDigit" id="regY3-08" data-value="P27 L"></span>
+  	  <span class="regDigit" id="regY3-07" data-value="P28 H"></span>
+  	  <span class="regDigit" id="regY3-06" data-value="P28 L"></span>
+  	  <span class="regDigit" id="regY3-05" data-value="P29 H"></span>
+  	  <span class="regDigit" id="regY3-04" data-value="P29 L"></span>
+  	  <span class="regDigit" id="regY3-03" data-value="P30 H"></span>
+  	  <span class="regDigit" id="regY3-02" data-value="P30 L"></span>
+  	  <span class="regDigit" id="regY3-01" data-value="P31 H"></span>
+  	  <span class="regDigit" id="regY3-00" data-value="P31 L"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">Y4</span>
+  	  <span class="regDigit" id="regY4-15" data-value="P32 H"></span>
+  	  <span class="regDigit" id="regY4-14" data-value="P32 L"></span>
+  	  <span class="regDigit" id="regY4-13" data-value="P33 H"></span>
+  	  <span class="regDigit" id="regY4-12" data-value="P33 L"></span>
+  	  <span class="regDigit" id="regY4-11" data-value="P34 H"></span>
+  	  <span class="regDigit" id="regY4-10" data-value="P34 L"></span>
+  	  <span class="regDigit" id="regY4-09" data-value="P35 H"></span>
+  	  <span class="regDigit" id="regY4-08" data-value="P35 L"></span>
+  	  <span class="regDigit" id="regY4-07" data-value="P36 H"></span>
+  	  <span class="regDigit" id="regY4-06" data-value="P36 L"></span>
+  	  <span class="regDigit" id="regY4-05" data-value="P37 H"></span>
+  	  <span class="regDigit" id="regY4-04" data-value="P37 L"></span>
+  	  <span class="regDigit" id="regY4-03" data-value="P38 H"></span>
+  	  <span class="regDigit" id="regY4-02" data-value="P38 L"></span>
+  	  <span class="regDigit" id="regY4-01" data-value="P39 H"></span>
+  	  <span class="regDigit" id="regY4-00" data-value="P39 L"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">Y5</span>
+  	  <span class="regDigit" id="regY5-15" data-value="P40 H"></span>
+  	  <span class="regDigit" id="regY5-14" data-value="P40 L"></span>
+  	  <span class="regDigit" id="regY5-13" data-value="P41 H"></span>
+  	  <span class="regDigit" id="regY5-12" data-value="P41 L"></span>
+  	  <span class="regDigit" id="regY5-11" data-value="P42 H"></span>
+  	  <span class="regDigit" id="regY5-10" data-value="P42 L"></span>
+  	  <span class="regDigit" id="regY5-09" data-value="P43 H"></span>
+  	  <span class="regDigit" id="regY5-08" data-value="P43 L"></span>
+  	  <span class="regDigit" id="regY5-07" data-value="P44 H"></span>
+  	  <span class="regDigit" id="regY5-06" data-value="P44 L"></span>
+  	  <span class="regDigit" id="regY5-05" data-value="P45 H"></span>
+  	  <span class="regDigit" id="regY5-04" data-value="P45 L"></span>
+  	  <span class="regDigit" id="regY5-03" data-value="P46 H"></span>
+  	  <span class="regDigit" id="regY5-02" data-value="P46 L"></span>
+  	  <span class="regDigit" id="regY5-01" data-value="P47 H"></span>
+  	  <span class="regDigit" id="regY5-00" data-value="P47 L"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">Y6</span>
+  	  <span class="regDigit" id="regY6-15" data-value="P48 H"></span>
+  	  <span class="regDigit" id="regY6-14" data-value="P48 L"></span>
+  	  <span class="regDigit" id="regY6-13" data-value="R3 N"></span>
+  	  <span class="regDigit" id="regY6-12" data-value="R3 M"></span>
+  	  <span class="regDigit" id="regY6-11" data-value="R3 M"></span>
+  	  <span class="regDigit" id="regY6-10" data-value="R3 M"></span>
+  	  <span class="regDigit" id="regY6-09" data-value="R3 M"></span>
+  	  <span class="regDigit" id="regY6-08" data-value="R3 M"></span>
+  	  <span class="regDigit" id="regY6-07" data-value="R3 M"></span>
+  	  <span class="regDigit" id="regY6-06" data-value="R3 M"></span>
+  	  <span class="regDigit" id="regY6-05" data-value="R3 M"></span>
+  	  <span class="regDigit" id="regY6-04" data-value="R3 M"></span>
+  	  <span class="regDigit" id="regY6-03" data-value="R3 M"></span>
+  	  <span class="regDigit" id="regY6-02" data-value="R3 M"></span>
+  	  <span class="regDigit" id="regY6-01" data-value="R3 E"></span>
+  	  <span class="regDigit" id="regY6-00" data-value="R3 E"></span>
+  	</div>
+  	<div class="regRow">
+  	  <span class="regLabel">Y7</span>
+  	  <span class="regDigit" id="regY7-15" data-value="P49 H"></span>
+  	  <span class="regDigit" id="regY7-14" data-value="P49 L"></span>
+  	  <span class="regDigit" id="regY7-13" data-value="R4 N"></span>
+  	  <span class="regDigit" id="regY7-12" data-value="R4 M"></span>
+  	  <span class="regDigit" id="regY7-11" data-value="R4 M"></span>
+  	  <span class="regDigit" id="regY7-10" data-value="R4 M"></span>
+  	  <span class="regDigit" id="regY7-09" data-value="R4 M"></span>
+  	  <span class="regDigit" id="regY7-08" data-value="R4 M"></span>
+  	  <span class="regDigit" id="regY7-07" data-value="R4 M"></span>
+  	  <span class="regDigit" id="regY7-06" data-value="R4 M"></span>
+  	  <span class="regDigit" id="regY7-05" data-value="R4 M"></span>
+  	  <span class="regDigit" id="regY7-04" data-value="R4 M"></span>
+  	  <span class="regDigit" id="regY7-03" data-value="R4 M"></span>
+  	  <span class="regDigit" id="regY7-02" data-value="R4 M"></span>
+  	  <span class="regDigit" id="regY7-01" data-value="R4 E"></span>
+  	  <span class="regDigit" id="regY7-00" data-value="R4 E"></span>
+  	</div>
+  </div>
 </div>
-
