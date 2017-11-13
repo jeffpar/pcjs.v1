@@ -268,6 +268,7 @@ class Reg64 extends Device {
 /**
  * @typedef {Object} State
  * @property {Array} stateChip
+ * @property {Array} stateROM
  */
 
 /**
@@ -302,7 +303,6 @@ class Reg64 extends Device {
  * @property {Input} input
  * @property {number} regKey (current key status, propagated to regR5 at appropriate intervals)
  * @property {LED} led
- * @property {Array.<string>} ledBuffer (24-element LED buffer, propagated to the LED device on DISP operations)
  * @property {ROM} rom
  * @property {Time} time
  * @property {number} addrPrev
@@ -471,28 +471,30 @@ class Chip extends Device {
         this.nCyclesClocked = 0;
 
         /*
-         * Get access to the Input device, so we can add our clicker functions.
+         * Get access to the Input device, so we can add our click functions.
          */
-        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-        this.input.addClicker(this.onKey.bind(this), this.onPower.bind(this), this.onReset.bind(this));
+        this.input = /** @type {Input} */ (this.findDevice(this.config['input']));
+        this.input.addClick(this.onKey.bind(this), this.onPower.bind(this), this.onReset.bind(this));
         this.regKey = 0;
 
         /*
          * Get access to the LED device, so we can update its display.
          */
-        this.led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
-        this.ledBuffer = new Array(24);
+        this.led = /** @type {LED} */ (this.findDevice(this.config['output']));
 
         /*
          * Get access to the ROM device.
          */
         this.rom = /** @type {ROM} */ (this.findDeviceByClass(Machine.CLASS.ROM));
+        if (this.rom) this.rom.setChip(this);
 
         /*
          * Get access to the Time device, so we can give it our clocker() function.
          */
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
-        this.time.addClocker(this.clocker.bind(this));
+        if (this.time && this.rom) {
+            this.time.addClocker(this.clocker.bind(this));
+        }
 
         /*
          * The following set of properties are all debugger-related; see onCommand().
@@ -561,7 +563,7 @@ class Chip extends Device {
             let opCode = this.rom.getData(this.regPC);
             let addr = this.regPC;
             this.regPC = (addr + 1) & this.rom.addrMask;
-            if (!this.decode(opCode, addr)) {
+            if (opCode == undefined || !this.decode(opCode, addr)) {
                 this.regPC = addr;
                 this.println("unimplemented opcode");
                 this.time.stop();
@@ -1005,10 +1007,10 @@ class Chip extends Device {
                 this.regPC = stateChip.shift();
                 this.stack = stateChip.shift();
                 this.regKey = stateChip.shift();
-                this.ledBuffer = stateChip.shift();
             } catch(err) {
                 this.println("Chip state error: " + err.message);
             }
+            if (state.stateROM && this.rom) this.rom.loadState(state.stateROM);
         }
     }
 
@@ -1086,7 +1088,7 @@ class Chip extends Device {
         case 'u':
             addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
             while (nWords--) {
-                let opCode = this.rom.getData(addr);
+                let opCode = this.rom && this.rom.getData(addr);
                 if (opCode == undefined) break;
                 sResult += this.disassemble(opCode, addr++);
             }
@@ -1157,7 +1159,8 @@ class Chip extends Device {
         } else {
             if (this.time.fRunning) {
                 this.time.stop();
-                this.led.clearBuffer(true);
+                if (this.led) this.led.clearBuffer(true);
+                if (this.rom) this.rom.clearArray();
             }
         }
     }
@@ -1234,19 +1237,21 @@ class Chip extends Device {
     {
         this.checkBreakCondition('o');
 
-        for (let col = 0, iDigit = 11; iDigit >= 0; col++, iDigit--) {
-            let ch;
-            if (this.regB.digits[iDigit] & 0x8) {
-                ch = ' ';
-            }
-            else if (this.regB.digits[iDigit] & 0x1) {
-                ch = '-';
-            }
-            else {
-                ch = Device.HexUpperCase[this.regA.digits[iDigit]];
-            }
-            if (this.led.setBuffer(col, 0, ch, (this.regB.digits[iDigit] & 0x2)? '.' : '')) {
-                this.checkBreakCondition('om');
+        if (this.led) {
+            for (let col = 0, iDigit = 11; iDigit >= 0; col++, iDigit--) {
+                let ch;
+                if (this.regB.digits[iDigit] & 0x8) {
+                    ch = ' ';
+                }
+                else if (this.regB.digits[iDigit] & 0x1) {
+                    ch = '-';
+                }
+                else {
+                    ch = Device.HexUpperCase[this.regA.digits[iDigit]];
+                }
+                if (this.led.setBuffer(col, 0, ch, (this.regB.digits[iDigit] & 0x2)? '.' : '')) {
+                    this.checkBreakCondition('om');
+                }
             }
         }
 
@@ -1317,7 +1322,8 @@ class Chip extends Device {
     saveState()
     {
         let state = {
-            stateChip:  []
+            stateChip:  [],
+            stateROM:   []
         };
         let stateChip = state.stateChip;
         stateChip.push(Chip.VERSION);
@@ -1333,7 +1339,7 @@ class Chip extends Device {
         stateChip.push(this.regPC);
         stateChip.push(this.stack);
         stateChip.push(this.regKey);
-        stateChip.push(this.ledBuffer);
+        if (this.rom) this.rom.saveState(state.stateROM);
         return state;
     }
 
@@ -1361,7 +1367,9 @@ class Chip extends Device {
     {
         let s = "";
         if (this.nStringFormat) {
-            s += this.disassemble(this.rom.getData(this.regPC), this.regPC, true);
+            if (this.rom) {
+                s += this.disassemble(this.rom.getData(this.regPC), this.regPC, true);
+            }
             s += "  ";
             for (let i = 0, n = this.regsO.length; i < n; i++) {
                 s += this.regsO[i].toString(true) + ' ';
@@ -1390,7 +1398,9 @@ class Chip extends Device {
         s += " R5=" + this.sprintf("0x%02x", this.regR5);
         s += " RAB=" + this.regRAB + ' ';
         this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=0x%04x ", i, addr & 0xffff);});
-        s += '\n' + this.disassemble(this.rom.getData(this.regPC), this.regPC);
+        if (this.rom) {
+            s += '\n' + this.disassemble(this.rom.getData(this.regPC), this.regPC);
+        }
         this.addrPrev = this.regPC;
         return s.trim();
     }
@@ -1424,7 +1434,7 @@ class Chip extends Device {
         if (!name || value < 0) return;
         switch(name) {
         case "pc":
-            this.regPC = value & this.rom.addrMask;
+            this.regPC = value;
             break;
         default:
             this.println("unrecognized register: " + name);
@@ -1549,4 +1559,4 @@ Chip.COMMANDS = [
     "u [addr] [n]\tdisassemble (at addr)"
 ];
 
-Chip.VERSION    = 1.02;
+Chip.VERSION    = 1.03;

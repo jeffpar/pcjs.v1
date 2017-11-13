@@ -59,7 +59,9 @@
 /**
  * @typedef {Object} TimeConfig
  * @property {string} class
- * @property {Object} bindings
+ * @property {Object} [bindings]
+ * @property {number} [version]
+ * @property {Array.<string>} [overrides]
  * @property {number} cyclesPerSecond
  */
 
@@ -828,4 +830,4 @@ Time.BINDING = {
 
 Time.YIELDS_PER_SECOND = 60;
 
-Time.VERSION    = 1.02;
+Time.VERSION    = 1.03;

@@ -14,14 +14,16 @@ machines:
           "class": "Machine",
           "type": "TI57",
           "name": "TI-57 Emulator",
-          "version": 1.02,
+          "version": 1.03,
           "bindings": {
             "print": "printTI57"
           }
         },
         "chip": {
           "class": "Chip",
-          "type": "TMS-1500"
+          "type": "TMS-1500",
+          "input": "buttons",
+          "output": "display"
         },
         "clock": {
           "class": "Time",
@@ -44,7 +46,7 @@ machines:
           },
           "overrides": ["color","backgroundColor"]
         },
-        "input": {
+        "buttons": {
           "class": "Input",
           "map": [
             ["2nd",  "inv",  "lnx",  "\\b",  "clr"],

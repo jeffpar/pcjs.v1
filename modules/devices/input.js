@@ -31,8 +31,10 @@
 /**
  * @typedef {Object} InputConfig
  * @property {string} class
- * @property {Object} bindings
- * @property {Array.<Array.<number>>} map
+ * @property {Object} [bindings]
+ * @property {number} [version]
+ * @property {Array.<string>} [overrides]
+ * @property {Array.<Array.<number>>} [map]
  * @property {Array.<number>} location
  */
 
@@ -90,6 +92,7 @@ class Input extends Device {
         this.onKey = null;
         this.onPower = null;
         this.onReset = null;
+        this.onHover = null;
 
         let element = this.bindings[Input.BINDING.SURFACE];
         if (element) {
@@ -124,15 +127,21 @@ class Input extends Device {
             this.cyInput = location[3];
             this.hGap = location[4] || 1.0;
             this.vGap = location[5] || 1.0;
-            this.cxSurface = location[6] || element.naturalWidth;
-            this.cySurface = location[7] || element.naturalHeight;
+            this.cxSurface = location[6] || element.naturalWidth || this.cxInput;
+            this.cySurface = location[7] || element.naturalHeight || this.cyInput;
             this.xPower = location[8] || 0;
             this.yPower = location[9] || 0;
             this.cxPower = location[10] || 0;
             this.cyPower = location[11] || 0;
             this.map = this.config['map'];
-            this.nRows = this.map.length;
-            this.nCols = this.map[0].length;
+            if (this.map) {
+                this.nRows = this.map.length;
+                this.nCols = this.map[0].length;
+            } else {
+                this.nCols = this.hGap;
+                this.nRows = this.vGap;
+                this.hGap = this.vGap = 0;
+            }
 
             /*
              * To calculate the average button width (cxButton), we know that the overall width
@@ -161,43 +170,45 @@ class Input extends Device {
 
             if (this.time) {
                 /*
-                 * This auto-releases the last key reported after an appropriate delay, to ensure that
-                 * the machine had enough time to notice the corresponding button was pressed.
-                 */
-                this.timerKbd = this.time.addTimer("timerKbd", function() {
-                    input.onKeyTimer();
-                });
-                /*
-                 * We use a similar timer for the touch/mouse release events, to again ensure that the machine
-                 * had enough time to notice the input before releasing it.
+                 * We use a timer for the touch/mouse release events, to ensure that the machine had
+                 * enough time to notice the input before releasing it.
                  */
                 this.timerRelease = this.time.addTimer("timerRelease", function() {
                     if (input.xStart < 0 && input.yStart < 0) { // auto-release ONLY if it's REALLY released
                         input.setPosition(-1, -1);
                     }
                 });
-                /*
-                 * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
-                 * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
-                 * delay between release and the next press -- probably for de-bouncing purposes.  So we
-                 * maintain a key state: 0 means no key has gone down or up recently, 1 means a key just went
-                 * down, and 2 means a key just went up.  keysPressed maintains a queue of keys (up to 16)
-                 * received while key state is non-zero.
-                 */
-                this.keyState = 0;
-                this.keysPressed = [];
-                /*
-                 * I'm attaching my 'keypress' handlers to the document object, since image elements are
-                 * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
-                 * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
-                 * popping up and obscuring part of the display.
-                 *
-                 * A side-effect, however, is that if the user attempts to explicitly give the image
-                 * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
-                 * by redirecting focus to the "power" button, if any, not because we want that or any other
-                 * button to have focus, but simply to remove focus from any other input element on the page.
-                 */
-                this.captureKbd(document);
+                if (this.map) {
+                    /*
+                     * This auto-releases the last key reported after an appropriate delay, to ensure that
+                     * the machine had enough time to notice the corresponding button was pressed.
+                     */
+                    this.timerKbd = this.time.addTimer("timerKbd", function() {
+                        input.onKeyTimer();
+                    });
+                    /*
+                     * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
+                     * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
+                     * delay between release and the next press -- probably for de-bouncing purposes.  So we
+                     * maintain a key state: 0 means no key has gone down or up recently, 1 means a key just went
+                     * down, and 2 means a key just went up.  keysPressed maintains a queue of keys (up to 16)
+                     * received while key state is non-zero.
+                     */
+                    this.keyState = 0;
+                    this.keysPressed = [];
+                    /*
+                     * I'm attaching my 'keypress' handlers to the document object, since image elements are
+                     * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
+                     * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
+                     * popping up and obscuring part of the display.
+                     *
+                     * A side-effect, however, is that if the user attempts to explicitly give the image
+                     * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
+                     * by redirecting focus to the "power" button, if any, not because we want that or any other
+                     * button to have focus, but simply to remove focus from any other input element on the page.
+                     */
+                    this.captureKbd(document);
+                }
             }
 
             /*
@@ -232,7 +243,7 @@ class Input extends Device {
     }
 
     /**
-     * addClicker(onKey, onPower, onReset)
+     * addClick(onKey, onPower, onReset)
      *
      * Called by the Chip device to setup keyboard, power, and reset notifications.
      *
@@ -241,11 +252,22 @@ class Input extends Device {
      * @param {function()} onPower (called when the "power" button, if any, is clicked)
      * @param {function()} onReset (called when the "reset" button, if any, is clicked)
      */
-    addClicker(onKey, onPower, onReset)
+    addClick(onKey, onPower, onReset)
     {
         this.onKey = onKey;
         this.onPower = onPower;
         this.onReset = onReset;
+    }
+
+    /**
+     * addHover(onHover)
+     *
+     * @this {Input}
+     * @param {function(col, row)} onHover
+     */
+    addHover(onHover)
+    {
+        this.onHover = onHover;
     }
 
     /**
@@ -377,9 +399,9 @@ class Input extends Device {
                  * Instead, we'll rely on our own xStart/yStart properties, which should only
                  * be positive after 'mousedown' and before 'mouseup'.
                  */
-                if (input.xStart >= 0) {
+                //if (input.xStart >= 0) {
                     input.processEvent(element, Input.ACTION.MOVE, event);
-                }
+                //}
             }
         );
 
@@ -579,6 +601,7 @@ class Input extends Device {
              * In the case of a mouse, this can happen all the time, whether a button is 'down' or not, but
              * our event listener automatically suppresses all moves except those where the left button is down.
              */
+            if (this.onHover) this.onHover(col, row);
         }
         else if (action == Input.ACTION.RELEASE) {
             /*
@@ -630,4 +653,4 @@ Input.KEYCODE = {               // keyCode from keydown/keyup events
 
 Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
 
-Input.VERSION   = 1.02;
+Input.VERSION   = 1.03;

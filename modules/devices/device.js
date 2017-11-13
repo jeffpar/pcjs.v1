@@ -28,6 +28,14 @@
 
 "use strict";
 
+/**
+ * @define {boolean}
+ */
+var COMPILED = false;
+
+/**
+ * @define {boolean}
+ */
 var DEBUG = (window.location.hostname == "pcjs" || window.location.hostname == "jeffpar.local");
 
 /**
@@ -36,8 +44,9 @@ var DEBUG = (window.location.hostname == "pcjs" || window.location.hostname == "
  *
  * @typedef {Object} Config
  * @property {string} class
- * @property {Object} bindings
- * @property {number} version
+ * @property {Object} [bindings]
+ * @property {number} [version]
+ * @property {Array.<string>} [overrides]
  */
 
 /**
@@ -594,6 +603,28 @@ class Device {
     printf(format, ...args)
     {
         this.print(this.sprintf(format, ...args));
+    }
+
+    /**
+     * removeDevice(idDevice)
+     *
+     * @this {Device}
+     * @param {string} idDevice
+     * @returns {boolean} (true if successfully removed, false if not)
+     */
+    removeDevice(idDevice)
+    {
+        let device;
+        let devices = Device.Machines[this.idMachine];
+        if (devices) {
+            for (let i in devices) {
+                if (devices[i].idDevice == idDevice) {
+                    devices.splice(i, 1);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
