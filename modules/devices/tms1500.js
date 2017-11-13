@@ -918,8 +918,7 @@ class Chip extends Device {
                 }
                 sOperands = this.regsO[(opCode & Chip.IW_FF.J_MASK) >> Chip.IW_FF.J_SHIFT].name;
                 let d = ((opCode & Chip.IW_FF.D_MASK) >> Chip.IW_FF.D_SHIFT);
-                sOperands += '[' + (d? (d + 12) : '?') + ']';
-                sOperands += ':' + ((opCode & Chip.IW_FF.B_MASK) >> Chip.IW_FF.B_SHIFT);
+                sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opCode & Chip.IW_FF.B_MASK) >> Chip.IW_FF.B_SHIFT) + ']';
                 break;
 
             case Chip.IW_MF.PF:     // 0x0e00: (used for misc operations)
