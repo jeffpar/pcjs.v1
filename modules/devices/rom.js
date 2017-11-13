@@ -74,6 +74,10 @@ class ROM extends Device {
      *        "reference": "",
      *        "chipID": "TMC1501NC DI 7741",
      *        "revision": "0",
+     *        "bindings": {
+     *     	    "grid": "romGridTI57"
+     *        },
+     *        "overrides": ["colorROM","backgroundColorROM"],
      *        "values": [
      *        ]
      *      }
