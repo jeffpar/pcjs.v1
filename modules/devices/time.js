@@ -84,7 +84,8 @@ class Time extends Device {
      *          "run": "runTI57",
      *          "speed": "speedTI57",
      *          "step": "stepTI57"
-     *        }
+     *        },
+     *        "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate"]
      *      }
      *
      * @this {Time}
@@ -106,15 +107,18 @@ class Time extends Device {
          * TODO: Calculate a more precise cyclesPerSecond (650000 is based on crude eyeball timings).
          */
         this.nCyclesPerSecond = this.config['cyclesPerSecond'] || 650000;
+        this.nYieldsPerSecond = this.config['yieldsPerSecond'] || Time.YIELDS_PER_SECOND;
+        this.nYieldsPerUpdate = this.config['yieldsPerUpdate'] || Time.YIELDS_PER_UPDATE;
         if (this.nCyclesPerSecond < 1000) this.nCyclesPerSecond = 1000;
         this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
         this.mhzBase = Math.round(this.nCyclesPerSecond / 10000) / 100;
         this.mhzCurrent = this.mhzTarget = this.mhzBase * this.nTargetMultiplier;
         this.nYields = 0;
-        this.msYield = Math.round(1000 / Time.YIELDS_PER_SECOND);
+        this.msYield = Math.round(1000 / this.nYieldsPerSecond);
         this.aAnimators = [];
         this.aClockers = [];
         this.aTimers = [];
+        this.aUpdaters = [];
         this.fRunning = this.fYield = false;
         this.nStepping = 0;
         this.idRunTimeout = this.idStepTimeout = 0;
@@ -123,9 +127,15 @@ class Time extends Device {
         let time = this;
         this.timerYield = this.addTimer("timerYield", function() {
             time.fYield = true;
-            if (++time.nYields == Time.YIELDS_PER_SECOND) {
-                time.nYields = 0;
+            for (let i = 0; i < time.aAnimators.length; i++) {
+                time.aAnimators[i](time.nYields);
+            }
+            time.nYields++;
+            if (time.nYields == time.nYieldsPerUpdate) {
                 time.updateStatus();
+            }
+            if (time.nYields >= time.nYieldsPerSecond) {
+                time.nYields = 0;
             }
         }, this.msYield);
 
@@ -135,8 +145,10 @@ class Time extends Device {
     /**
      * addAnimator(callBack)
      *
+     * Animators are functions that are normally called at YIELDS_PER_SECOND.
+     *
      * @this {Time}
-     * @param {function()} callBack
+     * @param {function(number)} callBack (called with a animation index that ranges from 0 to YIELDS_PER_SECOND-1)
      */
     addAnimator(callBack)
     {
@@ -172,7 +184,7 @@ class Time extends Device {
             element.onclick = function onClickSetSpeed() {
                 time.setSpeed(time.nTargetMultiplier << 1);
             };
-            this.updateBindingText(binding, this.getSpeedTarget());
+            this.setBindingText(binding, this.getSpeedTarget());
             break;
 
         case Time.BINDING.STEP:
@@ -226,6 +238,17 @@ class Time extends Device {
     }
 
     /**
+     * addUpdater(callBack)
+     *
+     * @this {Time}
+     * @param {function()} callback
+     */
+    addUpdater(callBack)
+    {
+        this.aUpdaters.push(callBack);
+    }
+
+    /**
      * calcCycles()
      *
      * Calculate the maximum number of cycles we should attempt to process before the next yield.
@@ -238,7 +261,7 @@ class Time extends Device {
         if (!nMultiplier || nMultiplier > this.nTargetMultiplier) {
             nMultiplier = this.nTargetMultiplier;
         }
-        this.nCyclesPerYield = Math.floor(this.nCyclesPerSecond / Time.YIELDS_PER_SECOND * nMultiplier);
+        this.nCyclesPerYield = Math.floor(this.nCyclesPerSecond / this.nYieldsPerSecond * nMultiplier);
         this.nCurrentMultiplier = nMultiplier;
     }
 
@@ -464,7 +487,6 @@ class Time extends Device {
             this.assert(!this.idRunTimeout);
             this.idRunTimeout = setTimeout(this.onRunTimeout, this.snapStop());
         }
-        for (let i = 0; i < this.aAnimators.length; i++) this.aAnimators[i]();
     }
 
     /**
@@ -494,7 +516,7 @@ class Time extends Device {
             let mhzTarget = this.mhzBase * this.nTargetMultiplier;
             if (this.mhzTarget != mhzTarget) {
                 this.mhzTarget = mhzTarget;
-                this.updateBindingText(Time.BINDING.SETSPEED, this.getSpeedTarget());
+                this.setBindingText(Time.BINDING.SETSPEED, this.getSpeedTarget());
             }
         }
         this.nCyclesRun = 0;
@@ -769,16 +791,16 @@ class Time extends Device {
     }
 
     /**
-     * updateStatus(fForced)
+     * updateStatus(fTransition)
      *
-     * Used for both periodic status updates and forced updates (eg, on start() and stop() calls)
+     * Used for both periodic status updates and transitional updates (eg, start() and stop() calls)
      *
      * @this {Time}
-     * @param {boolean} [fForced]
+     * @param {boolean} [fTransition]
      */
-    updateStatus(fForced)
+    updateStatus(fTransition)
     {
-        if (fForced) {
+        if (fTransition) {
             if (this.fRunning) {
                 this.println("starting (target speed: " + this.getSpeedTarget() + ")");
             } else {
@@ -788,9 +810,14 @@ class Time extends Device {
                 }
             }
         }
-        this.updateBindingText(Time.BINDING.RUN, this.fRunning? "Halt" : "Run");
-        this.updateBindingText(Time.BINDING.STEP, this.nStepping? "Stop" : "Step");
-        this.updateBindingText(Time.BINDING.SPEED, this.getSpeedCurrent());
+
+        this.setBindingText(Time.BINDING.RUN, this.fRunning? "Halt" : "Run");
+        this.setBindingText(Time.BINDING.STEP, this.nStepping? "Stop" : "Step");
+        this.setBindingText(Time.BINDING.SPEED, this.getSpeedCurrent());
+
+        for (let i = 0; i < this.aUpdaters.length; i++) {
+            this.aUpdaters[i]();
+        }
     }
 
     /**
@@ -829,5 +856,6 @@ Time.BINDING = {
 };
 
 Time.YIELDS_PER_SECOND = 60;
+Time.YIELDS_PER_UPDATE = 30;
 
 Time.VERSION    = 1.03;

@@ -91,6 +91,7 @@ class Device {
         this.idMachine = idMachine;
         this.idDevice = idDevice;
         this.version = version || 0;
+        this.bindings = {};
         this.sCategories = "";
 
         /*
@@ -223,19 +224,22 @@ class Device {
     /**
      * addBindings(bindings)
      *
+     * This function supports either a "bindings" object map, or an array of "direct bindings".
+     *
      * @this {Device}
      * @param {Object} bindings
      */
     addBindings(bindings)
     {
-        this.bindings = {};
+        let fDirectBindings = Array.isArray(bindings);
         for (let binding in bindings) {
             let id = bindings[binding];
+            if (fDirectBindings) binding = id;
             let element = document.getElementById(id);
             if (element) {
                 this.addBinding(binding, element);
             } else {
-                this.println("unable to find device ID: " + id);
+                if (!fDirectBindings) this.println("unable to find device ID: " + id);
             }
         }
     }
@@ -453,47 +457,18 @@ class Device {
     }
 
     /**
-     * loadLocalStorage()
+     * getBindingText(name)
      *
      * @this {Device}
-     * @returns {Object|null}
+     * @param {string} name
+     * @return {string|undefined}
      */
-    loadLocalStorage()
+    getBindingText(name)
     {
-        let state = null;
-        if (this.hasLocalStorage()) {
-            let sValue;
-            if (window) {
-                try {
-                    sValue = window.localStorage.getItem(this.idMachine);
-                    state = JSON.parse(sValue);
-                } catch (err) {
-                    this.println(err.message);
-                }
-            }
-        }
-        return state;
-    }
-
-    /**
-     * saveLocalStorage(state)
-     *
-     * @this {Device}
-     * @param {Object} state
-     * @returns {boolean} true if successful, false if error
-     */
-    saveLocalStorage(state)
-    {
-        if (this.hasLocalStorage()) {
-            let sValue = JSON.stringify(state);
-            try {
-                window.localStorage.setItem(this.idMachine, sValue);
-                return true;
-            } catch(err) {
-                this.println(err.message);
-            }
-        }
-        return false;
+        let sText;
+        let element = this.bindings[name];
+        if (element) sText = element.textContent;
+        return sText;
     }
 
     /**
@@ -550,6 +525,29 @@ class Device {
             return s == "iOS" && !!userAgent.match(/(iPod|iPhone|iPad)/) && !!userAgent.match(/AppleWebKit/) || s == "MSIE" && !!userAgent.match(/(MSIE|Trident)/) || (userAgent.indexOf(s) >= 0);
         }
         return false;
+    }
+
+    /**
+     * loadLocalStorage()
+     *
+     * @this {Device}
+     * @returns {Object|null}
+     */
+    loadLocalStorage()
+    {
+        let state = null;
+        if (this.hasLocalStorage()) {
+            let sValue;
+            if (window) {
+                try {
+                    sValue = window.localStorage.getItem(this.idMachine);
+                    state = JSON.parse(sValue);
+                } catch (err) {
+                    this.println(err.message);
+                }
+            }
+        }
+        return state;
     }
 
     /**
@@ -625,6 +623,40 @@ class Device {
             }
         }
         return false;
+    }
+
+    /**
+     * saveLocalStorage(state)
+     *
+     * @this {Device}
+     * @param {Object} state
+     * @returns {boolean} true if successful, false if error
+     */
+    saveLocalStorage(state)
+    {
+        if (this.hasLocalStorage()) {
+            let sValue = JSON.stringify(state);
+            try {
+                window.localStorage.setItem(this.idMachine, sValue);
+                return true;
+            } catch(err) {
+                this.println(err.message);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * setBindingText(name, text)
+     *
+     * @this {Device}
+     * @param {string} name
+     * @param {string} text
+     */
+    setBindingText(name, text)
+    {
+        let element = this.bindings[name];
+        if (element) element.textContent = text;
     }
 
     /**
@@ -725,19 +757,6 @@ class Device {
 
         buffer += aParts[iPart];
         return buffer;
-    }
-
-    /**
-     * updateBindingText(name, text)
-     *
-     * @this {Device}
-     * @param {string} name
-     * @param {string} text
-     */
-    updateBindingText(name, text)
-    {
-        let element = this.bindings[name];
-        if (element) element.textContent = text;
     }
 
     /**

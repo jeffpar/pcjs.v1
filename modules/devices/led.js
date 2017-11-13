@@ -197,9 +197,12 @@ class LED extends Device {
          */
         this.fBufferModified = this.fTickled = false;
 
+        let led = this;
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
-            this.time.addAnimator(this.drawBuffer.bind(this));
+            this.time.addAnimator(function(iAnimation) {
+                led.drawBuffer();
+            });
         }
     }
 

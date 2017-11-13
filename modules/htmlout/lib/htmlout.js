@@ -1815,7 +1815,7 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
             if (aStyleDefs) {
                 var sStyles = '<style type="text/css">\n';
                 for (var id in aStyleDefs) {
-                    sStyles += '#' + id + ' {\n' + aStyleDefs[id] + '\n}\n';
+                    sStyles += (id[0] != '.'? '#' : "") + id + ' {\n' + aStyleDefs[id] + '\n}\n';
                 }
                 sStyles += '</style>\n';
                 obj.sHTML = obj.sHTML.replace(/([ \t]*<\/head>)/, sStyles + "$1");

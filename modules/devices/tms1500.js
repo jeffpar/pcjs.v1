@@ -49,75 +49,26 @@ class Reg64 extends Device {
         super(chip.idMachine, id, chip.version);
         this.chip = chip;
         this.name = id;
+
         /*
          * Each Reg64 register contains 16 BCD/Hex digits, which we store as 16 independent 4-bit numbers,
          * where [0] is D0, aka DIGIT 0, and [15] is D15, aka DIGIT 15.
          */
         this.digits = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-    }
 
-    /**
-     * init(value, range)
-     *
-     * @this {Reg64}
-     * @param {number} value
-     * @param {Array.<number>} range
-     * @returns {Reg64}
-     */
-    init(value, range = [0,15])
-    {
-        for (let i = 0; i < this.digits.length; i++) {
-            this.digits[i] = 0;
+        /*
+         * Automatically add direct bindings for this new register and all its digits to the caller's bindings.
+         */
+        let bindings = [];
+        let name = "reg" + this.name;
+        bindings.push(name);
+        chip.regMap[name] = [this, -1];
+        for (let d = 0; d < this.digits.length; d++) {
+            name = this.sprintf("reg%s-%02d", this.name, d);
+            bindings.push(name);
+            chip.regMap[name] = [this, d];
         }
-        for (let i = range[0], j = range[1]; i <= j; i++) {
-            this.digits[i] = value & 0xf;
-            value >>>= 4;
-        }
-        return this;
-    }
-
-    /**
-     * get()
-     *
-     * @this {Reg64}
-     * @returns {Array}
-     */
-    get()
-    {
-        return this.digits;
-    }
-
-    /**
-     * set(digits)
-     *
-     * @this {Reg64}
-     * @param {Array} digits
-     */
-    set(digits)
-    {
-        if (!digits || digits.length != this.digits.length) return;
-        for (let i = 0; i < this.digits.length; i++) this.digits[i] = digits[i];
-    }
-
-    /**
-     * toString(fCompact)
-     *
-     * @this {Reg64}
-     * @param {boolean} [fCompact]
-     * @returns {string}
-     */
-    toString(fCompact = false)
-    {
-        let s = this.idDevice + '=';
-        if (!fCompact && s.length < 3) s += ' ';
-        for (let i = this.digits.length - 1; i >= 0; i--) {
-            if (fCompact) {
-                s += Device.HexUpperCase[this.digits[i]];
-            } else {
-                s += Device.HexLowerCase[this.digits[i]] + ((i % 4)? '' : ' ');
-            }
-        }
-        return s;
+        chip.addBindings(bindings);
     }
 
     /**
@@ -145,6 +96,37 @@ class Reg64 extends Device {
     }
 
     /**
+     * get()
+     *
+     * @this {Reg64}
+     * @returns {Array}
+     */
+    get()
+    {
+        return this.digits;
+    }
+
+    /**
+     * init(value, range)
+     *
+     * @this {Reg64}
+     * @param {number} value
+     * @param {Array.<number>} range
+     * @returns {Reg64}
+     */
+    init(value, range = [0,15])
+    {
+        for (let i = 0; i < this.digits.length; i++) {
+            this.digits[i] = 0;
+        }
+        for (let i = range[0], j = range[1]; i <= j; i++) {
+            this.digits[i] = value & 0xf;
+            value >>>= 4;
+        }
+        return this;
+    }
+
+    /**
      * move(regSrc, range)
      *
      * @this {Reg64}
@@ -157,6 +139,18 @@ class Reg64 extends Device {
             this.digits[i] = regSrc.digits[i];
         }
         regSrc.updateR5(range);
+    }
+
+    /**
+     * set(digits)
+     *
+     * @this {Reg64}
+     * @param {Array} digits
+     */
+    set(digits)
+    {
+        if (!digits || digits.length != this.digits.length) return;
+        for (let i = 0; i < this.digits.length; i++) this.digits[i] = digits[i];
     }
 
     /**
@@ -233,20 +227,24 @@ class Reg64 extends Device {
     }
 
     /**
-     * xchg(regSrc, range)
+     * toString(fSpaces)
      *
      * @this {Reg64}
-     * @param {Reg64} regSrc
-     * @param {Array.<number>} range
+     * @param {boolean} [fSpaces]
+     * @returns {string}
      */
-    xchg(regSrc, range)
+    toString(fSpaces = false)
     {
-        for (let i = range[0], j = range[1]; i <= j; i++) {
-            let d = this.digits[i];
-            this.digits[i] = regSrc.digits[i];
-            regSrc.digits[i] = d;
+        let s = this.idDevice + '=';
+        if (fSpaces && s.length < 3) s += ' ';
+        for (let i = this.digits.length - 1; i >= 0; i--) {
+            if (fSpaces) {
+                s += Device.HexUpperCase[this.digits[i]];
+            } else {
+                s += Device.HexLowerCase[this.digits[i]] + ((i % 4)? '' : ' ');
+            }
         }
-        regSrc.updateR5(range);
+        return s;
     }
 
     /**
@@ -262,6 +260,23 @@ class Reg64 extends Device {
             this.chip.regR5 |= this.digits[range[0]+1] << 4;
             this.assert(!(this.chip.regR5 & ~0xff));
         }
+    }
+
+    /**
+     * xchg(regSrc, range)
+     *
+     * @this {Reg64}
+     * @param {Reg64} regSrc
+     * @param {Array.<number>} range
+     */
+    xchg(regSrc, range)
+    {
+        for (let i = range[0], j = range[1]; i <= j; i++) {
+            let d = this.digits[i];
+            this.digits[i] = regSrc.digits[i];
+            regSrc.digits[i] = d;
+        }
+        regSrc.updateR5(range);
     }
 }
 
@@ -325,6 +340,8 @@ class Chip extends Device {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, Chip.VERSION, config);
+
+        this.regMap = {};
 
         /*
          * Four (4) Operational Registers (A-D)
@@ -494,6 +511,7 @@ class Chip extends Device {
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time && this.rom) {
             this.time.addClocker(this.clocker.bind(this));
+            this.time.addUpdater(this.updateStatus.bind(this));
         }
 
         /*
@@ -552,6 +570,9 @@ class Chip extends Device {
      */
     clocker(nCyclesTarget = 0)
     {
+        /*
+         * NOTE: We can assume that the rom exists here, because we don't call addClocker() it if doesn't.
+         */
         this.nCyclesClocked = 0;
         while (this.nCyclesClocked <= nCyclesTarget) {
             if (this.addrStop == this.regPC) {
@@ -574,6 +595,7 @@ class Chip extends Device {
         if (nCyclesTarget <= 0) {
             let chip = this;
             this.time.doOutside(function() {
+                chip.rom.drawArray();
                 chip.println(chip.toString());
             });
         }
@@ -918,8 +940,7 @@ class Chip extends Device {
                 }
                 sOperands = this.regsO[(opCode & Chip.IW_FF.J_MASK) >> Chip.IW_FF.J_SHIFT].name;
                 let d = ((opCode & Chip.IW_FF.D_MASK) >> Chip.IW_FF.D_SHIFT);
-                sOperands += '[' + (d? (d + 12) : '?') + ']';
-                sOperands += ':' + ((opCode & Chip.IW_FF.B_MASK) >> Chip.IW_FF.B_SHIFT);
+                sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opCode & Chip.IW_FF.B_MASK) >> Chip.IW_FF.B_SHIFT) + ']';
                 break;
 
             case Chip.IW_MF.PF:     // 0x0e00: (used for misc operations)
@@ -1081,14 +1102,14 @@ class Chip extends Device {
             break;
         case 'r':
             if (s[1] == 'c') this.nStringFormat = Chip.SFORMAT.COMPACT;
-            this.updateRegister(s.substr(1), addr);
+            this.setRegister(s.substr(1), addr);
             sResult += this.toString(s[1]);
             this.sCommandPrev = sCommand;
             break;
         case 'u':
             addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
             while (nWords--) {
-                let opCode = this.rom && this.rom.getData(addr);
+                let opCode = this.rom && this.rom.getData(addr, true);
                 if (opCode == undefined) break;
                 sResult += this.disassemble(opCode, addr++);
             }
@@ -1176,6 +1197,7 @@ class Chip extends Device {
     {
         this.println("reset");
         this.regPC = 0;
+        this.rom.clearArray();
         if (!this.time.fRunning) {
             this.status();
         }
@@ -1344,6 +1366,25 @@ class Chip extends Device {
     }
 
     /**
+     * setRegister(name, value)
+     *
+     * @param {string} name
+     * @param {number} value
+     */
+    setRegister(name, value)
+    {
+        if (!name || value < 0) return;
+
+        switch(name) {
+        case "pc":
+            this.regPC = value;
+            break;
+        default:
+            this.println("unrecognized register: " + name);
+            break;
+        }
+    }
+    /**
      * status()
      *
      * This is called by the Machine after all the individual devices have been initialized.
@@ -1368,11 +1409,11 @@ class Chip extends Device {
         let s = "";
         if (this.nStringFormat) {
             if (this.rom) {
-                s += this.disassemble(this.rom.getData(this.regPC), this.regPC, true);
+                s += this.disassemble(this.rom.getData(this.regPC, true), this.regPC, true);
             }
             s += "  ";
             for (let i = 0, n = this.regsO.length; i < n; i++) {
-                s += this.regsO[i].toString(true) + ' ';
+                s += this.regsO[i].toString() + ' ';
             }
             s += '\n';
             s += "  COND=" + (this.fCOND? 1 : 0);
@@ -1384,7 +1425,7 @@ class Chip extends Device {
         }
         if (regs) {
             for (let i = 0, n = regs.length >> 1; i < n; i++) {
-                s += regs[i].toString() + '  ' + regs[i+n].toString() + '\n';
+                s += regs[i].toString(true) + '  ' + regs[i+n].toString(true) + '\n';
             }
             return s;
         }
@@ -1399,7 +1440,7 @@ class Chip extends Device {
         s += " RAB=" + this.regRAB + ' ';
         this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=0x%04x ", i, addr & 0xffff);});
         if (this.rom) {
-            s += '\n' + this.disassemble(this.rom.getData(this.regPC), this.regPC);
+            s += '\n' + this.disassemble(this.rom.getData(this.regPC, true), this.regPC);
         }
         this.addrPrev = this.regPC;
         return s.trim();
@@ -1424,21 +1465,27 @@ class Chip extends Device {
     }
 
     /**
-     * updateRegister(name, value)
+     * updateStatus()
      *
-     * @param {string} name
-     * @param {number} value
+     * Enumerate all bindings and update their values.
+     *
+     * @this {Chip}
      */
-    updateRegister(name, value)
+    updateStatus()
     {
-        if (!name || value < 0) return;
-        switch(name) {
-        case "pc":
-            this.regPC = value;
-            break;
-        default:
-            this.println("unrecognized register: " + name);
-            break;
+        for (let binding in this.bindings) {
+            let regMap = this.regMap[binding];
+            if (regMap) {
+                let sValue;
+                let reg = regMap[0];
+                let digit = regMap[1];
+                if (digit < 0) {
+                    sValue = reg.toString();
+                } else {
+                    sValue = Device.HexUpperCase[reg.digits[digit]];
+                }
+                this.setBindingText(binding, sValue);
+            }
         }
     }
 }
