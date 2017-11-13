@@ -606,6 +606,28 @@ class Device {
     }
 
     /**
+     * removeDevice(idDevice)
+     *
+     * @this {Device}
+     * @param {string} idDevice
+     * @returns {boolean} (true if successfully removed, false if not)
+     */
+    removeDevice(idDevice)
+    {
+        let device;
+        let devices = Device.Machines[this.idMachine];
+        if (devices) {
+            for (let i in devices) {
+                if (devices[i].idDevice == idDevice) {
+                    devices.splice(i, 1);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * sprintf(format, ...args)
      *
      * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.

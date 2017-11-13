@@ -75,7 +75,8 @@ class ROM extends Device {
      *        "chipID": "TMC1501NC DI 7741",
      *        "revision": "0",
      *        "bindings": {
-     *     	    "grid": "romGridTI57"
+     *          "array": "romArrayTI57",
+     *          "cellDesc": "romCellTI57"
      *        },
      *        "overrides": ["colorROM","backgroundColorROM"],
      *        "values": [
@@ -100,11 +101,12 @@ class ROM extends Device {
         this.assert(!((this.addrMask + 1) & this.addrMask));
 
         /*
-         * If a "grid" binding has been supplied, then create an LED array sufficiently large to represent the
-         * entire ROM.  If the power-of-two is odd, then we will favor a slightly wider grid over a taller one,
+         * If an "array" binding has been supplied, then create an LED array sufficiently large to represent the
+         * entire ROM.  If the power-of-two is odd, then we will favor a slightly wider array over a taller one,
          * by virtue of using Math.ceil() for cols and Math.floor() for rows.
          */
-        if (this.bindings[ROM.BINDING.GRID]) {
+        if (this.bindings[ROM.BINDING.ARRAY]) {
+            let rom = this;
             let addrLines = Math.log2(this.data.length) / 2;
             this.cols = Math.pow(2, Math.ceil(addrLines));
             this.rows = Math.pow(2, Math.floor(addrLines));
@@ -117,17 +119,25 @@ class ROM extends Device {
                 fixed:           true,
                 persistent:      true,
                 backgroundColor: config['backgroundColorROM'] || "black",
-                bindings:        {container: config.bindings[ROM.BINDING.GRID]}
+                bindings:        {container: config.bindings[ROM.BINDING.ARRAY]}
             };
-            let ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);
-            /*
-             * We can't assume success just because the constructor returned an LED object; check for a buffer
-             * to be sure it's fully initialized.  TODO: Consider having the LED constructor throw an error instead.
-             */
-            if (ledArray.buffer) {
-                this.ledArray = ledArray;
-                this.clearArray();
-            }
+            this.ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);
+            this.clearArray();
+            let configInput = {
+                class:          "Input",
+                location:       [0, 0, this.ledArray.widthView, this.ledArray.heightView, this.cols, this.rows],
+                bindings:       {surface: config.bindings[ROM.BINDING.ARRAY]}
+            };
+            this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
+            this.ledInput.addHover(function(col, row) {
+                if (rom.chip) {
+                    let addr = row * rom.cols + col;
+                    this.assert(addr >= 0 && addr < rom.data.length);
+                    let opCode = rom.data[addr];
+                    let sDesc = rom.chip.disassemble(opCode, addr);
+                    rom.updateBindingText(ROM.BINDING.CELLDESC, sDesc);
+                }
+            });
         }
     }
 
@@ -155,7 +165,6 @@ class ROM extends Device {
         }
         return this.data[addr];
     }
-
 
     /**
      * loadState(state)
@@ -187,10 +196,22 @@ class ROM extends Device {
             state.push(this.ledArray.buffer);
         }
     }
+
+    /**
+     * setChip()
+     *
+     * @this {ROM}
+     * @param {Chip} chip
+     */
+    setChip(chip)
+    {
+        this.chip = chip;
+    }
 }
 
 ROM.BINDING = {
-    GRID:       "grid"
+    ARRAY:      "array",
+    CELLDESC:   "cellDesc"
 };
 
 ROM.VERSION     = 1.03;

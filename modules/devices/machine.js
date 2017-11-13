@@ -50,7 +50,9 @@ class Machine extends Device {
      *      },
      *      "chip": {
      *        "class": "Chip",
-     *        "type": "TMS-1500"
+     *        "type": "TMS-1500",
+     *        "input": "buttons",
+     *        "output": "display"
      *      },
      *      "clock": {
      *        "class": "Time",
@@ -72,6 +74,26 @@ class Machine extends Device {
      *          "container": "displayTI57"
      *        },
      *        "overrides": ["color","backgroundColor"]
+     *      },
+     *      "buttons": {
+     *        "class": "Input",
+     *        "map": [
+     *          ["2nd",  "inv",  "lnx",  "\\b",  "clr"],
+     *          ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
+     *          ["sst",  "sto",  "rcl",  "sum",  "exp"],
+     *          ["bst",  "ee",   "(",    ")",    "/"],
+     *          ["gto",  "7",    "8",    "9",    "*"],
+     *          ["sbr",  "4",    "5",    "6",    "-"],
+     *          ["rst",  "1",    "2",    "3",    "+"],
+     *          ["r/s",  "0",    ".",    "+/-",  "=|\\r"]
+     *        ],
+     *        "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 418, 180, 75, 36],
+     *        "bindings": {
+     *          "surface": "imageTI57",
+     *          "power": "powerTI57",
+     *          "reset": "resetTI57",
+     *          "clear": "clearTI57"
+     *        }
      *      },
      *      "rom": {
      *        "class": "ROM",
@@ -170,7 +192,8 @@ class Machine extends Device {
                     this.println(sClass + " device initialized" + (sStatus? " (" + sStatus + ")" : ""));
                 }
                 catch(err) {
-                    this.println("error initializing " + sClass + " device '" + idDevice + "': " + err.message);
+                    this.println("error initializing " + sClass + " device '" + idDevice + "':\n" + err.message);
+                    this.removeDevice(idDevice);
                 }
             }
         }

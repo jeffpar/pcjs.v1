@@ -20,7 +20,9 @@ machines:
         },
         "chip": {
           "class": "Chip",
-          "type": "TMS-1500"
+          "type": "TMS-1500",
+          "input": "buttons",
+          "output": "display"
         },
         "clock": {
           "class": "Time",
@@ -43,7 +45,7 @@ machines:
           },
           "overrides": ["color","backgroundColor"]
         },
-        "input": {
+        "buttons": {
           "class": "Input",
           "map": [
             ["2nd",  "inv",  "lnx",  "\\b",  "clr"],
@@ -74,7 +76,8 @@ machines:
           "chipID": "TMC1501NC DI 7741",
           "revision": "0",
           "bindings": {
-          	"grid": "romGridTI57"
+          	"array": "romArrayTI57",
+          	"cellDesc": "romCellTI57"
           },
           "overrides": ["colorROM","backgroundColorROM"],
           "values": [
@@ -270,6 +273,7 @@ The window also accepts a few debugging commands.  Use '?' for help.
 </div>
 <div style="float:left;">
   <p>ROM Activity</p>
-  <div id="romGridTI57"></div>
+  <div id="romArrayTI57"></div>
+  <p id="romCellTI57"></p>
 </div>
 

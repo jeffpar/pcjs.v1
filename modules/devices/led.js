@@ -130,71 +130,76 @@ class LED extends Device {
         super(idMachine, idDevice, LED.VERSION, config);
 
         let container = this.bindings[LED.BINDING.CONTAINER];
-        if (container) {
-            let canvasView = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
-            if (canvasView == undefined || !canvasView.getContext) {
-                container.innerHTML = "Browser missing HTML5 canvas support";
-            } else {
-                this.canvasView = canvasView;
+        if (!container) {
+            let sError = "LED binding for '" + LED.BINDING.CONTAINER + "' missing: '" + this.config.bindings[LED.BINDING.CONTAINER] + "'";
+            throw new Error(sError);
+        }
 
-                this.type = this.config['type'];
-                this.widthCell = (this.type == LED.TYPE.DIGIT? LED.DIGIT.WIDTH : 8);
-                this.heightCell = (this.type == LED.TYPE.DIGIT? LED.DIGIT.HEIGHT : 8);
-                this.width = this.config['width'] || this.widthCell;
-                this.height = this.config['height'] || this.heightCell;
-                this.cols = this.config['cols'] || 1;
-                this.rows = this.config['rows'] || 1;
-                this.widthView = this.width * this.cols;
-                this.heightView = this.height * this.rows;
-                this.color = (this.config['color'] || "red");
-                this.colorDim = this.getRGBAColor(this.color, 1.0, 0.25);
-                this.backgroundColor = this.config['backgroundColor'];
+        let canvasView = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
+        if (canvasView == undefined || !canvasView.getContext) {
+            let sError = "LED device requires HTML5 canvas support";
+            container.innerHTML = sError;
+            throw new Error(sError);
+        }
 
-                if (!this.config['fixed']) {
-                    canvasView.setAttribute("class", "pcjs-canvas");
-                }
-                this.fPersistent = !!this.config['persistent'];
+        this.canvasView = canvasView;
 
-                canvasView.setAttribute("width", this.widthView.toString());
-                canvasView.setAttribute("height", this.heightView.toString());
-                canvasView.style.backgroundColor = (this.backgroundColor || this.getRGBAColor("black", 0));
-                container.appendChild(canvasView);
-                this.contextView = /** @type {CanvasRenderingContext2D} */ (canvasView.getContext("2d"));
+        this.type = this.config['type'];
+        this.widthCell = (this.type == LED.TYPE.DIGIT? LED.DIGIT.WIDTH : 8);
+        this.heightCell = (this.type == LED.TYPE.DIGIT? LED.DIGIT.HEIGHT : 8);
+        this.width = this.config['width'] || this.widthCell;
+        this.height = this.config['height'] || this.heightCell;
+        this.cols = this.config['cols'] || 1;
+        this.rows = this.config['rows'] || 1;
+        this.widthView = this.width * this.cols;
+        this.heightView = this.height * this.rows;
+        this.color = (this.config['color'] || "red");
+        this.colorDim = this.getRGBAColor(this.color, 1.0, 0.25);
+        this.backgroundColor = this.config['backgroundColor'];
 
-                /*
-                 * canvasGrid is where all LED segments are composited; then they're drawn onto canvasView.
-                 */
-                this.canvasGrid = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
-                if (this.canvasGrid) {
-                    this.canvasGrid.width = this.widthGrid = this.widthCell * this.cols;
-                    this.canvasGrid.height = this.heightGrid = this.heightCell * this.rows;
-                    this.contextGrid = this.canvasGrid.getContext("2d");
-                }
+        if (!this.config['fixed']) {
+            canvasView.setAttribute("class", "pcjs-canvas");
+        }
+        this.fPersistent = !!this.config['persistent'];
 
-                /*
-                 * This records LED cell changes via setBuffer().  It contains two per elements per cell;
-                 * the first records the primary character (eg, a digit) and the second records the secondary
-                 * character, if any (eg, a decimal point).
-                 */
-                this.buffer = new Array(this.rows * this.cols * 2);
+        canvasView.setAttribute("width", this.widthView.toString());
+        canvasView.setAttribute("height", this.heightView.toString());
+        canvasView.style.backgroundColor = (this.backgroundColor || this.getRGBAColor("black", 0));
+        container.appendChild(canvasView);
+        this.contextView = /** @type {CanvasRenderingContext2D} */ (canvasView.getContext("2d"));
 
-                /*
-                 * fBufferModified is straightforward: set to true by any setBuffer() call that actually
-                 * changed something in the buffer, set to false after every drawBuffer() call, periodic or
-                 * otherwise.
-                 *
-                 * fTickled is a flag which, under normal (idle) circumstances, will constantly be set to
-                 * true by periodic DISP calls to setBuffer(); we clear it after every periodic drawBuffer(),
-                 * so if the machine fails to execute a setBuffer() in a timely manner, we will see that
-                 * fTickled hasn't been "tickled", and automatically blank the screen.
-                 */
-                this.fBufferModified = this.fTickled = false;
+        /*
+         * canvasGrid is where all LED segments are composited; then they're drawn onto canvasView.
+         */
+        this.canvasGrid = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
+        if (this.canvasGrid) {
+            this.canvasGrid.width = this.widthGrid = this.widthCell * this.cols;
+            this.canvasGrid.height = this.heightGrid = this.heightCell * this.rows;
+            this.contextGrid = this.canvasGrid.getContext("2d");
+        }
 
-                this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
-                if (this.time) {
-                    this.time.addAnimator(this.drawBuffer.bind(this));
-                }
-            }
+        /*
+         * This records LED cell changes via setBuffer().  It contains two per elements per cell;
+         * the first records the primary character (eg, a digit) and the second records the secondary
+         * character, if any (eg, a decimal point).
+         */
+        this.buffer = new Array(this.rows * this.cols * 2);
+
+        /*
+         * fBufferModified is straightforward: set to true by any setBuffer() call that actually
+         * changed something in the buffer, set to false after every drawBuffer() call, periodic or
+         * otherwise.
+         *
+         * fTickled is a flag which, under normal (idle) circumstances, will constantly be set to
+         * true by periodic DISP calls to setBuffer(); we clear it after every periodic drawBuffer(),
+         * so if the machine fails to execute a setBuffer() in a timely manner, we will see that
+         * fTickled hasn't been "tickled", and automatically blank the screen.
+         */
+        this.fBufferModified = this.fTickled = false;
+
+        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        if (this.time) {
+            this.time.addAnimator(this.drawBuffer.bind(this));
         }
     }
 
