@@ -210,9 +210,9 @@ uses an electronic dump of a production TI-57 ROM.  Unfortunately, HrastProgramm
 about this dump, including who provided it, what the TMS-1500 chip version was, what the contents of the ROM were,
 or how those contents differed from previous dumps.
 
-He also went out of his way to obscure the ROM dump within the TI57E.EXE binary.  However, by using a debugger and
-carefully stepping through the program, I discovered that all 2048 words of the ROM were stored as a series of 32-bit
-floating-point numbers.  I've saved a [dump](ti57hrast2fp.txt) of the floating-point data.
+Using a debugger and carefully stepping through the TI57E.EXE program, I discovered that all 2048 words of that ROM
+were stored as a series of 32-bit floating-point numbers.  I've saved a [dump](ti57hrast2fp.txt) of the floating-point
+data.
 
 I then wrote a [script](fp2le.js) to convert the 32-bit floating-point values to 16-bit words, and then diff'ed the
 results with the [Little-endian ROM](ti57le.bin) from the "TMC1501NC DI 7741" chip:
@@ -250,8 +250,8 @@ results with the [Little-endian ROM](ti57le.bin) from the "TMC1501NC DI 7741" ch
 	---
 	> 0000d40    0c96    1aa3    0c10    0767    0197    007f    05ad    026d
 
-Like [Hrast ROM #1](#hrast-rom-1), this ROM was patched in several places to use custom opcodes that did not
-exist in the original hardware; specifically:
+Like [Hrast ROM #1](#hrast-rom-1), this ROM was patched in several places with custom opcodes
+that only the HrastProgrammer emulator uses; specifically:
 
 - 0E0B: `POWOFF`
 - 0E0D: `?KEY`

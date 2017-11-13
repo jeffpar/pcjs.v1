@@ -245,19 +245,25 @@ I recently unearthed my TI-57 from storage, and after retro-fitting it with a 9V
 still mostly worked, except for a few unresponsive buttons.  I immediately started wondering how much work it would be
 to write a TI-57 emulator, to sidestep these annoying problems with fussy old hardware.
 
-It wasn't much of a surprise to discover that several other people had had the same idea, long before I did.  However,
-as far as I could tell, only one person, who goes by the name "[HrastProgrammer](http://www.hrastprogrammer.com/)",
-went all-out and created a hardware emulation of the TI-57 calculator chip, the TMS-1500, which contained a very simple
-CPU, 20+ registers, 2K of ROM, and assorted circuitry for driving the LED display and scanning the keyboard.
+It was no real surprise that several other people already had the same idea, but as far as I could tell,
+only one person, who goes by the name "[HrastProgrammer](http://www.hrastprogrammer.com/)", went all-out and created
+a simulation of the TI-57 calculator chip, the TMS-1500: basically, a very simple CPU with 20+ registers, along with
+2K of ROM and assorted circuitry for driving the LED display and scanning the keyboard.
 
 This was an interesting challenge, because while no system manuals had ever been published for this "single-chip
 computer", it was documented in excruciating detail in at least *nine* [TI-57 Patents](/devices/ti57/patents/).
-And excruciating is the right word, because while a hard-core chip designer may have loved reading the many delightful
+And excruciating is the right word, because only a hard-core chip designer would love reading the many delightful
 pages of how `OR gate 515 is responsive to the DISP and REL HOLD signals` or how `NAND gate 468 is responsive to the MSKΦ
-signal from gates 220 received via inverter 434`, my eyes would quickly glaze over while reading much of that material.
+signal from gates 220 received via inverter 434`.
 
-Sadly, HrastProgrammer's work is closed-source.  His [FAQ](http://www.hrastprogrammer.com/faq.htm) summarizes his
-opinion of open-source projects:
+HrastProgrammer's work was a great step forward, proving that an emulator was possible, and other people used it
+to learn more about TI-57 internals.  For example, Claus Buchholz wrote a few articles
+("[The TI-57 Memory Map](http://www.rskey.org/CMS/index.php/the-library/100)" and 
+"[TI-57 Constant ROM](http://www.rskey.org/CMS/index.php/the-library/475)") with the assistance of that emulator.
+
+Sadly, HrastProgrammer's work is closed-source, so many of the details that he gleaned from the patents and learned
+along the way remain buried.  His [FAQ](http://www.hrastprogrammer.com/faq.htm) summarizes his opinion of
+open-source projects:
 
 	Yes, what about it? From time to time, I receive a request to release them as open-source.
 	Sometimes it sounds like I SHOULD DO THIS because it is to be expected. Well, I SHOULD do
@@ -268,22 +274,20 @@ opinion of open-source projects:
 
 We know from a handful of [blog posts](http://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/archv015.cgi?read=84950)
 that HrastProgrammer originally decided to use a hand-edited version of the TI-57 ROM, extracted from six TI patents,
-and that he probably made a number of useful corrections and discoveries along the way.  In the most recent version
-of his [TI-57E](http://www.hrastprogrammer.com/ti57e/index.htm) emulator, he uses an electronic dump of a production
-TI-57 ROM, reportedly obtained from a friend and which he claims he cannot distribute.  So, while the HrastProgrammer
-emulator appears to work fine, its history, overall accuracy, and most importantly, its contribution to a greater
-understanding of TI-57 hardware, is murky at best.
+and that he probably made a number of useful corrections and discoveries along the way.  However, in the most recent
+version of his [TI-57E](http://www.hrastprogrammer.com/ti57e/index.htm) emulator, he uses an electronic dump of a
+production TI-57 ROM, reportedly obtained from a friend and which he said he could not distribute.
 
-UPDATE: Although it appears that HrastProgrammer tried to obfuscate the electronic ROM dump stored inside his TI57E.EXE
-binary, I used a debugger to find and extract it.  See the [TI-57 ROM](/devices/ti57/rom/#hrast-rom-2) page for details.
+UPDATE: With a Windows debugger and lots of patience, I was able to isolate and extract the electronic ROM dump stored
+inside HrastProgrammer's TI57E.EXE binary.  See the [TI-57 ROM](/devices/ti57/rom/#hrast-rom-2) page for details.
 
-My only choice was to go down the same road that HrastProgrammer travelled and pore over those TI patents.  They are
+My only choice was to go down the same road that HrastProgrammer travelled and pore over the same TI patents.  They are
 definitely valuable historical documents, filled with detailed diagrams, instruction decoding tables, and object code
 listings of the chip's entire 2K ROM.  Unfortunately, as several people before me had found, the ROM listings in nearly
 every one of the *nine* patents were all slightly different, no doubt because they had all been typed by hand (with
-[one possible exception](/devices/ti57/rom/#rom-from-us-pat-no-4125867)).  Given all the obvious
-errors (invalid digits, excessive digits, and missing digits), it was all but certain that the listings also contained
-numerous non-obvious errors.
+[one possible exception](/devices/ti57/rom/#rom-from-us-pat-no-4125867)).  Given all the obvious errors (invalid digits,
+excessive digits, and missing digits), it was all but certain that the listings also contained numerous non-obvious
+errors.
 
 One enterprising person, [Sean Riddle](http://seanriddle.com/tms1500.html), had carefully scrutinized the ROM circuits
 of a [Decapped TMS-1500 Chip](http://seanriddle.com/ti57rombits.jpg) and created a "transcript" of all the ROM bits.
