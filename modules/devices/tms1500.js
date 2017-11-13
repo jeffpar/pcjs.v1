@@ -268,6 +268,7 @@ class Reg64 extends Device {
 /**
  * @typedef {Object} State
  * @property {Array} stateChip
+ * @property {Array} stateROM
  */
 
 /**
@@ -1006,6 +1007,7 @@ class Chip extends Device {
             } catch(err) {
                 this.println("Chip state error: " + err.message);
             }
+            if (state.stateROM) this.rom.loadState(state.stateROM);
         }
     }
 
@@ -1155,6 +1157,7 @@ class Chip extends Device {
             if (this.time.fRunning) {
                 this.time.stop();
                 this.led.clearBuffer(true);
+                this.rom.clearArray();
             }
         }
     }
@@ -1314,7 +1317,8 @@ class Chip extends Device {
     saveState()
     {
         let state = {
-            stateChip:  []
+            stateChip:  [],
+            stateROM:   []
         };
         let stateChip = state.stateChip;
         stateChip.push(Chip.VERSION);
@@ -1330,6 +1334,7 @@ class Chip extends Device {
         stateChip.push(this.regPC);
         stateChip.push(this.stack);
         stateChip.push(this.regKey);
+        this.rom.saveState(state.stateROM);
         return state;
     }
 

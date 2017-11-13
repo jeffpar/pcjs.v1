@@ -73,6 +73,10 @@ machines:
           "reference": "",
           "chipID": "unknown",
           "revision": "1",
+          "bindings": {
+          	"grid": "romGridTI57"
+          },
+          "overrides": ["colorROM","backgroundColorROM"],
           "values": [
             4623,4386,5106,7051,3246,6152,5813,5628,5805,7051,4386,3246,7911,5132,1822,6798,
             2600,1497,6539,6471,6642,6462,6899,6939,6660,3246,7587,4388,6648,4386,5634,7051,

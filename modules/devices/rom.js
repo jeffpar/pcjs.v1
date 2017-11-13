@@ -46,6 +46,8 @@ if (typeof module !== "undefined") {
  * @property {string} reference
  * @property {string} chipID
  * @property {number} revision
+ * @property {string} colorROM
+ * @property {string} backgroundColorROM
  * @property {Array.<number>} values
  */
 
@@ -101,29 +103,77 @@ class ROM extends Device {
         let sGrid = config.bindings && config.bindings[ROM.BINDING.GRID];
         if (sGrid) {
             let addrLines = Math.log2(this.data.length) / 2;
+            this.cols = Math.pow(2, Math.ceil(addrLines));
+            this.rows = Math.pow(2, Math.floor(addrLines));
             let configLEDs = {
-                class: "LED",
-                type: LED.TYPE.ROUND,
-                cols: Math.pow(2, Math.ceil(addrLines)),
-                rows: Math.pow(2, Math.floor(addrLines)),
-                color: "green",
-                fixedSize: true,
-                backgroundColor: "black",
-                bindings: {container: sGrid}
+                class:           "LED",
+                type:            LED.TYPE.ROUND,
+                cols:            this.cols,
+                rows:            this.rows,
+                color:           config['colorROM'] || "green",
+                fixed:           true,
+                persistent:      true,
+                backgroundColor: config['backgroundColorROM'] || "black",
+                bindings:        {container: sGrid}
             };
             this.ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);
+            this.clearArray();
         }
+    }
+
+    /**
+     * clearArray()
+     *
+     * @this {ROM}
+     */
+    clearArray()
+    {
+        if (this.ledArray) this.ledArray.clearBuffer(true);
     }
 
     /**
      * getData(addr)
      *
+     * @this {ROM}
      * @param {number} addr
      * @returns {number|undefined}
      */
     getData(addr)
     {
+        if (this.ledArray) {
+            this.ledArray.setBuffer(addr % this.cols, (addr / this.cols) | 0, LED.STATE.ON);
+        }
         return this.data[addr];
+    }
+
+
+    /**
+     * loadState(state)
+     *
+     * @this {ROM}
+     * @param {Array} state
+     */
+    loadState(state)
+    {
+        let buffer = state.shift();
+        if (buffer) {
+            this.assert(this.ledArray.buffer.length == buffer.length);
+            if (this.ledArray.buffer.length == buffer.length) {
+                this.ledArray.buffer = buffer;
+                this.ledArray.drawBuffer(true);
+            }
+        }
+    }
+
+    /**
+     * saveState(state)
+     *
+     * @this {ROM}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.ledArray.buffer);
     }
 }
 
