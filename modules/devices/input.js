@@ -490,11 +490,11 @@ class Input extends Device {
 
             /*
              * Touch coordinates (that is, the pageX and pageY properties) are relative to the page, so to make
-             * them relative to the canvas, we must subtract the canvas's left and top positions.  This Apple web page:
+             * them relative to the element, we must subtract the element's left and top positions.  This Apple web page:
              *
              *      https://developer.apple.com/library/safari/documentation/AudioVideo/Conceptual/HTML-canvas-guide/AddingMouseandTouchControlstoCanvas/AddingMouseandTouchControlstoCanvas.html
              *
-             * makes it sound simple, but it turns out we have to walk the canvas' entire "parentage" of DOM elements
+             * makes it sound simple, but it turns out we have to walk the element's entire "parentage" of DOM elements
              * to get the exact offsets.
              */
             let xOffset = 0;

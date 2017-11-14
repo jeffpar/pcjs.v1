@@ -57,7 +57,7 @@ machines:
             ["rst",  "1",    "2",    "3",    "+"],
             ["r/s",  "0",    ".",    "+/-",  "=|\\r"]
           ],
-          "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 418, 180, 75, 36],
+          "location": [45, 316, 372, 478, 0.34, 0.5, 459, 832, 322, 168, 75, 38],
           "bindings": {
             "surface": "imageTI57",
             "power": "powerTI57",
@@ -217,19 +217,22 @@ styles:
     position: relative;
     display: inline-block;
     float: left;
+    padding-right: 32px;
   displayTI57:
     position: absolute;
-    top: 8%;
-    left: 24%;
-    width: 53%;
+    top: 7%;
+    left: 16%;
+    width: 70%;
     height: 4%;
   powerTI57:
     position: absolute;
-    left: 418px;
-    top: 180px;
+    left: 322px;
+    top: 168px;
     width: 75px;
-    height: 36px;
+    height: 38px;
     opacity: 0;
+  .diagsTI57:
+    float: left;
   printTI57:
     font-family: Monaco,"Lucida Console",monospace;
   romArrayTI57:
@@ -272,8 +275,8 @@ The window also accepts a few debugging commands.  Use '?' for help.
   <div id="displayTI57"></div>
   <button id="powerTI57">Power</button>
 </div>
-<div style="float:left;">
-  <div style="width:100%;">
+<div class="diagsTI57">
+  <div>
     <p>Diagnostics</p>
     <textarea id="printTI57" cols="78" rows="16"></textarea>
   </div>
