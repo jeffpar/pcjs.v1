@@ -224,7 +224,7 @@ styles:
     position: relative;
     display: inline-block;
     float: left;
-    padding-right: 32px;
+    margin-right: 32px;
   displayTI57:
     position: absolute;
     left: 16%;
