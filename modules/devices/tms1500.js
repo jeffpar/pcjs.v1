@@ -38,13 +38,14 @@
  */
 class Reg64 extends Device {
     /**
-     * Reg64(chip, id)
+     * Reg64(chip, id, fInternal)
      *
      * @this {Reg64}
      * @param {Chip} chip
      * @param {string} [id]
+     * @param {boolean} [fInternal]
      */
-    constructor(chip, id)
+    constructor(chip, id, fInternal)
     {
         super(chip.idMachine, id, chip.version);
         this.chip = chip;
@@ -59,16 +60,18 @@ class Reg64 extends Device {
         /*
          * Automatically add direct bindings for this new register and all its digits to the caller's bindings.
          */
-        let bindings = [];
-        let name = "reg" + this.name;
-        bindings.push(name);
-        chip.regMap[name] = [this, -1];
-        for (let d = 0; d < this.digits.length; d++) {
-            name = this.sprintf("reg%s-%02d", this.name, d);
+        if (!fInternal) {
+            let bindings = [];
+            let name = "reg" + this.name;
             bindings.push(name);
-            chip.regMap[name] = [this, d];
+            chip.regMap[name] = [this, -1];
+            for (let d = 0; d < this.digits.length; d++) {
+                name = this.sprintf("reg%s-%02d", this.name, d);
+                bindings.push(name);
+                chip.regMap[name] = [this, d];
+            }
+            chip.addBindings(bindings);
         }
-        chip.addBindings(bindings);
     }
 
     /**
@@ -345,18 +348,6 @@ class Chip extends Device {
 
         /*
          * Four (4) Operational Registers (A-D)
-         *
-         * Observations regarding these registers, made while the calculator was in an "idle" state:
-         *
-         *      C[14:3] may represent the "2nd" key being active
-         *      B[15:2] may represent the "INV" key being active
-         *
-         * The "Deg"/"Rad"/"Grad" setting may be related to D[14] and D[13]:
-         *
-         *              D[14]   D[13]
-         *      "Deg"   1       0
-         *      "Rad"   0       4
-         *      "Grad"  0       0
          */
         this.regsO = new Array(4);
         for (let i = 0; i < 4; i++) {
@@ -388,8 +379,8 @@ class Chip extends Device {
             this.regsY[i] = new Reg64(this, "Y" + i);
         }
 
-        this.regSupp = new Reg64(this, "Supp");
-        this.regTemp = new Reg64(this, "Temp");
+        this.regSupp = new Reg64(this, "Supp", true);
+        this.regTemp = new Reg64(this, "Temp", true);
 
         this.base = 10;
         this.fCOND = false;
@@ -531,6 +522,13 @@ class Chip extends Device {
         }
 
         /*
+         * To add support for indicators like "2nd" and "INV", I use a set of flags to reflect
+         * the state of the external indicator.  They are initially undefined and will be updated
+         * by updateIndicators() whenever the internal and external states differ.
+         */
+        this.f2nd = this.fINV = this.modeAngle = undefined;
+
+        /*
          * The following set of properties are all debugger-related; see onCommand().
          */
         this.addrPrev = -1;
@@ -557,6 +555,21 @@ class Chip extends Device {
             return true;
         }
         return false;
+    }
+
+    /**
+     * clearDisplays()
+     *
+     * There are certain events (eg, power off, reset) where it is wise to clear all associated displays,
+     * such as the LED display, the ROM activity array (if any), and assorted calculator indicators.
+     *
+     * @this {Chip}
+     */
+    clearDisplays()
+    {
+        if (this.led) this.led.clearBuffer(true);
+        if (this.rom) this.rom.clearArray();
+        this.updateIndicators(false);
     }
 
     /**
@@ -1196,9 +1209,8 @@ class Chip extends Device {
         } else {
             if (this.time.fRunning) {
                 this.time.stop();
-                if (this.led) this.led.clearBuffer(true);
-                if (this.rom) this.rom.clearArray();
             }
+            this.clearDisplays();
         }
     }
 
@@ -1213,7 +1225,7 @@ class Chip extends Device {
     {
         this.println("reset");
         this.regPC = 0;
-        this.rom.clearArray();
+        this.clearDisplays();
         if (!this.time.fRunning) {
             this.status();
         }
@@ -1291,6 +1303,7 @@ class Chip extends Device {
                     this.checkBreakCondition('om');
                 }
             }
+            this.updateIndicators();
         }
 
         /*
@@ -1478,6 +1491,48 @@ class Chip extends Device {
             s = (range? (i >= range[0] && i <= range[1]? 'F' : '0') : '?') + s;
         }
         return s;
+    }
+
+    /**
+     * updateIndicators(on)
+     *
+     * I made the following observations of the Operational Registers while the calculator was in an "idle" state:
+     *
+     *      C[14:3] may represent the "2nd" key being active
+     *      B[15:2] may represent the "INV" key being active
+     *
+     * The "Deg"/"Rad"/"Grad" key settings may be related to X4[15]:
+     *
+     *              X4[15]  Angle Mode
+     *              ------  ----------
+     *      "Deg"      0        1
+     *      "Rad"      4        2
+     *      "Grad"     C        3
+     *
+     * @this {Chip}
+     * @param {boolean} [on] (default is true, allowing all active indicators to be displayed; set to false to force all indicators off)
+     */
+    updateIndicators(on = true)
+    {
+        let element;
+        let f2nd = on && !!(this.regC.digits[14] & 0x8);
+        if (this.f2nd !== f2nd) {
+            this.f2nd = f2nd;
+            if (element = this.bindings['2nd']) element.style.opacity = f2nd? "1" : "0";
+        }
+        let fINV = on && !!(this.regB.digits[15] & 0x4);
+        if (this.fINV !== fINV) {
+            this.fINV = fINV;
+            if (element = this.bindings['INV']) element.style.opacity = fINV? "1" : "0";
+        }
+        let modeAngle = this.regsX[4].digits[15];
+        modeAngle = on? ((!modeAngle)? 1 : (modeAngle == 4)? 2 : 3) : 0;
+        if (this.modeAngle !== modeAngle) {
+            this.modeAngle = modeAngle;
+            if (element = this.bindings['Deg'])  element.style.opacity = (modeAngle == 1)? "1" : "0";
+            if (element = this.bindings['Rad'])  element.style.opacity = (modeAngle == 2)? "1" : "0";
+            if (element = this.bindings['Grad']) element.style.opacity = (modeAngle == 3)? "1" : "0";
+        }
     }
 
     /**
