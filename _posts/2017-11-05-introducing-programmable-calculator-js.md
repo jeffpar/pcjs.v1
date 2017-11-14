@@ -220,7 +220,7 @@ styles:
     position: relative;
     display: inline-block;
     float: left;
-    padding-right: 32px;
+    margin-right: 32px;
   displayTI57:
     position: absolute;
     left: 16%;
@@ -283,7 +283,7 @@ For years, we all assumed that **PCjs** meant **Personal Computers in JavaScript
 it turns out that it also stands for **Programmable Calculators in JavaScript**.  Who knew?
 
 My first programmable device was a TI-57 Programmable Calculator, purchased in 1978.  I (or more likely my dad)
-bought it at Radio Shack, so it was actually an EC-4000, but as I explain on the [TI-57 Device](/devices/ti57/) page,
+bought it at Radio Shack, so it was actually an EC-4000, but as I explain on the [TI-57 Resources](/devices/ti57/) page,
 the EC-4000 was just a rebranded TI-57.  I'm not sure why we bought it at Radio Shack.  Maybe they were having a sale,
 or maybe we got a bunch of free punches on our Radio Shack Battery Cards.
 

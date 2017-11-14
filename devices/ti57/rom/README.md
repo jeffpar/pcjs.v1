@@ -11,6 +11,36 @@ TI-57 ROM images come in several flavors, [Production ROMs](#ti-57-production-ro
 [Patent ROMs](#ti-57-patent-roms), which are discussed in detail below.  There may also have been one or more
 [TI-57 Production ROM Revisions](#ti-57-production-rom-revisions), as discussed at the bottom of this document.
 
+TI-57 ROM Format
+----------------
+
+Before we get into the various TI-57 ROM dumps, it's worth saying a few words about the ROM format in general.
+
+TI-57 ROMs contain 2048 13-bit words, individually addressible via 11 address lines (since 2^11 equals 2048).
+
+Every word of the ROM is an instruction; in other words, it's all "code" and no "data".
+There are no instructions for loading words from ROM into registers.  An interesting article titled
+"[TI-57 Constant ROM](http://www.rskey.org/CMS/index.php/the-library/475)" explains how the TI-57 deals
+with this limitation of the instruction set, by examining the TI-57's techniques for generating various constants,
+such as Pi.
+
+Another limitation of the instruction set is the way conditional branch instructions are decoded: only 10 of the
+13 bits are available for specifying a branch address.  So the 11th bit is taken from the high address bit of the
+branch instruction itself.  This effectively means that conditional branches can only branch within whichever half
+of the ROM they are located.  This is reinforced by Texas Instrument's patent illustrations of the chip's internal
+architecture, where they depict the ROM in two blocks: `ROM A (1024 x 13 BITS)` and `ROM B (1024 x 13 BITS)`.
+
+TI programmers likely dealt with this limitation by simply writing the ROM code in two parts, ensuring that each
+part did not exceed 1024 words, and then combining the parts to produce the final ROM image.  This is why, in all
+ROM images, you'll see a few words at the end of both the first and second halves that have not been used (ie, words
+filled with zeros).
+
+And yes, while a zero (0x0000) is technically a valid instruction:
+
+	LOAD    A,A+A,000F 0000 0000 0000
+
+it is not an instruction that was ever used.  This is why I have disassembled zeros in my own listings as "UNUSED".
+
 TI-57 Production ROMs
 ---------------------
 
@@ -257,8 +287,8 @@ that only the HrastProgrammer emulator uses; specifically:
 - 0E0D: `?KEY`
 - 0EFF: `NOP`
 
-After replacing all three of those opcodes with their original value (presumably 0E07), that left the
-following differences:
+After replacing all three of those opcodes with their original value (presumably 0E07),
+that left the following differences:
 
 	118,119c118,119
 	< 0000750    0c11    1476    0c7a    1bae    1485    1baf    15c6    1476
@@ -275,9 +305,47 @@ following differences:
 	---
 	> 0000d40    0c96    1aa3    0c10    0767    0197    007f    05ad    026d
 
-It's possible that the remaining revisions were also made by HrastProgrammer, but for now, I'm going to
-assume they represent a minor TI revision.  I'll update this page with further information once I've been
-able to examine the revisions more closely.
+Looking at these differences as instructions:
+
+	937c937
+	< 	0x03a8: 0x0c11  CLR     A[13:0]
+	---
+	> 	0x03a8: 0x0e11  STORE   RAB,1
+	948c948
+	< 	0x03b3: 0x1465  CALL    0x0465
+	---
+	> 	0x03b3: 0x13fc  CALL    0x03fc
+	1021,1023c1021,1023
+	< 	0x03fc: 0x0000  UNUSED
+	< 	0x03fd: 0x0000  UNUSED
+	< 	0x03fe: 0x0000  UNUSED
+	---
+	> 	0x03fc: 0x0c11  CLR     A[13:0]
+	> 	0x03fd: 0x08df  MOVE    D,D,0F00 0000 0000 0000
+	> 	0x03fe: 0x0e03  RET
+	1701c1701
+	< 	0x06a4: 0x0597  MOVE    C,C,0000 0000 0000 00FF
+	---
+	> 	0x06a4: 0x0197  MOVE    C,C,FFFF FFFF FFFF FFFF
+
+they appear to have all the hallmarks of a patch.  For example, this instruction:
+
+	0x03b3: 0x1465  CALL    0x0465
+
+which originally called a 2-instruction subroutine that did nothing more than this:
+
+	0x0465: 0x08df  MOVE    D,D,0F00 0000 0000 0000
+	0x0466: 0x0e03  RET
+
+was replaced with `CALL 0x03fc`, which calls a new 3-instruction subroutine placed in the last 4
+unused words of the first half of the ROM, and which performs one additional `CLR` instruction:
+
+	0x03fc: 0x0c11  CLR     A[13:0]
+	0x03fd: 0x08df  MOVE    D,D,0F00 0000 0000 0000
+	0x03fe: 0x0e03  RET
+
+It's possible that these remaining revisions were also made by HrastProgrammer, but for now, I'm going to
+assume they represent a minor revision made by Texas Instruments at some point.
 
 This ROM has been saved as [Hrast ROM #2](ti57hrast2.bin), along with a [dump](ti57hrast2.txt).
 

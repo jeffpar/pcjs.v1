@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Texas Instruments TI-57
+title: Texas Instruments TI-57 Programmable Calculator
 permalink: /devices/ti57/
 ---
 
@@ -13,7 +13,8 @@ Serial No. 9604427) purchased on October 7, 1978.
 PCjs TI-57 emulator configurations are now available for your programming enjoyment:
 
 - [TI-57 with Original ROM](machine/)
-- [TI-57 with Revised ROM](machine/rev1/)
+- [TI-57 with Original ROM and Diagnostics](machine/rev0/)
+- [TI-57 with Revised ROM and Diagnostics](machine/rev1/)
 
 Additional resources include:
 
