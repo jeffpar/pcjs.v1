@@ -1498,16 +1498,20 @@ class Chip extends Device {
      *
      * I made the following observations of the Operational Registers while the calculator was in an "idle" state:
      *
-     *      C[14:3] may represent the "2nd" key being active
-     *      B[15:2] may represent the "INV" key being active
+     *      C[14:3] appears to represent the "2nd" key being active
+     *      B[15:2] appears to represent the "INV" key being active
      *
-     * The "Deg"/"Rad"/"Grad" key settings may be related to X4[15]:
+     * The "Deg"/"Rad"/"Grad" settings may be related to X4[15]:
      *
-     *              X4[15]  Angle Mode
-     *              ------  ----------
-     *      "Deg"      0        1
-     *      "Rad"      4        2
-     *      "Grad"     C        3
+     *              X4[15]  modeAngle
+     *              ------  ---------
+     *      "Deg"     0x0       1
+     *      "Rad"     0x4       2
+     *      "Grad"    0xC       3
+     *
+     * If this is the first time any of the indicator properties (ie, f2nd, fINV, or modeAngle) have been initialized,
+     * we will also propagate the LED display color (this.led.color) to the indicator's color, so that the colors of all
+     * the elements overlaid on the display match.
      *
      * @this {Chip}
      * @param {boolean} [on] (default is true, allowing all active indicators to be displayed; set to false to force all indicators off)
@@ -1517,21 +1521,36 @@ class Chip extends Device {
         let element;
         let f2nd = on && !!(this.regC.digits[14] & 0x8);
         if (this.f2nd !== f2nd) {
+            if (element = this.bindings['2nd']) {
+                element.style.opacity = f2nd? "1" : "0";
+                if (this.f2nd === undefined && this.led) element.style.color = this.led.color;
+            }
             this.f2nd = f2nd;
-            if (element = this.bindings['2nd']) element.style.opacity = f2nd? "1" : "0";
         }
         let fINV = on && !!(this.regB.digits[15] & 0x4);
         if (this.fINV !== fINV) {
+            if (element = this.bindings['INV']) {
+                element.style.opacity = fINV? "1" : "0";
+                if (this.fINV === undefined && this.led) element.style.color = this.led.color;
+            }
             this.fINV = fINV;
-            if (element = this.bindings['INV']) element.style.opacity = fINV? "1" : "0";
         }
         let modeAngle = this.regsX[4].digits[15];
         modeAngle = on? ((!modeAngle)? 1 : (modeAngle == 4)? 2 : 3) : 0;
         if (this.modeAngle !== modeAngle) {
+            if (element = this.bindings['Deg']) {
+                element.style.opacity = (modeAngle == 1)? "1" : "0";
+                if (this.modeAngle === undefined && this.led) element.style.color = this.led.color;
+            }
+            if (element = this.bindings['Rad']) {
+                element.style.opacity = (modeAngle == 2)? "1" : "0";
+                if (this.modeAngle === undefined && this.led) element.style.color = this.led.color;
+            }
+            if (element = this.bindings['Grad']) {
+                element.style.opacity = (modeAngle == 3)? "1" : "0";
+                if (this.modeAngle === undefined && this.led) element.style.color = this.led.color;
+            }
             this.modeAngle = modeAngle;
-            if (element = this.bindings['Deg'])  element.style.opacity = (modeAngle == 1)? "1" : "0";
-            if (element = this.bindings['Rad'])  element.style.opacity = (modeAngle == 2)? "1" : "0";
-            if (element = this.bindings['Grad']) element.style.opacity = (modeAngle == 3)? "1" : "0";
         }
     }
 

@@ -155,6 +155,7 @@ class LED extends Device {
         this.heightView = this.height * this.rows;
         this.color = (this.config['color'] || "red");
         this.colorDim = this.getRGBAColor(this.color, 1.0, 0.25);
+        this.colorBright = this.getRGBAColor(this.color, 1.0, 2.0);
         this.backgroundColor = this.config['backgroundColor'];
 
         if (!this.config['fixed']) {
@@ -196,6 +197,12 @@ class LED extends Device {
          * fTickled hasn't been "tickled", and automatically blank the screen.
          */
         this.fBufferModified = this.fTickled = false;
+
+        /*
+         * This records the location of the most recent buffer location updated via setBuffer(), in
+         * case we want to highlight it.
+         */
+        this.iBufferRecent = -1;
 
         let led = this;
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
@@ -244,6 +251,23 @@ class LED extends Device {
     }
 
     /**
+     * clearGridCell(col, row)
+     *
+     * @this {LED}
+     */
+    clearGridCell(col, row)
+    {
+        let xBias = col * this.widthCell;
+        let yBias = row * this.heightCell;
+        if (this.backgroundColor) {
+            this.contextGrid.fillStyle = this.backgroundColor;
+            this.contextGrid.fillRect(xBias, yBias, this.widthCell, this.heightCell);
+        } else {
+            this.contextGrid.clearRect(xBias, yBias, this.widthCell, this.heightCell);
+        }
+    }
+
+    /**
      * drawBuffer(fForced)
      *
      * This is our periodic (60Hz) redraw function; however, it can also be called synchronously
@@ -270,6 +294,7 @@ class LED extends Device {
                 this.drawString(s);
             }
             this.fBufferModified = false;
+            this.iBufferRecent = -1;
         }
         else if (!this.fPersistent && !this.fTickled) {
             this.clearBuffer(true);
@@ -293,19 +318,21 @@ class LED extends Device {
         let i = 0;
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
-                let state = this.buffer[i++];
-                let stateDirty = this.buffer[i++];
-                if (stateDirty || fForced) {
-                    this.drawGridCell(state, col, row);
-                    this.buffer[i-1] = LED.STATE.CLEAN;
+                let state = this.buffer[i];
+                let fDirty = !!this.buffer[i+1];
+                let fRecent = (i == this.iBufferRecent);
+                if (fDirty || fRecent || fForced) {
+                    this.drawGridCell(state, col, row, fRecent);
+                    this.buffer[i+1] = fRecent? LED.STATE.DIRTY : LED.STATE.CLEAN;
                 }
+                i += 2;
             }
         }
         this.drawView();
     }
 
     /**
-     * drawGridCell(state, col, row)
+     * drawGridCell(state, col, row, fHighlight)
      *
      * Used by drawGrid() for LED.TYPE.ROUND and LED.TYPE.SQUARE.
      *
@@ -313,12 +340,22 @@ class LED extends Device {
      * @param {string} state (eg, LED.STATE.ON or LED.STATE.OFF)
      * @param {number} [col] (default is zero)
      * @param {number} [row] (default is zero)
+     * @param {boolean} [fHighlight] (true if the cell should be highlighted; default is false)
      */
-    drawGridCell(state, col = 0, row = 0)
+    drawGridCell(state, col = 0, row = 0, fHighlight = false)
     {
+        /*
+         * If this is NOT a persistent LED display, then drawGrid() will have done a preliminary clearGrid(),
+         * eliminating the need to clear individual cells.  Whereas if this IS a persistent LED display, then
+         * we need to clear cells on an as-drawn basis.  If we don't, there could be residual "bleed over"
+         * around the edges of the shape we drew here previously.
+         */
+        if (this.fPersistent) {
+            this.clearGridCell(col, row);
+        }
         let xBias = col * this.widthCell;
         let yBias = row * this.heightCell;
-        this.contextGrid.fillStyle = (state? this.color : this.colorDim);
+        this.contextGrid.fillStyle = (state? (fHighlight? this.colorBright : this.color) : this.colorDim);
         let coords = LED.SHAPES[this.type];
         if (coords.length == 3) {
             this.contextGrid.beginPath();
@@ -435,11 +472,12 @@ class LED extends Device {
     /**
      * getRGBAColor(sColor, alpha, brightness)
      *
-     * Returns a color in the "rgba" format that fillStyle recognizes (eg, "rgba(255, 255, 255, 0)").
+     * Returns a color string in the "rgba" format that fillStyle recognizes (eg, "rgba(255, 255, 255, 0)").
      *
      * I used to use "alpha" to adjust the brightness, but it's safer to use the "brightness" parameter,
-     * which simply scales all the RGB values.  If any shapes are redrawn using a fill style with alpha < 1.0,
-     * the target alpha values will be added instead of replaced, resulting in progressively brighter shapes.
+     * which simply scales all the RGB values.  If any shapes are redrawn using a fillStyle with alpha < 1.0,
+     * the target alpha values will be added instead of replaced, resulting in progressively brighter shapes;
+     * probably not what you want.
      *
      * @param {string} sColor
      * @param {number} [alpha]
@@ -452,7 +490,11 @@ class LED extends Device {
         let match = sColor.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
         if (match) {
             sColor = "rgba(";
-            for (let i = 1; i <= 3; i++) sColor += Math.round(Number.parseInt(match[i], 16) * brightness) + ",";
+            for (let i = 1; i <= 3; i++) {
+                let n = Math.round(Number.parseInt(match[i], 16) * brightness);
+                n = (n < 0? 0 : (n > 255? 255 : n));
+                sColor += n + ",";
+            }
             sColor += alpha + ")";
         }
         return sColor;
@@ -468,16 +510,17 @@ class LED extends Device {
      * @param {string|number} [d2]
      * @returns {boolean} (true if this call modified the buffer, false if not)
      */
-    setBuffer(col, row, d1, d2)
+    setBuffer(col, row, d1, d2 = LED.STATE.DIRTY)
     {
         let fModified = false;
         let i = (row * this.cols + col) * 2;
         this.assert(row >= 0 && row < this.rows && col >= 0 && col < this.cols);
-        if (this.buffer[i] !== d1 || d2 !== undefined && this.buffer[i+1] !== d2) {
+        if (this.buffer[i] !== d1 || this.buffer[i+1] !== d2) {
             this.buffer[i] = d1;
-            this.buffer[i+1] = (d2 !== undefined? d2 : LED.STATE.DIRTY);
+            this.buffer[i+1] = d2;
             this.fBufferModified = fModified = true;
         }
+        this.iBufferRecent = i;
         this.fTickled = true;
         return fModified;
     }
