@@ -220,10 +220,14 @@ styles:
     padding-right: 32px;
   displayTI57:
     position: absolute;
-    top: 7%;
-    left: 16%;
-    width: 70%;
-    height: 4%;
+    left: 73px;
+    top: 58px;
+    width: 320px;
+    height: 33px;
+  .indicatorTI57:
+    font-size: small;
+    font-family: Monaco,"Lucida Console",monospace;
+    color: red;
   powerTI57:
     position: absolute;
     left: 322px;
