@@ -288,5 +288,3 @@ The ROM that the [PCjs TI-57 Emulator](/devices/ti57/machine/) uses is the [Litt
 which is the fully-corrected transcribed ROM taken from the contents of chip "TMC1501NC DI 7741".  Using the
 [PCjs TI-57 Emulator's](/devices/ti57/machine/) built-in disassembler, here's a [listing](ti57le.asm.txt)
 of that ROM.
-
-{% include_relative ti57le.asm.txt %}
