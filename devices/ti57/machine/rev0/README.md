@@ -1,15 +1,15 @@
 ---
 layout: page
-title: "TI-57 Programmable Calculator (with Revised ROM and Diagnostics)"
-permalink: /devices/ti57/machine/rev1/
+title: "TI-57 Programmable Calculator (with Original ROM and Diagnostics)"
+permalink: /devices/ti57/machine/rev0/
 machines:
-  - id: ti57Rev1
+  - id: ti57
     type: ti57
     name: TI-57 Programmable Calculator
     uncompiled: true
     config: |
       {
-        "ti57Rev1": {
+        "ti57": {
           "class": "Machine",
           "type": "TI57",
           "name": "TI-57 Emulator",
@@ -78,10 +78,10 @@ machines:
           "valueSize": 16,
           "valueTotal": 2048,
           "littleEndian": true,
-          "file": "ti57hrast2.bin",
+          "file": "ti57le.bin",
           "reference": "",
-          "chipID": "unknown",
-          "revision": "1",
+          "chipID": "TMC1501NC DI 7741",
+          "revision": "0",
           "bindings": {
           	"array": "romArrayTI57",
           	"cellDesc": "romCellTI57"
@@ -146,12 +146,12 @@ machines:
             3290,7007,3286,8032,7007,2408,2408,6990,2408,2408,2193,6775,3122,3123,3126,3125,
             6224,3588,3665,5211,3665,3588,3697,5214,3681,3588,1815,3242,2193,7899,5426,3254,
             7061,3262,3261,8085,3253,5276,3593,3877,2265,7732,3289,2305,1504,1508,3586,4386,
-            3194,8101,5426,5186,5253,3090,7080,2279,3601,5238,3194,7086,5253,7087,5574,5238,
-            3194,7091,5574,5116,3376,7051,4386,3300,5132,5627,3633,5213,5226,3681,5223,5106,
+            3194,8101,5426,5186,5253,3090,7080,2279,3089,5238,3194,7086,5253,7087,5574,5238,
+            3194,7091,5574,5221,3376,7051,4386,3300,5132,5627,3633,5213,5226,3681,5223,5106,
             3697,5223,5133,3302,3303,8125,5552,3649,5223,3665,5223,7050,3296,4386,3194,8145,
             3300,3681,5138,5136,3298,7333,1991,1807,5628,1806,5635,3697,1863,5138,5587,1806,
             6309,1927,769,6093,6090,6099,6104,6112,6090,6045,6103,6101,5826,967,768,839,
-            768,3587,1991,5627,1865,103,2055,3587,5213,3588,1807,3587,3089,2271,3587,0,
+            768,3587,1991,5627,1865,103,2055,3587,5213,3588,1807,3587,0,0,0,0,
             2663,3936,7164,5136,2631,1793,3587,3871,3594,455,3589,3587,1991,3649,6154,1991,
             3665,6154,3302,7262,3584,6239,3293,6180,3294,6177,2591,3429,6187,3590,591,2687,
             3587,2759,6174,3292,2639,639,3401,2575,5170,2145,7192,5488,1399,296,3424,1288,
@@ -194,7 +194,7 @@ machines:
             3122,6773,103,549,7678,798,769,2063,2081,7877,2081,7887,2081,7894,2081,7899,
             39,6052,798,3122,6800,797,7829,793,655,534,6052,534,592,6789,535,856,
             647,6052,534,530,6798,2144,749,741,6773,3122,7678,5814,1991,521,5554,1822,
-            3222,6819,3088,1895,407,127,1453,621,1431,127,1806,5636,6612,3120,5813,5511,
+            3222,6819,3088,1895,1431,127,1453,621,1431,127,1806,5636,6612,3120,5813,5511,
             3328,3170,8171,1423,6766,1863,1793,6106,6104,808,6106,6099,6090,6099,808,6112,
             6104,808,808,808,3587,6098,6104,6045,808,6045,6093,6112,6090,5826,6786,6111,
             6099,808,6104,6104,808,6860,6110,6099,5826,6106,6861,6109,6099,5825,6786,4386,
@@ -220,7 +220,7 @@ machines:
         }
       }
 styles:
-  ti57Rev1:
+  ti57:
     position: relative;
     display: inline-block;
     float: left;
@@ -294,18 +294,35 @@ styles:
     border: 1px solid;
 ---
 
-TI-57 Programmable Calculator (with Revised ROM and Diagnostics)
-----------------------------------------------------------------
+TI-57 Programmable Calculator (with Original ROM and Diagnostics)
+-----------------------------------------------------------------
 
-The TI-57 configuration below is identical to our [Original ROM](../) configuration, except that it is
-using a [Revised ROM](/devices/ti57/rom/#hrast-rom-2).
+Our TI-57 emulator below is one of the most faithful TI-57 emulations currently available.  It should run at
+roughly the same speed as an original device.  That includes calculation speed, display speed, and pause delays.
+
+It is also using an exact copy of an original [TI-57 ROM](/devices/ti57/rom/); no instructions have been patched.
+A configuration using a [Revised ROM](../rev1/) is also available.
+
+Special attention has been made to the display as well.  The shape of the digits were taken directly from TI patent
+drawings, and the digits are drawn/erased with the same frequency as a real device, so when the display goes blank for
+brief periods, you know that a lengthy calculation is being performed.  A few minor display enhancements have been
+enabled, since they don't affect the overall authenticity of the simulation, such as
+<span class="indTI57">2nd</span>,
+<span class="indTI57">INV</span>,
+<span class="indTI57">Deg</span>,
+<span class="indTI57">Rad</span>, and
+<span class="indTI57">Grad</span> indicators.
+
+The TI-57 emulator is also the first PCjs machine to use our newer (late 2017) [PCjs Device Classes](/modules/devices/),
+so it requires a modern web browser.  We'll probably add an ES5 fall-back mechanism eventually, but for now, make sure
+you're using the latest version of Chrome, Firefox, Safari, Edge, etc.
 
 If any errors occur during operation, the Diagnostics window should display the last instruction decoded.
 The window also accepts a few debugging commands.  Use '?' for help.
 
-{% include machine.html id="ti57Rev1" config="json" %}
+{% include machine.html id="ti57" config="json" %}
 
-<div id="ti57Rev1">
+<div id="ti57">
   <img id="imageTI57" src="/devices/ti57/images/TI-57-640.png"/>
   <div id="displayTI57"></div>
   <div id="ind2nd" class="indTI57">2nd</div>
