@@ -22,7 +22,14 @@ machines:
           "class": "Chip",
           "type": "TMS-1500",
           "input": "buttons",
-          "output": "display"
+          "output": "display",
+          "bindings": {
+            "2nd": "ind2nd",
+            "INV": "indINV",
+            "Deg": "indDeg",
+            "Rad": "indRad",
+            "Grad": "indGrad"
+          }
         },
         "clock": {
           "class": "Time",
@@ -219,22 +226,23 @@ styles:
     float: left;
     padding-right: 32px;
   displayTI57:
-    position: absolute;
-    left: 73px;
-    top: 58px;
-    width: 320px;
-    height: 33px;
-  .indicatorTI57:
-    font-size: small;
+    position: absolute; left: 16%; top: 7%; width: 70%; height: 4%;
+  .indTI57:
+    font-size: 11px;
     font-family: Monaco,"Lucida Console",monospace;
     color: red;
+  ind2nd:
+    position: absolute; left: 17%; top: 12%; width: 7%; height: 2%; opacity: 0;
+  indINV:
+    position: absolute; left: 25%; top: 12%; width: 7%; height: 2%; opacity: 0;
+  indDeg:
+    position: absolute; left: 33%; top: 12%; width: 7%; height: 2%; opacity: 0;
+  indRad:
+    position: absolute; left: 41%; top: 12%; width: 7%; height: 2%; opacity: 0;
+  indGrad:
+    position: absolute; left: 49%; top: 12%; width: 7%; height: 2%; opacity: 0;
   powerTI57:
-    position: absolute;
-    left: 322px;
-    top: 168px;
-    width: 75px;
-    height: 38px;
-    opacity: 0;
+    position: absolute; left: 70%; top: 20%; width: 16%; height: 5%; opacity: 0;
   .diagsTI57:
     float: left;
   printTI57:
@@ -265,12 +273,12 @@ Special attention has been made to the display as well.  The shape of the digits
 drawings, and the digits are drawn/erased with the same frequency as a real device, so when the display goes blank for
 brief periods, you know that a lengthy calculation is being performed.
 
-Some non-standard display enhancements will eventually include
-<span class="indicatorTI57">2nd</span>,
-<span class="indicatorTI57">INV</span>,
-<span class="indicatorTI57">Deg</span>,
-<span class="indicatorTI57">Rad</span>, and
-<span class="indicatorTI57">Grad</span> indicators.
+A few display enhancements can be selectively enabled, including
+<span class="indTI57">2nd</span>,
+<span class="indTI57">INV</span>,
+<span class="indTI57">Deg</span>,
+<span class="indTI57">Rad</span>, and
+<span class="indTI57">Grad</span> indicators.
 
 The TI-57 emulator is also the first PCjs machine to use our newer (late 2017) [PCjs Device Classes](/modules/devices/),
 so it requires a modern web browser.  We'll probably add an ES5 fall-back mechanism eventually, but for now, make sure
@@ -284,6 +292,11 @@ The window also accepts a few debugging commands.  Use '?' for help.
 <div id="ti57">
   <img id="imageTI57" src="../images/TI-57-640.png"/>
   <div id="displayTI57"></div>
+  <div id="ind2nd" class="indTI57">2nd</div>
+  <div id="indINV" class="indTI57">INV</div>
+  <div id="indDeg" class="indTI57">Deg</div>
+  <div id="indRad" class="indTI57">Rad</div>
+  <div id="indGrad" class="indTI57">Grad</div>
   <button id="powerTI57">Power</button>
 </div>
 <div class="diagsTI57">

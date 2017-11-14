@@ -23,7 +23,14 @@ machines:
           "class": "Chip",
           "type": "TMS-1500",
           "input": "buttons",
-          "output": "display"
+          "output": "display",
+          "bindings": {
+            "2nd": "ind2nd",
+            "INV": "indINV",
+            "Deg": "indDeg",
+            "Rad": "indRad",
+            "Grad": "indGrad"
+          }
         },
         "clock": {
           "class": "Time",
@@ -215,22 +222,23 @@ styles:
     float: left;
     padding-right: 32px;
   displayTI57:
-    position: absolute;
-    left: 73px;
-    top: 58px;
-    width: 320px;
-    height: 33px;
-  .indicatorTI57:
-    font-size: small;
+    position: absolute; left: 16%; top: 7%; width: 70%; height: 4%;
+  .indTI57:
+    font-size: 11px;
     font-family: Monaco,"Lucida Console",monospace;
     color: red;
+  ind2nd:
+    position: absolute; left: 17%; top: 12%; width: 7%; height: 2%; opacity: 0;
+  indINV:
+    position: absolute; left: 25%; top: 12%; width: 7%; height: 2%; opacity: 0;
+  indDeg:
+    position: absolute; left: 33%; top: 12%; width: 7%; height: 2%; opacity: 0;
+  indRad:
+    position: absolute; left: 41%; top: 12%; width: 7%; height: 2%; opacity: 0;
+  indGrad:
+    position: absolute; left: 49%; top: 12%; width: 7%; height: 2%; opacity: 0;
   powerTI57:
-    position: absolute;
-    left: 322px;
-    top: 168px;
-    width: 75px;
-    height: 38px;
-    opacity: 0;
+    position: absolute; left: 70%; top: 20%; width: 16%; height: 5%; opacity: 0;
   .diagsTI57:
     float: left;
   printTI57:
@@ -352,6 +360,11 @@ backward-compatibility.
 <div id="ti57">
   <img id="imageTI57" src="/devices/ti57/images/TI-57-640.png"/>
   <div id="displayTI57"></div>
+  <div id="ind2nd" class="indTI57">2nd</div>
+  <div id="indINV" class="indTI57">INV</div>
+  <div id="indDeg" class="indTI57">Deg</div>
+  <div id="indRad" class="indTI57">Rad</div>
+  <div id="indGrad" class="indTI57">Grad</div>
   <button id="powerTI57">Power</button>
 </div>
 <div class="diagsTI57">
