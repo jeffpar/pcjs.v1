@@ -220,10 +220,14 @@ styles:
     padding-right: 32px;
   displayTI57:
     position: absolute;
-    top: 7%;
-    left: 16%;
-    width: 70%;
-    height: 4%;
+    left: 73px;
+    top: 58px;
+    width: 320px;
+    height: 33px;
+  .indicatorTI57:
+    font-size: small;
+    font-family: Monaco,"Lucida Console",monospace;
+    color: red;
   powerTI57:
     position: absolute;
     left: 322px;
@@ -260,6 +264,13 @@ A configuration using a [Revised ROM](rev1/) is also available.
 Special attention has been made to the display as well.  The shape of the digits were taken directly from TI patent
 drawings, and the digits are drawn/erased with the same frequency as a real device, so when the display goes blank for
 brief periods, you know that a lengthy calculation is being performed.
+
+Some non-standard display enhancements will eventually include
+<span class="indicatorTI57">2nd</span>,
+<span class="indicatorTI57">INV</span>,
+<span class="indicatorTI57">Deg</span>,
+<span class="indicatorTI57">Rad</span>, and
+<span class="indicatorTI57">Grad</span> indicators.
 
 The TI-57 emulator is also the first PCjs machine to use our newer (late 2017) [PCjs Device Classes](/modules/devices/),
 so it requires a modern web browser.  We'll probably add an ES5 fall-back mechanism eventually, but for now, make sure

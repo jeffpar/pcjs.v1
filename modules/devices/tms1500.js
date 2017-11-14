@@ -313,10 +313,10 @@ class Reg64 extends Device {
  * @property {number} regRAB
  * @property {number} regR5 (least significant masked digit(s) from last arithmetic result)
  * @property {number} regPC (program counter: address of next instruction to decode)
+ * @property {number} regKey (current key status, propagated to regR5 at appropriate intervals)
  * @property {Array.<number>} stack (3-level address stack; managed by push() and pop())
  * @property {number} nCyclesClocked
  * @property {Input} input
- * @property {number} regKey (current key status, propagated to regR5 at appropriate intervals)
  * @property {LED} led
  * @property {ROM} rom
  * @property {Time} time
@@ -345,6 +345,18 @@ class Chip extends Device {
 
         /*
          * Four (4) Operational Registers (A-D)
+         *
+         * Observations regarding these registers, made while the calculator was in an "idle" state:
+         *
+         *      C[14:3] may represent the "2nd" key being active
+         *      B[15:2] may represent the "INV" key being active
+         *
+         * The "Deg"/"Rad"/"Grad" setting may be related to D[14] and D[13]:
+         *
+         *              D[14]   D[13]
+         *      "Deg"   1       0
+         *      "Rad"   0       4
+         *      "Grad"  0       0
          */
         this.regsO = new Array(4);
         for (let i = 0; i < 4; i++) {
@@ -469,6 +481,11 @@ class Chip extends Device {
         this.regPC = 0;
 
         /*
+         * If non-zero, a key is being pressed.  Bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).
+         */
+        this.regKey = 0;
+
+        /*
          * The "Subroutine Stack".  "When an unconditional branch instruction is decoded by branch logic 32b, the
          * CALL signal goes to zero permitting the present ROM address plus one to be loaded into subroutine stack
          * register 33a....  Addresses previously loaded into subroutine stack/registers 33a and 33b are shifted
@@ -492,7 +509,6 @@ class Chip extends Device {
          */
         this.input = /** @type {Input} */ (this.findDevice(this.config['input']));
         this.input.addClick(this.onKey.bind(this), this.onPower.bind(this), this.onReset.bind(this));
-        this.regKey = 0;
 
         /*
          * Get access to the LED device, so we can update its display.
