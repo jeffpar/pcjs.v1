@@ -222,23 +222,57 @@ styles:
     float: left;
     padding-right: 32px;
   displayTI57:
-    position: absolute; left: 16%; top: 7%; width: 70%; height: 4%;
+    position: absolute;
+    left: 16%;
+    top: 7%;
+    width: 70%;
+    height: 4%;
   .indTI57:
     font-size: 11px;
     font-family: Monaco,"Lucida Console",monospace;
     color: red;
   ind2nd:
-    position: absolute; left: 17%; top: 12%; width: 7%; height: 2%; opacity: 0;
+    position: absolute;
+    left: 17%;
+    top: 12%;
+    width: 7%;
+    height: 2%;
+    opacity: 0;
   indINV:
-    position: absolute; left: 25%; top: 12%; width: 7%; height: 2%; opacity: 0;
+    position: absolute;
+    left: 25%;
+    top: 12%;
+    width: 7%;
+    height: 2%;
+    opacity: 0;
   indDeg:
-    position: absolute; left: 33%; top: 12%; width: 7%; height: 2%; opacity: 0;
+    position: absolute;
+    left: 33%;
+    top: 12%;
+    width: 7%;
+    height: 2%;
+    opacity: 0;
   indRad:
-    position: absolute; left: 41%; top: 12%; width: 7%; height: 2%; opacity: 0;
+    position: absolute;
+    left: 41%;
+    top: 12%;
+    width: 7%;
+    height: 2%;
+    opacity: 0;
   indGrad:
-    position: absolute; left: 49%; top: 12%; width: 7%; height: 2%; opacity: 0;
+    position: absolute;
+    left: 49%;
+    top: 12%;
+    width: 7%;
+    height: 2%;
+    opacity: 0;
   powerTI57:
-    position: absolute; left: 70%; top: 20%; width: 16%; height: 5%; opacity: 0;
+    position: absolute;
+    left: 70%;
+    top: 20%;
+    width: 16%;
+    height: 5%;
+    opacity: 0;
   .diagsTI57:
     float: left;
   printTI57:
