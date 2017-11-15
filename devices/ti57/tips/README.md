@@ -1,8 +1,7 @@
 ---
-layout: post
-title: The TI-57 Programmable Calculator
-date: 2017-11-10 15:00:00
-permalink: /blog/2017/11/10/
+layout: page
+title: TI-57 Tips and Tricks
+permalink: /devices/ti57/tips/
 machines:
   - id: ti57
     type: ti57
@@ -14,10 +13,7 @@ machines:
           "class": "Machine",
           "type": "TI57",
           "name": "TI-57 Emulator",
-          "version": 1.03,
-          "bindings": {
-            "print": "printTI57"
-          }
+          "version": 1.03
         },
         "chip": {
           "class": "Chip",
@@ -35,11 +31,6 @@ machines:
         "clock": {
           "class": "Time",
           "cyclesPerSecond": 650000,
-          "bindings": {
-            "run": "runTI57",
-            "speed": "speedTI57",
-            "step": "stepTI57"
-          },
           "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate"]
         },
         "display": {
@@ -68,9 +59,7 @@ machines:
           "location": [45, 316, 372, 478, 0.34, 0.5, 459, 832, 322, 168, 75, 38],
           "bindings": {
             "surface": "imageTI57",
-            "power": "powerTI57",
-            "reset": "resetTI57",
-            "clear": "clearTI57"
+            "power": "powerTI57"
           }
         },
         "rom": {
@@ -83,6 +72,7 @@ machines:
           "reference": "",
           "chipID": "TMC1501NC DI 7741",
           "revision": "0",
+          "overrides": ["colorROM","backgroundColorROM"],
           "values": [
             4623,4386,5106,7051,3246,6152,5813,5628,5805,7051,4386,3246,7911,5132,1822,6798,
             2600,1497,6539,6471,6642,6462,6899,6939,6660,3246,7587,4388,6648,4386,5634,7051,
@@ -219,8 +209,6 @@ styles:
   ti57:
     position: relative;
     display: inline-block;
-    float: left;
-    margin-right: 32px;
   displayTI57:
     position: absolute;
     left: 16%;
@@ -273,118 +261,67 @@ styles:
     width: 16%;
     height: 5%;
     opacity: 0;
-  .diagsTI57:
-    float: left;
-  printTI57:
-    font-family: Monaco,"Lucida Console",monospace;
+  .key:
+    border: 1px solid;
 ---
 
-The new [TI-57 Programmable Calculator](/devices/ti57/) emulator, shown below, is the latest addition to the
-PCjs Machines collection.  It emulates a TMS-1500 chip at the register level, and uses an original
-[TI-57 ROM](/devices/ti57/rom/), providing about as perfect a simulation as you can get.
+TI-57 Tips and Tricks
+---------------------
 
-Even though it's my smallest JavaScript-based emulator to date, it's still packed with goodies:
+### Powering Off The TI-57 Display
 
-- Faithful speed and LED simulation
-- Built-in disassembler and "mini-debugger"
-- Works on desktop and mobile devices
-- Saves and restores state automatically
+The post "[Give your TI-57 Constant Memory](https://www.rskey.org/gene/calcgene/57c.htm)"
+describes a trick for powering off the calculator while preserving memory.
+It's more accurately described as a means of powering off the display without powering off the entire calculator,
+and since the display is (apparently) what consumes the most power, you could "pretend" that you turned your
+calculator off, even though you really hadn't.
 
-Since it saves your calculator's state whenever the web page is closed, and restores that state when the page
-is reopened, you shouldn't lose your work.  However, just like a real calculator, if you turn it off and on again
-(using the **Power** button), then everything will be reset.
+This trick was previously reported in an old [TI PPC Notes](https://www.rskey.org/CMS/index.php/the-library/14)
+newsletter from the "TI Programmable Calculator Club" in Lanham, MD.  The article in
+[Vol. 7, No. 6, Page 9](http://bulk.rskey.org/BULK/CALCDOCS/TI/PPC/V7N6.pdf) reported that this trick was in turn
+previously reported in a French magazine, "L'Ordinateur de Poche" (No. 4 from 1982).
 
-The "mini-debugger" is connected to the Diagnostics window, so you can type commands there as well.
-As the "?" command will tell you, available commands include:
+Rather than repeat either of those repetitions of the trick, both of which suffer from a little vagueness, I'll
+repeat a better explanation from rskey.org's page on the [TI-57](http://www.rskey.org/ti57).  It involves entering
+two program steps at the end of the TI-57's 50-step program memory (at step 48), where it's conveniently out of the
+way of any other programs you might write, and then executing it when you're ready to power the screen off:
 
-	b[c]        	break on condition c
-	bl          	list break conditions
-	g [addr]    	run (to addr)
-	h           	halt
-	r[a]        	dump (all) registers
-	t [n]           step (n instructions)
-	u [addr] [n]    disassemble (at addr)
+> Briefly, you need to enter the two steps with the following keystrokes:
+<span class="key">GTO</span>
+<span class="key">2nd</span>
+<span class="key">4</span>
+<span class="key">8</span>
+<span class="key">LRN</span>
+<span class="key">2nd</span>
+<span class="key">Exc</span>
+<span class="key">SST</span>
+<span class="key">2nd</span>
+<span class="key">Lbl</span>
+<span class="key">1</span>.
+To put the calculator in sleep mode, enter:
+<span class="key">CLR</span>
+<span class="key">GTO</span>
+<span class="key">2nd</span>
+<span class="key">4</span>
+<span class="key">8</span>
+<span class="key">R/S</span>
+<span class="key">INV</span>
+<span class="key">STO</span>
+<span class="key">3</span>
+<span class="key">+/-</span>
+<span class="key">+/-</span>.
+To exit sleep mode, enter:
+<span class="key">INV</span>
+<span class="key">2nd</span>
+<span class="key">Fix</span>
+<span class="key">CLR</span>.
 
-Clicking the **Halt** button is equivalent to the "h" command, the **Run** button is equivalent to "g", and the
-**Step** button is equivalent to "t".  The **Reset** button has no equivalent; it's just a shortcut for cycling the
-**Power** button.  If you use the "t" command to step through a large number of instructions, the **Step** button
-becomes a **Stop** button, allowing you to terminate the step operation.
-
-In addition to supporting *touch* and *mouse* events, *keyboard* shortcuts are supported, too.  The set
-of shortcuts is configurable, based on the button *map* passed to the emulator.  The default *map* looks like
-this:
-
-	"map": [
-	    ["2nd",  "inv",  "lnx",  "\\b",  "clr"],
-	    ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
-	    ["sst",  "sto",  "rcl",  "sum",  "exp"],
-	    ["bst",  "ee",   "(",    ")",    "/"],
-	    ["gto",  "7",    "8",    "9",    "*"],
-	    ["sbr",  "4",    "5",    "6",    "-"],
-	    ["rst",  "1",    "2",    "3",    "+"],
-	    ["r/s",  "0",    ".",    "+/-",  "=|\\r"]
-	]
-
-Any button that corresponds to a single character can be triggered by typing that character (eg, "+" for the **Add**
-button).  Escape sequences are allowed, too; for example, `\\b` represents Backspace, which will trigger the **CE**
-button.  Buttons can have multiple mappings, too; for example, the **Equals** button can be triggered by typing either
-"=" *or* the **Enter** key.
-
-The LED display is configurable as well.  The default JSON properties for the LED Device look like this:
-
-	"display": {
-	    "class": "LED",
-	    "type": 3,
-	    "cols": 12,
-	    "rows": 1,
-	    "color": "red",
-	    "bindings": {
-	        "container": "displayTI57"
-	    }
-	}
-
-So if you prefer *green* or *blue* digits, change the *color* property.  A *backgroundColor* property is supported,
-too, but if it's omitted, a transparent background is used.
-
-All properties listed in a configuration's *overrides* array may be overridden with a URL parameter.  Currently,
-that includes:
-
-- *cyclesPerSecond* (default speed is 650000)
-- *color* (default LED color is red)
-- *backgroundColor* (default LED background color is none, for a transparent background)
-
-So, for example, this [URL](?color=green#pcjs-ti-57-emulator) loads the machine on this page with green LEDs.
-
-Check out the [TI-57 Tips and Tricks](/devices/ti57/tips/) page for more, um, tips and tricks.
-
-Since this emulator is still "hot off the press", don't be surprised if there are still a few lingering
-bugs.  If you run into any, or you have a browser or device where it doesn't work as expected,
-[send me a note](mailto:Jeff@pcjs.org).  If your web browser is "old" though, please try a newer browser first.
-
-*[@jeffpar](http://twitter.com/jeffpar)*  
-*Nov 10, 2017*
-
-## PCjs TI-57 Emulator
+So, give it a try!
 
 {% include machine.html id="ti57" config="json" %}
 
 <div id="ti57">
   <img id="imageTI57" src="/devices/ti57/images/TI-57-640.png"/>
   <div id="displayTI57"></div>
-  <div id="ind2nd" class="indTI57">2nd</div>
-  <div id="indINV" class="indTI57">INV</div>
-  <div id="indDeg" class="indTI57">Deg</div>
-  <div id="indRad" class="indTI57">Rad</div>
-  <div id="indGrad" class="indTI57">Grad</div>
   <button id="powerTI57">Power</button>
-</div>
-<div class="diagsTI57">
-  <div>
-    <p>Diagnostics</p>
-    <textarea id="printTI57" cols="78" rows="16"></textarea>
-  </div>
-  <button id="runTI57">Run</button>
-  <button id="stepTI57">Step</button><span id="speedTI57">Stopped</span>
-  <button id="resetTI57">Reset</button>
-  <button id="clearTI57">Clear</button>
 </div>

@@ -21,6 +21,7 @@ Additional resources include:
 - [TI-57 Documents](docs/)
 - [TI-57 Patents](patents/)
 - [TI-57 ROMs](rom/)
+- [TI-57 Tips and Tricks](tips/)
 
 Pictures of my Radio Shack EC-4000 are below.  I have a hunch that if I peeled off the Radio Shack sticker on
 the back (underneath my custom Dymo label), it would say `Texas Instruments electronic calculator`.
