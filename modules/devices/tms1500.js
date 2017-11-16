@@ -845,7 +845,7 @@ class Chip extends Device {
      * Instructions that use masks are displayed as either "LOAD", "MOVE", or "XCHG".  If the result
      * of the operation is suppressed, the destination will be displayed as "NUL" instead of a register.
      * And if the inputs are being added, subtracted, shifted left, or shifted right, they will be
-     * displayed with "+", "-", "<", or ">", respectively.  Finally, the 16-digit mask is displayed,
+     * displayed with "+", "-", "<<", or ">>", respectively.  Finally, the 16-digit mask is displayed,
      * as a series of hex digits rather than the unmemorable names used in the patents (eg, MMSD, FMAEX,
      * etc).  I do use the patent nomenclature internally, just not for display purposes.
      *
@@ -902,9 +902,9 @@ class Chip extends Device {
                 let sDst = "?", sSrc = "?";
 
                 if (!n) {
-                    sOperator = (k == 5? "<" : "+");
+                    sOperator = (k == 5? "<<" : "+");
                 } else {
-                    sOperator = (k == 5? ">" : "-");
+                    sOperator = (k == 5? ">>" : "-");
                 }
 
                 switch(l) {
