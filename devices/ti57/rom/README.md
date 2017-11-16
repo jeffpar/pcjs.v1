@@ -352,7 +352,7 @@ This ROM has been saved as [Hrast ROM #2](ti57hrast2.bin), along with a [dump](t
 TI-57 ROM Used With PCjs
 ------------------------ 
 
-The ROM that the [PCjs TI-57 Emulator](/devices/ti57/machine/) uses is the [Little-endian ROM](ti57le.bin),
+The ROM that the [PCjs TI-57 Emulator](/devices/ti57/machine/rev0/) uses is the [Little-endian ROM](ti57le.bin),
 which is the fully-corrected transcribed ROM taken from the contents of chip "TMC1501NC DI 7741".  Using the
-[PCjs TI-57 Emulator's](/devices/ti57/machine/) built-in disassembler, here's a [listing](ti57le.asm.txt)
+[PCjs TI-57 Emulator's](/devices/ti57/machine/rev0/) built-in disassembler, here's a [listing](ti57le.asm.txt)
 of that ROM.
