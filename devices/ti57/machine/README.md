@@ -273,7 +273,7 @@ If you want any of those features, visit the [TI-57 Resources](../) page.
 {% include machine.html id="ti57" config="json" %}
 
 <div id="ti57">
-  <img id="imageTI57" src="/devices/ti57/images/TI-57-640.png"/>
+  <img id="imageTI57" src="/devices/ti57/images/TI-57-640.png" alt="TI-57 Calculator"/>
   <div id="displayTI57"></div>
   <div id="ind2nd" class="indTI57">2nd</div>
   <div id="indINV" class="indTI57">INV</div>
