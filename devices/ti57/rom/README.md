@@ -211,7 +211,7 @@ Here's the OCR'ed object code [dump](ti57pat037.txt) from [4,164,037](../patents
 
 NOTE: This listing is actually missing data on one of the lines; comparing the listing to [4,125,901](../patents/us4125901)
 makes it fairly clear that a value in the middle of the row (`0E07`) was omitted.  The listing in [4,146,928](.../patents/us4146928)
-is even worse, with four lines of missing data.
+is even worse, with four lines that are missing data.
 
 #### ROM From U.S. Pat. No. 4,125,867
 
@@ -226,9 +226,10 @@ distinguish between, say, `8` and `B`, and in those cases, my tendency was to le
 in patent 4,125,901 in place.  The result is [ti57pat867.bin](ti57pat867.bin), a 4096-byte 16-bit-word little-endian
 binary file.
 
-Interestingly, the final result of my very careful transcription of U.S. Patent No.
+Interestingly, the final result of my careful transcription of U.S. Patent No.
 [4,125,867](https://docs.google.com/viewer?url=patentimages.storage.googleapis.com/pdfs/US4125867.pdf) yields
-a ROM that, of all the patent ROM listings available, is *closest* to the [Hrast ROM #1](#hrast-rom-1).   
+a ROM that, of all the patent ROM listings available, appears to be *closest* to [Hrast ROM #1](#hrast-rom-1), so
+it's likely that HrastProgrammer relied primarily on this patent listing as well.   
 
 TI-57 Production ROM Revisions
 ------------------------------
