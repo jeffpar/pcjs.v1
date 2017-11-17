@@ -98,18 +98,16 @@ class Time extends Device {
         super(idMachine, idDevice, Time.VERSION, config);
 
         /*
-         * NOTE: The default speed of 650,000Hz (0.65Mhz) is a crude approximation based on actual
-         * TI-57 device timings.  I had originally calculated the speed as 1,600,000Hz (1.6Mhz) based
-         * on timing information in TI's patents, but in hindsight, that speed seems rather high for
-         * a mid-1970's device.  OTOH, the TMS-1500 does burn through a lot of cycles (minimum of 128)
-         * per instruction.
-         *
-         * TODO: Calculate a more precise cyclesPerSecond (650000 is based on crude eyeball timings).
+         * NOTE: The default speed of 650,000Hz (0.65Mhz) is a crude approximation based on real
+         * world TI-57 device timings.  I had originally assumed the speed as 1,600,000Hz (1.6Mhz),
+         * based on timing information in TI's patents, but in hindsight, that speed seems rather
+         * high for a mid-1970's device, and reality suggests it was much lower.  The TMS-1500 does
+         * burn through a lot of cycles (minimum of 128) per instruction, but either that cycle
+         * burn was much higher, or the underlying clock speed was much lower.  I assume the latter.
          */
-        this.nCyclesPerSecond = this.config['cyclesPerSecond'] || 650000;
-        this.nYieldsPerSecond = this.config['yieldsPerSecond'] || Time.YIELDS_PER_SECOND;
-        this.nYieldsPerUpdate = this.config['yieldsPerUpdate'] || Time.YIELDS_PER_UPDATE;
-        if (this.nCyclesPerSecond < 1000) this.nCyclesPerSecond = 1000;
+        this.nCyclesPerSecond = this.bound(this.config['cyclesPerSecond'] || 650000, 100000, 1600000);
+        this.nYieldsPerSecond = this.bound(this.config['yieldsPerSecond'] || Time.YIELDS_PER_SECOND, 30, 120);
+        this.nYieldsPerUpdate = this.bound(this.config['yieldsPerUpdate'] || Time.YIELDS_PER_UPDATE, 1, this.nYieldsPerSecond);
         this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
         this.mhzBase = Math.round(this.nCyclesPerSecond / 10000) / 100;
         this.mhzCurrent = this.mhzTarget = this.mhzBase * this.nTargetMultiplier;

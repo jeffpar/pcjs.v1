@@ -306,6 +306,24 @@ class Device {
     }
 
     /**
+     * bound(n, min, max)
+     *
+     * Restricts n to the bounds defined by min and max.
+     *
+     * @param {number} n
+     * @param (number} min
+     * @param {number} max
+     * @returns {number} (updated n)
+     */
+    bound(n, min, max)
+    {
+        this.assert(min <= max);
+        if (n < min) n = min;
+        if (n > max) n = max;
+        return n;
+    }
+
+    /**
      * checkVersion(config)
      *
      * Verify that device's version matches the machine's version, and also that the config version stored in
