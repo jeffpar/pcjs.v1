@@ -21,5 +21,5 @@ PC Software Tool Guides
 
 * [Microsoft Tool Guides](tools/microsoft/)
 
-[<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/dos/PCDOS100/thumbs/PCDOS100.jpg" width="200" height="260" alt="IBM PC Disk Operating System v1.00"/>](dos/PCDOS100/)
-[<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/dos/PCDOS110/thumbs/PCDOS110.jpg" width="200" height="260" alt="IBM PC Disk Operating System v1.10"/>](dos/PCDOS110/)
+[<img src="/pubs/images/PCDOS100-thumb.jpg" width="200" height="260" alt="IBM PC Disk Operating System v1.00"/>](dos/PCDOS100/)
+[<img src="/pubs/images/PCDOS110-thumb.jpg" width="200" height="260" alt="IBM PC Disk Operating System v1.10"/>](dos/PCDOS110/)
