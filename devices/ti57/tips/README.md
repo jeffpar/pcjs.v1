@@ -12,7 +12,7 @@ machines:
         "ti57": {
           "class": "Machine",
           "type": "TI57",
-          "name": "TI-57 Emulator",
+          "name": "PCjs TI-57 Emulator",
           "version": 1.03
         },
         "chip": {
@@ -316,11 +316,12 @@ To exit sleep mode, enter:
 <span class="key">Fix</span>
 <span class="key">CLR</span>.
 
-Give it a try!
+Use the [PCjs TI-57 Emulator](#pcjs-ti-57-emulator) below to give it a try!
 
-### Overriding Speed and Color Settings
+### Overriding PCjs TI-57 Settings
 
-The PCjs TI-57 emulator allows you to override selected properties from the URL.
+The [PCjs TI-57 Emulator](#pcjs-ti-57-emulator) allows you to override a variety of configuration properties
+from the URL, including speed and color settings.
 
 Currently, the following properties may be overridden, within the given minimums and maximums:
 
@@ -332,13 +333,16 @@ Currently, the following properties may be overridden, within the given minimums
 - *colorROM* (default ROM activity LED color is green)
 - *backgroundColorROM* (default ROM activity background color is black)
 
-So, for example, this [URL](?color=lime#pcjs-ti-57-emulator) loads this page's TI-57 with bright green LEDs.
+So, if you want a [TI-57 with Bright Green LEDs](?color=lime#pcjs-ti-57-emulator), you've got it!
 
 Note that ROM activity colors apply only to the "ROM Activity" window that appears on a
 [TI-57 Diagnostics](/devices/ti57/machine/rev0/) page.
 
 The *yieldsPerSecond* property is essentially the emulator's LED refresh rate, whereas *yieldsPerUpdate* determines
-how frequently any other non-LED elements on the page should be updated.
+how frequently any other non-LED elements on the page should be updated (e.g., current speed, current register values,
+etc.)
+
+#### PCjs TI-57 Emulator
 
 {% include machine.html id="ti57" config="json" %}
 

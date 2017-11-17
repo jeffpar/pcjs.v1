@@ -12,7 +12,7 @@ machines:
         "ti57": {
           "class": "Machine",
           "type": "TI57",
-          "name": "TI-57 Emulator",
+          "name": "PCjs TI-57 Emulator",
           "version": 1.03,
           "bindings": {
             "print": "printTI57"

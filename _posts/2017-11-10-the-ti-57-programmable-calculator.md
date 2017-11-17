@@ -13,7 +13,7 @@ machines:
         "ti57": {
           "class": "Machine",
           "type": "TI57",
-          "name": "TI-57 Emulator",
+          "name": "PCjs TI-57 Emulator",
           "version": 1.03,
           "bindings": {
             "print": "printTI57"
@@ -339,23 +339,33 @@ The LED display is configurable as well.  The default JSON properties for the LE
 	    "rows": 1,
 	    "color": "red",
 	    "bindings": {
-	        "container": "displayTI57"
-	    }
+	      "container": "displayTI57"
+	    },
+        "overrides": ["color","backgroundColor"]
 	}
 
 So if you prefer *green* or *blue* digits, change the *color* property.  A *backgroundColor* property is supported,
 too, but if it's omitted, a transparent background is used.
 
-All properties listed in a configuration's *overrides* array may be overridden with a URL parameter.  Currently,
-that includes:
+Even for configurations that have already been created, like the [TI-57](#pcjs-ti-57-emulator) on this page, any
+property listed in a device's *overrides* can be overridden with a URL parameter.  For example:
 
-- *cyclesPerSecond* (default speed is 650000)
-- *color* (default LED color is red)
-- *backgroundColor* (default LED background color is none, for a transparent background)
+	http://www.pcjs.org/devices/ti57/machine/?color=lime
 
-So, for example, this [URL](?color=lime#pcjs-ti-57-emulator) loads this page's TI-57 with bright green LEDs.
+Currently, the following properties may be overridden, within the given minimums and maximums:
 
-Check out the [TI-57 Tips and Tricks](/devices/ti57/tips/) page for more, um, tips and tricks.
+- *cyclesPerSecond* (default speed is 650000; minimum is 100000 and maximum is 1600000)
+- *yieldsPerSecond* (default is 60; minimum is 30 and maximum is 120)
+- *yieldsPerUpdate* (default is 30; minimum is 1 and maximum is *yieldsPerSecond*)
+- *color* (default LED digit color is red)
+- *backgroundColor* (default LED digit background color is none, for a transparent background)
+- *colorROM* (default ROM activity LED color is green)
+- *backgroundColorROM* (default ROM activity background color is black)
+
+So, if you want a [TI-57 with Bright Green LEDs](?color=lime#pcjs-ti-57-emulator), you've got it!
+
+Check out our [TI-57 Tips and Tricks](/devices/ti57/tips/) for more information on
+[PCjs TI-57 Overrides](/devices/ti57/tips/#overriding-pcjs-ti-57-settings).
 
 Since this emulator is still "hot off the press", don't be surprised if there are still a few lingering
 bugs.  If you run into any, or you have a browser or device where it doesn't work as expected,
