@@ -5,7 +5,7 @@ permalink: /pubs/pc/datasheets/
 ---
 
 PC Component Datasheets
----
+-----------------------
 
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/datasheets/thumbs/8088-CPU.jpg" width="200" height="260" alt="8088 CPU"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/datasheets/8088-CPU.pdf)
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/datasheets/thumbs/8087-FPU.jpg" width="200" height="260" alt="8087 FPU"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/datasheets/8087-FPU.pdf)

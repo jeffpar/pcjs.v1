@@ -8,9 +8,9 @@ Magazines
 ---
 Browse our collection of PC-related magazines.
 
-[<img src="/pubs/images/BYTE-1975-11-thumb.jpeg" width="200" height="260" alt= "Byte Magazine"/>](byte/)
-[<img src="/pubs/images/MSJ-1986-10-thumb.jpeg" width="200" height="260" alt= "Microsoft Systems Journal"/>](msj/)
-[<img src="/pubs/images/PCTJ-1983-07-thumb.jpeg" width="200" height="260" alt= "PC Tech Journal"/>](pctj/)
+[<img src="/pubs/images/BYTE-1975-11-thumb.jpg" width="200" height="260" alt= "Byte Magazine"/>](byte/)
+[<img src="/pubs/images/MSJ-1986-10-thumb.jpg" width="200" height="260" alt= "Microsoft Systems Journal"/>](msj/)
+[<img src="/pubs/images/PCTJ-1983-07-thumb.jpg" width="200" height="260" alt= "PC Tech Journal"/>](pctj/)
 
 From [PC Tech Journal](/pubs/pc/magazines/pctj/), we also have all the [Microsoft Languages NewsLetters](/disks/pcx86/tools/microsoft/).
 

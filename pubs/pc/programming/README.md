@@ -25,4 +25,4 @@ information (errata, disks, etc) is provided where available.
 * *[Undocumented Windows](Undocumented_Windows/)* (Covers Windows 3.1 and 3.0) by Schulman, Maxey, Pietrek
 
 [<img src="/pubs/images/The_8086_Book-thumb.jpg" width="200" height="260" alt="The 8086 Book"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/programming/The_8086_Book/The_8086_Book.pdf)
-[<img src="/pubs/images/Graphics_for_the_IBM_PC-thumb.jpeg" width="200" height="260" alt="Graphics for the IBM PC"/>](Graphics_for_the_IBM_PC/)
+[<img src="/pubs/images/Graphics_for_the_IBM_PC-thumb.jpg" width="200" height="260" alt="Graphics for the IBM PC"/>](Graphics_for_the_IBM_PC/)
