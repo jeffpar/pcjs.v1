@@ -37,6 +37,7 @@ For general historical interest, the project includes a [Publication Archive](/p
 * [Microsoft PC Reference Materials](/pubs/pc/reference/microsoft/)
 * [Digital Equipment Corporation (DEC)](/pubs/dec/)
 * [Ohio Scientific's 6502-based Challenger 1P](/pubs/c1p/)
+* [Texas Instruments TI-57](/devices/ti57/) [Manuals](/devices/ti57/docs/) and [Patents](/devices/ti57/patents/)
 
 ---
 

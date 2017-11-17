@@ -24,6 +24,9 @@ For general historical interest, the project includes a Publication Archive that
 	* [Datasheets](c1p/datasheets/)
 	* [Programming Guides/Samples](c1p/programming/)
 	* [Reference Manuals](c1p/techref/)
+* [Texas Instruments TI-57](/devices/ti57/)
+	* [Manuals](/devices/ti57/docs/)
+	* [Patents](/devices/ti57/patents/)
 
 ---
 
