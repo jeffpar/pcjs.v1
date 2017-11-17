@@ -316,7 +316,29 @@ To exit sleep mode, enter:
 <span class="key">Fix</span>
 <span class="key">CLR</span>.
 
-So, give it a try!
+Give it a try!
+
+### Overriding Speed and Color Settings
+
+The PCjs TI-57 emulator allows you to override selected properties from the URL.
+
+Currently, the following properties may be overridden, within the given minimums and maximums:
+
+- *cyclesPerSecond* (default speed is 650000; minimum is 100000 and maximum is 1600000)
+- *yieldsPerSecond* (default is 60; minimum is 30 and maximum is 120)
+- *yieldsPerUpdate* (default is 30; minimum is 1 and maximum is *yieldsPerSecond*)
+- *color* (default LED digit color is red)
+- *backgroundColor* (default LED digit background color is none, for a transparent background)
+- *colorROM* (default ROM activity LED color is green)
+- *backgroundColorROM* (default ROM activity background color is black)
+
+So, for example, this [URL](?color=lime#pcjs-ti-57-emulator) loads this page's TI-57 with bright green LEDs.
+
+Note that ROM activity colors apply only to the "ROM Activity" window that appears on a
+[TI-57 Diagnostics](/devices/ti57/machine/rev0/) page.
+
+The *yieldsPerSecond* property is essentially the emulator's LED refresh rate, whereas *yieldsPerUpdate* determines
+how frequently any other non-LED elements on the page should be updated.
 
 {% include machine.html id="ti57" config="json" %}
 
