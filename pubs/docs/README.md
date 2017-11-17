@@ -42,10 +42,10 @@ For general historical interest, the project includes a [Publication Archive](/p
 ---
 
 [<img src="/pubs/images/8088-CPU-thumb.jpg" width="200" height="260" alt="8088 CPU"/>](/pubs/pc/datasheets/)
-[<img src="/pubs/images/BYTE-1975-11-thumb.jpeg" width="200" height="260" alt="Byte Magazine"/>](/pubs/pc/magazines/byte/)
-[<img src="/pubs/images/MSJ-1986-10-thumb.jpeg" width="200" height="260" alt="Microsoft Systems Journal"/>](/pubs/pc/magazines/msj/)
-[<img src="/pubs/images/PCTJ-1983-07-thumb.jpeg" width="200" height="260" alt="PC Tech Journal"/>](/pubs/pc/magazines/pctj/)
-[<img src="/pubs/images/Graphics_for_the_IBM_PC-thumb.jpeg" width="200" height="260" alt="Graphics for the IBM PC"/>](/pubs/pc/programming/Graphics_for_the_IBM_PC/)
-[<img src="/pubs/images/IBM-5150-TECHREF-thumb.jpeg" width="200" height="260" alt="IBM 5150 Technical Reference (August 1981)"/>](/pubs/pc/reference/ibm/)
-[<img src="/pubs/images/80286_and_80287_Programmers_Reference_Manual_1987-thumb.jpeg" width="200" height="260" alt="80286 and 80287 Programmer's Reference"/>](/pubs/pc/reference/intel/)
+[<img src="/pubs/images/BYTE-1975-11-thumb.jpg" width="200" height="260" alt="Byte Magazine"/>](/pubs/pc/magazines/byte/)
+[<img src="/pubs/images/MSJ-1986-10-thumb.jpg" width="200" height="260" alt="Microsoft Systems Journal"/>](/pubs/pc/magazines/msj/)
+[<img src="/pubs/images/PCTJ-1983-07-thumb.jpg" width="200" height="260" alt="PC Tech Journal"/>](/pubs/pc/magazines/pctj/)
+[<img src="/pubs/images/Graphics_for_the_IBM_PC-thumb.jpg" width="200" height="260" alt="Graphics for the IBM PC"/>](/pubs/pc/programming/Graphics_for_the_IBM_PC/)
+[<img src="/pubs/images/IBM-5150-TECHREF-thumb.jpg" width="200" height="260" alt="IBM 5150 Technical Reference (August 1981)"/>](/pubs/pc/reference/ibm/)
+[<img src="/pubs/images/80286_and_80287_Programmers_Reference_Manual_1987-thumb.jpg" width="200" height="260" alt="80286 and 80287 Programmer's Reference"/>](/pubs/pc/reference/intel/)
 [<img src="/pubs/images/PCDOS100-thumb.jpg" width="200" height="260" alt="IBM PC Disk Operating System v1.00"/>](/pubs/pc/software/)
