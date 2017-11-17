@@ -353,7 +353,7 @@ that includes:
 - *color* (default LED color is red)
 - *backgroundColor* (default LED background color is none, for a transparent background)
 
-So, for example, this [URL](?color=green#pcjs-ti-57-emulator) loads the machine on this page with green LEDs.
+So, for example, this [URL](?color=lime#pcjs-ti-57-emulator) loads this page's TI-57 with bright green LEDs.
 
 Check out the [TI-57 Tips and Tricks](/devices/ti57/tips/) page for more, um, tips and tricks.
 
