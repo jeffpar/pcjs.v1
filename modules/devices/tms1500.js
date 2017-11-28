@@ -1,5 +1,5 @@
 /**
- * @fileoverview Simulates the instructions of a TMS-1500 chip
+ * @fileoverview Simulates the instructions of a TMS-150x/TMC-150x chip
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -290,7 +290,12 @@ class Reg64 extends Device {
  */
 
 /**
- * TMS-1500 Calculator Chip
+ * TMS-150x Calculator Chip
+ *
+ * Emulates various TMS ("Texas Mos Standard") and TMC ("Texas Mos Custom") chips; eg:
+ *
+ *      TMS-1501/TMC-1501: Used in the TI-57
+ *      TMS-1503/TMC-1503: Used in the TI-55
  *
  * This chip contains lots of small discrete devices, most of which will be emulated either within this
  * class or within another small container class in the same file, because most of them are either very simple
@@ -333,7 +338,7 @@ class Chip extends Device {
     /**
      * Chip(idMachine, idDevice, config)
      *
-     * Defines the basic devices of the TMS-1500 chip, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
+     * Defines the basic elements of the TMS-150x chip, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
      *
      * @this {Chip}
      * @param {string} idMachine

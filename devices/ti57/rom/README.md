@@ -19,7 +19,7 @@ Before we get into the various TI-57 ROM dumps, it's worth saying a few words ab
 TI-57 ROMs contain 2048 13-bit words, individually addressible via 11 address lines (since 2^11 equals 2048).
 
 Every word of the ROM is an instruction; in other words, it's all "code" and no "data".
-There are no instructions for loading words from ROM into registers.  An interesting article titled
+There are no instructions for loading values from ROM into registers.  An interesting article titled
 "[TI-57 Constant ROM](http://www.rskey.org/CMS/index.php/the-library/475)" explains how the TI-57 deals
 with this limitation of the instruction set, by examining the TI-57's techniques for generating various constants,
 such as Pi.
@@ -39,7 +39,8 @@ And yes, while a zero (0x0000) is technically a valid instruction:
 
 	LOAD    A,A+A,000F 0000 0000 0000
 
-it is not an instruction that was ever used.  This is why I have disassembled zeros in my own listings as "UNUSED".
+it does not appear to be an instruction that TI ever used.  This is why I have disassembled zeros in my own listings
+as "UNUSED".
 
 TI-57 Production ROMs
 ---------------------
@@ -108,7 +109,7 @@ diff'ed the hexdumps of `ti57raw.bin` and `myraw.bin`, and found 4 bits that wer
 	> 0000a20 c0 e2 e1 dc 6f 69 1d 7a 24 fe 70 96 3c 2a 48 b8
 
 Sean had already found the first two corrections himself, and after making the other corrections, he updated
-the Raw ROM dump on his website; it has been updated here as well.
+the Raw ROM dump on his website (see "updated 10/22/2017 - 4 bits fixed"); it has been updated here as well.
 
 Turning our attention to the *interpretation* of the raw data, let's review some additional information that Sean
 [posted in a forum](http://forums.bannister.org//ubbthreads.php?ubb=showflat&Number=98011#Post98011):
@@ -135,14 +136,14 @@ The reordered data that he saved as `ti57.bin` is what I call the [Reordered ROM
 It is a 4096-byte file that pads each 13-bit word to a 16-bit word and stores them in big-endian format.
 
 To make sure I understood the above interpretation of the raw data, and to produce a corresponding
-[Little-endian ROM](ti57le.bin), I wrote [raw2le.js](raw2le.js):
+[Original ROM (Little-endian)](ti57le.bin), I wrote [raw2le.js](raw2le.js):
 
 	node raw2le.js ti57raw.bin ti57le.bin
 
 I also verified that if the script was modified to output big-endian data, the result was identical
 to the original [Reordered ROM (Big-endian)](ti57be.bin).  I then saved a [dump](ti57le.txt) of the
-[Little-endian ROM](ti57le.bin), including all the corrections mentioned above, using `hexdump -x ti57le.bin`,
-with the byte offsets changed to ROM addresses.
+[Original ROM (Little-endian)](ti57le.bin), including all the corrections mentioned above, using
+`hexdump -x ti57le.bin`, with the byte offsets changed to ROM addresses.
 
 During the process of understanding the raw ROM data, it was also helpful to view the raw data file as binary,
 using this handy command:
@@ -196,10 +197,11 @@ obtained from the [PockEmul](https://github.com/pockemul/PockEmul) project on Gi
 came from "[HrastProgrammer's](http://www.hrastprogrammer.com/)" [TI-57 emulator](http://www.hrastprogrammer.com/ti57e/),
 based on an attribution in the PockEmul [source code](https://github.com/pockemul/PockEmul/blob/master/src/cpu/ti57cpu.cpp).
 
-Hrast ROM #1 [dump](ti57hrast1.txt) appears to be very similar to the
-[ROM From U.S. Pat. No. 4,125,867](#rom-from-us-pat-no-4125867).  As I mentioned
-[in my blog](/blog/2017/11/05/), HrastProgrammer's own [comments](http://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/archv015.cgi?read=84950)
-indicate that he originally created a working ROM image using object code dumps from multiple TI patents.
+As I mentioned [in my blog](/blog/2017/11/05/), HrastProgrammer
+[indicated](http://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/archv015.cgi?read=84950) that he originally created a
+working ROM image using object code dumps from multiple TI patents.  However, the [dump](ti57hrast1.txt) of Hrast ROM #1
+appears to be very similar to the [ROM From U.S. Pat. No. 4,125,867](#rom-from-us-pat-no-4125867), so it's likely that
+he relied *primarily* on that patent listing.   
 
 #### ROM From U.S. Pat. No. 4,125,901
  
@@ -209,8 +211,8 @@ Here's the OCR'ed object code [dump](ti57pat901.txt) from [4,125,901](../patents
  
 Here's the OCR'ed object code [dump](ti57pat037.txt) from [4,164,037](../patents/us4164037/), also for comparison purposes.
 
-NOTE: This listing is actually missing data on one of the lines; comparing the listing to [4,125,901](../patents/us4125901)
-makes it fairly clear that a value in the middle of the row (`0E07`) was omitted.  The listing in [4,146,928](.../patents/us4146928)
+NOTE: The patent listing was actually missing data on one of the lines; comparing the listing to [4,125,901](../patents/us4125901)
+made it fairly clear that a value in the middle of the row (`0E07`) was omitted.  The listing in [4,146,928](.../patents/us4146928)
 is even worse, with four lines that are missing data.
 
 #### ROM From U.S. Pat. No. 4,125,867
@@ -226,27 +228,28 @@ distinguish between, say, `8` and `B`, and in those cases, my tendency was to le
 in patent 4,125,901 in place.  The result is [ti57pat867.bin](ti57pat867.bin), a 4096-byte 16-bit-word little-endian
 binary file.
 
-Interestingly, the final result of my careful transcription of U.S. Patent No.
-[4,125,867](https://docs.google.com/viewer?url=patentimages.storage.googleapis.com/pdfs/US4125867.pdf) yields
-a ROM that, of all the patent ROM listings available, appears to be *closest* to [Hrast ROM #1](#hrast-rom-1), so
-it's likely that HrastProgrammer relied primarily on this patent listing as well.   
-
 TI-57 Production ROM Revisions
 ------------------------------
 
 #### Hrast ROM #2
 
 The most recent version of HrastProgrammer's Windows-based [TI-57 emulator](http://www.hrastprogrammer.com/ti57e/)
-uses an electronic dump of a production TI-57 ROM.  Unfortunately, HrastProgrammer declined to share any information
-about this dump, including who provided it, what the TMS-1500 chip version was, what the contents of the ROM were,
-or how those contents differed from previous dumps.
+uses an electronic dump of a production TI-57 ROM.  Unfortunately, HrastProgrammer has so far declined to share any
+information about this dump, including who provided it, what the TMS-1500 chip version was, what the contents of the
+ROM were, or how those contents differed from previous dumps.
 
 Using a debugger and carefully stepping through the TI57E.EXE program, I discovered that all 2048 words of that ROM
 were stored as a series of 32-bit floating-point numbers.  I've saved a [dump](ti57hrast2fp.txt) of the floating-point
 data.
 
-I then wrote a [script](fp2le.js) to convert the 32-bit floating-point values to 16-bit words, and then diff'ed the
-results with the [Little-endian ROM](ti57le.bin) from the "TMC1501NC DI 7741" chip:
+The next question: was this just another copy of the original TI-57 ROM, or was it a revision?  And if it was a
+revision, which one was the original?
+
+#### Revised ROM
+
+I wrote a [script](fp2le.js) to convert the 32-bit floating-point values from [Hrast ROM #2](#hrast-rom-2) to 16-bit
+words, and then diff'ed the results with the [Original ROM (Little-endian)](ti57le.bin) from the "TMC1501NC DI 7741"
+chip:
 
 	64c64
 	< 00003f0    0cbe    1e00    07cf    1528    0e07    0e07    1dfc    075f
@@ -281,15 +284,15 @@ results with the [Little-endian ROM](ti57le.bin) from the "TMC1501NC DI 7741" ch
 	---
 	> 0000d40    0c96    1aa3    0c10    0767    0197    007f    05ad    026d
 
-Like [Hrast ROM #1](#hrast-rom-1), this ROM was patched in several places with custom opcodes
-that only the HrastProgrammer emulator uses; specifically:
+Like [Hrast ROM #1](#hrast-rom-1), this ROM was patched in several places with custom opcodes that only the
+HrastProgrammer emulator uses; specifically:
 
 - 0E0B: `POWOFF`
 - 0E0D: `?KEY`
 - 0EFF: `NOP`
 
-After replacing all three of those opcodes with their original value (presumably 0E07),
-that left the following differences:
+After replacing all three of those opcodes with their original value (presumably 0E07), that left the following
+differences:
 
 	118,119c118,119
 	< 0000750    0c11    1476    0c7a    1bae    1485    1baf    15c6    1476
@@ -348,12 +351,12 @@ unused words of the first half of the ROM, and which performs one additional `CL
 It's possible that these remaining revisions were also made by HrastProgrammer, but for now, I'm going to
 assume they represent a minor revision made by Texas Instruments at some point.
 
-This ROM has been saved as [Hrast ROM #2](ti57hrast2.bin), along with a [dump](ti57hrast2.txt).
+This ROM has been saved as [Revised ROM (Little-endian)](ti57rev1le.bin), along with a [dump](ti57rev1le.txt).
 
 TI-57 ROM Used With PCjs
 ------------------------ 
 
-The ROM that the [PCjs TI-57 Emulator](/devices/ti57/machine/rev0/) uses is the [Little-endian ROM](ti57le.bin),
-which is the fully-corrected transcribed ROM taken from the contents of chip "TMC1501NC DI 7741".  Using the
-[PCjs TI-57 Emulator's](/devices/ti57/machine/rev0/) built-in disassembler, here's a [listing](ti57le.asm.txt)
-of that ROM.
+The ROM that the [PCjs TI-57 Emulator](/devices/ti57/machine/rev0/) uses is the
+[Original ROM (Little-endian)](ti57le.bin), which is the fully-corrected transcribed ROM taken from the
+contents of chip "TMC1501NC DI 7741".  Using the [PCjs TI-57 Emulator's](/devices/ti57/machine/rev0/) built-in
+disassembler, here's a [listing](ti57le.asm.txt) of that ROM.

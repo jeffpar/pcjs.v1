@@ -4,7 +4,7 @@
   "valueSize": 16,
   "valueTotal": 2048,
   "littleEndian": true,
-  "file": "ti57hrast2.bin",
+  "file": "ti57rev1le.bin",
   "reference": "",
   "values": [
     4623,4386,5106,7051,3246,6152,5813,5628,5805,7051,4386,3246,7911,5132,1822,6798,
