@@ -12,7 +12,7 @@ machines:
         "ti55": {
           "class": "Machine",
           "type": "TI55",
-          "name": "PCjs TI-55 Emulator",
+          "name": "TI-55 Emulator",
           "version": 1.03
         },
         "chip": {
@@ -56,7 +56,7 @@ machines:
             ["sum",  "1",    "2",    "3",    "+"],
             ["\\b",  "0",    ".",    "+/-",  "=|\\r"]
           ],
-          "location": [45, 316, 372, 478, 0.34, 0.5, 459, 832, 322, 168, 75, 38],
+          "location": [55, 302, 355, 443, 0.34, 0.5, 460, 788, 320, 170, 71, 36],
           "bindings": {
             "surface": "imageTI55",
             "power": "powerTI55"
@@ -211,8 +211,8 @@ styles:
     display: inline-block;
   displayTI55:
     position: absolute;
-    left: 16%;
-    top: 7%;
+    left: 15%;
+    top: 8%;
     width: 70%;
     height: 4%;
   .indTI55:
@@ -221,43 +221,43 @@ styles:
     color: red;
   ind2nd:
     position: absolute;
-    left: 17%;
-    top: 12%;
+    left: 15%;
+    top: 13%;
     width: 7%;
     height: 2%;
     opacity: 0;
   indINV:
     position: absolute;
-    left: 25%;
-    top: 12%;
+    left: 23%;
+    top: 13%;
     width: 7%;
     height: 2%;
     opacity: 0;
   indDeg:
     position: absolute;
-    left: 33%;
-    top: 12%;
+    left: 31%;
+    top: 13%;
     width: 7%;
     height: 2%;
     opacity: 0;
   indRad:
     position: absolute;
-    left: 41%;
-    top: 12%;
+    left: 39%;
+    top: 13%;
     width: 7%;
     height: 2%;
     opacity: 0;
   indGrad:
     position: absolute;
-    left: 49%;
-    top: 12%;
+    left: 47%;
+    top: 13%;
     width: 7%;
     height: 2%;
     opacity: 0;
   powerTI55:
     position: absolute;
-    left: 70%;
-    top: 20%;
+    left: 69%;
+    top: 21%;
     width: 16%;
     height: 5%;
     opacity: 0;
@@ -266,9 +266,8 @@ styles:
 TI-55 Programmable Calculator (with Original ROM)
 -------------------------------------------------
 
-This is a demonstration of the PCjs TI-55 Emulator in its simplest form, with no diagnostic features enabled.
-
-If you want any of those features, visit the [TI-55 Resources](../) page.
+This is a demonstration of the PCjs TI-55 Emulator in its simplest form.  It is also available with
+[Diagnostics](diags/) enabled.
 
 {% include machine.html id="ti55" config="json" %}
 
