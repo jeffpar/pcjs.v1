@@ -1,16 +1,13 @@
 ---
 layout: page
-title: Texas Instruments TI-57 Programmable Calculator
+title: Texas Instruments TI-57
 permalink: /devices/ti57/
 ---
 
-TI-57 Resources
----------------
+Texas Instruments TI-57
+-----------------------
 
-My first programmable device was a TI-57 Programmable Calculator (the Radio Shack EC-4000 version,
-Serial No. 9604427) purchased on October 7, 1978.
-
-PCjs TI-57 emulator configurations are now available for your programming enjoyment:
+A PCjs emulator for the TI-57 Programmable Calculator is now available.  Ready-to-run configurations include:
 
 - [TI-57 with Original ROM](machine/)
 - [TI-57 with Original ROM and Diagnostics](machine/rev0/)
@@ -23,7 +20,10 @@ Additional resources include:
 - [TI-57 ROMs](rom/)
 - [TI-57 Tips and Tricks](tips/)
 
-Pictures of my Radio Shack EC-4000 are below.  I have a hunch that if I peeled off the Radio Shack sticker on
+My first programmable device was a TI-57; specifically, the Radio Shack EC-4000 version, Serial No. 9604427,
+purchased on October 7, 1978.
+
+Pictures of my EC-4000 are below.  I have a hunch that if I peeled off the Radio Shack sticker on
 the back (underneath my custom Dymo label), it would say `Texas Instruments electronic calculator`.
 
 ![EC-4000 Front](images/EC-4000-Front.jpg)

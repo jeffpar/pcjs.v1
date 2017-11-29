@@ -7,7 +7,7 @@ permalink: /devices/ti57/rom/
 TI-57 ROMs
 ----------
 
-TI-57 ROM images come in several flavors, [Production ROMs](#ti-57-production-roms) and
+TI-57 ROM binaries come in several flavors, [Production ROMs](#ti-57-production-roms) and
 [Patent ROMs](#ti-57-patent-roms), which are discussed in detail below.  There may also have been one or more
 [TI-57 Production ROM Revisions](#ti-57-production-rom-revisions), as discussed at the bottom of this document.
 
@@ -31,8 +31,8 @@ of the ROM they are located.  This is reinforced by Texas Instrument's patent il
 architecture, where they depict the ROM in two blocks: `ROM A (1024 x 13 BITS)` and `ROM B (1024 x 13 BITS)`.
 
 TI programmers likely dealt with this limitation by simply writing the ROM code in two parts, ensuring that each
-part did not exceed 1024 words, and then combining the parts to produce the final ROM image.  This is why, in all
-ROM images, you'll see a few words at the end of both the first and second halves that have not been used (ie, words
+part did not exceed 1024 words, and then combining the parts to produce the final ROM binary.  This is why, in all
+ROM binaries, you'll see a few words at the end of both the first and second halves that have not been used (ie, words
 filled with zeros).
 
 And yes, while a zero (0x0000) is technically a valid instruction:
@@ -49,21 +49,21 @@ For a long time, all we had were [Patent ROM](#ti-57-patent-roms) object code li
 [one possible exception](#rom-from-us-pat-no-4125867), suffered from numerous typos.
 Fortunately, thanks to efforts by [Sean Riddle](http://seanriddle.com/tms1500.html), who in turn relied on
 imaging work by [John McMaster](http://uvicrec.blogspot.com), a viable copy of an actual TI-57 production ROM
-was created, by carefully examining an image of the ROM array inside the chip.  That is the ROM I ultimately
+was created, by carefully examining a photograph of the ROM array inside the chip.  That is the ROM I ultimately
 [used with the PCjs TI-57 Emulator](#ti-57-rom-used-with-pcjs). 
 
 The chip was labelled "TMC1501NC DI 7741".  Here's what a section of its ROM array looks like:
 
 ![TI-57 ROM Section](/devices/ti57/images/TI-57-ROM.png)
 
-Using the entire [ROM Array Image](http://seanriddle.com/ti57rombits.jpg), and using the TI patents for comparison
+Using the entire [ROM Array Photo](http://seanriddle.com/ti57rombits.jpg), and using the TI patents for comparison
 purposes, Sean created the following resources: 
 
 - [Raw ROM](ti57raw.bin) (from [siliconpr0n](http://siliconpr0n.org) [photo](http://siliconpr0n.org/archive/doku.php?id=mcmaster:ti:tmc1501nc))
 - [Reordered ROM (Big-endian)](ti57be.bin) (bits in instruction order)
 - [Patent ROM (Big-endian)](ti57patbe.bin) (transcribed from various TI patents)
 
-Looking at that ROM array image, I counted 215 columns and 128 rows, for a total of 27520 bits.  Divide that by 13
+Looking at that ROM array photo, I counted 215 columns and 128 rows, for a total of 27520 bits.  Divide that by 13
 and you get 2116 13-bit words -- just enough room for 2K words.
 
 The TI-57 patents describe the operation of the ROM to some extent:
@@ -75,7 +75,7 @@ The TI-57 patents describe the operation of the ROM to some extent:
 	ROM 30 at S29.02 by gates 111 and inverted to true logic by inverters 110.
 
 So 7 bits (A0-A6) form an "X address" and 4 bits (A7-A10) form a "Y address".  Looking more closely at the columns
-of the ROM Array Image, I noticed the following pattern:
+of the ROM Array photo, I noticed the following pattern:
 
 	1 empty column, 16 data columns, [1 empty column, 32 data columns] * 6
 
@@ -84,11 +84,11 @@ columns, which are divided into 13 16-bit groups.  So it seems clear that A0-A6 
 and that the other four address bits, A7-A10, select a column from each of those 13 16-bit groups.
 
 Examination of the 3328-byte [Raw ROM](ti57raw.bin) revealed that it was a straight-forward byte-by-byte
-transcription of the visible bits in the [ROM Array Image](http://seanriddle.com/ti57rombits.jpg), left-to-right
+transcription of the visible bits in the [ROM Array Photo](http://seanriddle.com/ti57rombits.jpg), left-to-right
 and top-to-bottom.
 
 Since the Raw ROM dump is the starting point for creating any original ROM listing, I wanted to make absolutely
-sure it was accurate, so I decided to make my own "[transcript](ti57rawbits.txt)" of the data in the image.
+sure it was accurate, so I decided to make my own "[transcript](ti57rawbits.txt)" of the data in the photo.
 Then I wrote a [script](txt2raw.js) to convert that text file to a binary file:
 
 	node txt2raw.js ti57rawbits.txt myraw.bin
@@ -199,7 +199,7 @@ based on an attribution in the PockEmul [source code](https://github.com/pockemu
 
 As I mentioned [in my blog](/blog/2017/11/05/), HrastProgrammer
 [indicated](http://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/archv015.cgi?read=84950) that he originally created a
-working ROM image using object code dumps from multiple TI patents.  However, the [dump](ti57hrast1.txt) of Hrast ROM #1
+working ROM binary using object code dumps from multiple TI patents.  However, the [dump](ti57hrast1.txt) of Hrast ROM #1
 appears to be very similar to the [ROM From U.S. Pat. No. 4,125,867](#rom-from-us-pat-no-4125867), so it's likely that
 he relied *primarily* on that patent listing.   
 

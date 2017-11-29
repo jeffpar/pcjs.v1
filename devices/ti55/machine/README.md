@@ -266,7 +266,7 @@ styles:
 TI-55 Programmable Calculator (with Original ROM)
 -------------------------------------------------
 
-This is a demonstration of the PCjs TI-55 Emulator in its simplest form.  It is also available with
+This is a demonstration of the PCjs [TI-55 Emulator](../) in its simplest form.  It is also available with
 [Diagnostics](diags/) enabled.
 
 {% include machine.html id="ti55" config="json" %}
