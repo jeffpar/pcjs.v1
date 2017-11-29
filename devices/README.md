@@ -30,5 +30,5 @@ machines, such as these programmable calculators:
 
 * Texas Instruments [TI-55](ti55/) and [TI-57](ti57/)
 
-The goal is to make it easy to construct a variety of machines from a common set of devices (	i.e., keyboards,
+The goal is to make it easy to construct a variety of machines from a common set of devices (i.e., keyboards,
 displays, disk and tape drive controllers, etc).
