@@ -11,7 +11,7 @@ redirect_from:
 Device Configurations
 ---------------------
 
-All PCjs machines are built from devices organized by CPU:
+PCjs machines can be built with the following CPUs:
  
 * [6502](c1p/)
     - [Challenger 1P](c1p/machine/)
@@ -24,8 +24,11 @@ All PCjs machines are built from devices organized by CPU:
     - [PDP-10 (Model KA10)](pdp10/machine/ka10/)
 * [PDP-11](pdp11/)
     - [PDP-11/20](pdp11/machine/1120/), [PDP-11/45](pdp11/machine/1145/), [PDP-11/70](pdp11/machine/1170/)
-* Other
-    - [TI-57 Programmable Calculator](ti57/)
 
-These devices are user-installable components that you would typically find in a real personal computer,
-such as keyboards, disk drive controllers with one or more drives, video cards, etc.
+More recently, PCjs has added a new set of [Device Classes](/modules/devices/) that can be used to create simpler
+machines, such as these programmable calculators:
+
+* Texas Instruments [TI-55](ti55/) and [TI-57](ti57/)
+
+The goal is to make it easy to construct a variety of machines from a common set of devices (	i.e., keyboards,
+displays, disk and tape drive controllers, etc).
