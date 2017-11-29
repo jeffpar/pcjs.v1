@@ -58,7 +58,7 @@ machines:
           "map": [
             ["2nd",  "inv",  "lnx",  "\\b",  "clr"],
             ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
-            ["sst",  "sto",  "rcl",  "sum",  "exp"],
+            ["sst",  "sto",  "rcl",  "sum",  "ypow"],
             ["bst",  "ee",   "(",    ")",    "/"],
             ["gto",  "7",    "8",    "9",    "*"],
             ["sbr",  "4",    "5",    "6",    "-"],
