@@ -64,7 +64,7 @@ machines:
             ["sum",  "1",    "2",    "3",    "+"],
             ["\\b",  "0",    ".",    "+/-",  "=|\\r"]
           ],
-          "location": [55, 302, 355, 443, 0.34, 0.5, 460, 788, 320, 170, 71, 36],
+          "location": [56, 322, 358, 462, 0.34, 0.5, 465, 832, 322, 182, 74, 36],
           "bindings": {
             "surface": "imageTI55",
             "power": "powerTI55",
@@ -273,9 +273,9 @@ styles:
   powerTI55:
     position: absolute;
     left: 69%;
-    top: 21%;
+    top: 22%;
     width: 16%;
-    height: 5%;
+    height: 4%;
     opacity: 0;
   .diagsTI55:
     float: left;

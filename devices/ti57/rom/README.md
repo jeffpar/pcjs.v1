@@ -7,7 +7,7 @@ permalink: /devices/ti57/rom/
 TI-57 ROMs
 ----------
 
-TI-57 ROM binaries come in several flavors, [Production ROMs](#ti-57-production-roms) and
+TI-57 ROMs come in several flavors, [Production ROMs](#ti-57-production-roms) and
 [Patent ROMs](#ti-57-patent-roms), which are discussed in detail below.  There may also have been one or more
 [TI-57 Production ROM Revisions](#ti-57-production-rom-revisions), as discussed at the bottom of this document.
 
@@ -60,7 +60,7 @@ Using the entire [ROM Array Photo](http://seanriddle.com/ti57rombits.jpg), and u
 purposes, Sean created the following resources: 
 
 - [Raw ROM](ti57raw.bin) (from [siliconpr0n](http://siliconpr0n.org) [photo](http://siliconpr0n.org/archive/doku.php?id=mcmaster:ti:tmc1501nc))
-- [Reordered ROM (Big-endian)](ti57be.bin) (bits in instruction order)
+- [Original ROM (Big-endian)](ti57be.bin) (bits in instruction order)
 - [Patent ROM (Big-endian)](ti57patbe.bin) (transcribed from various TI patents)
 
 Looking at that ROM array photo, I counted 215 columns and 128 rows, for a total of 27520 bits.  Divide that by 13
@@ -132,7 +132,7 @@ Turning our attention to the *interpretation* of the raw data, let's review some
 	I'll get a TI57 eventually and try to dump the ROM electronically to compare. I picked up a TI55, which uses
 	the same chip, and I'll dump it, too.
 
-The reordered data that he saved as `ti57.bin` is what I call the [Reordered ROM (Big-endian)](ti57be.bin).
+The reordered data that he saved as `ti57.bin` is what I call the [Original ROM (Big-endian)](ti57be.bin).
 It is a 4096-byte file that pads each 13-bit word to a 16-bit word and stores them in big-endian format.
 
 To make sure I understood the above interpretation of the raw data, and to produce a corresponding
@@ -141,7 +141,7 @@ To make sure I understood the above interpretation of the raw data, and to produ
 	node raw2le.js ti57raw.bin ti57le.bin
 
 I also verified that if the script was modified to output big-endian data, the result was identical
-to the original [Reordered ROM (Big-endian)](ti57be.bin).  I then saved a [dump](ti57le.txt) of the
+to the [Original ROM (Big-endian)](ti57be.bin).  I then saved a [dump](ti57le.txt) of the
 [Original ROM (Little-endian)](ti57le.bin), including all the corrections mentioned above, using
 `hexdump -x ti57le.bin`, with the byte offsets changed to ROM addresses.
 
@@ -167,7 +167,7 @@ TI-57 Patent ROMs
 -----------------
 
 The [Patent ROM (Big-endian)](ti57patbe.bin) that Sean created, to help verify the correctness of his
-[Reordered ROM (Big-endian)](ti57be.bin), was generated from ROM object code listings in the following patents:
+[Original ROM (Big-endian)](ti57be.bin), was generated from ROM object code listings in the following patents:
 
 - [4,078,251](../patents/us4078251)
 - [4,079,459](../patents/us4079459)
@@ -242,8 +242,8 @@ Using a debugger and carefully stepping through the TI57E.EXE program, I discove
 were stored as a series of 32-bit floating-point numbers.  I've saved a [dump](ti57hrast2fp.txt) of the floating-point
 data.
 
-The next question: was this just another copy of the original TI-57 ROM, or was it a revision?  And if it was a
-revision, which one was the original?
+The next question: was this just another copy of what I called the [Original ROM (Little-endian)](ti57le.bin), and
+if not, did it precede that ROM or was it a revision?
 
 #### Revised ROM
 
@@ -348,15 +348,18 @@ unused words of the first half of the ROM, and which performs one additional `CL
 	0x03fd: 0x08df  MOVE    D,D,0F00 0000 0000 0000
 	0x03fe: 0x0e03  RET
 
-It's possible that these remaining revisions were also made by HrastProgrammer, but for now, I'm going to
-assume they represent a minor revision made by Texas Instruments at some point.
+It's possible that these remaining revisions were also made by HrastProgrammer, but for now,
+I'm going to assume they represent a minor subsequent revision made by Texas Instruments to the
+[Original ROM (Little-endian)](ti57le.bin).
 
 This ROM has been saved as [Revised ROM (Little-endian)](ti57rev1le.bin), along with a [dump](ti57rev1le.txt).
 
 TI-57 ROM Used With PCjs
 ------------------------ 
 
-The ROM that the [PCjs TI-57 Emulator](/devices/ti57/machine/rev0/) uses is the
+The ROM that the PCjs [TI-57 Emulator](/devices/ti57/machine/rev0/) uses is the
 [Original ROM (Little-endian)](ti57le.bin), which is the fully-corrected transcribed ROM taken from the
-contents of chip "TMC1501NC DI 7741".  Using the [PCjs TI-57 Emulator's](/devices/ti57/machine/rev0/) built-in
-disassembler, here's a [listing](ti57le.asm.txt) of that ROM.
+contents of chip "TMC1501NC DI 7741".
+
+Using the PCjs [TI-57 Emulator's](/devices/ti57/machine/rev0/) built-in disassembler, here's a
+[listing](ti57le.asm.txt) of that ROM.

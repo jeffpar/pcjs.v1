@@ -13,10 +13,10 @@ the ROM, and produced the following resources:
 - [Die Shots](http://seanriddledecap.blogspot.com/2017/11/blog-post.html)
 - [ROM Array Photo](http://seanriddle.com/tmc1503acidroms.jpg)
 - [Raw ROM](tmc1503raw.bin)
-- [Reordered ROM (Big-endian)](tmc1503be.bin)
+- [Original ROM (Big-endian)](tmc1503be.bin)
 
-From the [Reordered ROM (Big-endian)](tmc1503be.bin), I created a [little-endian binary](tmc1503le.bin)
-and the corresponding [JSON Data](tmc1503le.json) that the [PCjs TI-55 Emulator](../machine/) uses.
+From the [Original ROM (Big-endian)](tmc1503be.bin), I created an [Original ROM (Little-endian)](tmc1503le.bin)
+binary, along with the corresponding [JSON Data](tmc1503le.json) that the PCjs [TI-55 Emulator](../machine/) uses.
 
 See the [TI-57 ROM](/devices/ti57/rom/) for more details on the ROM format, including how the "raw" photographic ROM
 data is used to produce a working ROM binary.
