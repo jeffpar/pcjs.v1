@@ -412,7 +412,7 @@ class Chip extends Device {
 
         /*
          * The "Output Register" is twelve bit register, one bit for each digit of the display.  This essentially
-         * provides column information for the LED display, while the next register (regSGC) provides row information.
+         * provides column information for the LED display, while the next register (regScanGen) provides row information.
          *
          * However, this is only necessary if we decide to simulate the internal operation of the Display Decoder
          * and Keyboard Scanner.
@@ -500,8 +500,8 @@ class Chip extends Device {
         this.stack = [-1, -1, -1];
 
         /*
-         * This internal cycle count is initialized on every clocker() invocation, enabling opcode
-         * functions that need to consume a few extra cycles to bump this count upward as needed.
+         * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions that
+         * need to consume a few extra cycles to bump this count upward as needed.
          */
         this.nCyclesClocked = 0;
 
@@ -1407,6 +1407,7 @@ class Chip extends Device {
     /**
      * setRegister(name, value)
      *
+     * @this {Chip}
      * @param {string} name
      * @param {number} value
      */
@@ -1530,7 +1531,7 @@ class Chip extends Device {
      * ROMs are closely tied to their respective chips, I'm going to cheat and just check the chip type.
      *
      * @this {Chip}
-     * @param {boolean} [on] (default is true, allowing all active indicators to be displayed; set to false to force all indicators off)
+     * @param {boolean} [on] (default is true, to display all active indicators; set to false to force all indicators off)
      */
     updateIndicators(on = true)
     {

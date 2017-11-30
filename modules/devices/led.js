@@ -479,6 +479,7 @@ class LED extends Device {
      * the target alpha values will be added instead of replaced, resulting in progressively brighter shapes;
      * probably not what you want.
      *
+     * @this {LED}
      * @param {string} sColor
      * @param {number} [alpha]
      * @param {number} [brightness]

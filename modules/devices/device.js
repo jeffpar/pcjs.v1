@@ -272,6 +272,7 @@ class Device {
     /**
      * alert(s, type)
      *
+     * @this {Device}
      * @param {string} s
      * @param {string} [type]
      */
@@ -306,7 +307,7 @@ class Device {
     }
 
     /**
-     * bound(n, min, max)
+     * bounds(n, min, max)
      *
      * Restricts n to the bounds defined by min and max.
      *
@@ -316,7 +317,7 @@ class Device {
      * @param {number} max
      * @returns {number} (updated n)
      */
-    bound(n, min, max)
+    bounds(n, min, max)
     {
         this.assert(min <= max);
         if (n < min) n = min;
@@ -454,6 +455,7 @@ class Device {
      *
      * If localStorage support exists, is enabled, and works, return true.
      *
+     * @this {Device}
      * @returns {boolean}
      */
     hasLocalStorage()
@@ -534,6 +536,7 @@ class Device {
      *
      *      Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko
      *
+     * @this {Device}
      * @param {string} s is a substring to search for in the user-agent; as noted above, "iOS" and "MSIE" are special values
      * @returns {boolean} is true if the string was found, false if not
      */
