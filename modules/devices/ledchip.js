@@ -66,14 +66,15 @@ class Chip extends Device {
             let configInput = {
                 class:          "Input",
                 location:       [0, 0, this.ledArray.widthView, this.ledArray.heightView, this.ledArray.cols, this.ledArray.rows],
+                drag:           true,
                 bindings:       {surface: this.ledArray.config.bindings[LED.BINDING.CONTAINER]}
             };
 
-            let chip = this;
+            let led = this.ledArray;
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
             this.ledInput.addClick(function(col, row) {
                 if (col >= 0 && row >= 0) {
-                    chip.ledArray.setBuffer(col, row, LED.STATE.ON);
+                    led.setBuffer(col, row, LED.STATE.ON - led.getBufferData(col, row));
                 }
             });
         }

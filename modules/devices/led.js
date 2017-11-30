@@ -471,6 +471,25 @@ class LED extends Device {
     }
 
     /**
+     * getBufferData(col, row)
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @returns {number}
+     */
+    getBufferData(col, row)
+    {
+        let d;
+        let i = (row * this.cols + col) * 2;
+        this.assert(row >= 0 && row < this.rows && col >= 0 && col < this.cols);
+        if (i >= 0 && i < this.buffer.length - 1) {
+            d = this.buffer[i];
+        }
+        return d;
+    }
+
+    /**
      * getRGBAColor(sColor, alpha, brightness)
      *
      * Returns a color string in the "rgba" format that fillStyle recognizes (eg, "rgba(255, 255, 255, 0)").
@@ -724,14 +743,14 @@ LED.COLORS = {
  * one or more pairs (eg, the 'P' or period segment), then the coordinates are treated as arc() parameters.
  */
 LED.SEGMENT = {
-    'A':        [30,  8, 79,  8, 67, 19, 37, 19],
-    'B':        [83, 10, 77, 52, 67, 46, 70, 22],
-    'C':        [77, 59, 71,100, 61, 89, 64, 64],
-    'D':        [28, 91, 58, 91, 69,104, 15,104],
-    'E':        [18, 59, 28, 64, 25, 88, 12,100],
-    'F':        [24, 10, 34, 21, 31, 47, 18, 52],
-    'G':        [24, 56, 34, 50, 60, 50, 71, 56, 61, 61, 33, 61],
-    'P':        [80,102, 8]
+    'A':        [30,   8,  79,   8,  67,  19,  37,  19],
+    'B':        [83,  10,  77,  52,  67,  46,  70,  22],
+    'C':        [77,  59,  71, 100,  61,  89,  64,  64],
+    'D':        [28,  91,  58,  91,  69, 104,  15, 104],
+    'E':        [18,  59,  28,  64,  25,  88,  12, 100],
+    'F':        [24,  10,  34,  21,  31,  47,  18,  52],
+    'G':        [24,  56,  34,  50,  60,  50,  71,  56,  61,  61,  33,  61],
+    'P':        [80, 102,  8]
 };
 
 /*

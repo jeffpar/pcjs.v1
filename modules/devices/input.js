@@ -34,8 +34,9 @@
  * @property {Object} [bindings]
  * @property {number} [version]
  * @property {Array.<string>} [overrides]
- * @property {Array.<Array.<number>>} [map]
  * @property {Array.<number>} location
+ * @property {Array.<Array.<number>>} [map]
+ * @property {boolean} [drag]
  */
 
 /**
@@ -56,6 +57,7 @@ class Input extends Device {
      *
      *      "input": {
      *        "class": "Input",
+     *        "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
      *        "map": [
      *          ["2nd",  "inv",  "lnx",  "\\b",  "clr"],
      *          ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
@@ -66,7 +68,7 @@ class Input extends Device {
      *          ["rst",  "1",    "2",    "3",    "+"],
      *          ["r/s",  "0",    ".",    "+/-",  "=|\\r"]
      *        ],
-     *        "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
+     *        "drag": false,
      *        "bindings": {
      *          "surface": "imageTI57",
      *          "power": "powerTI57"
@@ -76,7 +78,7 @@ class Input extends Device {
      * A word about the "power" button: the page will likely use absolute positioning to overlay the HTML button
      * onto the image of the physical button, and the temptation might be to use the style "display:none" to hide
      * it, but "opacity:0" should be used instead, because otherwise our efforts to use it as focusable element
-     * will fail.
+     * may fail.
      *
      * @this {Input}
      * @param {string} idMachine
@@ -142,6 +144,15 @@ class Input extends Device {
                 this.nRows = this.vGap;
                 this.hGap = this.vGap = 0;
             }
+            /*
+             * If 'drag' is true, then the onInput() handler will be called whenever the current col and/or row
+             * changes, even if the mouse hasn't been released since the previous onInput() call.
+             *
+             * The default is false, because in general, allowing drag is a bad idea for calculator buttons.  But
+             * I've made this an option for other input surfaces, like LED arrays, where you might want to turn a
+             * series of LEDs on or off.
+             */
+            this.fDrag = !!this.config['drag'];
 
             /*
              * To calculate the average button width (cxButton), we know that the overall width
@@ -393,12 +404,6 @@ class Input extends Device {
         element.addEventListener(
             'mousemove',
             function onMouseMove(event) {
-                /*
-                 * Sadly, the 'buttons' property is not supported in all browsers (eg, Safari),
-                 * so my original test for the left button (event.buttons & 0x1) is not sufficient.
-                 * Instead, we'll rely on our own xStart/yStart properties, which should only
-                 * be positive after 'mousedown' and before 'mouseup'.
-                 */
                 input.processEvent(element, Input.ACTION.MOVE, event);
             }
         );
@@ -597,11 +602,12 @@ class Input extends Device {
             }
         }
         else if (action == Input.ACTION.MOVE) {
-            /*
-             * In the case of a mouse, this can happen all the time, whether a button is 'down' or not, but
-             * our event listener automatically suppresses all moves except those where the left button is down.
-             */
-            if (this.onHover) this.onHover(col, row);
+            if (this.xStart >= 0 && this.yStart >= 0 && this.fDrag) {
+                this.setPosition(col, row);
+            }
+            else if (this.onHover) {
+                this.onHover(col, row);
+            }
         }
         else if (action == Input.ACTION.RELEASE) {
             /*
