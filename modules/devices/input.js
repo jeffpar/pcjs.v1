@@ -89,7 +89,7 @@ class Input extends Device {
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
 
-        this.onKey = null;
+        this.onInput = null;
         this.onPower = null;
         this.onReset = null;
         this.onHover = null;
@@ -243,18 +243,18 @@ class Input extends Device {
     }
 
     /**
-     * addClick(onKey, onPower, onReset)
+     * addClick(onInput, onPower, onReset)
      *
-     * Called by the Chip device to setup keyboard, power, and reset notifications.
+     * Called by the Chip device to set up input, power, and reset notifications.
      *
      * @this {Input}
-     * @param {function(number,number)} onKey
-     * @param {function()} onPower (called when the "power" button, if any, is clicked)
-     * @param {function()} onReset (called when the "reset" button, if any, is clicked)
+     * @param {function(number,number)} onInput
+     * @param {function()} [onPower] (called when the "power" button, if any, is clicked)
+     * @param {function()} [onReset] (called when the "reset" button, if any, is clicked)
      */
-    addClick(onKey, onPower, onReset)
+    addClick(onInput, onPower, onReset)
     {
-        this.onKey = onKey;
+        this.onInput = onInput;
         this.onPower = onPower;
         this.onReset = onReset;
     }
@@ -629,7 +629,7 @@ class Input extends Device {
         if (col != this.col || row != this.row) {
             this.col = col;
             this.row = row;
-            if (this.onKey) this.onKey(col, row);
+            if (this.onInput) this.onInput(col, row);
         }
     }
 }

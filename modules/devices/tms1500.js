@@ -509,7 +509,7 @@ class Chip extends Device {
          * Get access to the Input device, so we can add our click functions.
          */
         this.input = /** @type {Input} */ (this.findDevice(this.config['input']));
-        this.input.addClick(this.onKey.bind(this), this.onPower.bind(this), this.onReset.bind(this));
+        this.input.addClick(this.onInput.bind(this), this.onPower.bind(this), this.onReset.bind(this));
 
         /*
          * Get access to the LED device, so we can update its display.
@@ -1170,7 +1170,7 @@ class Chip extends Device {
     }
 
     /**
-     * onKey(col, row)
+     * onInput(col, row)
      *
      * Called by the Input device to provide notification of key presses and releases.
      *
@@ -1182,7 +1182,7 @@ class Chip extends Device {
      * @param {number} col
      * @param {number} row
      */
-    onKey(col, row)
+    onInput(col, row)
     {
         let b = 0;
         if (col >= 0 && row >= 0) {

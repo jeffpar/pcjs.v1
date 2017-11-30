@@ -55,12 +55,27 @@ class Chip extends Device {
         /*
          * Get access to the LED device, so we can update its display.
          */
-        this.led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
-        if (this.led) {
+        this.ledArray = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
+        if (this.ledArray) {
+
             /*
              * clearBuffer(true) performs a combination of clearBuffer() and drawBuffer().
              */
-            this.led.clearBuffer(true);
+            this.ledArray.clearBuffer(true);
+
+            let configInput = {
+                class:          "Input",
+                location:       [0, 0, this.ledArray.widthView, this.ledArray.heightView, this.ledArray.cols, this.ledArray.rows],
+                bindings:       {surface: this.ledArray.config.bindings[LED.BINDING.CONTAINER]}
+            };
+
+            let chip = this;
+            this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
+            this.ledInput.addClick(function(col, row) {
+                if (col >= 0 && row >= 0) {
+                    chip.ledArray.setBuffer(col, row, LED.STATE.ON);
+                }
+            });
         }
 
         /*

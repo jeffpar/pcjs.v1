@@ -87,7 +87,7 @@
  * @property {string} color (default is "red")
  * @property {string} backgroundColor (default is none; ie, transparent background)
  * @property {boolean} fixed (default is false, meaning the view may fill the container to its maximum size)
- * @property {boolean} persistent (default is false, meaning the view may be blanked if it hasn't been refreshed)
+ * @property {boolean} persistent (default is false for LED.TYPE.DIGIT, meaning the view may be blanked if it hasn't been "tickled")
  * @property {number} widthView (computed)
  * @property {number} heightView (computed)
  * @property {number} widthGrid (computed)
@@ -161,7 +161,8 @@ class LED extends Device {
         if (!this.config['fixed']) {
             canvasView.setAttribute("class", "pcjs-canvas");
         }
-        this.fPersistent = !!this.config['persistent'];
+        this.fPersistent = this.config['persistent'];
+        if (this.fPersistent == undefined) this.fPersistent = (this.type < LED.TYPE.DIGIT);
 
         canvasView.setAttribute("width", this.widthView.toString());
         canvasView.setAttribute("height", this.heightView.toString());
@@ -504,6 +505,8 @@ class LED extends Device {
     /**
      * setBuffer(col, row, d1, d2)
      *
+     * For LED.TYPE.ROUND or LED.TYPE.SQUARE, the d1 parameter should generally be LED.STATE.OFF or LED.STATE.ON.
+     *
      * @this {LED}
      * @param {number} col
      * @param {number} row
@@ -516,12 +519,16 @@ class LED extends Device {
         let fModified = false;
         let i = (row * this.cols + col) * 2;
         this.assert(row >= 0 && row < this.rows && col >= 0 && col < this.cols);
-        if (this.buffer[i] !== d1 || this.buffer[i+1] !== d2) {
-            this.buffer[i] = d1;
-            this.buffer[i+1] = d2;
-            this.fBufferModified = fModified = true;
+        if (i >= 0 && i < this.buffer.length - 1) {
+            if (this.buffer[i] !== d1 || this.buffer[i + 1] !== d2) {
+                this.buffer[i] = d1;
+                this.buffer[i + 1] = d2;
+                this.fBufferModified = fModified = true;
+            }
+            this.iBufferRecent = i;
+        } else {
+            this.assert(false);
         }
-        this.iBufferRecent = i;
         this.fTickled = true;
         return fModified;
     }
