@@ -9,7 +9,8 @@ PCjs Device Classes
 
 In the spirit of [Vanilla JS](http://vanilla-js.com/), the following ES2015 (aka ES6)
 JavaScript classes are all you need to create any of our newer (late 2017) PCjs machines,
-starting with the [TI-57 Programmable Calculator](/devices/ti57/machine/).
+starting with the [TI-55](/devices/ti55/machine/) and [TI-57](/devices/ti57/machine/)
+Programmable Calculators.
 
 * [Device](device.js)
 * [Input](input.js)

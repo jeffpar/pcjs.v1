@@ -23,7 +23,7 @@ includes:
 * [PC8080](/modules/pc8080/), an 8080 machine emulator (see [Space Invaders](/devices/pc8080/machine/invaders/) and the [VT100 Terminal](/devices/pc8080/machine/vt100/))
 * [C1Pjs](/docs/c1pjs/), an emulation of the 6502-based [Ohio Scientific Challenger 1P](/devices/c1p/)
 * [PDPjs](/docs/pdpjs/), a set of machine emulation modules supporting the DEC [PDP-10](/devices/pdp10/machine/) and [PDP-11](/devices/pdp11/machine/)
-* [PCjs Device Classes](/modules/devices/), a new set of JavaScript classes for devices like the [TI-57 Programmable Calculator](/devices/ti57/)
+* [PCjs Device Modules](/modules/devices/), for simple machines like the [TI-55](/devices/ti55/) and [TI-57](/devices/ti57/) Programmable Calculators
 
 All PCjs machine simulations are written entirely in [JavaScript](/modules/).  No Flash, Java or other plugins are
 required.  Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,
