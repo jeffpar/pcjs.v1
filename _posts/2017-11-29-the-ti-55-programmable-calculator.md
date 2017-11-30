@@ -523,7 +523,7 @@ styles:
 
 Building on the PCjs [TI-57 Programmable Calculator](/blog/2017/11/10/) emulator,
 I'm happy to report that PCjs can also emulate the [TI-55 Programmable Calculator](/devices/ti55/) now.
-You can see both in operation [below](#pcjs-ti-55-and-ti-57-emulators).
+You can see both in operation [below](/blog/2017/11/29/#pcjs-ti-55-and-ti-57-emulators).
 
 Both calculators used the same basic chip.  In the TI-57, the chip was designated "TMC1501", and in the TI-55,
 it was "TMC1503", but both were [TMS-1500](/modules/devices/tms1500.js)-compatible.  The primary difference between
