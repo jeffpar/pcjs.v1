@@ -37,12 +37,12 @@
  * @property {number} type
  * @property {number} [width]
  * @property {number} [height]
- * @property {number} cols
- * @property {number} rows
- * @property {string} color
- * @property {string} backgroundColor
- * @property {boolean} fixed
- * @property {boolean} persistent
+ * @property {number} [cols]
+ * @property {number} [rows]
+ * @property {string} [color]
+ * @property {string} [backgroundColor]
+ * @property {boolean} [fixed]
+ * @property {boolean} [persistent]
  */
 
 /**
@@ -136,7 +136,7 @@ class LED extends Device {
         }
 
         let canvasView = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
-        if (canvasView == undefined || !canvasView.getContext) {
+        if (!canvasView || !canvasView.getContext) {
             let sError = "LED device requires HTML5 canvas support";
             container.innerHTML = sError;
             throw new Error(sError);

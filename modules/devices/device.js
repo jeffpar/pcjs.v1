@@ -100,9 +100,9 @@ class Device {
         this.addDevice();
 
         /*
-         * Build the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config.bindings)
+         * Build the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config['bindings'])
          */
-        this.addBindings(this.config.bindings);
+        this.addBindings(this.config['bindings']);
 
         this.checkVersion(this.config);
 
@@ -111,10 +111,10 @@ class Device {
          * that array may be overridden with a URL parameter.  We don't impose any checks on the overriding
          * value, so it is the responsibility of the component with overridable properties to validate them.
          */
-        if (this.config.overrides) {
+        if (this.config['overrides']) {
             let parms = Device.getURLParms();
             for (let prop in parms) {
-                if (this.config.overrides.indexOf(prop) >= 0) {
+                if (this.config['overrides'].indexOf(prop) >= 0) {
                     let value;
                     let s = parms[prop];
                     /*
@@ -429,7 +429,7 @@ class Device {
         let devices = Device.Machines[this.idMachine];
         if (devices) {
             for (let i in devices) {
-                if (devices[i].config.class == idClass) {
+                if (devices[i].config['class'] == idClass) {
                     device = devices[i];
                     break;
                 }

@@ -41,9 +41,9 @@
  * @property {string} file
  * @property {string} reference
  * @property {string} chipID
- * @property {number} revision
- * @property {string} colorROM
- * @property {string} backgroundColorROM
+ * @property {number} [revision]
+ * @property {string} [colorROM]
+ * @property {string} [backgroundColorROM]
  * @property {Array.<number>} values
  */
 
@@ -76,6 +76,7 @@ class ROM extends Device {
      *        },
      *        "overrides": ["colorROM","backgroundColorROM"],
      *        "values": [
+     *          ...
      *        ]
      *      }
      *

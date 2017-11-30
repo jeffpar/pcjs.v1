@@ -175,7 +175,7 @@ class Machine extends Device {
                         break;
                     case Machine.CLASS.ROM:
                         device = new ROM(this.idMachine, idDevice, config);
-                        if (device.config.revision) sStatus = "revision " + device.config.revision;
+                        if (device.config['revision']) sStatus = "revision " + device.config['revision'];
                         break;
                     case Machine.CLASS.TIME:
                         device = new Time(this.idMachine, idDevice, config);
