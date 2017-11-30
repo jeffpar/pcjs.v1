@@ -274,5 +274,12 @@
     "./modules/devices/time.js",
     "./modules/devices/tms1500.js",
     "./modules/devices/machine.js"
+  ],
+  "LEDDFiles": [
+    "./modules/devices/device.js",
+    "./modules/devices/led.js",
+    "./modules/devices/time.js",
+    "./modules/devices/ledchip.js",
+    "./modules/devices/machine.js"
   ]
 }

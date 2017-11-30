@@ -1195,7 +1195,11 @@ class Chip extends Device {
     /**
      * onPower(fOn)
      *
-     * Called by the Input device to provide notification of a power event.
+     * Automatically called by the Machine device after all other devices have been powered up (eg, after
+     * a page load event), as well as when all devices are being powered down (eg, before a page unload event).
+     *
+     * May subsequently be called by the Input device to provide notification of a user-initiated power event
+     * (eg, toggling a power button); in this case, fOn should NOT be set, so that no state is loaded or saved.
      *
      * @this {Chip}
      * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
@@ -1209,17 +1213,13 @@ class Chip extends Device {
             this.loadState(this.loadLocalStorage());
         }
         if (fOn == undefined) {
-            fOn = !this.time.fRunning;
+            fOn = !this.time.isRunning();
             if (fOn) this.regPC = 0;
         }
         if (fOn) {
-            if (!this.time.fRunning) {
-                this.time.start();
-            }
+            this.time.start();
         } else {
-            if (this.time.fRunning) {
-                this.time.stop();
-            }
+            this.time.stop();
             this.clearDisplays();
         }
     }
@@ -1236,7 +1236,7 @@ class Chip extends Device {
         this.println("reset");
         this.regPC = 0;
         this.clearDisplays();
-        if (!this.time.fRunning) {
+        if (!this.time.isRunning()) {
             this.status();
         }
     }

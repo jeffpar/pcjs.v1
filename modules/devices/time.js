@@ -409,6 +409,17 @@ class Time extends Device {
     }
 
     /**
+     * isRunning()
+     *
+     * @this {Time}
+     * @returns {boolean}
+     */
+    isRunning()
+    {
+        return this.fRunning;
+    }
+
+    /**
      * isTimerSet(iTimer)
      *
      * @this {Time}

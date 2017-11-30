@@ -58,6 +58,7 @@ var usr     = require("../../shared/lib/usrlib");
  * @property {Array.<string>} PDP11Files
  * @property {Array.<string>} TI55Files
  * @property {Array.<string>} TI57Files
+ * @property {Array.<string>} LEDDFiles
  */
 var pkg = require("../../../package.json");
 
@@ -175,7 +176,8 @@ var aMachineFiles = {
     'PDP10':    pkg.PCCSS.concat(pkg.PDP10Files),
     'PDP11':    pkg.PCCSS.concat(pkg.PDP11Files),
     'TI55':     pkg.PCCSS.concat(pkg.TI55Files),
-    'TI57':     pkg.PCCSS.concat(pkg.TI57Files)
+    'TI57':     pkg.PCCSS.concat(pkg.TI57Files),
+    'LEDD':     pkg.PCCSS.concat(pkg.LEDDFiles)
 };
 var aMachineFileTypes = {
     'head': [".css"],           // put BOTH ".css" and ".js" here if convertMDMachineLinks() embeds its own scripts

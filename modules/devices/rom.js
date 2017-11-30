@@ -145,7 +145,7 @@ class ROM extends Device {
     /**
      * clearArray()
      *
-     * This performs a combination of clearBuffer() and drawBuffer().
+     * clearBuffer(true) performs a combination of clearBuffer() and drawBuffer().
      *
      * @this {ROM}
      */

@@ -125,7 +125,7 @@ class Machine extends Device {
             if (match) {
                 sError += " ('" + sConfig.substr(+match[1], 40).replace(/\s+/g, ' ') + "...')";
             }
-            this.println(sError);
+            this.println("machine '" + idMachine + "' initialization error: " + sError);
         }
         /*
          * Device initialization is now deferred until after the page is fully loaded, for the benefit
@@ -136,11 +136,11 @@ class Machine extends Device {
         let machine = this, chip = null;
         window.addEventListener('load', function onLoad(event) {
             chip = machine.initDevices();
-            if (chip) chip.onPower(true);
+            if (chip && chip.onPower) chip.onPower(true);
         });
         let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : undefined);
         window.addEventListener(sEvent || 'beforeunload', function onUnload(event) {
-            if (chip) chip.onPower(false);
+            if (chip && chip.onPower) chip.onPower(false);
         });
     }
 
