@@ -246,7 +246,7 @@ under the `config` property, which configures all the devices, and includes any 
 and then you need some HTML markup:
 
 	<div id="ti57">
-	  <img id="imageTI57" src="/devices/ti57/images/TI-57-640.png"/>
+	  <img id="imageTI57" src="/devices/ti57/images/TI-57.png"/>
 	  <div id="displayTI57"></div>
 	  <button id="powerTI57">Power</button>
 	</div>

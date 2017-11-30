@@ -13,7 +13,7 @@ machines:
         "ti57": {
           "class": "Machine",
           "type": "TI57",
-          "name": "PCjs TI-57 Emulator",
+          "name": "TI-57 Emulator",
           "version": 1.03,
           "bindings": {
             "print": "printTI57"
@@ -21,7 +21,7 @@ machines:
         },
         "chip": {
           "class": "Chip",
-          "type": "TMS-1500",
+          "type": "TMS-1501",
           "input": "buttons",
           "output": "display",
           "bindings": {
@@ -58,7 +58,7 @@ machines:
           "map": [
             ["2nd",  "inv",  "lnx",  "\\b",  "clr"],
             ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
-            ["sst",  "sto",  "rcl",  "sum",  "exp"],
+            ["sst",  "sto",  "rcl",  "sum",  "ypow"],
             ["bst",  "ee",   "(",    ")",    "/"],
             ["gto",  "7",    "8",    "9",    "*"],
             ["sbr",  "4",    "5",    "6",    "-"],
@@ -280,7 +280,7 @@ styles:
 ---
 
 The new [TI-57 Programmable Calculator](/devices/ti57/) emulator, shown below, is the latest addition to the
-PCjs Machines collection.  It emulates a TMS-1500 chip at the register level, and uses an original
+PCjs Machines collection.  It emulates a TMS-1501 chip at the register level, and uses an original
 [TI-57 ROM](/devices/ti57/rom/), providing about as perfect a simulation as you can get.
 
 Even though it's my smallest JavaScript-based emulator to date, it's still packed with goodies:
@@ -379,7 +379,7 @@ bugs.  If you run into any, or you have a browser or device where it doesn't wor
 {% include machine.html id="ti57" config="json" %}
 
 <div id="ti57">
-  <img id="imageTI57" src="/devices/ti57/images/TI-57-640.png" alt="TI-57 Calculator"/>
+  <img id="imageTI57" src="/devices/ti57/images/TI-57.png" alt="TI-57 Calculator"/>
   <div id="displayTI57"></div>
   <div id="ind2nd" class="indTI57">2nd</div>
   <div id="indINV" class="indTI57">INV</div>

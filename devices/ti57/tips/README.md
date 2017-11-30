@@ -12,7 +12,7 @@ machines:
         "ti57": {
           "class": "Machine",
           "type": "TI57",
-          "name": "PCjs TI-57 Emulator",
+          "name": "TI-57 Emulator",
           "version": 1.03
         },
         "chip": {
@@ -49,7 +49,7 @@ machines:
           "map": [
             ["2nd",  "inv",  "lnx",  "\\b",  "clr"],
             ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
-            ["sst",  "sto",  "rcl",  "sum",  "exp"],
+            ["sst",  "sto",  "rcl",  "sum",  "ypow"],
             ["bst",  "ee",   "(",    ")",    "/"],
             ["gto",  "7",    "8",    "9",    "*"],
             ["sbr",  "4",    "5",    "6",    "-"],
@@ -349,7 +349,7 @@ etc.)
 {% include machine.html id="ti57" config="json" %}
 
 <div id="ti57">
-  <img id="imageTI57" src="/devices/ti57/images/TI-57-640.png"/>
+  <img id="imageTI57" src="/devices/ti57/images/TI-57.png"/>
   <div id="displayTI57"></div>
   <button id="powerTI57">Power</button>
 </div>

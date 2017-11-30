@@ -274,7 +274,7 @@ class Input extends Device {
      * captureKbd(element)
      *
      * @this {Input}
-     * @param {HTMLDocument|HTMLElement} element
+     * @param {Document|HTMLElement} element
      */
     captureKbd(element)
     {
@@ -466,7 +466,7 @@ class Input extends Device {
      * @this {Input}
      * @param {HTMLImageElement} element
      * @param {number} action
-     * @param {Event} [event] (eg, the object from a 'touch' or 'mouse' event)
+     * @param {MouseEvent|TouchEvent} [event] (eg, the object from a 'touch' or 'mouse' event)
      */
     processEvent(element, action, event)
     {

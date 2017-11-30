@@ -12,7 +12,7 @@ machines:
         "ti57Rev1": {
           "class": "Machine",
           "type": "TI57",
-          "name": "PCjs TI-57 Emulator",
+          "name": "TI-57 Emulator",
           "version": 1.03,
           "bindings": {
             "print": "printTI57"
@@ -20,7 +20,7 @@ machines:
         },
         "chip": {
           "class": "Chip",
-          "type": "TMS-1500",
+          "type": "TMS-1501",
           "input": "buttons",
           "output": "display",
           "bindings": {
@@ -57,7 +57,7 @@ machines:
           "map": [
             ["2nd",  "inv",  "lnx",  "\\b",  "clr"],
             ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
-            ["sst",  "sto",  "rcl",  "sum",  "exp"],
+            ["sst",  "sto",  "rcl",  "sum",  "ypow"],
             ["bst",  "ee",   "(",    ")",    "/"],
             ["gto",  "7",    "8",    "9",    "*"],
             ["sbr",  "4",    "5",    "6",    "-"],
@@ -78,7 +78,7 @@ machines:
           "valueSize": 16,
           "valueTotal": 2048,
           "littleEndian": true,
-          "file": "ti57hrast2.bin",
+          "file": "ti57rev1le.bin",
           "reference": "",
           "chipID": "unknown",
           "revision": "1",
@@ -298,7 +298,7 @@ TI-57 Programmable Calculator (with Revised ROM and Diagnostics)
 ----------------------------------------------------------------
 
 The TI-57 configuration below is identical to our [Original ROM](../rev0/) configuration, except that
-it is using a [Revised ROM](/devices/ti57/rom/#hrast-rom-2).
+it is using a [Revised ROM](/devices/ti57/rom/#revised-rom).
 
 If any errors occur during operation, the Diagnostics window should display the last instruction decoded.
 The window also accepts a few debugging commands.  Use '?' for help.
@@ -306,7 +306,7 @@ The window also accepts a few debugging commands.  Use '?' for help.
 {% include machine.html id="ti57Rev1" config="json" %}
 
 <div id="ti57Rev1">
-  <img id="imageTI57" src="/devices/ti57/images/TI-57-640.png" alt="TI-57 Calculator"/>
+  <img id="imageTI57" src="/devices/ti57/images/TI-57.png" alt="TI-57 Calculator"/>
   <div id="displayTI57"></div>
   <div id="ind2nd" class="indTI57">2nd</div>
   <div id="indINV" class="indTI57">INV</div>

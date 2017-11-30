@@ -1,5 +1,5 @@
 /**
- * @fileoverview Simulates the instructions of a TMS-1500 chip
+ * @fileoverview Simulates the instructions of a TMS-150x/TMC-150x chip
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -290,7 +290,13 @@ class Reg64 extends Device {
  */
 
 /**
- * TMS-1500 Calculator Chip
+ * TMS-150x Calculator Chip
+ *
+ * Emulates various TMS ("Texas Mos Standard") and TMC ("Texas Mos Custom") chips.  The 'type' property of
+ * the config object should contain one of the following strings:
+ *
+ *      TI-57: "TMS-1501" or "TMC-1501" (or simply "1501")
+ *      TI-55: "TMS-1503" or "TMC-1503" (or simply "1503")
  *
  * This chip contains lots of small discrete devices, most of which will be emulated either within this
  * class or within another small container class in the same file, because most of them are either very simple
@@ -328,21 +334,25 @@ class Reg64 extends Device {
  * @property {Object} breakConditions
  * @property {string} sCommandPrev
  * @property {number} nStringFormat
+ * @property {number} type (one of the Chip.TYPE values)
  */
 class Chip extends Device {
     /**
      * Chip(idMachine, idDevice, config)
      *
-     * Defines the basic devices of the TMS-1500 chip, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
+     * Defines the basic elements of the TMS-150x chip, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
      *
      * @this {Chip}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {Object} [config]
+     * @param {Config} [config]
      */
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, Chip.VERSION, config);
+
+        let sType = this.config['type'] || "1501";
+        this.type = Number.parseInt(sType.slice(-4));
 
         this.regMap = {};
 
@@ -1033,7 +1043,7 @@ class Chip extends Device {
      * loadState(state)
      *
      * @this {Chip}
-     * @param {State|null} state
+     * @param {State|Object|null} state
      */
     loadState(state)
     {
@@ -1317,7 +1327,7 @@ class Chip extends Device {
 
         if (this.regKey) {
             this.regR5 = this.regKey;
-            this.fCOND = 1;
+            this.fCOND = true;
             this.checkBreakCondition('i');
         }
 
@@ -1496,22 +1506,28 @@ class Chip extends Device {
     /**
      * updateIndicators(on)
      *
-     * I made the following observations of the Operational Registers while the calculator was in an "idle" state:
+     * I made the following observations while running the TI-57's 1501 ROM:
      *
-     *      C[14:3] appears to represent the "2nd" key being active
-     *      B[15:2] appears to represent the "INV" key being active
+     *      "2nd"   C[14] bit 3 set
+     *      "INV"   B[15] bit 2 set
+     *      "Deg"   X4[15] == 0x0
+     *      "Rad"   X4[15] == 0x4
+     *      "Grad"  X4[15] == 0xC
      *
-     * The "Deg"/"Rad"/"Grad" settings may be related to X4[15]:
+     * Similarly, for the TI-55's 1503 ROM:
      *
-     *              X4[15]  modeAngle
-     *              ------  ---------
-     *      "Deg"     0x0       1
-     *      "Rad"     0x4       2
-     *      "Grad"    0xC       3
+     *      "2nd"   B[15] bit 2 set
+     *      "INV"   D[15] bit 3 set
+     *      "Deg"   C[15] == 0x0
+     *      "Rad"   C[15] == 0x1
+     *      "Grad"  C[15] == 0x2
      *
      * If this is the first time any of the indicator properties (ie, f2nd, fINV, or modeAngle) have been initialized,
      * we will also propagate the LED display color (this.led.color) to the indicator's color, so that the colors of all
      * the elements overlaid on the display match.
+     *
+     * NOTE: These indicators are specific to locations chosen by the ROM, not by the chip's hardware, but since the
+     * ROMs are closely tied to their respective chips, I'm going to cheat and just check the chip type.
      *
      * @this {Chip}
      * @param {boolean} [on] (default is true, allowing all active indicators to be displayed; set to false to force all indicators off)
@@ -1519,7 +1535,7 @@ class Chip extends Device {
     updateIndicators(on = true)
     {
         let element;
-        let f2nd = on && !!(this.regC.digits[14] & 0x8);
+        let f2nd = on && (this.type == Chip.TYPE.TMS1501? !!(this.regC.digits[14] & 0x8) : !!(this.regB.digits[15] & 0x4));
         if (this.f2nd !== f2nd) {
             if (element = this.bindings['2nd']) {
                 element.style.opacity = f2nd? "1" : "0";
@@ -1527,7 +1543,7 @@ class Chip extends Device {
             }
             this.f2nd = f2nd;
         }
-        let fINV = on && !!(this.regB.digits[15] & 0x4);
+        let fINV = on && (this.type == Chip.TYPE.TMS1501? !!(this.regB.digits[15] & 0x4) : !!(this.regD.digits[15] & 0x8));
         if (this.fINV !== fINV) {
             if (element = this.bindings['INV']) {
                 element.style.opacity = fINV? "1" : "0";
@@ -1535,8 +1551,8 @@ class Chip extends Device {
             }
             this.fINV = fINV;
         }
-        let modeAngle = this.regsX[4].digits[15];
-        modeAngle = on? ((!modeAngle)? 1 : (modeAngle == 4)? 2 : 3) : 0;
+        let modeAngle = (this.type == Chip.TYPE.TMS1501? (this.regsX[4].digits[15] >> 2) : this.regC.digits[15]);
+        modeAngle = on? ((!modeAngle)? 1 : (modeAngle == 1)? 2 : 3) : 0;
         if (this.modeAngle !== modeAngle) {
             if (element = this.bindings['Deg']) {
                 element.style.opacity = (modeAngle == 1)? "1" : "0";
@@ -1668,6 +1684,11 @@ Chip.OP = {
     SHR:    3,
     XCHG:   4,
     MOVE:   5
+};
+
+Chip.TYPE = {
+    TMS1501:    1501,
+    TMS1503:    1503
 };
 
 Chip.BREAK = {

@@ -43,7 +43,7 @@ class Machine extends Device {
      *        "class": "Machine",
      *        "type": "TI57",
      *        "name": "TI-57 Programmable Calculator Simulation",
-     *        "version": 1.02,
+     *        "version": 1.03,
      *        "bindings": {
      *          "print": "printTI57"
      *        }

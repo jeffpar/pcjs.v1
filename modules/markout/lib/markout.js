@@ -1291,7 +1291,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * Start looking for Markdown-style machine links now...
      */
     var cMatches = 0;
-    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P|PDP|TI57)([^:!|]*)([:!|])(.*?)"\)/gi;
+    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P|PDP|TI55|TI57)([^:!|]*)([:!|])(.*?)"\)/gi;
 
     while ((aMatch = reMachines.exec(sBlock))) {
 
