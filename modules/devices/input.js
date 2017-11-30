@@ -248,18 +248,16 @@ class Input extends Device {
     }
 
     /**
-     * addClick(onInput, onPower, onReset)
+     * addClick(onPower, onReset)
      *
-     * Called by the Chip device to set up input, power, and reset notifications.
+     * Called by the Chip device to set up power and reset notifications.
      *
      * @this {Input}
-     * @param {function(number,number)} onInput
      * @param {function()} [onPower] (called when the "power" button, if any, is clicked)
      * @param {function()} [onReset] (called when the "reset" button, if any, is clicked)
      */
-    addClick(onInput, onPower, onReset)
+    addClick(onPower, onReset)
     {
-        this.onInput = onInput;
         this.onPower = onPower;
         this.onReset = onReset;
     }
@@ -273,6 +271,19 @@ class Input extends Device {
     addHover(onHover)
     {
         this.onHover = onHover;
+    }
+
+    /**
+     * addInput(onInput)
+     *
+     * Called by the Chip device to set up input notifications.
+     *
+     * @this {Input}
+     * @param {function(number,number)} onInput
+     */
+    addInput(onInput)
+    {
+        this.onInput = onInput;
     }
 
     /**
@@ -652,4 +663,4 @@ Input.KEYCODE = {               // keyCode from keydown/keyup events
 
 Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
 
-Input.VERSION   = 1.03;
+Input.VERSION   = 1.10;

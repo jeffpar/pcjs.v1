@@ -53,6 +53,12 @@ class Chip extends Device {
         this.nCyclesClocked = 0;
 
         /*
+         * Get access to the Input device, so we can add our click functions.
+         */
+        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+        this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
+
+        /*
          * Get access to the LED device, so we can update its display.
          */
         this.ledArray = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
@@ -72,9 +78,10 @@ class Chip extends Device {
 
             let led = this.ledArray;
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
-            this.ledInput.addClick(function(col, row) {
+            this.ledInput.addInput(function(col, row) {
                 if (col >= 0 && row >= 0) {
                     led.setBuffer(col, row, LED.STATE.ON - led.getBufferData(col, row));
+                    led.drawBuffer();
                 }
             });
         }
@@ -124,6 +131,18 @@ class Chip extends Device {
             this.time.stop();
         }
     }
+
+    /**
+     * onReset()
+     *
+     * Called by the Input device to provide notification of a reset event.
+     *
+     * @this {Chip}
+     */
+    onReset()
+    {
+        this.println("reset");
+    }
 }
 
-Chip.VERSION    = 1.03;
+Chip.VERSION    = 1.10;

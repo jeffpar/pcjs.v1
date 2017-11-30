@@ -773,4 +773,4 @@ LED.SYMBOLS = {
     '.':        ['P']
 };
 
-LED.VERSION     = 1.03;
+LED.VERSION     = 1.10;

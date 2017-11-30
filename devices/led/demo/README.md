@@ -13,7 +13,7 @@ machines:
           "class": "Machine",
           "type": "Life",
           "name": "Life Demo",
-          "version": 1.03,
+          "version": 1.10,
           "bindings": {
             "clear": "clearLife",
             "print": "printLife"
@@ -25,6 +25,8 @@ machines:
         "lifeClock": {
           "class": "Time",
           "cyclesPerSecond": 1,
+          "cyclesMinimum": 100,
+          "cyclesMaximum": 1000,
           "bindings": {
             "run": "runLife",
             "speed": "speedLife",
@@ -42,6 +44,12 @@ machines:
             "container": "lifeDisplay"
           },
           "overrides": ["color","backgroundColor"]
+        },
+        "lifeInput": {
+          "class": "Input",
+          "bindings": {
+            "reset": "resetLife"
+          }
         }
       }
 styles:

@@ -43,7 +43,7 @@ class Machine extends Device {
      *        "class": "Machine",
      *        "type": "TI57",
      *        "name": "TI-57 Programmable Calculator Simulation",
-     *        "version": 1.03,
+     *        "version": 1.10,
      *        "bindings": {
      *          "clear": "clearTI57",
      *          "print": "printTI57"
@@ -222,4 +222,4 @@ Machine.CLASSORDER = [
 Machine.COPYRIGHT = "Copyright © 2012-2017 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
-Machine.VERSION = 1.03;
+Machine.VERSION = 1.10;

@@ -69,7 +69,11 @@
  * @class {Time}
  * @unrestricted
  * @property {TimeConfig} config
+ * @property {number} nCyclesMinimum
+ * @property {number} nCyclesMaximum
  * @property {number} nCyclesPerSecond
+ * @property {number} nYieldsPerSecond
+ * @property {number} nYieldsPerUpdate
  */
 class Time extends Device {
     /**
@@ -105,7 +109,9 @@ class Time extends Device {
          * burn through a lot of cycles (minimum of 128) per instruction, but either that cycle
          * burn was much higher, or the underlying clock speed was much lower.  I assume the latter.
          */
-        this.nCyclesPerSecond = this.bounds(this.config['cyclesPerSecond'] || 650000, 100000, 1600000);
+        this.nCyclesMinimum = this.config['cyclesMinimum'] || 100000;
+        this.nCyclesMaximum = this.config['cyclesMaximum'] || 3000000;
+        this.nCyclesPerSecond = this.bounds(this.config['cyclesPerSecond'] || 650000, this.nCyclesMinimum, this.nCyclesMaximum);
         this.nYieldsPerSecond = this.bounds(this.config['yieldsPerSecond'] || Time.YIELDS_PER_SECOND, 30, 120);
         this.nYieldsPerUpdate = this.bounds(this.config['yieldsPerUpdate'] || Time.YIELDS_PER_UPDATE, 1, this.nYieldsPerSecond);
         this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
@@ -866,4 +872,4 @@ Time.BINDING = {
 Time.YIELDS_PER_SECOND = 60;
 Time.YIELDS_PER_UPDATE = 30;
 
-Time.VERSION    = 1.03;
+Time.VERSION    = 1.10;

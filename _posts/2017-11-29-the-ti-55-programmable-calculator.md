@@ -14,7 +14,7 @@ machines:
           "class": "Machine",
           "type": "TI55",
           "name": "TI-55 Emulator",
-          "version": 1.03
+          "version": 1.10
         },
         "chip": {
           "class": "Chip",
@@ -216,7 +216,7 @@ machines:
           "class": "Machine",
           "type": "TI57",
           "name": "TI-57 Emulator",
-          "version": 1.03
+          "version": 1.10
         },
         "chip": {
           "class": "Chip",

@@ -13,7 +13,7 @@ machines:
           "class": "Machine",
           "type": "TI55",
           "name": "TI-55 Emulator",
-          "version": 1.03,
+          "version": 1.10,
           "bindings": {
             "clear": "clearTI55",
             "print": "printTI55"

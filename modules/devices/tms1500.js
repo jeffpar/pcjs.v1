@@ -509,7 +509,8 @@ class Chip extends Device {
          * Get access to the Input device, so we can add our click functions.
          */
         this.input = /** @type {Input} */ (this.findDevice(this.config['input']));
-        this.input.addClick(this.onInput.bind(this), this.onPower.bind(this), this.onReset.bind(this));
+        this.input.addInput(this.onInput.bind(this));
+        this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
 
         /*
          * Get access to the LED device, so we can update its display.
@@ -1050,8 +1051,8 @@ class Chip extends Device {
         if (state) {
             let stateChip = state.stateChip;
             let version = stateChip.shift();
-            if (version !== Chip.VERSION) {
-                this.printf("Chip state version mismatch: %3.2f\n", version);
+            if ((version|0) !== (Chip.VERSION|0)) {
+                this.printf("Saved state version mismatch: %3.2f\n", version);
                 return;
             }
             try {
@@ -1718,4 +1719,4 @@ Chip.COMMANDS = [
     "u [addr] [n]\tdisassemble (at addr)"
 ];
 
-Chip.VERSION    = 1.03;
+Chip.VERSION    = 1.10;
