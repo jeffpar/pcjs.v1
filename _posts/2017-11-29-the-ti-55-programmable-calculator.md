@@ -523,7 +523,6 @@ styles:
 
 Building on the PCjs [TI-57 Programmable Calculator](/blog/2017/11/10/) emulator,
 I'm happy to report that PCjs can also emulate the [TI-55 Programmable Calculator](/devices/ti55/) now.
-
 You can see both in operation [below](#pcjs-ti-55-and-ti-57-emulators).
 
 Both calculators used the same basic chip.  In the TI-57, the chip was designated "TMC1501", and in the TI-55,
@@ -537,11 +536,16 @@ sold at the same list price.  All I know is that both were introduced in 1977 an
 was $79.95.  I have no information on the TI-55 list price.
 
 It's possible that the TI-55 was produced first, and then programmers at Texas Instruments were able to optimize
-the ROM, increasing the number of programming steps from 32 to 50, which they then marketed as the slightly more
-powerful TI-57.  However, that's pure speculation on my part.  It's also possible that they decided up front to
-create several devices with the same hardware, providing different capabilities to different audiences, and possibly
-at different price points.  The fact that the TI-55 uses a chip with a higher designation ("1503") than the TI-57
-("1501") is also difficult to reconcile.
+the ROM, increasing the number of programming steps from 32 to 50 and adding support for loops and conditionals, which
+they then marketed as the slightly more powerful TI-57.  However, that's pure speculation on my part.  It's more
+likely that they decided up front to create several devices with the same hardware, providing different capabilities
+to different audiences, and possibly at different price points.
+
+Also, the fact that the TI-55 uses a chip with a higher designation ("1503") than the TI-57 ("1501") suggests that the
+TI-55 may have been finished *after* the TI-57, and that the lower model number was simply a reflection of its more
+limited programmability.  Finally, Sean Riddle points out that since the TI-55 and TI-57 produce different results for
+the "[Calculator Forensics](http://www.rskey.org/~mwsebastian/miscprj/models.htm)" test, the ROMs may have even been
+developed by different teams at Texas Instruments.
 
 It may be worth undertaking a detailed comparison of the [TI-55 ROM](/devices/ti55/rom/) and
 [TI-57 ROM](/devices/ti57/rom/) at some point, because the TI-57 has fewer built-in functions, as evidenced by
