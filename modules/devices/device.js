@@ -152,67 +152,72 @@ class Device {
 
         switch(binding) {
 
+        case Device.BINDING.CLEAR:
+            this.bindings[binding] = element;
+            element.onclick = function onClickClear() {
+                device.clear();
+            };
+            break;
+
         case Device.BINDING.PRINT:
-            if (!this.bindings[binding]) {
-                let elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
-                this.bindings[binding] = elementTextArea;
-                /*
-                 * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
-                 */
-                elementTextArea.value = "";
-                /*
-                 * An onKeyPress handler has been added to this element simply to stop event propagation, so that if the
-                 * element has been explicitly given focus, any key presses won't be picked up by the Input device (which,
-                 * as that device's constructor explains, is monitoring key presses for the entire document).
-                 */
-                elementTextArea.addEventListener(
-                    'keypress',
-                    function onKeyPress(event) {
-                        event = event || window.event;
-                        let keyCode = event.which || event.keyCode;
-                        if (keyCode) {
-                            /*
-                             * Move the caret to the end of any text in the textarea.
-                             */
-                            let sText = elementTextArea.value;
-                            elementTextArea.setSelectionRange(sText.length, sText.length);
+            let elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
+            this.bindings[binding] = elementTextArea;
+            /*
+             * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
+             */
+            elementTextArea.value = "";
+            /*
+             * An onKeyPress handler has been added to this element simply to stop event propagation, so that if the
+             * element has been explicitly given focus, any key presses won't be picked up by the Input device (which,
+             * as that device's constructor explains, is monitoring key presses for the entire document).
+             */
+            elementTextArea.addEventListener(
+                'keypress',
+                function onKeyPress(event) {
+                    event = event || window.event;
+                    let keyCode = event.which || event.keyCode;
+                    if (keyCode) {
+                        /*
+                         * Move the caret to the end of any text in the textarea.
+                         */
+                        let sText = elementTextArea.value;
+                        elementTextArea.setSelectionRange(sText.length, sText.length);
 
-                            /*
-                             * Don't let the Input device's document-based keypress handler see any key presses
-                             * that came to this element first.
-                             */
-                            event.stopPropagation();
+                        /*
+                         * Don't let the Input device's document-based keypress handler see any key presses
+                         * that came to this element first.
+                         */
+                        event.stopPropagation();
 
-                            /*
-                             * On the ENTER key, look for any COMMAND handlers and invoke them until one of them
-                             * returns true.
-                             */
-                            if (keyCode == 13) {
-                                let afn = device.findHandlers(Device.HANDLER.COMMAND);
-                                if (afn) {
-                                    /*
-                                     * At the time we call any command handlers, a linefeed will not yet have been
-                                     * appended to the text, so for consistency, we prevent the default behavior and
-                                     * add the linefeed ourselves.  Unfortunately, one side-effect is that we must
-                                     * go to some extra effort to ensure the cursor remains in view; hence the stupid
-                                     * blur() and focus() calls.
-                                     */
-                                    event.preventDefault();
-                                    sText = (elementTextArea.value += '\n');
-                                    elementTextArea.blur();
-                                    elementTextArea.focus();
+                        /*
+                         * On the ENTER key, look for any COMMAND handlers and invoke them until one of them
+                         * returns true.
+                         */
+                        if (keyCode == 13) {
+                            let afn = device.findHandlers(Device.HANDLER.COMMAND);
+                            if (afn) {
+                                /*
+                                 * At the time we call any command handlers, a linefeed will not yet have been
+                                 * appended to the text, so for consistency, we prevent the default behavior and
+                                 * add the linefeed ourselves.  Unfortunately, one side-effect is that we must
+                                 * go to some extra effort to ensure the cursor remains in view; hence the stupid
+                                 * blur() and focus() calls.
+                                 */
+                                event.preventDefault();
+                                sText = (elementTextArea.value += '\n');
+                                elementTextArea.blur();
+                                elementTextArea.focus();
 
-                                    let i = sText.lastIndexOf('\n', sText.length - 2);
-                                    let sCommand = sText.slice(i+1, -1);
-                                    for (let i = 0; i < afn.length; i++) {
-                                        if (afn[i](sCommand)) break;
-                                    }
+                                let i = sText.lastIndexOf('\n', sText.length - 2);
+                                let sCommand = sText.slice(i+1, -1);
+                                for (let i = 0; i < afn.length; i++) {
+                                    if (afn[i](sCommand)) break;
                                 }
                             }
                         }
                     }
-                );
-            }
+                }
+            );
             break;
 
         default:
@@ -818,6 +823,7 @@ class Device {
 }
 
 Device.BINDING = {
+    CLEAR:      "clear",
     PRINT:      "print"
 };
 

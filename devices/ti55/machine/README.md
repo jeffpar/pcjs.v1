@@ -46,6 +46,7 @@ machines:
         },
         "buttons": {
           "class": "Input",
+          "location": [56, 322, 358, 462, 0.34, 0.5, 465, 832, 322, 182, 74, 36],
           "map": [
             ["2nd",  "sin",  "cos",  "tan",  "clr"],
             ["inv",  "pct",  "lnx",  "epow", "root"],
@@ -56,7 +57,6 @@ machines:
             ["sum",  "1",    "2",    "3",    "+"],
             ["\\b",  "0",    ".",    "+/-",  "=|\\r"]
           ],
-          "location": [56, 322, 358, 462, 0.34, 0.5, 465, 832, 322, 182, 74, 36],
           "bindings": {
             "surface": "imageTI55",
             "power": "powerTI55"

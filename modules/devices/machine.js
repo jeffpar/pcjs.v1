@@ -45,6 +45,7 @@ class Machine extends Device {
      *        "name": "TI-57 Programmable Calculator Simulation",
      *        "version": 1.03,
      *        "bindings": {
+     *          "clear": "clearTI57",
      *          "print": "printTI57"
      *        }
      *      },
@@ -91,8 +92,7 @@ class Machine extends Device {
      *        "bindings": {
      *          "surface": "imageTI57",
      *          "power": "powerTI57",
-     *          "reset": "resetTI57",
-     *          "clear": "clearTI57"
+     *          "reset": "resetTI57"
      *        }
      *      },
      *      "rom": {

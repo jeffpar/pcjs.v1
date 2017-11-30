@@ -1,5 +1,5 @@
 /**
- * @fileoverview Simulates a (theoretical) LED Display Chip
+ * @fileoverview Simulates a "Game of Life" Chip
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -29,7 +29,7 @@
 "use strict";
 
 /**
- * LED Display Chip
+ * "Game of Life" Chip
  *
  * @class {Chip}
  * @unrestricted
@@ -101,12 +101,6 @@ class Chip extends Device {
         while (this.nCyclesClocked <= nCyclesTarget) {
             this.nCyclesClocked += 1;
         }
-        // if (nCyclesTarget <= 0) {
-        //     let chip = this;
-        //     this.time.doOutside(function() {
-        //         chip.println(chip.toString());
-        //     });
-        // }
         return this.nCyclesClocked;
     }
 

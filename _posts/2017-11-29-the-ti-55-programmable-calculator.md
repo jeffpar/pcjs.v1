@@ -47,6 +47,7 @@ machines:
         },
         "buttons": {
           "class": "Input",
+          "location": [56, 322, 358, 462, 0.34, 0.5, 465, 832, 322, 182, 74, 36],
           "map": [
             ["2nd",  "sin",  "cos",  "tan",  "clr"],
             ["inv",  "pct",  "lnx",  "epow", "root"],
@@ -57,7 +58,6 @@ machines:
             ["sum",  "1",    "2",    "3",    "+"],
             ["\\b",  "0",    ".",    "+/-",  "=|\\r"]
           ],
-          "location": [56, 322, 358, 462, 0.34, 0.5, 465, 832, 322, 182, 74, 36],
           "bindings": {
             "surface": "imageTI55",
             "power": "powerTI55"
@@ -249,6 +249,7 @@ machines:
         },
         "buttons": {
           "class": "Input",
+          "location": [45, 316, 372, 478, 0.34, 0.5, 459, 832, 322, 168, 75, 38],
           "map": [
             ["2nd",  "inv",  "lnx",  "\\b",  "clr"],
             ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
@@ -259,7 +260,6 @@ machines:
             ["rst",  "1",    "2",    "3",    "+"],
             ["r/s",  "0",    ".",    "+/-",  "=|\\r"]
           ],
-          "location": [45, 316, 372, 478, 0.34, 0.5, 459, 832, 322, 168, 75, 38],
           "bindings": {
             "surface": "imageTI57",
             "power": "powerTI57"

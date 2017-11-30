@@ -1,53 +1,77 @@
 ---
 layout: page
-title: LED Demo
+title: Life Demo
 permalink: /devices/led/demo/
 machines:
-  - id: ledDemo
-    type: ledd
-    name: LED Demo
+  - id: lifeDemo
+    type: life
+    name: Life Demo
     uncompiled: true
     config: |
       {
-        "ledDemo": {
+        "lifeDemo": {
           "class": "Machine",
-          "type": "LEDD",
-          "name": "LED Demo",
-          "version": 1.03
+          "type": "Life",
+          "name": "Life Demo",
+          "version": 1.03,
+          "bindings": {
+            "clear": "clearLife",
+            "print": "printLife"
+          }
         },
-        "ledController": {
+        "lifeChip": {
           "class": "Chip"
         },
-        "ledClock": {
+        "lifeClock": {
           "class": "Time",
-          "cyclesPerSecond": 10,
+          "cyclesPerSecond": 1,
+          "bindings": {
+            "run": "runLife",
+            "speed": "speedLife",
+            "step": "stepLife"
+          },
           "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate"]
         },
-        "ledDisplay": {
+        "lifeDisplay": {
           "class": "LED",
           "type": 1,
           "cols": 32,
           "rows": 32,
           "color": "green",
           "bindings": {
-            "container": "ledDisplay"
+            "container": "lifeDisplay"
           },
           "overrides": ["color","backgroundColor"]
         }
       }
 styles:
-  ledDemo:
+  lifeDemo:
     position: relative;
     display: inline-block;
-  ledDisplay:
+    float: left;
+    margin-right: 32px;
+  lifeDisplay:
     position: relative;
+  .diagsLife:
+    float: left;
+  printLife:
+    font-family: Monaco,"Lucida Console",monospace;
 ---
 
-LED Demo
---------
+Life Demo
+---------
 
-{% include machine.html id="ledDemo" config="json" %}
+{% include machine.html id="lifeDemo" config="json" %}
 
-<div id="ledDemo">
-  <div id="ledDisplay"></div>
+<div id="lifeDemo">
+  <div id="lifeDisplay"></div>
+</div>
+<div class="diagsLife">
+  <div>
+    <textarea id="printLife" cols="78" rows="16"></textarea>
+  </div>
+  <button id="runLife">Run</button>
+  <button id="stepLife">Step</button><span id="speedLife">Stopped</span>
+  <button id="resetLife">Reset</button>
+  <button id="clearLife">Clear</button>
 </div>

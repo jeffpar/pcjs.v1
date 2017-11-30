@@ -71,7 +71,8 @@ class Input extends Device {
      *        "drag": false,
      *        "bindings": {
      *          "surface": "imageTI57",
-     *          "power": "powerTI57"
+     *          "power": "powerTI57",
+     *          "reset": "resetTI57"
      *        }
      *      }
      *
@@ -230,13 +231,6 @@ class Input extends Device {
         }
 
         let input = this;
-
-        element = this.bindings[Input.BINDING.CLEAR];
-        if (element) {
-            element.onclick = function onClickClear() {
-                input.clear();
-            };
-        }
 
         element = this.bindings[Input.BINDING.POWER];
         if (element) {
@@ -647,7 +641,6 @@ Input.ACTION = {
 };
 
 Input.BINDING = {
-    CLEAR:      "clear",
     POWER:      "power",
     RESET:      "reset",
     SURFACE:    "surface"

@@ -15,6 +15,7 @@ Programmable Calculators.
 * [Device](device.js)
 * [Input](input.js)
 * [LED](led.js)
+* [LifeChip](lifechip.js)
 * [ROM](rom.js)
 * [Time](time.js)
 * [TMS-1500](tms1500.js)
@@ -36,6 +37,7 @@ under the `config` property, which configures all the devices, and includes any 
 	          "type": "TI57",
 	          "name": "TI-57 Emulator",
 	          "bindings": {
+	            "clear": "clearTI57",
 	            "print": "printTI57"
 	          }
 	        },
@@ -65,6 +67,7 @@ under the `config` property, which configures all the devices, and includes any 
 	        },
 	        "input": {
 	          "class": "Input",
+	          "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 418, 180, 75, 36],
 	          "map": [
 	            ["2nd",  "inv",  "lnx",  "\\b",  "clr"],
 	            ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
@@ -75,12 +78,10 @@ under the `config` property, which configures all the devices, and includes any 
 	            ["rst",  "1",    "2",    "3",    "+"],
 	            ["r/s",  "0",    ".",    "+/-",  "=|\\r"]
 	          ],
-	          "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 418, 180, 75, 36],
 	          "bindings": {
 	            "surface": "imageTI57",
 	            "power": "powerTI57",
-	            "reset": "resetTI57",
-	            "clear": "clearTI57"
+	            "reset": "resetTI57"
 	          }
 	        },
 	        "rom": {
