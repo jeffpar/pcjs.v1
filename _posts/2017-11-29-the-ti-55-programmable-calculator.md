@@ -528,7 +528,8 @@ You can see both in operation [below](#pcjs-ti-55-and-ti-57-emulators).
 
 Both calculators used the same basic chip.  In the TI-57, the chip was designated "TMC1501", and in the TI-55,
 it was "TMC1503", but both were [TMS-1500](/modules/devices/tms1500.js)-compatible.  The primary difference between
-the chips was the contents of their ROMs.
+the chips was the contents of their ROMs.  And I'm not sure the [TI-55 ROM](/devices/ti55/rom/) was available anywhere
+previously, until now, thanks to [Sean Riddle](http://seanriddle.com/tms1500.html).
 
 In theory, the TI-55 and TI-57 would have cost exactly the same to manufacture.  However, I haven't seen any
 sales materials for the two calculators, so I don't know in what order they were introduced or whether they were
