@@ -517,7 +517,7 @@ class Chip extends Device {
         this.led = /** @type {LED} */ (this.findDevice(this.config['output']));
 
         /*
-         * Get access to the ROM device.
+         * Get access to the ROM device, so we can give it access to functions like disassemble().
          */
         this.rom = /** @type {ROM} */ (this.findDeviceByClass(Machine.CLASS.ROM));
         if (this.rom) this.rom.setChip(this);
@@ -1136,7 +1136,7 @@ class Chip extends Device {
         case 't':
             if (s[1] == 'c') this.nStringFormat = Chip.SFORMAT.COMPACT;
             nWords = Number.parseInt(aCommands[1], 10) || 1;
-            this.time.toggleStep(nWords);
+            this.time.onStep(nWords);
             this.sCommandPrev = sCommand;
             break;
         case 'r':

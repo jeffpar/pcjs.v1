@@ -169,7 +169,7 @@ class Time extends Device {
         case Time.BINDING.RUN:
             this.bindings[binding] = element;
             element.onclick = function onClickRun() {
-                time.toggleRun();
+                time.onRun();
             };
             break;
 
@@ -188,7 +188,7 @@ class Time extends Device {
         case Time.BINDING.STEP:
             this.bindings[binding] = element;
             element.onclick = function onClickStep() {
-                time.toggleStep();
+                time.onStep();
             };
             break;
 
@@ -422,6 +422,47 @@ class Time extends Device {
             return (timer.nCyclesLeft >= 0);
         }
         return false;
+    }
+
+    /**
+     * onRun()
+     *
+     * This handles the "run" button, if any, attached to the Time device.
+     *
+     * Note that this serves a different purpose than the "power" button that's managed by the Input device,
+     * because toggling power also requires resetting the program counter prior to start() OR clearing the display
+     * after stop().  See the Chip's onPower() function for details.
+     *
+     * @this {Time}
+     */
+    onRun()
+    {
+        if (this.fRunning) {
+            this.stop();
+        } else {
+            this.start();
+        }
+    }
+
+    /**
+     * onStep(nRepeat)
+     *
+     * This handles the "step" button, if any, attached to the Time device.
+     *
+     * @this {Time}
+     * @param {number} [nRepeat]
+     */
+    onStep(nRepeat)
+    {
+        if (!this.fRunning) {
+            if (this.nStepping) {
+                this.stop();
+            } else {
+                this.step(nRepeat);
+            }
+        } else {
+            this.println("already running");
+        }
     }
 
     /**
@@ -744,48 +785,6 @@ class Time extends Device {
             return true;
         }
         return false;
-    }
-
-    /**
-     * toggleRun()
-     *
-     * This handles the "run" button, if any, attached to the Time device.
-     *
-     * Note that this serves a different purpose than the "power" button that's managed
-     * by the Input device, because toggling power also requires resetting the program counter
-     * prior to start() OR clearing the display after stop().  See the Chip's setPower()
-     * function for details.
-     *
-     * @this {Time}
-     */
-    toggleRun()
-    {
-        if (this.fRunning) {
-            this.stop();
-        } else {
-            this.start();
-        }
-    }
-
-    /**
-     * toggleStep(nRepeat)
-     *
-     * This handles the "step" button, if any, attached to the Time device.
-     *
-     * @this {Time}
-     * @param {number} [nRepeat]
-     */
-    toggleStep(nRepeat)
-    {
-        if (!this.fRunning) {
-            if (this.nStepping) {
-                this.stop();
-            } else {
-                this.step(nRepeat);
-            }
-        } else {
-            this.println("already running");
-        }
     }
 
     /**

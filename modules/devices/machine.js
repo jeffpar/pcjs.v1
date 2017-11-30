@@ -138,8 +138,8 @@ class Machine extends Device {
             chip = machine.initDevices();
             if (chip) chip.onPower(true);
         });
-        let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : 'beforeunload');
-        window.addEventListener(sEvent, function onUnload(event) {
+        let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : undefined);
+        window.addEventListener(sEvent || 'beforeunload', function onUnload(event) {
             if (chip) chip.onPower(false);
         });
     }

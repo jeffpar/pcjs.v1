@@ -310,8 +310,9 @@ class Device {
      *
      * Restricts n to the bounds defined by min and max.
      *
+     * @this {Device}
      * @param {number} n
-     * @param (number} min
+     * @param {number} min
      * @param {number} max
      * @returns {number} (updated n)
      */
