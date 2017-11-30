@@ -29,7 +29,7 @@
 "use strict";
 
 /**
- * @typedef {Object} InputConfig
+ * @typedef {Config} InputConfig
  * @property {string} class
  * @property {Object} [bindings]
  * @property {number} [version]

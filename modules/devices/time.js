@@ -57,7 +57,7 @@
  */
 
 /**
- * @typedef {Object} TimeConfig
+ * @typedef {Config} TimeConfig
  * @property {string} class
  * @property {Object} [bindings]
  * @property {number} [version]

@@ -29,7 +29,7 @@
 "use strict";
 
 /**
- * @typedef {Object} ROMConfig
+ * @typedef {Config} ROMConfig
  * @property {string} class
  * @property {Object} [bindings]
  * @property {number} [version]
@@ -108,14 +108,14 @@ class ROM extends Device {
             this.rows = Math.pow(2, Math.floor(addrLines));
             let configLEDs = {
                 class:           "LED",
+                bindings:        {container: config.bindings[ROM.BINDING.ARRAY]},
                 type:            LED.TYPE.ROUND,
                 cols:            this.cols,
                 rows:            this.rows,
                 color:           config['colorROM'] || "green",
-                fixed:           true,
-                persistent:      true,
                 backgroundColor: config['backgroundColorROM'] || "black",
-                bindings:        {container: config.bindings[ROM.BINDING.ARRAY]}
+                fixed:           true,
+                persistent:      true
             };
             this.ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);
             this.clearArray();

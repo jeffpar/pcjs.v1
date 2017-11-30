@@ -29,14 +29,14 @@
 "use strict";
 
 /**
- * @typedef {Object} LEDConfig
+ * @typedef {Config} LEDConfig
  * @property {string} class
  * @property {Object} [bindings]
  * @property {number} [version]
  * @property {Array.<string>} [overrides]
  * @property {number} type
- * @property {number} width
- * @property {number} height
+ * @property {number} [width]
+ * @property {number} [height]
  * @property {number} cols
  * @property {number} rows
  * @property {string} color
