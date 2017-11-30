@@ -224,11 +224,11 @@ machines:
           "input": "buttons",
           "output": "display",
           "bindings": {
-            "2nd": "ind2nd57",
-            "INV": "indINV57",
-            "Deg": "indDeg57",
-            "Rad": "indRad57",
-            "Grad": "indGrad57"
+            "2nd": "ind2ndTI57",
+            "INV": "indINVTI57",
+            "Deg": "indDegTI57",
+            "Rad": "indRadTI57",
+            "Grad": "indGradTI57"
           }
         },
         "clock": {
