@@ -100,6 +100,7 @@
  *  container: HTMLElement|undefined
  * }} bindings
  * @property {Array.<string|number>} buffer
+ * @property {Array.<string|number>|null} bufferClone
  * @property {boolean} fBufferModified
  * @property {boolean} fTickled
  */
@@ -185,7 +186,9 @@ class LED extends Device {
          * the first records the primary character (eg, a digit) and the second records the secondary
          * character, if any (eg, a decimal point).
          */
-        this.buffer = new Array(this.rows * this.cols * 2);
+        this.nBufferCells = this.rows * this.cols * 2;
+        this.buffer = new Array(this.nBufferCells);
+        this.bufferClone = null;
 
         /*
          * fBufferModified is straightforward: set to true by any setBuffer() call that actually
@@ -471,6 +474,28 @@ class LED extends Device {
     }
 
     /**
+     * getBuffer()
+     *
+     * @this {LED}
+     * @returns {Array}
+     */
+    getBuffer()
+    {
+        return this.buffer;
+    }
+
+    /**
+     * getBufferClone()
+     *
+     * @this {LED}
+     * @returns {Array}
+     */
+    getBufferClone()
+    {
+        return this.bufferClone || (this.bufferClone = new Array(this.nBufferCells));
+    }
+
+    /**
      * getBufferData(col, row)
      *
      * @this {LED}
@@ -550,6 +575,19 @@ class LED extends Device {
         }
         this.fTickled = true;
         return fModified;
+    }
+
+    /**
+     * swapBufferClone()
+     *
+     * @this {LED}
+     */
+    swapBufferClone()
+    {
+        let buffer = this.buffer;
+        this.buffer = this.bufferClone;
+        this.bufferClone = buffer;
+        this.fBufferModified = true;
     }
 }
 

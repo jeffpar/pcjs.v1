@@ -102,11 +102,85 @@ class Chip extends Device {
         let nCyclesClocked = 0;
         if (nCyclesTarget >= 0) {
             do {
-                this.ledArray.setBuffer(0, 0, LED.STATE.ON - this.ledArray.getBufferData(0, 0));
+                this.doGeneration();
                 nCyclesClocked += 1;
             } while (nCyclesClocked < nCyclesTarget);
         }
         return nCyclesClocked;
+    }
+
+    /**
+     * doGeneration()
+     *
+     * @this {Chip}
+     */
+    doGeneration()
+    {
+        let buffer = this.ledArray.getBuffer();
+        let bufferClone = this.ledArray.getBufferClone();
+        let nCols = this.ledArray.cols;
+        let nRows = this.ledArray.rows;
+        let nCellsPerRow = nCols * 2, nCells = nRows * nCellsPerRow;
+
+        let iCell = 0;
+        let iNO = iCell - nCellsPerRow;
+        let iNW = iNO - 2;
+        let iNE = iNO + 2;
+        let iWE = iCell - 2;
+        let iEA = iCell + 2;
+        let iSO = iCell + nCellsPerRow;
+        let iSW = iSO - 2;
+        let iSE = iSO + 2;
+
+        for (let row = 0; row < nRows; row++) {
+            if (!row) {
+                iNW += nCells;
+                iNO += nCells;
+                iNE += nCells;
+            } else if (row == 1) {
+                iNW -= nCells;
+                iNO -= nCells;
+                iNE -= nCells;
+            } else if (row == nRows - 1) {
+                iSW -= nCells;
+                iSO -= nCells;
+                iSE -= nCells;
+            }
+            for (let col = 0; col <= nCols; col++) {
+                if (!col) {
+                    iNW += nCellsPerRow;
+                    iWE += nCellsPerRow;
+                    iSW += nCellsPerRow;
+                } else if (col == 1) {
+                    iNW -= nCellsPerRow;
+                    iWE -= nCellsPerRow;
+                    iSW -= nCellsPerRow;
+                } else if (col == nCols - 1) {
+                    iNE -= nCellsPerRow;
+                    iEA -= nCellsPerRow;
+                    iSE -= nCellsPerRow;
+                } else if (col == nCols) {
+                    iNE += nCellsPerRow;
+                    iEA += nCellsPerRow;
+                    iSE += nCellsPerRow;
+                    break;
+                }
+                let state = buffer[iCell];
+                let nNeighbors = buffer[iNW]+buffer[iNO]+buffer[iNE]+buffer[iEA]+buffer[iSE]+buffer[iSO]+buffer[iSW]+buffer[iWE];
+                this.assert(!isNaN(nNeighbors));
+                if (nNeighbors == 3) {
+                    state = LED.STATE.ON;
+                } else if (nNeighbors != 2) {
+                    state = LED.STATE.OFF;
+                }
+                if (bufferClone[iCell] !== state) {
+                    bufferClone[iCell] = state;
+                    bufferClone[iCell + 1] = LED.STATE.DIRTY;
+                }
+                iCell += 2; iNW += 2; iNO += 2; iNE += 2; iEA += 2; iSE += 2; iSO += 2; iSW += 2; iWE += 2;
+            }
+        }
+        this.ledArray.swapBufferClone();
     }
 
     /**
