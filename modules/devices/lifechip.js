@@ -48,17 +48,6 @@ class Chip extends Device {
         super(idMachine, idDevice, Chip.VERSION, config);
 
         /*
-         * This internal cycle count is initialized on every clocker() invocation.
-         */
-        this.nCyclesClocked = 0;
-
-        /*
-         * Get access to the Input device, so we can add our click functions.
-         */
-        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-        this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
-
-        /*
          * Get access to the LED device, so we can update its display.
          */
         this.ledArray = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
@@ -84,14 +73,25 @@ class Chip extends Device {
                     led.drawBuffer();
                 }
             });
-        }
 
-        /*
-         * Get access to the Time device, so we can give it our clocker() function.
-         */
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
-        if (this.time) {
-            this.time.addClocker(this.clocker.bind(this));
+            /*
+             * Get access to the Input device, so we can add our click functions.
+             */
+            this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+            this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
+
+            /*
+             * This internal cycle count is initialized on every clocker() invocation.
+             */
+            this.nCyclesClocked = 0;
+
+            /*
+             * Get access to the Time device, so we can give it our clocker() function.
+             */
+            this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+            if (this.time) {
+                this.time.addClocker(this.clocker.bind(this));
+            }
         }
     }
 
@@ -144,6 +144,7 @@ class Chip extends Device {
     onReset()
     {
         this.println("reset");
+        this.ledArray.clearBuffer(true);
     }
 }
 
