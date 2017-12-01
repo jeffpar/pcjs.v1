@@ -150,10 +150,9 @@ class Device {
     {
         let device = this;
 
-        switch(binding) {
+        switch (binding) {
 
         case Device.BINDING.CLEAR:
-            this.bindings[binding] = element;
             element.onclick = function onClickClear() {
                 device.clear();
             };
@@ -161,7 +160,6 @@ class Device {
 
         case Device.BINDING.PRINT:
             let elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
-            this.bindings[binding] = elementTextArea;
             /*
              * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
              */
@@ -209,7 +207,7 @@ class Device {
                                 elementTextArea.focus();
 
                                 let i = sText.lastIndexOf('\n', sText.length - 2);
-                                let sCommand = sText.slice(i+1, -1);
+                                let sCommand = sText.slice(i + 1, -1);
                                 for (let i = 0; i < afn.length; i++) {
                                     if (afn[i](sCommand)) break;
                                 }
@@ -219,11 +217,8 @@ class Device {
                 }
             );
             break;
-
-        default:
-            if (!this.bindings[binding]) this.bindings[binding] = element;
-            break;
         }
+        this.bindings[binding] = element;
     }
 
     /**
@@ -808,7 +803,7 @@ class Device {
                 let match;
                 let pl = /\+/g; // RegExp for replacing addition symbol with a space
                 let search = /([^&=]+)=?([^&]*)/g;
-                let decode = function(s) {
+                let decode = function decodeParameter(s) {
                     return decodeURIComponent(s.replace(pl, " ")).trim();
                 };
 

@@ -127,7 +127,7 @@ class ROM extends Device {
             };
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
             this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC);
-            this.ledInput.addHover(function(col, row) {
+            this.ledInput.addHover(function onROMHover(col, row) {
                 if (rom.chip) {
                     let sDesc = rom.sCellDesc;
                     if (col >= 0 && row >= 0) {

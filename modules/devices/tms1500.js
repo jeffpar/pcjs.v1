@@ -538,7 +538,7 @@ class Chip extends Device {
          * the state of the external indicator.  They are initially undefined and will be updated
          * by updateIndicators() whenever the internal and external states differ.
          */
-        this.f2nd = this.fINV = this.modeAngle = undefined;
+        this.f2nd = this.fINV = this.angleMode = undefined;
 
         /*
          * The following set of properties are all debugger-related; see onCommand().
@@ -635,7 +635,7 @@ class Chip extends Device {
         }
         if (nCyclesTarget <= 0) {
             let chip = this;
-            this.time.doOutside(function() {
+            this.time.doOutside(function clockerOutside() {
                 chip.rom.drawArray();
                 chip.println(chip.toString());
             });
@@ -1457,8 +1457,8 @@ class Chip extends Device {
             for (let i = 0, n = this.regsO.length; i < n; i++) {
                 s += this.regsO[i].toString() + ' ';
             }
-            s += '\n';
-            s += "  COND=" + (this.fCOND? 1 : 0);
+            s += "\n ";
+            s += " COND=" + (this.fCOND? 1 : 0);
             s += " BASE=" + this.base;
             s += " R5=" + this.sprintf("%02X", this.regR5);
             s += " RAB=" + this.regRAB + " ST=";
@@ -1525,7 +1525,7 @@ class Chip extends Device {
      *      "Rad"   C[15] == 0x1
      *      "Grad"  C[15] == 0x2
      *
-     * If this is the first time any of the indicator properties (ie, f2nd, fINV, or modeAngle) have been initialized,
+     * If this is the first time any of the indicator properties (ie, f2nd, fINV, or angleMode) have been initialized,
      * we will also propagate the LED display color (this.led.color) to the indicator's color, so that the colors of all
      * the elements overlaid on the display match.
      *
@@ -1554,22 +1554,22 @@ class Chip extends Device {
             }
             this.fINV = fINV;
         }
-        let modeAngle = (this.type == Chip.TYPE.TMS1501? (this.regsX[4].digits[15] >> 2) : this.regC.digits[15]);
-        modeAngle = on? ((!modeAngle)? 1 : (modeAngle == 1)? 2 : 3) : 0;
-        if (this.modeAngle !== modeAngle) {
+        let angleBits = (this.type == Chip.TYPE.TMS1501? (this.regsX[4].digits[15] >> 2) : this.regC.digits[15]);
+        let angleMode = on? ((!angleBits)? Chip.ANGLEMODE.DEGREES : (angleBits == 1)? Chip.ANGLEMODE.RADIANS : Chip.ANGLEMODE.GRADIENTS) : Chip.ANGLEMODE.OFF;
+        if (this.angleMode !== angleMode) {
             if (element = this.bindings['Deg']) {
-                element.style.opacity = (modeAngle == 1)? "1" : "0";
-                if (this.modeAngle === undefined && this.led) element.style.color = this.led.color;
+                element.style.opacity = (angleMode == Chip.ANGLEMODE.DEGREES)? "1" : "0";
+                if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
             if (element = this.bindings['Rad']) {
-                element.style.opacity = (modeAngle == 2)? "1" : "0";
-                if (this.modeAngle === undefined && this.led) element.style.color = this.led.color;
+                element.style.opacity = (angleMode == Chip.ANGLEMODE.RADIANS)? "1" : "0";
+                if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
             if (element = this.bindings['Grad']) {
-                element.style.opacity = (modeAngle == 3)? "1" : "0";
-                if (this.modeAngle === undefined && this.led) element.style.color = this.led.color;
+                element.style.opacity = (angleMode == Chip.ANGLEMODE.GRADIENTS)? "1" : "0";
+                if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
-            this.modeAngle = modeAngle;
+            this.angleMode = angleMode;
         }
     }
 
@@ -1692,6 +1692,13 @@ Chip.OP = {
 Chip.TYPE = {
     TMS1501:    1501,
     TMS1503:    1503
+};
+
+Chip.ANGLEMODE = {
+    OFF:        0,
+    DEGREES:    1,
+    RADIANS:    2,
+    GRADIENTS:  3
 };
 
 Chip.BREAK = {

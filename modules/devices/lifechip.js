@@ -67,7 +67,7 @@ class Chip extends Device {
 
             let led = this.ledArray;
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
-            this.ledInput.addInput(function(col, row) {
+            this.ledInput.addInput(function onLEDInput(col, row) {
                 if (col >= 0 && row >= 0) {
                     led.setBuffer(col, row, LED.STATE.ON - led.getBufferData(col, row));
                     led.drawBuffer();
@@ -79,11 +79,6 @@ class Chip extends Device {
              */
             this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
             this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
-
-            /*
-             * This internal cycle count is initialized on every clocker() invocation.
-             */
-            this.nCyclesClocked = 0;
 
             /*
              * Get access to the Time device, so we can give it our clocker() function.
@@ -104,13 +99,14 @@ class Chip extends Device {
      */
     clocker(nCyclesTarget = 0)
     {
-        this.nCyclesClocked = 0;
+        let nCyclesClocked = 0;
         if (nCyclesTarget >= 0) {
             do {
-                this.nCyclesClocked += 1;
-            } while (this.nCyclesClocked < nCyclesTarget);
+                this.ledArray.setBuffer(0, 0, LED.STATE.ON - this.ledArray.getBufferData(0, 0));
+                nCyclesClocked += 1;
+            } while (nCyclesClocked < nCyclesTarget);
         }
-        return this.nCyclesClocked;
+        return nCyclesClocked;
     }
 
     /**

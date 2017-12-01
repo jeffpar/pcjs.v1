@@ -185,7 +185,8 @@ class Input extends Device {
                  * We use a timer for the touch/mouse release events, to ensure that the machine had
                  * enough time to notice the input before releasing it.
                  */
-                this.timerRelease = this.time.addTimer("timerRelease", function() {
+                let input = this;
+                this.timerInputRelease = this.time.addTimer("timerInputRelease", function onInputRelease() {
                     if (input.xStart < 0 && input.yStart < 0) { // auto-release ONLY if it's REALLY released
                         input.setPosition(-1, -1);
                     }
@@ -195,7 +196,7 @@ class Input extends Device {
                      * This auto-releases the last key reported after an appropriate delay, to ensure that
                      * the machine had enough time to notice the corresponding button was pressed.
                      */
-                    this.timerKbd = this.time.addTimer("timerKbd", function() {
+                    this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function onKeyRelease() {
                         input.onKeyTimer();
                     });
                     /*
@@ -219,7 +220,7 @@ class Input extends Device {
                      * by redirecting focus to the "power" button, if any, not because we want that or any other
                      * button to have focus, but simply to remove focus from any other input element on the page.
                      */
-                    this.captureKbd(document);
+                    this.captureKeys(document);
                 }
             }
 
@@ -229,22 +230,34 @@ class Input extends Device {
              */
             this.col = this.row = -1;
         }
+    }
 
+    /**
+     * addBinding(binding, element)
+     *
+     * @this {Input}
+     * @param {string} binding
+     * @param {HTMLElement} element
+     */
+    addBinding(binding, element)
+    {
         let input = this;
 
-        element = this.bindings[Input.BINDING.POWER];
-        if (element) {
+        switch(binding) {
+
+        case Input.BINDING.POWER:
             element.onclick = function onClickPower() {
                 if (input.onPower) input.onPower();
             };
-        }
+            break;
 
-        element = this.bindings[Input.BINDING.RESET];
-        if (element) {
+        case Input.BINDING.RESET:
             element.onclick = function onClickReset() {
                 if (input.onReset) input.onReset();
             };
+            break;
         }
+        super.addBinding(binding, element);
     }
 
     /**
@@ -287,12 +300,12 @@ class Input extends Device {
     }
 
     /**
-     * captureKbd(element)
+     * captureKeys(element)
      *
      * @this {Input}
      * @param {Document|HTMLElement} element
      */
-    captureKbd(element)
+    captureKeys(element)
     {
         let input = this;
         element.addEventListener(
@@ -343,7 +356,7 @@ class Input extends Device {
                     } else {
                         this.keyState = 1;
                         this.setPosition(col, row);
-                        this.time.setTimer(this.timerKbd, Input.BUTTON_DELAY);
+                        this.time.setTimer(this.timerKeyRelease, Input.BUTTON_DELAY);
                     }
                     return true;
                 }
@@ -364,7 +377,7 @@ class Input extends Device {
         if (this.keyState == 1) {
             this.keyState++;
             this.setPosition(-1, -1);
-            this.time.setTimer(this.timerKbd, Input.BUTTON_DELAY);
+            this.time.setTimer(this.timerKeyRelease, Input.BUTTON_DELAY);
         } else {
             this.keyState = 0;
             if (this.keysPressed.length) {
@@ -600,7 +613,7 @@ class Input extends Device {
                  * a minimum amount of time (ie, BUTTON_DELAY).
                  */
                 if (fButton) {
-                    this.time.setTimer(this.timerRelease, Input.BUTTON_DELAY, true);
+                    this.time.setTimer(this.timerInputRelease, Input.BUTTON_DELAY, true);
                 }
             } else if (fPower && this.onPower) {
                 this.onPower();
@@ -618,7 +631,7 @@ class Input extends Device {
             /*
              * Don't immediately signal the release if the release timer is active (let the timer take care of it).
              */
-            if (!this.time.isTimerSet(this.timerRelease)) {
+            if (!this.time.isTimerSet(this.timerInputRelease)) {
                 this.setPosition(-1, -1);
             }
             this.xStart = this.yStart = -1;

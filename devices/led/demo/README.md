@@ -26,11 +26,12 @@ machines:
           "class": "Time",
           "cyclesPerSecond": 1,
           "cyclesMinimum": 1,
-          "cyclesMaximum": 10,
+          "cyclesMaximum": 1000,
           "bindings": {
             "run": "runLife",
             "speed": "speedLife",
-            "step": "stepLife"
+            "step": "stepLife",
+            "throttle": "throttleLife"
           },
           "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate"]
         },
@@ -58,6 +59,7 @@ styles:
     display: inline-block;
     float: left;
     margin-right: 32px;
+    margin-bottom: 16px;
   lifeDisplay:
     position: relative;
   .diagsLife:
@@ -79,7 +81,8 @@ Life Demo
     <textarea id="printLife" cols="78" rows="16"></textarea>
   </div>
   <button id="runLife">Run</button>
-  <button id="stepLife">Step</button><span id="speedLife">Stopped</span>
+  <button id="stepLife">Step</button>
   <button id="resetLife">Reset</button>
   <button id="clearLife">Clear</button>
+  <input type="range" min="1" max="1000" value="1" class="slider" id="throttleLife"><span id="speedLife">Stopped</span>
 </div>

@@ -51,7 +51,7 @@
  *
  * WARNING: If you need to set the 'cyclesPerSecond' TimeConfig property below 60Hz, then 1) you will have
  * to also set 'cyclesMinimum' to an equally low value, otherwise the default minimum will be used, and 2) any
- * timers configured to fire at a faster rate will be rate-limited; for example, if the machine is configured
+ * timers configured to fire at a faster rate will not be able to; for example, if the machine is configured
  * for 1Hz, then a 60Hz timer will only be able to fire at most 1Hz as well.  In practice, this shouldn't be an
  * issue, as long as the timer is firing at least as frequently as any other work being performed.
  *
@@ -133,19 +133,30 @@ class Time extends Device {
         this.aClockers = [];
         this.aTimers = [];
         this.aUpdaters = [];
-        this.fRunning = this.fYield = false;
+        this.fRunning = this.fYield = this.fThrottling = false;
         this.nStepping = 0;
         this.idRunTimeout = this.idStepTimeout = 0;
         this.onRunTimeout = this.run.bind(this);
 
         let time = this;
-        this.timerYield = this.addTimer("timerYield", function() {
+        this.timerYield = this.addTimer("timerYield", function onYield() {
             time.fYield = true;
             for (let i = 0; i < time.aAnimators.length; i++) {
                 time.aAnimators[i](time.nYields);
             }
-            time.nYields++;
-            if (time.nYields == time.nYieldsPerUpdate) {
+            let nYields = time.nYields;
+            let nCyclesPerSecond = time.getCycles();
+            if (nCyclesPerSecond >= time.nYieldsPerSecond) {
+                time.nYields++;
+            } else {
+                /*
+                 * Let's imagine that nCyclesPerSecond has dropped to 4, whereas the usual nYieldsPerSecond is 60;
+                 * that's means we're yielding at 1/15th the usual rate, so to compensate, we want to bump nYields
+                 * by 15 instead of 1.
+                 */
+                time.nYields += Math.ceil(time.nYieldsPerSecond / nCyclesPerSecond);
+            }
+            if (time.nYields >= time.nYieldsPerUpdate && nYields < time.nYieldsPerUpdate) {
                 time.updateStatus();
             }
             if (time.nYields >= time.nYieldsPerSecond) {
@@ -183,35 +194,34 @@ class Time extends Device {
         switch(binding) {
 
         case Time.BINDING.RUN:
-            this.bindings[binding] = element;
             element.onclick = function onClickRun() {
                 time.onRun();
             };
             break;
 
-        case Time.BINDING.SPEED:
-            this.bindings[binding] = element;
-            break;
-
-        case Time.BINDING.SETSPEED:
-            this.bindings[binding] = element;
-            element.onclick = function onClickSetSpeed() {
-                time.setSpeed(time.nTargetMultiplier << 1);
-            };
-            this.setBindingText(binding, this.getSpeedTarget());
-            break;
-
         case Time.BINDING.STEP:
-            this.bindings[binding] = element;
             element.onclick = function onClickStep() {
                 time.onStep();
             };
             break;
 
-        default:
-            super.addBinding(binding, element);
+        case Time.BINDING.THROTTLE:
+            let elementInput = /** @type {HTMLInputElement} */ (element);
+            elementInput.addEventListener("mousedown", function onThrottleStart() {
+                time.fThrottling = true;
+            });
+            elementInput.addEventListener("mouseup", function onThrottleStop() {
+                time.fThrottling = false;
+                time.setSpeedThrottle();
+            });
+            elementInput.addEventListener("mousemove", function onThrottleChange() {
+                if (time.fThrottling) {
+                    time.setSpeedThrottle();
+                }
+            });
             break;
         }
+        super.addBinding(binding, element);
     }
 
     /**
@@ -365,11 +375,13 @@ class Time extends Device {
     /**
      * getCycles(ms)
      *
+     * If no time period is specified, this returns the current number of cycles per second.
+     *
      * @this {Time}
-     * @param {number} ms
+     * @param {number} ms (default is 1000)
      * @returns {number} number of corresponding cycles
      */
-    getCycles(ms)
+    getCycles(ms = 1000)
     {
         return Math.ceil((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms);
     }
@@ -406,10 +418,15 @@ class Time extends Device {
     getSpeed(mhz)
     {
         let s;
-        if (mhz >= 0.01) {
+        if (mhz >= 1) {
             s = mhz.toFixed(2) + "Mhz";
         } else {
-            s = Math.round(mhz * 1000000) + "Hz";
+            let hz = Math.round(mhz * 1000000);
+            if (hz <= 999) {
+                s = hz + "Hz";
+            } else {
+                s = Math.ceil(mhz / 1000) + "Khz";
+            }
         }
         return s;
     }
@@ -568,6 +585,28 @@ class Time extends Device {
     }
 
     /**
+     * setSpeedThrottle()
+     *
+     * This handles speed adjustments requested by the throttling slider.
+     *
+     * @this {Time}
+     */
+    setSpeedThrottle()
+    {
+        /*
+         * We're not going to assume any direct relationship between the slider's min/max/value
+         * and our own nCyclesMinimum/nCyclesMaximum/nCyclesPerSecond.  We're just going to calculate
+         * a new target nCyclesPerSecond that is proportional, and then convert that to a speed multiplier.
+         */
+        let elementInput = this.bindings[Time.BINDING.THROTTLE];
+        let ratio = (elementInput.value - elementInput.min) / (elementInput.max - elementInput.min);
+        let nCycles = Math.floor((this.nCyclesMaximum - this.nCyclesMinimum) * ratio + this.nCyclesMinimum);
+        let nMultiplier = nCycles / this.nCyclesPerSecond;
+        this.assert(nMultiplier >= 1);
+        this.setSpeed(nMultiplier);
+    }
+
+    /**
      * setSpeed(nMultiplier)
      *
      * @this {Time}
@@ -585,7 +624,7 @@ class Time extends Device {
             /*
              * If we haven't reached 90% (0.9) of the current target speed, revert to the default multiplier.
              */
-            if (this.mhzCurrent > 0 && this.mhzCurrent < this.mhzTarget * 0.9) {
+            if (!this.fThrottling && this.mhzCurrent > 0 && this.mhzCurrent < this.mhzTarget * 0.9) {
                 nMultiplier = this.nBaseMultiplier;
                 fSuccess = false;
             }
@@ -594,7 +633,7 @@ class Time extends Device {
             let mhzTarget = this.mhzBase * this.nTargetMultiplier;
             if (this.mhzTarget != mhzTarget) {
                 this.mhzTarget = mhzTarget;
-                this.setBindingText(Time.BINDING.SETSPEED, this.getSpeedTarget());
+                this.setBindingText(Time.BINDING.SPEED, this.getSpeedTarget());
             }
         }
         this.nCyclesRun = 0;
@@ -793,7 +832,7 @@ class Time extends Device {
                 this.updateStatus();
                 if (this.nStepping) {
                     let time = this;
-                    this.idStepTimeout = setTimeout(function() {
+                    this.idStepTimeout = setTimeout(function onStepTimeout() {
                         time.step(0);
                     }, 0);
                     return true;
@@ -849,7 +888,9 @@ class Time extends Device {
 
         this.setBindingText(Time.BINDING.RUN, this.fRunning? "Halt" : "Run");
         this.setBindingText(Time.BINDING.STEP, this.nStepping? "Stop" : "Step");
-        this.setBindingText(Time.BINDING.SPEED, this.getSpeedCurrent());
+        if (!this.fThrottling) {
+            this.setBindingText(Time.BINDING.SPEED, this.getSpeedCurrent());
+        }
 
         for (let i = 0; i < this.aUpdaters.length; i++) {
             this.aUpdaters[i]();
@@ -886,9 +927,9 @@ class Time extends Device {
 
 Time.BINDING = {
     RUN:        "run",
-    SETSPEED:   "setSpeed",
     SPEED:      "speed",
-    STEP:       "step"
+    STEP:       "step",
+    THROTTLE:   "throttle"
 };
 
 Time.YIELDS_PER_SECOND = 60;
