@@ -25,8 +25,8 @@ machines:
         "lifeClock": {
           "class": "Time",
           "cyclesPerSecond": 1,
-          "cyclesMinimum": 100,
-          "cyclesMaximum": 1000,
+          "cyclesMinimum": 1,
+          "cyclesMaximum": 10,
           "bindings": {
             "run": "runLife",
             "speed": "speedLife",

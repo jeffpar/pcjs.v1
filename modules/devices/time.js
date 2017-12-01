@@ -115,7 +115,7 @@ class Time extends Device {
         this.nYieldsPerSecond = this.bounds(this.config['yieldsPerSecond'] || Time.YIELDS_PER_SECOND, 30, 120);
         this.nYieldsPerUpdate = this.bounds(this.config['yieldsPerUpdate'] || Time.YIELDS_PER_UPDATE, 1, this.nYieldsPerSecond);
         this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
-        this.mhzBase = Math.round(this.nCyclesPerSecond / 10000) / 100;
+        this.mhzBase = (this.nCyclesPerSecond / 10000) / 100;
         this.mhzCurrent = this.mhzTarget = this.mhzBase * this.nTargetMultiplier;
         this.nYields = 0;
         this.msYield = Math.round(1000 / this.nYieldsPerSecond);
@@ -265,7 +265,7 @@ class Time extends Device {
         if (!nMultiplier || nMultiplier > this.nTargetMultiplier) {
             nMultiplier = this.nTargetMultiplier;
         }
-        this.nCyclesPerYield = Math.floor(this.nCyclesPerSecond / this.nYieldsPerSecond * nMultiplier);
+        this.nCyclesPerYield = Math.ceil(this.nCyclesPerSecond / this.nYieldsPerSecond * nMultiplier);
         this.nCurrentMultiplier = nMultiplier;
     }
 
@@ -279,7 +279,7 @@ class Time extends Device {
     calcSpeed(nCycles, msElapsed)
     {
         if (msElapsed) {
-            this.mhzCurrent = Math.round(nCycles / (msElapsed * 10)) / 100;
+            this.mhzCurrent = (nCycles / (msElapsed * 10)) / 100;
         }
     }
 
@@ -356,7 +356,7 @@ class Time extends Device {
      */
     getCycles(ms)
     {
-        return ((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms)|0;
+        return Math.ceil((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms);
     }
 
     /**
@@ -382,36 +382,43 @@ class Time extends Device {
     }
 
     /**
-     * getSpeed()
+     * getSpeed(mhz)
      *
      * @this {Time}
-     * @returns {number} the current speed multiplier
+     * @param {number} mhz
+     * @returns {string} the given speed, as a formatted string
      */
-    getSpeed()
+    getSpeed(mhz)
     {
-        return this.nTargetMultiplier;
+        let s;
+        if (mhz >= 0.01) {
+            s = mhz.toFixed(2) + "Mhz";
+        } else {
+            s = Math.round(mhz * 1000000) + "Hz";
+        }
+        return s;
     }
 
     /**
      * getSpeedCurrent()
      *
      * @this {Time}
-     * @returns {string} the current speed, in mhz, as a string formatted to two decimal places
+     * @returns {string} the current speed, as a formatted string
      */
     getSpeedCurrent()
     {
-        return ((this.fRunning && this.mhzCurrent)? (this.mhzCurrent.toFixed(2) + "Mhz") : "Stopped");
+        return (this.fRunning && this.mhzCurrent)? this.getSpeed(this.mhzCurrent) : "Stopped";
     }
 
     /**
      * getSpeedTarget()
      *
      * @this {Time}
-     * @returns {string} the target speed, in mhz, as a string formatted to two decimal places
+     * @returns {string} the target speed, as a formatted string
      */
     getSpeedTarget()
     {
-        return this.mhzTarget.toFixed(2) + "Mhz";
+        return this.getSpeed(this.mhzTarget);
     }
 
     /**

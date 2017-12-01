@@ -105,8 +105,10 @@ class Chip extends Device {
     clocker(nCyclesTarget = 0)
     {
         this.nCyclesClocked = 0;
-        while (this.nCyclesClocked <= nCyclesTarget) {
-            this.nCyclesClocked += 1;
+        if (nCyclesTarget >= 0) {
+            do {
+                this.nCyclesClocked += 1;
+            } while (this.nCyclesClocked < nCyclesTarget);
         }
         return this.nCyclesClocked;
     }
