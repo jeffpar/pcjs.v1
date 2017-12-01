@@ -705,13 +705,10 @@ class Device {
             buffer += aParts[iPart];
 
             let arg = args[iArg++];
-            if (arg === undefined) continue;
-
             let flags = aParts[iPart+1];
             let minimum = +aParts[iPart+2] || 0;
             let precision = +aParts[iPart+4] || 0;
             let conversion = aParts[iPart+6];
-
             let ach = null, s;
 
             switch(conversion) {

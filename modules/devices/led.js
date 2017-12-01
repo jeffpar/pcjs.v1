@@ -186,7 +186,8 @@ class LED extends Device {
          * the first records the primary character (eg, a digit) and the second records the secondary
          * character, if any (eg, a decimal point).
          */
-        this.nBufferCells = this.rows * this.cols * 2;
+        this.nBufferInc = 2;
+        this.nBufferCells = this.rows * this.cols * this.nBufferInc;
         this.buffer = new Array(this.nBufferCells);
         this.bufferClone = null;
 
@@ -226,13 +227,13 @@ class LED extends Device {
     clearBuffer(fDraw)
     {
         let i = 0;
-        while (i < this.buffer.length) {
+        for (let i = 0; i < this.buffer.length; i += this.nBufferInc) {
             if (this.type < LED.TYPE.DIGIT) {
-                this.buffer[i++] = LED.STATE.OFF;
-                this.buffer[i++] = LED.STATE.DIRTY;
+                this.buffer[i] = LED.STATE.OFF;
+                this.buffer[i+1] = LED.STATE.DIRTY;
             } else {
-                this.buffer[i++] = ' ';
-                this.buffer[i++] = '';
+                this.buffer[i] = ' ';
+                this.buffer[i+1] = '';
             }
         }
         this.fBufferModified = this.fTickled = true;
@@ -290,10 +291,10 @@ class LED extends Device {
             if (this.type < LED.TYPE.DIGIT) {
                 this.drawGrid(fForced);
             } else {
-                let s = "", i = 0;
-                while (i < this.buffer.length) {
-                    s += this.buffer[i++] || ' ';
-                    s += this.buffer[i++] || '';
+                let s = "";
+                for (let i = 0; i < this.buffer.length; i += this.nBufferInc) {
+                    s += this.buffer[i] || ' ';
+                    s += this.buffer[i+1] || '';
                 }
                 this.drawString(s);
             }
@@ -329,7 +330,7 @@ class LED extends Device {
                     this.drawGridCell(state, col, row, fRecent);
                     this.buffer[i+1] = fRecent? LED.STATE.DIRTY : LED.STATE.CLEAN;
                 }
-                i += 2;
+                i += this.nBufferInc;
             }
         }
         this.drawView();
@@ -363,7 +364,7 @@ class LED extends Device {
         let coords = LED.SHAPES[this.type];
         if (coords.length == 3) {
             this.contextGrid.beginPath();
-            this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, Math.PI*2);
+            this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, Math.PI * 2);
             this.contextGrid.fill();
         } else {
             this.contextGrid.fillRect(coords[0] + xBias, coords[1] + yBias, coords[2], coords[3]);
@@ -389,7 +390,7 @@ class LED extends Device {
             this.contextGrid.fillStyle = this.color;
             this.contextGrid.beginPath();
             if (coords.length == 3) {
-                this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, Math.PI*2);
+                this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, Math.PI * 2);
             } else {
                 for (let i = 0; i < coords.length; i += 2) {
                     if (!i) {
@@ -506,7 +507,7 @@ class LED extends Device {
     getBufferData(col, row)
     {
         let d;
-        let i = (row * this.cols + col) * 2;
+        let i = (row * this.cols + col) * this.nBufferInc;
         this.assert(row >= 0 && row < this.rows && col >= 0 && col < this.cols);
         if (i >= 0 && i < this.buffer.length - 1) {
             d = this.buffer[i];
@@ -561,12 +562,12 @@ class LED extends Device {
     setBuffer(col, row, d1, d2 = LED.STATE.DIRTY)
     {
         let fModified = false;
-        let i = (row * this.cols + col) * 2;
+        let i = (row * this.cols + col) * this.nBufferInc;
         this.assert(row >= 0 && row < this.rows && col >= 0 && col < this.cols);
         if (i >= 0 && i < this.buffer.length - 1) {
-            if (this.buffer[i] !== d1 || this.buffer[i + 1] !== d2) {
+            if (this.buffer[i] !== d1 || this.buffer[i+1] !== d2) {
                 this.buffer[i] = d1;
-                this.buffer[i + 1] = d2;
+                this.buffer[i+1] = d2;
                 this.fBufferModified = fModified = true;
             }
             this.iBufferRecent = i;

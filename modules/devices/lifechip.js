@@ -120,17 +120,18 @@ class Chip extends Device {
         let bufferClone = this.ledArray.getBufferClone();
         let nCols = this.ledArray.cols;
         let nRows = this.ledArray.rows;
-        let nCellsPerRow = nCols * 2, nCells = nRows * nCellsPerRow;
+        let nInc = this.ledArray.nBufferInc;
+        let nCellsPerRow = nCols * nInc, nCells = nRows * nCellsPerRow;
 
         let iCell = 0;
         let iNO = iCell - nCellsPerRow;
-        let iNW = iNO - 2;
-        let iNE = iNO + 2;
-        let iWE = iCell - 2;
-        let iEA = iCell + 2;
+        let iNW = iNO - nInc;
+        let iNE = iNO + nInc;
+        let iWE = iCell - nInc;
+        let iEA = iCell + nInc;
         let iSO = iCell + nCellsPerRow;
-        let iSW = iSO - 2;
-        let iSE = iSO + 2;
+        let iSW = iSO - nInc;
+        let iSE = iSO + nInc;
 
         for (let row = 0; row < nRows; row++) {
             if (!row) {
@@ -173,13 +174,12 @@ class Chip extends Device {
                 } else if (nNeighbors != 2) {
                     state = LED.STATE.OFF;
                 }
-                if (bufferClone[iCell] !== state) {
-                    bufferClone[iCell] = state;
-                    bufferClone[iCell + 1] = LED.STATE.DIRTY;
-                }
-                iCell += 2; iNW += 2; iNO += 2; iNE += 2; iEA += 2; iSE += 2; iSO += 2; iSW += 2; iWE += 2;
+                bufferClone[iCell] = state;
+                bufferClone[iCell+1] = (buffer[iCell] !== state)? LED.STATE.DIRTY : buffer[iCell+1];
+                iCell += nInc; iNW += nInc; iNO += nInc; iNE += nInc; iEA += nInc; iSE += nInc; iSO += nInc; iSW += nInc; iWE += nInc;
             }
         }
+        this.assert(iCell == buffer.length);
         this.ledArray.swapBufferClone();
     }
 
