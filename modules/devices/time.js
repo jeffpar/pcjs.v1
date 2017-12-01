@@ -49,6 +49,12 @@
  * duration is fixed.  Also, certain types of updates may benefit from the subsequent yield (eg, DOM updates),
  * but you should avoid making expensive updates at such a high frequency.
  *
+ * WARNING: If you need to set the 'cyclesPerSecond' TimeConfig property below 60Hz, then 1) you will have
+ * to also set 'cyclesMinimum' to an equally low value, otherwise the default minimum will be used, and 2) any
+ * timers configured to fire at a faster rate will be rate-limited; for example, if the machine is configured
+ * for 1Hz, then a 60Hz timer will only be able to fire at most 1Hz as well.  In practice, this shouldn't be an
+ * issue, as long as the timer is firing at least as frequently as any other work being performed.
+ *
  * @typedef {Object} Timer
  * @property {string} id
  * @property {function()} callBack
@@ -62,7 +68,11 @@
  * @property {Object} [bindings]
  * @property {number} [version]
  * @property {Array.<string>} [overrides]
- * @property {number} cyclesPerSecond
+ * @property {number} [cyclesMinimum]
+ * @property {number} [cyclesMaximum]
+ * @property {number} [cyclesPerSecond]
+ * @property {number} [yieldsPerSecond]
+ * @property {number} [yieldsPerUpdate]
  */
 
 /**
@@ -102,7 +112,7 @@ class Time extends Device {
         super(idMachine, idDevice, Time.VERSION, config);
 
         /*
-         * NOTE: The default speed of 650,000Hz (0.65Mhz) is a crude approximation based on real
+         * NOTE: The default speed of 650,000Hz (0.65Mhz) was a crude approximation based on real
          * world TI-57 device timings.  I had originally assumed the speed as 1,600,000Hz (1.6Mhz),
          * based on timing information in TI's patents, but in hindsight, that speed seems rather
          * high for a mid-1970's device, and reality suggests it was much lower.  The TMS-1500 does
@@ -265,7 +275,12 @@ class Time extends Device {
         if (!nMultiplier || nMultiplier > this.nTargetMultiplier) {
             nMultiplier = this.nTargetMultiplier;
         }
-        this.nCyclesPerYield = Math.ceil(this.nCyclesPerSecond / this.nYieldsPerSecond * nMultiplier);
+        /*
+         * nCyclesPerYield is now allowed to be a fractional number, so that for machines configured
+         * to run at an extremely slow speed (eg, less than 60Hz), a fractional value here will signal
+         * to snapStop() that it should increase msYield to a proportionally higher value.
+         */
+        this.nCyclesPerYield = (this.nCyclesPerSecond / this.nYieldsPerSecond * nMultiplier);
         this.nCurrentMultiplier = nMultiplier;
     }
 

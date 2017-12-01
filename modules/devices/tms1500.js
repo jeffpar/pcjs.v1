@@ -412,7 +412,8 @@ class Chip extends Device {
 
         /*
          * The "Output Register" is twelve bit register, one bit for each digit of the display.  This essentially
-         * provides column information for the LED display, while the next register (regScanGen) provides row information.
+         * provides column information for the LED display, while the next register (regScanGen) provides row
+         * information.
          *
          * However, this is only necessary if we decide to simulate the internal operation of the Display Decoder
          * and Keyboard Scanner.
