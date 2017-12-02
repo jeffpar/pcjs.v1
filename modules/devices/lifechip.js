@@ -124,7 +124,8 @@ class Chip extends Device {
         let nCyclesClocked = 0;
         if (nCyclesTarget >= 0) {
             do {
-                this.doGeneration();
+                let nAlive = this.doGeneration();
+                if (!nCyclesTarget) this.println("living cells: " + nAlive);
                 nCyclesClocked += 1;
             } while (nCyclesClocked < nCyclesTarget);
         }
@@ -157,9 +158,11 @@ class Chip extends Device {
      * leave it as-is.
      *
      * @this {Chip}
+     * @returns {number}
      */
     doGeneration()
     {
+        let cAlive = 0;
         let buffer = this.ledArray.getBuffer();
         let bufferClone = this.ledArray.getBufferClone();
         let nCols = this.ledArray.cols;
@@ -230,6 +233,7 @@ class Chip extends Device {
                 bufferClone[iCell] = state;
                 bufferClone[iCell+1] = (buffer[iCell] !== state)? LED.STATE.DIRTY : buffer[iCell+1];
                 iCell += nInc; iNW += nInc; iNO += nInc; iNE += nInc; iEA += nInc; iSE += nInc; iSO += nInc; iSW += nInc; iWE += nInc;
+                if (state == LED.STATE.ON) cAlive++;
             }
             if (!this.fWrap) {
                 if (!row) {
@@ -245,6 +249,7 @@ class Chip extends Device {
         }
         this.assert(iCell == nIncPerGrid);
         this.ledArray.swapBufferClone();
+        return cAlive;
     }
 
     /**
