@@ -219,6 +219,11 @@ class Time extends Device {
                     time.setSpeedThrottle();
                 }
             });
+            elementInput.addEventListener("change", function onThrottleChange() {
+                time.fThrottling = true;
+                time.setSpeedThrottle();
+                time.fThrottling = false;
+            });
             break;
         }
         super.addBinding(binding, element);

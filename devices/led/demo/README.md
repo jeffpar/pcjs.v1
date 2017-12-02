@@ -41,7 +41,7 @@ machines:
           "class": "Time",
           "cyclesPerSecond": 1,
           "cyclesMinimum": 1,
-          "cyclesMaximum": 1000,
+          "cyclesMaximum": 120,
           "bindings": {
             "run": "runLife",
             "speed": "speedLife",
@@ -53,8 +53,6 @@ machines:
         "lifeDisplay": {
           "class": "LED",
           "type": 1,
-          "width": 32,
-          "height": 32,
           "cols": 38,
           "rows": 26,
           "color": "green",

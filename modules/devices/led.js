@@ -80,14 +80,14 @@
  * @unrestricted
  * @property {LEDConfig} config
  * @property {number} type (one of the LED.TYPE values)
- * @property {number} width (default is 96 for LED.TYPE.DIGIT; 8 otherwise)
- * @property {number} height (default is 128 for LED.TYPE.DIGIT; 8 otherwise)
+ * @property {number} width (default is 96 for LED.TYPE.DIGIT, 32 otherwise; see LED.SIZES)
+ * @property {number} height (default is 128 for LED.TYPE.DIGIT, 32 otherwise; see LED.SIZES)
  * @property {number} cols (default is 1)
  * @property {number} rows (default is 1)
  * @property {string} color (default is "red")
  * @property {string} backgroundColor (default is none; ie, transparent background)
  * @property {boolean} fixed (default is false, meaning the view may fill the container to its maximum size)
- * @property {boolean} persistent (default is false for LED.TYPE.DIGIT, meaning the view may be blanked if it hasn't been "tickled")
+ * @property {boolean} persistent (default is false for LED.TYPE.DIGIT, meaning the view will be blanked if not refreshed)
  * @property {number} widthView (computed)
  * @property {number} heightView (computed)
  * @property {number} widthGrid (computed)
@@ -145,9 +145,9 @@ class LED extends Device {
 
         this.canvasView = canvasView;
 
-        this.type = this.config['type'];
-        this.widthCell = (this.type == LED.TYPE.DIGIT? LED.DIGIT.WIDTH : 8);
-        this.heightCell = (this.type == LED.TYPE.DIGIT? LED.DIGIT.HEIGHT : 8);
+        this.type = this.bounds(this.config['type'] || LED.TYPE.ROUND, LED.TYPE.ROUND, LED.TYPE.DIGIT);
+        this.widthCell = LED.SIZES[this.type][0];
+        this.heightCell = LED.SIZES[this.type][1];
         this.width = this.config['width'] || this.widthCell;
         this.height = this.config['height'] || this.heightCell;
         this.cols = this.config['cols'] || 1;
@@ -198,9 +198,9 @@ class LED extends Device {
          * otherwise.
          *
          * fTickled is a flag which, under normal (idle) circumstances, will constantly be set to
-         * true by periodic DISP calls to setBuffer(); we clear it after every periodic drawBuffer(),
-         * so if the machine fails to execute a setBuffer() in a timely manner, we will see that
-         * fTickled hasn't been "tickled", and automatically blank the screen.
+         * true by periodic display operations that call setBuffer(); we clear it after every periodic
+         * drawBuffer(), so if the machine fails to execute a setBuffer() in a timely manner, we will
+         * see that fTickled hasn't been "tickled", and automatically blank the display.
          */
         this.fBufferModified = this.fTickled = false;
 
@@ -270,7 +270,7 @@ class LED extends Device {
      * This is our periodic (60Hz) redraw function; however, it can also be called synchronously
      * (eg, see clearBuffer()).  The other important periodic side-effect of this function is clearing
      * fTickled, so that if no other setBuffer() calls occur between now and the next drawBuffer(),
-     * an automatic clearBuffer() will be triggered.  This simulates the normal blanking of the screen
+     * an automatic clearBuffer() will be triggered.  This simulates the normal blanking of the display
      * whenever the machine performs lengthy calculations, because for the LED display to remain on,
      * the machine must perform a DISP operation at least 30-60 times per second.
      *
@@ -617,26 +617,6 @@ LED.BINDING = {
     CONTAINER:  "container"
 };
 
-LED.STATE = {
-    OFF:        0,
-    ON:         1,
-    CLEAN:      0,
-    DIRTY:      3
-};
-
-LED.SHAPES = {
-    [LED.TYPE.ROUND]:   [4, 4, 3],
-    [LED.TYPE.SQUARE]:  [1, 1, 6, 6]
-};
-
-/*
- * For LED.TYPE.DIGIT, each cell has the following width and height.
- */
-LED.DIGIT = {
-    WIDTH:      96,
-    HEIGHT:     128
-};
-
 LED.COLORS = {
     "aliceblue":            "#f0f8ff",
     "antiquewhite":         "#faebd7",
@@ -781,6 +761,25 @@ LED.COLORS = {
     "yellowgreen":          "#9acd32"
 };
 
+LED.STATE = {
+    OFF:        0,
+    ON:         1,
+    CLEAN:      0,
+    DIRTY:      3
+};
+
+LED.SHAPES = {
+    [LED.TYPE.ROUND]:   [16, 16, 14],
+    [LED.TYPE.SQUARE]:  [2, 2, 28, 28]
+};
+
+LED.SIZES = [
+    [],
+    [32,  32],          // LED.TYPE.ROUND
+    [32,  32],          // LED.TYPE.SQUARE
+    [96, 128]           // LED.TYPE.DIGIT
+];
+
 /*
  * The segments are arranged roughly as follows in a 96x128 grid:
  *
@@ -793,8 +792,9 @@ LED.COLORS = {
  *      DDDD P
  *
  * The following arrays specify pairs of moveTo()/lineTo() coordinates, used by drawGridSegment().  They all
- * assume the hard-coded LED.DIGIT.WIDTH and LED.DIGIT.HEIGHT specified above.  If there is a triplet instead of
- * one or more pairs (eg, the 'P' or period segment), then the coordinates are treated as arc() parameters.
+ * assume the hard-coded width and height in LED.SIZES[LED.TYPE.DIGIT] specified above.  If there is a triplet
+ * instead of one or more pairs (eg, the 'P' or period segment), then the coordinates are treated as arc()
+ * parameters.
  */
 LED.SEGMENT = {
     'A':        [30,   8,  79,   8,  67,  19,  37,  19],
