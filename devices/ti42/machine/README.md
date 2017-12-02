@@ -65,7 +65,7 @@ machines:
           "valueTotal": 2048,
           "littleEndian": true,
           "file": "tmc1502le.bin",
-          "reference": "",
+          "reference": "http://seanriddle.com/tmc1502.bin",
           "chipID": "TMC1502",
           "revision": "0",
           "overrides": ["colorROM","backgroundColorROM"],

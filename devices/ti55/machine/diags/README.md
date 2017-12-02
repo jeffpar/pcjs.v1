@@ -79,7 +79,7 @@ machines:
           "valueTotal": 2048,
           "littleEndian": true,
           "file": "tmc1503le.bin",
-          "reference": "",
+          "reference": "http://seanriddle.com/tmc1503.bin",
           "chipID": "TMC1503NL DD 8035",
           "revision": "0",
           "bindings": {
