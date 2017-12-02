@@ -182,12 +182,13 @@ class LED extends Device {
         }
 
         /*
-         * This records LED cell changes via setBuffer().  It contains two per elements per cell;
+         * This records LED cell changes via setBuffer().  It currently contains two per elements per cell;
          * the first records the primary character (eg, a digit) and the second records the secondary
-         * character, if any (eg, a decimal point).
+         * character, if any (eg, a decimal point).  It also contains an extra (scratch) row at the end, for
+         * devices like LifeChip.
          */
         this.nBufferInc = 2;
-        this.nBufferCells = this.rows * this.cols * this.nBufferInc;
+        this.nBufferCells = ((this.rows + 1) * this.cols) * this.nBufferInc;
         this.buffer = new Array(this.nBufferCells);
         this.bufferClone = null;
 
@@ -226,16 +227,7 @@ class LED extends Device {
      */
     clearBuffer(fDraw)
     {
-        let i = 0;
-        for (let i = 0; i < this.buffer.length; i += this.nBufferInc) {
-            if (this.type < LED.TYPE.DIGIT) {
-                this.buffer[i] = LED.STATE.OFF;
-                this.buffer[i+1] = LED.STATE.DIRTY;
-            } else {
-                this.buffer[i] = ' ';
-                this.buffer[i+1] = '';
-            }
-        }
+        this.initBuffer(this.buffer);
         this.fBufferModified = this.fTickled = true;
         if (fDraw) this.drawBuffer(true);
     }
@@ -493,7 +485,11 @@ class LED extends Device {
      */
     getBufferClone()
     {
-        return this.bufferClone || (this.bufferClone = new Array(this.nBufferCells));
+        if (!this.bufferClone) {
+            this.bufferClone = new Array(this.nBufferCells);
+            this.initBuffer(this.bufferClone);
+        }
+        return this.bufferClone;
     }
 
     /**
@@ -509,7 +505,7 @@ class LED extends Device {
         let d;
         let i = (row * this.cols + col) * this.nBufferInc;
         this.assert(row >= 0 && row < this.rows && col >= 0 && col < this.cols);
-        if (i >= 0 && i < this.buffer.length - 1) {
+        if (i >= 0 && i <= this.buffer.length - this.nBufferInc) {
             d = this.buffer[i];
         }
         return d;
@@ -548,6 +544,25 @@ class LED extends Device {
     }
 
     /**
+     * initBuffer(buffer)
+     *
+     * @this {LED}
+     * @param buffer
+     */
+    initBuffer(buffer)
+    {
+        for (let i = 0; i < buffer.length; i += this.nBufferInc) {
+            if (this.type < LED.TYPE.DIGIT) {
+                buffer[i] = LED.STATE.OFF;
+                buffer[i+1] = LED.STATE.DIRTY;
+            } else {
+                buffer[i] = ' ';
+                buffer[i+1] = '';
+            }
+        }
+    }
+
+    /**
      * setBuffer(col, row, d1, d2)
      *
      * For LED.TYPE.ROUND or LED.TYPE.SQUARE, the d1 parameter should generally be LED.STATE.OFF or LED.STATE.ON.
@@ -564,7 +579,7 @@ class LED extends Device {
         let fModified = false;
         let i = (row * this.cols + col) * this.nBufferInc;
         this.assert(row >= 0 && row < this.rows && col >= 0 && col < this.cols);
-        if (i >= 0 && i < this.buffer.length - 1) {
+        if (i >= 0 && i <= this.buffer.length - this.nBufferInc) {
             if (this.buffer[i] !== d1 || this.buffer[i+1] !== d2) {
                 this.buffer[i] = d1;
                 this.buffer[i+1] = d2;

@@ -47,6 +47,9 @@ class Chip extends Device {
     {
         super(idMachine, idDevice, Chip.VERSION, config);
 
+        this.fWrap = this.config['wrap'] || false;
+        this.sRule = this.config['rule'] || "B3/S23";   // default rule (births require 3 neighbors, survivors require 2 or 3)
+
         /*
          * Get access to the LED device, so we can update its display.
          */
@@ -91,6 +94,25 @@ class Chip extends Device {
     }
 
     /**
+     * addBinding(binding, element)
+     *
+     * @this {Input}
+     * @param {string} binding
+     * @param {HTMLElement} element
+     */
+    addBinding(binding, element)
+    {
+        let chip = this;
+        let patterns = this.config['patterns'];
+        if (patterns && patterns[binding]) {
+            element.onclick = function onClickPattern() {
+                chip.loadPattern(binding);
+            };
+        }
+        super.addBinding(binding, element);
+    }
+
+    /**
      * clocker(nCyclesTarget)
      *
      * @this {Chip}
@@ -124,6 +146,7 @@ class Chip extends Device {
         let nCellsPerRow = nCols * nInc, nCells = nRows * nCellsPerRow;
 
         let iCell = 0;
+        let iCellDummy = nCells;
         let iNO = iCell - nCellsPerRow;
         let iNW = iNO - nInc;
         let iNE = iNO + nInc;
@@ -135,36 +158,37 @@ class Chip extends Device {
 
         for (let row = 0; row < nRows; row++) {
             if (!row) {
-                iNW += nCells;
-                iNO += nCells;
-                iNE += nCells;
-            } else if (row == 1) {
-                iNW -= nCells;
-                iNO -= nCells;
-                iNE -= nCells;
+                if (!this.fWrap) {
+                    iNO = iNW = iNE = iCellDummy;
+                } else {
+                    iNO += nCells; iNW += nCells; iNE += nCells;
+                }
             } else if (row == nRows - 1) {
-                iSW -= nCells;
-                iSO -= nCells;
-                iSE -= nCells;
+                if (!this.fWrap) {
+                    iSO = iSW = iSE = iCellDummy;
+                } else {
+                    iSO -= nCells; iSW -= nCells; iSE -= nCells;
+                }
             }
-            for (let col = 0; col <= nCols; col++) {
+            for (let col = 0; col < nCols; col++) {
                 if (!col) {
-                    iNW += nCellsPerRow;
-                    iWE += nCellsPerRow;
-                    iSW += nCellsPerRow;
+                    if (!this.fWrap) {
+                        iWE = iNW = iSW = iCellDummy;
+                    } else {
+                        iWE += nCellsPerRow; iNW += nCellsPerRow; iSW += nCellsPerRow;
+                    }
                 } else if (col == 1) {
-                    iNW -= nCellsPerRow;
-                    iWE -= nCellsPerRow;
-                    iSW -= nCellsPerRow;
+                    if (!this.fWrap) {
+                        iWE = iCell - nInc; iNW = iNO - nInc; iSW = iSO - nInc;
+                    } else {
+                        iWE -= nCellsPerRow; iNW -= nCellsPerRow; iSW -= nCellsPerRow;
+                    }
                 } else if (col == nCols - 1) {
-                    iNE -= nCellsPerRow;
-                    iEA -= nCellsPerRow;
-                    iSE -= nCellsPerRow;
-                } else if (col == nCols) {
-                    iNE += nCellsPerRow;
-                    iEA += nCellsPerRow;
-                    iSE += nCellsPerRow;
-                    break;
+                    if (!this.fWrap) {
+                        iEA = iNE = iSE = iCellDummy;
+                    } else {
+                        iEA -= nCellsPerRow; iNE -= nCellsPerRow; iSE -= nCellsPerRow;
+                    }
                 }
                 let state = buffer[iCell];
                 let nNeighbors = buffer[iNW]+buffer[iNO]+buffer[iNE]+buffer[iEA]+buffer[iSE]+buffer[iSO]+buffer[iSW]+buffer[iWE];
@@ -178,9 +202,95 @@ class Chip extends Device {
                 bufferClone[iCell+1] = (buffer[iCell] !== state)? LED.STATE.DIRTY : buffer[iCell+1];
                 iCell += nInc; iNW += nInc; iNO += nInc; iNE += nInc; iEA += nInc; iSE += nInc; iSO += nInc; iSW += nInc; iWE += nInc;
             }
+            if (!this.fWrap) {
+                if (!row) {
+                    iNO = iCell - nCellsPerRow; iNW = iNO - nInc; iNE = iNO + nInc;
+                }
+                iEA = iCell + nInc; iNE = iNO + nInc; iSE = iSO + nInc;
+            } else {
+                if (!row) {
+                    iNO -= nCells; iNW -= nCells; iNE -= nCells;
+                }
+                iEA += nCellsPerRow; iNE += nCellsPerRow; iSE += nCellsPerRow;
+            }
         }
-        this.assert(iCell == buffer.length);
+        this.assert(iCell == nCells);
         this.ledArray.swapBufferClone();
+    }
+
+    /**
+     * loadPattern(id)
+     *
+     * @this {Chip}
+     * @param {string} id
+     */
+    loadPattern(id)
+    {
+        let ledArray = this.ledArray;
+        let patterns = this.config['patterns'];
+        let lines = patterns && patterns[id];
+        if (!lines) {
+            this.println("unknown pattern: " + id);
+            return;
+        }
+        let nCmds = 0;
+        let width = 0, height = 0, rule = "", sPattern = "";
+        ledArray.clearBuffer();
+        for (let i = 0; i < lines.length; i++) {
+            let sLine = lines[i];
+            this.println(sLine);
+            if (sLine[0] == '#') continue;
+            if (!nCmds++) {
+                let match = sLine.match(/x\s*=\s*([0-9]+)\s*,\s*y\s*=\s*([0-9]+)\s*(?:,\s*rule\s*=\s*(\S+)|)/i);
+                if (!match) {
+                    this.println("unrecognized header line");
+                    return;
+                }
+                width = +match[1];
+                height = +match[2];
+                rule = match[3];
+                if (rule != this.sRule) {
+                    this.println("unsupported rule: " + rule);
+                    return;
+                }
+                continue;
+            }
+            let end = sLine.indexOf('!');
+            if (end >= 0) {
+                sPattern += sLine.substr(0, end);
+                break;
+            }
+            sPattern += sLine;
+        }
+        if (width > ledArray.cols || height > ledArray.rows) {
+            this.printf("pattern too large (%d,%d)\n", width, height);
+            return;
+        }
+        let iCol = (ledArray.cols - width) >> 1;
+        let iRow = (ledArray.rows - height) >> 1;
+        let aTokens = sPattern.split(/([bo$])/);
+        let i = 0, col = iCol, row = iRow;
+        while (i < aTokens.length - 1) {
+            let count = aTokens[i++];
+            if (count === "") count = 1;
+            let token = aTokens[i++];
+            // this.println("token('" + count + "','" + token + "')");
+            while (count--) {
+                switch(token) {
+                case '$':
+                    col = iCol;
+                    row++;
+                    break;
+                case 'b':
+                    ledArray.setBuffer(col++, row, LED.STATE.OFF);
+                    break;
+                case 'o':
+                    ledArray.setBuffer(col++, row, LED.STATE.ON);
+                    break;
+                }
+            }
+        }
+        ledArray.drawBuffer();
     }
 
     /**
