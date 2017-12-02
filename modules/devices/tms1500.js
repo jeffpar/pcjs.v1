@@ -412,7 +412,8 @@ class Chip extends Device {
 
         /*
          * The "Output Register" is twelve bit register, one bit for each digit of the display.  This essentially
-         * provides column information for the LED display, while the next register (regSGC) provides row information.
+         * provides column information for the LED display, while the next register (regScanGen) provides row
+         * information.
          *
          * However, this is only necessary if we decide to simulate the internal operation of the Display Decoder
          * and Keyboard Scanner.
@@ -500,8 +501,8 @@ class Chip extends Device {
         this.stack = [-1, -1, -1];
 
         /*
-         * This internal cycle count is initialized on every clocker() invocation, enabling opcode
-         * functions that need to consume a few extra cycles to bump this count upward as needed.
+         * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions that
+         * need to consume a few extra cycles to bump this count upward as needed.
          */
         this.nCyclesClocked = 0;
 
@@ -509,7 +510,8 @@ class Chip extends Device {
          * Get access to the Input device, so we can add our click functions.
          */
         this.input = /** @type {Input} */ (this.findDevice(this.config['input']));
-        this.input.addClick(this.onKey.bind(this), this.onPower.bind(this), this.onReset.bind(this));
+        this.input.addInput(this.onInput.bind(this));
+        this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
 
         /*
          * Get access to the LED device, so we can update its display.
@@ -517,7 +519,7 @@ class Chip extends Device {
         this.led = /** @type {LED} */ (this.findDevice(this.config['output']));
 
         /*
-         * Get access to the ROM device.
+         * Get access to the ROM device, so we can give it access to functions like disassemble().
          */
         this.rom = /** @type {ROM} */ (this.findDeviceByClass(Machine.CLASS.ROM));
         if (this.rom) this.rom.setChip(this);
@@ -536,7 +538,7 @@ class Chip extends Device {
          * the state of the external indicator.  They are initially undefined and will be updated
          * by updateIndicators() whenever the internal and external states differ.
          */
-        this.f2nd = this.fINV = this.modeAngle = undefined;
+        this.f2nd = this.fINV = this.angleMode = undefined;
 
         /*
          * The following set of properties are all debugger-related; see onCommand().
@@ -604,7 +606,7 @@ class Chip extends Device {
      * an example of an operation that imposes additional cycle overhead.
      *
      * @this {Chip}
-     * @param {number} nCyclesTarget (0 to single-step, -1 to display status only)
+     * @param {number} nCyclesTarget (0 to single-step)
      * @returns {number} (number of cycles actually "clocked")
      */
     clocker(nCyclesTarget = 0)
@@ -633,7 +635,7 @@ class Chip extends Device {
         }
         if (nCyclesTarget <= 0) {
             let chip = this;
-            this.time.doOutside(function() {
+            this.time.doOutside(function clockerOutside() {
                 chip.rom.drawArray();
                 chip.println(chip.toString());
             });
@@ -1050,8 +1052,8 @@ class Chip extends Device {
         if (state) {
             let stateChip = state.stateChip;
             let version = stateChip.shift();
-            if (version !== Chip.VERSION) {
-                this.printf("Chip state version mismatch: %3.2f\n", version);
+            if ((version|0) !== (Chip.VERSION|0)) {
+                this.printf("Saved state version mismatch: %3.2f\n", version);
                 return;
             }
             try {
@@ -1136,7 +1138,7 @@ class Chip extends Device {
         case 't':
             if (s[1] == 'c') this.nStringFormat = Chip.SFORMAT.COMPACT;
             nWords = Number.parseInt(aCommands[1], 10) || 1;
-            this.time.toggleStep(nWords);
+            this.time.onStep(nWords);
             this.sCommandPrev = sCommand;
             break;
         case 'r':
@@ -1170,7 +1172,7 @@ class Chip extends Device {
     }
 
     /**
-     * onKey(col, row)
+     * onInput(col, row)
      *
      * Called by the Input device to provide notification of key presses and releases.
      *
@@ -1182,7 +1184,7 @@ class Chip extends Device {
      * @param {number} col
      * @param {number} row
      */
-    onKey(col, row)
+    onInput(col, row)
     {
         let b = 0;
         if (col >= 0 && row >= 0) {
@@ -1195,7 +1197,11 @@ class Chip extends Device {
     /**
      * onPower(fOn)
      *
-     * Called by the Input device to provide notification of a power event.
+     * Automatically called by the Machine device after all other devices have been powered up (eg, after
+     * a page load event), as well as when all devices are being powered down (eg, before a page unload event).
+     *
+     * May subsequently be called by the Input device to provide notification of a user-initiated power event
+     * (eg, toggling a power button); in this case, fOn should NOT be set, so that no state is loaded or saved.
      *
      * @this {Chip}
      * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
@@ -1209,17 +1215,13 @@ class Chip extends Device {
             this.loadState(this.loadLocalStorage());
         }
         if (fOn == undefined) {
-            fOn = !this.time.fRunning;
+            fOn = !this.time.isRunning();
             if (fOn) this.regPC = 0;
         }
         if (fOn) {
-            if (!this.time.fRunning) {
-                this.time.start();
-            }
+            this.time.start();
         } else {
-            if (this.time.fRunning) {
-                this.time.stop();
-            }
+            this.time.stop();
             this.clearDisplays();
         }
     }
@@ -1236,7 +1238,7 @@ class Chip extends Device {
         this.println("reset");
         this.regPC = 0;
         this.clearDisplays();
-        if (!this.time.fRunning) {
+        if (!this.time.isRunning()) {
             this.status();
         }
     }
@@ -1407,6 +1409,7 @@ class Chip extends Device {
     /**
      * setRegister(name, value)
      *
+     * @this {Chip}
      * @param {string} name
      * @param {number} value
      */
@@ -1454,8 +1457,8 @@ class Chip extends Device {
             for (let i = 0, n = this.regsO.length; i < n; i++) {
                 s += this.regsO[i].toString() + ' ';
             }
-            s += '\n';
-            s += "  COND=" + (this.fCOND? 1 : 0);
+            s += "\n ";
+            s += " COND=" + (this.fCOND? 1 : 0);
             s += " BASE=" + this.base;
             s += " R5=" + this.sprintf("%02X", this.regR5);
             s += " RAB=" + this.regRAB + " ST=";
@@ -1522,7 +1525,7 @@ class Chip extends Device {
      *      "Rad"   C[15] == 0x1
      *      "Grad"  C[15] == 0x2
      *
-     * If this is the first time any of the indicator properties (ie, f2nd, fINV, or modeAngle) have been initialized,
+     * If this is the first time any of the indicator properties (ie, f2nd, fINV, or angleMode) have been initialized,
      * we will also propagate the LED display color (this.led.color) to the indicator's color, so that the colors of all
      * the elements overlaid on the display match.
      *
@@ -1530,7 +1533,7 @@ class Chip extends Device {
      * ROMs are closely tied to their respective chips, I'm going to cheat and just check the chip type.
      *
      * @this {Chip}
-     * @param {boolean} [on] (default is true, allowing all active indicators to be displayed; set to false to force all indicators off)
+     * @param {boolean} [on] (default is true, to display all active indicators; set to false to force all indicators off)
      */
     updateIndicators(on = true)
     {
@@ -1551,33 +1554,38 @@ class Chip extends Device {
             }
             this.fINV = fINV;
         }
-        let modeAngle = (this.type == Chip.TYPE.TMS1501? (this.regsX[4].digits[15] >> 2) : this.regC.digits[15]);
-        modeAngle = on? ((!modeAngle)? 1 : (modeAngle == 1)? 2 : 3) : 0;
-        if (this.modeAngle !== modeAngle) {
+        let angleBits = (this.type == Chip.TYPE.TMS1501? (this.regsX[4].digits[15] >> 2) : this.regC.digits[15]);
+        let angleMode = on? ((!angleBits)? Chip.ANGLEMODE.DEGREES : (angleBits == 1)? Chip.ANGLEMODE.RADIANS : Chip.ANGLEMODE.GRADIENTS) : Chip.ANGLEMODE.OFF;
+        if (this.angleMode !== angleMode) {
             if (element = this.bindings['Deg']) {
-                element.style.opacity = (modeAngle == 1)? "1" : "0";
-                if (this.modeAngle === undefined && this.led) element.style.color = this.led.color;
+                element.style.opacity = (angleMode == Chip.ANGLEMODE.DEGREES)? "1" : "0";
+                if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
             if (element = this.bindings['Rad']) {
-                element.style.opacity = (modeAngle == 2)? "1" : "0";
-                if (this.modeAngle === undefined && this.led) element.style.color = this.led.color;
+                element.style.opacity = (angleMode == Chip.ANGLEMODE.RADIANS)? "1" : "0";
+                if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
             if (element = this.bindings['Grad']) {
-                element.style.opacity = (modeAngle == 3)? "1" : "0";
-                if (this.modeAngle === undefined && this.led) element.style.color = this.led.color;
+                element.style.opacity = (angleMode == Chip.ANGLEMODE.GRADIENTS)? "1" : "0";
+                if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
-            this.modeAngle = modeAngle;
+            this.angleMode = angleMode;
         }
     }
 
     /**
-     * updateStatus()
+     * updateStatus(fTransition)
      *
      * Enumerate all bindings and update their values.
      *
+     * Called by Time's updateStatus() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
+     * single-stepped), and 3) a start() or stop() transition has occurred.
+     *
      * @this {Chip}
+     * @param {boolean} [fTransition]
      */
-    updateStatus()
+    updateStatus(fTransition)
     {
         for (let binding in this.bindings) {
             let regMap = this.regMap[binding];
@@ -1592,6 +1600,10 @@ class Chip extends Device {
                 }
                 this.setBindingText(binding, sValue);
             }
+        }
+        if (fTransition && !this.time.isRunning()) {
+            this.rom.drawArray();
+            this.println(this.toString());
         }
     }
 }
@@ -1687,8 +1699,16 @@ Chip.OP = {
 };
 
 Chip.TYPE = {
-    TMS1501:    1501,
-    TMS1503:    1503
+    TMS1501:    1501,       // aka TI-57
+    TMS1502:    1502,       // aka TI-42 ("MBA")
+    TMS1503:    1503        // aka TI-55
+};
+
+Chip.ANGLEMODE = {
+    OFF:        0,
+    DEGREES:    1,
+    RADIANS:    2,
+    GRADIENTS:  3
 };
 
 Chip.BREAK = {
@@ -1717,4 +1737,4 @@ Chip.COMMANDS = [
     "u [addr] [n]\tdisassemble (at addr)"
 ];
 
-Chip.VERSION    = 1.03;
+Chip.VERSION    = 1.10;

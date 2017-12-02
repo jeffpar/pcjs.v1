@@ -29,20 +29,20 @@
 "use strict";
 
 /**
- * @typedef {Object} LEDConfig
+ * @typedef {Config} LEDConfig
  * @property {string} class
  * @property {Object} [bindings]
  * @property {number} [version]
  * @property {Array.<string>} [overrides]
  * @property {number} type
- * @property {number} width
- * @property {number} height
- * @property {number} cols
- * @property {number} rows
- * @property {string} color
- * @property {string} backgroundColor
- * @property {boolean} fixed
- * @property {boolean} persistent
+ * @property {number} [width]
+ * @property {number} [height]
+ * @property {number} [cols]
+ * @property {number} [rows]
+ * @property {string} [color]
+ * @property {string} [backgroundColor]
+ * @property {boolean} [fixed]
+ * @property {boolean} [persistent]
  */
 
 /**
@@ -80,14 +80,14 @@
  * @unrestricted
  * @property {LEDConfig} config
  * @property {number} type (one of the LED.TYPE values)
- * @property {number} width (default is 96)
- * @property {number} height (default is 128)
+ * @property {number} width (default is 96 for LED.TYPE.DIGIT, 32 otherwise; see LED.SIZES)
+ * @property {number} height (default is 128 for LED.TYPE.DIGIT, 32 otherwise; see LED.SIZES)
  * @property {number} cols (default is 1)
  * @property {number} rows (default is 1)
  * @property {string} color (default is "red")
  * @property {string} backgroundColor (default is none; ie, transparent background)
  * @property {boolean} fixed (default is false, meaning the view may fill the container to its maximum size)
- * @property {boolean} persistent (default is false, meaning the view may be blanked if it hasn't been refreshed)
+ * @property {boolean} persistent (default is false for LED.TYPE.DIGIT, meaning the view will be blanked if not refreshed)
  * @property {number} widthView (computed)
  * @property {number} heightView (computed)
  * @property {number} widthGrid (computed)
@@ -100,6 +100,7 @@
  *  container: HTMLElement|undefined
  * }} bindings
  * @property {Array.<string|number>} buffer
+ * @property {Array.<string|number>|null} bufferClone
  * @property {boolean} fBufferModified
  * @property {boolean} fTickled
  */
@@ -136,7 +137,7 @@ class LED extends Device {
         }
 
         let canvasView = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
-        if (canvasView == undefined || !canvasView.getContext) {
+        if (!canvasView || !canvasView.getContext) {
             let sError = "LED device requires HTML5 canvas support";
             container.innerHTML = sError;
             throw new Error(sError);
@@ -144,9 +145,9 @@ class LED extends Device {
 
         this.canvasView = canvasView;
 
-        this.type = this.config['type'];
-        this.widthCell = (this.type == LED.TYPE.DIGIT? LED.DIGIT.WIDTH : 8);
-        this.heightCell = (this.type == LED.TYPE.DIGIT? LED.DIGIT.HEIGHT : 8);
+        this.type = this.bounds(this.config['type'] || LED.TYPE.ROUND, LED.TYPE.ROUND, LED.TYPE.DIGIT);
+        this.widthCell = LED.SIZES[this.type][0];
+        this.heightCell = LED.SIZES[this.type][1];
         this.width = this.config['width'] || this.widthCell;
         this.height = this.config['height'] || this.heightCell;
         this.cols = this.config['cols'] || 1;
@@ -158,10 +159,27 @@ class LED extends Device {
         this.colorBright = this.getRGBAColor(this.color, 1.0, 2.0);
         this.backgroundColor = this.config['backgroundColor'];
 
+        /*
+         * We generally want our view canvas to be "responsive", not "fixed" (ie, to automatically be resized
+         * with changes to the overall window size), in which case we apply the following style attributes
+         * (formerly applied with the "pcjs-canvas" style in /modules/shared/templates/components.css):
+         *
+         *      width: 100%;
+         *      height: auto;
+         *
+         * But, if you really don't want those style attributes, then set the LED config's "fixed" property to true.
+         */
         if (!this.config['fixed']) {
-            canvasView.setAttribute("class", "pcjs-canvas");
+            canvasView.style.width = "100%";
+            canvasView.style.height = "auto";
         }
-        this.fPersistent = !!this.config['persistent'];
+
+        /*
+         * Persistent LEDS are the default, except for LED.TYPE.DIGIT, which is generally used with calculator displays
+         * and whose underlying hardware is required to constantly "refresh" the LEDs, otherwise they go dark.
+         */
+        this.fPersistent = this.config['persistent'];
+        if (this.fPersistent == undefined) this.fPersistent = (this.type < LED.TYPE.DIGIT);
 
         canvasView.setAttribute("width", this.widthView.toString());
         canvasView.setAttribute("height", this.heightView.toString());
@@ -180,11 +198,15 @@ class LED extends Device {
         }
 
         /*
-         * This records LED cell changes via setBuffer().  It contains two per elements per cell;
+         * This records LED cell changes via setBuffer().  It currently contains two per elements per cell;
          * the first records the primary character (eg, a digit) and the second records the secondary
-         * character, if any (eg, a decimal point).
+         * character, if any (eg, a decimal point).  It also contains an extra (scratch) row at the end, for
+         * devices like LifeChip.
          */
-        this.buffer = new Array(this.rows * this.cols * 2);
+        this.nBufferInc = 2;
+        this.nBufferCells = ((this.rows + 1) * this.cols) * this.nBufferInc;
+        this.buffer = new Array(this.nBufferCells);
+        this.bufferClone = null;
 
         /*
          * fBufferModified is straightforward: set to true by any setBuffer() call that actually
@@ -192,9 +214,9 @@ class LED extends Device {
          * otherwise.
          *
          * fTickled is a flag which, under normal (idle) circumstances, will constantly be set to
-         * true by periodic DISP calls to setBuffer(); we clear it after every periodic drawBuffer(),
-         * so if the machine fails to execute a setBuffer() in a timely manner, we will see that
-         * fTickled hasn't been "tickled", and automatically blank the screen.
+         * true by periodic display operations that call setBuffer(); we clear it after every periodic
+         * drawBuffer(), so if the machine fails to execute a setBuffer() in a timely manner, we will
+         * see that fTickled hasn't been "tickled", and automatically blank the display.
          */
         this.fBufferModified = this.fTickled = false;
 
@@ -207,7 +229,7 @@ class LED extends Device {
         let led = this;
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
-            this.time.addAnimator(function(iAnimation) {
+            this.time.addAnimator(function ledAnimate(iAnimation) {
                 led.drawBuffer();
             });
         }
@@ -221,16 +243,7 @@ class LED extends Device {
      */
     clearBuffer(fDraw)
     {
-        let i = 0;
-        while (i < this.buffer.length) {
-            if (this.type < LED.TYPE.DIGIT) {
-                this.buffer[i++] = LED.STATE.OFF;
-                this.buffer[i++] = LED.STATE.DIRTY;
-            } else {
-                this.buffer[i++] = ' ';
-                this.buffer[i++] = '';
-            }
-        }
+        this.initBuffer(this.buffer);
         this.fBufferModified = this.fTickled = true;
         if (fDraw) this.drawBuffer(true);
     }
@@ -273,7 +286,7 @@ class LED extends Device {
      * This is our periodic (60Hz) redraw function; however, it can also be called synchronously
      * (eg, see clearBuffer()).  The other important periodic side-effect of this function is clearing
      * fTickled, so that if no other setBuffer() calls occur between now and the next drawBuffer(),
-     * an automatic clearBuffer() will be triggered.  This simulates the normal blanking of the screen
+     * an automatic clearBuffer() will be triggered.  This simulates the normal blanking of the display
      * whenever the machine performs lengthy calculations, because for the LED display to remain on,
      * the machine must perform a DISP operation at least 30-60 times per second.
      *
@@ -286,10 +299,10 @@ class LED extends Device {
             if (this.type < LED.TYPE.DIGIT) {
                 this.drawGrid(fForced);
             } else {
-                let s = "", i = 0;
-                while (i < this.buffer.length) {
-                    s += this.buffer[i++] || ' ';
-                    s += this.buffer[i++] || '';
+                let s = "";
+                for (let i = 0; i < this.buffer.length; i += this.nBufferInc) {
+                    s += this.buffer[i] || ' ';
+                    s += this.buffer[i+1] || '';
                 }
                 this.drawString(s);
             }
@@ -325,7 +338,7 @@ class LED extends Device {
                     this.drawGridCell(state, col, row, fRecent);
                     this.buffer[i+1] = fRecent? LED.STATE.DIRTY : LED.STATE.CLEAN;
                 }
-                i += 2;
+                i += this.nBufferInc;
             }
         }
         this.drawView();
@@ -359,7 +372,7 @@ class LED extends Device {
         let coords = LED.SHAPES[this.type];
         if (coords.length == 3) {
             this.contextGrid.beginPath();
-            this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, Math.PI*2);
+            this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, Math.PI * 2);
             this.contextGrid.fill();
         } else {
             this.contextGrid.fillRect(coords[0] + xBias, coords[1] + yBias, coords[2], coords[3]);
@@ -385,7 +398,7 @@ class LED extends Device {
             this.contextGrid.fillStyle = this.color;
             this.contextGrid.beginPath();
             if (coords.length == 3) {
-                this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, Math.PI*2);
+                this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, Math.PI * 2);
             } else {
                 for (let i = 0; i < coords.length; i += 2) {
                     if (!i) {
@@ -470,6 +483,51 @@ class LED extends Device {
     }
 
     /**
+     * getBuffer()
+     *
+     * @this {LED}
+     * @returns {Array}
+     */
+    getBuffer()
+    {
+        return this.buffer;
+    }
+
+    /**
+     * getBufferClone()
+     *
+     * @this {LED}
+     * @returns {Array}
+     */
+    getBufferClone()
+    {
+        if (!this.bufferClone) {
+            this.bufferClone = new Array(this.nBufferCells);
+            this.initBuffer(this.bufferClone);
+        }
+        return this.bufferClone;
+    }
+
+    /**
+     * getBufferData(col, row)
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @returns {number}
+     */
+    getBufferData(col, row)
+    {
+        let d;
+        let i = (row * this.cols + col) * this.nBufferInc;
+        this.assert(row >= 0 && row < this.rows && col >= 0 && col < this.cols);
+        if (i >= 0 && i <= this.buffer.length - this.nBufferInc) {
+            d = this.buffer[i];
+        }
+        return d;
+    }
+
+    /**
      * getRGBAColor(sColor, alpha, brightness)
      *
      * Returns a color string in the "rgba" format that fillStyle recognizes (eg, "rgba(255, 255, 255, 0)").
@@ -479,6 +537,7 @@ class LED extends Device {
      * the target alpha values will be added instead of replaced, resulting in progressively brighter shapes;
      * probably not what you want.
      *
+     * @this {LED}
      * @param {string} sColor
      * @param {number} [alpha]
      * @param {number} [brightness]
@@ -501,28 +560,66 @@ class LED extends Device {
     }
 
     /**
+     * initBuffer(buffer)
+     *
+     * @this {LED}
+     * @param buffer
+     */
+    initBuffer(buffer)
+    {
+        for (let i = 0; i < buffer.length; i += this.nBufferInc) {
+            if (this.type < LED.TYPE.DIGIT) {
+                buffer[i] = LED.STATE.OFF;
+                buffer[i+1] = LED.STATE.DIRTY;
+            } else {
+                buffer[i] = ' ';
+                buffer[i+1] = '';
+            }
+        }
+    }
+
+    /**
      * setBuffer(col, row, d1, d2)
+     *
+     * For LED.TYPE.ROUND or LED.TYPE.SQUARE, the d1 parameter should generally be LED.STATE.OFF or LED.STATE.ON.
      *
      * @this {LED}
      * @param {number} col
      * @param {number} row
      * @param {string|number} d1
      * @param {string|number} [d2]
-     * @returns {boolean} (true if this call modified the buffer, false if not)
+     * @returns {boolean|null} (true if this call modified the buffer, false if not, null if error)
      */
     setBuffer(col, row, d1, d2 = LED.STATE.DIRTY)
     {
         let fModified = false;
-        let i = (row * this.cols + col) * 2;
-        this.assert(row >= 0 && row < this.rows && col >= 0 && col < this.cols);
-        if (this.buffer[i] !== d1 || this.buffer[i+1] !== d2) {
-            this.buffer[i] = d1;
-            this.buffer[i+1] = d2;
-            this.fBufferModified = fModified = true;
+        if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
+            let i = (row * this.cols + col) * this.nBufferInc;
+            if (this.buffer[i] !== d1 || this.buffer[i+1] !== d2) {
+                this.buffer[i] = d1;
+                this.buffer[i+1] = d2;
+                this.fBufferModified = fModified = true;
+            }
+            this.iBufferRecent = i;
+            this.fTickled = true;
+        } else {
+            this.assert(false);         // almost no one's looking at these return values, so let's assert as well
+            fModified = null;
         }
-        this.iBufferRecent = i;
-        this.fTickled = true;
         return fModified;
+    }
+
+    /**
+     * swapBufferClone()
+     *
+     * @this {LED}
+     */
+    swapBufferClone()
+    {
+        let buffer = this.buffer;
+        this.buffer = this.bufferClone;
+        this.bufferClone = buffer;
+        this.fBufferModified = true;
     }
 }
 
@@ -534,26 +631,6 @@ LED.TYPE = {
 
 LED.BINDING = {
     CONTAINER:  "container"
-};
-
-LED.STATE = {
-    OFF:        0,
-    ON:         1,
-    CLEAN:      0,
-    DIRTY:      3
-};
-
-LED.SHAPES = {
-    [LED.TYPE.ROUND]:   [4, 4, 3],
-    [LED.TYPE.SQUARE]:  [1, 1, 6, 6]
-};
-
-/*
- * For LED.TYPE.DIGIT, each cell has the following width and height.
- */
-LED.DIGIT = {
-    WIDTH:      96,
-    HEIGHT:     128
 };
 
 LED.COLORS = {
@@ -700,6 +777,25 @@ LED.COLORS = {
     "yellowgreen":          "#9acd32"
 };
 
+LED.STATE = {
+    OFF:        0,
+    ON:         1,
+    CLEAN:      0,
+    DIRTY:      3
+};
+
+LED.SHAPES = {
+    [LED.TYPE.ROUND]:   [16, 16, 14],
+    [LED.TYPE.SQUARE]:  [2, 2, 28, 28]
+};
+
+LED.SIZES = [
+    [],
+    [32,  32],          // LED.TYPE.ROUND
+    [32,  32],          // LED.TYPE.SQUARE
+    [96, 128]           // LED.TYPE.DIGIT
+];
+
 /*
  * The segments are arranged roughly as follows in a 96x128 grid:
  *
@@ -712,18 +808,19 @@ LED.COLORS = {
  *      DDDD P
  *
  * The following arrays specify pairs of moveTo()/lineTo() coordinates, used by drawGridSegment().  They all
- * assume the hard-coded LED.DIGIT.WIDTH and LED.DIGIT.HEIGHT specified above.  If there is a triplet instead of
- * one or more pairs (eg, the 'P' or period segment), then the coordinates are treated as arc() parameters.
+ * assume the hard-coded width and height in LED.SIZES[LED.TYPE.DIGIT] specified above.  If there is a triplet
+ * instead of one or more pairs (eg, the 'P' or period segment), then the coordinates are treated as arc()
+ * parameters.
  */
 LED.SEGMENT = {
-    'A':        [30,  8, 79,  8, 67, 19, 37, 19],
-    'B':        [83, 10, 77, 52, 67, 46, 70, 22],
-    'C':        [77, 59, 71,100, 61, 89, 64, 64],
-    'D':        [28, 91, 58, 91, 69,104, 15,104],
-    'E':        [18, 59, 28, 64, 25, 88, 12,100],
-    'F':        [24, 10, 34, 21, 31, 47, 18, 52],
-    'G':        [24, 56, 34, 50, 60, 50, 71, 56, 61, 61, 33, 61],
-    'P':        [80,102, 8]
+    'A':        [30,   8,  79,   8,  67,  19,  37,  19],
+    'B':        [83,  10,  77,  52,  67,  46,  70,  22],
+    'C':        [77,  59,  71, 100,  61,  89,  64,  64],
+    'D':        [28,  91,  58,  91,  69, 104,  15, 104],
+    'E':        [18,  59,  28,  64,  25,  88,  12, 100],
+    'F':        [24,  10,  34,  21,  31,  47,  18,  52],
+    'G':        [24,  56,  34,  50,  60,  50,  71,  56,  61,  61,  33,  61],
+    'P':        [80, 102,  8]
 };
 
 /*
@@ -746,4 +843,4 @@ LED.SYMBOLS = {
     '.':        ['P']
 };
 
-LED.VERSION     = 1.03;
+LED.VERSION     = 1.10;

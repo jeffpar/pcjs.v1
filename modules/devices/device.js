@@ -100,9 +100,9 @@ class Device {
         this.addDevice();
 
         /*
-         * Build the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config.bindings)
+         * Build the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config['bindings'])
          */
-        this.addBindings(this.config.bindings);
+        this.addBindings(this.config['bindings']);
 
         this.checkVersion(this.config);
 
@@ -111,10 +111,10 @@ class Device {
          * that array may be overridden with a URL parameter.  We don't impose any checks on the overriding
          * value, so it is the responsibility of the component with overridable properties to validate them.
          */
-        if (this.config.overrides) {
+        if (this.config['overrides']) {
             let parms = Device.getURLParms();
             for (let prop in parms) {
-                if (this.config.overrides.indexOf(prop) >= 0) {
+                if (this.config['overrides'].indexOf(prop) >= 0) {
                     let value;
                     let s = parms[prop];
                     /*
@@ -150,75 +150,75 @@ class Device {
     {
         let device = this;
 
-        switch(binding) {
+        switch (binding) {
+
+        case Device.BINDING.CLEAR:
+            element.onclick = function onClickClear() {
+                device.clear();
+            };
+            break;
 
         case Device.BINDING.PRINT:
-            if (!this.bindings[binding]) {
-                let elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
-                this.bindings[binding] = elementTextArea;
-                /*
-                 * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
-                 */
-                elementTextArea.value = "";
-                /*
-                 * An onKeyPress handler has been added to this element simply to stop event propagation, so that if the
-                 * element has been explicitly given focus, any key presses won't be picked up by the Input device (which,
-                 * as that device's constructor explains, is monitoring key presses for the entire document).
-                 */
-                elementTextArea.addEventListener(
-                    'keypress',
-                    function onKeyPress(event) {
-                        event = event || window.event;
-                        let keyCode = event.which || event.keyCode;
-                        if (keyCode) {
-                            /*
-                             * Move the caret to the end of any text in the textarea.
-                             */
-                            let sText = elementTextArea.value;
-                            elementTextArea.setSelectionRange(sText.length, sText.length);
+            let elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
+            /*
+             * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
+             */
+            elementTextArea.value = "";
+            /*
+             * An onKeyPress handler has been added to this element simply to stop event propagation, so that if the
+             * element has been explicitly given focus, any key presses won't be picked up by the Input device (which,
+             * as that device's constructor explains, is monitoring key presses for the entire document).
+             */
+            elementTextArea.addEventListener(
+                'keypress',
+                function onKeyPress(event) {
+                    event = event || window.event;
+                    let keyCode = event.which || event.keyCode;
+                    if (keyCode) {
+                        /*
+                         * Move the caret to the end of any text in the textarea.
+                         */
+                        let sText = elementTextArea.value;
+                        elementTextArea.setSelectionRange(sText.length, sText.length);
 
-                            /*
-                             * Don't let the Input device's document-based keypress handler see any key presses
-                             * that came to this element first.
-                             */
-                            event.stopPropagation();
+                        /*
+                         * Don't let the Input device's document-based keypress handler see any key presses
+                         * that came to this element first.
+                         */
+                        event.stopPropagation();
 
-                            /*
-                             * On the ENTER key, look for any COMMAND handlers and invoke them until one of them
-                             * returns true.
-                             */
-                            if (keyCode == 13) {
-                                let afn = device.findHandlers(Device.HANDLER.COMMAND);
-                                if (afn) {
-                                    /*
-                                     * At the time we call any command handlers, a linefeed will not yet have been
-                                     * appended to the text, so for consistency, we prevent the default behavior and
-                                     * add the linefeed ourselves.  Unfortunately, one side-effect is that we must
-                                     * go to some extra effort to ensure the cursor remains in view; hence the stupid
-                                     * blur() and focus() calls.
-                                     */
-                                    event.preventDefault();
-                                    sText = (elementTextArea.value += '\n');
-                                    elementTextArea.blur();
-                                    elementTextArea.focus();
+                        /*
+                         * On the ENTER key, look for any COMMAND handlers and invoke them until one of them
+                         * returns true.
+                         */
+                        if (keyCode == 13) {
+                            let afn = device.findHandlers(Device.HANDLER.COMMAND);
+                            if (afn) {
+                                /*
+                                 * At the time we call any command handlers, a linefeed will not yet have been
+                                 * appended to the text, so for consistency, we prevent the default behavior and
+                                 * add the linefeed ourselves.  Unfortunately, one side-effect is that we must
+                                 * go to some extra effort to ensure the cursor remains in view; hence the stupid
+                                 * blur() and focus() calls.
+                                 */
+                                event.preventDefault();
+                                sText = (elementTextArea.value += '\n');
+                                elementTextArea.blur();
+                                elementTextArea.focus();
 
-                                    let i = sText.lastIndexOf('\n', sText.length - 2);
-                                    let sCommand = sText.slice(i+1, -1);
-                                    for (let i = 0; i < afn.length; i++) {
-                                        if (afn[i](sCommand)) break;
-                                    }
+                                let i = sText.lastIndexOf('\n', sText.length - 2);
+                                let sCommand = sText.slice(i + 1, -1);
+                                for (let i = 0; i < afn.length; i++) {
+                                    if (afn[i](sCommand)) break;
                                 }
                             }
                         }
                     }
-                );
-            }
-            break;
-
-        default:
-            if (!this.bindings[binding]) this.bindings[binding] = element;
+                }
+            );
             break;
         }
+        this.bindings[binding] = element;
     }
 
     /**
@@ -272,6 +272,7 @@ class Device {
     /**
      * alert(s, type)
      *
+     * @this {Device}
      * @param {string} s
      * @param {string} [type]
      */
@@ -306,18 +307,21 @@ class Device {
     }
 
     /**
-     * bound(n, min, max)
+     * bounds(n, min, max)
      *
-     * Restricts n to the bounds defined by min and max.
+     * Restricts n to the bounds defined by min and max.  A side-effect is ensuring that the return
+     * value is ALWAYS a number, even n is not.
      *
+     * @this {Device}
      * @param {number} n
-     * @param (number} min
+     * @param {number} min
      * @param {number} max
      * @returns {number} (updated n)
      */
-    bound(n, min, max)
+    bounds(n, min, max)
     {
         this.assert(min <= max);
+        n = +n || 0;
         if (n < min) n = min;
         if (n > max) n = max;
         return n;
@@ -427,7 +431,7 @@ class Device {
         let devices = Device.Machines[this.idMachine];
         if (devices) {
             for (let i in devices) {
-                if (devices[i].config.class == idClass) {
+                if (devices[i].config['class'] == idClass) {
                     device = devices[i];
                     break;
                 }
@@ -453,6 +457,7 @@ class Device {
      *
      * If localStorage support exists, is enabled, and works, return true.
      *
+     * @this {Device}
      * @returns {boolean}
      */
     hasLocalStorage()
@@ -533,6 +538,7 @@ class Device {
      *
      *      Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko
      *
+     * @this {Device}
      * @param {string} s is a substring to search for in the user-agent; as noted above, "iOS" and "MSIE" are special values
      * @returns {boolean} is true if the string was found, false if not
      */
@@ -701,13 +707,10 @@ class Device {
             buffer += aParts[iPart];
 
             let arg = args[iArg++];
-            if (arg === undefined) continue;
-
             let flags = aParts[iPart+1];
             let minimum = +aParts[iPart+2] || 0;
             let precision = +aParts[iPart+4] || 0;
             let conversion = aParts[iPart+6];
-
             let ach = null, s;
 
             switch(conversion) {
@@ -799,7 +802,7 @@ class Device {
                 let match;
                 let pl = /\+/g; // RegExp for replacing addition symbol with a space
                 let search = /([^&=]+)=?([^&]*)/g;
-                let decode = function(s) {
+                let decode = function decodeParameter(s) {
                     return decodeURIComponent(s.replace(pl, " ")).trim();
                 };
 
@@ -814,6 +817,7 @@ class Device {
 }
 
 Device.BINDING = {
+    CLEAR:      "clear",
     PRINT:      "print"
 };
 

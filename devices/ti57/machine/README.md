@@ -13,7 +13,7 @@ machines:
           "class": "Machine",
           "type": "TI57",
           "name": "TI-57 Emulator",
-          "version": 1.03
+          "version": 1.10
         },
         "chip": {
           "class": "Chip",
@@ -46,6 +46,7 @@ machines:
         },
         "buttons": {
           "class": "Input",
+          "location": [45, 316, 372, 478, 0.34, 0.5, 459, 832, 322, 168, 75, 38],
           "map": [
             ["2nd",  "inv",  "lnx",  "\\b",  "clr"],
             ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
@@ -56,7 +57,6 @@ machines:
             ["rst",  "1",    "2",    "3",    "+"],
             ["r/s",  "0",    ".",    "+/-",  "=|\\r"]
           ],
-          "location": [45, 316, 372, 478, 0.34, 0.5, 459, 832, 322, 168, 75, 38],
           "bindings": {
             "surface": "imageTI57",
             "power": "powerTI57"

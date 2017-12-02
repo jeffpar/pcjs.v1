@@ -29,7 +29,7 @@
 "use strict";
 
 /**
- * @typedef {Object} ROMConfig
+ * @typedef {Config} ROMConfig
  * @property {string} class
  * @property {Object} [bindings]
  * @property {number} [version]
@@ -41,9 +41,9 @@
  * @property {string} file
  * @property {string} reference
  * @property {string} chipID
- * @property {number} revision
- * @property {string} colorROM
- * @property {string} backgroundColorROM
+ * @property {number} [revision]
+ * @property {string} [colorROM]
+ * @property {string} [backgroundColorROM]
  * @property {Array.<number>} values
  */
 
@@ -76,6 +76,7 @@ class ROM extends Device {
      *        },
      *        "overrides": ["colorROM","backgroundColorROM"],
      *        "values": [
+     *          ...
      *        ]
      *      }
      *
@@ -108,14 +109,13 @@ class ROM extends Device {
             this.rows = Math.pow(2, Math.floor(addrLines));
             let configLEDs = {
                 class:           "LED",
+                bindings:        {container: config.bindings[ROM.BINDING.ARRAY]},
                 type:            LED.TYPE.ROUND,
                 cols:            this.cols,
                 rows:            this.rows,
                 color:           config['colorROM'] || "green",
-                fixed:           true,
-                persistent:      true,
                 backgroundColor: config['backgroundColorROM'] || "black",
-                bindings:        {container: config.bindings[ROM.BINDING.ARRAY]}
+                persistent:      true
             };
             this.ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);
             this.clearArray();
@@ -126,7 +126,7 @@ class ROM extends Device {
             };
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
             this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC);
-            this.ledInput.addHover(function(col, row) {
+            this.ledInput.addHover(function onROMHover(col, row) {
                 if (rom.chip) {
                     let sDesc = rom.sCellDesc;
                     if (col >= 0 && row >= 0) {
@@ -144,7 +144,7 @@ class ROM extends Device {
     /**
      * clearArray()
      *
-     * This performs a combination of clearBuffer() and drawBuffer().
+     * clearBuffer(true) performs a combination of clearBuffer() and drawBuffer().
      *
      * @this {ROM}
      */
@@ -233,4 +233,4 @@ ROM.BINDING = {
     CELLDESC:   "cellDesc"
 };
 
-ROM.VERSION     = 1.03;
+ROM.VERSION     = 1.10;

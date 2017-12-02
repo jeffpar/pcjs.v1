@@ -43,8 +43,10 @@ class Machine extends Device {
      *        "class": "Machine",
      *        "type": "TI57",
      *        "name": "TI-57 Programmable Calculator Simulation",
-     *        "version": 1.03,
+     *        "version": 1.10,
+     *        "autoPower": true,
      *        "bindings": {
+     *          "clear": "clearTI57",
      *          "print": "printTI57"
      *        }
      *      },
@@ -91,8 +93,7 @@ class Machine extends Device {
      *        "bindings": {
      *          "surface": "imageTI57",
      *          "power": "powerTI57",
-     *          "reset": "resetTI57",
-     *          "clear": "clearTI57"
+     *          "reset": "resetTI57"
      *        }
      *      },
      *      "rom": {
@@ -119,13 +120,14 @@ class Machine extends Device {
             this.config = JSON.parse(sConfig);
             this.addBindings(this.config[idMachine].bindings);
             this.checkVersion(this.config[idMachine]);
+            this.fAutoPower = (this.config[idMachine]['autoPower'] !== false);
         } catch(err) {
             let sError = err.message;
             let match = sError.match(/position ([0-9]+)/);
             if (match) {
                 sError += " ('" + sConfig.substr(+match[1], 40).replace(/\s+/g, ' ') + "...')";
             }
-            this.println(sError);
+            this.println("machine '" + idMachine + "' initialization error: " + sError);
         }
         /*
          * Device initialization is now deferred until after the page is fully loaded, for the benefit
@@ -136,11 +138,11 @@ class Machine extends Device {
         let machine = this, chip = null;
         window.addEventListener('load', function onLoad(event) {
             chip = machine.initDevices();
-            if (chip) chip.onPower(true);
+            if (chip && chip.onPower && machine.fAutoPower) chip.onPower(true);
         });
-        let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : 'beforeunload');
-        window.addEventListener(sEvent, function onUnload(event) {
-            if (chip) chip.onPower(false);
+        let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : undefined);
+        window.addEventListener(sEvent || 'beforeunload', function onUnload(event) {
+            if (chip && chip.onPower) chip.onPower(false);
         });
     }
 
@@ -175,7 +177,7 @@ class Machine extends Device {
                         break;
                     case Machine.CLASS.ROM:
                         device = new ROM(this.idMachine, idDevice, config);
-                        if (device.config.revision) sStatus = "revision " + device.config.revision;
+                        if (device.config['revision']) sStatus = "revision " + device.config['revision'];
                         break;
                     case Machine.CLASS.TIME:
                         device = new Time(this.idMachine, idDevice, config);
@@ -222,4 +224,4 @@ Machine.CLASSORDER = [
 Machine.COPYRIGHT = "Copyright © 2012-2017 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
-Machine.VERSION = 1.03;
+Machine.VERSION = 1.10;

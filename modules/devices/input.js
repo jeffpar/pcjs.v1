@@ -29,13 +29,14 @@
 "use strict";
 
 /**
- * @typedef {Object} InputConfig
+ * @typedef {Config} InputConfig
  * @property {string} class
  * @property {Object} [bindings]
  * @property {number} [version]
  * @property {Array.<string>} [overrides]
- * @property {Array.<Array.<number>>} [map]
  * @property {Array.<number>} location
+ * @property {Array.<Array.<number>>} [map]
+ * @property {boolean} [drag]
  */
 
 /**
@@ -56,6 +57,7 @@ class Input extends Device {
      *
      *      "input": {
      *        "class": "Input",
+     *        "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
      *        "map": [
      *          ["2nd",  "inv",  "lnx",  "\\b",  "clr"],
      *          ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
@@ -66,17 +68,18 @@ class Input extends Device {
      *          ["rst",  "1",    "2",    "3",    "+"],
      *          ["r/s",  "0",    ".",    "+/-",  "=|\\r"]
      *        ],
-     *        "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
+     *        "drag": false,
      *        "bindings": {
      *          "surface": "imageTI57",
-     *          "power": "powerTI57"
+     *          "power": "powerTI57",
+     *          "reset": "resetTI57"
      *        }
      *      }
      *
      * A word about the "power" button: the page will likely use absolute positioning to overlay the HTML button
      * onto the image of the physical button, and the temptation might be to use the style "display:none" to hide
      * it, but "opacity:0" should be used instead, because otherwise our efforts to use it as focusable element
-     * will fail.
+     * may fail.
      *
      * @this {Input}
      * @param {string} idMachine
@@ -89,7 +92,7 @@ class Input extends Device {
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
 
-        this.onKey = null;
+        this.onInput = null;
         this.onPower = null;
         this.onReset = null;
         this.onHover = null;
@@ -142,6 +145,15 @@ class Input extends Device {
                 this.nRows = this.vGap;
                 this.hGap = this.vGap = 0;
             }
+            /*
+             * If 'drag' is true, then the onInput() handler will be called whenever the current col and/or row
+             * changes, even if the mouse hasn't been released since the previous onInput() call.
+             *
+             * The default is false, because in general, allowing drag is a bad idea for calculator buttons.  But
+             * I've made this an option for other input surfaces, like LED arrays, where you might want to turn a
+             * series of LEDs on or off.
+             */
+            this.fDrag = !!this.config['drag'];
 
             /*
              * To calculate the average button width (cxButton), we know that the overall width
@@ -173,7 +185,8 @@ class Input extends Device {
                  * We use a timer for the touch/mouse release events, to ensure that the machine had
                  * enough time to notice the input before releasing it.
                  */
-                this.timerRelease = this.time.addTimer("timerRelease", function() {
+                let input = this;
+                this.timerInputRelease = this.time.addTimer("timerInputRelease", function onInputRelease() {
                     if (input.xStart < 0 && input.yStart < 0) { // auto-release ONLY if it's REALLY released
                         input.setPosition(-1, -1);
                     }
@@ -183,7 +196,7 @@ class Input extends Device {
                      * This auto-releases the last key reported after an appropriate delay, to ensure that
                      * the machine had enough time to notice the corresponding button was pressed.
                      */
-                    this.timerKbd = this.time.addTimer("timerKbd", function() {
+                    this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function onKeyRelease() {
                         input.onKeyTimer();
                     });
                     /*
@@ -207,7 +220,7 @@ class Input extends Device {
                      * by redirecting focus to the "power" button, if any, not because we want that or any other
                      * button to have focus, but simply to remove focus from any other input element on the page.
                      */
-                    this.captureKbd(document);
+                    this.captureKeys(document);
                 }
             }
 
@@ -217,44 +230,47 @@ class Input extends Device {
              */
             this.col = this.row = -1;
         }
-
-        let input = this;
-
-        element = this.bindings[Input.BINDING.CLEAR];
-        if (element) {
-            element.onclick = function onClickClear() {
-                input.clear();
-            };
-        }
-
-        element = this.bindings[Input.BINDING.POWER];
-        if (element) {
-            element.onclick = function onClickPower() {
-                if (input.onPower) input.onPower();
-            };
-        }
-
-        element = this.bindings[Input.BINDING.RESET];
-        if (element) {
-            element.onclick = function onClickReset() {
-                if (input.onReset) input.onReset();
-            };
-        }
     }
 
     /**
-     * addClick(onKey, onPower, onReset)
-     *
-     * Called by the Chip device to setup keyboard, power, and reset notifications.
+     * addBinding(binding, element)
      *
      * @this {Input}
-     * @param {function(number,number)} onKey
-     * @param {function()} onPower (called when the "power" button, if any, is clicked)
-     * @param {function()} onReset (called when the "reset" button, if any, is clicked)
+     * @param {string} binding
+     * @param {HTMLElement} element
      */
-    addClick(onKey, onPower, onReset)
+    addBinding(binding, element)
     {
-        this.onKey = onKey;
+        let input = this;
+
+        switch(binding) {
+
+        case Input.BINDING.POWER:
+            element.onclick = function onClickPower() {
+                if (input.onPower) input.onPower();
+            };
+            break;
+
+        case Input.BINDING.RESET:
+            element.onclick = function onClickReset() {
+                if (input.onReset) input.onReset();
+            };
+            break;
+        }
+        super.addBinding(binding, element);
+    }
+
+    /**
+     * addClick(onPower, onReset)
+     *
+     * Called by the Chip device to set up power and reset notifications.
+     *
+     * @this {Input}
+     * @param {function()} [onPower] (called when the "power" button, if any, is clicked)
+     * @param {function()} [onReset] (called when the "reset" button, if any, is clicked)
+     */
+    addClick(onPower, onReset)
+    {
         this.onPower = onPower;
         this.onReset = onReset;
     }
@@ -271,12 +287,25 @@ class Input extends Device {
     }
 
     /**
-     * captureKbd(element)
+     * addInput(onInput)
+     *
+     * Called by the Chip device to set up input notifications.
+     *
+     * @this {Input}
+     * @param {function(number,number)} onInput
+     */
+    addInput(onInput)
+    {
+        this.onInput = onInput;
+    }
+
+    /**
+     * captureKeys(element)
      *
      * @this {Input}
      * @param {Document|HTMLElement} element
      */
-    captureKbd(element)
+    captureKeys(element)
     {
         let input = this;
         element.addEventListener(
@@ -327,7 +356,7 @@ class Input extends Device {
                     } else {
                         this.keyState = 1;
                         this.setPosition(col, row);
-                        this.time.setTimer(this.timerKbd, Input.BUTTON_DELAY);
+                        this.time.setTimer(this.timerKeyRelease, Input.BUTTON_DELAY);
                     }
                     return true;
                 }
@@ -348,7 +377,7 @@ class Input extends Device {
         if (this.keyState == 1) {
             this.keyState++;
             this.setPosition(-1, -1);
-            this.time.setTimer(this.timerKbd, Input.BUTTON_DELAY);
+            this.time.setTimer(this.timerKeyRelease, Input.BUTTON_DELAY);
         } else {
             this.keyState = 0;
             if (this.keysPressed.length) {
@@ -393,12 +422,6 @@ class Input extends Device {
         element.addEventListener(
             'mousemove',
             function onMouseMove(event) {
-                /*
-                 * Sadly, the 'buttons' property is not supported in all browsers (eg, Safari),
-                 * so my original test for the left button (event.buttons & 0x1) is not sufficient.
-                 * Instead, we'll rely on our own xStart/yStart properties, which should only
-                 * be positive after 'mousedown' and before 'mouseup'.
-                 */
                 input.processEvent(element, Input.ACTION.MOVE, event);
             }
         );
@@ -590,24 +613,25 @@ class Input extends Device {
                  * a minimum amount of time (ie, BUTTON_DELAY).
                  */
                 if (fButton) {
-                    this.time.setTimer(this.timerRelease, Input.BUTTON_DELAY, true);
+                    this.time.setTimer(this.timerInputRelease, Input.BUTTON_DELAY, true);
                 }
             } else if (fPower && this.onPower) {
                 this.onPower();
             }
         }
         else if (action == Input.ACTION.MOVE) {
-            /*
-             * In the case of a mouse, this can happen all the time, whether a button is 'down' or not, but
-             * our event listener automatically suppresses all moves except those where the left button is down.
-             */
-            if (this.onHover) this.onHover(col, row);
+            if (this.xStart >= 0 && this.yStart >= 0 && this.fDrag) {
+                this.setPosition(col, row);
+            }
+            else if (this.onHover) {
+                this.onHover(col, row);
+            }
         }
         else if (action == Input.ACTION.RELEASE) {
             /*
              * Don't immediately signal the release if the release timer is active (let the timer take care of it).
              */
-            if (!this.time.isTimerSet(this.timerRelease)) {
+            if (!this.time.isTimerSet(this.timerInputRelease)) {
                 this.setPosition(-1, -1);
             }
             this.xStart = this.yStart = -1;
@@ -629,7 +653,7 @@ class Input extends Device {
         if (col != this.col || row != this.row) {
             this.col = col;
             this.row = row;
-            if (this.onKey) this.onKey(col, row);
+            if (this.onInput) this.onInput(col, row);
         }
     }
 }
@@ -641,7 +665,6 @@ Input.ACTION = {
 };
 
 Input.BINDING = {
-    CLEAR:      "clear",
     POWER:      "power",
     RESET:      "reset",
     SURFACE:    "surface"
@@ -653,4 +676,4 @@ Input.KEYCODE = {               // keyCode from keydown/keyup events
 
 Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
 
-Input.VERSION   = 1.03;
+Input.VERSION   = 1.10;
