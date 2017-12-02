@@ -211,8 +211,8 @@ class Time extends Device {
                 time.fThrottling = true;
             });
             elementInput.addEventListener("mouseup", function onThrottleStop() {
-                time.fThrottling = false;
                 time.setSpeedThrottle();
+                time.fThrottling = false;
             });
             elementInput.addEventListener("mousemove", function onThrottleChange() {
                 if (time.fThrottling) {
