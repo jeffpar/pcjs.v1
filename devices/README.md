@@ -22,7 +22,11 @@ PCjs machines can be built with the following CPUs:
 More recently, PCjs has added a new set of [Device Classes](/modules/devices/) that can be used to create simpler
 machines, like these programmable calculators:
 
-* Texas Instruments [TI-55](ti55/) and [TI-57](ti57/)
+* Texas Instruments [TI-42](ti42/), [TI-55](ti55/), and [TI-57](ti57/)
 
 The goal is to make it easy to construct a variety of machines from a common set of devices (i.e., keyboards,
 displays, disk and tape drive controllers, etc).
+
+We also have a set of "pseudo-hardware" emulations:
+
+* [John Conway's](http://www.conwaylife.com/wiki/John_Horton_Conway) "[Game of Life](http://www.conwaylife.com/wiki/Conway%27s_Game_of_Life)" implemented as a [Chip](/modules/devices/lifechip.js) [[Demo](life/demo/)]

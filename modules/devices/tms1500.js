@@ -1699,8 +1699,9 @@ Chip.OP = {
 };
 
 Chip.TYPE = {
-    TMS1501:    1501,
-    TMS1503:    1503
+    TMS1501:    1501,       // aka TI-57
+    TMS1502:    1502,       // aka TI-42 ("MBA")
+    TMS1503:    1503        // aka TI-55
 };
 
 Chip.ANGLEMODE = {

@@ -1,11 +1,11 @@
 ---
 layout: page
-title: Life Demo
-permalink: /devices/led/demo/
+title: '"Game of Life" Demo'
+permalink: /devices/life/demo/
 machines:
   - id: lifeDemo
     type: life
-    name: Life Demo
+    name: Game of Life Demo
     uncompiled: true
     config: |
       {
@@ -84,8 +84,12 @@ styles:
     font-family: Monaco,"Lucida Console",monospace;
 ---
 
-Life Demo
----------
+"Game of Life" Demo
+-------------------
+
+Using [PCjs Devices](/modules/devices/), here's a simple demo of
+[John Conway's](http://www.conwaylife.com/wiki/John_Horton_Conway)
+"[Game of Life](http://www.conwaylife.com/wiki/Conway%27s_Game_of_Life)". 
 
 {% include machine.html id="lifeDemo" config="json" %}
 

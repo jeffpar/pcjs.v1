@@ -16,7 +16,13 @@ the ROM, and produced the following resources:
 - [Original ROM (Big-endian)](tmc1503be.bin)
 
 From the [Original ROM (Big-endian)](tmc1503be.bin), I created an [Original ROM (Little-endian)](tmc1503le.bin)
-binary, along with the corresponding [JSON Data](tmc1503le.json) that the PCjs [TI-55 Emulator](../machine/) uses.
+binary:
+
+	node ../../ti57/rom/be2le.js tmc1503be.bin tmc1503le.bin
+
+along with the corresponding [JSON Data](tmc1503le.json) that the PCjs [TI-55 Emulator](../machine/) uses:
+
+	node ../../ti57/rom/bin2json.js tmc1503le.bin > tmc1503le.json
 
 See the [TI-57 ROM](/devices/ti57/rom/) for more details on the ROM format, including how the "raw" photographic ROM
 data is used to produce a working ROM binary.
