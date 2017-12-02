@@ -430,7 +430,7 @@ class Time extends Device {
             if (hz <= 999) {
                 s = hz + "Hz";
             } else {
-                s = Math.ceil(mhz / 1000) + "Khz";
+                s = Math.ceil(hz / 1000) + "Khz";
             }
         }
         return s;

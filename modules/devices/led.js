@@ -159,9 +159,25 @@ class LED extends Device {
         this.colorBright = this.getRGBAColor(this.color, 1.0, 2.0);
         this.backgroundColor = this.config['backgroundColor'];
 
+        /*
+         * We generally want our view canvas to be "responsive", not "fixed" (ie, to automatically be resized
+         * with changes to the overall window size), in which case we apply the following style attributes
+         * (formerly applied with the "pcjs-canvas" style in /modules/shared/templates/components.css):
+         *
+         *      width: 100%;
+         *      height: auto;
+         *
+         * But, if you really don't want those style attributes, then set the LED config's "fixed" property to true.
+         */
         if (!this.config['fixed']) {
-            canvasView.setAttribute("class", "pcjs-canvas");
+            canvasView.style.width = "100%";
+            canvasView.style.height = "auto";
         }
+
+        /*
+         * Persistent LEDS are the default, except for LED.TYPE.DIGIT, which is generally used with calculator displays
+         * and whose underlying hardware is required to constantly "refresh" the LEDs, otherwise they go dark.
+         */
         this.fPersistent = this.config['persistent'];
         if (this.fPersistent == undefined) this.fPersistent = (this.type < LED.TYPE.DIGIT);
 

@@ -284,6 +284,7 @@ styles:
     font-family: Monaco,"Lucida Console",monospace;
   romArrayTI57:
     display: inline-block;
+    max-width: 512px;
   romCellTI57:
     font-family: Monaco,"Lucida Console",monospace;
   .regRow:

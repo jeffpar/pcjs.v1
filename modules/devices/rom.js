@@ -115,7 +115,6 @@ class ROM extends Device {
                 rows:            this.rows,
                 color:           config['colorROM'] || "green",
                 backgroundColor: config['backgroundColorROM'] || "black",
-                fixed:           true,
                 persistent:      true
             };
             this.ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);
