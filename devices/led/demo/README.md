@@ -53,6 +53,8 @@ machines:
         "lifeDisplay": {
           "class": "LED",
           "type": 1,
+          "width": 32,
+          "height": 32,
           "cols": 38,
           "rows": 26,
           "color": "green",

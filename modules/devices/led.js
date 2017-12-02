@@ -80,8 +80,8 @@
  * @unrestricted
  * @property {LEDConfig} config
  * @property {number} type (one of the LED.TYPE values)
- * @property {number} width (default is 96)
- * @property {number} height (default is 128)
+ * @property {number} width (default is 96 for LED.TYPE.DIGIT; 8 otherwise)
+ * @property {number} height (default is 128 for LED.TYPE.DIGIT; 8 otherwise)
  * @property {number} cols (default is 1)
  * @property {number} rows (default is 1)
  * @property {string} color (default is "red")
@@ -572,24 +572,24 @@ class LED extends Device {
      * @param {number} row
      * @param {string|number} d1
      * @param {string|number} [d2]
-     * @returns {boolean} (true if this call modified the buffer, false if not)
+     * @returns {boolean|null} (true if this call modified the buffer, false if not, null if error)
      */
     setBuffer(col, row, d1, d2 = LED.STATE.DIRTY)
     {
         let fModified = false;
-        let i = (row * this.cols + col) * this.nBufferInc;
-        this.assert(row >= 0 && row < this.rows && col >= 0 && col < this.cols);
-        if (i >= 0 && i <= this.buffer.length - this.nBufferInc) {
+        if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
+            let i = (row * this.cols + col) * this.nBufferInc;
             if (this.buffer[i] !== d1 || this.buffer[i+1] !== d2) {
                 this.buffer[i] = d1;
                 this.buffer[i+1] = d2;
                 this.fBufferModified = fModified = true;
             }
             this.iBufferRecent = i;
+            this.fTickled = true;
         } else {
-            this.assert(false);
+            this.assert(false);         // almost no one's looking at these return values, so let's assert as well
+            fModified = null;
         }
-        this.fTickled = true;
         return fModified;
     }
 

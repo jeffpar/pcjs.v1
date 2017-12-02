@@ -134,6 +134,28 @@ class Chip extends Device {
     /**
      * doGeneration()
      *
+     * This is a straight-forward implementation of the standard Conway "Game of Life" rules ("B3/S23"),
+     * iterating row-by-row and column-by-column.  It takes advantage of the LED array's one-dimensional
+     * buffer layout to move through the entire grid with a "master" cell index (iCell) and corresponding
+     * indexes for all 8 "neighboring" cells (iNO, iNE, iEA, iSE, iSO, iSW, iWE, and iNW), incrementing
+     * them all in unison.
+     *
+     * The row and col variables are used only to detect when we are at the "edges" of the grid, and whether
+     * (depending on the wrap setting) any north, east, south, or west indexes that are now "off the grid"
+     * should be adjusted to the other side of the grid (or set to the dead "scratch" row at the end of the
+     * grid if wrap is disabled).  Similarly, when we leave an "edge", those same indexes must be restored
+     * to their normal positions, relative to the "master" index (iCell).
+     *
+     * The inline tests for whether iCell is at an edge are unavoidable, unless we break the logic up into
+     * 5 discrete steps: one for the rectangle just inside the edges, and then four for each of the north,
+     * east, south, and west edge strips.  But unless we really need that (presumably tiny) speed boost,
+     * I'm inclined to keep the logic simple.
+     *
+     * The logic is still a bit cluttered by the all the edge detection checks (and the wrap checks within
+     * each edge case), and perhaps I should have written two versions of this function (with and without wrap),
+     * but again, that would produce more repetition of the rest of the game logic, so I'm still inclined to
+     * leave it as-is.
+     *
      * @this {Chip}
      */
     doGeneration()
@@ -142,52 +164,59 @@ class Chip extends Device {
         let bufferClone = this.ledArray.getBufferClone();
         let nCols = this.ledArray.cols;
         let nRows = this.ledArray.rows;
+        /*
+         * The number of LED buffer elements per cell is an LED implementation detail that should not be
+         * assumed, so we obtain it from the LED object, and use it to calculate the per-cell increment,
+         * per-row increment, and per-grid increment; the latter gives us the offset of the LED buffer's
+         * scratch row, which we rely upon when wrap is turned off.
+         */
         let nInc = this.ledArray.nBufferInc;
-        let nCellsPerRow = nCols * nInc, nCells = nRows * nCellsPerRow;
+        let nIncPerRow = nCols * nInc;
+        let nIncPerGrid = nRows * nIncPerRow;
 
         let iCell = 0;
-        let iCellDummy = nCells;
-        let iNO = iCell - nCellsPerRow;
+        let iCellDummy = nIncPerGrid;
+        let iNO = iCell - nIncPerRow;
         let iNW = iNO - nInc;
         let iNE = iNO + nInc;
         let iWE = iCell - nInc;
         let iEA = iCell + nInc;
-        let iSO = iCell + nCellsPerRow;
+        let iSO = iCell + nIncPerRow;
         let iSW = iSO - nInc;
         let iSE = iSO + nInc;
 
         for (let row = 0; row < nRows; row++) {
-            if (!row) {
+            if (!row) {                         // at top (north) edge; restore will be done after the col loop ends
                 if (!this.fWrap) {
                     iNO = iNW = iNE = iCellDummy;
                 } else {
-                    iNO += nCells; iNW += nCells; iNE += nCells;
+                    iNO += nIncPerGrid; iNW += nIncPerGrid; iNE += nIncPerGrid;
                 }
-            } else if (row == nRows - 1) {
+            } else if (row == nRows - 1) {      // at bottom (south) edge
                 if (!this.fWrap) {
                     iSO = iSW = iSE = iCellDummy;
                 } else {
-                    iSO -= nCells; iSW -= nCells; iSE -= nCells;
+                    iSO -= nIncPerGrid; iSW -= nIncPerGrid; iSE -= nIncPerGrid;
                 }
             }
             for (let col = 0; col < nCols; col++) {
-                if (!col) {
+                if (!col) {                     // at left (west) edge
                     if (!this.fWrap) {
                         iWE = iNW = iSW = iCellDummy;
                     } else {
-                        iWE += nCellsPerRow; iNW += nCellsPerRow; iSW += nCellsPerRow;
+                        iWE += nIncPerRow; iNW += nIncPerRow; iSW += nIncPerRow;
                     }
-                } else if (col == 1) {
+                } else if (col == 1) {          // just finished left edge, restore west indexes
                     if (!this.fWrap) {
                         iWE = iCell - nInc; iNW = iNO - nInc; iSW = iSO - nInc;
                     } else {
-                        iWE -= nCellsPerRow; iNW -= nCellsPerRow; iSW -= nCellsPerRow;
+                        iWE -= nIncPerRow; iNW -= nIncPerRow; iSW -= nIncPerRow;
                     }
-                } else if (col == nCols - 1) {
+                } else if (col == nCols - 1) {  // at right (east) edge; restore will be done after the col loop ends
                     if (!this.fWrap) {
                         iEA = iNE = iSE = iCellDummy;
                     } else {
-                        iEA -= nCellsPerRow; iNE -= nCellsPerRow; iSE -= nCellsPerRow;
+                        iEA -= nIncPerRow; iNE -= nIncPerRow; iSE -= nIncPerRow;
                     }
                 }
                 let state = buffer[iCell];
@@ -204,17 +233,17 @@ class Chip extends Device {
             }
             if (!this.fWrap) {
                 if (!row) {
-                    iNO = iCell - nCellsPerRow; iNW = iNO - nInc; iNE = iNO + nInc;
+                    iNO = iCell - nIncPerRow; iNW = iNO - nInc; iNE = iNO + nInc;
                 }
                 iEA = iCell + nInc; iNE = iNO + nInc; iSE = iSO + nInc;
             } else {
                 if (!row) {
-                    iNO -= nCells; iNW -= nCells; iNE -= nCells;
+                    iNO -= nIncPerGrid; iNW -= nIncPerGrid; iNE -= nIncPerGrid;
                 }
-                iEA += nCellsPerRow; iNE += nCellsPerRow; iSE += nCellsPerRow;
+                iEA += nIncPerRow; iNE += nIncPerRow; iSE += nIncPerRow;
             }
         }
-        this.assert(iCell == nCells);
+        this.assert(iCell == nIncPerGrid);
         this.ledArray.swapBufferClone();
     }
 
@@ -271,24 +300,37 @@ class Chip extends Device {
         }
         let iCol = (ledArray.cols - width) >> 1;
         let iRow = (ledArray.rows - height) >> 1;
-        let aTokens = sPattern.split(/([bo$])/);
+        let aTokens = sPattern.split(/([bo$])/i);
         let i = 0, col = iCol, row = iRow;
+        /*
+         * We could add checks that verify that col and row stay within the bounds of the specified
+         * width and height of the pattern, but it's possible that there are some legit patterns out
+         * there that didn't get their bounds quite right.  And in any case, no harm can come of it,
+         * because setBuffer() will ignore any parameters outside the LED array's bounds.
+         */
         while (i < aTokens.length - 1) {
             let count = aTokens[i++];
             if (count === "") count = 1;
             let token = aTokens[i++];
             while (count--) {
+                let fModified = false;
                 switch(token) {
                 case '$':
                     col = iCol;
                     row++;
                     break;
                 case 'b':
-                    ledArray.setBuffer(col++, row, LED.STATE.OFF);
+                    fModified = ledArray.setBuffer(col++, row, LED.STATE.OFF);
                     break;
                 case 'o':
-                    ledArray.setBuffer(col++, row, LED.STATE.ON);
+                    fModified = ledArray.setBuffer(col++, row, LED.STATE.ON);
                     break;
+                default:
+                    this.printf("unrecognized pattern token: %s\n", token);
+                    break;
+                }
+                if (fModified == null) {
+                    this.printf("invalid pattern position (%d,%d)\n", col-1, row);
                 }
             }
         }
