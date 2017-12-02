@@ -233,13 +233,16 @@ class Chip extends Device {
             this.println("unknown pattern: " + id);
             return;
         }
+        this.println("loading pattern '" + id + "'");
         let nCmds = 0;
         let width = 0, height = 0, rule = "", sPattern = "";
         ledArray.clearBuffer();
         for (let i = 0; i < lines.length; i++) {
             let sLine = lines[i];
-            this.println(sLine);
-            if (sLine[0] == '#') continue;
+            if (sLine[0] == '#') {
+                this.println(sLine);
+                continue;
+            }
             if (!nCmds++) {
                 let match = sLine.match(/x\s*=\s*([0-9]+)\s*,\s*y\s*=\s*([0-9]+)\s*(?:,\s*rule\s*=\s*(\S+)|)/i);
                 if (!match) {
@@ -274,7 +277,6 @@ class Chip extends Device {
             let count = aTokens[i++];
             if (count === "") count = 1;
             let token = aTokens[i++];
-            // this.println("token('" + count + "','" + token + "')");
             while (count--) {
                 switch(token) {
                 case '$':

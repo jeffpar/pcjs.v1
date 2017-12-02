@@ -41,7 +41,7 @@ machines:
           "class": "Time",
           "cyclesPerSecond": 1,
           "cyclesMinimum": 1,
-          "cyclesMaximum": 1000,
+          "cyclesMaximum": 100,
           "bindings": {
             "run": "runLife",
             "speed": "speedLife",
