@@ -57,6 +57,7 @@ machines:
           "cols": 38,
           "rows": 26,
           "color": "green",
+          "backgroundColor": "black",
           "bindings": {
             "container": "lifeDisplay"
           },
@@ -89,7 +90,12 @@ styles:
 
 Using [PCjs Devices](/modules/devices/), here's a simple demo of
 [John Conway's](http://www.conwaylife.com/wiki/John_Horton_Conway)
-"[Game of Life](http://www.conwaylife.com/wiki/Conway%27s_Game_of_Life)". 
+"[Game of Life](http://www.conwaylife.com/wiki/Conway%27s_Game_of_Life)", using an grid of simulated LEDs.
+
+Think of it as a smart "[Lite-Brite](https://en.wikipedia.org/wiki/Lite-Brite)".  Want a different LED color?
+Try [Red](?color=red#game-of-life) or [Blue](?color=blue#game-of-life).
+
+### Game of Life
 
 {% include machine.html id="lifeDemo" config="json" %}
 

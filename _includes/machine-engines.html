@@ -5,7 +5,7 @@ in the Front Matter of our Markdown documents, for compatibility with the Jekyll
 
     'id' (eg: ibm5150)
     'name' (eg: "IBM PC (Model 5150) with Monochrome Display")
-    'type' (eg: c1p, pcx86, pc8080, pdp10, pdp11, ti55, ti57)
+    'type' (eg: c1p, pcx86, pc8080, pdp10, pdp11, life, ti42, ti55, ti57)
     'debugger' (default: false)
     'config' (default: machine.xml)
     'template' (default: machine.xsl)
@@ -110,7 +110,16 @@ The following optional machine properties will be added to the 'parms' property:
       {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/components.xsl{% endcapture %}
     {% endif %}
   {% else %}
-    {% if machine_type == "ti55" or machine_type == "ti57" %}
+    {% if machine_type == "life" %}
+      {% assign array_scripts = site.pcjs.life_scripts %}
+      {% for script in array_scripts %}
+        {% capture page_script %}<script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>{% endcapture %}
+        {% unless page_scripts contains page_script %}
+          {{ page_script }}
+        {% endunless %}
+        {% capture page_scripts %}{{ page_scripts }}{{ page_script }}{% endcapture %}
+      {% endfor %}
+    {% elsif machine_type == "ti42" or machine_type == "ti55" or machine_type == "ti57" %}
       {% assign array_scripts = site.pcjs.ti57_scripts %}
       {% for script in array_scripts %}
         {% capture page_script %}<script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>{% endcapture %}
@@ -177,7 +186,7 @@ The following optional machine properties will be added to the 'parms' property:
       {% endif %}
   {% endcomment %}
   {% endif %}
-  {% if machine_type == "ti55" or machine_type == "ti57" %}
+  {% if machine_type == "life" or machine_type == "ti42" or machine_type == "ti55" or machine_type == "ti57" %}
     <script type="text/javascript">new Machine('{{ machine.id }}','{{ machine_config | strip_newlines }}');</script>
   {% else %}
     <script type="text/javascript">{{ machine_embed }}('{{ machine.id }}','{{ machine_config }}','{{ machine_template }}','{{ machine_parms }}');</script>
