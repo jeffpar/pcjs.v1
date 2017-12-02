@@ -89,6 +89,7 @@ class Chip extends Device {
             this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
             if (this.time) {
                 this.time.addClocker(this.clocker.bind(this));
+                this.time.addUpdater(this.updateStatus.bind(this));
             }
         }
     }
@@ -116,7 +117,7 @@ class Chip extends Device {
      * clocker(nCyclesTarget)
      *
      * @this {Chip}
-     * @param {number} nCyclesTarget (0 to single-step, -1 to display status only)
+     * @param {number} nCyclesTarget (0 to single-step)
      * @returns {number} (number of cycles actually "clocked")
      */
     clocker(nCyclesTarget = 0)
@@ -374,6 +375,30 @@ class Chip extends Device {
     {
         this.println("reset");
         this.ledArray.clearBuffer(true);
+    }
+
+    /**
+     * updateStatus(fTransition)
+     *
+     * Update the LED array as needed.
+     *
+     * Called by Time's updateStatus() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
+     * single-stepped), and 3) a start() or stop() transition has occurred.
+     *
+     * Of those, all we currently care about are step() and stop() notifications, because we want to make sure
+     * the LED display is in sync with the last LED buffer update performed by doGeneration().  In both of those
+     * cases, time has been stopped.  If time has NOT been stopped, then the normal LED animator function takes
+     * care of updating the display.
+     *
+     * @this {Chip}
+     * @param {boolean} [fTransition]
+     */
+    updateStatus(fTransition)
+    {
+        if (fTransition && !this.time.isRunning()) {
+            this.ledArray.drawBuffer();
+        }
     }
 }
 

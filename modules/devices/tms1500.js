@@ -606,7 +606,7 @@ class Chip extends Device {
      * an example of an operation that imposes additional cycle overhead.
      *
      * @this {Chip}
-     * @param {number} nCyclesTarget (0 to single-step, -1 to display status only)
+     * @param {number} nCyclesTarget (0 to single-step)
      * @returns {number} (number of cycles actually "clocked")
      */
     clocker(nCyclesTarget = 0)
@@ -1574,13 +1574,18 @@ class Chip extends Device {
     }
 
     /**
-     * updateStatus()
+     * updateStatus(fTransition)
      *
      * Enumerate all bindings and update their values.
      *
+     * Called by Time's updateStatus() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
+     * single-stepped), and 3) a start() or stop() transition has occurred.
+     *
      * @this {Chip}
+     * @param {boolean} [fTransition]
      */
-    updateStatus()
+    updateStatus(fTransition)
     {
         for (let binding in this.bindings) {
             let regMap = this.regMap[binding];
@@ -1595,6 +1600,10 @@ class Chip extends Device {
                 }
                 this.setBindingText(binding, sValue);
             }
+        }
+        if (fTransition && !this.time.isRunning()) {
+            this.rom.drawArray();
+            this.println(this.toString());
         }
     }
 }

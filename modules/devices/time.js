@@ -873,7 +873,8 @@ class Time extends Device {
     /**
      * updateStatus(fTransition)
      *
-     * Used for both periodic status updates and transitional updates (eg, start() and stop() calls)
+     * Used for periodic status updates (from onYield()), single-step updates (from step()), and
+     * transitional updates (from start() and stop()).
      *
      * @this {Time}
      * @param {boolean} [fTransition]
@@ -885,9 +886,6 @@ class Time extends Device {
                 this.println("starting (target speed: " + this.getSpeedTarget() + ")");
             } else {
                 this.println("stopping");
-                for (let i = 0; i < this.aClockers.length; i++) {
-                    this.aClockers[i](-1);
-                }
             }
         }
 
@@ -898,7 +896,7 @@ class Time extends Device {
         }
 
         for (let i = 0; i < this.aUpdaters.length; i++) {
-            this.aUpdaters[i]();
+            this.aUpdaters[i](fTransition);
         }
     }
 

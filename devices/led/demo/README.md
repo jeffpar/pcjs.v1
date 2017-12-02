@@ -35,7 +35,8 @@ machines:
           },
           "bindings": {
             "gliderGun": "gliderGun"
-          }
+          },
+          "overrides": ["wrap"]
         },
         "lifeClock": {
           "class": "Time",
@@ -48,7 +49,7 @@ machines:
             "step": "stepLife",
             "throttle": "throttleLife"
           },
-          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate"]
+          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum"]
         },
         "lifeDisplay": {
           "class": "LED",
