@@ -69,7 +69,7 @@ machines:
           "valueTotal": 2048,
           "littleEndian": true,
           "file": "ti57le.bin",
-          "reference": "",
+          "reference": "http://seanriddle.com/ti57.bin",
           "chipID": "TMC1501NC DI 7741",
           "revision": "0",
           "overrides": ["colorROM","backgroundColorROM"],
