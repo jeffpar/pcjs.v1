@@ -29,6 +29,17 @@
 "use strict";
 
 /**
+ * @typedef {Config} LifeConfig
+ * @property {string} class
+ * @property {Object} [bindings]
+ * @property {number} [version]
+ * @property {Array.<string>} [overrides]
+ * @property {boolean} [wrap]
+ * @property {string} [rule]
+ * @property {string} [pattern]
+ */
+
+/**
  * "Game of Life" Chip
  *
  * @class {Chip}
@@ -41,7 +52,7 @@ class Chip extends Device {
      * @this {Chip}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {Config} [config]
+     * @param {LifeConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
@@ -49,6 +60,7 @@ class Chip extends Device {
 
         this.fWrap = this.config['wrap'] || false;
         this.sRule = this.config['rule'] || "B3/S23";   // default rule (births require 3 neighbors, survivors require 2 or 3)
+        this.sPatternInit = this.config['pattern'];
 
         /*
          * Get access to the LED device, so we can update its display.
@@ -57,9 +69,10 @@ class Chip extends Device {
         if (this.ledArray) {
 
             /*
-             * clearBuffer(true) performs a combination of clearBuffer() and drawBuffer().
+             * If loadPattern() didn't load anything into the LED array, then call
+             * clearBuffer(true), which performs a combination of clearBuffer() and drawBuffer().
              */
-            this.ledArray.clearBuffer(true);
+            if (!this.loadPattern()) this.ledArray.clearBuffer(true);
 
             let configInput = {
                 class:          "Input",
@@ -104,11 +117,29 @@ class Chip extends Device {
     addBinding(binding, element)
     {
         let chip = this;
-        let patterns = this.config['patterns'];
-        if (patterns && patterns[binding]) {
-            element.onclick = function onClickPattern() {
-                chip.loadPattern(binding);
+
+        switch(binding) {
+        case "save":
+            element.onclick = function onClickSave() {
+                let sPattern = chip.savePattern();
+                chip.println(sPattern);
+                let href = window.location.href;
+                if (href.indexOf('pattern=') >= 0) {
+                    href = href.replace(/(pattern=)[^&]*/, "$1" + sPattern.replace(/\$/g, "$$$$"));
+                } else {
+                    href += ((href.indexOf('?') < 0)? '?' : '&') + "pattern=" + sPattern;
+                }
+                window.location = href;
             };
+            break;
+
+        default:
+            let patterns = this.config['patterns'];
+            if (patterns && patterns[binding]) {
+                element.onclick = function onClickPattern() {
+                    chip.loadPattern(binding);
+                };
+            }
         }
         super.addBinding(binding, element);
     }
@@ -256,58 +287,94 @@ class Chip extends Device {
     /**
      * loadPattern(id)
      *
+     * If no id is specified, we load the initialization pattern, if any, set via the LifeConfig
+     * "pattern" property (which, in turn, can be set as URL override, if desired).
+     *
+     * NOTE: Our initialization pattern is a simplified "single-string" version of the RLE pattern
+     * file format: "col/row/width/height/tokens".  The default rule is assumed.
+     *
      * @this {Chip}
-     * @param {string} id
+     * @param {string} [id]
+     * @returns {boolean}
      */
     loadPattern(id)
     {
         let ledArray = this.ledArray;
-        let patterns = this.config['patterns'];
-        let lines = patterns && patterns[id];
-        if (!lines) {
-            this.println("unknown pattern: " + id);
-            return;
+        let iCol = -1, iRow = -1, width, height, rule, sPattern = "";
+
+        if (!id) {
+            if (!this.sPatternInit) {
+                return false;
+            }
+            let i = 0;
+            let aParts = this.sPatternInit.split('/');
+            if (aParts.length == 5) {
+                iCol = +aParts[i++];
+                iRow = +aParts[i++];
+            }
+            if (aParts.length == 3 || aParts.length == 5) {
+                width = +aParts[i++];
+                height = +aParts[i++];
+                sPattern = aParts[i];
+            }
+            else {
+                this.println("unrecognized pattern: " + this.sPatternInit);
+                return false;
+            }
+            rule = this.sRule;  // TODO: If we ever support multiple rules, then allow rule overrides, too
         }
-        this.println("loading pattern '" + id + "'");
-        let nCmds = 0;
-        let width = 0, height = 0, rule = "", sPattern = "";
-        ledArray.clearBuffer();
-        for (let i = 0; i < lines.length; i++) {
-            let sLine = lines[i];
-            if (sLine[0] == '#') {
-                this.println(sLine);
-                continue;
+        else {
+            let patterns = this.config['patterns'];
+            let lines = patterns && patterns[id];
+            if (!lines) {
+                this.println("unknown pattern: " + id);
+                return false;
             }
-            if (!nCmds++) {
-                let match = sLine.match(/x\s*=\s*([0-9]+)\s*,\s*y\s*=\s*([0-9]+)\s*(?:,\s*rule\s*=\s*(\S+)|)/i);
-                if (!match) {
-                    this.println("unrecognized header line");
-                    return;
+            this.println("loading pattern '" + id + "'");
+            for (let i = 0, n = 0; i < lines.length; i++) {
+                let sLine = lines[i];
+                if (sLine[0] == '#') {
+                    this.println(sLine);
+                    continue;
                 }
-                width = +match[1];
-                height = +match[2];
-                rule = match[3];
-                if (rule != this.sRule) {
-                    this.println("unsupported rule: " + rule);
-                    return;
+                if (!n++) {
+                    let match = sLine.match(/x\s*=\s*([0-9]+)\s*,\s*y\s*=\s*([0-9]+)\s*(?:,\s*rule\s*=\s*(\S+)|)/i);
+                    if (!match) {
+                        this.println("unrecognized header line");
+                        return false;
+                    }
+                    width = +match[1];
+                    height = +match[2];
+                    rule = match[3];
+                    continue;
                 }
-                continue;
+                let end = sLine.indexOf('!');
+                if (end >= 0) {
+                    sPattern += sLine.substr(0, end);
+                    break;
+                }
+                sPattern += sLine;
             }
-            let end = sLine.indexOf('!');
-            if (end >= 0) {
-                sPattern += sLine.substr(0, end);
-                break;
-            }
-            sPattern += sLine;
         }
-        if (width > ledArray.cols || height > ledArray.rows) {
+
+        if (rule != this.sRule) {
+            this.println("unsupported rule: " + rule);
+            return false;
+        }
+
+        if (iCol < 0) iCol = (ledArray.cols - width) >> 1;
+        if (iRow < 0) iRow = (ledArray.rows - height) >> 1;
+
+        if (iCol < 0 || iCol + width > ledArray.cols || iRow < 0 || iRow + height > ledArray.rows) {
             this.printf("pattern too large (%d,%d)\n", width, height);
-            return;
+            return false;
         }
-        let iCol = (ledArray.cols - width) >> 1;
-        let iRow = (ledArray.rows - height) >> 1;
-        let aTokens = sPattern.split(/([bo$])/i);
+
         let i = 0, col = iCol, row = iRow;
+        let aTokens = sPattern.split(/([bo$])/i);
+
+        ledArray.clearBuffer();
+
         /*
          * We could add checks that verify that col and row stay within the bounds of the specified
          * width and height of the pattern, but it's possible that there are some legit patterns out
@@ -340,7 +407,9 @@ class Chip extends Device {
                 }
             }
         }
+
         ledArray.drawBuffer();
+        return true;
     }
 
     /**
@@ -375,6 +444,75 @@ class Chip extends Device {
     {
         this.println("reset");
         this.ledArray.clearBuffer(true);
+    }
+
+    /**
+     * savePattern()
+     *
+     * @this {Chip}
+     * @returns {string}
+     */
+    savePattern()
+    {
+        let ledArray = this.ledArray;
+
+        let nRunOn = 0, nRunOff = 0, sPattern = "";
+        let iCol = 0, iRow = 0, nCols = this.ledArray.cols, nRows = this.ledArray.rows;
+
+        for (let row = 0; row < ledArray.rows; row++) {
+            for (let col = 0; col < ledArray.cols; col++) {
+                let on = ledArray.getBufferData(col, row);
+                if (!on) {
+                    /*
+                     * The OFF case...
+                     */
+                    if (nRunOn) {
+                        if (nRunOn > 1) sPattern += nRunOn;
+                        sPattern += 'o';
+                        nRunOn = 0;
+                    }
+                    nRunOff++;
+                } else {
+                    /*
+                     * The ON case...
+                     */
+                    if (nRunOff) {
+                        if (nRunOff > 1) sPattern += nRunOff;
+                        sPattern += 'b';
+                        nRunOff = 0;
+                    }
+                    nRunOn++;
+                }
+            }
+            if (nRunOn) {
+                if (nRunOn > 1) sPattern += nRunOn;
+                sPattern += 'o';
+                nRunOn = 0;
+            }
+            nRunOff = 0;
+            sPattern += '$';
+        }
+
+        /*
+         * Remove any '$' at the beginning of the pattern.
+         */
+        while (sPattern[0] == '$') {
+            iRow++; nRows--;
+            sPattern = sPattern.slice(1);
+        }
+
+        /*
+         * Similarly, for every '$$' at the end of the pattern.
+         */
+        while (sPattern.slice(-2) == '$$') {
+            nRows--;
+            sPattern = sPattern.slice(0, -1);
+        }
+
+        sPattern = iCol + '/' + iRow + '/' + nCols + '/' + nRows + '/' + sPattern.slice(0, -1);
+
+        sPattern = sPattern.replace(/\$+$/, '');
+        return sPattern;
     }
 
     /**
