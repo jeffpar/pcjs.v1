@@ -173,8 +173,8 @@ class Time extends Device {
      * addAnimator(callBack)
      *
      * Animators are functions that used to be called with YIELDS_PER_SECOND frequency, when animate()
-     * was called after every yield, but now we rely on requestAnimationFrame(), so the frequency is
-     * browser-dependent (but presumably at least 60Hz).
+     * was called on every onYield() call, but now we rely on requestAnimationFrame(), so the frequency
+     * is browser-dependent (but presumably at least 60Hz).
      *
      * @this {Time}
      * @param {function()} callBack
@@ -275,9 +275,9 @@ class Time extends Device {
     /**
      * addUpdater(callBack)
      *
-     * Adds a status update function that's called from updateStatus(), either as the result of
-     * periodic status updates (from onYield()), single-step updates (from step()), or transitional
-     * updates (from start() and stop()).
+     * Adds a status update function that's called from updateStatus(), either as the result
+     * of periodic status updates from onYield(), single-step updates from step(), or transitional
+     * updates from start() and stop().
      *
      * @this {Time}
      * @param {function(boolean)} callBack
@@ -933,8 +933,8 @@ class Time extends Device {
     /**
      * updateStatus(fTransition)
      *
-     * Used for periodic status updates (from onYield()), single-step updates (from step()), and
-     * transitional updates (from start() and stop()).
+     * Used for periodic status updates from onYield(), single-step updates from step(), and transitional
+     * updates from start() and stop().
      *
      * @this {Time}
      * @param {boolean} [fTransition]
