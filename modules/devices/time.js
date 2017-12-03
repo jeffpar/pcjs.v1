@@ -538,7 +538,7 @@ class Time extends Device {
     resetSpeed()
     {
         this.nCyclesRun = this.nCyclesBurst = this.nCyclesRemain = 0;
-        this.setSpeed(this.nBaseMultiplier);
+        if (!this.setSpeedThrottle()) this.setSpeed(this.nBaseMultiplier);
     }
 
     /**
@@ -595,6 +595,7 @@ class Time extends Device {
      * This handles speed adjustments requested by the throttling slider.
      *
      * @this {Time}
+     * @returns {boolean}
      */
     setSpeedThrottle()
     {
@@ -604,11 +605,15 @@ class Time extends Device {
          * a new target nCyclesPerSecond that is proportional, and then convert that to a speed multiplier.
          */
         let elementInput = this.bindings[Time.BINDING.THROTTLE];
-        let ratio = (elementInput.value - elementInput.min) / (elementInput.max - elementInput.min);
-        let nCycles = Math.floor((this.nCyclesMaximum - this.nCyclesMinimum) * ratio + this.nCyclesMinimum);
-        let nMultiplier = nCycles / this.nCyclesPerSecond;
-        this.assert(nMultiplier >= 1);
-        this.setSpeed(nMultiplier);
+        if (elementInput) {
+            let ratio = (elementInput.value - elementInput.min) / (elementInput.max - elementInput.min);
+            let nCycles = Math.floor((this.nCyclesMaximum - this.nCyclesMinimum) * ratio + this.nCyclesMinimum);
+            let nMultiplier = nCycles / this.nCyclesPerSecond;
+            this.assert(nMultiplier >= 1);
+            this.setSpeed(nMultiplier);
+            return true;
+        }
+        return false;
     }
 
     /**

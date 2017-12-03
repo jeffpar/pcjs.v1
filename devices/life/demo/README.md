@@ -34,9 +34,10 @@ machines:
             ]
           },
           "bindings": {
-            "gliderGun": "gliderGun"
+            "gliderGun": "gliderGun",
+            "save": "saveLife"
           },
-          "overrides": ["wrap"]
+          "overrides": ["wrap","pattern"]
         },
         "lifeClock": {
           "class": "Time",
@@ -102,6 +103,7 @@ Try [Red](?color=red#game-of-life) or [Blue](?color=blue#game-of-life).
 <div id="lifeDemo">
   <div id="lifeDisplay"></div>
   <button id="gliderGun">Glider Gun</button>
+  <button id="saveLife">Save</button>
 </div>
 <div class="diagsLife">
   <div>
@@ -111,5 +113,5 @@ Try [Red](?color=red#game-of-life) or [Blue](?color=blue#game-of-life).
   <button id="stepLife">Step</button>
   <button id="resetLife">Reset</button>
   <button id="clearLife">Clear</button>
-  <input type="range" min="1" max="1000" value="1" class="slider" id="throttleLife"><span id="speedLife">Stopped</span>
+  <input type="range" min="1" max="120" value="15" class="slider" id="throttleLife"><span id="speedLife">Stopped</span>
 </div>
