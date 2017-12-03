@@ -77,6 +77,7 @@
  * @property {number} [cyclesPerSecond]
  * @property {number} [yieldsPerSecond]
  * @property {number} [yieldsPerUpdate]
+ * @property {boolean} [requestAnimationFrame]
  */
 
 /**
@@ -127,6 +128,10 @@ class Time extends Device {
         this.nCyclesPerSecond = this.bounds(this.config['cyclesPerSecond'] || 650000, this.nCyclesMinimum, this.nCyclesMaximum);
         this.nYieldsPerSecond = this.bounds(this.config['yieldsPerSecond'] || Time.YIELDS_PER_SECOND, 30, 120);
         this.nYieldsPerUpdate = this.bounds(this.config['yieldsPerUpdate'] || Time.YIELDS_PER_UPDATE, 1, this.nYieldsPerSecond);
+
+        this.fRequestAnimationFrame = this.config['requestAnimationFrame'];
+        if (this.fRequestAnimationFrame === undefined) this.fRequestAnimationFrame = true;
+
         this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
         this.mhzBase = (this.nCyclesPerSecond / 10000) / 100;
         this.mhzCurrent = this.mhzTarget = this.mhzBase * this.nTargetMultiplier;
@@ -145,25 +150,7 @@ class Time extends Device {
 
         let time = this;
         this.timerYield = this.addTimer("timerYield", function onYield() {
-            time.fYield = true;
-            let nYields = time.nYields;
-            let nCyclesPerSecond = time.getCycles();
-            if (nCyclesPerSecond >= time.nYieldsPerSecond) {
-                time.nYields++;
-            } else {
-                /*
-                 * Let's imagine that nCyclesPerSecond has dropped to 4, whereas the usual nYieldsPerSecond is 60;
-                 * that's means we're yielding at 1/15th the usual rate, so to compensate, we want to bump nYields
-                 * by 15 instead of 1.
-                 */
-                time.nYields += Math.ceil(time.nYieldsPerSecond / nCyclesPerSecond);
-            }
-            if (time.nYields >= time.nYieldsPerUpdate && nYields < time.nYieldsPerUpdate) {
-                time.updateStatus();
-            }
-            if (time.nYields >= time.nYieldsPerSecond) {
-                time.nYields = 0;
-            }
+            time.onYield();
         }, this.msYield);
 
         this.resetSpeed();
@@ -304,7 +291,7 @@ class Time extends Device {
         for (let i = 0; i < this.aAnimators.length; i++) {
             this.aAnimators[i]();
         }
-        if (this.fRunning) this.requestAnimationFrame(this.onAnimationFrame);
+        if (this.fRunning && this.fRequestAnimationFrame) this.requestAnimationFrame(this.onAnimationFrame);
     }
 
     /**
@@ -562,6 +549,34 @@ class Time extends Device {
     }
 
     /**
+     * onYield()
+     *
+     * @this {Time}
+     */
+    onYield()
+    {
+        this.fYield = true;
+        let nYields = this.nYields;
+        let nCyclesPerSecond = this.getCycles();
+        if (nCyclesPerSecond >= this.nYieldsPerSecond) {
+            this.nYields++;
+        } else {
+            /*
+             * Let's imagine that nCyclesPerSecond has dropped to 4, whereas the usual nYieldsPerSecond is 60;
+             * that's means we're yielding at 1/15th the usual rate, so to compensate, we want to bump nYields
+             * by 15 instead of 1.
+             */
+            this.nYields += Math.ceil(this.nYieldsPerSecond / nCyclesPerSecond);
+        }
+        if (this.nYields >= this.nYieldsPerUpdate && nYields < this.nYieldsPerUpdate) {
+            this.updateStatus();
+        }
+        if (this.nYields >= this.nYieldsPerSecond) {
+            this.nYields = 0;
+        }
+    }
+
+    /**
      * resetSpeed()
      *
      * Resets speed and cycle information as part of any reset() or restore(); this typically occurs during powerUp().
@@ -619,13 +634,9 @@ class Time extends Device {
             return;
         }
         if (this.fRunning) {
-            /*
-             * Before we started using requestAnimationFrame(), this was the logical point to call
-             * animate(), because we had just performed some work and then yielded.  But now, that's
-             * no longer our concern.
-             */
             this.assert(!this.idRunTimeout);
             this.idRunTimeout = setTimeout(this.onRunTimeout, this.snapStop());
+            if (!this.fRequestAnimationFrame) this.animate();
         }
     }
 
@@ -865,13 +876,14 @@ class Time extends Device {
         this.msStartRun = this.msEndRun = 0;
         this.updateStatus(true);
         /*
-         * Kickstart both the clockers and the animators; it's a little premature to start animation
-         * here, because the first run() should take place before the first animate(), but since clock
-         * speed is now decoupled from animation speed, this isn't something we should worry about.
+         * Kickstart both the clockers and requestAnimationFrame; it's a little premature to start
+         * animation here, because the first run() should take place before the first animate(), but
+         * since clock speed can now be decoupled from animation speed, this isn't something we should
+         * worry about.
          */
         this.assert(!this.idRunTimeout);
         this.idRunTimeout = setTimeout(this.onRunTimeout, 0);
-        this.requestAnimationFrame(this.onAnimationFrame);
+        if (this.fRequestAnimationFrame) this.requestAnimationFrame(this.onAnimationFrame);
         return true;
     }
 
@@ -997,7 +1009,7 @@ Time.BINDING = {
 
 /*
  * We yield more often now (120 times per second instead of 60), to help ensure that requestAnimationFrame()
- * callbacks are called as timely as possible.  And we still only want to perform DOM-related status updates
+ * callbacks can be called as timely as possible.  And we still only want to perform DOM-related status updates
  * no more than twice per second, so the required number of yields before each update has been increased as well.
  */
 Time.YIELDS_PER_SECOND = 120;

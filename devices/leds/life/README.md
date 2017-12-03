@@ -55,7 +55,7 @@ machines:
             "step": "stepLife",
             "throttle": "throttleLife"
           },
-          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum"]
+          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","requestAnimationFrame"]
         },
         "lifeDisplay": {
           "class": "LED",
