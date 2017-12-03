@@ -24,6 +24,7 @@ machines:
         "lifeChip": {
           "class": "Chip",
           "wrap": false,
+          "pattern": "gliderGun",
           "patterns": {
             "gliderGun": [
               "#N Gosper glider gun",
