@@ -472,15 +472,20 @@ class Time extends Device {
     /**
      * isTimerSet(iTimer)
      *
+     * NOTE: Even if the timer is armed, we return false if the clock is currently stopped;
+     * in that sense, perhaps this function should be named isTimerArmedAndWillItFireOnTime().
+     *
      * @this {Time}
      * @param {number} iTimer
      * @returns {boolean}
      */
     isTimerSet(iTimer)
     {
-        if (iTimer > 0 && iTimer <= this.aTimers.length) {
-            let timer = this.aTimers[iTimer-1];
-            return (timer.nCyclesLeft >= 0);
+        if (this.fRunning) {
+            if (iTimer > 0 && iTimer <= this.aTimers.length) {
+                let timer = this.aTimers[iTimer - 1];
+                return (timer.nCyclesLeft >= 0);
+            }
         }
         return false;
     }
@@ -638,13 +643,18 @@ class Time extends Device {
                 nMultiplier = this.nBaseMultiplier;
                 fSuccess = false;
             }
-            // this.mhzCurrent = 0;
             this.nTargetMultiplier = nMultiplier;
             let mhzTarget = this.mhzBase * this.nTargetMultiplier;
             if (this.mhzTarget != mhzTarget) {
                 this.mhzTarget = mhzTarget;
                 this.setBindingText(Time.BINDING.SPEED, this.getSpeedTarget());
             }
+            /*
+             * After every yield, calcSpeed() will update mhzCurrent, but we also need to be optimistic
+             * and set it to the mhzTarget now, so that the next calcCycles() call will make a reasonable
+             * initial estimate.
+             */
+            this.mhzCurrent = this.mhzTarget;
         }
         this.nCyclesRun = 0;
         this.msStartRun = this.msEndRun = 0;
@@ -793,6 +803,10 @@ class Time extends Device {
         }
 
         this.msEndRun += msRemainsThisRun;
+
+        if (this.isCategoryOn(Device.CATEGORY.TIME)) {
+            this.printf("after running %d cycles, resting for %dms\n", this.nCyclesThisRun, msRemainsThisRun);
+        }
 
         return msRemainsThisRun;
     }

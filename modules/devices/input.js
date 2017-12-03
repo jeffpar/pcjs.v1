@@ -437,7 +437,7 @@ class Input extends Device {
 
         element.addEventListener(
             'mouseout',
-            function onMouseUp(event) {
+            function onMouseOut(event) {
                 if (input.xStart < 0) {
                     input.processEvent(element, Input.ACTION.MOVE, event);
                 } else {

@@ -15,7 +15,7 @@ Programmable Calculators.
 * [Device](device.js)
 * [Input](input.js)
 * [LED](led.js)
-* [LifeChip](lifechip.js)
+* [LEDCtrl](ledctrl.js)
 * [ROM](rom.js)
 * [Time](time.js)
 * [TMS-1500](tms1500.js)
