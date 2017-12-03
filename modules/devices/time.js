@@ -54,11 +54,10 @@
  * overhead, since the duration is fixed.  Also, certain types of updates may benefit from the subsequent yield
  * (eg, DOM updates), but you should avoid making expensive updates at such a high frequency.
  *
- * NOTE: addAnimator() used to rely on the "yield" timer created with addTimer(), which meant that our
- * animation callbacks were limited by the current clock frequency, which could be below 60Hz, but now we
- * use requestAnimationFrame(), so it should now be possible to continue having high-speed animations,
- * regardless of our own clock speed.  However, we still automatically stop animations whenever our clock
- * is stopped.
+ * NOTE: addAnimator() used to rely on our onYield() timer callback, which meant that our animation callbacks
+ * were limited by the current clock frequency, which could be below 60Hz, but now we use requestAnimationFrame(),
+ * so it should now be possible to continue having high-speed animations, regardless of our own clock speed.
+ * However, we still automatically stop all animations whenever our own clock is stopped as well.
  *
  * @typedef {Object} Timer
  * @property {string} id
@@ -173,7 +172,9 @@ class Time extends Device {
     /**
      * addAnimator(callBack)
      *
-     * Animators are functions that are normally called at YIELDS_PER_SECOND.
+     * Animators are functions that used to be called with YIELDS_PER_SECOND frequency, when animate()
+     * was called after every yield, but now we rely on requestAnimationFrame(), so the frequency is
+     * browser-dependent (but presumably at least 60Hz).
      *
      * @this {Time}
      * @param {function()} callBack
@@ -235,6 +236,8 @@ class Time extends Device {
     /**
      * addClocker(callBack)
      *
+     * Adds a clocker function that's called from doBurst() to process a specified number of cycles.
+     *
      * @this {Time}
      * @param {function(number)} callBack
      */
@@ -272,8 +275,12 @@ class Time extends Device {
     /**
      * addUpdater(callBack)
      *
+     * Adds a status update function that's called from updateStatus(), either as the result of
+     * periodic status updates (from onYield()), single-step updates (from step()), or transitional
+     * updates (from start() and stop()).
+     *
      * @this {Time}
-     * @param {function()} callBack
+     * @param {function(boolean)} callBack
      */
     addUpdater(callBack)
     {
