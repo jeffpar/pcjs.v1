@@ -18,7 +18,8 @@ machines:
           "bindings": {
             "clear": "clearLife",
             "print": "printLife"
-          }
+          },
+          "overrides": ["autoPower"]
         },
         "lifeChip": {
           "class": "Chip",

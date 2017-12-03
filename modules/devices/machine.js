@@ -118,9 +118,11 @@ class Machine extends Device {
         super(idMachine, idMachine, Machine.VERSION);
         try {
             this.config = JSON.parse(sConfig);
-            this.addBindings(this.config[idMachine].bindings);
-            this.checkVersion(this.config[idMachine]);
-            this.fAutoPower = (this.config[idMachine]['autoPower'] !== false);
+            let config = this.config[idMachine];
+            this.addBindings(config.bindings);
+            this.checkVersion(config);
+            this.checkOverrides(config);
+            this.fAutoPower = (config['autoPower'] !== false);
         } catch(err) {
             let sError = err.message;
             let match = sError.match(/position ([0-9]+)/);
