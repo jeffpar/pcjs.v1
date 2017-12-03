@@ -199,12 +199,12 @@ pcjs:
     - /modules/pdp11/lib/computer.js
     - /modules/shared/lib/state.js
     - /modules/shared/lib/embed.js
-  life_scripts:
+  led_scripts:
     - /modules/devices/device.js
     - /modules/devices/input.js
     - /modules/devices/led.js
     - /modules/devices/time.js
-    - /modules/devices/lifechip.js
+    - /modules/devices/ledctrl.js
     - /modules/devices/machine.js
   ti57_scripts:
     - /modules/devices/device.js
