@@ -1,7 +1,9 @@
 ---
 layout: page
 title: '"Game of Life" Demo'
-permalink: /devices/life/demo/
+permalink: /devices/leds/life/
+redirect_from:
+  - /devices/life/demo/
 machines:
   - id: lifeDemo
     type: leds
