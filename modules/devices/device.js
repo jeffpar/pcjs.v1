@@ -93,50 +93,10 @@ class Device {
         this.version = version || 0;
         this.bindings = {};
         this.sCategories = "";
-
-        /*
-         * Add this Device to the global set of Devices, so that findDevice(), findBinding(), etc, will work.
-         */
         this.addDevice();
-
-        /*
-         * Build the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config['bindings'])
-         */
         this.addBindings(this.config['bindings']);
-
         this.checkVersion(this.config);
-
-        /*
-         * If this device's config contains an "overrides" array, then any of the properties listed in
-         * that array may be overridden with a URL parameter.  We don't impose any checks on the overriding
-         * value, so it is the responsibility of the component with overridable properties to validate them.
-         */
-        if (this.config['overrides']) {
-            let parms = Device.getURLParms();
-            for (let prop in parms) {
-                if (this.config['overrides'].indexOf(prop) >= 0) {
-                    let value;
-                    let s = parms[prop];
-                    /*
-                     * You might think we could simply call parseInt() and check isNaN(), but parseInt() has
-                     * some annoying quirks, like stopping at the first non-numeric character.  If the ENTIRE
-                     * string isn't a number, then we don't want to treat ANY part of it as a number.
-                     */
-                    if (s.match(/^[+-]?[0-9.]+$/)) {
-                        value = Number.parseInt(s, 10);
-                    } else if (s == "true") {
-                        value = true;
-                    } else if (s == "false") {
-                        value = false;
-                    } else {
-                        value = s;
-                        s = '"' + s + '"';
-                    }
-                    this.config[prop] = value;
-                    this.println("overriding " + idDevice + " property '" + prop + "' with " + s);
-                }
-            }
-        }
+        this.checkOverrides(this.config);
     }
 
     /**
@@ -224,7 +184,8 @@ class Device {
     /**
      * addBindings(bindings)
      *
-     * This function supports either a "bindings" object map, or an array of "direct bindings".
+     * Builds the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config['bindings']),
+     * using either a "bindings" object map OR an array of "direct bindings".
      *
      * @this {Device}
      * @param {Object} bindings
@@ -246,6 +207,8 @@ class Device {
 
     /**
      * addDevice()
+     *
+     * Adds this Device to the global set of Devices, so that findDevice(), findBinding(), etc, will work.
      *
      * @this {Device}
      */
@@ -325,6 +288,47 @@ class Device {
         if (n < min) n = min;
         if (n > max) n = max;
         return n;
+    }
+
+    /**
+     * checkOverrides(config)
+     *
+     * @this {Device}
+     * @param {Config} config
+     */
+    checkOverrides(config)
+    {
+        /*
+         * If this device's config contains an "overrides" array, then any of the properties listed in
+         * that array may be overridden with a URL parameter.  We don't impose any checks on the overriding
+         * value, so it is the responsibility of the component with overridable properties to validate them.
+         */
+        if (config['overrides']) {
+            let parms = Device.getURLParms();
+            for (let prop in parms) {
+                if (config['overrides'].indexOf(prop) >= 0) {
+                    let value;
+                    let s = parms[prop];
+                    /*
+                     * You might think we could simply call parseInt() and check isNaN(), but parseInt() has
+                     * some annoying quirks, like stopping at the first non-numeric character.  If the ENTIRE
+                     * string isn't a number, then we don't want to treat ANY part of it as a number.
+                     */
+                    if (s.match(/^[+-]?[0-9.]+$/)) {
+                        value = Number.parseInt(s, 10);
+                    } else if (s == "true") {
+                        value = true;
+                    } else if (s == "false") {
+                        value = false;
+                    } else {
+                        value = s;
+                        s = '"' + s + '"';
+                    }
+                    config[prop] = value;
+                    this.println("overriding " + this.idDevice + " property '" + prop + "' with " + s);
+                }
+            }
+        }
     }
 
     /**
