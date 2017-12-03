@@ -94,8 +94,8 @@ Using [PCjs Devices](/modules/devices/), here's a simple demo of
 [John Conway's](http://www.conwaylife.com/wiki/John_Horton_Conway)
 "[Game of Life](http://www.conwaylife.com/wiki/Conway%27s_Game_of_Life)", using an grid of simulated LEDs.
 
-Think of it as a smart "[Lite-Brite](https://en.wikipedia.org/wiki/Lite-Brite)".  Want a different LED color?
-Try [Red](?color=red#game-of-life) or [Blue](?color=blue#game-of-life).
+Think of it as a animated "[Lite-Brite](https://en.wikipedia.org/wiki/Lite-Brite)".  Want a different LED color?
+Try [Red](?color=red&autoStart=true#game-of-life) or [Blue](?color=blue#game-of-life) or any other color, by changing the URL.
 
 ### Game of Life
 

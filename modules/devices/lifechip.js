@@ -60,7 +60,7 @@ class Chip extends Device {
 
         this.fWrap = this.config['wrap'] || false;
         this.sRule = this.config['rule'] || "B3/S23";   // default rule (births require 3 neighbors, survivors require 2 or 3)
-        this.sPatternInit = this.config['pattern'];
+        this.sPatternInit = this.config['pattern'] || "";
 
         /*
          * Get access to the LED device, so we can update its display.
@@ -301,6 +301,14 @@ class Chip extends Device {
     {
         let ledArray = this.ledArray;
         let iCol = -1, iRow = -1, width, height, rule, sPattern = "";
+
+        if (!id) {
+            /*
+             * If no id is provided, then we fallback to sPatternInit, which can be either
+             * an id (if it doesn't start with a digit) or one of our simplified pattern strings.
+             */
+            if (!this.sPatternInit.match(/^[0-9]/)) id = this.sPatternInit;
+        }
 
         if (!id) {
             if (!this.sPatternInit) {
