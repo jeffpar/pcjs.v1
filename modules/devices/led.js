@@ -229,7 +229,7 @@ class LED extends Device {
         let led = this;
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
-            this.time.addAnimator(function ledAnimate(iAnimation) {
+            this.time.addAnimator(function ledAnimate() {
                 led.drawBuffer();
             });
         }

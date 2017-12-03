@@ -37,23 +37,28 @@
  *
  * These functions are preferred over JavaScript's setTimeout(), because our timers convert "real time"
  * into cycle countdowns, which are effectively paused whenever cycle generation is paused (eg, when the
- * Debugger halts execution).  Moreover, setTimeout() handlers only run after run() yields, which is too
- * granular for high-speed devices (eg, when a serial port tries to simulate interrupts at 9600 baud).
- *
- * Conversely, addClocker() should be used for devices that are cycle-driven (ie, that need to be "clocked")
- * rather than time-driven; they must define a clocker() function and install it with addClocker().
- *
- * Finally, addAnimator() should be used by any device that wants to update its state YIELDS_PER_SECOND
- * (normally 60Hz); for example, the LED device uses this to cap display updates at 60Hz.  A separate 60Hz
- * timer could be used as well, but using an addAnimator() callback imposes slightly less overhead, since the
- * duration is fixed.  Also, certain types of updates may benefit from the subsequent yield (eg, DOM updates),
- * but you should avoid making expensive updates at such a high frequency.
+ * user stops the emulation).  Moreover, setTimeout() handlers only run after run() yields, which may be
+ * too granular for certain devices (eg, when a serial port tries to simulate interrupts at high baud rates).
  *
  * WARNING: If you need to set the 'cyclesPerSecond' TimeConfig property below 60Hz, then 1) you will have
  * to also set 'cyclesMinimum' to an equally low value, otherwise the default minimum will be used, and 2) any
  * timers configured to fire at a faster rate will not be able to; for example, if the machine is configured
- * for 1Hz, then a 60Hz timer will only be able to fire at most 1Hz as well.  In practice, this shouldn't be an
- * issue, as long as the timer is firing at least as frequently as any other work being performed.
+ * for 1Hz, then a 60Hz timer will only be able to fire at most 1Hz as well.  In practice, this shouldn't be
+ * an issue, as long as the timer is firing at least as frequently as any other work being performed.
+ *
+ * addClocker() should be used for devices that are cycle-driven (ie, that need to be "clocked") rather than
+ * time-driven; they must define a clocker() function and install it with addClocker().
+ *
+ * Finally, addAnimator() should be used by any device that wants to perform high-speed animations (normally
+ * 60Hz); a separate 60Hz timer could be used as well, but using an addAnimator() callback imposes slightly less
+ * overhead, since the duration is fixed.  Also, certain types of updates may benefit from the subsequent yield
+ * (eg, DOM updates), but you should avoid making expensive updates at such a high frequency.
+ *
+ * NOTE: addAnimator() used to rely on the "yield" timer created with addTimer(), which meant that our
+ * animation callbacks were limited by the current clock frequency, which could be below 60Hz, but now we
+ * use requestAnimationFrame(), so it should now be possible to continue having high-speed animations,
+ * regardless of our own clock speed.  However, we still automatically stop animations whenever our clock
+ * is stopped.
  *
  * @typedef {Object} Timer
  * @property {string} id
@@ -112,12 +117,11 @@ class Time extends Device {
         super(idMachine, idDevice, Time.VERSION, config);
 
         /*
-         * NOTE: The default speed of 650,000Hz (0.65Mhz) was a crude approximation based on real
-         * world TI-57 device timings.  I had originally assumed the speed as 1,600,000Hz (1.6Mhz),
-         * based on timing information in TI's patents, but in hindsight, that speed seems rather
-         * high for a mid-1970's device, and reality suggests it was much lower.  The TMS-1500 does
-         * burn through a lot of cycles (minimum of 128) per instruction, but either that cycle
-         * burn was much higher, or the underlying clock speed was much lower.  I assume the latter.
+         * NOTE: The default speed of 650,000Hz (0.65Mhz) was a crude approximation based on real world TI-57
+         * device timings.  I had originally assumed the speed as 1,600,000Hz (1.6Mhz), based on timing information
+         * in TI's patents, but in hindsight, that speed seems rather high for a mid-1970's device, and reality
+         * suggests it was much lower.  The TMS-1500 does burn through a lot of cycles (minimum of 128) per instruction,
+         * but either that cycle burn was much higher, or the underlying clock speed was much lower.  I assume the latter.
          */
         this.nCyclesMinimum = this.config['cyclesMinimum'] || 100000;
         this.nCyclesMaximum = this.config['cyclesMaximum'] || 3000000;
@@ -137,13 +141,12 @@ class Time extends Device {
         this.nStepping = 0;
         this.idRunTimeout = this.idStepTimeout = 0;
         this.onRunTimeout = this.run.bind(this);
+        this.onAnimationFrame = this.animate.bind(this);
+        this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
 
         let time = this;
         this.timerYield = this.addTimer("timerYield", function onYield() {
             time.fYield = true;
-            for (let i = 0; i < time.aAnimators.length; i++) {
-                time.aAnimators[i](time.nYields);
-            }
             let nYields = time.nYields;
             let nCyclesPerSecond = time.getCycles();
             if (nCyclesPerSecond >= time.nYieldsPerSecond) {
@@ -173,7 +176,7 @@ class Time extends Device {
      * Animators are functions that are normally called at YIELDS_PER_SECOND.
      *
      * @this {Time}
-     * @param {function(number)} callBack (called with a animation index that ranges from 0 to YIELDS_PER_SECOND-1)
+     * @param {function()} callBack
      */
     addAnimator(callBack)
     {
@@ -275,6 +278,26 @@ class Time extends Device {
     addUpdater(callBack)
     {
         this.aUpdaters.push(callBack);
+    }
+
+    /**
+     * animate()
+     *
+     * This is the callback function we supply to requestAnimationFrame().  The callback has a single
+     * (DOMHighResTimeStamp) argument, which indicates the current time (returned from performance.now())
+     * for when requestAnimationFrame() starts to fire callbacks.
+     *
+     * See: https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame
+     *
+     * @this {Time}
+     * @param {number} [t]
+     */
+    animate(t)
+    {
+        for (let i = 0; i < this.aAnimators.length; i++) {
+            this.aAnimators[i]();
+        }
+        if (this.fRunning) this.requestAnimationFrame(this.onAnimationFrame);
     }
 
     /**
@@ -589,6 +612,11 @@ class Time extends Device {
             return;
         }
         if (this.fRunning) {
+            /*
+             * Before we started using requestAnimationFrame(), this was the logical point to call
+             * animate(), because we had just performed some work and then yielded.  But now, that's
+             * no longer our concern.
+             */
             this.assert(!this.idRunTimeout);
             this.idRunTimeout = setTimeout(this.onRunTimeout, this.snapStop());
         }
@@ -829,8 +857,14 @@ class Time extends Device {
         this.fRunning = true;
         this.msStartRun = this.msEndRun = 0;
         this.updateStatus(true);
+        /*
+         * Kickstart both the clockers and the animators; it's a little premature to start animation
+         * here, because the first run() should take place before the first animate(), but since clock
+         * speed is now decoupled from animation speed, this isn't something we should worry about.
+         */
         this.assert(!this.idRunTimeout);
         this.idRunTimeout = setTimeout(this.onRunTimeout, 0);
+        this.requestAnimationFrame(this.onAnimationFrame);
         return true;
     }
 
@@ -954,7 +988,12 @@ Time.BINDING = {
     THROTTLE:   "throttle"
 };
 
-Time.YIELDS_PER_SECOND = 60;
-Time.YIELDS_PER_UPDATE = 30;
+/*
+ * We yield more often now (120 times per second instead of 60), to help ensure that requestAnimationFrame()
+ * callbacks are called as timely as possible.  And we still only want to perform DOM-related status updates
+ * no more than twice per second, so the required number of yields before each update has been increased as well.
+ */
+Time.YIELDS_PER_SECOND = 120;
+Time.YIELDS_PER_UPDATE = 60;
 
 Time.VERSION    = 1.10;

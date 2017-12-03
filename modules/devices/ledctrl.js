@@ -604,7 +604,7 @@ class Chip extends Device {
      */
     updateStatus(fTransition)
     {
-        if (fTransition && !this.time.isRunning()) {
+        if (!this.time.isRunning()) {
             this.ledArray.drawBuffer();
         }
     }
