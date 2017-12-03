@@ -176,10 +176,10 @@ var aMachineFiles = {
     'PC8080':   pkg.PCCSS.concat(pkg.PC8080Files),
     'PDP10':    pkg.PCCSS.concat(pkg.PDP10Files),
     'PDP11':    pkg.PCCSS.concat(pkg.PDP11Files),
+    'LEDS':     pkg.PCCSS.concat(pkg.LEDFiles),
     'TI42':     pkg.PCCSS.concat(pkg.TI42Files),
     'TI55':     pkg.PCCSS.concat(pkg.TI55Files),
-    'TI57':     pkg.PCCSS.concat(pkg.TI57Files),
-    'LIFE':     pkg.PCCSS.concat(pkg.LifeFiles)
+    'TI57':     pkg.PCCSS.concat(pkg.TI57Files)
 };
 var aMachineFileTypes = {
     'head': [".css"],           // put BOTH ".css" and ".js" here if convertMDMachineLinks() embeds its own scripts

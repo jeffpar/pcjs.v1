@@ -284,12 +284,12 @@
     "./modules/devices/tms1500.js",
     "./modules/devices/machine.js"
   ],
-  "LifeFiles": [
+  "LEDFiles": [
     "./modules/devices/device.js",
     "./modules/devices/input.js",
     "./modules/devices/led.js",
     "./modules/devices/time.js",
-    "./modules/devices/lifechip.js",
+    "./modules/devices/ledctrl.js",
     "./modules/devices/machine.js"
   ]
 }

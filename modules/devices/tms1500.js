@@ -1125,6 +1125,7 @@ class Chip extends Device {
                 if (c) sResult = "unrecognized break option '" + c + "'";
             }
             break;
+
         case 'g':
             if (this.time.start()) {
                 this.addrStop = addr;
@@ -1132,21 +1133,25 @@ class Chip extends Device {
                 sResult = "already started";
             }
             break;
+
         case 'h':
             if (!this.time.stop()) sResult = "already stopped";
             break;
+
         case 't':
             if (s[1] == 'c') this.nStringFormat = Chip.SFORMAT.COMPACT;
             nWords = Number.parseInt(aCommands[1], 10) || 1;
             this.time.onStep(nWords);
             this.sCommandPrev = sCommand;
             break;
+
         case 'r':
             if (s[1] == 'c') this.nStringFormat = Chip.SFORMAT.COMPACT;
             this.setRegister(s.substr(1), addr);
             sResult += this.toString(s[1]);
             this.sCommandPrev = sCommand;
             break;
+
         case 'u':
             addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
             while (nWords--) {
@@ -1157,10 +1162,12 @@ class Chip extends Device {
             this.addrPrev = addr;
             this.sCommandPrev = sCommand;
             break;
+
         case '?':
             sResult = "available commands:";
             Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
             break;
+
         default:
             if (sCommand) {
                 sResult = "unrecognized command '" + sCommand + "' (try '?')";

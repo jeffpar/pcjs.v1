@@ -1,5 +1,5 @@
 /**
- * @fileoverview Simulates a "Game of Life" Chip
+ * @fileoverview Simulates an LED controller
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -104,6 +104,12 @@ class Chip extends Device {
                 this.time.addClocker(this.clocker.bind(this));
                 this.time.addUpdater(this.updateStatus.bind(this));
             }
+
+            /*
+             * The following set of properties are all debugger-related; see onCommand().
+             */
+            this.sCommandPrev = "";
+            this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
         }
     }
 
@@ -421,6 +427,62 @@ class Chip extends Device {
     }
 
     /**
+     * onCommand(sCommand)
+     *
+     * Processes commands for our "mini-debugger".
+     *
+     * If sCommand is blank (ie, if Enter alone was pressed), then sCommandPrev will be used,
+     * but sCommandPrev is set only for certain commands deemed "repeatable" (eg, step and dump
+     * commands).
+     *
+     * @this {Chip}
+     * @param {string} sCommand
+     * @returns {boolean} (true if processed, false if not)
+     */
+    onCommand(sCommand)
+    {
+        let sResult = "";
+
+        if (sCommand == "") {
+            sCommand = this.sCommandPrev;
+        }
+        this.sCommandPrev = "";
+        sCommand = sCommand.trim();
+
+        let aCommands = sCommand.split(' ');
+        let s = aCommands[0], c = aCommands[1];
+
+        switch(s[0]) {
+        case 'c':
+            if (c) {
+                this.println("set category '" + c + "'");
+                this.setCategory(c);
+            } else {
+                c = this.setCategory();
+                if (c) {
+                    this.println("cleared category '" + c + "'");
+                } else {
+                    this.println("no category set");
+                }
+            }
+            break;
+
+        case '?':
+            sResult = "available commands:";
+            Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
+            break;
+
+        default:
+            if (sCommand) {
+                sResult = "unrecognized command '" + sCommand + "' (try '?')";
+            }
+            break;
+        }
+        if (sResult) this.println(sResult.trim());
+        return true;
+    }
+
+    /**
      * onPower(fOn)
      *
      * Automatically called by the Machine device after all other devices have been powered up (eg, after
@@ -547,5 +609,9 @@ class Chip extends Device {
         }
     }
 }
+
+Chip.COMMANDS = [
+    "c\tset category"
+];
 
 Chip.VERSION    = 1.10;

@@ -4,15 +4,15 @@ title: '"Game of Life" Demo'
 permalink: /devices/life/demo/
 machines:
   - id: lifeDemo
-    type: life
+    type: leds
     name: Game of Life Demo
     uncompiled: true
     config: |
       {
         "lifeDemo": {
           "class": "Machine",
-          "type": "Life",
-          "name": "Life Demo",
+          "type": "leds",
+          "name": "Game of Life Demo",
           "version": 1.10,
           "autoPower": false,
           "bindings": {
@@ -24,6 +24,7 @@ machines:
         "lifeChip": {
           "class": "Chip",
           "wrap": false,
+          "rule": "B3/S23",
           "pattern": "gliderGun",
           "patterns": {
             "gliderGun": [
@@ -95,8 +96,9 @@ Using [PCjs Devices](/modules/devices/), here's a simple demo of
 [John Conway's](http://www.conwaylife.com/wiki/John_Horton_Conway)
 "[Game of Life](http://www.conwaylife.com/wiki/Conway%27s_Game_of_Life)", using an grid of simulated LEDs.
 
-Think of it as a animated "[Lite-Brite](https://en.wikipedia.org/wiki/Lite-Brite)".  Want a different LED color?
-Try [Red](?color=red&autoStart=true#game-of-life) or [Blue](?color=blue#game-of-life) or any other color, by changing the URL.
+Think of it as an animated "[Lite-Brite](https://en.wikipedia.org/wiki/Lite-Brite)".  Want a different LED color?
+Try [Red](?color=red&autoStart=true&pattern=gliderGun#game-of-life)
+or [Blue](?color=blue&autoStart=true&pattern=gliderGun#game-of-life) or any other color, by changing the URL.
 
 ### Game of Life
 

@@ -56,7 +56,6 @@ var DEBUG = (window.location.hostname == "pcjs" || window.location.hostname == "
  * @property {string} idDevice
  * @property {Config} config
  * @property {Object} bindings [added by addBindings()]
- * @property {string} sCategories
  */
 class Device {
     /**
@@ -92,7 +91,6 @@ class Device {
         this.idDevice = idDevice;
         this.version = version || 0;
         this.bindings = {};
-        this.sCategories = "";
         this.addDevice();
         this.addBindings(this.config['bindings']);
         this.checkVersion(this.config);
@@ -515,9 +513,9 @@ class Device {
     }
 
     /**
-     * isCategoryOn(category)
+     * isCategory(category)
      *
-     * Use this function to enable/disable any calls (eg, print() calls) based on 1) whether specific
+     * Use this function to enable/disable any code (eg, print() calls) based on 1) whether specific
      * categories are required, and 2) whether the specified category is one of them.
      *
      * @this {Device}
@@ -525,7 +523,7 @@ class Device {
      */
     isCategoryOn(category)
     {
-        return (!this.sCategories || this.sCategories.indexOf(category) >= 0);
+        return (Device.Category && Device.Category.indexOf(category) >= 0);
     }
 
     /**
@@ -586,6 +584,10 @@ class Device {
      */
     print(s)
     {
+        if (this.isCategoryOn(Device.CATEGORY.BUFFER)) {
+            Device.PrintBuffer += s;
+            return;
+        }
         let element = this.findBinding(Device.BINDING.PRINT, true);
         if (element) {
             element.value += s;
@@ -685,6 +687,39 @@ class Device {
     {
         let element = this.bindings[name];
         if (element) element.textContent = text;
+    }
+
+    /**
+     * setCategory(category)
+     *
+     * Use this function to set/clear categories.  Generally, these are thought of as print categories,
+     * allowing code to use isCategoryOn() to decide whether to print a certain category of messages, but
+     * it can be used to control any functionality related to a given category, not just printing.
+     *
+     * You usually want to use one of the predefined category strings in Device.CATEGORIES, but in reality,
+     * the category string can be anything you want.
+     *
+     * If you want to enable multiple categories, specify them all in a single string (eg, "time|buffer",
+     * or Device.CATEGORY.TIME + Device.CATEGORY.BUFFER).
+     *
+     * Device.CATEGORY.BUFFER is special, causing all print calls to be buffered; the print buffer will be
+     * dumped as soon as setCategory() clears Device.CATEGORY.BUFFER.
+     *
+     * @this {Device}
+     * @param {string} [category] (if undefined, clear previous category)
+     * @returns {string}
+     */
+    setCategory(category = "")
+    {
+        let cPrev = Device.Category;
+        let fFlush = (!category && this.isCategoryOn(Device.CATEGORY.BUFFER));
+        Device.Category = category;
+        if (fFlush) {
+            let sBuffer = Device.PrintBuffer;
+            Device.PrintBuffer = "";
+            this.print(sBuffer);
+        }
+        return cPrev;
     }
 
     /**
@@ -825,6 +860,12 @@ Device.BINDING = {
     PRINT:      "print"
 };
 
+/*
+ * List of standard categories.
+ *
+ * Device.CATEGORY.BUFFER is special, causing all print calls to be buffered; the print buffer will be
+ * dumped as soon as setCategory() clears Device.CATEGORY.BUFFER.
+ */
 Device.CATEGORY = {
     TIME:       "time",
     BUFFER:     "buffer"
@@ -858,6 +899,13 @@ Device.Handlers = {};
  * @type {Object}
  */
 Device.Machines = {};
+
+/**
+ * Category is a global string that contains zero or more Device.CATEGORY strings; see setCategory().
+ *
+ * @type {string}
+ */
+Device.Category = "";
 
 /**
  * PrintBuffer is a global string that buffers partial lines for our print services when using console.log().
