@@ -868,17 +868,20 @@ class Time extends Device {
         if (this.fRunning || this.nStepping) {
             return false;
         }
+
         if (this.idRunTimeout) {
             clearTimeout(this.idRunTimeout);
             this.idRunTimeout = 0;
         }
+
         this.fRunning = true;
         this.msStartRun = this.msEndRun = 0;
         this.updateStatus(true);
+
         /*
          * Kickstart both the clockers and requestAnimationFrame; it's a little premature to start
          * animation here, because the first run() should take place before the first animate(), but
-         * since clock speed can now be decoupled from animation speed, this isn't something we should
+         * since clock speed is now decoupled from animation speed, this isn't something we should
          * worry about.
          */
         this.assert(!this.idRunTimeout);

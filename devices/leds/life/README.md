@@ -39,8 +39,26 @@ machines:
             ]
           },
           "bindings": {
+            "colorSwatch": "colorSwatch",
+            "colorSelect": "colorSelect",
             "gliderGun": "gliderGun",
-            "save": "saveLife"
+            "saveToURL": "saveLife"
+          },
+          "colors": {
+            "Navy":    "#000080",
+            "Green":   "#008000",
+            "Teal":    "#008080",
+            "Maroon":  "#800000",
+            "Purple":  "#800080",
+            "Olive":   "#808000",
+            "Gray":    "#808080",
+            "Blue":    "#0000ff",
+            "Lime":    "#00ff00",
+            "Cyan":    "#00ffff",
+            "Red":     "#ff0000",
+            "Magenta": "#ff00ff",
+            "Yellow":  "#ffff00",
+            "White":   "#ffffff"
           },
           "overrides": ["wrap","pattern"]
         },
@@ -85,6 +103,9 @@ styles:
     margin-bottom: 16px;
   lifeDisplay:
     position: relative;
+  colorSwatch:
+    background: green;
+    border: 1px solid;
   .diagsLife:
     float: left;
   printLife:
@@ -108,8 +129,9 @@ or [Blue](?color=blue&autoStart=true&pattern=gliderGun#game-of-life) or any othe
 
 <div id="lifeDemo">
   <div id="lifeDisplay"></div>
+  <select id="colorSelect"></select>&nbsp;<span id="colorSwatch">&nbsp;&nbsp;&nbsp;&nbsp;</span>
   <button id="gliderGun">Glider Gun</button>
-  <button id="saveLife">Save</button>
+  <button id="saveLife">Save to URL</button>
 </div>
 <div class="diagsLife">
   <div>

@@ -176,7 +176,6 @@ class Device {
             );
             break;
         }
-        this.bindings[binding] = element;
     }
 
     /**
@@ -196,9 +195,30 @@ class Device {
             if (fDirectBindings) binding = id;
             let element = document.getElementById(id);
             if (element) {
+                this.bindings[binding] = element;
                 this.addBinding(binding, element);
             } else {
                 if (!fDirectBindings) this.println("unable to find device ID: " + id);
+            }
+        }
+    }
+
+    /**
+     * addBindingOptions(element, child, options)
+     *
+     * @this {Device}
+     * @param {HTMLElement} element (eg, an HTMLSelectElement)
+     * @param {string} child (eg, "option")
+     * @param {Object} options (eg, key/value pairs for a series of "option" elements)
+     */
+    addBindingOptions(element, child, options)
+    {
+        if (options) {
+            for (let prop in options) {
+                let option = document.createElement(child);
+                option.text = prop;
+                option.value = options[prop];
+                element.appendChild(option);
             }
         }
     }

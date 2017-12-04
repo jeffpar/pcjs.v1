@@ -125,7 +125,20 @@ class Chip extends Device {
         let chip = this;
 
         switch(binding) {
-        case "save":
+        case Chip.BINDING.COLOR_SELECT:
+            let elementSelect = /** @type {HTMLSelectElement} */ (element);
+            this.addBindingOptions(elementSelect, "option", this.config['colors']);
+            this.updateColorSwatch();
+            elementSelect.onchange = function onSelectChange() {
+                chip.updateColorSwatch();
+            };
+            break;
+
+        case Chip.BINDING.COLOR_SWATCH:
+            this.updateColorSwatch();
+            break;
+
+        case Chip.BINDING.SAVE_TO_URL:
             element.onclick = function onClickSave() {
                 let sPattern = chip.savePattern();
                 chip.println(sPattern);
@@ -586,6 +599,25 @@ class Chip extends Device {
     }
 
     /**
+     * updateColorSwatch()
+     *
+     * In addition to being called whenever the COLOR_SELECT's onChange handler is called, this is
+     * also called when either COLOR_SELECT or COLOR_SWATCH is bound, to initialize the swatch, and
+     * because we don't know which element will be bound and initialized first, we must deal with
+     * either element being as yet unbound.
+     *
+     * @this {Chip}
+     */
+    updateColorSwatch()
+    {
+        let elementSelect = this.bindings[Chip.BINDING.COLOR_SELECT];
+        let elementSwatch = this.bindings[Chip.BINDING.COLOR_SWATCH];
+        if (elementSelect && elementSwatch) {
+            elementSwatch.style.backgroundColor = elementSelect.options[elementSelect.selectedIndex].value;
+        }
+    }
+
+    /**
      * updateStatus(fTransition)
      *
      * Update the LED array as needed.
@@ -609,6 +641,12 @@ class Chip extends Device {
         }
     }
 }
+
+Chip.BINDING = {
+    COLOR_SWATCH:   "colorSwatch",
+    COLOR_SELECT:   "colorSelect",
+    SAVE_TO_URL:    "saveToURL",
+};
 
 Chip.COMMANDS = [
     "c\tset category"
