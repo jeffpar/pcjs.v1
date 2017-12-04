@@ -66,11 +66,11 @@
  * generally, you start with clearGrid(), draw all the segments for a given update, and then call drawView()
  * to make them visible.
  *
- * However, our Chip device operates at a higher level.  We provide a "buffer" that the Chip can fill with
- * characters representing the digits that each of the LED cells should display, which the Chip updates by
- * calling setBufferState().  Then at whatever display refresh rate is set (typically 60Hz), drawBuffer() is
- * called to see if the buffer contents have been modified since the last refresh, and if so, it converts
- * the contents of the buffer to a string and calls drawString().
+ * However, our Chip devices operate at a higher level.  They use setLEDState() to modify the state,
+ * character, etc, that each of the LED cells should display, which updates our internal LED buffer.  Then
+ * at whatever display refresh rate is set (typically 60Hz), drawBuffer() is called to see if the buffer
+ * contents have been modified since the last refresh, and if so, it converts the contents of the buffer to
+ * a string and calls drawString().
  *
  * This buffering strategy, combined with the buffer "tickled" flag (see below), not only makes life
  * simple for the Chip device, but also simulates how the display goes blank for short periods of time while
@@ -198,14 +198,17 @@ class LED extends Device {
         }
 
         /*
-         * This records cell changes via setBufferState().  It contains four per elements per cell:
+         * Time to allocate our internal LED buffer.  Other devices access the buffer through interfaces
+         * like setLEDState() and getLEDState().  The LED buffer contains four per elements per LED cell:
          *
          *      [0]:    state (eg, ON or OFF or a digit)
          *      [1]:    color
          *      [2]:    counter
          *      [3]:    flags (eg, PERIOD, MODIFIED, etc)
          *
-         * The buffer also contains an extra (scratch) row at the end, for devices like the LED Controller.
+         * The LED buffer also contains an extra (scratch) row at the end.  This extra row, along with the
+         * dynamically allocated "clone" buffer, is used by the LED Controller for direct buffer manipulation;
+         * see the low-level getBuffer(), getBufferClone(), and swapBuffers() interfaces.
          */
         this.nBufferInc = 4;
         this.nBufferCells = ((this.rows + 1) * this.cols) * this.nBufferInc;
@@ -213,19 +216,19 @@ class LED extends Device {
         this.bufferClone = null;
 
         /*
-         * fBufferModified is straightforward: set to true by any setBufferState() call that actually
-         * changed something in the buffer, set to false after every drawBuffer() call, periodic or
-         * otherwise.
+         * fBufferModified is straightforward: set to true by any setLEDState() call that actually
+         * changed something in the LED buffer, set to false after every drawBuffer() call, periodic
+         * or otherwise.
          *
          * fTickled is a flag which, under normal (idle) circumstances, will constantly be set to
-         * true by periodic display operations that call setBufferState(); we clear it after every
+         * true by periodic display operations that call setLEDState(); we clear it after every
          * periodic drawBuffer(), so if the machine fails to execute a setBuffer() in a timely manner,
          * we will see that fTickled hasn't been "tickled", and automatically blank the display.
          */
         this.fBufferModified = this.fTickled = false;
 
         /*
-         * This records the location of the most recent buffer location updated via setBufferState(),
+         * This records the location of the most recent LED buffer location updated via setLEDState(),
          * in case we want to highlight it.
          */
         this.iBufferRecent = -1;
@@ -289,7 +292,7 @@ class LED extends Device {
      *
      * This is our periodic (60Hz) redraw function; however, it can also be called synchronously
      * (eg, see clearBuffer()).  The other important periodic side-effect of this function is clearing
-     * fTickled, so that if no other setBufferState() calls occur between now and the next drawBuffer(),
+     * fTickled, so that if no other setLEDState() calls occur between now and the next drawBuffer(),
      * an automatic clearBuffer() will be triggered.  This simulates the normal blanking of the display
      * whenever the machine performs lengthy calculations, because for the LED display to remain on,
      * the machine must perform a DISP operation at least 30-60 times per second.
@@ -514,22 +517,22 @@ class LED extends Device {
     }
 
     /**
-     * getBufferData(col, row)
+     * getLEDState(col, row)
      *
      * @this {LED}
      * @param {number} col
      * @param {number} row
      * @returns {number}
      */
-    getBufferState(col, row)
+    getLEDState(col, row)
     {
-        let d;
+        let state;
         let i = (row * this.cols + col) * this.nBufferInc;
         this.assert(row >= 0 && row < this.rows && col >= 0 && col < this.cols);
         if (i >= 0 && i <= this.buffer.length - this.nBufferInc) {
-            d = this.buffer[i];
+            state = this.buffer[i];
         }
-        return d;
+        return state;
     }
 
     /**
@@ -599,7 +602,7 @@ class LED extends Device {
     }
 
     /**
-     * setBufferState(col, row, state, flags)
+     * setLEDState(col, row, state, flags)
      *
      * For LED.TYPE.ROUND or LED.TYPE.SQUARE, the state parameter should be LED.STATE.OFF or LED.STATE.ON.
      *
@@ -610,7 +613,7 @@ class LED extends Device {
      * @param {number} [flags] (may only be zero or more of the bits in LED.FLAGS.SET)
      * @returns {boolean|null} (true if this call modified the buffer, false if not, null if error)
      */
-    setBufferState(col, row, state, flags = 0)
+    setLEDState(col, row, state, flags = 0)
     {
         let fModified = false;
         this.assert(!(flags & ~LED.FLAGS.SET));
@@ -631,11 +634,11 @@ class LED extends Device {
     }
 
     /**
-     * swapBufferClone()
+     * swapBuffers()
      *
      * @this {LED}
      */
-    swapBufferClone()
+    swapBuffers()
     {
         let buffer = this.buffer;
         this.buffer = this.bufferClone;

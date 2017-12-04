@@ -180,7 +180,7 @@ class ROM extends Device {
     getData(addr, fInternal)
     {
         if (this.ledArray && !fInternal) {
-            this.ledArray.setBufferState(addr % this.cols, (addr / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
+            this.ledArray.setLEDState(addr % this.cols, (addr / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
         }
         return this.data[addr];
     }

@@ -93,7 +93,7 @@ class Chip extends Device {
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
             this.ledInput.addInput(function onLEDInput(col, row) {
                 if (col >= 0 && row >= 0) {
-                    led.setBufferState(col, row, LED.STATE.ON - led.getBufferState(col, row));
+                    led.setLEDState(col, row, LED.STATE.ON - led.getLEDState(col, row));
                     led.drawBuffer();
                 }
             });
@@ -312,7 +312,7 @@ class Chip extends Device {
             }
         }
         this.assert(iCell == nIncPerGrid);
-        this.ledArray.swapBufferClone();
+        this.ledArray.swapBuffers();
         return cAlive;
     }
 
@@ -419,7 +419,7 @@ class Chip extends Device {
          * We could add checks that verify that col and row stay within the bounds of the specified
          * width and height of the pattern, but it's possible that there are some legit patterns out
          * there that didn't get their bounds quite right.  And in any case, no harm can come of it,
-         * because setBufferState() will ignore any parameters outside the LED array's bounds.
+         * because setLEDState() will ignore any parameters outside the LED array's bounds.
          */
         while (i < aTokens.length - 1) {
             let count = aTokens[i++];
@@ -433,10 +433,10 @@ class Chip extends Device {
                     row++;
                     break;
                 case 'b':
-                    fModified = ledArray.setBufferState(col++, row, LED.STATE.OFF);
+                    fModified = ledArray.setLEDState(col++, row, LED.STATE.OFF);
                     break;
                 case 'o':
-                    fModified = ledArray.setBufferState(col++, row, LED.STATE.ON);
+                    fModified = ledArray.setLEDState(col++, row, LED.STATE.ON);
                     break;
                 default:
                     this.printf("unrecognized pattern token: %s\n", token);
@@ -557,8 +557,8 @@ class Chip extends Device {
 
         for (let row = 0; row < ledArray.rows; row++) {
             for (let col = 0; col < ledArray.cols; col++) {
-                let on = ledArray.getBufferState(col, row);
-                if (!on) {
+                let state = ledArray.getLEDState(col, row);
+                if (!state) {
                     /*
                      * The OFF case...
                      */
