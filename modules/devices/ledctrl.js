@@ -93,7 +93,7 @@ class Chip extends Device {
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
             this.ledInput.addInput(function onLEDInput(col, row) {
                 if (col >= 0 && row >= 0) {
-                    led.setBuffer(col, row, LED.STATE.ON - led.getBufferData(col, row));
+                    led.setBufferState(col, row, LED.STATE.ON - led.getBufferState(col, row));
                     led.drawBuffer();
                 }
             });
@@ -293,7 +293,9 @@ class Chip extends Device {
                     state = LED.STATE.OFF;
                 }
                 bufferClone[iCell] = state;
-                bufferClone[iCell+1] = (buffer[iCell] !== state)? LED.STATE.DIRTY : buffer[iCell+1];
+                bufferClone[iCell+1] = buffer[iCell+1];
+                bufferClone[iCell+2] = buffer[iCell+2];
+                bufferClone[iCell+3] = buffer[iCell+3] | ((buffer[iCell] !== state)? LED.FLAGS.MODIFIED : 0);
                 iCell += nInc; iNW += nInc; iNO += nInc; iNE += nInc; iEA += nInc; iSE += nInc; iSO += nInc; iSW += nInc; iWE += nInc;
                 if (state == LED.STATE.ON) cAlive++;
             }
@@ -417,7 +419,7 @@ class Chip extends Device {
          * We could add checks that verify that col and row stay within the bounds of the specified
          * width and height of the pattern, but it's possible that there are some legit patterns out
          * there that didn't get their bounds quite right.  And in any case, no harm can come of it,
-         * because setBuffer() will ignore any parameters outside the LED array's bounds.
+         * because setBufferState() will ignore any parameters outside the LED array's bounds.
          */
         while (i < aTokens.length - 1) {
             let count = aTokens[i++];
@@ -431,10 +433,10 @@ class Chip extends Device {
                     row++;
                     break;
                 case 'b':
-                    fModified = ledArray.setBuffer(col++, row, LED.STATE.OFF);
+                    fModified = ledArray.setBufferState(col++, row, LED.STATE.OFF);
                     break;
                 case 'o':
-                    fModified = ledArray.setBuffer(col++, row, LED.STATE.ON);
+                    fModified = ledArray.setBufferState(col++, row, LED.STATE.ON);
                     break;
                 default:
                     this.printf("unrecognized pattern token: %s\n", token);
@@ -555,7 +557,7 @@ class Chip extends Device {
 
         for (let row = 0; row < ledArray.rows; row++) {
             for (let col = 0; col < ledArray.cols; col++) {
-                let on = ledArray.getBufferData(col, row);
+                let on = ledArray.getBufferState(col, row);
                 if (!on) {
                     /*
                      * The OFF case...

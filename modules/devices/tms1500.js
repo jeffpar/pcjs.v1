@@ -1318,7 +1318,7 @@ class Chip extends Device {
                 else {
                     ch = Device.HexUpperCase[this.regA.digits[iDigit]];
                 }
-                if (this.led.setBuffer(col, 0, ch, (this.regB.digits[iDigit] & 0x2)? '.' : '')) {
+                if (this.led.setBufferState(col, 0, ch, (this.regB.digits[iDigit] & 0x2)? LED.FLAGS.PERIOD : 0)) {
                     this.checkBreakCondition('om');
                 }
             }
