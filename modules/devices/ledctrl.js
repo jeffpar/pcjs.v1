@@ -89,11 +89,17 @@ class Chip extends Device {
                 bindings:       {surface: this.ledArray.config.bindings[LED.BINDING.CONTAINER]}
             };
 
+            let chip = this;
             let led = this.ledArray;
+
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
             this.ledInput.addInput(function onLEDInput(col, row) {
                 if (col >= 0 && row >= 0) {
-                    led.setLEDState(col, row, LED.STATE.ON - led.getLEDState(col, row));
+                    let fToggle = true;
+                    if (chip.colorSelected) {
+                        if (led.setLEDColor(col, row, chip.colorSelected)) fToggle = false;
+                    }
+                    if (fToggle) led.setLEDState(col, row, LED.STATE.ON - led.getLEDState(col, row));
                     led.drawBuffer();
                 }
             });

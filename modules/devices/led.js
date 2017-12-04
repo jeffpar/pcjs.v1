@@ -155,6 +155,7 @@ class LED extends Device {
         this.widthView = this.width * this.cols;
         this.heightView = this.height * this.rows;
         this.color = (this.config['color'] || "red");
+        this.color = LED.COLORS[this.color] || this.color;
         this.colorDim = this.getRGBAColor(this.color, 1.0, 0.25);
         this.colorBright = this.getRGBAColor(this.color, 1.0, 2.0);
         this.backgroundColor = this.config['backgroundColor'];
@@ -339,10 +340,11 @@ class LED extends Device {
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
                 let state = this.buffer[i];
+                let color = this.buffer[i+1];
                 let fModified = !!(this.buffer[i+3] & LED.FLAGS.MODIFIED);
                 let fRecent = (i == this.iBufferRecent);
                 if (fModified || fRecent || fForced) {
-                    this.drawGridCell(state, col, row, fRecent);
+                    this.drawGridCell(state, color, col, row, fRecent);
                     this.buffer[i+3] &= ~LED.FLAGS.MODIFIED;
                     if (fRecent) this.buffer[i+3] |= LED.FLAGS.MODIFIED;
                 }
@@ -353,17 +355,18 @@ class LED extends Device {
     }
 
     /**
-     * drawGridCell(state, col, row, fHighlight)
+     * drawGridCell(state, color, col, row, fHighlight)
      *
      * Used by drawGrid() for LED.TYPE.ROUND and LED.TYPE.SQUARE.
      *
      * @this {LED}
      * @param {string} state (eg, LED.STATE.ON or LED.STATE.OFF)
+     * @param {string} [color]
      * @param {number} [col] (default is zero)
      * @param {number} [row] (default is zero)
      * @param {boolean} [fHighlight] (true if the cell should be highlighted; default is false)
      */
-    drawGridCell(state, col = 0, row = 0, fHighlight = false)
+    drawGridCell(state, color, col = 0, row = 0, fHighlight = false)
     {
         /*
          * If this is NOT a persistent LED display, then drawGrid() will have done a preliminary clearGrid(),
@@ -376,7 +379,20 @@ class LED extends Device {
         }
         let xBias = col * this.widthCell;
         let yBias = row * this.heightCell;
-        this.contextGrid.fillStyle = (state? (fHighlight? this.colorBright : this.color) : this.colorDim);
+
+        let colorOn, colorBright, colorDim;
+        if (!color || color == this.color) {
+            colorOn = this.color;
+            colorDim = this.colorDim;
+            colorBright = this.colorBright;
+        } else {
+            colorOn = color;
+            colorDim = this.getRGBAColor(color, 1.0, 0.25);
+            colorBright = this.getRGBAColor(color, 1.0, 2.0);
+        }
+
+        this.contextGrid.fillStyle = (state? (fHighlight? colorBright : colorOn) : colorDim);
+
         let coords = LED.SHAPES[this.type];
         if (coords.length == 3) {
             this.contextGrid.beginPath();
@@ -538,15 +554,12 @@ class LED extends Device {
     /**
      * getDefaultColor()
      *
-     * We make a (minimal) effort to return the default color as an RGB hex code (ie, "#rrggbb"), so that if the
-     * LED Controller wants to locate the color in one of its palettes, it has a better chance of finding a match.
-     *
      * @this {LED}
      * @returns {string}
      */
     getDefaultColor()
     {
-        return LED.COLORS[this.color] || this.color;
+        return this.color;
     }
 
     /**
@@ -602,6 +615,32 @@ class LED extends Device {
     }
 
     /**
+     * setLEDColor(col, row, color)
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @param {string} color
+     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     */
+    setLEDColor(col, row, color)
+    {
+        let fModified = null;
+        if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
+            fModified = false;
+            let i = (row * this.cols + col) * this.nBufferInc;
+            if (this.buffer[i+1] !== color) {
+                this.buffer[i+1] = color;
+                this.buffer[i+3] |= LED.FLAGS.MODIFIED;
+                this.fBufferModified = fModified = true;
+            }
+            this.iBufferRecent = i;
+            this.fTickled = true;
+        }
+        return fModified;
+    }
+
+    /**
      * setLEDState(col, row, state, flags)
      *
      * For LED.TYPE.ROUND or LED.TYPE.SQUARE, the state parameter should be LED.STATE.OFF or LED.STATE.ON.
@@ -611,13 +650,14 @@ class LED extends Device {
      * @param {number} row
      * @param {string|number} state (new state for the specified cell)
      * @param {number} [flags] (may only be zero or more of the bits in LED.FLAGS.SET)
-     * @returns {boolean|null} (true if this call modified the buffer, false if not, null if error)
+     * @returns {boolean|null} (true if this call modified the LED state, false if not, null if error)
      */
     setLEDState(col, row, state, flags = 0)
     {
-        let fModified = false;
+        let fModified = null;
         this.assert(!(flags & ~LED.FLAGS.SET));
         if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
+            fModified = false;
             let i = (row * this.cols + col) * this.nBufferInc;
             if (this.buffer[i] !== state || (this.buffer[i+3] & LED.FLAGS.SET) !== flags) {
                 this.buffer[i] = state;
@@ -626,9 +666,6 @@ class LED extends Device {
             }
             this.iBufferRecent = i;
             this.fTickled = true;
-        } else {
-            this.assert(false);         // almost no one's looking at these return values, so let's assert as well
-            fModified = null;
         }
         return fModified;
     }
