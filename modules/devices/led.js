@@ -528,6 +528,20 @@ class LED extends Device {
     }
 
     /**
+     * getDefaultColor()
+     *
+     * We make a (minimal) effort to return the default color as an RGB hex code (ie, "#rrggbb"), so that if the
+     * LED Controller wants to locate the color in one of its palettes, it has a better chance of finding a match.
+     *
+     * @this {LED}
+     * @returns {string}
+     */
+    getDefaultColor()
+    {
+        return LED.COLORS[this.color] || this.color;
+    }
+
+    /**
      * getRGBAColor(sColor, alpha, brightness)
      *
      * Returns a color string in the "rgba" format that fillStyle recognizes (eg, "rgba(255, 255, 255, 0)").

@@ -204,20 +204,20 @@ class Device {
     }
 
     /**
-     * addBindingOptions(element, child, options)
+     * addBindingOptions(element, options)
      *
      * @this {Device}
-     * @param {HTMLElement} element (eg, an HTMLSelectElement)
-     * @param {string} child (eg, "option")
+     * @param {HTMLSelectElement} element
      * @param {Object} options (eg, key/value pairs for a series of "option" elements)
      */
-    addBindingOptions(element, child, options)
+    addBindingOptions(element, options)
     {
+        element.options.length = 0;
         if (options) {
             for (let prop in options) {
-                let option = document.createElement(child);
+                let option = document.createElement("option");
                 option.text = prop;
-                option.value = options[prop];
+                option.value = (typeof options[prop] == "string"? options[prop] : prop);
                 element.appendChild(option);
             }
         }

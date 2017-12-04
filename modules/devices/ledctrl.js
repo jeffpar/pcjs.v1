@@ -29,7 +29,7 @@
 "use strict";
 
 /**
- * @typedef {Config} LifeConfig
+ * @typedef {Config} LCConfig
  * @property {string} class
  * @property {Object} [bindings]
  * @property {number} [version]
@@ -37,13 +37,21 @@
  * @property {boolean} [wrap]
  * @property {string} [rule]
  * @property {string} [pattern]
+ * @property {Object} [patterns]
+ * @property {Object} [colors]
  */
 
 /**
- * "Game of Life" Chip
+ * LED Controller Chip
  *
  * @class {Chip}
  * @unrestricted
+ * @property {boolean} fWrap
+ * @property {string} sRule
+ * @property {string} sPatternInit
+ * @property {LED} ledArray
+ * @property {string} colorDefault (obtained from the ledArray)
+ * @property {string} colorSelected (set by updateColorSelection())
  */
 class Chip extends Device {
     /**
@@ -52,7 +60,7 @@ class Chip extends Device {
      * @this {Chip}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {LifeConfig} [config]
+     * @param {LCConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
@@ -90,6 +98,10 @@ class Chip extends Device {
                 }
             });
 
+            this.colorDefault = led.getDefaultColor();
+            this.selectDefaultColor();
+            this.updateColorSelection();
+
             /*
              * Get access to the Input device, so we can add our click functions.
              */
@@ -125,17 +137,16 @@ class Chip extends Device {
         let chip = this;
 
         switch(binding) {
-        case Chip.BINDING.COLOR_SELECT:
-            let elementSelect = /** @type {HTMLSelectElement} */ (element);
-            this.addBindingOptions(elementSelect, "option", this.config['colors']);
-            this.updateColorSwatch();
-            elementSelect.onchange = function onSelectChange() {
-                chip.updateColorSwatch();
+        case Chip.BINDING.COLOR_PALETTE:
+        case Chip.BINDING.COLOR_SELECTION:
+            element.onchange = function onSelectChange() {
+                chip.updateColorSelection(binding);
             };
+            this.updateColorSelection();
             break;
 
         case Chip.BINDING.COLOR_SWATCH:
-            this.updateColorSwatch();
+            this.updateColorSelection();
             break;
 
         case Chip.BINDING.SAVE_TO_URL:
@@ -186,7 +197,7 @@ class Chip extends Device {
     /**
      * doGeneration()
      *
-     * This is a straight-forward implementation of the standard Conway "Game of Life" rules ("B3/S23"),
+     * This contains a straight-forward implementation of the Conway "Game of Life" rules ("B3/S23"),
      * iterating row-by-row and column-by-column.  It takes advantage of the LED array's one-dimensional
      * buffer layout to move through the entire grid with a "master" cell index (iCell) and corresponding
      * indexes for all 8 "neighboring" cells (iNO, iNE, iEA, iSE, iSO, iSW, iWE, and iNW), incrementing
@@ -306,10 +317,10 @@ class Chip extends Device {
     /**
      * loadPattern(id)
      *
-     * If no id is specified, we load the initialization pattern, if any, set via the LifeConfig
+     * If no id is specified, we load the initialization pattern, if any, set via the LCConfig
      * "pattern" property (which, in turn, can be set as URL override, if desired).
      *
-     * NOTE: Our initialization pattern is a simplified "single-string" version of the RLE pattern
+     * NOTE: Our initialization pattern is a extended single-string version of the RLE pattern
      * file format: "col/row/width/height/tokens".  The default rule is assumed.
      *
      * @this {Chip}
@@ -323,8 +334,8 @@ class Chip extends Device {
 
         if (!id) {
             /*
-             * If no id is provided, then we fallback to sPatternInit, which can be either
-             * an id (if it doesn't start with a digit) or one of our simplified pattern strings.
+             * If no id is provided, then we fallback to sPatternInit, which can be either an
+             * id (if it doesn't start with a digit) or one of our own extended pattern strings.
              */
             if (!this.sPatternInit.match(/^[0-9]/)) id = this.sPatternInit;
         }
@@ -335,12 +346,12 @@ class Chip extends Device {
             }
             let i = 0;
             let aParts = this.sPatternInit.split('/');
-            if (aParts.length == 5) {
+            if (aParts.length == 5) {           // extended pattern string
                 iCol = +aParts[i++];
                 iRow = +aParts[i++];
             }
             if (aParts.length == 3 || aParts.length == 5) {
-                width = +aParts[i++];
+                width = +aParts[i++];           // conventional pattern string
                 height = +aParts[i++];
                 sPattern = aParts[i];
             }
@@ -599,21 +610,62 @@ class Chip extends Device {
     }
 
     /**
-     * updateColorSwatch()
+     * selectDefaultColor()
      *
-     * In addition to being called whenever the COLOR_SELECT's onChange handler is called, this is
-     * also called when either COLOR_SELECT or COLOR_SWATCH is bound, to initialize the swatch, and
-     * because we don't know which element will be bound and initialized first, we must deal with
-     * either element being as yet unbound.
+     * Whenever the color palette changes, this checks for the LED array's default color in that palette,
+     * and selects it, if it exists in the palette.
      *
      * @this {Chip}
      */
-    updateColorSwatch()
+    selectDefaultColor()
     {
-        let elementSelect = this.bindings[Chip.BINDING.COLOR_SELECT];
+        if (this.colorDefault) {
+            let elementSelection = this.bindings[Chip.BINDING.COLOR_SELECTION];
+            if (elementSelection) {
+                let i;
+                for (i = 0; i < elementSelection.options.length; i++) {
+                    if (elementSelection.options[i].value == this.colorDefault) {
+                        if (elementSelection.selectedIndex != i) {
+                            elementSelection.selectedIndex = i;
+                        }
+                        break;
+                    }
+                }
+                if (i == elementSelection.options.length) elementSelection.selectedIndex = 0;
+            }
+        }
+    }
+
+    /**
+     * updateColorSelection(binding)
+     *
+     * In addition to being called whenever the COLOR_PALETTE or COLOR_SELECTION onChange handler is
+     * called, this is also called when any of color controls are initialized, because we don't know in
+     * what order the elements will be bound.
+     *
+     * @this {Chip}
+     * @param {string} [binding] (if set, the selection for the specified binding has changed)
+     */
+    updateColorSelection(binding)
+    {
+        let elementPalette = this.bindings[Chip.BINDING.COLOR_PALETTE];
+        let elementSelection = this.bindings[Chip.BINDING.COLOR_SELECTION];
         let elementSwatch = this.bindings[Chip.BINDING.COLOR_SWATCH];
-        if (elementSelect && elementSwatch) {
-            elementSwatch.style.backgroundColor = elementSelect.options[elementSelect.selectedIndex].value;
+
+        let fPaletteChange = (binding === Chip.BINDING.COLOR_PALETTE);
+        if (elementPalette && !elementPalette.options.length) {
+            this.addBindingOptions(elementPalette, this.config['colors']);
+            fPaletteChange = true;
+        }
+
+        if (elementPalette && elementSelection && (!elementSelection.options.length || fPaletteChange)) {
+            let sPalette = elementPalette.options[elementPalette.selectedIndex].value;
+            this.addBindingOptions(elementSelection, this.config['colors'][sPalette]);
+            this.selectDefaultColor();
+        }
+
+        if (elementPalette && elementSelection && elementSwatch) {
+            this.colorSelected = elementSwatch.style.backgroundColor = elementSelection.options[elementSelection.selectedIndex].value;
         }
     }
 
@@ -628,8 +680,8 @@ class Chip extends Device {
      *
      * Of those, all we currently care about are step() and stop() notifications, because we want to make sure
      * the LED display is in sync with the last LED buffer update performed by doGeneration().  In both of those
-     * cases, time has been stopped.  If time has NOT been stopped, then the normal LED animator function takes
-     * care of updating the display.
+     * cases, time has stopped.  If time has NOT stopped, then the LED's normal animator function (ledAnimate())
+     * takes care of updating the LED display.
      *
      * @this {Chip}
      * @param {boolean} [fTransition]
@@ -643,9 +695,10 @@ class Chip extends Device {
 }
 
 Chip.BINDING = {
-    COLOR_SWATCH:   "colorSwatch",
-    COLOR_SELECT:   "colorSelect",
-    SAVE_TO_URL:    "saveToURL",
+    COLOR_PALETTE:      "colorPalette",
+    COLOR_SELECTION:    "colorSelection",
+    COLOR_SWATCH:       "colorSwatch",
+    SAVE_TO_URL:        "saveToURL",
 };
 
 Chip.COMMANDS = [
