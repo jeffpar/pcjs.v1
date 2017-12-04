@@ -66,11 +66,11 @@
  * generally, you start with clearGrid(), draw all the segments for a given update, and then call drawView()
  * to make them visible.
  *
- * However, our Chip device operates at a higher level.  We provide a "buffer" that the Chip can fill with
- * characters representing the digits that each of the LED cells should display, which the Chip updates by
- * calling setBuffer().  Then at whatever display refresh rate is set (typically 60Hz), drawBuffer() is called
- * to see if the buffer contents have been modified since the last refresh, and if so, it converts the contents
- * of the buffer to a string and calls drawString().
+ * However, our Chip devices operate at a higher level.  They use setLEDState() to modify the state,
+ * character, etc, that each of the LED cells should display, which updates our internal LED buffer.  Then
+ * at whatever display refresh rate is set (typically 60Hz), drawBuffer() is called to see if the buffer
+ * contents have been modified since the last refresh, and if so, it converts the contents of the buffer to
+ * a string and calls drawString().
  *
  * This buffering strategy, combined with the buffer "tickled" flag (see below), not only makes life
  * simple for the Chip device, but also simulates how the display goes blank for short periods of time while
@@ -155,6 +155,7 @@ class LED extends Device {
         this.widthView = this.width * this.cols;
         this.heightView = this.height * this.rows;
         this.color = (this.config['color'] || "red");
+        this.color = LED.COLORS[this.color] || this.color;
         this.colorDim = this.getRGBAColor(this.color, 1.0, 0.25);
         this.colorBright = this.getRGBAColor(this.color, 1.0, 2.0);
         this.backgroundColor = this.config['backgroundColor'];
@@ -198,38 +199,45 @@ class LED extends Device {
         }
 
         /*
-         * This records LED cell changes via setBuffer().  It currently contains two per elements per cell;
-         * the first records the primary character (eg, a digit) and the second records the secondary
-         * character, if any (eg, a decimal point).  It also contains an extra (scratch) row at the end, for
-         * devices like LifeChip.
+         * Time to allocate our internal LED buffer.  Other devices access the buffer through interfaces
+         * like setLEDState() and getLEDState().  The LED buffer contains four per elements per LED cell:
+         *
+         *      [0]:    state (eg, ON or OFF or a digit)
+         *      [1]:    color
+         *      [2]:    counter
+         *      [3]:    flags (eg, PERIOD, MODIFIED, etc)
+         *
+         * The LED buffer also contains an extra (scratch) row at the end.  This extra row, along with the
+         * dynamically allocated "clone" buffer, is used by the LED Controller for direct buffer manipulation;
+         * see the low-level getBuffer(), getBufferClone(), and swapBuffers() interfaces.
          */
-        this.nBufferInc = 2;
+        this.nBufferInc = 4;
         this.nBufferCells = ((this.rows + 1) * this.cols) * this.nBufferInc;
         this.buffer = new Array(this.nBufferCells);
         this.bufferClone = null;
 
         /*
-         * fBufferModified is straightforward: set to true by any setBuffer() call that actually
-         * changed something in the buffer, set to false after every drawBuffer() call, periodic or
-         * otherwise.
+         * fBufferModified is straightforward: set to true by any setLEDState() call that actually
+         * changed something in the LED buffer, set to false after every drawBuffer() call, periodic
+         * or otherwise.
          *
          * fTickled is a flag which, under normal (idle) circumstances, will constantly be set to
-         * true by periodic display operations that call setBuffer(); we clear it after every periodic
-         * drawBuffer(), so if the machine fails to execute a setBuffer() in a timely manner, we will
-         * see that fTickled hasn't been "tickled", and automatically blank the display.
+         * true by periodic display operations that call setLEDState(); we clear it after every
+         * periodic drawBuffer(), so if the machine fails to execute a setBuffer() in a timely manner,
+         * we will see that fTickled hasn't been "tickled", and automatically blank the display.
          */
         this.fBufferModified = this.fTickled = false;
 
         /*
-         * This records the location of the most recent buffer location updated via setBuffer(), in
-         * case we want to highlight it.
+         * This records the location of the most recent LED buffer location updated via setLEDState(),
+         * in case we want to highlight it.
          */
         this.iBufferRecent = -1;
 
         let led = this;
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
-            this.time.addAnimator(function ledAnimate(iAnimation) {
+            this.time.addAnimator(function ledAnimate() {
                 led.drawBuffer();
             });
         }
@@ -285,7 +293,7 @@ class LED extends Device {
      *
      * This is our periodic (60Hz) redraw function; however, it can also be called synchronously
      * (eg, see clearBuffer()).  The other important periodic side-effect of this function is clearing
-     * fTickled, so that if no other setBuffer() calls occur between now and the next drawBuffer(),
+     * fTickled, so that if no other setLEDState() calls occur between now and the next drawBuffer(),
      * an automatic clearBuffer() will be triggered.  This simulates the normal blanking of the display
      * whenever the machine performs lengthy calculations, because for the LED display to remain on,
      * the machine must perform a DISP operation at least 30-60 times per second.
@@ -302,7 +310,7 @@ class LED extends Device {
                 let s = "";
                 for (let i = 0; i < this.buffer.length; i += this.nBufferInc) {
                     s += this.buffer[i] || ' ';
-                    s += this.buffer[i+1] || '';
+                    if (this.buffer[i+3] & LED.FLAGS.PERIOD) s += '.';
                 }
                 this.drawString(s);
             }
@@ -332,11 +340,13 @@ class LED extends Device {
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
                 let state = this.buffer[i];
-                let fDirty = !!this.buffer[i+1];
+                let color = this.buffer[i+1];
+                let fModified = !!(this.buffer[i+3] & LED.FLAGS.MODIFIED);
                 let fRecent = (i == this.iBufferRecent);
-                if (fDirty || fRecent || fForced) {
-                    this.drawGridCell(state, col, row, fRecent);
-                    this.buffer[i+1] = fRecent? LED.STATE.DIRTY : LED.STATE.CLEAN;
+                if (fModified || fRecent || fForced) {
+                    this.drawGridCell(state, color, col, row, fRecent);
+                    this.buffer[i+3] &= ~LED.FLAGS.MODIFIED;
+                    if (fRecent) this.buffer[i+3] |= LED.FLAGS.MODIFIED;
                 }
                 i += this.nBufferInc;
             }
@@ -345,17 +355,18 @@ class LED extends Device {
     }
 
     /**
-     * drawGridCell(state, col, row, fHighlight)
+     * drawGridCell(state, color, col, row, fHighlight)
      *
      * Used by drawGrid() for LED.TYPE.ROUND and LED.TYPE.SQUARE.
      *
      * @this {LED}
      * @param {string} state (eg, LED.STATE.ON or LED.STATE.OFF)
+     * @param {string} [color]
      * @param {number} [col] (default is zero)
      * @param {number} [row] (default is zero)
      * @param {boolean} [fHighlight] (true if the cell should be highlighted; default is false)
      */
-    drawGridCell(state, col = 0, row = 0, fHighlight = false)
+    drawGridCell(state, color, col = 0, row = 0, fHighlight = false)
     {
         /*
          * If this is NOT a persistent LED display, then drawGrid() will have done a preliminary clearGrid(),
@@ -368,7 +379,20 @@ class LED extends Device {
         }
         let xBias = col * this.widthCell;
         let yBias = row * this.heightCell;
-        this.contextGrid.fillStyle = (state? (fHighlight? this.colorBright : this.color) : this.colorDim);
+
+        let colorOn, colorBright, colorDim;
+        if (!color || color == this.color) {
+            colorOn = this.color;
+            colorDim = this.colorDim;
+            colorBright = this.colorBright;
+        } else {
+            colorOn = color;
+            colorDim = this.getRGBAColor(color, 1.0, 0.25);
+            colorBright = this.getRGBAColor(color, 1.0, 2.0);
+        }
+
+        this.contextGrid.fillStyle = (state? (fHighlight? colorBright : colorOn) : colorDim);
+
         let coords = LED.SHAPES[this.type];
         if (coords.length == 3) {
             this.contextGrid.beginPath();
@@ -509,22 +533,33 @@ class LED extends Device {
     }
 
     /**
-     * getBufferData(col, row)
+     * getLEDState(col, row)
      *
      * @this {LED}
      * @param {number} col
      * @param {number} row
      * @returns {number}
      */
-    getBufferData(col, row)
+    getLEDState(col, row)
     {
-        let d;
+        let state;
         let i = (row * this.cols + col) * this.nBufferInc;
         this.assert(row >= 0 && row < this.rows && col >= 0 && col < this.cols);
         if (i >= 0 && i <= this.buffer.length - this.nBufferInc) {
-            d = this.buffer[i];
+            state = this.buffer[i];
         }
-        return d;
+        return state;
+    }
+
+    /**
+     * getDefaultColor()
+     *
+     * @this {LED}
+     * @returns {string}
+     */
+    getDefaultColor()
+    {
+        return this.color;
     }
 
     /**
@@ -570,51 +605,77 @@ class LED extends Device {
         for (let i = 0; i < buffer.length; i += this.nBufferInc) {
             if (this.type < LED.TYPE.DIGIT) {
                 buffer[i] = LED.STATE.OFF;
-                buffer[i+1] = LED.STATE.DIRTY;
             } else {
                 buffer[i] = ' ';
-                buffer[i+1] = '';
             }
+            buffer[i+1] = this.color;
+            buffer[i+2] = -1;
+            buffer[i+3] = LED.FLAGS.MODIFIED;
         }
     }
 
     /**
-     * setBuffer(col, row, d1, d2)
-     *
-     * For LED.TYPE.ROUND or LED.TYPE.SQUARE, the d1 parameter should generally be LED.STATE.OFF or LED.STATE.ON.
+     * setLEDColor(col, row, color)
      *
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @param {string|number} d1
-     * @param {string|number} [d2]
-     * @returns {boolean|null} (true if this call modified the buffer, false if not, null if error)
+     * @param {string} color
+     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
-    setBuffer(col, row, d1, d2 = LED.STATE.DIRTY)
+    setLEDColor(col, row, color)
     {
-        let fModified = false;
+        let fModified = null;
         if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
+            fModified = false;
             let i = (row * this.cols + col) * this.nBufferInc;
-            if (this.buffer[i] !== d1 || this.buffer[i+1] !== d2) {
-                this.buffer[i] = d1;
-                this.buffer[i+1] = d2;
+            if (this.buffer[i+1] !== color) {
+                this.buffer[i+1] = color;
+                this.buffer[i+3] |= LED.FLAGS.MODIFIED;
                 this.fBufferModified = fModified = true;
             }
             this.iBufferRecent = i;
             this.fTickled = true;
-        } else {
-            this.assert(false);         // almost no one's looking at these return values, so let's assert as well
-            fModified = null;
         }
         return fModified;
     }
 
     /**
-     * swapBufferClone()
+     * setLEDState(col, row, state, flags)
+     *
+     * For LED.TYPE.ROUND or LED.TYPE.SQUARE, the state parameter should be LED.STATE.OFF or LED.STATE.ON.
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @param {string|number} state (new state for the specified cell)
+     * @param {number} [flags] (may only be zero or more of the bits in LED.FLAGS.SET)
+     * @returns {boolean|null} (true if this call modified the LED state, false if not, null if error)
+     */
+    setLEDState(col, row, state, flags = 0)
+    {
+        let fModified = null;
+        this.assert(!(flags & ~LED.FLAGS.SET));
+        if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
+            fModified = false;
+            let i = (row * this.cols + col) * this.nBufferInc;
+            if (this.buffer[i] !== state || (this.buffer[i+3] & LED.FLAGS.SET) !== flags) {
+                this.buffer[i] = state;
+                this.buffer[i+3] = (this.buffer[i+3] & ~LED.FLAGS.SET) | flags | LED.FLAGS.MODIFIED;
+                this.fBufferModified = fModified = true;
+            }
+            this.iBufferRecent = i;
+            this.fTickled = true;
+        }
+        return fModified;
+    }
+
+    /**
+     * swapBuffers()
      *
      * @this {LED}
      */
-    swapBufferClone()
+    swapBuffers()
     {
         let buffer = this.buffer;
         this.buffer = this.bufferClone;
@@ -779,9 +840,14 @@ LED.COLORS = {
 
 LED.STATE = {
     OFF:        0,
-    ON:         1,
-    CLEAN:      0,
-    DIRTY:      3
+    ON:         1
+};
+
+LED.FLAGS = {
+    NONE:       0x00,
+    SET:        0x81,
+    PERIOD:     0x01,
+    MODIFIED:   0x80,
 };
 
 LED.SHAPES = {

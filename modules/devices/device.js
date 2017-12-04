@@ -176,7 +176,6 @@ class Device {
             );
             break;
         }
-        this.bindings[binding] = element;
     }
 
     /**
@@ -196,9 +195,30 @@ class Device {
             if (fDirectBindings) binding = id;
             let element = document.getElementById(id);
             if (element) {
+                this.bindings[binding] = element;
                 this.addBinding(binding, element);
             } else {
                 if (!fDirectBindings) this.println("unable to find device ID: " + id);
+            }
+        }
+    }
+
+    /**
+     * addBindingOptions(element, options)
+     *
+     * @this {Device}
+     * @param {HTMLSelectElement} element
+     * @param {Object} options (eg, key/value pairs for a series of "option" elements)
+     */
+    addBindingOptions(element, options)
+    {
+        element.options.length = 0;
+        if (options) {
+            for (let prop in options) {
+                let option = document.createElement("option");
+                option.text = prop;
+                option.value = (typeof options[prop] == "string"? options[prop] : prop);
+                element.appendChild(option);
             }
         }
     }

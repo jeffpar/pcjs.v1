@@ -39,8 +39,36 @@ machines:
             ]
           },
           "bindings": {
+            "colorPalette": "colorPalette",
+            "colorSelection": "colorSelection",
+            "colorSwatch": "colorSwatch",
             "gliderGun": "gliderGun",
-            "save": "saveLife"
+            "saveToURL": "saveLife"
+          },
+          "colors": {
+            "Primary": {
+              "Navy":    "#000080",
+              "Green":   "#008000",
+              "Teal":    "#008080",
+              "Maroon":  "#800000",
+              "Purple":  "#800080",
+              "Olive":   "#808000",
+              "Gray":    "#808080",
+              "Blue":    "#0000ff",
+              "Lime":    "#00ff00",
+              "Cyan":    "#00ffff",
+              "Red":     "#ff0000",
+              "Magenta": "#ff00ff",
+              "Yellow":  "#ffff00",
+              "White":   "#ffffff"
+            },
+            "Pastels": {
+              "Pink":    "#ffb3ba",
+              "Beige":   "#ffdfba",
+              "Yellow":  "#ffffba",
+              "Green":	 "#baffc9",
+              "Blue":	 "#bae1ff"
+            }
           },
           "overrides": ["wrap","pattern"]
         },
@@ -55,7 +83,7 @@ machines:
             "step": "stepLife",
             "throttle": "throttleLife"
           },
-          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum"]
+          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","requestAnimationFrame"]
         },
         "lifeDisplay": {
           "class": "LED",
@@ -85,6 +113,14 @@ styles:
     margin-bottom: 16px;
   lifeDisplay:
     position: relative;
+  colorSwatch:
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 1px solid;
+    border-radius: 50%;
+    vertical-align: middle;
+    background-color: green;
   .diagsLife:
     float: left;
   printLife:
@@ -108,8 +144,9 @@ or [Blue](?color=blue&autoStart=true&pattern=gliderGun#game-of-life) or any othe
 
 <div id="lifeDemo">
   <div id="lifeDisplay"></div>
+  <select id="colorPalette"></select>&nbsp;<select id="colorSelection"></select>&nbsp;<div id="colorSwatch"></div>
   <button id="gliderGun">Glider Gun</button>
-  <button id="saveLife">Save</button>
+  <button id="saveLife">Save to URL</button>
 </div>
 <div class="diagsLife">
   <div>
