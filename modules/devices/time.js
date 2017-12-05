@@ -125,9 +125,9 @@ class Time extends Device {
          */
         this.nCyclesMinimum = this.config['cyclesMinimum'] || 100000;
         this.nCyclesMaximum = this.config['cyclesMaximum'] || 3000000;
-        this.nCyclesPerSecond = this.bounds(this.config['cyclesPerSecond'] || 650000, this.nCyclesMinimum, this.nCyclesMaximum);
-        this.nYieldsPerSecond = this.bounds(this.config['yieldsPerSecond'] || Time.YIELDS_PER_SECOND, 30, 120);
-        this.nYieldsPerUpdate = this.bounds(this.config['yieldsPerUpdate'] || Time.YIELDS_PER_UPDATE, 1, this.nYieldsPerSecond);
+        this.nCyclesPerSecond = this.getBounded(this.config['cyclesPerSecond'] || 650000, this.nCyclesMinimum, this.nCyclesMaximum);
+        this.nYieldsPerSecond = this.getBounded(this.config['yieldsPerSecond'] || Time.YIELDS_PER_SECOND, 30, 120);
+        this.nYieldsPerUpdate = this.getBounded(this.config['yieldsPerUpdate'] || Time.YIELDS_PER_UPDATE, 1, this.nYieldsPerSecond);
 
         this.fRequestAnimationFrame = this.config['requestAnimationFrame'];
         if (this.fRequestAnimationFrame === undefined) this.fRequestAnimationFrame = true;

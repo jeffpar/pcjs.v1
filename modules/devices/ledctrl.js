@@ -34,6 +34,7 @@
  * @property {Object} [bindings]
  * @property {number} [version]
  * @property {Array.<string>} [overrides]
+ * @property {boolean} [toggle]
  * @property {boolean} [wrap]
  * @property {string} [rule]
  * @property {string} [pattern]
@@ -46,10 +47,12 @@
  *
  * @class {Chip}
  * @unrestricted
+ * @property {boolean} fToggle
  * @property {boolean} fWrap
  * @property {string} sRule
  * @property {string} sPatternInit
  * @property {LED} ledArray
+ * @property {Object} colorPalette
  * @property {string} colorDefault (obtained from the ledArray)
  * @property {string} colorSelected (set by updateColorSelection())
  */
@@ -66,9 +69,10 @@ class Chip extends Device {
     {
         super(idMachine, idDevice, Chip.VERSION, config);
 
-        this.fWrap = this.config['wrap'] || false;
-        this.sRule = this.config['rule'] || "B3/S23";   // default rule (births require 3 neighbors, survivors require 2 or 3)
-        this.sPatternInit = this.config['pattern'] || "";
+        this.fToggle = this.getDefault(this.config['toggle'], true);
+        this.fWrap = this.getDefault(this.config['wrap'], false);
+        this.sRule = this.getDefault(this.config['rule'], "B3/S23");    // default rule (births require 3 neighbors, survivors require 2 or 3)
+        this.sPatternInit = this.getDefault(this.config['pattern'], "");
 
         /*
          * Get access to the LED device, so we can update its display.
@@ -96,18 +100,27 @@ class Chip extends Device {
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
             this.ledInput.addInput(function onLEDInput(col, row) {
                 if (col >= 0 && row >= 0) {
-                    let fToggle = true;
                     if (chip.colorSelected) {
-                        if (led.setLEDColor(col, row, chip.colorSelected)) fToggle = false;
+                        if (!led.setLEDColor(col, row, chip.colorSelected)) {
+                            if (!chip.fToggle) {
+                                led.setLEDColor(col, row);
+                            } else {
+                                led.setLEDState(col, row, LED.STATE.ON - led.getLEDState(col, row));
+                            }
+                        } else {
+                            led.setLEDState(col, row, LED.STATE.ON);
+                        }
                     }
-                    if (fToggle) led.setLEDState(col, row, LED.STATE.ON - led.getLEDState(col, row));
+                    else {
+                        led.setLEDState(col, row, LED.STATE.ON - led.getLEDState(col, row));
+                    }
                     led.drawBuffer();
                 }
             });
 
             this.colorDefault = led.getDefaultColor();
-            this.selectDefaultColor();
-            this.updateColorSelection();
+            this.updateColorSelection(this.colorDefault);
+            this.updateColorSwatches();
 
             /*
              * Get access to the Input device, so we can add our click functions.
@@ -147,13 +160,9 @@ class Chip extends Device {
         case Chip.BINDING.COLOR_PALETTE:
         case Chip.BINDING.COLOR_SELECTION:
             element.onchange = function onSelectChange() {
-                chip.updateColorSelection(binding);
+                chip.updateColorPalette(binding);
             };
-            this.updateColorSelection();
-            break;
-
-        case Chip.BINDING.COLOR_SWATCH:
-            this.updateColorSelection();
+            this.updateColorPalette();
             break;
 
         case Chip.BINDING.SAVE_TO_URL:
@@ -171,6 +180,12 @@ class Chip extends Device {
             break;
 
         default:
+            if (binding.startsWith(Chip.BINDING.COLOR_SWATCH)) {
+                element.onclick = function onClickColorSwatch() {
+                    chip.updateColorSwatches(binding);
+                };
+                break;
+            }
             let patterns = this.config['patterns'];
             if (patterns && patterns[binding]) {
                 element.onclick = function onClickPattern() {
@@ -525,7 +540,7 @@ class Chip extends Device {
      * (eg, toggling a power button); in this case, fOn should NOT be set, so that no state is loaded or saved.
      *
      * @this {Chip}
-     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     * @param {boolean} [fOn] (true to power on, false to power off)
      */
     onPower(fOn)
     {
@@ -619,47 +634,19 @@ class Chip extends Device {
     }
 
     /**
-     * selectDefaultColor()
-     *
-     * Whenever the color palette changes, this checks for the LED array's default color in that palette,
-     * and selects it, if it exists in the palette.
-     *
-     * @this {Chip}
-     */
-    selectDefaultColor()
-    {
-        if (this.colorDefault) {
-            let elementSelection = this.bindings[Chip.BINDING.COLOR_SELECTION];
-            if (elementSelection) {
-                let i;
-                for (i = 0; i < elementSelection.options.length; i++) {
-                    if (elementSelection.options[i].value == this.colorDefault) {
-                        if (elementSelection.selectedIndex != i) {
-                            elementSelection.selectedIndex = i;
-                        }
-                        break;
-                    }
-                }
-                if (i == elementSelection.options.length) elementSelection.selectedIndex = 0;
-            }
-        }
-    }
-
-    /**
-     * updateColorSelection(binding)
+     * updateColorPalette(binding)
      *
      * In addition to being called whenever the COLOR_PALETTE or COLOR_SELECTION onChange handler is
-     * called, this is also called when any of color controls are initialized, because we don't know in
-     * what order the elements will be bound.
+     * called, this is also called when any of the color controls are initialized, because we don't know
+     * in what order the elements will be bound.
      *
      * @this {Chip}
      * @param {string} [binding] (if set, the selection for the specified binding has changed)
      */
-    updateColorSelection(binding)
+    updateColorPalette(binding)
     {
         let elementPalette = this.bindings[Chip.BINDING.COLOR_PALETTE];
         let elementSelection = this.bindings[Chip.BINDING.COLOR_SELECTION];
-        let elementSwatch = this.bindings[Chip.BINDING.COLOR_SWATCH];
 
         let fPaletteChange = (binding === Chip.BINDING.COLOR_PALETTE);
         if (elementPalette && !elementPalette.options.length) {
@@ -669,12 +656,76 @@ class Chip extends Device {
 
         if (elementPalette && elementSelection && (!elementSelection.options.length || fPaletteChange)) {
             let sPalette = elementPalette.options[elementPalette.selectedIndex].value;
-            this.addBindingOptions(elementSelection, this.config['colors'][sPalette]);
-            this.selectDefaultColor();
+            this.colorPalette = this.config['colors'][sPalette];
+            this.addBindingOptions(elementSelection, this.colorPalette);
         }
 
-        if (elementPalette && elementSelection && elementSwatch) {
-            this.colorSelected = elementSwatch.style.backgroundColor = elementSelection.options[elementSelection.selectedIndex].value;
+        if (elementPalette && elementSelection && elementSelection.options.length) {
+            this.colorSelected = elementSelection.options[elementSelection.selectedIndex].value;
+            this.updateColorSwatches();
+        }
+    }
+
+    /**
+     * updateColorSelection(color)
+     *
+     * @this {Chip}
+     * @param {string} color
+     */
+    updateColorSelection(color)
+    {
+        let elementSelection = this.bindings[Chip.BINDING.COLOR_SELECTION];
+        if (elementSelection) {
+            let i;
+            for (i = 0; i < elementSelection.options.length; i++) {
+                if (elementSelection.options[i].value == color) {
+                    this.colorSelected = color;
+                    if (elementSelection.selectedIndex != i) {
+                        elementSelection.selectedIndex = i;
+                    }
+                    break;
+                }
+            }
+            if (i == elementSelection.options.length) elementSelection.selectedIndex = 0;
+        }
+    }
+
+    /**
+     * updateColorSwatches(binding)
+     *
+     * @this {Chip}
+     * @param {string} [binding]
+     */
+    updateColorSwatches(binding)
+    {
+        let i = 1, elementSwatch;
+        if (!binding && this.colorSelected) {
+            elementSwatch = this.bindings[Chip.BINDING.COLOR_SWATCH_SELECTED];
+            if (elementSwatch) {
+                elementSwatch.style.backgroundColor = this.colorSelected;
+            }
+        }
+        if (this.colorPalette) {
+            for (let idColor in this.colorPalette) {
+                let idSwatch = Chip.BINDING.COLOR_SWATCH + i++;
+                elementSwatch = this.bindings[idSwatch];
+                if (!elementSwatch) break;
+                elementSwatch.style.display = "inline-block";
+                let color = this.colorPalette[idColor];
+                if (idSwatch == binding) {
+                    this.updateColorSelection(color);
+                }
+                if (color != this.colorSelected) {
+                    color = this.ledArray.getRGBAColor(color, 1.0, 0.50);
+                }
+                elementSwatch.style.backgroundColor = color;
+            }
+        }
+        while (true) {
+            let idSwatch = Chip.BINDING.COLOR_SWATCH + i++;
+            let elementSwatch = this.bindings[idSwatch];
+            if (!elementSwatch) break;
+            elementSwatch.style.display = "none";
         }
     }
 
@@ -704,10 +755,11 @@ class Chip extends Device {
 }
 
 Chip.BINDING = {
-    COLOR_PALETTE:      "colorPalette",
-    COLOR_SELECTION:    "colorSelection",
-    COLOR_SWATCH:       "colorSwatch",
-    SAVE_TO_URL:        "saveToURL",
+    COLOR_PALETTE:         "colorPalette",
+    COLOR_SELECTION:       "colorSelection",
+    COLOR_SWATCH:          "colorSwatch",
+    COLOR_SWATCH_SELECTED: "colorSwatchSelected",
+    SAVE_TO_URL:           "saveToURL",
 };
 
 Chip.COMMANDS = [

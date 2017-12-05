@@ -25,7 +25,6 @@ machines:
         },
         "lifeChip": {
           "class": "Chip",
-          "wrap": false,
           "rule": "B3/S23",
           "pattern": "gliderGun",
           "patterns": {
@@ -41,7 +40,7 @@ machines:
           "bindings": {
             "colorPalette": "colorPaletteLife",
             "colorSelection": "colorSelectionLife",
-            "colorSwatch": "colorSwatchLife",
+            "colorSwatchSelected": "colorSwatchLife",
             "gliderGun": "gliderGun",
             "saveToURL": "saveLife"
           },
@@ -134,9 +133,10 @@ Using [PCjs Devices](/modules/devices/), here's a simple demo of
 [John Conway's](http://www.conwaylife.com/wiki/John_Horton_Conway)
 "[Game of Life](http://www.conwaylife.com/wiki/Conway%27s_Game_of_Life)", using an grid of simulated LEDs.
 
-Think of it as an animated "[Lite-Brite](https://en.wikipedia.org/wiki/Lite-Brite)".  Want a different LED color?
-Try [Red](?color=red&autoStart=true&pattern=gliderGun#game-of-life)
-or [Blue](?color=blue&autoStart=true&pattern=gliderGun#game-of-life) or any other color, by changing the URL.
+[Red](?color=red&autoStart=true&pattern=gliderGun#game-of-life),
+[Blue](?color=blue&autoStart=true&pattern=gliderGun#game-of-life), or any other LED color can be specified in the URL.
+
+For another interesting LED simulation, check out our [Animated "Lite-Brite" Demo](/devices/leds/litebrite/).
 
 ### Game of Life
 

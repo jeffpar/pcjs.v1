@@ -23,11 +23,18 @@ machines:
         },
         "lbChip": {
           "class": "Chip",
-          "wrap": false,
+          "toggle": false,
           "bindings": {
             "colorPalette": "colorPaletteLB",
             "colorSelection": "colorSelectionLB",
-            "colorSwatch": "colorSwatchLB",
+            "colorSwatch1": "colorSwatchLB1",
+            "colorSwatch2": "colorSwatchLB2",
+            "colorSwatch3": "colorSwatchLB3",
+            "colorSwatch4": "colorSwatchLB4",
+            "colorSwatch5": "colorSwatchLB5",
+            "colorSwatch6": "colorSwatchLB6",
+            "colorSwatch7": "colorSwatchLB7",
+            "colorSwatch8": "colorSwatchLB8",
             "saveToURL": "saveLB"
           },
           "colors": {
@@ -40,9 +47,6 @@ machines:
               "Pink":   "#ffc0cb",
               "Yellow": "#ffff00",
               "White":  "#ffffff"
-            },
-            "Special": {
-              "Black":  "#000000"
             }
           },
           "overrides": ["wrap","pattern"]
@@ -65,9 +69,10 @@ machines:
           "type": 1,
           "cols": 45,
           "rows": 39,
-          "color": "green",
+          "color": "black",
           "backgroundColor": "black",
           "hexagonal": true,
+          "highlight": false,
           "bindings": {
             "container": "displayLB"
           },
@@ -89,8 +94,8 @@ styles:
     margin-bottom: 16px;
   displayLB:
     position: relative;
-  colorSwatchLB:
-    display: inline-block;
+  .colorSwatchLB:
+    display: none;
     width: 16px;
     height: 16px;
     border: 1px solid;
@@ -106,11 +111,29 @@ styles:
 Animated "Lite-Brite" Demo
 --------------------------
 
+The "[Lite-Brite](https://en.wikipedia.org/wiki/Lite-Brite)" concept was invented by Joseph M. Burck at
+[Marvin Glass & Associates](https://en.wikipedia.org/wiki/Marvin_Glass_and_Associates) and first marketed as a toy
+in 1967 by [Hasbro](https://en.wikipedia.org/wiki/Hasbro).
+
+The original Lite-Brite design had a pair of matching black panels that were punctured with a series of evenly spaced holes
+arranged in a grid of 39 rows, which alternated between 44 and 45 holes per row, resulting in a hexagonal ("honeycomb")
+layout consisting of 1735 holes.  A piece of black paper containing a pre-printed pattern would be sandwiched between
+the panels, and then your job was to insert any of the (blue, green, purple, red, orange, pink, yellow, or white)
+colored pegs into the appropriately marked holes.
+
 {% include machine.html id="lbDemo" config="json" %}
 
 <div id="lbDemo">
   <div id="displayLB"></div>
-  <select id="colorPaletteLB"></select>&nbsp;<select id="colorSelectionLB"></select>&nbsp;<div id="colorSwatchLB"></div>
+  <select id="colorPaletteLB"></select>&nbsp;<select id="colorSelectionLB"></select>
+  <div id="colorSwatchLB1" class="colorSwatchLB"></div>
+  <div id="colorSwatchLB2" class="colorSwatchLB"></div>
+  <div id="colorSwatchLB3" class="colorSwatchLB"></div>
+  <div id="colorSwatchLB4" class="colorSwatchLB"></div>
+  <div id="colorSwatchLB5" class="colorSwatchLB"></div>
+  <div id="colorSwatchLB6" class="colorSwatchLB"></div>
+  <div id="colorSwatchLB7" class="colorSwatchLB"></div>
+  <div id="colorSwatchLB8" class="colorSwatchLB"></div>
   <button id="saveLB">Save to URL</button>
 </div>
 <div id="diagsLB">

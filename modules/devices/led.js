@@ -43,6 +43,7 @@
  * @property {string} [backgroundColor]
  * @property {boolean} [fixed]
  * @property {boolean} [hexagonal]
+ * @property {boolean} [highlight]
  * @property {boolean} [persistent]
  */
 
@@ -102,6 +103,7 @@
  * @property {Array.<string|number>|null} bufferClone
  * @property {boolean} fFixed (default is false, meaning the view may fill the container to its maximum size)
  * @property {boolean} fHexagonal (default is false)
+ * @property {boolean} fHighlight (default is true)
  * @property {boolean} fPersistent (default is false for LED.TYPE.DIGIT, meaning the view will be blanked if not refreshed)
  * @property {boolean} fBufferModified
  * @property {boolean} fTickled
@@ -147,7 +149,7 @@ class LED extends Device {
 
         this.canvasView = canvasView;
 
-        this.type = this.bounds(this.config['type'] || LED.TYPE.ROUND, LED.TYPE.ROUND, LED.TYPE.DIGIT);
+        this.type = this.getBounded(this.config['type'] || LED.TYPE.ROUND, LED.TYPE.ROUND, LED.TYPE.DIGIT);
         this.widthCell = LED.SIZES[this.type][0];
         this.heightCell = LED.SIZES[this.type][1];
         this.width = this.config['width'] || this.widthCell;
@@ -156,11 +158,14 @@ class LED extends Device {
         this.rows = this.config['rows'] || 1;
         this.widthView = this.width * this.cols;
         this.heightView = this.height * this.rows;
-        this.color = (this.config['color'] || "red");
-        this.color = LED.COLORS[this.color] || this.color;
-        this.colorDim = this.getRGBAColor(this.color, 1.0, 0.25);
-        this.colorBright = this.getRGBAColor(this.color, 1.0, 2.0);
-        this.backgroundColor = this.config['backgroundColor'];
+        this.colorOn = this.getRGBColor(this.config['color'], "red");
+        this.colorOff = this.getRGBAColor(this.colorOn, 1.0, 0.25);
+        this.colorHighlight = this.getRGBAColor(this.colorOn, 1.0, 2.0);
+        this.backgroundColor = this.getRGBColor(this.config['backgroundColor']);
+        this.foregroundColor = this.getRGBAColor(this.backgroundColor || "black", 1.0, 0.25);
+        if (this.foregroundColor == this.getRGBAColor(this.backgroundColor)) {
+            this.foregroundColor = this.getRGBAColor("white", 1.0, 0.15);
+        }
 
         /*
          * We generally want our view canvas to be "responsive", not "fixed" (ie, to automatically be resized
@@ -186,9 +191,11 @@ class LED extends Device {
         if (this.fPersistent == undefined) this.fPersistent = (this.type < LED.TYPE.DIGIT);
 
         /*
-         * Hexagonal option (aka "Lite-Brite" mode)
+         * Hexagonal (aka "Lite-Brite" mode) and highlighting options
          */
         this.fHexagonal = this.config['hexagonal'] || false;
+        this.fHighlight = this.config['highlight'];
+        if (this.fHighlight === undefined) this.fHighlight = true;
 
         canvasView.setAttribute("width", this.widthView.toString());
         canvasView.setAttribute("height", this.heightView.toString());
@@ -353,11 +360,11 @@ class LED extends Device {
                 let state = this.buffer[i];
                 let color = this.buffer[i+1];
                 let fModified = !!(this.buffer[i+3] & LED.FLAGS.MODIFIED);
-                let fRecent = (i == this.iBufferRecent);
-                if (fModified || fRecent || fForced) {
-                    this.drawGridCell(state, color, col, row, fRecent);
+                let fHighlight = (this.fHighlight && i == this.iBufferRecent);
+                if (fModified || fHighlight || fForced) {
+                    this.drawGridCell(state, color, col, row, fHighlight);
                     this.buffer[i+3] &= ~LED.FLAGS.MODIFIED;
-                    if (fRecent) this.buffer[i+3] |= LED.FLAGS.MODIFIED;
+                    if (fHighlight) this.buffer[i+3] |= LED.FLAGS.MODIFIED;
                 }
                 i += this.nBufferInc;
             }
@@ -397,18 +404,19 @@ class LED extends Device {
             this.clearGridCell(col, row, xOffset);
         }
 
-        let colorOn, colorBright, colorDim;
-        if (!color || color == this.color) {
-            colorOn = this.color;
-            colorDim = this.colorDim;
-            colorBright = this.colorBright;
+        let colorOn, colorOff, colorHighlight;
+        if (!color || color == this.colorOn) {
+            colorOn = fHighlight? this.colorHighlight : this.colorOn;
+            colorOff = this.colorOff;
         } else {
-            colorOn = color;
-            colorDim = this.getRGBAColor(color, 1.0, 0.25);
-            colorBright = this.getRGBAColor(color, 1.0, 2.0);
+            colorOn = fHighlight? this.getRGBAColor(color, 1.0, 2.0) : color;
+            colorOff = this.getRGBAColor(color, 1.0, 0.25);
         }
 
-        this.contextGrid.fillStyle = (state? (fHighlight? colorBright : colorOn) : colorDim);
+        color = (state? colorOn : colorOff);
+        if (colorOn == this.backgroundColor) color = this.foregroundColor;
+
+        this.contextGrid.fillStyle = color;
 
         let xBias = col * this.widthCell + xOffset;
         let yBias = row * this.heightCell;
@@ -438,7 +446,7 @@ class LED extends Device {
         if (coords) {
             let xBias = col * this.widthCell;
             let yBias = row * this.heightCell;
-            this.contextGrid.fillStyle = this.color;
+            this.contextGrid.fillStyle = this.colorOn;
             this.contextGrid.beginPath();
             if (coords.length == 3) {
                 this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, Math.PI * 2);
@@ -578,39 +586,60 @@ class LED extends Device {
      */
     getDefaultColor()
     {
-        return this.color;
+        return this.colorOn;
     }
 
     /**
-     * getRGBAColor(sColor, alpha, brightness)
+     * getRGBColor(color, sDefault)
+     *
+     * Returns a color string in the "hex" format that fillStyle recognizes (eg, "#rrggbb").
+     *
+     * The default is optional, allowing an undefined color to remain undefined if we want to use
+     * that to signal transparency (as in the case of backgroundColor).
+     *
+     * @this {LED}
+     * @param {string} color
+     * @param {string} [sDefault]
+     * @returns {string}
+     */
+    getRGBColor(color, sDefault)
+    {
+        color = color || sDefault;
+        return LED.COLORS[color] || color;
+    }
+
+    /**
+     * getRGBAColor(color, alpha, brightness)
      *
      * Returns a color string in the "rgba" format that fillStyle recognizes (eg, "rgba(255, 255, 255, 0)").
      *
      * I used to use "alpha" to adjust the brightness, but it's safer to use the "brightness" parameter,
-     * which simply scales all the RGB values.  If any shapes are redrawn using a fillStyle with alpha < 1.0,
-     * the target alpha values will be added instead of replaced, resulting in progressively brighter shapes;
-     * probably not what you want.
+     * which simply scales all the RGB values.  That's because if any shapes are redrawn using a fillStyle
+     * with alpha < 1.0, the target alpha values will be added instead of replaced, resulting in progressively
+     * brighter shapes; probably not what you want.
      *
      * @this {LED}
-     * @param {string} sColor
+     * @param {string} color
      * @param {number} [alpha]
      * @param {number} [brightness]
      * @returns {string}
      */
-    getRGBAColor(sColor, alpha = 1.0, brightness = 1.0)
+    getRGBAColor(color, alpha = 1.0, brightness = 1.0)
     {
-        sColor = LED.COLORS[sColor] || sColor;
-        let match = sColor.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
-        if (match) {
-            sColor = "rgba(";
-            for (let i = 1; i <= 3; i++) {
-                let n = Math.round(Number.parseInt(match[i], 16) * brightness);
-                n = (n < 0? 0 : (n > 255? 255 : n));
-                sColor += n + ",";
+        if (color) {
+            color = LED.COLORS[color] || color;
+            let match = color.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+            if (match) {
+                color = "rgba(";
+                for (let i = 1; i <= 3; i++) {
+                    let n = Math.round(Number.parseInt(match[i], 16) * brightness);
+                    n = (n < 0? 0 : (n > 255? 255 : n));
+                    color += n + ",";
+                }
+                color += alpha + ")";
             }
-            sColor += alpha + ")";
         }
-        return sColor;
+        return color;
     }
 
     /**
@@ -627,7 +656,7 @@ class LED extends Device {
             } else {
                 buffer[i] = ' ';
             }
-            buffer[i+1] = this.color;
+            buffer[i+1] = this.colorOn;
             buffer[i+2] = -1;
             buffer[i+3] = LED.FLAGS.MODIFIED;
         }
@@ -639,7 +668,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @param {string} color
+     * @param {string} [color]
      * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
     setLEDColor(col, row, color)
@@ -647,6 +676,7 @@ class LED extends Device {
         let fModified = null;
         if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
             fModified = false;
+            color = color || this.colorOn;
             let i = (row * this.cols + col) * this.nBufferInc;
             if (this.buffer[i+1] !== color) {
                 this.buffer[i+1] = color;
