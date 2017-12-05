@@ -43,6 +43,7 @@
  * @property {string} [backgroundColor]
  * @property {boolean} [fixed]
  * @property {boolean} [persistent]
+ * @property {boolean} [liteBrite]
  */
 
 /**
@@ -86,8 +87,6 @@
  * @property {number} rows (default is 1)
  * @property {string} color (default is "red")
  * @property {string} backgroundColor (default is none; ie, transparent background)
- * @property {boolean} fixed (default is false, meaning the view may fill the container to its maximum size)
- * @property {boolean} persistent (default is false for LED.TYPE.DIGIT, meaning the view will be blanked if not refreshed)
  * @property {number} widthView (computed)
  * @property {number} heightView (computed)
  * @property {number} widthGrid (computed)
@@ -101,6 +100,9 @@
  * }} bindings
  * @property {Array.<string|number>} buffer
  * @property {Array.<string|number>|null} bufferClone
+ * @property {boolean} fFixed (default is false, meaning the view may fill the container to its maximum size)
+ * @property {boolean} fPersistent (default is false for LED.TYPE.DIGIT, meaning the view will be blanked if not refreshed)
+ * @property {boolean} fLiteBrite (default is false)
  * @property {boolean} fBufferModified
  * @property {boolean} fTickled
  */
@@ -170,7 +172,8 @@ class LED extends Device {
          *
          * But, if you really don't want those style attributes, then set the LED config's "fixed" property to true.
          */
-        if (!this.config['fixed']) {
+        this.fFixed = this.config['fixed'] || false;
+        if (!this.fFixed) {
             canvasView.style.width = "100%";
             canvasView.style.height = "auto";
         }
@@ -181,6 +184,11 @@ class LED extends Device {
          */
         this.fPersistent = this.config['persistent'];
         if (this.fPersistent == undefined) this.fPersistent = (this.type < LED.TYPE.DIGIT);
+
+        /*
+         * Option to enable "Lite-Brite" mode
+         */
+        this.fLiteBrite = this.config['liteBrite'] || false;
 
         canvasView.setAttribute("width", this.widthView.toString());
         canvasView.setAttribute("height", this.heightView.toString());
@@ -272,13 +280,16 @@ class LED extends Device {
     }
 
     /**
-     * clearGridCell(col, row)
+     * clearGridCell(col, row, xOffset)
      *
      * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @param {number} xOffset
      */
-    clearGridCell(col, row)
+    clearGridCell(col, row, xOffset)
     {
-        let xBias = col * this.widthCell;
+        let xBias = col * this.widthCell + xOffset;
         let yBias = row * this.heightCell;
         if (this.backgroundColor) {
             this.contextGrid.fillStyle = this.backgroundColor;
@@ -368,6 +379,14 @@ class LED extends Device {
      */
     drawGridCell(state, color, col = 0, row = 0, fHighlight = false)
     {
+        let xOffset = 0;
+        if (this.fLiteBrite) {
+            if (!(row & 0x1)) {
+                xOffset = (this.widthCell >> 1);
+                if (col == this.cols - 1) return;
+            }
+        }
+
         /*
          * If this is NOT a persistent LED display, then drawGrid() will have done a preliminary clearGrid(),
          * eliminating the need to clear individual cells.  Whereas if this IS a persistent LED display, then
@@ -375,10 +394,8 @@ class LED extends Device {
          * around the edges of the shape we drew here previously.
          */
         if (this.fPersistent) {
-            this.clearGridCell(col, row);
+            this.clearGridCell(col, row, xOffset);
         }
-        let xBias = col * this.widthCell;
-        let yBias = row * this.heightCell;
 
         let colorOn, colorBright, colorDim;
         if (!color || color == this.color) {
@@ -393,6 +410,8 @@ class LED extends Device {
 
         this.contextGrid.fillStyle = (state? (fHighlight? colorBright : colorOn) : colorDim);
 
+        let xBias = col * this.widthCell + xOffset;
+        let yBias = row * this.heightCell;
         let coords = LED.SHAPES[this.type];
         if (coords.length == 3) {
             this.contextGrid.beginPath();
