@@ -39,9 +39,9 @@ machines:
             ]
           },
           "bindings": {
-            "colorPalette": "colorPalette",
-            "colorSelection": "colorSelection",
-            "colorSwatch": "colorSwatch",
+            "colorPalette": "colorPaletteLife",
+            "colorSelection": "colorSelectionLife",
+            "colorSwatch": "colorSwatchLife",
             "gliderGun": "gliderGun",
             "saveToURL": "saveLife"
           },
@@ -93,7 +93,7 @@ machines:
           "color": "green",
           "backgroundColor": "black",
           "bindings": {
-            "container": "lifeDisplay"
+            "container": "displayLife"
           },
           "overrides": ["color","backgroundColor"]
         },
@@ -111,9 +111,9 @@ styles:
     float: left;
     margin-right: 32px;
     margin-bottom: 16px;
-  lifeDisplay:
+  displayLife:
     position: relative;
-  colorSwatch:
+  colorSwatchLife:
     display: inline-block;
     width: 16px;
     height: 16px;
@@ -121,7 +121,7 @@ styles:
     border-radius: 50%;
     vertical-align: middle;
     background-color: green;
-  .diagsLife:
+  diagsLife:
     float: left;
   printLife:
     font-family: Monaco,"Lucida Console",monospace;
@@ -143,12 +143,12 @@ or [Blue](?color=blue&autoStart=true&pattern=gliderGun#game-of-life) or any othe
 {% include machine.html id="lifeDemo" config="json" %}
 
 <div id="lifeDemo">
-  <div id="lifeDisplay"></div>
-  <select id="colorPalette"></select>&nbsp;<select id="colorSelection"></select>&nbsp;<div id="colorSwatch"></div>
+  <div id="displayLife"></div>
+  <select id="colorPaletteLife"></select>&nbsp;<select id="colorSelectionLife"></select>&nbsp;<div id="colorSwatchLife"></div>
   <button id="gliderGun">Glider Gun</button>
   <button id="saveLife">Save to URL</button>
 </div>
-<div class="diagsLife">
+<div id="diagsLife">
   <div>
     <textarea id="printLife" cols="78" rows="16"></textarea>
   </div>

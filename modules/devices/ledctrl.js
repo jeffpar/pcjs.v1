@@ -86,6 +86,7 @@ class Chip extends Device {
                 class:          "Input",
                 location:       [0, 0, this.ledArray.widthView, this.ledArray.heightView, this.ledArray.cols, this.ledArray.rows],
                 drag:           true,
+                liteBrite:      this.ledArray.fLiteBrite,
                 bindings:       {surface: this.ledArray.config.bindings[LED.BINDING.CONTAINER]}
             };
 
@@ -596,7 +597,7 @@ class Chip extends Device {
         }
 
         /*
-         * Remove any '$' at the beginning of the pattern.
+         * Remove all '$' at the beginning of the pattern.
          */
         while (sPattern[0] == '$') {
             iRow++; nRows--;
@@ -604,7 +605,7 @@ class Chip extends Device {
         }
 
         /*
-         * Similarly, for every '$$' at the end of the pattern.
+         * Similarly, remove all '$$' at the end of the pattern.
          */
         while (sPattern.slice(-2) == '$$') {
             nRows--;
