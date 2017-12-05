@@ -86,7 +86,7 @@ class Chip extends Device {
                 class:          "Input",
                 location:       [0, 0, this.ledArray.widthView, this.ledArray.heightView, this.ledArray.cols, this.ledArray.rows],
                 drag:           true,
-                liteBrite:      this.ledArray.fLiteBrite,
+                hexagonal:      this.ledArray.fHexagonal,
                 bindings:       {surface: this.ledArray.config.bindings[LED.BINDING.CONTAINER]}
             };
 

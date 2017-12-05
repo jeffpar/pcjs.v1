@@ -3,13 +3,13 @@ layout: page
 title: Animated Lite-Brite Demo
 permalink: /devices/leds/litebrite/
 machines:
-  - id: liteBrite
+  - id: lbDemo
     type: leds
     name: Lite-Brite Demo
     uncompiled: true
     config: |
       {
-        "liteBrite": {
+        "lbDemo": {
           "class": "Machine",
           "type": "leds",
           "name": "Lite-Brite Demo",
@@ -31,28 +31,18 @@ machines:
             "saveToURL": "saveLB"
           },
           "colors": {
-            "Primary": {
-              "Navy":    "#000080",
-              "Green":   "#008000",
-              "Teal":    "#008080",
-              "Maroon":  "#800000",
-              "Purple":  "#800080",
-              "Olive":   "#808000",
-              "Gray":    "#808080",
-              "Blue":    "#0000ff",
-              "Lime":    "#00ff00",
-              "Cyan":    "#00ffff",
-              "Red":     "#ff0000",
-              "Magenta": "#ff00ff",
-              "Yellow":  "#ffff00",
-              "White":   "#ffffff"
+            "Original": {
+              "Blue":   "#0000ff",
+              "Green":  "#008000",
+              "Purple": "#800080",
+              "Red":    "#ff0000",
+              "Orange": "#ffa500",
+              "Pink":   "#ffc0cb",
+              "Yellow": "#ffff00",
+              "White":  "#ffffff"
             },
-            "Pastels": {
-              "Pink":    "#ffb3ba",
-              "Beige":   "#ffdfba",
-              "Yellow":  "#ffffba",
-              "Green":	 "#baffc9",
-              "Blue":	 "#bae1ff"
+            "Special": {
+              "Black":  "#000000"
             }
           },
           "overrides": ["wrap","pattern"]
@@ -73,11 +63,11 @@ machines:
         "lbDisplay": {
           "class": "LED",
           "type": 1,
-          "cols": 38,
-          "rows": 26,
+          "cols": 45,
+          "rows": 39,
           "color": "green",
           "backgroundColor": "black",
-          "liteBrite": true,
+          "hexagonal": true,
           "bindings": {
             "container": "displayLB"
           },
@@ -91,7 +81,7 @@ machines:
         }
       }
 styles:
-  liteBrite:
+  lbDemo:
     position: relative;
     display: inline-block;
     float: left;
@@ -116,9 +106,9 @@ styles:
 Animated "Lite-Brite" Demo
 --------------------------
 
-{% include machine.html id="liteBrite" config="json" %}
+{% include machine.html id="lbDemo" config="json" %}
 
-<div id="liteBrite">
+<div id="lbDemo">
   <div id="displayLB"></div>
   <select id="colorPaletteLB"></select>&nbsp;<select id="colorSelectionLB"></select>&nbsp;<div id="colorSwatchLB"></div>
   <button id="saveLB">Save to URL</button>

@@ -42,8 +42,8 @@
  * @property {string} [color]
  * @property {string} [backgroundColor]
  * @property {boolean} [fixed]
+ * @property {boolean} [hexagonal]
  * @property {boolean} [persistent]
- * @property {boolean} [liteBrite]
  */
 
 /**
@@ -101,8 +101,8 @@
  * @property {Array.<string|number>} buffer
  * @property {Array.<string|number>|null} bufferClone
  * @property {boolean} fFixed (default is false, meaning the view may fill the container to its maximum size)
+ * @property {boolean} fHexagonal (default is false)
  * @property {boolean} fPersistent (default is false for LED.TYPE.DIGIT, meaning the view will be blanked if not refreshed)
- * @property {boolean} fLiteBrite (default is false)
  * @property {boolean} fBufferModified
  * @property {boolean} fTickled
  */
@@ -186,9 +186,9 @@ class LED extends Device {
         if (this.fPersistent == undefined) this.fPersistent = (this.type < LED.TYPE.DIGIT);
 
         /*
-         * Option to enable "Lite-Brite" mode
+         * Hexagonal option (aka "Lite-Brite" mode)
          */
-        this.fLiteBrite = this.config['liteBrite'] || false;
+        this.fHexagonal = this.config['hexagonal'] || false;
 
         canvasView.setAttribute("width", this.widthView.toString());
         canvasView.setAttribute("height", this.heightView.toString());
@@ -380,7 +380,7 @@ class LED extends Device {
     drawGridCell(state, color, col = 0, row = 0, fHighlight = false)
     {
         let xOffset = 0;
-        if (this.fLiteBrite) {
+        if (this.fHexagonal) {
             if (!(row & 0x1)) {
                 xOffset = (this.widthCell >> 1);
                 if (col == this.cols - 1) return;
