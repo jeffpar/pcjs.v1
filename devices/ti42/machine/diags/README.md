@@ -283,7 +283,7 @@ The window also accepts a few debugging commands.  Use '?' for help.
 <div class="diagsTI42">
   <div>
     <p>Diagnostics</p>
-    <textarea id="printTI42" cols="78" rows="16"></textarea>
+    <textarea id="printTI42" cols="74" rows="16"></textarea>
   </div>
   <button id="runTI42">Run</button>
   <button id="stepTI42">Step</button><span id="speedTI42">Stopped</span>

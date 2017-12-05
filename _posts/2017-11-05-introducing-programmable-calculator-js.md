@@ -404,7 +404,7 @@ backward-compatibility.
 <div class="diagsTI57">
   <div>
     <p>Diagnostics</p>
-    <textarea id="printTI57" cols="78" rows="16"></textarea>
+    <textarea id="printTI57" cols="74" rows="16"></textarea>
   </div>
   <button id="runTI57">Run</button>
   <button id="stepTI57">Step</button><span id="speedTI57">Stopped</span>

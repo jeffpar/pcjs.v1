@@ -49,7 +49,7 @@
  * The ultimate goal is to provide support for a variety of LED types, such as:
  *
  * 1) LED Light (single light)
- * 2) LED Digits (1 or more 7-segment digits)
+ * 2) LED Digit (7-segment digit)
  *
  * The initial goal is to manage a 12-element array of 7-segment LED digits for the TI-57.
  *
