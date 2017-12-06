@@ -699,12 +699,19 @@ class Chip extends Device {
     updateColorSwatches(binding)
     {
         let i = 1, elementSwatch;
+        /*
+         * Some machines use only a single swatch called COLOR_SWATCH_SELECTED; update as appropriate.
+         */
         if (!binding && this.colorSelected) {
             elementSwatch = this.bindings[Chip.BINDING.COLOR_SWATCH_SELECTED];
             if (elementSwatch) {
                 elementSwatch.style.backgroundColor = this.colorSelected;
             }
         }
+        /*
+         * Other machines use a series of swatches named COLOR_SWATCH + "1", COLOR_SWATCH + "2", etc;
+         * for each color in colorPalette, update the next available swatch.
+         */
         if (this.colorPalette) {
             for (let idColor in this.colorPalette) {
                 let idSwatch = Chip.BINDING.COLOR_SWATCH + i++;
@@ -721,6 +728,10 @@ class Chip extends Device {
                 elementSwatch.style.backgroundColor = color;
             }
         }
+        /*
+         * Finally, for any remaining swatches in the series (ie, because the current palette doesn't need
+         * them all), hide them.
+         */
         while (true) {
             let idSwatch = Chip.BINDING.COLOR_SWATCH + i++;
             let elementSwatch = this.bindings[idSwatch];

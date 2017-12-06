@@ -115,11 +115,15 @@ The "[Lite-Brite](https://en.wikipedia.org/wiki/Lite-Brite)" concept was invente
 [Marvin Glass & Associates](https://en.wikipedia.org/wiki/Marvin_Glass_and_Associates) and first marketed as a toy
 in 1967 by [Hasbro](https://en.wikipedia.org/wiki/Hasbro).
 
-The original Lite-Brite design had a pair of matching black panels that were punctured with a series of evenly spaced holes
+The original Lite-Brite design used a pair of matching black panels punctured with a series of evenly spaced holes
 arranged in a grid of 39 rows, which alternated between 44 and 45 holes per row, resulting in a hexagonal ("honeycomb")
 layout consisting of 1735 holes.  A piece of black paper containing a pre-printed pattern would be sandwiched between
 the panels, and then your job was to insert any of the (blue, green, purple, red, orange, pink, yellow, or white)
 colored pegs into the appropriately marked holes.
+
+One of the goals of this demo is to take the "Lite-Brite" concept a bit farther, allowing you to associate
+sequence numbers with each of the colored LEDs, making it possible to create a variety of "blinking" and "color-cycling"
+animations.  Stay tuned.
 
 {% include machine.html id="lbDemo" config="json" %}
 
@@ -134,6 +138,7 @@ colored pegs into the appropriately marked holes.
   <div id="colorSwatchLB6" class="colorSwatchLB"></div>
   <div id="colorSwatchLB7" class="colorSwatchLB"></div>
   <div id="colorSwatchLB8" class="colorSwatchLB"></div>
+  <select id="colorSwatch
   <button id="saveLB">Save to URL</button>
 </div>
 <div id="diagsLB">
