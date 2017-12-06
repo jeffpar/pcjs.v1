@@ -102,10 +102,14 @@ class Chip extends Device {
                 if (col >= 0 && row >= 0) {
                     if (chip.colorSelected) {
                         if (!led.setLEDColor(col, row, chip.colorSelected)) {
-                            if (!chip.fToggle) {
-                                led.setLEDColor(col, row);
-                            } else {
+                            if (chip.fToggle) {
                                 led.setLEDState(col, row, LED.STATE.ON - led.getLEDState(col, row));
+                            } else {
+                                if (!led.getLEDState(col, row)) {
+                                    led.setLEDColor(col, row);
+                                } else {
+                                    led.setLEDState(col, row, LED.STATE.OFF);
+                                }
                             }
                         } else {
                             led.setLEDState(col, row, LED.STATE.ON);
@@ -114,6 +118,7 @@ class Chip extends Device {
                     else {
                         led.setLEDState(col, row, LED.STATE.ON - led.getLEDState(col, row));
                     }
+                    led.setLEDCounts(col, row, chip.getCounts());
                     led.drawBuffer();
                 }
             });
@@ -336,6 +341,25 @@ class Chip extends Device {
         this.assert(iCell == nIncPerGrid);
         this.ledArray.swapBuffers();
         return cAlive;
+    }
+
+    /**
+     * getCounts()
+     *
+     * @this {Chip}
+     * @returns {Array.<number>}
+     */
+    getCounts()
+    {
+        let counts = [];
+        for (let i = 0; i < Chip.COUNTS.length; i++) {
+            let elementCount;
+            let binding = Chip.COUNTS[i];
+            if (elementCount = this.bindings[binding]) {
+                counts.unshift(+elementCount.options[elementCount.selectedIndex].value);
+            }
+        }
+        return counts;
     }
 
     /**
@@ -770,8 +794,12 @@ Chip.BINDING = {
     COLOR_SELECTION:       "colorSelection",
     COLOR_SWATCH:          "colorSwatch",
     COLOR_SWATCH_SELECTED: "colorSwatchSelected",
+    COUNT_ON:              "countOn",
+    COUNT_OFF:             "countOff",
     SAVE_TO_URL:           "saveToURL",
 };
+
+Chip.COUNTS = [Chip.BINDING.COUNT_ON, Chip.BINDING.COUNT_OFF];
 
 Chip.COMMANDS = [
     "c\tset category"

@@ -164,7 +164,7 @@ class LED extends Device {
         this.backgroundColor = this.getRGBColor(this.config['backgroundColor']);
         this.foregroundColor = this.getRGBAColor(this.backgroundColor || "black", 1.0, 0.25);
         if (this.foregroundColor == this.getRGBAColor(this.backgroundColor)) {
-            this.foregroundColor = this.getRGBAColor("white", 1.0, 0.15);
+            this.foregroundColor = this.getRGBAColor("white", 1.0, 0.10);
         }
 
         /*
@@ -219,7 +219,7 @@ class LED extends Device {
          *
          *      [0]:    state (eg, ON or OFF or a digit)
          *      [1]:    color
-         *      [2]:    counter
+         *      [2]:    count(s) (eg, 0 to 8  4-bit counts)
          *      [3]:    flags (eg, PERIOD, MODIFIED, etc)
          *
          * The LED buffer also contains an extra (scratch) row at the end.  This extra row, along with the
@@ -680,6 +680,36 @@ class LED extends Device {
             let i = (row * this.cols + col) * this.nBufferInc;
             if (this.buffer[i+1] !== color) {
                 this.buffer[i+1] = color;
+                this.buffer[i+3] |= LED.FLAGS.MODIFIED;
+                this.fBufferModified = fModified = true;
+            }
+            this.iBufferRecent = i;
+            this.fTickled = true;
+        }
+        return fModified;
+    }
+
+    /**
+     * setLEDCounts(col, row, counts)
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @param {Array.<number>} counts
+     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     */
+    setLEDCounts(col, row, counts)
+    {
+        let fModified = null;
+        if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
+            fModified = false;
+            let i = (row * this.cols + col) * this.nBufferInc;
+            let bits = 0;
+            for (let c = 0; c < counts.length; c++) {
+                bits = (bits << 4) | (counts[c] & 0xf);
+            }
+            if (this.buffer[i+2] !== bits) {
+                this.buffer[i+2] = bits;
                 this.buffer[i+3] |= LED.FLAGS.MODIFIED;
                 this.fBufferModified = fModified = true;
             }

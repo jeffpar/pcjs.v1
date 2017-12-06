@@ -24,6 +24,7 @@ machines:
         "lbChip": {
           "class": "Chip",
           "toggle": false,
+          "rule": "C8",
           "bindings": {
             "colorPalette": "colorPaletteLB",
             "colorSelection": "colorSelectionLB",
@@ -35,6 +36,8 @@ machines:
             "colorSwatch6": "colorSwatchLB6",
             "colorSwatch7": "colorSwatchLB7",
             "colorSwatch8": "colorSwatchLB8",
+            "countOn": "countOn",
+            "countOff": "countOff",
             "saveToURL": "saveLB"
           },
           "colors": {
@@ -138,6 +141,26 @@ animations.  Stay tuned.
   <div id="colorSwatchLB6" class="colorSwatchLB"></div>
   <div id="colorSwatchLB7" class="colorSwatchLB"></div>
   <div id="colorSwatchLB8" class="colorSwatchLB"></div>
+  <select id="countOn">
+    <option value="0">On for 0</option>
+    <option value="1" selected="selected">On for 1</option>
+    <option value="2">On for 2</option>
+    <option value="3">On for 3</option>
+    <option value="4">On for 4</option>
+    <option value="5">On for 5</option>
+    <option value="6">On for 6</option>
+    <option value="7">On for 7</option>
+  </select>
+  <select id="countOff">
+    <option value="0">Off for 0</option>
+    <option value="1" selected="selected">Off for 1</option>
+    <option value="2">Off for 2</option>
+    <option value="3">Off for 3</option>
+    <option value="4">Off for 4</option>
+    <option value="5">Off for 5</option>
+    <option value="6">Off for 6</option>
+    <option value="7">Off for 7</option>
+  </select>
   <button id="saveLB">Save to URL</button>
 </div>
 <div id="diagsLB">
