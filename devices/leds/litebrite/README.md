@@ -138,7 +138,6 @@ animations.  Stay tuned.
   <div id="colorSwatchLB6" class="colorSwatchLB"></div>
   <div id="colorSwatchLB7" class="colorSwatchLB"></div>
   <div id="colorSwatchLB8" class="colorSwatchLB"></div>
-  <select id="colorSwatch
   <button id="saveLB">Save to URL</button>
 </div>
 <div id="diagsLB">
