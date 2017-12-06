@@ -288,27 +288,6 @@ class Device {
     }
 
     /**
-     * bounds(n, min, max)
-     *
-     * Restricts n to the bounds defined by min and max.  A side-effect is ensuring that the return
-     * value is ALWAYS a number, even n is not.
-     *
-     * @this {Device}
-     * @param {number} n
-     * @param {number} min
-     * @param {number} max
-     * @returns {number} (updated n)
-     */
-    bounds(n, min, max)
-    {
-        this.assert(min <= max);
-        n = +n || 0;
-        if (n < min) n = min;
-        if (n > max) n = max;
-        return n;
-    }
-
-    /**
      * checkOverrides(config)
      *
      * @this {Device}
@@ -472,6 +451,40 @@ class Device {
     findHandlers(sType)
     {
         return Device.Handlers[this.idMachine] && Device.Handlers[this.idMachine][sType];
+    }
+
+    /**
+     * getBounded(n, min, max)
+     *
+     * Restricts n to the bounds defined by min and max.  A side-effect is ensuring that the return
+     * value is ALWAYS a number, even n is not.
+     *
+     * @this {Device}
+     * @param {number} n
+     * @param {number} min
+     * @param {number} max
+     * @returns {number} (updated n)
+     */
+    getBounded(n, min, max)
+    {
+        this.assert(min <= max);
+        n = +n || 0;
+        if (n < min) n = min;
+        if (n > max) n = max;
+        return n;
+    }
+
+    /**
+     * getDefault(value, defaultValue)
+     *
+     * @this {Device}
+     * @param {*} value
+     * @param {*} defaultValue
+     * @returns {*}
+     */
+    getDefault(value, defaultValue)
+    {
+        return (value !== undefined)? value : defaultValue;
     }
 
     /**

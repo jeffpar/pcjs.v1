@@ -37,7 +37,7 @@
  * @property {Array.<number>} location
  * @property {Array.<Array.<number>>} [map]
  * @property {boolean} [drag]
- * @property {boolean} [liteBrite]
+ * @property {boolean} [hexagonal]
  */
 
 /**
@@ -47,7 +47,7 @@
  * @property {Array.<number>} location
  * @property {Array.<Array.<number>>} map
  * @property {boolean} fDrag
- * @property {boolean} fLiteBrite
+ * @property {boolean} fHexagonal
  * @property {{
  *  surface: HTMLImageElement|undefined
  * }} bindings
@@ -157,7 +157,7 @@ class Input extends Device {
              * series of LEDs on or off.
              */
             this.fDrag = !!this.config['drag'];
-            this.fLiteBrite = !!this.config['liteBrite'];
+            this.fHexagonal = !!this.config['hexagonal'];
 
             /*
              * To calculate the average button width (cxButton), we know that the overall width
@@ -582,12 +582,12 @@ class Input extends Device {
                     let rowInput = (yInput / cyCol) | 0;
 
                     /*
-                     * In "Lite-Brite" mode, the cells of even-numbered rows are offset horizontally by 1/2 cell,
-                     * resulting in a hexagonal layout.  In addition, the last cell in those rows is unused, so if
+                     * If the grid is hexagonal (aka "Lite-Brite" mode), then the cells of even-numbered rows are
+                     * offset horizontally by 1/2 cell.  In addition, the last cell in those rows is unused, so if
                      * after compensating by 1/2 cell, the target column is the last cell, we set xInput to -1,
                      * effectively ignoring input on that cell.
                      */
-                    if (this.fLiteBrite && !(rowInput & 0x1)) {
+                    if (this.fHexagonal && !(rowInput & 0x1)) {
                         xInput -= (cxCol >> 1);
                         colInput = (xInput / cxCol) | 0;
                         if (colInput == this.nCols - 1) xInput = -1;
