@@ -55,6 +55,7 @@
  * @property {Object} colorPalette
  * @property {string} colorDefault (obtained from the ledArray)
  * @property {string} colorSelected (set by updateColorSelection())
+ * @property {Array.<string>} colorArray
  */
 class Chip extends Device {
     /**
@@ -69,10 +70,27 @@ class Chip extends Device {
     {
         super(idMachine, idDevice, Chip.VERSION, config);
 
+        /*
+         * The 'toggle' property is set to true for grids like the "Game of Life", where you normally
+         * just want to toggle a cell on or off; it's false for the "Lite-Brite" grid where we're dealing
+         * with LEDs of multiple colors.  I admit it's a kludgy distinction between grids with different
+         * UI requirements, but it's good enough to get the ball rolling.  We'll revisit the UI later.
+         */
         this.fToggle = this.getDefault(this.config['toggle'], true);
+
+        /*
+         * These are grid "behavior" properties.  If 'wrap' is true, then any off-grid neighbor cell locations
+         * are mapped to the opposite edge; otherwise, they are mapped to the LED array's "scratch" row.
+         */
         this.fWrap = this.getDefault(this.config['wrap'], false);
         this.sRule = this.getDefault(this.config['rule'], "B3/S23");    // default rule (births require 3 neighbors, survivors require 2 or 3)
         this.sPatternInit = this.getDefault(this.config['pattern'], "");
+
+        /*
+         * Since all bindings should have been completed by super(), we can make a preliminary call
+         * to getCounts() to determine how many counts are stored per LED, to preallocate a count buffer.
+         */
+        this.countBuffer = new Array(this.getCounts().length);
 
         /*
          * Get access to the LED device, so we can update its display.
@@ -95,35 +113,36 @@ class Chip extends Device {
             };
 
             let chip = this;
-            let led = this.ledArray;
+            let ledArray = this.ledArray;
 
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
             this.ledInput.addInput(function onLEDInput(col, row) {
                 if (col >= 0 && row >= 0) {
                     if (chip.colorSelected) {
-                        if (!led.setLEDColor(col, row, chip.colorSelected)) {
+                        if (!ledArray.setLEDColor(col, row, chip.colorSelected)) {
                             if (chip.fToggle) {
-                                led.setLEDState(col, row, LED.STATE.ON - led.getLEDState(col, row));
+                                ledArray.setLEDState(col, row, LED.STATE.ON - ledArray.getLEDState(col, row));
                             } else {
-                                if (!led.getLEDState(col, row)) {
-                                    led.setLEDColor(col, row);
+                                if (!ledArray.getLEDState(col, row)) {
+                                    ledArray.setLEDColor(col, row);
                                 } else {
-                                    led.setLEDState(col, row, LED.STATE.OFF);
+                                    ledArray.setLEDState(col, row, LED.STATE.OFF);
                                 }
                             }
                         } else {
-                            led.setLEDState(col, row, LED.STATE.ON);
+                            ledArray.setLEDState(col, row, LED.STATE.ON);
                         }
                     }
                     else {
-                        led.setLEDState(col, row, LED.STATE.ON - led.getLEDState(col, row));
+                        ledArray.setLEDState(col, row, LED.STATE.ON - ledArray.getLEDState(col, row));
                     }
-                    led.setLEDCounts(col, row, chip.getCounts());
-                    led.drawBuffer();
+                    ledArray.setLEDCounts(col, row, chip.getCounts());
+                    ledArray.drawBuffer();
                 }
             });
 
-            this.colorDefault = led.getDefaultColor();
+            this.colorArray = [];
+            this.colorDefault = ledArray.getDefaultColor();
             this.updateColorSelection(this.colorDefault);
             this.updateColorSwatches();
 
@@ -212,8 +231,16 @@ class Chip extends Device {
     {
         let nCyclesClocked = 0;
         if (nCyclesTarget >= 0) {
+            let nAlive;
             do {
-                let nAlive = this.doGeneration();
+                switch(this.sRule) {
+                case "C4":
+                    nAlive = this.countCells();
+                    break;
+                default:
+                    nAlive = this.countNeighbors();
+                    break;
+                }
                 if (!nCyclesTarget) this.println("living cells: " + nAlive);
                 nCyclesClocked += 1;
             } while (nCyclesClocked < nCyclesTarget);
@@ -222,7 +249,69 @@ class Chip extends Device {
     }
 
     /**
-     * doGeneration()
+     * countCells()
+     *
+     * @this {Chip}
+     * @returns {number}
+     */
+    countCells()
+    {
+        let cAlive = 0;
+        let ledArray = this.ledArray;
+        let nCols = ledArray.cols, nRows = ledArray.rows;
+        let counts = this.countBuffer;
+        for (let row = 0; row < nRows; row++) {
+            for (let col = 0; col < nCols; col++) {
+                if (!ledArray.getLEDCounts(col, row, counts)) continue;
+                cAlive++;
+                /*
+                 * Here's the layout of the cell's counts (which mirrors the Chip.COUNTS layout):
+                 *
+                 *      [0] is the "working" count
+                 *      [1] is the ON count
+                 *      [2] is the OFF count
+                 *      [3] is the color-cycle count
+                 *
+                 * Whenever the working count is zero, we examine the cell's state and advance it to
+                 * the next state: if it was ON, it goes to OFF (and the OFF count is loaded into
+                 * the working count); if it was OFF, then color-cycle count (if any) is applied, and
+                 * the state goes to ON (and the ON count is loaded).
+                 */
+                if (counts[0]) {
+                    counts[0]--;
+                }
+                if (!counts[0]) {
+                    let state = ledArray.getLEDState(col, row), stateNew = state;
+                    switch(state) {
+                    case LED.STATE.ON:
+                        stateNew = LED.STATE.OFF;
+                        counts[0] = counts[2];
+                        if (counts[0]) break;
+                        /* falls through */
+                    case LED.STATE.OFF:
+                        if (counts[3]) {
+                            let color = ledArray.getLEDColor(col, row);
+                            let iColor = this.colorArray.indexOf(color);
+                            if (iColor >= 0) {
+                                iColor = (iColor + counts[3]);
+                                while (iColor >= this.colorArray.length) iColor -= this.colorArray.length;
+                                ledArray.setLEDColor(col, row, this.colorArray[iColor]);
+                            }
+                        }
+                        stateNew = LED.STATE.ON;
+                        counts[0] = counts[1];
+                        break;
+                    }
+                    if (stateNew !== state) ledArray.setLEDState(col, row, stateNew);
+                }
+                ledArray.setLEDCounts(col, row, counts);
+            }
+        }
+        return cAlive;
+    }
+
+    /**
+     * countNeighbors()
      *
      * This contains a straight-forward implementation of the Conway "Game of Life" rules ("B3/S23"),
      * iterating row-by-row and column-by-column.  It takes advantage of the LED array's one-dimensional
@@ -249,7 +338,7 @@ class Chip extends Device {
      * @this {Chip}
      * @returns {number}
      */
-    doGeneration()
+    countNeighbors()
     {
         let cAlive = 0;
         let buffer = this.ledArray.getBuffer();
@@ -351,12 +440,12 @@ class Chip extends Device {
      */
     getCounts()
     {
-        let counts = [];
-        for (let i = 0; i < Chip.COUNTS.length; i++) {
+        let counts = [0];
+        for (let i = 1; i < Chip.COUNTS.length; i++) {
             let elementCount;
             let binding = Chip.COUNTS[i];
             if (elementCount = this.bindings[binding]) {
-                counts.unshift(+elementCount.options[elementCount.selectedIndex].value);
+                counts.push(+elementCount.options[elementCount.selectedIndex].value);
             }
         }
         return counts;
@@ -591,6 +680,30 @@ class Chip extends Device {
     /**
      * savePattern()
      *
+     * We save our patterns as a string that is largely compatible with the "Game of Life RLE Format"
+     * (refer to http://www.conwaylife.com/w/index.php?title=Run_Length_Encoded), which uses <repetition><tag>
+     * pairs to describes runs of identical cells; the <tag> is either 'o' for "active" cells, 'b' for "empty"
+     * cells, or '$' for end of line.
+     *
+     * We say "largely" compatible because it's not really a goal for our pattern strings to be compatible
+     * with any other RLE reader.  For example, we don't break our string into lines of 70 characters or less,
+     * so that's already one incompatibility.  Also, we don't attempt to determine the minimum bounding
+     * rectangle for the current pattern, because we use these strings to save/restore the entire grid as it
+     * originally appeared, not just the pattern within the grid.  Both of those differences can be dealt with
+     * in the future with a special RLE-compatibility flag, if we ever care.
+     *
+     * For grids containing multi-color cells and additional state (eg, internal counters) not found in typical
+     * "Game of Life" grids, we may precede each <repetition><tag> pair with zero or more <value><modifier> pairs,
+     * where <modifier> can be:
+     *
+     *      'R':    red color value (assumed zero if not present)
+     *      'G':    green color value (assumed zero if not present)
+     *      'B':    blue color value (assumed zero if not present)
+     *      'C':    packed count value (ie, internal counts packed into a single unsigned 32-bit number)
+     *
+     * If we use any of the above modifiers, they are ALWAYS preceded with a value (unlike the <repetition><tag>
+     * pairs, where a repetition of 1 is assumed if omitted).
+     *
      * @this {Chip}
      * @returns {string}
      */
@@ -738,11 +851,12 @@ class Chip extends Device {
          */
         if (this.colorPalette) {
             for (let idColor in this.colorPalette) {
+                let color = this.colorPalette[idColor];
+                if (this.colorArray) this.colorArray[i-1] = color;
                 let idSwatch = Chip.BINDING.COLOR_SWATCH + i++;
                 elementSwatch = this.bindings[idSwatch];
                 if (!elementSwatch) break;
                 elementSwatch.style.display = "inline-block";
-                let color = this.colorPalette[idColor];
                 if (idSwatch == binding) {
                     this.updateColorSelection(color);
                 }
@@ -774,7 +888,7 @@ class Chip extends Device {
      * single-stepped), and 3) a start() or stop() transition has occurred.
      *
      * Of those, all we currently care about are step() and stop() notifications, because we want to make sure
-     * the LED display is in sync with the last LED buffer update performed by doGeneration().  In both of those
+     * the LED display is in sync with the last LED buffer update performed by countNeighbors().  In both of those
      * cases, time has stopped.  If time has NOT stopped, then the LED's normal animator function (ledAnimate())
      * takes care of updating the LED display.
      *
@@ -796,10 +910,11 @@ Chip.BINDING = {
     COLOR_SWATCH_SELECTED: "colorSwatchSelected",
     COUNT_ON:              "countOn",
     COUNT_OFF:             "countOff",
+    COUNT_CYCLE:           "countCycle",
     SAVE_TO_URL:           "saveToURL",
 };
 
-Chip.COUNTS = [Chip.BINDING.COUNT_ON, Chip.BINDING.COUNT_OFF];
+Chip.COUNTS = [null, Chip.BINDING.COUNT_ON, Chip.BINDING.COUNT_OFF, Chip.BINDING.COUNT_CYCLE];
 
 Chip.COMMANDS = [
     "c\tset category"

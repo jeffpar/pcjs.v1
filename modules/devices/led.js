@@ -162,20 +162,20 @@ class LED extends Device {
         this.colorOff = this.getRGBAColor(this.colorOn, 1.0, 0.25);
         this.colorHighlight = this.getRGBAColor(this.colorOn, 1.0, 2.0);
         this.backgroundColor = this.getRGBColor(this.config['backgroundColor']);
-        this.foregroundColor = this.getRGBAColor(this.backgroundColor || "black", 1.0, 0.25);
-        if (this.foregroundColor == this.getRGBAColor(this.backgroundColor)) {
-            this.foregroundColor = this.getRGBAColor("white", 1.0, 0.10);
+        this.backgroundContrast = this.getRGBAColor(this.backgroundColor || "black", 1.0, 0.25);
+        if (this.backgroundContrast == this.getRGBAColor(this.backgroundColor)) {
+            this.backgroundContrast = this.getRGBAColor("white", 1.0, 0.10);
         }
 
         /*
-         * We generally want our view canvas to be "responsive", not "fixed" (ie, to automatically be resized
-         * with changes to the overall window size), in which case we apply the following style attributes
-         * (formerly applied with the "pcjs-canvas" style in /modules/shared/templates/components.css):
+         * We generally want our view canvas to be "responsive", not "fixed" (ie, to automatically resize
+         * with changes to the overall window size), so we apply the following style attributes (formerly
+         * applied with the "pcjs-canvas" style in /modules/shared/templates/components.css):
          *
          *      width: 100%;
          *      height: auto;
          *
-         * But, if you really don't want those style attributes, then set the LED config's "fixed" property to true.
+         * But, if you really don't want that feature, then set the LED config's "fixed" property to true.
          */
         this.fFixed = this.config['fixed'] || false;
         if (!this.fFixed) {
@@ -184,8 +184,8 @@ class LED extends Device {
         }
 
         /*
-         * Persistent LEDS are the default, except for LED.TYPE.DIGIT, which is generally used with calculator displays
-         * and whose underlying hardware is required to constantly "refresh" the LEDs, otherwise they go dark.
+         * Persistent LEDS are the default, except for LED.TYPE.DIGIT, which is used with calculator displays
+         * whose underlying hardware must constantly "refresh" the LEDs to prevent them from going dark.
          */
         this.fPersistent = this.config['persistent'];
         if (this.fPersistent == undefined) this.fPersistent = (this.type < LED.TYPE.DIGIT);
@@ -414,7 +414,7 @@ class LED extends Device {
         }
 
         color = (state? colorOn : colorOff);
-        if (colorOn == this.backgroundColor) color = this.foregroundColor;
+        if (colorOn == this.backgroundColor) color = this.backgroundContrast;
 
         this.contextGrid.fillStyle = color;
 
@@ -560,12 +560,56 @@ class LED extends Device {
     }
 
     /**
+     * getLEDColor(col, row)
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @returns {string|undefined}
+     */
+    getLEDColor(col, row)
+    {
+        let i = (row * this.cols + col) * this.nBufferInc;
+        return this.buffer[i+1];
+    }
+
+    /**
+     * getLEDCounts(col, row, counts)
+     *
+     * For the moment, this function returns success (true) ONLY for cells that have been set to
+     * a non-default color.  For a typical "Lite-Brite" grid, that means non-black cells only; make
+     * sure that LED controller's palette does NOT include the grid's default color.
+     *
+     * TODO: Consider another attribute that marks a cell and its counts as "dead" (color is not ideal).
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @param {Array.<number>} counts
+     * @returns {boolean}
+     */
+    getLEDCounts(col, row, counts)
+    {
+        let fSuccess = false;
+        let i = (row * this.cols + col) * this.nBufferInc + 1;
+        if (i < this.buffer.length - 1 && this.buffer[i] !== this.colorOn) {
+            fSuccess = true;
+            let bits = this.buffer[i+1];
+            for (let c = counts.length - 1; c >= 0; c--) {
+                counts[c] = bits & 0xf;
+                bits >>>= 4;
+            }
+        }
+        return fSuccess;
+    }
+
+    /**
      * getLEDState(col, row)
      *
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @returns {number}
+     * @returns {number|undefined}
      */
     getLEDState(col, row)
     {

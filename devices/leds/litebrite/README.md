@@ -24,7 +24,7 @@ machines:
         "lbChip": {
           "class": "Chip",
           "toggle": false,
-          "rule": "C8",
+          "rule": "C4",
           "bindings": {
             "colorPalette": "colorPaletteLB",
             "colorSelection": "colorSelectionLB",
@@ -38,6 +38,7 @@ machines:
             "colorSwatch8": "colorSwatchLB8",
             "countOn": "countOn",
             "countOff": "countOff",
+            "countCycle": "countCycle",
             "saveToURL": "saveLB"
           },
           "colors": {
@@ -152,14 +153,24 @@ animations.  Stay tuned.
     <option value="7">On for 7</option>
   </select>
   <select id="countOff">
-    <option value="0">Off for 0</option>
-    <option value="1" selected="selected">Off for 1</option>
+    <option value="0" selected="selected">Off for 0</option>
+    <option value="1">Off for 1</option>
     <option value="2">Off for 2</option>
     <option value="3">Off for 3</option>
     <option value="4">Off for 4</option>
     <option value="5">Off for 5</option>
     <option value="6">Off for 6</option>
     <option value="7">Off for 7</option>
+  </select>
+  <select id="countCycle">
+    <option value="0" selected="selected">Cycle by 0</option>
+    <option value="1">Cycle by 1</option>
+    <option value="2">Cycle by 2</option>
+    <option value="3">Cycle by 3</option>
+    <option value="4">Cycle by 4</option>
+    <option value="5">Cycle by 5</option>
+    <option value="6">Cycle by 6</option>
+    <option value="7">Cycle by 7</option>
   </select>
   <button id="saveLB">Save to URL</button>
 </div>
