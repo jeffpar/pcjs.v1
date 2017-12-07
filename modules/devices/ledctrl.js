@@ -747,40 +747,41 @@ class Chip extends Device {
 
         let flushRun = function(fEndRow) {
             let fDelta = false;
-            if (fEndRow) {
-                if (statePrev) state = stateLast;
-                rgb[0] = rgbLast[0];
-                rgb[1] = rgbLast[1];
-                rgb[2] = rgbLast[2];
-                count = countLast;
-            }
             if (nPrev) {
                 if (fColors) {
                     if (rgb[0] != rgbPrev[0]) {
-                        rgbLast[0] = rgbPrev[0];
-                        sPattern += (rgbPrev[0] || "") + 'R';
                         fDelta = true;
                     }
                     if (rgb[1] != rgbPrev[1]) {
-                        rgbLast[1] = rgbPrev[1];
-                        sPattern += (rgbPrev[1] || "") + 'G';
                         fDelta = true;
                     }
                     if (rgb[2] != rgbPrev[2]) {
-                        rgbLast[2] = rgbPrev[2];
-                        sPattern += (rgbPrev[2] || "") + 'B';
                         fDelta = true;
                     }
-                    if (count != countPrev) {
-                        countLast = countPrev;
-                        sPattern += (countPrev || "") + 'C';
+                    if (count != countPrev || state != statePrev) {
                         fDelta = true;
                     }
                 }
-                if (fDelta || state != statePrev) {
-                    stateLast = statePrev;
+                if (fDelta || fEndRow) {
+                    if (rgbLast[0] != rgbPrev[0]) {
+                        rgbLast[0] = rgbPrev[0];
+                        sPattern += (rgbPrev[0] || "") + 'R';
+                    }
+                    if (rgbLast[1] != rgbPrev[1]) {
+                        rgbLast[1] = rgbPrev[1];
+                        sPattern += (rgbPrev[1] || "") + 'G';
+                    }
+                    if (rgbLast[2] != rgbPrev[2]) {
+                        rgbLast[2] = rgbPrev[2];
+                        sPattern += (rgbPrev[2] || "") + 'B';
+                    }
+                    if (countLast != countPrev) {
+                        countLast = countPrev;
+                        sPattern += (countPrev || "") + 'C';
+                    }
                     if (nPrev > 1) sPattern += nPrev;
                     sPattern += (statePrev == LED.STATE.ON? 'o' : 'b');
+                    stateLast = statePrev;
                     fDelta = true;
                 }
             }

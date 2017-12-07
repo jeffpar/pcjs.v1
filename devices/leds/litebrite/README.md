@@ -125,9 +125,8 @@ layout containing 1735 holes.  A piece of black paper containing a pre-printed p
 the panels, and then your job was to insert any of the (blue, green, purple, red, orange, pink, yellow, or white)
 colored pegs into the appropriately marked holes.
 
-One of the goals of this demo is to take the "Lite-Brite" concept a bit farther, allowing you to associate
-sequence numbers with each of the colored LEDs, making it possible to create a variety of "blinking" and "color-cycling"
-animations.  Stay tuned.
+This demo takes the "Lite-Brite" concept a bit farther, allowing you to associate sequence numbers with each of the
+colored LEDs, making it possible to create a variety of "blinking" and "color-cycling" animations.
 
 {% include machine.html id="lbDemo" config="json" %}
 
