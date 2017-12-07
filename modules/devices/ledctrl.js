@@ -605,7 +605,7 @@ class Chip extends Device {
             }
         }
 
-        ledArray.drawBuffer();
+        ledArray.drawBuffer(true);
         return true;
     }
 
