@@ -98,6 +98,9 @@ styles:
     margin-bottom: 16px;
   displayLB:
     position: relative;
+    background-color: rgb(26,26,26);
+    line-height: 0;
+    margin-bottom: 8px;
   .colorSwatchLB:
     display: none;
     width: 16px;

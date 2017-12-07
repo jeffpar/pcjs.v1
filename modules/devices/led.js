@@ -199,7 +199,7 @@ class LED extends Device {
 
         canvasView.setAttribute("width", this.widthView.toString());
         canvasView.setAttribute("height", this.heightView.toString());
-        canvasView.style.backgroundColor = (this.backgroundColor || this.getRGBAColor("black", 0));
+        canvasView.style.backgroundColor = /* this.backgroundColor || */ this.getRGBAColor("black", 0);
         container.appendChild(canvasView);
         this.contextView = /** @type {CanvasRenderingContext2D} */ (canvasView.getContext("2d"));
 
@@ -413,8 +413,12 @@ class LED extends Device {
             colorOff = this.getRGBAColor(color, 1.0, 0.25);
         }
 
+        let fTransparent = false;
         color = (state? colorOn : colorOff);
-        if (colorOn == this.backgroundColor) color = this.backgroundContrast;
+        if (colorOn == this.backgroundColor) {
+            color = this.backgroundContrast;
+            fTransparent = true;
+        }
 
         this.contextGrid.fillStyle = color;
 
@@ -424,7 +428,23 @@ class LED extends Device {
         if (coords.length == 3) {
             this.contextGrid.beginPath();
             this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, Math.PI * 2);
-            this.contextGrid.fill();
+            if (fTransparent) {
+                /*
+                 * The following code works as well:
+                 *
+                 *      this.contextGrid.save();
+                 *      this.contextGrid.clip();
+                 *      this.contextGrid.clearRect(xBias, yBias, this.widthCell, this.heightCell);
+                 *      this.contextGrid.restore();
+                 *
+                 * but I assume it's not as efficient.
+                 */
+                this.contextGrid.globalCompositeOperation = "destination-out";
+                this.contextGrid.fill();
+                this.contextGrid.globalCompositeOperation = "source-over";
+            } else {
+                this.contextGrid.fill();
+            }
         } else {
             this.contextGrid.fillRect(coords[0] + xBias, coords[1] + yBias, coords[2], coords[3]);
         }
@@ -524,8 +544,8 @@ class LED extends Device {
          * Setting the 'globalCompositeOperation' property of a 2D context is something you rarely need to do,
          * because the default draw behavior ("source-over") is fine for most cases.  One case where it is NOT
          * fine is when we're using a transparent background color (ie, the backgroundColor property is not set),
-         * because it doesn't copy over any transparent pixels, effectively making it impossible to "turn off" any
-         * previously drawn LED segments.  To force that behavior, we must select the "copy" behavior.
+         * because it doesn't copy over any transparent pixels, effectively making it impossible to "turn off"
+         * any previously drawn LED segments.  To force that behavior, we must select the "copy" behavior.
          *
          * Refer to: https://www.w3.org/TR/2dcontext/#dom-context-2d-globalcompositeoperation
          */
