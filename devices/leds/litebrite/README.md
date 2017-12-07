@@ -121,7 +121,7 @@ in 1967 by [Hasbro](https://en.wikipedia.org/wiki/Hasbro).
 
 The original Lite-Brite design used a pair of matching black panels punctured with a series of evenly spaced holes
 arranged in a grid of 39 rows, which alternated between 44 and 45 holes per row, resulting in a hexagonal ("honeycomb")
-layout consisting of 1735 holes.  A piece of black paper containing a pre-printed pattern would be sandwiched between
+layout containing 1735 holes.  A piece of black paper containing a pre-printed pattern would be sandwiched between
 the panels, and then your job was to insert any of the (blue, green, purple, red, orange, pink, yellow, or white)
 colored pegs into the appropriately marked holes.
 

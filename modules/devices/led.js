@@ -574,6 +574,21 @@ class LED extends Device {
     }
 
     /**
+     * getLEDColorValues(col, row, rgb)
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @param {Array.<number>} rgb
+     * @returns {boolean}
+     */
+    getLEDColorValues(col, row, rgb)
+    {
+        let i = (row * this.cols + col) * this.nBufferInc;
+        return this.parseRGBValues(this.buffer[i+1], rgb);
+    }
+
+    /**
      * getLEDCounts(col, row, counts)
      *
      * For the moment, this function returns success (true) ONLY for cells that have been set to
@@ -601,6 +616,20 @@ class LED extends Device {
             }
         }
         return fSuccess;
+    }
+
+    /**
+     * getLEDPackedCounts(col, row)
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @returns {number}
+     */
+    getLEDPackedCounts(col, row)
+    {
+        let i = (row * this.cols + col) * this.nBufferInc + 2;
+        return (i < this.buffer.length)? this.buffer[i] : 0;
     }
 
     /**
@@ -653,6 +682,20 @@ class LED extends Device {
     }
 
     /**
+     * getRGBColorString(rgb)
+     *
+     * Returns a color string in the "hex" format that fillStyle recognizes (eg, "#rrggbb").
+     *
+     * @this {LED}
+     * @param {Array.<number>} rgb
+     * @returns {string}
+     */
+    getRGBColorString(rgb)
+    {
+        return this.sprintf("#%02x%02x%02x", rgb[0], rgb[1], rgb[2]);
+    }
+
+    /**
      * getRGBAColor(color, alpha, brightness)
      *
      * Returns a color string in the "rgba" format that fillStyle recognizes (eg, "rgba(255, 255, 255, 0)").
@@ -671,12 +714,12 @@ class LED extends Device {
     getRGBAColor(color, alpha = 1.0, brightness = 1.0)
     {
         if (color) {
+            let rgb = [];
             color = LED.COLORS[color] || color;
-            let match = color.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
-            if (match) {
+            if (this.parseRGBValues(color, rgb)) {
                 color = "rgba(";
-                for (let i = 1; i <= 3; i++) {
-                    let n = Math.round(Number.parseInt(match[i], 16) * brightness);
+                for (let i = 0; i < 3; i++) {
+                    let n = Math.round(rgb[i] * brightness);
                     n = (n < 0? 0 : (n > 255? 255 : n));
                     color += n + ",";
                 }
@@ -701,9 +744,34 @@ class LED extends Device {
                 buffer[i] = ' ';
             }
             buffer[i+1] = this.colorOn;
-            buffer[i+2] = -1;
+            buffer[i+2] = 0;
             buffer[i+3] = LED.FLAGS.MODIFIED;
         }
+    }
+
+    /**
+     * parseRGBValues(color, rgb)
+     *
+     * @this {LED}
+     * @param {string} color
+     * @param {Array.<number>} rgb
+     * @returns {boolean}
+     */
+    parseRGBValues(color, rgb)
+    {
+        let base = 16;
+        let match = color.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+        if (!match) {
+            base = 10;
+            match = color.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,?\s*(\d+|)\)$/i);
+        }
+        if (match) {
+            for (let i = 1; i < match.length; i++) {
+                rgb[i-1] = Number.parseInt(match[i], base);
+            }
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -546,9 +546,11 @@ class Chip extends Device {
         }
 
         let i = 0, col = iCol, row = iRow;
-        let aTokens = sPattern.split(/([bo$])/i);
+        let aTokens = sPattern.split(/([a-z$])/i);
 
         ledArray.clearBuffer();
+
+        let rgb = [0, 0, 0], count = 0, fColors = false;
 
         /*
          * We could add checks that verify that col and row stay within the bounds of the specified
@@ -557,15 +559,30 @@ class Chip extends Device {
          * because setLEDState() will ignore any parameters outside the LED array's bounds.
          */
         while (i < aTokens.length - 1) {
-            let count = aTokens[i++];
-            if (count === "") count = 1;
+            let n = aTokens[i++];
             let token = aTokens[i++];
-            while (count--) {
+            let v = +n, nRepeat = (n === ""? 1 : v);
+            while (nRepeat--) {
                 let fModified = false;
                 switch(token) {
                 case '$':
                     col = iCol;
                     row++;
+                    break;
+                case 'C':
+                    count = v;
+                    break;
+                case 'R':
+                    rgb[0] = v;
+                    fColors = true;
+                    break;
+                case 'G':
+                    rgb[1] = v;
+                    fColors = true;
+                    break;
+                case 'B':
+                    rgb[2] = v;
+                    fColors = true;
                     break;
                 case 'b':
                     fModified = ledArray.setLEDState(col++, row, LED.STATE.OFF);
@@ -577,7 +594,12 @@ class Chip extends Device {
                     this.printf("unrecognized pattern token: %s\n", token);
                     break;
                 }
-                if (fModified == null) {
+                if (fModified) {
+                    if (fColors) {
+                        ledArray.setLEDColor(col-1, row, ledArray.getRGBColorString(rgb));
+                    }
+                }
+                else if (fModified == null) {
                     this.printf("invalid pattern position (%d,%d)\n", col-1, row);
                 }
             }
@@ -682,7 +704,7 @@ class Chip extends Device {
      *
      * We save our patterns as a string that is largely compatible with the "Game of Life RLE Format"
      * (refer to http://www.conwaylife.com/w/index.php?title=Run_Length_Encoded), which uses <repetition><tag>
-     * pairs to describes runs of identical cells; the <tag> is either 'o' for "active" cells, 'b' for "empty"
+     * pairs to describes runs of identical cells; the <tag> is either 'o' for "alive" cells, 'b' for "dead"
      * cells, or '$' for end of line.
      *
      * We say "largely" compatible because it's not really a goal for our pattern strings to be compatible
@@ -692,17 +714,20 @@ class Chip extends Device {
      * originally appeared, not just the pattern within the grid.  Both of those differences can be dealt with
      * in the future with a special RLE-compatibility flag, if we ever care.
      *
-     * For grids containing multi-color cells and additional state (eg, internal counters) not found in typical
-     * "Game of Life" grids, we may precede each <repetition><tag> pair with zero or more <value><modifier> pairs,
-     * where <modifier> can be:
+     * Moreover, we must deal with grids containing multi-color cells and additional state (eg, internal counters)
+     * not found in typical "Game of Life" grids, so we may precede each <repetition><tag> pair with zero or more
+     * <value><modifier> pairs, where <modifier> can be:
      *
      *      'R':    red color value (assumed zero if not present)
      *      'G':    green color value (assumed zero if not present)
      *      'B':    blue color value (assumed zero if not present)
      *      'C':    packed count value (ie, internal counts packed into a single unsigned 32-bit number)
      *
-     * If we use any of the above modifiers, they are ALWAYS preceded with a value (unlike the <repetition><tag>
-     * pairs, where a repetition of 1 is assumed if omitted).
+     * If we use any of the above modifiers, they are always preceded with a value unless the value is zero
+     * (unlike the <repetition><tag> pairs, where a repetition of 1 is assumed if omitted).
+     *
+     * Also, a modifier remains in effect until modified by another modifier, reducing the amount of
+     * "modifier noise" in the pattern string.
      *
      * @this {Chip}
      * @returns {string}
@@ -711,41 +736,79 @@ class Chip extends Device {
     {
         let ledArray = this.ledArray;
 
-        let nRunOn = 0, nRunOff = 0, sPattern = "";
-        let iCol = 0, iRow = 0, nCols = this.ledArray.cols, nRows = this.ledArray.rows;
+        let sPattern = "";
+        let iCol = 0, iRow = 0;
+        let nCols = this.ledArray.cols, nRows = this.ledArray.rows;
+
+        let fColors = !!this.colorArray.length;
+        let state, rgb = [0, 0, 0], count;
+        let stateLast = 0, rgbLast = [0, 0, 0], countLast = 0;
+        let statePrev = 0, rgbPrev = [0, 0, 0], countPrev = 0, nPrev = 0;
+
+        let flushRun = function(fEndRow) {
+            let fDelta = false;
+            if (fEndRow) {
+                if (statePrev) state = stateLast;
+                rgb[0] = rgbLast[0];
+                rgb[1] = rgbLast[1];
+                rgb[2] = rgbLast[2];
+                count = countLast;
+            }
+            if (nPrev) {
+                if (fColors) {
+                    if (rgb[0] != rgbPrev[0]) {
+                        rgbLast[0] = rgbPrev[0];
+                        sPattern += (rgbPrev[0] || "") + 'R';
+                        fDelta = true;
+                    }
+                    if (rgb[1] != rgbPrev[1]) {
+                        rgbLast[1] = rgbPrev[1];
+                        sPattern += (rgbPrev[1] || "") + 'G';
+                        fDelta = true;
+                    }
+                    if (rgb[2] != rgbPrev[2]) {
+                        rgbLast[2] = rgbPrev[2];
+                        sPattern += (rgbPrev[2] || "") + 'B';
+                        fDelta = true;
+                    }
+                    if (count != countPrev) {
+                        countLast = countPrev;
+                        sPattern += (countPrev || "") + 'C';
+                        fDelta = true;
+                    }
+                }
+                if (fDelta || state != statePrev) {
+                    stateLast = statePrev;
+                    if (nPrev > 1) sPattern += nPrev;
+                    sPattern += (statePrev == LED.STATE.ON? 'o' : 'b');
+                    fDelta = true;
+                }
+            }
+            if (fEndRow) {
+                sPattern += '$';
+                nPrev = 0;
+            } else {
+                if (!fDelta) {
+                    nPrev++;
+                } else {
+                    nPrev = 1;
+                }
+                statePrev = state;
+                rgbPrev[0] = rgb[0];
+                rgbPrev[1] = rgb[1];
+                rgbPrev[2] = rgb[2];
+                countPrev = count;
+            }
+        };
 
         for (let row = 0; row < ledArray.rows; row++) {
             for (let col = 0; col < ledArray.cols; col++) {
-                let state = ledArray.getLEDState(col, row);
-                if (!state) {
-                    /*
-                     * The OFF case...
-                     */
-                    if (nRunOn) {
-                        if (nRunOn > 1) sPattern += nRunOn;
-                        sPattern += 'o';
-                        nRunOn = 0;
-                    }
-                    nRunOff++;
-                } else {
-                    /*
-                     * The ON case...
-                     */
-                    if (nRunOff) {
-                        if (nRunOff > 1) sPattern += nRunOff;
-                        sPattern += 'b';
-                        nRunOff = 0;
-                    }
-                    nRunOn++;
-                }
+                state = ledArray.getLEDState(col, row);
+                ledArray.getLEDColorValues(col, row, rgb);
+                count = ledArray.getLEDPackedCounts(col, row);
+                flushRun();
             }
-            if (nRunOn) {
-                if (nRunOn > 1) sPattern += nRunOn;
-                sPattern += 'o';
-                nRunOn = 0;
-            }
-            nRunOff = 0;
-            sPattern += '$';
+            flushRun(true);
         }
 
         /*
