@@ -567,6 +567,7 @@ class Chip extends Device {
                 let nAdvance = 0, fModified = false;
                 switch(token) {
                 case '$':
+                    fColors = fCounts = false;
                     col = iCol;
                     row++;
                     break;
@@ -773,22 +774,24 @@ class Chip extends Device {
                 if (state != statePrev) {
                     fDelta = true;
                 }
-                if (fDelta || fEndRow) {
-                    if (rgbLast[0] != rgbPrev[0]) {
-                        rgbLast[0] = rgbPrev[0];
-                        sPattern += (rgbPrev[0] || "") + 'R';
-                    }
-                    if (rgbLast[1] != rgbPrev[1]) {
-                        rgbLast[1] = rgbPrev[1];
-                        sPattern += (rgbPrev[1] || "") + 'G';
-                    }
-                    if (rgbLast[2] != rgbPrev[2]) {
-                        rgbLast[2] = rgbPrev[2];
-                        sPattern += (rgbPrev[2] || "") + 'B';
-                    }
-                    if (countsLast != countsPrev) {
-                        countsLast = countsPrev;
-                        sPattern += (countsPrev || "") + 'C';
+                if (fDelta || fEndRow && statePrev) {
+                    if (fColors) {
+                        if (rgbLast[0] != rgbPrev[0]) {
+                            rgbLast[0] = rgbPrev[0];
+                            sPattern += (rgbPrev[0] || "") + 'R';
+                        }
+                        if (rgbLast[1] != rgbPrev[1]) {
+                            rgbLast[1] = rgbPrev[1];
+                            sPattern += (rgbPrev[1] || "") + 'G';
+                        }
+                        if (rgbLast[2] != rgbPrev[2]) {
+                            rgbLast[2] = rgbPrev[2];
+                            sPattern += (rgbPrev[2] || "") + 'B';
+                        }
+                        if (countsLast != countsPrev) {
+                            countsLast = countsPrev;
+                            sPattern += (countsPrev || "") + 'C';
+                        }
                     }
                     if (nPrev > 1) sPattern += nPrev;
                     sPattern += (statePrev == LED.STATE.ON? 'o' : 'b');
