@@ -550,7 +550,8 @@ class Chip extends Device {
 
         ledArray.clearBuffer();
 
-        let rgb = [0, 0, 0], count = 0, fColors = false;
+        let rgb = [0, 0, 0], counts = 0;
+        let fColors = false, fCounts = false;
 
         /*
          * We could add checks that verify that col and row stay within the bounds of the specified
@@ -563,14 +564,15 @@ class Chip extends Device {
             let token = aTokens[i++];
             let v = +n, nRepeat = (n === ""? 1 : v);
             while (nRepeat--) {
-                let fModified = false;
+                let nAdvance = 0, fModified = false;
                 switch(token) {
                 case '$':
                     col = iCol;
                     row++;
                     break;
                 case 'C':
-                    count = v;
+                    counts = v;
+                    fCounts = true;
                     break;
                 case 'R':
                     rgb[0] = v;
@@ -585,22 +587,28 @@ class Chip extends Device {
                     fColors = true;
                     break;
                 case 'b':
-                    fModified = ledArray.setLEDState(col++, row, LED.STATE.OFF);
+                    fModified = ledArray.setLEDState(col, row, LED.STATE.OFF);
+                    nAdvance++;
                     break;
                 case 'o':
-                    fModified = ledArray.setLEDState(col++, row, LED.STATE.ON);
+                    fModified = ledArray.setLEDState(col, row, LED.STATE.ON);
+                    nAdvance++;
                     break;
                 default:
                     this.printf("unrecognized pattern token: %s\n", token);
                     break;
                 }
-                if (fModified) {
+                if (fModified == null) {
+                    this.printf("invalid pattern position (%d,%d)\n", col, row);
+                } else {
                     if (fColors) {
-                        ledArray.setLEDColor(col-1, row, ledArray.getRGBColorString(rgb));
+                        let color = ledArray.getRGBColorString(rgb);
+                        ledArray.setLEDColor(col, row, color);
                     }
-                }
-                else if (fModified == null) {
-                    this.printf("invalid pattern position (%d,%d)\n", col-1, row);
+                    if (fCounts) {
+                        ledArray.setLEDCountsPacked(col, row, counts);
+                    }
+                    col += nAdvance;
                 }
             }
         }
@@ -741,9 +749,9 @@ class Chip extends Device {
         let nCols = this.ledArray.cols, nRows = this.ledArray.rows;
 
         let fColors = !!this.colorArray.length;
-        let state, rgb = [0, 0, 0], count;
-        let stateLast = 0, rgbLast = [0, 0, 0], countLast = 0;
-        let statePrev = 0, rgbPrev = [0, 0, 0], countPrev = 0, nPrev = 0;
+        let state, rgb = [0, 0, 0], counts;
+        let stateLast = 0, rgbLast = [0, 0, 0], countsLast = 0;
+        let statePrev = 0, rgbPrev = [0, 0, 0], countsPrev = 0, nPrev = 0;
 
         let flushRun = function(fEndRow) {
             let fDelta = false;
@@ -758,9 +766,12 @@ class Chip extends Device {
                     if (rgb[2] != rgbPrev[2]) {
                         fDelta = true;
                     }
-                    if (count != countPrev || state != statePrev) {
+                    if (counts != countsPrev) {
                         fDelta = true;
                     }
+                }
+                if (state != statePrev) {
+                    fDelta = true;
                 }
                 if (fDelta || fEndRow) {
                     if (rgbLast[0] != rgbPrev[0]) {
@@ -775,9 +786,9 @@ class Chip extends Device {
                         rgbLast[2] = rgbPrev[2];
                         sPattern += (rgbPrev[2] || "") + 'B';
                     }
-                    if (countLast != countPrev) {
-                        countLast = countPrev;
-                        sPattern += (countPrev || "") + 'C';
+                    if (countsLast != countsPrev) {
+                        countsLast = countsPrev;
+                        sPattern += (countsPrev || "") + 'C';
                     }
                     if (nPrev > 1) sPattern += nPrev;
                     sPattern += (statePrev == LED.STATE.ON? 'o' : 'b');
@@ -798,7 +809,7 @@ class Chip extends Device {
                 rgbPrev[0] = rgb[0];
                 rgbPrev[1] = rgb[1];
                 rgbPrev[2] = rgb[2];
-                countPrev = count;
+                countsPrev = counts;
             }
         };
 
@@ -806,7 +817,7 @@ class Chip extends Device {
             for (let col = 0; col < ledArray.cols; col++) {
                 state = ledArray.getLEDState(col, row);
                 ledArray.getLEDColorValues(col, row, rgb);
-                count = ledArray.getLEDPackedCounts(col, row);
+                counts = ledArray.getLEDCountsPacked(col, row);
                 flushRun();
             }
             flushRun(true);

@@ -313,8 +313,8 @@ class LED extends Device {
      * (eg, see clearBuffer()).  The other important periodic side-effect of this function is clearing
      * fTickled, so that if no other setLEDState() calls occur between now and the next drawBuffer(),
      * an automatic clearBuffer() will be triggered.  This simulates the normal blanking of the display
-     * whenever the machine performs lengthy calculations, because for the LED display to remain on,
-     * the machine must perform a DISP operation at least 30-60 times per second.
+     * whenever the machine performs lengthy calculations, because for an LED display to remain lit,
+     * the machine must perform a display operation ("refresh") at least 30-60 times per second.
      *
      * @this {LED}
      * @param {boolean} [fForced]
@@ -639,14 +639,14 @@ class LED extends Device {
     }
 
     /**
-     * getLEDPackedCounts(col, row)
+     * getLEDCountsPacked(col, row)
      *
      * @this {LED}
      * @param {number} col
      * @param {number} row
      * @returns {number}
      */
-    getLEDPackedCounts(col, row)
+    getLEDCountsPacked(col, row)
     {
         let i = (row * this.cols + col) * this.nBufferInc + 2;
         return (i < this.buffer.length)? this.buffer[i] : 0;
@@ -849,6 +849,28 @@ class LED extends Device {
             this.fTickled = true;
         }
         return fModified;
+    }
+
+    /**
+     * setLEDCountsPacked(col, row, counts)
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @param {number} counts
+     * @returns {boolean|null} (true if this call modified the LED state, false if not, null if error)
+     */
+    setLEDCountsPacked(col, row, counts)
+    {
+        let i = (row * this.cols + col) * this.nBufferInc + 2;
+        if (i < this.buffer.length) {
+            if (this.buffer[i] != counts) {
+                this.buffer[i] = counts;
+                return true;
+            }
+            return false;
+        }
+        return null;
     }
 
     /**
