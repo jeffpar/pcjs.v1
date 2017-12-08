@@ -86,8 +86,8 @@
  * @property {number} height (default is 128 for LED.TYPE.DIGIT, 32 otherwise; see LED.SIZES)
  * @property {number} cols (default is 1)
  * @property {number} rows (default is 1)
- * @property {string} color (default is "red")
- * @property {string} backgroundColor (default is none; ie, transparent background)
+ * @property {string} color (default is none; ie, transparent foreground)
+ * @property {string} colorBackground (default is none; ie, transparent background)
  * @property {number} widthView (computed)
  * @property {number} heightView (computed)
  * @property {number} widthGrid (computed)
@@ -158,14 +158,12 @@ class LED extends Device {
         this.rows = this.config['rows'] || 1;
         this.widthView = this.width * this.cols;
         this.heightView = this.height * this.rows;
-        this.colorOn = this.getRGBColor(this.config['color'], "red");
+
+        this.colorTransparent = this.getRGBAColor("black", 0);
+        this.colorOn = this.getRGBColor(this.config['color']) || this.colorTransparent;
         this.colorOff = this.getRGBAColor(this.colorOn, 1.0, 0.25);
         this.colorHighlight = this.getRGBAColor(this.colorOn, 1.0, 2.0);
-        this.backgroundColor = this.getRGBColor(this.config['backgroundColor']);
-        this.backgroundContrast = this.getRGBAColor(this.backgroundColor || "black", 1.0, 0.25);
-        if (this.backgroundContrast == this.getRGBAColor(this.backgroundColor)) {
-            this.backgroundContrast = this.getRGBAColor("white", 1.0, 0.10);
-        }
+        this.colorBackground = this.getRGBColor(this.config['backgroundColor']);
 
         /*
          * We generally want our view canvas to be "responsive", not "fixed" (ie, to automatically resize
@@ -199,7 +197,7 @@ class LED extends Device {
 
         canvasView.setAttribute("width", this.widthView.toString());
         canvasView.setAttribute("height", this.heightView.toString());
-        canvasView.style.backgroundColor = /* this.backgroundColor || */ this.getRGBAColor("black", 0);
+        canvasView.style.backgroundColor = this.colorTransparent;
         container.appendChild(canvasView);
         this.contextView = /** @type {CanvasRenderingContext2D} */ (canvasView.getContext("2d"));
 
@@ -278,8 +276,8 @@ class LED extends Device {
      */
     clearGrid()
     {
-        if (this.backgroundColor) {
-            this.contextGrid.fillStyle = this.backgroundColor;
+        if (this.colorBackground) {
+            this.contextGrid.fillStyle = this.colorBackground;
             this.contextGrid.fillRect(0, 0, this.widthGrid, this.heightGrid);
         } else {
             this.contextGrid.clearRect(0, 0, this.widthGrid, this.heightGrid);
@@ -298,8 +296,8 @@ class LED extends Device {
     {
         let xBias = col * this.widthCell + xOffset;
         let yBias = row * this.heightCell;
-        if (this.backgroundColor) {
-            this.contextGrid.fillStyle = this.backgroundColor;
+        if (this.colorBackground) {
+            this.contextGrid.fillStyle = this.colorBackground;
             this.contextGrid.fillRect(xBias, yBias, this.widthCell, this.heightCell);
         } else {
             this.contextGrid.clearRect(xBias, yBias, this.widthCell, this.heightCell);
@@ -404,7 +402,7 @@ class LED extends Device {
             this.clearGridCell(col, row, xOffset);
         }
 
-        let colorOn, colorOff, colorHighlight;
+        let colorOn, colorOff;
         if (!color || color == this.colorOn) {
             colorOn = fHighlight? this.colorHighlight : this.colorOn;
             colorOff = this.colorOff;
@@ -415,8 +413,8 @@ class LED extends Device {
 
         let fTransparent = false;
         color = (state? colorOn : colorOff);
-        if (colorOn == this.backgroundColor) {
-            color = this.backgroundContrast;
+        if (colorOn == this.colorTransparent) {
+            color = this.colorBackground;
             fTransparent = true;
         }
 
@@ -543,13 +541,13 @@ class LED extends Device {
         /*
          * Setting the 'globalCompositeOperation' property of a 2D context is something you rarely need to do,
          * because the default draw behavior ("source-over") is fine for most cases.  One case where it is NOT
-         * fine is when we're using a transparent background color (ie, the backgroundColor property is not set),
-         * because it doesn't copy over any transparent pixels, effectively making it impossible to "turn off"
-         * any previously drawn LED segments.  To force that behavior, we must select the "copy" behavior.
+         * fine is when we're using a transparent background color, because it doesn't copy over any transparent
+         * pixels, effectively making it impossible to "turn off" any previously drawn LED segments.  To force
+         * that behavior, we must select the "copy" behavior.
          *
          * Refer to: https://www.w3.org/TR/2dcontext/#dom-context-2d-globalcompositeoperation
          */
-        this.contextView.globalCompositeOperation = (this.backgroundColor && !this.fPersistent)? "source-over" : "copy";
+        this.contextView.globalCompositeOperation = (this.colorBackground && !this.fPersistent)? "source-over" : "copy";
         this.contextView.drawImage(this.canvasGrid, 0, 0, this.widthGrid, this.heightGrid, 0, 0, this.widthView, this.heightView);
     }
 
@@ -611,11 +609,10 @@ class LED extends Device {
     /**
      * getLEDCounts(col, row, counts)
      *
-     * For the moment, this function returns success (true) ONLY for cells that have been set to
-     * a non-default color.  For a typical "Lite-Brite" grid, that means non-black cells only; make
-     * sure that LED controller's palette does NOT include the grid's default color.
+     * This function returns success (true) ONLY for cells that are not transparent.
      *
-     * TODO: Consider another attribute that marks a cell and its counts as "dead" (color is not ideal).
+     * For a typical "Lite-Brite" grid, transparent cells are considered "empty", so we want to
+     * ignore them.
      *
      * @this {LED}
      * @param {number} col
@@ -627,7 +624,7 @@ class LED extends Device {
     {
         let fSuccess = false;
         let i = (row * this.cols + col) * this.nBufferInc + 1;
-        if (i < this.buffer.length - 1 && this.buffer[i] !== this.colorOn) {
+        if (i < this.buffer.length - 1 && this.buffer[i] !== this.colorTransparent) {
             fSuccess = true;
             let bits = this.buffer[i+1];
             for (let c = counts.length - 1; c >= 0; c--) {
@@ -683,22 +680,22 @@ class LED extends Device {
     }
 
     /**
-     * getRGBColor(color, sDefault)
+     * getRGBColor(color, colorDefault)
      *
      * Returns a color string in the "hex" format that fillStyle recognizes (eg, "#rrggbb").
      *
      * The default is optional, allowing an undefined color to remain undefined if we want to use
-     * that to signal transparency (as in the case of backgroundColor).
+     * that to signal transparency (as in the case of colorBackground).
      *
      * @this {LED}
      * @param {string} color
-     * @param {string} [sDefault]
+     * @param {string} [colorDefault]
      * @returns {string}
      */
-    getRGBColor(color, sDefault)
+    getRGBColor(color, colorDefault)
     {
-        color = color || sDefault;
-        return LED.COLORS[color] || color;
+        color = color || colorDefault;
+        return color && LED.COLORS[color] || color;
     }
 
     /**
@@ -738,12 +735,13 @@ class LED extends Device {
             color = LED.COLORS[color] || color;
             if (this.parseRGBValues(color, rgb)) {
                 color = "rgba(";
-                for (let i = 0; i < 3; i++) {
+                let i;
+                for (i = 0; i < 3; i++) {
                     let n = Math.round(rgb[i] * brightness);
                     n = (n < 0? 0 : (n > 255? 255 : n));
                     color += n + ",";
                 }
-                color += alpha + ")";
+                color += (i < rgb.length? rgb[i] : alpha) + ")";
             }
         }
         return color;
@@ -786,9 +784,11 @@ class LED extends Device {
             match = color.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,?\s*(\d+|)\)$/i);
         }
         if (match) {
-            for (let i = 1; i < match.length; i++) {
+            let i;
+            for (i = 1; i < match.length; i++) {
                 rgb[i-1] = Number.parseInt(match[i], base);
             }
+            rgb.length = i-1;
             return true;
         }
         return false;

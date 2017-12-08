@@ -45,7 +45,7 @@ machines:
             "Original": {
               "Blue":   "#0000ff",
               "Green":  "#008000",
-              "Purple": "#800080",
+              "Violet": "#800080",
               "Red":    "#ff0000",
               "Orange": "#ffa500",
               "Pink":   "#ffc0cb",
@@ -73,7 +73,6 @@ machines:
           "type": 1,
           "cols": 45,
           "rows": 39,
-          "color": "black",
           "backgroundColor": "black",
           "hexagonal": true,
           "highlight": false,
@@ -101,6 +100,8 @@ styles:
     background-color: rgb(26,26,26);
     line-height: 0;
     margin-bottom: 8px;
+    background-image: url('patterns/Snow_Man.jpg');
+    background-size: 100% 100%;
   .colorSwatchLB:
     display: none;
     width: 16px;
@@ -125,7 +126,7 @@ in 1967 by [Hasbro](https://en.wikipedia.org/wiki/Hasbro).
 The original Lite-Brite design used a pair of matching black panels punctured with a series of evenly spaced holes
 arranged in a grid of 39 rows, which alternated between 44 and 45 holes per row, resulting in a hexagonal ("honeycomb")
 layout containing 1735 holes.  A piece of black paper containing a pre-printed pattern would be sandwiched between
-the panels, and then your job was to insert any of the (blue, green, purple, red, orange, pink, yellow, or white)
+the panels, and then your job was to insert any of the (blue, green, violet, red, orange, pink, yellow, or white)
 colored pegs into the appropriately marked holes.
 
 This demo takes the "Lite-Brite" concept a bit farther, allowing you to associate sequence numbers with each of the
