@@ -701,7 +701,8 @@ class LED extends Device {
     /**
      * getRGBColorString(rgb)
      *
-     * Returns a color string in the "hex" format that fillStyle recognizes (eg, "#rrggbb").
+     * Returns a color string fillStyle recognizes (ie, "#rrggbb", or "rgba(r,g,b,a)" if an alpha value
+     * less than 1 is set).
      *
      * @this {LED}
      * @param {Array.<number>} rgb
@@ -709,7 +710,13 @@ class LED extends Device {
      */
     getRGBColorString(rgb)
     {
-        return this.sprintf("#%02x%02x%02x", rgb[0], rgb[1], rgb[2]);
+        let s;
+        if (rgb.length < 4 || rgb[3] == 1) {
+            s = this.sprintf("#%02x%02x%02x", rgb[0], rgb[1], rgb[2]);
+        } else {
+            s = this.sprintf("rgba(%d,%d,%d,%d)", rgb[0], rgb[1], rgb[2], rgb[3]);
+        }
+        return s;
     }
 
     /**
@@ -810,6 +817,9 @@ class LED extends Device {
             fModified = false;
             color = color || this.colorOn;
             let i = (row * this.cols + col) * this.nBufferInc;
+            if (color == this.colorTransparent) {
+                this.assert(this.buffer[i] === LED.STATE.OFF);
+            }
             if (this.buffer[i+1] !== color) {
                 this.buffer[i+1] = color;
                 this.buffer[i+3] |= LED.FLAGS.MODIFIED;

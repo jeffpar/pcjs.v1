@@ -24,7 +24,7 @@ machines:
         "lbChip": {
           "class": "Chip",
           "toggle": false,
-          "rule": "C4",
+          "rule": "C8",
           "bindings": {
             "colorPalette": "colorPaletteLB",
             "colorSelection": "colorSelectionLB",

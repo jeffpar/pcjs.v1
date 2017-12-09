@@ -234,7 +234,7 @@ class Chip extends Device {
             let nAlive;
             do {
                 switch(this.sRule) {
-                case "C4":
+                case "C8":
                     nAlive = this.countCells();
                     break;
                 default:
@@ -550,7 +550,7 @@ class Chip extends Device {
 
         ledArray.clearBuffer();
 
-        let rgb = [0, 0, 0], counts = 0;
+        let rgb = [0, 0, 0, 1], counts = 0;
         let fColors = false, fCounts = false;
 
         /*
@@ -585,6 +585,10 @@ class Chip extends Device {
                     break;
                 case 'B':
                     rgb[2] = v;
+                    fColors = true;
+                    break;
+                case 'A':
+                    rgb[3] = v;
                     fColors = true;
                     break;
                 case 'b':
@@ -751,50 +755,49 @@ class Chip extends Device {
 
         let fColors = !!this.colorArray.length;
         let state, rgb = [0, 0, 0], counts;
-        let stateLast = 0, rgbLast = [0, 0, 0], countsLast = 0;
-        let statePrev = 0, rgbPrev = [0, 0, 0], countsPrev = 0, nPrev = 0;
+        let stateLast = 0, rgbLast = [0, 0, 0, 1], countsLast = 0;
+        let statePrev = 0, rgbPrev = [0, 0, 0, 1], countsPrev = 0, nPrev = 0;
 
         let flushRun = function(fEndRow) {
             let fDelta = false;
+            if (rgb[3] == null) rgb[3] = 1;
             if (nPrev) {
                 if (fColors) {
-                    if (rgb[0] != rgbPrev[0]) {
+                    if (rgb[0] !== rgbPrev[0] || rgb[1] !== rgbPrev[1] || rgb[2] !== rgbPrev[2] || rgb[3] !== rgbPrev[3]) {
                         fDelta = true;
                     }
-                    if (rgb[1] != rgbPrev[1]) {
-                        fDelta = true;
-                    }
-                    if (rgb[2] != rgbPrev[2]) {
-                        fDelta = true;
-                    }
-                    if (counts != countsPrev) {
+                    if (counts !== countsPrev) {
                         fDelta = true;
                     }
                 }
-                if (state != statePrev) {
+                if (state !== statePrev) {
                     fDelta = true;
                 }
                 if (fDelta || fEndRow && statePrev) {
                     if (fColors) {
-                        if (rgbLast[0] != rgbPrev[0]) {
+                        if (rgbLast[0] !== rgbPrev[0]) {
                             rgbLast[0] = rgbPrev[0];
                             sPattern += (rgbPrev[0] || "") + 'R';
                         }
-                        if (rgbLast[1] != rgbPrev[1]) {
+                        if (rgbLast[1] !== rgbPrev[1]) {
                             rgbLast[1] = rgbPrev[1];
                             sPattern += (rgbPrev[1] || "") + 'G';
                         }
-                        if (rgbLast[2] != rgbPrev[2]) {
+                        if (rgbLast[2] !== rgbPrev[2]) {
                             rgbLast[2] = rgbPrev[2];
                             sPattern += (rgbPrev[2] || "") + 'B';
                         }
-                        if (countsLast != countsPrev) {
+                        if (rgbLast[3] !== rgbPrev[3]) {
+                            rgbLast[3] = rgbPrev[3];
+                            sPattern += (rgbPrev[3] || "") + 'A';
+                        }
+                        if (countsLast !== countsPrev) {
                             countsLast = countsPrev;
                             sPattern += (countsPrev || "") + 'C';
                         }
                     }
                     if (nPrev > 1) sPattern += nPrev;
-                    sPattern += (statePrev == LED.STATE.ON? 'o' : 'b');
+                    sPattern += (statePrev === LED.STATE.ON? 'o' : 'b');
                     stateLast = statePrev;
                     fDelta = true;
                 }
@@ -812,6 +815,7 @@ class Chip extends Device {
                 rgbPrev[0] = rgb[0];
                 rgbPrev[1] = rgb[1];
                 rgbPrev[2] = rgb[2];
+                rgbPrev[3] = rgb[3];
                 countsPrev = counts;
             }
         };
