@@ -15,14 +15,14 @@ machines:
 PCjs Machines
 =============
 
-Welcome to PCjs, home of [PCx86](/docs/pcx86/), the original IBM PC simulation that runs in your web browser.  It is
+Welcome to PCjs, home of [PCx86](/pubs/docs/pcx86/), the original IBM PC simulation that runs in your web browser.  It is
 one of several JavaScript Machines in the [PCjs Project](https://github.com/jeffpar/pcjs), an open-source project that
 includes:
 
-* [PCx86](/docs/pcx86/), an x86-based emulator of the [IBM PC and PC-compatibles](/devices/pcx86/machine/)
+* [PCx86](/pubs/docs/pcx86/), an x86-based emulator of the [IBM PC and PC-compatibles](/devices/pcx86/machine/)
 * [PC8080](/modules/pc8080/), an 8080 machine emulator (see [Space Invaders](/devices/pc8080/machine/invaders/) and the [VT100 Terminal](/devices/pc8080/machine/vt100/))
-* [C1Pjs](/docs/c1pjs/), an emulation of the 6502-based [Ohio Scientific Challenger 1P](/devices/c1p/)
-* [PDPjs](/docs/pdpjs/), a set of machine emulation modules supporting the DEC [PDP-10](/devices/pdp10/machine/) and [PDP-11](/devices/pdp11/machine/)
+* [C1Pjs](/pubs/docs/c1pjs/), an emulation of the 6502-based [Ohio Scientific Challenger 1P](/devices/c1p/)
+* [PDPjs](/pubs/docs/pdpjs/), a set of machine emulation modules supporting the DEC [PDP-10](/devices/pdp10/machine/) and [PDP-11](/devices/pdp11/machine/)
 * [PCjs Devices](/modules/devices/), for simple machines like the [TI-57 Calculator](/devices/ti57/), the [Game of Life](/devices/leds/life/), and [Lite-Brite](/devices/leds/litebrite/)
 
 All PCjs machine simulations are written entirely in [JavaScript](/modules/).  No Flash, Java or other plugins are
@@ -31,17 +31,17 @@ and assorted mobile browsers.
 
 {% include machine.html id="ibm5150" %}
 
-The [JavaScript Machine](/devices/pcx86/machine/5150/mda/64kb/) above uses [PCx86](/docs/pcx86/) configured with an Intel
+The [JavaScript Machine](/devices/pcx86/machine/5150/mda/64kb/) above uses [PCx86](/pubs/docs/pcx86/) configured with an Intel
 8088 running at 4.77Mhz, with 64Kb of RAM and an IBM Monochrome Display Adapter.  For more control, there are also
 [Control Panel](/devices/pcx86/machine/5150/mda/64kb/debugger/) and [Soft Keyboard](/devices/pcx86/machine/5150/mda/64kb/softkbd/)
 configurations, featuring the built-in PCx86 Debugger.  For even greater control, build your own PC. The
-[PCx86 Documentation](/docs/pcx86/) will help you get started.
+[PCx86 Documentation](/pubs/docs/pcx86/) will help you get started.
 
 PCx86 has steadily evolved to support more classic x86-based machines, including the IBM PC XT, the 80286-based IBM PC AT,
 and the 80386-based COMPAQ DeskPro 386.  PCx86 fully supports the original machine ROMs, video cards, etc, and all
 machines run at their original speeds.
 
-The goals of the [PCjs Project](/docs/about/) are to create fast, full-featured simulations of classic
+The goals of the [PCjs Project](/pubs/docs/about/) are to create fast, full-featured simulations of classic
 computer hardware, help people understand how these early machines worked, make it easy to experiment with different
 machine configurations, and provide a platform for running and analyzing old computer software.
 
@@ -73,9 +73,9 @@ and [EGA Displays](/devices/pcx86/machine/5160/ega/640kb/array/).
 
 C1Pjs
 -----
-Below is the [OSI Challenger C1P](/docs/c1pjs/), another simulation in the PCjs Project.
+Below is the [OSI Challenger C1P](/pubs/docs/c1pjs/), another simulation in the PCjs Project.
 It simulates Ohio Scientific's 6502-based microcomputer, released in 1978.  More details about this simulation
-and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/).
+and the original machine are available in the [C1Pjs Documentation](/pubs/docs/c1pjs/).
 
 {% include machine.html id="demoC1P" %}
 
@@ -412,7 +412,7 @@ specified page; e.g.:
 
 	http://localhost:8088/?resume=0
 
-More information about the *resume* attribute is available in the [documentation](/docs/pcx86/computer/#attributes).
+More information about the *resume* attribute is available in the [documentation](/pubs/docs/pcx86/computer/#attributes).
 
 Updating PCjs
 -------------
@@ -471,8 +471,8 @@ See [LICENSE](/LICENSE) for details.
 
 More Information
 ----------------
-Learn more about the [PCjs Project](/docs/about/) and [PCx86](/docs/about/pcx86/).  To
-create your own PCx86 machines, see the [PCx86 Documentation](/docs/pcx86/) for details.
+Learn more about the [PCjs Project](/pubs/docs/about/) and [PCx86](/pubs/docs/about/pcx86/).  To
+create your own PCx86 machines, see the [PCx86 Documentation](/pubs/docs/pcx86/) for details.
 
 If you have questions or run into any problems, feel free to [tweet](http://twitter.com/jeffpar) or
 [email](mailto:Jeff@pcjs.org).
