@@ -86,8 +86,8 @@
  * @property {number} height (default is 128 for LED.TYPE.DIGIT, 32 otherwise; see LED.SIZES)
  * @property {number} cols (default is 1)
  * @property {number} rows (default is 1)
- * @property {string} color (default is "red")
- * @property {string} backgroundColor (default is none; ie, transparent background)
+ * @property {string} color (default is none; ie, transparent foreground)
+ * @property {string} colorBackground (default is none; ie, transparent background)
  * @property {number} widthView (computed)
  * @property {number} heightView (computed)
  * @property {number} widthGrid (computed)
@@ -147,6 +147,7 @@ class LED extends Device {
             throw new Error(sError);
         }
 
+        this.container = container;
         this.canvasView = canvasView;
 
         this.type = this.getBounded(this.config['type'] || LED.TYPE.ROUND, LED.TYPE.ROUND, LED.TYPE.DIGIT);
@@ -158,24 +159,22 @@ class LED extends Device {
         this.rows = this.config['rows'] || 1;
         this.widthView = this.width * this.cols;
         this.heightView = this.height * this.rows;
-        this.colorOn = this.getRGBColor(this.config['color'], "red");
+
+        this.colorTransparent = this.getRGBAColor("black", 0);
+        this.colorOn = this.getRGBColor(this.config['color']) || this.colorTransparent;
         this.colorOff = this.getRGBAColor(this.colorOn, 1.0, 0.25);
         this.colorHighlight = this.getRGBAColor(this.colorOn, 1.0, 2.0);
-        this.backgroundColor = this.getRGBColor(this.config['backgroundColor']);
-        this.foregroundColor = this.getRGBAColor(this.backgroundColor || "black", 1.0, 0.25);
-        if (this.foregroundColor == this.getRGBAColor(this.backgroundColor)) {
-            this.foregroundColor = this.getRGBAColor("white", 1.0, 0.15);
-        }
+        this.colorBackground = this.getRGBColor(this.config['backgroundColor']);
 
         /*
-         * We generally want our view canvas to be "responsive", not "fixed" (ie, to automatically be resized
-         * with changes to the overall window size), in which case we apply the following style attributes
-         * (formerly applied with the "pcjs-canvas" style in /modules/shared/templates/components.css):
+         * We generally want our view canvas to be "responsive", not "fixed" (ie, to automatically resize
+         * with changes to the overall window size), so we apply the following style attributes (formerly
+         * applied with the "pcjs-canvas" style in /modules/shared/templates/components.css):
          *
          *      width: 100%;
          *      height: auto;
          *
-         * But, if you really don't want those style attributes, then set the LED config's "fixed" property to true.
+         * But, if you really don't want that feature, then set the LED config's "fixed" property to true.
          */
         this.fFixed = this.config['fixed'] || false;
         if (!this.fFixed) {
@@ -184,8 +183,8 @@ class LED extends Device {
         }
 
         /*
-         * Persistent LEDS are the default, except for LED.TYPE.DIGIT, which is generally used with calculator displays
-         * and whose underlying hardware is required to constantly "refresh" the LEDs, otherwise they go dark.
+         * Persistent LEDS are the default, except for LED.TYPE.DIGIT, which is used with calculator displays
+         * whose underlying hardware must constantly "refresh" the LEDs to prevent them from going dark.
          */
         this.fPersistent = this.config['persistent'];
         if (this.fPersistent == undefined) this.fPersistent = (this.type < LED.TYPE.DIGIT);
@@ -199,7 +198,7 @@ class LED extends Device {
 
         canvasView.setAttribute("width", this.widthView.toString());
         canvasView.setAttribute("height", this.heightView.toString());
-        canvasView.style.backgroundColor = (this.backgroundColor || this.getRGBAColor("black", 0));
+        canvasView.style.backgroundColor = this.colorTransparent;
         container.appendChild(canvasView);
         this.contextView = /** @type {CanvasRenderingContext2D} */ (canvasView.getContext("2d"));
 
@@ -219,7 +218,7 @@ class LED extends Device {
          *
          *      [0]:    state (eg, ON or OFF or a digit)
          *      [1]:    color
-         *      [2]:    counter
+         *      [2]:    count(s) (eg, 0 to 8  4-bit counts)
          *      [3]:    flags (eg, PERIOD, MODIFIED, etc)
          *
          * The LED buffer also contains an extra (scratch) row at the end.  This extra row, along with the
@@ -278,8 +277,8 @@ class LED extends Device {
      */
     clearGrid()
     {
-        if (this.backgroundColor) {
-            this.contextGrid.fillStyle = this.backgroundColor;
+        if (this.colorBackground) {
+            this.contextGrid.fillStyle = this.colorBackground;
             this.contextGrid.fillRect(0, 0, this.widthGrid, this.heightGrid);
         } else {
             this.contextGrid.clearRect(0, 0, this.widthGrid, this.heightGrid);
@@ -298,8 +297,8 @@ class LED extends Device {
     {
         let xBias = col * this.widthCell + xOffset;
         let yBias = row * this.heightCell;
-        if (this.backgroundColor) {
-            this.contextGrid.fillStyle = this.backgroundColor;
+        if (this.colorBackground) {
+            this.contextGrid.fillStyle = this.colorBackground;
             this.contextGrid.fillRect(xBias, yBias, this.widthCell, this.heightCell);
         } else {
             this.contextGrid.clearRect(xBias, yBias, this.widthCell, this.heightCell);
@@ -313,8 +312,8 @@ class LED extends Device {
      * (eg, see clearBuffer()).  The other important periodic side-effect of this function is clearing
      * fTickled, so that if no other setLEDState() calls occur between now and the next drawBuffer(),
      * an automatic clearBuffer() will be triggered.  This simulates the normal blanking of the display
-     * whenever the machine performs lengthy calculations, because for the LED display to remain on,
-     * the machine must perform a DISP operation at least 30-60 times per second.
+     * whenever the machine performs lengthy calculations, because for an LED display to remain lit,
+     * the machine must perform a display operation ("refresh") at least 30-60 times per second.
      *
      * @this {LED}
      * @param {boolean} [fForced]
@@ -404,7 +403,7 @@ class LED extends Device {
             this.clearGridCell(col, row, xOffset);
         }
 
-        let colorOn, colorOff, colorHighlight;
+        let colorOn, colorOff;
         if (!color || color == this.colorOn) {
             colorOn = fHighlight? this.colorHighlight : this.colorOn;
             colorOff = this.colorOff;
@@ -413,8 +412,12 @@ class LED extends Device {
             colorOff = this.getRGBAColor(color, 1.0, 0.25);
         }
 
+        let fTransparent = false;
         color = (state? colorOn : colorOff);
-        if (colorOn == this.backgroundColor) color = this.foregroundColor;
+        if (colorOn == this.colorTransparent) {
+            color = this.colorBackground;
+            fTransparent = true;
+        }
 
         this.contextGrid.fillStyle = color;
 
@@ -424,7 +427,23 @@ class LED extends Device {
         if (coords.length == 3) {
             this.contextGrid.beginPath();
             this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, Math.PI * 2);
-            this.contextGrid.fill();
+            if (fTransparent) {
+                /*
+                 * The following code works as well:
+                 *
+                 *      this.contextGrid.save();
+                 *      this.contextGrid.clip();
+                 *      this.contextGrid.clearRect(xBias, yBias, this.widthCell, this.heightCell);
+                 *      this.contextGrid.restore();
+                 *
+                 * but I assume it's not as efficient.
+                 */
+                this.contextGrid.globalCompositeOperation = "destination-out";
+                this.contextGrid.fill();
+                this.contextGrid.globalCompositeOperation = "source-over";
+            } else {
+                this.contextGrid.fill();
+            }
         } else {
             this.contextGrid.fillRect(coords[0] + xBias, coords[1] + yBias, coords[2], coords[3]);
         }
@@ -523,13 +542,13 @@ class LED extends Device {
         /*
          * Setting the 'globalCompositeOperation' property of a 2D context is something you rarely need to do,
          * because the default draw behavior ("source-over") is fine for most cases.  One case where it is NOT
-         * fine is when we're using a transparent background color (ie, the backgroundColor property is not set),
-         * because it doesn't copy over any transparent pixels, effectively making it impossible to "turn off" any
-         * previously drawn LED segments.  To force that behavior, we must select the "copy" behavior.
+         * fine is when we're using a transparent background color, because it doesn't copy over any transparent
+         * pixels, effectively making it impossible to "turn off" any previously drawn LED segments.  To force
+         * that behavior, we must select the "copy" behavior.
          *
          * Refer to: https://www.w3.org/TR/2dcontext/#dom-context-2d-globalcompositeoperation
          */
-        this.contextView.globalCompositeOperation = (this.backgroundColor && !this.fPersistent)? "source-over" : "copy";
+        this.contextView.globalCompositeOperation = (this.colorBackground && !this.fPersistent)? "source-over" : "copy";
         this.contextView.drawImage(this.canvasGrid, 0, 0, this.widthGrid, this.heightGrid, 0, 0, this.widthView, this.heightView);
     }
 
@@ -560,12 +579,84 @@ class LED extends Device {
     }
 
     /**
-     * getLEDState(col, row)
+     * getLEDColor(col, row)
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @returns {string|undefined}
+     */
+    getLEDColor(col, row)
+    {
+        let i = (row * this.cols + col) * this.nBufferInc;
+        return this.buffer[i+1];
+    }
+
+    /**
+     * getLEDColorValues(col, row, rgb)
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @param {Array.<number>} rgb
+     * @returns {boolean}
+     */
+    getLEDColorValues(col, row, rgb)
+    {
+        let i = (row * this.cols + col) * this.nBufferInc;
+        return this.parseRGBValues(this.buffer[i+1], rgb);
+    }
+
+    /**
+     * getLEDCounts(col, row, counts)
+     *
+     * This function returns success (true) ONLY for cells that are not transparent.
+     *
+     * For a typical "Lite-Brite" grid, transparent cells are considered "empty", so we want to
+     * ignore them.
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @param {Array.<number>} counts
+     * @returns {boolean}
+     */
+    getLEDCounts(col, row, counts)
+    {
+        let fSuccess = false;
+        let i = (row * this.cols + col) * this.nBufferInc + 1;
+        if (i < this.buffer.length - 1 && this.buffer[i] !== this.colorTransparent) {
+            fSuccess = true;
+            let bits = this.buffer[i+1];
+            for (let c = counts.length - 1; c >= 0; c--) {
+                counts[c] = bits & 0xf;
+                bits >>>= 4;
+            }
+        }
+        return fSuccess;
+    }
+
+    /**
+     * getLEDCountsPacked(col, row)
      *
      * @this {LED}
      * @param {number} col
      * @param {number} row
      * @returns {number}
+     */
+    getLEDCountsPacked(col, row)
+    {
+        let i = (row * this.cols + col) * this.nBufferInc + 2;
+        return (i < this.buffer.length)? this.buffer[i] : 0;
+    }
+
+    /**
+     * getLEDState(col, row)
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @returns {number|undefined}
      */
     getLEDState(col, row)
     {
@@ -590,22 +681,43 @@ class LED extends Device {
     }
 
     /**
-     * getRGBColor(color, sDefault)
+     * getRGBColor(color, colorDefault)
      *
      * Returns a color string in the "hex" format that fillStyle recognizes (eg, "#rrggbb").
      *
      * The default is optional, allowing an undefined color to remain undefined if we want to use
-     * that to signal transparency (as in the case of backgroundColor).
+     * that to signal transparency (as in the case of colorBackground).
      *
      * @this {LED}
      * @param {string} color
-     * @param {string} [sDefault]
+     * @param {string} [colorDefault]
      * @returns {string}
      */
-    getRGBColor(color, sDefault)
+    getRGBColor(color, colorDefault)
     {
-        color = color || sDefault;
-        return LED.COLORS[color] || color;
+        color = color || colorDefault;
+        return color && LED.COLORS[color] || color;
+    }
+
+    /**
+     * getRGBColorString(rgb)
+     *
+     * Returns a color string fillStyle recognizes (ie, "#rrggbb", or "rgba(r,g,b,a)" if an alpha value
+     * less than 1 is set).
+     *
+     * @this {LED}
+     * @param {Array.<number>} rgb
+     * @returns {string}
+     */
+    getRGBColorString(rgb)
+    {
+        let s;
+        if (rgb.length < 4 || rgb[3] == 1) {
+            s = this.sprintf("#%02x%02x%02x", rgb[0], rgb[1], rgb[2]);
+        } else {
+            s = this.sprintf("rgba(%d,%d,%d,%d)", rgb[0], rgb[1], rgb[2], rgb[3]);
+        }
+        return s;
     }
 
     /**
@@ -627,16 +739,17 @@ class LED extends Device {
     getRGBAColor(color, alpha = 1.0, brightness = 1.0)
     {
         if (color) {
+            let rgb = [];
             color = LED.COLORS[color] || color;
-            let match = color.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
-            if (match) {
+            if (this.parseRGBValues(color, rgb)) {
                 color = "rgba(";
-                for (let i = 1; i <= 3; i++) {
-                    let n = Math.round(Number.parseInt(match[i], 16) * brightness);
+                let i;
+                for (i = 0; i < 3; i++) {
+                    let n = Math.round(rgb[i] * brightness);
                     n = (n < 0? 0 : (n > 255? 255 : n));
                     color += n + ",";
                 }
-                color += alpha + ")";
+                color += (i < rgb.length? rgb[i] : alpha) + ")";
             }
         }
         return color;
@@ -657,9 +770,36 @@ class LED extends Device {
                 buffer[i] = ' ';
             }
             buffer[i+1] = this.colorOn;
-            buffer[i+2] = -1;
+            buffer[i+2] = 0;
             buffer[i+3] = LED.FLAGS.MODIFIED;
         }
+    }
+
+    /**
+     * parseRGBValues(color, rgb)
+     *
+     * @this {LED}
+     * @param {string} color
+     * @param {Array.<number>} rgb
+     * @returns {boolean}
+     */
+    parseRGBValues(color, rgb)
+    {
+        let base = 16;
+        let match = color.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+        if (!match) {
+            base = 10;
+            match = color.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,?\s*(\d+|)\)$/i);
+        }
+        if (match) {
+            let i;
+            for (i = 1; i < match.length; i++) {
+                rgb[i-1] = Number.parseInt(match[i], base);
+            }
+            rgb.length = i-1;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -680,6 +820,12 @@ class LED extends Device {
             let i = (row * this.cols + col) * this.nBufferInc;
             if (this.buffer[i+1] !== color) {
                 this.buffer[i+1] = color;
+                /*
+                 * Since a transparent LED set to ON is meaningless, let's avoid it.
+                 */
+                if (color == this.colorTransparent) {
+                    this.buffer[i] = LED.STATE.OFF;
+                }
                 this.buffer[i+3] |= LED.FLAGS.MODIFIED;
                 this.fBufferModified = fModified = true;
             }
@@ -687,6 +833,63 @@ class LED extends Device {
             this.fTickled = true;
         }
         return fModified;
+    }
+
+    /**
+     * setLEDCounts(col, row, counts)
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @param {Array.<number>} counts
+     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     */
+    setLEDCounts(col, row, counts)
+    {
+        let fModified = null;
+        if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
+            fModified = false;
+            let i = (row * this.cols + col) * this.nBufferInc;
+            let bits = 0;
+            /*
+             * Since a transparent LED with counts is meaningless, let's avoid it.
+             */
+            if (this.buffer[i+1] != this.colorTransparent) {
+                for (let c = 0; c < counts.length; c++) {
+                    bits = (bits << 4) | (counts[c] & 0xf);
+                }
+            }
+            if (this.buffer[i+2] !== bits) {
+                this.buffer[i+2] = bits;
+                this.buffer[i+3] |= LED.FLAGS.MODIFIED;
+                this.fBufferModified = fModified = true;
+            }
+            this.iBufferRecent = i;
+            this.fTickled = true;
+        }
+        return fModified;
+    }
+
+    /**
+     * setLEDCountsPacked(col, row, counts)
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @param {number} counts
+     * @returns {boolean|null} (true if this call modified the LED state, false if not, null if error)
+     */
+    setLEDCountsPacked(col, row, counts)
+    {
+        let i = (row * this.cols + col) * this.nBufferInc + 2;
+        if (i < this.buffer.length) {
+            if (this.buffer[i] != counts) {
+                this.buffer[i] = counts;
+                return true;
+            }
+            return false;
+        }
+        return null;
     }
 
     /**

@@ -1,13 +1,11 @@
 ---
 layout: page
-title: '"Game of Life" Demo'
-permalink: /devices/leds/life/
-redirect_from:
-  - /devices/life/demo/
+title: '"Game of Life" Multi-Color Demo'
+permalink: /devices/leds/life/colors/
 machines:
   - id: lifeDemo
     type: leds
-    name: Game of Life Demo
+    name: Game of Life Multi-Color Demo
     uncompiled: true
     config: |
       {
@@ -38,8 +36,36 @@ machines:
             ]
           },
           "bindings": {
+            "colorPalette": "colorPaletteLife",
+            "colorSelection": "colorSelectionLife",
+            "colorSwatchSelected": "colorSwatchLife",
             "gliderGun": "gliderGun",
             "saveToURL": "saveLife"
+          },
+          "colors": {
+            "Primary": {
+              "Navy":    "#000080",
+              "Green":   "#008000",
+              "Teal":    "#008080",
+              "Maroon":  "#800000",
+              "Purple":  "#800080",
+              "Olive":   "#808000",
+              "Gray":    "#808080",
+              "Blue":    "#0000ff",
+              "Lime":    "#00ff00",
+              "Cyan":    "#00ffff",
+              "Red":     "#ff0000",
+              "Magenta": "#ff00ff",
+              "Yellow":  "#ffff00",
+              "White":   "#ffffff"
+            },
+            "Pastels": {
+              "Pink":    "#ffb3ba",
+              "Beige":   "#ffdfba",
+              "Yellow":  "#ffffba",
+              "Green":	 "#baffc9",
+              "Blue":	 "#bae1ff"
+            }
           },
           "overrides": ["wrap","pattern"]
         },
@@ -84,6 +110,14 @@ styles:
     margin-bottom: 16px;
   displayLife:
     position: relative;
+  colorSwatchLife:
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 1px solid;
+    border-radius: 50%;
+    vertical-align: middle;
+    background-color: green;
   diagsLife:
     float: left;
   printLife:
@@ -100,8 +134,7 @@ Using [PCjs Devices](/modules/devices/), here's a simple demo of
 [Red](?color=red&autoStart=true&pattern=gliderGun#game-of-life),
 [Blue](?color=blue&autoStart=true&pattern=gliderGun#game-of-life), or any other LED color can be specified in the URL.
 
-For other LED simulations, check out the [Multi-Color "Game of Life" Demo](colors/) and the
-[Animated "Lite-Brite" Demo](/devices/leds/litebrite/).
+For another interesting LED simulation, check out our [Animated "Lite-Brite" Demo](/devices/leds/litebrite/).
 
 ### Game of Life
 
@@ -109,6 +142,7 @@ For other LED simulations, check out the [Multi-Color "Game of Life" Demo](color
 
 <div id="lifeDemo">
   <div id="displayLife"></div>
+  <select id="colorPaletteLife"></select>&nbsp;<select id="colorSelectionLife"></select>&nbsp;<div id="colorSwatchLife"></div>
   <button id="gliderGun">Glider Gun</button>
   <button id="saveLife">Save to URL</button>
 </div>

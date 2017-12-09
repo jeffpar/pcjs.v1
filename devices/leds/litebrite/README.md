@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Animated Lite-Brite Demo
+title: '"Lite-Brite" LED Simulation'
 permalink: /devices/leds/litebrite/
 machines:
   - id: lbDemo
@@ -24,6 +24,7 @@ machines:
         "lbChip": {
           "class": "Chip",
           "toggle": false,
+          "rule": "C8",
           "bindings": {
             "colorPalette": "colorPaletteLB",
             "colorSelection": "colorSelectionLB",
@@ -35,21 +36,25 @@ machines:
             "colorSwatch6": "colorSwatchLB6",
             "colorSwatch7": "colorSwatchLB7",
             "colorSwatch8": "colorSwatchLB8",
+            "countOn": "countOn",
+            "countOff": "countOff",
+            "countCycle": "countCycle",
+            "backgroundImage": "backgroundImage",
             "saveToURL": "saveLB"
           },
           "colors": {
             "Original": {
-              "Blue":   "#0000ff",
-              "Green":  "#008000",
-              "Purple": "#800080",
-              "Red":    "#ff0000",
-              "Orange": "#ffa500",
-              "Pink":   "#ffc0cb",
-              "Yellow": "#ffff00",
-              "White":  "#ffffff"
+              "Blue":   "#3067c1",
+              "Green":  "#2f9a27",
+              "Violet": "#9f3c92",
+              "Red":    "#b71e1d",
+              "Orange": "#fa7d14",
+              "Pink":   "#ff7379",
+              "Yellow": "#fadc4e",
+              "White":  "#fffff9"
             }
           },
-          "overrides": ["wrap","pattern"]
+          "overrides": ["blue","green","violet","red","orange","pink","yellow","white","wrap","pattern"]
         },
         "lbClock": {
           "class": "Time",
@@ -69,7 +74,6 @@ machines:
           "type": 1,
           "cols": 45,
           "rows": 39,
-          "color": "black",
           "backgroundColor": "black",
           "hexagonal": true,
           "highlight": false,
@@ -94,6 +98,11 @@ styles:
     margin-bottom: 16px;
   displayLB:
     position: relative;
+    background-color: rgb(26,26,26);
+    line-height: 0;
+    margin-bottom: 8px;
+    background-image: none;
+    background-size: 100% 100%;
   .colorSwatchLB:
     display: none;
     width: 16px;
@@ -108,22 +117,26 @@ styles:
     font-family: Monaco,"Lucida Console",monospace;
 ---
 
-Animated "Lite-Brite" Demo
---------------------------
+"Lite-Brite" LED Simulation
+---------------------------
 
-The "[Lite-Brite](https://en.wikipedia.org/wiki/Lite-Brite)" concept was invented by Joseph M. Burck at
+The [Lite-Brite](https://en.wikipedia.org/wiki/Lite-Brite) concept was invented by Joseph M. Burck at
 [Marvin Glass & Associates](https://en.wikipedia.org/wiki/Marvin_Glass_and_Associates) and first marketed as a toy
 in 1967 by [Hasbro](https://en.wikipedia.org/wiki/Hasbro).
 
 The original Lite-Brite design used a pair of matching black panels punctured with a series of evenly spaced holes
 arranged in a grid of 39 rows, which alternated between 44 and 45 holes per row, resulting in a hexagonal ("honeycomb")
-layout consisting of 1735 holes.  A piece of black paper containing a pre-printed pattern would be sandwiched between
-the panels, and then your job was to insert any of the (blue, green, purple, red, orange, pink, yellow, or white)
+layout containing 1735 holes.  A piece of black paper containing a pre-printed pattern would be sandwiched between
+the panels, and then your job was to insert any of the (blue, green, violet, red, orange, pink, yellow, or white)
 colored pegs into the appropriately marked holes.
 
-One of the goals of this demo is to take the "Lite-Brite" concept a bit farther, allowing you to associate
-sequence numbers with each of the colored LEDs, making it possible to create a variety of "blinking" and "color-cycling"
-animations.  Stay tuned.
+This demo takes the "Lite-Brite" concept a bit farther, allowing you to add counters to each of the colored LEDs, making
+it possible to create a variety of "blinking" and "color-cycling" animations.
+
+A small collection of original background images can also be turned on underneath the grid, to help you recreate them
+with LEDs.  However, it's difficult to find decent high-quality images of the original 1967 patterns, so some
+"artistic interpretation" is required.  Eventually, we'll also add some of the original black-and-white pattern images
+that just displayed the original Lite-Brite color codes (B, G, V, R, O, P, Y, and W).
 
 {% include machine.html id="lbDemo" config="json" %}
 
@@ -138,6 +151,41 @@ animations.  Stay tuned.
   <div id="colorSwatchLB6" class="colorSwatchLB"></div>
   <div id="colorSwatchLB7" class="colorSwatchLB"></div>
   <div id="colorSwatchLB8" class="colorSwatchLB"></div>
+  <select id="countOn">
+    <option value="0">On for 0</option>
+    <option value="1" selected="selected">On for 1</option>
+    <option value="2">On for 2</option>
+    <option value="3">On for 3</option>
+    <option value="4">On for 4</option>
+    <option value="5">On for 5</option>
+    <option value="6">On for 6</option>
+    <option value="7">On for 7</option>
+  </select>
+  <select id="countOff">
+    <option value="0" selected="selected">Off for 0</option>
+    <option value="1">Off for 1</option>
+    <option value="2">Off for 2</option>
+    <option value="3">Off for 3</option>
+    <option value="4">Off for 4</option>
+    <option value="5">Off for 5</option>
+    <option value="6">Off for 6</option>
+    <option value="7">Off for 7</option>
+  </select>
+  <select id="countCycle">
+    <option value="0" selected="selected">Cycle by 0</option>
+    <option value="1">Cycle by 1</option>
+    <option value="2">Cycle by 2</option>
+    <option value="3">Cycle by 3</option>
+    <option value="4">Cycle by 4</option>
+    <option value="5">Cycle by 5</option>
+    <option value="6">Cycle by 6</option>
+    <option value="7">Cycle by 7</option>
+  </select>
+  <select id="backgroundImage">
+    <option value="" selected="selected">No Image</option>
+    <option value="images/Snow_Man.jpg">Snow Man</option>
+    <option value="images/Bird_of_Paradise.jpg">Bird of Paradise</option>
+  </select>
   <button id="saveLB">Save to URL</button>
 </div>
 <div id="diagsLB">

@@ -23,6 +23,7 @@ Examples of those newer PCjs Machines include:
 
 * Texas Instruments [TI-42](/devices/ti42/), [TI-55](/devices/ti55/), and [TI-57](/devices/ti57/) Calculators
 * [John Conway's](http://www.conwaylife.com/wiki/John_Horton_Conway) "[Game of Life](http://www.conwaylife.com/wiki/Conway%27s_Game_of_Life)" Cellular Automaton [Simulation](/devices/leds/life/)
+* [Hasbro's](https://en.wikipedia.org/wiki/Hasbro) "[Lite-Brite](https://en.wikipedia.org/wiki/Lite-Brite)" reimagined as an [LED Simulation](/devices/leds/litebrite/)
 
 The [Markdown](https://raw.githubusercontent.com/jeffpar/pcjs/master/devices/ti57/machine/README.md) file in
 the [TI-57](/devices/ti57/machine/) directory provides a good example.  First, you need a blob of JSON, like you see below

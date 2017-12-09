@@ -92,9 +92,9 @@ class Device {
         this.version = version || 0;
         this.bindings = {};
         this.addDevice();
-        this.addBindings(this.config['bindings']);
-        this.checkVersion(this.config);
         this.checkOverrides(this.config);
+        this.checkVersion(this.config);
+        this.addBindings(this.config['bindings']);
     }
 
     /**
