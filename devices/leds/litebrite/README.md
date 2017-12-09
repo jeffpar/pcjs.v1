@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Animated Lite-Brite Demo
+title: '"Lite-Brite" LED Simulation'
 permalink: /devices/leds/litebrite/
 machines:
   - id: lbDemo
@@ -117,10 +117,10 @@ styles:
     font-family: Monaco,"Lucida Console",monospace;
 ---
 
-Animated "Lite-Brite" Demo
---------------------------
+"Lite-Brite" LED Simulation
+---------------------------
 
-The "[Lite-Brite](https://en.wikipedia.org/wiki/Lite-Brite)" concept was invented by Joseph M. Burck at
+The [Lite-Brite](https://en.wikipedia.org/wiki/Lite-Brite) concept was invented by Joseph M. Burck at
 [Marvin Glass & Associates](https://en.wikipedia.org/wiki/Marvin_Glass_and_Associates) and first marketed as a toy
 in 1967 by [Hasbro](https://en.wikipedia.org/wiki/Hasbro).
 
@@ -130,8 +130,13 @@ layout containing 1735 holes.  A piece of black paper containing a pre-printed p
 the panels, and then your job was to insert any of the (blue, green, violet, red, orange, pink, yellow, or white)
 colored pegs into the appropriately marked holes.
 
-This demo takes the "Lite-Brite" concept a bit farther, allowing you to associate sequence numbers with each of the
-colored LEDs, making it possible to create a variety of "blinking" and "color-cycling" animations.
+This demo takes the "Lite-Brite" concept a bit farther, allowing you to add counters to each of the colored LEDs, making
+it possible to create a variety of "blinking" and "color-cycling" animations.
+
+A small collection of original background images can also be turned on underneath the grid, to help you recreate them
+with LEDs.  However, it's difficult to find decent high-quality images of the original 1967 patterns, so some
+"artistic interpretation" is required.  Eventually, we'll also add some of the original black-and-white pattern images
+that just displayed the original Lite-Brite color codes (B, G, V, R, O, P, Y, and W).
 
 {% include machine.html id="lbDemo" config="json" %}
 
