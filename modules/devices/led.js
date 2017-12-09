@@ -147,6 +147,7 @@ class LED extends Device {
             throw new Error(sError);
         }
 
+        this.container = container;
         this.canvasView = canvasView;
 
         this.type = this.getBounded(this.config['type'] || LED.TYPE.ROUND, LED.TYPE.ROUND, LED.TYPE.DIGIT);

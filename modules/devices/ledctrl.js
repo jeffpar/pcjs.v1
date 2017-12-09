@@ -197,6 +197,12 @@ class Chip extends Device {
             this.updateColorPalette();
             break;
 
+        case Chip.BINDING.IMAGE_SELECTION:
+            element.onchange = function onSelectChange() {
+                chip.updateBackgroundImage();
+            };
+            break;
+
         case Chip.BINDING.SAVE_TO_URL:
             element.onclick = function onClickSave() {
                 let sPattern = chip.savePattern();
@@ -861,6 +867,20 @@ class Chip extends Device {
     }
 
     /**
+     * updateBackgroundImage()
+     *
+     * @this {Chip}
+     */
+    updateBackgroundImage()
+    {
+        let elementSelection = this.bindings[Chip.BINDING.IMAGE_SELECTION];
+        if (elementSelection && elementSelection.options.length) {
+            let sImage = elementSelection.options[elementSelection.selectedIndex].value;
+            this.ledArray.container.style.backgroundImage = sImage? ("url('" + sImage + "')") : "none";
+        }
+    }
+
+    /**
      * updateColorPalette(binding)
      *
      * In addition to being called whenever the COLOR_PALETTE or COLOR_SELECTION onChange handler is
@@ -994,14 +1014,15 @@ class Chip extends Device {
 }
 
 Chip.BINDING = {
-    COLOR_PALETTE:         "colorPalette",
-    COLOR_SELECTION:       "colorSelection",
-    COLOR_SWATCH:          "colorSwatch",
-    COLOR_SWATCH_SELECTED: "colorSwatchSelected",
-    COUNT_ON:              "countOn",
-    COUNT_OFF:             "countOff",
-    COUNT_CYCLE:           "countCycle",
-    SAVE_TO_URL:           "saveToURL",
+    COLOR_PALETTE:          "colorPalette",
+    COLOR_SELECTION:        "colorSelection",
+    COLOR_SWATCH:           "colorSwatch",
+    COLOR_SWATCH_SELECTED:  "colorSwatchSelected",
+    COUNT_ON:               "countOn",
+    COUNT_OFF:              "countOff",
+    COUNT_CYCLE:            "countCycle",
+    IMAGE_SELECTION:        "backgroundImage",
+    SAVE_TO_URL:            "saveToURL",
 };
 
 Chip.COUNTS = [null, Chip.BINDING.COUNT_ON, Chip.BINDING.COUNT_OFF, Chip.BINDING.COUNT_CYCLE];

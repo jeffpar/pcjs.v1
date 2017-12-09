@@ -39,6 +39,7 @@ machines:
             "countOn": "countOn",
             "countOff": "countOff",
             "countCycle": "countCycle",
+            "backgroundImage": "backgroundImage",
             "saveToURL": "saveLB"
           },
           "colors": {
@@ -100,7 +101,7 @@ styles:
     background-color: rgb(26,26,26);
     line-height: 0;
     margin-bottom: 8px;
-    background-image: url('patterns/Snow_Man.jpg');
+    background-image: none;
     background-size: 100% 100%;
   .colorSwatchLB:
     display: none;
@@ -174,6 +175,10 @@ colored LEDs, making it possible to create a variety of "blinking" and "color-cy
     <option value="5">Cycle by 5</option>
     <option value="6">Cycle by 6</option>
     <option value="7">Cycle by 7</option>
+  </select>
+  <select id="backgroundImage">
+    <option value="" selected="selected">No Image</option>
+    <option value="images/Snow_Man.jpg">Snow Man</option>
   </select>
   <button id="saveLB">Save to URL</button>
 </div>
