@@ -357,7 +357,7 @@ class LED extends Device {
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
                 let state = this.buffer[i];
-                let color = this.buffer[i+1];
+                let color = this.buffer[i+1] || this.colorTransparent;
                 let fModified = !!(this.buffer[i+3] & LED.FLAGS.MODIFIED);
                 let fHighlight = (this.fHighlight && i == this.iBufferRecent);
                 if (fModified || fHighlight || fForced) {
@@ -589,7 +589,7 @@ class LED extends Device {
     getLEDColor(col, row)
     {
         let i = (row * this.cols + col) * this.nBufferInc;
-        return this.buffer[i+1];
+        return this.buffer[i+1] || this.colorTransparent;
     }
 
     /**
@@ -604,7 +604,7 @@ class LED extends Device {
     getLEDColorValues(col, row, rgb)
     {
         let i = (row * this.cols + col) * this.nBufferInc;
-        return this.parseRGBValues(this.buffer[i+1], rgb);
+        return this.parseRGBValues(this.buffer[i+1] || this.colorTransparent, rgb);
     }
 
     /**
@@ -625,7 +625,7 @@ class LED extends Device {
     {
         let fSuccess = false;
         let i = (row * this.cols + col) * this.nBufferInc;
-        if (i <= this.buffer.length - this.nBufferInc && this.buffer[i+1] !== this.colorTransparent) {
+        if (i <= this.buffer.length - this.nBufferInc && this.buffer[i+1]) {
             fSuccess = true;
             let bits = this.buffer[i+2];
             for (let c = counts.length - 1; c >= 0; c--) {
@@ -777,7 +777,7 @@ class LED extends Device {
 
     /**
      * loadState(state)
-     * 
+     *
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
      * @this {LED}
@@ -791,6 +791,12 @@ class LED extends Device {
         let buffer = state.shift();
         if (colorOn == this.colorOn && colorBackground == this.colorBackground && buffer && buffer.length == this.buffer.length) {
             this.buffer = buffer;
+            /*
+             * Loop over all the buffer colors to fix a legacy problem (ie, before we started storing null for colorTransparent)
+             */
+            for (let i = 0; i <= this.buffer.length - this.nBufferInc; i += this.nBufferInc) {
+                if (this.buffer[i+1] == this.colorTransparent) this.buffer[i+1] = null;
+            }
             this.drawBuffer(true);
             return true;
         }
@@ -854,6 +860,7 @@ class LED extends Device {
         if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
             fModified = false;
             color = color || this.colorOn;
+            if (color == this.colorTransparent) color = null;
             let i = (row * this.cols + col) * this.nBufferInc;
             if (this.buffer[i+1] !== color) {
                 this.buffer[i+1] = color;
@@ -891,7 +898,7 @@ class LED extends Device {
             /*
              * Since a transparent LED with counts is meaningless, let's avoid it.
              */
-            if (this.buffer[i+1] != this.colorTransparent) {
+            if (this.buffer[i+1]) {
                 for (let c = 0; c < counts.length; c++) {
                     bits = (bits << 4) | (counts[c] & 0xf);
                 }

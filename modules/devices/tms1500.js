@@ -1079,6 +1079,7 @@ class Chip extends Device {
                 if (!this.rom.loadState(state.stateROM)) {
                     return false;
                 }
+            }
         }
         return true;
     }
