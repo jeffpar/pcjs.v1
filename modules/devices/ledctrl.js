@@ -123,11 +123,19 @@ class Chip extends Device {
                             if (chip.fToggle) {
                                 ledArray.setLEDState(col, row, LED.STATE.ON - ledArray.getLEDState(col, row));
                             } else {
-                                if (!ledArray.getLEDState(col, row)) {
-                                    ledArray.setLEDColor(col, row);
-                                } else {
-                                    ledArray.setLEDState(col, row, LED.STATE.OFF);
-                                }
+                                /*
+                                 * Non-toggle mode used to require clicking through 3 states: on, then off, then
+                                 * transparent.  But when creating an initial image, you don't really care about the
+                                 * middle (off) state; it's a legitimate state for blinking LEDs, but having to click
+                                 * through that extra state just to remove a misplaced LED quickly becomes tedious.
+                                 *
+                                 *      if (!ledArray.getLEDState(col, row)) {
+                                 *          ledArray.setLEDColor(col, row);
+                                 *      } else {
+                                 *          ledArray.setLEDState(col, row, LED.STATE.OFF);
+                                 *      }
+                                 */
+                                ledArray.setLEDColor(col, row);
                             }
                         } else {
                             ledArray.setLEDState(col, row, LED.STATE.ON);
