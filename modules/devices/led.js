@@ -624,10 +624,10 @@ class LED extends Device {
     getLEDCounts(col, row, counts)
     {
         let fSuccess = false;
-        let i = (row * this.cols + col) * this.nBufferInc + 1;
-        if (i < this.buffer.length - 1 && this.buffer[i] !== this.colorTransparent) {
+        let i = (row * this.cols + col) * this.nBufferInc;
+        if (i <= this.buffer.length - this.nBufferInc && this.buffer[i+1] !== this.colorTransparent) {
             fSuccess = true;
-            let bits = this.buffer[i+1];
+            let bits = this.buffer[i+2];
             for (let c = counts.length - 1; c >= 0; c--) {
                 counts[c] = bits & 0xf;
                 bits >>>= 4;
@@ -646,8 +646,8 @@ class LED extends Device {
      */
     getLEDCountsPacked(col, row)
     {
-        let i = (row * this.cols + col) * this.nBufferInc + 2;
-        return (i < this.buffer.length)? this.buffer[i] : 0;
+        let i = (row * this.cols + col) * this.nBufferInc;
+        return (i <= this.buffer.length - this.nBufferInc)? this.buffer[i+2] : 0;
     }
 
     /**
@@ -776,6 +776,21 @@ class LED extends Device {
     }
 
     /**
+     * loadState(state)
+     *
+     * @this {LED}
+     * @param {Array} state
+     */
+    loadState(state)
+    {
+        let buffer = state.shift();
+        if (buffer && buffer.length == this.buffer.length) {
+            this.buffer = buffer;
+            this.drawBuffer(true);
+        }
+    }
+
+    /**
      * parseRGBValues(color, rgb)
      *
      * @this {LED}
@@ -800,6 +815,19 @@ class LED extends Device {
             return true;
         }
         return false;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * @this {LED}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        if (this.buffer) {
+            state.push(this.buffer);
+        }
     }
 
     /**
@@ -881,10 +909,10 @@ class LED extends Device {
      */
     setLEDCountsPacked(col, row, counts)
     {
-        let i = (row * this.cols + col) * this.nBufferInc + 2;
-        if (i < this.buffer.length) {
-            if (this.buffer[i] != counts) {
-                this.buffer[i] = counts;
+        let i = (row * this.cols + col) * this.nBufferInc;
+        if (i <= this.buffer.length - this.nBufferInc) {
+            if (this.buffer[i+2] != counts) {
+                this.buffer[i+2] = counts;
                 return true;
             }
             return false;

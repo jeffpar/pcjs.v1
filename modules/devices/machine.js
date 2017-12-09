@@ -140,11 +140,17 @@ class Machine extends Device {
         let machine = this, chip = null;
         window.addEventListener('load', function onLoad(event) {
             chip = machine.initDevices();
-            if (chip && chip.onPower && machine.fAutoPower) chip.onPower(true);
+            if (chip) {
+                if (chip.onRestore) chip.onRestore();
+                if (chip.onPower && machine.fAutoPower) chip.onPower(true);
+            }
         });
         let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : undefined);
         window.addEventListener(sEvent || 'beforeunload', function onUnload(event) {
-            if (chip && chip.onPower) chip.onPower(false);
+            if (chip) {
+                if (chip.onSave) chip.onSave();
+                if (chip.onPower) chip.onPower(false);
+            }
         });
     }
 

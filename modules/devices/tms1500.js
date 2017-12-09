@@ -1215,12 +1215,6 @@ class Chip extends Device {
      */
     onPower(fOn)
     {
-        if (fOn === false) {
-            this.saveLocalStorage(this.saveState());
-        }
-        else if (fOn === true) {
-            this.loadState(this.loadLocalStorage());
-        }
         if (fOn == undefined) {
             fOn = !this.time.isRunning();
             if (fOn) this.regPC = 0;
@@ -1248,6 +1242,26 @@ class Chip extends Device {
         if (!this.time.isRunning()) {
             this.status();
         }
+    }
+
+    /**
+     * onRestore()
+     *
+     * @this {Chip}
+     */
+    onRestore()
+    {
+        this.loadState(this.loadLocalStorage());
+    }
+
+    /**
+     * onSave()
+     *
+     * @this {Chip}
+     */
+    onSave()
+    {
+        this.saveLocalStorage(this.saveState());
     }
 
     /**
