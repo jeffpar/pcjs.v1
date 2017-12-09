@@ -96,8 +96,8 @@ styles:
 Using [PCjs Devices](/modules/devices/), here's a simple demo of
 [John Conway's](http://www.conwaylife.com/wiki/John_Horton_Conway)
 "[Game of Life](http://www.conwaylife.com/wiki/Conway%27s_Game_of_Life)", using an grid of simulated LEDs.
-[Red](?color=red&autoStart=true&pattern=gliderGun#game-of-life),
-[Blue](?color=blue&autoStart=true&pattern=gliderGun#game-of-life), or any other LED color can be specified in the URL.
+[Red](?color=red&pattern=gliderGun#game-of-life),
+[Blue](?color=blue&pattern=gliderGun#game-of-life), or any other LED color can be specified in the URL.
 
 Check out the ["Game of Life" Color Demo](colors/) and ["Lite-Brite" LED Simulation](/devices/leds/litebrite/), too.
 
