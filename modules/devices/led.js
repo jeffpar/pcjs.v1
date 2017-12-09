@@ -777,17 +777,24 @@ class LED extends Device {
 
     /**
      * loadState(state)
+     * 
+     * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
      * @this {LED}
      * @param {Array} state
+     * @returns {boolean}
      */
     loadState(state)
     {
+        let colorOn = state.shift();
+        let colorBackground = state.shift();
         let buffer = state.shift();
-        if (buffer && buffer.length == this.buffer.length) {
+        if (colorOn == this.colorOn && colorBackground == this.colorBackground && buffer && buffer.length == this.buffer.length) {
             this.buffer = buffer;
             this.drawBuffer(true);
+            return true;
         }
+        return false;
     }
 
     /**
@@ -826,6 +833,8 @@ class LED extends Device {
     saveState(state)
     {
         if (this.buffer) {
+            state.push(this.colorOn);
+            state.push(this.colorBackground);
             state.push(this.buffer);
         }
     }

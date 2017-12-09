@@ -680,8 +680,11 @@ class Chip extends Device {
     /**
      * loadState(state)
      *
+     * If any saved values don't match (possibly overridden), abandon the given state and return false.
+     * 
      * @this {Chip}
      * @param {State|Object|null} state
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -690,14 +693,20 @@ class Chip extends Device {
             let version = stateChip.shift();
             if ((version|0) !== (Chip.VERSION|0)) {
                 this.printf("Saved state version mismatch: %3.2f\n", version);
-                return;
+                return false;
             }
             try {
             } catch(err) {
                 this.println("Chip state error: " + err.message);
+                return false;
             }
-            if (state.stateLEDs && this.leds) this.leds.loadState(state.stateLEDs);
+            if (state.stateLEDs && this.leds) {
+                if (!this.leds.loadState(state.stateLEDs)) {
+                    return false;
+                }
+            }
         }
+        return true;
     }
 
     /**

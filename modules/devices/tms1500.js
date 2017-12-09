@@ -1044,6 +1044,8 @@ class Chip extends Device {
     /**
      * loadState(state)
      *
+     * If any saved values don't match (possibly overridden), abandon the given state and return false.
+     * 
      * @this {Chip}
      * @param {State|Object|null} state
      */
@@ -1054,7 +1056,7 @@ class Chip extends Device {
             let version = stateChip.shift();
             if ((version|0) !== (Chip.VERSION|0)) {
                 this.printf("Saved state version mismatch: %3.2f\n", version);
-                return;
+                return false;
             }
             try {
                 this.regsO.forEach(reg => reg.set(stateChip.shift()));
@@ -1071,9 +1073,14 @@ class Chip extends Device {
                 this.regKey = stateChip.shift();
             } catch(err) {
                 this.println("Chip state error: " + err.message);
+                return false;
             }
-            if (state.stateROM && this.rom) this.rom.loadState(state.stateROM);
+            if (state.stateROM && this.rom) {
+                if (!this.rom.loadState(state.stateROM)) {
+                    return false;
+                }
         }
+        return true;
     }
 
     /**

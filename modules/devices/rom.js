@@ -188,8 +188,11 @@ class ROM extends Device {
     /**
      * loadState(state)
      *
+     * If any saved values don't match (presumably overridden), abandon the given state and return false.
+     * 
      * @this {ROM}
      * @param {Array} state
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -199,8 +202,10 @@ class ROM extends Device {
             if (this.ledArray.buffer.length == buffer.length) {
                 this.ledArray.buffer = buffer;
                 this.ledArray.drawBuffer(true);
+                return true;
             }
         }
+        return false;
     }
 
     /**

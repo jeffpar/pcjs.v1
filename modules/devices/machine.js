@@ -119,9 +119,9 @@ class Machine extends Device {
         try {
             this.config = JSON.parse(sConfig);
             let config = this.config[idMachine];
-            this.addBindings(config.bindings);
             this.checkVersion(config);
             this.checkOverrides(config);
+            this.addBindings(config.bindings);
             this.fAutoPower = (config['autoPower'] !== false);
         } catch(err) {
             let sError = err.message;
