@@ -54,7 +54,7 @@ machines:
               "White":  "#fffff9"
             }
           },
-          "overrides": ["wrap","pattern"]
+          "overrides": ["blue","green","violet","red","orange","pink","yellow","white","wrap","pattern"]
         },
         "lbClock": {
           "class": "Time",

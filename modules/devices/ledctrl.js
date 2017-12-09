@@ -904,6 +904,14 @@ class Chip extends Device {
         if (elementPalette && elementSelection && (!elementSelection.options.length || fPaletteChange)) {
             let sPalette = elementPalette.options[elementPalette.selectedIndex].value;
             this.colorPalette = this.config['colors'][sPalette];
+            for (let color in this.colorPalette) {
+                let sColorOverride = this.config[color.toLowerCase()];
+                if (sColorOverride) {
+                    if (sColorOverride[0] != '#') sColorOverride = '#' + sColorOverride;
+                    this.println("overriding color '" + color + "' with " + sColorOverride + " (formerly " + this.colorPalette[color] + ")");
+                    this.colorPalette[color] = sColorOverride;
+                }
+            }
             this.addBindingOptions(elementSelection, this.colorPalette);
         }
 
