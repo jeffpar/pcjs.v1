@@ -204,21 +204,26 @@ class Device {
     }
 
     /**
-     * addBindingOptions(element, options)
+     * addBindingOptions(element, options, fReset, sDefault)
      *
      * @this {Device}
-     * @param {HTMLSelectElement} element
+     * @param {HTMLElement|HTMLSelectElement} element
      * @param {Object} options (eg, key/value pairs for a series of "option" elements)
+     * @param {boolean} [fReset]
+     * @param {string} [sDefault]
      */
-    addBindingOptions(element, options)
+    addBindingOptions(element, options, fReset, sDefault)
     {
-        element.options.length = 0;
+        if (fReset) {
+            element.options.length = 0;
+        }
         if (options) {
             for (let prop in options) {
                 let option = document.createElement("option");
                 option.text = prop;
                 option.value = (typeof options[prop] == "string"? options[prop] : prop);
                 element.appendChild(option);
+                if (option.value == sDefault) element.selectedIndex = element.options.length - 1;
             }
         }
     }

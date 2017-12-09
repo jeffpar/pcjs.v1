@@ -204,8 +204,15 @@ class Chip extends Device {
             break;
 
         case Chip.BINDING.IMAGE_SELECTION:
-            element.onchange = function onSelectChange() {
+            element.onchange = function onImageChange() {
                 chip.updateBackgroundImage();
+            };
+            break;
+
+        case Chip.BINDING.PATTERN_SELECTION:
+            this.addBindingOptions(element, this.buildPatternOptions(this.config['patterns']), false, this.config['pattern']);
+            element.onchange = function onPatternChange() {
+                chip.updatePattern();
             };
             break;
 
@@ -230,6 +237,10 @@ class Chip extends Device {
                 };
                 break;
             }
+            /*
+             * This code allows you to bind a specific control (ie, a button) to a specific pattern;
+             * however, it's preferable to use the PATTERN_SELECTION binding above, and use a single list.
+             */
             let patterns = this.config['patterns'];
             if (patterns && patterns[binding]) {
                 element.onclick = function onClickPattern() {
@@ -238,6 +249,30 @@ class Chip extends Device {
             }
         }
         super.addBinding(binding, element);
+    }
+
+    /**
+     * buildPatternOptions(patterns)
+     *
+     * @this {Chip}
+     * @param {Object} patterns
+     * @returns {Object}
+     */
+    buildPatternOptions(patterns)
+    {
+        let options = {};
+        for (let id in patterns) {
+            let name = id;
+            let lines = patterns[id];
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].indexOf("#N") == 0) {
+                    name = lines[i].substr(2).trim();
+                    break;
+                }
+            }
+            options[name] = id;
+        }
+        return options;
     }
 
     /**
@@ -964,7 +999,7 @@ class Chip extends Device {
 
         let fPaletteChange = (binding === Chip.BINDING.COLOR_PALETTE);
         if (elementPalette && !elementPalette.options.length) {
-            this.addBindingOptions(elementPalette, this.config['colors']);
+            this.addBindingOptions(elementPalette, this.config['colors'], true);
             fPaletteChange = true;
         }
 
@@ -979,7 +1014,7 @@ class Chip extends Device {
                     this.colorPalette[color] = sColorOverride;
                 }
             }
-            this.addBindingOptions(elementSelection, this.colorPalette);
+            this.addBindingOptions(elementSelection, this.colorPalette, true);
         }
 
         if (elementPalette && elementSelection && elementSelection.options.length) {
@@ -1064,6 +1099,24 @@ class Chip extends Device {
     }
 
     /**
+     * updatePattern()
+     *
+     * @this {Chip}
+     */
+    updatePattern()
+    {
+        let elementSelection = this.bindings[Chip.BINDING.PATTERN_SELECTION];
+        if (elementSelection && elementSelection.options.length) {
+            let sPattern = elementSelection.options[elementSelection.selectedIndex].value;
+            if (!sPattern) {
+                this.onReset();
+            } else {
+                this.loadPattern(sPattern);
+            }
+        }
+    }
+
+    /**
      * updateStatus(fTransition)
      *
      * Update the LEDs as needed.
@@ -1097,6 +1150,7 @@ Chip.BINDING = {
     COUNT_OFF:              "countOff",
     COUNT_CYCLE:            "countCycle",
     IMAGE_SELECTION:        "backgroundImage",
+    PATTERN_SELECTION:      "patterns",
     SAVE_TO_URL:            "saveToURL",
 };
 
