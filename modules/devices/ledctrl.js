@@ -43,6 +43,12 @@
  */
 
 /**
+ * @typedef {Object} State
+ * @property {Array} stateChip
+ * @property {Array} stateLEDs
+ */
+
+/**
  * LED Controller Chip
  *
  * @class {Chip}
@@ -51,11 +57,11 @@
  * @property {boolean} fWrap
  * @property {string} sRule
  * @property {string} sPatternInit
- * @property {LED} ledArray
+ * @property {LED} leds
  * @property {Object} colorPalette
- * @property {string} colorDefault (obtained from the ledArray)
+ * @property {string} colorDefault (obtained from the leds)
  * @property {string} colorSelected (set by updateColorSelection())
- * @property {Array.<string>} colorArray
+ * @property {Array.<string>} colors
  */
 class Chip extends Device {
     /**
@@ -80,7 +86,7 @@ class Chip extends Device {
 
         /*
          * These are grid "behavior" properties.  If 'wrap' is true, then any off-grid neighbor cell locations
-         * are mapped to the opposite edge; otherwise, they are mapped to the LED array's "scratch" row.
+         * are mapped to the opposite edge; otherwise, they are mapped to the LEDs "scratch" row.
          */
         this.fWrap = this.getDefault(this.config['wrap'], false);
         this.sRule = this.getDefault(this.config['rule'], "B3/S23");    // default rule (births require 3 neighbors, survivors require 2 or 3)
@@ -95,33 +101,33 @@ class Chip extends Device {
         /*
          * Get access to the LED device, so we can update its display.
          */
-        this.ledArray = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
-        if (this.ledArray) {
+        this.leds = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
+        if (this.leds) {
 
             /*
              * If loadPattern() didn't load anything into the LED array, then call
              * clearBuffer(true), which performs a combination of clearBuffer() and drawBuffer().
              */
-            if (!this.loadPattern()) this.ledArray.clearBuffer(true);
+            if (!this.loadPattern()) this.leds.clearBuffer(true);
 
             let configInput = {
                 class:          "Input",
-                location:       [0, 0, this.ledArray.widthView, this.ledArray.heightView, this.ledArray.cols, this.ledArray.rows],
+                location:       [0, 0, this.leds.widthView, this.leds.heightView, this.leds.cols, this.leds.rows],
                 drag:           true,
-                hexagonal:      this.ledArray.fHexagonal,
-                bindings:       {surface: this.ledArray.config.bindings[LED.BINDING.CONTAINER]}
+                hexagonal:      this.leds.fHexagonal,
+                bindings:       {surface: this.leds.config.bindings[LED.BINDING.CONTAINER]}
             };
 
             let chip = this;
-            let ledArray = this.ledArray;
+            let leds = this.leds;
 
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
             this.ledInput.addInput(function onLEDInput(col, row) {
                 if (col >= 0 && row >= 0) {
                     if (chip.colorSelected) {
-                        if (!ledArray.setLEDColor(col, row, chip.colorSelected)) {
+                        if (!leds.setLEDColor(col, row, chip.colorSelected)) {
                             if (chip.fToggle) {
-                                ledArray.setLEDState(col, row, LED.STATE.ON - ledArray.getLEDState(col, row));
+                                leds.setLEDState(col, row, LED.STATE.ON - leds.getLEDState(col, row));
                             } else {
                                 /*
                                  * Non-toggle mode used to require clicking through 3 states: on, then off, then
@@ -129,28 +135,28 @@ class Chip extends Device {
                                  * middle (off) state; it's a legitimate state for blinking LEDs, but having to click
                                  * through that extra state just to remove a misplaced LED quickly becomes tedious.
                                  *
-                                 *      if (!ledArray.getLEDState(col, row)) {
-                                 *          ledArray.setLEDColor(col, row);
+                                 *      if (!leds.getLEDState(col, row)) {
+                                 *          leds.setLEDColor(col, row);
                                  *      } else {
-                                 *          ledArray.setLEDState(col, row, LED.STATE.OFF);
+                                 *          leds.setLEDState(col, row, LED.STATE.OFF);
                                  *      }
                                  */
-                                ledArray.setLEDColor(col, row);
+                                leds.setLEDColor(col, row);
                             }
                         } else {
-                            ledArray.setLEDState(col, row, LED.STATE.ON);
+                            leds.setLEDState(col, row, LED.STATE.ON);
                         }
                     }
                     else {
-                        ledArray.setLEDState(col, row, LED.STATE.ON - ledArray.getLEDState(col, row));
+                        leds.setLEDState(col, row, LED.STATE.ON - leds.getLEDState(col, row));
                     }
-                    ledArray.setLEDCounts(col, row, chip.getCounts());
-                    ledArray.drawBuffer();
+                    leds.setLEDCounts(col, row, chip.getCounts());
+                    leds.drawBuffer();
                 }
             });
 
-            this.colorArray = [];
-            this.colorDefault = ledArray.getDefaultColor();
+            this.colors = [];
+            this.colorDefault = leds.getDefaultColor();
             this.updateColorSelection(this.colorDefault);
             this.updateColorSwatches();
 
@@ -198,8 +204,15 @@ class Chip extends Device {
             break;
 
         case Chip.BINDING.IMAGE_SELECTION:
-            element.onchange = function onSelectChange() {
+            element.onchange = function onImageChange() {
                 chip.updateBackgroundImage();
+            };
+            break;
+
+        case Chip.BINDING.PATTERN_SELECTION:
+            this.addBindingOptions(element, this.buildPatternOptions(this.config['patterns']), false, this.config['pattern']);
+            element.onchange = function onPatternChange() {
+                chip.updatePattern();
             };
             break;
 
@@ -224,6 +237,10 @@ class Chip extends Device {
                 };
                 break;
             }
+            /*
+             * This code allows you to bind a specific control (ie, a button) to a specific pattern;
+             * however, it's preferable to use the PATTERN_SELECTION binding above, and use a single list.
+             */
             let patterns = this.config['patterns'];
             if (patterns && patterns[binding]) {
                 element.onclick = function onClickPattern() {
@@ -232,6 +249,30 @@ class Chip extends Device {
             }
         }
         super.addBinding(binding, element);
+    }
+
+    /**
+     * buildPatternOptions(patterns)
+     *
+     * @this {Chip}
+     * @param {Object} patterns
+     * @returns {Object}
+     */
+    buildPatternOptions(patterns)
+    {
+        let options = {};
+        for (let id in patterns) {
+            let name = id;
+            let lines = patterns[id];
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].indexOf("#N") == 0) {
+                    name = lines[i].substr(2).trim();
+                    break;
+                }
+            }
+            options[name] = id;
+        }
+        return options;
     }
 
     /**
@@ -271,12 +312,12 @@ class Chip extends Device {
     countCells()
     {
         let cAlive = 0;
-        let ledArray = this.ledArray;
-        let nCols = ledArray.cols, nRows = ledArray.rows;
+        let leds = this.leds;
+        let nCols = leds.cols, nRows = leds.rows;
         let counts = this.countBuffer;
         for (let row = 0; row < nRows; row++) {
             for (let col = 0; col < nCols; col++) {
-                if (!ledArray.getLEDCounts(col, row, counts)) continue;
+                if (!leds.getLEDCounts(col, row, counts)) continue;
                 cAlive++;
                 /*
                  * Here's the layout of the cell's counts (which mirrors the Chip.COUNTS layout):
@@ -295,7 +336,7 @@ class Chip extends Device {
                     counts[0]--;
                 }
                 if (!counts[0]) {
-                    let state = ledArray.getLEDState(col, row), stateNew = state;
+                    let state = leds.getLEDState(col, row), stateNew = state;
                     switch(state) {
                     case LED.STATE.ON:
                         stateNew = LED.STATE.OFF;
@@ -304,21 +345,21 @@ class Chip extends Device {
                         /* falls through */
                     case LED.STATE.OFF:
                         if (counts[3]) {
-                            let color = ledArray.getLEDColor(col, row);
-                            let iColor = this.colorArray.indexOf(color);
+                            let color = leds.getLEDColor(col, row);
+                            let iColor = this.colors.indexOf(color);
                             if (iColor >= 0) {
                                 iColor = (iColor + counts[3]);
-                                while (iColor >= this.colorArray.length) iColor -= this.colorArray.length;
-                                ledArray.setLEDColor(col, row, this.colorArray[iColor]);
+                                while (iColor >= this.colors.length) iColor -= this.colors.length;
+                                leds.setLEDColor(col, row, this.colors[iColor]);
                             }
                         }
                         stateNew = LED.STATE.ON;
                         counts[0] = counts[1];
                         break;
                     }
-                    if (stateNew !== state) ledArray.setLEDState(col, row, stateNew);
+                    if (stateNew !== state) leds.setLEDState(col, row, stateNew);
                 }
-                ledArray.setLEDCounts(col, row, counts);
+                leds.setLEDCounts(col, row, counts);
             }
         }
         return cAlive;
@@ -328,7 +369,7 @@ class Chip extends Device {
      * countNeighbors()
      *
      * This contains a straight-forward implementation of the Conway "Game of Life" rules ("B3/S23"),
-     * iterating row-by-row and column-by-column.  It takes advantage of the LED array's one-dimensional
+     * iterating row-by-row and column-by-column.  It takes advantage of the one-dimensional LED
      * buffer layout to move through the entire grid with a "master" cell index (iCell) and corresponding
      * indexes for all 8 "neighboring" cells (iNO, iNE, iEA, iSE, iSO, iSW, iWE, and iNW), incrementing
      * them all in unison.
@@ -355,17 +396,17 @@ class Chip extends Device {
     countNeighbors()
     {
         let cAlive = 0;
-        let buffer = this.ledArray.getBuffer();
-        let bufferClone = this.ledArray.getBufferClone();
-        let nCols = this.ledArray.cols;
-        let nRows = this.ledArray.rows;
+        let buffer = this.leds.getBuffer();
+        let bufferClone = this.leds.getBufferClone();
+        let nCols = this.leds.cols;
+        let nRows = this.leds.rows;
         /*
          * The number of LED buffer elements per cell is an LED implementation detail that should not be
          * assumed, so we obtain it from the LED object, and use it to calculate the per-cell increment,
          * per-row increment, and per-grid increment; the latter gives us the offset of the LED buffer's
          * scratch row, which we rely upon when wrap is turned off.
          */
-        let nInc = this.ledArray.nBufferInc;
+        let nInc = this.leds.nBufferInc;
         let nIncPerRow = nCols * nInc;
         let nIncPerGrid = nRows * nIncPerRow;
 
@@ -442,7 +483,7 @@ class Chip extends Device {
             }
         }
         this.assert(iCell == nIncPerGrid);
-        this.ledArray.swapBuffers();
+        this.leds.swapBuffers();
         return cAlive;
     }
 
@@ -480,7 +521,7 @@ class Chip extends Device {
      */
     loadPattern(id)
     {
-        let ledArray = this.ledArray;
+        let leds = this.leds;
         let iCol = -1, iRow = -1, width, height, rule, sPattern = "";
 
         if (!id) {
@@ -551,10 +592,10 @@ class Chip extends Device {
             return false;
         }
 
-        if (iCol < 0) iCol = (ledArray.cols - width) >> 1;
-        if (iRow < 0) iRow = (ledArray.rows - height) >> 1;
+        if (iCol < 0) iCol = (leds.cols - width) >> 1;
+        if (iRow < 0) iRow = (leds.rows - height) >> 1;
 
-        if (iCol < 0 || iCol + width > ledArray.cols || iRow < 0 || iRow + height > ledArray.rows) {
+        if (iCol < 0 || iCol + width > leds.cols || iRow < 0 || iRow + height > leds.rows) {
             this.printf("pattern too large (%d,%d)\n", width, height);
             return false;
         }
@@ -562,7 +603,7 @@ class Chip extends Device {
         let i = 0, col = iCol, row = iRow;
         let aTokens = sPattern.split(/([a-z$])/i);
 
-        ledArray.clearBuffer();
+        leds.clearBuffer();
 
         let rgb = [0, 0, 0, 1], counts = 0;
         let fColors = false, fCounts = false;
@@ -571,7 +612,7 @@ class Chip extends Device {
          * We could add checks that verify that col and row stay within the bounds of the specified
          * width and height of the pattern, but it's possible that there are some legit patterns out
          * there that didn't get their bounds quite right.  And in any case, no harm can come of it,
-         * because setLEDState() will ignore any parameters outside the LED array's bounds.
+         * because setLEDState() will ignore any parameters outside the LED's array bounds.
          */
         while (i < aTokens.length - 1) {
             let n = aTokens[i++];
@@ -606,11 +647,11 @@ class Chip extends Device {
                     fColors = true;
                     break;
                 case 'b':
-                    fModified = ledArray.setLEDState(col, row, LED.STATE.OFF);
+                    fModified = leds.setLEDState(col, row, LED.STATE.OFF);
                     nAdvance++;
                     break;
                 case 'o':
-                    fModified = ledArray.setLEDState(col, row, LED.STATE.ON);
+                    fModified = leds.setLEDState(col, row, LED.STATE.ON);
                     nAdvance++;
                     break;
                 default:
@@ -621,19 +662,42 @@ class Chip extends Device {
                     this.printf("invalid pattern position (%d,%d)\n", col, row);
                 } else {
                     if (fColors) {
-                        let color = ledArray.getRGBColorString(rgb);
-                        ledArray.setLEDColor(col, row, color);
+                        let color = leds.getRGBColorString(rgb);
+                        leds.setLEDColor(col, row, color);
                     }
                     if (fCounts) {
-                        ledArray.setLEDCountsPacked(col, row, counts);
+                        leds.setLEDCountsPacked(col, row, counts);
                     }
                     col += nAdvance;
                 }
             }
         }
 
-        ledArray.drawBuffer(true);
+        leds.drawBuffer(true);
         return true;
+    }
+
+    /**
+     * loadState(state)
+     *
+     * @this {Chip}
+     * @param {State|Object|null} state
+     */
+    loadState(state)
+    {
+        if (state) {
+            let stateChip = state.stateChip;
+            let version = stateChip.shift();
+            if ((version|0) !== (Chip.VERSION|0)) {
+                this.printf("Saved state version mismatch: %3.2f\n", version);
+                return;
+            }
+            try {
+            } catch(err) {
+                this.println("Chip state error: " + err.message);
+            }
+            if (state.stateLEDs && this.leds) this.leds.loadState(state.stateLEDs);
+        }
     }
 
     /**
@@ -702,7 +766,7 @@ class Chip extends Device {
      * (eg, toggling a power button); in this case, fOn should NOT be set, so that no state is loaded or saved.
      *
      * @this {Chip}
-     * @param {boolean} [fOn] (true to power on, false to power off)
+     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
      */
     onPower(fOn)
     {
@@ -723,7 +787,27 @@ class Chip extends Device {
     onReset()
     {
         this.println("reset");
-        this.ledArray.clearBuffer(true);
+        this.leds.clearBuffer(true);
+    }
+
+    /**
+     * onRestore()
+     *
+     * @this {Chip}
+     */
+    onRestore()
+    {
+        this.loadState(this.loadLocalStorage());
+    }
+
+    /**
+     * onSave()
+     *
+     * @this {Chip}
+     */
+    onSave()
+    {
+        this.saveLocalStorage(this.saveState());
     }
 
     /**
@@ -761,13 +845,13 @@ class Chip extends Device {
      */
     savePattern()
     {
-        let ledArray = this.ledArray;
+        let leds = this.leds;
 
         let sPattern = "";
         let iCol = 0, iRow = 0;
-        let nCols = this.ledArray.cols, nRows = this.ledArray.rows;
+        let nCols = this.leds.cols, nRows = this.leds.rows;
 
-        let fColors = !!this.colorArray.length;
+        let fColors = !!this.colors.length;
         let state, rgb = [0, 0, 0], counts;
         let stateLast = 0, rgbLast = [0, 0, 0, 1], countsLast = 0;
         let statePrev = 0, rgbPrev = [0, 0, 0, 1], countsPrev = 0, nPrev = 0;
@@ -834,11 +918,11 @@ class Chip extends Device {
             }
         };
 
-        for (let row = 0; row < ledArray.rows; row++) {
-            for (let col = 0; col < ledArray.cols; col++) {
-                state = ledArray.getLEDState(col, row);
-                ledArray.getLEDColorValues(col, row, rgb);
-                counts = ledArray.getLEDCountsPacked(col, row);
+        for (let row = 0; row < leds.rows; row++) {
+            for (let col = 0; col < leds.cols; col++) {
+                state = leds.getLEDState(col, row);
+                leds.getLEDColorValues(col, row, rgb);
+                counts = leds.getLEDCountsPacked(col, row);
                 flushRun();
             }
             flushRun(true);
@@ -867,6 +951,24 @@ class Chip extends Device {
     }
 
     /**
+     * saveState()
+     *
+     * @this {Chip}
+     * @returns {State}
+     */
+    saveState()
+    {
+        let state = {
+            stateChip:  [],
+            stateLEDs:  []
+        };
+        let stateChip = state.stateChip;
+        stateChip.push(Chip.VERSION);
+        if (this.leds) this.leds.saveState(state.stateLEDs);
+        return /** @type {State} */ (state);
+    }
+
+    /**
      * updateBackgroundImage()
      *
      * @this {Chip}
@@ -876,7 +978,7 @@ class Chip extends Device {
         let elementSelection = this.bindings[Chip.BINDING.IMAGE_SELECTION];
         if (elementSelection && elementSelection.options.length) {
             let sImage = elementSelection.options[elementSelection.selectedIndex].value;
-            this.ledArray.container.style.backgroundImage = sImage? ("url('" + sImage + "')") : "none";
+            this.leds.container.style.backgroundImage = sImage? ("url('" + sImage + "')") : "none";
         }
     }
 
@@ -897,7 +999,7 @@ class Chip extends Device {
 
         let fPaletteChange = (binding === Chip.BINDING.COLOR_PALETTE);
         if (elementPalette && !elementPalette.options.length) {
-            this.addBindingOptions(elementPalette, this.config['colors']);
+            this.addBindingOptions(elementPalette, this.config['colors'], true);
             fPaletteChange = true;
         }
 
@@ -912,7 +1014,7 @@ class Chip extends Device {
                     this.colorPalette[color] = sColorOverride;
                 }
             }
-            this.addBindingOptions(elementSelection, this.colorPalette);
+            this.addBindingOptions(elementSelection, this.colorPalette, true);
         }
 
         if (elementPalette && elementSelection && elementSelection.options.length) {
@@ -970,7 +1072,7 @@ class Chip extends Device {
         if (this.colorPalette) {
             for (let idColor in this.colorPalette) {
                 let color = this.colorPalette[idColor];
-                if (this.colorArray) this.colorArray[i-1] = color;
+                if (this.colors) this.colors[i-1] = color;
                 let idSwatch = Chip.BINDING.COLOR_SWATCH + i++;
                 elementSwatch = this.bindings[idSwatch];
                 if (!elementSwatch) break;
@@ -979,7 +1081,7 @@ class Chip extends Device {
                     this.updateColorSelection(color);
                 }
                 if (color != this.colorSelected) {
-                    color = this.ledArray.getRGBAColor(color, 1.0, 0.50);
+                    color = this.leds.getRGBAColor(color, 1.0, 0.50);
                 }
                 elementSwatch.style.backgroundColor = color;
             }
@@ -997,9 +1099,27 @@ class Chip extends Device {
     }
 
     /**
+     * updatePattern()
+     *
+     * @this {Chip}
+     */
+    updatePattern()
+    {
+        let elementSelection = this.bindings[Chip.BINDING.PATTERN_SELECTION];
+        if (elementSelection && elementSelection.options.length) {
+            let sPattern = elementSelection.options[elementSelection.selectedIndex].value;
+            if (!sPattern) {
+                this.onReset();
+            } else {
+                this.loadPattern(sPattern);
+            }
+        }
+    }
+
+    /**
      * updateStatus(fTransition)
      *
-     * Update the LED array as needed.
+     * Update the LEDs as needed.
      *
      * Called by Time's updateStatus() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
      * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
@@ -1016,7 +1136,7 @@ class Chip extends Device {
     updateStatus(fTransition)
     {
         if (!this.time.isRunning()) {
-            this.ledArray.drawBuffer();
+            this.leds.drawBuffer();
         }
     }
 }
@@ -1030,6 +1150,7 @@ Chip.BINDING = {
     COUNT_OFF:              "countOff",
     COUNT_CYCLE:            "countCycle",
     IMAGE_SELECTION:        "backgroundImage",
+    PATTERN_SELECTION:      "patterns",
     SAVE_TO_URL:            "saveToURL",
 };
 
