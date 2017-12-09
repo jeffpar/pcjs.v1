@@ -23,7 +23,7 @@ More recently, PCjs has added a new set of [Device Classes](/modules/devices/) t
 machines, such as:
 
 * Texas Instruments [TI-42](ti42/), [TI-55](ti55/), and [TI-57](ti57/) Calculators
-* [John Conway's](http://www.conwaylife.com/wiki/John_Horton_Conway) "[Game of Life](http://www.conwaylife.com/wiki/Conway%27s_Game_of_Life)" Cellular Automaton [Simulation](leds/life/)
+* [John Conway's](http://www.conwaylife.com/wiki/John_Horton_Conway) "[Game of Life](http://www.conwaylife.com/wiki/Conway%27s_Game_of_Life)" Cellular Automaton [LED Simulation](leds/life/)
 * [Hasbro's](https://en.wikipedia.org/wiki/Hasbro) "[Lite-Brite](https://en.wikipedia.org/wiki/Lite-Brite)" reimagined as an animated [LED Simulation](leds/litebrite/)
 
 The goal is to make it easy to construct a variety of machines from a common set of devices (i.e., keyboards,
