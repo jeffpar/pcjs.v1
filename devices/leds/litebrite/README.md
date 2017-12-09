@@ -44,14 +44,14 @@ machines:
           },
           "colors": {
             "Original": {
-              "Blue":   "#0000ff",
-              "Green":  "#008000",
-              "Violet": "#800080",
-              "Red":    "#ff0000",
-              "Orange": "#ffa500",
-              "Pink":   "#ffc0cb",
-              "Yellow": "#ffff00",
-              "White":  "#ffffff"
+              "Blue":   "#3067c1",
+              "Green":  "#2f9a27",
+              "Violet": "#9f3c92",
+              "Red":    "#b71e1d",
+              "Orange": "#fa7d14",
+              "Pink":   "#ff7379",
+              "Yellow": "#fadc4e",
+              "White":  "#fffff9"
             }
           },
           "overrides": ["wrap","pattern"]
@@ -179,6 +179,7 @@ colored LEDs, making it possible to create a variety of "blinking" and "color-cy
   <select id="backgroundImage">
     <option value="" selected="selected">No Image</option>
     <option value="images/Snow_Man.jpg">Snow Man</option>
+    <option value="images/Bird_of_Paradise.jpg">Bird of Paradise</option>
   </select>
   <button id="saveLB">Save to URL</button>
 </div>
