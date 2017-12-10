@@ -56,7 +56,7 @@
  * @property {boolean} fToggle
  * @property {boolean} fWrap
  * @property {string} sRule
- * @property {string} sPatternInit
+ * @property {string} sPattern
  * @property {LED} leds
  * @property {Object} colorPalette
  * @property {string} colorDefault (obtained from the leds)
@@ -90,7 +90,7 @@ class Chip extends Device {
          */
         this.fWrap = this.getDefault(this.config['wrap'], false);
         this.sRule = this.getDefault(this.config['rule'], "B3/S23");    // default rule (births require 3 neighbors, survivors require 2 or 3)
-        this.sPatternInit = this.getDefault(this.config['pattern'], "");
+        this.sPattern = this.getDefault(this.config['pattern'], "");
 
         /*
          * Since all bindings should have been completed by super(), we can make a preliminary call
@@ -101,58 +101,28 @@ class Chip extends Device {
         /*
          * Get access to the LED device, so we can update its display.
          */
-        this.leds = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
-        if (this.leds) {
+        let leds = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
+        if (leds) {
+            this.leds = leds;
 
             /*
              * If loadPattern() didn't load anything into the LED array, then call
              * clearBuffer(true), which performs a combination of clearBuffer() and drawBuffer().
              */
-            if (!this.loadPattern()) this.leds.clearBuffer(true);
+            if (!this.loadPattern()) leds.clearBuffer(true);
 
             let configInput = {
                 class:          "Input",
-                location:       [0, 0, this.leds.widthView, this.leds.heightView, this.leds.cols, this.leds.rows],
+                location:       [0, 0, leds.widthView, leds.heightView, leds.cols, leds.rows],
                 drag:           true,
-                hexagonal:      this.leds.fHexagonal,
-                bindings:       {surface: this.leds.config.bindings[LED.BINDING.CONTAINER]}
+                hexagonal:      leds.fHexagonal,
+                bindings:       {surface: leds.config.bindings[LED.BINDING.CONTAINER]}
             };
 
             let chip = this;
-            let leds = this.leds;
-
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
             this.ledInput.addInput(function onLEDInput(col, row) {
-                if (col >= 0 && row >= 0) {
-                    if (chip.colorSelected) {
-                        if (!leds.setLEDColor(col, row, chip.colorSelected)) {
-                            if (chip.fToggle) {
-                                leds.setLEDState(col, row, LED.STATE.ON - leds.getLEDState(col, row));
-                            } else {
-                                /*
-                                 * Non-toggle mode used to require clicking through 3 states: on, then off, then
-                                 * transparent.  But when creating an initial image, you don't really care about the
-                                 * middle (off) state; it's a legitimate state for blinking LEDs, but having to click
-                                 * through that extra state just to remove a misplaced LED quickly becomes tedious.
-                                 *
-                                 *      if (!leds.getLEDState(col, row)) {
-                                 *          leds.setLEDColor(col, row);
-                                 *      } else {
-                                 *          leds.setLEDState(col, row, LED.STATE.OFF);
-                                 *      }
-                                 */
-                                leds.setLEDColor(col, row);
-                            }
-                        } else {
-                            leds.setLEDState(col, row, LED.STATE.ON);
-                        }
-                    }
-                    else {
-                        leds.setLEDState(col, row, LED.STATE.ON - leds.getLEDState(col, row));
-                    }
-                    leds.setLEDCounts(col, row, chip.getCounts());
-                    leds.drawBuffer();
-                }
+                chip.onInput(col, row);
             });
 
             this.colors = [];
@@ -335,13 +305,16 @@ class Chip extends Device {
                 if (counts[0]) {
                     counts[0]--;
                 }
-                if (!counts[0]) {
+                else {
                     let state = leds.getLEDState(col, row), stateNew = state;
                     switch(state) {
                     case LED.STATE.ON:
                         stateNew = LED.STATE.OFF;
                         counts[0] = counts[2];
-                        if (counts[0]) break;
+                        if (counts[0]) {
+                            counts[0]--;
+                            break;
+                        }
                         /* falls through */
                     case LED.STATE.OFF:
                         if (counts[3]) {
@@ -355,6 +328,9 @@ class Chip extends Device {
                         }
                         stateNew = LED.STATE.ON;
                         counts[0] = counts[1];
+                        if (counts[0]) {
+                            counts[0]--;
+                        }
                         break;
                     }
                     if (stateNew !== state) leds.setLEDState(col, row, stateNew);
@@ -488,20 +464,58 @@ class Chip extends Device {
     }
 
     /**
+     * getCount(binding)
+     * 
+     * @this {Chip}
+     * @param {string} binding 
+     * @returns {number}
+     */
+    getCount(binding)
+    {
+        let count = 0;
+        let element = this.bindings[binding];
+        if (element && element.options) {
+            let option = element.options[element.selectedIndex];
+            count = option && +option.value || 0;
+        }
+        return count;
+    }
+    
+    /**
      * getCounts()
      *
      * @this {Chip}
+     * @param {boolean} [fAdvance]
      * @returns {Array.<number>}
      */
-    getCounts()
+    getCounts(fAdvance)
     {
-        let counts = [0];
-        for (let i = 1; i < Chip.COUNTS.length; i++) {
-            let elementCount;
-            let binding = Chip.COUNTS[i];
-            if (elementCount = this.bindings[binding]) {
-                counts.push(+elementCount.options[elementCount.selectedIndex].value);
+        let init = 0;
+        if (fAdvance) {
+            let element = this.bindings[Chip.BINDING.COUNT_INIT];
+            if (element && element.options) {
+                let option = element.options[element.selectedIndex];
+                if (option) {
+                    init = +option.value || 0;
+                    /*
+                     * A more regular pattern results if we stick to a range of counts equal to the
+                     * sum of the ON and OFF counts.  Let's get that sum now.  However, this assumes
+                     * that the user is starting with an initial count of ZERO.  Also, we're only going
+                     * to do this if the sum of ON and OFF counts is EVEN; if it's odd, then we'll let
+                     * the user do their thing.
+                     */
+                    element.selectedIndex++;
+                    let range = this.getCount(Chip.BINDING.COUNT_ON) + this.getCount(Chip.BINDING.COUNT_OFF);
+                    let fReset = (!(range & 1) && init == range - 1);
+                    if (fReset || element.selectedIndex < 0 || element.selectedIndex >= element.options.length) {
+                        element.selectedIndex = 0;
+                    }
+                }
             }
+        }
+        let counts = [init];
+        for (let i = 1; i < Chip.COUNTS.length; i++) {
+            counts.push(this.getCount(Chip.COUNTS[i]));
         }
         return counts;
     }
@@ -526,18 +540,18 @@ class Chip extends Device {
 
         if (!id) {
             /*
-             * If no id is provided, then we fallback to sPatternInit, which can be either an
+             * If no id is provided, then we fallback to sPattern, which can be either an
              * id (if it doesn't start with a digit) or one of our own extended pattern strings.
              */
-            if (!this.sPatternInit.match(/^[0-9]/)) id = this.sPatternInit;
+            if (!this.sPattern.match(/^[0-9]/)) id = this.sPattern;
         }
 
         if (!id) {
-            if (!this.sPatternInit) {
+            if (!this.sPattern) {
                 return false;
             }
             let i = 0;
-            let aParts = this.sPatternInit.split('/');
+            let aParts = this.sPattern.split('/');
             if (aParts.length == 5) {           // extended pattern string
                 iCol = +aParts[i++];
                 iRow = +aParts[i++];
@@ -548,7 +562,7 @@ class Chip extends Device {
                 sPattern = aParts[i];
             }
             else {
-                this.println("unrecognized pattern: " + this.sPatternInit);
+                this.println("unrecognized pattern: " + this.sPattern);
                 return false;
             }
             rule = this.sRule;  // TODO: If we ever support multiple rules, then allow rule overrides, too
@@ -700,7 +714,7 @@ class Chip extends Device {
                 this.println("Chip state error: " + err.message);
                 return false;
             }
-            if (state.stateLEDs && this.leds) {
+            if (!Device.getURLParms()['pattern'] && state.stateLEDs && this.leds) {
                 if (!this.leds.loadState(state.stateLEDs)) {
                     return false;
                 }
@@ -765,6 +779,49 @@ class Chip extends Device {
         return true;
     }
 
+    /**
+     * onInput(col, row)
+     *
+     * @this {Chip}
+     * @param {number} col
+     * @param {number} row
+     */
+    onInput(col, row)
+    {
+        let leds = this.leds;
+        if (col >= 0 && row >= 0) {
+            if (this.colorSelected) {
+                if (!leds.setLEDColor(col, row, this.colorSelected)) {
+                    if (this.fToggle) {
+                        leds.setLEDState(col, row, LED.STATE.ON - leds.getLEDState(col, row));
+                    } else {
+                        /*
+                         * Non-toggle mode used to require clicking through 3 states: on, then off, then
+                         * transparent.  But when creating an initial image, you don't really care about the
+                         * middle (off) state; it's a legitimate state for blinking LEDs, but having to click
+                         * through that extra state just to remove a misplaced LED quickly becomes tedious.
+                         *
+                         *      if (!leds.getLEDState(col, row)) {
+                         *          leds.setLEDColor(col, row);
+                         *      } else {
+                         *          leds.setLEDState(col, row, LED.STATE.OFF);
+                         *      }
+                         */
+                        leds.setLEDColor(col, row);
+                    }
+                } else {
+                    leds.setLEDState(col, row, LED.STATE.ON);
+                }
+            }
+            else {
+                leds.setLEDState(col, row, LED.STATE.ON - leds.getLEDState(col, row));
+            }
+            let fAdvance = !!leds.getLEDState(col, row);
+            leds.setLEDCounts(col, row, this.getCounts(fAdvance));
+            leds.drawBuffer();
+        }
+    }
+    
     /**
      * onPower(fOn)
      *
@@ -984,9 +1041,9 @@ class Chip extends Device {
      */
     updateBackgroundImage()
     {
-        let elementSelection = this.bindings[Chip.BINDING.IMAGE_SELECTION];
-        if (elementSelection && elementSelection.options.length) {
-            let sImage = elementSelection.options[elementSelection.selectedIndex].value;
+        let element = this.bindings[Chip.BINDING.IMAGE_SELECTION];
+        if (element && element.options.length) {
+            let sImage = element.options[element.selectedIndex].value;
             this.leds.container.style.backgroundImage = sImage? ("url('" + sImage + "')") : "none";
         }
     }
@@ -1040,19 +1097,19 @@ class Chip extends Device {
      */
     updateColorSelection(color)
     {
-        let elementSelection = this.bindings[Chip.BINDING.COLOR_SELECTION];
-        if (elementSelection) {
+        let element = this.bindings[Chip.BINDING.COLOR_SELECTION];
+        if (element) {
             let i;
-            for (i = 0; i < elementSelection.options.length; i++) {
-                if (elementSelection.options[i].value == color) {
+            for (i = 0; i < element.options.length; i++) {
+                if (element.options[i].value == color) {
                     this.colorSelected = color;
-                    if (elementSelection.selectedIndex != i) {
-                        elementSelection.selectedIndex = i;
+                    if (element.selectedIndex != i) {
+                        element.selectedIndex = i;
                     }
                     break;
                 }
             }
-            if (i == elementSelection.options.length) elementSelection.selectedIndex = 0;
+            if (i == element.options.length) element.selectedIndex = 0;
         }
     }
 
@@ -1114,9 +1171,9 @@ class Chip extends Device {
      */
     updatePattern()
     {
-        let elementSelection = this.bindings[Chip.BINDING.PATTERN_SELECTION];
-        if (elementSelection && elementSelection.options.length) {
-            let sPattern = elementSelection.options[elementSelection.selectedIndex].value;
+        let element = this.bindings[Chip.BINDING.PATTERN_SELECTION];
+        if (element && element.options.length) {
+            let sPattern = element.options[element.selectedIndex].value;
             if (!sPattern) {
                 this.onReset();
             } else {
@@ -1155,6 +1212,7 @@ Chip.BINDING = {
     COLOR_SELECTION:        "colorSelection",
     COLOR_SWATCH:           "colorSwatch",
     COLOR_SWATCH_SELECTED:  "colorSwatchSelected",
+    COUNT_INIT:             "countInit",
     COUNT_ON:               "countOn",
     COUNT_OFF:              "countOff",
     COUNT_CYCLE:            "countCycle",

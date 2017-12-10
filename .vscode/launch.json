@@ -5,7 +5,7 @@
 		"name": "Launch localhost",
 		"type": "chrome",
 		"request": "launch",
-		"url": "http://pcjs:8088/",
+		"url": "http://pcjs:8088/devices/leds/litebrite/",
 		"webRoot": "${workspaceFolder}"
 	    },
 	    {
