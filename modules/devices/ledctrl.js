@@ -181,7 +181,7 @@ class Chip extends Device {
             break;
 
         case Chip.BINDING.PATTERN_SELECTION:
-            this.addBindingOptions(element, this.buildPatternOptions(this.config['patterns']), false, this.config['pattern']);
+            this.addBindingOptions(element, this.buildPatternOptions(this.config[Chip.BINDING.PATTERN_SELECTION]), false, this.config['pattern']);
             element.onchange = function onPatternChange() {
                 chip.updatePattern();
             };
@@ -212,7 +212,7 @@ class Chip extends Device {
              * This code allows you to bind a specific control (ie, a button) to a specific pattern;
              * however, it's preferable to use the PATTERN_SELECTION binding above, and use a single list.
              */
-            let patterns = this.config['patterns'];
+            let patterns = this.config[Chip.BINDING.PATTERN_SELECTION];
             if (patterns && patterns[binding]) {
                 element.onclick = function onClickPattern() {
                     chip.loadPattern(binding);
@@ -569,7 +569,7 @@ class Chip extends Device {
             rule = this.sRule;  // TODO: If we ever support multiple rules, then allow rule overrides, too
         }
         else {
-            let patterns = this.config['patterns'];
+            let patterns = this.config[Chip.BINDING.PATTERN_SELECTION];
             let lines = patterns && patterns[id];
             if (!lines) {
                 this.println("unknown pattern: " + id);
@@ -715,7 +715,7 @@ class Chip extends Device {
                 this.println("Chip state error: " + err.message);
                 return false;
             }
-            if (!Device.getURLParms()['pattern'] && state.stateLEDs && this.leds) {
+            if (!Device.getURLParms()['pattern'] && !Device.getURLParms()[Chip.BINDING.IMAGE_SELECTION] && state.stateLEDs && this.leds) {
                 if (!this.leds.loadState(state.stateLEDs)) {
                     return false;
                 }
