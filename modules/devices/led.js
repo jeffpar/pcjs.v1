@@ -769,7 +769,7 @@ class LED extends Device {
             } else {
                 buffer[i] = ' ';
             }
-            buffer[i+1] = this.colorOn;
+            buffer[i+1] = (this.colorOn == this.colorTransparent? null : this.colorOn);
             buffer[i+2] = 0;
             buffer[i+3] = LED.FLAGS.MODIFIED;
         }
