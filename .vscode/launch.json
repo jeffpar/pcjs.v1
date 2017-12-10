@@ -1,19 +1,30 @@
 {
 	"version": "0.1.0",
 	"configurations": [
-	    {
-		"name": "Launch localhost",
-		"type": "chrome",
-		"request": "launch",
-		"url": "http://pcjs:8088/devices/leds/litebrite/",
-		"webRoot": "${workspaceFolder}"
-	    },
-	    {
-		"name": "Launch index.html (disable sourcemaps)",
-		"type": "chrome",
-		"request": "launch",
-		"sourceMaps": false,
-		"file": "${workspaceFolder}"
-	    }
+    {
+      "name": "Launch Program",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.js",
+      "args": [
+        "--cache",
+        "--console",
+        "--debug"
+      ]
+    },
+	  {
+		  "name": "Launch localhost",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/leds/litebrite/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "Launch index.html (disable sourcemaps)",
+		  "type": "chrome",
+		  "request": "launch",
+		  "sourceMaps": false,
+		  "file": "${workspaceFolder}"
+	  }
 	]
 }
