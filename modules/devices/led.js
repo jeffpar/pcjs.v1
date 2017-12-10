@@ -864,12 +864,7 @@ class LED extends Device {
             let i = (row * this.cols + col) * this.nBufferInc;
             if (this.buffer[i+1] !== color) {
                 this.buffer[i+1] = color;
-                /*
-                 * Since a transparent LED set to ON is meaningless, let's avoid it.
-                 */
-                if (color == this.colorTransparent) {
-                    this.buffer[i] = LED.STATE.OFF;
-                }
+                if (!color) this.buffer[i] = LED.STATE.OFF;     // transparent LEDs are automatically turned off
                 this.buffer[i+3] |= LED.FLAGS.MODIFIED;
                 this.fBufferModified = fModified = true;
             }
@@ -895,10 +890,7 @@ class LED extends Device {
             fModified = false;
             let i = (row * this.cols + col) * this.nBufferInc;
             let bits = 0;
-            /*
-             * Since a transparent LED with counts is meaningless, let's avoid it.
-             */
-            if (this.buffer[i+1]) {
+            if (this.buffer[i+1]) {                             // only non-transparent LEDs are allowed to set counters
                 for (let c = 0; c < counts.length; c++) {
                     bits = (bits << 4) | (counts[c] & 0xf);
                 }
