@@ -55,7 +55,7 @@ machines:
               "White":  "#fffff9"
             }
           },
-          "overrides": ["blue","green","violet","red","orange","pink","yellow","white","wrap","pattern"]
+          "overrides": ["blue","green","violet","red","orange","pink","yellow","white","wrap","pattern","backgroundImage"]
         },
         "lbClock": {
           "class": "Time",
@@ -131,13 +131,15 @@ layout containing 1735 holes.  A piece of black paper containing a pre-printed p
 the panels, and then your job was to insert any of the (blue, green, violet, red, orange, pink, yellow, or white)
 colored pegs into the appropriately marked holes.
 
-This demo takes the "Lite-Brite" concept a bit farther, allowing you to add counters to each of the colored LEDs, making
-it possible to create a variety of "blinking" and "color-cycling" animations.
+This simulation takes the "Lite-Brite" concept a bit farther, allowing you to add counters to each of the colored LEDs,
+making it possible to create a variety of "blinking" and "color-cycling" animations.
 
-A small collection of original background images can also be turned on underneath the grid, to help you recreate them
-with LEDs.  However, it's difficult to find decent high-quality images of the original 1967 patterns, so some
-"artistic interpretation" is required.  Eventually, we'll also add some of the original black-and-white pattern images
-that just displayed the original Lite-Brite color codes (B, G, V, R, O, P, Y, and W).
+Some of the original background images can also be turned on underneath the grid, to help you recreate them
+with LEDs.  However, it's difficult to find decent high-quality images of the original 1967 patterns, and tricky to
+get them to line up properly, so some "artistic interpretation" is required.
+
+Eventually, we'll also add recreations of some of the original black-and-white pattern images, using the original
+Lite-Brite color codes: B, G, V, R, O, P, Y, and W.
 
 {% include machine.html id="lbDemo" config="json" %}
 
@@ -194,8 +196,47 @@ that just displayed the original Lite-Brite color codes (B, G, V, R, O, P, Y, an
   </select>
   <select id="backgroundImage">
     <option value="" selected="selected">No Image</option>
-    <option value="images/Snow_Man.jpg">Snow Man</option>
-    <option value="images/Bird_of_Paradise.jpg">Bird of Paradise</option>
+    <option value="images/American_Eagle.png">American Eagle</option>
+    <option value="images/American_Flag.png">American Flag</option>
+    <option value="images/Antique_Auto.png">Antique Auto</option>
+    <option value="images/Barnyard_Scene.png">Barnyard Scene</option>
+    <option value="images/Basketball_Player.png">Basketball Player</option>
+    <option value="images/Bird_of_Paradise.png">Bird of Paradise</option>
+    <option value="images/Boy_and_Girl.png">Boy and Girl</option>
+    <option value="images/Butterflies.png">Butterflies</option>
+    <option value="images/Cat_on_Fence.png">Cat on Fence</option>
+    <option value="images/Chicken.png">Chicken</option>
+    <option value="images/Choo-Choo_Train.png">Choo-Choo Train</option>
+    <option value="images/Christmas_Tree.png">Christmas Tree</option>
+    <option value="images/Clown.png">Clown</option>
+    <option value="images/Cowboy_and_Indian.png">Cowboy and Indian</option>
+    <option value="images/Dancing_Ballerina.png">Dancing Ballerina</option>
+    <option value="images/Ducks.png">Ducks</option>
+    <option value="images/Flower_Garden.png">Flower Garden</option>
+    <option value="images/Fruit_Bowl.png">Fruit Bowl</option>
+    <option value="images/Girl_in_the_Rain.png">Girl in the Rain</option>
+    <option value="images/House_and_Light.png">House and Light</option>
+    <option value="images/Indian_Chief.png">Indian Chief</option>
+    <option value="images/Jack_be_Nimble.png">Jack be Nimble</option>
+    <option value="images/Jungle_Scene.png">Jungle Scene</option>
+    <option value="images/Lemonade_Sign.png">Lemonade Sign</option>
+    <option value="images/Lighthouse.png">Lighthouse</option>
+    <option value="images/Little_Bo_Peep.png">Little Bo Peep</option>
+    <option value="images/Merry-Go-Round_Horse.png">Merry-Go-Round Horse</option>
+    <option value="images/Performing_Seal.png">Performing Seal</option>
+    <option value="images/Pumpkin_Coach.png">Pumpkin Coach</option>
+    <option value="images/Ring_Around_the_Rosy.png">Ring Around the Rosy</option>
+    <option value="images/Sailboat.png">Sailboat</option>
+    <option value="images/Snow_Man.png">Snow Man</option>
+    <option value="images/Steamboat.png">Steamboat</option>
+    <option value="images/Surfer.png">Surfer</option>
+    <option value="images/The_Red_Balloon.png">The Red Balloon</option>
+    <option value="images/The_Skier.png">The Skier</option>
+    <option value="images/The_Witch.png">The Witch</option>
+    <option value="images/The_Wizard_of_Light.png">The Wizard of Light</option>
+    <option value="images/Toy_Soldier.png">Toy Soldier</option>
+    <option value="images/Tropical_Fish.png">Tropical Fish</option>
+    <option value="images/Windmill.png">Windmill</option>
   </select>
   <button id="saveLB">Save to URL</button>
 </div>

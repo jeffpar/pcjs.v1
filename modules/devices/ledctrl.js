@@ -129,6 +129,7 @@ class Chip extends Device {
             this.colorDefault = leds.getDefaultColor();
             this.updateColorSelection(this.colorDefault);
             this.updateColorSwatches();
+            this.updateBackgroundImage(this.config[Chip.BINDING.IMAGE_SELECTION]);
 
             /*
              * Get access to the Input device, so we can add our click functions.
@@ -290,7 +291,7 @@ class Chip extends Device {
                 if (!leds.getLEDCounts(col, row, counts)) continue;
                 cAlive++;
                 /*
-                 * Here's the layout of the cell's counts (which mirrors the Chip.COUNTS layout):
+                 * Here's the layout of each cell's counts (which mirrors the Chip.COUNTS layout):
                  *
                  *      [0] is the "working" count
                  *      [1] is the ON count
@@ -1035,15 +1036,24 @@ class Chip extends Device {
     }
 
     /**
-     * updateBackgroundImage()
+     * updateBackgroundImage(sImage)
      *
      * @this {Chip}
+     * @param {string} sImage
      */
-    updateBackgroundImage()
+    updateBackgroundImage(sImage)
     {
         let element = this.bindings[Chip.BINDING.IMAGE_SELECTION];
         if (element && element.options.length) {
-            let sImage = element.options[element.selectedIndex].value;
+            if (sImage) {
+                for (let i = 0; i < element.options.length; i++) {
+                    if (element.options[i].value == sImage) {
+                        element.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+            sImage = element.options[element.selectedIndex].value;
             this.leds.container.style.backgroundImage = sImage? ("url('" + sImage + "')") : "none";
         }
     }
