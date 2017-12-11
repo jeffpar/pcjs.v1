@@ -31,12 +31,11 @@
  * so for normal development, you should continue using Grunt.
  * 
  * To learn Gulp, I started with a simple concatenation task ("mktmp") that combines all the files
- * required to compile a single emulation module (PDPjs), and then I added a compilation task ("compile")
+ * required to compile a single emulation module (LEDs), and then I added a compilation task ("compile")
  * that runs the new JavaScript version of Google's Closure Compiler.
  * 
  * Unfortunately, the JavaScript version of the Closure Compiler appears to be MUCH slower than the
- * Java version.  But, it did uncover a few new type-related bugs in my code, which are now fixed,
- * and the PDPjs emulation module now compiles successfully (although I haven't tested it yet).
+ * Java version.  But, it did uncover a few new type-related bugs in my code, which are now fixed.
  * 
  * Additional work is required to make Gulp skip tasks when the output file(s) are still newer
  * than the input file(s).  By default, every time you run Gulp, EVERYTHING is built again.  Apparently,
@@ -55,10 +54,8 @@ var fs = require("fs");
 var path = require("path");
 var pkg = require("./package.json");
 
-// pkg.version = pkg.version.slice(0, -1) + 'x';                           // TODO: Remove this hack when we're done testing
-
-var deviceTmpDir  = "./tmp/devices/"  + pkg.version;
-var deviceReleaseDir = "./versions/devices/" + pkg.version;
+var deviceTmpDir  = "./tmp/devices/current"; // pkg.version;
+var deviceReleaseDir = "./versions/devices/current"; // pkg.version;
 var deviceReleaseFile  = "leds.js";
 
 var sExterns = "";
@@ -118,8 +115,6 @@ gulp.task('compile', function() {
             assumeFunctionWrapper: true,
             compilationLevel: 'ADVANCED',
             defines: {
-                /* "APPVERSION": pkg.version, */
-                /* "SITEHOST": sSiteHost, */
                 "COMPILED": true,
                 "DEBUG": false
             },
