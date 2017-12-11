@@ -464,6 +464,36 @@ class Device {
     }
 
     /**
+     * getBindingID(name)
+     * 
+     * Since this.bindings contains the actual elements, not their original IDs, we must delve back into
+     * the original this.config['bindings'] to determine the original ID.
+     * 
+     * @this {Device}
+     * @param {string} name 
+     * @returns {string|undefined}
+     */
+    getBindingID(name)
+    {
+        return this.config['bindings'] && this.config['bindings'][name];
+    }
+    
+    /**
+     * getBindingText(name)
+     *
+     * @this {Device}
+     * @param {string} name
+     * @return {string|undefined}
+     */
+    getBindingText(name)
+    {
+        let sText;
+        let element = this.bindings[name];
+        if (element) sText = element.textContent;
+        return sText;
+    }
+
+    /**
      * getBounded(n, min, max)
      *
      * Restricts n to the bounds defined by min and max.  A side-effect is ensuring that the return
@@ -522,21 +552,6 @@ class Device {
             Device.LocalStorage.Available = f;
         }
         return !!Device.LocalStorage.Available;
-    }
-
-    /**
-     * getBindingText(name)
-     *
-     * @this {Device}
-     * @param {string} name
-     * @return {string|undefined}
-     */
-    getBindingText(name)
-    {
-        let sText;
-        let element = this.bindings[name];
-        if (element) sText = element.textContent;
-        return sText;
     }
 
     /**

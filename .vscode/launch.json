@@ -2,7 +2,7 @@
 	"version": "0.1.0",
 	"configurations": [
     {
-      "name": "Launch Program",
+      "name": "Webserver (Debug)",
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/server.js",
@@ -10,6 +10,17 @@
         "--cache",
         "--console",
         "--debug"
+      ]
+    },
+    {
+      "name": "Webserver (Release)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.js",
+      "args": [
+        "--cache",
+        "--console",
+        "--rebuild"
       ]
     },
 	  {

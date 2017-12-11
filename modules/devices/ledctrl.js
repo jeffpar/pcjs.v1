@@ -116,7 +116,7 @@ class Chip extends Device {
                 location:       [0, 0, leds.widthView, leds.heightView, leds.cols, leds.rows],
                 drag:           true,
                 hexagonal:      leds.fHexagonal,
-                bindings:       {surface: leds.config.bindings[LED.BINDING.CONTAINER]}
+                bindings:       {"surface": leds.getBindingID(LED.BINDING.CONTAINER)}
             };
 
             let chip = this;
@@ -1059,7 +1059,7 @@ class Chip extends Device {
                 }
             }
             sImage = element.options[element.selectedIndex].value;
-            this.leds.container.style.backgroundImage = sImage? ("url('" + sImage + "')") : "none";
+            this.leds.setContainerStyle('backgroundImage', sImage? ("url('" + sImage + "')") : "none");
         }
     }
 

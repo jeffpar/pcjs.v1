@@ -49,17 +49,6 @@ var usr     = require("../../shared/lib/usrlib");
  * @class exports
  * @property {string} name
  * @property {string} version
- * @property {Array.<string>} C1PCSSFiles
- * @property {Array.<string>} C1PFiles
- * @property {Array.<string>} PCCSSFiles
- * @property {Array.<string>} PCx86Files
- * @property {Array.<string>} PC8080Files
- * @property {Array.<string>} PDP10Files
- * @property {Array.<string>} PDP11Files
- * @property {Array.<string>} TI42Files
- * @property {Array.<string>} TI55Files
- * @property {Array.<string>} TI57Files
- * @property {Array.<string>} LifeFiles
  */
 var pkg = require("../../../package.json");
 
@@ -1941,7 +1930,7 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         }
 
         var asFiles = [];
-        if (fCompiled && infoMachine['xml'] != "{}") {
+        if (fCompiled) {
             var sScriptFile = sType + (fDebugger? "-dbg" : "") + ".js";
             asFiles.push("/versions/" + configMachine['folder'] + "/" + sVersion + "/components.css");
             asFiles.push("/versions/" + configMachine['folder'] + "/" + sVersion + "/" + sScriptFile);

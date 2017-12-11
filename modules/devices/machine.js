@@ -121,7 +121,7 @@ class Machine extends Device {
             let config = this.config[idMachine];
             this.checkVersion(config);
             this.checkOverrides(config);
-            this.addBindings(config.bindings);
+            this.addBindings(config['bindings']);
             this.fAutoPower = (config['autoPower'] !== false);
         } catch(err) {
             let sError = err.message;
@@ -191,7 +191,7 @@ class Machine extends Device {
                         device = new Time(this.idMachine, idDevice, config);
                         break;
                     case Machine.CLASS.MACHINE:
-                        this.printf("PCjs %s v%3.2f\n", config.name, Machine.VERSION);
+                        this.printf("PCjs %s v%3.2f\n", config['name'], Machine.VERSION);
                         this.println(Machine.COPYRIGHT);
                         this.println(Machine.LICENSE);
                         continue;

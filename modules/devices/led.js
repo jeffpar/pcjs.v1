@@ -846,6 +846,18 @@ class LED extends Device {
     }
 
     /**
+     * setContainerStyle(sAttr, sValue)
+     * 
+     * @this {LED}
+     * @param {string} sAttr 
+     * @param {string} sValue 
+     */
+    setContainerStyle(sAttr, sValue)
+    {
+        if (this.container) this.container.style[sAttr] = sValue;
+    }
+    
+    /**
      * setLEDColor(col, row, color)
      *
      * @this {LED}
