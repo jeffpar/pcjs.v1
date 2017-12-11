@@ -584,7 +584,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @returns {string|undefined}
+     * @returns {string}
      */
     getLEDColor(col, row)
     {
@@ -859,12 +859,12 @@ class LED extends Device {
         let fModified = null;
         if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
             fModified = false;
-            color = color || this.colorOn;
-            if (color == this.colorTransparent) color = undefined;
+            let colorNew = color || this.colorOn;
+            if (colorNew == this.colorTransparent) colorNew = null;
             let i = (row * this.cols + col) * this.nBufferInc;
-            if (this.buffer[i+1] !== color) {
-                this.buffer[i+1] = color;
-                if (!color) this.buffer[i] = LED.STATE.OFF;     // transparent LEDs are automatically turned off
+            if (this.buffer[i+1] !== colorNew) {
+                this.buffer[i+1] = colorNew;
+                if (!colorNew) this.buffer[i] = LED.STATE.OFF;  // transparent LEDs are automatically turned off
                 this.buffer[i+3] |= LED.FLAGS.MODIFIED;
                 this.fBufferModified = fModified = true;
             }
