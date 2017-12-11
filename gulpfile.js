@@ -128,9 +128,9 @@ gulp.task('compile', function() {
             languageOut: "ES5",                         // this is also the default
             outputWrapper: '(function(){%output%})()',
             jsOutputFile: deviceReleaseFile,            // TODO: This must vary according to debugger/non-debugger releases
-            createSourceMap: false
+            createSourceMap: true
         }))
-        .pipe(sourcemaps.write('/'))                    // gulp-sourcemaps automatically adds the sourcemap url comment
+        .pipe(sourcemaps.write('./'))                   // gulp-sourcemaps automatically adds the sourcemap url comment
         .pipe(gulp.dest(deviceReleaseDir));
 });
 

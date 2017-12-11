@@ -120,9 +120,9 @@ class ROM extends Device {
             this.ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);
             this.clearArray();
             let configInput = {
-                class:          "Input",
-                location:       [0, 0, this.ledArray.widthView, this.ledArray.heightView, this.cols, this.rows],
-                bindings:       {"surface": config.bindings[ROM.BINDING.ARRAY]}
+                "class":        "Input",
+                "location":     [0, 0, this.ledArray.widthView, this.ledArray.heightView, this.cols, this.rows],
+                "bindings":     {"surface": config.bindings[ROM.BINDING.ARRAY]}
             };
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
             this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC);

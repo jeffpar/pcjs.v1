@@ -112,11 +112,11 @@ class Chip extends Device {
             if (!this.loadPattern()) leds.clearBuffer(true);
 
             let configInput = {
-                class:          "Input",
-                location:       [0, 0, leds.widthView, leds.heightView, leds.cols, leds.rows],
-                drag:           true,
-                hexagonal:      leds.fHexagonal,
-                bindings:       {"surface": leds.getBindingID(LED.BINDING.CONTAINER)}
+                "class":        "Input",
+                "location":     [0, 0, leds.widthView, leds.heightView, leds.cols, leds.rows],
+                "drag":         true,
+                "hexagonal":    leds.fHexagonal,
+                "bindings":     {"surface": leds.getBindingID(LED.BINDING.CONTAINER)}
             };
 
             let chip = this;
