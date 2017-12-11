@@ -36,14 +36,14 @@ var COMPILED = false;
 /**
  * @define {boolean}
  */
-var DEBUG = (window.location.hostname == "pcjs" || window.location.hostname == "jeffpar.local");
+var DEBUG = false;  // (window.location.hostname == "pcjs" || window.location.hostname == "jeffpar.local");
 
 /**
  * The following properties are the standard set of properties a Device's config object may contain.
  * Other devices will generally define their own extended versions (eg, LEDConfig, InputConfig, etc).
  *
  * @typedef {Object} Config
- * @property {string} class
+ * @property {string} [class]
  * @property {Object} [bindings]
  * @property {number} [version]
  * @property {Array.<string>} [overrides]
@@ -102,7 +102,7 @@ class Device {
      *
      * @this {Device}
      * @param {string} binding
-     * @param {HTMLElement} element
+     * @param {Element} element
      */
     addBinding(binding, element)
     {
@@ -207,7 +207,7 @@ class Device {
      * addBindingOptions(element, options, fReset, sDefault)
      *
      * @this {Device}
-     * @param {HTMLElement|HTMLSelectElement} element
+     * @param {Element|HTMLSelectElement} element
      * @param {Object} options (eg, key/value pairs for a series of "option" elements)
      * @param {boolean} [fReset]
      * @param {string} [sDefault]
@@ -385,7 +385,7 @@ class Device {
      * @this {Device}
      * @param {string} name
      * @param {boolean} [fAll]
-     * @returns {HTMLElement|null|undefined}
+     * @returns {Element|null|undefined}
      */
     findBinding(name, fAll = false)
     {
@@ -451,7 +451,7 @@ class Device {
      *
      * @this {Device}
      * @param {string} sType
-     * @returns {Array.<function()>|undefined}
+     * @returns {Array.<function(string)>|undefined}
      */
     findHandlers(sType)
     {
@@ -502,7 +502,7 @@ class Device {
      */
     hasLocalStorage()
     {
-        if (Device.LocalStorage.Available == null) {
+        if (Device.LocalStorage.Available === undefined) {
             let f = false;
             if (window) {
                 try {
@@ -516,7 +516,7 @@ class Device {
             }
             Device.LocalStorage.Available = f;
         }
-        return Device.LocalStorage.Available;
+        return !!Device.LocalStorage.Available;
     }
 
     /**
@@ -605,7 +605,7 @@ class Device {
             if (window) {
                 try {
                     sValue = window.localStorage.getItem(this.idMachine);
-                    state = JSON.parse(sValue);
+                    if (sValue) state = /** @type {Object} */ (JSON.parse(sValue));
                 } catch (err) {
                     this.println(err.message);
                 }

@@ -241,7 +241,7 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {string} binding
-     * @param {HTMLElement} element
+     * @param {Element} element
      */
     addBinding(binding, element)
     {
@@ -283,7 +283,7 @@ class Input extends Device {
      * addHover(onHover)
      *
      * @this {Input}
-     * @param {function(col, row)} onHover
+     * @param {function(number, number)} onHover
      */
     addHover(onHover)
     {
@@ -493,7 +493,7 @@ class Input extends Device {
      * @this {Input}
      * @param {HTMLImageElement} element
      * @param {number} action
-     * @param {MouseEvent|TouchEvent} [event] (eg, the object from a 'touch' or 'mouse' event)
+     * @param {Event|MouseEvent|TouchEvent} [event] (eg, the object from a 'touch' or 'mouse' event)
      */
     processEvent(element, action, event)
     {

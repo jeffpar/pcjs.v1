@@ -157,9 +157,9 @@ class Chip extends Device {
     /**
      * addBinding(binding, element)
      *
-     * @this {Input}
+     * @this {Chip}
      * @param {string} binding
-     * @param {HTMLElement} element
+     * @param {Element} element
      */
     addBinding(binding, element)
     {
@@ -307,7 +307,7 @@ class Chip extends Device {
                     counts[0]--;
                 }
                 else {
-                    let state = leds.getLEDState(col, row), stateNew = state;
+                    let state = leds.getLEDState(col, row), stateNew = state || 0;
                     switch(state) {
                     case LED.STATE.ON:
                         stateNew = LED.STATE.OFF;
@@ -544,7 +544,7 @@ class Chip extends Device {
              * If no id is provided, then we fallback to sPattern, which can be either an
              * id (if it doesn't start with a digit) or one of our own extended pattern strings.
              */
-            if (!this.sPattern.match(/^[0-9]/)) id = this.sPattern;
+            if (!this.sPattern.match(/^[0-9]/)) id = /** @type {string} */ (this.sPattern);
         }
 
         if (!id) {
@@ -710,11 +710,11 @@ class Chip extends Device {
                 this.printf("Saved state version mismatch: %3.2f\n", version);
                 return false;
             }
-            try {
-            } catch(err) {
-                this.println("Chip state error: " + err.message);
-                return false;
-            }
+            // try {
+            // } catch(err) {
+            //     this.println("Chip state error: " + err.message);
+            //     return false;
+            // }
             if (!Device.getURLParms()['pattern'] && !Device.getURLParms()[Chip.BINDING.IMAGE_SELECTION] && state.stateLEDs && this.leds) {
                 if (!this.leds.loadState(state.stateLEDs)) {
                     return false;
@@ -923,6 +923,11 @@ class Chip extends Device {
         let stateLast = 0, rgbLast = [0, 0, 0, 1], countsLast = 0;
         let statePrev = 0, rgbPrev = [0, 0, 0, 1], countsPrev = 0, nPrev = 0;
 
+        /**
+         * flushRun(fEndRow)
+         * 
+         * @param {boolean} [fEndRow]
+         */
         let flushRun = function(fEndRow) {
             let fDelta = false;
             if (rgb[3] == null) rgb[3] = 1;
@@ -1039,7 +1044,7 @@ class Chip extends Device {
      * updateBackgroundImage(sImage)
      *
      * @this {Chip}
-     * @param {string} sImage
+     * @param {string} [sImage]
      */
     updateBackgroundImage(sImage)
     {

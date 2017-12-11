@@ -318,7 +318,7 @@ class LED extends Device {
      * @this {LED}
      * @param {boolean} [fForced]
      */
-    drawBuffer(fForced)
+    drawBuffer(fForced = false)
     {
         if (this.fBufferModified || fForced) {
             if (this.type < LED.TYPE.DIGIT) {
@@ -689,9 +689,9 @@ class LED extends Device {
      * that to signal transparency (as in the case of colorBackground).
      *
      * @this {LED}
-     * @param {string} color
+     * @param {string|undefined} color
      * @param {string} [colorDefault]
-     * @returns {string}
+     * @returns {string|undefined}
      */
     getRGBColor(color, colorDefault)
     {
@@ -860,7 +860,7 @@ class LED extends Device {
         if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
             fModified = false;
             color = color || this.colorOn;
-            if (color == this.colorTransparent) color = null;
+            if (color == this.colorTransparent) color = undefined;
             let i = (row * this.cols + col) * this.nBufferInc;
             if (this.buffer[i+1] !== color) {
                 this.buffer[i+1] = color;

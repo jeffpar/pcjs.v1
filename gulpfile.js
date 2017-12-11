@@ -55,11 +55,11 @@ var fs = require("fs");
 var path = require("path");
 var pkg = require("./package.json");
 
-pkg.version = pkg.version.slice(0, -1) + 'x';                           // TODO: Remove this hack when we're done testing
+// pkg.version = pkg.version.slice(0, -1) + 'x';                           // TODO: Remove this hack when we're done testing
 
-var pdp11TmpDir  = "./tmp/pdp11/"  + pkg.version;
-var pdp11ReleaseDir = "./versions/pdpjs/" + pkg.version;
-var pdp11ReleaseFile  = "pdp11.js";
+var deviceTmpDir  = "./tmp/devices/"  + pkg.version;
+var deviceReleaseDir = "./versions/devices/" + pkg.version;
+var deviceReleaseFile  = "leds.js";
 
 var sExterns = "";
 var sSiteHost = "www.pcjs.org";
@@ -83,7 +83,7 @@ if (pkg.homepage) {
 }
 
 gulp.task('mktmp', function() {
-    return gulp.src(pkg.PDP11Files)
+    return gulp.src(pkg.LEDFiles)
         .pipe(foreach(function(stream, file){
               return stream
                 .pipe(header('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2017\n */\n\n'))
@@ -94,34 +94,44 @@ gulp.task('mktmp', function() {
                 .pipe(replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, ""))
                 .pipe(replace(/[ \t]*if\s*\(NODE\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
                 .pipe(replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
-                .pipe(replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
+                .pipe(replace(/\/\*\*[^@]*@typedef\s*{[^}]*}\s*(\S+)\s*([\s\S]*?)\*\//g, function(match, type, props) {
+                    let sType = "/** @typedef {{ ";
+                    let sProps = "";
+                    let reProps = /@property\s*{([^}]*)}\s*(\[|)([^\s\]]+)\]?/g, matchProps;
+                    while (matchProps = reProps.exec(props)) {
+                        if (sProps) sProps += ", ";
+                        sProps += matchProps[3] + ": " + (matchProps[2]? ("(" + matchProps[1] + "|undefined)") : matchProps[1]);
+                    }
+                    sType += sProps + " }} */\nvar " + type + ";";
+                    return sType;
+                }))
+                .pipe(replace(/%%[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
             }))        
-        .pipe(concat(pdp11ReleaseFile))
+        .pipe(concat(deviceReleaseFile))
         .pipe(header('"use strict";\n\n'))
-        .pipe(gulp.dest(pdp11TmpDir));
+        .pipe(gulp.dest(deviceTmpDir));
 });
 
 gulp.task('compile', function() {
-    return gulp.src(path.join(pdp11TmpDir, pdp11ReleaseFile) /*, {base: './'} */)
+    return gulp.src(path.join(deviceTmpDir, deviceReleaseFile) /*, {base: './'} */)
         .pipe(compiler({
             assumeFunctionWrapper: true,
             compilationLevel: 'ADVANCED',
             defines: {
-                "APPVERSION": pkg.version,
-                "SITEHOST": sSiteHost,
+                /* "APPVERSION": pkg.version, */
+                /* "SITEHOST": sSiteHost, */
                 "COMPILED": true,
-                "DEBUG": false,
-                "DEBUGGER": false
+                "DEBUG": false
             },
             externs: [{src: sExterns}],
             warningLevel: 'VERBOSE',
             languageIn: "ES6",                          // this is now the default, just documenting our requirements
             languageOut: "ES5",                         // this is also the default
             outputWrapper: '(function(){%output%})()',
-            jsOutputFile: pdp11ReleaseFile,             // TODO: This must vary according to debugger/non-debugger releases
+            jsOutputFile: deviceReleaseFile,            // TODO: This must vary according to debugger/non-debugger releases
             createSourceMap: false
         }))
-        .pipe(gulp.dest(pdp11ReleaseDir));
+        .pipe(gulp.dest(deviceReleaseDir));
 });
 
 gulp.task('default', function() {

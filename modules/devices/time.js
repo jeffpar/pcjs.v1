@@ -176,7 +176,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {string} binding
-     * @param {HTMLElement} element
+     * @param {Element} element
      */
     addBinding(binding, element)
     {
