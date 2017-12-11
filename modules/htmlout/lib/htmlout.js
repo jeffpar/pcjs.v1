@@ -1929,6 +1929,7 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         if (sCreator) {
             sScriptEmbed = '<script type="text/javascript">';
             if (sCreator.indexOf("new ") >= 0) {
+                sCreator = "new window." + sCreator.substr(4);
                 sScriptEmbed += sCreator + "('" + infoMachine['id'] + "','" + infoMachine['config'].replace(/\n/g, '\\n') + "');"
             } else {
                 sScriptEmbed += 'window.' + sCreator;

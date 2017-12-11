@@ -29,11 +29,6 @@
 "use strict";
 
 /**
- * @define {string}
- */
-var MACHINE = "Machine";
-
-/**
  * @class {Machine}
  * @unrestricted
  */

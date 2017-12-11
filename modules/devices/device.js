@@ -39,6 +39,11 @@ var COMPILED = false;
 var DEBUG = false;  // (window.location.hostname == "pcjs" || window.location.hostname == "jeffpar.local");
 
 /**
+ * @type {string}
+ */
+var MACHINE = "Machine";
+
+/**
  * The following properties are the standard set of properties a Device's config object may contain.
  * Other devices will generally define their own extended versions (eg, LEDConfig, InputConfig, etc).
  *

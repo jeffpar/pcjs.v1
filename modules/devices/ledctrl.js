@@ -1243,3 +1243,5 @@ Chip.COMMANDS = [
 ];
 
 Chip.VERSION    = 1.10;
+
+MACHINE = "LEDs";

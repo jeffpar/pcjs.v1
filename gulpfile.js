@@ -118,8 +118,7 @@ gulp.task('compile', function() {
             compilationLevel: 'ADVANCED',
             defines: {
                 "COMPILED": true,
-                "DEBUG": false,
-                "MACHINE": "LEDs"
+                "DEBUG": false
             },
             externs: [{src: sExterns}],
             warningLevel: 'VERBOSE',

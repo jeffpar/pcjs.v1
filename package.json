@@ -309,7 +309,7 @@
         "./modules/devices/machine.js"
       ],
       "folder": "devices",
-      "creator": "embedTMS1500"
+      "creator": "new TMS1500"
     }
   }
 }
