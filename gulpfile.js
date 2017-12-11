@@ -48,7 +48,8 @@ var foreach = require("gulp-foreach");
 var header = require("gulp-header");
 var replace = require("gulp-replace");
 var sequence = require("run-sequence");
-var compiler = require('google-closure-compiler-js').gulp();
+var closureCompiler = require('google-closure-compiler-js').gulp();
+var sourcemaps = require('gulp-sourcemaps');
 
 var fs = require("fs");
 var path = require("path");
@@ -113,7 +114,8 @@ gulp.task('mktmp', function() {
 
 gulp.task('compile', function() {
     return gulp.src(path.join(deviceTmpDir, deviceReleaseFile) /*, {base: './'} */)
-        .pipe(compiler({
+        .pipe(sourcemaps.init())
+        .pipe(closureCompiler({
             assumeFunctionWrapper: true,
             compilationLevel: 'ADVANCED',
             defines: {
@@ -128,6 +130,7 @@ gulp.task('compile', function() {
             jsOutputFile: deviceReleaseFile,            // TODO: This must vary according to debugger/non-debugger releases
             createSourceMap: false
         }))
+        .pipe(sourcemaps.write('/'))                    // gulp-sourcemaps automatically adds the sourcemap url comment
         .pipe(gulp.dest(deviceReleaseDir));
 });
 
