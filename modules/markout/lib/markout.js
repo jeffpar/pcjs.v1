@@ -230,8 +230,7 @@ MarkOut.setOptions = function(options)
  * The infoMachine object should contain, at a minimum:
  *
  *      {
- *          'type':     sMachineType,   // eg, "PCx86"
- *          'func':     sMachineFunc,
+ *          'type':     sMachineType,   // eg, "pcx86"
  *          'id':       sMachineID,
  *          'xml':      sMachineXMLFile,
  *          'xsl':      sMachineXSLFile,
@@ -1210,7 +1209,7 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
  *
  * where a special title attribute triggers generation of an embedded machine rather than a link.
  *
- * Use "PCx86" or "C1P" to automatically include the latest version of either "pcx86.js" or "c1p.js", followed
+ * Use "pcx86" or "c1p" to automatically include the latest version of either "pcx86.js" or "c1p.js", followed
  * by a colon and the ID you want to use for the embedded <div>.  If you need to use the script with the built-in
  * Debugger (ie, either "pcx86-dbg.js" or "c1p-dbg.js"), then include "debugger" in the list of comma-delimited
  * options, as in:
@@ -1262,7 +1261,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         sMachineID = aMatch[3];
         if (this.aMachineDefs[sMachineID]) {
             machine = this.aMachineDefs[sMachineID];
-            sMachineType = machine['type'] || "PCx86";
+            sMachineType = machine['type'] || "pcx86";
             sMachineXMLFile = machine['config'] || this.sMachineFile || "machine.xml";
             if (sMachineXMLFile.match(/^\s*{/)) {
                 sMachineXMLFile = "{}";
@@ -1295,21 +1294,15 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
 
     while ((aMatch = reMachines.exec(sBlock))) {
 
-        var sMachineFunc;
         sMachineXMLFile = aMatch[2];
         if (sMachineXMLFile.slice(-1) == "/") sMachineXMLFile += "machine.xml";
 
-        sMachineType = aMatch[3];
-        if (sMachineXMLFile == "{}") {
-            sMachineFunc = "new Machine";
-        } else {
-            sMachineType = sMachineType.toUpperCase();
-            sMachineType += (aMatch[4] != "js"? aMatch[4] : "");
-            sMachineFunc = "embed" + sMachineType;
-        }
+        sMachineType = aMatch[3].toLowerCase();
+        sMachineType += (aMatch[4] != "js"? aMatch[4] : "");
+        if (sMachineType == "pc") sMachineType = "pcx86";
 
         var aMachineParms = aMatch[6].split(aMatch[5]);
-        var sMachineMessage = "Waiting for " + sMachineType + " to load";
+        var sMachineMessage = "Waiting for machine " + sMachineType.toUpperCase() + " to load";
 
         sMachineID = aMachineParms[0];
         sMachineXSLFile = aMachineParms[1] || "";
@@ -1345,7 +1338,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
          */
         if (!sMachineXSLFile || sMachineXSLFile.indexOf("components.xsl") >= 0) {
             if (this.fDebug && sMachineXMLFile != "{}") {
-                if (sMachineType == "C1P") {
+                if (sMachineType == "c1p") {
                     sMachineXSLFile = "/modules/c1pjs/templates/components.xsl";
                 } else {
                     sMachineXSLFile = "/modules/shared/templates/components.xsl";
@@ -1353,20 +1346,12 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             }
         }
 
-        /*
-         * Now that we're providing all of the following machine information to addMachine(), we don't
-         * need to install the machine embed code here; processMachines() in HTMLOut will take care of that now.
-         *
-        sReplacement += this.sIndent + '<script type="text/javascript">\n' + this.sIndent + 'window.' + sMachineFunc + '("' + sMachineID + '","' + sMachineXMLFile + '","' + sMachineXSLFile + '");\n' + this.sIndent + '</script>';
-         */
-
         sBlock = sBlock.replace(aMatch[0], sReplacement);
         reMachines.lastIndex = 0;       // reset lastIndex, since we just modified the string that reMachines is iterating over
         cMatches++;
 
         this.addMachine({
-            'type':     sMachineType,   // eg, a machine type, such as "PCx86" or "C1P"
-            'func':     sMachineFunc,
+            'type':     sMachineType,   // eg, a machine type, such as "pcx86" or "c1p"
             'id':       sMachineID,
             'config':   this.aMachineDefs[sMachineID] && this.aMachineDefs[sMachineID]['config'],
             'xml':      sMachineXMLFile,

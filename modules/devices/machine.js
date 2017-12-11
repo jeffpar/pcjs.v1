@@ -29,6 +29,11 @@
 "use strict";
 
 /**
+ * @define {string}
+ */
+var MACHINE = "Machine";
+
+/**
  * @class {Machine}
  * @unrestricted
  */
@@ -234,4 +239,4 @@ Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.
 
 Machine.VERSION = 1.10;
 
-window['Machine'] = Machine;
+window[MACHINE] = Machine;

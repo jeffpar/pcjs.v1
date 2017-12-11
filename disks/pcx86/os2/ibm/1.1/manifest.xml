@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.37.1/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.40.0/manifest.xsl"?>
 <manifest type="software">
 	<title>IBM OS/2 1.1</title>
 	<disk id="disk00" size="1474560" chs="80:2:18" img="archive/OS211-INSTALL.img" href="/disks/pcx86/os2/ibm/1.1/OS211-INSTALL.json" md5="c8a3ca490384bcd633ddf076adcc236a" md5json="ea26c8054ac25f42043fd1bb5b644463">

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.37.1/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.40.0/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 1.01</title>
 	<disk id="disk01" size="368640" chs="40:2:9" dir="archive/01-SETUP/" href="/disks/pcx86/windows/1.01/WIN101-DISK1-SETUP.json" md5="f82a9804ea9baab98f0d1fe9bf639637" md5json="6fd1f1762e78830e27f44e3e9386ae55">

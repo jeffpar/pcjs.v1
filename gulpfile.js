@@ -53,9 +53,11 @@ var compiler = require('google-closure-compiler-js').gulp();
 var fs = require("fs");
 var path = require("path");
 var pkg = require("./package.json");
+var machineType = "leds";
+var machine = pkg.machines[machineType];
 
-var deviceTmpDir  = "./tmp/devices/current"; // pkg.version;
-var deviceReleaseDir = "./versions/devices/current"; // pkg.version;
+var deviceTmpDir  = "./tmp/" + machine.folder + "/" + machine.version;
+var deviceReleaseDir = "./versions/" + machine.folder + "/" + machine.version;
 var deviceReleaseFile  = "leds.js";
 
 var sExterns = "";
@@ -80,7 +82,7 @@ if (pkg.homepage) {
 }
 
 gulp.task('mktmp', function() {
-    return gulp.src(pkg.LEDFiles)
+    return gulp.src(machine.files)
         .pipe(foreach(function(stream, file){
               return stream
                 .pipe(header('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2017\n */\n\n'))
@@ -116,7 +118,8 @@ gulp.task('compile', function() {
             compilationLevel: 'ADVANCED',
             defines: {
                 "COMPILED": true,
-                "DEBUG": false
+                "DEBUG": false,
+                "MACHINE": "LEDs"
             },
             externs: [{src: sExterns}],
             warningLevel: 'VERBOSE',
