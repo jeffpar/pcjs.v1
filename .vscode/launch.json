@@ -2,6 +2,15 @@
 	"version": "0.1.0",
 	"configurations": [
     {
+      "name": "Gulp",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/gulp/bin/gulp.js",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "stopOnEntry": true
+    },
+    {
       "name": "Webserver (Debug)",
       "type": "node",
       "request": "launch",
