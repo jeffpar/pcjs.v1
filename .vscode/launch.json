@@ -33,10 +33,17 @@
       ]
     },
 	  {
-		  "name": "Launch localhost",
+		  "name": "PCjs: Lite-Brite",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/leds/litebrite/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PCjs: TI-57",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/ti57/machine/rev0/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
