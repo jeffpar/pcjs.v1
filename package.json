@@ -90,10 +90,12 @@
   "closureCompilerExterns": [
     "./modules/shared/lib/externs.js"
   ],
-  "machines": {
+  "sharedFiles": {
     "css": [
       "./modules/shared/templates/components.css"
-    ],
+    ]
+  },
+  "machines": {
     "c1p": {
       "css": [
         "./modules/c1pjs/templates/components.css"
@@ -310,7 +312,8 @@
         "./modules/devices/machine.js"
       ],
       "folder": "devices",
-      "creator": "new TMS1500"
+      "creator": "new TMS1500",
+      "version": "1.10"
     }
   }
 }

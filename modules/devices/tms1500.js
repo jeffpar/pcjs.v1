@@ -42,7 +42,7 @@ class Reg64 extends Device {
      *
      * @this {Reg64}
      * @param {Chip} chip
-     * @param {string} [id]
+     * @param {string} id
      * @param {boolean} [fInternal]
      */
     constructor(chip, id, fInternal)
@@ -352,7 +352,7 @@ class Chip extends Device {
         super(idMachine, idDevice, Chip.VERSION, config);
 
         let sType = this.config['type'] || "1501";
-        this.type = Number.parseInt(sType.slice(-4));
+        this.type = Number.parseInt(sType.slice(-4), 10);
 
         this.regMap = {};
 
@@ -862,7 +862,7 @@ class Chip extends Device {
      * etc).  I do use the patent nomenclature internally, just not for display purposes.
      *
      * @this {Chip}
-     * @param {number} opCode
+     * @param {number|undefined} opCode
      * @param {number} addr
      * @param {boolean} [fCompact]
      * @returns {string}
@@ -887,7 +887,7 @@ class Chip extends Device {
             }
             sOperands = this.sprintf("0x%04x", v);
         }
-        else {
+        else if (opCode >= 0) {
             let mask = opCode & Chip.IW_MF.MASK;
 
             switch(mask) {

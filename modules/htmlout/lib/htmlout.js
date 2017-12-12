@@ -1936,7 +1936,7 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
             asFiles.push("/versions/" + configMachine['folder'] + "/" + sVersion + "/" + sScriptFile);
         }
         else {
-            var asCSSFiles = configMachine['css'] || pkg.machines['css'];
+            var asCSSFiles = configMachine['css'] || pkg.sharedFiles['css'];
             asFiles = asFiles.concat(asCSSFiles).concat(configMachine['files']);
             /*
              * SIDEBAR: Why the "slice()"?  It's a handy way to create a copy of the array, and we need a copy,

@@ -47,25 +47,17 @@ var concat = require("gulp-concat");
 var foreach = require("gulp-foreach");
 var header = require("gulp-header");
 var replace = require("gulp-replace");
-var sequence = require("run-sequence");
 var closureCompiler = require('google-closure-compiler-js').gulp();
 var sourcemaps = require('gulp-sourcemaps');
 
 var fs = require("fs");
 var path = require("path");
 var pkg = require("./package.json");
-var machineType = "leds";
-var machine = pkg.machines[machineType];
-
-var deviceTmpDir  = "./tmp/" + machine.folder + "/" + machine.version;
-var deviceReleaseDir = "./versions/" + machine.folder + "/" + machine.version;
-var deviceReleaseFile  = "leds.js";
 
 var sExterns = "";
-var sSiteHost = "www.pcjs.org";
 
-for (var i = 0; i < pkg.closureCompilerExterns.length; i++) {
-    var sContents = "";
+for (let i = 0; i < pkg.closureCompilerExterns.length; i++) {
+    let sContents = "";
     try {
         sContents = fs.readFileSync(pkg.closureCompilerExterns[i], "utf8");
     } catch(err) {
@@ -77,65 +69,78 @@ for (var i = 0; i < pkg.closureCompilerExterns.length; i++) {
     }
 }
 
+var sSiteHost = "www.pcjs.org";
+
 if (pkg.homepage) {
-    var match = pkg.homepage.match(/^http:\/\/([^\/]*)(.*)/);
+    let match = pkg.homepage.match(/^http:\/\/([^\/]*)(.*)/);
     if (match) sSiteHost = match[1];
 }
 
-gulp.task('mktmp', function() {
-    return gulp.src(machine.files)
-        .pipe(foreach(function(stream, file){
-              return stream
-                .pipe(header('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2017\n */\n\n'))
-                .pipe(replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, ""))
-                .pipe(replace(/^(import|export)[ \t]+[^\n]*\n/gm, ""))
-                .pipe(replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, ""))
-                .pipe(replace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, ""))
-                .pipe(replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, ""))
-                .pipe(replace(/[ \t]*if\s*\(NODE\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
-                .pipe(replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
-                .pipe(replace(/\/\*\*[^@]*@typedef\s*{[^}]*}\s*(\S+)\s*([\s\S]*?)\*\//g, function(match, type, props) {
-                    let sType = "/** @typedef {{ ";
-                    let sProps = "";
-                    let reProps = /@property\s*{([^}]*)}\s*(\[|)([^\s\]]+)\]?/g, matchProps;
-                    while (matchProps = reProps.exec(props)) {
-                        if (sProps) sProps += ", ";
-                        sProps += matchProps[3] + ": " + (matchProps[2]? ("(" + matchProps[1] + "|undefined)") : matchProps[1]);
-                    }
-                    sType += sProps + " }} */\nvar " + type + ";";
-                    return sType;
-                }))
-                .pipe(replace(/%%[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
-            }))        
-        .pipe(concat(deviceReleaseFile))
-        .pipe(header('"use strict";\n\n'))
-        .pipe(gulp.dest(deviceTmpDir));
+var aCompileTasks = [];
+var aMachines = Object.keys(pkg.machines);
+
+aMachines.forEach(function(machineType) {
+    gulp.task("mktmp/" + machineType, function() {
+        let machineConfig = pkg.machines[machineType];
+        while (machineConfig.alias) machineConfig = pkg.machines[machineConfig.alias];
+        let machineTmpDir  = "./tmp/" + machineConfig.folder + "/" + (machineConfig.version || pkg.version);
+        let machineReleaseFile  = machineType + ".js";
+        return gulp.src(machineConfig.files)
+            .pipe(foreach(function(stream, file){
+                return stream
+                    .pipe(header('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2017\n */\n\n'))
+                    .pipe(replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, ""))
+                    .pipe(replace(/^(import|export)[ \t]+[^\n]*\n/gm, ""))
+                    .pipe(replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, ""))
+                    .pipe(replace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, ""))
+                    .pipe(replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, ""))
+                    .pipe(replace(/[ \t]*if\s*\(NODE\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
+                    .pipe(replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
+                    .pipe(replace(/\/\*\*[^@]*@typedef\s*{[^}]*}\s*(\S+)\s*([\s\S]*?)\*\//g, function(match, type, props) {
+                        let sType = "/** @typedef {{ ";
+                        let sProps = "";
+                        let reProps = /@property\s*{([^}]*)}\s*(\[|)([^\s\]]+)\]?/g, matchProps;
+                        while (matchProps = reProps.exec(props)) {
+                            if (sProps) sProps += ", ";
+                            sProps += matchProps[3] + ": " + (matchProps[2]? ("(" + matchProps[1] + "|undefined)") : matchProps[1]);
+                        }
+                        sType += sProps + " }} */\nvar " + type + ";";
+                        return sType;
+                    }))
+                    .pipe(replace(/%%[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
+                }))        
+            .pipe(concat(machineReleaseFile))
+            .pipe(header('"use strict";\n\n'))
+            .pipe(gulp.dest(machineTmpDir));
+    });
+    let sTask = "compile/" + machineType;
+    aCompileTasks.push(sTask);
+    gulp.task(sTask, ["mktmp/" + machineType], function() {
+        let machineConfig = pkg.machines[machineType];
+        while (machineConfig.alias) machineConfig = pkg.machines[machineConfig.alias];
+        let machineTmpDir  = "./tmp/" + machineConfig.folder + "/" + (machineConfig.version || pkg.version);
+        let machineReleaseDir = "./versions/" + machineConfig.folder + "/" + (machineConfig.version || pkg.version);
+        let machineReleaseFile  = machineType + ".js";
+        return gulp.src(path.join(machineTmpDir, machineReleaseFile) /*, {base: './'} */)
+            .pipe(sourcemaps.init())
+            .pipe(closureCompiler({
+                assumeFunctionWrapper: true,
+                compilationLevel: 'ADVANCED',
+                defines: {
+                    "COMPILED": true,
+                    "DEBUG": false
+                },
+                externs: [{src: sExterns}],
+                warningLevel: 'VERBOSE',
+                languageIn: "ES6",                          // this is now the default, just documenting our requirements
+                languageOut: "ES5",                         // this is also the default
+                outputWrapper: '(function(){%output%})()',
+                jsOutputFile: machineReleaseFile,           // TODO: This must vary according to debugger/non-debugger releases
+                createSourceMap: true
+            }))
+            .pipe(sourcemaps.write('./'))                   // gulp-sourcemaps automatically adds the sourcemap url comment
+            .pipe(gulp.dest(machineReleaseDir));
+    });
 });
 
-gulp.task('compile', function() {
-    return gulp.src(path.join(deviceTmpDir, deviceReleaseFile) /*, {base: './'} */)
-        .pipe(sourcemaps.init())
-        .pipe(closureCompiler({
-            assumeFunctionWrapper: true,
-            compilationLevel: 'ADVANCED',
-            defines: {
-                "COMPILED": true,
-                "DEBUG": false
-            },
-            externs: [{src: sExterns}],
-            warningLevel: 'VERBOSE',
-            languageIn: "ES6",                          // this is now the default, just documenting our requirements
-            languageOut: "ES5",                         // this is also the default
-            outputWrapper: '(function(){%output%})()',
-            jsOutputFile: deviceReleaseFile,            // TODO: This must vary according to debugger/non-debugger releases
-            createSourceMap: true
-        }))
-        .pipe(sourcemaps.write('./'))                   // gulp-sourcemaps automatically adds the sourcemap url comment
-        .pipe(gulp.dest(deviceReleaseDir));
-});
-
-gulp.task('default', function() {
-    sequence(
-        'mktmp', 'compile'
-    );
-});
+gulp.task('default', aCompileTasks);
