@@ -43,7 +43,6 @@
  * too old-fashioned.
  */
 var gulp = require("gulp");
-var changed = require("gulp-changed");
 var concat = require("gulp-concat");
 var foreach = require("gulp-foreach");
 var header = require("gulp-header");
@@ -113,7 +112,6 @@ aMachines.forEach(function(machineType) {
     }
     gulp.task("mktmp/" + machineType, function() {
         return gulp.src(machineConfig.files)
-            .pipe(changed(machineTmpDir))
             .pipe(foreach(function(stream, file){
                 return stream
                     .pipe(header('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2017\n */\n\n'))
@@ -145,7 +143,6 @@ aMachines.forEach(function(machineType) {
     aCompileTasks.push(sTask);
     gulp.task(sTask, ["mktmp/" + machineType], function() {
         return gulp.src(path.join(machineTmpDir, machineReleaseFile) /*, {base: './'} */)
-            .pipe(changed(machineReleaseDir))
             .pipe(sourcemaps.init())
             .pipe(closureCompiler({
                 assumeFunctionWrapper: true,

@@ -78,6 +78,7 @@
     "gulp-concat": "^2.6.1",
     "gulp-foreach": "^0.1.0",
     "gulp-header": "^1.8.9",
+    "gulp-newer": "^1.3.0",
     "gulp-rename": "^1.2.2",
     "gulp-replace": "^0.5.4",
     "gulp-sourcemaps": "^2.6.1",
@@ -101,7 +102,13 @@
       "css": [
         "./modules/c1pjs/templates/components.css"
       ],
-      "defines": ["APPVERSION", "COMPILED", "DEBUG", "DEBUGGER", "SITEHOST"],
+      "defines": [
+        "APPVERSION",
+        "COMPILED",
+        "DEBUG",
+        "DEBUGGER",
+        "SITEHOST"
+      ],
       "files": [
         "./modules/shared/lib/defines.js",
         "./modules/shared/lib/dumpapi.js",
@@ -127,7 +134,10 @@
       "creator": "embedC1P"
     },
     "leds": {
-      "defines": ["COMPILED", "DEBUG"],
+      "defines": [
+        "COMPILED",
+        "DEBUG"
+      ],
       "files": [
         "./modules/devices/device.js",
         "./modules/devices/input.js",
@@ -142,7 +152,13 @@
       "version": "1.10"
     },
     "pc8080": {
-      "defines": ["APPVERSION", "COMPILED", "DEBUG", "DEBUGGER", "SITEHOST"],
+      "defines": [
+        "APPVERSION",
+        "COMPILED",
+        "DEBUG",
+        "DEBUGGER",
+        "SITEHOST"
+      ],
       "files": [
         "./modules/shared/lib/defines.js",
         "./modules/shared/lib/dumpapi.js",
@@ -178,7 +194,15 @@
       "creator": "embedPC8080"
     },
     "pcx86": {
-      "defines": ["APPVERSION", "COMPILED", "DEBUG", "DEBUGGER", "SITEHOST", "BACKTRACK", "I386"],
+      "defines": [
+        "APPVERSION",
+        "COMPILED",
+        "DEBUG",
+        "DEBUGGER",
+        "SITEHOST",
+        "BACKTRACK",
+        "I386"
+      ],
       "files": [
         "./modules/shared/lib/defines.js",
         "./modules/shared/lib/diskapi.js",
@@ -228,7 +252,13 @@
       "creator": "embedPCx86"
     },
     "pdp10": {
-      "defines": ["APPVERSION", "COMPILED", "DEBUG", "DEBUGGER", "SITEHOST"],
+      "defines": [
+        "APPVERSION",
+        "COMPILED",
+        "DEBUG",
+        "DEBUGGER",
+        "SITEHOST"
+      ],
       "files": [
         "./modules/shared/lib/defines.js",
         "./modules/shared/lib/dumpapi.js",
@@ -262,7 +292,13 @@
       "creator": "embedPDP10"
     },
     "pdp11": {
-      "defines": ["APPVERSION", "COMPILED", "DEBUG", "DEBUGGER", "SITEHOST"],
+      "defines": [
+        "APPVERSION",
+        "COMPILED",
+        "DEBUG",
+        "DEBUGGER",
+        "SITEHOST"
+      ],
       "files": [
         "./modules/shared/lib/defines.js",
         "./modules/shared/lib/diskapi.js",
@@ -309,7 +345,10 @@
       "alias": "ti57"
     },
     "ti57": {
-      "defines": ["COMPILED", "DEBUG"],
+      "defines": [
+        "COMPILED",
+        "DEBUG"
+      ],
       "files": [
         "./modules/devices/device.js",
         "./modules/devices/input.js",
