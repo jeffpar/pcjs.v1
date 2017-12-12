@@ -632,7 +632,7 @@ class ComputerPDP11 extends Component {
             /*
              * TODO: If all components called super.powerUp(), the powered flag would be set automatically.
              */
-            this.assert(component.powerUp);
+            this.assert(!!component.powerUp);
             component.flags.powered = true;
 
             var data = null;

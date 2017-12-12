@@ -481,7 +481,7 @@ class X86CPU extends CPU {
      */
     releasePageBlock(block)
     {
-        this.assert(block && block.type === Memory.TYPE.PAGED);
+        this.assert(!!(block && block.type === Memory.TYPE.PAGED));
         if (this.iCacheBlocks < X86CPU.PAGEBLOCKS_CACHE) {
             this.aCacheBlocks[this.iCacheBlocks++] = block;
         }

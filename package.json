@@ -74,6 +74,7 @@
     "grunt-run": "^0.2.1",
     "grunt-text-replace": "^0.3.11",
     "gulp": "^3.9.1",
+    "gulp-changed": "^3.1.1",
     "gulp-concat": "^2.6.1",
     "gulp-foreach": "^0.1.0",
     "gulp-header": "^1.8.9",
@@ -100,6 +101,7 @@
       "css": [
         "./modules/c1pjs/templates/components.css"
       ],
+      "defines": ["APPVERSION", "COMPILED", "DEBUG", "DEBUGGER", "SITEHOST"],
       "files": [
         "./modules/shared/lib/defines.js",
         "./modules/shared/lib/dumpapi.js",
@@ -125,6 +127,7 @@
       "creator": "embedC1P"
     },
     "leds": {
+      "defines": ["COMPILED", "DEBUG"],
       "files": [
         "./modules/devices/device.js",
         "./modules/devices/input.js",
@@ -139,6 +142,7 @@
       "version": "1.10"
     },
     "pc8080": {
+      "defines": ["APPVERSION", "COMPILED", "DEBUG", "DEBUGGER", "SITEHOST"],
       "files": [
         "./modules/shared/lib/defines.js",
         "./modules/shared/lib/dumpapi.js",
@@ -174,6 +178,7 @@
       "creator": "embedPC8080"
     },
     "pcx86": {
+      "defines": ["APPVERSION", "COMPILED", "DEBUG", "DEBUGGER", "SITEHOST", "BACKTRACK", "I386"],
       "files": [
         "./modules/shared/lib/defines.js",
         "./modules/shared/lib/diskapi.js",
@@ -223,6 +228,7 @@
       "creator": "embedPCx86"
     },
     "pdp10": {
+      "defines": ["APPVERSION", "COMPILED", "DEBUG", "DEBUGGER", "SITEHOST"],
       "files": [
         "./modules/shared/lib/defines.js",
         "./modules/shared/lib/dumpapi.js",
@@ -256,6 +262,7 @@
       "creator": "embedPDP10"
     },
     "pdp11": {
+      "defines": ["APPVERSION", "COMPILED", "DEBUG", "DEBUGGER", "SITEHOST"],
       "files": [
         "./modules/shared/lib/defines.js",
         "./modules/shared/lib/diskapi.js",
@@ -302,6 +309,7 @@
       "alias": "ti57"
     },
     "ti57": {
+      "defines": ["COMPILED", "DEBUG"],
       "files": [
         "./modules/devices/device.js",
         "./modules/devices/input.js",

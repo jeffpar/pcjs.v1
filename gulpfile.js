@@ -43,6 +43,7 @@
  * too old-fashioned.
  */
 var gulp = require("gulp");
+var changed = require("gulp-changed");
 var concat = require("gulp-concat");
 var foreach = require("gulp-foreach");
 var header = require("gulp-header");
@@ -80,12 +81,39 @@ var aCompileTasks = [];
 var aMachines = Object.keys(pkg.machines);
 
 aMachines.forEach(function(machineType) {
+    let machineConfig = pkg.machines[machineType];
+    while (machineConfig.alias) machineConfig = pkg.machines[machineConfig.alias];
+    let machineVersion = (machineConfig.version || pkg.version);
+    let machineTmpDir  = "./tmp/" + machineConfig.folder + "/" + machineVersion;
+    let machineReleaseDir = "./versions/" + machineConfig.folder + "/" + machineVersion;
+    let machineReleaseFile  = machineType + ".js";
+    let machineDefines = {};
+    if (machineConfig.defines) {
+        for (let i = 0; i < machineConfig.defines.length; i++) {
+            let define = machineConfig.defines[i];
+            switch(define) {
+            case "APPVERSION":
+                machineDefines[define] = machineVersion;
+                break;
+            case "SITEHOST":
+                machineDefines[define] = sSiteHost;
+                break;
+            case "BACKTRACK":
+            case "DEBUG":
+                machineDefines[define] = false;
+                break;
+            case "COMPILED":
+            case "DEBUGGER":
+            case "I386":
+            default:
+                machineDefines[define] = true;
+                break;
+            }
+        }
+    }
     gulp.task("mktmp/" + machineType, function() {
-        let machineConfig = pkg.machines[machineType];
-        while (machineConfig.alias) machineConfig = pkg.machines[machineConfig.alias];
-        let machineTmpDir  = "./tmp/" + machineConfig.folder + "/" + (machineConfig.version || pkg.version);
-        let machineReleaseFile  = machineType + ".js";
         return gulp.src(machineConfig.files)
+            .pipe(changed(machineTmpDir))
             .pipe(foreach(function(stream, file){
                 return stream
                     .pipe(header('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2017\n */\n\n'))
@@ -96,7 +124,7 @@ aMachines.forEach(function(machineType) {
                     .pipe(replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, ""))
                     .pipe(replace(/[ \t]*if\s*\(NODE\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
                     .pipe(replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
-                    .pipe(replace(/\/\*\*[^@]*@typedef\s*{[^}]*}\s*(\S+)\s*([\s\S]*?)\*\//g, function(match, type, props) {
+                    .pipe(replace(/\/\*\*[^@]*@typedef\s*{[A-Z][A-Za-z0-9_]+}\s*(\S+)\s*([\s\S]*?)\*\//g, function(match, type, props) {
                         let sType = "/** @typedef {{ ";
                         let sProps = "";
                         let reProps = /@property\s*{([^}]*)}\s*(\[|)([^\s\]]+)\]?/g, matchProps;
@@ -107,7 +135,7 @@ aMachines.forEach(function(machineType) {
                         sType += sProps + " }} */\nvar " + type + ";";
                         return sType;
                     }))
-                    .pipe(replace(/%%[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
+                    .pipe(replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
                 }))        
             .pipe(concat(machineReleaseFile))
             .pipe(header('"use strict";\n\n'))
@@ -116,20 +144,13 @@ aMachines.forEach(function(machineType) {
     let sTask = "compile/" + machineType;
     aCompileTasks.push(sTask);
     gulp.task(sTask, ["mktmp/" + machineType], function() {
-        let machineConfig = pkg.machines[machineType];
-        while (machineConfig.alias) machineConfig = pkg.machines[machineConfig.alias];
-        let machineTmpDir  = "./tmp/" + machineConfig.folder + "/" + (machineConfig.version || pkg.version);
-        let machineReleaseDir = "./versions/" + machineConfig.folder + "/" + (machineConfig.version || pkg.version);
-        let machineReleaseFile  = machineType + ".js";
         return gulp.src(path.join(machineTmpDir, machineReleaseFile) /*, {base: './'} */)
+            .pipe(changed(machineReleaseDir))
             .pipe(sourcemaps.init())
             .pipe(closureCompiler({
                 assumeFunctionWrapper: true,
                 compilationLevel: 'ADVANCED',
-                defines: {
-                    "COMPILED": true,
-                    "DEBUG": false
-                },
+                defines: machineDefines,
                 externs: [{src: sExterns}],
                 warningLevel: 'VERBOSE',
                 languageIn: "ES6",                          // this is now the default, just documenting our requirements

@@ -240,21 +240,17 @@ project.
 
 ### Building with Gulp (and the JavaScript-based Closure Compiler)
 
-I've started dabbling with [Gulp](http://gulpjs.com/), but the current [gulpfile](gulpfile.js) has a long way to
-go before it can replace the [Gruntfile](Gruntfile.js).  At the moment, all Gulp builds is a single emulation module with
-hard-coded settings, using Google's new [JavaScript-based Closure Compiler](https://github.com/google/closure-compiler-js).
+I've continued experimenting with [Gulp](http://gulpjs.com/), and the current [gulpfile](gulpfile.js) can now compile
+all PCjs machine modules using Google's [JavaScript-based Closure Compiler](https://github.com/google/closure-compiler-js).
 
 Here's what I installed to get Gulp working:
 
 	sudo npm install -g gulp
-	npm install --save-dev gulp gulp-concat gulp-rename gulp-replace gulp-header gulp-foreach gulp-wrapper run-sequence
+	npm install --save-dev gulp gulp-change gulp-concat gulp-rename gulp-replace gulp-header gulp-foreach gulp-wrapper run-sequence
 	npm install --save-dev google-closure-compiler-js
 
-Running `gulp` should build a new **pcx86.js** in the [versions](/versions/) directory.  However,
-you should consider Gulp support (and anything built with Gulp) as **experimental** until further notice.
-The [JavaScript-based Closure Compiler](https://github.com/google/closure-compiler-js) is in a state of
-flux as well; for example, *output_wrapper* support is documented in their
-[blog](https://developers.googleblog.com/2016/08/closure-compiler-in-javascript.html) but hasn't been implemented yet.
+Running `gulp` should build a complete set of machine scripts in the [versions](/versions/) directory.  Individual
+machines can be compiled as well (eg, `gulp compile/pc8080`).
 
 Using PCjs
 ----------
