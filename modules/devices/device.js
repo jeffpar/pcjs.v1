@@ -615,7 +615,7 @@ class Device {
      * loadLocalStorage()
      *
      * @this {Device}
-     * @returns {Object|null}
+     * @returns {Array|null}
      */
     loadLocalStorage()
     {
@@ -625,7 +625,7 @@ class Device {
             if (window) {
                 try {
                     sValue = window.localStorage.getItem(this.idMachine);
-                    if (sValue) state = /** @type {Object} */ (JSON.parse(sValue));
+                    if (sValue) state = /** @type {Array} */ (JSON.parse(sValue));
                 } catch (err) {
                     this.println(err.message);
                 }
@@ -717,7 +717,7 @@ class Device {
      * saveLocalStorage(state)
      *
      * @this {Device}
-     * @param {Object} state
+     * @param {Array} state
      * @returns {boolean} true if successful, false if error
      */
     saveLocalStorage(state)

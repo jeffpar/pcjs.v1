@@ -163,4 +163,11 @@ aMachines.forEach(function(machineType) {
     });
 });
 
-gulp.task('default', aCompileTasks);
+gulp.task("compile/devices", [
+    "compile/leds",
+    "compile/ti42",
+    "compile/ti55",
+    "compile/ti57"
+]);
+
+gulp.task("default", aCompileTasks);

@@ -33,10 +33,31 @@
       ]
     },
 	  {
+		  "name": "PCjs: Game of Life",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/leds/life/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
 		  "name": "PCjs: Lite-Brite",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/leds/litebrite/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PCjs: TI-42",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/ti42/machine/rev0/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PCjs: TI-55",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/ti55/machine/rev0/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {

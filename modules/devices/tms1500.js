@@ -284,12 +284,6 @@ class Reg64 extends Device {
 }
 
 /**
- * @typedef {Object} State
- * @property {Array} stateChip
- * @property {Array} stateROM
- */
-
-/**
  * TMS-150x Calculator Chip
  *
  * Emulates various TMS ("Texas Mos Standard") and TMC ("Texas Mos Custom") chips.  The 'type' property of
@@ -1047,12 +1041,17 @@ class Chip extends Device {
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      * 
      * @this {Chip}
-     * @param {State|Object|null} state
+     * @param {Object|Array|null} state
+     * @returns {boolean}
      */
     loadState(state)
     {
         if (state) {
-            let stateChip = state.stateChip;
+            let stateChip = state['stateChip'] || state[0];
+            if (!stateChip || !stateChip.length) {
+                this.println("Invalid saved state");
+                return false;
+            }
             let version = stateChip.shift();
             if ((version|0) !== (Chip.VERSION|0)) {
                 this.printf("Saved state version mismatch: %3.2f\n", version);
@@ -1075,8 +1074,9 @@ class Chip extends Device {
                 this.println("Chip state error: " + err.message);
                 return false;
             }
-            if (state.stateROM && this.rom) {
-                if (!this.rom.loadState(state.stateROM)) {
+            let stateROM = state['stateROM'] || state[1];
+            if (stateROM && this.rom) {
+                if (!this.rom.loadState(stateROM)) {
                     return false;
                 }
             }
@@ -1409,15 +1409,13 @@ class Chip extends Device {
      * saveState()
      *
      * @this {Chip}
-     * @returns {State}
+     * @returns {Array}
      */
     saveState()
     {
-        let state = {
-            stateChip:  [],
-            stateROM:   []
-        };
-        let stateChip = state.stateChip;
+        let state = [[],[]];
+        let stateChip = state[0];
+        let stateROM = state[1];
         stateChip.push(Chip.VERSION);
         this.regsO.forEach(reg => stateChip.push(reg.get()));
         this.regsX.forEach(reg => stateChip.push(reg.get()));
@@ -1431,7 +1429,7 @@ class Chip extends Device {
         stateChip.push(this.regPC);
         stateChip.push(this.stack);
         stateChip.push(this.regKey);
-        if (this.rom) this.rom.saveState(state.stateROM);
+        if (this.rom) this.rom.saveState(stateROM);
         return state;
     }
 

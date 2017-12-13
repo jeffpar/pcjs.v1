@@ -43,12 +43,6 @@
  */
 
 /**
- * @typedef {Object} State
- * @property {Array} stateChip
- * @property {Array} stateLEDs
- */
-
-/**
  * LED Controller Chip
  *
  * @class {Chip}
@@ -698,13 +692,17 @@ class Chip extends Device {
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      * 
      * @this {Chip}
-     * @param {State|Object|null} state
+     * @param {Object|Array|null} state
      * @returns {boolean}
      */
     loadState(state)
     {
         if (state) {
-            let stateChip = state.stateChip;
+            let stateChip = state['stateChip'] || state[0];
+            if (!stateChip || !stateChip.length) {
+                this.println("Invalid saved state");
+                return false;
+            }
             let version = stateChip.shift();
             if ((version|0) !== (Chip.VERSION|0)) {
                 this.printf("Saved state version mismatch: %3.2f\n", version);
@@ -715,8 +713,9 @@ class Chip extends Device {
             //     this.println("Chip state error: " + err.message);
             //     return false;
             // }
-            if (!Device.getURLParms()['pattern'] && !Device.getURLParms()[Chip.BINDING.IMAGE_SELECTION] && state.stateLEDs && this.leds) {
-                if (!this.leds.loadState(state.stateLEDs)) {
+            let stateLEDs = state['stateLEDs'] || state[1];
+            if (!Device.getURLParms()['pattern'] && !Device.getURLParms()[Chip.BINDING.IMAGE_SELECTION] && stateLEDs && this.leds) {
+                if (!this.leds.loadState(stateLEDs)) {
                     return false;
                 }
             }
@@ -1026,18 +1025,16 @@ class Chip extends Device {
      * saveState()
      *
      * @this {Chip}
-     * @returns {State}
+     * @returns {Array}
      */
     saveState()
     {
-        let state = {
-            stateChip:  [],
-            stateLEDs:  []
-        };
-        let stateChip = state.stateChip;
+        let state = [[],[]];
+        let stateChip = state[0];
+        let stateLEDs = state[1];
         stateChip.push(Chip.VERSION);
-        if (this.leds) this.leds.saveState(state.stateLEDs);
-        return /** @type {State} */ (state);
+        if (this.leds) this.leds.saveState(stateLEDs);
+        return state;
     }
 
     /**
