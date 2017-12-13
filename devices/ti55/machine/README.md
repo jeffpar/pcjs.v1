@@ -6,7 +6,6 @@ machines:
   - id: ti55
     type: ti55
     name: TI-55 Programmable Calculator
-    uncompiled: true
     config: |
       {
         "ti55": {

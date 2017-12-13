@@ -8,7 +8,6 @@ machines:
   - id: lifeDemo
     type: leds
     name: Game of Life Demo
-    uncompiled: true
     config: |
       {
         "lifeDemo": {

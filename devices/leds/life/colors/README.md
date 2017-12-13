@@ -6,7 +6,6 @@ machines:
   - id: lifeColorDemo
     type: leds
     name: Game of Life Color Demo
-    uncompiled: true
     config: |
       {
         "lifeColorDemo": {

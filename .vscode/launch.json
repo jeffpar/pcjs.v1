@@ -47,6 +47,13 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
+		  "name": "PCjs: Scrolling LED",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/leds/scrolling/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
 		  "name": "PCjs: TI-42",
 		  "type": "chrome",
 		  "request": "launch",

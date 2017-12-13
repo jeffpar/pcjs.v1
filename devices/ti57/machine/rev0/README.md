@@ -6,7 +6,6 @@ machines:
   - id: ti57
     type: ti57
     name: TI-57 Programmable Calculator
-    uncompiled: true
     config: |
       {
         "ti57": {

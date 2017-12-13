@@ -6,7 +6,6 @@ machines:
   - id: ti42
     type: ti42
     name: TI-42 Programmable Calculator
-    uncompiled: true
     config: |
       {
         "ti42": {
