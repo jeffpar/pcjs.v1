@@ -37,7 +37,9 @@
  * @property {Array.<number>} location
  * @property {Array.<Array.<number>>} [map]
  * @property {boolean} [drag]
+ * @property {boolean} [scroll]
  * @property {boolean} [hexagonal]
+ * @property {number} [buttonDelay]
  */
 
 /**
@@ -47,7 +49,9 @@
  * @property {Array.<number>} location
  * @property {Array.<Array.<number>>} map
  * @property {boolean} fDrag
+ * @property {boolean} fScroll
  * @property {boolean} fHexagonal
+ * @property {number} buttonDelay
  * @property {{
  *  surface: HTMLImageElement|undefined
  * }} bindings
@@ -100,6 +104,29 @@ class Input extends Device {
         this.onReset = null;
         this.onHover = null;
 
+        /*
+         * If 'drag' is true, then the onInput() handler will be called whenever the current col and/or row
+         * changes, even if the mouse hasn't been released since the previous onInput() call.
+         *
+         * The default is false, because in general, allowing drag is a bad idea for calculator buttons.  But
+         * I've made this an option for other input surfaces, like LED arrays, where you might want to turn a
+         * series of LEDs on or off.
+         */
+        this.fDrag = !!this.config['drag'];
+
+        /*
+         * If 'scroll' is true, then we do NOT call preventDefault() on touch events; this permits the input
+         * surface to be scrolled like any other part of the page.  The default is false, because this has other
+         * side-effects (eg, inadvertent zooms).
+         */
+        this.fScroll = !!this.config['scroll'];
+
+        /*
+         * This is set on receipt of the first 'touch' event of any kind, and is used by the 'mouse' event
+         * handlers to disregard mouse events if set.
+         */
+        this.fTouch = false;
+
         let element = this.bindings[Input.BINDING.SURFACE];
         if (element) {
             /*
@@ -148,16 +175,18 @@ class Input extends Device {
                 this.nRows = this.vGap;
                 this.hGap = this.vGap = 0;
             }
+
             /*
-             * If 'drag' is true, then the onInput() handler will be called whenever the current col and/or row
-             * changes, even if the mouse hasn't been released since the previous onInput() call.
-             *
-             * The default is false, because in general, allowing drag is a bad idea for calculator buttons.  But
-             * I've made this an option for other input surfaces, like LED arrays, where you might want to turn a
-             * series of LEDs on or off.
+             * If 'hexagonal' is true, then we treat the input grid as hexagonal, where even rows of the associated
+             * display are offset.
              */
-            this.fDrag = !!this.config['drag'];
             this.fHexagonal = !!this.config['hexagonal'];
+            
+            /*
+             * The 'buttonDelay' setting is only necessary for devices (ie, old calculator chips) that are either slow
+             * to respond and/or have debouncing logic that would otherwise be defeated.
+             */
+            this.buttonDelay = this.config['buttonDelay'] || 0;
 
             /*
              * To calculate the average button width (cxButton), we know that the overall width
@@ -190,19 +219,23 @@ class Input extends Device {
                  * enough time to notice the input before releasing it.
                  */
                 let input = this;
-                this.timerInputRelease = this.time.addTimer("timerInputRelease", function onInputRelease() {
-                    if (input.xStart < 0 && input.yStart < 0) { // auto-release ONLY if it's REALLY released
-                        input.setPosition(-1, -1);
-                    }
-                });
+                if (this.buttonDelay) {
+                    this.timerInputRelease = this.time.addTimer("timerInputRelease", function onInputRelease() {
+                        if (input.xStart < 0 && input.yStart < 0) { // auto-release ONLY if it's REALLY released
+                            input.setPosition(-1, -1);
+                        }
+                    });
+                }
                 if (this.map) {
                     /*
                      * This auto-releases the last key reported after an appropriate delay, to ensure that
                      * the machine had enough time to notice the corresponding button was pressed.
                      */
-                    this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function onKeyRelease() {
-                        input.onKeyTimer();
-                    });
+                    if (this.buttonDelay) {
+                        this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function onKeyRelease() {
+                            input.onKeyTimer();
+                        });
+                    }
                     /*
                      * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
                      * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
@@ -304,6 +337,20 @@ class Input extends Device {
     }
 
     /**
+     * advanceKeyState()
+     *
+     * @this {Input}
+     */
+    advanceKeyState()
+    {
+        if (!this.buttonDelay) {
+            this.onKeyTimer();
+        } else {
+            this.time.setTimer(this.timerKeyRelease, this.buttonDelay);
+        }
+    }
+
+    /**
      * captureKeys(element)
      *
      * @this {Input}
@@ -320,9 +367,7 @@ class Input extends Device {
                 if (activeElement == input.bindings[Input.BINDING.POWER]) {
                     let keyCode = event.which || event.keyCode;
                     let ch = Input.KEYCODE[keyCode];
-                    if (ch && input.onKeyPress(ch)) {
-                        event.preventDefault();
-                    }
+                    if (ch && input.onKeyPress(ch)) event.preventDefault();
                 }
             }
         );
@@ -332,62 +377,9 @@ class Input extends Device {
                 event = event || window.event;
                 let charCode = event.which || event.charCode;
                 let ch = String.fromCharCode(charCode);
-                if (ch && input.onKeyPress(ch)) {
-                    event.preventDefault();
-                }
+                if (ch && input.onKeyPress(ch)) event.preventDefault();
             }
         );
-    }
-
-    /**
-     * onKeyPress(ch)
-     *
-     * @this {Input}
-     * @param {string} ch
-     * @returns {boolean} (true if processed, false if not)
-     */
-    onKeyPress(ch)
-    {
-        for (let row = 0; row < this.map.length; row++) {
-            let rowMap = this.map[row];
-            for (let col = 0; col < rowMap.length; col++) {
-                let aParts = rowMap[col].split('|');
-                if (aParts.indexOf(ch) >= 0) {
-                    if (this.keyState) {
-                        if (this.keysPressed.length < 16) {
-                            this.keysPressed.push(ch);
-                        }
-                    } else {
-                        this.keyState = 1;
-                        this.setPosition(col, row);
-                        this.time.setTimer(this.timerKeyRelease, Input.BUTTON_DELAY);
-                    }
-                    return true;
-                }
-            }
-        }
-        this.printf("unrecognized key '%s' (0x%02x)\n", ch, ch.charCodeAt(0));
-        return false;
-    }
-
-    /**
-     * onKeyTimer()
-     *
-     * @this {Input}
-     */
-    onKeyTimer()
-    {
-        this.assert(this.keyState);
-        if (this.keyState == 1) {
-            this.keyState++;
-            this.setPosition(-1, -1);
-            this.time.setTimer(this.timerKeyRelease, Input.BUTTON_DELAY);
-        } else {
-            this.keyState = 0;
-            if (this.keysPressed.length) {
-                this.onKeyPress(this.keysPressed.shift());
-            }
-        }
     }
 
     /**
@@ -403,6 +395,7 @@ class Input extends Device {
         element.addEventListener(
             'mousedown',
             function onMouseDown(event) {
+                if (input.fTouch) return;
                 /*
                  * If there are any text input elements on the page that might currently have focus,
                  * this is a good time to divert focus to a focusable element of our own (eg, a "power"
@@ -426,6 +419,7 @@ class Input extends Device {
         element.addEventListener(
             'mousemove',
             function onMouseMove(event) {
+                if (input.fTouch) return;
                 input.processEvent(element, Input.ACTION.MOVE, event);
             }
         );
@@ -433,6 +427,7 @@ class Input extends Device {
         element.addEventListener(
             'mouseup',
             function onMouseUp(event) {
+                if (input.fTouch) return;
                 if (!event.button) {
                     input.processEvent(element, Input.ACTION.RELEASE, event);
                 }
@@ -442,6 +437,7 @@ class Input extends Device {
         element.addEventListener(
             'mouseout',
             function onMouseOut(event) {
+                if (input.fTouch) return;
                 if (input.xStart < 0) {
                     input.processEvent(element, Input.ACTION.MOVE, event);
                 } else {
@@ -468,6 +464,14 @@ class Input extends Device {
         element.addEventListener(
             'touchstart',
             function onTouchStart(event) {
+                /*
+                 * Under normal circumstances (ie, when fScroll is false), when any touch events arrive,
+                 * processEvent() calls preventDefault(), which prevents a variety of potentially annoying
+                 * behaviors (ie, zooming, scrolling, fake mouse events, etc).  Under non-normal circumstances,
+                 * (ie, when fScroll is true), we set fTouch on receipt of a 'touchstart' event, which will
+                 * help our mouse event handlers avoid any redundant actions due to fake mouse events.
+                 */
+                if (input.fScroll) input.fTouch = true;
                 input.processEvent(element, Input.ACTION.PRESS, event);
             }
         );
@@ -488,6 +492,57 @@ class Input extends Device {
     }
 
     /**
+     * onKeyPress(ch)
+     *
+     * @this {Input}
+     * @param {string} ch
+     * @returns {boolean} (true if processed, false if not)
+     */
+    onKeyPress(ch)
+    {
+        for (let row = 0; row < this.map.length; row++) {
+            let rowMap = this.map[row];
+            for (let col = 0; col < rowMap.length; col++) {
+                let aParts = rowMap[col].split('|');
+                if (aParts.indexOf(ch) >= 0) {
+                    if (this.keyState) {
+                        if (this.keysPressed.length < 16) {
+                            this.keysPressed.push(ch);
+                        }
+                    } else {
+                        this.keyState = 1;
+                        this.setPosition(col, row);
+                        this.advanceKeyState();
+                    }
+                    return true;
+                }
+            }
+        }
+        this.printf("unrecognized key '%s' (0x%02x)\n", ch, ch.charCodeAt(0));
+        return false;
+    }
+
+    /**
+     * onKeyTimer()
+     *
+     * @this {Input}
+     */
+    onKeyTimer()
+    {
+        this.assert(this.keyState);
+        if (this.keyState == 1) {
+            this.keyState++;
+            this.setPosition(-1, -1);
+            this.advanceKeyState();
+        } else {
+            this.keyState = 0;
+            if (this.keysPressed.length) {
+                this.onKeyPress(this.keysPressed.shift());
+            }
+        }
+    }
+
+    /**
      * processEvent(element, action, event)
      *
      * @this {Input}
@@ -498,9 +553,11 @@ class Input extends Device {
     processEvent(element, action, event)
     {
         let col = -1, row = -1;
+        let fMultiTouch = false;
         let x, y, xInput, yInput, fButton, fInput, fPower;
 
         if (action < Input.ACTION.RELEASE) {
+
             /**
              * @name Event
              * @property {Array} targetTouches
@@ -513,6 +570,7 @@ class Input extends Device {
             } else {
                 x = event.targetTouches[0].pageX;
                 y = event.targetTouches[0].pageY;
+                fMultiTouch = (event.targetTouches.length > 1);
             }
 
             /*
@@ -562,12 +620,13 @@ class Input extends Device {
                 /*
                  * If we allow touch events to be processed, they will generate mouse events as well, causing
                  * confusion and delays.  We can sidestep that problem by preventing default actions on any event
-                 * that occurs within the input region.  One downside is that you can no longer scroll the image
-                 * using touch, but that may be just as well, because you probably don't want a sloppy touch moving
-                 * your device around (or worse, a rapid double-tap zooming the device).  Besides, if you really
-                 * want to move or zoom the device, the solution is simple: touch *outside* the input region.
+                 * that occurs within the input region.  One downside is that you can no longer scroll or zoom the
+                 * image using touch, but that may be just as well, because you probably don't want sloppy touches
+                 * moving your display around (or worse, a rapid double-tap zooming the display).  I do try to
+                 * make one small concession for two-finger zoom operations (see fMultiTouch), but that's a bit
+                 * fiddly, because it depends on both fingers hitting the surface at the same instant.
                  */
-                event.preventDefault();
+                if (!fMultiTouch && !this.fScroll) event.preventDefault();
 
                 if (xInput >= 0 && xInput < this.cxInput && yInput >= 0 && yInput < this.cyInput) {
                     fInput = true;
@@ -612,6 +671,8 @@ class Input extends Device {
             }
         }
 
+        if (fMultiTouch) return;
+
         if (action == Input.ACTION.PRESS) {
             /*
              * Record the position of the event, transitioning xStart and yStart to non-negative values.
@@ -628,8 +689,8 @@ class Input extends Device {
                  * On the other hand, if it DID hit a button, then we arm the auto-release timer, to ensure
                  * a minimum amount of time (ie, BUTTON_DELAY).
                  */
-                if (fButton) {
-                    this.time.setTimer(this.timerInputRelease, Input.BUTTON_DELAY, true);
+                if (fButton && this.buttonDelay) {
+                    this.time.setTimer(this.timerInputRelease, this.buttonDelay, true);
                 }
             } else if (fPower && this.onPower) {
                 this.onPower();
@@ -647,7 +708,7 @@ class Input extends Device {
             /*
              * Don't immediately signal the release if the release timer is active (let the timer take care of it).
              */
-            if (!this.time.isTimerSet(this.timerInputRelease)) {
+            if (!this.buttonDelay || !this.time.isTimerSet(this.timerInputRelease)) {
                 this.setPosition(-1, -1);
             }
             this.xStart = this.yStart = -1;
@@ -692,4 +753,4 @@ Input.KEYCODE = {               // keyCode from keydown/keyup events
 
 Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
 
-Input.VERSION   = 1.10;
+Input.VERSION   = 1.11;

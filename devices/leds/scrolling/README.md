@@ -12,7 +12,7 @@ machines:
           "class": "Machine",
           "type": "leds",
           "name": "LED Square",
-          "version": 1.10,
+          "version": 1.11,
           "autoPower": false,
           "bindings": {
             "clear": "clearLS",
@@ -22,10 +22,8 @@ machines:
         },
         "ledChip": {
           "class": "Chip",
-          "toggle": false,
           "rule": "C8",
           "bindings": {
-            "backgroundImage": "backgroundImage",
             "save": "saveLS"
           },
           "overrides": ["backgroundImage"]
@@ -49,7 +47,6 @@ machines:
           "cols": 16,
           "rows": 16,
           "color": "red",
-          "backgroundColor": "black",
           "highlight": false,
           "bindings": {
             "container": "displayLS"
@@ -58,6 +55,7 @@ machines:
         },
         "ledInput": {
           "class": "Input",
+          "drag": true,
           "bindings": {
             "reset": "resetLS"
           }
@@ -72,7 +70,7 @@ styles:
     margin-bottom: 16px;
   displayLS:
     position: relative;
-    background-color: rgb(26,26,26);
+    background-color: gray;
     line-height: 0;
     margin-bottom: 8px;
     background-image: none;

@@ -105,10 +105,13 @@ class Chip extends Device {
              */
             if (!this.loadPattern()) leds.clearBuffer(true);
 
+            let input = this.findDeviceByClass(Machine.CLASS.INPUT);
+
             let configInput = {
                 "class":        "Input",
                 "location":     [0, 0, leds.widthView, leds.heightView, leds.cols, leds.rows],
-                "drag":         true,
+                "drag":         !!(input && input.fDrag),
+                "scroll":       !!(input && input.fScroll),
                 "hexagonal":    leds.fHexagonal,
                 "bindings":     {"surface": leds.getBindingID(LED.BINDING.CONTAINER)}
             };
@@ -1239,6 +1242,6 @@ Chip.COMMANDS = [
     "c\tset category"
 ];
 
-Chip.VERSION    = 1.10;
+Chip.VERSION    = 1.11;
 
 MACHINE = "LEDs";

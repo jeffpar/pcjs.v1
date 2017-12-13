@@ -149,7 +149,7 @@
       ],
       "folder": "devices",
       "creator": "new LEDs",
-      "version": "1.10"
+      "version": "1.11"
     },
     "pc8080": {
       "defines": [
@@ -360,7 +360,7 @@
       ],
       "folder": "devices",
       "creator": "new TMS1500",
-      "version": "1.10"
+      "version": "1.11"
     }
   }
 }

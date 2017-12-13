@@ -359,12 +359,12 @@ class Device {
                 sVersion = "Machine";
                 version = machine.version;
             }
-            else if (config.version && config.version != this.version) {
+            else if (config.version && config.version > this.version) {
                 sVersion = "Config";
                 version = config.version;
             }
             if (sVersion) {
-                let sError = this.sprintf("%s Device version (%3.2f) does not match %s version (%3.2f)", config.class, this.version, sVersion, version);
+                let sError = this.sprintf("%s Device version (%3.2f) incompatible with %s version (%3.2f)", config.class, this.version, sVersion, version);
                 this.alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.", Device.Alerts.Version);
             }
         }

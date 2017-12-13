@@ -69,6 +69,7 @@ machines:
         },
         "lifeInput": {
           "class": "Input",
+          "drag": true,
           "bindings": {
             "reset": "resetLife"
           }

@@ -84,6 +84,7 @@ machines:
         },
         "lbInput": {
           "class": "Input",
+          "drag": true,
           "bindings": {
             "reset": "resetLB"
           }
@@ -103,6 +104,7 @@ styles:
     margin-bottom: 8px;
     background-image: none;
     background-size: 100% 100%;
+	-webkit-tap-highlight-color: transparent;
   .colorSwatchLB:
     display: none;
     width: 16px;

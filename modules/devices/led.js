@@ -1209,4 +1209,4 @@ LED.SYMBOLS = {
     '.':        ['P']
 };
 
-LED.VERSION     = 1.10;
+LED.VERSION     = 1.11;
