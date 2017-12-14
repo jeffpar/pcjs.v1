@@ -47,9 +47,9 @@ machines:
               "Blue":   "#3067c1",
               "Green":  "#2f9a27",
               "Violet": "#9f3c92",
-              "Red":    "#b71e1d",
+              "Red":    "#ff0000",
               "Orange": "#fa7d14",
-              "Pink":   "#ff7379",
+              "Pink":   "#ff1493",
               "Yellow": "#fadc4e",
               "White":  "#fffff9"
             }
@@ -99,9 +99,9 @@ styles:
     margin-bottom: 16px;
   displayLB:
     position: relative;
-    background-color: rgb(26,26,26);
     line-height: 0;
     margin-bottom: 8px;
+    background-color: rgb(26,26,26);
     background-image: none;
     background-size: 100% 100%;
 	-webkit-tap-highlight-color: transparent;

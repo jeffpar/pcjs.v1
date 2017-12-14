@@ -84,7 +84,7 @@ class Chip extends Device {
          */
         this.fToggleColor = this.getDefault('toggleColor', false);
         
-                /*
+        /*
          * Since all bindings should have been completed by super(), we can make a preliminary call
          * to getCounts() to determine how many counts are stored per LED, to preallocate a count buffer.
          */
@@ -103,13 +103,19 @@ class Chip extends Device {
              */
             if (!this.loadPattern()) leds.clearBuffer(true);
 
-            let input = this.findDeviceByClass(Machine.CLASS.INPUT);
+            /*
+             * Get access to the Input device, so we can add our click functions.
+             */
+            this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+            if (this.input) {
+                this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
+            }
 
             let configInput = {
                 "class":        "Input",
                 "location":     [0, 0, leds.widthView, leds.heightView, leds.cols, leds.rows],
-                "drag":         !!(input && input.fDrag),
-                "scroll":       !!(input && input.fScroll),
+                "drag":         !!(this.input && this.input.fDrag),
+                "scroll":       !!(this.input && this.input.fScroll),
                 "hexagonal":    leds.fHexagonal,
                 "bindings":     {"surface": leds.getBindingID(LED.BINDING.CONTAINER)}
             };
@@ -125,12 +131,6 @@ class Chip extends Device {
             this.updateColorSelection(this.colorDefault);
             this.updateColorSwatches();
             this.updateBackgroundImage(this.config[Chip.BINDING.IMAGE_SELECTION]);
-
-            /*
-             * Get access to the Input device, so we can add our click functions.
-             */
-            this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-            this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
 
             /*
              * Get access to the Time device, so we can give it our clocker() function.
@@ -184,7 +184,11 @@ class Chip extends Device {
 
         case Chip.BINDING.SAVE:
             element.onclick = function onClickSave() {
-                let sPattern = chip.savePattern();
+                let sPattern = chip.savePattern(true);
+                let elementSymbol = chip.bindings[Chip.BINDING.SYMBOL_INPUT];
+                if (elementSymbol) {
+                    sPattern = '"' + elementSymbol.value + '":"' + sPattern + '",';
+                }
                 chip.println(sPattern);
             };
             break;
@@ -841,10 +845,12 @@ class Chip extends Device {
      */
     onPower(fOn)
     {
-        if (fOn) {
-            this.time.start();
-        } else {
-            this.time.stop();
+        if (this.time) {
+            if (fOn) {
+                this.time.start();
+            } else {
+                this.time.stop();
+            }
         }
     }
 
@@ -882,7 +888,7 @@ class Chip extends Device {
     }
 
     /**
-     * savePattern()
+     * savePattern(fMinWidth, fMinHeight)
      *
      * We save our patterns as a string that is largely compatible with the "Game of Life RLE Format"
      * (refer to http://www.conwaylife.com/w/index.php?title=Run_Length_Encoded), which uses <repetition><tag>
@@ -912,9 +918,11 @@ class Chip extends Device {
      * "modifier noise" in the pattern string.
      *
      * @this {Chip}
+     * @param {boolean} [fMinWidth] (set to true to determine the minimum width)
+     * @param {boolean} [fMinHeight] (set to true to determine the minimum height)
      * @returns {string}
      */
-    savePattern()
+    savePattern(fMinWidth, fMinHeight)
     {
         let leds = this.leds;
 
@@ -994,8 +1002,42 @@ class Chip extends Device {
             }
         };
 
-        for (let row = 0; row < leds.rows; row++) {
-            for (let col = 0; col < leds.cols; col++) {
+        /*
+         * Before we begin, see if either fMinWidth or fMinHeight are set, requiring an initial bounding prescan.
+         */
+        let colMin = 0, colMax = leds.cols - 1;
+        let rowMin = 0, rowMax = leds.rows - 1;
+        if (fMinWidth || fMinHeight) {
+            if (fMinWidth) {
+                colMin = colMax; colMax = 0;
+            }
+            if (fMinHeight) {
+                rowMin = rowMax; rowMax = 0;
+            }
+            for (let row = 0; row < leds.rows; row++) {
+                for (let col = 0; col < leds.cols; col++) {
+                    state = leds.getLEDState(col, row);
+                    if (state) {
+                        if (fMinWidth) {
+                            if (colMin > col) colMin = col;
+                            if (colMax < col) colMax = col;
+                        }
+                        if (fMinHeight) {
+                            if (rowMin > row) rowMin = row;
+                            if (rowMax < row) rowMax = row;
+                        }
+                    }
+                }
+            }
+            nCols = colMax - colMin + 1;
+            nRows = rowMax - rowMin + 1;
+        }
+
+         /*
+          * Begin pattern generation.
+          */
+        for (let row = rowMin; row <= rowMax; row++) {
+            for (let col = colMin; col <= colMax; col++) {
                 state = leds.getLEDState(col, row);
                 leds.getLEDColorValues(col, row, rgb);
                 counts = leds.getLEDCountsPacked(col, row);
@@ -1007,9 +1049,11 @@ class Chip extends Device {
         /*
          * Remove all '$' at the beginning of the pattern.
          */
-        while (sPattern[0] == '$') {
-            iRow++; nRows--;
-            sPattern = sPattern.slice(1);
+        if (fMinHeight || !fMinWidth) {
+            while (sPattern[0] == '$') {
+                iRow++; nRows--;
+                sPattern = sPattern.slice(1);
+            }
         }
 
         /*
@@ -1020,8 +1064,7 @@ class Chip extends Device {
             sPattern = sPattern.slice(0, -1);
         }
 
-        sPattern = iCol + '/' + iRow + '/' + nCols + '/' + nRows + '/' + sPattern.slice(0, -1);
-
+        sPattern = ((fMinWidth || fMinHeight)? "" : (iCol + '/' + iRow + '/')) + nCols + '/' + nRows + '/' + sPattern.slice(0, -1);
         sPattern = sPattern.replace(/\$+$/, '');
         return sPattern;
     }
@@ -1134,18 +1177,20 @@ class Chip extends Device {
      * updateColorSwatches(binding)
      *
      * @this {Chip}
-     * @param {string} [binding]
+     * @param {string} [binding] (set if a specific color swatch was just clicked)
      */
     updateColorSwatches(binding)
     {
         let i = 1, elementSwatch;
         /*
-         * Some machines use only a single swatch called COLOR_SWATCH_SELECTED; update as appropriate.
+         * Some machines use a single swatch called COLOR_SWATCH_SELECTED; update as appropriate.
          */
-        if (!binding && this.colorSelected) {
-            elementSwatch = this.bindings[Chip.BINDING.COLOR_SWATCH_SELECTED];
-            if (elementSwatch) {
-                elementSwatch.style.backgroundColor = this.colorSelected;
+        if (!binding) {
+            if (this.colorSelected) {
+                elementSwatch = this.bindings[Chip.BINDING.COLOR_SWATCH_SELECTED];
+                if (elementSwatch) {
+                    elementSwatch.style.backgroundColor = this.colorSelected;
+                }
             }
         }
         /*
@@ -1153,6 +1198,7 @@ class Chip extends Device {
          * for each color in colorPalette, update the next available swatch.
          */
         if (this.colorPalette) {
+            // this.println("updateColorSwatches(" + this.colorSelected + ")");
             for (let idColor in this.colorPalette) {
                 let color = this.colorPalette[idColor];
                 if (this.colors) this.colors[i-1] = color;
@@ -1163,10 +1209,11 @@ class Chip extends Device {
                 if (idSwatch == binding) {
                     this.updateColorSelection(color);
                 }
-                if (color != this.colorSelected) {
+                if (binding && binding != idSwatch || color != this.colorSelected) {
                     color = this.leds.getRGBAColor(color, 1.0, 0.50);
                 }
                 elementSwatch.style.backgroundColor = color;
+                // this.println("swatch '" + idSwatch + "' updated to color '" + color + "'");
             }
         }
         /*
@@ -1246,6 +1293,22 @@ Chip.COUNTS = [null, Chip.BINDING.COUNT_ON, Chip.BINDING.COUNT_OFF, Chip.BINDING
 Chip.COMMANDS = [
     "c\tset category"
 ];
+
+/*
+ * Symbols can be formed with the following 16x16 grid patterns.
+ */
+Chip.SYMBOLS = {
+    "A": "10/14/$3b4o$2bo4bo$2bo4bo$bo6bo$bo6bo$o8bo$o8bo$o8bo$10o$o8bo$o8bo$o8bo$o8bo",
+    "B": "10/14/$7o$o6bo$o7bo$o7bo$o7bo$o6bo$8o$o7bo$o8bo$o8bo$o8bo$o8bo$9o",
+    "C": "8/14/$2b6o$bo$o$o$o$o$o$o$o$o$o$bo$2b6o",
+    "D": "10/14/$8o$o7bo$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo$o7bo$8o",
+    "E": "8/14/$8o$o$o$o$o$o$7o$o$o$o$o$o$8o",
+    "F": "8/14/$8o$o$o$o$o$o$o$7o$o$o$o$o$o",
+    "G": "9/14/$2b6o$bo$o$o$o$o$o$o$o6b2o$o7bo$o7bo$bo6bo$2b7o",
+    "H": "10/14/$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo$10o$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo",
+    "I": "7/14/$7o$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$7o",
+    "J": "9/14/$8bo$8bo$8bo$8bo$8bo$8bo$8bo$8bo$o7bo$o7bo$o7bo$bo5bo$2b5o"
+};
 
 Chip.VERSION    = 1.11;
 

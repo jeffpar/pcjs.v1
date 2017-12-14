@@ -1890,7 +1890,9 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
 
         var sType = infoMachine['type'];
         var configMachine = pkg.machines[sType];
-        configMachine = (configMachine && configMachine['alias']) || configMachine;
+        while (configMachine && configMachine['alias']) {
+            configMachine = pkg.machines[configMachine['alias']];
+        }
         if (!configMachine) {
             HTMLOut.logDebug('HTMLOut.processMachines(): unrecognized machine type "' + sType + '"');
             continue;

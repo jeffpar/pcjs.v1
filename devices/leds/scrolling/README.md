@@ -3,46 +3,33 @@ layout: page
 title: Scrolling LEDs
 permalink: /devices/leds/scrolling/
 machines:
-  - id: ledSquare
+  - id: symbolLEDs
     type: leds
-    name: LED Square
+    name: LED Symbol
     config: |
       {
-        "ledSquare": {
+        "symbolLEDs": {
           "class": "Machine",
           "type": "leds",
-          "name": "LED Square",
+          "name": "LED Symbol",
           "version": 1.11,
           "autoPower": false,
           "bindings": {
-            "clear": "clearLS",
-            "print": "printLS"
+            "clear": "clearSymbol",
+            "print": "printSymbol"
           },
           "overrides": ["autoPower"]
         },
-        "ledChip": {
+        "symbolChip": {
           "class": "Chip",
           "bindings": {
-            "save": "saveLS",
-            "symbolInput": "inputLS",
-            "symbolPreview": "previewLS"
+            "save": "saveSymbol",
+            "symbolInput": "inputSymbol",
+            "symbolPreview": "previewSymbol"
           },
           "overrides": ["backgroundImage"]
         },
-        "ledClock": {
-          "class": "Time",
-          "cyclesPerSecond": 1,
-          "cyclesMinimum": 1,
-          "cyclesMaximum": 120,
-          "bindings": {
-            "run": "runLS",
-            "speed": "speedLS",
-            "step": "stepLS",
-            "throttle": "throttleLS"
-          },
-          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","requestAnimationFrame"]
-        },
-        "ledDisplay": {
+        "symbolDisplay": {
           "class": "LED",
           "type": 1,
           "cols": 16,
@@ -50,64 +37,140 @@ machines:
           "color": "red",
           "highlight": false,
           "bindings": {
-            "container": "displayLS"
+            "container": "displaySymbol"
           },
           "overrides": ["color","backgroundColor"]
         },
-        "ledInput": {
+        "symbolInput": {
           "class": "Input",
           "drag": true,
           "bindings": {
-            "reset": "resetLS"
+            "reset": "resetSymbol"
+          }
+        }
+      }
+  - id: scrollLEDs
+    type: leds
+    name: LED Scroller
+    config: |
+      {
+        "scrollLEDs": {
+          "class": "Machine",
+          "type": "leds",
+          "name": "LED Scroller",
+          "version": 1.11,
+          "autoPower": false,
+          "bindings": {
+            "clear": "clearSroll",
+            "print": "printScroll"
+          },
+          "overrides": ["autoPower"]
+        },
+        "scrollChip": {
+          "class": "Chip",
+          "overrides": ["backgroundImage"]
+        },
+        "scrollClock": {
+          "class": "Time",
+          "cyclesPerSecond": 1,
+          "cyclesMinimum": 1,
+          "cyclesMaximum": 120,
+          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","requestAnimationFrame"]
+        },
+        "scrollDisplay": {
+          "class": "LED",
+          "type": 1,
+          "cols": 256,
+          "rows": 16,
+          "colsExtra": 16,
+          "color": "red",
+          "highlight": false,
+          "bindings": {
+            "container": "displayScroll"
+          },
+          "overrides": ["color","backgroundColor"]
+        },
+        "scrollInput": {
+          "class": "Input",
+          "drag": true,
+          "bindings": {
+            "reset": "resetScroll"
           }
         }
       }
 styles:
-  ledSquare:
+  symbolLEDs:
     position: relative;
     display: inline-block;
     float: left;
     margin-right: 32px;
     margin-bottom: 16px;
-  displayLS:
+  displaySymbol:
     position: relative;
     background-color: rgba(0,0,0,0);
-    margin-bottom: 8px;
     background-image: none;
     background-size: 100% 100%;
-  inputLS:
+  inputSymbol:
     width: 16px;
-  previewLS:
+  previewSymbol:
     position: absolute;
-    font-size: 32em;
-	font-family: Helvetica;
+    font-size: 48em;
+	font-family: 'Bungee Hairline';
 	font-weight: normal;
     width: 100%;
-    height: 100%;
-    line-height: 100%;
+    height: auto;
+    line-height: 68%;
     text-align: center;
     vertical-align: middle;
-  printLS:
+    margin-left: -10px;
+  scrollLEDs:
+    position: relative;
+    display: inline-block;
+    float: left;
+    margin-right: 32px;
+    margin-bottom: 16px;
+  displayScroll:
+    position: relative;
+    line-height: 0;
+    background-color: black;
+    background-image: none;
+    background-size: 100% 100%;
+	-webkit-tap-highlight-color: transparent;
+  .print:
     font-family: Monaco,"Lucida Console",monospace;
   .diags:
     float: left;
+    margin-bottom: 16px;
 ---
 
 Scrolling LEDs
 --------------
 
-{% include machine.html id="ledSquare" config="json" %}
+{% include machine.html id="symbolLEDs" config="json" %}
 
-<div id="ledSquare">
-  <div id="previewLS">F</div>
-  <div id="displayLS"></div>
+<div id="symbolLEDs">
+  <div id="previewSymbol">A</div>
+  <div id="displaySymbol"></div>
 </div>
 <div class="diags">
   <div>
-    <textarea id="printLS" cols="78" rows="16"></textarea>
+    <textarea id="printSymbol" class="print" cols="78" rows="16"></textarea>
   </div>
-  Symbol: <input id="inputLS" type="text" value="F"/>
-  <button id="saveLS">Save</button>
-  <button id="resetLS">Reset</button>
-  <button id="clearLS">Clear</button>
+  Symbol: <input id="inputSymbol" type="text" value="A"/>
+  <button id="saveSymbol">Save</button>
+  <button id="resetSymbol">Reset</button>
+  <button id="clearSymbol">Clear</button>
+</div>
+
+{% include machine.html id="scrollLEDs" config="json" %}
+
+<div id="scrollLEDs">
+  <div id="displayScroll"></div>
+</div>
+<div class="diags">
+  <div>
+    <textarea id="printScroll" class="print" cols="78" rows="16"></textarea>
+  </div>
+  <button id="resetScroll">Reset</button>
+  <button id="clearScroll">Clear</button>
 </div>

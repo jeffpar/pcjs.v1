@@ -34,10 +34,11 @@
  * @property {Object} [bindings]
  * @property {number} [version]
  * @property {Array.<string>} [overrides]
- * @property {number} type
- * @property {number} [width]
- * @property {number} [height]
+ * @property {number} type  (one of the LED.TYPE values)
+ * @property {number} [width] (the view width of a cell)
+ * @property {number} [height] (the view height of a cell)
  * @property {number} [cols]
+ * @property {number} [colsVisible] (default value is cols)
  * @property {number} [rows]
  * @property {string} [color]
  * @property {string} [backgroundColor]
@@ -59,7 +60,7 @@
  * where all the real drawing occurs; drawView() then renders the "grid" canvas onto the "view" canvas.
  *
  * Internally, our LED digits have a width and height of 96 and 128.  Those are "grid" dimensions which
- * cannot be changed, because our table of drawing coordinates in LED.SEGMENT are hard-coded for those
+ * cannot be changed, because our table of drawing coordinates in LED.SEGMENTS are hard-coded for those
  * dimensions.  The cell width and height that are specified as part of the LEDConfig are "view" dimensions,
  * which usually match the grid dimensions, but you're welcome to scale them up or down; the browser's
  * drawImage() function takes care of that.
@@ -155,9 +156,10 @@ class LED extends Device {
         this.heightCell = LED.SIZES[this.type][1];
         this.width = this.getDefault('width', this.widthCell);
         this.height = this.getDefault('height', this.heightCell);
-        this.cols = this.getDefault('cols',  1);
+        this.colsVisible = this.getDefault('cols',  1);
+        this.cols = this.colsVisible + this.getDefault('colsExtra', 0);
         this.rows = this.getDefault('rows', 1);
-        this.widthView = this.width * this.cols;
+        this.widthView = this.width * this.colsVisible;
         this.heightView = this.height * this.rows;
 
         this.colorTransparent = this.getRGBAColor("black", 0);
@@ -205,7 +207,7 @@ class LED extends Device {
          */
         this.canvasGrid = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
         if (this.canvasGrid) {
-            this.canvasGrid.width = this.widthGrid = this.widthCell * this.cols;
+            this.canvasGrid.width = this.widthGrid = this.widthCell * this.colsVisible;
             this.canvasGrid.height = this.heightGrid = this.heightCell * this.rows;
             this.contextGrid = this.canvasGrid.getContext("2d");
         }
@@ -227,6 +229,7 @@ class LED extends Device {
         this.nBufferCells = ((this.rows + 1) * this.cols) * this.nBufferInc;
         this.buffer = new Array(this.nBufferCells);
         this.bufferClone = null;
+        this.nBufferSkip = (this.colsVisible < this.cols? (this.cols - this.colsVisible) * 4 : 0);
 
         /*
          * fBufferModified is straightforward: set to true by any setLEDState() call that actually
@@ -353,7 +356,7 @@ class LED extends Device {
         }
         let i = 0;
         for (let row = 0; row < this.rows; row++) {
-            for (let col = 0; col < this.cols; col++) {
+            for (let col = 0; col < this.colsVisible; col++) {
                 let state = this.buffer[i];
                 let color = this.buffer[i+1] || this.colorTransparent;
                 let fModified = !!(this.buffer[i+3] & LED.FLAGS.MODIFIED);
@@ -365,6 +368,7 @@ class LED extends Device {
                 }
                 i += this.nBufferInc;
             }
+            i += this.nBufferSkip;
         }
         this.drawView();
     }
@@ -387,7 +391,7 @@ class LED extends Device {
         if (this.fHexagonal) {
             if (!(row & 0x1)) {
                 xOffset = (this.widthCell >> 1);
-                if (col == this.cols - 1) return;
+                if (col == this.colsVisible - 1) return;
             }
         }
 
@@ -459,7 +463,7 @@ class LED extends Device {
      */
     drawGridSegment(seg, col = 0, row = 0)
     {
-        let coords = LED.SEGMENT[seg];
+        let coords = LED.SEGMENTS[seg];
         if (coords) {
             let xBias = col * this.widthCell;
             let yBias = row * this.heightCell;
@@ -498,7 +502,7 @@ class LED extends Device {
                 if (col) col--;
             }
             this.drawSymbol(ch, col, row);
-            if (++col == this.cols) {
+            if (++col == this.colsVisible) {
                 col = 0;
                 if (++row == this.rows) {
                     break;
@@ -513,7 +517,7 @@ class LED extends Device {
      *
      * Used by drawString() for LED.TYPE.DIGIT.
      *
-     * If the symbol does not exist in LED.SYMBOLS, then nothing is drawn.
+     * If the symbol does not exist in LED.SYMBOL_SEGMENTS, then nothing is drawn.
      *
      * @this {LED}
      * @param {string} symbol
@@ -522,7 +526,7 @@ class LED extends Device {
      */
     drawSymbol(symbol, col = 0, row = 0)
     {
-        let segments = LED.SYMBOLS[symbol];
+        let segments = LED.SYMBOL_SEGMENTS[symbol];
         if (segments) {
             for (let i = 0; i < segments.length; i++) {
                 this.drawGridSegment(segments[i], col, row)
@@ -1161,7 +1165,7 @@ LED.SIZES = [
 ];
 
 /*
- * The segments are arranged roughly as follows in a 96x128 grid:
+ * The segments are arranged roughly as follows, in a 96x128 grid:
  *
  *      AAAA
  *     F    B
@@ -1176,7 +1180,7 @@ LED.SIZES = [
  * instead of one or more pairs (eg, the 'P' or period segment), then the coordinates are treated as arc()
  * parameters.
  */
-LED.SEGMENT = {
+LED.SEGMENTS = {
     'A':        [30,   8,  79,   8,  67,  19,  37,  19],
     'B':        [83,  10,  77,  52,  67,  46,  70,  22],
     'C':        [77,  59,  71, 100,  61,  89,  64,  64],
@@ -1188,9 +1192,9 @@ LED.SEGMENT = {
 };
 
 /*
- * Symbols are formed with the following segments.
+ * Segmented symbols are formed with the following segments.
  */
-LED.SYMBOLS = {
+LED.SYMBOL_SEGMENTS = {
     ' ':        [],
     '0':        ['A','B','C','D','E','F'],
     '1':        ['B','C'],
