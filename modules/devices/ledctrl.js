@@ -76,16 +76,16 @@ class Chip extends Device {
          * These are grid "behavior" properties.  If 'wrap' is true, then any off-grid neighbor cell
          * locations are mapped to the opposite edge; otherwise, they are mapped to the LEDs "scratch" row.
          */
-        this.fWrap = this.getDefault('wrap', false);
-        this.sRule = this.getDefault('rule', "");
-        this.sPattern = this.getDefault('pattern', "");
-        this.sSymbols = this.getDefault('symbols', "");
+        this.fWrap = this.getDefaultBoolean('wrap', false);
+        this.sRule = this.getDefaultString('rule', "");
+        this.sPattern = this.getDefaultString('pattern', "");
+        this.sSymbols = this.getDefaultString('symbols', "");
         
         /*
          * The 'toggleColor' property currently affects only grids that have a color palette: if true,
          * then only an LED's color is toggled; otherwise, only its state (ie, ON or OFF) is toggled.
          */
-        this.fToggleColor = this.getDefault('toggleColor', false);
+        this.fToggleColor = this.getDefaultBoolean('toggleColor', false);
         
         /*
          * Since all bindings should have been completed by super(), we can make a preliminary call
@@ -516,9 +516,9 @@ class Chip extends Device {
         }
         for (let row = 0; row < nRows; row++) {
             for (let col = 0; col < nCols - shift; col++) {
-                let stateLeft = leds.getLEDState(col, row);
+                let stateLeft = leds.getLEDState(col, row) || LED.STATE.OFF;
                 if (stateLeft) cAlive++;
-                let stateRight = leds.getLEDState(col + 1, row);
+                let stateRight = leds.getLEDState(col + 1, row) || LED.STATE.OFF;
                 leds.setLEDState(col, row, stateRight);
                 leds.setLEDState(col + 1, row, stateLeft);
             }

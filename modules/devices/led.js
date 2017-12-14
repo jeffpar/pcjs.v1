@@ -157,12 +157,12 @@ class LED extends Device {
         this.type = this.getBounded(this.config['type'] || LED.TYPE.ROUND, LED.TYPE.ROUND, LED.TYPE.DIGIT);
         this.widthCell = LED.SIZES[this.type][0];
         this.heightCell = LED.SIZES[this.type][1];
-        this.width = this.getDefault('width', this.widthCell);
-        this.height = this.getDefault('height', this.heightCell);
-        this.colsView = this.getDefault('cols',  1);
-        this.cols = this.colsView + this.getDefault('colsExtra', 0);
-        this.rowsView = this.getDefault('rows',  1);
-        this.rows = this.rowsView + this.getDefault('rowsExtra', 0);
+        this.width = this.getDefaultNumber('width', this.widthCell);
+        this.height = this.getDefaultNumber('height', this.heightCell);
+        this.colsView = this.getDefaultNumber('cols',  1);
+        this.cols = this.colsView + this.getDefaultNumber('colsExtra', 0);
+        this.rowsView = this.getDefaultNumber('rows',  1);
+        this.rows = this.rowsView + this.getDefaultNumber('rowsExtra', 0);
         this.widthView = this.width * this.colsView;
         this.heightView = this.height * this.rowsView;
 
@@ -182,7 +182,7 @@ class LED extends Device {
          *
          * But, if you really don't want that feature, then set the LED config's "fixed" property to true.
          */
-        this.fFixed = this.getDefault('fixed', false);
+        this.fFixed = this.getDefaultBoolean('fixed', false);
         if (!this.fFixed) {
             canvasView.style.width = "100%";
             canvasView.style.height = "auto";
@@ -191,14 +191,14 @@ class LED extends Device {
         /*
          * Hexagonal (aka "Lite-Brite" mode) and highlighting options
          */
-        this.fHexagonal = this.getDefault('hexagonal', false);
-        this.fHighlight = this.getDefault('highlight', true);
+        this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
+        this.fHighlight = this.getDefaultBoolean('highlight', true);
 
         /*
          * Persistent LEDS are the default, except for LED.TYPE.DIGIT, which is used with calculator displays
          * whose underlying hardware must constantly "refresh" the LEDs to prevent them from going dark.
          */
-        this.fPersistent = this.getDefault('persistent', (this.type < LED.TYPE.DIGIT));
+        this.fPersistent = this.getDefaultBoolean('persistent', (this.type < LED.TYPE.DIGIT));
 
         canvasView.setAttribute("width", this.widthView.toString());
         canvasView.setAttribute("height", this.heightView.toString());

@@ -518,7 +518,7 @@ class Device {
      * getDefault(idConfig, defaultValue)
      *
      * @this {Device}
-     * @param {*} idConfig
+     * @param {string} idConfig
      * @param {*} defaultValue
      * @returns {*}
      */
@@ -539,6 +539,45 @@ class Device {
             }
         }
         return value;
+    }
+
+    /**
+     * getDefaultBoolean(idConfig, defaultValue)
+     *
+     * @this {Device}
+     * @param {string} idConfig
+     * @param {boolean} defaultValue
+     * @returns {boolean}
+     */
+    getDefaultBoolean(idConfig, defaultValue)
+    {
+        return /** @type {boolean} */ (this.getDefault(idConfig, defaultValue));
+    }
+
+    /**
+     * getDefaultNumber(idConfig, defaultValue)
+     *
+     * @this {Device}
+     * @param {string} idConfig
+     * @param {number} defaultValue
+     * @returns {number}
+     */
+    getDefaultNumber(idConfig, defaultValue)
+    {
+        return /** @type {number} */ (this.getDefault(idConfig, defaultValue));
+    }
+
+    /**
+     * getDefaultString(idConfig, defaultValue)
+     *
+     * @this {Device}
+     * @param {string} idConfig
+     * @param {string} defaultValue
+     * @returns {string}
+     */
+    getDefaultString(idConfig, defaultValue)
+    {
+        return /** @type {string} */ (this.getDefault(idConfig, defaultValue));
     }
 
     /**
