@@ -1089,7 +1089,7 @@ class Chip extends Device {
      *
      * @this {Chip}
      * @param {Array.<string>} aTokens
-     * @param {Machine} [machine]
+     * @param {Device} [machine]
      * @returns {boolean} (true if processed, false if not)
      */
     onCommand(aTokens, machine)

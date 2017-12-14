@@ -245,7 +245,7 @@ class Device {
      *
      * @this {Device}
      * @param {string} sType
-     * @param {function(string)} fn
+     * @param {function(Array.<string>,Device)} fn
      */
     addHandler(sType, fn)
     {
@@ -497,7 +497,7 @@ class Device {
      *
      * @this {Device}
      * @param {string} sType
-     * @returns {Array.<function(string)>|undefined}
+     * @returns {Array.<function(Array.<string>,Device)>|undefined}
      */
     findHandlers(sType)
     {
