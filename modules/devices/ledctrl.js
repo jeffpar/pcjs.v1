@@ -145,9 +145,8 @@ class Chip extends Device {
             }
 
             /*
-             * The following set of properties are all debugger-related; see onCommand().
+             * Establish an onCommand() handler.
              */
-            this.sCommandPrev = "";
             this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
 
             this.iSymbolNext = this.nColsRemaining = 0;
@@ -814,54 +813,30 @@ class Chip extends Device {
     }
 
     /**
-     * onCommand(sCommand)
+     * onCommand(aTokens, machine)
      *
      * Processes commands for our "mini-debugger".
      *
-     * If sCommand is blank (ie, if Enter alone was pressed), then sCommandPrev will be used,
-     * but sCommandPrev is set only for certain commands deemed "repeatable" (eg, step and dump
-     * commands).
-     *
      * @this {Chip}
-     * @param {string} sCommand
+     * @param {Array.<string>} aTokens
+     * @param {Machine} [machine]
      * @returns {boolean} (true if processed, false if not)
      */
-    onCommand(sCommand)
+    onCommand(aTokens, machine)
     {
         let sResult = "";
-
-        if (sCommand == "") {
-            sCommand = this.sCommandPrev;
-        }
-        this.sCommandPrev = "";
-        sCommand = sCommand.trim();
-
-        let aCommands = sCommand.split(' ');
-        let s = aCommands[0], c = aCommands[1];
+        let s = aTokens[1], c = aTokens[2];
 
         switch(s[0]) {
-        case 'c':
-            if (c) {
-                this.println("set category '" + c + "'");
-                this.setCategory(c);
-            } else {
-                c = this.setCategory();
-                if (c) {
-                    this.println("cleared category '" + c + "'");
-                } else {
-                    this.println("no category set");
-                }
-            }
-            break;
-
         case '?':
-            sResult = "available commands:";
+            sResult = "";
             Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
+            if (sResult) sResult = "available commands:" + sResult;
             break;
 
         default:
-            if (sCommand) {
-                sResult = "unrecognized command '" + sCommand + "' (try '?')";
+            if (aTokens[0]) {
+                sResult = "unrecognized command '" + aTokens[0] + "' (try '?')";
             }
             break;
         }
@@ -1366,9 +1341,7 @@ Chip.BINDING = {
 
 Chip.COUNTS = [null, Chip.BINDING.COUNT_ON, Chip.BINDING.COUNT_OFF, Chip.BINDING.COUNT_CYCLE];
 
-Chip.COMMANDS = [
-    "c\tset category"
-];
+Chip.COMMANDS = [];
 
 Chip.RULES = {
     ANIM4:      "A4",       // animation using 4-bit counters for state/color cycling

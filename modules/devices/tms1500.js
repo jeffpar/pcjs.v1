@@ -326,7 +326,6 @@ class Reg64 extends Device {
  * @property {number} addrPrev
  * @property {number} addrStop
  * @property {Object} breakConditions
- * @property {string} sCommandPrev
  * @property {number} nStringFormat
  * @property {number} type (one of the Chip.TYPE values)
  */
@@ -540,7 +539,6 @@ class Chip extends Device {
         this.addrPrev = -1;
         this.addrStop = -1;
         this.breakConditions = {};
-        this.sCommandPrev = "";
         this.nStringFormat = Chip.SFORMAT.DEFAULT;
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
     }
@@ -1085,35 +1083,25 @@ class Chip extends Device {
     }
 
     /**
-     * onCommand(sCommand)
+     * onCommand(aTokens, machine)
      *
      * Processes commands for our "mini-debugger".
      *
-     * If sCommand is blank (ie, if Enter alone was pressed), then sCommandPrev will be used,
-     * but sCommandPrev is set only for certain commands deemed "repeatable" (eg, step and dump
-     * commands).
-     *
      * @this {Chip}
-     * @param {string} sCommand
+     * @param {Array.<string>} aTokens
+     * @param {Machine} [machine]
      * @returns {boolean} (true if processed, false if not)
      */
-    onCommand(sCommand)
+    onCommand(aTokens, machine)
     {
         let sResult = "";
-
-        if (sCommand == "") {
-            sCommand = this.sCommandPrev;
-        }
-        this.sCommandPrev = "";
-        this.nStringFormat = Chip.SFORMAT.DEFAULT;
-        sCommand = sCommand.trim();
-
-        let aCommands = sCommand.split(' ');
-        let s = aCommands[0];
-        let addr = Number.parseInt(aCommands[1], 16);
+        let s = aTokens[1];
+        let addr = Number.parseInt(aTokens[2], 16);
         if (isNaN(addr)) addr = -1;
-        let nWords = Number.parseInt(aCommands[2], 10) || 8;
+        let nWords = Number.parseInt(aTokens[3], 10) || 8;
 
+        this.nStringFormat = Chip.SFORMAT.DEFAULT;
+        
         switch(s[0]) {
         case 'b':
             let c = s.substr(1);
@@ -1148,16 +1136,16 @@ class Chip extends Device {
 
         case 't':
             if (s[1] == 'c') this.nStringFormat = Chip.SFORMAT.COMPACT;
-            nWords = Number.parseInt(aCommands[1], 10) || 1;
+            nWords = Number.parseInt(aTokens[2], 10) || 1;
             this.time.onStep(nWords);
-            this.sCommandPrev = sCommand;
+            if (machine) machine.sCommandPrev = aTokens[0];
             break;
 
         case 'r':
             if (s[1] == 'c') this.nStringFormat = Chip.SFORMAT.COMPACT;
             this.setRegister(s.substr(1), addr);
             sResult += this.toString(s[1]);
-            this.sCommandPrev = sCommand;
+            if (machine) machine.sCommandPrev = aTokens[0];
             break;
 
         case 'u':
@@ -1168,7 +1156,7 @@ class Chip extends Device {
                 sResult += this.disassemble(opCode, addr++);
             }
             this.addrPrev = addr;
-            this.sCommandPrev = sCommand;
+            if (machine) machine.sCommandPrev = aTokens[0];
             break;
 
         case '?':
@@ -1177,8 +1165,8 @@ class Chip extends Device {
             break;
 
         default:
-            if (sCommand) {
-                sResult = "unrecognized command '" + sCommand + "' (try '?')";
+            if (aTokens[0]) {
+                sResult = "unrecognized command '" + aTokens[0] + "' (try '?')";
             }
             break;
         }

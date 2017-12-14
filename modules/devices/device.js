@@ -61,6 +61,7 @@ var MACHINE = "Machine";
  * @property {string} idDevice
  * @property {Config} config
  * @property {Object} bindings [added by addBindings()]
+ * @property {string} sCommandPrev
  */
 class Device {
     /**
@@ -100,6 +101,7 @@ class Device {
         this.checkVersion(this.config);
         this.checkOverrides(this.config);
         this.addBindings(this.config['bindings']);
+        this.sCommandPrev = "";
     }
 
     /**
@@ -155,26 +157,18 @@ class Device {
                          * returns true.
                          */
                         if (keyCode == 13) {
-                            let afn = device.findHandlers(Device.HANDLER.COMMAND);
-                            if (afn) {
-                                /*
-                                 * At the time we call any command handlers, a linefeed will not yet have been
-                                 * appended to the text, so for consistency, we prevent the default behavior and
-                                 * add the linefeed ourselves.  Unfortunately, one side-effect is that we must
-                                 * go to some extra effort to ensure the cursor remains in view; hence the stupid
-                                 * blur() and focus() calls.
-                                 */
-                                event.preventDefault();
-                                sText = (elementTextArea.value += '\n');
-                                elementTextArea.blur();
-                                elementTextArea.focus();
-
-                                let i = sText.lastIndexOf('\n', sText.length - 2);
-                                let sCommand = sText.slice(i + 1, -1);
-                                for (let i = 0; i < afn.length; i++) {
-                                    if (afn[i](sCommand)) break;
-                                }
-                            }
+                            /*
+                             * At the time we call any command handlers, a linefeed will not yet have been
+                             * appended to the text, so for consistency, we prevent the default behavior and
+                             * add the linefeed ourselves.  Unfortunately, one side-effect is that we must
+                             * go to some extra effort to ensure the cursor remains in view; hence the stupid
+                             * blur() and focus() calls.
+                             */
+                            event.preventDefault();
+                            sText = (elementTextArea.value += '\n');
+                            elementTextArea.blur();
+                            elementTextArea.focus();
+                            device.doCommand(sText);
                         }
                     }
                 }
@@ -381,6 +375,53 @@ class Device {
         if (element) element.value = "";
     }
 
+    /**
+     * doCommand(sText)
+     * 
+     * @this {Device}
+     * @param {string} sText
+     */
+    doCommand(sText)
+    {
+        let afnHandlers = this.findHandlers(Device.HANDLER.COMMAND);
+        if (afnHandlers) {
+
+            let i = sText.lastIndexOf('\n', sText.length - 2);
+            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev;
+            this.sCommandPrev = "";
+            sCommand = sCommand.trim();
+            let aTokens = sCommand.split(' ');
+    
+            switch(aTokens[0]) {
+            case 'c':
+                let c = aTokens[1];
+                if (c) {
+                    this.println("set category '" + c + "'");
+                    this.setCategory(c);
+                } else {
+                    c = this.setCategory();
+                    if (c) {
+                        this.println("cleared category '" + c + "'");
+                    } else {
+                        this.println("no category set");
+                    }
+                }
+                break;
+            case '?':
+                let sResult = "";
+                Device.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
+                if (sResult) this.println("default commands:" + sResult);
+                /* falls through */
+            default:
+                aTokens.unshift(sCommand);
+                for (let i = 0; i < afnHandlers.length; i++) {
+                    if (afnHandlers[i](aTokens, this)) break;
+                }
+                break;
+            }
+        }
+    }
+    
     /**
      * findBinding(name, fAll)
      *
@@ -981,6 +1022,10 @@ Device.CATEGORY = {
     TIME:       "time",
     BUFFER:     "buffer"
 };
+
+Device.COMMANDS = [
+    "c\tset category"
+];
 
 Device.HANDLER = {
     COMMAND:    "command"
