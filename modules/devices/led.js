@@ -88,6 +88,10 @@
  * @property {number} rows (default is 1)
  * @property {string} color (default is none; ie, transparent foreground)
  * @property {string} colorBackground (default is none; ie, transparent background)
+ * @property {boolean} fFixed (default is false, meaning the view may fill the container to its maximum size)
+ * @property {boolean} fHexagonal (default is false)
+ * @property {boolean} fHighlight (default is true)
+ * @property {boolean} fPersistent (default is false for LED.TYPE.DIGIT, meaning the view will be blanked if not refreshed)
  * @property {number} widthView (computed)
  * @property {number} heightView (computed)
  * @property {number} widthGrid (computed)
@@ -101,10 +105,6 @@
  * }} bindings
  * @property {Array.<string|number>} buffer
  * @property {Array.<string|number>|null} bufferClone
- * @property {boolean} fFixed (default is false, meaning the view may fill the container to its maximum size)
- * @property {boolean} fHexagonal (default is false)
- * @property {boolean} fHighlight (default is true)
- * @property {boolean} fPersistent (default is false for LED.TYPE.DIGIT, meaning the view will be blanked if not refreshed)
  * @property {boolean} fBufferModified
  * @property {boolean} fTickled
  */
@@ -153,10 +153,10 @@ class LED extends Device {
         this.type = this.getBounded(this.config['type'] || LED.TYPE.ROUND, LED.TYPE.ROUND, LED.TYPE.DIGIT);
         this.widthCell = LED.SIZES[this.type][0];
         this.heightCell = LED.SIZES[this.type][1];
-        this.width = this.config['width'] || this.widthCell;
-        this.height = this.config['height'] || this.heightCell;
-        this.cols = this.config['cols'] || 1;
-        this.rows = this.config['rows'] || 1;
+        this.width = this.getDefault('width', this.widthCell);
+        this.height = this.getDefault('height', this.heightCell);
+        this.cols = this.getDefault('cols',  1);
+        this.rows = this.getDefault('rows', 1);
         this.widthView = this.width * this.cols;
         this.heightView = this.height * this.rows;
 
@@ -176,25 +176,23 @@ class LED extends Device {
          *
          * But, if you really don't want that feature, then set the LED config's "fixed" property to true.
          */
-        this.fFixed = this.config['fixed'] || false;
+        this.fFixed = this.getDefault('fixed', false);
         if (!this.fFixed) {
             canvasView.style.width = "100%";
             canvasView.style.height = "auto";
         }
 
         /*
+         * Hexagonal (aka "Lite-Brite" mode) and highlighting options
+         */
+        this.fHexagonal = this.getDefault('hexagonal', false);
+        this.fHighlight = this.getDefault('highlight', true);
+
+        /*
          * Persistent LEDS are the default, except for LED.TYPE.DIGIT, which is used with calculator displays
          * whose underlying hardware must constantly "refresh" the LEDs to prevent them from going dark.
          */
-        this.fPersistent = this.config['persistent'];
-        if (this.fPersistent == undefined) this.fPersistent = (this.type < LED.TYPE.DIGIT);
-
-        /*
-         * Hexagonal (aka "Lite-Brite" mode) and highlighting options
-         */
-        this.fHexagonal = this.config['hexagonal'] || false;
-        this.fHighlight = this.config['highlight'];
-        if (this.fHighlight === undefined) this.fHighlight = true;
+        this.fPersistent = this.getDefault('persistent', (this.type < LED.TYPE.DIGIT));
 
         canvasView.setAttribute("width", this.widthView.toString());
         canvasView.setAttribute("height", this.heightView.toString());

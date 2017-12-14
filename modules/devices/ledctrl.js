@@ -34,12 +34,12 @@
  * @property {Object} [bindings]
  * @property {number} [version]
  * @property {Array.<string>} [overrides]
- * @property {boolean} [toggle]
  * @property {boolean} [wrap]
  * @property {string} [rule]
  * @property {string} [pattern]
  * @property {Object} [patterns]
  * @property {Object} [colors]
+ * @property {boolean} [toggleColor]
  */
 
 /**
@@ -47,10 +47,10 @@
  *
  * @class {Chip}
  * @unrestricted
- * @property {boolean} fToggle
  * @property {boolean} fWrap
  * @property {string} sRule
  * @property {string} sPattern
+ * @property {boolean} fToggleColor
  * @property {LED} leds
  * @property {Object} colorPalette
  * @property {string} colorDefault (obtained from the leds)
@@ -71,22 +71,20 @@ class Chip extends Device {
         super(idMachine, idDevice, Chip.VERSION, config);
 
         /*
-         * The 'toggle' property is set to true for grids like the "Game of Life", where you normally
-         * just want to toggle a cell on or off; it's false for the "Lite-Brite" grid where we're dealing
-         * with LEDs of multiple colors.  I admit it's a kludgy distinction between grids with different
-         * UI requirements, but it's good enough to get the ball rolling.  We'll revisit the UI later.
+         * These are grid "behavior" properties.  If 'wrap' is true, then any off-grid neighbor cell
+         * locations are mapped to the opposite edge; otherwise, they are mapped to the LEDs "scratch" row.
          */
-        this.fToggle = this.getDefault(this.config['toggle'], true);
+        this.fWrap = this.getDefault('wrap', false);
+        this.sRule = this.getDefault('rule', "B3/S23");    // default rule (births require 3 neighbors, survivors require 2 or 3)
+        this.sPattern = this.getDefault('pattern', "");
 
         /*
-         * These are grid "behavior" properties.  If 'wrap' is true, then any off-grid neighbor cell locations
-         * are mapped to the opposite edge; otherwise, they are mapped to the LEDs "scratch" row.
+         * The 'toggleColor' property currently affects only grids that have a color palette: if true,
+         * then only an LED's color is toggled; otherwise, only its state (ie, ON or OFF) is toggled.
          */
-        this.fWrap = this.getDefault(this.config['wrap'], false);
-        this.sRule = this.getDefault(this.config['rule'], "B3/S23");    // default rule (births require 3 neighbors, survivors require 2 or 3)
-        this.sPattern = this.getDefault(this.config['pattern'], "");
-
-        /*
+        this.fToggleColor = this.getDefault('toggleColor', false);
+        
+                /*
          * Since all bindings should have been completed by super(), we can make a preliminary call
          * to getCounts() to determine how many counts are stored per LED, to preallocate a count buffer.
          */
@@ -184,8 +182,15 @@ class Chip extends Device {
             };
             break;
 
-        case Chip.BINDING.SAVE_TO_URL:
+        case Chip.BINDING.SAVE:
             element.onclick = function onClickSave() {
+                let sPattern = chip.savePattern();
+                chip.println(sPattern);
+            };
+            break;
+
+        case Chip.BINDING.SAVE_TO_URL:
+            element.onclick = function onClickSaveToURL() {
                 let sPattern = chip.savePattern();
                 chip.println(sPattern);
                 let href = window.location.href;
@@ -195,6 +200,15 @@ class Chip extends Device {
                     href += ((href.indexOf('?') < 0)? '?' : '&') + "pattern=" + sPattern;
                 }
                 window.location = href;
+            };
+            break;
+
+        case Chip.BINDING.SYMBOL_INPUT:
+            element.onkeypress = function onChangeSymbol(event) {
+                element.value = String.fromCharCode(event.charCode);
+                let elementPreview = chip.bindings[Chip.BINDING.SYMBOL_PREVIEW];
+                if (elementPreview) elementPreview.textContent = element.value;
+                event.preventDefault();
             };
             break;
 
@@ -795,22 +809,10 @@ class Chip extends Device {
         if (col >= 0 && row >= 0) {
             if (this.colorSelected) {
                 if (!leds.setLEDColor(col, row, this.colorSelected)) {
-                    if (this.fToggle) {
-                        leds.setLEDState(col, row, LED.STATE.ON - leds.getLEDState(col, row));
-                    } else {
-                        /*
-                         * Non-toggle mode used to require clicking through 3 states: on, then off, then
-                         * transparent.  But when creating an initial image, you don't really care about the
-                         * middle (off) state; it's a legitimate state for blinking LEDs, but having to click
-                         * through that extra state just to remove a misplaced LED quickly becomes tedious.
-                         *
-                         *      if (!leds.getLEDState(col, row)) {
-                         *          leds.setLEDColor(col, row);
-                         *      } else {
-                         *          leds.setLEDState(col, row, LED.STATE.OFF);
-                         *      }
-                         */
+                    if (this.fToggleColor) {
                         leds.setLEDColor(col, row);
+                    } else {
+                        leds.setLEDState(col, row, LED.STATE.ON - leds.getLEDState(col, row));
                     }
                 } else {
                     leds.setLEDState(col, row, LED.STATE.ON);
@@ -1233,7 +1235,10 @@ Chip.BINDING = {
     COUNT_CYCLE:            "countCycle",
     IMAGE_SELECTION:        "backgroundImage",
     PATTERN_SELECTION:      "patterns",
-    SAVE_TO_URL:            "saveToURL",
+    SYMBOL_INPUT:           "symbolInput",
+    SYMBOL_PREVIEW:         "symbolPreview",
+    SAVE:                   "save",
+    SAVE_TO_URL:            "saveToURL"
 };
 
 Chip.COUNTS = [null, Chip.BINDING.COUNT_ON, Chip.BINDING.COUNT_OFF, Chip.BINDING.COUNT_CYCLE];

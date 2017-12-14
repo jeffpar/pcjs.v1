@@ -113,8 +113,8 @@ class ROM extends Device {
                 "type":             LED.TYPE.ROUND,
                 "cols":             this.cols,
                 "rows":             this.rows,
-                "color":            config['colorROM'] || "green",
-                "backgroundColor":  config['backgroundColorROM'] || "black",
+                "color":            this.getDefault('colorROM', "green"),
+                "backgroundColor":  this.getDefault('backgroundColorROM', "black"),
                 "persistent":       true
             };
             this.ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);

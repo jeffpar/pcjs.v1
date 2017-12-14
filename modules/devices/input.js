@@ -112,14 +112,14 @@ class Input extends Device {
          * I've made this an option for other input surfaces, like LED arrays, where you might want to turn a
          * series of LEDs on or off.
          */
-        this.fDrag = !!this.config['drag'];
+        this.fDrag = this.getDefault('drag', false);
 
         /*
          * If 'scroll' is true, then we do NOT call preventDefault() on touch events; this permits the input
          * surface to be scrolled like any other part of the page.  The default is false, because this has other
          * side-effects (eg, inadvertent zooms).
          */
-        this.fScroll = !!this.config['scroll'];
+        this.fScroll = this.getDefault('scroll', false);
 
         /*
          * This is set on receipt of the first 'touch' event of any kind, and is used by the 'mouse' event
@@ -180,13 +180,13 @@ class Input extends Device {
              * If 'hexagonal' is true, then we treat the input grid as hexagonal, where even rows of the associated
              * display are offset.
              */
-            this.fHexagonal = !!this.config['hexagonal'];
+            this.fHexagonal = this.getDefault('hexagonal', false);
             
             /*
              * The 'buttonDelay' setting is only necessary for devices (ie, old calculator chips) that are either slow
              * to respond and/or have debouncing logic that would otherwise be defeated.
              */
-            this.buttonDelay = this.config['buttonDelay'] || 0;
+            this.buttonDelay = this.getDefault('buttonDelay', 0);
 
             /*
              * To calculate the average button width (cxButton), we know that the overall width

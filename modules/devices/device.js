@@ -515,16 +515,30 @@ class Device {
     }
 
     /**
-     * getDefault(value, defaultValue)
+     * getDefault(idConfig, defaultValue)
      *
      * @this {Device}
-     * @param {*} value
+     * @param {*} idConfig
      * @param {*} defaultValue
      * @returns {*}
      */
-    getDefault(value, defaultValue)
+    getDefault(idConfig, defaultValue)
     {
-        return (value !== undefined)? value : defaultValue;
+        let value = this.config[idConfig];
+        if (value === undefined) {
+            value = defaultValue;
+        } else {
+            let type = typeof defaultValue;
+            if (typeof value != type) {
+                this.assert(false);
+                if (type == "boolean") {
+                    value = !!value;
+                } else if (typeof defaultValue == "number") {
+                    value = +value;
+                }
+            }
+        }
+        return value;
     }
 
     /**

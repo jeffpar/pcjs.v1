@@ -22,9 +22,10 @@ machines:
         },
         "ledChip": {
           "class": "Chip",
-          "rule": "C8",
           "bindings": {
-            "save": "saveLS"
+            "save": "saveLS",
+            "symbolInput": "inputLS",
+            "symbolPreview": "previewLS"
           },
           "overrides": ["backgroundImage"]
         },
@@ -70,15 +71,29 @@ styles:
     margin-bottom: 16px;
   displayLS:
     position: relative;
-    background-color: gray;
-    line-height: 0;
+    background-color: rgba(0,0,0,0);
     margin-bottom: 8px;
     background-image: none;
     background-size: 100% 100%;
-  diagsLS:
-    float: left;
+  inputLS:
+    width: 16px;
+  previewLS:
+    position: absolute;
+    font-size: 32em;
+	font-family: Helvetica;
+	font-weight: normal;
+    width: 100%;
+    height: 100%;
+    line-height: 100%;
+    text-align: center;
+    vertical-align: middle;
   printLS:
     font-family: Monaco,"Lucida Console",monospace;
+  .diags:
+    float: left;
+  .controls:
+    float: left;
+    width: 100%;
 ---
 
 Scrolling LEDs
@@ -87,10 +102,10 @@ Scrolling LEDs
 {% include machine.html id="ledSquare" config="json" %}
 
 <div id="ledSquare">
+  <div id="previewLS">F</div>
   <div id="displayLS"></div>
-  <button id="saveLS">Save</button>
 </div>
-<div id="diagsLS">
+<div class="diags">
   <div>
     <textarea id="printLS" cols="78" rows="16"></textarea>
   </div>
@@ -99,4 +114,8 @@ Scrolling LEDs
   <button id="resetLS">Reset</button>
   <button id="clearLS">Clear</button>
   <input type="range" min="1" max="120" value="15" class="slider" id="throttleLS"><span id="speedLS">Stopped</span>
+</div>
+<div class="controls">
+  Symbol: <input id="inputLS" type="text" value="F"/>
+  <button id="saveLS">Save</button>
 </div>

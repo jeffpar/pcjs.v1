@@ -123,14 +123,12 @@ class Time extends Device {
          * suggests it was much lower.  The TMS-1500 does burn through a lot of cycles (minimum of 128) per instruction,
          * but either that cycle burn was much higher, or the underlying clock speed was much lower.  I assume the latter.
          */
-        this.nCyclesMinimum = this.config['cyclesMinimum'] || 100000;
-        this.nCyclesMaximum = this.config['cyclesMaximum'] || 3000000;
-        this.nCyclesPerSecond = this.getBounded(this.config['cyclesPerSecond'] || 650000, this.nCyclesMinimum, this.nCyclesMaximum);
-        this.nYieldsPerSecond = this.getBounded(this.config['yieldsPerSecond'] || Time.YIELDS_PER_SECOND, 30, 120);
-        this.nYieldsPerUpdate = this.getBounded(this.config['yieldsPerUpdate'] || Time.YIELDS_PER_UPDATE, 1, this.nYieldsPerSecond);
-
-        this.fRequestAnimationFrame = this.config['requestAnimationFrame'];
-        if (this.fRequestAnimationFrame === undefined) this.fRequestAnimationFrame = true;
+        this.nCyclesMinimum = this.getDefault('cyclesMinimum', 100000);
+        this.nCyclesMaximum = this.getDefault('cyclesMaximum', 3000000);
+        this.nCyclesPerSecond = this.getBounded(this.getDefault('cyclesPerSecond', 650000), this.nCyclesMinimum, this.nCyclesMaximum);
+        this.nYieldsPerSecond = this.getBounded(this.getDefault('yieldsPerSecond', Time.YIELDS_PER_SECOND), 30, 120);
+        this.nYieldsPerUpdate = this.getBounded(this.getDefault('yieldsPerUpdate', Time.YIELDS_PER_UPDATE), 1, this.nYieldsPerSecond);
+        this.fRequestAnimationFrame = this.getDefault('requestAnimationFrame', true);
 
         this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
         this.mhzBase = (this.nCyclesPerSecond / 10000) / 100;

@@ -345,7 +345,7 @@ class Chip extends Device {
     {
         super(idMachine, idDevice, Chip.VERSION, config);
 
-        let sType = this.config['type'] || "1501";
+        let sType = this.getDefault('type', "1501");
         this.type = Number.parseInt(sType.slice(-4), 10);
 
         this.regMap = {};
