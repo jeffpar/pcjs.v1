@@ -91,9 +91,6 @@ styles:
     font-family: Monaco,"Lucida Console",monospace;
   .diags:
     float: left;
-  .controls:
-    float: left;
-    width: 100%;
 ---
 
 Scrolling LEDs
@@ -109,13 +106,8 @@ Scrolling LEDs
   <div>
     <textarea id="printLS" cols="78" rows="16"></textarea>
   </div>
-  <button id="runLS">Run</button>
-  <button id="stepLS">Step</button>
-  <button id="resetLS">Reset</button>
-  <button id="clearLS">Clear</button>
-  <input type="range" min="1" max="120" value="15" class="slider" id="throttleLS"><span id="speedLS">Stopped</span>
-</div>
-<div class="controls">
   Symbol: <input id="inputLS" type="text" value="F"/>
   <button id="saveLS">Save</button>
+  <button id="resetLS">Reset</button>
+  <button id="clearLS">Clear</button>
 </div>
