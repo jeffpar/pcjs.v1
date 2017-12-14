@@ -539,7 +539,7 @@ class Chip extends Device {
     /**
      * loadPattern(id)
      *
-     * If no id is specified, we load the initialization pattern, if any, set via the LCConfig
+     * If no id is specified, load the initialization pattern, if any, set via the LCConfig
      * "pattern" property (which, in turn, can be set as URL override, if desired).
      *
      * NOTE: Our initialization pattern is a extended single-string version of the RLE pattern
@@ -630,20 +630,34 @@ class Chip extends Device {
             return false;
         }
 
-        let i = 0, col = iCol, row = iRow;
-        let aTokens = sPattern.split(/([a-z$])/i);
+        return this.loadPatternString(iCol, iRow, sPattern);
+    }
 
-        leds.clearBuffer();
-
+    /**
+     * loadPatternString(col, row, sPattern)
+     *
+     * @this {Chip}
+     * @param {number} col
+     * @param {number} row
+     * @param {string} sPattern
+     * @returns {boolean}
+     */
+    loadPatternString(col, row, sPattern)
+    {
+        let leds = this.leds;
         let rgb = [0, 0, 0, 1], counts = 0;
         let fColors = false, fCounts = false;
-
+        let aTokens = sPattern.split(/([a-z$])/i);
+        
+        leds.clearBuffer();
+        
         /*
          * We could add checks that verify that col and row stay within the bounds of the specified
          * width and height of the pattern, but it's possible that there are some legit patterns out
          * there that didn't get their bounds quite right.  And in any case, no harm can come of it,
          * because setLEDState() will ignore any parameters outside the LED's array bounds.
          */
+        let i = 0, iCol = col;
         while (i < aTokens.length - 1) {
             let n = aTokens[i++];
             let token = aTokens[i++];
@@ -706,7 +720,7 @@ class Chip extends Device {
         leds.drawBuffer(true);
         return true;
     }
-
+    
     /**
      * loadState(state)
      *
@@ -1003,7 +1017,7 @@ class Chip extends Device {
         };
 
         /*
-         * Before we begin, see if either fMinWidth or fMinHeight are set, requiring an initial bounding prescan.
+         * Before we begin, see if either fMinWidth or fMinHeight are set, requiring a bounds prescan.
          */
         let colMin = 0, colMax = leds.cols - 1;
         let rowMin = 0, rowMax = leds.rows - 1;
