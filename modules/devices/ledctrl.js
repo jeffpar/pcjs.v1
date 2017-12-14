@@ -38,8 +38,9 @@
  * @property {string} [rule]
  * @property {string} [pattern]
  * @property {Object} [patterns]
- * @property {Object} [colors]
+ * @property {string} [symbols]
  * @property {boolean} [toggleColor]
+ * @property {Object} [colors]
  */
 
 /**
@@ -50,6 +51,7 @@
  * @property {boolean} fWrap
  * @property {string} sRule
  * @property {string} sPattern
+ * @property {string} sSymbols
  * @property {boolean} fToggleColor
  * @property {LED} leds
  * @property {Object} colorPalette
@@ -75,9 +77,10 @@ class Chip extends Device {
          * locations are mapped to the opposite edge; otherwise, they are mapped to the LEDs "scratch" row.
          */
         this.fWrap = this.getDefault('wrap', false);
-        this.sRule = this.getDefault('rule', "B3/S23");    // default rule (births require 3 neighbors, survivors require 2 or 3)
+        this.sRule = this.getDefault('rule', "");
         this.sPattern = this.getDefault('pattern', "");
-
+        this.sSymbols = this.getDefault('symbols', "");
+        
         /*
          * The 'toggleColor' property currently affects only grids that have a color palette: if true,
          * then only an LED's color is toggled; otherwise, only its state (ie, ON or OFF) is toggled.
@@ -113,7 +116,7 @@ class Chip extends Device {
 
             let configInput = {
                 "class":        "Input",
-                "location":     [0, 0, leds.widthView, leds.heightView, leds.cols, leds.rows],
+                "location":     [0, 0, leds.widthView, leds.heightView, leds.colsView, leds.rowsView],
                 "drag":         !!(this.input && this.input.fDrag),
                 "scroll":       !!(this.input && this.input.fScroll),
                 "hexagonal":    leds.fHexagonal,
@@ -146,6 +149,8 @@ class Chip extends Device {
              */
             this.sCommandPrev = "";
             this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
+
+            if (this.sSymbols) this.loadPatternString(0, 0, Chip.SYMBOLS[this.sSymbols[0]]);
         }
     }
 
@@ -275,11 +280,14 @@ class Chip extends Device {
             let nAlive;
             do {
                 switch(this.sRule) {
-                case "C8":
-                    nAlive = this.countCells();
+                case Chip.RULES.ANIM4:
+                    nAlive = this.doCycling();
                     break;
-                default:
-                    nAlive = this.countNeighbors();
+                case Chip.RULES.LEFT1:
+                    nAlive = this.doShifting(1);
+                    break;
+                case Chip.RULES.LIFE1:
+                    nAlive = this.doCounting();
                     break;
                 }
                 if (!nCyclesTarget) this.println("living cells: " + nAlive);
@@ -290,78 +298,11 @@ class Chip extends Device {
     }
 
     /**
-     * countCells()
+     * doCounting()
      *
-     * @this {Chip}
-     * @returns {number}
-     */
-    countCells()
-    {
-        let cAlive = 0;
-        let leds = this.leds;
-        let nCols = leds.cols, nRows = leds.rows;
-        let counts = this.countBuffer;
-        for (let row = 0; row < nRows; row++) {
-            for (let col = 0; col < nCols; col++) {
-                if (!leds.getLEDCounts(col, row, counts)) continue;
-                cAlive++;
-                /*
-                 * Here's the layout of each cell's counts (which mirrors the Chip.COUNTS layout):
-                 *
-                 *      [0] is the "working" count
-                 *      [1] is the ON count
-                 *      [2] is the OFF count
-                 *      [3] is the color-cycle count
-                 *
-                 * Whenever the working count is zero, we examine the cell's state and advance it to
-                 * the next state: if it was ON, it goes to OFF (and the OFF count is loaded into
-                 * the working count); if it was OFF, then color-cycle count (if any) is applied, and
-                 * the state goes to ON (and the ON count is loaded).
-                 */
-                if (counts[0]) {
-                    counts[0]--;
-                }
-                else {
-                    let state = leds.getLEDState(col, row), stateNew = state || 0;
-                    switch(state) {
-                    case LED.STATE.ON:
-                        stateNew = LED.STATE.OFF;
-                        counts[0] = counts[2];
-                        if (counts[0]) {
-                            counts[0]--;
-                            break;
-                        }
-                        /* falls through */
-                    case LED.STATE.OFF:
-                        if (counts[3]) {
-                            let color = leds.getLEDColor(col, row);
-                            let iColor = this.colors.indexOf(color);
-                            if (iColor >= 0) {
-                                iColor = (iColor + counts[3]);
-                                while (iColor >= this.colors.length) iColor -= this.colors.length;
-                                leds.setLEDColor(col, row, this.colors[iColor]);
-                            }
-                        }
-                        stateNew = LED.STATE.ON;
-                        counts[0] = counts[1];
-                        if (counts[0]) {
-                            counts[0]--;
-                        }
-                        break;
-                    }
-                    if (stateNew !== state) leds.setLEDState(col, row, stateNew);
-                }
-                leds.setLEDCounts(col, row, counts);
-            }
-        }
-        return cAlive;
-    }
-
-    /**
-     * countNeighbors()
-     *
-     * This contains a straight-forward implementation of the Conway "Game of Life" rules ("B3/S23"),
-     * iterating row-by-row and column-by-column.  It takes advantage of the one-dimensional LED
+     * Implements rule LIFE1 (straight-forward implementation of Conway's Game of Life rule "B3/S23").
+     * 
+     * This iterates row-by-row and column-by-column.  It takes advantage of the one-dimensional LED
      * buffer layout to move through the entire grid with a "master" cell index (iCell) and corresponding
      * indexes for all 8 "neighboring" cells (iNO, iNE, iEA, iSE, iSO, iSW, iWE, and iNW), incrementing
      * them all in unison.
@@ -385,7 +326,7 @@ class Chip extends Device {
      * @this {Chip}
      * @returns {number}
      */
-    countNeighbors()
+    doCounting()
     {
         let cAlive = 0;
         let buffer = this.leds.getBuffer();
@@ -476,6 +417,100 @@ class Chip extends Device {
         }
         this.assert(iCell == nIncPerGrid);
         this.leds.swapBuffers();
+        return cAlive;
+    }
+
+    /**
+     * doCycling()
+     *
+     * Implements rule ANIM4 (animation using 4-bit counters for state/color cycling)
+     *
+     * @this {Chip}
+     * @returns {number}
+     */
+    doCycling()
+    {
+        let cAlive = 0;
+        let leds = this.leds;
+        let nCols = leds.cols, nRows = leds.rows;
+        let counts = this.countBuffer;
+        for (let row = 0; row < nRows; row++) {
+            for (let col = 0; col < nCols; col++) {
+                if (!leds.getLEDCounts(col, row, counts)) continue;
+                cAlive++;
+                /*
+                 * Here's the layout of each cell's counts (which mirrors the Chip.COUNTS layout):
+                 *
+                 *      [0] is the "working" count
+                 *      [1] is the ON count
+                 *      [2] is the OFF count
+                 *      [3] is the color-cycle count
+                 *
+                 * Whenever the working count is zero, we examine the cell's state and advance it to
+                 * the next state: if it was ON, it goes to OFF (and the OFF count is loaded into
+                 * the working count); if it was OFF, then color-cycle count (if any) is applied, and
+                 * the state goes to ON (and the ON count is loaded).
+                 */
+                if (counts[0]) {
+                    counts[0]--;
+                }
+                else {
+                    let state = leds.getLEDState(col, row), stateNew = state || 0;
+                    switch(state) {
+                    case LED.STATE.ON:
+                        stateNew = LED.STATE.OFF;
+                        counts[0] = counts[2];
+                        if (counts[0]) {
+                            counts[0]--;
+                            break;
+                        }
+                        /* falls through */
+                    case LED.STATE.OFF:
+                        if (counts[3]) {
+                            let color = leds.getLEDColor(col, row);
+                            let iColor = this.colors.indexOf(color);
+                            if (iColor >= 0) {
+                                iColor = (iColor + counts[3]);
+                                while (iColor >= this.colors.length) iColor -= this.colors.length;
+                                leds.setLEDColor(col, row, this.colors[iColor]);
+                            }
+                        }
+                        stateNew = LED.STATE.ON;
+                        counts[0] = counts[1];
+                        if (counts[0]) {
+                            counts[0]--;
+                        }
+                        break;
+                    }
+                    if (stateNew !== state) leds.setLEDState(col, row, stateNew);
+                }
+                leds.setLEDCounts(col, row, counts);
+            }
+        }
+        return cAlive;
+    }
+
+    /**
+     * doShifting()
+     *
+     * Implements rule LEFT1 (shift left one cell)
+     * 
+     * @this {Chip}
+     * @param {number} [shift] (default is 1, for a leftward shift of one cell)
+     * @returns {number}
+     */
+    doShifting(shift = 1)
+    {
+        let cAlive = 0;
+        let leds = this.leds;
+        let nCols = leds.cols, nRows = leds.rows;
+        for (let row = 0; row < nRows; row++) {
+            for (let col = 0; col < nCols; col++) {
+                let state = leds.getLEDState(col + shift, row);
+                if (state) cAlive++;
+                leds.setLEDState(col, row, state);
+            }
+        }
         return cAlive;
     }
 
@@ -748,10 +783,10 @@ class Chip extends Device {
             //     this.println("Chip state error: " + err.message);
             //     return false;
             // }
-            let stateLEDs = state['stateLEDs'] || state[1];
-            if (!Device.getURLParms()['pattern'] && !Device.getURLParms()[Chip.BINDING.IMAGE_SELECTION] && stateLEDs && this.leds) {
-                if (!this.leds.loadState(stateLEDs)) {
-                    return false;
+            if (!Device.getURLParms()['pattern'] && !Device.getURLParms()[Chip.BINDING.IMAGE_SELECTION]) {
+                let stateLEDs = state['stateLEDs'] || state[1];
+                if (stateLEDs && this.leds && !this.sSymbols) {
+                    if (!this.leds.loadState(stateLEDs)) return false;
                 }
             }
         }
@@ -1270,9 +1305,9 @@ class Chip extends Device {
      * single-stepped), and 3) a start() or stop() transition has occurred.
      *
      * Of those, all we currently care about are step() and stop() notifications, because we want to make sure
-     * the LED display is in sync with the last LED buffer update performed by countNeighbors().  In both of those
-     * cases, time has stopped.  If time has NOT stopped, then the LED's normal animator function (ledAnimate())
-     * takes care of updating the LED display.
+     * the LED display is in sync with the last LED buffer update.  In both of those cases, time has stopped.
+     * If time has NOT stopped, then the LED's normal animator function (ledAnimate()) takes care of updating
+     * the LED display.
      *
      * @this {Chip}
      * @param {boolean} [fTransition]
@@ -1307,6 +1342,12 @@ Chip.COUNTS = [null, Chip.BINDING.COUNT_ON, Chip.BINDING.COUNT_OFF, Chip.BINDING
 Chip.COMMANDS = [
     "c\tset category"
 ];
+
+Chip.RULES = {
+    ANIM4:      "A4",       // animation using 4-bit counters for state/color cycling
+    LEFT1:      "L1",       // shift left one cell
+    LIFE1:      "B3/S23"    // Game of Life v1.0 (births require 3 neighbors, survivors require 2 or 3)
+};
 
 /*
  * Symbols can be formed with the following 16x16 grid patterns.

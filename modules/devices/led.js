@@ -38,8 +38,9 @@
  * @property {number} [width] (the view width of a cell)
  * @property {number} [height] (the view height of a cell)
  * @property {number} [cols]
- * @property {number} [colsVisible] (default value is cols)
+ * @property {number} [colsExtra] (number of hidden columns, if any, on the right)
  * @property {number} [rows]
+ * @property {number} [rowsExtra] (number of hidden rows, if any, on the bottom; TBD)
  * @property {string} [color]
  * @property {string} [backgroundColor]
  * @property {boolean} [fixed]
@@ -87,6 +88,8 @@
  * @property {number} height (default is 128 for LED.TYPE.DIGIT, 32 otherwise; see LED.SIZES)
  * @property {number} cols (default is 1)
  * @property {number} rows (default is 1)
+ * @property {number} colsView (default is cols)
+ * @property {number} rowsView (default is rows)
  * @property {string} color (default is none; ie, transparent foreground)
  * @property {string} colorBackground (default is none; ie, transparent background)
  * @property {boolean} fFixed (default is false, meaning the view may fill the container to its maximum size)
@@ -156,11 +159,12 @@ class LED extends Device {
         this.heightCell = LED.SIZES[this.type][1];
         this.width = this.getDefault('width', this.widthCell);
         this.height = this.getDefault('height', this.heightCell);
-        this.colsVisible = this.getDefault('cols',  1);
-        this.cols = this.colsVisible + this.getDefault('colsExtra', 0);
-        this.rows = this.getDefault('rows', 1);
-        this.widthView = this.width * this.colsVisible;
-        this.heightView = this.height * this.rows;
+        this.colsView = this.getDefault('cols',  1);
+        this.cols = this.colsView + this.getDefault('colsExtra', 0);
+        this.rowsView = this.getDefault('rows',  1);
+        this.rows = this.rowsView + this.getDefault('rowsExtra', 0);
+        this.widthView = this.width * this.colsView;
+        this.heightView = this.height * this.rowsView;
 
         this.colorTransparent = this.getRGBAColor("black", 0);
         this.colorOn = this.getRGBColor(this.config['color']) || this.colorTransparent;
@@ -207,8 +211,8 @@ class LED extends Device {
          */
         this.canvasGrid = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
         if (this.canvasGrid) {
-            this.canvasGrid.width = this.widthGrid = this.widthCell * this.colsVisible;
-            this.canvasGrid.height = this.heightGrid = this.heightCell * this.rows;
+            this.canvasGrid.width = this.widthGrid = this.widthCell * this.colsView;
+            this.canvasGrid.height = this.heightGrid = this.heightCell * this.rowsView;
             this.contextGrid = this.canvasGrid.getContext("2d");
         }
 
@@ -229,7 +233,7 @@ class LED extends Device {
         this.nBufferCells = ((this.rows + 1) * this.cols) * this.nBufferInc;
         this.buffer = new Array(this.nBufferCells);
         this.bufferClone = null;
-        this.nBufferSkip = (this.colsVisible < this.cols? (this.cols - this.colsVisible) * 4 : 0);
+        this.nBufferSkip = (this.colsView < this.cols? (this.cols - this.colsView) * 4 : 0);
 
         /*
          * fBufferModified is straightforward: set to true by any setLEDState() call that actually
@@ -356,7 +360,7 @@ class LED extends Device {
         }
         let i = 0;
         for (let row = 0; row < this.rows; row++) {
-            for (let col = 0; col < this.colsVisible; col++) {
+            for (let col = 0; col < this.colsView; col++) {
                 let state = this.buffer[i];
                 let color = this.buffer[i+1] || this.colorTransparent;
                 let fModified = !!(this.buffer[i+3] & LED.FLAGS.MODIFIED);
@@ -391,7 +395,7 @@ class LED extends Device {
         if (this.fHexagonal) {
             if (!(row & 0x1)) {
                 xOffset = (this.widthCell >> 1);
-                if (col == this.colsVisible - 1) return;
+                if (col == this.colsView - 1) return;
             }
         }
 
@@ -502,7 +506,7 @@ class LED extends Device {
                 if (col) col--;
             }
             this.drawSymbol(ch, col, row);
-            if (++col == this.colsVisible) {
+            if (++col == this.colsView) {
                 col = 0;
                 if (++row == this.rows) {
                     break;

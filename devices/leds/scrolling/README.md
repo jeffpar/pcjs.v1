@@ -61,13 +61,15 @@ machines:
           "version": 1.11,
           "autoPower": false,
           "bindings": {
-            "clear": "clearSroll",
+            "clear": "clearScroll",
             "print": "printScroll"
           },
           "overrides": ["autoPower"]
         },
         "scrollChip": {
           "class": "Chip",
+          "rule": "L1",
+          "symbols": "A",
           "overrides": ["backgroundImage"]
         },
         "scrollClock": {
@@ -75,6 +77,12 @@ machines:
           "cyclesPerSecond": 1,
           "cyclesMinimum": 1,
           "cyclesMaximum": 120,
+          "bindings": {
+            "run": "runScroll",
+            "speed": "speedScroll",
+            "step": "stepScroll",
+            "throttle": "throttleScroll"
+          },
           "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","requestAnimationFrame"]
         },
         "scrollDisplay": {
@@ -171,6 +179,9 @@ Scrolling LEDs
   <div>
     <textarea id="printScroll" class="print" cols="78" rows="16"></textarea>
   </div>
+  <button id="runScroll">Run</button>
+  <button id="stepScroll">Step</button>
   <button id="resetScroll">Reset</button>
   <button id="clearScroll">Clear</button>
+  <input type="range" min="1" max="120" value="15" class="slider" id="throttleScroll"><span id="speedScroll">Stopped</span>
 </div>
