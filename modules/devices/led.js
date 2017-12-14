@@ -711,6 +711,8 @@ class LED extends Device {
      * Returns a color string fillStyle recognizes (ie, "#rrggbb", or "rgba(r,g,b,a)" if an alpha value
      * less than 1 is set).
      *
+     * TODO: Cache frequently requested colors.
+     * 
      * @this {LED}
      * @param {Array.<number>} rgb
      * @returns {string}

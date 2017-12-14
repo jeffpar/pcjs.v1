@@ -150,7 +150,7 @@ class Chip extends Device {
             this.sCommandPrev = "";
             this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
 
-            if (this.sSymbols) this.loadPatternString(0, 0, Chip.SYMBOLS[this.sSymbols[0]]);
+            this.iSymbolNext = this.nColsRemaining = 0;
         }
     }
 
@@ -423,7 +423,7 @@ class Chip extends Device {
     /**
      * doCycling()
      *
-     * Implements rule ANIM4 (animation using 4-bit counters for state/color cycling)
+     * Implements rule ANIM4 (animation using 4-bit counters for state/color cycling).
      *
      * @this {Chip}
      * @returns {number}
@@ -493,7 +493,11 @@ class Chip extends Device {
     /**
      * doShifting()
      *
-     * Implements rule LEFT1 (shift left one cell)
+     * Implements rule LEFT1 (shift left one cell).
+     * 
+     * Some of the state we maintain outside of the LED array includes the number of columns of data remaining in
+     * the "offscreen" portion of the array (nColsRemaining).  Whenever we see that it's zero, we load it with the
+     * next chuck of data (ie, the LED pattern for the next symbol in sSymbols).
      * 
      * @this {Chip}
      * @param {number} [shift] (default is 1, for a leftward shift of one cell)
@@ -504,13 +508,22 @@ class Chip extends Device {
         let cAlive = 0;
         let leds = this.leds;
         let nCols = leds.cols, nRows = leds.rows;
-        for (let row = 0; row < nRows; row++) {
-            for (let col = 0; col < nCols; col++) {
-                let state = leds.getLEDState(col + shift, row);
-                if (state) cAlive++;
-                leds.setLEDState(col, row, state);
+
+        if (!this.nColsRemaining) {
+            if (this.sSymbols && this.iSymbolNext < this.sSymbols.length) {
+                this.nColsRemaining = this.loadPatternString(leds.colsView, 0, Chip.SYMBOLS[this.sSymbols[this.iSymbolNext++]], true);
             }
         }
+        for (let row = 0; row < nRows; row++) {
+            for (let col = 0; col < nCols - shift; col++) {
+                let stateLeft = leds.getLEDState(col, row);
+                if (stateLeft) cAlive++;
+                let stateRight = leds.getLEDState(col + 1, row);
+                leds.setLEDState(col, row, stateRight);
+                leds.setLEDState(col + 1, row, stateLeft);
+            }
+        }
+        if (this.nColsRemaining) this.nColsRemaining--;
         return cAlive;
     }
 
@@ -665,26 +678,31 @@ class Chip extends Device {
             return false;
         }
 
-        return this.loadPatternString(iCol, iRow, sPattern);
+        return this.loadPatternString(iCol, iRow, sPattern) > 0;
     }
 
     /**
-     * loadPatternString(col, row, sPattern)
+     * loadPatternString(col, row, sPattern, fOverwrite)
      *
      * @this {Chip}
      * @param {number} col
      * @param {number} row
      * @param {string} sPattern
-     * @returns {boolean}
+     * @param {boolean} [fOverwrite]
+     * @returns {number} (number of columns changed, 0 if none)
      */
-    loadPatternString(col, row, sPattern)
+    loadPatternString(col, row, sPattern, fOverwrite = false)
     {
         let leds = this.leds;
         let rgb = [0, 0, 0, 1], counts = 0;
         let fColors = false, fCounts = false;
+
+        /*
+         * TODO: Cache these pattern splits.
+         */
         let aTokens = sPattern.split(/([a-z$])/i);
         
-        leds.clearBuffer();
+        if (!fOverwrite) leds.clearBuffer();
         
         /*
          * We could add checks that verify that col and row stay within the bounds of the specified
@@ -692,7 +710,7 @@ class Chip extends Device {
          * there that didn't get their bounds quite right.  And in any case, no harm can come of it,
          * because setLEDState() will ignore any parameters outside the LED's array bounds.
          */
-        let i = 0, iCol = col;
+        let i = 0, iCol = col, colMax = 0;
         while (i < aTokens.length - 1) {
             let n = aTokens[i++];
             let token = aTokens[i++];
@@ -747,13 +765,15 @@ class Chip extends Device {
                     if (fCounts) {
                         leds.setLEDCountsPacked(col, row, counts);
                     }
+                    if (colMax < col) colMax = col;
                     col += nAdvance;
                 }
             }
         }
 
-        leds.drawBuffer(true);
-        return true;
+        if (!fOverwrite) leds.drawBuffer(true);
+
+        return ((colMax -= (iCol - 1)) < 0? 0 : colMax);
     }
     
     /**
@@ -1080,11 +1100,13 @@ class Chip extends Device {
             }
             nCols = colMax - colMin + 1;
             nRows = rowMax - rowMin + 1;
+            if (nCols < 0) nCols = 0;
+            if (nRows < 0) nRows = 0;
         }
 
-         /*
-          * Begin pattern generation.
-          */
+        /*
+         * Begin pattern generation.
+         */
         for (let row = rowMin; row <= rowMax; row++) {
             for (let col = colMin; col <= colMax; col++) {
                 state = leds.getLEDState(col, row);
@@ -1096,7 +1118,7 @@ class Chip extends Device {
         }
 
         /*
-         * Remove all '$' at the beginning of the pattern.
+         * Remove all '$' at the beginning of the pattern, if we're asked for the minimum height (or no minimums at all)
          */
         if (fMinHeight || !fMinWidth) {
             while (sPattern[0] == '$') {
@@ -1112,7 +1134,12 @@ class Chip extends Device {
             nRows--;
             sPattern = sPattern.slice(0, -1);
         }
+        if (sPattern == '$') nRows = 0;
 
+        /*
+         * If we were asked for either the minimum width or height, then don't bother including starting col and row (which
+         * we only want for patterns used to save/restore entire grids).
+         */
         sPattern = ((fMinWidth || fMinHeight)? "" : (iCol + '/' + iRow + '/')) + nCols + '/' + nRows + '/' + sPattern.slice(0, -1);
         sPattern = sPattern.replace(/\$+$/, '');
         return sPattern;

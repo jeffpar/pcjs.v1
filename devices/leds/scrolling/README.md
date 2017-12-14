@@ -69,7 +69,7 @@ machines:
         "scrollChip": {
           "class": "Chip",
           "rule": "L1",
-          "symbols": "A",
+          "symbols": "ABCABCABCABCABCABCABCABC",
           "overrides": ["backgroundImage"]
         },
         "scrollClock": {
