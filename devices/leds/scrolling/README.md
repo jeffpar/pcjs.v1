@@ -69,7 +69,7 @@ machines:
         "scrollChip": {
           "class": "Chip",
           "rule": "L1",
-          "symbols": "ApBCDEFGHIJK",
+          "symbols": "The quick brown fox jumped over the lazy dog",
           "overrides": ["backgroundImage"]
         },
         "scrollClock": {
