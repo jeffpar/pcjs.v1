@@ -507,10 +507,9 @@ class Chip extends Device {
         let cAlive = 0;
         let leds = this.leds;
         let nCols = leds.cols, nRows = leds.rows;
-
         if (!this.nColsRemaining) {
             if (this.sSymbols && this.iSymbolNext < this.sSymbols.length) {
-                this.nColsRemaining = this.loadPatternString(leds.colsView, 0, Chip.SYMBOLS[this.sSymbols[this.iSymbolNext++]], true);
+                this.nColsRemaining = this.loadPatternString(leds.colsView + 1, 1, Chip.SYMBOLS[this.sSymbols[this.iSymbolNext++]], true) + 1;
             }
         }
         for (let row = 0; row < nRows; row++) {
@@ -523,6 +522,7 @@ class Chip extends Device {
             }
         }
         if (this.nColsRemaining) this.nColsRemaining--;
+        leds.fShiftedLeft = true;
         return cAlive;
     }
 
@@ -1353,16 +1353,21 @@ Chip.RULES = {
  * Symbols can be formed with the following 16x16 grid patterns.
  */
 Chip.SYMBOLS = {
-    "A": "10/14/$3b4o$2bo4bo$2bo4bo$bo6bo$bo6bo$o8bo$o8bo$o8bo$10o$o8bo$o8bo$o8bo$o8bo",
-    "B": "10/14/$7o$o6bo$o7bo$o7bo$o7bo$o6bo$8o$o7bo$o8bo$o8bo$o8bo$o8bo$9o",
-    "C": "8/14/$2b6o$bo$o$o$o$o$o$o$o$o$o$bo$2b6o",
-    "D": "10/14/$8o$o7bo$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo$o7bo$8o",
-    "E": "8/14/$8o$o$o$o$o$o$7o$o$o$o$o$o$8o",
-    "F": "8/14/$8o$o$o$o$o$o$o$7o$o$o$o$o$o",
-    "G": "9/14/$2b6o$bo$o$o$o$o$o$o$o6b2o$o7bo$o7bo$bo6bo$2b7o",
-    "H": "10/14/$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo$10o$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo",
-    "I": "7/14/$7o$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$7o",
-    "J": "9/14/$8bo$8bo$8bo$8bo$8bo$8bo$8bo$8bo$o7bo$o7bo$o7bo$bo5bo$2b5o"
+    "A":"8/12/$3b2o$2bo2bo$bo4bo$bo4bo$o6bo$o6bo$o6bo$8o$o6bo$o6bo$o6bo",
+    "B":"8/12/$6o$o5bo$o5bo$o5bo$o4bo$7o$o6bo$o6bo$o6bo$o6bo$7o",
+    "C":"8/12/$2b4o$bo4bo$o6bo$o$o$o$o$o$o6bo$bo4bo$2b4o",
+    "D":"8/12/$6o$o5bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o5bo$6o",
+    "E":"7/12/$7o$o$o$o$o$6o$o$o$o$o$7o",
+    "F":"7/12/$7o$o$o$o$o$6o$o$o$o$o$o",
+    "G":"8/12/$2b4o$bo4bo$o$o$o$o3b4o$o6bo$o6bo$o6bo$bo4bo$2b4o",
+    "H":"8/12/$o6bo$o6bo$o6bo$o6bo$o6bo$8o$o6bo$o6bo$o6bo$o6bo$o6bo",
+    "I":"1/12/$o$o$o$o$o$o$o$o$o$o$o",
+    "J":"6/12/$5bo$5bo$5bo$5bo$5bo$5bo$5bo$o4bo$o4bo$o4bo$b4o",
+    "K":"9/12/$o6bo$o5bo$o4bo$o3bo$o2bo$ob2o$2o2bo$o4bo$o5bo$o6bo$o7bo",
+    "a":"7/12/$$$$b4o$o4bo$5bo$b5o$o4bo$o4bo$o3b2o$b3ob2o",
+    "b":"7/12/$o$o$o$ob3o$2o3bo$o5bo$o5bo$o5bo$o5bo$2o3bo$ob3o",
+    "k":"8/12/$2o$2o$2o$2o2b2o$2ob2o$4o$4o$2ob2o$2o2b2o$2o3b2o$2o4b2o",
+    "p":"7/15/$$$$ob3o$2o3bo$o5bo$o5bo$o5bo$o5bo$2o3bo$ob3o$o$o$o"
 };
 
 Chip.VERSION    = 1.11;

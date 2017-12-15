@@ -69,7 +69,7 @@ machines:
         "scrollChip": {
           "class": "Chip",
           "rule": "L1",
-          "symbols": "ABC",
+          "symbols": "ApBCDEFGHIJK",
           "overrides": ["backgroundImage"]
         },
         "scrollClock": {
@@ -123,15 +123,13 @@ styles:
     width: 16px;
   previewSymbol:
     position: absolute;
-    font-size: 48em;
-    font-family: "Bungee Hairline"
+    font-size: 32em;
     font-weight: normal;
     width: 100%;
     height: auto;
-    line-height: 68%;
+    line-height: 85%;
     text-align: center;
     vertical-align: middle;
-    margin-left: -10px;
   scrollLEDs:
     position: relative;
     display: inline-block;

@@ -78,7 +78,7 @@
  * @property {number} [yieldsPerSecond]
  * @property {number} [yieldsPerUpdate]
  * @property {boolean} [requestAnimationFrame]
- * @property {boolean} clockByFrame
+ * @property {boolean} [clockByFrame]
  */
 
 /**
@@ -150,6 +150,10 @@ class Time extends Device {
         this.onAnimationFrame = this.animate.bind(this);
         this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
 
+        /*
+         * When fClockByFrame is true, we rely exclusively on requestAnimationFrame() instead of setTimeout()
+         * to drive the clock, which means we automatically yield after every frame, so no yield timer is required.
+         */
         if (!this.fClockByFrame) {
             let time = this;
             this.timerYield = this.addTimer("timerYield", function onYield() {
