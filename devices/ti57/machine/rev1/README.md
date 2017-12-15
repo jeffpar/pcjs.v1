@@ -6,7 +6,6 @@ machines:
   - id: ti57Rev1
     type: ti57
     name: TI-57 Programmable Calculator
-    uncompiled: true
     config: |
       {
         "ti57Rev1": {
@@ -55,6 +54,7 @@ machines:
         },
         "buttons": {
           "class": "Input",
+          "buttonDelay": 50,
           "location": [45, 316, 372, 478, 0.34, 0.5, 459, 832, 322, 168, 75, 38],
           "map": [
             ["2nd",  "inv",  "lnx",  "\\b",  "clr"],

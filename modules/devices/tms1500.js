@@ -42,7 +42,7 @@ class Reg64 extends Device {
      *
      * @this {Reg64}
      * @param {Chip} chip
-     * @param {string} [id]
+     * @param {string} id
      * @param {boolean} [fInternal]
      */
     constructor(chip, id, fInternal)
@@ -284,12 +284,6 @@ class Reg64 extends Device {
 }
 
 /**
- * @typedef {Object} State
- * @property {Array} stateChip
- * @property {Array} stateROM
- */
-
-/**
  * TMS-150x Calculator Chip
  *
  * Emulates various TMS ("Texas Mos Standard") and TMC ("Texas Mos Custom") chips.  The 'type' property of
@@ -332,7 +326,6 @@ class Reg64 extends Device {
  * @property {number} addrPrev
  * @property {number} addrStop
  * @property {Object} breakConditions
- * @property {string} sCommandPrev
  * @property {number} nStringFormat
  * @property {number} type (one of the Chip.TYPE values)
  */
@@ -351,8 +344,8 @@ class Chip extends Device {
     {
         super(idMachine, idDevice, Chip.VERSION, config);
 
-        let sType = this.config['type'] || "1501";
-        this.type = Number.parseInt(sType.slice(-4));
+        let sType = this.getDefaultString('type', "1501");
+        this.type = Number.parseInt(sType.slice(-4), 10);
 
         this.regMap = {};
 
@@ -546,7 +539,6 @@ class Chip extends Device {
         this.addrPrev = -1;
         this.addrStop = -1;
         this.breakConditions = {};
-        this.sCommandPrev = "";
         this.nStringFormat = Chip.SFORMAT.DEFAULT;
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
     }
@@ -862,7 +854,7 @@ class Chip extends Device {
      * etc).  I do use the patent nomenclature internally, just not for display purposes.
      *
      * @this {Chip}
-     * @param {number} opCode
+     * @param {number|undefined} opCode
      * @param {number} addr
      * @param {boolean} [fCompact]
      * @returns {string}
@@ -887,7 +879,7 @@ class Chip extends Device {
             }
             sOperands = this.sprintf("0x%04x", v);
         }
-        else {
+        else if (opCode >= 0) {
             let mask = opCode & Chip.IW_MF.MASK;
 
             switch(mask) {
@@ -1047,12 +1039,17 @@ class Chip extends Device {
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      * 
      * @this {Chip}
-     * @param {State|Object|null} state
+     * @param {Object|Array|null} state
+     * @returns {boolean}
      */
     loadState(state)
     {
         if (state) {
-            let stateChip = state.stateChip;
+            let stateChip = state['stateChip'] || state[0];
+            if (!stateChip || !stateChip.length) {
+                this.println("Invalid saved state");
+                return false;
+            }
             let version = stateChip.shift();
             if ((version|0) !== (Chip.VERSION|0)) {
                 this.printf("Saved state version mismatch: %3.2f\n", version);
@@ -1075,8 +1072,9 @@ class Chip extends Device {
                 this.println("Chip state error: " + err.message);
                 return false;
             }
-            if (state.stateROM && this.rom) {
-                if (!this.rom.loadState(state.stateROM)) {
+            let stateROM = state['stateROM'] || state[1];
+            if (stateROM && this.rom) {
+                if (!this.rom.loadState(stateROM)) {
                     return false;
                 }
             }
@@ -1085,35 +1083,25 @@ class Chip extends Device {
     }
 
     /**
-     * onCommand(sCommand)
+     * onCommand(aTokens, machine)
      *
      * Processes commands for our "mini-debugger".
      *
-     * If sCommand is blank (ie, if Enter alone was pressed), then sCommandPrev will be used,
-     * but sCommandPrev is set only for certain commands deemed "repeatable" (eg, step and dump
-     * commands).
-     *
      * @this {Chip}
-     * @param {string} sCommand
+     * @param {Array.<string>} aTokens
+     * @param {Device} [machine]
      * @returns {boolean} (true if processed, false if not)
      */
-    onCommand(sCommand)
+    onCommand(aTokens, machine)
     {
         let sResult = "";
-
-        if (sCommand == "") {
-            sCommand = this.sCommandPrev;
-        }
-        this.sCommandPrev = "";
-        this.nStringFormat = Chip.SFORMAT.DEFAULT;
-        sCommand = sCommand.trim();
-
-        let aCommands = sCommand.split(' ');
-        let s = aCommands[0];
-        let addr = Number.parseInt(aCommands[1], 16);
+        let s = aTokens[1];
+        let addr = Number.parseInt(aTokens[2], 16);
         if (isNaN(addr)) addr = -1;
-        let nWords = Number.parseInt(aCommands[2], 10) || 8;
+        let nWords = Number.parseInt(aTokens[3], 10) || 8;
 
+        this.nStringFormat = Chip.SFORMAT.DEFAULT;
+        
         switch(s[0]) {
         case 'b':
             let c = s.substr(1);
@@ -1148,16 +1136,16 @@ class Chip extends Device {
 
         case 't':
             if (s[1] == 'c') this.nStringFormat = Chip.SFORMAT.COMPACT;
-            nWords = Number.parseInt(aCommands[1], 10) || 1;
+            nWords = Number.parseInt(aTokens[2], 10) || 1;
             this.time.onStep(nWords);
-            this.sCommandPrev = sCommand;
+            if (machine) machine.sCommandPrev = aTokens[0];
             break;
 
         case 'r':
             if (s[1] == 'c') this.nStringFormat = Chip.SFORMAT.COMPACT;
             this.setRegister(s.substr(1), addr);
             sResult += this.toString(s[1]);
-            this.sCommandPrev = sCommand;
+            if (machine) machine.sCommandPrev = aTokens[0];
             break;
 
         case 'u':
@@ -1168,7 +1156,7 @@ class Chip extends Device {
                 sResult += this.disassemble(opCode, addr++);
             }
             this.addrPrev = addr;
-            this.sCommandPrev = sCommand;
+            if (machine) machine.sCommandPrev = aTokens[0];
             break;
 
         case '?':
@@ -1177,8 +1165,8 @@ class Chip extends Device {
             break;
 
         default:
-            if (sCommand) {
-                sResult = "unrecognized command '" + sCommand + "' (try '?')";
+            if (aTokens[0]) {
+                sResult = "unrecognized command '" + aTokens[0] + "' (try '?')";
             }
             break;
         }
@@ -1409,15 +1397,13 @@ class Chip extends Device {
      * saveState()
      *
      * @this {Chip}
-     * @returns {State}
+     * @returns {Array}
      */
     saveState()
     {
-        let state = {
-            stateChip:  [],
-            stateROM:   []
-        };
-        let stateChip = state.stateChip;
+        let state = [[],[]];
+        let stateChip = state[0];
+        let stateROM = state[1];
         stateChip.push(Chip.VERSION);
         this.regsO.forEach(reg => stateChip.push(reg.get()));
         this.regsX.forEach(reg => stateChip.push(reg.get()));
@@ -1431,7 +1417,7 @@ class Chip extends Device {
         stateChip.push(this.regPC);
         stateChip.push(this.stack);
         stateChip.push(this.regKey);
-        if (this.rom) this.rom.saveState(state.stateROM);
+        if (this.rom) this.rom.saveState(stateROM);
         return state;
     }
 
@@ -1766,4 +1752,6 @@ Chip.COMMANDS = [
     "u [addr] [n]\tdisassemble (at addr)"
 ];
 
-Chip.VERSION    = 1.10;
+Chip.VERSION    = 1.11;
+
+MACHINE = "TMS1500";

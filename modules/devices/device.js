@@ -36,14 +36,19 @@ var COMPILED = false;
 /**
  * @define {boolean}
  */
-var DEBUG = (window.location.hostname == "pcjs" || window.location.hostname == "jeffpar.local");
+var DEBUG = false;  // (window.location.hostname == "pcjs" || window.location.hostname == "jeffpar.local");
+
+/**
+ * @type {string}
+ */
+var MACHINE = "Machine";
 
 /**
  * The following properties are the standard set of properties a Device's config object may contain.
  * Other devices will generally define their own extended versions (eg, LEDConfig, InputConfig, etc).
  *
  * @typedef {Object} Config
- * @property {string} class
+ * @property {string} [class]
  * @property {Object} [bindings]
  * @property {number} [version]
  * @property {Array.<string>} [overrides]
@@ -56,6 +61,7 @@ var DEBUG = (window.location.hostname == "pcjs" || window.location.hostname == "
  * @property {string} idDevice
  * @property {Config} config
  * @property {Object} bindings [added by addBindings()]
+ * @property {string} sCommandPrev
  */
 class Device {
     /**
@@ -95,6 +101,7 @@ class Device {
         this.checkVersion(this.config);
         this.checkOverrides(this.config);
         this.addBindings(this.config['bindings']);
+        this.sCommandPrev = "";
     }
 
     /**
@@ -102,7 +109,7 @@ class Device {
      *
      * @this {Device}
      * @param {string} binding
-     * @param {HTMLElement} element
+     * @param {Element} element
      */
     addBinding(binding, element)
     {
@@ -150,26 +157,18 @@ class Device {
                          * returns true.
                          */
                         if (keyCode == 13) {
-                            let afn = device.findHandlers(Device.HANDLER.COMMAND);
-                            if (afn) {
-                                /*
-                                 * At the time we call any command handlers, a linefeed will not yet have been
-                                 * appended to the text, so for consistency, we prevent the default behavior and
-                                 * add the linefeed ourselves.  Unfortunately, one side-effect is that we must
-                                 * go to some extra effort to ensure the cursor remains in view; hence the stupid
-                                 * blur() and focus() calls.
-                                 */
-                                event.preventDefault();
-                                sText = (elementTextArea.value += '\n');
-                                elementTextArea.blur();
-                                elementTextArea.focus();
-
-                                let i = sText.lastIndexOf('\n', sText.length - 2);
-                                let sCommand = sText.slice(i + 1, -1);
-                                for (let i = 0; i < afn.length; i++) {
-                                    if (afn[i](sCommand)) break;
-                                }
-                            }
+                            /*
+                             * At the time we call any command handlers, a linefeed will not yet have been
+                             * appended to the text, so for consistency, we prevent the default behavior and
+                             * add the linefeed ourselves.  Unfortunately, one side-effect is that we must
+                             * go to some extra effort to ensure the cursor remains in view; hence the stupid
+                             * blur() and focus() calls.
+                             */
+                            event.preventDefault();
+                            sText = (elementTextArea.value += '\n');
+                            elementTextArea.blur();
+                            elementTextArea.focus();
+                            device.doCommand(sText);
                         }
                     }
                 }
@@ -207,7 +206,7 @@ class Device {
      * addBindingOptions(element, options, fReset, sDefault)
      *
      * @this {Device}
-     * @param {HTMLElement|HTMLSelectElement} element
+     * @param {Element|HTMLSelectElement} element
      * @param {Object} options (eg, key/value pairs for a series of "option" elements)
      * @param {boolean} [fReset]
      * @param {string} [sDefault]
@@ -246,7 +245,7 @@ class Device {
      *
      * @this {Device}
      * @param {string} sType
-     * @param {function(string)} fn
+     * @param {function(Array.<string>,Device)} fn
      */
     addHandler(sType, fn)
     {
@@ -354,12 +353,12 @@ class Device {
                 sVersion = "Machine";
                 version = machine.version;
             }
-            else if (config.version && config.version != this.version) {
+            else if (config.version && config.version > this.version) {
                 sVersion = "Config";
                 version = config.version;
             }
             if (sVersion) {
-                let sError = this.sprintf("%s Device version (%3.2f) does not match %s version (%3.2f)", config.class, this.version, sVersion, version);
+                let sError = this.sprintf("%s Device version (%3.2f) incompatible with %s version (%3.2f)", config.class, this.version, sVersion, version);
                 this.alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.", Device.Alerts.Version);
             }
         }
@@ -377,6 +376,53 @@ class Device {
     }
 
     /**
+     * doCommand(sText)
+     * 
+     * @this {Device}
+     * @param {string} sText
+     */
+    doCommand(sText)
+    {
+        let afnHandlers = this.findHandlers(Device.HANDLER.COMMAND);
+        if (afnHandlers) {
+
+            let i = sText.lastIndexOf('\n', sText.length - 2);
+            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev;
+            this.sCommandPrev = "";
+            sCommand = sCommand.trim();
+            let aTokens = sCommand.split(' ');
+    
+            switch(aTokens[0]) {
+            case 'c':
+                let c = aTokens[1];
+                if (c) {
+                    this.println("set category '" + c + "'");
+                    this.setCategory(c);
+                } else {
+                    c = this.setCategory();
+                    if (c) {
+                        this.println("cleared category '" + c + "'");
+                    } else {
+                        this.println("no category set");
+                    }
+                }
+                break;
+            case '?':
+                let sResult = "";
+                Device.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
+                if (sResult) this.println("default commands:" + sResult);
+                /* falls through */
+            default:
+                aTokens.unshift(sCommand);
+                for (let i = 0; i < afnHandlers.length; i++) {
+                    if (afnHandlers[i](aTokens, this)) break;
+                }
+                break;
+            }
+        }
+    }
+    
+    /**
      * findBinding(name, fAll)
      *
      * This will search the current device's bindings, and optionally all the device bindings within the
@@ -385,7 +431,7 @@ class Device {
      * @this {Device}
      * @param {string} name
      * @param {boolean} [fAll]
-     * @returns {HTMLElement|null|undefined}
+     * @returns {Element|null|undefined}
      */
     findBinding(name, fAll = false)
     {
@@ -451,11 +497,41 @@ class Device {
      *
      * @this {Device}
      * @param {string} sType
-     * @returns {Array.<function()>|undefined}
+     * @returns {Array.<function(Array.<string>,Device)>|undefined}
      */
     findHandlers(sType)
     {
         return Device.Handlers[this.idMachine] && Device.Handlers[this.idMachine][sType];
+    }
+
+    /**
+     * getBindingID(name)
+     * 
+     * Since this.bindings contains the actual elements, not their original IDs, we must delve back into
+     * the original this.config['bindings'] to determine the original ID.
+     * 
+     * @this {Device}
+     * @param {string} name 
+     * @returns {string|undefined}
+     */
+    getBindingID(name)
+    {
+        return this.config['bindings'] && this.config['bindings'][name];
+    }
+    
+    /**
+     * getBindingText(name)
+     *
+     * @this {Device}
+     * @param {string} name
+     * @return {string|undefined}
+     */
+    getBindingText(name)
+    {
+        let sText;
+        let element = this.bindings[name];
+        if (element) sText = element.textContent;
+        return sText;
     }
 
     /**
@@ -480,16 +556,69 @@ class Device {
     }
 
     /**
-     * getDefault(value, defaultValue)
+     * getDefault(idConfig, defaultValue)
      *
      * @this {Device}
-     * @param {*} value
+     * @param {string} idConfig
      * @param {*} defaultValue
      * @returns {*}
      */
-    getDefault(value, defaultValue)
+    getDefault(idConfig, defaultValue)
     {
-        return (value !== undefined)? value : defaultValue;
+        let value = this.config[idConfig];
+        if (value === undefined) {
+            value = defaultValue;
+        } else {
+            let type = typeof defaultValue;
+            if (typeof value != type) {
+                this.assert(false);
+                if (type == "boolean") {
+                    value = !!value;
+                } else if (typeof defaultValue == "number") {
+                    value = +value;
+                }
+            }
+        }
+        return value;
+    }
+
+    /**
+     * getDefaultBoolean(idConfig, defaultValue)
+     *
+     * @this {Device}
+     * @param {string} idConfig
+     * @param {boolean} defaultValue
+     * @returns {boolean}
+     */
+    getDefaultBoolean(idConfig, defaultValue)
+    {
+        return /** @type {boolean} */ (this.getDefault(idConfig, defaultValue));
+    }
+
+    /**
+     * getDefaultNumber(idConfig, defaultValue)
+     *
+     * @this {Device}
+     * @param {string} idConfig
+     * @param {number} defaultValue
+     * @returns {number}
+     */
+    getDefaultNumber(idConfig, defaultValue)
+    {
+        return /** @type {number} */ (this.getDefault(idConfig, defaultValue));
+    }
+
+    /**
+     * getDefaultString(idConfig, defaultValue)
+     *
+     * @this {Device}
+     * @param {string} idConfig
+     * @param {string} defaultValue
+     * @returns {string}
+     */
+    getDefaultString(idConfig, defaultValue)
+    {
+        return /** @type {string} */ (this.getDefault(idConfig, defaultValue));
     }
 
     /**
@@ -502,7 +631,7 @@ class Device {
      */
     hasLocalStorage()
     {
-        if (Device.LocalStorage.Available == null) {
+        if (Device.LocalStorage.Available === undefined) {
             let f = false;
             if (window) {
                 try {
@@ -516,22 +645,7 @@ class Device {
             }
             Device.LocalStorage.Available = f;
         }
-        return Device.LocalStorage.Available;
-    }
-
-    /**
-     * getBindingText(name)
-     *
-     * @this {Device}
-     * @param {string} name
-     * @return {string|undefined}
-     */
-    getBindingText(name)
-    {
-        let sText;
-        let element = this.bindings[name];
-        if (element) sText = element.textContent;
-        return sText;
+        return !!Device.LocalStorage.Available;
     }
 
     /**
@@ -595,7 +709,7 @@ class Device {
      * loadLocalStorage()
      *
      * @this {Device}
-     * @returns {Object|null}
+     * @returns {Array|null}
      */
     loadLocalStorage()
     {
@@ -605,7 +719,7 @@ class Device {
             if (window) {
                 try {
                     sValue = window.localStorage.getItem(this.idMachine);
-                    state = JSON.parse(sValue);
+                    if (sValue) state = /** @type {Array} */ (JSON.parse(sValue));
                 } catch (err) {
                     this.println(err.message);
                 }
@@ -697,7 +811,7 @@ class Device {
      * saveLocalStorage(state)
      *
      * @this {Device}
-     * @param {Object} state
+     * @param {Array} state
      * @returns {boolean} true if successful, false if error
      */
     saveLocalStorage(state)
@@ -908,6 +1022,10 @@ Device.CATEGORY = {
     TIME:       "time",
     BUFFER:     "buffer"
 };
+
+Device.COMMANDS = [
+    "c\tset category"
+];
 
 Device.HANDLER = {
     COMMAND:    "command"

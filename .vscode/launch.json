@@ -1,19 +1,85 @@
 {
 	"version": "0.1.0",
 	"configurations": [
-	    {
-		"name": "Launch localhost",
-		"type": "chrome",
-		"request": "launch",
-		"url": "http://pcjs:8088/devices/leds/litebrite/",
-		"webRoot": "${workspaceFolder}"
-	    },
-	    {
-		"name": "Launch index.html (disable sourcemaps)",
-		"type": "chrome",
-		"request": "launch",
-		"sourceMaps": false,
-		"file": "${workspaceFolder}"
-	    }
+    {
+      "name": "Gulp",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/gulp/bin/gulp.js",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "stopOnEntry": true
+    },
+    {
+      "name": "Webserver (Debug)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.js",
+      "args": [
+        "--cache",
+        "--console",
+        "--debug"
+      ]
+    },
+    {
+      "name": "Webserver (Release)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.js",
+      "args": [
+        "--cache",
+        "--console",
+        "--rebuild"
+      ]
+    },
+	  {
+		  "name": "PCjs: Game of Life",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/leds/life/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PCjs: Lite-Brite",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/leds/litebrite/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PCjs: Scrolling LED",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/leds/scrolling/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PCjs: TI-42",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/ti42/machine/rev0/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PCjs: TI-55",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/ti55/machine/rev0/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PCjs: TI-57",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/ti57/machine/rev0/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "Launch index.html (disable sourcemaps)",
+		  "type": "chrome",
+		  "request": "launch",
+		  "sourceMaps": false,
+		  "file": "${workspaceFolder}"
+	  }
 	]
 }

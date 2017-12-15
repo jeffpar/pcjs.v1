@@ -108,21 +108,21 @@ class ROM extends Device {
             this.cols = Math.pow(2, Math.ceil(addrLines));
             this.rows = Math.pow(2, Math.floor(addrLines));
             let configLEDs = {
-                class:           "LED",
-                bindings:        {container: config.bindings[ROM.BINDING.ARRAY]},
-                type:            LED.TYPE.ROUND,
-                cols:            this.cols,
-                rows:            this.rows,
-                color:           config['colorROM'] || "green",
-                backgroundColor: config['backgroundColorROM'] || "black",
-                persistent:      true
+                "class":            "LED",
+                "bindings":         {"container": this.getBindingID(ROM.BINDING.ARRAY)},
+                "type":             LED.TYPE.ROUND,
+                "cols":             this.cols,
+                "rows":             this.rows,
+                "color":            this.getDefaultString('colorROM', "green"),
+                "backgroundColor":  this.getDefaultString('backgroundColorROM', "black"),
+                "persistent":       true
             };
             this.ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);
             this.clearArray();
             let configInput = {
-                class:          "Input",
-                location:       [0, 0, this.ledArray.widthView, this.ledArray.heightView, this.cols, this.rows],
-                bindings:       {surface: config.bindings[ROM.BINDING.ARRAY]}
+                "class":        "Input",
+                "location":     [0, 0, this.ledArray.widthView, this.ledArray.heightView, this.cols, this.rows],
+                "bindings":     {"surface": this.getBindingID(ROM.BINDING.ARRAY)}
             };
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
             this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC);
@@ -238,4 +238,4 @@ ROM.BINDING = {
     CELLDESC:   "cellDesc"
 };
 
-ROM.VERSION     = 1.10;
+ROM.VERSION     = 1.11;

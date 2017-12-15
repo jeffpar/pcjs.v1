@@ -6,7 +6,6 @@ machines:
   - id: ti42
     type: ti42
     name: TI-42 Programmable Calculator
-    uncompiled: true
     config: |
       {
         "ti42": {
@@ -42,6 +41,7 @@ machines:
         },
         "buttons": {
           "class": "Input",
+          "buttonDelay": 50,
           "location": [56, 322, 358, 462, 0.34, 0.5, 465, 832, 322, 182, 74, 36],
           "map": [
             ["2nd",  "cpt",  "lnx",  "sq",   "clr"],

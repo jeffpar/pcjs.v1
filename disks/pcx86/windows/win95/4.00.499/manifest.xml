@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.37.1/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.40.0/manifest.xsl"?>
 <manifest type="software">
 	<title>Windows 95 (Build 499)</title>
 	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/WIN95-DISK01.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK01.json" md5="ed568ad39cb447c40184c3ead9a84c86" md5json="a5846d059b45f937d3fcf905703c1fdb">

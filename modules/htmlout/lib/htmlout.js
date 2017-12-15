@@ -49,19 +49,9 @@ var usr     = require("../../shared/lib/usrlib");
  * @class exports
  * @property {string} name
  * @property {string} version
- * @property {Array.<string>} C1PCSSFiles
- * @property {Array.<string>} C1PFiles
- * @property {Array.<string>} PCCSSFiles
- * @property {Array.<string>} PCx86Files
- * @property {Array.<string>} PC8080Files
- * @property {Array.<string>} PDP10Files
- * @property {Array.<string>} PDP11Files
- * @property {Array.<string>} TI42Files
- * @property {Array.<string>} TI55Files
- * @property {Array.<string>} TI57Files
- * @property {Array.<string>} LifeFiles
  */
 var pkg = require("../../../package.json");
+var machines = require("../../../_data/machines.json");
 
 /*
  * fCache controls "index.html" caching; it is true by default and can be overridden using the setOptions()
@@ -157,30 +147,6 @@ var sMachineMDFile = "machine.md";
 var sMachineXMLFile = "machine.xml";
 var sManifestXMLFile = "manifest.xml";
 
-/*
- * We need lists of the uncompiled scripts for C1P and PCx86, indexed by machine type, so that if we have
- * to inject those individual scripts into the current document, all the ordering dependencies will be honored
- * (which is why processMachines() can't simply enumerate all the .js files in the respective script folder).
- *
- * We build these lists from the lists stored in the project's "package.json" file; also, we start with the
- * complete lists (ie, with "debugger.js" included in the proper sequence) and then filter out the debugger
- * later if it turns out we don't need it.
- *
- * We include any required CSS files in these lists as well, for convenience.  CSS files are added just before
- * the closing </head> tag, and JS files are added just before the closing </body> tag.
- */
-var aMachineFiles = {
-    'C1P':      pkg.C1PCSS.concat(pkg.C1PFiles),        // will be deprecated when PC6502 becomes available
-    'PC':       pkg.PCCSS.concat(pkg.PCx86Files),       // deprecated (same as PCx86)
-    'PCX86':    pkg.PCCSS.concat(pkg.PCx86Files),
-    'PC8080':   pkg.PCCSS.concat(pkg.PC8080Files),
-    'PDP10':    pkg.PCCSS.concat(pkg.PDP10Files),
-    'PDP11':    pkg.PCCSS.concat(pkg.PDP11Files),
-    'LEDS':     pkg.PCCSS.concat(pkg.LEDFiles),
-    'TI42':     pkg.PCCSS.concat(pkg.TI42Files),
-    'TI55':     pkg.PCCSS.concat(pkg.TI55Files),
-    'TI57':     pkg.PCCSS.concat(pkg.TI57Files)
-};
 var aMachineFileTypes = {
     'head': [".css"],           // put BOTH ".css" and ".js" here if convertMDMachineLinks() embeds its own scripts
     'body': [".js"]
@@ -1476,7 +1442,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                  * or development stylesheets in ("/modules/pcx86/templates"|"/modules/c1pjs/templates").
                  *
                  * The common denominator in both sets is either "/pc" or "/c1p", which in turn indicates the type of machine
-                 * (eg, "PC", "C1P", etc).
+                 * (eg, "pcx86", "c1p", etc).
                  */
                 aMatch = sStyleSheet.match(/\/(pc|c1p|pdp)([^/]*)/);
                 if (aMatch) {
@@ -1487,8 +1453,8 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                      *
                      * The string we initialize the MarkOut object should look like one of
                      *
-                     *      '[Embedded PC](machine.xml "PCx86:machineID:stylesheet:version:options:state")'
-                     *      '[Embedded C1P](machine.xml "C1P:machineID:stylesheet:version:options:state")'
+                     *      '[Embedded PC](machine.xml "pcx86:machineID:stylesheet:version:options:state")'
+                     *      '[Embedded C1P](machine.xml "c1p:machineID:stylesheet:version:options:state")'
                      *
                      * where machineID is the machine "id" embedded in the XML, stylesheet is the path to the XML stylesheet,
                      * version is a version number ('*' or blank for the latest version, which is all we support here), and
@@ -1906,7 +1872,7 @@ HTMLOut.prototype.getRandomString = function(sIndent)
  *
  * At a minimum, each machine object should contain the following properties:
  *
- *      'type' (eg, a machine type, such as "C1P", "PCx86", "PC8080", "PDP10", or "PDP11")
+ *      'type' (eg, a machine type, such as "c1p", "pcx86", "pc8080", "pdp10", or "pdp11")
  *      'version' (eg, "1.10", "*" to select the current version, or "uncompiled"; "*" is the default)
  *      'debugger' (eg, true or false; false is the default)
  *
@@ -1924,11 +1890,19 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         HTMLOut.logDebug('HTMLOut.processMachines(' + JSON.stringify(infoMachine) + ')');
 
         var sType = infoMachine['type'];
+        var machineConfig = machines[sType];
+        while (machineConfig && machineConfig['alias']) {
+            machineConfig = machines[machineConfig['alias']];
+        }
+        if (!machineConfig) {
+            HTMLOut.logDebug('HTMLOut.processMachines(): unrecognized machine type "' + sType + '"');
+            continue;
+        }
 
         var fCompiled = !this.fDebug;
         var sVersion = infoMachine['version'];
         if (sVersion === undefined || sVersion == '*') {
-            sVersion = pkg.version;
+            sVersion = machineConfig['version'] || pkg.version;
         } else {
             fCompiled = (sVersion != "uncompiled");
         }
@@ -1943,13 +1917,14 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         }
 
         var sScriptEmbed = "";
-        var sFunction = infoMachine['func'];
-        if (sFunction) {
+        var sCreator = machineConfig['creator'];
+        if (sCreator) {
             sScriptEmbed = '<script type="text/javascript">';
-            if (sFunction.indexOf("embed") < 0) {
-                sScriptEmbed += sFunction + "('" + infoMachine['id'] + "','" + infoMachine['config'].replace(/\n/g, '\\n') + "');"
+            if (sCreator.indexOf("new ") >= 0) {
+                sCreator = "new window." + sCreator.substr(4);
+                sScriptEmbed += sCreator + "('" + infoMachine['id'] + "','" + infoMachine['config'].replace(/\n/g, '\\n') + "');"
             } else {
-                sScriptEmbed += 'window.' + sFunction;
+                sScriptEmbed += 'window.' + sCreator;
                 sScriptEmbed += "('" + infoMachine['id'] + "','" + infoMachine['xml'] + "'";
                 sScriptEmbed += (infoMachine['xsl']? (",'" + infoMachine['xsl'] + "'") : ",''");
                 sScriptEmbed += (infoMachine['parms']? (",'" + infoMachine['parms'] + "'") : '') + ');';
@@ -1958,14 +1933,14 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         }
 
         var asFiles = [];
-        if (fCompiled && infoMachine['xml'] != "{}") {
-            var sScriptName = sType.toLowerCase();
-            var sScriptFile = sScriptName + (fDebugger? "-dbg" : "") + ".js";
-            var sScriptFolder = sScriptName == "c1p"? "c1pjs" : (sScriptName.substr(0, 3) == "pdp"? "pdpjs" : sScriptName);
-            asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/components.css");
-            asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/" + sScriptFile);
+        if (fCompiled) {
+            var sScriptFile = sType + (fDebugger? "-dbg" : "") + ".js";
+            asFiles.push("/versions/" + machineConfig['folder'] + "/" + sVersion + "/components.css");
+            asFiles.push("/versions/" + machineConfig['folder'] + "/" + sVersion + "/" + sScriptFile);
         }
-        else if (asFiles = aMachineFiles[sType.toUpperCase()]) {
+        else {
+            var asCSSFiles = machineConfig['css'] || pkg.sharedFiles['css'];
+            asFiles = asFiles.concat(asCSSFiles).concat(machineConfig['files']);
             /*
              * SIDEBAR: Why the "slice()"?  It's a handy way to create a copy of the array, and we need a copy,
              * because if it turns out we need to "cut out" some of the files below (using splice), we don't want that
@@ -2008,10 +1983,6 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
                     }
                 }
             }
-        }
-        else {
-            HTMLOut.logDebug('HTMLOut.processMachines(): unrecognized machine type "' + sType + '"');
-            continue;
         }
 
         this.addFilesToHTML(asFiles, sScriptEmbed);

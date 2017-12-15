@@ -6,7 +6,6 @@ machines:
   - id: lifeColorDemo
     type: leds
     name: Game of Life Color Demo
-    uncompiled: true
     config: |
       {
         "lifeColorDemo": {
@@ -96,6 +95,7 @@ machines:
         },
         "lifeInput": {
           "class": "Input",
+          "drag": true,
           "bindings": {
             "reset": "resetLife"
           }

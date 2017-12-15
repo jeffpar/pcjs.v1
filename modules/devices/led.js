@@ -34,11 +34,13 @@
  * @property {Object} [bindings]
  * @property {number} [version]
  * @property {Array.<string>} [overrides]
- * @property {number} type
- * @property {number} [width]
- * @property {number} [height]
+ * @property {number} type  (one of the LED.TYPE values)
+ * @property {number} [width] (the view width of a cell)
+ * @property {number} [height] (the view height of a cell)
  * @property {number} [cols]
+ * @property {number} [colsExtra] (number of hidden columns, if any, on the right)
  * @property {number} [rows]
+ * @property {number} [rowsExtra] (number of hidden rows, if any, on the bottom; TBD)
  * @property {string} [color]
  * @property {string} [backgroundColor]
  * @property {boolean} [fixed]
@@ -59,7 +61,7 @@
  * where all the real drawing occurs; drawView() then renders the "grid" canvas onto the "view" canvas.
  *
  * Internally, our LED digits have a width and height of 96 and 128.  Those are "grid" dimensions which
- * cannot be changed, because our table of drawing coordinates in LED.SEGMENT are hard-coded for those
+ * cannot be changed, because our table of drawing coordinates in LED.SEGMENTS are hard-coded for those
  * dimensions.  The cell width and height that are specified as part of the LEDConfig are "view" dimensions,
  * which usually match the grid dimensions, but you're welcome to scale them up or down; the browser's
  * drawImage() function takes care of that.
@@ -86,8 +88,14 @@
  * @property {number} height (default is 128 for LED.TYPE.DIGIT, 32 otherwise; see LED.SIZES)
  * @property {number} cols (default is 1)
  * @property {number} rows (default is 1)
+ * @property {number} colsView (default is cols)
+ * @property {number} rowsView (default is rows)
  * @property {string} color (default is none; ie, transparent foreground)
  * @property {string} colorBackground (default is none; ie, transparent background)
+ * @property {boolean} fFixed (default is false, meaning the view may fill the container to its maximum size)
+ * @property {boolean} fHexagonal (default is false)
+ * @property {boolean} fHighlight (default is true)
+ * @property {boolean} fPersistent (default is false for LED.TYPE.DIGIT, meaning the view will be blanked if not refreshed)
  * @property {number} widthView (computed)
  * @property {number} heightView (computed)
  * @property {number} widthGrid (computed)
@@ -101,10 +109,6 @@
  * }} bindings
  * @property {Array.<string|number>} buffer
  * @property {Array.<string|number>|null} bufferClone
- * @property {boolean} fFixed (default is false, meaning the view may fill the container to its maximum size)
- * @property {boolean} fHexagonal (default is false)
- * @property {boolean} fHighlight (default is true)
- * @property {boolean} fPersistent (default is false for LED.TYPE.DIGIT, meaning the view will be blanked if not refreshed)
  * @property {boolean} fBufferModified
  * @property {boolean} fTickled
  */
@@ -153,12 +157,14 @@ class LED extends Device {
         this.type = this.getBounded(this.config['type'] || LED.TYPE.ROUND, LED.TYPE.ROUND, LED.TYPE.DIGIT);
         this.widthCell = LED.SIZES[this.type][0];
         this.heightCell = LED.SIZES[this.type][1];
-        this.width = this.config['width'] || this.widthCell;
-        this.height = this.config['height'] || this.heightCell;
-        this.cols = this.config['cols'] || 1;
-        this.rows = this.config['rows'] || 1;
-        this.widthView = this.width * this.cols;
-        this.heightView = this.height * this.rows;
+        this.width = this.getDefaultNumber('width', this.widthCell);
+        this.height = this.getDefaultNumber('height', this.heightCell);
+        this.colsView = this.getDefaultNumber('cols',  1);
+        this.cols = this.colsView + this.getDefaultNumber('colsExtra', 0);
+        this.rowsView = this.getDefaultNumber('rows',  1);
+        this.rows = this.rowsView + this.getDefaultNumber('rowsExtra', 0);
+        this.widthView = this.width * this.colsView;
+        this.heightView = this.height * this.rowsView;
 
         this.colorTransparent = this.getRGBAColor("black", 0);
         this.colorOn = this.getRGBColor(this.config['color']) || this.colorTransparent;
@@ -176,25 +182,23 @@ class LED extends Device {
          *
          * But, if you really don't want that feature, then set the LED config's "fixed" property to true.
          */
-        this.fFixed = this.config['fixed'] || false;
+        this.fFixed = this.getDefaultBoolean('fixed', false);
         if (!this.fFixed) {
             canvasView.style.width = "100%";
             canvasView.style.height = "auto";
         }
 
         /*
+         * Hexagonal (aka "Lite-Brite" mode) and highlighting options
+         */
+        this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
+        this.fHighlight = this.getDefaultBoolean('highlight', true);
+
+        /*
          * Persistent LEDS are the default, except for LED.TYPE.DIGIT, which is used with calculator displays
          * whose underlying hardware must constantly "refresh" the LEDs to prevent them from going dark.
          */
-        this.fPersistent = this.config['persistent'];
-        if (this.fPersistent == undefined) this.fPersistent = (this.type < LED.TYPE.DIGIT);
-
-        /*
-         * Hexagonal (aka "Lite-Brite" mode) and highlighting options
-         */
-        this.fHexagonal = this.config['hexagonal'] || false;
-        this.fHighlight = this.config['highlight'];
-        if (this.fHighlight === undefined) this.fHighlight = true;
+        this.fPersistent = this.getDefaultBoolean('persistent', (this.type < LED.TYPE.DIGIT));
 
         canvasView.setAttribute("width", this.widthView.toString());
         canvasView.setAttribute("height", this.heightView.toString());
@@ -207,8 +211,8 @@ class LED extends Device {
          */
         this.canvasGrid = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
         if (this.canvasGrid) {
-            this.canvasGrid.width = this.widthGrid = this.widthCell * this.cols;
-            this.canvasGrid.height = this.heightGrid = this.heightCell * this.rows;
+            this.canvasGrid.width = this.widthGrid = this.widthCell * this.colsView;
+            this.canvasGrid.height = this.heightGrid = this.heightCell * this.rowsView;
             this.contextGrid = this.canvasGrid.getContext("2d");
         }
 
@@ -229,6 +233,7 @@ class LED extends Device {
         this.nBufferCells = ((this.rows + 1) * this.cols) * this.nBufferInc;
         this.buffer = new Array(this.nBufferCells);
         this.bufferClone = null;
+        this.nBufferSkip = (this.colsView < this.cols? (this.cols - this.colsView) * 4 : 0);
 
         /*
          * fBufferModified is straightforward: set to true by any setLEDState() call that actually
@@ -295,13 +300,13 @@ class LED extends Device {
      */
     clearGridCell(col, row, xOffset)
     {
-        let xBias = col * this.widthCell + xOffset;
-        let yBias = row * this.heightCell;
+        let xDst = col * this.widthCell + xOffset;
+        let yDst = row * this.heightCell;
         if (this.colorBackground) {
             this.contextGrid.fillStyle = this.colorBackground;
-            this.contextGrid.fillRect(xBias, yBias, this.widthCell, this.heightCell);
+            this.contextGrid.fillRect(xDst, yDst, this.widthCell, this.heightCell);
         } else {
-            this.contextGrid.clearRect(xBias, yBias, this.widthCell, this.heightCell);
+            this.contextGrid.clearRect(xDst, yDst, this.widthCell, this.heightCell);
         }
     }
 
@@ -318,7 +323,7 @@ class LED extends Device {
      * @this {LED}
      * @param {boolean} [fForced]
      */
-    drawBuffer(fForced)
+    drawBuffer(fForced = false)
     {
         if (this.fBufferModified || fForced) {
             if (this.type < LED.TYPE.DIGIT) {
@@ -355,7 +360,7 @@ class LED extends Device {
         }
         let i = 0;
         for (let row = 0; row < this.rows; row++) {
-            for (let col = 0; col < this.cols; col++) {
+            for (let col = 0; col < this.colsView; col++) {
                 let state = this.buffer[i];
                 let color = this.buffer[i+1] || this.colorTransparent;
                 let fModified = !!(this.buffer[i+3] & LED.FLAGS.MODIFIED);
@@ -367,6 +372,7 @@ class LED extends Device {
                 }
                 i += this.nBufferInc;
             }
+            i += this.nBufferSkip;
         }
         this.drawView();
     }
@@ -389,18 +395,8 @@ class LED extends Device {
         if (this.fHexagonal) {
             if (!(row & 0x1)) {
                 xOffset = (this.widthCell >> 1);
-                if (col == this.cols - 1) return;
+                if (col == this.colsView - 1) return;
             }
-        }
-
-        /*
-         * If this is NOT a persistent LED display, then drawGrid() will have done a preliminary clearGrid(),
-         * eliminating the need to clear individual cells.  Whereas if this IS a persistent LED display, then
-         * we need to clear cells on an as-drawn basis.  If we don't, there could be residual "bleed over"
-         * around the edges of the shape we drew here previously.
-         */
-        if (this.fPersistent) {
-            this.clearGridCell(col, row, xOffset);
         }
 
         let colorOn, colorOff;
@@ -413,27 +409,38 @@ class LED extends Device {
         }
 
         let fTransparent = false;
-        color = (state? colorOn : colorOff);
+        let colorCell = (state? colorOn : colorOff);
         if (colorOn == this.colorTransparent) {
-            color = this.colorBackground;
+            colorCell = this.colorBackground;
             fTransparent = true;
         }
 
-        this.contextGrid.fillStyle = color;
+        let xDst = col * this.widthCell + xOffset;
+        let yDst = row * this.heightCell;
 
-        let xBias = col * this.widthCell + xOffset;
-        let yBias = row * this.heightCell;
+        /*
+         * If this is NOT a persistent LED display, then drawGrid() will have done a preliminary clearGrid(),
+         * eliminating the need to clear individual cells.  Whereas if this IS a persistent LED display, then
+         * we need to clear cells on an as-drawn basis.  If we don't, there could be residual "bleed over"
+         * around the edges of the shape we drew here previously.
+         */
+        if (this.fPersistent) {
+            this.clearGridCell(col, row, xOffset);
+        }
+
+        this.contextGrid.fillStyle = colorCell;
+
         let coords = LED.SHAPES[this.type];
         if (coords.length == 3) {
             this.contextGrid.beginPath();
-            this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, Math.PI * 2);
+            this.contextGrid.arc(xDst + coords[0], yDst + coords[1], coords[2], 0, Math.PI * 2);
             if (fTransparent) {
                 /*
                  * The following code works as well:
                  *
                  *      this.contextGrid.save();
                  *      this.contextGrid.clip();
-                 *      this.contextGrid.clearRect(xBias, yBias, this.widthCell, this.heightCell);
+                 *      this.contextGrid.clearRect(xDst, yDst, this.widthCell, this.heightCell);
                  *      this.contextGrid.restore();
                  *
                  * but I assume it's not as efficient.
@@ -445,7 +452,7 @@ class LED extends Device {
                 this.contextGrid.fill();
             }
         } else {
-            this.contextGrid.fillRect(coords[0] + xBias, coords[1] + yBias, coords[2], coords[3]);
+            this.contextGrid.fillRect(xDst + coords[0], yDst + coords[1], coords[2], coords[3]);
         }
     }
 
@@ -461,20 +468,20 @@ class LED extends Device {
      */
     drawGridSegment(seg, col = 0, row = 0)
     {
-        let coords = LED.SEGMENT[seg];
+        let coords = LED.SEGMENTS[seg];
         if (coords) {
-            let xBias = col * this.widthCell;
-            let yBias = row * this.heightCell;
+            let xDst = col * this.widthCell;
+            let yDst = row * this.heightCell;
             this.contextGrid.fillStyle = this.colorOn;
             this.contextGrid.beginPath();
             if (coords.length == 3) {
-                this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, Math.PI * 2);
+                this.contextGrid.arc(xDst + coords[0], yDst + coords[1], coords[2], 0, Math.PI * 2);
             } else {
                 for (let i = 0; i < coords.length; i += 2) {
                     if (!i) {
-                        this.contextGrid.moveTo(coords[i] + xBias, coords[i + 1] + yBias);
+                        this.contextGrid.moveTo(xDst + coords[i], yDst + coords[i+1]);
                     } else {
-                        this.contextGrid.lineTo(coords[i] + xBias, coords[i + 1] + yBias);
+                        this.contextGrid.lineTo(xDst + coords[i], yDst + coords[i+1]);
                     }
                 }
             }
@@ -500,7 +507,7 @@ class LED extends Device {
                 if (col) col--;
             }
             this.drawSymbol(ch, col, row);
-            if (++col == this.cols) {
+            if (++col == this.colsView) {
                 col = 0;
                 if (++row == this.rows) {
                     break;
@@ -515,7 +522,7 @@ class LED extends Device {
      *
      * Used by drawString() for LED.TYPE.DIGIT.
      *
-     * If the symbol does not exist in LED.SYMBOLS, then nothing is drawn.
+     * If the symbol does not exist in LED.SYMBOL_SEGMENTS, then nothing is drawn.
      *
      * @this {LED}
      * @param {string} symbol
@@ -524,7 +531,7 @@ class LED extends Device {
      */
     drawSymbol(symbol, col = 0, row = 0)
     {
-        let segments = LED.SYMBOLS[symbol];
+        let segments = LED.SYMBOL_SEGMENTS[symbol];
         if (segments) {
             for (let i = 0; i < segments.length; i++) {
                 this.drawGridSegment(segments[i], col, row)
@@ -584,7 +591,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @returns {string|undefined}
+     * @returns {string}
      */
     getLEDColor(col, row)
     {
@@ -689,9 +696,9 @@ class LED extends Device {
      * that to signal transparency (as in the case of colorBackground).
      *
      * @this {LED}
-     * @param {string} color
+     * @param {string|undefined} color
      * @param {string} [colorDefault]
-     * @returns {string}
+     * @returns {string|undefined}
      */
     getRGBColor(color, colorDefault)
     {
@@ -705,6 +712,8 @@ class LED extends Device {
      * Returns a color string fillStyle recognizes (ie, "#rrggbb", or "rgba(r,g,b,a)" if an alpha value
      * less than 1 is set).
      *
+     * TODO: Cache frequently requested colors.
+     * 
      * @this {LED}
      * @param {Array.<number>} rgb
      * @returns {string}
@@ -846,6 +855,18 @@ class LED extends Device {
     }
 
     /**
+     * setContainerStyle(sAttr, sValue)
+     * 
+     * @this {LED}
+     * @param {string} sAttr 
+     * @param {string} sValue 
+     */
+    setContainerStyle(sAttr, sValue)
+    {
+        if (this.container) this.container.style[sAttr] = sValue;
+    }
+    
+    /**
      * setLEDColor(col, row, color)
      *
      * @this {LED}
@@ -859,12 +880,12 @@ class LED extends Device {
         let fModified = null;
         if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
             fModified = false;
-            color = color || this.colorOn;
-            if (color == this.colorTransparent) color = null;
+            let colorNew = color || this.colorOn;
+            if (colorNew == this.colorTransparent) colorNew = null;
             let i = (row * this.cols + col) * this.nBufferInc;
-            if (this.buffer[i+1] !== color) {
-                this.buffer[i+1] = color;
-                if (!color) this.buffer[i] = LED.STATE.OFF;     // transparent LEDs are automatically turned off
+            if (this.buffer[i+1] !== colorNew) {
+                this.buffer[i+1] = colorNew;
+                if (!colorNew) this.buffer[i] = LED.STATE.OFF;  // transparent LEDs are automatically turned off
                 this.buffer[i+3] |= LED.FLAGS.MODIFIED;
                 this.fBufferModified = fModified = true;
             }
@@ -1151,7 +1172,7 @@ LED.SIZES = [
 ];
 
 /*
- * The segments are arranged roughly as follows in a 96x128 grid:
+ * The segments are arranged roughly as follows, in a 96x128 grid:
  *
  *      AAAA
  *     F    B
@@ -1166,7 +1187,7 @@ LED.SIZES = [
  * instead of one or more pairs (eg, the 'P' or period segment), then the coordinates are treated as arc()
  * parameters.
  */
-LED.SEGMENT = {
+LED.SEGMENTS = {
     'A':        [30,   8,  79,   8,  67,  19,  37,  19],
     'B':        [83,  10,  77,  52,  67,  46,  70,  22],
     'C':        [77,  59,  71, 100,  61,  89,  64,  64],
@@ -1178,9 +1199,9 @@ LED.SEGMENT = {
 };
 
 /*
- * Symbols are formed with the following segments.
+ * Segmented symbols are formed with the following segments.
  */
-LED.SYMBOLS = {
+LED.SYMBOL_SEGMENTS = {
     ' ':        [],
     '0':        ['A','B','C','D','E','F'],
     '1':        ['B','C'],
@@ -1197,4 +1218,4 @@ LED.SYMBOLS = {
     '.':        ['P']
 };
 
-LED.VERSION     = 1.10;
+LED.VERSION     = 1.11;

@@ -31,12 +31,11 @@
  * so for normal development, you should continue using Grunt.
  * 
  * To learn Gulp, I started with a simple concatenation task ("mktmp") that combines all the files
- * required to compile a single emulation module (PDPjs), and then I added a compilation task ("compile")
+ * required to compile a single emulation module (LEDs), and then I added a compilation task ("compile")
  * that runs the new JavaScript version of Google's Closure Compiler.
  * 
  * Unfortunately, the JavaScript version of the Closure Compiler appears to be MUCH slower than the
- * Java version.  But, it did uncover a few new type-related bugs in my code, which are now fixed,
- * and the PDPjs emulation module now compiles successfully (although I haven't tested it yet).
+ * Java version.  But, it did uncover a few new type-related bugs in my code, which are now fixed.
  * 
  * Additional work is required to make Gulp skip tasks when the output file(s) are still newer
  * than the input file(s).  By default, every time you run Gulp, EVERYTHING is built again.  Apparently,
@@ -44,28 +43,23 @@
  * too old-fashioned.
  */
 var gulp = require("gulp");
+var newer = require("gulp-newer");
 var concat = require("gulp-concat");
 var foreach = require("gulp-foreach");
 var header = require("gulp-header");
 var replace = require("gulp-replace");
-var sequence = require("run-sequence");
-var compiler = require('google-closure-compiler-js').gulp();
+var closureCompiler = require('google-closure-compiler-js').gulp();
+var sourcemaps = require('gulp-sourcemaps');
 
 var fs = require("fs");
 var path = require("path");
 var pkg = require("./package.json");
-
-pkg.version = pkg.version.slice(0, -1) + 'x';                           // TODO: Remove this hack when we're done testing
-
-var pdp11TmpDir  = "./tmp/pdp11/"  + pkg.version;
-var pdp11ReleaseDir = "./versions/pdpjs/" + pkg.version;
-var pdp11ReleaseFile  = "pdp11.js";
+var machines = require("./_data/machines.json");
 
 var sExterns = "";
-var sSiteHost = "www.pcjs.org";
 
-for (var i = 0; i < pkg.closureCompilerExterns.length; i++) {
-    var sContents = "";
+for (let i = 0; i < pkg.closureCompilerExterns.length; i++) {
+    let sContents = "";
     try {
         sContents = fs.readFileSync(pkg.closureCompilerExterns[i], "utf8");
     } catch(err) {
@@ -77,55 +71,106 @@ for (var i = 0; i < pkg.closureCompilerExterns.length; i++) {
     }
 }
 
+var sSiteHost = "www.pcjs.org";
+
 if (pkg.homepage) {
-    var match = pkg.homepage.match(/^http:\/\/([^\/]*)(.*)/);
+    let match = pkg.homepage.match(/^http:\/\/([^\/]*)(.*)/);
     if (match) sSiteHost = match[1];
 }
 
-gulp.task('mktmp', function() {
-    return gulp.src(pkg.PDP11Files)
-        .pipe(foreach(function(stream, file){
-              return stream
-                .pipe(header('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2017\n */\n\n'))
-                .pipe(replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, ""))
-                .pipe(replace(/^(import|export)[ \t]+[^\n]*\n/gm, ""))
-                .pipe(replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, ""))
-                .pipe(replace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, ""))
-                .pipe(replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, ""))
-                .pipe(replace(/[ \t]*if\s*\(NODE\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
-                .pipe(replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
-                .pipe(replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
-            }))        
-        .pipe(concat(pdp11ReleaseFile))
-        .pipe(header('"use strict";\n\n'))
-        .pipe(gulp.dest(pdp11TmpDir));
+var aCompileTasks = [];
+var aMachines = Object.keys(machines);
+
+aMachines.forEach(function(machineType) {
+    let machineConfig = machines[machineType];
+    while (machineConfig && machineConfig.alias) {
+        machineConfig = machines[machineConfig.alias];
+    }
+    let machineVersion = (machineConfig.version || pkg.version);
+    let machineTmpDir  = "./tmp/" + machineConfig.folder + "/" + machineVersion;
+    let machineReleaseDir = "./versions/" + machineConfig.folder + "/" + machineVersion;
+    let machineReleaseFile  = machineType + ".js";
+    let machineDefines = {};
+    if (machineConfig.defines) {
+        for (let i = 0; i < machineConfig.defines.length; i++) {
+            let define = machineConfig.defines[i];
+            switch(define) {
+            case "APPVERSION":
+                machineDefines[define] = machineVersion;
+                break;
+            case "SITEHOST":
+                machineDefines[define] = sSiteHost;
+                break;
+            case "BACKTRACK":
+            case "DEBUG":
+                machineDefines[define] = false;
+                break;
+            case "COMPILED":
+            case "DEBUGGER":
+            case "I386":
+            default:
+                machineDefines[define] = true;
+                break;
+            }
+        }
+    }
+    gulp.task("mktmp/" + machineType, function() {
+        return gulp.src(machineConfig.files)
+            .pipe(newer(path.join(machineTmpDir, machineReleaseFile)))
+            .pipe(foreach(function(stream, file){
+                return stream
+                    .pipe(header('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2017\n */\n\n'))
+                    .pipe(replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, ""))
+                    .pipe(replace(/^(import|export)[ \t]+[^\n]*\n/gm, ""))
+                    .pipe(replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, ""))
+                    .pipe(replace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, ""))
+                    .pipe(replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, ""))
+                    .pipe(replace(/[ \t]*if\s*\(NODE\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
+                    .pipe(replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
+                    .pipe(replace(/\/\*\*[^@]*@typedef\s*{[A-Z][A-Za-z0-9_]+}\s*(\S+)\s*([\s\S]*?)\*\//g, function(match, type, props) {
+                        let sType = "/** @typedef {{ ";
+                        let sProps = "";
+                        let reProps = /@property\s*{([^}]*)}\s*(\[|)([^\s\]]+)\]?/g, matchProps;
+                        while (matchProps = reProps.exec(props)) {
+                            if (sProps) sProps += ", ";
+                            sProps += matchProps[3] + ": " + (matchProps[2]? ("(" + matchProps[1] + "|undefined)") : matchProps[1]);
+                        }
+                        sType += sProps + " }} */\nvar " + type + ";";
+                        return sType;
+                    }))
+                    .pipe(replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
+                }))        
+            .pipe(concat(machineReleaseFile))
+            .pipe(header('"use strict";\n\n'))
+            .pipe(gulp.dest(machineTmpDir));
+    });
+    let sTask = "compile/" + machineType;
+    aCompileTasks.push(sTask);
+    gulp.task(sTask, ["mktmp/" + machineType], function() {
+        return gulp.src(path.join(machineTmpDir, machineReleaseFile) /*, {base: './'} */)
+            .pipe(sourcemaps.init())
+            .pipe(closureCompiler({
+                assumeFunctionWrapper: true,
+                compilationLevel: 'ADVANCED',
+                defines: machineDefines,
+                externs: [{src: sExterns}],
+                warningLevel: 'VERBOSE',
+                languageIn: "ES6",                          // this is now the default, just documenting our requirements
+                languageOut: "ES5",                         // this is also the default
+                outputWrapper: '(function(){%output%})()',
+                jsOutputFile: machineReleaseFile,           // TODO: This must vary according to debugger/non-debugger releases
+                createSourceMap: true
+            }))
+            .pipe(sourcemaps.write('./'))                   // gulp-sourcemaps automatically adds the sourcemap url comment
+            .pipe(gulp.dest(machineReleaseDir));
+    });
 });
 
-gulp.task('compile', function() {
-    return gulp.src(path.join(pdp11TmpDir, pdp11ReleaseFile) /*, {base: './'} */)
-        .pipe(compiler({
-            assumeFunctionWrapper: true,
-            compilationLevel: 'ADVANCED',
-            defines: {
-                "APPVERSION": pkg.version,
-                "SITEHOST": sSiteHost,
-                "COMPILED": true,
-                "DEBUG": false,
-                "DEBUGGER": false
-            },
-            externs: [{src: sExterns}],
-            warningLevel: 'VERBOSE',
-            languageIn: "ES6",                          // this is now the default, just documenting our requirements
-            languageOut: "ES5",                         // this is also the default
-            outputWrapper: '(function(){%output%})()',
-            jsOutputFile: pdp11ReleaseFile,             // TODO: This must vary according to debugger/non-debugger releases
-            createSourceMap: false
-        }))
-        .pipe(gulp.dest(pdp11ReleaseDir));
-});
+gulp.task("compile/devices", [
+    "compile/leds",
+    "compile/ti42",
+    "compile/ti55",
+    "compile/ti57"
+]);
 
-gulp.task('default', function() {
-    sequence(
-        'mktmp', 'compile'
-    );
-});
+gulp.task("default", aCompileTasks);

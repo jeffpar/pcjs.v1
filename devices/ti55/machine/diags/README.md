@@ -6,7 +6,6 @@ machines:
   - id: ti55
     type: ti55
     name: TI-55 Programmable Calculator
-    uncompiled: true
     config: |
       {
         "ti55": {
@@ -55,6 +54,7 @@ machines:
         },
         "buttons": {
           "class": "Input",
+          "buttonDelay": 50,
           "location": [56, 322, 358, 462, 0.34, 0.5, 465, 832, 322, 182, 74, 36],
           "map": [
             ["2nd",  "sin",  "cos",  "tan",  "clr"],
