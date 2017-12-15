@@ -140,7 +140,7 @@ aMachines.forEach(function(machineType) {
                     }))
                     .pipe(replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
                 }))        
-            .pipe(concat(machineReleaseFile))
+            .pipe(concat(machineUncompiledFile))
             .pipe(header('"use strict";\n\n'))
             .pipe(gulp.dest(machineReleaseDir));
     });
