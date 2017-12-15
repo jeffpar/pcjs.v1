@@ -30,7 +30,7 @@
  * This is an experimental Gulp file; this will NOT yet build everything that Gruntfile.js builds,
  * so for normal development, you should continue using Grunt.
  * 
- * To learn Gulp, I started with a simple concatenation task ("mktmp") that combines all the files
+ * To learn Gulp, I started with a simple concatenation task ("mksrc") that combines all the files
  * required to compile a single emulation module (LEDs), and then I added a compilation task ("compile")
  * that runs the new JavaScript version of Google's Closure Compiler.
  * 
@@ -87,9 +87,9 @@ aMachines.forEach(function(machineType) {
         machineConfig = machines[machineConfig.alias];
     }
     let machineVersion = (machineConfig.version || pkg.version);
-    let machineTmpDir  = "./tmp/" + machineConfig.folder + "/" + machineVersion;
     let machineReleaseDir = "./versions/" + machineConfig.folder + "/" + machineVersion;
     let machineReleaseFile  = machineType + ".js";
+    let machineUncompiledFile  = machineType + "-uncompiled.js";
     let machineDefines = {};
     if (machineConfig.defines) {
         for (let i = 0; i < machineConfig.defines.length; i++) {
@@ -114,9 +114,9 @@ aMachines.forEach(function(machineType) {
             }
         }
     }
-    gulp.task("mktmp/" + machineType, function() {
+    gulp.task("mksrc/" + machineType, function() {
         return gulp.src(machineConfig.files)
-            .pipe(newer(path.join(machineTmpDir, machineReleaseFile)))
+            .pipe(newer(path.join(machineReleaseDir, machineUncompiledFile)))
             .pipe(foreach(function(stream, file){
                 return stream
                     .pipe(header('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2017\n */\n\n'))
@@ -142,12 +142,12 @@ aMachines.forEach(function(machineType) {
                 }))        
             .pipe(concat(machineReleaseFile))
             .pipe(header('"use strict";\n\n'))
-            .pipe(gulp.dest(machineTmpDir));
+            .pipe(gulp.dest(machineReleaseDir));
     });
     let sTask = "compile/" + machineType;
     aCompileTasks.push(sTask);
-    gulp.task(sTask, ["mktmp/" + machineType], function() {
-        return gulp.src(path.join(machineTmpDir, machineReleaseFile) /*, {base: './'} */)
+    gulp.task(sTask, ["mksrc/" + machineType], function() {
+        return gulp.src(path.join(machineReleaseDir, machineUncompiledFile) /*, {base: './'} */)
             .pipe(sourcemaps.init())
             .pipe(closureCompiler({
                 assumeFunctionWrapper: true,
