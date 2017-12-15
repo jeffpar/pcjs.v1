@@ -35,30 +35,22 @@ The following optional machine properties will be added to the 'parms' property:
 {% endcomment %}
 {% for machine in page.machines %}
   {% capture machine_type %}{{ machine.type | remove:"-dbg" }}{% endcapture %}
-  {% if machine_type == "c1p" %}
-    {% assign machine_app = "c1pjs" %}
-  {% elsif machine_type == "pdp10" or machine_type == "pdp11" %}
-    {% assign machine_app = "pdpjs" %}
-  {% else %}
-    {% capture machine_app %}{{ machine_type }}{% endcapture %}
+  {% assign machine_data = site.data.machines[machine_type] %}
+  {% if machine_data.alias != nil %}
+    {% assign machine_data = site.data.machines[machine_data.alias] %}
   {% endif %}
+  {% assign machine_folder = machine_data.folder %}
   {% unless machine.config %}
     {% assign machine_config = "machine.xml" %}
   {% else %}
     {% assign machine_config = machine.config %}
   {% endunless %}
-  {% if machine.debugger or machine_config contains "debugger" %}
-    {% capture machine_file %}{{ machine_type }}-dbg{% endcapture %}
-    {% assign machine_debugger = true %}
+  {% capture machine_embed %}{{ machine_data.creator }}{% endcapture %}
+  {% if machine_data.version == nil %}
+    {% capture machine_version %}{{ site.pcjs.version }}{% endcapture %}
   {% else %}
-    {% capture machine_file %}{{ machine.type }}{% endcapture %}
-    {% if machine.type != machine_type %}
-      {% assign machine_debugger = true %}
-    {% else %}
-      {% assign machine_debugger = false %}
-    {% endif %}
+    {% capture machine_version %}{{ machine_data.version }}{% endcapture %}
   {% endif %}
-  {% capture machine_embed %}embed{{ machine_type | upcase | replace:"X86","x86" }}{% endcapture %}
   {% if machine.autoMount == "" %}
     {% assign machine_autoMount = "{}" %}
   {% else %}
@@ -101,93 +93,27 @@ The following optional machine properties will be added to the 'parms' property:
   {% capture machine_parms %}{{ site.left_brace }}autoMount:{{ machine_autoMount }}{{ machine_autoPower }}{{ machine_autoScript }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_drives }},resume:"{{ machine.resume }}",state:"{{ machine.state }}",commands:"{{ machine.commands }}",messages:"{{ machine.messages }}",connection:"{{ machine.connection }}"{{ site.right_brace }}{% endcapture %}
   {% if site.pcjs.compiled == true and machine.uncompiled != true %}
     {% capture page_script %}
-      <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/{{ machine_file }}.js"></script>{% endcapture %}
+      <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/{{ machine_type }}.js"></script>{% endcapture %}
     {% unless page_scripts contains page_script %}
       {{ page_script }}
     {% endunless %}
     {% capture page_scripts %}{{ page_scripts }}{{ page_script }}{% endcapture %}
     {% if machine_template == "" %}
-      {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/components.xsl{% endcapture %}
+      {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/components.xsl{% endcapture %}
     {% endif %}
   {% else %}
-    {% if machine_type == "leds" %}
-      {% assign array_scripts = site.pcjs.led_scripts %}
-      {% for script in array_scripts %}
-        {% capture page_script %}<script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>{% endcapture %}
-        {% unless page_scripts contains page_script %}
-          {{ page_script }}
-        {% endunless %}
-        {% capture page_scripts %}{{ page_scripts }}{{ page_script }}{% endcapture %}
-      {% endfor %}
-    {% elsif machine_type == "ti42" or machine_type == "ti55" or machine_type == "ti57" %}
-      {% assign array_scripts = site.pcjs.ti57_scripts %}
-      {% for script in array_scripts %}
-        {% capture page_script %}<script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>{% endcapture %}
-        {% unless page_scripts contains page_script %}
-          {{ page_script }}
-        {% endunless %}
-        {% capture page_scripts %}{{ page_scripts }}{{ page_script }}{% endcapture %}
-      {% endfor %}
-    {% else %}
-      {% capture machine_file_uncompiled %}{{ machine_file | remove:"-dbg" | append:"-uncompiled" }}{% endcapture %}
-      {% capture page_script %}
-      <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/{{ machine_file_uncompiled }}.js"></script>{% endcapture %}
-      {% unless page_scripts contains page_script %}
-        {{ page_script }}
-      {% endunless %}
-      {% capture page_scripts %}{{ page_scripts }}{{ page_script }}{% endcapture %}
-      {% if machine_template == "" %}
-        {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/components.xsl{% endcapture %}
-      {% endif %}
+    {% capture page_script %}
+    <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/{{ machine_type }}-uncompiled.js"></script>{% endcapture %}
+    {% unless page_scripts contains page_script %}
+      {{ page_script }}
+    {% endunless %}
+    {% capture page_scripts %}{{ page_scripts }}{{ page_script }}{% endcapture %}
+    {% if machine_template == "" %}
+      {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/components.xsl{% endcapture %}
     {% endif %}
-
-    {% comment %}
-      The following approach worked well before we converted most of the code to ES6 classes.  Unfortunately, ES6 classes
-      don't coexist well with the conditional Node require() statements inside the individual scripts.  Since we were already
-      stripping all the Node-related code from the scripts to build monolithic scripts that we could feed into the Closure
-      Compiler, we have simply moved those monolithic scripts from the /tmp folder to the /versions folder, with "-uncompiled"
-      suffixes.  And since they are now checked in alongside the compiled files, there's the added benefit that we can always
-      reference them from source maps.
-
-      So, the following template code is no longer of any use, but we'll leave it here for historical reference.  Note that
-      our Node web server still serves up individual scripts, because it has the ability to strip all Node references from the
-      scripts before delivering them to the web browser.  But that's not really feasible in the Jekyll environment.
-
-      {% if machine_type == "c1p" %}{% assign array_scripts = site.pcjs.c1p_scripts %}{% endif %}
-      {% if machine_type == "pcx86" %}{% assign array_scripts = site.pcjs.pcx86_scripts %}{% endif %}
-      {% if machine_type == "pc8080" %}{% assign array_scripts = site.pcjs.pc8080_scripts %}{% endif %}
-      {% if machine_type == "pdp10" %}{% assign array_scripts = site.pcjs.pdp10_scripts %}{% endif %}
-      {% if machine_type == "pdp11" %}{% assign array_scripts = site.pcjs.pdp11_scripts %}{% endif %}
-      {% for script in array_scripts %}
-        {% if script != "/modules/shared/lib/nodebug.js" or machine.debug != true and site.pcjs.debug != true %}
-          {% capture page_script %}<script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>{% endcapture %}
-          {% unless page_scripts contains page_script %}
-            {{ page_script }}
-            {% if script contains "shared/lib/defines.js" %}
-              {% if site.pcjs.private %}
-                {{ page_script | replace:"defines.js","private.js" }}
-              {% endif %}
-            {% endif %}
-            {% if script contains "js/lib/defines.js" %}
-              {% if machine_debugger != true %}
-                {{ page_script | replace:"defines.js","nodebugger.js" }}
-              {% endif %}
-            {% endif %}
-          {% endunless %}
-          {% capture page_scripts %}{{ page_scripts }}{{ page_script }}{% endcapture %}
-        {% endif %}
-      {% endfor %}
-      {% if machine_template == "" %}
-        {% if machine_app != "c1pjs" %}
-          {% capture machine_template %}{{ site.baseurl }}/modules/shared/templates/components.xsl{% endcapture %}
-        {% else %}
-          {% capture machine_template %}{{ site.baseurl }}/modules/{{ machine_app }}/templates/components.xsl{% endcapture %}
-        {% endif %}
-      {% endif %}
-  {% endcomment %}
   {% endif %}
-  {% if machine_type == "leds" or machine_type == "ti42" or machine_type == "ti55" or machine_type == "ti57" %}
-    <script type="text/javascript">new Machine('{{ machine.id }}','{{ machine_config | strip_newlines }}');</script>
+  {% if machine_embed contains "new " %}
+    <script type="text/javascript">{{ machine_embed }}('{{ machine.id }}','{{ machine_config | strip_newlines }}');</script>
   {% else %}
     <script type="text/javascript">{{ machine_embed }}('{{ machine.id }}','{{ machine_config }}','{{ machine_template }}','{{ machine_parms }}');</script>
   {% endif %}

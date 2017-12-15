@@ -22,7 +22,7 @@ encoding: UTF-8
 
 # Build settings
 
-exclude: ["index.html", "**/index.html", "bin", "logs", "node_modules", "projects", "src", "tmp", "videos", "web", "**/archive", "**/ecp", "**/c64", "**/private", "**/restricted", "**/src", "**/tmp", "**/unlisted", ".git", ".idea", "/Gemfile", "/Gemfile.lock", "/Gruntfile.js", "/gulpfile.js", "/notes.md", "/server.js", "/*.sh", "/pubs"]
+exclude: ["index.html", "**/index.html", "bin", "logs", "node_modules", "src", "**/src", "tmp", "**/tmp", "videos", "web", "**/archive", "**/ecp", "**/c64", "**/private", "**/restricted", "**/unlisted", ".git", ".idea", "/Gemfile", "/Gemfile.lock", "/Gruntfile.js", "/gulpfile.js", "/notes.md", "/server.js", "/*.sh"]
 markdown: kramdown
 kramdown:
   input: GFM
@@ -36,5 +36,5 @@ plugins:
 
 pcjs:
   domain: pcjs.org    # whereas site.url is used for linking purposes, site.pcjs.domain is used for display purposes
-  version: 1.37.1     # IMPORTANT: keep pcjs.version in sync with package.json:version
+  version: 1.40.0     # IMPORTANT: keep pcjs.version in sync with package.json:version
   compiled: true      # by default, the compiled pcjs.version scripts will be used (eg, pcx86.js, pc8080.js, etc)
