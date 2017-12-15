@@ -253,12 +253,6 @@ class LED extends Device {
          */
         this.iBufferRecent = -1;
 
-        /*
-         * Every time we draw a grid cell with a specific color, we cache that information in these arrays.
-         */
-        this.cacheGridColors = [];
-        this.cacheGridPositions = [];
-
         let led = this;
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
@@ -294,7 +288,6 @@ class LED extends Device {
         } else {
             this.contextGrid.clearRect(0, 0, this.widthGrid, this.heightGrid);
         }
-        this.cacheGridColors.length = this.cacheGridPositions.length = 0;
     }
 
     /**
@@ -425,17 +418,6 @@ class LED extends Device {
         let xDst = col * this.widthCell + xOffset;
         let yDst = row * this.heightCell;
 
-        if (!fHighlight) {
-            let i = this.cacheGridColors.indexOf(colorCell);
-            if (i >= 0) {
-                let pos = this.cacheGridPositions[i];
-                let xSrc = (pos & 0xffff) * this.widthCell + xOffset;
-                let ySrc = (pos >>> 16) * this.heightCell;
-                // this.contextGrid.drawImage(this.canvasGrid, xSrc, ySrc, this.widthCell, this.heightCell, xDst, yDst, this.widthCell, this.heightCell);
-                // return;
-            }
-        }
-
         /*
          * If this is NOT a persistent LED display, then drawGrid() will have done a preliminary clearGrid(),
          * eliminating the need to clear individual cells.  Whereas if this IS a persistent LED display, then
@@ -471,18 +453,6 @@ class LED extends Device {
             }
         } else {
             this.contextGrid.fillRect(xDst + coords[0], yDst + coords[1], coords[2], coords[3]);
-        }
-
-        if (!fHighlight) {
-            let pos = (row << 16) | col;
-            let i = this.cacheGridPositions.indexOf(pos);
-            if (i >= 0) {
-                this.cacheGridColors[i] = colorCell;
-            }
-            else if (this.cacheGridColors.length < 16) {
-                this.cacheGridColors.push(colorCell);
-                this.cacheGridPositions.push(pos);
-            }
         }
     }
 
