@@ -233,7 +233,7 @@ class LED extends Device {
         this.nBufferCells = ((this.rows + 1) * this.cols) * this.nBufferInc;
         this.buffer = new Array(this.nBufferCells);
         this.bufferClone = null;
-        this.nBufferSkip = (this.colsView < this.cols? (this.cols - this.colsView) * 4 : 0);
+        this.nBufferIncExtra = (this.colsView < this.cols? (this.cols - this.colsView) * 4 : 0);
 
         /*
          * fBufferModified is straightforward: set to true by any setLEDState() call that actually
@@ -387,7 +387,7 @@ class LED extends Device {
                 }
                 i += this.nBufferInc;
             }
-            i += this.nBufferSkip;
+            i += this.nBufferIncExtra;
         }
         this.fShiftedLeft = false;
         this.drawView();
@@ -788,15 +788,27 @@ class LED extends Device {
     initBuffer(buffer)
     {
         for (let i = 0; i < buffer.length; i += this.nBufferInc) {
-            if (this.type < LED.TYPE.DIGIT) {
-                buffer[i] = LED.STATE.OFF;
-            } else {
-                buffer[i] = ' ';
-            }
-            buffer[i+1] = (this.colorOn == this.colorTransparent? null : this.colorOn);
-            buffer[i+2] = 0;
-            buffer[i+3] = LED.FLAGS.MODIFIED;
+            this.initCell(buffer, i);
         }
+    }
+
+    /**
+     * initCell(buffer, iCell)
+     *
+     * @this {LED}
+     * @param {Array.<number|string>} buffer
+     * @param {number} iCell
+     */
+    initCell(buffer, iCell)
+    {
+        if (this.type < LED.TYPE.DIGIT) {
+            buffer[iCell] = LED.STATE.OFF;
+        } else {
+            buffer[iCell] = ' ';
+        }
+        buffer[iCell+1] = (this.colorOn == this.colorTransparent? null : this.colorOn);
+        buffer[iCell+2] = 0;
+        buffer[iCell+3] = LED.FLAGS.MODIFIED;
     }
 
     /**

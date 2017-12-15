@@ -328,18 +328,21 @@ class Chip extends Device {
     doCounting()
     {
         let cActive = 0;
-        let buffer = this.leds.getBuffer();
-        let bufferClone = this.leds.getBufferClone();
-        let nCols = this.leds.cols;
-        let nRows = this.leds.rows;
+        let leds = this.leds;
+        let buffer = leds.getBuffer();
+        let bufferClone = leds.getBufferClone();
+        let nCols = leds.colsView;
+        let nRows = leds.rows;
         /*
          * The number of LED buffer elements per cell is an LED implementation detail that should not be
          * assumed, so we obtain it from the LED object, and use it to calculate the per-cell increment,
          * per-row increment, and per-grid increment; the latter gives us the offset of the LED buffer's
          * scratch row, which we rely upon when wrap is turned off.
+         * 
+         * NOTE: Since we're only processing colsView, not cols, we must include nBufferIncExtra in nIncPerRow.
          */
-        let nInc = this.leds.nBufferInc;
-        let nIncPerRow = nCols * nInc;
+        let nInc = leds.nBufferInc;
+        let nIncPerRow = nCols * nInc + leds.nBufferIncExtra;
         let nIncPerGrid = nRows * nIncPerRow;
 
         let iCell = 0;
@@ -415,7 +418,10 @@ class Chip extends Device {
             }
         }
         this.assert(iCell == nIncPerGrid);
-        this.leds.swapBuffers();
+        /*
+         * swapBuffers() takes care of setting the buffer-wide modified flags (leds.fBufferModified), so we don't have to.
+         */
+        leds.swapBuffers();
         return cActive;
     }
 
@@ -431,7 +437,7 @@ class Chip extends Device {
     {
         let cActive = 0;
         let leds = this.leds;
-        let nCols = leds.cols, nRows = leds.rows;
+        let nCols = leds.colsView, nRows = leds.rows;
         let counts = this.countBuffer;
         for (let row = 0; row < nRows; row++) {
             for (let col = 0; col < nCols; col++) {
@@ -507,24 +513,63 @@ class Chip extends Device {
         let cActive = 0;
         let leds = this.leds;
         let nCols = leds.cols, nRows = leds.rows;
+
         if (!this.nColsRemaining) {
-            if (this.sSymbols && this.iSymbolNext < this.sSymbols.length) {
-                let sPattern = Chip.SYMBOLS[this.sSymbols[this.iSymbolNext++]];
-                if (sPattern) this.nColsRemaining = this.loadPatternString(leds.colsView + 1, 0, sPattern, true);
-                this.nColsRemaining++;
+            if (this.sSymbols) {
+                if (this.iSymbolNext >= this.sSymbols.length) {
+                    this.iSymbolNext = 0;
+                }
+                let chSymbol = this.sSymbols[this.iSymbolNext++];
+                if (chSymbol == ' ') {
+                    this.nColsRemaining += 2;
+                } else {
+                    let sPattern = Chip.SYMBOLS[chSymbol];
+                    if (sPattern) this.nColsRemaining = this.loadPatternString(leds.colsView + 1, 0, sPattern, true);
+                    this.nColsRemaining += 1;
+                }
             }
+        }
+
+        /*
+         * This is a very slow and simple shift-and-exchange loop, which through a series of exchanges,
+         * also migrates the left-most column to the right-most column.  Good for testing but not much else.
+         */
+        // for (let row = 0; row < nRows; row++) {
+        //     for (let col = 0; col < nCols - shift; col++) {
+        //         let stateLeft = leds.getLEDState(col, row) || LED.STATE.OFF;
+        //         let stateRight = leds.getLEDState(col + 1, row) || LED.STATE.OFF;
+        //         if (stateRight) cActive++;
+        //         leds.setLEDState(col, row, stateRight);
+        //         leds.setLEDState(col + 1, row, stateLeft);
+        //     }
+        // }
+        // leds.fShiftedLeft = true;
+
+        let iCell = 0;
+        let buffer = leds.getBuffer();
+        let nInc = leds.nBufferInc;
+        let nIncPerRow = nCols * nInc;
+        for (let col = 0; col < nCols - shift; col++) {
+            let iCellOrig = iCell;
+            for (let row = 0; row < nRows; row++) {
+                let stateOld = buffer[iCell];
+                let stateNew = (buffer[iCell] = buffer[iCell + nInc]);
+                let flagsNew = ((stateNew !== stateOld)? LED.FLAGS.MODIFIED : 0);
+                buffer[iCell + 1] = buffer[iCell + nInc + 1];
+                buffer[iCell + 2] = buffer[iCell + nInc + 2];
+                buffer[iCell + 3] = buffer[iCell + nInc + 3] | flagsNew;
+                if (stateNew) cActive++;
+                iCell += nIncPerRow;
+            }
+            iCell = iCellOrig + nInc;
         }
         for (let row = 0; row < nRows; row++) {
-            for (let col = 0; col < nCols - shift; col++) {
-                let stateLeft = leds.getLEDState(col, row) || LED.STATE.OFF;
-                let stateRight = leds.getLEDState(col + 1, row) || LED.STATE.OFF;
-                if (stateRight) cActive++;
-                leds.setLEDState(col, row, stateRight);
-                leds.setLEDState(col + 1, row, stateLeft);
-            }
+            leds.initCell(buffer, iCell);
+            iCell += nIncPerRow;
         }
+        leds.fShiftedLeft = leds.fBufferModified = true;
+        
         if (this.nColsRemaining) this.nColsRemaining--;
-        leds.fShiftedLeft = true;
         return cActive;
     }
 
