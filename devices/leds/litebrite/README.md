@@ -104,7 +104,7 @@ styles:
     background-color: rgb(26,26,26);
     background-image: none;
     background-size: 100% 100%;
-	-webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: transparent;
   .colorSwatchLB:
     display: none;
     width: 16px;

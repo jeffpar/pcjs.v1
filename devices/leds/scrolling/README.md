@@ -124,8 +124,8 @@ styles:
   previewSymbol:
     position: absolute;
     font-size: 48em;
-	font-family: 'Bungee Hairline';
-	font-weight: normal;
+    font-family: "Bungee Hairline"
+    font-weight: normal;
     width: 100%;
     height: auto;
     line-height: 68%;
@@ -144,7 +144,7 @@ styles:
     background-color: black;
     background-image: none;
     background-size: 100% 100%;
-	-webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: transparent;
   .print:
     font-family: Monaco,"Lucida Console",monospace;
   .diags:
