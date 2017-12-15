@@ -54,6 +54,7 @@ var sourcemaps = require('gulp-sourcemaps');
 var fs = require("fs");
 var path = require("path");
 var pkg = require("./package.json");
+var machines = require("./_data/machines.json");
 
 var sExterns = "";
 
@@ -78,11 +79,13 @@ if (pkg.homepage) {
 }
 
 var aCompileTasks = [];
-var aMachines = Object.keys(pkg.machines);
+var aMachines = Object.keys(machines);
 
 aMachines.forEach(function(machineType) {
-    let machineConfig = pkg.machines[machineType];
-    while (machineConfig.alias) machineConfig = pkg.machines[machineConfig.alias];
+    let machineConfig = machines[machineType];
+    while (machineConfig && machineConfig.alias) {
+        machineConfig = machines[machineConfig.alias];
+    }
     let machineVersion = (machineConfig.version || pkg.version);
     let machineTmpDir  = "./tmp/" + machineConfig.folder + "/" + machineVersion;
     let machineReleaseDir = "./versions/" + machineConfig.folder + "/" + machineVersion;

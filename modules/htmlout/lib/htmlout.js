@@ -51,6 +51,7 @@ var usr     = require("../../shared/lib/usrlib");
  * @property {string} version
  */
 var pkg = require("../../../package.json");
+var machines = require("../../../_data/machines.json");
 
 /*
  * fCache controls "index.html" caching; it is true by default and can be overridden using the setOptions()
@@ -1889,11 +1890,11 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         HTMLOut.logDebug('HTMLOut.processMachines(' + JSON.stringify(infoMachine) + ')');
 
         var sType = infoMachine['type'];
-        var configMachine = pkg.machines[sType];
-        while (configMachine && configMachine['alias']) {
-            configMachine = pkg.machines[configMachine['alias']];
+        var machineConfig = machines[sType];
+        while (machineConfig && machineConfig['alias']) {
+            machineConfig = machines[machineConfig['alias']];
         }
-        if (!configMachine) {
+        if (!machineConfig) {
             HTMLOut.logDebug('HTMLOut.processMachines(): unrecognized machine type "' + sType + '"');
             continue;
         }
@@ -1901,7 +1902,7 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         var fCompiled = !this.fDebug;
         var sVersion = infoMachine['version'];
         if (sVersion === undefined || sVersion == '*') {
-            sVersion = configMachine['version'] || pkg.version;
+            sVersion = machineConfig['version'] || pkg.version;
         } else {
             fCompiled = (sVersion != "uncompiled");
         }
@@ -1916,7 +1917,7 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         }
 
         var sScriptEmbed = "";
-        var sCreator = configMachine['creator'];
+        var sCreator = machineConfig['creator'];
         if (sCreator) {
             sScriptEmbed = '<script type="text/javascript">';
             if (sCreator.indexOf("new ") >= 0) {
@@ -1934,12 +1935,12 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         var asFiles = [];
         if (fCompiled) {
             var sScriptFile = sType + (fDebugger? "-dbg" : "") + ".js";
-            asFiles.push("/versions/" + configMachine['folder'] + "/" + sVersion + "/components.css");
-            asFiles.push("/versions/" + configMachine['folder'] + "/" + sVersion + "/" + sScriptFile);
+            asFiles.push("/versions/" + machineConfig['folder'] + "/" + sVersion + "/components.css");
+            asFiles.push("/versions/" + machineConfig['folder'] + "/" + sVersion + "/" + sScriptFile);
         }
         else {
-            var asCSSFiles = configMachine['css'] || pkg.sharedFiles['css'];
-            asFiles = asFiles.concat(asCSSFiles).concat(configMachine['files']);
+            var asCSSFiles = machineConfig['css'] || pkg.sharedFiles['css'];
+            asFiles = asFiles.concat(asCSSFiles).concat(machineConfig['files']);
             /*
              * SIDEBAR: Why the "slice()"?  It's a handy way to create a copy of the array, and we need a copy,
              * because if it turns out we need to "cut out" some of the files below (using splice), we don't want that
