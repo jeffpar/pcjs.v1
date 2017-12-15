@@ -160,6 +160,23 @@ class Time extends Device {
                 time.onYield();
             }, this.msYield);
         }
+        else {
+            /*
+             * When clocking exclusively by animation frames, setSpeed() calculates how many cycles
+             * each animation frame should "deposit" in our cycle bank:
+             * 
+             *      this.nCyclesDepositPerFrame = (nCyclesPerSecond / 60) + 0.00000001;
+             *
+             * After that amount is added to our "balance" (this.nCyclesDeposited), we make a "withdrawal"
+             * whenever the balance is >= 1.0 and call all our clocking functions with the maximum number
+             * of cycles we were able to withdraw.
+             *
+             * setSpeed() also adds a tiny amount of "interest" to each "deposit" (0.00000001); otherwise
+             * you can end up in situations where the deposit amount is, say, 0.2499999 instead of 0.25,
+             * and four such deposits would still fall short of the 1-cycle threshold.
+             */
+            this.nCyclesDeposited = this.nCyclesDepositPerFrame = 0;
+        }
         this.resetSpeed();
     }
 
@@ -766,7 +783,7 @@ class Time extends Device {
         }
         if (this.fClockByFrame) {
             let nCyclesPerSecond = this.mhzCurrent * 1000000;
-            this.nCyclesDepositPerFrame = (nCyclesPerSecond / 60) + 0.000001;
+            this.nCyclesDepositPerFrame = (nCyclesPerSecond / 60) + 0.00000001;
             this.nCyclesDeposited = 0;
         }
         this.nCyclesRun = 0;

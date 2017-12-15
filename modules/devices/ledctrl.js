@@ -276,20 +276,20 @@ class Chip extends Device {
     {
         let nCyclesClocked = 0;
         if (nCyclesTarget >= 0) {
-            let nAlive;
+            let nActive;
             do {
                 switch(this.sRule) {
                 case Chip.RULES.ANIM4:
-                    nAlive = this.doCycling();
+                    nActive = this.doCycling();
                     break;
                 case Chip.RULES.LEFT1:
-                    nAlive = this.doShifting(1);
+                    nActive = this.doShifting(1);
                     break;
                 case Chip.RULES.LIFE1:
-                    nAlive = this.doCounting();
+                    nActive = this.doCounting();
                     break;
                 }
-                if (!nCyclesTarget) this.println("living cells: " + nAlive);
+                if (!nCyclesTarget) this.println("active cells: " + nActive);
                 nCyclesClocked += 1;
             } while (nCyclesClocked < nCyclesTarget);
         }
@@ -327,7 +327,7 @@ class Chip extends Device {
      */
     doCounting()
     {
-        let cAlive = 0;
+        let cActive = 0;
         let buffer = this.leds.getBuffer();
         let bufferClone = this.leds.getBufferClone();
         let nCols = this.leds.cols;
@@ -400,7 +400,7 @@ class Chip extends Device {
                 bufferClone[iCell+2] = buffer[iCell+2];
                 bufferClone[iCell+3] = buffer[iCell+3] | ((buffer[iCell] !== state)? LED.FLAGS.MODIFIED : 0);
                 iCell += nInc; iNW += nInc; iNO += nInc; iNE += nInc; iEA += nInc; iSE += nInc; iSO += nInc; iSW += nInc; iWE += nInc;
-                if (state == LED.STATE.ON) cAlive++;
+                if (state == LED.STATE.ON) cActive++;
             }
             if (!this.fWrap) {
                 if (!row) {
@@ -416,7 +416,7 @@ class Chip extends Device {
         }
         this.assert(iCell == nIncPerGrid);
         this.leds.swapBuffers();
-        return cAlive;
+        return cActive;
     }
 
     /**
@@ -429,14 +429,14 @@ class Chip extends Device {
      */
     doCycling()
     {
-        let cAlive = 0;
+        let cActive = 0;
         let leds = this.leds;
         let nCols = leds.cols, nRows = leds.rows;
         let counts = this.countBuffer;
         for (let row = 0; row < nRows; row++) {
             for (let col = 0; col < nCols; col++) {
                 if (!leds.getLEDCounts(col, row, counts)) continue;
-                cAlive++;
+                cActive++;
                 /*
                  * Here's the layout of each cell's counts (which mirrors the Chip.COUNTS layout):
                  *
@@ -486,7 +486,7 @@ class Chip extends Device {
                 leds.setLEDCounts(col, row, counts);
             }
         }
-        return cAlive;
+        return cActive;
     }
 
     /**
@@ -504,7 +504,7 @@ class Chip extends Device {
      */
     doShifting(shift = 1)
     {
-        let cAlive = 0;
+        let cActive = 0;
         let leds = this.leds;
         let nCols = leds.cols, nRows = leds.rows;
         if (!this.nColsRemaining) {
@@ -516,14 +516,14 @@ class Chip extends Device {
             for (let col = 0; col < nCols - shift; col++) {
                 let stateLeft = leds.getLEDState(col, row) || LED.STATE.OFF;
                 let stateRight = leds.getLEDState(col + 1, row) || LED.STATE.OFF;
-                if (stateRight) cAlive++;
+                if (stateRight) cActive++;
                 leds.setLEDState(col, row, stateRight);
                 leds.setLEDState(col + 1, row, stateLeft);
             }
         }
         if (this.nColsRemaining) this.nColsRemaining--;
         leds.fShiftedLeft = true;
-        return cAlive;
+        return cActive;
     }
 
     /**
@@ -936,7 +936,7 @@ class Chip extends Device {
      *
      * We save our patterns as a string that is largely compatible with the "Game of Life RLE Format"
      * (refer to http://www.conwaylife.com/w/index.php?title=Run_Length_Encoded), which uses <repetition><tag>
-     * pairs to describes runs of identical cells; the <tag> is either 'o' for "alive" cells, 'b' for "dead"
+     * pairs to describes runs of identical cells; the <tag> is either 'o' for "active" cells, 'b' for "inactive"
      * cells, or '$' for end of line.
      *
      * We say "largely" compatible because it's not really a goal for our pattern strings to be compatible
