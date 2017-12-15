@@ -516,8 +516,8 @@ class Chip extends Device {
         for (let row = 0; row < nRows; row++) {
             for (let col = 0; col < nCols - shift; col++) {
                 let stateLeft = leds.getLEDState(col, row) || LED.STATE.OFF;
-                if (stateLeft) cAlive++;
                 let stateRight = leds.getLEDState(col + 1, row) || LED.STATE.OFF;
+                if (stateRight) cAlive++;
                 leds.setLEDState(col, row, stateRight);
                 leds.setLEDState(col + 1, row, stateLeft);
             }

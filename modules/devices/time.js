@@ -78,6 +78,7 @@
  * @property {number} [yieldsPerSecond]
  * @property {number} [yieldsPerUpdate]
  * @property {boolean} [requestAnimationFrame]
+ * @property {boolean} clockByFrame
  */
 
 /**
@@ -89,6 +90,7 @@
  * @property {number} nCyclesPerSecond
  * @property {number} nYieldsPerSecond
  * @property {number} nYieldsPerUpdate
+ * @property {boolean} fClockByFrame
  */
 class Time extends Device {
     /**
@@ -99,6 +101,7 @@ class Time extends Device {
      *      "clock": {
      *        "class": "Time",
      *        "cyclesPerSecond": 650000,
+     *        "clockByFrame": true,
      *        "bindings": {
      *          "run": "runTI57",
      *          "speed": "speedTI57",
@@ -128,7 +131,8 @@ class Time extends Device {
         this.nCyclesPerSecond = this.getBounded(this.getDefaultNumber('cyclesPerSecond', 650000), this.nCyclesMinimum, this.nCyclesMaximum);
         this.nYieldsPerSecond = this.getBounded(this.getDefaultNumber('yieldsPerSecond', Time.YIELDS_PER_SECOND), 30, 120);
         this.nYieldsPerUpdate = this.getBounded(this.getDefaultNumber('yieldsPerUpdate', Time.YIELDS_PER_UPDATE), 1, this.nYieldsPerSecond);
-        this.fRequestAnimationFrame = this.getDefaultBoolean('requestAnimationFrame', true);
+        this.fClockByFrame = this.getDefaultBoolean('clockByFrame', true);
+        this.fRequestAnimationFrame = this.fClockByFrame || this.getDefaultBoolean('requestAnimationFrame', true);
 
         this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
         this.mhzBase = (this.nCyclesPerSecond / 10000) / 100;
@@ -146,11 +150,12 @@ class Time extends Device {
         this.onAnimationFrame = this.animate.bind(this);
         this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
 
-        let time = this;
-        this.timerYield = this.addTimer("timerYield", function onYield() {
-            time.onYield();
-        }, this.msYield);
-
+        if (!this.fClockByFrame) {
+            let time = this;
+            this.timerYield = this.addTimer("timerYield", function onYield() {
+                time.onYield();
+            }, this.msYield);
+        }
         this.resetSpeed();
     }
 
@@ -286,6 +291,28 @@ class Time extends Device {
      */
     animate(t)
     {
+        if (this.fClockByFrame) {
+            /*
+             * Mimic the logic in run()
+             */
+            if (!this.fRunning) return;
+            this.snapStart();
+            try {
+                this.fYield = false;
+                do {
+                    /*
+                    * Execute the burst and then update all timers.
+                    */
+                    this.updateTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame())));
+                } while (this.fRunning && !this.fYield);
+            }
+            catch(err) {
+                this.println(err.message);
+                this.stop();
+                return;
+            }
+            this.snapStop();
+        }
         for (let i = 0; i < this.aAnimators.length; i++) {
             this.aAnimators[i]();
         }
@@ -385,6 +412,12 @@ class Time extends Device {
      */
     endBurst(nCycles = this.nCyclesBurst - this.nCyclesRemain)
     {
+        if (this.fClockByFrame && this.fRunning) {
+            this.nCyclesDeposited -= nCycles;
+            if (this.nCyclesDeposited < 1) {
+                this.fYield = true;
+            }
+        }
         this.nCyclesBurst = this.nCyclesRemain = 0;
         this.nCyclesThisRun += nCycles;
         this.nCyclesRun += nCycles;
@@ -423,6 +456,33 @@ class Time extends Device {
             if (timer.nCyclesLeft < 0) continue;
             if (nCycles > timer.nCyclesLeft) {
                 nCycles = timer.nCyclesLeft;
+            }
+        }
+        return nCycles;
+    }
+
+    /**
+     * getCyclesPerFrame()
+     *
+     * This tells us how many cycles to execute per frame (assuming fClockByFrame).
+     *
+     * @this {Time}
+     * @returns {number} (the maximum number of cycles we should execute in the next burst)
+     */
+    getCyclesPerFrame()
+    {
+        let nCycles = (this.nCyclesDeposited += this.nCyclesDepositPerFrame);
+        if (nCycles < 1) {
+            nCycles = 0;
+        } else {
+            nCycles |= 0;
+            for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
+                let timer = this.aTimers[iTimer-1];
+                this.assert(!isNaN(timer.nCyclesLeft));
+                if (timer.nCyclesLeft < 0) continue;
+                if (nCycles > timer.nCyclesLeft) {
+                    nCycles = timer.nCyclesLeft;
+                }
             }
         }
         return nCycles;
@@ -644,7 +704,7 @@ class Time extends Device {
      * This handles speed adjustments requested by the throttling slider.
      *
      * @this {Time}
-     * @returns {boolean}
+     * @returns {boolean} (true if a throttle exists, false if not)
      */
     setSpeedThrottle()
     {
@@ -699,6 +759,11 @@ class Time extends Device {
              * initial estimate.
              */
             this.mhzCurrent = this.mhzTarget;
+        }
+        if (this.fClockByFrame) {
+            let nCyclesPerSecond = this.mhzCurrent * 1000000;
+            this.nCyclesDepositPerFrame = (nCyclesPerSecond / 60) + 0.000001;
+            this.nCyclesDeposited = 0;
         }
         this.nCyclesRun = 0;
         this.msStartRun = this.msEndRun = 0;
@@ -882,8 +947,10 @@ class Time extends Device {
          * since clock speed is now decoupled from animation speed, this isn't something we should
          * worry about.
          */
-        this.assert(!this.idRunTimeout);
-        this.idRunTimeout = setTimeout(this.onRunTimeout, 0);
+        if (!this.fClockByFrame) {
+            this.assert(!this.idRunTimeout);
+            this.idRunTimeout = setTimeout(this.onRunTimeout, 0);
+        }
         if (this.fRequestAnimationFrame) this.requestAnimationFrame(this.onAnimationFrame);
         return true;
     }
@@ -956,7 +1023,7 @@ class Time extends Device {
     {
         if (fTransition) {
             if (this.fRunning) {
-                this.println("starting (target speed: " + this.getSpeedTarget() + ")");
+                this.println("starting (" + this.getSpeedTarget() + " target by " + (this.fClockByFrame? "frame" : "timer") + ")");
             } else {
                 this.println("stopping");
             }
@@ -985,16 +1052,18 @@ class Time extends Device {
      */
     updateTimers(nCycles)
     {
-        for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
-            let timer = this.aTimers[iTimer-1];
-            this.assert(!isNaN(timer.nCyclesLeft));
-            if (timer.nCyclesLeft < 0) continue;
-            timer.nCyclesLeft -= nCycles;
-            if (timer.nCyclesLeft <= 0) {
-                timer.nCyclesLeft = -1; // zero is technically an "active" value, so ensure the timer is dormant now
-                timer.callBack();       // safe to invoke the callback function now
-                if (timer.msAuto >= 0) {
-                    this.setTimer(iTimer, timer.msAuto);
+        if (nCycles >= 1) {
+            for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
+                let timer = this.aTimers[iTimer-1];
+                this.assert(!isNaN(timer.nCyclesLeft));
+                if (timer.nCyclesLeft < 0) continue;
+                timer.nCyclesLeft -= nCycles;
+                if (timer.nCyclesLeft <= 0) {
+                    timer.nCyclesLeft = -1; // zero is technically an "active" value, so ensure the timer is dormant now
+                    timer.callBack();       // safe to invoke the callback function now
+                    if (timer.msAuto >= 0) {
+                        this.setTimer(iTimer, timer.msAuto);
+                    }
                 }
             }
         }

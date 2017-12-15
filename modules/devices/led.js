@@ -253,6 +253,12 @@ class LED extends Device {
          */
         this.iBufferRecent = -1;
 
+        /*
+         * Every time we draw a grid cell with a specific color, we cache that information in these arrays.
+         */
+        this.cacheGridColors = [];
+        this.cacheGridPositions = [];
+
         let led = this;
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
@@ -288,6 +294,7 @@ class LED extends Device {
         } else {
             this.contextGrid.clearRect(0, 0, this.widthGrid, this.heightGrid);
         }
+        this.cacheGridColors.length = this.cacheGridPositions.length = 0;
     }
 
     /**
@@ -300,13 +307,13 @@ class LED extends Device {
      */
     clearGridCell(col, row, xOffset)
     {
-        let xBias = col * this.widthCell + xOffset;
-        let yBias = row * this.heightCell;
+        let xDst = col * this.widthCell + xOffset;
+        let yDst = row * this.heightCell;
         if (this.colorBackground) {
             this.contextGrid.fillStyle = this.colorBackground;
-            this.contextGrid.fillRect(xBias, yBias, this.widthCell, this.heightCell);
+            this.contextGrid.fillRect(xDst, yDst, this.widthCell, this.heightCell);
         } else {
-            this.contextGrid.clearRect(xBias, yBias, this.widthCell, this.heightCell);
+            this.contextGrid.clearRect(xDst, yDst, this.widthCell, this.heightCell);
         }
     }
 
@@ -399,16 +406,6 @@ class LED extends Device {
             }
         }
 
-        /*
-         * If this is NOT a persistent LED display, then drawGrid() will have done a preliminary clearGrid(),
-         * eliminating the need to clear individual cells.  Whereas if this IS a persistent LED display, then
-         * we need to clear cells on an as-drawn basis.  If we don't, there could be residual "bleed over"
-         * around the edges of the shape we drew here previously.
-         */
-        if (this.fPersistent) {
-            this.clearGridCell(col, row, xOffset);
-        }
-
         let colorOn, colorOff;
         if (!color || color == this.colorOn) {
             colorOn = fHighlight? this.colorHighlight : this.colorOn;
@@ -419,27 +416,49 @@ class LED extends Device {
         }
 
         let fTransparent = false;
-        color = (state? colorOn : colorOff);
+        let colorCell = (state? colorOn : colorOff);
         if (colorOn == this.colorTransparent) {
-            color = this.colorBackground;
+            colorCell = this.colorBackground;
             fTransparent = true;
         }
 
-        this.contextGrid.fillStyle = color;
+        let xDst = col * this.widthCell + xOffset;
+        let yDst = row * this.heightCell;
 
-        let xBias = col * this.widthCell + xOffset;
-        let yBias = row * this.heightCell;
+        if (!fHighlight) {
+            let i = this.cacheGridColors.indexOf(colorCell);
+            if (i >= 0) {
+                let pos = this.cacheGridPositions[i];
+                let xSrc = (pos & 0xffff) * this.widthCell + xOffset;
+                let ySrc = (pos >>> 16) * this.heightCell;
+                // this.contextGrid.drawImage(this.canvasGrid, xSrc, ySrc, this.widthCell, this.heightCell, xDst, yDst, this.widthCell, this.heightCell);
+                // return;
+            }
+        }
+
+        /*
+         * If this is NOT a persistent LED display, then drawGrid() will have done a preliminary clearGrid(),
+         * eliminating the need to clear individual cells.  Whereas if this IS a persistent LED display, then
+         * we need to clear cells on an as-drawn basis.  If we don't, there could be residual "bleed over"
+         * around the edges of the shape we drew here previously.
+         */
+        if (this.fPersistent) {
+            this.clearGridCell(col, row, xOffset);
+        }
+
+        this.contextGrid.fillStyle = colorCell;
+
         let coords = LED.SHAPES[this.type];
         if (coords.length == 3) {
             this.contextGrid.beginPath();
-            this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, Math.PI * 2);
+            this.contextGrid.arc(xDst + coords[0], yDst + coords[1], coords[2], 0, Math.PI * 2);
             if (fTransparent) {
                 /*
                  * The following code works as well:
                  *
                  *      this.contextGrid.save();
                  *      this.contextGrid.clip();
-                 *      this.contextGrid.clearRect(xBias, yBias, this.widthCell, this.heightCell);
+                 *      this.contextGrid.clearRect(xDst, yDst, this.widthCell, this.heightCell);
                  *      this.contextGrid.restore();
                  *
                  * but I assume it's not as efficient.
@@ -451,7 +470,19 @@ class LED extends Device {
                 this.contextGrid.fill();
             }
         } else {
-            this.contextGrid.fillRect(coords[0] + xBias, coords[1] + yBias, coords[2], coords[3]);
+            this.contextGrid.fillRect(xDst + coords[0], yDst + coords[1], coords[2], coords[3]);
+        }
+
+        if (!fHighlight) {
+            let pos = (row << 16) | col;
+            let i = this.cacheGridPositions.indexOf(pos);
+            if (i >= 0) {
+                this.cacheGridColors[i] = colorCell;
+            }
+            else if (this.cacheGridColors.length < 16) {
+                this.cacheGridColors.push(colorCell);
+                this.cacheGridPositions.push(pos);
+            }
         }
     }
 
@@ -469,18 +500,18 @@ class LED extends Device {
     {
         let coords = LED.SEGMENTS[seg];
         if (coords) {
-            let xBias = col * this.widthCell;
-            let yBias = row * this.heightCell;
+            let xDst = col * this.widthCell;
+            let yDst = row * this.heightCell;
             this.contextGrid.fillStyle = this.colorOn;
             this.contextGrid.beginPath();
             if (coords.length == 3) {
-                this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, Math.PI * 2);
+                this.contextGrid.arc(xDst + coords[0], yDst + coords[1], coords[2], 0, Math.PI * 2);
             } else {
                 for (let i = 0; i < coords.length; i += 2) {
                     if (!i) {
-                        this.contextGrid.moveTo(coords[i] + xBias, coords[i + 1] + yBias);
+                        this.contextGrid.moveTo(xDst + coords[i], yDst + coords[i+1]);
                     } else {
-                        this.contextGrid.lineTo(coords[i] + xBias, coords[i + 1] + yBias);
+                        this.contextGrid.lineTo(xDst + coords[i], yDst + coords[i+1]);
                     }
                 }
             }

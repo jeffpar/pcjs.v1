@@ -69,7 +69,7 @@ machines:
         "scrollChip": {
           "class": "Chip",
           "rule": "L1",
-          "symbols": "ABCABCABCABCABCABCABCABC",
+          "symbols": "ABC",
           "overrides": ["backgroundImage"]
         },
         "scrollClock": {
@@ -77,6 +77,7 @@ machines:
           "cyclesPerSecond": 1,
           "cyclesMinimum": 1,
           "cyclesMaximum": 120,
+          "clockByFrame": true,
           "bindings": {
             "run": "runScroll",
             "speed": "speedScroll",
@@ -183,5 +184,5 @@ Scrolling LEDs
   <button id="stepScroll">Step</button>
   <button id="resetScroll">Reset</button>
   <button id="clearScroll">Clear</button>
-  <input type="range" min="1" max="120" value="15" class="slider" id="throttleScroll"><span id="speedScroll">Stopped</span>
+  <input type="range" min="1" max="120" value="60" class="slider" id="throttleScroll"><span id="speedScroll">Stopped</span>
 </div>
