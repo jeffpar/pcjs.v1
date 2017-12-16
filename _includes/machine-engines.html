@@ -5,18 +5,18 @@ in the Front Matter of our Markdown documents, for compatibility with the Jekyll
 
     'id' (eg: ibm5150)
     'name' (eg: "IBM PC (Model 5150) with Monochrome Display")
-    'type' (eg: c1p, pcx86, pc8080, pdp10, pdp11, leds, ti42, ti55, ti57)
-    'debugger' (default: false)
+    'type' (eg: c1p, pcx86, pc8080, pdp10, pdp11, leds, ti42, ti55, ti57) ["-dbg" suffixes are DEPRECATED]
+    'debugger' (default: true) [DEPRECATED along with the "-dbg" suffixes on 'type'; all debuggers are built-in now]
     'config' (default: machine.xml)
     'template' (default: machine.xsl)
     'debug' (default: false; true enables asserts and is much slower)
     'uncompiled' (default: false; true is useful for debugging but slower)
     'parms' (stringified object that collects additional machine properties listed below)
 
-Note that if you want BACKTRACK support enabled in a machine, both 'debugger' and 'uncompiled' must be true.
-Also note that while multiple machines ARE supported on a single page, there are some limitations; for example,
-loading two or more machines of the same 'type' but with different 'debug', 'uncompiled', or 'debugger' settings
-may not work as desired.
+Note that if you want BACKTRACK support enabled in a machine, 'uncompiled' must be true, because that isn't
+currently compiled into any machines.  Also note that while multiple machines ARE supported on a single page, there
+are some limitations; for example, loading two or more machines of the same 'type' but with different 'debug',
+'debugger' and/or 'uncompiled' settings may not work properly.
 
 The following optional machine properties will be added to the 'parms' property:
 
@@ -25,7 +25,7 @@ The following optional machine properties will be added to the 'parms' property:
     'autoScript' (eg, type Keyboard "$date\r$time\r")
     'autoStart' (eg: true)
     'autoType' (eg: $date\r$time\r)
-    'drives' (eg: '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}]')
+    'drives' (eg: '[{name:"68Mb Hard Disk",type:4,path:"/disks/pc/fixed/68mb/win95.json"}]')
     'resume' (eg: 1)
     'state' (eg: state.json)
     'commands' (debugger commands, if any)
@@ -40,17 +40,17 @@ The following optional machine properties will be added to the 'parms' property:
     {% assign machine_data = site.data.machines[machine_data.alias] %}
   {% endif %}
   {% assign machine_folder = machine_data.folder %}
+  {% if machine_data.version != nil %}
+    {% capture machine_version %}{{ machine_data.version }}{% endcapture %}
+  {% else %}
+    {% capture machine_version %}{{ site.data.machines.shared.version }}{% endcapture %}
+  {% endif %}
   {% unless machine.config %}
     {% assign machine_config = "machine.xml" %}
   {% else %}
     {% assign machine_config = machine.config %}
   {% endunless %}
   {% capture machine_embed %}{{ machine_data.creator }}{% endcapture %}
-  {% if machine_data.version == nil %}
-    {% capture machine_version %}{{ site.pcjs.version }}{% endcapture %}
-  {% else %}
-    {% capture machine_version %}{{ machine_data.version }}{% endcapture %}
-  {% endif %}
   {% if machine.autoMount == "" %}
     {% assign machine_autoMount = "{}" %}
   {% else %}

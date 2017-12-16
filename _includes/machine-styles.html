@@ -1,23 +1,30 @@
 {% for machine in page.machines %}
   {% capture machine_type %}{{ machine.type | remove:"-dbg" }}{% endcapture %}
-  {% if machine_type == "c1p" %}
-    {% assign machine_app = "c1pjs" %}
-  {% elsif machine_type == "pdp10" or machine_type == "pdp11" %}
-    {% assign machine_app = "pdpjs" %}
-  {% else %}
-    {% capture machine_app %}{{ machine_type }}{% endcapture %}
+  {% assign machine_data = site.data.machines[machine_type] %}
+  {% if machine_data.alias != nil %}
+    {% assign machine_data = site.data.machines[machine_data.alias] %}
   {% endif %}
-  {% unless site.pcjs.compiled == true and machine.uncompiled != true %}
-    {% if machine_type == "c1p" %}
-      {% capture machine_style %}{{ site.baseurl }}/modules/c1pjs/templates/components.css{% endcapture %}
-    {% else %}
-      {% capture machine_style %}{{ site.baseurl }}/modules/shared/templates/components.css{% endcapture %}
-    {% endif %}
+  {% assign machine_folder = machine_data.folder %}
+  {% if machine_data.version != nil %}
+    {% capture machine_version %}{{ machine_data.version }}{% endcapture %}
   {% else %}
-    {% capture machine_style %}{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/components.css{% endcapture %}
-  {% endunless %}
-  {% unless machine_styles contains machine_style %}
-	<link rel="stylesheet" type="text/css" href="{{ machine_style }}">
-  {% endunless %}
-  {% capture machine_styles %}{{ machine_styles }}{{ machine_style }}{% endcapture %}
+    {% capture machine_version %}{{ site.data.machines.shared.version }}{% endcapture %}
+  {% endif %}
+  {% if machine_data.styles != nil %}
+    {% assign machine_styles = machine_data.styles %}
+  {% else %}
+    {% assign machine_styles = site.data.machines.shared.styles %}
+  {% endif %}
+  {% for machine_style in machine_styles %}
+    {% unless site.pcjs.compiled == true and machine.uncompiled != true %}
+      {% capture machine_url %}{{ site.baseurl }}{{ machine_style | replace:"./":"/" }}{% endcapture %}
+    {% else %}
+      {% comment %} -- A Jekyll "basename" filter would be SOOOO nice, instead of hard-coding to components.css -- {% endcomment %}
+      {% capture machine_url %}{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/components.css{% endcapture %}
+    {% endunless %}
+    {% unless machine_urls contains machine_url %}
+	  <link rel="stylesheet" type="text/css" href="{{ machine_url }}">
+    {% endunless %}
+    {% capture machine_urls %}{{ machine_urls }}{{ machine_url }}{% endcapture %}
+  {% endfor %}
 {% endfor %}

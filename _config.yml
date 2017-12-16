@@ -35,6 +35,5 @@ plugins:
 # Custom site settings
 
 pcjs:
-  domain: pcjs.org    # whereas site.url is used for linking purposes, site.pcjs.domain is used for display purposes
-  version: 1.40.0     # IMPORTANT: keep pcjs.version in sync with package.json:version
   compiled: true      # by default, the compiled pcjs.version scripts will be used (eg, pcx86.js, pc8080.js, etc)
+  domain: pcjs.org    # whereas site.url is used for linking purposes, site.pcjs.domain is used for display purposes
