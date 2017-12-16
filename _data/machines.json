@@ -74,10 +74,13 @@
   "leds": {
     "name": "LEDs",
     "class": "leds",
+    "version": "1.11",
     "defines": [
       "COMPILED",
       "DEBUG"
     ],
+    "folder": "devices",
+    "creator": "new LEDs",
     "scripts": [
       "./modules/devices/device.js",
       "./modules/devices/input.js",
@@ -87,9 +90,8 @@
       "./modules/devices/ledctrl.js",
       "./modules/devices/machine.js"
     ],
-    "folder": "devices",
-    "creator": "new LEDs",
-    "version": "1.11"
+    "css": [],
+    "xsl": []
   },
   "pc8080": {
     "name": "PC8080",
@@ -101,6 +103,8 @@
       "DEBUGGER",
       "SITEHOST"
     ],
+    "folder": "pc8080",
+    "creator": "embedPC8080",
     "scripts": [
       "./modules/shared/lib/defines.js",
       "./modules/shared/lib/dumpapi.js",
@@ -131,9 +135,7 @@
       "./modules/pc8080/lib/computer.js",
       "./modules/shared/lib/state.js",
       "./modules/shared/lib/embed.js"
-    ],
-    "folder": "pc8080",
-    "creator": "embedPC8080"
+    ]
   },
   "pcx86": {
     "name": "PCx86",
@@ -147,6 +149,8 @@
       "BACKTRACK",
       "I386"
     ],
+    "folder": "pcx86",
+    "creator": "embedPCx86",
     "scripts": [
       "./modules/shared/lib/defines.js",
       "./modules/shared/lib/diskapi.js",
@@ -191,9 +195,7 @@
       "./modules/shared/lib/state.js",
       "./modules/shared/lib/embed.js",
       "./modules/shared/lib/save.js"
-    ],
-    "folder": "pcx86",
-    "creator": "embedPCx86"
+    ]
   },
   "pdp10": {
     "name": "PDPjs",
@@ -205,6 +207,8 @@
       "DEBUGGER",
       "SITEHOST"
     ],
+    "folder": "pdpjs",
+    "creator": "embedPDP10",
     "scripts": [
       "./modules/shared/lib/defines.js",
       "./modules/shared/lib/dumpapi.js",
@@ -233,9 +237,7 @@
       "./modules/pdp10/lib/computer.js",
       "./modules/shared/lib/state.js",
       "./modules/shared/lib/embed.js"
-    ],
-    "folder": "pdpjs",
-    "creator": "embedPDP10"
+    ]
   },
   "pdp11": {
     "name": "PDPjs",
@@ -247,6 +249,8 @@
       "DEBUGGER",
       "SITEHOST"
     ],
+    "folder": "pdpjs",
+    "creator": "embedPDP11",
     "scripts": [
       "./modules/shared/lib/defines.js",
       "./modules/shared/lib/diskapi.js",
@@ -282,9 +286,7 @@
       "./modules/pdp11/lib/computer.js",
       "./modules/shared/lib/state.js",
       "./modules/shared/lib/embed.js"
-    ],
-    "folder": "pdpjs",
-    "creator": "embedPDP11"
+    ]
   },
   "ti42": {
     "name": "TI42",
@@ -299,10 +301,13 @@
   "ti57": {
     "name": "TI57",
     "class": "ti57",
+    "version": "1.11",
     "defines": [
       "COMPILED",
       "DEBUG"
     ],
+    "folder": "devices",
+    "creator": "new TMS1500",
     "scripts": [
       "./modules/devices/device.js",
       "./modules/devices/input.js",
@@ -312,8 +317,7 @@
       "./modules/devices/tms1500.js",
       "./modules/devices/machine.js"
     ],
-    "folder": "devices",
-    "creator": "new TMS1500",
-    "version": "1.11"
+    "css": [],
+    "xsl": []
   }
 }
