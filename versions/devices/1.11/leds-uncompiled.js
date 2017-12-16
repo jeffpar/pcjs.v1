@@ -1829,7 +1829,7 @@ var LEDConfig;
  * @property {{
  *  container: HTMLElement|undefined
  * }} bindings
- * @property {Array.<string|number>} buffer
+ * @property {Array.<string|number|null>} buffer
  * @property {Array.<string|number>|null} bufferClone
  * @property {boolean} fBufferModified
  * @property {boolean} fTickled
@@ -1955,7 +1955,7 @@ class LED extends Device {
         this.nBufferCells = ((this.rows + 1) * this.cols) * this.nBufferInc;
         this.buffer = new Array(this.nBufferCells);
         this.bufferClone = null;
-        this.nBufferSkip = (this.colsView < this.cols? (this.cols - this.colsView) * 4 : 0);
+        this.nBufferIncExtra = (this.colsView < this.cols? (this.cols - this.colsView) * 4 : 0);
 
         /*
          * fBufferModified is straightforward: set to true by any setLEDState() call that actually
@@ -2109,7 +2109,7 @@ class LED extends Device {
                 }
                 i += this.nBufferInc;
             }
-            i += this.nBufferSkip;
+            i += this.nBufferIncExtra;
         }
         this.fShiftedLeft = false;
         this.drawView();
@@ -2510,15 +2510,27 @@ class LED extends Device {
     initBuffer(buffer)
     {
         for (let i = 0; i < buffer.length; i += this.nBufferInc) {
-            if (this.type < LED.TYPE.DIGIT) {
-                buffer[i] = LED.STATE.OFF;
-            } else {
-                buffer[i] = ' ';
-            }
-            buffer[i+1] = (this.colorOn == this.colorTransparent? null : this.colorOn);
-            buffer[i+2] = 0;
-            buffer[i+3] = LED.FLAGS.MODIFIED;
+            this.initCell(buffer, i);
         }
+    }
+
+    /**
+     * initCell(buffer, iCell)
+     *
+     * @this {LED}
+     * @param {Array.<number|string>} buffer
+     * @param {number} iCell
+     */
+    initCell(buffer, iCell)
+    {
+        if (this.type < LED.TYPE.DIGIT) {
+            buffer[iCell] = LED.STATE.OFF;
+        } else {
+            buffer[iCell] = ' ';
+        }
+        buffer[iCell+1] = (this.colorOn == this.colorTransparent? null : this.colorOn);
+        buffer[iCell+2] = 0;
+        buffer[iCell+3] = LED.FLAGS.MODIFIED;
     }
 
     /**
@@ -3246,6 +3258,23 @@ class Time extends Device {
                 time.onYield();
             }, this.msYield);
         }
+        else {
+            /*
+             * When clocking exclusively by animation frames, setSpeed() calculates how many cycles
+             * each animation frame should "deposit" in our cycle bank:
+             * 
+             *      this.nCyclesDepositPerFrame = (nCyclesPerSecond / 60) + 0.00000001;
+             *
+             * After that amount is added to our "balance" (this.nCyclesDeposited), we make a "withdrawal"
+             * whenever the balance is >= 1.0 and call all our clocking functions with the maximum number
+             * of cycles we were able to withdraw.
+             *
+             * setSpeed() also adds a tiny amount of "interest" to each "deposit" (0.00000001); otherwise
+             * you can end up in situations where the deposit amount is, say, 0.2499999 instead of 0.25,
+             * and four such deposits would still fall short of the 1-cycle threshold.
+             */
+            this.nCyclesDeposited = this.nCyclesDepositPerFrame = 0;
+        }
         this.resetSpeed();
     }
 
@@ -3852,7 +3881,7 @@ class Time extends Device {
         }
         if (this.fClockByFrame) {
             let nCyclesPerSecond = this.mhzCurrent * 1000000;
-            this.nCyclesDepositPerFrame = (nCyclesPerSecond / 60) + 0.000001;
+            this.nCyclesDepositPerFrame = (nCyclesPerSecond / 60) + 0.00000001;
             this.nCyclesDeposited = 0;
         }
         this.nCyclesRun = 0;
@@ -4332,7 +4361,7 @@ class Chip extends Device {
                 let sPattern = chip.savePattern(true);
                 let elementSymbol = chip.bindings[Chip.BINDING.SYMBOL_INPUT];
                 if (elementSymbol) {
-                    sPattern = '"' + elementSymbol.value + '":"' + sPattern + '",';
+                    sPattern = '"' + elementSymbol.value + '":"' + sPattern.replace(/^([0-9]+\/)*/, "") + '",';
                 }
                 chip.println(sPattern);
             };
@@ -4417,20 +4446,20 @@ class Chip extends Device {
     {
         let nCyclesClocked = 0;
         if (nCyclesTarget >= 0) {
-            let nAlive;
+            let nActive;
             do {
                 switch(this.sRule) {
                 case Chip.RULES.ANIM4:
-                    nAlive = this.doCycling();
+                    nActive = this.doCycling();
                     break;
                 case Chip.RULES.LEFT1:
-                    nAlive = this.doShifting(1);
+                    nActive = this.doShifting(1);
                     break;
                 case Chip.RULES.LIFE1:
-                    nAlive = this.doCounting();
+                    nActive = this.doCounting();
                     break;
                 }
-                if (!nCyclesTarget) this.println("living cells: " + nAlive);
+                if (!nCyclesTarget) this.println("active cells: " + nActive);
                 nCyclesClocked += 1;
             } while (nCyclesClocked < nCyclesTarget);
         }
@@ -4468,19 +4497,22 @@ class Chip extends Device {
      */
     doCounting()
     {
-        let cAlive = 0;
-        let buffer = this.leds.getBuffer();
-        let bufferClone = this.leds.getBufferClone();
-        let nCols = this.leds.cols;
-        let nRows = this.leds.rows;
+        let cActive = 0;
+        let leds = this.leds;
+        let buffer = leds.getBuffer();
+        let bufferClone = leds.getBufferClone();
+        let nCols = leds.colsView;
+        let nRows = leds.rows;
         /*
          * The number of LED buffer elements per cell is an LED implementation detail that should not be
          * assumed, so we obtain it from the LED object, and use it to calculate the per-cell increment,
          * per-row increment, and per-grid increment; the latter gives us the offset of the LED buffer's
          * scratch row, which we rely upon when wrap is turned off.
+         * 
+         * NOTE: Since we're only processing colsView, not cols, we must include nBufferIncExtra in nIncPerRow.
          */
-        let nInc = this.leds.nBufferInc;
-        let nIncPerRow = nCols * nInc;
+        let nInc = leds.nBufferInc;
+        let nIncPerRow = nCols * nInc + leds.nBufferIncExtra;
         let nIncPerGrid = nRows * nIncPerRow;
 
         let iCell = 0;
@@ -4541,7 +4573,7 @@ class Chip extends Device {
                 bufferClone[iCell+2] = buffer[iCell+2];
                 bufferClone[iCell+3] = buffer[iCell+3] | ((buffer[iCell] !== state)? LED.FLAGS.MODIFIED : 0);
                 iCell += nInc; iNW += nInc; iNO += nInc; iNE += nInc; iEA += nInc; iSE += nInc; iSO += nInc; iSW += nInc; iWE += nInc;
-                if (state == LED.STATE.ON) cAlive++;
+                if (state == LED.STATE.ON) cActive++;
             }
             if (!this.fWrap) {
                 if (!row) {
@@ -4556,8 +4588,11 @@ class Chip extends Device {
             }
         }
 
-        this.leds.swapBuffers();
-        return cAlive;
+        /*
+         * swapBuffers() takes care of setting the buffer-wide modified flags (leds.fBufferModified), so we don't have to.
+         */
+        leds.swapBuffers();
+        return cActive;
     }
 
     /**
@@ -4570,14 +4605,14 @@ class Chip extends Device {
      */
     doCycling()
     {
-        let cAlive = 0;
+        let cActive = 0;
         let leds = this.leds;
-        let nCols = leds.cols, nRows = leds.rows;
+        let nCols = leds.colsView, nRows = leds.rows;
         let counts = this.countBuffer;
         for (let row = 0; row < nRows; row++) {
             for (let col = 0; col < nCols; col++) {
                 if (!leds.getLEDCounts(col, row, counts)) continue;
-                cAlive++;
+                cActive++;
                 /*
                  * Here's the layout of each cell's counts (which mirrors the Chip.COUNTS layout):
                  *
@@ -4627,7 +4662,7 @@ class Chip extends Device {
                 leds.setLEDCounts(col, row, counts);
             }
         }
-        return cAlive;
+        return cActive;
     }
 
     /**
@@ -4645,26 +4680,67 @@ class Chip extends Device {
      */
     doShifting(shift = 1)
     {
-        let cAlive = 0;
+        let cActive = 0;
         let leds = this.leds;
         let nCols = leds.cols, nRows = leds.rows;
+
         if (!this.nColsRemaining) {
-            if (this.sSymbols && this.iSymbolNext < this.sSymbols.length) {
-                this.nColsRemaining = this.loadPatternString(leds.colsView, 0, Chip.SYMBOLS[this.sSymbols[this.iSymbolNext++]], true);
+            if (this.sSymbols) {
+                if (this.iSymbolNext >= this.sSymbols.length) {
+                    this.iSymbolNext = 0;
+                }
+                let chSymbol = this.sSymbols[this.iSymbolNext++];
+                if (chSymbol == ' ') {
+                    this.nColsRemaining += 2;
+                } else {
+                    let sPattern = Chip.SYMBOLS[chSymbol];
+                    if (sPattern) this.nColsRemaining = this.loadPatternString(leds.colsView + 1, 0, sPattern, true);
+                    this.nColsRemaining += 1;
+                }
             }
+        }
+
+        /*
+         * This is a very slow and simple shift-and-exchange loop, which through a series of exchanges,
+         * also migrates the left-most column to the right-most column.  Good for testing but not much else.
+         */
+        // for (let row = 0; row < nRows; row++) {
+        //     for (let col = 0; col < nCols - shift; col++) {
+        //         let stateLeft = leds.getLEDState(col, row) || LED.STATE.OFF;
+        //         let stateRight = leds.getLEDState(col + 1, row) || LED.STATE.OFF;
+        //         if (stateRight) cActive++;
+        //         leds.setLEDState(col, row, stateRight);
+        //         leds.setLEDState(col + 1, row, stateLeft);
+        //     }
+        // }
+        // leds.fShiftedLeft = true;
+
+        let iCell = 0;
+        let buffer = leds.getBuffer();
+        let nInc = leds.nBufferInc;
+        let nIncPerRow = nCols * nInc;
+        for (let col = 0; col < nCols - shift; col++) {
+            let iCellOrig = iCell;
+            for (let row = 0; row < nRows; row++) {
+                let stateOld = buffer[iCell];
+                let stateNew = (buffer[iCell] = buffer[iCell + nInc]);
+                let flagsNew = ((stateNew !== stateOld)? LED.FLAGS.MODIFIED : 0);
+                buffer[iCell + 1] = buffer[iCell + nInc + 1];
+                buffer[iCell + 2] = buffer[iCell + nInc + 2];
+                buffer[iCell + 3] = buffer[iCell + nInc + 3] | flagsNew;
+                if (stateNew) cActive++;
+                iCell += nIncPerRow;
+            }
+            iCell = iCellOrig + nInc;
         }
         for (let row = 0; row < nRows; row++) {
-            for (let col = 0; col < nCols - shift; col++) {
-                let stateLeft = leds.getLEDState(col, row) || LED.STATE.OFF;
-                let stateRight = leds.getLEDState(col + 1, row) || LED.STATE.OFF;
-                if (stateRight) cAlive++;
-                leds.setLEDState(col, row, stateRight);
-                leds.setLEDState(col + 1, row, stateLeft);
-            }
+            leds.initCell(buffer, iCell);
+            iCell += nIncPerRow;
         }
+        leds.fShiftedLeft = leds.fBufferModified = true;
+        
         if (this.nColsRemaining) this.nColsRemaining--;
-        leds.fShiftedLeft = true;
-        return cAlive;
+        return cActive;
     }
 
     /**
@@ -5077,7 +5153,7 @@ class Chip extends Device {
      *
      * We save our patterns as a string that is largely compatible with the "Game of Life RLE Format"
      * (refer to http://www.conwaylife.com/w/index.php?title=Run_Length_Encoded), which uses <repetition><tag>
-     * pairs to describes runs of identical cells; the <tag> is either 'o' for "alive" cells, 'b' for "dead"
+     * pairs to describes runs of identical cells; the <tag> is either 'o' for "active" cells, 'b' for "inactive"
      * cells, or '$' for end of line.
      *
      * We say "largely" compatible because it's not really a goal for our pattern strings to be compatible
@@ -5494,16 +5570,58 @@ Chip.RULES = {
  * Symbols can be formed with the following 16x16 grid patterns.
  */
 Chip.SYMBOLS = {
-    "A": "10/14/$3b4o$2bo4bo$2bo4bo$bo6bo$bo6bo$o8bo$o8bo$o8bo$10o$o8bo$o8bo$o8bo$o8bo",
-    "B": "10/14/$7o$o6bo$o7bo$o7bo$o7bo$o6bo$8o$o7bo$o8bo$o8bo$o8bo$o8bo$9o",
-    "C": "8/14/$2b6o$bo$o$o$o$o$o$o$o$o$o$bo$2b6o",
-    "D": "10/14/$8o$o7bo$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo$o7bo$8o",
-    "E": "8/14/$8o$o$o$o$o$o$7o$o$o$o$o$o$8o",
-    "F": "8/14/$8o$o$o$o$o$o$o$7o$o$o$o$o$o",
-    "G": "9/14/$2b6o$bo$o$o$o$o$o$o$o6b2o$o7bo$o7bo$bo6bo$2b7o",
-    "H": "10/14/$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo$10o$o8bo$o8bo$o8bo$o8bo$o8bo$o8bo",
-    "I": "7/14/$7o$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$7o",
-    "J": "9/14/$8bo$8bo$8bo$8bo$8bo$8bo$8bo$8bo$o7bo$o7bo$o7bo$bo5bo$2b5o"
+    "A":"$3b2o$2bo2bo$bo4bo$bo4bo$o6bo$o6bo$o6bo$8o$o6bo$o6bo$o6bo",
+    "B":"$6o$o5bo$o5bo$o5bo$o4bo$7o$o6bo$o6bo$o6bo$o6bo$7o",
+    "C":"$2b4o$bo4bo$o6bo$o$o$o$o$o$o6bo$bo4bo$2b4o",
+    "D":"$6o$o5bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o5bo$6o",
+    "E":"$7o$o$o$o$o$6o$o$o$o$o$7o",
+    "F":"$7o$o$o$o$o$6o$o$o$o$o$o",
+    "G":"$2b4o$bo4bo$o$o$o$o3b4o$o6bo$o6bo$o6bo$bo4bo$2b4o",
+    "H":"$o6bo$o6bo$o6bo$o6bo$o6bo$8o$o6bo$o6bo$o6bo$o6bo$o6bo",
+    "I":"$o$o$o$o$o$o$o$o$o$o$o",
+    "J":"$5bo$5bo$5bo$5bo$5bo$5bo$5bo$o4bo$o4bo$o4bo$b4o",
+    "K":"$o6bo$o5bo$o4bo$o3bo$o2bo$ob2o$2o2bo$o4bo$o5bo$o6bo$o7bo",
+    "L":"$o$o$o$o$o$o$o$o$o$o$7o",
+    "M":"$o8bo$2o6b2o$obo4bobo$obo4bobo$o2bo2bo2bo$o2bo2bo2bo$o3b2o3bo$o8bo$o8bo$o8bo$o8bo",
+    "N":"$2o5bo$obo4bo$obo4bo$o2bo3bo$o2bo3bo$o3bo2bo$o3bo2bo$o4bobo$o4bobo$o4bobo$o5b2o",
+    "O":"$3b4o$2bo4bo$bo6bo$o8bo$o8bo$o8bo$o8bo$o8bo$bo6bo$2bo4bo$3b4o",
+    "P":"$6o$o5bo$o6bo$o6bo$o6bo$o5bo$6o$o$o$o$o",
+    "Q":"$3b4o$2bo4bo$bo6bo$o8bo$o8bo$o8bo$o8bo$o8bo$bo4bobo$2bo4bo$3b4obo$9bo",
+    "R":"$6o$o5bo$o5bo$o5bo$o5bo$6o$o2bo$o3bo$o4bo$o5bo$o6bo",
+    "S":"$2b4o$bo4bo$o6bo$o$bo$2b4o$6bo$7bo$o6bo$bo4bo$2b4o",
+    "T":"$9o$4bo$4bo$4bo$4bo$4bo$4bo$4bo$4bo$4bo$4bo",
+    "U":"$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$bo4bo$2b4o",
+    "V":"$o8bo$o8bo$bo6bo$bo6bo$bo6bo$2bo4bo$2bo4bo$2bo4bo$3bo2bo$3bo2bo$4b2o",
+    "W":"$o4b2o4bo$o4b2o4bo$o4b2o4bo$o3bo2bo3bo$bo2bo2bo2bo$bo2bo2bo2bo$bo2bo2bo2bo$bo2bo2bo2bo$2b2o4b2o$2b2o4b2o$2b2o4b2o",
+    "X":"$o8bo$bo6bo$2bo4bo$3bo2bo$4b2o$4b2o$4b2o$3bo2bo$2bo4bo$bo6bo$o8bo",
+    "Y":"$o9bo$bo7bo$2bo5bo$3bo3bo$4bobo$5bo$5bo$5bo$5bo$5bo$5bo",
+    "Z":"$9o$8bo$7bo$6bo$5bo$4bo$3bo$2bo$bo$o$9o",
+    "a":"$$$$b4o$o4bo$5bo$b5o$o4bo$o4bo$o3b2o$b3ob2o",
+    "b":"$o$o$o$ob3o$2o3bo$o5bo$o5bo$o5bo$o5bo$2o3bo$ob3o",
+    "c":"$$$$2b4o$bo4bo$o$o$o$o$bo4bo$2b4o",
+    "d":"$6bo$6bo$6bo$2b3obo$bo3b2o$o5bo$o5bo$o5bo$o5bo$bo3b2o$2b3obo",
+    "e":"$$$$2b2o$bo2bo$o4bo$6o$o$o$o4bo$b4o",
+    "f":"$2b2o$bo2bo$bo$bo$4o$bo$bo$bo$bo$bo$bo",
+    "g":"$$$$2b2obo$bo2b2o$o4bo$o4bo$o4bo$bo2b2o$2b2obo$5bo$5bo$o4bo$b4o",
+    "h":"$o$o$o$ob3o$2o3bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo",
+    "i":"$$o$$o$o$o$o$o$o$o$o",
+    "j":"$$3bo$$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$o2bo$b2o",
+    "k":"$o$o$o$o4bo$o3bo$o2bo$obo$2obo$o3bo$o4bo$o5bo",
+    "l":"$o$o$o$o$o$o$o$o$o$o$o",
+    "m":"$$$$ob2o3b2o$2o2bobo2bo$o4bo4bo$o4bo4bo$o4bo4bo$o4bo4bo$o4bo4bo$o4bo4bo",
+    "n":"$$$$ob3o$2o3bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo",
+    "o":"$$$$2b4o$bo4bo$o6bo$o6bo$o6bo$o6bo$bo4bo$2b4o",
+    "p":"$$$$ob3o$2o3bo$o5bo$o5bo$o5bo$o5bo$2o3bo$ob3o$o$o$o",
+    "q":"$$$$2b3obo$bo3b2o$o5bo$o5bo$o5bo$o5bo$bo3b2o$2b3obo$6bo$6bo$6bo",
+    "r":"$$$$ob2o$2o2bo$o$o$o$o$o$o",
+    "s":"$$$$b4o$o4bo$o$b4o$5bo$5bo$o4bo$b4o",
+    "t":"$$bo$bo$4o$bo$bo$bo$bo$bo$bo2bo$2b2o",
+    "u":"$$$$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo$o3b2o$b3obo",
+    "v":"$$$$o5bo$o5bo$bo3bo$bo3bo$bo3bo$2bobo$2bobo$3bo",
+    "w":"$$$$o3b2o3bo$o3b2o3bo$o3b2o3bo$o3b2o3bo$bobo2bobo$bobo2bobo$bobo2bobo$2bo4bo",
+    "x":"$$$$$o5bo$bo3bo$2bobo$3bo$2bobo$bo3bo$o5bo",
+    "y":"$$$$o5bo$o5bo$bo3bo$bo3bo$2bobo$2bobo$3bo$3bo$3bo$2bo$2o",
+    "z":"$$$$6o$5bo$4bo$3bo$2bo$bo$o$6o",
 };
 
 Chip.VERSION    = 1.11;

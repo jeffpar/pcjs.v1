@@ -107,7 +107,7 @@
  * @property {{
  *  container: HTMLElement|undefined
  * }} bindings
- * @property {Array.<string|number>} buffer
+ * @property {Array.<string|number|null>} buffer
  * @property {Array.<string|number>|null} bufferClone
  * @property {boolean} fBufferModified
  * @property {boolean} fTickled

@@ -22,6 +22,8 @@
     ]
   },
   "c1p": {
+    "name": "C1Pjs",
+    "class": "c1pjs",
     "defines": [
       "APPVERSION",
       "COMPILED",
@@ -70,6 +72,8 @@
     ]
   },
   "leds": {
+    "name": "LEDs",
+    "class": "leds",
     "defines": [
       "COMPILED",
       "DEBUG"
@@ -88,6 +92,8 @@
     "version": "1.11"
   },
   "pc8080": {
+    "name": "PC8080",
+    "class": "pc8080",
     "defines": [
       "APPVERSION",
       "COMPILED",
@@ -130,6 +136,8 @@
     "creator": "embedPC8080"
   },
   "pcx86": {
+    "name": "PCx86",
+    "class": "pcx86",
     "defines": [
       "APPVERSION",
       "COMPILED",
@@ -188,6 +196,8 @@
     "creator": "embedPCx86"
   },
   "pdp10": {
+    "name": "PDPjs",
+    "class": "pdp10",
     "defines": [
       "APPVERSION",
       "COMPILED",
@@ -228,6 +238,8 @@
     "creator": "embedPDP10"
   },
   "pdp11": {
+    "name": "PDPjs",
+    "class": "pdp11",
     "defines": [
       "APPVERSION",
       "COMPILED",
@@ -275,12 +287,18 @@
     "creator": "embedPDP11"
   },
   "ti42": {
+    "name": "TI42",
+    "class": "ti42",
     "alias": "ti57"
   },
   "ti55": {
+    "name": "TI55",
+    "class": "ti55",
     "alias": "ti57"
   },
   "ti57": {
+    "name": "TI57",
+    "class": "ti57",
     "defines": [
       "COMPILED",
       "DEBUG"
