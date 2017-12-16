@@ -90,6 +90,7 @@
       "./modules/devices/ledctrl.js",
       "./modules/devices/machine.js"
     ],
+    "styles": [],
     "css": [],
     "xsl": []
   },
@@ -317,6 +318,7 @@
       "./modules/devices/tms1500.js",
       "./modules/devices/machine.js"
     ],
+    "styles": [],
     "css": [],
     "xsl": []
   }
