@@ -979,7 +979,7 @@ HTMLOut.prototype.getVersion = function(sToken, sIndent, aParms)
      * all operating systems would deal with it properly even if was added, so now I'm treating the "version"
      * token as the equivalent of a symlink here.
      */
-    this.aTokens[sToken] = this.fDebug? "../../modules/shared/templates" : pkg.version;
+    this.aTokens[sToken] = this.fDebug? "../../modules/shared/templates" : machines.shared.version;
 };
 
 /**
@@ -1902,7 +1902,7 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         var fCompiled = !this.fDebug;
         var sVersion = infoMachine['version'];
         if (sVersion === undefined || sVersion == '*') {
-            sVersion = machineConfig['version'] || pkg.version;
+            sVersion = machineConfig['version'] || machines.shared.version;
         } else {
             fCompiled = (sVersion != "uncompiled");
         }
@@ -1939,8 +1939,8 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
             asFiles.push("/versions/" + machineConfig['folder'] + "/" + sVersion + "/" + sScriptFile);
         }
         else {
-            var asCSSFiles = machineConfig['css'] || pkg.sharedFiles['css'];
-            asFiles = asFiles.concat(asCSSFiles).concat(machineConfig['files']);
+            asFiles = machineConfig['styles'] || machines.shared['styles'];
+            asFiles = asFiles.concat(machineConfig['scripts']);
             /*
              * SIDEBAR: Why the "slice()"?  It's a handy way to create a copy of the array, and we need a copy,
              * because if it turns out we need to "cut out" some of the files below (using splice), we don't want that

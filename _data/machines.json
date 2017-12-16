@@ -1,8 +1,27 @@
 {
-  "c1p": {
-    "css": [
-      "./modules/c1pjs/templates/components.css"
+  "shared": {
+    "version": "1.40.0",
+    "externs": [
+      "./modules/shared/lib/externs.js"
     ],
+    "styles": [
+      "./modules/shared/templates/components.css"
+    ],
+    "css": [
+      "./modules/shared/templates/common.css",
+      "./modules/shared/templates/components.css",
+      "./modules/shared/templates/document.css"
+    ],
+    "xsl": [
+      "./modules/shared/templates/common.xsl",
+      "./modules/shared/templates/components.xsl",
+      "./modules/shared/templates/document.xsl",
+      "./modules/shared/templates/machine.xsl",
+      "./modules/shared/templates/manifest.xsl",
+      "./modules/shared/templates/outline.xsl"
+    ]
+  },
+  "c1p": {
     "defines": [
       "APPVERSION",
       "COMPILED",
@@ -10,7 +29,9 @@
       "DEBUGGER",
       "SITEHOST"
     ],
-    "files": [
+    "folder": "c1pjs",
+    "creator": "embedC1P",
+    "scripts": [
       "./modules/shared/lib/defines.js",
       "./modules/shared/lib/dumpapi.js",
       "./modules/shared/lib/reportapi.js",
@@ -31,15 +52,29 @@
       "./modules/c1pjs/lib/computer.js",
       "./modules/shared/lib/embed.js"
     ],
-    "folder": "c1pjs",
-    "creator": "embedC1P"
+    "styles": [
+      "./modules/c1pjs/templates/components.css"
+    ],
+    "css": [
+      "./modules/shared/templates/common.css",
+      "./modules/shared/templates/document.css",
+      "./modules/c1pjs/templates/components.css"
+    ],
+    "xsl": [
+      "./modules/shared/templates/common.xsl",
+      "./modules/shared/templates/document.xsl",
+      "./modules/shared/templates/machine.xsl",
+      "./modules/shared/templates/manifest.xsl",
+      "./modules/shared/templates/outline.xsl",
+      "./modules/c1pjs/templates/components.xsl"
+    ]
   },
   "leds": {
     "defines": [
       "COMPILED",
       "DEBUG"
     ],
-    "files": [
+    "scripts": [
       "./modules/devices/device.js",
       "./modules/devices/input.js",
       "./modules/devices/led.js",
@@ -60,7 +95,7 @@
       "DEBUGGER",
       "SITEHOST"
     ],
-    "files": [
+    "scripts": [
       "./modules/shared/lib/defines.js",
       "./modules/shared/lib/dumpapi.js",
       "./modules/shared/lib/reportapi.js",
@@ -104,7 +139,7 @@
       "BACKTRACK",
       "I386"
     ],
-    "files": [
+    "scripts": [
       "./modules/shared/lib/defines.js",
       "./modules/shared/lib/diskapi.js",
       "./modules/shared/lib/dumpapi.js",
@@ -160,7 +195,7 @@
       "DEBUGGER",
       "SITEHOST"
     ],
-    "files": [
+    "scripts": [
       "./modules/shared/lib/defines.js",
       "./modules/shared/lib/dumpapi.js",
       "./modules/shared/lib/reportapi.js",
@@ -200,7 +235,7 @@
       "DEBUGGER",
       "SITEHOST"
     ],
-    "files": [
+    "scripts": [
       "./modules/shared/lib/defines.js",
       "./modules/shared/lib/diskapi.js",
       "./modules/shared/lib/dumpapi.js",
@@ -250,7 +285,7 @@
       "COMPILED",
       "DEBUG"
     ],
-    "files": [
+    "scripts": [
       "./modules/devices/device.js",
       "./modules/devices/input.js",
       "./modules/devices/led.js",

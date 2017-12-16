@@ -58,10 +58,10 @@ var machines = require("./_data/machines.json");
 
 var sExterns = "";
 
-for (let i = 0; i < pkg.closureCompilerExterns.length; i++) {
+for (let i = 0; i < machines.shared.externs.length; i++) {
     let sContents = "";
     try {
-        sContents = fs.readFileSync(pkg.closureCompilerExterns[i], "utf8");
+        sContents = fs.readFileSync(machines.shared.externs[i], "utf8");
     } catch(err) {
         console.log(err.message);
     }
@@ -86,7 +86,7 @@ aMachines.forEach(function(machineType) {
     while (machineConfig && machineConfig.alias) {
         machineConfig = machines[machineConfig.alias];
     }
-    let machineVersion = (machineConfig.version || pkg.version);
+    let machineVersion = (machineConfig.version || machines.shared.version);
     let machineReleaseDir = "./versions/" + machineConfig.folder + "/" + machineVersion;
     let machineReleaseFile  = machineType + ".js";
     let machineUncompiledFile  = machineType + "-uncompiled.js";
@@ -114,8 +114,10 @@ aMachines.forEach(function(machineType) {
             }
         }
     }
+    let machineFiles = machineConfig.css || machines.shared.css;
+    machineFiles = machineFiles.concat(machineConfig.xsl || machines.shared.xsl);
     gulp.task("mksrc/" + machineType, function() {
-        return gulp.src(machineConfig.files)
+        return gulp.src(machineConfig.scripts)
             .pipe(newer(path.join(machineReleaseDir, machineUncompiledFile)))
             .pipe(foreach(function(stream, file){
                 return stream
@@ -162,6 +164,15 @@ aMachines.forEach(function(machineType) {
                 createSourceMap: true
             }))
             .pipe(sourcemaps.write('./'))                   // gulp-sourcemaps automatically adds the sourcemap url comment
+            .pipe(gulp.dest(machineReleaseDir));
+    });
+    gulp.task("cpfiles/" + machineType, function() {
+        return gulp.src(machineFiles)
+            .pipe(newer(machineReleaseDir))
+            .pipe(replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + machineVersion + "$2"))
+            .pipe(replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"' + machineReleaseDir.substr(1) + '/$1"'))
+            .pipe(replace(/[ \t]*\/\*[^*][\s\S]*?\*\//g, ""))
+            .pipe(replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, ""))
             .pipe(gulp.dest(machineReleaseDir));
     });
 });
