@@ -210,5 +210,12 @@ gulp.task("compile/devices", [
     "compile/ti57"
 ]);
 
-gulp.task("default", aCompileTasks.concat(aCopyTasks));
+gulp.task("promote", function() {
+    let baseDir = "./";
+    return gulp.src(["apps/**/*.xml", "devices/**/*.xml", "disks/**/*.xml", "pubs/**/*.xml"], {base: baseDir})
+        .pipe(newer(baseDir))
+        .pipe(replace(/href="\/versions\/([^\/]*)\/[0-9\.]*\/(machine|manifest|outline)\.xsl"/g, 'href="/versions/$1/' + machines.shared.version + '/$2.xsl"'))
+        .pipe(gulp.dest(baseDir));
+});
 
+gulp.task("default", aCompileTasks.concat(aCopyTasks));

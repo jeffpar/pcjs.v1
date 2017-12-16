@@ -48,7 +48,8 @@ if (argv['debug'] !== undefined) fDebug = argv['debug'];
 var lib = path.join(path.dirname(fs.realpathSync(__filename)), "../lib/");
 
 try {
-    var pkg = require(lib + "../../../package.json");
+    var machines = require(lib + "../../../_data/machines.json");
+    var scriptsPCx86 = machines.pcx86.scripts;
 } catch(err) {
     console.log(err.message);
 }
@@ -377,8 +378,8 @@ var onCommand = function (cmd, context, filename, callback)
     callback(null, result);
 };
 
-if (pkg) {
-    loadComponents(pkg.pcX86Files);
+if (scriptsPCx86) {
+    loadComponents(scriptsPCx86);
 }
 
 /*

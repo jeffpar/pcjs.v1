@@ -2518,7 +2518,7 @@ class LED extends Device {
      * initCell(buffer, iCell)
      *
      * @this {LED}
-     * @param {Array.<number|string>} buffer
+     * @param {Array.<number|string|null>} buffer
      * @param {number} iCell
      */
     initCell(buffer, iCell)

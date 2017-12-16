@@ -195,62 +195,33 @@ Unlike a typical project, where you have to *build* or *configure* or *make* som
 That's because both the compiled and uncompiled versions of PCjs emulation modules are checked into the project,
 making deployment to a web server easy.
 
-However, in order to build and test PCjs modifications, you'll want to use [Grunt](http://gruntjs.com/) and the
-Grunt tasks defined by [Gruntfile.js](Gruntfile.js).
+However, in order to build and test PCjs modifications, you'll want to use [gulp](https://gulpjs.com/) and the
+gulp tasks defined by [gulpfile.js](gulpfile.js).
 
-Although Grunt was installed locally when you ran `npm install`, you'll also want to install the command-line
-interface to Grunt. You can install that locally as well, but it's recommended you install it globally with *-g*;
+Although gulp was installed locally when you ran `npm install`, you'll also want to install the command-line
+interface to gulp. You can install that locally as well, but it's recommended you install it globally with *-g*;
 OS X users may also need to preface this command with `sudo`:
 
-	npm install grunt-cli -g
+	npm install gulp-cli -g
 
-Now you can run `grunt` anywhere within the PCjs project to build an updated version.  If no command-line arguments
-are specified, `grunt` runs the "default" task defined by the project's [Gruntfile](Gruntfile.js); that task runs
+Now you can run `gulp` anywhere within the PCjs project to build an updated version.  If no command-line arguments
+are specified, `gulp` runs the "default" task defined by the project's [gulpfile](gulpfile.js); that task runs
 Google's [Closure Compiler](https://developers.google.com/closure/compiler/) if any of the target files (eg, pcx86.js
-or pcx86-dbg.js in the [versions](/versions/) directory) are out-of date.
+in the [versions](/versions/) directory) are out-of date.
 
-To ensure consistent compilation results, a copy of the Closure Compiler has been checked into the
-[/bin](bin/) folder.  This version of Closure Compiler, in turn, requires Java v7 or later.  Use the following
-commands to confirm that everything is working properly:
+### Using the JavaScript-based Closure Compiler
 
-	java -version
+The latest [gulpfile](gulpfile.js) now compiles all PCjs machine modules using
+Google's [JavaScript-based Closure Compiler](https://github.com/google/closure-compiler-js).
 
-which should report a version >= 1.7; eg:
-
-    java version "1.7.0_67"
-    Java(TM) SE Runtime Environment (build 1.7.0_67-b01)
-    Java HotSpot(TM) 64-Bit Server VM (build 24.65-b04, mixed mode)
-
-Then run:
-
-	java -jar bin/compiler.jar --version
-
-which should report:
-
-	Closure Compiler (http://github.com/google/closure-compiler)
-	Version: v20160911
-	Built on: 2016-09-13 16:51
-
-If you don't have Java installed, it's recommended that you install the JDK (*not* the JRE), because the JRE may not
-update your command-line tools properly.  Note that Java is used *only* by the Closure Compiler; none of the PCjs
-client or server components use Java.
-
-Newer versions of the Closure Compiler should work as well, and at some point, a newer version will be checked into the
-project.
-
-### Building with Gulp (and the JavaScript-based Closure Compiler)
-
-I've continued experimenting with [Gulp](http://gulpjs.com/), and the current [gulpfile](gulpfile.js) can now compile
-all PCjs machine modules using Google's [JavaScript-based Closure Compiler](https://github.com/google/closure-compiler-js).
-
-Here's what I installed to get Gulp working:
+Here's what I installed to get it all working:
 
 	sudo npm install -g gulp
-	npm install --save-dev gulp gulp-change gulp-concat gulp-rename gulp-replace gulp-header gulp-foreach gulp-wrapper run-sequence
+	npm install --save-dev gulp gulp-newer gulp-concat gulp-rename gulp-replace gulp-header gulp-foreach gulp-wrapper gulp-sourcemaps
 	npm install --save-dev google-closure-compiler-js
 
-Running `gulp` should build a complete set of machine scripts in the [versions](/versions/) directory.  Individual
-machines can be compiled as well (eg, `gulp compile/pc8080`).
+Running `gulp` should build a complete set of machine scripts in the [versions](/versions/) directory.
+Individual machines can be compiled as well (eg, `gulp compile/pcx86`).
 
 Using PCjs
 ----------
@@ -350,7 +321,7 @@ To help test/debug changes to PCjs server components (eg, [DiskDump](modules/dis
 you can start the server with some additional options; eg:
 
 	node server.js --logging --console --debug
-	
+
 The *--logging* option will create a [node.log](/logs/) that records all the HTTP requests, *--debug*
 will generate additional debug-only messages (which will also be logged if *--logging* is enabled), and *--console*
 will replicate any messages to your console as well.
@@ -359,7 +330,7 @@ If you want server.js to use a different port (the default is 8088), set PORT in
 the server:
 
 	export PORT=80
-	
+
 or add *--port* to your command-line:
 
 	node server.js --logging --console --debug --port=80
@@ -394,13 +365,11 @@ where PCjs could run amok and destroy the planet.
 
 Other parameters that can be passed via the URL:
 
-- *autostart*: set it to "true" to allow all machines to start normally, "false" to prevent all machines from starting,
-or "no" to prevent all machines from starting *unless* they have no **Run** button; e.g.:
+- *autostart*: set it to "true" to allow all machines to start normally, "false" to prevent all machines from starting, or "no" to prevent all machines from starting *unless* they have no **Run** button; e.g.:
 
 	http://localhost:8088/?gort=debug&autostart=false
 
-- *aspect*: set it to a numeric value >= 0.3 and <= 3.33 to modify the default aspect ratio of a machine's screen on the
-specified page; e.g.:
+- *aspect*: set it to a numeric value >= 0.3 and <= 3.33 to modify the default aspect ratio of a machine's screen on the specified page; e.g.:
 
 	http://localhost:8088/?aspect=2.0
 
@@ -416,18 +385,17 @@ Updating PCjs
 ### Developing
 
 To start developing features for a new version of PCjs, here are the recommended steps:
- 
-1. Change the version number in the root [package.json](package.json)
-(and [_config.yml](https://github.com/jeffpar/pcjs/blob/jekyll/_config.yml))
-2. Run the "grunt promote" task to bump the version in all the machine XML files
+
+1. Change the version number in the root [package.json](package.json) (and [_config.yml](https://github.com/jeffpar/pcjs/blob/jekyll/_config.yml))
+2. Run the "gulp promote" task to bump the version in all the machine XML files
 3. Make changes
-4. Run "grunt" to build new versions of the apps (eg, "/versions/pcx86/1.x.x/pcx86.js")
- 
+4. Run "gulp" to build new versions of the apps (eg, "/versions/pcx86/1.x.x/pcx86.js")
+
 You might also want to check out the blog post on [PCjs Coding Conventions](http://www.pcjs.org/blog/2014/09/30/).
 
 You may also want to skip step #2 until you're ready to start testing the new version.  Depending on the nature
 of your changes, it may be better to manually edit the version number in only a few machine XML files for testing,
-leaving the rest of the XML files pointing to the previous version.  Run "grunt promote" when the new version is much
+leaving the rest of the XML files pointing to the previous version.  Run "gulp promote" when the new version is much
 closer to being released.
 
 ### Testing
@@ -436,21 +404,20 @@ In the course of testing PCjs, there may be stale "index.html" files that preven
 updates, changes to README.md files, etc.  So before running Node, you may want to "touch" the default HTML template:
 
 	touch modules/shared/templates/common.html
-	
+
 The [HTMLOut](modules/htmlout/) module compares the timestamp of that template file to the timestamp of any
 "index.html" and will regenerate the latter if it's out-of-date.
 
 There's a TODO to expand that check to include the timestamp of any local README.md file, but there are many other
 factors that can contribute to stale "index.html" files, so usually the safest thing to do is "touch" the
 [common.html](modules/shared/templates/common.html) template, or delete all existing "index.html" files, either
-manually or with the Grunt "clean" task:
+manually or with the `modules/htmlout/bin/delete_indexes.sh` script.
 
-	grunt clean
-	
 <!--END:EXCLUDE-->
 
 License
 -------
+
 The [PCjs Project](https://github.com/jeffpar/pcjs) is now an open-source project on [GitHub](http://github.com/).
 All published portions are free for redistribution and/or modification under the terms of the
 [GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
@@ -467,6 +434,7 @@ See [LICENSE](/LICENSE) for details.
 
 More Information
 ----------------
+
 Learn more about the [PCjs Project](/pubs/docs/about/) and [PCx86](/pubs/docs/about/pcx86/).  To
 create your own PCx86 machines, see the [PCx86 Documentation](/pubs/docs/pcx86/) for details.
 
