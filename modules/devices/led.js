@@ -107,7 +107,7 @@
  * @property {{
  *  container: HTMLElement|undefined
  * }} bindings
- * @property {Array.<string|number>} buffer
+ * @property {Array.<string|number|null>} buffer
  * @property {Array.<string|number>|null} bufferClone
  * @property {boolean} fBufferModified
  * @property {boolean} fTickled
@@ -233,7 +233,7 @@ class LED extends Device {
         this.nBufferCells = ((this.rows + 1) * this.cols) * this.nBufferInc;
         this.buffer = new Array(this.nBufferCells);
         this.bufferClone = null;
-        this.nBufferSkip = (this.colsView < this.cols? (this.cols - this.colsView) * 4 : 0);
+        this.nBufferIncExtra = (this.colsView < this.cols? (this.cols - this.colsView) * 4 : 0);
 
         /*
          * fBufferModified is straightforward: set to true by any setLEDState() call that actually
@@ -244,8 +244,12 @@ class LED extends Device {
          * true by periodic display operations that call setLEDState(); we clear it after every
          * periodic drawBuffer(), so if the machine fails to execute a setBuffer() in a timely manner,
          * we will see that fTickled hasn't been "tickled", and automatically blank the display.
+         * 
+         * fShiftedLeft is an optimization that tells drawGrid() when it can minimize the number of
+         * individual cells to redraw, by shifting the entire grid image leftward and redrawing only
+         * the rightmost cells.
          */
-        this.fBufferModified = this.fTickled = false;
+        this.fBufferModified = this.fTickled = this.fShiftedLeft = false;
 
         /*
          * This records the location of the most recent LED buffer location updated via setLEDState(),
@@ -321,7 +325,7 @@ class LED extends Device {
      * the machine must perform a display operation ("refresh") at least 30-60 times per second.
      *
      * @this {LED}
-     * @param {boolean} [fForced]
+     * @param {boolean} [fForced] (if not set, this is a normal refresh call)
      */
     drawBuffer(fForced = false)
     {
@@ -349,14 +353,23 @@ class LED extends Device {
      * drawGrid(fForced)
      *
      * Used by drawBuffer() for LED.TYPE.ROUND and LED.TYPE.SQUARE.
+     * 
+     * If the buffer was recently shifted left (ie, fShiftedLeft is true), then we take advantage
+     * of that knowledge to use drawImage() to shift the entire grid image left, and then redrawing
+     * only the rightmost visible column.
      *
      * @this {LED}
-     * @param {boolean} fForced
+     * @param {boolean} [fForced] (if not set, this is a normal refresh call)
      */
     drawGrid(fForced)
     {
+        let colRedraw = -1;
         if (!this.fPersistent || fForced) {
             this.clearGrid();
+        } else if (this.fShiftedLeft) {
+            colRedraw = this.colsView - 1;
+            let cxVisible = this.widthCell * colRedraw;
+            this.contextGrid.drawImage(this.canvasGrid, this.widthCell, 0, cxVisible, this.heightGrid, 0, 0, cxVisible, this.heightGrid);
         }
         let i = 0;
         for (let row = 0; row < this.rows; row++) {
@@ -366,14 +379,17 @@ class LED extends Device {
                 let fModified = !!(this.buffer[i+3] & LED.FLAGS.MODIFIED);
                 let fHighlight = (this.fHighlight && i == this.iBufferRecent);
                 if (fModified || fHighlight || fForced) {
-                    this.drawGridCell(state, color, col, row, fHighlight);
+                    if (colRedraw < 0 || col == colRedraw) {
+                        this.drawGridCell(state, color, col, row, fHighlight);
+                    }
                     this.buffer[i+3] &= ~LED.FLAGS.MODIFIED;
                     if (fHighlight) this.buffer[i+3] |= LED.FLAGS.MODIFIED;
                 }
                 i += this.nBufferInc;
             }
-            i += this.nBufferSkip;
+            i += this.nBufferIncExtra;
         }
+        this.fShiftedLeft = false;
         this.drawView();
     }
 
@@ -669,8 +685,7 @@ class LED extends Device {
     {
         let state;
         let i = (row * this.cols + col) * this.nBufferInc;
-        this.assert(row >= 0 && row < this.rows && col >= 0 && col < this.cols);
-        if (i >= 0 && i <= this.buffer.length - this.nBufferInc) {
+        if (i <= this.buffer.length - this.nBufferInc) {
             state = this.buffer[i];
         }
         return state;
@@ -773,15 +788,27 @@ class LED extends Device {
     initBuffer(buffer)
     {
         for (let i = 0; i < buffer.length; i += this.nBufferInc) {
-            if (this.type < LED.TYPE.DIGIT) {
-                buffer[i] = LED.STATE.OFF;
-            } else {
-                buffer[i] = ' ';
-            }
-            buffer[i+1] = (this.colorOn == this.colorTransparent? null : this.colorOn);
-            buffer[i+2] = 0;
-            buffer[i+3] = LED.FLAGS.MODIFIED;
+            this.initCell(buffer, i);
         }
+    }
+
+    /**
+     * initCell(buffer, iCell)
+     *
+     * @this {LED}
+     * @param {Array.<number|string>} buffer
+     * @param {number} iCell
+     */
+    initCell(buffer, iCell)
+    {
+        if (this.type < LED.TYPE.DIGIT) {
+            buffer[iCell] = LED.STATE.OFF;
+        } else {
+            buffer[iCell] = ' ';
+        }
+        buffer[iCell+1] = (this.colorOn == this.colorTransparent? null : this.colorOn);
+        buffer[iCell+2] = 0;
+        buffer[iCell+3] = LED.FLAGS.MODIFIED;
     }
 
     /**
@@ -958,21 +985,21 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {string|number} state (new state for the specified cell)
-     * @param {number} [flags] (may only be zero or more of the bits in LED.FLAGS.SET)
-     * @returns {boolean|null} (true if this call modified the LED state, false if not, null if error)
+     * @param {number} [flags]
+     * @returns {boolean} (true if this call modified the LED state, false if not)
      */
     setLEDState(col, row, state, flags = 0)
     {
-        let fModified = null;
-        this.assert(!(flags & ~LED.FLAGS.SET));
-        if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
-            fModified = false;
-            let i = (row * this.cols + col) * this.nBufferInc;
-            if (this.buffer[i] !== state || (this.buffer[i+3] & LED.FLAGS.SET) !== flags) {
+        let fModified = false;
+        let flagsSet = flags & LED.FLAGS.SET;
+        let i = (row * this.cols + col) * this.nBufferInc;
+        if (i <= this.buffer.length - this.nBufferInc) {
+            if (this.buffer[i] !== state || (this.buffer[i+3] & LED.FLAGS.SET) !== flagsSet) {
                 this.buffer[i] = state;
-                this.buffer[i+3] = (this.buffer[i+3] & ~LED.FLAGS.SET) | flags | LED.FLAGS.MODIFIED;
+                this.buffer[i+3] = (this.buffer[i+3] & ~LED.FLAGS.SET) | flagsSet | LED.FLAGS.MODIFIED;
                 this.fBufferModified = fModified = true;
             }
+            this.fShiftedLeft = false;
             this.iBufferRecent = i;
             this.fTickled = true;
         }
@@ -1154,7 +1181,7 @@ LED.STATE = {
 
 LED.FLAGS = {
     NONE:       0x00,
-    SET:        0x81,
+    SET:        0x01,
     PERIOD:     0x01,
     MODIFIED:   0x80,
 };

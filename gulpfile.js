@@ -58,10 +58,10 @@ var machines = require("./_data/machines.json");
 
 var sExterns = "";
 
-for (let i = 0; i < pkg.closureCompilerExterns.length; i++) {
+for (let i = 0; i < machines.shared.externs.length; i++) {
     let sContents = "";
     try {
-        sContents = fs.readFileSync(pkg.closureCompilerExterns[i], "utf8");
+        sContents = fs.readFileSync(machines.shared.externs[i], "utf8");
     } catch(err) {
         console.log(err.message);
     }
@@ -78,15 +78,18 @@ if (pkg.homepage) {
     if (match) sSiteHost = match[1];
 }
 
-var aCompileTasks = [];
+var aCompileTasks = [], aCopyTasks = [];
 var aMachines = Object.keys(machines);
 
 aMachines.forEach(function(machineType) {
+    if (machineType == "shared") return;
     let machineConfig = machines[machineType];
+    let machineName = machineConfig.name;
+    let machineClass = machineConfig.class;
     while (machineConfig && machineConfig.alias) {
         machineConfig = machines[machineConfig.alias];
     }
-    let machineVersion = (machineConfig.version || pkg.version);
+    let machineVersion = (machineConfig.version || machines.shared.version);
     let machineReleaseDir = "./versions/" + machineConfig.folder + "/" + machineVersion;
     let machineReleaseFile  = machineType + ".js";
     let machineUncompiledFile  = machineType + "-uncompiled.js";
@@ -114,8 +117,10 @@ aMachines.forEach(function(machineType) {
             }
         }
     }
+    let machineFiles = machineConfig.css || machines.shared.css;
+    machineFiles = machineFiles.concat(machineConfig.xsl || machines.shared.xsl);
     gulp.task("mksrc/" + machineType, function() {
-        return gulp.src(machineConfig.files)
+        return gulp.src(machineConfig.scripts)
             .pipe(newer(path.join(machineReleaseDir, machineUncompiledFile)))
             .pipe(foreach(function(stream, file){
                 return stream
@@ -144,24 +149,56 @@ aMachines.forEach(function(machineType) {
             .pipe(header('"use strict";\n\n'))
             .pipe(gulp.dest(machineReleaseDir));
     });
+    /*
+     * The newer() plugin doesn't seem to work properly with the closureCompiler() plugin;
+     * if the destination file is newer than the source, the compiler still gets invoked, but
+     * with a screwed-up stream, resulting in bogus errors.  My solution is to compare filetimes
+     * myself, and if the destination file is newer, then don't even add the 'compile' task.
+     */
     let sTask = "compile/" + machineType;
-    aCompileTasks.push(sTask);
-    gulp.task(sTask, ["mksrc/" + machineType], function() {
-        return gulp.src(path.join(machineReleaseDir, machineUncompiledFile) /*, {base: './'} */)
-            .pipe(sourcemaps.init())
-            .pipe(closureCompiler({
-                assumeFunctionWrapper: true,
-                compilationLevel: 'ADVANCED',
-                defines: machineDefines,
-                externs: [{src: sExterns}],
-                warningLevel: 'VERBOSE',
-                languageIn: "ES6",                          // this is now the default, just documenting our requirements
-                languageOut: "ES5",                         // this is also the default
-                outputWrapper: '(function(){%output%})()',
-                jsOutputFile: machineReleaseFile,           // TODO: This must vary according to debugger/non-debugger releases
-                createSourceMap: true
-            }))
-            .pipe(sourcemaps.write('./'))                   // gulp-sourcemaps automatically adds the sourcemap url comment
+    let srcFile = path.join(machineReleaseDir, machineUncompiledFile);
+    let dstFile = path.join(machineReleaseDir, machineReleaseFile);
+    try {
+        let srcStat = fs.statSync(srcFile);
+        let dstStat = fs.statSync(dstFile);
+        let srcTime = new Date(srcStat.mtime);
+        let dstTime = new Date(dstStat.mtime);
+        if (dstTime > srcTime) sTask = "";
+    } catch(err) {
+        // console.log(err.message);
+    }
+    if (sTask) {
+        aCompileTasks.push(sTask);
+        gulp.task(sTask, ["mksrc/" + machineType], function() {
+            return gulp.src(srcFile /*, {base: './'} */)
+                .pipe(sourcemaps.init())
+                .pipe(closureCompiler({
+                    assumeFunctionWrapper: true,
+                    compilationLevel: 'ADVANCED',
+                    defines: machineDefines,
+                    externs: [{src: sExterns}],
+                    warningLevel: 'VERBOSE',
+                    languageIn: "ES6",                          // this is now the default, just documenting our requirements
+                    languageOut: "ES5",                         // this is also the default
+                    outputWrapper: '(function(){%output%})()',
+                    jsOutputFile: machineReleaseFile,           // TODO: This must vary according to debugger/non-debugger releases
+                    createSourceMap: true
+                }))
+                .pipe(sourcemaps.write('./'))                   // gulp-sourcemaps automatically adds the sourcemap url comment
+                .pipe(gulp.dest(machineReleaseDir));
+        });
+    }
+    sTask = "cpfiles/" + machineType;
+    aCopyTasks.push(sTask);
+    gulp.task(sTask, function() {
+        return gulp.src(machineFiles)
+            .pipe(newer(machineReleaseDir))
+            .pipe(replace(/(<xsl:variable name="APPCLASS">)[^<]*(<\/xsl:variable>)/g, '$1' + machineClass + '$2'))
+            .pipe(replace(/(<xsl:variable name="APPNAME">)[^<]*(<\/xsl:variable>)/g, '$1' + machineName + '$2'))
+            .pipe(replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + machineVersion + "$2"))
+            .pipe(replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"' + machineReleaseDir.substr(1) + '/$1"'))
+            .pipe(replace(/[ \t]*\/\*[^*][\s\S]*?\*\//g, ""))
+            .pipe(replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, ""))
             .pipe(gulp.dest(machineReleaseDir));
     });
 });
@@ -173,4 +210,5 @@ gulp.task("compile/devices", [
     "compile/ti57"
 ]);
 
-gulp.task("default", aCompileTasks);
+gulp.task("default", aCompileTasks.concat(aCopyTasks));
+

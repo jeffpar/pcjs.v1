@@ -16,7 +16,7 @@
 	<xsl:variable name="BGNDCOLOR">#FAEBD7</xsl:variable>
 
 	<xsl:template name="componentStyles">
-		<link rel="stylesheet" type="text/css" href="/versions/{$APPCLASS}/{$APPVERSION}/components.css"/>
+		<link rel="stylesheet" type="text/css" href="/versions/c1pjs/1.40.0/components.css"/>
 	</xsl:template>
 
 	<xsl:template name="componentScripts">
