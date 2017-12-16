@@ -27,20 +27,39 @@
  */
 
 /*
- * This is an experimental Gulp file; this will NOT yet build everything that Gruntfile.js builds,
- * so for normal development, you should continue using Grunt.
+ * Scenarios
  * 
- * To learn Gulp, I started with a simple concatenation task ("mksrc") that combines all the files
- * required to compile a single emulation module (LEDs), and then I added a compilation task ("compile")
- * that runs the new JavaScript version of Google's Closure Compiler.
+ *      `gulp` (aka `gulp default`)
  * 
- * Unfortunately, the JavaScript version of the Closure Compiler appears to be MUCH slower than the
- * Java version.  But, it did uncover a few new type-related bugs in my code, which are now fixed.
+ *          Recompiles all machine scripts in their respective version folder (under /versions) that
+ *          are out-of-date with respect to the individual files (under /modules).  The target version
+ *          comes from _data/machines.json:shared.version.
  * 
- * Additional work is required to make Gulp skip tasks when the output file(s) are still newer
- * than the input file(s).  By default, every time you run Gulp, EVERYTHING is built again.  Apparently,
- * JavaScript developers think that simple declarative makefiles and automatic dependency checks are
- * too old-fashioned.
+ *      `gulp mksrc/{machine}`
+ * 
+ *          Concatenates all the individual files (under /modules) that comprise the machines's compiled
+ *          script; the resulting file (eg, pcx86-uncompiled.js) becomes the input file for the Closure
+ *          Compiler, which is why each machine's compile task lists this task as a dependency/prerequisite.
+ * 
+ *      `gulp compile/{machine}`
+ * 
+ *          For example, `gulp compile/pcx86` will recompile the current version of the pcx86.js script
+ *          if it's out of date.
+ * 
+ *      `gulp compile/devices`
+ * 
+ *          This special compiler task compiles all the newer machines that use the Device classes;
+ *          you can also compile them individually, just like any other machine (eg, gulp compile/ti57).
+ * 
+ *      `gulp cpfiles/{machine}`
+ * 
+ *          Copies any other individual resources files listed in machines.json (other than scripts) to the
+ *          machine's current version folder.
+ * 
+ *      `gulp promote`
+ * 
+ *          Updates the version number in all project machine XML files to match the version contained in
+ *          _data/machines.json:shared.version.
  */
 var gulp = require("gulp");
 var newer = require("gulp-newer");
