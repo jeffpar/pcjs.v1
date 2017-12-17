@@ -154,7 +154,7 @@ class LED extends Device {
         this.container = container;
         this.canvasView = canvasView;
 
-        this.type = this.getBounded(this.config['type'] || LED.TYPE.ROUND, LED.TYPE.ROUND, LED.TYPE.DIGIT);
+        this.type = this.getBounded(this.getDefaultNumber('type', LED.TYPE.ROUND), LED.TYPE.SMALL, LED.TYPE.DIGIT);
         this.widthCell = LED.SIZES[this.type][0];
         this.heightCell = LED.SIZES[this.type][1];
         this.width = this.getDefaultNumber('width', this.widthCell);
@@ -354,7 +354,7 @@ class LED extends Device {
     /**
      * drawGrid(fForced)
      *
-     * Used by drawBuffer() for LED.TYPE.ROUND and LED.TYPE.SQUARE.
+     * Used by drawBuffer() for LED.TYPE.ROUND, LED.TYPE.SQUARE, etc.
      * 
      * If the buffer was recently shifted left (ie, fShiftedLeft is true), then we take advantage
      * of that knowledge to use drawImage() to shift the entire grid image left, and then redrawing
@@ -410,7 +410,7 @@ class LED extends Device {
     /**
      * drawGridCell(state, color, col, row, fHighlight)
      *
-     * Used by drawGrid() for LED.TYPE.ROUND and LED.TYPE.SQUARE.
+     * Used by drawGrid() for LED.TYPE.ROUND, LED.TYPE.SQUARE, etc.
      *
      * @this {LED}
      * @param {string} state (eg, LED.STATE.ON or LED.STATE.OFF)
@@ -585,7 +585,7 @@ class LED extends Device {
          *
          * Refer to: https://www.w3.org/TR/2dcontext/#dom-context-2d-globalcompositeoperation
          */
-        this.contextView.globalCompositeOperation = (this.colorBackground && !this.fPersistent)? "source-over" : "copy";
+        this.contextView.globalCompositeOperation = (this.colorBackground && this.colorOn != this.colorTransparent)? "source-over" : "copy";
         this.contextView.drawImage(this.canvasGrid, 0, 0, this.widthGrid, this.heightGrid, 0, 0, this.widthView, this.heightView);
     }
 
@@ -1049,9 +1049,10 @@ class LED extends Device {
 }
 
 LED.TYPE = {
+    SMALL:      0,      // a smaller, more efficient (round) LED for large grids
     ROUND:      1,      // a single (round) LED
     SQUARE:     2,      // a single (square) LED
-    DIGIT:      3       // a 7-segment (digit) LED, with a period as an 8th segment
+    DIGIT:      3       // a 7-segment (digit) LED, with optional period as an 8th segment
 };
 
 LED.BINDING = {
@@ -1220,12 +1221,13 @@ LED.FLAGS = {
 };
 
 LED.SHAPES = {
+    [LED.TYPE.SMALL]:   [4, 4, 3],
     [LED.TYPE.ROUND]:   [16, 16, 14],
     [LED.TYPE.SQUARE]:  [2, 2, 28, 28]
 };
 
 LED.SIZES = [
-    [],
+    [8,   8],           // LED.TYPE.SMALL
     [32,  32],          // LED.TYPE.ROUND
     [32,  32],          // LED.TYPE.SQUARE
     [96, 128]           // LED.TYPE.DIGIT

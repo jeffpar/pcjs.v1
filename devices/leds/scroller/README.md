@@ -42,11 +42,12 @@ machines:
         },
         "scrollDisplay": {
           "class": "LED",
-          "type": 1,
+          "type": 0,
           "cols": 256,
           "rows": 16,
           "colsExtra": 16,
           "color": "red",
+          "backgroundColor": "black",
           "highlight": false,
           "bindings": {
             "container": "displayScroll"
@@ -70,11 +71,6 @@ styles:
     margin-bottom: 16px;
   displayScroll:
     position: relative;
-    line-height: 0;
-    background-color: black;
-    background-image: none;
-    background-size: 100% 100%;
-    -webkit-tap-highlight-color: transparent;
   .print:
     font-family: Monaco,"Lucida Console",monospace;
   .diags:
