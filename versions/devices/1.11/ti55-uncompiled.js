@@ -2929,11 +2929,16 @@ LED.STATE = {
     ON:         1
 };
 
+/*
+ * NOTE: Although technically the MODIFIED flag is an internal flag, it may be set explicitly as well;
+ * the ROM device uses the setLEDState() flags parameter to set it, in order to trigger highlighting of
+ * the most recently active LED.
+ */
 LED.FLAGS = {
     NONE:       0x00,
-    SET:        0x01,
-    PERIOD:     0x01,
-    MODIFIED:   0x80,
+    SET:        0x81,   // bits that may be set using the flags parameter of setLEDState()
+    PERIOD:     0x01,   // used with DIGIT-type LED to indicate that the period "segment" should be on, too
+    MODIFIED:   0x80,   // cell has been modified since the last time it was drawn
 };
 
 LED.SHAPES = {

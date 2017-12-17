@@ -999,7 +999,7 @@ class Chip extends Device {
 
         switch(this.nMessageCmd) {
 
-        case Chip.MESSAGE_CMD.STOP:
+        case Chip.MESSAGE_CMD.HALT:
             return false;
 
         case Chip.MESSAGE_CMD.SHIFT:
@@ -1092,7 +1092,7 @@ class Chip extends Device {
             this.nMessageCmd = Chip.MESSAGE_CMD.SHIFT;
             return true;
         }
-        this.nMessageCmd = Chip.MESSAGE_CMD.STOP;
+        this.nMessageCmd = Chip.MESSAGE_CMD.HALT;
         return false;
     }
     
