@@ -15,6 +15,7 @@ index.html
 node_modules
 src
 tmp
+/blog/*.html
 /docs
 /projects
 /videos
