@@ -1,6 +1,7 @@
 {
 	"version": "0.1.0",
 	"configurations": [
+
     {
       "name": "Gulp",
       "type": "node",
@@ -47,10 +48,17 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PCjs: Scrolling LED",
+		  "name": "PCjs: LED Scroller",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/leds/scrolling/",
+		  "url": "http://pcjs:8088/devices/leds/scroller/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PCjs: LED Symbols",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/leds/symbols/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {

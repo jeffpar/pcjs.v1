@@ -879,7 +879,6 @@ class Chip extends Device {
         switch(c[0]) {
         case 's':
             this.setMessage(aTokens.join(' '));
-            this.println("new message: '" + this.sMessage + "'");
             break;
 
         case '?':
@@ -1071,12 +1070,16 @@ class Chip extends Device {
                 }
                 if (i < this.sMessage.length) {
                     let ch = this.sMessage[i++];
-                    let cmd = Chip.MESSAGE_CODE[ch];
-                    if (cmd) {
+                    if (ch == '$') {
                         this.iMessageNext = i;
-                        return this.processMessageCmd(cmd, cols);
+                    } else {
+                        let cmd = Chip.MESSAGE_CODE[ch];
+                        if (cmd) {
+                            this.iMessageNext = i;
+                            return this.processMessageCmd(cmd, cols);
+                        }
+                        this.println("unrecognized message code: $" + ch);
                     }
-                    this.println("unrecognized message code: $" + ch);
                 }
             }
             if (chMessage == ' ') {
@@ -1306,7 +1309,10 @@ class Chip extends Device {
      */
     setMessage(s)
     {
-        this.sMessage = s;
+        if (this.sMessage != s) {
+            if (s) this.println("new message: '" + s + "'");
+            this.sMessage = s;
+        }
         this.iMessageNext = this.nMessageCount = 0;
         this.nMessageCmd = Chip.MESSAGE_CMD.LOAD;
     }
@@ -1584,13 +1590,13 @@ Chip.SYMBOLS = {
     "V":"$o8bo$o8bo$bo6bo$bo6bo$bo6bo$2bo4bo$2bo4bo$2bo4bo$3bo2bo$3bo2bo$4b2o",
     "W":"$o4b2o4bo$o4b2o4bo$o4b2o4bo$o3bo2bo3bo$bo2bo2bo2bo$bo2bo2bo2bo$bo2bo2bo2bo$bo2bo2bo2bo$2b2o4b2o$2b2o4b2o$2b2o4b2o",
     "X":"$o8bo$bo6bo$2bo4bo$3bo2bo$4b2o$4b2o$4b2o$3bo2bo$2bo4bo$bo6bo$o8bo",
-    "Y":"$o9bo$bo7bo$2bo5bo$3bo3bo$4bobo$5bo$5bo$5bo$5bo$5bo$5bo",
+    "Y":"$o5bo$o5bo$bo3bo$bo3bo$2bobo$2bobo$3bo$3bo$3bo$3bo$3bo",
     "Z":"$9o$8bo$7bo$6bo$5bo$4bo$3bo$2bo$bo$o$9o",
-    "a":"$$$$b4o$o4bo$5bo$b5o$o4bo$o4bo$o3b2o$b3ob2o",
+    "a":"$$$$b4o$o4bo$5bo$b5o$o4bo$o4bo$o3b2o$b3obo",
     "b":"$o$o$o$ob3o$2o3bo$o5bo$o5bo$o5bo$o5bo$2o3bo$ob3o",
     "c":"$$$$2b4o$bo4bo$o$o$o$o$bo4bo$2b4o",
     "d":"$6bo$6bo$6bo$2b3obo$bo3b2o$o5bo$o5bo$o5bo$o5bo$bo3b2o$2b3obo",
-    "e":"$$$$2b2o$bo2bo$o4bo$6o$o$o$o4bo$b4o",
+    "e":"$$$$2b3o$bo3bo$o5bo$7o$o$o$bo4bo$2b4o",
     "f":"$2b2o$bo2bo$bo$bo$4o$bo$bo$bo$bo$bo$bo",
     "g":"$$$$2b2obo$bo2b2o$o4bo$o4bo$o4bo$bo2b2o$2b2obo$5bo$5bo$o4bo$b4o",
     "h":"$o$o$o$ob3o$2o3bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo",
