@@ -1160,7 +1160,7 @@ class Chip extends Device {
             break;
 
         case '?':
-            sResult = "available commands:";
+            sResult = "additional commands:";
             Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
             break;
 

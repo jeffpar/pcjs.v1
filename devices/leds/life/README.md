@@ -99,7 +99,7 @@ Using [PCjs Devices](/modules/devices/), here's a simple demo of
 [Red](?color=red&pattern=gliderGun#game-of-life),
 [Blue](?color=blue&pattern=gliderGun#game-of-life), or any other LED color can be specified in the URL.
 
-Check out the ["Game of Life" Color Demo](colors/) and ["Lite-Brite" LED Simulation](/devices/leds/litebrite/), too.
+There is also a ["Game of Life" Color Demo](colors/) that allows you to change LED colors.
 
 ### Game of Life
 

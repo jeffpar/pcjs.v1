@@ -27,7 +27,7 @@
  */
 
 /*
- * Scenarios
+ * Scenarios:
  * 
  *      `gulp` (aka `gulp default`)
  * 
@@ -35,23 +35,24 @@
  *          are out-of-date with respect to the individual files (under /modules).  The target version
  *          comes from _data/machines.json:shared.version.
  * 
- *      `gulp mksrc/{machine}`
+ *      `gulp make` (or `gulp make/{machine}`)
  * 
  *          Concatenates all the individual files (under /modules) that comprise the machines's compiled
  *          script; the resulting file (eg, pcx86-uncompiled.js) becomes the input file for the Closure
- *          Compiler, which is why each machine's compile task lists this task as a dependency/prerequisite.
+ *          Compiler, which is why each machine's `compile` task lists the corresponding `make` task as a
+ *          dependency/prerequisite.
  * 
- *      `gulp compile/{machine}`
+ *      `gulp compile` (or `gulp compile/{machine}`)
  * 
  *          For example, `gulp compile/pcx86` will recompile the current version of the pcx86.js script
  *          if it's out of date.
  * 
  *      `gulp compile/devices`
  * 
- *          This special compiler task compiles all the newer machines that use the Device classes;
- *          you can also compile them individually, just like any other machine (eg, gulp compile/ti57).
+ *          This special task compiles all the newer machines that use Device classes; you can also compile
+ *          them individually, just like any other machine (eg, `gulp compile/ti57`).
  * 
- *      `gulp cpfiles/{machine}`
+ *      `gulp copy` (or `gulp copy/{machine}`)
  * 
  *          Copies any other individual resources files listed in machines.json (other than scripts) to the
  *          machine's current version folder.
@@ -60,6 +61,22 @@
  * 
  *          Updates the version number in all project machine XML files to match the version contained in
  *          _data/machines.json:shared.version.
+ * 
+ * Notes:
+ * 
+ *  Because the 'gulp-newer' plugin doesn't work properly with 'google-closure-compiler-js' (or perhaps
+ *  because the 'google-closure-compiler-js' plugin doesn't work properly with 'gulp-newer'), you should invoke
+ *  gulp for each of the major tasks in the following order:
+ * 
+ *      gulp make
+ *      gulp compile
+ *      gulp copy
+ * 
+ *  Alternatively, simply run `gulp` twice to ensure that any changed files get detected properly.
+ * 
+ *  It might be possible to have a final `make` task dynamically add all the `compile` tasks that have outdated
+ *  targets and then automatically run them, but I'm not enough of a gulp expert at this point to know whether
+ *  that would work, and besides, the damn plugins should just work....
  */
 var gulp = require("gulp");
 var newer = require("gulp-newer");
@@ -68,6 +85,7 @@ var foreach = require("gulp-foreach");
 var header = require("gulp-header");
 var replace = require("gulp-replace");
 var closureCompiler = require('google-closure-compiler-js').gulp();
+var sequence = require("run-sequence");
 var sourcemaps = require('gulp-sourcemaps');
 
 var fs = require("fs");
@@ -97,8 +115,8 @@ if (pkg.homepage) {
     if (match) sSiteHost = match[1];
 }
 
-var aCompileTasks = [], aCopyTasks = [];
 var aMachines = Object.keys(machines);
+var aMakeTasks = [], aCompileTasks = [], aCopyTasks = [];
 
 aMachines.forEach(function(machineType) {
     if (machineType == "shared") return;
@@ -136,9 +154,11 @@ aMachines.forEach(function(machineType) {
             }
         }
     }
+    let sTask = "make/" + machineType;
     let machineFiles = machineConfig.css || machines.shared.css;
     machineFiles = machineFiles.concat(machineConfig.xsl || machines.shared.xsl);
-    gulp.task("mksrc/" + machineType, function() {
+    aMakeTasks.push(sTask);
+    gulp.task(sTask, function() {
         return gulp.src(machineConfig.scripts)
             .pipe(newer(path.join(machineReleaseDir, machineUncompiledFile)))
             .pipe(foreach(function(stream, file){
@@ -174,7 +194,7 @@ aMachines.forEach(function(machineType) {
      * with a screwed-up stream, resulting in bogus errors.  My solution is to compare filetimes
      * myself, and if the destination file is newer, then don't even add the 'compile' task.
      */
-    let sTask = "compile/" + machineType;
+    sTask = "compile/" + machineType;
     let srcFile = path.join(machineReleaseDir, machineUncompiledFile);
     let dstFile = path.join(machineReleaseDir, machineReleaseFile);
     try {
@@ -188,7 +208,7 @@ aMachines.forEach(function(machineType) {
     }
     if (sTask) {
         aCompileTasks.push(sTask);
-        gulp.task(sTask, ["mksrc/" + machineType], function() {
+        gulp.task(sTask, ["make/" + machineType], function() {
             return gulp.src(srcFile /*, {base: './'} */)
                 .pipe(sourcemaps.init())
                 .pipe(closureCompiler({
@@ -207,7 +227,7 @@ aMachines.forEach(function(machineType) {
                 .pipe(gulp.dest(machineReleaseDir));
         });
     }
-    sTask = "cpfiles/" + machineType;
+    sTask = "copy/" + machineType;
     aCopyTasks.push(sTask);
     gulp.task(sTask, function() {
         return gulp.src(machineFiles)
@@ -222,12 +242,18 @@ aMachines.forEach(function(machineType) {
     });
 });
 
+gulp.task("make", aMakeTasks);
+
+gulp.task("compile", aCompileTasks);
+
 gulp.task("compile/devices", [
     "compile/leds",
     "compile/ti42",
     "compile/ti55",
     "compile/ti57"
 ]);
+
+gulp.task("copy", aCopyTasks);
 
 gulp.task("promote", function() {
     let baseDir = "./";
@@ -237,4 +263,8 @@ gulp.task("promote", function() {
         .pipe(gulp.dest(baseDir));
 });
 
-gulp.task("default", aCompileTasks.concat(aCopyTasks));
+gulp.task("default", function() {
+    sequence(
+        "make", "compile", "copy"
+    );
+});

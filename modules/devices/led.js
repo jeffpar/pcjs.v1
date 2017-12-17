@@ -248,8 +248,10 @@ class LED extends Device {
          * fShiftedLeft is an optimization that tells drawGrid() when it can minimize the number of
          * individual cells to redraw, by shifting the entire grid image leftward and redrawing only
          * the rightmost cells.
+         * 
+         * fDisplayOff is a global "off" switch for the entire display.
          */
-        this.fBufferModified = this.fTickled = this.fShiftedLeft = false;
+        this.fBufferModified = this.fTickled = this.fShiftedLeft = this.fDisplayOff = false;
 
         /*
          * This records the location of the most recent LED buffer location updated via setLEDState(),
@@ -370,20 +372,32 @@ class LED extends Device {
             colRedraw = this.colsView - 1;
             let cxVisible = this.widthCell * colRedraw;
             this.contextGrid.drawImage(this.canvasGrid, this.widthCell, 0, cxVisible, this.heightGrid, 0, 0, cxVisible, this.heightGrid);
+            /*
+             * At this point, the only grid drawing we might need to do now is the column at colRedraw,
+             * but we still loop over the entire buffer to ensure all the cell MODIFIED states are in sync.
+             */
         }
         let i = 0;
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.colsView; col++) {
                 let state = this.buffer[i];
                 let color = this.buffer[i+1] || this.colorTransparent;
+                let fLeaveModified = false;
                 let fModified = !!(this.buffer[i+3] & LED.FLAGS.MODIFIED);
                 let fHighlight = (this.fHighlight && i == this.iBufferRecent);
+                if (this.fDisplayOff && state) {
+                    state = LED.STATE.OFF;
+                    fModified = fLeaveModified = true;
+                }
                 if (fModified || fHighlight || fForced) {
                     if (colRedraw < 0 || col == colRedraw) {
                         this.drawGridCell(state, color, col, row, fHighlight);
                     }
-                    this.buffer[i+3] &= ~LED.FLAGS.MODIFIED;
-                    if (fHighlight) this.buffer[i+3] |= LED.FLAGS.MODIFIED;
+                    if (fHighlight || fLeaveModified) {
+                        this.buffer[i+3] |= LED.FLAGS.MODIFIED;
+                    } else {
+                        this.buffer[i+3] &= ~LED.FLAGS.MODIFIED;
+                    }
                 }
                 i += this.nBufferInc;
             }
@@ -892,6 +906,20 @@ class LED extends Device {
     {
         if (this.container) this.container.style[sAttr] = sValue;
     }
+
+    /**
+     * setDisplayOff(off)
+     * 
+     * @this {LED}
+     * @param {boolean} [off]
+     */
+    setDisplayOff(off)
+    {
+        if (this.fDisplayOff != off) {
+            this.fDisplayOff = off;
+            this.fBufferModified = true;
+        }
+    }
     
     /**
      * setLEDColor(col, row, color)
@@ -1179,11 +1207,16 @@ LED.STATE = {
     ON:         1
 };
 
+/*
+ * NOTE: Although technically the MODIFIED flag is an internal flag, it may be set explicitly as well;
+ * the ROM device uses the setLEDState() flags parameter to set it, in order to trigger highlighting of
+ * the most recently active LED.
+ */
 LED.FLAGS = {
     NONE:       0x00,
-    SET:        0x01,
-    PERIOD:     0x01,
-    MODIFIED:   0x80,
+    SET:        0x81,   // bits that may be set using the flags parameter of setLEDState()
+    PERIOD:     0x01,   // used with DIGIT-type LED to indicate that the period "segment" should be on, too
+    MODIFIED:   0x80,   // cell has been modified since the last time it was drawn
 };
 
 LED.SHAPES = {

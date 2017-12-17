@@ -42241,13 +42241,14 @@ class ChipSet extends Component {
                  * setValueAtTime() method, with a time of zero, as a work-around to avoid the "easing" (aka
                  * "de-zippering") of the frequency that browsers like to do.  Supposedly de-zippering is an
                  * attempt to avoid "pops" if the frequency is altered while the wave is still rising or falling.
-                 * We'll see.
+                 * 
+                 * Ditto for gain.
                  */
                 this.oscillatorAudio['frequency']['setValueAtTime'](freq, 0);
-                this.volumeAudio['gain']['value'] = this.volumeInit;
+                this.volumeAudio['gain']['setValueAtTime'](this.volumeInit, 0);
                 if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
             } else if (this.volumeAudio) {
-                this.volumeAudio['gain']['value'] = 0;
+                this.volumeAudio['gain']['setValueAtTime'](0, 0);
                 if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
             }
         } else if (fOn) {
@@ -42295,7 +42296,15 @@ class ChipSet extends Component {
                     this.volumeAudio = this.contextAudio['createGain']();
                     this.oscillatorAudio['connect'](this.volumeAudio);
                     this.volumeAudio['connect'](this.contextAudio['destination']);
-                    this.volumeAudio['gain']['value'] = 0;
+                    /*
+                     * Instead of setting the gain's 'value' property directly, as we used to do, we use the
+                     * setValueAtTime() method, with a time of zero, as a work-around to avoid the "easing" (aka
+                     * "de-zippering") of the gain that browsers like to do.  Supposedly de-zippering is an
+                     * attempt to avoid "pops" if the gain is altered while the wave is still rising or falling.
+                     * 
+                     *      this.volumeAudio['gain']['value'] = 0;
+                     */
+                    this.volumeAudio['gain']['setValueAtTime'](0, 0);
                     this.oscillatorAudio['type'] = "square";
                     this.oscillatorAudio['start'](0);
                     return true;

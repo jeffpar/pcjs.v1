@@ -38,7 +38,7 @@
  * @property {string} [rule]
  * @property {string} [pattern]
  * @property {Object} [patterns]
- * @property {string} [symbols]
+ * @property {string} [message]
  * @property {boolean} [toggleColor]
  * @property {Object} [colors]
  */
@@ -51,7 +51,7 @@
  * @property {boolean} fWrap
  * @property {string} sRule
  * @property {string} sPattern
- * @property {string} sSymbols
+ * @property {string} sMessage
  * @property {boolean} fToggleColor
  * @property {LED} leds
  * @property {Object} colorPalette
@@ -79,7 +79,7 @@ class Chip extends Device {
         this.fWrap = this.getDefaultBoolean('wrap', false);
         this.sRule = this.getDefaultString('rule', "");
         this.sPattern = this.getDefaultString('pattern', "");
-        this.sSymbols = this.getDefaultString('symbols', "");
+        this.setMessage(this.getDefaultString('message', ""));
         
         /*
          * The 'toggleColor' property currently affects only grids that have a color palette: if true,
@@ -148,8 +148,6 @@ class Chip extends Device {
              * Establish an onCommand() handler.
              */
             this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
-
-            this.iSymbolNext = this.nColsRemaining = 0;
         }
     }
 
@@ -500,9 +498,9 @@ class Chip extends Device {
      *
      * Implements rule LEFT1 (shift left one cell).
      * 
-     * Some of the state we maintain outside of the LED array includes the number of columns of data remaining in
-     * the "offscreen" portion of the array (nColsRemaining).  Whenever we see that it's zero, we load it with the
-     * next chuck of data (ie, the LED pattern for the next symbol in sSymbols).
+     * Some of the state we maintain outside of the LED array includes the number of columns of data remaining
+     * in the "offscreen" portion of the array (nMessageCount).  Whenever we see that it's zero, we load it with the
+     * next chuck of data (ie, the LED pattern for the next symbol in sMessage).
      * 
      * @this {Chip}
      * @param {number} [shift] (default is 1, for a leftward shift of one cell)
@@ -514,26 +512,12 @@ class Chip extends Device {
         let leds = this.leds;
         let nCols = leds.cols, nRows = leds.rows;
 
-        if (!this.nColsRemaining) {
-            if (this.sSymbols) {
-                if (this.iSymbolNext >= this.sSymbols.length) {
-                    this.iSymbolNext = 0;
-                }
-                let chSymbol = this.sSymbols[this.iSymbolNext++];
-                if (chSymbol == ' ') {
-                    this.nColsRemaining += 2;
-                } else {
-                    let sPattern = Chip.SYMBOLS[chSymbol];
-                    if (sPattern) this.nColsRemaining = this.loadPatternString(leds.colsView + 1, 0, sPattern, true);
-                    this.nColsRemaining += 1;
-                }
-            }
-        }
+        if (!this.processMessageCmd()) return 0;
 
-        /*
-         * This is a very slow and simple shift-and-exchange loop, which through a series of exchanges,
-         * also migrates the left-most column to the right-most column.  Good for testing but not much else.
-         */
+        //
+        // This is a very slow and simple shift-and-exchange loop, which through a series of exchanges,
+        // also migrates the left-most column to the right-most column.  Good for testing but not much else.
+        //
         // for (let row = 0; row < nRows; row++) {
         //     for (let col = 0; col < nCols - shift; col++) {
         //         let stateLeft = leds.getLEDState(col, row) || LED.STATE.OFF;
@@ -544,12 +528,17 @@ class Chip extends Device {
         //     }
         // }
         // leds.fShiftedLeft = true;
+        //
 
         let iCell = 0;
         let buffer = leds.getBuffer();
         let nInc = leds.nBufferInc;
         let nIncPerRow = nCols * nInc;
+        
+        let nEmptyCols = 0;
+        this.nLeftEmpty = this.nRightEmpty = -1;
         for (let col = 0; col < nCols - shift; col++) {
+            let isEmptyCol = 1;
             let iCellOrig = iCell;
             for (let row = 0; row < nRows; row++) {
                 let stateOld = buffer[iCell];
@@ -558,18 +547,30 @@ class Chip extends Device {
                 buffer[iCell + 1] = buffer[iCell + nInc + 1];
                 buffer[iCell + 2] = buffer[iCell + nInc + 2];
                 buffer[iCell + 3] = buffer[iCell + nInc + 3] | flagsNew;
-                if (stateNew) cActive++;
+                if (stateNew) {
+                    cActive++;
+                    isEmptyCol = 0;
+                }
                 iCell += nIncPerRow;
             }
             iCell = iCellOrig + nInc;
+            if (isEmptyCol) {
+                nEmptyCols++;
+            } else {
+                if (this.nLeftEmpty < 0) this.nLeftEmpty = nEmptyCols;
+                nEmptyCols = 0;
+            }
         }
+        if (this.nLeftEmpty < 0) this.nLeftEmpty = nEmptyCols;
+        this.nRightEmpty = nEmptyCols;
+
         for (let row = 0; row < nRows; row++) {
             leds.initCell(buffer, iCell);
             iCell += nIncPerRow;
         }
+
         leds.fShiftedLeft = leds.fBufferModified = true;
         
-        if (this.nColsRemaining) this.nColsRemaining--;
         return cActive;
     }
 
@@ -851,7 +852,7 @@ class Chip extends Device {
             // }
             if (!Device.getURLParms()['pattern'] && !Device.getURLParms()[Chip.BINDING.IMAGE_SELECTION]) {
                 let stateLEDs = state['stateLEDs'] || state[1];
-                if (stateLEDs && this.leds && !this.sSymbols) {
+                if (stateLEDs && this.leds && !this.sMessage) {
                     if (!this.leds.loadState(stateLEDs)) return false;
                 }
             }
@@ -872,19 +873,22 @@ class Chip extends Device {
     onCommand(aTokens, machine)
     {
         let sResult = "";
-        let s = aTokens[1], c = aTokens[2];
+        let s = aTokens.shift();
+        let c = aTokens.shift();
 
-        switch(s[0]) {
+        switch(c[0]) {
+        case 's':
+            this.setMessage(aTokens.join(' '));
+            break;
+
         case '?':
             sResult = "";
             Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
-            if (sResult) sResult = "available commands:" + sResult;
+            if (sResult) sResult = "additional commands:" + sResult;
             break;
 
         default:
-            if (aTokens[0]) {
-                sResult = "unrecognized command '" + aTokens[0] + "' (try '?')";
-            }
+            if (s) sResult = "unrecognized command '" + s + "' (try '?')";
             break;
         }
         if (sResult) this.println(sResult.trim());
@@ -978,6 +982,120 @@ class Chip extends Device {
         this.saveLocalStorage(this.saveState());
     }
 
+    /**
+     * processMessageCmd(cmd, count)
+     * 
+     * @this {Chip}
+     * @param {number} [cmd]
+     * @param {number} [count]
+     * @returns {boolean} (true to shift another cell, false if not)
+     */
+    processMessageCmd(cmd, count = 0)
+    {
+        if (cmd) {
+            this.nMessageCmd = cmd;
+            this.nMessageCount = count;
+        }
+
+        switch(this.nMessageCmd) {
+
+        case Chip.MESSAGE_CMD.HALT:
+            return false;
+
+        case Chip.MESSAGE_CMD.SHIFT:
+            if (this.nMessageCount) {
+                this.nMessageCount--;
+                return true;
+            }
+            break;
+
+        case Chip.MESSAGE_CMD.SLEEP:
+            if (this.nMessageCount) {
+                this.nMessageCount--;
+                return false;
+            }
+            break;
+
+        case Chip.MESSAGE_CMD.LOAD:
+            break;
+
+        case Chip.MESSAGE_CMD.CENTER:
+            if (this.nLeftEmpty > this.nRightEmpty) return true;
+            break;
+
+        case Chip.MESSAGE_CMD.OFF:
+            this.leds.setDisplayOff(true);
+            this.nMessageCmd = Chip.MESSAGE_CMD.SLEEP;
+            break;
+
+        case Chip.MESSAGE_CMD.ON:
+            this.leds.setDisplayOff(false);
+            this.nMessageCmd = Chip.MESSAGE_CMD.SLEEP;
+            break;
+
+        case Chip.MESSAGE_CMD.RELOAD:
+            this.setMessage(this.sMessage);
+            return true;
+
+        default:
+            this.assert(false);
+            return false;
+        }
+
+        if (!cmd) return this.processMessageSymbol();
+        return false;
+    }
+    
+    /**
+     * processMessageSymbol()
+     * 
+     * @this {Chip}
+     * @returns {boolean} (true if another message symbol loaded)
+     */
+    processMessageSymbol()
+    {
+        if (this.sMessage) {
+            if (this.iMessageNext >= this.sMessage.length) {
+                this.iMessageNext = 0;
+            }
+            let chMessage = this.sMessage[this.iMessageNext++];
+            if (chMessage == '$') {
+                let cols = 0;
+                let i = this.iMessageNext;
+                while (i < this.sMessage.length) {
+                    let d = this.sMessage.charCodeAt(i) - 0x30;
+                    if (d < 0 || d > 9) break;
+                    cols = cols * 10 + d;
+                    i++;
+                }
+                if (i < this.sMessage.length) {
+                    let ch = this.sMessage[i++];
+                    if (ch == '$') {
+                        this.iMessageNext = i;
+                    } else {
+                        let cmd = Chip.MESSAGE_CODE[ch];
+                        if (cmd) {
+                            this.iMessageNext = i;
+                            return this.processMessageCmd(cmd, cols);
+                        }
+                        this.println("unrecognized message code: $" + ch);
+                    }
+                }
+            }
+            if (chMessage == ' ') {
+                this.nMessageCount += 2;
+            } else {
+                let sPattern = Chip.SYMBOLS[chMessage];
+                if (sPattern) this.nMessageCount = this.loadPatternString(this.leds.colsView + 1, 0, sPattern, true);
+                this.nMessageCount += 1;
+            }
+            this.nMessageCmd = Chip.MESSAGE_CMD.SHIFT;
+            return true;
+        }
+        this.nMessageCmd = Chip.MESSAGE_CMD.HALT;
+        return false;
+    }
+    
     /**
      * savePattern(fMinWidth, fMinHeight)
      *
@@ -1184,6 +1302,22 @@ class Chip extends Device {
     }
 
     /**
+     * setMessage(s)
+     *
+     * @this {Chip}
+     * @param {string} s
+     */
+    setMessage(s)
+    {
+        if (this.sMessage != s) {
+            if (s) this.println("new message: '" + s + "'");
+            this.sMessage = s;
+        }
+        this.iMessageNext = this.nMessageCount = 0;
+        this.nMessageCmd = Chip.MESSAGE_CMD.LOAD;
+    }
+    
+    /**
      * updateBackgroundImage(sImage)
      *
      * @this {Chip}
@@ -1388,7 +1522,29 @@ Chip.BINDING = {
 
 Chip.COUNTS = [null, Chip.BINDING.COUNT_ON, Chip.BINDING.COUNT_OFF, Chip.BINDING.COUNT_CYCLE];
 
-Chip.COMMANDS = [];
+Chip.COMMANDS = [
+    "s\tset string"
+];
+
+Chip.MESSAGE_CMD = {
+    HALT:       1,
+    LOAD:       2,
+    SHIFT:      3,
+    SLEEP:      4,
+    CENTER:     5,
+    OFF:        6,
+    ON:         7,
+    RELOAD:     8
+};
+
+Chip.MESSAGE_CODE = {
+    'b':        Chip.MESSAGE_CMD.OFF,
+    'c':        Chip.MESSAGE_CMD.CENTER,
+    'h':        Chip.MESSAGE_CMD.HALT,
+    'o':        Chip.MESSAGE_CMD.ON,
+    'r':        Chip.MESSAGE_CMD.RELOAD,
+    's':        Chip.MESSAGE_CMD.SHIFT
+};
 
 Chip.RULES = {
     ANIM4:      "A4",       // animation using 4-bit counters for state/color cycling
@@ -1400,6 +1556,16 @@ Chip.RULES = {
  * Symbols can be formed with the following 16x16 grid patterns.
  */
 Chip.SYMBOLS = {
+    "0":"$2b2o$bo2bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo$bo2bo$2b2o",
+    "1":"$3bo$2b2o$4o$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo",
+    "2":"$2b3o$bo3bo$o5bo$o5bo$6bo$5bo$3b2o$2bo$bo$o$7o",
+    "3":"$b4o$o4bo$o4bo$5bo$4bo$2b2o$4bo$5bo$o4bo$o4bo$b4o",
+    "4":"$5bo$4b2o$3bobo$2bo2bo$bo3bo$o4bo$o4bo$8o$5bo$5bo$5bo",
+    "5":"$6o$o$o$o$4o$4bo$5bo$5bo$5bo$o3bo$b3o",
+    "6":"$2b4o$bo4bo$o$o$o$ob4o$2o4bo$o5bo$o5bo$bo4bo$2b4o",
+    "7":"$8o$7bo$6bo$5bo$4bo$4bo$3bo$3bo$2bo$2bo$2bo",
+    "8":"$b4o$o4bo$o4bo$o4bo$bo2bo$2b2o$bo2bo$o4bo$o4bo$o4bo$b4o",
+    "9":"$b4o$o4bo$o5bo$o5bo$o4b2o$b4obo$6bo$6bo$6bo$o4bo$b4o",
     "A":"$3b2o$2bo2bo$bo4bo$bo4bo$o6bo$o6bo$o6bo$8o$o6bo$o6bo$o6bo",
     "B":"$6o$o5bo$o5bo$o5bo$o4bo$7o$o6bo$o6bo$o6bo$o6bo$7o",
     "C":"$2b4o$bo4bo$o6bo$o$o$o$o$o$o6bo$bo4bo$2b4o",
@@ -1424,13 +1590,13 @@ Chip.SYMBOLS = {
     "V":"$o8bo$o8bo$bo6bo$bo6bo$bo6bo$2bo4bo$2bo4bo$2bo4bo$3bo2bo$3bo2bo$4b2o",
     "W":"$o4b2o4bo$o4b2o4bo$o4b2o4bo$o3bo2bo3bo$bo2bo2bo2bo$bo2bo2bo2bo$bo2bo2bo2bo$bo2bo2bo2bo$2b2o4b2o$2b2o4b2o$2b2o4b2o",
     "X":"$o8bo$bo6bo$2bo4bo$3bo2bo$4b2o$4b2o$4b2o$3bo2bo$2bo4bo$bo6bo$o8bo",
-    "Y":"$o9bo$bo7bo$2bo5bo$3bo3bo$4bobo$5bo$5bo$5bo$5bo$5bo$5bo",
+    "Y":"$o5bo$o5bo$bo3bo$bo3bo$2bobo$2bobo$3bo$3bo$3bo$3bo$3bo",
     "Z":"$9o$8bo$7bo$6bo$5bo$4bo$3bo$2bo$bo$o$9o",
-    "a":"$$$$b4o$o4bo$5bo$b5o$o4bo$o4bo$o3b2o$b3ob2o",
+    "a":"$$$$b4o$o4bo$5bo$b5o$o4bo$o4bo$o3b2o$b3obo",
     "b":"$o$o$o$ob3o$2o3bo$o5bo$o5bo$o5bo$o5bo$2o3bo$ob3o",
     "c":"$$$$2b4o$bo4bo$o$o$o$o$bo4bo$2b4o",
     "d":"$6bo$6bo$6bo$2b3obo$bo3b2o$o5bo$o5bo$o5bo$o5bo$bo3b2o$2b3obo",
-    "e":"$$$$2b2o$bo2bo$o4bo$6o$o$o$o4bo$b4o",
+    "e":"$$$$2b3o$bo3bo$o5bo$7o$o$o$bo4bo$2b4o",
     "f":"$2b2o$bo2bo$bo$bo$4o$bo$bo$bo$bo$bo$bo",
     "g":"$$$$2b2obo$bo2b2o$o4bo$o4bo$o4bo$bo2b2o$2b2obo$5bo$5bo$o4bo$b4o",
     "h":"$o$o$o$ob3o$2o3bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo",
@@ -1452,6 +1618,37 @@ Chip.SYMBOLS = {
     "x":"$$$$$o5bo$bo3bo$2bobo$3bo$2bobo$bo3bo$o5bo",
     "y":"$$$$o5bo$o5bo$bo3bo$bo3bo$2bobo$2bobo$3bo$3bo$3bo$2bo$2o",
     "z":"$$$$6o$5bo$4bo$3bo$2bo$bo$o$6o",
+    "!":"$o$o$o$o$o$o$o$o$$o$o",
+    "\"":"$obo$obo$obo$obo",
+    "#":"$2bo2bo$2bo2bo$2bo2bo$8o$2bo2bo$2bo2bo$2bo2bo$8o$2bo2bo$2bo2bo$2bo2bo",
+    "$":"3bo$2b4o$bobo2bo$o2bo$o2bo$bobo$2b3o$3bobo$3bo2bo$3bo2bo$o2bobo$b4o$3bo",
+    "%":"$b2o7bo$o2bo5bo$o2bo4bo$o2bo3bo$o2bo2bo$b2o2bo2b2o$4bo2bo2bo$3bo3bo2bo$2bo4bo2bo$bo5bo2bo$o7b2o",
+    "&":"$b3o$o3bo$o3bo$o3bo$bobo$2bo$bobo$o3bobo$o4bo$o3bobo$b3o3bo",
+    "'":"$o$o$o$o",
+    "(":"$3bo$2bo$bo$bo$o$o$o$o$o$o$bo$bo$2bo$3bo",
+    ")":"$o$bo$2bo$2bo$3bo$3bo$3bo$3bo$3bo$3bo$2bo$2bo$bo$o",
+    "*":"2bo$obobo$b3o$b3o$o3bo",
+    "+":"$$$$3bo$3bo$3bo$7o$3bo$3bo$3bo",
+    ",":"$$$$$$$$$$2o$2o$bo$o",
+    ".":"$$$$$$$$$$2o$2o",
+    "/":"$3bo$3bo$2bo$2bo$2bo$bo$bo$bo$o$o$o",
+    ":":"$$$$2o$2o$$$$$2o$2o",
+    ";":"$$$$2o$2o$$$$$2o$2o$bo$o",
+    "<":"$$$$6b2o$4b2o$2b2o$2o$2o$2b2o$4b2o$6b2o",
+    ">":"$$$$2o$2b2o$4b2o$6b2o$6b2o$4b2o$2b2o$2o",
+    "=":"$$$$$$8o$$$8o",
+    "?":"$b4o$o4bo$o4bo$5bo$4bo$3bo$2bo$2bo$$2bo$2bo",
+    "@":"$3b4o$2bo4bo$bo6bo$o3b2o3bo$o2bo2bo2bo$o2bo2bo2bo$o3b2o3bo$o5b3o$bo$2bo5bo$3b5o",
+    "[":"$3o$o$o$o$o$o$o$o$o$o$o$o$o$3o",
+    "]":"$3o$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$3o",
+    "\\":"$o$o$bo$bo$bo$2bo$2bo$2bo$3bo$3bo$3bo",
+    "^":"$2b2o$2b2o$bo2bo$bo2bo$o4bo$o4bo",
+    "_":"$$$$$$$$$$$$$8o",
+    "`":"o$bo$2bo",
+    "{":"$2b2o$bo$bo$bo$bo$bo$bo$o$bo$bo$bo$bo$bo$2b2o",
+    "}":"$2o$2bo$2bo$2bo$2bo$2bo$2bo$3bo$2bo$2bo$2bo$2bo$2bo$2o",
+    "|":"o$o$o$o$o$o$o$o$o$o$o$o$o$o$o",
+    "~":"$$$$$$b3o3bo$o3b3o"
 };
 
 Chip.VERSION    = 1.11;

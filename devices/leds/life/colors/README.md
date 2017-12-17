@@ -131,8 +131,6 @@ Using [PCjs Devices](/modules/devices/), here's a simple demo of
 [John Conway's](http://www.conwaylife.com/wiki/John_Horton_Conway)
 "[Game of Life](http://www.conwaylife.com/wiki/Conway%27s_Game_of_Life)", using an grid of simulated multi-colored LEDs.
 
-Check out the ["Lite-Brite" LED Simulation](/devices/leds/litebrite/), too.
-
 ### Game of Life
 
 {% include machine.html id="lifeColorDemo" config="json" %}
