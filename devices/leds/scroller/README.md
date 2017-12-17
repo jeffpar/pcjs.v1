@@ -23,7 +23,7 @@ machines:
         "scrollChip": {
           "class": "Chip",
           "rule": "L1",
-          "message": "Happy New Year!$c$30b$30o$30b$30o$90s$r",
+          "message": "Happy New Year!$c$30b$30o$30b$30o$90s",
           "overrides": ["backgroundImage"]
         },
         "scrollClock": {
@@ -74,7 +74,7 @@ styles:
   .print:
     font-family: Monaco,"Lucida Console",monospace;
   .diags:
-    float: left;
+    clear: both;
     margin-bottom: 16px;
 ---
 
@@ -100,3 +100,30 @@ You can enter new messages in the Diagnostics window using the `s` command (eg, 
   <button id="clearScroll">Clear</button>
   <input type="range" min="1" max="120" value="60" class="slider" id="throttleScroll"><span id="speedScroll">Stopped</span>
 </div>
+
+You may have noticed that the default message ("Happy New Year!") also includes some special characters ("$c$30b$30o$30b$30o$90s")
+that aren't displayed.  The `$` is used to embed *commands* into the message instead of symbols.
+
+Current command symbols include:
+
+- `$b` (*blank* the display; turns all LEDs off)
+- `$c` (*center* the current display contents; ie, continue scrolling until centered)
+- `$h` (*halt* scrolling)
+- `$o` (turn the display *on*; the opposite of *blank*)
+- `$p` (*pause* scrolling)
+- `$s` (*scroll* the display without adding more symbols)
+
+The default operation is to scroll the display, adding new symbols on the right as needed.  When all symbols in the current
+message are exhausted, processing returns to the beginning of the message.
+
+To change the default operation at any point, insert one or more command symbols into the string.  Commands may also include a count
+immediately after the `$` (eg, `$90s`), which determines how many "steps" (cycles) should be applied to that command before moving on
+to the next command.  So, for example, `$90s` will scroll the display 90 times (without adding new symbols) before continuing on to
+the next symbol.
+
+For convenience, commands that don't need a count (eg, `$b` and `$o`) automatically treat the count as a pause (`$p`).  In other words,
+`$30b` is equivalent to `$b$30p`.
+
+Finally, to display a `$`, use two of them.
+
+More commands will be added over time.  This was just an initial set to get the ball rolling -- or rather, to get it scrolling.

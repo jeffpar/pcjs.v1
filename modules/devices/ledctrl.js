@@ -1002,14 +1002,14 @@ class Chip extends Device {
         case Chip.MESSAGE_CMD.HALT:
             return false;
 
-        case Chip.MESSAGE_CMD.SHIFT:
+        case Chip.MESSAGE_CMD.SCROLL:
             if (this.nMessageCount) {
                 this.nMessageCount--;
                 return true;
             }
             break;
 
-        case Chip.MESSAGE_CMD.SLEEP:
+        case Chip.MESSAGE_CMD.PAUSE:
             if (this.nMessageCount) {
                 this.nMessageCount--;
                 return false;
@@ -1025,15 +1025,15 @@ class Chip extends Device {
 
         case Chip.MESSAGE_CMD.OFF:
             this.leds.setDisplayOff(true);
-            this.nMessageCmd = Chip.MESSAGE_CMD.SLEEP;
+            this.nMessageCmd = Chip.MESSAGE_CMD.PAUSE;
             break;
 
         case Chip.MESSAGE_CMD.ON:
             this.leds.setDisplayOff(false);
-            this.nMessageCmd = Chip.MESSAGE_CMD.SLEEP;
+            this.nMessageCmd = Chip.MESSAGE_CMD.PAUSE;
             break;
 
-        case Chip.MESSAGE_CMD.RELOAD:
+        case Chip.MESSAGE_CMD.RESTART:
             this.setMessage(this.sMessage);
             return true;
 
@@ -1089,7 +1089,7 @@ class Chip extends Device {
                 if (sPattern) this.nMessageCount = this.loadPatternString(this.leds.colsView + 1, 0, sPattern, true);
                 this.nMessageCount += 1;
             }
-            this.nMessageCmd = Chip.MESSAGE_CMD.SHIFT;
+            this.nMessageCmd = Chip.MESSAGE_CMD.SCROLL;
             return true;
         }
         this.nMessageCmd = Chip.MESSAGE_CMD.HALT;
@@ -1529,12 +1529,12 @@ Chip.COMMANDS = [
 Chip.MESSAGE_CMD = {
     HALT:       1,
     LOAD:       2,
-    SHIFT:      3,
-    SLEEP:      4,
+    SCROLL:     3,
+    PAUSE:      4,
     CENTER:     5,
     OFF:        6,
     ON:         7,
-    RELOAD:     8
+    RESTART:    8
 };
 
 Chip.MESSAGE_CODE = {
@@ -1542,8 +1542,9 @@ Chip.MESSAGE_CODE = {
     'c':        Chip.MESSAGE_CMD.CENTER,
     'h':        Chip.MESSAGE_CMD.HALT,
     'o':        Chip.MESSAGE_CMD.ON,
-    'r':        Chip.MESSAGE_CMD.RELOAD,
-    's':        Chip.MESSAGE_CMD.SHIFT
+    'p':        Chip.MESSAGE_CMD.PAUSE,
+    'r':        Chip.MESSAGE_CMD.RESTART,
+    's':        Chip.MESSAGE_CMD.SCROLL
 };
 
 Chip.RULES = {
