@@ -69,7 +69,7 @@ machines:
         "scrollChip": {
           "class": "Chip",
           "rule": "L1",
-          "symbols": "The quick brown fox jumped over the lazy beagle and stole its favorite toy",
+          "message": "Hello World!$c$30b$30o$30b$30o$r",
           "overrides": ["backgroundImage"]
         },
         "scrollClock": {

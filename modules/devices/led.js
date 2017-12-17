@@ -248,8 +248,10 @@ class LED extends Device {
          * fShiftedLeft is an optimization that tells drawGrid() when it can minimize the number of
          * individual cells to redraw, by shifting the entire grid image leftward and redrawing only
          * the rightmost cells.
+         * 
+         * fDisplayOff is a global "off" switch for the entire display.
          */
-        this.fBufferModified = this.fTickled = this.fShiftedLeft = false;
+        this.fBufferModified = this.fTickled = this.fShiftedLeft = this.fDisplayOff = false;
 
         /*
          * This records the location of the most recent LED buffer location updated via setLEDState(),
@@ -370,20 +372,32 @@ class LED extends Device {
             colRedraw = this.colsView - 1;
             let cxVisible = this.widthCell * colRedraw;
             this.contextGrid.drawImage(this.canvasGrid, this.widthCell, 0, cxVisible, this.heightGrid, 0, 0, cxVisible, this.heightGrid);
+            /*
+             * At this point, the only grid drawing we might need to do now is the column at colRedraw,
+             * but we still loop over the entire buffer to ensure all the cell MODIFIED states are in sync.
+             */
         }
         let i = 0;
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.colsView; col++) {
                 let state = this.buffer[i];
                 let color = this.buffer[i+1] || this.colorTransparent;
+                let fLeaveModified = false;
                 let fModified = !!(this.buffer[i+3] & LED.FLAGS.MODIFIED);
                 let fHighlight = (this.fHighlight && i == this.iBufferRecent);
+                if (this.fDisplayOff && state) {
+                    state = LED.STATE.OFF;
+                    fModified = fLeaveModified = true;
+                }
                 if (fModified || fHighlight || fForced) {
                     if (colRedraw < 0 || col == colRedraw) {
                         this.drawGridCell(state, color, col, row, fHighlight);
                     }
-                    this.buffer[i+3] &= ~LED.FLAGS.MODIFIED;
-                    if (fHighlight) this.buffer[i+3] |= LED.FLAGS.MODIFIED;
+                    if (fHighlight || fLeaveModified) {
+                        this.buffer[i+3] |= LED.FLAGS.MODIFIED;
+                    } else {
+                        this.buffer[i+3] &= ~LED.FLAGS.MODIFIED;
+                    }
                 }
                 i += this.nBufferInc;
             }
@@ -891,6 +905,20 @@ class LED extends Device {
     setContainerStyle(sAttr, sValue)
     {
         if (this.container) this.container.style[sAttr] = sValue;
+    }
+
+    /**
+     * setDisplayOff(off)
+     * 
+     * @this {LED}
+     * @param {boolean} [off]
+     */
+    setDisplayOff(off)
+    {
+        if (this.fDisplayOff != off) {
+            this.fDisplayOff = off;
+            this.fBufferModified = true;
+        }
     }
     
     /**
