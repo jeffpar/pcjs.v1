@@ -69,7 +69,7 @@ machines:
         "scrollChip": {
           "class": "Chip",
           "rule": "L1",
-          "message": "Hello World!$c$30b$30o$30b$30o$r",
+          "message": "Happy New Year!$c$30b$30o$30b$30o$90s$r",
           "overrides": ["backgroundImage"]
         },
         "scrollClock": {

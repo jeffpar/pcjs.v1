@@ -499,7 +499,7 @@ class Chip extends Device {
      * Implements rule LEFT1 (shift left one cell).
      * 
      * Some of the state we maintain outside of the LED array includes the number of columns of data remaining
-     * in the "offscreen" portion of the array (nMessageCols).  Whenever we see that it's zero, we load it with the
+     * in the "offscreen" portion of the array (nMessageCount).  Whenever we see that it's zero, we load it with the
      * next chuck of data (ie, the LED pattern for the next symbol in sMessage).
      * 
      * @this {Chip}
@@ -984,18 +984,18 @@ class Chip extends Device {
     }
 
     /**
-     * processMessageCmd(cmd, cols)
+     * processMessageCmd(cmd, count)
      * 
      * @this {Chip}
      * @param {number} [cmd]
-     * @param {number} [cols]
+     * @param {number} [count]
      * @returns {boolean} (true to shift another cell, false if not)
      */
-    processMessageCmd(cmd, cols = 0)
+    processMessageCmd(cmd, count = 0)
     {
         if (cmd) {
             this.nMessageCmd = cmd;
-            this.nMessageCols = cols;
+            this.nMessageCount = count;
         }
 
         switch(this.nMessageCmd) {
@@ -1004,15 +1004,15 @@ class Chip extends Device {
             return false;
 
         case Chip.MESSAGE_CMD.SHIFT:
-            if (this.nMessageCols) {
-                this.nMessageCols--;
+            if (this.nMessageCount) {
+                this.nMessageCount--;
                 return true;
             }
             break;
 
         case Chip.MESSAGE_CMD.SLEEP:
-            if (this.nMessageCols) {
-                this.nMessageCols--;
+            if (this.nMessageCount) {
+                this.nMessageCount--;
                 return false;
             }
             break;
@@ -1043,17 +1043,17 @@ class Chip extends Device {
             return false;
         }
 
-        if (!cmd) return this.processNextSymbol();
+        if (!cmd) return this.processMessageSymbol();
         return false;
     }
     
     /**
-     * processNextSymbol()
+     * processMessageSymbol()
      * 
      * @this {Chip}
      * @returns {boolean} (true if another message symbol loaded)
      */
-    processNextSymbol()
+    processMessageSymbol()
     {
         if (this.sMessage) {
             if (this.iMessageNext >= this.sMessage.length) {
@@ -1080,11 +1080,11 @@ class Chip extends Device {
                 }
             }
             if (chMessage == ' ') {
-                this.nMessageCols += 2;
+                this.nMessageCount += 2;
             } else {
                 let sPattern = Chip.SYMBOLS[chMessage];
-                if (sPattern) this.nMessageCols = this.loadPatternString(this.leds.colsView + 1, 0, sPattern, true);
-                this.nMessageCols += 1;
+                if (sPattern) this.nMessageCount = this.loadPatternString(this.leds.colsView + 1, 0, sPattern, true);
+                this.nMessageCount += 1;
             }
             this.nMessageCmd = Chip.MESSAGE_CMD.SHIFT;
             return true;
@@ -1307,7 +1307,7 @@ class Chip extends Device {
     setMessage(s)
     {
         this.sMessage = s;
-        this.iMessageNext = this.nMessageCols = 0;
+        this.iMessageNext = this.nMessageCount = 0;
         this.nMessageCmd = Chip.MESSAGE_CMD.LOAD;
     }
     
@@ -1521,7 +1521,7 @@ Chip.COMMANDS = [
 ];
 
 Chip.MESSAGE_CMD = {
-    STOP:       1,
+    HALT:       1,
     LOAD:       2,
     SHIFT:      3,
     SLEEP:      4,
@@ -1534,9 +1534,10 @@ Chip.MESSAGE_CMD = {
 Chip.MESSAGE_CODE = {
     'b':        Chip.MESSAGE_CMD.OFF,
     'c':        Chip.MESSAGE_CMD.CENTER,
+    'h':        Chip.MESSAGE_CMD.HALT,
     'o':        Chip.MESSAGE_CMD.ON,
     'r':        Chip.MESSAGE_CMD.RELOAD,
-    's':        Chip.MESSAGE_CMD.STOP
+    's':        Chip.MESSAGE_CMD.SHIFT
 };
 
 Chip.RULES = {
@@ -1549,6 +1550,16 @@ Chip.RULES = {
  * Symbols can be formed with the following 16x16 grid patterns.
  */
 Chip.SYMBOLS = {
+    "0":"$2b2o$bo2bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo$bo2bo$2b2o",
+    "1":"$3bo$2b2o$4o$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo",
+    "2":"$2b3o$bo3bo$o5bo$o5bo$6bo$5bo$3b2o$2bo$bo$o$7o",
+    "3":"$b4o$o4bo$o4bo$5bo$4bo$2b2o$4bo$5bo$o4bo$o4bo$b4o",
+    "4":"$5bo$4b2o$3bobo$2bo2bo$bo3bo$o4bo$o4bo$8o$5bo$5bo$5bo",
+    "5":"$6o$o$o$o$4o$4bo$5bo$5bo$5bo$o3bo$b3o",
+    "6":"$2b4o$bo4bo$o$o$o$ob4o$2o4bo$o5bo$o5bo$bo4bo$2b4o",
+    "7":"$8o$7bo$6bo$5bo$4bo$4bo$3bo$3bo$2bo$2bo$2bo",
+    "8":"$b4o$o4bo$o4bo$o4bo$bo2bo$2b2o$bo2bo$o4bo$o4bo$o4bo$b4o",
+    "9":"$b4o$o4bo$o5bo$o5bo$o4b2o$b4obo$6bo$6bo$6bo$o4bo$b4o",
     "A":"$3b2o$2bo2bo$bo4bo$bo4bo$o6bo$o6bo$o6bo$8o$o6bo$o6bo$o6bo",
     "B":"$6o$o5bo$o5bo$o5bo$o4bo$7o$o6bo$o6bo$o6bo$o6bo$7o",
     "C":"$2b4o$bo4bo$o6bo$o$o$o$o$o$o6bo$bo4bo$2b4o",
@@ -1601,6 +1612,37 @@ Chip.SYMBOLS = {
     "x":"$$$$$o5bo$bo3bo$2bobo$3bo$2bobo$bo3bo$o5bo",
     "y":"$$$$o5bo$o5bo$bo3bo$bo3bo$2bobo$2bobo$3bo$3bo$3bo$2bo$2o",
     "z":"$$$$6o$5bo$4bo$3bo$2bo$bo$o$6o",
+    "!":"$o$o$o$o$o$o$o$o$$o$o",
+    "\"":"$obo$obo$obo$obo",
+    "#":"$2bo2bo$2bo2bo$2bo2bo$8o$2bo2bo$2bo2bo$2bo2bo$8o$2bo2bo$2bo2bo$2bo2bo",
+    "$":"3bo$2b4o$bobo2bo$o2bo$o2bo$bobo$2b3o$3bobo$3bo2bo$3bo2bo$o2bobo$b4o$3bo",
+    "%":"$b2o7bo$o2bo5bo$o2bo4bo$o2bo3bo$o2bo2bo$b2o2bo2b2o$4bo2bo2bo$3bo3bo2bo$2bo4bo2bo$bo5bo2bo$o7b2o",
+    "&":"$b3o$o3bo$o3bo$o3bo$bobo$2bo$bobo$o3bobo$o4bo$o3bobo$b3o3bo",
+    "'":"$o$o$o$o",
+    "(":"$3bo$2bo$bo$bo$o$o$o$o$o$o$bo$bo$2bo$3bo",
+    ")":"$o$bo$2bo$2bo$3bo$3bo$3bo$3bo$3bo$3bo$2bo$2bo$bo$o",
+    "*":"2bo$obobo$b3o$b3o$o3bo",
+    "+":"$$$$3bo$3bo$3bo$7o$3bo$3bo$3bo",
+    ",":"$$$$$$$$$$2o$2o$bo$o",
+    ".":"$$$$$$$$$$2o$2o",
+    "/":"$3bo$3bo$2bo$2bo$2bo$bo$bo$bo$o$o$o",
+    ":":"$$$$2o$2o$$$$$2o$2o",
+    ";":"$$$$2o$2o$$$$$2o$2o$bo$o",
+    "<":"$$$$6b2o$4b2o$2b2o$2o$2o$2b2o$4b2o$6b2o",
+    ">":"$$$$2o$2b2o$4b2o$6b2o$6b2o$4b2o$2b2o$2o",
+    "=":"$$$$$$8o$$$8o",
+    "?":"$b4o$o4bo$o4bo$5bo$4bo$3bo$2bo$2bo$$2bo$2bo",
+    "@":"$3b4o$2bo4bo$bo6bo$o3b2o3bo$o2bo2bo2bo$o2bo2bo2bo$o3b2o3bo$o5b3o$bo$2bo5bo$3b5o",
+    "[":"$3o$o$o$o$o$o$o$o$o$o$o$o$o$3o",
+    "]":"$3o$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$3o",
+    "\\":"$o$o$bo$bo$bo$2bo$2bo$2bo$3bo$3bo$3bo",
+    "^":"$2b2o$2b2o$bo2bo$bo2bo$o4bo$o4bo",
+    "_":"$$$$$$$$$$$$$8o",
+    "`":"o$bo$2bo",
+    "{":"$2b2o$bo$bo$bo$bo$bo$bo$o$bo$bo$bo$bo$bo$2b2o",
+    "}":"$2o$2bo$2bo$2bo$2bo$2bo$2bo$3bo$2bo$2bo$2bo$2bo$2bo$2o",
+    "|":"o$o$o$o$o$o$o$o$o$o$o$o$o$o$o",
+    "~":"$$$$$$b3o3bo$o3b3o"
 };
 
 Chip.VERSION    = 1.11;
