@@ -217,7 +217,7 @@ Google's [JavaScript-based Closure Compiler](https://github.com/google/closure-c
 Here's what I installed to get it all working:
 
 	sudo npm install -g gulp
-	npm install --save-dev gulp gulp-newer gulp-concat gulp-rename gulp-replace gulp-header gulp-foreach gulp-wrapper gulp-sourcemaps
+	npm install --save-dev gulp gulp-newer gulp-concat gulp-rename gulp-replace gulp-header gulp-foreach gulp-wrapper gulp-sourcemaps run-sequence
 	npm install --save-dev google-closure-compiler-js
 
 Running `gulp` should build a complete set of machine scripts in the [versions](/versions/) directory.

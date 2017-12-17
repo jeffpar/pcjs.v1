@@ -1935,7 +1935,13 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         var asFiles = [];
         if (fCompiled) {
             var sScriptFile = sType + (fDebugger? "-dbg" : "") + ".js";
-            asFiles.push("/versions/" + machineConfig['folder'] + "/" + sVersion + "/components.css");
+            /*
+             * If the machine has an empty 'styles' array, that's an explicit indication that there are no specific stylesheets;
+             * otherwise, we currently assume that, at a minimum, there is a version-specific components.css.
+             */
+            if (!machineConfig['styles'] || machineConfig['styles'].length) {
+                asFiles.push("/versions/" + machineConfig['folder'] + "/" + sVersion + "/components.css");
+            }
             asFiles.push("/versions/" + machineConfig['folder'] + "/" + sVersion + "/" + sScriptFile);
         }
         else {
