@@ -1221,7 +1221,7 @@ LED.FLAGS = {
 };
 
 LED.SHAPES = {
-    [LED.TYPE.SMALL]:   [4, 4, 3],
+    [LED.TYPE.SMALL]:   [4, 4, 4],
     [LED.TYPE.ROUND]:   [16, 16, 14],
     [LED.TYPE.SQUARE]:  [2, 2, 28, 28]
 };

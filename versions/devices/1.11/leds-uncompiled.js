@@ -2943,7 +2943,7 @@ LED.FLAGS = {
 };
 
 LED.SHAPES = {
-    [LED.TYPE.SMALL]:   [4, 4, 3],
+    [LED.TYPE.SMALL]:   [4, 4, 4],
     [LED.TYPE.ROUND]:   [16, 16, 14],
     [LED.TYPE.SQUARE]:  [2, 2, 28, 28]
 };
@@ -5050,14 +5050,18 @@ class Chip extends Device {
                 this.printf("Saved state version mismatch: %3.2f\n", version);
                 return false;
             }
-            // try {
-            // } catch(err) {
-            //     this.println("Chip state error: " + err.message);
-            //     return false;
-            // }
-            if (!Device.getURLParms()['pattern'] && !Device.getURLParms()[Chip.BINDING.IMAGE_SELECTION]) {
+            try {
+                this.sMessage = stateChip.shift();
+                this.iMessageNext = stateChip.shift();
+                this.nMessageCount = stateChip.shift();
+                this.nMessageCmd = stateChip.shift();
+            } catch(err) {
+                this.println("Chip state error: " + err.message);
+                return false;
+            }
+            if (!Device.getURLParms()['message'] && !Device.getURLParms()['pattern'] && !Device.getURLParms()[Chip.BINDING.IMAGE_SELECTION]) {
                 let stateLEDs = state['stateLEDs'] || state[1];
-                if (stateLEDs && this.leds && !this.sMessage) {
+                if (stateLEDs && this.leds) {
                     if (!this.leds.loadState(stateLEDs)) return false;
                 }
             }
@@ -5165,6 +5169,7 @@ class Chip extends Device {
     {
         this.println("reset");
         this.leds.clearBuffer(true);
+        if (this.sMessage) this.setMessage(this.sMessage);
     }
 
     /**
@@ -5237,10 +5242,6 @@ class Chip extends Device {
             this.leds.setDisplayOff(false);
             this.nMessageCmd = Chip.MESSAGE_CMD.PAUSE;
             break;
-
-        case Chip.MESSAGE_CMD.RESTART:
-            this.setMessage(this.sMessage);
-            return true;
 
         default:
 
@@ -5463,7 +5464,7 @@ class Chip extends Device {
         }
 
         /*
-         * Remove all '$' at the beginning of the pattern, if we're asked for the minimum height (or no minimums at all)
+         * Remove all '$' at the beginning of the pattern, if we've asked for the minimum height (or no minimums at all)
          */
         if (fMinHeight || !fMinWidth) {
             while (sPattern[0] == '$') {
@@ -5482,8 +5483,8 @@ class Chip extends Device {
         if (sPattern == '$') nRows = 0;
 
         /*
-         * If we were asked for either the minimum width or height, then don't bother including starting col and row (which
-         * we only want for patterns used to save/restore entire grids).
+         * If we've asked for either the minimum width or height, then don't bother including starting col and row (which
+         * we only want for patterns used to save/restore the state of the entire grid).
          */
         sPattern = ((fMinWidth || fMinHeight)? "" : (iCol + '/' + iRow + '/')) + nCols + '/' + nRows + '/' + sPattern.slice(0, -1);
         sPattern = sPattern.replace(/\$+$/, '');
@@ -5502,7 +5503,13 @@ class Chip extends Device {
         let stateChip = state[0];
         let stateLEDs = state[1];
         stateChip.push(Chip.VERSION);
-        if (this.leds) this.leds.saveState(stateLEDs);
+        stateChip.push(this.sMessage);
+        stateChip.push(this.iMessageNext);
+        stateChip.push(this.nMessageCount);
+        stateChip.push(this.nMessageCmd);
+        if (this.leds) {
+            this.leds.saveState(stateLEDs);
+        }
         return state;
     }
 
@@ -5635,7 +5642,6 @@ class Chip extends Device {
          * for each color in colorPalette, update the next available swatch.
          */
         if (this.colorPalette) {
-            // this.println("updateColorSwatches(" + this.colorSelected + ")");
             for (let idColor in this.colorPalette) {
                 let color = this.colorPalette[idColor];
                 if (this.colors) this.colors[i-1] = color;
@@ -5650,7 +5656,6 @@ class Chip extends Device {
                     color = this.leds.getRGBAColor(color, 1.0, 0.50);
                 }
                 elementSwatch.style.backgroundColor = color;
-                // this.println("swatch '" + idSwatch + "' updated to color '" + color + "'");
             }
         }
         /*
@@ -5732,23 +5737,45 @@ Chip.COMMANDS = [
 ];
 
 Chip.MESSAGE_CMD = {
-    HALT:       1,
-    LOAD:       2,
-    SCROLL:     3,
-    PAUSE:      4,
+    LOAD:       1,
+    SCROLL:     2,
+    PAUSE:      3,
+    HALT:       4,
     CENTER:     5,
     OFF:        6,
-    ON:         7,
-    RESTART:    8
+    ON:         7
 };
 
+/*
+ * The symbol `$` is used as a prefix to embed "command codes" in an LED message.  Current command codes include:
+ *
+ *      $b (blank the display; turns all LEDs off)
+ *      $c (center the current display contents; ie, continue scrolling until centered)
+ *      $h (halt scrolling)
+ *      $o (turn the display on; the opposite of blank)
+ *      $p (pause scrolling)
+ *      $s (scroll/shift the display one cell, without adding more symbols)
+ *
+ * The default operation is to scroll the display, adding new symbols to the vacated end of the display as needed.
+ * When all symbols in the current message have been processed, processing returns to the beginning of the message.
+ *
+ * To change the default operation at any point, insert one or more command codes into the string.  Commands may also
+ * include a count immediately after the `$` (eg, `$90s`), which determines how many "steps" (cycles) that command
+ * should remain in effect before advancing to the next symbol (or command) in the message.  So, for example, `$90s`
+ * will scroll the display 90 times (without adding new symbols) before continuing to the next symbol.  The default
+ * count for an operation is 1.
+ *
+ * For convenience, commands that don't need a count (eg, `$b` and `$o`) automatically treat the count as a pause (`$p`).
+ * In other words, `$30b` is equivalent to `$b$30p`.
+ *
+ * Finally, if you want to embed `$` as a normal symbol, use two of them (`$$`).
+ */
 Chip.MESSAGE_CODE = {
     'b':        Chip.MESSAGE_CMD.OFF,
     'c':        Chip.MESSAGE_CMD.CENTER,
     'h':        Chip.MESSAGE_CMD.HALT,
     'o':        Chip.MESSAGE_CMD.ON,
     'p':        Chip.MESSAGE_CMD.PAUSE,
-    'r':        Chip.MESSAGE_CMD.RESTART,
     's':        Chip.MESSAGE_CMD.SCROLL
 };
 
