@@ -24,7 +24,7 @@ machines:
           "class": "Chip",
           "rule": "L1",
           "message": "Happy New Year!$c$30b$30o$30b$30o$90s",
-          "overrides": ["backgroundImage"]
+          "overrides": ["message"]
         },
         "scrollClock": {
           "class": "Time",
@@ -101,10 +101,10 @@ You can enter new messages in the Diagnostics window using the `s` command (eg, 
   <input type="range" min="1" max="120" value="60" class="slider" id="throttleScroll"><span id="speedScroll">Stopped</span>
 </div>
 
-You may have noticed that the default message ("Happy New Year!") also includes some special characters ("$c$30b$30o$30b$30o$90s")
-that aren't displayed.  The `$` is used to embed *commands* into the message instead of symbols.
+You may have noticed that the LED message set above ("Happy New Year!") also includes some special characters
+("$c$30b$30o$30b$30o$90s") that aren't displayed.  The `$` symbol is used to embed "command codes" into a message.
 
-Current command symbols include:
+Current command codes include:
 
 - `$b` (*blank* the display; turns all LEDs off)
 - `$c` (*center* the current display contents; ie, continue scrolling until centered)
@@ -113,17 +113,18 @@ Current command symbols include:
 - `$p` (*pause* scrolling)
 - `$s` (*scroll* the display without adding more symbols)
 
-The default operation is to scroll the display, adding new symbols on the right as needed.  When all symbols in the current
-message are exhausted, processing returns to the beginning of the message.
+The default operation is to scroll the display, adding new symbols to the vacated end of the display as needed.
+When all symbols in the current message have been processed, processing returns to the beginning of the message.
 
-To change the default operation at any point, insert one or more command symbols into the string.  Commands may also include a count
-immediately after the `$` (eg, `$90s`), which determines how many "steps" (cycles) should be applied to that command before moving on
-to the next command.  So, for example, `$90s` will scroll the display 90 times (without adding new symbols) before continuing on to
-the next symbol.
+To change the default operation at any point, insert one or more command codes into the string.  Commands may also
+include a count immediately after the `$` (e.g., `$90s`), which determines how many "steps" (cycles) that command
+should remain in effect before advancing to the next symbol (or command) in the message.  So, for example, `$90s`
+will scroll the display 90 times (without adding new symbols) before continuing to the next symbol.  The default
+count for an operation is 1.
 
-For convenience, commands that don't need a count (eg, `$b` and `$o`) automatically treat the count as a pause (`$p`).  In other words,
-`$30b` is equivalent to `$b$30p`.
+For convenience, commands that don't need a count (e.g., `$b` and `$o`) automatically treat the count as a pause (`$p`).
+In other words, `$30b` is equivalent to `$b$30p`.
 
-Finally, to display a `$`, use two of them.
+Finally, if you want to embed `$` as a normal symbol, use two of them (`$$`).
 
 More commands will be added over time.  This was just an initial set to get the ball rolling -- or rather, to get it scrolling.

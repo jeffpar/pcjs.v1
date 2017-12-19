@@ -845,14 +845,18 @@ class Chip extends Device {
                 this.printf("Saved state version mismatch: %3.2f\n", version);
                 return false;
             }
-            // try {
-            // } catch(err) {
-            //     this.println("Chip state error: " + err.message);
-            //     return false;
-            // }
-            if (!Device.getURLParms()['pattern'] && !Device.getURLParms()[Chip.BINDING.IMAGE_SELECTION]) {
+            try {
+                this.sMessage = stateChip.shift();
+                this.iMessageNext = stateChip.shift();
+                this.nMessageCount = stateChip.shift();
+                this.nMessageCmd = stateChip.shift();
+            } catch(err) {
+                this.println("Chip state error: " + err.message);
+                return false;
+            }
+            if (!Device.getURLParms()['message'] && !Device.getURLParms()['pattern'] && !Device.getURLParms()[Chip.BINDING.IMAGE_SELECTION]) {
                 let stateLEDs = state['stateLEDs'] || state[1];
-                if (stateLEDs && this.leds && !this.sMessage) {
+                if (stateLEDs && this.leds) {
                     if (!this.leds.loadState(stateLEDs)) return false;
                 }
             }
@@ -960,6 +964,7 @@ class Chip extends Device {
     {
         this.println("reset");
         this.leds.clearBuffer(true);
+        if (this.sMessage) this.setMessage(this.sMessage);
     }
 
     /**
@@ -1293,7 +1298,13 @@ class Chip extends Device {
         let stateChip = state[0];
         let stateLEDs = state[1];
         stateChip.push(Chip.VERSION);
-        if (this.leds) this.leds.saveState(stateLEDs);
+        stateChip.push(this.sMessage);
+        stateChip.push(this.iMessageNext);
+        stateChip.push(this.nMessageCount);
+        stateChip.push(this.nMessageCmd);
+        if (this.leds) {
+            this.leds.saveState(stateLEDs);
+        }
         return state;
     }
 
@@ -1426,7 +1437,6 @@ class Chip extends Device {
          * for each color in colorPalette, update the next available swatch.
          */
         if (this.colorPalette) {
-            // this.println("updateColorSwatches(" + this.colorSelected + ")");
             for (let idColor in this.colorPalette) {
                 let color = this.colorPalette[idColor];
                 if (this.colors) this.colors[i-1] = color;
@@ -1441,7 +1451,6 @@ class Chip extends Device {
                     color = this.leds.getRGBAColor(color, 1.0, 0.50);
                 }
                 elementSwatch.style.backgroundColor = color;
-                // this.println("swatch '" + idSwatch + "' updated to color '" + color + "'");
             }
         }
         /*
@@ -1546,9 +1555,10 @@ Chip.MESSAGE_CMD = {
  * When all symbols in the current message have been processed, processing returns to the beginning of the message.
  *
  * To change the default operation at any point, insert one or more command codes into the string.  Commands may also
- * include a count immediately after the `$` (eg, `$90s`), which determines how many "steps" (cycles) to perform that
- * command before advancing to the next symbol (or command) in the message.  So, for example, `$90s` will scroll the
- * display 90 times (without adding new symbols) before continuing to the next symbol.
+ * include a count immediately after the `$` (eg, `$90s`), which determines how many "steps" (cycles) that command
+ * should remain in effect before advancing to the next symbol (or command) in the message.  So, for example, `$90s`
+ * will scroll the display 90 times (without adding new symbols) before continuing to the next symbol.  The default
+ * count for an operation is 1.
  *
  * For convenience, commands that don't need a count (eg, `$b` and `$o`) automatically treat the count as a pause (`$p`).
  * In other words, `$30b` is equivalent to `$b$30p`.
