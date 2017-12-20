@@ -38,8 +38,7 @@ machines:
           "cyclesPerSecond": 60,
           "cyclesMinimum": 1,
           "cyclesMaximum": 120,
-          "clockByFrame": true,
-          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","requestAnimationFrame"]
+          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","clockByFrame","requestAnimationFrame"]
         },
         "scrollDisplay": {
           "class": "LED",

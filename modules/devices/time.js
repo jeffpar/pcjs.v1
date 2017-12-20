@@ -131,7 +131,7 @@ class Time extends Device {
         this.nCyclesPerSecond = this.getBounded(this.getDefaultNumber('cyclesPerSecond', 650000), this.nCyclesMinimum, this.nCyclesMaximum);
         this.nYieldsPerSecond = this.getBounded(this.getDefaultNumber('yieldsPerSecond', Time.YIELDS_PER_SECOND), 30, 120);
         this.nYieldsPerUpdate = this.getBounded(this.getDefaultNumber('yieldsPerUpdate', Time.YIELDS_PER_UPDATE), 1, this.nYieldsPerSecond);
-        this.fClockByFrame = this.getDefaultBoolean('clockByFrame', true);
+        this.fClockByFrame = this.getDefaultBoolean('clockByFrame', this.nCyclesPerSecond <= 120);
         this.fRequestAnimationFrame = this.fClockByFrame || this.getDefaultBoolean('requestAnimationFrame', true);
 
         this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
@@ -992,7 +992,7 @@ class Time extends Device {
                 /*
                  * Execute a minimum-cycle burst and then update all timers.
                  */
-                let nCycles = (this.fClockByFrame? this.getCyclesPerFrame() : 0) || 1;
+                let nCycles = (this.fClockByFrame? (this.getCyclesPerFrame() || 1) : 1);
                 this.nStepping--;
                 this.updateTimers(this.endBurst(this.doBurst(nCycles)));
                 this.updateStatus();
@@ -1045,6 +1045,7 @@ class Time extends Device {
         if (fTransition) {
             if (this.fRunning) {
                 this.println("starting (" + this.getSpeedTarget() + " target by " + (this.fClockByFrame? "frame" : "timer") + ")");
+                fTransition = false;
             } else {
                 this.println("stopping");
             }
