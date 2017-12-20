@@ -36,7 +36,7 @@ var COMPILED = false;
 /**
  * @define {boolean}
  */
-var DEBUG = false;  // (window.location.hostname == "pcjs" || window.location.hostname == "jeffpar.local");
+var DEBUG = true; // (window.location.hostname == "pcjs" || window.location.hostname == "jeffpar.local");
 
 /**
  * @type {string}
@@ -932,6 +932,10 @@ class Device {
                 }
                 buffer += s;
                 break;
+
+            case 'c':
+                arg = String.fromCharCode(arg);
+                /* falls through */
 
             case 's':
                 while (arg.length < minimum) {

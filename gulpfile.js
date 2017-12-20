@@ -255,10 +255,70 @@ gulp.task("compile/devices", [
 
 gulp.task("copy", aCopyTasks);
 
+gulp.task("disks", function() {
+    let baseDir = "./disks/pcx86/";
+    let targetDir = baseDir + "compiled/";
+    return gulp.src([
+            "disks/pcx86/library.xml",
+            "disks/pcx86/samples.xml",
+            "disks/pcx86/shareware/pcsig08/pcsig08.xml",
+            "disks/pcx86/private/library.xml"
+        ], {base: baseDir})
+        .pipe(replace(/([ \t]*)<manifest.*? ref="(.*?)".*?\/>/g, function(match, sIndent, sFile) {
+            /*
+             * This function mimics what components.xsl normally does for disk manifests referenced
+             * by the FDC machine component.  Compare it to the following template in components.xsl:
+             * 
+             *      <xsl:template match="manifest[not(@ref)]" mode="component">
+             * 
+             * This code is not perfect (it doesn't process "link" attributes, for example, which is why
+             * we've left machines that use the samples.xml disk library alone), but for machines that use
+             * library.xml, having them use compiled/library.xml instead speeds up loading significantly.
+             * 
+             * Granted, after the first machine has fetched all the individual manifest files, your
+             * browser should do a reasonably good job using cached copies for all subsequent machines,
+             * but even then, there's still a noticeable delay.
+             */
+            let sDisks = match;
+            let sFilePath = path.join('.', sFile);
+            try {
+                let sManifest = fs.readFileSync(sFilePath, {encoding: 'utf8'});
+                if (sManifest) {
+                    sDisks = "";
+                    let sPrefix = "", sDefaultName = "Unknown";
+                    let matchTitle = sManifest.match(/<title(?: prefix="(.*?)"|)[^>]*>(.*?)<\/title>/);
+                    if (matchTitle) {
+                        sPrefix = matchTitle[1];
+                        sDefaultName = matchTitle[2];
+                        let matchVersion = sManifest.match(/<version.*?>(.*?)<\/version>/);
+                        if ( matchVersion) sDefaultName += ' ' +  matchVersion[1];
+                    }
+                    let reDisk, matchDisk;
+                    reDisk = /<disk.*? href="([^"]*)".*?\/>/g;
+                    while ((matchDisk = reDisk.exec(sManifest))) {
+                        if (sDisks) sDisks += "\n";
+                        sDisks += sIndent + "<disk path=\"" + matchDisk[1] + "\">" + sDefaultName + "</disk>";
+                    }
+                    reDisk = /<disk.*? href="([^"]*)".*?>([\S\s]*?)<\/disk>/g;
+                    while ((matchDisk = reDisk.exec(sManifest))) {
+                        if (sDisks) sDisks += "\n";
+                        var matchName = matchDisk[2].match(/<name.*?>(.*?)<\/name>/);
+                        var sName = matchName? ((sPrefix? sPrefix + ": " : "") + matchName[1]) : sDefaultName;
+                        sDisks += sIndent + "<disk path=\"" + matchDisk[1] + "\">" + sName + "</disk>";
+                    }
+                    return sDisks;
+                }
+            } catch(err) {
+                console.log(err.message);
+            }
+            return sDisks;
+        }))
+        .pipe(gulp.dest(targetDir));
+});
+
 gulp.task("promote", function() {
     let baseDir = "./";
     return gulp.src(["apps/**/*.xml", "devices/**/*.xml", "disks/**/*.xml", "pubs/**/*.xml"], {base: baseDir})
-        .pipe(newer(baseDir))
         .pipe(replace(/href="\/versions\/([^\/]*)\/[0-9\.]*\/(machine|manifest|outline)\.xsl"/g, 'href="/versions/$1/' + machines.shared.version + '/$2.xsl"'))
         .pipe(gulp.dest(baseDir));
 });
