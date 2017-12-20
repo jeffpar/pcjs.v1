@@ -12,70 +12,10 @@ machines:
       B:
         path: /disks/pcx86/apps/other/wordstar/3.24/WS324-MOUNTABLE.json
     autoType: $date\r$time\rB:\rWS\r
-  - id: scrollLEDs
-    type: leds
-    name: LED Scroller
-    config: |
-      {
-        "scrollLEDs": {
-          "class": "Machine",
-          "type": "leds",
-          "name": "LED Scroller",
-          "version": 1.11,
-          "autoPower": true,
-          "autoRestore": false,
-          "overrides": ["autoPower","autoRestore"]
-        },
-        "scrollChip": {
-          "class": "Chip",
-          "rule": "L1",
-          "message": "Happy New Year!$c$30b$30o$30b$30o$90s",
-          "overrides": ["message"]
-        },
-        "scrollClock": {
-          "class": "Time",
-          "cyclesPerSecond": 60,
-          "cyclesMinimum": 1,
-          "cyclesMaximum": 120,
-          "clockByFrame": true,
-          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","requestAnimationFrame"]
-        },
-        "scrollDisplay": {
-          "class": "LED",
-          "type": 0,
-          "cols": 256,
-          "rows": 16,
-          "colsExtra": 16,
-          "color": "red",
-          "backgroundColor": "black",
-          "highlight": false,
-          "bindings": {
-            "container": "displayScroll"
-          },
-          "overrides": ["color","backgroundColor"]
-        },
-        "scrollInput": {
-          "class": "Input",
-          "drag": true
-        }
-      }
-styles:
-  scrollLEDs:
-    position: relative;
-    display: inline-block;
-    float: left;
-    margin-right: 32px;
-    margin-bottom: 16px;
-  displayScroll:
-    position: relative;
 ---
 
 MicroPro WordStar 3.24
 ----------------------
-
-{% include machine.html id="scrollLEDs" config="json" %}
-
-<div id="scrollLEDs"><div id="displayScroll"></div></div>
 
 A [Directory Listing](#directory-of-wordstar-324) of the single-sided (160Kb) WordStar 3.24 diskette from the PCjs Archives
 is provided below.
