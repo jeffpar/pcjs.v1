@@ -12,7 +12,7 @@ var COMPILED = false;
 /**
  * @define {boolean}
  */
-var DEBUG = false;  // (window.location.hostname == "pcjs" || window.location.hostname == "jeffpar.local");
+var DEBUG = true; // (window.location.hostname == "pcjs" || window.location.hostname == "jeffpar.local");
 
 /**
  * @type {string}
@@ -900,6 +900,10 @@ class Device {
                 }
                 buffer += s;
                 break;
+
+            case 'c':
+                arg = String.fromCharCode(arg);
+                /* falls through */
 
             case 's':
                 while (arg.length < minimum) {
@@ -1967,13 +1971,17 @@ class LED extends Device {
          * periodic drawBuffer(), so if the machine fails to execute a setBuffer() in a timely manner,
          * we will see that fTickled hasn't been "tickled", and automatically blank the display.
          * 
-         * fShiftedLeft is an optimization that tells drawGrid() when it can minimize the number of
+         * fDisplayOn is a global "on/off" switch for the entire display.
+         */
+        this.fBufferModified = this.fTickled = false;
+        this.fDisplayOn = true;
+
+        /*
+         * nShiftedLeft is an optimization that tells drawGrid() when it can minimize the number of
          * individual cells to redraw, by shifting the entire grid image leftward and redrawing only
          * the rightmost cells.
-         * 
-         * fDisplayOff is a global "off" switch for the entire display.
          */
-        this.fBufferModified = this.fTickled = this.fShiftedLeft = this.fDisplayOff = false;
+        this.nShiftedLeft = 0;
 
         /*
          * This records the location of the most recent LED buffer location updated via setLEDState(),
@@ -2078,7 +2086,7 @@ class LED extends Device {
      *
      * Used by drawBuffer() for LED.TYPE.ROUND, LED.TYPE.SQUARE, etc.
      * 
-     * If the buffer was recently shifted left (ie, fShiftedLeft is true), then we take advantage
+     * If the buffer was recently shifted left (ie, nShiftedLeft is set), then we take advantage
      * of that knowledge to use drawImage() to shift the entire grid image left, and then redrawing
      * only the rightmost visible column.
      *
@@ -2087,13 +2095,14 @@ class LED extends Device {
      */
     drawGrid(fForced)
     {
-        let colRedraw = -1;
+        let colRedraw = 0;
         if (!this.fPersistent || fForced) {
             this.clearGrid();
-        } else if (this.fShiftedLeft) {
-            colRedraw = this.colsView - 1;
+        } else if (this.nShiftedLeft) {
+            colRedraw = this.colsView - this.nShiftedLeft;
+            let xStart = this.widthCell * this.nShiftedLeft;
             let cxVisible = this.widthCell * colRedraw;
-            this.contextGrid.drawImage(this.canvasGrid, this.widthCell, 0, cxVisible, this.heightGrid, 0, 0, cxVisible, this.heightGrid);
+            this.contextGrid.drawImage(this.canvasGrid, xStart, 0, cxVisible, this.heightGrid, 0, 0, cxVisible, this.heightGrid);
             /*
              * At this point, the only grid drawing we might need to do now is the column at colRedraw,
              * but we still loop over the entire buffer to ensure all the cell MODIFIED states are in sync.
@@ -2107,12 +2116,12 @@ class LED extends Device {
                 let fLeaveModified = false;
                 let fModified = !!(this.buffer[i+3] & LED.FLAGS.MODIFIED);
                 let fHighlight = (this.fHighlight && i == this.iBufferRecent);
-                if (this.fDisplayOff && state) {
+                if (!this.fDisplayOn && state) {
                     state = LED.STATE.OFF;
                     fModified = fLeaveModified = true;
                 }
                 if (fModified || fHighlight || fForced) {
-                    if (colRedraw < 0 || col == colRedraw) {
+                    if (col >= colRedraw) {
                         this.drawGridCell(state, color, col, row, fHighlight);
                     }
                     if (fHighlight || fLeaveModified) {
@@ -2125,7 +2134,7 @@ class LED extends Device {
             }
             i += this.nBufferIncExtra;
         }
-        this.fShiftedLeft = false;
+        this.nShiftedLeft = 0;
         this.drawView();
     }
 
@@ -2311,6 +2320,20 @@ class LED extends Device {
         this.contextView.drawImage(this.canvasGrid, 0, 0, this.widthGrid, this.heightGrid, 0, 0, this.widthView, this.heightView);
     }
 
+    /**
+     * enableDisplay(on)
+     * 
+     * @this {LED}
+     * @param {boolean} [on]
+     */
+    enableDisplay(on = true)
+    {
+        if (this.fDisplayOn != on) {
+            this.fDisplayOn = on;
+            this.fBufferModified = true;
+        }
+    }
+    
     /**
      * getBuffer()
      *
@@ -2630,20 +2653,6 @@ class LED extends Device {
     }
 
     /**
-     * setDisplayOff(off)
-     * 
-     * @this {LED}
-     * @param {boolean} [off]
-     */
-    setDisplayOff(off)
-    {
-        if (this.fDisplayOff != off) {
-            this.fDisplayOff = off;
-            this.fBufferModified = true;
-        }
-    }
-    
-    /**
      * setLEDColor(col, row, color)
      *
      * @this {LED}
@@ -2749,9 +2758,9 @@ class LED extends Device {
                 this.buffer[i+3] = (this.buffer[i+3] & ~LED.FLAGS.SET) | flagsSet | LED.FLAGS.MODIFIED;
                 this.fBufferModified = fModified = true;
             }
-            this.fShiftedLeft = false;
             this.iBufferRecent = i;
             this.fTickled = true;
+            this.nShiftedLeft = 0;
         }
         return fModified;
     }
@@ -3510,14 +3519,13 @@ class Time extends Device {
     }
 
     /**
-     * doBurst(nCycles, fStep)
+     * doBurst(nCycles)
      *
      * @this {Time}
      * @param {number} nCycles
-     * @param {boolean} [fStep]
      * @returns {number} (number of cycles actually executed)
      */
-    doBurst(nCycles, fStep)
+    doBurst(nCycles)
     {
         this.nCyclesBurst = this.nCyclesRemain = nCycles;
         if (!this.aClockers.length) {
@@ -3527,7 +3535,7 @@ class Time extends Device {
         let iClocker = 0;
         while (this.nCyclesRemain > 0) {
             if (iClocker < this.aClockers.length) {
-                nCycles = this.aClockers[iClocker++](fStep? 0 : nCycles) || 1;
+                nCycles = this.aClockers[iClocker++](nCycles) || 1;
             } else {
                 iClocker = nCycles = 0;
             }
@@ -3566,7 +3574,7 @@ class Time extends Device {
      */
     endBurst(nCycles = this.nCyclesBurst - this.nCyclesRemain)
     {
-        if (this.fClockByFrame && this.fRunning) {
+        if (this.fClockByFrame) {
             this.nCyclesDeposited -= nCycles;
             if (this.nCyclesDeposited < 1) {
                 this.fYield = true;
@@ -4126,8 +4134,9 @@ class Time extends Device {
                 /*
                  * Execute a minimum-cycle burst and then update all timers.
                  */
+                let nCycles = (this.fClockByFrame? this.getCyclesPerFrame() : 0) || 1;
                 this.nStepping--;
-                this.updateTimers(this.endBurst(this.doBurst(1, true)));
+                this.updateTimers(this.endBurst(this.doBurst(nCycles)));
                 this.updateStatus();
                 if (this.nStepping) {
                     let time = this;
@@ -4257,6 +4266,7 @@ var LCConfig;
  * @property {string} sRule
  * @property {string} sPattern
  * @property {string} sMessage
+ * @property {string} sMessageInit
  * @property {boolean} fToggleColor
  * @property {LED} leds
  * @property {Object} colorPalette
@@ -4284,7 +4294,7 @@ class Chip extends Device {
         this.fWrap = this.getDefaultBoolean('wrap', false);
         this.sRule = this.getDefaultString('rule', "");
         this.sPattern = this.getDefaultString('pattern', "");
-        this.setMessage(this.getDefaultString('message', ""));
+        this.setMessage(this.sMessageInit = this.getDefaultString('message', ""));
         
         /*
          * The 'toggleColor' property currently affects only grids that have a color palette: if true,
@@ -4479,21 +4489,22 @@ class Chip extends Device {
     {
         let nCyclesClocked = 0;
         if (nCyclesTarget >= 0) {
-            let nActive;
+            let nActive, nCycles = 1;
             do {
                 switch(this.sRule) {
                 case Chip.RULES.ANIM4:
                     nActive = this.doCycling();
                     break;
                 case Chip.RULES.LEFT1:
-                    nActive = this.doShifting(1);
+                    nCycles = nCyclesTarget || nCycles;
+                    nActive = this.doShifting(nCycles);
                     break;
                 case Chip.RULES.LIFE1:
                     nActive = this.doCounting();
                     break;
                 }
                 if (!nCyclesTarget) this.println("active cells: " + nActive);
-                nCyclesClocked += 1;
+                nCyclesClocked += nCycles;
             } while (nCyclesClocked < nCyclesTarget);
         }
         return nCyclesClocked;
@@ -4717,14 +4728,23 @@ class Chip extends Device {
         let leds = this.leds;
         let nCols = leds.cols, nRows = leds.rows;
 
-        if (!this.processMessageCmd()) return 0;
+        /*
+         * If nShiftedLeft is already set, we can't allow another shift until the display has been redrawn.
+         */
+        if (leds.nShiftedLeft) {
+            return 0;
+        }
+
+        if (!this.processMessageCmd(shift)) {
+            return 0;
+        }
 
         //
         // This is a very slow and simple shift-and-exchange loop, which through a series of exchanges,
         // also migrates the left-most column to the right-most column.  Good for testing but not much else.
         //
         // for (let row = 0; row < nRows; row++) {
-        //     for (let col = 0; col < nCols - shift; col++) {
+        //     for (let col = 0; col < nCols - 1; col++) {
         //         let stateLeft = leds.getLEDState(col, row) || LED.STATE.OFF;
         //         let stateRight = leds.getLEDState(col + 1, row) || LED.STATE.OFF;
         //         if (stateRight) cActive++;
@@ -4732,17 +4752,17 @@ class Chip extends Device {
         //         leds.setLEDState(col + 1, row, stateLeft);
         //     }
         // }
-        // leds.fShiftedLeft = true;
+        // leds.nShiftedLeft = 1;
         //
 
-        let iCell = 0;
         let buffer = leds.getBuffer();
-        let nInc = leds.nBufferInc;
-        let nIncPerRow = nCols * nInc;
+        let nInc = leds.nBufferInc * shift;
+        let nIncPerRow = leds.nBufferInc * nCols;
         
-        let nEmptyCols = 0;
+        let col = 0, nEmptyCols = 0, iCell = 0;
         this.nLeftEmpty = this.nRightEmpty = -1;
-        for (let col = 0; col < nCols - shift; col++) {
+
+        while (col < nCols - shift) {
             let isEmptyCol = 1;
             let iCellOrig = iCell;
             for (let row = 0; row < nRows; row++) {
@@ -4758,23 +4778,32 @@ class Chip extends Device {
                 }
                 iCell += nIncPerRow;
             }
-            iCell = iCellOrig + nInc;
-            if (isEmptyCol) {
-                nEmptyCols++;
-            } else {
-                if (this.nLeftEmpty < 0) this.nLeftEmpty = nEmptyCols;
-                nEmptyCols = 0;
+            iCell = iCellOrig + leds.nBufferInc;
+            if (col++ < leds.colsView) {
+                if (isEmptyCol) {
+                    nEmptyCols++;
+                } else {
+                    if (this.nLeftEmpty < 0) this.nLeftEmpty = nEmptyCols;
+                    nEmptyCols = 0;
+                }
             }
         }
+
         if (this.nLeftEmpty < 0) this.nLeftEmpty = nEmptyCols;
         this.nRightEmpty = nEmptyCols;
 
-        for (let row = 0; row < nRows; row++) {
-            leds.initCell(buffer, iCell);
-            iCell += nIncPerRow;
+        while (col < nCols) {
+            let iCellOrig = iCell;
+            for (let row = 0; row < nRows; row++) {
+                leds.initCell(buffer, iCell);
+                iCell += nIncPerRow;
+            }
+            iCell = iCellOrig + leds.nBufferInc;
+            col++;
         }
 
-        leds.fShiftedLeft = leds.fBufferModified = true;
+        leds.fBufferModified = true;
+        leds.nShiftedLeft = shift;
         
         return cActive;
     }
@@ -5053,8 +5082,8 @@ class Chip extends Device {
             try {
                 this.sMessage = stateChip.shift();
                 this.iMessageNext = stateChip.shift();
+                this.sMessageCmd = stateChip.shift();
                 this.nMessageCount = stateChip.shift();
-                this.nMessageCmd = stateChip.shift();
             } catch(err) {
                 this.println("Chip state error: " + err.message);
                 return false;
@@ -5169,7 +5198,8 @@ class Chip extends Device {
     {
         this.println("reset");
         this.leds.clearBuffer(true);
-        if (this.sMessage) this.setMessage(this.sMessage);
+        this.leds.enableDisplay(true);
+        if (this.sMessageInit) this.setMessage(this.sMessageInit);
     }
 
     /**
@@ -5193,40 +5223,41 @@ class Chip extends Device {
     }
 
     /**
-     * processMessageCmd(cmd, count)
+     * processMessageCmd(shift, cmd, count)
      * 
      * @this {Chip}
-     * @param {number} [cmd]
+     * @param {number} [shift]
+     * @param {string} [cmd]
      * @param {number} [count]
      * @returns {boolean} (true to shift another cell, false if not)
      */
-    processMessageCmd(cmd, count = 0)
+    processMessageCmd(shift = 1, cmd, count)
     {
         if (cmd) {
-            this.nMessageCmd = cmd;
+            this.sMessageCmd = cmd;
             this.nMessageCount = count;
         }
 
-        switch(this.nMessageCmd) {
+        // this.println("processing command '" + this.sMessageCmd + "', count " + this.nMessageCount);
+
+        switch(this.sMessageCmd) {
 
         case Chip.MESSAGE_CMD.HALT:
             return false;
 
+        case Chip.MESSAGE_CMD.LOAD:
         case Chip.MESSAGE_CMD.SCROLL:
-            if (this.nMessageCount) {
-                this.nMessageCount--;
+            if (this.nMessageCount > 0) {
+                this.nMessageCount -= shift;
                 return true;
             }
             break;
 
         case Chip.MESSAGE_CMD.PAUSE:
-            if (this.nMessageCount) {
-                this.nMessageCount--;
+            if (this.nMessageCount > 0) {
+                this.nMessageCount -= shift;
                 return false;
             }
-            break;
-
-        case Chip.MESSAGE_CMD.LOAD:
             break;
 
         case Chip.MESSAGE_CMD.CENTER:
@@ -5234,13 +5265,13 @@ class Chip extends Device {
             break;
 
         case Chip.MESSAGE_CMD.OFF:
-            this.leds.setDisplayOff(true);
-            this.nMessageCmd = Chip.MESSAGE_CMD.PAUSE;
+            this.leds.enableDisplay(false);
+            this.sMessageCmd = Chip.MESSAGE_CMD.PAUSE;
             break;
 
         case Chip.MESSAGE_CMD.ON:
-            this.leds.setDisplayOff(false);
-            this.nMessageCmd = Chip.MESSAGE_CMD.PAUSE;
+            this.leds.enableDisplay(true);
+            this.sMessageCmd = Chip.MESSAGE_CMD.PAUSE;
             break;
 
         default:
@@ -5248,24 +5279,25 @@ class Chip extends Device {
             return false;
         }
 
-        if (!cmd) return this.processMessageSymbol();
+        if (!cmd) return this.processMessageSymbol(shift);
         return false;
     }
     
     /**
-     * processMessageSymbol()
+     * processMessageSymbol(shift)
      * 
      * @this {Chip}
+     * @param {number} [shift]
      * @returns {boolean} (true if another message symbol loaded)
      */
-    processMessageSymbol()
+    processMessageSymbol(shift = 1)
     {
         if (this.sMessage) {
             if (this.iMessageNext >= this.sMessage.length) {
                 this.iMessageNext = 0;
             }
-            let chMessage = this.sMessage[this.iMessageNext++];
-            if (chMessage == '$') {
+            let chSymbol = this.sMessage[this.iMessageNext++];
+            if (chSymbol == '$') {
                 let cols = 0;
                 let i = this.iMessageNext;
                 while (i < this.sMessage.length) {
@@ -5282,23 +5314,26 @@ class Chip extends Device {
                         let cmd = Chip.MESSAGE_CODE[ch];
                         if (cmd) {
                             this.iMessageNext = i;
-                            return this.processMessageCmd(cmd, cols);
+                            return this.processMessageCmd(shift, cmd, cols);
                         }
                         this.println("unrecognized message code: $" + ch);
                     }
                 }
             }
-            if (chMessage == ' ') {
+            if (chSymbol == ' ') {
                 this.nMessageCount += 2;
             } else {
-                let sPattern = Chip.SYMBOLS[chMessage];
-                if (sPattern) this.nMessageCount = this.loadPatternString(this.leds.colsView + 1, 0, sPattern, true);
-                this.nMessageCount += 1;
+                let col = this.leds.colsView + 1;
+                let delta = (this.nMessageCount < 0? this.nMessageCount : 0);
+                let sPattern = Chip.SYMBOLS[chSymbol];
+                if (sPattern) this.nMessageCount += this.loadPatternString(col + delta, 0, sPattern, true);
+                this.nMessageCount += (2 - shift);
+                // this.printf("loaded symbol '%s' at offscreen column %d (%d), new count %d\n", chSymbol, (col - this.leds.colsView), delta, this.nMessageCount);
             }
-            this.nMessageCmd = Chip.MESSAGE_CMD.SCROLL;
+            this.sMessageCmd = Chip.MESSAGE_CMD.SCROLL;
             return true;
         }
-        this.nMessageCmd = Chip.MESSAGE_CMD.HALT;
+        this.sMessageCmd = Chip.MESSAGE_CMD.HALT;
         return false;
     }
     
@@ -5505,8 +5540,8 @@ class Chip extends Device {
         stateChip.push(Chip.VERSION);
         stateChip.push(this.sMessage);
         stateChip.push(this.iMessageNext);
+        stateChip.push(this.sMessageCmd);
         stateChip.push(this.nMessageCount);
-        stateChip.push(this.nMessageCmd);
         if (this.leds) {
             this.leds.saveState(stateLEDs);
         }
@@ -5525,8 +5560,8 @@ class Chip extends Device {
             if (s) this.println("new message: '" + s + "'");
             this.sMessage = s;
         }
+        this.sMessageCmd = Chip.MESSAGE_CMD.LOAD;
         this.iMessageNext = this.nMessageCount = 0;
-        this.nMessageCmd = Chip.MESSAGE_CMD.LOAD;
     }
     
     /**
@@ -5737,13 +5772,13 @@ Chip.COMMANDS = [
 ];
 
 Chip.MESSAGE_CMD = {
-    LOAD:       1,
-    SCROLL:     2,
-    PAUSE:      3,
-    HALT:       4,
-    CENTER:     5,
-    OFF:        6,
-    ON:         7
+    LOAD:       "load",
+    SCROLL:     "scroll",
+    PAUSE:      "pause",
+    HALT:       "halt",
+    CENTER:     "center",
+    OFF:        "off",
+    ON:         "on"
 };
 
 /*

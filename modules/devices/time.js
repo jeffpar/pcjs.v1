@@ -377,14 +377,13 @@ class Time extends Device {
     }
 
     /**
-     * doBurst(nCycles, fStep)
+     * doBurst(nCycles)
      *
      * @this {Time}
      * @param {number} nCycles
-     * @param {boolean} [fStep]
      * @returns {number} (number of cycles actually executed)
      */
-    doBurst(nCycles, fStep)
+    doBurst(nCycles)
     {
         this.nCyclesBurst = this.nCyclesRemain = nCycles;
         if (!this.aClockers.length) {
@@ -394,7 +393,7 @@ class Time extends Device {
         let iClocker = 0;
         while (this.nCyclesRemain > 0) {
             if (iClocker < this.aClockers.length) {
-                nCycles = this.aClockers[iClocker++](fStep? 0 : nCycles) || 1;
+                nCycles = this.aClockers[iClocker++](nCycles) || 1;
             } else {
                 iClocker = nCycles = 0;
             }
@@ -433,7 +432,7 @@ class Time extends Device {
      */
     endBurst(nCycles = this.nCyclesBurst - this.nCyclesRemain)
     {
-        if (this.fClockByFrame && this.fRunning) {
+        if (this.fClockByFrame) {
             this.nCyclesDeposited -= nCycles;
             if (this.nCyclesDeposited < 1) {
                 this.fYield = true;
@@ -993,8 +992,9 @@ class Time extends Device {
                 /*
                  * Execute a minimum-cycle burst and then update all timers.
                  */
+                let nCycles = (this.fClockByFrame? this.getCyclesPerFrame() : 0) || 1;
                 this.nStepping--;
-                this.updateTimers(this.endBurst(this.doBurst(1, true)));
+                this.updateTimers(this.endBurst(this.doBurst(nCycles)));
                 this.updateStatus();
                 if (this.nStepping) {
                     let time = this;
