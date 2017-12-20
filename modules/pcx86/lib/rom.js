@@ -44,11 +44,11 @@ if (NODE) {
  *
  * @unrestricted
  */
-class ROM extends Component {
+class ROMx86 extends Component {
     /**
-     * ROM(parmsROM)
+     * ROMx86(parmsROM)
      *
-     * The ROM component expects the following (parmsROM) properties:
+     * The ROMx86 component expects the following (parmsROM) properties:
      *
      *      addr: physical address of ROM
      *      size: amount of ROM, in bytes
@@ -62,12 +62,12 @@ class ROM extends Component {
      * Also, while the size parameter may seem redundant, I consider it useful to confirm that the ROM you received
      * is the ROM you expected.
      *
-     * @this {ROM}
+     * @this {ROMx86}
      * @param {Object} parmsROM
      */
     constructor(parmsROM)
     {
-        super("ROM", parmsROM);
+        super("ROMx86", parmsROM);
 
         this.abROM = null;
         this.addrROM = parmsROM['addr'];
@@ -127,7 +127,7 @@ class ROM extends Component {
     /**
      * initBus(cmp, bus, cpu, dbg)
      *
-     * @this {ROM}
+     * @this {ROMx86}
      * @param {Computer} cmp
      * @param {Bus} bus
      * @param {X86CPU} cpu
@@ -154,7 +154,7 @@ class ROM extends Component {
     /**
      * powerUp(data, fRepower)
      *
-     * @this {ROM}
+     * @this {ROMx86}
      * @param {Object|null} data
      * @param {boolean} [fRepower]
      * @return {boolean} true if successful, false if failure
@@ -182,7 +182,7 @@ class ROM extends Component {
      * useful down the road, like user-defined symbols (ie, symbols that the Debugger may have
      * created, above and beyond those symbols we automatically loaded, if any, along with the ROM).
      *
-     * @this {ROM}
+     * @this {ROMx86}
      * @param {boolean} [fSave]
      * @param {boolean} [fShutdown]
      * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
@@ -195,7 +195,7 @@ class ROM extends Component {
     /**
      * doneLoad(sURL, sROMData, nErrorCode)
      *
-     * @this {ROM}
+     * @this {ROMx86}
      * @param {string} sURL
      * @param {string} sROMData
      * @param {number} nErrorCode (response from server if anything other than 200)
@@ -278,7 +278,7 @@ class ROM extends Component {
      * until after initBus() has received the Bus component AND doneLoad() has received the abROM data.  When both
      * those criteria are satisfied, the component becomes "ready".
      *
-     * @this {ROM}
+     * @this {ROMx86}
      */
     copyROM()
     {
@@ -346,7 +346,7 @@ class ROM extends Component {
     /**
      * addROM(addr)
      *
-     * @this {ROM}
+     * @this {ROMx86}
      * @param {number} addr
      * @return {boolean}
      */
@@ -380,7 +380,7 @@ class ROM extends Component {
      * Now that the Bus component provides low-level getMemoryBlocks() and setMemoryBlocks() methods
      * to manually get and set the blocks of any memory range, it is now possible to create true aliases.
      *
-     * @this {ROM}
+     * @this {ROMx86}
      * @param {number} addr
      */
     cloneROM(addr)
@@ -390,7 +390,7 @@ class ROM extends Component {
     }
 
     /**
-     * ROM.init()
+     * ROMx86.init()
      *
      * This function operates on every HTML element of class "rom", extracting the
      * JSON-encoded parameters for the ROM constructor from the element's "data-value"
@@ -403,7 +403,7 @@ class ROM extends Component {
         for (var iROM = 0; iROM < aeROM.length; iROM++) {
             var eROM = aeROM[iROM];
             var parmsROM = Component.getComponentParms(eROM);
-            var rom = new ROM(parmsROM);
+            var rom = new ROMx86(parmsROM);
             Component.bindComponentControls(rom, eROM, PCX86.APPCLASS);
         }
     }
@@ -413,7 +413,7 @@ class ROM extends Component {
  * ROM BIOS Data Area (RBDA) definitions, in physical address form, using the same ALL-CAPS names
  * found in the original IBM PC ROM BIOS listing.  TODO: Fill in remaining RBDA holes.
  */
-ROM.BIOS = {
+ROMx86.BIOS = {
     RS232_BASE:     0x400,              // 4 (word) I/O addresses of RS-232 adapters
     PRINTER_BASE:   0x408,              // 4 (word) I/O addresses of printer adapters
     EQUIP_FLAG:     0x410,              // installed hardware (word)
@@ -424,7 +424,7 @@ ROM.BIOS = {
 
 // RESET_FLAG is the traditional end of the RBDA, as originally defined at real-mode segment 0x40.
 
-ROM.BIOS.RESET_FLAG_WARMBOOT = 0x1234;  // value stored at ROM.BIOS.RESET_FLAG to indicate a "warm boot", bypassing memory tests
+ROMx86.BIOS.RESET_FLAG_WARMBOOT = 0x1234;   // value stored at ROMx86.BIOS.RESET_FLAG to indicate a "warm boot", bypassing memory tests
 
 /*
  * NOTE: There's currently no need for this component to have a reset() function, since
@@ -442,6 +442,6 @@ ROM.BIOS.RESET_FLAG_WARMBOOT = 0x1234;  // value stored at ROM.BIOS.RESET_FLAG t
 /*
  * Initialize all the ROM modules on the page.
  */
-Web.onInit(ROM.init);
+Web.onInit(ROMx86.init);
 
 if (NODE) module.exports = ROM;

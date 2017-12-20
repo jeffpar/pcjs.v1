@@ -1,6 +1,6 @@
 ---
 layout: page
-title: LED Symbols
+title: LED Symbol Builder
 permalink: /devices/leds/symbols/
 machines:
   - id: symbolLEDs
@@ -79,8 +79,8 @@ styles:
     margin-bottom: 16px;
 ---
 
-LED Symbols
------------
+LED Symbol Builder
+------------------
 
 This page helps you build new LED symbols by displaying characters underneath the LED grid as guides.
 

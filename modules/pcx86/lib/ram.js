@@ -35,7 +35,7 @@ if (NODE) {
     var State       = require("../../shared/lib/state");
     var PCX86       = require("./defines");
     var Memory      = require("./memory");
-    var ROM         = require("./rom");
+    var ROMx86      = require("./rom");
 }
 
 /**
@@ -212,7 +212,7 @@ class RAM extends Component {
                  * memory storage tests. See rom.js for all RBDA definitions.
                  */
                 if (MAXDEBUG) this.status("ROM BIOS memory test has been disabled");
-                this.bus.setShortDirect(ROM.BIOS.RESET_FLAG, ROM.BIOS.RESET_FLAG_WARMBOOT);
+                this.bus.setShortDirect(ROMx86.BIOS.RESET_FLAG, ROMx86.BIOS.RESET_FLAG_WARMBOOT);
             }
             /*
              * Don't add the "ramCPQ" memory to the CMOS total, because addCMOSMemory() will add it to the extended

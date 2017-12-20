@@ -51,6 +51,9 @@ The machine below is configured to automatically start TopView 1.01 on top of PC
 so you must use TopView's "Keyboard Mouse" support: arrow keys move the cursor and **Home**, **PgUp**, and **Alt**
 act as mouse buttons.  The machine is also available with the [PCjs Debugger](debugger/).
 
+Directory listings of the original [Program](#directory-of-topview-101-program) and [Tutorial](#directory-of-topview-101-tutorial)
+disks are provided below.
+
 {% include machine.html id="ibm5160" %}
 
 {% comment %}
