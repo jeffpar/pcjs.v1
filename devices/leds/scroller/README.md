@@ -28,17 +28,16 @@ machines:
         },
         "scrollClock": {
           "class": "Time",
-          "cyclesPerSecond": 1,
+          "cyclesPerSecond": 60,
           "cyclesMinimum": 1,
           "cyclesMaximum": 120,
-          "clockByFrame": true,
           "bindings": {
             "run": "runScroll",
             "speed": "speedScroll",
             "step": "stepScroll",
             "throttle": "throttleScroll"
           },
-          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","requestAnimationFrame"]
+          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","clockByFrame","requestAnimationFrame"]
         },
         "scrollDisplay": {
           "class": "LED",

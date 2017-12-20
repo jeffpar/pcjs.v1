@@ -1616,7 +1616,7 @@ class Chip extends Device {
                 this.setBindingText(binding, sValue);
             }
         }
-        if (fTransition && !this.time.isRunning()) {
+        if (fTransition || !this.time.isRunning()) {
             this.rom.drawArray();
             this.println(this.toString());
         }
