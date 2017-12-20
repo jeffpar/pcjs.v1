@@ -6,7 +6,7 @@ permalink: /disks/pcx86/apps/other/wordstar/
 
 ## MicroPro WordStar
 
-Information is available for the following versions of [WordStar](https://en.wikipedia.org/wiki/WordStar).
+Information is available for the following versions of [WordStar](https://en.wikipedia.org/wiki/WordStar):
 
 * [WordStar 3.24](3.24/)
 * [WordStar 3.30](3.30/)
@@ -361,6 +361,7 @@ control codes. This task must be done in hexadecimal format. Unless you are reas
 
     These printers may be installed in either serial or parallel mode if applicable.
     Other printers may be installed with a "custom printer installation" option.
+
       A  C. Itoh/TEC Starwriter F-10
       B  Centronics 353
       C  Centronics 739

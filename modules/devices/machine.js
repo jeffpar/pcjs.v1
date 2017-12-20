@@ -45,6 +45,7 @@ class Machine extends Device {
      *        "name": "TI-57 Programmable Calculator Simulation",
      *        "version": 1.10,
      *        "autoPower": true,
+     *        "autoRestore": true,
      *        "bindings": {
      *          "clear": "clearTI57",
      *          "print": "printTI57"
@@ -123,6 +124,7 @@ class Machine extends Device {
             this.checkOverrides(config);
             this.addBindings(config['bindings']);
             this.fAutoPower = (config['autoPower'] !== false);
+            this.fAutoRestore = (config['autoRestore'] !== false);
         } catch(err) {
             let sError = err.message;
             let match = sError.match(/position ([0-9]+)/);
@@ -141,7 +143,7 @@ class Machine extends Device {
         window.addEventListener('load', function onLoad(event) {
             chip = machine.initDevices();
             if (chip) {
-                if (chip.onRestore) chip.onRestore();
+                if (chip.onLoad && machine.fAutoRestore) chip.onLoad();
                 if (chip.onPower && machine.fAutoPower) chip.onPower(true);
             }
         });

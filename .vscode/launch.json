@@ -34,56 +34,70 @@
       ]
     },
 	  {
-		  "name": "PCjs: Game of Life",
+		  "name": "Devices: Game of Life",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/leds/life/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PCjs: Lite-Brite",
+		  "name": "Devices: Lite-Brite",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/leds/litebrite/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PCjs: LED Scroller",
+		  "name": "Devices: LED Scroller",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/leds/scroller/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PCjs: LED Symbols",
+		  "name": "Devices: LED Symbols",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/leds/symbols/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PCjs: TI-42",
+		  "name": "Devices: TI-42",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/ti42/machine/rev0/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PCjs: TI-55",
+		  "name": "Devices: TI-55",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/ti55/machine/rev0/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PCjs: TI-57",
+		  "name": "Devices: TI-57",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/ti57/machine/rev0/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PCjs: PC-DOS 1.10",
+		  "name": "Apps: TopView 1.01",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/apps/ibm/topview/1.01/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "Apps: WordStar 3.24",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/apps/other/wordstar/3.24/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "DOS: PC-DOS 1.10",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.10/",

@@ -955,6 +955,16 @@ class Chip extends Device {
     }
     
     /**
+     * onLoad()
+     *
+     * @this {Chip}
+     */
+    onLoad()
+    {
+        this.loadState(this.loadLocalStorage());
+    }
+
+    /**
      * onPower(fOn)
      *
      * Automatically called by the Machine device after all other devices have been powered up (eg, after
@@ -990,16 +1000,6 @@ class Chip extends Device {
         this.leds.clearBuffer(true);
         this.leds.enableDisplay(true);
         if (this.sMessageInit) this.setMessage(this.sMessageInit);
-    }
-
-    /**
-     * onRestore()
-     *
-     * @this {Chip}
-     */
-    onRestore()
-    {
-        this.loadState(this.loadLocalStorage());
     }
 
     /**
