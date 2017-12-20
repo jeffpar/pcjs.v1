@@ -83,6 +83,13 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
+		  "name": "PCjs: PC-DOS 1.10",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.10/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
 		  "name": "Launch index.html (disable sourcemaps)",
 		  "type": "chrome",
 		  "request": "launch",

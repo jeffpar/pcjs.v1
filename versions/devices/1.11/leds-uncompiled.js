@@ -4735,6 +4735,10 @@ class Chip extends Device {
             return 0;
         }
 
+        /*
+         * The way the code is currently written, shifting more than two cells at a time creates gap issues.
+         */
+
         if (!this.processMessageCmd(shift)) {
             return 0;
         }

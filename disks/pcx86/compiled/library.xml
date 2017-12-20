@@ -403,6 +403,7 @@
 		<disk path="/disks/pcx86/apps/other/sc2/1.00/SC2_V100.json">SuperCalc2 1.00</disk>
 		<disk path="/disks/pcx86/apps/other/sc3/1.00/SC3_V100-SETUP.json">SuperCalc3 1.00 Setup</disk>
 		<disk path="/disks/pcx86/apps/other/sc3/1.00/SC3_V100-UTILITY.json">SuperCalc3 1.00 Utility</disk>
+		<disk path="/disks/pcx86/apps/other/wordstar/3.24/WS324-MOUNTABLE.json">WordStar 3.24</disk>
 		<disk path="/disks/pcx86/apps/other/wordstar/3.30/WS330-DISK1-INST.json">WordStar 3.30 (Disk 1)</disk>
 		<disk path="/disks/pcx86/apps/other/wordstar/3.30/WS330-DISK2-PROG.json">WordStar 3.30 (Disk 2)</disk>
 		<disk path="/disks/pcx86/apps/other/wordstar/3.30/WS330-DISK3-SPELL.json">WordStar 3.30 (Disk 3)</disk>

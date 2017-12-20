@@ -79,6 +79,7 @@
 		<manifest ref="/disks/pcx86/apps/other/omniview/4.30/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/other/sc2/1.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/other/sc3/1.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/apps/other/wordstar/3.24/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/other/wordstar/3.30/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/other/wordstar/4.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/borland/tpascal/3.00b/manifest.xml"/>
