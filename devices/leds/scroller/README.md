@@ -13,7 +13,7 @@ machines:
           "type": "leds",
           "name": "LED Scroller",
           "version": 1.11,
-          "autoPower": false,
+          "autoPower": true,
           "bindings": {
             "clear": "clearScroll",
             "print": "printScroll"
@@ -98,7 +98,7 @@ You can enter new messages in the Diagnostics window using the `s` command (eg, 
   <button id="stepScroll">Step</button>
   <button id="resetScroll">Reset</button>
   <button id="clearScroll">Clear</button>
-  <input type="range" min="1" max="120" value="120" class="slider" id="throttleScroll"><span id="speedScroll">Stopped</span>
+  <input type="range" min="1" max="120" value="60" class="slider" id="throttleScroll"><span id="speedScroll">Stopped</span>
 </div>
 
 You may have noticed that the LED message set above ("Happy New Year!") also includes some special characters
