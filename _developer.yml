@@ -1,6 +1,7 @@
 developer: true
 baseurl: ""
 url: "http://localhost:4000"
+exclude: ["/pubs", "index.html", "**/index.html", "bin", "logs", "node_modules", "src", "**/src", "tmp", "**/tmp", "videos", "web", "**/archive", "**/ecp", "**/c64", "**/private", "**/restricted", "**/unlisted", ".git", ".idea", "/Gemfile", "/Gemfile.lock", "/Gruntfile.js", "/gulpfile.js", "/notes.md", "/package-lock.json", "/server.js", "/*.sh"]
 #
 # In the following pcjs section, setting "compiled: false" works only for pages with a single machine,
 # because the uncompiled scripts use shared classes that can only be instantiated once on a page (unless
