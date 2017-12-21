@@ -6,13 +6,12 @@
 	<type>Application</type>
 	<category>Productivity</category>
 	<author>Lotus</author>
-	<releaseDate/>
+	<releaseDate>1983-06-07</releaseDate>
 	<disk id="disk01" size="327680" chs="40:2:8" img="archive/123-DISK1-SYSTEM-PATCHED.img" href="/disks/pcx86/apps/lotus/123/1a/123-DISK1-SYSTEM-PATCHED.json" md5="1617990f841df43fd60f83680e1d5add" md5json="f1e05791c6681a61e675bfc8ca264bee">
 		<name>Lotus 1-2-3 1A (1-System)</name>
 		<file size="256" time="1983-06-07 01:23:00" attr="0x20">123.CNF</file>
 		<file size="89856" time="2017-07-09 09:18:44" attr="0x20">123.EXE</file>
 		<file size="113416" time="1983-06-07 01:23:00" attr="0x20">123.HLP</file>
-		<file size="89856" time="1983-06-07 01:23:00" attr="0x20">123.OLD</file>
 		<file size="20" time="1983-06-07 01:23:00" attr="0x20">AUTOEXEC.BAT</file>
 		<file size="2139" time="1983-06-07 01:23:00" attr="0x20">GD.DRV</file>
 		<file size="1920" time="1983-06-02 17:20:44" attr="0x20">IBMBIO.COM</file>
