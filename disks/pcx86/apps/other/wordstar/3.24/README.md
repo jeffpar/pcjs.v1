@@ -37,3 +37,5 @@ an interesting review/rant from 1983 on this and other versions of WordStar for 
 	WS       COM     20864 02-01-83  12:00a
 	        5 file(s)     111360 bytes
 	                       48128 bytes free
+
+![WordStar 3.24 Diskette](WS324.jpg)
