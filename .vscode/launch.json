@@ -97,10 +97,10 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "DOS: PC-DOS 1.10",
+		  "name": "DOS: PC-DOS 1.10 (DEBUG:false)",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.10/",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.10/?gort=nodebug",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {

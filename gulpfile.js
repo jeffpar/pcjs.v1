@@ -35,11 +35,11 @@
  *          are out-of-date with respect to the individual files (under /modules).  The target version
  *          comes from _data/machines.json:shared.version.
  * 
- *      `gulp make` (or `gulp make/{machine}`)
+ *      `gulp concat` (or `gulp concat/{machine}`)
  * 
  *          Concatenates all the individual files (under /modules) that comprise the machines's compiled
  *          script; the resulting file (eg, pcx86-uncompiled.js) becomes the input file for the Closure
- *          Compiler, which is why each machine's `compile` task lists the corresponding `make` task as a
+ *          Compiler, which is why each machine's `compile` task lists the corresponding `concat` task as a
  *          dependency/prerequisite.
  * 
  *      `gulp compile` (or `gulp compile/{machine}`)
@@ -57,36 +57,26 @@
  *          Copies any other individual resources files listed in machines.json (other than scripts) to the
  *          machine's current version folder.
  * 
+ *      `gulp disks`
+ * 
+ *          Updates "compiled" (inlined) disk manifests (eg, /disks/pcx86/compiled/library.xml) from the
+ *          "uncompiled" manifests (eg, /disks/pcx86/library.xml), which are actually "manifests of manifests"
+ *          and therefore inherently slower to load.
+ * 
  *      `gulp promote`
  * 
  *          Updates the version number in all project machine XML files to match the version contained in
  *          _data/machines.json:shared.version.
- * 
- * Notes:
- * 
- *  Because the 'gulp-newer' plugin doesn't work properly with 'google-closure-compiler-js' (or perhaps
- *  because the 'google-closure-compiler-js' plugin doesn't work properly with 'gulp-newer'), you should invoke
- *  gulp for each of the major tasks in the following order:
- * 
- *      gulp make
- *      gulp compile
- *      gulp copy
- * 
- *  Alternatively, simply run `gulp` twice to ensure that any changed files get detected properly.
- * 
- *  It might be possible to have a final `make` task dynamically add all the `compile` tasks that have outdated
- *  targets and then automatically run them, but I'm not enough of a gulp expert at this point to know whether
- *  that would work, and besides, the damn plugins should just work....
  */
 var gulp = require("gulp");
-var newer = require("gulp-newer");
-var concat = require("gulp-concat");
-var foreach = require("gulp-foreach");
-var header = require("gulp-header");
-var replace = require("gulp-replace");
-var closureCompiler = require('google-closure-compiler-js').gulp();
-var sequence = require("run-sequence");
-var sourcemaps = require('gulp-sourcemaps');
+var gulpNewer = require("gulp-newer");
+var gulpConcat = require("gulp-concat");
+var gulpForEach = require("gulp-foreach");
+var gulpHeader = require("gulp-header");
+var gulpReplace = require("gulp-replace");
+var gulpClosureCompiler = require('google-closure-compiler-js').gulp();
+var gulpSequence = require("run-sequence");
+var gulpSourceMaps = require('gulp-sourcemaps');
 
 var fs = require("fs");
 var path = require("path");
@@ -116,21 +106,25 @@ if (pkg.homepage) {
 }
 
 var aMachines = Object.keys(machines);
-var aMakeTasks = [], aCompileTasks = [], aCopyTasks = [];
+var aConcatTasks = [], aCompileTasks = [], aCopyTasks = [];
 
 aMachines.forEach(function(machineType) {
     if (machineType == "shared") return;
+
     let machineConfig = machines[machineType];
     let machineName = machineConfig.name;
     let machineClass = machineConfig.class;
+
     while (machineConfig && machineConfig.alias) {
         machineConfig = machines[machineConfig.alias];
     }
+
     let machineVersion = (machineConfig.version || machines.shared.version);
     let machineReleaseDir = "./versions/" + machineConfig.folder + "/" + machineVersion;
     let machineReleaseFile  = machineType + ".js";
     let machineUncompiledFile  = machineType + "-uncompiled.js";
     let machineDefines = {};
+
     if (machineConfig.defines) {
         for (let i = 0; i < machineConfig.defines.length; i++) {
             let define = machineConfig.defines[i];
@@ -154,24 +148,50 @@ aMachines.forEach(function(machineType) {
             }
         }
     }
-    let sTask = "make/" + machineType;
+    
     let machineFiles = machineConfig.css || machines.shared.css;
     machineFiles = machineFiles.concat(machineConfig.xsl || machines.shared.xsl);
-    aMakeTasks.push(sTask);
-    gulp.task(sTask, function() {
+
+    /*
+     * The gulpNewer() plugin doesn't seem to work properly with the closureCompiler() plugin;
+     * if the destination file is newer than the source, the compiler still gets invoked, but
+     * with an incomplete stream, resulting in bogus errors.  My work-around is to compare filetimes
+     * myself, marking the machine as "outdated" ONLY if the destination file is older, and then
+     * change the appropriate "compile" tasks to simply ignore any machines that aren't outdated.
+     * 
+     * Since this code runs *before* any of the actual tasks, the "outdated" machines array must
+     * ALSO be updated by any "concat" task that recreated one of the uncompiled input files.
+     */
+    let aMachinesOutdated = [];
+    let srcFile = path.join(machineReleaseDir, machineUncompiledFile);
+    let dstFile = path.join(machineReleaseDir, machineReleaseFile);
+    try {
+        let srcStat = fs.statSync(srcFile);
+        let dstStat = fs.statSync(dstFile);
+        let srcTime = new Date(srcStat.mtime);
+        let dstTime = new Date(dstStat.mtime);
+        if (dstTime < srcTime) aMachinesOutdated.push(machineType);
+    } catch(err) {
+        console.log(err.message);
+    }
+
+    let taskConcat = "concat/" + machineType;
+    aConcatTasks.push(taskConcat);
+    gulp.task(taskConcat, function() {
         return gulp.src(machineConfig.scripts)
-            .pipe(newer(path.join(machineReleaseDir, machineUncompiledFile)))
-            .pipe(foreach(function(stream, file){
+            .pipe(gulpNewer(path.join(machineReleaseDir, machineUncompiledFile)))
+            .pipe(gulpForEach(function(stream, file) {
+                aMachinesOutdated.push(machineType);
                 return stream
-                    .pipe(header('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2017\n */\n\n'))
-                    .pipe(replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, ""))
-                    .pipe(replace(/^(import|export)[ \t]+[^\n]*\n/gm, ""))
-                    .pipe(replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, ""))
-                    .pipe(replace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, ""))
-                    .pipe(replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, ""))
-                    .pipe(replace(/[ \t]*if\s*\(NODE\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
-                    .pipe(replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
-                    .pipe(replace(/\/\*\*[^@]*@typedef\s*{[A-Z][A-Za-z0-9_]+}\s*(\S+)\s*([\s\S]*?)\*\//g, function(match, type, props) {
+                    .pipe(gulpHeader('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2017\n */\n\n'))
+                    .pipe(gulpReplace(/(^|\n)[ \t]*(['"])use strict\2;?/g, ""))
+                    .pipe(gulpReplace(/^(import|export)[ \t]+[^\n]*\n/gm, ""))
+                    .pipe(gulpReplace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, ""))
+                    .pipe(gulpReplace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, ""))
+                    .pipe(gulpReplace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, ""))
+                    .pipe(gulpReplace(/[ \t]*if\s*\(NODE\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
+                    .pipe(gulpReplace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
+                    .pipe(gulpReplace(/\/\*\*[^@]*@typedef\s*{[A-Z][A-Za-z0-9_]+}\s*(\S+)\s*([\s\S]*?)\*\//g, function(match, type, props) {
                         let sType = "/** @typedef {{ ";
                         let sProps = "";
                         let reProps = /@property\s*{([^}]*)}\s*(\[|)([^\s\]]+)\]?/g, matchProps;
@@ -182,36 +202,20 @@ aMachines.forEach(function(machineType) {
                         sType += sProps + " }} */\nvar " + type + ";";
                         return sType;
                     }))
-                    .pipe(replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
+                    .pipe(gulpReplace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
                 }))        
-            .pipe(concat(machineUncompiledFile))
-            .pipe(header('"use strict";\n\n'))
+            .pipe(gulpConcat(machineUncompiledFile))
+            .pipe(gulpHeader('"use strict";\n\n'))
             .pipe(gulp.dest(machineReleaseDir));
     });
-    /*
-     * The newer() plugin doesn't seem to work properly with the closureCompiler() plugin;
-     * if the destination file is newer than the source, the compiler still gets invoked, but
-     * with a screwed-up stream, resulting in bogus errors.  My solution is to compare filetimes
-     * myself, and if the destination file is newer, then don't even add the 'compile' task.
-     */
-    sTask = "compile/" + machineType;
-    let srcFile = path.join(machineReleaseDir, machineUncompiledFile);
-    let dstFile = path.join(machineReleaseDir, machineReleaseFile);
-    try {
-        let srcStat = fs.statSync(srcFile);
-        let dstStat = fs.statSync(dstFile);
-        let srcTime = new Date(srcStat.mtime);
-        let dstTime = new Date(dstStat.mtime);
-        if (dstTime > srcTime) sTask = "";
-    } catch(err) {
-        // console.log(err.message);
-    }
-    if (sTask) {
-        aCompileTasks.push(sTask);
-        gulp.task(sTask, ["make/" + machineType], function() {
-            return gulp.src(srcFile /*, {base: './'} */)
-                .pipe(sourcemaps.init())
-                .pipe(closureCompiler({
+
+    let taskCompile = "compile/" + machineType;
+    aCompileTasks.push(taskCompile);
+    gulp.task(taskCompile, ["concat/" + machineType], function() {
+        let stream = gulp.src(srcFile /*, {base: './'} */);
+        if (aMachinesOutdated.indexOf(machineType) >= 0) {
+            stream.pipe(gulpSourceMaps.init())
+                  .pipe(gulpClosureCompiler({
                     assumeFunctionWrapper: true,
                     compilationLevel: 'ADVANCED',
                     defines: machineDefines,
@@ -222,27 +226,29 @@ aMachines.forEach(function(machineType) {
                     outputWrapper: '(function(){%output%})()',
                     jsOutputFile: machineReleaseFile,           // TODO: This must vary according to debugger/non-debugger releases
                     createSourceMap: true
-                }))
-                .pipe(sourcemaps.write('./'))                   // gulp-sourcemaps automatically adds the sourcemap url comment
-                .pipe(gulp.dest(machineReleaseDir));
-        });
-    }
-    sTask = "copy/" + machineType;
-    aCopyTasks.push(sTask);
-    gulp.task(sTask, function() {
+                  }))
+                  .pipe(gulpSourceMaps.write('./'))             // gulp-sourcemaps automatically adds the sourcemap url comment
+                  .pipe(gulp.dest(machineReleaseDir));
+        }
+        return stream;
+    });
+
+    let taskCopy = "copy/" + machineType;
+    aCopyTasks.push(taskCopy);
+    gulp.task(taskCopy, function() {
         return gulp.src(machineFiles)
-            .pipe(newer(machineReleaseDir))
-            .pipe(replace(/(<xsl:variable name="APPCLASS">)[^<]*(<\/xsl:variable>)/g, '$1' + machineClass + '$2'))
-            .pipe(replace(/(<xsl:variable name="APPNAME">)[^<]*(<\/xsl:variable>)/g, '$1' + machineName + '$2'))
-            .pipe(replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + machineVersion + "$2"))
-            .pipe(replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"' + machineReleaseDir.substr(1) + '/$1"'))
-            .pipe(replace(/[ \t]*\/\*[^*][\s\S]*?\*\//g, ""))
-            .pipe(replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, ""))
+            .pipe(gulpNewer(machineReleaseDir))
+            .pipe(gulpReplace(/(<xsl:variable name="APPCLASS">)[^<]*(<\/xsl:variable>)/g, '$1' + machineClass + '$2'))
+            .pipe(gulpReplace(/(<xsl:variable name="APPNAME">)[^<]*(<\/xsl:variable>)/g, '$1' + machineName + '$2'))
+            .pipe(gulpReplace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + machineVersion + "$2"))
+            .pipe(gulpReplace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"' + machineReleaseDir.substr(1) + '/$1"'))
+            .pipe(gulpReplace(/[ \t]*\/\*[^*][\s\S]*?\*\//g, ""))
+            .pipe(gulpReplace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, ""))
             .pipe(gulp.dest(machineReleaseDir));
     });
 });
 
-gulp.task("make", aMakeTasks);
+gulp.task("concat", aConcatTasks);
 
 gulp.task("compile", aCompileTasks);
 
@@ -264,7 +270,7 @@ gulp.task("disks", function() {
             "disks/pcx86/shareware/pcsig08/pcsig08.xml",
             "disks/pcx86/private/library.xml"
         ], {base: baseDir})
-        .pipe(replace(/([ \t]*)<manifest.*? ref="(.*?)".*?\/>/g, function(match, sIndent, sFile) {
+        .pipe(gulpReplace(/([ \t]*)<manifest.*? ref="(.*?)".*?\/>/g, function(match, sIndent, sFile) {
             /*
              * This function mimics what components.xsl normally does for disk manifests referenced
              * by the FDC machine component.  Compare it to the following template in components.xsl:
@@ -319,12 +325,12 @@ gulp.task("disks", function() {
 gulp.task("promote", function() {
     let baseDir = "./";
     return gulp.src(["apps/**/*.xml", "devices/**/*.xml", "disks/**/*.xml", "pubs/**/*.xml"], {base: baseDir})
-        .pipe(replace(/href="\/versions\/([^\/]*)\/[0-9\.]*\/(machine|manifest|outline)\.xsl"/g, 'href="/versions/$1/' + machines.shared.version + '/$2.xsl"'))
+        .pipe(gulpReplace(/href="\/versions\/([^\/]*)\/[0-9\.]*\/(machine|manifest|outline)\.xsl"/g, 'href="/versions/$1/' + machines.shared.version + '/$2.xsl"'))
         .pipe(gulp.dest(baseDir));
 });
 
 gulp.task("default", function() {
-    sequence(
-        "make", "compile", "copy"
+    gulpSequence(
+        "concat", "compile", "copy", "disks"
     );
 });

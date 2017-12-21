@@ -1591,6 +1591,7 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
         var sDir = sImage.replace(/\.(img|json)/, "");
         if (sDir != sImage) {
             sDir = sDir + path.sep;
+            var today = new Date();
             var asFiles = glob.sync(sDir + "**");
             for (var i = 0; i < asFiles.length; i++) {
                 var sFile = asFiles[i];
@@ -1602,6 +1603,21 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
                 fileInfo.FILE_ATTR = stats.isDirectory()? DiskDump.ATTR_SUBDIR : DiskDump.ATTR_ARCHIVE;
                 fileInfo.FILE_SIZE = stats.size;
                 fileInfo.FILE_TIME = stats.mtime;
+                /*
+                 * This is a hack to determine if we're currently outside of Daylight Savings Time (assumes Pacific time zone).
+                 * If we are, then reduce the modification times of these FAT file system entries by one additional hour.  This was
+                 * necessary to obtain the correct timestamps for files on the Lotus 1-2-3 Release 1A diskettes, whose files we
+                 * know had timestamps of 1:23am (from June 1983, when DST was presumably in effect), yet are being interpreted as
+                 * 2:23am when mounted by an operating system running outside of Daylight Savings Time.
+                 * 
+                 * TODO: Determine whether the operating system is to blame.  For legacy file systems, shouldn't the timestamps
+                 * be interpreted according to the DST settings that were in effect at the time the files were originally created?
+                 * And regardless of who's to blame, what should I really be doing?  Do I need to also check the timestamps and
+                 * determine whether they are inside or outside DST as well?
+                 */
+                if (today.getTimezoneOffset() == 480) {
+                    fileInfo.FILE_TIME.setHours(fileInfo.FILE_TIME.getHours() - 1);
+                }
                 this.validateTime(fileInfo.FILE_TIME);
                 this.addManifestInfo(fileInfo);
             }

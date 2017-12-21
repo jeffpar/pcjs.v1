@@ -4,12 +4,14 @@
 	<title>WordStar 3.30</title>
 	<disk id="disk01" size="163840" chs="40:1:8" img="archive/WS330-DISK1-INST.img" href="/disks/pcx86/apps/other/wordstar/3.30/WS330-DISK1-INST.json" md5="7730d9da48c74d562f330bc62a32b134" md5json="e5ed3e61c05cee5a0e91353241d684e2">
 		<name>WordStar 3.30 (Disk 1)</name>
+		<link href="https://winworldpc.com/product/wordstar/330-z-100">D1_INST.IMG</link>
 		<file size="1152" time="1983-03-01 23:00:00" attr="0x20">WINSTALL.COM</file>
 		<file size="38528" time="1983-03-01 23:00:00" attr="0x20">WINSTALL.OVR</file>
 		<file size="43776" time="1983-03-01 23:00:00" attr="0x20">WS.INS</file>
 	</disk>
 	<disk id="disk02" size="163840" chs="40:1:8" img="archive/WS330-DISK2-PROG.img" href="/disks/pcx86/apps/other/wordstar/3.30/WS330-DISK2-PROG.json" md5="4afa78a178834dd39132a372d4bcaea7" md5json="3ddb511be883892c6c522e1539558e1e">
 		<name>WordStar 3.30 (Disk 2)</name>
+		<link href="https://winworldpc.com/product/wordstar/330-z-100">D2_PROG.IMG</link>
 		<file size="3968" time="1983-04-11 23:00:00" attr="0x20">PRINT.TST</file>
 		<file size="21376" time="1980-01-01 00:00:02" attr="0x20">WS.COM</file>
 		<file size="6656" time="1983-04-11 23:00:00" attr="0x20">WSCOLOR.BAS</file>
@@ -19,12 +21,14 @@
 	</disk>
 	<disk id="disk03" size="163840" chs="40:1:8" img="archive/WS330-DISK3-SPELL.img" href="/disks/pcx86/apps/other/wordstar/3.30/WS330-DISK3-SPELL.json" md5="7c1d881c9dde8e9c5bd9eea56606f178" md5json="7d524b60a8aff7c914bbd6350ca31c5b">
 		<name>WordStar 3.30 (Disk 3)</name>
+		<link href="https://winworldpc.com/product/wordstar/330-z-100">D3_SPELL.IMG</link>
 		<file size="3328" time="1983-03-30 23:00:00" attr="0x20">SAMPLE.TXT</file>
 		<file size="97024" time="1983-03-30 23:00:00" attr="0x20">SPELSTAR.DCT</file>
 		<file size="22784" time="1983-03-30 23:00:00" attr="0x20">SPELSTAR.OVR</file>
 	</disk>
 	<disk id="disk04" size="163840" chs="40:1:8" img="archive/WS330-DISK4-STIDX.img" href="/disks/pcx86/apps/other/wordstar/3.30/WS330-DISK4-STIDX.json" md5="cb7b239bfcaf78a66e1b7dec193a35ad" md5json="8fbecced6783f62025ffddcf0b715428">
 		<name>WordStar 3.30 (Disk 4)</name>
+		<link href="https://winworldpc.com/product/wordstar/330-z-100">D4_STIDX.IMG</link>
 		<file size="384" time="1983-07-27 00:07:36" attr="0x20">FORMAT.FMT</file>
 		<file size="6912" time="1983-07-27 00:08:42" attr="0x20">MACHINES.TXT</file>
 		<file size="1920" time="1983-07-27 00:06:00" attr="0x20">STARINDX.COM</file>
@@ -34,6 +38,7 @@
 	</disk>
 	<disk id="disk05" size="163840" chs="40:1:8" img="archive/WS330-DISK5-MMRG.img" href="/disks/pcx86/apps/other/wordstar/3.30/WS330-DISK5-MMRG.json" md5="5c5789d7b6e5a493b7a1562ebdfc28c5" md5json="e9290f8922c934f427b4d56dc47f00cc">
 		<name>WordStar 3.30 (Disk 5)</name>
+		<link href="https://winworldpc.com/product/wordstar/330-z-100">D5_MMRG.IMG</link>
 		<file size="11520" time="1983-03-30 23:00:00" attr="0x20">MAILMRGE.OVR</file>
 	</disk>
 </manifest>
