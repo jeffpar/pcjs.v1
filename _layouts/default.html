@@ -1,26 +1,30 @@
 <!DOCTYPE html>
 <html lang="en-US">
-
+  <--
+   _____   _____ _     
+  |  __ \ / ____(_)    
+  | |__) | |     _ ___ 
+  |  ___/| |    | / __|
+  | |    | |____| \__ \
+  |_|     \_____| |___/
+               _/ |    
+              |__/     
+  -->
+  {% comment %}
+    Website © 2012-2017 by Jeff Parsons (@jeffpar)
+    ASCII art from http://patorjk.com/software/taag/#p=testall&f=Graffiti&t=PCjs
+  {% endcomment %}
   {% include head.html %}
-
   <body>
-
     {% include header.html %}
-
     <div class="page-content">
       <div class="wrapper">
         {{ content }}
       </div>
     </div>
-
     {% include footer.html %}
-  
     {% include machine-engines.html %}
-
     {% include page-scripts.html %}
-
     {% include google-analytics.html %}
-
   </body>
-
 </html>
