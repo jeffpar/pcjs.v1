@@ -5948,7 +5948,7 @@ class Machine extends Device {
      *        "type": "TI57",
      *        "name": "TI-57 Programmable Calculator Simulation",
      *        "version": 1.10,
-     *        "autoPower": true,
+     *        "autoStart": true,
      *        "autoRestore": true,
      *        "bindings": {
      *          "clear": "clearTI57",
@@ -6027,7 +6027,7 @@ class Machine extends Device {
             this.checkVersion(config);
             this.checkOverrides(config);
             this.addBindings(config['bindings']);
-            this.fAutoPower = (config['autoPower'] !== false);
+            this.fAutoStart = (config['autoStart'] !== false);
             this.fAutoRestore = (config['autoRestore'] !== false);
         } catch(err) {
             let sError = err.message;
@@ -6048,7 +6048,7 @@ class Machine extends Device {
             chip = machine.initDevices();
             if (chip) {
                 if (chip.onLoad && machine.fAutoRestore) chip.onLoad();
-                if (chip.onPower && machine.fAutoPower) chip.onPower(true);
+                if (chip.onPower && machine.fAutoStart) chip.onPower(true);
             }
         });
         let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : undefined);

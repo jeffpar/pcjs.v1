@@ -13,12 +13,12 @@ machines:
           "type": "leds",
           "name": "LED Scroller",
           "version": 1.11,
-          "autoPower": true,
+          "autoStart": true,
           "bindings": {
             "clear": "clearScroll",
             "print": "printScroll"
           },
-          "overrides": ["autoPower"]
+          "overrides": ["autoStart"]
         },
         "scrollChip": {
           "class": "Chip",

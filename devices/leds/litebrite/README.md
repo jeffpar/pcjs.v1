@@ -13,12 +13,12 @@ machines:
           "type": "leds",
           "name": "Lite-Brite Demo",
           "version": 1.10,
-          "autoPower": false,
+          "autoStart": false,
           "bindings": {
             "clear": "clearLB",
             "print": "printLB"
           },
-          "overrides": ["autoPower"]
+          "overrides": ["autoStart"]
         },
         "lbChip": {
           "class": "Chip",

@@ -13,12 +13,12 @@ machines:
           "type": "leds",
           "name": "LED Symbol",
           "version": 1.11,
-          "autoPower": false,
+          "autoStart": false,
           "bindings": {
             "clear": "clearSymbol",
             "print": "printSymbol"
           },
-          "overrides": ["autoPower"]
+          "overrides": ["autoStart"]
         },
         "symbolChip": {
           "class": "Chip",

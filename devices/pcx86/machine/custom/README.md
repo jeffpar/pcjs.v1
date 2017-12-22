@@ -7,7 +7,7 @@ machines:
     type: pcx86
     name: Custom PC
     uncompiled: true
-    autoPower: false
+    autoStart: false
 build: build-pc
 sitemap: false
 ---

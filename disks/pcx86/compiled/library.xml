@@ -573,6 +573,8 @@
 		<disk path="/disks/pcx86/games/id/wolf3d/1WOLF14.json">Wolfenstein 3D 1.4</disk>
 		<disk path="/disks/pcx86/games/microsoft/flightsim/1982/FLIGHTSIM-1982.json">MS Flight Simulator (1982)</disk>
 		<disk path="/disks/pcx86/games/microsoft/flightsim/1984/FLIGHTSIM-1984.json">MS Flight Simulator (1984)</disk>
+		<disk path="/disks/pcx86/games/other/wizardry1/WIZARDRY1-MASTER.json">Wizardry I - Master Disk</disk>
+		<disk path="/disks/pcx86/games/other/wizardry1/WIZARDRY1-SCENARIO.json">Wizardry I - Scenario Disk</disk>
 		<disk path="/disks/pcx86/shareware/pcmag/disks/VOL06N08.json">PC Magazine (Vol. 06 No. 08)</disk>
 		<disk path="/disks/pcx86/shareware/pcmag/disks/VOL06N09.json">PC Magazine (Vol. 06 No. 09)</disk>
 		<disk path="/disks/pcx86/shareware/pcmag/disks/VOL06N10.json">PC Magazine (Vol. 06 No. 10)</disk>
