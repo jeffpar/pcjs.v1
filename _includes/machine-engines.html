@@ -26,6 +26,7 @@ The following optional machine properties will be added to the 'parms' property:
     'autoType' (eg: $date\r$time\r)
     'drives' (eg: '[{name:"68Mb Hard Disk",type:4,path:"/disks/pc/fixed/68mb/win95.json"}]')
     'resume' (eg: 1)
+    'sound' (eg: true)
     'state' (eg: state.json)
     'commands' (debugger commands, if any)
     'messages' (eg: fault)
@@ -51,9 +52,9 @@ The following optional machine properties will be added to the 'parms' property:
   {% endunless %}
   {% capture machine_embed %}{{ machine_data.creator }}{% endcapture %}
   {% if machine.autoMount == "" %}
-    {% assign machine_autoMount = "{}" %}
+    {% assign machine_autoMount = "autoMount:{}" %}
   {% else %}
-    {% capture machine_autoMount %}{{ machine.autoMount|jsonify }}{% endcapture %}
+    {% capture machine_autoMount %}autoMount:{{ machine.autoMount|jsonify }}{% endcapture %}
   {% endif %}
   {% if machine.autoScript != nil %}
     {% capture machine_autoScript %},autoScript:"{{ page.machineScripts[machine.autoScript] | strip_newlines | replace:'"':"\\\\&quot;" | replace:"\r":"\\\\r" | replace:"\n":"\\\\n" | replace:"\t":"\\\\t" | replace:"\x":"\\\\x" }}"{% endcapture %}
@@ -79,12 +80,17 @@ The following optional machine properties will be added to the 'parms' property:
   {% else %}
     {% assign machine_drives = "" %}
   {% endif %}
+  {% if machine.sound != nil %}
+    {% capture machine_sound %},sound:{{ machine.sound }}{% endcapture %}
+  {% else %}
+    {% assign machine_sound = "" %}
+  {% endif %}
   {% unless machine.template %}
     {% assign machine_template = "" %}
   {% else %}
     {% assign machine_template = machine.template %}
   {% endunless %}
-  {% capture machine_parms %}{{ site.left_brace }}autoMount:{{ machine_autoMount }}{{ machine_autoScript }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_drives }},resume:"{{ machine.resume }}",state:"{{ machine.state }}",commands:"{{ machine.commands }}",messages:"{{ machine.messages }}",connection:"{{ machine.connection }}"{{ site.right_brace }}{% endcapture %}
+  {% capture machine_parms %}{{ site.left_brace }}{{ machine_autoMount }}{{ machine_autoScript }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_drives }}{{ machine_sound }},resume:"{{ machine.resume }}",state:"{{ machine.state }}",commands:"{{ machine.commands }}",messages:"{{ machine.messages }}",connection:"{{ machine.connection }}"{{ site.right_brace }}{% endcapture %}
   {% if site.pcjs.compiled == true and machine.uncompiled != true %}
     {% capture page_script %}
       <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/{{ machine_type }}.js"></script>{% endcapture %}
