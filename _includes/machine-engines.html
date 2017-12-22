@@ -21,7 +21,6 @@ are some limitations; for example, loading two or more machines of the same 'typ
 The following optional machine properties will be added to the 'parms' property:
 
     'autoMount' (eg: {"A":{"name":"OS/2 FOOTBALL (v7.68.17)","path":"/disks/pc/os2/misc/football/FOOTBALL-76817.json"}})
-    'autoPower' (eg: true)
     'autoScript' (eg, type Keyboard "$date\r$time\r")
     'autoStart' (eg: true)
     'autoType' (eg: $date\r$time\r)
@@ -56,11 +55,6 @@ The following optional machine properties will be added to the 'parms' property:
   {% else %}
     {% capture machine_autoMount %}{{ machine.autoMount|jsonify }}{% endcapture %}
   {% endif %}
-  {% if machine.autoPower != nil %}
-    {% capture machine_autoPower %},autoPower:{{ machine.autoPower }}{% endcapture %}
-  {% else %}
-    {% assign machine_autoPower = "" %}
-  {% endif %}
   {% if machine.autoScript != nil %}
     {% capture machine_autoScript %},autoScript:"{{ page.machineScripts[machine.autoScript] | strip_newlines | replace:'"':"\\\\&quot;" | replace:"\r":"\\\\r" | replace:"\n":"\\\\n" | replace:"\t":"\\\\t" | replace:"\x":"\\\\x" }}"{% endcapture %}
   {% else %}
@@ -90,7 +84,7 @@ The following optional machine properties will be added to the 'parms' property:
   {% else %}
     {% assign machine_template = machine.template %}
   {% endunless %}
-  {% capture machine_parms %}{{ site.left_brace }}autoMount:{{ machine_autoMount }}{{ machine_autoPower }}{{ machine_autoScript }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_drives }},resume:"{{ machine.resume }}",state:"{{ machine.state }}",commands:"{{ machine.commands }}",messages:"{{ machine.messages }}",connection:"{{ machine.connection }}"{{ site.right_brace }}{% endcapture %}
+  {% capture machine_parms %}{{ site.left_brace }}autoMount:{{ machine_autoMount }}{{ machine_autoScript }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_drives }},resume:"{{ machine.resume }}",state:"{{ machine.state }}",commands:"{{ machine.commands }}",messages:"{{ machine.messages }}",connection:"{{ machine.connection }}"{{ site.right_brace }}{% endcapture %}
   {% if site.pcjs.compiled == true and machine.uncompiled != true %}
     {% capture page_script %}
       <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/{{ machine_type }}.js"></script>{% endcapture %}
