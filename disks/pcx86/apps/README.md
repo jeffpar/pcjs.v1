@@ -5,7 +5,7 @@ permalink: /disks/pcx86/apps/
 ---
 
 PC Applications
----
+---------------
 
 Information is available for applications from the following vendors.
 

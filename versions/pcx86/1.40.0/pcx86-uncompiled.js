@@ -37823,6 +37823,7 @@ class ChipSet extends Component {
             var volume = +sound || 0;
             this.volumeInit = (sound == "true" || volume < 0 || volume > 1? 0.5 : volume);
         }
+        if (!this.volumeInit) this.println("note: speaker disabled");
 
         /*
          * This divisor is invariant, so we calculate it as soon as we're able to query the CPU's base speed.

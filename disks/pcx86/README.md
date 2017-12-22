@@ -53,6 +53,7 @@ more detail, along with a live demonstration of the software, but that's not yet
 * [id Software](games/id/)
 * [Infocom Games](games/infocom/)
 * [Microsoft Games](games/microsoft/)
+* [More...](games/other/)
 
 ### Shareware
 
