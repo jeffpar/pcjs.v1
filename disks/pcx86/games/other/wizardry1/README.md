@@ -5,7 +5,7 @@ permalink: /disks/pcx86/games/other/wizardry1/
 machines:
   - id: ibm5150-wizardry1
     type: pcx86
-    config: /devices/pcx86/machine/5150/cga/256kb/debugger/machine.xml
+    config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       A:
         path: /disks/pcx86/games/other/wizardry1/WIZARDRY1-MASTER.json
@@ -16,7 +16,8 @@ machines:
     sound: false
 ---
 
-## Wizardry I: Proving Grounds of the Mad Overlord
+Wizardry I: Proving Grounds of the Mad Overlord
+-----------------------------------------------
 
 {% include machine.html id="ibm5150-wizardry1" %}
 
