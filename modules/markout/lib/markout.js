@@ -360,13 +360,13 @@ MarkOut.aHTMLEntities = {
  *
  *      'state' (eg, "state.json")
  *      'messages' (eg, "disk")
- *      'autopower' (eg, true)
  *      'autostart' (eg, true)
  *      'resume' (eg, "0", "1", "2", "3", or "state.json")
+ *      'sound' (eg, false)
  *
  * and any other string-based property you wish to pass through to PCjs (via the embedPC() sParms parameter).
  *
- * As for any other NON-string-based property you might want to pass through sParms, like 'autopower', add it to the
+ * As for any other NON-string-based property you might want to pass through sParms, like 'autostart', add it to the
  * aFMBooleanMachineProps table, and it will be unquoted (ie, true or false rather than "true" or "false"); also note
  * that even though the only non-reserved, non-string properties we currently use are booleans, that table is not
  * really limited to booleans (eg, they could just as well be numeric properties).
@@ -377,8 +377,8 @@ MarkOut.aHTMLEntities = {
  * which are then converted to camelCase prior to calling the JavaScript components.
  */
 MarkOut.aFMBooleanMachineProps = {
-    'autopower': "autoPower",
-    'autostart': "autoStart"
+    'autostart': "autoStart",
+    'sound': "sound"
 };
 MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'config', 'template', 'uncompiled', 'autoMount', 'drives', 'parms', 'sticky'];
 
