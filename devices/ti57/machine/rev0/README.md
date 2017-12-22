@@ -13,7 +13,6 @@ machines:
           "type": "TI57",
           "name": "TI-57 Emulator",
           "version": 1.10,
-          "autoPower": true,
           "bindings": {
             "clear": "clearTI57",
             "print": "printTI57"

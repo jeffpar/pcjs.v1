@@ -120,6 +120,7 @@
 		<manifest ref="/disks/pcx86/games/id/wolf3d/manifest.xml"/>
 		<manifest ref="/disks/pcx86/games/microsoft/flightsim/1982/manifest.xml"/>
 		<manifest ref="/disks/pcx86/games/microsoft/flightsim/1984/manifest.xml"/>
+		<manifest ref="/disks/pcx86/games/other/wizardry1/manifest.xml"/>
 		<manifest ref="/disks/pcx86/shareware/pcmag/manifest.xml"/>
 		<manifest ref="/disks/pcx86/shareware/pctj/manifest.xml"/>
 		<manifest ref="/disks/pcx86/personal/manifest.xml"/>

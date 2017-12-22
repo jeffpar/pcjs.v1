@@ -15,12 +15,12 @@ machines:
           "type": "leds",
           "name": "Game of Life Demo",
           "version": 1.10,
-          "autoPower": false,
+          "autoStart": false,
           "bindings": {
             "clear": "clearLife",
             "print": "printLife"
           },
-          "overrides": ["autoPower"]
+          "overrides": ["autoStart"]
         },
         "lifeChip": {
           "class": "Chip",
