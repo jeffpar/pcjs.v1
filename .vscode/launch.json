@@ -97,24 +97,31 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "DOS: PC-DOS 1.10 (DEBUG:false)",
+		  "name": "Games: Wizardry I",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/games/other/wizardry1/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PC-DOS 1.10 (DEBUG:false)",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.10/?gort=nodebug",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "Machines: 5150/CGA/256Kb",
+		  "name": "5150, CGA, 256Kb",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/256kb/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "Machines: 5150/CGA/256Kb/Debugger",
+		  "name": "5150, CGA, 256Kb, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/256kb/debugger/",
+		  "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/256kb/debugger/?autoStart=true",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
