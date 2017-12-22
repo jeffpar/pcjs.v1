@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.40.0/manifest.xsl"?>
+<manifest type="software">
+	<title>Wizardry I: Proving Grounds of the Mad Overlord</title>
+	<version>1.00</version>
+	<type>Game</type>
+	<category>Adventure</category>
+	<publisher>Sir-Tech Software</publisher>
+	<releaseDate>1981</releaseDate>
+	<disk id="disk01" size="327680" chs="40:2:8" img="archive/Wizardry - Proving Grounds of the Mad Overlord (198x)(Sir-Tech Software, Inc)[Orginal Release][Master Disk].img" href="/disks/pcx86/games/other/wizardry1/WIZARDRY1-MASTER.json" md5="7e1b98c90bcacdb786712531eb4bd14e" md5json="90e1b6c3e08c0d04ecea0019b9e44231">
+		<name>Wizardry I - Master Disk</name>
+	</disk>
+	<disk id="disk02" size="327680" chs="40:2:8" img="archive/Wizardry - Proving Grounds of the Mad Overlord (198x)(Sir-Tech Software, Inc)[Orginal Release][Scenario Disk].img" href="/disks/pcx86/games/other/wizardry1/WIZARDRY1-SCENARIO.json" md5="3fd8e759e465f7a64056105eeec0ca18" md5json="10b5cb0c1f650fc6ed3f53fc7cfb0402">
+		<name>Wizardry I - Scenario Disk</name>
+	</disk>
+</manifest>
