@@ -1,15 +1,15 @@
 ---
 layout: post
-title: Daylight Savings Time Headaches
+title: Daylight Savings Time Headache
 date: 2017-12-23 10:00:00
 permalink: /blog/2017/12/23/
 ---
 
 This past summer, I added a couple sets of Lotus 1-2-3 disk images to the PCjs archives
-([1-2-3 Release 1A](/disks/pcx86/apps/lotus/1a/) and [1-2-3 Release 1A*](/disks/pcx86/apps/lotus/1as/)), and I had
+([1-2-3 Release 1A](/disks/pcx86/apps/lotus/123/1a/) and [1-2-3 Release 1A*](/disks/pcx86/apps/lotus/123/1as/)), and I had
 noticed with some amusement that Lotus had timestamped all their files with the local time of 1:23am.
 
-Fast-forward to this December, when I was updating the [disk manifest](/disks/pcx86/apps/lotus/1a/manifest.xml) for these
+Fast-forward to this December, when I was updating the [disk manifest](/disks/pcx86/apps/lotus/123/1a/manifest.xml) for these
 Lotus 1-2-3 disks with my [DiskDump utility](/modules/diskdump/), and I noticed that all the file times were *now* being
 recorded as 2:23am.
 
@@ -88,15 +88,15 @@ And if time zones are irrelevant, shouldn't Daylight Savings Time be irrelevant,
 setting I can choose that will display all three files in the above test with their original times.  Perhaps there's some
 macOS "defaults" setting that I can tweak to change this behavior, but so far, I haven't found one.
 
-Can we please get rid of Daylight Savings Time?  There are no real practical benefits, it burdens our operating systems and
-and other time-sensitive software with extraneous logic, and it creates obscure headaches like this one.
+Can we please just get rid of Daylight Savings Time?  There are no real practical benefits, it burdens our operating systems
+and and other time-sensitive software with extraneous logic, and it creates obscure headaches like this one.
 
 And look at those two old serial Mouse drivers, MOUSE.COM and MOUSE.SYS.  Chances are, they were originally timestamped with
-the same local time as the bus mouse drivers (12:00p), because they all have the same date (Sep 13, 1984).  All it takes is for
-the files to pass through a few hands, on computers with different time zones and/or DST settings, and now you've got files
-with timestamps that are out of sync.
+the same local time as the bus mouse drivers (`12:00p`) because they all have the same date (`Sep 13, 1984`).  All it takes is
+for the files to pass through a few hands, on computers with different time zones and/or DST settings, and now you've got files
+with timestamps that are no longer original.
 
-It's an archivist's nightmare.  Well, OK, maybe nightmare is bit extreme.  An archivist's headache.
+It's an archivist's nightmare.  Well, OK, maybe nightmare is a bit extreme.  An archivist's headache.
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *Dec 23, 2017*
