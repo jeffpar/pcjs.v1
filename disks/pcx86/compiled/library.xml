@@ -499,6 +499,8 @@
 		<disk path="/disks/pcx86/tools/microsoft/masm/6.11/MASM611-DISK4.json">MS MASM 6.11 (Disk 4)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/masm/6.11/MASM611-DISK5.json">MS MASM 6.11 (Disk 5)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/mouse/2.00/MSMOUSE-200--1983-12-31.json">MS Mouse 2.00</disk>
+		<disk path="/disks/pcx86/tools/microsoft/mouse/2.50/MSMOUSE-250.json">MS Mouse 2.50 (Bus)</disk>
+		<disk path="/disks/pcx86/tools/microsoft/mouse/2.50/MSMOUSE-250-SERIAL.json">MS Mouse 2.50 (Serial)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/mouse/4.00/MSMOUSE-000099-400-DISK1-SYSTEM.json">MS Mouse 4.00 (SYSTEM)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/mouse/4.00/MSMOUSE-000099-400-DISK2-PROGRAM.json">MS Mouse 4.00 (PROGRAM)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/mouse/5.00/MSMOUSE-000199-500-DISK1-SYSTEM.json">MS Mouse 5.00 (SYSTEM)</disk>

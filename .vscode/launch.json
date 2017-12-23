@@ -158,6 +158,13 @@
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/",
 		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "5170, EGA, 2048Kb, Serial Tabbed Output",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/",
+		  "webRoot": "${workspaceFolder}"
 	  }
 	]
 }

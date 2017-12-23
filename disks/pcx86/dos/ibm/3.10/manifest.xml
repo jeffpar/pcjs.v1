@@ -9,6 +9,7 @@
 	<releaseDate>1985-03-07</releaseDate>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/PCDOS310-DISK1.img" href="/disks/pcx86/dos/ibm/3.10/PCDOS310-DISK1.json" md5="588ab5b50f769593e2b67b9d0784752d" md5json="db9ac761ccc2e79a45fd8f91e6bd3381">
 		<name>PC-DOS 3.10 (Disk 1)</name>
+		<link href="https://winworldpc.com/product/pc-dos/3x">IBM PC-DOS 3.10 (03-07-1985) (5.25): Disk1.img</link>
 		<file size="1651" time="1985-03-07 13:43:00" attr="0x20">ANSI.SYS</file>
 		<file size="1509" time="1985-03-07 13:43:00" attr="0x20">ASSIGN.COM</file>
 		<file size="15091" time="1985-03-07 13:43:00" attr="0x20">ATTRIB.EXE</file>
@@ -51,6 +52,7 @@
 	</disk>
 	<disk id="disk02" size="368640" chs="40:2:9" img="archive/PCDOS310-DISK2.img" href="/disks/pcx86/dos/ibm/3.10/PCDOS310-DISK2.json" md5="18eadfa38eddb3f6906a8b6f9deb41a9" md5json="f71991bb1ecab653ecf1a433c1589a84">
 		<name>PC-DOS 3.10 (Disk 2)</name>
+		<link href="https://winworldpc.com/product/pc-dos/3x">IBM PC-DOS 3.10 (03-07-1985) (5.25): Disk2.img</link>
 		<file size="1879" time="1985-03-07 13:43:00" attr="0x20">ART.BAS</file>
 		<file size="1966" time="1985-03-07 13:43:00" attr="0x20">BALL.BAS</file>
 		<file size="369" time="1985-03-07 13:43:00" attr="0x20">BASIC.PIF</file>
@@ -73,6 +75,7 @@
 	</disk>
 	<disk id="disk03" size="368640" chs="40:2:9" img="archive/PCDOS310-DISK1-PATCHED.img" href="/disks/pcx86/dos/ibm/3.10/PCDOS310-DISK1-PATCHED.json" md5="08af3a895e75812b39809cde4c958e2f" md5json="867414d535fd4b34b805fc1ca24d4063">
 		<name>PC-DOS 3.10 (Patched Disk 1)</name>
+		<link href="https://winworldpc.com/product/pc-dos/3x">IBM PC-DOS 3.10 (04-22-1985) (5.25): Disk01.img</link>
 		<file size="1651" time="1985-03-07 13:43:00" attr="0x20">ANSI.SYS</file>
 		<file size="1509" time="1985-03-07 13:43:00" attr="0x20">ASSIGN.COM</file>
 		<file size="15091" time="1985-03-07 13:43:00" attr="0x20">ATTRIB.EXE</file>
