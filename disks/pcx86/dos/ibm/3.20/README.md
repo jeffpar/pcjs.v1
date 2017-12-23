@@ -2,15 +2,29 @@
 layout: page
 title: PC-DOS 3.20
 permalink: /disks/pcx86/dos/ibm/3.20/
+machines:
+  - id: ibm5170-pcdos320
+    type: pcx86
+    config: /devices/pcx86/machine/5170/ega/2048kb/rev3/machine.xml
+    resume: 1
+    autoMount:
+      A:
+        path: /disks/pcx86/dos/ibm/3.20/PCDOS320-DISK1.json
+      B:
+        path: /disks/pcx86/dos/ibm/3.20/PCDOS320-DISK2.json
+    autoType: $date\r$time\r
 ---
 
 PC-DOS 3.20
 -----------
 
-PC-DOS 3.20 was first announced on March 18, 1986 and released later that year.
+PC-DOS 3.20 was first announced on March 18, 1986 and released later that year.  Read the early
+[PC Magazine Review](#pc-magazine-review) below.
 
-Directory listings of the two 360Kb distribution diskettes are provided below.  This version of PC-DOS was also
-available on one 720Kb diskette.
+[Directory Listings](#directory-of-pc-dos-320-disk-1) of the two 360Kb distribution diskettes are provided below.
+This version of PC-DOS was also available on one 720Kb diskette.
+
+{% include machine.html id="ibm5170-pcdos320" %}
 
 ### Directory of PC-DOS 3.20 (Disk 1)
 
@@ -87,9 +101,13 @@ available on one 720Kb diskette.
 
 ---
 
-From PC Magazine, July 1986, by Charles Petzold:
+## PC Magazine Review
 
-> ### DOS GETS BETTER--AND MORE EXPENSIVE, TOO
+The following article appeared in PC Magazine, Vol. 5, No. 13, July 1986, p. 110.
+
+### DOS GETS BETTER--AND MORE EXPENSIVE, TOO
+
+*by Charles Petzold*
 
 > #### DOS 3.2 adds new commands and a unique device driver and makes some minor changes.
 

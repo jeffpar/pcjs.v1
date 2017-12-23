@@ -2,6 +2,17 @@
 layout: page
 title: PC-DOS 3.10
 permalink: /disks/pcx86/dos/ibm/3.10/
+machines:
+  - id: ibm5170-pcdos310
+    type: pcx86
+    config: /devices/pcx86/machine/5170/ega/640kb/rev1/machine.xml
+    resume: 1
+    autoMount:
+      A:
+        path: /disks/pcx86/dos/ibm/3.10/PCDOS310-DISK1.json
+      B:
+        path: /disks/pcx86/dos/ibm/3.10/PCDOS310-DISK2.json
+    autoType: $date\r$time\r
 ---
 
 PC-DOS 3.10
@@ -10,10 +21,10 @@ PC-DOS 3.10
 PC-DOS 3.10 was announced on August 14, 1984 (along with [PC-DOS 3.00](/disks/pcx86/dos/ibm/3.00/)) and released
 on April 2, 1985.
 
-Directory listings of the two 360Kb distribution diskettes are provided below.  Another variation of the first disk
-has been found, which I've called [Patched Disk 1](#directory-of-pc-dos-310-patched-disk-1).  It contains a modified
-IBMDOS.COM, along with updated `KEYBxx` "Load Keyboard" programs.  The modified IBMDOS.COM was patched with 4 NOP (0x90)
-bytes as follows:
+[Directory Listings](#directory-of-pc-dos-310-disk-1) of the two 360Kb distribution diskettes are provided below.
+Another variation of the first disk has been found, which I've called [Patched Disk 1](#directory-of-pc-dos-310-patched-disk-1).
+It contains a modified IBMDOS.COM, along with updated `KEYBxx` "Load Keyboard" programs.  The modified IBMDOS.COM was patched
+with 4 NOP (0x90) bytes as follows:
 
     298,299c298,299
     < 00001cb0  43 3c 7f 74 36 3c 08 74  32 3c 17 74 5e 3c 15 74  |C<.t6<.t2<.t^<.t|
@@ -32,6 +43,8 @@ any contemporary reports (e.g., press releases or magazine articles) regarding t
 
 Also, a note of thanks to [Jeff Duntemann](https://www.contrapositivediary.com/?p=2107) for sharing his collection
 of old diskettes with PCjs, which included, among other things, IBM's "patched" copy of PC-DOS 3.10.
+
+{% include machine.html id="ibm5170-pcdos310" %}
 
 ### Directory of PC-DOS 3.10 (Disk 1)
 

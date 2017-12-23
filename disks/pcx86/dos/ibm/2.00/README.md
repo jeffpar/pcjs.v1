@@ -2,6 +2,17 @@
 layout: page
 title: PC-DOS 2.00
 permalink: /disks/pcx86/dos/ibm/2.00/
+machines:
+  - id: ibm5160-pcdos200
+    type: pcx86
+    config: /devices/pcx86/machine/5160/cga/256kb/machine.xml
+    resume: 1
+    autoMount:
+      A:
+        path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
+      B:
+        path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json
+    autoType: $date\r$time\r
 ---
 
 PC-DOS 2.00
@@ -9,7 +20,9 @@ PC-DOS 2.00
 
 PC-DOS 2.00 was released in March 1983.
 
-Directory listings of the two 360Kb distribution diskettes are provided below.
+[Directory Listings](#directory-of-pc-dos-200-disk-1) of the two 360Kb distribution diskettes are provided below.
+
+{% include machine.html id="ibm5160-pcdos200" %}
 
 ### Directory of PC-DOS 2.00 (Disk 1)
 
