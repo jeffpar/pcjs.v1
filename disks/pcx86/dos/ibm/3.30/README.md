@@ -2,15 +2,28 @@
 layout: page
 title: PC-DOS 3.30
 permalink: /disks/pcx86/dos/ibm/3.30/
+machines:
+  - id: ibm5170-pcdos330
+    type: pcx86
+    config: /devices/pcx86/machine/5170/ega/2048kb/rev3/machine.xml
+    resume: 1
+    autoMount:
+      A:
+        path: /disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1.json
+      B:
+        path: /disks/pcx86/dos/ibm/3.30/PCDOS330-DISK2.json
+    autoType: $date\r$time\r
 ---
 
 PC-DOS 3.30
----
+-----------
 
 PC-DOS 3.30 was announced and released on April 2, 1987, along with the first PS/2 models. 
 
-Directory listings of the two 360Kb distribution diskettes are provided below.  This version of PC-DOS was also
-available on one 720Kb diskette.
+[Directory Listings](#directory-of-pc-dos-330-disk-1) of the two 360Kb distribution diskettes are provided below.
+This version of PC-DOS was also available on one 720Kb diskette.
+
+{% include machine.html id="ibm5170-pcdos330" %}
 
 ### Directory of PC-DOS 3.30 (Disk 1)
 

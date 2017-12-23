@@ -2,14 +2,27 @@
 layout: page
 title: PC-DOS 2.10
 permalink: /disks/pcx86/dos/ibm/2.10/
+machines:
+  - id: ibm5160-pcdos210
+    type: pcx86
+    config: /devices/pcx86/machine/5160/cga/256kb/machine.xml
+    resume: 1
+    autoMount:
+      A:
+        path: /disks/pcx86/dos/ibm/2.10/PCDOS210-DISK1.json
+      B:
+        path: /disks/pcx86/dos/ibm/2.10/PCDOS210-DISK2.json
+    autoType: $date\r$time\r
 ---
 
 PC-DOS 2.10
----
+-----------
 
 PC-DOS 2.10 was finalized in October 1983 and released on November 1, 1983.
 
-Directory listings of the two 360Kb distribution diskettes are provided below.
+[Directory Listings](#directory-of-pc-dos-210-disk-1) of the two 360Kb distribution diskettes are provided below.
+
+{% include machine.html id="ibm5160-pcdos210" %}
 
 ### Directory of PC-DOS 2.10 (Disk 1)
 
