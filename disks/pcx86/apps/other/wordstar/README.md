@@ -389,12 +389,12 @@ printer drivers without ever mentioning that none of that information is the lea
 port. Although its documentation doesn't mention this, MicroPro recommended that a printer running from the IBM be configured with no protocol
 and treated as an "operating system primary list device." If this is done for a serial printer, two PC-DOS commands will be required:
 
-    MODE COM1: 9600,N,8,1,P
-    MODE LPT1: =COM1
+    MODE COM1:9600,N,8,1,P
+    MODE LPT1:=COM1
 
 These commands assume that the printer will be running at 9600 baud and that a cable lets the printer and the PC exchange status information.
 
-If you're an old WordStar band, you'll probably find it speedier to use DEBUG to make all your patches at once rather than endure a seemingly
+If you're an old WordStar hand, you'll probably find it speedier to use DEBUG to make all your patches at once rather than endure a seemingly
 endless and occasionally ambiguous series of prompts. All the patch points documented in Appendix C of the WordStar 3.20 and 3.24 manuals
 remain the same in version 3.3. A new patch area is included for the NEC 3550's "VMI Trailer String''; it begins at 0881h, so addresses above
 that will not match the old version.

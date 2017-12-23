@@ -11,6 +11,13 @@
       "cwd": "${workspaceFolder}",
       "stopOnEntry": true
     },
+	  {
+		  "name": "Launch index.html (disable sourcemaps)",
+		  "type": "chrome",
+		  "request": "launch",
+		  "sourceMaps": false,
+		  "file": "${workspaceFolder}"
+	  },
     {
       "name": "Webserver (Debug)",
       "type": "node",
@@ -104,10 +111,24 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
+		  "name": "Tests: VGA Black Book",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/tests/pcx86/vga/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
 		  "name": "PC-DOS 1.10 (DEBUG:false)",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.10/?gort=nodebug",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "5150, CGA, 64Kb, Debugger, LPT1",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/64kb/debugger/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
@@ -125,11 +146,18 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "Launch index.html (disable sourcemaps)",
+		  "name": "5160, CGA, 640Kb, 10Mb, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
-		  "sourceMaps": false,
-		  "file": "${workspaceFolder}"
+		  "url": "http://pcjs:8088/devices/pcx86/machine/5160/cga/640kb/debugger/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "5170, EGA, 640Kb, Debugger",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/",
+		  "webRoot": "${workspaceFolder}"
 	  }
 	]
 }

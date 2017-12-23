@@ -3,6 +3,10 @@
 <manifest type="software">
 	<title>WordStar</title>
 	<version>3.24</version>
+	<type>Application</type>
+	<category>Word Processing</category>
+	<author>MicroPro</author>
+	<releaseDate>1983-02-01</releaseDate>
 	<disk id="disk01" size="163840" chs="40:1:8" img="archive/WS324-MOUNTABLE.img" href="/disks/pcx86/apps/other/wordstar/3.24/WS324-MOUNTABLE.json" md5="3127ce782680b32aa35b6d388e8f8778" md5json="f654eecadc826503f2619fb580e67b42">
 		<name>WordStar 3.24</name>
 		<file size="17152" time="1982-10-01 01:00:00" attr="0x20">INSTALL.BAS</file>

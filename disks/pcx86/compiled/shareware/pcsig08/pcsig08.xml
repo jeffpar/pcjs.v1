@@ -24,6 +24,7 @@
 		<disk path="/disks/pcx86/dos/ibm/3.00/PCDOS300-DISK2.json">PC-DOS 3.00 (Disk 2)</disk>
 		<disk path="/disks/pcx86/dos/ibm/3.10/PCDOS310-DISK1.json">PC-DOS 3.10 (Disk 1)</disk>
 		<disk path="/disks/pcx86/dos/ibm/3.10/PCDOS310-DISK2.json">PC-DOS 3.10 (Disk 2)</disk>
+		<disk path="/disks/pcx86/dos/ibm/3.10/PCDOS310-DISK1-PATCHED.json">PC-DOS 3.10 (Patched Disk 1)</disk>
 		<disk path="/disks/pcx86/dos/ibm/3.20/PCDOS320-DISK1.json">PC-DOS 3.20 (Disk 1)</disk>
 		<disk path="/disks/pcx86/dos/ibm/3.20/PCDOS320-DISK2.json">PC-DOS 3.20 (Disk 2)</disk>
 		<disk path="/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1.json">PC-DOS 3.30 (Disk 1)</disk>

@@ -1615,9 +1615,9 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
                  * And regardless of who's to blame, what should I really be doing?  Do I need to also check the timestamps and
                  * determine whether they are inside or outside DST as well?
                  */
-                if (today.getTimezoneOffset() == 480) {
-                    fileInfo.FILE_TIME.setHours(fileInfo.FILE_TIME.getHours() - 1);
-                }
+                // if (today.getTimezoneOffset() == 480) {
+                //     fileInfo.FILE_TIME.setHours(fileInfo.FILE_TIME.getHours() - 1);
+                // }
                 this.validateTime(fileInfo.FILE_TIME);
                 this.addManifestInfo(fileInfo);
             }
