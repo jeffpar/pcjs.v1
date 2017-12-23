@@ -9,5 +9,6 @@ Other PC Tools
 
 Information is available for these additional tools:
 
+* [DoubleDOS](doubledos/)
 * [Enhanced DEBUG](enhdebug/)
 * [FlickerFree](flickerfree/)

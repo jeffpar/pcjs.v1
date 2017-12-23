@@ -10,7 +10,21 @@ PC-DOS 3.10
 PC-DOS 3.10 was announced on August 14, 1984 (along with [PC-DOS 3.00](/disks/pcx86/dos/ibm/3.00/)) and released
 on April 2, 1985.
 
-Directory listings of the two 360Kb distribution diskettes are provided below.
+Directory listings of the two 360Kb distribution diskettes are provided below.  Another variation of the first disk
+has been found, which we've called [Patched Disk 1](#directory-of-pc-dos-310-patched-disk-1).  It contains a modified
+IBMDOS.COM, along with updated `KEYBxx` "Load Keyboard" programs.  The modified IBMDOS.COM was patched with 4 NOP (0x90)
+bytes as follows:
+
+    298,299c298,299
+    < 00001cb0  43 3c 7f 74 36 3c 08 74  32 3c 17 74 5e 3c 15 74  |C<.t6<.t2<.t^<.t|
+    < 00001cc0  51 3c 0d 74 32 3c 0a 74  44 36 3a 06 11 11 74 6b  |Q<.t2<.tD6:...tk|
+    ---
+    > 00001cb0  43 3c 7f 74 36 3c 08 74  32 3c 17 90 90 3c 15 90  |C<.t6<.t2<...<..|
+    > 00001cc0  90 3c 0d 74 32 3c 0a 74  44 36 3a 06 11 11 74 6b  |.<.t2<.tD6:...tk|
+
+Different websites (e.g., [16BitOS](http://16bitos.com/310ibm.htm), [PC DOS Retro](https://sites.google.com/site/pcdosretro/disklistings#TOC-PCDOS310))
+list different "authoritative" directory listings for PC-DOS 3.10, but thanks to the way IBM slipped these changes
+into production, there is no single authoritative listing.  There are essentially two versions of PC-DOS version 3.10.
 
 ### Directory of PC-DOS 3.10 (Disk 1)
 
@@ -81,3 +95,50 @@ Directory listings of the two 360Kb distribution diskettes are provided below.
 	SPACE    BAS     1851   3-07-85   1:43p
 	VDISK    LST   136313   3-07-85   1:43p
 	       18 File(s)    108544 bytes free
+
+### Directory of PC-DOS 3.10 (Patched Disk 1)
+
+     Volume in drive A has no label
+     Directory of A:\
+
+    IBMBIO   COM      9564 03-07-85   1:43p
+    IBMDOS   COM     27760 04-22-85  12:09p
+    ANSI     SYS      1651 03-07-85   1:43p
+    ASSIGN   COM      1509 03-07-85   1:43p
+    ATTRIB   EXE     15091 03-07-85   1:43p
+    BACKUP   COM      5577 03-07-85   1:43p
+    BASIC    COM     17792 03-07-85   1:43p
+    BASICA   COM     27520 03-07-85   1:43p
+    CHKDSK   COM      9435 03-07-85   1:43p
+    COMMAND  COM     23210 03-07-85   1:43p
+    COMP     COM      3664 03-07-85   1:43p
+    DISKCOMP COM      4073 03-07-85   1:43p
+    DISKCOPY COM      4329 03-07-85   1:43p
+    EDLIN    COM      7261 03-07-85   1:43p
+    FDISK    COM      8173 03-07-85   1:43p
+    FIND     EXE      6403 03-07-85   1:43p
+    FORMAT   COM      9398 03-07-85   1:43p
+    GRAFTABL COM      1169 03-07-85   1:43p
+    GRAPHICS COM      3111 03-07-85   1:43p
+    JOIN     EXE     15971 03-07-85   1:43p
+    KEYBFR   COM      2473 04-12-85   4:22p
+    KEYBGR   COM      2418 04-12-85   4:23p
+    KEYBIT   COM      2361 04-12-85   4:25p
+    KEYBSP   COM      2451 04-12-85   4:24p
+    KEYBUK   COM      2348 04-12-85   4:26p
+    LABEL    COM      1826 03-07-85   1:43p
+    MODE     COM      5295 03-07-85   1:43p
+    MORE     COM       282 03-07-85   1:43p
+    PRINT    COM      8291 03-07-85   1:43p
+    RECOVER  COM      4050 03-07-85   1:43p
+    RESTORE  COM      5410 03-07-85   1:43p
+    SELECT   COM      2084 03-07-85   1:43p
+    SHARE    EXE      8304 03-07-85   1:43p
+    SORT     EXE      1664 03-07-85   1:43p
+    SUBST    EXE     16611 03-07-85   1:43p
+    SYS      COM      3727 03-07-85   1:43p
+    TREE     COM      2831 03-07-85   1:43p
+    VDISK    SYS      3307 03-07-85   1:43p
+    VENDOR-# DO1         0 07-04-83  12:00a
+           39 file(s)     278394 bytes
+                           61440 bytes free

@@ -125,6 +125,13 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
+		  "name": "5150, CGA, 64Kb, Debugger, LPT1",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/64kb/debugger/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
 		  "name": "5150, CGA, 256Kb",
 		  "type": "chrome",
 		  "request": "launch",
@@ -136,6 +143,20 @@
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/256kb/debugger/?autoStart=true",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "5160, CGA, 640Kb, 10Mb, Debugger",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/pcx86/machine/5160/cga/640kb/debugger/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "5170, EGA, 640Kb, Debugger",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/",
 		  "webRoot": "${workspaceFolder}"
 	  }
 	]
