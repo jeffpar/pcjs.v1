@@ -11,7 +11,7 @@ PC-DOS 3.10 was announced on August 14, 1984 (along with [PC-DOS 3.00](/disks/pc
 on April 2, 1985.
 
 Directory listings of the two 360Kb distribution diskettes are provided below.  Another variation of the first disk
-has been found, which we've called [Patched Disk 1](#directory-of-pc-dos-310-patched-disk-1).  It contains a modified
+has been found, which I've called [Patched Disk 1](#directory-of-pc-dos-310-patched-disk-1).  It contains a modified
 IBMDOS.COM, along with updated `KEYBxx` "Load Keyboard" programs.  The modified IBMDOS.COM was patched with 4 NOP (0x90)
 bytes as follows:
 
@@ -22,9 +22,13 @@ bytes as follows:
     > 00001cb0  43 3c 7f 74 36 3c 08 74  32 3c 17 90 90 3c 15 90  |C<.t6<.t2<...<..|
     > 00001cc0  90 3c 0d 74 32 3c 0a 74  44 36 3a 06 11 11 74 6b  |.<.t2<.tD6:...tk|
 
-Different websites (e.g., [16BitOS](http://16bitos.com/310ibm.htm), [PC DOS Retro](https://sites.google.com/site/pcdosretro/disklistings#TOC-PCDOS310))
-list different "authoritative" directory listings for PC-DOS 3.10, but thanks to the way IBM slipped these changes
-into production, there is no single authoritative listing.  There are essentially two versions of PC-DOS version 3.10.
+Different websites (e.g.,
+[16BitOS](http://16bitos.com/310ibm.htm),
+[PC DOS Retro](https://sites.google.com/site/pcdosretro/disklistings#TOC-PCDOS310))
+list different "authoritative" directory listings for PC-DOS 3.10, which helps confirm that both variations of Disk 1
+are authentic (as opposed to someone's random changes) and that IBM quietly slipped in these last-minute changes during
+the first month of its release.  And "quietly" seems to be a fair assessment, since I've so far been unable to locate
+any contemporary reports (e.g., press releases or magazine articles) regarding these PC-DOS 3.10 variations.
 
 ### Directory of PC-DOS 3.10 (Disk 1)
 
