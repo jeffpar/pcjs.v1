@@ -104,6 +104,7 @@
 		<manifest ref="/disks/pcx86/tools/microsoft/masm/6.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/masm/6.11/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/mouse/2.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/mouse/2.50/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/mouse/4.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/mouse/5.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/mouse/6.00/manifest.xml"/>

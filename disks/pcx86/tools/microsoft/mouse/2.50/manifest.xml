@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.40.0/manifest.xsl"?>
+<manifest type="software">
+	<title>MS Mouse</title>
+	<version>2.50</version>
+	<type>Driver</type>
+	<category>Mouse</category>
+	<author>Microsoft</author>
+	<releaseDate/>
+	<disk id="disk01" size="327680" chs="40:2:8" img="archive/MSMOUSE-250.img" href="/disks/pcx86/tools/microsoft/mouse/2.50/MSMOUSE-250.json" md5="105888519aa82dbcd6541cdade67825b" md5json="a66b966b261b40c8d6554c01f31529c8">
+		<name>MS Mouse 2.50 (Bus)</name>
+		<link href="https://winworldpc.com/product/microsoft-mouse/2x">Microsoft Mouse 2.50 (Word Bundle): MSMOUSE.IMG</link>
+		<file size="3356" time="1984-09-13 13:00:00" attr="0x20">123.DEF</file>
+		<file size="1024" time="1984-09-13 13:00:00" attr="0x20">123.MNU</file>
+		<file size="17" time="1984-09-13 13:00:00" attr="0x20">AUTOEXEC.BAT</file>
+		<file size="6272" time="1984-09-13 13:00:00" attr="0x20">DOODLE.EXE</file>
+		<file size="10624" time="1984-09-13 13:00:00" attr="0x20">HOKUSAI</file>
+		<file size="1920" time="1984-09-13 13:00:00" attr="0x20">IBMBIO.COM</file>
+		<file size="6400" time="1984-09-13 13:00:00" attr="0x20">IBMDOS.COM</file>
+		<file size="2095" time="1984-09-13 13:00:00" attr="0x20">LIFE.EXE</file>
+		<file size="25180" time="1984-09-13 13:00:00" attr="0x20">MAKEMENU.EXE</file>
+		<file size="2418" time="1984-09-13 13:00:00" attr="0x20">MENU.COM</file>
+		<file size="4192" time="1984-09-13 13:00:00" attr="0x20">MOUSE.COM</file>
+		<file size="2560" time="1984-09-13 13:00:00" attr="0x20">MOUSE.LIB</file>
+		<file size="4440" time="1984-09-13 13:00:00" attr="0x20">MOUSE.SYS</file>
+		<file size="7712" time="1984-09-13 13:00:00" attr="0x20">MPIBM.DEF</file>
+		<file size="1664" time="1984-09-13 13:00:00" attr="0x20">MPIBM.MNU</file>
+		<file size="7705" time="1984-09-13 13:00:00" attr="0x20">MPMS.DEF</file>
+		<file size="1664" time="1984-09-13 13:00:00" attr="0x20">MPMS.MNU</file>
+		<file size="9536" time="1984-09-13 13:00:00" attr="0x20">PIANO.BAS</file>
+		<file size="33044" time="1984-09-13 13:00:00" attr="0x20">PIANO.EXE</file>
+		<file size="7977" time="1984-09-13 13:00:00" attr="0x20">VC.DEF</file>
+		<file size="2560" time="1984-09-13 13:00:00" attr="0x20">VC.MNU</file>
+		<file size="11904" time="1984-09-13 13:00:00" attr="0x20">WS.DEF</file>
+		<file size="4608" time="1984-09-13 13:00:00" attr="0x20">WS.MNU</file>
+	</disk>
+	<disk id="disk02" size="327680" chs="40:2:8" dir="archive/MSMOUSE-250-SERIAL" href="/disks/pcx86/tools/microsoft/mouse/2.50/MSMOUSE-250-SERIAL.json" md5="e419e27b22e3bf7a31bc577c228f92d4" md5json="f623e009b770f66e2873fef8b7e823df">
+		<name>MS Mouse 2.50 (Serial)</name>
+		<link href="https://winworldpc.com/product/microsoft-mouse/2x">Microsoft Mouse 2.50 (Word Bundle): SERMOUSE.COM and SERMOUSE.SYS</link>
+		<file size="4138" time="1984-09-13 10:00:00" attr="0x20" md5="790e73b95e2bbf966aac72806f0dc9c2">MOUSE.COM</file>
+		<file size="4386" time="1984-09-13 10:00:00" attr="0x20" md5="6a261e2aefa188eed03b93f55373b9fc">MOUSE.SYS</file>
+	</disk>
+</manifest>

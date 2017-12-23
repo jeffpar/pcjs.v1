@@ -38,3 +38,5 @@ Microsoft Mouse 2.00
 	MPIBM    DEF     7268  12-31-83  12:00p
 	MPMS     DEF     7261  12-31-83  12:00p
 	       25 File(s)     93184 bytes free
+
+![MS Mouse 2.00 Diskette](MSMOUSE-200--1983-12-31.jpg)
