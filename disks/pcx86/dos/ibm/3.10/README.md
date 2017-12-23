@@ -30,6 +30,9 @@ are authentic (as opposed to someone's random changes) and that IBM quietly slip
 the first month of its release.  And "quietly" seems to be a fair assessment, since I've so far been unable to locate
 any contemporary reports (e.g., press releases or magazine articles) regarding these PC-DOS 3.10 variations.
 
+Also, a note of thanks to [Jeff Duntemann](https://www.contrapositivediary.com/?p=2107) for sharing his collection
+of old diskettes with PCjs, which included, among other things, IBM's "patched" copy of PC-DOS 3.10.
+
 ### Directory of PC-DOS 3.10 (Disk 1)
 
 	 Volume in drive A has no label
