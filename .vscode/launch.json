@@ -41,6 +41,20 @@
       ]
     },
 	  {
+		  "name": "Apps: TopView 1.01",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/apps/ibm/topview/1.01/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "Apps: WordStar 3.24",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/apps/other/wordstar/3.24/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
 		  "name": "Devices: Game of Life",
 		  "type": "chrome",
 		  "request": "launch",
@@ -90,17 +104,10 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "Apps: TopView 1.01",
+		  "name": "Disks: Private",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/apps/ibm/topview/1.01/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "Apps: WordStar 3.24",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/apps/other/wordstar/3.24/",
+		  "url": "http://pcjs:8088/disks/pcx86/private/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
@@ -111,6 +118,76 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
+		  "name": "PC-DOS 0.90",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/0.90/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PC-DOS 1.10 (NODEBUG)",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.10/?gort=nodebug",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PC-DOS 1.00",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.00/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PC-DOS 1.10",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.10/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PC-DOS 2.00",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/2.00/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PC-DOS 2.10",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/2.10/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PC-DOS 3.00",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/3.00/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PC-DOS 3.10",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/3.10/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PC-DOS 3.20",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/3.20/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "PC-DOS 3.30",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/3.30/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
 		  "name": "Tests: VGA Black Book",
 		  "type": "chrome",
 		  "request": "launch",
@@ -118,14 +195,7 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PC-DOS 1.10 (DEBUG:false)",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.10/?gort=nodebug",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "5150, CGA, 64Kb, Debugger, LPT1",
+		  "name": "5150, CGA, 64Kb, LPT1, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/64kb/debugger/",
@@ -160,7 +230,7 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "5170, EGA, 2048Kb, Serial Tabbed Output",
+		  "name": "5170, EGA, 2048Kb, COM2, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/",
