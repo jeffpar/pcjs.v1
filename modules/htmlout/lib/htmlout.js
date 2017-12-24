@@ -1736,6 +1736,8 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
         if (err) {
             /*
              * HACK to look for a "machine.md" if our attempt to load a "README.md" failed.
+             * 
+             * NOTE: I've since renamed all the "machine.md" files to "README.md", but I've decided to leave this as an option.
              */
             if (sFile.indexOf(sReadMeFile) >= 0) {
                 sFile = sFile.replace(sReadMeFile, sMachineMDFile);
