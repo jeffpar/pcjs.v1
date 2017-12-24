@@ -79,24 +79,24 @@ On one level, this makes sense: `MOUSE.COM` and `MOUSE.SYS` were created during 
 or UTC minus 7 hours, while `TEST` was created during Pacific Standard Time (PST), which is "-0800" or UTC minus 8 hours, and
 my local operating system is apparently trying to preserve that distinction.
 
-On the other hand, these offsets are essentially time zone "biases", and the entire notion of "time zone" is completely alien
-to the FAT file system.  All of the above files could have been created on the east coast, but since the the FAT file system
-stores *local* times, not UTC-style times, any files created at 10am on the east coast would be displayed as 10am files on the
-west coast, too.
+On the other hand, DST is essentially a time zone "bias", and the entire notion of "time zone" is completely unknown
+to the FAT file system.  All it stores are *local* times, not UTC-style times, so any files created at 10am on, say, the
+east coast *must* be displayed as 10am files on the west coast, too.  No information is recorded regarding the original time
+zone.
 
 And if time zones are irrelevant, shouldn't Daylight Savings Time be irrelevant, too?  As it stands, there is no clock
 setting I can choose that will display all three files in the above test with their original times.  Perhaps there's some
 macOS "defaults" setting that I can tweak to change this behavior, but so far, I haven't found one.
 
 Can we please just get rid of Daylight Savings Time?  There are no real practical benefits, it burdens our operating systems
-and and other time-sensitive software with extraneous logic, and it creates obscure headaches like this one.
+and other time-sensitive software with extraneous logic, and it creates obscure headaches like this one.
 
 And look at those two old serial Mouse drivers, MOUSE.COM and MOUSE.SYS.  Chances are, they were originally timestamped with
 the same local time as the bus mouse drivers (`12:00p`) because they all have the same date (`Sep 13, 1984`).  All it takes is
-for the files to pass through a few hands, on computers with different time zones and/or DST settings, and now you've got files
-with timestamps that are no longer original.
+for the files to pass through a few hands, on computers with different time zones or DST settings, and their timestamps
+may change in subtle, unexpected ways.
 
-It's an archivist's nightmare.  Well, OK, maybe nightmare is a bit extreme.  An archivist's headache.
+It's an archivist's nightmare.  Well, OK, maybe nightmare is a bit extreme, but certainly an archivist's headache.
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *Dec 23, 2017*
