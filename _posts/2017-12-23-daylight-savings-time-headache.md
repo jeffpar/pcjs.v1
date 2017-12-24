@@ -91,7 +91,7 @@ macOS "defaults" setting that I can tweak to change this behavior, but so far, I
 Can we please just get rid of Daylight Savings Time?  There are no real practical benefits, it burdens our operating systems
 and other time-sensitive software with extraneous logic, and it creates obscure headaches like this one.
 
-And look at those two old serial Mouse drivers, MOUSE.COM and MOUSE.SYS.  Chances are, they were originally timestamped with
+And look at those two old serial mouse drivers, MOUSE.COM and MOUSE.SYS.  Chances are, they were originally timestamped with
 the same local time as the bus mouse drivers (`12:00p`) because they all have the same date (`Sep 13, 1984`).  All it takes is
 for the files to pass through a few hands, on computers with different time zones or DST settings, and their timestamps
 may change in subtle, unexpected ways.
