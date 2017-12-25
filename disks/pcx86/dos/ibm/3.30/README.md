@@ -12,7 +12,7 @@ machines:
         path: /disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1.json
       B:
         path: /disks/pcx86/dos/ibm/3.30/PCDOS330-DISK2.json
-    autoType: $date\r$time\r
+    autoType: \r\r
 ---
 
 PC-DOS 3.30
