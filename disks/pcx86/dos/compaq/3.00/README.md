@@ -2,6 +2,17 @@
 layout: page
 title: COMPAQ MS-DOS 3.00
 permalink: /disks/pcx86/dos/compaq/3.00/
+machines:
+  - id: ibm5170-compaq300
+    type: pcx86
+    config: /devices/pcx86/machine/5170/ega/640kb/rev1/machine.xml
+    resume: 1
+    autoMount:
+      A:
+        path: /disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-STARTUP.json
+      B:
+        path: /disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-SUPP.json
+    autoType: \r\r
 ---
 
 COMPAQ MS-DOS 3.00
@@ -15,8 +26,10 @@ Released in 1985 by COMPAQ Computer Corp, this version of MS-DOS displays the fo
 	(C) Copyright COMPAQ Computer Corp. 1982, 1983, 1984, 1985
 	(C) Copyright Microsoft Corp. 1981, 1982, 1983, 1984, 1985
 
-Directory listings of the distribution diskettes are provided below.  Thanks (again) to the
-[OS/2 Museum](http://www.os2museum.com/) for sharing these disks with us.
+[Directory Listings](#directory-of-compaq-ms-dos-300-startup) of the distribution diskettes are provided below.
+Thanks (again) to the [OS/2 Museum](http://www.os2museum.com/) for sharing these disks with us.
+
+{% include machine.html id="ibm5170-compaq300" %}
 
 ### Directory of COMPAQ MS-DOS 3.00 (Startup)
 

@@ -2,6 +2,17 @@
 layout: page
 title: COMPAQ MS-DOS 3.10
 permalink: /disks/pcx86/dos/compaq/3.10/
+machines:
+  - id: deskpro386
+    type: pcx86
+    debugger: true
+    config: /devices/pcx86/machine/compaq/deskpro386/ega/2048kb/debugger/machine.xml
+    autoMount:
+      A:
+        path: /disks/pcx86/dos/compaq/3.10/COMPAQ-DOS310-DISK1.json
+      B:
+        path: /disks/pcx86/dos/compaq/3.10/COMPAQ-DOS310-DISK2.json
+    autoStart: true
 ---
 
 COMPAQ MS-DOS 3.10
@@ -19,7 +30,7 @@ to make use of V86-mode on the 80386.
 
 More information about CEMM is available at the [OS/2 Museum](http://www.os2museum.com/wp/original-cemm-unearthed/).
 
----
+{% include machine.html id="deskpro386" %}
 
 COMPAQ MS-DOS 3.10 (10-31-86)
 -----------------------------

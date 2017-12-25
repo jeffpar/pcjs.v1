@@ -118,6 +118,55 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
+		  "name": "COMPAQ DOS 1.11",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/compaq/1.11/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "COMPAQ DOS 1.12",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/compaq/1.12/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "COMPAQ DOS 2.12",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/compaq/2.12/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "COMPAQ DOS 3.00",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/compaq/3.00/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "COMPAQ DOS 3.10",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/compaq/3.10/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "COMPAQ DOS 3.31",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/compaq/3.31/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "MS-DOS 3.20",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/dos/microsoft/3.20/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
 		  "name": "PC-DOS 0.90",
 		  "type": "chrome",
 		  "request": "launch",

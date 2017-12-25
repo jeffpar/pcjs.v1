@@ -2,6 +2,17 @@
 layout: page
 title: COMPAQ MS-DOS 3.31
 permalink: /disks/pcx86/dos/compaq/3.31/
+machines:
+  - id: deskpro386
+    type: pcx86
+    debugger: true
+    config: /devices/pcx86/machine/compaq/deskpro386/ega/2048kb/debugger/machine.xml
+    autoMount:
+      A:
+        path: /disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK1.json
+      B:
+        path: /disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json
+    autoStart: true
 ---
 
 COMPAQ MS-DOS 3.31
@@ -15,7 +26,9 @@ Released in 1988 by COMPAQ Computer Corp, this version of MS-DOS displays the fo
 	(C) Copyright Compaq Computer Corp. 1982, 1988
 	(C) Copyright Microsoft Corp. 1981, 1987
 
-Directory listings of the distribution diskettes are provided below.
+[Directory Listings](#directory-of-compaq-ms-dos-331-disk-1) of the distribution diskettes are provided below.
+
+{% include machine.html id="deskpro386" %}
 
 ### Directory of COMPAQ MS-DOS 3.31 (Disk 1)
 
