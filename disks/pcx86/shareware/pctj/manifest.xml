@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.40.0/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/manifest.xsl"?>
 <manifest type="software">
 	<title>PC Tech Journal Diskettes</title>
 	<disk id="disk01" size="163840" chs="40:1:8" dir="archive/PCTJ8512" href="/disks/pcx86/shareware/pctj/disks/PCTJ8512.json" md5="cf9e657a00ff80c049103c2b916c6039" md5json="c127f27e1f71822032e75016948b1f97">

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.40.0/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/machine.xsl"?>
 <machine id="ibm5150" type="pcx86" border="1" pos="center" background="default">
 	<name pos="center">Zork I (IBM PC Model 5150)</name>
 	<computer id="zork-cga-64k" name="IBM PC"/>

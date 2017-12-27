@@ -160,7 +160,7 @@ aMachines.forEach(function(machineType) {
      * change the appropriate "compile" tasks to simply ignore any machines that aren't outdated.
      * 
      * Since this code runs *before* any of the actual tasks, the "outdated" machines array must
-     * ALSO be updated by any "concat" task that recreated one of the uncompiled input files.
+     * ALSO be updated by any "concat" task that recreates one of the uncompiled input files.
      */
     let aMachinesOutdated = [];
     let srcFile = path.join(machineReleaseDir, machineUncompiledFile);
@@ -172,7 +172,7 @@ aMachines.forEach(function(machineType) {
         let dstTime = new Date(dstStat.mtime);
         if (dstTime < srcTime) aMachinesOutdated.push(machineType);
     } catch(err) {
-        console.log(err.message);
+        // console.log(err.message);
     }
 
     let taskConcat = "concat/" + machineType;

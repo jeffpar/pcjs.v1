@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.40.0/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/manifest.xsl"?>
 <manifest type="software">
 	<title>WordStar 4.00</title>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WS400-DISK1-INST.img" href="/disks/pcx86/apps/other/wordstar/4.00/WS400-DISK1-INST.json" md5="8cf777671c3bc3bd6abe79c796cb7c11" md5json="4f8fcd191a091c2b17cf43807df4873f">
