@@ -2,12 +2,25 @@
 layout: page
 title: MicroPro WordStar 3.30
 permalink: /disks/pcx86/apps/other/wordstar/3.30/
+machines:
+  - id: ibm5150
+    type: pcx86
+    config: /devices/pcx86/machine/5150/mda/256kb/machine.xml
+    autoMount:
+      A:
+        path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
+      B:
+        path: /disks/pcx86/apps/other/wordstar/3.30/WS330-DISK2-PROG.json
+    autoType: $date\r$time\rB:\rWS\r
 ---
 
 MicroPro WordStar 3.30
 ----------------------
 
-Directory listings of the five 160Kb distribution diskettes are provided below.
+[Directory Listings](#directory-of-wordstar-330-disk-1) of the five single-sided (160Kb) distribution diskettes
+are provided below.  The disk images were obtained from [WinWorld](https://winworldpc.com/product/wordstar/330-z-100).
+
+{% include machine.html id="ibm5150" %}
 
 ### Directory of WordStar 3.30 (Disk 1)
 

@@ -55,6 +55,13 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
+		  "name": "Apps: WordStar for PCjr",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/disks/pcx86/apps/other/wordstar/pcjr/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
 		  "name": "Devices: Game of Life",
 		  "type": "chrome",
 		  "request": "launch",
@@ -289,7 +296,7 @@
 		  "name": "IBM PC AT: EGA, 2048Kb, COM2, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/",
+		  "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/?autoMount={A:{name:%22PC-DOS%205.00%20(Disk%201)%22}}",
 		  "webRoot": "${workspaceFolder}"
 	  }
 	]

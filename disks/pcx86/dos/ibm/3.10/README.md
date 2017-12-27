@@ -42,7 +42,8 @@ the first month of its release.  And "quietly" seems to be a fair assessment, si
 any contemporary reports (e.g., press releases or magazine articles) regarding these PC-DOS 3.10 variations.
 
 Also, a note of thanks to [Jeff Duntemann](https://www.contrapositivediary.com/?p=2107) for sharing his collection
-of old diskettes with PCjs, which included, among other things, IBM's "patched" copy of PC-DOS 3.10.
+of old diskettes with PCjs, which included, among other things, IBM's "patched" version of PC-DOS 3.10.  The earlier
+"unpatched" disk images were obtained from [WinWorld](https://winworldpc.com/product/pc-dos/3x).
 
 {% include machine.html id="ibm5170-pcdos310" %}
 

@@ -7,13 +7,14 @@
 	<category>Word Processing</category>
 	<author>MicroPro</author>
 	<releaseDate>1983-02-01</releaseDate>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WSPCJR100-DISK1.img" href="/disks/pcx86/apps/other/wordstar/pcjr/WSPCJR100-DISK1.json" md5="30b4b32b53848ebf900fbf9f943bad04" md5json="79464c9431196bc78c203fcedd17ce00">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WSPCJR100-DISK1-EXE.img" href="/disks/pcx86/apps/other/wordstar/pcjr/WSPCJR100-DISK1.json" md5="484eab6577120a69d25c6c7b29e37762" md5json="86f0e7dc8bb3863a3b37a64b9389477a">
 		<name>WordStar for PCjr (Disk 1)</name>
 		<link href="https://winworldpc.com/product/wordstar/for-pcjr">Disk1.img</link>
 		<file size="3840" time="1984-08-17 09:41:30" attr="0x20">DAISY.TST</file>
 		<file size="3840" time="1984-08-17 09:41:30" attr="0x20">MATRIX1.TST</file>
 		<file size="3840" time="1984-08-17 09:41:30" attr="0x20">MATRIX2.TST</file>
 		<file size="40960" time="1984-08-17 09:41:30" attr="0x20">WINSTALL.EXE</file>
+		<file size="87680" time="2017-12-26 14:07:55" attr="0x20">WS.EXE</file>
 		<file size="57216" time="1984-08-17 09:41:30" attr="0x20">WS.INS</file>
 		<file size="16392" time="1984-08-17 09:41:30" attr="0x20">WS.PIC</file>
 		<file size="87792" time="1987-07-30 20:50:10" attr="0x20">WSU.EXE</file>
@@ -43,9 +44,5 @@
 		<file size="11008" time="1984-08-17 18:10:34" attr="0x20">WSTUTOR4.COM</file>
 		<file size="11008" time="1984-08-17 18:10:34" attr="0x20">WSTUTOR5.COM</file>
 		<file size="11008" time="1984-08-17 18:10:34" attr="0x20">WSTUTOR6.COM</file>
-	</disk>
-	<disk id="disk04" size="163840" chs="40:1:8" dir="archive/WSPCJR100-EXE" href="/disks/pcx86/apps/other/wordstar/pcjr/WSPCJR100-EXE.json" md5="51acbec5a99a7d214d1c30d7e2471a14" md5json="a0f5f7ef8be3db7648b50d871f5c6ef5">
-		<name>WordStar for PCjr (EXE)</name>
-		<file size="87680" time="2017-12-26 14:07:55" attr="0x20" md5="6ac97980e8b1a0d5c75fe07f3be76edd">WS.EXE</file>
 	</disk>
 </manifest>
