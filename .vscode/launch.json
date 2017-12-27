@@ -244,42 +244,49 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "5150, CGA, 64Kb, LPT1, Debugger",
+		  "name": "IBM PCjr: CGA, 64Kb, Debugger",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/devices/pcx86/machine/4860/cga/64kb/debugger/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
+		  "name": "IBM PC: CGA, 64Kb, LPT1, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/64kb/debugger/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "5150, CGA, 256Kb",
+		  "name": "IBM PC: CGA, 256Kb",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/256kb/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "5150, CGA, 256Kb, Debugger",
+		  "name": "IBM PC: CGA, 256Kb, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/256kb/debugger/?autoStart=true",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "5160, CGA, 640Kb, 10Mb, Debugger",
+		  "name": "IBM PC XT: CGA, 640Kb, 10Mb, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/pcx86/machine/5160/cga/640kb/debugger/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "5170, EGA, 640Kb, Debugger",
+		  "name": "IBM PC AT: EGA, 640Kb, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "5170, EGA, 2048Kb, COM2, Debugger",
+		  "name": "IBM PC AT: EGA, 2048Kb, COM2, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/",
