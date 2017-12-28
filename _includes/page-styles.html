@@ -5,6 +5,10 @@
       {{ id[0] }} {
         {% for style in id[1] %}{{ style[0] }}: {{ style[1] }}{% endfor %}
       }
+    {% elsif id[0] == "font-face" %}
+      @{{ id[0] }} {
+        {% for style in id[1] %}{{ style[0] }}: {{ style[1] }}{% endfor %}
+      }
     {% else %}
       #{{ id[0] }} {
         {% for style in id[1] %}{{ style[0] }}: {{ style[1] }}{% endfor %}
