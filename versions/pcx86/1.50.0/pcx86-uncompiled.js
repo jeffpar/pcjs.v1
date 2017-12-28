@@ -3483,7 +3483,7 @@ class Component {
      *
      * This is a simple parser that breaks sScript into an array of commands, where each command
      * is an array of tokens, where tokens are sequences of characters separated by any of: tab, space,
-     * carriage-return (CR), line-feed (LF), semicolon, single-quote, or double-quote;  if a quote is
+     * carriage-return (CR), line-feed (LF), semicolon, single-quote, or double-quote; if a quote is
      * used, all characters up to the next matching quote become part of the token, allowing any of the
      * other separators to be part of the token.  CR, LF and semicolon also serve to terminate a command,
      * with semicolon being preferred, because it's 1) more visible, and 2) essential when the entire
@@ -3916,6 +3916,7 @@ class Component {
      * status() is like println() but it also includes information about the component (ie, the component type),
      * which is why there is no corresponding Component.status() function.
      *
+     * @this {Component}
      * @param {string} s is the message text
      */
     status(s)
@@ -4123,18 +4124,36 @@ class Component {
      * @param {number} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      * @return {boolean} true if all specified message enabled, false if not
      */
-    messageEnabled(bitsMessage)
+    messageEnabled(bitsMessage = 0)
     {
         if (DEBUGGER && this.dbg) {
-            if (this === this.dbg) {
-                bitsMessage |= 0;
-            } else {
+            if (this !== this.dbg) {
                 bitsMessage = bitsMessage || this.bitsMessage;
             }
             var bitsEnabled = this.dbg.bitsMessage & bitsMessage;
             return (!!bitsMessage && bitsEnabled === bitsMessage || !!(bitsEnabled & this.dbg.bitsWarning));
         }
         return false;
+    }
+
+    /**
+     * printf(format, ...args)
+     *
+     * @this {Component} (imported from Device)
+     * @param {string} format
+     * @param {...} args
+     */
+    printf(format, ...args)
+    {
+        /*
+         * Callers often check messageEnabled() themselves, but for those that don't, check it now.
+         */
+        if (DEBUGGER && this.dbg && this.messageEnabled()) {
+            /*
+             * TODO: If/when dbg.message() is replaced with print(), remove the following linefeed removal.
+             */
+            this.dbg.message(this.sprintf(format, ...args).replace(/\n$/,""));
+        }
     }
 
     /**
@@ -4181,6 +4200,107 @@ class Component {
             }
             this.dbg.messageIO(this, port, bOut, addrFrom, name, bIn, bitsMessage);
         }
+    }
+
+    /**
+     * sprintf(format, ...args)
+     *
+     * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
+     *
+     * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
+     * specifiers that I use.
+     *
+     * @this {Component} (imported from Device)
+     * @param {string} format
+     * @param {...} args
+     * @returns {string}
+     */
+    sprintf(format, ...args)
+    {
+        let buffer = "";
+        let aParts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
+
+        let iArg = 0, iPart;
+        for (iPart = 0; iPart < aParts.length - 7; iPart += 7) {
+
+            buffer += aParts[iPart];
+
+            let arg = args[iArg++];
+            let flags = aParts[iPart+1];
+            let minimum = +aParts[iPart+2] || 0;
+            let precision = +aParts[iPart+4] || 0;
+            let conversion = aParts[iPart+6];
+            let ach = null, s;
+
+            switch(conversion) {
+            case 'd':
+                /*
+                 * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
+                 */
+                arg = Math.trunc(arg);
+                /* falls through */
+
+            case 'f':
+                s = Math.trunc(arg) + "";
+                if (precision) {
+                    minimum -= (precision + 1);
+                }
+                if (s.length < minimum) {
+                    if (flags == '0') {
+                        if (arg < 0) minimum--;
+                        s = ("0000000000" + Math.abs(arg)).slice(-minimum);
+                        if (arg < 0) s = '-' + s;
+                    } else {
+                        s = ("          " + s).slice(-minimum);
+                    }
+                }
+                if (precision) {
+                    arg = Math.trunc((arg - Math.trunc(arg)) * Math.pow(10, precision));
+                    s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
+                }
+                buffer += s;
+                break;
+
+            case 'c':
+                arg = String.fromCharCode(arg);
+                /* falls through */
+
+            case 's':
+                while (arg.length < minimum) {
+                    if (flags == '-') {
+                        arg += ' ';
+                    } else {
+                        arg = ' ' + arg;
+                    }
+                }
+                buffer += arg;
+                break;
+
+            case 'X':
+                ach = "0123456789ABCDEF";
+                /* falls through */
+
+            case 'x':
+                if (!ach) ach = "0123456789abcdef";
+                s = "";
+                do {
+                    s = ach[arg & 0xf] + s;
+                    arg >>>= 4;
+                } while (--minimum > 0 || arg);
+                buffer += s;
+                break;
+
+            default:
+                /*
+                 * The supported ANSI C set of conversions: "dioxXucsfeEgGpn%"
+                 */
+                buffer += "(unrecognized printf conversion %" + conversion + ")";
+                break;
+            }
+        }
+
+        buffer += aParts[iPart];
+        return buffer;
     }
 }
 
@@ -51302,8 +51422,8 @@ class Video extends Component {
         var bCursorMax = this.cardActive.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
 
         /*
-         * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to detect
-         * that particular combination of bad values and automatically fix them (we're so thoughtful!)
+         * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to
+         * detect that particular combination of bad values and automatically fix them (we're so thoughtful!)
          */
         var fEGAHack = false;
         if (this.cardActive === this.cardEGA) {
@@ -51316,13 +51436,30 @@ class Video extends Component {
          * another way is setting bCursorStart > bCursorEnd (unless it's an EGA, in which case we must actually draw a
          * "split block" cursor instead).
          *
-         * TODO: Verify whether the second test (bCursorStart > bCursorMax) should also result in a hidden cursor;
-         * ThinkTank sets both start and end values to 0x0f, which doesn't make sense on a CGA, where the max is 0x07.
+         * TODO: Determine whether the final condition (bCursorStart > bCursorMax) should also result in a hidden cursor
+         * on a CGA.  For example, ThinkTank sets both start and end values to 15, and WordStar for PCjr sets start and end
+         * to 12 and 13, respectively.  Those values don't make sense when the max is 7, but what does a *real* CGA do?
          */
-        if ((bCursorFlags & Card.CRTC.CURSTART_BLINKOFF) || bCursorStart > bCursorEnd && !fEGAHack || bCursorStart > bCursorMax) {
+        if ((bCursorFlags & Card.CRTC.CURSTART_BLINKOFF) || bCursorStart > bCursorEnd && !fEGAHack /* || bCursorStart > bCursorMax */) {
             this.removeCursor();
             return false;
         }
+
+        /*
+         * Range-check CURSTART and CUREND against MAXSCAN now.
+         * 
+         * HACK: Since I've already made the decision (above) that this condition should *not* hide the cursor,
+         * I've decided to double-down and also "thicken" the cursor to two scan lines if both start and end needed
+         * to be rounded down to the max.
+         */
+        if (bCursorStart > bCursorMax) {
+            bCursorStart = bCursorMax;
+        }
+        if (bCursorEnd > bCursorMax) {
+            bCursorEnd = bCursorMax;
+            if (bCursorStart = bCursorMax) bCursorStart = bCursorMax - 1;
+        }
+        var bCursorSize = bCursorEnd - bCursorStart + 1;
 
         /*
          * The most compatible way of disabling the cursor is to simply move the cursor to an off-screen position.
@@ -51330,26 +51467,36 @@ class Video extends Component {
         var iCellCursor = this.cardActive.regCRTData[Card.CRTC.CURLOW];
         iCellCursor |= (this.cardActive.regCRTData[Card.CRTC.CURHIGH] & this.cardActive.addrMaskHigh) << 8;
         if (this.iCellCursor != iCellCursor) {
-            if (MAXDEBUG && this.messageEnabled()) {
-                this.printMessage("checkCursor(): cursor moved from " + this.iCellCursor + " to " + iCellCursor);
-            }
+            let rowFrom = (this.iCellCursor / this.nCols)|0;
+            let colFrom = (this.iCellCursor % this.nCols);
+            let rowTo = (iCellCursor / this.nCols)|0;
+            let colTo = (iCellCursor % this.nCols);
+            this.printf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo);
             this.removeCursor();
             this.iCellCursor = iCellCursor;
         }
 
         /*
-         * yCursor and cyCursor are no longer scaled at this point, because the necessary scaling will depend on whether we're
-         * drawing the cursor to the on-screen or off-screen buffer, and updateChar() is in the best position to determine that.
+         * yCursor and cyCursor are no longer scaled at this point, because the necessary scaling will depend on
+         * whether we're drawing the cursor to the on-screen or off-screen buffer, and updateChar() is in the best
+         * position to determine that.
          *
-         * We also record cyCursorCell, the hardware cell height, since we'll need to know what the yCursor and cyCursor values
-         * are relative to when it's time to scale them.
+         * We also record cyCursorCell, the hardware cell height, since we'll need to know what the yCursor and
+         * cyCursor values are relative to when it's time to scale them.
          */
-        var bCursorSize = bCursorEnd - bCursorStart + 1;
         if (this.yCursor != bCursorStart || this.cyCursor != bCursorSize) {
+            this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize);
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
         }
         this.cyCursorCell = bCursorMax + 1;
+
+        /*
+         * This next condition is critical; WordStar for PCjr (designed for the CGA) would program CUREND to 31,
+         * whereas MAXSCAN was 7.  This resulted in cyCursorCell of 8 and cyCursor of 32, producing elongated cursors
+         * in updateChar().  By range-checking CURSTART and CUREND against MAXSCAN above, that should no longer happen.
+         */
+
 
         this.checkBlink();
         return true;
@@ -51385,9 +51532,7 @@ class Video extends Component {
                          */
                         this.updateChar(col, row, data);
                     }
-                    if (MAXDEBUG && this.messageEnabled()) {
-                        this.printMessage("removeCursor(): removed from " + row + "," + col);
-                    }
+                    this.printf("removeCursor(): removed from %d,%d\n", row, col);
                     this.aCellCache[this.iCellCursor] = data;
                 }
             }
@@ -51524,9 +51669,7 @@ class Video extends Component {
         var card = this.cardActive;
         if (card && nAccess != null && nAccess != card.nAccess) {
 
-            if (MAXDEBUG && this.messageEnabled()) {
-                this.printMessage("setCardAccess(" + Str.toHexWord(nAccess) + ")");
-            }
+            this.printf("setCardAccess(0x%04x)\n", nAccess);
 
             card.setMemoryAccess(nAccess);
 

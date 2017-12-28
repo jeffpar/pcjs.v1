@@ -8,9 +8,10 @@ machines:
     config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
+        path: /disks/pcx86/dos/ibm/2.10/PCDOS210-DISK1.json
       B:
-        path: /disks/pcx86/apps/other/wordstar/pcjr/WSPCJR100-EXE.json
+        path: /disks/pcx86/apps/other/wordstar/pcjr/WSPCJR100-DISK1.json
+    autoStart: true
     autoType: $date\r$time\rB:\rWS\r
 ---
 
@@ -20,8 +21,15 @@ MicroPro WordStar for PCjr
 [Directory Listings](#directory-of-wordstar-for-pcjr-disk-1) of the double-sided (360Kb) WordStar for PCjr diskettes
 are provided below.  The disk images were obtained from [WinWorld](https://winworldpc.com/product/wordstar/for-pcjr).
 
+It's worth noting that, despite being called "WordStar for PCjr", this version of WordStar appears to work fine on non-PCjr
+configurations, including the one below, which also has twice the memory (256Kb) that the PCjr supported (128Kb).  We've
+taken care to boot [PC-DOS 2.10](/disks/pcx86/dos/ibm/2.10/) for this demo, because it's possible that WordStar for PCjr has
+some dependencies on that version of DOS (since the PCjr required PC-DOS 2.10 or later).
+
 We have also included another variation of the WordStar for PCjr binary (`WS.EXE`) on
-[Disk 1](#directory-of-wordstar-for-pcjr-disk-1), exactly as it was provided to us by a former MicroPro employee.
+[Disk 1](#directory-of-wordstar-for-pcjr-disk-1), exactly as it was provided to us by a former MicroPro employee.  It
+is slightly smaller than the "official" PCjr binary (`WSU.EXE`), but given that both files have dates well past the apparent
+release date of August 17, 1984, it's not clear to what extent *either* of the programs on Disk 1 can be considered "official".
 
 {% include machine.html id="ibm5150" %}
 

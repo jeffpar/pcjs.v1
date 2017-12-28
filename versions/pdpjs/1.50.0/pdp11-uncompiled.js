@@ -3483,7 +3483,7 @@ class Component {
      *
      * This is a simple parser that breaks sScript into an array of commands, where each command
      * is an array of tokens, where tokens are sequences of characters separated by any of: tab, space,
-     * carriage-return (CR), line-feed (LF), semicolon, single-quote, or double-quote;  if a quote is
+     * carriage-return (CR), line-feed (LF), semicolon, single-quote, or double-quote; if a quote is
      * used, all characters up to the next matching quote become part of the token, allowing any of the
      * other separators to be part of the token.  CR, LF and semicolon also serve to terminate a command,
      * with semicolon being preferred, because it's 1) more visible, and 2) essential when the entire
@@ -3916,6 +3916,7 @@ class Component {
      * status() is like println() but it also includes information about the component (ie, the component type),
      * which is why there is no corresponding Component.status() function.
      *
+     * @this {Component}
      * @param {string} s is the message text
      */
     status(s)
@@ -4123,18 +4124,36 @@ class Component {
      * @param {number} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      * @return {boolean} true if all specified message enabled, false if not
      */
-    messageEnabled(bitsMessage)
+    messageEnabled(bitsMessage = 0)
     {
         if (DEBUGGER && this.dbg) {
-            if (this === this.dbg) {
-                bitsMessage |= 0;
-            } else {
+            if (this !== this.dbg) {
                 bitsMessage = bitsMessage || this.bitsMessage;
             }
             var bitsEnabled = this.dbg.bitsMessage & bitsMessage;
             return (!!bitsMessage && bitsEnabled === bitsMessage || !!(bitsEnabled & this.dbg.bitsWarning));
         }
         return false;
+    }
+
+    /**
+     * printf(format, ...args)
+     *
+     * @this {Component} (imported from Device)
+     * @param {string} format
+     * @param {...} args
+     */
+    printf(format, ...args)
+    {
+        /*
+         * Callers often check messageEnabled() themselves, but for those that don't, check it now.
+         */
+        if (DEBUGGER && this.dbg && this.messageEnabled()) {
+            /*
+             * TODO: If/when dbg.message() is replaced with print(), remove the following linefeed removal.
+             */
+            this.dbg.message(this.sprintf(format, ...args).replace(/\n$/,""));
+        }
     }
 
     /**
@@ -4181,6 +4200,107 @@ class Component {
             }
             this.dbg.messageIO(this, port, bOut, addrFrom, name, bIn, bitsMessage);
         }
+    }
+
+    /**
+     * sprintf(format, ...args)
+     *
+     * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
+     *
+     * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
+     * specifiers that I use.
+     *
+     * @this {Component} (imported from Device)
+     * @param {string} format
+     * @param {...} args
+     * @returns {string}
+     */
+    sprintf(format, ...args)
+    {
+        let buffer = "";
+        let aParts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
+
+        let iArg = 0, iPart;
+        for (iPart = 0; iPart < aParts.length - 7; iPart += 7) {
+
+            buffer += aParts[iPart];
+
+            let arg = args[iArg++];
+            let flags = aParts[iPart+1];
+            let minimum = +aParts[iPart+2] || 0;
+            let precision = +aParts[iPart+4] || 0;
+            let conversion = aParts[iPart+6];
+            let ach = null, s;
+
+            switch(conversion) {
+            case 'd':
+                /*
+                 * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
+                 */
+                arg = Math.trunc(arg);
+                /* falls through */
+
+            case 'f':
+                s = Math.trunc(arg) + "";
+                if (precision) {
+                    minimum -= (precision + 1);
+                }
+                if (s.length < minimum) {
+                    if (flags == '0') {
+                        if (arg < 0) minimum--;
+                        s = ("0000000000" + Math.abs(arg)).slice(-minimum);
+                        if (arg < 0) s = '-' + s;
+                    } else {
+                        s = ("          " + s).slice(-minimum);
+                    }
+                }
+                if (precision) {
+                    arg = Math.trunc((arg - Math.trunc(arg)) * Math.pow(10, precision));
+                    s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
+                }
+                buffer += s;
+                break;
+
+            case 'c':
+                arg = String.fromCharCode(arg);
+                /* falls through */
+
+            case 's':
+                while (arg.length < minimum) {
+                    if (flags == '-') {
+                        arg += ' ';
+                    } else {
+                        arg = ' ' + arg;
+                    }
+                }
+                buffer += arg;
+                break;
+
+            case 'X':
+                ach = "0123456789ABCDEF";
+                /* falls through */
+
+            case 'x':
+                if (!ach) ach = "0123456789abcdef";
+                s = "";
+                do {
+                    s = ach[arg & 0xf] + s;
+                    arg >>>= 4;
+                } while (--minimum > 0 || arg);
+                buffer += s;
+                break;
+
+            default:
+                /*
+                 * The supported ANSI C set of conversions: "dioxXucsfeEgGpn%"
+                 */
+                buffer += "(unrecognized printf conversion %" + conversion + ")";
+                break;
+            }
+        }
+
+        buffer += aParts[iPart];
+        return buffer;
     }
 }
 

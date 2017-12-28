@@ -41,6 +41,13 @@
       ]
     },
 	  {
+		  "name": "Apps: ThinkTank",
+		  "type": "chrome",
+		  "request": "launch",
+		  "url": "http://pcjs:8088/apps/pcx86/1987/thinktank/",
+		  "webRoot": "${workspaceFolder}"
+	  },
+	  {
 		  "name": "Apps: TopView 1.01",
 		  "type": "chrome",
 		  "request": "launch",
