@@ -102,15 +102,15 @@ machines:
         }
       }
 styles:
-  lifeColorDemo:
+  _lifeColorDemo:
     position: relative;
     display: inline-block;
     float: left;
     margin-right: 32px;
     margin-bottom: 16px;
-  displayLife:
+  _displayLife:
     position: relative;
-  colorSwatchLife:
+  _colorSwatchLife:
     display: inline-block;
     width: 16px;
     height: 16px;
@@ -118,9 +118,9 @@ styles:
     border-radius: 50%;
     vertical-align: middle;
     background-color: green;
-  diagsLife:
+  _diagsLife:
     float: left;
-  printLife:
+  _printLife:
     font-family: Monaco,"Lucida Console",monospace;
 ---
 

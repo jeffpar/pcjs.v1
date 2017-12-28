@@ -206,10 +206,10 @@ machines:
         }
       }
 styles:
-  ti55:
+  _ti55:
     position: relative;
     display: inline-block;
-  displayTI55:
+  _displayTI55:
     position: absolute;
     left: 15%;
     top: 8%;
@@ -219,42 +219,42 @@ styles:
     font-size: 11px;
     font-family: Monaco,"Lucida Console",monospace;
     color: red;
-  ind2nd:
+  _ind2nd:
     position: absolute;
     left: 15%;
     top: 13%;
     width: 7%;
     height: 2%;
     opacity: 0;
-  indINV:
+  _indINV:
     position: absolute;
     left: 23%;
     top: 13%;
     width: 7%;
     height: 2%;
     opacity: 0;
-  indDeg:
+  _indDeg:
     position: absolute;
     left: 31%;
     top: 13%;
     width: 7%;
     height: 2%;
     opacity: 0;
-  indRad:
+  _indRad:
     position: absolute;
     left: 39%;
     top: 13%;
     width: 7%;
     height: 2%;
     opacity: 0;
-  indGrad:
+  _indGrad:
     position: absolute;
     left: 47%;
     top: 13%;
     width: 7%;
     height: 2%;
     opacity: 0;
-  powerTI55:
+  _powerTI55:
     position: absolute;
     left: 69%;
     top: 22%;

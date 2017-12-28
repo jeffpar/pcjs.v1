@@ -60,13 +60,13 @@ machines:
         }
       }
 styles:
-  scrollLEDs:
+  _scrollLEDs:
     position: relative;
     display: inline-block;
     float: left;
     margin-right: 32px;
     margin-bottom: 16px;
-  displayScroll:
+  _displayScroll:
     position: relative;
 ---
 

@@ -216,12 +216,12 @@ machines:
         }
       }
 styles:
-  ti42:
+  _ti42:
     position: relative;
     display: inline-block;
     float: left;
     margin-right: 32px;
-  displayTI42:
+  _displayTI42:
     position: absolute;
     left: 15%;
     top: 8%;
@@ -231,14 +231,14 @@ styles:
     font-size: 11px;
     font-family: Monaco,"Lucida Console",monospace;
     color: red;
-  ind2ndTI42:
+  _ind2ndTI42:
     position: absolute;
     left: 15%;
     top: 13%;
     width: 7%;
     height: 2%;
     opacity: 0;
-  powerTI42:
+  _powerTI42:
     position: absolute;
     left: 69%;
     top: 22%;
@@ -247,12 +247,12 @@ styles:
     opacity: 0;
   .diagsTI42:
     float: left;
-  printTI42:
+  _printTI42:
     font-family: Monaco,"Lucida Console",monospace;
-  romArrayTI42:
+  _romArrayTI42:
     display: inline-block;
     max-width: 512px;
-  romCellTI42:
+  _romCellTI42:
     font-family: Monaco,"Lucida Console",monospace;
   .regRow:
     padding-left: 1em;

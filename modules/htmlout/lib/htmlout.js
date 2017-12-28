@@ -1789,7 +1789,14 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
             if (aStyleDefs) {
                 var sStyles = '<style type="text/css">\n';
                 for (var id in aStyleDefs) {
-                    sStyles += (id[0] != '.'? '#' : "") + id + ' {\n' + aStyleDefs[id] + '\n}\n';
+                    var idStyle = id;
+                    if (idStyle[0] == '_') {
+                        idStyle = '#' + idStyle.substr(1);
+                    }
+                    else if (idStyle == "font-face") {
+                        idStyle = '@' + idStyle;
+                    }
+                    sStyles += idStyle + ' {\n' + aStyleDefs[id] + '\n}\n';
                 }
                 sStyles += '</style>\n';
                 obj.sHTML = obj.sHTML.replace(/([ \t]*<\/head>)/, sStyles + "$1");

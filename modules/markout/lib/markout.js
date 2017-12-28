@@ -455,7 +455,7 @@ MarkOut.prototype.convertMD = function(sIndent)
              */
             var aStyleDefs = aMatch[1].match(/\nstyles:([\s\S]*?)\n([^\s]|$)/);
             if (aStyleDefs) {
-                var reStyle = /\n  ([a-z.][a-z0-9-]*):\n/gi;
+                var reStyle = /\n  ([a-z_.][a-z0-9-]*):\n/gi;
                 var aStyles = aStyleDefs[1].split(reStyle);
                 /*
                  * Since the preceding RegExp contains a capture group (representing the ID for the style),

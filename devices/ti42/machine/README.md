@@ -202,10 +202,10 @@ machines:
         }
       }
 styles:
-  ti42:
+  _ti42:
     position: relative;
     display: inline-block;
-  displayTI42:
+  _displayTI42:
     position: absolute;
     left: 15%;
     top: 9%;
@@ -215,14 +215,14 @@ styles:
     font-size: 11px;
     font-family: Monaco,"Lucida Console",monospace;
     color: red;
-  ind2ndTI42:
+  _ind2ndTI42:
     position: absolute;
     left: 15%;
     top: 13%;
     width: 7%;
     height: 2%;
     opacity: 0;
-  powerTI42:
+  _powerTI42:
     position: absolute;
     left: 69%;
     top: 22%;

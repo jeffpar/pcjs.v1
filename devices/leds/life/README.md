@@ -76,17 +76,17 @@ machines:
         }
       }
 styles:
-  lifeDemo:
+  _lifeDemo:
     position: relative;
     display: inline-block;
     float: left;
     margin-right: 32px;
     margin-bottom: 16px;
-  displayLife:
+  _displayLife:
     position: relative;
-  diagsLife:
+  _diagsLife:
     float: left;
-  printLife:
+  _printLife:
     font-family: Monaco,"Lucida Console",monospace;
 ---
 
