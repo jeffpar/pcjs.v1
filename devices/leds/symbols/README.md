@@ -78,8 +78,8 @@ styles:
   .diags:
     float: left;
     margin-bottom: 16px;
-  @font-face:
-    font-family: "ATT4425";
+  font-face:
+    font-family: ATT4425;
     src: url("/modules/shared/templates/ATT4425.ttf") format("truetype");
 ---
 
