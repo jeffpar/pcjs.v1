@@ -590,6 +590,41 @@ class Device {
     }
 
     /**
+     * getURLParms(sParms)
+     *
+     * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
+     * @returns {Object} containing properties for each parameter found
+     */
+    static getURLParms(sParms)
+    {
+        let parms = Device.URLParms;
+        if (!parms) {
+            parms = {};
+            if (window) {
+                if (!sParms) {
+                    /*
+                     * Note that window.location.href returns the entire URL, whereas window.location.search
+                     * returns only the parameters, if any (starting with the '?', which we skip over with a substr() call).
+                     */
+                    sParms = window.location.search.substr(1);
+                }
+                let match;
+                let pl = /\+/g; // RegExp for replacing addition symbol with a space
+                let search = /([^&=]+)=?([^&]*)/g;
+                let decode = function decodeParameter(s) {
+                    return decodeURIComponent(s.replace(pl, " ")).trim();
+                };
+
+                while ((match = search.exec(sParms))) {
+                    parms[decode(match[1])] = decode(match[2]);
+                }
+            }
+            Device.URLParms = parms;
+        }
+        return parms;
+    }
+
+    /**
      * hasLocalStorage
      *
      * If localStorage support exists, is enabled, and works, return true.
@@ -941,41 +976,6 @@ class Device {
 
         buffer += aParts[iPart];
         return buffer;
-    }
-
-    /**
-     * getURLParms(sParms)
-     *
-     * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
-     * @returns {Object} containing properties for each parameter found
-     */
-    static getURLParms(sParms)
-    {
-        let parms = Device.URLParms;
-        if (!parms) {
-            parms = {};
-            if (window) {
-                if (!sParms) {
-                    /*
-                     * Note that window.location.href returns the entire URL, whereas window.location.search
-                     * returns only the parameters, if any (starting with the '?', which we skip over with a substr() call).
-                     */
-                    sParms = window.location.search.substr(1);
-                }
-                let match;
-                let pl = /\+/g; // RegExp for replacing addition symbol with a space
-                let search = /([^&=]+)=?([^&]*)/g;
-                let decode = function decodeParameter(s) {
-                    return decodeURIComponent(s.replace(pl, " ")).trim();
-                };
-
-                while ((match = search.exec(sParms))) {
-                    parms[decode(match[1])] = decode(match[2]);
-                }
-            }
-            Device.URLParms = parms;
-        }
-        return parms;
     }
 }
 
@@ -4255,7 +4255,7 @@ Time.VERSION    = 1.11;
  * @copyright http://pcjs.org/modules/devices/ledctrl.js (C) Jeff Parsons 2012-2017
  */
 
-/** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), wrap: (boolean|undefined), rule: (string|undefined), pattern: (string|undefined), patterns: (Object|undefined), message: (string|undefined), toggleColor: (boolean|undefined), colors: (Object|undefined) }} */
+/** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), wrap: (boolean|undefined), font: (string|undefined), rule: (string|undefined), pattern: (string|undefined), patterns: (Object|undefined), message: (string|undefined), toggleColor: (boolean|undefined), colors: (Object|undefined) }} */
 var LCConfig;
 
 /**
@@ -4264,6 +4264,7 @@ var LCConfig;
  * @class {Chip}
  * @unrestricted
  * @property {boolean} fWrap
+ * @property {string} sFont
  * @property {string} sRule
  * @property {string} sPattern
  * @property {string} sMessage
@@ -4290,9 +4291,11 @@ class Chip extends Device {
 
         /*
          * These are grid "behavior" properties.  If 'wrap' is true, then any off-grid neighbor cell
-         * locations are mapped to the opposite edge; otherwise, they are mapped to the LEDs "scratch" row.
+         * locations are mapped to the opposite edge; otherwise, they are mapped to the LED "scratch" row.
          */
         this.fWrap = this.getDefaultBoolean('wrap', false);
+        this.sFont = this.getDefaultString('font', "");
+        this.font = this.sFont && Chip.FONTS[this.sFont] || Chip.FONTS["Helvetica"];
         this.sRule = this.getDefaultString('rule', "");
         this.sPattern = this.getDefaultString('pattern', "");
         this.setMessage(this.sMessageInit = this.getDefaultString('message', ""));
@@ -5330,8 +5333,9 @@ class Chip extends Device {
             } else {
                 let col = this.leds.colsView + 1;
                 let delta = (this.nMessageCount < 0? this.nMessageCount : 0);
-                let sPattern = Chip.SYMBOLS[chSymbol];
-                if (sPattern) this.nMessageCount += this.loadPatternString(col + delta, 0, sPattern, true);
+                let sPattern = this.font[chSymbol] || this.font[chSymbol.toUpperCase()];
+                let row = Math.round((this.leds.rowsView - this.font['height']) / 2);
+                if (sPattern) this.nMessageCount += this.loadPatternString(col + delta, (row < 0? 0 : row), sPattern, true);
                 this.nMessageCount += (2 - shift);
                 // this.printf("loaded symbol '%s' at offscreen column %d (%d), new count %d\n", chSymbol, (col - this.leds.colsView), delta, this.nMessageCount);
             }
@@ -5826,102 +5830,136 @@ Chip.RULES = {
 };
 
 /*
- * Symbols can be formed with the following 16x16 grid patterns.
+ * Symbols can be formed with the following grid patterns.
  */
-Chip.SYMBOLS = {
-    "0":"$2b2o$bo2bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo$bo2bo$2b2o",
-    "1":"$3bo$2b2o$4o$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo",
-    "2":"$2b3o$bo3bo$o5bo$o5bo$6bo$5bo$3b2o$2bo$bo$o$7o",
-    "3":"$b4o$o4bo$o4bo$5bo$4bo$2b2o$4bo$5bo$o4bo$o4bo$b4o",
-    "4":"$5bo$4b2o$3bobo$2bo2bo$bo3bo$o4bo$o4bo$8o$5bo$5bo$5bo",
-    "5":"$6o$o$o$o$4o$4bo$5bo$5bo$5bo$o3bo$b3o",
-    "6":"$2b4o$bo4bo$o$o$o$ob4o$2o4bo$o5bo$o5bo$bo4bo$2b4o",
-    "7":"$8o$7bo$6bo$5bo$4bo$4bo$3bo$3bo$2bo$2bo$2bo",
-    "8":"$b4o$o4bo$o4bo$o4bo$bo2bo$2b2o$bo2bo$o4bo$o4bo$o4bo$b4o",
-    "9":"$b4o$o4bo$o5bo$o5bo$o4b2o$b4obo$6bo$6bo$6bo$o4bo$b4o",
-    "A":"$3b2o$2bo2bo$bo4bo$bo4bo$o6bo$o6bo$o6bo$8o$o6bo$o6bo$o6bo",
-    "B":"$6o$o5bo$o5bo$o5bo$o4bo$7o$o6bo$o6bo$o6bo$o6bo$7o",
-    "C":"$2b4o$bo4bo$o6bo$o$o$o$o$o$o6bo$bo4bo$2b4o",
-    "D":"$6o$o5bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o5bo$6o",
-    "E":"$7o$o$o$o$o$6o$o$o$o$o$7o",
-    "F":"$7o$o$o$o$o$6o$o$o$o$o$o",
-    "G":"$2b4o$bo4bo$o$o$o$o3b4o$o6bo$o6bo$o6bo$bo4bo$2b4o",
-    "H":"$o6bo$o6bo$o6bo$o6bo$o6bo$8o$o6bo$o6bo$o6bo$o6bo$o6bo",
-    "I":"$o$o$o$o$o$o$o$o$o$o$o",
-    "J":"$5bo$5bo$5bo$5bo$5bo$5bo$5bo$o4bo$o4bo$o4bo$b4o",
-    "K":"$o6bo$o5bo$o4bo$o3bo$o2bo$ob2o$2o2bo$o4bo$o5bo$o6bo$o7bo",
-    "L":"$o$o$o$o$o$o$o$o$o$o$7o",
-    "M":"$o8bo$2o6b2o$obo4bobo$obo4bobo$o2bo2bo2bo$o2bo2bo2bo$o3b2o3bo$o8bo$o8bo$o8bo$o8bo",
-    "N":"$2o5bo$obo4bo$obo4bo$o2bo3bo$o2bo3bo$o3bo2bo$o3bo2bo$o4bobo$o4bobo$o4bobo$o5b2o",
-    "O":"$3b4o$2bo4bo$bo6bo$o8bo$o8bo$o8bo$o8bo$o8bo$bo6bo$2bo4bo$3b4o",
-    "P":"$6o$o5bo$o6bo$o6bo$o6bo$o5bo$6o$o$o$o$o",
-    "Q":"$3b4o$2bo4bo$bo6bo$o8bo$o8bo$o8bo$o8bo$o8bo$bo4bobo$2bo4bo$3b4obo$9bo",
-    "R":"$6o$o5bo$o5bo$o5bo$o5bo$6o$o2bo$o3bo$o4bo$o5bo$o6bo",
-    "S":"$2b4o$bo4bo$o6bo$o$bo$2b4o$6bo$7bo$o6bo$bo4bo$2b4o",
-    "T":"$9o$4bo$4bo$4bo$4bo$4bo$4bo$4bo$4bo$4bo$4bo",
-    "U":"$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$bo4bo$2b4o",
-    "V":"$o8bo$o8bo$bo6bo$bo6bo$bo6bo$2bo4bo$2bo4bo$2bo4bo$3bo2bo$3bo2bo$4b2o",
-    "W":"$o4b2o4bo$o4b2o4bo$o4b2o4bo$o3bo2bo3bo$bo2bo2bo2bo$bo2bo2bo2bo$bo2bo2bo2bo$bo2bo2bo2bo$2b2o4b2o$2b2o4b2o$2b2o4b2o",
-    "X":"$o8bo$bo6bo$2bo4bo$3bo2bo$4b2o$4b2o$4b2o$3bo2bo$2bo4bo$bo6bo$o8bo",
-    "Y":"$o5bo$o5bo$bo3bo$bo3bo$2bobo$2bobo$3bo$3bo$3bo$3bo$3bo",
-    "Z":"$9o$8bo$7bo$6bo$5bo$4bo$3bo$2bo$bo$o$9o",
-    "a":"$$$$b4o$o4bo$5bo$b5o$o4bo$o4bo$o3b2o$b3obo",
-    "b":"$o$o$o$ob3o$2o3bo$o5bo$o5bo$o5bo$o5bo$2o3bo$ob3o",
-    "c":"$$$$2b4o$bo4bo$o$o$o$o$bo4bo$2b4o",
-    "d":"$6bo$6bo$6bo$2b3obo$bo3b2o$o5bo$o5bo$o5bo$o5bo$bo3b2o$2b3obo",
-    "e":"$$$$2b3o$bo3bo$o5bo$7o$o$o$bo4bo$2b4o",
-    "f":"$2b2o$bo2bo$bo$bo$4o$bo$bo$bo$bo$bo$bo",
-    "g":"$$$$2b2obo$bo2b2o$o4bo$o4bo$o4bo$bo2b2o$2b2obo$5bo$5bo$o4bo$b4o",
-    "h":"$o$o$o$ob3o$2o3bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo",
-    "i":"$$o$$o$o$o$o$o$o$o$o",
-    "j":"$$3bo$$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$o2bo$b2o",
-    "k":"$o$o$o$o4bo$o3bo$o2bo$obo$2obo$o3bo$o4bo$o5bo",
-    "l":"$o$o$o$o$o$o$o$o$o$o$o",
-    "m":"$$$$ob2o3b2o$2o2bobo2bo$o4bo4bo$o4bo4bo$o4bo4bo$o4bo4bo$o4bo4bo$o4bo4bo",
-    "n":"$$$$ob3o$2o3bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo",
-    "o":"$$$$2b4o$bo4bo$o6bo$o6bo$o6bo$o6bo$bo4bo$2b4o",
-    "p":"$$$$ob3o$2o3bo$o5bo$o5bo$o5bo$o5bo$2o3bo$ob3o$o$o$o",
-    "q":"$$$$2b3obo$bo3b2o$o5bo$o5bo$o5bo$o5bo$bo3b2o$2b3obo$6bo$6bo$6bo",
-    "r":"$$$$ob2o$2o2bo$o$o$o$o$o$o",
-    "s":"$$$$b4o$o4bo$o$b4o$5bo$5bo$o4bo$b4o",
-    "t":"$$bo$bo$4o$bo$bo$bo$bo$bo$bo2bo$2b2o",
-    "u":"$$$$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo$o3b2o$b3obo",
-    "v":"$$$$o5bo$o5bo$bo3bo$bo3bo$bo3bo$2bobo$2bobo$3bo",
-    "w":"$$$$o3b2o3bo$o3b2o3bo$o3b2o3bo$o3b2o3bo$bobo2bobo$bobo2bobo$bobo2bobo$2bo4bo",
-    "x":"$$$$$o5bo$bo3bo$2bobo$3bo$2bobo$bo3bo$o5bo",
-    "y":"$$$$o5bo$o5bo$bo3bo$bo3bo$2bobo$2bobo$3bo$3bo$3bo$2bo$2o",
-    "z":"$$$$6o$5bo$4bo$3bo$2bo$bo$o$6o",
-    "!":"$o$o$o$o$o$o$o$o$$o$o",
-    "\"":"$obo$obo$obo$obo",
-    "#":"$2bo2bo$2bo2bo$2bo2bo$8o$2bo2bo$2bo2bo$2bo2bo$8o$2bo2bo$2bo2bo$2bo2bo",
-    "$":"3bo$2b4o$bobo2bo$o2bo$o2bo$bobo$2b3o$3bobo$3bo2bo$3bo2bo$o2bobo$b4o$3bo",
-    "%":"$b2o7bo$o2bo5bo$o2bo4bo$o2bo3bo$o2bo2bo$b2o2bo2b2o$4bo2bo2bo$3bo3bo2bo$2bo4bo2bo$bo5bo2bo$o7b2o",
-    "&":"$b3o$o3bo$o3bo$o3bo$bobo$2bo$bobo$o3bobo$o4bo$o3bobo$b3o3bo",
-    "'":"$o$o$o$o",
-    "(":"$3bo$2bo$bo$bo$o$o$o$o$o$o$bo$bo$2bo$3bo",
-    ")":"$o$bo$2bo$2bo$3bo$3bo$3bo$3bo$3bo$3bo$2bo$2bo$bo$o",
-    "*":"2bo$obobo$b3o$b3o$o3bo",
-    "+":"$$$$3bo$3bo$3bo$7o$3bo$3bo$3bo",
-    ",":"$$$$$$$$$$2o$2o$bo$o",
-    ".":"$$$$$$$$$$2o$2o",
-    "/":"$3bo$3bo$2bo$2bo$2bo$bo$bo$bo$o$o$o",
-    ":":"$$$$2o$2o$$$$$2o$2o",
-    ";":"$$$$2o$2o$$$$$2o$2o$bo$o",
-    "<":"$$$$6b2o$4b2o$2b2o$2o$2o$2b2o$4b2o$6b2o",
-    ">":"$$$$2o$2b2o$4b2o$6b2o$6b2o$4b2o$2b2o$2o",
-    "=":"$$$$$$8o$$$8o",
-    "?":"$b4o$o4bo$o4bo$5bo$4bo$3bo$2bo$2bo$$2bo$2bo",
-    "@":"$3b4o$2bo4bo$bo6bo$o3b2o3bo$o2bo2bo2bo$o2bo2bo2bo$o3b2o3bo$o5b3o$bo$2bo5bo$3b5o",
-    "[":"$3o$o$o$o$o$o$o$o$o$o$o$o$o$3o",
-    "]":"$3o$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$3o",
-    "\\":"$o$o$bo$bo$bo$2bo$2bo$2bo$3bo$3bo$3bo",
-    "^":"$2b2o$2b2o$bo2bo$bo2bo$o4bo$o4bo",
-    "_":"$$$$$$$$$$$$$8o",
-    "`":"o$bo$2bo",
-    "{":"$2b2o$bo$bo$bo$bo$bo$bo$o$bo$bo$bo$bo$bo$2b2o",
-    "}":"$2o$2bo$2bo$2bo$2bo$2bo$2bo$3bo$2bo$2bo$2bo$2bo$2bo$2o",
-    "|":"o$o$o$o$o$o$o$o$o$o$o$o$o$o$o",
-    "~":"$$$$$$b3o3bo$o3b3o"
+Chip.FONTS = {
+    "Helvetica": {          // designed for 16x16 grids
+        "width": 16,
+        "height": 16,
+        "0":"$2b2o$bo2bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo$bo2bo$2b2o",
+        "1":"$3bo$2b2o$4o$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo",
+        "2":"$2b3o$bo3bo$o5bo$o5bo$6bo$5bo$3b2o$2bo$bo$o$7o",
+        "3":"$b4o$o4bo$o4bo$5bo$4bo$2b2o$4bo$5bo$o4bo$o4bo$b4o",
+        "4":"$5bo$4b2o$3bobo$2bo2bo$bo3bo$o4bo$o4bo$8o$5bo$5bo$5bo",
+        "5":"$6o$o$o$o$4o$4bo$5bo$5bo$5bo$o3bo$b3o",
+        "6":"$2b4o$bo4bo$o$o$o$ob4o$2o4bo$o5bo$o5bo$bo4bo$2b4o",
+        "7":"$8o$7bo$6bo$5bo$4bo$4bo$3bo$3bo$2bo$2bo$2bo",
+        "8":"$b4o$o4bo$o4bo$o4bo$bo2bo$2b2o$bo2bo$o4bo$o4bo$o4bo$b4o",
+        "9":"$b4o$o4bo$o5bo$o5bo$o4b2o$b4obo$6bo$6bo$6bo$o4bo$b4o",
+        "A":"$3b2o$2bo2bo$bo4bo$bo4bo$o6bo$o6bo$o6bo$8o$o6bo$o6bo$o6bo",
+        "B":"$6o$o5bo$o5bo$o5bo$o4bo$7o$o6bo$o6bo$o6bo$o6bo$7o",
+        "C":"$2b4o$bo4bo$o6bo$o$o$o$o$o$o6bo$bo4bo$2b4o",
+        "D":"$6o$o5bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o5bo$6o",
+        "E":"$7o$o$o$o$o$6o$o$o$o$o$7o",
+        "F":"$7o$o$o$o$o$6o$o$o$o$o$o",
+        "G":"$2b4o$bo4bo$o$o$o$o3b4o$o6bo$o6bo$o6bo$bo4bo$2b4o",
+        "H":"$o6bo$o6bo$o6bo$o6bo$o6bo$8o$o6bo$o6bo$o6bo$o6bo$o6bo",
+        "I":"$o$o$o$o$o$o$o$o$o$o$o",
+        "J":"$5bo$5bo$5bo$5bo$5bo$5bo$5bo$o4bo$o4bo$o4bo$b4o",
+        "K":"$o6bo$o5bo$o4bo$o3bo$o2bo$ob2o$2o2bo$o4bo$o5bo$o6bo$o7bo",
+        "L":"$o$o$o$o$o$o$o$o$o$o$7o",
+        "M":"$o8bo$2o6b2o$obo4bobo$obo4bobo$o2bo2bo2bo$o2bo2bo2bo$o3b2o3bo$o8bo$o8bo$o8bo$o8bo",
+        "N":"$2o5bo$obo4bo$obo4bo$o2bo3bo$o2bo3bo$o3bo2bo$o3bo2bo$o4bobo$o4bobo$o4bobo$o5b2o",
+        "O":"$3b4o$2bo4bo$bo6bo$o8bo$o8bo$o8bo$o8bo$o8bo$bo6bo$2bo4bo$3b4o",
+        "P":"$6o$o5bo$o6bo$o6bo$o6bo$o5bo$6o$o$o$o$o",
+        "Q":"$3b4o$2bo4bo$bo6bo$o8bo$o8bo$o8bo$o8bo$o8bo$bo4bobo$2bo4bo$3b4obo$9bo",
+        "R":"$6o$o5bo$o5bo$o5bo$o5bo$6o$o2bo$o3bo$o4bo$o5bo$o6bo",
+        "S":"$2b4o$bo4bo$o6bo$o$bo$2b4o$6bo$7bo$o6bo$bo4bo$2b4o",
+        "T":"$9o$4bo$4bo$4bo$4bo$4bo$4bo$4bo$4bo$4bo$4bo",
+        "U":"$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$o6bo$bo4bo$2b4o",
+        "V":"$o8bo$o8bo$bo6bo$bo6bo$bo6bo$2bo4bo$2bo4bo$2bo4bo$3bo2bo$3bo2bo$4b2o",
+        "W":"$o4b2o4bo$o4b2o4bo$o4b2o4bo$o3bo2bo3bo$bo2bo2bo2bo$bo2bo2bo2bo$bo2bo2bo2bo$bo2bo2bo2bo$2b2o4b2o$2b2o4b2o$2b2o4b2o",
+        "X":"$o8bo$bo6bo$2bo4bo$3bo2bo$4b2o$4b2o$4b2o$3bo2bo$2bo4bo$bo6bo$o8bo",
+        "Y":"$o5bo$o5bo$bo3bo$bo3bo$2bobo$2bobo$3bo$3bo$3bo$3bo$3bo",
+        "Z":"$9o$8bo$7bo$6bo$5bo$4bo$3bo$2bo$bo$o$9o",
+        "a":"$$$$b4o$o4bo$5bo$b5o$o4bo$o4bo$o3b2o$b3obo",
+        "b":"$o$o$o$ob3o$2o3bo$o5bo$o5bo$o5bo$o5bo$2o3bo$ob3o",
+        "c":"$$$$2b4o$bo4bo$o$o$o$o$bo4bo$2b4o",
+        "d":"$6bo$6bo$6bo$2b3obo$bo3b2o$o5bo$o5bo$o5bo$o5bo$bo3b2o$2b3obo",
+        "e":"$$$$2b3o$bo3bo$o5bo$7o$o$o$bo4bo$2b4o",
+        "f":"$2b2o$bo2bo$bo$bo$4o$bo$bo$bo$bo$bo$bo",
+        "g":"$$$$2b2obo$bo2b2o$o4bo$o4bo$o4bo$bo2b2o$2b2obo$5bo$5bo$o4bo$b4o",
+        "h":"$o$o$o$ob3o$2o3bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo",
+        "i":"$$o$$o$o$o$o$o$o$o$o",
+        "j":"$$3bo$$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$3bo$o2bo$b2o",
+        "k":"$o$o$o$o4bo$o3bo$o2bo$obo$2obo$o3bo$o4bo$o5bo",
+        "l":"$o$o$o$o$o$o$o$o$o$o$o",
+        "m":"$$$$ob2o3b2o$2o2bobo2bo$o4bo4bo$o4bo4bo$o4bo4bo$o4bo4bo$o4bo4bo$o4bo4bo",
+        "n":"$$$$ob3o$2o3bo$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo",
+        "o":"$$$$2b4o$bo4bo$o6bo$o6bo$o6bo$o6bo$bo4bo$2b4o",
+        "p":"$$$$ob3o$2o3bo$o5bo$o5bo$o5bo$o5bo$2o3bo$ob3o$o$o$o",
+        "q":"$$$$2b3obo$bo3b2o$o5bo$o5bo$o5bo$o5bo$bo3b2o$2b3obo$6bo$6bo$6bo",
+        "r":"$$$$ob2o$2o2bo$o$o$o$o$o$o",
+        "s":"$$$$b4o$o4bo$o$b4o$5bo$5bo$o4bo$b4o",
+        "t":"$$bo$bo$4o$bo$bo$bo$bo$bo$bo2bo$2b2o",
+        "u":"$$$$o4bo$o4bo$o4bo$o4bo$o4bo$o4bo$o3b2o$b3obo",
+        "v":"$$$$o5bo$o5bo$bo3bo$bo3bo$bo3bo$2bobo$2bobo$3bo",
+        "w":"$$$$o3b2o3bo$o3b2o3bo$o3b2o3bo$o3b2o3bo$bobo2bobo$bobo2bobo$bobo2bobo$2bo4bo",
+        "x":"$$$$$o5bo$bo3bo$2bobo$3bo$2bobo$bo3bo$o5bo",
+        "y":"$$$$o5bo$o5bo$bo3bo$bo3bo$2bobo$2bobo$3bo$3bo$3bo$2bo$2o",
+        "z":"$$$$6o$5bo$4bo$3bo$2bo$bo$o$6o",
+        "!":"$o$o$o$o$o$o$o$o$$o$o",
+        "\"":"$obo$obo$obo$obo",
+        "#":"$2bo2bo$2bo2bo$2bo2bo$8o$2bo2bo$2bo2bo$2bo2bo$8o$2bo2bo$2bo2bo$2bo2bo",
+        "$":"3bo$2b4o$bobo2bo$o2bo$o2bo$bobo$2b3o$3bobo$3bo2bo$3bo2bo$o2bobo$b4o$3bo",
+        "%":"$b2o7bo$o2bo5bo$o2bo4bo$o2bo3bo$o2bo2bo$b2o2bo2b2o$4bo2bo2bo$3bo3bo2bo$2bo4bo2bo$bo5bo2bo$o7b2o",
+        "&":"$b3o$o3bo$o3bo$o3bo$bobo$2bo$bobo$o3bobo$o4bo$o3bobo$b3o3bo",
+        "'":"$o$o$o$o",
+        "(":"$3bo$2bo$bo$bo$o$o$o$o$o$o$bo$bo$2bo$3bo",
+        ")":"$o$bo$2bo$2bo$3bo$3bo$3bo$3bo$3bo$3bo$2bo$2bo$bo$o",
+        "*":"2bo$obobo$b3o$b3o$o3bo",
+        "+":"$$$$3bo$3bo$3bo$7o$3bo$3bo$3bo",
+        ",":"$$$$$$$$$$2o$2o$bo$o",
+        ".":"$$$$$$$$$$2o$2o",
+        "/":"$3bo$3bo$2bo$2bo$2bo$bo$bo$bo$o$o$o",
+        ":":"$$$$2o$2o$$$$$2o$2o",
+        ";":"$$$$2o$2o$$$$$2o$2o$bo$o",
+        "<":"$$$$6b2o$4b2o$2b2o$2o$2o$2b2o$4b2o$6b2o",
+        ">":"$$$$2o$2b2o$4b2o$6b2o$6b2o$4b2o$2b2o$2o",
+        "=":"$$$$$$8o$$$8o",
+        "?":"$b4o$o4bo$o4bo$5bo$4bo$3bo$2bo$2bo$$2bo$2bo",
+        "@":"$3b4o$2bo4bo$bo6bo$o3b2o3bo$o2bo2bo2bo$o2bo2bo2bo$o3b2o3bo$o5b3o$bo$2bo5bo$3b5o",
+        "[":"$3o$o$o$o$o$o$o$o$o$o$o$o$o$3o",
+        "]":"$3o$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo$3o",
+        "\\":"$o$o$bo$bo$bo$2bo$2bo$2bo$3bo$3bo$3bo",
+        "^":"$2b2o$2b2o$bo2bo$bo2bo$o4bo$o4bo",
+        "_":"$$$$$$$$$$$$$8o",
+        "`":"o$bo$2bo",
+        "{":"$2b2o$bo$bo$bo$bo$bo$bo$o$bo$bo$bo$bo$bo$2b2o",
+        "}":"$2o$2bo$2bo$2bo$2bo$2bo$2bo$3bo$2bo$2bo$2bo$2bo$2bo$2o",
+        "|":"o$o$o$o$o$o$o$o$o$o$o$o$o$o$o",
+        "~":"$$$$$$b3o3bo$o3b3o"
+    },
+    "ATT4425": {            // designed for 9x13 grids
+        "width": 9,
+        "height": 13,
+        "A":"$3bo$3bo$2bobo$2bobo$bo3bo$bo3bo$7o$o5bo$o5bo",
+        "B":"$6o$bo4bo$bo4bo$bo3bo$b4o$bo3bo$bo4bo$bo4bo$6o",
+        "C":"$2b5o$bo$o$o$o$o$o$bo$2b5o",
+        "D":"$5o$bo3bo$bo4bo$bo4bo$bo4bo$bo4bo$bo4bo$bo3bo$5o",
+        "E":"$6o$o$o$o$5o$o$o$o$6o",
+        "F":"$6o$o$o$o$5o$o$o$o$o",
+        "G":"$2b3o$bo3bo$o$o$o$o3b3o$o4bo$bo3bo$2b3o",
+        "H":"$o5bo$o5bo$o5bo$o5bo$7o$o5bo$o5bo$o5bo$o5bo",
+        "I":"$3o$bo$bo$bo$bo$bo$bo$bo$3o",
+        "J":"$4bo$4bo$4bo$4bo$4bo$4bo$o3bo$o3bo$b3o",
+        "K":"$o5bo$o4bo$o3bo$o2bo$3o$o2bo$o3bo$o4bo$o5bo",
+        "L":"$o$o$o$o$o$o$o$o$7o",
+        "M":"$o5bo$2o3b2o$obobobo$o2bo2bo$o5bo$o5bo$o5bo$o5bo$o5bo",
+        "N":"$o5bo$2o4bo$obo3bo$obo3bo$o2bo2bo$o3bobo$o3bobo$o4b2o$o5bo",
+        "O":"$2b3o$bo3bo$o5bo$o5bo$o5bo$o5bo$o5bo$bo3bo$2b3o",
+        "P":"$6o$o5bo$o5bo$o5bo$6o$o$o$o$o",
+        "Q":"$2b3o$bo3bo$o5bo$o5bo$o5bo$o5bo$o5bo$bo3bo$2b3o$3bo2bo$4b3o",
+        "R":"$6o$o5bo$o5bo$o5bo$6o$o2bo$o3bo$o4bo$o5bo",
+        "S":"$2b3o$bo3bo$bo$2bo$3bo$4bo$o4bo$bo3bo$2b3o",
+        "T":"$5o$2bo$2bo$2bo$2bo$2bo$2bo$2bo$2bo",
+        "U":"$o5bo$o5bo$o5bo$o5bo$o5bo$o5bo$o5bo$bo3bo$2b3o",
+        "V":"$o5bo$o5bo$bo3bo$bo3bo$bo3bo$2bobo$2bobo$3bo$3bo",
+        "W":"$o5bo$o5bo$o2bo2bo$o2bo2bo$obobobo$obobobo$2o3b2o$2o3b2o$o5bo",
+        "X":"$o5bo$bo3bo$bo3bo$2bobo$3bo$2bobo$bo3bo$bo3bo$o5bo",
+        "Y":"$o5bo$o5bo$bo3bo$2bobo$3bo$3bo$3bo$3bo$3bo",
+        "Z":"$7o$6bo$5bo$4bo$3bo$2bo$bo$o$7o"
+    }
 };
 
 Chip.VERSION    = 1.11;

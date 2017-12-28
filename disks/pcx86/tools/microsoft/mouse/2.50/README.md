@@ -7,11 +7,12 @@ permalink: /disks/pcx86/tools/microsoft/mouse/2.50/
 Microsoft Mouse 2.50
 --------------------
 
-NOTE: The [MS Mouse 2.50 (Bus)](#ms-mouse-250-bus) diskette is from a "Microsoft Word with Microsoft Mouse combination package",
-and it appears to be a complete copy of the original diskette, whereas the [MS Mouse 2.50 (Serial)](#ms-mouse-250-serial) diskette
-is a custom diskette that contains only the 2.50 serial mouse drivers, perhaps from a different Microsoft Word bundle.  Since
-the serial drivers were not perserved inside an original disk image, the difference in timestamps is not meaningful.
-All files were obtained via [WinWorld](https://winworldpc.com/product/microsoft-mouse/2x).
+NOTE: The [MS Mouse 2.50 (Bus)](#directory-of-ms-mouse-250-bus) diskette is from a
+"Microsoft Word with Microsoft Mouse combination package", and it appears to be a complete copy of the original diskette,
+whereas the [MS Mouse 2.50 (Serial)](#directory-of-ms-mouse-250-serial) diskette is a custom diskette that contains only the
+2.50 serial mouse drivers, perhaps from a different Microsoft Word bundle.  Since the serial drivers were not preserved inside
+an original disk image, the difference in timestamps is not meaningful. All files were obtained from
+[WinWorld](https://winworldpc.com/product/microsoft-mouse/2x).
 
 ### Directory of MS Mouse 2.50 (Bus)
 

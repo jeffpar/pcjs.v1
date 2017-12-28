@@ -22,8 +22,9 @@ machines:
         },
         "scrollChip": {
           "class": "Chip",
-          "rule": "L1",
+          "font": "ATT4425",
           "message": "Happy New Year!$c$30b$30o$30b$30o$90s",
+          "rule": "L1",
           "overrides": ["message"]
         },
         "scrollClock": {

@@ -15,7 +15,7 @@ You could use `git branch`, but if you've already modified some files that you n
 move to a new branch:
 
 	git checkout -b next-release
-	
+
 Pushing a new branch ("next-release")
 ---
 
@@ -23,7 +23,7 @@ If `git push` reports:
 
 	fatal: The current branch next-release has no upstream branch.
     To push the current branch and set the remote as upstream, use
-    
+
         git push --set-upstream origin next-release
 
 do what it recommends (*-u* is shorthand for *--set-upstream*):
@@ -65,30 +65,17 @@ But in this case, there's nothing to pull, so force the push (this example assum
 
 	git push -f origin master
 
-Bringing the "gh-pages" branch up-to-date with the "master" branch
----
-
-First, make sure all changes have been checked into the "master" branch (or stashed).
-
-Next, issue these commands:
-
-	git checkout gh-pages
-	git merge master
-	git push origin gh-pages
-	git checkout master
-
-
 Node "Cheat Sheet"
 ===
 
 Installing Node (and NPM)
 ---
+
 I downloaded and installed Node v0.11.11 [node-v0.11.11.pkg](http://nodejs.org/dist/v0.11.11/node-v0.11.11.pkg),
 which appears to be the newest version of Node that does *not* suffer from a [serious regression](https://github.com/joyent/node/issues/9310)
 on OS X.  In newer versions of Node, the REPL blocks execution of the application until keys are typed.
 
 That Node package came bundled with its own version of NPM as well: v1.3.25.
-
 
 Markdown "Cheat Sheet"
 ===
@@ -100,7 +87,7 @@ To convert PCjs' special links, such as:
 to normal Markdown links, search using this regex:
 
 	\!\[(.*?)\]\((.*?) \"link:(.*?):([0-9]*):([0-9]*)\"\)
-	
+
 and replace using this regex:
 
 	[<img src="$2" width="$4" height="$5" alt="$1"/>]($3)
@@ -112,7 +99,6 @@ For magazines (eg, BYTE), change:
 to:
 
 	[<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/BYTE/$2" width="$4" height="$5" alt= "$1"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/BYTE/$3)
-
 
 Jekyll "Cheat Sheet"
 ===
@@ -225,3 +211,9 @@ indicating the name of serial device to connect to:
 The advantage of using *nc* is that no "middle man" is required: your terminal window will be connected directly
 to the virtual serial port.  And *nc* is included with OS X, whereas *socat* must installed separately (see
 [http://www.dest-unreach.org/socat/](http://www.dest-unreach.org/socat/)).
+
+TODO
+===
+
+- Since the "debugger" machine property is deprecated now, go ahead with removing it from all README machine configs
+- Check PC Magazine Nov 29 1988, p. 402, for the CURSOR.PAS program, to test various cursor settings

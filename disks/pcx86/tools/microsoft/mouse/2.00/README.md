@@ -7,6 +7,9 @@ permalink: /disks/pcx86/tools/microsoft/mouse/2.00/
 Microsoft Mouse 2.00
 --------------------
 
+A [Directory Listing](#directory-of-ms-mouse-200) of the double-sided (320Kb) diskette
+is provided below.  The disk image was obtained from [WinWorld](https://winworldpc.com/product/microsoft-mouse/1x).
+
 ### Directory of MS Mouse 2.00
 
 	 Volume in drive A has no label

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.40.0/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 1.00</title>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WIN100-DISK1.img" href="/disks/pcx86/windows/1.00/WIN100-DISK1.json" md5="0fbc0a88183b67fc2a15e554933c6df3" md5json="499c89da7482263c0691052bfd10d530">

@@ -4041,8 +4041,8 @@ class Video extends Component {
         var bCursorMax = this.cardActive.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
 
         /*
-         * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to detect
-         * that particular combination of bad values and automatically fix them (we're so thoughtful!)
+         * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to
+         * detect that particular combination of bad values and automatically fix them (we're so thoughtful!)
          */
         var fEGAHack = false;
         if (this.cardActive === this.cardEGA) {
@@ -4055,13 +4055,30 @@ class Video extends Component {
          * another way is setting bCursorStart > bCursorEnd (unless it's an EGA, in which case we must actually draw a
          * "split block" cursor instead).
          *
-         * TODO: Verify whether the second test (bCursorStart > bCursorMax) should also result in a hidden cursor;
-         * ThinkTank sets both start and end values to 0x0f, which doesn't make sense on a CGA, where the max is 0x07.
+         * TODO: Determine whether the final condition (bCursorStart > bCursorMax) should also result in a hidden cursor
+         * on a CGA.  For example, ThinkTank sets both start and end values to 15, and WordStar for PCjr sets start and end
+         * to 12 and 13, respectively.  Those values don't make sense when the max is 7, but what does a *real* CGA do?
          */
-        if ((bCursorFlags & Card.CRTC.CURSTART_BLINKOFF) || bCursorStart > bCursorEnd && !fEGAHack || bCursorStart > bCursorMax) {
+        if ((bCursorFlags & Card.CRTC.CURSTART_BLINKOFF) || bCursorStart > bCursorEnd && !fEGAHack /* || bCursorStart > bCursorMax */) {
             this.removeCursor();
             return false;
         }
+
+        /*
+         * Range-check CURSTART and CUREND against MAXSCAN now.
+         * 
+         * HACK: Since I've already made the decision (above) that this condition should *not* hide the cursor,
+         * I've decided to double-down and also "thicken" the cursor to two scan lines if both start and end needed
+         * to be rounded down to the max.
+         */
+        if (bCursorStart > bCursorMax) {
+            bCursorStart = bCursorMax;
+        }
+        if (bCursorEnd > bCursorMax) {
+            bCursorEnd = bCursorMax;
+            if (bCursorStart = bCursorMax) bCursorStart = bCursorMax - 1;
+        }
+        var bCursorSize = bCursorEnd - bCursorStart + 1;
 
         /*
          * The most compatible way of disabling the cursor is to simply move the cursor to an off-screen position.
@@ -4069,26 +4086,36 @@ class Video extends Component {
         var iCellCursor = this.cardActive.regCRTData[Card.CRTC.CURLOW];
         iCellCursor |= (this.cardActive.regCRTData[Card.CRTC.CURHIGH] & this.cardActive.addrMaskHigh) << 8;
         if (this.iCellCursor != iCellCursor) {
-            if (MAXDEBUG && this.messageEnabled()) {
-                this.printMessage("checkCursor(): cursor moved from " + this.iCellCursor + " to " + iCellCursor);
-            }
+            let rowFrom = (this.iCellCursor / this.nCols)|0;
+            let colFrom = (this.iCellCursor % this.nCols);
+            let rowTo = (iCellCursor / this.nCols)|0;
+            let colTo = (iCellCursor % this.nCols);
+            this.printf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo);
             this.removeCursor();
             this.iCellCursor = iCellCursor;
         }
 
         /*
-         * yCursor and cyCursor are no longer scaled at this point, because the necessary scaling will depend on whether we're
-         * drawing the cursor to the on-screen or off-screen buffer, and updateChar() is in the best position to determine that.
+         * yCursor and cyCursor are no longer scaled at this point, because the necessary scaling will depend on
+         * whether we're drawing the cursor to the on-screen or off-screen buffer, and updateChar() is in the best
+         * position to determine that.
          *
-         * We also record cyCursorCell, the hardware cell height, since we'll need to know what the yCursor and cyCursor values
-         * are relative to when it's time to scale them.
+         * We also record cyCursorCell, the hardware cell height, since we'll need to know what the yCursor and
+         * cyCursor values are relative to when it's time to scale them.
          */
-        var bCursorSize = bCursorEnd - bCursorStart + 1;
         if (this.yCursor != bCursorStart || this.cyCursor != bCursorSize) {
+            this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize);
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
         }
         this.cyCursorCell = bCursorMax + 1;
+
+        /*
+         * This next condition is critical; WordStar for PCjr (designed for the CGA) would program CUREND to 31,
+         * whereas MAXSCAN was 7.  This resulted in cyCursorCell of 8 and cyCursor of 32, producing elongated cursors
+         * in updateChar().  By range-checking CURSTART and CUREND against MAXSCAN above, that should no longer happen.
+         */
+        this.assert(this.cyCursor <= this.cyCursorCell);
 
         this.checkBlink();
         return true;
@@ -4124,9 +4151,7 @@ class Video extends Component {
                          */
                         this.updateChar(col, row, data);
                     }
-                    if (MAXDEBUG && this.messageEnabled()) {
-                        this.printMessage("removeCursor(): removed from " + row + "," + col);
-                    }
+                    this.printf("removeCursor(): removed from %d,%d\n", row, col);
                     this.aCellCache[this.iCellCursor] = data;
                 }
             }
@@ -4263,9 +4288,7 @@ class Video extends Component {
         var card = this.cardActive;
         if (card && nAccess != null && nAccess != card.nAccess) {
 
-            if (MAXDEBUG && this.messageEnabled()) {
-                this.printMessage("setCardAccess(" + Str.toHexWord(nAccess) + ")");
-            }
+            this.printf("setCardAccess(0x%04x)\n", nAccess);
 
             card.setMemoryAccess(nAccess);
 

@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.40.0/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/manifest.xsl"?>
 <manifest type="software">
-	<title>WordStar 3.30</title>
+	<title>WordStar</title>
+	<version>3.30</version>
+	<type>Application</type>
+	<category>Word Processing</category>
+	<author>MicroPro</author>
+	<releaseDate>1983-04-11</releaseDate>
 	<disk id="disk01" size="163840" chs="40:1:8" img="archive/WS330-DISK1-INST.img" href="/disks/pcx86/apps/other/wordstar/3.30/WS330-DISK1-INST.json" md5="7730d9da48c74d562f330bc62a32b134" md5json="e5ed3e61c05cee5a0e91353241d684e2">
 		<name>WordStar 3.30 (Disk 1)</name>
 		<link href="https://winworldpc.com/product/wordstar/330-z-100">D1_INST.IMG</link>

@@ -416,6 +416,9 @@
 		<disk path="/disks/pcx86/apps/other/wordstar/4.00/WS400-DISK4-TUTOR.json">WordStar 4.00 (TUTOR)</disk>
 		<disk path="/disks/pcx86/apps/other/wordstar/4.00/WS400-DISK5-WORDFINDER1.json">WordStar 4.00 (WORD FINDER1)</disk>
 		<disk path="/disks/pcx86/apps/other/wordstar/4.00/WS400-DISK6-WORDFINDER2.json">WordStar 4.00 (WORD FINDER2)</disk>
+		<disk path="/disks/pcx86/apps/other/wordstar/pcjr/WSPCJR100-DISK1.json">WordStar for PCjr (Disk 1)</disk>
+		<disk path="/disks/pcx86/apps/other/wordstar/pcjr/WSPCJR100-DISK2.json">WordStar for PCjr (Disk 2)</disk>
+		<disk path="/disks/pcx86/apps/other/wordstar/pcjr/WSPCJR100-DISK3.json">WordStar for PCjr (Disk 3)</disk>
 		<disk path="/disks/pcx86/tools/borland/tpascal/3.00b/TURBO-PASCAL-300B.json">Borland Turbo Pascal 3.00B</disk>
 		<disk path="/disks/pcx86/tools/borland/tpascal/3.01a/TURBO-PASCAL-301A.json">Borland Turbo Pascal 3.01A</disk>
 		<disk path="/disks/pcx86/tools/ibm/bascom/1.00/BASCOM100-DISK1.json">IBM BASIC Compiler 1.00 (Disk 1)</disk>

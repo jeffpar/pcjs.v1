@@ -622,6 +622,41 @@ class Device {
     }
 
     /**
+     * getURLParms(sParms)
+     *
+     * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
+     * @returns {Object} containing properties for each parameter found
+     */
+    static getURLParms(sParms)
+    {
+        let parms = Device.URLParms;
+        if (!parms) {
+            parms = {};
+            if (window) {
+                if (!sParms) {
+                    /*
+                     * Note that window.location.href returns the entire URL, whereas window.location.search
+                     * returns only the parameters, if any (starting with the '?', which we skip over with a substr() call).
+                     */
+                    sParms = window.location.search.substr(1);
+                }
+                let match;
+                let pl = /\+/g; // RegExp for replacing addition symbol with a space
+                let search = /([^&=]+)=?([^&]*)/g;
+                let decode = function decodeParameter(s) {
+                    return decodeURIComponent(s.replace(pl, " ")).trim();
+                };
+
+                while ((match = search.exec(sParms))) {
+                    parms[decode(match[1])] = decode(match[2]);
+                }
+            }
+            Device.URLParms = parms;
+        }
+        return parms;
+    }
+
+    /**
      * hasLocalStorage
      *
      * If localStorage support exists, is enabled, and works, return true.
@@ -973,41 +1008,6 @@ class Device {
 
         buffer += aParts[iPart];
         return buffer;
-    }
-
-    /**
-     * getURLParms(sParms)
-     *
-     * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
-     * @returns {Object} containing properties for each parameter found
-     */
-    static getURLParms(sParms)
-    {
-        let parms = Device.URLParms;
-        if (!parms) {
-            parms = {};
-            if (window) {
-                if (!sParms) {
-                    /*
-                     * Note that window.location.href returns the entire URL, whereas window.location.search
-                     * returns only the parameters, if any (starting with the '?', which we skip over with a substr() call).
-                     */
-                    sParms = window.location.search.substr(1);
-                }
-                let match;
-                let pl = /\+/g; // RegExp for replacing addition symbol with a space
-                let search = /([^&=]+)=?([^&]*)/g;
-                let decode = function decodeParameter(s) {
-                    return decodeURIComponent(s.replace(pl, " ")).trim();
-                };
-
-                while ((match = search.exec(sParms))) {
-                    parms[decode(match[1])] = decode(match[2]);
-                }
-            }
-            Device.URLParms = parms;
-        }
-        return parms;
     }
 }
 

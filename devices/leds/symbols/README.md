@@ -32,8 +32,8 @@ machines:
         "symbolDisplay": {
           "class": "LED",
           "type": 1,
-          "cols": 16,
-          "rows": 16,
+          "cols": 9,
+          "rows": 13,
           "color": "red",
           "highlight": false,
           "bindings": {
@@ -65,11 +65,12 @@ styles:
     width: 16px;
   previewSymbol:
     position: absolute;
-    font-size: 32em;
+    font-family: ATT4425;
+    font-size: 28em;
     font-weight: normal;
     width: 100%;
     height: auto;
-    line-height: 85%;
+    line-height: 90%;
     text-align: center;
     vertical-align: middle;
   .print:
@@ -77,6 +78,9 @@ styles:
   .diags:
     float: left;
     margin-bottom: 16px;
+  @font-face:
+    font-family: "ATT4425";
+    src: url("/modules/shared/templates/ATT4425.ttf") format("truetype");
 ---
 
 LED Symbol Builder

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pdpjs/1.40.0/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pdpjs/1.50.0/machine.xsl"?>
 <machine id="test1170" type="pdp11" class="machine-left" border="1" pos="center" background="#FAEBD7">
 	<name pos="center">PDP-11/70 with 256Kb and Front Panel</name>
 	<computer id="computer" busWidth="22"/>
