@@ -13,5 +13,8 @@
         "printf",
         "println",
         "romhax"
+    ],
+    "favorites.resources": [
+        "pubs/pc/reference/ibm/4860"
     ]
 }

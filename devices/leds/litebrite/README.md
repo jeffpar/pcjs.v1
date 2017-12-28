@@ -91,13 +91,13 @@ machines:
         }
       }
 styles:
-  lbDemo:
+  _lbDemo:
     position: relative;
     display: inline-block;
     float: left;
     margin-right: 32px;
     margin-bottom: 16px;
-  displayLB:
+  _displayLB:
     position: relative;
     line-height: 0;
     margin-bottom: 8px;
@@ -113,9 +113,9 @@ styles:
     border-radius: 50%;
     vertical-align: middle;
     background-color: green;
-  diagsLB:
+  _diagsLB:
     float: left;
-  printLB:
+  _printLB:
     font-family: Monaco,"Lucida Console",monospace;
 ---
 

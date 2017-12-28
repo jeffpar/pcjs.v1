@@ -50,20 +50,20 @@ machines:
         }
       }
 styles:
-  symbolLEDs:
+  _symbolLEDs:
     position: relative;
     display: inline-block;
     float: left;
     margin-right: 32px;
     margin-bottom: 16px;
-  displaySymbol:
+  _displaySymbol:
     position: relative;
     background-color: rgba(0,0,0,0);
     background-image: none;
     background-size: 100% 100%;
-  inputSymbol:
+  _inputSymbol:
     width: 16px;
-  previewSymbol:
+  _previewSymbol:
     position: absolute;
     font-family: ATT4425;
     font-size: 28em;
