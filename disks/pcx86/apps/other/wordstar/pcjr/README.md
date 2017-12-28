@@ -28,8 +28,9 @@ some dependencies on that version of DOS (since the PCjr required PC-DOS 2.10 or
 
 We have also included another variation of the WordStar for PCjr binary (`WS.EXE`) on
 [Disk 1](#directory-of-wordstar-for-pcjr-disk-1), exactly as it was provided to us by a former MicroPro employee.  It
-is slightly smaller than the "official" PCjr binary (`WSU.EXE`), but given that both files have dates well past the apparent
-release date of August 17, 1984, it's not clear to what extent *either* of the programs on Disk 1 can be considered "official".
+is slightly smaller than the "official" PCjr binary (`WSU.EXE`), but given WordStar's propensity for "patching", and the
+fact that both files have dates well past the apparent release date of August 17, 1984, it's not clear to what extent
+*either* of the programs on Disk 1 can be considered "official".
 
 {% include machine.html id="ibm5150" %}
 
