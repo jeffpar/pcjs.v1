@@ -489,7 +489,7 @@ class FDC extends Component {
                 controlDrives.value = "";
                 for (var iDrive = 0; iDrive < this.nDrives; iDrive++) {
                     var controlOption = document.createElement("option");
-                    controlOption.value = iDrive;
+                    controlOption.value = iDrive.toString();
                     /*
                      * TODO: This conversion of drive number to drive letter, starting with A:, is very simplistic
                      * and will NOT match the drive mappings that DOS ultimately uses.  We'll need to spiff this up at

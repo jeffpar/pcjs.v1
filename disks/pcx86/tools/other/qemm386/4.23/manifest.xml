@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/manifest.xsl"?>
+<manifest type="software">
+	<title>QEMM-386</title>
+	<version>4.23</version>
+	<type>Utility</type>
+	<category>Memory Manager</category>
+	<author>Quarterdeck Office Systems</author>
+	<releaseDate>1988-11-22</releaseDate>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/QEMM386-423.img" href="/disks/pcx86/tools/other/qemm386/4.23/QEMM386-423.json" md5="e458e70441ca6027015403d5d4834a32" md5json="5616e796a509f5d6f8b1cbafe37c94c5">
+		<file size="842" time="1988-11-22 04:23:00" attr="0x20">BUFFERS.COM</file>
+		<file size="792" time="1988-11-22 04:23:00" attr="0x20">COPYDV.BAT</file>
+		<file size="7564" time="1988-11-22 04:23:00" attr="0x20">EMM.DVR</file>
+		<file size="24217" time="1988-11-22 04:23:00" attr="0x20">INSTQEMM.EXE</file>
+		<file size="2430" time="1988-11-22 04:23:00" attr="0x20">LOADHI.COM</file>
+		<file size="1089" time="1988-11-22 04:23:00" attr="0x20">LOADHI.SYS</file>
+		<file size="213" time="1988-11-22 04:23:00" attr="0x20">NOEGA.COM</file>
+		<file size="2148" time="1988-11-22 04:23:00" attr="0x20">QEMM.COM</file>
+		<file size="37134" time="1988-11-22 04:23:00" attr="0x20">QEMM.SYS</file>
+		<file size="7769" time="1988-11-22 04:23:00" attr="0x20">READ.ME</file>
+		<file size="8207" time="1988-11-22 04:23:00" attr="0x20">XDV.COM</file>
+	</disk>
+</manifest>

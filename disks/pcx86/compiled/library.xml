@@ -574,10 +574,13 @@
 		<disk path="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK08.json">Windows SDK 3.00 (720K Disk 08)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK09.json">Windows SDK 3.00 (720K Disk 09)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK10.json">Windows SDK 3.00 (720K Disk 10)</disk>
-		<disk path="/disks/pcx86/tools/other/doubledos/SOFTLOGIC-DOUBLEDOS-DISK1.json">DoubleDOS (Disk 1)</disk>
-		<disk path="/disks/pcx86/tools/other/doubledos/SOFTLOGIC-DOUBLEDOS-DISK2.json">DoubleDOS (Disk 2)</disk>
+		<disk path="/disks/pcx86/tools/other/doubledos/2.0v/SOFTLOGIC-DOUBLEDOS-DISK1.json">DoubleDOS 2.0V (Disk 1)</disk>
+		<disk path="/disks/pcx86/tools/other/doubledos/2.0v/SOFTLOGIC-DOUBLEDOS-DISK2.json">DoubleDOS 2.0V (Disk 2)</disk>
 		<disk path="/disks/pcx86/tools/other/enhdebug/ENHDEBUG.json">Enhanced DEBUG 1.32a</disk>
 		<disk path="/disks/pcx86/tools/other/flickerfree/FLICKERFREE.json">FlickerFree 1.0</disk>
+		<disk path="/disks/pcx86/tools/other/qemm386/4.10/QEMM386-410.json">QEMM-386 4.10</disk>
+		<disk path="/disks/pcx86/tools/other/qemm386/4.23/QEMM386-423.json">QEMM-386 4.23</disk>
+		<disk path="/disks/pcx86/tools/other/qemm386/6.02/QEMM386-602.json">QEMM-386 6.02</disk>
 		<disk path="/disks/pcx86/games/id/wolf3d/1WOLF14.json">Wolfenstein 3D 1.4</disk>
 		<disk path="/disks/pcx86/games/microsoft/flightsim/1982/FLIGHTSIM-1982.json">MS Flight Simulator (1982)</disk>
 		<disk path="/disks/pcx86/games/microsoft/flightsim/1984/FLIGHTSIM-1984.json">MS Flight Simulator (1984)</disk>

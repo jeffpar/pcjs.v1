@@ -968,7 +968,7 @@ class Web {
                     afn[i]();
                 }
             } catch (e) {
-                Web.notice("An unexpected exception occurred:\n\n" + e.message + "\n\nPlease send this information to support@pcjs.org. Thanks.");
+                Web.notice("An unexpected error occurred: " + e.message + "\n\nIf it happens again, please send this information to support@pcjs.org. Thanks.");
             }
         }
     };

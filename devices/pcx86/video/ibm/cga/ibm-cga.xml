@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<video id="videoCGA" screenWidth="1280" screenHeight="800" scale="true" smoothing="false" fontROM="/devices/pcx86/video/ibm/cga/ibm-cga.json" pos="center" padding="8px">
+<video id="videoCGA" model="cga" screenWidth="1280" screenHeight="800" scale="true" smoothing="false" fontROM="/devices/pcx86/video/ibm/cga/ibm-cga.json" pos="center" padding="8px">
 	<menu>
 		<title>Color Display</title>
 		<control type="container" pos="right">

@@ -215,10 +215,11 @@ class Chip extends Device {
             break;
 
         case Chip.BINDING.SYMBOL_INPUT:
-            element.onkeypress = function onChangeSymbol(event) {
-                element.value = String.fromCharCode(event.charCode);
+            let elementInput = /** @type {HTMLInputElement} */ (element);
+            elementInput.onkeypress = function onChangeSymbol(event) {
+                elementInput.value = String.fromCharCode(event.charCode);
                 let elementPreview = chip.bindings[Chip.BINDING.SYMBOL_PREVIEW];
-                if (elementPreview) elementPreview.textContent = element.value;
+                if (elementPreview) elementPreview.textContent = elementInput.value;
                 event.preventDefault();
             };
             break;

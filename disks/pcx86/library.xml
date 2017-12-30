@@ -117,9 +117,12 @@
 		<manifest ref="/disks/pcx86/tools/microsoft/windows/sdk/1.04/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/windows/sdk/2.03/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/windows/sdk/3.00/manifest.xml"/>
-		<manifest ref="/disks/pcx86/tools/other/doubledos/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/other/doubledos/2.0v/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/other/enhdebug/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/other/flickerfree/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/other/qemm386/4.10/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/other/qemm386/4.23/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/other/qemm386/6.02/manifest.xml"/>
 		<manifest ref="/disks/pcx86/games/id/wolf3d/manifest.xml"/>
 		<manifest ref="/disks/pcx86/games/microsoft/flightsim/1982/manifest.xml"/>
 		<manifest ref="/disks/pcx86/games/microsoft/flightsim/1984/manifest.xml"/>

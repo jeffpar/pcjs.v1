@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/manifest.xsl"?>
+<manifest type="software">
+	<title>DoubleDOS</title>
+	<version>2.0V</version>
+	<type>Utility</type>
+	<category>Multitasking</category>
+	<author>SoftLogic Solutions</author>
+	<releaseDate>1986</releaseDate>
+	<serialNumber>00715045</serialNumber>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/SOFTLOGIC-DOUBLEDOS-DISK1.img" href="/disks/pcx86/tools/other/doubledos/2.0v/SOFTLOGIC-DOUBLEDOS-DISK1.json" md5="307b71549ec0f886c4e9e3fbc88f610b" md5json="8eb3bac5b81062b81ea01227ee139e53">
+		<name>DoubleDOS 2.0V (Disk 1)</name>
+		<file size="857" time="1985-10-21 15:07:44" attr="0x20">123DRIVE.BAT</file>
+		<file size="12864" time="1985-06-21 12:05:04" attr="0x20">CML0203.FCL</file>
+		<file size="9344" time="1985-06-19 17:06:12" attr="0x20">CML0203.HCL</file>
+		<file size="1698" time="1985-10-21 15:07:24" attr="0x20">DBLDANSI.SYS</file>
+		<file size="5363" time="1985-10-21 15:07:38" attr="0x20">DBLDB&amp;W.DRV</file>
+		<file size="5363" time="1985-10-21 15:07:32" attr="0x20">DBLDCOLO.DRV</file>
+		<file size="798" time="1985-10-21 15:07:42" attr="0x20">DBLDCPQ.DRV</file>
+		<file size="5330" time="1985-10-21 15:07:36" attr="0x20">DBLDHERC.DRV</file>
+		<file size="798" time="1985-10-21 15:07:30" attr="0x20">DBLDMONO.DRV</file>
+		<file size="36864" time="1985-10-21 15:07:52" attr="0x20">DBLDRPGM.DRV</file>
+		<file size="2540" time="1985-10-21 15:07:26" attr="0x20">DDCONFIG.SYS</file>
+		<file size="2016" time="1985-04-18 10:01:06" attr="0x20">DDOS</file>
+		<file size="46080" time="1986-04-29 13:09:46" attr="0x20">DOUBLED2.PGM</file>
+		<file size="18432" time="1985-10-21 15:08:06" attr="0x20">DOUBLEDO.EXE</file>
+		<file size="3608" time="1986-03-03 14:00:38" attr="0x20">INSTALL.BAT</file>
+		<file size="2016" time="1985-04-18 10:01:06" attr="0x20">MNL0203.FML</file>
+		<file size="1840" time="1985-05-21 17:05:30" attr="0x20">MNL0203.HML</file>
+		<file size="2240" time="1985-10-21 15:12:02" attr="0x10">PATCHES</file>
+		<file size="16" time="1986-02-03 16:21:04" attr="0x20" dir="PATCHES/">DB.BAT</file>
+		<file size="514" time="1986-02-18 14:38:02" attr="0x20" dir="PATCHES/">DB2.COM</file>
+		<file size="411" time="1985-11-05 03:36:52" attr="0x20" dir="PATCHES/">DBLDBBS.BAT</file>
+		<file size="636" time="1985-11-05 04:27:36" attr="0x20" dir="PATCHES/">DBLDBBS.DEB</file>
+		<file size="535" time="1986-02-04 01:55:08" attr="0x20" dir="PATCHES/">DBLDDB3.BAT</file>
+		<file size="540" time="1985-06-27 11:07:34" attr="0x20" dir="PATCHES/">DBLDDB3.DEB</file>
+		<file size="525" time="1985-06-27 12:14:58" attr="0x20" dir="PATCHES/">DBLDDB3B.BAT</file>
+		<file size="533" time="1985-06-27 14:44:42" attr="0x20" dir="PATCHES/">DBLDDB3B.DEB</file>
+		<file size="259" time="1985-03-06 12:02:28" attr="0x20" dir="PATCHES/">DBLDEML.BAT</file>
+		<file size="1358" time="1985-03-25 12:54:18" attr="0x20" dir="PATCHES/">DBLDEML.DEB</file>
+		<file size="288" time="1985-05-22 10:54:24" attr="0x20" dir="PATCHES/">DBLDFC2.BAT</file>
+		<file size="173" time="1984-08-23 16:46:32" attr="0x20" dir="PATCHES/">DBLDFC2.DEB</file>
+		<file size="445" time="1985-07-18 14:04:36" attr="0x20" dir="PATCHES/">DBLDLEWP.BAT</file>
+		<file size="1245" time="1985-07-29 15:20:32" attr="0x20" dir="PATCHES/">DBLDLEWP.DEB</file>
+		<file size="362" time="1985-02-28 15:32:44" attr="0x20" dir="PATCHES/">DBLDM320.BAT</file>
+		<file size="1656" time="1985-07-10 01:23:26" attr="0x20" dir="PATCHES/">DBLDM320.DEB</file>
+		<file size="416" time="1985-05-21 14:54:36" attr="0x20" dir="PATCHES/">DBLDM32A.BAT</file>
+		<file size="4176" time="1985-05-21 15:12:58" attr="0x20" dir="PATCHES/">DBLDM32A.DEB</file>
+		<file size="415" time="1985-05-21 14:52:12" attr="0x20" dir="PATCHES/">DBLDM32B.BAT</file>
+		<file size="4176" time="1985-03-01 14:33:44" attr="0x20" dir="PATCHES/">DBLDM32B.DEB</file>
+		<file size="338" time="1985-06-11 10:03:46" attr="0x20" dir="PATCHES/">DBLDM330.BAT</file>
+		<file size="4922" time="1985-06-12 23:14:58" attr="0x20" dir="PATCHES/">DBLDM330.DEB</file>
+		<file size="700" time="1985-07-15 16:59:56" attr="0x20" dir="PATCHES/">DBLDMETA.BAT</file>
+		<file size="198" time="1985-07-16 11:37:24" attr="0x20" dir="PATCHES/">DBLDMETA.DE2</file>
+		<file size="782" time="1985-07-16 12:14:04" attr="0x20" dir="PATCHES/">DBLDMETA.DEB</file>
+		<file size="425" time="1985-06-21 11:49:28" attr="0x20" dir="PATCHES/">DBLDNUTS.BAT</file>
+		<file size="1865" time="1985-06-21 11:34:08" attr="0x20" dir="PATCHES/">DBLDNUTS.DEB</file>
+		<file size="336" time="1984-08-13 10:14:04" attr="0x20" dir="PATCHES/">DBLDPFS.BAT</file>
+		<file size="1219" time="1984-08-10 17:52:36" attr="0x20" dir="PATCHES/">DBLDPFS.DEB</file>
+		<file size="368" time="1985-02-20 15:43:12" attr="0x20" dir="PATCHES/">DBLDR.BAT</file>
+		<file size="742" time="1985-09-10 13:49:28" attr="0x20" dir="PATCHES/">DBLDR.DEB</file>
+		<file size="332" time="1985-07-16 17:36:52" attr="0x20" dir="PATCHES/">DBLDREL2.BAT</file>
+		<file size="1474" time="1985-07-17 10:44:00" attr="0x20" dir="PATCHES/">DBLDREL2.DEB</file>
+		<file size="405" time="1985-05-21 12:36:12" attr="0x20" dir="PATCHES/">DBLDSC11.BAT</file>
+		<file size="961" time="1984-09-25 12:21:22" attr="0x20" dir="PATCHES/">DBLDSC11.DEB</file>
+		<file size="425" time="1985-11-04 16:25:32" attr="0x20" dir="PATCHES/">DBLDSC20.BAT</file>
+		<file size="2023" time="1985-05-21 12:28:52" attr="0x20" dir="PATCHES/">DBLDSC20.DEB</file>
+		<file size="430" time="1985-06-13 04:00:10" attr="0x20" dir="PATCHES/">DBLDSC21.BAT</file>
+		<file size="2023" time="1985-06-13 04:57:26" attr="0x20" dir="PATCHES/">DBLDSC21.DEB</file>
+		<file size="445" time="1985-11-04 20:08:20" attr="0x20" dir="PATCHES/">DBLDSC2B.BAT</file>
+		<file size="2024" time="1985-11-04 20:04:28" attr="0x20" dir="PATCHES/">DBLDSC2B.DEB</file>
+		<file size="344" time="1985-06-14 16:33:38" attr="0x20" dir="PATCHES/">DBLDSCL2.BAT</file>
+		<file size="717" time="1985-06-14 17:53:56" attr="0x20" dir="PATCHES/">DBLDSCL2.DEB</file>
+		<file size="548" time="1985-03-06 16:26:02" attr="0x20" dir="PATCHES/">DBLDSYM.BAT</file>
+		<file size="10478" time="1985-03-07 13:57:44" attr="0x20" dir="PATCHES/">DBLDSYM.DEB</file>
+		<file size="409" time="1985-07-31 11:03:56" attr="0x20" dir="PATCHES/">DBLDVW12.BAT</file>
+		<file size="1208" time="1985-07-31 18:44:50" attr="0x20" dir="PATCHES/">DBLDVW12.DEB</file>
+		<file size="413" time="1985-11-05 09:20:36" attr="0x20" dir="PATCHES/">DBLDVX20.BAT</file>
+		<file size="939" time="1985-11-05 09:47:10" attr="0x20" dir="PATCHES/">DBLDVX20.DEB</file>
+		<file size="323" time="1984-08-13 13:01:40" attr="0x20" dir="PATCHES/">DBLDWS.BAT</file>
+		<file size="239" time="1984-08-13 12:34:06" attr="0x20" dir="PATCHES/">DBLDWS.DEB</file>
+		<file size="435" time="1986-02-27 15:58:22" attr="0x20" dir="PATCHES/">DBLDXT35.BAT</file>
+		<file size="1640" time="1986-02-28 20:38:26" attr="0x20" dir="PATCHES/">DBLDXT35.DEB</file>
+		<file size="394" time="1986-02-28 17:40:20" attr="0x20" dir="PATCHES/">DBLDXT36.BAT</file>
+		<file size="1824" time="1986-03-04 16:39:26" attr="0x20" dir="PATCHES/">DBLDXT36.DEB</file>
+		<file size="438" time="1985-06-13 00:55:34" attr="0x20" dir="PATCHES/">DBLDXTAJ.BAT</file>
+		<file size="1640" time="1986-02-28 20:50:56" attr="0x20" dir="PATCHES/">DBLDXTAJ.DEB</file>
+		<file size="413" time="1984-11-13 13:07:28" attr="0x20" dir="PATCHES/">DBLDXTK1.BAT</file>
+		<file size="1021" time="1984-08-14 14:08:34" attr="0x20" dir="PATCHES/">DBLDXTK1.DEB</file>
+		<file size="444" time="1985-06-13 00:19:28" attr="0x20" dir="PATCHES/">DBLDXTK2.BAT</file>
+		<file size="1553" time="1985-06-12 23:58:00" attr="0x20" dir="PATCHES/">DBLDXTK2.DEB</file>
+		<file size="422" time="1986-02-27 14:42:52" attr="0x20" dir="PATCHES/">DBLDXTK3.BAT</file>
+		<file size="1640" time="1986-02-28 20:46:12" attr="0x20" dir="PATCHES/">DBLDXTK3.DEB</file>
+		<file size="3343" time="1985-04-23 16:55:00" attr="0x20" dir="PATCHES/">DDSWITCH.BAS</file>
+		<file size="2673" time="1986-03-03 09:23:22" attr="0x20" dir="PATCHES/">PATCH.LST</file>
+		<file size="2590" time="1986-02-04 01:50:16" attr="0x20" dir="PATCHES/">PATCHES.DOC</file>
+		<file size="496" time="1985-04-02 01:42:00" attr="0x20" dir="PATCHES/">PRINTER.COM</file>
+		<file size="690" time="1985-12-05 20:00:06" attr="0x20" dir="PATCHES/">SKLOAD.COM</file>
+		<file size="3200" time="1986-03-02 18:12:52" attr="0x20">READ_ME.1ST</file>
+		<file size="0" time="1985-10-21 15:09:18" attr="0x20">SGS0203.SUP</file>
+		<file size="14757" time="1986-04-29 10:56:38" attr="0x20">SWITCH.ASM</file>
+		<file size="1136" time="1986-03-10 16:10:44" attr="0x20">SWITCH.EXE</file>
+		<file size="50192" time="1985-06-21 14:10:46" attr="0x20">TRANSFER.COM</file>
+		<file size="3025" time="1986-03-03 10:41:28" attr="0x20">UNINSTAL.BAT</file>
+		<file size="2192" time="1987-01-28 22:38:30" attr="0x20">VDF0203.VDF</file>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/SOFTLOGIC-DOUBLEDOS-DISK2.img" href="/disks/pcx86/tools/other/doubledos/2.0v/SOFTLOGIC-DOUBLEDOS-DISK2.json" md5="9568aadbe242f06fc020bba8e2d2e413" md5json="24f9d701e9b7509002a7de2c0f919b6a">
+		<name>DoubleDOS 2.0V (Disk 2)</name>
+		<file size="7209" time="1986-02-18 10:56:16" attr="0x20">ANALYZE.EXE</file>
+		<file size="35" time="1986-03-11 15:55:42" attr="0x20">BOOT.COM</file>
+		<file size="6144" time="1986-12-12 08:53:28" attr="0x20">CAROUSEL.EXE</file>
+		<file size="32108" time="1986-06-18 13:41:44" attr="0x20">CAROUSEL.PGM</file>
+		<file size="1698" time="1985-10-21 15:07:24" attr="0x20">DBLDANSI.SYS</file>
+		<file size="2540" time="1985-10-21 15:07:26" attr="0x20">DDCONFIG.SYS</file>
+		<file size="46080" time="1986-04-29 13:09:46" attr="0x20">DOUBLED2.PGM</file>
+		<file size="6144" time="1986-12-12 09:50:46" attr="0x20">DOUBLEDO.EXE</file>
+		<file size="1408" time="1986-03-14 16:00:42" attr="0x20">ETC.DOC</file>
+		<file size="6449" time="1986-02-16 15:48:06" attr="0x20">FILEPEEK.EXE</file>
+		<file size="32" time="1986-03-10 09:48:48" attr="0x20">INT15.COM</file>
+		<file size="3352" time="1986-02-06 10:02:42" attr="0x20">LOCK.EXE</file>
+		<file size="16384" time="1986-06-30 17:19:16" attr="0x20">OPTIMIZ2.PGM</file>
+		<file size="3072" time="1986-12-12 09:06:36" attr="0x20">OPTIMIZE.EXE</file>
+		<file size="3200" time="1986-03-02 18:12:52" attr="0x20">READ_ME.1ST</file>
+		<file size="14757" time="1986-04-29 10:56:38" attr="0x20">SWITCH.ASM</file>
+		<file size="1136" time="1986-03-10 16:10:44" attr="0x20">SWITCH.EXE</file>
+		<file size="4369" time="1986-03-12 10:34:24" attr="0x20">SWITCHC.ASM</file>
+		<file size="45" time="1986-03-12 10:34:46" attr="0x20">SWITCHC.COM</file>
+		<file size="3443" time="1986-02-06 10:24:18" attr="0x20">UNLOCK.EXE</file>
+	</disk>
+</manifest>

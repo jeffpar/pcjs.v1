@@ -995,7 +995,7 @@ X86.helpCheckFault = function(nFault, nError, fHalt)
              * If there's no Debugger, then messageEnabled() must have returned false, which means that fHalt must
              * be true.  Which means we should shut the machine down.
              */
-            this.assert(!!fHalt);
+            this.assert(fHalt);
             this.notice(sMessage);
             this.stopCPU();
         }

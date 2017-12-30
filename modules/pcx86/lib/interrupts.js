@@ -163,7 +163,8 @@ if (DEBUGGER) {
         0x4A0:  ["RTC_WAIT_FLAG",1],    // WAIT ACTIVE FLAG (01=BUSY, 80=POSTED) (00=POST ACKNOWLEDGED)
         0x4A1:  ["NET",7],              // RESERVED FOR NETWORK ADAPTERS
         0x4A8:  ["SAVE_PTR",4]          // POINTER TO EGA PARAMETER CONTROL BLOCK
-    },
+    };
+    
     /*
      * See DebuggerX86.prototype.replaceRegs() for the rules governing how register contents are replaced in the strings below.
      *
@@ -216,6 +217,7 @@ if (DEBUGGER) {
          *      CTL_DIAGNOSTIC: 0x14
          */
     };
+    
     Interrupts.FUNCS[Interrupts.CASSETTE] = {
         0x80: "open device",
         0x81: "close device",
@@ -230,6 +232,7 @@ if (DEBUGGER) {
         0x90: "device busy loop",
         0x91: "interrupt complete flag set"
     };
+    
     Interrupts.FUNCS[Interrupts.DOS] = {
         0x00: "terminate program",
         0x01: "read character (AL) from stdin with echo",
@@ -325,6 +328,7 @@ if (DEBUGGER) {
         0x63: "get lead byte table (@AL)",                                      // DOS 2.25 and 3.20+
         0x6C: "extended open file $@DS:@SI"                                     // DOS 4.00+
     };
+    
     Interrupts.FUNCS[Interrupts.WINDBG.VECTOR] = {
         0x004F: "check debugger loaded"         // WINDBG.IS_LOADED returns WINDBG.LOADED (0xF386) if debugger loaded
     };

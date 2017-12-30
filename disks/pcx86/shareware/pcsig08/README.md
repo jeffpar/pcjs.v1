@@ -5,7 +5,6 @@ permalink: /disks/pcx86/shareware/pcsig08/
 machines:
   - id: pcsig08
     type: pcx86
-    resume: 1
 ---
 
 PC-SIG Library 8th Edition CD-ROM (April 1990)

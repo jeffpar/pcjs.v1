@@ -38,6 +38,41 @@ if (NODE) {
 }
 
 /**
+ * Think of this Controller class definition as an interface definition, implemented by the
+ * Video Card class and the RAM CompaqController class.
+ * 
+ * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
+ * which would force us to declare all class properties in the constructor, as well as prevent
+ * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
+ *
+ * @unrestricted
+ */
+class Controller {
+    /**
+     * getMemoryAccess()
+     *
+     * @this {Controller}
+     * @return {Array.<function()>}
+     */
+    getMemoryAccess()
+    {
+        return [];
+    }
+    
+    /**
+     * getMemoryBuffer(addr)
+     *
+     * @this {Controller}
+     * @param {number} addr
+     * @return {Array} containing the buffer (and an offset within that buffer)
+     */
+    getMemoryBuffer(addr)
+    {
+        return [];
+    }
+}
+
+/**
  * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
  * which would force us to declare all class properties in the constructor, as well as prevent
  * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
@@ -265,7 +300,7 @@ class Bus extends Component {
      * @param {number} addr is the starting physical address of the request
      * @param {number} size of the request, in bytes
      * @param {number} type is one of the Memory.TYPE constants
-     * @param {Object} [controller] is an optional memory controller component
+     * @param {Controller} [controller] is an optional memory controller component
      * @return {boolean} true if successful, false if not
      */
     addMemory(addr, size, type, controller)
