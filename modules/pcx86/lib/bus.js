@@ -38,6 +38,9 @@ if (NODE) {
 }
 
 /**
+ * Think of this Controller class definition as an interface definition, implemented by the
+ * Video Card class and the RAM CompaqController class.
+ * 
  * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
  * which would force us to declare all class properties in the constructor, as well as prevent
  * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
@@ -66,52 +69,6 @@ class Controller {
     getMemoryBuffer(addr)
     {
         return [];
-    }
-
-    /**
-     * save()
-     *
-     * @this {Controller}
-     * @return {Array}
-     */
-    save()
-    {
-        return [];
-    }
-
-    /**
-     * restore(data)
-     *
-     * @this {Controller}
-     * @param {Object} data
-     * @return {boolean} true if successful, false if failure
-     */
-    restore(data)
-    {
-        return true;
-    }
-
-    /**
-     * getByte(off)
-     *
-     * @this {Controller}
-     * @param {number} off
-     * @return {number}
-     */
-    getByte(off)
-    {
-        return 0xff;
-    }
-
-    /**
-     * setByte(off, b)
-     *
-     * @this {Controller}
-     * @param {number} off
-     * @param {number} b
-     */
-    setByte(off, b)
-    {
     }
 }
 

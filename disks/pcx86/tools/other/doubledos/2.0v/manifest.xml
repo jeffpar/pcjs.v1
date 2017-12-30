@@ -9,7 +9,7 @@
 	<releaseDate>1986</releaseDate>
 	<serialNumber>00715045</serialNumber>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/SOFTLOGIC-DOUBLEDOS-DISK1.img" href="/disks/pcx86/tools/other/doubledos/2.0v/SOFTLOGIC-DOUBLEDOS-DISK1.json" md5="307b71549ec0f886c4e9e3fbc88f610b" md5json="8eb3bac5b81062b81ea01227ee139e53">
-		<name>DoubleDOS (Disk 1)</name>
+		<name>DoubleDOS 2.0V (Disk 1)</name>
 		<file size="857" time="1985-10-21 15:07:44" attr="0x20">123DRIVE.BAT</file>
 		<file size="12864" time="1985-06-21 12:05:04" attr="0x20">CML0203.FCL</file>
 		<file size="9344" time="1985-06-19 17:06:12" attr="0x20">CML0203.HCL</file>
@@ -105,7 +105,7 @@
 		<file size="2192" time="1987-01-28 22:38:30" attr="0x20">VDF0203.VDF</file>
 	</disk>
 	<disk id="disk02" size="368640" chs="40:2:9" img="archive/SOFTLOGIC-DOUBLEDOS-DISK2.img" href="/disks/pcx86/tools/other/doubledos/2.0v/SOFTLOGIC-DOUBLEDOS-DISK2.json" md5="9568aadbe242f06fc020bba8e2d2e413" md5json="24f9d701e9b7509002a7de2c0f919b6a">
-		<name>DoubleDOS (Disk 2)</name>
+		<name>DoubleDOS 2.0V (Disk 2)</name>
 		<file size="7209" time="1986-02-18 10:56:16" attr="0x20">ANALYZE.EXE</file>
 		<file size="35" time="1986-03-11 15:55:42" attr="0x20">BOOT.COM</file>
 		<file size="6144" time="1986-12-12 08:53:28" attr="0x20">CAROUSEL.EXE</file>

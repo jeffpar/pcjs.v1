@@ -8598,6 +8598,9 @@ Web.onInit(Panel.init);
 
 
 /**
+ * Think of this Controller class definition as an interface definition, implemented by the
+ * Video Card class and the RAM CompaqController class.
+ * 
  * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
  * which would force us to declare all class properties in the constructor, as well as prevent
  * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
@@ -8626,52 +8629,6 @@ class Controller {
     getMemoryBuffer(addr)
     {
         return [];
-    }
-
-    /**
-     * save()
-     *
-     * @this {Controller}
-     * @return {Array}
-     */
-    save()
-    {
-        return [];
-    }
-
-    /**
-     * restore(data)
-     *
-     * @this {Controller}
-     * @param {Object} data
-     * @return {boolean} true if successful, false if failure
-     */
-    restore(data)
-    {
-        return true;
-    }
-
-    /**
-     * getByte(off)
-     *
-     * @this {Controller}
-     * @param {number} off
-     * @return {number}
-     */
-    getByte(off)
-    {
-        return 0xff;
-    }
-
-    /**
-     * setByte(off, b)
-     *
-     * @this {Controller}
-     * @param {number} off
-     * @param {number} b
-     */
-    setByte(off, b)
-    {
     }
 }
 
@@ -38205,7 +38162,8 @@ class ChipSet extends Component {
         this.bPPIB = null;              // tracks writes to port 0x61, in case PPI_CTRL.B_IN is not set
         this.bPPIC = null;              // tracks writes to port 0x62, in case PPI_CTRL.C_IN_LO or PPI_CTRL.C_IN_HI is not set
         this.bPPICtrl = null;           // tracks writes to port 0x63 (eg, 0x99); read-only
-        this.bNMI = ChipSet.NMI.DISABLE;// tracks writes to the NMI Mask Register
+        this.bNMI = ChipSet.NMI.RESET;  // tracks writes to the NMI Mask Register
+        this.bKbdData = 0;              // records last byte received via notifyKbdData(); for MODEL_4860 only
 
         if (this.model == ChipSet.MODEL_ATT_6300) {
             this.b8041Status = 0;       // similar to b8042Status (but apparently only bits 0 and 1 are used)
@@ -40781,7 +40739,7 @@ class ChipSet extends Component {
              * TODO: Determine whether we need to maintain an "Active NMI" state; ie, if NMI.DISABLE is cleared
              * later, and the FPU coprocessor is still indicating an error condition, should we then generate an NMI?
              */
-            if (!(this.bNMI & ChipSet.NMI.DISABLE)) {
+            if (this.bNMI & ChipSet.NMI.ENABLE) {
                 X86.helpInterrupt.call(this.cpu, X86.EXCEPTION.NMI);
             }
         }
@@ -41515,7 +41473,20 @@ class ChipSet extends Component {
          * If you ever wanted to simulate I/O channel errors or R/W memory parity errors, you could
          * add either PPI_C.IO_CHANNEL_CHK (0x40) or PPI_C.RW_PARITY_CHK (0x80) to the return value (b).
          */
-        if ((this.model|0) == ChipSet.MODEL_5150) {
+        if ((this.model|0) == ChipSet.MODEL_4860) {
+            b |= this.bNMI & ChipSet.NMI.KBD_LATCH;
+            /*
+             * We're going to hard-code the rest of the PCjr settings for now, including NOT setting the NO_KBD_CABLE
+             * bit, on the theory that if we don't have to deal with IR hardware emulation, so much the better.
+             */
+            b |= ChipSet.PPI_C.NO_MODEM | ChipSet.PPI_C.NO_DISKETTE | ChipSet.PPI_C.NO_MEMEXP;
+            /*
+             * I'm just guessing at how keyboard data is "clocked" into the the KBD_DATA bit; this will be revisited.
+             */
+            b |= (this.bKbdData & 0x1)? ChipSet.PPI_C.KBD_DATA : 0;
+            this.bKbdData >>>= 1;
+        }
+        else if ((this.model|0) == ChipSet.MODEL_5150) {
             if (this.bPPIB & ChipSet.PPI_B.ENABLE_SW2) {
                 b |= this.aDIPSwitches[1][1] & ChipSet.PPI_C.SW;
             } else {
@@ -42183,7 +42154,16 @@ class ChipSet extends Component {
         if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
             this.printMessage("notifyKbdData(" + Str.toHexByte(b) + ')', true);
         }
-        if (this.model < ChipSet.MODEL_5170) {
+        if (this.model == ChipSet.MODEL_4860) {
+            if (!(this.bNMI & ChipSet.NMI.KBD_LATCH)) {
+                this.bNMI |= ChipSet.NMI.KBD_LATCH;
+                this.bKbdData = b;
+                if (this.bNMI & ChipSet.NMI.ENABLE) {
+                    X86.helpInterrupt.call(this.cpu, X86.EXCEPTION.NMI);
+                }
+            }
+        }
+        else if (this.model < ChipSet.MODEL_5170) {
             /*
              * TODO: Should we be checking bPPI for PPI_B.CLK_KBD on these older machines, before calling setIRR()?
              */
@@ -42260,7 +42240,7 @@ class ChipSet extends Component {
     {
         this.printMessageIO(port, bOut, addrFrom, "CMOS.ADDR", null, Messages.CMOS);
         this.bCMOSAddr = bOut;
-        this.bNMI = (bOut & ChipSet.CMOS.ADDR.NMI_DISABLE)? ChipSet.NMI.DISABLE : ChipSet.NMI.ENABLE;
+        this.bNMI = (this.bNMI & ~ChipSet.NMI.ENABLE) | ((bOut & ChipSet.CMOS.ADDR.NMI_DISABLE)? 0 : ChipSet.NMI.ENABLE);
     }
 
     /**
@@ -42328,7 +42308,9 @@ class ChipSet extends Component {
     /**
      * inNMI(port, addrFrom)
      *
-     * This handler is installed only for models before MODEL_5170.
+     * This handler is installed only for models before MODEL_5170; technically, this port is not readable,
+     * except on the MODEL_4860, and even there, all a read is required to do is clear KBD_LATCH, but we go ahead
+     * and return all the bits.
      *
      * @this {ChipSet}
      * @param {number} port (0xA0)
@@ -42337,8 +42319,10 @@ class ChipSet extends Component {
      */
     inNMI(port, addrFrom)
     {
-        this.printMessageIO(port, null, addrFrom, "NMI");
-        return this.bNMI;
+        let bIn = this.bNMI;
+        this.printMessageIO(port, null, addrFrom, "NMI", bIn);
+        this.bNMI &= ~ChipSet.NMI.KBD_LATCH;
+        return bIn;
     }
 
     /**
@@ -43107,9 +43091,15 @@ ChipSet.PPI_B = {               // this.bPPIB (port 0x61)
 
 ChipSet.PPI_C = {               // this.bPPIC (port 0x62)
     PORT:               0x62,   // INPUT (see below)
+    KBD_LATCH:          0x01,   // MODEL_4860 only (set if keyboard data latched)
+    NO_MODEM:           0x02,   // MODEL_4860 only (set if no Internal Model Card installed)
+    NO_DISKETTE:        0x04,   // MODEL_4860 only (set if no Diskette Drive Adapter installed)
+    NO_MEMEXP:          0x08,   // MODEL_4860 only (set if no 64Kb Memory Expansion installed)
     SW:                 0x0F,   // MODEL_5150: SW2[1-4] or SW2[5], depending on whether PPI_B.ENABLE_SW2 is set or clear; MODEL_5160: SW1[1-4] or SW1[5-8], depending on whether PPI_B.ENABLE_SW_HI is clear or set
-    CASS_DATA_IN:       0x10,
-    TIMER2_OUT:         0x20,
+    CASS_DATA_IN:       0x10,   // MODEL_4860 and MODEL_5150 
+    TIMER2_OUT:         0x20,   // MODEL_4860 and up (timer 2 output)
+    KBD_DATA:           0x40,   // MODEL_4860 only: data from either the keyboard cable or the IR receiver
+    NO_KBD_CABLE:       0x80,   // MODEL_4860 only: (set if keyboard cable not connected)
     IO_CHANNEL_CHK:     0x40,   // used by NMI handler to detect I/O channel errors
     RW_PARITY_CHK:      0x80    // used by NMI handler to detect R/W memory parity errors
 };
@@ -43699,12 +43689,21 @@ ChipSet.CMOS = {
  */
 
 /*
- * NMI Mask Register (MODEL_5150 and MODEL_5160 only)
+ * NMI Mask Register (port 0xA0)
+ * 
+ * On the MODEL_5150 and MODEL_5160, this is a write-only register, and the only valid bit is ENABLE.
+ * 
+ * On the MODEL_4860, this is a read-write register; the following bit definitions apply to writes, whereas
+ * reads are defined as merely clearing the PCjr's keyboard NMI latch (which we maintain here in bit 0).  
  */
 ChipSet.NMI = {                 // this.bNMI
-    PORT:               0xA0,
-    ENABLE:             0x80,
-    DISABLE:            0x00
+    PORT:               0xA0,   //
+    ENABLE:             0x80,   // enables NMI
+    IRTEST:             0x40,   // enables 8253 timer 2 output into an IR diode on the IR receiver board
+    SELCLK1:            0x20,   // selects timer 0 output to be used as CLK input to timer 1
+    DISHRQ:             0x10,   // not implemented on the system board; for use with external bus-master devices
+    KBD_LATCH:          0x01,   // keyboard latch (we maintain it here for convenience; it gets propagated to PPI_C bit 0)
+    RESET:              0x00    // default value on reset (TODO: Is NMI really disabled by default on reset?)
 };
 
 /*
@@ -43735,7 +43734,7 @@ ChipSet.aPortInput = {
     0x43: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimerCtrl(ChipSet.PIT0.INDEX, port, addrFrom); },
 };
 
-ChipSet.aPortInput4860 = {
+ChipSet.aPortInput4860 = ChipSet.aPortInput5150 = {
     0x60: ChipSet.prototype.inPPIA,
     0x61: ChipSet.prototype.inPPIB,
     0x62: ChipSet.prototype.inPPIC,
@@ -43758,13 +43757,6 @@ ChipSet.aPortInput5xxx = {
     0x82: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 3, port, addrFrom); },
     0x83: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 1, port, addrFrom); },
     0x87: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 0, port, addrFrom); }
-};
-
-ChipSet.aPortInput5150 = {
-    0x60: ChipSet.prototype.inPPIA,
-    0x61: ChipSet.prototype.inPPIB,
-    0x62: ChipSet.prototype.inPPIC,
-    0x63: ChipSet.prototype.inPPICtrl   // technically, not actually readable, but I want the Debugger to be able to read it
 };
 
 ChipSet.aPortInput5170 = {
@@ -43828,7 +43820,7 @@ ChipSet.aPortOutput = {
     0x43: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimerCtrl(ChipSet.PIT0.INDEX, port, bOut, addrFrom); },
 };
 
-ChipSet.aPortOutput4860 = {
+ChipSet.aPortOutput4860 = ChipSet.aPortOutput5150 = {
     0x60: ChipSet.prototype.outPPIA,
     0x61: ChipSet.prototype.outPPIB,
     0x62: ChipSet.prototype.outPPIC,
@@ -43855,14 +43847,6 @@ ChipSet.aPortOutput5xxx = {
     0x82: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 3, port, bOut, addrFrom); },
     0x83: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 1, port, bOut, addrFrom); },
     0x87: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 0, port, bOut, addrFrom); }
-};
-
-ChipSet.aPortOutput5150 = {
-    0x60: ChipSet.prototype.outPPIA,
-    0x61: ChipSet.prototype.outPPIB,
-    0x62: ChipSet.prototype.outPPIC,
-    0x63: ChipSet.prototype.outPPICtrl,
-    0xA0: ChipSet.prototype.outNMI
 };
 
 ChipSet.aPortOutput5170 = {
