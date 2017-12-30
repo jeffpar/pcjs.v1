@@ -16,7 +16,7 @@ a variety of newer (late 2017) PCjs Machines:
 * [LED Controller "Chip"](ledctrl.js)
 * [ROM](rom.js)
 * [Time](time.js)
-* [TMS-1500 Calulator "Chip"](tms1500.js)
+* [TMS-1500 Calculator "Chip"](tms1500.js)
 * [Machine](machine.js)
 
 Examples of those newer PCjs Machines include:
