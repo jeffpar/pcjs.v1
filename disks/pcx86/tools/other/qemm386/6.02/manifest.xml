@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/manifest.xsl"?>
+<manifest type="software">
+	<title>QEMM-386</title>
+	<version>6.02</version>
+	<type>Utility</type>
+	<category>Memory Manager</category>
+	<author>Quarterdeck Office Systems</author>
+	<releaseDate>1991-11-13</releaseDate>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/QEMM386-602.img" href="/disks/pcx86/tools/other/qemm386/6.02/QEMM386-602.json" md5="cdf59e43e27ba58c60c7a785c3c738cb" md5json="6f8fef3deec383897b6074296ae60118">
+		<file size="77490" time="1991-11-13 06:02:02" attr="0x20">INSTALL.EXE</file>
+		<file size="251366" time="1991-11-13 06:02:02" attr="0x20">QEMM386.QIP</file>
+	</disk>
+</manifest>
