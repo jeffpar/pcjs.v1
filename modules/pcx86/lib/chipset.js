@@ -213,24 +213,28 @@ class ChipSet extends Component {
 
         bus.addPortInputTable(this, ChipSet.aPortInput);
         bus.addPortOutputTable(this, ChipSet.aPortOutput);
-
-        if (this.model < ChipSet.MODEL_5170) {
-            if (this.model == ChipSet.MODEL_4860) {
-                bus.addPortInputTable(this, ChipSet.aPortInput4860);
-                bus.addPortOutputTable(this, ChipSet.aPortOutput4860);
-            } else if (this.model == ChipSet.MODEL_ATT_6300) {
-                bus.addPortInputTable(this, ChipSet.aPortInput6300);
-                bus.addPortOutputTable(this, ChipSet.aPortOutput6300);
+        if (this.model == ChipSet.MODEL_4860) {
+            bus.addPortInputTable(this, ChipSet.aPortInput4860);
+            bus.addPortOutputTable(this, ChipSet.aPortOutput4860);
+        }
+        else {
+            bus.addPortInputTable(this, ChipSet.aPortInput5xxx);
+            bus.addPortOutputTable(this, ChipSet.aPortOutput5xxx);
+            if (this.model < ChipSet.MODEL_5170) {
+                if (this.model == ChipSet.MODEL_ATT_6300) {
+                    bus.addPortInputTable(this, ChipSet.aPortInput6300);
+                    bus.addPortOutputTable(this, ChipSet.aPortOutput6300);
+                } else {
+                    bus.addPortInputTable(this, ChipSet.aPortInput5150);
+                    bus.addPortOutputTable(this, ChipSet.aPortOutput5150);
+                }
             } else {
-                bus.addPortInputTable(this, ChipSet.aPortInput5150);
-                bus.addPortOutputTable(this, ChipSet.aPortOutput5150);
-            }
-        } else {
-            bus.addPortInputTable(this, ChipSet.aPortInput5170);
-            bus.addPortOutputTable(this, ChipSet.aPortOutput5170);
-            if (DESKPRO386 && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386) {
-                bus.addPortInputTable(this, ChipSet.aPortInputDeskPro386);
-                bus.addPortOutputTable(this, ChipSet.aPortOutputDeskPro386);
+                bus.addPortInputTable(this, ChipSet.aPortInput5170);
+                bus.addPortOutputTable(this, ChipSet.aPortOutput5170);
+                if (DESKPRO386 && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386) {
+                    bus.addPortInputTable(this, ChipSet.aPortInputDeskPro386);
+                    bus.addPortOutputTable(this, ChipSet.aPortOutputDeskPro386);
+                }
             }
         }
         if (DEBUGGER) {
