@@ -283,7 +283,7 @@ class RAM extends Component {
  *
  * @unrestricted
  */
-class CompaqController {
+class CompaqController extends Controller {
     /**
      * CompaqController(ram)
      *
@@ -319,6 +319,8 @@ class CompaqController {
      */
     constructor(ram)
     {
+        super();
+        
         this.ram = ram;
         this.wMappings = CompaqController.MAPPINGS.DEFAULT;
         /*
@@ -428,6 +430,17 @@ class CompaqController {
     }
 
     /**
+     * getMemoryAccess()
+     *
+     * @this {CompaqController}
+     * @return {Array.<function()>}
+     */
+    getMemoryAccess()
+    {
+        return CompaqController.ACCESS;
+    }
+
+    /**
      * getMemoryBuffer(addr)
      *
      * @this {CompaqController}
@@ -437,17 +450,6 @@ class CompaqController {
     getMemoryBuffer(addr)
     {
         return CompaqController.BUFFER;
-    }
-
-    /**
-     * getMemoryAccess()
-     *
-     * @this {CompaqController}
-     * @return {Array.<function()>}
-     */
-    getMemoryAccess()
-    {
-        return CompaqController.ACCESS;
     }
 
     /**

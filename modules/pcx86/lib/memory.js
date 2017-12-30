@@ -97,7 +97,7 @@ class Memory {
      * @param {number} [used] portion of block in bytes (0 for none); must be a multiple of 4
      * @param {number} [size] of block's buffer in bytes (0 for none); must be a multiple of 4
      * @param {number} [type] is one of the Memory.TYPE constants (default is Memory.TYPE.NONE)
-     * @param {Object} [controller] is an optional memory controller component
+     * @param {Controller} [controller] is an optional memory controller component
      * @param {X86CPU} [cpu] is required for UNPAGED memory blocks, so that the CPU can map it to a PAGED block
      */
     constructor(addr, used, size, type, controller, cpu)
@@ -160,7 +160,7 @@ class Memory {
          */
         if (controller) {
             this.controller = controller;
-            var a = controller.getMemoryBuffer(addr);
+            var a = controller.getMemoryBuffer(addr|0);
             this.adw = a[0];
             this.offset = a[1];
             this.setAccess(controller.getMemoryAccess());

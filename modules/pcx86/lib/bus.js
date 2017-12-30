@@ -44,6 +44,84 @@ if (NODE) {
  *
  * @unrestricted
  */
+class Controller {
+    /**
+     * getMemoryAccess()
+     *
+     * @this {Controller}
+     * @return {Array.<function()>}
+     */
+    getMemoryAccess()
+    {
+        return [];
+    }
+    
+    /**
+     * getMemoryBuffer(addr)
+     *
+     * @this {Controller}
+     * @param {number} addr
+     * @return {Array} containing the buffer (and an offset within that buffer)
+     */
+    getMemoryBuffer(addr)
+    {
+        return [];
+    }
+
+    /**
+     * save()
+     *
+     * @this {Controller}
+     * @return {Array}
+     */
+    save()
+    {
+        return [];
+    }
+
+    /**
+     * restore(data)
+     *
+     * @this {Controller}
+     * @param {Object} data
+     * @return {boolean} true if successful, false if failure
+     */
+    restore(data)
+    {
+        return true;
+    }
+
+    /**
+     * getByte(off)
+     *
+     * @this {Controller}
+     * @param {number} off
+     * @return {number}
+     */
+    getByte(off)
+    {
+        return 0xff;
+    }
+
+    /**
+     * setByte(off, b)
+     *
+     * @this {Controller}
+     * @param {number} off
+     * @param {number} b
+     */
+    setByte(off, b)
+    {
+    }
+}
+
+/**
+ * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
+ * which would force us to declare all class properties in the constructor, as well as prevent
+ * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
+ *
+ * @unrestricted
+ */
 class Bus extends Component {
     /**
      * Bus(cpu, dbg)
@@ -265,7 +343,7 @@ class Bus extends Component {
      * @param {number} addr is the starting physical address of the request
      * @param {number} size of the request, in bytes
      * @param {number} type is one of the Memory.TYPE constants
-     * @param {Object} [controller] is an optional memory controller component
+     * @param {Controller} [controller] is an optional memory controller component
      * @return {boolean} true if successful, false if not
      */
     addMemory(addr, size, type, controller)

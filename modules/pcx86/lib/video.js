@@ -288,7 +288,7 @@ if (NODE) {
  *
  * @unrestricted
  */
-class Card {
+class Card extends Controller {
     /**
      * Card(video, nCard, data, cbMemory)
      *
@@ -307,6 +307,8 @@ class Card {
      */
     constructor(video, nCard, data, cbMemory)
     {
+        super();
+        
         /*
          * If a card was originally not present (eg, EGA), then the state will be empty,
          * so we need to detect that case and continue indicating that the card is not present.
@@ -2938,7 +2940,7 @@ class Video extends Component {
      * simulated mouse around.  If Video.TOUCH.MOUSE is enabled, it's already been confirmed the machine has a mouse.
      *
      * @this {Video}
-     * @param {Event} event object from a 'touch' event
+     * @param {Event|MouseEvent|TouchEvent} event object from a 'touch' event
      * @param {boolean} [fStart] (true if 'touchstart', false if 'touchend', undefined if 'touchmove')
      */
     processTouchEvent(event, fStart)
