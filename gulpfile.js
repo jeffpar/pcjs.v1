@@ -67,6 +67,10 @@
  * 
  *          Updates the version number in all project machine XML files to match the version contained in
  *          _data/machines.json:shared.version.
+ *
+ *      `gulp copyright`
+ *
+ *          Updates the copyright year in all project files to match the year contained in package.json.
  */
 var gulp = require("gulp");
 var gulpNewer = require("gulp-newer");
