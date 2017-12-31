@@ -2,7 +2,7 @@
  * grunt-prepjs
  * https://github.com/jeffpar/pcjs
  *
- * Copyright (c) 2014-2016 jeffpar
+ * Copyright (c) 2014-2018 jeffpar
  * Licensed under the MIT license.
  *
  * Genesis:

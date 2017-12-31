@@ -2,7 +2,7 @@
  * grunt-manifester
  * https://github.com/jeffpar/pcjs
  *
- * Copyright (c) 2014-2016 jeffpar
+ * Copyright (c) 2014-2018 jeffpar
  * Licensed under the MIT license.
  *
  * TODO: Update this header with our standard header and fix all the JSHint warnings

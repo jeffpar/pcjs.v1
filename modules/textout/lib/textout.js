@@ -1,7 +1,7 @@
 /**
  * @fileoverview Provides miscellaneous text-munging services
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
- * @copyright © Jeff Parsons 2012-2017
+ * @copyright © 2012-2018 Jeff Parsons
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
