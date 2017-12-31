@@ -11,7 +11,7 @@ var APPVERSION = "1.x.x";       // this @define is overridden by the Closure Com
 
 var XMLVERSION = null;          // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
 
-var COPYRIGHT = "Copyright © 2012-2017 Jeff Parsons <Jeff@pcjs.org>";
+var COPYRIGHT = "Copyright © 2012-2018 Jeff Parsons <Jeff@pcjs.org>";
 
 var LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 

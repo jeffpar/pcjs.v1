@@ -63,10 +63,14 @@
  *          "uncompiled" manifests (eg, /disks/pcx86/library.xml), which are actually "manifests of manifests"
  *          and therefore inherently slower to load.
  * 
- *      `gulp promote`
+ *      `gulp version`
  * 
  *          Updates the version number in all project machine XML files to match the version contained in
  *          _data/machines.json:shared.version.
+ *
+ *      `gulp copyright`
+ *
+ *          Updates the copyright year in all project files to match the year contained in package.json.
  */
 var gulp = require("gulp");
 var gulpNewer = require("gulp-newer");
@@ -194,7 +198,7 @@ aMachines.forEach(function(machineType) {
                     .pipe(gulpReplace(/\/\*\*[^@]*@typedef\s*{[A-Z][A-Za-z0-9_]+}\s*(\S+)\s*([\s\S]*?)\*\//g, function(match, type, props) {
                         let sType = "/** @typedef {{ ";
                         let sProps = "";
-                        let reProps = /@property\s*{([^}]*)}\s*(\[|)([^\s\]]+)\]?/g, matchProps;
+                        let reProps = /@property\s*{([^}]*)}\s*(\[|)([^\s\]]+)]?/g, matchProps;
                         while (matchProps = reProps.exec(props)) {
                             if (sProps) sProps += ", ";
                             sProps += matchProps[3] + ": " + (matchProps[2]? ("(" + matchProps[1] + "|undefined)") : matchProps[1]);
@@ -322,10 +326,23 @@ gulp.task("disks", function() {
         .pipe(gulp.dest(targetDir));
 });
 
-gulp.task("promote", function() {
+gulp.task("version", function() {
     let baseDir = "./";
     return gulp.src(["apps/**/*.xml", "devices/**/*.xml", "disks/**/*.xml", "pubs/**/*.xml"], {base: baseDir})
-        .pipe(gulpReplace(/href="\/versions\/([^\/]*)\/[0-9\.]*\/(machine|manifest|outline)\.xsl"/g, 'href="/versions/$1/' + machines.shared.version + '/$2.xsl"'))
+        .pipe(gulpReplace(/href="\/versions\/([^\/]*)\/[0-9.]*\/(machine|manifest|outline)\.xsl"/g, 'href="/versions/$1/' + machines.shared.version + '/$2.xsl"'))
+        .pipe(gulp.dest(baseDir));
+});
+
+gulp.task("copyright", function() {
+    let baseDir = "./";
+    /*
+     * TODO: Although I've added the 'skipBinary' option to gulpReplace(), to avoid mucking up files like ATT4425.ttf,
+     * it would also be nice if we could avoid rewriting ANY file that contains no matches, because Gulp's default behavior
+     * seems to be rewrite EVERYTHING, at least when we're doing these sorts of "in place" operations.
+     */
+    return gulp.src(["devices/**/*.js", "modules/**/*", "**/*.md"], {base: baseDir})
+        .pipe(gulpReplace(/(Copyright[ \S]+?)( Jeff Parsons)( +201\d-)[0-9]+/gi, '$1$3' + pkg.year + '$2', {skipBinary: true}))
+        .pipe(gulpReplace(/(Copyright|\u00A9)( +201\d-)[0-9]+(.*?Jeff Parsons)/gi, '$1$2' + pkg.year + '$3', {skipBinary: true}))
         .pipe(gulp.dest(baseDir));
 });
 

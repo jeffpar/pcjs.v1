@@ -1,7 +1,7 @@
 /**
  * @fileoverview Manages a collection of devices as a single machine
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @copyright © Jeff Parsons 2012-2017
+ * @copyright © 2012-2018 Jeff Parsons
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -231,7 +231,7 @@ Machine.CLASSORDER = [
     Machine.CLASS.CHIP
 ];
 
-Machine.COPYRIGHT = "Copyright © 2012-2017 Jeff Parsons <Jeff@pcjs.org>";
+Machine.COPYRIGHT = "Copyright © 2012-2018 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 Machine.VERSION = 1.11;

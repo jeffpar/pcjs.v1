@@ -161,7 +161,7 @@ Here's a sample run, from a macOS Terminal window:
 	Debugger object created: test1170.debugger
 	bus: 8Kb H/W at 17760000
 	PDPjs v1.x.x
-	Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
+	Copyright © 2012-2018 Jeff Parsons <Jeff@pcjs.org>
 	License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 	Portions adapted from the PDP-11/70 Emulator v1.4 by Paul Nankervis <paulnank@hotmail.com>
 	bus: 256Kb RAM at 000000

@@ -1,7 +1,7 @@
 /**
  * @fileoverview Disk APIs, as defined by diskdump.js and consumed by disk.js
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @copyright © Jeff Parsons 2012-2017
+ * @copyright © 2012-2018 Jeff Parsons
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *

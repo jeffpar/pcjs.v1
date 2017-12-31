@@ -182,7 +182,7 @@ Step 5: Enjoy!
 
 All I ask is that any page that embeds the simulator also includes attribution, such as: 
 
-> [PCjs](http://pcjs.org) © 2012-2017 by [Jeff Parsons](mailto:Jeff@pcjs.org) ([@jeffpar](http://twitter.com/jeffpar))
+> [PCjs](http://pcjs.org) © 2012-2018 by [Jeff Parsons](mailto:Jeff@pcjs.org) ([@jeffpar](http://twitter.com/jeffpar))
 
 If you use the default [XML stylesheet](/versions/c1pjs/1.37.0/components.xsl), attribution is automatically inserted,
 which relieves you from including it yourself.

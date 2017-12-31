@@ -1,7 +1,7 @@
 /**
  * @fileoverview Implements the PCx86 ChipSet component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @copyright © Jeff Parsons 2012-2017
+ * @copyright © 2012-2018 Jeff Parsons
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -3577,6 +3577,21 @@ class ChipSet extends Component {
     }
 
     /**
+     * outMFGTest(port, bOut, addrFrom)
+     * 
+     * This is test port on the PCjr (MODEL_4860) only.
+     *
+     * @this {ChipSet}
+     * @param {number} port (0x10)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+     */
+    outMFGTest(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, "MFG_TEST");
+    }
+
+    /**
      * inPPIA(port, addrFrom)
      *
      * @this {ChipSet}
@@ -5956,12 +5971,19 @@ ChipSet.aPortInput = {
     0x43: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimerCtrl(ChipSet.PIT0.INDEX, port, addrFrom); },
 };
 
-ChipSet.aPortInput4860 = ChipSet.aPortInput5150 = {
+ChipSet.aPortInput4860 = {
     0x60: ChipSet.prototype.inPPIA,
     0x61: ChipSet.prototype.inPPIB,
     0x62: ChipSet.prototype.inPPIC,
     0x63: ChipSet.prototype.inPPICtrl,  // technically, not actually readable, but I want the Debugger to be able to read it
     0xA0: ChipSet.prototype.inNMI
+};
+
+ChipSet.aPortInput5150 = {
+    0x60: ChipSet.prototype.inPPIA,
+    0x61: ChipSet.prototype.inPPIB,
+    0x62: ChipSet.prototype.inPPIC,
+    0x63: ChipSet.prototype.inPPICtrl,  // technically, not actually readable, but I want the Debugger to be able to read it
 };
 
 ChipSet.aPortInput5xxx = {
@@ -6042,7 +6064,16 @@ ChipSet.aPortOutput = {
     0x43: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimerCtrl(ChipSet.PIT0.INDEX, port, bOut, addrFrom); },
 };
 
-ChipSet.aPortOutput4860 = ChipSet.aPortOutput5150 = {
+ChipSet.aPortOutput4860 = {
+    0x10: ChipSet.prototype.outMFGTest,     // a manufacturing test port that we don't really care about     
+    0x60: ChipSet.prototype.outPPIA,
+    0x61: ChipSet.prototype.outPPIB,
+    0x62: ChipSet.prototype.outPPIC,
+    0x63: ChipSet.prototype.outPPICtrl,
+    0xA0: ChipSet.prototype.outNMI
+};
+
+ChipSet.aPortOutput5150 = {
     0x60: ChipSet.prototype.outPPIA,
     0x61: ChipSet.prototype.outPPIB,
     0x62: ChipSet.prototype.outPPIC,
