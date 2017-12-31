@@ -2,7 +2,7 @@
 /**
  * @fileoverview Tool for converting 16-column data to 17-column data
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @copyright © Jeff Parsons 2012-2017
+ * @copyright © 2012-2018 Jeff Parsons
  * @suppress {missingProperties}
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.

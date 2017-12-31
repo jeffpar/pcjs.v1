@@ -2,7 +2,7 @@
 /**
  * @fileoverview Tool for converting "raw" TI-57 ROM data to 16-bit little-endian words
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @copyright © Jeff Parsons 2012-2017
+ * @copyright © 2012-2018 Jeff Parsons
  * @suppress {missingProperties}
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
