@@ -335,6 +335,11 @@ gulp.task("version", function() {
 
 gulp.task("copyright", function() {
     let baseDir = "./";
+    /*
+     * TODO: Add a filter that skips over known binary files, such as ATT4425.ttf, because unfortunately, even though nothing
+     * matches inside the file, the stream gets rewritten and corrupted.  In fact, see if we can avoid rewriting ANY file that
+     * contains no matches, because Gulp's default behavior is to basically rewrite EVERYTHING, which is rather excessive.
+     */
     return gulp.src(["modules/**/*"], {base: baseDir})
         .pipe(gulpReplace(/(Copyright[ \S]+?)( Jeff Parsons|)( 201\d-)[0-9]+/gi, '$1$3' + pkg.year + '$2'))
         .pipe(gulp.dest(baseDir));
