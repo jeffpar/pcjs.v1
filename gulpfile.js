@@ -341,7 +341,7 @@ gulp.task("copyright", function() {
      * contains no matches, because Gulp's default behavior is to basically rewrite EVERYTHING, which is rather excessive.
      */
     return gulp.src(["modules/**/*"], {base: baseDir})
-        .pipe(gulpReplace(/(Copyright[ \S]+?)( Jeff Parsons|)( 201\d-)[0-9]+/gi, '$1$3' + pkg.year + '$2'))
+        .pipe(gulpReplace(/(Copyright[ \S]+?)( Jeff Parsons|)( 201\d-)[0-9]+/gi, '$1$3' + pkg.year + '$2', {skipBinary: true}))
         .pipe(gulp.dest(baseDir));
 });
 
