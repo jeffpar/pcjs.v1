@@ -343,7 +343,7 @@ gulp.task("copyright", function() {
     return gulp.src(["devices/**/*.js", "modules/**/*", "**/*.md", "_layouts/*.html"], {base: baseDir})
     return gulp.src(["devices/**/*.js", "modules/**/*", "**/*.md", "_layouts/*.html", "*.js"], {base: baseDir})
         .pipe(gulpReplace(/(Copyright[ \S]+?)( Jeff Parsons)( +201\d-)[0-9]+/gi, '$1$3' + pkg.year + '$2', {skipBinary: true}))
-        .pipe(gulpReplace(/(Copyright|\u00A9)( +201\d-)[0-9]+(.*?Jeff Parsons)/gi, '$1$2' + pkg.year + '$3', {skipBinary: true}))
+        .pipe(gulpReplace(/(Copyright|\u00A9)( +201\d-)[0-9]+(.*?Jeff Parsons|.*?twitter_username)/gi, '$1$2' + pkg.year + '$3', {skipBinary: true}))
         .pipe(gulp.dest(baseDir));
 });
 
