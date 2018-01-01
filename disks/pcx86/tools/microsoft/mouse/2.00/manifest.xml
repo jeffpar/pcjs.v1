@@ -8,7 +8,7 @@
 	<author>Microsoft</author>
 	<releaseDate>1983-12-31</releaseDate>
 	<disk id="disk01" size="327680" chs="40:2:8" img="archive/MSMOUSE-200--1983-12-31.img" href="/disks/pcx86/tools/microsoft/mouse/2.00/MSMOUSE-200--1983-12-31.json" md5="c64be16385d3f8b3df50ef40b1c037e9" md5json="c16ca7b1836462283d1d21ed2e5e4bbf">
-		<link href="https://winworldpc.com/product/microsoft-mouse/1x">Microsoft Mouse 2.00 Bus Version (1983-12-31) (5.25-320k): disk01.img</link>
+		<link href="https://winworldpc.com/product/microsoft-mouse/1x" name="Microsoft Mouse 2.00 Bus Version (1983-12-31) (5.25-320k)" file="disk01.img">WinWorld</link>
 		<file size="3022" time="1983-12-31 11:00:00" attr="0x20">123.DEF</file>
 		<file size="1024" time="1983-12-31 11:00:00" attr="0x20">123.MNU</file>
 		<file size="17" time="1983-12-31 11:00:00" attr="0x20">AUTOEXEC.BAT</file>

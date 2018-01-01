@@ -9,7 +9,7 @@
 	<releaseDate>1985-03-07</releaseDate>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/PCDOS310-DISK1.img" href="/disks/pcx86/dos/ibm/3.10/PCDOS310-DISK1.json" md5="588ab5b50f769593e2b67b9d0784752d" md5json="db9ac761ccc2e79a45fd8f91e6bd3381">
 		<name>PC-DOS 3.10 (Disk 1)</name>
-		<link href="https://winworldpc.com/product/pc-dos/3x">IBM PC-DOS 3.10 (03-07-1985) (5.25): Disk1.img</link>
+		<link href="https://winworldpc.com/product/pc-dos/3x" name="IBM PC-DOS 3.10 (03-07-1985) (5.25)" file="Disk1.img">WinWorld</link>
 		<file size="1651" time="1985-03-07 13:43:00" attr="0x20">ANSI.SYS</file>
 		<file size="1509" time="1985-03-07 13:43:00" attr="0x20">ASSIGN.COM</file>
 		<file size="15091" time="1985-03-07 13:43:00" attr="0x20">ATTRIB.EXE</file>

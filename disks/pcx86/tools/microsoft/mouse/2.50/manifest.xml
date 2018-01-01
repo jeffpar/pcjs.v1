@@ -9,7 +9,7 @@
 	<releaseDate/>
 	<disk id="disk01" size="327680" chs="40:2:8" img="archive/MSMOUSE-250.img" href="/disks/pcx86/tools/microsoft/mouse/2.50/MSMOUSE-250.json" md5="105888519aa82dbcd6541cdade67825b" md5json="a66b966b261b40c8d6554c01f31529c8">
 		<name>MS Mouse 2.50 (Bus)</name>
-		<link href="https://winworldpc.com/product/microsoft-mouse/2x">Microsoft Mouse 2.50 (Word Bundle): MSMOUSE.IMG</link>
+		<link href="https://winworldpc.com/product/microsoft-mouse/2x" name="Microsoft Mouse 2.50 (Word Bundle)" file="MSMOUSE.IMG">WinWorld</link>
 		<file size="3356" time="1984-09-13 13:00:00" attr="0x20">123.DEF</file>
 		<file size="1024" time="1984-09-13 13:00:00" attr="0x20">123.MNU</file>
 		<file size="17" time="1984-09-13 13:00:00" attr="0x20">AUTOEXEC.BAT</file>
@@ -36,7 +36,7 @@
 	</disk>
 	<disk id="disk02" size="327680" chs="40:2:8" dir="archive/MSMOUSE-250-SERIAL" href="/disks/pcx86/tools/microsoft/mouse/2.50/MSMOUSE-250-SERIAL.json" md5="e419e27b22e3bf7a31bc577c228f92d4" md5json="f623e009b770f66e2873fef8b7e823df">
 		<name>MS Mouse 2.50 (Serial)</name>
-		<link href="https://winworldpc.com/product/microsoft-mouse/2x">Microsoft Mouse 2.50 (Word Bundle): SERMOUSE.COM and SERMOUSE.SYS</link>
+		<link href="https://winworldpc.com/product/microsoft-mouse/2x" name="Microsoft Mouse 2.50 (Word Bundle)" file="SERMOUSE.COM;SERMOUSE.SYS">WinWorld</link>
 		<file size="4138" time="1984-09-13 10:00:00" attr="0x20" md5="790e73b95e2bbf966aac72806f0dc9c2">MOUSE.COM</file>
 		<file size="4386" time="1984-09-13 10:00:00" attr="0x20" md5="6a261e2aefa188eed03b93f55373b9fc">MOUSE.SYS</file>
 	</disk>
