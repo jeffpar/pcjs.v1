@@ -354,7 +354,7 @@ class Input extends Device {
      * captureKeys(element)
      *
      * @this {Input}
-     * @param {Document|HTMLElement} element
+     * @param {Document|Element} element
      */
     captureKeys(element)
     {

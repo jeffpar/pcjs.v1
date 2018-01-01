@@ -104,9 +104,7 @@
  * @property {CanvasRenderingContext2D} contextView
  * @property {HTMLCanvasElement} canvasGrid
  * @property {CanvasRenderingContext2D} contextGrid
- * @property {{
- *  container: HTMLElement|undefined
- * }} bindings
+ * @property {{ container: Element|undefined }} bindings
  * @property {Array.<string|number|null>} buffer
  * @property {Array.<string|number>|null} bufferClone
  * @property {boolean} fBufferModified
