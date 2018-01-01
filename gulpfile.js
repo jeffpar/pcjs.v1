@@ -34,6 +34,9 @@
  *          Recompiles all machine scripts in their respective version folder (under /versions) that
  *          are out-of-date with respect to the individual files (under /modules).  The target version
  *          comes from _data/machines.json:shared.version.
+ *
+ *          It does this by running the `concat`, `compile`, `copy`, and `disks` tasks for all machines,
+ *          in that order.
  * 
  *      `gulp concat` (or `gulp concat/{machine}`)
  * 
@@ -44,7 +47,7 @@
  * 
  *      `gulp compile` (or `gulp compile/{machine}`)
  * 
- *          For example, `gulp compile/pcx86` will recompile the current version of the pcx86.js script
+ *          For example, `gulp compile/pcx86` will recompile the current version of pcx86-uncompiled.js
  *          if it's out of date.
  * 
  *      `gulp compile/devices`
@@ -124,7 +127,7 @@ aMachines.forEach(function(machineType) {
     }
 
     let machineVersion = (machineConfig.version || machines.shared.version);
-    let machineReleaseDir = "./versions/" + machineConfig.folder + "/" + machineVersion;
+    let machineReleaseDir = "./versions/" + machineConfig['folder'] + "/" + machineVersion;
     let machineReleaseFile  = machineType + ".js";
     let machineUncompiledFile  = machineType + "-uncompiled.js";
     let machineDefines = {};
@@ -276,18 +279,17 @@ gulp.task("disks", function() {
         ], {base: baseDir})
         .pipe(gulpReplace(/([ \t]*)<manifest.*? ref="(.*?)".*?\/>/g, function(match, sIndent, sFile) {
             /*
-             * This function mimics what components.xsl normally does for disk manifests referenced
-             * by the FDC machine component.  Compare it to the following template in components.xsl:
+             * This function mimics what components.xsl normally does for disk manifests referenced by the FDC
+             * machine component.  Compare it to the following template in components.xsl:
              * 
              *      <xsl:template match="manifest[not(@ref)]" mode="component">
              * 
-             * This code is not perfect (it doesn't process "link" attributes, for example, which is why
-             * we've left machines that use the samples.xml disk library alone), but for machines that use
-             * library.xml, having them use compiled/library.xml instead speeds up loading significantly.
+             * This code is not perfect (it doesn't process <link> elements, for example), but for machines
+             * that used library.xml, having them use compiled/library.xml instead speeds up loading significantly.
              * 
-             * Granted, after the first machine has fetched all the individual manifest files, your
-             * browser should do a reasonably good job using cached copies for all subsequent machines,
-             * but even then, there's still a noticeable delay.
+             * Granted, after the first machine has fetched all the individual manifest files, your browser should
+             * do a reasonably good job using cached copies for all subsequent machines, but even then, there's
+             * still a noticeable delay.
              */
             let sDisks = match;
             let sFilePath = path.join('.', sFile);
@@ -340,7 +342,6 @@ gulp.task("copyright", function() {
      * it would also be nice if we could avoid rewriting ANY file that contains no matches, because Gulp's default behavior
      * seems to be rewrite EVERYTHING, at least when we're doing these sorts of "in place" operations.
      */
-    return gulp.src(["devices/**/*.js", "modules/**/*", "**/*.md", "_layouts/*.html"], {base: baseDir})
     return gulp.src(["devices/**/*.js", "modules/**/*", "**/*.md", "_layouts/*.html", "*.js"], {base: baseDir})
         .pipe(gulpReplace(/(Copyright[ \S]+?)( Jeff Parsons)( +201\d-)[0-9]+/gi, '$1$3' + pkg.year + '$2', {skipBinary: true}))
         .pipe(gulpReplace(/(Copyright|\u00A9)( +201\d-)[0-9]+(.*?Jeff Parsons|.*?twitter_username)/gi, '$1$2' + pkg.year + '$3', {skipBinary: true}))
