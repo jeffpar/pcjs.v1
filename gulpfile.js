@@ -127,7 +127,7 @@ aMachines.forEach(function(machineType) {
     }
 
     let machineVersion = (machineConfig.version || machines.shared.version);
-    let machineReleaseDir = "./versions/" + machineConfig.folder + "/" + machineVersion;
+    let machineReleaseDir = "./versions/" + machineConfig['folder'] + "/" + machineVersion;
     let machineReleaseFile  = machineType + ".js";
     let machineUncompiledFile  = machineType + "-uncompiled.js";
     let machineDefines = {};
@@ -342,7 +342,6 @@ gulp.task("copyright", function() {
      * it would also be nice if we could avoid rewriting ANY file that contains no matches, because Gulp's default behavior
      * seems to be rewrite EVERYTHING, at least when we're doing these sorts of "in place" operations.
      */
-    return gulp.src(["devices/**/*.js", "modules/**/*", "**/*.md", "_layouts/*.html"], {base: baseDir})
     return gulp.src(["devices/**/*.js", "modules/**/*", "**/*.md", "_layouts/*.html", "*.js"], {base: baseDir})
         .pipe(gulpReplace(/(Copyright[ \S]+?)( Jeff Parsons)( +201\d-)[0-9]+/gi, '$1$3' + pkg.year + '$2', {skipBinary: true}))
         .pipe(gulpReplace(/(Copyright|\u00A9)( +201\d-)[0-9]+(.*?Jeff Parsons|.*?twitter_username)/gi, '$1$2' + pkg.year + '$3', {skipBinary: true}))
