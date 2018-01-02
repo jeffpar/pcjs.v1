@@ -1,7 +1,7 @@
 /**
  * @fileoverview Gulp file for pcjs.org
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
- * @copyright © Jeff Parsons 2012-2017
+ * @copyright © Jeff Parsons 2012-2018
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -294,7 +294,7 @@ gulp.task("disks", function() {
             let sDisks = match;
             let sFilePath = path.join('.', sFile);
             try {
-                let sManifest = fs.readFileSync(sFilePath, {encoding: 'utf8'});
+                let sManifest = /** @type {string} */ (fs.readFileSync(sFilePath, {encoding: 'utf8'}));
                 if (sManifest) {
                     sDisks = "";
                     let sPrefix = "", sDefaultName = "Unknown";
