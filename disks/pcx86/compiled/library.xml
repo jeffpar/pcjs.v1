@@ -580,6 +580,7 @@
 		<disk path="/disks/pcx86/tools/other/flickerfree/FLICKERFREE.json">FlickerFree 1.0</disk>
 		<disk path="/disks/pcx86/tools/other/qemm386/4.10/QEMM386-410.json">QEMM-386 4.10</disk>
 		<disk path="/disks/pcx86/tools/other/qemm386/4.23/QEMM386-423.json">QEMM-386 4.23</disk>
+		<disk path="/disks/pcx86/tools/other/qemm386/5.13/QEMM386-513.json">QEMM-386 5.13</disk>
 		<disk path="/disks/pcx86/tools/other/qemm386/6.02/QEMM386-602.json">QEMM-386 6.02</disk>
 		<disk path="/disks/pcx86/games/id/wolf3d/1WOLF14.json">Wolfenstein 3D 1.4</disk>
 		<disk path="/disks/pcx86/games/microsoft/flightsim/1982/FLIGHTSIM-1982.json">MS Flight Simulator (1982)</disk>

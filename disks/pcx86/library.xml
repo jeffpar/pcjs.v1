@@ -122,6 +122,7 @@
 		<manifest ref="/disks/pcx86/tools/other/flickerfree/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/other/qemm386/4.10/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/other/qemm386/4.23/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/other/qemm386/5.13/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/other/qemm386/6.02/manifest.xml"/>
 		<manifest ref="/disks/pcx86/games/id/wolf3d/manifest.xml"/>
 		<manifest ref="/disks/pcx86/games/microsoft/flightsim/1982/manifest.xml"/>
