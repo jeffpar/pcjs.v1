@@ -5,7 +5,7 @@
 	<version>4.23</version>
 	<type>Utility</type>
 	<category>Memory Manager</category>
-	<author>Quarterdeck Office Systems</author>
+	<company>Quarterdeck Office Systems</company>
 	<releaseDate>1988-11-22</releaseDate>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/QEMM386-423.img" href="/disks/pcx86/tools/other/qemm386/4.23/QEMM386-423.json" md5="e458e70441ca6027015403d5d4834a32" md5json="5616e796a509f5d6f8b1cbafe37c94c5">
 		<file size="842" time="1988-11-22 04:23:00" attr="0x20">BUFFERS.COM</file>

@@ -1,7 +1,9 @@
 ---
 layout: page
 title: Omniview
-permalink: /disks/pcx86/apps/other/omniview/
+permalink: /disks/pcx86/tools/other/omniview/
+redirect_from:
+  - /disks/pcx86/apps/other/omniview/
 ---
 
 Omniview

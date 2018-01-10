@@ -1,7 +1,9 @@
 ---
 layout: page
 title: Omniview 386 4.30
-permalink: /disks/pcx86/apps/other/omniview/4.30/
+permalink: /disks/pcx86/tools/other/omniview/4.30/
+redirect_from:
+  - /disks/pcx86/apps/other/omniview/4.30/
 machines:
   - id: compaq386
     type: pcx86

@@ -5,7 +5,7 @@
 	<version>5.13</version>
 	<type>Utility</type>
 	<category>Memory Manager</category>
-	<author>Quarterdeck Office Systems</author>
+	<company>Quarterdeck Office Systems</company>
 	<releaseDate>1991-04-22</releaseDate>
 	<serialNumber>539-B6-3838</serialNumber>
 	<disk id="disk01" size="737280" chs="80:2:9" img="archive/QEMM386-513.img" href="/disks/pcx86/tools/other/qemm386/5.13/QEMM386-513.json" md5="1dc19af00c57f2d15c6f0beb1b3d6031" md5json="17fee84ba9b5910567c64ae84d4b886a">

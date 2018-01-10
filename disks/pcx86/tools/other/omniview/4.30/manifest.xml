@@ -3,7 +3,8 @@
 <manifest type="software">
 	<title>Omniview 386</title>
 	<version>4.30</version>
-	<type>Operating Environment</type>
+	<type>Utility</type>
+	<category>Multitasking</category>
 	<company>Sunny Hill</company>
 	<releaseDate>October 1991</releaseDate>
 	<machine href="/devices/pcx86/machine/compaq/deskpro386/vga/4096kb/machine.xml"/>

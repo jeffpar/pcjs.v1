@@ -5,7 +5,7 @@
 	<version>6.02</version>
 	<type>Utility</type>
 	<category>Memory Manager</category>
-	<author>Quarterdeck Office Systems</author>
+	<company>Quarterdeck Office Systems</company>
 	<releaseDate>1991-11-13</releaseDate>
 	<serialNumber>600-XQ-1011</serialNumber>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/QEMM386-602.img" href="/disks/pcx86/tools/other/qemm386/6.02/QEMM386-602.json" md5="cdf59e43e27ba58c60c7a785c3c738cb" md5json="6f8fef3deec383897b6074296ae60118">
