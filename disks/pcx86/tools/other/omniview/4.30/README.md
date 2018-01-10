@@ -12,7 +12,7 @@ machines:
       A:
         path: /disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1-720K.json
       B:
-        path: /disks/pcx86/apps/other/omniview/4.30/OMNIVIEW386-430.json
+        path: /disks/pcx86/tools/other/omniview/4.30/OMNIVIEW386-430.json
 ---
 
 Omniview 386 4.30
