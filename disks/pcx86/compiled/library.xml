@@ -400,7 +400,6 @@
 		<disk path="/disks/pcx86/apps/other/dbase3/1.0/DBIII-100-LOCKED.json">dBASE III 1.0 (Locked)</disk>
 		<disk path="/disks/pcx86/apps/other/dbase3/1.0/DBIII-100-PATCHED.json">dBASE III 1.0 (Patched)</disk>
 		<disk path="/disks/pcx86/apps/other/dbase3/1.0/DBIII-100-SAMPLES.json">dBASE III 1.0 (Samples)</disk>
-		<disk path="/disks/pcx86/apps/other/omniview/4.30/OMNIVIEW386-430.json">Omniview 386 4.30</disk>
 		<disk path="/disks/pcx86/apps/other/sc2/1.00/SC2_V100.json">SuperCalc2 1.00</disk>
 		<disk path="/disks/pcx86/apps/other/sc3/1.00/SC3_V100-SETUP.json">SuperCalc3 1.00 Setup</disk>
 		<disk path="/disks/pcx86/apps/other/sc3/1.00/SC3_V100-UTILITY.json">SuperCalc3 1.00 Utility</disk>
@@ -578,6 +577,7 @@
 		<disk path="/disks/pcx86/tools/other/doubledos/2.0v/SOFTLOGIC-DOUBLEDOS-DISK2.json">DoubleDOS 2.0V (Disk 2)</disk>
 		<disk path="/disks/pcx86/tools/other/enhdebug/ENHDEBUG.json">Enhanced DEBUG 1.32a</disk>
 		<disk path="/disks/pcx86/tools/other/flickerfree/FLICKERFREE.json">FlickerFree 1.0</disk>
+		<disk path="/disks/pcx86/tools/other/omniview/4.30/OMNIVIEW386-430.json">Omniview 386 4.30</disk>
 		<disk path="/disks/pcx86/tools/other/qemm386/4.10/QEMM386-410.json">QEMM-386 4.10</disk>
 		<disk path="/disks/pcx86/tools/other/qemm386/4.23/QEMM386-423.json">QEMM-386 4.23</disk>
 		<disk path="/disks/pcx86/tools/other/qemm386/5.13/QEMM386-513.json">QEMM-386 5.13</disk>
