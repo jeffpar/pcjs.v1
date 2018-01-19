@@ -149,7 +149,6 @@ class Time extends Device {
         this.onRunTimeout = this.run.bind(this);
         this.onAnimationFrame = this.animate.bind(this);
         this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
-        this.msLastAnimation = 0;
 
         /*
          * When fClockByFrame is true, we rely exclusively on requestAnimationFrame() instead of setTimeout()
@@ -189,7 +188,7 @@ class Time extends Device {
      * is browser-dependent (but presumably at least 60Hz).
      *
      * @this {Time}
-     * @param {function()} callBack
+     * @param {function(number)} callBack
      */
     addAnimator(callBack)
     {
@@ -335,25 +334,8 @@ class Time extends Device {
             }
             this.snapStop();
         }
-        let fSkip = false;
-        if (t !== undefined) {
-            /*
-             * For devices (eg, calculators) with a clock rate greater than 120Hz, don't allow animation updates
-             * more frequently than 60Hz, otherwise the LED display's "tickled" logic may be spoofed into blanking
-             * the display and creating flicker.  This was a problem in FireFox, because they apparently like to
-             * crank up the animation rate beyond 60Hz.
-             */
-            if (this.nCyclesPerSecond > Time.YIELDS_PER_SECOND) {
-                if (this.msLastAnimation && (t - this.msLastAnimation) < ((1000 / Time.FRAMES_PER_SECOND)|0)) {
-                    fSkip = true;
-                }
-            }
-        }
-        if (!fSkip) {
-            for (let i = 0; i < this.aAnimators.length; i++) {
-                this.aAnimators[i]();
-            }
-            this.msLastAnimation = t;
+        for (let i = 0; i < this.aAnimators.length; i++) {
+            this.aAnimators[i](t);
         }
         if (this.fRunning && this.fRequestAnimationFrame) this.requestAnimationFrame(this.onAnimationFrame);
     }
@@ -1122,7 +1104,6 @@ Time.BINDING = {
  * callbacks can be called as timely as possible.  And we still only want to perform DOM-related status updates
  * no more than twice per second, so the required number of yields before each update has been increased as well.
  */
-Time.FRAMES_PER_SECOND = 60;
 Time.YIELDS_PER_SECOND = 120;
 Time.YIELDS_PER_UPDATE = 60;
 

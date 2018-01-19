@@ -1938,7 +1938,7 @@ var LEDConfig;
  * @property {Array.<string|number|null>} buffer
  * @property {Array.<string|number>|null} bufferClone
  * @property {boolean} fBufferModified
- * @property {boolean} fTickled
+ * @property {boolean} fBufferTickled
  */
 class LED extends Device {
     /**
@@ -2068,14 +2068,15 @@ class LED extends Device {
          * changed something in the LED buffer, set to false after every drawBuffer() call, periodic
          * or otherwise.
          *
-         * fTickled is a flag which, under normal (idle) circumstances, will constantly be set to
-         * true by periodic display operations that call setLEDState(); we clear it after every
+         * fBufferTickled is a flag which, under normal (idle) circumstances, will constantly be set
+         * to true by periodic display operations that call setLEDState(); we clear it after every
          * periodic drawBuffer(), so if the machine fails to execute a setBuffer() in a timely manner,
-         * we will see that fTickled hasn't been "tickled", and automatically blank the display.
+         * we will see that fBufferTickled hasn't been "tickled", and automatically blank the display.
          * 
          * fDisplayOn is a global "on/off" switch for the entire display.
          */
-        this.fBufferModified = this.fTickled = false;
+        this.fBufferModified = this.fBufferTickled = false;
+        this.msLastDraw = 0;
         this.fDisplayOn = true;
 
         /*
@@ -2094,8 +2095,8 @@ class LED extends Device {
         let led = this;
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
-            this.time.addAnimator(function ledAnimate() {
-                led.drawBuffer();
+            this.time.addAnimator(function ledAnimate(t) {
+                led.drawBuffer(false, t);
             });
         }
     }
@@ -2109,7 +2110,7 @@ class LED extends Device {
     clearBuffer(fDraw)
     {
         this.initBuffer(this.buffer);
-        this.fBufferModified = this.fTickled = true;
+        this.fBufferModified = this.fBufferTickled = true;
         if (fDraw) this.drawBuffer(true);
     }
 
@@ -2149,19 +2150,20 @@ class LED extends Device {
     }
 
     /**
-     * drawBuffer(fForced)
+     * drawBuffer(fForced, t)
      *
      * This is our periodic (60Hz) redraw function; however, it can also be called synchronously
      * (eg, see clearBuffer()).  The other important periodic side-effect of this function is clearing
-     * fTickled, so that if no other setLEDState() calls occur between now and the next drawBuffer(),
+     * fBufferTickled, so that if no other setLEDState() calls occur between now and the next drawBuffer(),
      * an automatic clearBuffer() will be triggered.  This simulates the normal blanking of the display
      * whenever the machine performs lengthy calculations, because for an LED display to remain lit,
      * the machine must perform a display operation ("refresh") at least 30-60 times per second.
      *
      * @this {LED}
      * @param {boolean} [fForced] (if not set, this is a normal refresh call)
+     * @param {number} [t] (time value, if available)
      */
-    drawBuffer(fForced = false)
+    drawBuffer(fForced = false, t)
     {
         if (this.fBufferModified || fForced) {
             if (this.type < LED.TYPE.DIGIT) {
@@ -2177,10 +2179,13 @@ class LED extends Device {
             this.fBufferModified = false;
             this.iBufferRecent = -1;
         }
-        else if (!this.fPersistent && !this.fTickled) {
-            this.clearBuffer(true);
+        else if (!this.fPersistent && !this.fBufferTickled) {
+            if (!t || !this.msLastDraw || (t - this.msLastDraw) >= ((1000 / 60)|0)) {
+                this.clearBuffer(true);
+            }
         }
-        this.fTickled = false;
+        this.fBufferTickled = false;
+        if (t) this.msLastDraw = t;
     }
 
     /**
@@ -2778,7 +2783,7 @@ class LED extends Device {
                 this.fBufferModified = fModified = true;
             }
             this.iBufferRecent = i;
-            this.fTickled = true;
+            this.fBufferTickled = true;
         }
         return fModified;
     }
@@ -2810,7 +2815,7 @@ class LED extends Device {
                 this.fBufferModified = fModified = true;
             }
             this.iBufferRecent = i;
-            this.fTickled = true;
+            this.fBufferTickled = true;
         }
         return fModified;
     }
@@ -2861,7 +2866,7 @@ class LED extends Device {
                 this.fBufferModified = fModified = true;
             }
             this.iBufferRecent = i;
-            this.fTickled = true;
+            this.fBufferTickled = true;
             this.nShiftedLeft = 0;
         }
         return fModified;
@@ -3393,7 +3398,6 @@ class Time extends Device {
         this.onRunTimeout = this.run.bind(this);
         this.onAnimationFrame = this.animate.bind(this);
         this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
-        this.msLastAnimation = 0;
 
         /*
          * When fClockByFrame is true, we rely exclusively on requestAnimationFrame() instead of setTimeout()
@@ -3433,7 +3437,7 @@ class Time extends Device {
      * is browser-dependent (but presumably at least 60Hz).
      *
      * @this {Time}
-     * @param {function()} callBack
+     * @param {function(number)} callBack
      */
     addAnimator(callBack)
     {
@@ -3579,25 +3583,8 @@ class Time extends Device {
             }
             this.snapStop();
         }
-        let fSkip = false;
-        if (t !== undefined) {
-            /*
-             * For devices (eg, calculators) with a clock rate greater than 120Hz, don't allow animation updates
-             * more frequently than 60Hz, otherwise the LED display's "tickled" logic may be spoofed into blanking
-             * the display and creating flicker.  This was a problem in FireFox, because they apparently like to
-             * crank up the animation rate beyond 60Hz.
-             */
-            if (this.nCyclesPerSecond > Time.YIELDS_PER_SECOND) {
-                if (this.msLastAnimation && (t - this.msLastAnimation) < ((1000 / Time.FRAMES_PER_SECOND)|0)) {
-                    fSkip = true;
-                }
-            }
-        }
-        if (!fSkip) {
-            for (let i = 0; i < this.aAnimators.length; i++) {
-                this.aAnimators[i]();
-            }
-            this.msLastAnimation = t;
+        for (let i = 0; i < this.aAnimators.length; i++) {
+            this.aAnimators[i](t);
         }
         if (this.fRunning && this.fRequestAnimationFrame) this.requestAnimationFrame(this.onAnimationFrame);
     }
@@ -4366,7 +4353,6 @@ Time.BINDING = {
  * callbacks can be called as timely as possible.  And we still only want to perform DOM-related status updates
  * no more than twice per second, so the required number of yields before each update has been increased as well.
  */
-Time.FRAMES_PER_SECOND = 60;
 Time.YIELDS_PER_SECOND = 120;
 Time.YIELDS_PER_UPDATE = 60;
 
