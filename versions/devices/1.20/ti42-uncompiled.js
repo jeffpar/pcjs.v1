@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * @copyright http://pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2018
  */
 
 /**
@@ -1153,7 +1153,7 @@ Device.HexLowerCase = "0123456789abcdef";
 Device.HexUpperCase = "0123456789ABCDEF";
 
 /**
- * @copyright http://pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2018
  */
 
 /** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), location: Array.<number>, map: (Array.<Array.<number>>|undefined), drag: (boolean|undefined), scroll: (boolean|undefined), hexagonal: (boolean|undefined), buttonDelay: (number|undefined) }} */
@@ -1873,7 +1873,7 @@ Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure betw
 Input.VERSION = +VERSION || 1.20;
 
 /**
- * @copyright http://pcjs.org/modules/devices/led.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/devices/led.js (C) Jeff Parsons 2012-2018
  */
 
 /** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), type: number, width: (number|undefined), height: (number|undefined), cols: (number|undefined), colsExtra: (number|undefined), rows: (number|undefined), rowsExtra: (number|undefined), color: (string|undefined), backgroundColor: (string|undefined), fixed: (boolean|undefined), hexagonal: (boolean|undefined), highlight: (boolean|undefined), persistent: (boolean|undefined) }} */
@@ -3116,7 +3116,7 @@ LED.SYMBOL_SEGMENTS = {
 LED.VERSION = +VERSION || 1.20;
 
 /**
- * @copyright http://pcjs.org/modules/devices/rom.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/devices/rom.js (C) Jeff Parsons 2012-2018
  */
 
 /** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), wordSize: number, valueSize: number, valueTotal: number, littleEndian: boolean, file: string, reference: string, chipID: string, revision: (number|undefined), colorROM: (string|undefined), backgroundColorROM: (string|undefined), values: Array.<number> }} */
@@ -3316,7 +3316,7 @@ ROM.BINDING = {
 ROM.VERSION = +VERSION || 1.20;
 
 /**
- * @copyright http://pcjs.org/modules/devices/time.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/devices/time.js (C) Jeff Parsons 2012-2018
  */
 
 /** @typedef {{ id: string, callBack: function(), msAuto: number, nCyclesLeft: number }} */
@@ -3393,6 +3393,7 @@ class Time extends Device {
         this.onRunTimeout = this.run.bind(this);
         this.onAnimationFrame = this.animate.bind(this);
         this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
+        this.msLastAnimation = 0;
 
         /*
          * When fClockByFrame is true, we rely exclusively on requestAnimationFrame() instead of setTimeout()
@@ -3543,7 +3544,7 @@ class Time extends Device {
     }
 
     /**
-     * animate()
+     * animate(t)
      *
      * This is the callback function we supply to requestAnimationFrame().  The callback has a single
      * (DOMHighResTimeStamp) argument, which indicates the current time (returned from performance.now())
@@ -3566,20 +3567,31 @@ class Time extends Device {
                 this.fYield = false;
                 do {
                     /*
-                    * Execute the burst and then update all timers.
-                    */
+                     * Execute the burst and then update all timers.
+                     */
                     this.updateTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame())));
                 } while (this.fRunning && !this.fYield);
             }
-            catch(err) {
+            catch (err) {
                 this.println(err.message);
                 this.stop();
                 return;
             }
             this.snapStop();
         }
-        for (let i = 0; i < this.aAnimators.length; i++) {
-            this.aAnimators[i]();
+        let fSkip = false;
+        if (t !== undefined) {
+            if (this.nCyclesPerSecond > Time.YIELDS_PER_SECOND) {
+                if (this.msLastAnimation && (t - this.msLastAnimation) < ((1000 / Time.FRAMES_PER_SECOND)|0)) {
+                    fSkip = true;
+                }
+            }
+        }
+        if (!fSkip) {
+            for (let i = 0; i < this.aAnimators.length; i++) {
+                this.aAnimators[i]();
+            }
+            this.msLastAnimation = t;
         }
         if (this.fRunning && this.fRequestAnimationFrame) this.requestAnimationFrame(this.onAnimationFrame);
     }
@@ -4348,13 +4360,14 @@ Time.BINDING = {
  * callbacks can be called as timely as possible.  And we still only want to perform DOM-related status updates
  * no more than twice per second, so the required number of yields before each update has been increased as well.
  */
+Time.FRAMES_PER_SECOND = 60;
 Time.YIELDS_PER_SECOND = 120;
 Time.YIELDS_PER_UPDATE = 60;
 
 Time.VERSION = +VERSION || 1.20;
 
 /**
- * @copyright http://pcjs.org/modules/devices/tms1500.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/devices/tms1500.js (C) Jeff Parsons 2012-2018
  */
 
 /**
@@ -6093,7 +6106,7 @@ Chip.VERSION = +VERSION || 1.20;
 MACHINE = "TMS1500";
 
 /**
- * @copyright http://pcjs.org/modules/devices/machine.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/devices/machine.js (C) Jeff Parsons 2012-2018
  */
 
 /**

@@ -1,23 +1,23 @@
 (function(){/*
- http://pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/lib/strlib.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/lib/embed.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/lib/defines.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/lib/component.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/c1pjs/lib/defines.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/c1pjs/lib/panel.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/c1pjs/lib/cpu.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/c1pjs/lib/rom.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/c1pjs/lib/ram.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/c1pjs/lib/keyboard.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/c1pjs/lib/video.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/c1pjs/lib/serial.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/c1pjs/lib/disk.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/c1pjs/lib/debugger.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/c1pjs/lib/computer.js (C) Jeff Parsons 2012-2017
+ https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/shared/lib/strlib.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/shared/lib/embed.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/shared/lib/defines.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/shared/lib/component.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/c1pjs/lib/defines.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/c1pjs/lib/panel.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/c1pjs/lib/cpu.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/c1pjs/lib/rom.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/c1pjs/lib/ram.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/c1pjs/lib/keyboard.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/c1pjs/lib/video.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/c1pjs/lib/serial.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/c1pjs/lib/disk.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/c1pjs/lib/debugger.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/c1pjs/lib/computer.js (C) Jeff Parsons 2012-2018
 */
 var f,aa="function"==typeof Object.create?Object.create:function(a){function b(){}b.prototype=a;return new b},ba;if("function"==typeof Object.setPrototypeOf)ba=Object.setPrototypeOf;else{var ca;a:{var ea={Jb:!0},fa={};try{fa.__proto__=ea;ca=fa.Jb;break a}catch(a){}ca=!1}ba=ca?function(a,b){a.__proto__=b;if(a.__proto__!==b)throw new TypeError(a+" is not extensible");return a}:null}var ha=ba;
 function p(a,b){a.prototype=aa(b.prototype);a.prototype.constructor=a;if(ha)ha(a,b);else for(var c in b)if("prototype"!=c)if(Object.defineProperties){var d=Object.getOwnPropertyDescriptor(b,c);d&&Object.defineProperty(a,c,d)}else a[c]=b[c];a.Te=b.prototype}

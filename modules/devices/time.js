@@ -149,6 +149,7 @@ class Time extends Device {
         this.onRunTimeout = this.run.bind(this);
         this.onAnimationFrame = this.animate.bind(this);
         this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
+        this.msLastAnimation = 0;
 
         /*
          * When fClockByFrame is true, we rely exclusively on requestAnimationFrame() instead of setTimeout()
@@ -299,7 +300,7 @@ class Time extends Device {
     }
 
     /**
-     * animate()
+     * animate(t)
      *
      * This is the callback function we supply to requestAnimationFrame().  The callback has a single
      * (DOMHighResTimeStamp) argument, which indicates the current time (returned from performance.now())
@@ -322,20 +323,31 @@ class Time extends Device {
                 this.fYield = false;
                 do {
                     /*
-                    * Execute the burst and then update all timers.
-                    */
+                     * Execute the burst and then update all timers.
+                     */
                     this.updateTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame())));
                 } while (this.fRunning && !this.fYield);
             }
-            catch(err) {
+            catch (err) {
                 this.println(err.message);
                 this.stop();
                 return;
             }
             this.snapStop();
         }
-        for (let i = 0; i < this.aAnimators.length; i++) {
-            this.aAnimators[i]();
+        let fSkip = false;
+        if (t !== undefined) {
+            if (this.nCyclesPerSecond > Time.YIELDS_PER_SECOND) {
+                if (this.msLastAnimation && (t - this.msLastAnimation) < ((1000 / Time.FRAMES_PER_SECOND)|0)) {
+                    fSkip = true;
+                }
+            }
+        }
+        if (!fSkip) {
+            for (let i = 0; i < this.aAnimators.length; i++) {
+                this.aAnimators[i]();
+            }
+            this.msLastAnimation = t;
         }
         if (this.fRunning && this.fRequestAnimationFrame) this.requestAnimationFrame(this.onAnimationFrame);
     }
@@ -1104,6 +1116,7 @@ Time.BINDING = {
  * callbacks can be called as timely as possible.  And we still only want to perform DOM-related status updates
  * no more than twice per second, so the required number of yields before each update has been increased as well.
  */
+Time.FRAMES_PER_SECOND = 60;
 Time.YIELDS_PER_SECOND = 120;
 Time.YIELDS_PER_UPDATE = 60;
 

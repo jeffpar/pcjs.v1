@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/defines.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/defines.js (C) Jeff Parsons 2012-2018
  */
 
 /**
@@ -94,7 +94,7 @@ var NODE = false;
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/diskapi.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/diskapi.js (C) Jeff Parsons 2012-2018
  */
 
 /*
@@ -322,7 +322,7 @@ DiskAPI.ATTR = {
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2018
  */
 
 /*
@@ -383,7 +383,7 @@ DumpAPI.asFileCommands = [DumpAPI.QUERY.FILE];
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2018
  */
 
 var ReportAPI = {
@@ -407,7 +407,7 @@ var ReportAPI = {
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/userapi.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/userapi.js (C) Jeff Parsons 2012-2018
  */
 
 /*
@@ -450,7 +450,7 @@ var UserAPI = {
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/keys.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/keys.js (C) Jeff Parsons 2012-2018
  */
 
 var Keys = {
@@ -697,7 +697,7 @@ Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_SEMI]   = Keys.ASCII[':'];
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/strlib.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/strlib.js (C) Jeff Parsons 2012-2018
  */
 
 class Str {
@@ -1496,7 +1496,7 @@ Str.TYPES = {
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2018
  */
 
 /**
@@ -1805,7 +1805,7 @@ Usr.getTime = Date.now || function() { return +new Date(); };
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -2817,7 +2817,7 @@ Web.onPageEvent(Web.isUserAgent("iOS")? 'onpagehide' : (Web.isUserAgent("Opera")
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/component.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/component.js (C) Jeff Parsons 2012-2018
  */
 
 /*
@@ -4416,7 +4416,7 @@ if (!Function.prototype.bind) {
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/defines.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/defines.js (C) Jeff Parsons 2012-2018
  */
 
 /**
@@ -5383,7 +5383,7 @@ PDP11.WORDBUS           = WORDBUS;
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/messages.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/messages.js (C) Jeff Parsons 2012-2018
  */
 
 var MessagesPDP11 = {
@@ -5474,7 +5474,7 @@ MessagesPDP11.CATEGORIES = {
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/panel.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/panel.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -6782,7 +6782,7 @@ Web.onInit(PanelPDP11.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/bus.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/bus.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -8208,7 +8208,7 @@ BusPDP11.IOController = {
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/device.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/device.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -9436,7 +9436,7 @@ Web.onInit(DevicePDP11.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/memory.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/memory.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -10413,7 +10413,7 @@ var littleEndian = (TYPEDARRAYS? (function() {
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/cpu.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/cpu.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -11618,7 +11618,7 @@ CPUPDP11.BUTTONS = ["power", "reset"];
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/cpustate.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/cpustate.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -14670,7 +14670,7 @@ Web.onInit(CPUStatePDP11.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/cpuops.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/cpuops.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -17183,7 +17183,7 @@ PDP11.aOp8DXn_1140 = [
 ];
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/rom.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/rom.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -17538,7 +17538,7 @@ Web.onInit(ROMPDP11.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/ram.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/ram.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -17924,7 +17924,7 @@ Web.onInit(RAMPDP11.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/keyboard.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/keyboard.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -18002,7 +18002,7 @@ Web.onInit(KeyboardPDP11.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/serial.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/serial.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -18890,7 +18890,7 @@ Web.onInit(SerialPortPDP11.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/pc11.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/pc11.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -19877,7 +19877,7 @@ PC11.UNIBUS_IOTABLE = {
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/disk.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/disk.js (C) Jeff Parsons 2012-2018
  */
 
 /*
@@ -21089,7 +21089,7 @@ DiskPDP11.nDisks = 0;
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/drive.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/drive.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -22416,7 +22416,7 @@ DriveController.SOURCE = {
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/rk11.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/rk11.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -23004,7 +23004,7 @@ RK11.UNIBUS_IOTABLE = {
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/rl11.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/rl11.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -23529,7 +23529,7 @@ RL11.UNIBUS_IOTABLE = {
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/rx11.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/rx11.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -24087,7 +24087,7 @@ RX11.UNIBUS_IOTABLE = {
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/debugger.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/debugger.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -25422,7 +25422,7 @@ if (DEBUGGER) {
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/debugger.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/debugger.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -29723,7 +29723,7 @@ if (DEBUGGER) {
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp11/lib/computer.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp11/lib/computer.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -31362,7 +31362,7 @@ Web.onExit(ComputerPDP11.exit);
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -31730,7 +31730,7 @@ class State {
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/embed.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/embed.js (C) Jeff Parsons 2012-2018
  */
 
 

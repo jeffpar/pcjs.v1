@@ -191,7 +191,7 @@ aMachines.forEach(function(machineType) {
             .pipe(gulpForEach(function(stream, file) {
                 aMachinesOutdated.push(machineType);
                 return stream
-                    .pipe(gulpHeader('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2017\n */\n\n'))
+                    .pipe(gulpHeader('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "https://www.pcjs.org/$1") + ' (C) Jeff Parsons 2012-2018\n */\n\n'))
                     .pipe(gulpReplace(/(^|\n)[ \t]*(['"])use strict\2;?/g, ""))
                     .pipe(gulpReplace(/^(import|export)[ \t]+[^\n]*\n/gm, ""))
                     .pipe(gulpReplace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, ""))
