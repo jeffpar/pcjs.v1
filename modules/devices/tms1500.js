@@ -1759,6 +1759,6 @@ Chip.COMMANDS = [
     "u [addr] [n]\tdisassemble (at addr)"
 ];
 
-Chip.VERSION = VERSION || 1.20;
+Chip.VERSION = +VERSION || 1.20;
 
 MACHINE = "TMS1500";

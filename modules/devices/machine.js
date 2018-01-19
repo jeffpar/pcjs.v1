@@ -292,6 +292,6 @@ Machine.CLASSORDER = [
 Machine.COPYRIGHT = "Copyright © 2012-2018 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
-Machine.VERSION = VERSION || 1.20;
+Machine.VERSION = +VERSION || 1.20;
 
 window[MACHINE] = Machine;

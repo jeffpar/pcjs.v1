@@ -44,9 +44,9 @@ var DEBUG = true; // (window.location.hostname == "pcjs" || window.location.host
 var MACHINE = "Machine";
 
 /**
- * @define {number}
+ * @define {string}
  */
-var VERSION = 0;
+var VERSION = "";
 
 /**
  * The following properties are the standard set of properties a Device's config object may contain.
