@@ -108,7 +108,7 @@
  * @property {Array.<string|number|null>} buffer
  * @property {Array.<string|number>|null} bufferClone
  * @property {boolean} fBufferModified
- * @property {boolean} fTickled
+ * @property {boolean} fBufferTickled
  */
 class LED extends Device {
     /**
@@ -238,14 +238,15 @@ class LED extends Device {
          * changed something in the LED buffer, set to false after every drawBuffer() call, periodic
          * or otherwise.
          *
-         * fTickled is a flag which, under normal (idle) circumstances, will constantly be set to
-         * true by periodic display operations that call setLEDState(); we clear it after every
+         * fBufferTickled is a flag which, under normal (idle) circumstances, will constantly be set
+         * to true by periodic display operations that call setLEDState(); we clear it after every
          * periodic drawBuffer(), so if the machine fails to execute a setBuffer() in a timely manner,
-         * we will see that fTickled hasn't been "tickled", and automatically blank the display.
+         * we will see that fBufferTickled hasn't been "tickled", and automatically blank the display.
          * 
          * fDisplayOn is a global "on/off" switch for the entire display.
          */
-        this.fBufferModified = this.fTickled = false;
+        this.fBufferModified = this.fBufferTickled = false;
+        this.msLastDraw = 0;
         this.fDisplayOn = true;
 
         /*
@@ -264,8 +265,8 @@ class LED extends Device {
         let led = this;
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
-            this.time.addAnimator(function ledAnimate() {
-                led.drawBuffer();
+            this.time.addAnimator(function ledAnimate(t) {
+                led.drawBuffer(false, t);
             });
         }
     }
@@ -279,7 +280,7 @@ class LED extends Device {
     clearBuffer(fDraw)
     {
         this.initBuffer(this.buffer);
-        this.fBufferModified = this.fTickled = true;
+        this.fBufferModified = this.fBufferTickled = true;
         if (fDraw) this.drawBuffer(true);
     }
 
@@ -319,19 +320,20 @@ class LED extends Device {
     }
 
     /**
-     * drawBuffer(fForced)
+     * drawBuffer(fForced, t)
      *
      * This is our periodic (60Hz) redraw function; however, it can also be called synchronously
      * (eg, see clearBuffer()).  The other important periodic side-effect of this function is clearing
-     * fTickled, so that if no other setLEDState() calls occur between now and the next drawBuffer(),
+     * fBufferTickled, so that if no other setLEDState() calls occur between now and the next drawBuffer(),
      * an automatic clearBuffer() will be triggered.  This simulates the normal blanking of the display
      * whenever the machine performs lengthy calculations, because for an LED display to remain lit,
      * the machine must perform a display operation ("refresh") at least 30-60 times per second.
      *
      * @this {LED}
      * @param {boolean} [fForced] (if not set, this is a normal refresh call)
+     * @param {number} [t] (time value, if available, from the requestAnimationFrame() callback)
      */
-    drawBuffer(fForced = false)
+    drawBuffer(fForced = false, t = 0)
     {
         if (this.fBufferModified || fForced) {
             if (this.type < LED.TYPE.DIGIT) {
@@ -347,10 +349,13 @@ class LED extends Device {
             this.fBufferModified = false;
             this.iBufferRecent = -1;
         }
-        else if (!this.fPersistent && !this.fTickled) {
-            this.clearBuffer(true);
+        else if (!this.fPersistent && !this.fBufferTickled) {
+            if (!t || !this.msLastDraw || (t - this.msLastDraw) >= ((1000 / 60)|0)) {
+                this.clearBuffer(true);
+            }
         }
-        this.fTickled = false;
+        this.fBufferTickled = false;
+        if (t) this.msLastDraw = t;
     }
 
     /**
@@ -948,7 +953,7 @@ class LED extends Device {
                 this.fBufferModified = fModified = true;
             }
             this.iBufferRecent = i;
-            this.fTickled = true;
+            this.fBufferTickled = true;
         }
         return fModified;
     }
@@ -980,7 +985,7 @@ class LED extends Device {
                 this.fBufferModified = fModified = true;
             }
             this.iBufferRecent = i;
-            this.fTickled = true;
+            this.fBufferTickled = true;
         }
         return fModified;
     }
@@ -1031,7 +1036,7 @@ class LED extends Device {
                 this.fBufferModified = fModified = true;
             }
             this.iBufferRecent = i;
-            this.fTickled = true;
+            this.fBufferTickled = true;
             this.nShiftedLeft = 0;
         }
         return fModified;
