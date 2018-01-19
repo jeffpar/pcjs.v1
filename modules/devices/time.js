@@ -337,6 +337,12 @@ class Time extends Device {
         }
         let fSkip = false;
         if (t !== undefined) {
+            /*
+             * For devices (eg, calculators) with a clock rate greater than 120Hz, don't allow animation updates
+             * more frequently than 60Hz, otherwise the LED display's "tickled" logic may be spoofed into blanking
+             * the display and creating flicker.  This was a problem in FireFox, because they apparently like to
+             * crank up the animation rate beyond 60Hz.
+             */
             if (this.nCyclesPerSecond > Time.YIELDS_PER_SECOND) {
                 if (this.msLastAnimation && (t - this.msLastAnimation) < ((1000 / Time.FRAMES_PER_SECOND)|0)) {
                     fSkip = true;
