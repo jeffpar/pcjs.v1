@@ -43,7 +43,7 @@ The following optional machine properties will be added to the 'parms' property:
   {% if machine_data.version != nil %}
     {% capture machine_version %}{{ machine_data.version }}{% endcapture %}
   {% else %}
-    {% capture machine_version %}{{ site.data.machines.shared.version }}{% endcapture %}
+    {% capture machine_version %}{{ site.data.machines.shared.appversion }}{% endcapture %}
   {% endif %}
   {% unless machine.config %}
     {% assign machine_config = "machine.xml" %}
