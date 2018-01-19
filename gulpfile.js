@@ -126,7 +126,12 @@ aMachines.forEach(function(machineType) {
         machineConfig = machines[machineConfig.alias];
     }
 
-    let machineVersion = (machineConfig.version || machines.shared.appversion);
+    let machineVersion = machineConfig.version;
+    if (machineVersion) {
+        machineVersion = machineVersion.toFixed(2);
+    } else {
+        machineVersion = machines.shared.appversion;
+    }
     let machineReleaseDir = "./versions/" + machineConfig['folder'] + "/" + machineVersion;
     let machineReleaseFile  = machineType + ".js";
     let machineUncompiledFile  = machineType + "-uncompiled.js";
