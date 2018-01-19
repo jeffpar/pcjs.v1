@@ -1749,6 +1749,6 @@ Chip.FONTS = {
     }
 };
 
-Chip.VERSION = VERSION || 1.20;
+Chip.VERSION = +VERSION || 1.20;
 
 MACHINE = "LEDs";

@@ -20,9 +20,9 @@ var DEBUG = true; // (window.location.hostname == "pcjs" || window.location.host
 var MACHINE = "Machine";
 
 /**
- * @define {number}
+ * @define {string}
  */
-var VERSION = 0;
+var VERSION = "";
 
 /** @typedef {{ class: (string|undefined), bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined) }} */
 var Config;
@@ -1870,7 +1870,7 @@ Input.KEYCODE = {               // keyCode from keydown/keyup events
 
 Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
 
-Input.VERSION = VERSION || 1.20;
+Input.VERSION = +VERSION || 1.20;
 
 /**
  * @copyright http://pcjs.org/modules/devices/led.js (C) Jeff Parsons 2012-2017
@@ -3113,7 +3113,7 @@ LED.SYMBOL_SEGMENTS = {
     '.':        ['P']
 };
 
-LED.VERSION = VERSION || 1.20;
+LED.VERSION = +VERSION || 1.20;
 
 /**
  * @copyright http://pcjs.org/modules/devices/rom.js (C) Jeff Parsons 2012-2017
@@ -3313,7 +3313,7 @@ ROM.BINDING = {
     CELLDESC:   "cellDesc"
 };
 
-ROM.VERSION = VERSION || 1.20;
+ROM.VERSION = +VERSION || 1.20;
 
 /**
  * @copyright http://pcjs.org/modules/devices/time.js (C) Jeff Parsons 2012-2017
@@ -4351,7 +4351,7 @@ Time.BINDING = {
 Time.YIELDS_PER_SECOND = 120;
 Time.YIELDS_PER_UPDATE = 60;
 
-Time.VERSION = VERSION || 1.20;
+Time.VERSION = +VERSION || 1.20;
 
 /**
  * @copyright http://pcjs.org/modules/devices/tms1500.js (C) Jeff Parsons 2012-2017
@@ -6088,7 +6088,7 @@ Chip.COMMANDS = [
     "u [addr] [n]\tdisassemble (at addr)"
 ];
 
-Chip.VERSION = VERSION || 1.20;
+Chip.VERSION = +VERSION || 1.20;
 
 MACHINE = "TMS1500";
 
@@ -6360,6 +6360,6 @@ Machine.CLASSORDER = [
 Machine.COPYRIGHT = "Copyright © 2012-2018 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
-Machine.VERSION = VERSION || 1.20;
+Machine.VERSION = +VERSION || 1.20;
 
 window[MACHINE] = Machine;

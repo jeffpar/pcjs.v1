@@ -74,7 +74,7 @@
   "leds": {
     "name": "LEDs",
     "class": "leds",
-    "version": 1.20,
+    "version": "1.20",
     "defines": [
       "COMPILED",
       "DEBUG",
@@ -303,7 +303,7 @@
   "ti57": {
     "name": "TI57",
     "class": "ti57",
-    "version": 1.20,
+    "version": "1.20",
     "defines": [
       "COMPILED",
       "DEBUG",
