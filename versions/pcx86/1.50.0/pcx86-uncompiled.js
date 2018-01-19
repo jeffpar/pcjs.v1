@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/defines.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/defines.js (C) Jeff Parsons 2012-2018
  */
 
 /**
@@ -94,7 +94,7 @@ var NODE = false;
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/diskapi.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/diskapi.js (C) Jeff Parsons 2012-2018
  */
 
 /*
@@ -322,7 +322,7 @@ DiskAPI.ATTR = {
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2018
  */
 
 /*
@@ -383,7 +383,7 @@ DumpAPI.asFileCommands = [DumpAPI.QUERY.FILE];
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2018
  */
 
 var ReportAPI = {
@@ -407,7 +407,7 @@ var ReportAPI = {
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/userapi.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/userapi.js (C) Jeff Parsons 2012-2018
  */
 
 /*
@@ -450,7 +450,7 @@ var UserAPI = {
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/keys.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/keys.js (C) Jeff Parsons 2012-2018
  */
 
 var Keys = {
@@ -697,7 +697,7 @@ Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_SEMI]   = Keys.ASCII[':'];
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/strlib.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/strlib.js (C) Jeff Parsons 2012-2018
  */
 
 class Str {
@@ -1496,7 +1496,7 @@ Str.TYPES = {
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2018
  */
 
 /**
@@ -1805,7 +1805,7 @@ Usr.getTime = Date.now || function() { return +new Date(); };
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -2817,7 +2817,7 @@ Web.onPageEvent(Web.isUserAgent("iOS")? 'onpagehide' : (Web.isUserAgent("Opera")
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/component.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/component.js (C) Jeff Parsons 2012-2018
  */
 
 /*
@@ -4416,7 +4416,7 @@ if (!Function.prototype.bind) {
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/defines.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/defines.js (C) Jeff Parsons 2012-2018
  */
 
 /**
@@ -4564,7 +4564,7 @@ var PCX86 = {
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/x86.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/x86.js (C) Jeff Parsons 2012-2018
  */
 
 var X86 = {
@@ -5433,7 +5433,7 @@ X86.OPFLAG_PREFIXES = (X86.OPFLAG.SEG | X86.OPFLAG.LOCK | X86.OPFLAG.REPZ | X86.
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/interrupts.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/interrupts.js (C) Jeff Parsons 2012-2018
  */
 
 var Interrupts = {
@@ -7504,7 +7504,7 @@ if (DEBUGGER) {
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/messages.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/messages.js (C) Jeff Parsons 2012-2018
  */
 
 var Messages = {
@@ -7601,7 +7601,7 @@ Messages.CATEGORIES = {
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/panel.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/panel.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -8593,7 +8593,7 @@ Web.onInit(Panel.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/bus.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/bus.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -10341,7 +10341,7 @@ Bus.ERROR = {
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/memory.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/memory.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -12054,7 +12054,7 @@ if (TYPEDARRAYS) {
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/cpu.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/cpu.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -13410,7 +13410,7 @@ CPU.BUTTONS = ["power", "reset"];
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/x86seg.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/x86seg.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -15083,7 +15083,7 @@ X86Seg.CALLBREAK_SEL = 0x0001;
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/x86cpu.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/x86cpu.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -19591,7 +19591,7 @@ Web.onInit(X86CPU.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/x86fpu.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/x86fpu.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -22934,7 +22934,7 @@ Web.onInit(X86FPU.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/x86func.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/x86func.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -26307,7 +26307,7 @@ X86.fnXORw = function(dst, src)
 };
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/x86help.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/x86help.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -27301,7 +27301,7 @@ X86.zeroSeg = function(seg)
 };
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/x86mods.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/x86mods.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -31470,7 +31470,7 @@ X86.modSIB = function(mod)
 };
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/x86ops.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/x86ops.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -36057,7 +36057,7 @@ X86.aOpGrp4w = [
 ];
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/x86op0f.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/x86op0f.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -37814,7 +37814,7 @@ X86.aOpGrp8 = [
 ];
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/chipset.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/chipset.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -43941,7 +43941,7 @@ Web.onInit(ChipSet.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/rom.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/rom.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -44355,7 +44355,7 @@ Web.onInit(ROMx86.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/ram.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/ram.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -44926,7 +44926,7 @@ Web.onInit(RAM.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/keyboard.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/keyboard.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -47568,7 +47568,7 @@ Web.onInit(Keyboard.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/video.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/video.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -55115,7 +55115,7 @@ Web.onInit(Video.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/parallel.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/parallel.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -55646,7 +55646,7 @@ Web.onInit(ParallelPort.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/serial.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/serial.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -56762,7 +56762,7 @@ Web.onInit(SerialPort.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/mouse.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/mouse.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -57721,7 +57721,7 @@ Web.onInit(Mouse.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/disk.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/disk.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -60609,7 +60609,7 @@ var SectorInfo;
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/fdc.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/fdc.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -63438,7 +63438,7 @@ Web.onInit(FDC.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/hdc.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/hdc.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -66499,7 +66499,7 @@ Web.onInit(HDC.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/debugger.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/debugger.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -67834,7 +67834,7 @@ if (DEBUGGER) {
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/debugger.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/debugger.js (C) Jeff Parsons 2012-2018
  */
 
 if (DEBUGGER) {
@@ -75653,7 +75653,7 @@ if (DEBUGGER) {
 
 
 /**
- * @copyright http://pcjs.org/modules/pcx86/lib/computer.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/computer.js (C) Jeff Parsons 2012-2018
  */
 
 /*
@@ -77551,7 +77551,7 @@ Web.onExit(Computer.exit);
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -77919,7 +77919,7 @@ class State {
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/embed.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/embed.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -78583,7 +78583,7 @@ window['enableEvents'] = Web.enablePageEvents;
 window['sendEvent']    = Web.sendPageEvent;
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/save.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/save.js (C) Jeff Parsons 2012-2018
  */
 
 

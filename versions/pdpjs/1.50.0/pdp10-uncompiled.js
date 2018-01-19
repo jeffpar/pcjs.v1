@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/defines.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/defines.js (C) Jeff Parsons 2012-2018
  */
 
 /**
@@ -94,7 +94,7 @@ var NODE = false;
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2018
  */
 
 /*
@@ -155,7 +155,7 @@ DumpAPI.asFileCommands = [DumpAPI.QUERY.FILE];
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2018
  */
 
 var ReportAPI = {
@@ -179,7 +179,7 @@ var ReportAPI = {
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/userapi.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/userapi.js (C) Jeff Parsons 2012-2018
  */
 
 /*
@@ -222,7 +222,7 @@ var UserAPI = {
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/keys.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/keys.js (C) Jeff Parsons 2012-2018
  */
 
 var Keys = {
@@ -469,7 +469,7 @@ Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_SEMI]   = Keys.ASCII[':'];
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/strlib.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/strlib.js (C) Jeff Parsons 2012-2018
  */
 
 class Str {
@@ -1268,7 +1268,7 @@ Str.TYPES = {
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2018
  */
 
 /**
@@ -1577,7 +1577,7 @@ Usr.getTime = Date.now || function() { return +new Date(); };
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -2589,7 +2589,7 @@ Web.onPageEvent(Web.isUserAgent("iOS")? 'onpagehide' : (Web.isUserAgent("Opera")
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/component.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/component.js (C) Jeff Parsons 2012-2018
  */
 
 /*
@@ -4188,7 +4188,7 @@ if (!Function.prototype.bind) {
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp10/lib/defines.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp10/lib/defines.js (C) Jeff Parsons 2012-2018
  */
 
 /**
@@ -4448,7 +4448,7 @@ PDP10.SIMH              = SIMH;
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp10/lib/messages.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp10/lib/messages.js (C) Jeff Parsons 2012-2018
  */
 
 var MessagesPDP10 = {
@@ -4527,7 +4527,7 @@ MessagesPDP10.CATEGORIES = {
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp10/lib/panel.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp10/lib/panel.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -5747,7 +5747,7 @@ Web.onInit(PanelPDP10.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp10/lib/bus.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp10/lib/bus.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -6475,7 +6475,7 @@ BusPDP10.ERROR = {
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp10/lib/device.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp10/lib/device.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -6612,7 +6612,7 @@ Web.onInit(DevicePDP10.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp10/lib/memory.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp10/lib/memory.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -7115,7 +7115,7 @@ MemoryPDP10.afnChecked = [
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp10/lib/cpu.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp10/lib/cpu.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -8325,7 +8325,7 @@ CPUPDP10.BUTTONS = ["power", "reset"];
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp10/lib/cpustate.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp10/lib/cpustate.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -9278,7 +9278,7 @@ Web.onInit(CPUStatePDP10.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp10/lib/cpuops.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp10/lib/cpuops.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -16914,7 +16914,7 @@ PDP10.aOpIO_KA10 = [
 ];
 
 /**
- * @copyright http://pcjs.org/modules/pdp10/lib/rom.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp10/lib/rom.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -17218,7 +17218,7 @@ Web.onInit(ROMPDP10.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp10/lib/ram.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp10/lib/ram.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -17518,7 +17518,7 @@ Web.onInit(RAMPDP10.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp10/lib/serial.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp10/lib/serial.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -18154,7 +18154,7 @@ Web.onInit(SerialPortPDP10.init);
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/debugger.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/debugger.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -19489,7 +19489,7 @@ if (DEBUGGER) {
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp10/lib/debugger.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp10/lib/debugger.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -23789,7 +23789,7 @@ if (DEBUGGER) {
 
 
 /**
- * @copyright http://pcjs.org/modules/pdp10/lib/macro10.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp10/lib/macro10.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -25850,7 +25850,7 @@ Macro10.MACRO_OP = {
 };
 
 /**
- * @copyright http://pcjs.org/modules/pdp10/lib/computer.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/pdp10/lib/computer.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -27483,7 +27483,7 @@ Web.onExit(ComputerPDP10.exit);
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2018
  */
 
 
@@ -27851,7 +27851,7 @@ class State {
 
 
 /**
- * @copyright http://pcjs.org/modules/shared/lib/embed.js (C) Jeff Parsons 2012-2017
+ * @copyright https://www.pcjs.org/modules/shared/lib/embed.js (C) Jeff Parsons 2012-2018
  */
 
 
