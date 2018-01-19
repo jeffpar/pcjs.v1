@@ -6,49 +6,7 @@ machines:
   - id: symbolLEDs
     type: leds
     name: LED Symbol
-    config: |
-      {
-        "symbolLEDs": {
-          "class": "Machine",
-          "type": "leds",
-          "name": "LED Symbol",
-          "version": 1.11,
-          "autoStart": false,
-          "bindings": {
-            "clear": "clearSymbol",
-            "print": "printSymbol"
-          },
-          "overrides": ["autoStart"]
-        },
-        "symbolChip": {
-          "class": "Chip",
-          "bindings": {
-            "save": "saveSymbol",
-            "symbolInput": "inputSymbol",
-            "symbolPreview": "previewSymbol"
-          },
-          "overrides": ["backgroundImage"]
-        },
-        "symbolDisplay": {
-          "class": "LED",
-          "type": 1,
-          "cols": 9,
-          "rows": 13,
-          "color": "red",
-          "highlight": false,
-          "bindings": {
-            "container": "displaySymbol"
-          },
-          "overrides": ["color","backgroundColor"]
-        },
-        "symbolInput": {
-          "class": "Input",
-          "drag": true,
-          "bindings": {
-            "reset": "resetSymbol"
-          }
-        }
-      }
+    config: symbols.json
 styles:
   _symbolLEDs:
     position: relative;

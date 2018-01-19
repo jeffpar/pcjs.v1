@@ -1,6 +1,6 @@
 {
   "shared": {
-    "version": "1.50.0",
+    "appversion": "1.50.0",
     "externs": [
       "./modules/shared/lib/externs.js"
     ],
@@ -74,10 +74,11 @@
   "leds": {
     "name": "LEDs",
     "class": "leds",
-    "version": "1.11",
+    "version": 1.21,
     "defines": [
       "COMPILED",
-      "DEBUG"
+      "DEBUG",
+      "VERSION"
     ],
     "folder": "devices",
     "creator": "new LEDs",
@@ -302,10 +303,11 @@
   "ti57": {
     "name": "TI57",
     "class": "ti57",
-    "version": "1.11",
+    "version": 1.21,
     "defines": [
       "COMPILED",
-      "DEBUG"
+      "DEBUG",
+      "VERSION"
     ],
     "folder": "devices",
     "creator": "new TMS1500",

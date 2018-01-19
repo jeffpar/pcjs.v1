@@ -455,7 +455,7 @@ MarkOut.prototype.convertMD = function(sIndent)
              */
             var aStyleDefs = aMatch[1].match(/\nstyles:([\s\S]*?)\n([^\s]|$)/);
             if (aStyleDefs) {
-                var reStyle = /\n  ([a-z_.][a-z0-9-]*):\n/gi;
+                var reStyle = /\n {2}([a-z_.][a-z0-9-]*):\n/gi;
                 var aStyles = aStyleDefs[1].split(reStyle);
                 /*
                  * Since the preceding RegExp contains a capture group (representing the ID for the style),
@@ -1263,7 +1263,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             machine = this.aMachineDefs[sMachineID];
             sMachineType = machine['type'] || "pcx86";
             sMachineXMLFile = machine['config'] || this.sMachineFile || "machine.xml";
-            if (sMachineXMLFile.match(/^\s*{/)) {
+            if (sMachineXMLFile.match(/^\s*{/) || sMachineXMLFile.endsWith(".json")) {
                 sMachineXMLFile = "{}";
                 machine['parms'] = "";
             }

@@ -16,49 +16,7 @@ machines:
   - id: scrollLEDs
     type: leds
     name: LED Scroller
-    config: |
-      {
-        "scrollLEDs": {
-          "class": "Machine",
-          "type": "leds",
-          "name": "LED Scroller",
-          "version": 1.11,
-          "autoStart": true,
-          "autoRestore": false,
-          "overrides": ["autoStart","autoRestore"]
-        },
-        "scrollChip": {
-          "class": "Chip",
-          "rule": "L1",
-          "message": "Happy New Year!$c$30b$30o$30b$30o$90s",
-          "overrides": ["message"]
-        },
-        "scrollClock": {
-          "class": "Time",
-          "cyclesPerSecond": 60,
-          "cyclesMinimum": 1,
-          "cyclesMaximum": 120,
-          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","clockByFrame","requestAnimationFrame"]
-        },
-        "scrollDisplay": {
-          "class": "LED",
-          "type": 0,
-          "cols": 256,
-          "rows": 16,
-          "colsExtra": 16,
-          "color": "red",
-          "backgroundColor": "black",
-          "highlight": false,
-          "bindings": {
-            "container": "displayScroll"
-          },
-          "overrides": ["color","backgroundColor"]
-        },
-        "scrollInput": {
-          "class": "Input",
-          "drag": true
-        }
-      }
+    config: /devices/leds/scroller/ATT4425.json
 styles:
   _scrollLEDs:
     position: relative;
