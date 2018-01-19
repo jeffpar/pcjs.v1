@@ -3,11 +3,12 @@
 <manifest type="software">
 	<title>Omniview 386</title>
 	<version>4.30</version>
-	<type>Operating Environment</type>
+	<type>Utility</type>
+	<category>Multitasking</category>
 	<company>Sunny Hill</company>
 	<releaseDate>October 1991</releaseDate>
 	<machine href="/devices/pcx86/machine/compaq/deskpro386/vga/4096kb/machine.xml"/>
-	<disk id="disk01" size="737280" chs="80:2:9" dir="archive/omniview.430" href="/disks/pcx86/apps/other/omniview/4.30/OMNIVIEW386-430.json" md5="94e0eb0aa3d1c8bb30d57e2b18509cb9" md5json="5b586081f864ac3cd2a0da871b3514ee">
+	<disk id="disk01" size="737280" chs="80:2:9" dir="archive/omniview.430" href="/disks/pcx86/tools/other/omniview/4.30/OMNIVIEW386-430.json" md5="94e0eb0aa3d1c8bb30d57e2b18509cb9" md5json="5b586081f864ac3cd2a0da871b3514ee">
 		<name>Omniview 386 4.30</name>
 		<file size="4790" time="1992-01-07 09:25:54" attr="0x20" md5="e5621815315e1eac06bf326e82d06ea0">2</file>
 		<file size="4902" time="1992-01-14 08:56:44" attr="0x20" md5="54d8d2c00aaec70f1194cca1618518ef">3</file>

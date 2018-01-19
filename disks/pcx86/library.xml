@@ -76,7 +76,6 @@
 		<manifest ref="/disks/pcx86/apps/microsoft/winword/2.0c/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/other/dbase2/2.4/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/other/dbase3/1.0/manifest.xml"/>
-		<manifest ref="/disks/pcx86/apps/other/omniview/4.30/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/other/sc2/1.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/other/sc3/1.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/other/wordstar/3.24/manifest.xml"/>
@@ -120,8 +119,10 @@
 		<manifest ref="/disks/pcx86/tools/other/doubledos/2.0v/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/other/enhdebug/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/other/flickerfree/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/other/omniview/4.30/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/other/qemm386/4.10/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/other/qemm386/4.23/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/other/qemm386/5.13/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/other/qemm386/6.02/manifest.xml"/>
 		<manifest ref="/disks/pcx86/games/id/wolf3d/manifest.xml"/>
 		<manifest ref="/disks/pcx86/games/microsoft/flightsim/1982/manifest.xml"/>

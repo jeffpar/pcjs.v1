@@ -883,7 +883,7 @@ class Chip extends Device {
                 this.println("Chip state error: " + err.message);
                 return false;
             }
-            if (!Device.getURLParms()['message'] && !Device.getURLParms()['pattern'] && !Device.getURLParms()[Chip.BINDING.IMAGE_SELECTION]) {
+            if (!this.getURLParms()['message'] && !this.getURLParms()['pattern'] && !this.getURLParms()[Chip.BINDING.IMAGE_SELECTION]) {
                 let stateLEDs = state['stateLEDs'] || state[1];
                 if (stateLEDs && this.leds) {
                     if (!this.leds.loadState(stateLEDs)) return false;
@@ -1749,6 +1749,6 @@ Chip.FONTS = {
     }
 };
 
-Chip.VERSION    = 1.11;
+Chip.VERSION = VERSION || 1.20;
 
 MACHINE = "LEDs";

@@ -1200,6 +1200,9 @@ class Chip extends Device {
     /**
      * onLoad()
      *
+     * Automatically called by the Machine device after all other devices have been powered up (eg, during
+     * a page load event) AND the machine's 'autoRestore' property is true.  It is called BEFORE onPower().
+     *
      * @this {Chip}
      */
     onLoad()
@@ -1210,8 +1213,9 @@ class Chip extends Device {
     /**
      * onPower(fOn)
      *
-     * Automatically called by the Machine device after all other devices have been powered up (eg, after
-     * a page load event), as well as when all devices are being powered down (eg, before a page unload event).
+     * Automatically called by the Machine device after all other devices have been powered up (eg, during
+     * a page load event) AND the machine's 'autoStart' property is true, with fOn set to true.  It is also
+     * called before all devices are powered down (eg, during a page unload event), with fOn set to false.
      *
      * May subsequently be called by the Input device to provide notification of a user-initiated power event
      * (eg, toggling a power button); in this case, fOn should NOT be set, so that no state is loaded or saved.
@@ -1252,6 +1256,9 @@ class Chip extends Device {
 
     /**
      * onSave()
+     *
+     * Automatically called by the Machine device before all other devices have been powered down (eg, during
+     * a page unload event).
      *
      * @this {Chip}
      */
@@ -1752,6 +1759,6 @@ Chip.COMMANDS = [
     "u [addr] [n]\tdisassemble (at addr)"
 ];
 
-Chip.VERSION    = 1.11;
+Chip.VERSION = VERSION || 1.20;
 
 MACHINE = "TMS1500";

@@ -6,62 +6,7 @@ machines:
   - id: scrollLEDs
     type: leds
     name: LED Scroller
-    config: |
-      {
-        "scrollLEDs": {
-          "class": "Machine",
-          "type": "leds",
-          "name": "LED Scroller",
-          "version": 1.11,
-          "autoStart": true,
-          "bindings": {
-            "clear": "clearScroll",
-            "print": "printScroll"
-          },
-          "overrides": ["autoStart"]
-        },
-        "scrollChip": {
-          "class": "Chip",
-          "font": "ATT4425",
-          "message": "Happy New Year!$c$30b$30o$30b$30o$90s",
-          "rule": "L1",
-          "overrides": ["message"]
-        },
-        "scrollClock": {
-          "class": "Time",
-          "cyclesPerSecond": 60,
-          "cyclesMinimum": 1,
-          "cyclesMaximum": 120,
-          "bindings": {
-            "run": "runScroll",
-            "speed": "speedScroll",
-            "step": "stepScroll",
-            "throttle": "throttleScroll"
-          },
-          "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","clockByFrame","requestAnimationFrame"]
-        },
-        "scrollDisplay": {
-          "class": "LED",
-          "type": 0,
-          "cols": 256,
-          "rows": 16,
-          "colsExtra": 16,
-          "color": "red",
-          "backgroundColor": "black",
-          "highlight": false,
-          "bindings": {
-            "container": "displayScroll"
-          },
-          "overrides": ["color","backgroundColor"]
-        },
-        "scrollInput": {
-          "class": "Input",
-          "drag": true,
-          "bindings": {
-            "reset": "resetScroll"
-          }
-        }
-      }
+    config: helvetica.json
 styles:
   _scrollLEDs:
     position: relative;

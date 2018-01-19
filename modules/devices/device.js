@@ -44,6 +44,11 @@ var DEBUG = true; // (window.location.hostname == "pcjs" || window.location.host
 var MACHINE = "Machine";
 
 /**
+ * @define {number}
+ */
+var VERSION = 0;
+
+/**
  * The following properties are the standard set of properties a Device's config object may contain.
  * Other devices will generally define their own extended versions (eg, LEDConfig, InputConfig, etc).
  *
@@ -196,9 +201,9 @@ class Device {
             if (element) {
                 this.bindings[binding] = element;
                 this.addBinding(binding, element);
-            } else {
-                if (!fDirectBindings) this.println("unable to find device ID: " + id);
+                continue;
             }
+            if (DEBUG && !fDirectBindings) this.println("unable to find device ID: " + id);
         }
     }
 
@@ -305,7 +310,7 @@ class Device {
          * value, so it is the responsibility of the component with overridable properties to validate them.
          */
         if (config['overrides']) {
-            let parms = Device.getURLParms();
+            let parms = this.getURLParms();
             for (let prop in parms) {
                 if (config['overrides'].indexOf(prop) >= 0) {
                     let value;
@@ -622,12 +627,111 @@ class Device {
     }
 
     /**
+     * getHost()
+     *
+     * @this {Device}
+     * @return {string}
+     */
+    getHost()
+    {
+        return ("http://" + (window? window.location.host : "localhost"));
+    }
+
+    /**
+     * getHostURL()
+     *
+     * @this {Device}
+     * @return {string|null}
+     */
+    getHostURL()
+    {
+        return (window? window.location.href : null);
+    }
+
+    /**
+     * getHostProtocol()
+     *
+     * @this {Device}
+     * @return {string}
+     */
+    getHostProtocol()
+    {
+        return (window? window.location.protocol : "file:");
+    }
+
+    /**
+     * getResource(sURL, done)
+     *
+     * Request the specified resource, and once the request is complete, notify done().
+     *
+     * done() is passed four parameters:
+     *
+     *      done(sURL, sResource, readyState, nErrorCode)
+     *
+     * readyState comes from the request's 'readyState' property, and the operation should not be considered complete
+     * until readyState is 4.
+     * 
+     * If nErrorCode is zero, sResource should contain the requested data; otherwise, an error occurred.
+     *
+     * @param {string} sURL
+     * @param {function(string,string,number,number)} done
+     */
+    getResource(sURL, done)
+    {
+        let nErrorCode = 0, sResource = null;
+
+        if (DEBUG) {
+            /*
+             * The larger resources we put on archive.pcjs.org should also be available locally.
+             *
+             * NOTE: "http://archive.pcjs.org" is now "https://s3-us-west-2.amazonaws.com/archive.pcjs.org"
+             */
+            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^\/]*)$/, "$2/archive/$3");
+        }
+
+        let xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
+        xmlHTTP.onreadystatechange = function()
+        {
+            if (xmlHTTP.readyState !== 4) {
+                done(sURL, sResource, xmlHTTP.readyState, nErrorCode);
+                return;
+            }
+            
+            /*
+             * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
+             * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
+             * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
+             * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
+             * happening are mis-notifications rather than redundant notifications.
+             *
+             *      xmlHTTP.onreadystatechange = undefined;
+             */
+            sResource = xmlHTTP.responseText;
+            
+            /*
+             * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
+             * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
+             */
+            if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && this.getHostProtocol() == "file:") {
+                // if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sResource.length + " bytes");
+            }
+            else {
+                nErrorCode = xmlHTTP.status || -1;
+            }
+            done(sURL, sResource, xmlHTTP.readyState, nErrorCode);
+        };
+        
+        xmlHTTP.open("GET", sURL, true);
+        xmlHTTP.send();
+    }
+
+    /**
      * getURLParms(sParms)
      *
      * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
      * @returns {Object} containing properties for each parameter found
      */
-    static getURLParms(sParms)
+    getURLParms(sParms)
     {
         let parms = Device.URLParms;
         if (!parms) {
@@ -962,7 +1066,7 @@ class Device {
                     }
                 }
                 if (precision) {
-                    arg = Math.trunc((arg - Math.trunc(arg)) * Math.pow(10, precision));
+                    arg = Math.round((arg - Math.trunc(arg)) * Math.pow(10, precision));
                     s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
                 }
                 buffer += s;
@@ -1028,7 +1132,7 @@ Device.CATEGORY = {
 };
 
 Device.COMMANDS = [
-    "c\tset category"
+    "c\t\tset category"
 ];
 
 Device.HANDLER = {

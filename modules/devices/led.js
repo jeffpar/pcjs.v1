@@ -1283,4 +1283,4 @@ LED.SYMBOL_SEGMENTS = {
     '.':        ['P']
 };
 
-LED.VERSION     = 1.11;
+LED.VERSION = VERSION || 1.20;

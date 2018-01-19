@@ -1,7 +1,9 @@
 ---
 layout: page
 title: Omniview 386 4.30
-permalink: /disks/pcx86/apps/other/omniview/4.30/
+permalink: /disks/pcx86/tools/other/omniview/4.30/
+redirect_from:
+  - /disks/pcx86/apps/other/omniview/4.30/
 machines:
   - id: compaq386
     type: pcx86
@@ -10,14 +12,16 @@ machines:
       A:
         path: /disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1-720K.json
       B:
-        path: /disks/pcx86/apps/other/omniview/4.30/OMNIVIEW386-430.json
+        path: /disks/pcx86/tools/other/omniview/4.30/OMNIVIEW386-430.json
 ---
 
 Omniview 386 4.30
 -----------------
 
-The COMPAQ DeskPro 386 machine below is recommended for Omniview 386 4.30.
-A [directory listing](#directory-of-omniview-386-430) is also provided.
+Omniview 386 was a multitasking application manager for DOS produced by Sunny Hill Software in the late 1980's.  Version 4.11
+was reviewed in the February 13, 1989 issue of [InfoWorld](https://books.google.com/books?id=QDoEAAAAMBAJ&lpg=PT73&dq=omniview%20386&pg=PT72#v=onepage&q&f=false).
+
+The COMPAQ DeskPro 386 machine below is recommended for Omniview 386 4.30.  A [directory listing](#directory-of-omniview-386-430) is also provided.
 
 {% include machine.html id="compaq386" %}
 

@@ -281,3 +281,7 @@ and then you need to add the new scripts, preferably in the order shown above:
 and then you can create the machine:
 
 	new Machine('ti57','{insert JSON blob here}');
+
+Alternatively, the JSON can be stored in a separate file and its URL passed to the Machine constructor:
+
+	new Machine('ti57','ti57.json');

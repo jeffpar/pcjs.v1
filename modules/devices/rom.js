@@ -238,4 +238,4 @@ ROM.BINDING = {
     CELLDESC:   "cellDesc"
 };
 
-ROM.VERSION     = 1.11;
+ROM.VERSION = VERSION || 1.20;

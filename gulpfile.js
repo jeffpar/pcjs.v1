@@ -1,7 +1,7 @@
 /**
  * @fileoverview Gulp file for pcjs.org
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
- * @copyright © Jeff Parsons 2012-2017
+ * @copyright © Jeff Parsons 2012-2018
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -33,7 +33,7 @@
  * 
  *          Recompiles all machine scripts in their respective version folder (under /versions) that
  *          are out-of-date with respect to the individual files (under /modules).  The target version
- *          comes from _data/machines.json:shared.version.
+ *          comes from _data/machines.json:shared.appversion.
  *
  *          It does this by running the `concat`, `compile`, `copy`, and `disks` tasks for all machines,
  *          in that order.
@@ -69,7 +69,7 @@
  *      `gulp version`
  * 
  *          Updates the version number in all project machine XML files to match the version contained in
- *          _data/machines.json:shared.version.
+ *          _data/machines.json:shared.appversion.
  *
  *      `gulp copyright`
  *
@@ -126,7 +126,7 @@ aMachines.forEach(function(machineType) {
         machineConfig = machines[machineConfig.alias];
     }
 
-    let machineVersion = (machineConfig.version || machines.shared.version);
+    let machineVersion = (machineConfig.version || machines.shared.appversion);
     let machineReleaseDir = "./versions/" + machineConfig['folder'] + "/" + machineVersion;
     let machineReleaseFile  = machineType + ".js";
     let machineUncompiledFile  = machineType + "-uncompiled.js";
@@ -137,6 +137,7 @@ aMachines.forEach(function(machineType) {
             let define = machineConfig.defines[i];
             switch(define) {
             case "APPVERSION":
+            case "VERSION":
                 machineDefines[define] = machineVersion;
                 break;
             case "SITEHOST":
@@ -294,7 +295,7 @@ gulp.task("disks", function() {
             let sDisks = match;
             let sFilePath = path.join('.', sFile);
             try {
-                let sManifest = fs.readFileSync(sFilePath, {encoding: 'utf8'});
+                let sManifest = /** @type {string} */ (fs.readFileSync(sFilePath, {encoding: 'utf8'}));
                 if (sManifest) {
                     sDisks = "";
                     let sPrefix = "", sDefaultName = "Unknown";
@@ -331,7 +332,7 @@ gulp.task("disks", function() {
 gulp.task("version", function() {
     let baseDir = "./";
     return gulp.src(["apps/**/*.xml", "devices/**/*.xml", "disks/**/*.xml", "pubs/**/*.xml"], {base: baseDir})
-        .pipe(gulpReplace(/href="\/versions\/([^\/]*)\/[0-9.]*\/(machine|manifest|outline)\.xsl"/g, 'href="/versions/$1/' + machines.shared.version + '/$2.xsl"'))
+        .pipe(gulpReplace(/href="\/versions\/([^\/]*)\/[0-9.]*\/(machine|manifest|outline)\.xsl"/g, 'href="/versions/$1/' + machines.shared.appversion + '/$2.xsl"'))
         .pipe(gulp.dest(baseDir));
 });
 

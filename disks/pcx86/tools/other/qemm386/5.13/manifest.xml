@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/manifest.xsl"?>
+<manifest type="software">
+	<title>QEMM-386</title>
+	<version>5.13</version>
+	<type>Utility</type>
+	<category>Memory Manager</category>
+	<company>Quarterdeck Office Systems</company>
+	<releaseDate>1991-04-22</releaseDate>
+	<serialNumber>539-B6-3838</serialNumber>
+	<disk id="disk01" size="737280" chs="80:2:9" img="archive/QEMM386-513.img" href="/disks/pcx86/tools/other/qemm386/5.13/QEMM386-513.json" md5="1dc19af00c57f2d15c6f0beb1b3d6031" md5json="17fee84ba9b5910567c64ae84d4b886a">
+		<file size="2752" time="1991-04-22 06:13:02" attr="0x20">BUFFERS.COM</file>
+		<file size="6027" time="1991-04-22 06:13:02" attr="0x20">EMS.COM</file>
+		<file size="6209" time="1991-04-22 06:13:02" attr="0x20">EMS.SYS</file>
+		<file size="3040" time="1991-04-22 06:13:02" attr="0x20">EMS2EXT.SYS</file>
+		<file size="2978" time="1991-04-22 06:13:02" attr="0x20">FCBS.COM</file>
+		<file size="2688" time="1991-04-22 06:13:02" attr="0x20">FILES.COM</file>
+		<file size="41377" time="1991-04-22 06:13:02" attr="0x20">INSTALL.EXE</file>
+		<file size="2868" time="1991-04-22 06:13:02" attr="0x20">LASTDRIV.COM</file>
+		<file size="7844" time="1991-04-22 06:13:02" attr="0x20">LOADHI.COM</file>
+		<file size="6473" time="1991-04-22 06:13:02" attr="0x20">LOADHI.SYS</file>
+		<file size="2833" time="1991-04-22 06:13:02" attr="0x20">LOGOPT.COM</file>
+		<file size="36357" time="1991-04-22 06:13:02" attr="0x20">MCA.ADL</file>
+		<file size="416" time="1991-04-22 06:13:02" attr="0x20">MF-PIF.DVP</file>
+		<file size="20321" time="1991-04-22 06:13:02" attr="0x20">MFT.HLP</file>
+		<file size="75210" time="1991-04-22 06:13:02" attr="0x20">MFT.INS</file>
+		<file size="17916" time="1991-04-22 06:13:02" attr="0x20">OPTIMIZE.COM</file>
+		<file size="7083" time="1991-04-22 06:13:02" attr="0x20">QEMM.COM</file>
+		<file size="64007" time="1991-04-22 06:13:02" attr="0x20">QEMM386.INS</file>
+		<file size="414" time="1991-04-22 06:13:02" attr="0x20">QEMMREG.INS</file>
+		<file size="20904" time="1991-04-22 06:13:02" attr="0x20">READ.ME</file>
+		<file size="319" time="1991-04-22 06:13:02" attr="0x20">RSTRCFG.SYS</file>
+		<file size="276" time="1991-04-22 06:13:02" attr="0x20">TECHSUP.BAT</file>
+		<file size="7150" time="1991-04-22 06:13:02" attr="0x20">VIDRAM.INS</file>
+		<file size="10826" time="1991-04-22 06:13:02" attr="0x20">WINHIRAM.VXD</file>
+	</disk>
+</manifest>

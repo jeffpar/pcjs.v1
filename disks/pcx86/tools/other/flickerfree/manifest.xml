@@ -4,7 +4,7 @@
 	<title>FlickerFree</title>
 	<version>1.0</version>
 	<type>Utility</type>
-	<category>Enhancement</category>
+	<category>Video Optimizer</category>
 	<author>Steve Gibson</author>
 	<releaseDate>1986</releaseDate>
 	<disk id="disk01" size="184320" chs="40:1:9" img="archive/FLICKERFREE.img" href="/disks/pcx86/tools/other/flickerfree/FLICKERFREE.json" md5="f4d6055fa14adffc754c2fadee04ac82" md5json="b9f60250d63a162c2b65c884c4bcba40">

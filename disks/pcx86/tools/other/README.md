@@ -12,4 +12,5 @@ Information is available for these additional tools:
 * [DoubleDOS](doubledos/)
 * [Enhanced DEBUG](enhdebug/)
 * [FlickerFree](flickerfree/)
+* [Omniview](omniview/)
 * [QEMM-386](qemm386/)
