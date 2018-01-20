@@ -78225,8 +78225,8 @@ function resolveXML(sXML, display, done)
  * @param {string} sAppClass is the app class (eg, "pcx86"); also known as the machine class
  * @param {string} sVersion is the app version (eg, "1.15.7")
  * @param {string} idMachine
- * @param {string} sXMLFile
- * @param {string} sXSLFile
+ * @param {string} [sXMLFile]
+ * @param {string} [sXSLFile]
  * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
@@ -78234,6 +78234,11 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
 {
     var eMachine, eWarning, fSuccess = true;
 
+    if (!sXMLFile) {
+        sXMLFile = "machine.xml";
+        if (!sXSLFile) sXSLFile = "components.xsl";
+    }
+    
     cAsyncMachines++;
     Component.addMachine(idMachine);
 
@@ -78332,8 +78337,10 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
 
                     /*
                      * Record the XSL file, in case someone wants to save the entire machine later.
+                     * 
+                     * NOTE: sXSLFile will never be undefined by this point, but apparently the Closure Compiler doesn't realize that.  
                      */
-                    Component.addMachineResource(idMachine, sXSLFile, sXSL);
+                    Component.addMachineResource(idMachine, sXSLFile || "", sXSL);
 
                     /*
                      * The <machine> template in components.xsl now generates a "machine div" that makes
@@ -78409,7 +78416,10 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                         displayError("unable to transform XML: unsupported browser");
                     }
                 };
-                loadXML(sXSLFile, null, sAppName, sAppClass, null, false, displayMessage, transformXML);
+                /*
+                 * NOTE: sXSLFile will never be undefined by this point, but apparently the Closure Compiler doesn't realize that.  
+                 */
+                loadXML(sXSLFile || "", null, sAppName, sAppClass, null, false, displayMessage, transformXML);
             };
 
             if (sXMLFile.charAt(0) != '<') {
@@ -78430,8 +78440,8 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
  * embedC1P(idMachine, sXMLFile, sXSLFile)
  *
  * @param {string} idMachine
- * @param {string} sXMLFile
- * @param {string} sXSLFile
+ * @param {string} [sXMLFile]
+ * @param {string} [sXSLFile]
  * @return {boolean} true if successful, false if error
  */
 function embedC1P(idMachine, sXMLFile, sXSLFile)
@@ -78444,8 +78454,8 @@ function embedC1P(idMachine, sXMLFile, sXSLFile)
  * embedPCx86(idMachine, sXMLFile, sXSLFile, sParms)
  *
  * @param {string} idMachine
- * @param {string} sXMLFile
- * @param {string} sXSLFile
+ * @param {string} [sXMLFile]
+ * @param {string} [sXSLFile]
  * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
@@ -78459,8 +78469,8 @@ function embedPCx86(idMachine, sXMLFile, sXSLFile, sParms)
  * embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
  *
  * @param {string} idMachine
- * @param {string} sXMLFile
- * @param {string} sXSLFile
+ * @param {string} [sXMLFile]
+ * @param {string} [sXSLFile]
  * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
@@ -78474,8 +78484,8 @@ function embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
  * embedPDP10(idMachine, sXMLFile, sXSLFile, sParms)
  *
  * @param {string} idMachine
- * @param {string} sXMLFile
- * @param {string} sXSLFile
+ * @param {string} [sXMLFile]
+ * @param {string} [sXSLFile]
  * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
@@ -78489,8 +78499,8 @@ function embedPDP10(idMachine, sXMLFile, sXSLFile, sParms)
  * embedPDP11(idMachine, sXMLFile, sXSLFile, sParms)
  *
  * @param {string} idMachine
- * @param {string} sXMLFile
- * @param {string} sXSLFile
+ * @param {string} [sXMLFile]
+ * @param {string} [sXSLFile]
  * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
@@ -78756,7 +78766,14 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
         sPCJS = matchScript[1] + "var resources=" + sResources + ";" + matchScript[2] + matchScript[3];
         Component.log("saving machine: '" + idMachine + "' (" + sPCJS.length + " bytes)");
 
-        sPCJS = sPCJS.replace(/\u00A9/g, "&#xA9;");
+        /*
+         * I don't recall exactly why I did this, because I just tested FireFox with copyright symbols intact,
+         * and it seems to work fine.  And unfortunately, if we print any copyright strings containing the HTML
+         * entity, the entity doesn't get translated prior to output.  So if it turns out we DO need this,
+         * it's better to replace with the old-fashioned ASCII version.
+         * 
+         *      sPCJS = sPCJS.replace(/\u00A9/g, "(C)");    // "&#xA9;" or "&copy;"
+         */
 
         var sAlert = Web.downloadFile(sPCJS, "javascript", false, sScript);
 
@@ -78764,7 +78781,19 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
         sAlert += '<div id="' + idMachine + '"></div>\n';
         sAlert += '...\n';
         sAlert += '<script type="text/javascript" src="' + sScript + '"></script>\n';
-        sAlert += '<script type="text/javascript">embedPC("' + idMachine + '","' + sXMLFile + '","' + sXSLFile + '");</script>\n\n';
+        
+        /*
+         * I've updated embedMachine() in embed.js to use these defaults whenever the XML file is omitted, so if our
+         * values match those defaults, we can omit both the XML and XSL file parameters and display a simplified call.
+         */
+        if (sXMLFile == "machine.xml" && sXSLFile == "components.xsl") {
+            sXMLFile = sXSLFile = "";
+        } else {
+            sXMLFile = ',"' + sXMLFile + '"';
+            sXSLFile = ',"' + sXSLFile + '"';
+        }
+        
+        sAlert += '<script type="text/javascript">embedPCx86("' + idMachine + '"' + sXMLFile + sXSLFile + ');</script>\n\n';
         sAlert += 'The machine should appear where the <div> is located.';
         Component.alertUser(sAlert);
         return;
