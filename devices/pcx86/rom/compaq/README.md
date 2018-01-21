@@ -5,7 +5,7 @@ permalink: /devices/pcx86/rom/compaq/
 ---
 
 COMPAQ ROMs
----
+-----------
 
 Since the PCjs Project is focused on the 1980's, this roughly chronological list of COMPAQ machines is limited to
 that era:
@@ -20,6 +20,4 @@ that era:
  + [COMPAQ Portable III](portable3/)
  + COMPAQ Portable 386
  + COMPAQ SLT Series
- + COMPAQ LTE Series
-	 + COMPAQ LTE 286
-	 + COMPAQ LTE 386
+ + COMPAQ LTE Series (LTE 286 and LTE 386)
