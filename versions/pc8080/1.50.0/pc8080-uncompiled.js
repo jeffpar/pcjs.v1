@@ -25533,7 +25533,9 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                 var head = document.head || document.getElementsByTagName('head')[0];
                 var style = document.createElement('style');
                 style.type = 'text/css';
+                // noinspection JSDeprecatedSymbols
                 if (style.styleSheet) {
+                    // noinspection JSDeprecatedSymbols
                     style.styleSheet.cssText = css;
                 } else {
                     style.appendChild(document.createTextNode(css));

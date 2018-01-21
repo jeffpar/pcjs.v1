@@ -30,4 +30,5 @@ it was understood in 1988) is equal to 1,048,576 bytes.
 
 Machines using the [Unformatted Disk](unformatted-at5.xml) include:
 
-* [IBM PC AT (Model 5170) with Enhanced Color Display](/devices/pcx86/machine/5170/ega/640kb/)
+* [IBM PC AT (Model 5170) Machines with Enhanced Color Display](/devices/pcx86/machine/5170/ega/640kb/)
+* [COMPAQ DeskPro 386 Machines](/devices/pcx86/machine/compaq/deskpro386/)
