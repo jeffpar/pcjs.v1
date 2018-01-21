@@ -12,7 +12,7 @@
 	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-functions.xml"/>
 	<debugger id="debugger" messages="fault" commands=""/>
 	<panel ref="/devices/pcx86/panel/btpanel.xml"/>
-	<hdc ref="/disks/pcx86/fixed/20mb/pcdos330-empty.xml"/>
+	<hdc ref="/disks/pcx86/fixed/20mb/pcdos330-empty-at2.xml"/>
 	<chipset id="chipset" model="5170" floppies="[1440,1200]" monitor="ega"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2" binding="print"/>

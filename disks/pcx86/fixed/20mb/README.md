@@ -7,9 +7,10 @@ permalink: /disks/pcx86/fixed/20mb/
 20Mb Hard Drive (Fixed Disk) Images
 -----------------------------------
 
-This folder contains the following 20Mb disk configurations:
+This folder contains the following 20Mb (PC AT Type 2) fixed disk configurations:
 
-* [PC-DOS 3.30 Formatted Disk (Empty)](pcdos330-empty.xml)
+* [Unformatted Disk](unformatted-at2.xml)
+* [PC-DOS 3.30 Formatted Disk (Empty)](pcdos330-empty-at2.xml)
 
 along with the following pre-built 20Mb disk images:
 
@@ -18,3 +19,6 @@ along with the following pre-built 20Mb disk images:
 * [PC-DOS 3.20 with Windows 3.00 for EGA](/disks/pcx86/fixed/20mb/PCDOS320-WIN300-EGA.json)
 * [PC-DOS 3.30 with Windows 3.10 for VGA](/disks/pcx86/fixed/20mb/PCDOS330-WIN310-VGA.json)
 * [COMPAQ MS-DOS 3.10 with Windows/386 2.01 for VGA](/disks/pcx86/fixed/20mb/COMPAQ310-WIN386201-VGA.json)
+
+Note that in order to use an unformatted fixed disk with DOS, it must first be partitioned using `FDISK` and then formatted
+using `FORMAT`.
