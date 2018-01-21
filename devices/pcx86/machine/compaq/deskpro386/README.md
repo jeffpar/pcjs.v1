@@ -5,7 +5,7 @@ permalink: /devices/pcx86/machine/compaq/deskpro386/
 ---
 
 COMPAQ DeskPro 386 Machines
----
+---------------------------
 
 * [COMPAQ DeskPro 386 with 2Mb RAM and IBM EGA](ega/2048kb/) ([Debugger](ega/2048kb/debugger/))
 * [COMPAQ DeskPro 386 with 4Mb RAM and IBM EGA](ega/4096kb/) ([Debugger](ega/4096kb/debugger/))

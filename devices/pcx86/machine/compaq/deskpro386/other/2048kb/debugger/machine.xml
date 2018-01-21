@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/machine.xsl"?>
 <machine id="deskpro386" type="pcx86" border="1" pos="center" background="default">
-	<name pos="center">COMPAQ DeskPro 386, 2Mb RAM, COMPAQ VGA, 20Mb Hard Disk</name>
+	<name pos="center">COMPAQ DeskPro 386, 2Mb RAM, COMPAQ VGA, 47Mb Hard Disk (Unformatted)</name>
 	<computer id="deskpro386-vga-2048k" name="COMPAQ DeskPro 386" buswidth="32"/>
 	<cpu id="cpu386" model="80386"/>
 	<ram id="ramLow" addr="0x00000" test="true" size="0xa0000" comment="ROM BIOS memory test has NOT been disabled"/>
@@ -13,7 +13,7 @@
 	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-functions.xml"/>
 	<debugger id="debugger" messages="fault|port" commands=""/>
 	<panel ref="/devices/pcx86/panel/wide386.xml"/>
-	<hdcNone id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2}]'/>
+	<hdc ref="/disks/pcx86/fixed/47mb/unformatted-at5.xml"/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2" binding="print"/>

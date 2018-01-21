@@ -12,7 +12,7 @@
 	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-functions.xml"/>
 	<debugger id="debugger" messages="fault" commands=""/>
 	<panel ref="/devices/pcx86/panel/wide.xml"/>
-	<hdc id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2}]'/>
+	<hdc id="hdcAT" type="AT" drives='[{name:"20Mb Hard Disk",type:2}]'/>
 	<chipset id="chipset" model="5170" floppies="[1200,1200]"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2" binding="print"/>

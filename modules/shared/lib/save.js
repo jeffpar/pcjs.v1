@@ -203,7 +203,14 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
         sPCJS = matchScript[1] + "var resources=" + sResources + ";" + matchScript[2] + matchScript[3];
         Component.log("saving machine: '" + idMachine + "' (" + sPCJS.length + " bytes)");
 
-        sPCJS = sPCJS.replace(/\u00A9/g, "&#xA9;");
+        /*
+         * I don't recall exactly why I did this, because I just tested FireFox with copyright symbols intact,
+         * and it seems to work fine.  And unfortunately, if we print any copyright strings containing the HTML
+         * entity, the entity doesn't get translated prior to output.  So if it turns out we DO need this,
+         * it's better to replace with the old-fashioned ASCII version.
+         * 
+         *      sPCJS = sPCJS.replace(/\u00A9/g, "(C)");    // "&#xA9;" or "&copy;"
+         */
 
         var sAlert = Web.downloadFile(sPCJS, "javascript", false, sScript);
 
@@ -211,7 +218,19 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
         sAlert += '<div id="' + idMachine + '"></div>\n';
         sAlert += '...\n';
         sAlert += '<script type="text/javascript" src="' + sScript + '"></script>\n';
-        sAlert += '<script type="text/javascript">embedPC("' + idMachine + '","' + sXMLFile + '","' + sXSLFile + '");</script>\n\n';
+        
+        /*
+         * I've updated embedMachine() in embed.js to use these defaults whenever the XML file is omitted, so if our
+         * values match those defaults, we can omit both the XML and XSL file parameters and display a simplified call.
+         */
+        if (sXMLFile == "machine.xml" && sXSLFile == "components.xsl") {
+            sXMLFile = sXSLFile = "";
+        } else {
+            sXMLFile = ',"' + sXMLFile + '"';
+            sXSLFile = ',"' + sXSLFile + '"';
+        }
+        
+        sAlert += '<script type="text/javascript">embedPCx86("' + idMachine + '"' + sXMLFile + sXSLFile + ');</script>\n\n';
         sAlert += 'The machine should appear where the <div> is located.';
         Component.alertUser(sAlert);
         return;

@@ -336,8 +336,8 @@ function resolveXML(sXML, display, done)
  * @param {string} sAppClass is the app class (eg, "pcx86"); also known as the machine class
  * @param {string} sVersion is the app version (eg, "1.15.7")
  * @param {string} idMachine
- * @param {string} sXMLFile
- * @param {string} sXSLFile
+ * @param {string} [sXMLFile]
+ * @param {string} [sXSLFile]
  * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
@@ -345,6 +345,11 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
 {
     var eMachine, eWarning, fSuccess = true;
 
+    if (!sXMLFile) {
+        sXMLFile = "machine.xml";
+        if (!sXSLFile) sXSLFile = "components.xsl";
+    }
+    
     cAsyncMachines++;
     Component.addMachine(idMachine);
 
@@ -394,7 +399,9 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                 var head = document.head || document.getElementsByTagName('head')[0];
                 var style = document.createElement('style');
                 style.type = 'text/css';
+                // noinspection JSDeprecatedSymbols
                 if (style.styleSheet) {
+                    // noinspection JSDeprecatedSymbols
                     style.styleSheet.cssText = css;
                 } else {
                     style.appendChild(document.createTextNode(css));
@@ -443,8 +450,10 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
 
                     /*
                      * Record the XSL file, in case someone wants to save the entire machine later.
+                     * 
+                     * NOTE: sXSLFile will never be undefined by this point, but apparently the Closure Compiler doesn't realize that.  
                      */
-                    Component.addMachineResource(idMachine, sXSLFile, sXSL);
+                    Component.addMachineResource(idMachine, sXSLFile || "", sXSL);
 
                     /*
                      * The <machine> template in components.xsl now generates a "machine div" that makes
@@ -520,7 +529,10 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                         displayError("unable to transform XML: unsupported browser");
                     }
                 };
-                loadXML(sXSLFile, null, sAppName, sAppClass, null, false, displayMessage, transformXML);
+                /*
+                 * NOTE: sXSLFile will never be undefined by this point, but apparently the Closure Compiler doesn't realize that.  
+                 */
+                loadXML(sXSLFile || "", null, sAppName, sAppClass, null, false, displayMessage, transformXML);
             };
 
             if (sXMLFile.charAt(0) != '<') {
@@ -541,8 +553,8 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
  * embedC1P(idMachine, sXMLFile, sXSLFile)
  *
  * @param {string} idMachine
- * @param {string} sXMLFile
- * @param {string} sXSLFile
+ * @param {string} [sXMLFile]
+ * @param {string} [sXSLFile]
  * @return {boolean} true if successful, false if error
  */
 function embedC1P(idMachine, sXMLFile, sXSLFile)
@@ -555,8 +567,8 @@ function embedC1P(idMachine, sXMLFile, sXSLFile)
  * embedPCx86(idMachine, sXMLFile, sXSLFile, sParms)
  *
  * @param {string} idMachine
- * @param {string} sXMLFile
- * @param {string} sXSLFile
+ * @param {string} [sXMLFile]
+ * @param {string} [sXSLFile]
  * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
@@ -570,8 +582,8 @@ function embedPCx86(idMachine, sXMLFile, sXSLFile, sParms)
  * embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
  *
  * @param {string} idMachine
- * @param {string} sXMLFile
- * @param {string} sXSLFile
+ * @param {string} [sXMLFile]
+ * @param {string} [sXSLFile]
  * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
@@ -585,8 +597,8 @@ function embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
  * embedPDP10(idMachine, sXMLFile, sXSLFile, sParms)
  *
  * @param {string} idMachine
- * @param {string} sXMLFile
- * @param {string} sXSLFile
+ * @param {string} [sXMLFile]
+ * @param {string} [sXSLFile]
  * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
@@ -600,8 +612,8 @@ function embedPDP10(idMachine, sXMLFile, sXSLFile, sParms)
  * embedPDP11(idMachine, sXMLFile, sXSLFile, sParms)
  *
  * @param {string} idMachine
- * @param {string} sXMLFile
- * @param {string} sXSLFile
+ * @param {string} [sXMLFile]
+ * @param {string} [sXSLFile]
  * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */

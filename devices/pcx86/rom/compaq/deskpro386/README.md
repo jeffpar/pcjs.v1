@@ -5,7 +5,7 @@ permalink: /devices/pcx86/rom/compaq/deskpro386/
 ---
 
 COMPAQ DeskPro 386 ROMs
----
+-----------------------
 
 The oldest COMPAQ DeskPro 386 ROM I have is a Rev J.4 ROM from a "Version 2" motherboard designed
 in 1987 and released in 1988.
@@ -56,7 +56,8 @@ from the two 16Kb BIN files provided by [Al Kossow](http://www.vintage-computer.
 	filedump --file=archive/1989-04-14.rom --output=1989-04-14.json
 
 Dumping the ROMs
----
+----------------
+
 The *.hex* files for the 1988-01-28 DeskPro ROM were produced by running
 [eeprom_read](http://github.com/phooky/PROM/blob/master/tools/eeprom_read/eeprom_read.pde)
 on a [chipKIT Uno32](http://www.digilentinc.com/Products/Detail.cfm?NavPath=2,892,893&Prod=CHIPKIT-UNO32)
@@ -76,7 +77,8 @@ of GND, and the dump worked perfectly.  The NYC Resistor article implied that ev
 connected to GND, but apparently there are exceptions to that general rule.
 
 Recreating ROM Source Code
----
+--------------------------
+
 In the current directory, an original ROM can be regenerated from the JSON-encoded file:
 
 	cd 1988-01-28

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/machine.xsl"?>
 <machine id="deskpro386" type="pcx86" border="1" pos="center" background="default">
-	<name pos="center">COMPAQ DeskPro 386, 2Mb RAM, IBM VGA, 20Mb Hard Disk</name>
+	<name pos="center">COMPAQ DeskPro 386, 2Mb RAM, IBM VGA, 47Mb Hard Disk (Unformatted)</name>
 	<computer id="deskpro386-vga-2048k" name="COMPAQ DeskPro 386" buswidth="32"/>
 	<cpu id="cpu386" model="80386"/>
 	<ram id="ramLow" addr="0x00000" test="false" size="0xa0000" comment="ROM BIOS memory test has been disabled"/>
@@ -10,7 +10,7 @@
 	<rom id="romBIOS" addr="0xf8000" size="0x8000" alias="[0xf0000,0xffff0000,0xffff8000]" file="/devices/pcx86/rom/compaq/deskpro386/1988-01-28/1988-01-28.json"/>
 	<video ref="/devices/pcx86/video/ibm/vga/1986-10-27/256kb-autolockfs.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml" autoMount='{A: {name: "COMPAQ MS-DOS 3.31 (Disk 2)", path: "/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json"}, B: {name: "COMPAQ MS-DOS 3.31 (Disk 3)", path: "/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK3.json"}}'/>
-	<hdc ref="/disks/pcx86/fixed/20mb/pcdos330-empty.xml"/>
+	<hdc ref="/disks/pcx86/fixed/47mb/unformatted-at5.xml"/>
 	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-functions.xml"/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]" monitor="vga"/>
 	<serial id="com1" adapter="1"/>

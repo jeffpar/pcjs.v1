@@ -16,7 +16,7 @@
 	</cpu>
 	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-functions.xml"/>
 	<chipset id="chipset" model="5160" sw1="01001101"/>
-	<hdc ref="/disks/pcx86/fixed/10mb/msdos320-c400-xt.xml"/>
+	<hdc ref="/disks/pcx86/fixed/10mb/msdos320-c400-xt3.xml"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2"/>
 	<mouse serial="com2"/>

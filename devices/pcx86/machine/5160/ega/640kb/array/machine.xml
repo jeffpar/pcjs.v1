@@ -14,7 +14,7 @@
 		<control type="button" binding="setSpeed">Fast</control>
 	</cpu>
 	<chipset id="chipset" model="5160" sw1="01001101"/>
-	<hdc ref="/disks/pcx86/fixed/10mb/unformatted.xml"/>
+	<hdc ref="/disks/pcx86/fixed/10mb/unformatted-xt3.xml"/>
 	<serial id="com2" adapter="2"/>
 	<mouse serial="com2"/>
 </machine>

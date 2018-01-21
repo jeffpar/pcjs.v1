@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<hdc id="hdcAT" type="at" drives='[{name:"20Mb Hard Drive",type:2,path:"/disks/pcx86/fixed/20mb/PCDOS330-EMPTY.json"}]' pos="left" padLeft="8px" padBottom="8px">
-	<control type="button" binding="saveHD0">Save HD</control>
-</hdc>

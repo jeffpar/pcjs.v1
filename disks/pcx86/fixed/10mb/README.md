@@ -9,19 +9,22 @@ permalink: /disks/pcx86/fixed/10mb/
 
 This folder contains a variety of 10Mb (PC XT Type 3) fixed disk configurations:
  
-* [Unformatted Disk](unformatted.xml)
-* [PC-DOS 2.00 Formatted Disk (Empty)](pcdos200-empty.xml)
-* [PC-DOS 2.00 with Windows 1.01 for CGA](pcdos200-win101-cga.xml)
-* [PC-DOS 2.00 with Windows 1.01 for EGA](pcdos200-win101-ega.xml)
-* [MS-DOS 3.20 with Microsoft C 4.00](msdos320-c400-xt.xml)
+* [Unformatted Disk](unformatted-xt3.xml)
+* [PC-DOS 2.00 Formatted Disk (Empty)](pcdos200-empty-xt3.xml)
+* [PC-DOS 2.00 with Windows 1.01 for CGA](pcdos200-win101-cga-xt3.xml)
+* [PC-DOS 2.00 with Windows 1.01 for EGA](pcdos200-win101-ega-xt3.xml)
+* [MS-DOS 3.20 with Microsoft C 4.00](msdos320-c400-xt3.xml)
 
-These XML disk configurations are used to load fixed disk images into various IBM PC XT
+Note that in order to use an unformatted fixed disk with DOS, it must first be partitioned using `FDISK` and then formatted
+using `FORMAT`.
+
+The XML disk configurations above are used to load fixed disk images into various IBM PC XT
 [Model 5160](/devices/pcx86/machine/5160/) machine configurations.
 
 For example, a PC XT machine using this HDC XML reference:
 
 ```xml
-<hdc ref="/disks/pcx86/fixed/10mb/msdos320-c400-xt.xml"/>
+<hdc ref="/disks/pcx86/fixed/10mb/msdos320-c400-xt3.xml"/>
 ```
 
 will load the following PC XT controller configuration and disk image:
@@ -32,7 +35,7 @@ will load the following PC XT controller configuration and disk image:
 
 Some of the 10Mb disk images have also been pre-configured for use in PC AT configurations:
  
-* [MS-DOS 3.20 with Microsoft C 4.00 (PC AT Drive Type 1)](msdos320-c400-at.xml)
+* [MS-DOS 3.20 with Microsoft C 4.00 (PC AT Drive Type 1)](msdos320-c400-at1.xml)
 
 The configuration must set the HDC's controller type to "AT" and select an appropriate AT
 drive type.  So, whereas the XT drive type for a 10Mb disk was 3, the corresponding AT drive type is 1.
@@ -40,7 +43,7 @@ drive type.  So, whereas the XT drive type for a 10Mb disk was 3, the correspond
 So, a PC AT machine using this HDC XML reference:
 
 ```xml
-<hdc ref="/disks/pcx86/fixed/10mb/msdos320-c400-at.xml"/>
+<hdc ref="/disks/pcx86/fixed/10mb/msdos320-c400-at1.xml"/>
 ```
 
 will load the following PC AT controller configuration and disk image:
@@ -51,7 +54,7 @@ will load the following PC AT controller configuration and disk image:
 
 ### Notes Regarding 10Mb Disks
 
-The [PC-DOS 2.00 Formatted Disk (Empty)](pcdos200-empty.xml) is *completely* empty.  It was partitioned with the PC-DOS
+The [PC-DOS 2.00 Formatted Disk (Empty)](pcdos200-empty-xt3.xml) is *completely* empty.  It was partitioned with the PC-DOS
 2.00 **FDISK** utility, allocating the entire disk to a single DOS partition, and then it was formatted with the PC-DOS
 2.00 **FORMAT** utility.  Neither the **FORMAT** "/S" option nor the **SYS** command were used, so no system files were
 transferred, leaving the disk completely empty and unbootable.

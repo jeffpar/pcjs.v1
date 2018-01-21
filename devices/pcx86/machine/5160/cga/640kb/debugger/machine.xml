@@ -13,7 +13,7 @@
 	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-arrows.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pcx86/panel/wide.xml"/>
-	<hdc ref="/disks/pcx86/fixed/10mb/pcdos200-empty.xml"/>
+	<hdc ref="/disks/pcx86/fixed/10mb/pcdos200-empty-xt3.xml"/>
 	<chipset id="chipset" model="5160" sw1="01001001" pos="left" padLeft="8px" padBottom="8px">
 		<control type="switches" label="SW1" binding="sw1" left="0px"/>
 		<control type="description" binding="swdesc" left="0px"/>

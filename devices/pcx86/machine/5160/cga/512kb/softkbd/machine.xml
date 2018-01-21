@@ -17,7 +17,7 @@
 		<control type="switches" label="SW1" binding="sw1" left="0px"/>
 		<control type="description" binding="swdesc" left="0px"/>
 	</chipset>
-	<hdc ref="/disks/pcx86/fixed/10mb/pcdos200-win101-cga.xml"/>
+	<hdc ref="/disks/pcx86/fixed/10mb/pcdos200-win101-cga-xt3.xml"/>
 	<serial id="com1" adapter="1" binding="print"/>
 	<serial id="com2" adapter="2"/>
 	<mouse serial="com2"/>
