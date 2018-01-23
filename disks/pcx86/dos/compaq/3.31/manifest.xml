@@ -8,7 +8,7 @@
 	<author>Microsoft/COMPAQ</author>
 	<releaseDate/>
 	<disk id="disk01" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-DISK1.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK1.json" md5="4f4dd586446048d44b831d4495c7e9f9" md5json="8d51ba40eea6eae0b3eefdda8d4a13b2">
-		<name>COMPAQ MS-DOS 3.31 (Disk 1: FASTART)</name>
+		<name>COMPAQ MS-DOS 3.31 (Disk 1)</name>
 		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM] (3.5-720k)" file="Disk1.img">WinWorld</link>
 		<file size="11" time="1988-10-14 12:00:00" attr="0x20">AUTOEXEC.BAT</file>
 		<file size="25332" time="1988-10-03 12:00:00" attr="0x20">COMMAND.COM</file>
@@ -20,7 +20,7 @@
 		<file size="30648" time="1988-10-03 12:00:00" attr="0x20">IBMDOS.COM</file>
 	</disk>
 	<disk id="disk02" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-DISK2.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json" md5="609fb88433723695cc45395ade571ad2" md5json="aed7f9a150d9ce2d12b90a834a74688f">
-		<name>COMPAQ MS-DOS 3.31 (Disk 2: STARTUP)</name>
+		<name>COMPAQ MS-DOS 3.31 (Disk 2)</name>
 		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM] (3.5-720k)" file="Disk2.img">WinWorld</link>
 		<file size="1709" time="1988-10-03 12:00:00" attr="0x20">ANSI.SYS</file>
 		<file size="1787" time="1988-10-03 12:00:00" attr="0x20">CLOCK.SYS</file>
@@ -45,7 +45,7 @@
 		<file size="11216" time="1988-10-03 12:00:00" attr="0x20">XCOPY.EXE</file>
 	</disk>
 	<disk id="disk03" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-DISK3.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK3.json" md5="e9de92ca679b7c341b151b5ecd3a0720" md5json="5f0feb96e46d78005f1ef6f461013491">
-		<name>COMPAQ MS-DOS 3.31 (Disk 3: OPERATING)</name>
+		<name>COMPAQ MS-DOS 3.31 (Disk 3)</name>
 		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM] (3.5-720k)" file="Disk3.img">WinWorld</link>
 		<file size="17089" time="1988-10-03 12:00:00" attr="0x20">4201.CPI</file>
 		<file size="459" time="1988-10-03 12:00:00" attr="0x20">5202.CPI</file>
@@ -89,7 +89,7 @@
 		<file size="11216" time="1988-10-03 12:00:00" attr="0x20">XCOPY.EXE</file>
 	</disk>
 	<disk id="disk04" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-DISK4.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK4.json" md5="18acab24603ac511d11fd3cbac9780ed" md5json="81ef2ab455bca4a4c50aea32e39be05d">
-		<name>COMPAQ MS-DOS 3.31 (Disk 4: USER)</name>
+		<name>COMPAQ MS-DOS 3.31 (Disk 4)</name>
 		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM] (3.5-720k)" file="Disk5.img">WinWorld</link>
 		<file size="4" time="1980-01-01 00:15:14" attr="0x20">ADAPT.CFG</file>
 		<file size="18514" time="1989-07-27 12:00:00" attr="0x20">ADAPT.COM</file>
@@ -160,7 +160,7 @@
 		<file size="193264" time="1988-01-29 12:00:00" attr="0x20">USER.EXE</file>
 	</disk>
 	<disk id="disk07" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-REVG-DISK1.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK1.json" md5="1c5fde12c505860ec57e69bfff32aa40" md5json="23a2aa42d76d1d72a2d9b7e35a771c8b">
-		<name>COMPAQ MS-DOS 3.31G (Disk 1: FASTART)</name>
+		<name>COMPAQ MS-DOS 3.31G (Disk 1)</name>
 		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM Rev G] (3.5-720k)" file="FASTART.IMG">WinWorld</link>
 		<file size="11" time="1990-05-08 12:00:00" attr="0x20">AUTOEXEC.BAT</file>
 		<file size="25398" time="1990-05-08 12:00:00" attr="0x20">COMMAND.COM</file>
@@ -171,7 +171,7 @@
 		<file size="30650" time="1990-05-08 12:00:00" attr="0x20">IBMDOS.COM</file>
 	</disk>
 	<disk id="disk08" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-REVG-DISK2.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK2.json" md5="4992becef9122ea920fd11c9a5bfa67d" md5json="31f85ff3d2d8678e90f0b99a14e0934c">
-		<name>COMPAQ MS-DOS 3.31G (Disk 2: STARTUP)</name>
+		<name>COMPAQ MS-DOS 3.31G (Disk 2)</name>
 		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM Rev G] (3.5-720k)" file="STARTUP.IMG">WinWorld</link>
 		<file size="2023" time="1990-05-08 12:00:00" attr="0x20">ANSI.SYS</file>
 		<file size="1789" time="1990-05-08 12:00:00" attr="0x20">CLOCK.SYS</file>
@@ -195,7 +195,7 @@
 		<file size="11776" time="1990-05-08 12:00:00" attr="0x20">XCOPY.EXE</file>
 	</disk>
 	<disk id="disk09" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-REVG-DISK3.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK3.json" md5="a6a96444c8a1f04ac5719c702826c6ea" md5json="18390bf710f7e08e92bcf1417032579a">
-		<name>COMPAQ MS-DOS 3.31G (Disk 3: OPERATING)</name>
+		<name>COMPAQ MS-DOS 3.31G (Disk 3)</name>
 		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM Rev G] (3.5-720k)" file="OPER.IMG">WinWorld</link>
 		<file size="17089" time="1990-05-08 12:00:00" attr="0x20">4201.CPI</file>
 		<file size="459" time="1990-05-08 12:00:00" attr="0x20">5202.CPI</file>

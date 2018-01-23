@@ -9,7 +9,7 @@ machines:
     config: /devices/pcx86/machine/compaq/deskpro386/ega/2048kb/debugger/machine.xml
     autoMount:
       A:
-        name: COMPAQ MS-DOS 3.31 (Disk 1: FASTART)
+        name: COMPAQ MS-DOS 3.31 (Disk 1)
       B:
         name: None
     autoStart: true
@@ -29,7 +29,7 @@ Released in late 1987 by COMPAQ Computer Corp, this version of MS-DOS displays t
 This was the first version of DOS to support 32-bit logical sector numbers and partitions larger than 32MB,
 a feature that was soon added to DOS 4.0 and OS/2 1.1.
 
-[Directory Listings](#directory-of-compaq-ms-dos-331-disk-1-fastart) of the distribution diskettes are provided below.
+[Directory Listings](#directory-of-compaq-ms-dos-331-disk-1) of the distribution diskettes are provided below.
 The first five disks come from [WinWorld](https://winworldpc.com/product/ms-dos/331)
 (see "Microsoft MS-DOS 3.31 [Compaq OEM] (3.5-720k)"), and of those five, the first three appear to be original,
 with all files dated October 1988.
@@ -74,13 +74,13 @@ a slightly different (older) boot message:
 making it clear that earlier COMPAQ MS-DOS 3.31 revisions existed.
 
 Later revisions of COMPAQ MS-DOS 3.31 were released as well.  We have archived 
-three "[Rev. G](#directory-of-compaq-ms-dos-331g-disk-1-fastart)" disks obtained from
+three "[Rev. G](#directory-of-compaq-ms-dos-331g-disk-1)" disks obtained from
 [WinWorld](https://winworldpc.com/product/ms-dos/331) (see "Microsoft MS-DOS 3.31 [Compaq OEM Rev G] (3.5-720k)").
 All the files on those disks are dated May 1990.
 
 {% include machine.html id="deskpro386" %}
 
-### Directory of COMPAQ MS-DOS 3.31 (Disk 1: FASTART)
+### Directory of COMPAQ MS-DOS 3.31 (Disk 1)
 
 	 Volume in drive A is FASTART    
 
@@ -100,7 +100,7 @@ All the files on those disks are dated May 1990.
 	        8 file(s)     337865 bytes
 	                      387072 bytes free
 
-### Directory of COMPAQ MS-DOS 3.31 (Disk 2: STARTUP)
+### Directory of COMPAQ MS-DOS 3.31 (Disk 2)
 
 	 Volume in drive A is STARTUP    
 
@@ -133,7 +133,7 @@ All the files on those disks are dated May 1990.
 	       21 file(s)     337505 bytes
 	                      382976 bytes free
 
-### Directory of COMPAQ MS-DOS 3.31 (Disk 3: OPERATING)
+### Directory of COMPAQ MS-DOS 3.31 (Disk 3)
 
 	 Volume in drive A is OPERATING  
 
@@ -185,7 +185,7 @@ All the files on those disks are dated May 1990.
 	       40 file(s)     478242 bytes
 	                      231424 bytes free
 
-### Directory of COMPAQ MS-DOS 3.31 (Disk 4: USER)
+### Directory of COMPAQ MS-DOS 3.31 (Disk 4)
 
 	 Volume in drive A is USER 072789
 	 Volume Serial Number is 10D5-0C56
@@ -294,7 +294,7 @@ All the files on those disks are dated May 1990.
 	       17 file(s)     325724 bytes
 	                       16384 bytes free
 
-### Directory of COMPAQ MS-DOS 3.31G (Disk 1: FASTART)
+### Directory of COMPAQ MS-DOS 3.31G (Disk 1)
 
      Volume in drive A is FASTART    
      Directory of A:\
@@ -309,7 +309,7 @@ All the files on those disks are dated May 1990.
             7 file(s)     317483 bytes
                           408576 bytes free
 
-### Directory of COMPAQ MS-DOS 3.31G (Disk 2: STARTUP)
+### Directory of COMPAQ MS-DOS 3.31G (Disk 2)
 
      Volume in drive A is STARTUP    
      Directory of A:\
@@ -337,7 +337,7 @@ All the files on those disks are dated May 1990.
            20 file(s)     299738 bytes
                           421888 bytes free
 
-### Directory of COMPAQ MS-DOS 3.31G (Disk 3: OPERATING)
+### Directory of COMPAQ MS-DOS 3.31G (Disk 3)
 
      Volume in drive A is OPERATING  
      Directory of A:\
