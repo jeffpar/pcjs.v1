@@ -26,18 +26,16 @@ Released in late 1987 by COMPAQ Computer Corp, this version of MS-DOS displays t
 	(C) Copyright Compaq Computer Corp. 1982, 1988
 	(C) Copyright Microsoft Corp. 1981, 1987
 
-This version pioneered support for 32-bit logical sector numbers and thus partitions larger than 32MB. The same support
-appeared a few months later in DOS 4.0 and OS/2 1.1.
+This was the first version of DOS to support 32-bit logical sector numbers and partitions larger than 32MB,
+a feature that was soon added to DOS 4.0 and OS/2 1.1.
 
-[Directory Listings](#directory-of-compaq-ms-dos-331-disk-1) of the distribution diskettes are provided below.
-
+[Directory Listings](#directory-of-compaq-ms-dos-331-disk-1-fastart) of the distribution diskettes are provided below.
 The first five disks come from [WinWorld](https://winworldpc.com/product/ms-dos/331)
 (see "Microsoft MS-DOS 3.31 [Compaq OEM] (3.5-720k)"), and of those five, the first three appear to be original,
 with all files dated October 1988.
 
 Disk 4, the COMPAQ "USER PROGRAMS" diskette, was part of a COMPAQ MS-DOS 4.01 release, with hidden MS-DOS files dated
 April 1989 and other distribution files dated July 1989, along with a few random user-generated files with later dates.
-
 As the README.CPQ file on that diskette explains:
 
     The software provided on this diskette supercedes earlier versions  
@@ -56,15 +54,16 @@ As the README.CPQ file on that diskette explains:
     Supplemental Software Guide, or by booting this diskette, typing    
     HELP at the A> prompt, and then pressing the ENTER key.             
 
-So, despite the evidence that this particular disk was not part of a COMPAQ MS-DOS 3.31 release, we're keeping
-it here until an earlier version of the "USER PROGRAMS" diskette is located, since COMPAQ does state that this disk
-"supersedes earlier versions", and since the `FASTART` program on Disk 1 expects a "USER PROGRAMS" disk.
+So despite the evidence that this particular disk was part of a later COMPAQ MS-DOS release, it will remain part of
+this distribution for now, since COMPAQ states that this disk "supersedes earlier versions", and since the `FASTART`
+program on Disk 1 expects a "USER PROGRAMS" disk.  If/when an earlier revision is located, it will be added here.
 
 Disk 5, the COMPAQ "USER DIAGNOSTICS, SETUP AND INSPECT" diskette, which contains SETUP v6.08, TEST v6.12, and
 INSPECT v1.02, has files dated June 1989.
 
-A separate 360Kb disk image ("SETUP 5.05") from the PCjs Archives has been included here as well, because it contains
-hidden MS-DOS 3.31 files dated September 1987 that display a slightly different boot message:
+A separate 360Kb disk image, [SETUP 5.05](#directory-of-compaq-ms-dos-331-setup-505), from the PCjs Archives
+has been included here as well, because it contains hidden MS-DOS 3.31 files dated September 1987 that display
+a slightly different (older) boot message:
 
     The COMPAQ Personal Computer MS-DOS 
     Version 3.31
@@ -72,7 +71,12 @@ hidden MS-DOS 3.31 files dated September 1987 that display a slightly different 
     (C) Copyright Compaq Computer Corp. 1982, 1987                             
     (C) Copyright Microsoft Corp. 1981, 1987   
 
-making it clear that COMPAQ MS-DOS 3.31 existed more than a year before the above distribution disks were created.
+making it clear that earlier COMPAQ MS-DOS 3.31 revisions existed.
+
+Later revisions of COMPAQ MS-DOS 3.31 were released as well.  We have archived 
+three "[Rev. G](#directory-of-compaq-ms-dos-331g-disk-1-fastart)" disks obtained from
+[WinWorld](https://winworldpc.com/product/ms-dos/331) (see "Microsoft MS-DOS 3.31 [Compaq OEM Rev G] (3.5-720k)").
+All the files on those disks are dated May 1990.
 
 {% include machine.html id="deskpro386" %}
 
@@ -267,14 +271,14 @@ making it clear that COMPAQ MS-DOS 3.31 existed more than a year before the abov
 
 	Directory of A:\
 
-	IBMBIO   COM     23591 09-16-87  12:00p     HIDDEN
-	IBMDOS   COM     30632 09-16-87  12:00p     HIDDEN
-	COMMAND  COM     25332 09-16-87  12:00p     HIDDEN
-	AUTOEXEC BAT        33 01-29-88  12:00p     HIDDEN
-	CONFIG   SYS        12 01-29-88  12:00p     HIDDEN
-	DISKCOPY COM      6264 09-16-87  12:00p     HIDDEN
+	IBMBIO   COM     23591 09-16-87  12:00p
+	IBMDOS   COM     30632 09-16-87  12:00p
+	COMMAND  COM     25332 09-16-87  12:00p
+	AUTOEXEC BAT        33 01-29-88  12:00p
+	CONFIG   SYS        12 01-29-88  12:00p
+	DISKCOPY COM      6264 09-16-87  12:00p
 	ROMREV   COM      1248 01-29-88  12:00p
-	USER     EXE    193264 01-29-88  12:00p     HIDDEN
+	USER     EXE    193264 01-29-88  12:00p
 	TEST     COM      1984 01-29-88  12:00p
 	SETUP    EXE     39968 01-29-88  12:00p
 	README   CPQ      1464 01-29-88  12:00p
@@ -289,5 +293,99 @@ making it clear that COMPAQ MS-DOS 3.31 existed more than a year before the abov
 	Total files listed:
 	       17 file(s)     325724 bytes
 	                       16384 bytes free
+
+### Directory of COMPAQ MS-DOS 3.31G (Disk 1: FASTART)
+
+     Volume in drive A is FASTART    
+     Directory of A:\
+    
+    IBMBIO   COM     23740 05-08-90  12:00p
+    IBMDOS   COM     30650 05-08-90  12:00p
+    COMMAND  COM     25398 05-08-90  12:00p
+    AUTOEXEC BAT        11 05-08-90  12:00p
+    CONFIG   SYS        45 05-08-90  12:00p
+    FASTART  EXE    227233 05-08-90  12:00p
+    EXTDISK  SYS     10406 05-08-90  12:00p
+            7 file(s)     317483 bytes
+                          408576 bytes free
+
+### Directory of COMPAQ MS-DOS 3.31G (Disk 2: STARTUP)
+
+     Volume in drive A is STARTUP    
+     Directory of A:\
+    
+    IBMBIO   COM     23740 05-08-90  12:00p
+    IBMDOS   COM     30650 05-08-90  12:00p
+    COMMAND  COM     25398 05-08-90  12:00p
+    DISKCOPY COM      6850 05-08-90  12:00p
+    FDISK    COM     51136 05-08-90  12:00p
+    FORMAT   COM     14733 05-08-90  12:00p
+    KEYB     COM     11076 05-08-90  12:00p
+    MODE     COM     16618 05-08-90  12:00p
+    SYS      COM      6227 05-08-90  12:00p
+    FASTOPEN EXE      3888 05-08-90  12:00p
+    XCOPY    EXE     11776 05-08-90  12:00p
+    ANSI     SYS      2023 05-08-90  12:00p
+    CLOCK    SYS      1789 05-08-90  12:00p
+    COUNTRY  SYS     11254 05-08-90  12:00p
+    DISPLAY  SYS     11971 05-08-90  12:00p
+    DRIVER   SYS      1520 05-08-90  12:00p
+    ENHDISK  SYS     10406 05-08-90  12:00p
+    KEYBOARD SYS     41164 05-08-90  12:00p
+    PRINTER  SYS     13751 05-08-90  12:00p
+    VDISK    SYS      3768 05-08-90  12:00p
+           20 file(s)     299738 bytes
+                          421888 bytes free
+
+### Directory of COMPAQ MS-DOS 3.31G (Disk 3: OPERATING)
+
+     Volume in drive A is OPERATING  
+     Directory of A:\
+    
+    APPEND   EXE      5810 05-08-90  12:00p
+    ASSIGN   COM      1530 05-08-90  12:00p
+    ATTRIB   EXE     10656 05-08-90  12:00p
+    BACKUP   COM     30738 05-08-90  12:00p
+    BASIC    COM      3534 05-08-90  12:00p
+    BASICA   COM      3534 05-08-90  12:00p
+    BASICA   EXE     79434 05-08-90  12:00p
+    CHKDSK   COM     11941 05-08-90  12:00p
+    COMMAND  COM     25398 05-08-90  12:00p
+    COMP     COM      4183 05-08-90  12:00p
+    DEBUG    COM     16002 05-08-90  12:00p
+    DISKCOMP COM      5848 05-08-90  12:00p
+    DISKCOPY COM      6850 05-08-90  12:00p
+    EDLIN    COM      7495 05-08-90  12:00p
+    EXE2BIN  EXE      3050 05-08-90  12:00p
+    FIND     EXE      6403 05-08-90  12:00p
+    FORMAT   COM     14733 05-08-90  12:00p
+    GRAFTABL COM      6274 05-08-90  12:00p
+    GRAPHICS COM      7578 05-08-90  12:00p
+    JOIN     EXE      9612 05-08-90  12:00p
+    LABEL    COM      2363 05-08-90  12:00p
+    LINK     EXE     43988 05-08-90  12:00p
+    MORE     COM       314 05-08-90  12:00p
+    NLSFUNC  EXE      3029 05-08-90  12:00p
+    PRINT    COM      9309 05-08-90  12:00p
+    RECOVER  COM      5387 05-08-90  12:00p
+    REPLACE  EXE     14304 05-08-90  12:00p
+    RESTORE  COM     35868 05-08-90  12:00p
+    SELECT   COM      4190 05-08-90  12:00p
+    SETCLOCK COM      3717 05-08-90  12:00p
+    SHARE    EXE      8666 05-08-90  12:00p
+    SORT     EXE      1946 05-08-90  12:00p
+    SUBST    EXE     10552 05-08-90  12:00p
+    TREE     COM      3540 05-08-90  12:00p
+    XCOPY    EXE     11776 05-08-90  12:00p
+    4201     CPI     17089 05-08-90  12:00p
+    5202     CPI       459 05-08-90  12:00p
+    EGA      CPI     49065 05-08-90  12:00p
+    INTEREST BAS       384 05-08-90  12:00p
+    WORDS              660 05-08-90  12:00p
+    EGA_THIN CPI     49030 05-08-90  12:00p
+    LCD_THIN CPI     10618 05-08-90  12:00p
+    LCD      CPI     10752 05-08-90  12:00p
+           43 file(s)     557609 bytes
+                          150528 bytes free
 
 [Return to [COMPAQ MS-DOS Disks](/disks/pcx86/dos/compaq/)]
