@@ -14,19 +14,592 @@
 		<name>The 8086 Book</name>
 		<cover href="archive/The_8086_Book.jpg"/>
 	</document>
-	<disk id="disk01" size="1228800" chs="80:2:15" img="DOS_Internals/archive/DOS-INTERN.img" href="/pubs/pc/programming/DOS_Internals/DOS-INTERN.json" md5="bc8cdc0887473c7cd081107408c12579" md5json="3cf1390937ee6287d46076fac8655bc5">
+	<disk id="disk01" size="1228800" chs="80:2:15" img="DOS_Internals/archive/DOS-INTERN.img" href="/pubs/pc/programming/DOS_Internals/DOS-INTERN.json" md5="bc8cdc0887473c7cd081107408c12579" md5json="0757bc9812906eeb5df8c94665a517bd">
 		<name>DOS Internals</name>
+		<file size="128" time="1993-11-10 16:18:16" attr="0x10">DEVTOOLS</file>
+		<file size="160" time="1993-11-10 16:18:16" attr="0x10" dir="DEVTOOLS/">DRIVER</file>
+		<file size="192" time="1993-11-10 16:18:18" attr="0x10" dir="DEVTOOLS/DRIVER/">CRTDRVR</file>
+		<file size="18540" time="1992-05-28 07:06:54" attr="0x20" dir="DEVTOOLS/DRIVER/CRTDRVR/">CRTDRVR.ASM</file>
+		<file size="2575" time="1993-04-23 09:03:32" attr="0x20" dir="DEVTOOLS/DRIVER/CRTDRVR/">CRTDRVR.LIB</file>
+		<file size="1475" time="1993-04-23 09:03:30" attr="0x20" dir="DEVTOOLS/DRIVER/CRTDRVR/">CRTDRVR.OBJ</file>
+		<file size="584" time="1993-08-29 05:28:36" attr="0x20" dir="DEVTOOLS/DRIVER/CRTDRVR/">MAKEFILE</file>
+		<file size="160" time="1993-11-10 16:18:22" attr="0x10" dir="DEVTOOLS/DRIVER/">DRIVER</file>
+		<file size="5423" time="1992-05-28 06:52:00" attr="0x20" dir="DEVTOOLS/DRIVER/DRIVER/">DRIVER.ASM</file>
+		<file size="1491" time="1993-04-23 09:04:22" attr="0x20" dir="DEVTOOLS/DRIVER/DRIVER/">DRIVER.OBJ</file>
+		<file size="544" time="1993-08-29 05:29:00" attr="0x20" dir="DEVTOOLS/DRIVER/DRIVER/">MAKEFILE</file>
+		<file size="128" time="1993-11-10 16:18:26" attr="0x10" dir="DEVTOOLS/DRIVER/">SAMPLES</file>
+		<file size="256" time="1993-11-10 16:18:26" attr="0x10" dir="DEVTOOLS/DRIVER/SAMPLES/">INT15MEM</file>
+		<file size="766" time="1992-05-28 06:03:56" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/INT15MEM/">HANDLER.C</file>
+		<file size="387" time="1993-04-23 09:05:00" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/INT15MEM/">HANDLER.OBJ</file>
+		<file size="9861" time="1993-04-23 09:05:06" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/INT15MEM/">INT15MEM.EXE</file>
+		<file size="3867" time="1993-01-09 21:24:32" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/INT15MEM/">MAIN.C</file>
+		<file size="1399" time="1993-04-23 09:05:04" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/INT15MEM/">MAIN.OBJ</file>
+		<file size="324" time="1993-04-23 07:33:08" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/INT15MEM/">MAKEFILE</file>
+		<file size="160" time="1993-11-10 16:18:32" attr="0x10" dir="DEVTOOLS/DRIVER/SAMPLES/">SEQFILE</file>
+		<file size="416" time="1993-11-10 16:18:34" attr="0x10" dir="DEVTOOLS/DRIVER/SAMPLES/SEQFILE/">INT15MEM</file>
+		<file size="5423" time="1992-05-28 06:52:00" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/SEQFILE/INT15MEM/">DRIVER.ASM</file>
+		<file size="1491" time="1993-04-23 09:05:34" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/SEQFILE/INT15MEM/">DRIVER.OBJ</file>
+		<file size="766" time="1992-05-28 06:03:56" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/SEQFILE/INT15MEM/">HANDLER.C</file>
+		<file size="387" time="1993-04-23 09:05:36" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/SEQFILE/INT15MEM/">HANDLER.OBJ</file>
+		<file size="11269" time="1993-04-23 09:05:44" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/SEQFILE/INT15MEM/">INT15MEM.EXE</file>
+		<file size="4357" time="1993-01-10 02:11:30" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/SEQFILE/INT15MEM/">MAIN.C</file>
+		<file size="1648" time="1993-04-23 09:05:38" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/SEQFILE/INT15MEM/">MAIN.OBJ</file>
+		<file size="721" time="1993-04-23 08:58:20" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/SEQFILE/INT15MEM/">MAKEFILE</file>
+		<file size="1881" time="1993-04-23 09:05:40" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/SEQFILE/INT15MEM/">SEQFILE.OBJ</file>
+		<file size="4628" time="1993-01-10 02:16:34" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/SEQFILE/INT15MEM/">TRANSFER.C</file>
+		<file size="841" time="1993-04-23 09:05:42" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/SEQFILE/INT15MEM/">TRANSFER.OBJ</file>
+		<file size="10677" time="1993-01-10 02:05:12" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/SEQFILE/">SEQFILE.C</file>
+		<file size="1878" time="1993-01-10 02:06:54" attr="0x20" dir="DEVTOOLS/DRIVER/SAMPLES/SEQFILE/">SEQFILE.OBJ</file>
+		<file size="160" time="1993-11-10 16:18:46" attr="0x10" dir="DEVTOOLS/">KEEPC</file>
+		<file size="544" time="1993-11-10 16:18:46" attr="0x10" dir="DEVTOOLS/KEEPC/">CRTKEEPC</file>
+		<file size="4659" time="1993-04-23 09:06:18" attr="0x20" dir="DEVTOOLS/KEEPC/CRTKEEPC/">CRTKEEPC.LIB</file>
+		<file size="3583" time="1992-05-28 02:42:02" attr="0x20" dir="DEVTOOLS/KEEPC/CRTKEEPC/">KEEPINIT.ASM</file>
+		<file size="2124" time="1992-01-05 23:24:56" attr="0x20" dir="DEVTOOLS/KEEPC/CRTKEEPC/">KEEPINIT.INC</file>
+		<file size="695" time="1993-04-23 09:06:14" attr="0x20" dir="DEVTOOLS/KEEPC/CRTKEEPC/">KEEPINIT.OBJ</file>
+		<file size="533" time="1992-01-05 23:25:22" attr="0x20" dir="DEVTOOLS/KEEPC/CRTKEEPC/">KEEPSEGS.ASM</file>
+		<file size="233" time="1993-04-23 09:06:12" attr="0x20" dir="DEVTOOLS/KEEPC/CRTKEEPC/">KEEPSEGS.OBJ</file>
+		<file size="1680" time="1993-08-29 05:30:26" attr="0x20" dir="DEVTOOLS/KEEPC/CRTKEEPC/">MAKEFILE</file>
+		<file size="2506" time="1992-05-28 02:44:02" attr="0x20" dir="DEVTOOLS/KEEPC/CRTKEEPC/">PROGNAME.ASM</file>
+		<file size="437" time="1993-04-23 09:06:14" attr="0x20" dir="DEVTOOLS/KEEPC/CRTKEEPC/">PROGNAME.OBJ</file>
+		<file size="2811" time="1992-05-28 03:14:32" attr="0x20" dir="DEVTOOLS/KEEPC/CRTKEEPC/">SEGDEBUG.ASM</file>
+		<file size="627" time="1993-04-23 09:06:14" attr="0x20" dir="DEVTOOLS/KEEPC/CRTKEEPC/">SEGDEBUG.OBJ</file>
+		<file size="5804" time="1992-05-28 03:14:54" attr="0x20" dir="DEVTOOLS/KEEPC/CRTKEEPC/">SWAPREFS.ASM</file>
+		<file size="710" time="1993-04-23 09:06:14" attr="0x20" dir="DEVTOOLS/KEEPC/CRTKEEPC/">SWAPREFS.OBJ</file>
+		<file size="4606" time="1992-05-28 02:43:10" attr="0x20" dir="DEVTOOLS/KEEPC/CRTKEEPC/">SWAPSEGS.ASM</file>
+		<file size="597" time="1993-04-23 09:06:14" attr="0x20" dir="DEVTOOLS/KEEPC/CRTKEEPC/">SWAPSEGS.OBJ</file>
+		<file size="512" time="1993-11-10 16:19:02" attr="0x10" dir="DEVTOOLS/KEEPC/">KEEPCLIB</file>
+		<file size="2406" time="1992-05-28 02:49:40" attr="0x20" dir="DEVTOOLS/KEEPC/KEEPCLIB/">CHAININT.ASM</file>
+		<file size="344" time="1993-04-23 09:06:56" attr="0x20" dir="DEVTOOLS/KEEPC/KEEPCLIB/">CHAININT.OBJ</file>
+		<file size="1590" time="1992-10-12 15:37:34" attr="0x20" dir="DEVTOOLS/KEEPC/KEEPCLIB/">CLOSEALL.C</file>
+		<file size="332" time="1993-04-23 09:06:58" attr="0x20" dir="DEVTOOLS/KEEPC/KEEPCLIB/">CLOSEALL.OBJ</file>
+		<file size="1194" time="1992-05-28 03:58:40" attr="0x20" dir="DEVTOOLS/KEEPC/KEEPCLIB/">FREE_ENV.C</file>
+		<file size="312" time="1993-04-23 09:07:00" attr="0x20" dir="DEVTOOLS/KEEPC/KEEPCLIB/">FREE_ENV.OBJ</file>
+		<file size="4143" time="1993-04-23 09:07:04" attr="0x20" dir="DEVTOOLS/KEEPC/KEEPCLIB/">KEEPCLIB.LIB</file>
+		<file size="9584" time="1992-12-18 06:56:42" attr="0x20" dir="DEVTOOLS/KEEPC/KEEPCLIB/">KEEPEXIT.ASM</file>
+		<file size="779" time="1993-04-23 09:07:00" attr="0x20" dir="DEVTOOLS/KEEPC/KEEPCLIB/">KEEPEXIT.OBJ</file>
+		<file size="1077" time="1993-08-29 05:31:24" attr="0x20" dir="DEVTOOLS/KEEPC/KEEPCLIB/">MAKEFILE</file>
+		<file size="1928" time="1992-05-28 03:52:30" attr="0x20" dir="DEVTOOLS/KEEPC/KEEPCLIB/">ONEXIT.ASM</file>
+		<file size="269" time="1993-04-23 09:07:00" attr="0x20" dir="DEVTOOLS/KEEPC/KEEPCLIB/">ONEXIT.OBJ</file>
+		<file size="1340" time="1992-05-28 02:50:18" attr="0x20" dir="DEVTOOLS/KEEPC/KEEPCLIB/">SHIFT.C</file>
+		<file size="402" time="1993-04-23 09:07:02" attr="0x20" dir="DEVTOOLS/KEEPC/KEEPCLIB/">SHIFT.OBJ</file>
+		<file size="128" time="1993-11-10 16:19:16" attr="0x10" dir="DEVTOOLS/KEEPC/">SAMPLES</file>
+		<file size="288" time="1993-11-10 16:19:16" attr="0x10" dir="DEVTOOLS/KEEPC/SAMPLES/">FP</file>
+		<file size="1535" time="1993-01-09 20:25:28" attr="0x20" dir="DEVTOOLS/KEEPC/SAMPLES/FP/">FP.C</file>
+		<file size="22088" time="1993-04-23 09:07:28" attr="0x20" dir="DEVTOOLS/KEEPC/SAMPLES/FP/">FP.EXE</file>
+		<file size="498" time="1993-04-23 09:07:24" attr="0x20" dir="DEVTOOLS/KEEPC/SAMPLES/FP/">FP.OBJ</file>
+		<file size="1036" time="1992-05-28 06:07:56" attr="0x20" dir="DEVTOOLS/KEEPC/SAMPLES/FP/">FPFIXUPS.ASM</file>
+		<file size="1057" time="1992-05-28 06:01:32" attr="0x20" dir="DEVTOOLS/KEEPC/SAMPLES/FP/">KEEPSEGS.ASM</file>
+		<file size="281" time="1993-04-23 09:07:26" attr="0x20" dir="DEVTOOLS/KEEPC/SAMPLES/FP/">KEEPSEGS.OBJ</file>
+		<file size="267" time="1993-04-22 19:00:16" attr="0x20" dir="DEVTOOLS/KEEPC/SAMPLES/FP/">MAKEFILE</file>
+		<file size="256" time="1993-11-10 16:19:24" attr="0x10" dir="DEVTOOLS/KEEPC/SAMPLES/">INT15MEM</file>
+		<file size="791" time="1993-01-09 20:28:16" attr="0x20" dir="DEVTOOLS/KEEPC/SAMPLES/INT15MEM/">HANDLER.C</file>
+		<file size="387" time="1993-04-23 09:07:48" attr="0x20" dir="DEVTOOLS/KEEPC/SAMPLES/INT15MEM/">HANDLER.OBJ</file>
+		<file size="8393" time="1993-04-23 09:07:52" attr="0x20" dir="DEVTOOLS/KEEPC/SAMPLES/INT15MEM/">INT15MEM.EXE</file>
+		<file size="3867" time="1993-01-09 21:24:32" attr="0x20" dir="DEVTOOLS/KEEPC/SAMPLES/INT15MEM/">MAIN.C</file>
+		<file size="1399" time="1993-04-23 09:07:50" attr="0x20" dir="DEVTOOLS/KEEPC/SAMPLES/INT15MEM/">MAIN.OBJ</file>
+		<file size="340" time="1993-04-22 19:00:54" attr="0x20" dir="DEVTOOLS/KEEPC/SAMPLES/INT15MEM/">MAKEFILE</file>
+		<file size="128" time="1993-11-10 16:19:32" attr="0x10">DISKMAN</file>
+		<file size="832" time="1993-11-10 16:19:32" attr="0x10" dir="DISKMAN/">DISKDUP</file>
+		<file size="14761" time="1993-11-10 03:58:54" attr="0x20" dir="DISKMAN/DISKDUP/">DISKDUP.EXE</file>
+		<file size="111" time="1993-11-10 03:58:50" attr="0x20" dir="DISKMAN/DISKDUP/">DISKDUP.LNK</file>
+		<file size="8438" time="1993-11-10 03:58:46" attr="0x20" dir="DISKMAN/DISKDUP/">DISKID.C</file>
+		<file size="1258" time="1993-11-10 03:58:50" attr="0x20" dir="DISKMAN/DISKDUP/">DISKID.OBJ</file>
+		<file size="11662" time="1992-07-26 03:08:10" attr="0x20" dir="DISKMAN/DISKDUP/">DISKIO.C</file>
+		<file size="2143" time="1993-04-23 09:10:04" attr="0x20" dir="DISKMAN/DISKDUP/">DISKIO.OBJ</file>
+		<file size="2930" time="1992-08-11 15:30:14" attr="0x20" dir="DISKMAN/DISKDUP/">ERRORMSG.C</file>
+		<file size="662" time="1993-04-23 09:10:06" attr="0x20" dir="DISKMAN/DISKDUP/">ERRORMSG.OBJ</file>
+		<file size="2240" time="1992-07-25 10:07:56" attr="0x20" dir="DISKMAN/DISKDUP/">GIOCTL.C</file>
+		<file size="663" time="1993-04-23 09:10:08" attr="0x20" dir="DISKMAN/DISKDUP/">GIOCTL.OBJ</file>
+		<file size="9298" time="1992-07-26 03:05:54" attr="0x20" dir="DISKMAN/DISKDUP/">MAIN.C</file>
+		<file size="2491" time="1993-04-23 09:10:12" attr="0x20" dir="DISKMAN/DISKDUP/">MAIN.OBJ</file>
+		<file size="1043" time="1993-04-23 09:00:10" attr="0x20" dir="DISKMAN/DISKDUP/">MAKEFILE</file>
+		<file size="2128" time="1993-04-20 12:19:00" attr="0x20" dir="DISKMAN/DISKDUP/">MEM.C</file>
+		<file size="1082" time="1993-04-23 09:10:14" attr="0x20" dir="DISKMAN/DISKDUP/">MEM.OBJ</file>
+		<file size="1756" time="1993-04-23 09:10:18" attr="0x20" dir="DISKMAN/DISKDUP/">SEQFILE.OBJ</file>
+		<file size="1010" time="1993-04-23 09:10:20" attr="0x20" dir="DISKMAN/DISKDUP/">SMARTDRV.OBJ</file>
+		<file size="4505" time="1993-11-04 03:16:56" attr="0x20" dir="DISKMAN/DISKDUP/">STORAGE.C</file>
+		<file size="623" time="1993-04-20 12:10:50" attr="0x20" dir="DISKMAN/DISKDUP/">STORAGE.H</file>
+		<file size="1228" time="1993-11-04 03:18:22" attr="0x20" dir="DISKMAN/DISKDUP/">STORAGE.OBJ</file>
+		<file size="1753" time="1993-04-23 09:10:26" attr="0x20" dir="DISKMAN/DISKDUP/">TRANSFER.OBJ</file>
+		<file size="4652" time="1993-11-10 03:32:14" attr="0x20" dir="DISKMAN/DISKDUP/">XMSFILE.C</file>
+		<file size="1068" time="1993-11-10 03:33:32" attr="0x20" dir="DISKMAN/DISKDUP/">XMSFILE.OBJ</file>
+		<file size="2516" time="1993-01-11 02:40:34" attr="0x20" dir="DISKMAN/DISKDUP/">XMSFUNC.H</file>
+		<file size="480" time="1993-11-10 16:20:00" attr="0x10" dir="DISKMAN/">DRVINFO</file>
+		<file size="9119" time="1993-04-20 10:45:12" attr="0x20" dir="DISKMAN/DRVINFO/">BIOSDRV.C</file>
+		<file size="1043" time="1993-11-10 03:11:34" attr="0x20" dir="DISKMAN/DRVINFO/">BIOSDRV.OBJ</file>
+		<file size="7625" time="1993-11-10 03:10:56" attr="0x20" dir="DISKMAN/DRVINFO/">DOSLEVEL.C</file>
+		<file size="743" time="1993-11-10 03:11:36" attr="0x20" dir="DISKMAN/DRVINFO/">DOSLEVEL.OBJ</file>
+		<file size="5615" time="1993-11-08 12:41:10" attr="0x20" dir="DISKMAN/DRVINFO/">DRVINFO.C</file>
+		<file size="8789" time="1993-11-10 03:11:44" attr="0x20" dir="DISKMAN/DRVINFO/">DRVINFO.EXE</file>
+		<file size="1092" time="1993-11-10 03:11:38" attr="0x20" dir="DISKMAN/DRVINFO/">DRVINFO.OBJ</file>
+		<file size="3276" time="1992-07-20 04:37:38" attr="0x20" dir="DISKMAN/DRVINFO/">DRVMAP.C</file>
+		<file size="679" time="1993-11-10 03:11:42" attr="0x20" dir="DISKMAN/DRVINFO/">DRVMAP.OBJ</file>
+		<file size="4564" time="1992-08-03 05:32:38" attr="0x20" dir="DISKMAN/DRVINFO/">MAIN.C</file>
+		<file size="1294" time="1993-11-10 03:11:40" attr="0x20" dir="DISKMAN/DRVINFO/">MAIN.OBJ</file>
+		<file size="2079" time="1993-11-10 03:12:28" attr="0x20" dir="DISKMAN/DRVINFO/">MAKEFILE</file>
+		<file size="14" time="1993-11-10 03:11:30" attr="0x20" dir="DISKMAN/DRVINFO/">SYMBOLS.LST</file>
+		<file size="1152" time="1993-11-10 16:20:14" attr="0x10">INCLUDE</file>
+		<file size="1211" time="1992-12-08 14:32:38" attr="0x20" dir="INCLUDE/">ARENA.H</file>
+		<file size="903" time="1993-01-28 06:38:44" attr="0x20" dir="INCLUDE/">ARENA.INC</file>
+		<file size="527" time="1992-03-18 07:53:26" attr="0x20" dir="INCLUDE/">ASCII.INC</file>
+		<file size="726" time="1992-03-24 07:26:46" attr="0x20" dir="INCLUDE/">BPB.H</file>
+		<file size="1398" time="1992-08-31 13:53:08" attr="0x20" dir="INCLUDE/">BUFFERS.H</file>
+		<file size="853" time="1992-08-13 03:59:26" attr="0x20" dir="INCLUDE/">CDS.H</file>
+		<file size="1161" time="1992-03-24 07:27:10" attr="0x20" dir="INCLUDE/">CPU.H</file>
+		<file size="1586" time="1992-03-18 07:54:46" attr="0x20" dir="INCLUDE/">CPU.INC</file>
+		<file size="728" time="1992-03-18 07:54:56" attr="0x20" dir="INCLUDE/">CSEGS.INC</file>
+		<file size="2968" time="1992-08-28 12:03:56" attr="0x20" dir="INCLUDE/">DOSERROR.H</file>
+		<file size="904" time="1992-03-24 07:28:16" attr="0x20" dir="INCLUDE/">DPB.H</file>
+		<file size="4890" time="1992-05-27 08:15:06" attr="0x20" dir="INCLUDE/">DRIVER.H</file>
+		<file size="2876" time="1992-05-27 08:15:34" attr="0x20" dir="INCLUDE/">DRIVER.INC</file>
+		<file size="1983" time="1992-08-13 04:04:58" attr="0x20" dir="INCLUDE/">DRIVPARM.H</file>
+		<file size="1030" time="1992-12-08 08:06:56" attr="0x20" dir="INCLUDE/">EXEC.H</file>
+		<file size="811" time="1993-01-28 06:43:50" attr="0x20" dir="INCLUDE/">EXEC.INC</file>
+		<file size="824" time="1992-03-18 08:01:12" attr="0x20" dir="INCLUDE/">EXEHDR.INC</file>
+		<file size="935" time="1992-12-07 19:47:10" attr="0x20" dir="INCLUDE/">FCB.H</file>
+		<file size="674" time="1992-03-24 07:29:42" attr="0x20" dir="INCLUDE/">INTPACK.H</file>
+		<file size="659" time="1992-03-18 08:02:38" attr="0x20" dir="INCLUDE/">INTPACK.INC</file>
+		<file size="958" time="1992-07-19 05:47:48" attr="0x20" dir="INCLUDE/">IOSYS.H</file>
+		<file size="1364" time="1992-05-28 02:51:06" attr="0x20" dir="INCLUDE/">KEEPC.H</file>
+		<file size="318" time="1992-03-18 08:03:26" attr="0x20" dir="INCLUDE/">KEEPC.MAK</file>
+		<file size="2548" time="1992-05-28 03:03:42" attr="0x20" dir="INCLUDE/">KEEPSEGS.INC</file>
+		<file size="1171" time="1992-03-24 07:30:10" attr="0x20" dir="INCLUDE/">PSP.H</file>
+		<file size="919" time="1991-12-26 04:38:54" attr="0x20" dir="INCLUDE/">PSP.INC</file>
+		<file size="1157" time="1992-03-24 07:31:08" attr="0x20" dir="INCLUDE/">SFT.H</file>
+		<file size="1017" time="1992-03-18 08:12:40" attr="0x20" dir="INCLUDE/">SFT.INC</file>
+		<file size="1664" time="1992-05-26 03:31:52" attr="0x20" dir="INCLUDE/">SMARTDRV.H</file>
+		<file size="2302" time="1993-01-10 01:53:24" attr="0x20" dir="INCLUDE/">STANDARD.H</file>
+		<file size="444" time="1992-03-18 07:51:58" attr="0x20" dir="INCLUDE/">STANDARD.INC</file>
+		<file size="1962" time="1993-04-23 07:43:26" attr="0x20" dir="INCLUDE/">STANDARD.MAK</file>
+		<file size="1491" time="1992-08-31 13:53:30" attr="0x20" dir="INCLUDE/">SYSVARS.H</file>
+		<file size="881" time="1993-04-23 07:44:24" attr="0x20" dir="INCLUDE/">SYSVARS.INC</file>
+		<file size="704" time="1993-11-10 16:20:52" attr="0x10">LIB</file>
+		<file size="640" time="1993-01-04 12:05:44" attr="0x20" dir="LIB/">BREAK.C</file>
+		<file size="322" time="1993-04-20 10:45:22" attr="0x20" dir="LIB/">BREAK.OBJ</file>
+		<file size="2575" time="1993-04-23 09:03:32" attr="0x20" dir="LIB/">CRTDRVR.LIB</file>
+		<file size="4659" time="1993-04-23 09:06:18" attr="0x20" dir="LIB/">CRTKEEPC.LIB</file>
+		<file size="1491" time="1993-04-23 09:04:22" attr="0x20" dir="LIB/">DRIVER.OBJ</file>
+		<file size="1016" time="1992-07-31 13:58:28" attr="0x20" dir="LIB/">GETXMS.C</file>
+		<file size="267" time="1992-05-28 09:37:24" attr="0x20" dir="LIB/">GETXMS.OBJ</file>
+		<file size="950" time="1992-08-31 13:56:54" attr="0x20" dir="LIB/">IS80386.C</file>
+		<file size="256" time="1992-05-28 09:27:28" attr="0x20" dir="LIB/">IS80386.OBJ</file>
+		<file size="4143" time="1993-04-23 09:07:04" attr="0x20" dir="LIB/">KEEPCLIB.LIB</file>
+		<file size="1223" time="1993-01-04 23:56:38" attr="0x20" dir="LIB/">MEMSTRAT.C</file>
+		<file size="456" time="1993-01-05 02:03:08" attr="0x20" dir="LIB/">MEMSTRAT.OBJ</file>
+		<file size="794" time="1992-12-10 06:53:18" attr="0x20" dir="LIB/">READBOOL.C</file>
+		<file size="400" time="1992-12-10 06:55:46" attr="0x20" dir="LIB/">READBOOL.OBJ</file>
+		<file size="1210" time="1992-12-08 06:47:36" attr="0x20" dir="LIB/">READHEX.C</file>
+		<file size="362" time="1992-12-10 11:16:44" attr="0x20" dir="LIB/">READHEX.OBJ</file>
+		<file size="1340" time="1992-05-28 02:50:18" attr="0x20" dir="LIB/">SHIFT.C</file>
+		<file size="353" time="1993-04-19 19:55:06" attr="0x20" dir="LIB/">SHIFT.OBJ</file>
+		<file size="555" time="1992-08-31 10:29:22" attr="0x20" dir="LIB/">VM.C</file>
+		<file size="243" time="1992-08-31 13:54:56" attr="0x20" dir="LIB/">VM.OBJ</file>
+		<file size="288" time="1993-11-10 16:21:14" attr="0x10">MEMMAN</file>
+		<file size="128" time="1993-11-10 16:22:04" attr="0x10" dir="MEMMAN/">A20TEST</file>
+		<file size="824" time="1993-11-08 09:36:16" attr="0x20" dir="MEMMAN/A20TEST/">A20TEST.ASM</file>
+		<file size="107" time="1993-11-08 09:34:06" attr="0x20" dir="MEMMAN/A20TEST/">A20TEST.COM</file>
+		<file size="256" time="1993-11-10 16:21:38" attr="0x10" dir="MEMMAN/">ADDFILES</file>
+		<file size="15557" time="1992-12-28 21:51:56" attr="0x20" dir="MEMMAN/ADDFILES/">ADDFILES.C</file>
+		<file size="11111" time="1993-04-23 09:17:22" attr="0x20" dir="MEMMAN/ADDFILES/">ADDFILES.EXE</file>
+		<file size="3239" time="1993-04-23 09:17:20" attr="0x20" dir="MEMMAN/ADDFILES/">ADDFILES.OBJ</file>
+		<file size="506" time="1993-08-29 05:32:38" attr="0x20" dir="MEMMAN/ADDFILES/">MAKEFILE</file>
+		<file size="2730" time="1992-12-28 21:56:44" attr="0x20" dir="MEMMAN/ADDFILES/">SFT.C</file>
+		<file size="558" time="1993-04-23 09:17:20" attr="0x20" dir="MEMMAN/ADDFILES/">SFT.OBJ</file>
+		<file size="288" time="1993-11-10 16:21:48" attr="0x10" dir="MEMMAN/">DISKHOOK</file>
+		<file size="17729" time="1993-01-06 23:48:52" attr="0x20" dir="MEMMAN/DISKHOOK/">DISKHOOK.C</file>
+		<file size="10937" time="1993-04-23 09:26:22" attr="0x20" dir="MEMMAN/DISKHOOK/">DISKHOOK.EXE</file>
+		<file size="3553" time="1993-04-23 09:26:20" attr="0x20" dir="MEMMAN/DISKHOOK/">DISKHOOK.OBJ</file>
+		<file size="2968" time="1993-04-20 14:39:48" attr="0x20" dir="MEMMAN/DISKHOOK/">GETINT13.C</file>
+		<file size="6023" time="1993-04-20 14:40:28" attr="0x20" dir="MEMMAN/DISKHOOK/">GETINT13.EXE</file>
+		<file size="545" time="1993-04-20 14:40:02" attr="0x20" dir="MEMMAN/DISKHOOK/">GETINT13.OBJ</file>
+		<file size="202" time="1993-04-23 08:27:14" attr="0x20" dir="MEMMAN/DISKHOOK/">MAKEFILE</file>
+		<file size="288" time="1993-11-10 16:21:18" attr="0x10" dir="MEMMAN/">EATBLOCK</file>
+		<file size="6785" time="1993-01-05 00:59:46" attr="0x20" dir="MEMMAN/EATBLOCK/">EATBLOCK.C</file>
+		<file size="10789" time="1993-04-23 09:26:44" attr="0x20" dir="MEMMAN/EATBLOCK/">EATBLOCK.EXE</file>
+		<file size="2206" time="1993-04-23 09:26:38" attr="0x20" dir="MEMMAN/EATBLOCK/">EATBLOCK.OBJ</file>
+		<file size="746" time="1993-08-29 05:33:02" attr="0x20" dir="MEMMAN/EATBLOCK/">MAKEFILE</file>
+		<file size="2043" time="1993-01-04 23:47:50" attr="0x20" dir="MEMMAN/EATBLOCK/">MALLOC.C</file>
+		<file size="643" time="1993-04-23 09:26:40" attr="0x20" dir="MEMMAN/EATBLOCK/">MALLOC.OBJ</file>
+		<file size="1033" time="1993-04-23 09:26:44" attr="0x20" dir="MEMMAN/EATBLOCK/">MEMBLOCK.OBJ</file>
+		<file size="4388" time="1992-12-10 01:55:28" attr="0x20" dir="MEMMAN/">MEMBLOCK.C</file>
+		<file size="1030" time="1993-01-04 23:47:16" attr="0x20" dir="MEMMAN/">MEMBLOCK.OBJ</file>
+		<file size="320" time="1993-11-10 16:21:28" attr="0x10" dir="MEMMAN/">SPOTLOAD</file>
+		<file size="15890" time="1993-01-05 02:02:54" attr="0x20" dir="MEMMAN/SPOTLOAD/">DOSPAWN.C</file>
+		<file size="1993" time="1993-04-23 09:27:06" attr="0x20" dir="MEMMAN/SPOTLOAD/">DOSPAWN.OBJ</file>
+		<file size="799" time="1993-08-29 05:33:18" attr="0x20" dir="MEMMAN/SPOTLOAD/">MAKEFILE</file>
+		<file size="1033" time="1993-04-23 09:27:08" attr="0x20" dir="MEMMAN/SPOTLOAD/">MEMBLOCK.OBJ</file>
+		<file size="5296" time="1993-01-05 01:53:14" attr="0x20" dir="MEMMAN/SPOTLOAD/">SPOTLOAD.C</file>
+		<file size="11435" time="1993-04-23 09:27:12" attr="0x20" dir="MEMMAN/SPOTLOAD/">SPOTLOAD.EXE</file>
+		<file size="69" time="1993-04-23 09:27:12" attr="0x20" dir="MEMMAN/SPOTLOAD/">SPOTLOAD.LNK</file>
+		<file size="2153" time="1993-04-23 09:27:12" attr="0x20" dir="MEMMAN/SPOTLOAD/">SPOTLOAD.OBJ</file>
+		<file size="224" time="1993-11-10 16:22:06" attr="0x10">XMS</file>
+		<file size="256" time="1993-11-10 16:22:10" attr="0x10" dir="XMS/">ACCESS</file>
+		<file size="352" time="1993-11-10 16:22:32" attr="0x10" dir="XMS/ACCESS/">A20MAP</file>
+		<file size="8374" time="1993-04-22 12:17:46" attr="0x20" dir="XMS/ACCESS/A20MAP/">A20MAP.C</file>
+		<file size="7461" time="1993-04-23 09:27:46" attr="0x20" dir="XMS/ACCESS/A20MAP/">A20MAP.EXE</file>
+		<file size="1886" time="1993-04-23 09:27:42" attr="0x20" dir="XMS/ACCESS/A20MAP/">A20MAP.OBJ</file>
+		<file size="358" time="1993-04-23 09:27:44" attr="0x20" dir="XMS/ACCESS/A20MAP/">GETLIMIT.OBJ</file>
+		<file size="450" time="1993-04-23 08:40:26" attr="0x20" dir="XMS/ACCESS/A20MAP/">MAKEFILE</file>
+		<file size="808" time="1992-08-31 13:50:54" attr="0x20" dir="XMS/ACCESS/A20MAP/">RDWRID.ASM</file>
+		<file size="167" time="1993-04-23 09:27:44" attr="0x20" dir="XMS/ACCESS/A20MAP/">RDWRID.OBJ</file>
+		<file size="3344" time="1992-05-28 09:20:28" attr="0x20" dir="XMS/ACCESS/A20MAP/">SETLIMIT.ASM</file>
+		<file size="268" time="1993-04-23 09:27:44" attr="0x20" dir="XMS/ACCESS/A20MAP/">SETLIMIT.OBJ</file>
+		<file size="4331" time="1992-05-28 09:02:54" attr="0x20" dir="XMS/ACCESS/">GETLIMIT.ASM</file>
+		<file size="355" time="1992-08-31 10:30:22" attr="0x20" dir="XMS/ACCESS/">GETLIMIT.OBJ</file>
+		<file size="288" time="1993-11-10 16:22:12" attr="0x10" dir="XMS/ACCESS/">LOADALL</file>
+		<file size="358" time="1993-04-23 09:28:04" attr="0x20" dir="XMS/ACCESS/LOADALL/">GETLIMIT.OBJ</file>
+		<file size="4004" time="1992-10-21 04:42:18" attr="0x20" dir="XMS/ACCESS/LOADALL/">MAIN.C</file>
+		<file size="1670" time="1993-04-23 09:28:08" attr="0x20" dir="XMS/ACCESS/LOADALL/">MAIN.OBJ</file>
+		<file size="415" time="1993-04-23 08:40:38" attr="0x20" dir="XMS/ACCESS/LOADALL/">MAKEFILE</file>
+		<file size="7771" time="1993-04-23 09:28:10" attr="0x20" dir="XMS/ACCESS/LOADALL/">SEGLIMIT.EXE</file>
+		<file size="4001" time="1992-10-21 04:22:22" attr="0x20" dir="XMS/ACCESS/LOADALL/">SETLIMIT.ASM</file>
+		<file size="485" time="1993-04-23 09:28:10" attr="0x20" dir="XMS/ACCESS/LOADALL/">SETLIMIT.OBJ</file>
+		<file size="288" time="1993-11-10 16:22:22" attr="0x10" dir="XMS/ACCESS/">SEGLIMIT</file>
+		<file size="358" time="1993-04-23 09:28:22" attr="0x20" dir="XMS/ACCESS/SEGLIMIT/">GETLIMIT.OBJ</file>
+		<file size="4004" time="1992-10-21 04:42:06" attr="0x20" dir="XMS/ACCESS/SEGLIMIT/">MAIN.C</file>
+		<file size="1670" time="1993-04-23 09:28:26" attr="0x20" dir="XMS/ACCESS/SEGLIMIT/">MAIN.OBJ</file>
+		<file size="415" time="1993-04-23 08:41:52" attr="0x20" dir="XMS/ACCESS/SEGLIMIT/">MAKEFILE</file>
+		<file size="7525" time="1993-04-23 09:28:28" attr="0x20" dir="XMS/ACCESS/SEGLIMIT/">SEGLIMIT.EXE</file>
+		<file size="3355" time="1992-08-31 10:05:22" attr="0x20" dir="XMS/ACCESS/SEGLIMIT/">SETLIMIT.ASM</file>
+		<file size="268" time="1993-04-23 09:28:26" attr="0x20" dir="XMS/ACCESS/SEGLIMIT/">SETLIMIT.OBJ</file>
+		<file size="384" time="1993-11-10 16:22:42" attr="0x10" dir="XMS/ACCESS/">XA20</file>
+		<file size="2415" time="1992-09-28 08:36:16" attr="0x20" dir="XMS/ACCESS/XA20/">HANDLER.C</file>
+		<file size="357" time="1993-04-23 09:28:42" attr="0x20" dir="XMS/ACCESS/XA20/">HANDLER.OBJ</file>
+		<file size="2268" time="1992-09-28 08:37:54" attr="0x20" dir="XMS/ACCESS/XA20/">MACHINE.C</file>
+		<file size="368" time="1993-04-23 09:28:44" attr="0x20" dir="XMS/ACCESS/XA20/">MACHINE.OBJ</file>
+		<file size="4621" time="1992-05-29 00:54:56" attr="0x20" dir="XMS/ACCESS/XA20/">MAIN.C</file>
+		<file size="1427" time="1993-04-23 09:28:46" attr="0x20" dir="XMS/ACCESS/XA20/">MAIN.OBJ</file>
+		<file size="1176" time="1993-04-23 08:35:36" attr="0x20" dir="XMS/ACCESS/XA20/">MAKEFILE</file>
+		<file size="743" time="1992-09-28 07:44:16" attr="0x20" dir="XMS/ACCESS/XA20/">XA20.C</file>
+		<file size="9413" time="1993-04-23 09:28:48" attr="0x20" dir="XMS/ACCESS/XA20/">XA20.EXE</file>
+		<file size="434" time="1993-04-23 09:28:46" attr="0x20" dir="XMS/ACCESS/XA20/">XA20.OBJ</file>
+		<file size="1026" time="1992-05-28 09:36:32" attr="0x20" dir="XMS/">GETXMS.C</file>
+		<file size="256" time="1993-11-10 16:23:52" attr="0x10" dir="XMS/">SMARTDRV</file>
+		<file size="138" time="1993-04-22 19:08:56" attr="0x20" dir="XMS/SMARTDRV/">MAKEFILE</file>
+		<file size="8186" time="1993-01-11 16:40:44" attr="0x20" dir="XMS/SMARTDRV/">SDCONFIG.C</file>
+		<file size="8461" time="1993-04-23 09:29:10" attr="0x20" dir="XMS/SMARTDRV/">SDCONFIG.EXE</file>
+		<file size="2818" time="1993-04-23 09:29:06" attr="0x20" dir="XMS/SMARTDRV/">SDCONFIG.OBJ</file>
+		<file size="10228" time="1993-04-19 19:19:50" attr="0x20" dir="XMS/SMARTDRV/">SMARTDRV.C</file>
+		<file size="991" time="1993-04-23 09:29:08" attr="0x20" dir="XMS/SMARTDRV/">SMARTDRV.OBJ</file>
+		<file size="480" time="1993-11-10 16:24:02" attr="0x10" dir="XMS/">XMSFILE</file>
+		<file size="5525" time="1992-03-26 15:44:36" attr="0x20" dir="XMS/XMSFILE/">DRIVER.ASM</file>
+		<file size="1500" time="1993-04-23 09:29:30" attr="0x20" dir="XMS/XMSFILE/">DRIVER.OBJ</file>
+		<file size="7419" time="1993-01-11 02:46:00" attr="0x20" dir="XMS/XMSFILE/">MAIN.C</file>
+		<file size="2884" time="1993-04-23 09:29:34" attr="0x20" dir="XMS/XMSFILE/">MAIN.OBJ</file>
+		<file size="1049" time="1993-04-23 08:47:00" attr="0x20" dir="XMS/XMSFILE/">MAKEFILE</file>
+		<file size="1976" time="1993-01-10 04:31:26" attr="0x20" dir="XMS/XMSFILE/">SDINIT.C</file>
+		<file size="535" time="1993-04-23 09:29:34" attr="0x20" dir="XMS/XMSFILE/">SDINIT.OBJ</file>
+		<file size="1916" time="1993-04-23 09:29:38" attr="0x20" dir="XMS/XMSFILE/">SEQFILE.OBJ</file>
+		<file size="1514" time="1993-04-23 09:29:40" attr="0x20" dir="XMS/XMSFILE/">SMARTDRV.OBJ</file>
+		<file size="10591" time="1993-04-19 19:58:48" attr="0x20" dir="XMS/XMSFILE/">TRANSFER.C</file>
+		<file size="1776" time="1993-04-23 09:29:44" attr="0x20" dir="XMS/XMSFILE/">TRANSFER.OBJ</file>
+		<file size="13653" time="1993-04-23 09:29:46" attr="0x20" dir="XMS/XMSFILE/">XMSFILE.EXE</file>
+		<file size="2516" time="1993-01-11 02:40:34" attr="0x20" dir="XMS/XMSFILE/">XMSFUNC.H</file>
+		<file size="1312" time="1993-11-10 16:22:56" attr="0x10" dir="XMS/">XMSWATCH</file>
+		<file size="2225" time="1992-07-01 04:56:52" attr="0x20" dir="XMS/XMSWATCH/">API.C</file>
+		<file size="625" time="1993-04-23 09:30:16" attr="0x20" dir="XMS/XMSWATCH/">API.OBJ</file>
+		<file size="14602" time="1993-02-28 02:11:36" attr="0x20" dir="XMS/XMSWATCH/">ARENA.C</file>
+		<file size="1327" time="1993-04-23 09:30:20" attr="0x20" dir="XMS/XMSWATCH/">ARENA.OBJ</file>
+		<file size="3731" time="1992-07-01 16:47:42" attr="0x20" dir="XMS/XMSWATCH/">CONSULT.C</file>
+		<file size="648" time="1993-04-23 09:30:22" attr="0x20" dir="XMS/XMSWATCH/">CONSULT.OBJ</file>
+		<file size="5636" time="1992-03-10 00:52:20" attr="0x20" dir="XMS/XMSWATCH/">DRIVER.ASM</file>
+		<file size="1492" time="1993-04-23 09:30:22" attr="0x20" dir="XMS/XMSWATCH/">DRIVER.OBJ</file>
+		<file size="8686" time="1993-01-10 23:55:56" attr="0x20" dir="XMS/XMSWATCH/">FREE.C</file>
+		<file size="1628" time="1993-04-23 09:30:26" attr="0x20" dir="XMS/XMSWATCH/">FREE.OBJ</file>
+		<file size="1627" time="1993-01-10 07:32:26" attr="0x20" dir="XMS/XMSWATCH/">HANDLERS.C</file>
+		<file size="611" time="1993-04-23 09:30:28" attr="0x20" dir="XMS/XMSWATCH/">HANDLERS.OBJ</file>
+		<file size="2066" time="1993-01-10 16:57:54" attr="0x20" dir="XMS/XMSWATCH/">HMA.C</file>
+		<file size="587" time="1993-04-23 09:30:28" attr="0x20" dir="XMS/XMSWATCH/">HMA.OBJ</file>
+		<file size="5501" time="1992-12-16 04:43:46" attr="0x20" dir="XMS/XMSWATCH/">INSTALL.C</file>
+		<file size="1222" time="1993-04-23 09:30:30" attr="0x20" dir="XMS/XMSWATCH/">INSTALL.OBJ</file>
+		<file size="3971" time="1992-07-01 16:45:50" attr="0x20" dir="XMS/XMSWATCH/">LIST.C</file>
+		<file size="634" time="1993-04-23 09:30:32" attr="0x20" dir="XMS/XMSWATCH/">LIST.OBJ</file>
+		<file size="4852" time="1993-02-22 05:01:44" attr="0x20" dir="XMS/XMSWATCH/">MAIN.C</file>
+		<file size="1620" time="1993-04-23 09:30:36" attr="0x20" dir="XMS/XMSWATCH/">MAIN.OBJ</file>
+		<file size="1715" time="1993-08-29 05:34:44" attr="0x20" dir="XMS/XMSWATCH/">MAKEFILE</file>
+		<file size="2624" time="1993-02-28 02:10:30" attr="0x20" dir="XMS/XMSWATCH/">MEMOWNER.C</file>
+		<file size="540" time="1993-04-23 09:30:36" attr="0x20" dir="XMS/XMSWATCH/">MEMOWNER.OBJ</file>
+		<file size="5053" time="1993-02-22 05:02:46" attr="0x20" dir="XMS/XMSWATCH/">MONITOR.C</file>
+		<file size="923" time="1993-04-23 09:30:38" attr="0x20" dir="XMS/XMSWATCH/">MONITOR.OBJ</file>
+		<file size="1447" time="1993-01-10 04:54:12" attr="0x20" dir="XMS/XMSWATCH/">VERSION.C</file>
+		<file size="478" time="1993-04-23 09:30:40" attr="0x20" dir="XMS/XMSWATCH/">VERSION.OBJ</file>
+		<file size="12607" time="1993-01-11 05:06:30" attr="0x20" dir="XMS/XMSWATCH/">WATCHED.C</file>
+		<file size="2126" time="1993-04-23 09:30:44" attr="0x20" dir="XMS/XMSWATCH/">WATCHED.OBJ</file>
+		<file size="7984" time="1992-06-27 02:25:06" attr="0x20" dir="XMS/XMSWATCH/">XMS.ASM</file>
+		<file size="1345" time="1993-04-23 09:30:44" attr="0x20" dir="XMS/XMSWATCH/">XMS.OBJ</file>
+		<file size="3270" time="1993-01-10 07:22:20" attr="0x20" dir="XMS/XMSWATCH/">XMSCHAIN.C</file>
+		<file size="412" time="1993-04-23 09:30:46" attr="0x20" dir="XMS/XMSWATCH/">XMSCHAIN.OBJ</file>
+		<file size="1296" time="1993-01-10 23:42:10" attr="0x20" dir="XMS/XMSWATCH/">XMSFUNC.C</file>
+		<file size="2516" time="1993-01-11 02:47:44" attr="0x20" dir="XMS/XMSWATCH/">XMSFUNC.H</file>
+		<file size="366" time="1993-04-23 09:30:46" attr="0x20" dir="XMS/XMSWATCH/">XMSFUNC.OBJ</file>
+		<file size="15079" time="1993-04-23 09:30:48" attr="0x20" dir="XMS/XMSWATCH/">XMSWATCH.EXE</file>
+		<file size="1896" time="1992-07-01 20:33:50" attr="0x20" dir="XMS/XMSWATCH/">XMSWATCH.H</file>
+		<file size="167" time="1993-04-23 09:30:46" attr="0x20" dir="XMS/XMSWATCH/">XMSWATCH.LNK</file>
 	</disk>
-	<disk id="disk02" size="1228800" chs="80:2:15" img="The_Undocumented_PC/archive/UNDOC-PC.img" href="/pubs/pc/programming/The_Undocumented_PC/UNDOC.json" md5="beb02e4594f45a395d43c110759dc3ea" md5json="fdf2d24bb28196b751a58e749a6b0d1a">
+	<disk id="disk02" size="1228800" chs="80:2:15" img="The_Undocumented_PC/archive/UNDOC-PC.img" href="/pubs/pc/programming/The_Undocumented_PC/UNDOC.json" md5="beb02e4594f45a395d43c110759dc3ea" md5json="9bdee7166f30054421d3e9f3ee51d294">
 		<name>Undocumented PC</name>
+		<file size="2" time="1996-11-01 01:00:00" attr="0x20">--EXES--.---</file>
+		<file size="2" time="1996-11-01 01:00:00" attr="0x20">-SOURCE-.---</file>
+		<file size="29678" time="1996-11-01 01:00:00" attr="0x20">A20TEST.ASM</file>
+		<file size="2672" time="1996-11-01 01:00:00" attr="0x20">A20TEST.EXE</file>
+		<file size="1671" time="1996-11-01 01:00:00" attr="0x20">BEEPA.ASM</file>
+		<file size="55" time="1996-11-01 01:00:00" attr="0x20">BEEPA.COM</file>
+		<file size="1486" time="1996-11-01 01:00:00" attr="0x20">BEEPB.C</file>
+		<file size="28532" time="1996-11-01 01:00:00" attr="0x20">BEEPB.EXE</file>
+		<file size="1456" time="1996-11-01 01:00:00" attr="0x20">BEEPM.C</file>
+		<file size="3285" time="1996-11-01 01:00:00" attr="0x20">BEEPM.EXE</file>
+		<file size="58837" time="1996-11-01 01:00:00" attr="0x20">BIOSVIEW.ASM</file>
+		<file size="14880" time="1996-11-01 01:00:00" attr="0x20">BIOSVIEW.EXE</file>
+		<file size="29464" time="1996-11-01 01:00:00" attr="0x20">CMOSVIEW.ASM</file>
+		<file size="3936" time="1996-11-01 01:00:00" attr="0x20">CMOSVIEW.EXE</file>
+		<file size="46141" time="1996-11-01 01:00:00" attr="0x20">CPURDMSR.ASM</file>
+		<file size="7536" time="1996-11-01 01:00:00" attr="0x20">CPURDMSR.EXE</file>
+		<file size="31652" time="1996-11-01 01:00:00" attr="0x20">CPURDTSC.ASM</file>
+		<file size="2080" time="1996-11-01 01:00:00" attr="0x20">CPURDTSC.EXE</file>
+		<file size="42077" time="1996-11-01 01:00:00" attr="0x20">CPUTEST.ASM</file>
+		<file size="2624" time="1996-11-01 01:00:00" attr="0x20">CPUTEST.EXE</file>
+		<file size="32389" time="1996-11-01 01:00:00" attr="0x20">CPUTYPE.ASM</file>
+		<file size="41104" time="1996-11-01 01:00:00" attr="0x20">CPUTYPE.EXE</file>
+		<file size="84893" time="1996-11-01 01:00:00" attr="0x20">CPUTYPE2.ASM</file>
+		<file size="39981" time="1996-11-01 01:00:00" attr="0x20">CPUUNDOC.ASM</file>
+		<file size="3520" time="1996-11-01 01:00:00" attr="0x20">CPUUNDOC.EXE</file>
+		<file size="3237" time="1996-11-01 01:00:00" attr="0x20">CTRL2CAP.ASM</file>
+		<file size="822" time="1996-11-01 01:00:00" attr="0x20">CTRL2CAP.EXE</file>
+		<file size="19104" time="1996-11-01 01:00:00" attr="0x20">DISKTEST.ASM</file>
+		<file size="1947" time="1996-11-01 01:00:00" attr="0x20">DISKTEST.EXE</file>
+		<file size="2458" time="1996-11-01 01:00:00" attr="0x20">DMA_READ.SUB</file>
+		<file size="4092" time="1996-11-01 01:00:00" attr="0x20">IODELAY.ASM</file>
+		<file size="109" time="1996-11-01 01:00:00" attr="0x20">IODELAY.COM</file>
+		<file size="6518" time="1996-11-01 01:00:00" attr="0x20">IOSPY.EXE</file>
+		<file size="4898" time="1996-11-01 01:00:00" attr="0x20">IRQREDIR.ASM</file>
+		<file size="896" time="1996-11-01 01:00:00" attr="0x20">IRQREDIR.EXE</file>
+		<file size="4822" time="1996-11-01 01:00:00" attr="0x20">KEYBIOS.ASM</file>
+		<file size="1024" time="1996-11-01 01:00:00" attr="0x20">KEYBIOS.EXE</file>
+		<file size="21230" time="1996-11-01 01:00:00" attr="0x20">KEYSCAN.ASM</file>
+		<file size="1968" time="1996-11-01 01:00:00" attr="0x20">KEYSCAN.EXE</file>
+		<file size="11012" time="1996-11-01 01:00:00" attr="0x20">MAX_RECV.ASM</file>
+		<file size="1910" time="1996-11-01 01:00:00" attr="0x20">MAX_RECV.EXE</file>
+		<file size="7874" time="1996-11-01 01:00:00" attr="0x20">MAX_XMIT.ASM</file>
+		<file size="1766" time="1996-11-01 01:00:00" attr="0x20">MAX_XMIT.EXE</file>
+		<file size="3819" time="1996-11-01 01:00:00" attr="0x20">PRNASCII.ASM</file>
+		<file size="950" time="1996-11-01 01:00:00" attr="0x20">PRNASCII.EXE</file>
+		<file size="1643" time="1996-11-01 01:00:00" attr="0x20">PRNSWAP.ASM</file>
+		<file size="110" time="1996-11-01 01:00:00" attr="0x20">PRNSWAP.COM</file>
+		<file size="5230" time="1996-11-01 01:00:00" attr="0x20">PRNTYPE.ASM</file>
+		<file size="480" time="1996-11-01 01:00:00" attr="0x20">PRNTYPE.COM</file>
+		<file size="420" time="1996-11-01 01:00:00" attr="0x20">README</file>
+		<file size="1245" time="1996-11-01 01:00:00" attr="0x20">SERSLOW.SUB</file>
+		<file size="13356" time="1996-11-01 01:00:00" attr="0x20">SERTYPE.ASM</file>
+		<file size="890" time="1996-11-01 01:00:00" attr="0x20">SERTYPE.COM</file>
+		<file size="7553" time="1996-11-01 01:00:00" attr="0x20">SSPY.ASM</file>
+		<file size="1622" time="1996-11-01 01:00:00" attr="0x20">SSPY.EXE</file>
+		<file size="72137" time="1996-11-01 01:00:00" attr="0x20">SYSTYPE.ASM</file>
+		<file size="6976" time="1996-11-01 01:00:00" attr="0x20">SYSTYPE.EXE</file>
+		<file size="1832" time="1996-11-01 01:00:00" attr="0x20">TESTCASE.ASM</file>
+		<file size="165" time="1996-11-01 01:00:00" attr="0x20">TESTCASE.COM</file>
+		<file size="10325" time="1996-11-01 01:00:00" attr="0x20">TIMEVENT.ASM</file>
+		<file size="520" time="1996-11-01 01:00:00" attr="0x20">TIMEVENT.COM</file>
+		<file size="5711" time="1996-11-01 01:00:00" attr="0x20">TMRFAST.ASM</file>
+		<file size="998" time="1996-11-01 01:00:00" attr="0x20">TMRFAST.EXE</file>
+		<file size="3644" time="1996-11-01 01:00:00" attr="0x20">UNDOCPC.INC</file>
+		<file size="193374" time="1996-11-01 01:00:00" attr="0x20">UNPC.EXE</file>
+		<file size="6039" time="1996-11-01 01:00:00" attr="0x20">UNPCLIST.TXT</file>
+		<file size="2682" time="1996-11-01 01:00:00" attr="0x20">UNPCNOTE.TXT</file>
+		<file size="49120" time="1996-11-01 01:00:00" attr="0x20">VCOM.MSG</file>
 	</disk>
-	<disk id="disk03" size="1228800" chs="80:2:15" img="Undocumented_DOS/archive/UNDOC-DOS-DISK1.img" href="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK1.json" md5="dd9d85065ec27b54055f991ea6bb4968" md5json="67fc8754967ec2588655826a484422f0">
+	<disk id="disk03" size="1228800" chs="80:2:15" img="Undocumented_DOS/archive/UNDOC-DOS-DISK1.img" href="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK1.json" md5="dd9d85065ec27b54055f991ea6bb4968" md5json="deed3c2bdc7a3567bae098092798e000">
 		<name>Undocumented DOS (Disk 1)</name>
+		<file size="52" time="1990-09-27 08:02:28" attr="0x20">INSTALL.DAT</file>
+		<file size="32225" time="1990-09-27 08:02:28" attr="0x20">INSTALL.EXE</file>
+		<file size="1041144" time="1990-09-27 08:02:28" attr="0x20">INTRLIST.EXE</file>
+		<file size="3420" time="1990-09-27 08:02:28" attr="0x20">README</file>
 	</disk>
-	<disk id="disk04" size="1228800" chs="80:2:15" img="Undocumented_DOS/archive/UNDOC-DOS-DISK2.img" href="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK2.json" md5="d35c9141a554b4854bb635173e72a999" md5json="ba92b1ec5bf2ac501736a4f025ce3caf">
+	<disk id="disk04" size="1228800" chs="80:2:15" img="Undocumented_DOS/archive/UNDOC-DOS-DISK2.img" href="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK2.json" md5="d35c9141a554b4854bb635173e72a999" md5json="e8b14acd15937edd281070dcc5df4f30">
 		<name>Undocumented DOS (Disk 2)</name>
+		<file size="832" time="1993-08-30 12:38:32" attr="0x10">CHAP2</file>
+		<file size="1057" time="1990-09-25 21:26:12" attr="0x20" dir="CHAP2/">CHAP2MK.BAT</file>
+		<file size="1213" time="1990-09-25 20:58:16" attr="0x20" dir="CHAP2/">FUNC0E32.C</file>
+		<file size="8905" time="1990-09-25 21:19:58" attr="0x20" dir="CHAP2/">FUNC0E32.EXE</file>
+		<file size="1276" time="1990-09-25 20:40:24" attr="0x20" dir="CHAP2/">LASTDRV.ASM</file>
+		<file size="769" time="1990-09-25 20:42:38" attr="0x20" dir="CHAP2/">LASTDRV.BAS</file>
+		<file size="848" time="1990-09-25 20:41:00" attr="0x20" dir="CHAP2/">LASTDRV.C</file>
+		<file size="561" time="1990-09-25 21:24:56" attr="0x20" dir="CHAP2/">LASTDRV.EXE</file>
+		<file size="460" time="1990-09-25 20:41:58" attr="0x20" dir="CHAP2/">LASTDRV.PAS</file>
+		<file size="2313" time="1991-05-14 03:36:12" attr="0x20" dir="CHAP2/">LASTDRV2.ASM</file>
+		<file size="1119" time="1990-09-25 20:47:00" attr="0x20" dir="CHAP2/">LASTDRV2.BAS</file>
+		<file size="1051" time="1990-09-25 20:41:08" attr="0x20" dir="CHAP2/">LASTDRV2.C</file>
+		<file size="620" time="1990-09-25 21:25:06" attr="0x20" dir="CHAP2/">LASTDRV2.EXE</file>
+		<file size="858" time="1990-09-25 20:45:50" attr="0x20" dir="CHAP2/">LASTDRV2.PAS</file>
+		<file size="374" time="1990-09-25 20:41:22" attr="0x20" dir="CHAP2/">LASTDRV3.C</file>
+		<file size="2221" time="1990-09-25 20:46:28" attr="0x20" dir="CHAP2/">LASTDRV3.PAS</file>
+		<file size="1246" time="1990-09-25 20:43:36" attr="0x20" dir="CHAP2/">LASTDRV4.C</file>
+		<file size="2305" time="1990-09-25 21:17:34" attr="0x20" dir="CHAP2/">LASTDRV5.C</file>
+		<file size="846" time="1990-09-25 20:44:36" attr="0x20" dir="CHAP2/">LASTDRV6.C</file>
+		<file size="1372" time="1990-09-25 21:06:14" attr="0x20" dir="CHAP2/">LD386.C</file>
+		<file size="7384" time="1990-09-25 21:24:22" attr="0x20" dir="CHAP2/">LD386.EXP</file>
+		<file size="8607" time="1991-05-14 03:04:16" attr="0x20" dir="CHAP2/">LDDPMI.C</file>
+		<file size="7510" time="1991-05-14 03:03:30" attr="0x20" dir="CHAP2/">LDDPMI.EXE</file>
+		<file size="2423" time="1990-09-25 21:21:42" attr="0x20" dir="CHAP2/">OKAY.C</file>
+		<file size="4946" time="1990-09-25 21:22:38" attr="0x20" dir="CHAP2/">OKAY.EXE</file>
+		<file size="704" time="1993-08-30 12:38:40" attr="0x10">CHAP3</file>
+		<file size="6491" time="1990-09-25 22:07:16" attr="0x20" dir="CHAP3/">C0.ASM</file>
+		<file size="487" time="1990-09-25 22:23:56" attr="0x20" dir="CHAP3/">CHAP3MK.BAT</file>
+		<file size="2081" time="1990-09-25 22:05:48" attr="0x20" dir="CHAP3/">DEV.ASM</file>
+		<file size="613" time="1990-09-25 22:22:44" attr="0x20" dir="CHAP3/">DEV.EXE</file>
+		<file size="2801" time="1991-05-14 02:49:00" attr="0x20" dir="CHAP3/">DEVCON.C</file>
+		<file size="7053" time="1991-05-14 02:49:22" attr="0x20" dir="CHAP3/">DEVCON.EXE</file>
+		<file size="12913" time="1990-09-25 22:14:42" attr="0x20" dir="CHAP3/">DEVLOD.C</file>
+		<file size="1954" time="1990-09-25 22:23:48" attr="0x20" dir="CHAP3/">DEVLOD.COM</file>
+		<file size="1456" time="1990-09-25 22:07:28" attr="0x20" dir="CHAP3/">DOSVER.C</file>
+		<file size="7657" time="1990-09-25 22:23:12" attr="0x20" dir="CHAP3/">DOSVER.EXE</file>
+		<file size="464" time="1990-09-25 22:07:20" attr="0x20" dir="CHAP3/">MAKEFILE</file>
+		<file size="7097" time="1990-09-25 22:01:36" attr="0x20" dir="CHAP3/">MEM.C</file>
+		<file size="11445" time="1990-09-25 22:22:22" attr="0x20" dir="CHAP3/">MEM.EXE</file>
+		<file size="3075" time="1990-09-25 21:50:16" attr="0x20" dir="CHAP3/">MEM1.C</file>
+		<file size="10145" time="1990-09-25 22:21:54" attr="0x20" dir="CHAP3/">MEM1.EXE</file>
+		<file size="2399" time="1990-09-25 22:07:02" attr="0x20" dir="CHAP3/">MOVUP.ASM</file>
+		<file size="631" time="1990-09-25 22:08:34" attr="0x20" dir="CHAP3/">ROOTS.C</file>
+		<file size="5995" time="1990-09-25 22:22:40" attr="0x20" dir="CHAP3/">ROOTS.EXE</file>
+		<file size="1914" time="1990-09-25 22:08:08" attr="0x20" dir="CHAP3/">STRATST.C</file>
+		<file size="6559" time="1990-09-25 22:22:32" attr="0x20" dir="CHAP3/">STRATST.EXE</file>
+		<file size="1056" time="1993-08-30 12:38:50" attr="0x10">CHAP4</file>
+		<file size="1299" time="1990-09-25 22:46:12" attr="0x20" dir="CHAP4/">2FOPEN.SCR</file>
+		<file size="1210" time="1990-09-25 22:41:56" attr="0x20" dir="CHAP4/">BUFFERS.C</file>
+		<file size="6075" time="1990-09-25 23:05:32" attr="0x20" dir="CHAP4/">BUFFERS.EXE</file>
+		<file size="1028" time="1990-09-25 23:18:50" attr="0x20" dir="CHAP4/">CHAP4MK.BAT</file>
+		<file size="964" time="1990-09-25 22:49:26" attr="0x20" dir="CHAP4/">COUNTF.C</file>
+		<file size="6739" time="1990-09-25 23:06:00" attr="0x20" dir="CHAP4/">COUNTF.EXE</file>
+		<file size="2605" time="1990-09-25 22:42:36" attr="0x20" dir="CHAP4/">CURRDIR.C</file>
+		<file size="1034" time="1990-09-25 22:42:22" attr="0x20" dir="CHAP4/">CURRDIR.H</file>
+		<file size="4880" time="1990-09-25 22:45:40" attr="0x20" dir="CHAP4/">DOSSTRUC.SCR</file>
+		<file size="3488" time="1990-09-25 22:41:44" attr="0x20" dir="CHAP4/">DPBTEST.C</file>
+		<file size="7407" time="1990-09-25 23:05:20" attr="0x20" dir="CHAP4/">DPBTEST.EXE</file>
+		<file size="6563" time="1990-09-25 23:06:46" attr="0x20" dir="CHAP4/">DRVOFF.EXE</file>
+		<file size="1747" time="1990-09-25 22:44:58" attr="0x20" dir="CHAP4/">DRVSET.C</file>
+		<file size="6563" time="1990-09-25 23:06:46" attr="0x20" dir="CHAP4/">DRVSET.EXE</file>
+		<file size="859" time="1990-09-25 22:42:44" attr="0x20" dir="CHAP4/">ENUMDRV.C</file>
+		<file size="7019" time="1990-09-25 23:05:44" attr="0x20" dir="CHAP4/">ENUMDRV.EXE</file>
+		<file size="3809" time="1990-09-25 22:41:28" attr="0x20" dir="CHAP4/">FAKEFRMT.ASM</file>
+		<file size="6234" time="1990-09-25 23:04:54" attr="0x20" dir="CHAP4/">FAKEFRMT.COM</file>
+		<file size="2361" time="1990-09-25 23:09:08" attr="0x20" dir="CHAP4/">FHANDLE.C</file>
+		<file size="7481" time="1990-09-25 23:09:22" attr="0x20" dir="CHAP4/">FHANDLE.EXE</file>
+		<file size="9811" time="1991-05-14 02:54:08" attr="0x20" dir="CHAP4/">FILES.C</file>
+		<file size="7674" time="1991-03-23 19:33:08" attr="0x20" dir="CHAP4/">FILES.EXE</file>
+		<file size="8155" time="1990-09-25 23:06:20" attr="0x20" dir="CHAP4/">FREEUP.EXE</file>
+		<file size="2940" time="1990-09-25 22:44:44" attr="0x20" dir="CHAP4/">H2NAME.C</file>
+		<file size="10513" time="1990-09-25 23:06:36" attr="0x20" dir="CHAP4/">H2NAME.EXE</file>
+		<file size="2944" time="1991-05-14 03:21:42" attr="0x20" dir="CHAP4/">MOV.C</file>
+		<file size="5728" time="1991-05-14 03:20:28" attr="0x20" dir="CHAP4/">MOV.EXE</file>
+		<file size="14832" time="1991-05-14 03:09:02" attr="0x20" dir="CHAP4/">PHANTOM.EXE</file>
+		<file size="41899" time="1991-05-14 03:33:34" attr="0x20" dir="CHAP4/">PHANTOM.PAS</file>
+		<file size="1250" time="1991-05-14 03:40:16" attr="0x20" dir="CHAP4/">TRUENAME.C</file>
+		<file size="5400" time="1991-05-14 03:38:14" attr="0x20" dir="CHAP4/">TRUENAME.EXE</file>
+		<file size="928" time="1993-08-30 12:39:10" attr="0x10">CHAP5</file>
+		<file size="266" time="1990-09-26 23:00:42" attr="0x20" dir="CHAP5/">CHAP5MK.BAT</file>
+		<file size="566" time="1990-09-26 22:42:38" attr="0x20" dir="CHAP5/">DO2E.ASM</file>
+		<file size="5787" time="1991-01-21 15:33:06" attr="0x20" dir="CHAP5/">DOSSWAP.C</file>
+		<file size="1239" time="1990-09-26 21:01:52" attr="0x20" dir="CHAP5/">EXTERR.C</file>
+		<file size="1789" time="1990-09-26 21:03:20" attr="0x20" dir="CHAP5/">FILE.C</file>
+		<file size="376" time="1990-09-26 22:41:48" attr="0x20" dir="CHAP5/">HAVE2E.ASM</file>
+		<file size="1830" time="1990-09-26 21:01:36" attr="0x20" dir="CHAP5/">INDOS.C</file>
+		<file size="1929" time="1990-09-26 22:34:00" attr="0x20" dir="CHAP5/">MAKEFILE</file>
+		<file size="7733" time="1990-09-26 22:39:38" attr="0x20" dir="CHAP5/">MEM.C</file>
+		<file size="10944" time="1990-09-26 22:26:58" attr="0x20" dir="CHAP5/">MULTI.C</file>
+		<file size="8277" time="1990-09-26 22:52:38" attr="0x20" dir="CHAP5/">MULTI.EXE</file>
+		<file size="9841" time="1990-09-13 21:10:48" attr="0x20" dir="CHAP5/">MULTTEST.C</file>
+		<file size="1095" time="1990-09-26 22:11:40" attr="0x20" dir="CHAP5/">PSP.C</file>
+		<file size="1996" time="1990-09-26 21:03:36" attr="0x20" dir="CHAP5/">PUT.C</file>
+		<file size="779" time="1990-09-26 21:03:30" attr="0x20" dir="CHAP5/">PUT.H</file>
+		<file size="598" time="1990-09-26 22:43:04" attr="0x20" dir="CHAP5/">SEND2E.C</file>
+		<file size="1920" time="1990-09-26 22:11:34" attr="0x20" dir="CHAP5/">STACK.ASM</file>
+		<file size="12581" time="1991-01-24 19:14:28" attr="0x20" dir="CHAP5/">STSR2E.EXE</file>
+		<file size="11755" time="1991-01-21 15:21:44" attr="0x20" dir="CHAP5/">STSRFILE.EXE</file>
+		<file size="13077" time="1991-01-21 15:16:42" attr="0x20" dir="CHAP5/">STSRMEM.EXE</file>
+		<file size="1972" time="1991-01-24 19:16:36" attr="0x20" dir="CHAP5/">TEST2E.C</file>
+		<file size="1427" time="1990-09-26 21:02:32" attr="0x20" dir="CHAP5/">TSR.H</file>
+		<file size="11861" time="1991-01-24 19:17:16" attr="0x20" dir="CHAP5/">TSR2E.EXE</file>
+		<file size="15783" time="1990-09-26 22:26:02" attr="0x20" dir="CHAP5/">TSREXAMP.C</file>
+		<file size="11019" time="1990-09-26 22:50:54" attr="0x20" dir="CHAP5/">TSRFILE.EXE</file>
+		<file size="12357" time="1990-09-26 22:50:58" attr="0x20" dir="CHAP5/">TSRMEM.EXE</file>
+		<file size="6329" time="1990-09-26 21:02:46" attr="0x20" dir="CHAP5/">TSRUTIL.ASM</file>
+		<file size="864" time="1993-08-30 12:39:24" attr="0x10">CHAP6</file>
+		<file size="566" time="1990-09-27 00:16:54" attr="0x20" dir="CHAP6/">DO2E.ASM</file>
+		<file size="1828" time="1990-09-27 00:43:10" attr="0x20" dir="CHAP6/">EEA.ASM</file>
+		<file size="11866" time="1990-09-27 00:43:16" attr="0x20" dir="CHAP6/">ENVEDT.C</file>
+		<file size="9203" time="1990-09-27 00:39:12" attr="0x20" dir="CHAP6/">ENVEDT.EXE</file>
+		<file size="1070" time="1990-09-26 23:46:20" attr="0x20" dir="CHAP6/">ENVPKG.ASM</file>
+		<file size="863" time="1990-09-27 00:05:04" attr="0x20" dir="CHAP6/">EPTST.C</file>
+		<file size="6569" time="1990-09-27 00:05:14" attr="0x20" dir="CHAP6/">EPTST.EXE</file>
+		<file size="1218" time="1990-09-27 00:15:38" attr="0x20" dir="CHAP6/">FMEV.C</file>
+		<file size="6981" time="1990-09-27 00:14:34" attr="0x20" dir="CHAP6/">FMEV.EXE</file>
+		<file size="376" time="1990-09-27 00:16:20" attr="0x20" dir="CHAP6/">HAVE2E.ASM</file>
+		<file size="5609" time="1991-05-14 04:03:52" attr="0x20" dir="CHAP6/">INSTCMD.C</file>
+		<file size="9239" time="1990-09-27 00:00:14" attr="0x20" dir="CHAP6/">INSTCMD.EXE</file>
+		<file size="609" time="1991-05-14 04:03:38" attr="0x20" dir="CHAP6/">INSTCMD.SCR</file>
+		<file size="4711" time="1990-09-27 00:09:42" attr="0x20" dir="CHAP6/">MSTENVP.C</file>
+		<file size="6979" time="1990-09-27 00:06:06" attr="0x20" dir="CHAP6/">MSTENVP.EXE</file>
+		<file size="673" time="1990-09-27 00:13:24" attr="0x20" dir="CHAP6/">NEV.C</file>
+		<file size="6021" time="1990-09-27 00:13:36" attr="0x20" dir="CHAP6/">NEV.EXE</file>
+		<file size="601" time="1990-09-27 00:11:14" attr="0x20" dir="CHAP6/">NXTEVAR.ASM</file>
+		<file size="598" time="1990-09-27 00:17:06" attr="0x20" dir="CHAP6/">SEND2E.C</file>
+		<file size="696" time="1990-09-26 23:52:10" attr="0x20" dir="CHAP6/">SWITCHAR.C</file>
+		<file size="2907" time="1990-09-26 23:52:42" attr="0x20" dir="CHAP6/">SWITCHAR.EXE</file>
+		<file size="706" time="1991-01-24 19:48:42" attr="0x20" dir="CHAP6/">TEST2E.C</file>
+		<file size="7231" time="1991-01-24 19:48:56" attr="0x20" dir="CHAP6/">TEST2E.EXE</file>
+		<file size="2943" time="1991-05-14 02:59:42" attr="0x20" dir="CHAP6/">TSHELL.C</file>
+		<file size="7026" time="1991-05-14 02:58:28" attr="0x20" dir="CHAP6/">TSHELL.COM</file>
+		<file size="704" time="1993-08-30 12:39:34" attr="0x10">CHAP7</file>
+		<file size="17144" time="1988-07-26 00:00:02" attr="0x20" dir="CHAP7/">CMACROS.INC</file>
+		<file size="15289" time="1990-06-17 11:20:52" attr="0x20" dir="CHAP7/">COMMANDS.ASM</file>
+		<file size="16809" time="1990-08-25 01:25:32" attr="0x20" dir="CHAP7/">DIS.ASM</file>
+		<file size="798" time="1990-05-18 17:18:02" attr="0x20" dir="CHAP7/">DOS.INC</file>
+		<file size="1168" time="1990-05-28 16:19:26" attr="0x20" dir="CHAP7/">DOSIO.ASM</file>
+		<file size="9164" time="1990-09-27 00:47:34" attr="0x20" dir="CHAP7/">MON.ASM</file>
+		<file size="5027" time="1990-08-25 01:26:10" attr="0x20" dir="CHAP7/">MON.COM</file>
+		<file size="411" time="1990-09-27 00:53:48" attr="0x20" dir="CHAP7/">MON.MAK</file>
+		<file size="4038" time="1990-06-17 11:26:16" attr="0x20" dir="CHAP7/">MONOIO.ASM</file>
+		<file size="2610" time="1990-08-03 20:23:12" attr="0x20" dir="CHAP7/">ROMIO.ASM</file>
+		<file size="5648" time="1990-09-04 19:53:12" attr="0x20" dir="CHAP7/">ROMMON.COM</file>
+		<file size="497" time="1990-09-27 01:00:08" attr="0x20" dir="CHAP7/">ROMMON.MAK</file>
+		<file size="2820" time="1990-08-03 21:55:04" attr="0x20" dir="CHAP7/">SERIO.ASM</file>
+		<file size="5680" time="1990-09-04 19:52:54" attr="0x20" dir="CHAP7/">SERMON.COM</file>
+		<file size="497" time="1990-09-27 00:54:42" attr="0x20" dir="CHAP7/">SERMON.MAK</file>
+		<file size="6863" time="1990-08-24 21:31:46" attr="0x20" dir="CHAP7/">TRACE.ASM</file>
+		<file size="3841" time="1990-06-16 23:48:10" attr="0x20" dir="CHAP7/">UTIL.ASM</file>
+		<file size="4593" time="1990-07-01 11:21:28" attr="0x20" dir="CHAP7/">WINDBG.ASM</file>
+		<file size="5774" time="1990-08-25 01:26:20" attr="0x20" dir="CHAP7/">WINMON.COM</file>
+		<file size="502" time="1990-09-27 00:59:22" attr="0x20" dir="CHAP7/">WINMON.MAK</file>
+		<file size="416" time="1993-08-30 12:39:42" attr="0x10">CHAP8</file>
+		<file size="45616" time="1990-09-07 09:15:10" attr="0x20" dir="CHAP8/">CMDSPY.EXE</file>
+		<file size="5055" time="1990-09-26 20:51:14" attr="0x20" dir="CHAP8/">DISK.SCR</file>
+		<file size="759" time="1990-09-26 20:54:38" attr="0x20" dir="CHAP8/">EXEC.SCR</file>
+		<file size="1152" time="1990-09-26 20:50:22" attr="0x20" dir="CHAP8/">FOPEN.SCR</file>
+		<file size="8720" time="1990-09-27 00:44:08" attr="0x20" dir="CHAP8/">INTRSPY.DOC</file>
+		<file size="14144" time="1990-09-07 09:15:12" attr="0x20" dir="CHAP8/">INTRSPY.EXE</file>
+		<file size="2089" time="1990-09-26 20:50:48" attr="0x20" dir="CHAP8/">LSTOFLST.SCR</file>
+		<file size="684" time="1990-09-26 20:51:24" attr="0x20" dir="CHAP8/">MEM.SCR</file>
+		<file size="754" time="1990-09-27 01:34:22" attr="0x20" dir="CHAP8/">NETBIOS.SCR</file>
+		<file size="1557" time="1990-09-26 20:50:38" attr="0x20" dir="CHAP8/">UNDOC.SCR</file>
+		<file size="185" time="1990-09-27 01:35:36" attr="0x20" dir="CHAP8/">VEC.SCR</file>
+		<file size="3473" time="1991-05-14 04:04:54" attr="0x20">READ.ME</file>
 	</disk>
-	<disk id="disk05" size="1228800" chs="80:2:15" img="Undocumented_Windows/archive/UNDOC-WIN.img" href="/pubs/pc/programming/Undocumented_Windows/UNDOC-WIN.json" md5="d5b088e7bc68da3741844b3505822a4d" md5json="4199690986b5ac03885e403b66e29058">
+	<disk id="disk05" size="1228800" chs="80:2:15" img="Undocumented_Windows/archive/UNDOC-WIN.img" href="/pubs/pc/programming/Undocumented_Windows/UNDOC-WIN.json" md5="d5b088e7bc68da3741844b3505822a4d" md5json="dd8608a02d96e17d126e715fb4d45e20">
 		<name>Undocumented Windows</name>
+		<file size="3658" time="1992-06-10 03:09:56" attr="0x20">CHAP1.ZIP</file>
+		<file size="35761" time="1992-06-10 03:13:20" attr="0x20">CHAP10.ZIP</file>
+		<file size="205837" time="1992-06-10 03:10:42" attr="0x20">CHAP2.ZIP</file>
+		<file size="18055" time="1992-06-10 03:10:46" attr="0x20">CHAP3.ZIP</file>
+		<file size="119052" time="1992-06-10 03:11:22" attr="0x20">CHAP4.ZIP</file>
+		<file size="211928" time="1992-06-10 03:12:20" attr="0x20">CHAP5.ZIP</file>
+		<file size="92798" time="1992-06-10 03:12:46" attr="0x20">CHAP6.ZIP</file>
+		<file size="50174" time="1992-06-10 03:13:00" attr="0x20">CHAP8.ZIP</file>
+		<file size="15233" time="1992-06-10 03:13:08" attr="0x20">CHAP9.ZIP</file>
+		<file size="728" time="1992-06-09 12:55:44" attr="0x20">INSTALL.BAT</file>
+		<file size="23528" time="1990-03-15 00:10:00" attr="0x20">PKUNZIP.EXE</file>
+		<file size="29473" time="1992-06-10 02:56:52" attr="0x20">READ.ME</file>
+		<file size="55240" time="1992-06-10 03:14:44" attr="0x20">SOURCE.ZIP</file>
+		<file size="67255" time="1992-06-10 03:13:46" attr="0x20">WINIOBC.ZIP</file>
+		<file size="68728" time="1992-06-10 03:14:02" attr="0x20">WINIOMS6.ZIP</file>
+		<file size="107955" time="1992-06-10 03:14:26" attr="0x20">WINIOMS7.ZIP</file>
 	</disk>
 </manifest>
