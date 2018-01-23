@@ -5,7 +5,7 @@ permalink: /pubs/pc/programming/Graphics_for_the_IBM_PC/
 ---
 
 [Graphics for the IBM PC](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/programming/Graphics_for_the_IBM_PC/Graphics_for_the_IBM_PC.pdf)
----
+-------------------------
 by Dan Illowsky and Michael Abrash (1984)
 
 Check out the [Live Demos](demos/) we've created from this classic text.

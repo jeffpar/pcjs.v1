@@ -15,18 +15,18 @@
 		<cover href="archive/The_8086_Book.jpg"/>
 	</document>
 	<disk id="disk01" size="1228800" chs="80:2:15" img="DOS_Internals/archive/DOS-INTERN.img" href="/pubs/pc/programming/DOS_Internals/DOS-INTERN.json" md5="bc8cdc0887473c7cd081107408c12579" md5json="3cf1390937ee6287d46076fac8655bc5">
-		<name>Book: DOS Internals</name>
+		<name>DOS Internals</name>
 	</disk>
 	<disk id="disk02" size="1228800" chs="80:2:15" img="The_Undocumented_PC/archive/UNDOC-PC.img" href="/pubs/pc/programming/The_Undocumented_PC/UNDOC.json" md5="beb02e4594f45a395d43c110759dc3ea" md5json="fdf2d24bb28196b751a58e749a6b0d1a">
-		<name>Book: The Undocumented PC</name>
+		<name>Undocumented PC</name>
 	</disk>
 	<disk id="disk03" size="1228800" chs="80:2:15" img="Undocumented_DOS/archive/UNDOC-DOS-DISK1.img" href="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK1.json" md5="dd9d85065ec27b54055f991ea6bb4968" md5json="67fc8754967ec2588655826a484422f0">
-		<name>Book: Undocumented DOS (Disk 1)</name>
+		<name>Undocumented DOS (Disk 1)</name>
 	</disk>
 	<disk id="disk04" size="1228800" chs="80:2:15" img="Undocumented_DOS/archive/UNDOC-DOS-DISK2.img" href="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK2.json" md5="d35c9141a554b4854bb635173e72a999" md5json="ba92b1ec5bf2ac501736a4f025ce3caf">
-		<name>Book: Undocumented DOS (Disk 2)</name>
+		<name>Undocumented DOS (Disk 2)</name>
 	</disk>
 	<disk id="disk05" size="1228800" chs="80:2:15" img="Undocumented_Windows/archive/UNDOC-WIN.img" href="/pubs/pc/programming/Undocumented_Windows/UNDOC-WIN.json" md5="d5b088e7bc68da3741844b3505822a4d" md5json="4199690986b5ac03885e403b66e29058">
-		<name>Book: Undocumented Windows</name>
+		<name>Undocumented Windows</name>
 	</disk>
 </manifest>

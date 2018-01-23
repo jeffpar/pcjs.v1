@@ -2914,11 +2914,11 @@
 		<disk path="/apps/pcx86/1985/rogue/disk.json">Rogue (1985)</disk>
 		<disk path="/apps/pcx86/1987/thinktank/disk.json">ThinkTank (1987)</disk>
 		<disk path="/apps/pcx86/1992/moria/disk.json">Moria 5.5 (1992)</disk>
-		<disk path="/pubs/pc/programming/DOS_Internals/DOS-INTERN.json">Book: DOS Internals</disk>
-		<disk path="/pubs/pc/programming/The_Undocumented_PC/UNDOC.json">Book: The Undocumented PC</disk>
-		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK1.json">Book: Undocumented DOS (Disk 1)</disk>
-		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK2.json">Book: Undocumented DOS (Disk 2)</disk>
-		<disk path="/pubs/pc/programming/Undocumented_Windows/UNDOC-WIN.json">Book: Undocumented Windows</disk>
+		<disk path="/pubs/pc/programming/DOS_Internals/DOS-INTERN.json">DOS Internals</disk>
+		<disk path="/pubs/pc/programming/The_Undocumented_PC/UNDOC.json">Undocumented PC</disk>
+		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK1.json">Undocumented DOS (Disk 1)</disk>
+		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK2.json">Undocumented DOS (Disk 2)</disk>
+		<disk path="/pubs/pc/programming/Undocumented_Windows/UNDOC-WIN.json">Undocumented Windows</disk>
 		<disk path="/tests/pcx86/vga/VGABIN.json">VGA Tests (Black Book)</disk>
 	</control>
 	<control type="button" binding="loadDisk">Load</control>
