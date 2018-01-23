@@ -9,7 +9,7 @@
 	<releaseDate>August 24, 1995</releaseDate>
 	<disk id="disk00" size="1474560" chs="80:2:18" img="archive/WIN95-BOOT.img" href="/disks/pcx86/windows/win95/4.00.950/WIN95-BOOT.json" md5="4e959d66a4709f7715ca922326a35b71" md5json="43c2049d1c4a313052a2fc5572059775">
 		<name>Windows 95 (RTM Boot)</name>
-		<link href="https://winworldpc.com/product/windows-95/rtm">Windows 95 (Retail Full) (3.5-DMF): BOOTDISK.IMG</link>
+		<link href="https://winworldpc.com/product/windows-95/rtm" name="Windows 95 (Retail Full) (3.5-DMF)" file="BOOTDISK.IMG">WinWorld</link>
 		<file size="25" time="1995-07-11 09:50:00" attr="0x20">AUTOEXEC.BAT</file>
 		<file size="92870" time="1995-07-11 09:50:00" attr="0x20">COMMAND.COM</file>
 		<file size="40" time="1995-07-11 09:50:00" attr="0x20">CONFIG.SYS</file>
@@ -32,7 +32,7 @@
 	</disk>
 	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/WIN95-DISK01.img" href="/disks/pcx86/windows/win95/4.00.950/WIN95-DISK01.json" md5="17d39ecce9379dd5d8c202b9d8bd1688" md5json="c96c91b291cc5aa2b1f2d47bd8f0a8a0">
 		<name>Windows 95 (RTM Disk 01)</name>
-		<link href="https://winworldpc.com/product/windows-95/rtm">Windows 95 (Retail Full) (3.5-DMF): DISK01.IMG</link>
+		<link href="https://winworldpc.com/product/windows-95/rtm" name="Windows 95 (Retail Full) (3.5-DMF)" file="DISK01.IMG">WinWorld</link>
 		<file size="496" time="1995-07-11 09:50:00" attr="0x20">DELTEMP.COM</file>
 		<file size="72246" time="1995-07-11 09:50:00" attr="0x20">DOSSETUP.BIN</file>
 		<file size="46656" time="1995-07-11 09:50:00" attr="0x20">EXTRACT.EXE</file>
@@ -52,63 +52,63 @@
 	</disk>
 	<disk id="disk02" size="1720320" chs="80:2:21" img="archive/WIN95-DISK02.img" href="/disks/pcx86/windows/win95/4.00.950/WIN95-DISK02.json" md5="8f56a49fa1410f30ada822e1d9898f09" md5json="42cd04efc60d4d4e3dc4223cb8f6c383">
 		<name>Windows 95 (RTM Disk 02)</name>
-		<link href="https://winworldpc.com/product/windows-95/rtm">Windows 95 (Retail Full) (3.5-DMF): DISK02.IMG</link>
+		<link href="https://winworldpc.com/product/windows-95/rtm" name="Windows 95 (Retail Full) (3.5-DMF)" file="DISK02.IMG">WinWorld</link>
 		<file size="1042774" time="1995-07-11 09:50:00" attr="0x20">PRECOPY2.CAB</file>
 		<file size="657408" time="1995-07-11 09:50:00" attr="0x20">WIN95_02.CAB</file>
 	</disk>
 	<disk id="disk03" size="1720320" chs="80:2:21" img="archive/WIN95-DISK03.img" href="/disks/pcx86/windows/win95/4.00.950/WIN95-DISK03.json" md5="5afc77ef74b725ee469756f4f288a563" md5json="ecdee403bd88e65d62e09f943b8715a6">
 		<name>Windows 95 (RTM Disk 03)</name>
-		<link href="https://winworldpc.com/product/windows-95/rtm">Windows 95 (Retail Full) (3.5-DMF): DISK03.IMG</link>
+		<link href="https://winworldpc.com/product/windows-95/rtm" name="Windows 95 (Retail Full) (3.5-DMF)" file="DISK03.IMG">WinWorld</link>
 		<file size="1716224" time="1995-07-11 09:50:00" attr="0x20">WIN95_03.CAB</file>
 	</disk>
 	<disk id="disk04" size="1720320" chs="80:2:21" img="archive/WIN95-DISK04.img" href="/disks/pcx86/windows/win95/4.00.950/WIN95-DISK04.json" md5="69381a10fe9dd6c2230fe0720f21518a" md5json="ee0710614efaa30a8edbf6c72964e4e8">
 		<name>Windows 95 (RTM Disk 04)</name>
-		<link href="https://winworldpc.com/product/windows-95/rtm">Windows 95 (Retail Full) (3.5-DMF): DISK04.IMG</link>
+		<link href="https://winworldpc.com/product/windows-95/rtm" name="Windows 95 (Retail Full) (3.5-DMF)" file="DISK04.IMG">WinWorld</link>
 		<file size="1716224" time="1995-07-11 09:50:00" attr="0x20">WIN95_04.CAB</file>
 	</disk>
 	<disk id="disk05" size="1720320" chs="80:2:21" img="archive/WIN95-DISK05.img" href="/disks/pcx86/windows/win95/4.00.950/WIN95-DISK05.json" md5="3f7398aa89d837b530a7110f8c2f33b6" md5json="6eacc325af3f0ccb5d39227557e4f986">
 		<name>Windows 95 (RTM Disk 05)</name>
-		<link href="https://winworldpc.com/product/windows-95/rtm">Windows 95 (Retail Full) (3.5-DMF): DISK05.IMG</link>
+		<link href="https://winworldpc.com/product/windows-95/rtm" name="Windows 95 (Retail Full) (3.5-DMF)" file="DISK05.IMG">WinWorld</link>
 		<file size="1716224" time="1995-07-11 09:50:00" attr="0x20">WIN95_05.CAB</file>
 	</disk>
 	<disk id="disk06" size="1720320" chs="80:2:21" img="archive/WIN95-DISK06.img" href="/disks/pcx86/windows/win95/4.00.950/WIN95-DISK06.json" md5="5f1d1b9c99b470fbfe3dda3eafbf9f2a" md5json="aeeb9065cdb292c25b65e0b9d742c7ad">
 		<name>Windows 95 (RTM Disk 06)</name>
-		<link href="https://winworldpc.com/product/windows-95/rtm">Windows 95 (Retail Full) (3.5-DMF): DISK06.IMG</link>
+		<link href="https://winworldpc.com/product/windows-95/rtm" name="Windows 95 (Retail Full) (3.5-DMF)" file="DISK06.IMG">WinWorld</link>
 		<file size="1716224" time="1995-07-11 09:50:00" attr="0x20">WIN95_06.CAB</file>
 	</disk>
 	<disk id="disk07" size="1720320" chs="80:2:21" img="archive/WIN95-DISK07.img" href="/disks/pcx86/windows/win95/4.00.950/WIN95-DISK07.json" md5="10ec2f27c8d9cf045d86ebb80eee0f5a" md5json="1c9ae96d2ba5a4586211b05072f1c448">
 		<name>Windows 95 (RTM Disk 07)</name>
-		<link href="https://winworldpc.com/product/windows-95/rtm">Windows 95 (Retail Full) (3.5-DMF): DISK07.IMG</link>
+		<link href="https://winworldpc.com/product/windows-95/rtm" name="Windows 95 (Retail Full) (3.5-DMF)" file="DISK07.IMG">WinWorld</link>
 		<file size="1716224" time="1995-07-11 09:50:00" attr="0x20">WIN95_07.CAB</file>
 	</disk>
 	<disk id="disk08" size="1720320" chs="80:2:21" img="archive/WIN95-DISK08.img" href="/disks/pcx86/windows/win95/4.00.950/WIN95-DISK08.json" md5="4a58f3b694810064f9a42ed0ab19c9a5" md5json="ae52620cfa0e7f4a2e99b2ff4e137893">
 		<name>Windows 95 (RTM Disk 08)</name>
-		<link href="https://winworldpc.com/product/windows-95/rtm">Windows 95 (Retail Full) (3.5-DMF): DISK08.IMG</link>
+		<link href="https://winworldpc.com/product/windows-95/rtm" name="Windows 95 (Retail Full) (3.5-DMF)" file="DISK08.IMG">WinWorld</link>
 		<file size="1716224" time="1995-07-11 09:50:00" attr="0x20">WIN95_08.CAB</file>
 	</disk>
 	<disk id="disk09" size="1720320" chs="80:2:21" img="archive/WIN95-DISK09.img" href="/disks/pcx86/windows/win95/4.00.950/WIN95-DISK09.json" md5="c650dc82cc71628c5844d1ffc55beafe" md5json="e61df46d1d43fbca4f003928208e725e">
 		<name>Windows 95 (RTM Disk 09)</name>
-		<link href="https://winworldpc.com/product/windows-95/rtm">Windows 95 (Retail Full) (3.5-DMF): DISK09.IMG</link>
+		<link href="https://winworldpc.com/product/windows-95/rtm" name="Windows 95 (Retail Full) (3.5-DMF)" file="DISK09.IMG">WinWorld</link>
 		<file size="1716224" time="1995-07-11 09:50:00" attr="0x20">WIN95_09.CAB</file>
 	</disk>
 	<disk id="disk10" size="1720320" chs="80:2:21" img="archive/WIN95-DISK10.img" href="/disks/pcx86/windows/win95/4.00.950/WIN95-DISK10.json" md5="77a1a583015d4fb117db147244a99c70" md5json="0a0e76ca770a28f842b84be811bdc57c">
 		<name>Windows 95 (RTM Disk 10)</name>
-		<link href="https://winworldpc.com/product/windows-95/rtm">Windows 95 (Retail Full) (3.5-DMF): DISK10.IMG</link>
+		<link href="https://winworldpc.com/product/windows-95/rtm" name="Windows 95 (Retail Full) (3.5-DMF)" file="DISK10.IMG">WinWorld</link>
 		<file size="1716224" time="1995-07-11 09:50:00" attr="0x20">WIN95_10.CAB</file>
 	</disk>
 	<disk id="disk11" size="1720320" chs="80:2:21" img="archive/WIN95-DISK11.img" href="/disks/pcx86/windows/win95/4.00.950/WIN95-DISK11.json" md5="3ead4acf033c6073faa65fbad733be8b" md5json="f8cd5371caeabcbbf4d883d025c6409a">
 		<name>Windows 95 (RTM Disk 11)</name>
-		<link href="https://winworldpc.com/product/windows-95/rtm">Windows 95 (Retail Full) (3.5-DMF): DISK11.IMG</link>
+		<link href="https://winworldpc.com/product/windows-95/rtm" name="Windows 95 (Retail Full) (3.5-DMF)" file="DISK11.IMG">WinWorld</link>
 		<file size="1716224" time="1995-07-11 09:50:00" attr="0x20">WIN95_11.CAB</file>
 	</disk>
 	<disk id="disk12" size="1720320" chs="80:2:21" img="archive/WIN95-DISK12.img" href="/disks/pcx86/windows/win95/4.00.950/WIN95-DISK12.json" md5="69f46db298c5395383abf9a3074e1507" md5json="a4af40ab1e1a605150d9593e2ac5d674">
 		<name>Windows 95 (RTM Disk 12)</name>
-		<link href="https://winworldpc.com/product/windows-95/rtm">Windows 95 (Retail Full) (3.5-DMF): DISK12.IMG</link>
+		<link href="https://winworldpc.com/product/windows-95/rtm" name="Windows 95 (Retail Full) (3.5-DMF)" file="DISK12.IMG">WinWorld</link>
 		<file size="1716224" time="1995-07-11 09:50:00" attr="0x20">WIN95_12.CAB</file>
 	</disk>
 	<disk id="disk13" size="1720320" chs="80:2:21" img="archive/WIN95-DISK13.img" href="/disks/pcx86/windows/win95/4.00.950/WIN95-DISK13.json" md5="8fb85e80ede0dbaa9c497e4968a7666f" md5json="b3d02aba740aa58948e51d723148c89a">
 		<name>Windows 95 (RTM Disk 13)</name>
-		<link href="https://winworldpc.com/product/windows-95/rtm">Windows 95 (Retail Full) (3.5-DMF): DISK13.IMG</link>
+		<link href="https://winworldpc.com/product/windows-95/rtm" name="Windows 95 (Retail Full) (3.5-DMF)" file="DISK13.IMG">WinWorld</link>
 		<file size="981813" time="1995-07-11 09:50:00" attr="0x20">WIN95_13.CAB</file>
 	</disk>
 	<disk id="disk14" size="1474560" chs="80:2:18" img="archive/WIN95-STARTUP.img" href="/disks/pcx86/windows/win95/4.00.950/WIN95-STARTUP.json" md5="897a5732299fb2a00598a972000f3e73" md5json="d4c5265cb385f9ed5df1b78516cbf8bf">
