@@ -23,8 +23,8 @@ parameters are identical in both types of machines:
 - 6 heads
 - 17 sectors/track
 
-which yields a capacity of 49,090,560 bytes (940 * 6 * 17 * 512), or approximately 47Mb, since 1 megabyte (as
-it was understood in 1988) is equal to 1,048,576 bytes.
+yielding a capacity of 49,090,560 bytes (940 * 6 * 17 * 512), or approximately 47Mb
+(since PCjs considers 1 megabyte to be 1,048,576 bytes).
 
 ---
 

@@ -2670,10 +2670,8 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
  *
  * Apparently, in 1998, it was decided that a kilobyte should be 1,000 bytes and a megabyte should be 1,000,000 bytes,
  * and that if you really meant 2^10 (1,024) or 2^20 (1,048,576), you should use "kibibyte" (KiB) or "mebibyte" (MiB)
- * instead.  But since PCjs simulates machines that pre-date 1998, I have chosen to retain the original understanding
- * of Kb and Mb; I never use KiB or MiB.  Besides, I suspect these changes were little more than a self-serving push
- * by hard drive manufacturers who wanted to exaggerate their disk capacities by dividing total drive space by 1,000,000
- * rather than 1,048,576. 
+ * instead.  But since PCjs simulates machines that pre-date 1998, I have chosen to retain the more "traditional"
+ * understanding of Kb and Mb; I never use KiB or MiB. 
  */
 
 /*

@@ -1403,6 +1403,22 @@ class Web {
     }
 
     /**
+     * alertUser(sMessage)
+     * 
+     * NOTE: Legacy function for older modules (eg, DiskDump); see Component.alertUser().
+     *
+     * @param {string} sMessage
+     */
+    static alertUser(sMessage)
+    {
+        if (window) {
+            window.alert(sMessage);
+        } else {
+            Web.log(sMessage);
+        }
+    }
+
+    /**
      * getResource(sURL, dataPost, fAsync, done, progress)
      *
      * Request the specified resource (sURL), and once the request is complete, notify done().
@@ -2646,7 +2662,7 @@ class Component {
         } else {
             Component.log(sMessage);
         }
-    };
+    }
 
     /**
      * Component.confirmUser(sPrompt)

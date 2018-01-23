@@ -371,7 +371,7 @@ class Component {
         } else {
             Component.log(sMessage);
         }
-    };
+    }
 
     /**
      * Component.confirmUser(sPrompt)

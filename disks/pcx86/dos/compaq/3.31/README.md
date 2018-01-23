@@ -9,16 +9,16 @@ machines:
     config: /devices/pcx86/machine/compaq/deskpro386/ega/2048kb/debugger/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK1.json
+        name: COMPAQ MS-DOS 3.31 (Disk 1: FASTART)
       B:
-        path: /disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json
+        name: None
     autoStart: true
 ---
 
 COMPAQ MS-DOS 3.31
 ------------------
 
-Released in 1988 by COMPAQ Computer Corp, this version of MS-DOS displays the following messages on boot:
+Released in late 1987 by COMPAQ Computer Corp, this version of MS-DOS displays the following messages on boot:
 
 	The COMPAQ Personal Computer MS-DOS
 	Version 3.31
@@ -26,11 +26,57 @@ Released in 1988 by COMPAQ Computer Corp, this version of MS-DOS displays the fo
 	(C) Copyright Compaq Computer Corp. 1982, 1988
 	(C) Copyright Microsoft Corp. 1981, 1987
 
+This version pioneered support for 32-bit logical sector numbers and thus partitions larger than 32MB. The same support
+appeared a few months later in DOS 4.0 and OS/2 1.1.
+
 [Directory Listings](#directory-of-compaq-ms-dos-331-disk-1) of the distribution diskettes are provided below.
+
+The first five disks come from [WinWorld](https://winworldpc.com/product/ms-dos/331)
+(see "Microsoft MS-DOS 3.31 [Compaq OEM] (3.5-720k)"), and of those five, the first three appear to be original,
+with all files dated October 1988.
+
+Disk 4, the COMPAQ "USER PROGRAMS" diskette, was part of a COMPAQ MS-DOS 4.01 release, with hidden MS-DOS files dated
+April 1989 and other distribution files dated July 1989, along with a few random user-generated files with later dates.
+
+As the README.CPQ file on that diskette explains:
+
+    The software provided on this diskette supercedes earlier versions  
+    of the software located on MS-DOS(R) as published by Compaq Computer
+    Corporation or other USER PROGRAMS diskettes.  Software for use with
+    Microsoft(R) Operating System/2 can be found in the OS2 directory.  
+    Software for use only with MS-DOS(R) versions 3.31 and earlier can  
+    be found in the DOS331 directory.                                   
+                                                                        
+    This software enables you to take advantage of specific capabilities
+    of your computer.  Refer to the individual software files located on
+    this diskette for specific version or date information.             
+                                                                        
+    Additional information concerning the files on this diskette can    
+    be obtained by referring to the User Programs Reference, or the     
+    Supplemental Software Guide, or by booting this diskette, typing    
+    HELP at the A> prompt, and then pressing the ENTER key.             
+
+So, despite the evidence that this particular disk was not part of a COMPAQ MS-DOS 3.31 release, we're keeping
+it here until an earlier version of the "USER PROGRAMS" diskette is located, since COMPAQ does state that this disk
+"supersedes earlier versions", and since the `FASTART` program on Disk 1 expects a "USER PROGRAMS" disk.
+
+Disk 5, the COMPAQ "USER DIAGNOSTICS, SETUP AND INSPECT" diskette, which contains SETUP v6.08, TEST v6.12, and
+INSPECT v1.02, has files dated June 1989.
+
+A separate 360Kb disk image ("SETUP 5.05") from the PCjs Archives has been included here as well, because it contains
+hidden MS-DOS 3.31 files dated September 1987 that display a slightly different boot message:
+
+    The COMPAQ Personal Computer MS-DOS 
+    Version 3.31
+                              
+    (C) Copyright Compaq Computer Corp. 1982, 1987                             
+    (C) Copyright Microsoft Corp. 1981, 1987   
+
+making it clear that COMPAQ MS-DOS 3.31 existed more than a year before the above distribution disks were created.
 
 {% include machine.html id="deskpro386" %}
 
-### Directory of COMPAQ MS-DOS 3.31 (Disk 1)
+### Directory of COMPAQ MS-DOS 3.31 (Disk 1: FASTART)
 
 	 Volume in drive A is FASTART    
 
@@ -50,7 +96,7 @@ Released in 1988 by COMPAQ Computer Corp, this version of MS-DOS displays the fo
 	        8 file(s)     337865 bytes
 	                      387072 bytes free
 
-### Directory of COMPAQ MS-DOS 3.31 (Disk 2)
+### Directory of COMPAQ MS-DOS 3.31 (Disk 2: STARTUP)
 
 	 Volume in drive A is STARTUP    
 
@@ -83,7 +129,7 @@ Released in 1988 by COMPAQ Computer Corp, this version of MS-DOS displays the fo
 	       21 file(s)     337505 bytes
 	                      382976 bytes free
 
-### Directory of COMPAQ MS-DOS 3.31 (Disk 3)
+### Directory of COMPAQ MS-DOS 3.31 (Disk 3: OPERATING)
 
 	 Volume in drive A is OPERATING  
 
@@ -135,25 +181,7 @@ Released in 1988 by COMPAQ Computer Corp, this version of MS-DOS displays the fo
 	       40 file(s)     478242 bytes
 	                      231424 bytes free
 
-### Directory of COMPAQ MS-DOS 3.31 (Disk 4)
-
-	 Volume in drive A has no label
-
-	Directory of A:\
-
-	DIAG     CPQ      8320 06-21-89  12:00p
-	USER     EXE    243296 06-21-89  12:00p
-	TEST     COM      2576 06-21-89  12:00p
-	SETUP    EXE     84992 06-21-89  12:00p
-	INSPECT  EXE     59392 06-21-89  12:00p
-	README   CPQ      1849 06-21-89  12:00p
-	        6 file(s)     400425 bytes
-
-	Total files listed:
-	        6 file(s)     400425 bytes
-	                      327680 bytes free
-
-### Directory of COMPAQ MS-DOS 3.31 (Disk 5)
+### Directory of COMPAQ MS-DOS 3.31 (Disk 4: USER)
 
 	 Volume in drive A is USER 072789
 	 Volume Serial Number is 10D5-0C56
@@ -215,20 +243,38 @@ Released in 1988 by COMPAQ Computer Corp, this version of MS-DOS displays the fo
 	       41 file(s)     593971 bytes
 	                      118784 bytes free
 
-### Directory of COMPAQ MS-DOS 3.31 (Diagnostics)
+### Directory of COMPAQ MS-DOS 3.31 (SETUP 6.08)
 
 	 Volume in drive A has no label
 
 	Directory of A:\
 
-	IBMBIO   COM     23591 09-16-87  12:00p
-	IBMDOS   COM     30632 09-16-87  12:00p
-	COMMAND  COM     25332 09-16-87  12:00p
-	AUTOEXEC BAT        33 01-29-88  12:00p
-	CONFIG   SYS        12 01-29-88  12:00p
-	DISKCOPY COM      6264 09-16-87  12:00p
+	DIAG     CPQ      8320 06-21-89  12:00p
+	USER     EXE    243296 06-21-89  12:00p
+	TEST     COM      2576 06-21-89  12:00p
+	SETUP    EXE     84992 06-21-89  12:00p
+	INSPECT  EXE     59392 06-21-89  12:00p
+	README   CPQ      1849 06-21-89  12:00p
+	        6 file(s)     400425 bytes
+
+	Total files listed:
+	        6 file(s)     400425 bytes
+	                      327680 bytes free
+
+### Directory of COMPAQ MS-DOS 3.31 (SETUP 5.05)
+
+	 Volume in drive A has no label
+
+	Directory of A:\
+
+	IBMBIO   COM     23591 09-16-87  12:00p     HIDDEN
+	IBMDOS   COM     30632 09-16-87  12:00p     HIDDEN
+	COMMAND  COM     25332 09-16-87  12:00p     HIDDEN
+	AUTOEXEC BAT        33 01-29-88  12:00p     HIDDEN
+	CONFIG   SYS        12 01-29-88  12:00p     HIDDEN
+	DISKCOPY COM      6264 09-16-87  12:00p     HIDDEN
 	ROMREV   COM      1248 01-29-88  12:00p
-	USER     EXE    193264 01-29-88  12:00p
+	USER     EXE    193264 01-29-88  12:00p     HIDDEN
 	TEST     COM      1984 01-29-88  12:00p
 	SETUP    EXE     39968 01-29-88  12:00p
 	README   CPQ      1464 01-29-88  12:00p

@@ -9,7 +9,7 @@
 	<ram id="ramExt" addr="0x100000" size="0x100000" comment="Extended memory at 0x100000"/>
 	<rom id="romBIOS" addr="0xf8000" size="0x8000" alias="[0xf0000,0xffff0000,0xffff8000]" file="/devices/pcx86/rom/compaq/deskpro386/1986-09-04/1986-09-04-HI.json"/>
 	<video ref="/devices/pcx86/video/ibm/ega/1984-09-13/128kb-autolockfs.xml"/>
-	<fdc ref="/disks/pcx86/compiled/library.xml" autoMount='{A: {name: "COMPAQ MS-DOS 3.31 (Disk 1)"}, B: {name: "None"}}'/>
+	<fdc ref="/disks/pcx86/compiled/library.xml" autoMount='{A: {name: "COMPAQ MS-DOS 3.31 (Disk 1: FASTART)"}, B: {name: "None"}}'/>
 	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-arrows.xml"/>
 	<debugger id="debugger" messages="" commands=""/>
 	<panel ref="/devices/pcx86/panel/wide386.xml"/>

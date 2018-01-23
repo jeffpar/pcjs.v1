@@ -1591,7 +1591,6 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
         var sDir = sImage.replace(/\.(img|json)/, "");
         if (sDir != sImage) {
             sDir = sDir + path.sep;
-            var today = new Date();
             var asFiles = glob.sync(sDir + "**");
             for (var i = 0; i < asFiles.length; i++) {
                 var sFile = asFiles[i];
@@ -1602,27 +1601,54 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
                 var stats = fs.statSync(sFile);
                 fileInfo.FILE_ATTR = stats.isDirectory()? DiskDump.ATTR_SUBDIR : DiskDump.ATTR_ARCHIVE;
                 fileInfo.FILE_SIZE = stats.size;
-                fileInfo.FILE_TIME = stats.mtime;
-                /*
-                 * This is a hack to determine if we're currently outside of Daylight Savings Time (assumes Pacific time zone).
-                 * If we are, then reduce the modification times of these FAT file system entries by one additional hour.  This was
-                 * necessary to obtain the correct timestamps for files on the Lotus 1-2-3 Release 1A diskettes, whose files we
-                 * know had timestamps of 1:23am (from June 1983, when DST was presumably in effect), yet are being interpreted as
-                 * 2:23am when mounted by an operating system running outside of Daylight Savings Time.
-                 * 
-                 * TODO: Determine whether the operating system is to blame.  For legacy file systems, shouldn't the timestamps
-                 * be interpreted according to the DST settings that were in effect at the time the files were originally created?
-                 * And regardless of who's to blame, what should I really be doing?  Do I need to also check the timestamps and
-                 * determine whether they are inside or outside DST as well?
-                 */
-                // if (today.getTimezoneOffset() == 480) {
-                //     fileInfo.FILE_TIME.setHours(fileInfo.FILE_TIME.getHours() - 1);
-                // }
+                fileInfo.FILE_TIME = this.getDSTAdjustedTime(stats.mtime);
                 this.validateTime(fileInfo.FILE_TIME);
                 this.addManifestInfo(fileInfo);
             }
         }
     }
+};
+
+/**
+ * isDST(time)
+ *
+ * See: https://stackoverflow.com/questions/11887934/how-to-check-if-the-dst-daylight-saving-time-is-in-effect-and-if-it-is-whats
+ * 
+ * NOTE: This code uses the fact that getTimezoneOffset() returns different values inside and outside of DST,
+ * and compares the difference between the two (for example, New York returns -5 outside DST and -4 inside DST).
+ *
+ * @this {DiskDump}
+ * @param {Date} time
+ * @return {number} (1 if time is INSIDE Daylight Savings Time, 0 if OUTSIDE)
+ */
+DiskDump.prototype.isDST = function(time)
+{
+    var jan = new Date(time.getFullYear(), 0, 1);
+    var jul = new Date(time.getFullYear(), 6, 1);
+    return time.getTimezoneOffset() < Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset())? 1 : 0;
+};
+
+/**
+ * getDSTAdjustedTime(time)
+ *
+ * To compensate for the fact that modern operating systems (eg, macOS) like to apply a DST bias to file times
+ * inside FAT volumes, we attempt to remove that bias as follows: if "today" is INSIDE DST, then any file time
+ * OUTSIDE DST should have its hour adjusted by +1; conversely, if "today" is OUTSIDE DST, then any file time
+ * INSIDE DST should have its hour adjusted by -1.
+ *
+ * So, we have defined a function, isDST(time), which returns 1 for INSIDE and 0 for OUTSIDE; thus, the appropriate
+ * hour delta is simply "isDST(today) - isDST(time)".
+ *
+ * @this {DiskDump}
+ * @param {Date} time (ie, some local file time)
+ * @return {Date}
+ */
+DiskDump.prototype.getDSTAdjustedTime = function(time)
+{
+    var today = new Date();
+    var delta = this.isDST(today) - this.isDST(time);
+    if (delta) time.setHours(time.getHours() + delta);
+    return time;
 };
 
 /**

@@ -8,7 +8,8 @@
 	<author>Microsoft/COMPAQ</author>
 	<releaseDate/>
 	<disk id="disk01" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-DISK1.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK1.json" md5="4f4dd586446048d44b831d4495c7e9f9" md5json="8d51ba40eea6eae0b3eefdda8d4a13b2">
-		<name>COMPAQ MS-DOS 3.31 (Disk 1)</name>
+		<name>COMPAQ MS-DOS 3.31 (Disk 1: FASTART)</name>
+		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM] (3.5-720k)" file="Disk1.img">WinWorld</link>
 		<file size="11" time="1988-10-14 12:00:00" attr="0x20">AUTOEXEC.BAT</file>
 		<file size="25332" time="1988-10-03 12:00:00" attr="0x20">COMMAND.COM</file>
 		<file size="46" time="1988-10-14 12:00:00" attr="0x20">CONFIG.SYS</file>
@@ -19,7 +20,8 @@
 		<file size="30648" time="1988-10-03 12:00:00" attr="0x20">IBMDOS.COM</file>
 	</disk>
 	<disk id="disk02" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-DISK2.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json" md5="609fb88433723695cc45395ade571ad2" md5json="aed7f9a150d9ce2d12b90a834a74688f">
-		<name>COMPAQ MS-DOS 3.31 (Disk 2)</name>
+		<name>COMPAQ MS-DOS 3.31 (Disk 2: STARTUP)</name>
+		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM] (3.5-720k)" file="Disk2.img">WinWorld</link>
 		<file size="1709" time="1988-10-03 12:00:00" attr="0x20">ANSI.SYS</file>
 		<file size="1787" time="1988-10-03 12:00:00" attr="0x20">CLOCK.SYS</file>
 		<file size="25332" time="1988-10-03 12:00:00" attr="0x20">COMMAND.COM</file>
@@ -43,7 +45,8 @@
 		<file size="11216" time="1988-10-03 12:00:00" attr="0x20">XCOPY.EXE</file>
 	</disk>
 	<disk id="disk03" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-DISK3.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK3.json" md5="e9de92ca679b7c341b151b5ecd3a0720" md5json="5f0feb96e46d78005f1ef6f461013491">
-		<name>COMPAQ MS-DOS 3.31 (Disk 3)</name>
+		<name>COMPAQ MS-DOS 3.31 (Disk 3: OPERATING)</name>
+		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM] (3.5-720k)" file="Disk3.img">WinWorld</link>
 		<file size="17089" time="1988-10-03 12:00:00" attr="0x20">4201.CPI</file>
 		<file size="459" time="1988-10-03 12:00:00" attr="0x20">5202.CPI</file>
 		<file size="5794" time="1988-10-03 12:00:00" attr="0x20">APPEND.EXE</file>
@@ -85,18 +88,10 @@
 		<file size="660" time="1988-10-03 12:00:00" attr="0x20">WORDS</file>
 		<file size="11216" time="1988-10-03 12:00:00" attr="0x20">XCOPY.EXE</file>
 	</disk>
-	<disk id="disk04" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-DISK4.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK4.json" md5="92c26885c372db846ce990fb5e16c745" md5json="4f09c8fd5382203ff49950b3308efea4">
-		<name>COMPAQ MS-DOS 3.31 (Disk 4)</name>
-		<file size="8320" time="1989-06-21 12:00:00" attr="0x20">DIAG.CPQ</file>
-		<file size="59392" time="1989-06-21 12:00:00" attr="0x20">INSPECT.EXE</file>
-		<file size="1849" time="1989-06-21 12:00:00" attr="0x20">README.CPQ</file>
-		<file size="84992" time="1989-06-21 12:00:00" attr="0x20">SETUP.EXE</file>
-		<file size="2576" time="1989-06-21 12:00:00" attr="0x20">TEST.COM</file>
-		<file size="243296" time="1989-06-21 12:00:00" attr="0x20">USER.EXE</file>
-	</disk>
-	<disk id="disk05" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-DISK5.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK5.json" md5="18acab24603ac511d11fd3cbac9780ed" md5json="81ef2ab455bca4a4c50aea32e39be05d">
-		<name>COMPAQ MS-DOS 3.31 (Disk 5)</name>
-		<file size="4" time="1980-01-01 00:00:02" attr="0x20">ADAPT.CFG</file>
+	<disk id="disk04" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-DISK4.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK4.json" md5="18acab24603ac511d11fd3cbac9780ed" md5json="81ef2ab455bca4a4c50aea32e39be05d">
+		<name>COMPAQ MS-DOS 3.31 (Disk 4: USER)</name>
+		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM] (3.5-720k)" file="Disk5.img">WinWorld</link>
+		<file size="4" time="1980-01-01 00:15:14" attr="0x20">ADAPT.CFG</file>
 		<file size="18514" time="1989-07-27 12:00:00" attr="0x20">ADAPT.COM</file>
 		<file size="33" time="1989-07-27 12:00:00" attr="0x20">AUTOEXEC.BAT</file>
 		<file size="26210" time="1989-07-27 12:00:00" attr="0x20">CACHE.EXE</file>
@@ -108,7 +103,7 @@
 		<file size="37667" time="1989-04-05 12:00:00" attr="0x20">COMMAND.COM</file>
 		<file size="0" time="1989-09-17 13:43:00" attr="0x20">CONFIG.SYS</file>
 		<file size="890" time="1989-09-11 08:09:20" attr="0x20">DOS</file>
-		<file size="102" time="1989-07-27 12:00:02" attr="0x10">DOS331</file>
+		<file size="96" time="1989-07-27 12:00:02" attr="0x10">DOS331</file>
 		<file size="15194" time="1989-07-27 12:00:00" attr="0x20" dir="DOS331/">MODE.COM</file>
 		<file size="39448" time="1989-07-27 12:00:00" attr="0x20">HELP.COM</file>
 		<file size="33688" time="1989-04-05 12:00:00" attr="0x20">IBMBIO.COM</file>
@@ -119,7 +114,7 @@
 		<file size="41144" time="1989-07-27 12:00:00" attr="0x20">KEYBOARD.SYS</file>
 		<file size="18840" time="1989-07-27 12:00:00" attr="0x20">KP.COM</file>
 		<file size="28136" time="1989-07-27 12:00:00" attr="0x20">MODE.COM</file>
-		<file size="204" time="1989-07-27 12:00:00" attr="0x10">OS2</file>
+		<file size="192" time="1989-07-27 12:00:00" attr="0x10">OS2</file>
 		<file size="18840" time="1989-07-27 12:00:00" attr="0x20" dir="OS2/">KP.COM</file>
 		<file size="17462" time="1989-07-27 12:00:00" attr="0x20" dir="OS2/">MOUSEA05.SYS</file>
 		<file size="37084" time="1989-07-27 12:00:00" attr="0x20" dir="OS2/">PWRCON.COM</file>
@@ -134,24 +129,116 @@
 		<file size="2048" time="1989-07-27 12:00:00" attr="0x20">THINUS.F8</file>
 		<file size="7946" time="1989-07-27 12:00:00" attr="0x20">VDISK.SYS</file>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" img="archive/COMPAQ-DOS331-DIAG.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DIAG.json" md5="a23cc98d904e01e233c9682b4d1cf413" md5json="658e35ede4a47db9ed85f97d98ab7cf8">
-		<name>COMPAQ MS-DOS 3.31 (Diags)</name>
-		<file size="70" time="1988-01-29 11:00:00" attr="0x20">1.BAT</file>
-		<file size="71" time="1988-01-29 11:00:00" attr="0x20">2.BAT</file>
-		<file size="72" time="1988-01-29 11:00:00" attr="0x20">3.BAT</file>
-		<file size="33" time="1988-01-29 11:00:00" attr="0x20">AUTOEXEC.BAT</file>
+	<disk id="disk05" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-SETUP608.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-SETUP608.json" md5="92c26885c372db846ce990fb5e16c745" md5json="4f09c8fd5382203ff49950b3308efea4">
+		<name>COMPAQ MS-DOS 3.31 (SETUP 6.08)</name>
+		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM] (3.5-720k)" file="Disk4.img">WinWorld</link>
+		<file size="8320" time="1989-06-21 12:00:00" attr="0x20">DIAG.CPQ</file>
+		<file size="59392" time="1989-06-21 12:00:00" attr="0x20">INSPECT.EXE</file>
+		<file size="1849" time="1989-06-21 12:00:00" attr="0x20">README.CPQ</file>
+		<file size="84992" time="1989-06-21 12:00:00" attr="0x20">SETUP.EXE</file>
+		<file size="2576" time="1989-06-21 12:00:00" attr="0x20">TEST.COM</file>
+		<file size="243296" time="1989-06-21 12:00:00" attr="0x20">USER.EXE</file>
+	</disk>
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/COMPAQ-DOS331-SETUP505.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-SETUP505.json" md5="a23cc98d904e01e233c9682b4d1cf413" md5json="658e35ede4a47db9ed85f97d98ab7cf8">
+		<name>COMPAQ MS-DOS 3.31 (SETUP 5.05)</name>
+		<file size="70" time="1988-01-29 12:00:00" attr="0x20">1.BAT</file>
+		<file size="71" time="1988-01-29 12:00:00" attr="0x20">2.BAT</file>
+		<file size="72" time="1988-01-29 12:00:00" attr="0x20">3.BAT</file>
+		<file size="33" time="1988-01-29 12:00:00" attr="0x20">AUTOEXEC.BAT</file>
 		<file size="25332" time="1987-09-16 12:00:00" attr="0x20">COMMAND.COM</file>
-		<file size="12" time="1988-01-29 11:00:00" attr="0x20">CONFIG.SYS</file>
+		<file size="12" time="1988-01-29 12:00:00" attr="0x20">CONFIG.SYS</file>
 		<file size="6264" time="1987-09-16 12:00:00" attr="0x20">DISKCOPY.COM</file>
 		<file size="23591" time="1987-09-16 12:00:00" attr="0x20">IBMBIO.COM</file>
 		<file size="30632" time="1987-09-16 12:00:00" attr="0x20">IBMDOS.COM</file>
-		<file size="1464" time="1988-01-29 11:00:00" attr="0x20">README.CPQ</file>
-		<file size="1248" time="1988-01-29 11:00:00" attr="0x20">ROMREV.COM</file>
-		<file size="518" time="1988-01-29 11:00:00" attr="0x20">ROMREV.SCR</file>
-		<file size="39968" time="1988-01-29 11:00:00" attr="0x20">SETUP.EXE</file>
-		<file size="652" time="1988-01-29 11:00:00" attr="0x20">SETUP.SCR</file>
-		<file size="1984" time="1988-01-29 11:00:00" attr="0x20">TEST.COM</file>
-		<file size="549" time="1988-01-29 11:00:00" attr="0x20">TEST.SCR</file>
-		<file size="193264" time="1988-01-29 11:00:00" attr="0x20">USER.EXE</file>
+		<file size="1464" time="1988-01-29 12:00:00" attr="0x20">README.CPQ</file>
+		<file size="1248" time="1988-01-29 12:00:00" attr="0x20">ROMREV.COM</file>
+		<file size="518" time="1988-01-29 12:00:00" attr="0x20">ROMREV.SCR</file>
+		<file size="39968" time="1988-01-29 12:00:00" attr="0x20">SETUP.EXE</file>
+		<file size="652" time="1988-01-29 12:00:00" attr="0x20">SETUP.SCR</file>
+		<file size="1984" time="1988-01-29 12:00:00" attr="0x20">TEST.COM</file>
+		<file size="549" time="1988-01-29 12:00:00" attr="0x20">TEST.SCR</file>
+		<file size="193264" time="1988-01-29 12:00:00" attr="0x20">USER.EXE</file>
+	</disk>
+	<disk id="disk07" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-REVG-DISK1.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK1.json" md5="1c5fde12c505860ec57e69bfff32aa40" md5json="23a2aa42d76d1d72a2d9b7e35a771c8b">
+		<name>COMPAQ MS-DOS 3.31G (Disk 1: FASTART)</name>
+		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM Rev G] (3.5-720k)" file="FASTART.IMG">WinWorld</link>
+		<file size="11" time="1990-05-08 12:00:00" attr="0x20">AUTOEXEC.BAT</file>
+		<file size="25398" time="1990-05-08 12:00:00" attr="0x20">COMMAND.COM</file>
+		<file size="45" time="1990-05-08 12:00:00" attr="0x20">CONFIG.SYS</file>
+		<file size="10406" time="1990-05-08 12:00:00" attr="0x20">EXTDISK.SYS</file>
+		<file size="227233" time="1990-05-08 12:00:00" attr="0x20">FASTART.EXE</file>
+		<file size="23740" time="1990-05-08 12:00:00" attr="0x20">IBMBIO.COM</file>
+		<file size="30650" time="1990-05-08 12:00:00" attr="0x20">IBMDOS.COM</file>
+	</disk>
+	<disk id="disk08" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-REVG-DISK2.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK2.json" md5="4992becef9122ea920fd11c9a5bfa67d" md5json="31f85ff3d2d8678e90f0b99a14e0934c">
+		<name>COMPAQ MS-DOS 3.31G (Disk 2: STARTUP)</name>
+		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM Rev G] (3.5-720k)" file="STARTUP.IMG">WinWorld</link>
+		<file size="2023" time="1990-05-08 12:00:00" attr="0x20">ANSI.SYS</file>
+		<file size="1789" time="1990-05-08 12:00:00" attr="0x20">CLOCK.SYS</file>
+		<file size="25398" time="1990-05-08 12:00:00" attr="0x20">COMMAND.COM</file>
+		<file size="11254" time="1990-05-08 12:00:00" attr="0x20">COUNTRY.SYS</file>
+		<file size="6850" time="1990-05-08 12:00:00" attr="0x20">DISKCOPY.COM</file>
+		<file size="11971" time="1990-05-08 12:00:00" attr="0x20">DISPLAY.SYS</file>
+		<file size="1520" time="1990-05-08 12:00:00" attr="0x20">DRIVER.SYS</file>
+		<file size="10406" time="1990-05-08 12:00:00" attr="0x20">ENHDISK.SYS</file>
+		<file size="3888" time="1990-05-08 12:00:00" attr="0x20">FASTOPEN.EXE</file>
+		<file size="51136" time="1990-05-08 12:00:00" attr="0x20">FDISK.COM</file>
+		<file size="14733" time="1990-05-08 12:00:00" attr="0x20">FORMAT.COM</file>
+		<file size="23740" time="1990-05-08 12:00:00" attr="0x20">IBMBIO.COM</file>
+		<file size="30650" time="1990-05-08 12:00:00" attr="0x20">IBMDOS.COM</file>
+		<file size="11076" time="1990-05-08 12:00:00" attr="0x20">KEYB.COM</file>
+		<file size="41164" time="1990-05-08 12:00:00" attr="0x20">KEYBOARD.SYS</file>
+		<file size="16618" time="1990-05-08 12:00:00" attr="0x20">MODE.COM</file>
+		<file size="13751" time="1990-05-08 12:00:00" attr="0x20">PRINTER.SYS</file>
+		<file size="6227" time="1990-05-08 12:00:00" attr="0x20">SYS.COM</file>
+		<file size="3768" time="1990-05-08 12:00:00" attr="0x20">VDISK.SYS</file>
+		<file size="11776" time="1990-05-08 12:00:00" attr="0x20">XCOPY.EXE</file>
+	</disk>
+	<disk id="disk09" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-REVG-DISK3.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK3.json" md5="a6a96444c8a1f04ac5719c702826c6ea" md5json="18390bf710f7e08e92bcf1417032579a">
+		<name>COMPAQ MS-DOS 3.31G (Disk 3: OPERATING)</name>
+		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM Rev G] (3.5-720k)" file="OPER.IMG">WinWorld</link>
+		<file size="17089" time="1990-05-08 12:00:00" attr="0x20">4201.CPI</file>
+		<file size="459" time="1990-05-08 12:00:00" attr="0x20">5202.CPI</file>
+		<file size="5810" time="1990-05-08 12:00:00" attr="0x20">APPEND.EXE</file>
+		<file size="1530" time="1990-05-08 12:00:00" attr="0x20">ASSIGN.COM</file>
+		<file size="10656" time="1990-05-08 12:00:00" attr="0x20">ATTRIB.EXE</file>
+		<file size="30738" time="1990-05-08 12:00:00" attr="0x20">BACKUP.COM</file>
+		<file size="3534" time="1990-05-08 12:00:00" attr="0x20">BASIC.COM</file>
+		<file size="3534" time="1990-05-08 12:00:00" attr="0x20">BASICA.COM</file>
+		<file size="79434" time="1990-05-08 12:00:00" attr="0x20">BASICA.EXE</file>
+		<file size="11941" time="1990-05-08 12:00:00" attr="0x20">CHKDSK.COM</file>
+		<file size="25398" time="1990-05-08 12:00:00" attr="0x20">COMMAND.COM</file>
+		<file size="4183" time="1990-05-08 12:00:00" attr="0x20">COMP.COM</file>
+		<file size="16002" time="1990-05-08 12:00:00" attr="0x20">DEBUG.COM</file>
+		<file size="5848" time="1990-05-08 12:00:00" attr="0x20">DISKCOMP.COM</file>
+		<file size="6850" time="1990-05-08 12:00:00" attr="0x20">DISKCOPY.COM</file>
+		<file size="7495" time="1990-05-08 12:00:00" attr="0x20">EDLIN.COM</file>
+		<file size="49065" time="1990-05-08 12:00:00" attr="0x20">EGA.CPI</file>
+		<file size="49030" time="1990-05-08 12:00:00" attr="0x20">EGA_THIN.CPI</file>
+		<file size="3050" time="1990-05-08 12:00:00" attr="0x20">EXE2BIN.EXE</file>
+		<file size="6403" time="1990-05-08 12:00:00" attr="0x20">FIND.EXE</file>
+		<file size="14733" time="1990-05-08 12:00:00" attr="0x20">FORMAT.COM</file>
+		<file size="6274" time="1990-05-08 12:00:00" attr="0x20">GRAFTABL.COM</file>
+		<file size="7578" time="1990-05-08 12:00:00" attr="0x20">GRAPHICS.COM</file>
+		<file size="384" time="1990-05-08 12:00:00" attr="0x20">INTEREST.BAS</file>
+		<file size="9612" time="1990-05-08 12:00:00" attr="0x20">JOIN.EXE</file>
+		<file size="2363" time="1990-05-08 12:00:00" attr="0x20">LABEL.COM</file>
+		<file size="10752" time="1990-05-08 12:00:00" attr="0x20">LCD.CPI</file>
+		<file size="10618" time="1990-05-08 12:00:00" attr="0x20">LCD_THIN.CPI</file>
+		<file size="43988" time="1990-05-08 12:00:00" attr="0x20">LINK.EXE</file>
+		<file size="314" time="1990-05-08 12:00:00" attr="0x20">MORE.COM</file>
+		<file size="3029" time="1990-05-08 12:00:00" attr="0x20">NLSFUNC.EXE</file>
+		<file size="9309" time="1990-05-08 12:00:00" attr="0x20">PRINT.COM</file>
+		<file size="5387" time="1990-05-08 12:00:00" attr="0x20">RECOVER.COM</file>
+		<file size="14304" time="1990-05-08 12:00:00" attr="0x20">REPLACE.EXE</file>
+		<file size="35868" time="1990-05-08 12:00:00" attr="0x20">RESTORE.COM</file>
+		<file size="4190" time="1990-05-08 12:00:00" attr="0x20">SELECT.COM</file>
+		<file size="3717" time="1990-05-08 12:00:00" attr="0x20">SETCLOCK.COM</file>
+		<file size="8666" time="1990-05-08 12:00:00" attr="0x20">SHARE.EXE</file>
+		<file size="1946" time="1990-05-08 12:00:00" attr="0x20">SORT.EXE</file>
+		<file size="10552" time="1990-05-08 12:00:00" attr="0x20">SUBST.EXE</file>
+		<file size="3540" time="1990-05-08 12:00:00" attr="0x20">TREE.COM</file>
+		<file size="660" time="1990-05-08 12:00:00" attr="0x20">WORDS</file>
+		<file size="11776" time="1990-05-08 12:00:00" attr="0x20">XCOPY.EXE</file>
 	</disk>
 </manifest>
