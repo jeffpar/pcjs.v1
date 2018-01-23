@@ -121,8 +121,8 @@
 		<disk path="/disks/pcx86/dos/compaq/1.11/COMPAQ-DOS111.json">COMPAQ MS-DOS 1.11</disk>
 		<disk path="/disks/pcx86/dos/compaq/1.12/COMPAQ-DOS112.json">COMPAQ MS-DOS 1.12</disk>
 		<disk path="/disks/pcx86/dos/compaq/2.12/COMPAQ-DOS212.json">COMPAQ MS-DOS 2.12</disk>
-		<disk path="/disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-STARTUP.json">COMPAQ MS-DOS 3.00 (Startup)</disk>
-		<disk path="/disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-SUPP.json">COMPAQ MS-DOS 3.00 (Supp)</disk>
+		<disk path="/disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-DISK1.json">COMPAQ MS-DOS 3.00 (Disk 1)</disk>
+		<disk path="/disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-DISK2.json">COMPAQ MS-DOS 3.00 (Disk 2)</disk>
 		<disk path="/disks/pcx86/dos/compaq/3.10/COMPAQ-DOS310-DISK1.json">COMPAQ MS-DOS 3.10 (Disk 1)</disk>
 		<disk path="/disks/pcx86/dos/compaq/3.10/COMPAQ-DOS310-DISK2.json">COMPAQ MS-DOS 3.10 (Disk 2)</disk>
 		<disk path="/disks/pcx86/dos/compaq/3.10/COMPAQ-DOS310-PERSONAL.json">COMPAQ MS-DOS 3.10 (Personal)</disk>

@@ -9,9 +9,9 @@ machines:
     resume: 1
     autoMount:
       A:
-        path: /disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-STARTUP.json
+        path: /disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-DISK1.json
       B:
-        path: /disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-SUPP.json
+        path: /disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-DISK2.json
     autoType: \r\r
 ---
 
@@ -26,12 +26,12 @@ Released in 1985 by COMPAQ Computer Corp, this version of MS-DOS displays the fo
 	(C) Copyright COMPAQ Computer Corp. 1982, 1983, 1984, 1985
 	(C) Copyright Microsoft Corp. 1981, 1982, 1983, 1984, 1985
 
-[Directory Listings](#directory-of-compaq-ms-dos-300-startup) of the distribution diskettes are provided below.
+[Directory Listings](#directory-of-compaq-ms-dos-300-disk-1) of the distribution diskettes are provided below.
 Thanks (again) to the [OS/2 Museum](http://www.os2museum.com/) for sharing these disks with us.
 
 {% include machine.html id="ibm5170-compaq300" %}
 
-### Directory of COMPAQ MS-DOS 3.00 (Startup)
+### Directory of COMPAQ MS-DOS 3.00 (Disk 1)
 
 	 Volume in drive A has no label
 
@@ -82,7 +82,7 @@ Thanks (again) to the [OS/2 Museum](http://www.os2museum.com/) for sharing these
 	       39 file(s)     292143 bytes
 	                       50176 bytes free
 
-### Directory of COMPAQ MS-DOS 3.00 (Supp)
+### Directory of COMPAQ MS-DOS 3.00 (Disk 2)
 
 	 Volume in drive A has no label
 

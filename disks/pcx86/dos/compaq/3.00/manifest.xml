@@ -8,8 +8,8 @@
 	<author>Microsoft/COMPAQ</author>
 	<releaseDate/>
 	<source href="http://os2museum.com">os2museum.com</source>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/COMPAQ-DOS300-STARTUP.img" href="/disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-STARTUP.json" md5="28bdedff1ce7927fa9ffcdabc2ff1dcb" md5json="e9856a218b2898aaa3a19b7ddd8b9c5d">
-		<name>COMPAQ MS-DOS 3.00 (Startup)</name>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/COMPAQ-DOS300-DISK1.img" href="/disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-DISK1.json" md5="28bdedff1ce7927fa9ffcdabc2ff1dcb" md5json="e9856a218b2898aaa3a19b7ddd8b9c5d">
+		<name>COMPAQ MS-DOS 3.00 (Disk 1)</name>
 		<file size="1593" time="1985-04-22 11:00:00" attr="0x20">ANSI.SYS</file>
 		<file size="1509" time="1985-04-22 11:00:00" attr="0x20">ASSIGN.COM</file>
 		<file size="15220" time="1985-04-22 11:00:00" attr="0x20">ATTRIB.EXE</file>
@@ -50,8 +50,8 @@
 		<file size="1752" time="1985-04-22 11:00:00" attr="0x20">TREE.COM</file>
 		<file size="2483" time="1985-04-22 11:00:00" attr="0x20">VDISK.SYS</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/COMPAQ-DOS300-SUPP.img" href="/disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-SUPP.json" md5="f1b1342fef2a7d2635a9d7d7a6c48822" md5json="0e12902feb90a9ec7a82466a94f29c27">
-		<name>COMPAQ MS-DOS 3.00 (Supp)</name>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/COMPAQ-DOS300-DISK2.img" href="/disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-DISK2.json" md5="f1b1342fef2a7d2635a9d7d7a6c48822" md5json="0e12902feb90a9ec7a82466a94f29c27">
+		<name>COMPAQ MS-DOS 3.00 (Disk 2)</name>
 		<file size="1173" time="1985-04-22 11:00:00" attr="0x20">BASICA.COM</file>
 		<file size="21766" time="1985-04-22 11:00:00" attr="0x20">CMPQADAP.COM</file>
 		<file size="15354" time="1985-04-22 11:00:00" attr="0x20">DEBUG.COM</file>
