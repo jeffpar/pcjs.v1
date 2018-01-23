@@ -34,8 +34,9 @@ The first five disks come from [WinWorld](https://winworldpc.com/product/ms-dos/
 (see "Microsoft MS-DOS 3.31 [Compaq OEM] (3.5-720k)"), and of those five, the first three appear to be original,
 with all files dated October 1988.
 
-Disk 4, the COMPAQ "USER PROGRAMS" diskette, was part of a COMPAQ MS-DOS 4.01 release, with hidden MS-DOS files dated
-April 1989 and other distribution files dated July 1989, along with a few random user-generated files with later dates.
+The 4th disk, [USER 072789](#directory-of-compaq-ms-dos-401-user-072789), is a COMPAQ "USER PROGRAMS" diskette
+that was actually part of a COMPAQ MS-DOS 4.01 release, with hidden MS-DOS files dated April 1989 and other
+distribution files dated July 1989, along with a few random user-generated files with later dates.
 As the README.CPQ file on that diskette explains:
 
     The software provided on this diskette supercedes earlier versions  
@@ -54,12 +55,14 @@ As the README.CPQ file on that diskette explains:
     Supplemental Software Guide, or by booting this diskette, typing    
     HELP at the A> prompt, and then pressing the ENTER key.             
 
-So despite the evidence that this particular disk was part of a later COMPAQ MS-DOS release, it will remain part of
-this distribution for now, since COMPAQ states that this disk "supersedes earlier versions", and since the `FASTART`
-program on Disk 1 expects a "USER PROGRAMS" disk.  If/when an earlier revision is located, it will be added here.
+So, despite the fact that this particular disk was part of a later COMPAQ MS-DOS release, we're leaving it as part
+of this distribution for now, since COMPAQ states that this disk "supersedes earlier versions", since the `FASTART`
+program on Disk 1 expects a "USER PROGRAMS" disk, and since we don't have a COMPAQ MS-DOS 4.01 distribution anyway.
 
-Disk 5, the COMPAQ "USER DIAGNOSTICS, SETUP AND INSPECT" diskette, which contains SETUP v6.08, TEST v6.12, and
-INSPECT v1.02, has files dated June 1989.
+The 5th disk, [SETUP 6.08](#directory-of-compaq-ms-dos-331-setup-608), is the COMPAQ "USER DIAGNOSTICS, SETUP AND
+INSPECT" diskette, which contains SETUP v6.08, TEST v6.12, and INSPECT v1.02, has files dated June 1989.  Again, there
+is nothing that specifically identifies this diskette as part of a COMPAQ MS-DOS 3.31 release; we're simply leaving
+it as we found it.
 
 A separate 360Kb disk image, [SETUP 5.05](#directory-of-compaq-ms-dos-331-setup-505), from the PCjs Archives
 has been included here as well, because it contains hidden MS-DOS 3.31 files dated September 1987 that display
@@ -71,12 +74,12 @@ a slightly different (older) boot message:
     (C) Copyright Compaq Computer Corp. 1982, 1987                             
     (C) Copyright Microsoft Corp. 1981, 1987   
 
-making it clear that earlier COMPAQ MS-DOS 3.31 revisions existed.
+making it clear that this diskette *is* a COMPAQ MS-DOS 3.31 diskette from 1987; all the other sources we've checked only
+have disks from 1988 or later.
 
-Later revisions of COMPAQ MS-DOS 3.31 were released as well.  We have archived 
-three "[Rev. G](#directory-of-compaq-ms-dos-331g-disk-1)" disks obtained from
-[WinWorld](https://winworldpc.com/product/ms-dos/331) (see "Microsoft MS-DOS 3.31 [Compaq OEM Rev G] (3.5-720k)").
-All the files on those disks are dated May 1990.
+Later revisions of COMPAQ MS-DOS 3.31 were released as well.  We have archived three
+"[Rev. G](#compaq-ms-dos-331-rev-g)" disks obtained from [WinWorld](https://winworldpc.com/product/ms-dos/331)
+(see "Microsoft MS-DOS 3.31 [Compaq OEM Rev G] (3.5-720k)").  All the files on those disks are dated May 1990.
 
 {% include machine.html id="deskpro386" %}
 
@@ -185,7 +188,7 @@ All the files on those disks are dated May 1990.
 	       40 file(s)     478242 bytes
 	                      231424 bytes free
 
-### Directory of COMPAQ MS-DOS 3.31 (Disk 4)
+### Directory of COMPAQ MS-DOS 4.01 (USER 072789)
 
 	 Volume in drive A is USER 072789
 	 Volume Serial Number is 10D5-0C56
@@ -293,6 +296,9 @@ All the files on those disks are dated May 1990.
 	Total files listed:
 	       17 file(s)     325724 bytes
 	                       16384 bytes free
+
+COMPAQ MS-DOS 3.31 (Rev. G)
+---------------------------
 
 ### Directory of COMPAQ MS-DOS 3.31G (Disk 1)
 

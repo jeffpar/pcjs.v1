@@ -88,8 +88,8 @@
 		<file size="660" time="1988-10-03 12:00:00" attr="0x20">WORDS</file>
 		<file size="11216" time="1988-10-03 12:00:00" attr="0x20">XCOPY.EXE</file>
 	</disk>
-	<disk id="disk04" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-DISK4.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK4.json" md5="18acab24603ac511d11fd3cbac9780ed" md5json="81ef2ab455bca4a4c50aea32e39be05d">
-		<name>COMPAQ MS-DOS 3.31 (Disk 4)</name>
+	<disk id="disk04" size="737280" chs="80:2:9" img="archive/COMPAQ-USER-072789.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-USER-072789.json" md5="18acab24603ac511d11fd3cbac9780ed" md5json="81ef2ab455bca4a4c50aea32e39be05d">
+		<name>COMPAQ MS-DOS 4.01 (USER 072789)</name>
 		<link href="https://winworldpc.com/product/ms-dos/331" name="Microsoft MS-DOS 3.31 [Compaq OEM] (3.5-720k)" file="Disk5.img">WinWorld</link>
 		<file size="4" time="1980-01-01 00:15:14" attr="0x20">ADAPT.CFG</file>
 		<file size="18514" time="1989-07-27 12:00:00" attr="0x20">ADAPT.COM</file>

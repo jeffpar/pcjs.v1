@@ -131,7 +131,7 @@
 		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK1.json">COMPAQ MS-DOS 3.31 (Disk 1)</disk>
 		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json">COMPAQ MS-DOS 3.31 (Disk 2)</disk>
 		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK3.json">COMPAQ MS-DOS 3.31 (Disk 3)</disk>
-		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK4.json">COMPAQ MS-DOS 3.31 (Disk 4)</disk>
+		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-USER-072789.json">COMPAQ MS-DOS 4.01 (USER 072789)</disk>
 		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-SETUP608.json">COMPAQ MS-DOS 3.31 (SETUP 6.08)</disk>
 		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-SETUP505.json">COMPAQ MS-DOS 3.31 (SETUP 5.05)</disk>
 		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK1.json">COMPAQ MS-DOS 3.31G (Disk 1)</disk>
