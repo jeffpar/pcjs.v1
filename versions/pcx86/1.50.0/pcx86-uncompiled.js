@@ -1937,44 +1937,40 @@ class Web {
     }
 
     /**
-     * getResource(sURL, dataPost, fAsync, done, progress)
+     * getResource(sURL, type, fAsync, done, progress)
      *
      * Request the specified resource (sURL), and once the request is complete, notify done().
      *
      * If fAsync is true, a done() callback should ALWAYS be supplied; otherwise, you'll have no
      * idea when the request is complete or what the response was.  done() is passed three parameters:
      *
-     *      done(sURL, sResource, nErrorCode)
+     *      done(sURL, resource, nErrorCode)
      *
-     * If nErrorCode is zero, sResource should contain the requested data; otherwise, an error occurred.
+     * If nErrorCode is zero, resource should contain the requested data; otherwise, an error occurred.
      *
-     * If dataPost is set to a string, that string can be used to control the response format;
-     * by default, the response format is plain text, but you can specify "bytes" to request arbitrary
-     * binary data, which should come back as a string of bytes.
-     *
-     * TODO: The "bytes" option works by calling overrideMimeType(), which was never a best practice.
-     * Instead, we should implement supported response types ("text" and "arraybuffer", at a minimum)
-     * by setting xmlHTTP.responseType to one of those values before calling xmlHTTP.send().
+     * If type is set to a string, that string can be used to control the response format;
+     * by default, the response format is plain text, but you can specify "arraybuffer" to request arbitrary
+     * binary data, in which case the returned resource will be a ArrayBuffer rather than a string.
      *
      * @param {string} sURL
-     * @param {string|Object|null} [dataPost] for a POST request (default is a GET request)
-     * @param {boolean} [fAsync] is true for an asynchronous request
+     * @param {string|Object|null} [type] (object for POST request, otherwise type of GET request)
+     * @param {boolean} [fAsync] is true for an asynchronous request; false otherwise (MUST be set for IE)
      * @param {function(string,string,number)} [done]
      * @param {function(number)} [progress]
-     * @return {Array|null} Array containing [sResource, nErrorCode], or null if no response yet
+     * @return {Array|null} Array containing [resource, nErrorCode], or null if no response available (yet)
      */
-    static getResource(sURL, dataPost, fAsync = false, done, progress)
+    static getResource(sURL, type = "text", fAsync = false, done, progress)
     {
-        var nErrorCode = 0, sResource = null, response = null;
+        var nErrorCode = 0, resource = null, response = null;
 
-        if (typeof resources == 'object' && (sResource = resources[sURL])) {
-            if (done) done(sURL, sResource, nErrorCode);
-            return [sResource, nErrorCode];
+        if (typeof resources == 'object' && (resource = resources[sURL])) {
+            if (done) done(sURL, resource, nErrorCode);
+            return [resource, nErrorCode];
         }
         else if (fAsync && typeof resources == 'function') {
-            resources(sURL, function(sResource, nErrorCode)
+            resources(sURL, function(resource, nErrorCode)
             {
-                if (done) done(sURL, sResource, nErrorCode);
+                if (done) done(sURL, resource, nErrorCode);
             });
             return response;
         }
@@ -1989,73 +1985,94 @@ class Web {
         }
 
 
-        var xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
+        var request = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
+        var fArrayBuffer = false, fXHR2 = (typeof request.responseType === 'string');
+        
+        var callback = function() {
+            if (request.readyState !== 4) {
+                if (progress) progress(1);
+                return null;
+            }
+            /*
+             * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
+             * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
+             * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
+             * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
+             * happening are mis-notifications rather than redundant notifications.
+             *
+             *      request.onreadystatechange = undefined;
+             */
+            /*
+             * If the request failed due to, say, a CORS policy denial; eg:
+             * 
+             *      Failed to load http://www.allbootdisks.com/downloads/Disks/Windows_95_Boot_Disk_Download48/Diskette%20Images/Windows95a.img:
+             *      Redirect from 'http://www.allbootdisks.com/downloads/Disks/Windows_95_Boot_Disk_Download48/Diskette%20Images/Windows95a.img' to
+             *      'http://www.allbootdisks.com/' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+             *      Origin 'http://pcjs:8088' is therefore not allowed access.
+             *      
+             * and our request type was "arraybuffer", attempting to access responseText may trigger an exception; eg:
+             * 
+             *      Uncaught DOMException: Failed to read the 'responseText' property from 'XMLHttpRequest': The value is only accessible if the object's
+             *      'responseType' is '' or 'text' (was 'arraybuffer').
+             * 
+             * We could tiptoe around these potential landmines, but the safest thing to do is wrap this code with try/catch.
+             */
+            try {
+                resource = fArrayBuffer? request.response : request.responseText;
+            } catch(err) {
+                if (MAXDEBUG) Web.log("xmlHTTPRequest(" + sURL + ") exception: " + err.message);
+            }
+            /*
+             * The normal "success" case is a non-null resource and an HTTP status code of 200, but when loading files from the
+             * local file system (ie, when using the "file:" protocol), we have to be a bit more flexible.
+             */
+            if (resource != null && (request.status == 200 || !request.status && resource.length && Web.getHostProtocol() == "file:")) {
+                if (MAXDEBUG) Web.log("xmlHTTPRequest(" + sURL + "): returned " + resource.length + " bytes");
+            }
+            else {
+                nErrorCode = request.status || -1;
+                Web.log("xmlHTTPRequest(" + sURL + "): error code " + nErrorCode);
+            }
+            if (progress) progress(2);
+            if (done) done(sURL, resource, nErrorCode);
+            return [resource, nErrorCode];
+        };
+        
         if (fAsync) {
-            xmlHTTP.onreadystatechange = function()
-            {
-                if (xmlHTTP.readyState !== 4) {
-                    if (progress) progress(1);
-                    return;
-                }
-                /*
-                 * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
-                 * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
-                 * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
-                 * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
-                 * happening are mis-notifications rather than redundant notifications.
-                 *
-                 *      xmlHTTP.onreadystatechange = undefined;
-                 */
-                sResource = xmlHTTP.responseText;
-                /*
-                 * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
-                 * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
-                 */
-                if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && Web.getHostProtocol() == "file:") {
-                    if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sResource.length + " bytes");
-                }
-                else {
-                    nErrorCode = xmlHTTP.status || -1;
-                    Web.log("xmlHTTP.onreadystatechange(" + sURL + "): error code " + nErrorCode);
-                }
-                if (progress) progress(2);
-                if (done) done(sURL, sResource, nErrorCode);
-            };
+            request.onreadystatechange = callback;
         }
 
         if (progress) progress(0);
 
-        if (dataPost && typeof dataPost == "object") {
-            var sDataPost = "";
-            for (var p in dataPost) {
-                if (!dataPost.hasOwnProperty(p)) continue;
-                if (sDataPost) sDataPost += "&";
-                sDataPost += p + '=' + encodeURIComponent(dataPost[p]);
+        if (type && typeof type == "object") {
+            var sPost = "";
+            for (var p in type) {
+                if (!type.hasOwnProperty(p)) continue;
+                if (sPost) sPost += "&";
+                sPost += p + '=' + encodeURIComponent(type[p]);
             }
-            sDataPost = sDataPost.replace(/%20/g, '+');
-            if (MAXDEBUG) Web.log("Web.getResource(POST " + sURL + "): " + sDataPost.length + " bytes");
-            xmlHTTP.open("POST", sURL, fAsync);     // ensure that fAsync is a valid boolean (Internet Explorer xmlHTTP functions insist on it)
-            xmlHTTP.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            xmlHTTP.send(sDataPost);
+            sPost = sPost.replace(/%20/g, '+');
+            if (MAXDEBUG) Web.log("Web.getResource(POST " + sURL + "): " + sPost.length + " bytes");
+            request.open("POST", sURL, fAsync);
+            request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            request.send(sPost);
         } else {
             if (MAXDEBUG) Web.log("Web.getResource(GET " + sURL + ")");
-            xmlHTTP.open("GET", sURL, fAsync);      // ensure that fAsync is a valid boolean (Internet Explorer xmlHTTP functions insist on it)
-            if (dataPost == "bytes") {
-                xmlHTTP.overrideMimeType("text/plain; charset=x-user-defined");
+            request.open("GET", sURL, fAsync);
+            if (type == "arraybuffer") {
+                if (fXHR2) {
+                    fArrayBuffer = true;
+                    request.responseType = type;
+                } else {
+                    request.overrideMimeType("text/plain; charset=x-user-defined");
+                }
             }
-            xmlHTTP.send();
+            request.send();
         }
 
         if (!fAsync) {
-            sResource = xmlHTTP.responseText;
-            if (xmlHTTP.status == 200) {
-                if (MAXDEBUG) Web.log("Web.getResource(" + sURL + "): returned " + sResource.length + " bytes");
-            } else {
-                nErrorCode = xmlHTTP.status || -1;
-                Web.log("Web.getResource(" + sURL + "): error code " + nErrorCode);
-            }
-            if (done) done(sURL, sResource, nErrorCode);
-            response = [sResource, nErrorCode];
+            request.readyState = 4;     // this may already be set for synchronous requests, but I don't want to take any chances 
+            response = callback();
         }
         return response;
     }
@@ -58169,6 +58186,7 @@ class Disk extends Component {
         this.sDiskName = sDiskName;
         this.sDiskPath = sDiskPath;
         this.sDiskFile = Str.getBaseName(sDiskPath);
+        this.sFormat = "json";
 
         var disk = this;
         this.fnNotify = fnNotify;
@@ -58177,7 +58195,7 @@ class Disk extends Component {
         if (file) {
             var reader = new FileReader();
             reader.onload = function() {
-                disk.build(reader.result, true);
+                disk.buildDisk(reader.result, true);
             };
             reader.readAsArrayBuffer(file);
             return true;
@@ -58201,41 +58219,44 @@ class Disk extends Component {
                     sDiskURL = this.connectRemoteDisk(sDiskPath);
                     this.fOnDemand = true;
                 } else {
-                    var sDiskParm = DumpAPI.QUERY.PATH;
-                    var sSizeParm = '&' + DumpAPI.QUERY.MBHD + "=10";
-                    /*
-                     * 'mbhd' is a new parm added for hard drive support.  In the case of 'file' or 'dir' requests,
-                     * 'mbhd' informs DumpAPI.ENDPOINT that it should create a hard disk image, and one not larger than
-                     * the specified size (eg, 10mb).  In fact, until DumpAPI.ENDPOINT is changed to create custom hard
-                     * disk BPBs, you'll always get a standard PC XT 10mb disk image, so if the 'file' or 'dir' contains
-                     * more than 10mb of data, the request will fail.  Ultimately, I want to honor the controller's
-                     * driveConfig 'size' parm, or to match the capacity required by the driveConfig 'type' parameter.
-                     *
-                     * If a 'disk' is specified, we pass mbhd=0, because the actual size will depend on the image.
-                     * However, I don't currently have any "dsk" or "img" files containing hard disk images; those formats
-                     * were really intended for floppy disk images.  If I never create any hard disk image files, then
-                     * we can simply eliminate sSizeParm in the 'disk' case.
-                     *
-                     * Added more extensions to the list of paths-treated-as-disk-images, so that URLs to files located here:
-                     *
-                     *      ftp://ftp.oldskool.org/pub/TOPBENCH/dskimage/
-                     *
-                     * can be used as-is.  TODO: There's a TODO in netlib.getFile() regarding remote support that needs
-                     * to be resolved first; DiskDump relies on that function for its remote requests, and it currently
-                     * supports only HTTP.
-                     */
-                    if (!sDiskPath.indexOf("http:") || !sDiskPath.indexOf("ftp:") || ["dsk", "ima", "img", "360", "720", "12", "144"].indexOf(sDiskExt) >= 0) {
-                        sDiskParm = DumpAPI.QUERY.DISK;
-                        sSizeParm = '&' + DumpAPI.QUERY.MBHD + "=0";
-                    } else if (Str.endsWith(sDiskPath, '/')) {
-                        sDiskParm = DumpAPI.QUERY.DIR;
-                    }
-                    sDiskURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + sDiskParm + '=' + encodeURIComponent(sDiskPath) + (this.fRemovable ? "" : sSizeParm) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
+                    this.sFormat = "arraybuffer";
                 }
+                // else {
+                //     var sDiskParm = DumpAPI.QUERY.PATH;
+                //     var sSizeParm = '&' + DumpAPI.QUERY.MBHD + "=10";
+                //     /*
+                //      * 'mbhd' is a new parm added for hard drive support.  In the case of 'file' or 'dir' requests,
+                //      * 'mbhd' informs DumpAPI.ENDPOINT that it should create a hard disk image, and one not larger than
+                //      * the specified size (eg, 10mb).  In fact, until DumpAPI.ENDPOINT is changed to create custom hard
+                //      * disk BPBs, you'll always get a standard PC XT 10mb disk image, so if the 'file' or 'dir' contains
+                //      * more than 10mb of data, the request will fail.  Ultimately, I want to honor the controller's
+                //      * driveConfig 'size' parm, or to match the capacity required by the driveConfig 'type' parameter.
+                //      *
+                //      * If a 'disk' is specified, we pass mbhd=0, because the actual size will depend on the image.
+                //      * However, I don't currently have any "dsk" or "img" files containing hard disk images; those formats
+                //      * were really intended for floppy disk images.  If I never create any hard disk image files, then
+                //      * we can simply eliminate sSizeParm in the 'disk' case.
+                //      *
+                //      * Added more extensions to the list of paths-treated-as-disk-images, so that URLs to files located here:
+                //      *
+                //      *      ftp://ftp.oldskool.org/pub/TOPBENCH/dskimage/
+                //      *
+                //      * can be used as-is.  TODO: There's a TODO in netlib.getFile() regarding remote support that needs
+                //      * to be resolved first; DiskDump relies on that function for its remote requests, and it currently
+                //      * supports only HTTP.
+                //      */
+                //     if (!sDiskPath.indexOf("http:") || !sDiskPath.indexOf("ftp:") || ["dsk", "ima", "img", "360", "720", "12", "144"].indexOf(sDiskExt) >= 0) {
+                //         sDiskParm = DumpAPI.QUERY.DISK;
+                //         sSizeParm = '&' + DumpAPI.QUERY.MBHD + "=0";
+                //     } else if (Str.endsWith(sDiskPath, '/')) {
+                //         sDiskParm = DumpAPI.QUERY.DIR;
+                //     }
+                //     sDiskURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + sDiskParm + '=' + encodeURIComponent(sDiskPath) + (this.fRemovable ? "" : sSizeParm) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
+                // }
             }
         }
         var sProgress = "Loading " + sDiskURL + "...";
-        return !!Web.getResource(sDiskURL, null, true, function loadDone(sURL, sResponse, nErrorCode) {
+        return !!Web.getResource(sDiskURL, this.sFormat, true, function loadDone(sURL, sResponse, nErrorCode) {
             disk.doneLoad(sURL, sResponse, nErrorCode);
         }, function(nState) {
             disk.println(sProgress, Component.PRINT.PROGRESS);
@@ -58243,15 +58264,15 @@ class Disk extends Component {
     }
 
     /**
-     * build(buffer, fModified)
+     * buildDisk(buffer, fModified)
      *
      * Builds a disk image from an ArrayBuffer (eg, from a FileReader object), rather than from JSON-encoded data.
      *
      * @this {Disk}
-     * @param {?} buffer (we KNOW this is an ArrayBuffer, but we can't seem to convince the Closure Compiler)
+     * @param {?} buffer (technically, this is always an ArrayBuffer, because we tell FileReader to use readAsArrayBuffer, but the Closure Compiler doesn't realize that) 
      * @param {boolean} [fModified] is true if we should mark the entire disk modified (to ensure that we save/restore it)
      */
-    build(buffer, fModified)
+    buildDisk(buffer, fModified)
     {
         var disk;
         var cbDiskData = buffer? buffer.byteLength : 0;
@@ -58297,17 +58318,17 @@ class Disk extends Component {
     }
 
     /**
-     * doneLoad(sURL, sDiskData, nErrorCode)
+     * doneLoad(sURL, diskData, nErrorCode)
      *
      * This function was originally called mount().  If the mount is successful, we pass the Disk object to the
      * caller's fnNotify handler; otherwise, we pass null.
      *
      * @this {Disk}
      * @param {string} sURL
-     * @param {string} sDiskData
+     * @param {string|ArrayBuffer} diskData
      * @param {number} nErrorCode (response from server if anything other than 200)
      */
-    doneLoad(sURL, sDiskData, nErrorCode)
+    doneLoad(sURL, diskData, nErrorCode)
     {
         var disk = null;
         this.fWriteProtected = false;
@@ -58322,7 +58343,7 @@ class Disk extends Component {
                 if (BACKTRACK || SYMBOLS) this.buildFileTable();
                 disk = this;
             } else {
-                this.notice('Unable to connect to disk "' + this.sDiskPath + '" (error ' + nErrorCode + ': ' + sDiskData + ')', fPrintOnly);
+                this.notice('Unable to connect to disk "' + this.sDiskPath + '" (error ' + nErrorCode + ': ' + diskData + ')', fPrintOnly);
             }
         }
         else if (nErrorCode) {
@@ -58339,8 +58360,15 @@ class Disk extends Component {
                 this.printMessage('doneLoad("' + this.sDiskPath + '")');
             }
 
-            Component.addMachineResource(this.controller.idMachine, sURL, sDiskData);
-
+            /*
+             * If we received binary data instead of JSON, we can use the same buildDisk() function that our FileReader
+             * code uses.
+             */
+            if (typeof diskData != "string") {
+                this.buildDisk(diskData);
+                return;
+            }
+            
             try {
                 /*
                  * The following code was a hack to turn on write-protection for a disk image if there was
@@ -58355,9 +58383,9 @@ class Disk extends Component {
                 if (sBaseName.indexOf("-readonly") > 0) {
                     this.fWriteProtected = true;
                 } else {
-                    var iEOL = sDiskData.indexOf("\n");
+                    var iEOL = diskData.indexOf("\n");
                     if (iEOL > 0 && iEOL < 1024) {
-                        var sConfig = sDiskData.substring(0, iEOL);
+                        var sConfig = diskData.substring(0, iEOL);
                         if (sConfig.indexOf("write-protected") > 0) {
                             this.fWriteProtected = true;
                         }
@@ -58367,7 +58395,7 @@ class Disk extends Component {
                  * The most likely source of any exception will be here, where we're parsing the disk data.
                  */
                 var aDiskData;
-                if (sDiskData.substr(0, 1) == "<") {        // if the "data" begins with a "<"...
+                if (diskData.substr(0, 1) == "<") {        // if the "data" begins with a "<"...
                     /*
                      * Early server configs reported an error (via the nErrorCode parameter) if a disk URL was invalid,
                      * but more recent server configs now display a somewhat friendlier HTML error page.  The downside,
@@ -58385,7 +58413,7 @@ class Disk extends Component {
                      * IE9 with an "Out of memory" exception.  One work-around would be to chop the data into chunks
                      * (perhaps one track per chunk, using regular expressions) and then manually re-assemble it.
                      *
-                     * However, it turns out that using JSON.parse(sDiskData) instead of eval("(" + sDiskData + ")")
+                     * However, it turns out that using JSON.parse(diskData) instead of eval("(" + diskData + ")")
                      * is a much easier fix. The only drawback is that we must first quote any unquoted property names
                      * and remove any comments, because while eval() was cool with them, JSON.parse() is more particular;
                      * the following RegExp replacements take care of those requirements.
@@ -58398,10 +58426,10 @@ class Disk extends Component {
                      *
                      *      ["unrecognized disk path: test.img"]
                      */
-                    if (sDiskData.indexOf("0x") < 0 && sDiskData.substr(0, 2) != "[\"") {
-                        aDiskData = JSON.parse(sDiskData.replace(/([a-z]+):/gm, "\"$1\":").replace(/\/\/[^\n]*/gm, ""));
+                    if (diskData.indexOf("0x") < 0 && diskData.substr(0, 2) != "[\"") {
+                        aDiskData = JSON.parse(diskData.replace(/([a-z]+):/gm, "\"$1\":").replace(/\/\/[^\n]*/gm, ""));
                     } else {
-                        aDiskData = eval("(" + sDiskData + ")");
+                        aDiskData = eval("(" + diskData + ")");
                     }
                 }
 
@@ -58524,6 +58552,11 @@ class Disk extends Component {
                 }
             } catch (e) {
                 Component.error("Disk image error (" + sURL + "): " + e.message);
+                diskData = null;
+            }
+            
+            if (diskData) {
+                Component.addMachineResource(this.controller.idMachine, sURL, diskData);
             }
         }
 
@@ -59817,7 +59850,7 @@ class Disk extends Component {
                     /*
                      * TODO: Consider setting a flag here that we can check at the end of the restore() function
                      * that indicates we should recalculate dwChecksum, because we currently have an inconsistency
-                     * between local disks that are mounted via build() and the same disks that are "remounted"
+                     * between local disks that are mounted via buildDisk() and the same disks that are "remounted"
                      * later by this code; the former has the correct checksum, while the latter has a null checksum.
                      *
                      * As you can see below, we currently deal with this by simply ignoring null checksums....
