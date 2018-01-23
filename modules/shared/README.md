@@ -5,7 +5,7 @@ permalink: /modules/shared/
 ---
 
 Shared Components
-=================
+-----------------
 
 PCjs Machines share the following:
 

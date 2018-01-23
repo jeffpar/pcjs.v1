@@ -466,6 +466,7 @@ class Disk extends Component {
         this.sDiskName = sDiskName;
         this.sDiskPath = sDiskPath;
         this.sDiskFile = Str.getBaseName(sDiskPath);
+        this.sFormat = "json";
 
         var disk = this;
         this.fnNotify = fnNotify;
@@ -474,7 +475,7 @@ class Disk extends Component {
         if (file) {
             var reader = new FileReader();
             reader.onload = function() {
-                disk.build(reader.result, true);
+                disk.buildDisk(reader.result, true);
             };
             reader.readAsArrayBuffer(file);
             return true;
@@ -498,41 +499,44 @@ class Disk extends Component {
                     sDiskURL = this.connectRemoteDisk(sDiskPath);
                     this.fOnDemand = true;
                 } else {
-                    var sDiskParm = DumpAPI.QUERY.PATH;
-                    var sSizeParm = '&' + DumpAPI.QUERY.MBHD + "=10";
-                    /*
-                     * 'mbhd' is a new parm added for hard drive support.  In the case of 'file' or 'dir' requests,
-                     * 'mbhd' informs DumpAPI.ENDPOINT that it should create a hard disk image, and one not larger than
-                     * the specified size (eg, 10mb).  In fact, until DumpAPI.ENDPOINT is changed to create custom hard
-                     * disk BPBs, you'll always get a standard PC XT 10mb disk image, so if the 'file' or 'dir' contains
-                     * more than 10mb of data, the request will fail.  Ultimately, I want to honor the controller's
-                     * driveConfig 'size' parm, or to match the capacity required by the driveConfig 'type' parameter.
-                     *
-                     * If a 'disk' is specified, we pass mbhd=0, because the actual size will depend on the image.
-                     * However, I don't currently have any "dsk" or "img" files containing hard disk images; those formats
-                     * were really intended for floppy disk images.  If I never create any hard disk image files, then
-                     * we can simply eliminate sSizeParm in the 'disk' case.
-                     *
-                     * Added more extensions to the list of paths-treated-as-disk-images, so that URLs to files located here:
-                     *
-                     *      ftp://ftp.oldskool.org/pub/TOPBENCH/dskimage/
-                     *
-                     * can be used as-is.  TODO: There's a TODO in netlib.getFile() regarding remote support that needs
-                     * to be resolved first; DiskDump relies on that function for its remote requests, and it currently
-                     * supports only HTTP.
-                     */
-                    if (!sDiskPath.indexOf("http:") || !sDiskPath.indexOf("ftp:") || ["dsk", "ima", "img", "360", "720", "12", "144"].indexOf(sDiskExt) >= 0) {
-                        sDiskParm = DumpAPI.QUERY.DISK;
-                        sSizeParm = '&' + DumpAPI.QUERY.MBHD + "=0";
-                    } else if (Str.endsWith(sDiskPath, '/')) {
-                        sDiskParm = DumpAPI.QUERY.DIR;
-                    }
-                    sDiskURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + sDiskParm + '=' + encodeURIComponent(sDiskPath) + (this.fRemovable ? "" : sSizeParm) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
+                    this.sFormat = "arraybuffer";
                 }
+                // else {
+                //     var sDiskParm = DumpAPI.QUERY.PATH;
+                //     var sSizeParm = '&' + DumpAPI.QUERY.MBHD + "=10";
+                //     /*
+                //      * 'mbhd' is a new parm added for hard drive support.  In the case of 'file' or 'dir' requests,
+                //      * 'mbhd' informs DumpAPI.ENDPOINT that it should create a hard disk image, and one not larger than
+                //      * the specified size (eg, 10mb).  In fact, until DumpAPI.ENDPOINT is changed to create custom hard
+                //      * disk BPBs, you'll always get a standard PC XT 10mb disk image, so if the 'file' or 'dir' contains
+                //      * more than 10mb of data, the request will fail.  Ultimately, I want to honor the controller's
+                //      * driveConfig 'size' parm, or to match the capacity required by the driveConfig 'type' parameter.
+                //      *
+                //      * If a 'disk' is specified, we pass mbhd=0, because the actual size will depend on the image.
+                //      * However, I don't currently have any "dsk" or "img" files containing hard disk images; those formats
+                //      * were really intended for floppy disk images.  If I never create any hard disk image files, then
+                //      * we can simply eliminate sSizeParm in the 'disk' case.
+                //      *
+                //      * Added more extensions to the list of paths-treated-as-disk-images, so that URLs to files located here:
+                //      *
+                //      *      ftp://ftp.oldskool.org/pub/TOPBENCH/dskimage/
+                //      *
+                //      * can be used as-is.  TODO: There's a TODO in netlib.getFile() regarding remote support that needs
+                //      * to be resolved first; DiskDump relies on that function for its remote requests, and it currently
+                //      * supports only HTTP.
+                //      */
+                //     if (!sDiskPath.indexOf("http:") || !sDiskPath.indexOf("ftp:") || ["dsk", "ima", "img", "360", "720", "12", "144"].indexOf(sDiskExt) >= 0) {
+                //         sDiskParm = DumpAPI.QUERY.DISK;
+                //         sSizeParm = '&' + DumpAPI.QUERY.MBHD + "=0";
+                //     } else if (Str.endsWith(sDiskPath, '/')) {
+                //         sDiskParm = DumpAPI.QUERY.DIR;
+                //     }
+                //     sDiskURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + sDiskParm + '=' + encodeURIComponent(sDiskPath) + (this.fRemovable ? "" : sSizeParm) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
+                // }
             }
         }
         var sProgress = "Loading " + sDiskURL + "...";
-        return !!Web.getResource(sDiskURL, null, true, function loadDone(sURL, sResponse, nErrorCode) {
+        return !!Web.getResource(sDiskURL, this.sFormat, true, function loadDone(sURL, sResponse, nErrorCode) {
             disk.doneLoad(sURL, sResponse, nErrorCode);
         }, function(nState) {
             disk.println(sProgress, Component.PRINT.PROGRESS);
@@ -540,15 +544,15 @@ class Disk extends Component {
     }
 
     /**
-     * build(buffer, fModified)
+     * buildDisk(buffer, fModified)
      *
      * Builds a disk image from an ArrayBuffer (eg, from a FileReader object), rather than from JSON-encoded data.
      *
      * @this {Disk}
-     * @param {?} buffer (we KNOW this is an ArrayBuffer, but we can't seem to convince the Closure Compiler)
+     * @param {?} buffer (technically, this is always an ArrayBuffer, because we tell FileReader to use readAsArrayBuffer, but the Closure Compiler doesn't realize that) 
      * @param {boolean} [fModified] is true if we should mark the entire disk modified (to ensure that we save/restore it)
      */
-    build(buffer, fModified)
+    buildDisk(buffer, fModified)
     {
         var disk;
         var cbDiskData = buffer? buffer.byteLength : 0;
@@ -594,17 +598,17 @@ class Disk extends Component {
     }
 
     /**
-     * doneLoad(sURL, sDiskData, nErrorCode)
+     * doneLoad(sURL, diskData, nErrorCode)
      *
      * This function was originally called mount().  If the mount is successful, we pass the Disk object to the
      * caller's fnNotify handler; otherwise, we pass null.
      *
      * @this {Disk}
      * @param {string} sURL
-     * @param {string} sDiskData
+     * @param {string|ArrayBuffer} diskData
      * @param {number} nErrorCode (response from server if anything other than 200)
      */
-    doneLoad(sURL, sDiskData, nErrorCode)
+    doneLoad(sURL, diskData, nErrorCode)
     {
         var disk = null;
         this.fWriteProtected = false;
@@ -619,7 +623,7 @@ class Disk extends Component {
                 if (BACKTRACK || SYMBOLS) this.buildFileTable();
                 disk = this;
             } else {
-                this.notice('Unable to connect to disk "' + this.sDiskPath + '" (error ' + nErrorCode + ': ' + sDiskData + ')', fPrintOnly);
+                this.notice('Unable to connect to disk "' + this.sDiskPath + '" (error ' + nErrorCode + ': ' + diskData + ')', fPrintOnly);
             }
         }
         else if (nErrorCode) {
@@ -636,8 +640,15 @@ class Disk extends Component {
                 this.printMessage('doneLoad("' + this.sDiskPath + '")');
             }
 
-            Component.addMachineResource(this.controller.idMachine, sURL, sDiskData);
-
+            /*
+             * If we received binary data instead of JSON, we can use the same buildDisk() function that our FileReader
+             * code uses.
+             */
+            if (typeof diskData != "string") {
+                this.buildDisk(diskData);
+                return;
+            }
+            
             try {
                 /*
                  * The following code was a hack to turn on write-protection for a disk image if there was
@@ -652,9 +663,9 @@ class Disk extends Component {
                 if (sBaseName.indexOf("-readonly") > 0) {
                     this.fWriteProtected = true;
                 } else {
-                    var iEOL = sDiskData.indexOf("\n");
+                    var iEOL = diskData.indexOf("\n");
                     if (iEOL > 0 && iEOL < 1024) {
-                        var sConfig = sDiskData.substring(0, iEOL);
+                        var sConfig = diskData.substring(0, iEOL);
                         if (sConfig.indexOf("write-protected") > 0) {
                             this.fWriteProtected = true;
                         }
@@ -664,7 +675,7 @@ class Disk extends Component {
                  * The most likely source of any exception will be here, where we're parsing the disk data.
                  */
                 var aDiskData;
-                if (sDiskData.substr(0, 1) == "<") {        // if the "data" begins with a "<"...
+                if (diskData.substr(0, 1) == "<") {        // if the "data" begins with a "<"...
                     /*
                      * Early server configs reported an error (via the nErrorCode parameter) if a disk URL was invalid,
                      * but more recent server configs now display a somewhat friendlier HTML error page.  The downside,
@@ -682,7 +693,7 @@ class Disk extends Component {
                      * IE9 with an "Out of memory" exception.  One work-around would be to chop the data into chunks
                      * (perhaps one track per chunk, using regular expressions) and then manually re-assemble it.
                      *
-                     * However, it turns out that using JSON.parse(sDiskData) instead of eval("(" + sDiskData + ")")
+                     * However, it turns out that using JSON.parse(diskData) instead of eval("(" + diskData + ")")
                      * is a much easier fix. The only drawback is that we must first quote any unquoted property names
                      * and remove any comments, because while eval() was cool with them, JSON.parse() is more particular;
                      * the following RegExp replacements take care of those requirements.
@@ -695,10 +706,10 @@ class Disk extends Component {
                      *
                      *      ["unrecognized disk path: test.img"]
                      */
-                    if (sDiskData.indexOf("0x") < 0 && sDiskData.substr(0, 2) != "[\"") {
-                        aDiskData = JSON.parse(sDiskData.replace(/([a-z]+):/gm, "\"$1\":").replace(/\/\/[^\n]*/gm, ""));
+                    if (diskData.indexOf("0x") < 0 && diskData.substr(0, 2) != "[\"") {
+                        aDiskData = JSON.parse(diskData.replace(/([a-z]+):/gm, "\"$1\":").replace(/\/\/[^\n]*/gm, ""));
                     } else {
-                        aDiskData = eval("(" + sDiskData + ")");
+                        aDiskData = eval("(" + diskData + ")");
                     }
                 }
 
@@ -821,6 +832,11 @@ class Disk extends Component {
                 }
             } catch (e) {
                 Component.error("Disk image error (" + sURL + "): " + e.message);
+                diskData = null;
+            }
+            
+            if (diskData) {
+                Component.addMachineResource(this.controller.idMachine, sURL, diskData);
             }
         }
 
@@ -2114,7 +2130,7 @@ class Disk extends Component {
                     /*
                      * TODO: Consider setting a flag here that we can check at the end of the restore() function
                      * that indicates we should recalculate dwChecksum, because we currently have an inconsistency
-                     * between local disks that are mounted via build() and the same disks that are "remounted"
+                     * between local disks that are mounted via buildDisk() and the same disks that are "remounted"
                      * later by this code; the former has the correct checksum, while the latter has a null checksum.
                      *
                      * As you can see below, we currently deal with this by simply ignoring null checksums....

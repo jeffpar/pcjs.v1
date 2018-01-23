@@ -5,7 +5,7 @@ permalink: /modules/
 ---
 
 PCjs Project Modules
-====================
+--------------------
 
 This folder contains all the JavaScript modules for the [PCjs Project](https://github.com/jeffpar/pcjs).
 It is our *private* counterpart to the **node_modules** folder, where all *public* Node modules are typically installed.

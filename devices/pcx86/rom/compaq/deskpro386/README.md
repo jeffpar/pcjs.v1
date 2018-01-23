@@ -7,27 +7,47 @@ permalink: /devices/pcx86/rom/compaq/deskpro386/
 COMPAQ DeskPro 386 ROMs
 -----------------------
 
-The oldest COMPAQ DeskPro 386 ROM I have is a Rev J.4 ROM from a "Version 2" motherboard designed
-in 1987 and released in 1988.
+Originally, the oldest COMPAQ DeskPro 386 ROM I had was a `Rev J.4` ROM from a "Version 2" motherboard designed
+in 1987, released in 1988, and purchased on eBay in October 2014.
 
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/reference/compaq/images/Compaq_DeskPro_386-16_System_Board_V2-640.jpg" alt="Compaq DeskPro 386 System Board Version 2"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/reference/compaq/images/Compaq_DeskPro_386-16_System_Board_V2.jpg)
 
-Thanks to folks on the [Vintage Computer](http://www.vintage-computer.com/) forums, I also have a Rev N.1 ROM from 1989.
+And thanks to folks on the [Vintage Computer](http://www.vintage-computer.com/) forums, I was later able to add
+the `Rev N.1` ROM from 1989 to this collection.  And when I obtained a DeskPro 386/25 from eBay in March 2015, I was
+able to add the `Rev K.2` ROM.
 
-However, I'm still on the lookout for any "Version 1" motherboards from 1986, so that I can obtain dumps of COMPAQ's
-ROMs for their earliest 80386-based systems.
+More recently (January 2018), I discovered that I still had a copy of the 1986 `Rev F` ROM, which I had made on
+April 22, 1987, using one of the early DeskPro 386 machines that Microsoft had purchased for the OS/2 development team.
+The only downside of my `Rev F` ROM image is that it was dumped using the DOS `DEBUG` utility, since I didn't have
+ROM reader hardware in those days.  Fortunately, since I wasn't sure how large the ROM actually was, I had dumped the
+entire 64Kb from F000:0000 through F000:FFFF.  As it turns out, that entire address range is actually write-protected
+RAM (since, at least in those days, RAM was much faster than ROM), where the first 32Kb contained a modified copy of the
+second.  For example, the first 32Kb contains some data structures that are updated by COMPAQ utilities such as `CEMM`
+to record "Built-in Memory" allocations.
 
-### System ROM Locations on COMPAQ DESKPRO 386 System Board Version 2 (Assembly No. 000558-001)
+Sure enough, attempting to use the [first 32Kb](1986-09-04/1986-09-04-LO.json) as a DeskPro 386 ROM generated a
+"ROM Error", no doubt due to a checksum mismatch.  However, the [second 32Kb](1986-09-04/1986-09-04-HI.json) appeared
+to work fine.  I can't guarantee that its contents are identical to the original `Rev F` ROM, because the ROM may
+have been self-modifying, but it works, and it's all we've got.  One of our COMPAQ machine configurations
+([COMPAQ DeskPro 386 (2Mb) with COMPAQ EGA](/devices/pcx86/machine/compaq/deskpro386/ega/2048kb/)) has now been
+updated to use that ROM.
 
-	U13 (EVEN)
-	U15 (ODD)
+This collection of COMPAQ DeskPro 386 ROMs still has several holes, but I'm very happy to have finally found one of the
+earliest (if not *the* earliest) ROMs commercially available for this line of COMPAQ computers.
+
+### System ROM Locations
+
+    COMPAQ DESKPRO 386 System Board Version 2 (Assembly No. 000558-001)
+    
+    U13 (EVEN)
+    U15 (ODD)
 
 ### System ROM Revisions
 
 	Rev  Even ROM #  Odd ROM #   Size  Date
 	---  ----------  ----------  ----  ----
 	E    108285-001  108284-001
-	F    108328-001  108327-001
+	F    108328-001  108327-001  32Kb  1986-09-04
 	G    108328-002  108327-002
 	H.8  113270-008  113269-008
 	J.4  109592-001  109591-001  32Kb  1988-01-28 (from a 386/16 motherboard)

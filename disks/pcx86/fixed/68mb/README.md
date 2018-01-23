@@ -24,8 +24,8 @@ January 8, 1988), the characteristics of drive type 4 come from that ROM's Fixed
 - 8 heads
 - 17 sectors/track
 
-which yields a capacity of 71,233,536 bytes (1023 * 8 * 17 * 512), or approximately 68Mb, since 1 megabyte (as
-it was understood in 1988) is equal to 1,048,576 bytes.
+yielding a capacity of 71,233,536 bytes (1023 * 8 * 17 * 512), or approximately 68Mb
+(since PCjs considers 1 megabyte to be 1,048,576 bytes).
 
 NOTE: There is a discrepancy between the ROM and the COMPAQ Technical Reference; the latter claims that a Type 4 drive
 supports 1024 cylinders rather than 1023.  However, it's possible that the larger total included a cylinder at the end
