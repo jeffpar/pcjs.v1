@@ -324,7 +324,7 @@ class Keyboard extends Component {
      * TODO: This function is woefully inefficient, because the SOFTCODES table is designed for converting
      * soft key presses into SIMCODES, whereas this function is doing the reverse: looking for the soft key,
      * if any, that corresponds to a SIMCODE, simply so we can provide visual feedback of keys activated
-     * by other means (eg, real keyboard events, button clicks that generate key sequences like CTRL_ALT_DEL,
+     * by other means (eg, real keyboard events, button clicks that generate key sequences like CTRL-ALT-DEL,
      * etc).
      *
      * To minimize this function's cost, we would want to dynamically create a reverse-lookup table after
@@ -1722,10 +1722,15 @@ class Keyboard extends Component {
         if (wCode !== undefined) {
 
             /*
-             * Hack to transform the IBM "BACKSPACE" key (which we normally map to KEYCODE_DELETE) to the IBM "DEL" key
-             * whenever both CTRL and ALT are pressed as well, so that it's easier to simulate that old favorite: CTRL_ALT_DEL
+             * We transform the BACKSPACE scancode (which normally originates in the browser as KEYCODE_DELETE) to the
+             * NUM_DEL scancode whenever both CTRL and ALT are down as well, so that you can easily type CTRL-ALT-DEL.
+             * 
+             * And, since the browser's operating environment may intercept CTRL-ALT-BACKSPACE and/or CTRL-ALT-DEL, we
+             * also check for CTRL-ALT-PERIOD as an alias.  And what if you really wanted to type CTRL-ALT-BACKSPACE or
+             * CTRL-ALT-PERIOD *without* them being transformed to CTRL-ALT-NUM_DEL?  Well, we leave that unlikely worry
+             * for another day.
              */
-            if (wCode == Keyboard.SCANCODE.BS) {
+            if (wCode == Keyboard.SCANCODE.BS || wCode == Keyboard.SCANCODE.PERIOD) {
                 if ((this.bitsState & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) == (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
                     wCode = Keyboard.SCANCODE.NUM_DEL;
                 }

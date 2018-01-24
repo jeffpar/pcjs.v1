@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.1/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 1.03a</title>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WIN103A-DISK1-SETUP.img" href="/disks/pcx86/windows/1.03a/WIN103A-DISK1-SETUP.json" md5="4d027d177c29a690a44942476410a7bb" md5json="51ba7bf76477b713addd603221e1648f">

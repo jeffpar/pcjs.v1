@@ -387,7 +387,7 @@ Updating PCjs
 To start developing features for a new version of PCjs, here are the recommended steps:
 
 1. Change the version number in the root [package.json](package.json) (and [_config.yml](https://github.com/jeffpar/pcjs/blob/jekyll/_config.yml))
-2. Run the "gulp promote" task to bump the version in all the machine XML files
+2. Run the "gulp version" task to bump the version in all the machine XML files
 3. Make changes
 4. Run "gulp" to build new versions of the apps (eg, "/versions/pcx86/1.x.x/pcx86.js")
 
@@ -395,7 +395,7 @@ You might also want to check out the blog post on [PCjs Coding Conventions](http
 
 You may also want to skip step #2 until you're ready to start testing the new version.  Depending on the nature
 of your changes, it may be better to manually edit the version number in only a few machine XML files for testing,
-leaving the rest of the XML files pointing to the previous version.  Run "gulp promote" when the new version is much
+leaving the rest of the XML files pointing to the previous version.  Run "gulp version" when the new version is much
 closer to being released.
 
 ### Testing

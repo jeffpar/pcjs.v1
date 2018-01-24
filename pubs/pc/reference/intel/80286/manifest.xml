@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.1/manifest.xsl"?>
 <manifest type="document">
 	<title>Intel 80286 References</title>
 	<document href="https://archive.org/download/bitsavers_intel80286287ProgrammersReferenceManual1987_27505703/210498-005_80286_and_80287_Programmers_Reference_Manual_1987.pdf">

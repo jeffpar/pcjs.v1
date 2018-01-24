@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.1/manifest.xsl"?>
 <manifest type="software">
 	<title>Windows COMM Driver (Source)</title>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WINCOMM.img" href="/disks/pcx86/windows/wincomm/WINCOMM.json" md5="a3a1edb104e149fea3572c20d0f12987" md5json="6ba0862c845c9ff38bef2f6bc0e94340">

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.1/manifest.xsl"?>
 <manifest type="software">
 	<title>OS/2 Prototype Disks</title>
 	<disk id="disk01" size="1228800" chs="80:2:15" img="cpdos/archive/286DOS-76800.img" href="/disks/pcx86/os2/misc/cpdos/286DOS-76800.json" md5="d206be5501ae2e5cfead6a93d4b7b953" md5json="6d12b3080301eb13b3d1142c41880aa2">
