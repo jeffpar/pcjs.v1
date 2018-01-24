@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.1/manifest.xsl"?>
 <manifest type="software">
 	<title>Borland Turbo Pascal</title>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/TURBO-PASCAL-301A.img" href="/disks/pcx86/tools/borland/tpascal/3.01a/TURBO-PASCAL-301A.json" md5="4cd5df43438b3fee96322bf1c7188ac3" md5json="284b7f994ac0c527cbf6df62a34db333">

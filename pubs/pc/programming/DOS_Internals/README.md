@@ -5,12 +5,11 @@ permalink: /pubs/pc/programming/DOS_Internals/
 ---
 
 *DOS Internals* by Geoff Chappell (January 1994)
----
+------------------------------------------------
 
-Directory Listing
----
+A directory listing of the *DOS Internals* diskette that accompanied the book is provided below.
 
-The following files are available on the *DOS Internals* diskette that accompanied the book.
+## Directory of *DOS Internals* Diskette
 
 	 Volume in drive A is PCJSDISK   
 

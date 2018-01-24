@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.1/manifest.xsl"?>
 <manifest type="software">
 	<title>Wolfenstein 3D</title>
 	<disk id="disk01" size="1228800" chs="80:2:15" dir="archive/1WOLF14" href="/disks/pcx86/games/id/wolf3d/1WOLF14.json" md5="f834555a36cc2d99b100ca8bbb7309b0" md5json="2ba049953af759e891a285db38a143de">

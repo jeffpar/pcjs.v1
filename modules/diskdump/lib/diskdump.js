@@ -1021,9 +1021,15 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         if (sName) {
             sXMLDisk += '\t\t<name>' + sName + '</name>\n';
         }
+        
+        if (sMatchDisk && (match = sMatchDisk.match(/<link[^>]*>[^<]*<\/link>/))) {
+            sXMLDisk += '\t\t' + match[0] + '\n';
+        }
+        
         if (sMatchDisk && (match = sMatchDisk.match(/<from [^>]*?\/>/))) {
             sXMLDisk += '\t\t' + match[0] + '\n';
         }
+        
         var sBaseDir = null;
         for (i = 0; i < disk.aManifestInfo.length; i++) {
             var sAttrs = "";

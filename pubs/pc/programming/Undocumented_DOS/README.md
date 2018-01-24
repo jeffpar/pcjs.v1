@@ -5,16 +5,15 @@ permalink: /pubs/pc/programming/Undocumented_DOS/
 ---
 
 *Undocumented DOS* (2nd Edition) by Schulman, Brown, Maxey, Michels, Kyle
----
+-------------------------------------------------------------------------
 
 * [READ.ME](#read-me)
-* [Directory (Disk 1)](#directory-disk-1)
-* [Directory (Disk 2)](#directory-disk-2)
+* [Directory of Disk 1](#directory-of-undocumented-dos-disk-1)
+* [Directory of Disk 2](#directory-of-undocumented-dos-disk-2)
 * [Errata (1st Edition)](#errata-1st-edition)
 * [Errata (2nd Edition)](#errata-2nd-edition)
 
-READ.ME
----
+### READ.ME
 
 
 	                                        27 September 1990
@@ -112,8 +111,7 @@ READ.ME
 	                                       uunet!pharlap!andrew
 	                                       CIS: 76320,302
 
-Directory (Disk 1)
----
+### Directory of Undocumented DOS (Disk 1)
 
 	 Volume in drive A is DISK1      
 
@@ -129,8 +127,7 @@ Directory (Disk 1)
 	        4 file(s)    1076841 bytes
 	                      136192 bytes free
 
-Directory (Disk 2)
----
+### Directory of Undocumented DOS (Disk 2)
 
 	 Volume in drive A is DISK2      
 
@@ -350,8 +347,7 @@ Directory (Disk 2)
 	      180 file(s)     789601 bytes
 	                      377856 bytes free
 
-Errata (1st Edition)
----
+### Errata (1st Edition)
 
 	Date: Mon, 18 Mar 91 15:03:13 EST
 	From: Andrew Schulman <andrew@pharlap.com>
@@ -1434,8 +1430,7 @@ Errata (1st Edition)
 	
 	                            THE END?
 
-Errata (2nd Edition)
----
+### Errata (2nd Edition)
 
 	Undocumented DOS, 2nd Edtion		Errata
 	by Ralf Brown

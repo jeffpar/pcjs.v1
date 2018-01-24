@@ -5,12 +5,11 @@ permalink: /pubs/pc/programming/Undocumented_Windows/
 ---
 
 *Undocumented Windows* (Covers Windows 3.1 and 3.0) by Schulman, Maxey, Pietrek
----
+-------------------------------------------------------------------------------
 
-Directory Listing
----
+A directory listing of the *Undocumented Windows* diskette that accompanied the book is provided below.
 
-The following files are available on the *Undocumented Windows* diskette that accompanied the book.
+### Directory of "Undocumented Windows" Diskette
 
 	 Volume in drive A is PCJSDISK   
 

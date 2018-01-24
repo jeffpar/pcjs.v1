@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.0/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.1/manifest.xsl"?>
 <manifest type="software">
 	<title>PC Magazine Diskettes</title>
 	<disk id="disk01" size="163840" chs="40:1:8" dir="archive/VOL06N08" href="/disks/pcx86/shareware/pcmag/disks/VOL06N08.json" md5="d75cf2d16d104ebd61843cc67dd6ac88" md5json="46bc9c75178d3119f0f85b8611bd52c8">
