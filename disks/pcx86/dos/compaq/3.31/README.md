@@ -26,8 +26,9 @@ Released in late 1987 by COMPAQ Computer Corp, this version of MS-DOS displays t
 	(C) Copyright Compaq Computer Corp. 1982, 1988
 	(C) Copyright Microsoft Corp. 1981, 1987
 
-This was the first version of DOS to support 32-bit logical sector numbers and partitions larger than 32MB,
-a feature that was soon added to DOS 4.0 and OS/2 1.1.
+This was the first version of DOS to support 32-bit logical sector numbers, enabling partitions larger than 32Mb
+and partitions that extended beyond the first 32Mb of disk space.  These features were soon added to DOS 4.0 and
+OS/2 1.1 as well.
 
 [Directory Listings](#directory-of-compaq-ms-dos-331-disk-1) of the distribution diskettes are provided below.
 The first five disks come from [WinWorld](https://winworldpc.com/product/ms-dos/331)

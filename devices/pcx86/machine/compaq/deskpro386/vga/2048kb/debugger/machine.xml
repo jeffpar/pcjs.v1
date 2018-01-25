@@ -10,10 +10,10 @@
 	<rom id="romBIOS" addr="0xf8000" size="0x8000" alias="[0xf0000,0xffff0000,0xffff8000]" file="/devices/pcx86/rom/compaq/deskpro386/1988-01-28/1988-01-28.json"/>
 	<video ref="/devices/pcx86/video/ibm/vga/1986-10-27/256kb-autolockfs.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml" autoMount='{A: {name: "COMPAQ MS-DOS 3.31 (Disk 2)", path: "/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json"}, B: {name: "COMPAQ MS-DOS 3.31 (Disk 3)", path: "/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK3.json"}}'/>
+	<hdc ref="/disks/pcx86/fixed/47mb/unformatted-at5.xml"/>
 	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-functions.xml"/>
 	<debugger id="debugger" messages="fault|int" commands=""/>
 	<panel ref="/devices/pcx86/panel/wide386.xml"/>
-	<hdc ref="/disks/pcx86/fixed/47mb/unformatted-at5.xml"/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]" monitor="vga"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2" binding="print"/>

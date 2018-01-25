@@ -85,17 +85,17 @@ And this is confirmed by the PC XT BIOS, page A-94, in the code for the "GET PAR
 By "RESERVE LAST TRACK", they really meant "RESERVE LAST CYLINDER", because 68 (not 17) sectors are reserved at
 the end of the disk.  In addition, the first sector of the disk is reserved for the Master Boot Record (MBR), so there
 are a total of 69 reserved sectors.  20808 - 69 = 20739 sectors (0x5103), which is exactly what's stored in the
-"total sectors" field of the disk's BPB, yielding a total partition size of 10,618,368 bytes.
+"total sectors" field of the disk's BPB, yielding a total volume size of 10,618,368 bytes.
 
 However, that 69-sector overhead is not the end of the story.  There is also overhead incurred by the FAT file system,
 which, in this case, consists of:
 
-- DOS Boot sector (1)
-- FAT sectors (2 * 8 = 16)
-- Root directory sectors (32)
+    DOS Boot sector: 1
+    FAT sectors: 2 * 8 = 16
+    Root directory sectors: 32
 
 for a total of 49 sectors, leaving 20739 - 49 = 20690 sectors.  Moreover, free space is measured in clusters,
-not sectors, and the partition uses 8 sectors/cluster, leaving room for 2586.25 clusters.  Since a fractional cluster
+not sectors, and the volume uses 8 sectors/cluster, leaving room for 2586.25 clusters.  Since a fractional cluster
 is not allowed, another 2 sectors are lost, bringing the total FAT file system overhead to 51 sectors.
  
 Thus, actual free space is (20739 - 51) * 512, or 10,592,256 bytes, which is exactly what DOS reports as the available

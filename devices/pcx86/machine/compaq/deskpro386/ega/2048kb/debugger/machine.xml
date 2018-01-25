@@ -10,12 +10,13 @@
 	<rom id="romBIOS" addr="0xf8000" size="0x8000" alias="[0xf0000,0xffff0000,0xffff8000]" file="/devices/pcx86/rom/compaq/deskpro386/1986-09-04/1986-09-04-HI.json"/>
 	<video ref="/devices/pcx86/video/ibm/ega/1984-09-13/128kb-autolockfs.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml" autoMount='{A: {name: "COMPAQ MS-DOS 3.31 (Disk 1)"}, B: {name: "None"}}'/>
+	<hdc ref="/disks/pcx86/fixed/47mb/unformatted-at5.xml"/>
 	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-arrows.xml"/>
 	<debugger id="debugger" messages="" commands=""/>
 	<panel ref="/devices/pcx86/panel/wide386.xml"/>
-	<hdc ref="/disks/pcx86/fixed/47mb/unformatted-at5.xml"/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]"/>
+	<parallel id="lpt1" adapter="2"/>
 	<serial id="com1" adapter="1"/>
-	<serial id="com2" adapter="2" binding="print"/>
+	<serial id="com2" adapter="2" binding="print" tabsize="8" charbol="9"/>
 	<mouse serial="com1"/>
 </machine>

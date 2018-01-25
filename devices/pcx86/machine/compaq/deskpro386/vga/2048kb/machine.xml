@@ -14,6 +14,6 @@
 	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-functions.xml"/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]" monitor="vga"/>
 	<serial id="com1" adapter="1"/>
-	<serial id="com2" adapter="2" binding="print"/>
+	<serial id="com2" adapter="2"/>
 	<mouse serial="com1"/>
 </machine>

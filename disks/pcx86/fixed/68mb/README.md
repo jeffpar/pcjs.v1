@@ -20,9 +20,9 @@ Since that machine is a [COMPAQ DeskPro 386](/devices/pcx86/machine/compaq/deskp
 which uses a [COMPAQ DeskPro 386 ROM](/devices/pcx86/rom/compaq/deskpro386/) (specifically, ROM Revision J.4, dated
 January 8, 1988), the characteristics of drive type 4 come from that ROM's Fixed Disk Parameter Table:
 
-- 1023 cylinders
-- 8 heads
-- 17 sectors/track
+    1023 cylinders
+    8 heads
+    17 sectors/track
 
 yielding a capacity of 71,233,536 bytes (1023 * 8 * 17 * 512), or approximately 68Mb
 (since PCjs considers 1 megabyte to be 1,048,576 bytes).
