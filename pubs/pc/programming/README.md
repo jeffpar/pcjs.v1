@@ -21,7 +21,8 @@ information (errata, disks, etc) is provided where available.
 * *[The 8086 Book](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/programming/The_8086_Book/The_8086_Book.pdf)* by Russell Rector and George Alexy
 * *The Zen of Assembly Language* by Michael Abrash
 * *[The Undocumented PC](The_Undocumented_PC/)* (2nd Edition) by Frank van Gilluwe
-* *[Undocumented DOS](Undocumented_DOS/)* (2nd Edition) by Schulman, Brown, Maxey, Michels, Kyle
+* *[Unauthorized Windows 95](Unauthorized_Windows_95/)* by Andrew Schulman
+* *[Undocumented DOS](Undocumented_DOS/)* (1st and 2nd Editions) by Schulman, Michels, Kyle, Paterson, Maxey, Brown
 * *[Undocumented Windows](Undocumented_Windows/)* (Covers Windows 3.1 and 3.0) by Schulman, Maxey, Pietrek
 
 [<img src="/pubs/images/The_8086_Book-thumb.jpg" width="200" height="260" alt="The 8086 Book"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/programming/The_8086_Book/The_8086_Book.pdf)

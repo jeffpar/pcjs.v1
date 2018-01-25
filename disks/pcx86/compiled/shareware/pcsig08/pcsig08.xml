@@ -2919,6 +2919,10 @@
 		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK1.json">Undocumented DOS (Disk 1)</disk>
 		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK2.json">Undocumented DOS (Disk 2)</disk>
 		<disk path="/pubs/pc/programming/Undocumented_Windows/UNDOC-WIN.json">Undocumented Windows</disk>
+		<disk path="/pubs/pc/programming/Unauthorized_Windows_95/UNAUTH-W95B.json">Unauthorized Windows 95 (BIN)</disk>
+		<disk path="/pubs/pc/programming/Unauthorized_Windows_95/UNAUTH-W95S.json">Unauthorized Windows 95 (SRC)</disk>
+		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2B.json">Undocumented DOS, 2nd Ed. (BIN)</disk>
+		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2S.json">Undocumented DOS, 2nd Ed. (SRC)</disk>
 		<disk path="/tests/pcx86/vga/VGABIN.json">VGA Tests (Black Book)</disk>
 	</control>
 	<control type="button" binding="loadDisk">Load</control>
