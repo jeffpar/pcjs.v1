@@ -4,8 +4,8 @@ title: Undocumented DOS
 permalink: /pubs/pc/programming/Undocumented_DOS/
 ---
 
-*Undocumented DOS* (1st Edition)
---------------------------------
+Undocumented DOS (1st Edition)
+------------------------------
 by Schulman, Michels, Kyle, Paterson, Maxey, Brown
 	
 * [READ.ME](#read-me-1st-edition)
@@ -13,8 +13,8 @@ by Schulman, Michels, Kyle, Paterson, Maxey, Brown
 * [Directory of Undocumented DOS (Disk 2)](#directory-of-undocumented-dos-disk-2)
 * [Errata (1st Edition)](#errata-1st-edition)
 
-*Undocumented DOS* (2nd Edition)
---------------------------------
+Undocumented DOS (2nd Edition)
+------------------------------
 by Schulman, Brown, Maxey, Michels, Kyle
 
 * [Directory of Undocumented DOS, 2nd Ed. (BIN)](#directory-of-undocumented-dos-2nd-ed-bin)

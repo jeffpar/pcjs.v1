@@ -4,12 +4,13 @@ title: The Undocumented PC
 permalink: /pubs/pc/programming/The_Undocumented_PC/
 ---
 
-*The Undocumented PC* by Frank van Gilluwe (December 1996)
-----------------------------------------------------------
+*The Undocumented PC*
+---------------------
+by Frank van Gilluwe (December 1996)
 
 A directory listing of *The Undocumented PC* diskette that accompanied the book is provided below.
 
-### Directory of "The Undocumented PC" Diskette
+### Directory of Undocumented PC diskette
 
 	 Volume in drive A is PCJSDISK   
 
