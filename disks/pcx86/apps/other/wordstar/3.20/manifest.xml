@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.1/manifest.xsl"?>
+<manifest type="software">
+	<title>WordStar</title>
+	<version>3.20</version>
+	<type>Application</type>
+	<category>Word Processing</category>
+	<author>MicroPro</author>
+	<releaseDate></releaseDate>
+	<disk id="disk01" size="163840" chs="40:1:8" img="archive/WS320-MOUNTABLE.img" href="/disks/pcx86/apps/other/wordstar/3.20/WS320-MOUNTABLE.json" md5="77a6beb225f61ee0c02a98b7c6f29c69" md5json="4958aca2571a8a4def6f64327440a77c">
+		<name>WordStar 3.20</name>
+		<file size="17152" time="1982-10-01 00:00:00" attr="0x20">INSTALL.BAS</file>
+		<file size="11520" time="1980-01-01 00:00:00" attr="0x20">MAILMRGE.OVR</file>
+		<file size="3968" time="1980-01-01 00:00:00" attr="0x20">PRINT.TST</file>
+		<file size="20480" time="1980-01-01 00:00:00" attr="0x20">WS.COM</file>
+		<file size="1152" time="2013-02-23 08:45:36" attr="0x20">WSBAUD.BAS</file>
+		<file size="27264" time="1980-01-01 00:00:00" attr="0x20">WSMSGS.OVR</file>
+		<file size="40960" time="1980-01-01 00:00:00" attr="0x20">WSOVLY1.OVR</file>
+	</disk>
+</manifest>

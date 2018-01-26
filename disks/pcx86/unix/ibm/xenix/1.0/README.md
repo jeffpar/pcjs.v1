@@ -5,7 +5,7 @@ permalink: /disks/pcx86/unix/ibm/xenix/1.0/
 ---
 
 IBM PC XENIX 1.0
----
+----------------
 
 From [OS/2 Museum](http://www.os2museum.com/wp/ibm-pc-xenix/):
 

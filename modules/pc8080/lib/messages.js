@@ -43,7 +43,7 @@ var Messages8080 = {
     SERIAL:     0x00800000,
     SPEAKER:    0x02000000,
     COMPUTER:   0x04000000,
-    LOG:        0x20000000,
+    BUFFER:     0x20000000,
     WARN:       0x40000000,
     HALT:       0x80000000|0
 };
@@ -81,10 +81,10 @@ Messages8080.CATEGORIES = {
      * Now we turn to message actions rather than message types; for example, setting "halt"
      * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
      *
-     * Similarly, "m log on" turns on message logging, deferring the display of all messages
-     * until "m log off" is issued.
+     * Similarly, "m buffer on" turns on message buffering, deferring the display of all messages
+     * until "m buffer off" is issued.
      */
-    "log":      Messages8080.LOG,
+    "buffer":   Messages8080.BUFFER,
     "warn":     Messages8080.WARN,
     "halt":     Messages8080.HALT
 };

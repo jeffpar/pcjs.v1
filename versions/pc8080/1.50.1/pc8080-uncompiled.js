@@ -4409,7 +4409,7 @@ var Messages8080 = {
     SERIAL:     0x00800000,
     SPEAKER:    0x02000000,
     COMPUTER:   0x04000000,
-    LOG:        0x20000000,
+    BUFFER:     0x20000000,
     WARN:       0x40000000,
     HALT:       0x80000000|0
 };
@@ -4447,10 +4447,10 @@ Messages8080.CATEGORIES = {
      * Now we turn to message actions rather than message types; for example, setting "halt"
      * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
      *
-     * Similarly, "m log on" turns on message logging, deferring the display of all messages
-     * until "m log off" is issued.
+     * Similarly, "m buffer on" turns on message buffering, deferring the display of all messages
+     * until "m buffer off" is issued.
      */
-    "log":      Messages8080.LOG,
+    "buffer":   Messages8080.BUFFER,
     "warn":     Messages8080.WARN,
     "halt":     Messages8080.HALT
 };
@@ -19602,7 +19602,7 @@ class Debugger8080 extends Debugger {
         this.dbg = this;
         this.bitsMessage = this.bitsWarning = Messages8080.WARN;
         this.sMessagePrev = null;
-        this.aMessageLog = [];
+        this.aMessageBuffer = [];
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -19849,8 +19849,8 @@ class Debugger8080 extends Debugger {
             sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getPC()));
         }
 
-        if (this.bitsMessage & Messages8080.LOG) {
-            this.aMessageLog.push(sMessage);
+        if (this.bitsMessage & Messages8080.BUFFER) {
+            this.aMessageBuffer.push(sMessage);
             return;
         }
 
@@ -21833,7 +21833,7 @@ class Debugger8080 extends Debugger {
         if (sCategory !== undefined) {
             var bitsMessage = 0;
             if (sCategory == "all") {
-                bitsMessage = (0xffffffff|0) & ~(Messages8080.HALT | Messages8080.KEYS | Messages8080.LOG);
+                bitsMessage = (0xffffffff|0) & ~(Messages8080.HALT | Messages8080.KEYS | Messages8080.BUFFER);
                 sCategory = null;
             } else if (sCategory == "on") {
                 fCriteria = true;
@@ -21868,11 +21868,11 @@ class Debugger8080 extends Debugger {
                 else if (asArgs[2] == "off") {
                     this.bitsMessage &= ~bitsMessage;
                     fCriteria = false;
-                    if (bitsMessage == Messages8080.LOG) {
-                        for (var i = 0; i < this.aMessageLog.length; i++) {
-                            this.println(this.aMessageLog[i]);
+                    if (bitsMessage == Messages8080.BUFFER) {
+                        for (var i = 0; i < this.aMessageBuffer.length; i++) {
+                            this.println(this.aMessageBuffer[i]);
                         }
-                        this.aMessageLog = [];
+                        this.aMessageBuffer = [];
                     }
                 }
             }

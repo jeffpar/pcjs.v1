@@ -5618,6 +5618,24 @@ if (DEBUGGER) {
      *
      * The last replacement is obviously DOS-specific, since FCBs are DOS constructs.
      */
+    Interrupts.FUNCS[Interrupts.VIDEO] = {
+        0x00: "set mode (@AL)",
+        0x01: "set cursor type (start=@CH,end=@CL)",
+        0x02: "set cursor pos (row=@DH,col=@DL,page=@BH)",
+        0x03: "read cursor pos (page=@BH)",
+        0x04: "read light pen",
+        0x05: "set display page (@AL)",
+        0x06: "scroll up (lines=@AL)",
+        0x07: "scroll down (lines=@AL)",
+        0x08: "read character (page=@BH)",
+        0x09: "write char/attr (@AL,attr=@BL,count=@CX)",
+        0x0A: "write char (@AL,count=@CX)",
+        0x0B: "set palette (id=@BH,color=@BL)",
+        0x0C: "write dot (row=@DX,col=@CX)",
+        0x0D: "read dot (row=@DX,col=@CX)",
+        0x0E: "write tty (@AL)"
+    };
+    
     Interrupts.FUNCS[Interrupts.DISK] = {
         0x00: "disk reset",
         0x01: "get status",
@@ -7570,7 +7588,7 @@ var Messages = {
     COMPUTER:   0x04000000,
     DOS:        0x08000000,
     DATA:       0x10000000,
-    LOG:        0x20000000,
+    BUFFER:     0x20000000,
     WARN:       0x40000000,
     HALT:       0x80000000|0
 };
@@ -7623,10 +7641,10 @@ Messages.CATEGORIES = {
      * Now we turn to message actions rather than message types; for example, setting "halt"
      * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
      *
-     * Similarly, "m log on" turns on message logging, deferring the display of all messages
-     * until "m log off" is issued.
+     * Similarly, "m buffer on" turns on message buffering, deferring the display of all messages
+     * until "m buffer off" is issued.
      */
-    "log":      Messages.LOG,
+    "buffer":   Messages.BUFFER,
     "warn":     Messages.WARN,
     "halt":     Messages.HALT
 };
@@ -41362,7 +41380,7 @@ class ChipSet extends Component {
                 }
             }
 
-            if (DEBUG && this.messageEnabled(Messages.TIMER | Messages.LOG)) {
+            if (MAXDEBUG && this.messageEnabled(Messages.TIMER | Messages.BUFFER)) {
                 this.log("TIMER" + iTimer + " count: " + count + ", ticks: " + ticksElapsed + ", fired: " + (fFired? "true" : "false"));
             }
 
@@ -41859,7 +41877,7 @@ class ChipSet extends Component {
         let b = this.bPPIB & ~(ChipSet.KC8042.RWREG.NMI_ERROR | ChipSet.KC8042.RWREG.REFRESH_BIT) | ((this.cpu.getCycles() & 0x40)? ChipSet.KC8042.RWREG.REFRESH_BIT : 0);
         /*
          * Thanks to the WAITF function, this has become a very "busy" port, so if this generates too
-         * many messages, try adding Messages.LOG to the criteria.
+         * many messages, try adding Messages.BUFFER to the criteria.
          */
         this.printMessageIO(port, null, addrFrom, "8042_RWREG", b, Messages.C8042);
         return b;
@@ -45040,7 +45058,7 @@ class Keyboard extends Component {
          * first entry in the array is allowed to repeat.  Each entry is a key object with the following
          * properties:
          *
-         *      simCode:    our simulated keyCode from onKeyDown, onKeyUp, or onKeyPress
+         *      simCode:    our simulated keyCode from onKeyChange or onKeyPress
          *      fDown:      next state to simulate (true for down, false for up)
          *      nRepeat:    > 0 if timer should generate more "make" scan code(s), -1 for "break" scan code(s)
          *      timer:      timer for next key operation, if any
@@ -45138,13 +45156,13 @@ class Keyboard extends Component {
                  *      this.bindings[id] = control;
                  */
                 controlText.onkeydown = function onKeyDown(event) {
-                    return kbd.onKeyDown(event, true);
+                    return kbd.onKeyChange(event, true);
                 };
                 controlText.onkeypress = function onKeyPressKbd(event) {
                     return kbd.onKeyPress(event);
                 };
                 controlText.onkeyup = function onKeyUp(event) {
-                    return kbd.onKeyDown(event, false);
+                    return kbd.onKeyChange(event, false);
                 };
                 return true;
 
@@ -45967,7 +45985,7 @@ class Keyboard extends Component {
              */
             if (charCode <= Keys.ASCII.CTRL_Z) {
                 if (charCode != Keys.ASCII.CTRL_I && charCode != Keys.ASCII.CTRL_J && charCode != Keys.ASCII.CTRL_M) {
-                    charCode = charCode + Keys.KEYCODE.FAKE;
+                    charCode += Keys.KEYCODE.FAKE;
                 }
             }
             else if (charCode == 0x1C) {
@@ -46337,6 +46355,8 @@ class Keyboard extends Component {
 
     /**
      * updateActiveKey(key, msTimer)
+     * 
+     * When called by addActiveKey(), msTimer is undefined; that's used only when we're called by our own timeout handler.
      *
      * @param {Object} key
      * @param {number} [msTimer]
@@ -46355,9 +46375,11 @@ class Keyboard extends Component {
             this.printMessage((msTimer? '\n' : "") + "updateActiveKey(" + key.simCode + (msTimer? "," + msTimer + "ms" : "") + "): " + (key.fDown? "down" : "up"), true);
         }
 
-        if (!this.keySimulate(key.simCode, key.fDown)) return;
-
-        if (!key.nRepeat) return;
+        if (msTimer && key.nRepeat < 0) {
+            key.fDown = false;
+        }
+        
+        if (!this.keySimulate(key.simCode, key.fDown) || !key.nRepeat) return;
 
         var ms;
         if (key.nRepeat < 0) {
@@ -46365,12 +46387,12 @@ class Keyboard extends Component {
                 this.removeActiveKey(key.simCode);
                 return;
             }
-            key.fDown = false;
             ms = this.msAutoRelease;
         }
         else {
             ms = (key.nRepeat++ == 1? this.msAutoRepeat : this.msNextRepeat);
         }
+        
         key.timer = setTimeout(function(kbd) {
             return function onUpdateActiveKey() {
                 kbd.updateActiveKey(key, ms);
@@ -46433,14 +46455,14 @@ class Keyboard extends Component {
     }
 
     /**
-     * onKeyDown(event, fDown)
+     * onKeyChange(event, fDown)
      *
      * @this {Keyboard}
      * @param {Object} event
      * @param {boolean} fDown is true for a keyDown event, false for a keyUp event
      * @return {boolean} true to pass the event along, false to consume it
      */
-    onKeyDown(event, fDown)
+    onKeyChange(event, fDown)
     {
         var fPass = true;
         var fPress = false;
@@ -46551,7 +46573,9 @@ class Keyboard extends Component {
             /*
              * Don't simulate any key not explicitly marked ONDOWN, as well as any key sequence with the CMD key held.
              */
-            if (!this.fAllDown && fPass && fDown || !!(this.bitsState & Keyboard.STATE.CMDS)) fIgnore = true;
+            if (!this.fAllDown && fPass && fDown || (this.bitsState & Keyboard.STATE.CMDS)) {
+                fIgnore = true;
+            }
         }
 
         if (!fPass) {
@@ -46563,7 +46587,7 @@ class Keyboard extends Component {
         }
 
         /*
-         * Mobile (eg, iOS) keyboards don't fully support onKeyDown/onKeyUp events; for example, they usually
+         * Mobile (eg, iOS) keyboards don't fully support onkeydown/onkeyup events; for example, they usually
          * don't generate ANY events when a shift key is pressed, and even for normal keys, they seem to generate
          * rapid (ie, fake) "up" and "down" events around "press" events, probably more to satisfy compatibility
          * issues rather than making a serious effort to indicate when a key ACTUALLY went down or up.
@@ -48204,7 +48228,7 @@ class Card extends Controller {
                 var reg = (aRegs === this.regCRTData)? this.getCRTCReg(i) : aRegs[i];
                 if (s) s += '\n';
                 s += sName + "[" + Str.toHex(i, 2) + "]: " + Str.pad(asRegs[i], cchMax) + (i === iReg? '*' : ' ') + Str.toHex(reg, reg > 0xff? 4 : 2);
-                if (reg != null) s += " (" + reg + ".)"
+                if (reg != null) s += " (" + reg + ".)";
             }
             this.dbg.println(s);
         }
@@ -51351,7 +51375,9 @@ class Video extends Component {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont][0] + " font");
             }
-            if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) fChanges = true;
+            if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) {
+                fChanges = true;
+            }
             /*
              * If font-doubling is enabled, then load a double-size version of the font as well, as it provides
              * sharper rendering, especially when the screen cell size is a multiple of the above font cell size;
@@ -51362,7 +51388,9 @@ class Video extends Component {
                 if (DEBUG && this.messageEnabled()) {
                     this.printMessage("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont >> 1][0] + " double-size font");
                 }
-                if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) fChanges = true;
+                if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) {
+                    fChanges = true;
+                }
             }
         }
         return fChanges;
@@ -51614,41 +51642,45 @@ class Video extends Component {
          * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to
          * detect that particular combination of bad values and automatically fix them (we're so thoughtful!)
          */
-        var fEGAHack = false;
-        if (this.cardActive === this.cardEGA) {
-            fEGAHack = true;
+        if (this.nCard == Video.CARD.EGA) {
             if (bCursorMax == 7 && bCursorStart == 4 && !bCursorEnd) bCursorEnd = 7;
         }
 
         /*
-         * One way of disabling the cursor is to set bit 5 (Card.CRTC.CURSTART_BLINKOFF) of the CRTC.CURSTART flags;
-         * another way is setting bCursorStart > bCursorEnd (unless it's an EGA, in which case we must actually draw a
-         * "split block" cursor instead).
-         *
-         * TODO: Determine whether the final condition (bCursorStart > bCursorMax) should also result in a hidden cursor
-         * on a CGA.  For example, ThinkTank sets both start and end values to 15, and WordStar for PCjr sets start and end
-         * to 12 and 13, respectively.  Those values don't make sense when the max is 7, but what does a *real* CGA do?
-         */
-        if ((bCursorFlags & Card.CRTC.CURSTART_BLINKOFF) || bCursorStart > bCursorEnd && !fEGAHack /* || bCursorStart > bCursorMax */) {
-            this.removeCursor();
-            return false;
-        }
-
-        /*
          * Range-check CURSTART and CUREND against MAXSCAN now.
-         * 
-         * HACK: Since I've already made the decision (above) that this condition should *not* hide the cursor,
-         * I've decided to double-down and also "thicken" the cursor to two scan lines if both start and end needed
-         * to be rounded down to the max.
          */
         if (bCursorStart > bCursorMax) {
             bCursorStart = bCursorMax;
         }
         if (bCursorEnd > bCursorMax) {
             bCursorEnd = bCursorMax;
-            if (bCursorStart = bCursorMax) bCursorStart = bCursorMax - 1;
+            /*
+             * HACK: "Thicken" the cursor to two scan lines as part of the "rounding down" process.
+             * 
+             * TODO: I need a suite of cursor shape and visibility tests across all cards (MDA, CGA, EGA, and VGA),
+             * because I'm not really cool with code like this.
+             */
+            if (bCursorMax && bCursorStart == bCursorMax) bCursorStart = bCursorMax - 1;
         }
+        
         var bCursorSize = bCursorEnd - bCursorStart + 1;
+
+        /*
+         * One way of disabling the cursor is to set bit 5 (Card.CRTC.CURSTART_BLINKOFF) of the CRTC.CURSTART flags;
+         * another way is setting bCursorStart > bCursorEnd, which implies that bCursorSize <= 0.
+         * 
+         * TODO: On a CGA, determine whether additional criteria (eg, when bCursorStart > bCursorMax before range-checking
+         * above) should also result in a hidden cursor.  For example, ThinkTank sets both start and end values to 15,
+         * and WordStar for PCjr sets start and end to 12 and 13, respectively.  Those values don't make sense when the max
+         * is 7, so what does a *real* CGA do?
+         * 
+         * TODO: On an EGA, the second condition can generate a "split block" cursor; see p. 201 of The Programmer's Guide
+         * to the EGA, VGA, et al.
+         */
+        if ((bCursorFlags & Card.CRTC.CURSTART_BLINKOFF) || bCursorSize <= 0 /* && !fEGA || bCursorStart > bCursorMax */) {
+            this.removeCursor();
+            return false;
+        }
 
         /*
          * The most compatible way of disabling the cursor is to simply move the cursor to an off-screen position.
@@ -51678,6 +51710,7 @@ class Video extends Component {
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
         }
+        
         this.cyCursorCell = bCursorMax + 1;
 
         /*
@@ -52482,7 +52515,7 @@ class Video extends Component {
             this.contextScreen.fillRect(xDst, yDst, this.cxScreenCell, this.cyScreenCell);
         }
 
-        if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.LOG)) {
+        if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.BUFFER)) {
             this.log("updateCharBgnd(" + col + "," + row + "," + bChar + "): filled " + xDst + "," + yDst);
         }
 
@@ -52493,7 +52526,7 @@ class Video extends Component {
             var xSrcFgnd = (bChar & 0xf) * font.cxCell;
             var ySrcFgnd = (bChar >> 4) * font.cyCell;
 
-            if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.LOG)) {
+            if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.BUFFER)) {
                 this.log("updateCharFgnd(" + col + "," + row + "," + bChar + "): draw from " + xSrcFgnd + "," + ySrcFgnd + " (" + font.cxCell + "," + font.cyCell + ") to " + xDst + "," + yDst);
             }
 
@@ -70053,7 +70086,7 @@ class DebuggerX86 extends Debugger {
         this.dbg = this;
         this.bitsMessage = this.bitsWarning = Messages.WARN;
         this.sMessagePrev = null;
-        this.aMessageLog = [];
+        this.aMessageBuffer = [];
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -70402,8 +70435,8 @@ class DebuggerX86 extends Debugger {
             sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getIP(), this.cpu.getCS())) + " (%" + Str.toHex(this.cpu.regLIP) + ")";
         }
 
-        if (this.bitsMessage & Messages.LOG) {
-            this.aMessageLog.push(sMessage);
+        if (this.bitsMessage & Messages.BUFFER) {
+            this.aMessageBuffer.push(sMessage);
             return;
         }
 
@@ -72713,7 +72746,7 @@ class DebuggerX86 extends Debugger {
             for (m in Messages.CATEGORIES) {
                 if (this.afnDumpers[m]) {
                     if (sDumpers) sDumpers += ',';
-                    sDumpers = sDumpers + m;
+                    sDumpers += m;
                 }
             }
             sDumpers += ",state,symbols";
@@ -73312,7 +73345,7 @@ class DebuggerX86 extends Debugger {
         if (sCategory !== undefined) {
             var bitsMessage = 0;
             if (sCategory == "all") {
-                bitsMessage = (0xffffffff|0) & ~(Messages.HALT | Messages.KEYS | Messages.LOG);
+                bitsMessage = (0xffffffff|0) & ~(Messages.HALT | Messages.KEYS | Messages.BUFFER);
                 sCategory = null;
             } else if (sCategory == "on") {
                 fCriteria = true;
@@ -73347,11 +73380,11 @@ class DebuggerX86 extends Debugger {
                 else if (asArgs[2] == "off") {
                     this.bitsMessage &= ~bitsMessage;
                     fCriteria = false;
-                    if (bitsMessage == Messages.LOG) {
-                        for (var i = 0; i < this.aMessageLog.length; i++) {
-                            this.println(this.aMessageLog[i]);
+                    if (bitsMessage == Messages.BUFFER) {
+                        for (var i = 0; i < this.aMessageBuffer.length; i++) {
+                            this.println(this.aMessageBuffer[i]);
                         }
-                        this.aMessageLog = [];
+                        this.aMessageBuffer = [];
                     }
                 }
             }

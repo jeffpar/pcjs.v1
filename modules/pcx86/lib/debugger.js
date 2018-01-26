@@ -2154,7 +2154,7 @@ class DebuggerX86 extends Debugger {
         this.dbg = this;
         this.bitsMessage = this.bitsWarning = Messages.WARN;
         this.sMessagePrev = null;
-        this.aMessageLog = [];
+        this.aMessageBuffer = [];
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -2503,8 +2503,8 @@ class DebuggerX86 extends Debugger {
             sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getIP(), this.cpu.getCS())) + " (%" + Str.toHex(this.cpu.regLIP) + ")";
         }
 
-        if (this.bitsMessage & Messages.LOG) {
-            this.aMessageLog.push(sMessage);
+        if (this.bitsMessage & Messages.BUFFER) {
+            this.aMessageBuffer.push(sMessage);
             return;
         }
 
@@ -4814,7 +4814,7 @@ class DebuggerX86 extends Debugger {
             for (m in Messages.CATEGORIES) {
                 if (this.afnDumpers[m]) {
                     if (sDumpers) sDumpers += ',';
-                    sDumpers = sDumpers + m;
+                    sDumpers += m;
                 }
             }
             sDumpers += ",state,symbols";
@@ -5413,7 +5413,7 @@ class DebuggerX86 extends Debugger {
         if (sCategory !== undefined) {
             var bitsMessage = 0;
             if (sCategory == "all") {
-                bitsMessage = (0xffffffff|0) & ~(Messages.HALT | Messages.KEYS | Messages.LOG);
+                bitsMessage = (0xffffffff|0) & ~(Messages.HALT | Messages.KEYS | Messages.BUFFER);
                 sCategory = null;
             } else if (sCategory == "on") {
                 fCriteria = true;
@@ -5448,11 +5448,11 @@ class DebuggerX86 extends Debugger {
                 else if (asArgs[2] == "off") {
                     this.bitsMessage &= ~bitsMessage;
                     fCriteria = false;
-                    if (bitsMessage == Messages.LOG) {
-                        for (var i = 0; i < this.aMessageLog.length; i++) {
-                            this.println(this.aMessageLog[i]);
+                    if (bitsMessage == Messages.BUFFER) {
+                        for (var i = 0; i < this.aMessageBuffer.length; i++) {
+                            this.println(this.aMessageBuffer[i]);
                         }
-                        this.aMessageLog = [];
+                        this.aMessageBuffer = [];
                     }
                 }
             }

@@ -636,7 +636,7 @@ class Card extends Controller {
                 var reg = (aRegs === this.regCRTData)? this.getCRTCReg(i) : aRegs[i];
                 if (s) s += '\n';
                 s += sName + "[" + Str.toHex(i, 2) + "]: " + Str.pad(asRegs[i], cchMax) + (i === iReg? '*' : ' ') + Str.toHex(reg, reg > 0xff? 4 : 2);
-                if (reg != null) s += " (" + reg + ".)"
+                if (reg != null) s += " (" + reg + ".)";
             }
             this.dbg.println(s);
         }
@@ -3783,7 +3783,9 @@ class Video extends Component {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont][0] + " font");
             }
-            if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) fChanges = true;
+            if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) {
+                fChanges = true;
+            }
             /*
              * If font-doubling is enabled, then load a double-size version of the font as well, as it provides
              * sharper rendering, especially when the screen cell size is a multiple of the above font cell size;
@@ -3794,7 +3796,9 @@ class Video extends Component {
                 if (DEBUG && this.messageEnabled()) {
                     this.printMessage("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont >> 1][0] + " double-size font");
                 }
-                if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) fChanges = true;
+                if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) {
+                    fChanges = true;
+                }
             }
         }
         return fChanges;
@@ -4046,41 +4050,45 @@ class Video extends Component {
          * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to
          * detect that particular combination of bad values and automatically fix them (we're so thoughtful!)
          */
-        var fEGAHack = false;
-        if (this.cardActive === this.cardEGA) {
-            fEGAHack = true;
+        if (this.nCard == Video.CARD.EGA) {
             if (bCursorMax == 7 && bCursorStart == 4 && !bCursorEnd) bCursorEnd = 7;
         }
 
         /*
-         * One way of disabling the cursor is to set bit 5 (Card.CRTC.CURSTART_BLINKOFF) of the CRTC.CURSTART flags;
-         * another way is setting bCursorStart > bCursorEnd (unless it's an EGA, in which case we must actually draw a
-         * "split block" cursor instead).
-         *
-         * TODO: Determine whether the final condition (bCursorStart > bCursorMax) should also result in a hidden cursor
-         * on a CGA.  For example, ThinkTank sets both start and end values to 15, and WordStar for PCjr sets start and end
-         * to 12 and 13, respectively.  Those values don't make sense when the max is 7, but what does a *real* CGA do?
-         */
-        if ((bCursorFlags & Card.CRTC.CURSTART_BLINKOFF) || bCursorStart > bCursorEnd && !fEGAHack /* || bCursorStart > bCursorMax */) {
-            this.removeCursor();
-            return false;
-        }
-
-        /*
          * Range-check CURSTART and CUREND against MAXSCAN now.
-         * 
-         * HACK: Since I've already made the decision (above) that this condition should *not* hide the cursor,
-         * I've decided to double-down and also "thicken" the cursor to two scan lines if both start and end needed
-         * to be rounded down to the max.
          */
         if (bCursorStart > bCursorMax) {
             bCursorStart = bCursorMax;
         }
         if (bCursorEnd > bCursorMax) {
             bCursorEnd = bCursorMax;
-            if (bCursorStart = bCursorMax) bCursorStart = bCursorMax - 1;
+            /*
+             * HACK: "Thicken" the cursor to two scan lines as part of the "rounding down" process.
+             * 
+             * TODO: I need a suite of cursor shape and visibility tests across all cards (MDA, CGA, EGA, and VGA),
+             * because I'm not really cool with code like this.
+             */
+            if (bCursorMax && bCursorStart == bCursorMax) bCursorStart = bCursorMax - 1;
         }
+        
         var bCursorSize = bCursorEnd - bCursorStart + 1;
+
+        /*
+         * One way of disabling the cursor is to set bit 5 (Card.CRTC.CURSTART_BLINKOFF) of the CRTC.CURSTART flags;
+         * another way is setting bCursorStart > bCursorEnd, which implies that bCursorSize <= 0.
+         * 
+         * TODO: On a CGA, determine whether additional criteria (eg, when bCursorStart > bCursorMax before range-checking
+         * above) should also result in a hidden cursor.  For example, ThinkTank sets both start and end values to 15,
+         * and WordStar for PCjr sets start and end to 12 and 13, respectively.  Those values don't make sense when the max
+         * is 7, so what does a *real* CGA do?
+         * 
+         * TODO: On an EGA, the second condition can generate a "split block" cursor; see p. 201 of The Programmer's Guide
+         * to the EGA, VGA, et al.
+         */
+        if ((bCursorFlags & Card.CRTC.CURSTART_BLINKOFF) || bCursorSize <= 0 /* && !fEGA || bCursorStart > bCursorMax */) {
+            this.removeCursor();
+            return false;
+        }
 
         /*
          * The most compatible way of disabling the cursor is to simply move the cursor to an off-screen position.
@@ -4110,6 +4118,7 @@ class Video extends Component {
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
         }
+        
         this.cyCursorCell = bCursorMax + 1;
 
         /*
@@ -4914,7 +4923,7 @@ class Video extends Component {
             this.contextScreen.fillRect(xDst, yDst, this.cxScreenCell, this.cyScreenCell);
         }
 
-        if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.LOG)) {
+        if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.BUFFER)) {
             this.log("updateCharBgnd(" + col + "," + row + "," + bChar + "): filled " + xDst + "," + yDst);
         }
 
@@ -4925,7 +4934,7 @@ class Video extends Component {
             var xSrcFgnd = (bChar & 0xf) * font.cxCell;
             var ySrcFgnd = (bChar >> 4) * font.cyCell;
 
-            if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.LOG)) {
+            if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.BUFFER)) {
                 this.log("updateCharFgnd(" + col + "," + row + "," + bChar + "): draw from " + xSrcFgnd + "," + ySrcFgnd + " (" + font.cxCell + "," + font.cyCell + ") to " + xDst + "," + yDst);
             }
 

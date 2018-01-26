@@ -1,17 +1,23 @@
 {
-    "eqnull": true,
-    "loopfunc": true,
-    "sub": true,
-    "globalstrict": true,
-    "globals": {
-        "Buffer": true,
-        "console": true,
-        "global": true,
-        "module": true,
-        "process": true,
-        "require": true,
-        "setTimeout": true,
-        "__dirname": false,
-        "__filename": false
-    }
+  "bitwise": false,
+  "boss": false,
+  "eqnull": true,
+  "eqeqeq": false,
+  "esversion": 6,
+  "evil": true,
+  "loopfunc": true,
+  "sub": true,
+  "globalstrict": true,
+  "globals": {
+    "Buffer": true,
+    "console": true,
+    "global": true,
+    "module": true,
+    "process": true,
+    "require": true,
+    "screen": true,
+    "setTimeout": true,
+    "__dirname": false,
+    "__filename": false
+  }
 }

@@ -769,7 +769,7 @@ class Debugger8080 extends Debugger {
         this.dbg = this;
         this.bitsMessage = this.bitsWarning = Messages8080.WARN;
         this.sMessagePrev = null;
-        this.aMessageLog = [];
+        this.aMessageBuffer = [];
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -1016,8 +1016,8 @@ class Debugger8080 extends Debugger {
             sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getPC()));
         }
 
-        if (this.bitsMessage & Messages8080.LOG) {
-            this.aMessageLog.push(sMessage);
+        if (this.bitsMessage & Messages8080.BUFFER) {
+            this.aMessageBuffer.push(sMessage);
             return;
         }
 
@@ -3000,7 +3000,7 @@ class Debugger8080 extends Debugger {
         if (sCategory !== undefined) {
             var bitsMessage = 0;
             if (sCategory == "all") {
-                bitsMessage = (0xffffffff|0) & ~(Messages8080.HALT | Messages8080.KEYS | Messages8080.LOG);
+                bitsMessage = (0xffffffff|0) & ~(Messages8080.HALT | Messages8080.KEYS | Messages8080.BUFFER);
                 sCategory = null;
             } else if (sCategory == "on") {
                 fCriteria = true;
@@ -3035,11 +3035,11 @@ class Debugger8080 extends Debugger {
                 else if (asArgs[2] == "off") {
                     this.bitsMessage &= ~bitsMessage;
                     fCriteria = false;
-                    if (bitsMessage == Messages8080.LOG) {
-                        for (var i = 0; i < this.aMessageLog.length; i++) {
-                            this.println(this.aMessageLog[i]);
+                    if (bitsMessage == Messages8080.BUFFER) {
+                        for (var i = 0; i < this.aMessageBuffer.length; i++) {
+                            this.println(this.aMessageBuffer[i]);
                         }
-                        this.aMessageLog = [];
+                        this.aMessageBuffer = [];
                     }
                 }
             }

@@ -119,7 +119,7 @@ class Keyboard extends Component {
          * first entry in the array is allowed to repeat.  Each entry is a key object with the following
          * properties:
          *
-         *      simCode:    our simulated keyCode from onKeyDown, onKeyUp, or onKeyPress
+         *      simCode:    our simulated keyCode from onKeyChange or onKeyPress
          *      fDown:      next state to simulate (true for down, false for up)
          *      nRepeat:    > 0 if timer should generate more "make" scan code(s), -1 for "break" scan code(s)
          *      timer:      timer for next key operation, if any
@@ -217,13 +217,13 @@ class Keyboard extends Component {
                  *      this.bindings[id] = control;
                  */
                 controlText.onkeydown = function onKeyDown(event) {
-                    return kbd.onKeyDown(event, true);
+                    return kbd.onKeyChange(event, true);
                 };
                 controlText.onkeypress = function onKeyPressKbd(event) {
                     return kbd.onKeyPress(event);
                 };
                 controlText.onkeyup = function onKeyUp(event) {
-                    return kbd.onKeyDown(event, false);
+                    return kbd.onKeyChange(event, false);
                 };
                 return true;
 
@@ -1046,7 +1046,7 @@ class Keyboard extends Component {
              */
             if (charCode <= Keys.ASCII.CTRL_Z) {
                 if (charCode != Keys.ASCII.CTRL_I && charCode != Keys.ASCII.CTRL_J && charCode != Keys.ASCII.CTRL_M) {
-                    charCode = charCode + Keys.KEYCODE.FAKE;
+                    charCode += Keys.KEYCODE.FAKE;
                 }
             }
             else if (charCode == 0x1C) {
@@ -1416,6 +1416,8 @@ class Keyboard extends Component {
 
     /**
      * updateActiveKey(key, msTimer)
+     * 
+     * When called by addActiveKey(), msTimer is undefined; that's used only when we're called by our own timeout handler.
      *
      * @param {Object} key
      * @param {number} [msTimer]
@@ -1434,9 +1436,11 @@ class Keyboard extends Component {
             this.printMessage((msTimer? '\n' : "") + "updateActiveKey(" + key.simCode + (msTimer? "," + msTimer + "ms" : "") + "): " + (key.fDown? "down" : "up"), true);
         }
 
-        if (!this.keySimulate(key.simCode, key.fDown)) return;
-
-        if (!key.nRepeat) return;
+        if (msTimer && key.nRepeat < 0) {
+            key.fDown = false;
+        }
+        
+        if (!this.keySimulate(key.simCode, key.fDown) || !key.nRepeat) return;
 
         var ms;
         if (key.nRepeat < 0) {
@@ -1444,12 +1448,12 @@ class Keyboard extends Component {
                 this.removeActiveKey(key.simCode);
                 return;
             }
-            key.fDown = false;
             ms = this.msAutoRelease;
         }
         else {
             ms = (key.nRepeat++ == 1? this.msAutoRepeat : this.msNextRepeat);
         }
+        
         key.timer = setTimeout(function(kbd) {
             return function onUpdateActiveKey() {
                 kbd.updateActiveKey(key, ms);
@@ -1512,14 +1516,14 @@ class Keyboard extends Component {
     }
 
     /**
-     * onKeyDown(event, fDown)
+     * onKeyChange(event, fDown)
      *
      * @this {Keyboard}
      * @param {Object} event
      * @param {boolean} fDown is true for a keyDown event, false for a keyUp event
      * @return {boolean} true to pass the event along, false to consume it
      */
-    onKeyDown(event, fDown)
+    onKeyChange(event, fDown)
     {
         var fPass = true;
         var fPress = false;
@@ -1630,7 +1634,9 @@ class Keyboard extends Component {
             /*
              * Don't simulate any key not explicitly marked ONDOWN, as well as any key sequence with the CMD key held.
              */
-            if (!this.fAllDown && fPass && fDown || !!(this.bitsState & Keyboard.STATE.CMDS)) fIgnore = true;
+            if (!this.fAllDown && fPass && fDown || (this.bitsState & Keyboard.STATE.CMDS)) {
+                fIgnore = true;
+            }
         }
 
         if (!fPass) {
@@ -1642,7 +1648,7 @@ class Keyboard extends Component {
         }
 
         /*
-         * Mobile (eg, iOS) keyboards don't fully support onKeyDown/onKeyUp events; for example, they usually
+         * Mobile (eg, iOS) keyboards don't fully support onkeydown/onkeyup events; for example, they usually
          * don't generate ANY events when a shift key is pressed, and even for normal keys, they seem to generate
          * rapid (ie, fake) "up" and "down" events around "press" events, probably more to satisfy compatibility
          * issues rather than making a serious effort to indicate when a key ACTUALLY went down or up.

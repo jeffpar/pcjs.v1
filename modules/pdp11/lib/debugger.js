@@ -157,7 +157,7 @@ class DebuggerPDP11 extends Debugger {
             this.afnDumpers = {};
             this.bitsMessage = this.bitsWarning = 0;
             this.sMessagePrev = null;
-            this.aMessageLog = [];
+            this.aMessageBuffer = [];
             this.messageInit(parmsDbg['messages']);
             this.sInitCommands = parmsDbg['commands'];
 
@@ -322,7 +322,7 @@ class DebuggerPDP11 extends Debugger {
      * @this {DebuggerPDP11}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "debugInput")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -847,7 +847,7 @@ class DebuggerPDP11 extends Debugger {
         this.dbg = this;
         this.bitsMessage = this.bitsWarning = MessagesPDP11.WARN;
         this.sMessagePrev = null;
-        this.aMessageLog = [];
+        this.aMessageBuffer = [];
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -1014,8 +1014,8 @@ class DebuggerPDP11 extends Debugger {
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
         this.sMessagePrev = sMessage;
 
-        if (this.bitsMessage & MessagesPDP11.LOG) {
-            this.aMessageLog.push(sMessage);
+        if (this.bitsMessage & MessagesPDP11.BUFFER) {
+            this.aMessageBuffer.push(sMessage);
             return;
         }
 
@@ -2776,7 +2776,7 @@ class DebuggerPDP11 extends Debugger {
             for (m in MessagesPDP11.CATEGORIES) {
                 if (this.afnDumpers[m]) {
                     if (sDumpers) sDumpers += ',';
-                    sDumpers = sDumpers + m;
+                    sDumpers += m;
                 }
             }
             sDumpers += ",state,symbols";
@@ -3168,7 +3168,7 @@ class DebuggerPDP11 extends Debugger {
         if (sCategory !== undefined) {
             var bitsMessage = 0;
             if (sCategory == "all") {
-                bitsMessage = (0xffffffff|0) & ~(MessagesPDP11.HALT | MessagesPDP11.KEYS | MessagesPDP11.LOG);
+                bitsMessage = (0xffffffff|0) & ~(MessagesPDP11.HALT | MessagesPDP11.KEYS | MessagesPDP11.BUFFER);
                 sCategory = null;
             } else if (sCategory == "on") {
                 fCriteria = true;
@@ -3203,12 +3203,12 @@ class DebuggerPDP11 extends Debugger {
                 else if (asArgs[2] == "off") {
                     this.bitsMessage &= ~bitsMessage;
                     fCriteria = false;
-                    if (bitsMessage == MessagesPDP11.LOG) {
-                        var i = this.aMessageLog.length >= 1000? this.aMessageLog.length - 1000 : 0;
-                        while (i < this.aMessageLog.length) {
-                            this.println(this.aMessageLog[i++]);
+                    if (bitsMessage == MessagesPDP11.BUFFER) {
+                        var i = this.aMessageBuffer.length >= 1000? this.aMessageBuffer.length - 1000 : 0;
+                        while (i < this.aMessageBuffer.length) {
+                            this.println(this.aMessageBuffer[i++]);
                         }
-                        this.aMessageLog = [];
+                        this.aMessageBuffer = [];
                     }
                 }
             }

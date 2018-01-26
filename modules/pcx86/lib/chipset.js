@@ -3551,7 +3551,7 @@ class ChipSet extends Component {
                 }
             }
 
-            if (DEBUG && this.messageEnabled(Messages.TIMER | Messages.LOG)) {
+            if (MAXDEBUG && this.messageEnabled(Messages.TIMER | Messages.BUFFER)) {
                 this.log("TIMER" + iTimer + " count: " + count + ", ticks: " + ticksElapsed + ", fired: " + (fFired? "true" : "false"));
             }
 
@@ -4048,7 +4048,7 @@ class ChipSet extends Component {
         let b = this.bPPIB & ~(ChipSet.KC8042.RWREG.NMI_ERROR | ChipSet.KC8042.RWREG.REFRESH_BIT) | ((this.cpu.getCycles() & 0x40)? ChipSet.KC8042.RWREG.REFRESH_BIT : 0);
         /*
          * Thanks to the WAITF function, this has become a very "busy" port, so if this generates too
-         * many messages, try adding Messages.LOG to the criteria.
+         * many messages, try adding Messages.BUFFER to the criteria.
          */
         this.printMessageIO(port, null, addrFrom, "8042_RWREG", b, Messages.C8042);
         return b;

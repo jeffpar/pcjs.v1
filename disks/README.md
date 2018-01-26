@@ -11,9 +11,9 @@ Disk Libraries
 
 Browse the following PCjs Disk Libraries.
 
-* [IBM PC](pcx86/)
-* [Challenger 1P](c1p/)
-* [DEC](dec/)
+* [IBM PC Disk Library](pcx86/)
+* [Challenger 1P Disk Library](c1p/)
+* [DEC Disk Library](dec/)
 
 Additional software is available in the [Application Archives](/apps/).
 
