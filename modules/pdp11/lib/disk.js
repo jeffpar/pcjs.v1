@@ -501,7 +501,7 @@ class DiskPDP11 extends Component {
                  * conversion to a forward-compatible 'data' array.
                  */
                 else {
-                    if (DEBUG && this.messageEnabled(MessagesPDP11.DISK | MessagesPDP11.LOG)) {
+                    if (DEBUG && this.messageEnabled(MessagesPDP11.DISK | MessagesPDP11.BUFFER)) {
                         var sCylinders = aDiskData.length + " track" + (aDiskData.length > 1 ? "s" : "");
                         var nHeads = aDiskData[0].length;
                         var sHeads = nHeads + " head" + (nHeads > 1 ? "s" : "");

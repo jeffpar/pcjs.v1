@@ -497,9 +497,9 @@ class Component {
                     sClass = aClasses[iClass];
                     switch (sClass) {
                         case sAppClass + "-binding":
-                            parms = Component.getComponentParms(control);
+                            parms = Component.getComponentParms(/** @type {HTMLElement} */(control));
                             if (parms && parms['binding']) {
-                                component.setBinding(parms['type'], parms['binding'], control, parms['value']);
+                                component.setBinding(parms['type'], parms['binding'], /** @type {HTMLElement} */(control), parms['value']);
                             } else if (!parms || parms['type'] != "description") {
                                 Component.log("Component '" + component.toString() + "' missing binding" + (parms? " for " + parms['type'] : ""), "warning");
                             }
@@ -974,7 +974,7 @@ class Component {
             return true;
         case 'print':
             if (!this.bindings[sBinding]) {
-                var controlTextArea = /** @type {HTMLTextAreaElement} */ (control);
+                var controlTextArea = /** @type {HTMLTextAreaElement} */(control);
                 this.bindings[sBinding] = controlTextArea;
                 /**
                  * Override this.notice() with a replacement function that eliminates the Component.alertUser() call.
@@ -1338,7 +1338,18 @@ class Component {
                 bitsMessage = bitsMessage || this.bitsMessage;
             }
             var bitsEnabled = this.dbg.bitsMessage & bitsMessage;
-            return (!!bitsMessage && bitsEnabled === bitsMessage || !!(bitsEnabled & this.dbg.bitsWarning));
+            /*
+             * This next "bit" of logic is for PCx86 and any other machine where we've expanded the set of
+             * messages by reusing bits in the low nibbles in combination with different bits in the high nibble.
+             * If the input bits adhere to that format, then the mask we just produced must adhere to it as well;
+             * if not, then we zero the mask, ensuring that the test will return false.
+             */
+            if ((bitsMessage & 0xf0000000) && (bitsMessage & 0x0fffffff)) {
+                if (!(bitsEnabled & 0xf0000000) || !(bitsEnabled & 0x0fffffff)) bitsEnabled = 0;
+            }
+            if (bitsMessage && bitsEnabled === bitsMessage || (bitsEnabled & this.dbg.bitsWarning)) {
+                return true;
+            }
         }
         return false;
     }
@@ -1612,7 +1623,7 @@ if (!Function.prototype.bind) {
         var fToBind = this;
         var fnNOP = /** @constructor */ (function() {});
         var fnBound = function() {
-            return fToBind.apply(this instanceof fnNOP && obj? this : obj, args.concat(Array.prototype.slice.call(arguments)));
+            return fToBind.apply(this instanceof fnNOP && obj? this : obj, args.concat(/** @type {Array} */(Array.prototype.slice.call(arguments))));
         };
         fnNOP.prototype = this.prototype;
         fnBound.prototype = new fnNOP();

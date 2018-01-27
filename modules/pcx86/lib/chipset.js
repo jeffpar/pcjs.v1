@@ -2532,7 +2532,7 @@ class ChipSet extends Component {
                     break;
             }
         }
-        if (this.messageEnabled(Messages.PIC | Messages.PORT | Messages.CHIPSET)) {
+        if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
             this.printMessageIO(pic.port, null, addrFrom, "PIC" + iPIC, b, true);
         }
         return b;
@@ -2549,7 +2549,7 @@ class ChipSet extends Component {
     outPICLo(iPIC, bOut, addrFrom)
     {
         let pic = this.aPICs[iPIC];
-        if (this.messageEnabled(Messages.PIC | Messages.PORT | Messages.CHIPSET)) {
+        if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
             this.printMessageIO(pic.port, bOut, addrFrom, "PIC" + iPIC, null, true);
         }
         if (bOut & ChipSet.PIC_LO.ICW1) {
@@ -2648,7 +2648,7 @@ class ChipSet extends Component {
                  * TODO: Support EOI commands with automatic rotation (eg, ChipSet.PIC_LO.OCW2_EOI_ROT and ChipSet.PIC_LO.OCW2_EOI_ROTSPEC)
                  */
                 if (bOCW2 & ChipSet.PIC_LO.OCW2_SET_ROTAUTO) {
-                    if (this.messageEnabled(/*Messages.PIC | */Messages.WARN)) {
+                    if (this.messageEnabled(/*Messages.PIC | */ Messages.WARN)) {
                         this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW2 rotate " + Str.toHexByte(bOut), true, true);
                     }
                 }
@@ -2663,7 +2663,7 @@ class ChipSet extends Component {
                 /*
                  * TODO: Remaining commands to support: ChipSet.PIC_LO.OCW2_SET_ROTAUTO and ChipSet.PIC_LO.OCW2_CLR_ROTAUTO
                  */
-                if (this.messageEnabled(/*Messages.PIC | */Messages.WARN)) {
+                if (this.messageEnabled(/*Messages.PIC | */ Messages.WARN)) {
                     this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI " + Str.toHexByte(bOut), true, true);
                 }
             }
@@ -2675,7 +2675,7 @@ class ChipSet extends Component {
              * that's unfortunate, because I don't support them yet.
              */
             if (bOut & (ChipSet.PIC_LO.OCW3_POLL_CMD | ChipSet.PIC_LO.OCW3_SMM_CMD)) {
-                if (this.messageEnabled(/*Messages.PIC | */Messages.WARN)) {
+                if (this.messageEnabled(/*Messages.PIC | */ Messages.WARN)) {
                     this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW3 " + Str.toHexByte(bOut), true, true);
                 }
             }
@@ -2695,7 +2695,7 @@ class ChipSet extends Component {
     {
         let pic = this.aPICs[iPIC];
         let b = pic.bIMR;
-        if (this.messageEnabled(Messages.PIC | Messages.PORT | Messages.CHIPSET)) {
+        if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
             this.printMessageIO(pic.port+1, null, addrFrom, "PIC" + iPIC, b, true);
         }
         return b;
@@ -2712,7 +2712,7 @@ class ChipSet extends Component {
     outPICHi(iPIC, bOut, addrFrom)
     {
         let pic = this.aPICs[iPIC];
-        if (this.messageEnabled(Messages.PIC | Messages.PORT | Messages.CHIPSET)) {
+        if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
             this.printMessageIO(pic.port+1, bOut, addrFrom, "PIC" + iPIC, null, true);
         }
         if (pic.nICW < pic.aICW.length) {
@@ -2771,9 +2771,7 @@ class ChipSet extends Component {
         let bIRR = (1 << nIRL);
         if (!(pic.bIRR & bIRR)) {
             pic.bIRR |= bIRR;
-            if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ) | Messages.CHIPSET)) {
-                this.printMessage("setIRR(" + nIRQ + ")", true);
-            }
+            if (this.messageEnabled(this.messageBitsIRQ(nIRQ))) this.printMessage("set IRQ " + nIRQ, true);
             pic.nDelay = nDelay || 0;
             this.checkIRR();
         }
@@ -2793,9 +2791,7 @@ class ChipSet extends Component {
         let bIRR = (1 << nIRL);
         if (pic.bIRR & bIRR) {
             pic.bIRR &= ~bIRR;
-            if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ) | Messages.CHIPSET)) {
-                this.printMessage("clearIRR(" + nIRQ + ")", true);
-            }
+            if (this.messageEnabled(this.messageBitsIRQ(nIRQ))) this.printMessage("clear IRQ " + nIRQ, true);
             this.checkIRR();
         }
     }
@@ -3749,9 +3745,9 @@ class ChipSet extends Component {
 
         /*
          * The ROM BIOS polls this port incessantly during its memory tests, checking for memory parity errors
-         * (which of course we never report), so we further restrict these port messages to Messages.MEM.
+         * (which of course we never report), so you must use both Messages.PORT and Messages.CHIPSET.
          */
-        this.printMessageIO(port, null, addrFrom, "PPI_C", b, Messages.CHIPSET | Messages.MEM);
+        this.printMessageIO(port, null, addrFrom, "PPI_C", b, Messages.CHIPSET);
         return b;
     }
 
@@ -4144,7 +4140,7 @@ class ChipSet extends Component {
 
         case ChipSet.KC8042.CMD.DISABLE_KBD:        // 0xAD
             this.set8042CmdData(this.b8042CmdData | ChipSet.KC8042.DATA.CMD.NO_CLOCK);
-            if (DEBUG) this.printMessage("keyboard disabled", Messages.KEYBOARD | Messages.PORT);
+            if (DEBUG) this.printMessage("keyboard disabled", Messages.KBD | Messages.PORT);
             /*
              * NOTE: The MODEL_5170 BIOS calls "KBD_RESET" (F000:17D2) while the keyboard interface is disabled,
              * yet we must still deliver the Keyboard's CMDRES.BAT_OK response code?  Seems like an odd thing for
@@ -4154,14 +4150,14 @@ class ChipSet extends Component {
 
         case ChipSet.KC8042.CMD.ENABLE_KBD:         // 0xAE
             this.set8042CmdData(this.b8042CmdData & ~ChipSet.KC8042.DATA.CMD.NO_CLOCK);
-            if (DEBUG) this.printMessage("keyboard re-enabled", Messages.KEYBOARD | Messages.PORT);
+            if (DEBUG) this.printMessage("keyboard re-enabled", Messages.KBD | Messages.PORT);
             if (this.kbd) this.kbd.checkScanCode();
             break;
 
         case ChipSet.KC8042.CMD.SELF_TEST:          // 0xAA
             if (this.kbd) this.kbd.flushScanCode();
             this.set8042CmdData(this.b8042CmdData | ChipSet.KC8042.DATA.CMD.NO_CLOCK);
-            if (DEBUG) this.printMessage("keyboard disabled on reset", Messages.KEYBOARD | Messages.PORT);
+            if (DEBUG) this.printMessage("keyboard disabled on reset", Messages.KBD | Messages.PORT);
             this.set8042OutBuff(ChipSet.KC8042.DATA.SELF_TEST.OK);
             this.set8042OutPort(ChipSet.KC8042.OUTPORT.NO_RESET | ChipSet.KC8042.OUTPORT.A20_ON);
             break;
@@ -4272,7 +4268,7 @@ class ChipSet extends Component {
                 this.b8042Status &= ~ChipSet.KC8042.STATUS.OUTBUFF_FULL;
                 this.b8042Status |= ChipSet.KC8042.STATUS.OUTBUFF_DELAY;
             }
-            if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
+            if (DEBUG && this.messageEnabled(Messages.KBD | Messages.PORT)) {
                 this.printMessage("set8042OutBuff(" + Str.toHexByte(b) + ',' + (fNoDelay? "no" : "") + "delay)", true);
             }
         }
@@ -4388,7 +4384,7 @@ class ChipSet extends Component {
      */
     notifyKbdData(b)
     {
-        if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
+        if (DEBUG && this.messageEnabled(Messages.KBD | Messages.PORT)) {
             this.printMessage("notifyKbdData(" + Str.toHexByte(b) + ')', true);
         }
         if (this.model == ChipSet.MODEL_4860) {
@@ -4423,12 +4419,12 @@ class ChipSet extends Component {
                     this.setIRR(ChipSet.IRQ.KBD, 120);
                 }
                 else {
-                    if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
+                    if (DEBUG && this.messageEnabled(Messages.KBD | Messages.PORT)) {
                         this.printMessage("notifyKbdData(" + Str.toHexByte(b) + "): output buffer full", true);
                     }
                 }
             } else {
-                if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
+                if (DEBUG && this.messageEnabled(Messages.KBD | Messages.PORT)) {
                     this.printMessage("notifyKbdData(" + Str.toHexByte(b) + "): disabled", true);
                 }
             }
@@ -4796,26 +4792,21 @@ class ChipSet extends Component {
      */
     messageBitsIRQ(nIRQ)
     {
-        let bitsMessage = 0;
-        if (DEBUG) {
-            bitsMessage = Messages.PIC;
-            if (nIRQ == ChipSet.IRQ.TIMER0) {           // IRQ 0
-                bitsMessage |= Messages.TIMER;
-            } else if (nIRQ == ChipSet.IRQ.KBD) {       // IRQ 1
-                bitsMessage |= Messages.KEYBOARD;
-            } else if (nIRQ == ChipSet.IRQ.SLAVE) {     // IRQ 2 (MODEL_5170 and up)
-                bitsMessage |= Messages.CHIPSET;
-            } else if (nIRQ == ChipSet.IRQ.COM1 || nIRQ == ChipSet.IRQ.COM2) {
-                bitsMessage |= Messages.SERIAL;
-            } else if (nIRQ == ChipSet.IRQ.XTC) {       // IRQ 5 (MODEL_5160)
-                bitsMessage |= Messages.HDC;
-            } else if (nIRQ == ChipSet.IRQ.FDC) {       // IRQ 6
-                bitsMessage |= Messages.FDC;
-            } else if (nIRQ == ChipSet.IRQ.RTC) {       // IRQ 8 (MODEL_5170 and up)
-                bitsMessage |= Messages.RTC;
-            } else if (nIRQ == ChipSet.IRQ.ATC) {       // IRQ 14 (MODEL_5170 and up)
-                bitsMessage |= Messages.HDC;
-            }
+        let bitsMessage = Messages.IRQ;
+        if (nIRQ == ChipSet.IRQ.TIMER0) {       // IRQ 0
+            bitsMessage |= Messages.TIMER;
+        } else if (nIRQ == ChipSet.IRQ.KBD) {   // IRQ 1
+            bitsMessage |= Messages.KBD;
+        } else if (nIRQ == ChipSet.IRQ.COM1 || nIRQ == ChipSet.IRQ.COM2) {
+            bitsMessage |= Messages.SERIAL;
+        } else if (nIRQ == ChipSet.IRQ.XTC) {   // IRQ 5 (MODEL_5160)
+            bitsMessage |= Messages.HDC;
+        } else if (nIRQ == ChipSet.IRQ.FDC) {   // IRQ 6
+            bitsMessage |= Messages.FDC;
+        } else if (nIRQ == ChipSet.IRQ.RTC) {   // IRQ 8 (MODEL_5170 and up)
+            bitsMessage |= Messages.RTC;
+        } else if (nIRQ == ChipSet.IRQ.ATC) {   // IRQ 14 (MODEL_5170 and up)
+            bitsMessage |= Messages.HDC;
         }
         return bitsMessage;
     }

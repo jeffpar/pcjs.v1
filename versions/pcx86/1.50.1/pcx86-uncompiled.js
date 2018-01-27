@@ -3323,9 +3323,9 @@ class Component {
                     sClass = aClasses[iClass];
                     switch (sClass) {
                         case sAppClass + "-binding":
-                            parms = Component.getComponentParms(control);
+                            parms = Component.getComponentParms(/** @type {HTMLElement} */(control));
                             if (parms && parms['binding']) {
-                                component.setBinding(parms['type'], parms['binding'], control, parms['value']);
+                                component.setBinding(parms['type'], parms['binding'], /** @type {HTMLElement} */(control), parms['value']);
                             } else if (!parms || parms['type'] != "description") {
                                 Component.log("Component '" + component.toString() + "' missing binding" + (parms? " for " + parms['type'] : ""), "warning");
                             }
@@ -3800,7 +3800,7 @@ class Component {
             return true;
         case 'print':
             if (!this.bindings[sBinding]) {
-                var controlTextArea = /** @type {HTMLTextAreaElement} */ (control);
+                var controlTextArea = /** @type {HTMLTextAreaElement} */(control);
                 this.bindings[sBinding] = controlTextArea;
                 /**
                  * Override this.notice() with a replacement function that eliminates the Component.alertUser() call.
@@ -4164,7 +4164,18 @@ class Component {
                 bitsMessage = bitsMessage || this.bitsMessage;
             }
             var bitsEnabled = this.dbg.bitsMessage & bitsMessage;
-            return (!!bitsMessage && bitsEnabled === bitsMessage || !!(bitsEnabled & this.dbg.bitsWarning));
+            /*
+             * This next "bit" of logic is for PCx86 and any other machine where we've expanded the set of
+             * messages by reusing bits in the low nibbles in combination with different bits in the high nibble.
+             * If the input bits adhere to that format, then the mask we just produced must adhere to it as well;
+             * if not, then we zero the mask, ensuring that the test will return false.
+             */
+            if ((bitsMessage & 0xf0000000) && (bitsMessage & 0x0fffffff)) {
+                if (!(bitsEnabled & 0xf0000000) || !(bitsEnabled & 0x0fffffff)) bitsEnabled = 0;
+            }
+            if (bitsMessage && bitsEnabled === bitsMessage || (bitsEnabled & this.dbg.bitsWarning)) {
+                return true;
+            }
         }
         return false;
     }
@@ -4438,7 +4449,7 @@ if (!Function.prototype.bind) {
         var fToBind = this;
         var fnNOP = /** @constructor */ (function() {});
         var fnBound = function() {
-            return fToBind.apply(this instanceof fnNOP && obj? this : obj, args.concat(Array.prototype.slice.call(arguments)));
+            return fToBind.apply(this instanceof fnNOP && obj? this : obj, args.concat(/** @type {Array} */(Array.prototype.slice.call(arguments))));
         };
         fnNOP.prototype = this.prototype;
         fnBound.prototype = new fnNOP();
@@ -7559,38 +7570,44 @@ if (DEBUGGER) {
  */
 
 var Messages = {
-    CPU:        0x00000001,
-    SEG:        0x00000002,
-    DESC:       0x00000004,
-    TSS:        0x00000008,
-    INT:        0x00000010,
-    FAULT:      0x00000020,
-    BUS:        0x00000040,
-    MEM:        0x00000080,
-    PORT:       0x00000100,
-    DMA:        0x00000200,
-    PIC:        0x00000400,
-    TIMER:      0x00000800,
-    CMOS:       0x00001000,
-    RTC:        0x00002000,
-    C8042:      0x00004000,
-    CHIPSET:    0x00008000,
-    KEYBOARD:   0x00010000,
-    KEYS:       0x00020000,
-    VIDEO:      0x00040000,
-    FDC:        0x00080000,
-    HDC:        0x00100000,
-    DISK:       0x00200000,
-    PARALLEL:   0x00400000,
-    SERIAL:     0x00800000,
-    MOUSE:      0x01000000,
-    SPEAKER:    0x02000000,
-    COMPUTER:   0x04000000,
-    DOS:        0x08000000,
-    DATA:       0x10000000,
-    BUFFER:     0x20000000,
-    WARN:       0x40000000,
-    HALT:       0x80000000|0
+    NONE:       0x00000000,
+    CPU:        0x10000001,
+    SEG:        0x10000002,
+    DESC:       0x10000004,
+    PORT:       0x10000008,
+    TSS:        0x10000010,
+    IOPM:       0x10000020,
+    INT:        0x10000040,
+    NMI:        0x10000080,
+    FAULT:      0x10000100,
+    TRAP:       0x10000200,
+    BUS:        0x20000001,
+    IRQ:        0x20000002,     
+    MEM:        0x20000004,
+    DMA:        0x20000008,
+    FDC:        0x20000010,
+    HDC:        0x20000020,
+    DISK:       0x20000040,
+    PIC:        0x20000080,
+    TIMER:      0x20000100,
+    CMOS:       0x20000200,
+    RTC:        0x20000400,
+    C8042:      0x20000800,
+    KBD:        0x20001000,
+    PARALLEL:   0x20002000,
+    SERIAL:     0x20004000,
+    MOUSE:      0x20008000,
+    SPEAKER:    0x20010000,
+    CHIPSET:    0x20020000,
+    VIDEO:      0x20040000,
+    COMPUTER:   0x20080000,
+    DOS:        0x40100000,
+    DATA:       0x40200000,
+    EVENT:      0x40400000,
+    KEY:        0x40800000,
+    WARN:       0x41000000,
+    HALT:       0x81000000|0,
+    BUFFER:     0x82000000|0
 };
 
 /*
@@ -7611,32 +7628,38 @@ Messages.CATEGORIES = {
     "cpu":      Messages.CPU,
     "seg":      Messages.SEG,
     "desc":     Messages.DESC,
-    "tss":      Messages.TSS,
-    "int":      Messages.INT,
-    "fault":    Messages.FAULT,
-    "bus":      Messages.BUS,
-    "mem":      Messages.MEM,
     "port":     Messages.PORT,
+    "tss":      Messages.TSS,
+    "iopm":     Messages.IOPM,
+    "int":      Messages.INT,
+    "nmi":      Messages.NMI,
+    "fault":    Messages.FAULT,
+    "trap":     Messages.TRAP,
+    "bus":      Messages.BUS,
+    "irq":      Messages.IRQ,
+    "mem":      Messages.MEM,
     "dma":      Messages.DMA,
+    "fdc":      Messages.FDC,
+    "hdc":      Messages.HDC,
+    "disk":     Messages.DISK,
     "pic":      Messages.PIC,
     "timer":    Messages.TIMER,
     "cmos":     Messages.CMOS,
     "rtc":      Messages.RTC,
     "8042":     Messages.C8042,
-    "chipset":  Messages.CHIPSET,       // ie, anything else in ChipSet besides DMA, PIC, TIMER, CMOS, RTC and 8042
-    "keyboard": Messages.KEYBOARD,      // "kbd" is also allowed as shorthand for "keyboard"; see doMessages()
-    "key":      Messages.KEYS,          // using "key" instead of "keys", since the latter is a method on JavasScript objects
-    "video":    Messages.VIDEO,
-    "fdc":      Messages.FDC,
-    "hdc":      Messages.HDC,
-    "disk":     Messages.DISK,
+    "kbd":      Messages.KBD,
     "parallel": Messages.PARALLEL,
     "serial":   Messages.SERIAL,
     "mouse":    Messages.MOUSE,
     "speaker":  Messages.SPEAKER,
+    "chipset":  Messages.CHIPSET,
+    "video":    Messages.VIDEO,
     "computer": Messages.COMPUTER,
     "dos":      Messages.DOS,
     "data":     Messages.DATA,
+    "event":    Messages.EVENT,
+    "key":      Messages.KEY,
+    "warn":     Messages.WARN,
     /*
      * Now we turn to message actions rather than message types; for example, setting "halt"
      * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
@@ -7644,9 +7667,8 @@ Messages.CATEGORIES = {
      * Similarly, "m buffer on" turns on message buffering, deferring the display of all messages
      * until "m buffer off" is issued.
      */
-    "buffer":   Messages.BUFFER,
-    "warn":     Messages.WARN,
-    "halt":     Messages.HALT
+    "halt":     Messages.HALT,
+    "buffer":   Messages.BUFFER
 };
 
 
@@ -40361,7 +40383,7 @@ class ChipSet extends Component {
                     break;
             }
         }
-        if (this.messageEnabled(Messages.PIC | Messages.PORT | Messages.CHIPSET)) {
+        if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
             this.printMessageIO(pic.port, null, addrFrom, "PIC" + iPIC, b, true);
         }
         return b;
@@ -40378,7 +40400,7 @@ class ChipSet extends Component {
     outPICLo(iPIC, bOut, addrFrom)
     {
         let pic = this.aPICs[iPIC];
-        if (this.messageEnabled(Messages.PIC | Messages.PORT | Messages.CHIPSET)) {
+        if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
             this.printMessageIO(pic.port, bOut, addrFrom, "PIC" + iPIC, null, true);
         }
         if (bOut & ChipSet.PIC_LO.ICW1) {
@@ -40477,7 +40499,7 @@ class ChipSet extends Component {
                  * TODO: Support EOI commands with automatic rotation (eg, ChipSet.PIC_LO.OCW2_EOI_ROT and ChipSet.PIC_LO.OCW2_EOI_ROTSPEC)
                  */
                 if (bOCW2 & ChipSet.PIC_LO.OCW2_SET_ROTAUTO) {
-                    if (this.messageEnabled(/*Messages.PIC | */Messages.WARN)) {
+                    if (this.messageEnabled(/*Messages.PIC | */ Messages.WARN)) {
                         this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW2 rotate " + Str.toHexByte(bOut), true, true);
                     }
                 }
@@ -40492,7 +40514,7 @@ class ChipSet extends Component {
                 /*
                  * TODO: Remaining commands to support: ChipSet.PIC_LO.OCW2_SET_ROTAUTO and ChipSet.PIC_LO.OCW2_CLR_ROTAUTO
                  */
-                if (this.messageEnabled(/*Messages.PIC | */Messages.WARN)) {
+                if (this.messageEnabled(/*Messages.PIC | */ Messages.WARN)) {
                     this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI " + Str.toHexByte(bOut), true, true);
                 }
             }
@@ -40504,7 +40526,7 @@ class ChipSet extends Component {
              * that's unfortunate, because I don't support them yet.
              */
             if (bOut & (ChipSet.PIC_LO.OCW3_POLL_CMD | ChipSet.PIC_LO.OCW3_SMM_CMD)) {
-                if (this.messageEnabled(/*Messages.PIC | */Messages.WARN)) {
+                if (this.messageEnabled(/*Messages.PIC | */ Messages.WARN)) {
                     this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW3 " + Str.toHexByte(bOut), true, true);
                 }
             }
@@ -40524,7 +40546,7 @@ class ChipSet extends Component {
     {
         let pic = this.aPICs[iPIC];
         let b = pic.bIMR;
-        if (this.messageEnabled(Messages.PIC | Messages.PORT | Messages.CHIPSET)) {
+        if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
             this.printMessageIO(pic.port+1, null, addrFrom, "PIC" + iPIC, b, true);
         }
         return b;
@@ -40541,7 +40563,7 @@ class ChipSet extends Component {
     outPICHi(iPIC, bOut, addrFrom)
     {
         let pic = this.aPICs[iPIC];
-        if (this.messageEnabled(Messages.PIC | Messages.PORT | Messages.CHIPSET)) {
+        if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
             this.printMessageIO(pic.port+1, bOut, addrFrom, "PIC" + iPIC, null, true);
         }
         if (pic.nICW < pic.aICW.length) {
@@ -40600,9 +40622,7 @@ class ChipSet extends Component {
         let bIRR = (1 << nIRL);
         if (!(pic.bIRR & bIRR)) {
             pic.bIRR |= bIRR;
-            if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ) | Messages.CHIPSET)) {
-                this.printMessage("setIRR(" + nIRQ + ")", true);
-            }
+            if (this.messageEnabled(this.messageBitsIRQ(nIRQ))) this.printMessage("set IRQ " + nIRQ, true);
             pic.nDelay = nDelay || 0;
             this.checkIRR();
         }
@@ -40622,9 +40642,7 @@ class ChipSet extends Component {
         let bIRR = (1 << nIRL);
         if (pic.bIRR & bIRR) {
             pic.bIRR &= ~bIRR;
-            if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ) | Messages.CHIPSET)) {
-                this.printMessage("clearIRR(" + nIRQ + ")", true);
-            }
+            if (this.messageEnabled(this.messageBitsIRQ(nIRQ))) this.printMessage("clear IRQ " + nIRQ, true);
             this.checkIRR();
         }
     }
@@ -41578,9 +41596,9 @@ class ChipSet extends Component {
 
         /*
          * The ROM BIOS polls this port incessantly during its memory tests, checking for memory parity errors
-         * (which of course we never report), so we further restrict these port messages to Messages.MEM.
+         * (which of course we never report), so you must use both Messages.PORT and Messages.CHIPSET.
          */
-        this.printMessageIO(port, null, addrFrom, "PPI_C", b, Messages.CHIPSET | Messages.MEM);
+        this.printMessageIO(port, null, addrFrom, "PPI_C", b, Messages.CHIPSET);
         return b;
     }
 
@@ -41973,7 +41991,7 @@ class ChipSet extends Component {
 
         case ChipSet.KC8042.CMD.DISABLE_KBD:        // 0xAD
             this.set8042CmdData(this.b8042CmdData | ChipSet.KC8042.DATA.CMD.NO_CLOCK);
-            if (DEBUG) this.printMessage("keyboard disabled", Messages.KEYBOARD | Messages.PORT);
+            if (DEBUG) this.printMessage("keyboard disabled", Messages.KBD | Messages.PORT);
             /*
              * NOTE: The MODEL_5170 BIOS calls "KBD_RESET" (F000:17D2) while the keyboard interface is disabled,
              * yet we must still deliver the Keyboard's CMDRES.BAT_OK response code?  Seems like an odd thing for
@@ -41983,14 +42001,14 @@ class ChipSet extends Component {
 
         case ChipSet.KC8042.CMD.ENABLE_KBD:         // 0xAE
             this.set8042CmdData(this.b8042CmdData & ~ChipSet.KC8042.DATA.CMD.NO_CLOCK);
-            if (DEBUG) this.printMessage("keyboard re-enabled", Messages.KEYBOARD | Messages.PORT);
+            if (DEBUG) this.printMessage("keyboard re-enabled", Messages.KBD | Messages.PORT);
             if (this.kbd) this.kbd.checkScanCode();
             break;
 
         case ChipSet.KC8042.CMD.SELF_TEST:          // 0xAA
             if (this.kbd) this.kbd.flushScanCode();
             this.set8042CmdData(this.b8042CmdData | ChipSet.KC8042.DATA.CMD.NO_CLOCK);
-            if (DEBUG) this.printMessage("keyboard disabled on reset", Messages.KEYBOARD | Messages.PORT);
+            if (DEBUG) this.printMessage("keyboard disabled on reset", Messages.KBD | Messages.PORT);
             this.set8042OutBuff(ChipSet.KC8042.DATA.SELF_TEST.OK);
             this.set8042OutPort(ChipSet.KC8042.OUTPORT.NO_RESET | ChipSet.KC8042.OUTPORT.A20_ON);
             break;
@@ -42101,7 +42119,7 @@ class ChipSet extends Component {
                 this.b8042Status &= ~ChipSet.KC8042.STATUS.OUTBUFF_FULL;
                 this.b8042Status |= ChipSet.KC8042.STATUS.OUTBUFF_DELAY;
             }
-            if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
+            if (DEBUG && this.messageEnabled(Messages.KBD | Messages.PORT)) {
                 this.printMessage("set8042OutBuff(" + Str.toHexByte(b) + ',' + (fNoDelay? "no" : "") + "delay)", true);
             }
         }
@@ -42217,7 +42235,7 @@ class ChipSet extends Component {
      */
     notifyKbdData(b)
     {
-        if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
+        if (DEBUG && this.messageEnabled(Messages.KBD | Messages.PORT)) {
             this.printMessage("notifyKbdData(" + Str.toHexByte(b) + ')', true);
         }
         if (this.model == ChipSet.MODEL_4860) {
@@ -42252,12 +42270,12 @@ class ChipSet extends Component {
                     this.setIRR(ChipSet.IRQ.KBD, 120);
                 }
                 else {
-                    if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
+                    if (DEBUG && this.messageEnabled(Messages.KBD | Messages.PORT)) {
                         this.printMessage("notifyKbdData(" + Str.toHexByte(b) + "): output buffer full", true);
                     }
                 }
             } else {
-                if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
+                if (DEBUG && this.messageEnabled(Messages.KBD | Messages.PORT)) {
                     this.printMessage("notifyKbdData(" + Str.toHexByte(b) + "): disabled", true);
                 }
             }
@@ -42625,26 +42643,21 @@ class ChipSet extends Component {
      */
     messageBitsIRQ(nIRQ)
     {
-        let bitsMessage = 0;
-        if (DEBUG) {
-            bitsMessage = Messages.PIC;
-            if (nIRQ == ChipSet.IRQ.TIMER0) {           // IRQ 0
-                bitsMessage |= Messages.TIMER;
-            } else if (nIRQ == ChipSet.IRQ.KBD) {       // IRQ 1
-                bitsMessage |= Messages.KEYBOARD;
-            } else if (nIRQ == ChipSet.IRQ.SLAVE) {     // IRQ 2 (MODEL_5170 and up)
-                bitsMessage |= Messages.CHIPSET;
-            } else if (nIRQ == ChipSet.IRQ.COM1 || nIRQ == ChipSet.IRQ.COM2) {
-                bitsMessage |= Messages.SERIAL;
-            } else if (nIRQ == ChipSet.IRQ.XTC) {       // IRQ 5 (MODEL_5160)
-                bitsMessage |= Messages.HDC;
-            } else if (nIRQ == ChipSet.IRQ.FDC) {       // IRQ 6
-                bitsMessage |= Messages.FDC;
-            } else if (nIRQ == ChipSet.IRQ.RTC) {       // IRQ 8 (MODEL_5170 and up)
-                bitsMessage |= Messages.RTC;
-            } else if (nIRQ == ChipSet.IRQ.ATC) {       // IRQ 14 (MODEL_5170 and up)
-                bitsMessage |= Messages.HDC;
-            }
+        let bitsMessage = Messages.IRQ;
+        if (nIRQ == ChipSet.IRQ.TIMER0) {       // IRQ 0
+            bitsMessage |= Messages.TIMER;
+        } else if (nIRQ == ChipSet.IRQ.KBD) {   // IRQ 1
+            bitsMessage |= Messages.KBD;
+        } else if (nIRQ == ChipSet.IRQ.COM1 || nIRQ == ChipSet.IRQ.COM2) {
+            bitsMessage |= Messages.SERIAL;
+        } else if (nIRQ == ChipSet.IRQ.XTC) {   // IRQ 5 (MODEL_5160)
+            bitsMessage |= Messages.HDC;
+        } else if (nIRQ == ChipSet.IRQ.FDC) {   // IRQ 6
+            bitsMessage |= Messages.FDC;
+        } else if (nIRQ == ChipSet.IRQ.RTC) {   // IRQ 8 (MODEL_5170 and up)
+            bitsMessage |= Messages.RTC;
+        } else if (nIRQ == ChipSet.IRQ.ATC) {   // IRQ 14 (MODEL_5170 and up)
+            bitsMessage |= Messages.HDC;
         }
         return bitsMessage;
     }
@@ -45010,7 +45023,7 @@ class Keyboard extends Component {
      */
     constructor(parmsKbd)
     {
-        super("Keyboard", parmsKbd, Messages.KEYBOARD);
+        super("Keyboard", parmsKbd, Messages.KBD);
 
         this.setModel(parmsKbd['model']);
 
@@ -45059,6 +45072,7 @@ class Keyboard extends Component {
          * properties:
          *
          *      simCode:    our simulated keyCode from onKeyChange or onKeyPress
+         *      bitsState:  snapshot of the current bitsState when the key is added (currently not used)
          *      fDown:      next state to simulate (true for down, false for up)
          *      nRepeat:    > 0 if timer should generate more "make" scan code(s), -1 for "break" scan code(s)
          *      timer:      timer for next key operation, if any
@@ -45202,7 +45216,7 @@ class Keyboard extends Component {
                     this.bindings[id] = controlText;
                     controlText.onclick = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingClick(event) {
-                            if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.KEYS);
+                            if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.KEY);
                             event.preventDefault();                 // preventDefault() is necessary...
                             if (kbd.cmp) kbd.cmp.updateFocus();     // ...for the updateFocus() call to actually work
                             kbd.sInjectBuffer = "";                 // key events should stop any injection currently in progress
@@ -45485,7 +45499,7 @@ class Keyboard extends Component {
         /*
          * TODO: There's more to reset, like LED indicators, default type rate, and emptying the scan code buffer.
          */
-        this.printMessage("keyboard reset", Messages.KEYBOARD | Messages.PORT);
+        this.printMessage("keyboard reset", Messages.KBD | Messages.PORT);
         this.abBuffer = [];
         this.setResponse(Keyboard.CMDRES.BAT_OK);
     }
@@ -45507,7 +45521,7 @@ class Keyboard extends Component {
     {
         var fReset = false;
         if (this.fClock !== fClock) {
-            if (!COMPILED && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
+            if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
                 this.printMessage("keyboard clock line changing to " + fClock, true);
             }
             /*
@@ -45521,7 +45535,7 @@ class Keyboard extends Component {
             if (fClock) this.fAdvance = true;
         }
         if (this.fData !== fData) {
-            if (!COMPILED && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
+            if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
                 this.printMessage("keyboard data line changing to " + fData, true);
             }
             this.fData = fData;
@@ -46192,7 +46206,7 @@ class Keyboard extends Component {
         var wCode = Keyboard.SIMCODES[simCode] || Keyboard.SIMCODES[simCode += Keys.KEYCODE.ONDOWN];
 
         if (!wCode) {
-            if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+            if (!COMPILED && this.messageEnabled(Messages.KEY)) {
                 this.printMessage("addActiveKey(" + simCode + "," + (fPress? "press" : "down") + "): unrecognized", true);
             }
             return;
@@ -46230,21 +46244,21 @@ class Keyboard extends Component {
             }
         }
 
-        if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Messages.KEY)) {
             this.printMessage("addActiveKey(" + simCode + "," + (fPress? "press" : "down") + "): " + (i < 0? "already active" : (i == this.aKeysActive.length? "adding" : "updating")), true);
         }
 
         if (i < 0) return;
 
         if (i == this.aKeysActive.length) {
-            key = {};
-            key.simCode = simCode;
-            key.bitsState = this.bitsState;
+            key = {simCode};                            // create a new Key object
+            // key.bitsState = this.bitsState;          // not needed unless we revive checkActiveKeyShift()
             this.findBinding(simCode, "key", true);
             i++;
         }
+        
         if (i > 0) {
-            this.aKeysActive.splice(0, 0, key);
+            this.aKeysActive.splice(0, 0, key);         // aka aKeysActive.unshift(key)
         }
 
         key.fDown = true;
@@ -46319,7 +46333,7 @@ class Keyboard extends Component {
     removeActiveKey(simCode, fFlush)
     {
         if (!Keyboard.SIMCODES[simCode]) {
-            if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+            if (!COMPILED && this.messageEnabled(Messages.KEY)) {
                 this.printMessage("removeActiveKey(" + simCode + "): unrecognized", true);
             }
             return false;
@@ -46342,11 +46356,11 @@ class Keyboard extends Component {
                 break;
             }
         }
-        if (!COMPILED && !fFlush && this.messageEnabled(Messages.KEYS)) {
+        if (!COMPILED && !fFlush && this.messageEnabled(Messages.KEY)) {
             this.printMessage("removeActiveKey(" + simCode + "): " + (fRemoved? "removed" : "not active"), true);
         }
         if (!this.aKeysActive.length && this.fToggleCapsLock) {
-            if (!COMPILED) this.printMessage("removeActiveKey(): inverting caps-lock now", Messages.KEYS);
+            if (!COMPILED) this.printMessage("removeActiveKey(): inverting caps-lock now", Messages.KEY);
             this.updateShiftState(Keyboard.SIMCODE.CAPS_LOCK);
             this.fToggleCapsLock = false;
         }
@@ -46355,7 +46369,7 @@ class Keyboard extends Component {
 
     /**
      * updateActiveKey(key, msTimer)
-     * 
+     *
      * When called by addActiveKey(), msTimer is undefined; that's used only when we're called by our own timeout handler.
      *
      * @param {Object} key
@@ -46371,7 +46385,7 @@ class Keyboard extends Component {
             return;
         }
 
-        if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Messages.KEY)) {
             this.printMessage((msTimer? '\n' : "") + "updateActiveKey(" + key.simCode + (msTimer? "," + msTimer + "ms" : "") + "): " + (key.fDown? "down" : "up"), true);
         }
 
@@ -46379,7 +46393,12 @@ class Keyboard extends Component {
             key.fDown = false;
         }
         
-        if (!this.keySimulate(key.simCode, key.fDown) || !key.nRepeat) return;
+        if (!this.keySimulate(key.simCode, key.fDown) || !key.nRepeat) {
+            if (!msTimer) {
+                return;
+            }
+            return;
+        }
 
         var ms;
         if (key.nRepeat < 0) {
@@ -46391,6 +46410,10 @@ class Keyboard extends Component {
         }
         else {
             ms = (key.nRepeat++ == 1? this.msAutoRepeat : this.msNextRepeat);
+        }
+        
+        if (key.timer) {
+            clearTimeout(key.timer);
         }
         
         key.timer = setTimeout(function(kbd) {
@@ -46444,14 +46467,17 @@ class Keyboard extends Component {
      */
     onFocusChange(fFocus)
     {
-        if (this.fHasFocus != fFocus && !COMPILED && this.messageEnabled(Messages.KEYS)) {
+        if (this.fHasFocus != fFocus && !COMPILED && this.messageEnabled(Messages.EVENT)) {
             this.printMessage("onFocusChange(" + (fFocus? "true" : "false") + ")", true);
         }
         this.fHasFocus = fFocus;
         /*
          * Since we can't be sure of any shift states after losing focus, we clear them all.
          */
-        if (!fFocus) this.bitsState &= ~Keyboard.STATE.ALL_SHIFT;
+        if (!fFocus) {
+            this.bitsState &= ~Keyboard.STATE.ALL_SHIFT;
+            this.clearActiveKeys();
+        }
     }
 
     /**
@@ -46582,7 +46608,7 @@ class Keyboard extends Component {
             event.preventDefault();
         }
 
-        if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Messages.KEY)) {
             this.printMessage("\nonKey" + (fDown? "Down" : "Up") + "(" + keyCode + "): " + (fIgnore? "ignore" : (fPass? "true" : "false")), true);
         }
 
@@ -46627,7 +46653,7 @@ class Keyboard extends Component {
         if (this.fAllDown) {
             var simCode = this.checkActiveKey();
             if (simCode && this.isAlphaKey(simCode) && this.isAlphaKey(keyCode) && simCode != keyCode) {
-                if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+                if (!COMPILED && this.messageEnabled(Messages.KEY)) {
                     this.printMessage("onKeyPress(" + keyCode + ") out of sync with " + simCode + ", invert caps-lock", true);
                 }
                 this.fToggleCapsLock = true;
@@ -46637,7 +46663,7 @@ class Keyboard extends Component {
 
         var fPass = !Keyboard.SIMCODES[keyCode] || !!(this.bitsState & Keyboard.STATE.CMD);
 
-        if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Messages.KEY)) {
             this.printMessage("\nonKeyPress(" + keyCode + "): " + (fPass? "true" : "false"), true);
         }
 
@@ -46740,7 +46766,7 @@ class Keyboard extends Component {
             fSimulated = true;
         }
 
-        if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Messages.KEY)) {
             this.printMessage("keySimulate(" + simCode + "," + (fDown? "down" : "up") + "): " + (fSimulated? "true" : "false"), true);
         }
 
@@ -70087,11 +70113,7 @@ class DebuggerX86 extends Debugger {
         this.bitsMessage = this.bitsWarning = Messages.WARN;
         this.sMessagePrev = null;
         this.aMessageBuffer = [];
-        /*
-         * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
-         * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
-         */
-        var aEnable = this.parseCommand(sEnable.replace("keys","key").replace("kbd","keyboard"), false, '|');
+        var aEnable = this.parseCommand(sEnable, false, '|');
         if (aEnable.length) {
             for (var m in Messages.CATEGORIES) {
                 if (Usr.indexOf(aEnable, m) >= 0) {
@@ -70435,7 +70457,7 @@ class DebuggerX86 extends Debugger {
             sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getIP(), this.cpu.getCS())) + " (%" + Str.toHex(this.cpu.regLIP) + ")";
         }
 
-        if (this.bitsMessage & Messages.BUFFER) {
+        if ((this.bitsMessage & Messages.BUFFER) == Messages.BUFFER) {
             this.aMessageBuffer.push(sMessage);
             return;
         }
@@ -70443,7 +70465,7 @@ class DebuggerX86 extends Debugger {
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
         this.sMessagePrev = sMessage;
 
-        if (this.bitsMessage & Messages.HALT) {
+        if ((this.bitsMessage & Messages.HALT) == Messages.HALT) {
             this.stopCPU();
             sMessage += " (cpu halted)";
         }
@@ -70859,7 +70881,14 @@ class DebuggerX86 extends Debugger {
             this.aPrevCmds = data[i][0];
             if (typeof this.aPrevCmds == "string") this.aPrevCmds = [this.aPrevCmds];
             this.fAssemble = data[i][1];
-            this.bitsMessage |= data[i][2];     // keep our current message bits set, and simply "add" any extra bits defined by the saved state
+            var bits = data[i][2];
+            /*
+             * We supplement the message bits only the incoming bits adhere to the new format (ie, if bits exist in both the high
+             * nibble and one of the low nibbles).
+             */
+            if ((bits & 0xf0000000) && (bits & 0x0fffffff)) {
+                this.bitsMessage |= bits;       // include any saved message bits ONLY if they match our new format (ie, bits in both high and low nibbles)
+            }
             i++;
         }
         if (data[i]) {
@@ -73337,15 +73366,15 @@ class DebuggerX86 extends Debugger {
      */
     doMessages(asArgs)
     {
-        var m;
-        var fCriteria = null;
-        var sCategory = asArgs[1];
+        let m;
+        let fCriteria = null;
+        let sCategory = asArgs[1];
         if (sCategory == '?') sCategory = undefined;
 
         if (sCategory !== undefined) {
-            var bitsMessage = 0;
+            let bitsMessage = 0;
             if (sCategory == "all") {
-                bitsMessage = (0xffffffff|0) & ~(Messages.HALT | Messages.KEYS | Messages.BUFFER);
+                bitsMessage = (0xffffffff|0) & ~(Messages.HALT | Messages.BUFFER);
                 sCategory = null;
             } else if (sCategory == "on") {
                 fCriteria = true;
@@ -73354,16 +73383,10 @@ class DebuggerX86 extends Debugger {
                 fCriteria = false;
                 sCategory = null;
             } else {
-                /*
-                 * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
-                 * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
-                 */
-                if (sCategory == "keys") sCategory = "key";
-                if (sCategory == "kbd") sCategory = "keyboard";
                 for (m in Messages.CATEGORIES) {
                     if (sCategory == m) {
                         bitsMessage = Messages.CATEGORIES[m];
-                        fCriteria = !!(this.bitsMessage & bitsMessage);
+                        fCriteria = ((this.bitsMessage & bitsMessage) === bitsMessage);
                         break;
                     }
                 }
@@ -73379,6 +73402,9 @@ class DebuggerX86 extends Debugger {
                 }
                 else if (asArgs[2] == "off") {
                     this.bitsMessage &= ~bitsMessage;
+                    if (!(this.bitsMessage & 0xF0000000) && bitsMessage) {
+                        this.bitsMessage = 0;   // if all the high (shared) bits were turned off, ensure all the low bits are off as well.
+                    }
                     fCriteria = false;
                     if (bitsMessage == Messages.BUFFER) {
                         for (var i = 0; i < this.aMessageBuffer.length; i++) {
@@ -73393,20 +73419,15 @@ class DebuggerX86 extends Debugger {
         /*
          * Display those message categories that match the current criteria (on or off)
          */
-        var n = 0;
-        var sCategories = "";
+        let n = 0;
+        let sCategories = "";
         for (m in Messages.CATEGORIES) {
             if (!sCategory || sCategory == m) {
-                var bitMessage = Messages.CATEGORIES[m];
-                var fEnabled = !!(this.bitsMessage & bitMessage);
+                let bitsMessage = Messages.CATEGORIES[m];
+                let fEnabled = ((this.bitsMessage & bitsMessage) === bitsMessage);
                 if (fCriteria !== null && fCriteria != fEnabled) continue;
                 if (sCategories) sCategories += ',';
                 if (!(++n % 10)) sCategories += "\n\t";     // jshint ignore:line
-                /*
-                 * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
-                 * but externally, we allow the user to specify "keys".
-                 */
-                if (m == "key") m = "keys";
                 sCategories += m;
             }
         }
@@ -74612,7 +74633,7 @@ if (DEBUGGER) {
         0x10:       Messages.VIDEO,
         0x13:       Messages.FDC,
         0x15:       Messages.CHIPSET,
-        0x16:       Messages.KEYBOARD,
+        0x16:       Messages.KBD,
      // 0x1A:       Messages.RTC,       // ChipSet contains its own custom messageInt() handler for the RTC
         0x1C:       Messages.TIMER,
         0x21:       Messages.DOS,
