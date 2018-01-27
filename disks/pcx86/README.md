@@ -1,6 +1,8 @@
 ---
 layout: page
 title: IBM PC Disk Library
+menu_title: Disks
+menu_order: 5
 permalink: /disks/pcx86/
 redirect_from:
   - /disks/pc/
