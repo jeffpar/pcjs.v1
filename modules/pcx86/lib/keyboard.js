@@ -587,12 +587,21 @@ class Keyboard extends Component {
                 this.printMessage("keyboard data line changing to " + fData, true);
             }
             this.fData = fData;
-            /*
-             * TODO: Review this code; it was added during the early days of MODEL_5150 testing and may not be
-             * *exactly* what's called for here.
-             */
             if (fData && !this.fResetOnEnable) {
-                this.shiftScanCode(true);
+                if (this.modelKeys < 84) {
+                    this.shiftScanCode(true);   // TODO: Review this code; it was added during early MODEL_5150 testing
+                } else {
+                    /*
+                     * I added this for Windows 95's protected-mode keyboard driver, which pulses the PPI_B port after
+                     * retrieving a scan code.  Seems rather odd (like legacy code); one would have thought that it
+                     * would know it's dealing with a 8042-based keyboard interface.
+                     * 
+                     * Note that that code path is DIFFERENT from Windows 95's keyboard handling for DOS sessions, which
+                     * does NOT pulse the PPI_B port; it simply polls the 8042 status port, perhaps to confirm that the
+                     * OUTBUFF_FULL bit is clear, and then waits for the next interrupt.  See in8042Status() for details.
+                     */
+                    this.checkScanCode(true);
+                }
             }
         }
         if (this.fData && this.fResetOnEnable) {
@@ -658,7 +667,7 @@ class Keyboard extends Component {
     {
         var b = -1;
 
-        if (this.messageEnabled()) this.printMessage("sendCmd(" + Str.toHexByte(bCmd) + ")");
+        if (!COMPILED && this.messageEnabled()) this.printMessage("sendCmd(" + Str.toHexByte(bCmd) + ")");
 
         switch(this.bCmdPending || bCmd) {
 
@@ -690,7 +699,7 @@ class Keyboard extends Component {
             break;
 
         default:
-            this.printMessage("sendCmd(): unrecognized command");
+            if (!COMPILED) this.printMessage("sendCmd(): unrecognized command");
             break;
         }
 
@@ -698,7 +707,7 @@ class Keyboard extends Component {
     }
 
     /**
-     * checkScanCode()
+     * checkScanCode(fAdvance)
      *
      * This is the ChipSet's interface for checking data availability.
      *
@@ -707,16 +716,18 @@ class Keyboard extends Component {
      * making more data available.
      *
      * @this {Keyboard}
+     * @param {boolean} [fAdvance] is true to notify ChipSet if more data is available
      * @return {number} next scan code, or 0 if none
      */
-    checkScanCode()
+    checkScanCode(fAdvance)
     {
         var b = 0;
+        if (fAdvance) this.fAdvance = true;
         if (this.abBuffer.length && this.fAdvance) {
             b = this.abBuffer[0];
             if (this.chipset) this.chipset.notifyKbdData(b);
         }
-        if (this.messageEnabled()) {
+        if (!COMPILED && this.messageEnabled()) {
             this.printMessage(b? ("scan code " + Str.toHexByte(b) + " available") : "no scan codes available");
         }
         return b;
@@ -736,7 +747,7 @@ class Keyboard extends Component {
         if (this.abBuffer.length) {
             b = this.abBuffer[0];
         }
-        if (this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(b) + " delivered");
+        if (!COMPILED && this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(b) + " delivered");
         return b;
     }
 
@@ -750,7 +761,7 @@ class Keyboard extends Component {
     flushScanCode()
     {
         this.abBuffer = [];
-        if (this.messageEnabled()) this.printMessage("scan codes flushed");
+        if (!COMPILED && this.messageEnabled()) this.printMessage("scan codes flushed");
     }
 
     /**
@@ -759,7 +770,7 @@ class Keyboard extends Component {
      * This is the ChipSet's interface to advance scan codes.
      *
      * @this {Keyboard}
-     * @param {boolean} [fNotify] is true to notify ChipSet if more data is available.
+     * @param {boolean} [fNotify] is true to notify ChipSet if more data is available
      */
     shiftScanCode(fNotify)
     {
@@ -769,16 +780,13 @@ class Keyboard extends Component {
              * presumably this is the proper point at which to shift the last scan code out, and then assert
              * another interrupt if more scan codes exist.
              */
-            this.abBuffer.shift();
+            var bNew;
+            var bOld = this.abBuffer.shift();
             this.fAdvance = fNotify;
-            if (fNotify) {
-                if (!this.abBuffer.length || !this.chipset) {
-                    fNotify = false;
-                } else {
-                    this.chipset.notifyKbdData(this.abBuffer[0]);
-                }
+            if (fNotify && this.abBuffer.length && this.chipset) {
+                this.chipset.notifyKbdData(bNew = this.abBuffer[0]);
             }
-            if (this.messageEnabled()) this.printMessage("scan codes shifted, notify " + (fNotify? "true" : "false"));
+            if (!COMPILED && this.messageEnabled()) this.printMessage("shifted out scan code " + Str.toHexByte(bOld) + (bNew? (", shifted in " + Str.toHexByte(bNew)) : "") + ", " + this.abBuffer.length + " scan codes remaining");
         }
     }
 
@@ -895,7 +903,7 @@ class Keyboard extends Component {
         } else {
             this.autoInject = this.autoType;
         }
-        this.fClock = this.fAdvance = data[i++];
+        this.fClock = data[i++];
         this.fData = data[i];
         this.bCmdPending = 0;       // when non-zero, a command is pending (eg, SET_LED or SET_RATE)
 
@@ -967,7 +975,7 @@ class Keyboard extends Component {
          */
         if (this.abBuffer) {
             if (this.abBuffer.length < Keyboard.LIMIT.MAX_SCANCODES) {
-                if (this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(bScan) + " buffered");
+                if (!COMPILED && this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(bScan) + " buffered");
                 this.abBuffer.push(bScan);
                 if (this.abBuffer.length == 1) {
                     if (this.chipset) this.chipset.notifyKbdData(bScan);
@@ -1442,6 +1450,9 @@ class Keyboard extends Component {
         }
         
         if (!this.keySimulate(key.simCode, key.fDown) || !key.nRepeat) {
+            /*
+             * Why isn't there a simple return here? In order to set breakpoints on two different return conditions, of course!
+             */
             if (!msTimer) {
                 return;
             }
@@ -1515,7 +1526,7 @@ class Keyboard extends Component {
      */
     onFocusChange(fFocus)
     {
-        if (this.fHasFocus != fFocus && !COMPILED && this.messageEnabled(Messages.EVENT)) {
+        if (!COMPILED && this.fHasFocus != fFocus && this.messageEnabled(Messages.EVENT)) {
             this.printMessage("onFocusChange(" + (fFocus? "true" : "false") + ")", true);
         }
         this.fHasFocus = fFocus;

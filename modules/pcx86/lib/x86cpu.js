@@ -2964,7 +2964,7 @@ class X86CPU extends CPU {
             }
         }
         if (bitsPorts) {
-            if (this.messageEnabled(Messages.PORT)) this.printMessage("checkIOPM(" + Str.toHexWord(port) + "," + nPorts + "," + (fInput? "input" : "output") + "): trapped", true, true);
+            if (this.messageEnabled(Messages.IOPM)) this.printMessage("checkIOPM(" + Str.toHexWord(port) + "," + nPorts + "," + (fInput? "input" : "output") + "): trapped", true, true);
             X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
             return false;
         }

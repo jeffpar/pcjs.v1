@@ -3939,13 +3939,13 @@ class Component {
             /*
              * This next "bit" of logic is for PCx86 and any other machine where we've expanded the set of
              * messages by reusing bits in the low nibbles in combination with different bits in the high nibble.
-             * If the input bits adhere to that format, then the mask we just produced must adhere to it as well;
-             * if not, then we zero the mask, ensuring that the test will return false.
+             * If the input bits adhere to that format, then the mask we just produced must adhere to it as well,
+             * and if it doesn't, zero the mask, ensuring that the test will return false.
              */
             if ((bitsMessage & 0xf0000000) && (bitsMessage & 0x0fffffff)) {
                 if (!(bitsEnabled & 0xf0000000) || !(bitsEnabled & 0x0fffffff)) bitsEnabled = 0;
             }
-            if (bitsMessage && bitsEnabled === bitsMessage || (bitsEnabled & this.dbg.bitsWarning)) {
+            if (bitsMessage && bitsEnabled === bitsMessage) {
                 return true;
             }
         }

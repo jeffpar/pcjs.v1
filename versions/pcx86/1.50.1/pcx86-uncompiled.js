@@ -4167,13 +4167,13 @@ class Component {
             /*
              * This next "bit" of logic is for PCx86 and any other machine where we've expanded the set of
              * messages by reusing bits in the low nibbles in combination with different bits in the high nibble.
-             * If the input bits adhere to that format, then the mask we just produced must adhere to it as well;
-             * if not, then we zero the mask, ensuring that the test will return false.
+             * If the input bits adhere to that format, then the mask we just produced must adhere to it as well,
+             * and if it doesn't, zero the mask, ensuring that the test will return false.
              */
             if ((bitsMessage & 0xf0000000) && (bitsMessage & 0x0fffffff)) {
                 if (!(bitsEnabled & 0xf0000000) || !(bitsEnabled & 0x0fffffff)) bitsEnabled = 0;
             }
-            if (bitsMessage && bitsEnabled === bitsMessage || (bitsEnabled & this.dbg.bitsWarning)) {
+            if (bitsMessage && bitsEnabled === bitsMessage) {
                 return true;
             }
         }
@@ -7573,39 +7573,39 @@ var Messages = {
     NONE:       0x00000000,
     CPU:        0x10000001,
     SEG:        0x10000002,
-    DESC:       0x10000004,
+    DESC:       0x10000003,
+    TSS:        0x10000004,
     PORT:       0x10000008,
-    TSS:        0x10000010,
-    IOPM:       0x10000020,
+    IOPM:       0x10000009,
+    NMI:        0x10000010,
+    TRAP:       0x10000020,
+    FAULT:      0x10000030,
     INT:        0x10000040,
-    NMI:        0x10000080,
-    FAULT:      0x10000100,
-    TRAP:       0x10000200,
-    BUS:        0x20000001,
-    IRQ:        0x20000002,     
-    MEM:        0x20000004,
-    DMA:        0x20000008,
-    FDC:        0x20000010,
-    HDC:        0x20000020,
-    DISK:       0x20000040,
-    PIC:        0x20000080,
-    TIMER:      0x20000100,
-    CMOS:       0x20000200,
-    RTC:        0x20000400,
-    C8042:      0x20000800,
-    KBD:        0x20001000,
-    PARALLEL:   0x20002000,
-    SERIAL:     0x20004000,
-    MOUSE:      0x20008000,
-    SPEAKER:    0x20010000,
-    CHIPSET:    0x20020000,
-    VIDEO:      0x20040000,
-    COMPUTER:   0x20080000,
-    DOS:        0x40100000,
-    DATA:       0x40200000,
-    EVENT:      0x40400000,
-    KEY:        0x40800000,
-    WARN:       0x41000000,
+    IRQ:        0x20000080,
+    BUS:        0x20000100,
+    MEM:        0x20000200,
+    DMA:        0x20000400,
+    FDC:        0x20000800,
+    HDC:        0x20001000,
+    DISK:       0x20002000,
+    PIC:        0x20004000,
+    TIMER:      0x20008000,
+    CMOS:       0x20010000,
+    RTC:        0x20020000,
+    C8042:      0x20040000,
+    KBD:        0x20080000,
+    PARALLEL:   0x20100000,
+    SERIAL:     0x20200000,
+    MOUSE:      0x20400000,
+    SPEAKER:    0x20800000,
+    CHIPSET:    0x21000000,
+    VIDEO:      0x22000000,
+    COMPUTER:   0x24000000,
+    DOS:        0x40000001,
+    DATA:       0x40000002,
+    EVENT:      0x40000004,
+    KEY:        0x41000000,
+    WARN:       0x48000000,
     HALT:       0x81000000|0,
     BUFFER:     0x82000000|0
 };
@@ -18083,7 +18083,7 @@ class X86CPU extends CPU {
             }
         }
         if (bitsPorts) {
-            if (this.messageEnabled(Messages.PORT)) this.printMessage("checkIOPM(" + Str.toHexWord(port) + "," + nPorts + "," + (fInput? "input" : "output") + "): trapped", true, true);
+            if (this.messageEnabled(Messages.IOPM)) this.printMessage("checkIOPM(" + Str.toHexWord(port) + "," + nPorts + "," + (fInput? "input" : "output") + "): trapped", true, true);
             X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
             return false;
         }
@@ -38248,36 +38248,36 @@ class ChipSet extends Component {
         if (this.model >= ChipSet.MODEL_5170) {
             /*
              * The 8042 input buffer is treated as a "command byte" when written via port 0x64 and as a "data byte"
-             * when written via port 0x60.  So, whenever the KC8042.CMD.WRITE_CMD "command byte" is written to the input
-             * buffer, the subsequent command data byte is saved in b8042CmdData.  Similarly, for KC8042.CMD.WRITE_OUTPORT,
+             * when written via port 0x60.  So, whenever the C8042.CMD.WRITE_CMD "command byte" is written to the input
+             * buffer, the subsequent command data byte is saved in b8042CmdData.  Similarly, for C8042.CMD.WRITE_OUTPORT,
              * the subsequent data byte is saved in b8042OutPort.
              *
              * TODO: Consider a UI for the Keyboard INHIBIT switch.  By default, our keyboard is never inhibited
              * (ie, locked).  Also, note that the hardware changes this bit only when new data is sent to b8042OutBuff.
              */
-            this.b8042Status = ChipSet.KC8042.STATUS.NO_INHIBIT;
+            this.b8042Status = ChipSet.C8042.STATUS.NO_INHIBIT;
             this.b8042InBuff = 0;
-            this.b8042CmdData = ChipSet.KC8042.DATA.CMD.NO_CLOCK;
+            this.b8042CmdData = ChipSet.C8042.DATA.CMD.NO_CLOCK;
             this.b8042OutBuff = 0;
 
             /*
              * TODO: Provide more control over these 8042 "Input Port" bits (eg, the keyboard lock)
              */
-            this.b8042InPort = ChipSet.KC8042.INPORT.MFG_OFF | ChipSet.KC8042.INPORT.KBD_UNLOCKED;
+            this.b8042InPort = ChipSet.C8042.INPORT.MFG_OFF | ChipSet.C8042.INPORT.KBD_UNLOCKED;
 
             if (this.getDIPMemorySize() >= 512) {
-                this.b8042InPort |= ChipSet.KC8042.INPORT.ENABLE_256KB;
+                this.b8042InPort |= ChipSet.C8042.INPORT.ENABLE_256KB;
             }
 
             if (this.getDIPVideoMonitor() == ChipSet.MONITOR.MONO) {
-                this.b8042InPort |= ChipSet.KC8042.INPORT.MONO;
+                this.b8042InPort |= ChipSet.C8042.INPORT.MONO;
             }
 
             if (DESKPRO386 && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386) {
-                this.b8042InPort |= ChipSet.KC8042.INPORT.COMPAQ_NO80387 | ChipSet.KC8042.INPORT.COMPAQ_NOWEITEK;
+                this.b8042InPort |= ChipSet.C8042.INPORT.COMPAQ_NO80387 | ChipSet.C8042.INPORT.COMPAQ_NOWEITEK;
             }
 
-            this.b8042OutPort = ChipSet.KC8042.OUTPORT.NO_RESET | ChipSet.KC8042.OUTPORT.A20_ON;
+            this.b8042OutPort = ChipSet.C8042.OUTPORT.NO_RESET | ChipSet.C8042.OUTPORT.A20_ON;
 
             this.abDMAPageSpare = new Array(8);
 
@@ -40499,7 +40499,7 @@ class ChipSet extends Component {
                  * TODO: Support EOI commands with automatic rotation (eg, ChipSet.PIC_LO.OCW2_EOI_ROT and ChipSet.PIC_LO.OCW2_EOI_ROTSPEC)
                  */
                 if (bOCW2 & ChipSet.PIC_LO.OCW2_SET_ROTAUTO) {
-                    if (this.messageEnabled(/*Messages.PIC | */ Messages.WARN)) {
+                    if (this.messageEnabled(Messages.PIC | Messages.WARN)) {
                         this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW2 rotate " + Str.toHexByte(bOut), true, true);
                     }
                 }
@@ -40514,7 +40514,7 @@ class ChipSet extends Component {
                 /*
                  * TODO: Remaining commands to support: ChipSet.PIC_LO.OCW2_SET_ROTAUTO and ChipSet.PIC_LO.OCW2_CLR_ROTAUTO
                  */
-                if (this.messageEnabled(/*Messages.PIC | */ Messages.WARN)) {
+                if (this.messageEnabled(Messages.PIC | Messages.WARN)) {
                     this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI " + Str.toHexByte(bOut), true, true);
                 }
             }
@@ -40526,7 +40526,7 @@ class ChipSet extends Component {
              * that's unfortunate, because I don't support them yet.
              */
             if (bOut & (ChipSet.PIC_LO.OCW3_POLL_CMD | ChipSet.PIC_LO.OCW3_SMM_CMD)) {
-                if (this.messageEnabled(/*Messages.PIC | */ Messages.WARN)) {
+                if (this.messageEnabled(Messages.PIC | Messages.WARN)) {
                     this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW3 " + Str.toHexByte(bOut), true, true);
                 }
             }
@@ -41398,7 +41398,7 @@ class ChipSet extends Component {
                 }
             }
 
-            if (MAXDEBUG && this.messageEnabled(Messages.TIMER | Messages.BUFFER)) {
+            if (MAXDEBUG && this.messageEnabled(Messages.TIMER | Messages.WARN)) {
                 this.log("TIMER" + iTimer + " count: " + count + ", ticks: " + ticksElapsed + ", fired: " + (fFired? "true" : "false"));
             }
 
@@ -41657,7 +41657,7 @@ class ChipSet extends Component {
     {
         let b = this.kbd? this.kbd.readScanCode() : 0;
         this.printMessageIO(port, null, addrFrom, "8041_KBD", b);
-        this.b8041Status &= ~ChipSet.KC8042.STATUS.OUTBUFF_FULL;
+        this.b8041Status &= ~ChipSet.C8042.STATUS.OUTBUFF_FULL;
         return b;
     }
 
@@ -41733,7 +41733,7 @@ class ChipSet extends Component {
      *
      * To avoid that problem, kbd.checkScanCode() also requires that kbd.setEnabled() be called
      * before it supplies any more data via notifyKbdData().  That will happen as soon as the
-     * ROM re-enables the controller, and is why KC8042.CMD.ENABLE_KBD processing also ends with a
+     * ROM re-enables the controller, and is why C8042.CMD.ENABLE_KBD processing also ends with a
      * call to kbd.checkScanCode().
      *
      * Note that, the foregoing notwithstanding, I still clear the OUTBUFF_FULL bit here (as I
@@ -41751,7 +41751,7 @@ class ChipSet extends Component {
     {
         let b = this.b8042OutBuff;
         this.printMessageIO(port, null, addrFrom, "8042_OUTBUFF", b, Messages.C8042);
-        this.b8042Status &= ~(ChipSet.KC8042.STATUS.OUTBUFF_FULL | ChipSet.KC8042.STATUS.OUTBUFF_DELAY);
+        this.b8042Status &= ~(ChipSet.C8042.STATUS.OUTBUFF_FULL | ChipSet.C8042.STATUS.OUTBUFF_DELAY);
         if (this.kbd) this.kbd.checkScanCode();
         return b;
     }
@@ -41760,8 +41760,8 @@ class ChipSet extends Component {
      * out8042InBuffData(port, bOut, addrFrom)
      *
      * This writes to the 8042's input buffer; using this port (ie, 0x60 instead of 0x64) designates the
-     * the byte as a KC8042.DATA.CMD "data byte".  Before clearing KC8042.STATUS.CMD_FLAG, however, we see if it's set,
-     * and then based on the previous KC8042.CMD "command byte", we do whatever needs to be done with this "data byte".
+     * the byte as a C8042.DATA.CMD "data byte".  Before clearing C8042.STATUS.CMD_FLAG, however, we see if it's set,
+     * and then based on the previous C8042.CMD "command byte", we do whatever needs to be done with this "data byte".
      *
      * @this {ChipSet}
      * @param {number} port (0x60)
@@ -41772,15 +41772,15 @@ class ChipSet extends Component {
     {
         this.printMessageIO(port, bOut, addrFrom, "8042_INBUF.DATA", null, Messages.C8042);
 
-        if (this.b8042Status & ChipSet.KC8042.STATUS.CMD_FLAG) {
+        if (this.b8042Status & ChipSet.C8042.STATUS.CMD_FLAG) {
 
             switch (this.b8042InBuff) {
 
-            case ChipSet.KC8042.CMD.WRITE_CMD:
+            case ChipSet.C8042.CMD.WRITE_CMD:
                 this.set8042CmdData(bOut);
                 break;
 
-            case ChipSet.KC8042.CMD.WRITE_OUTPORT:
+            case ChipSet.C8042.CMD.WRITE_OUTPORT:
                 this.set8042OutPort(bOut);
                 break;
 
@@ -41849,13 +41849,13 @@ class ChipSet extends Component {
              * an error, but "TEST.21" assumes that it is.
              */
             default:
-                this.set8042CmdData(this.b8042CmdData & ~ChipSet.KC8042.DATA.CMD.NO_CLOCK);
+                this.set8042CmdData(this.b8042CmdData & ~ChipSet.C8042.DATA.CMD.NO_CLOCK);
                 if (this.kbd) this.set8042OutBuff(this.kbd.sendCmd(bOut));
                 break;
             }
         }
         this.b8042InBuff = bOut;
-        this.b8042Status &= ~ChipSet.KC8042.STATUS.CMD_FLAG;
+        this.b8042Status &= ~ChipSet.C8042.STATUS.CMD_FLAG;
     }
 
     /**
@@ -41870,13 +41870,13 @@ class ChipSet extends Component {
     {
         /*
          * Normally, we return whatever was last written to this port, but we do need to mask the
-         * two upper-most bits (KC8042.RWREG.NMI_ERROR), as those are output-only bits used to signal
+         * two upper-most bits (C8042.RWREG.NMI_ERROR), as those are output-only bits used to signal
          * parity errors.
          *
          * Also, "TEST.09" of the MODEL_5170 BIOS expects the REFRESH_BIT to alternate, so we used to
          * do this:
          *
-         *      this.bPPIB ^= ChipSet.KC8042.RWREG.REFRESH_BIT;
+         *      this.bPPIB ^= ChipSet.C8042.RWREG.REFRESH_BIT;
          *
          * However, the MODEL_5170_REV3 BIOS not only checks REFRESH_BIT in "TEST.09", but includes
          * an additional test right before "TEST.11A", which requires the bit change "a bit less"
@@ -41892,12 +41892,12 @@ class ChipSet extends Component {
          * in 1us, 64 cycles represents 8us, so that might be a bit fast for "WAITF", but bit 6
          * is the only choice that also satisfies the pre-"TEST.11A" test as well.
          */
-        let b = this.bPPIB & ~(ChipSet.KC8042.RWREG.NMI_ERROR | ChipSet.KC8042.RWREG.REFRESH_BIT) | ((this.cpu.getCycles() & 0x40)? ChipSet.KC8042.RWREG.REFRESH_BIT : 0);
+        let b = this.bPPIB & ~(ChipSet.C8042.RWREG.NMI_ERROR | ChipSet.C8042.RWREG.REFRESH_BIT) | ((this.cpu.getCycles() & 0x40)? ChipSet.C8042.RWREG.REFRESH_BIT : 0);
         /*
          * Thanks to the WAITF function, this has become a very "busy" port, so if this generates too
-         * many messages, try adding Messages.BUFFER to the criteria.
+         * many messages, try adding Messages.WARN to the criteria.
          */
-        this.printMessageIO(port, null, addrFrom, "8042_RWREG", b, Messages.C8042);
+        this.printMessageIO(port, null, addrFrom, "8042_RWREG", b, Messages.C8042 | Messages.WARN);
         return b;
     }
 
@@ -41929,22 +41929,34 @@ class ChipSet extends Component {
         let b = this.b8042Status & 0xff;
         /*
          * There's code in the 5170 BIOS (F000:03BF) that writes an 8042 command (0xAA), waits for
-         * KC8042.STATUS.INBUFF_FULL to go clear (which it always is, because we always accept commands
-         * immediately), then checks KC8042.STATUS.OUTBUFF_FULL and performs a "flush" on port 0x60 if
-         * it's set, then waits for KC8042.STATUS.OUTBUFF_FULL *again*.  Unfortunately, the "flush" throws
+         * C8042.STATUS.INBUFF_FULL to go clear (which it always is, because we always accept commands
+         * immediately), then checks C8042.STATUS.OUTBUFF_FULL and performs a "flush" on port 0x60 if
+         * it's set, then waits for C8042.STATUS.OUTBUFF_FULL *again*.  Unfortunately, the "flush" throws
          * away our response if we respond immediately.
          *
-         * So now when out8042InBuffCmd() has a response, it sets KC8042.STATUS.OUTBUFF_DELAY instead
-         * (which is outside the 0xff range of bits we return); when we see KC8042.STATUS.OUTBUFF_DELAY,
-         * we clear it and set KC8042.STATUS.OUTBUFF_FULL, which will be returned on the next read.
+         * So now when out8042InBuffCmd() has a response, it sets C8042.STATUS.OUTBUFF_DELAY instead
+         * (which is outside the 0xff range of bits we return); when we see C8042.STATUS.OUTBUFF_DELAY,
+         * we clear it and set C8042.STATUS.OUTBUFF_FULL, which will be returned on the next read.
          *
          * This provides a single poll delay, so that the aforementioned "flush" won't toss our response.
-         * If longer delays are needed down the road, we may need to set a delay count in the upper (hidden)
+         * If longer delays are needed down the road, we may need to set a delay count in the upper (unused)
          * bits of b8042Status, instead of using a single delay bit.
          */
-        if (this.b8042Status & ChipSet.KC8042.STATUS.OUTBUFF_DELAY) {
-            this.b8042Status |= ChipSet.KC8042.STATUS.OUTBUFF_FULL;
-            this.b8042Status &= ~ChipSet.KC8042.STATUS.OUTBUFF_DELAY;
+        if (this.b8042Status & ChipSet.C8042.STATUS.OUTBUFF_DELAY) {
+            this.b8042Status |= ChipSet.C8042.STATUS.OUTBUFF_FULL;
+            this.b8042Status &= ~ChipSet.C8042.STATUS.OUTBUFF_DELAY;
+        }
+        /*
+         * I added this for Windows 95's VMM keyboard driver for DOS sessions, which differs from the keyboard
+         * driver for protected-mode applications (see the keyboard's setEnabled() function for more details).
+         * 
+         * The Windows 95 VMM driver doesn't do what EITHER the ROM or the protected-mode driver typically does
+         * after receiving a scan code (ie, toggle the keyboard's enable state).  Instead, the VMM simply checks
+         * this status port one more time, perhaps to confirm that the OUTBUFF_FULL bit is clear.  It then
+         * expects another keyboard interrupt to arrive when the next scan code is available.  Very minimalistic.
+         */
+        if (!(this.b8042Status & ChipSet.C8042.STATUS.OUTBUFF_FULL)) {
+            this.kbd.checkScanCode(true);
         }
         return b;
     }
@@ -41953,7 +41965,7 @@ class ChipSet extends Component {
      * out8042InBuffCmd(port, bOut, addrFrom)
      *
      * This writes to the 8042's input buffer; using this port (ie, 0x64 instead of 0x60) designates the
-     * the byte as a "command byte".  We immediately set KC8042.STATUS.CMD_FLAG, and then see if we can act upon
+     * the byte as a "command byte".  We immediately set C8042.STATUS.CMD_FLAG, and then see if we can act upon
      * the command immediately (some commands requires us to wait for a "data byte").
      *
      * @this {ChipSet}
@@ -41967,31 +41979,31 @@ class ChipSet extends Component {
 
         this.b8042InBuff = bOut;
 
-        this.b8042Status |= ChipSet.KC8042.STATUS.CMD_FLAG;
+        this.b8042Status |= ChipSet.C8042.STATUS.CMD_FLAG;
 
         let bPulseBits = 0;
-        if (this.b8042InBuff >= ChipSet.KC8042.CMD.PULSE_OUTPORT) {
+        if (this.b8042InBuff >= ChipSet.C8042.CMD.PULSE_OUTPORT) {
             bPulseBits = (this.b8042InBuff ^ 0xf);
             /*
-             * Now that we have isolated the bit(s) to pulse, map all pulse commands to KC8042.CMD.PULSE_OUTPORT
+             * Now that we have isolated the bit(s) to pulse, map all pulse commands to C8042.CMD.PULSE_OUTPORT
              */
-            this.b8042InBuff = ChipSet.KC8042.CMD.PULSE_OUTPORT;
+            this.b8042InBuff = ChipSet.C8042.CMD.PULSE_OUTPORT;
         }
 
         switch (this.b8042InBuff) {
-        case ChipSet.KC8042.CMD.READ_CMD:           // 0x20
+        case ChipSet.C8042.CMD.READ_CMD:        // 0x20
             this.set8042OutBuff(this.b8042CmdData);
             break;
 
-        case ChipSet.KC8042.CMD.WRITE_CMD:          // 0x60
+        case ChipSet.C8042.CMD.WRITE_CMD:       // 0x60
             /*
              * No further action required for this command; more data is expected via out8042InBuffData()
              */
             break;
 
-        case ChipSet.KC8042.CMD.DISABLE_KBD:        // 0xAD
-            this.set8042CmdData(this.b8042CmdData | ChipSet.KC8042.DATA.CMD.NO_CLOCK);
-            if (DEBUG) this.printMessage("keyboard disabled", Messages.KBD | Messages.PORT);
+        case ChipSet.C8042.CMD.DISABLE_KBD:     // 0xAD
+            this.set8042CmdData(this.b8042CmdData | ChipSet.C8042.DATA.CMD.NO_CLOCK);
+            if (!COMPILED) this.printMessage("keyboard disabled", Messages.KBD | Messages.PORT);
             /*
              * NOTE: The MODEL_5170 BIOS calls "KBD_RESET" (F000:17D2) while the keyboard interface is disabled,
              * yet we must still deliver the Keyboard's CMDRES.BAT_OK response code?  Seems like an odd thing for
@@ -41999,46 +42011,46 @@ class ChipSet extends Component {
              */
             break;
 
-        case ChipSet.KC8042.CMD.ENABLE_KBD:         // 0xAE
-            this.set8042CmdData(this.b8042CmdData & ~ChipSet.KC8042.DATA.CMD.NO_CLOCK);
-            if (DEBUG) this.printMessage("keyboard re-enabled", Messages.KBD | Messages.PORT);
+        case ChipSet.C8042.CMD.ENABLE_KBD:      // 0xAE
+            this.set8042CmdData(this.b8042CmdData & ~ChipSet.C8042.DATA.CMD.NO_CLOCK);
+            if (!COMPILED) this.printMessage("keyboard re-enabled", Messages.KBD | Messages.PORT);
             if (this.kbd) this.kbd.checkScanCode();
             break;
 
-        case ChipSet.KC8042.CMD.SELF_TEST:          // 0xAA
+        case ChipSet.C8042.CMD.SELF_TEST:       // 0xAA
             if (this.kbd) this.kbd.flushScanCode();
-            this.set8042CmdData(this.b8042CmdData | ChipSet.KC8042.DATA.CMD.NO_CLOCK);
-            if (DEBUG) this.printMessage("keyboard disabled on reset", Messages.KBD | Messages.PORT);
-            this.set8042OutBuff(ChipSet.KC8042.DATA.SELF_TEST.OK);
-            this.set8042OutPort(ChipSet.KC8042.OUTPORT.NO_RESET | ChipSet.KC8042.OUTPORT.A20_ON);
+            this.set8042CmdData(this.b8042CmdData | ChipSet.C8042.DATA.CMD.NO_CLOCK);
+            if (!COMPILED) this.printMessage("keyboard disabled on reset", Messages.KBD | Messages.PORT);
+            this.set8042OutBuff(ChipSet.C8042.DATA.SELF_TEST.OK);
+            this.set8042OutPort(ChipSet.C8042.OUTPORT.NO_RESET | ChipSet.C8042.OUTPORT.A20_ON);
             break;
 
-        case ChipSet.KC8042.CMD.INTF_TEST:          // 0xAB
+        case ChipSet.C8042.CMD.INTF_TEST:       // 0xAB
             /*
              * TODO: Determine all the side-effects of the Interface Test, if any.
              */
-            this.set8042OutBuff(ChipSet.KC8042.DATA.INTF_TEST.OK);
+            this.set8042OutBuff(ChipSet.C8042.DATA.INTF_TEST.OK);
             break;
 
-        case ChipSet.KC8042.CMD.READ_INPORT:        // 0xC0
+        case ChipSet.C8042.CMD.READ_INPORT:     // 0xC0
             this.set8042OutBuff(this.b8042InPort);
             break;
 
-        case ChipSet.KC8042.CMD.READ_OUTPORT:       // 0xD0
+        case ChipSet.C8042.CMD.READ_OUTPORT:    // 0xD0
             this.set8042OutBuff(this.b8042OutPort);
             break;
 
-        case ChipSet.KC8042.CMD.WRITE_OUTPORT:      // 0xD1
+        case ChipSet.C8042.CMD.WRITE_OUTPORT:   // 0xD1
             /*
              * No further action required for this command; more data is expected via out8042InBuffData()
              */
             break;
 
-        case ChipSet.KC8042.CMD.READ_TEST:          // 0xE0
-            this.set8042OutBuff((this.b8042CmdData & ChipSet.KC8042.DATA.CMD.NO_CLOCK)? 0 : ChipSet.KC8042.TESTPORT.KBD_CLOCK);
+        case ChipSet.C8042.CMD.READ_TEST:       // 0xE0
+            this.set8042OutBuff((this.b8042CmdData & ChipSet.C8042.DATA.CMD.NO_CLOCK)? 0 : ChipSet.C8042.TESTPORT.KBD_CLOCK);
             break;
 
-        case ChipSet.KC8042.CMD.PULSE_OUTPORT:      // 0xF0-0xFF
+        case ChipSet.C8042.CMD.PULSE_OUTPORT:   // 0xF0-0xFF
             if (bPulseBits & 0x1) {
                 /*
                  * Bit 0 of the 8042's output port is connected to RESET.  If it's pulsed, the processor resets.
@@ -42050,7 +42062,7 @@ class ChipSet extends Component {
             break;
 
         default:
-            if (DEBUG && this.messageEnabled(Messages.C8042)) {
+            if (!COMPILED && this.messageEnabled(Messages.C8042)) {
                 this.printMessage("unrecognized 8042 command: " + Str.toHexByte(this.b8042InBuff), true);
                 this.dbg.stopCPU();
             }
@@ -42068,11 +42080,11 @@ class ChipSet extends Component {
     {
         this.b8042CmdData = b;
 
-        this.b8042Status = (this.b8042Status & ~ChipSet.KC8042.STATUS.SYS_FLAG) | (b & ChipSet.KC8042.DATA.CMD.SYS_FLAG);
+        this.b8042Status = (this.b8042Status & ~ChipSet.C8042.STATUS.SYS_FLAG) | (b & ChipSet.C8042.DATA.CMD.SYS_FLAG);
         if (this.kbd) {
             /*
              * This seems to be what the doctor ordered for the MODEL_5170_REV3 BIOS @F000:0A6D, where it
-             * sends ChipSet.KC8042.CMD.WRITE_CMD to port 0x64, followed by 0x4D to port 0x60, which clears NO_CLOCK
+             * sends ChipSet.C8042.CMD.WRITE_CMD to port 0x64, followed by 0x4D to port 0x60, which clears NO_CLOCK
              * and enables the keyboard.  The BIOS then waits for OUTBUFF_FULL to be set, at which point it seems
              * to be anticipating an 0xAA response in the output buffer.
              *
@@ -42085,7 +42097,7 @@ class ChipSet extends Component {
              * powered on, it performs the BAT, and then when the clock and data lines go high, the keyboard sends
              * a completion code (eg, 0xAA for success, or 0xFC or something else for failure).
              */
-            this.kbd.setEnabled(!!(b & ChipSet.KC8042.DATA.CMD.NO_INHIBIT), !(b & ChipSet.KC8042.DATA.CMD.NO_CLOCK));
+            this.kbd.setEnabled(!!(b & ChipSet.C8042.DATA.CMD.NO_INHIBIT), !(b & ChipSet.C8042.DATA.CMD.NO_CLOCK));
         }
     }
 
@@ -42114,12 +42126,12 @@ class ChipSet extends Component {
         if (b >= 0) {
             this.b8042OutBuff = b;
             if (fNoDelay) {
-                this.b8042Status |= ChipSet.KC8042.STATUS.OUTBUFF_FULL;
+                this.b8042Status |= ChipSet.C8042.STATUS.OUTBUFF_FULL;
             } else {
-                this.b8042Status &= ~ChipSet.KC8042.STATUS.OUTBUFF_FULL;
-                this.b8042Status |= ChipSet.KC8042.STATUS.OUTBUFF_DELAY;
+                this.b8042Status &= ~ChipSet.C8042.STATUS.OUTBUFF_FULL;
+                this.b8042Status |= ChipSet.C8042.STATUS.OUTBUFF_DELAY;
             }
-            if (DEBUG && this.messageEnabled(Messages.KBD | Messages.PORT)) {
+            if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
                 this.printMessage("set8042OutBuff(" + Str.toHexByte(b) + ',' + (fNoDelay? "no" : "") + "delay)", true);
             }
         }
@@ -42128,7 +42140,7 @@ class ChipSet extends Component {
     /**
      * set8042OutPort(b)
      *
-     * When ChipSet.KC8042.CMD.WRITE_OUTPORT (0xD1) is written to port 0x64, the next byte written to port 0x60 comes here,
+     * When ChipSet.C8042.CMD.WRITE_OUTPORT (0xD1) is written to port 0x64, the next byte written to port 0x60 comes here,
      * to the KBC's OUTPORT.  One of the most important bits in the OUTPORT is the A20_ON bit (0x02): set it to turn A20 on,
      * clear it to turn A20 off.
      *
@@ -42139,15 +42151,15 @@ class ChipSet extends Component {
     {
         this.b8042OutPort = b;
 
-        this.bus.setA20(!!(b & ChipSet.KC8042.OUTPORT.A20_ON));
+        this.bus.setA20(!!(b & ChipSet.C8042.OUTPORT.A20_ON));
 
-        if (!(b & ChipSet.KC8042.OUTPORT.NO_RESET)) {
+        if (!(b & ChipSet.C8042.OUTPORT.NO_RESET)) {
             /*
              * Bit 0 of the 8042's output port is connected to RESET.  Normally, it's "pulsed" with the
-             * KC8042.CMD.PULSE_OUTPORT command, so if a RESET is detected via this command, we should try to
+             * C8042.CMD.PULSE_OUTPORT command, so if a RESET is detected via this command, we should try to
              * determine if that's what the caller intended.
              */
-            if (DEBUG && this.messageEnabled(Messages.C8042)) {
+            if (!COMPILED && this.messageEnabled(Messages.C8042)) {
                 this.printMessage("unexpected 8042 output port reset: " + Str.toHexByte(b), true);
                 this.dbg.stopCPU();
             }
@@ -42162,7 +42174,7 @@ class ChipSet extends Component {
      * keyboard controller.  However, the Keyboard's sole responsibility is to emulate an actual keyboard and call
      * notifyKbdData() whenever it has some data; it's not allowed to mess with IRQ lines.
      *
-     * If there's an 8042, we check (this.b8042CmdData & ChipSet.KC8042.DATA.CMD.NO_CLOCK); if NO_CLOCK is clear,
+     * If there's an 8042, we check (this.b8042CmdData & ChipSet.C8042.DATA.CMD.NO_CLOCK); if NO_CLOCK is clear,
      * we can raise the IRQ immediately.  Well, not quite immediately....
      *
      * Notes regarding the MODEL_5170 (eg, /devices/pc/machine/5170/ega/1152kb/rev3/machine.xml):
@@ -42205,7 +42217,7 @@ class ChipSet extends Component {
      * eliminating the need for the second CLI (@F000:370E).
      *
      * Of course, in "real life", this was probably never a problem, because the 8042 probably wasn't fast enough to
-     * generate another interrupt so soon after receiving the ChipSet.KC8042.CMD.ENABLE_KBD command.  In my case, I ran
+     * generate another interrupt so soon after receiving the ChipSet.C8042.CMD.ENABLE_KBD command.  In my case, I ran
      * into this problem by 1) turning on "kbd" Debugger messages and 2) rapidly typing lots of keys.  The Debugger
      * messages bogged the machine down enough for me to hit the "window of opportunity", generating this message in
      * PC-DOS 3.20:
@@ -42235,7 +42247,7 @@ class ChipSet extends Component {
      */
     notifyKbdData(b)
     {
-        if (DEBUG && this.messageEnabled(Messages.KBD | Messages.PORT)) {
+        if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
             this.printMessage("notifyKbdData(" + Str.toHexByte(b) + ')', true);
         }
         if (this.model == ChipSet.MODEL_4860) {
@@ -42252,15 +42264,15 @@ class ChipSet extends Component {
              * TODO: Should we be checking bPPI for PPI_B.CLK_KBD on these older machines, before calling setIRR()?
              */
             this.setIRR(ChipSet.IRQ.KBD, 4);
-            this.b8041Status |= ChipSet.KC8042.STATUS.OUTBUFF_FULL;
+            this.b8041Status |= ChipSet.C8042.STATUS.OUTBUFF_FULL;
         }
         else {
-            if (!(this.b8042CmdData & ChipSet.KC8042.DATA.CMD.NO_CLOCK)) {
+            if (!(this.b8042CmdData & ChipSet.C8042.DATA.CMD.NO_CLOCK)) {
                 /*
-                 * The next read of b8042OutBuff will clear both of these bits and call kbd.checkScanCode(),
+                 * The next in8042OutBuff() will clear both of these bits and call kbd.checkScanCode(),
                  * which will call notifyKbdData() again if there's still keyboard data to process.
                  */
-                if (!(this.b8042Status & (ChipSet.KC8042.STATUS.OUTBUFF_FULL | ChipSet.KC8042.STATUS.OUTBUFF_DELAY))) {
+                if (!(this.b8042Status & (ChipSet.C8042.STATUS.OUTBUFF_FULL | ChipSet.C8042.STATUS.OUTBUFF_DELAY))) {
                     this.set8042OutBuff(b, true);
                     this.kbd.shiftScanCode();
                     /*
@@ -42270,12 +42282,12 @@ class ChipSet extends Component {
                     this.setIRR(ChipSet.IRQ.KBD, 120);
                 }
                 else {
-                    if (DEBUG && this.messageEnabled(Messages.KBD | Messages.PORT)) {
+                    if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
                         this.printMessage("notifyKbdData(" + Str.toHexByte(b) + "): output buffer full", true);
                     }
                 }
             } else {
-                if (DEBUG && this.messageEnabled(Messages.KBD | Messages.PORT)) {
+                if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
                     this.printMessage("notifyKbdData(" + Str.toHexByte(b) + "): disabled", true);
                 }
             }
@@ -42355,7 +42367,7 @@ class ChipSet extends Component {
                  * occurs in a timely manner, too.
                  */
                 if ((bIn & ChipSet.CMOS.STATUSC.PF) && (this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.PIE)) {
-                    if (DEBUG) this.printMessage("RTC periodic interrupt cleared", Messages.RTC);
+                    if (!COMPILED) this.printMessage("RTC periodic interrupt cleared", Messages.RTC);
                     this.setRTCCycleLimit();
                 }
             }
@@ -42381,10 +42393,10 @@ class ChipSet extends Component {
         this.abCMOSData[bAddr] = (bAddr <= ChipSet.CMOS.ADDR.STATUSD? this.setRTCByte(bAddr, bOut) : bOut);
         if (bAddr == ChipSet.CMOS.ADDR.STATUSB && (bDelta & ChipSet.CMOS.STATUSB.PIE)) {
             if (bOut & ChipSet.CMOS.STATUSB.PIE) {
-                if (DEBUG) this.printMessage("RTC periodic interrupts enabled", Messages.RTC);
+                if (!COMPILED) this.printMessage("RTC periodic interrupts enabled", Messages.RTC);
                 this.setRTCCycleLimit();
             } else {
-                if (DEBUG) this.printMessage("RTC periodic interrupts disabled", Messages.RTC);
+                if (!COMPILED) this.printMessage("RTC periodic interrupts disabled", Messages.RTC);
             }
         }
     }
@@ -43485,21 +43497,21 @@ ChipSet.DIPSW[ChipSet.MODEL_ATT_6300][1][ChipSet.SWITCH_TYPE.MONITOR] = ChipSet.
 /*
  * 8042 Keyboard Controller I/O ports (MODEL_5170)
  *
- * On the MODEL_5170, port 0x60 is designated KC8042.DATA rather than PPI_A, although the BIOS also refers to it
+ * On the MODEL_5170, port 0x60 is designated C8042.DATA rather than PPI_A, although the BIOS also refers to it
  * as "PORT_A: 8042 KEYBOARD SCAN/DIAG OUTPUTS").  This is the 8042's output buffer and should be read only when
- * KC8042.STATUS.OUTBUFF_FULL is set.
+ * C8042.STATUS.OUTBUFF_FULL is set.
  *
- * Similarly, port 0x61 is designated KC8042.RWREG rather than PPI_B; the BIOS also refers to it as "PORT_B: 8042
+ * Similarly, port 0x61 is designated C8042.RWREG rather than PPI_B; the BIOS also refers to it as "PORT_B: 8042
  * READ WRITE REGISTER", but it is not otherwise discussed in the MODEL_5170 TechRef's 8042 documentation.
  *
- * There are brief references to bits 0 and 1 (KC8042.RWREG.CLK_TIMER2 and KC8042.RWREG.SPK_TIMER2), and the BIOS sets
- * bits 2-7 to "DISABLE PARITY CHECKERS" (principally KC8042.RWREG.DISABLE_NMI, which are bits 2 and 3); why the BIOS
+ * There are brief references to bits 0 and 1 (C8042.RWREG.CLK_TIMER2 and C8042.RWREG.SPK_TIMER2), and the BIOS sets
+ * bits 2-7 to "DISABLE PARITY CHECKERS" (principally C8042.RWREG.DISABLE_NMI, which are bits 2 and 3); why the BIOS
  * also sets bits 4-7 (or if those bits are even settable) is unclear, since it uses 11111100b rather than defined
  * constants.
  *
  * The bottom line: on a MODEL_5170, port 0x61 is still used for speaker control and parity checking, so we use
  * the same register (bPPIB) but install different I/O handlers.  It's also bi-directional: at one point, the BIOS
- * reads KC8042.RWREG.REFRESH_BIT (bit 4) to verify that it's alternating.
+ * reads C8042.RWREG.REFRESH_BIT (bit 4) to verify that it's alternating.
  *
  * PPI_C and PPI_CTRL don't seem to be documented or used by the MODEL_5170 BIOS, so I'm assuming they're obsolete.
  *
@@ -43509,21 +43521,21 @@ ChipSet.DIPSW[ChipSet.MODEL_ATT_6300][1][ChipSet.SWITCH_TYPE.MONITOR] = ChipSet.
  *      http://halicery.com/8042/8042_INTERN_TXT.htm
  *      http://www.os2museum.com/wp/ibm-pcat-8042-keyboard-controller-commands/
  */
-ChipSet.KC8042 = {
+ChipSet.C8042 = {
     DATA: {                     // this.b8042OutBuff (PPI_A on previous models, still referred to as "PORT A" by the MODEL_5170 BIOS)
         PORT:           0x60,
-        CMD: {                  // this.b8042CmdData (KC8042.DATA.CMD "data bytes" written to port 0x60, after writing a KC8042.CMD byte to port 0x64)
+        CMD: {                  // this.b8042CmdData (C8042.DATA.CMD "data bytes" written to port 0x60, after writing a C8042.CMD byte to port 0x64)
             INT_ENABLE: 0x01,   // generate an interrupt when the controller places data in the output buffer
-            SYS_FLAG:   0x04,   // this value is propagated to ChipSet.KC8042.STATUS.SYS_FLAG
+            SYS_FLAG:   0x04,   // this value is propagated to ChipSet.C8042.STATUS.SYS_FLAG
             NO_INHIBIT: 0x08,   // disable inhibit function
             NO_CLOCK:   0x10,   // disable keyboard by driving "clock" line low
             PC_MODE:    0x20,
             PC_COMPAT:  0x40    // generate IBM PC-compatible scan codes
         },
-        SELF_TEST: {            // result of ChipSet.KC8042.CMD.SELF_TEST command (0xAA)
+        SELF_TEST: {            // result of ChipSet.C8042.CMD.SELF_TEST command (0xAA)
             OK:         0x55
         },
-        INTF_TEST: {            // result of ChipSet.KC8042.CMD.INTF_TEST command (0xAB)
+        INTF_TEST: {            // result of ChipSet.C8042.CMD.INTF_TEST command (0xAB)
             OK:         0x00,   // no error
             CLOCK_LO:   0x01,   // keyboard clock line stuck low
             CLOCK_HI:   0x02,   // keyboard clock line stuck high
@@ -43572,19 +43584,19 @@ ChipSet.KC8042 = {
     },
     CMD: {                      // this.b8042InBuff (on write to port 0x64, interpret this as a CMD)
         PORT:           0x64,
-        READ_CMD:       0x20,   // sends the current CMD byte (this.b8042CmdData) to KC8042.DATA.PORT
-        WRITE_CMD:      0x60,   // followed by a command byte written to KC8042.DATA.PORT (see KC8042.DATA.CMD)
+        READ_CMD:       0x20,   // sends the current CMD byte (this.b8042CmdData) to C8042.DATA.PORT
+        WRITE_CMD:      0x60,   // followed by a command byte written to C8042.DATA.PORT (see C8042.DATA.CMD)
         COMPAQ_SLOWD:   0xA3,   // enable system slow down; see COMPAQ 386/25 TechRef p2-111
         COMPAQ_TOGGLE:  0xA4,   // toggle speed-control bit; see COMPAQ 386/25 TechRef p2-111
         COMPAQ_SPCREAD: 0xA5,   // special read of "port 2"; see COMPAQ 386/25 TechRef p2-111
-        SELF_TEST:      0xAA,   // self-test (KC8042.DATA.SELF_TEST.OK is placed in the output buffer if no errors)
+        SELF_TEST:      0xAA,   // self-test (C8042.DATA.SELF_TEST.OK is placed in the output buffer if no errors)
         INTF_TEST:      0xAB,   // interface test
         DIAG_DUMP:      0xAC,   // diagnostic dump
         DISABLE_KBD:    0xAD,   // disable keyboard
         ENABLE_KBD:     0xAE,   // enable keyboard
         READ_INPORT:    0xC0,   // read input port and place data in output buffer (use only if output buffer empty)
         READ_OUTPORT:   0xD0,   // read output port and place data in output buffer (use only if output buffer empty)
-        WRITE_OUTPORT:  0xD1,   // next byte written to KC8042.DATA.PORT (port 0x60) is placed in the output port (see KC8042.OUTPORT)
+        WRITE_OUTPORT:  0xD1,   // next byte written to C8042.DATA.PORT (port 0x60) is placed in the output port (see C8042.OUTPORT)
         READ_TEST:      0xE0,
         PULSE_OUTPORT:  0xF0    // this is the 1st of 16 commands (0xF0-0xFF) that pulse bits 0-3 of the output port
     },
@@ -43593,7 +43605,7 @@ ChipSet.KC8042 = {
         OUTBUFF_FULL:   0x01,
         INBUFF_FULL:    0x02,   // set if the controller has received but not yet read data from the input buffer (not normally set)
         SYS_FLAG:       0x04,
-        CMD_FLAG:       0x08,   // set on write to KC8042.CMD (port 0x64), clear on write to KC8042.DATA (port 0x60)
+        CMD_FLAG:       0x08,   // set on write to C8042.CMD (port 0x64), clear on write to C8042.DATA (port 0x60)
         NO_INHIBIT:     0x10,   // (in COMPAQ parlance: security lock not engaged)
         XMT_TIMEOUT:    0x20,
         RCV_TIMEOUT:    0x40,
@@ -45539,12 +45551,21 @@ class Keyboard extends Component {
                 this.printMessage("keyboard data line changing to " + fData, true);
             }
             this.fData = fData;
-            /*
-             * TODO: Review this code; it was added during the early days of MODEL_5150 testing and may not be
-             * *exactly* what's called for here.
-             */
             if (fData && !this.fResetOnEnable) {
-                this.shiftScanCode(true);
+                if (this.modelKeys < 84) {
+                    this.shiftScanCode(true);   // TODO: Review this code; it was added during early MODEL_5150 testing
+                } else {
+                    /*
+                     * I added this for Windows 95's protected-mode keyboard driver, which pulses the PPI_B port after
+                     * retrieving a scan code.  Seems rather odd (like legacy code); one would have thought that it
+                     * would know it's dealing with a 8042-based keyboard interface.
+                     * 
+                     * Note that that code path is DIFFERENT from Windows 95's keyboard handling for DOS sessions, which
+                     * does NOT pulse the PPI_B port; it simply polls the 8042 status port, perhaps to confirm that the
+                     * OUTBUFF_FULL bit is clear, and then waits for the next interrupt.  See in8042Status() for details.
+                     */
+                    this.checkScanCode(true);
+                }
             }
         }
         if (this.fData && this.fResetOnEnable) {
@@ -45610,7 +45631,7 @@ class Keyboard extends Component {
     {
         var b = -1;
 
-        if (this.messageEnabled()) this.printMessage("sendCmd(" + Str.toHexByte(bCmd) + ")");
+        if (!COMPILED && this.messageEnabled()) this.printMessage("sendCmd(" + Str.toHexByte(bCmd) + ")");
 
         switch(this.bCmdPending || bCmd) {
 
@@ -45642,7 +45663,7 @@ class Keyboard extends Component {
             break;
 
         default:
-            this.printMessage("sendCmd(): unrecognized command");
+            if (!COMPILED) this.printMessage("sendCmd(): unrecognized command");
             break;
         }
 
@@ -45650,7 +45671,7 @@ class Keyboard extends Component {
     }
 
     /**
-     * checkScanCode()
+     * checkScanCode(fAdvance)
      *
      * This is the ChipSet's interface for checking data availability.
      *
@@ -45659,16 +45680,18 @@ class Keyboard extends Component {
      * making more data available.
      *
      * @this {Keyboard}
+     * @param {boolean} [fAdvance] is true to notify ChipSet if more data is available
      * @return {number} next scan code, or 0 if none
      */
-    checkScanCode()
+    checkScanCode(fAdvance)
     {
         var b = 0;
+        if (fAdvance) this.fAdvance = true;
         if (this.abBuffer.length && this.fAdvance) {
             b = this.abBuffer[0];
             if (this.chipset) this.chipset.notifyKbdData(b);
         }
-        if (this.messageEnabled()) {
+        if (!COMPILED && this.messageEnabled()) {
             this.printMessage(b? ("scan code " + Str.toHexByte(b) + " available") : "no scan codes available");
         }
         return b;
@@ -45688,7 +45711,7 @@ class Keyboard extends Component {
         if (this.abBuffer.length) {
             b = this.abBuffer[0];
         }
-        if (this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(b) + " delivered");
+        if (!COMPILED && this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(b) + " delivered");
         return b;
     }
 
@@ -45702,7 +45725,7 @@ class Keyboard extends Component {
     flushScanCode()
     {
         this.abBuffer = [];
-        if (this.messageEnabled()) this.printMessage("scan codes flushed");
+        if (!COMPILED && this.messageEnabled()) this.printMessage("scan codes flushed");
     }
 
     /**
@@ -45711,7 +45734,7 @@ class Keyboard extends Component {
      * This is the ChipSet's interface to advance scan codes.
      *
      * @this {Keyboard}
-     * @param {boolean} [fNotify] is true to notify ChipSet if more data is available.
+     * @param {boolean} [fNotify] is true to notify ChipSet if more data is available
      */
     shiftScanCode(fNotify)
     {
@@ -45721,16 +45744,13 @@ class Keyboard extends Component {
              * presumably this is the proper point at which to shift the last scan code out, and then assert
              * another interrupt if more scan codes exist.
              */
-            this.abBuffer.shift();
+            var bNew;
+            var bOld = this.abBuffer.shift();
             this.fAdvance = fNotify;
-            if (fNotify) {
-                if (!this.abBuffer.length || !this.chipset) {
-                    fNotify = false;
-                } else {
-                    this.chipset.notifyKbdData(this.abBuffer[0]);
-                }
+            if (fNotify && this.abBuffer.length && this.chipset) {
+                this.chipset.notifyKbdData(bNew = this.abBuffer[0]);
             }
-            if (this.messageEnabled()) this.printMessage("scan codes shifted, notify " + (fNotify? "true" : "false"));
+            if (!COMPILED && this.messageEnabled()) this.printMessage("shifted out scan code " + Str.toHexByte(bOld) + (bNew? (", shifted in " + Str.toHexByte(bNew)) : "") + ", " + this.abBuffer.length + " scan codes remaining");
         }
     }
 
@@ -45847,7 +45867,7 @@ class Keyboard extends Component {
         } else {
             this.autoInject = this.autoType;
         }
-        this.fClock = this.fAdvance = data[i++];
+        this.fClock = data[i++];
         this.fData = data[i];
         this.bCmdPending = 0;       // when non-zero, a command is pending (eg, SET_LED or SET_RATE)
 
@@ -45919,7 +45939,7 @@ class Keyboard extends Component {
          */
         if (this.abBuffer) {
             if (this.abBuffer.length < Keyboard.LIMIT.MAX_SCANCODES) {
-                if (this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(bScan) + " buffered");
+                if (!COMPILED && this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(bScan) + " buffered");
                 this.abBuffer.push(bScan);
                 if (this.abBuffer.length == 1) {
                     if (this.chipset) this.chipset.notifyKbdData(bScan);
@@ -46394,6 +46414,9 @@ class Keyboard extends Component {
         }
         
         if (!this.keySimulate(key.simCode, key.fDown) || !key.nRepeat) {
+            /*
+             * Why isn't there a simple return here? In order to set breakpoints on two different return conditions, of course!
+             */
             if (!msTimer) {
                 return;
             }
@@ -46467,7 +46490,7 @@ class Keyboard extends Component {
      */
     onFocusChange(fFocus)
     {
-        if (this.fHasFocus != fFocus && !COMPILED && this.messageEnabled(Messages.EVENT)) {
+        if (!COMPILED && this.fHasFocus != fFocus && this.messageEnabled(Messages.EVENT)) {
             this.printMessage("onFocusChange(" + (fFocus? "true" : "false") + ")", true);
         }
         this.fHasFocus = fFocus;
@@ -70110,7 +70133,7 @@ class DebuggerX86 extends Debugger {
     messageInit(sEnable)
     {
         this.dbg = this;
-        this.bitsMessage = this.bitsWarning = Messages.WARN;
+        this.bitsMessage = Messages.WARN;
         this.sMessagePrev = null;
         this.aMessageBuffer = [];
         var aEnable = this.parseCommand(sEnable, false, '|');
@@ -70582,6 +70605,7 @@ class DebuggerX86 extends Debugger {
     messageIO(component, port, bOut, addrFrom, name, bIn, bitsMessage)
     {
         bitsMessage |= Messages.PORT;
+        if (!name) bitsMessage |= Messages.WARN;        // we don't want to see "unknown" I/O messages unless WARN is enabled
         if (addrFrom == null || (this.bitsMessage & bitsMessage) == bitsMessage) {
             var selFrom = null;
             if (addrFrom != null) {

@@ -2152,7 +2152,7 @@ class DebuggerX86 extends Debugger {
     messageInit(sEnable)
     {
         this.dbg = this;
-        this.bitsMessage = this.bitsWarning = Messages.WARN;
+        this.bitsMessage = Messages.WARN;
         this.sMessagePrev = null;
         this.aMessageBuffer = [];
         var aEnable = this.parseCommand(sEnable, false, '|');
@@ -2624,6 +2624,7 @@ class DebuggerX86 extends Debugger {
     messageIO(component, port, bOut, addrFrom, name, bIn, bitsMessage)
     {
         bitsMessage |= Messages.PORT;
+        if (!name) bitsMessage |= Messages.WARN;        // we don't want to see "unknown" I/O messages unless WARN is enabled
         if (addrFrom == null || (this.bitsMessage & bitsMessage) == bitsMessage) {
             var selFrom = null;
             if (addrFrom != null) {
