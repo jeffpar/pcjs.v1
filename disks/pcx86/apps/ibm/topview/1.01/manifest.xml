@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.1/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.2/manifest.xsl"?>
 <manifest type="software">
 	<title>TopView 1.01</title>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/TOPVIEW101-PROGRAM.img" href="/disks/pcx86/apps/ibm/topview/1.01/TOPVIEW101-PROGRAM.json" md5="c9f2ef16b87e344f032da5ce60ba085d" md5json="99970fd94483b0c750808b55eef72a90">

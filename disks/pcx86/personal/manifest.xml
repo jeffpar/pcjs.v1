@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.1/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.2/manifest.xsl"?>
 <manifest type="software">
 	<title>PCjs Personal Disk Collection</title>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/JEFFPAR-DISK001.img" href="/disks/pcx86/personal/JEFFPAR-DISK001.json" md5="69fa0304d04823d0631d07df846d9560" md5json="deb68108a2bafdf5c2867989b7c3de30">
