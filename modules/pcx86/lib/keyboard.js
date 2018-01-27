@@ -71,7 +71,7 @@ class Keyboard extends Component {
      */
     constructor(parmsKbd)
     {
-        super("Keyboard", parmsKbd, Messages.KEYBOARD);
+        super("Keyboard", parmsKbd, Messages.KBD);
 
         this.setModel(parmsKbd['model']);
 
@@ -119,7 +119,8 @@ class Keyboard extends Component {
          * first entry in the array is allowed to repeat.  Each entry is a key object with the following
          * properties:
          *
-         *      simCode:    our simulated keyCode from onKeyDown, onKeyUp, or onKeyPress
+         *      simCode:    our simulated keyCode from onKeyChange or onKeyPress
+         *      bitsState:  snapshot of the current bitsState when the key is added (currently not used)
          *      fDown:      next state to simulate (true for down, false for up)
          *      nRepeat:    > 0 if timer should generate more "make" scan code(s), -1 for "break" scan code(s)
          *      timer:      timer for next key operation, if any
@@ -217,13 +218,13 @@ class Keyboard extends Component {
                  *      this.bindings[id] = control;
                  */
                 controlText.onkeydown = function onKeyDown(event) {
-                    return kbd.onKeyDown(event, true);
+                    return kbd.onKeyChange(event, true);
                 };
                 controlText.onkeypress = function onKeyPressKbd(event) {
                     return kbd.onKeyPress(event);
                 };
                 controlText.onkeyup = function onKeyUp(event) {
-                    return kbd.onKeyDown(event, false);
+                    return kbd.onKeyChange(event, false);
                 };
                 return true;
 
@@ -263,7 +264,7 @@ class Keyboard extends Component {
                     this.bindings[id] = controlText;
                     controlText.onclick = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingClick(event) {
-                            if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.KEYS);
+                            if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.KEY);
                             event.preventDefault();                 // preventDefault() is necessary...
                             if (kbd.cmp) kbd.cmp.updateFocus();     // ...for the updateFocus() call to actually work
                             kbd.sInjectBuffer = "";                 // key events should stop any injection currently in progress
@@ -546,7 +547,7 @@ class Keyboard extends Component {
         /*
          * TODO: There's more to reset, like LED indicators, default type rate, and emptying the scan code buffer.
          */
-        this.printMessage("keyboard reset", Messages.KEYBOARD | Messages.PORT);
+        this.printMessage("keyboard reset", Messages.KBD | Messages.PORT);
         this.abBuffer = [];
         this.setResponse(Keyboard.CMDRES.BAT_OK);
     }
@@ -568,7 +569,7 @@ class Keyboard extends Component {
     {
         var fReset = false;
         if (this.fClock !== fClock) {
-            if (!COMPILED && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
+            if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
                 this.printMessage("keyboard clock line changing to " + fClock, true);
             }
             /*
@@ -582,16 +583,25 @@ class Keyboard extends Component {
             if (fClock) this.fAdvance = true;
         }
         if (this.fData !== fData) {
-            if (!COMPILED && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
+            if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
                 this.printMessage("keyboard data line changing to " + fData, true);
             }
             this.fData = fData;
-            /*
-             * TODO: Review this code; it was added during the early days of MODEL_5150 testing and may not be
-             * *exactly* what's called for here.
-             */
             if (fData && !this.fResetOnEnable) {
-                this.shiftScanCode(true);
+                if (this.modelKeys < 84) {
+                    this.shiftScanCode(true);   // TODO: Review this code; it was added during early MODEL_5150 testing
+                } else {
+                    /*
+                     * I added this for Windows 95's protected-mode keyboard driver, which pulses the PPI_B port after
+                     * retrieving a scan code.  Seems rather odd (like legacy code); one would have thought that it
+                     * would know it's dealing with a 8042-based keyboard interface.
+                     * 
+                     * Note that that code path is DIFFERENT from Windows 95's keyboard handling for DOS sessions, which
+                     * does NOT pulse the PPI_B port; it simply polls the 8042 status port, perhaps to confirm that the
+                     * OUTBUFF_FULL bit is clear, and then waits for the next interrupt.  See in8042Status() for details.
+                     */
+                    this.checkScanCode(true);
+                }
             }
         }
         if (this.fData && this.fResetOnEnable) {
@@ -657,7 +667,7 @@ class Keyboard extends Component {
     {
         var b = -1;
 
-        if (this.messageEnabled()) this.printMessage("sendCmd(" + Str.toHexByte(bCmd) + ")");
+        if (!COMPILED && this.messageEnabled()) this.printMessage("sendCmd(" + Str.toHexByte(bCmd) + ")");
 
         switch(this.bCmdPending || bCmd) {
 
@@ -689,7 +699,7 @@ class Keyboard extends Component {
             break;
 
         default:
-            this.printMessage("sendCmd(): unrecognized command");
+            if (!COMPILED) this.printMessage("sendCmd(): unrecognized command");
             break;
         }
 
@@ -697,7 +707,7 @@ class Keyboard extends Component {
     }
 
     /**
-     * checkScanCode()
+     * checkScanCode(fAdvance)
      *
      * This is the ChipSet's interface for checking data availability.
      *
@@ -706,16 +716,18 @@ class Keyboard extends Component {
      * making more data available.
      *
      * @this {Keyboard}
+     * @param {boolean} [fAdvance] is true to notify ChipSet if more data is available
      * @return {number} next scan code, or 0 if none
      */
-    checkScanCode()
+    checkScanCode(fAdvance)
     {
         var b = 0;
+        if (fAdvance) this.fAdvance = true;
         if (this.abBuffer.length && this.fAdvance) {
             b = this.abBuffer[0];
             if (this.chipset) this.chipset.notifyKbdData(b);
         }
-        if (this.messageEnabled()) {
+        if (!COMPILED && this.messageEnabled()) {
             this.printMessage(b? ("scan code " + Str.toHexByte(b) + " available") : "no scan codes available");
         }
         return b;
@@ -735,7 +747,7 @@ class Keyboard extends Component {
         if (this.abBuffer.length) {
             b = this.abBuffer[0];
         }
-        if (this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(b) + " delivered");
+        if (!COMPILED && this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(b) + " delivered");
         return b;
     }
 
@@ -749,7 +761,7 @@ class Keyboard extends Component {
     flushScanCode()
     {
         this.abBuffer = [];
-        if (this.messageEnabled()) this.printMessage("scan codes flushed");
+        if (!COMPILED && this.messageEnabled()) this.printMessage("scan codes flushed");
     }
 
     /**
@@ -758,7 +770,7 @@ class Keyboard extends Component {
      * This is the ChipSet's interface to advance scan codes.
      *
      * @this {Keyboard}
-     * @param {boolean} [fNotify] is true to notify ChipSet if more data is available.
+     * @param {boolean} [fNotify] is true to notify ChipSet if more data is available
      */
     shiftScanCode(fNotify)
     {
@@ -768,16 +780,13 @@ class Keyboard extends Component {
              * presumably this is the proper point at which to shift the last scan code out, and then assert
              * another interrupt if more scan codes exist.
              */
-            this.abBuffer.shift();
+            var bNew;
+            var bOld = this.abBuffer.shift();
             this.fAdvance = fNotify;
-            if (fNotify) {
-                if (!this.abBuffer.length || !this.chipset) {
-                    fNotify = false;
-                } else {
-                    this.chipset.notifyKbdData(this.abBuffer[0]);
-                }
+            if (fNotify && this.abBuffer.length && this.chipset) {
+                this.chipset.notifyKbdData(bNew = this.abBuffer[0]);
             }
-            if (this.messageEnabled()) this.printMessage("scan codes shifted, notify " + (fNotify? "true" : "false"));
+            if (!COMPILED && this.messageEnabled()) this.printMessage("shifted out scan code " + Str.toHexByte(bOld) + (bNew? (", shifted in " + Str.toHexByte(bNew)) : "") + ", " + this.abBuffer.length + " scan codes remaining");
         }
     }
 
@@ -894,7 +903,7 @@ class Keyboard extends Component {
         } else {
             this.autoInject = this.autoType;
         }
-        this.fClock = this.fAdvance = data[i++];
+        this.fClock = data[i++];
         this.fData = data[i];
         this.bCmdPending = 0;       // when non-zero, a command is pending (eg, SET_LED or SET_RATE)
 
@@ -966,7 +975,7 @@ class Keyboard extends Component {
          */
         if (this.abBuffer) {
             if (this.abBuffer.length < Keyboard.LIMIT.MAX_SCANCODES) {
-                if (this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(bScan) + " buffered");
+                if (!COMPILED && this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(bScan) + " buffered");
                 this.abBuffer.push(bScan);
                 if (this.abBuffer.length == 1) {
                     if (this.chipset) this.chipset.notifyKbdData(bScan);
@@ -1046,7 +1055,7 @@ class Keyboard extends Component {
              */
             if (charCode <= Keys.ASCII.CTRL_Z) {
                 if (charCode != Keys.ASCII.CTRL_I && charCode != Keys.ASCII.CTRL_J && charCode != Keys.ASCII.CTRL_M) {
-                    charCode = charCode + Keys.KEYCODE.FAKE;
+                    charCode += Keys.KEYCODE.FAKE;
                 }
             }
             else if (charCode == 0x1C) {
@@ -1253,7 +1262,7 @@ class Keyboard extends Component {
         var wCode = Keyboard.SIMCODES[simCode] || Keyboard.SIMCODES[simCode += Keys.KEYCODE.ONDOWN];
 
         if (!wCode) {
-            if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+            if (!COMPILED && this.messageEnabled(Messages.KEY)) {
                 this.printMessage("addActiveKey(" + simCode + "," + (fPress? "press" : "down") + "): unrecognized", true);
             }
             return;
@@ -1291,21 +1300,21 @@ class Keyboard extends Component {
             }
         }
 
-        if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Messages.KEY)) {
             this.printMessage("addActiveKey(" + simCode + "," + (fPress? "press" : "down") + "): " + (i < 0? "already active" : (i == this.aKeysActive.length? "adding" : "updating")), true);
         }
 
         if (i < 0) return;
 
         if (i == this.aKeysActive.length) {
-            key = {};
-            key.simCode = simCode;
-            key.bitsState = this.bitsState;
+            key = {simCode};                            // create a new Key object
+            // key.bitsState = this.bitsState;          // not needed unless we revive checkActiveKeyShift()
             this.findBinding(simCode, "key", true);
             i++;
         }
+        
         if (i > 0) {
-            this.aKeysActive.splice(0, 0, key);
+            this.aKeysActive.splice(0, 0, key);         // aka aKeysActive.unshift(key)
         }
 
         key.fDown = true;
@@ -1380,7 +1389,7 @@ class Keyboard extends Component {
     removeActiveKey(simCode, fFlush)
     {
         if (!Keyboard.SIMCODES[simCode]) {
-            if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+            if (!COMPILED && this.messageEnabled(Messages.KEY)) {
                 this.printMessage("removeActiveKey(" + simCode + "): unrecognized", true);
             }
             return false;
@@ -1403,11 +1412,11 @@ class Keyboard extends Component {
                 break;
             }
         }
-        if (!COMPILED && !fFlush && this.messageEnabled(Messages.KEYS)) {
+        if (!COMPILED && !fFlush && this.messageEnabled(Messages.KEY)) {
             this.printMessage("removeActiveKey(" + simCode + "): " + (fRemoved? "removed" : "not active"), true);
         }
         if (!this.aKeysActive.length && this.fToggleCapsLock) {
-            if (!COMPILED) this.printMessage("removeActiveKey(): inverting caps-lock now", Messages.KEYS);
+            if (!COMPILED) this.printMessage("removeActiveKey(): inverting caps-lock now", Messages.KEY);
             this.updateShiftState(Keyboard.SIMCODE.CAPS_LOCK);
             this.fToggleCapsLock = false;
         }
@@ -1416,6 +1425,8 @@ class Keyboard extends Component {
 
     /**
      * updateActiveKey(key, msTimer)
+     *
+     * When called by addActiveKey(), msTimer is undefined; that's used only when we're called by our own timeout handler.
      *
      * @param {Object} key
      * @param {number} [msTimer]
@@ -1430,13 +1441,23 @@ class Keyboard extends Component {
             return;
         }
 
-        if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Messages.KEY)) {
             this.printMessage((msTimer? '\n' : "") + "updateActiveKey(" + key.simCode + (msTimer? "," + msTimer + "ms" : "") + "): " + (key.fDown? "down" : "up"), true);
         }
 
-        if (!this.keySimulate(key.simCode, key.fDown)) return;
-
-        if (!key.nRepeat) return;
+        if (msTimer && key.nRepeat < 0) {
+            key.fDown = false;
+        }
+        
+        if (!this.keySimulate(key.simCode, key.fDown) || !key.nRepeat) {
+            /*
+             * Why isn't there a simple return here? In order to set breakpoints on two different return conditions, of course!
+             */
+            if (!msTimer) {
+                return;
+            }
+            return;
+        }
 
         var ms;
         if (key.nRepeat < 0) {
@@ -1444,12 +1465,16 @@ class Keyboard extends Component {
                 this.removeActiveKey(key.simCode);
                 return;
             }
-            key.fDown = false;
             ms = this.msAutoRelease;
         }
         else {
             ms = (key.nRepeat++ == 1? this.msAutoRepeat : this.msNextRepeat);
         }
+        
+        if (key.timer) {
+            clearTimeout(key.timer);
+        }
+        
         key.timer = setTimeout(function(kbd) {
             return function onUpdateActiveKey() {
                 kbd.updateActiveKey(key, ms);
@@ -1501,25 +1526,28 @@ class Keyboard extends Component {
      */
     onFocusChange(fFocus)
     {
-        if (this.fHasFocus != fFocus && !COMPILED && this.messageEnabled(Messages.KEYS)) {
+        if (!COMPILED && this.fHasFocus != fFocus && this.messageEnabled(Messages.EVENT)) {
             this.printMessage("onFocusChange(" + (fFocus? "true" : "false") + ")", true);
         }
         this.fHasFocus = fFocus;
         /*
          * Since we can't be sure of any shift states after losing focus, we clear them all.
          */
-        if (!fFocus) this.bitsState &= ~Keyboard.STATE.ALL_SHIFT;
+        if (!fFocus) {
+            this.bitsState &= ~Keyboard.STATE.ALL_SHIFT;
+            this.clearActiveKeys();
+        }
     }
 
     /**
-     * onKeyDown(event, fDown)
+     * onKeyChange(event, fDown)
      *
      * @this {Keyboard}
      * @param {Object} event
      * @param {boolean} fDown is true for a keyDown event, false for a keyUp event
      * @return {boolean} true to pass the event along, false to consume it
      */
-    onKeyDown(event, fDown)
+    onKeyChange(event, fDown)
     {
         var fPass = true;
         var fPress = false;
@@ -1630,19 +1658,21 @@ class Keyboard extends Component {
             /*
              * Don't simulate any key not explicitly marked ONDOWN, as well as any key sequence with the CMD key held.
              */
-            if (!this.fAllDown && fPass && fDown || !!(this.bitsState & Keyboard.STATE.CMDS)) fIgnore = true;
+            if (!this.fAllDown && fPass && fDown || (this.bitsState & Keyboard.STATE.CMDS)) {
+                fIgnore = true;
+            }
         }
 
         if (!fPass) {
             event.preventDefault();
         }
 
-        if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Messages.KEY)) {
             this.printMessage("\nonKey" + (fDown? "Down" : "Up") + "(" + keyCode + "): " + (fIgnore? "ignore" : (fPass? "true" : "false")), true);
         }
 
         /*
-         * Mobile (eg, iOS) keyboards don't fully support onKeyDown/onKeyUp events; for example, they usually
+         * Mobile (eg, iOS) keyboards don't fully support onkeydown/onkeyup events; for example, they usually
          * don't generate ANY events when a shift key is pressed, and even for normal keys, they seem to generate
          * rapid (ie, fake) "up" and "down" events around "press" events, probably more to satisfy compatibility
          * issues rather than making a serious effort to indicate when a key ACTUALLY went down or up.
@@ -1682,7 +1712,7 @@ class Keyboard extends Component {
         if (this.fAllDown) {
             var simCode = this.checkActiveKey();
             if (simCode && this.isAlphaKey(simCode) && this.isAlphaKey(keyCode) && simCode != keyCode) {
-                if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+                if (!COMPILED && this.messageEnabled(Messages.KEY)) {
                     this.printMessage("onKeyPress(" + keyCode + ") out of sync with " + simCode + ", invert caps-lock", true);
                 }
                 this.fToggleCapsLock = true;
@@ -1692,7 +1722,7 @@ class Keyboard extends Component {
 
         var fPass = !Keyboard.SIMCODES[keyCode] || !!(this.bitsState & Keyboard.STATE.CMD);
 
-        if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Messages.KEY)) {
             this.printMessage("\nonKeyPress(" + keyCode + "): " + (fPass? "true" : "false"), true);
         }
 
@@ -1795,7 +1825,7 @@ class Keyboard extends Component {
             fSimulated = true;
         }
 
-        if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Messages.KEY)) {
             this.printMessage("keySimulate(" + simCode + "," + (fDown? "down" : "up") + "): " + (fSimulated? "true" : "false"), true);
         }
 

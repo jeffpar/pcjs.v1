@@ -2152,14 +2152,10 @@ class DebuggerX86 extends Debugger {
     messageInit(sEnable)
     {
         this.dbg = this;
-        this.bitsMessage = this.bitsWarning = Messages.WARN;
+        this.bitsMessage = Messages.WARN;
         this.sMessagePrev = null;
-        this.aMessageLog = [];
-        /*
-         * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
-         * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
-         */
-        var aEnable = this.parseCommand(sEnable.replace("keys","key").replace("kbd","keyboard"), false, '|');
+        this.aMessageBuffer = [];
+        var aEnable = this.parseCommand(sEnable, false, '|');
         if (aEnable.length) {
             for (var m in Messages.CATEGORIES) {
                 if (Usr.indexOf(aEnable, m) >= 0) {
@@ -2503,15 +2499,15 @@ class DebuggerX86 extends Debugger {
             sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getIP(), this.cpu.getCS())) + " (%" + Str.toHex(this.cpu.regLIP) + ")";
         }
 
-        if (this.bitsMessage & Messages.LOG) {
-            this.aMessageLog.push(sMessage);
+        if ((this.bitsMessage & Messages.BUFFER) == Messages.BUFFER) {
+            this.aMessageBuffer.push(sMessage);
             return;
         }
 
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
         this.sMessagePrev = sMessage;
 
-        if (this.bitsMessage & Messages.HALT) {
+        if ((this.bitsMessage & Messages.HALT) == Messages.HALT) {
             this.stopCPU();
             sMessage += " (cpu halted)";
         }
@@ -2628,6 +2624,7 @@ class DebuggerX86 extends Debugger {
     messageIO(component, port, bOut, addrFrom, name, bIn, bitsMessage)
     {
         bitsMessage |= Messages.PORT;
+        if (!name) bitsMessage |= Messages.WARN;        // we don't want to see "unknown" I/O messages unless WARN is enabled
         if (addrFrom == null || (this.bitsMessage & bitsMessage) == bitsMessage) {
             var selFrom = null;
             if (addrFrom != null) {
@@ -2927,7 +2924,14 @@ class DebuggerX86 extends Debugger {
             this.aPrevCmds = data[i][0];
             if (typeof this.aPrevCmds == "string") this.aPrevCmds = [this.aPrevCmds];
             this.fAssemble = data[i][1];
-            this.bitsMessage |= data[i][2];     // keep our current message bits set, and simply "add" any extra bits defined by the saved state
+            var bits = data[i][2];
+            /*
+             * We supplement the message bits only the incoming bits adhere to the new format (ie, if bits exist in both the high
+             * nibble and one of the low nibbles).
+             */
+            if ((bits & 0xf0000000) && (bits & 0x0fffffff)) {
+                this.bitsMessage |= bits;       // include any saved message bits ONLY if they match our new format (ie, bits in both high and low nibbles)
+            }
             i++;
         }
         if (data[i]) {
@@ -4814,7 +4818,7 @@ class DebuggerX86 extends Debugger {
             for (m in Messages.CATEGORIES) {
                 if (this.afnDumpers[m]) {
                     if (sDumpers) sDumpers += ',';
-                    sDumpers = sDumpers + m;
+                    sDumpers += m;
                 }
             }
             sDumpers += ",state,symbols";
@@ -5405,15 +5409,15 @@ class DebuggerX86 extends Debugger {
      */
     doMessages(asArgs)
     {
-        var m;
-        var fCriteria = null;
-        var sCategory = asArgs[1];
+        let m;
+        let fCriteria = null;
+        let sCategory = asArgs[1];
         if (sCategory == '?') sCategory = undefined;
 
         if (sCategory !== undefined) {
-            var bitsMessage = 0;
+            let bitsMessage = 0;
             if (sCategory == "all") {
-                bitsMessage = (0xffffffff|0) & ~(Messages.HALT | Messages.KEYS | Messages.LOG);
+                bitsMessage = (0xffffffff|0) & ~(Messages.HALT | Messages.BUFFER);
                 sCategory = null;
             } else if (sCategory == "on") {
                 fCriteria = true;
@@ -5422,16 +5426,10 @@ class DebuggerX86 extends Debugger {
                 fCriteria = false;
                 sCategory = null;
             } else {
-                /*
-                 * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
-                 * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
-                 */
-                if (sCategory == "keys") sCategory = "key";
-                if (sCategory == "kbd") sCategory = "keyboard";
                 for (m in Messages.CATEGORIES) {
                     if (sCategory == m) {
                         bitsMessage = Messages.CATEGORIES[m];
-                        fCriteria = !!(this.bitsMessage & bitsMessage);
+                        fCriteria = ((this.bitsMessage & bitsMessage) === bitsMessage);
                         break;
                     }
                 }
@@ -5447,12 +5445,15 @@ class DebuggerX86 extends Debugger {
                 }
                 else if (asArgs[2] == "off") {
                     this.bitsMessage &= ~bitsMessage;
+                    if (!(this.bitsMessage & 0xF0000000) && bitsMessage) {
+                        this.bitsMessage = 0;   // if all the high (shared) bits were turned off, ensure all the low bits are off as well.
+                    }
                     fCriteria = false;
-                    if (bitsMessage == Messages.LOG) {
-                        for (var i = 0; i < this.aMessageLog.length; i++) {
-                            this.println(this.aMessageLog[i]);
+                    if (bitsMessage == Messages.BUFFER) {
+                        for (var i = 0; i < this.aMessageBuffer.length; i++) {
+                            this.println(this.aMessageBuffer[i]);
                         }
-                        this.aMessageLog = [];
+                        this.aMessageBuffer = [];
                     }
                 }
             }
@@ -5461,20 +5462,15 @@ class DebuggerX86 extends Debugger {
         /*
          * Display those message categories that match the current criteria (on or off)
          */
-        var n = 0;
-        var sCategories = "";
+        let n = 0;
+        let sCategories = "";
         for (m in Messages.CATEGORIES) {
             if (!sCategory || sCategory == m) {
-                var bitMessage = Messages.CATEGORIES[m];
-                var fEnabled = !!(this.bitsMessage & bitMessage);
+                let bitsMessage = Messages.CATEGORIES[m];
+                let fEnabled = ((this.bitsMessage & bitsMessage) === bitsMessage);
                 if (fCriteria !== null && fCriteria != fEnabled) continue;
                 if (sCategories) sCategories += ',';
                 if (!(++n % 10)) sCategories += "\n\t";     // jshint ignore:line
-                /*
-                 * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
-                 * but externally, we allow the user to specify "keys".
-                 */
-                if (m == "key") m = "keys";
                 sCategories += m;
             }
         }
@@ -6680,7 +6676,7 @@ if (DEBUGGER) {
         0x10:       Messages.VIDEO,
         0x13:       Messages.FDC,
         0x15:       Messages.CHIPSET,
-        0x16:       Messages.KEYBOARD,
+        0x16:       Messages.KBD,
      // 0x1A:       Messages.RTC,       // ChipSet contains its own custom messageInt() handler for the RTC
         0x1C:       Messages.TIMER,
         0x21:       Messages.DOS,

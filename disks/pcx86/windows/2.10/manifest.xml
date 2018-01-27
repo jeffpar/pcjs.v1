@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.1/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.2/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows/386 2.10</title>
 	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/WIN210-386-DISK1.img" href="/disks/pcx86/windows/2.10/WIN210-386-DISK1.json" md5="1d8c9bc574a15e6d44334e5bae471802" md5json="391e6fff2366ebacb7f804f84dd0bc98">

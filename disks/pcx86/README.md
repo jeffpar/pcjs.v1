@@ -12,6 +12,8 @@ IBM PC Disk Library
 The [IBM PC Disk Library](/disks/pcx86/library.xml) lists all of our [Disk Manifests](#disk-manifests)
 and makes those disks available to the project's [IBM PC Machines](/devices/pcx86/machine/).
 
+For non-DOS diskettes, see [Disk Libraries](/disks/).
+
 Whenever possible, PCjs archives copies of original distribution diskettes.  Exceptions include the application
 "Demo Disks" that we've created for our [IBM PC Application Demos](/apps/pcx86/).  PCjs may also makes minor changes
 to disk boot sectors, to make it easier to mount the disk images in modern operating systems.
@@ -76,7 +78,7 @@ more detail, along with a live demonstration of the software, but that's not yet
 
 ### Fixed Disks
 
-* [Assorted Fixed Disk Images](/disks/pcx86/fixed/) (eg, [10Mb](/disks/pcx86/fixed/10mb/) and [20Mb](/disks/pcx86/fixed/20mb/))
+* [Assorted Fixed Disk Images](/disks/pcx86/fixed/) (eg, [10Mb](/disks/pcx86/fixed/10mb/), [20Mb](/disks/pcx86/fixed/20mb/), [47Mb](/disks/pcx86/fixed/47mb/), [68Mb](/disks/pcx86/fixed/68mb/))
 
 ---
 

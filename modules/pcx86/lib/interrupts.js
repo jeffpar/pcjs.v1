@@ -177,6 +177,24 @@ if (DEBUGGER) {
      *
      * The last replacement is obviously DOS-specific, since FCBs are DOS constructs.
      */
+    Interrupts.FUNCS[Interrupts.VIDEO] = {
+        0x00: "set mode (@AL)",
+        0x01: "set cursor type (start=@CH,end=@CL)",
+        0x02: "set cursor pos (row=@DH,col=@DL,page=@BH)",
+        0x03: "read cursor pos (page=@BH)",
+        0x04: "read light pen",
+        0x05: "set display page (@AL)",
+        0x06: "scroll up (lines=@AL)",
+        0x07: "scroll down (lines=@AL)",
+        0x08: "read character (page=@BH)",
+        0x09: "write char/attr (@AL,attr=@BL,count=@CX)",
+        0x0A: "write char (@AL,count=@CX)",
+        0x0B: "set palette (id=@BH,color=@BL)",
+        0x0C: "write dot (row=@DX,col=@CX)",
+        0x0D: "read dot (row=@DX,col=@CX)",
+        0x0E: "write tty (@AL)"
+    };
+    
     Interrupts.FUNCS[Interrupts.DISK] = {
         0x00: "disk reset",
         0x01: "get status",
