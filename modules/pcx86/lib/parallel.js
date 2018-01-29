@@ -311,8 +311,7 @@ class ParallelPort extends Component {
     inStatus(port, addrFrom)
     {
         var b = this.bStatus;
-        this.bStatus |= ParallelPort.STATUS.NACK;
-        this.bStatus &= ~ParallelPort.STATUS.BUSY;
+        this.bStatus |= (ParallelPort.STATUS.NACK | ParallelPort.STATUS.NBUSY);
         this.printMessageIO(port, null, addrFrom, "STAT", b);
         this.updateIRR();
         return b;
@@ -348,8 +347,8 @@ class ParallelPort extends Component {
         this.bData = bOut;
         this.cpu.nonCPU(function() {
             if (parallel.transmitByte(bOut)) {
-                parallel.bStatus |= ParallelPort.STATUS.BUSY | ParallelPort.STATUS.NERR;
-                parallel.bStatus &= ~ParallelPort.STATUS.NACK;
+                parallel.bStatus |= ParallelPort.STATUS.NERR;
+                parallel.bStatus &= ~(ParallelPort.STATUS.NACK | ParallelPort.STATUS.NBUSY);
                 return true;
             }
             return false;
@@ -516,11 +515,11 @@ ParallelPort.DATA = {           // (read/write)
  */
 ParallelPort.STATUS = {         // (read)
     REG:        1,
-    NERR:       0x08,           // when this bit is cleared, I/O error
+    NERR:       0x08,           // when this bit is clear, I/O error (inverted by the ROM BIOS INT 17h Status function)
     SELECT:     0x10,           // when this bit is set, printer selected
     PAPER:      0x20,           // when this bit is set, out of paper
-    NACK:       0x40,           // when this bit is cleared, data acknowledged (and optionally, interrupt requested)
-    BUSY:       0x80            // when this bit is set, printer busy
+    NACK:       0x40,           // when this bit is clear, data acknowledged (and optionally, interrupt requested; inverted by the ROM BIOS INT 17h Status function)
+    NBUSY:      0x80            // when this bit is clear, printer busy
 };
 
 /*
