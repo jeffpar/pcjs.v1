@@ -1,7 +1,7 @@
 ---
 layout: post
 title: New Old Software
-date: 2018-01027 10:00:00
+date: 2018-01-27 10:00:00
 permalink: /blog/2018/01/27/
 ---
 
