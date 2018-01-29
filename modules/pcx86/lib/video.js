@@ -4060,7 +4060,7 @@ class Video extends Component {
         if (bCursorStart > bCursorMax) {
             bCursorStart = bCursorMax;
         }
-        if (bCursorEnd > bCursorMax) {
+        if (!bCursorEnd || bCursorEnd > bCursorMax) {
             bCursorEnd = bCursorMax;
             /*
              * HACK: "Thicken" the cursor to two scan lines as part of the "rounding down" process.

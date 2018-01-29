@@ -7,7 +7,7 @@ permalink: /disks/pcx86/tools/other/
 Other PC Tools
 --------------
 
-Information is available for these additional tools:
+Information is available for these additional PC tools.
 
 * [DoubleDOS](doubledos/)
 * [Enhanced DEBUG](enhdebug/)
