@@ -5,7 +5,7 @@ permalink: /disks/pcx86/minix/1.1/
 ---
 
 MINIX 1.1
----
+---------
 
 The MINIX 1.1 Operating System was distributed on five 1.2M disk images:
 

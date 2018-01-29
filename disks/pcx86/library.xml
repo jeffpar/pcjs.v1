@@ -83,6 +83,8 @@
 		<manifest ref="/disks/pcx86/apps/other/wordstar/3.30/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/other/wordstar/4.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/other/wordstar/pcjr/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/borland/sidekick/1.11c/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/borland/sidekick/1.56/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/borland/tpascal/3.00b/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/borland/tpascal/3.01a/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/ibm/bascom/1.00/manifest.xml"/>

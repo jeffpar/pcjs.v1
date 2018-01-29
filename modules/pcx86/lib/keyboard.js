@@ -75,8 +75,16 @@ class Keyboard extends Component {
         this.setModel(parmsKbd['model']);
 
         this.fMobile = Web.isMobile();
-        this.fMSIE = Web.isUserAgent("MSIE");
         this.printMessage("mobile keyboard support: " + (this.fMobile? "true" : "false"));
+        
+        /*
+         * This flag (formerly fMSIE, for all versions of Microsoft Internet Explorer, up to and including v11)
+         * has been expanded to include the Microsoft Edge browser, because while Microsoft did eliminate lots of
+         * incompatibilities with other browsers in Edge, the one that this component actually cares about (ie,
+         * whether the "lock" keys generate UP and DOWN events on every press, like IE historically did, or only
+         * DOWN on "lock" and UP on "unlock", like other browsers do) has been preserved by Edge. 
+         */
+        this.fMSIEorEdge = Web.isUserAgent("MSIE") || Web.isUserAgent("Edge");
 
         /*
          * This is count of the number of "soft keyboard" keys present.  At the moment, its only
@@ -1219,7 +1227,7 @@ class Keyboard extends Component {
                 else if (!fDown) {
                     /*
                      * In current webkit browsers, pressing and then releasing both left and right shift keys together
-                     * (or both alt keys, or both cmd/windows keys, or presumably both ctrl keys) results in 4 events, as
+                     * (or both ALT keys, or both CMD/Windows keys, or presumably both CTRL keys) results in 4 events, as
                      * you would expect, but 3 of the 4 are "down" events; only the last of the 4 is an "up" event.
                      *
                      * Perhaps this is a browser accessibility feature (ie, deliberately suppressing the "up" event
@@ -1255,6 +1263,7 @@ class Keyboard extends Component {
      * @this {Keyboard}
      * @param {number} simCode
      * @param {boolean} [fPress]
+     * @return {boolean} true if added, false if not (eg, not recognized, already added, etc)
      */
     addActiveKey(simCode, fPress)
     {
@@ -1264,13 +1273,13 @@ class Keyboard extends Component {
             if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.KEY)) {
                 this.printMessage("addActiveKey(" + simCode + "," + (fPress? "press" : "down") + "): unrecognized", true);
             }
-            return;
+            return false;
         }
 
         /*
          * Ignore all active keys if the CPU is not running.
          */
-        if (!this.cpu || !this.cpu.isRunning()) return;
+        if (!this.cpu || !this.cpu.isRunning()) return false;
 
         /*
          * If this simCode is in the KEYSTATE table, then stop all repeating.
@@ -1303,7 +1312,7 @@ class Keyboard extends Component {
             this.printMessage("addActiveKey(" + simCode + "," + (fPress? "press" : "down") + "): " + (i < 0? "already active" : (i == this.aKeysActive.length? "adding" : "updating")), true);
         }
 
-        if (i < 0) return;
+        if (i < 0) return false;
 
         if (i == this.aKeysActive.length) {
             key = {simCode};                            // create a new Key object
@@ -1320,6 +1329,7 @@ class Keyboard extends Component {
         key.nRepeat = (fPress? -1: (Keyboard.KEYSTATES[simCode]? 0 : 1));
 
         this.updateActiveKey(key);
+        return true;
     }
 
     /**
@@ -1585,16 +1595,16 @@ class Keyboard extends Component {
 
                 if (keyCode == Keys.KEYCODE.CAPS_LOCK || keyCode == Keys.KEYCODE.NUM_LOCK || keyCode == Keys.KEYCODE.SCROLL_LOCK) {
                     /*
-                     * FYI, "lock" keys generate a "down" event ONLY when getting locked and an "up" event ONLY
+                     * FYI, "lock" keys generate a DOWN event ONLY when getting locked and an UP event ONLY
                      * when getting unlocked--which is a little odd, since the key did go UP and DOWN each time.
                      *
                      * We must treat each event like a "down", and also as a "press", so that addActiveKey() will
                      * automatically generate both the "make" and "break".
                      *
-                     * Of course, there have to be exceptions, most notably MSIE, which sends both "up" and down"
-                     * on every press, so there's no need for trickery.
+                     * Of course, there have to be exceptions, most notably both Microsoft Internet Explorer and Edge,
+                     * which send both UP and DOWN events on every press, so there's no need for trickery.
                      */
-                    if (!this.fMSIE) {
+                    if (!this.fMSIEorEdge) {
                         fDown = fPress = true;
                     }
                 }
@@ -1606,15 +1616,19 @@ class Keyboard extends Component {
                  * for the ALT key, but not an UP event, leaving our machine with the impression that the ALT key
                  * is still down, which the user user has no easy way to detect OR correct.
                  * 
-                 * We still record the ALT state in bitsState as best we can, and clear it whenever we lose focus
+                 * So we still record the ALT state in bitsState as best we can, and clear it whenever we lose focus
                  * in onFocusChange(), but we no longer pass through DOWN events to our machine.  Instead, we now
                  * check bitsState prior to simulating any other key, and if the ALT bit is set, we simulate an
                  * active ALT key first; you'll find that check at the end of both onKeyChange() and onKeyPress().
                  * 
+                 * However, one exception to this hack is the "Sidekick" exception: if the CTRL key is also down,
+                 * we'll still simulate ALT immediately, for those users who press CTRL and then ALT to pop up Sidekick
+                 * (as opposed to pressing ALT and then CTRL, which should also work, regardless).
+                 * 
                  * NOTE: Even though this is a hack specifically for Windows, I'm doing it across the board, for all
                  * platforms and browsers, for consistency.
                  */
-                if (keyCode == Keys.KEYCODE.ALT) {
+                if (keyCode == Keys.KEYCODE.ALT && !(this.bitsState & Keyboard.STATE.CTRL)) {
                     fIgnore = fDown;    // if an ALT key went down, then set fIgnore as well
                 }
                 
@@ -1640,14 +1654,14 @@ class Keyboard extends Component {
                  * leaving the current page.
                  *
                  * Regarding TAB: If I don't consume TAB on the "down" event, then that's all I'll see, because the browser
-                 * act on it by giving focus to the next control.
+                 * acts on it by giving focus to the next control.
                  *
                  * Regarding ESC: This key generates "down" and "up" events (LOTS of "down" events for that matter), but no
                  * "press" event.
                  */
 
                 /*
-                 * HACK for simulating CTRL_BREAK using CTRL_DEL (Mac) or CTRL_BS (Windows)
+                 * HACK for simulating CTRL-BREAK using CTRL-DEL (Mac) or CTRL-BS (Windows)
                  */
                 if (keyCode == Keys.KEYCODE.BS && (this.bitsState & (Keyboard.STATE.CTRL|Keyboard.STATE.ALT)) == Keyboard.STATE.CTRL) {
                     simCode = Keyboard.SIMCODE.CTRL_BREAK;
@@ -1864,7 +1878,7 @@ class Keyboard extends Component {
             fSimulated = true;
         }
 
-        if (!COMPILED && this.messageEnabled(Messages.KEY)) {
+        if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.KEY)) {
             this.printMessage("keySimulate(" + simCode + "," + (fDown? "down" : "up") + "): " + (fSimulated? "true" : "false"), true);
         }
 

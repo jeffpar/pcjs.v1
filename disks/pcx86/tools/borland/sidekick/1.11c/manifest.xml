@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.3/manifest.xsl"?>
+<manifest type="software">
+	<title>Sidekick</title>
+	<version>1.11C</version>
+	<type>Utility</type>
+	<category>TSR</category>
+	<company>Borland</company>
+	<releaseDate>1984</releaseDate>
+	<serialNumber>258608</serialNumber>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/SIDEKICK-111C.img" href="/disks/pcx86/tools/borland/sidekick/1.11c/SIDEKICK-111C.json" md5="c84070e57f48a60052688140f2092813" md5json="52e60644d7cd824a69003ee38b4d5f02">
+		<link href="https://winworldpc.com/product/sidekick/1x" name="Borland Sidekick 1.11c (5.25)" file="disk1.img">WinWorld</link>
+		<file size="589" time="1985-01-04 10:43:00" attr="0x20">CHIP.APP</file>
+		<file size="980" time="1984-10-17 11:25:36" attr="0x20">DIAL.DOC</file>
+		<file size="1156" time="1984-09-02 04:59:24" attr="0x20">PHONE.DIR</file>
+		<file size="2275" time="1984-10-30 14:48:22" attr="0x20">READ.ME!</file>
+		<file size="36318" time="1985-01-26 00:19:06" attr="0x20">SK.COM</file>
+		<file size="43520" time="1984-10-09 16:21:08" attr="0x20">SK.HLP</file>
+		<file size="26286" time="1985-01-26 00:19:08" attr="0x20">SKC.COM</file>
+		<file size="44971" time="1984-07-23 16:53:06" attr="0x20">SKINST.COM</file>
+		<file size="3456" time="1984-07-12 14:03:34" attr="0x20">SKINST.MSG</file>
+		<file size="16401" time="1985-01-26 00:19:08" attr="0x20">SKM.COM</file>
+		<file size="30968" time="1985-01-26 00:19:08" attr="0x20">SKN.COM</file>
+	</disk>
+</manifest>
