@@ -45044,12 +45044,12 @@ class Keyboard extends Component {
         
         /*
          * This flag (formerly fMSIE, for all versions of Microsoft Internet Explorer, up to and including v11)
-         * has been expanded to include the Microsoft Edge browser, because while Microsoft did eliminate lots of
-         * incompatibilities with other browsers in Edge, the one that this component actually cares about (ie,
-         * whether the "lock" keys generate UP and DOWN events on every press, like IE historically did, or only
-         * DOWN on "lock" and UP on "unlock", like other browsers do) has been preserved by Edge. 
+         * has been updated to reflect the Microsoft Windows *platform* rather than the *browser*, because it appears
+         * that all Windows-based browsers (at least now, as of 2018) have the same behavior with respect to "lock"
+         * keys: keys like CAPS-LOCK generate both UP and DOWN events on every press.  On other platforms (eg, macOS),
+         * those keys generate only a DOWN event when "locking" and only an UP event when "unlocking".
          */
-        this.fMSIEorEdge = Web.isUserAgent("MSIE") || Web.isUserAgent("Edge");
+        this.fMSWindows = Web.isUserAgent("Windows");
 
         /*
          * This is count of the number of "soft keyboard" keys present.  At the moment, its only
@@ -46171,10 +46171,11 @@ class Keyboard extends Component {
      * @param {number} simCode (includes any ONDOWN and/or ONRIGHT modifiers)
      * @param {boolean} [fSim] is true to update simulated state only
      * @param {boolean|null} [fDown] is true for down, false for up, undefined for toggle
-     * @return {boolean} true if simCode was a shift key, false if not
+     * @return {number} 0 if not a shift key, 1 if shift key down, -1 if shift key up
      */
     updateShiftState(simCode, fSim, fDown)
     {
+        var result = 0;
         if (Keyboard.SIMCODES[simCode]) {
             var fRight = (Math.floor(simCode / 1000) & 2);
             var bitState = Keyboard.KEYSTATES[simCode] || 0;
@@ -46183,7 +46184,7 @@ class Keyboard extends Component {
                     bitState >>= 1;
                 }
                 if (bitState & Keyboard.STATE.ALL_LOCKS) {
-                    if (fDown === false) return true;
+                    if (fDown === false) return -1;
                     fDown = null;
                 }
                 if (fDown == null) {        // ie, null or undefined
@@ -46216,10 +46217,10 @@ class Keyboard extends Component {
                     if (fDown) this.bitsStateSim |= bitState;
                     this.updateLEDs(bitState);
                 }
-                return true;
+                result = fDown? 1 : -1;
             }
         }
-        return false;
+        return result;
     }
 
     /**
@@ -46556,7 +46557,8 @@ class Keyboard extends Component {
                 simCode += Keys.KEYCODE.ONRIGHT;
             }
 
-            if (this.updateShiftState(simCode, false, fDown)) {
+            var nShiftState = this.updateShiftState(simCode, false, fDown);
+            if (nShiftState) {
 
                 if (keyCode == Keys.KEYCODE.CAPS_LOCK || keyCode == Keys.KEYCODE.NUM_LOCK || keyCode == Keys.KEYCODE.SCROLL_LOCK) {
                     /*
@@ -46566,10 +46568,11 @@ class Keyboard extends Component {
                      * We must treat each event like a "down", and also as a "press", so that addActiveKey() will
                      * automatically generate both the "make" and "break".
                      *
-                     * Of course, there have to be exceptions, most notably both Microsoft Internet Explorer and Edge,
-                     * which send both UP and DOWN events on every press, so there's no need for trickery.
+                     * Of course, there have to be exceptions, most notably both Microsoft Internet Explorer and Edge
+                     * (and, apparently, pretty much any other browser running on the Windows platform), which send both
+                     * UP and DOWN events on every press, so there's no need for this trickery.
                      */
-                    if (!this.fMSIEorEdge) {
+                    if (!this.fMSWindows) {
                         fDown = fPress = true;
                     }
                 }
