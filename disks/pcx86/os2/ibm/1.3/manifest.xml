@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.2/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.3/manifest.xsl"?>
 <manifest type="software">
 	<title>IBM OS/2 1.3</title>
 	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/OS213-DISK01.img" href="/disks/pcx86/os2/ibm/1.3/OS213-DISK01.json" md5="59ee406bf765860a3c2f04df63ea64fa" md5json="87f9daadc5970fb2cae82e714a5e00eb">

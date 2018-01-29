@@ -39,7 +39,6 @@ if (NODE) {
     var Interrupts  = require("./interrupts");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
-    var CPU         = require("./cpu");
 }
 
 /**
@@ -286,7 +285,7 @@ class Keyboard extends Component {
                         };
                     }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
                     var fnUp = function(kbd, sKey, simCode) {
-                        return function onKeyboardBindingUp(event) {
+                        return function onKeyboardBindingUp(/*event*/) {
                             kbd.removeActiveKey(simCode);
                         };
                     }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
@@ -1602,7 +1601,7 @@ class Keyboard extends Component {
                 
                 /*
                  * HACK for Windows: the ALT key is often used with key combinations not meant for our machine
-                 * (eg, Alt-Tab to switch to a different window, or simply tapping the Alt key by itself to switch
+                 * (eg, Alt-Tab to switch to a different window, or simply tapping the ALT key by itself to switch
                  * focus to the browser's menubar).  And sadly, browsers are quite happy to give us the DOWN event
                  * for the ALT key, but not an UP event, leaving our machine with the impression that the ALT key
                  * is still down, which the user user has no easy way to detect OR correct.
@@ -1615,7 +1614,7 @@ class Keyboard extends Component {
                  * NOTE: Even though this is a hack specifically for Windows, I'm doing it across the board, for all
                  * platforms and browsers, for consistency.
                  */
-                if (keyCode == Keys.KEYCODE.ALT || keyCode == Keys.KEYCODE.RALT) {
+                if (keyCode == Keys.KEYCODE.ALT) {
                     fIgnore = fDown;    // if an ALT key went down, then set fIgnore as well
                 }
                 
@@ -1916,6 +1915,7 @@ Keyboard.SIMCODE = {
     RSHIFT:       Keys.KEYCODE.SHIFT       + Keys.KEYCODE.ONDOWN + Keys.KEYCODE.ONRIGHT,
     CTRL:         Keys.KEYCODE.CTRL        + Keys.KEYCODE.ONDOWN,
     ALT:          Keys.KEYCODE.ALT         + Keys.KEYCODE.ONDOWN,
+    RALT:         Keys.KEYCODE.ALT         + Keys.KEYCODE.ONDOWN + Keys.KEYCODE.ONRIGHT,
     CAPS_LOCK:    Keys.KEYCODE.CAPS_LOCK   + Keys.KEYCODE.ONDOWN,
     ESC:          Keys.KEYCODE.ESC         + Keys.KEYCODE.ONDOWN,
     /*
@@ -2144,6 +2144,7 @@ Keyboard.KEYSTATES[Keyboard.SIMCODE.RSHIFT]      = Keyboard.STATE.RSHIFT;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.SHIFT]       = Keyboard.STATE.SHIFT;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.CTRL]        = Keyboard.STATE.CTRL;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.ALT]         = Keyboard.STATE.ALT;
+Keyboard.KEYSTATES[Keyboard.SIMCODE.RALT]        = Keyboard.STATE.ALT;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.CMD]         = Keyboard.STATE.CMD;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.RCMD]        = Keyboard.STATE.RCMD;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.FF_CMD]      = Keyboard.STATE.CMD;
@@ -2474,6 +2475,7 @@ Keyboard.SIMCODES[Keys.ASCII['?']]              = Keyboard.SCANCODE.SLASH  | (Ke
 Keyboard.SIMCODES[Keyboard.SIMCODE.RSHIFT]      = Keyboard.SCANCODE.RSHIFT;
 Keyboard.SIMCODES[Keyboard.SIMCODE.PRTSC]       = Keyboard.SCANCODE.PRTSC;
 Keyboard.SIMCODES[Keyboard.SIMCODE.ALT]         = Keyboard.SCANCODE.ALT;
+Keyboard.SIMCODES[Keyboard.SIMCODE.RALT]        = Keyboard.SCANCODE.ALT;
 Keyboard.SIMCODES[Keyboard.SIMCODE.SPACE]       = Keyboard.SCANCODE.SPACE;
 Keyboard.SIMCODES[Keyboard.SIMCODE.CAPS_LOCK]   = Keyboard.SCANCODE.CAPS_LOCK;
 Keyboard.SIMCODES[Keyboard.SIMCODE.F1]          = Keyboard.SCANCODE.F1;

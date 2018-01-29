@@ -7,4 +7,7 @@ machines:
     type: pcx86
 ---
 
+COMPAQ DeskPro 386 (2Mb) with IBM VGA and 47Mb Hard Disk (Unformatted)
+----------------------------------------------------------------------
+
 {% include machine.html id="deskpro386" %}

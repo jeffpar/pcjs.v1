@@ -9,8 +9,8 @@ permalink: /disks/pcx86/fixed/20mb/
 
 This folder contains the following 20Mb (PC AT Type 2) fixed disk configurations:
 
-* [Unformatted Disk](unformatted-at2.xml)
-* [PC-DOS 3.30 Formatted Disk (Empty)](pcdos330-empty-at2.xml)
+* [Unformatted 20Mb Disk](unformatted-at2.xml)
+* [PC-DOS 3.30 Formatted 20Mb Disk (Empty)](pcdos330-empty-at2.xml)
 
 along with the following pre-built 20Mb disk images:
 

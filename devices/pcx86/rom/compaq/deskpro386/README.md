@@ -28,8 +28,8 @@ to record "Built-in Memory" allocations.
 Sure enough, attempting to use the [first 32Kb](1986-09-04/1986-09-04-LO.json) as a DeskPro 386 ROM generated a
 "ROM Error", no doubt due to a checksum mismatch.  However, the [second 32Kb](1986-09-04/1986-09-04-HI.json) appeared
 to work fine.  I can't guarantee that its contents are identical to the original `Rev F` ROM, because the ROM may
-have been self-modifying, but it works, and it's all we've got.  One of our COMPAQ machine configurations
-([COMPAQ DeskPro 386 (2Mb) with COMPAQ EGA](/devices/pcx86/machine/compaq/deskpro386/ega/2048kb/)) has now been
+have been self-modifying, but it works, and it's all we've got.  All our EGA-based COMPAQ machine configurations
+(eg, [COMPAQ DeskPro 386 (2Mb) with IBM EGA (128Kb)](/devices/pcx86/machine/compaq/deskpro386/ega/2048kb/)) have been
 updated to use that ROM.
 
 This collection of COMPAQ DeskPro 386 ROMs still has several holes, but I'm very happy to have finally found one of the

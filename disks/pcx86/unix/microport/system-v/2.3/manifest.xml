@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.2/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.3/manifest.xsl"?>
 <manifest type="software">
 	<title>Microport's AT&amp;T UNIX System V-AT 2.3 (5¨)</title>
 	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/SYSTEMV23-DISK01.img" href="/disks/pcx86/unix/microport/system-v/2.3/SYSTEMV23-DISK01.json" md5="08b5f4199ca06be2595ee9cf46f94857" md5json="87e19cb658085bd6d6173526ec0d3261">
