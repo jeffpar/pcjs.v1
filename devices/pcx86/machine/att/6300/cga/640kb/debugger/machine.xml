@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.2/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.3/machine.xsl"?>
 <machine id="att6300" type="pcx86" border="1" pos="center" background="default">
 	<name pos="center">AT&amp;T Personal Computer 6300 with Color Display</name>
 	<computer id="att6300-640k" name="AT&amp;T 6300"/>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.2/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.3/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 3.10</title>
 	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/WIN310-DISK1.img" href="/disks/pcx86/windows/3.10/WIN310-DISK1.json" md5="6529a2396f50b0263fb3ef439b55d23f" md5json="37157ff3aaa47079b77f3ddfd9517d55">

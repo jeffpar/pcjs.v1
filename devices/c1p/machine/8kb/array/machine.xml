@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/c1pjs/1.50.2/outline.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/c1pjs/1.50.3/outline.xsl"?>
 <outline>
 	<title>Challenger 1P (8Kb) "Server Array"</title>
 	<machine id="OSI1" ref="/devices/c1p/machine/8kb/small/machine.xml"/>

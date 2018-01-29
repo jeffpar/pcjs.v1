@@ -9,7 +9,7 @@ permalink: /disks/pcx86/fixed/47mb/
 
 This folder contains the following 47Mb (PC AT Type 5) fixed disk configurations:
  
-* [Unformatted Disk](unformatted-at5.xml)
+* [Unformatted 47Mb Disk](unformatted-at5.xml)
 
 Note that in order to use an unformatted fixed disk with DOS, it must first be partitioned using `FDISK`
 and then formatted using `FORMAT`.  Moreover, you should use DOS 3.30 or newer if you want to make full use
