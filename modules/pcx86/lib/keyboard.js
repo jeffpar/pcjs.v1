@@ -1964,11 +1964,21 @@ Keyboard.SIMCODE = {
     HOME:         Keys.KEYCODE.HOME        + Keys.KEYCODE.ONDOWN,
     UP:           Keys.KEYCODE.UP          + Keys.KEYCODE.ONDOWN,
     PGUP:         Keys.KEYCODE.PGUP        + Keys.KEYCODE.ONDOWN,
-    NUM_SUB:      Keys.KEYCODE.NUM_SUB     + Keys.KEYCODE.ONDOWN,
     LEFT:         Keys.KEYCODE.LEFT        + Keys.KEYCODE.ONDOWN,
+    NUM_INS:      Keys.KEYCODE.NUM_INS     + Keys.KEYCODE.ONDOWN,
+    NUM_END:      Keys.KEYCODE.NUM_END     + Keys.KEYCODE.ONDOWN,
+    NUM_DOWN:     Keys.KEYCODE.NUM_DOWN    + Keys.KEYCODE.ONDOWN,
+    NUM_PGDN:     Keys.KEYCODE.NUM_PGDN    + Keys.KEYCODE.ONDOWN,
+    NUM_LEFT:     Keys.KEYCODE.NUM_LEFT    + Keys.KEYCODE.ONDOWN,
     NUM_CENTER:   Keys.KEYCODE.NUM_CENTER  + Keys.KEYCODE.ONDOWN,
-    RIGHT:        Keys.KEYCODE.RIGHT       + Keys.KEYCODE.ONDOWN,
+    NUM_RIGHT:    Keys.KEYCODE.NUM_RIGHT   + Keys.KEYCODE.ONDOWN,
+    NUM_HOME:     Keys.KEYCODE.NUM_HOME    + Keys.KEYCODE.ONDOWN,
+    NUM_UP:       Keys.KEYCODE.NUM_UP      + Keys.KEYCODE.ONDOWN,
+    NUM_PGUP:     Keys.KEYCODE.NUM_PGUP    + Keys.KEYCODE.ONDOWN,
     NUM_ADD:      Keys.KEYCODE.NUM_ADD     + Keys.KEYCODE.ONDOWN,
+    NUM_SUB:      Keys.KEYCODE.NUM_SUB     + Keys.KEYCODE.ONDOWN,
+    NUM_DEL:      Keys.KEYCODE.NUM_DEL     + Keys.KEYCODE.ONDOWN,
+    RIGHT:        Keys.KEYCODE.RIGHT       + Keys.KEYCODE.ONDOWN,
     END:          Keys.KEYCODE.END         + Keys.KEYCODE.ONDOWN,
     DOWN:         Keys.KEYCODE.DOWN        + Keys.KEYCODE.ONDOWN,
     PGDN:         Keys.KEYCODE.PGDN        + Keys.KEYCODE.ONDOWN,
@@ -2508,18 +2518,28 @@ Keyboard.SIMCODES[Keyboard.SIMCODE.F10]         = Keyboard.SCANCODE.F10;
 Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_LOCK]    = Keyboard.SCANCODE.NUM_LOCK;
 Keyboard.SIMCODES[Keyboard.SIMCODE.SCROLL_LOCK] = Keyboard.SCANCODE.SCROLL_LOCK;
 Keyboard.SIMCODES[Keyboard.SIMCODE.HOME]        = Keyboard.SCANCODE.NUM_HOME;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_HOME]    = Keyboard.SCANCODE.NUM_HOME;
 Keyboard.SIMCODES[Keyboard.SIMCODE.UP]          = Keyboard.SCANCODE.NUM_UP;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_UP]      = Keyboard.SCANCODE.NUM_UP;
 Keyboard.SIMCODES[Keyboard.SIMCODE.PGUP]        = Keyboard.SCANCODE.NUM_PGUP;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_SUB]     = Keyboard.SCANCODE.NUM_SUB;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_PGUP]    = Keyboard.SCANCODE.NUM_PGUP;
 Keyboard.SIMCODES[Keyboard.SIMCODE.LEFT]        = Keyboard.SCANCODE.NUM_LEFT;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_LEFT]    = Keyboard.SCANCODE.NUM_LEFT;
 Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_CENTER]  = Keyboard.SCANCODE.NUM_CENTER;
 Keyboard.SIMCODES[Keyboard.SIMCODE.RIGHT]       = Keyboard.SCANCODE.NUM_RIGHT;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_ADD]     = Keyboard.SCANCODE.NUM_ADD;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_RIGHT]   = Keyboard.SCANCODE.NUM_RIGHT;
 Keyboard.SIMCODES[Keyboard.SIMCODE.END]         = Keyboard.SCANCODE.NUM_END;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_END]     = Keyboard.SCANCODE.NUM_END;
 Keyboard.SIMCODES[Keyboard.SIMCODE.DOWN]        = Keyboard.SCANCODE.NUM_DOWN;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_DOWN]    = Keyboard.SCANCODE.NUM_DOWN;
 Keyboard.SIMCODES[Keyboard.SIMCODE.PGDN]        = Keyboard.SCANCODE.NUM_PGDN;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_PGDN]    = Keyboard.SCANCODE.NUM_PGDN;
 Keyboard.SIMCODES[Keyboard.SIMCODE.INS]         = Keyboard.SCANCODE.NUM_INS;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_INS]     = Keyboard.SCANCODE.NUM_INS;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_ADD]     = Keyboard.SCANCODE.NUM_ADD;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_SUB]     = Keyboard.SCANCODE.NUM_SUB;
 Keyboard.SIMCODES[Keyboard.SIMCODE.DEL]         = Keyboard.SCANCODE.NUM_DEL;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_DEL]     = Keyboard.SCANCODE.NUM_DEL;
 Keyboard.SIMCODES[Keyboard.SIMCODE.SYSREQ]      = Keyboard.SCANCODE.SYSREQ;
 /*
  * Entries beyond this point are for keys that existed only on 101-key keyboards (well, except for 'sysreq',
