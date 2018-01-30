@@ -23,10 +23,10 @@
 		<control type="description" binding="descDisk" padRight="8px"/>
 		<control type="file" binding="mountDisk"/>
 	</fdc>
+	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
 	<cpu id="cpu80188" model="80188" autostart="true" pos="left" padLeft="8px" padBottom="8px">
 		<control type="button" binding="run">Run</control>
 	</cpu>
 	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-minimal.xml"/>
 	<chipset id="chipset" model="5160" sw1="01000001"/>
-	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
 </machine>

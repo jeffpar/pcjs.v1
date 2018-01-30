@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.3/manifest.xsl"?>
+<manifest type="software">
+	<title>Castle Adventure</title>
+	<version></version>
+	<type>Game</type>
+	<category>Adventure</category>
+	<author>Kevin Bales</author>
+	<releaseDate>1985</releaseDate>
+	<disk id="disk01" size="163840" chs="40:1:8" dir="archive" href="/apps/pcx86/1985/castle_adventure/CASTLE-ADVENTURE-1985.json" md5="a37dd1bde14b9d2630de3e9cdb462da5" md5json="d106f30e8d170d44e89ab856d823d2ed">
+		<name>Castle Adventure (1985)</name>
+		<file size="70656" time="1985-06-01 20:48:48" attr="0x20" md5="c65dcfc98d281a76343716810e02e999">CASTLE.EXE</file>
+		<file size="48384" time="1985-06-01 20:48:50" attr="0x20" md5="91e9aa8d5652302f9794b8fb16213383">CASTLE.RAN</file>
+	</disk>
+</manifest>

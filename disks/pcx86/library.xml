@@ -138,6 +138,7 @@
 		<manifest ref="/apps/pcx86/1982/esuite/manifest.xml"/>
 		<manifest ref="/apps/pcx86/1982/ratbas/manifest.xml"/>
 		<manifest ref="/apps/pcx86/1983/adventmath/manifest.xml"/>
+		<manifest ref="/apps/pcx86/1985/castle_adventure/manifest.xml"/>
 		<manifest ref="/apps/pcx86/1985/rogue/manifest.xml"/>
 		<manifest ref="/apps/pcx86/1987/thinktank/manifest.xml"/>
 		<manifest ref="/apps/pcx86/1992/moria/manifest.xml"/>

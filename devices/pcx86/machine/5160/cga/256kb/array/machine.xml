@@ -9,11 +9,11 @@
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5160/1982-11-08/XTBIOS-REV1.json"/>
 	<video ref="/devices/pcx86/video/ibm/cga/ibm-cga.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml"/>
+	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
 	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padLeft="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 	</cpu>
 	<keyboard id="keyboard" model="us83"/>
 	<chipset id="chipset" model="5160" sw1="01001001"/>
-	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
 </machine>

@@ -9,12 +9,12 @@
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5160/1982-11-08/XTBIOS-REV1.json"/>
 	<video ref="/devices/pcx86/video/ibm/cga/ibm-cga-keygrid.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml"/>
+	<hdc ref="/disks/pcx86/fixed/10mb/pcdos200-empty-xt3.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padLeft="8px" padBottom="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 	</cpu>
 	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-arrows.xml"/>
-	<hdc ref="/disks/pcx86/fixed/10mb/pcdos200-empty-xt3.xml"/>
 	<chipset id="chipset" model="5160" sw1="01001001"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2"/>

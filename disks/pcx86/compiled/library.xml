@@ -793,6 +793,7 @@
 		<disk path="/apps/pcx86/1982/esuite/disk.json">Executive Suite (1982)</disk>
 		<disk path="/apps/pcx86/1982/ratbas/RATBAS213.json">RatBas 2.13</disk>
 		<disk path="/apps/pcx86/1983/adventmath/ADVENTMATH100.json">Adventures in Math 1.00</disk>
+		<disk path="/apps/pcx86/1985/castle_adventure/CASTLE-ADVENTURE-1985.json">Castle Adventure (1985)</disk>
 		<disk path="/apps/pcx86/1985/rogue/disk.json">Rogue (1985)</disk>
 		<disk path="/apps/pcx86/1987/thinktank/disk.json">ThinkTank (1987)</disk>
 		<disk path="/apps/pcx86/1992/moria/disk.json">Moria 5.5 (1992)</disk>
