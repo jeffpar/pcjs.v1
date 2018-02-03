@@ -289,10 +289,10 @@ DiskAPI.FAT16 = {
 /*
  * Directory Entry offsets (and assorted constants) in FAT disk images
  *
- * NOTE: Versions of DOS prior to 2.0 use INVALID exclusively to mark available directory entries; any entry marked
- * UNUSED will actually be considered USED.  In DOS 2.0 and up, UNUSED was added to indicate that all remaining entries
- * are unused, relieving it from having to initialize the rest of the sectors in the directory cluster(s).  And in fact,
- * you WILL encounter garbage in subsequent directory sectors if you attempt to read past an UNUSED entry.
+ * NOTE: Versions of DOS prior to 2.0 used INVALID exclusively to mark available directory entries; any entry marked
+ * UNUSED was actually considered USED.  In DOS 2.0 and up, UNUSED was added to indicate that all remaining entries were
+ * unused, relieving it from having to initialize the rest of the sectors in the directory cluster(s).  And in fact,
+ * you will likely encounter garbage in subsequent directory sectors if you read beyond the first UNUSED entry.
  */
 DiskAPI.DIRENT = {
     NAME:           0x000,      // 8 bytes
@@ -61197,7 +61197,7 @@ class FDC extends Component {
                     }
                 }
             }
-            controlSelect.onchange = function onChangeListDisks(event) {
+            controlSelect.onchange = function onChangeListDisks(/*event*/) {
                 fdc.updateSelectedDiskette();
             };
             return true;
@@ -61210,7 +61210,7 @@ class FDC extends Component {
              * loaded in a particular drive, you could click the drive control without having to change it.
              * However, that doesn't seem to work for all browsers, so I've reverted to onchange.
              */
-            controlSelect.onchange = function onChangeListDrives(event) {
+            controlSelect.onchange = function onChangeListDrives(/*event*/) {
                 var iDrive = Str.parseInt(controlSelect.value, 10);
                 if (iDrive != null) fdc.displayDiskette(iDrive);
             };
@@ -61218,7 +61218,7 @@ class FDC extends Component {
 
         case "loadDisk":
             this.bindings[sBinding] = control;
-            control.onclick = function onClickLoadDisk(event) {
+            control.onclick = function onClickLoadDisk(/*event*/) {
                 fdc.loadSelectedDisk();
             };
             return true;
@@ -61242,7 +61242,7 @@ class FDC extends Component {
                 return false;
             }
             this.bindings[sBinding] = control;
-            control.onclick = function onClickSaveDisk(event) {
+            control.onclick = function onClickSaveDisk(/*event*/) {
                 var controlDrives = fdc.bindings["listDrives"];
                 if (controlDrives && controlDrives.options && fdc.aDrives) {
                     var iDriveSelected = Str.parseInt(controlDrives.value, 10) || 0;
@@ -62606,11 +62606,9 @@ class FDC extends Component {
         }
         else if (!(this.regOutput & FDC.REG_OUTPUT.ENABLE)) {
             /*
-             * When FDC.REG_OUTPUT.ENABLE transitions from 0 to 1, generate an interrupt.
+             * When FDC.REG_OUTPUT.ENABLE transitions from 0 to 1, generate an interrupt (assuming INT_ENABLE is set).
              */
-            if (this.regOutput & FDC.REG_OUTPUT.INT_ENABLE) {
-                if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.FDC);
-            }
+            this.requestInterrupt();
         }
         /*
          * This no longer updates the internally selected drive (this.iDrive) based on regOutput, because (a) there seems
@@ -63030,11 +63028,7 @@ class FDC extends Component {
          * TODO: Technically, interrupt request status should be cleared by the FDC.REG_DATA.CMD.SENSE_INT command; in fact,
          * if that command is issued and no interrupt was pending, then FDC.REG_DATA.RES.INVALID should be returned (via ST0).
          */
-        if (this.regOutput & FDC.REG_OUTPUT.INT_ENABLE) {
-            if (drive && !(drive.resCode & FDC.REG_DATA.RES.NOT_READY) && fIRQ) {
-                if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.FDC);
-            }
-        }
+        this.requestInterrupt(drive && !(drive.resCode & FDC.REG_DATA.RES.NOT_READY) && fIRQ);
     }
 
     /**
@@ -63127,6 +63121,39 @@ class FDC extends Component {
      // this.nSRT = this.popCmd(FDC.TERMS.SRT);
     }
 
+    /**
+     * requestInterrupt(fCondition)
+     * 
+     * Request an FDC interrupt, as long as INT_ENABLE is set (and the optional supplied condition, if any, is true).
+     * 
+     * @this {FDC}
+     * @param [fCondition] (default is true)
+     */
+    requestInterrupt(fCondition = true)
+    {
+        if (fCondition && (this.regOutput & FDC.REG_OUTPUT.INT_ENABLE)) {
+            /*
+             * When the Windows 95 HSFLOP ("High-Speed Floppy") VxD performs its diskette change-line detection logic
+             * ("determine_changeline"), it sets a special callback ("dcl_callback_int_entry") for its interrupt handler
+             * to invoke, then issues a READ_ID command, and then sets a bit telling its interrupt handler to expect an
+             * interrupt ("FLP_NEC_INT_EXPECTED").
+             * 
+             * Technically, it should have set *both* "dcl_callback_int_entry" *and* "FLP_NEC_INT_EXPECTED" *before*
+             * issuing the READ_ID command, but I imagine the author assumed all was fine, since interrupts had been
+             * disabled with a "cli" beforehand and had not been re-enabled with an "sti" yet.  But alas, the function
+             * used to the issue the READ_ID command ("NecOut") immediately re-enabled interrupts.
+             * 
+             * So, if we request an interrupt immediately after the READ_ID command, the interrupt handler will think
+             * our interrupt is spurious (ie, not EXPECTED).  In this particular case, there are only about 10 instructions
+             * executed from the time READ_ID is issued until the "FLP_NEC_INT_EXPECTED" bit is set, but I'm going to
+             * triple that, in part because I wouldn't be surprised if there are other places where a similar assumption
+             * exists (ie, either that "NecOut" leaves interrupts disabled, or simply that the floppy controller is an
+             * inherently slow device).
+             */
+            if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.FDC, 32);
+        }
+    }
+    
     /**
      * beginResult()
      *
@@ -63628,7 +63655,7 @@ FDC.REG_DATA = {
         WRITE_DATA:     0x05,
         READ_DATA:      0x06,
         RECALIBRATE:    0x07,
-        SENSE_INT:      0x08,       // this command is used to clear the FDC interrupt following the clearing/setting of FDC.REG_OUTPUT.ENABLE
+        SENSE_INT:      0x08,           // this command is used to clear the FDC interrupt following the clearing/setting of FDC.REG_OUTPUT.ENABLE
         WRITE_DEL_DATA: 0x09,
         READ_ID:        0x0A,
         READ_DEL_DATA:  0x0C,
@@ -63638,9 +63665,9 @@ FDC.REG_DATA = {
         SCAN_LO_EQUAL:  0x19,
         SCAN_HI_EQUAL:  0x1D,
         MASK:           0x1F,
-        SK:             0x20,       // SK (Skip Deleted Data Address Mark)
-        MF:             0x40,       // MF (Modified Frequency Modulation)
-        MT:             0x80        // MT (Multi-Track; ie, data under both heads will be processed)
+        SK:             0x20,           // SK (Skip Deleted Data Address Mark)
+        MF:             0x40,           // MF (Modified Frequency Modulation)
+        MT:             0x80            // MT (Multi-Track; ie, data under both heads will be processed)
     },
     /*
      * FDC status/error results, generally assigned according to the corresponding ST0, ST1, ST2 or ST3 status bit.
@@ -63648,36 +63675,36 @@ FDC.REG_DATA = {
      * TODO: Determine when EQUIP_CHECK is *really* set; also, "77 step pulses" sounds suspiciously like a typo (it's not 79?)
      */
     RES: {
-        NONE:           0x00000000, // ST0 (IC): Normal termination of command (NT)
-        NOT_READY:      0x00000008, // ST0 (NR): When the FDD is in the not-ready state and a read or write command is issued, this flag is set; if a read or write command is issued to side 1 of a single sided drive, then this flag is set
-        EQUIP_CHECK:    0x00000010, // ST0 (EC): If a fault signal is received from the FDD, or if the track 0 signal fails to occur after 77 step pulses (recalibrate command), then this flag is set
-        SEEK_END:       0x00000020, // ST0 (SE): When the FDC completes the Seek command, this flag is set to 1 (high)
-        INCOMPLETE:     0x00000040, // ST0 (IC): Abnormal termination of command (AT); execution of command was started, but was not successfully completed
-        RESET:          0x000000C0, // ST0 (IC): Abnormal termination because during command execution the ready signal from the drive changed state
-        INVALID:        0x00000080, // ST0 (IC): Invalid command issue (IC); command which was issued was never started
+        NONE:           0x00000000,     // ST0 (IC): Normal termination of command (NT)
+        NOT_READY:      0x00000008,     // ST0 (NR): When the FDD is in the not-ready state and a read or write command is issued, this flag is set; if a read or write command is issued to side 1 of a single sided drive, then this flag is set
+        EQUIP_CHECK:    0x00000010,     // ST0 (EC): If a fault signal is received from the FDD, or if the track 0 signal fails to occur after 77 step pulses (recalibrate command), then this flag is set
+        SEEK_END:       0x00000020,     // ST0 (SE): When the FDC completes the Seek command, this flag is set to 1 (high)
+        INCOMPLETE:     0x00000040,     // ST0 (IC): Abnormal termination of command (AT); execution of command was started, but was not successfully completed
+        RESET:          0x000000C0,     // ST0 (IC): Abnormal termination because during command execution the ready signal from the drive changed state
+        INVALID:        0x00000080,     // ST0 (IC): Invalid command issue (IC); command which was issued was never started
         ST0:            0x000000FF,
-        NO_ID_MARK:     0x00000100, // ST1 (MA): If the FDC cannot detect the ID Address Mark, this flag is set; at the same time, the MD (Missing Address Mark in Data Field) of Status Register 2 is set
-        NOT_WRITABLE:   0x00000200, // ST1 (NW): During Execution of a Write Data, Write Deleted Data, or Format a Cylinder command, if the FDC detects a write protect signal from the FDD, then this flag is set
-        NO_DATA:        0x00000400, // ST1 (ND): FDC cannot find specified sector (or specified ID if READ_ID command)
-        DMA_OVERRUN:    0x00001000, // ST1 (OR): If the FDC is not serviced by the main systems during data transfers within a certain time interval, this flag is set
-        CRC_ERROR:      0x00002000, // ST1 (DE): When the FDC detects a CRC error in either the ID field or the data field, this flag is set
-        END_OF_CYL:     0x00008000, // ST1 (EN): When the FDC tries to access a sector beyond the final sector of a cylinder, this flag is set
+        NO_ID_MARK:     0x00000100,     // ST1 (MA): If the FDC cannot detect the ID Address Mark, this flag is set; at the same time, the MD (Missing Address Mark in Data Field) of Status Register 2 is set
+        NOT_WRITABLE:   0x00000200,     // ST1 (NW): During Execution of a Write Data, Write Deleted Data, or Format a Cylinder command, if the FDC detects a write protect signal from the FDD, then this flag is set
+        NO_DATA:        0x00000400,     // ST1 (ND): FDC cannot find specified sector (or specified ID if READ_ID command)
+        DMA_OVERRUN:    0x00001000,     // ST1 (OR): If the FDC is not serviced by the main systems during data transfers within a certain time interval, this flag is set
+        CRC_ERROR:      0x00002000,     // ST1 (DE): When the FDC detects a CRC error in either the ID field or the data field, this flag is set
+        END_OF_CYL:     0x00008000,     // ST1 (EN): When the FDC tries to access a sector beyond the final sector of a cylinder, this flag is set
         ST1:            0x0000FF00,
-        NO_DATA_MARK:   0x00010000, // ST2 (MD): When data is read from the medium, if the FDC cannot find a Data Address Mark or Deleted Data Address Mark, then this flag is set
-        BAD_CYL:        0x00020000, // ST2 (BC): This bit is related to the ND bit, and when the contents of C on the medium are different from that stored in the ID Register, and the content of C is FF, then this flag is set
-        SCAN_FAILED:    0x00040000, // ST2 (SN): During execution of the Scan command, if the FDC cannot find a sector on the cylinder which meets the condition, then this flag is set
-        SCAN_EQUAL:     0x00080000, // ST2 (SH): During execution of the Scan command, if the condition of "equal" is satisfied, this flag is set
-        WRONG_CYL:      0x00100000, // ST2 (WC): This bit is related to the ND bit, and when the contents of C on the medium are different from that stored in the ID Register, this flag is set
-        DATA_FIELD:     0x00200000, // ST2 (DD): If the FDC detects a CRC error in the data, then this flag is set
-        STRL_MARK:      0x00400000, // ST2 (CM): During execution of the Read Data or Scan command, if the FDC encounters a sector which contains a Deleted Data Address Mark, this flag is set
+        NO_DATA_MARK:   0x00010000,     // ST2 (MD): When data is read from the medium, if the FDC cannot find a Data Address Mark or Deleted Data Address Mark, then this flag is set
+        BAD_CYL:        0x00020000,     // ST2 (BC): This bit is related to the ND bit, and when the contents of C on the medium are different from that stored in the ID Register, and the content of C is FF, then this flag is set
+        SCAN_FAILED:    0x00040000,     // ST2 (SN): During execution of the Scan command, if the FDC cannot find a sector on the cylinder which meets the condition, then this flag is set
+        SCAN_EQUAL:     0x00080000,     // ST2 (SH): During execution of the Scan command, if the condition of "equal" is satisfied, this flag is set
+        WRONG_CYL:      0x00100000,     // ST2 (WC): This bit is related to the ND bit, and when the contents of C on the medium are different from that stored in the ID Register, this flag is set
+        DATA_FIELD:     0x00200000,     // ST2 (DD): If the FDC detects a CRC error in the data, then this flag is set
+        STRL_MARK:      0x00400000,     // ST2 (CM): During execution of the Read Data or Scan command, if the FDC encounters a sector which contains a Deleted Data Address Mark, this flag is set
         ST2:            0x00FF0000,
-        DRIVE:          0x03000000, // ST3 (Ux): Status of the "Drive Select" signals from the diskette drive
-        HEAD:           0x04000000, // ST3 (HD): Status of the "Side Select" signal from the diskette drive
-        TWOSIDE:        0x08000000, // ST3 (TS): Status of the "Two Side" signal from the diskette drive
-        TRACK0:         0x10000000, // ST3 (T0): Status of the "Track 0" signal from the diskette drive
-        READY:          0x20000000, // ST3 (RY): Status of the "Ready" signal from the diskette drive
-        WRITEPROT:      0x40000000, // ST3 (WP): Status of the "Write Protect" signal from the diskette drive
-        FAULT:          0x80000000|0, // ST3 (FT): Status of the "Fault" signal from the diskette drive
+        DRIVE:          0x03000000,     // ST3 (Ux): Status of the "Drive Select" signals from the diskette drive
+        HEAD:           0x04000000,     // ST3 (HD): Status of the "Side Select" signal from the diskette drive
+        TWOSIDE:        0x08000000,     // ST3 (TS): Status of the "Two Side" signal from the diskette drive
+        TRACK0:         0x10000000,     // ST3 (T0): Status of the "Track 0" signal from the diskette drive
+        READY:          0x20000000,     // ST3 (RY): Status of the "Ready" signal from the diskette drive
+        WRITEPROT:      0x40000000,     // ST3 (WP): Status of the "Write Protect" signal from the diskette drive
+        FAULT:          0x80000000|0,   // ST3 (FT): Status of the "Fault" signal from the diskette drive
         ST3:            0xFF000000|0
     }
 };
@@ -73465,7 +73492,7 @@ class DebuggerX86 extends Debugger {
                 if (aSymbol[0]) {
                     sDelta = "";
                     nDelta = dbgAddr.off - aSymbol[1];
-                    if (nDelta) sDelta = " + " + Str.toHexWord(nDelta);
+                    if (nDelta) sDelta = " + " + Str.toHex(nDelta, 0, true);
                     s = aSymbol[0] + " (" + this.toHexOffset(aSymbol[1], dbgAddr.sel) + ')' + sDelta;
                     if (fPrint) this.println(s);
                     sSymbol = s;
@@ -73473,7 +73500,7 @@ class DebuggerX86 extends Debugger {
                 if (aSymbol.length > 4 && aSymbol[4]) {
                     sDelta = "";
                     nDelta = aSymbol[5] - dbgAddr.off;
-                    if (nDelta) sDelta = " - " + Str.toHexWord(nDelta);
+                    if (nDelta) sDelta = " - " + Str.toHex(nDelta, 0, true);
                     s = aSymbol[4] + " (" + this.toHexOffset(aSymbol[5], dbgAddr.sel) + ')' + sDelta;
                     if (fPrint) this.println(s);
                     if (!sSymbol) sSymbol = s;
