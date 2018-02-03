@@ -13,9 +13,9 @@
 	<debugger id="debugger"/>
 	<panel ref="/devices/pcx86/panel/default.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml" width="360px"/>
+	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
 	<chipset id="chipset" model="5160" sw1="01110001" pos="left" padLeft="8px" padBottom="8px">
 		<control type="switches" label="SW1" binding="sw1" left="0px"/>
 		<control type="description" binding="swdesc" left="0px"/>
 	</chipset>
-	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
 </machine>

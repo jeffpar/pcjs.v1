@@ -145,7 +145,7 @@ class ROMx86 extends Component {
             var sProgress = "Loading " + this.sFileURL + "...";
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
                 rom.doneLoad(sURL, sResponse, nErrorCode);
-            }, function(nState) {
+            }, function(/*nState*/) {
                 rom.println(sProgress, Component.PRINT.PROGRESS);
             });
         }
@@ -410,21 +410,119 @@ class ROMx86 extends Component {
 }
 
 /*
- * ROM BIOS Data Area (RBDA) definitions, in physical address form, using the same ALL-CAPS names
- * found in the original IBM PC ROM BIOS listing.  TODO: Fill in remaining RBDA holes.
+ * ROM BIOS Data Area (RBDA) definitions, in physical address form, using the same CAPITALIZED names
+ * found in the original IBM PC ROM BIOS listing.
  */
 ROMx86.BIOS = {
-    RS232_BASE:     0x400,              // 4 (word) I/O addresses of RS-232 adapters
-    PRINTER_BASE:   0x408,              // 4 (word) I/O addresses of printer adapters
-    EQUIP_FLAG:     0x410,              // installed hardware (word)
-    MFG_TEST:       0x412,              // initialization flag (byte)
-    MEMORY_SIZE:    0x413,              // memory size in K-bytes (word)
-    RESET_FLAG:     0x472               // set to 0x1234 if keyboard reset underway (word)
+    RS232_BASE:     0x400,              // ADDRESSES OF RS232 ADAPTERS (4 words)
+    PRINTER_BASE:   0x408,              // ADDRESSES OF PRINTERS (4 words)
+    EQUIP_FLAG: {                       // INSTALLED HARDWARE (word)
+        ADDR:       0x410,
+        NUM_PRINT:      0xC000,         // NUMBER OF PRINTERS ATTACHED
+        GAME_CTRL:      0x1000,         // GAME I/O ATTACHED
+        NUM_RS232:      0x0E00,         // NUMBER OF RS232 CARDS ATTACHED
+        NUM_DRIVES:     0x00C0,         // NUMBER OF DISKETTE DRIVES (00=1, 01=2, 10=3, 11=4) ONLY IF IPL_DRIVE SET
+        VIDEO_MODE:     0x0030,         // INITIAL VIDEO MODE (00=UNUSED, 01=40X25 COLOR, 10=80X25 COLOR, 11=80X25 MONO)
+        RAM_SIZE:       0x000C,         // PLANAR RAM SIZE (00=16K,01=32K,10=48K,11=64K)
+        IPL_DRIVE:      0x0001          // IPL (Initial Program Load) FROM DISKETTE (ie, diskette drives exist)
+    },
+    MFG_TEST:       0x412,              // INITIALIZATION FLAG (byte)
+    MEMORY_SIZE:    0x413,              // MEMORY SIZE IN K BYTES (word)
+    IO_RAM_SIZE:    0x415,              // MEMORY IN I/O CHANNEL (word)
+    COMPAQ_PREV_SC: 0x415,              // COMPAQ DESKPRO 386: PREVIOUS SCAN CODE (byte)
+    COMPAQ_KEYCLICK:0x416,              // COMPAQ DESKPRO 386: KEYCLICK LOUDNESS (byte)
+    /*
+     * KEYBOARD DATA AREAS
+     */
+    KB_FLAG: {                          // FIRST BYTE OF KEYBOARD STATUS (byte)
+        ADDR:       0x417,              //
+        INS_STATE:      0x80,           // INSERT STATE IS ACTIVE
+        CAPS_STATE:     0x40,           // CAPS LOCK STATE HAS BEEN TOGGLED
+        NUM_STATE:      0x20,           // NUM LOCK STATE HAS BEEN TOGGLED
+        SCROLL_STATE:   0x10,           // SCROLL LOCK STATE HAS BEEN TOGGLED
+        ALT_SHIFT:      0x08,           // ALTERNATE SHIFT KEY DEPRESSED
+        CTL_SHIFT:      0x04,           // CONTROL SHIFT KEY DEPRESSED
+        LEFT_SHIFT:     0x02,           // LEFT SHIFT KEY DEPRESSED
+        RIGHT_SHIFT:    0x01            // RIGHT SHIFT KEY DEPRESSED
+    },
+    KB_FLAG_1: {                        // SECOND BYTE OF KEYBOARD STATUS (byte)
+        ADDR:       0x418,              //
+        INS_SHIFT:      0x80,           // INSERT KEY IS DEPRESSED
+        CAPS_SHIFT:     0x40,           // CAPS LOCK KEY IS DEPRESSED
+        NUM_SHIFT:      0x20,           // NUM LOCK KEY IS DEPRESSED
+        SCROLL_SHIFT:   0x10,           // SCROLL LOCK KEY IS DEPRESSED
+        HOLD_STATE:     0x08            // SUSPEND KEY HAS BEEN TOGGLED
+    },
+    ALT_INPUT:      0x419,              // STORAGE FOR ALTERNATE KEYPAD ENTRY (byte)
+    BUFFER_HEAD:    0x41A,              // POINTER TO HEAD OF KEYBOARD BUFFER (word)
+    BUFFER_TAIL:    0x41C,              // POINTER TO TAIL OF KEYBOARD BUFFER (word)
+    KB_BUFFER:      0x41E,              // ROOM FOR 15 ENTRIES (16 words)
+    KB_BUFFER_END:  0x43E,              // HEAD = TAIL INDICATES THAT THE BUFFER IS EMPTY
+    /*
+     * DISKETTE DATA AREAS
+     */
+    SEEK_STATUS: {                      // DRIVE RECALIBRATION STATUS (byte)
+        ADDR:       0x43E,              //
+                                        //      BIT 3-0 = DRIVE 3-0 NEEDS RECAL BEFORE
+                                        //      NEXT SEEK IF BIT IS = 0
+        INT_FLAG:       0x80,           // INTERRUPT OCCURRENCE FLAG
+    },
+    MOTOR_STATUS:   0x43F,              // MOTOR STATUS (byte)
+                                        //      BIT 3-0 = DRIVE 3-0 IS CURRENTLY RUNNING
+                                        //      BIT 7 = CURRENT OPERATION IS A WRITE, REQUIRES DELAY
+    MOTOR_COUNT:    0x440,              // TIME OUT COUNTER FOR DRIVE TURN OFF
+                                        //      37 == TWO SECONDS OF COUNTS FOR MOTOR TURN OFF
+    DISKETTE_STATUS: {                  // SINGLE BYTE OF RETURN CODE INFO FOR STATUS
+        ADDR:       0x441,
+        TIME_OUT:       0x80,           // ATTACHMENT FAILED TO RESPOND
+        BAD_SEEK:       0x40,           // SEEK OPERATION FAILED
+        BAD_NEC:        0x20,           // NEC CONTROLLER HAS FAILED
+        BAD_CRC:        0x10,           // BAD CRC ON DISKETTE READ
+        DMA_BOUNDARY:   0x09,           // ATTEMPT TO DMA ACROSS 64K BOUNDARY
+        BAD_DMA:        0x08,           // DMA OVERRUN ON OPERATION
+        RECORD_NOT_FND: 0x04,           // REQUESTED SECTOR NOT FOUND
+        WRITE_PROTECT:  0x03,           // WRITE ATTEMPTED ON WRITE PROT DISK
+        BAD_ADDR_MARK:  0x02,           // ADDRESS MARK NOT FOUND
+        BAD_CMD:        0x01            // BAD COMMAND PASSED TO DISKETTE I/O
+    },
+    NEC_STATUS:     0x442,              // STATUS BYTES FROM NEC (7 bytes)
+    /*
+     * VIDEO DISPLAY DATA AREA
+     */
+    CRT_MODE:       0x449,              // CURRENT CRT MODE (byte)
+    CRT_COLS:       0x44A,              // NUMBER OF COLUMNS ON SCREEN (word)
+    CRT_LEN:        0x44C,              // LENGTH OF REGEN IN BYTES (word)
+    CRT_START:      0x44E,              // STARTING ADDRESS IN REGEN BUFFER (word)
+    CURSOR_POSN:    0x450,              // CURSOR FOR EACH OF UP TO 8 PAGES (8 words)
+    CURSOR_MODE:    0x460,              // CURRENT CURSOR MODE SETTING (word)
+    ACTIVE_PAGE:    0x462,              // CURRENT PAGE BEING DISPLAYED (byte)
+    ADDR_6845:      0x463,              // BASE ADDRESS FOR ACTIVE DISPLAY CARD (word)
+    CRT_MODE_SET:   0x465,              // CURRENT SETTING OF THE 3X8 REGISTER (byte)
+    CRT_PALLETTE:   0x466,              // CURRENT PALLETTE SETTING COLOR CARD (byte)
+    /*
+     * CASSETTE DATA AREA
+     */
+    EDGE_CNT:       0x467,              // TIME COUNT AT DATA EDGE (word)
+    CRC_REG:        0x469,              // CRC REGISTER (word)
+    LAST_VAL:       0x46B,              // LAST INPUT VALUE (byte)
+    /*
+     * TIMER DATA AREA
+     */
+    TIMER_LOW:      0x46C,              // LOW WORD OF TIMER COUNT (word)
+    TIMER_HIGH:     0x46E,              // HIGH WORD OF TIMER COUNT (word)
+    TIMER_OFL:      0x470,              // TIMER HAS ROLLED OVER SINCE LAST READ (byte)
+    /*
+     * SYSTEM DATA AREA
+     */
+    BIOS_BREAK:     0x471,              // BIT 7 = 1 IF BREAK KEY HAS BEEN DEPRESSED (byte)
+    RESET_FLAG: {
+        ADDR:       0x472,              // SET TO 0x1234 IF KEYBOARD RESET UNDERWAY (word)
+        WARMBOOT:       0x1234          // this value indicates a "warm boot", bypassing memory tests
+    }
+    /*
+     * RESET_FLAG is the traditional end of the RBDA, as originally defined in real-mode segment 0x40.
+     */
 };
-
-// RESET_FLAG is the traditional end of the RBDA, as originally defined at real-mode segment 0x40.
-
-ROMx86.BIOS.RESET_FLAG_WARMBOOT = 0x1234;   // value stored at ROMx86.BIOS.RESET_FLAG to indicate a "warm boot", bypassing memory tests
 
 /*
  * NOTE: There's currently no need for this component to have a reset() function, since

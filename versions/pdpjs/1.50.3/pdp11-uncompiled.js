@@ -289,10 +289,10 @@ DiskAPI.FAT16 = {
 /*
  * Directory Entry offsets (and assorted constants) in FAT disk images
  *
- * NOTE: Versions of DOS prior to 2.0 use INVALID exclusively to mark available directory entries; any entry marked
- * UNUSED will actually be considered USED.  In DOS 2.0 and up, UNUSED was added to indicate that all remaining entries
- * are unused, relieving it from having to initialize the rest of the sectors in the directory cluster(s).  And in fact,
- * you WILL encounter garbage in subsequent directory sectors if you attempt to read past an UNUSED entry.
+ * NOTE: Versions of DOS prior to 2.0 used INVALID exclusively to mark available directory entries; any entry marked
+ * UNUSED was actually considered USED.  In DOS 2.0 and up, UNUSED was added to indicate that all remaining entries were
+ * unused, relieving it from having to initialize the rest of the sectors in the directory cluster(s).  And in fact,
+ * you will likely encounter garbage in subsequent directory sectors if you read beyond the first UNUSED entry.
  */
 DiskAPI.DIRENT = {
     NAME:           0x000,      // 8 bytes
@@ -3807,11 +3807,9 @@ class Component {
                  *
                  * @this {Component}
                  * @param {string} s
-                 * @param {boolean} [fPrintOnly]
-                 * @param {string} [id]
                  * @return {boolean}
                  */
-                this.notice = function noticeControl(s, fPrintOnly, id) {
+                this.notice = function noticeControl(s /*, fPrintOnly, id*/) {
                     this.println(s, this.type);
                     return true;
                 };

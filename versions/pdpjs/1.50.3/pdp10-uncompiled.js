@@ -3579,11 +3579,9 @@ class Component {
                  *
                  * @this {Component}
                  * @param {string} s
-                 * @param {boolean} [fPrintOnly]
-                 * @param {string} [id]
                  * @return {boolean}
                  */
-                this.notice = function noticeControl(s, fPrintOnly, id) {
+                this.notice = function noticeControl(s /*, fPrintOnly, id*/) {
                     this.println(s, this.type);
                     return true;
                 };

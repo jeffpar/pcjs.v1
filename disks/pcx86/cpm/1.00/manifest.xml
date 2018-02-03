@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.3/manifest.xsl"?>
+<manifest type="software">
+	<title>CP/M-86</title>
+	<version>1.00</version>
+	<type>Operating System</type>
+	<category>CP/M</category>
+	<disk id="disk01" size="163840" chs="40:1:8" img="archive/CPM86-100.img" href="/disks/pcx86/cpm/1.00/CPM86-100.json" md5="8e61390d8a6f965543e3cb2ecb08cb89" md5json="5f38dd33d01c32a57c98d39448d3b643"/>
+</manifest>

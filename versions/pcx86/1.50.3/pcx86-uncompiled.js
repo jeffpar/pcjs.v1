@@ -289,10 +289,10 @@ DiskAPI.FAT16 = {
 /*
  * Directory Entry offsets (and assorted constants) in FAT disk images
  *
- * NOTE: Versions of DOS prior to 2.0 use INVALID exclusively to mark available directory entries; any entry marked
- * UNUSED will actually be considered USED.  In DOS 2.0 and up, UNUSED was added to indicate that all remaining entries
- * are unused, relieving it from having to initialize the rest of the sectors in the directory cluster(s).  And in fact,
- * you WILL encounter garbage in subsequent directory sectors if you attempt to read past an UNUSED entry.
+ * NOTE: Versions of DOS prior to 2.0 used INVALID exclusively to mark available directory entries; any entry marked
+ * UNUSED was actually considered USED.  In DOS 2.0 and up, UNUSED was added to indicate that all remaining entries were
+ * unused, relieving it from having to initialize the rest of the sectors in the directory cluster(s).  And in fact,
+ * you will likely encounter garbage in subsequent directory sectors if you read beyond the first UNUSED entry.
  */
 DiskAPI.DIRENT = {
     NAME:           0x000,      // 8 bytes
@@ -3807,11 +3807,9 @@ class Component {
                  *
                  * @this {Component}
                  * @param {string} s
-                 * @param {boolean} [fPrintOnly]
-                 * @param {string} [id]
                  * @return {boolean}
                  */
-                this.notice = function noticeControl(s, fPrintOnly, id) {
+                this.notice = function noticeControl(s /*, fPrintOnly, id*/) {
                     this.println(s, this.type);
                     return true;
                 };
@@ -38004,7 +38002,6 @@ class ChipSet extends Component {
          * To start, we create an audio context, unless the 'sound' parameter has been explicitly set to false
          * or 0; the boolean value true (along with any illegal number) now defaults to 0.5 instead of 1.0.
          */
-        this.fSpeaker = this.fUserSound = false;
         this.volumeInit = 0;
         let sound = parmsChipSet['sound'];
         if (sound) {
@@ -38019,6 +38016,13 @@ class ChipSet extends Component {
                 if (DEBUG) this.log("AudioContext not available");
             }
         }
+        /*
+         * fSpeakerEnabled indicates whether the speaker is *logically* on, whereas fSpeakerOn indicates
+         * whether we have ACTUALLY turned the speaker on.  And finally, fUserSound is set to true only after
+         * we have have created the audio oscillator in the context of a user event (a requirement for most
+         * browsers before they'll actually emit any sound).
+         */
+        this.fSpeakerEnabled = this.fSpeakerOn = this.fUserSound = false;
 
         /*
          * I used to defer ChipSet's reset() to powerUp(), which then gave us the option of doing either
@@ -42522,27 +42526,37 @@ class ChipSet extends Component {
     }
 
     /**
-     * setSpeaker(fOn)
+     * setSpeaker(fEnable)
      *
      * @this {ChipSet}
-     * @param {boolean} [fOn] true to turn speaker on, false to turn off, otherwise update as appropriate
+     * @param {boolean} [fEnable] true to enable speaker, false to disable it, otherwise update it as appropriate
      */
-    setSpeaker(fOn)
+    setSpeaker(fEnable)
     {
+        let fOn;
+        if (fEnable !== undefined) {
+            fOn = fEnable;
+            if (fOn != this.fSpeakerEnabled) {
+                // 
+                // Yielding doesn't seem to help the simulation of sound via rapid speaker toggling.
+                //
+                // if (this.cpu) {
+                //     this.cpu.yieldCPU();
+                // }
+                this.fSpeakerEnabled = fOn;
+            }
+        } else {
+            fOn = !!(this.fSpeakerEnabled && this.cpu && this.cpu.isRunning());
+        }
+        let freq = Math.round(ChipSet.TIMER_TICKS_PER_SEC / this.getTimerInit(ChipSet.PIT0.TIMER2));
+        if (freq < 20 || freq > 20000) {
+            /*
+             * Treat frequencies outside the normal hearing range (below 20hz or above 20Khz) as a clever
+             * attempt to turn sound off.
+             */
+            fOn = false;
+        }
         if (this.contextAudio) {
-            if (fOn !== undefined) {
-                this.fSpeaker = fOn;
-            } else {
-                fOn = !!(this.fSpeaker && this.cpu && this.cpu.isRunning());
-            }
-            let freq = Math.round(ChipSet.TIMER_TICKS_PER_SEC / this.getTimerInit(ChipSet.PIT0.TIMER2));
-            if (freq < 20 || freq > 20000) {
-                /*
-                 * Treat frequencies outside the normal hearing range (below 20hz or above 20Khz) as a clever
-                 * attempt to turn sound off.
-                 */
-                fOn = false;
-            }
             if (fOn && this.startAudio()) {
                 /*
                  * Instead of setting the frequency's 'value' property directly, as we used to do, we use the
@@ -42550,18 +42564,21 @@ class ChipSet extends Component {
                  * "de-zippering") of the frequency that browsers like to do.  Supposedly de-zippering is an
                  * attempt to avoid "pops" if the frequency is altered while the wave is still rising or falling.
                  * 
-                 * Ditto for gain.
+                 * Ditto for the gain's 'value'.
                  */
+                // this.oscillatorAudio['frequency']['value'] = freq;
                 this.oscillatorAudio['frequency']['setValueAtTime'](freq, 0);
+                // this.volumeAudio['gain']['value'] = this.volumeInit;
                 this.volumeAudio['gain']['setValueAtTime'](this.volumeInit, 0);
                 if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
             } else if (this.volumeAudio) {
                 this.volumeAudio['gain']['setValueAtTime'](0, 0);
                 if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
             }
-        } else if (fOn) {
+        } else if (fOn && this.fSpeakerOn != fOn) {
             this.printMessage("BEEP", Messages.SPEAKER);
         }
+        this.fSpeakerOn = fOn;
     }
 
     /**
@@ -42604,15 +42621,7 @@ class ChipSet extends Component {
                     this.volumeAudio = this.contextAudio['createGain']();
                     this.oscillatorAudio['connect'](this.volumeAudio);
                     this.volumeAudio['connect'](this.contextAudio['destination']);
-                    /*
-                     * Instead of setting the gain's 'value' property directly, as we used to do, we use the
-                     * setValueAtTime() method, with a time of zero, as a work-around to avoid the "easing" (aka
-                     * "de-zippering") of the gain that browsers like to do.  Supposedly de-zippering is an
-                     * attempt to avoid "pops" if the gain is altered while the wave is still rising or falling.
-                     * 
-                     *      this.volumeAudio['gain']['value'] = 0;
-                     */
-                    this.volumeAudio['gain']['setValueAtTime'](0, 0);
+                    this.volumeAudio['gain']['value'] = 0;
                     this.oscillatorAudio['type'] = "square";
                     this.oscillatorAudio['start'](0);
                     return true;
@@ -44129,7 +44138,7 @@ class ROMx86 extends Component {
             var sProgress = "Loading " + this.sFileURL + "...";
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
                 rom.doneLoad(sURL, sResponse, nErrorCode);
-            }, function(nState) {
+            }, function(/*nState*/) {
                 rom.println(sProgress, Component.PRINT.PROGRESS);
             });
         }
@@ -44394,21 +44403,119 @@ class ROMx86 extends Component {
 }
 
 /*
- * ROM BIOS Data Area (RBDA) definitions, in physical address form, using the same ALL-CAPS names
- * found in the original IBM PC ROM BIOS listing.  TODO: Fill in remaining RBDA holes.
+ * ROM BIOS Data Area (RBDA) definitions, in physical address form, using the same CAPITALIZED names
+ * found in the original IBM PC ROM BIOS listing.
  */
 ROMx86.BIOS = {
-    RS232_BASE:     0x400,              // 4 (word) I/O addresses of RS-232 adapters
-    PRINTER_BASE:   0x408,              // 4 (word) I/O addresses of printer adapters
-    EQUIP_FLAG:     0x410,              // installed hardware (word)
-    MFG_TEST:       0x412,              // initialization flag (byte)
-    MEMORY_SIZE:    0x413,              // memory size in K-bytes (word)
-    RESET_FLAG:     0x472               // set to 0x1234 if keyboard reset underway (word)
+    RS232_BASE:     0x400,              // ADDRESSES OF RS232 ADAPTERS (4 words)
+    PRINTER_BASE:   0x408,              // ADDRESSES OF PRINTERS (4 words)
+    EQUIP_FLAG: {                       // INSTALLED HARDWARE (word)
+        ADDR:       0x410,
+        NUM_PRINT:      0xC000,         // NUMBER OF PRINTERS ATTACHED
+        GAME_CTRL:      0x1000,         // GAME I/O ATTACHED
+        NUM_RS232:      0x0E00,         // NUMBER OF RS232 CARDS ATTACHED
+        NUM_DRIVES:     0x00C0,         // NUMBER OF DISKETTE DRIVES (00=1, 01=2, 10=3, 11=4) ONLY IF IPL_DRIVE SET
+        VIDEO_MODE:     0x0030,         // INITIAL VIDEO MODE (00=UNUSED, 01=40X25 COLOR, 10=80X25 COLOR, 11=80X25 MONO)
+        RAM_SIZE:       0x000C,         // PLANAR RAM SIZE (00=16K,01=32K,10=48K,11=64K)
+        IPL_DRIVE:      0x0001          // IPL (Initial Program Load) FROM DISKETTE (ie, diskette drives exist)
+    },
+    MFG_TEST:       0x412,              // INITIALIZATION FLAG (byte)
+    MEMORY_SIZE:    0x413,              // MEMORY SIZE IN K BYTES (word)
+    IO_RAM_SIZE:    0x415,              // MEMORY IN I/O CHANNEL (word)
+    COMPAQ_PREV_SC: 0x415,              // COMPAQ DESKPRO 386: PREVIOUS SCAN CODE (byte)
+    COMPAQ_KEYCLICK:0x416,              // COMPAQ DESKPRO 386: KEYCLICK LOUDNESS (byte)
+    /*
+     * KEYBOARD DATA AREAS
+     */
+    KB_FLAG: {                          // FIRST BYTE OF KEYBOARD STATUS (byte)
+        ADDR:       0x417,              //
+        INS_STATE:      0x80,           // INSERT STATE IS ACTIVE
+        CAPS_STATE:     0x40,           // CAPS LOCK STATE HAS BEEN TOGGLED
+        NUM_STATE:      0x20,           // NUM LOCK STATE HAS BEEN TOGGLED
+        SCROLL_STATE:   0x10,           // SCROLL LOCK STATE HAS BEEN TOGGLED
+        ALT_SHIFT:      0x08,           // ALTERNATE SHIFT KEY DEPRESSED
+        CTL_SHIFT:      0x04,           // CONTROL SHIFT KEY DEPRESSED
+        LEFT_SHIFT:     0x02,           // LEFT SHIFT KEY DEPRESSED
+        RIGHT_SHIFT:    0x01            // RIGHT SHIFT KEY DEPRESSED
+    },
+    KB_FLAG_1: {                        // SECOND BYTE OF KEYBOARD STATUS (byte)
+        ADDR:       0x418,              //
+        INS_SHIFT:      0x80,           // INSERT KEY IS DEPRESSED
+        CAPS_SHIFT:     0x40,           // CAPS LOCK KEY IS DEPRESSED
+        NUM_SHIFT:      0x20,           // NUM LOCK KEY IS DEPRESSED
+        SCROLL_SHIFT:   0x10,           // SCROLL LOCK KEY IS DEPRESSED
+        HOLD_STATE:     0x08            // SUSPEND KEY HAS BEEN TOGGLED
+    },
+    ALT_INPUT:      0x419,              // STORAGE FOR ALTERNATE KEYPAD ENTRY (byte)
+    BUFFER_HEAD:    0x41A,              // POINTER TO HEAD OF KEYBOARD BUFFER (word)
+    BUFFER_TAIL:    0x41C,              // POINTER TO TAIL OF KEYBOARD BUFFER (word)
+    KB_BUFFER:      0x41E,              // ROOM FOR 15 ENTRIES (16 words)
+    KB_BUFFER_END:  0x43E,              // HEAD = TAIL INDICATES THAT THE BUFFER IS EMPTY
+    /*
+     * DISKETTE DATA AREAS
+     */
+    SEEK_STATUS: {                      // DRIVE RECALIBRATION STATUS (byte)
+        ADDR:       0x43E,              //
+                                        //      BIT 3-0 = DRIVE 3-0 NEEDS RECAL BEFORE
+                                        //      NEXT SEEK IF BIT IS = 0
+        INT_FLAG:       0x80,           // INTERRUPT OCCURRENCE FLAG
+    },
+    MOTOR_STATUS:   0x43F,              // MOTOR STATUS (byte)
+                                        //      BIT 3-0 = DRIVE 3-0 IS CURRENTLY RUNNING
+                                        //      BIT 7 = CURRENT OPERATION IS A WRITE, REQUIRES DELAY
+    MOTOR_COUNT:    0x440,              // TIME OUT COUNTER FOR DRIVE TURN OFF
+                                        //      37 == TWO SECONDS OF COUNTS FOR MOTOR TURN OFF
+    DISKETTE_STATUS: {                  // SINGLE BYTE OF RETURN CODE INFO FOR STATUS
+        ADDR:       0x441,
+        TIME_OUT:       0x80,           // ATTACHMENT FAILED TO RESPOND
+        BAD_SEEK:       0x40,           // SEEK OPERATION FAILED
+        BAD_NEC:        0x20,           // NEC CONTROLLER HAS FAILED
+        BAD_CRC:        0x10,           // BAD CRC ON DISKETTE READ
+        DMA_BOUNDARY:   0x09,           // ATTEMPT TO DMA ACROSS 64K BOUNDARY
+        BAD_DMA:        0x08,           // DMA OVERRUN ON OPERATION
+        RECORD_NOT_FND: 0x04,           // REQUESTED SECTOR NOT FOUND
+        WRITE_PROTECT:  0x03,           // WRITE ATTEMPTED ON WRITE PROT DISK
+        BAD_ADDR_MARK:  0x02,           // ADDRESS MARK NOT FOUND
+        BAD_CMD:        0x01            // BAD COMMAND PASSED TO DISKETTE I/O
+    },
+    NEC_STATUS:     0x442,              // STATUS BYTES FROM NEC (7 bytes)
+    /*
+     * VIDEO DISPLAY DATA AREA
+     */
+    CRT_MODE:       0x449,              // CURRENT CRT MODE (byte)
+    CRT_COLS:       0x44A,              // NUMBER OF COLUMNS ON SCREEN (word)
+    CRT_LEN:        0x44C,              // LENGTH OF REGEN IN BYTES (word)
+    CRT_START:      0x44E,              // STARTING ADDRESS IN REGEN BUFFER (word)
+    CURSOR_POSN:    0x450,              // CURSOR FOR EACH OF UP TO 8 PAGES (8 words)
+    CURSOR_MODE:    0x460,              // CURRENT CURSOR MODE SETTING (word)
+    ACTIVE_PAGE:    0x462,              // CURRENT PAGE BEING DISPLAYED (byte)
+    ADDR_6845:      0x463,              // BASE ADDRESS FOR ACTIVE DISPLAY CARD (word)
+    CRT_MODE_SET:   0x465,              // CURRENT SETTING OF THE 3X8 REGISTER (byte)
+    CRT_PALLETTE:   0x466,              // CURRENT PALLETTE SETTING COLOR CARD (byte)
+    /*
+     * CASSETTE DATA AREA
+     */
+    EDGE_CNT:       0x467,              // TIME COUNT AT DATA EDGE (word)
+    CRC_REG:        0x469,              // CRC REGISTER (word)
+    LAST_VAL:       0x46B,              // LAST INPUT VALUE (byte)
+    /*
+     * TIMER DATA AREA
+     */
+    TIMER_LOW:      0x46C,              // LOW WORD OF TIMER COUNT (word)
+    TIMER_HIGH:     0x46E,              // HIGH WORD OF TIMER COUNT (word)
+    TIMER_OFL:      0x470,              // TIMER HAS ROLLED OVER SINCE LAST READ (byte)
+    /*
+     * SYSTEM DATA AREA
+     */
+    BIOS_BREAK:     0x471,              // BIT 7 = 1 IF BREAK KEY HAS BEEN DEPRESSED (byte)
+    RESET_FLAG: {
+        ADDR:       0x472,              // SET TO 0x1234 IF KEYBOARD RESET UNDERWAY (word)
+        WARMBOOT:       0x1234          // this value indicates a "warm boot", bypassing memory tests
+    }
+    /*
+     * RESET_FLAG is the traditional end of the RBDA, as originally defined in real-mode segment 0x40.
+     */
 };
-
-// RESET_FLAG is the traditional end of the RBDA, as originally defined at real-mode segment 0x40.
-
-ROMx86.BIOS.RESET_FLAG_WARMBOOT = 0x1234;   // value stored at ROMx86.BIOS.RESET_FLAG to indicate a "warm boot", bypassing memory tests
 
 /*
  * NOTE: There's currently no need for this component to have a reset() function, since
@@ -44574,7 +44681,7 @@ class RAM extends Component {
                  * and perhaps better alternative is to add "comment" attributes to the XML configuration file
                  * for these components, which the Computer component will display as it "powers up" components.
                  */
-                if (MAXDEBUG && this.fInstalled) this.status("specified size overrides SW1");
+                if (MAXDEBUG && !this.addrRAM && this.fInstalled) this.status("specified size overrides SW1");
 
                 /*
                  * Memory with an ID of "ramCPQ" is reserved for built-in memory located just below the 16Mb
@@ -44603,13 +44710,13 @@ class RAM extends Component {
             }
         }
         if (this.fAllocated) {
-            if (!this.fTestRAM) {
+            if (!this.addrRAM && !this.fTestRAM) {
                 /*
                  * HACK: Set the word at 40:72 in the ROM BIOS Data Area (RBDA) to 0x1234 to bypass the ROM BIOS
                  * memory storage tests. See rom.js for all RBDA definitions.
                  */
                 if (MAXDEBUG) this.status("ROM BIOS memory test has been disabled");
-                this.bus.setShortDirect(ROMx86.BIOS.RESET_FLAG, ROMx86.BIOS.RESET_FLAG_WARMBOOT);
+                this.bus.setShortDirect(ROMx86.BIOS.RESET_FLAG.ADDR, ROMx86.BIOS.RESET_FLAG.WARMBOOT);
             }
             /*
              * Don't add the "ramCPQ" memory to the CMOS total, because addCMOSMemory() will add it to the extended
@@ -44622,7 +44729,7 @@ class RAM extends Component {
             Component.error("No RAM allocated");
         }
     }
-
+    
     /**
      * save()
      *
@@ -45947,6 +46054,24 @@ class Keyboard extends Component {
          */
         if (this.abBuffer) {
             if (this.abBuffer.length < Keyboard.LIMIT.MAX_SCANCODES) {
+                if (DESKPRO386) {
+                    if (this.chipset && this.chipset.model == ChipSet.MODEL_COMPAQ_DESKPRO386) {
+                        /*
+                         * COMPAQ keyclick support is being disabled because we are currently unable to properly
+                         * simulate the keyclick sound, due to the way the COMPAQ DeskPro 386 ROM rapidly toggles
+                         * the speaker bit.  And there isn't really a better time to disable it, because the
+                         * COMPAQ_KEYCLICK byte is set by IBMBIO.COM initialization code in COMPAQ MS-DOS, if the
+                         * machine model byte is FC (indicating PC AT):
+                         * 
+                         *      &0070:2EF7 2E               CS:
+                         *      &0070:2EF8 803E442DFC       CMP      [2D44],FC
+                         *      &0070:2EFD 750C             JNZ      2F0B (IBMBIO.COM+0x3174)
+                         *      &0070:2EFF 26               ES:
+                         *      &0070:2F00 C606160401       MOV      [0416],01
+                         */
+                        this.bus.setByteDirect(ROMx86.BIOS.COMPAQ_KEYCLICK, 0);
+                    }
+                }
                 if (!COMPILED && this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(bScan) + " buffered");
                 this.abBuffer.push(bScan);
                 if (this.abBuffer.length == 1) {
@@ -46780,10 +46905,20 @@ class Keyboard extends Component {
              * also check for CTRL-ALT-PERIOD as an alias.  And what if you really wanted to type CTRL-ALT-BACKSPACE or
              * CTRL-ALT-PERIOD *without* them being transformed to CTRL-ALT-NUM_DEL?  Well, we leave that unlikely worry
              * for another day.
+             * 
+             * Similarly, for CTRL-ALT-NUM_ADD and CTRL-ALT-NUM_SUB, which many (most?) early Compaq machines used to
+             * adjust keyclick volume, we alias EQUALS to the numpad "+" and DASH to the numpad "-", since modern keyboards
+             * provide no easy way of explicitly typing a numeric keypad key.
              */
-            if (wCode == Keyboard.SCANCODE.BS || wCode == Keyboard.SCANCODE.PERIOD) {
-                if ((this.bitsState & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) == (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
+            if ((this.bitsState & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) == (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
+                if (wCode == Keyboard.SCANCODE.BS || wCode == Keyboard.SCANCODE.PERIOD) {
                     wCode = Keyboard.SCANCODE.NUM_DEL;
+                }
+                else if (wCode == Keyboard.SCANCODE.EQUALS) {
+                    wCode = Keyboard.SCANCODE.NUM_ADD;
+                }
+                else if (wCode == Keyboard.SCANCODE.DASH) {
+                    wCode = Keyboard.SCANCODE.NUM_SUB;
                 }
             }
 
@@ -46929,11 +47064,21 @@ Keyboard.SIMCODE = {
     HOME:         Keys.KEYCODE.HOME        + Keys.KEYCODE.ONDOWN,
     UP:           Keys.KEYCODE.UP          + Keys.KEYCODE.ONDOWN,
     PGUP:         Keys.KEYCODE.PGUP        + Keys.KEYCODE.ONDOWN,
-    NUM_SUB:      Keys.KEYCODE.NUM_SUB     + Keys.KEYCODE.ONDOWN,
     LEFT:         Keys.KEYCODE.LEFT        + Keys.KEYCODE.ONDOWN,
+    NUM_INS:      Keys.KEYCODE.NUM_INS     + Keys.KEYCODE.ONDOWN,
+    NUM_END:      Keys.KEYCODE.NUM_END     + Keys.KEYCODE.ONDOWN,
+    NUM_DOWN:     Keys.KEYCODE.NUM_DOWN    + Keys.KEYCODE.ONDOWN,
+    NUM_PGDN:     Keys.KEYCODE.NUM_PGDN    + Keys.KEYCODE.ONDOWN,
+    NUM_LEFT:     Keys.KEYCODE.NUM_LEFT    + Keys.KEYCODE.ONDOWN,
     NUM_CENTER:   Keys.KEYCODE.NUM_CENTER  + Keys.KEYCODE.ONDOWN,
-    RIGHT:        Keys.KEYCODE.RIGHT       + Keys.KEYCODE.ONDOWN,
+    NUM_RIGHT:    Keys.KEYCODE.NUM_RIGHT   + Keys.KEYCODE.ONDOWN,
+    NUM_HOME:     Keys.KEYCODE.NUM_HOME    + Keys.KEYCODE.ONDOWN,
+    NUM_UP:       Keys.KEYCODE.NUM_UP      + Keys.KEYCODE.ONDOWN,
+    NUM_PGUP:     Keys.KEYCODE.NUM_PGUP    + Keys.KEYCODE.ONDOWN,
     NUM_ADD:      Keys.KEYCODE.NUM_ADD     + Keys.KEYCODE.ONDOWN,
+    NUM_SUB:      Keys.KEYCODE.NUM_SUB     + Keys.KEYCODE.ONDOWN,
+    NUM_DEL:      Keys.KEYCODE.NUM_DEL     + Keys.KEYCODE.ONDOWN,
+    RIGHT:        Keys.KEYCODE.RIGHT       + Keys.KEYCODE.ONDOWN,
     END:          Keys.KEYCODE.END         + Keys.KEYCODE.ONDOWN,
     DOWN:         Keys.KEYCODE.DOWN        + Keys.KEYCODE.ONDOWN,
     PGDN:         Keys.KEYCODE.PGDN        + Keys.KEYCODE.ONDOWN,
@@ -47473,18 +47618,28 @@ Keyboard.SIMCODES[Keyboard.SIMCODE.F10]         = Keyboard.SCANCODE.F10;
 Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_LOCK]    = Keyboard.SCANCODE.NUM_LOCK;
 Keyboard.SIMCODES[Keyboard.SIMCODE.SCROLL_LOCK] = Keyboard.SCANCODE.SCROLL_LOCK;
 Keyboard.SIMCODES[Keyboard.SIMCODE.HOME]        = Keyboard.SCANCODE.NUM_HOME;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_HOME]    = Keyboard.SCANCODE.NUM_HOME;
 Keyboard.SIMCODES[Keyboard.SIMCODE.UP]          = Keyboard.SCANCODE.NUM_UP;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_UP]      = Keyboard.SCANCODE.NUM_UP;
 Keyboard.SIMCODES[Keyboard.SIMCODE.PGUP]        = Keyboard.SCANCODE.NUM_PGUP;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_SUB]     = Keyboard.SCANCODE.NUM_SUB;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_PGUP]    = Keyboard.SCANCODE.NUM_PGUP;
 Keyboard.SIMCODES[Keyboard.SIMCODE.LEFT]        = Keyboard.SCANCODE.NUM_LEFT;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_LEFT]    = Keyboard.SCANCODE.NUM_LEFT;
 Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_CENTER]  = Keyboard.SCANCODE.NUM_CENTER;
 Keyboard.SIMCODES[Keyboard.SIMCODE.RIGHT]       = Keyboard.SCANCODE.NUM_RIGHT;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_ADD]     = Keyboard.SCANCODE.NUM_ADD;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_RIGHT]   = Keyboard.SCANCODE.NUM_RIGHT;
 Keyboard.SIMCODES[Keyboard.SIMCODE.END]         = Keyboard.SCANCODE.NUM_END;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_END]     = Keyboard.SCANCODE.NUM_END;
 Keyboard.SIMCODES[Keyboard.SIMCODE.DOWN]        = Keyboard.SCANCODE.NUM_DOWN;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_DOWN]    = Keyboard.SCANCODE.NUM_DOWN;
 Keyboard.SIMCODES[Keyboard.SIMCODE.PGDN]        = Keyboard.SCANCODE.NUM_PGDN;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_PGDN]    = Keyboard.SCANCODE.NUM_PGDN;
 Keyboard.SIMCODES[Keyboard.SIMCODE.INS]         = Keyboard.SCANCODE.NUM_INS;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_INS]     = Keyboard.SCANCODE.NUM_INS;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_ADD]     = Keyboard.SCANCODE.NUM_ADD;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_SUB]     = Keyboard.SCANCODE.NUM_SUB;
 Keyboard.SIMCODES[Keyboard.SIMCODE.DEL]         = Keyboard.SCANCODE.NUM_DEL;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_DEL]     = Keyboard.SCANCODE.NUM_DEL;
 Keyboard.SIMCODES[Keyboard.SIMCODE.SYSREQ]      = Keyboard.SCANCODE.SYSREQ;
 /*
  * Entries beyond this point are for keys that existed only on 101-key keyboards (well, except for 'sysreq',
@@ -61042,7 +61197,7 @@ class FDC extends Component {
                     }
                 }
             }
-            controlSelect.onchange = function onChangeListDisks(event) {
+            controlSelect.onchange = function onChangeListDisks(/*event*/) {
                 fdc.updateSelectedDiskette();
             };
             return true;
@@ -61055,7 +61210,7 @@ class FDC extends Component {
              * loaded in a particular drive, you could click the drive control without having to change it.
              * However, that doesn't seem to work for all browsers, so I've reverted to onchange.
              */
-            controlSelect.onchange = function onChangeListDrives(event) {
+            controlSelect.onchange = function onChangeListDrives(/*event*/) {
                 var iDrive = Str.parseInt(controlSelect.value, 10);
                 if (iDrive != null) fdc.displayDiskette(iDrive);
             };
@@ -61063,7 +61218,7 @@ class FDC extends Component {
 
         case "loadDisk":
             this.bindings[sBinding] = control;
-            control.onclick = function onClickLoadDisk(event) {
+            control.onclick = function onClickLoadDisk(/*event*/) {
                 fdc.loadSelectedDisk();
             };
             return true;
@@ -61087,7 +61242,7 @@ class FDC extends Component {
                 return false;
             }
             this.bindings[sBinding] = control;
-            control.onclick = function onClickSaveDisk(event) {
+            control.onclick = function onClickSaveDisk(/*event*/) {
                 var controlDrives = fdc.bindings["listDrives"];
                 if (controlDrives && controlDrives.options && fdc.aDrives) {
                     var iDriveSelected = Str.parseInt(controlDrives.value, 10) || 0;
@@ -62451,11 +62606,9 @@ class FDC extends Component {
         }
         else if (!(this.regOutput & FDC.REG_OUTPUT.ENABLE)) {
             /*
-             * When FDC.REG_OUTPUT.ENABLE transitions from 0 to 1, generate an interrupt.
+             * When FDC.REG_OUTPUT.ENABLE transitions from 0 to 1, generate an interrupt (assuming INT_ENABLE is set).
              */
-            if (this.regOutput & FDC.REG_OUTPUT.INT_ENABLE) {
-                if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.FDC);
-            }
+            this.requestInterrupt();
         }
         /*
          * This no longer updates the internally selected drive (this.iDrive) based on regOutput, because (a) there seems
@@ -62875,11 +63028,7 @@ class FDC extends Component {
          * TODO: Technically, interrupt request status should be cleared by the FDC.REG_DATA.CMD.SENSE_INT command; in fact,
          * if that command is issued and no interrupt was pending, then FDC.REG_DATA.RES.INVALID should be returned (via ST0).
          */
-        if (this.regOutput & FDC.REG_OUTPUT.INT_ENABLE) {
-            if (drive && !(drive.resCode & FDC.REG_DATA.RES.NOT_READY) && fIRQ) {
-                if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.FDC);
-            }
-        }
+        this.requestInterrupt(drive && !(drive.resCode & FDC.REG_DATA.RES.NOT_READY) && fIRQ);
     }
 
     /**
@@ -62972,6 +63121,39 @@ class FDC extends Component {
      // this.nSRT = this.popCmd(FDC.TERMS.SRT);
     }
 
+    /**
+     * requestInterrupt(fCondition)
+     * 
+     * Request an FDC interrupt, as long as INT_ENABLE is set (and the optional supplied condition, if any, is true).
+     * 
+     * @this {FDC}
+     * @param [fCondition] (default is true)
+     */
+    requestInterrupt(fCondition = true)
+    {
+        if (fCondition && (this.regOutput & FDC.REG_OUTPUT.INT_ENABLE)) {
+            /*
+             * When the Windows 95 HSFLOP ("High-Speed Floppy") VxD performs its diskette change-line detection logic
+             * ("determine_changeline"), it sets a special callback ("dcl_callback_int_entry") for its interrupt handler
+             * to invoke, then issues a READ_ID command, and then sets a bit telling its interrupt handler to expect an
+             * interrupt ("FLP_NEC_INT_EXPECTED").
+             * 
+             * Technically, it should have set *both* "dcl_callback_int_entry" *and* "FLP_NEC_INT_EXPECTED" *before*
+             * issuing the READ_ID command, but I imagine the author assumed all was fine, since interrupts had been
+             * disabled with a "cli" beforehand and had not been re-enabled with an "sti" yet.  But alas, the function
+             * used to the issue the READ_ID command ("NecOut") immediately re-enabled interrupts.
+             * 
+             * So, if we request an interrupt immediately after the READ_ID command, the interrupt handler will think
+             * our interrupt is spurious (ie, not EXPECTED).  In this particular case, there are only about 10 instructions
+             * executed from the time READ_ID is issued until the "FLP_NEC_INT_EXPECTED" bit is set, but I'm going to
+             * triple that, in part because I wouldn't be surprised if there are other places where a similar assumption
+             * exists (ie, either that "NecOut" leaves interrupts disabled, or simply that the floppy controller is an
+             * inherently slow device).
+             */
+            if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.FDC, 32);
+        }
+    }
+    
     /**
      * beginResult()
      *
@@ -63473,7 +63655,7 @@ FDC.REG_DATA = {
         WRITE_DATA:     0x05,
         READ_DATA:      0x06,
         RECALIBRATE:    0x07,
-        SENSE_INT:      0x08,       // this command is used to clear the FDC interrupt following the clearing/setting of FDC.REG_OUTPUT.ENABLE
+        SENSE_INT:      0x08,           // this command is used to clear the FDC interrupt following the clearing/setting of FDC.REG_OUTPUT.ENABLE
         WRITE_DEL_DATA: 0x09,
         READ_ID:        0x0A,
         READ_DEL_DATA:  0x0C,
@@ -63483,9 +63665,9 @@ FDC.REG_DATA = {
         SCAN_LO_EQUAL:  0x19,
         SCAN_HI_EQUAL:  0x1D,
         MASK:           0x1F,
-        SK:             0x20,       // SK (Skip Deleted Data Address Mark)
-        MF:             0x40,       // MF (Modified Frequency Modulation)
-        MT:             0x80        // MT (Multi-Track; ie, data under both heads will be processed)
+        SK:             0x20,           // SK (Skip Deleted Data Address Mark)
+        MF:             0x40,           // MF (Modified Frequency Modulation)
+        MT:             0x80            // MT (Multi-Track; ie, data under both heads will be processed)
     },
     /*
      * FDC status/error results, generally assigned according to the corresponding ST0, ST1, ST2 or ST3 status bit.
@@ -63493,36 +63675,36 @@ FDC.REG_DATA = {
      * TODO: Determine when EQUIP_CHECK is *really* set; also, "77 step pulses" sounds suspiciously like a typo (it's not 79?)
      */
     RES: {
-        NONE:           0x00000000, // ST0 (IC): Normal termination of command (NT)
-        NOT_READY:      0x00000008, // ST0 (NR): When the FDD is in the not-ready state and a read or write command is issued, this flag is set; if a read or write command is issued to side 1 of a single sided drive, then this flag is set
-        EQUIP_CHECK:    0x00000010, // ST0 (EC): If a fault signal is received from the FDD, or if the track 0 signal fails to occur after 77 step pulses (recalibrate command), then this flag is set
-        SEEK_END:       0x00000020, // ST0 (SE): When the FDC completes the Seek command, this flag is set to 1 (high)
-        INCOMPLETE:     0x00000040, // ST0 (IC): Abnormal termination of command (AT); execution of command was started, but was not successfully completed
-        RESET:          0x000000C0, // ST0 (IC): Abnormal termination because during command execution the ready signal from the drive changed state
-        INVALID:        0x00000080, // ST0 (IC): Invalid command issue (IC); command which was issued was never started
+        NONE:           0x00000000,     // ST0 (IC): Normal termination of command (NT)
+        NOT_READY:      0x00000008,     // ST0 (NR): When the FDD is in the not-ready state and a read or write command is issued, this flag is set; if a read or write command is issued to side 1 of a single sided drive, then this flag is set
+        EQUIP_CHECK:    0x00000010,     // ST0 (EC): If a fault signal is received from the FDD, or if the track 0 signal fails to occur after 77 step pulses (recalibrate command), then this flag is set
+        SEEK_END:       0x00000020,     // ST0 (SE): When the FDC completes the Seek command, this flag is set to 1 (high)
+        INCOMPLETE:     0x00000040,     // ST0 (IC): Abnormal termination of command (AT); execution of command was started, but was not successfully completed
+        RESET:          0x000000C0,     // ST0 (IC): Abnormal termination because during command execution the ready signal from the drive changed state
+        INVALID:        0x00000080,     // ST0 (IC): Invalid command issue (IC); command which was issued was never started
         ST0:            0x000000FF,
-        NO_ID_MARK:     0x00000100, // ST1 (MA): If the FDC cannot detect the ID Address Mark, this flag is set; at the same time, the MD (Missing Address Mark in Data Field) of Status Register 2 is set
-        NOT_WRITABLE:   0x00000200, // ST1 (NW): During Execution of a Write Data, Write Deleted Data, or Format a Cylinder command, if the FDC detects a write protect signal from the FDD, then this flag is set
-        NO_DATA:        0x00000400, // ST1 (ND): FDC cannot find specified sector (or specified ID if READ_ID command)
-        DMA_OVERRUN:    0x00001000, // ST1 (OR): If the FDC is not serviced by the main systems during data transfers within a certain time interval, this flag is set
-        CRC_ERROR:      0x00002000, // ST1 (DE): When the FDC detects a CRC error in either the ID field or the data field, this flag is set
-        END_OF_CYL:     0x00008000, // ST1 (EN): When the FDC tries to access a sector beyond the final sector of a cylinder, this flag is set
+        NO_ID_MARK:     0x00000100,     // ST1 (MA): If the FDC cannot detect the ID Address Mark, this flag is set; at the same time, the MD (Missing Address Mark in Data Field) of Status Register 2 is set
+        NOT_WRITABLE:   0x00000200,     // ST1 (NW): During Execution of a Write Data, Write Deleted Data, or Format a Cylinder command, if the FDC detects a write protect signal from the FDD, then this flag is set
+        NO_DATA:        0x00000400,     // ST1 (ND): FDC cannot find specified sector (or specified ID if READ_ID command)
+        DMA_OVERRUN:    0x00001000,     // ST1 (OR): If the FDC is not serviced by the main systems during data transfers within a certain time interval, this flag is set
+        CRC_ERROR:      0x00002000,     // ST1 (DE): When the FDC detects a CRC error in either the ID field or the data field, this flag is set
+        END_OF_CYL:     0x00008000,     // ST1 (EN): When the FDC tries to access a sector beyond the final sector of a cylinder, this flag is set
         ST1:            0x0000FF00,
-        NO_DATA_MARK:   0x00010000, // ST2 (MD): When data is read from the medium, if the FDC cannot find a Data Address Mark or Deleted Data Address Mark, then this flag is set
-        BAD_CYL:        0x00020000, // ST2 (BC): This bit is related to the ND bit, and when the contents of C on the medium are different from that stored in the ID Register, and the content of C is FF, then this flag is set
-        SCAN_FAILED:    0x00040000, // ST2 (SN): During execution of the Scan command, if the FDC cannot find a sector on the cylinder which meets the condition, then this flag is set
-        SCAN_EQUAL:     0x00080000, // ST2 (SH): During execution of the Scan command, if the condition of "equal" is satisfied, this flag is set
-        WRONG_CYL:      0x00100000, // ST2 (WC): This bit is related to the ND bit, and when the contents of C on the medium are different from that stored in the ID Register, this flag is set
-        DATA_FIELD:     0x00200000, // ST2 (DD): If the FDC detects a CRC error in the data, then this flag is set
-        STRL_MARK:      0x00400000, // ST2 (CM): During execution of the Read Data or Scan command, if the FDC encounters a sector which contains a Deleted Data Address Mark, this flag is set
+        NO_DATA_MARK:   0x00010000,     // ST2 (MD): When data is read from the medium, if the FDC cannot find a Data Address Mark or Deleted Data Address Mark, then this flag is set
+        BAD_CYL:        0x00020000,     // ST2 (BC): This bit is related to the ND bit, and when the contents of C on the medium are different from that stored in the ID Register, and the content of C is FF, then this flag is set
+        SCAN_FAILED:    0x00040000,     // ST2 (SN): During execution of the Scan command, if the FDC cannot find a sector on the cylinder which meets the condition, then this flag is set
+        SCAN_EQUAL:     0x00080000,     // ST2 (SH): During execution of the Scan command, if the condition of "equal" is satisfied, this flag is set
+        WRONG_CYL:      0x00100000,     // ST2 (WC): This bit is related to the ND bit, and when the contents of C on the medium are different from that stored in the ID Register, this flag is set
+        DATA_FIELD:     0x00200000,     // ST2 (DD): If the FDC detects a CRC error in the data, then this flag is set
+        STRL_MARK:      0x00400000,     // ST2 (CM): During execution of the Read Data or Scan command, if the FDC encounters a sector which contains a Deleted Data Address Mark, this flag is set
         ST2:            0x00FF0000,
-        DRIVE:          0x03000000, // ST3 (Ux): Status of the "Drive Select" signals from the diskette drive
-        HEAD:           0x04000000, // ST3 (HD): Status of the "Side Select" signal from the diskette drive
-        TWOSIDE:        0x08000000, // ST3 (TS): Status of the "Two Side" signal from the diskette drive
-        TRACK0:         0x10000000, // ST3 (T0): Status of the "Track 0" signal from the diskette drive
-        READY:          0x20000000, // ST3 (RY): Status of the "Ready" signal from the diskette drive
-        WRITEPROT:      0x40000000, // ST3 (WP): Status of the "Write Protect" signal from the diskette drive
-        FAULT:          0x80000000|0, // ST3 (FT): Status of the "Fault" signal from the diskette drive
+        DRIVE:          0x03000000,     // ST3 (Ux): Status of the "Drive Select" signals from the diskette drive
+        HEAD:           0x04000000,     // ST3 (HD): Status of the "Side Select" signal from the diskette drive
+        TWOSIDE:        0x08000000,     // ST3 (TS): Status of the "Two Side" signal from the diskette drive
+        TRACK0:         0x10000000,     // ST3 (T0): Status of the "Track 0" signal from the diskette drive
+        READY:          0x20000000,     // ST3 (RY): Status of the "Ready" signal from the diskette drive
+        WRITEPROT:      0x40000000,     // ST3 (WP): Status of the "Write Protect" signal from the diskette drive
+        FAULT:          0x80000000|0,   // ST3 (FT): Status of the "Fault" signal from the diskette drive
         ST3:            0xFF000000|0
     }
 };
@@ -73310,7 +73492,7 @@ class DebuggerX86 extends Debugger {
                 if (aSymbol[0]) {
                     sDelta = "";
                     nDelta = dbgAddr.off - aSymbol[1];
-                    if (nDelta) sDelta = " + " + Str.toHexWord(nDelta);
+                    if (nDelta) sDelta = " + " + Str.toHex(nDelta, 0, true);
                     s = aSymbol[0] + " (" + this.toHexOffset(aSymbol[1], dbgAddr.sel) + ')' + sDelta;
                     if (fPrint) this.println(s);
                     sSymbol = s;
@@ -73318,7 +73500,7 @@ class DebuggerX86 extends Debugger {
                 if (aSymbol.length > 4 && aSymbol[4]) {
                     sDelta = "";
                     nDelta = aSymbol[5] - dbgAddr.off;
-                    if (nDelta) sDelta = " - " + Str.toHexWord(nDelta);
+                    if (nDelta) sDelta = " - " + Str.toHex(nDelta, 0, true);
                     s = aSymbol[4] + " (" + this.toHexOffset(aSymbol[5], dbgAddr.sel) + ')' + sDelta;
                     if (fPrint) this.println(s);
                     if (!sSymbol) sSymbol = s;

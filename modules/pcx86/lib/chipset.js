@@ -153,7 +153,6 @@ class ChipSet extends Component {
          * To start, we create an audio context, unless the 'sound' parameter has been explicitly set to false
          * or 0; the boolean value true (along with any illegal number) now defaults to 0.5 instead of 1.0.
          */
-        this.fSpeaker = this.fUserSound = false;
         this.volumeInit = 0;
         let sound = parmsChipSet['sound'];
         if (sound) {
@@ -168,6 +167,13 @@ class ChipSet extends Component {
                 if (DEBUG) this.log("AudioContext not available");
             }
         }
+        /*
+         * fSpeakerEnabled indicates whether the speaker is *logically* on, whereas fSpeakerOn indicates
+         * whether we have ACTUALLY turned the speaker on.  And finally, fUserSound is set to true only after
+         * we have have created the audio oscillator in the context of a user event (a requirement for most
+         * browsers before they'll actually emit any sound).
+         */
+        this.fSpeakerEnabled = this.fSpeakerOn = this.fUserSound = false;
 
         /*
          * I used to defer ChipSet's reset() to powerUp(), which then gave us the option of doing either
@@ -4671,27 +4677,37 @@ class ChipSet extends Component {
     }
 
     /**
-     * setSpeaker(fOn)
+     * setSpeaker(fEnable)
      *
      * @this {ChipSet}
-     * @param {boolean} [fOn] true to turn speaker on, false to turn off, otherwise update as appropriate
+     * @param {boolean} [fEnable] true to enable speaker, false to disable it, otherwise update it as appropriate
      */
-    setSpeaker(fOn)
+    setSpeaker(fEnable)
     {
+        let fOn;
+        if (fEnable !== undefined) {
+            fOn = fEnable;
+            if (fOn != this.fSpeakerEnabled) {
+                // 
+                // Yielding doesn't seem to help the simulation of sound via rapid speaker toggling.
+                //
+                // if (this.cpu) {
+                //     this.cpu.yieldCPU();
+                // }
+                this.fSpeakerEnabled = fOn;
+            }
+        } else {
+            fOn = !!(this.fSpeakerEnabled && this.cpu && this.cpu.isRunning());
+        }
+        let freq = Math.round(ChipSet.TIMER_TICKS_PER_SEC / this.getTimerInit(ChipSet.PIT0.TIMER2));
+        if (freq < 20 || freq > 20000) {
+            /*
+             * Treat frequencies outside the normal hearing range (below 20hz or above 20Khz) as a clever
+             * attempt to turn sound off.
+             */
+            fOn = false;
+        }
         if (this.contextAudio) {
-            if (fOn !== undefined) {
-                this.fSpeaker = fOn;
-            } else {
-                fOn = !!(this.fSpeaker && this.cpu && this.cpu.isRunning());
-            }
-            let freq = Math.round(ChipSet.TIMER_TICKS_PER_SEC / this.getTimerInit(ChipSet.PIT0.TIMER2));
-            if (freq < 20 || freq > 20000) {
-                /*
-                 * Treat frequencies outside the normal hearing range (below 20hz or above 20Khz) as a clever
-                 * attempt to turn sound off.
-                 */
-                fOn = false;
-            }
             if (fOn && this.startAudio()) {
                 /*
                  * Instead of setting the frequency's 'value' property directly, as we used to do, we use the
@@ -4699,18 +4715,21 @@ class ChipSet extends Component {
                  * "de-zippering") of the frequency that browsers like to do.  Supposedly de-zippering is an
                  * attempt to avoid "pops" if the frequency is altered while the wave is still rising or falling.
                  * 
-                 * Ditto for gain.
+                 * Ditto for the gain's 'value'.
                  */
+                // this.oscillatorAudio['frequency']['value'] = freq;
                 this.oscillatorAudio['frequency']['setValueAtTime'](freq, 0);
+                // this.volumeAudio['gain']['value'] = this.volumeInit;
                 this.volumeAudio['gain']['setValueAtTime'](this.volumeInit, 0);
                 if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
             } else if (this.volumeAudio) {
                 this.volumeAudio['gain']['setValueAtTime'](0, 0);
                 if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
             }
-        } else if (fOn) {
+        } else if (fOn && this.fSpeakerOn != fOn) {
             this.printMessage("BEEP", Messages.SPEAKER);
         }
+        this.fSpeakerOn = fOn;
     }
 
     /**
@@ -4753,15 +4772,7 @@ class ChipSet extends Component {
                     this.volumeAudio = this.contextAudio['createGain']();
                     this.oscillatorAudio['connect'](this.volumeAudio);
                     this.volumeAudio['connect'](this.contextAudio['destination']);
-                    /*
-                     * Instead of setting the gain's 'value' property directly, as we used to do, we use the
-                     * setValueAtTime() method, with a time of zero, as a work-around to avoid the "easing" (aka
-                     * "de-zippering") of the gain that browsers like to do.  Supposedly de-zippering is an
-                     * attempt to avoid "pops" if the gain is altered while the wave is still rising or falling.
-                     * 
-                     *      this.volumeAudio['gain']['value'] = 0;
-                     */
-                    this.volumeAudio['gain']['setValueAtTime'](0, 0);
+                    this.volumeAudio['gain']['value'] = 0;
                     this.oscillatorAudio['type'] = "square";
                     this.oscillatorAudio['start'](0);
                     return true;

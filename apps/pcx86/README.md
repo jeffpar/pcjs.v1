@@ -38,6 +38,7 @@ A list of all the software available to PCx86 machines can be found in the [IBM 
 
 ### [1985](/apps/pcx86/1985/)
 
+* [Castle Adventure](/apps/pcx86/1985/castle_adventure/)
 * [Rogue](/apps/pcx86/1985/rogue/)
 
 ### [1986](/apps/pcx86/1986/)

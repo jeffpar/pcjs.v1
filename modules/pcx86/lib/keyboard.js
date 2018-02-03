@@ -982,6 +982,24 @@ class Keyboard extends Component {
          */
         if (this.abBuffer) {
             if (this.abBuffer.length < Keyboard.LIMIT.MAX_SCANCODES) {
+                if (DESKPRO386) {
+                    if (this.chipset && this.chipset.model == ChipSet.MODEL_COMPAQ_DESKPRO386) {
+                        /*
+                         * COMPAQ keyclick support is being disabled because we are currently unable to properly
+                         * simulate the keyclick sound, due to the way the COMPAQ DeskPro 386 ROM rapidly toggles
+                         * the speaker bit.  And there isn't really a better time to disable it, because the
+                         * COMPAQ_KEYCLICK byte is set by IBMBIO.COM initialization code in COMPAQ MS-DOS, if the
+                         * machine model byte is FC (indicating PC AT):
+                         * 
+                         *      &0070:2EF7 2E               CS:
+                         *      &0070:2EF8 803E442DFC       CMP      [2D44],FC
+                         *      &0070:2EFD 750C             JNZ      2F0B (IBMBIO.COM+0x3174)
+                         *      &0070:2EFF 26               ES:
+                         *      &0070:2F00 C606160401       MOV      [0416],01
+                         */
+                        this.bus.setByteDirect(ROMx86.BIOS.COMPAQ_KEYCLICK, 0);
+                    }
+                }
                 if (!COMPILED && this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(bScan) + " buffered");
                 this.abBuffer.push(bScan);
                 if (this.abBuffer.length == 1) {
@@ -1815,10 +1833,20 @@ class Keyboard extends Component {
              * also check for CTRL-ALT-PERIOD as an alias.  And what if you really wanted to type CTRL-ALT-BACKSPACE or
              * CTRL-ALT-PERIOD *without* them being transformed to CTRL-ALT-NUM_DEL?  Well, we leave that unlikely worry
              * for another day.
+             * 
+             * Similarly, for CTRL-ALT-NUM_ADD and CTRL-ALT-NUM_SUB, which many (most?) early Compaq machines used to
+             * adjust keyclick volume, we alias EQUALS to the numpad "+" and DASH to the numpad "-", since modern keyboards
+             * provide no easy way of explicitly typing a numeric keypad key.
              */
-            if (wCode == Keyboard.SCANCODE.BS || wCode == Keyboard.SCANCODE.PERIOD) {
-                if ((this.bitsState & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) == (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
+            if ((this.bitsState & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) == (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
+                if (wCode == Keyboard.SCANCODE.BS || wCode == Keyboard.SCANCODE.PERIOD) {
                     wCode = Keyboard.SCANCODE.NUM_DEL;
+                }
+                else if (wCode == Keyboard.SCANCODE.EQUALS) {
+                    wCode = Keyboard.SCANCODE.NUM_ADD;
+                }
+                else if (wCode == Keyboard.SCANCODE.DASH) {
+                    wCode = Keyboard.SCANCODE.NUM_SUB;
                 }
             }
 
@@ -1964,11 +1992,21 @@ Keyboard.SIMCODE = {
     HOME:         Keys.KEYCODE.HOME        + Keys.KEYCODE.ONDOWN,
     UP:           Keys.KEYCODE.UP          + Keys.KEYCODE.ONDOWN,
     PGUP:         Keys.KEYCODE.PGUP        + Keys.KEYCODE.ONDOWN,
-    NUM_SUB:      Keys.KEYCODE.NUM_SUB     + Keys.KEYCODE.ONDOWN,
     LEFT:         Keys.KEYCODE.LEFT        + Keys.KEYCODE.ONDOWN,
+    NUM_INS:      Keys.KEYCODE.NUM_INS     + Keys.KEYCODE.ONDOWN,
+    NUM_END:      Keys.KEYCODE.NUM_END     + Keys.KEYCODE.ONDOWN,
+    NUM_DOWN:     Keys.KEYCODE.NUM_DOWN    + Keys.KEYCODE.ONDOWN,
+    NUM_PGDN:     Keys.KEYCODE.NUM_PGDN    + Keys.KEYCODE.ONDOWN,
+    NUM_LEFT:     Keys.KEYCODE.NUM_LEFT    + Keys.KEYCODE.ONDOWN,
     NUM_CENTER:   Keys.KEYCODE.NUM_CENTER  + Keys.KEYCODE.ONDOWN,
-    RIGHT:        Keys.KEYCODE.RIGHT       + Keys.KEYCODE.ONDOWN,
+    NUM_RIGHT:    Keys.KEYCODE.NUM_RIGHT   + Keys.KEYCODE.ONDOWN,
+    NUM_HOME:     Keys.KEYCODE.NUM_HOME    + Keys.KEYCODE.ONDOWN,
+    NUM_UP:       Keys.KEYCODE.NUM_UP      + Keys.KEYCODE.ONDOWN,
+    NUM_PGUP:     Keys.KEYCODE.NUM_PGUP    + Keys.KEYCODE.ONDOWN,
     NUM_ADD:      Keys.KEYCODE.NUM_ADD     + Keys.KEYCODE.ONDOWN,
+    NUM_SUB:      Keys.KEYCODE.NUM_SUB     + Keys.KEYCODE.ONDOWN,
+    NUM_DEL:      Keys.KEYCODE.NUM_DEL     + Keys.KEYCODE.ONDOWN,
+    RIGHT:        Keys.KEYCODE.RIGHT       + Keys.KEYCODE.ONDOWN,
     END:          Keys.KEYCODE.END         + Keys.KEYCODE.ONDOWN,
     DOWN:         Keys.KEYCODE.DOWN        + Keys.KEYCODE.ONDOWN,
     PGDN:         Keys.KEYCODE.PGDN        + Keys.KEYCODE.ONDOWN,
@@ -2508,18 +2546,28 @@ Keyboard.SIMCODES[Keyboard.SIMCODE.F10]         = Keyboard.SCANCODE.F10;
 Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_LOCK]    = Keyboard.SCANCODE.NUM_LOCK;
 Keyboard.SIMCODES[Keyboard.SIMCODE.SCROLL_LOCK] = Keyboard.SCANCODE.SCROLL_LOCK;
 Keyboard.SIMCODES[Keyboard.SIMCODE.HOME]        = Keyboard.SCANCODE.NUM_HOME;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_HOME]    = Keyboard.SCANCODE.NUM_HOME;
 Keyboard.SIMCODES[Keyboard.SIMCODE.UP]          = Keyboard.SCANCODE.NUM_UP;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_UP]      = Keyboard.SCANCODE.NUM_UP;
 Keyboard.SIMCODES[Keyboard.SIMCODE.PGUP]        = Keyboard.SCANCODE.NUM_PGUP;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_SUB]     = Keyboard.SCANCODE.NUM_SUB;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_PGUP]    = Keyboard.SCANCODE.NUM_PGUP;
 Keyboard.SIMCODES[Keyboard.SIMCODE.LEFT]        = Keyboard.SCANCODE.NUM_LEFT;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_LEFT]    = Keyboard.SCANCODE.NUM_LEFT;
 Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_CENTER]  = Keyboard.SCANCODE.NUM_CENTER;
 Keyboard.SIMCODES[Keyboard.SIMCODE.RIGHT]       = Keyboard.SCANCODE.NUM_RIGHT;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_ADD]     = Keyboard.SCANCODE.NUM_ADD;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_RIGHT]   = Keyboard.SCANCODE.NUM_RIGHT;
 Keyboard.SIMCODES[Keyboard.SIMCODE.END]         = Keyboard.SCANCODE.NUM_END;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_END]     = Keyboard.SCANCODE.NUM_END;
 Keyboard.SIMCODES[Keyboard.SIMCODE.DOWN]        = Keyboard.SCANCODE.NUM_DOWN;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_DOWN]    = Keyboard.SCANCODE.NUM_DOWN;
 Keyboard.SIMCODES[Keyboard.SIMCODE.PGDN]        = Keyboard.SCANCODE.NUM_PGDN;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_PGDN]    = Keyboard.SCANCODE.NUM_PGDN;
 Keyboard.SIMCODES[Keyboard.SIMCODE.INS]         = Keyboard.SCANCODE.NUM_INS;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_INS]     = Keyboard.SCANCODE.NUM_INS;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_ADD]     = Keyboard.SCANCODE.NUM_ADD;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_SUB]     = Keyboard.SCANCODE.NUM_SUB;
 Keyboard.SIMCODES[Keyboard.SIMCODE.DEL]         = Keyboard.SCANCODE.NUM_DEL;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_DEL]     = Keyboard.SCANCODE.NUM_DEL;
 Keyboard.SIMCODES[Keyboard.SIMCODE.SYSREQ]      = Keyboard.SCANCODE.SYSREQ;
 /*
  * Entries beyond this point are for keys that existed only on 101-key keyboards (well, except for 'sysreq',

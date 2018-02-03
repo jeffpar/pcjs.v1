@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.3/manifest.xsl"?>
 <manifest type="software">
 	<title>Windows SDK 3.00</title>
-	<disk id="disk01" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK01.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK01.json" md5="865a8cf0692dc9ecdf6c8e74b3430884" md5json="655d088776b3826728d89e89cef5c50c">
+	<disk id="disk01" size="737280" chs="80:2:9" img="720K/archive/WIN30SDK_DISK01.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/720K/WIN30SDK-DISK01.json" md5="865a8cf0692dc9ecdf6c8e74b3430884" md5json="655d088776b3826728d89e89cef5c50c">
 		<name>Windows SDK 3.00 (720K Disk 01)</name>
 		<file size="83691" time="1990-06-01 03:00:00" attr="0x20">INSTALL.EXE</file>
 		<file size="15885" time="1990-06-01 03:00:00" attr="0x20">INSTALL.INF</file>
@@ -19,7 +19,7 @@
 		<file size="92" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">SDKPAINT.DAT</file>
 		<file size="5461" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">VGASYS.FNT</file>
 	</disk>
-	<disk id="disk02" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK02.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK02.json" md5="6429f8c0146b060f7081216217029820" md5json="3ec17477a4530cddf8bc0c4c58591b09">
+	<disk id="disk02" size="737280" chs="80:2:9" img="720K/archive/WIN30SDK_DISK02.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/720K/WIN30SDK-DISK02.json" md5="6429f8c0146b060f7081216217029820" md5json="3ec17477a4530cddf8bc0c4c58591b09">
 		<name>Windows SDK 3.00 (720K Disk 02)</name>
 		<file size="340" time="1990-06-01 08:55:56" attr="0x10">ANALYSIS</file>
 		<file size="36304" time="1990-06-01 03:00:00" attr="0x20" dir="ANALYSIS/">HEAPWALK.EXE</file>
@@ -49,7 +49,7 @@
 		<file size="10178" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">SDKTOOLS.GRP</file>
 		<file size="6224" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">ZOOMIN.EXE</file>
 	</disk>
-	<disk id="disk03" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK03.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK03.json" md5="816e657c01fd7b5e8e432ba2c8d34c1c" md5json="008b33c78bccc01adf2c3dbde4ca3f59">
+	<disk id="disk03" size="737280" chs="80:2:9" img="720K/archive/WIN30SDK_DISK03.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/720K/WIN30SDK-DISK03.json" md5="816e657c01fd7b5e8e432ba2c8d34c1c" md5json="008b33c78bccc01adf2c3dbde4ca3f59">
 		<name>Windows SDK 3.00 (720K Disk 03)</name>
 		<file size="136" time="1990-06-01 08:58:48" attr="0x10">DBGTOOLS</file>
 		<file size="390192" time="1990-06-01 03:00:00" attr="0x20" dir="DBGTOOLS/">CVW.EXE</file>
@@ -58,7 +58,7 @@
 		<file size="159762" time="1990-06-01 03:00:00" attr="0x20" dir="DEBUG/">GDI.EXE</file>
 		<file size="88346" time="1990-06-01 03:00:00" attr="0x20" dir="DEBUG/">KRNL286.EXE</file>
 	</disk>
-	<disk id="disk04" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK04.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK04.json" md5="e2ea543caa10aa7482fcb976351733b2" md5json="8f9c086ba96d08c0ff80c235683a833f">
+	<disk id="disk04" size="737280" chs="80:2:9" img="720K/archive/WIN30SDK_DISK04.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/720K/WIN30SDK-DISK04.json" md5="e2ea543caa10aa7482fcb976351733b2" md5json="8f9c086ba96d08c0ff80c235683a833f">
 		<name>Windows SDK 3.00 (720K Disk 04)</name>
 		<file size="340" time="1990-06-01 09:02:38" attr="0x10">DEBUG</file>
 		<file size="4004" time="1990-06-01 03:00:00" attr="0x20" dir="DEBUG/">GDI.SYM</file>
@@ -82,7 +82,7 @@
 		<file size="102" time="1990-06-01 09:03:52" attr="0x10">WINSTUB</file>
 		<file size="610" time="1990-06-01 03:00:00" attr="0x20" dir="WINSTUB/">WINSTUB.EXE</file>
 	</disk>
-	<disk id="disk05" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK05.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK05.json" md5="42478a907a5c04aff4c7be2e76ef41f5" md5json="087afe62f678feee3e10c0b744457758">
+	<disk id="disk05" size="737280" chs="80:2:9" img="720K/archive/WIN30SDK_DISK05.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/720K/WIN30SDK-DISK05.json" md5="42478a907a5c04aff4c7be2e76ef41f5" md5json="087afe62f678feee3e10c0b744457758">
 		<name>Windows SDK 3.00 (720K Disk 05)</name>
 		<file size="476" time="1990-06-01 09:05:16" attr="0x10">CLIB</file>
 		<file size="541" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">DLLCW.BAT</file>
@@ -111,7 +111,7 @@
 		<file size="1559" time="1990-06-01 03:00:00" attr="0x20" dir="WLIB/">SNOCRTD.LIB</file>
 		<file size="1577" time="1990-06-01 03:00:00" attr="0x20" dir="WLIB/">WIN87EM.LIB</file>
 	</disk>
-	<disk id="disk06" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK06.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK06.json" md5="bcfe69c767e4ca10744d3e7ee1d46278" md5json="7d51c6427e17be9e811c5905cc4f4e1e">
+	<disk id="disk06" size="737280" chs="80:2:9" img="720K/archive/WIN30SDK_DISK06.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/720K/WIN30SDK-DISK06.json" md5="bcfe69c767e4ca10744d3e7ee1d46278" md5json="7d51c6427e17be9e811c5905cc4f4e1e">
 		<name>Windows SDK 3.00 (720K Disk 06)</name>
 		<file size="340" time="1990-06-01 12:45:16" attr="0x10">CLIB</file>
 		<file size="13457" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">CDLLCW0.LIB</file>
@@ -131,7 +131,7 @@
 		<file size="837" time="1990-06-01 03:00:00" attr="0x20" dir="WINMEM32/">WINMEM32.H</file>
 		<file size="1536" time="1990-06-01 03:00:00" attr="0x20" dir="WINMEM32/">WINMEM32.LIB</file>
 	</disk>
-	<disk id="disk07" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK07.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK07.json" md5="85c3d4456cf910f612fdae8b22e4e0b2" md5json="803195e0c1d085cb0b098f375ada45be">
+	<disk id="disk07" size="737280" chs="80:2:9" img="720K/archive/WIN30SDK_DISK07.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/720K/WIN30SDK-DISK07.json" md5="85c3d4456cf910f612fdae8b22e4e0b2" md5json="803195e0c1d085cb0b098f375ada45be">
 		<name>Windows SDK 3.00 (720K Disk 07)</name>
 		<file size="408" time="1990-06-01 09:15:20" attr="0x10">BITMAP</file>
 		<file size="325" time="1990-06-01 03:00:00" attr="0x20" dir="BITMAP/">BITMAP</file>
@@ -262,7 +262,7 @@
 		<file size="108580" time="1990-06-01 03:00:00" attr="0x20" dir="INC/">WINDOWS.H</file>
 		<file size="58084" time="1990-06-01 03:00:00" attr="0x20" dir="INC/">WINDOWS.INC</file>
 	</disk>
-	<disk id="disk08" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK08.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK08.json" md5="9bda452f91c8309e888595ac6ba6d1e5" md5json="5786414e2d7431b22b523a1fe7a807b7">
+	<disk id="disk08" size="737280" chs="80:2:9" img="720K/archive/WIN30SDK_DISK08.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/720K/WIN30SDK-DISK08.json" md5="9bda452f91c8309e888595ac6ba6d1e5" md5json="5786414e2d7431b22b523a1fe7a807b7">
 		<name>Windows SDK 3.00 (720K Disk 08)</name>
 		<file size="816" time="1990-06-01 09:25:54" attr="0x10">HELPEX</file>
 		<file size="342" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">BULLET.BMP</file>
@@ -420,12 +420,12 @@
 		<file size="240" time="1990-06-01 03:00:00" attr="0x20" dir="TTY/">WSTDIO.H</file>
 		<file size="5410" time="1990-06-01 03:00:00" attr="0x20" dir="TTY/">WSTDIO.TXT</file>
 	</disk>
-	<disk id="disk09" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK09.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK09.json" md5="23d923f1f69ce71d398c1b9750d5717d" md5json="ee9a136836cf40e36ed43dc4517509bc">
+	<disk id="disk09" size="737280" chs="80:2:9" img="720K/archive/WIN30SDK_DISK09.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/720K/WIN30SDK-DISK09.json" md5="23d923f1f69ce71d398c1b9750d5717d" md5json="ee9a136836cf40e36ed43dc4517509bc">
 		<name>Windows SDK 3.00 (720K Disk 09)</name>
 		<file size="102" time="1990-06-01 09:31:22" attr="0x10">HELPADV</file>
 		<file size="688486" time="1990-06-01 03:00:00" attr="0x20" dir="HELPADV/">SDKADV.HL$</file>
 	</disk>
-	<disk id="disk10" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK10.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK10.json" md5="3e0cea404a88c2079fe660542ed02e5f" md5json="39fbadc7c8308f797d3c757ab9c6c612">
+	<disk id="disk10" size="737280" chs="80:2:9" img="720K/archive/WIN30SDK_DISK10.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/720K/WIN30SDK-DISK10.json" md5="3e0cea404a88c2079fe660542ed02e5f" md5json="39fbadc7c8308f797d3c757ab9c6c612">
 		<name>Windows SDK 3.00 (720K Disk 10)</name>
 		<file size="102" time="1990-06-01 09:32:56" attr="0x10">HELPWIN</file>
 		<file size="685389" time="1990-06-01 03:00:00" attr="0x20" dir="HELPWIN/">SDKWIN.HL$</file>
