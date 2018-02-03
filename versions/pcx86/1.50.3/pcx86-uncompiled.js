@@ -3807,11 +3807,9 @@ class Component {
                  *
                  * @this {Component}
                  * @param {string} s
-                 * @param {boolean} [fPrintOnly]
-                 * @param {string} [id]
                  * @return {boolean}
                  */
-                this.notice = function noticeControl(s, fPrintOnly, id) {
+                this.notice = function noticeControl(s /*, fPrintOnly, id*/) {
                     this.println(s, this.type);
                     return true;
                 };
@@ -38004,7 +38002,6 @@ class ChipSet extends Component {
          * To start, we create an audio context, unless the 'sound' parameter has been explicitly set to false
          * or 0; the boolean value true (along with any illegal number) now defaults to 0.5 instead of 1.0.
          */
-        this.fSpeaker = this.fUserSound = false;
         this.volumeInit = 0;
         let sound = parmsChipSet['sound'];
         if (sound) {
@@ -38019,6 +38016,13 @@ class ChipSet extends Component {
                 if (DEBUG) this.log("AudioContext not available");
             }
         }
+        /*
+         * fSpeakerEnabled indicates whether the speaker is *logically* on, whereas fSpeakerOn indicates
+         * whether we have ACTUALLY turned the speaker on.  And finally, fUserSound is set to true only after
+         * we have have created the audio oscillator in the context of a user event (a requirement for most
+         * browsers before they'll actually emit any sound).
+         */
+        this.fSpeakerEnabled = this.fSpeakerOn = this.fUserSound = false;
 
         /*
          * I used to defer ChipSet's reset() to powerUp(), which then gave us the option of doing either
@@ -42522,27 +42526,37 @@ class ChipSet extends Component {
     }
 
     /**
-     * setSpeaker(fOn)
+     * setSpeaker(fEnable)
      *
      * @this {ChipSet}
-     * @param {boolean} [fOn] true to turn speaker on, false to turn off, otherwise update as appropriate
+     * @param {boolean} [fEnable] true to enable speaker, false to disable it, otherwise update it as appropriate
      */
-    setSpeaker(fOn)
+    setSpeaker(fEnable)
     {
+        let fOn;
+        if (fEnable !== undefined) {
+            fOn = fEnable;
+            if (fOn != this.fSpeakerEnabled) {
+                // 
+                // Yielding doesn't seem to help the simulation of sound via rapid speaker toggling.
+                //
+                // if (this.cpu) {
+                //     this.cpu.yieldCPU();
+                // }
+                this.fSpeakerEnabled = fOn;
+            }
+        } else {
+            fOn = !!(this.fSpeakerEnabled && this.cpu && this.cpu.isRunning());
+        }
+        let freq = Math.round(ChipSet.TIMER_TICKS_PER_SEC / this.getTimerInit(ChipSet.PIT0.TIMER2));
+        if (freq < 20 || freq > 20000) {
+            /*
+             * Treat frequencies outside the normal hearing range (below 20hz or above 20Khz) as a clever
+             * attempt to turn sound off.
+             */
+            fOn = false;
+        }
         if (this.contextAudio) {
-            if (fOn !== undefined) {
-                this.fSpeaker = fOn;
-            } else {
-                fOn = !!(this.fSpeaker && this.cpu && this.cpu.isRunning());
-            }
-            let freq = Math.round(ChipSet.TIMER_TICKS_PER_SEC / this.getTimerInit(ChipSet.PIT0.TIMER2));
-            if (freq < 20 || freq > 20000) {
-                /*
-                 * Treat frequencies outside the normal hearing range (below 20hz or above 20Khz) as a clever
-                 * attempt to turn sound off.
-                 */
-                fOn = false;
-            }
             if (fOn && this.startAudio()) {
                 /*
                  * Instead of setting the frequency's 'value' property directly, as we used to do, we use the
@@ -42550,18 +42564,21 @@ class ChipSet extends Component {
                  * "de-zippering") of the frequency that browsers like to do.  Supposedly de-zippering is an
                  * attempt to avoid "pops" if the frequency is altered while the wave is still rising or falling.
                  * 
-                 * Ditto for gain.
+                 * Ditto for the gain's 'value'.
                  */
+                // this.oscillatorAudio['frequency']['value'] = freq;
                 this.oscillatorAudio['frequency']['setValueAtTime'](freq, 0);
+                // this.volumeAudio['gain']['value'] = this.volumeInit;
                 this.volumeAudio['gain']['setValueAtTime'](this.volumeInit, 0);
                 if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
             } else if (this.volumeAudio) {
                 this.volumeAudio['gain']['setValueAtTime'](0, 0);
                 if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
             }
-        } else if (fOn) {
+        } else if (fOn && this.fSpeakerOn != fOn) {
             this.printMessage("BEEP", Messages.SPEAKER);
         }
+        this.fSpeakerOn = fOn;
     }
 
     /**
@@ -42604,15 +42621,7 @@ class ChipSet extends Component {
                     this.volumeAudio = this.contextAudio['createGain']();
                     this.oscillatorAudio['connect'](this.volumeAudio);
                     this.volumeAudio['connect'](this.contextAudio['destination']);
-                    /*
-                     * Instead of setting the gain's 'value' property directly, as we used to do, we use the
-                     * setValueAtTime() method, with a time of zero, as a work-around to avoid the "easing" (aka
-                     * "de-zippering") of the gain that browsers like to do.  Supposedly de-zippering is an
-                     * attempt to avoid "pops" if the gain is altered while the wave is still rising or falling.
-                     * 
-                     *      this.volumeAudio['gain']['value'] = 0;
-                     */
-                    this.volumeAudio['gain']['setValueAtTime'](0, 0);
+                    this.volumeAudio['gain']['value'] = 0;
                     this.oscillatorAudio['type'] = "square";
                     this.oscillatorAudio['start'](0);
                     return true;
@@ -44129,7 +44138,7 @@ class ROMx86 extends Component {
             var sProgress = "Loading " + this.sFileURL + "...";
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
                 rom.doneLoad(sURL, sResponse, nErrorCode);
-            }, function(nState) {
+            }, function(/*nState*/) {
                 rom.println(sProgress, Component.PRINT.PROGRESS);
             });
         }
@@ -44394,21 +44403,119 @@ class ROMx86 extends Component {
 }
 
 /*
- * ROM BIOS Data Area (RBDA) definitions, in physical address form, using the same ALL-CAPS names
- * found in the original IBM PC ROM BIOS listing.  TODO: Fill in remaining RBDA holes.
+ * ROM BIOS Data Area (RBDA) definitions, in physical address form, using the same CAPITALIZED names
+ * found in the original IBM PC ROM BIOS listing.
  */
 ROMx86.BIOS = {
-    RS232_BASE:     0x400,              // 4 (word) I/O addresses of RS-232 adapters
-    PRINTER_BASE:   0x408,              // 4 (word) I/O addresses of printer adapters
-    EQUIP_FLAG:     0x410,              // installed hardware (word)
-    MFG_TEST:       0x412,              // initialization flag (byte)
-    MEMORY_SIZE:    0x413,              // memory size in K-bytes (word)
-    RESET_FLAG:     0x472               // set to 0x1234 if keyboard reset underway (word)
+    RS232_BASE:     0x400,              // ADDRESSES OF RS232 ADAPTERS (4 words)
+    PRINTER_BASE:   0x408,              // ADDRESSES OF PRINTERS (4 words)
+    EQUIP_FLAG: {                       // INSTALLED HARDWARE (word)
+        ADDR:       0x410,
+        NUM_PRINT:      0xC000,         // NUMBER OF PRINTERS ATTACHED
+        GAME_CTRL:      0x1000,         // GAME I/O ATTACHED
+        NUM_RS232:      0x0E00,         // NUMBER OF RS232 CARDS ATTACHED
+        NUM_DRIVES:     0x00C0,         // NUMBER OF DISKETTE DRIVES (00=1, 01=2, 10=3, 11=4) ONLY IF IPL_DRIVE SET
+        VIDEO_MODE:     0x0030,         // INITIAL VIDEO MODE (00=UNUSED, 01=40X25 COLOR, 10=80X25 COLOR, 11=80X25 MONO)
+        RAM_SIZE:       0x000C,         // PLANAR RAM SIZE (00=16K,01=32K,10=48K,11=64K)
+        IPL_DRIVE:      0x0001          // IPL (Initial Program Load) FROM DISKETTE (ie, diskette drives exist)
+    },
+    MFG_TEST:       0x412,              // INITIALIZATION FLAG (byte)
+    MEMORY_SIZE:    0x413,              // MEMORY SIZE IN K BYTES (word)
+    IO_RAM_SIZE:    0x415,              // MEMORY IN I/O CHANNEL (word)
+    COMPAQ_PREV_SC: 0x415,              // COMPAQ DESKPRO 386: PREVIOUS SCAN CODE (byte)
+    COMPAQ_KEYCLICK:0x416,              // COMPAQ DESKPRO 386: KEYCLICK LOUDNESS (byte)
+    /*
+     * KEYBOARD DATA AREAS
+     */
+    KB_FLAG: {                          // FIRST BYTE OF KEYBOARD STATUS (byte)
+        ADDR:       0x417,              //
+        INS_STATE:      0x80,           // INSERT STATE IS ACTIVE
+        CAPS_STATE:     0x40,           // CAPS LOCK STATE HAS BEEN TOGGLED
+        NUM_STATE:      0x20,           // NUM LOCK STATE HAS BEEN TOGGLED
+        SCROLL_STATE:   0x10,           // SCROLL LOCK STATE HAS BEEN TOGGLED
+        ALT_SHIFT:      0x08,           // ALTERNATE SHIFT KEY DEPRESSED
+        CTL_SHIFT:      0x04,           // CONTROL SHIFT KEY DEPRESSED
+        LEFT_SHIFT:     0x02,           // LEFT SHIFT KEY DEPRESSED
+        RIGHT_SHIFT:    0x01            // RIGHT SHIFT KEY DEPRESSED
+    },
+    KB_FLAG_1: {                        // SECOND BYTE OF KEYBOARD STATUS (byte)
+        ADDR:       0x418,              //
+        INS_SHIFT:      0x80,           // INSERT KEY IS DEPRESSED
+        CAPS_SHIFT:     0x40,           // CAPS LOCK KEY IS DEPRESSED
+        NUM_SHIFT:      0x20,           // NUM LOCK KEY IS DEPRESSED
+        SCROLL_SHIFT:   0x10,           // SCROLL LOCK KEY IS DEPRESSED
+        HOLD_STATE:     0x08            // SUSPEND KEY HAS BEEN TOGGLED
+    },
+    ALT_INPUT:      0x419,              // STORAGE FOR ALTERNATE KEYPAD ENTRY (byte)
+    BUFFER_HEAD:    0x41A,              // POINTER TO HEAD OF KEYBOARD BUFFER (word)
+    BUFFER_TAIL:    0x41C,              // POINTER TO TAIL OF KEYBOARD BUFFER (word)
+    KB_BUFFER:      0x41E,              // ROOM FOR 15 ENTRIES (16 words)
+    KB_BUFFER_END:  0x43E,              // HEAD = TAIL INDICATES THAT THE BUFFER IS EMPTY
+    /*
+     * DISKETTE DATA AREAS
+     */
+    SEEK_STATUS: {                      // DRIVE RECALIBRATION STATUS (byte)
+        ADDR:       0x43E,              //
+                                        //      BIT 3-0 = DRIVE 3-0 NEEDS RECAL BEFORE
+                                        //      NEXT SEEK IF BIT IS = 0
+        INT_FLAG:       0x80,           // INTERRUPT OCCURRENCE FLAG
+    },
+    MOTOR_STATUS:   0x43F,              // MOTOR STATUS (byte)
+                                        //      BIT 3-0 = DRIVE 3-0 IS CURRENTLY RUNNING
+                                        //      BIT 7 = CURRENT OPERATION IS A WRITE, REQUIRES DELAY
+    MOTOR_COUNT:    0x440,              // TIME OUT COUNTER FOR DRIVE TURN OFF
+                                        //      37 == TWO SECONDS OF COUNTS FOR MOTOR TURN OFF
+    DISKETTE_STATUS: {                  // SINGLE BYTE OF RETURN CODE INFO FOR STATUS
+        ADDR:       0x441,
+        TIME_OUT:       0x80,           // ATTACHMENT FAILED TO RESPOND
+        BAD_SEEK:       0x40,           // SEEK OPERATION FAILED
+        BAD_NEC:        0x20,           // NEC CONTROLLER HAS FAILED
+        BAD_CRC:        0x10,           // BAD CRC ON DISKETTE READ
+        DMA_BOUNDARY:   0x09,           // ATTEMPT TO DMA ACROSS 64K BOUNDARY
+        BAD_DMA:        0x08,           // DMA OVERRUN ON OPERATION
+        RECORD_NOT_FND: 0x04,           // REQUESTED SECTOR NOT FOUND
+        WRITE_PROTECT:  0x03,           // WRITE ATTEMPTED ON WRITE PROT DISK
+        BAD_ADDR_MARK:  0x02,           // ADDRESS MARK NOT FOUND
+        BAD_CMD:        0x01            // BAD COMMAND PASSED TO DISKETTE I/O
+    },
+    NEC_STATUS:     0x442,              // STATUS BYTES FROM NEC (7 bytes)
+    /*
+     * VIDEO DISPLAY DATA AREA
+     */
+    CRT_MODE:       0x449,              // CURRENT CRT MODE (byte)
+    CRT_COLS:       0x44A,              // NUMBER OF COLUMNS ON SCREEN (word)
+    CRT_LEN:        0x44C,              // LENGTH OF REGEN IN BYTES (word)
+    CRT_START:      0x44E,              // STARTING ADDRESS IN REGEN BUFFER (word)
+    CURSOR_POSN:    0x450,              // CURSOR FOR EACH OF UP TO 8 PAGES (8 words)
+    CURSOR_MODE:    0x460,              // CURRENT CURSOR MODE SETTING (word)
+    ACTIVE_PAGE:    0x462,              // CURRENT PAGE BEING DISPLAYED (byte)
+    ADDR_6845:      0x463,              // BASE ADDRESS FOR ACTIVE DISPLAY CARD (word)
+    CRT_MODE_SET:   0x465,              // CURRENT SETTING OF THE 3X8 REGISTER (byte)
+    CRT_PALLETTE:   0x466,              // CURRENT PALLETTE SETTING COLOR CARD (byte)
+    /*
+     * CASSETTE DATA AREA
+     */
+    EDGE_CNT:       0x467,              // TIME COUNT AT DATA EDGE (word)
+    CRC_REG:        0x469,              // CRC REGISTER (word)
+    LAST_VAL:       0x46B,              // LAST INPUT VALUE (byte)
+    /*
+     * TIMER DATA AREA
+     */
+    TIMER_LOW:      0x46C,              // LOW WORD OF TIMER COUNT (word)
+    TIMER_HIGH:     0x46E,              // HIGH WORD OF TIMER COUNT (word)
+    TIMER_OFL:      0x470,              // TIMER HAS ROLLED OVER SINCE LAST READ (byte)
+    /*
+     * SYSTEM DATA AREA
+     */
+    BIOS_BREAK:     0x471,              // BIT 7 = 1 IF BREAK KEY HAS BEEN DEPRESSED (byte)
+    RESET_FLAG: {
+        ADDR:       0x472,              // SET TO 0x1234 IF KEYBOARD RESET UNDERWAY (word)
+        WARMBOOT:       0x1234          // this value indicates a "warm boot", bypassing memory tests
+    }
+    /*
+     * RESET_FLAG is the traditional end of the RBDA, as originally defined in real-mode segment 0x40.
+     */
 };
-
-// RESET_FLAG is the traditional end of the RBDA, as originally defined at real-mode segment 0x40.
-
-ROMx86.BIOS.RESET_FLAG_WARMBOOT = 0x1234;   // value stored at ROMx86.BIOS.RESET_FLAG to indicate a "warm boot", bypassing memory tests
 
 /*
  * NOTE: There's currently no need for this component to have a reset() function, since
@@ -44574,7 +44681,7 @@ class RAM extends Component {
                  * and perhaps better alternative is to add "comment" attributes to the XML configuration file
                  * for these components, which the Computer component will display as it "powers up" components.
                  */
-                if (MAXDEBUG && this.fInstalled) this.status("specified size overrides SW1");
+                if (MAXDEBUG && !this.addrRAM && this.fInstalled) this.status("specified size overrides SW1");
 
                 /*
                  * Memory with an ID of "ramCPQ" is reserved for built-in memory located just below the 16Mb
@@ -44603,13 +44710,13 @@ class RAM extends Component {
             }
         }
         if (this.fAllocated) {
-            if (!this.fTestRAM) {
+            if (!this.addrRAM && !this.fTestRAM) {
                 /*
                  * HACK: Set the word at 40:72 in the ROM BIOS Data Area (RBDA) to 0x1234 to bypass the ROM BIOS
                  * memory storage tests. See rom.js for all RBDA definitions.
                  */
                 if (MAXDEBUG) this.status("ROM BIOS memory test has been disabled");
-                this.bus.setShortDirect(ROMx86.BIOS.RESET_FLAG, ROMx86.BIOS.RESET_FLAG_WARMBOOT);
+                this.bus.setShortDirect(ROMx86.BIOS.RESET_FLAG.ADDR, ROMx86.BIOS.RESET_FLAG.WARMBOOT);
             }
             /*
              * Don't add the "ramCPQ" memory to the CMOS total, because addCMOSMemory() will add it to the extended
@@ -44622,7 +44729,7 @@ class RAM extends Component {
             Component.error("No RAM allocated");
         }
     }
-
+    
     /**
      * save()
      *
@@ -45947,6 +46054,24 @@ class Keyboard extends Component {
          */
         if (this.abBuffer) {
             if (this.abBuffer.length < Keyboard.LIMIT.MAX_SCANCODES) {
+                if (DESKPRO386) {
+                    if (this.chipset && this.chipset.model == ChipSet.MODEL_COMPAQ_DESKPRO386) {
+                        /*
+                         * COMPAQ keyclick support is being disabled because we are currently unable to properly
+                         * simulate the keyclick sound, due to the way the COMPAQ DeskPro 386 ROM rapidly toggles
+                         * the speaker bit.  And there isn't really a better time to disable it, because the
+                         * COMPAQ_KEYCLICK byte is set by IBMBIO.COM initialization code in COMPAQ MS-DOS, if the
+                         * machine model byte is FC (indicating PC AT):
+                         * 
+                         *      &0070:2EF7 2E               CS:
+                         *      &0070:2EF8 803E442DFC       CMP      [2D44],FC
+                         *      &0070:2EFD 750C             JNZ      2F0B (IBMBIO.COM+0x3174)
+                         *      &0070:2EFF 26               ES:
+                         *      &0070:2F00 C606160401       MOV      [0416],01
+                         */
+                        this.bus.setByteDirect(ROMx86.BIOS.COMPAQ_KEYCLICK, 0);
+                    }
+                }
                 if (!COMPILED && this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(bScan) + " buffered");
                 this.abBuffer.push(bScan);
                 if (this.abBuffer.length == 1) {
@@ -46780,10 +46905,20 @@ class Keyboard extends Component {
              * also check for CTRL-ALT-PERIOD as an alias.  And what if you really wanted to type CTRL-ALT-BACKSPACE or
              * CTRL-ALT-PERIOD *without* them being transformed to CTRL-ALT-NUM_DEL?  Well, we leave that unlikely worry
              * for another day.
+             * 
+             * Similarly, for CTRL-ALT-NUM_ADD and CTRL-ALT-NUM_SUB, which many (most?) early Compaq machines used to
+             * adjust keyclick volume, we alias EQUALS to the numpad "+" and DASH to the numpad "-", since modern keyboards
+             * provide no easy way of explicitly typing a numeric keypad key.
              */
-            if (wCode == Keyboard.SCANCODE.BS || wCode == Keyboard.SCANCODE.PERIOD) {
-                if ((this.bitsState & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) == (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
+            if ((this.bitsState & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) == (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
+                if (wCode == Keyboard.SCANCODE.BS || wCode == Keyboard.SCANCODE.PERIOD) {
                     wCode = Keyboard.SCANCODE.NUM_DEL;
+                }
+                else if (wCode == Keyboard.SCANCODE.EQUALS) {
+                    wCode = Keyboard.SCANCODE.NUM_ADD;
+                }
+                else if (wCode == Keyboard.SCANCODE.DASH) {
+                    wCode = Keyboard.SCANCODE.NUM_SUB;
                 }
             }
 

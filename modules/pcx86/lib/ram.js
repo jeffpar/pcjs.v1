@@ -34,6 +34,7 @@ if (NODE) {
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
     var PCX86       = require("./defines");
+    var ChipSet     = require("./chipset");
     var Memory      = require("./memory");
     var ROMx86      = require("./rom");
 }
@@ -177,7 +178,7 @@ class RAM extends Component {
                  * and perhaps better alternative is to add "comment" attributes to the XML configuration file
                  * for these components, which the Computer component will display as it "powers up" components.
                  */
-                if (MAXDEBUG && this.fInstalled) this.status("specified size overrides SW1");
+                if (MAXDEBUG && !this.addrRAM && this.fInstalled) this.status("specified size overrides SW1");
 
                 /*
                  * Memory with an ID of "ramCPQ" is reserved for built-in memory located just below the 16Mb
@@ -206,13 +207,13 @@ class RAM extends Component {
             }
         }
         if (this.fAllocated) {
-            if (!this.fTestRAM) {
+            if (!this.addrRAM && !this.fTestRAM) {
                 /*
                  * HACK: Set the word at 40:72 in the ROM BIOS Data Area (RBDA) to 0x1234 to bypass the ROM BIOS
                  * memory storage tests. See rom.js for all RBDA definitions.
                  */
                 if (MAXDEBUG) this.status("ROM BIOS memory test has been disabled");
-                this.bus.setShortDirect(ROMx86.BIOS.RESET_FLAG, ROMx86.BIOS.RESET_FLAG_WARMBOOT);
+                this.bus.setShortDirect(ROMx86.BIOS.RESET_FLAG.ADDR, ROMx86.BIOS.RESET_FLAG.WARMBOOT);
             }
             /*
              * Don't add the "ramCPQ" memory to the CMOS total, because addCMOSMemory() will add it to the extended
@@ -225,7 +226,7 @@ class RAM extends Component {
             Component.error("No RAM allocated");
         }
     }
-
+    
     /**
      * save()
      *

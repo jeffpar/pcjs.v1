@@ -3,6 +3,7 @@
 	<control type="list" binding="listDrives"/>
 	<control type="list" binding="listDisks">
 		<manifest ref="/disks/pcx86/empty/manifest.xml"/>
+		<manifest ref="/disks/pcx86/cpm/1.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/cpm/1.1b/manifest.xml"/>
 		<manifest ref="/disks/pcx86/diags/ibm/manifest.xml"/>
 		<manifest ref="/disks/pcx86/dos/ibm/0.90/manifest.xml"/>
