@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PCx86 Hard Drive Controller (HDC) component.
+ * @fileoverview Implements the PCx86 Hard Drive Controller (HDC) component
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
@@ -42,11 +42,8 @@ if (NODE) {
 }
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
- *
- * @unrestricted
+ * @class HDC
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class HDC extends Component {
     /**
@@ -895,8 +892,8 @@ class HDC extends Component {
         drive.fBusy = false;
         if ((drive.disk = disk)) {
             /*
-             * With the addition of notify(), users are now "alerted" whenever a diskette has finished loading;
-             * notify() is selective about its output, using print() if a print window is open, otherwise alert().
+             * With the addition of notice(), users are now "alerted" whenever a diskette has finished loading;
+             * notice() is selective about its output, using print() if a print window is open, otherwise alert().
              *
              * WARNING: This conversion of drive number to drive letter, starting with "C:" (0x43), is very simplistic
              * and is not guaranteed to match the drive mapping that DOS ultimately uses.

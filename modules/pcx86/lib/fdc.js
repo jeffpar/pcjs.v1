@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PCx86 Floppy Drive Controller (FDC) component.
+ * @fileoverview Implements the PCx86 Floppy Drive Controller (FDC) component
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
@@ -97,11 +97,8 @@ if (NODE) {
  */
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
- *
- * @unrestricted
+ * @class FDC
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class FDC extends Component {
     /**
@@ -274,7 +271,7 @@ class FDC extends Component {
                     }
                 }
             }
-            controlSelect.onchange = function onChangeListDisks(/*event*/) {
+            controlSelect.onchange = function onChangeListDisks(event) {
                 fdc.updateSelectedDiskette();
             };
             return true;
@@ -287,7 +284,7 @@ class FDC extends Component {
              * loaded in a particular drive, you could click the drive control without having to change it.
              * However, that doesn't seem to work for all browsers, so I've reverted to onchange.
              */
-            controlSelect.onchange = function onChangeListDrives(/*event*/) {
+            controlSelect.onchange = function onChangeListDrives(event) {
                 var iDrive = Str.parseInt(controlSelect.value, 10);
                 if (iDrive != null) fdc.displayDiskette(iDrive);
             };
@@ -295,7 +292,7 @@ class FDC extends Component {
 
         case "loadDisk":
             this.bindings[sBinding] = control;
-            control.onclick = function onClickLoadDisk(/*event*/) {
+            control.onclick = function onClickLoadDisk(event) {
                 fdc.loadSelectedDisk();
             };
             return true;
@@ -319,7 +316,7 @@ class FDC extends Component {
                 return false;
             }
             this.bindings[sBinding] = control;
-            control.onclick = function onClickSaveDisk(/*event*/) {
+            control.onclick = function onClickSaveDisk(event) {
                 var controlDrives = fdc.bindings["listDrives"];
                 if (controlDrives && controlDrives.options && fdc.aDrives) {
                     var iDriveSelected = Str.parseInt(controlDrives.value, 10) || 0;

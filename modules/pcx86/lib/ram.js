@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PCx86 RAM component.
+ * @fileoverview Implements the PCx86 RAM component
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
@@ -40,11 +40,8 @@ if (NODE) {
 }
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
- *
- * @unrestricted
+ * @class RAM
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class RAM extends Component {
     /**
@@ -278,11 +275,8 @@ class RAM extends Component {
 }
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
- *
- * @unrestricted
+ * @class CompaqController
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class CompaqController extends Controller {
     /**

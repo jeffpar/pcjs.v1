@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements PCx86 8086 opcode decoding.
+ * @fileoverview Implements PCx86 opcode handlers
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *

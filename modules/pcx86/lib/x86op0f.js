@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements PCx86 0x0F two-byte opcodes
+ * @fileoverview Implements PCx86 0x0F two-byte opcode handlers
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *

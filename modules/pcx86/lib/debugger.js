@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PCx86 Debugger component.
+ * @fileoverview Implements the PCx86 Debugger component
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
@@ -114,11 +114,8 @@ var DbgAddrX86;
  */
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
- *
- * @unrestricted
+ * @class DebuggerX86
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class DebuggerX86 extends Debugger {
     /**
@@ -216,12 +213,11 @@ class DebuggerX86 extends Debugger {
             this.historyInit();
 
             /*
-             * Initialize Debugger message support
+             * Initialize Debugger message and command support
              */
             this.afnDumpers = {};
             this.messageInit(parmsDbg['messages']);
-
-            this.sInitCommands = parmsDbg['commands'];
+            this.sCommandsInit = parmsDbg['commands'];
 
             /*
              * Make it easier to access Debugger commands from an external REPL, like the WebStorm "live" console
@@ -267,10 +263,11 @@ class DebuggerX86 extends Debugger {
         if (MAXDEBUG) this.chipset = cmp.getMachineComponent("ChipSet");
 
         /*
-         * Re-initialize Debugger message support if necessary
+         * Re-initialize Debugger message and command support as needed
          */
         var sMessages = cmp.getMachineParm('messages');
         if (sMessages) this.messageInit(sMessages);
+        this.sCommandsInit = cmp.getMachineParm('commands') || this.sCommandsInit;
 
         this.cchAddr = bus.getWidth() >> 2;
         this.maskAddr = bus.nBusLimit;
@@ -947,9 +944,9 @@ class DebuggerX86 extends Debugger {
                 500, 100,
                 function onClickDebugEnter(fRepeat) {
                     if (dbg.controlDebug) {
-                        var sCmds = dbg.controlDebug.value;
+                        var sCommands = dbg.controlDebug.value;
                         dbg.controlDebug.value = "";
-                        dbg.doCommands(sCmds, true);
+                        dbg.doCommands(sCommands, true);
                         return true;
                     }
                     if (DEBUG) dbg.log("no debugger input buffer");
@@ -2644,10 +2641,10 @@ class DebuggerX86 extends Debugger {
     {
         this.println("Type ? for help with PCx86 Debugger commands");
         this.updateStatus();
-        if (this.sInitCommands) {
-            var sCmds = this.sInitCommands;
-            this.sInitCommands = null;
-            this.doCommands(sCmds);
+        if (this.sCommandsInit) {
+            var sCommands = this.sCommandsInit;
+            this.sCommandsInit = null;
+            this.doCommands(sCommands);
         }
     }
 
@@ -6618,16 +6615,16 @@ class DebuggerX86 extends Debugger {
     }
 
     /**
-     * doCommands(sCmds, fSave)
+     * doCommands(sCommands, fSave)
      *
      * @this {DebuggerX86}
-     * @param {string} sCmds
+     * @param {string} sCommands
      * @param {boolean} [fSave]
      * @return {boolean} true if all commands processed, false if not
      */
-    doCommands(sCmds, fSave)
+    doCommands(sCommands, fSave)
     {
-        var a = this.parseCommand(sCmds, fSave);
+        var a = this.parseCommand(sCommands, fSave);
         for (var s in a) {
             if (!this.doCommand(a[+s])) return false;
         }

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements PCx86 general-purpose ModRegRM decoding.
+ * @fileoverview Implements PCx86 ModRegRM decoders
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *

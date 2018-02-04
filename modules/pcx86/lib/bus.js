@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PCx86 Bus component.
+ * @fileoverview Implements the PCx86 Bus component
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
@@ -38,14 +38,11 @@ if (NODE) {
 }
 
 /**
- * Think of this Controller class definition as an interface definition, implemented by the
- * Video Card class and the RAM CompaqController class.
+ * Think of this Controller class definition as an interface definition, implemented by the Video Card
+ * class and the RAM CompaqController class.
  * 
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
- *
- * @unrestricted
+ * @class Controller
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Controller {
     /**
@@ -73,11 +70,8 @@ class Controller {
 }
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
- *
- * @unrestricted
+ * @class Bus
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Bus extends Component {
     /**

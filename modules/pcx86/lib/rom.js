@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PCx86 ROM component.
+ * @fileoverview Implements the PCx86 ROM component
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
@@ -38,11 +38,8 @@ if (NODE) {
 }
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
- *
- * @unrestricted
+ * @class ROMx86
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class ROMx86 extends Component {
     /**
@@ -145,7 +142,7 @@ class ROMx86 extends Component {
             var sProgress = "Loading " + this.sFileURL + "...";
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
                 rom.doneLoad(sURL, sResponse, nErrorCode);
-            }, function(/*nState*/) {
+            }, function(nState) {
                 rom.println(sProgress, Component.PRINT.PROGRESS);
             });
         }
@@ -428,7 +425,8 @@ ROMx86.BIOS = {
     },
     MFG_TEST:       0x412,              // INITIALIZATION FLAG (byte)
     MEMORY_SIZE:    0x413,              // MEMORY SIZE IN K BYTES (word)
-    IO_RAM_SIZE:    0x415,              // MEMORY IN I/O CHANNEL (word)
+    IO_RAM_SIZE:    0x415,              // PC: MEMORY IN I/O CHANNEL (word)
+    MFG_ERR_FLAG:   0x415,              // PC AT: SCRATCHPAD FOR MANUFACTURING ERROR CODES (2 bytes)
     COMPAQ_PREV_SC: 0x415,              // COMPAQ DESKPRO 386: PREVIOUS SCAN CODE (byte)
     COMPAQ_KEYCLICK:0x416,              // COMPAQ DESKPRO 386: KEYCLICK LOUDNESS (byte)
     /*
@@ -502,9 +500,12 @@ ROMx86.BIOS = {
     /*
      * CASSETTE DATA AREA
      */
-    EDGE_CNT:       0x467,              // TIME COUNT AT DATA EDGE (word)
-    CRC_REG:        0x469,              // CRC REGISTER (word)
-    LAST_VAL:       0x46B,              // LAST INPUT VALUE (byte)
+    EDGE_CNT:       0x467,              // PC: TIME COUNT AT DATA EDGE (word)
+    CRC_REG:        0x469,              // PC: CRC REGISTER (word)
+    LAST_VAL:       0x46B,              // PC: LAST INPUT VALUE (byte)
+    IO_ROM_INIT:    0x467,              // PC AT: POINTER TO ROM INITIALIZATION ROUTINE
+    IO_ROM_SEG:     0x469,              // PC AT: POINTER TO I/O ROM SEGMENT
+    INTR_FLAG:      0x46B,              // PC AT: FLAG INDICATING AN INTERRUPT HAPPENED
     /*
      * TIMER DATA AREA
      */
@@ -515,13 +516,93 @@ ROMx86.BIOS = {
      * SYSTEM DATA AREA
      */
     BIOS_BREAK:     0x471,              // BIT 7 = 1 IF BREAK KEY HAS BEEN DEPRESSED (byte)
+    /*
+     * RESET_FLAG is the traditional end of the RBDA, as originally defined by the IBM PC
+     */
     RESET_FLAG: {
         ADDR:       0x472,              // SET TO 0x1234 IF KEYBOARD RESET UNDERWAY (word)
         WARMBOOT:       0x1234          // this value indicates a "warm boot", bypassing memory tests
-    }
+    },
     /*
-     * RESET_FLAG is the traditional end of the RBDA, as originally defined in real-mode segment 0x40.
+     * FIXED DISK DATA AREAS
      */
+    DISK_STATUS1:   0x474,              // PC AT: FIXED DISK STATUS (byte)
+    HF_NUM:         0x475,              // PC AT: COUNT OF FIXED DISK DRIVES (byte)
+    CONTROL_BYTE:   0x476,              // PC AT: HEAD CONTROL BYTE (byte)
+    PORT_OFF:       0x477,              // PC AT: RESERVED (PORT OFFSET) (byte)
+    /*
+     * TIME-OUT VARIABLES
+     */
+    PRINT_TIM_OUT:  0x478,              // PC AT: TIME OUT COUNTERS FOR PRINTER RESPONSE (4 bytes)
+    RS232_TIM_OUT:  0x47C,              // PC AT: TIME OUT COUNTERS FOR RS232 RESPONSE (4 bytes)
+    /*
+     * ADDITIONAL KEYBOARD DATA AREA
+     */
+    BUFFER_START:   0x480,              // PC AT: OFFSET OF KEYBOARD BUFFER START WITHIN SEGMENT 40H
+    BUFFER_END:     0x482,              // PC AT: OFFSET OF END OF BUFFER
+    /*
+     * EGA/PGA DISPLAY WORK AREA
+     */
+    ROWS:           0x484,              // PC AT: ROWS ON THE ACTIVE SCREEN (LESS 1) (byte)
+    POINTS:         0x485,              // PC AT: BYTES PER CHARACTER (word)
+    INFO:           0x487,              // PC AT: MODE OPTIONS (byte)
+    INFO_3:         0x488,              // PC AT: FEATURE BIT SWITCHES (1 byte, plus 2 reserved bytes)
+    /*
+     * ADDITIONAL MEDIA DATA
+     */
+    LASTRATE:       0x48B,              // PC AT: LAST DISKETTE DATA RATE SELECTED (byte)
+    HF_STATUS:      0x48C,              // PC AT: STATUS REGISTER (byte)
+    HF_ERROR:       0x48D,              // PC AT: ERROR REGISTER (byte)
+    HF_INT_FLAG:    0x48E,              // PC AT: FIXED DISK INTERRUPT FLAG (byte)
+    HF_CNTRL:       0x48F,              // PC AT: COMBO FIXED DISK/DISKETTE CARD BIT 0=1 (byte)
+    DSK_STATE:      0x490,              // PC AT: DRIVE 0/1 MEDIA/OPERATION STATES (4 bytes)
+    DSK_TRK:        0x494,              // PC AT: DRIVE 0/1 PRESENT CYLINDER (2 bytes)
+    /*
+     * ADDITIONAL KEYBOARD FLAGS
+     */
+    KB_FLAG_3: {
+        ADDR:       0x496,              // PC AT: KEYBOARD MODE STATE AND TYPE FLAGS (byte)
+        LC_E1:          0b00000001,     // LAST CODE WAS THE E1 HIDDEN CODE
+        LC_E0:          0b00000010,     // LAST CODE WAS THE E0 HIDDEN CODE
+        R_CTL_SHIFT:    0b00000100,     // RIGHT CTL KEY DOWN
+        R_ALT_SHIFT:    0b00001000,     // RIGHT ALT KEY DOWN
+        GRAPH_ON:       0b00001000,     // ALT GRAPHICS KEY DOWN (WT ONLY)
+        KBX:            0b00010000,     // ENHANCED KEYBOARD INSTALLED
+        SET_NUM_LK:     0b00100000,     // FORCE NUM LOCK IF READ ID AND KBX
+        LC_AB:          0b01000000,     // LAST CHARACTER WAS FIRST ID CHARACTER
+        RD_ID:          0b10000000      // DOING A READ ID (MUST BE BIT0)
+    },
+    KB_FLAG_2: {
+        ADDR:       0x497,              // PC AT: KEYBOARD LED FLAGS (byte)
+        KB_LEDS:        0b00000111,     // KEYBOARD LED STATE BITS
+        SCROLL_LOCK:    0b00000001,     // SCROLL LOCK INDICATOR
+        NUM_LOCK:       0b00000010,     // NUM LOCK INDICATOR
+        CAPS_LOCK:      0b00000100,     // CAPS LOCK INDICATOR
+        KB_FA:          0b00010000,     // ACKNOWLEDGMENT RECEIVED
+        KB_FE:          0b00100000,     // RESEND RECEIVED FLAG
+        KB_PR_LED:      0b01000000,     // MODE INDICATOR UPDATE
+        KB_ERR:         0b10000000      // KEYBOARD TRANSMIT ERROR FLAG
+    },
+    /*
+     * REAL TIME CLOCK DATA AREA
+     */
+    USER_FLAG:      0x498,              // PC AT: OFFSET ADDRESS OF USERS WAIT FLAG (word)
+    USER_FLAG_SEG:  0x49A,              // PC AT: SEGMENT ADDRESS OF USER WAIT FLAG (word)
+    RTC_LOW:        0x49C,              // PC AT: LOW WORD OF USER WAIT FLAG (word)
+    RTC_HIGH:       0x49E,              // PC AT: HIGH WORD OF USER WAIT FLAG (word)
+    RTC_WAIT_FLAG:  0x4A0,              // PC AT: WAIT ACTIVE FLAG (01=BUSY, 80=POSTED, 00=POST ACKNOWLEDGED) (byte)
+    /*
+     * AREA FOR NETWORK ADAPTER
+     */
+    NET:            0x4A1,              // PC AT: RESERVED FOR NETWORK ADAPTERS (7 bytes)
+    /*
+     * EGA/PGA PALETTE POINTER
+     */
+    SAVE_PTR:       0x4A8,              // PC AT: POINTER TO EGA PARAMETER CONTROL BLOCK (2 words)
+    /*
+     * DATA AREA - PRINT SCREEN
+     */
+    STATUS_BYTE:    0x500               // PRINT SCREEN STATUS BYTE (00=READY/OK, 01=BUSY, FF=ERROR) (byte)
 };
 
 /*
