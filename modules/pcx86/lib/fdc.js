@@ -1682,7 +1682,7 @@ class FDC extends Component {
             /*
              * When FDC.REG_OUTPUT.ENABLE transitions from 0 to 1, generate an interrupt (assuming INT_ENABLE is set).
              */
-            this.requestInterrupt();
+            this.requestInterrupt(true);
         }
         /*
          * This no longer updates the internally selected drive (this.iDrive) based on regOutput, because (a) there seems
@@ -2201,11 +2201,11 @@ class FDC extends Component {
      * Request an FDC interrupt, as long as INT_ENABLE is set (and the optional supplied condition, if any, is true).
      * 
      * @this {FDC}
-     * @param [fCondition] (default is true)
+     * @param {boolean} [fCondition]
      */
-    requestInterrupt(fCondition = true)
+    requestInterrupt(fCondition)
     {
-        if (fCondition && (this.regOutput & FDC.REG_OUTPUT.INT_ENABLE)) {
+        if ((this.regOutput & FDC.REG_OUTPUT.INT_ENABLE) && fCondition) {
             /*
              * When the Windows 95 HSFLOP ("High-Speed Floppy") VxD performs its diskette change-line detection logic
              * ("determine_changeline"), it sets a special callback ("dcl_callback_int_entry") for its interrupt handler
@@ -2220,11 +2220,13 @@ class FDC extends Component {
              * So, if we request an interrupt immediately after the READ_ID command, the interrupt handler will think
              * our interrupt is spurious (ie, not EXPECTED).  In this particular case, there are only about 10 instructions
              * executed from the time READ_ID is issued until the "FLP_NEC_INT_EXPECTED" bit is set, but I'm going to
-             * triple that, in part because I wouldn't be surprised if there are other places where a similar assumption
-             * exists (ie, either that "NecOut" leaves interrupts disabled, or simply that the floppy controller is an
-             * inherently slow device).
+             * add a little padding to that, in part because I wouldn't be surprised if there are other places where a
+             * similar assumption exists (ie, either that "NecOut" leaves interrupts disabled, or simply that the floppy
+             * controller is an inherently slow device).
+             * 
+             * TODO: Determine why the Football prototype disk fails to boot if we specify a larger delay (eg, 32).
              */
-            if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.FDC);
+            if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.FDC, 16);
         }
     }
     
