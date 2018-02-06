@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.5/manifest.xsl"?>
+<manifest type="software">
+	<title>Xenix</title>
+	<version>1.0</version>
+	<type>Operating System</type>
+	<category>Unix</category>
+	<company>IBM</company>
+	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/X-BOOT.img" href="/disks/pcx86/unix/ibm/xenix/1.0/BOOT.json" md5="db86492fce79f3f93f7a719032ddc1be" md5json="60526cc86006e9dea8f93c36508725e7">
+		<name>IBM Xenix 1.0 (BOOT)</name>
+	</disk>
+	<disk id="disk02" size="1228800" chs="80:2:15" img="archive/X-BASE1.img" href="/disks/pcx86/unix/ibm/xenix/1.0/BASE1.json" md5="0de138f6f89b7db360e026367c5a43e0" md5json="eabb9ef14f40fdc50489ea79c68448f9">
+		<name>IBM Xenix 1.0 (BASE1)</name>
+	</disk>
+	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/X-BASE2.img" href="/disks/pcx86/unix/ibm/xenix/1.0/BASE2.json" md5="efaed4227644e0c14b378bbf577905f9" md5json="fd49a9a62c47d768f70d4bd64c124333">
+		<name>IBM Xenix 1.0 (BASE2)</name>
+	</disk>
+	<disk id="disk04" size="1228800" chs="80:2:15" img="archive/X-BASE3.img" href="/disks/pcx86/unix/ibm/xenix/1.0/BASE3.json" md5="fbeb941bed45dfcb7aec2f26702703f5" md5json="40055ac043cf5eee9cb9dfa1c3ebc41e">
+		<name>IBM Xenix 1.0 (BASE3)</name>
+	</disk>
+	<disk id="disk05" size="1228800" chs="80:2:15" img="archive/IBM-XENIX-100-SDK1.img" href="/disks/pcx86/unix/ibm/xenix/1.0/IBM-XENIX-100-SDK1.json" md5="d8b0f95647dc7f24270f8ffa83c5d91a" md5json="6ca433299364ad8eeb8073b0612184ee">
+		<name>IBM Xenix 1.0 (SDK1)</name>
+	</disk>
+	<disk id="disk06" size="1228800" chs="80:2:15" img="archive/IBM-XENIX-100-SDK2.img" href="/disks/pcx86/unix/ibm/xenix/1.0/IBM-XENIX-100-SDK2.json" md5="617a138bc3081dd052c8eb5643fce28e" md5json="6af2834302fee189a28c86d9eb2808d9">
+		<name>IBM Xenix 1.0 (SDK2)</name>
+	</disk>
+	<disk id="disk07" size="1228800" chs="80:2:15" img="archive/IBM-XENIX-100-SDK3.img" href="/disks/pcx86/unix/ibm/xenix/1.0/IBM-XENIX-100-SDK3.json" md5="15fabfbd2e97ae560ede389890c79e5c" md5json="bff3b1f2af198667e573b972c5747bdb">
+		<name>IBM Xenix 1.0 (SDK3)</name>
+	</disk>
+	<disk id="disk08" size="1228800" chs="80:2:15" img="archive/IBM-XENIX-100-TEXT.img" href="/disks/pcx86/unix/ibm/xenix/1.0/IBM-XENIX-100-TEXT.json" md5="066bdc4832dd74aa88a4f67635a4d967" md5json="09a3414a6e3b9453f03ea1cf7eb20ae6">
+		<name>IBM Xenix 1.0 (TEXT)</name>
+	</disk>
+	<disk id="disk09" size="1228800" chs="80:2:15" img="archive/IBM-XENIX-100-EXT1.img" href="/disks/pcx86/unix/ibm/xenix/1.0/IBM-XENIX-100-EXT1.json" md5="0736697ede748d7e889801acda74745d" md5json="57e3a991a586b62de99845bf65b03cf9">
+		<name>IBM Xenix 1.0 (EXT1)</name>
+	</disk>
+	<disk id="disk10" size="1228800" chs="80:2:15" img="archive/IBM-XENIX-100-EXT2.img" href="/disks/pcx86/unix/ibm/xenix/1.0/IBM-XENIX-100-EXT2.json" md5="0627b656076239439baf942b83dc08fd" md5json="187e081d03edbbc505ac6b26a2ac0249">
+		<name>IBM Xenix 1.0 (EXT2)</name>
+	</disk>
+	<disk id="disk11" size="1228800" chs="80:2:15" img="archive/X2.img" href="/disks/pcx86/unix/ibm/xenix/1.0/X2.json" md5="36e935bc61cc2f7e09178b4434e25509" md5json="ece14d567fc1b88e51647d86f12b5ee3">
+		<name>IBM Xenix 1.0 (X2)</name>
+	</disk>
+	<disk id="disk12" size="1228800" chs="80:2:15" img="archive/X3.img" href="/disks/pcx86/unix/ibm/xenix/1.0/X3.json" md5="101a7e7377c20b237b8a7ffc078fff5a" md5json="24695300bb9db1b07fbf9822caadc541">
+		<name>IBM Xenix 1.0 (X3)</name>
+	</disk>
+</manifest>

@@ -2,10 +2,23 @@
 layout: page
 title: IBM PC Xenix 1.0
 permalink: /disks/pcx86/unix/ibm/xenix/1.0/
+machines:
+  - id: ibm5170
+    type: pcx86
+    debugger: true
+    config: /devices/pcx86/machine/5170/cga/640kb/rev3/debugger/machine.xml
+    autoMount:
+      A:
+        name: IBM Xenix 1.0 (BOOT)
+      B:
+        name: None
+    autoStart: true
 ---
 
 IBM PC Xenix 1.0
 ----------------
+
+{% include machine.html id="ibm5170" %}
 
 From [OS/2 Museum](http://www.os2museum.com/wp/ibm-pc-xenix/):
 
