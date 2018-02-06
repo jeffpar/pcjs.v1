@@ -71,7 +71,7 @@ if (NODE) {
 }
 
 /**
- * @class Computer
+ * class Computer
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Computer extends Component {
@@ -178,10 +178,10 @@ class Computer extends Component {
          * Find the appropriate CPU (and Debugger and Control Panel, if any)
          *
          * CLOSURE COMPILER TIP: To override the type of a right-hand expression (as we need to do here,
-         * where we know getComponentByType() will only return an X86CPU object or null), wrap the expression
+         * where we know getComponentByType() will only return an CPUX86 object or null), wrap the expression
          * in parentheses.  I never knew this until I stumbled across it in "Closure: The Definitive Guide".
          */
-        this.cpu = /** @type {X86CPU} */ (Component.getComponentByType("CPU", this.id));
+        this.cpu = /** @type {CPUX86} */ (Component.getComponentByType("CPU", this.id));
         if (!this.cpu) {
             Component.error("Unable to find CPU component");
             return;
@@ -1720,7 +1720,7 @@ class Computer extends Component {
      * neither.  In theory, there could be BOTH, but that would be unusual.
      *
      * TODO: Consider alternate approaches to these largely register-oriented display updates.  Ordinarily, we like to
-     * separate logic from presentation, and currently the X86CPU contains both, since it's the component that intimately
+     * separate logic from presentation, and currently the CPUX86 contains both, since it's the component that intimately
      * knows the names, number, sizes, etc, of all the active registers.  The Panel component is the logical candidate,
      * but Panel is an optional component; generally, only machines that include Debugger also include Panel.
      *

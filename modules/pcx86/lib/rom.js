@@ -38,7 +38,7 @@ if (NODE) {
 }
 
 /**
- * @class ROMx86
+ * class ROMx86
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class ROMx86 extends Component {
@@ -127,7 +127,7 @@ class ROMx86 extends Component {
      * @this {ROMx86}
      * @param {Computer} cmp
      * @param {Bus} bus
-     * @param {X86CPU} cpu
+     * @param {CPUX86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)

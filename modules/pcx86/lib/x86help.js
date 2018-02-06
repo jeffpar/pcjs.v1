@@ -120,7 +120,7 @@ X86.helpSub64 = function(r64Dst, r64Src)
 /**
  * helpDECreg(w)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} w
  * @return {number}
  */
@@ -139,7 +139,7 @@ X86.helpDECreg = function(w)
  *
  * Refer to: http://lxr.linux.no/linux+v2.6.22/lib/div64.c
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} dstLo (low 32-bit portion of dividend)
  * @param {number} dstHi (high 32-bit portion of dividend)
  * @param {number} src (32-bit divisor)
@@ -185,7 +185,7 @@ X86.helpDIV32 = function(dstLo, dstHi, src)
  *
  * Refer to: http://lxr.linux.no/linux+v2.6.22/lib/div64.c
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} dstLo (low 32-bit portion of dividend)
  * @param {number} dstHi (high 32-bit portion of dividend)
  * @param {number} src (32-bit divisor)
@@ -224,7 +224,7 @@ X86.helpIDIV32 = function(dstLo, dstHi, src)
 /**
  * helpINCreg(w)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} w
  * @return {number}
  */
@@ -243,7 +243,7 @@ X86.helpINCreg = function(w)
  *
  * TODO: Determine which CR0 bits, if any, cannot be modified by MOV CR0,reg.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} l
  */
 X86.helpLoadCR0 = function(l)
@@ -266,7 +266,7 @@ X86.helpLoadCR0 = function(l)
  *
  * This is called by an 80386 control instruction (ie, MOV CR3,reg) or an 80386 task switch.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} l
  */
 X86.helpLoadCR3 = function(l)
@@ -283,7 +283,7 @@ X86.helpLoadCR3 = function(l)
 /**
  * helpSETcc()
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {function(number,number)} fnSet
  */
 X86.helpSETcc = function(fnSet)
@@ -296,7 +296,7 @@ X86.helpSETcc = function(fnSet)
 /**
  * helpSHLDw(dst, src, count)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} dst
  * @param {number} src
  * @param {number} count (0-31)
@@ -319,7 +319,7 @@ X86.helpSHLDw = function(dst, src, count)
 /**
  * helpSHLDd(dst, src, count)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} dst
  * @param {number} src
  * @param {number} count
@@ -338,7 +338,7 @@ X86.helpSHLDd = function(dst, src, count)
 /**
  * helpSHRDw(dst, src, count)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} dst
  * @param {number} src
  * @param {number} count (0-31)
@@ -361,7 +361,7 @@ X86.helpSHRDw = function(dst, src, count)
 /**
  * helpSHRDd(dst, src, count)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} dst
  * @param {number} src
  * @param {number} count
@@ -380,7 +380,7 @@ X86.helpSHRDd = function(dst, src, count)
 /**
  * helpSRC1()
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @return {number}
  */
 X86.helpSRC1 = function()
@@ -392,7 +392,7 @@ X86.helpSRC1 = function()
 /**
  * helpSRCCL()
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @return {number}
  */
 X86.helpSRCCL = function()
@@ -405,7 +405,7 @@ X86.helpSRCCL = function()
 /**
  * helpSRCByte()
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @return {number}
  */
 X86.helpSRCByte = function()
@@ -418,7 +418,7 @@ X86.helpSRCByte = function()
 /**
  * helpSRCNone()
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @return {number|null}
  */
 X86.helpSRCNone = function()
@@ -433,7 +433,7 @@ X86.helpSRCNone = function()
  * calculation.  So opPOPmw() does the pop, saves the popped value in regXX, and this passes src function
  * to the EA worker.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @return {number} regXX
  */
 X86.helpSRCxx = function()
@@ -456,7 +456,7 @@ X86.helpSRCxx = function()
  * those pushes AND eliminate the need for pushData().  Unfortunately, load() is also used by loadIDT(), and loadIDT()
  * has different requirements (eg, pushing flags first), so it's not a trivial change.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} off
  * @param {number} sel
  */
@@ -492,7 +492,7 @@ X86.helpCALLF = function(off, sel)
  * how to load GDT and LDT descriptors, whereas interrupts must use setCS.loadIDT(), which deals exclusively
  * with IDT descriptors.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} nIDT
  * @param {number|null} [nError]
  * @param {number} [nCycles] (in addition to the default of nOpCyclesInt)
@@ -529,7 +529,7 @@ X86.helpINT = function(nIDT, nError, nCycles)
 /**
  * helpIRET()
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.helpIRET = function()
 {
@@ -619,7 +619,7 @@ X86.helpIRET = function()
  * we may have switched to; setCSIP() returns true if a stack switch occurred, false if not, and null
  * if an error occurred.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} n
  */
 X86.helpRETF = function(n)
@@ -666,7 +666,7 @@ X86.helpRETF = function(n)
 /**
  * helpDIVOverflow()
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.helpDIVOverflow = function()
 {
@@ -692,7 +692,7 @@ X86.helpDIVOverflow = function()
  * Helper to dispatch external interrupts.  nCycles defaults to 11 for the 8086/8088
  * if no alternate value is specified.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} nIDT
  * @param {number} [nCycles] (number of cycles in addition to the default of nOpCyclesInt)
  */
@@ -708,7 +708,7 @@ X86.helpInterrupt = function(nIDT, nCycles)
  *
  * Helper to dispatch traps (ie, exceptions that occur AFTER the instruction, with NO error code)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} nIDT
  * @param {number} [nCycles] (number of cycles in addition to the default of nOpCyclesInt)
  */
@@ -723,7 +723,7 @@ X86.helpTrap = function(nIDT, nCycles)
  *
  * Helper to dispatch faults (ie, exceptions that occur DURING an instruction and MAY generate an error code)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} nFault
  * @param {number|null} [nError] (if omitted, no error code will be pushed)
  * @param {number} [nCycles] cycle count to pass through to helpINT(), if any
@@ -789,24 +789,28 @@ X86.helpFault = function(nFault, nError, nCycles, fHalt)
         }
         else if (this.nFault != X86.EXCEPTION.DF_FAULT) {
             /*
-             * Double-fault (error code is always zero, and the responsible instruction is not restartable)
+             * Double-fault (error code is always zero, and the responsible instruction is not restartable).
              */
             nError = 0;
             nFault = X86.EXCEPTION.DF_FAULT;
         }
         else {
             /*
-             * Triple-fault (usually referred to in Intel literature as a "shutdown", but at least on the 80286,
-             * it's actually a "reset")
+             * This is a triple-fault (usually referred to in Intel literature as a "shutdown", but it's actually a
+             * "reset").  There's nothing to "dispatch" in this case, but we still want to let helpCheckFault() see
+             * the triple-fault.  However, regardless what helpCheckFault() returns, we must leave via "throw -1",
+             * because we need to blow off whatever context triggered the triple-fault; that was less critical when
+             * all we dealt with were 80286-based triple-faults (at least the "normal" triple-faults that OS/2 would
+             * generate), but for any other unexpected triple-faults, "dispatching" a throw is critical. 
              */
             nError = 0;
             nFault = -1;
+            fHalt = false;
             this.resetRegs();
-            fDispatch = fHalt = false;
         }
     }
 
-    if (X86.helpCheckFault.call(this, nFault, nError, fHalt)) {
+    if (X86.helpCheckFault.call(this, nFault, nError, fHalt) || nFault < 0) {
         /*
          * If this is a fault that would normally be dispatched BUT helpCheckFault() wants us to halt,
          * then we throw a bogus fault number (-1), simply to interrupt the current instruction in exactly
@@ -867,7 +871,7 @@ X86.helpFault = function(nFault, nError, nCycles, fHalt)
  *
  * Helper to dispatch page faults.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} addr
  * @param {boolean} fPresent
  * @param {boolean} fWrite
@@ -893,7 +897,7 @@ X86.helpPageFault = function(addr, fPresent, fWrite)
  * MESSAGE.FAULT.  If you want execution to continue after halting, clear MESSAGE.FAULT and/or MESSAGE.HALT,
  * or single-step over the offending instruction, which will allow the fault to be dispatched.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} nFault
  * @param {number|null} [nError] (if omitted, no error code will be reported)
  * @param {boolean} [fHalt] (true to halt the CPU, false to not, undefined if "it depends")
@@ -1008,8 +1012,8 @@ X86.helpCheckFault = function(nFault, nError, fHalt)
  *
  * Helper to zero a segment register whenever transitioning to a less privileged (numerically higher) level.
  *
- * @this {X86CPU}
- * @param {X86Seg} seg
+ * @this {CPUX86}
+ * @param {SegX86} seg
  */
 X86.zeroSeg = function(seg)
 {

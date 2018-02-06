@@ -36,7 +36,7 @@ if (NODE) {
 }
 
 /**
- * @class CPU
+ * class CPU
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class CPU extends Component {
@@ -45,7 +45,7 @@ class CPU extends Component {
      *
      * The CPU class supports the following (parmsCPU) properties:
      *
-     *      cycles: the machine's base cycles per second; the X86CPU constructor will provide us with a default
+     *      cycles: the machine's base cycles per second; the CPUX86 constructor will provide us with a default
      *      (based on the CPU model) to use as a fallback.
      *
      *      multiplier: base cycle multiplier; default is 1.
@@ -65,7 +65,7 @@ class CPU extends Component {
      * This component is primarily responsible for interfacing the CPU with the outside world (eg, Panel and Debugger
      * components), and managing overall CPU operation.
      *
-     * It is extended by the X86CPU component, where all the x86-specific logic resides.
+     * It is extended by the CPUX86 component, where all the x86-specific logic resides.
      *
      * @this {CPU}
      * @param {Object} parmsCPU
@@ -178,7 +178,7 @@ class CPU extends Component {
     /**
      * reset()
      *
-     * This is a placeholder for reset (overridden by the X86CPU component).
+     * This is a placeholder for reset (overridden by the CPUX86 component).
      *
      * @this {CPU}
      */
@@ -189,7 +189,7 @@ class CPU extends Component {
     /**
      * save(fRunning)
      *
-     * This is a placeholder for save support (overridden by the X86CPU component).
+     * This is a placeholder for save support (overridden by the CPUX86 component).
      *
      * @this {CPU}
      * @param {boolean} [fRunning]
@@ -203,7 +203,7 @@ class CPU extends Component {
     /**
      * restore(data)
      *
-     * This is a placeholder for restore support (overridden by the X86CPU component).
+     * This is a placeholder for restore support (overridden by the CPUX86 component).
      *
      * @this {CPU}
      * @param {Object} data
@@ -326,7 +326,7 @@ class CPU extends Component {
     /**
      * getChecksum()
      *
-     * This will be implemented by the X86CPU component.
+     * This will be implemented by the CPUX86 component.
      *
      * @this {CPU}
      * @return {number} a 32-bit summation of key elements of the current CPU state (used by the CPU checksum code)
@@ -1278,7 +1278,7 @@ class CPU extends Component {
     /**
      * stepCPU(nMinCycles)
      *
-     * This will be implemented by the X86CPU component.
+     * This will be implemented by the CPUX86 component.
      *
      * @this {CPU}
      * @param {number} nMinCycles (0 implies a single-step, and therefore breakpoints should be ignored)

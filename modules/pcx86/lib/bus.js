@@ -41,7 +41,7 @@ if (NODE) {
  * Think of this Controller class definition as an interface definition, implemented by the Video Card
  * class and the RAM CompaqController class.
  * 
- * @class Controller
+ * class Controller
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Controller {
@@ -70,7 +70,7 @@ class Controller {
 }
 
 /**
- * @class Bus
+ * class Bus
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Bus extends Component {
@@ -100,7 +100,7 @@ class Bus extends Component {
      *
      * @this {Bus}
      * @param {Object} parmsBus
-     * @param {X86CPU} cpu
+     * @param {CPUX86} cpu
      * @param {DebuggerX86} dbg
      */
     constructor(parmsBus, cpu, dbg)
@@ -879,9 +879,9 @@ class Bus extends Component {
                  *      at HDC.inATCByte (http://pcjs:8088/modules/pcx86/lib/hdc.js:1398:20)
                  *      at HDC.inATCData (http://pcjs:8088/modules/pcx86/lib/hdc.js:1487:17)
                  *      at Bus.checkPortInputNotify (http://pcjs:8088/modules/pcx86/lib/bus.js:1457:38)
-                 *      at X86CPU.INSw (http://pcjs:8088/modules/pcx86/lib/x86ops.js:1640:26)
-                 *      at X86CPU.stepCPU (http://pcjs:8088/modules/pcx86/lib/x86cpu.js:4637:37)
-                 *      at X86CPU.CPU.runCPU (http://pcjs:8088/modules/pcx86/lib/cpu.js:1014:22)
+                 *      at CPUX86.INSw (http://pcjs:8088/modules/pcx86/lib/x86ops.js:1640:26)
+                 *      at CPUX86.stepCPU (http://pcjs:8088/modules/pcx86/lib/cpux86.js:4637:37)
+                 *      at CPUX86.CPU.runCPU (http://pcjs:8088/modules/pcx86/lib/cpu.js:1014:22)
                  *
                  * TODO: Investigate.  For now, BACKTRACK is completely disabled (in part because it also needs
                  * to be revamped for machines with paging enabled).
@@ -1188,7 +1188,7 @@ class Bus extends Component {
     /**
      * restoreMemory(a)
      *
-     * This restores the contents of all Memory blocks; called by X86CPU.restore().
+     * This restores the contents of all Memory blocks; called by CPUX86.restore().
      *
      * In theory, we ONLY have to save/restore block contents.  Other block attributes,
      * like the type, the memory controller (if any), and the active memory access functions,

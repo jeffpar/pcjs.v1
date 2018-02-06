@@ -56,7 +56,7 @@ if (NODE) {
  */
 
 /**
- * @class ParallelPort
+ * class ParallelPort
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class ParallelPort extends Component {
@@ -161,7 +161,7 @@ class ParallelPort extends Component {
      * @this {ParallelPort}
      * @param {Computer} cmp
      * @param {Bus} bus
-     * @param {X86CPU} cpu
+     * @param {CPUX86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)

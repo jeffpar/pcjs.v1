@@ -282,7 +282,7 @@ if (NODE) {
  */
 
 /**
- * @class Card
+ * class Card
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Card extends Controller {
@@ -2140,7 +2140,7 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.XOR] = Card.ACCESS.
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE3] = Card.ACCESS.writeByteMode3;
 
 /**
- * @class Video
+ * class Video
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Video extends Component {
@@ -2405,7 +2405,7 @@ class Video extends Component {
      * @this {Video}
      * @param {Computer} cmp
      * @param {Bus} bus
-     * @param {X86CPU} cpu
+     * @param {CPUX86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)

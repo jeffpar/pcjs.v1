@@ -35,7 +35,7 @@ if (NODE) {
 /**
  * op=0x0F,0x00 (GRP6 mem/reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP6 = function()
 {
@@ -49,7 +49,7 @@ X86.opGRP6 = function()
 /**
  * op=0x0F,0x01 (GRP7 mem/reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP7 = function()
 {
@@ -65,7 +65,7 @@ X86.opGRP7 = function()
  *
  * op=0x0F,0x02 (LAR reg,mem/reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLAR = function()
 {
@@ -84,7 +84,7 @@ X86.opLAR = function()
  *
  * op=0x0F,0x03 (LSL reg,mem/reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLSL = function()
 {
@@ -134,7 +134,7 @@ X86.opLSL = function()
  *          85A-85F                        IDTR
  *          860-865                        TSS descriptor cache
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLOADALL286 = function()
 {
@@ -202,7 +202,7 @@ X86.opLOADALL286 = function()
  *
  * op=0x0F,0x06 (CLTS)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCLTS = function()
 {
@@ -301,7 +301,7 @@ X86.opCLTS = function()
  *      In particular, the LIMIT field loaded for a page granular segment gives a byte granular limit, so should
  *      contain the page limit*4096 plus 4095.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLOADALL386 = function()
 {
@@ -384,7 +384,7 @@ X86.opLOADALL386 = function()
  * And in fact, the COMPAQ DeskPro 386 ROM BIOS executes this instruction with MOD set to 00, so we have
  * to ignore it.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVrc = function()
 {
@@ -433,7 +433,7 @@ X86.opMOVrc = function()
  * NOTE: Since this instruction uses only 32-bit general-purpose registers, our ModRM decoders
  * are going to be more hindrance than help, so we fully decode and execute the instruction ourselves.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVrd = function()
 {
@@ -482,7 +482,7 @@ X86.opMOVrd = function()
  * And in fact, the COMPAQ DeskPro 386 ROM BIOS executes this instruction with MOD set to 00, so we have
  * to ignore it.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVcr = function()
 {
@@ -531,7 +531,7 @@ X86.opMOVcr = function()
  * NOTE: Since this instruction uses only 32-bit general-purpose registers, our ModRM decoders
  * are going to be more hindrance than help, so we fully decode and execute the instruction ourselves.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVdr = function()
 {
@@ -577,7 +577,7 @@ X86.opMOVdr = function()
  * NOTE: Since this instruction uses only 32-bit general-purpose registers, our ModRM decoders
  * are going to be more hindrance than help, so we fully decode and execute the instruction ourselves.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVrt = function()
 {
@@ -623,7 +623,7 @@ X86.opMOVrt = function()
  * NOTE: Since this instruction uses only 32-bit general-purpose registers, our ModRM decoders
  * are going to be more hindrance than help, so we fully decode and execute the instruction ourselves.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVtr = function()
 {
@@ -687,7 +687,7 @@ X86.opMOVtr = function()
  *
  * op=0x0F,0x80 (JO rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJOw = function()
 {
@@ -705,7 +705,7 @@ X86.opJOw = function()
  *
  * op=0x0F,0x81 (JNO rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNOw = function()
 {
@@ -723,7 +723,7 @@ X86.opJNOw = function()
  *
  * op=0x0F,0x82 (JC rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJCw = function()
 {
@@ -741,7 +741,7 @@ X86.opJCw = function()
  *
  * op=0x0F,0x83 (JNC rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNCw = function()
 {
@@ -759,7 +759,7 @@ X86.opJNCw = function()
  *
  * op=0x0F,0x84 (JZ rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJZw = function()
 {
@@ -777,7 +777,7 @@ X86.opJZw = function()
  *
  * op=0x0F,0x85 (JNZ rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNZw = function()
 {
@@ -795,7 +795,7 @@ X86.opJNZw = function()
  *
  * op=0x0F,0x86 (JBE rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJBEw = function()
 {
@@ -813,7 +813,7 @@ X86.opJBEw = function()
  *
  * op=0x0F,0x87 (JNBE rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNBEw = function()
 {
@@ -831,7 +831,7 @@ X86.opJNBEw = function()
  *
  * op=0x0F,0x88 (JS rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJSw = function()
 {
@@ -849,7 +849,7 @@ X86.opJSw = function()
  *
  * op=0x0F,0x89 (JNS rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNSw = function()
 {
@@ -867,7 +867,7 @@ X86.opJNSw = function()
  *
  * op=0x0F,0x8A (JP rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJPw = function()
 {
@@ -885,7 +885,7 @@ X86.opJPw = function()
  *
  * op=0x0F,0x8B (JNP rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNPw = function()
 {
@@ -903,7 +903,7 @@ X86.opJNPw = function()
  *
  * op=0x0F,0x8C (JL rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJLw = function()
 {
@@ -921,7 +921,7 @@ X86.opJLw = function()
  *
  * op=0x0F,0x8D (JNL rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNLw = function()
 {
@@ -939,7 +939,7 @@ X86.opJNLw = function()
  *
  * op=0x0F,0x8E (JLE rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJLEw = function()
 {
@@ -957,7 +957,7 @@ X86.opJLEw = function()
  *
  * op=0x0F,0x8F (JNLE rel16/rel32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNLEw = function()
 {
@@ -975,7 +975,7 @@ X86.opJNLEw = function()
  *
  * op=0x0F,0x90 (SETO b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETO = function()
 {
@@ -987,7 +987,7 @@ X86.opSETO = function()
  *
  * op=0x0F,0x91 (SETNO b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETNO = function()
 {
@@ -999,7 +999,7 @@ X86.opSETNO = function()
  *
  * op=0x0F,0x92 (SETC b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETC = function()
 {
@@ -1011,7 +1011,7 @@ X86.opSETC = function()
  *
  * op=0x0F,0x93 (SETNC b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETNC = function()
 {
@@ -1023,7 +1023,7 @@ X86.opSETNC = function()
  *
  * op=0x0F,0x94 (SETZ b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETZ = function()
 {
@@ -1035,7 +1035,7 @@ X86.opSETZ = function()
  *
  * op=0x0F,0x95 (SETNZ b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETNZ = function()
 {
@@ -1047,7 +1047,7 @@ X86.opSETNZ = function()
  *
  * op=0x0F,0x96 (SETBE b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETBE = function()
 {
@@ -1059,7 +1059,7 @@ X86.opSETBE = function()
  *
  * op=0x0F,0x97 (SETNBE b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETNBE = function()
 {
@@ -1071,7 +1071,7 @@ X86.opSETNBE = function()
  *
  * op=0x0F,0x98 (SETS b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETS = function()
 {
@@ -1083,7 +1083,7 @@ X86.opSETS = function()
  *
  * op=0x0F,0x99 (SETNS b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETNS = function()
 {
@@ -1095,7 +1095,7 @@ X86.opSETNS = function()
  *
  * op=0x0F,0x9A (SETP b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETP = function()
 {
@@ -1107,7 +1107,7 @@ X86.opSETP = function()
  *
  * op=0x0F,0x9B (SETNP b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETNP = function()
 {
@@ -1119,7 +1119,7 @@ X86.opSETNP = function()
  *
  * op=0x0F,0x9C (SETL b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETL = function()
 {
@@ -1131,7 +1131,7 @@ X86.opSETL = function()
  *
  * op=0x0F,0x9D (SETNL b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETNL = function()
 {
@@ -1143,7 +1143,7 @@ X86.opSETNL = function()
  *
  * op=0x0F,0x9E (SETLE b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETLE = function()
 {
@@ -1155,7 +1155,7 @@ X86.opSETLE = function()
  *
  * op=0x0F,0x9F (SETNLE b)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSETNLE = function()
 {
@@ -1167,7 +1167,7 @@ X86.opSETNLE = function()
  *
  * op=0x0F,0xA0 (PUSH FS)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHFS = function()
 {
@@ -1189,7 +1189,7 @@ X86.opPUSHFS = function()
  *
  * op=0x0F,0xA1 (POP FS)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPFS = function()
 {
@@ -1207,7 +1207,7 @@ X86.opPOPFS = function()
  *
  * op=0x0F,0xA3 (BT mem/reg,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opBT = function()
 {
@@ -1220,7 +1220,7 @@ X86.opBT = function()
  *
  * op=0x0F,0xA4 (SHLD mem/reg,reg,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSHLDn = function()
 {
@@ -1233,7 +1233,7 @@ X86.opSHLDn = function()
  *
  * op=0x0F,0xA5 (SHLD mem/reg,reg,CL)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSHLDcl = function()
 {
@@ -1246,7 +1246,7 @@ X86.opSHLDcl = function()
  *
  * op=0x0F,0xA6 (XBTS reg,mem/reg,[E]AX,CL)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXBTS = function()
 {
@@ -1259,7 +1259,7 @@ X86.opXBTS = function()
  *
  * op=0x0F,0xA7 (IBTS mem/reg,[E]AX,CL,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opIBTS = function()
 {
@@ -1272,7 +1272,7 @@ X86.opIBTS = function()
  *
  * op=0x0F,0xA8 (PUSH GS)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHGS = function()
 {
@@ -1294,7 +1294,7 @@ X86.opPUSHGS = function()
  *
  * op=0x0F,0xA9 (POP GS)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPGS = function()
 {
@@ -1312,7 +1312,7 @@ X86.opPOPGS = function()
  *
  * op=0x0F,0xAB (BTC mem/reg,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opBTS = function()
 {
@@ -1325,7 +1325,7 @@ X86.opBTS = function()
  *
  * op=0x0F,0xAC (SHRD mem/reg,reg,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSHRDn = function()
 {
@@ -1338,7 +1338,7 @@ X86.opSHRDn = function()
  *
  * op=0x0F,0xAD (SHRD mem/reg,reg,CL)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSHRDcl = function()
 {
@@ -1351,7 +1351,7 @@ X86.opSHRDcl = function()
  *
  * op=0x0F,0xAF (IMUL reg,mem/reg) (80386 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opIMUL = function()
 {
@@ -1365,7 +1365,7 @@ X86.opIMUL = function()
  *
  * This is like a "MOV reg,rm" operation, but it also loads SS from the next word.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLSS = function()
 {
@@ -1377,7 +1377,7 @@ X86.opLSS = function()
  *
  * op=0x0F,0xB3 (BTC mem/reg,reg) (80386 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opBTR = function()
 {
@@ -1392,7 +1392,7 @@ X86.opBTR = function()
  *
  * This is like a "MOV reg,rm" operation, but it also loads FS from the next word.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLFS = function()
 {
@@ -1406,7 +1406,7 @@ X86.opLFS = function()
  *
  * This is like a "MOV reg,rm" operation, but it also loads GS from the next word.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLGS = function()
 {
@@ -1418,7 +1418,7 @@ X86.opLGS = function()
  *
  * op=0x0F,0xB6 (MOVZX reg,byte)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVZXb = function()
 {
@@ -1462,7 +1462,7 @@ X86.opMOVZXb = function()
  *
  * op=0x0F,0xB7 (MOVZX reg,word)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVZXw = function()
 {
@@ -1500,7 +1500,7 @@ X86.opMOVZXw = function()
 /**
  * op=0x0F,0xBA (GRP8 mem/reg) (80386 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP8 = function()
 {
@@ -1512,7 +1512,7 @@ X86.opGRP8 = function()
  *
  * op=0x0F,0xBB (BTC mem/reg,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opBTC = function()
 {
@@ -1525,7 +1525,7 @@ X86.opBTC = function()
  *
  * op=0x0F,0xBC (BSF reg,mem/reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opBSF = function()
 {
@@ -1537,7 +1537,7 @@ X86.opBSF = function()
  *
  * op=0x0F,0xBD (BSR reg,mem/reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opBSR = function()
 {
@@ -1549,7 +1549,7 @@ X86.opBSR = function()
  *
  * op=0x0F,0xBE (MOVSX reg,byte)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVSXb = function()
 {
@@ -1593,7 +1593,7 @@ X86.opMOVSXb = function()
  *
  * op=0x0F,0xBF (MOVSX reg,word)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVSXw = function()
 {

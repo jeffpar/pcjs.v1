@@ -40,7 +40,7 @@ if (NODE) {
 }
 
 /**
- * @class RAM
+ * class RAM
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class RAM extends Component {
@@ -76,7 +76,7 @@ class RAM extends Component {
      * @this {RAM}
      * @param {Computer} cmp
      * @param {Bus} bus
-     * @param {X86CPU} cpu
+     * @param {CPUX86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -100,7 +100,7 @@ class RAM extends Component {
     {
         if (!fRepower) {
             /*
-             * The Computer powers up the CPU last, at which point X86CPU state is restored,
+             * The Computer powers up the CPU last, at which point CPUX86 state is restored,
              * which includes the Bus state, and since we use the Bus to allocate all our memory,
              * memory contents are already restored for us, so we don't need the usual restore
              * logic.  We just need to call reset(), to allocate memory for the RAM.
@@ -126,7 +126,7 @@ class RAM extends Component {
     powerDown(fSave, fShutdown)
     {
         /*
-         * The Computer powers down the CPU first, at which point X86CPU state is saved,
+         * The Computer powers down the CPU first, at which point CPUX86 state is saved,
          * which includes the Bus state, and since we use the Bus component to allocate all
          * our memory, memory contents are already saved for us, so we don't need the usual
          * save logic.
@@ -275,7 +275,7 @@ class RAM extends Component {
 }
 
 /**
- * @class CompaqController
+ * class CompaqController
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class CompaqController extends Controller {

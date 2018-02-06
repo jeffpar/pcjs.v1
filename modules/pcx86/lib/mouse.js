@@ -39,7 +39,7 @@ if (NODE) {
 }
 
 /**
- * @class Mouse
+ * class Mouse
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Mouse extends Component {
@@ -108,7 +108,7 @@ class Mouse extends Component {
      * @this {Mouse}
      * @param {Computer} cmp
      * @param {Bus} bus
-     * @param {X86CPU} cpu
+     * @param {CPUX86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)

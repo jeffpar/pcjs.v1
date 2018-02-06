@@ -69,19 +69,19 @@ if (NODE) {
  */
 
 /**
- * @class X86FPU
+ * class FPUX86
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
-class X86FPU extends Component {
+class FPUX86 extends Component {
     /**
-     * X86FPU(parmsFPU)
+     * FPUX86(parmsFPU)
      *
-     * The X86FPU class uses the following (parmsFPU) properties:
+     * The FPUX86 class uses the following (parmsFPU) properties:
      *
      *      model: a number (eg, 8087) that should match one of the X86.FPU.MODEL values (default is 8087)
      *      stepping: a string (eg, "B1") that should match one of the X86.FPU.STEPPING values (default is "")
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {Object} parmsFPU
      */
     constructor(parmsFPU)
@@ -157,26 +157,26 @@ class X86FPU extends Component {
          *
          * Stores the (32-bit) "short-real" value in the internal regTmpSR register to the address in regEA.
          *
-         * @this {X86FPU}
+         * @this {FPUX86}
          */
-        this.setEAFromSR = X86FPU.prototype.setEAFromSI;
+        this.setEAFromSR = FPUX86.prototype.setEAFromSI;
         /**
          * setEAFromLR()
          *
          * Stores the (64-bit) "long-real" value in the internal regTmpLR register to the address in regEA.
          *
-         * @this {X86FPU}
+         * @this {FPUX86}
          */
-        this.setEAFromLR = X86FPU.prototype.setEAFromLI;
+        this.setEAFromLR = FPUX86.prototype.setEAFromLI;
     }
 
     /**
      * initBus(cmp, bus, cpu, dbg)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {Computer} cmp
      * @param {Bus} bus
-     * @param {X86CPU} cpu
+     * @param {CPUX86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -191,7 +191,7 @@ class X86FPU extends Component {
      *
      * The ChipSet calls us whenever an I/O operation that clears the coprocessor's "busy" state is performed.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     clearBusy()
     {
@@ -204,7 +204,7 @@ class X86FPU extends Component {
     /**
      * powerUp(data, fRepower)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {Object|null} data
      * @param {boolean} [fRepower]
      * @return {boolean} true if successful, false if failure
@@ -224,7 +224,7 @@ class X86FPU extends Component {
     /**
      * powerDown(fSave, fShutdown)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {boolean} [fSave]
      * @param {boolean} [fShutdown]
      * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
@@ -237,9 +237,9 @@ class X86FPU extends Component {
     /**
      * save()
      *
-     * This implements save support for the X86FPU component.
+     * This implements save support for the FPUX86 component.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @return {Object}
      */
     save()
@@ -264,9 +264,9 @@ class X86FPU extends Component {
     /**
      * restore(data)
      *
-     * This implements restore support for the X86FPU component.
+     * This implements restore support for the FPUX86 component.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {Object} data
      * @return {boolean} true if successful, false if failure
      */
@@ -291,7 +291,7 @@ class X86FPU extends Component {
      *
      * TODO: Add support for X86.FPU.CONTROL.PC (Precision Control) and X86.FPU.CONTROL.IC (Infinity Control)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     resetFPU()
     {
@@ -317,7 +317,7 @@ class X86FPU extends Component {
      * If the current model is equal to the specified model, then it's assumed the current operation
      * is supported, and we return true.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} model
      * @return {boolean}
      */
@@ -332,7 +332,7 @@ class X86FPU extends Component {
      * If the current model is greater than or equal to the specified model, then it's assumed that the
      * current operation is supported, and we return true.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} model
      * @return {boolean}
      */
@@ -350,7 +350,7 @@ class X86FPU extends Component {
      *
      * You can still use the Debugger to single-step over the instruction; opStop() will return false in that case.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {boolean} [fError]
      * @return {boolean} (true if there was an error or the CPU was running, false if not)
      */
@@ -372,7 +372,7 @@ class X86FPU extends Component {
      *
      * Used for any coprocessor opcode that has no known operation for the given model.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     opNone()
     {
@@ -385,7 +385,7 @@ class X86FPU extends Component {
      *
      * Used for any coprocessor opcodes that are redundant and potentially obsolete.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     opObsolete()
     {
@@ -398,7 +398,7 @@ class X86FPU extends Component {
      *
      * Used for any coprocessor opcode that DOES have a known operation, we just haven't implemented it yet.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     opUnimplemented()
     {
@@ -409,7 +409,7 @@ class X86FPU extends Component {
     /**
      * checkException()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @return {boolean} (true if unmasked exception exists, false if not)
      */
     checkException()
@@ -451,7 +451,7 @@ class X86FPU extends Component {
      * Also, as noted in checkException(), any time you set the SF bit, you should also set the IE bit, because
      * Stack Fault is a subset of Invalid Operation.  TODO: We should include a test for that in the assertion below.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} n (one or more of the above error status bits)
      * @return {boolean} (true if unmasked exception exists, false if not)
      */
@@ -470,7 +470,7 @@ class X86FPU extends Component {
     /**
      * getControl()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @return {number}
      */
     getControl()
@@ -485,7 +485,7 @@ class X86FPU extends Component {
      * unused bits cannot be set -- including bit 6, which could otherwise inadvertently mask the SF error
      * condition on 80387 and newer coprocessors.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} n
      */
     setControl(n)
@@ -496,7 +496,7 @@ class X86FPU extends Component {
     /**
      * clearStatus(n)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} n
      */
     clearStatus(n)
@@ -508,7 +508,7 @@ class X86FPU extends Component {
     /**
      * getStatus()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @return {number} regStatus merged with iST
      */
     getStatus()
@@ -528,7 +528,7 @@ class X86FPU extends Component {
      * through the fault() interface, and clearing individual EXC or BUSY bits should be done through
      * clearStatus().  Both functions, including this function, call checkException() after updating regStatus.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} n
      */
     setStatus(n)
@@ -541,7 +541,7 @@ class X86FPU extends Component {
     /**
      * checkOperand(v)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number|null} v
      * @return {boolean} (true if no exception, false otherwise)
      */
@@ -553,7 +553,7 @@ class X86FPU extends Component {
     /**
      * checkResult(v)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} v
      * @return {boolean} (true if no exception, false otherwise)
      */
@@ -565,7 +565,7 @@ class X86FPU extends Component {
     /**
      * doAdd(operand1, operand2)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number|null} operand1
      * @param {number|null} operand2
      * @return {number|null}
@@ -583,7 +583,7 @@ class X86FPU extends Component {
     /**
      * doSubtract(operand1, operand2)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number|null} operand1
      * @param {number|null} operand2
      * @return {number|null}
@@ -601,7 +601,7 @@ class X86FPU extends Component {
     /**
      * doMultiply(operand1, operand2)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number|null} operand1
      * @param {number|null} operand2
      * @return {number|null}
@@ -621,7 +621,7 @@ class X86FPU extends Component {
      *
      * TODO: IE exceptions: infinity / infinity, 0 / 0, 0 / pseudo-zero, or divisor is denormal or unnormal.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number|null} dividend
      * @param {number|null} divisor
      * @return {number|null}
@@ -641,7 +641,7 @@ class X86FPU extends Component {
     /**
      * doCompare(operand1, operand2)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number|null} operand1
      * @param {number|null} operand2
      * @return {boolean}
@@ -669,7 +669,7 @@ class X86FPU extends Component {
     /**
      * doSquareRoot(operand)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number|null} operand
      * @return {number|null}
      */
@@ -694,7 +694,7 @@ class X86FPU extends Component {
      * Also, callers that expect intTmpLR[] to be loaded with the result *must* also specify a max parameter;
      * callers performing internal rounding and using just the return value may omit max to skip loading intTmpLR[].
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number|null} operand
      * @param {number} [max] (ie, 0x8000, 0x80000000, or 0x8000000000000000)
      * @return {number|null} (rounded result, or null if there was an unmasked exception)
@@ -726,7 +726,7 @@ class X86FPU extends Component {
                 result = -max;
             }
             this.intTmpLR[0] = result|0;
-            if (max > X86FPU.MAX_INT32) {
+            if (max > FPUX86.MAX_INT32) {
                 this.intTmpLR[1] = (result / 0x100000000)|0;
                 if (!this.intTmpLR[1] && result < 0) this.intTmpLR[1] = -1;
             }
@@ -737,7 +737,7 @@ class X86FPU extends Component {
     /**
      * truncateValue(v)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} v
      * @return {number}
      */
@@ -749,7 +749,7 @@ class X86FPU extends Component {
     /**
      * getTag(iReg)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} iReg (register index)
      * @return {number} tag value for register
      */
@@ -773,7 +773,7 @@ class X86FPU extends Component {
     /**
      * getTags()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @return {number} tag values for all registers
      */
     getTags()
@@ -789,7 +789,7 @@ class X86FPU extends Component {
     /**
      * setTag(iReg, tag)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} iReg (register index)
      * @param {number} tag value for register (EMPTY is the only supported value)
      */
@@ -805,7 +805,7 @@ class X86FPU extends Component {
      * All we need to update here are which physical registers are marked "empty"; the rest of the tags
      * are generated on the fly based on actual values in the registers.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} n (16-bit tag word, containing 8 2-bit tags)
      */
     setTags(n)
@@ -825,13 +825,13 @@ class X86FPU extends Component {
      *
      * Gets a "word-integer" (WI aka INT16) from ST(i)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @return {boolean} true if intTmpLR was loaded, false if not
      */
     getWI(i)
     {
-        return this.roundValue(this.getST(i), X86FPU.MAX_INT16) != null;
+        return this.roundValue(this.getST(i), FPUX86.MAX_INT16) != null;
     }
 
     /**
@@ -839,13 +839,13 @@ class X86FPU extends Component {
      *
      * Gets a "short-integer" (SI aka INT32) from ST(i)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @return {boolean} true if intTmpLR was loaded, false if not
      */
     getSI(i)
     {
-        return this.roundValue(this.getST(i), X86FPU.MAX_INT32) != null;
+        return this.roundValue(this.getST(i), FPUX86.MAX_INT32) != null;
     }
 
     /**
@@ -853,19 +853,19 @@ class X86FPU extends Component {
      *
      * Gets a "long-integer" (LI aka INT64) from ST(i)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @return {boolean} true if intTmpLR was loaded, false if not
      */
     getLI(i)
     {
-        return this.roundValue(this.getST(i), X86FPU.MAX_INT64) != null;
+        return this.roundValue(this.getST(i), FPUX86.MAX_INT64) != null;
     }
 
     /**
      * getSR(i)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @return {boolean} true if regTmpSR was loaded, false if not
      */
@@ -885,7 +885,7 @@ class X86FPU extends Component {
     /**
      * getLR(i)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @return {boolean} true if regTmpLR was loaded, false if not
      */
@@ -905,7 +905,7 @@ class X86FPU extends Component {
     /**
      * getST(i)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @return {number|null} v
      */
@@ -929,7 +929,7 @@ class X86FPU extends Component {
      *
      * For internal use only; ignores whether the register is empty, and performs no exception checks.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @return {number}
      */
@@ -942,7 +942,7 @@ class X86FPU extends Component {
     /**
      * setST(i, v)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @param {number|null} v
      * @return {boolean}
@@ -961,7 +961,7 @@ class X86FPU extends Component {
     /**
      * getTR(i, fSafe)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} i (stack index, 0-7)
      * @param {boolean} [fSafe] (true to ignore all exception criteria; used by FSAVE)
      * @return {Array.<number>|null} ("temp-real" aka TR, as an array of three 32-bit integers)
@@ -982,7 +982,7 @@ class X86FPU extends Component {
      *
      * Sets ST(i) to the TR ("long-real") in a[].
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} i (stack index, 0-7)
      * @param {Array.<number>|null} a
      */
@@ -996,7 +996,7 @@ class X86FPU extends Component {
      *
      * Returns the (16-bit) "word-integer" value located at regEA.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @return {number} v
      */
     getWIFromEA()
@@ -1010,7 +1010,7 @@ class X86FPU extends Component {
      *
      * Returns the (32-bit) "short-integer" value located at regEA.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @return {number} v
      */
     getSIFromEA()
@@ -1024,7 +1024,7 @@ class X86FPU extends Component {
      *
      * Returns the (64-bit) "long-integer" value located at regEA.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @return {number} v
      */
     getLIFromEA()
@@ -1040,7 +1040,7 @@ class X86FPU extends Component {
      *
      * Sets the internal regTmpSR register to the (32-bit) "short-real" value located at regEA.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @return {number} v
      */
     getSRFromEA()
@@ -1055,7 +1055,7 @@ class X86FPU extends Component {
      *
      * Sets the internal regTmpLR register to the (64-bit) "long-real" value located at regEA.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @return {number} v
      */
     getLRFromEA()
@@ -1071,7 +1071,7 @@ class X86FPU extends Component {
      *
      * Sets the internal intTmpTR register to the (80-bit) "temp-real" value located at regEA.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @return {Array.<number>} intTmpTR
      */
     getTRFromEA()
@@ -1088,7 +1088,7 @@ class X86FPU extends Component {
      *
      * Stores the (16-bit) "word-integer" value in the internal intTmpLR register to the address in regEA.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     setEAFromWI()
     {
@@ -1101,7 +1101,7 @@ class X86FPU extends Component {
      *
      * Stores the (32-bit) "short-integer" value in the internal intTmpLR register to the address in regEA.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     setEAFromSI()
     {
@@ -1114,7 +1114,7 @@ class X86FPU extends Component {
      *
      * Stores the (64-bit) "long-integer" value in the internal intTmpLR register to the address in regEA.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     setEAFromLI()
     {
@@ -1128,7 +1128,7 @@ class X86FPU extends Component {
      *
      * Stores the (80-bit) "temp-real" value in the internal intTmpTR register to the address in regEA.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     setEAFromTR()
     {
@@ -1146,7 +1146,7 @@ class X86FPU extends Component {
      * fraction and 11-bit exponent, while the latter uses a 64-bit fraction and 15-bit exponent; 2) the former
      * does NOT store a leading 1 with the fraction, whereas the latter does.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {Array.<number>} a (eg, intTmpTR)
      * @return {number} v
      */
@@ -1192,7 +1192,7 @@ class X86FPU extends Component {
      * fraction and 11-bit exponent, while the latter uses a 64-bit fraction and 15-bit exponent; 2) the former
      * does NOT store a leading 1 with the fraction, whereas the latter does.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} loLR
      * @param {number} hiLR
      * @return {Array.<number>} (intTmpTR)
@@ -1238,7 +1238,7 @@ class X86FPU extends Component {
     /**
      * decodeBCD()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} i (32-bit integer containing n BCD digits)
      * @param {number} n (number of BCD digits to decode)
      * @return {number} (binary value representing the specified number of BCD digits)
@@ -1260,7 +1260,7 @@ class X86FPU extends Component {
     /**
      * encodeBCD()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} v (binary value from which to extract n BCD digits)
      * @param {number} n (number of BCD digits to extract)
      * @return {number} (integer containing the requested number of BCD digits)
@@ -1280,7 +1280,7 @@ class X86FPU extends Component {
     /**
      * popValue()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @return {number|null} v
      */
     popValue()
@@ -1300,7 +1300,7 @@ class X86FPU extends Component {
     /**
      * pushValue(v)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number|null} v
      */
     pushValue(v)
@@ -1323,7 +1323,7 @@ class X86FPU extends Component {
     /**
      * loadEnv(addr)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} addr
      * @return {number} updated addr
      */
@@ -1359,7 +1359,7 @@ class X86FPU extends Component {
     /**
      * saveEnv(addr)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} addr
      * @return {number} updated addr
      */
@@ -1392,7 +1392,7 @@ class X86FPU extends Component {
      *
      * This is called by the CPU's ESC opcode handlers, after each instruction has been fully decoded.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} bOpcode (0xD8-0xDF)
      * @param {number} bModRM
      * @param {number} dst
@@ -1418,13 +1418,13 @@ class X86FPU extends Component {
             modReg = (reg << 4) | this.iStack;
         }
 
-        var fnOp = X86FPU.aaOps[bOpcode][modReg];
+        var fnOp = FPUX86.aaOps[bOpcode][modReg];
         if (fnOp) {
             /*
              * A handful of FPU instructions must preserve (at least some of) the "exception" registers,
              * so if the current function is NOT one of those, then update all the "exception" registers.
              */
-            if (X86FPU.afnPreserveExceptions.indexOf(fnOp) < 0) {
+            if (FPUX86.afnPreserveExceptions.indexOf(fnOp) < 0) {
                 var cpu = this.cpu;
                 var off = cpu.opLIP;
                 /*
@@ -1469,7 +1469,7 @@ class X86FPU extends Component {
      *
      * If we choose to do nothing, then we must return false, so that the CPU can charge a default number of cycles.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @return {boolean} true if implemented, false if not
      */
     opWAIT()
@@ -1497,7 +1497,7 @@ class X86FPU extends Component {
      * NOTE: The "temp-real" values are fake; we manufacture them on demand from 64-bit "long-real" values
      * actually stored in the stack; see getTRFromLR().
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} i (stack index, relative to ST)
      * @return {Array.<number>|null} (an array of information as described above, or null if invalid element)
      */
@@ -1530,7 +1530,7 @@ class X86FPU extends Component {
      * through some bitwise operation(s), then that value may end up being negative, so you may end up with an inverted
      * range, or a range that's smaller or larger than intended.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      * @param {number} min (inclusive)
      * @param {number} max (inclusive)
      * @return {number}
@@ -1569,7 +1569,7 @@ class X86FPU extends Component {
      *
      * See also: FYL2X, FLDL2T, FLDL2E.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static F2XM1()
     {
@@ -1579,7 +1579,7 @@ class X86FPU extends Component {
     /**
      * FABS()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FABS()
     {
@@ -1592,7 +1592,7 @@ class X86FPU extends Component {
     /**
      * FADDlr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FADDlr()
     {
@@ -1604,7 +1604,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xD8,reg=0x00 ("FADD short-real"): ST(0) <- ST(0) + REAL32
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FADDsr()
     {
@@ -1614,7 +1614,7 @@ class X86FPU extends Component {
     /**
      * FADDst()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FADDst()
     {
@@ -1624,7 +1624,7 @@ class X86FPU extends Component {
     /**
      * FADDsti()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FADDsti()
     {
@@ -1634,7 +1634,7 @@ class X86FPU extends Component {
     /**
      * FADDPsti()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FADDPsti()
     {
@@ -1644,7 +1644,7 @@ class X86FPU extends Component {
     /**
      * FBLDpd()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FBLDpd()
     {
@@ -1661,7 +1661,7 @@ class X86FPU extends Component {
     /**
      * FBSTPpd()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FBSTPpd()
     {
@@ -1686,7 +1686,7 @@ class X86FPU extends Component {
     /**
      * FCHS()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FCHS()
     {
@@ -1704,7 +1704,7 @@ class X86FPU extends Component {
      * no need to explicitly clear the ES bit, because clearStatus() will call checkException(), which
      * updates ES and clears/sets FPU interrupt status as appropriate.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FCLEX()
     {
@@ -1716,7 +1716,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xDC,mod<3,reg=2 ("FCOM long-real"): Evaluate ST(0) - REAL64
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FCOMlr()
     {
@@ -1728,7 +1728,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xD8,mod<3,reg=2 ("FCOM short-real"): Evaluate ST(0) - REAL32
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FCOMsr()
     {
@@ -1740,7 +1740,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xD8,mod=3,reg=2 ("FCOM ST(i)"): Evaluate ST(0) - ST(i)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FCOMst()
     {
@@ -1756,12 +1756,12 @@ class X86FPU extends Component {
      * TODO: Determine if this form subtracted the operands in the same order, or if it requires an FCOMsti(),
      * which, like the other *sti() functions, uses ST(0) as the second operand rather than the first.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FCOM8087()
     {
         this.opObsolete();
-        X86FPU.FCOMst.call(this);
+        FPUX86.FCOMst.call(this);
     }
 
     /**
@@ -1769,7 +1769,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xDC,mod<3,reg=3 ("FCOM long-real"): Evaluate ST(0) - REAL64, POP
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FCOMPlr()
     {
@@ -1781,7 +1781,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xD8,mod<3,reg=3 ("FCOM short-real"): Evaluate ST(0) - REAL32, POP
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FCOMPsr()
     {
@@ -1793,7 +1793,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xD8,mod=3,reg=3 ("FCOMP ST(i)"): Evaluate ST(0) - ST(i), POP
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FCOMPst()
     {
@@ -1809,18 +1809,18 @@ class X86FPU extends Component {
      * TODO: Determine if this form subtracted the operands in the same order, or if it requires an FCOMPsti(),
      * which, like the other *sti() functions, uses ST(0) as the second operand rather than the first.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FCOMP8087()
     {
         this.opObsolete();
-        X86FPU.FCOMPst.call(this);
+        FPUX86.FCOMPst.call(this);
     }
 
     /**
      * FCOMPP()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FCOMPP()
     {
@@ -1830,7 +1830,7 @@ class X86FPU extends Component {
     /**
      * FDECSTP()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FDECSTP()
     {
@@ -1841,7 +1841,7 @@ class X86FPU extends Component {
     /**
      * FDISI8087()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FDISI8087()
     {
@@ -1853,7 +1853,7 @@ class X86FPU extends Component {
     /**
      * FDIVlr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FDIVlr()
     {
@@ -1863,7 +1863,7 @@ class X86FPU extends Component {
     /**
      * FDIVsr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FDIVsr()
     {
@@ -1875,7 +1875,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xD8,0xF0-0xF7 ("FDIV ST,ST(i)"): ST(0) <- ST(0) / ST(i)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FDIVst()
     {
@@ -1887,7 +1887,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xDC,0xF8-0xFF ("FDIV ST(i),ST"): ST(i) <- ST(i) / ST(0)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FDIVsti()
     {
@@ -1899,7 +1899,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xDE,0xF8-0xFF ("FDIVP ST(i),ST"): ST(i) <- ST(i) / ST(0), POP
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FDIVPsti()
     {
@@ -1909,7 +1909,7 @@ class X86FPU extends Component {
     /**
      * FDIVRlr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FDIVRlr()
     {
@@ -1919,7 +1919,7 @@ class X86FPU extends Component {
     /**
      * FDIVRsr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FDIVRsr()
     {
@@ -1931,7 +1931,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xD8,0xF8-0xFF ("FDIVR ST,ST(i)"): ST(0) <- ST(i) / ST(0)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FDIVRst()
     {
@@ -1943,7 +1943,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xDC,0xF0-0xF7 ("FDIVR ST(i),ST"): ST(i) <- ST(0) / ST(i)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FDIVRsti()
     {
@@ -1955,7 +1955,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xDE,0xF0-0xE7 ("FDIVRP ST(i),ST"): ST(i) <- ST(0) / ST(i), POP
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FDIVRPsti()
     {
@@ -1965,7 +1965,7 @@ class X86FPU extends Component {
     /**
      * FENI8087()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FENI8087()
     {
@@ -1977,7 +1977,7 @@ class X86FPU extends Component {
     /**
      * FFREEsti()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FFREEsti()
     {
@@ -1991,19 +1991,19 @@ class X86FPU extends Component {
      * but may no longer be valid as of the 80387.  Also, if the older documentation is to be believed,
      * this instruction has no modern counterpart, as FFREE doesn't pop the stack.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FFREEP8087()
     {
         this.opObsolete();
-        X86FPU.FFREEsti.call(this);
+        FPUX86.FFREEsti.call(this);
         this.popValue();
     }
 
     /**
      * FIADD16()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FIADD16()
     {
@@ -2013,7 +2013,7 @@ class X86FPU extends Component {
     /**
      * FIADD32()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FIADD32()
     {
@@ -2023,7 +2023,7 @@ class X86FPU extends Component {
     /**
      * FICOM16()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FICOM16()
     {
@@ -2033,7 +2033,7 @@ class X86FPU extends Component {
     /**
      * FICOM32()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FICOM32()
     {
@@ -2043,7 +2043,7 @@ class X86FPU extends Component {
     /**
      * FICOMP16()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FICOMP16()
     {
@@ -2053,7 +2053,7 @@ class X86FPU extends Component {
     /**
      * FICOMP32()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FICOMP32()
     {
@@ -2063,7 +2063,7 @@ class X86FPU extends Component {
     /**
      * FIDIV16()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FIDIV16()
     {
@@ -2073,7 +2073,7 @@ class X86FPU extends Component {
     /**
      * FIDIV32()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FIDIV32()
     {
@@ -2083,7 +2083,7 @@ class X86FPU extends Component {
     /**
      * FIDIVR16()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FIDIVR16()
     {
@@ -2093,7 +2093,7 @@ class X86FPU extends Component {
     /**
      * FIDIVR32()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FIDIVR32()
     {
@@ -2103,7 +2103,7 @@ class X86FPU extends Component {
     /**
      * FILD16()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FILD16()
     {
@@ -2113,7 +2113,7 @@ class X86FPU extends Component {
     /**
      * FILD32()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FILD32()
     {
@@ -2123,7 +2123,7 @@ class X86FPU extends Component {
     /**
      * FILD64()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FILD64()
     {
@@ -2133,7 +2133,7 @@ class X86FPU extends Component {
     /**
      * FIMUL16()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FIMUL16()
     {
@@ -2143,7 +2143,7 @@ class X86FPU extends Component {
     /**
      * FIMUL32()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FIMUL32()
     {
@@ -2153,7 +2153,7 @@ class X86FPU extends Component {
     /**
      * FINCSTP()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FINCSTP()
     {
@@ -2164,7 +2164,7 @@ class X86FPU extends Component {
     /**
      * FINIT()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FINIT()
     {
@@ -2174,7 +2174,7 @@ class X86FPU extends Component {
     /**
      * FIST16()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FIST16()
     {
@@ -2184,7 +2184,7 @@ class X86FPU extends Component {
     /**
      * FIST32()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FIST32()
     {
@@ -2194,7 +2194,7 @@ class X86FPU extends Component {
     /**
      * FISTP16()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FISTP16()
     {
@@ -2207,7 +2207,7 @@ class X86FPU extends Component {
     /**
      * FISTP32()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FISTP32()
     {
@@ -2220,7 +2220,7 @@ class X86FPU extends Component {
     /**
      * FISTP64()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FISTP64()
     {
@@ -2233,7 +2233,7 @@ class X86FPU extends Component {
     /**
      * FISUB16()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FISUB16()
     {
@@ -2243,7 +2243,7 @@ class X86FPU extends Component {
     /**
      * FISUB32()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FISUB32()
     {
@@ -2253,7 +2253,7 @@ class X86FPU extends Component {
     /**
      * FISUBR16()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FISUBR16()
     {
@@ -2263,7 +2263,7 @@ class X86FPU extends Component {
     /**
      * FISUBR32()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FISUBR32()
     {
@@ -2294,7 +2294,7 @@ class X86FPU extends Component {
      * a signaling NaN; on the 80287XL and later coprocessors, loading a signaling NaN raises the invalid operation
      * exception.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FLDlr()
     {
@@ -2304,7 +2304,7 @@ class X86FPU extends Component {
     /**
      * FLDsr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FLDsr()
     {
@@ -2314,7 +2314,7 @@ class X86FPU extends Component {
     /**
      * FLDsti()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FLDsti()
     {
@@ -2324,7 +2324,7 @@ class X86FPU extends Component {
     /**
      * FLDtr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FLDtr()
     {
@@ -2334,7 +2334,7 @@ class X86FPU extends Component {
     /**
      * FLDCW()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FLDCW()
     {
@@ -2345,7 +2345,7 @@ class X86FPU extends Component {
     /**
      * FLDENV()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FLDENV()
     {
@@ -2363,7 +2363,7 @@ class X86FPU extends Component {
      *
      * See also: FLDLG2, FLDLN2, FLDL2E, FLDL2T, FLDPI, and FLD1.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FLD1()
     {
@@ -2385,11 +2385,11 @@ class X86FPU extends Component {
      *
      * See also: FLDLG2, FLDLN2, FLDL2E, FLDPI, FLD1, and FLDZ.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FLDL2T()
     {
-        this.pushValue(X86FPU.regL2T);
+        this.pushValue(FPUX86.regL2T);
     }
 
     /**
@@ -2407,11 +2407,11 @@ class X86FPU extends Component {
      *
      * See also: FLDLG2, FLDLN2, FLDL2T, FLDPI, FLD1, and FLDZ.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FLDL2E()
     {
-        this.pushValue(X86FPU.regL2E);
+        this.pushValue(FPUX86.regL2E);
     }
 
     /**
@@ -2429,11 +2429,11 @@ class X86FPU extends Component {
      *
      * See also: FLDLG2, FLDLN2, FLDL2E, FLDL2T, FLD1, and FLDZ.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FLDPI()
     {
-        this.pushValue(X86FPU.regPI);
+        this.pushValue(FPUX86.regPI);
     }
 
     /**
@@ -2451,11 +2451,11 @@ class X86FPU extends Component {
      *
      * See also: FLDLN2, FLDL2E, FLDL2T, FLDPI, FLD1, and FLDZ.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FLDLG2()
     {
-        this.pushValue(X86FPU.regLG2);
+        this.pushValue(FPUX86.regLG2);
     }
 
     /**
@@ -2473,11 +2473,11 @@ class X86FPU extends Component {
      *
      * See also: FLDLG2, FLDL2E, FLDL2T, FLDPI, FLD1, and FLDZ.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FLDLN2()
     {
-        this.pushValue(X86FPU.regLN2);
+        this.pushValue(FPUX86.regLN2);
     }
 
     /**
@@ -2490,7 +2490,7 @@ class X86FPU extends Component {
      *
      * See also: FLDLG2, FLDLN2, FLDL2E, FLDL2T, FLDPI, and FLD1.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FLDZ()
     {
@@ -2500,7 +2500,7 @@ class X86FPU extends Component {
     /**
      * FMULlr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FMULlr()
     {
@@ -2512,7 +2512,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xD8,reg=0x01 ("FMUL short-real"): ST(0) <- ST(0) * REAL32
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FMULsr()
     {
@@ -2522,7 +2522,7 @@ class X86FPU extends Component {
     /**
      * FMULst()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FMULst()
     {
@@ -2532,7 +2532,7 @@ class X86FPU extends Component {
     /**
      * FMULsti()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FMULsti()
     {
@@ -2542,7 +2542,7 @@ class X86FPU extends Component {
     /**
      * FMULPsti()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FMULPsti()
     {
@@ -2552,7 +2552,7 @@ class X86FPU extends Component {
     /**
      * FNOP()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FNOP()
     {
@@ -2569,7 +2569,7 @@ class X86FPU extends Component {
      * On the 80287XL and later coprocessors, the range of the operands is unrestricted.  The result is
      * returned to ST(1), and the stack is popped, destroying both operands and leaving the result in ST(0).
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FPATAN()
     {
@@ -2607,7 +2607,7 @@ class X86FPU extends Component {
      * if condition code bit C2 is 0 and the precision exception is raised, then C1=1 if the last bit was rounded up. C1 is
      * undefined for the 8087 and 80287.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FPTAN()
     {
@@ -2670,7 +2670,7 @@ class X86FPU extends Component {
      * ERRATA: On the 8087 and 80287, the condition code bits C3, C1, and C0 are incorrect when performing a reduction of
      * 64^n + m, where n >= 1, and m=1 or m=2.  A bug fix should be implemented in software.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FPREM()
     {
@@ -2680,7 +2680,7 @@ class X86FPU extends Component {
     /**
      * FRSTOR()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FRSTOR()
     {
@@ -2699,17 +2699,17 @@ class X86FPU extends Component {
     /**
      * FRNDINT()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FRNDINT()
     {
-        this.setST(0, this.roundValue(this.getST(0), X86FPU.MAX_INT64));
+        this.setST(0, this.roundValue(this.getST(0), FPUX86.MAX_INT64));
     }
 
     /**
      * FSAVE()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSAVE()
     {
@@ -2741,7 +2741,7 @@ class X86FPU extends Component {
      * On the 80287XL and later coprocessors, there is no limit on the range of the scale factor in ST(1). The value in
      * ST(1) is still chopped toward zero.  If ST(1) is 0, ST(0) is unchanged.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSCALE()
     {
@@ -2753,7 +2753,7 @@ class X86FPU extends Component {
     /**
      * FSETPM287()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSETPM287()
     {
@@ -2765,7 +2765,7 @@ class X86FPU extends Component {
     /**
      * FSINCOS387()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSINCOS387()
     {
@@ -2777,7 +2777,7 @@ class X86FPU extends Component {
     /**
      * FSQRT()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSQRT()
     {
@@ -2787,7 +2787,7 @@ class X86FPU extends Component {
     /**
      * FSTlr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSTlr()
     {
@@ -2797,7 +2797,7 @@ class X86FPU extends Component {
     /**
      * FSTsr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSTsr()
     {
@@ -2807,7 +2807,7 @@ class X86FPU extends Component {
     /**
      * FSTsti()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSTsti()
     {
@@ -2817,7 +2817,7 @@ class X86FPU extends Component {
     /**
      * FSTENV()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSTENV()
     {
@@ -2829,7 +2829,7 @@ class X86FPU extends Component {
     /**
      * FSTPlr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSTPlr()
     {
@@ -2842,7 +2842,7 @@ class X86FPU extends Component {
     /**
      * FSTPsr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSTPsr()
     {
@@ -2855,7 +2855,7 @@ class X86FPU extends Component {
     /**
      * FSTPsti()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSTPsti()
     {
@@ -2868,18 +2868,18 @@ class X86FPU extends Component {
      * NOTE: This is used with encodings (0xD9,0xD8-0xDF and 0xDF,0xD0-0xDF) that were valid for the 8087 and 80287
      * but may no longer be valid as of the 80387.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSTP8087()
     {
         this.opObsolete();
-        X86FPU.FSTPsti.call(this);
+        FPUX86.FSTPsti.call(this);
     }
 
     /**
      * FSTPtr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSTPtr()
     {
@@ -2892,7 +2892,7 @@ class X86FPU extends Component {
     /**
      * FSTCW()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSTCW()
     {
@@ -2903,7 +2903,7 @@ class X86FPU extends Component {
     /**
      * FSTSW()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSTSW()
     {
@@ -2914,7 +2914,7 @@ class X86FPU extends Component {
     /**
      * FSTSWAX287()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSTSWAX287()
     {
@@ -2926,7 +2926,7 @@ class X86FPU extends Component {
     /**
      * FSUBlr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSUBlr()
     {
@@ -2936,7 +2936,7 @@ class X86FPU extends Component {
     /**
      * FSUBsr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSUBsr()
     {
@@ -2948,7 +2948,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xD8,0xE0-0xE7 ("FSUB ST,ST(i)"): ST(0) <- ST(0) - ST(i)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSUBst()
     {
@@ -2960,7 +2960,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xDC,0xE8-0xEF ("FSUB ST(i),ST"): ST(i) <- ST(i) - ST(0)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSUBsti()
     {
@@ -2972,7 +2972,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xDE,0xE8-0xEF ("FSUBP ST(i),ST"): ST(i) <- ST(i) - ST(0), POP
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSUBPsti()
     {
@@ -2982,7 +2982,7 @@ class X86FPU extends Component {
     /**
      * FSUBRlr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSUBRlr()
     {
@@ -2992,7 +2992,7 @@ class X86FPU extends Component {
     /**
      * FSUBRsr()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSUBRsr()
     {
@@ -3004,7 +3004,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xD8,0xE8-0xEF ("FSUBR ST,ST(i)"): ST(0) <- ST(i) - ST(0)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSUBRst()
     {
@@ -3016,7 +3016,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xDC,0xE0-0xE7 ("FSUBR ST(i),ST"): ST(i) <- ST(0) - ST(i)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSUBRsti()
     {
@@ -3028,7 +3028,7 @@ class X86FPU extends Component {
      *
      * Encoding 0xDE,0xE0-0xE7 ("FSUBRP ST(i),ST"): ST(i) <- ST(0) - ST(i), POP
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FSUBRPsti()
     {
@@ -3038,7 +3038,7 @@ class X86FPU extends Component {
     /**
      * FTST()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FTST()
     {
@@ -3048,7 +3048,7 @@ class X86FPU extends Component {
     /**
      * FXAM()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FXAM()
     {
@@ -3080,7 +3080,7 @@ class X86FPU extends Component {
     /**
      * FXCHsti()
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FXCHsti()
     {
@@ -3095,12 +3095,12 @@ class X86FPU extends Component {
      * NOTE: This is used with encodings (0xDD,0xC8-0xCF and 0xDF,0xC8-0xCF) that were valid for the 8087 and 80287
      * but may no longer be valid as of the 80387.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FXCH8087()
     {
         this.opObsolete();
-        X86FPU.FXCHsti.call(this);
+        FPUX86.FXCHsti.call(this);
     }
 
     /**
@@ -3135,7 +3135,7 @@ class X86FPU extends Component {
      *          ST(0) = FRACTION(ST(0))
      *      ENDIF
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FXTRACT()
     {
@@ -3163,7 +3163,7 @@ class X86FPU extends Component {
      *
      *      logn(x) = logn(2) * log2(x)
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FYL2X()
     {
@@ -3186,7 +3186,7 @@ class X86FPU extends Component {
      * of 1.0 + n where 0 < n < 0.29.  If 1.0 was added to n, significant digits might be lost.  By using FYL2XP1, the result
      * will be as accurate as n to within three units of temporary real precision.
      *
-     * @this {X86FPU}
+     * @this {FPUX86}
      */
     static FYL2XP1()
     {
@@ -3194,11 +3194,11 @@ class X86FPU extends Component {
     }
 
     /**
-     * X86FPU.init()
+     * FPUX86.init()
      *
      * This function operates on every HTML element of class "fpu", extracting the
-     * JSON-encoded parameters for the X86FPU constructor from the element's "data-value"
-     * attribute, invoking the constructor to create an X86FPU component, and then binding
+     * JSON-encoded parameters for the FPUX86 constructor from the element's "data-value"
+     * attribute, invoking the constructor to create an FPUX86 component, and then binding
      * any associated HTML controls to the new component.
      */
     static init()
@@ -3207,7 +3207,7 @@ class X86FPU extends Component {
         for (var iFPU = 0; iFPU < aeFPUs.length; iFPU++) {
             var eFPU = aeFPUs[iFPU];
             var parmsFPU = Component.getComponentParms(eFPU);
-            var fpu = new X86FPU(parmsFPU);
+            var fpu = new FPUX86(parmsFPU);
             Component.bindComponentControls(fpu, eFPU, PCX86.APPCLASS);
         }
     }
@@ -3220,28 +3220,28 @@ class X86FPU extends Component {
  */
 
 /** @const */
-X86FPU.regL2T = Math.log(10) / Math.LN2;        // log2(10) (use Math.log2() if we ever switch to ES6)
+FPUX86.regL2T = Math.log(10) / Math.LN2;        // log2(10) (use Math.log2() if we ever switch to ES6)
 
 /** @const */
-X86FPU.regL2E = Math.LOG2E;                     // log2(e)
+FPUX86.regL2E = Math.LOG2E;                     // log2(e)
 
 /** @const */
-X86FPU.regPI  = Math.PI;                        // pi
+FPUX86.regPI  = Math.PI;                        // pi
 
 /** @const */
-X86FPU.regLG2 = Math.log(2) / Math.LN10;        // log10(2) (use Math.log10() if we ever switch to ES6)
+FPUX86.regLG2 = Math.log(2) / Math.LN10;        // log10(2) (use Math.log10() if we ever switch to ES6)
 
 /** @const */
-X86FPU.regLN2 = Math.LN2;                       // log(2)
+FPUX86.regLN2 = Math.LN2;                       // log(2)
 
 /** @const */
-X86FPU.MAX_INT16 = 0x8000;
+FPUX86.MAX_INT16 = 0x8000;
 
 /** @const */
-X86FPU.MAX_INT32 = 0x80000000;
+FPUX86.MAX_INT32 = 0x80000000;
 
 /** @const */
-X86FPU.MAX_INT64 = Math.pow(2, 63);
+FPUX86.MAX_INT64 = Math.pow(2, 63);
 
 
 /*
@@ -3298,79 +3298,79 @@ X86FPU.MAX_INT64 = Math.pow(2, 63);
  *      0x76:   0xFE
  *      0x77:   0xFF
  */
-X86FPU.aaOps = {
+FPUX86.aaOps = {
     0xD8: {
-        0x00: X86FPU.FADDsr,    0x01: X86FPU.FMULsr,    0x02: X86FPU.FCOMsr,    0x03: X86FPU.FCOMPsr,
-        0x04: X86FPU.FSUBsr,    0x05: X86FPU.FSUBRsr,   0x06: X86FPU.FDIVsr,    0x07: X86FPU.FDIVsr,
-        0x30: X86FPU.FADDst,    0x31: X86FPU.FMULst,    0x32: X86FPU.FCOMst,    0x33: X86FPU.FCOMPst,
-        0x34: X86FPU.FSUBst,    0x35: X86FPU.FSUBRst,   0x36: X86FPU.FDIVst,    0x37: X86FPU.FDIVRst
+        0x00: FPUX86.FADDsr,    0x01: FPUX86.FMULsr,    0x02: FPUX86.FCOMsr,    0x03: FPUX86.FCOMPsr,
+        0x04: FPUX86.FSUBsr,    0x05: FPUX86.FSUBRsr,   0x06: FPUX86.FDIVsr,    0x07: FPUX86.FDIVsr,
+        0x30: FPUX86.FADDst,    0x31: FPUX86.FMULst,    0x32: FPUX86.FCOMst,    0x33: FPUX86.FCOMPst,
+        0x34: FPUX86.FSUBst,    0x35: FPUX86.FSUBRst,   0x36: FPUX86.FDIVst,    0x37: FPUX86.FDIVRst
     },
     0xD9: {
-        0x00: X86FPU.FLDsr,                             0x02: X86FPU.FSTsr,     0x03: X86FPU.FSTPsr,
-        0x04: X86FPU.FLDENV,    0x05: X86FPU.FLDCW,     0x06: X86FPU.FSTENV,    0x07: X86FPU.FSTCW,
-        0x30: X86FPU.FLDsti,    0x31: X86FPU.FXCHsti,   0x32: X86FPU.FNOP,      0x33: X86FPU.FSTP8087,
-        0x40: X86FPU.FCHS,      0x41: X86FPU.FABS,
-        0x44: X86FPU.FTST,      0x45: X86FPU.FXAM,
-        0x50: X86FPU.FLD1,      0x51: X86FPU.FLDL2T,    0x52: X86FPU.FLDL2E,    0x53: X86FPU.FLDPI,
-        0x54: X86FPU.FLDLG2,    0x55: X86FPU.FLDLN2,    0x56: X86FPU.FLDZ,
-        0x60: X86FPU.F2XM1,     0x61: X86FPU.FYL2X,     0x62: X86FPU.FPTAN,     0x63: X86FPU.FPATAN,
-        0x64: X86FPU.FXTRACT,                           0x66: X86FPU.FDECSTP,   0x67: X86FPU.FINCSTP,
-        0x70: X86FPU.FPREM,     0x71: X86FPU.FYL2XP1,   0x72: X86FPU.FSQRT,
-        0x74: X86FPU.FRNDINT,   0x75: X86FPU.FSCALE
+        0x00: FPUX86.FLDsr,                             0x02: FPUX86.FSTsr,     0x03: FPUX86.FSTPsr,
+        0x04: FPUX86.FLDENV,    0x05: FPUX86.FLDCW,     0x06: FPUX86.FSTENV,    0x07: FPUX86.FSTCW,
+        0x30: FPUX86.FLDsti,    0x31: FPUX86.FXCHsti,   0x32: FPUX86.FNOP,      0x33: FPUX86.FSTP8087,
+        0x40: FPUX86.FCHS,      0x41: FPUX86.FABS,
+        0x44: FPUX86.FTST,      0x45: FPUX86.FXAM,
+        0x50: FPUX86.FLD1,      0x51: FPUX86.FLDL2T,    0x52: FPUX86.FLDL2E,    0x53: FPUX86.FLDPI,
+        0x54: FPUX86.FLDLG2,    0x55: FPUX86.FLDLN2,    0x56: FPUX86.FLDZ,
+        0x60: FPUX86.F2XM1,     0x61: FPUX86.FYL2X,     0x62: FPUX86.FPTAN,     0x63: FPUX86.FPATAN,
+        0x64: FPUX86.FXTRACT,                           0x66: FPUX86.FDECSTP,   0x67: FPUX86.FINCSTP,
+        0x70: FPUX86.FPREM,     0x71: FPUX86.FYL2XP1,   0x72: FPUX86.FSQRT,
+        0x74: FPUX86.FRNDINT,   0x75: FPUX86.FSCALE
     },
     0xDA: {
-        0x00: X86FPU.FIADD32,   0x01: X86FPU.FIMUL32,   0x02: X86FPU.FICOM32,   0x03: X86FPU.FICOMP32,
-        0x04: X86FPU.FISUB32,   0x05: X86FPU.FISUBR32,  0x06: X86FPU.FIDIV32,   0x07: X86FPU.FIDIVR32
+        0x00: FPUX86.FIADD32,   0x01: FPUX86.FIMUL32,   0x02: FPUX86.FICOM32,   0x03: FPUX86.FICOMP32,
+        0x04: FPUX86.FISUB32,   0x05: FPUX86.FISUBR32,  0x06: FPUX86.FIDIV32,   0x07: FPUX86.FIDIVR32
     },
     0xDB: {
-        0x00: X86FPU.FILD32,    0x02: X86FPU.FIST32,    0x03: X86FPU.FISTP32,
-                                0x05: X86FPU.FLDtr,                             0x07: X86FPU.FSTPtr,
-        0x40: X86FPU.FENI8087,  0x41: X86FPU.FDISI8087, 0x42: X86FPU.FCLEX,     0x43: X86FPU.FINIT,
-        0x44: X86FPU.FSETPM287,
-        0x73: X86FPU.FSINCOS387
+        0x00: FPUX86.FILD32,    0x02: FPUX86.FIST32,    0x03: FPUX86.FISTP32,
+                                0x05: FPUX86.FLDtr,                             0x07: FPUX86.FSTPtr,
+        0x40: FPUX86.FENI8087,  0x41: FPUX86.FDISI8087, 0x42: FPUX86.FCLEX,     0x43: FPUX86.FINIT,
+        0x44: FPUX86.FSETPM287,
+        0x73: FPUX86.FSINCOS387
     },
     0xDC: {
-        0x00: X86FPU.FADDlr,    0x01: X86FPU.FMULlr,    0x02: X86FPU.FCOMlr,    0x03: X86FPU.FCOMPlr,
-        0x04: X86FPU.FSUBlr,    0x05: X86FPU.FSUBRlr,   0x06: X86FPU.FDIVlr,    0x07: X86FPU.FDIVRlr,
-        0x30: X86FPU.FADDsti,   0x31: X86FPU.FMULsti,   0x32: X86FPU.FCOM8087,  0x33: X86FPU.FCOMP8087,
+        0x00: FPUX86.FADDlr,    0x01: FPUX86.FMULlr,    0x02: FPUX86.FCOMlr,    0x03: FPUX86.FCOMPlr,
+        0x04: FPUX86.FSUBlr,    0x05: FPUX86.FSUBRlr,   0x06: FPUX86.FDIVlr,    0x07: FPUX86.FDIVRlr,
+        0x30: FPUX86.FADDsti,   0x31: FPUX86.FMULsti,   0x32: FPUX86.FCOM8087,  0x33: FPUX86.FCOMP8087,
         /*
          * Intel's original 8087 datasheet had these forms of SUB and SUBR (and DIV and DIVR) swapped.
          */
-        0x34: X86FPU.FSUBRsti,  0x35: X86FPU.FSUBsti,   0x36: X86FPU.FDIVRsti,  0x37: X86FPU.FDIVsti
+        0x34: FPUX86.FSUBRsti,  0x35: FPUX86.FSUBsti,   0x36: FPUX86.FDIVRsti,  0x37: FPUX86.FDIVsti
     },
     0xDD: {
-        0x00: X86FPU.FLDlr,                             0x02: X86FPU.FSTlr,     0x03: X86FPU.FSTPlr,
-        0x04: X86FPU.FRSTOR,                            0x06: X86FPU.FSAVE,     0x07: X86FPU.FSTSW,
-        0x30: X86FPU.FFREEsti,  0x31: X86FPU.FXCH8087,  0x32: X86FPU.FSTsti,    0x33: X86FPU.FSTPsti
+        0x00: FPUX86.FLDlr,                             0x02: FPUX86.FSTlr,     0x03: FPUX86.FSTPlr,
+        0x04: FPUX86.FRSTOR,                            0x06: FPUX86.FSAVE,     0x07: FPUX86.FSTSW,
+        0x30: FPUX86.FFREEsti,  0x31: FPUX86.FXCH8087,  0x32: FPUX86.FSTsti,    0x33: FPUX86.FSTPsti
     },
     0xDE: {
-        0x00: X86FPU.FIADD16,   0x01: X86FPU.FIMUL16,   0x02: X86FPU.FICOM16,   0x03: X86FPU.FICOMP16,
-        0x04: X86FPU.FISUB16,   0x05: X86FPU.FISUBR16,  0x06: X86FPU.FIDIV16,   0x07: X86FPU.FIDIVR16,
-        0x30: X86FPU.FADDPsti,  0x31: X86FPU.FMULPsti,  0x32: X86FPU.FCOMP8087, 0x33: X86FPU.FCOMPP,
+        0x00: FPUX86.FIADD16,   0x01: FPUX86.FIMUL16,   0x02: FPUX86.FICOM16,   0x03: FPUX86.FICOMP16,
+        0x04: FPUX86.FISUB16,   0x05: FPUX86.FISUBR16,  0x06: FPUX86.FIDIV16,   0x07: FPUX86.FIDIVR16,
+        0x30: FPUX86.FADDPsti,  0x31: FPUX86.FMULPsti,  0x32: FPUX86.FCOMP8087, 0x33: FPUX86.FCOMPP,
         /*
          * Intel's original 8087 datasheet had these forms of SUBP and SUBRP (and DIVP and DIVRP) swapped.
          */
-        0x34: X86FPU.FSUBRPsti, 0x35: X86FPU.FSUBPsti,  0x36: X86FPU.FDIVRPsti, 0x37: X86FPU.FDIVPsti
+        0x34: FPUX86.FSUBRPsti, 0x35: FPUX86.FSUBPsti,  0x36: FPUX86.FDIVRPsti, 0x37: FPUX86.FDIVPsti
     },
     0xDF: {
-        0x00: X86FPU.FILD16,                            0x02: X86FPU.FIST16,    0x03: X86FPU.FISTP16,
-        0x04: X86FPU.FBLDpd,    0x05: X86FPU.FILD64,    0x06: X86FPU.FBSTPpd,   0x07: X86FPU.FISTP64,
-        0x30: X86FPU.FFREEP8087,0x31: X86FPU.FXCH8087,  0x32: X86FPU.FSTP8087,  0x33: X86FPU.FSTP8087,
-        0x34: X86FPU.FSTSWAX287
+        0x00: FPUX86.FILD16,                            0x02: FPUX86.FIST16,    0x03: FPUX86.FISTP16,
+        0x04: FPUX86.FBLDpd,    0x05: FPUX86.FILD64,    0x06: FPUX86.FBSTPpd,   0x07: FPUX86.FISTP64,
+        0x30: FPUX86.FFREEP8087,0x31: FPUX86.FXCH8087,  0x32: FPUX86.FSTP8087,  0x33: FPUX86.FSTP8087,
+        0x34: FPUX86.FSTSWAX287
     }
 };
 
 /*
- * An array of X86FPU functions documented as preserving the "exception" registers.
+ * An array of FPUX86 functions documented as preserving the "exception" registers.
  */
-X86FPU.afnPreserveExceptions = [
-    X86FPU.FCLEX,   X86FPU.FINIT,   X86FPU.FLDCW,   X86FPU.FLDENV,  X86FPU.FRSTOR,
-    X86FPU.FSAVE,   X86FPU.FSTCW,   X86FPU.FSTENV,  X86FPU.FSTSW,   X86FPU.FSTSWAX287
+FPUX86.afnPreserveExceptions = [
+    FPUX86.FCLEX,   FPUX86.FINIT,   FPUX86.FLDCW,   FPUX86.FLDENV,  FPUX86.FRSTOR,
+    FPUX86.FSAVE,   FPUX86.FSTCW,   FPUX86.FSTENV,  FPUX86.FSTSW,   FPUX86.FSTSWAX287
 ];
 
 /*
  * Initialize every FPU module on the page
  */
-Web.onInit(X86FPU.init);
+Web.onInit(FPUX86.init);
 
-if (NODE) module.exports = X86FPU;
+if (NODE) module.exports = FPUX86;

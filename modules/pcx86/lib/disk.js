@@ -165,7 +165,7 @@ if (NODE) {
  */
 
 /**
- * @class Disk
+ * class Disk
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Disk extends Component {
@@ -244,7 +244,7 @@ class Disk extends Component {
      * @this {Disk}
      * @param {Computer} cmp
      * @param {Bus} bus
-     * @param {X86CPU} cpu
+     * @param {CPUX86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -2366,7 +2366,7 @@ Disk.REMOTE_WRITE_DELAY = 2000;         // 2-second delay
 Disk.nDisks = 0;
 
 /**
- * @class FileInfo
+ * class FileInfo
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class FileInfo {

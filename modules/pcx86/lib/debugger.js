@@ -38,9 +38,9 @@ if (DEBUGGER) {
         var Keys        = require("../../shared/lib/keys");
         var State       = require("../../shared/lib/state");
         var PCX86       = require("./defines");
-        var CPU         = require("./cpu");
         var X86         = require("./x86");
-        var X86Seg      = require("./x86seg");
+        var CPU         = require("./cpu");
+        var SegX86      = require("./segx86");
         var Interrupts  = require("./interrupts");
         var Messages    = require("./messages");
         var Memory      = require("./memory");
@@ -114,7 +114,7 @@ var DbgAddrX86;
  */
 
 /**
- * @class DebuggerX86
+ * class DebuggerX86
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class DebuggerX86 extends Debugger {
@@ -248,7 +248,7 @@ class DebuggerX86 extends Debugger {
      * @this {DebuggerX86}
      * @param {Computer} cmp
      * @param {Bus} bus
-     * @param {X86CPU} cpu
+     * @param {CPUX86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -275,7 +275,7 @@ class DebuggerX86 extends Debugger {
         /*
          * Allocate a special segment "register", for use whenever a requested selector is not currently loaded
          */
-        this.segDebugger = new X86Seg(this.cpu, X86Seg.ID.DBG, "DBG");
+        this.segDebugger = new SegX86(this.cpu, SegX86.ID.DBG, "DBG");
 
         this.aaOpDescs = DebuggerX86.aaOpDescs;
         if (this.cpu.model >= X86.MODEL_80186) {
@@ -284,7 +284,7 @@ class DebuggerX86 extends Debugger {
             if (this.cpu.model >= X86.MODEL_80286) {
                 /*
                  * TODO: Consider whether the aOpDesc0F table should be split in two: one for 80286-only instructions,
-                 * and one for both 80286 and 80386.  For now, the Debugger is not as strict as the X86CPU is about
+                 * and one for both 80286 and 80386.  For now, the Debugger is not as strict as the CPUX86 is about
                  * the instructions it supports for each type of CPU, in part because an 80286 machine could still be
                  * presented with 80386-only code that is simply "skipped over" when then CPU doesn't support it.
                  *
@@ -1022,7 +1022,7 @@ class DebuggerX86 extends Debugger {
      * @this {DebuggerX86}
      * @param {number|null|undefined} sel
      * @param {number} [type] (defaults to getAddressType())
-     * @return {X86Seg|null} seg
+     * @return {SegX86|null} seg
      */
     getSegment(sel, type)
     {
@@ -4169,7 +4169,7 @@ class DebuggerX86 extends Debugger {
      * getSegOutput(seg, fProt)
      *
      * @this {DebuggerX86}
-     * @param {X86Seg} seg
+     * @param {SegX86} seg
      * @param {boolean} [fProt]
      * @return {string}
      */
@@ -6130,7 +6130,7 @@ class DebuggerX86 extends Debugger {
 
         while (cFrames < nFrames) {
             var sCall = null, sCallPrev = null, cTests = 256;
-            while ((dbgAddrStack.off >>> 0) < (this.cpu.regLSPLimit >>> 0)) {
+            while ((dbgAddrStack.off >>> 0) < this.cpu.regLSPLimit) {
                 dbgAddrCall.off = this.getWord(dbgAddrStack, true);
                 /*
                  * Because we're using the auto-increment feature of getWord(), and because that will automatically
@@ -7445,7 +7445,7 @@ if (DEBUGGER) {
     };
 
     /*
-     * Be sure to keep the following table in sync with X86FPU.aaOps
+     * Be sure to keep the following table in sync with FPUX86.aaOps
      */
     DebuggerX86.aaaOpFPUDescs = {
         0xD8: {

@@ -187,7 +187,7 @@ class Rectangle {
 }
 
 /**
- * @class Panel
+ * class Panel
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Panel extends Component {
@@ -220,7 +220,7 @@ class Panel extends Component {
      * @this {Panel}
      * @param {Computer} cmp
      * @param {Bus} bus
-     * @param {X86CPU} cpu
+     * @param {CPUX86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -589,7 +589,7 @@ class Panel extends Component {
      *
      * Update function for Panels containing elements with high-frequency display requirements.
      *
-     * For older (and slower) DOM-based display elements, those are sill being managed by the X86CPU component,
+     * For older (and slower) DOM-based display elements, those are sill being managed by the CPUX86 component,
      * so it has its own updateStatus() handler.
      *
      * The Computer's updateStatus() handler is currently responsible for calling both our handler and the CPU's handler.

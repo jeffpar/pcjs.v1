@@ -97,7 +97,7 @@ if (NODE) {
  */
 
 /**
- * @class FDC
+ * class FDC
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class FDC extends Component {
@@ -390,7 +390,7 @@ class FDC extends Component {
      * @this {FDC}
      * @param {Computer} cmp
      * @param {Bus} bus
-     * @param {X86CPU} cpu
+     * @param {CPUX86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -2224,7 +2224,7 @@ class FDC extends Component {
              * exists (ie, either that "NecOut" leaves interrupts disabled, or simply that the floppy controller is an
              * inherently slow device).
              */
-            if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.FDC, 32);
+            if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.FDC);
         }
     }
     

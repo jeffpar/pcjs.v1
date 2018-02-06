@@ -7,9 +7,8 @@ permalink: /disks/pcx86/os2/
 IBM OS/2 and Microsoft MS OS/2
 ---
 
-Information is available for assorted versions of OS/2 from these vendors:
+Information is available for assorted versions of OS/2.
 
 * [IBM](ibm/)
 * [Microsoft](microsoft/)
-
-We are also the *original* online source of an assortment of early [OS/2 Prototype Disks](misc/).
+* [Early OS/2 Prototypes](misc/)
