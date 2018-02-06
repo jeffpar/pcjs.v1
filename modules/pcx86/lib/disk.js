@@ -964,7 +964,7 @@ class Disk extends Component {
                             if (sectorBoot) fValid = true;
                             break;
                         }
-                        off += DiskAPI.MBR.PARTITIONS.ENTRY.LENGTH;
+                        off += DiskAPI.MBR.PARTITIONS.ENTRY_LENGTH;
                     }
                 }
                 if (!fValid) {

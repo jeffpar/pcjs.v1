@@ -7,11 +7,11 @@ redirect_from:
 ---
 
 Microsoft Macro Assembler 1.00
----
+------------------------------
 
 Directory listing of the 160Kb distribution diskette is provided below.
 
-### Directory of MS MASM 1.00
+### Directory of MS Macro Assembler 1.00
 
 	 Volume in drive A has no label
 

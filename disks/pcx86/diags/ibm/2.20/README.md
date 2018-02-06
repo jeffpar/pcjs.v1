@@ -9,7 +9,7 @@ machines:
     config: /devices/pcx86/machine/5150/mda/64kb/debugger/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/diags/ibm/2.20/5150_5155_5160_ADVDIAG_220.json
+        path: /disks/pcx86/diags/ibm/2.20/5150-5155-5160-ADV-DIAG-220.json
 ---
 
 {% include machine.html id="ibm5150" %}

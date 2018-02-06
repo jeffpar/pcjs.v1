@@ -7,7 +7,7 @@ redirect_from:
 ---
 
 Microsoft Macro Assembler 5.10
----
+------------------------------
 
 Directory listings of the five distribution diskettes (plus an update disk issued by Microsoft in March 1990)
 are provided below.
@@ -15,7 +15,7 @@ are provided below.
 We don't have any documents from this release, but we do have
 [Microsoft Macro Assembler 5.0 Documentation](/pubs/pc/software/tools/microsoft/masm/5.00/).
 
-### Directory of MS MASM 5.10 (Disk 1)
+### Directory of MS Macro Assembler 5.10 (Disk 1)
 
 	 Volume in drive A is MASM       
 
@@ -53,7 +53,7 @@ We don't have any documents from this release, but we do have
 	       22 file(s)     245337 bytes
 	                      103424 bytes free
 
-### Directory of MS MASM 5.10 (Disk 2)
+### Directory of MS Macro Assembler 5.10 (Disk 2)
 
 	 Volume in drive A is UTILITIES  
 
@@ -75,7 +75,7 @@ We don't have any documents from this release, but we do have
 	       10 file(s)     295252 bytes
 	                       61440 bytes free
 
-### Directory of MS MASM 5.10 (Disk 3)
+### Directory of MS Macro Assembler 5.10 (Disk 3)
 
 	 Volume in drive A is CODEVIEW   
 
@@ -102,7 +102,7 @@ We don't have any documents from this release, but we do have
 	       15 file(s)     351344 bytes
 	                        2048 bytes free
 
-### Directory of MS MASM 5.10 (Disk 4)
+### Directory of MS Macro Assembler 5.10 (Disk 4)
 
 	 Volume in drive A is EDITOR     
 
@@ -147,7 +147,7 @@ We don't have any documents from this release, but we do have
 	       25 file(s)     305172 bytes
 	                       45056 bytes free
 
-### Directory of MS MASM 5.10 (Disk 5)
+### Directory of MS Macro Assembler 5.10 (Disk 5)
 
 	 Volume in drive A is OS2 PROGRAM
 
@@ -186,7 +186,7 @@ We don't have any documents from this release, but we do have
 	       27 file(s)     966076 bytes
 	                      241152 bytes free
 
-### Directory of MS MASM 5.10A (Update)
+### Directory of MS Macro Assembler 5.10A (Update)
 
 	 Volume in drive A is MASM-5-10A 
 
@@ -208,7 +208,7 @@ We don't have any documents from this release, but we do have
 	        6 file(s)     239336 bytes
 	                      120832 bytes free
 
-### Contents of README.DOC from the **MS MASM 5.10A (Update)** Diskette
+### Contents of README.DOC from the **MS Macro Assembler 5.10A (Update)** Diskette
 
 	Dear Macro Assembler Customer,
 	

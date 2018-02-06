@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.5/manifest.xsl"?>
 <manifest type="software">
-	<title>Microsoft Macro Assembler</title>
+	<title>Macro Assembler</title>
 	<version>6.11</version>
 	<type>Utility</type>
 	<category>Assembler</category>
 	<language>x86</language>
-	<author>Microsoft</author>
+	<company>Microsoft</company>
 	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/MASM611-DISK1.img" href="/disks/pcx86/tools/microsoft/masm/6.11/MASM611-DISK1.json" md5="bb1f36e70d67720fa63356010b07c992" md5json="6a7ab4d31a18de6d5b2e56ebc46e0cca">
-		<name>MS MASM 6.11 (Disk 1)</name>
+		<name>MS Macro Assembler 6.11 (Disk 1)</name>
 		<file size="544" time="1993-10-19 11:49:52" attr="0x10">BIN</file>
 		<file size="270756" time="1992-07-16 16:43:44" attr="0x20" dir="BIN/">CV.EX$</file>
 		<file size="629" time="1992-01-15 17:16:18" attr="0x20" dir="BIN/">CV.IC$</file>
@@ -35,7 +35,7 @@
 		<file size="2632" time="1993-09-21 10:22:12" attr="0x20">SUPPORT.TX$</file>
 	</disk>
 	<disk id="disk02" size="1474560" chs="80:2:18" img="archive/MASM611-DISK2.img" href="/disks/pcx86/tools/microsoft/masm/6.11/MASM611-DISK2.json" md5="1eec7644feb4ef930b1e989ab5d2e28e" md5json="11c4dd0119d9fb27dde1d9965b30121f">
-		<name>MS MASM 6.11 (Disk 2)</name>
+		<name>MS Macro Assembler 6.11 (Disk 2)</name>
 		<file size="612" time="1993-10-18 13:26:02" attr="0x10">BIN</file>
 		<file size="53029" time="1992-03-07 07:39:32" attr="0x20" dir="BIN/">BSCMAKE.EX$</file>
 		<file size="55260" time="1992-03-07 07:39:38" attr="0x20" dir="BIN/">BSCMAKEV.EX$</file>
@@ -55,7 +55,7 @@
 		<file size="121806" time="1992-07-13 10:06:36" attr="0x20" dir="BIN/">LINK.EX$</file>
 	</disk>
 	<disk id="disk03" size="1474560" chs="80:2:18" img="archive/MASM611-DISK3.img" href="/disks/pcx86/tools/microsoft/masm/6.11/MASM611-DISK3.json" md5="fbe44a7aa2e679b26b49eea0d88293c8" md5json="aca5a58db2c14d56ca4a59241ec39ddf">
-		<name>MS MASM 6.11 (Disk 3)</name>
+		<name>MS Macro Assembler 6.11 (Disk 3)</name>
 		<file size="1258" time="1993-10-18 13:30:32" attr="0x10">BIN</file>
 		<file size="28230" time="1993-08-19 09:50:52" attr="0x20" dir="BIN/">MASM.EX$</file>
 		<file size="1639" time="1992-08-19 19:26:08" attr="0x20" dir="BIN/">MASM.GR$</file>
@@ -94,7 +94,7 @@
 		<file size="5647" time="1992-07-17 10:26:24" attr="0x20" dir="BIN/">TLD1COM.DL$</file>
 	</disk>
 	<disk id="disk04" size="1474560" chs="80:2:18" img="archive/MASM611-DISK4.img" href="/disks/pcx86/tools/microsoft/masm/6.11/MASM611-DISK4.json" md5="8036d7371a7049df2b83d12e946535bf" md5json="c1fdce9bf7fb3248e1ae432cc707f56b">
-		<name>MS MASM 6.11 (Disk 4)</name>
+		<name>MS Macro Assembler 6.11 (Disk 4)</name>
 		<file size="306" time="1993-10-18 13:36:06" attr="0x10">BIN</file>
 		<file size="9926" time="1992-07-16 16:52:22" attr="0x20" dir="BIN/">TLD1LOC.DL$</file>
 		<file size="23148" time="1992-07-16 17:42:50" attr="0x20" dir="BIN/">TLW0LOC.DL$</file>
@@ -216,7 +216,7 @@
 		<file size="726" time="1993-09-03 11:01:06" attr="0x20" dir="SAMPLES/WINDLL/">SYSINFO.MA$</file>
 	</disk>
 	<disk id="disk05" size="1474560" chs="80:2:18" img="archive/MASM611-DISK5.img" href="/disks/pcx86/tools/microsoft/masm/6.11/MASM611-DISK5.json" md5="fd557e7a2451718ee49b22597c460c04" md5json="0a08f96d569b5d9449678ba220d22891">
-		<name>MS MASM 6.11 (Disk 5)</name>
+		<name>MS Macro Assembler 6.11 (Disk 5)</name>
 		<file size="272" time="1993-10-18 13:43:22" attr="0x10">HELP</file>
 		<file size="23363" time="1992-03-03 20:52:36" attr="0x20" dir="HELP/">ADVISOR.HL$</file>
 		<file size="575809" time="1992-11-15 18:57:44" attr="0x20" dir="HELP/">ALANG.HL$</file>

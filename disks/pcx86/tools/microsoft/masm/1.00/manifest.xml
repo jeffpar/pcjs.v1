@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.5/manifest.xsl"?>
 <manifest type="software">
-	<title>Microsoft Macro Assembler</title>
+	<title>Macro Assembler</title>
 	<version>1.00</version>
 	<type>Utility</type>
 	<category>Assembler</category>
 	<language>x86</language>
-	<author>Microsoft</author>
+	<company>Microsoft</company>
 	<disk id="disk01" size="163840" chs="40:1:8" img="archive/MASM100.img" href="/disks/pcx86/tools/microsoft/masm/1.00/MASM100.json" md5="5bd35dfd065544c2fc602974ea9b4186" md5json="698926f454c3a30f8d6f25bc2fec2177">
-		<name>MS MASM 1.00</name>
+		<name>MS Macro Assembler 1.00</name>
 		<file size="41216" time="1982-02-04 12:47:30" attr="0x20">LINK.EXE</file>
 		<file size="67840" time="1982-02-05 11:49:50" attr="0x20">M.EXE</file>
 	</disk>

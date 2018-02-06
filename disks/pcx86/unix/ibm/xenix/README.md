@@ -10,3 +10,4 @@ IBM PC Xenix
 Information is available for these versions of Xenix from IBM.
 
 * [IBM PC Xenix 1.0](1.0/)
+* [IBM PC Xenix 2.0](2.0/)

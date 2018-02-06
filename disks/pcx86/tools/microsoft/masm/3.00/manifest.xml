@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.5/manifest.xsl"?>
 <manifest type="software">
-	<title>Microsoft Macro Assembler</title>
+	<title>Macro Assembler</title>
 	<version>3.00</version>
 	<type>Utility</type>
 	<category>Assembler</category>
 	<language>x86</language>
-	<author>Microsoft</author>
+	<company>Microsoft</company>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MASM-016014-300.img" href="/disks/pcx86/tools/microsoft/masm/3.00/MASM-016014-300.json" md5="4051aa0ca1d19c1e30623b8aac9d3e74" md5json="c7ed72242b137fca677c25e0e77021b8">
-		<name>MS MASM 3.00</name>
+		<name>MS Macro Assembler 3.00</name>
 		<file size="10544" time="1984-11-21 13:51:20" attr="0x20">CREF.EXE</file>
 		<file size="24138" time="1984-10-31 15:57:24" attr="0x20">LIB.EXE</file>
 		<file size="41114" time="1984-11-14 13:48:18" attr="0x20">LINK.EXE</file>

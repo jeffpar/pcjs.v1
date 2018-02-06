@@ -6,7 +6,8 @@ machines:
   - id: ibm5170
     type: pcx86
     debugger: true
-    config: /devices/pcx86/machine/5170/cga/640kb/rev3/debugger/machine.xml
+    config: /devices/pcx86/machine/5170/ega/640kb/rev1/debugger/machine.xml
+    drives: '[{name:"XENIX 286 (20Mb Hard Disk)",type:2,path:"/disks/pcx86/fixed/20mb/XENIX286.json"}]'
     autoMount:
       A:
         name: IBM Xenix 2.0 (INSTALL)
