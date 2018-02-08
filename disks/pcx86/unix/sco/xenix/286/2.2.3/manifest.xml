@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.5/manifest.xsl"?>
+<manifest type="software">
+	<title>Xenix 286</title>
+	<version>2.2.3</version>
+	<type>Operating System</type>
+	<category>Unix</category>
+	<company>SCO</company>
+	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/N1-BOOT.img" href="/disks/pcx86/unix/sco/xenix/286/2.2.3/N1-BOOT.json" md5="ffea71673d68ff372fa89bccbefe7a12" md5json="c97ee5a21b14792577a4b82c9868f987">
+		<name>SCO Xenix 286 2.2.3 (N1-BOOT)</name>
+	</disk>
+	<disk id="disk02" size="1228800" chs="80:2:15" img="archive/N2.img" href="/disks/pcx86/unix/sco/xenix/286/2.2.3/N2.json" md5="c52620f1f58b07cc56e463b9308e7ec4" md5json="0e2a5848fa3012568695172766b5bbea">
+		<name>SCO Xenix 286 2.2.3 (N2)</name>
+	</disk>
+	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/B1.img" href="/disks/pcx86/unix/sco/xenix/286/2.2.3/B1.json" md5="6ada3c6f69d25e56f3950928a64155cb" md5json="887ab07a43fc95097d67bb051a44c2a8">
+		<name>SCO Xenix 286 2.2.3 (B1)</name>
+	</disk>
+	<disk id="disk04" size="1228800" chs="80:2:15" img="archive/D1.img" href="/disks/pcx86/unix/sco/xenix/286/2.2.3/D1.json" md5="cfa23b822db4785728e9deb6c9e7927f" md5json="1cd6be900dde1587ed1e168d068c24c9">
+		<name>SCO Xenix 286 2.2.3 (D1)</name>
+	</disk>
+	<disk id="disk05" size="1228800" chs="80:2:15" img="archive/D2.img" href="/disks/pcx86/unix/sco/xenix/286/2.2.3/D2.json" md5="f478a6d7432ea16c27d35c7678ba2250" md5json="f1e289caba1fa71b4289142184ff680a">
+		<name>SCO Xenix 286 2.2.3 (D2)</name>
+	</disk>
+	<disk id="disk06" size="1228800" chs="80:2:15" img="archive/D3.img" href="/disks/pcx86/unix/sco/xenix/286/2.2.3/D3.json" md5="08e5ffb7c4896878e7e6cffd75a3e39a" md5json="338cf161d1aa8957651a34b90ab79c77">
+		<name>SCO Xenix 286 2.2.3 (D3)</name>
+	</disk>
+	<disk id="disk07" size="1228800" chs="80:2:15" img="archive/D4.img" href="/disks/pcx86/unix/sco/xenix/286/2.2.3/D4.json" md5="3f66821e9cf7da02bcc35246966e3d5b" md5json="c7205f13bfc38d61775a6bc269ad4dee">
+		<name>SCO Xenix 286 2.2.3 (D4)</name>
+	</disk>
+	<disk id="disk08" size="1228800" chs="80:2:15" img="archive/X1.img" href="/disks/pcx86/unix/sco/xenix/286/2.2.3/X1.json" md5="ab805efb47ea9435982a5a97a110f5c4" md5json="1b33a823e8e18a6836ad204d412d219c">
+		<name>SCO Xenix 286 2.2.3 (X1)</name>
+	</disk>
+	<disk id="disk09" size="1228800" chs="80:2:15" img="archive/X3.img" href="/disks/pcx86/unix/sco/xenix/286/2.2.3/X3.json" md5="1fffc9b98f8df2df60c1bb9795238cdd" md5json="4538e6bbb71741967ba717b6beacf8a9">
+		<name>SCO Xenix 286 2.2.3 (X3)</name>
+	</disk>
+	<disk id="disk10" size="1228800" chs="80:2:15" img="archive/GAMES.img" href="/disks/pcx86/unix/sco/xenix/286/2.2.3/GAMES.json" md5="ea77a409147e9d3b034cbe098480e86f" md5json="874a5e2d4dac21ca33e1e277bf9eab1a">
+		<name>SCO Xenix 286 2.2.3 (GAMES)</name>
+	</disk>
+	<disk id="disk11" size="1228800" chs="80:2:15" img="archive/GSS-CGI2.img" href="/disks/pcx86/unix/sco/xenix/286/2.2.3/GSS-CGI2.json" md5="3df86cfa8b0857816fc284f73facc273" md5json="037e78fc5f39403476c3a4a18e945770">
+		<name>SCO Xenix 286 2.2.3 (GSS-CGI2)</name>
+	</disk>
+	<disk id="disk12" size="1228800" chs="80:2:15" img="archive/GSS-CGI3.img" href="/disks/pcx86/unix/sco/xenix/286/2.2.3/GSS-CGI3.json" md5="ae7a6dcc5713f2d7d8baa2d9b2d1bc82" md5json="64da3c078031cf374008df3b6de6cb30">
+		<name>SCO Xenix 286 2.2.3 (GSS-CGI3)</name>
+	</disk>
+</manifest>

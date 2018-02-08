@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.4/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.5/manifest.xsl"?>
 <manifest type="software">
-	<title>Microsoft Macro Assembler</title>
+	<title>Macro Assembler</title>
 	<version>6.00</version>
 	<type>Utility</type>
 	<category>Assembler</category>
 	<language>x86</language>
-	<author>Microsoft</author>
+	<company>Microsoft</company>
 	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/MASM600-DISK1.img" href="/disks/pcx86/tools/microsoft/masm/6.00/MASM600-DISK1.json" md5="80854f1d1019c4d1143dfda3cd60837b" md5json="3cbf433923d74f0999bf98fd02be88ce">
-		<name>MS MASM 6.00 (Disk 1)</name>
+		<name>MS Macro Assembler 6.00 (Disk 1)</name>
 		<file size="442" time="1999-12-13 15:11:38" attr="0x10">BINB</file>
 		<file size="25614" time="1990-02-20 04:21:20" attr="0x20" dir="BINB/">BIND.EX$</file>
 		<file size="30769" time="1990-02-13 07:59:36" attr="0x20" dir="BINB/">CVPACK.EX$</file>
@@ -30,7 +30,7 @@
 		<file size="1485" time="1990-08-07 12:01:34" attr="0x20">TOOLS.PR$</file>
 	</disk>
 	<disk id="disk02" size="1474560" chs="80:2:18" img="archive/MASM600-DISK2.img" href="/disks/pcx86/tools/microsoft/masm/6.00/MASM600-DISK2.json" md5="64bfe09ecffdcda59e898ebd490024c6" md5json="b7fc9992d83aac3abc38a89f274f531f">
-		<name>MS MASM 6.00 (Disk 2)</name>
+		<name>MS Macro Assembler 6.00 (Disk 2)</name>
 		<file size="170" time="1999-12-13 15:12:04" attr="0x10">BINB</file>
 		<file size="7025" time="1991-01-31 02:20:44" attr="0x20" dir="BINB/">H2INC.ER$</file>
 		<file size="87543" time="1991-04-03 07:38:36" attr="0x20" dir="BINB/">H2INC.EX$</file>
@@ -43,7 +43,7 @@
 		<file size="44590" time="1991-02-07 09:49:24" attr="0x20">QH.EX$</file>
 	</disk>
 	<disk id="disk03" size="1474560" chs="80:2:18" img="archive/MASM600-DISK3.img" href="/disks/pcx86/tools/microsoft/masm/6.00/MASM600-DISK3.json" md5="d1f8d7836227d898179ca39d7d360feb" md5json="9c46e88be94e4294f5d240a15aa14f5d">
-		<name>MS MASM 6.00 (Disk 3)</name>
+		<name>MS Macro Assembler 6.00 (Disk 3)</name>
 		<file size="49727" time="1990-05-04 18:51:50" attr="0x20">API.LI$</file>
 		<file size="122" time="1989-03-16 12:25:04" attr="0x20">APILMR.OB$</file>
 		<file size="237321" time="1991-02-20 00:06:40" attr="0x20">CVP.EX$</file>
@@ -63,7 +63,7 @@
 		<file size="39474" time="1991-02-07 09:48:14" attr="0x20">QH.EX$</file>
 	</disk>
 	<disk id="disk04" size="1474560" chs="80:2:18" img="archive/MASM600-DISK4.img" href="/disks/pcx86/tools/microsoft/masm/6.00/MASM600-DISK4.json" md5="caa20b2fed2069d4c94a2fdb355c89da" md5json="4d8fea13689a7aa2d035f08b23f35c81">
-		<name>MS MASM 6.00 (Disk 4)</name>
+		<name>MS Macro Assembler 6.00 (Disk 4)</name>
 		<file size="272" time="1999-12-13 15:12:46" attr="0x10">BINP</file>
 		<file size="204495" time="1990-06-14 08:40:18" attr="0x20" dir="BINP/">PWB.EX$</file>
 		<file size="11024" time="1990-08-17 08:43:06" attr="0x20" dir="BINP/">PWBC.PX$</file>
@@ -146,7 +146,7 @@
 		<file size="1481" time="1991-02-15 05:29:30" attr="0x20" dir="SAMPLES/TSR/">TSR.IN$</file>
 	</disk>
 	<disk id="disk05" size="1474560" chs="80:2:18" img="archive/MASM600-DISK5.img" href="/disks/pcx86/tools/microsoft/masm/6.00/MASM600-DISK5.json" md5="239b2d711a356af052f7751a82e7b885" md5json="b858eef81881211033093058386295be">
-		<name>MS MASM 6.00 (Disk 5)</name>
+		<name>MS Macro Assembler 6.00 (Disk 5)</name>
 		<file size="574602" time="1991-03-15 11:11:14" attr="0x20">ALANG.HL$</file>
 		<file size="107458" time="1991-04-03 08:22:56" attr="0x20">ML.HL$</file>
 		<file size="304963" time="1991-02-14 17:27:02" attr="0x20">PWB.HL$</file>

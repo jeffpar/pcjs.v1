@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PCx86 Keyboard component.
+ * @fileoverview Implements the PCx86 Keyboard component
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
@@ -42,11 +42,8 @@ if (NODE) {
 }
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
- *
- * @unrestricted
+ * class Keyboard
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Keyboard extends Component {
     /**
@@ -293,7 +290,7 @@ class Keyboard extends Component {
                         };
                     }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
                     var fnUp = function(kbd, sKey, simCode) {
-                        return function onKeyboardBindingUp(/*event*/) {
+                        return function onKeyboardBindingUp(event) {
                             kbd.removeActiveKey(simCode);
                         };
                     }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
@@ -378,7 +375,7 @@ class Keyboard extends Component {
      * @this {Keyboard}
      * @param {Computer} cmp
      * @param {Bus} bus
-     * @param {X86CPU} cpu
+     * @param {CPUX86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -997,7 +994,9 @@ class Keyboard extends Component {
                          *      &0070:2EFF 26               ES:
                          *      &0070:2F00 C606160401       MOV      [0416],01
                          */
-                        this.bus.setByteDirect(ROMx86.BIOS.COMPAQ_KEYCLICK, 0);
+                        if (!this.cpu.getProtMode()) {
+                            this.bus.setByteDirect(ROMx86.BIOS.COMPAQ_KEYCLICK, 0);
+                        }
                     }
                 }
                 if (!COMPILED && this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(bScan) + " buffered");

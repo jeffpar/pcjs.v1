@@ -5,7 +5,7 @@ permalink: /disks/pcx86/tools/microsoft/masm/
 ---
 
 Microsoft Macro Assemblers
----
+--------------------------
 
 * [Microsoft Macro Assembler 1.00](/disks/pcx86/tools/microsoft/masm/1.00/)
 * [Microsoft Macro Assembler 3.00](/disks/pcx86/tools/microsoft/masm/3.00/)
@@ -15,3 +15,5 @@ Microsoft Macro Assemblers
 * [Microsoft Macro Assembler 5.10](/disks/pcx86/tools/microsoft/masm/5.10/)
 * [Microsoft Macro Assembler 6.00](/disks/pcx86/tools/microsoft/masm/6.00/)
 * [Microsoft Macro Assembler 6.11](/disks/pcx86/tools/microsoft/masm/6.11/)
+
+See also: [IBM Macro Assemblers](/disks/pcx86/tools/ibm/masm/)

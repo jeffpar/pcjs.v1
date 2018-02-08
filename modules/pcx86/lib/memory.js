@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PCx86 "physical" Memory component.
+ * @fileoverview Implements the PCx86 "physical" Memory component
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
@@ -52,11 +52,8 @@ var littleEndian = (TYPEDARRAYS? (function() {
 })() : false);
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
- *
- * @unrestricted
+ * class Memory
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Memory {
     /**
@@ -98,7 +95,7 @@ class Memory {
      * @param {number} [size] of block's buffer in bytes (0 for none); must be a multiple of 4
      * @param {number} [type] is one of the Memory.TYPE constants (default is Memory.TYPE.NONE)
      * @param {Controller} [controller] is an optional memory controller component
-     * @param {X86CPU} [cpu] is required for UNPAGED memory blocks, so that the CPU can map it to a PAGED block
+     * @param {CPUX86} [cpu] is required for UNPAGED memory blocks, so that the CPU can map it to a PAGED block
      */
     constructor(addr, used, size, type, controller, cpu)
     {
@@ -264,7 +261,7 @@ class Memory {
      * save()
      *
      * This gets the contents of a Memory block as an array of 32-bit values; used by Bus.saveMemory(),
-     * which in turn is called by X86CPU.save().
+     * which in turn is called by CPUX86.save().
      *
      * Memory blocks with custom memory controllers do NOT save their contents; that's the responsibility
      * of the controller component.
@@ -312,7 +309,7 @@ class Memory {
      * restore(adw)
      *
      * This restores the contents of a Memory block from an array of 32-bit values;
-     * used by Bus.restoreMemory(), which is called by X86CPU.restore(), after all other
+     * used by Bus.restoreMemory(), which is called by CPUX86.restore(), after all other
      * components have been restored and thus all Memory blocks have been allocated
      * by their respective components.
      *
@@ -538,7 +535,7 @@ class Memory {
      * @this {Memory}
      * @param {number} off
      * @param {boolean} fWrite
-     * @param {X86CPU} [cpu] (required for breakpoints set by the CPU, as opposed to the Debugger)
+     * @param {CPUX86} [cpu] (required for breakpoints set by the CPU, as opposed to the Debugger)
      */
     addBreakpoint(off, fWrite, cpu)
     {
@@ -1629,7 +1626,7 @@ class Memory {
  * Originally, the Debugger always went through the Bus interfaces, and could therefore modify ROMs as well,
  * but with the introduction of protected mode memory segmentation (and later paging), where logical and
  * physical addresses were no longer the same, that is no longer true.  For coherency, all Debugger memory
- * accesses now go through X86Seg and X86CPU memory interfaces, so that the user sees the same segment
+ * accesses now go through SegX86 and CPUX86 memory interfaces, so that the user sees the same segment
  * and page translation that the CPU sees.  However, the Debugger uses a special probeAddr() interface to
  * read memory, along with a special "fSuppress" flag to mapPageBlock(), to prevent its memory accesses
  * from triggering segment and/or page faults when invalid or not-present segments or pages are accessed.

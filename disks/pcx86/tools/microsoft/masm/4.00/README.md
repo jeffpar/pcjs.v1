@@ -7,11 +7,11 @@ redirect_from:
 ---
 
 Microsoft Macro Assembler 4.00
----
+------------------------------
 
 Directory listing of the 360Kb distribution diskette is provided below.
 
-### Directory of MS MASM 4.00
+### Directory of MS Macro Assembler 4.00
 
 	 Volume in drive A has no label
 

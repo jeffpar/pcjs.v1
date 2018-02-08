@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.5/manifest.xsl"?>
+<manifest type="software">
+	<title>Macro Assembler</title>
+	<version>2.00</version>
+	<type>Utility</type>
+	<category>Assembler</category>
+	<language>x86</language>
+	<company>IBM</company>
+	<author>Microsoft</author>
+	<disk id="disk01" size="327680" chs="40:2:8" img="archive/IBM-MASM-200.img" href="/disks/pcx86/tools/ibm/masm/2.00/IBM-MASM-200.json" md5="7936ec503fa38dfe2354f7ccc26d2af5" md5json="06b269f8da65791d9f53538c8484fb0f">
+		<name>IBM Macro Assembler 2.00</name>
+	</disk>
+</manifest>

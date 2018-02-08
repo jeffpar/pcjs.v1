@@ -1,5 +1,5 @@
 /**
- * @fileoverview PCx86-specific BIOS/DOS interrupt definitions.
+ * @fileoverview PCx86-specific BIOS/DOS interrupt definitions
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *

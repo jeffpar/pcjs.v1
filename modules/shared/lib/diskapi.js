@@ -82,14 +82,14 @@ DiskAPI.MBR = {
     PARTITIONS: {
         OFFSET:     0x1BE,
         ENTRY: {
-            STATUS:         0x00,   // 0x80 if active
+            STATUS:         0x00,   // 1-byte (0x80 if active)
             CHS_FIRST:      0x01,   // 3-byte CHS specifier
-            TYPE:           0x04,   // see TYPE.*
+            TYPE:           0x04,   // 1-byte TYPE (see below)
             CHS_LAST:       0x05,   // 3-byte CHS specifier
-            LBA_FIRST:      0x08,
-            LBA_TOTAL:      0x0C,
-            LENGTH:         0x10
+            LBA_FIRST:      0x08,   // 4-byte Logical Block Address
+            LBA_TOTAL:      0x0C,   // 4-byte Logical Block Address
         },
+        ENTRY_LENGTH:       0x10,
         STATUS: {
             ACTIVE:         0x80
         },

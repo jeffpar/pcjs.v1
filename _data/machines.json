@@ -1,6 +1,6 @@
 {
   "shared": {
-    "appversion": "1.50.4",
+    "appversion": "1.50.5",
     "externs": [
       "./modules/shared/lib/externs.js"
     ],
@@ -172,9 +172,9 @@
       "./modules/pcx86/lib/bus.js",
       "./modules/pcx86/lib/memory.js",
       "./modules/pcx86/lib/cpu.js",
-      "./modules/pcx86/lib/x86seg.js",
-      "./modules/pcx86/lib/x86cpu.js",
-      "./modules/pcx86/lib/x86fpu.js",
+      "./modules/pcx86/lib/cpux86.js",
+      "./modules/pcx86/lib/fpux86.js",
+      "./modules/pcx86/lib/segx86.js",
       "./modules/pcx86/lib/x86func.js",
       "./modules/pcx86/lib/x86help.js",
       "./modules/pcx86/lib/x86mods.js",

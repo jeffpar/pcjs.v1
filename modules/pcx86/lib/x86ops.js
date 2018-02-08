@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements PCx86 8086 opcode decoding.
+ * @fileoverview Implements PCx86 opcode handlers
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
@@ -37,7 +37,7 @@ if (NODE) {
 /**
  * op=0x00 (ADD byte,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opADDmb = function()
 {
@@ -59,7 +59,7 @@ X86.opADDmb = function()
 /**
  * op=0x01 (ADD word,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opADDmw = function()
 {
@@ -69,7 +69,7 @@ X86.opADDmw = function()
 /**
  * op=0x02 (ADD reg,byte)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opADDrb = function()
 {
@@ -79,7 +79,7 @@ X86.opADDrb = function()
 /**
  * op=0x03 (ADD reg,word)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opADDrw = function()
 {
@@ -89,7 +89,7 @@ X86.opADDrw = function()
 /**
  * op=0x04 (ADD AL,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opADDALb = function()
 {
@@ -105,7 +105,7 @@ X86.opADDALb = function()
 /**
  * op=0x05 (ADD AX,imm16 or ADD EAX,imm32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opADDAX = function()
 {
@@ -119,7 +119,7 @@ X86.opADDAX = function()
 /**
  * op=0x06 (PUSH ES)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHES = function()
 {
@@ -139,7 +139,7 @@ X86.opPUSHES = function()
 /**
  * op=0x07 (POP ES)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPES = function()
 {
@@ -155,7 +155,7 @@ X86.opPOPES = function()
 /**
  * op=0x08 (OR byte,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opORmb = function()
 {
@@ -165,7 +165,7 @@ X86.opORmb = function()
 /**
  * op=0x09 (OR word,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opORmw = function()
 {
@@ -175,7 +175,7 @@ X86.opORmw = function()
 /**
  * op=0x0A (OR reg,byte)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opORrb = function()
 {
@@ -185,7 +185,7 @@ X86.opORrb = function()
 /**
  * op=0x0B (OR reg,word)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opORrw = function()
 {
@@ -195,7 +195,7 @@ X86.opORrw = function()
 /**
  * op=0x0C (OR AL,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opORALb = function()
 {
@@ -207,7 +207,7 @@ X86.opORALb = function()
 /**
  * op=0x0D (OR AX,imm16 or OR EAX,imm32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opORAX = function()
 {
@@ -221,7 +221,7 @@ X86.opORAX = function()
 /**
  * op=0x0E (PUSH CS)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHCS = function()
 {
@@ -241,7 +241,7 @@ X86.opPUSHCS = function()
 /**
  * op=0x0F (POP CS) (undocumented on 8086/8088; replaced with opInvalid() on 80186/80188, and op0F() on 80286 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPCS = function()
 {
@@ -255,7 +255,7 @@ X86.opPOPCS = function()
 /**
  * op=0x0F (handler for two-byte opcodes; 80286 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.op0F = function()
 {
@@ -265,7 +265,7 @@ X86.op0F = function()
 /**
  * op=0x10 (ADC byte,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opADCmb = function()
 {
@@ -275,7 +275,7 @@ X86.opADCmb = function()
 /**
  * op=0x11 (ADC word,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opADCmw = function()
 {
@@ -285,7 +285,7 @@ X86.opADCmw = function()
 /**
  * op=0x12 (ADC reg,byte)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opADCrb = function()
 {
@@ -295,7 +295,7 @@ X86.opADCrb = function()
 /**
  * op=0x13 (ADC reg,word)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opADCrw = function()
 {
@@ -305,7 +305,7 @@ X86.opADCrw = function()
 /**
  * op=0x14 (ADC AL,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opADCALb = function()
 {
@@ -317,7 +317,7 @@ X86.opADCALb = function()
 /**
  * op=0x15 (ADC AX,imm16 or ADC EAX,imm32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opADCAX = function()
 {
@@ -331,7 +331,7 @@ X86.opADCAX = function()
 /**
  * op=0x16 (PUSH SS)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHSS = function()
 {
@@ -351,7 +351,7 @@ X86.opPUSHSS = function()
 /**
  * op=0x17 (POP SS)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPSS = function()
 {
@@ -367,7 +367,7 @@ X86.opPOPSS = function()
 /**
  * op=0x18 (SBB byte,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSBBmb = function()
 {
@@ -377,7 +377,7 @@ X86.opSBBmb = function()
 /**
  * op=0x19 (SBB word,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSBBmw = function()
 {
@@ -387,7 +387,7 @@ X86.opSBBmw = function()
 /**
  * op=0x1A (SBB reg,byte)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSBBrb = function()
 {
@@ -397,7 +397,7 @@ X86.opSBBrb = function()
 /**
  * op=0x1B (SBB reg,word)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSBBrw = function()
 {
@@ -407,7 +407,7 @@ X86.opSBBrw = function()
 /**
  * op=0x1C (SBB AL,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSBBALb = function()
 {
@@ -419,7 +419,7 @@ X86.opSBBALb = function()
 /**
  * op=0x1D (SBB AX,imm16 or SBB EAX,imm32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSBBAX = function()
 {
@@ -433,7 +433,7 @@ X86.opSBBAX = function()
 /**
  * op=0x1E (PUSH DS)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHDS = function()
 {
@@ -453,7 +453,7 @@ X86.opPUSHDS = function()
 /**
  * op=0x1F (POP DS)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPDS = function()
 {
@@ -469,7 +469,7 @@ X86.opPOPDS = function()
 /**
  * op=0x20 (AND byte,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opANDmb = function()
 {
@@ -479,7 +479,7 @@ X86.opANDmb = function()
 /**
  * op=0x21 (AND word,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opANDmw = function()
 {
@@ -489,7 +489,7 @@ X86.opANDmw = function()
 /**
  * op=0x22 (AND reg,byte)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opANDrb = function()
 {
@@ -499,7 +499,7 @@ X86.opANDrb = function()
 /**
  * op=0x23 (AND reg,word)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opANDrw = function()
 {
@@ -509,7 +509,7 @@ X86.opANDrw = function()
 /**
  * op=0x24 (AND AL,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opANDAL = function()
 {
@@ -521,7 +521,7 @@ X86.opANDAL = function()
 /**
  * op=0x25 (AND AX,imm16 or AND EAX,imm32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opANDAX = function()
 {
@@ -535,7 +535,7 @@ X86.opANDAX = function()
 /**
  * op=0x26 (ES:)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opES = function()
 {
@@ -547,7 +547,7 @@ X86.opES = function()
 /**
  * op=0x27 (DAA)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opDAA = function()
 {
@@ -577,7 +577,7 @@ X86.opDAA = function()
 /**
  * op=0x28 (SUB byte,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSUBmb = function()
 {
@@ -587,7 +587,7 @@ X86.opSUBmb = function()
 /**
  * op=0x29 (SUB word,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSUBmw = function()
 {
@@ -597,7 +597,7 @@ X86.opSUBmw = function()
 /**
  * op=0x2A (SUB reg,byte)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSUBrb = function()
 {
@@ -607,7 +607,7 @@ X86.opSUBrb = function()
 /**
  * op=0x2B (SUB reg,word)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSUBrw = function()
 {
@@ -617,7 +617,7 @@ X86.opSUBrw = function()
 /**
  * op=0x2C (SUB AL,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSUBALb = function()
 {
@@ -629,7 +629,7 @@ X86.opSUBALb = function()
 /**
  * op=0x2D (SUB AX,imm16 or SUB EAX,imm32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSUBAX = function()
 {
@@ -643,7 +643,7 @@ X86.opSUBAX = function()
 /**
  * op=0x2E (CS:)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCS = function()
 {
@@ -655,7 +655,7 @@ X86.opCS = function()
 /**
  * op=0x2F (DAS)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opDAS = function()
 {
@@ -685,7 +685,7 @@ X86.opDAS = function()
 /**
  * op=0x30 (XOR byte,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXORmb = function()
 {
@@ -695,7 +695,7 @@ X86.opXORmb = function()
 /**
  * op=0x31 (XOR word,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXORmw = function()
 {
@@ -705,7 +705,7 @@ X86.opXORmw = function()
 /**
  * op=0x32 (XOR reg,byte)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXORrb = function()
 {
@@ -715,7 +715,7 @@ X86.opXORrb = function()
 /**
  * op=0x33 (XOR reg,word)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXORrw = function()
 {
@@ -725,7 +725,7 @@ X86.opXORrw = function()
 /**
  * op=0x34 (XOR AL,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXORALb = function()
 {
@@ -737,7 +737,7 @@ X86.opXORALb = function()
 /**
  * op=0x35 (XOR AX,imm16 or XOR EAX,imm32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXORAX = function()
 {
@@ -751,7 +751,7 @@ X86.opXORAX = function()
 /**
  * op=0x36 (SS:)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSS = function()
 {
@@ -763,7 +763,7 @@ X86.opSS = function()
 /**
  * op=0x37 (AAA)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opAAA = function()
 {
@@ -790,7 +790,7 @@ X86.opAAA = function()
 /**
  * op=0x38 (CMP byte,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCMPmb = function()
 {
@@ -800,7 +800,7 @@ X86.opCMPmb = function()
 /**
  * op=0x39 (CMP word,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCMPmw = function()
 {
@@ -810,7 +810,7 @@ X86.opCMPmw = function()
 /**
  * op=0x3A (CMP reg,byte)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCMPrb = function()
 {
@@ -820,7 +820,7 @@ X86.opCMPrb = function()
 /**
  * op=0x3B (CMP reg,word)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCMPrw = function()
 {
@@ -830,7 +830,7 @@ X86.opCMPrw = function()
 /**
  * op=0x3C (CMP AL,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCMPALb = function()
 {
@@ -841,7 +841,7 @@ X86.opCMPALb = function()
 /**
  * op=0x3D (CMP AX,imm16 or CMP EAX,imm32)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCMPAX = function()
 {
@@ -852,7 +852,7 @@ X86.opCMPAX = function()
 /**
  * op=0x3E (DS:)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opDS = function()
 {
@@ -864,7 +864,7 @@ X86.opDS = function()
 /**
  * op=0x3D (AAS)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opAAS = function()
 {
@@ -887,7 +887,7 @@ X86.opAAS = function()
 /**
  * op=0x40 (INC [E]AX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINCAX = function()
 {
@@ -897,7 +897,7 @@ X86.opINCAX = function()
 /**
  * op=0x41 (INC [E]CX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINCCX = function()
 {
@@ -907,7 +907,7 @@ X86.opINCCX = function()
 /**
  * op=0x42 (INC [E]DX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINCDX = function()
 {
@@ -917,7 +917,7 @@ X86.opINCDX = function()
 /**
  * op=0x43 (INC [E]BX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINCBX = function()
 {
@@ -927,7 +927,7 @@ X86.opINCBX = function()
 /**
  * op=0x44 (INC [E]SP)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINCSP = function()
 {
@@ -937,7 +937,7 @@ X86.opINCSP = function()
 /**
  * op=0x45 (INC [E]BP)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINCBP = function()
 {
@@ -947,7 +947,7 @@ X86.opINCBP = function()
 /**
  * op=0x46 (INC [E]SI)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINCSI = function()
 {
@@ -957,7 +957,7 @@ X86.opINCSI = function()
 /**
  * op=0x47 (INC [E]DI)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINCDI = function()
 {
@@ -967,7 +967,7 @@ X86.opINCDI = function()
 /**
  * op=0x48 (DEC [E]AX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opDECAX = function()
 {
@@ -977,7 +977,7 @@ X86.opDECAX = function()
 /**
  * op=0x49 (DEC [E]CX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opDECCX = function()
 {
@@ -987,7 +987,7 @@ X86.opDECCX = function()
 /**
  * op=0x4A (DEC [E]DX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opDECDX = function()
 {
@@ -997,7 +997,7 @@ X86.opDECDX = function()
 /**
  * op=0x4B (DEC [E]BX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opDECBX = function()
 {
@@ -1007,7 +1007,7 @@ X86.opDECBX = function()
 /**
  * op=0x4C (DEC [E]SP)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opDECSP = function()
 {
@@ -1017,7 +1017,7 @@ X86.opDECSP = function()
 /**
  * op=0x4D (DEC [E]BP)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opDECBP = function()
 {
@@ -1027,7 +1027,7 @@ X86.opDECBP = function()
 /**
  * op=0x4E (DEC [E]SI)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opDECSI = function()
 {
@@ -1037,7 +1037,7 @@ X86.opDECSI = function()
 /**`
  * op=0x4F (DEC [E]DI)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opDECDI = function()
 {
@@ -1047,7 +1047,7 @@ X86.opDECDI = function()
 /**
  * op=0x50 (PUSH [E]AX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHAX = function()
 {
@@ -1061,7 +1061,7 @@ X86.opPUSHAX = function()
 /**
  * op=0x51 (PUSH [E]CX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHCX = function()
 {
@@ -1075,7 +1075,7 @@ X86.opPUSHCX = function()
 /**
  * op=0x52 (PUSH [E]DX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHDX = function()
 {
@@ -1089,7 +1089,7 @@ X86.opPUSHDX = function()
 /**
  * op=0x53 (PUSH [E]BX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHBX = function()
 {
@@ -1149,7 +1149,7 @@ X86.opPUSHBX = function()
  *      &0E4E:0721 58              POP      AX
  *      &0E4E:0722 CF              IRET
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHSP_8086 = function()
 {
@@ -1161,7 +1161,7 @@ X86.opPUSHSP_8086 = function()
 /**
  * op=0x54 (PUSH [E]SP)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHSP = function()
 {
@@ -1172,7 +1172,7 @@ X86.opPUSHSP = function()
 /**
  * op=0x55 (PUSH [E]BP)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHBP = function()
 {
@@ -1186,7 +1186,7 @@ X86.opPUSHBP = function()
 /**
  * op=0x56 (PUSH [E]SI)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHSI = function()
 {
@@ -1200,7 +1200,7 @@ X86.opPUSHSI = function()
 /**
  * op=0x57 (PUSH [E]DI)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHDI = function()
 {
@@ -1214,7 +1214,7 @@ X86.opPUSHDI = function()
 /**
  * op=0x58 (POP [E]AX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPAX = function()
 {
@@ -1228,7 +1228,7 @@ X86.opPOPAX = function()
 /**
  * op=0x59 (POP [E]CX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPCX = function()
 {
@@ -1242,7 +1242,7 @@ X86.opPOPCX = function()
 /**
  * op=0x5A (POP [E]DX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPDX = function()
 {
@@ -1256,7 +1256,7 @@ X86.opPOPDX = function()
 /**
  * op=0x5B (POP [E]BX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPBX = function()
 {
@@ -1270,7 +1270,7 @@ X86.opPOPBX = function()
 /**
  * op=0x5C (POP [E]SP)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPSP = function()
 {
@@ -1281,7 +1281,7 @@ X86.opPOPSP = function()
 /**
  * op=0x5D (POP [E]BP)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPBP = function()
 {
@@ -1295,7 +1295,7 @@ X86.opPOPBP = function()
 /**
  * op=0x5E (POP [E]SI)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPSI = function()
 {
@@ -1309,7 +1309,7 @@ X86.opPOPSI = function()
 /**
  * op=0x5F (POP [E]DI)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPDI = function()
 {
@@ -1323,7 +1323,7 @@ X86.opPOPDI = function()
 /**
  * op=0x60 (PUSHA) (80186/80188 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHA = function()
 {
@@ -1373,7 +1373,7 @@ X86.opPUSHA = function()
 /**
  * op=0x61 (POPA) (80186/80188 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPA = function()
 {
@@ -1423,7 +1423,7 @@ X86.opPOPA = function()
 /**
  * op=0x62 (BOUND reg,word) (80186/80188 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opBOUND = function()
 {
@@ -1433,7 +1433,7 @@ X86.opBOUND = function()
 /**
  * op=0x63 (ARPL word,reg) (80286 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opARPL = function()
 {
@@ -1468,7 +1468,7 @@ X86.opARPL = function()
 /**
  * op=0x64 (FS:)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opFS = function()
 {
@@ -1480,7 +1480,7 @@ X86.opFS = function()
 /**
  * op=0x65 (GS:)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGS = function()
 {
@@ -1494,7 +1494,7 @@ X86.opGS = function()
  *
  * TODO: Review other effective operand-size criteria, cycle count, etc.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opOS = function()
 {
@@ -1520,7 +1520,7 @@ X86.opOS = function()
  *
  * TODO: Review other effective address-size criteria, cycle count, etc.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opAS = function()
 {
@@ -1557,7 +1557,7 @@ X86.opAS = function()
 /**
  * op=0x68 (PUSH imm) (80186/80188 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHn = function()
 {
@@ -1568,7 +1568,7 @@ X86.opPUSHn = function()
 /**
  * op=0x69 (IMUL reg,word,imm) (80186/80188 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opIMULn = function()
 {
@@ -1578,7 +1578,7 @@ X86.opIMULn = function()
 /**
  * op=0x6A (PUSH imm8) (80186/80188 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSH8 = function()
 {
@@ -1590,7 +1590,7 @@ X86.opPUSH8 = function()
 /**
  * op=0x6B (IMUL reg,word,imm8) (80186/80188 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opIMUL8 = function()
 {
@@ -1602,7 +1602,7 @@ X86.opIMUL8 = function()
  *
  * NOTE: Segment overrides are ignored for this instruction, so we must use segES instead of segData.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINSb = function()
 {
@@ -1652,7 +1652,7 @@ X86.opINSb = function()
  *
  * NOTE: Segment overrides are ignored for this instruction, so we must use segDS instead of segData.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINSw = function()
 {
@@ -1704,7 +1704,7 @@ X86.opINSw = function()
  *
  * NOTE: Segment overrides are ignored for this instruction, so we must use segDS instead of segData.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opOUTSb = function()
 {
@@ -1752,7 +1752,7 @@ X86.opOUTSb = function()
  *
  * NOTE: Segment overrides are ignored for this instruction, so we must use segDS instead of segData.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opOUTSw = function()
 {
@@ -1801,7 +1801,7 @@ X86.opOUTSw = function()
 /**
  * op=0x70 (JO disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJO = function()
 {
@@ -1817,7 +1817,7 @@ X86.opJO = function()
 /**
  * op=0x71 (JNO disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNO = function()
 {
@@ -1833,7 +1833,7 @@ X86.opJNO = function()
 /**
  * op=0x72 (JC disp, aka JB disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJC = function()
 {
@@ -1849,7 +1849,7 @@ X86.opJC = function()
 /**
  * op=0x73 (JNC disp, aka JAE disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNC = function()
 {
@@ -1865,7 +1865,7 @@ X86.opJNC = function()
 /**
  * op=0x74 (JZ disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJZ = function()
 {
@@ -1881,7 +1881,7 @@ X86.opJZ = function()
 /**
  * op=0x75 (JNZ disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNZ = function()
 {
@@ -1897,7 +1897,7 @@ X86.opJNZ = function()
 /**
  * op=0x76 (JBE disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJBE = function()
 {
@@ -1913,7 +1913,7 @@ X86.opJBE = function()
 /**
  * op=0x77 (JNBE disp, JA disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNBE = function()
 {
@@ -1929,7 +1929,7 @@ X86.opJNBE = function()
 /**
  * op=0x78 (JS disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJS = function()
 {
@@ -1945,7 +1945,7 @@ X86.opJS = function()
 /**
  * op=0x79 (JNS disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNS = function()
 {
@@ -1961,7 +1961,7 @@ X86.opJNS = function()
 /**
  * op=0x7A (JP disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJP = function()
 {
@@ -1977,7 +1977,7 @@ X86.opJP = function()
 /**
  * op=0x7B (JNP disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNP = function()
 {
@@ -1993,7 +1993,7 @@ X86.opJNP = function()
 /**
  * op=0x7C (JL disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJL = function()
 {
@@ -2009,7 +2009,7 @@ X86.opJL = function()
 /**
  * op=0x7D (JNL disp, aka JGE disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNL = function()
 {
@@ -2025,7 +2025,7 @@ X86.opJNL = function()
 /**
  * op=0x7E (JLE disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJLE = function()
 {
@@ -2041,7 +2041,7 @@ X86.opJLE = function()
 /**
  * op=0x7F (JNLE disp, aka JG disp)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJNLE = function()
 {
@@ -2057,7 +2057,7 @@ X86.opJNLE = function()
 /**
  * op=0x80/0x82 (GRP1 byte,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP1b = function()
 {
@@ -2068,7 +2068,7 @@ X86.opGRP1b = function()
 /**
  * op=0x81 (GRP1 word,imm)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP1w = function()
 {
@@ -2083,7 +2083,7 @@ X86.opGRP1w = function()
  * so the worker functions (ie, the functions listed in aOpGrp1w[]) MUST mask their result with maskData,
  * to avoid setting bits beyond the current operand size.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP1sw = function()
 {
@@ -2094,7 +2094,7 @@ X86.opGRP1sw = function()
 /**
  * op=0x84 (TEST reg,byte)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opTESTrb = function()
 {
@@ -2104,7 +2104,7 @@ X86.opTESTrb = function()
 /**
  * op=0x85 (TEST reg,word)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opTESTrw = function()
 {
@@ -2117,7 +2117,7 @@ X86.opTESTrw = function()
  * NOTE: The XCHG instruction is unique in that both src and dst are both read and written;
  * see fnXCHGrb() for how we deal with this special case.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXCHGrb = function()
 {
@@ -2150,7 +2150,7 @@ X86.opXCHGrb = function()
  * NOTE: The XCHG instruction is unique in that both src and dst are both read and written;
  * see fnXCHGrw() for how we deal with this special case.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXCHGrw = function()
 {
@@ -2160,7 +2160,7 @@ X86.opXCHGrw = function()
 /**
  * op=0x88 (MOV byte,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVmb = function()
 {
@@ -2174,7 +2174,7 @@ X86.opMOVmb = function()
 /**
  * op=0x89 (MOV word,reg)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVmw = function()
 {
@@ -2188,7 +2188,7 @@ X86.opMOVmw = function()
 /**
  * op=0x8A (MOV reg,byte)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVrb = function()
 {
@@ -2198,7 +2198,7 @@ X86.opMOVrb = function()
 /**
  * op=0x8B (MOV reg,word)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVrw = function()
 {
@@ -2211,7 +2211,7 @@ X86.opMOVrw = function()
  * NOTE: Since the ModRM decoders deal only with general-purpose registers, we rely on our helper
  * function (fnMOVwsr) to select the appropriate segment register and replace the decoder's src operand.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVwsr = function()
 {
@@ -2225,7 +2225,7 @@ X86.opMOVwsr = function()
 /**
  * op=0x8D (LEA reg,word)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLEA = function()
 {
@@ -2241,7 +2241,7 @@ X86.opLEA = function()
  * helper function (fnMOVsrw) to make a note of which general-purpose register will be overwritten,
  * so that we can restore it after moving the updated value to the correct segment register.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVsrw = function()
 {
@@ -2302,7 +2302,7 @@ X86.opMOVsrw = function()
 /**
  * op=0x8F (POP word)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPmw = function()
 {
@@ -2341,7 +2341,7 @@ X86.opPOPmw = function()
 /**
  * op=0x90 (NOP, aka XCHG AX,AX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opNOP = function()
 {
@@ -2351,7 +2351,7 @@ X86.opNOP = function()
 /**
  * op=0x91 (XCHG AX,CX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXCHGCX = function()
 {
@@ -2368,7 +2368,7 @@ X86.opXCHGCX = function()
 /**
  * op=0x92 (XCHG AX,DX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXCHGDX = function()
 {
@@ -2385,7 +2385,7 @@ X86.opXCHGDX = function()
 /**
  * op=0x93 (XCHG AX,BX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXCHGBX = function()
 {
@@ -2402,7 +2402,7 @@ X86.opXCHGBX = function()
 /**
  * op=0x94 (XCHG AX,SP)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXCHGSP = function()
 {
@@ -2417,7 +2417,7 @@ X86.opXCHGSP = function()
 /**
  * op=0x95 (XCHG AX,BP)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXCHGBP = function()
 {
@@ -2434,7 +2434,7 @@ X86.opXCHGBP = function()
 /**
  * op=0x96 (XCHG AX,SI)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXCHGSI = function()
 {
@@ -2451,7 +2451,7 @@ X86.opXCHGSI = function()
 /**
  * op=0x97 (XCHG AX,DI)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXCHGDI = function()
 {
@@ -2471,7 +2471,7 @@ X86.opXCHGDI = function()
  * NOTE: The 16-bit form (CBW) sign-extends AL into AX, whereas the 32-bit form (CWDE) sign-extends AX into EAX;
  * CWDE is similar to CWD, except that the destination is EAX rather than DX:AX.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCBW = function()
 {
@@ -2491,7 +2491,7 @@ X86.opCBW = function()
  * NOTE: The 16-bit form (CWD) sign-extends AX, producing a 32-bit result in DX:AX, while the 32-bit form (CDQ)
  * sign-extends EAX, producing a 64-bit result in EDX:EAX.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCWD = function()
 {
@@ -2508,7 +2508,7 @@ X86.opCWD = function()
 /**
  * op=0x9A (CALL seg:off)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCALLF = function()
 {
@@ -2519,19 +2519,19 @@ X86.opCALLF = function()
 /**
  * op=0x9B (WAIT)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opWAIT = function()
 {
     if (!this.fpu || !this.fpu.opWAIT()) {
-        this.nStepCycles -= 3;     // X86FPU.opWAIT() is required to charge some number of cycles if it returns true
+        this.nStepCycles -= 3;     // FPUX86.opWAIT() is required to charge some number of cycles if it returns true
     }
 };
 
 /**
  * op=0x9C (PUSHF/PUSHFD)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPUSHF = function()
 {
@@ -2568,7 +2568,7 @@ X86.opPUSHF = function()
 /**
  * op=0x9D (POPF/POPFD)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opPOPF = function()
 {
@@ -2595,7 +2595,7 @@ X86.opPOPF = function()
 /**
  * op=0x9E (SAHF)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSAHF = function()
 {
@@ -2621,7 +2621,7 @@ X86.opSAHF = function()
 /**
  * op=0x9F (LAHF)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLAHF = function()
 {
@@ -2632,7 +2632,7 @@ X86.opLAHF = function()
 /**
  * op=0xA0 (MOV AL,mem)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVALm = function()
 {
@@ -2644,7 +2644,7 @@ X86.opMOVALm = function()
 /**
  * op=0xA1 (MOV [E]AX,mem)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVAXm = function()
 {
@@ -2658,7 +2658,7 @@ X86.opMOVAXm = function()
 /**
  * op=0xA2 (MOV mem,AL)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVmAL = function()
 {
@@ -2673,7 +2673,7 @@ X86.opMOVmAL = function()
 /**
  * op=0xA3 (MOV mem,AX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVmAX = function()
 {
@@ -2690,7 +2690,7 @@ X86.opMOVmAX = function()
 /**
  * op=0xA4 (MOVSB)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVSb = function()
 {
@@ -2727,7 +2727,7 @@ X86.opMOVSb = function()
 /**
  * op=0xA5 (MOVSW)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVSw = function()
 {
@@ -2764,7 +2764,7 @@ X86.opMOVSw = function()
 /**
  * op=0xA6 (CMPSB)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCMPSb = function()
 {
@@ -2812,7 +2812,7 @@ X86.opCMPSb = function()
 /**
  * op=0xA7 (CMPSW)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCMPSw = function()
 {
@@ -2860,7 +2860,7 @@ X86.opCMPSw = function()
 /**
  * op=0xA8 (TEST AL,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opTESTALb = function()
 {
@@ -2871,7 +2871,7 @@ X86.opTESTALb = function()
 /**
  * op=0xA9 (TEST [E]AX,imm)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opTESTAX = function()
 {
@@ -2884,7 +2884,7 @@ X86.opTESTAX = function()
  *
  * NOTES: Segment overrides are ignored for this instruction, so we must use segES instead of segData.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSTOSb = function()
 {
@@ -2942,7 +2942,7 @@ X86.opSTOSb = function()
  *
  * NOTES: Segment overrides are ignored for this instruction, so we must use segES instead of segData.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSTOSw = function()
 {
@@ -2980,7 +2980,7 @@ X86.opSTOSw = function()
 /**
  * op=0xAC (LODSB)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLODSb = function()
 {
@@ -3017,7 +3017,7 @@ X86.opLODSb = function()
 /**
  * op=0xAD (LODSW)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLODSw = function()
 {
@@ -3056,7 +3056,7 @@ X86.opLODSw = function()
 /**
  * op=0xAE (SCASB)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSCASb = function()
 {
@@ -3102,7 +3102,7 @@ X86.opSCASb = function()
 /**
  * op=0xAF (SCASW)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSCASw = function()
 {
@@ -3148,7 +3148,7 @@ X86.opSCASw = function()
 /**
  * op=0xB0 (MOV AL,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVALb = function()
 {
@@ -3160,7 +3160,7 @@ X86.opMOVALb = function()
 /**
  * op=0xB1 (MOV CL,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVCLb = function()
 {
@@ -3172,7 +3172,7 @@ X86.opMOVCLb = function()
 /**
  * op=0xB2 (MOV DL,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVDLb = function()
 {
@@ -3184,7 +3184,7 @@ X86.opMOVDLb = function()
 /**
  * op=0xB3 (MOV BL,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVBLb = function()
 {
@@ -3196,7 +3196,7 @@ X86.opMOVBLb = function()
 /**
  * op=0xB4 (MOV AH,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVAHb = function()
 {
@@ -3208,7 +3208,7 @@ X86.opMOVAHb = function()
 /**
  * op=0xB5 (MOV CH,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVCHb = function()
 {
@@ -3220,7 +3220,7 @@ X86.opMOVCHb = function()
 /**
  * op=0xB6 (MOV DH,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVDHb = function()
 {
@@ -3232,7 +3232,7 @@ X86.opMOVDHb = function()
 /**
  * op=0xB7 (MOV BH,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVBHb = function()
 {
@@ -3244,7 +3244,7 @@ X86.opMOVBHb = function()
 /**
  * op=0xB8 (MOV [E]AX,imm)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVAX = function()
 {
@@ -3258,7 +3258,7 @@ X86.opMOVAX = function()
 /**
  * op=0xB9 (MOV [E]CX,imm)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVCX = function()
 {
@@ -3272,7 +3272,7 @@ X86.opMOVCX = function()
 /**
  * op=0xBA (MOV [E]DX,imm)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVDX = function()
 {
@@ -3286,7 +3286,7 @@ X86.opMOVDX = function()
 /**
  * op=0xBB (MOV [E]BX,imm)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVBX = function()
 {
@@ -3300,7 +3300,7 @@ X86.opMOVBX = function()
 /**
  * op=0xBC (MOV [E]SP,imm)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVSP = function()
 {
@@ -3311,7 +3311,7 @@ X86.opMOVSP = function()
 /**
  * op=0xBD (MOV [E]BP,imm)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVBP = function()
 {
@@ -3325,7 +3325,7 @@ X86.opMOVBP = function()
 /**
  * op=0xBE (MOV [E]SI,imm)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVSI = function()
 {
@@ -3339,7 +3339,7 @@ X86.opMOVSI = function()
 /**
  * op=0xBF (MOV [E]DI,imm)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVDI = function()
 {
@@ -3353,7 +3353,7 @@ X86.opMOVDI = function()
 /**
  * op=0xC0 (GRP2 byte,imm8) (80186/80188 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP2bn = function()
 {
@@ -3363,7 +3363,7 @@ X86.opGRP2bn = function()
 /**
  * op=0xC1 (GRP2 word,imm) (80186/80188 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP2wn = function()
 {
@@ -3373,7 +3373,7 @@ X86.opGRP2wn = function()
 /**
  * op=0xC2 (RET n)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opRETn = function()
 {
@@ -3387,7 +3387,7 @@ X86.opRETn = function()
 /**
  * op=0xC3 (RET)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opRET = function()
 {
@@ -3401,7 +3401,7 @@ X86.opRET = function()
  *
  * This is like a "MOV reg,rm" operation, but it also loads ES from the next word.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLES = function()
 {
@@ -3413,7 +3413,7 @@ X86.opLES = function()
  *
  * This is like a "MOV reg,rm" operation, but it also loads DS from the next word.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLDS = function()
 {
@@ -3423,7 +3423,7 @@ X86.opLDS = function()
 /**
  * op=0xC6 (MOV byte,imm8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVb = function()
 {
@@ -3437,7 +3437,7 @@ X86.opMOVb = function()
 /**
  * op=0xC7 (MOV word,imm)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opMOVw = function()
 {
@@ -3451,7 +3451,7 @@ X86.opMOVw = function()
 /**
  * op=0xC8 (ENTER imm16,imm8) (80186/80188 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opENTER = function()
 {
@@ -3486,7 +3486,7 @@ X86.opENTER = function()
 /**
  * op=0xC9 (LEAVE) (80186/80188 and up)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLEAVE = function()
 {
@@ -3509,7 +3509,7 @@ X86.opLEAVE = function()
 /**
  * op=0xCA (RETF n)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opRETFn = function()
 {
@@ -3520,7 +3520,7 @@ X86.opRETFn = function()
 /**
  * op=0xCB (RETF)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opRETF = function()
 {
@@ -3531,7 +3531,7 @@ X86.opRETF = function()
 /**
  * op=0xCC (INT 3)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINT3 = function()
 {
@@ -3555,7 +3555,7 @@ X86.opINT3 = function()
 /**
  * op=0xCD (INT n)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINTn = function()
 {
@@ -3582,7 +3582,7 @@ X86.opINTn = function()
 /**
  * op=0xCE (INTO: INT 4 if OF set)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINTO = function()
 {
@@ -3604,7 +3604,7 @@ X86.opINTO = function()
 /**
  * op=0xCF (IRET)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opIRET = function()
 {
@@ -3622,7 +3622,7 @@ X86.opIRET = function()
 /**
  * op=0xD0 (GRP2 byte,1)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP2b1 = function()
 {
@@ -3632,7 +3632,7 @@ X86.opGRP2b1 = function()
 /**
  * op=0xD1 (GRP2 word,1)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP2w1 = function()
 {
@@ -3642,7 +3642,7 @@ X86.opGRP2w1 = function()
 /**
  * op=0xD2 (GRP2 byte,CL)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP2bCL = function()
 {
@@ -3652,7 +3652,7 @@ X86.opGRP2bCL = function()
 /**
  * op=0xD3 (GRP2 word,CL)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP2wCL = function()
 {
@@ -3698,7 +3698,7 @@ X86.opGRP2wCL = function()
  *      This instruction exists in this form on all Intel x86 processors. See the file [AAM.ASM](/docs/x86/ops/AAM/AAM.ASM)
  *      for diagnostics source code for this instruction.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opAAM = function()
 {
@@ -3747,7 +3747,7 @@ X86.opAAM = function()
  * TODO: Confirm on real hardware that flags reflect the result of the final addition (ie, that the result of the
  * intermediate multiplication is irrelevant); it also might be nice to confirm that an operand override has no effect.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opAAD = function()
 {
@@ -3766,7 +3766,7 @@ X86.opAAD = function()
  *
  * WARNING: I have no idea how many clocks this instruction originally required, so for now, I'm going with a minimum of 2.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSALC = function()
 {
@@ -3777,7 +3777,7 @@ X86.opSALC = function()
 /**
  * op=0xD7 (XLAT)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opXLAT = function()
 {
@@ -3791,7 +3791,7 @@ X86.opXLAT = function()
 /**
  * opESC()
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  * @param {number} bOpcode
  */
 X86.opESC = function(bOpcode)
@@ -3803,7 +3803,7 @@ X86.opESC = function(bOpcode)
 /**
  * op=0xD8 (ESC0)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opESC0 = function()
 {
@@ -3813,7 +3813,7 @@ X86.opESC0 = function()
 /**
  * op=0xD9 (ESC1)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opESC1 = function()
 {
@@ -3823,7 +3823,7 @@ X86.opESC1 = function()
 /**
  * op=0xDA (ESC2)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opESC2 = function()
 {
@@ -3833,7 +3833,7 @@ X86.opESC2 = function()
 /**
  * op=0xDB (ESC3)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opESC3 = function()
 {
@@ -3843,7 +3843,7 @@ X86.opESC3 = function()
 /**
  * op=0xDC (ESC4)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opESC4 = function()
 {
@@ -3853,7 +3853,7 @@ X86.opESC4 = function()
 /**
  * op=0xDD (ESC5)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opESC5 = function()
 {
@@ -3863,7 +3863,7 @@ X86.opESC5 = function()
 /**
  * op=0xDE (ESC6)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opESC6 = function()
 {
@@ -3873,7 +3873,7 @@ X86.opESC6 = function()
 /**
  * op=0xDF (ESC7)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opESC7 = function()
 {
@@ -3887,7 +3887,7 @@ X86.opESC7 = function()
  * rely on the ADDRESS override setting for determining whether CX or ECX will be used,
  * even though it seems counter-intuitive; ditto for the REP prefix.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLOOPNZ = function()
 {
@@ -3909,7 +3909,7 @@ X86.opLOOPNZ = function()
  * rely on the ADDRESS override setting for determining whether CX or ECX will be used,
  * even though it seems counter-intuitive; ditto for the REP prefix.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLOOPZ = function()
 {
@@ -3931,7 +3931,7 @@ X86.opLOOPZ = function()
  * rely on the ADDRESS override setting for determining whether CX or ECX will be used,
  * even though it seems counter-intuitive; ditto for the REP prefix.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLOOP = function()
 {
@@ -3953,7 +3953,7 @@ X86.opLOOP = function()
  * rely on the ADDRESS override setting for determining whether CX or ECX will be used,
  * even though it seems counter-intuitive; ditto for the REP prefix.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJCXZ = function()
 {
@@ -3969,7 +3969,7 @@ X86.opJCXZ = function()
 /**
  * op=0xE4 (IN AL,port)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINb = function()
 {
@@ -3983,7 +3983,7 @@ X86.opINb = function()
 /**
  * op=0xE5 (IN AX,port)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINw = function()
 {
@@ -4000,7 +4000,7 @@ X86.opINw = function()
 /**
  * op=0xE6 (OUT port,AL)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opOUTb = function()
 {
@@ -4013,7 +4013,7 @@ X86.opOUTb = function()
 /**
  * op=0xE7 (OUT port,AX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opOUTw = function()
 {
@@ -4026,7 +4026,7 @@ X86.opOUTw = function()
 /**
  * op=0xE8 (CALL disp16)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCALL = function()
 {
@@ -4041,7 +4041,7 @@ X86.opCALL = function()
 /**
  * op=0xE9 (JMP disp16)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJMP = function()
 {
@@ -4053,7 +4053,7 @@ X86.opJMP = function()
 /**
  * op=0xEA (JMP seg:off)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJMPF = function()
 {
@@ -4064,7 +4064,7 @@ X86.opJMPF = function()
 /**
  * op=0xEB (JMP short disp8)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opJMPs = function()
 {
@@ -4076,7 +4076,7 @@ X86.opJMPs = function()
 /**
  * op=0xEC (IN AL,dx)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINDXb = function()
 {
@@ -4090,7 +4090,7 @@ X86.opINDXb = function()
 /**
  * op=0xED (IN AX,dx)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINDXw = function()
 {
@@ -4107,7 +4107,7 @@ X86.opINDXw = function()
 /**
  * op=0xEE (OUT dx,AL)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opOUTDXb = function()
 {
@@ -4121,7 +4121,7 @@ X86.opOUTDXb = function()
 /**
  * op=0xEF (OUT dx,AX)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opOUTDXw = function()
 {
@@ -4138,7 +4138,7 @@ X86.opOUTDXw = function()
 /**
  * op=0xF0 (LOCK:)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opLOCK = function()
 {
@@ -4155,7 +4155,7 @@ X86.opLOCK = function()
  * For the 80186 and up, and we treat it as undefined.  Starting with the 80386, this opcode is known as INT1
  * or ICEBP, since it effectively performs an INT 0x01 but is normally only performed with an ICE.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opINT1 = function()
 {
@@ -4165,7 +4165,7 @@ X86.opINT1 = function()
 /**
  * op=0xF2 (REPNZ:) (repeat CMPS or SCAS until NZ; repeat MOVS, LODS, or STOS unconditionally)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opREPNZ = function()
 {
@@ -4176,7 +4176,7 @@ X86.opREPNZ = function()
 /**
  * op=0xF3 (REPZ:) (repeat CMPS or SCAS until Z; repeat MOVS, LODS, or STOS unconditionally)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opREPZ = function()
 {
@@ -4187,7 +4187,7 @@ X86.opREPZ = function()
 /**
  * op=0xF4 (HLT)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opHLT = function()
 {
@@ -4206,10 +4206,10 @@ X86.opHLT = function()
     this.intFlags |= X86.INTFLAG.HALT;
     this.nStepCycles -= 2;
     /*
-     * If a Debugger is present and the HALT message category is enabled, then we REALLY halt the CPU,
-     * on the theory that whoever's using the Debugger would like to see HLTs.
+     * If a Debugger is present and both the CPU and HALT message categories are enabled, then we
+     * REALLY halt the CPU, on the theory that whoever's using the Debugger would like to see HLTs.
      */
-    if (DEBUGGER && this.dbg && this.messageEnabled(Messages.HALT)) {
+    if (DEBUGGER && this.dbg && this.messageEnabled(Messages.CPU | Messages.HALT)) {
         this.resetIP(-1);       // this is purely for the Debugger's benefit, to show the HLT
         this.dbg.stopCPU();
         return;
@@ -4227,7 +4227,7 @@ X86.opHLT = function()
 /**
  * op=0xF5 (CMC)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCMC = function()
 {
@@ -4254,7 +4254,7 @@ X86.opCMC = function()
  *
  * Similar issues with IMUL (and DIV and IDIV) are resolved using the same special variable(s).
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP3b = function()
 {
@@ -4280,7 +4280,7 @@ X86.opGRP3b = function()
  * updated.  This also relieves us from having to decode any part of the ModRM byte, so maybe
  * it's not such a bad work-around after all.
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP3w = function()
 {
@@ -4295,7 +4295,7 @@ X86.opGRP3w = function()
 /**
  * op=0xF8 (CLC)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCLC = function()
 {
@@ -4306,7 +4306,7 @@ X86.opCLC = function()
 /**
  * op=0xF9 (STC)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSTC = function()
 {
@@ -4317,7 +4317,7 @@ X86.opSTC = function()
 /**
  * op=0xFA (CLI)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCLI = function()
 {
@@ -4337,7 +4337,7 @@ X86.opCLI = function()
 /**
  * op=0xFB (STI)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSTI = function()
 {
@@ -4358,7 +4358,7 @@ X86.opSTI = function()
 /**
  * op=0xFC (CLD)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opCLD = function()
 {
@@ -4369,7 +4369,7 @@ X86.opCLD = function()
 /**
  * op=0xFD (STD)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opSTD = function()
 {
@@ -4380,7 +4380,7 @@ X86.opSTD = function()
 /**
  * op=0xFE (GRP4 byte)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP4b = function()
 {
@@ -4390,7 +4390,7 @@ X86.opGRP4b = function()
 /**
  * op=0xFF (GRP4 word)
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opGRP4w = function()
 {
@@ -4400,7 +4400,7 @@ X86.opGRP4w = function()
 /**
  * opInvalid()
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opInvalid = function()
 {
@@ -4410,7 +4410,7 @@ X86.opInvalid = function()
 /**
  * opUndefined()
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opUndefined = function()
 {
@@ -4422,7 +4422,7 @@ X86.opUndefined = function()
 /**
  * opTBD()
  *
- * @this {X86CPU}
+ * @this {CPUX86}
  */
 X86.opTBD = function()
 {

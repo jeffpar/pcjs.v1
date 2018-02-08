@@ -7,8 +7,10 @@ permalink: /disks/pcx86/diags/ibm/
 IBM PC Diagnostics
 ------------------
 
-Information is available for these IBM PC diagnostics:
+The following IBM PC diagnostics are available.
 
-* [IBM PC Diagnostics 1.02](1.02/)
-* [IBM PC Diagnostics 2.20](2.20/)
-* [IBM PC AT Diagnostics 2.07](2.07/)
+* [IBM PC Diagnostics 1.01 (Advanced for AT)](1.01/)
+* [IBM PC Diagnostics 1.02 (Advanced for PC)](1.02/)
+* [IBM PC Diagnostics 2.05 (Standard and Advanced)](2.05/)
+* [IBM PC Diagnostics 2.07 (Advanced for AT)](2.07/)
+* [IBM PC Diagnostics 2.20 (Advanced for PC)](2.20/)

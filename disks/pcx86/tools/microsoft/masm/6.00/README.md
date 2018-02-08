@@ -7,11 +7,11 @@ redirect_from:
 ---
 
 Microsoft Macro Assembler 6.00
----
+------------------------------
 
 Directory listings of the five 1.44Mb distribution diskettes are provided below.
 
-### Directory of MS MASM 6.00 (Disk 1)
+### Directory of MS Macro Assembler 6.00 (Disk 1)
 
 	 Volume in drive A is AR
 	 Volume Serial Number is 1465-5DC2
@@ -49,7 +49,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	       21 file(s)     600229 bytes
 	                      851456 bytes free
 
-### Directory of MS MASM 6.00 (Disk 2)
+### Directory of MS Macro Assembler 6.00 (Disk 2)
 
 	 Volume in drive A is DISK 2     
 	 Volume Serial Number is 14BA-2164
@@ -78,7 +78,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	       12 file(s)     651824 bytes
 	                      803328 bytes free
 
-### Directory of MS MASM 6.00 (Disk 3)
+### Directory of MS Macro Assembler 6.00 (Disk 3)
 
 	 Volume in drive A is DISK 3     
 	 Volume Serial Number is 14FB-691D
@@ -114,7 +114,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	       19 file(s)     621269 bytes
 	                      832000 bytes free
 
-### Directory of MS MASM 6.00 (Disk 4)
+### Directory of MS Macro Assembler 6.00 (Disk 4)
 
 	 Volume in drive A is DISK 4     
 	 Volume Serial Number is 1553-56BC
@@ -261,7 +261,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	       98 file(s)    1174243 bytes
 	                      259072 bytes free
 
-### Directory of MS MASM 6.00 (Disk 5)
+### Directory of MS Macro Assembler 6.00 (Disk 5)
 
 	 Volume in drive A is DISK 5     
 	 Volume Serial Number is 1594-1E74

@@ -5,13 +5,13 @@ permalink: /disks/pcx86/tools/microsoft/masm/5.00/
 ---
 
 Microsoft Macro Assembler 5.00
----
+------------------------------
 
 Directory listings of the two 360Kb distribution diskettes are provided below.
 
 We also have [Microsoft Macro Assembler 5.0 Documentation](/pubs/pc/software/tools/microsoft/masm/5.00/).
 
-### Directory of MS MASM 5.00 (Disk 1)
+### Directory of MS Macro Assembler 5.00 (Disk 1)
 
 	 Volume in drive A is MASM 500 #1
 
@@ -57,7 +57,7 @@ We also have [Microsoft Macro Assembler 5.0 Documentation](/pubs/pc/software/too
 	       30 file(s)     344180 bytes
 	                        2048 bytes free
 
-### Directory of MS MASM 5.00 (Disk 2)
+### Directory of MS Macro Assembler 5.00 (Disk 2)
 
 	 Volume in drive A is MASM 500 #2
 

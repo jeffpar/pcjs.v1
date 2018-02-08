@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PCx86 ChipSet component.
+ * @fileoverview Implements the PCx86 ChipSet component
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
@@ -41,11 +41,8 @@ if (NODE) {
 }
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
- *
- * @unrestricted
+ * class ChipSet
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class ChipSet extends Component {
     /**
@@ -190,7 +187,7 @@ class ChipSet extends Component {
      * @this {ChipSet}
      * @param {Computer} cmp
      * @param {Bus} bus
-     * @param {X86CPU} cpu
+     * @param {CPUX86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -4772,7 +4769,7 @@ class ChipSet extends Component {
                     this.volumeAudio = this.contextAudio['createGain']();
                     this.oscillatorAudio['connect'](this.volumeAudio);
                     this.volumeAudio['connect'](this.contextAudio['destination']);
-                    this.volumeAudio['gain']['value'] = 0;
+                    this.volumeAudio['gain']['setValueAtTime'](0, 0);
                     this.oscillatorAudio['type'] = "square";
                     this.oscillatorAudio['start'](0);
                     return true;

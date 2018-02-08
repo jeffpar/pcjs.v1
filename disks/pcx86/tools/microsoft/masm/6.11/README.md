@@ -7,11 +7,11 @@ redirect_from:
 ---
 
 Microsoft Macro Assembler 6.11
----
+------------------------------
 
 Directory listings of the five 1.44Mb distribution diskettes are provided below.
 
-### Directory of MS MASM 6.11 (Disk 1)
+### Directory of MS Macro Assembler 6.11 (Disk 1)
 
 	 Volume in drive A is MASM611_01 
 	 Volume Serial Number is 1346-12FA
@@ -54,7 +54,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	       26 file(s)    1427790 bytes
 	                       23040 bytes free
 
-### Directory of MS MASM 6.11 (Disk 2)
+### Directory of MS Macro Assembler 6.11 (Disk 2)
 
 	 Volume in drive A is MASM611_02 
 	 Volume Serial Number is 3856-14E2
@@ -90,7 +90,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	       19 file(s)     663671 bytes
 	                      788992 bytes free
 
-### Directory of MS MASM 6.11 (Disk 3)
+### Directory of MS Macro Assembler 6.11 (Disk 3)
 
 	 Volume in drive A is MASM611_03 
 	 Volume Serial Number is 1E53-14E7
@@ -145,7 +145,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	       38 file(s)     967319 bytes
 	                      478208 bytes free
 
-### Directory of MS MASM 6.11 (Disk 4)
+### Directory of MS Macro Assembler 6.11 (Disk 4)
 
 	 Volume in drive A is MASM611_04 
 	 Volume Serial Number is 3A65-14EC
@@ -391,7 +391,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	      157 file(s)     635717 bytes
 	                      786944 bytes free
 
-### Directory of MS MASM 6.11 (Disk 5)
+### Directory of MS Macro Assembler 6.11 (Disk 5)
 
 	 Volume in drive A is MASM611_05 
 	 Volume Serial Number is 1317-14F4

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Defines message categories.
+ * @fileoverview Defines PCx86 message categories
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PCx86 Panel component.
+ * @fileoverview Implements the PCx86 Panel component
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
@@ -187,11 +187,8 @@ class Rectangle {
 }
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
- *
- * @unrestricted
+ * class Panel
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Panel extends Component {
     /**
@@ -223,7 +220,7 @@ class Panel extends Component {
      * @this {Panel}
      * @param {Computer} cmp
      * @param {Bus} bus
-     * @param {X86CPU} cpu
+     * @param {CPUX86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -592,7 +589,7 @@ class Panel extends Component {
      *
      * Update function for Panels containing elements with high-frequency display requirements.
      *
-     * For older (and slower) DOM-based display elements, those are sill being managed by the X86CPU component,
+     * For older (and slower) DOM-based display elements, those are sill being managed by the CPUX86 component,
      * so it has its own updateStatus() handler.
      *
      * The Computer's updateStatus() handler is currently responsible for calling both our handler and the CPU's handler.

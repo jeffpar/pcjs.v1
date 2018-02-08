@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PCx86 RAM component.
+ * @fileoverview Implements the PCx86 RAM component
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
@@ -40,11 +40,8 @@ if (NODE) {
 }
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
- *
- * @unrestricted
+ * class RAM
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class RAM extends Component {
     /**
@@ -79,7 +76,7 @@ class RAM extends Component {
      * @this {RAM}
      * @param {Computer} cmp
      * @param {Bus} bus
-     * @param {X86CPU} cpu
+     * @param {CPUX86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -103,7 +100,7 @@ class RAM extends Component {
     {
         if (!fRepower) {
             /*
-             * The Computer powers up the CPU last, at which point X86CPU state is restored,
+             * The Computer powers up the CPU last, at which point CPUX86 state is restored,
              * which includes the Bus state, and since we use the Bus to allocate all our memory,
              * memory contents are already restored for us, so we don't need the usual restore
              * logic.  We just need to call reset(), to allocate memory for the RAM.
@@ -129,7 +126,7 @@ class RAM extends Component {
     powerDown(fSave, fShutdown)
     {
         /*
-         * The Computer powers down the CPU first, at which point X86CPU state is saved,
+         * The Computer powers down the CPU first, at which point CPUX86 state is saved,
          * which includes the Bus state, and since we use the Bus component to allocate all
          * our memory, memory contents are already saved for us, so we don't need the usual
          * save logic.
@@ -278,11 +275,8 @@ class RAM extends Component {
 }
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
- *
- * @unrestricted
+ * class CompaqController
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class CompaqController extends Controller {
     /**

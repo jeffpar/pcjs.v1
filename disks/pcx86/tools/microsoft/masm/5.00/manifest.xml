@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.4/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.5/manifest.xsl"?>
 <manifest type="software">
-	<title>Microsoft Macro Assembler</title>
+	<title>Macro Assembler</title>
 	<version>5.00</version>
 	<type>Utility</type>
 	<category>Assembler</category>
 	<language>x86</language>
-	<author>Microsoft</author>
+	<company>Microsoft</company>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MASM500-DISK1.img" href="/disks/pcx86/tools/microsoft/masm/5.00/MASM500-DISK1.json" md5="db3a2c11a48bd66f684ee8258af9c6ca" md5json="a251bf02f169d53d5e026e87295ed228">
-		<name>MS MASM 5.00 (Disk 1)</name>
+		<name>MS Macro Assembler 5.00 (Disk 1)</name>
 		<file size="15830" time="1987-07-31 00:00:00" attr="0x20">CREF.EXE</file>
 		<file size="9499" time="1987-07-31 00:00:00" attr="0x20">ERROUT.EXE</file>
 		<file size="12149" time="1987-07-31 00:00:00" attr="0x20">EXEMOD.EXE</file>
@@ -39,7 +39,7 @@
 		<file size="3170" time="1987-07-31 00:00:00" attr="0x20">WHAT.EXE</file>
 	</disk>
 	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MASM500-DISK2.img" href="/disks/pcx86/tools/microsoft/masm/5.00/MASM500-DISK2.json" md5="90c23b2c12c6d3e5f0002f7091738480" md5json="a794324b6b5c779ce2b01429f16dfcf5">
-		<name>MS MASM 5.00 (Disk 2)</name>
+		<name>MS Macro Assembler 5.00 (Disk 2)</name>
 		<file size="2302" time="1987-07-31 00:00:00" attr="0x20">BIOS.INC</file>
 		<file size="218018" time="1987-07-31 00:00:00" attr="0x20">CV.EXE</file>
 		<file size="18348" time="1987-07-31 00:00:00" attr="0x20">CV.HLP</file>
