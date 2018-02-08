@@ -40,6 +40,7 @@ if (NODE) {
     var ChipSet     = require("./chipset");
     var Keyboard    = require("./keyboard");
     var Mouse       = require("./mouse");
+    var Controller  = require("./bus").Controller;
 }
 
 /*

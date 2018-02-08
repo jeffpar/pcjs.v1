@@ -67,7 +67,7 @@ if (NODE) {
     var State       = require("../../shared/lib/state");
     var PCX86       = require("./defines");
     var Messages    = require("./messages");
-    var Bus         = require("./bus");
+    var Bus         = require("./bus").Bus;
 }
 
 /**

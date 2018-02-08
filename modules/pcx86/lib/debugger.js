@@ -1758,7 +1758,7 @@ class DebuggerX86 extends Debugger {
             return;
         }
 
-        var ch = '&', fProt = this.cpu.getProtMode(), fAddr32 = false;
+        var ch = '&', fProt = this.cpu.isProtMode(), fAddr32 = false;
         var addrIDT = this.cpu.addrIDT + (nIDT << (fProt? 3 : 2));
         var off = this.cpu.getShort(addrIDT + X86.DESC.LIMIT.OFFSET);
         var sel = this.cpu.getShort(addrIDT + X86.DESC.BASE.OFFSET);

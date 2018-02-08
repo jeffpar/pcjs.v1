@@ -1685,23 +1685,23 @@ class CPUX86 extends CPU {
     }
 
     /**
-     * getProtMode()
+     * isProtMode()
      *
      * @this {CPUX86}
      * @return {boolean} true if protected-mode, false if not
      */
-    getProtMode()
+    isProtMode()
     {
         return !!(this.regCR0 & X86.CR0.MSW.PE);
     }
 
     /**
-     * getV68Mode()
+     * isV86Mode()
      *
      * @this {CPUX86}
      * @return {boolean} true if V86-mode, false if not
      */
-    getV86Mode()
+    isV86Mode()
     {
         return !!(this.regPS & X86.PS.VM);
     }
@@ -1725,12 +1725,12 @@ class CPUX86 extends CPU {
     setProtMode(fProt, fV86)
     {
         if (fProt === undefined) {
-            fProt = this.getProtMode();
+            fProt = this.isProtMode();
         }
         if (fV86 === undefined) {
-            fV86 = this.getV86Mode();
+            fV86 = this.isV86Mode();
         }
-        if (DEBUG && (fProt != this.getProtMode() || fV86 != this.getV86Mode()) && this.messageEnabled()) {
+        if (DEBUG && (fProt != this.isProtMode() || fV86 != this.isV86Mode()) && this.messageEnabled()) {
             this.printMessage("CPU switching to " + (fProt? (fV86? "v86" : "protected") : "real") + "-mode", this.bitsMessage, true);
         }
         this.aOpGrp6 = (fProt && !fV86? X86.aOpGrp6Prot : X86.aOpGrp6Real);

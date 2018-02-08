@@ -365,10 +365,9 @@ X86.fnBTMem = function(dst, src)
     var max = this.sizeData << 3;
     if (src >= max || src < -max) {
         /*
-         * We just divided src by 8, but now we need to divide src by 16 or 32, according to the OPERAND size,
-         * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
-         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we must add to
-         * the original EA offset.
+         * Now we need to divide src by 16 or 32, according to the OPERAND size, which means shifting it right
+         * by either 4 or 5 bits.  That gives us a short or long INDEX, which we then multiply by the OPERAND size
+         * to obtain to the corresponding short or long OFFSET that we must add to the original EA offset.
          */
         var i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
@@ -378,9 +377,6 @@ X86.fnBTMem = function(dst, src)
      */
     src = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & src) this.setCF(); else this.clearCF();
-    /*
-     * End of common code block
-     */
 
     this.nStepCycles -= 6;
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -410,10 +406,9 @@ X86.fnBTCMem = function(dst, src)
     var max = this.sizeData << 3;
     if (src >= max || src < -max) {
         /*
-         * We just divided src by 8, but now we need to divide src by 16 or 32, according to the OPERAND size,
-         * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
-         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we must add to
-         * the original EA offset.
+         * Now we need to divide src by 16 or 32, according to the OPERAND size, which means shifting it right
+         * by either 4 or 5 bits.  That gives us a short or long INDEX, which we then multiply by the OPERAND size
+         * to obtain to the corresponding short or long OFFSET that we must add to the original EA offset.
          */
         var i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
@@ -451,10 +446,9 @@ X86.fnBTRMem = function(dst, src)
     var max = this.sizeData << 3;
     if (src >= max || src < -max) {
         /*
-         * We just divided src by 8, but now we need to divide src by 16 or 32, according to the OPERAND size,
-         * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
-         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we must add to
-         * the original EA offset.
+         * Now we need to divide src by 16 or 32, according to the OPERAND size, which means shifting it right
+         * by either 4 or 5 bits.  That gives us a short or long INDEX, which we then multiply by the OPERAND size
+         * to obtain to the corresponding short or long OFFSET that we must add to the original EA offset.
          */
         var i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
@@ -492,10 +486,9 @@ X86.fnBTSMem = function(dst, src)
     var max = this.sizeData << 3;
     if (src >= max || src < -max) {
         /*
-         * We just divided src by 8, but now we need to divide src by 16 or 32, according to the OPERAND size,
-         * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
-         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we must add to
-         * the original EA offset.
+         * Now we need to divide src by 16 or 32, according to the OPERAND size, which means shifting it right
+         * by either 4 or 5 bits.  That gives us a short or long INDEX, which we then multiply by the OPERAND size
+         * to obtain to the corresponding short or long OFFSET that we must add to the original EA offset.
          */
         var i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);

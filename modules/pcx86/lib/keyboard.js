@@ -39,6 +39,7 @@ if (NODE) {
     var Interrupts  = require("./interrupts");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
+    var ROMX86      = require("./rom");
 }
 
 /**
@@ -994,8 +995,8 @@ class Keyboard extends Component {
                          *      &0070:2EFF 26               ES:
                          *      &0070:2F00 C606160401       MOV      [0416],01
                          */
-                        if (!this.cpu.getProtMode()) {
-                            this.bus.setByteDirect(ROMx86.BIOS.COMPAQ_KEYCLICK, 0);
+                        if (!this.cpu.isProtMode()) {
+                            this.bus.setByteDirect(ROMX86.BIOS.COMPAQ_KEYCLICK, 0);
                         }
                     }
                 }

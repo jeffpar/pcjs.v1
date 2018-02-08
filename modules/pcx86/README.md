@@ -27,8 +27,10 @@ Examples of non-device components include visual components like [panel.js](lib/
 [debugger.js](lib/debugger.js), and sub-components like [x86ops.js](lib/x86ops.js) and [x86func.js](lib/x86func.js),
 which separate the CPU functionality of [x86.js](lib/x86.js) into more manageable pieces.
 
-These components should always be loaded or compiled in the order listed by the *pcX86Files* property in
-[package.json](../../package.json), which includes all the necessary *shared* components as well.
+These components should always be loaded or compiled in the order listed by the *pcx86.scripts* property in
+[machines.json](../../_data/machines.json), which includes all the necessary [shared components](../shared/lib/) as
+well.
+
 At the time of this writing, the recommended order is:
 
 * [shared/defines.js](../shared/lib/defines.js)
