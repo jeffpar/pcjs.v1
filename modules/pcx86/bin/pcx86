@@ -49,7 +49,7 @@ var lib = path.join(path.dirname(fs.realpathSync(__filename)), "../lib/");
 
 try {
     var machines = require(lib + "../../../_data/machines.json");
-    var scriptsPCx86 = machines.pcx86.scripts;
+    var scriptsPCx86 = /** @type {Array.<string>} */ (machines.pcx86.scripts);
 } catch(err) {
     console.log(err.message);
 }
@@ -77,13 +77,13 @@ var aComponents = [];
 var asComponentsIgnore = ["panel", "embed", "save"];
 
 /*
- * A few of the components are subclasses of other classes (eg, "x86cpu" is a subclass
+ * A few of the components are subclasses of other classes (eg, "cpux86" is a subclass
  * of "cpu").  In those situations, we "hoist" the subclass constructor into the 
  * corresponding superclass, because it is the name of the superclass that we rely on during
  * machine initialization.
  */
 var aSubClasses = {
-    "pcx86/lib/x86cpu": "pcx86/lib/cpu",
+    "pcx86/lib/cpux86": "pcx86/lib/cpu",
     "pcx86/lib/debugger": "shared/lib/debugger"
 };
     
@@ -107,39 +107,44 @@ function loadComponents(asFiles)
              * is simpler, and it also gives us direct references to certain components
              * we'll want to access later (eg, "component" in getComponentByType()).
              */
-            var fn = require(lib + "../../../" + sFile);
-            var sSuperClass = null;
-            for (var s in aSubClasses) {
-                if (sFile.indexOf(s) >= 0) {
-                    sSuperClass = aSubClasses[s];
-                    break;
-                }
-            }
-            if (sSuperClass) {
-                for (var j = 0; j < aComponents.length; j++) {
-                    if (aComponents[j].path.indexOf(sSuperClass) >= 0) {
-                        if (fDebug) console.log("updating superclass " + aComponents[j].path + " with subclass " + sFile);
-                        aComponents[j].Create = fn;
-                        sName = null;
+            var exports = require(lib + "../../../" + sFile);
+            var afn = (typeof exports == "function"? [exports] : exports);
+            for (var f in afn) {
+                var fn = afn[f];
+                if (typeof fn != "function") continue;
+                var sSuperClass = null;
+                for (var s in aSubClasses) {
+                    if (sFile.indexOf(s) >= 0) {
+                        sSuperClass = aSubClasses[s];
                         break;
                     }
                 }
-            }
-            if (sName == "component") {
-                fn.log = fn.println = function(s, type) {
-                    console.log((type !== undefined? (type + ": ") : "") + (s || ""));
-                };      // jshint ignore:line
-            }
-            if (sName) {
-                aComponents.push({name: sName, path: sFile, Create: fn, objects: []});
-            }
-            if (sName == "defines") {
-                /*
-                 * Enabling component console messages requires setting CONSOLE to true.
-                 */ 
-                if (global.DEBUG !== undefined) {
-                    global.DEBUG = fDebug;
-                    global.CONSOLE = fConsole;
+                if (sSuperClass) {
+                    for (var j = 0; j < aComponents.length; j++) {
+                        if (aComponents[j].path.indexOf(sSuperClass) >= 0) {
+                            if (fDebug) console.log("updating superclass " + aComponents[j].path + " with subclass " + sFile);
+                            aComponents[j].Create = fn;
+                            sName = null;
+                            break;
+                        }
+                    }
+                }
+                if (sName == "component") {
+                    fn.log = fn.println = function(s, type) {
+                        console.log((type !== undefined? (type + ": ") : "") + (s || ""));
+                    };      // jshint ignore:line
+                }
+                if (sName) {
+                    aComponents.push({name: sName, path: sFile, Create: fn, objects: []});
+                }
+                if (sName == "defines") {
+                    /*
+                     * Enabling component console messages requires setting CONSOLE to true.
+                     */
+                    if (global.DEBUG !== undefined) {
+                        global.DEBUG = fDebug;
+                        global.CONSOLE = fConsole;
+                    }
                 }
             }
         } catch(err) {
@@ -216,7 +221,7 @@ function loadMachine(sFile)
          *
          *      var machine = require(lib + "../bin/" +sFile);
          */
-        var sMachine = fs.readFileSync(sFile, {encoding: "utf8"});
+        var sMachine = /** @type {string} */ (fs.readFileSync(sFile, {encoding: "utf8"}));
         sMachine = '(' + sMachine + ')';
         if (fDebug) console.log(sMachine);
         machine = eval(sMachine);       // jshint ignore:line

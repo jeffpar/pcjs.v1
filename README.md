@@ -273,7 +273,7 @@ run a series of automated tests, etc:
     node pcx86
 
 The [pcx86](modules/pcx86/bin/pcx86) script in [modules/pcx86/bin](modules/pcx86/bin) loads
-all the PCx86 browser scripts listed in the root [package.json](/package.json) and then starts a Node REPL
+all the PCx86 browser scripts listed in [machines.json](/_data/machines.json) and then starts a Node REPL
 ("read-eval-print loop").  The REPL handles a few special commands (eg, "load", "quit") and passes anything else
 to the PCx86 Debugger component.  If no Debugger component has been created yet, or if the Debugger didn't recognize
 the command, then it's passed on to *eval()*, like a good little REPL.
@@ -386,7 +386,7 @@ Updating PCjs
 
 To start developing features for a new version of PCjs, here are the recommended steps:
 
-1. Change the version number in the root [package.json](package.json) (and [_config.yml](https://github.com/jeffpar/pcjs/blob/jekyll/_config.yml))
+1. Change the version number in the root [package.json](package.json) and [machines.json](_data/machines.json)
 2. Run the "gulp version" task to bump the version in all the machine XML files
 3. Make changes
 4. Run "gulp" to build new versions of the apps (eg, "/versions/pcx86/1.x.x/pcx86.js")

@@ -34,9 +34,9 @@ if (NODE) {
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var PCX86       = require("./defines");
-    var Bus         = require("./bus");
     var Memory      = require("./memory");
     var X86         = require("./x86");
+    var Bus         = require("./bus").Bus;
 }
 
 /**

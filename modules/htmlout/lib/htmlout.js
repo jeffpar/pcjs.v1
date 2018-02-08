@@ -495,8 +495,8 @@ HTMLOut.filter = function(req, res, next)
             } else {
                 sData = sData.replace(/^([ \t]*import\s+\S+\s+from\s+['"].*?['"];)/gm, "// $1");
                 sData = sData.replace(/^([ \t]*export\s+default\s+\S+;)/gm, "// $1");
-                sData = sData.replace(/^([ \t]*var\s+\S+\s*=\s*require\(['"].*?['"]\);)/gm, "// $1");
-                sData = sData.replace(/^([ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;)/gm, "// $1");
+                sData = sData.replace(/^([ \t]*var\s+\S+\s*=\s*require\(['"].*?['"]\)[^;]*;)/gm, "// $1");
+                sData = sData.replace(/^([ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*[^;]*;)/gm, "// $1");
                 res.set("Content-Type", "application/javascript");
                 res.status(200).send(sData);
             }
@@ -1943,7 +1943,11 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
 
         var asFiles = [];
         if (fCompiled) {
-            var sScriptFile = sType + (fDebugger? "-dbg" : "") + ".js";
+            /*
+             * NOTE: We no longer build a separate "debugger" version, so we no longer need to add a "-dbg" suffix;
+             * the debugger is always built-in.
+             */
+            var sScriptFile = sType /* + (fDebugger? "-dbg" : "") */ + ".js";
             /*
              * If the machine has an empty 'styles' array, that's an explicit indication that there are no specific stylesheets;
              * otherwise, we currently assume that, at a minimum, there is a version-specific components.css.

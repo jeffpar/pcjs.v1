@@ -5,9 +5,9 @@ permalink: /modules/shared/
 ---
 
 Shared Components
------------------
+=================
 
-PCjs Machines share the following:
+PCjs Machines share the following components:
 
 * [Shared JavaScript Modules](lib/)
 * [Shared XML/HTML/CSS Templates](templates/)

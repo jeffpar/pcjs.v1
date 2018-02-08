@@ -1772,4 +1772,4 @@ Bus.ERROR = {
     REM_MEM_BADRANGE:   5
 };
 
-if (NODE) module.exports = Bus;
+if (NODE) module.exports = {Bus, Controller};
