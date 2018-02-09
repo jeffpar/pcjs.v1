@@ -641,14 +641,11 @@ class SerialPort extends Component {
     {
         var b = this.bIIR;
         /*
-         * TODO: Based on how BASIC.COM polls this register repeatedly in its serial ISR, it's clear that we
-         * should maintain a separate set of "trigger" bits for each of the four possible interrupt conditions,
-         * and that updateIRR() should test-and-clear each of those trigger bits in priority order, updating the
-         * IIR register as appropriate.  Then we could simply call updateIRR() here to set the next interrupt
-         * condition, if any.  As things stand now, another interrupt won't occur until another explicit
-         * "triggering" call to updateIRR() is issued, so we have to set the NO_INT bit here every time.
+         * Reading the IRR is supposed to clear the INT_THR condition (as is another write to the THR).
          */
-        this.bIIR |= SerialPort.IIR.NO_INT;
+        if (b == SerialPort.IIR.INT_THR) {
+            this.bIIR = SerialPort.IIR.NO_INT;
+        }
         this.printMessageIO(port, null, addrFrom, "IIR", b);
         return b;
     }
@@ -861,7 +858,7 @@ class SerialPort extends Component {
              */
             if (this.chipset && this.nIRQ) this.chipset.setIRR(this.nIRQ, 100);
         } else {
-            this.bIIR |= SerialPort.IIR.NO_INT;
+            this.bIIR = SerialPort.IIR.NO_INT;
             if (this.chipset && this.nIRQ) this.chipset.clearIRR(this.nIRQ);
         }
     }
@@ -944,6 +941,7 @@ class SerialPort extends Component {
     transmitData()
     {
         this.bLSR |= (SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
+        this.updateIRR();
     }
 
     /**
