@@ -4098,6 +4098,12 @@ class Video extends Component {
             this.printf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo);
             this.removeCursor();
             this.iCellCursor = iCellCursor;
+            /*
+             * We invalidate cBlinkVisible on a cursor position change to ensure the cursor will be redrawn on the
+             * next call to updateScreenCells().  It has the downside of requiring ALL cells to be re-examined, not
+             * just the old and new cursor cells, but the cell cache should prevent any unnecessary redrawing.
+             */
+            this.cBlinkVisible = -1;
         }
 
         /*
@@ -4112,6 +4118,13 @@ class Video extends Component {
             this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize);
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
+            /*
+             * TODO: Consider our redraw options for cursor shape changes, because invalidating cBlinkVisible won't
+             * have the desired effect if the cursor is still in the same location.  The only existing mechanism for
+             * making this happen would be to invalidate the cell cache (reset fCellCacheValid), which is rather drastic.
+             * Note that we don't have to worry about this if the cursor has ALSO just moved (ie, this.cBlinkVisible < 0).
+             */
+            // if (this.cBlinkVisible >= 0) this.fCellCacheValid = false;
         }
         
         this.cyCursorCell = bCursorMax + 1;
@@ -4838,7 +4851,7 @@ class Video extends Component {
      */
     initCache()
     {
-        this.cBlinkVisible = -1;                // invalidate the visible blinking character count, to force updateScreen() to recount
+        this.cBlinkVisible = -1;                // force updateScreen() to recount visible blinking characters 
         this.fCellCacheValid = false;
         var nCells = this.nCellCache;
         if (this.aCellCache === undefined || this.aCellCache.length != nCells) {
@@ -5181,15 +5194,9 @@ class Video extends Component {
          * AND there are no visible blinking characters (as of the last updateScreen) AND there is
          * no visible cursor, then we're done; simply return.  Otherwise, if there's only a blinking
          * cursor, then update JUST that one cell.
-         *
-         * When dealing with blinking characters, note that we need to run through the entire buffer
-         * ONLY if the low bits of the blink count just transitioned to 2 or 0; hence, we could return if
-         * the blink count was ODD.  But we'd still have to worry about the cursor, so it's simpler to blow
-         * that small optimization off.  Further optimizations are certainly possible, such as a hash table
-         * of all blinking character locations, but all those optimizations are saved for a rainy day.
          */
         if (!fForce && this.fCellCacheValid && this.bus.cleanMemory(addrScreen, cbScreen)) {
-            if (!fBlinkUpdate) {
+            if (!fBlinkUpdate && this.cBlinkVisible >= 0) {
                 return cCells;
             }
             if (!this.cBlinkVisible) {
