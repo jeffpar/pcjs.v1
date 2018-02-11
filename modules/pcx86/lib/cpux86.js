@@ -4372,23 +4372,29 @@ class CPUX86 extends CPU {
                     }
                     if (this.intFlags & X86.INTFLAG.HALT) {
                         /*
-                         * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction; instead,
-                         * opHLT() sets X86.INTFLAG.HALT, signalling to us that we're free to end the current burst
-                         * AND that we should not execute any more instructions until checkINTR() indicates a hardware
-                         * interrupt has been requested.
+                         * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction, because the
+                         * entire machine relies on the steady advance of the overall cycle count, to ensure that timer
+                         * updates, video updates, etc, all continue to occur at the expected rates.
+                         * 
+                         * So opHLT() sets X86.INTFLAG.HALT, signalling that we should not execute any more instructions
+                         * until checkINTR() detects a hardware interrupt and clears X86.INTFLAG.HALT. 
+                         * 
+                         * Ideally, we would also end the current burst; ie:
                          *
-                         * One downside to this approach is that it *might* appear to the careful observer that we
-                         * executed a full complement of instructions during bursts where X86.INTFLAG.HALT was set,
-                         * when in fact we did not.  However, the steady advance of the overall cycle count, and thus
-                         * the steady series calls to stepCPU(), is needed to ensure that timer updates, video updates,
-                         * etc, all continue to occur at the expected rates.
+                         *      this.nStepCycles = 0;
+                         *      this.opFlags = 0;
+                         *      break;
+                         * 
+                         * and save the browser a bunch of work, which would translate into power savings for the host
+                         * operating system, just as HLT was intended to do for the guest operating system.  Unfortunately,
+                         * that screws up up our dynamic speed recalculations, because it makes it appear that a single
+                         * instruction (HLT) performed the work of many.
                          *
-                         * If necessary, we can add another bookkeeping cycle counter (eg, one that keeps tracks of the
-                         * number of cycles during which we did not actually execute any instructions).
+                         * We could certainly add more cycle bookkeeping to compensate for HLT's lack of work, but for now,
+                         * it's simpler to re-execute the HLT as long as X86.INTFLAG.HALT is set. 
                          */
-                        this.nStepCycles = 0;
-                        this.opFlags = 0;
-                        break;
+                        X86.opHLT.call(this);
+                        continue;
                     }
                 }
             }
