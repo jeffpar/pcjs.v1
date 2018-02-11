@@ -51959,6 +51959,18 @@ class Video extends Component {
         if (this.nCard == Video.CARD.EGA) {
             if (bCursorMax == 7 && bCursorStart == 4 && !bCursorEnd) bCursorEnd = 7;
         }
+        /*
+         * Before range-checking CURSTART and CUREND, we need to see if they satisfy the disabled cursor condition,
+         * because the cursor may have been disabled with values outside the the normal range.  If so, then we simulate
+         * the disabled condition by pretending the CURSTART_BLINKOFF bit is set.
+         * 
+         * For example, on a CGA, ThinkTank sets both CURSTART and CUREND to 15, WordStar for PCjr sets CURSTART and
+         * CUREND to 12 and 13, respectively, and Rogue sets CURSTART and CUREND to 15 and 0, respectively.  Those values
+         * don't make sense when the max is 7, so what does a *real* CGA do?
+         */
+        else if (bCursorStart > bCursorEnd) {
+            bCursorFlags |= Card.CRTC.CURSTART_BLINKOFF;
+        }
 
         /*
          * Range-check CURSTART and CUREND against MAXSCAN now.
@@ -51982,11 +51994,6 @@ class Video extends Component {
         /*
          * One way of disabling the cursor is to set bit 5 (Card.CRTC.CURSTART_BLINKOFF) of the CRTC.CURSTART flags;
          * another way is setting bCursorStart > bCursorEnd, which implies that bCursorSize <= 0.
-         * 
-         * TODO: On a CGA, determine whether additional criteria (eg, when bCursorStart > bCursorMax before range-checking
-         * above) should also result in a hidden cursor.  For example, ThinkTank sets both start and end values to 15,
-         * and WordStar for PCjr sets start and end to 12 and 13, respectively.  Those values don't make sense when the max
-         * is 7, so what does a *real* CGA do?
          * 
          * TODO: On an EGA, the second condition can generate a "split block" cursor; see p. 201 of The Programmer's Guide
          * to the EGA, VGA, et al.
