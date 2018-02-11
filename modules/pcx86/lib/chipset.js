@@ -4423,7 +4423,7 @@ class ChipSet extends Component {
             if (this.bPPIB & ChipSet.PPI_B.CLK_KBD) {
                 this.bKbdData = b;
                 if (b) {
-                    this.setIRR(ChipSet.IRQ.KBD, 4);
+                    this.setIRR(ChipSet.IRQ.KBD, 120);
                     this.b8041Status |= ChipSet.C8042.STATUS.OUTBUFF_FULL;
                 }
                 return true;
