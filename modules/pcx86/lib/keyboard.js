@@ -562,15 +562,29 @@ class Keyboard extends Component {
     }
 
     /**
-     * checkBuffer(fReady)
+     * checkBuffer(b)
      *
      * This is the ChipSet's interface to let us know it's ready.
      *
      * @this {Keyboard}
-     * @param {boolean} [fReady]
+     * @param {number} [b] (set to the data, if any, that the ChipSet just delivered)
      */
-    checkBuffer(fReady)
+    checkBuffer(b)
     {
+        var fReady = false;
+        if (b) {
+            /*
+             * The following hack is for the 5170 ROM BIOS keyboard diagnostic, which expects the keyboard
+             * to report BAT_OK immediately after the ACK from a RESET command.  The BAT_OK response should already
+             * be in the keyboard's buffer; we just need to give it a little nudge.
+             */
+            if (b == Keyboard.CMDRES.ACK) {
+                fReady = true;
+            }
+            if (this.cpu) {
+                this.cpu.setTimer(this.timerTransmit, this.msTransmit, true);
+            }
+        }
         this.transmitData(fReady);
     }
 

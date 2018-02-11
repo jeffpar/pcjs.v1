@@ -3878,25 +3878,26 @@ class ChipSet extends Component {
      *
      * Return the contents of the OUTBUFF register and clear the OUTBUFF_FULL status bit.
      *
-     * This function then used to call kbd.checkBuffer(), on the theory that the next buffered
-     * scan code, if any, could now be delivered to OUTBUFF.  However, there are applications like
-     * BASICA that install a keyboard interrupt handler that reads OUTBUFF, do some scan code
-     * preprocessing, and then pass control on to the ROM's interrupt handler.  As a result,
-     * OUTBUFF is read multiple times during a single interrupt, so filling it with new data
-     * after every read would result in lost scan codes.
+     * Moreover, we also call kbd.checkBuffer() to let the Keyboard know that we just pulled
+     * data, so that it can reset its internal timer controlling the delivery of additional data.
+     * 
+     * Note that there are applications like BASICA that install a keyboard interrupt handler
+     * that reads OUTBUFF, does some scan code preprocessing, and then passes control on to the
+     * ROM's interrupt handler.  As a result, OUTBUFF is read multiple times during a single
+     * interrupt, so we need to avoid filling it with new data after every read; otherwise,
+     * scan codes will get dropped.
      *
      * The safest thing to do is to wait until kbd.setEnabled() is called, and let that call supply
      * more data to receiveKbdData().  That will happen as soon as the ROM re-enables the controller,
-     * and is why C8042.CMD.ENABLE_KBD processing ends with a call to kbd.checkBuffer().  As for
-     * software (eg, Xenix 286, and the Windows 95 VMM) that doesn't bother toggling the keyboard 
-     * interface, that's OK, because our Keyboard component also tries to transmit its next byte of
-     * data after a predetermined interval (see the Keyboard transmitData() function). 
+     * and is why C8042.CMD.ENABLE_KBD processing ends with a call to kbd.checkBuffer().  However,
+     * not all software (eg, Xenix 286, and the Windows 95 VMM) does that, so we have to rely on
+     * the Keyboard's internal timer.
      *
-     * Note that, the foregoing notwithstanding, I still clear the OUTBUFF_FULL bit here (as I
-     * believe I should); fortunately, none of the interrupt handlers rely on OUTBUFF_FULL as a
-     * prerequisite for reading OUTBUFF (not the BASICA handler, and not the ROM).  The assumption
-     * seems to be that if an interrupt occurred, OUTBUFF must contain data, regardless of the
-     * state of OUTBUFF_FULL.
+     * Also note that, the foregoing notwithstanding, I still clear the OUTBUFF_FULL bit here
+     * (as I believe I should); fortunately, none of the interrupt handlers I've seen rely on
+     * OUTBUFF_FULL as a prerequisite for reading OUTBUFF (certainly not BASICA or the ROM).
+     * The assumption seems to be that if an interrupt occurred, OUTBUFF must contain data,
+     * regardless of the state of OUTBUFF_FULL.
      *
      * @this {ChipSet}
      * @param {number} port (0x60)
@@ -3908,14 +3909,7 @@ class ChipSet extends Component {
         let b = this.b8042OutBuff;
         this.printMessageIO(port, null, addrFrom, "8042_OUTBUFF", b, Messages.C8042);
         this.b8042Status &= ~(ChipSet.C8042.STATUS.OUTBUFF_FULL | ChipSet.C8042.STATUS.OUTBUFF_DELAY);
-        /*
-         * This is hack for the 5170 ROM BIOS keyboard diagnostic, which expects the keyboard to report BAT_OK
-         * immediately after the ACK from a RESET command.  The BAT_OK response should already be in the keyboard's
-         * buffer; we just need to give it a little nudge.
-         */
-        if (b == Keyboard.CMDRES.ACK && this.kbd) {
-            this.kbd.checkBuffer(true);
-        }
+        if (this.kbd) this.kbd.checkBuffer(b);
         return b;
     }
 
@@ -4295,7 +4289,7 @@ class ChipSet extends Component {
                 this.b8042Status |= ChipSet.C8042.STATUS.OUTBUFF_DELAY;
             }
             if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
-                this.printMessage("set8042OutBuff(" + Str.toHexByte(b) + ',' + (fNoDelay? "no" : "") + "delay)", true);
+                this.printMessage("chipset.set8042OutBuff(" + Str.toHexByte(b) + ',' + (fNoDelay? "no" : "") + "delay)", true);
             }
         }
     }
@@ -4412,7 +4406,7 @@ class ChipSet extends Component {
     receiveKbdData(b)
     {
         if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
-            this.printMessage("receiveKbdData(" + Str.toHexByte(b) + ')', true);
+            this.printMessage("chipset.receiveKbdData(" + Str.toHexByte(b) + ')', true);
         }
         if (this.model == ChipSet.MODEL_4860) {
             if (!(this.bNMI & ChipSet.NMI.KBD_LATCH)) {
@@ -4452,12 +4446,12 @@ class ChipSet extends Component {
                     return true;
                 }
                 if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
-                    this.printMessage("receiveKbdData(" + Str.toHexByte(b) + "): output buffer full", true);
+                    this.printMessage("chipset.receiveKbdData(" + Str.toHexByte(b) + "): output buffer full", true);
                 }
                 return false;
             }
             if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
-                this.printMessage("receiveKbdData(" + Str.toHexByte(b) + "): disabled", true);
+                this.printMessage("chipset.receiveKbdData(" + Str.toHexByte(b) + "): disabled", true);
             }
         }
         return false;
