@@ -32,7 +32,6 @@ more detail, along with a live demonstration of the software, but that's not yet
 
 * [CP/M-86](cpm/)
 * [DOS](dos/)
-* [MINIX](minix/)
 * [OS/2](os2/)
 * [Unix](unix/)
 * [Windows](windows/)

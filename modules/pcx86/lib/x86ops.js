@@ -2909,15 +2909,15 @@ X86.opSTOSb = function()
         if (BACKTRACK) this.backTrack.btiMem0 = this.backTrack.btiAL;
 
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
-
+        
         /*
-         * Implement 80386 B1 Errata #7 (to the extent that Windows 95 checks for the errata).  This
-         * isn't a rock-solid implementation of the errata (for example, the ADDRESS override on the next
-         * instruction, if it exists, may or may not be the first prefix byte), but it's close enough.
+         * Implement 80386 B1 Errata #7, to the extent that Windows 95 checked for it.  This test doesn't
+         * detect every possible variation (for example, the ADDRESS override on the next instruction, if
+         * it exists, may not be the first prefix byte), but it's adequate for our limited purpose.
          *
-         * Note that we carefully alter with maskAddr only AFTER updating ECX, because this errata affects
-         * only EDI in the case of STOS.  The other instructions mentioned below trash different registers,
-         * so read the errata carefully.
+         * Note that this code alters maskAddr AFTER it's been used to update ECX, because in the case
+         * of STOS, the errata reportedly affects only EDI.  The other instructions mentioned in the errata
+         * trash different registers, so read the errata carefully.
          *
          * TODO: Extend this errata to STOSW, as well as MOVSB, MOVSW, INSB, and INSW.  Also, verify the
          * extent to which this errata existed on earlier 80386 steppings (I'm currently assuming A0-B1).
@@ -4191,9 +4191,6 @@ X86.opREPZ = function()
  */
 X86.opHLT = function()
 {
-    /*
-     * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
-     */
     if (I386 && (this.regPS & X86.PS.VM)) {
         X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
@@ -4215,8 +4212,8 @@ X86.opHLT = function()
         return;
     }
     /*
-     * We also REALLY halt the machine if interrupts have been disabled, since that means it's dead
-     * in the water (we have no NMI generation mechanism at the moment).
+     * We also REALLY halt the machine if interrupts have been disabled, since that means it's dead in
+     * the water (yes, we support NMIs, but none of our devices are going to generate an NMI at this point).
      */
     if (!this.getIF()) {
         if (DEBUGGER && this.dbg) this.resetIP(-1);

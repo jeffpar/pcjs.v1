@@ -2154,6 +2154,7 @@ class DebuggerX86 extends Debugger {
         this.aMessageBuffer = [];
         var aEnable = this.parseCommand(sEnable, false, '|');
         if (aEnable.length) {
+            this.bitsMessage = Messages.NONE;       // when specific messages are being enabled, WARN must be explicitly set
             for (var m in Messages.CATEGORIES) {
                 if (Usr.indexOf(aEnable, m) >= 0) {
                     this.bitsMessage |= Messages.CATEGORIES[m];

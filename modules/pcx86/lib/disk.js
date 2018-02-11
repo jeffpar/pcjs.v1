@@ -961,7 +961,9 @@ class Disk extends Component {
                         if (bStatus == DiskAPI.MBR.PARTITIONS.STATUS.ACTIVE) {
                             dir.pbaVolume = this.getSectorData(sectorBoot, off + DiskAPI.MBR.PARTITIONS.ENTRY.LBA_FIRST, 4);
                             sectorBoot = this.getSector(dir.pbaVolume);
-                            if (sectorBoot) fValid = true;
+                            if (sectorBoot && this.getSectorData(sectorBoot, DiskAPI.BPB.SECTOR_BYTES, 2) == this.cbSector) {
+                                fValid = true;
+                            }
                             break;
                         }
                         off += DiskAPI.MBR.PARTITIONS.ENTRY_LENGTH;
