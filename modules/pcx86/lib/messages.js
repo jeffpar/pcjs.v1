@@ -63,10 +63,10 @@ var Messages = {
     DOS:        0x40000001,
     DATA:       0x40000002,
     EVENT:      0x40000004,
-    KEY:        0x41000000,
-    WARN:       0x48000000,
-    HALT:       0x81000000|0,
-    BUFFER:     0x82000000|0
+    KEY:        0x40000010,
+    WARN:       0x40000020,
+    HALT:       0x84000000|0,
+    BUFFER:     0x88000000|0
 };
 
 /*

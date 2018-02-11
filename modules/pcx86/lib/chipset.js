@@ -36,6 +36,7 @@ if (NODE) {
     var State       = require("../../shared/lib/state");
     var PCX86       = require("./defines");
     var Interrupts  = require("./interrupts");
+    var Keyboard    = require("./keyboard");
     var Messages    = require("./messages");
     var X86         = require("./x86");
 }
@@ -388,7 +389,7 @@ class ChipSet extends Component {
         this.bPPIC = null;              // tracks writes to port 0x62, in case PPI_CTRL.C_IN_LO or PPI_CTRL.C_IN_HI is not set
         this.bPPICtrl = null;           // tracks writes to port 0x63 (eg, 0x99); read-only
         this.bNMI = ChipSet.NMI.RESET;  // tracks writes to the NMI Mask Register
-        this.bKbdData = 0;              // records last byte received via notifyKbdData(); for MODEL_4860 only
+        this.bKbdData = 0;              // records last byte received via receiveKbdData(); for machines without an 8042 (eg, PC/PC XT/PCjr)
 
         if (this.model == ChipSet.MODEL_ATT_6300) {
             this.b8041Status = 0;       // similar to b8042Status (but apparently only bits 0 and 1 are used)
@@ -3604,9 +3605,10 @@ class ChipSet extends Component {
         if (this.bPPICtrl & ChipSet.PPI_CTRL.A_IN) {
             if (this.bPPIB & ChipSet.PPI_B.CLEAR_KBD) {
                 b = this.aDIPSwitches[0][1];
-            }
-            else if (this.kbd) {
-                b = this.kbd.readScanCode();
+            } else {
+                b = this.bKbdData;
+                this.printMessageIO(port, null, addrFrom, "PPI_A", b, Messages.KBD);
+                return b;
             }
         }
         this.printMessageIO(port, null, addrFrom, "PPI_A", b);
@@ -3807,8 +3809,8 @@ class ChipSet extends Component {
      */
     in8041Kbd(port, addrFrom)
     {
-        let b = this.kbd? this.kbd.readScanCode() : 0;
-        this.printMessageIO(port, null, addrFrom, "8041_KBD", b);
+        let b = this.bKbdData;
+        this.printMessageIO(port, null, addrFrom, "8041_KBD", b, Messages.KBD);
         this.b8041Status &= ~ChipSet.C8042.STATUS.OUTBUFF_FULL;
         return b;
     }
@@ -3824,7 +3826,7 @@ class ChipSet extends Component {
     out8041Kbd(port, bOut, addrFrom)
     {
         this.printMessageIO(port, bOut, addrFrom, "8041_KBD");
-        // if (this.kbd) this.kbd.sendCmd(bOut);
+        // if (this.kbd) this.kbd.receiveCmd(bOut);
     }
 
     /**
@@ -3876,17 +3878,19 @@ class ChipSet extends Component {
      *
      * Return the contents of the OUTBUFF register and clear the OUTBUFF_FULL status bit.
      *
-     * This function then calls kbd.checkScanCode(), on the theory that the next buffered scan
-     * code, if any, can now be delivered to OUTBUFF.  However, there are applications like
+     * This function then used to call kbd.checkBuffer(), on the theory that the next buffered
+     * scan code, if any, could now be delivered to OUTBUFF.  However, there are applications like
      * BASICA that install a keyboard interrupt handler that reads OUTBUFF, do some scan code
      * preprocessing, and then pass control on to the ROM's interrupt handler.  As a result,
      * OUTBUFF is read multiple times during a single interrupt, so filling it with new data
      * after every read would result in lost scan codes.
      *
-     * To avoid that problem, kbd.checkScanCode() also requires that kbd.setEnabled() be called
-     * before it supplies any more data via notifyKbdData().  That will happen as soon as the
-     * ROM re-enables the controller, and is why C8042.CMD.ENABLE_KBD processing also ends with a
-     * call to kbd.checkScanCode().
+     * The safest thing to do is to wait until kbd.setEnabled() is called, and let that call supply
+     * more data to receiveKbdData().  That will happen as soon as the ROM re-enables the controller,
+     * and is why C8042.CMD.ENABLE_KBD processing ends with a call to kbd.checkBuffer().  As for
+     * software (eg, Xenix 286, and the Windows 95 VMM) that doesn't bother toggling the keyboard 
+     * interface, that's OK, because our Keyboard component also tries to transmit its next byte of
+     * data after a predetermined interval (see the Keyboard transmitData() function). 
      *
      * Note that, the foregoing notwithstanding, I still clear the OUTBUFF_FULL bit here (as I
      * believe I should); fortunately, none of the interrupt handlers rely on OUTBUFF_FULL as a
@@ -3904,7 +3908,14 @@ class ChipSet extends Component {
         let b = this.b8042OutBuff;
         this.printMessageIO(port, null, addrFrom, "8042_OUTBUFF", b, Messages.C8042);
         this.b8042Status &= ~(ChipSet.C8042.STATUS.OUTBUFF_FULL | ChipSet.C8042.STATUS.OUTBUFF_DELAY);
-        if (this.kbd) this.kbd.checkScanCode();
+        /*
+         * This is hack for the 5170 ROM BIOS keyboard diagnostic, which expects the keyboard to report BAT_OK
+         * immediately after the ACK from a RESET command.  The BAT_OK response should already be in the keyboard's
+         * buffer; we just need to give it a little nudge.
+         */
+        if (b == Keyboard.CMDRES.ACK && this.kbd) {
+            this.kbd.checkBuffer(true);
+        }
         return b;
     }
 
@@ -4002,7 +4013,7 @@ class ChipSet extends Component {
              */
             default:
                 this.set8042CmdData(this.b8042CmdData & ~ChipSet.C8042.DATA.CMD.NO_CLOCK);
-                if (this.kbd) this.set8042OutBuff(this.kbd.sendCmd(bOut));
+                if (this.kbd) this.set8042OutBuff(this.kbd.receiveCmd(bOut));
                 break;
             }
         }
@@ -4107,8 +4118,8 @@ class ChipSet extends Component {
          * this status port one more time, perhaps to confirm that the OUTBUFF_FULL bit is clear.  It then
          * expects another keyboard interrupt to arrive when the next scan code is available.  Very minimalistic.
          */
-        if (!(this.b8042Status & ChipSet.C8042.STATUS.OUTBUFF_FULL)) {
-            this.kbd.checkScanCode(true);
+        if (!(this.b8042Status & ChipSet.C8042.STATUS.OUTBUFF_FULL) && this.kbd) {
+            this.kbd.checkBuffer();
         }
         return b;
     }
@@ -4166,11 +4177,11 @@ class ChipSet extends Component {
         case ChipSet.C8042.CMD.ENABLE_KBD:      // 0xAE
             this.set8042CmdData(this.b8042CmdData & ~ChipSet.C8042.DATA.CMD.NO_CLOCK);
             if (!COMPILED) this.printMessage("keyboard re-enabled", Messages.KBD | Messages.PORT);
-            if (this.kbd) this.kbd.checkScanCode();
+            if (this.kbd) this.kbd.checkBuffer();
             break;
 
         case ChipSet.C8042.CMD.SELF_TEST:       // 0xAA
-            if (this.kbd) this.kbd.flushScanCode();
+            if (this.kbd) this.kbd.flushBuffer();
             this.set8042CmdData(this.b8042CmdData | ChipSet.C8042.DATA.CMD.NO_CLOCK);
             if (!COMPILED) this.printMessage("keyboard disabled on reset", Messages.KBD | Messages.PORT);
             this.set8042OutBuff(ChipSet.C8042.DATA.SELF_TEST.OK);
@@ -4261,7 +4272,7 @@ class ChipSet extends Component {
      * a delay.  This is discussed in greater detail in in8042Status().
      *
      * So we default to a "single poll" delay, setting OUTBUFF_DELAY instead of OUTBUFF_FULL, unless the caller
-     * explicitly asks for no delay.  The fNoDelay parameter was added later, so that notifyKbdData() could
+     * explicitly asks for no delay.  The fNoDelay parameter was added later, so that receiveKbdData() could
      * request immediate delivery of keyboard scan codes, because some operating systems (eg, Microport's 1986
      * version of Unix for PC AT machines) poll the status port only once, immediately giving up if no data is
      * available.
@@ -4320,11 +4331,11 @@ class ChipSet extends Component {
     }
 
     /**
-     * notifyKbdData(b)
+     * receiveKbdData(b)
      *
      * In the old days of PCx86, the Keyboard component would simply call setIRR() when it had some data for the
      * keyboard controller.  However, the Keyboard's sole responsibility is to emulate an actual keyboard and call
-     * notifyKbdData() whenever it has some data; it's not allowed to mess with IRQ lines.
+     * receiveKbdData() whenever it has some data; it's not allowed to mess with IRQ lines.
      *
      * If there's an 8042, we check (this.b8042CmdData & ChipSet.C8042.DATA.CMD.NO_CLOCK); if NO_CLOCK is clear,
      * we can raise the IRQ immediately.  Well, not quite immediately....
@@ -4396,54 +4407,60 @@ class ChipSet extends Component {
      *
      * @this {ChipSet}
      * @param {number} b
+     * @return {boolean} (true if data accepted, false if declined)
      */
-    notifyKbdData(b)
+    receiveKbdData(b)
     {
         if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
-            this.printMessage("notifyKbdData(" + Str.toHexByte(b) + ')', true);
+            this.printMessage("receiveKbdData(" + Str.toHexByte(b) + ')', true);
         }
         if (this.model == ChipSet.MODEL_4860) {
             if (!(this.bNMI & ChipSet.NMI.KBD_LATCH)) {
                 this.bNMI |= ChipSet.NMI.KBD_LATCH;
                 this.bKbdData = b;
-                if (this.bNMI & ChipSet.NMI.ENABLE) {
+                if (b && (this.bNMI & ChipSet.NMI.ENABLE)) {
                     X86.helpInterrupt.call(this.cpu, X86.EXCEPTION.NMI);
                 }
+                return true;
             }
+            return false;
         }
-        else if (this.model < ChipSet.MODEL_5170) {
-            /*
-             * TODO: Should we be checking bPPI for PPI_B.CLK_KBD on these older machines, before calling setIRR()?
-             */
-            this.setIRR(ChipSet.IRQ.KBD, 4);
-            this.b8041Status |= ChipSet.C8042.STATUS.OUTBUFF_FULL;
+        if (this.model < ChipSet.MODEL_5170) {
+            if (this.bPPIB & ChipSet.PPI_B.CLK_KBD) {
+                this.bKbdData = b;
+                if (b) {
+                    this.setIRR(ChipSet.IRQ.KBD, 4);
+                    this.b8041Status |= ChipSet.C8042.STATUS.OUTBUFF_FULL;
+                }
+                return true;
+            }
+            return false;
         }
-        else {
+        if (b) {
             if (!(this.b8042CmdData & ChipSet.C8042.DATA.CMD.NO_CLOCK)) {
                 /*
-                 * The next in8042OutBuff() will clear both of these bits and call kbd.checkScanCode(),
-                 * which will call notifyKbdData() again if there's still keyboard data to process.
+                 * The next in8042OutBuff() will clear both of these bits and call kbd.checkBuffer(),
+                 * which will call receiveKbdData() again if there's still keyboard data to process.
                  */
                 if (!(this.b8042Status & (ChipSet.C8042.STATUS.OUTBUFF_FULL | ChipSet.C8042.STATUS.OUTBUFF_DELAY))) {
                     this.set8042OutBuff(b, true);
-                    this.kbd.shiftScanCode();
                     /*
                      * A delay of 4 instructions was originally requested as part of the the Keyboard's resetDevice()
                      * response, but a larger delay (120) is now needed for MODEL_5170 machines, per the discussion above.
                      */
                     this.setIRR(ChipSet.IRQ.KBD, 120);
+                    return true;
                 }
-                else {
-                    if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
-                        this.printMessage("notifyKbdData(" + Str.toHexByte(b) + "): output buffer full", true);
-                    }
-                }
-            } else {
                 if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
-                    this.printMessage("notifyKbdData(" + Str.toHexByte(b) + "): disabled", true);
+                    this.printMessage("receiveKbdData(" + Str.toHexByte(b) + "): output buffer full", true);
                 }
+                return false;
+            }
+            if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
+                this.printMessage("receiveKbdData(" + Str.toHexByte(b) + "): disabled", true);
             }
         }
+        return false;
     }
 
     /**
@@ -4817,6 +4834,8 @@ class ChipSet extends Component {
             bitsMessage |= Messages.TIMER;
         } else if (nIRQ == ChipSet.IRQ.KBD) {   // IRQ 1
             bitsMessage |= Messages.KBD;
+        } else if (nIRQ == ChipSet.IRQ.SLAVE) { // IRQ 2
+            bitsMessage =  Messages.NONE;       // (we're not really interested in IRQ 2 itself, just the slaves)
         } else if (nIRQ == ChipSet.IRQ.COM1 || nIRQ == ChipSet.IRQ.COM2) {
             bitsMessage |= Messages.SERIAL;
         } else if (nIRQ == ChipSet.IRQ.XTC) {   // IRQ 5 (MODEL_5160)

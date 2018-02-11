@@ -937,6 +937,24 @@ class CPU extends Component {
     }
 
     /**
+     * clearTimer(iTimer)
+     *
+     * Using the timer index from a previous addTimer() call, this clears that timer.
+     *
+     * @this {CPU}
+     * @param {number} iTimer
+     * @return {boolean}
+     */
+    clearTimer(iTimer)
+    {
+        if (iTimer >= 0 && iTimer < this.aTimers.length) {
+            this.aTimers[iTimer][1] = -1;
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * findTimer(id)
      *
      * @this {CPU}
@@ -950,6 +968,21 @@ class CPU extends Component {
             if (timer[0] == id) return timer;
         }
         return null;
+    }
+
+    /**
+     * isTimerSet(iTimer)
+     *
+     * @this {CPU}
+     * @param {number} iTimer
+     * @return {boolean}
+     */
+    isTimerSet(iTimer)
+    {
+        if (iTimer >= 0 && iTimer < this.aTimers.length) {
+            return this.aTimers[iTimer][1] >= 0;
+        }
+        return false;
     }
 
     /**

@@ -292,10 +292,10 @@ class SerialPort extends Component {
         this.dbg = dbg;
 
         var serial = this;
-        this.timerReceiveNext = this.cpu.addTimer(this.id + ".receive", function() {
+        this.timerReceiveNext = this.cpu.addTimer(this.id + ".receive", function receiveDataTimer() {
             serial.receiveData();
         });
-        this.timerTransmitNext = this.cpu.addTimer(this.id + ".transmit", function() {
+        this.timerTransmitNext = this.cpu.addTimer(this.id + ".transmit", function transmitDataTimer() {
             serial.transmitData();
         });
 

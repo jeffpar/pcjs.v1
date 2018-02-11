@@ -144,6 +144,7 @@ class Keyboard extends Component {
          */
         this.aKeysActive = [];
 
+        this.msTransmit      = 10;          // minimum number of milliseconds between data transmissions
         this.msAutoRepeat    = 500;
         this.msNextRepeat    = 100;
         this.msAutoRelease   = 50;
@@ -387,8 +388,12 @@ class Keyboard extends Component {
         this.dbg = dbg;
 
         var kbd = this;
-        this.timerInject = this.cpu.addTimer(this.id + ".inject", function() {
-            kbd.injectKeysFromBuffer();
+        this.timerInject = this.cpu.addTimer(this.id + ".inject", function injectKeysTimer() {
+            kbd.injectKeys();
+        });
+        
+        this.timerTransmit = this.cpu.addTimer(this.id + ".transmit", function transmitDataTimer() {
+            kbd.transmitData();
         });
 
         this.chipset = cmp.getMachineComponent("ChipSet");
@@ -517,6 +522,21 @@ class Keyboard extends Component {
     }
 
     /**
+     * resetDevice()
+     *
+     * @this {Keyboard}
+     */
+    resetDevice()
+    {
+        /*
+         * TODO: There's more to reset, like LED indicators, default type rate, and emptying the scan code buffer.
+         */
+        this.printMessage("keyboard reset", Messages.KBD | Messages.PORT);
+        this.abBuffer = [];
+        this.setResponse(Keyboard.CMDRES.BAT_OK);
+    }
+
+    /**
      * setModel(sModel)
      *
      * This breaks a model string (eg, "US83") into two parts: modelCountry (eg, "US") and modelKeys (eg, 83).
@@ -542,25 +562,85 @@ class Keyboard extends Component {
     }
 
     /**
-     * resetDevice(fNotify)
+     * checkBuffer(fReady)
+     *
+     * This is the ChipSet's interface to let us know it's ready.
      *
      * @this {Keyboard}
-     * @param {boolean} [fNotify]
+     * @param {boolean} [fReady]
      */
-    resetDevice(fNotify)
+    checkBuffer(fReady)
     {
-        /*
-         * TODO: There's more to reset, like LED indicators, default type rate, and emptying the scan code buffer.
-         */
-        this.printMessage("keyboard reset", Messages.KBD | Messages.PORT);
+        this.transmitData(fReady);
+    }
+
+    /**
+     * flushBuffer()
+     *
+     * This is the ChipSet's interface to flush any buffered keyboard data.
+     *
+     * @this {Keyboard}
+     */
+    flushBuffer()
+    {
         this.abBuffer = [];
-        this.setResponse(Keyboard.CMDRES.BAT_OK);
+        if (!COMPILED && this.messageEnabled()) this.printMessage("keyboard data flushed");
+    }
+
+    /**
+     * receiveCmd(bCmd)
+     *
+     * This is the ChipSet's interface for controlling "Model M" keyboards (ie, those used with MODEL_5170
+     * machines).  Commands are delivered through the ChipSet's 8042 Keyboard Controller.
+     *
+     * @this {Keyboard}
+     * @param {number} bCmd should be one of the Keyboard.CMD.* command codes (Model M keyboards only)
+     * @return {number} response should be one of the Keyboard.CMDRES.* response codes, or -1 if unrecognized
+     */
+    receiveCmd(bCmd)
+    {
+        var b = -1;
+
+        if (!COMPILED && this.messageEnabled()) this.printMessage("receiveCmd(" + Str.toHexByte(bCmd) + ")");
+
+        switch(this.bCmdPending || bCmd) {
+
+        case Keyboard.CMD.RESET:            // 0xFF
+            b = Keyboard.CMDRES.ACK;
+            this.resetDevice();
+            break;
+
+        case Keyboard.CMD.SET_RATE:         // 0xF3
+            if (this.bCmdPending) {
+                this.setRate(bCmd);
+                bCmd = 0;
+            }
+            this.setResponse(Keyboard.CMDRES.ACK);
+            this.bCmdPending = bCmd;
+            break;
+
+        case Keyboard.CMD.SET_LEDS:         // 0xED
+            if (this.bCmdPending) {
+                this.setLEDs(bCmd);
+                bCmd = 0;
+            }
+            this.setResponse(Keyboard.CMDRES.ACK);
+            this.bCmdPending = bCmd;
+            break;
+
+        default:
+            if (!COMPILED) this.printMessage("receiveCmd(): unrecognized command");
+            break;
+        }
+
+        return b;
     }
 
     /**
      * setEnabled(fData, fClock)
      *
-     * This is the ChipSet's primary interface for toggling keyboard "data" and "clock" lines.
+     * This is the ChipSet's interface for toggling keyboard "data" and "clock" lines.
+     * 
      * For MODEL_5150 and MODEL_5160 machines, this function is called from the ChipSet's PPI_B
      * output handler.  For MODEL_5170 machines, this function is called when selected CMD
      * "data bytes" have been written.
@@ -582,10 +662,6 @@ class Keyboard extends Component {
              * data line is high as well.
              */
             this.fClock = this.fResetOnEnable = fClock;
-            /*
-             * Allow the next buffered scan code, if any, to advance.
-             */
-            if (fClock) this.fAdvance = true;
         }
         if (this.fData !== fData) {
             if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
@@ -593,24 +669,11 @@ class Keyboard extends Component {
             }
             this.fData = fData;
             if (fData && !this.fResetOnEnable) {
-                if (this.modelKeys < 84) {
-                    this.shiftScanCode(true);   // TODO: Review this code; it was added during early MODEL_5150 testing
-                } else {
-                    /*
-                     * I added this for Windows 95's protected-mode keyboard driver, which pulses the PPI_B port after
-                     * retrieving a scan code.  Seems rather odd (like legacy code); one would have thought that it
-                     * would know it's dealing with a 8042-based keyboard interface.
-                     * 
-                     * Note that that code path is DIFFERENT from Windows 95's keyboard handling for DOS sessions, which
-                     * does NOT pulse the PPI_B port; it simply polls the 8042 status port, perhaps to confirm that the
-                     * OUTBUFF_FULL bit is clear, and then waits for the next interrupt.  See in8042Status() for details.
-                     */
-                    this.checkScanCode(true);
-                }
+                this.transmitData(true);
             }
         }
         if (this.fData && this.fResetOnEnable) {
-            this.resetDevice(true);
+            this.resetDevice();
             this.fResetOnEnable = false;
             fReset = true;
         }
@@ -653,145 +716,37 @@ class Keyboard extends Component {
     {
         if (this.chipset) {
             this.abBuffer.unshift(b);
-            this.fAdvance = true;
-            this.chipset.notifyKbdData(b);
+            if (!COMPILED && this.messageEnabled()) this.printMessage("keyboard response " + Str.toHexByte(b) + " buffered");
+            this.transmitData();
         }
     }
 
     /**
-     * sendCmd(bCmd)
+     * transmitData(fReady)
      *
-     * This is the ChipSet's primary interface for controlling "Model M" keyboards (ie, those used
-     * with MODEL_5170 machines).  Commands are delivered through the ChipSet's 8042 Keyboard Controller.
+     * This manages communication with the ChipSet's receiveKbdData() interface.
      *
      * @this {Keyboard}
-     * @param {number} bCmd should be one of the Keyboard.CMD.* command codes (Model M keyboards only)
-     * @return {number} response should be one of the Keyboard.CMDRES.* response codes, or -1 if unrecognized
+     * @param {boolean} [fReady]
      */
-    sendCmd(bCmd)
+    transmitData(fReady)
     {
-        var b = -1;
-
-        if (!COMPILED && this.messageEnabled()) this.printMessage("sendCmd(" + Str.toHexByte(bCmd) + ")");
-
-        switch(this.bCmdPending || bCmd) {
-
-        case Keyboard.CMD.RESET:            // 0xFF
-            /*
-             * TODO: Determine whether we really need to also return CMDRES.ACK. resetDevice() operates
-             * like setResponse(CMDRES.BAT_OK).  Do we need both the ACK and the BAT_OK?
-             */
-            b = Keyboard.CMDRES.ACK;
-            this.resetDevice();
-            break;
-
-        case Keyboard.CMD.SET_RATE:         // 0xF3
-            if (this.bCmdPending) {
-                this.setRate(bCmd);
-                bCmd = 0;
+        if (this.chipset) {
+            if (fReady || !this.cpu.isTimerSet(this.timerTransmit)) {
+                /*
+                 * The original IBM PC BIOS performs a "stuck key" test by resetting the keyboard
+                 * (by toggling the CLOCK line), then checking for a BAT_OK response (0xAA), and then
+                 * clocking in the next byte (by toggling the DATA line); if that next byte isn't zero,
+                 * then the BIOS reports a "301" error, along with "AA" if we failed to properly flush
+                 * the BAT_OK response. 
+                 */
+                var b = this.abBuffer.length? this.abBuffer[0] : 0; 
+                if (this.chipset.receiveKbdData(b)) {
+                    if (!COMPILED && this.messageEnabled()) this.printMessage("keyboard data " + Str.toHexByte(b) + " delivered");
+                    this.abBuffer.shift();
+                }
+                if (b) this.cpu.setTimer(this.timerTransmit, this.msTransmit);
             }
-            this.setResponse(Keyboard.CMDRES.ACK);
-            this.bCmdPending = bCmd;
-            break;
-
-        case Keyboard.CMD.SET_LEDS:         // 0xED
-            if (this.bCmdPending) {
-                this.setLEDs(bCmd);
-                bCmd = 0;
-            }
-            this.setResponse(Keyboard.CMDRES.ACK);
-            this.bCmdPending = bCmd;
-            break;
-
-        default:
-            if (!COMPILED) this.printMessage("sendCmd(): unrecognized command");
-            break;
-        }
-
-        return b;
-    }
-
-    /**
-     * checkScanCode(fAdvance)
-     *
-     * This is the ChipSet's interface for checking data availability.
-     *
-     * Note that even if we have data, we don't provide it unless fAdvance is set as well.
-     * This ensures that we wait until the ROM to disable and re-enable the controller before
-     * making more data available.
-     *
-     * @this {Keyboard}
-     * @param {boolean} [fAdvance] is true to notify ChipSet if more data is available
-     * @return {number} next scan code, or 0 if none
-     */
-    checkScanCode(fAdvance)
-    {
-        var b = 0;
-        if (fAdvance) this.fAdvance = true;
-        if (this.abBuffer.length && this.fAdvance) {
-            b = this.abBuffer[0];
-            if (this.chipset) this.chipset.notifyKbdData(b);
-        }
-        if (!COMPILED && this.messageEnabled()) {
-            this.printMessage(b? ("scan code " + Str.toHexByte(b) + " available") : "no scan codes available");
-        }
-        return b;
-    }
-
-    /**
-     * readScanCode()
-     *
-     * This is the ChipSet's interface for reading scan codes.
-     *
-     * @this {Keyboard}
-     * @return {number} next scan code, or 0 if none
-     */
-    readScanCode()
-    {
-        var b = 0;
-        if (this.abBuffer.length) {
-            b = this.abBuffer[0];
-        }
-        if (!COMPILED && this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(b) + " delivered");
-        return b;
-    }
-
-    /**
-     * flushScanCode()
-     *
-     * This is the ChipSet's interface to flush scan codes.
-     *
-     * @this {Keyboard}
-     */
-    flushScanCode()
-    {
-        this.abBuffer = [];
-        if (!COMPILED && this.messageEnabled()) this.printMessage("scan codes flushed");
-    }
-
-    /**
-     * shiftScanCode(fNotify)
-     *
-     * This is the ChipSet's interface to advance scan codes.
-     *
-     * @this {Keyboard}
-     * @param {boolean} [fNotify] is true to notify ChipSet if more data is available
-     */
-    shiftScanCode(fNotify)
-    {
-        if (this.abBuffer.length > 0) {
-            /*
-             * The keyboard interrupt service routine toggles the enable bit after reading a scan code, so
-             * presumably this is the proper point at which to shift the last scan code out, and then assert
-             * another interrupt if more scan codes exist.
-             */
-            var bNew;
-            var bOld = this.abBuffer.shift();
-            this.fAdvance = fNotify;
-            if (fNotify && this.abBuffer.length && this.chipset) {
-                this.chipset.notifyKbdData(bNew = this.abBuffer[0]);
-            }
-            if (!COMPILED && this.messageEnabled()) this.printMessage("shifted out scan code " + Str.toHexByte(bOld) + (bNew? (", shifted in " + Str.toHexByte(bNew)) : "") + ", " + this.abBuffer.length + " scan codes remaining");
         }
     }
 
@@ -923,10 +878,6 @@ class Keyboard extends Component {
          * New scan codes are "pushed" onto abBuffer and then "shifted" off.
          */
         this.abBuffer = [];
-        this.fAdvance = true;
-
-        this.prevCharDown = 0;
-        this.prevKeyDown = 0;
 
         /*
          * Make sure the auto-injection buffer is empty (an injection could have been in progress on any reset after the first).
@@ -1000,17 +951,15 @@ class Keyboard extends Component {
                         }
                     }
                 }
-                if (!COMPILED && this.messageEnabled()) this.printMessage("scan code " + Str.toHexByte(bScan) + " buffered");
                 this.abBuffer.push(bScan);
-                if (this.abBuffer.length == 1) {
-                    if (this.chipset) this.chipset.notifyKbdData(bScan);
-                }
+                if (!COMPILED && this.messageEnabled()) this.printMessage("keyboard scan code " + Str.toHexByte(bScan) + " buffered");
+                this.transmitData();
                 return;
             }
             if (this.abBuffer.length == Keyboard.LIMIT.MAX_SCANCODES) {
                 this.abBuffer.push(Keyboard.CMDRES.BUFF_FULL);
             }
-            this.printMessage("scan code buffer overflow");
+            this.printMessage("keyboard buffer overflow");
         }
     }
 
@@ -1034,29 +983,22 @@ class Keyboard extends Component {
      * injectKeys(sKeys, msDelay)
      *
      * @this {Keyboard}
-     * @param {string|undefined} sKeys
+     * @param {string} [sKeys]
      * @param {number} [msDelay] is an optional injection delay (default is msInjectDefault)
      * @return {boolean}
      */
     injectKeys(sKeys, msDelay)
     {
-        if (sKeys && !this.sInjectBuffer) {
-            this.sInjectBuffer = this.parseKeys(sKeys);
-            if (!COMPILED) this.log("injectKeys(\"" + this.sInjectBuffer.split("\n").join("\\n") + "\")");
-            this.msInjectDelay = msDelay || this.msInjectDefault;
-            this.injectKeysFromBuffer();
-            return true;
+        if (sKeys) {
+            if (!this.sInjectBuffer) {
+                this.sInjectBuffer = this.parseKeys(sKeys);
+                if (!COMPILED) this.log("injectKeys(\"" + this.sInjectBuffer.split("\n").join("\\n") + "\")");
+                this.msInjectDelay = msDelay || this.msInjectDefault;
+                this.injectKeys();
+                return true;
+            }
+            return false;
         }
-        return false;
-    }
-
-    /**
-     * injectKeysFromBuffer()
-     *
-     * @this {Keyboard}
-     */
-    injectKeysFromBuffer()
-    {
         var charCode = 0;
         while (this.sInjectBuffer.length > 0 && !charCode) {
             var ch = this.sInjectBuffer.charAt(0);
@@ -1114,6 +1056,7 @@ class Keyboard extends Component {
         } else {
             this.cpu.setTimer(this.timerInject, this.msInjectDelay);
         }
+        return true;
     }
 
     /**
@@ -1631,11 +1574,11 @@ class Keyboard extends Component {
                 }
                 
                 /*
-                 * HACK for Windows: the ALT key is often used with key combinations not meant for our machine
-                 * (eg, Alt-Tab to switch to a different window, or simply tapping the ALT key by itself to switch
-                 * focus to the browser's menubar).  And sadly, browsers are quite happy to give us the DOWN event
-                 * for the ALT key, but not an UP event, leaving our machine with the impression that the ALT key
-                 * is still down, which the user user has no easy way to detect OR correct.
+                 * HACK for Windows (as the host operating system): the ALT key is often used with key combinations
+                 * not meant for our machine (eg, Alt-Tab to switch to a different window, or simply tapping the ALT
+                 * key by itself to switch focus to the browser's menubar).  And sadly, browsers are quite happy to
+                 * give us the DOWN event for the ALT key, but not an UP event, leaving our machine with the impression
+                 * that the ALT key is still down, which the user user has no easy way to detect OR correct.
                  * 
                  * So we still record the ALT state in bitsState as best we can, and clear it whenever we lose focus
                  * in onFocusChange(), but we no longer pass through DOWN events to our machine.  Instead, we now
@@ -1646,8 +1589,8 @@ class Keyboard extends Component {
                  * we'll still simulate ALT immediately, for those users who press CTRL and then ALT to pop up Sidekick
                  * (as opposed to pressing ALT and then CTRL, which should also work, regardless).
                  * 
-                 * NOTE: Even though this is a hack specifically for Windows, I'm doing it across the board, for all
-                 * platforms and browsers, for consistency.
+                 * NOTE: Even though this is a hack intended largely for browsers running on Windows, I'm implementing
+                 * it for all platforms, for consistency.
                  */
                 if (keyCode == Keys.KEYCODE.ALT && !(this.bitsState & Keyboard.STATE.CTRL)) {
                     fIgnore = fDown;    // if an ALT key went down, then set fIgnore as well
@@ -2623,7 +2566,7 @@ Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_INS]    = Keyboard.SCANCODE.NUM_INS 
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_ENTER]  = Keyboard.SCANCODE.ENTER       | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
 
 /**
- * Commands that can be sent to the Keyboard via the 8042; see sendCmd()
+ * Commands that can be sent to the Keyboard via the 8042; see receiveCmd()
  *
  * Aside from the commands listed below, 0xEF-0xF2 and 0xF7-0xFD are expressly documented as NOPs; ie:
  *
@@ -2739,7 +2682,7 @@ Keyboard.CMD = {
 };
 
 /**
- * Command responses returned to the Keyboard via the 8042; see sendCmd()
+ * Command responses returned to the Keyboard via the 8042; see receiveCmd()
  *
  * @enum {number}
  */
