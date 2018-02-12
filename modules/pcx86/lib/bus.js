@@ -365,22 +365,26 @@ class Bus extends Component {
     }
 
     /**
-     * cleanMemory(addr, size)
+     * cleanMemory(addr, size, fNoScrub)
      *
      * @this {Bus}
      * @param {number} addr
      * @param {number} size
-     * @return {boolean} true if all blocks were clean, false if dirty; all blocks are cleaned in the process
+     * @param {boolean} [fNoScrub] (by default, all blocks are "scrubbed" in the process)
+     * @return {boolean} (true if all blocks were clean, false if dirty)
      */
-    cleanMemory(addr, size)
+    cleanMemory(addr, size, fNoScrub)
     {
         var fClean = true;
         var iBlock = addr >>> this.nBlockShift;
         var sizeBlock = this.nBlockSize - (addr & this.nBlockLimit);
         while (size > 0 && iBlock < this.aMemBlocks.length) {
             if (this.aMemBlocks[iBlock].fDirty) {
-                this.aMemBlocks[iBlock].fDirty = fClean = false;
-                this.aMemBlocks[iBlock].fDirtyEver = true;
+                if (!fNoScrub) {
+                    this.aMemBlocks[iBlock].fDirty = false;
+                    this.aMemBlocks[iBlock].fDirtyEver = true;
+                }
+                fClean = false;
             }
             size -= sizeBlock;
             sizeBlock = this.nBlockSize;
