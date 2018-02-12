@@ -349,7 +349,7 @@ class Panel extends Component {
     {
         if (this.timer < 0 && this.canvas && this.cpu) {
             var panel = this;
-            this.timer = this.cpu.addTimer(this.id, function() {
+            this.timer = this.cpu.addTimer(this.id, function updateAnimationTimer() {
                 panel.updateAnimation();
             }, 1000 / Panel.UPDATES_PER_SECOND);
         }

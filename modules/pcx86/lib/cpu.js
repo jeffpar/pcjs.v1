@@ -168,7 +168,7 @@ class CPU extends Component {
             this.flags.autoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
         }
 
-        this.timerYield = cpu.addTimer(this.id, function() {
+        this.timerYield = cpu.addTimer(this.id, function yieldTimer() {
             cpu.flags.yield = true;
         }, this.counts.msPerYield);
 
