@@ -7986,7 +7986,7 @@ class Panel extends Component {
     {
         if (this.timer < 0 && this.canvas && this.cpu) {
             var panel = this;
-            this.timer = this.cpu.addTimer(this.id, function() {
+            this.timer = this.cpu.addTimer(this.id, function updateAnimationTimer() {
                 panel.updateAnimation();
             }, 1000 / Panel.UPDATES_PER_SECOND);
         }
@@ -12254,7 +12254,7 @@ class CPU extends Component {
             this.flags.autoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
         }
 
-        this.timerYield = cpu.addTimer(this.id, function() {
+        this.timerYield = cpu.addTimer(this.id, function yieldTimer() {
             cpu.flags.yield = true;
         }, this.counts.msPerYield);
 
@@ -50437,7 +50437,7 @@ class Video extends Component {
             });
         }
 
-        this.cpu.addTimer(this.id, function() {
+        this.cpu.addTimer(this.id, function updateScreenTimer() {
             video.updateScreen();
         }, 1000 / Video.UPDATES_PER_SECOND);
     }
@@ -51950,16 +51950,17 @@ class Video extends Component {
          * The "hardware cursor" is never visible in graphics modes.
          */
         if (!this.nFont) return false;
-
+        
+        var card = this.cardActive;
         for (var i = Card.CRTC.CURSTART; i <= Card.CRTC.CURLOW; i++) {
-            if (this.cardActive.regCRTData[i] == null)
+            if (card.regCRTData[i] == null)
                 return false;
         }
 
-        var bCursorFlags = this.cardActive.regCRTData[Card.CRTC.CURSTART];
+        var bCursorFlags = card.regCRTData[Card.CRTC.CURSTART];
         var bCursorStart = bCursorFlags & Card.CRTC.CURSTART_SLMASK;
-        var bCursorEnd = this.cardActive.regCRTData[Card.CRTC.CUREND] & Card.CRTCMASKS[Card.CRTC.CUREND];
-        var bCursorMax = this.cardActive.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
+        var bCursorEnd = card.regCRTData[Card.CRTC.CUREND] & Card.CRTCMASKS[Card.CRTC.CUREND];
+        var bCursorMax = card.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
 
         /*
          * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to
@@ -52013,17 +52014,25 @@ class Video extends Component {
         }
 
         /*
-         * The most compatible way of disabling the cursor is to simply move the cursor to an off-screen position.
+         * The most compatible way of disabling the cursor is to simply move it to an off-screen position.
          */
-        var iCellCursor = this.cardActive.regCRTData[Card.CRTC.CURLOW];
-        iCellCursor |= (this.cardActive.regCRTData[Card.CRTC.CURHIGH] & this.cardActive.addrMaskHigh) << 8;
+        var iCellCursor = card.regCRTData[Card.CRTC.CURLOW];
+        iCellCursor |= (card.regCRTData[Card.CRTC.CURHIGH] & card.addrMaskHigh) << 8;
+
+        var offStartAddr = card.regCRTData[Card.CRTC.STARTLOW];
+        offStartAddr |= (card.regCRTData[Card.CRTC.STARTHIGH] & card.addrMaskHigh) << 8;
+        
+        iCellCursor -= offStartAddr;
+        
         if (this.iCellCursor != iCellCursor) {
-            let rowFrom = (this.iCellCursor / this.nCols)|0;
-            let colFrom = (this.iCellCursor % this.nCols);
-            let rowTo = (iCellCursor / this.nCols)|0;
-            let colTo = (iCellCursor % this.nCols);
-            this.printf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo);
-            this.removeCursor();
+            //
+            // let rowFrom = (this.iCellCursor / this.nCols)|0;
+            // let colFrom = (this.iCellCursor % this.nCols);
+            // let rowTo = (iCellCursor / this.nCols)|0;
+            // let colTo = (iCellCursor % this.nCols);
+            // this.printf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo);
+            // this.removeCursor();
+            //
             this.iCellCursor = iCellCursor;
             /*
              * We invalidate cBlinkVisible on a cursor position change to ensure the cursor will be redrawn on the
@@ -52075,7 +52084,7 @@ class Video extends Component {
     removeCursor()
     {
         if (this.iCellCursor >= 0) {
-            if (this.aCellCache !== undefined) {
+            if (this.aCellCache !== undefined && this.iCellCursor < this.aCellCache.length) {
                 var drawCursor = (Video.ATTRS.DRAW_CURSOR << 8);
                 var data = this.aCellCache[this.iCellCursor];
                 if (data & drawCursor) {
@@ -53035,8 +53044,7 @@ class Video extends Component {
          * Any screen (aka "page") offset must be doubled for text modes, due to the attribute bytes.
          * TODO: Come up with a more robust method of deciding when any screen offset should be doubled.
          */
-        var offScreen = card.offStartAddr << (this.nFont? 1 : 0);
-        addrScreen += offScreen;
+        addrScreen += card.offStartAddr << (this.nFont? 1 : 0);
         var cbScreen = this.cbScreen;
 
         if (this.nCard >= Video.CARD.EGA && card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
@@ -53086,11 +53094,14 @@ class Video extends Component {
          * of the screen until both subsets have been updated, otherwise the second update may erroneously think
          * that nothing changed if it happens to share any blocks with the first.
          */
-        var iCellCursor = this.iCellCursor - (offScreen >> 1);
-        var cCells = this.updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, iCellCursor, nCells, fForce, fBlinkUpdate);
+        var cBlinkOrig = this.cBlinkVisible;
+        var cCells = this.updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, nCells, fForce, fBlinkUpdate);
         if (cbScreenWrap) {
             iCell += cCells;
-            cCells += this.updateScreenCells(addrBuffer, addrScreenWrap, cbScreenWrap, iCell, iCellCursor, nCells, fForce, fBlinkUpdate);
+            var cBlinkNew = this.cBlinkVisible;
+            if (cBlinkOrig < 0) this.cBlinkVisible = -1;
+            cCells += this.updateScreenCells(addrBuffer, addrScreenWrap, cbScreenWrap, iCell, nCells, fForce, fBlinkUpdate);
+            this.cBlinkVisible += cBlinkNew;
             this.bus.cleanMemory(addrScreenWrap, cbScreenWrap);
         }
         this.bus.cleanMemory(addrScreen, cbScreen);
@@ -53098,20 +53109,19 @@ class Video extends Component {
     }
 
     /**
-     * updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, iCellCursor, nCells, fForce, fBlinkUpdate)
+     * updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, nCells, fForce, fBlinkUpdate)
      *
      * @this {Video}
      * @param {number} addrBuffer
      * @param {number} addrScreen
      * @param {number} cbScreen
      * @param {number} iCell
-     * @param {number} iCellCursor
      * @param {number} nCells
      * @param {boolean} fForce
      * @param {boolean} fBlinkUpdate
      * @return {number} (number of cells processed)
      */
-    updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, iCellCursor, nCells, fForce, fBlinkUpdate)
+    updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, nCells, fForce, fBlinkUpdate)
     {
         var cCells = cbScreen >> 1;
         if (cCells > nCells) cCells = nCells;
@@ -53134,7 +53144,7 @@ class Video extends Component {
                 /*
                  * iCellCursor may be negative if the cursor is hidden or if it's not on the visible screen.
                  */
-                iCellCursor -= iCell;
+                var iCellCursor = this.iCellCursor - iCell;
                 if (iCellCursor < 0) {
                     return cCells;
                 }
@@ -53206,12 +53216,6 @@ class Video extends Component {
             fBlinkEnable = (this.cardActive.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.BLINK_ENABLE);
         }
 
-        /*
-         * Since iCell is always relative to addrScreen, we must make iCellCursor similarly relative,
-         * otherwise the cursor test below fails when the active video page is something other than page 0.
-         */
-        var iCellCursor = this.iCellCursor - this.cardActive.offStartAddr;
-
         if (fBlinkEnable) {
             dataBlink = (Video.ATTRS.BGND_BLINK << 8);
             dataMask &= ~dataBlink;
@@ -53226,7 +53230,7 @@ class Video extends Component {
                 this.cBlinkVisible++;
                 data &= dataMask;
             }
-            if (iCell == iCellCursor) {
+            if (iCell == this.iCellCursor) {
                 data |= ((this.cBlinks & 0x1)? (Video.ATTRS.DRAW_CURSOR << 8) : 0);
             }
 
@@ -76348,7 +76352,7 @@ class Computer extends Component {
          * This timer replaces the CPU's old dedicated STATUS_UPDATES_PER_SECOND logic; periodic updateStatus()
          * calls are now our own responsibility.
          */
-        this.cpu.addTimer(this.id, function() {
+        this.cpu.addTimer(this.id, function updateStatusTimer() {
             cmp.updateStatus(false);
         }, 1000 / Computer.UPDATES_PER_SECOND);
 

@@ -256,7 +256,7 @@ class Computer extends Component {
          * This timer replaces the CPU's old dedicated STATUS_UPDATES_PER_SECOND logic; periodic updateStatus()
          * calls are now our own responsibility.
          */
-        this.cpu.addTimer(this.id, function() {
+        this.cpu.addTimer(this.id, function updateStatusTimer() {
             cmp.updateStatus(false);
         }, 1000 / Computer.UPDATES_PER_SECOND);
 
