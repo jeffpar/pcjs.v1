@@ -3,14 +3,15 @@
 <machine id="ibm5150" type="pcx86" border="1" pos="center" background="default">
 	<name pos="center">IBM PC (Model 5150), MDA, 256K</name>
 	<computer id="cpm-mda-256k" name="IBM PC"/>
-	<ram id="ramLow" addr="0x00000"/>
+	<ram id="ramLow" addr="0x00000" test="false" comment="ROM BIOS memory test disabled"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5150/basic/BASIC100.json"/>
 	<rom id="romBIOS"  addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5150/1981-04-24/PCBIOS-REV1.json"/>
 	<video ref="/devices/pcx86/video/ibm/mda/ibm-mda.xml"/>
-	<fdc id="fdcNEC" autoMount='{A: {name: "CP/M-86 (Disk 1)", path: "/disks/pcx86/cpm/1.1b/CPM86-DISK1.json"}, B: {name: "CP/M-86 (Disk 2)", path: "/disks/pcx86/cpm/1.1b/CPM86-DISK2.json"}}' pos="right">
+	<fdc id="fdcNEC" autoMount='{A: {name: "CP/M-86 1.00", path: "/disks/pcx86/cpm/1.00/CPM86-100.json"}, B: {name: "CP/M-86 (PCjs Disk 2)", path: "/disks/pcx86/cpm/1.1b/CPM86-DISK2-PCJS.json"}}' pos="right">
 		<control type="list" binding="listDrives"/>
 		<control type="list" binding="listDisks">
-			<manifest ref="/disks/pcx86/cpm/1.1b/manifest.xml" disk="*"/>
+			<manifest ref="/disks/pcx86/cpm/1.00/manifest.xml"/>
+			<manifest ref="/disks/pcx86/cpm/1.1b/manifest.xml"/>
 		</control>
 		<control type="button" binding="loadDisk">Load</control>
 		<control type="description" binding="descDisk" padLeft="8px"/>
