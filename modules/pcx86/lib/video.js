@@ -108,6 +108,10 @@ if (NODE) {
  * VGA Support
  * -----------
  *
+ * VGA support further piggy-backs on the existing EGA support, by adding the extra registers, I/O port
+ * handlers, etc, that the VGA requires; any differences in registers common to both EGA and VGA are handled on
+ * a case-by-case basis, usually according to the Video.CARD value stored in nCard.
+ * 
  * More will be said here about PCjs VGA support later.  But first, a word from IBM: "Video Graphics Array [VGA]
  * Programming Considerations":
  *
@@ -3953,7 +3957,7 @@ class Video extends Component {
     /**
      * checkBlink()
      *
-     * Called at the end of every updateScreen(), which may have updated cBlinkVisible to a non-zero value.
+     * Called at the end of every updateScreenText(), which may have updated cBlinkVisible to a non-zero value.
      *
      * Also called at the end of every checkCursor(); ie, whenever the CRT register(s) affecting the position or shape
      * of the hardware cursor have been modified, and any of iCellCursor, yCursor or cyCursor have been modified as a result.
@@ -3984,18 +3988,19 @@ class Video extends Component {
             if (this.cBlinks < 0) {
                 this.cBlinks = 0;
                 /*
-                 * At this point, we can either fire up our own timer (doBlink), or rely on updateScreen()
-                 * being called by the CPU at regular bursts (eg, Video.UPDATES_PER_SECOND = 60) and advance
-                 * cBlinks at the start of updateScreen() accordingly.
+                 * At this point, we can either fire up our own timer (doBlink), or rely on updateScreen() being
+                 * called by the CPU at regular bursts (eg, Video.UPDATES_PER_SECOND = 60) and advance cBlinks at
+                 * the start of updateScreen() accordingly.
                  *
                  * doBlink() wants to increment cBlinks every 266ms.  On the other hand, if updateScreen() is being
                  * called 60 times per second, that's about once every 16ms, so if every 16th updateScreen() increments
                  * cBlinks, cBlinks should advance at the same rate.
                  *
-                 * The only downside to relying on the CPU driving our blink count is that whenever the CPU is halted
-                 * (eg, by the PCjs debugger) all blinking stops -- all characters with the blink attribute AND the cursor.
+                 * One side-effect of relying on the CPU driving our blink count is that whenever the CPU is halted
+                 * (eg, by our Debugger) all blinking stops -- all characters with the blink attribute AND the cursor.
                  *
-                 * But we can simply say that when we halt, we mean "halt everything" (ie, call it a feature).
+                 * But that's more consistent with how we halt everything else (eg, the PITs, RTC, etc); our Debugger
+                 * halts the entire machine, not just the CPU.
                  *
                  *      this.doBlink(true);
                  */
@@ -4747,8 +4752,8 @@ class Video extends Component {
     /**
      * setMode(nMode, fForce)
      *
-     * Set fForce to true to update the mode regardless of previous mode, or false to perform
-     * a normal update that bypasses updateScreen() but still calls initCache().
+     * Set fForce to true to update the mode regardless of previous mode, or false to perform a normal update
+     * that bypasses updateScreen() but still calls initCache().
      *
      * @this {Video}
      * @param {number|null} nMode
@@ -5007,10 +5012,6 @@ class Video extends Component {
      * are generally internal updates triggered by an I/O operation or other state change, while non-forced updates
      * are the periodic updates coming from the CPU.
      *
-     * For every cell in the video buffer, compare it to the cell stored in the cell cache, render if it differs,
-     * and then update the cell cache to match.  Since initCache() sets every cell in the cell cache to an
-     * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
-     *
      * @this {Video}
      * @param {boolean} [fForce] is used by setMode() to reset the cell cache and force a redraw
      */
@@ -5162,15 +5163,23 @@ class Video extends Component {
                 cbScreenWrap -= cbScreen;
             }
         }
+        /*
+         * updateScreenCells() no longer "scrubs" the screen buffer itself; we call cleanMemory() afterward
+         * to take care of that.  This has two benefits: 1) if this was a "forced" updated (or an update to make
+         * the cell cache valid), cleaning the screen buffer ourselves reflects the fact that both it and our
+         * display are now "in sync"; 2) if screen wrap-around is in effect, we don't want to scrub either subset
+         * of the screen until both subsets have been updated, otherwise the second update may erroneously think
+         * that nothing changed if it happens to share any blocks with the first.
+         */
         var iCellCursor = this.iCellCursor - (offScreen >> 1);
         var cCells = this.updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, iCellCursor, nCells, fForce, fBlinkUpdate);
         if (cbScreenWrap) {
             iCell += cCells;
             cCells += this.updateScreenCells(addrBuffer, addrScreenWrap, cbScreenWrap, iCell, iCellCursor, nCells, fForce, fBlinkUpdate);
+            this.bus.cleanMemory(addrScreenWrap, cbScreenWrap);
         }
-        if (cCells) {
-            this.fCellCacheValid = true;
-        }
+        this.bus.cleanMemory(addrScreen, cbScreen);
+        if (cCells) this.fCellCacheValid = true;
     }
 
     /**
@@ -5202,7 +5211,7 @@ class Video extends Component {
          * no visible cursor, then we're done; simply return.  Otherwise, if there's only a blinking
          * cursor, then update JUST that one cell.
          */
-        if (!fForce && this.fCellCacheValid && this.bus.cleanMemory(addrScreen, cbScreen)) {
+        if (!fForce && this.fCellCacheValid && this.bus.cleanMemory(addrScreen, cbScreen, true)) {
             if (!fBlinkUpdate && this.cBlinkVisible >= 0) {
                 return cCells;
             }
@@ -5228,7 +5237,6 @@ class Video extends Component {
              */
             if (this.aFonts[this.nFont]) {
                 this.updateScreenText(addrScreen, addrScreenLimit, iCell, nCells);
-                this.checkBlink();
             }
         }
         else if (this.cbSplit) {
@@ -5339,6 +5347,8 @@ class Video extends Component {
         if (cUpdated && this.contextBuffer) {
             this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.cxBuffer, this.cyBuffer, this.xScreenOffset, this.yScreenOffset, this.cxScreenOffset, this.cyScreenOffset);
         }
+        
+        this.checkBlink();
         return cCells;
     }
 
@@ -6812,12 +6822,6 @@ class Video extends Component {
             this.cardActive.dumpVideoCard();
         }
     }
-
-    /*
-     releaseTouch()
-     {
-     }
-     */
 
     /**
      * doBlink()
