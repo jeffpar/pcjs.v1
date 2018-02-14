@@ -7,7 +7,7 @@ permalink: /disks/pcx86/dos/microsoft/
 Microsoft MS-DOS
 ----------------
 
-Information is available for these versions of Microsoft MS-DOS:
+Information is available for the following versions of Microsoft MS-DOS.
 
 * [Microsoft MS-DOS 1.25](/disks/pcx86/dos/microsoft/1.25/)
 * [Microsoft MS-DOS 2.00](/disks/pcx86/dos/microsoft/2.00/)
