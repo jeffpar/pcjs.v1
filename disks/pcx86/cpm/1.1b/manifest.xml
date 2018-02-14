@@ -10,10 +10,10 @@
 	<releaseDate>May 20, 1983</releaseDate>
 	<machine href="/disks/pcx86/cpm/1.1b/machine.xml"/>
 	<disk id="disk01" size="327680" chs="40:2:8" img="archive/CPM86-DISK1.img" href="/disks/pcx86/cpm/1.1b/CPM86-DISK1.json" md5="0ad2a1ebf83d7846fece9e9c6741f83f" md5json="51fc85d3a4dc6b4c97aa8eb3b9d9200a">
-		<name>CP/M-86 (Disk 1)</name>
+		<name>CP/M-86 1.1B (Disk 1)</name>
 	</disk>
 	<disk id="disk02" size="327680" chs="40:2:8" img="archive/CPM86-DISK2.img" href="/disks/pcx86/cpm/1.1b/CPM86-DISK2.json" md5="604c3e60c3a044e19bb22d15184bc22c" md5json="4f7972845b50e0d7e83f9cae5c04b407">
-		<name>CP/M-86 (Disk 2)</name>
+		<name>CP/M-86 1.1B (Disk 2)</name>
 	</disk>
 	<disk id="disk03" size="327680" chs="40:2:8" img="archive/CPM86-DISK1.dsk" href="/disks/pcx86/cpm/1.1b/CPM86-DISK1-PCJS.json" md5="0cfdd3af220207b49a63c4cd2b3c0be4" md5json="9a0810c8e0e09580351c4507b25b2af2">
 		<name>CP/M-86 (PCjs Disk 1)</name>

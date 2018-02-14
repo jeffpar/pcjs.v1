@@ -1,11 +1,16 @@
 ---
 layout: page
-title: "IBM PC (Model 5150) running CP/M-86 v1.1B"
+title: "IBM PC (Model 5150) running CP/M-86 1.1B"
 permalink: /disks/pcx86/cpm/1.1b/
 machines:
-  - id: ibm5150
+  - id: cpm-mda-256k
     type: pcx86
-    resume: 1
+    config: /disks/pcx86/cpm/1.00/machine.xml
+    autoMount:
+      A:
+        name: CP/M-86 1.1B (Disk 1)
+      B:
+        name: CP/M-86 1.1B (Disk 2)
 ---
 
 CP/M-86 1.1B (Eagle Computer)
@@ -19,14 +24,14 @@ The PCjs Disk Archives include the two Eagle Computer distribution diskettes, al
 private collection that contain [Useful CP/M-86 Utilities](#useful-cpm-86-utilities).  [Directory Listings](#directory-listings)
 are provided below.
 
-{% include machine.html id="ibm5150" %}
+The machine below is also available with a [Debugger](debugger/).
 
-This machine is also available with a [Debugger](debugger/).
+{% include machine.html id="cpm-mda-256k" %}
 
 Directory Listings
 ------------------
 
-### Directory of CP/M-86 (Disk 1)
+### Directory of CP/M-86 1.1B (Disk 1)
 
 	 Drive A:                         User :  0                                     
 	 Recs  Bytes FCBs Attributes      Name                                          
@@ -56,7 +61,7 @@ Directory Listings
 	Total:  268k   22                                                               
 	A: RW, Free Space:        20k                                                   
 
-### Directory of CP/M-86 (Disk 2)
+### Directory of CP/M-86 1.1B (Disk 2)
 
 	 Drive B:                         User :  0                                     
 	 Recs  Bytes FCBs Attributes      Name                                          
