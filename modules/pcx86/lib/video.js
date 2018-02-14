@@ -2472,8 +2472,8 @@ class Video extends Component {
         }
 
         /*
-         * If we have an associated keyboard, then ensure that the keyboard will be notified
-         * whenever the canvas gets focus and receives input.
+         * If we have an associated keyboard, then ensure that the keyboard will be notified whenever the canvas
+         * gets focus and receives input.
          */
         this.kbd = cmp.getMachineComponent("Keyboard");
         if (this.kbd && this.canvasScreen) {
