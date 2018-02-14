@@ -2795,11 +2795,31 @@ class Video extends Component {
             if (!this.nTouchConfig) {
 
                 this.nTouchConfig = nTouchConfig;
+                
+                var addPassive = false;
+                if (nTouchConfig != Video.TOUCH.MOUSE) {
+                    /*
+                     * If we're not capturing touch events for mouse event simulation, then we won't be calling
+                     * preventDefault(), which means we should tell Chrome and any other browser that supports
+                     * passive event listeners that we're installing a "passive" event listener, so that the browser
+                     * won't suspend us during `touchstart` and `touchmove` events.  But in order to know whether
+                     * the browser supports that feature, we have to probe for it first.
+                     */
+                    try {
+                        var opts = Object.defineProperty({}, 'passive', {
+                            get: function() {
+                                addPassive = true;
+                            }
+                        });
+                        window.addEventListener("testPassive", null, opts);
+                        window.removeEventListener("testPassive", null, opts);
+                    } catch (e) {}
+                }
 
                 control.addEventListener(
                     'touchstart',
                     function onTouchStart(event) { video.onTouchStart(event); },
-                    false                   // we'll specify false for the 'useCapture' parameter for now...
+                    addPassive? {passive: true} : false
                 );
 
                 if (nTouchConfig == Video.TOUCH.DEFAULT) {
@@ -2809,7 +2829,7 @@ class Video extends Component {
                 control.addEventListener(
                     'touchmove',
                     function onTouchMove(event) { video.onTouchMove(event); },
-                    true
+                    addPassive? {passive: true} : true
                 );
 
                 control.addEventListener(

@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.7/manifest.xsl"?>
+<manifest type="software">
+	<title>DR-DOS</title>
+	<version>6.00</version>
+	<type>Operating System</type>
+	<category>DOS</category>
+	<author>Digital Research Inc.</author>
+	<releaseDate></releaseDate>
+	<disk id="disk01" size="368640" chs="40:2:9" img="360K/archive/Disk01.img" href="/disks/pcx86/dos/dr-dos/6.00/360K/DRDOS600-DISK1.json" md5="cb4fd1b9abb12e7587b04186d5bd349b" md5json="d89e171824fac88798a425019f5e22c5">
+		<name>DR-DOS 6.00 (360K Disk 1)</name>
+		<file size="4833" time="1992-04-07 06:00:00" attr="0x20">ANSI.SYS</file>
+		<file size="50440" time="1992-04-07 06:00:00" attr="0x20">COMMAND.COM</file>
+		<file size="10752" time="1992-04-07 06:00:00" attr="0x20">COUNTRY.SYS</file>
+		<file size="4608" time="1992-04-07 06:00:00" attr="0x20">DISPLAY.SYS</file>
+		<file size="3084" time="1996-07-02 19:30:10" attr="0x20">DRDOS.INI</file>
+		<file size="2150" time="1992-04-07 06:00:00" attr="0x20">DRIVER.SYS</file>
+		<file size="40010" time="1992-04-07 06:00:00" attr="0x20">EMM386.SYS</file>
+		<file size="6847" time="1992-04-07 06:00:00" attr="0x20">EMMXMA.SYS</file>
+		<file size="20922" time="1992-04-07 06:00:00" attr="0x20">HIDOS.SYS</file>
+		<file size="24474" time="1992-04-07 06:00:00" attr="0x20">IBMBIO.COM</file>
+		<file size="39239" time="1992-04-07 06:00:00" attr="0x20">IBMDOS.COM</file>
+		<file size="2382" time="1992-04-07 06:00:00" attr="0x20">PCKWIK.SYS</file>
+		<file size="2940" time="1992-04-07 06:00:00" attr="0x20">PCKWIN.SYS</file>
+		<file size="5590" time="1992-04-07 06:00:00" attr="0x20">PRINTER.SYS</file>
+		<file size="23683" time="1992-04-07 06:00:00" attr="0x20">README</file>
+		<file size="3371" time="1997-03-14 20:25:46" attr="0x20">TASKMAX.INI</file>
+		<file size="5190" time="1992-04-07 06:00:00" attr="0x20">VDISK.SYS</file>
+		<file size="73220" time="1992-04-07 06:00:00" attr="0x20">VIEWMAX</file>
+		<file size="2795" time="1996-07-02 21:56:04" attr="0x20">VIEWMAX.INI</file>
+		<file size="597" time="1999-11-14 13:08:24" attr="0x20">readme.txt</file>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="360K/archive/Disk02.img" href="/disks/pcx86/dos/dr-dos/6.00/360K/DRDOS600-DISK2.json" md5="20f41b7a0a04a68332e83c8549af8626" md5json="eada40616f41124ea49cd3c7326bb751">
+		<name>DR-DOS 6.00 (360K Disk 2)</name>
+		<file size="5467" time="1992-04-07 06:00:00" attr="0x20">1050.CPI</file>
+		<file size="21547" time="1992-04-07 06:00:00" attr="0x20">4201.CPI</file>
+		<file size="492" time="1992-04-07 06:00:00" attr="0x20">4208.CPI</file>
+		<file size="492" time="1992-04-07 06:00:00" attr="0x20">5202.CPI</file>
+		<file size="24888" time="1992-04-07 06:00:00" attr="0x20">EGA.CPI</file>
+		<file size="21" time="1992-04-07 06:00:00" attr="0x20">HELP.BAT</file>
+		<file size="422" time="1992-04-07 06:00:00" attr="0x20">LOCK.ERR</file>
+		<file size="1309" time="1992-04-07 06:00:00" attr="0x20">LOCK.TXT</file>
+		<file size="402" time="1992-04-07 06:00:00" attr="0x20">LOGIN.ERR</file>
+		<file size="1283" time="1992-04-07 06:00:00" attr="0x20">LOGIN.TXT</file>
+		<file size="41536" time="1992-04-07 06:00:00" attr="0x20">SUPERPCK.SB1</file>
+		<file size="52128" time="1992-04-07 06:00:00" attr="0x20">SUPERPCK.SB6</file>
+		<file size="46320" time="1992-04-07 06:00:00" attr="0x20">SUPERPCK.SB7</file>
+		<file size="37952" time="1992-04-07 06:00:00" attr="0x20">SUPERPCK.SB8</file>
+		<file size="6642" time="1992-04-07 06:00:00" attr="0x20">VIEWHELP.RSC</file>
+		<file size="8896" time="1992-04-07 06:00:00" attr="0x20">VIEWHI.ICN</file>
+		<file size="9664" time="1992-04-07 06:00:00" attr="0x20">VIEWLO.ICN</file>
+		<file size="37722" time="1992-04-07 06:00:00" attr="0x20">VIEWMAX.OVL</file>
+		<file size="26526" time="1992-04-07 06:00:00" attr="0x20">VIEWMAX.RSC</file>
+		<file size="5768" time="1992-04-07 06:00:00" attr="0x20">VIEWRUN.RSC</file>
+	</disk>
+	<disk id="disk03" size="368640" chs="40:2:9" img="360K/archive/Disk03.img" href="/disks/pcx86/dos/dr-dos/6.00/360K/DRDOS600-DISK3.json" md5="65a356278b20818c65f57879cbb67199" md5json="6f672538e6548bea52dcdb42a9d66885">
+		<name>DR-DOS 6.00 (360K Disk 3)</name>
+		<file size="9855" time="1992-04-07 06:00:00" attr="0x20">ATTRIB.EXE</file>
+		<file size="5200" time="1992-04-07 06:00:00" attr="0x20">CURSOR.EXE</file>
+		<file size="8857" time="1992-04-07 06:00:00" attr="0x20">EXE2BIN.EXE</file>
+		<file size="12437" time="1992-04-07 06:00:00" attr="0x20">FC.EXE</file>
+		<file size="21536" time="1992-04-07 06:00:00" attr="0x20">FILELINK.EXE</file>
+		<file size="10717" time="1992-04-07 06:00:00" attr="0x20">FIND.EXE</file>
+		<file size="6393" time="1992-04-07 06:00:00" attr="0x20">JOIN.EXE</file>
+		<file size="11290" time="1992-04-07 06:00:00" attr="0x20">PASSWORD.EXE</file>
+		<file size="12058" time="1992-04-07 06:00:00" attr="0x20">REPLACE.EXE</file>
+		<file size="16501" time="1992-04-07 06:00:00" attr="0x20">SID.EXE</file>
+		<file size="38525" time="1992-04-07 06:00:00" attr="0x20">SUPERPCK.EXE</file>
+		<file size="10754" time="1992-04-07 06:00:00" attr="0x20">TOUCH.EXE</file>
+		<file size="49664" time="1992-04-07 06:00:00" attr="0x20">UDCAT9.EGA</file>
+		<file size="46592" time="1992-04-07 06:00:00" attr="0x20">UDHRC9.EGA</file>
+		<file size="53248" time="1992-04-07 06:00:00" attr="0x20">UDUNI9.VGA</file>
+		<file size="21602" time="1992-04-07 06:00:00" attr="0x20">VIEWMAX.ACC</file>
+		<file size="10607" time="1992-04-07 06:00:00" attr="0x20">VIEWMAX.EXE</file>
+	</disk>
+	<disk id="disk04" size="368640" chs="40:2:9" img="360K/archive/Disk04.img" href="/disks/pcx86/dos/dr-dos/6.00/360K/DRDOS600-DISK4.json" md5="be02f04ce5889f7f053152c10582eab1" md5json="907075bfae56223dcde373d0eb105b5f">
+		<name>DR-DOS 6.00 (360K Disk 4)</name>
+		<file size="3073" time="1992-04-07 06:00:00" attr="0x20">APPEND.EXE</file>
+		<file size="19910" time="1992-04-07 06:00:00" attr="0x20">DELPURGE.EXE</file>
+		<file size="10856" time="1992-04-07 06:00:00" attr="0x20">DELWATCH.EXE</file>
+		<file size="21819" time="1992-04-07 06:00:00" attr="0x20">EDITOR.EXE</file>
+		<file size="680" time="1992-04-07 06:00:00" attr="0x20">FASTOPEN.EXE</file>
+		<file size="29696" time="1992-04-07 06:00:00" attr="0x20">LOCK.EXE</file>
+		<file size="15087" time="1992-04-07 06:00:00" attr="0x20">LOGIN.EXE</file>
+		<file size="11328" time="1992-04-07 06:00:00" attr="0x20">MEM.EXE</file>
+		<file size="2214" time="1992-04-07 06:00:00" attr="0x20">MEMMAX.EXE</file>
+		<file size="16611" time="1992-04-07 06:00:00" attr="0x20">MOVE.EXE</file>
+		<file size="2707" time="1992-04-07 06:00:00" attr="0x20">NLSFUNC.EXE</file>
+		<file size="4957" time="1992-04-07 06:00:00" attr="0x20">RENDIR.EXE</file>
+		<file size="20279" time="1992-04-07 06:00:00" attr="0x20">SCRIPT.EXE</file>
+		<file size="79522" time="1992-04-07 06:00:00" attr="0x20">SETUP.EXE</file>
+		<file size="2781" time="1992-04-07 06:00:00" attr="0x20">SHARE.EXE</file>
+		<file size="6956" time="1992-04-07 06:00:00" attr="0x20">SORT.EXE</file>
+		<file size="66105" time="1992-04-07 06:00:00" attr="0x20">SSTOR.EXE</file>
+		<file size="4837" time="1992-04-07 06:00:00" attr="0x20">SUBST.EXE</file>
+		<file size="19047" time="1992-04-07 06:00:00" attr="0x20">TASKMAX.EXE</file>
+	</disk>
+	<disk id="disk05" size="368640" chs="40:2:9" img="360K/archive/Disk05.img" href="/disks/pcx86/dos/dr-dos/6.00/360K/DRDOS600-DISK5.json" md5="8b5c5cbc944725519ada94fc61dab51f" md5json="c6543136e698786b34b067e7095cc692">
+		<name>DR-DOS 6.00 (360K Disk 5)</name>
+		<file size="8233" time="1992-04-07 06:00:00" attr="0x20">DISKMAP.EXE</file>
+		<file size="45527" time="1992-04-07 06:00:00" attr="0x20">DISKOPT.EXE</file>
+		<file size="282084" time="1992-04-07 06:00:00" attr="0x20">DOSBOOK.EXE</file>
+	</disk>
+	<disk id="disk06" size="368640" chs="40:2:9" img="360K/archive/Disk06.img" href="/disks/pcx86/dos/dr-dos/6.00/360K/DRDOS600-DISK6.json" md5="ad14411d1e3858afae552668f382fc8d" md5json="be4e57427f60460b88e995658cd81127">
+		<name>DR-DOS 6.00 (360K Disk 6)</name>
+		<file size="4849" time="1992-04-07 06:00:00" attr="0x20">ASSIGN.COM</file>
+		<file size="12984" time="1992-04-07 06:00:00" attr="0x20">BACKUP.COM</file>
+		<file size="16995" time="1992-04-07 06:00:00" attr="0x20">CHKDSK.COM</file>
+		<file size="8506" time="1992-04-07 06:00:00" attr="0x20">COMP.COM</file>
+		<file size="11519" time="1992-04-07 06:00:00" attr="0x20">DISKCOMP.COM</file>
+		<file size="11401" time="1992-04-07 06:00:00" attr="0x20">DISKCOPY.COM</file>
+		<file size="18137" time="1992-04-07 06:00:00" attr="0x20">FDISK.COM</file>
+		<file size="15213" time="1992-04-07 06:00:00" attr="0x20">FORMAT.COM</file>
+		<file size="2851" time="1992-04-07 06:00:00" attr="0x20">GRAFTABL.COM</file>
+		<file size="2035" time="1992-04-07 06:00:00" attr="0x20">GRAPHICS.COM</file>
+		<file size="34591" time="1992-04-07 06:00:00" attr="0x20">KEYB.COM</file>
+		<file size="5202" time="1992-04-07 06:00:00" attr="0x20">LABEL.COM</file>
+		<file size="14134" time="1992-04-07 06:00:00" attr="0x20">MODE.COM</file>
+		<file size="12196" time="1992-04-07 06:00:00" attr="0x20">PRINT.COM</file>
+		<file size="9575" time="1992-04-07 06:00:00" attr="0x20">RECOVER.COM</file>
+		<file size="14319" time="1992-04-07 06:00:00" attr="0x20">RESTORE.COM</file>
+		<file size="8988" time="1992-04-07 06:00:00" attr="0x20">SYS.COM</file>
+		<file size="9847" time="1992-04-07 06:00:00" attr="0x20">TREE.COM</file>
+		<file size="64370" time="1992-04-07 06:00:00" attr="0x20">UNDELETE.EXE</file>
+		<file size="7480" time="1992-04-07 06:00:00" attr="0x20">UNFORMAT.COM</file>
+		<file size="18826" time="1992-04-07 06:00:00" attr="0x20">UNINSTAL.EXE</file>
+		<file size="13660" time="1992-04-07 06:00:00" attr="0x20">XCOPY.EXE</file>
+		<file size="10768" time="1992-04-07 06:00:00" attr="0x20">XDEL.EXE</file>
+		<file size="13767" time="1992-04-07 06:00:00" attr="0x20">XDIR.EXE</file>
+	</disk>
+	<disk id="disk07" size="1228800" chs="80:2:15" img="1200K/archive/DRDOS-600-STARTUP.img" href="/disks/pcx86/dos/dr-dos/6.00/1200K/DRDOS600-DISK1.json" md5="a01ecc2548744606c0d8baa74daa64ae" md5json="6f57282325b7d2f027d5fa14ccbd495e">
+		<name>DR-DOS 6.00 (1.2M Disk 1)</name>
+		<file size="5467" time="1991-08-23 06:00:00" attr="0x20">1050.CPI</file>
+		<file size="21547" time="1991-08-23 06:00:00" attr="0x20">4201.CPI</file>
+		<file size="492" time="1991-08-23 06:00:00" attr="0x20">4208.CPI</file>
+		<file size="492" time="1991-08-23 06:00:00" attr="0x20">5202.CPI</file>
+		<file size="4833" time="1991-08-23 06:00:00" attr="0x20">ANSI.SYS</file>
+		<file size="3073" time="1991-08-23 06:00:00" attr="0x20">APPEND.EXE</file>
+		<file size="4849" time="1991-08-23 06:00:00" attr="0x20">ASSIGN.COM</file>
+		<file size="178" time="1991-08-23 06:00:00" attr="0x20">AUTOEXEC.BAT</file>
+		<file size="12984" time="1991-08-23 06:00:00" attr="0x20">BACKUP.COM</file>
+		<file size="16429" time="1991-08-23 06:00:00" attr="0x20">CHKDSK.COM</file>
+		<file size="50456" time="1991-08-23 06:00:00" attr="0x20">COMMAND.COM</file>
+		<file size="63" time="1991-08-23 06:00:00" attr="0x20">CONFIG.SYS</file>
+		<file size="10752" time="1991-08-23 06:00:00" attr="0x20">COUNTRY.SYS</file>
+		<file size="19771" time="1991-08-23 06:00:00" attr="0x20">DELPURGE.EXE</file>
+		<file size="11527" time="1991-08-23 06:00:00" attr="0x20">DELWATCH.EXE</file>
+		<file size="1583" time="1991-08-23 06:00:00" attr="0x20">DEVSWAP.COM</file>
+		<file size="11457" time="1991-08-23 06:00:00" attr="0x20">DISKCOMP.COM</file>
+		<file size="11359" time="1991-08-23 06:00:00" attr="0x20">DISKCOPY.COM</file>
+		<file size="8233" time="1991-08-23 06:00:00" attr="0x20">DISKMAP.EXE</file>
+		<file size="50080" time="1991-08-23 06:00:00" attr="0x20">DISKOPT.EXE</file>
+		<file size="4608" time="1991-08-23 06:00:00" attr="0x20">DISPLAY.SYS</file>
+		<file size="2896" time="1991-08-23 06:00:00" attr="0x20">DRDOS.INI</file>
+		<file size="2150" time="1991-08-23 06:00:00" attr="0x20">DRIVER.SYS</file>
+		<file size="21819" time="1991-08-23 06:00:00" attr="0x20">EDITOR.EXE</file>
+		<file size="24888" time="1991-08-23 06:00:00" attr="0x20">EGA.CPI</file>
+		<file size="39498" time="1991-08-23 06:00:00" attr="0x20">EMM386.SYS</file>
+		<file size="6847" time="1991-08-23 06:00:00" attr="0x20">EMMXMA.SYS</file>
+		<file size="680" time="1991-08-23 06:00:00" attr="0x20">FASTOPEN.EXE</file>
+		<file size="17487" time="1991-08-23 06:00:00" attr="0x20">FDISK.COM</file>
+		<file size="21571" time="1991-08-23 06:00:00" attr="0x20">FILELINK.EXE</file>
+		<file size="15206" time="1991-08-23 06:00:00" attr="0x20">FORMAT.COM</file>
+		<file size="2851" time="1991-08-23 06:00:00" attr="0x20">GRAFTABL.COM</file>
+		<file size="18562" time="1991-08-23 06:00:00" attr="0x20">HIDOS.SYS</file>
+		<file size="24442" time="1991-08-23 06:00:00" attr="0x20">IBMBIO.COM</file>
+		<file size="39239" time="1991-08-23 06:00:00" attr="0x20">IBMDOS.COM</file>
+		<file size="79298" time="1991-08-23 06:00:00" attr="0x20">INSTALL.EXE</file>
+		<file size="272" time="1991-08-23 06:00:00" attr="0x20">INSTALL.INI</file>
+		<file size="34591" time="1991-08-23 06:00:00" attr="0x20">KEYB.COM</file>
+		<file size="422" time="1991-08-23 06:00:00" attr="0x20">LOCK.ERR</file>
+		<file size="15662" time="1991-08-23 06:00:00" attr="0x20">LOCK.EXE</file>
+		<file size="1309" time="1991-08-23 06:00:00" attr="0x20">LOCK.TXT</file>
+		<file size="402" time="1991-08-23 06:00:00" attr="0x20">LOGIN.ERR</file>
+		<file size="14858" time="1991-08-23 06:00:00" attr="0x20">LOGIN.EXE</file>
+		<file size="1283" time="1991-08-23 06:00:00" attr="0x20">LOGIN.TXT</file>
+		<file size="11309" time="1991-08-23 06:00:00" attr="0x20">MEM.EXE</file>
+		<file size="2214" time="1991-08-23 06:00:00" attr="0x20">MEMMAX.EXE</file>
+		<file size="14134" time="1991-08-23 06:00:00" attr="0x20">MODE.COM</file>
+		<file size="16611" time="1991-08-23 06:00:00" attr="0x20">MOVE.EXE</file>
+		<file size="2707" time="1991-08-23 06:00:00" attr="0x20">NLSFUNC.EXE</file>
+		<file size="2382" time="1991-08-23 06:00:00" attr="0x20">PCKWIK.SYS</file>
+		<file size="2940" time="1991-08-23 06:00:00" attr="0x20">PCKWIN.SYS</file>
+		<file size="5590" time="1991-08-23 06:00:00" attr="0x20">PRINTER.SYS</file>
+		<file size="4957" time="1991-08-23 06:00:00" attr="0x20">RENDIR.EXE</file>
+		<file size="14319" time="1991-08-23 06:00:00" attr="0x20">RESTORE.COM</file>
+		<file size="2781" time="1991-08-23 06:00:00" attr="0x20">SHARE.EXE</file>
+		<file size="35327" time="1991-08-23 06:00:00" attr="0x20">SSTORDRV.SYS</file>
+		<file size="4837" time="1991-08-23 06:00:00" attr="0x20">SUBST.EXE</file>
+		<file size="38525" time="1991-08-23 06:00:00" attr="0x20">SUPERPCK.EXE</file>
+		<file size="41536" time="1991-08-23 06:00:00" attr="0x20">SUPERPCK.SB1</file>
+		<file size="52128" time="1991-08-23 06:00:00" attr="0x20">SUPERPCK.SB6</file>
+		<file size="46320" time="1991-08-23 06:00:00" attr="0x20">SUPERPCK.SB7</file>
+		<file size="37952" time="1991-08-23 06:00:00" attr="0x20">SUPERPCK.SB8</file>
+		<file size="8917" time="1991-08-23 06:00:00" attr="0x20">SYS.COM</file>
+		<file size="17581" time="1991-08-23 06:00:00" attr="0x20">TASKMAX.EXE</file>
+		<file size="3360" time="1991-08-23 06:00:00" attr="0x20">TASKMAX.INI</file>
+		<file size="9847" time="1991-08-23 06:00:00" attr="0x20">TREE.COM</file>
+		<file size="74410" time="1991-08-23 06:00:00" attr="0x20">UNDELETE.EXE</file>
+		<file size="7480" time="1991-08-23 06:00:00" attr="0x20">UNFORMAT.COM</file>
+		<file size="18506" time="1991-08-23 06:00:00" attr="0x20">UNINSTAL.EXE</file>
+		<file size="5190" time="1991-08-23 06:00:00" attr="0x20">VDISK.SYS</file>
+		<file size="3730" time="1991-08-23 06:00:00" attr="0x20">VIEWMAX.INI</file>
+		<file size="13660" time="1991-08-23 06:00:00" attr="0x20">XCOPY.EXE</file>
+		<file size="10768" time="1991-08-23 06:00:00" attr="0x20">XDEL.EXE</file>
+		<file size="13665" time="1991-08-23 06:00:00" attr="0x20">XDIR.EXE</file>
+	</disk>
+	<disk id="disk08" size="1228800" chs="80:2:15" img="1200K/archive/DRDOS-600-VIEWMAX.img" href="/disks/pcx86/dos/dr-dos/6.00/1200K/DRDOS600-DISK2.json" md5="64e6d9291052536c2dd3d29ac1a3b939" md5json="131d2c9d4cf2aa50326e76e1ef82c9e1">
+		<name>DR-DOS 6.00 (1.2M Disk 2)</name>
+		<file size="9855" time="1991-08-23 06:00:00" attr="0x20">ATTRIB.EXE</file>
+		<file size="8506" time="1991-08-23 06:00:00" attr="0x20">COMP.COM</file>
+		<file size="5200" time="1991-08-23 06:00:00" attr="0x20">CURSOR.EXE</file>
+		<file size="281507" time="1991-08-23 06:00:00" attr="0x20">DOSBOOK.EXE</file>
+		<file size="8857" time="1991-08-23 06:00:00" attr="0x20">EXE2BIN.EXE</file>
+		<file size="12437" time="1991-08-23 06:00:00" attr="0x20">FC.EXE</file>
+		<file size="10717" time="1991-08-23 06:00:00" attr="0x20">FIND.EXE</file>
+		<file size="2016" time="1991-08-23 06:00:00" attr="0x20">GRAPHICS.COM</file>
+		<file size="21" time="1991-08-23 06:00:00" attr="0x20">HELP.BAT</file>
+		<file size="6393" time="1991-08-23 06:00:00" attr="0x20">JOIN.EXE</file>
+		<file size="5202" time="1991-08-23 06:00:00" attr="0x20">LABEL.COM</file>
+		<file size="320" time="1991-08-23 11:53:50" attr="0x10">NETWARE</file>
+		<file size="63838" time="1991-08-23 06:00:00" attr="0x20" dir="NETWARE/">EMSNETX.EXE</file>
+		<file size="20141" time="1991-08-23 06:00:00" attr="0x20" dir="NETWARE/">IPX.OBJ</file>
+		<file size="27449" time="1991-08-23 06:00:00" attr="0x20" dir="NETWARE/">MAP.EXE</file>
+		<file size="51201" time="1991-08-23 06:00:00" attr="0x20" dir="NETWARE/">NETX.COM</file>
+		<file size="1232" time="1991-08-23 06:00:00" attr="0x20" dir="NETWARE/">RPLFIX.COM</file>
+		<file size="4950" time="1991-08-23 06:00:00" attr="0x20" dir="NETWARE/">TBMI2.COM</file>
+		<file size="9355" time="1991-08-23 06:00:00" attr="0x20" dir="NETWARE/">TBMI2.DOC</file>
+		<file size="60307" time="1991-08-23 06:00:00" attr="0x20" dir="NETWARE/">XMSNETX.EXE</file>
+		<file size="11290" time="1991-08-23 06:00:00" attr="0x20">PASSWORD.EXE</file>
+		<file size="12196" time="1991-08-23 06:00:00" attr="0x20">PRINT.COM</file>
+		<file size="16659" time="1991-08-23 06:00:00" attr="0x20">README</file>
+		<file size="9575" time="1991-08-23 06:00:00" attr="0x20">RECOVER.COM</file>
+		<file size="12058" time="1991-08-23 06:00:00" attr="0x20">REPLACE.EXE</file>
+		<file size="20126" time="1991-08-23 06:00:00" attr="0x20">SCRIPT.EXE</file>
+		<file size="16501" time="1991-08-23 06:00:00" attr="0x20">SID.EXE</file>
+		<file size="6956" time="1991-08-23 06:00:00" attr="0x20">SORT.EXE</file>
+		<file size="65605" time="1991-08-23 06:00:00" attr="0x20">SSTOR.EXE</file>
+		<file size="3360" time="1991-08-23 06:00:00" attr="0x20">TASKMAX.INI</file>
+		<file size="10754" time="1991-08-23 06:00:00" attr="0x20">TOUCH.EXE</file>
+		<file size="49664" time="1991-08-23 06:00:00" attr="0x20">UDCAT9.EGA</file>
+		<file size="46592" time="1991-08-23 06:00:00" attr="0x20">UDHRC9.EGA</file>
+		<file size="53248" time="1991-08-23 06:00:00" attr="0x20">UDUNI9.VGA</file>
+		<file size="6642" time="1991-08-23 06:00:00" attr="0x20">VIEWHELP.RSC</file>
+		<file size="8896" time="1991-08-23 06:00:00" attr="0x20">VIEWHI.ICN</file>
+		<file size="9664" time="1991-08-23 06:00:00" attr="0x20">VIEWLO.ICN</file>
+		<file size="73220" time="1991-08-23 06:00:00" attr="0x20">VIEWMAX</file>
+		<file size="21602" time="1991-08-23 06:00:00" attr="0x20">VIEWMAX.ACC</file>
+		<file size="10607" time="1991-08-23 06:00:00" attr="0x20">VIEWMAX.EXE</file>
+		<file size="3730" time="1991-08-23 06:00:00" attr="0x20">VIEWMAX.INI</file>
+		<file size="37722" time="1991-08-23 06:00:00" attr="0x20">VIEWMAX.OVL</file>
+		<file size="26526" time="1991-08-23 06:00:00" attr="0x20">VIEWMAX.RSC</file>
+		<file size="5768" time="1991-08-23 06:00:00" attr="0x20">VIEWRUN.RSC</file>
+	</disk>
+	<disk id="disk09" size="368640" chs="40:2:9" img="1200K/archive/DRDOS-600-UPDATE1-1991-12.img" href="/disks/pcx86/dos/dr-dos/6.00/1200K/DRDOS600-UPDATE-1991-12-DISK1.json" md5="c8f025351a393f8fb9ea59076900df1a" md5json="596e96c2a8ac9de78b6aae9bdfd4b5b8">
+		<name>DR-DOS 6.00 (1991 Update 1)</name>
+		<file size="12058" time="1991-12-06 06:00:00" attr="0x20">REPLACE.EXE</file>
+		<file size="3670" time="1991-12-06 06:00:00" attr="0x20">SSTORCHK.EXE</file>
+		<file size="192" time="1991-12-10 14:08:58" attr="0x10">SYS</file>
+		<file size="67" time="1991-12-06 06:00:00" attr="0x20">SYS.FL</file>
+		<file size="50440" time="1991-12-06 06:00:00" attr="0x20" dir="SYS/">COMMAND.COM</file>
+		<file size="24442" time="1991-12-06 06:00:00" attr="0x20" dir="SYS/">IBMBIO.COM</file>
+		<file size="39239" time="1991-12-06 06:00:00" attr="0x20" dir="SYS/">IBMDOS.COM</file>
+		<file size="36278" time="1991-12-06 06:00:00" attr="0x20" dir="SYS/">SSTORDRV.SYS</file>
+		<file size="0" time="1991-12-06 06:00:00" attr="0x20">UPDATE.1</file>
+		<file size="5708" time="1991-12-06 06:00:00" attr="0x20">UPDATE.BAT</file>
+		<file size="224" time="1991-12-10 14:08:56" attr="0x10">UTIL</file>
+		<file size="83" time="1991-12-06 06:00:00" attr="0x20">UTIL.FL</file>
+		<file size="4608" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">DISPLAY.SYS</file>
+		<file size="2035" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">GRAPHICS.COM</file>
+		<file size="11328" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">MEM.EXE</file>
+		<file size="79481" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">SETUP.EXE</file>
+		<file size="66105" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">SSTOR.EXE</file>
+	</disk>
+	<disk id="disk10" size="368640" chs="40:2:9" img="1200K/archive/DRDOS-600-UPDATE2-1991-12.img" href="/disks/pcx86/dos/dr-dos/6.00/1200K/DRDOS600-UPDATE-1991-12-DISK2.json" md5="4dbc7806bc29cffc9c1dd73bdcbf9bf5" md5json="c3361a0532e04f64ef4fc2029bdd5525">
+		<name>DR-DOS 6.00 (1991 Update 2)</name>
+		<file size="256" time="1991-12-13 12:08:32" attr="0x10">EXAMPLES</file>
+		<file size="96" time="1991-12-13 12:08:36" attr="0x10" dir="EXAMPLES/">GEOS</file>
+		<file size="949" time="1991-12-06 06:00:00" attr="0x20" dir="EXAMPLES/GEOS/">CONFIG.GEO</file>
+		<file size="96" time="1991-12-13 12:08:48" attr="0x10" dir="EXAMPLES/">LIM40</file>
+		<file size="1528" time="1991-12-06 06:00:00" attr="0x20" dir="EXAMPLES/LIM40/">CONFIG.LIM</file>
+		<file size="160" time="1991-12-13 12:08:40" attr="0x10" dir="EXAMPLES/">NETWARE</file>
+		<file size="1273" time="1991-12-06 06:00:00" attr="0x20" dir="EXAMPLES/NETWARE/">CONFIG.EMS</file>
+		<file size="1336" time="1991-12-06 06:00:00" attr="0x20" dir="EXAMPLES/NETWARE/">CONFIG.SYS</file>
+		<file size="1653" time="1991-12-06 06:00:00" attr="0x20" dir="EXAMPLES/NETWARE/">CONFIG.XMS</file>
+		<file size="96" time="1991-12-13 12:08:58" attr="0x10" dir="EXAMPLES/">QEMM</file>
+		<file size="3393" time="1991-12-06 06:00:00" attr="0x20" dir="EXAMPLES/QEMM/">CONFIG.QMM</file>
+		<file size="595" time="1991-12-06 06:00:00" attr="0x20" dir="EXAMPLES/">README</file>
+		<file size="128" time="1991-12-13 12:08:52" attr="0x10" dir="EXAMPLES/">WINDOWS</file>
+		<file size="1069" time="1991-12-06 06:00:00" attr="0x20" dir="EXAMPLES/WINDOWS/">CONFIG.286</file>
+		<file size="1075" time="1991-12-06 06:00:00" attr="0x20" dir="EXAMPLES/WINDOWS/">CONFIG.386</file>
+		<file size="12058" time="1991-12-06 06:00:00" attr="0x20">REPLACE.EXE</file>
+		<file size="3670" time="1991-12-06 06:00:00" attr="0x20">SSTORCHK.EXE</file>
+		<file size="64" time="1991-12-10 14:09:56" attr="0x10">SYS</file>
+		<file size="0" time="1991-12-06 06:00:00" attr="0x20">SYS.FL</file>
+		<file size="0" time="1991-12-06 06:00:00" attr="0x20">UPDATE.2</file>
+		<file size="5708" time="1991-12-06 06:00:00" attr="0x20">UPDATE.BAT</file>
+		<file size="1913" time="1991-12-06 06:00:00" attr="0x20">UPDATE.DOC</file>
+		<file size="416" time="1991-12-10 14:09:56" attr="0x10">UTIL</file>
+		<file size="191" time="1991-12-06 06:00:00" attr="0x20">UTIL.FL</file>
+		<file size="16995" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">CHKDSK.COM</file>
+		<file size="10856" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">DELWATCH.EXE</file>
+		<file size="11519" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">DISKCOMP.COM</file>
+		<file size="11401" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">DISKCOPY.COM</file>
+		<file size="39498" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">EMM386.SYS</file>
+		<file size="18137" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">FDISK.COM</file>
+		<file size="20798" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">HIDOS.SYS</file>
+		<file size="29696" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">LOCK.EXE</file>
+		<file size="15087" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">LOGIN.EXE</file>
+		<file size="19047" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">TASKMAX.EXE</file>
+		<file size="18826" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">UNINSTAL.EXE</file>
+	</disk>
+	<disk id="disk11" size="368640" chs="40:2:9" img="1200K/archive/DRDOS-600-UPDATE1-1992-04.img" href="/disks/pcx86/dos/dr-dos/6.00/1200K/DRDOS600-UPDATE-1992-04-DISK1.json" md5="d0bde44e82162e23126eb96e80ecd032" md5json="57f7c18425c9af793dae2dd10da2657b">
+		<name>DR-DOS 6.00 (1992 Update 1)</name>
+		<file size="12058" time="1992-04-07 06:00:00" attr="0x20">REPLACE.EXE</file>
+		<file size="3670" time="1992-04-07 06:00:00" attr="0x20">SSTORCHK.EXE</file>
+		<file size="192" time="1991-12-10 14:08:58" attr="0x10">SYS</file>
+		<file size="67" time="1992-04-07 06:00:00" attr="0x20">SYS.FL</file>
+		<file size="50440" time="1992-04-07 06:00:00" attr="0x20" dir="SYS/">COMMAND.COM</file>
+		<file size="24474" time="1992-04-07 06:00:00" attr="0x20" dir="SYS/">IBMBIO.COM</file>
+		<file size="39239" time="1992-04-07 06:00:00" attr="0x20" dir="SYS/">IBMDOS.COM</file>
+		<file size="36523" time="1992-04-07 06:00:00" attr="0x20" dir="SYS/">SSTORDRV.SYS</file>
+		<file size="0" time="1992-04-07 06:00:00" attr="0x20">UPDATE.1</file>
+		<file size="7044" time="1992-04-07 06:00:00" attr="0x20">UPDATE.BAT</file>
+		<file size="224" time="1991-12-10 14:08:56" attr="0x10">UTIL</file>
+		<file size="83" time="1992-04-07 06:00:00" attr="0x20">UTIL.FL</file>
+		<file size="4608" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">DISPLAY.SYS</file>
+		<file size="2035" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">GRAPHICS.COM</file>
+		<file size="11328" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">MEM.EXE</file>
+		<file size="79522" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">SETUP.EXE</file>
+		<file size="66105" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">SSTOR.EXE</file>
+	</disk>
+	<disk id="disk12" size="368640" chs="40:2:9" img="1200K/archive/DRDOS-600-UPDATE2-1992-04.img" href="/disks/pcx86/dos/dr-dos/6.00/1200K/DRDOS600-UPDATE-1992-04-DISK2.json" md5="1e838f04560a4923527fd99693a9cebd" md5json="ccc9138a3a0d25d2e438fba12bacc82f">
+		<name>DR-DOS 6.00 (1992 Update 2)</name>
+		<file size="256" time="1992-04-07 15:53:16" attr="0x10">EXAMPLES</file>
+		<file size="96" time="1992-04-07 15:53:20" attr="0x10" dir="EXAMPLES/">GEOS</file>
+		<file size="949" time="1992-04-07 06:00:00" attr="0x20" dir="EXAMPLES/GEOS/">CONFIG.GEO</file>
+		<file size="96" time="1992-04-07 15:53:30" attr="0x10" dir="EXAMPLES/">LIM40</file>
+		<file size="1528" time="1992-04-07 06:00:00" attr="0x20" dir="EXAMPLES/LIM40/">CONFIG.LIM</file>
+		<file size="160" time="1992-04-07 15:53:24" attr="0x10" dir="EXAMPLES/">NETWARE</file>
+		<file size="1273" time="1992-04-07 06:00:00" attr="0x20" dir="EXAMPLES/NETWARE/">CONFIG.EMS</file>
+		<file size="1336" time="1992-04-07 06:00:00" attr="0x20" dir="EXAMPLES/NETWARE/">CONFIG.SYS</file>
+		<file size="1653" time="1992-04-07 06:00:00" attr="0x20" dir="EXAMPLES/NETWARE/">CONFIG.XMS</file>
+		<file size="96" time="1992-04-07 15:53:42" attr="0x10" dir="EXAMPLES/">QEMM</file>
+		<file size="3393" time="1992-04-07 06:00:00" attr="0x20" dir="EXAMPLES/QEMM/">CONFIG.QMM</file>
+		<file size="595" time="1992-04-07 06:00:00" attr="0x20" dir="EXAMPLES/">README</file>
+		<file size="128" time="1992-04-07 15:53:34" attr="0x10" dir="EXAMPLES/">WIN30</file>
+		<file size="1069" time="1992-04-07 06:00:00" attr="0x20" dir="EXAMPLES/WIN30/">CONFIG.286</file>
+		<file size="1075" time="1992-04-07 06:00:00" attr="0x20" dir="EXAMPLES/WIN30/">CONFIG.386</file>
+		<file size="23683" time="1992-04-07 06:00:00" attr="0x20">README</file>
+		<file size="12058" time="1992-04-07 06:00:00" attr="0x20">REPLACE.EXE</file>
+		<file size="3670" time="1992-04-07 06:00:00" attr="0x20">SSTORCHK.EXE</file>
+		<file size="64" time="1991-12-10 14:09:56" attr="0x10">SYS</file>
+		<file size="0" time="1992-04-07 06:00:00" attr="0x20">SYS.FL</file>
+		<file size="0" time="1992-04-07 06:00:00" attr="0x20">UPDATE.2</file>
+		<file size="7044" time="1992-04-07 06:00:00" attr="0x20">UPDATE.BAT</file>
+		<file size="448" time="1991-12-10 14:09:56" attr="0x10">UTIL</file>
+		<file size="208" time="1992-04-07 06:00:00" attr="0x20">UTIL.FL</file>
+		<file size="16995" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">CHKDSK.COM</file>
+		<file size="10856" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">DELWATCH.EXE</file>
+		<file size="11519" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">DISKCOMP.COM</file>
+		<file size="11401" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">DISKCOPY.COM</file>
+		<file size="40010" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">EMM386.SYS</file>
+		<file size="18137" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">FDISK.COM</file>
+		<file size="20922" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">HIDOS.SYS</file>
+		<file size="29696" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">LOCK.EXE</file>
+		<file size="15087" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">LOGIN.EXE</file>
+		<file size="20279" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">SCRIPT.EXE</file>
+		<file size="19047" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">TASKMAX.EXE</file>
+		<file size="18826" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">UNINSTAL.EXE</file>
+	</disk>
+</manifest>

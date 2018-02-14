@@ -44,6 +44,7 @@
 		<manifest ref="/disks/pcx86/dos/dr-dos/3.34/manifest.xml"/>
 		<manifest ref="/disks/pcx86/dos/dr-dos/3.40/manifest.xml"/>
 		<manifest ref="/disks/pcx86/dos/dr-dos/3.41/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/dr-dos/6.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/os2/ibm/1.0/manifest.xml"/>
 		<manifest ref="/disks/pcx86/os2/ibm/1.1/manifest.xml"/>
 		<manifest ref="/disks/pcx86/os2/ibm/1.3/manifest.xml"/>

@@ -237,8 +237,8 @@ class Keyboard extends Component {
             case "caps-lock":
                 this.bindings[id] = control;
                 control.onclick = function onClickCapsLock(event) {
-                    event.preventDefault();                 // preventDefault() is necessary...
-                    if (kbd.cmp) kbd.cmp.updateFocus();     // ...for the updateFocus() call to actually work
+                    event.preventDefault();
+                    if (sHTMLType == 'led' && kbd.cmp) kbd.cmp.updateFocus();
                     return kbd.toggleCapsLock();
                 };
                 return true;
@@ -246,8 +246,8 @@ class Keyboard extends Component {
             case "num-lock":
                 this.bindings[id] = control;
                 control.onclick = function onClickNumLock(event) {
-                    event.preventDefault();                 // preventDefault() is necessary...
-                    if (kbd.cmp) kbd.cmp.updateFocus();     // ...for the updateFocus() call to actually work
+                    event.preventDefault();
+                    if (sHTMLType == 'led' && kbd.cmp) kbd.cmp.updateFocus();
                     return kbd.toggleNumLock();
                 };
                 return true;
@@ -255,8 +255,8 @@ class Keyboard extends Component {
             case "scroll-lock":
                 this.bindings[id] = control;
                 control.onclick = function onClickScrollLock(event) {
-                    event.preventDefault();                 // preventDefault() is necessary...
-                    if (kbd.cmp) kbd.cmp.updateFocus();     // ...for the updateFocus() call to actually work
+                    event.preventDefault();
+                    if (sHTMLType == 'led' && kbd.cmp) kbd.cmp.updateFocus();
                     return kbd.toggleScrollLock();
                 };
                 return true;
@@ -268,6 +268,7 @@ class Keyboard extends Component {
                 var sCode = sBinding.toUpperCase().replace(/-/g, '_');
                 if (Keyboard.CLICKCODES[sCode] !== undefined && sHTMLType == "button") {
                     this.bindings[id] = controlText;
+                    if (DEBUG) console.log("binding click-code '" + sCode + "'");
                     controlText.onclick = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingClick(event) {
                             if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.EVENT | Messages.KEY);
@@ -283,10 +284,10 @@ class Keyboard extends Component {
                 else if (Keyboard.SOFTCODES[sBinding] !== undefined) {
                     this.cSoftCodes++;
                     this.bindings[id] = controlText;
+                    if (DEBUG) console.log("binding soft-code '" + sBinding + "'");
                     var fnDown = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingDown(event) {
-                            event.preventDefault();                 // preventDefault() is necessary...
-                            if (kbd.cmp) kbd.cmp.updateFocus();     // ...for the updateFocus() call to actually work
+                            event.preventDefault();                 // preventDefault() is necessary to avoid "zooming" when you type rapidly
                             kbd.sInjectBuffer = "";                 // key events should stop any injection currently in progress
                             kbd.addActiveKey(simCode);
                         };
@@ -750,7 +751,7 @@ class Keyboard extends Component {
                 /*
                  * The original IBM PC BIOS performs a "stuck key" test by resetting the keyboard
                  * (by toggling the CLOCK line), then checking for a BAT_OK response (0xAA), and then
-                 * clocking in the next byte (by toggling the DATA line); if that next byte isn't zero,
+                 * clocking in the next byte (by toggling the DATA line); if that next byte isn't 0x00,
                  * then the BIOS reports a "301" error, along with "AA" if we failed to properly flush
                  * the BAT_OK response. 
                  */
@@ -966,7 +967,7 @@ class Keyboard extends Component {
                     }
                 }
                 this.abBuffer.push(bScan);
-                if (!COMPILED && this.messageEnabled()) this.printMessage("keyboard scan code " + Str.toHexByte(bScan) + " buffered");
+                if (!COMPILED && this.messageEnabled()) this.printMessage("keyboard data " + Str.toHexByte(bScan) + " buffered");
                 this.transmitData();
                 return;
             }
@@ -2187,10 +2188,15 @@ Keyboard.CLICKCODES = {
     'F8':           Keyboard.SIMCODE.F8,
     'F9':           Keyboard.SIMCODE.F9,
     'F10':          Keyboard.SIMCODE.F10,
-    'LEFT':         Keyboard.SIMCODE.LEFT,      // formerly "left-arrow"
-    'UP':           Keyboard.SIMCODE.UP,        // formerly "up-arrow"
-    'RIGHT':        Keyboard.SIMCODE.RIGHT,     // formerly "right-arrow"
-    'DOWN':         Keyboard.SIMCODE.DOWN,      // formerly "down-arrow"
+    'LEFT':         Keyboard.SIMCODE.LEFT,
+    'UP':           Keyboard.SIMCODE.UP,
+    'RIGHT':        Keyboard.SIMCODE.RIGHT,
+    'DOWN':         Keyboard.SIMCODE.DOWN,
+    'NUM_HOME':     Keyboard.SIMCODE.HOME,
+    'NUM_END':      Keyboard.SIMCODE.END,
+    'NUM_PGUP':     Keyboard.SIMCODE.PGUP,
+    'NUM_PGDN':     Keyboard.SIMCODE.PGDN,
+    'ALT':          Keyboard.SIMCODE.ALT,
     'SYSREQ':       Keyboard.SIMCODE.SYSREQ,
     /*
      * These bindings are for convenience (common key combinations that can be bound to a single control)
@@ -2261,41 +2267,41 @@ Keyboard.SOFTCODES = {
     /* 13 */    '=':            Keys.ASCII['='],
     /* 14 */    'bs':           Keyboard.SIMCODE.BS,
     /* 15 */    'tab':          Keyboard.SIMCODE.TAB,
-    /* 16 */    'q':            Keys.ASCII.Q,
-    /* 17 */    'w':            Keys.ASCII.W,
-    /* 18 */    'e':            Keys.ASCII.E,
-    /* 19 */    'r':            Keys.ASCII.R,
-    /* 20 */    't':            Keys.ASCII.T,
-    /* 21 */    'y':            Keys.ASCII.Y,
-    /* 22 */    'u':            Keys.ASCII.U,
-    /* 23 */    'i':            Keys.ASCII.I,
-    /* 24 */    'o':            Keys.ASCII.O,
-    /* 25 */    'p':            Keys.ASCII.P,
+    /* 16 */    'q':            Keys.ASCII.q,
+    /* 17 */    'w':            Keys.ASCII.w,
+    /* 18 */    'e':            Keys.ASCII.e,
+    /* 19 */    'r':            Keys.ASCII.r,
+    /* 20 */    't':            Keys.ASCII.t,
+    /* 21 */    'y':            Keys.ASCII.y,
+    /* 22 */    'u':            Keys.ASCII.u,
+    /* 23 */    'i':            Keys.ASCII.i,
+    /* 24 */    'o':            Keys.ASCII.o,
+    /* 25 */    'p':            Keys.ASCII.p,
     /* 26 */    '[':            Keys.ASCII['['],
     /* 27 */    ']':            Keys.ASCII[']'],
     /* 28 */    'enter':        Keys.KEYCODE.CR,
     /* 29 */    'ctrl':         Keyboard.SIMCODE.CTRL,
-    /* 30 */    'a':            Keys.ASCII.A,
-    /* 31 */    's':            Keys.ASCII.S,
-    /* 32 */    'd':            Keys.ASCII.D,
-    /* 33 */    'f':            Keys.ASCII.F,
-    /* 34 */    'g':            Keys.ASCII.G,
-    /* 35 */    'h':            Keys.ASCII.H,
-    /* 36 */    'j':            Keys.ASCII.J,
-    /* 37 */    'k':            Keys.ASCII.K,
-    /* 38 */    'l':            Keys.ASCII.L,
+    /* 30 */    'a':            Keys.ASCII.a,
+    /* 31 */    's':            Keys.ASCII.s,
+    /* 32 */    'd':            Keys.ASCII.d,
+    /* 33 */    'f':            Keys.ASCII.f,
+    /* 34 */    'g':            Keys.ASCII.g,
+    /* 35 */    'h':            Keys.ASCII.h,
+    /* 36 */    'j':            Keys.ASCII.j,
+    /* 37 */    'k':            Keys.ASCII.k,
+    /* 38 */    'l':            Keys.ASCII.l,
     /* 39 */    ';':            Keys.ASCII[';'],
     /* 40 */    'quote':        Keys.ASCII["'"],                // formerly "squote"
     /* 41 */    '`':            Keys.ASCII['`'],                // formerly "bquote"
     /* 42 */    'shift':        Keyboard.SIMCODE.SHIFT,         // formerly "lshift"
     /* 43 */    '\\':           Keys.ASCII['\\'],               // formerly "bslash"
-    /* 44 */    'z':            Keys.ASCII.Z,
-    /* 45 */    'x':            Keys.ASCII.X,
-    /* 46 */    'c':            Keys.ASCII.C,
-    /* 47 */    'v':            Keys.ASCII.V,
-    /* 48 */    'b':            Keys.ASCII.B,
-    /* 49 */    'n':            Keys.ASCII.N,
-    /* 50 */    'm':            Keys.ASCII.M,
+    /* 44 */    'z':            Keys.ASCII.z,
+    /* 45 */    'x':            Keys.ASCII.x,
+    /* 46 */    'c':            Keys.ASCII.c,
+    /* 47 */    'v':            Keys.ASCII.v,
+    /* 48 */    'b':            Keys.ASCII.b,
+    /* 49 */    'n':            Keys.ASCII.n,
+    /* 50 */    'm':            Keys.ASCII.m,
     /* 51 */    ',':            Keys.ASCII[','],
     /* 52 */    '.':            Keys.ASCII['.'],
     /* 53 */    '/':            Keys.ASCII['/'],

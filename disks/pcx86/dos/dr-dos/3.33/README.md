@@ -9,6 +9,8 @@ machines:
     autoMount:
       A:
         name: DR-DOS 3.33
+      B:
+        name: None
 ---
 
 Digital Research DR-DOS 3.33
