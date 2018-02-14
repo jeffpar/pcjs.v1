@@ -12,7 +12,7 @@
 
 	<xsl:variable name="MACHINETYPE">pc</xsl:variable>
 	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPCLASS">pdp10</xsl:variable>
+	<xsl:variable name="APPCLASS">pdp11</xsl:variable>
 	<xsl:variable name="APPNAME">PDPjs</xsl:variable>
 	<xsl:variable name="APPVERSION">1.50.7</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
@@ -363,6 +363,7 @@
 			<xsl:value-of select="$pos"/><xsl:value-of select="$left"/><xsl:value-of select="$top"/><xsl:value-of select="$padding"/>
 			<xsl:choose>
 				<xsl:when test="@type = 'container'"><xsl:value-of select="$border"/><xsl:value-of select="$width"/><xsl:value-of select="$height"/><xsl:value-of select="$style"/></xsl:when>
+				<xsl:when test="@type = 'key'"><xsl:value-of select="$border"/><xsl:value-of select="$width"/><xsl:value-of select="$style"/></xsl:when>
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
@@ -426,6 +427,9 @@
 							<input type="submit" value="Mount" disabled="true"/>
 						</fieldset>
 					</form>
+				</xsl:when>
+				<xsl:when test="@type = 'key'">
+					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" style="-webkit-user-select:none;width:100%;{$height}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'led' or @type = 'rled'">
 					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding},{$value}}}" style="display:inline-block;"><xsl:value-of select="."/></div>
@@ -1411,6 +1415,10 @@
 			<xsl:with-param name="class">computer</xsl:with-param>
 			<xsl:with-param name="parms">,autoPower:<xsl:value-of select="$autoPower"/>,busWidth:<xsl:value-of select="$busWidth"/>,resume:'<xsl:value-of select="$resume"/>',state:'<xsl:value-of select="$state"/>'</xsl:with-param>
 		</xsl:call-template>
+	</xsl:template>
+
+	<xsl:template match="br">
+		<br/>
 	</xsl:template>
 
 	<xsl:template match="comment">
