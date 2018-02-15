@@ -45403,31 +45403,40 @@ class Keyboard extends Component {
                 return true;
 
             case "caps-lock":
-                this.bindings[id] = control;
-                control.onclick = function onClickCapsLock(event) {
-                    event.preventDefault();
-                    if (sHTMLType == 'led' && kbd.cmp) kbd.cmp.updateFocus();
-                    return kbd.toggleCapsLock();
-                };
-                return true;
+                if (sHTMLType == 'led') {
+                    this.bindings[id] = control;
+                    control.onclick = function onClickCapsLock(event) {
+                        event.preventDefault();
+                        if (kbd.cmp) kbd.cmp.updateFocus();
+                        return kbd.toggleCapsLock();
+                    };
+                    return true;
+                }
+                /* falls through */
 
             case "num-lock":
-                this.bindings[id] = control;
-                control.onclick = function onClickNumLock(event) {
-                    event.preventDefault();
-                    if (sHTMLType == 'led' && kbd.cmp) kbd.cmp.updateFocus();
-                    return kbd.toggleNumLock();
-                };
-                return true;
+                if (sHTMLType == 'led') {
+                    this.bindings[id] = control;
+                    control.onclick = function onClickNumLock(event) {
+                        event.preventDefault();
+                        if (kbd.cmp) kbd.cmp.updateFocus();
+                        return kbd.toggleNumLock();
+                    };
+                    return true;
+                }
+                /* falls through */
 
             case "scroll-lock":
-                this.bindings[id] = control;
-                control.onclick = function onClickScrollLock(event) {
-                    event.preventDefault();
-                    if (sHTMLType == 'led' && kbd.cmp) kbd.cmp.updateFocus();
-                    return kbd.toggleScrollLock();
-                };
-                return true;
+                if (sHTMLType == 'led') {
+                    this.bindings[id] = control;
+                    control.onclick = function onClickScrollLock(event) {
+                        event.preventDefault();
+                        if (kbd.cmp) kbd.cmp.updateFocus();
+                        return kbd.toggleScrollLock();
+                    };
+                    return true;
+                }
+                /* falls through */
 
             default:
                 /*
