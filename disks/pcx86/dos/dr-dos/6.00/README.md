@@ -17,3 +17,15 @@ Digital Research DR-DOS 6.00
 ----------------------------
 
 {% include machine.html id="ibm5170-drdos600" %}
+
+![DR-DOS 6.00 StartUp Disk](DRDOS-600-STARTUP.jpg)
+
+![DR-DOS 6.00 ViewMAX Disk](DRDOS-600-VIEWMAX.jpg)
+
+![DR-DOS 6.00 1991 Update Disk 1](DRDOS-600-1991-UPDATE1.jpg)
+
+![DR-DOS 6.00 1991 Update Disk 2](DRDOS-600-1991-UPDATE2.jpg)
+
+![DR-DOS 6.00 1992 Update Disk 1](DRDOS-600-1992-UPDATE1.jpg)
+
+![DR-DOS 6.00 1992 Update Disk 2](DRDOS-600-1992-UPDATE2.jpg)

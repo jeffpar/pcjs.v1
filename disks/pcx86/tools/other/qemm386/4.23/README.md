@@ -25,3 +25,5 @@ QEMM-386 v4.23
 	READ     ME       7769 11-22-88   4:23a
 	       11 file(s)      92405 bytes
 	                      263168 bytes free
+
+![QEMM-386 v4.23](QEMM386-423.jpg)

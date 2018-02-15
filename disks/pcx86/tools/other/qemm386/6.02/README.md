@@ -17,3 +17,5 @@ QEMM-386 v6.02
 	QEMM386  QIP    251366 11-13-91   6:02a
 	        2 file(s)     328856 bytes
 	                       32768 bytes free
+
+![QEMM-386 v6.02](QEMM386-602.jpg)
