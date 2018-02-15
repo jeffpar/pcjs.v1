@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.7/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.8/machine.xsl"?>
 <machine id="ibm5150" type="pcx86" border="1" pos="center" background="default">
 	<name pos="center">IBM PC (Model 5150), CGA, 64K</name>
 	<computer id="pc-cga-64k" name="IBM PC"/>
@@ -9,7 +9,7 @@
 	<video ref="/devices/pcx86/video/ibm/cga/ibm-cga.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true"/>
-	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-minimal.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pcx86/panel/wide.xml"/>
 	<chipset ref="/devices/pcx86/chipset/5150-cga-max.xml"/>

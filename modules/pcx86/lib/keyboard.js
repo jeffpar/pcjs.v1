@@ -189,33 +189,26 @@ class Keyboard extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        /*
-         * There's a special binding that the Video component uses ("screen") to effectively bind its
-         * screen to the entire keyboard, in Video.powerUp(); ie:
-         *
-         *      video.kbd.setBinding("canvas", "screen", video.canvasScreen);
-         * or:
-         *      video.kbd.setBinding("textarea", "screen", video.textareaScreen);
-         *
-         * However, it's also possible for the keyboard XML definition to define a control that serves
-         * a similar purpose; eg:
-         *
-         *      <control type="text" binding="kbd" width="2em">Keyboard</control>
-         *
-         * The latter is purely experimental, while we work on finding ways to trigger the soft keyboard on
-         * certain pesky devices (like the Kindle Fire).  Note that even if you use the latter, the former will
-         * still be enabled (there's currently no way to configure the Video component to not bind its screen,
-         * but we could certainly add one if the need ever arose).
-         */
         var kbd = this;
         var id = sHTMLType + '-' + sBinding;
         var controlText = /** @type {HTMLTextAreaElement} */ (control);
 
         if (this.bindings[id] === undefined) {
             switch (sBinding) {
-            case "kbd":
+            case "keyboard":
+                var controlKeyboard = control.parentElement.nextElementSibling;
+                control.onclick = function onClickKeyboard(event) {
+                    controlKeyboard.style.display = (controlKeyboard.style.display == "none"? "block" : "none");
+                };
+                return true;
+                
             case "screen":
                 /*
+                 * This is a special binding that the Video component uses to effectively bind its screen to the
+                 * entire keyboard; eg:
+                 * 
+                 *      this.kbd.setBinding(this.inputTextArea? "textarea" : "canvas", "screen", this.inputScreen);
+                 *
                  * Recording the binding ID prevents multiple controls (or components) from attempting to erroneously
                  * bind a control to the same ID, but in the case of a "dual display" configuration, we actually want
                  * to allow BOTH video components to call setBinding() for "screen", so that it doesn't matter which
@@ -314,8 +307,8 @@ class Keyboard extends Component {
                      */
                     this.bindings[id] = control;
                     control.onclick = function onClickTest(event) {
-                        event.preventDefault();                 // preventDefault() is necessary...
-                        if (kbd.cmp) kbd.cmp.updateFocus();     // ...for the updateFocus() call to actually work
+                        event.preventDefault();                     // preventDefault() is necessary...
+                        if (kbd.cmp) kbd.cmp.updateFocus();         // ...for the updateFocus() call to actually work
                         return kbd.injectKeys(sValue);
                     };
                     return true;

@@ -124,8 +124,8 @@ MSDOS.SYS and COMMAND.COM.
 Surprisingly Bad Bug in MS-DOS 3.20
 -----------------------------------
 
-If you attempt to boot MS-DOS 3.20 on an [IBM PC Model 5150](/devices/pcx86/machine/5150/cga/384kb/softkbd/) (with either
-an MDA or CGA video card), the machine will appear to crash after printing the first character.
+If you attempt to boot MS-DOS 3.20 on an [IBM PC Model 5150](/devices/pcx86/machine/5150/cga/384kb/debugger/)
+(with either an MDA or CGA video card), the machine will appear to crash after printing the first character.
 
 When MS-DOS 3.20 prints characters to the screen, it uses this code:
 

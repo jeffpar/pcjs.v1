@@ -4,7 +4,10 @@ title: Microsoft Windows 1.01 with CGA Display and Debugger
 permalink: /disks/pcx86/windows/1.01/cga/debugger/
 redirect_from:
   - /configs/pc/machines/5160/cga/256kb/win101/debugger/
+  - /configs/pc/machines/5160/cga/256kb/win101/softkbd/
   - /devices/pcx86/machine/5160/cga/256kb/win101/debugger/
+  - /devices/pcx86/machine/5160/cga/256kb/win101/softkbd/
+  - /disks/pcx86/windows/1.01/cga/softkbd/
 machines:
   - id: ibm5160-cga-win101
     type: pcx86

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.7/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.8/machine.xsl"?>
 <machine id="deskpro386" type="pcx86" border="1" pos="center" background="default">
 	<name pos="center">COMPAQ DeskPro 386, 4Mb RAM, IBM VGA</name>
 	<computer id="deskpro386-vga-4096k" name="COMPAQ DeskPro 386" buswidth="32"/>
@@ -11,7 +11,7 @@
 	<video ref="/devices/pcx86/video/ibm/vga/1986-10-27/256kb-autolockfs.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml" autoMount='{A: {name: "PC-DOS 3.30 (Disk 1)", path: "/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1.json"}, B: {name: "PC-DOS 3.30 (Disk 2)", path: "/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK2.json"}}'/>
 	<hdc ref="/disks/pcx86/fixed/47mb/unformatted-at5.xml"/>
-	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-functions.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us84-softkeys.xml"/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]" monitor="vga"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2"/>

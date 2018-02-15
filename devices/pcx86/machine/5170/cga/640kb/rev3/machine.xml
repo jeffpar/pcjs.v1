@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.7/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.8/machine.xsl"?>
 <machine id="ibm5170" type="pcx86" border="1" pos="center" background="default">
 	<name pos="center">IBM PC AT (8Mhz, 640Kb, Dual Floppy) with Color Display</name>
 	<computer id="at-mda-640k" name="IBM PC AT" buswidth="24"/>
@@ -8,7 +8,7 @@
 	<rom id="romBIOS" addr="0xf0000" size="0x10000" alias="0xff0000" file="/devices/pcx86/rom/5170/1985-11-15/ATBIOS-REV3.json"/>
 	<video ref="/devices/pcx86/video/ibm/cga/ibm-cga.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml" autoMount='{A: {name: "PC-DOS 3.00 (Disk 1)", path: "/disks/pcx86/dos/ibm/3.00/PCDOS300-DISK1.json"}, B: {name: "PC-DOS 3.00 (Disk 2)", path: "/disks/pcx86/dos/ibm/3.00/PCDOS300-DISK2.json"}}'/>
-	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-functions.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us84-softkeys.xml"/>
 	<chipset id="chipset" model="5170" floppies="[1200,1200]" monitor="color"/>
 	<serial id="com1" adapter="1"/>
 	<mouse serial="com1"/>

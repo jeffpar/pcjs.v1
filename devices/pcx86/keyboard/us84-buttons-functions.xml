@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <keyboard id="keyboard" model="us84" pos="left" padLeft="8px" padBottom="8px">
-	<control type="button" binding="esc">ESC</control>
+	<control type="button" binding="esc">Esc</control>
 	<control type="button" binding="num-ins">Ins</control>
 	<control type="button" binding="ctrl-break">Ctrl-Break</control>
 	<control type="button" binding="ctrl-c">Ctrl-C</control>
