@@ -11,7 +11,7 @@
 	<fdc ref="/disks/pcx86/compiled/library.xml"/>
 	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
 	<cpu id="cpu8088" model="8088" autoStart="true"/>
-	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-functions.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pcx86/panel/wide.xml"/>
 	<chipset id="chipset" model="5160" sw1="01001001" pos="left" padLeft="8px" padBottom="8px">

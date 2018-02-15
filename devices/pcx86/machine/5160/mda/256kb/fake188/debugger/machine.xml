@@ -25,7 +25,7 @@
 		<control type="file" binding="mountDisk"/>
 	</fdc>
 	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
-	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-minimal.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pcx86/panel/default.xml"/>
 	<chipset id="chipset" model="5160" sw1="01000001"/>

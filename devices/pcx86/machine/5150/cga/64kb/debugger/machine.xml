@@ -9,7 +9,7 @@
 	<video ref="/devices/pcx86/video/ibm/cga/ibm-cga.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true"/>
-	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-minimal.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pcx86/panel/wide.xml"/>
 	<chipset ref="/devices/pcx86/chipset/5150-cga-max.xml"/>

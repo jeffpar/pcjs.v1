@@ -11,7 +11,7 @@
 	<video ref="/devices/pcx86/video/ibm/ega/1984-09-13/128kb-autolockfs.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml" autoMount='{A: {name: "COMPAQ MS-DOS 3.31 (Disk 1)"}, B: {name: "None"}}'/>
 	<hdc ref="/disks/pcx86/fixed/47mb/unformatted-at5.xml"/>
-	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-arrows.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us84-softkeys.xml"/>
 	<debugger id="debugger" messages="" commands=""/>
 	<panel ref="/devices/pcx86/panel/wide386.xml"/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]"/>

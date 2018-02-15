@@ -13,6 +13,6 @@
 		<control type="button" binding="reset">Reset</control>
 		<control type="button" binding="setSpeed">Speed</control>
 	</cpu>
-	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-arrows.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<chipset id="chipset" model="5150" sw1="01000001" sw2="11111000"/>
 </machine>

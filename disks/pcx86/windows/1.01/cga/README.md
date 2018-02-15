@@ -24,7 +24,7 @@ Microsoft Windows 1.01 with CGA Display
 
 [Microsoft Windows 1.01](/disks/pcx86/windows/1.01/), the first public version of Windows, was released on
 November 20, 1985.  It is shown here running on an IBM PC XT (Model 5160) with a CGA Display.  You can also run
-Windows 1.01 with a [Debugger](debugger/), [Soft Keyboard](softkbd/), or [EGA Display](/disks/pcx86/windows/1.01/).
+Windows 1.01 with a [Debugger](debugger/) or [EGA Display](/disks/pcx86/windows/1.01/).
 
 {% include machine.html id="ibm5160-cga-win101" %}
 
@@ -39,5 +39,5 @@ been pre-configured to always start Windows 1.01 in the same state.
 NOTE: The Windows 1.01 mouse pointer can be controlled with your mouse, but only when your mouse is
 within the "CGA Display" window. This is a restriction imposed by your web browser, not PCjs.
 
-For more control over this machine, try the [Control Panel](debugger/) or [Soft Keyboard](softkbd/) configurations,
-both of which feature the built-in PCjs Debugger, with save/restore enabled.
+For more control over this machine, try the [Control Panel](debugger/) configuration, which features the built-in
+PCjs Debugger, with save/restore enabled.

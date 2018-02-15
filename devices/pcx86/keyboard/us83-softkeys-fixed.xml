@@ -83,7 +83,7 @@
 		<control type="key" binding="alt" top="168px" left="96px" width="54px">Alt</control>
 		<control type="key" binding="space" top="168px" left="158px" width="456px">Space</control>
 		<control type="key" binding="caps-lock" top="168px" left="622px" width="54px">Caps</control>
-		<control type="key" binding="num-ins" top="168px" left="696px" width="54px">Ins</control>
-		<control type="key" binding="num-del" top="168px" left="760px" width="54px">Del</control>
+		<control type="key" binding="num-ins" top="168px" left="696px" width="54px">0</control>
+		<control type="key" binding="num-del" top="168px" left="760px" width="54px">.</control>
 	</control>
 </keyboard>

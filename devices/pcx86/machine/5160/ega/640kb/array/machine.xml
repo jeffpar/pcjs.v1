@@ -10,7 +10,7 @@
 	<video ref="/devices/pcx86/video/ibm/ega/1984-09-13/128kb-autolock640.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml"/>
 	<hdc ref="/disks/pcx86/fixed/10mb/unformatted-xt3.xml"/>
-	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-minimal.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<cpu id="cpu8088" model="8088">
 		<control type="button" binding="setSpeed">Fast</control>
 	</cpu>

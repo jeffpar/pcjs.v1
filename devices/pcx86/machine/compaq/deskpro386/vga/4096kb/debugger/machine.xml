@@ -11,7 +11,7 @@
 	<video ref="/devices/pcx86/video/ibm/vga/1986-10-27/256kb-autolockfs.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml" autoMount='{A: {name: "PC-DOS 3.30 (Disk 1)", path: "/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1.json"}, B: {name: "PC-DOS 3.30 (Disk 2)", path: "/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK2.json"}}'/>
 	<hdc ref="/disks/pcx86/fixed/47mb/unformatted-at5.xml"/>
-	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-functions.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us84-softkeys.xml"/>
 	<debugger id="debugger" messages="" commands=''/>
 	<panel ref="/devices/pcx86/panel/wide386.xml"/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]" monitor="vga"/>

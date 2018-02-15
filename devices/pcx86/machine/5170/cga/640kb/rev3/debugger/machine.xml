@@ -8,7 +8,7 @@
 	<rom id="romBIOS" addr="0xf0000" size="0x10000" alias="0xff0000" file="/devices/pcx86/rom/5170/1985-11-15/ATBIOS-REV3.json"/>
 	<video ref="/devices/pcx86/video/ibm/cga/ibm-cga.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml" autoMount='{A: {name: "PC-DOS 3.00 (Disk 1)", path: "/disks/pcx86/dos/ibm/3.00/PCDOS300-DISK1.json"}, B: {name: "PC-DOS 3.00 (Disk 2)", path: "/disks/pcx86/dos/ibm/3.00/PCDOS300-DISK2.json"}}'/>
-	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-functions.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us84-softkeys.xml"/>
 	<debugger id="debugger" messages="fault" commands=""/>
 	<panel ref="/devices/pcx86/panel/wide.xml"/>
 	<comment>

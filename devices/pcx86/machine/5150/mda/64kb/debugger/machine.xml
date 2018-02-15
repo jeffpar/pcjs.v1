@@ -9,7 +9,7 @@
 	<video ref="/devices/pcx86/video/ibm/mda/ibm-mda.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true"/>
-	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-functions.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pcx86/panel/wide.xml"/>
 	<chipset id="chipset" model="5150" sw1="01000001" sw2="11111000" pos="left" padLeft="8px" padBottom="8px">

@@ -3,7 +3,7 @@
 <machine id="ibm5150" type="pcx86" border="1" pos="center" background="default">
 	<name pos="center">IBM PC (Model 5150), MDA, 256K</name>
 	<computer id="pc-mda-64k" name="IBM PC"/>
-	<ram id="ramLow" addr="0x00000" test="false" comment="no memory test"/>
+	<ram id="ramLow" addr="0x00000" test="false" comment="ROM BIOS memory test has been disabled"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5150/basic/BASIC100.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5150/1981-04-24/PCBIOS-REV1.json"/>
 	<video ref="/devices/pcx86/video/ibm/mda/ibm-mda.xml"/>
@@ -13,6 +13,6 @@
 		<control type="button" binding="reset">Reset</control>
 		<control type="button" binding="setSpeed">Speed</control>
 	</cpu>
-	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-minimal.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<chipset id="chipset" model="5150" sw1="01000001" sw2="10011000"/>
 </machine>

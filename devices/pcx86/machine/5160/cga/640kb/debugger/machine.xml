@@ -11,7 +11,7 @@
 	<video ref="/devices/pcx86/video/ibm/cga/ibm-cga-keygrid.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml"/>
 	<hdc ref="/disks/pcx86/fixed/10mb/pcdos200-empty-xt3.xml"/>
-	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-arrows.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pcx86/panel/wide.xml"/>
 	<chipset id="chipset" model="5160" sw1="01001001" pos="left" padLeft="8px" padBottom="8px">

@@ -11,6 +11,6 @@
 	<video ref="/devices/pcx86/video/ibm/mda/ibm-mda.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml"/>
 	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
-	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-minimal.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<chipset id="chipset" model="5160" sw1="01000001"/>
 </machine>

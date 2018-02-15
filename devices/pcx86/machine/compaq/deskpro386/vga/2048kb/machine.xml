@@ -11,7 +11,7 @@
 	<video ref="/devices/pcx86/video/ibm/vga/1986-10-27/256kb-autolockfs.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml" autoMount='{A: {name: "COMPAQ MS-DOS 3.31 (Disk 2)", path: "/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json"}, B: {name: "COMPAQ MS-DOS 3.31 (Disk 3)", path: "/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK3.json"}}'/>
 	<hdc ref="/disks/pcx86/fixed/47mb/unformatted-at5.xml"/>
-	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-functions.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us84-softkeys.xml"/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]" monitor="vga"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2"/>

@@ -17,7 +17,6 @@ IBM PC with Monochrome (MDA) Display
 All our Monochrome (MDA) configurations of the IBM PC Model 5150 are located here, including:
 
 * [IBM PC (64Kb) with Monochrome Display](/devices/pcx86/machine/5150/mda/64kb/) ([Debugger](/devices/pcx86/machine/5150/mda/64kb/debugger/))
-* [IBM PC (64Kb) with Monochrome Display and Soft Keyboard (Debugger)](/devices/pcx86/machine/5150/mda/64kb/softkbd/)
 * [IBM PC (256Kb) with Monochrome Display](/devices/pcx86/machine/5150/mda/256kb/) ([Debugger](/devices/pcx86/machine/5150/mda/256kb/debugger/))
 
 Below is a 64kb configuration, with a clock speed of 4.77Mhz,
