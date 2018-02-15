@@ -16,7 +16,7 @@ IBM PC XT (256Kb) with Color Display
 All our 256Kb Model 5160, aka IBM PC XT, configurations are located here, including:
 
 * [IBM PC XT (256Kb, 10Mb Drive) Machine Array with CGA Displays](/devices/pcx86/machine/5160/cga/256kb/array/)
-* [IBM PC XT (256Kb, 10Mb Drive) with Color Display and Soft Keyboard](/devices/pcx86/machine/5160/cga/256kb/softkbd/)
+* [IBM PC XT (256Kb, 10Mb Drive) with Color Display and Debugger](/devices/pcx86/machine/5160/cga/256kb/debugger/)
 
 {% include machine.html id="ibm5160" %}
 
@@ -25,6 +25,3 @@ using the original IBM PC Model 5160 ROM BIOS and CGA font ROM.
 
 This PC XT configuration also includes an empty 10Mb hard disk. Use FDISK and then FORMAT to turn it into
 a usable C: drive.
-
-For more control over this machine, try the [Control Panel](debugger/) configuration, featuring the
-built-in PCjs Debugger.

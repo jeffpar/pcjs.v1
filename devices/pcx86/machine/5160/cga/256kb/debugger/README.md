@@ -5,6 +5,7 @@ permalink: /devices/pcx86/machine/5160/cga/256kb/debugger/
 redirect_from:
   - /configs/pc/machines/5160/cga/256kb/demo/debugger/
   - /devices/pcx86/machine/5160/cga/256kb/demo/debugger/
+  - /devices/pcx86/machine/5160/cga/256kb/softkbd/
 machines:
   - id: ibm5160
     type: pcx86

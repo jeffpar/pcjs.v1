@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.7/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.8/machine.xsl"?>
 <machine id="ibm5160" type="pcx86" border="1" pos="center" background="default">
 	<name pos="center">IBM PC XT (Model 5160), CGA, 640K, 10Mb Drive (Formatted)</name>
 	<computer id="xt-cga-640k" name="IBM PC XT"/>
@@ -14,7 +14,7 @@
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 	</cpu>
-	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-arrows.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<chipset id="chipset" model="5160" sw1="01001001"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2"/>

@@ -175,7 +175,7 @@
 			<xsl:choose>
 				<xsl:when test="@width">
 					<xsl:choose>
-						<xsl:when test="$left != '' or $top != ''">width:<xsl:value-of select="@width"/>;</xsl:when>
+						<xsl:when test="$left != '' or $top != ''">width:<xsl:value-of select="@width"/></xsl:when>
 						<xsl:when test="@pos = 'left' or @pos = 'right'">width:<xsl:value-of select="@width"/>;max-width:<xsl:value-of select="@width"/>;</xsl:when>
 						<xsl:otherwise>width:auto;max-width:<xsl:value-of select="@width"/>;</xsl:otherwise>
 					</xsl:choose>
@@ -343,7 +343,7 @@
 			<xsl:choose>
 				<xsl:when test="@pos = 'left'">float:left;</xsl:when>
 				<xsl:when test="@pos = 'right'">float:right;</xsl:when>
-				<xsl:when test="@pos = 'center'">margin:0 auto;</xsl:when>
+				<xsl:when test="@pos = 'center'">clear:both;margin:0 auto;</xsl:when>
 				<xsl:when test="@pos = 'default'">clear:both;</xsl:when>
 				<xsl:when test="@pos">position:<xsl:value-of select="@pos"/>;</xsl:when>
 				<xsl:when test="$left != '' or $top != ''">position:relative;</xsl:when>

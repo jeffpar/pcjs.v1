@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.7/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.50.8/machine.xsl"?>
 <machine id="ibm5170" type="pcx86" border="1" pos="center" background="default">
 	<name pos="center">IBM PC AT (8Mhz), 128Kb EGA, 2Mb RAM, 20Mb Hard Disk (Formatted)</name>
 	<computer id="at-ega-2048k" name="IBM PC AT" buswidth="24"/>
@@ -9,7 +9,7 @@
 	<rom id="romBIOS" addr="0xf0000" size="0x10000" alias="0xff0000" file="/devices/pcx86/rom/5170/1985-11-15/ATBIOS-REV3.json"/>
 	<video ref="/devices/pcx86/video/ibm/ega/1984-09-13/128kb-lockfs.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml" autoMount='{A:{name:"PC-DOS 3.30 (Disk 1)",path:"/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1.json"}, B:{name:"PC-DOS 3.30 (Disk 2)",path:"/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK2.json"}}'/>
-	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-arrows.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us84-softkeys.xml"/>
 	<debugger id="debugger" messages="fault" commands=""/>
 	<panel ref="/devices/pcx86/panel/wide.xml"/>
 	<hdc ref="/disks/pcx86/fixed/20mb/pcdos330-empty-at2.xml"/>
