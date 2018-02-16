@@ -15,4 +15,6 @@
 		<control type="button" binding="setSpeed">Speed</control>
 	</cpu>
 	<chipset id="chipset" model="5150" sw1="01001001" sw2="10011000"/>
+	<serial id="com1" adapter="1"/>
+	<parallel id="lpt1" adapter="2"/>
 </machine>

@@ -4952,7 +4952,14 @@ class DebuggerX86 extends Debugger {
             } else {
                 var dbgAddrEnd = this.parseAddr(sLen);
                 if (!dbgAddrEnd) return;
-                len = dbgAddrEnd.off - dbgAddr.off + 1;
+                /*
+                 * To be more DEBUG-like, when an ending address is used instead of a length, we treat it inclusively, hence the "+ 1".
+                 */
+                if (dbgAddr.type != DebuggerX86.ADDRTYPE.LINEAR) {
+                    len = dbgAddrEnd.off - dbgAddr.off + 1;
+                } else {
+                    len = dbgAddrEnd.addr - dbgAddr.addr + 1;
+                }
             }
             if (len < 0 || len > 0x10000) len = 0;
         }
@@ -4963,12 +4970,22 @@ class DebuggerX86 extends Debugger {
         var cb = (size * len) || 128;
         var cLines = ((cb + 15) >> 4) || 1;
         var cbLine = (size == 4? 16 : this.nBase);  // the base also happens to be a reasonable number of bytes/line
+        
+        /*
+         * The "da" variation uses a line size of 160 bytes, because that's the number of characters
+         * per line in a text frame buffer; if no ending address or length is specified, the number of
+         * lines defaults to 25 (the typical number of visible lines in a frame buffer).
+         * 
+         * Beyond that, the command doesn't make any other assumptions about the memory format.  Video
+         * frame buffers usually dump nicely because all the attribute bytes tend to be non-ASCII.
+         */
         if (sCmd[1] == 'a') {
             fASCII = true;
-            cLines = 25;
             cbLine = 160;
+            cLines = (len <= 1? 25 : Math.ceil(len / cbLine));
             cb = cLines * cbLine;
         }
+        
         while (cLines-- && cb > 0) {
             var data = 0, iByte = 0, i;
             var sData = "", sChars = "";
