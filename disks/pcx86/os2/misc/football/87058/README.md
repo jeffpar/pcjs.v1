@@ -22,12 +22,15 @@ This disk contained a prototype version of OS/2 from February 1987, code-named *
 (aka **PIGSKIN**).  It predated the completion of OS/2 1.0 by some eight months and was based on the
 [SIZZLE](/disks/pcx86/os2/misc/cpdos/87007/) fork, which started around November 1986.
 
-On boot, it displays the following version banner:
+On startup, FOOTBALL displays the following banner:
 
 	CP-DOS version 1.0
 	Copyright 1986,1987  Microsoft Corp.
 	
 	PIGSKIN Internal revision 7.68.17, 87/02/26
+
+See [Booting FOOTBALL](#booting-football) for startup instructions, and the
+[FOOTBALL Design Document](#football-design-document) for an internal description of the prototype.
 
 Most of the work on this prototype occurred between December 1, 1986 and February 28, 1987, with the principal goal
 of demonstrating multiple DOS applications running in V86-mode to BillG; that demo probably occurred in March 1987.
@@ -43,15 +46,17 @@ initially was version 1.3 (also known as **PIGSKIN** and later **CRUISER**) but 
 
 A directory listing of this disk is provided [below](#directory-of-os2-football-boot-disk-v76817).
 
-We also have an original [FOOTBALL Design Document](#football-design-document) describing this prototype.
-
 {% include machine.html id="deskpro386" %}
 
 Booting FOOTBALL
----
+----------------
 
-When booting on a [COMPAQ DeskPro 386 with 4Mb of RAM](/devices/pcx86/machine/compaq/deskpro386/ega/4096kb/debugger/),
-the following information is output to COM2 by the kernel's built-in debugger:
+Click the "Run" button on the
+[COMPAQ DeskPro 386](/devices/pcx86/machine/compaq/deskpro386/ega/4096kb/debugger/) above to the start
+the machine and begin the boot process.
+
+The OS/2 kernel debugger is built into the FOOTBALL kernel and automatically connects to COM2, which is captured by the
+PCjs Control Panel output window:
 
 	bx=001d, cx=f905, dx=0700, cs=1770, ds=1b10
 	NoHighMem=0000
@@ -95,13 +100,36 @@ the following information is output to COM2 by the kernel's built-in debugger:
 	0128:0483 C3             RET
 	#
 
-After typing "g" into the kernel debugger, the version banner is displayed.  After any CONFIG.SYS messages,
-SHELL.EXE should display:
+At this point, the kernel debugger has stopped the boot process and is waiting for commands.  Click on the output window
+and type "g" and press Enter to continue booting.  The following additional debugger messages should appear:
+
+    PageInit: arenainfo=0048:21c4, dgroup=00026000
+    lastpaddr=00400000, NPAGETABLES=0004
+    0403 PFT entries @0098:0000 (3024 bytes)
+    0700 VALID pages=4000 to 5c00
+    08fa AOD pages=5c00 to 7fe8
+    Page directory at 00029000 (0138:3000)
+    Paging enabled
+    PFT moved to 0098:0000 (3024 bytes)
+    Freeing laddr=0040c000, size=002f4000
+    Freeing laddr=00057000, size=00042000
+    Swap_Pte=7ff8(4094) base=00ffe000, Copy_Pte=7ff0(4092) base=00ffc000, sel=00a0
+    free=0336, virtual=1321, lockable=0322, maxswap=0100, swap=0fff
+    PageReinit(dgroup laddr=00fc1000)
+    Page directory at 0006f000 (0138:3000)
+    Paging enabled
+    Symbols linked (IBMDOSD)
+
+If you don't see the above output, including final `Symbols linked (IBMDOSD)` message, then something went wrong.
+Otherwise, the version banner should appear on the machine's screen.  After any CONFIG.SYS messages, SHELL.EXE should
+display:
 
 * Start A Protect Mode Program
 * Start A Real Mode Program
 
-The first option will start CMD.EXE, and the second option will start COMMAND.COM.
+The first option will start CMD.EXE, and the second option will start COMMAND.COM.  To return to the SHELL, press the
+`Sys Req` key.  Since modern keyboards don't have that key, you will need to click the `Keyboard` button to display the
+PCjs soft keyboard, and then click the `Sys` key in the top right corner of that keyboard.  
 
 ### Directory of OS/2 FOOTBALL Boot Disk (v7.68.17)
 
@@ -142,9 +170,9 @@ The first option will start CMD.EXE, and the second option will start COMMAND.CO
 	       31 File(s)    549888 bytes free
 
 FOOTBALL Design Document
----
+------------------------
 
-The following text is from an email titled "3xBox Design Document" sent to the
+From the PCjs Archives: the following text is from an email titled "3xBox Design Document" sent to the
 Microsoft *football* alias on Saturday, February 28, 1987, at 5:02pm.
 
 	Overview

@@ -2211,7 +2211,7 @@ Keyboard.CLICKCODES = {
 };
 
 /**
- * Maps SOFTCODE (string) to KEYCODE or SIMCODE (number).
+ * Maps SOFTCODE (string) to SIMCODE (number) -- which may be the same as KEYCODE for ASCII keys.
  *
  * We define identifiers for all possible keys, based on their primary (unshifted) character or function.
  * This also serves as a definition of all supported keys, making it possible to create full-featured
@@ -2248,7 +2248,7 @@ Keyboard.CLICKCODES = {
  * key is defined as 'quote' rather than "'".  Similarly, if there was unshifted "double-quote" key, it could
  * not be called '"', because components.xsl quotes the *entire* "data-value" attribute using double-quotes.
  *
- * In the (informal) numbering of keys below, two keys are deliberately numbered 84, reflecting the fact that
+ * In the (commented) numbering of keys below, two keys are deliberately numbered 84, reflecting the fact that
  * the 'sysreq' key was added to the 84-key keyboard but then dropped from the 101-key keyboard as a stand-alone key.
  *
  * @enum {number}
@@ -2337,7 +2337,15 @@ Keyboard.SOFTCODES = {
     /* 81 */    'num-pgdn':     Keyboard.SIMCODE.PGDN,          // formerly "page-down"
     /* 82 */    'num-ins':      Keyboard.SIMCODE.INS,           // formerly "ins"
     /* 83 */    'num-del':      Keyboard.SIMCODE.DEL,           // formerly "del"
-    /* 84 */    'sysreq':       Keyboard.SCANCODE.SYSREQ        // 84-key keyboard only (simulated with 'alt'+'prtsc' on 101-key keyboards)
+    /* 84 */    'sysreq':       Keyboard.SIMCODE.SYSREQ         // 84-key keyboard only (simulated with 'alt'+'prtsc' on 101-key keyboards)
+    
+    /*
+     * If I ever add 101-key keyboard support (and it's not clear that I will), then the following entries
+     * will have to be converted to SIMCODE indexes, and each SIMCODE index will need an entry in the SIMCODES
+     * table that defines the appropriate SCANCODE(S); as this component has evolved, SOFTCODES are no longer
+     * mapped directly to SCANCODES.
+     */
+    
 //  /* 84 */    'pause':        Keyboard.SCANCODE.PAUSE,        // 101-key keyboard only
 //  /* 85 */    'f11':          Keyboard.SCANCODE.F11,
 //  /* 86 */    'f12':          Keyboard.SCANCODE.F12,

@@ -3324,7 +3324,7 @@ class Component {
                     switch (sClass) {
                         case sAppClass + "-binding":
                             parms = Component.getComponentParms(/** @type {HTMLElement} */(control));
-                            if (parms && parms['binding']) {
+                            if (parms && parms['binding'] !== undefined) {
                                 component.setBinding(parms['type'], parms['binding'], /** @type {HTMLElement} */(control), parms['value']);
                             } else if (!parms || parms['type'] != "description") {
                                 Component.log("Component '" + component.toString() + "' missing binding" + (parms? " for " + parms['type'] : ""), "warning");
