@@ -5,7 +5,7 @@ permalink: /disks/pcx86/os2/misc/football/
 ---
 
 OS/2 FOOTBALL Disks
----
+-------------------
 
 #### OS/2 FOOTBALL Boot Disk (v7.68.17)
 

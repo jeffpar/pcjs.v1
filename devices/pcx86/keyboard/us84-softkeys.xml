@@ -1,4 +1,4 @@
-<keyboard id="keyboard" model="us83" style="clear:both;">
+<keyboard id="keyboard" model="us84" style="clear:both;">
 	<control type="button" binding="ctrl-alt-del" padLeft="8px" padBottom="8px">Ctrl-Alt-Del</control>
 	<control type="button" binding="keyboard" padLeft="8px" padRight="8px" padBottom="8px">Keyboard</control>
 	<control type="container" height="210px" pos="center" style="max-width:900px;display:none;" padding="8px">
@@ -30,7 +30,7 @@
 		<control type="key" binding="esc" top="0" left="82.00%" width="3.78%">Esc</control>
 		<control type="key" binding="num-lock" top="0" left="86.67%" width="3.78%">Num</control>
 		<control type="key" binding="scroll-lock" top="0" left="91.33%" width="3.78%">Scr</control>
-		<control type="key" binding="sys-req" top="0" left="96.00%" width="3.78%">Sys</control>
+		<control type="key" binding="sysreq" top="0" left="96.00%" width="3.78%">Sys</control>
 		<control type="key" binding="tab" top="42px" left="10.67%" width="8.44%">Tab</control>
 		<control type="key" binding="q" top="42px" left="20.00%" width="3.78%">Q</control>
 		<control type="key" binding="w" top="42px" left="24.67%" width="3.78%">W</control>

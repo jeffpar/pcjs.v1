@@ -5,7 +5,7 @@ permalink: /disks/pcx86/os2/misc/cpdos/
 ---
 
 OS/2 CP-DOS Disks
----
+-----------------
 
 #### OS/2 CP-DOS Boot Disk (v7.68)
 
