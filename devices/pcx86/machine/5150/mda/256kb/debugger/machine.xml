@@ -17,4 +17,6 @@
 		<control type="switches" label="SW2" binding="sw2" left="0px"/>
 		<control type="description" binding="swdesc" left="0px"/>
 	</chipset>
+	<serial id="com1" adapter="1" binding="print"/>
+	<parallel id="lpt1" adapter="2" binding="print"/>
 </machine>

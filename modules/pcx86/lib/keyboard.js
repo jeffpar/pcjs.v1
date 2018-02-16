@@ -150,6 +150,7 @@ class Keyboard extends Component {
         this.msAutoRelease   = 50;
         this.msInjectDefault = 150;         // number of milliseconds between injected keystrokes
         this.msInjectDelay   = 0;           // set by the initial injectKeys() call
+        this.msDoubleClick   = 250;         // used by mousedown/mouseup handlers to soft-lock modifier keys
 
         /*
          * autoType records the machine's specified autoType sequence, if any.  At the appropriate signal(s),
@@ -287,8 +288,13 @@ class Keyboard extends Component {
                     this.cSoftCodes++;
                     this.bindings[id] = controlText;
                     if (DEBUG) console.log("binding soft-code '" + sBinding + "'");
+                    var msLastEvent = 0, nClickState = 0;
+                    var fStateKey = (Keyboard.KEYSTATES[Keyboard.SOFTCODES[sBinding]] <= Keyboard.STATE.ALL_SHIFT);
                     var fnDown = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingDown(event) {
+                            var msDelta = event.timeStamp - msLastEvent;
+                            nClickState = (nClickState && msDelta < kbd.msDoubleClick? (nClickState << 1) : 1);
+                            msLastEvent = event.timeStamp;
                             event.preventDefault();                 // preventDefault() is necessary to avoid "zooming" when you type rapidly
                             kbd.sInjectBuffer = "";                 // key events should stop any injection currently in progress
                             kbd.addActiveKey(simCode);
@@ -296,7 +302,17 @@ class Keyboard extends Component {
                     }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
                     var fnUp = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingUp(event) {
-                            kbd.removeActiveKey(simCode);
+                            if (nClickState) {
+                                var msDelta = event.timeStamp - msLastEvent;
+                                nClickState = (fStateKey && msDelta < kbd.msDoubleClick? (nClickState << 1) : 0);
+                                msLastEvent = event.timeStamp;
+                                if (nClickState < 8) {
+                                    kbd.removeActiveKey(simCode);
+                                } else {
+                                    if (DEBUG) console.log("soft-locking '" + sBinding + "'");
+                                    nClickState = 0;
+                                }
+                            }
                         };
                     }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
                     if ('ontouchstart' in window) {
