@@ -18,4 +18,5 @@
 		<control type="description" binding="swdesc" left="0px"/>
 	</chipset>
 	<serial id="com1" adapter="1" binding="print"/>
+	<parallel id="lpt1" adapter="2" binding="print"/>
 </machine>

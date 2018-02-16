@@ -15,4 +15,6 @@
 	</cpu>
 	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<chipset id="chipset" model="5150" sw1="01000001" sw2="11111000"/>
+	<serial id="com1" adapter="1"/>
+	<parallel id="lpt1" adapter="2"/>
 </machine>
