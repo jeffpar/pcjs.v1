@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Key Differences
+title: Key Challenges and Features
 date: 2018-02-15 10:00:00
 permalink: /blog/2018/02/15/
 machines:
@@ -10,7 +10,7 @@ machines:
 ---
 
 There are a number of "key" challenges to emulating *all* the keys on IBM PC and PC AT keyboards, due to
-differences that have evolved over time between those early PC keyboards and keyboards people are using today.
+differences that have evolved over time between the early PC keyboards and keyboards people are using today.
 
 Modern keyboards, like the keyboard on my MacBook Pro, have some extra keys (like `F11` and `F12`), which are easily
 ignored.  The bigger problem is missing keys.  The more obvious ones include:
@@ -21,8 +21,8 @@ ignored.  The bigger problem is missing keys.  The more obvious ones include:
 which PCjs allows you to simulate by simply clicking on the "Num" and "Scroll" LED indicators in top right corner of
 a PCjs machine.  Unfortunately, that doesn't help much when you need to type:
 
-- Ctrl-Num-Lock (to pause output to the display)
-- Ctrl-Scroll-Lock (also known as Ctrl-Break, and the only way to abort a BASIC `LIST` command, for example)
+- Ctrl-Num-Lock (also known as Ctrl-Pause, this spins inside the ROM BIOS keyboard interrupt handler)
+- Ctrl-Scroll-Lock (also known as Ctrl-Break, this is the only way to abort a BASIC `LIST` command, for example)
 
 Less obvious missing keys are all the "numeric keypad" keys.  Granted, you can type any of `0` through `9`, `.`, `+`,
 and `-` using other keys on your modern keyboard, but the PC had those other keys as well, so typing those "other" keys
@@ -66,7 +66,7 @@ example, if you're running Windows, then it intercepts a variety of Alt-key comb
 that if you're running an old version of Windows inside a PCjs machine, that machine won't be able to receive Alt-Tab.
 
 I've not fully addressed that problem yet, but I *have* started to define some alternative keyboard shortcuts in PCjs.
-Two useful ones are:
+Two of the most useful ones are:
 
 - Ctrl-Delete (mapped to Ctrl-Scroll-Lock, aka Ctrl-Break)
 - Ctrl-Alt-Period (mapped to Ctrl-Alt-Delete)
@@ -79,12 +79,13 @@ But first, you need to understand which key is your `Delete` key.  On a MacBook 
 press "fn", "ctrl", "alt", and "delete".
 
 Now, if you forget to hold the "fn" key, you might notice that your machine still reboots.  But that's not because you
-actually typed the correct sequence; it's because of another handy shortcut that PCjs defined for you:
+actually typed the correct sequence; it's because of another handy shortcut that PCjs defined for you: Ctrl-Alt-Backspace,
+which like Ctrl-Alt-Period, is mapped to Ctrl-Alt-Delete.
 
-- Ctrl-Alt-Backspace (mapped to Ctrl-Alt-Delete)
+### Soft Keyboards
 
 When all else fails (or when you're running on a touchscreen device with no physical keyboard at all), PCjs now offers
-the ultimate solution: soft keyboards.  Every machine should now sport a `Keyboard` button that will show/hide a full-size
+the ultimate solution: soft keyboards.  Most PCjs machines now sport a `Keyboard` button that will show/hide a full-size
 virtual keyboard.  PC and PC XT-class machines use IBM's original 83-key layout, while PC AT-class machines use IBM's
 84-key layout.
 
@@ -103,11 +104,13 @@ in most cases, no key events are generated until an entire line of input is "ent
 
 PCjs soft keyboards operate much more like the original IBM PC keyboards.  Keys not only *press* when you press them and
 *release* when you release them, but they also *auto-repeat* when you *hold* them.  What a concept!  And they support multi-touch,
-so you can type Ctrl-C or Ctrl-Alt-Delete using the same 2 or 3-finger combinations that you're used to, instead of relying
-on "modal" modifier keys that iOS keyboards and others have embraced.
+so you can type Ctrl-C or Ctrl-Alt-Delete using the same 2 or 3-finger combinations that you're used to.
 
-PCjs keyboard support will continue to evolve, with more alternative shortcuts for reserved key sequences being added as time
-permits and feedback is provided.  In the meantime, use the machine below to check out the improved soft keyboard support.
+For users who only have a mouse or trackpad, you can still type any of those multi-key sequences by first double-clicking
+any of the `Ctrl`, `Alt`, or `Shift` modifier keys; they will remain "locked" in the down position while you click other keys.
+To "unlock" them, simply click them once more.
+
+Check out the improved soft keyboard support in the machine below.
 
 {% include machine.html id="ibm5150" %}
 
