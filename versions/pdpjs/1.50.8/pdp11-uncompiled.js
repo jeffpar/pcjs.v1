@@ -2450,17 +2450,27 @@ class Web {
     }
 
     /**
-     * isMobile()
+     * isMobile(sDevice)
      *
-     * Check the browser's user-agent string for the substring "Mobi", as per Mozilla recommendation:
+     * Checks the URL for a "mobile" parameter, and failing that, checks the browser's user-agent string for the
+     * substring "Mobi", as per Mozilla recommendation:
      *
      *      https://developer.mozilla.org/en-US/docs/Browser_detection_using_the_user_agent
      *
+     * @param {string} [sDevice] (eg, "iPad" to check for iPad, or "!iPad" to specifically exclude it) 
      * @return {boolean} is true if the browser appears to be a mobile (ie, non-desktop) web browser, false if not
      */
-    static isMobile()
+    static isMobile(sDevice)
     {
-        return Web.isUserAgent("Mobi");
+        var sMobile = Web.getURLParm("mobile");
+        if (sMobile) return sMobile == "true";
+        if (Web.isUserAgent("Mobi")) {
+            if (!sDevice) return true;
+            var fInvert = sDevice[0] == '!';
+            if (fInvert) sDevice = sDevice.substr(1);
+            return Web.isUserAgent(sDevice) != fInvert;
+        }
+        return false;
     }
 
     /**
