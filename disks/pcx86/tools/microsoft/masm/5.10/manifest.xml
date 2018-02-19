@@ -116,7 +116,7 @@
 		<file size="18" time="1988-02-01 12:00:00" attr="0x20">SHOWS.DEF</file>
 	</disk>
 	<disk id="disk06" size="368640" chs="40:2:9" img="private/MASM51A-UPDATE.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51A-UPDATE.json" md5="5048f31119457f3d6a46018e93f5c8b9" md5json="e27a58274843028ea62c7dabed142d5b">
-		<name>MS Macro Assembler 5.10A (Update)</name>
+		<name>MS Macro Assembler 5.10A</name>
 		<file size="102" time="1990-03-19 11:15:40" attr="0x10">BINB</file>
 		<file size="124448" time="1989-01-16 10:11:18" attr="0x20" dir="BINB/">MASM.EXE</file>
 		<file size="110937" time="1989-01-16 10:16:52" attr="0x20">MASM.EXE</file>

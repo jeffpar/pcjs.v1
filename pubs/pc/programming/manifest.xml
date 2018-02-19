@@ -408,14 +408,14 @@
 		<file size="49120" time="1996-11-01 01:00:00" attr="0x20">VCOM.MSG</file>
 	</disk>
 	<disk id="disk03" size="1228800" chs="80:2:15" img="Undocumented_DOS/archive/UNDOC-DOS-DISK1.img" href="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK1.json" md5="dd9d85065ec27b54055f991ea6bb4968" md5json="deed3c2bdc7a3567bae098092798e000">
-		<name>Undocumented DOS (Disk 1)</name>
+		<name>Undocumented DOS (1E Disk 1)</name>
 		<file size="52" time="1990-09-27 08:02:28" attr="0x20">INSTALL.DAT</file>
 		<file size="32225" time="1990-09-27 08:02:28" attr="0x20">INSTALL.EXE</file>
 		<file size="1041144" time="1990-09-27 08:02:28" attr="0x20">INTRLIST.EXE</file>
 		<file size="3420" time="1990-09-27 08:02:28" attr="0x20">README</file>
 	</disk>
 	<disk id="disk04" size="1228800" chs="80:2:15" img="Undocumented_DOS/archive/UNDOC-DOS-DISK2.img" href="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK2.json" md5="d35c9141a554b4854bb635173e72a999" md5json="e8b14acd15937edd281070dcc5df4f30">
-		<name>Undocumented DOS (Disk 2)</name>
+		<name>Undocumented DOS (1E Disk 2)</name>
 		<file size="832" time="1993-08-30 12:38:32" attr="0x10">CHAP2</file>
 		<file size="1057" time="1990-09-25 21:26:12" attr="0x20" dir="CHAP2/">CHAP2MK.BAT</file>
 		<file size="1213" time="1990-09-25 20:58:16" attr="0x20" dir="CHAP2/">FUNC0E32.C</file>
@@ -774,7 +774,7 @@
 		<file size="6348" time="1998-07-06 17:58:08" attr="0x20" md5="d231c2ed0131073226af153af24d6e12">WTEST.C</file>
 	</disk>
 	<disk id="disk08" size="1228800" chs="80:2:15" dir="Undocumented_DOS/archive/UNDOC-DOS2B" href="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2B.json" md5="71006e4eba749c2884084e10e3fdbf66" md5json="9cc03ec2825faafa3e29fcfdb6833da7">
-		<name>Undocumented DOS, 2nd Ed. (BIN)</name>
+		<name>Undocumented DOS (2E BIN)</name>
 		<file size="8909" time="2018-01-24 02:26:40" attr="0x20" md5="2a0a4decd6ca23c1ab7747d9a4c6b48a">MSDETECT.EXE</file>
 		<file size="10715" time="2018-01-24 02:26:40" attr="0x20" md5="79f12761fbb4a1f0817db6c10a00145a">NODOSMGR.EXE</file>
 		<file size="11115" time="2018-01-24 02:26:38" attr="0x20" md5="dc8bd2405a48e57f7657a8a3099ff596">DOSVER.EXE</file>
@@ -872,7 +872,7 @@
 		<file size="15885" time="2018-01-24 02:24:26" attr="0x20" md5="006175eaf3d1f4c5d85e992a76ae0d12">TSRMEM.EXE</file>
 	</disk>
 	<disk id="disk09" size="1228800" chs="80:2:15" dir="Undocumented_DOS/archive/UNDOC-DOS2S" href="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2S.json" md5="0a17aac2f4abed054f8665252d75a705" md5json="54ed9952ef96937153f76fdca010c28d">
-		<name>Undocumented DOS, 2nd Ed. (SRC)</name>
+		<name>Undocumented DOS (2E SRC)</name>
 		<file size="5538" time="1998-04-23 09:20:56" attr="0x20" md5="2f1cb449beaa093b851d1ecdf6aa3b5c">MSDETECT.C</file>
 		<file size="3256" time="1993-09-16 07:27:30" attr="0x20" md5="ac9f55f5a537bb0a30c64246d2f18745">NODOSMGR.C</file>
 		<file size="820" time="1993-08-10 16:12:38" attr="0x20" md5="8ef0eaa3444a540a21b3143cb859df0d">DO2E.ASM</file>
