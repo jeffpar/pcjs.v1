@@ -72,7 +72,7 @@ class Keyboard extends Component {
 
         this.setModel(parmsKbd['model']);
 
-        this.fMobile = Web.isMobile();
+        this.fMobile = Web.isMobile("!iPad");
         this.printMessage("mobile keyboard support: " + (this.fMobile? "true" : "false"));
         
         /*
@@ -192,25 +192,35 @@ class Keyboard extends Component {
     setBinding(sHTMLType, sBinding, control, sValue)
     {
         var kbd = this;
+        var className;
         var id = sHTMLType + '-' + sBinding;
         var controlText = /** @type {HTMLTextAreaElement} */ (control);
 
         if (this.bindings[id] === undefined) {
             switch (sBinding) {
             case "keyboard":
-                var controlKeyboard = control.parentElement.nextElementSibling;
-                if (controlKeyboard) {
-                    control.onclick = function onClickKeyboard(event) {
-                        if (kbd.fSoftKeyboard) {
-                            controlKeyboard.style.display = "none";
-                            kbd.fSoftKeyboard = false;
-                        } else {
-                            controlKeyboard.style.display = "block";
-                            kbd.fSoftKeyboard = true;
-                        }
-                    };
-                    this.fSoftKeyboard = (controlKeyboard.style.display != "none");
-                }    
+                try {
+                    /*
+                     * TODO: Fix this rather fragile code, which depends on the current structure of the given xxxx-softkeys.xml
+                     */
+                    var controlKeyboard = control.parentElement.parentElement.nextElementSibling;
+                    className = controlKeyboard.className;
+                    if (this.fMobile != (className.indexOf('mobile') >= 0)) {
+                        controlKeyboard = controlKeyboard.nextElementSibling;
+                    }
+                    if (controlKeyboard) {
+                        control.onclick = function onClickKeyboard(event) {
+                            if (kbd.fSoftKeyboard) {
+                                controlKeyboard.style.display = "none";
+                                kbd.fSoftKeyboard = false;
+                            } else {
+                                controlKeyboard.style.display = "block";
+                                kbd.fSoftKeyboard = true;
+                            }
+                        };
+                        this.fSoftKeyboard = (controlKeyboard.style.display != "none");
+                    }
+                } catch(err) {}
                 return true;
                 
             case "screen":
@@ -295,6 +305,13 @@ class Keyboard extends Component {
                     return true;
                 }
                 else if (Keyboard.SOFTCODES[sBinding] !== undefined) {
+                    /*
+                     * TODO: Fix this rather fragile code, which depends on the current structure of the given xxxx-softkeys.xml
+                     */
+                    className = control.parentElement.parentElement.className;
+                    if (className && this.fMobile != (className.indexOf('mobile') >= 0)) {
+                        break;
+                    }
                     this.cSoftCodes++;
                     this.bindings[id] = controlText;
                     if (DEBUG) console.log("binding soft-code '" + sBinding + "'");
@@ -2050,7 +2067,7 @@ Keyboard.SIMCODE = {
     CTRL_X:         Keys.ASCII.CTRL_X        + Keys.KEYCODE.FAKE,
     CTRL_Y:         Keys.ASCII.CTRL_Y        + Keys.KEYCODE.FAKE,
     CTRL_Z:         Keys.ASCII.CTRL_Z        + Keys.KEYCODE.FAKE,
-    SYSREQ:         Keys.KEYCODE.ESC         + Keys.KEYCODE.FAKE,
+    SYS_REQ:        Keys.KEYCODE.ESC         + Keys.KEYCODE.FAKE,
     CTRL_PAUSE:     Keys.KEYCODE.NUM_LOCK    + Keys.KEYCODE.FAKE,
     CTRL_BREAK:     Keys.KEYCODE.SCROLL_LOCK + Keys.KEYCODE.FAKE,
     CTRL_ALT_DEL:   Keys.KEYCODE.DEL         + Keys.KEYCODE.FAKE,
@@ -2147,7 +2164,7 @@ Keyboard.SCANCODE = {
     /* 0x51 */ NUM_PGDN:    81,
     /* 0x52 */ NUM_INS:     82,
     /* 0x53 */ NUM_DEL:     83,
-    /* 0x54 */ SYSREQ:      84,         // 84-key keyboard only (simulated with 'alt'+'prtsc' on 101-key keyboards)
+    /* 0x54 */ SYS_REQ:     84,         // 84-key keyboard only (simulated with 'alt'+'prtsc' on 101-key keyboards)
     /* 0x54 */ PAUSE:       84,         // 101-key keyboard only
     /* 0x57 */ F11:         87,
     /* 0x58 */ F12:         88,
@@ -2250,7 +2267,7 @@ Keyboard.CLICKCODES = {
     'NUM_PGUP':         Keyboard.SIMCODE.PGUP,
     'NUM_PGDN':         Keyboard.SIMCODE.PGDN,
     'ALT':              Keyboard.SIMCODE.ALT,
-    'SYSREQ':           Keyboard.SIMCODE.SYSREQ,
+    'SYS_REQ':          Keyboard.SIMCODE.SYS_REQ,
     /*
      * These bindings are for convenience (common key combinations that can be bound to a single control)
      */
@@ -2280,7 +2297,7 @@ Keyboard.CLICKCODES = {
  * triggered a "break" operation.
  *
  * On 101-key keyboards, IBM decided to move both those special operations to a new 'pause' ("Pause/Break")
- * key, near the new dedicated 'prtsc' ("Print Screen/SysRq") key -- and to drop the "e" from "SysReq".
+ * key, near the new dedicated 'prtsc' ("Print Screen/SysRq") key -- and to drop the "e" from "Sys Req".
  * Those keys behave as follows:
  *
  *      When 'pause' is pressed alone, it generates 0xe1 0x1d 0x45 0xe1 0x9d 0xc5 on make (nothing on break),
@@ -2293,7 +2310,7 @@ Keyboard.CLICKCODES = {
  *
  *      When 'prtsc' is pressed alone, it generates 0xe0 0x2a 0xe0 0x37, simulating the make of both 'shift'
  *      and 'prtsc'; when pressed with 'shift' or 'ctrl', it generates only 0xe0 0x37; and when pressed with
- *      'alt', it generates only 0x54 (to simulate 'sysreq').
+ *      'alt', it generates only 0x54 (to simulate 'sys-req').
  *
  *      TODO: Implement the above behaviors.
  *
@@ -2303,7 +2320,7 @@ Keyboard.CLICKCODES = {
  * not be called '"', because components.xsl quotes the *entire* "data-value" attribute using double-quotes.
  *
  * In the (commented) numbering of keys below, two keys are deliberately numbered 84, reflecting the fact that
- * the 'sysreq' key was added to the 84-key keyboard but then dropped from the 101-key keyboard as a stand-alone key.
+ * the 'sys-req' key was added to the 84-key keyboard but then dropped from the 101-key keyboard as a stand-alone key.
  *
  * @enum {number}
  */
@@ -2391,7 +2408,7 @@ Keyboard.SOFTCODES = {
     /* 81 */    'num-pgdn':     Keyboard.SIMCODE.PGDN,          // formerly "page-down"
     /* 82 */    'num-ins':      Keyboard.SIMCODE.INS,           // formerly "ins"
     /* 83 */    'num-del':      Keyboard.SIMCODE.DEL,           // formerly "del"
-    /* 84 */    'sysreq':       Keyboard.SIMCODE.SYSREQ         // 84-key keyboard only (simulated with 'alt'+'prtsc' on 101-key keyboards)
+    /* 84 */    'sys-req':      Keyboard.SIMCODE.SYS_REQ        // 84-key keyboard only (simulated with 'alt'+'prtsc' on 101-key keyboards)
     
     /*
      * If I ever add 101-key keyboard support (and it's not clear that I will), then the following entries
@@ -2595,9 +2612,9 @@ Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_ADD]     = Keyboard.SCANCODE.NUM_ADD;
 Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_SUB]     = Keyboard.SCANCODE.NUM_SUB;
 Keyboard.SIMCODES[Keyboard.SIMCODE.DEL]         = Keyboard.SCANCODE.NUM_DEL;
 Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_DEL]     = Keyboard.SCANCODE.NUM_DEL;
-Keyboard.SIMCODES[Keyboard.SIMCODE.SYSREQ]      = Keyboard.SCANCODE.SYSREQ;
+Keyboard.SIMCODES[Keyboard.SIMCODE.SYS_REQ]     = Keyboard.SCANCODE.SYS_REQ;
 /*
- * Entries beyond this point are for keys that existed only on 101-key keyboards (well, except for 'sysreq',
+ * Entries beyond this point are for keys that existed only on 101-key keyboards (well, except for 'sys-req',
  * which also existed on the 84-key keyboard), which ALSO means that these keys essentially did not exist
  * for a MODEL_5150 or MODEL_5160 machine, because those machines could use only 83-key keyboards.  Remember
  * that IBM machines and IBM keyboards are our reference point here, so while there were undoubtedly 5150/5160

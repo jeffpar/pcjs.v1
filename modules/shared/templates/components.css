@@ -124,6 +124,7 @@
     height: 34px;
     line-height: 34px; /* the equivalent of "vertical-align: middle" for single-line elements */
     background-color: #ffffff;
+    overflow: hidden;
 }
 .pcjs-panel-group {
     color: #ffffff;
