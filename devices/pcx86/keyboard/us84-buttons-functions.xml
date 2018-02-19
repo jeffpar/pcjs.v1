@@ -15,5 +15,5 @@
 	<control type="button" binding="f8">F8</control>
 	<control type="button" binding="f9">F9</control>
 	<control type="button" binding="f10">F10</control>
-	<control type="button" binding="sysreq">SysReq</control>
+	<control type="button" binding="sys-req">SysReq</control>
 </keyboard>
