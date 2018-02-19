@@ -5,13 +5,13 @@ permalink: /devices/pcx86/machine/compaq/
 ---
 
 COMPAQ Machines
----
+---------------
 
 PCjs currently supports the following COMPAQ machines:
 
  - [COMPAQ DeskPro 386](deskpro386/)
 
-And here is a roughly chronological list of COMPAQ machines from the 1980's which PCjs may eventually support:
+Here is a roughly chronological list of COMPAQ machines from the 1980's which PCjs may eventually support:
 
  - [COMPAQ Portable](#compaq-portable)
  - [COMPAQ [Portable] Plus](#compaq-portable-plus-aka-compaq-plus)

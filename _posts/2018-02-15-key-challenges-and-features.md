@@ -95,7 +95,7 @@ like Ctrl-Alt-Period, is mapped to `Ctrl-Alt-Delete`.
 ### Soft Keyboards
 
 When all else fails (or when you're running on a touchscreen device with no physical keyboard at all), PCjs now offers
-the ultimate solution: soft keyboards.  Most PCjs machines now sport a `Keyboard` button that will show/hide a full-size
+the ultimate solution: soft keyboards.  Most PCjs machines now sport a `Keys` button that will show/hide a full-size
 virtual keyboard.  PC and PC XT-class machines use IBM's original 83-key layout, while PC AT-class machines use IBM's
 84-key layout.
 

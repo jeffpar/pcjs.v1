@@ -5,7 +5,8 @@ permalink: /devices/pcx86/rom/att/6300/
 ---
 
 AT&amp;T 6300 ROM BIOS
----
+----------------------
+
 [BIOS-143.json](BIOS-143.json) is JSON-encoded dump of the ROM images (BIOS143E.BIN and BIOS143O.BIN) obtained from
 the [AT&amp;T 6300 Shrine](https://sites.google.com/site/att6300shrine/Home/downloads) website.  
 

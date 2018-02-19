@@ -135,9 +135,9 @@
 		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK1.json">COMPAQ MS-DOS 3.31 (Disk 1)</disk>
 		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json">COMPAQ MS-DOS 3.31 (Disk 2)</disk>
 		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK3.json">COMPAQ MS-DOS 3.31 (Disk 3)</disk>
-		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-USER-072789.json">COMPAQ MS-DOS 4.01 (USER 072789)</disk>
-		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-SETUP608.json">COMPAQ MS-DOS 3.31 (SETUP 6.08)</disk>
-		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-SETUP505.json">COMPAQ MS-DOS 3.31 (SETUP 5.05)</disk>
+		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-USER-072789.json">COMPAQ MS-DOS 4.01 (User)</disk>
+		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-SETUP608.json">COMPAQ MS-DOS 3.31 (Setup v6)</disk>
+		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-SETUP505.json">COMPAQ MS-DOS 3.31 (Setup v5)</disk>
 		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK1.json">COMPAQ MS-DOS 3.31G (Disk 1)</disk>
 		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK2.json">COMPAQ MS-DOS 3.31G (Disk 2)</disk>
 		<disk path="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK3.json">COMPAQ MS-DOS 3.31G (Disk 3)</disk>
@@ -558,7 +558,7 @@
 		<disk path="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01512-DISK3.json">MS Macro Assembler 5.10 (Disk 3)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01514-DISK4.json">MS Macro Assembler 5.10 (Disk 4)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-03159-DISK5.json">MS Macro Assembler 5.10 (Disk 5)</disk>
-		<disk path="/disks/pcx86/tools/microsoft/masm/5.10/MASM51A-UPDATE.json">MS Macro Assembler 5.10A (Update)</disk>
+		<disk path="/disks/pcx86/tools/microsoft/masm/5.10/MASM51A-UPDATE.json">MS Macro Assembler 5.10A</disk>
 		<disk path="/disks/pcx86/tools/microsoft/masm/6.00/MASM600-DISK1.json">MS Macro Assembler 6.00 (Disk 1)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/masm/6.00/MASM600-DISK2.json">MS Macro Assembler 6.00 (Disk 2)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/masm/6.00/MASM600-DISK3.json">MS Macro Assembler 6.00 (Disk 3)</disk>
@@ -861,13 +861,13 @@
 		<disk path="/apps/pcx86/1992/moria/disk.json">Moria 5.5 (1992)</disk>
 		<disk path="/pubs/pc/programming/DOS_Internals/DOS-INTERN.json">DOS Internals</disk>
 		<disk path="/pubs/pc/programming/The_Undocumented_PC/UNDOC.json">Undocumented PC</disk>
-		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK1.json">Undocumented DOS (Disk 1)</disk>
-		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK2.json">Undocumented DOS (Disk 2)</disk>
+		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK1.json">Undocumented DOS (1E Disk 1)</disk>
+		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK2.json">Undocumented DOS (1E Disk 2)</disk>
 		<disk path="/pubs/pc/programming/Undocumented_Windows/UNDOC-WIN.json">Undocumented Windows</disk>
 		<disk path="/pubs/pc/programming/Unauthorized_Windows_95/UNAUTH-W95B.json">Unauthorized Windows 95 (BIN)</disk>
 		<disk path="/pubs/pc/programming/Unauthorized_Windows_95/UNAUTH-W95S.json">Unauthorized Windows 95 (SRC)</disk>
-		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2B.json">Undocumented DOS, 2nd Ed. (BIN)</disk>
-		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2S.json">Undocumented DOS, 2nd Ed. (SRC)</disk>
+		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2B.json">Undocumented DOS (2E BIN)</disk>
+		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2S.json">Undocumented DOS (2E SRC)</disk>
 		<disk path="/tests/pcx86/vga/VGABIN.json">VGA Tests (Black Book)</disk>
 	</control>
 	<control type="button" binding="loadDisk">Load</control>

@@ -49,9 +49,9 @@ Selected machines from our [IBM PC Disk Library](/disks/pcx86/):
 
 ### IBM PC Machines
 
-Shortcuts to most of the preconfigured IBM PC machines in the project are listed below.  Some of them include
+Shortcuts to many of the preconfigured IBM PC machines in the project are listed below.  Some of them include
 a predefined state, which automatically restores the machine and the specified application to an initial
-state, while others include a hard disk with preinstalled software.
+state, while others include a hard disk with pre-installed software.
 
 However, most simply boot an early version of DOS, and the hard disk, if any, will generally be unformatted.
 From there, you can load other disks from the [Disk Library](/disks/pcx86/) (or mount your own disks) and install
