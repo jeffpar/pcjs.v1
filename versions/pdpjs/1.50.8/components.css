@@ -119,6 +119,7 @@
     height: 34px;
     line-height: 34px;
     background-color: #ffffff;
+    overflow: hidden;
 }
 .pcjs-panel-group {
     color: #ffffff;
