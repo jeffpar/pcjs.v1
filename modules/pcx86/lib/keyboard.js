@@ -209,7 +209,7 @@ class Keyboard extends Component {
                         controlKeyboard = controlKeyboard.nextElementSibling;
                     }
                     if (controlKeyboard) {
-                        control.onclick = function onClickKeyboard(event) {
+                        control.onclick = function onToggleKeyboard(event) {
                             if (kbd.fSoftKeyboard) {
                                 controlKeyboard.style.display = "none";
                                 kbd.fSoftKeyboard = false;
@@ -218,6 +218,14 @@ class Keyboard extends Component {
                                 kbd.fSoftKeyboard = true;
                             }
                         };
+                        /*
+                         * This is added simply to prevent the page from "zooming" around if you accidentally touch between the keys.
+                         */
+                        if ('ontouchstart' in window) {
+                            controlKeyboard.ontouchstart = function onTouchKeyboard(event) {
+                                event.preventDefault();
+                            };
+                        }
                         this.fSoftKeyboard = (controlKeyboard.style.display != "none");
                     }
                 } catch(err) {}

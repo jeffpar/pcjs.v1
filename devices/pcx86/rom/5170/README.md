@@ -5,17 +5,22 @@ permalink: /devices/pcx86/rom/5170/
 ---
 
 IBM PC AT (Model 5170) ROM Revisions
----
+------------------------------------
 
-There were three ROM BIOS revisions for the IBM PC AT, which we refer to as **[Rev 1](#ibm-pc-at-rom-bios-rev-1)**,
-**[Rev 2](#ibm-pc-at-rom-bios-rev-2)**, and **[Rev 3](#ibm-pc-at-rom-bios-rev-3)**.  Each revision was used with a
-corresponding motherboard type (**Type 1**, **Type 2**, and **Type 3**, respectively), which in turn were used with
-corresponding 5170 models ([Models 68 and 99](/devices/pcx86/machine/5170/#models-68-and-99),
+There were three ROM BIOS revisions for the IBM PC AT:
+
+- [Model 5170: Jan 10, 1984 (Rev 1)](#ibm-pc-at-rom-bios-rev-1)
+- [Model 5170: Jun 10, 1985 (Rev 2)](#ibm-pc-at-rom-bios-rev-2)
+- [Model 5170: Nov 15, 1985 (Rev 3)](#ibm-pc-at-rom-bios-rev-3)
+
+Each revision was used with a corresponding motherboard type (**Type 1**, **Type 2**, and **Type 3**, respectively),
+which in turn were used with corresponding 5170 models ([Models 68 and 99](/devices/pcx86/machine/5170/#models-68-and-99),
 [Model 239](/devices/pcx86/machine/5170/#model-239), and
-[Models 319 and 339](/devices/pcx86/machine/5170/#models-319-and-339), respectively).
+[Models 319 and 339](/devices/pcx86/machine/5170/#models-319-and-339), respectively).  All revisions included
+[IBM BASIC C1.10](../5160/basic/BASIC110.json).
 
-IBM PC AT ROM BIOS (Rev 1)
----
+### IBM PC AT ROM BIOS (Rev 1)
+
 [ATBIOS-REV1.json](1984-01-10/ATBIOS-REV1.json) contains the original IBM PC AT BIOS, dated January 10, 1984
 ("01/10/84").  It was produced for [5170 Models 68 and 99](/devices/pcx86/machine/5170/#models-68-and-99),
 announced August 14, 1984.
@@ -60,8 +65,8 @@ either the *merge* option or the appending of MAP data.  For the moment, the API
 
 ---
 
-IBM PC AT ROM BIOS (Rev 2)
----
+### IBM PC AT ROM BIOS (Rev 2)
+
 [ATBIOS-REV2.json](1985-06-10/ATBIOS-REV2.json) contains the second IBM PC AT BIOS, dated June 10, 1985.
 
 This BIOS was produced for [5170 Model 239](/devices/pcx86/machine/5170/#model-239), announced October 10,
@@ -93,8 +98,8 @@ The JSON-encoded ROM image that PCjs uses was created using the *FileDump* comma
 
 ---
 
-IBM PC AT ROM BIOS (Rev 3)
----
+### IBM PC AT ROM BIOS (Rev 3)
+
 [ATBIOS-REV3.json](1985-11-15/ATBIOS-REV3.json) contains the third (and last) IBM PC AT BIOS, dated November 15, 1985.
 
 This BIOS was produced for [5170 Models 319 and 339](/devices/pcx86/machine/5170/#models-319-and-339),

@@ -1,7 +1,7 @@
 <keyboard id="keyboard" model="us83" style="pointer-events:none;">
 	<control type="container" style="pointer-events:auto;">
 		<control type="button" binding="ctrl-alt-del" padLeft="8px" padBottom="8px">Ctrl-Alt-Del</control>
-		<control type="button" binding="keyboard" padLeft="8px" padRight="8px" padBottom="8px">Keyboard</control>
+		<control type="button" binding="keyboard" padLeft="8px" padBottom="8px">Keys</control>
 	</control>
 	<control class="soft-keyboard" type="container" height="210px" pos="center" style="max-width:860px;display:none;pointer-events:auto;" padding="8px">
 		<control type="key" binding="f1" top="0" left="0" width="3.95%">F1</control>
@@ -101,7 +101,7 @@
 		<control type="key" binding="f8" top="0" left="55.59%" width="5.00%">F8</control>
 		<control type="key" binding="f9" top="0" left="61.76%" width="5.00%">F9</control>
 		<control type="key" binding="f10" top="0" left="67.94%" width="5.00%">F10</control>
-		<control type="key" binding="" top="0" left="74.12%" width="5.00%"></control>
+		<control type="key" binding="" top="0" left="74.12%" width="5.00%"/>
 		<control type="key" binding="num-lock" top="0" left="82.06%" width="7.94%">Num</control>
 		<control type="key" binding="scroll-lock" top="0" left="91.47%" width="7.94%">Scroll</control>
 		<control type="key" binding="1" top="42px" left="0" width="5.00%">1 !</control>
