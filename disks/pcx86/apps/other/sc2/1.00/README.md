@@ -1,6 +1,6 @@
 ---
 layout: page
-title: SuperCalc2 1.00
+title: Sorcim SuperCalc2 1.00
 permalink: /disks/pcx86/apps/other/sc2/1.00/
 machines:
   - id: ibm5150-sc2
@@ -14,8 +14,8 @@ machines:
     autoType: $date\r$time\rb:\rsc2\r
 ---
 
-SuperCalc2 v1.00
-----------------
+Sorcim SuperCalc2 v1.00
+-----------------------
 
 {% include machine.html id="ibm5150-sc2" %}
 
