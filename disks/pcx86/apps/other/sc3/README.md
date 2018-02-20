@@ -1,11 +1,11 @@
 ---
 layout: page
-title: SuperCalc3
+title: Sorcim SuperCalc3
 permalink: /disks/pcx86/apps/other/sc3/
 ---
 
-SuperCalc3
-----------
+Sorcim SuperCalc3
+-----------------
 
 Information is available for the following versions of SuperCalc3.
 

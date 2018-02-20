@@ -38,18 +38,16 @@ more detail, along with a live demonstration of the software, but that's not yet
 
 ### Applications
 
+* [Ashton-Tate dBase II](apps/other/dbase2/)
 * [IBM TopView](apps/ibm/topview/)
 * [Lotus 1-2-3](apps/lotus/123/)
+* [MicroPro WordStar](apps/other/wordstar/)
 * [Microsoft Applications](apps/microsoft/)
+* [Software Arts VisiCalc](/apps/pcx86/1981/visicalc/)
+* [Sorcim SuperCalc2](apps/other/sc2/)
 * [More...](apps/other/)
 
-### Application Demos
-
-* [VisiCalc (1981)](/apps/pcx86/1981/visicalc/)
-* [Executive Suite (1982)](/apps/pcx86/1982/esuite/)
-* [Adventures in Math (1983)](/apps/pcx86/1983/adventmath/)
-* [Rogue (1985)](/apps/pcx86/1985/rogue/)
-* [More...](/apps/pcx86/)
+Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 
 ### Games
 

@@ -44,9 +44,9 @@
 		<control type="key" binding="p" top="42px" left="60.00%" width="3.95%">P</control>
 		<control type="key" binding="[" top="42px" left="64.88%" width="3.95%">[ {</control>
 		<control type="key" binding="]" top="42px" left="69.77%" width="3.95%">] }</control>
-		<control type="key" binding="enter" top="42px" left="74.65%" width="3.95%" height="76px"><br/>Enter</control>
+		<control type="key" binding="enter" top="42px" left="74.65%" width="3.95%" height="76px"><br/>&#8629;</control>
 		<control type="key" binding="num-home" top="42px" left="80.93%" width="3.95%">7</control>
-		<control type="key" binding="num-up" top="42px" left="85.81%" width="3.95%">8</control>
+		<control type="key" binding="num-up" top="42px" left="85.81%" width="3.95%">&#8593; 8</control>
 		<control type="key" binding="num-pgup" top="42px" left="90.70%" width="3.95%">9</control>
 		<control type="key" binding="ctrl" top="84px" left="11.16%" width="3.95%">Ctrl</control>
 		<control type="key" binding="a" top="84px" left="16.05%" width="3.95%">A</control>
@@ -61,9 +61,9 @@
 		<control type="key" binding=";" top="84px" left="60.00%" width="3.95%">; :</control>
 		<control type="key" binding="quote" top="84px" left="64.88%" width="3.95%">' "</control>
 		<control type="key" binding="`" top="84px" left="69.77%" width="3.95%">` ~</control>
-		<control type="key" binding="num-left" top="84px" left="80.93%" width="3.95%">4</control>
+		<control type="key" binding="num-left" top="84px" left="80.93%" width="3.95%">&#8592; 4</control>
 		<control type="key" binding="num-center" top="84px" left="85.81%" width="3.95%">5</control>
-		<control type="key" binding="num-right" top="84px" left="90.70%" width="3.95%">6</control>
+		<control type="key" binding="num-right" top="84px" left="90.70%" width="3.95%">&#8594; 6</control>
 		<control type="key" binding="num-add" top="84px" left="95.58%" width="3.95%" height="118px"><br/>+</control>
 		<control type="key" binding="shift" top="126px" left="11.16%" width="3.95%">Shift</control>
 		<control type="key" binding="\\" top="126px" left="16.05%" width="3.95%">\ |</control>
@@ -80,13 +80,13 @@
 		<control type="key" binding="right-shift" top="126px" left="69.77%" width="3.95%">Shift</control>
 		<control type="key" binding="prtsc" top="126px" left="74.65%" width="3.95%">PrtSc</control>
 		<control type="key" binding="num-end" top="126px" left="80.93%" width="3.95%">1</control>
-		<control type="key" binding="num-down" top="126px" left="85.81%" width="3.95%">2</control>
+		<control type="key" binding="num-down" top="126px" left="85.81%" width="3.95%">&#8595; 2</control>
 		<control type="key" binding="num-pgdn" top="126px" left="90.70%" width="3.95%">3</control>
 		<control type="key" binding="alt" top="168px" left="11.16%" width="6.28%">Alt</control>
 		<control type="key" binding="space" top="168px" left="18.37%" width="53.02%">Space</control>
 		<control type="key" binding="caps-lock" top="168px" left="72.33%" width="6.28%">Caps</control>
-		<control type="key" binding="num-ins" top="168px" left="80.93%" width="6.28%">0</control>
-		<control type="key" binding="num-del" top="168px" left="88.37%" width="6.28%">.</control>
+		<control type="key" binding="num-ins" top="168px" left="80.93%" width="6.28%">Ins 0</control>
+		<control type="key" binding="num-del" top="168px" left="88.37%" width="6.28%">Del .</control>
 	</control>
 	<control class="soft-keyboard-mobile" type="container" height="252px" pos="center" style="max-width:680px;display:none;pointer-events:auto;" padding="8px">
 		<control type="key" binding="esc" top="0" left="0" width="5.00%">Esc</control>
@@ -131,9 +131,9 @@
 		<control type="key" binding="p" top="84px" left="55.59%" width="5.00%">P</control>
 		<control type="key" binding="[" top="84px" left="61.76%" width="5.00%">[ {</control>
 		<control type="key" binding="]" top="84px" left="67.94%" width="5.00%">] }</control>
-		<control type="key" binding="enter" top="84px" left="74.12%" width="5.00%" height="76px"><br/>Enter</control>
+		<control type="key" binding="enter" top="84px" left="74.12%" width="5.00%" height="76px"><br/>&#8629;</control>
 		<control type="key" binding="num-home" top="84px" left="82.06%" width="5.00%">7</control>
-		<control type="key" binding="num-up" top="84px" left="88.24%" width="5.00%">8</control>
+		<control type="key" binding="num-up" top="84px" left="88.24%" width="5.00%">&#8593; 8</control>
 		<control type="key" binding="num-pgup" top="84px" left="94.41%" width="5.00%">9</control>
 		<control type="key" binding="a" top="126px" left="0" width="5.00%">A</control>
 		<control type="key" binding="s" top="126px" left="6.18%" width="5.00%">S</control>
@@ -147,9 +147,9 @@
 		<control type="key" binding=";" top="126px" left="55.59%" width="5.00%">; :</control>
 		<control type="key" binding="quote" top="126px" left="61.76%" width="5.00%">' "</control>
 		<control type="key" binding="`" top="126px" left="67.94%" width="5.00%">` ~</control>
-		<control type="key" binding="num-left" top="126px" left="82.06%" width="5.00%">4</control>
+		<control type="key" binding="num-left" top="126px" left="82.06%" width="5.00%">&#8592; 4</control>
 		<control type="key" binding="num-center" top="126px" left="88.24%" width="5.00%">5</control>
-		<control type="key" binding="num-right" top="126px" left="94.41%" width="5.00%">6</control>
+		<control type="key" binding="num-right" top="126px" left="94.41%" width="5.00%">&#8594; 6</control>
 		<control type="key" binding="\\" top="168px" left="0" width="5.00%">\ |</control>
 		<control type="key" binding="z" top="168px" left="6.18%" width="5.00%">Z</control>
 		<control type="key" binding="x" top="168px" left="12.35%" width="5.00%">X</control>
@@ -164,14 +164,14 @@
 		<control type="key" binding="right-shift" top="168px" left="67.94%" width="5.00%">Shift</control>
 		<control type="key" binding="prtsc" top="168px" left="74.12%" width="5.00%">PrtSc</control>
 		<control type="key" binding="num-end" top="168px" left="82.06%" width="5.00%">1</control>
-		<control type="key" binding="num-down" top="168px" left="88.24%" width="5.00%">2</control>
+		<control type="key" binding="num-down" top="168px" left="88.24%" width="5.00%">&#8595; 2</control>
 		<control type="key" binding="num-pgdn" top="168px" left="94.41%" width="5.00%">3</control>
 		<control type="key" binding="ctrl" top="210px" left="0" width="5.00%">Ctrl</control>
 		<control type="key" binding="shift" top="210px" left="6.18%" width="5.00%">Shift</control>
 		<control type="key" binding="alt" top="210px" left="12.35%" width="7.94%">Alt</control>
 		<control type="key" binding="space" top="210px" left="21.47%" width="48.53%">Space</control>
 		<control type="key" binding="caps-lock" top="210px" left="71.18%" width="7.94%">Caps</control>
-		<control type="key" binding="num-ins" top="210px" left="82.06%" width="7.94%">0</control>
-		<control type="key" binding="num-del" top="210px" left="91.47%" width="7.94%">.</control>
+		<control type="key" binding="num-ins" top="210px" left="82.06%" width="7.94%">Ins 0</control>
+		<control type="key" binding="num-del" top="210px" left="91.47%" width="7.94%">Del .</control>
 	</control>
 </keyboard>

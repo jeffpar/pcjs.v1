@@ -43,7 +43,7 @@ have been self-modifying, but it works, and it's all we've got.  All our EGA-bas
 updated to use that ROM.
 
 My collection of COMPAQ DeskPro 386 ROMs still has several holes, but I'm very happy to have finally found one of the
-earliest (if not *the* earliest) ROMs commercially available for this line of COMPAQ computers.
+earliest (if not *the* earliest) ROMs commercially available for the DeskPro 386 series of COMPAQ computers.
 
 ### Old Windows on New Windows
 
