@@ -27,9 +27,9 @@
  */
 
 /*
- * Scenarios:
+ * Tasks
  * 
- *      `gulp` (aka `gulp default`)
+ *      default (eg: `gulp` or `gulp default`)
  * 
  *          Recompiles all machine scripts in their respective version folder (under /versions) that
  *          are out-of-date with respect to the individual files (under /modules).  The target version
@@ -38,40 +38,40 @@
  *          It does this by running the `concat`, `compile`, `copy`, and `disks` tasks for all machines,
  *          in that order.
  * 
- *      `gulp concat` (or `gulp concat/{machine}`)
+ *      concat (eg: `gulp concat` or `gulp concat/{machine}`)
  * 
  *          Concatenates all the individual files (under /modules) that comprise the machines's compiled
  *          script; the resulting file (eg, pcx86-uncompiled.js) becomes the input file for the Closure
  *          Compiler, which is why each machine's `compile` task lists the corresponding `concat` task as a
  *          dependency/prerequisite.
  * 
- *      `gulp compile` (or `gulp compile/{machine}`)
+ *      compile (eg: `gulp compile` `gulp compile/{machine}`)
  * 
  *          For example, `gulp compile/pcx86` will recompile the current version of pcx86-uncompiled.js
  *          if it's out of date.
  * 
- *      `gulp compile/devices`
+ *      compile/devices
  * 
  *          This special task compiles all the newer machines that use Device classes; you can also compile
  *          them individually, just like any other machine (eg, `gulp compile/ti57`).
  * 
- *      `gulp copy` (or `gulp copy/{machine}`)
+ *      copy (eg: `gulp copy` or `gulp copy/{machine}`)
  * 
  *          Copies any other individual resources files listed in machines.json (other than scripts) to the
  *          machine's current version folder.
  * 
- *      `gulp disks`
+ *      disks
  * 
  *          Updates "compiled" (inlined) disk manifests (eg, /disks/pcx86/compiled/library.xml) from the
  *          "uncompiled" manifests (eg, /disks/pcx86/library.xml), which are actually "manifests of manifests"
  *          and therefore inherently slower to load.
  * 
- *      `gulp version`
+ *      version
  * 
  *          Updates the version number in all project machine XML files to match the version contained in
  *          _data/machines.json:shared.appversion.
  *
- *      `gulp copyright`
+ *      copyright
  *
  *          Updates the copyright year in all project files to match the year contained in package.json.
  */
@@ -232,7 +232,7 @@ aMachines.forEach(function(machineType) {
                     languageIn: "ES6",                          // this is now the default, just documenting our requirements
                     languageOut: "ES5",                         // this is also the default
                     outputWrapper: '(function(){%output%})()',
-                    jsOutputFile: machineReleaseFile,           // TODO: This must vary according to debugger/non-debugger releases
+                    jsOutputFile: machineReleaseFile,           // NOTE: if we go back to doing debugger/non-debugger releases, this must be updated
                     createSourceMap: true
                   }))
                   .pipe(gulpSourceMaps.write('./'))             // gulp-sourcemaps automatically adds the sourcemap url comment
