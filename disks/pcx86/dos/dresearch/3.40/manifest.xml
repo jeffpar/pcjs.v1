@@ -7,7 +7,7 @@
 	<category>DOS</category>
 	<author>Digital Research Inc.</author>
 	<releaseDate></releaseDate>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/Disk01.img" href="/disks/pcx86/dos/dr-dos/3.40/DRDOS340-DISK1.json" md5="ea935215e26ae098b07470868766473a" md5json="631bf4dc34732d855fc7052918104c8b">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/Disk01.img" href="/disks/pcx86/dos/dresearch/3.40/DRDOS340-DISK1.json" md5="ea935215e26ae098b07470868766473a" md5json="631bf4dc34732d855fc7052918104c8b">
 		<name>DR-DOS 3.40 (Disk 1)</name>
 		<file size="4082" time="1989-01-25 12:15:00" attr="0x20">ANSI.SYS</file>
 		<file size="11080" time="1989-01-25 12:15:00" attr="0x20">ATTRIB.EXE</file>
@@ -37,7 +37,7 @@
 		<file size="3765" time="1989-01-25 12:15:00" attr="0x20">VDISK.SYS</file>
 		<file size="18444" time="1989-01-25 12:15:00" attr="0x20">XCOPY.EXE</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/Disk02.img" href="/disks/pcx86/dos/dr-dos/3.40/DRDOS340-DISK2.json" md5="ae2adc9afec1d6ca41c6cbb20c64bd7a" md5json="26656b70280a465ce7618e7facf8dac7">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/Disk02.img" href="/disks/pcx86/dos/dresearch/3.40/DRDOS340-DISK2.json" md5="ae2adc9afec1d6ca41c6cbb20c64bd7a" md5json="26656b70280a465ce7618e7facf8dac7">
 		<name>DR-DOS 3.40 (Disk 2)</name>
 		<file size="18737" time="1989-01-25 12:15:00" attr="0x20">BACKUP.COM</file>
 		<file size="11127" time="1989-01-25 12:15:00" attr="0x20">COMP.COM</file>

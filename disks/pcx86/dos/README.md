@@ -16,4 +16,4 @@ Information is available for assorted versions of PC-DOS and MS-DOS from the fol
 DOS Clones
 ----------
 
-* [Digital Research DR-DOS](dr-dos/)
+* [Digital Research DR-DOS](dresearch/)
