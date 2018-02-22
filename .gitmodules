@@ -1,0 +1,6 @@
+[submodule "pcjs-disks"]
+	path = pcjs-disks
+	url = https://github.com/jeffpar/pcjs-disks.git
+[submodule "private-disks"]
+	path = private-disks
+	url = https://github.com/jeffpar/private-disks.git

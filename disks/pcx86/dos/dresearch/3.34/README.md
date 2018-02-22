@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Digital Research DR-DOS 3.34
-permalink: /disks/pcx86/dos/dr-dos/3.34/
+permalink: /disks/pcx86/dos/dresearch/3.34/
 machines:
   - id: ibm5170-drdos334
     type: pcx86
