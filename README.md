@@ -128,7 +128,7 @@ Some additional (optional) tools are also recommended:
 Once you have the prerequisites, open a command-line window, `cd` to the directory where you'd like to install PCjs,
 and type the following commands:
 
-	git clone git@github.com:jeffpar/pcjs.git pcjs
+	git clone --recurse-submodules https://github.com/jeffpar/pcjs.git
 	cd pcjs
 	npm install --production
 	node server.js

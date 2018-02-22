@@ -7,7 +7,7 @@
 	<category>DOS</category>
 	<author>Digital Research Inc.</author>
 	<releaseDate></releaseDate>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/Disk1.img" href="/disks/pcx86/dos/dr-dos/3.41/DRDOS341-DISK1.json" md5="1434368fb752284c7615eda3e123ef8a" md5json="ebdd4a58af1267d9c51c7bf01164f9c5">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/Disk1.img" href="/disks/pcx86/dos/dresearch/3.41/DRDOS341-DISK1.json" md5="1434368fb752284c7615eda3e123ef8a" md5json="ebdd4a58af1267d9c51c7bf01164f9c5">
 		<name>DR-DOS 3.41 (Disk 1)</name>
 		<file size="6680" time="1989-06-30 12:16:00" attr="0x20">4201.CPI</file>
 		<file size="348" time="1989-06-30 12:16:00" attr="0x20">4208.CPI</file>
@@ -34,7 +34,7 @@
 		<file size="9658" time="1989-06-30 12:16:00" attr="0x20">SYS.COM</file>
 		<file size="3765" time="1989-06-30 12:16:00" attr="0x20">VDISK.SYS</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/Disk2.img" href="/disks/pcx86/dos/dr-dos/3.41/DRDOS341-DISK2.json" md5="a7396c8c9731307d5737ac6fc4f8ee39" md5json="a5d9922e994c217faaf0383f90c2140d">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/Disk2.img" href="/disks/pcx86/dos/dresearch/3.41/DRDOS341-DISK2.json" md5="a7396c8c9731307d5737ac6fc4f8ee39" md5json="a5d9922e994c217faaf0383f90c2140d">
 		<name>DR-DOS 3.41 (Disk 2)</name>
 		<file size="11026" time="1989-06-30 12:16:00" attr="0x20">ATTRIB.EXE</file>
 		<file size="18787" time="1989-06-30 12:16:00" attr="0x20">BACKUP.COM</file>

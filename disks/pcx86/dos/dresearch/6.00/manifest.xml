@@ -7,7 +7,7 @@
 	<category>DOS</category>
 	<author>Digital Research Inc.</author>
 	<releaseDate></releaseDate>
-	<disk id="disk01" size="368640" chs="40:2:9" img="360K/archive/Disk01.img" href="/disks/pcx86/dos/dr-dos/6.00/360K/DRDOS600-DISK1.json" md5="cb4fd1b9abb12e7587b04186d5bd349b" md5json="d89e171824fac88798a425019f5e22c5">
+	<disk id="disk01" size="368640" chs="40:2:9" img="360K/archive/Disk01.img" href="/disks/pcx86/dos/dresearch/6.00/360K/DRDOS600-DISK1.json" md5="cb4fd1b9abb12e7587b04186d5bd349b" md5json="d89e171824fac88798a425019f5e22c5">
 		<name>DR-DOS 6.00 (360K Disk 1)</name>
 		<file size="4833" time="1992-04-07 06:00:00" attr="0x20">ANSI.SYS</file>
 		<file size="50440" time="1992-04-07 06:00:00" attr="0x20">COMMAND.COM</file>
@@ -30,7 +30,7 @@
 		<file size="2795" time="1996-07-02 21:56:04" attr="0x20">VIEWMAX.INI</file>
 		<file size="597" time="1999-11-14 13:08:24" attr="0x20">readme.txt</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="360K/archive/Disk02.img" href="/disks/pcx86/dos/dr-dos/6.00/360K/DRDOS600-DISK2.json" md5="20f41b7a0a04a68332e83c8549af8626" md5json="eada40616f41124ea49cd3c7326bb751">
+	<disk id="disk02" size="368640" chs="40:2:9" img="360K/archive/Disk02.img" href="/disks/pcx86/dos/dresearch/6.00/360K/DRDOS600-DISK2.json" md5="20f41b7a0a04a68332e83c8549af8626" md5json="eada40616f41124ea49cd3c7326bb751">
 		<name>DR-DOS 6.00 (360K Disk 2)</name>
 		<file size="5467" time="1992-04-07 06:00:00" attr="0x20">1050.CPI</file>
 		<file size="21547" time="1992-04-07 06:00:00" attr="0x20">4201.CPI</file>
@@ -53,7 +53,7 @@
 		<file size="26526" time="1992-04-07 06:00:00" attr="0x20">VIEWMAX.RSC</file>
 		<file size="5768" time="1992-04-07 06:00:00" attr="0x20">VIEWRUN.RSC</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="360K/archive/Disk03.img" href="/disks/pcx86/dos/dr-dos/6.00/360K/DRDOS600-DISK3.json" md5="65a356278b20818c65f57879cbb67199" md5json="6f672538e6548bea52dcdb42a9d66885">
+	<disk id="disk03" size="368640" chs="40:2:9" img="360K/archive/Disk03.img" href="/disks/pcx86/dos/dresearch/6.00/360K/DRDOS600-DISK3.json" md5="65a356278b20818c65f57879cbb67199" md5json="6f672538e6548bea52dcdb42a9d66885">
 		<name>DR-DOS 6.00 (360K Disk 3)</name>
 		<file size="9855" time="1992-04-07 06:00:00" attr="0x20">ATTRIB.EXE</file>
 		<file size="5200" time="1992-04-07 06:00:00" attr="0x20">CURSOR.EXE</file>
@@ -73,7 +73,7 @@
 		<file size="21602" time="1992-04-07 06:00:00" attr="0x20">VIEWMAX.ACC</file>
 		<file size="10607" time="1992-04-07 06:00:00" attr="0x20">VIEWMAX.EXE</file>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="360K/archive/Disk04.img" href="/disks/pcx86/dos/dr-dos/6.00/360K/DRDOS600-DISK4.json" md5="be02f04ce5889f7f053152c10582eab1" md5json="907075bfae56223dcde373d0eb105b5f">
+	<disk id="disk04" size="368640" chs="40:2:9" img="360K/archive/Disk04.img" href="/disks/pcx86/dos/dresearch/6.00/360K/DRDOS600-DISK4.json" md5="be02f04ce5889f7f053152c10582eab1" md5json="907075bfae56223dcde373d0eb105b5f">
 		<name>DR-DOS 6.00 (360K Disk 4)</name>
 		<file size="3073" time="1992-04-07 06:00:00" attr="0x20">APPEND.EXE</file>
 		<file size="19910" time="1992-04-07 06:00:00" attr="0x20">DELPURGE.EXE</file>
@@ -95,13 +95,13 @@
 		<file size="4837" time="1992-04-07 06:00:00" attr="0x20">SUBST.EXE</file>
 		<file size="19047" time="1992-04-07 06:00:00" attr="0x20">TASKMAX.EXE</file>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" img="360K/archive/Disk05.img" href="/disks/pcx86/dos/dr-dos/6.00/360K/DRDOS600-DISK5.json" md5="8b5c5cbc944725519ada94fc61dab51f" md5json="c6543136e698786b34b067e7095cc692">
+	<disk id="disk05" size="368640" chs="40:2:9" img="360K/archive/Disk05.img" href="/disks/pcx86/dos/dresearch/6.00/360K/DRDOS600-DISK5.json" md5="8b5c5cbc944725519ada94fc61dab51f" md5json="c6543136e698786b34b067e7095cc692">
 		<name>DR-DOS 6.00 (360K Disk 5)</name>
 		<file size="8233" time="1992-04-07 06:00:00" attr="0x20">DISKMAP.EXE</file>
 		<file size="45527" time="1992-04-07 06:00:00" attr="0x20">DISKOPT.EXE</file>
 		<file size="282084" time="1992-04-07 06:00:00" attr="0x20">DOSBOOK.EXE</file>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" img="360K/archive/Disk06.img" href="/disks/pcx86/dos/dr-dos/6.00/360K/DRDOS600-DISK6.json" md5="ad14411d1e3858afae552668f382fc8d" md5json="be4e57427f60460b88e995658cd81127">
+	<disk id="disk06" size="368640" chs="40:2:9" img="360K/archive/Disk06.img" href="/disks/pcx86/dos/dresearch/6.00/360K/DRDOS600-DISK6.json" md5="ad14411d1e3858afae552668f382fc8d" md5json="be4e57427f60460b88e995658cd81127">
 		<name>DR-DOS 6.00 (360K Disk 6)</name>
 		<file size="4849" time="1992-04-07 06:00:00" attr="0x20">ASSIGN.COM</file>
 		<file size="12984" time="1992-04-07 06:00:00" attr="0x20">BACKUP.COM</file>
@@ -128,7 +128,7 @@
 		<file size="10768" time="1992-04-07 06:00:00" attr="0x20">XDEL.EXE</file>
 		<file size="13767" time="1992-04-07 06:00:00" attr="0x20">XDIR.EXE</file>
 	</disk>
-	<disk id="disk07" size="1228800" chs="80:2:15" img="1200K/archive/DRDOS-600-STARTUP.img" href="/disks/pcx86/dos/dr-dos/6.00/1200K/DRDOS600-DISK1.json" md5="a01ecc2548744606c0d8baa74daa64ae" md5json="6f57282325b7d2f027d5fa14ccbd495e">
+	<disk id="disk07" size="1228800" chs="80:2:15" img="1200K/archive/DRDOS-600-STARTUP.img" href="/disks/pcx86/dos/dresearch/6.00/1200K/DRDOS600-DISK1.json" md5="a01ecc2548744606c0d8baa74daa64ae" md5json="6f57282325b7d2f027d5fa14ccbd495e">
 		<name>DR-DOS 6.00 (1.2M Disk 1)</name>
 		<file size="5467" time="1991-08-23 06:00:00" attr="0x20">1050.CPI</file>
 		<file size="21547" time="1991-08-23 06:00:00" attr="0x20">4201.CPI</file>
@@ -205,7 +205,7 @@
 		<file size="10768" time="1991-08-23 06:00:00" attr="0x20">XDEL.EXE</file>
 		<file size="13665" time="1991-08-23 06:00:00" attr="0x20">XDIR.EXE</file>
 	</disk>
-	<disk id="disk08" size="1228800" chs="80:2:15" img="1200K/archive/DRDOS-600-VIEWMAX.img" href="/disks/pcx86/dos/dr-dos/6.00/1200K/DRDOS600-DISK2.json" md5="64e6d9291052536c2dd3d29ac1a3b939" md5json="131d2c9d4cf2aa50326e76e1ef82c9e1">
+	<disk id="disk08" size="1228800" chs="80:2:15" img="1200K/archive/DRDOS-600-VIEWMAX.img" href="/disks/pcx86/dos/dresearch/6.00/1200K/DRDOS600-DISK2.json" md5="64e6d9291052536c2dd3d29ac1a3b939" md5json="131d2c9d4cf2aa50326e76e1ef82c9e1">
 		<name>DR-DOS 6.00 (1.2M Disk 2)</name>
 		<file size="9855" time="1991-08-23 06:00:00" attr="0x20">ATTRIB.EXE</file>
 		<file size="8506" time="1991-08-23 06:00:00" attr="0x20">COMP.COM</file>
@@ -252,7 +252,7 @@
 		<file size="26526" time="1991-08-23 06:00:00" attr="0x20">VIEWMAX.RSC</file>
 		<file size="5768" time="1991-08-23 06:00:00" attr="0x20">VIEWRUN.RSC</file>
 	</disk>
-	<disk id="disk09" size="368640" chs="40:2:9" img="1200K/archive/DRDOS-600-UPDATE1-1991-12.img" href="/disks/pcx86/dos/dr-dos/6.00/1200K/DRDOS600-UPDATE-1991-12-DISK1.json" md5="c8f025351a393f8fb9ea59076900df1a" md5json="596e96c2a8ac9de78b6aae9bdfd4b5b8">
+	<disk id="disk09" size="368640" chs="40:2:9" img="1200K/archive/DRDOS-600-UPDATE1-1991-12.img" href="/disks/pcx86/dos/dresearch/6.00/1200K/DRDOS600-UPDATE-1991-12-DISK1.json" md5="c8f025351a393f8fb9ea59076900df1a" md5json="596e96c2a8ac9de78b6aae9bdfd4b5b8">
 		<name>DR-DOS 6.00 (1991 Update 1)</name>
 		<file size="12058" time="1991-12-06 06:00:00" attr="0x20">REPLACE.EXE</file>
 		<file size="3670" time="1991-12-06 06:00:00" attr="0x20">SSTORCHK.EXE</file>
@@ -272,7 +272,7 @@
 		<file size="79481" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">SETUP.EXE</file>
 		<file size="66105" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">SSTOR.EXE</file>
 	</disk>
-	<disk id="disk10" size="368640" chs="40:2:9" img="1200K/archive/DRDOS-600-UPDATE2-1991-12.img" href="/disks/pcx86/dos/dr-dos/6.00/1200K/DRDOS600-UPDATE-1991-12-DISK2.json" md5="4dbc7806bc29cffc9c1dd73bdcbf9bf5" md5json="c3361a0532e04f64ef4fc2029bdd5525">
+	<disk id="disk10" size="368640" chs="40:2:9" img="1200K/archive/DRDOS-600-UPDATE2-1991-12.img" href="/disks/pcx86/dos/dresearch/6.00/1200K/DRDOS600-UPDATE-1991-12-DISK2.json" md5="4dbc7806bc29cffc9c1dd73bdcbf9bf5" md5json="c3361a0532e04f64ef4fc2029bdd5525">
 		<name>DR-DOS 6.00 (1991 Update 2)</name>
 		<file size="256" time="1991-12-13 12:08:32" attr="0x10">EXAMPLES</file>
 		<file size="96" time="1991-12-13 12:08:36" attr="0x10" dir="EXAMPLES/">GEOS</file>
@@ -310,7 +310,7 @@
 		<file size="19047" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">TASKMAX.EXE</file>
 		<file size="18826" time="1991-12-06 06:00:00" attr="0x20" dir="UTIL/">UNINSTAL.EXE</file>
 	</disk>
-	<disk id="disk11" size="368640" chs="40:2:9" img="1200K/archive/DRDOS-600-UPDATE1-1992-04.img" href="/disks/pcx86/dos/dr-dos/6.00/1200K/DRDOS600-UPDATE-1992-04-DISK1.json" md5="d0bde44e82162e23126eb96e80ecd032" md5json="57f7c18425c9af793dae2dd10da2657b">
+	<disk id="disk11" size="368640" chs="40:2:9" img="1200K/archive/DRDOS-600-UPDATE1-1992-04.img" href="/disks/pcx86/dos/dresearch/6.00/1200K/DRDOS600-UPDATE-1992-04-DISK1.json" md5="d0bde44e82162e23126eb96e80ecd032" md5json="57f7c18425c9af793dae2dd10da2657b">
 		<name>DR-DOS 6.00 (1992 Update 1)</name>
 		<file size="12058" time="1992-04-07 06:00:00" attr="0x20">REPLACE.EXE</file>
 		<file size="3670" time="1992-04-07 06:00:00" attr="0x20">SSTORCHK.EXE</file>
@@ -330,7 +330,7 @@
 		<file size="79522" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">SETUP.EXE</file>
 		<file size="66105" time="1992-04-07 06:00:00" attr="0x20" dir="UTIL/">SSTOR.EXE</file>
 	</disk>
-	<disk id="disk12" size="368640" chs="40:2:9" img="1200K/archive/DRDOS-600-UPDATE2-1992-04.img" href="/disks/pcx86/dos/dr-dos/6.00/1200K/DRDOS600-UPDATE-1992-04-DISK2.json" md5="1e838f04560a4923527fd99693a9cebd" md5json="ccc9138a3a0d25d2e438fba12bacc82f">
+	<disk id="disk12" size="368640" chs="40:2:9" img="1200K/archive/DRDOS-600-UPDATE2-1992-04.img" href="/disks/pcx86/dos/dresearch/6.00/1200K/DRDOS600-UPDATE-1992-04-DISK2.json" md5="1e838f04560a4923527fd99693a9cebd" md5json="ccc9138a3a0d25d2e438fba12bacc82f">
 		<name>DR-DOS 6.00 (1992 Update 2)</name>
 		<file size="256" time="1992-04-07 15:53:16" attr="0x10">EXAMPLES</file>
 		<file size="96" time="1992-04-07 15:53:20" attr="0x10" dir="EXAMPLES/">GEOS</file>

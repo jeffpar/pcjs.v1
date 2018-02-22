@@ -7,7 +7,7 @@
 	<category>DOS</category>
 	<author>Digital Research Inc.</author>
 	<releaseDate>1988-08-17</releaseDate>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/DRDOS332.img" href="/disks/pcx86/dos/dr-dos/3.32/DRDOS332.json" md5="2c83e2bbc3059a2a55813255ce6de5cf" md5json="c7989f37918618123bc21ff83057fd33">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/DRDOS332.img" href="/disks/pcx86/dos/dresearch/3.32/DRDOS332.json" md5="2c83e2bbc3059a2a55813255ce6de5cf" md5json="c7989f37918618123bc21ff83057fd33">
 		<file size="31728" time="1988-08-17 03:32:00" attr="0x20">COMMAND.COM</file>
 		<file size="41856" time="1988-08-17 03:32:00" attr="0x20">DRBDOS.SYS</file>
 		<file size="16352" time="1988-08-17 03:32:00" attr="0x20">DRBIOS.SYS</file>
