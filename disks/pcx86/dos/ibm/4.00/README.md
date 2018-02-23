@@ -8,7 +8,7 @@ machines:
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/4.00/PCDOS400-DISK1.json
+        name: PC-DOS 4.00 (Disk 1)
       B:
         name: None
 ---

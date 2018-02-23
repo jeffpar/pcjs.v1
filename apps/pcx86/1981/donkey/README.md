@@ -16,7 +16,7 @@ machines:
     state: /apps/pcx86/1981/donkey/state.json
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/1.00/PCDOS100.json
+        name: PC-DOS 1.00
       B:
         name: None
     autoType: $date\rbasica donkey\r

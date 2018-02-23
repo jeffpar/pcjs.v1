@@ -14,7 +14,7 @@ makes sense to use the EGA with a contemporary ROM.
 All our VGA configurations use the `Rev J.4` [COMPAQ DeskPro 386 ROM](/devices/pcx86/rom/compaq/deskpro386/), dated
 January 28, 1988.
 
-All these machine configurations also include an unformatted "Type 5" [47Mb Hard Disk](/disks/pcx86/fixed/47mb/).  To
+All these machine configurations also include an unformatted "Type 5" [47Mb Hard Disk](/disks/pcx86/drives/47mb/).  To
 create a single 47Mb partition, you must use [COMPAQ MS-DOS 3.31](/disks/pcx86/dos/compaq/3.31/) or newer; older versions
 of DOS could create partitions only up to 32Mb, and all partitions had to reside within the first 32Mb of disk space.
 

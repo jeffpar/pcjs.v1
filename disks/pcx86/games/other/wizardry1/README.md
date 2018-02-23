@@ -8,9 +8,9 @@ machines:
     config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/games/other/wizardry1/WIZARDRY1-MASTER.json
+        name: Wizardry I - Master Disk
       B:
-        path: /disks/pcx86/games/other/wizardry1/WIZARDRY1-SCENARIO.json
+        name: Wizardry I - Scenario Disk
     autoStart: true
     resume: 1
     sound: false

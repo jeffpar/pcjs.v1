@@ -8,9 +8,9 @@ machines:
     config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/2.10/PCDOS210-DISK1.json
+        name: PC-DOS 2.10 (Disk 1)
       B:
-        path: /disks/pcx86/apps/other/wordstar/pcjr/WSPCJR100-DISK1.json
+        name: WordStar for PCjr (Disk 1)
     autoStart: true
     autoType: $date\r$time\rB:\rWS\r
 ---

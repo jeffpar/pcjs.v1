@@ -10,7 +10,7 @@ machines:
     config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       B:
-        path: /disks/pcx86/apps/lotus/123/1as/123-DISK1-SYSTEM-PATCHED.json
+        name: Lotus 1-2-3 1A* (1-System)
     autoType: $date\r$time\rb:\r123\r
 ---
 

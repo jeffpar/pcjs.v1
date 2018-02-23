@@ -48,7 +48,7 @@ example:
     <rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5150/basic/BASIC100.json"/>
     <rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5150/1981-04-24/PCBIOS-REV1.json"/>
     <video ref="/devices/pcx86/video/ibm/mda/ibm-mda.xml"/>
-    <fdc ref="/disks/pcx86/compiled/samples.xml"/>
+    <fdc ref="/disks/pcx86/samples.xml"/>
     <cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px" padbottom="8px">
         <control type="button" binding="run">Run</control>
         <control type="button" binding="reset">Reset</control>
@@ -60,6 +60,6 @@ example:
 
 In this example, all the devices are fully configured within the machine XML file, except for the
 *[Video](/docs/pcx86/video/)* ([XML](/devices/pcx86/video/ibm/mda/ibm-mda.xml)),
-*[Floppy Drive Controller](/docs/pcx86/fdc/)* ([XML](/disks/pcx86/compiled/samples.xml)), and
+*[Floppy Drive Controller](/docs/pcx86/fdc/)* ([XML](/disks/pcx86/samples.xml)), and
 *[Keyboard](/docs/pcx86/keyboard/)* ([XML](/devices/pcx86/keyboard/us83-buttons-arrows.xml)) components,
 which refer to separate XML configuration files.

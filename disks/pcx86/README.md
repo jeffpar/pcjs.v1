@@ -12,21 +12,21 @@ IBM PC Disk Library
 -------------------
 
 The [IBM PC Disk Library](/disks/pcx86/library.xml) lists all of our [Disk Manifests](#disk-manifests)
-and makes those disks available to the project's [IBM PC Machines](/devices/pcx86/machine/).
+and makes those disks available to the project's collection of [IBM PC Machines](/devices/pcx86/machine/).
 
 For non-DOS diskettes, see [Disk Libraries](/disks/).
 
 Whenever possible, PCjs archives copies of original distribution diskettes.  Exceptions include the application
-"Demo Disks" that we've created for our [IBM PC Application Demos](/apps/pcx86/).  PCjs may also makes minor changes
-to disk boot sectors, to make it easier to mount the disk images in modern operating systems.
+"Demo Disks" that we've created for our [IBM PC Application Demos](/apps/pcx86/).  PCjs may also include minor changes
+to a disk's boot sector, making it easier to mount the disk in modern operating systems.  See the description of the
+[PC-DOS 0.90 Boot Sector](/disks/pcx86/dos/ibm/0.90/#pc-dos-090-boot-sector) for an example.
 [macOS](http://www.apple.com/macos/) has built-in support for mounting *.IMG* disk images, and Windows can mount
 them with the help of third-party software like [OSFMount](http://www.osforensics.com/tools/mount-disk-images.html).
-See the description of the [PC-DOS 0.90](/disks/pcx86/dos/ibm/0.90/) disk for an example of boot sector modification.
 
 The summary below is not a complete list of everything in the library, just highlights.  For some of the disks,
 we have provided more information about the software, and in some cases, machines that automatically run the software.
-Ideally, everything in the library would also be listed below, and linked to a page that describes the software in
-more detail, along with a live demonstration of the software, but that's not yet a reality.
+Eventually, everything in the library will be listed here, with links to pages that describe the software in more detail,
+along with live demonstrations.
 
 ### Operating Systems
 
@@ -77,7 +77,7 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 
 ### Fixed Disks
 
-* [Assorted Fixed Disk Images](/disks/pcx86/fixed/) (eg, [10Mb](/disks/pcx86/fixed/10mb/), [20Mb](/disks/pcx86/fixed/20mb/), [47Mb](/disks/pcx86/fixed/47mb/), [68Mb](/disks/pcx86/fixed/68mb/))
+* [Assorted Fixed Disk Images](/disks/pcx86/drives/) (eg, [10Mb](/disks/pcx86/drives/10mb/), [20Mb](/disks/pcx86/drives/20mb/), [47Mb](/disks/pcx86/drives/47mb/), [68Mb](/disks/pcx86/drives/68mb/))
 
 ---
 
@@ -96,11 +96,13 @@ A simple FDC configuration file, such as [samples.xml](samples.xml), *could* con
 entries like:
 
 ```xml
-<disk path="/disks/pcx86/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
-<disk path="/disks/pcx86/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
-<disk path="/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json">PC-DOS 2.00 (Disk 1)</disk>
-<disk path="/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json">PC-DOS 2.00 (Disk 2)</disk>
-...
+<fdc id="fdcNEC">
+    <disk path="/disks/pcx86/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
+    <disk path="/disks/pcx86/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
+    <disk path="/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json">PC-DOS 2.00 (Disk 1)</disk>
+    <disk path="/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json">PC-DOS 2.00 (Disk 2)</disk>
+    ...
+</fdc>
 ```
 
 However, listing individual diskettes like that is tedious, so support was added for Disk Manifest references:

@@ -9,9 +9,9 @@ machines:
     config: /devices/pcx86/machine/compaq/deskpro386/vga/2048kb/debugger/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json
+        name: COMPAQ MS-DOS 3.31 (Disk 2)
       B:
-        path: /tests/pcx86/vga/VGABIN.json
+        name: VGA Tests (Black Book)
 ---
 
 VGA "Black Book" Tests

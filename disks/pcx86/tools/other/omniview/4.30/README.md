@@ -10,9 +10,9 @@ machines:
     config: /devices/pcx86/machine/compaq/deskpro386/vga/4096kb/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1-720K.json
+        name: PC-DOS 3.30 (720K)
       B:
-        path: /disks/pcx86/tools/other/omniview/4.30/OMNIVIEW386-430.json
+        name: Omniview 386 4.30
 ---
 
 Omniview 386 4.30

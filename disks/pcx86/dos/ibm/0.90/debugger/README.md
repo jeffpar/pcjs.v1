@@ -10,7 +10,7 @@ machines:
     resume: 1
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/0.90/PCDOS090.json
+        name: PC-DOS 0.90
       B:
         name: None
 ---

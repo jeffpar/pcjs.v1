@@ -306,6 +306,22 @@ BufferPF.prototype.slice = function(start, end)
 };
 
 /**
+ * toString(format)
+ *
+ * @this {BufferPF}
+ * @param {string} [format]
+ * @return {string}
+ */
+BufferPF.prototype.toString = function(format)
+{
+    if (NODE) {
+        return this.buf.toString(format);
+    } else {
+        return "";      // TODO: Implement; see also: encodeAsBase64()
+    }
+};
+
+/**
  * DiskDump()
  *
  * TODO: If sServerRoot is set, make sure sDiskPath refers to something in either /apps/ or /disks/,
@@ -357,7 +373,7 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, sSize, sServerRoot, 
      * If we have to enumerate one or more files during the buildImage() process, this array
      * will save them, in case the caller wants to query that information later, in updateManifest().
      *
-     * Originally, I thought each saved entry would be a subset of what the fileInfo objects contain,
+     * Originally, I thought each saved entry would be a subset of what the FileInfo objects contain,
      * but it turns out I pretty much need everything.  This, in turn, means that some of the original
      * buildImage() functions could simply use this.aManifestInfo, instead of their own aFiles array,
      * but sometimes they're using aFiles of subdirectories, so it's not quite that simple.
@@ -1033,6 +1049,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         var sBaseDir = null;
         for (i = 0; i < disk.aManifestInfo.length; i++) {
             var sAttrs = "";
+            /** @type {FileInfo} */
             var fileInfo = disk.aManifestInfo[i];
             if (fileInfo.FILE_SIZE < 0) continue;       // ignore non-file entries
             var sDir = path.dirname(fileInfo.FILE_PATH) + path.sep;
@@ -1478,8 +1495,8 @@ DiskDump.prototype.trimSector = function(buf, len)
     return [dwPattern, cbBuffer];
 };
 
-/*
- * fileInfo objects have the following properties:
+/**
+ * FileInfo objects have the following properties:
  *
  *      FILE_NAME: the 8.3 name to use
  *      FILE_PATH: the fully-qualified host path, if any
@@ -1488,15 +1505,17 @@ DiskDump.prototype.trimSector = function(buf, len)
  *      FILE_SIZE: the size of the file, in bytes (or -1, in which case FILE_DATA is another aFiles array)
  *      FILE_DATA: the file's data (either a string or a Buffer), which may either be pre-read or deferred to buildClusters()
  *      FILE_CLUS: the cluster to be assigned to the file, if any
- *
- * Next up: assorted FAT file system constants.
+ * 
+ * @class FileInfo
+ * @property {string} FILE_NAME
+ * @property {string} FILE_PATH
+ * @property {number} FILE_ATTR
+ * @property {Date} FILE_TIME
+ * @property {number} FILE_SIZE
+ * @property {string|Buffer} FILE_DATA
+ * @property {number} FILE_CLUS
+ * @property {string} FILE_MD5
  */
-DiskDump.ATTR_READONLY    = 0x01;
-DiskDump.ATTR_HIDDEN      = 0x02;
-DiskDump.ATTR_SYSTEM      = 0x04;
-DiskDump.ATTR_VOLUME      = 0x08;
-DiskDump.ATTR_SUBDIR      = 0x10;
-DiskDump.ATTR_ARCHIVE     = 0x20;
 
 /**
  * validateTime(dateTime)
@@ -1578,7 +1597,7 @@ DiskDump.prototype.copyData = function(offDisk, ab)
  * addManifestInfo(fileInfo)
  *
  * @this {DiskDump}
- * @param {Object} fileInfo
+ * @param {FileInfo} fileInfo
  */
 DiskDump.prototype.addManifestInfo = function(fileInfo)
 {
@@ -1596,16 +1615,17 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
     if (!this.aManifestInfo.length) {
         var sDir = sImage.replace(/\.(img|json)/, "");
         if (sDir != sImage) {
-            sDir = sDir + path.sep;
+            sDir += path.sep;
             var asFiles = glob.sync(sDir + "**");
             for (var i = 0; i < asFiles.length; i++) {
                 var sFile = asFiles[i];
                 if (!sFile.substr(sDir.length)) continue;
+                /** @type {FileInfo} */
                 var fileInfo = {};
                 fileInfo.FILE_PATH = sFile;
                 fileInfo.FILE_NAME = path.basename(sFile);
                 var stats = fs.statSync(sFile);
-                fileInfo.FILE_ATTR = stats.isDirectory()? DiskDump.ATTR_SUBDIR : DiskDump.ATTR_ARCHIVE;
+                fileInfo.FILE_ATTR = stats.isDirectory()? DiskAPI.ATTR.SUBDIR : DiskAPI.ATTR.ARCHIVE;
                 fileInfo.FILE_SIZE = stats.size;
                 fileInfo.FILE_TIME = this.getDSTAdjustedTime(stats.mtime);
                 this.validateTime(fileInfo.FILE_TIME);
@@ -1677,8 +1697,8 @@ DiskDump.prototype.isTextFile = function(sFileName)
 /**
  * readDir(sDir, fRoot, done)
  *
- * Returns an array (aFiles) via the done() callback, where each entry is a fileInfo object.
- * If fileInfo refers to a subdirectory, then FILE_SIZE is -1 and FILE_DATA entry is another aFiles array.
+ * Returns an array (aFiles) via the done() callback, where each entry is a FileInfo object.
+ * If the FileInfo refers to a subdirectory, then FILE_SIZE is -1 and FILE_DATA entry is another aFiles array.
  *
  * @this {DiskDump}
  * @param {string} sDir is a fully-qualified directory name
@@ -1736,6 +1756,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
              */
             if (sFileName.charAt(0) == '.') continue;
             var sFilePath = path.join(sDir, sFileName);
+            /** @type {FileInfo} */
             fileInfo = {};
             /*
              * TODO: Verify that buildName() didn't change the name into one that already exists in this directory.
@@ -1765,7 +1786,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
                         fileInfo.FILE_TIME = stats.mtime;       // NOTE: This is a Date object
                         obj.validateTime(fileInfo.FILE_TIME);
                         if (stats.isDirectory()) {
-                            fileInfo.FILE_ATTR = DiskDump.ATTR_SUBDIR;
+                            fileInfo.FILE_ATTR = DiskAPI.ATTR.SUBDIR;
                             fileInfo.FILE_SIZE = -1;
                             obj.readDir(fileInfo.FILE_PATH, false, function(err, aFilesDir) {
                                 fileInfo.FILE_DATA = aFilesDir;
@@ -1774,7 +1795,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
                             });
                             return;
                         } else {
-                            fileInfo.FILE_ATTR = DiskDump.ATTR_ARCHIVE;
+                            fileInfo.FILE_ATTR = DiskAPI.ATTR.ARCHIVE;
                             fileInfo.FILE_SIZE = stats.size;
                             if (obj.isTextFile(fileInfo.FILE_NAME)) {
                                 fs.readFile(fileInfo.FILE_PATH, {encoding: "utf8"}, function doneReadDirEntry(err, sData) {
@@ -1807,8 +1828,8 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
 /**
  * readPath(sPath, done)
  *
- * Returns an array (aFiles) via the done() callback, where each entry is a fileInfo object.
- * If fileInfo refers to a subdirectory, then FILE_SIZE is -1 and FILE_DATA entry is another aFiles array.
+ * Returns an array (aFiles) via the done() callback, where each entry is a FileInfo object.
+ * If the FileInfo refers to a subdirectory, then FILE_SIZE is -1 and FILE_DATA entry is another aFiles array.
  *
  * NOTE: sPath begins fully-qualified (see this.sDiskPath), but if any of the intermediate entries contains paths,
  * it's our responsibility to join them with sServerRoot.
@@ -1895,7 +1916,7 @@ DiskDump.prototype.readPath = function(sPath, done)
                     fileInfo.FILE_TIME = stats.mtime;           // NOTE: This is a Date object
                     obj.validateTime(fileInfo.FILE_TIME);
                     if (!stats.remote && stats.isDirectory()) {
-                        fileInfo.FILE_ATTR = DiskDump.ATTR_SUBDIR;
+                        fileInfo.FILE_ATTR = DiskAPI.ATTR.SUBDIR;
                         fileInfo.FILE_SIZE = -1;
                         obj.readDir(fileInfo.FILE_PATH, false, function(err, aFilesDir) {
                             fileInfo.FILE_DATA = aFilesDir;
@@ -1904,7 +1925,7 @@ DiskDump.prototype.readPath = function(sPath, done)
                         });
                         return;
                     } else {
-                        fileInfo.FILE_ATTR = DiskDump.ATTR_ARCHIVE;
+                        fileInfo.FILE_ATTR = DiskAPI.ATTR.ARCHIVE;
                         fileInfo.FILE_SIZE = stats.size;
                         if (obj.isTextFile(fileInfo.FILE_NAME)) {
                             DiskDump.readFile(sFilePath, "utf8", function doneReadPathEntry(err, sData) {
@@ -1972,16 +1993,17 @@ DiskDump.prototype.buildName = function(sFile, fLabel)
 /**
  * buildVolLabel(sDir)
  *
- * NOTE: When fileInfo is returned, there will be no FILE_PATH property, which means
+ * NOTE: When a FileInfo is returned, there will be no FILE_PATH property, which means
  * don't go looking for a corresponding entry in the host file system, because there isn't one.
  *
  * @this {DiskDump}
  * @param {string} [sDir]
- * @return {Object|null} fileInfo (or null if no suitable volume label)
+ * @return {FileInfo|null} (null if no suitable volume label)
  */
 DiskDump.prototype.buildVolLabel = function(sDir)
 {
     var sVolume = null;
+    /** @type {FileInfo} */
     var fileInfo = null;
     if (sDir) {
         sVolume = path.basename(sDir);
@@ -2013,7 +2035,7 @@ DiskDump.prototype.buildVolLabel = function(sDir)
     if (sVolume) {
         fileInfo = {};
         fileInfo.FILE_NAME = this.buildName(sVolume, true);
-        fileInfo.FILE_ATTR = DiskDump.ATTR_VOLUME;
+        fileInfo.FILE_ATTR = DiskAPI.ATTR.LABEL;
         /*
          * I used to initialize the volume label's date with a simple "new Date()", but because that results
          * in a different disk image every time we run DiskDump, I've opted for a hard-coded date/time (ie, the
@@ -2117,8 +2139,8 @@ DiskDump.prototype.buildDir = function(abDir, aFiles, dateMod, iCluster, iParent
     var offDir = 0;
     var cEntries = 0;
     if (iCluster >= 0) {
-        offDir += this.buildDirEntry(abDir, offDir, ".", 0, DiskDump.ATTR_SUBDIR, dateMod, iCluster);
-        offDir += this.buildDirEntry(abDir, offDir, "..", 0, DiskDump.ATTR_SUBDIR, dateMod, iParentCluster);
+        offDir += this.buildDirEntry(abDir, offDir, ".", 0, DiskAPI.ATTR.SUBDIR, dateMod, iCluster);
+        offDir += this.buildDirEntry(abDir, offDir, "..", 0, DiskAPI.ATTR.SUBDIR, dateMod, iParentCluster);
         cEntries += 2;
     }
     for (var iFile = 0; iFile < aFiles.length; iFile++) {

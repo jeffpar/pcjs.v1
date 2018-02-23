@@ -8,9 +8,9 @@ machines:
     config: /devices/pcx86/machine/5160/cga/640kb/debugger/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
+        name: PC-DOS 2.00 (Disk 1)
       B:
-        path: /disks/pcx86/apps/ibm/topview/1.01/TOPVIEW101-PROGRAM.json
+        name: TopView 1.01 (Program)
     autoScript: startKbd
 machineScripts:
   startKbd: |

@@ -7,7 +7,7 @@
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5150/basic/BASIC100.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5150/1981-04-24/PCBIOS-REV1.json"/>
 	<video ref="/devices/pcx86/video/ibm/mda/ibm-mda.xml"/>
-	<fdc ref="/disks/pcx86/compiled/library.xml"/>
+	<fdc ref="/disks/pcx86/library.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padLeft="8px" padBottom="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>

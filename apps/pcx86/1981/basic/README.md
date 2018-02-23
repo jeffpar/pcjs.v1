@@ -8,7 +8,7 @@ machines:
     config: /devices/pcx86/machine/5150/cga/64kb/debugger/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/1.00/PCDOS100.json
+        name: PC-DOS 1.00
       B:
         name: None
     autoType: $date\r

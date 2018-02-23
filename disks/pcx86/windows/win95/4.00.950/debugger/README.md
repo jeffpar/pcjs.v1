@@ -8,7 +8,7 @@ machines:
     debugger: true
     state: /disks/pcx86/windows/win95/4.00.950/deskpro386.json
     config: /devices/pcx86/machine/compaq/deskpro386/vga/4096kb/debugger/machine.xml
-    drives: '[{name:"68Mb Hard Disk",type:4,path:"/disks/pcx86/fixed/68mb/WIN95.json"}]'
+    drives: '[{name:"68Mb Hard Disk",type:4,path:"https://jeffpar.github.io/pcjs-disks/pcx86/drives/68mb/WIN95.json"}]'
     autoMount:
       A:
         name: None

@@ -9,6 +9,9 @@ machines:
     type: pcx86
     resume: 1
     config: /disks/pcx86/games/infocom/machine.xml
+    autoMount:
+      A:
+        name: Zork I
 ---
 
 Zork I: The Great Underground Empire
