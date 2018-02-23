@@ -9,7 +9,7 @@
 	<ram id="ramExt" addr="0x100000" size="0x100000" comment="Extended memory at 0x100000"/>
 	<rom id="romBIOS" addr="0xf8000" size="0x8000" alias="[0xf0000,0xffff0000,0xffff8000]" file="/devices/pcx86/rom/compaq/deskpro386/1988-01-28/1988-01-28.json"/>
 	<video ref="/devices/pcx86/video/compaq/vga/109360-001/256kb-autolock.xml"/>
-	<fdc ref="/disks/pcx86/library.xml" autoMount='{A: {name: "COMPAQ MS-DOS 3.31 (Disk 2)", path: "/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json"}, B: {name: "COMPAQ MS-DOS 3.31 (Disk 3)", path: "/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK3.json"}}'/>
+	<fdc ref="/disks/pcx86/library.xml" autoMount='{A: {name: "COMPAQ MS-DOS 3.31 (Disk 2)"}, B: {name: "COMPAQ MS-DOS 3.31 (Disk 3)"}}'/>
 	<keyboard ref="/devices/pcx86/keyboard/us84-softkeys.xml"/>
 	<debugger id="debugger" messages="fault|port" commands=""/>
 	<panel ref="/devices/pcx86/panel/wide386.xml"/>
