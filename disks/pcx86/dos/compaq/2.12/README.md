@@ -8,7 +8,7 @@ machines:
     config: /devices/pcx86/machine/5160/mda/256kb/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/compaq/2.12/COMPAQ-DOS212.json
+        name: COMPAQ MS-DOS 2.12
       B:
         name: None
     autoType: $date\r$time\r

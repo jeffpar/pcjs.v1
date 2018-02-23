@@ -11,7 +11,7 @@ machines:
     config: /devices/pcx86/machine/compaq/deskpro386/ega/2048kb/debugger/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/os2/misc/football/FOOTBALL-44100.json
+        name: OS/2 FOOTBALL (v4.41.00)
 ---
 
 OS/2 FOOTBALL Boot Disk (v4.41.00)

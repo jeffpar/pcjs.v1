@@ -7,7 +7,7 @@
 	<ram id="ramLow" addr="0x00000" size="0xa0000"/>
 	<rom ref="/devices/pcx86/rom/att/6300/bios-143.xml"/>
 	<video ref="/devices/pcx86/video/cdp/cga/cdp-cga.xml"/>
-	<fdc ref="/disks/pcx86/compiled/library.xml"/>
+	<fdc ref="/disks/pcx86/library.xml"/>
 	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pcx86/panel/wide.xml"/>

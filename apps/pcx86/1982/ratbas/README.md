@@ -8,9 +8,9 @@ machines:
     config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/1.10/PCDOS110.json
+        name: PC-DOS 1.10
       B:
-        path: /apps/pcx86/1982/ratbas/RATBAS213.json
+        name: RatBas 2.13
     autoType: $date\r$time\rb:\rrt\r\xff\xf0test;\r
 ---
 

@@ -9,7 +9,7 @@ machines:
     config: /devices/pcx86/machine/5170/cga/640kb/rev3/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/diags/ibm/1.01/5170-ADV-DIAG-101.json
+        name: IBM PC Diagnostics 1.01 (AT Adv)
 ---
 
 {% include machine.html id="ibm5170" %}

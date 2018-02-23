@@ -9,7 +9,7 @@ machines:
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/5.00/PCDOS500-DISK1-720K.json
+        name: PC-DOS 5.00 (Disk 1)
       B:
         name: None
 ---

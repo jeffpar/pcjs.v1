@@ -9,7 +9,7 @@ machines:
     config: /disks/pcx86/games/infocom/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/games/infocom/zork2/ZORK2-READONLY.json
+        name: Zork II
 ---
 
 Zork II: The Wizard of Frobozz

@@ -7,12 +7,12 @@ machines:
     type: pcx86
     state: /disks/pcx86/windows/1.00/state.json
     config: /devices/pcx86/machine/5160/ega/640kb/machine.xml
-    drives: '[{name:"10Mb Hard Disk",type:3,path:"/disks/pcx86/fixed/10mb/PCDOS310-WIN100-EGA.json"}]'
+    drives: '[{name:"10Mb Hard Disk",type:3,path:"https://jeffpar.github.io/pcjs-disks/pcx86/drives/10mb/PCDOS310-WIN100-EGA.json"}]'
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/3.10/PCDOS310-DISK1.json
+        name: PC-DOS 3.10 (Disk 1)
       B:
-        name: /disks/pcx86/dos/ibm/3.10/PCDOS310-DISK1.json
+        name: PC-DOS 3.10 (Disk 2)
 ---
 
 Microsoft Windows 1.0 ("Premiere Edition")

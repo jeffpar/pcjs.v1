@@ -9,7 +9,7 @@ machines:
     config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/os2/misc/cpdos/SIZZLE-76818-19870107-DEBUG.json
+        name: OS/2 SIZZLE (v7.68.18 DEBUG)
 ---
 
 OS/2 SIZZLE Boot Disk (v7.68.18 DEBUG)

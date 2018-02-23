@@ -10,7 +10,6 @@ machines:
     autoMount:
       B:
         name: Leather Goddesses of Phobos
-        path: /disks/pcx86/games/infocom/phobos/PHOBOS.json
     autoType: $date\r$time\rb:\rleather\r
 ---
 

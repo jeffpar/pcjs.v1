@@ -9,7 +9,7 @@ machines:
     config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/os2/misc/cpdos/286DOS-76800.json
+        name: OS/2 CP-DOS (v7.68)
 ---
 
 OS/2 CP-DOS Boot Disk (v7.68)

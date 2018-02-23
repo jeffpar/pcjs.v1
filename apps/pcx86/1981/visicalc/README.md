@@ -10,9 +10,9 @@ machines:
     state: /apps/pcx86/1981/visicalc/state.json
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/1.00/PCDOS100.json
+        name: PC-DOS 1.00
       B:
-        path: /apps/pcx86/1981/visicalc/VISICALC1981.json
+        name: VisiCalc (1981)
     autoType: $date\rb:\rvc\r
 ---
 

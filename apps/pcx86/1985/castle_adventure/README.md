@@ -9,9 +9,9 @@ machines:
     config: /devices/pcx86/machine/5160/cga/640kb/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
+        name: PC-DOS 2.00 (Disk 1)
       B:
-        path: /apps/pcx86/1985/castle_adventure/CASTLE-ADVENTURE-1985.json
+        name: Castle Adventure (1985)
     autoType: $date\r$time\rb:\rcastle\r
 ---
 

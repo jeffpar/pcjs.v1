@@ -6,19 +6,19 @@ machines:
   - id: ibm5160-ega-win101-1
     type: pcx86
     state: /disks/pcx86/windows/1.01/state.json
-    drives: '[{name:"10Mb Hard Disk",type:3,path:"/disks/pcx86/fixed/10mb/PCDOS200-WIN101-EGA.json"}]'
+    drives: '[{name:"10Mb Hard Disk",type:3,path:"https://jeffpar.github.io/pcjs-disks/pcx86/drives/10mb/PCDOS200-WIN101-EGA.json"}]'
   - id: ibm5160-ega-win101-2
     type: pcx86
     state: /disks/pcx86/windows/1.01/state.json
-    drives: '[{name:"10Mb Hard Disk",type:3,path:"/disks/pcx86/fixed/10mb/PCDOS200-WIN101-EGA.json"}]'
+    drives: '[{name:"10Mb Hard Disk",type:3,path:"https://jeffpar.github.io/pcjs-disks/pcx86/drives/10mb/PCDOS200-WIN101-EGA.json"}]'
   - id: ibm5160-ega-win101-3
     type: pcx86
     state: /disks/pcx86/windows/1.01/state.json
-    drives: '[{name:"10Mb Hard Disk",type:3,path:"/disks/pcx86/fixed/10mb/PCDOS200-WIN101-EGA.json"}]'
+    drives: '[{name:"10Mb Hard Disk",type:3,path:"https://jeffpar.github.io/pcjs-disks/pcx86/drives/10mb/PCDOS200-WIN101-EGA.json"}]'
   - id: ibm5160-ega-win101-4
     type: pcx86
     state: /disks/pcx86/windows/1.01/state.json
-    drives: '[{name:"10Mb Hard Disk",type:3,path:"/disks/pcx86/fixed/10mb/PCDOS200-WIN101-EGA.json"}]'
+    drives: '[{name:"10Mb Hard Disk",type:3,path:"https://jeffpar.github.io/pcjs-disks/pcx86/drives/10mb/PCDOS200-WIN101-EGA.json"}]'
 ---
 
 IBM PC XT Machine Array with EGA Displays

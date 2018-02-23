@@ -9,9 +9,9 @@ machines:
     config: /devices/pcx86/machine/compaq/deskpro386/ega/2048kb/debugger/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/compaq/3.10/COMPAQ-DOS310-DISK1.json
+        name: COMPAQ MS-DOS 3.10 (Disk 1)
       B:
-        path: /disks/pcx86/dos/compaq/3.10/COMPAQ-DOS310-DISK2.json
+        name: COMPAQ MS-DOS 3.10 (Disk 2)
     autoStart: true
 ---
 

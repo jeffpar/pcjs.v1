@@ -8,9 +8,9 @@ machines:
     config: /devices/pcx86/machine/5150/mda/256kb/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
+        name: PC-DOS 2.00 (Disk 1)
       B:
-        path: /disks/pcx86/apps/other/wordstar/3.20/WS320-MOUNTABLE.json
+        name: WordStar 3.20
     autoType: $date\r$time\rB:\rWS\r
 ---
 
