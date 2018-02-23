@@ -303,7 +303,7 @@ let matchRef = function(match, sIndent, sFile) {
             while ((matchDisk = reDisk.exec(sManifest))) {
                 if (sDisks) sDisks += "\n";
                 let urlDisk = matchDisk[1];
-                urlDisk = urlDisk.replace(/\/(pcjs-disks|private-disks)\//g, "https://jeffpar.github.io/$1/");
+                urlDisk = urlDisk.replace(/^\/(pcjs-disks|private-disks)\//g, "https://jeffpar.github.io/$1/");
                 // console.log(sFilePath + ": found '" + urlDisk + "'");
                 sDisks += sIndent + "<disk path=\"" + urlDisk + "\">" + sDefaultName + "</disk>";
             }
@@ -313,7 +313,7 @@ let matchRef = function(match, sIndent, sFile) {
                 let matchName = matchDisk[2].match(/<name.*?>(.*?)<\/name>/);
                 let sName = matchName? ((sPrefix? sPrefix + ": " : "") + matchName[1]) : sDefaultName;
                 let urlDisk = matchDisk[1];
-                urlDisk = urlDisk.replace(/\/(pcjs-disks|private-disks)\//g, "https://jeffpar.github.io/$1/");
+                urlDisk = urlDisk.replace(/^\/(pcjs-disks|private-disks)\//g, "https://jeffpar.github.io/$1/");
                 // console.log(sFilePath + ": found '" + urlDisk + "'");
                 sDisks += sIndent + "<disk path=\"" + urlDisk + "\">" + sName + "</disk>";
             }
