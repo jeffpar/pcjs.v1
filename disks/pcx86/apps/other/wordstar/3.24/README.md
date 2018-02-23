@@ -8,7 +8,7 @@ machines:
     config: /devices/pcx86/machine/5150/mda/256kb/machine.xml
     autoMount:
       A:
-        PC-DOS 2.00 (Disk 1)
+        name: PC-DOS 2.00 (Disk 1)
       B:
         name: WordStar 3.24
     autoType: $date\r$time\rB:\rWS\r

@@ -1,4 +1,4 @@
-    ---
+---
 layout: page
 title: MicroPro WordStar 3.20
 permalink: /disks/pcx86/apps/other/wordstar/3.20/
