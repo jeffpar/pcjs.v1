@@ -1464,6 +1464,7 @@ class Web {
              * NOTE: "http://archive.pcjs.org" is now "https://s3-us-west-2.amazonaws.com/archive.pcjs.org"
              */
             sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^\/]*)$/, "$2/archive/$3");
+            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/pcjs-disks\/(.*)$/, "/pcjs-disks/$1");
         }
 
 
