@@ -60,10 +60,10 @@
  *          Copies any other individual resources files listed in machines.json (other than scripts) to the
  *          machine's current version folder.
  * 
- *      disks
+ *      disks (eg: `gulp pcjs-disks` and `gulp private-disks`)
  * 
- *          Updates "compiled" (inlined) disk manifests (eg, /disks/pcx86/compiled/library.xml) from the
- *          "uncompiled" manifests (eg, /disks/pcx86/library.xml), which are actually "manifests of manifests"
+ *          Updates "compiled" (inlined) disk manifests (eg, /disks/pcx86/library.xml) from the "uncompiled"
+ *          submodule manifests (eg, /pcjs-disks/pcx86/library.xml), which are actually "manifests of manifests"
  *          and therefore inherently slower to load.
  * 
  *      version
@@ -84,6 +84,7 @@ var gulpReplace = require("gulp-replace");
 var gulpClosureCompiler = require('google-closure-compiler-js').gulp();
 var gulpSequence = require("run-sequence");
 var gulpSourceMaps = require('gulp-sourcemaps');
+var merge = require('merge-stream');
 
 var fs = require("fs");
 var path = require("path");
@@ -269,65 +270,88 @@ gulp.task("compile/devices", [
 
 gulp.task("copy", aCopyTasks);
 
-gulp.task("disks", function() {
-    let baseDir = "./disks/pcx86/";
-    let targetDir = baseDir + "compiled/";
-    return gulp.src([
-            "disks/pcx86/library.xml",
-            "disks/pcx86/samples.xml",
-            "disks/pcx86/shareware/pcsig08/pcsig08.xml",
-            "disks/pcx86/private/library.xml"
-        ], {base: baseDir})
-        .pipe(gulpReplace(/([ \t]*)<manifest.*? ref="(.*?)".*?\/>/g, function(match, sIndent, sFile) {
-            /*
-             * This function mimics what components.xsl normally does for disk manifests referenced by the FDC
-             * machine component.  Compare it to the following template in components.xsl:
-             * 
-             *      <xsl:template match="manifest[not(@ref)]" mode="component">
-             * 
-             * This code is not perfect (it doesn't process <link> elements, for example), but for machines
-             * that used library.xml, having them use compiled/library.xml instead speeds up loading significantly.
-             * 
-             * Granted, after the first machine has fetched all the individual manifest files, your browser should
-             * do a reasonably good job using cached copies for all subsequent machines, but even then, there's
-             * still a noticeable delay.
-             */
-            let sDisks = match;
-            let sFilePath = path.join('.', sFile);
-            try {
-                let sManifest = /** @type {string} */ (fs.readFileSync(sFilePath, {encoding: 'utf8'}));
-                if (sManifest) {
-                    sDisks = "";
-                    let sPrefix = "", sDefaultName = "Unknown";
-                    let matchTitle = sManifest.match(/<title(?: prefix="(.*?)"|)[^>]*>(.*?)<\/title>/);
-                    if (matchTitle) {
-                        sPrefix = matchTitle[1];
-                        sDefaultName = matchTitle[2];
-                        let matchVersion = sManifest.match(/<version.*?>(.*?)<\/version>/);
-                        if ( matchVersion) sDefaultName += ' ' +  matchVersion[1];
-                    }
-                    let reDisk, matchDisk;
-                    reDisk = /<disk.*? href="([^"]*)".*?\/>/g;
-                    while ((matchDisk = reDisk.exec(sManifest))) {
-                        if (sDisks) sDisks += "\n";
-                        sDisks += sIndent + "<disk path=\"" + matchDisk[1] + "\">" + sDefaultName + "</disk>";
-                    }
-                    reDisk = /<disk.*? href="([^"]*)".*?>([\S\s]*?)<\/disk>/g;
-                    while ((matchDisk = reDisk.exec(sManifest))) {
-                        if (sDisks) sDisks += "\n";
-                        var matchName = matchDisk[2].match(/<name.*?>(.*?)<\/name>/);
-                        var sName = matchName? ((sPrefix? sPrefix + ": " : "") + matchName[1]) : sDefaultName;
-                        sDisks += sIndent + "<disk path=\"" + matchDisk[1] + "\">" + sName + "</disk>";
-                    }
-                    return sDisks;
-                }
-            } catch(err) {
-                console.log(err.message);
+let matchRef = function(match, sIndent, sFile) {
+    /*
+     * This function mimics what components.xsl normally does for disk manifests referenced by the FDC
+     * machine component.  Compare it to the following template in components.xsl:
+     *
+     *      <xsl:template match="manifest[not(@ref)]" mode="component">
+     *
+     * This code is not perfect (it doesn't process <link> elements, for example), but for machines
+     * that used library.xml, having them use compiled/library.xml instead speeds up loading significantly.
+     *
+     * Granted, after the first machine has fetched all the individual manifest files, your browser should
+     * do a reasonably good job using cached copies for all subsequent machines, but even then, there's
+     * still a noticeable delay.
+     */
+    let sDisks = match;
+    let sFilePath = path.join('.', sFile);
+    try {
+        let sManifest = /** @type {string} */ (fs.readFileSync(sFilePath, {encoding: 'utf8'}));
+        if (sManifest) {
+            sDisks = "";
+            let sPrefix = "", sDefaultName = "Unknown";
+            let matchTitle = sManifest.match(/<title(?: prefix="(.*?)"|)[^>]*>(.*?)<\/title>/);
+            if (matchTitle) {
+                sPrefix = matchTitle[1];
+                sDefaultName = matchTitle[2];
+                let matchVersion = sManifest.match(/<version.*?>(.*?)<\/version>/);
+                if ( matchVersion) sDefaultName += ' ' +  matchVersion[1];
+            }
+            let reDisk, matchDisk;
+            reDisk = /<disk.*? href="([^"]*)".*?\/>/g;
+            while ((matchDisk = reDisk.exec(sManifest))) {
+                if (sDisks) sDisks += "\n";
+                let urlDisk = matchDisk[1];
+                urlDisk = urlDisk.replace(/\/(pcjs-disks|private-disks)\//g, "https://jeffpar.github.io/$1/");
+                // console.log(sFilePath + ": found '" + urlDisk + "'");
+                sDisks += sIndent + "<disk path=\"" + urlDisk + "\">" + sDefaultName + "</disk>";
+            }
+            reDisk = /<disk.*? href="([^"]*)".*?>([\S\s]*?)<\/disk>/g;
+            while ((matchDisk = reDisk.exec(sManifest))) {
+                if (sDisks) sDisks += "\n";
+                let matchName = matchDisk[2].match(/<name.*?>(.*?)<\/name>/);
+                let sName = matchName? ((sPrefix? sPrefix + ": " : "") + matchName[1]) : sDefaultName;
+                let urlDisk = matchDisk[1];
+                urlDisk = urlDisk.replace(/\/(pcjs-disks|private-disks)\//g, "https://jeffpar.github.io/$1/");
+                // console.log(sFilePath + ": found '" + urlDisk + "'");
+                sDisks += sIndent + "<disk path=\"" + urlDisk + "\">" + sName + "</disk>";
             }
             return sDisks;
-        }))
-        .pipe(gulp.dest(targetDir));
+        }
+    } catch(err) {
+        console.log(err.message);
+    }
+    return sDisks;
+};
+
+gulp.task("pcjs-disks", function() {
+    let replaceRefs = gulpReplace(/([ \t]*)<manifest.*? ref="(.*?)".*?\/>/g, matchRef);
+    let replacePaths = gulpReplace(/path:"\/(pcjs-disks|private-disks)\//g, 'path:"https://jeffpar.github.io/$1/');
+    return gulp.src([
+            "pcjs-disks/pcx86/library.xml",
+            "pcjs-disks/pcx86/samples.xml",
+            "pcjs-disks/pcx86/shareware/pcsig08/library.xml",
+        ], {base: "pcjs-disks/pcx86/"})
+        .pipe(replaceRefs)
+        .pipe(replacePaths)
+        .pipe(gulp.dest("disks/pcx86/")
+    );
 });
+
+gulp.task("private-disks", function() {
+    let replaceRefs = gulpReplace(/([ \t]*)<manifest.*? ref="(.*?)".*?\/>/g, matchRef);
+    let replacePaths = gulpReplace(/path:"\/(pcjs-disks|private-disks)\//g, 'path:"https://jeffpar.github.io/$1/');
+    return gulp.src([
+        "private-disks/pcx86/library.xml"
+        ], {base: "private-disks/pcx86/"})
+        .pipe(replaceRefs)
+        .pipe(replacePaths)
+        .pipe(gulp.dest("disks/pcx86/private/")
+    );
+});
+
+gulp.task("disks", ["pcjs-disks", "private-disks"]);
 
 gulp.task("version", function() {
     let baseDir = "./";

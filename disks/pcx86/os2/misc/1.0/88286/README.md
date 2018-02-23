@@ -9,7 +9,7 @@ machines:
     config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/os2/misc/1.0/OS210-88286.json
+        name: OS/2 1.0 Debugger
 ---
 
 OS/2 1.0 Debugger Boot Disk

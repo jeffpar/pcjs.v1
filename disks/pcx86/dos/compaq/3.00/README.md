@@ -9,9 +9,9 @@ machines:
     resume: 1
     autoMount:
       A:
-        path: /disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-DISK1.json
+        name: COMPAQ MS-DOS 3.00 (Disk 1)
       B:
-        path: /disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-DISK2.json
+        name: COMPAQ MS-DOS 3.00 (Disk 2)
     autoType: \r\r
 ---
 

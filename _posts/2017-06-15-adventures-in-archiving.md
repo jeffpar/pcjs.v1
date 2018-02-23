@@ -10,9 +10,9 @@ machines:
     resume: 1
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/1.00/PCDOS100.json
+        name: PC-DOS 1.00
       B:
-        path: /apps/pcx86/1983/adventmath/ADVENTMATH100.json
+        name: Adventures in Math 1.00
     autoType: $date\rB:\rA:BASICA CASTLE\r
 ---
 

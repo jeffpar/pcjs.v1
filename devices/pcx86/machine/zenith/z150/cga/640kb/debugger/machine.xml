@@ -8,7 +8,7 @@
 	<ram id="ramBIOS" addr="0xf0000" size="0x4000" comment="16Kb of scratchpad RAM"/>
 	<rom ref="/devices/pcx86/rom/zenith/z150/bios-z150-1988.xml"/>
 	<video ref="/devices/pcx86/video/ibm/cga/ibm-cga.xml"/>
-	<fdc ref="/disks/pcx86/compiled/library.xml"/>
+	<fdc ref="/disks/pcx86/library.xml"/>
 	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-z150.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pcx86/panel/wide.xml"/>

@@ -9,7 +9,7 @@ machines:
     resume: 1
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/1.10/PCDOS110.json
+        name: PC-DOS 1.10
       B:
         name: None
     autoType: $date\r$time\r

@@ -9,7 +9,7 @@ machines:
     config: /disks/pcx86/games/infocom/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/games/infocom/zork3/ZORK3-READONLY.json
+        name: Zork III
 ---
 
 Zork III: The Dungeon Master

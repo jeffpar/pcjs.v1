@@ -9,7 +9,7 @@ machines:
     config: /disks/pcx86/games/infocom/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/games/infocom/hhiker/HHIKER-READONLY.json
+        name: Hitchhiker's Guide
 ---
 
 The Hitchhiker's Guide to the Galaxy (1984)

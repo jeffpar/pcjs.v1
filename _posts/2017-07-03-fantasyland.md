@@ -9,7 +9,7 @@ machines:
     resume: 1
     state: /apps/pcx86/1984/modula2/state.json
     config: /devices/pcx86/machine/5160/ega/640kb/debugger/machine.xml
-    drives: '[{name:"10Mb Hard Disk",type:3,path:"/disks/pcx86/fixed/10mb/MSDOS320-C400.json"}]'
+    drives: '[{name:"10Mb Hard Disk",type:3,path:"https://jeffpar.github.io/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'
     autoMount:
       A:
         name: None
@@ -134,7 +134,7 @@ exactly what I've done "below the fold".
 	Loading /devices/pcx86/rom/5160/1982-11-08/XTBIOS-REV1.json.......
 	Loading /devices/pcx86/video/ibm/ega/1984-09-13/ibm-ega.json.......
 	HDC: Type 3 "10Mb Hard Disk" is fixed disk 0
-	Loading /disks/pcx86/fixed/10mb/MSDOS320-C400.json.........
+	Loading /disks/pcx86/drives/10mb/MSDOS320-C400.json.........
 	Loading /apps/pcx86/1984/modula2/state.json.........
 	Bus: 8Kb ROM at 000C8000
 	Bus: 8Kb ROM at 000FE000

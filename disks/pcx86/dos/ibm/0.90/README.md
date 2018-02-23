@@ -8,7 +8,7 @@ machines:
     config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/0.90/PCDOS090.json
+        name: PC-DOS 0.90
       B:
         name: None
 ---
@@ -71,6 +71,8 @@ of the disk is provided below.
 	CUBE     DAT       402 04-30-81  12:00a
 	       35 file(s)     144458 bytes
 	                        8192 bytes free
+
+### PC-DOS 0.90 Boot Sector
 
 The boot sector of the original PC-DOS 0.90 disk image contained the following bytes:
 

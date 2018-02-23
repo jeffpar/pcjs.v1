@@ -9,7 +9,7 @@ machines:
     config: /disks/pcx86/games/infocom/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/games/infocom/planet/PLANET-READONLY.json
+        name: Planetfall
 ---
 
 Planetfall (1983)

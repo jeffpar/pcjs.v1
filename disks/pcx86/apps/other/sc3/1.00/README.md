@@ -8,9 +8,9 @@ machines:
     config: /devices/pcx86/machine/5160/cga/640kb/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
+        name: PC-DOS 2.00 (Disk 1)
       B:
-        path: /disks/pcx86/apps/other/sc3/1.00/SC3_V100-SETUP.json
+        name: SuperCalc3 1.00 Setup
     autoType: $date\r$time\rb:\rsc3\r
 ---
 

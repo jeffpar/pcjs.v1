@@ -9,9 +9,9 @@ machines:
     resume: 1
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/3.10/PCDOS310-DISK1.json
+        name: PC-DOS 3.10 (Disk 1)
       B:
-        path: /disks/pcx86/dos/ibm/3.10/PCDOS310-DISK2.json
+        name: PC-DOS 3.10 (Disk 2)
     autoType: \r\r
 ---
 

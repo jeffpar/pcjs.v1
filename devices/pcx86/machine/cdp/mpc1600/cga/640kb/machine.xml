@@ -6,7 +6,7 @@
 	<ram id="ramLow" addr="0x00000" size="0xa0000"/>
 	<rom ref="/devices/pcx86/rom/cdp/mpc1600/bios-434.xml"/>
 	<video ref="/devices/pcx86/video/cdp/cga/cdp-cga.xml"/>
-	<fdc ref="/disks/pcx86/compiled/library.xml"/>
+	<fdc ref="/disks/pcx86/library.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padLeft="8px" padBottom="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>

@@ -22,7 +22,7 @@ old COMPAQ MS-DOS [SETUP Disk](/disks/pcx86/dos/compaq/3.31/#directory-of-compaq
 *also* reports version 3.31.  That makes at *least* three revisions of a single version of COMPAQ MS-DOS.
 
 The good news is that large (&gt;32Mb) partition support in [COMPAQ MS-DOS 3.31](/disks/pcx86/dos/compaq/3.31/) works
-fine in PCjs.  See the [47Mb Hard Drive](/disks/pcx86/fixed/47mb/) page for additional information.
+fine in PCjs.  See the [47Mb Hard Drive](/disks/pcx86/drives/47mb/) page for additional information.
 
 ### A New Old COMPAQ ROM
 

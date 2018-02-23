@@ -8,9 +8,9 @@ machines:
     config: /devices/pcx86/machine/5150/mda/256kb/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
+        PC-DOS 2.00 (Disk 1)
       B:
-        path: /disks/pcx86/apps/other/wordstar/3.24/WS324-MOUNTABLE.json
+        name: WordStar 3.24
     autoType: $date\r$time\rB:\rWS\r
 ---
 
@@ -38,4 +38,4 @@ an interesting review/rant from 1983 on this and other versions of WordStar for 
 	        5 file(s)     111360 bytes
 	                       48128 bytes free
 
-![WordStar 3.24 Diskette](WS324.jpg)
+![WordStar 3.24 Diskette](../../../../../../pcjs-disks/pcx86/apps/WS324.jpg)
