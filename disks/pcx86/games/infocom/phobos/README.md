@@ -6,8 +6,10 @@ machines:
   - id: ibm5150-phobos
     type: pcx86
     resume: 1
-    config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
+    config: /disks/pcx86/games/infocom/machine.xml
     autoMount:
+      A:
+        name: PC-DOS 2.00 (Disk 1)
       B:
         name: Leather Goddesses of Phobos
     autoType: $date\r$time\rb:\rleather\r

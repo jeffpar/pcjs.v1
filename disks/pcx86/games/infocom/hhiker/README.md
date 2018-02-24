@@ -9,7 +9,7 @@ machines:
     config: /disks/pcx86/games/infocom/machine.xml
     autoMount:
       A:
-        name: Hitchhiker's Guide
+        name: Hitchhiker&#39;s Guide
 ---
 
 The Hitchhiker's Guide to the Galaxy (1984)
