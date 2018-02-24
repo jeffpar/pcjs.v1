@@ -122,23 +122,23 @@ be re-generated.
 ### Example: CP/M-86
 
 CPM-86 is stored as two disk images in a [/disks folder](/disks/pcx86/cpm/1.1b/). The disk images are described in that
-folder's [manifest](/disks/pcx86/cpm/1.1b/manifest.xml):
+folder's [manifest](https://jeffpar.github.io/pcjs-disks/pcx86/cpm/1.1b/manifest.xml):
 
 ```xml
 <manifest>
     <title>CP/M-86</title>
     <version>1.1B</version>
-    <type>OS</type>
-    <category>Operating System</category>
+    <type>Operating System</type>
+    <category>CP/M</category>
     <company href="http://en.wikipedia.org/wiki/Digital_Research">Digital Research</company>
     <publisher href="http://en.wikipedia.org/wiki/Eagle_Computer">Eagle Computer</publisher>
     <releaseDate>May 20, 1983</releaseDate>
-    <machine href="/disks/pcx86/cpm/1.1b/machine.xml"/>
-    <disk id="disk01" href="/disks/pcx86/cpm/1.1b/cpm86-disk1.json">
-        <name>CP/M-86 (Disk 1)</name>
+    <machine href="/disks/pcx86/cpm/1.00/machine.xml"/>
+    <disk id="disk01" href="https://jeffpar.github.io/pcjs-disks/pcx86/cpm/1.1b/CPM86-DISK1.json">
+        <name>CP/M-86 1.1B (Disk 1)</name>
     </disk>
-    <disk id="disk02" href="/disks/pcx86/cpm/1.1b/cpm86-disk2.json">
-        <name>CP/M-86 (Disk 2)</name>
+    <disk id="disk02" href="https://jeffpar.github.io/pcjs-disks/pcx86/cpm/1.1b/CPM86-DISK2.json">
+        <name>CP/M-86 1.1B (Disk 2)</name>
     </disk>
 </manifest>
 ```
@@ -152,13 +152,12 @@ the disk images.
 If a machine file wanted to use only the first disk, then it would specify:
 
 ```xml
-<manifest ref="/disks/pcx86/cpm/1.1b/manifest.xml" disk="disk01"/>
+<manifest ref="https://jeffpar.github.io/pcjs-disks/pcx86/cpm/1.1b/manifest.xml" disk="disk01"/>
 ```
 
-and if it wanted to use all the disks listed in the manifest, it would specify:
+and if it wanted to use all the disks listed in the manifest, it could simply omit the *disk* attribute or
+use an asterisk; e.g.:
 
 ```xml
-<manifest ref="/disks/pcx86/cpm/1.1b/manifest.xml" disk="*"/>
+<manifest ref="https://jeffpar.github.io/pcjs-disks/pcx86/cpm/1.1b/manifest.xml" disk="*"/>
 ```
-
-which is what our [CP/M Machine Configuration](/disks/pcx86/cpm/1.1b/machine.xml) does.
