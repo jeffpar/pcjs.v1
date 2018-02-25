@@ -46,7 +46,7 @@
 		<control type="key" binding="p" top="42px" left="558px" width="34px">P</control>
 		<control type="key" binding="[" top="42px" left="600px" width="34px">[ {</control>
 		<control type="key" binding="]" top="42px" left="642px" width="34px">] }</control>
-		<control type="key" top="42px" left="684px" width="34px"></control>
+		<control type="key" top="42px" left="684px" width="34px"/>
 		<control type="key" binding="num-home" top="42px" left="738px" width="34px">7</control>
 		<control type="key" binding="num-up" top="42px" left="780px" width="34px">8</control>
 		<control type="key" binding="num-pgup" top="42px" left="822px" width="34px">9</control>
