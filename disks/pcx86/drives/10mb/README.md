@@ -15,8 +15,8 @@ This folder contains a variety of 10Mb (PC XT Type 3) fixed disk configurations:
 * [PC-DOS 2.00 with Windows 1.01 for EGA](pcdos200-win101-ega-xt3.xml)
 * [MS-DOS 3.20 with Microsoft C 4.00](msdos320-c400-xt3.xml)
 
-Note that in order to use an unformatted fixed disk with DOS, it must first be partitioned using `FDISK` and then formatted
-using `FORMAT`.
+Note that in order to use an unformatted fixed disk with DOS, it must first be partitioned using `FDISK` and then
+formatted using `FORMAT`.
 
 The XML disk configurations above are used to load fixed disk images into various IBM PC XT
 [Model 5160](/devices/pcx86/machine/5160/) machine configurations.
@@ -30,7 +30,7 @@ For example, a PC XT machine using this HDC XML reference:
 will load the following PC XT controller configuration and disk image:
 
 ```xml
-<hdc id="hdcXT" type="XT" drives='[{name:"10Mb Hard Disk",type:3,path:"https://jeffpar.github.io/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'/>
+<hdc id="hdcXT" type="XT" drives='[{name:"10Mb Hard Disk",type:3,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'/>
 ```
 
 Some of the 10Mb disk images have also been pre-configured for use in PC AT configurations:
@@ -49,7 +49,7 @@ So, a PC AT machine using this HDC XML reference:
 will load the following PC AT controller configuration and disk image:
 
 ```xml
-<hdc id="hdcAT" type="AT" drives='[{name:"10Mb Hard Disk",type:1,path:"https://jeffpar.github.io/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'/>
+<hdc id="hdcAT" type="AT" drives='[{name:"10Mb Hard Disk",type:1,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'/>
 ```
 
 ### Notes Regarding 10Mb Disks

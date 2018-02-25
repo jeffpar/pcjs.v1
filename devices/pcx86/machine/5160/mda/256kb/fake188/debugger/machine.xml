@@ -12,10 +12,10 @@
 	<fdc id="fdcNEC" pos="left" padLeft="8px" padBottom="8px" autoMount='{A:{name:"PC-DOS 2.00 (Disk 1)"}, B:{name:"Executive Suite (1982)"}}'>
 		<control type="list" binding="listDrives"/>
 		<control type="list" binding="listDisks">
-			<manifest ref="https://jeffpar.github.io/pcjs-disks/pcx86/dos/ibm/1.00/manifest.xml" disk="*"/>
-			<manifest ref="https://jeffpar.github.io/pcjs-disks/pcx86/dos/ibm/1.10/manifest.xml" disk="*"/>
-			<manifest ref="https://jeffpar.github.io/pcjs-disks/pcx86/dos/ibm/2.00/manifest.xml" disk="*"/>
-			<manifest ref="https://jeffpar.github.io/pcjs-disks/pcx86/games/microsoft/adventure/manifest.xml" disk="*"/>
+			<manifest ref="/pcjs-disks/pcx86/dos/ibm/1.00/manifest.xml" disk="*"/>
+			<manifest ref="/pcjs-disks/pcx86/dos/ibm/1.10/manifest.xml" disk="*"/>
+			<manifest ref="/pcjs-disks/pcx86/dos/ibm/2.00/manifest.xml" disk="*"/>
+			<manifest ref="/pcjs-disks/pcx86/games/microsoft/adventure/manifest.xml" disk="*"/>
 			<manifest ref="/apps/pcx86/1981/visicalc/manifest.xml" disk="*"/>
 			<manifest ref="/apps/pcx86/1982/esuite/manifest.xml" disk="*"/>
 		</control>
