@@ -6,7 +6,7 @@ machines:
   - id: pcmag
     type: pcx86
     config: /devices/pcx86/machine/5160/ega/640kb/debugger/machine.xml
-    drives: '[{name:"10Mb Hard Disk",type:3,path:"https://jeffpar.github.io/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'
+    drives: '[{name:"10Mb Hard Disk",type:3,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'
     resume: 1
     autoMount:
       A:

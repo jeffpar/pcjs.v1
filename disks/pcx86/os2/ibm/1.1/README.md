@@ -8,7 +8,7 @@ machines:
     debugger: true
     messages: fault
     config: /devices/pcx86/machine/5170/vga/4096kb/debugger/machine.xml
-    drives: '[{name:"20Mb Hard Disk",type:2,path:"https://jeffpar.github.io/pcjs-disks/pcx86/drives/20mb/IBMOS211-VGA.json"}]'
+    drives: '[{name:"20Mb Hard Disk",type:2,path:"/pcjs-disks/pcx86/drives/20mb/IBMOS211-VGA.json"}]'
     autoMount:
       A:
         name: None
