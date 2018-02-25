@@ -62,9 +62,9 @@
  * 
  *      disks (eg: `gulp pcjs-disks` and `gulp private-disks`)
  * 
- *          Updates "compiled" (inlined) disk manifests (eg, /disks/pcx86/library.xml) from the "uncompiled"
- *          submodule manifests (eg, /pcjs-disks/pcx86/library.xml), which are actually "manifests of manifests"
- *          and therefore inherently slower to load.
+ *          Updates inlined disk manifests (eg, /disks/pcx86/library.xml) from the submodule manifests
+ *          (eg, /pcjs-disks/pcx86/library.xml), which are actually "manifests of manifests" and therefore
+ *          inherently slower to load.
  * 
  *      version
  * 
@@ -278,7 +278,7 @@ let matchRef = function(match, sIndent, sFile) {
      *      <xsl:template match="manifest[not(@ref)]" mode="component">
      *
      * This code is not perfect (it doesn't process <link> elements, for example), but for machines
-     * that used library.xml, having them use compiled/library.xml instead speeds up loading significantly.
+     * that use library.xml, having them use an inlined library.xml instead speeds up loading significantly.
      *
      * Granted, after the first machine has fetched all the individual manifest files, your browser should
      * do a reasonably good job using cached copies for all subsequent machines, but even then, there's
@@ -349,7 +349,7 @@ gulp.task("private-disks", function() {
     let replaceRefs = gulpReplace(/([ \t]*)<manifest.*? ref="(.*?)".*?\/>/g, matchRef);
     let replacePaths = gulpReplace(/path:"\/(pcjs-disks|private-disks)\//g, 'path:"https://jeffpar.github.io/$1/');
     return gulp.src([
-        "private-disks/pcx86/library.xml"
+        "private-disks/pcx86/**/library.xml"
         ], {base: "private-disks/pcx86/"})
         .pipe(replaceRefs)
         .pipe(replacePaths)
