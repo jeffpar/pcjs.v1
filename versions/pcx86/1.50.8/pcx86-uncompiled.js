@@ -1975,8 +1975,12 @@ class Web {
             return response;
         }
 
-        sURL = sURL.replace(/^(\/disks\/pc\/private\/|\/disks\/pcx86\/private\/)(.*?)(\.json|manifest\.xml)$/, "/private-disks/pcx86/$2$3");
-        sURL = sURL.replace(/^(\/disks\/pc\/|\/disks\/pcx86\/)(.*?)(\.json|manifest\.xml)$/, "/pcjs-disks/pcx86/$2$3");
+        //
+        // The following code was just a crutch....
+        //
+        // sURL = sURL.replace(/^(\/disks\/pc\/private\/|\/disks\/pcx86\/private\/)(.*?)(\.json|manifest\.xml)$/, "/private-disks/pcx86/$2$3");
+        // sURL = sURL.replace(/^(\/disks\/pc\/|\/disks\/pcx86\/)(.*?)(\.json|manifest\.xml)$/, "/pcjs-disks/pcx86/$2$3");
+        //
         
         if (!DEBUG) {
             sURL = sURL.replace(/^\/(pcjs-disks|private-disks)\//, "https://jeffpar.github.io/$1/");
@@ -64839,10 +64843,6 @@ class HDC extends Component {
             if (this.messageEnabled()) this.printMessage("loading " + sDiskName);
         }
         var disk = drive.disk || new Disk(this, drive, drive.mode);
-        /*
-         * TODO: The following hack is similar to that in FDC's loadDrive(), to ease migration of disk images.
-         */
-        sDiskPath = sDiskPath.replace("/fixed/", "/drives/");
         disk.load(sDiskName, sDiskPath, null, this.doneLoadDisk);
         return false;
     }

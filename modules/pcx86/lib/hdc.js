@@ -872,10 +872,6 @@ class HDC extends Component {
             if (this.messageEnabled()) this.printMessage("loading " + sDiskName);
         }
         var disk = drive.disk || new Disk(this, drive, drive.mode);
-        /*
-         * TODO: The following hack is similar to that in FDC's loadDrive(), to ease migration of disk images.
-         */
-        sDiskPath = sDiskPath.replace("/fixed/", "/drives/");
         disk.load(sDiskName, sDiskPath, null, this.doneLoadDisk);
         return false;
     }

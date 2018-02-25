@@ -5,7 +5,7 @@ permalink: /disks/pcx86/windows/2.0x/
 machines:
   - id: deskpro386
     type: pcx86
-    state: deskpro386.json
+    state: state.json
     config: /devices/pcx86/machine/compaq/deskpro386/vga/2048kb/machine.xml
     drives: '[{name:"20Mb Hard Disk",type:2,path:"/pcjs-disks/pcx86/drives/20mb/COMPAQ310-WIN386201-VGA.json"}]'
     autoMount:
