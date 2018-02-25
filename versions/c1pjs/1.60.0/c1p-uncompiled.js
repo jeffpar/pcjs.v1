@@ -1457,13 +1457,6 @@ class Web {
             return response;
         }
 
-        //
-        // The following code was just a crutch....
-        //
-        // sURL = sURL.replace(/^(\/disks\/pc\/private\/|\/disks\/pcx86\/private\/)(.*?)(\.json|manifest\.xml)$/, "/private-disks/pcx86/$2$3");
-        // sURL = sURL.replace(/^(\/disks\/pc\/|\/disks\/pcx86\/)(.*?)(\.json|manifest\.xml)$/, "/pcjs-disks/pcx86/$2$3");
-        //
-        
         if (!DEBUG) {
             sURL = sURL.replace(/^\/(pcjs-disks|private-disks)\//, "https://jeffpar.github.io/$1/");
         }
