@@ -12,7 +12,7 @@ Device Configurations
 ---------------------
 
 PCjs machines can be built with the following CPUs:
- 
+
 * [6502](c1p/)
     - [Challenger 1P](c1p/machine/)
 * [8080](pc8080/)
