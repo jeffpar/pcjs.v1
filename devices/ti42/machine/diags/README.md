@@ -67,7 +67,7 @@ The window also accepts a few debugging commands.  Use '?' for help.
 {% include machine.html id="ti42" config="json" %}
 
 <div id="ti42">
-  <img id="imageTI42" src="/devices/ti42/images/TI-42.png" alt="TI-42 Calculator"/>
+  <img id="imageTI42" src="/devices/ti42/images/TI-42.png" width="300" alt="TI-42 Calculator"/>
   <div id="displayTI42"></div>
   <div id="ind2ndTI42" class="indTI42">2nd</div>
   <button id="powerTI42">Power</button>
