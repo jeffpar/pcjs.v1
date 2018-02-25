@@ -62344,6 +62344,13 @@ class FDC extends Component {
         var drive = this.aDrives[iDrive];
         if (sDiskettePath) {
             /*
+             * The following hacks should only be necessary for (old) saved states, since all our disk manifests
+             * should no longer be using any of these old paths.
+             */
+            sDiskettePath = sDiskettePath.replace("/disks/pc/", "/disks/pcx86/");
+            sDiskettePath = sDiskettePath.replace("/disks/pcx86/private/", "/private-disks/pcx86/");
+            sDiskettePath = sDiskettePath.replace("/disks/pcx86/", "/pcjs-disks/pcx86/");
+            /*
              * TODO: Machines with saved states may be using lower-case disk image names, whereas we now use
              * UPPER-CASE names for disk images, so we lower-case both before comparing.  The only problem with
              * removing these hacks is that we can never be sure when all saved states in the wild have been updated.
@@ -64863,6 +64870,14 @@ class HDC extends Component {
             if (this.messageEnabled()) this.printMessage("loading " + sDiskName);
         }
         var disk = drive.disk || new Disk(this, drive, drive.mode);
+        /*
+         * The following hacks should only be necessary for (old) saved states, since all our disk manifests
+         * should no longer be using any of these old paths.
+         */
+        sDiskPath = sDiskPath.replace("/disks/pc/", "/disks/pcx86/");
+        sDiskPath = sDiskPath.replace("/disks/pcx86/private/", "/private-disks/pcx86/");
+        sDiskPath = sDiskPath.replace("/disks/pcx86/", "/pcjs-disks/pcx86/");
+        sDiskPath = sDiskPath.replace("/fixed/", "/drives/");
         disk.load(sDiskName, sDiskPath, null, this.doneLoadDisk);
         return false;
     }
@@ -79258,7 +79273,7 @@ window['sendEvent']    = Web.sendPageEvent;
 function savePC(idMachine, sPCJSFile, callback)
 {
     var cmp = /** @type {Computer} */ (Component.getComponentByType("Computer", idMachine));
-    var dbg = /** @type {Debugger} */ (Component.getComponentByType("Debugger", idMachine));
+    var dbg = false; // /** @type {Debugger} */ (Component.getComponentByType("Debugger", idMachine));
     if (cmp) {
         var sState = cmp.powerOff(true);
         var sParms = cmp.saveMachineParms();
@@ -79351,7 +79366,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
      * Note that the "resources" variable has been added to our externs.js, to prevent it from being renamed
      * by the Closure Compiler.
      */
-    matchScript = sPCJS.match(/^(\s*\(function\(\)\{)([\s\S]*)(}\)\(\);)/);
+    matchScript = sPCJS.match(/^(\s*\(function\(\){)([\s\S]*)(}\)\(\);)/);
     if (!matchScript) {
         /*
          * If the match failed, we assume that a DEBUG (uncompiled) script is being used,

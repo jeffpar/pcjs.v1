@@ -872,6 +872,14 @@ class HDC extends Component {
             if (this.messageEnabled()) this.printMessage("loading " + sDiskName);
         }
         var disk = drive.disk || new Disk(this, drive, drive.mode);
+        /*
+         * The following hacks should only be necessary for (old) saved states, since all our disk manifests
+         * should no longer be using any of these old paths.
+         */
+        sDiskPath = sDiskPath.replace("/disks/pc/", "/disks/pcx86/");
+        sDiskPath = sDiskPath.replace("/disks/pcx86/private/", "/private-disks/pcx86/");
+        sDiskPath = sDiskPath.replace("/disks/pcx86/", "/pcjs-disks/pcx86/");
+        sDiskPath = sDiskPath.replace("/fixed/", "/drives/");
         disk.load(sDiskName, sDiskPath, null, this.doneLoadDisk);
         return false;
     }
