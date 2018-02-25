@@ -1975,14 +1975,20 @@ class Web {
             return response;
         }
 
-        if (DEBUG) {
+        sURL = sURL.replace(/^(\/disks\/pc\/private\/|\/disks\/pcx86\/private\/)(.*?)(\.json|manifest\.xml)$/, "/private-disks/pcx86/$2$3");
+        sURL = sURL.replace(/^(\/disks\/pc\/|\/disks\/pcx86\/)(.*?)(\.json|manifest\.xml)$/, "/pcjs-disks/pcx86/$2$3");
+        
+        if (!DEBUG) {
+            sURL = sURL.replace(/^\/(pcjs-disks|private-disks)\//, "https://jeffpar.github.io/$1/");
+        }
+        else {
             /*
              * The larger resources we put on archive.pcjs.org should also be available locally.
              *
              * NOTE: "http://archive.pcjs.org" is now "https://s3-us-west-2.amazonaws.com/archive.pcjs.org"
              */
             sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^\/]*)$/, "$2/archive/$3");
-            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/pcjs-disks\/(.*)$/, "/pcjs-disks/$1");
+            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-disks|private-disks)\/(.*)$/, "/$1/$2");
         }
 
 
@@ -58745,7 +58751,7 @@ class Disk extends Component {
                 // }
             }
         }
-        var sProgress = "Loading " + sDiskURL.replace("https://jeffpar.github.io/", "/") + "...";
+        var sProgress = "Loading " + sDiskURL + "...";
         return !!Web.getResource(sDiskURL, this.sFormat, true, function loadDone(sURL, sResponse, nErrorCode) {
             disk.doneLoad(sURL, sResponse, nErrorCode);
         }, function(nState) {
@@ -62314,15 +62320,10 @@ class FDC extends Component {
         var drive = this.aDrives[iDrive];
         if (sDiskettePath) {
             /*
-             * TODO: This code contains two hacks that should eventually be eliminated: first, machines
-             * with saved states may attempt to load disks using old paths, so we replace the old path
-             * with the new, and second, they may be using lower-case disk image names, whereas we now use
-             * UPPER-CASE names for disk images, so we lower-case both before comparing.  The only problem
-             * with removing these hacks is that we can never be sure when all saved states in the wild
-             * have been updated....
+             * TODO: Machines with saved states may be using lower-case disk image names, whereas we now use
+             * UPPER-CASE names for disk images, so we lower-case both before comparing.  The only problem with
+             * removing these hacks is that we can never be sure when all saved states in the wild have been updated.
              */
-            sDiskettePath = sDiskettePath.replace("/disks/pc/", "/disks/pcx86/");
-            sDiskettePath = sDiskettePath.replace("/disks/pcx86/", "https://jeffpar.github.io/pcjs-disks/pcx86/");
             if (drive.sDiskettePath.toLowerCase() != sDiskettePath.toLowerCase()) {
                 this.unloadDrive(iDrive, fAutoMount, true);
                 if (drive.fBusy) {
@@ -64839,9 +64840,9 @@ class HDC extends Component {
         }
         var disk = drive.disk || new Disk(this, drive, drive.mode);
         /*
-         * TODO: The following hack is similar to the one in FDC's loadDrive(), to ease migration of disk images.
+         * TODO: The following hack is similar to that in FDC's loadDrive(), to ease migration of disk images.
          */
-        sDiskPath = sDiskPath.replace("/disks/pcx86/fixed/", "https://jeffpar.github.io/pcjs-disks/pcx86/drives/");
+        sDiskPath = sDiskPath.replace("/fixed/", "/drives/");
         disk.load(sDiskName, sDiskPath, null, this.doneLoadDisk);
         return false;
     }
