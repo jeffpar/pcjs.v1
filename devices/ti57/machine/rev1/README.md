@@ -95,7 +95,7 @@ The window also accepts a few debugging commands.  Use '?' for help.
 {% include machine.html id="ti57Rev1" config="json" %}
 
 <div id="ti57Rev1">
-  <img id="imageTI57" src="/devices/ti57/images/TI-57.png" alt="TI-57 Calculator"/>
+  <img id="imageTI57" src="/devices/ti57/images/TI-57.png" width="300" alt="TI-57 Calculator"/>
   <div id="displayTI57"></div>
   <div id="ind2nd" class="indTI57">2nd</div>
   <div id="indINV" class="indTI57">INV</div>

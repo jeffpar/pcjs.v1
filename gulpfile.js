@@ -361,7 +361,7 @@ gulp.task("disks", ["pcjs-disks", "private-disks"]);
 
 gulp.task("version", function() {
     let baseDir = "./";
-    return gulp.src(["apps/**/*.xml", "devices/**/*.xml", "disks/**/*.xml", "pubs/**/*.xml"], {base: baseDir})
+    return gulp.src(["apps/**/*.xml", "devices/**/*.xml", "disks/**/*.xml", "pcjs-disks/**/*.xml", "private-disks/**/*.xml", "pubs/**/*.xml"], {base: baseDir})
         .pipe(gulpReplace(/href="\/versions\/([^\/]*)\/[0-9.]*\/(machine|manifest|outline)\.xsl"/g, 'href="/versions/$1/' + machines.shared.appversion + '/$2.xsl"'))
         .pipe(gulp.dest(baseDir));
 });
