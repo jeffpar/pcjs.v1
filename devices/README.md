@@ -16,12 +16,9 @@ PCjs machines can be built with the following CPUs:
 * [6502](c1p/)
     - [Challenger 1P](c1p/machine/)
 * [8080](pc8080/)
-    - [Space Invaders](pc8080/machine/invaders/)
-    - [VT100 Terminal](pc8080/machine/vt100/)
+    - [Space Invaders](pc8080/machine/invaders/), [VT100 Terminal](pc8080/machine/vt100/)
 * [8088](pcx86/)
-    - [IBM PC](pcx86/machine/5150/)
-    - [IBM PC XT](pcx86/machine/5160/)
-    - [PC Compatibles](pcx86/machine/)
+    - [IBM PC](pcx86/machine/5150/), [PC XT](pcx86/machine/5160/), and [Compatibles](pcx86/machine/)
 * [80286](pcx86/)
     - [IBM PC AT](pcx86/machine/5170/)
 * [80386](pcx86/)
@@ -29,9 +26,7 @@ PCjs machines can be built with the following CPUs:
 * [PDP-10](pdp10/)
     - [Model KA10](pdp10/machine/ka10/)
 * [PDP-11](pdp11/)
-    - [PDP-11/20](pdp11/machine/1120/)
-    - [PDP-11/45](pdp11/machine/1145/)
-    - [PDP-11/70](pdp11/machine/1170/)
+    - [PDP-11/20](pdp11/machine/1120/), [PDP-11/45](pdp11/machine/1145/), and [PDP-11/70](pdp11/machine/1170/)
 
 More recently, PCjs includes a new set of [Device Classes](/modules/devices/) used to create simpler machines, such as:
 
