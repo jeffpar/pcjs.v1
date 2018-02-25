@@ -1457,14 +1457,20 @@ class Web {
             return response;
         }
 
-        if (DEBUG) {
+        sURL = sURL.replace(/^(\/disks\/pc\/private\/|\/disks\/pcx86\/private\/)(.*?)(\.json|manifest\.xml)$/, "/private-disks/pcx86/$2$3");
+        sURL = sURL.replace(/^(\/disks\/pc\/|\/disks\/pcx86\/)(.*?)(\.json|manifest\.xml)$/, "/pcjs-disks/pcx86/$2$3");
+        
+        if (!DEBUG) {
+            sURL = sURL.replace(/^\/(pcjs-disks|private-disks)\//, "https://jeffpar.github.io/$1/");
+        }
+        else {
             /*
              * The larger resources we put on archive.pcjs.org should also be available locally.
              *
              * NOTE: "http://archive.pcjs.org" is now "https://s3-us-west-2.amazonaws.com/archive.pcjs.org"
              */
             sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^\/]*)$/, "$2/archive/$3");
-            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/pcjs-disks\/(.*)$/, "/pcjs-disks/$1");
+            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-disks|private-disks)\/(.*)$/, "/$1/$2");
         }
 
 
