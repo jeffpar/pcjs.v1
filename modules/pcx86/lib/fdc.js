@@ -1203,15 +1203,10 @@ class FDC extends Component {
         var drive = this.aDrives[iDrive];
         if (sDiskettePath) {
             /*
-             * TODO: This code contains two hacks that should eventually be eliminated: first, machines
-             * with saved states may attempt to load disks using old paths, so we replace the old path
-             * with the new, and second, they may be using lower-case disk image names, whereas we now use
-             * UPPER-CASE names for disk images, so we lower-case both before comparing.  The only problem
-             * with removing these hacks is that we can never be sure when all saved states in the wild
-             * have been updated....
+             * TODO: Machines with saved states may be using lower-case disk image names, whereas we now use
+             * UPPER-CASE names for disk images, so we lower-case both before comparing.  The only problem with
+             * removing these hacks is that we can never be sure when all saved states in the wild have been updated.
              */
-            sDiskettePath = sDiskettePath.replace("/disks/pc/", "/disks/pcx86/");
-            sDiskettePath = sDiskettePath.replace("/disks/pcx86/", "https://jeffpar.github.io/pcjs-disks/pcx86/");
             if (drive.sDiskettePath.toLowerCase() != sDiskettePath.toLowerCase()) {
                 this.unloadDrive(iDrive, fAutoMount, true);
                 if (drive.fBusy) {

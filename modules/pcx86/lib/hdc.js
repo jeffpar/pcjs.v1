@@ -873,9 +873,9 @@ class HDC extends Component {
         }
         var disk = drive.disk || new Disk(this, drive, drive.mode);
         /*
-         * TODO: The following hack is similar to the one in FDC's loadDrive(), to ease migration of disk images.
+         * TODO: The following hack is similar to that in FDC's loadDrive(), to ease migration of disk images.
          */
-        sDiskPath = sDiskPath.replace("/disks/pcx86/fixed/", "https://jeffpar.github.io/pcjs-disks/pcx86/drives/");
+        sDiskPath = sDiskPath.replace("/fixed/", "/drives/");
         disk.load(sDiskName, sDiskPath, null, this.doneLoadDisk);
         return false;
     }

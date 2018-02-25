@@ -532,7 +532,7 @@ class Disk extends Component {
                 // }
             }
         }
-        var sProgress = "Loading " + sDiskURL.replace("https://jeffpar.github.io/", "/") + "...";
+        var sProgress = "Loading " + sDiskURL + "...";
         return !!Web.getResource(sDiskURL, this.sFormat, true, function loadDone(sURL, sResponse, nErrorCode) {
             disk.doneLoad(sURL, sResponse, nErrorCode);
         }, function(nState) {

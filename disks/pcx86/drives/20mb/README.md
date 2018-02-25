@@ -17,5 +17,5 @@ This folder contains the following 20Mb (PC AT Type 2) fixed disk configurations
 * [PC-DOS 3.30 with Windows 3.10 for VGA](pcdos330-win310-vga-at2.xml)
 * [COMPAQ MS-DOS 3.10 with Windows/386 2.01 for VGA](compaq310-win386201-vga-at2.xml)
 
-Note that in order to use an unformatted fixed disk with DOS, it must first be partitioned using `FDISK` and then formatted
-using `FORMAT`.
+Note that in order to use an unformatted fixed disk with DOS, it must first be partitioned using `FDISK` and then
+formatted using `FORMAT`.

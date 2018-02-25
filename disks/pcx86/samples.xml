@@ -2,17 +2,17 @@
 <fdc id="fdcNEC" autoMount='{A:{name:"PC-DOS 2.00 (Disk 1)"}, B:{name:"PC-DOS 2.00 (Disk 2)"}}' pos="left" padLeft="8px" padBottom="8px">
 	<control type="list" binding="listDrives"/>
 	<control type="list" binding="listDisks">
-		<disk path="https://jeffpar.github.io/pcjs-disks/pcx86/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
-		<disk path="https://jeffpar.github.io/pcjs-disks/pcx86/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
-		<disk path="https://jeffpar.github.io/pcjs-disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json">PC-DOS 2.00 (Disk 1)</disk>
-		<disk path="https://jeffpar.github.io/pcjs-disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json">PC-DOS 2.00 (Disk 2)</disk>
-		<disk path="https://jeffpar.github.io/pcjs-disks/pcx86/games/microsoft/adventure/ADVENTURE-1981.json">Microsoft Adventure</disk>
-		<disk path="https://jeffpar.github.io/pcjs-disks/pcx86/games/infocom/hhiker/HHIKER-READONLY.json">Hitchhiker's Guide</disk>
-		<disk path="https://jeffpar.github.io/pcjs-disks/pcx86/games/infocom/phobos/PHOBOS.json">Leather Goddesses of Phobos</disk>
-		<disk path="https://jeffpar.github.io/pcjs-disks/pcx86/games/infocom/planet/PLANET-READONLY.json">Planetfall</disk>
-		<disk path="https://jeffpar.github.io/pcjs-disks/pcx86/games/infocom/zork1/ZORK1-READONLY.json">Zork I</disk>
-		<disk path="https://jeffpar.github.io/pcjs-disks/pcx86/games/infocom/zork2/ZORK2-READONLY.json">Zork II</disk>
-		<disk path="https://jeffpar.github.io/pcjs-disks/pcx86/games/infocom/zork3/ZORK3-READONLY.json">Zork III</disk>
+		<disk path="/pcjs-disks/pcx86/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
+		<disk path="/pcjs-disks/pcx86/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
+		<disk path="/pcjs-disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json">PC-DOS 2.00 (Disk 1)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json">PC-DOS 2.00 (Disk 2)</disk>
+		<disk path="/pcjs-disks/pcx86/games/microsoft/adventure/ADVENTURE-1981.json">Microsoft Adventure</disk>
+		<disk path="/pcjs-disks/pcx86/games/infocom/hhiker/HHIKER-READONLY.json">Hitchhiker's Guide</disk>
+		<disk path="/pcjs-disks/pcx86/games/infocom/phobos/PHOBOS.json">Leather Goddesses of Phobos</disk>
+		<disk path="/pcjs-disks/pcx86/games/infocom/planet/PLANET-READONLY.json">Planetfall</disk>
+		<disk path="/pcjs-disks/pcx86/games/infocom/zork1/ZORK1-READONLY.json">Zork I</disk>
+		<disk path="/pcjs-disks/pcx86/games/infocom/zork2/ZORK2-READONLY.json">Zork II</disk>
+		<disk path="/pcjs-disks/pcx86/games/infocom/zork3/ZORK3-READONLY.json">Zork III</disk>
 		<disk path="/apps/pcx86/1981/visicalc/VISICALC1981.json">VisiCalc (1981)</disk>
 		<disk path="/apps/pcx86/1983/adventmath/ADVENTMATH100.json">Adventures in Math 1.00</disk>
 	</control>

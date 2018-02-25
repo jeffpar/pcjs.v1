@@ -14,7 +14,7 @@ This folder contains the following 68Mb (COMPAQ Type 4) fixed disk images:
 The [Microsoft Windows 95: First Retail Release](/disks/pcx86/windows/win95/4.00.950/) demo machine uses the
 following settings: 
 
-    drives: '[{name:"68Mb Hard Disk",type:4,path:"https://jeffpar.github.io/pcjs-disks/pcx86/drives/68mb/WIN95.json"}]'
+    drives: '[{name:"68Mb Hard Disk",type:4,path:"/pcjs-disks/pcx86/drives/68mb/WIN95.json"}]'
 
 Since that machine is a [COMPAQ DeskPro 386](/devices/pcx86/machine/compaq/deskpro386/vga/4096kb/machine.xml)
 which uses a [COMPAQ DeskPro 386 ROM](/devices/pcx86/rom/compaq/deskpro386/) (specifically, ROM Revision J.4, dated
