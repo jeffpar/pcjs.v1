@@ -45245,12 +45245,20 @@ class Keyboard extends Component {
      *
      *          "US83" (default)
      *          "US84"
-     *          "US101"
+     *          "US101" (not fully supported yet) 
      *
      *      autoType: string of keys to automatically inject when the machine is ready (undefined if none)
+     *      
+     *      softKeys: boolean set to true to enable the machine's soft keyboard, if any (default is false)
      *
      * Its main purpose is to receive binding requests for various keyboard events, and to use those events
      * to simulate the PC's keyboard hardware.
+     * 
+     * TODO: Consider finishing 101-key keyboard support, even though that's sort of a "PS/2" thing, and I'm not
+     * really interested in taking PCjs into the PS/2 line (that's also why we still support only serial mice, not
+     * "PS/2" mice).  In addition, all keyboards *after* the original PC 83-key keyboard supported their own unique
+     * scan code sets, which the 8042 controller would then convert to PC-compatible scan codes.  That's probably
+     * more important to implement, because that feature was introduced with the 84-key keyboard on the PC AT.
      *
      * @this {Keyboard}
      * @param {Object} parmsKbd
@@ -45278,7 +45286,8 @@ class Keyboard extends Component {
          * purpose is to signal findBinding() whether to waste any time looking for SOFTCODE matches.
          */
         this.cSoftCodes = 0;
-        this.fSoftKeyboard = true;
+        this.fSoftKeyboard = parmsKbd['softKeys'];
+        this.controlSoftKeyboard = null;
 
         /*
          * Updated by onFocusChange()
@@ -45392,30 +45401,29 @@ class Keyboard extends Component {
                     /*
                      * TODO: Fix this rather fragile code, which depends on the current structure of the given xxxx-softkeys.xml
                      */
-                    var controlKeyboard = control.parentElement.parentElement.nextElementSibling;
-                    className = controlKeyboard.className;
+                    var controlSoftKeyboard = control.parentElement.parentElement.nextElementSibling;
+                    className = controlSoftKeyboard.className;
                     if (this.fMobile != (className.indexOf('mobile') >= 0)) {
-                        controlKeyboard = controlKeyboard.nextElementSibling;
+                        controlSoftKeyboard = controlSoftKeyboard.nextElementSibling;
                     }
-                    if (controlKeyboard) {
+                    if (controlSoftKeyboard) {
+                        this.controlSoftKeyboard = controlSoftKeyboard;
+                        if (this.fSoftKeyboard != null) {
+                            this.enableSoftKeyboard(this.fSoftKeyboard);
+                        } else {
+                            this.fSoftKeyboard = (controlSoftKeyboard.style.display != "none");
+                        }
                         control.onclick = function onToggleKeyboard(event) {
-                            if (kbd.fSoftKeyboard) {
-                                controlKeyboard.style.display = "none";
-                                kbd.fSoftKeyboard = false;
-                            } else {
-                                controlKeyboard.style.display = "block";
-                                kbd.fSoftKeyboard = true;
-                            }
+                            kbd.enableSoftKeyboard(!kbd.fSoftKeyboard);
                         };
                         /*
                          * This is added simply to prevent the page from "zooming" around if you accidentally touch between the keys.
                          */
                         if ('ontouchstart' in window) {
-                            controlKeyboard.ontouchstart = function onTouchKeyboard(event) {
+                            controlSoftKeyboard.ontouchstart = function onTouchKeyboard(event) {
                                 event.preventDefault();
                             };
                         }
-                        this.fSoftKeyboard = (controlKeyboard.style.display != "none");
                     }
                 } catch(err) {}
                 return true;
@@ -45663,6 +45671,9 @@ class Keyboard extends Component {
 
         this.chipset = cmp.getMachineComponent("ChipSet");
         this.autoType = cmp.getMachineParm('autoType') || this.autoType;
+
+        var softKeys = cmp.getMachineParm('softKeys');
+        if (softKeys) this.enableSoftKeyboard(softKeys != "false");
 
         cpu.addIntNotify(Interrupts.DOS, this.intDOS.bind(this));
     }
@@ -46180,6 +46191,22 @@ class Keyboard extends Component {
         return data;
     }
 
+    /**
+     * enableSoftKeyboard(fEnable)
+     *
+     * @this {Keyboard}
+     * @param {boolean} fEnable
+     */
+    enableSoftKeyboard(fEnable)
+    {
+        if (!fEnable) {
+            this.controlSoftKeyboard.style.display = "none";
+        } else {
+            this.controlSoftKeyboard.style.display = "block";
+        }
+        this.fSoftKeyboard = fEnable;
+    }
+    
     /**
      * setSoftKeyState(control, f)
      *
@@ -62317,6 +62344,13 @@ class FDC extends Component {
         var drive = this.aDrives[iDrive];
         if (sDiskettePath) {
             /*
+             * The following hacks should only be necessary for (old) saved states, since all our disk manifests
+             * should no longer be using any of these old paths.
+             */
+            sDiskettePath = sDiskettePath.replace("/disks/pc/", "/disks/pcx86/");
+            sDiskettePath = sDiskettePath.replace("/disks/pcx86/private/", "/private-disks/pcx86/");
+            sDiskettePath = sDiskettePath.replace("/disks/pcx86/", "/pcjs-disks/pcx86/");
+            /*
              * TODO: Machines with saved states may be using lower-case disk image names, whereas we now use
              * UPPER-CASE names for disk images, so we lower-case both before comparing.  The only problem with
              * removing these hacks is that we can never be sure when all saved states in the wild have been updated.
@@ -64836,6 +64870,14 @@ class HDC extends Component {
             if (this.messageEnabled()) this.printMessage("loading " + sDiskName);
         }
         var disk = drive.disk || new Disk(this, drive, drive.mode);
+        /*
+         * The following hacks should only be necessary for (old) saved states, since all our disk manifests
+         * should no longer be using any of these old paths.
+         */
+        sDiskPath = sDiskPath.replace("/disks/pc/", "/disks/pcx86/");
+        sDiskPath = sDiskPath.replace("/disks/pcx86/private/", "/private-disks/pcx86/");
+        sDiskPath = sDiskPath.replace("/disks/pcx86/", "/pcjs-disks/pcx86/");
+        sDiskPath = sDiskPath.replace("/fixed/", "/drives/");
         disk.load(sDiskName, sDiskPath, null, this.doneLoadDisk);
         return false;
     }
@@ -79231,7 +79273,7 @@ window['sendEvent']    = Web.sendPageEvent;
 function savePC(idMachine, sPCJSFile, callback)
 {
     var cmp = /** @type {Computer} */ (Component.getComponentByType("Computer", idMachine));
-    var dbg = /** @type {Debugger} */ (Component.getComponentByType("Debugger", idMachine));
+    var dbg = false; // /** @type {Debugger} */ (Component.getComponentByType("Debugger", idMachine));
     if (cmp) {
         var sState = cmp.powerOff(true);
         var sParms = cmp.saveMachineParms();
@@ -79324,7 +79366,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
      * Note that the "resources" variable has been added to our externs.js, to prevent it from being renamed
      * by the Closure Compiler.
      */
-    matchScript = sPCJS.match(/^(\s*\(function\(\)\{)([\s\S]*)(}\)\(\);)/);
+    matchScript = sPCJS.match(/^(\s*\(function\(\){)([\s\S]*)(}\)\(\);)/);
     if (!matchScript) {
         /*
          * If the match failed, we assume that a DEBUG (uncompiled) script is being used,

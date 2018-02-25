@@ -70,17 +70,16 @@
 		<control type="key" binding="num-sub" top="84px" left="96.00%" width="3.78%">-</control>
 		<control type="key" binding="num-add" top="126px" left="96.00%" width="3.78%" height="76px">+</control>
 		<control type="key" binding="shift" top="126px" left="10.67%" width="8.44%">Shift</control>
-		<control type="key" binding="a" top="126px" left="20.00%" width="3.78%">Z</control>
-		<control type="key" binding="z" top="126px" left="24.67%" width="3.78%">X</control>
-		<control type="key" binding="x" top="126px" left="29.33%" width="3.78%">C</control>
-		<control type="key" binding="c" top="126px" left="34.00%" width="3.78%">V</control>
-		<control type="key" binding="v" top="126px" left="38.67%" width="3.78%">B</control>
-		<control type="key" binding="b" top="126px" left="43.33%" width="3.78%">N</control>
-		<control type="key" binding="n" top="126px" left="48.00%" width="3.78%">M</control>
-		<control type="key" binding="m" top="126px" left="52.67%" width="3.78%">, &lt;</control>
-		<control type="key" binding="," top="126px" left="57.33%" width="3.78%">. &gt;</control>
-		<control type="key" binding="." top="126px" left="62.00%" width="3.78%">/ ?</control>
-		<control type="key" binding="/" top="126px" left="66.67%" width="3.78%">/ ?</control>
+		<control type="key" binding="z" top="126px" left="20.00%" width="3.78%">Z</control>
+		<control type="key" binding="x" top="126px" left="24.67%" width="3.78%">X</control>
+		<control type="key" binding="c" top="126px" left="29.33%" width="3.78%">C</control>
+		<control type="key" binding="v" top="126px" left="34.00%" width="3.78%">V</control>
+		<control type="key" binding="b" top="126px" left="38.67%" width="3.78%">B</control>
+		<control type="key" binding="n" top="126px" left="43.33%" width="3.78%">N</control>
+		<control type="key" binding="m" top="126px" left="48.00%" width="3.78%">M</control>
+		<control type="key" binding="," top="126px" left="52.67%" width="3.78%">, &lt;</control>
+		<control type="key" binding="." top="126px" left="57.33%" width="3.78%">. &gt;</control>
+		<control type="key" binding="/" top="126px" left="62.00%" width="3.78%">/ ?</control>
 		<control type="key" binding="right-shift" top="126px" left="66.67%" width="13.11%">Shift</control>
 		<control type="key" binding="num-end" top="126px" left="82.00%" width="3.78%">1</control>
 		<control type="key" binding="num-down" top="126px" left="86.67%" width="3.78%">&#8595; 2</control>

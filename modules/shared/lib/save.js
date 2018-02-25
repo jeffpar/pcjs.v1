@@ -45,7 +45,7 @@ if (NODE) {
 function savePC(idMachine, sPCJSFile, callback)
 {
     var cmp = /** @type {Computer} */ (Component.getComponentByType("Computer", idMachine));
-    var dbg = /** @type {Debugger} */ (Component.getComponentByType("Debugger", idMachine));
+    var dbg = false; // /** @type {Debugger} */ (Component.getComponentByType("Debugger", idMachine));
     if (cmp) {
         var sState = cmp.powerOff(true);
         var sParms = cmp.saveMachineParms();
@@ -138,7 +138,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
      * Note that the "resources" variable has been added to our externs.js, to prevent it from being renamed
      * by the Closure Compiler.
      */
-    matchScript = sPCJS.match(/^(\s*\(function\(\)\{)([\s\S]*)(}\)\(\);)/);
+    matchScript = sPCJS.match(/^(\s*\(function\(\){)([\s\S]*)(}\)\(\);)/);
     if (!matchScript) {
         /*
          * If the match failed, we assume that a DEBUG (uncompiled) script is being used,
