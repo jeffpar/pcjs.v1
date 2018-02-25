@@ -5610,8 +5610,7 @@ class PanelPDP11 extends Component {
          * examined or deposited [the equivalent of selecting 'DATA PATHS'].
          */
         this.fLEDTest = false;              // LED (lamp) test in progress
-        this.fExamine = false;              // true if the previously pressed switch was the 'EXAM' switch
-        this.fDeposit = false;              // true if the previously pressed switch was the 'DEP' switch
+        this.fAutoInc = false;              // true if the next 'DEP' or 'EXAM' should auto-increment
         this.nAddrSel = PanelPDP11.ADDRSEL.CONS_PHY;
 
         /*
@@ -6198,12 +6197,11 @@ class PanelPDP11 extends Component {
             if (sw[4]) sw[4].call(this, sw[1], sw[5]);
 
             /*
-             * This helps the next 'DEP' or 'EXAM' press determine if the previous press was the same,
-             * while also ignoring any intervening 'STEP' presses (see processStep() for why we do that).
+             * Whenever the user presses 'LOAD' to load a new address, we want the next 'DEP' or 'EXAM'
+             * to NOT auto-increment.  The next 'DEP' or 'EXAM' will automatically re-enable auto-increment. 
              */
-            if (sBinding != PanelPDP11.SWITCH.STEP) {
-                this.fDeposit = (sBinding == PanelPDP11.SWITCH.DEP);
-                this.fExamine = (sBinding == PanelPDP11.SWITCH.EXAM);
+            if (sBinding == PanelPDP11.SWITCH.LOAD) {
+                this.fAutoInc = false;
             }
             return true;
         }
@@ -6408,7 +6406,8 @@ class PanelPDP11 extends Component {
     processDeposit(value, index)
     {
         if (value && !this.cpu.isRunning()) {
-            if (this.fDeposit) this.advanceAddr();
+            if (this.fAutoInc) this.advanceAddr();
+            this.fAutoInc = true;
             /*
              * This used to be updateData(), but that only updates regData, whereas setDR() updates both regData and regDisplay,
              * and for these kinds of explicit Front Panel operations, I'm assuming the values should be synced.
@@ -6440,7 +6439,8 @@ class PanelPDP11 extends Component {
     {
         if (!value && !this.cpu.isRunning()) {
             var w;
-            if (this.fExamine) this.advanceAddr();
+            if (this.fAutoInc) this.advanceAddr();
+            this.fAutoInc = true;
             if (this.nAddrSel == PanelPDP11.ADDRSEL.CONS_PHY) {
                 /*
                  * TODO: Determine if this needs to take the UNIBUS map into consideration.
@@ -6817,6 +6817,7 @@ PanelPDP11.SWITCH = {
     DEP:    'DEP',
     ENABLE: 'ENABLE',
     EXAM:   'EXAM',
+    LOAD:   'LOAD',
     STEP:   'STEP'
 };
 
