@@ -3,7 +3,13 @@
 {% capture forLoopMaxInt %}{{ splitted_url_parts.size | minus:1 }}{% endcapture %}
 {% for i in (1..forLoopMaxInt) %}
   {% capture url %}{{ url }}{{ splitted_url_parts[i] }}/{% endcapture %}
-  {% capture path %}{{ path }}\<a href="/{{ url }}">{{ splitted_url_parts[i] | upcase }}</a>{% endcapture %}
+  {% if page.sitemap != false %}
+    {% assign visible_part = splitted_url_parts[i] %}
+  {% else %}
+    {% assign visible_parts = splitted_url_parts[i] | split: '-' %}
+    {% assign visible_part = visible_parts | first %}
+  {% endif %}
+  {% capture path %}{{ path }}\<a href="/{{ url }}">{{ visible_part | upcase }}</a>{% endcapture %}
   {% if splitted_url_parts[i] == "blog" %}
     {% break %}
   {% endif %}
