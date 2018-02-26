@@ -306,8 +306,6 @@ let matchRef = function(match, sIndent, sFile) {
                 if (urlDisk.indexOf("http") != 0 && !fs.existsSync(path.join('.', urlDisk))) {
                     console.log("warning: disk image '" + urlDisk + "' may not exist");
                 }
-                // urlDisk = urlDisk.replace(/^\/(pcjs-disks|private-disks)\//g, "https://jeffpar.github.io/$1/");
-                // console.log(sFilePath + ": found '" + urlDisk + "'");
                 sDisks += sIndent + "<disk path=\"" + urlDisk + "\">" + sDefaultName + "</disk>";
             }
             reDisk = /<disk.*? href="([^"]*)".*?>([\S\s]*?)<\/disk>/g;
@@ -319,8 +317,6 @@ let matchRef = function(match, sIndent, sFile) {
                 if (urlDisk.indexOf("http") != 0 && !fs.existsSync(path.join('.', urlDisk))) {
                     console.log("warning: disk image '" + urlDisk + "' may not exist");
                 }
-                // urlDisk = urlDisk.replace(/^\/(pcjs-disks|private-disks)\//g, "https://jeffpar.github.io/$1/");
-                // console.log(sFilePath + ": found '" + urlDisk + "'");
                 sDisks += sIndent + "<disk path=\"" + urlDisk + "\">" + sName + "</disk>";
             }
             return sDisks;
@@ -333,21 +329,18 @@ let matchRef = function(match, sIndent, sFile) {
 
 gulp.task("pcjs-disks", function() {
     let replaceRefs = gulpReplace(/([ \t]*)<manifest.*? ref="(.*?)".*?\/>/g, matchRef);
-    let replacePaths = gulpReplace(/(path: *"?)\/(pcjs-disks|private-disks)\//g, '$1https://jeffpar.github.io/$2/');
     return gulp.src([
             "pcjs-disks/pcx86/library.xml",
             "pcjs-disks/pcx86/samples.xml",
             "pcjs-disks/pcx86/shareware/pcsig08/library.xml",
         ], {base: "pcjs-disks/pcx86/"})
         .pipe(replaceRefs)
-        .pipe(replacePaths)
         .pipe(gulp.dest("disks/pcx86/")
     );
 });
 
 gulp.task("private-disks", function() {
     let replaceRefs = gulpReplace(/([ \t]*)<manifest.*? ref="(.*?)".*?\/>/g, matchRef);
-    let replacePaths = gulpReplace(/(path: *"?)\/(pcjs-disks|private-disks)\//g, '$1https://jeffpar.github.io/$2/');
     return gulp.src([
             "private-disks/pcx86/**/library.xml",
             "private-disks/pcx86/**/manifest.xml",
@@ -355,7 +348,6 @@ gulp.task("private-disks", function() {
             "private-disks/pcx86/**/README.md"
         ], {base: "private-disks/pcx86/"})
         .pipe(replaceRefs)
-        .pipe(replacePaths)
         .pipe(gulp.dest("disks/pcx86/private/")
     );
 });
