@@ -1,6 +1,6 @@
 ---
 layout: page
-title: IBM PC Xenix 1.0
+title: IBM PC XENIX 1.0
 permalink: /disks/pcx86/unix/ibm/xenix/1.0/
 machines:
   - id: ibm5170
@@ -9,13 +9,13 @@ machines:
     config: /devices/pcx86/machine/5170/cga/640kb/rev3/debugger/machine.xml
     autoMount:
       A:
-        name: IBM Xenix 1.0 (BOOT)
+        name: IBM XENIX 1.0 (BOOT)
       B:
         name: None
     autoStart: true
 ---
 
-IBM PC Xenix 1.0
+IBM PC XENIX 1.0
 ----------------
 
 {% include machine.html id="ibm5170" %}

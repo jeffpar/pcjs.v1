@@ -10,4 +10,4 @@ Unix Operating Systems from IBM
 Information is available for these variants of Unix from IBM.
 
 * [PC/IX](pcix/)
-* [Xenix](xenix/)
+* [XENIX](xenix/)
