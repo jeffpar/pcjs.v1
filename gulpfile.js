@@ -349,7 +349,8 @@ gulp.task("private-disks", function() {
     let replaceRefs = gulpReplace(/([ \t]*)<manifest.*? ref="(.*?)".*?\/>/g, matchRef);
     let replacePaths = gulpReplace(/path:"\/(pcjs-disks|private-disks)\//g, 'path:"https://jeffpar.github.io/$1/');
     return gulp.src([
-        "private-disks/pcx86/**/library.xml"
+            "private-disks/pcx86/**/library.xml",
+            "private-disks/pcx86/**/manifest.xml"
         ], {base: "private-disks/pcx86/"})
         .pipe(replaceRefs)
         .pipe(replacePaths)
