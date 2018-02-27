@@ -10,3 +10,5 @@ SoftLogic DoubleDOS
 PCjs has archived the following versions of DoubleDOS.
 
 * [DoubleDOS 2.0V](2.0v/)
+
+[Documentation](/pubs/pc/software/tools/softlogic/doubledos/) is also available.
