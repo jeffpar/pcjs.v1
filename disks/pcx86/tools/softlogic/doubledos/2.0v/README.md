@@ -1,7 +1,7 @@
 ---
 layout: page
-title: DoubleDOS
-permalink: /disks/pcx86/tools/other/doubledos/2.0v/
+title: DoubleDOS 2.0V
+permalink: /disks/pcx86/tools/softlogic/doubledos/2.0v/
 ---
 
 DoubleDOS 2.0V
@@ -149,3 +149,5 @@ DoubleDOS 2.0V
 	Total files listed:
 	       20 file(s)     159605 bytes
 	                      191488 bytes free
+
+![DoubleDOS Diskette]({{ site.pcjs-disks.url }}/pcjs-disks/pcx86/tools/softlogic/doubledos/2.0v/DOUBLEDOS-DISK1.jpg)

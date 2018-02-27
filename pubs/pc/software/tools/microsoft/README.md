@@ -1,11 +1,11 @@
 ---
 layout: page
-title: Microsoft Tool Guides
+title: Microsoft Tools Documentation
 permalink: /pubs/pc/software/tools/microsoft/
 ---
 
-Microsoft Tool Guides
----
+Microsoft Tools Documentation
+-----------------------------
 
 * [Microsoft C Compiler](c/)
 * [Microsoft Macro Assembler](masm/)
