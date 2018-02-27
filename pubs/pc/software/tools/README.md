@@ -1,10 +1,11 @@
 ---
 layout: page
-title: PC Software Tool Guides
+title: PC Software Documentation
 permalink: /pubs/pc/software/tools/
 ---
 
-PC Software Tool Guides
----
+PC Software Documentation
+-------------------------
 
-* [Microsoft Tool Guides](microsoft/)
+* [Microsoft Tools](microsoft/)
+* [SoftLogic](softlogic/)

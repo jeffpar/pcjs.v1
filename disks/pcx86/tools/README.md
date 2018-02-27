@@ -13,4 +13,5 @@ Information is available for tools from these vendors.
 * [IBM](ibm/)
 * [Logitech](logitech/)
 * [Microsoft](microsoft/)
+* [SoftLogic](softlogic/)
 * [Other...](other/)
