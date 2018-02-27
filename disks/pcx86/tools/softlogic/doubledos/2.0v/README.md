@@ -150,4 +150,4 @@ DoubleDOS 2.0V
 	       20 file(s)     159605 bytes
 	                      191488 bytes free
 
-![DoubleDOS Diskette]({{ site.pcjs-disks.url }}/pcjs-disks/pcx86/tools/softlogic/doubledos/2.0v/DOUBLEDOS-DISK1.jpg)
+![DoubleDOS Diskette]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/tools/softlogic/doubledos/2.0v/DOUBLEDOS-DISK1.jpg)
