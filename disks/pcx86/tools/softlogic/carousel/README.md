@@ -10,3 +10,5 @@ SoftLogic Software Carousel
 PCjs has archived the following versions of Software Carousel.
 
 * [Software Carousel 2.0.3](2.0.3/)
+
+[Documentation](/pubs/pc/software/tools/softlogic/carousel/) is also available.

@@ -10,3 +10,5 @@ SoftLogic Disk Optimizer
 PCjs has archived the following versions of Disk Optimizer.
 
 * [Disk Optimizer 2.0.3](2.0.3/)
+
+[Documentation](/pubs/pc/software/tools/softlogic/optimizer/) is also available.
