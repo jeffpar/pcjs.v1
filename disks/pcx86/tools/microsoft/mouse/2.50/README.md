@@ -55,4 +55,4 @@ an original disk image, the difference in timestamps is not meaningful. All file
 	        2 file(s)       8524 bytes
 	                      312320 bytes free
 
-![MS Mouse 2.50 Diskette](MSMOUSE-250.jpg)
+![MS Mouse 2.50 Diskette]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/tools/microsoft/mouse/2.50/MSMOUSE-250.jpg)
