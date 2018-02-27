@@ -7,7 +7,7 @@
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5150/basic/BASIC100.json"/>
 	<rom id="romBIOS"  addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5150/1981-04-24/PCBIOS-REV1.json"/>
 	<video ref="/devices/pcx86/video/ibm/mda/ibm-mda.xml"/>
-	<fdc id="fdcNEC" autoMount='{A:{name:"CP/M-86 1.00"},B:{name:"CP/M-86 (PCjs Disk 2)"}}' pos="right">
+	<fdc id="fdcNEC" autoMount='{A:{name:"IBM CP/M-86 1.00"},B:{name:"PCjs CP/M-86 (Disk 2)"}}' pos="right">
 		<control type="list" binding="listDrives"/>
 		<control type="list" binding="listDisks">
 			<manifest ref="/pcjs-disks/pcx86/cpm/1.00/manifest.xml"/>

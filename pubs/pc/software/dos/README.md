@@ -1,11 +1,11 @@
 ---
 layout: page
-title: PC-DOS Manuals
+title: DOS Documentation
 permalink: /pubs/pc/software/dos/
 ---
 
-IBM PC-DOS Manuals
-------------------
+IBM PC-DOS Documentation
+------------------------
 
 * [IBM PC Disk Operating System v1.00](PCDOS100/)
 * [IBM PC Disk Operating System v1.10](PCDOS110/)

@@ -1118,6 +1118,17 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
     var sBlockOrig = sBlock;
     var re = /!\[(.*?)]\((.*?)(?:\s*"(.*?)"\)|\))/g;
     while ((aMatch = re.exec(sBlockOrig))) {
+        
+        /*
+         * See if there are any Liquid-style replacements (in case this Markdown file is part of a Jekyll
+         * installation) and remove them.
+         *
+         * TODO: Any double-brace replacements should use appropriate values from _config.yml or the
+         * page's Front Matter; however, unless/until we start using Node again to host the public site,
+         * that's low priority.
+         */
+        aMatch[2] = aMatch[2].replace(/{{.*?}}/g, "");
+        
         var sImage = '<img src="' + net.encodeURL(aMatch[2], this.req, this.fDebug) + '" alt="' + aMatch[1] + '"';
         if (aMatch[3]) {
             /*

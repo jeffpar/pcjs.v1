@@ -19,7 +19,7 @@ On March 25, 2014, the source code upon which OEMs based their MS-DOS 2.x releas
 public by the [Computer History Museum](http://www.computerhistory.org/atchm/microsoft-ms-dos-early-source-code/),
 with the permission of Microsoft.
 
-![MS-DOS 2.00](MSDOS200-DISKS.jpg)
+![MS-DOS 2.00]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/dos/microsoft/2.00/MSDOS200-DISKS.jpg)
 
 For reasons known only to the Computer History Museum, the precise contents of the five diskettes donated to the
 museum remain a mystery.  Instead, the museum released a ZIP archive with the contents of the diskettes divided into

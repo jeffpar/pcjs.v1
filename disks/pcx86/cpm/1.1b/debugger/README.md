@@ -8,9 +8,9 @@ machines:
     config: /disks/pcx86/cpm/1.00/debugger/machine.xml
     autoMount:
       A:
-        name: CP/M-86 1.1B (Disk 1)
+        name: Eagle CP/M-86 1.1B (Disk 1)
       B:
-        name: CP/M-86 1.1B (Disk 2)
+        name: Eagle CP/M-86 1.1B (Disk 2)
 ---
 
 CP/M-86 1.1B (Eagle Computer) with Debugger
