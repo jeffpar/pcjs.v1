@@ -8,9 +8,9 @@ machines:
     config: /disks/pcx86/cpm/1.00/machine.xml
     autoMount:
       A:
-        name: CP/M-86 1.1B (Disk 1)
+        name: Eagle CP/M-86 1.1B (Disk 1)
       B:
-        name: CP/M-86 1.1B (Disk 2)
+        name: Eagle CP/M-86 1.1B (Disk 2)
 ---
 
 CP/M-86 1.1B (Eagle Computer)
@@ -88,7 +88,7 @@ Directory Listings
 	Total:  304k   22                                                               
 	B: RW, Free Space:        20k                                                   
 
-### Directory of CP/M-86 (PCjs Disk 1)
+### Directory of PCjs CP/M-86 (Disk 1)
 
 	 Drive A:                         User :  0                                     
 	 Recs  Bytes FCBs Attributes      Name                                          
@@ -119,7 +119,7 @@ Directory Listings
 	Total:  270k   23                                                               
 	A: RW, Free Space:        18k                                                   
 
-### Directory of CP/M-86 (PCjs Disk 2)
+### Directory of PCjs CP/M-86 (Disk 2)
 
 	 Drive B:                         User :  0                                     
 	 Recs  Bytes FCBs Attributes      Name                                          
