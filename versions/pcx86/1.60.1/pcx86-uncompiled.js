@@ -4193,26 +4193,6 @@ class Component {
     }
 
     /**
-     * printf(format, ...args)
-     *
-     * @this {Component} (imported from Device)
-     * @param {string} format
-     * @param {...} args
-     */
-    printf(format, ...args)
-    {
-        /*
-         * Callers often check messageEnabled() themselves, but for those that don't, check it now.
-         */
-        if (DEBUGGER && this.dbg && this.messageEnabled()) {
-            /*
-             * TODO: If/when dbg.message() is replaced with print(), remove the following linefeed removal.
-             */
-            this.dbg.message(this.sprintf(format, ...args).replace(/\n$/,""));
-        }
-    }
-
-    /**
      * printMessage(sMessage, bitsMessage, fAddress)
      *
      * If bitsMessage is not specified, the component's MESSAGE category is used.
@@ -4256,107 +4236,6 @@ class Component {
             }
             this.dbg.messageIO(this, port, bOut, addrFrom, name, bIn, bitsMessage);
         }
-    }
-
-    /**
-     * sprintf(format, ...args)
-     *
-     * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
-     *
-     * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
-     * specifiers that I use.
-     *
-     * @this {Component} (imported from Device)
-     * @param {string} format
-     * @param {...} args
-     * @returns {string}
-     */
-    sprintf(format, ...args)
-    {
-        let buffer = "";
-        let aParts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
-
-        let iArg = 0, iPart;
-        for (iPart = 0; iPart < aParts.length - 7; iPart += 7) {
-
-            buffer += aParts[iPart];
-
-            let arg = args[iArg++];
-            let flags = aParts[iPart+1];
-            let minimum = +aParts[iPart+2] || 0;
-            let precision = +aParts[iPart+4] || 0;
-            let conversion = aParts[iPart+6];
-            let ach = null, s;
-
-            switch(conversion) {
-            case 'd':
-                /*
-                 * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
-                 */
-                arg = Math.trunc(arg);
-                /* falls through */
-
-            case 'f':
-                s = Math.trunc(arg) + "";
-                if (precision) {
-                    minimum -= (precision + 1);
-                }
-                if (s.length < minimum) {
-                    if (flags == '0') {
-                        if (arg < 0) minimum--;
-                        s = ("0000000000" + Math.abs(arg)).slice(-minimum);
-                        if (arg < 0) s = '-' + s;
-                    } else {
-                        s = ("          " + s).slice(-minimum);
-                    }
-                }
-                if (precision) {
-                    arg = Math.trunc((arg - Math.trunc(arg)) * Math.pow(10, precision));
-                    s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
-                }
-                buffer += s;
-                break;
-
-            case 'c':
-                arg = String.fromCharCode(arg);
-                /* falls through */
-
-            case 's':
-                while (arg.length < minimum) {
-                    if (flags == '-') {
-                        arg += ' ';
-                    } else {
-                        arg = ' ' + arg;
-                    }
-                }
-                buffer += arg;
-                break;
-
-            case 'X':
-                ach = "0123456789ABCDEF";
-                /* falls through */
-
-            case 'x':
-                if (!ach) ach = "0123456789abcdef";
-                s = "";
-                do {
-                    s = ach[arg & 0xf] + s;
-                    arg >>>= 4;
-                } while (--minimum > 0 || arg);
-                buffer += s;
-                break;
-
-            default:
-                /*
-                 * The supported ANSI C set of conversions: "dioxXucsfeEgGpn%"
-                 */
-                buffer += "(unrecognized printf conversion %" + conversion + ")";
-                break;
-            }
-        }
-
-        buffer += aParts[iPart];
-        return buffer;
     }
 }
 
@@ -52188,7 +52067,7 @@ class Video extends Component {
             // let colFrom = (this.iCellCursor % this.nCols);
             // let rowTo = (iCellCursor / this.nCols)|0;
             // let colTo = (iCellCursor % this.nCols);
-            // this.printf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo);
+            // this.printMessage(Str.sprintf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo));
             // this.removeCursor();
             //
             this.iCellCursor = iCellCursor;
@@ -52209,7 +52088,7 @@ class Video extends Component {
          * cyCursor values are relative to when it's time to scale them.
          */
         if (this.yCursor != bCursorStart || this.cyCursor != bCursorSize) {
-            this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize);
+            this.printMessage(Str.sprintf("checkCursor(): cursor shape changed from %d,%d to %d,%d\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize));
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
             /*
@@ -52264,7 +52143,7 @@ class Video extends Component {
                          */
                         this.updateChar(col, row, data);
                     }
-                    this.printf("removeCursor(): removed from %d,%d\n", row, col);
+                    this.printMessage(Str.sprintf("removeCursor(): removed from %d,%d\n", row, col));
                     this.aCellCache[this.iCellCursor] = data;
                 }
             }
@@ -52401,7 +52280,7 @@ class Video extends Component {
         var card = this.cardActive;
         if (card && nAccess != null && nAccess != card.nAccess) {
 
-            this.printf("setCardAccess(0x%04x)\n", nAccess);
+            this.printMessage(Str.sprintf("setCardAccess(0x%04x)\n", nAccess));
 
             card.setMemoryAccess(nAccess);
 
