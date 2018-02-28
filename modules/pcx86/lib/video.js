@@ -4135,7 +4135,7 @@ class Video extends Component {
             // let colFrom = (this.iCellCursor % this.nCols);
             // let rowTo = (iCellCursor / this.nCols)|0;
             // let colTo = (iCellCursor % this.nCols);
-            // this.printf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo);
+            // this.printMessage(Str.sprintf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo));
             // this.removeCursor();
             //
             this.iCellCursor = iCellCursor;
@@ -4156,7 +4156,7 @@ class Video extends Component {
          * cyCursor values are relative to when it's time to scale them.
          */
         if (this.yCursor != bCursorStart || this.cyCursor != bCursorSize) {
-            this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize);
+            this.printMessage(Str.sprintf("checkCursor(): cursor shape changed from %d,%d to %d,%d\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize));
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
             /*
@@ -4211,7 +4211,7 @@ class Video extends Component {
                          */
                         this.updateChar(col, row, data);
                     }
-                    this.printf("removeCursor(): removed from %d,%d\n", row, col);
+                    this.printMessage(Str.sprintf("removeCursor(): removed from %d,%d\n", row, col));
                     this.aCellCache[this.iCellCursor] = data;
                 }
             }
@@ -4348,7 +4348,7 @@ class Video extends Component {
         var card = this.cardActive;
         if (card && nAccess != null && nAccess != card.nAccess) {
 
-            this.printf("setCardAccess(0x%04x)\n", nAccess);
+            this.printMessage(Str.sprintf("setCardAccess(0x%04x)\n", nAccess));
 
             card.setMemoryAccess(nAccess);
 

@@ -33,7 +33,7 @@
  * 
  *          Recompiles all machine scripts in their respective version folder (under /versions) that
  *          are out-of-date with respect to the individual files (under /modules).  The target version
- *          comes from _data/machines.json:shared.appversion.
+ *          comes from _data/machines.json:shared.version.
  *
  *          It does this by running the `concat`, `compile`, `copy`, and `disks` tasks for all machines,
  *          in that order.
@@ -69,7 +69,7 @@
  *      version
  * 
  *          Updates the version number in all project machine XML files to match the version contained in
- *          _data/machines.json:shared.appversion.
+ *          _data/machines.json:shared.version.
  *
  *      copyright
  *
@@ -89,6 +89,26 @@ var merge = require('merge-stream');
 var fs = require("fs");
 var path = require("path");
 var pkg = require("./package.json");
+
+/**
+ * @typedef {Object} MachineConfig
+ * @property {string} name
+ * @property {string} class
+ * @property {string} version (if not defined, shared.version is used instead)
+ * @property {string} alias (if defined, then all the alias' properties are used instead, except for name and class)
+ * @property {string} folder
+ * @property {string} creator
+ * @property {Array.<string>} defines
+ * @property {Array.<string>} externs
+ * @property {Array.<string>} scripts
+ * @property {Array.<string>} styles
+ * @property {Array.<string>} css
+ * @property {Array.<string>} xsl
+ */
+
+/**
+ * @type {Object.<string,MachineConfig>}
+ */
 var machines = require("./_data/machines.json");
 
 var sExterns = "";
@@ -119,6 +139,9 @@ var aConcatTasks = [], aCompileTasks = [], aCopyTasks = [];
 aMachines.forEach(function(machineType) {
     if (machineType == "shared") return;
 
+    /**
+     * @type {MachineConfig}
+     */
     let machineConfig = machines[machineType];
     let machineName = machineConfig.name;
     let machineClass = machineConfig.class;
@@ -127,7 +150,7 @@ aMachines.forEach(function(machineType) {
         machineConfig = machines[machineConfig.alias];
     }
 
-    let machineVersion = machineConfig.version || machines.shared.appversion;
+    let machineVersion = machineConfig.version || machines.shared.version;
     let machineReleaseDir = "./versions/" + machineConfig['folder'] + "/" + machineVersion;
     let machineReleaseFile  = machineType + ".js";
     let machineUncompiledFile  = machineType + "-uncompiled.js";
@@ -357,7 +380,7 @@ gulp.task("disks", ["pcjs-disks", "private-disks"]);
 gulp.task("version", function() {
     let baseDir = "./";
     return gulp.src(["apps/**/*.xml", "devices/**/*.xml", "disks/**/*.xml", "pcjs-disks/**/*.xml", "private-disks/**/*.xml", "pubs/**/*.xml"], {base: baseDir})
-        .pipe(gulpReplace(/href="\/versions\/([^\/]*)\/[0-9.]*\/(machine|manifest|outline)\.xsl"/g, 'href="/versions/$1/' + machines.shared.appversion + '/$2.xsl"'))
+        .pipe(gulpReplace(/href="\/versions\/([^\/]*)\/[0-9.]*\/(machine|manifest|outline)\.xsl"/g, 'href="/versions/$1/' + machines.shared.version + '/$2.xsl"'))
         .pipe(gulp.dest(baseDir));
 });
 
