@@ -63967,8 +63967,8 @@ class HDC extends Component {
         this.aDriveConfigs = [];
 
         /*
-         * We used to eval() sDriveConfigs immediately, but now we wait until initBus()
-         * is called, so that we can check for any machine overrides.
+         * We used to eval() sDriveConfigs immediately, but now we wait until initBus() is called, so that
+         * we can check for any machine overrides.
          */
         this.sDriveConfigs = parmsHDC['drives'];
 
@@ -64078,9 +64078,15 @@ class HDC extends Component {
 
         var aDriveConfigs = cmp.getMachineParm('drives');
         if (aDriveConfigs) {
-            this.aDriveConfigs = aDriveConfigs;
+            if (typeof aDriveConfigs == "string") {
+                this.sDriveConfigs = aDriveConfigs;
+            } else {
+                this.aDriveConfigs = aDriveConfigs;
+                this.sDriveConfigs = "";
+            }
         }
-        else if (this.sDriveConfigs) {
+        
+        if (this.sDriveConfigs) {
             try {
                 /*
                  * We must take care when parsing user-supplied JSON-encoded drive data.
@@ -64090,6 +64096,7 @@ class HDC extends Component {
                  * Nothing more to do with aDriveConfigs now. initController() and autoMount() (if there are
                  * any disk image "path" properties to process) will take care of the rest.
                  */
+                this.sDriveConfigs = "";
             } catch (e) {
                 Component.error("HDC drive configuration error: " + e.message + " (" + this.sDriveConfigs + ")");
             }
