@@ -11511,10 +11511,7 @@ Web.onInit(C1PDiskController.init);
 
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
- *
+ * @class C1PDebugger
  * @unrestricted
  */
 class C1PDebugger extends Component {
@@ -11982,7 +11979,7 @@ class C1PDebugger extends Component {
         switch(sBinding) {
         case "debugInput":
             this.bindings[sBinding] = control;
-            this.eDebug = control;
+            this.eDebug = /** @type {HTMLInputElement} */ (control);
             this.eDebug.focus();
             control.onkeypress = function(dbg, e) {
                 return function(event) {

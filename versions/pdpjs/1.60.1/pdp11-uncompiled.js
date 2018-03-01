@@ -9383,6 +9383,16 @@ Web.onInit(DevicePDP11.init);
  * @property {function(number,boolean):number} getInt32
  * @property {function(number,number,boolean)} setInt32
  */
+
+/**
+ * @class MemoryPDP11
+ * @property {number} id
+ * @property {number} used
+ * @property {number} size
+ * @property {Int32Array} adw
+ * @property {Object} controller
+ * @property {DebuggerPDP11} dbg
+ */
 class MemoryPDP11 {
     /**
      * MemoryPDP11(bus, addr, used, size, type, controller)
@@ -12534,7 +12544,7 @@ class CPUStatePDP11 extends CPUPDP11 {
     addIRQ(vector, priority, message)
     {
         var irq = {vector: vector, priority: priority, message: message || 0, name: PDP11.VECTORS[vector], next: null};
-        this.aIRQs.push(irq);
+        this.aIRQs.push(/** @type {IRQ} */ (irq));      // TODO: Why the F*CK do I need a type override? Damn JSDoc types....
         return irq;
     }
 

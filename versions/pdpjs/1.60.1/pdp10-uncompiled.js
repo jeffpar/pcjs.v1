@@ -6558,6 +6558,14 @@ Web.onInit(DevicePDP10.init);
  * @property {function(number,boolean):number} getInt32
  * @property {function(number,number,boolean)} setInt32
  */
+
+/**
+ * @class MemoryPDP10
+ * @property {number} id
+ * @property {number} used
+ * @property {number} size
+ * @property {Array.<number>} aw
+ */
 class MemoryPDP10 {
     /**
      * MemoryPDP10(bus, addr, used, size, type)
@@ -8785,7 +8793,7 @@ class CPUStatePDP10 extends CPUPDP10 {
     addIRQ(vector, priority, message)
     {
         var irq = {vector: vector, priority: priority, message: message || 0, name: null, next: null};
-        this.aIRQs.push(irq);
+        this.aIRQs.push(/** @type {IRQ} */ (irq));      // TODO: Why the F*CK do I need a type override? Damn JSDoc types....
         return irq;
     }
 
@@ -24743,7 +24751,7 @@ class Macro10 {
      *
      * @this {Macro10}
      * @param {string} sExp
-     * @param {Array} [aUndefined]
+     * @param {Array|undefined} [aUndefined]
      * @param {number|undefined} [nLocation]
      * @param {number|undefined} [nLine]
      * @return {number|undefined}
