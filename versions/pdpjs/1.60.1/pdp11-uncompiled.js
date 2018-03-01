@@ -3288,22 +3288,20 @@ class Component {
     }
 
     /**
-     * Component.bindExternalControl(component, sControl, sBinding, sType)
+     * Component.bindExternalControl(component, sBinding, sType)
      *
      * @param {Component} component
-     * @param {string} sControl
      * @param {string} sBinding
-     * @param {string} [sType] is the external component type
+     * @param {string} [sType] is the external component type (default is "Panel")
      */
-    static bindExternalControl(component, sControl, sBinding, sType)
+    static bindExternalControl(component, sBinding, sType = "Panel")
     {
-        if (sControl) {
-            if (sType === undefined) sType = "Panel";
+        if (sBinding) {
             var target = Component.getComponentByType(sType, component.id);
             if (target) {
-                var eBinding = target.bindings[sControl];
-                if (eBinding) {
-                    component.setBinding(null, sBinding, eBinding);
+                var control = target.bindings[sBinding];
+                if (control) {
+                    component.setBinding(null, sBinding, control);
                 }
             }
         }
@@ -18008,16 +18006,16 @@ class SerialPortPDP11 extends Component {
         this.fUpperCase = parmsSerial['upperCase'];
         if (typeof this.fUpperCase == "string") this.fUpperCase = (this.fUpperCase == "true");
         /**
-         * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
+         * consoleBuffer becomes a string that records serial port output if the 'binding' property is set to the
          * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
          * or the string length reaches a threshold (currently, 1024 characters).
          *
          * @type {string|null}
          */
-        this.consoleOutput = null;
+        this.consoleBuffer = null;
 
         /**
-         * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
+         * controlBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
          *
          * Example: CTTY COM2
          *
@@ -18026,14 +18024,14 @@ class SerialPortPDP11 extends Component {
          * terminal.  It further assumes that anything typed on such a terminal is NOT displayed, so as DOS *receives*
          * serial input, DOS *transmits* the appropriate characters back to the terminal via COM2.
          *
-         * As a result, controlIOBuffer only needs to be updated by the transmitByte() function.
+         * As a result, controlBuffer only needs to be updated by the transmitByte() function.
          *
          * @type {Object}
          */
-        this.controlIOBuffer = null;
+        this.controlBuffer = null;
 
         /*
-         * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
+         * If controlBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
          * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
          * number of spaces.
          *
@@ -18053,12 +18051,22 @@ class SerialPortPDP11 extends Component {
 
         var sBinding = parmsSerial['binding'];
         if (sBinding == "console") {
-            this.consoleOutput = "";
+            this.consoleBuffer = "";
         } else {
             /*
+             * If the SerialPort wants to bind to a control (eg, "print") in a DIFFERENT component (eg, "Panel"),
+             * then it specifies the name of that control with the 'binding' property.  The SerialPort constructor
+             * will then call bindExternalControl(), which looks up the control, and then passes it to our own
+             * setBinding() handler.
+             * 
+             * For bindExternalControl() to succeed, it also need to know the target component; for now, that's
+             * been hard-coded to "Panel", in part because that's one of the few components we can rely upon
+             * initializing before we do, but it would be a simple matter to include a component type or ID as part
+             * of the 'binding' property as well, if we need more flexibility later.
+             * 
              * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
              */
-            Component.bindExternalControl(this, sBinding, SerialPortPDP11.sIOBuffer);
+            Component.bindExternalControl(this, sBinding);
         }
 
         /*
@@ -18084,17 +18092,16 @@ class SerialPortPDP11 extends Component {
      * @this {SerialPortPDP11}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
     setBinding(sType, sBinding, control, sValue)
     {
-        var serial = this;
+        if (sType == null || sType == "textarea") {
 
-        switch (sBinding) {
-        case SerialPortPDP11.sIOBuffer:
-            this.bindings[sBinding] = this.controlIOBuffer = control;
+            var serial = this;
+            this.bindings[sBinding] = this.controlBuffer = control;
 
             /*
              * An onkeydown handler is required for certain keys that browsers tend to consume themselves;
@@ -18190,9 +18197,6 @@ class SerialPortPDP11 extends Component {
             control.removeAttribute("readonly");
 
             return true;
-
-        default:
-            break;
         }
         return false;
     }
@@ -18586,13 +18590,12 @@ class SerialPortPDP11 extends Component {
          * TODO: Why do DEC diagnostics like to output bytes with bit 7 set?
          */
         b &= 0x7F;
-
-        if (this.controlIOBuffer) {
+        if (this.controlBuffer) {
             if (b == 0x0D) {
                 this.iLogicalCol = 0;
             }
             else if (b == 0x08) {
-                this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
+                this.controlBuffer.value = this.controlBuffer.value.slice(0, -1);
                 /*
                  * TODO: Back up the correct number of columns if the character erased was a tab.
                  */
@@ -18616,19 +18619,19 @@ class SerialPortPDP11 extends Component {
                     if (this.tabSize) s = Str.pad("", nChars);
                 }
                 if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
-                this.controlIOBuffer.value += s;
-                this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+                this.controlBuffer.value += s;
+                this.controlBuffer.scrollTop = this.controlBuffer.scrollHeight;
                 this.iLogicalCol += nChars;
             }
             fTransmitted = true;
         }
-        else if (this.consoleOutput != null) {
-            if (b == 0x0A || this.consoleOutput.length >= 1024) {
-                this.println(this.consoleOutput);
-                this.consoleOutput = "";
+        else if (this.consoleBuffer != null) {
+            if (b == 0x0A || this.consoleBuffer.length >= 1024) {
+                this.println(this.consoleBuffer);
+                this.consoleBuffer = "";
             }
             if (b != 0x0A) {
-                this.consoleOutput += String.fromCharCode(b);
+                this.consoleBuffer += String.fromCharCode(b);
             }
             fTransmitted = true;
         }
@@ -18794,19 +18797,6 @@ class SerialPortPDP11 extends Component {
         }
     }
 }
-
-/*
- * Internal name used for the I/O buffer control, if any, that we bind to the SerialPort.
- *
- * Alternatively, if SerialPort wants to use another component's control (eg, the Panel's
- * "print" control), it can specify the name of that control with the 'binding' property.
- *
- * For that binding to succeed, we also need to know the target component; for now, that's
- * been hard-coded to "Panel", in part because that's one of the few components we can rely
- * upon initializing before we do, but it would be a simple matter to include a component type
- * or ID as part of the 'binding' property as well, if we need more flexibility later.
- */
-SerialPortPDP11.sIOBuffer = "buffer";
 
 /*
  * ES6 ALERT: As you can see below, I've finally started using computed property names.

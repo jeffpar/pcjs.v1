@@ -41,7 +41,7 @@ if (NODE) {
 /**
  * SerialPort class
  *
- * The class property declarations below started as a way of informing the code inspector of the controlIOBuffer
+ * The class property declarations below started as a way of informing the code inspector of the controlBuffer
  * property, which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
  * initializing such properties in the constructor is a better way to go -- even though it's more code -- because
  * JavaScript compilers are supposed to be happier when the underlying object structures aren't constantly changing.
@@ -54,8 +54,8 @@ if (NODE) {
  * @property {number} iAdapter
  * @property {number} portBase
  * @property {number} nIRQ
- * @property {string|null} consoleOutput
- * @property {HTMLTextAreaElement} controlIOBuffer (DOM element bound to the port for rudimentary output; see transmitByte())
+ * @property {string|null} consoleBuffer
+ * @property {HTMLTextAreaElement} controlBuffer (DOM element bound to the port for rudimentary output; see transmitByte())
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class SerialPort extends Component {
@@ -109,18 +109,22 @@ class SerialPort extends Component {
             this.nIRQ = ChipSet.IRQ.COM2;
             break;
         default:
-            Component.warning("Unrecognized serial adapter #" + this.iAdapter);
-            return;
+            if (this.idComponent != "test") {
+                Component.warning("Unrecognized serial adapter #" + this.iAdapter);
+                return;
+            }
+            break;
         }
-        /**
-         * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
+        
+        /*
+         * consoleBuffer becomes a string that records serial port output if the 'binding' property is set to the
          * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
          * or the string length reaches a threshold (currently, 1024 characters).
          */
-        this.consoleOutput = null;
+        this.consoleBuffer = null;
 
-        /**
-         * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
+        /*
+         * controlBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
          *
          * Example: CTTY COM2
          *
@@ -129,16 +133,16 @@ class SerialPort extends Component {
          * terminal.  It further assumes that anything typed on such a terminal is NOT displayed, so as DOS *receives*
          * serial input, DOS *transmits* the appropriate characters back to the terminal via COM2.
          *
-         * As a result, controlIOBuffer only needs to be updated by the transmitByte() function.
+         * As a result, controlBuffer only needs to be updated by the transmitByte() function.
          */
-        this.controlIOBuffer = null;
+        this.controlBuffer = null;
 
         /*
-         * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
+         * If controlBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
          * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
          * number of spaces.
          *
-         * Another controlIOBuffer feature is charBOL, which, if nonzero, specifies a character to automatically output
+         * Another controlBuffer feature is charBOL, which, if nonzero, specifies a character to automatically output
          * at the beginning of every line.  This probably isn't generally useful; I use it internally to preformat serial
          * output.
          */
@@ -152,12 +156,22 @@ class SerialPort extends Component {
 
         var sBinding = parmsSerial['binding'];
         if (sBinding == "console") {
-            this.consoleOutput = "";
+            this.consoleBuffer = "";
         } else {
             /*
+             * If the SerialPort wants to bind to a control (eg, "print") in a DIFFERENT component (eg, "Panel"),
+             * then it specifies the name of that control with the 'binding' property.  The SerialPort constructor
+             * will then call bindExternalControl(), which looks up the control, and then passes it to our own
+             * setBinding() handler.
+             * 
+             * For bindExternalControl() to succeed, it also need to know the target component; for now, that's
+             * been hard-coded to "Panel", in part because that's one of the few components we can rely upon
+             * initializing before we do, but it would be a simple matter to include a component type or ID as part
+             * of the 'binding' property as well, if we need more flexibility later.
+             * 
              * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
              */
-            Component.bindExternalControl(this, sBinding, SerialPort.sIOBuffer);
+            Component.bindExternalControl(this, sBinding);
         }
 
         /*
@@ -209,17 +223,16 @@ class SerialPort extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var serial = this;
+        if (sHTMLType == null || sHTMLType == "textarea") {
 
-        switch (sBinding) {
-        case SerialPort.sIOBuffer:
-            this.bindings[sBinding] = this.controlIOBuffer = /** @type {HTMLTextAreaElement} */ (control);
+            var serial = this;
+            this.bindings[sBinding] = this.controlBuffer = /** @type {HTMLTextAreaElement} */ (control);
 
             /*
              * By establishing an onkeypress handler here, we make it possible for DOS commands like
              * "CTTY COM1" to more or less work (use "CTTY CON" to restore control to the DOS console).
              */
-            this.controlIOBuffer.onkeydown = function onKeyDown(event) {
+            this.controlBuffer.onkeydown = function onKeyDown(event) {
                 /*
                  * This is required in addition to onkeypress, because it's the only way to prevent
                  * BACKSPACE (keyCode 8) from being interpreted by the browser as a "Back" operation;
@@ -241,7 +254,7 @@ class SerialPort extends Component {
                 return true;
             };
 
-            this.controlIOBuffer.onkeypress = function onKeyPress(event) {
+            this.controlBuffer.onkeypress = function onKeyPress(event) {
                 /*
                  * Browser-independent keyCode extraction; refer to onKeyPress() and the other key event
                  * handlers in keyboard.js.
@@ -265,13 +278,17 @@ class SerialPort extends Component {
              * itself no longer needs the "readonly" attribute; we primarily need to remove it for iOS browsers,
              * so that the soft keyboard will activate, but it shouldn't hurt to remove the attribute for all browsers.
              */
-            this.controlIOBuffer.removeAttribute("readonly");
-
+            this.controlBuffer.removeAttribute("readonly");
             return true;
-
-        default:
-            break;
         }
+
+        // default:
+        //     if (!this.iAdapter) {
+        //         control.removeAttribute("readonly");
+        //     }
+        //     break;
+        // }
+        
         return false;
     }
 
@@ -287,23 +304,25 @@ class SerialPort extends Component {
     initBus(cmp, bus, cpu, dbg)
     {
         this.cmp = cmp;
-        this.bus = bus;
-        this.cpu = cpu;
-        this.dbg = dbg;
+        
+        if (this.iAdapter) {
+            this.bus = bus;
+            this.cpu = cpu;
+            this.dbg = dbg;
 
-        var serial = this;
-        this.timerReceiveNext = this.cpu.addTimer(this.id + ".receive", function receiveDataTimer() {
-            serial.receiveData();
-        });
-        this.timerTransmitNext = this.cpu.addTimer(this.id + ".transmit", function transmitDataTimer() {
-            serial.transmitData();
-        });
+            var serial = this;
+            this.timerReceiveNext = this.cpu.addTimer(this.id + ".receive", function receiveDataTimer() {
+                serial.receiveData();
+            });
+            this.timerTransmitNext = this.cpu.addTimer(this.id + ".transmit", function transmitDataTimer() {
+                serial.transmitData();
+            });
 
-        this.chipset = cmp.getMachineComponent("ChipSet");
+            this.chipset = cmp.getMachineComponent("ChipSet");
 
-        bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
-        bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
-
+            bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
+            bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
+        }
         this.setReady();
     }
 
@@ -531,8 +550,8 @@ class SerialPort extends Component {
      *
      * This replaces the old sendRBR() function, which expected an Array of bytes.  We still support that,
      * but in order to support connections with other SerialPort components (ie, the PC8080 SerialPort), we
-     * have added support for numbers and strings as well.  If no data is specified at all, then all we do is
-     * "clock" any remaining data into the receiver.
+     * have added support for numbers and strings as well.  If no data is specified at all, then all we do
+     * is "clock" any remaining data into the receiver.
      *
      * @this {SerialPort}
      * @param {number|string|Array} [data]
@@ -882,12 +901,12 @@ class SerialPort extends Component {
             }
         }
 
-        if (this.controlIOBuffer) {
+        if (this.controlBuffer) {
             if (b == 0x0D) {
                 this.iLogicalCol = 0;
             }
             else if (b == 0x08) {
-                this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
+                this.controlBuffer.value = this.controlBuffer.value.slice(0, -1);
                 /*
                  * TODO: Back up the correct number of columns if the character erased was a tab.
                  */
@@ -910,20 +929,20 @@ class SerialPort extends Component {
                     if (this.charPrev != 0x0A) s = "\n" + s;
                     if (this.charBOL) s = String.fromCharCode(this.charBOL) + s;
                 }
-                this.controlIOBuffer.value += s;
-                this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+                this.controlBuffer.value += s;
+                this.controlBuffer.scrollTop = this.controlBuffer.scrollHeight;
                 this.iLogicalCol += nChars;
             }
             this.charPrev = b;
             fTransmitted = true;
         }
-        else if (this.consoleOutput != null) {
-            if (b == 0x0A || this.consoleOutput.length >= 1024) {
-                this.println(this.consoleOutput);
-                this.consoleOutput = "";
+        else if (this.consoleBuffer != null) {
+            if (b == 0x0A || this.consoleBuffer.length >= 1024) {
+                this.println(this.consoleBuffer);
+                this.consoleBuffer = "";
             }
             if (b != 0x0A) {
-                this.consoleOutput += String.fromCharCode(b);
+                this.consoleBuffer += String.fromCharCode(b);
             }
             fTransmitted = true;
         }
@@ -963,19 +982,6 @@ class SerialPort extends Component {
         }
     }
 }
-
-/*
- * Internal name used for the I/O buffer control, if any, that we bind to the SerialPort.
- *
- * Alternatively, if SerialPort wants to use another component's control (eg, the Panel's
- * "print" control), it can specify the name of that control with the 'binding' property.
- *
- * For that binding to succeed, we also need to know the target component; for now, that's
- * been hard-coded to "Panel", in part because that's one of the few components we can rely
- * upon initializing before we do, but it would be a simple matter to include a component type
- * or ID as part of the 'binding' property as well, if we need more flexibility later.
- */
-SerialPort.sIOBuffer = "buffer";
 
 /*
  * 8250 I/O register offsets (add these to a I/O base address to obtain an I/O port address)

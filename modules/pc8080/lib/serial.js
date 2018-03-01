@@ -38,10 +38,22 @@ if (NODE) {
 }
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
+ * SerialPort8080 class
  *
+ * The class property declarations below started as a way of informing the code inspector of the controlBuffer
+ * property, which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
+ * initializing such properties in the constructor is a better way to go -- even though it's more code -- because
+ * JavaScript compilers are supposed to be happier when the underlying object structures aren't constantly changing.
+ *
+ * Besides, I'm not sure I want to get into documenting every property this way, for this or any/every other class,
+ * let alone getting into which ones should be considered private or protected, because PCjs isn't really a library
+ * for third-party apps.
+ * 
+ * @class SerialPort8080
+ * @property {number} iAdapter
+ * @property {number} portBase
+ * @property {number} nIRQ
+ * @property {Object} controlBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
  * @unrestricted
  */
 class SerialPort8080 extends Component {
@@ -83,23 +95,23 @@ class SerialPort8080 extends Component {
             return;
         }
         /**
-         * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
+         * consoleBuffer becomes a string that records serial port output if the 'binding' property is set to the
          * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
          * or the string length reaches a threshold (currently, 1024 characters).
          *
          * @type {string|null}
          */
-        this.consoleOutput = null;
+        this.consoleBuffer = null;
 
         /**
-         * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
+         * controlBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
          *
          * @type {Object}
          */
-        this.controlIOBuffer = null;
+        this.controlBuffer = null;
 
         /*
-         * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
+         * If controlBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
          * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
          * number of spaces.
          *
@@ -124,12 +136,22 @@ class SerialPort8080 extends Component {
 
         var sBinding = parmsSerial['binding'];
         if (sBinding == "console") {
-            this.consoleOutput = "";
+            this.consoleBuffer = "";
         } else {
             /*
+             * If the SerialPort wants to bind to a control (eg, "print") in a DIFFERENT component (eg, "Panel"),
+             * then it specifies the name of that control with the 'binding' property.  The SerialPort constructor
+             * will then call bindExternalControl(), which looks up the control, and then passes it to our own
+             * setBinding() handler.
+             * 
+             * For bindExternalControl() to succeed, it also need to know the target component; for now, that's
+             * been hard-coded to "Panel", in part because that's one of the few components we can rely upon
+             * initializing before we do, but it would be a simple matter to include a component type or ID as part
+             * of the 'binding' property as well, if we need more flexibility later.
+             * 
              * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
              */
-            Component.bindExternalControl(this, sBinding, SerialPort8080.sIOBuffer);
+            Component.bindExternalControl(this, sBinding);
         }
 
         /*
@@ -154,17 +176,17 @@ class SerialPort8080 extends Component {
      * @this {SerialPort8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
         var serial = this;
+        
+        if (sHTMLType == null || sHTMLType == "textarea") {
 
-        switch (sBinding) {
-        case SerialPort8080.sIOBuffer:
-            this.bindings[sBinding] = this.controlIOBuffer = control;
+            this.bindings[sBinding] = this.controlBuffer = control;
 
             /*
              * By establishing an onkeypress handler here, we make it possible for DOS commands like
@@ -218,46 +240,45 @@ class SerialPort8080 extends Component {
              */
             control.removeAttribute("readonly");
             return true;
-
-        default:
-            if (sValue) {
-                /*
-                 * Instead of just having a dedicated "test" control, we now treat any unrecognized control with
-                 * a "value" attribute as a test control.  The only caveat is that such controls must have binding IDs
-                 * that do not conflict with predefined controls (which, of course, is the only way you can get here).
-                 */
-                this.bindings[sBinding] = control;
-
-                /*
-                 * Backslash sequences like \n, \r, and \\ have already been converted to LF, CR and backslash
-                 * characters, by virtue of the eval() function that all our component parameter strings pass through;
-                 * eval() treats strings like "source code", so any backslash sequence that JavaScript supports is
-                 * automatically converted.
-                 *
-                 * The complete list of backslash sequences supported by JavaScript:
-                 *
-                 *      \0  \'  \"  \\  \n  \r  \v  \t  \b  \f  \uXXXX \xXX
-                 *                      ^J  ^M  ^K  ^I  ^H  ^L
-                 *
-                 * To support any other non-printable 8-bit character, such as ESC, you should use \xXX, where XX
-                 * is the ASCII code in hex.  For ESC, that would \x1B.
-                 */
-                control.onclick = function onClickTest(event) {
-                    serial.receiveData(sValue);
-                    /*
-                     * Give focus back to the machine (since clicking the button takes focus away).
-                     *
-                     *      if (serial.cmp) serial.cmp.updateFocus();
-                     *
-                     * iOS Usability Improvement: NOT calling updateFocus() keeps the soft keyboard down
-                     * (assuming it was already down).
-                     */
-                    return true;
-                };
-                return true;
-            }
-            break;
         }
+        
+        if (sValue) {
+            /*
+             * Instead of just having a dedicated "test" control, we now treat any unrecognized control with
+             * a "value" attribute as a test control.  The only caveat is that such controls must have binding IDs
+             * that do not conflict with predefined controls (which, of course, is the only way you can get here).
+             */
+            this.bindings[sBinding] = control;
+
+            /*
+             * Backslash sequences like \n, \r, and \\ have already been converted to LF, CR and backslash
+             * characters, by virtue of the eval() function that all our component parameter strings pass through;
+             * eval() treats strings like "source code", so any backslash sequence that JavaScript supports is
+             * automatically converted.
+             *
+             * The complete list of backslash sequences supported by JavaScript:
+             *
+             *      \0  \'  \"  \\  \n  \r  \v  \t  \b  \f  \uXXXX \xXX
+             *                      ^J  ^M  ^K  ^I  ^H  ^L
+             *
+             * To support any other non-printable 8-bit character, such as ESC, you should use \xXX, where XX
+             * is the ASCII code in hex.  For ESC, that would \x1B.
+             */
+            control.onclick = function onClickTest(event) {
+                serial.receiveData(sValue);
+                /*
+                 * Give focus back to the machine (since clicking the button takes focus away).
+                 *
+                 *      if (serial.cmp) serial.cmp.updateFocus();
+                 *
+                 * iOS Usability Improvement: NOT calling updateFocus() keeps the soft keyboard down
+                 * (assuming it was already down).
+                 */
+                return true;
+            };
+            return true;
+        }
+        
         return false;
     }
 
@@ -272,9 +293,9 @@ class SerialPort8080 extends Component {
     {
         var fEchoed = false;
 
-        if (this.controlIOBuffer) {
+        if (this.controlBuffer) {
             if (b == 0x08) {
-                this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
+                this.controlBuffer.value = this.controlBuffer.value.slice(0, -1);
                 /*
                  * TODO: Back up the correct number of columns if the character erased was a tab.
                  */
@@ -293,19 +314,19 @@ class SerialPort8080 extends Component {
                     s = "\n";
                 }
                 if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
-                this.controlIOBuffer.value += s;
-                this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+                this.controlBuffer.value += s;
+                this.controlBuffer.scrollTop = this.controlBuffer.scrollHeight;
                 this.iLogicalCol += nChars;
             }
             fEchoed = true;
         }
-        else if (this.consoleOutput != null) {
-            if (b == 0x0A || this.consoleOutput.length >= 1024) {
-                this.println(this.consoleOutput);
-                this.consoleOutput = "";
+        else if (this.consoleBuffer != null) {
+            if (b == 0x0A || this.consoleBuffer.length >= 1024) {
+                this.println(this.consoleBuffer);
+                this.consoleBuffer = "";
             }
             if (b != 0x0A) {
-                this.consoleOutput += String.fromCharCode(b);
+                this.consoleBuffer += String.fromCharCode(b);
             }
             fEchoed = true;
         }
@@ -825,23 +846,6 @@ class SerialPort8080 extends Component {
     }
 }
 
-/*
- * class SerialPort8080
- * property {number} iAdapter
- * property {number} portBase
- * property {number} nIRQ
- * property {Object} controlIOBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
- *
- * NOTE: This class declaration started as a way of informing the code inspector of the controlIOBuffer property,
- * which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
- * initializing such properties in the constructor is a better way to go -- even though it's more code -- because
- * JavaScript compilers are supposed to be happier when the underlying object structures aren't constantly changing.
- *
- * Besides, I'm not sure I want to get into documenting every property this way, for this or any/every other class,
- * let alone getting into which ones should be considered private or protected, because PCjs isn't really a library
- * for third-party apps.
- */
-
 SerialPort8080.UART8251 = {
     /*
      * Format of MODE byte written to CONTROL port 0x1
@@ -928,19 +932,6 @@ SerialPort8080.UART8251.INIT = [
     SerialPort8080.UART8251.COMMAND.INIT,
     SerialPort8080.UART8251.BAUDRATES.INIT
 ];
-
-/*
- * Internal name used for the I/O buffer control, if any, that we bind to a SerialPort8080.
- *
- * Alternatively, if SerialPort8080 wants to use another component's control (eg, the Panel's
- * "print" control), it can specify the name of that control with the 'binding' property.
- *
- * For that binding to succeed, we also need to know the target component; for now, that's
- * been hard-coded to "Panel", in part because that's one of the few components we can rely
- * upon initializing before we do, but it would be a simple matter to include a component type
- * or ID as part of the 'binding' property as well, if we need more flexibility later.
- */
-SerialPort8080.sIOBuffer = "buffer";
 
 /*
  * Port input notification table
