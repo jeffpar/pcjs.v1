@@ -60,9 +60,9 @@ if (NODE) {
  */
 class SerialPort extends Component {
     /**
-     * SerialPort(parmsSerial)
+     * SerialPort(parms)
      *
-     * The SerialPort component has the following component-specific (parmsSerial) properties:
+     * The SerialPort component has the following component-specific (parms) properties:
      *
      *      adapter: 1 (port 0x3F8) or 2 (port 0x2F8); 0 if not defined
      *
@@ -91,13 +91,13 @@ class SerialPort extends Component {
      * adapter numbers, since not all operating systems follow those naming conventions.
      *
      * @this {SerialPort}
-     * @param {Object} parmsSerial
+     * @param {Object} parms
      */
-    constructor(parmsSerial)
+    constructor(parms)
     {
-        super("SerialPort", parmsSerial, Messages.SERIAL);
+        super("SerialPort", parms, Messages.SERIAL);
 
-        this.iAdapter = parmsSerial['adapter'];
+        this.iAdapter = parms['adapter'];
 
         switch (this.iAdapter) {
         case 1:
@@ -146,8 +146,8 @@ class SerialPort extends Component {
          * at the beginning of every line.  This probably isn't generally useful; I use it internally to preformat serial
          * output.
          */
-        this.tabSize = parmsSerial['tabSize'] || 0;
-        this.charBOL = parmsSerial['charBOL'] || 0;
+        this.tabSize = parms['tabSize'] || 0;
+        this.charBOL = parms['charBOL'] || 0;
         this.charPrev = 0;
         this.iLogicalCol = 0;
 
@@ -169,7 +169,7 @@ class SerialPort extends Component {
 	     * name "console" (for routing all output to the system console) or the name of a control binding that has
 	     * been defined in another component (eg, an HTMLTextAreaElement defined as part of the Control Panel layout).
          */
-        var sBinding = parmsSerial['binding'];
+        var sBinding = parms['binding'];
         if (sBinding == "console") {
             this.consoleBuffer = "";
         } else {
@@ -196,9 +196,10 @@ class SerialPort extends Component {
         this.connection = this.sendData = this.updateStatus = null;
 
         /*
-         * Export all functions required by initConnection().
+         * Export all functions required by bindConnection() or initConnection(), whichever is required.
          */
         this['exports'] = {
+            'bind': this.bindConnection,
             'connect': this.initConnection,
             'receiveData': this.receiveData,
             'receiveStatus': this.receiveStatus
@@ -206,7 +207,28 @@ class SerialPort extends Component {
     }
 
     /**
-     * attachMouse(id, mouse, fnUpdate)
+     * bindConnection(connection, receiveData)
+     * 
+     * This is basically a lighter-weight version of initConnection(), used by built-in components
+     * like TestController, as opposed to components in external machines, which require more work to connect.
+     *
+     * @this {SerialPort}
+     * @param {Component} connection
+     * @param {function()} receiveData
+     * @return {boolean}
+     */
+    bindConnection(connection, receiveData)
+    {
+        if (!this.connection) {
+            this.connection = connection;
+            this.sendData = receiveData;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * bindMouse(id, mouse, fnUpdate)
      *
      * @this {SerialPort}
      * @param {string} id
@@ -214,7 +236,7 @@ class SerialPort extends Component {
      * @param {function(number)} fnUpdate
      * @return {Component|null}
      */
-    attachMouse(id, mouse, fnUpdate)
+    bindMouse(id, mouse, fnUpdate)
     {
         var component = null;
         if (id == this.idComponent && !this.connection) {
@@ -408,7 +430,6 @@ class SerialPort extends Component {
     powerUp(data, fRepower)
     {
         if (!fRepower) {
-
             /*
              * This is as late as we can currently wait to make our first inter-machine connection attempt;
              * even so, the target machine's initialization process may still be ongoing, so any connection
@@ -991,8 +1012,8 @@ class SerialPort extends Component {
         var aeSerial = Component.getElementsByClass(document, PCX86.APPCLASS, "serial");
         for (var iSerial = 0; iSerial < aeSerial.length; iSerial++) {
             var eSerial = aeSerial[iSerial];
-            var parmsSerial = Component.getComponentParms(eSerial);
-            var serial = new SerialPort(parmsSerial);
+            var parms = Component.getComponentParms(eSerial);
+            var serial = new SerialPort(parms);
             Component.bindComponentControls(serial, eSerial, PCX86.APPCLASS);
         }
     }

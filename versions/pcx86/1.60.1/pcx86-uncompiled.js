@@ -1274,8 +1274,10 @@ class Str {
     /**
      * sprintf(format, ...args)
      *
-     * Copied from the CCjs project (/ccjs/lib/stdio.js) and extended.  Far from complete let alone sprintf-compatible,
-     * but it's a start.
+     * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
+     *
+     * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
+     * specifiers that I use.
      *
      * @param {string} format
      * @param {...} args
@@ -1283,44 +1285,79 @@ class Str {
      */
     static sprintf(format, ...args)
     {
-        var parts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
-        var buffer = "";
-        var partIndex = 0;
-        for (var i = 0; i < args.length; i++) {
+        let buffer = "";
+        let aParts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
 
-            var arg = args[i], d, s;
-            buffer += parts[partIndex++];
-            var flags = parts[partIndex];
-            var minimum = +parts[partIndex+1] || 0;
-            var precision = +parts[partIndex+3] || 0;
-            var conversion = parts[partIndex+5];
+        let iArg = 0, iPart;
+        for (iPart = 0; iPart < aParts.length - 7; iPart += 7) {
+
+            buffer += aParts[iPart];
+
+            let arg = args[iArg++];
+            let flags = aParts[iPart+1];
+            let minimum = +aParts[iPart+2] || 0;
+            let precision = +aParts[iPart+4] || 0;
+            let conversion = aParts[iPart+6];
+            let ach = null, s;
 
             switch(conversion) {
             case 'd':
+                /*
+                 * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
+                 */
+                arg = Math.trunc(arg);
+                /* falls through */
+
             case 'f':
-                d = Math.trunc(arg);
-                s = d + "";
+                s = Math.trunc(arg) + "";
                 if (precision) {
                     minimum -= (precision + 1);
                 }
                 if (s.length < minimum) {
                     if (flags == '0') {
-                        if (d < 0) minimum--;
-                        s = ("0000000000" + Math.abs(d)).slice(-minimum);
-                        if (d < 0) s = '-' + s;
+                        if (arg < 0) minimum--;
+                        s = ("0000000000" + Math.abs(arg)).slice(-minimum);
+                        if (arg < 0) s = '-' + s;
                     } else {
                         s = ("          " + s).slice(-minimum);
                     }
                 }
                 if (precision) {
-                    d = Math.trunc((arg - Math.trunc(arg)) * Math.pow(10, precision));
-                    s += '.' + ("0000000000" + Math.abs(d)).slice(-precision);
+                    arg = Math.round((arg - Math.trunc(arg)) * Math.pow(10, precision));
+                    s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
                 }
                 buffer += s;
                 break;
+
+            case 'c':
+                arg = String.fromCharCode(arg);
+                /* falls through */
+
             case 's':
+                while (arg.length < minimum) {
+                    if (flags == '-') {
+                        arg += ' ';
+                    } else {
+                        arg = ' ' + arg;
+                    }
+                }
                 buffer += arg;
                 break;
+
+            case 'X':
+                ach = Str.HexUpperCase;
+                /* falls through */
+
+            case 'x':
+                if (!ach) ach = Str.HexLowerCase;
+                s = "";
+                do {
+                    s = ach[arg & 0xf] + s;
+                    arg >>>= 4;
+                } while (--minimum > 0 || arg);
+                buffer += s;
+                break;
+
             default:
                 /*
                  * The supported ANSI C set of conversions: "dioxXucsfeEgGpn%"
@@ -1328,10 +1365,9 @@ class Str {
                 buffer += "(unrecognized printf conversion %" + conversion + ")";
                 break;
             }
-
-            partIndex += 6;
         }
-        buffer += parts[partIndex];
+
+        buffer += aParts[iPart];
         return buffer;
     }
 
@@ -1492,6 +1528,9 @@ Str.TYPES = {
     OBJECT:     7,
     ARRAY:      8
 };
+
+Str.HexLowerCase = "0123456789abcdef";
+Str.HexUpperCase = "0123456789ABCDEF";
 
 
 
@@ -48217,7 +48256,7 @@ Web.onInit(Keyboard.init);
  */
 
 /**
- * class Card
+ * @class Card
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Card extends Controller {
@@ -48260,7 +48299,7 @@ class Card extends Controller {
              * If a Debugger is present, we want to stash a bit more info in each Card.
              */
             if (DEBUGGER) {
-                this.dbg = video.dbg;
+                this.dbg = /** @type {DebuggerX86} */ (video.dbg);
                 this.type = specs[0];
                 this.port = specs[1];
             }
@@ -50075,7 +50114,7 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.XOR] = Card.ACCESS.
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE3] = Card.ACCESS.writeByteMode3;
 
 /**
- * class Video
+ * @class Video
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Video extends Component {
@@ -55093,21 +55132,8 @@ Video.MODEL = {
  *  Dots        238944       326340
  */
 
-/**
- * @class MonitorSpecs
- * @property {number} nHorzPeriodsPerSec
- * @property {number} nHorzPeriodsPerFrame
- * @property {number} percentHorzActive
- * @property {number} percentVertActive
- *
- * From these monitor specs, we calculate the following values for a given Card:
- *
- *      nCyclesDefault = cpu.getBaseCyclesPerSecond();          // eg, 4772727
- *      nCyclesHorzPeriod = (nCyclesDefault / monitorSpecs.nHorzPeriodsPerSec) | 0;
- *      nCyclesHorzActive = (nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100) | 0;
- *      nCyclesVertPeriod = nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame;
- *      nCyclesVertActive = (nCyclesVertPeriod * monitorSpecs.percentVertActive / 100) | 0;
- */
+/** @typedef {{ nHorzPeriodsPerSec: number, nHorzPeriodsPerFrame: number, percentHorzActive: number, percentVertActive: number }} */
+var MonitorSpecs;
 
 /**
  * @type {Object}
@@ -55200,15 +55226,8 @@ Video.aEGAMonitorSwitches = {
     0x05: [ChipSet.MONITOR.MONO,         ChipSet.MONITOR.COLOR, false]  // "0101"
 };
 
-/**
- * @class Font
- * @property {number} cxCell
- * @property {number} cyCell
- * @property {Array} aCSSColors
- * @property {Array} aRGBColors
- * @property {Array} aColorMap
- * @property {Array} aCanvas
- */
+/** @typedef {{ cxCell: number, cyCell: number, aCSSColors: Array, aRGBColors: Array, aColorMap: Array, aCanvas: Array }} */
+var Font;
 
 /*
  * For each video mode, we need to know the following pieces of information:
@@ -56107,9 +56126,9 @@ Web.onInit(ParallelPort.init);
  */
 class SerialPort extends Component {
     /**
-     * SerialPort(parmsSerial)
+     * SerialPort(parms)
      *
-     * The SerialPort component has the following component-specific (parmsSerial) properties:
+     * The SerialPort component has the following component-specific (parms) properties:
      *
      *      adapter: 1 (port 0x3F8) or 2 (port 0x2F8); 0 if not defined
      *
@@ -56138,13 +56157,13 @@ class SerialPort extends Component {
      * adapter numbers, since not all operating systems follow those naming conventions.
      *
      * @this {SerialPort}
-     * @param {Object} parmsSerial
+     * @param {Object} parms
      */
-    constructor(parmsSerial)
+    constructor(parms)
     {
-        super("SerialPort", parmsSerial, Messages.SERIAL);
+        super("SerialPort", parms, Messages.SERIAL);
 
-        this.iAdapter = parmsSerial['adapter'];
+        this.iAdapter = parms['adapter'];
 
         switch (this.iAdapter) {
         case 1:
@@ -56193,8 +56212,8 @@ class SerialPort extends Component {
          * at the beginning of every line.  This probably isn't generally useful; I use it internally to preformat serial
          * output.
          */
-        this.tabSize = parmsSerial['tabSize'] || 0;
-        this.charBOL = parmsSerial['charBOL'] || 0;
+        this.tabSize = parms['tabSize'] || 0;
+        this.charBOL = parms['charBOL'] || 0;
         this.charPrev = 0;
         this.iLogicalCol = 0;
 
@@ -56216,7 +56235,7 @@ class SerialPort extends Component {
 	     * name "console" (for routing all output to the system console) or the name of a control binding that has
 	     * been defined in another component (eg, an HTMLTextAreaElement defined as part of the Control Panel layout).
          */
-        var sBinding = parmsSerial['binding'];
+        var sBinding = parms['binding'];
         if (sBinding == "console") {
             this.consoleBuffer = "";
         } else {
@@ -56243,9 +56262,10 @@ class SerialPort extends Component {
         this.connection = this.sendData = this.updateStatus = null;
 
         /*
-         * Export all functions required by initConnection().
+         * Export all functions required by bindConnection() or initConnection(), whichever is required.
          */
         this['exports'] = {
+            'bind': this.bindConnection,
             'connect': this.initConnection,
             'receiveData': this.receiveData,
             'receiveStatus': this.receiveStatus
@@ -56253,7 +56273,28 @@ class SerialPort extends Component {
     }
 
     /**
-     * attachMouse(id, mouse, fnUpdate)
+     * bindConnection(connection, receiveData)
+     * 
+     * This is basically a lighter-weight version of initConnection(), used by built-in components
+     * like TestController, as opposed to components in external machines, which require more work to connect.
+     *
+     * @this {SerialPort}
+     * @param {Component} connection
+     * @param {function()} receiveData
+     * @return {boolean}
+     */
+    bindConnection(connection, receiveData)
+    {
+        if (!this.connection) {
+            this.connection = connection;
+            this.sendData = receiveData;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * bindMouse(id, mouse, fnUpdate)
      *
      * @this {SerialPort}
      * @param {string} id
@@ -56261,7 +56302,7 @@ class SerialPort extends Component {
      * @param {function(number)} fnUpdate
      * @return {Component|null}
      */
-    attachMouse(id, mouse, fnUpdate)
+    bindMouse(id, mouse, fnUpdate)
     {
         var component = null;
         if (id == this.idComponent && !this.connection) {
@@ -56455,7 +56496,6 @@ class SerialPort extends Component {
     powerUp(data, fRepower)
     {
         if (!fRepower) {
-
             /*
              * This is as late as we can currently wait to make our first inter-machine connection attempt;
              * even so, the target machine's initialization process may still be ongoing, so any connection
@@ -57038,8 +57078,8 @@ class SerialPort extends Component {
         var aeSerial = Component.getElementsByClass(document, PCX86.APPCLASS, "serial");
         for (var iSerial = 0; iSerial < aeSerial.length; iSerial++) {
             var eSerial = aeSerial[iSerial];
-            var parmsSerial = Component.getComponentParms(eSerial);
-            var serial = new SerialPort(parmsSerial);
+            var parms = Component.getComponentParms(eSerial);
+            var serial = new SerialPort(parms);
             Component.bindComponentControls(serial, eSerial, PCX86.APPCLASS);
         }
     }
@@ -57212,7 +57252,251 @@ Web.onInit(SerialPort.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/testctrl.js (C) Jeff Parsons 2012-2018
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/testctl.js (C) Jeff Parsons 2012-2018
+ */
+
+/*
+ * This module provides connectivity between the TestManager component and whichever PCx86 SerialPort
+ * our 'binding' property indicates, if any.
+ */
+
+
+/**
+ * TestController class
+ *
+ * @class TestController
+ * @property {string|null} consoleBuffer
+ * @property {HTMLTextAreaElement|null} controlBuffer
+ * @property {function(...)|null} sendData
+ * @property {function(...)|null} deliverData
+ * @property {function(number)|null} deliverInput
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
+ */
+class TestController extends Component {
+    /**
+     * TestController(parms)
+     *
+     * @this {TestController}
+     * @param {Object} parms
+     */
+    constructor(parms)
+    {
+        super("TestController", parms);
+
+        this.consoleBuffer = "";
+        this.controlBuffer = null;
+        this.sendData = this.deliverData = this.deliverInput = null;
+        
+        let sBinding = parms['binding'];
+        if (sBinding) {
+            this.serialPort = Component.getComponentByID(sBinding, this.id);
+            if (this.serialPort) {
+                let exports = this.serialPort['exports'];
+                if (exports) {
+                    let bind = /** @function */ (exports['bind']);
+                    if (bind && bind.call(this.serialPort, this, this.receiveData)) {
+                        this.sendData = exports['receiveData'].bind(this.serialPort);
+                    }
+                }
+            }
+            if (!this.sendData) {
+                Component.warning(this.id + ": binding '" + sBinding + "' unavailable");
+            }
+        }
+        this.setReady();
+    }
+
+    /**
+     * bindManager(manager, deliverData, deliverInput)
+     *
+     * @this {TestController}
+     * @param {TestManager} manager
+     * @param {function(...)} deliverData
+     * @param {function(number)} deliverInput
+     */
+    bindManager(manager, deliverData, deliverInput)
+    {
+        this.deliverData = deliverData.bind(manager);
+        this.deliverInput = deliverInput.bind(manager);
+    }
+
+    /**
+     * setBinding(sHTMLType, sBinding, control, sValue)
+     *
+     * @this {TestController}
+     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {string} [sValue] optional data value
+     * @return {boolean} true if binding was successful, false if unrecognized binding request
+     */
+    setBinding(sHTMLType, sBinding, control, sValue)
+    {
+        let controller = this;
+
+        if (sHTMLType == null || sHTMLType == "textarea") {
+
+            this.bindings[sBinding] = control;
+            this.controlBuffer = /** @type {HTMLTextAreaElement} */ (control);
+            this.consoleBuffer = null;          // we currently use one or the other: control or console
+
+            /*
+             * By establishing an onkeypress handler here, we make it possible for DOS commands like
+             * "CTTY COM1" to more or less work (use "CTTY CON" to restore control to the DOS console).
+             */
+            control.onkeydown = function onKeyDown(event) {
+                /*
+                 * This is required in addition to onkeypress, because it's the only way to prevent
+                 * BACKSPACE (keyCode 8) from being interpreted by the browser as a "Back" operation;
+                 * moreover, not all browsers generate an onkeypress notification for BACKSPACE.
+                 *
+                 * A related problem exists for Ctrl-key combinations in most Windows-based browsers
+                 * (eg, IE, Edge, Chrome for Windows, etc), because keys like Ctrl-C and Ctrl-S have
+                 * special meanings (eg, Copy, Save).  To the extent the browser will allow it, we
+                 * attempt to disable that default behavior when this control receives an onkeydown
+                 * event for one of those keys (probably the only event the browser generates for them).
+                 */
+                event = event || window.event;
+                let keyCode = event.keyCode;
+                if (keyCode === 0x08 || event.ctrlKey && keyCode >= 0x41 && keyCode <= 0x5A) {
+                    if (event.preventDefault) event.preventDefault();
+                    if (keyCode > 0x40) keyCode -= 0x40;
+                    if (controller.deliverInput) controller.deliverInput(keyCode);
+                }
+                return true;
+            };
+
+            control.onkeypress = function onKeyPress(event) {
+                /*
+                 * Browser-independent keyCode extraction; refer to onKeyPress() and the other key event
+                 * handlers in keyboard.js.
+                 */
+                event = event || window.event;
+                let keyCode = event.which || event.keyCode;
+                if (controller.deliverInput) controller.deliverInput(keyCode);
+                /*
+                 * Since we're going to remove the "readonly" attribute from the <textarea> control
+                 * (so that the soft keyboard activates on iOS), instead of calling preventDefault() for
+                 * selected keys (eg, the SPACE key, whose default behavior is to scroll the page), we must
+                 * now call it for *all* keys, so that the keyCode isn't added to the control immediately,
+                 * on top of whatever the machine is echoing back, resulting in double characters.
+                 */
+                if (event.preventDefault) event.preventDefault();
+                return true;
+            };
+
+            /*
+             * Now that we've added an onkeypress handler that calls preventDefault() for ALL keys, the control
+             * itself no longer needs the "readonly" attribute; we primarily need to remove it for iOS browsers,
+             * so that the soft keyboard will activate, but it shouldn't hurt to remove the attribute for all browsers.
+             */
+            control.removeAttribute("readonly");
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * printf(format, ...args)
+     *
+     * @this {TestController}
+     * @param {string} format
+     * @param {...} args
+     */
+    printf(format, ...args)
+    {
+        let s = Str.sprintf(format, ...args);
+        
+        if (this.controlBuffer != null) {
+            this.controlBuffer.value += s;
+            /*
+             * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+             */
+            if (!DEBUG && this.controlBuffer.value.length > 8192) {
+                this.controlBuffer.value = this.controlBuffer.value.substr(this.controlBuffer.value.length - 4096);
+            }
+            this.controlBuffer.scrollTop = this.controlBuffer.scrollHeight;
+        }
+        
+        if (this.consoleBuffer != null) {
+            let i = s.lastIndexOf('\n');
+            if (i >= 0) {
+                console.log(this.consoleBuffer + s.substr(0, i));
+                this.consoleBuffer = "";
+                s = s.substr(i + 1);
+            }
+            this.consoleBuffer += s;
+        }
+    }
+
+    /**
+     * powerUp(data, fRepower)
+     *
+     * @this {TestController}
+     * @param {Object|null} data
+     * @param {boolean} [fRepower]
+     * @return {boolean} true if successful, false if failure
+     */
+    powerUp(data, fRepower)
+    {
+        if (!fRepower) {
+            
+            if (this.controlBuffer) {
+                let manager = new TestManager();
+                manager.bindController(this, this.sendData, this.printf)
+            }
+            //
+            // We don't currently have any state we want to reset or restore on powerUp() notifications.
+            //
+            // if (!data || !this.restore) {
+            //     this.reset();
+            // } else {
+            //     if (!this.restore(data)) return false;
+            // }
+        }
+        return true;
+    }
+
+    /**
+     * receiveData(data)
+     *
+     * @this {TestController}
+     * @param {number|string|Array} data
+     */
+    receiveData(data)
+    {
+        if (this.deliverData) this.deliverData(data);
+    }
+    
+    /**
+     * TestController.init()
+     *
+     * This function operates on every HTML element of class "TestController", extracting the
+     * JSON-encoded parameters for the TestController constructor from the element's "data-value"
+     * attribute, invoking the constructor to create a TestController component, and then binding
+     * any associated HTML controls to the new component.
+     */
+    static init()
+    {
+        let aeTest = Component.getElementsByClass(document, PCX86.APPCLASS, "testctl");
+        for (let iTest = 0; iTest < aeTest.length; iTest++) {
+            let eTest = aeTest[iTest];
+            let parms = Component.getComponentParms(eTest);
+            let test = new TestController(parms);
+            Component.bindComponentControls(test, eTest, PCX86.APPCLASS);
+        }
+    }
+}
+
+/*
+ * Initialize every TestController module on the page.
+ */
+Web.onInit(TestController.init);
+
+
+
+/**
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/testmgr.js (C) Jeff Parsons 2012-2018
  */
 
 /*
@@ -57224,57 +57508,78 @@ Web.onInit(SerialPort.init);
  * to be loaded by a Node server-side script and communicate with another machine's serial port
  * using one of the Node server's serial ports (and the Node SerialPort package).  It is also
  * designed to be loaded by the browser, and communicate with a PCjs machine's serial port
- * using PCjs' own SerialPort class interfaces.
- * 
- * When being used in a browser, we want a text window to provide a command interface (ie,
- * a source of keyboard input)
+ * using PCjs' own SerialPort interfaces.
  */
 
 
 /**
- * TestControl class
+ * TestManager class
  *
- * @class TestControl
- * 
+ * @class TestManager
+ * @property {function(string,...)} printf
+ * @property {function(string,...)} printf
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
-class TestControl extends Component {
+class TestManager {
     /**
-     * TestControl(parms)
+     * TestManager()
      *
-     * @this {TestControl}
-     * @param {Object} parmsTest
+     * @this {TestManager}
      */
-    constructor(parmsTest) {
-
-        super("TestControl", parmsTest);
-        this.setReady();
-    }
-    
-    /**
-     * TestControl.init()
-     *
-     * This function operates on every HTML element of class "TestControl", extracting the
-     * JSON-encoded parameters for the TestControl constructor from the element's "data-value"
-     * attribute, invoking the constructor to create a TestControl component, and then binding
-     * any associated HTML controls to the new component.
-     */
-    static init()
+    constructor()
     {
-        var aeTest = Component.getElementsByClass(document, PCX86.APPCLASS, "testctrl");
-        for (var iTest = 0; iTest < aeTest.length; iTest++) {
-            var eTest = aeTest[iTest];
-            var parmsTest = Component.getComponentParms(eTest);
-            var test = new TestControl(parmsTest);
-            Component.bindComponentControls(test, eTest, PCX86.APPCLASS);
+        if (DEBUG) console.log("TestManager()");
+    }
+
+    /**
+     * bindController(controller, sendData, sendOutput)
+     *
+     * @this {TestManager}
+     * @param {Object} controller
+     * @param {function(...)} sendData
+     * @param {function(...)} sendOutput
+     */
+    bindController(controller, sendData, sendOutput)
+    {
+        this.controller = controller;
+        this.sendData = sendData.bind(controller);
+        this.printf = sendOutput.bind(controller);
+        this.controller.bindManager(this, this.receiveData, this.receiveInput);
+        if (DEBUG) this.printf("hello %s\n", "world");
+    }
+
+    /**
+     * receiveData(data)
+     *
+     * @this {TestManager}
+     * @param {number|string|Array} data
+     */
+    receiveData(data)
+    {
+        if (DEBUG) console.log("TestManager.receiveData(" + data + ")");
+        if (typeof data == "number") {
+            this.printf("%c", data);
+        }
+        else if (typeof data == "string") {
+            this.printf("%s", data);
+        }
+        else {
+            for (let i = 0; i < data.length; i++) this.printf("[0x%02x]", data[i]);
         }
     }
-}
 
-/*
- * Initialize every TestControl module on the page.
- */
-Web.onInit(TestControl.init);
+    /**
+     * receiveInput(charCode)
+     *
+     * @this {TestManager}
+     * @param {number} charCode
+     */
+    receiveInput(charCode)
+    {
+        if (DEBUG) console.log("TestManager.receiveInput(" + charCode + ")");
+        this.sendData(charCode);
+    }
+}
 
 
 
@@ -57425,14 +57730,14 @@ class Mouse extends Component {
             if (this.typeDevice && !this.componentDevice) {
                 var componentDevice = null;
                 while ((componentDevice = this.cmp.getMachineComponent(this.typeDevice, componentDevice))) {
-                    if (componentDevice.attachMouse) {
-                        this.componentDevice = componentDevice.attachMouse(this.idDevice, this, this.receiveStatus);
+                    if (componentDevice.bindMouse) {
+                        this.componentDevice = componentDevice.bindMouse(this.idDevice, this, this.receiveStatus);
                         if (this.componentDevice) {
                             /*
                              * It's possible that the SerialPort we've just attached to might want to bring us "up to speed"
                              * on the device's state, which is why I envisioned a subsequent syncMouse() call.  And you would
-                             * want to do that as a separate call, not as part of attachMouse(), because componentDevice
-                             * isn't set until attachMouse() returns.
+                             * want to do that as a separate call, not as part of bindMouse(), because componentDevice
+                             * isn't set until bindMouse() returns.
                              *
                              * However, syncMouse() seems unnecessary, given that SerialPort initializes its MCR to an "inactive"
                              * state, and even when restoring a previous state, if we've done our job properly, both SerialPort

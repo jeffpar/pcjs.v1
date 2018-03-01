@@ -389,7 +389,7 @@ class SerialPortPDP11 extends Component {
                     if (this.connection) {
                         var exports = this.connection['exports'];
                         if (exports) {
-                            var fnConnect = exports['connect'];
+                            var fnConnect = /** @function */ (exports['connect']);
                             if (fnConnect) fnConnect.call(this.connection, this.fNullModem);
                             this.sendData = exports['receiveData'];
                             if (this.sendData) {

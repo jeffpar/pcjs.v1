@@ -59,7 +59,7 @@ printf("hello %s\n", "world");
 
 var port = new SerialPort(sPortName, {baudRate});
 
-port.on('data', function (data) {
+port.on('data', function(data) {
     console.log("data(" + typeof data + "): ", data);
 });
 

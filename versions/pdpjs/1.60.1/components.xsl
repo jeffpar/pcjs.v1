@@ -12,7 +12,7 @@
 
 	<xsl:variable name="MACHINETYPE">pc</xsl:variable>
 	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPCLASS">pdp11</xsl:variable>
+	<xsl:variable name="APPCLASS">pdp10</xsl:variable>
 	<xsl:variable name="APPNAME">PDPjs</xsl:variable>
 	<xsl:variable name="APPVERSION">1.60.1</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
@@ -918,18 +918,24 @@
 		</xsl:call-template>
 	</xsl:template>
 
-	<xsl:template match="testctrl[@ref]">
+	<xsl:template match="testctl[@ref]">
 		<xsl:param name="machine" select="''"/>
 		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="@ref"/></xsl:variable>
-		<xsl:apply-templates select="document($componentFile)/testctrl"><xsl:with-param name="machine" select="$machine"/></xsl:apply-templates>
+		<xsl:apply-templates select="document($componentFile)/testctl"><xsl:with-param name="machine" select="$machine"/></xsl:apply-templates>
 	</xsl:template>
 
-	<xsl:template match="testctrl[not(@ref)]">
+	<xsl:template match="testctl[not(@ref)]">
 		<xsl:param name="machine" select="''"/>
+		<xsl:variable name="binding">
+			<xsl:choose>
+				<xsl:when test="@binding"><xsl:value-of select="@binding"/></xsl:when>
+				<xsl:otherwise/>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
-			<xsl:with-param name="class">testctrl</xsl:with-param>
-			<xsl:with-param name="parms"/>
+			<xsl:with-param name="class">testctl</xsl:with-param>
+			<xsl:with-param name="parms">,binding:'<xsl:value-of select="$binding"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

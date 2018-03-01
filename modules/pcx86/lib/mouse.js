@@ -180,14 +180,14 @@ class Mouse extends Component {
             if (this.typeDevice && !this.componentDevice) {
                 var componentDevice = null;
                 while ((componentDevice = this.cmp.getMachineComponent(this.typeDevice, componentDevice))) {
-                    if (componentDevice.attachMouse) {
-                        this.componentDevice = componentDevice.attachMouse(this.idDevice, this, this.receiveStatus);
+                    if (componentDevice.bindMouse) {
+                        this.componentDevice = componentDevice.bindMouse(this.idDevice, this, this.receiveStatus);
                         if (this.componentDevice) {
                             /*
                              * It's possible that the SerialPort we've just attached to might want to bring us "up to speed"
                              * on the device's state, which is why I envisioned a subsequent syncMouse() call.  And you would
-                             * want to do that as a separate call, not as part of attachMouse(), because componentDevice
-                             * isn't set until attachMouse() returns.
+                             * want to do that as a separate call, not as part of bindMouse(), because componentDevice
+                             * isn't set until bindMouse() returns.
                              *
                              * However, syncMouse() seems unnecessary, given that SerialPort initializes its MCR to an "inactive"
                              * state, and even when restoring a previous state, if we've done our job properly, both SerialPort
