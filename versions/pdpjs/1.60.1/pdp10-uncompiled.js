@@ -7424,7 +7424,7 @@ class CPUPDP10 extends Component {
      * @this {CPUPDP10}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -19732,7 +19732,7 @@ class DebuggerPDP10 extends Debugger {
      * @this {DebuggerPDP10}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "debugInput")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -19743,7 +19743,7 @@ class DebuggerPDP10 extends Debugger {
 
         case "debugInput":
             this.bindings[sBinding] = control;
-            this.controlDebug = control;
+            this.controlDebug = /** @type {HTMLInputElement} */ (control);
             /*
              * For halted machines, this is fine, but for auto-start machines, it can be annoying.
              *
@@ -19752,12 +19752,12 @@ class DebuggerPDP10 extends Debugger {
             control.onkeydown = function onKeyDownDebugInput(event) {
                 var sCmd;
                 if (event.keyCode == Keys.KEYCODE.CR) {
-                    sCmd = control.value;
-                    control.value = "";
+                    sCmd = dbg.controlDebug.value;
+                    dbg.controlDebug.value = "";
                     dbg.doCommands(sCmd, true);
                 }
                 else if (event.keyCode == Keys.KEYCODE.ESC) {
-                    control.value = sCmd = "";
+                    dbg.controlDebug.value = sCmd = "";
                 }
                 else {
                     if (event.keyCode == Keys.KEYCODE.UP) {
@@ -19768,8 +19768,8 @@ class DebuggerPDP10 extends Debugger {
                     }
                     if (sCmd != null) {
                         var cch = sCmd.length;
-                        control.value = sCmd;
-                        control.setSelectionRange(cch, cch);
+                        dbg.controlDebug.value = sCmd;
+                        dbg.controlDebug.setSelectionRange(cch, cch);
                     }
                 }
                 if (sCmd != null && event.preventDefault) event.preventDefault();
@@ -26829,7 +26829,7 @@ class ComputerPDP10 extends Component {
      * @this {ComputerPDP10}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */

@@ -307,7 +307,7 @@ class Keyboard extends Component {
                 var sCode = sBinding.toUpperCase().replace(/-/g, '_');
                 if (Keyboard.CLICKCODES[sCode] !== undefined && sHTMLType == "button") {
                     this.bindings[id] = controlText;
-                    if (DEBUG) console.log("binding click-code '" + sCode + "'");
+                    if (MAXDEBUG) console.log("binding click-code '" + sCode + "'");
                     controlText.onclick = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingClick(event) {
                             if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.EVENT | Messages.KEY);
@@ -330,7 +330,7 @@ class Keyboard extends Component {
                     }
                     this.cSoftCodes++;
                     this.bindings[id] = controlText;
-                    if (DEBUG) console.log("binding soft-code '" + sBinding + "'");
+                    if (MAXDEBUG) console.log("binding soft-code '" + sBinding + "'");
                     var msLastEvent = 0, nClickState = 0;
                     var fStateKey = (Keyboard.KEYSTATES[Keyboard.SOFTCODES[sBinding]] <= Keyboard.STATE.ALL_SHIFT);
                     var fnDown = function(kbd, sKey, simCode) {
@@ -352,7 +352,7 @@ class Keyboard extends Component {
                                 if (nClickState < 8) {
                                     kbd.removeActiveKey(simCode);
                                 } else {
-                                    if (DEBUG) console.log("soft-locking '" + sBinding + "'");
+                                    if (MAXDEBUG) console.log("soft-locking '" + sBinding + "'");
                                     nClickState = 0;
                                 }
                             }

@@ -16,4 +16,9 @@
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2" binding="print"/>
 	<mouse serial="com1"/>
+	<testctrl id="test">
+		<control type="container" class="pcjs-textarea" width="100%" padding="8px">
+			<control type="textarea" binding="testCommands" width="100%" padRight="16px" height="130px" pos="relative" style="resize:vertical;"/>
+		</control>
+	</testctrl>
 </machine>

@@ -6842,7 +6842,7 @@ class CPU8080 extends Component {
      * @this {CPU8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -7909,7 +7909,7 @@ class CPUState8080 extends CPU8080 {
      * @this {CPUState8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "AX")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -11837,7 +11837,7 @@ class ChipSet8080 extends Component {
      * @this {ChipSet8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "sw1")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -13603,7 +13603,7 @@ class Keyboard8080 extends Component {
      * @this {Keyboard8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -15301,7 +15301,7 @@ class Video8080 extends Component {
      * @this {Video8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -15368,7 +15368,7 @@ class Video8080 extends Component {
                 this.kbd.setBinding("led", s, this.ledBindings[s]);
             }
             if (this.canvasScreen) {
-                this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "screen", this.inputScreen);
+                this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "screen", /** @type {HTMLElement} */ (this.inputScreen));
             }
         }
 
@@ -18935,7 +18935,7 @@ class Debugger8080 extends Debugger {
      * @this {Debugger8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "debugInput")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -18946,7 +18946,7 @@ class Debugger8080 extends Debugger {
 
         case "debugInput":
             this.bindings[sBinding] = control;
-            this.controlDebug = control;
+            this.controlDebug = /** @type {HTMLInputElement} */ (control);
             /*
              * For halted machines, this is fine, but for auto-start machines, it can be annoying.
              *
@@ -18955,12 +18955,12 @@ class Debugger8080 extends Debugger {
             control.onkeydown = function onKeyDownDebugInput(event) {
                 var sCmd;
                 if (event.keyCode == Keys.KEYCODE.CR) {
-                    sCmd = control.value;
-                    control.value = "";
+                    sCmd = dbg.controlDebug.value;
+                    dbg.controlDebug.value = "";
                     dbg.doCommands(sCmd, true);
                 }
                 else if (event.keyCode == Keys.KEYCODE.ESC) {
-                    control.value = sCmd = "";
+                    dbg.controlDebug.value = sCmd = "";
                 }
                 else {
                     if (event.keyCode == Keys.KEYCODE.UP) {
@@ -18971,8 +18971,8 @@ class Debugger8080 extends Debugger {
                     }
                     if (sCmd != null) {
                         var cch = sCmd.length;
-                        control.value = sCmd;
-                        control.setSelectionRange(cch, cch);
+                        dbg.controlDebug.value = sCmd;
+                        dbg.controlDebug.setSelectionRange(cch, cch);
                     }
                 }
                 if (sCmd != null && event.preventDefault) event.preventDefault();
@@ -24092,7 +24092,7 @@ class Computer8080 extends Component {
      * @this {Computer8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */

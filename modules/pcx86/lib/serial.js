@@ -154,6 +154,21 @@ class SerialPort extends Component {
         this.bMSRInit = SerialPort.MSR.CTS | SerialPort.MSR.DSR;
         this.fNullModem = true;
 
+        /*
+         * Normally, any HTML controls defined within the scope of the component's XML element are *implicitly*
+         * bound to us.  For example, in the XML below, the textarea control will automatically trigger a call to
+         * setBinding() with sBinding set to "serialWindow" and control set to an HTMLTextAreaElement.
+         * 
+	     *      <serial id="com1">
+	     *          <control type="container" class="pcjs-textarea">
+	     *      	    <control type="textarea" binding="serialWindow"/>
+	     *          </control>
+	     *      </serial>
+	     * 
+	     * However, this component also supports an *explicit* binding attribute, which can either be the hard-coded
+	     * name "console" (for routing all output to the system console) or the name of a control binding that has
+	     * been defined in another component (eg, an HTMLTextAreaElement defined as part of the Control Panel layout).
+         */
         var sBinding = parmsSerial['binding'];
         if (sBinding == "console") {
             this.consoleBuffer = "";

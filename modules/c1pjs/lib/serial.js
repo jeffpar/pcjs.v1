@@ -103,7 +103,7 @@ class C1PSerialPort extends Component {
      * @this {C1PSerialPort}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listSerial")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -119,7 +119,6 @@ class C1PSerialPort extends Component {
 
         case "loadSerial":
             this.bindings[sBinding] = control;
-
             control.onclick = function onClickLoadSerial(event) {
                 if (serial.bindings["listSerial"]) {
                     var sFile = serial.bindings["listSerial"].value;
@@ -135,18 +134,19 @@ class C1PSerialPort extends Component {
             /*
              * Check for non-mobile (desktop) browser and the availability of FileReader
              */
+            var controlInput = /** @type {Object} */ (control);
             if (!Web.isMobile() && window && 'FileReader' in window) {
-                this.bindings[sBinding] = control;
+                this.bindings[sBinding] = controlInput;
                 /*
                  * Enable "Mount" button only if a file is actually selected
                  */
-                control.onchange = function onChangeMountSerial() {
-                    var fieldset = control.children[0];
+                controlInput.onchange = function onChangeMountSerial() {
+                    var fieldset = controlInput.children[0];
                     var files = fieldset.children[0].files;
                     var submit = fieldset.children[1];
                     submit.disabled = !files.length;
                 };
-                control.onsubmit = function onSubmitMountSerial(event) {
+                controlInput.onsubmit = function onSubmitMountSerial(event) {
                     var file = event.currentTarget[1].files[0];
 
                     var reader = new FileReader();
@@ -164,7 +164,7 @@ class C1PSerialPort extends Component {
             }
             else {
                 if (DEBUG) this.log("Local file support not available");
-                control.parentNode.removeChild(/** @type {Node} */ (control));
+                controlInput.parentNode.removeChild(/** @type {Node} */ (controlInput));
             }
             return true;
 

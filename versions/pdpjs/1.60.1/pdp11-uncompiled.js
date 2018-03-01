@@ -17881,7 +17881,7 @@ class KeyboardPDP11 extends Component {
      * @this {KeyboardPDP11}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -18918,7 +18918,7 @@ class PC11 extends Component {
      * @this {PC11}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "list", "text", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listTapes")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -18930,10 +18930,11 @@ class PC11 extends Component {
         switch (sBinding) {
 
         case "listTapes":
-            this.bindings[sBinding] = control;
-            control.onchange = function onChangeListTapes(event) {
+            var controlSelect = /** @type {HTMLSelectElement} */ (control);
+            this.bindings[sBinding] = controlSelect;
+            controlSelect.onchange = function onChangeListTapes(event) {
                 var controlDesc = pc11.bindings["descTape"];
-                var controlOption = control.options[control.selectedIndex];
+                var controlOption = controlSelect.options[controlSelect.selectedIndex];
                 if (controlDesc && controlOption) {
                     var dataValue = {};
                     var sValue = controlOption.getAttribute("data-value");
@@ -18980,32 +18981,34 @@ class PC11 extends Component {
             return true;
 
         case "mountTape":
+            var controlInput = /** @type {Object} */ (control);
+            
             if (!this.fLocalTapes) {
                 if (DEBUG) this.log("Local tape support not available");
                 /*
                  * We could also simply hide the control; eg:
                  *
-                 *      control.style.display = "none";
+                 *      controlInput.style.display = "none";
                  *
                  * but removing the control altogether seems better.
                  */
-                control.parentNode.removeChild(/** @type {Node} */ (control));
+                controlInput.parentNode.removeChild(/** @type {Node} */ (controlInput));
                 return false;
             }
 
-            this.bindings[sBinding] = control;
+            this.bindings[sBinding] = controlInput;
 
             /*
              * Enable "Mount" button only if a file is actually selected
              */
-            control.addEventListener('change', function() {
-                var fieldset = control.children[0];
+            controlInput.addEventListener('change', function() {
+                var fieldset = controlInput.children[0];
                 var files = fieldset.children[0].files;
                 var submit = fieldset.children[1];
                 submit.disabled = !files.length;
             });
 
-            control.onsubmit = function(event) {
+            controlInput.onsubmit = function(event) {
                 var file = event.currentTarget[1].files[0];
                 if (file) {
                     var sTapePath = file.name;
@@ -21141,7 +21144,7 @@ class DriveController extends Component {
      * @this {DriveController}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "list", "text", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listDisks")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -21166,8 +21169,9 @@ class DriveController extends Component {
              * loaded in a particular drive, you could click the drive control without having to change it.
              * However, that doesn't seem to work for all browsers, so I've reverted to onchange.
              */
+            var controlSelect = /** @type {HTMLSelectElement} */ (control);
             control.onchange = function onChangeListDrives(event) {
-                var iDrive = Str.parseInt(control.value, 10);
+                var iDrive = Str.parseInt(controlSelect.value, 10);
                 if (iDrive != null) dc.displayDisk(iDrive);
             };
             return true;
@@ -21232,32 +21236,34 @@ class DriveController extends Component {
             return true;
 
         case "mountDisk":
+            var controlInput = /** @type {Object} */ (control);
+
             if (!this.fLocalDisks) {
                 if (DEBUG) this.log("Local disk support not available");
                 /*
                  * We could also simply hide the control; eg:
                  *
-                 *      control.style.display = "none";
+                 *      controlInput.style.display = "none";
                  *
                  * but removing the control altogether seems better.
                  */
-                control.parentNode.removeChild(/** @type {Node} */ (control));
+                controlInput.parentNode.removeChild(/** @type {Node} */ (controlInput));
                 return false;
             }
 
-            this.bindings[sBinding] = control;
+            this.bindings[sBinding] = controlInput;
 
             /*
              * Enable "Mount" button only if a file is actually selected
              */
-            control.addEventListener('change', function() {
-                var fieldset = control.children[0];
+            controlInput.addEventListener('change', function() {
+                var fieldset = controlInput.children[0];
                 var files = fieldset.children[0].files;
                 var submit = fieldset.children[1];
                 submit.disabled = !files.length;
             });
 
-            control.onsubmit = function(event) {
+            controlInput.onsubmit = function(event) {
                 var file = event.currentTarget[1].files[0];
                 if (file) {
                     var sDiskPath = file.name;
@@ -25643,7 +25649,7 @@ class DebuggerPDP11 extends Debugger {
 
         case "debugInput":
             this.bindings[sBinding] = control;
-            this.controlDebug = control;
+            this.controlDebug = /** @type {HTMLInputElement} */ (control);
             /*
              * For halted machines, this is fine, but for auto-start machines, it can be annoying.
              *
@@ -25652,12 +25658,12 @@ class DebuggerPDP11 extends Debugger {
             control.onkeydown = function onKeyDownDebugInput(event) {
                 var sCmd;
                 if (event.keyCode == Keys.KEYCODE.CR) {
-                    sCmd = control.value;
-                    control.value = "";
+                    sCmd = dbg.controlDebug.value;
+                    dbg.controlDebug.value = "";
                     dbg.doCommands(sCmd, true);
                 }
                 else if (event.keyCode == Keys.KEYCODE.ESC) {
-                    control.value = sCmd = "";
+                    dbg.controlDebug.value = sCmd = "";
                 }
                 else {
                     if (event.keyCode == Keys.KEYCODE.UP) {
@@ -25668,8 +25674,8 @@ class DebuggerPDP11 extends Debugger {
                     }
                     if (sCmd != null) {
                         var cch = sCmd.length;
-                        control.value = sCmd;
-                        control.setSelectionRange(cch, cch);
+                        dbg.controlDebug.value = sCmd;
+                        dbg.controlDebug.setSelectionRange(cch, cch);
                     }
                 }
                 if (sCmd != null && event.preventDefault) event.preventDefault();
@@ -30709,7 +30715,7 @@ class ComputerPDP11 extends Component {
      * @this {ComputerPDP11}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */

@@ -918,6 +918,21 @@
 		</xsl:call-template>
 	</xsl:template>
 
+	<xsl:template match="testctrl[@ref]">
+		<xsl:param name="machine" select="''"/>
+		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="@ref"/></xsl:variable>
+		<xsl:apply-templates select="document($componentFile)/testctrl"><xsl:with-param name="machine" select="$machine"/></xsl:apply-templates>
+	</xsl:template>
+
+	<xsl:template match="testctrl[not(@ref)]">
+		<xsl:param name="machine" select="''"/>
+		<xsl:call-template name="component">
+			<xsl:with-param name="machine" select="$machine"/>
+			<xsl:with-param name="class">testctrl</xsl:with-param>
+			<xsl:with-param name="parms"/>
+		</xsl:call-template>
+	</xsl:template>
+
 	<xsl:template match="mouse[@ref]">
 		<xsl:param name="machine" select="''"/>
 		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="@ref"/></xsl:variable>

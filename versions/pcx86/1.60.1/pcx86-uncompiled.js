@@ -45373,7 +45373,7 @@ class Keyboard extends Component {
                 var sCode = sBinding.toUpperCase().replace(/-/g, '_');
                 if (Keyboard.CLICKCODES[sCode] !== undefined && sHTMLType == "button") {
                     this.bindings[id] = controlText;
-                    if (DEBUG) console.log("binding click-code '" + sCode + "'");
+                    if (MAXDEBUG) console.log("binding click-code '" + sCode + "'");
                     controlText.onclick = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingClick(event) {
                             if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.EVENT | Messages.KEY);
@@ -45396,7 +45396,7 @@ class Keyboard extends Component {
                     }
                     this.cSoftCodes++;
                     this.bindings[id] = controlText;
-                    if (DEBUG) console.log("binding soft-code '" + sBinding + "'");
+                    if (MAXDEBUG) console.log("binding soft-code '" + sBinding + "'");
                     var msLastEvent = 0, nClickState = 0;
                     var fStateKey = (Keyboard.KEYSTATES[Keyboard.SOFTCODES[sBinding]] <= Keyboard.STATE.ALL_SHIFT);
                     var fnDown = function(kbd, sKey, simCode) {
@@ -45418,7 +45418,7 @@ class Keyboard extends Component {
                                 if (nClickState < 8) {
                                     kbd.removeActiveKey(simCode);
                                 } else {
-                                    if (DEBUG) console.log("soft-locking '" + sBinding + "'");
+                                    if (MAXDEBUG) console.log("soft-locking '" + sBinding + "'");
                                     nClickState = 0;
                                 }
                             }
@@ -56201,6 +56201,21 @@ class SerialPort extends Component {
         this.bMSRInit = SerialPort.MSR.CTS | SerialPort.MSR.DSR;
         this.fNullModem = true;
 
+        /*
+         * Normally, any HTML controls defined within the scope of the component's XML element are *implicitly*
+         * bound to us.  For example, in the XML below, the textarea control will automatically trigger a call to
+         * setBinding() with sBinding set to "serialWindow" and control set to an HTMLTextAreaElement.
+         * 
+	     *      <serial id="com1">
+	     *          <control type="container" class="pcjs-textarea">
+	     *      	    <control type="textarea" binding="serialWindow"/>
+	     *          </control>
+	     *      </serial>
+	     * 
+	     * However, this component also supports an *explicit* binding attribute, which can either be the hard-coded
+	     * name "console" (for routing all output to the system console) or the name of a control binding that has
+	     * been defined in another component (eg, an HTMLTextAreaElement defined as part of the Control Panel layout).
+         */
         var sBinding = parmsSerial['binding'];
         if (sBinding == "console") {
             this.consoleBuffer = "";
@@ -57193,6 +57208,73 @@ SerialPort.aPortOutput = {
  * Initialize every SerialPort module on the page.
  */
 Web.onInit(SerialPort.init);
+
+
+
+/**
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/testctrl.js (C) Jeff Parsons 2012-2018
+ */
+
+/*
+ * Overview
+ * --------
+ * 
+ * This module is being created to send a series of automated commands to a machine via
+ * a serial port, and to optionally verify the responses to those commands.  It is designed
+ * to be loaded by a Node server-side script and communicate with another machine's serial port
+ * using one of the Node server's serial ports (and the Node SerialPort package).  It is also
+ * designed to be loaded by the browser, and communicate with a PCjs machine's serial port
+ * using PCjs' own SerialPort class interfaces.
+ * 
+ * When being used in a browser, we want a text window to provide a command interface (ie,
+ * a source of keyboard input)
+ */
+
+
+/**
+ * TestControl class
+ *
+ * @class TestControl
+ * 
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
+ */
+class TestControl extends Component {
+    /**
+     * TestControl(parms)
+     *
+     * @this {TestControl}
+     * @param {Object} parmsTest
+     */
+    constructor(parmsTest) {
+
+        super("TestControl", parmsTest);
+        this.setReady();
+    }
+    
+    /**
+     * TestControl.init()
+     *
+     * This function operates on every HTML element of class "TestControl", extracting the
+     * JSON-encoded parameters for the TestControl constructor from the element's "data-value"
+     * attribute, invoking the constructor to create a TestControl component, and then binding
+     * any associated HTML controls to the new component.
+     */
+    static init()
+    {
+        var aeTest = Component.getElementsByClass(document, PCX86.APPCLASS, "testctrl");
+        for (var iTest = 0; iTest < aeTest.length; iTest++) {
+            var eTest = aeTest[iTest];
+            var parmsTest = Component.getComponentParms(eTest);
+            var test = new TestControl(parmsTest);
+            Component.bindComponentControls(test, eTest, PCX86.APPCLASS);
+        }
+    }
+}
+
+/*
+ * Initialize every TestControl module on the page.
+ */
+Web.onInit(TestControl.init);
 
 
 
@@ -69232,23 +69314,22 @@ class DebuggerX86 extends Debugger {
         switch (sBinding) {
 
         case "debugInput":
-            var controlInput = /** @type {HTMLInputElement} */ (control);
-            this.bindings[sBinding] = controlInput;
-            this.controlDebug = controlInput;
+            this.bindings[sBinding] = control;
+            this.controlDebug = /** @type {HTMLInputElement} */ (control);
             /*
              * For halted machines, this is fine, but for auto-start machines, it can be annoying.
              *
              *      controlInput.focus();
              */
-            controlInput.onkeydown = function onKeyDownDebugInput(event) {
+            control.onkeydown = function onKeyDownDebugInput(event) {
                 var sCmd;
                 if (event.keyCode == Keys.KEYCODE.CR) {
-                    sCmd = controlInput.value;
-                    controlInput.value = "";
+                    sCmd = dbg.controlDebug.value;
+                    dbg.controlDebug.value = "";
                     dbg.doCommands(sCmd, true);
                 }
                 else if (event.keyCode == Keys.KEYCODE.ESC) {
-                    controlInput.value = sCmd = "";
+                    dbg.controlDebug.value = sCmd = "";
                 }
                 else {
                     if (event.keyCode == Keys.KEYCODE.UP) {
@@ -69259,8 +69340,8 @@ class DebuggerX86 extends Debugger {
                     }
                     if (sCmd != null) {
                         var cch = sCmd.length;
-                        controlInput.value = sCmd;
-                        controlInput.setSelectionRange(cch, cch);
+                        dbg.controlDebug.value = sCmd;
+                        dbg.controlDebug.setSelectionRange(cch, cch);
                     }
                 }
                 if (sCmd != null && event.preventDefault) event.preventDefault();

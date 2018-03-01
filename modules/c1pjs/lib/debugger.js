@@ -519,6 +519,7 @@ class C1PDebugger extends Component {
                 };
             }(this, control);
             return true;
+            
         case "debugEnter":
             this.bindings[sBinding] = control;
             /*
@@ -544,6 +545,7 @@ class C1PDebugger extends Component {
                 }
             );
             return true;
+            
         case "step":
             this.bindings[sBinding] = control;
             Web.onClickRepeat(
@@ -559,6 +561,7 @@ class C1PDebugger extends Component {
                 }
             );
             return true;
+            
         default:
             break;
         }
