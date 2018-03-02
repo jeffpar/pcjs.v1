@@ -19,3 +19,17 @@ IBM PC XENIX 2.0
 ----------------
 
 {% include machine.html id="ibm5170" %}
+
+![IBM PC XENIX 2.0 Disk 1]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/unix/ibm/xenix/2.0/IBM-XENIX-200-DISK1.jpg)
+
+![IBM PC XENIX 2.0 Disk 2]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/unix/ibm/xenix/2.0/IBM-XENIX-200-DISK2.jpg)
+
+![IBM PC XENIX 2.0 Disk 3]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/unix/ibm/xenix/2.0/IBM-XENIX-200-DISK3.jpg)
+
+![IBM PC XENIX 2.0 Installation Disk]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/unix/ibm/xenix/1.0/IBM-XENIX-100-INSTALL.jpg)
+
+![IBM PC XENIX 2.0 SDK 1]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/unix/ibm/xenix/2.0/IBM-XENIX-200-SDK1.jpg)
+
+![IBM PC XENIX 2.0 SDK 2]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/unix/ibm/xenix/2.0/IBM-XENIX-200-SDK2.jpg)
+
+![IBM PC XENIX 2.0 SDK 3]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/unix/ibm/xenix/2.0/IBM-XENIX-200-SDK3.jpg)
