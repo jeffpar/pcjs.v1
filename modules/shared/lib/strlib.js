@@ -662,11 +662,13 @@ class Str {
                 /* falls through */
 
             case 's':
-                while (arg.length < minimum) {
-                    if (flags == '-') {
-                        arg += ' ';
-                    } else {
-                        arg = ' ' + arg;
+                if (typeof arg == "string") {
+                    while (arg.length < minimum) {
+                        if (flags == '-') {
+                            arg += ' ';
+                        } else {
+                            arg = ' ' + arg;
+                        }
                     }
                 }
                 buffer += arg;

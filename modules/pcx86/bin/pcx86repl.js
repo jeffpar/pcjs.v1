@@ -38,6 +38,7 @@ var Proc = require("../../shared/lib/proclib");
 
 var fConsole = false;
 var fDebug = false;
+var fGlobalsSet = false;
 var args = Proc.getArgs();
 var argv = args.argv;
 var sCmdPrev = "";
@@ -93,33 +94,34 @@ var aSubClasses = {
  */
 function loadComponents(asFiles)
 {
-    for (var i = 0; i < asFiles.length; i++) {
-        var sFile = asFiles[i];
+    for (let i = 0; i < asFiles.length; i++) {
+        let sFile = asFiles[i];
         if (Str.getExtension(sFile) != "js") continue;
-        var sName = Str.getBaseName(sFile, true);
+        let sName = Str.getBaseName(sFile, true);
         if (asComponentsIgnore.indexOf(sName) >= 0) continue;
         if (fDebug) console.log(sFile);
         try {
             /*
-             * We COULD load ("require") all the files on-demand, because it's only the
-             * browser initialization sequence we want to mimic in loadMachine(), but this
-             * is simpler, and it also gives us direct references to certain components
-             * we'll want to access later (eg, "component" in getComponentByType()).
+             * We COULD load ("require") all the files on-demand, because it's only the browser initialization
+             * sequence we want to mimic in loadMachine(), but this is simpler, and it also gives us direct references
+             * to certain components we'll want to access later (eg, "component" in getComponentByType()).
              */
-            var exports = require(lib + "../../../" + sFile);
-            var afn = (typeof exports == "function"? [exports] : exports);
-            for (var f in afn) {
-                var fn = afn[f];
+            let props = 0;
+            let exports = require(lib + "../../../" + sFile);
+            let afn = (typeof exports == "function"? [exports] : exports);
+            for (let f in afn) {
+                props++;
+                let fn = afn[f];
                 if (typeof fn != "function") continue;
-                var sSuperClass = null;
-                for (var s in aSubClasses) {
+                let sSuperClass = null;
+                for (let s in aSubClasses) {
                     if (sFile.indexOf(s) >= 0) {
                         sSuperClass = aSubClasses[s];
                         break;
                     }
                 }
                 if (sSuperClass) {
-                    for (var j = 0; j < aComponents.length; j++) {
+                    for (let j = 0; j < aComponents.length; j++) {
                         if (aComponents[j].path.indexOf(sSuperClass) >= 0) {
                             if (fDebug) console.log("updating superclass " + aComponents[j].path + " with subclass " + sFile);
                             aComponents[j].Create = fn;
@@ -136,14 +138,17 @@ function loadComponents(asFiles)
                 if (sName) {
                     aComponents.push({name: sName, path: sFile, Create: fn, objects: []});
                 }
-                if (sName == "defines") {
-                    /*
-                     * Enabling component console messages requires setting CONSOLE to true.
-                     */
-                    if (global.DEBUG !== undefined) {
-                        global.DEBUG = fDebug;
-                        global.CONSOLE = fConsole;
-                    }
+            }
+            /*
+             * The "defines.js" module that defines all PCjs globals (as opposed to machine-specific globals)
+             * doesn't export anything, so exports is an empty object, hence props is zero.  However, that isn't
+             * the ONLY module that doesn't export anything, so we also check for whether DEBUG has been set yet.
+             */
+            if (!props && !fGlobalsSet) {
+                if (global.DEBUG !== undefined) {
+                    global.DEBUG = fDebug;
+                    global.APPVERSION = machines['shared']['version'];
+                    fGlobalsSet = true;
                 }
             }
         } catch(err) {
@@ -160,7 +165,7 @@ function loadComponents(asFiles)
  */
 function getComponentByName(sName)
 {
-    for (var i = 0; i < aComponents.length; i++) {
+    for (let i = 0; i < aComponents.length; i++) {
         if (aComponents[i].name == sName) {
             return aComponents[i].Create;
         }
@@ -176,7 +181,7 @@ function getComponentByName(sName)
  */
 function getComponentByType(sType)
 {
-    var component = null;
+    let component = null;
     
     if (!Component) {
         Component = getComponentByName("component");
@@ -200,37 +205,36 @@ function loadMachine(sFile)
     /*
      * Clear any/all saved objects from any previous machine
      */
-    var i, j;
+    let i, j;
     Component = dbg = null;
     for (i = 0; i < aComponents.length; i++) {
         aComponents[i].objects = [];
     }
-    
-    var machine;
+
+    let machine;
     try {
         /*
-         * Since our JSON files may contain comments, hex values, and/or other tokens deemed
-         * unacceptable by the JSON Overlords, we can't use require() to load it, as we're able to
-         * do with "package.json".  Also note that require() assumes the same path as that of the
-         * requiring file, whereas fs.readFileSync() assumes the path reported by process.cwd().
+         * Since our JSON files may contain comments, hex values, and/or other tokens deemed unacceptable
+         * by the JSON Overlords, we can't use require() to load it, as we're able to do with "package.json".
+         * Also note that require() assumes the same path as that of the requiring file, whereas fs.readFileSync()
+         * assumes the path reported by process.cwd().
          * 
-         * TODO: I've since removed the comments from my sample "ibm5150.json" file, so we could
-         * try to reinstate this code; however, there are still hex constants, which I find *much*
-         * preferable to the decimal equivalents.  JSON's restrictions continue to irritate me.
+         * TODO: I've since removed the comments from my sample "ibm5150.json" file, so we could try to reinstate
+         * this code; however, there are still hex constants, which I find *much* preferable to the decimal equivalents.
+         * JSON's restrictions continue to irritate me.
          *
-         *      var machine = require(lib + "../bin/" +sFile);
+         *      let machine = require(lib + "../bin/" +sFile);
          */
-        var sMachine = /** @type {string} */ (fs.readFileSync(sFile, {encoding: "utf8"}));
+        let sMachine = /** @type {string} */ (fs.readFileSync(sFile, {encoding: "utf8"}));
         sMachine = '(' + sMachine + ')';
         if (fDebug) console.log(sMachine);
         machine = eval(sMachine);       // jshint ignore:line
         if (machine) {
             /*
-             * Since we have a machine object, we now mimic the initialization sequence that occurs
-             * in the browser, by walking the list of PCx86 components we loaded above and looking for
-             * matches.
+             * Since we have a machine object, we now mimic the initialization sequence that occurs in
+             * the browser, by walking the list of PCx86 components we loaded above and looking for matches.
              */
-            var idMachine = "";
+            let idMachine = "";
             
             /*
              * 'machine' is a pseudo-component that is only used to define an ID for the entire machine;
@@ -246,9 +250,9 @@ function loadMachine(sFile)
             }
             
             for (i = 0; i < aComponents.length; i++) {
-                
-                var component = aComponents[i];
-                var parms = machine[component.name];
+
+                let component = aComponents[i];
+                let parms = machine[component.name];
                 /*
                  * If parms is undefined, it means there is no component with that name defined in the
                  * machine object (NOT that the component has no parms), and therefore we should skip it.
@@ -259,11 +263,11 @@ function loadMachine(sFile)
                  * I'm relying on the fact that none of my parm objects use a "length" property, as a quick
                  * and dirty way of differentiating objects from arrays.
                  */
-                var aParms = parms.length !== undefined? parms : [parms];
+                let aParms = parms.length !== undefined? parms : [parms];
                 for (j = 0; j < aParms.length; j++) {
-                    
-                    var obj;
-                    var parmsObj = aParms[j];
+
+                    let obj;
+                    let parmsObj = aParms[j];
                     if (idMachine) parmsObj['id'] = idMachine + '.' + parmsObj['id'];
                     
                     if (fDebug) {
@@ -314,9 +318,9 @@ function doCommand(sCmd)
     } else {
         sCmdPrev = sCmd;
     }
-    
-    var result = false;
-    var aTokens = sCmd.split(' ');
+
+    let result = false;
+    let aTokens = sCmd.split(' ');
     
     switch(aTokens[0]) {
     case "cwd":
@@ -372,12 +376,12 @@ function doCommand(sCmd)
  */
 var onCommand = function (cmd, context, filename, callback)
 {
-    var result = false;
+    let result = false;
     /*
      * WARNING: After updating from Node v0.10.x to v0.11.x, the incoming expression in "cmd" is no longer
      * parenthesized, so I had to tweak the RegExp below.  But... WTF.  Do we not care what we break, folks?
      */
-    var match = cmd.match(/^\(?\s*(.*?)\s*\)?$/);
+    let match = cmd.match(/^\(?\s*(.*?)\s*\)?$/);
     if (match) result = doCommand(match[1]);
     callback(null, result);
 };
@@ -392,7 +396,7 @@ if (scriptsPCx86) {
 if (argv['cmd'] !== undefined) {
     var cmds = argv['cmd'];
     var aCmds = (typeof cmds == "string"? [cmds] : cmds);
-    for (var i = 0; i < aCmds.length; i++) {
+    for (let i = 0; i < aCmds.length; i++) {
         doCommand(aCmds[i]);
     }
     sCmdPrev = "";

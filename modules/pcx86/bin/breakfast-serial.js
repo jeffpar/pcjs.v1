@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * @fileoverview SerialPort-based Test Harness
+ * @fileoverview SerialPort-based Experimental Code (superseded by testmon.js)
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
@@ -34,7 +34,7 @@ var path = require("path");
 var Defines = require("../../shared/lib/defines");
 var Str = require("../../shared/lib/strlib");
 var Proc = require("../../shared/lib/proclib");
-var SerialPort = require('serialport');
+var SerialPort = require("serialport");
 
 var fDebug = false;
 var args = Proc.getArgs();

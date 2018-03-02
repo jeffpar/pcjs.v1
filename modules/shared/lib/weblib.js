@@ -199,7 +199,11 @@ class Web {
             return response;
         }
 
-        if (!DEBUG) {
+        if (!DEBUG && !NODE) {
+            /*
+             * TODO: Perhaps it's time for our code in netlib.js to finally add support for HTTPS; for now
+             * though, it's just as well that the NODE environment assumes all resources are available locally.
+             */
             sURL = sURL.replace(/^\/(pcjs-disks|private-disks)\//, "https://jeffpar.github.io/$1/");
         }
         else {

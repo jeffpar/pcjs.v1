@@ -9,7 +9,7 @@ Running PCx86 From The Command-Line
 
 In this *bin* directory, run:
 
-	node pcx86 --cmd="load ibm5150.json"
+	node pcx86repl.js --cmd="load ibm5150.json"
 
 The following output should appear:
 

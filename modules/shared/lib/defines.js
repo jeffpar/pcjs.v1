@@ -1,5 +1,5 @@
 /**
- * @fileoverview Compile-time definitions used by C1Pjs and PCjs.
+ * @fileoverview PCjs compile-time definitions.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
