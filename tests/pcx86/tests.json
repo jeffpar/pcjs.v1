@@ -1,9 +1,22 @@
 {
   "DOS": {
-    "pattern": "A>",
+    "prompt": "A>",
     "commands": {
-      "d": {
-        "request": "dir\r",
+      "debug": {
+        "request": "b:debug\r",
+        "mode": "prompt"
+      }
+    }
+  },
+  "DEBUG": {
+    "prompt": "\n-",
+    "commands": {
+      "dos": {
+        "request": "q\r",
+        "mode": "prompt"
+      },
+      "reboot": {
+        "request": "a\rjmp ffff:0\r\rg\r",
         "response": "*"
       }
     }

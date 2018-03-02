@@ -39,8 +39,8 @@
  * and all data received from the user input device is routed to the SerialPort.  No special actions
  * are taken, until/unless the ATTENTION key is detected from the user input device (ie, Ctrl-T).
  * 
- * 2) PATTERN mode: data from the SerialPort is monitored for specific patterns (eg, "A>"), and
- * when one of those patterns is detected, we enter COMMAND mode, with category set to the appropriate
+ * 2) PROMPT mode: data from the SerialPort is monitored for specific prompts (eg, "A>"), and
+ * when one of those prompts is detected, we enter COMMAND mode, with category set to the appropriate
  * key in the current set of tests.
  * 
  * 3) COMMAND mode: CR-terminated lines of user input are checked against the current of commands,
@@ -60,8 +60,8 @@ if (NODE) {
  *
  * @class TestMonitor
  * @property {string} mode
- * @property {string} patternActive
- * @property {string} patternBuffer
+ * @property {string} promptActive
+ * @property {string} promptBuffer
  * @property {Object|undefined} tests
  * @property {Object|undefined} category (eg, "DOS")
  * @property {string} commandBuffer
@@ -115,6 +115,8 @@ class TestMonitor {
             let request = command['request'];
             if (DEBUG) console.log("TestMonitor.checkCommand(" + this.commandBuffer + "): request '" + request + "'");
             this.sendData(request);
+            let mode = command['mode'];
+            if (mode) this.setMode(mode);
         } else {
             this.printf("unrecognized command: %s\n", this.commandBuffer);
         }
@@ -130,35 +132,44 @@ class TestMonitor {
      */
     setMode(mode, category)
     {
-        switch(mode) {
-        case TestMonitor.MODE.TERMINAL:
-            break;
-            
-        case TestMonitor.MODE.PATTERN:
-            this.aCategories = [];
-            this.aPatterns = [];
-            this.cchPatternLongest = 0;
-            for (let category in this.tests) {
-                let suite = this.tests[category];
-                if (suite.pattern) {
-                    this.aCategories.push(category);
-                    this.aPatterns.push(suite.pattern);
-                    if (this.cchPatternLongest < suite.pattern.length) {
-                        this.cchPatternLongest = suite.pattern.length;
+        if (mode != this.mode) {
+            switch (mode) {
+            case TestMonitor.MODE.TERMINAL:
+                this.category = null;
+                break;
+
+            case TestMonitor.MODE.PROMPT:
+                this.aCategories = [];
+                this.aPrompts = [];
+                this.cchPromptLongest = 0;
+                for (let category in this.tests) {
+                    let suite = this.tests[category];
+                    let prompt = suite[TestMonitor.MODE.PROMPT];
+                    if (prompt) {
+                        this.aCategories.push(category);
+                        this.aPrompts.push(prompt);
+                        if (this.cchPromptLongest < prompt.length) {
+                            this.cchPromptLongest = prompt.length;
+                        }
                     }
                 }
+                this.promptActive = this.promptBuffer = "";
+                this.category = null;
+                break;
+
+            case TestMonitor.MODE.COMMAND:
+                if (category) this.category = category;
+                this.commandBuffer = "";
+                break;
+
+            default:
+                this.printf("unrecognized mode: %s\n", mode);
+                return;
             }
-            this.patternActive = this.patternBuffer = "";
-            break;
-            
-        case TestMonitor.MODE.COMMAND:
-            if (category) this.category = category;
-            this.commandBuffer = "";
-            break;
+
+            this.mode = mode;
+            this.printf("mode: %s\n", this.category || this.mode);
         }
-        
-        this.mode = mode;
-        this.printf("mode: %s\n", this.mode);
     }
     
     /**
@@ -171,7 +182,7 @@ class TestMonitor {
     {
         if (DEBUG) console.log("TestMonitor.receiveTests(" + JSON.stringify(tests) + ")");
         this.tests = tests;
-        this.setMode(TestMonitor.MODE.PATTERN);
+        this.setMode(TestMonitor.MODE.PROMPT);
     }
 
     /**
@@ -182,13 +193,13 @@ class TestMonitor {
      */
     receiveData(data)
     {
-        if (this.mode == TestMonitor.MODE.PATTERN) {
-            if (this.patternBuffer.length >= this.cchPatternLongest) {
-                this.patternBuffer = this.patternBuffer.slice(-(this.cchPatternLongest - 1));
+        if (this.mode == TestMonitor.MODE.PROMPT) {
+            if (this.promptBuffer.length >= this.cchPromptLongest) {
+                this.promptBuffer = this.promptBuffer.slice(-(this.cchPromptLongest - 1));
             }
-            this.patternBuffer += String.fromCharCode(data);
-            if (DEBUG) console.log("TestMonitor.receiveData(" + data + "): checking patterns for '" + this.patternBuffer + "'");
-            let i = this.aPatterns.indexOf(this.patternBuffer);
+            this.promptBuffer += String.fromCharCode(data);
+            if (DEBUG) console.log("TestMonitor.receiveData(" + data + "): checking prompts for '" + this.promptBuffer + "'");
+            let i = this.aPrompts.indexOf(this.promptBuffer);
             if (i >= 0) {
                 this.setMode(TestMonitor.MODE.COMMAND, this.aCategories[i]);
             }
@@ -210,10 +221,10 @@ class TestMonitor {
     {
         if (DEBUG) console.log("TestMonitor.receiveInput(" + charCode + ")");
         if (charCode == Keys.ASCII.CTRL_T) {
-            this.setMode(this.mode == TestMonitor.MODE.TERMINAL? (this.category? TestMonitor.MODE.COMMAND : TestMonitor.MODE.PATTERN) : TestMonitor.MODE.TERMINAL);
+            this.setMode(this.mode == TestMonitor.MODE.TERMINAL? (this.category? TestMonitor.MODE.COMMAND : TestMonitor.MODE.PROMPT) : TestMonitor.MODE.TERMINAL);
             return;
         }
-        if (this.mode == TestMonitor.MODE.TERMINAL) {
+        if (this.mode == TestMonitor.MODE.TERMINAL || this.mode == TestMonitor.MODE.PROMPT) {
             this.sendData(charCode);
         } else if (this.mode == TestMonitor.MODE.COMMAND) {
             if (charCode == Keys.KEYCODE.CR) {
@@ -229,7 +240,7 @@ class TestMonitor {
 
 TestMonitor.MODE = {
     TERMINAL:   "terminal",
-    PATTERN:    "pattern",
+    PROMPT:     "prompt",
     COMMAND:    "command"
 };
 
