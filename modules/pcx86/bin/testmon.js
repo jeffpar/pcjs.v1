@@ -31,10 +31,11 @@
 
 var fs = require("fs");
 var path = require("path");
+var SerialPort = require("serialport");
+
 var Defines = require("../../shared/lib/defines");
 var Str = require("../../shared/lib/strlib");
 var Proc = require("../../shared/lib/proclib");
-var SerialPort = require("serialport");
 var TestMonitor = require("../lib/testmon.js");
 var Machines = require("../../../_data/machines.json");
 
@@ -175,7 +176,7 @@ class PortController {
         if (typeof data == "number") {
             data = String.fromCharCode(data);
         }
-        this.port.write(data);
+        this.port.write(/** @type {string|Array} */ (data));
     }
 
     /**

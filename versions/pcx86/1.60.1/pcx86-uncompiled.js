@@ -1334,11 +1334,13 @@ class Str {
                 /* falls through */
 
             case 's':
-                while (arg.length < minimum) {
-                    if (flags == '-') {
-                        arg += ' ';
-                    } else {
-                        arg = ' ' + arg;
+                if (typeof arg == "string") {
+                    while (arg.length < minimum) {
+                        if (flags == '-') {
+                            arg += ' ';
+                        } else {
+                            arg = ' ' + arg;
+                        }
                     }
                 }
                 buffer += arg;
@@ -2014,7 +2016,11 @@ class Web {
             return response;
         }
 
-        if (!DEBUG) {
+        if (!DEBUG && !NODE) {
+            /*
+             * TODO: Perhaps it's time for our code in netlib.js to finally add support for HTTPS; for now
+             * though, it's just as well that the NODE environment assumes all resources are available locally.
+             */
             sURL = sURL.replace(/^\/(pcjs-disks|private-disks)\//, "https://jeffpar.github.io/$1/");
         }
         else {
@@ -57586,10 +57592,10 @@ Web.onInit(TestController.init);
  * 
  * 2) PROMPT mode: data from the SerialPort is monitored for specific prompts (eg, "A>"), and
  * when one of those prompts is detected, we enter COMMAND mode, with category set to the appropriate
- * key in the current set of tests.
+ * collection of tests.
  * 
- * 3) COMMAND mode: CR-terminated lines of user input are checked against the current of commands,
- * and if a match is found, the corresponding request is set to the SerialPort.
+ * 3) COMMAND mode: CR-terminated lines of user input are checked against the current set of test
+ * commands, and if a match is found, the corresponding request is sent to the SerialPort.
  */
 
 
@@ -57630,11 +57636,10 @@ class TestMonitor {
      */
     bindController(controller, sendData, sendOutput, printf)
     {
-        this.controller = controller;
         this.sendData = sendData.bind(controller);
         this.sendOutput = sendOutput.bind(controller);
         this.printf = printf.bind(controller);
-        this.controller.bindMonitor(this, this.receiveData, this.receiveInput, this.receiveTests);
+        controller.bindMonitor(this, this.receiveData, this.receiveInput, this.receiveTests);
         this.printf("%s TestMonitor v%s\nUse Ctrl-T to toggle terminal mode\n", APPNAME, APPVERSION || XMLVERSION);
         this.setMode(TestMonitor.MODE.TERMINAL);
     }

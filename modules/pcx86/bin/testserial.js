@@ -31,10 +31,11 @@
 
 var fs = require("fs");
 var path = require("path");
+var SerialPort = require("serialport");
+
 var Defines = require("../../shared/lib/defines");
 var Str = require("../../shared/lib/strlib");
 var Proc = require("../../shared/lib/proclib");
-var SerialPort = require("serialport");
 
 var fDebug = false;
 var args = Proc.getArgs();
