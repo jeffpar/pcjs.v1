@@ -31,7 +31,7 @@
 /**
  * @define {string}
  */
-var APPVERSION = "1.x.x";       // this @define is overridden by the Closure Compiler with the version in package.json
+var APPVERSION = "";            // this @define is overridden by the Closure Compiler with the version in machines.json
 
 var XMLVERSION = null;          // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
 

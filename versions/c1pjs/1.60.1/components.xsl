@@ -11,7 +11,7 @@
 
 	<xsl:variable name="MACHINETYPE">c1p</xsl:variable>
 	<xsl:variable name="APPCLASS">c1pjs</xsl:variable>
-	<xsl:variable name="APPVERSION">1.60.1</xsl:variable>
+	<xsl:variable name="APPVERSION"/>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 	<xsl:variable name="BGNDCOLOR">#FAEBD7</xsl:variable>
 

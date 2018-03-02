@@ -7,7 +7,7 @@
 /**
  * @define {string}
  */
-var APPVERSION = "1.x.x";       // this @define is overridden by the Closure Compiler with the version in package.json
+var APPVERSION = "";            // this @define is overridden by the Closure Compiler with the version in machines.json
 
 var XMLVERSION = null;          // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
 
@@ -14208,7 +14208,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResol
              * ES6 ALERT: Template strings.
              */
             if (!COMPILED && XMLVERSION) {
-                sXML = sXML.replace(/<xsl:variable name="APPVERSION">1.x.x<\/xsl:variable>/, `<xsl:variable name="APPVERSION">${XMLVERSION}</xsl:variable>`);
+                sXML = sXML.replace(/<xsl:variable name="APPVERSION"\/>/, `<xsl:variable name="APPVERSION">${XMLVERSION}</xsl:variable>`);
             }
         }
 
@@ -14452,7 +14452,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  * path to the XSL file, unless they choose to mirror our folder structure.
                  */
                 var sAppFolder = sAppClass;
-                if (DEBUG || sVersion == "1.x.x") {
+                if (DEBUG || !sVersion) {
                     if (sAppClass != "c1pjs") sAppFolder = "shared";
                     sXSLFile = "/modules/" + sAppFolder + "/templates/components.xsl";
                 } else {
@@ -14473,7 +14473,9 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  */
                 if (!COMPILED) {
                     var aMatch = sXML.match(/<\?xml-stylesheet[^>]* href=(['"])[^'"]*?\/([0-9.]*)\/([^'"]*)\1/);
-                    if (aMatch) XMLVERSION = aMatch[2];
+                    if (aMatch) {
+                        XMLVERSION = aMatch[2];
+                    }
                 }
 
                 var transformXML = function(sXSL, xsl) {

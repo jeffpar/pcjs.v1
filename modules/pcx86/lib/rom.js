@@ -140,7 +140,7 @@ class ROMX86 extends Component {
         if (this.sFileURL) {
             var rom = this;
             var sProgress = "Loading " + this.sFileURL + "...";
-            Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
+            Web.getResource(this.sFileURL, null, true, function doneROMLoad(sURL, sResponse, nErrorCode) {
                 rom.doneLoad(sURL, sResponse, nErrorCode);
             }, function(nState) {
                 rom.println(sProgress, Component.PRINT.PROGRESS);

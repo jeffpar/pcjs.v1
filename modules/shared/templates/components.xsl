@@ -15,7 +15,7 @@
 	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
 	<xsl:variable name="APPCLASS">pcx86</xsl:variable>
 	<xsl:variable name="APPNAME">PCx86</xsl:variable>
-	<xsl:variable name="APPVERSION">1.x.x</xsl:variable>
+	<xsl:variable name="APPVERSION"/>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 	<xsl:variable name="BGNDCOLOR">#FAEBD7</xsl:variable>
 
@@ -934,10 +934,16 @@
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="tests">
+			<xsl:choose>
+				<xsl:when test="@tests"><xsl:value-of select="@tests"/></xsl:when>
+				<xsl:otherwise/>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">testctl</xsl:with-param>
-			<xsl:with-param name="parms">,binding:'<xsl:value-of select="$binding"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,binding:'<xsl:value-of select="$binding"/>',tests:'<xsl:value-of select="$tests"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

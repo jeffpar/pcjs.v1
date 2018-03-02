@@ -7,7 +7,7 @@
 /**
  * @define {string}
  */
-var APPVERSION = "1.x.x";       // this @define is overridden by the Closure Compiler with the version in package.json
+var APPVERSION = "";            // this @define is overridden by the Closure Compiler with the version in machines.json
 
 var XMLVERSION = null;          // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
 
@@ -44092,7 +44092,7 @@ class ROMX86 extends Component {
         if (this.sFileURL) {
             var rom = this;
             var sProgress = "Loading " + this.sFileURL + "...";
-            Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
+            Web.getResource(this.sFileURL, null, true, function doneROMLoad(sURL, sResponse, nErrorCode) {
                 rom.doneLoad(sURL, sResponse, nErrorCode);
             }, function(nState) {
                 rom.println(sProgress, Component.PRINT.PROGRESS);
@@ -57256,7 +57256,7 @@ Web.onInit(SerialPort.init);
  */
 
 /*
- * This module provides connectivity between the TestManager component and whichever PCx86 SerialPort
+ * This module provides connectivity between the TestMonitor component and whichever PCx86 SerialPort
  * our 'binding' property indicates, if any.
  */
 
@@ -57265,11 +57265,14 @@ Web.onInit(SerialPort.init);
  * TestController class
  *
  * @class TestController
+ * @property {string|undefined urlTests
+ * @property {Object|null} tests
  * @property {string|null} consoleBuffer
  * @property {HTMLTextAreaElement|null} controlBuffer
  * @property {function(...)|null} sendData
- * @property {function(...)|null} deliverData
+ * @property {function(number)|null} deliverData
  * @property {function(number)|null} deliverInput
+ * @property {function(Object)|null} deliverTests
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class TestController extends Component {
@@ -57283,9 +57286,14 @@ class TestController extends Component {
     {
         super("TestController", parms);
 
+        this.tests = null;
+        let fLoading = false;
+        this.urlTests = parms['tests'];
+        
         this.consoleBuffer = "";
         this.controlBuffer = null;
-        this.sendData = this.deliverData = this.deliverInput = null;
+        this.sendData = null;
+        this.deliverData = this.deliverInput = this.deliverTests = null;
         
         let sBinding = parms['binding'];
         if (sBinding) {
@@ -57296,6 +57304,10 @@ class TestController extends Component {
                     let bind = /** @function */ (exports['bind']);
                     if (bind && bind.call(this.serialPort, this, this.receiveData)) {
                         this.sendData = exports['receiveData'].bind(this.serialPort);
+                        if (this.urlTests) {
+                            this.loadTests(this.urlTests);
+                            fLoading = true;
+                        }
                     }
                 }
             }
@@ -57303,21 +57315,73 @@ class TestController extends Component {
                 Component.warning(this.id + ": binding '" + sBinding + "' unavailable");
             }
         }
+        if (!fLoading) this.setReady();
+    }
+
+    /**
+     * loadTests(sURL)
+     *
+     * @this {TestController}
+     * @param {string} sURL
+     */
+    loadTests(sURL)
+    {
+        let controller = this;
+        let sProgress = "Loading " + sURL + "...";
+        Web.getResource(sURL, null, true, function(sURL, sResponse, nErrorCode) {
+            controller.doneLoad(sURL, sResponse, nErrorCode);
+        }, function(nState) {
+            controller.println(sProgress, Component.PRINT.PROGRESS);
+        });
+        
+    }
+    
+    /**
+     * doneLoad(sURL, sTestData, nErrorCode)
+     *
+     * @this {TestController}
+     * @param {string} sURL
+     * @param {string} sTestData
+     * @param {number} nErrorCode (response from server if anything other than 200)
+     */
+    doneLoad(sURL, sTestData, nErrorCode)
+    {
+        if (nErrorCode) {
+            this.notice("Unable to load tests (error " + nErrorCode + ": " + sURL + ")", nErrorCode < 0);
+        }
+        else {
+            try {
+                this.tests = /** @type {Object} */ (JSON.parse(sTestData));
+                if (this.deliverTests) {
+                    this.deliverTests(this.tests);
+                    this.tests = null;
+                }
+                Component.addMachineResource(this.idMachine, sURL, sTestData);
+            } catch (err) {
+                this.notice("Test parsing error: " + err.message);
+            }
+        }
         this.setReady();
     }
 
     /**
-     * bindManager(manager, deliverData, deliverInput)
+     * bindMonitor(monitor, deliverData, deliverInput, deliverTests)
      *
      * @this {TestController}
-     * @param {TestManager} manager
-     * @param {function(...)} deliverData
+     * @param {TestMonitor} monitor
+     * @param {function(number)} deliverData
      * @param {function(number)} deliverInput
+     * @param {function(Object)} deliverTests
      */
-    bindManager(manager, deliverData, deliverInput)
+    bindMonitor(monitor, deliverData, deliverInput, deliverTests)
     {
-        this.deliverData = deliverData.bind(manager);
-        this.deliverInput = deliverInput.bind(manager);
+        this.deliverData = deliverData.bind(monitor);
+        this.deliverInput = deliverInput.bind(monitor);
+        this.deliverTests = deliverTests.bind(monitor);
+        if (this.tests && this.deliverTests) {
+            this.deliverTests(this.tests);
+            this.tests = null;
+        }
     }
 
     /**
@@ -57334,7 +57398,7 @@ class TestController extends Component {
     {
         let controller = this;
 
-        if (sHTMLType == null || sHTMLType == "textarea") {
+        if (sHTMLType == "textarea" && !this.controlBuffer) {
 
             this.bindings[sBinding] = control;
             this.controlBuffer = /** @type {HTMLTextAreaElement} */ (control);
@@ -57391,9 +57455,33 @@ class TestController extends Component {
              * so that the soft keyboard will activate, but it shouldn't hurt to remove the attribute for all browsers.
              */
             control.removeAttribute("readonly");
+
+            if (this.sendData) {
+                let monitor = new TestMonitor();
+                monitor.bindController(this, this.sendData, this.sendOutput, this.printf);
+            }
             return true;
         }
         return false;
+    }
+
+    /**
+     * sendOutput(data)
+     *
+     * @this {TestController}
+     * @param {number|string|Array} data
+     */
+    sendOutput(data)
+    {
+        if (typeof data == "number") {
+            this.printf("%c", data);
+        }
+        else if (typeof data == "string") {
+            this.printf("%s", data);
+        }
+        else {
+            for (let i = 0; i < data.length; i++) this.printf("[0x%02x]", data[i]);
+        }
     }
 
     /**
@@ -57408,14 +57496,20 @@ class TestController extends Component {
         let s = Str.sprintf(format, ...args);
         
         if (this.controlBuffer != null) {
-            this.controlBuffer.value += s;
-            /*
-             * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-             */
-            if (!DEBUG && this.controlBuffer.value.length > 8192) {
-                this.controlBuffer.value = this.controlBuffer.value.substr(this.controlBuffer.value.length - 4096);
+            if (s != '\r') {
+                if (s == '\b') {
+                    this.controlBuffer.value = this.controlBuffer.value.slice(0, -1);
+                } else {
+                    this.controlBuffer.value += s;
+                }
+                /*
+                 * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+                 */
+                if (!DEBUG && this.controlBuffer.value.length > 8192) {
+                    this.controlBuffer.value = this.controlBuffer.value.substr(this.controlBuffer.value.length - 4096);
+                }
+                this.controlBuffer.scrollTop = this.controlBuffer.scrollHeight;
             }
-            this.controlBuffer.scrollTop = this.controlBuffer.scrollHeight;
         }
         
         if (this.consoleBuffer != null) {
@@ -57430,34 +57524,6 @@ class TestController extends Component {
     }
 
     /**
-     * powerUp(data, fRepower)
-     *
-     * @this {TestController}
-     * @param {Object|null} data
-     * @param {boolean} [fRepower]
-     * @return {boolean} true if successful, false if failure
-     */
-    powerUp(data, fRepower)
-    {
-        if (!fRepower) {
-            
-            if (this.controlBuffer) {
-                let manager = new TestManager();
-                manager.bindController(this, this.sendData, this.printf)
-            }
-            //
-            // We don't currently have any state we want to reset or restore on powerUp() notifications.
-            //
-            // if (!data || !this.restore) {
-            //     this.reset();
-            // } else {
-            //     if (!this.restore(data)) return false;
-            // }
-        }
-        return true;
-    }
-
-    /**
      * receiveData(data)
      *
      * @this {TestController}
@@ -57465,7 +57531,15 @@ class TestController extends Component {
      */
     receiveData(data)
     {
-        if (this.deliverData) this.deliverData(data);
+        if (typeof data == "number") {
+            this.deliverData(data);
+        }
+        else if (typeof data == "string") {
+            for (let i = 0; i < data.length; i++) this.deliverData(data.charCodeAt(i));
+        }
+        else {
+            for (let i = 0; i < data.length; i++) this.deliverData(data[i]);
+        }
     }
     
     /**
@@ -57496,90 +57570,206 @@ Web.onInit(TestController.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/testmgr.js (C) Jeff Parsons 2012-2018
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/testmon.js (C) Jeff Parsons 2012-2018
  */
 
 /*
  * Overview
  * --------
  * 
- * This module is being created to send a series of automated commands to a machine via
- * a serial port, and to optionally verify the responses to those commands.  It is designed
- * to be loaded by a Node server-side script and communicate with another machine's serial port
- * using one of the Node server's serial ports (and the Node SerialPort package).  It is also
- * designed to be loaded by the browser, and communicate with a PCjs machine's serial port
- * using PCjs' own SerialPort interfaces.
+ * TestMonitor monitors activity on the bound SerialPort and a user I/O device (eg, a terminal,
+ * a console window, etc).  It operates in several modes:
+ * 
+ * 1) TERMINAL mode: all data received from the SerialPort is routed the user output device,
+ * and all data received from the user input device is routed to the SerialPort.  No special actions
+ * are taken, until/unless the ATTENTION key is detected from the user input device (ie, Ctrl-T).
+ * 
+ * 2) PATTERN mode: data from the SerialPort is monitored for specific patterns (eg, "A>"), and
+ * when one of those patterns is detected, we enter COMMAND mode, with category set to the appropriate
+ * key in the current set of tests.
+ * 
+ * 3) COMMAND mode: CR-terminated lines of user input are checked against the current of commands,
+ * and if a match is found, the corresponding request is set to the SerialPort.
  */
 
 
 /**
- * TestManager class
+ * TestMonitor class
  *
- * @class TestManager
- * @property {function(string,...)} printf
+ * @class TestMonitor
+ * @property {string} mode
+ * @property {string} patternActive
+ * @property {string} patternBuffer
+ * @property {Object|undefined} tests
+ * @property {Object|undefined} category (eg, "DOS")
+ * @property {string} commandBuffer
+ * @property {function(...)} sendData
+ * @property {function(...)} sendOutput
  * @property {function(string,...)} printf
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
-class TestManager {
+class TestMonitor {
     /**
-     * TestManager()
+     * TestMonitor()
      *
-     * @this {TestManager}
+     * @this {TestMonitor}
      */
     constructor()
     {
-        if (DEBUG) console.log("TestManager()");
+        if (DEBUG) console.log("TestMonitor()");
     }
 
     /**
-     * bindController(controller, sendData, sendOutput)
+     * bindController(controller, sendData, sendOutput, printf)
      *
-     * @this {TestManager}
+     * @this {TestMonitor}
      * @param {Object} controller
      * @param {function(...)} sendData
      * @param {function(...)} sendOutput
+     * @param {function(string,...)} printf
      */
-    bindController(controller, sendData, sendOutput)
+    bindController(controller, sendData, sendOutput, printf)
     {
         this.controller = controller;
         this.sendData = sendData.bind(controller);
-        this.printf = sendOutput.bind(controller);
-        this.controller.bindManager(this, this.receiveData, this.receiveInput);
-        if (DEBUG) this.printf("hello %s\n", "world");
+        this.sendOutput = sendOutput.bind(controller);
+        this.printf = printf.bind(controller);
+        this.controller.bindMonitor(this, this.receiveData, this.receiveInput, this.receiveTests);
+        this.printf("%s TestMonitor v%s\nUse Ctrl-T to toggle terminal mode\n", APPNAME, APPVERSION || XMLVERSION);
+        this.setMode(TestMonitor.MODE.TERMINAL);
+    }
+
+    /**
+     * checkCommand()
+     *
+     * @this {TestMonitor}
+     */
+    checkCommand()
+    {
+        let suite = this.tests[this.category];
+        let commands = suite['commands'];
+        let command = commands[this.commandBuffer];
+        if (command) {
+            let request = command['request'];
+            if (DEBUG) console.log("TestMonitor.checkCommand(" + this.commandBuffer + "): request '" + request + "'");
+            this.sendData(request);
+        } else {
+            this.printf("unrecognized command: %s\n", this.commandBuffer);
+        }
+        this.commandBuffer = "";
+    }
+    
+    /**
+     * setMode(mode, category)
+     * 
+     * @this {TestMonitor}
+     * @param {string} mode
+     * @param {string} [category]
+     */
+    setMode(mode, category)
+    {
+        switch(mode) {
+        case TestMonitor.MODE.TERMINAL:
+            break;
+            
+        case TestMonitor.MODE.PATTERN:
+            this.aCategories = [];
+            this.aPatterns = [];
+            this.cchPatternLongest = 0;
+            for (let category in this.tests) {
+                let suite = this.tests[category];
+                if (suite.pattern) {
+                    this.aCategories.push(category);
+                    this.aPatterns.push(suite.pattern);
+                    if (this.cchPatternLongest < suite.pattern.length) {
+                        this.cchPatternLongest = suite.pattern.length;
+                    }
+                }
+            }
+            this.patternActive = this.patternBuffer = "";
+            break;
+            
+        case TestMonitor.MODE.COMMAND:
+            if (category) this.category = category;
+            this.commandBuffer = "";
+            break;
+        }
+        
+        this.mode = mode;
+        this.printf("mode: %s\n", this.mode);
+    }
+    
+    /**
+     * receiveTests(tests)
+     *
+     * @this {TestMonitor}
+     * @param {Object} tests
+     */
+    receiveTests(tests)
+    {
+        if (DEBUG) console.log("TestMonitor.receiveTests(" + JSON.stringify(tests) + ")");
+        this.tests = tests;
+        this.setMode(TestMonitor.MODE.PATTERN);
     }
 
     /**
      * receiveData(data)
      *
-     * @this {TestManager}
-     * @param {number|string|Array} data
+     * @this {TestMonitor}
+     * @param {number} data
      */
     receiveData(data)
     {
-        if (DEBUG) console.log("TestManager.receiveData(" + data + ")");
-        if (typeof data == "number") {
-            this.printf("%c", data);
-        }
-        else if (typeof data == "string") {
-            this.printf("%s", data);
-        }
-        else {
-            for (let i = 0; i < data.length; i++) this.printf("[0x%02x]", data[i]);
+        if (this.mode == TestMonitor.MODE.PATTERN) {
+            if (this.patternBuffer.length >= this.cchPatternLongest) {
+                this.patternBuffer = this.patternBuffer.slice(-(this.cchPatternLongest - 1));
+            }
+            this.patternBuffer += String.fromCharCode(data);
+            if (DEBUG) console.log("TestMonitor.receiveData(" + data + "): checking patterns for '" + this.patternBuffer + "'");
+            let i = this.aPatterns.indexOf(this.patternBuffer);
+            if (i >= 0) {
+                this.setMode(TestMonitor.MODE.COMMAND, this.aCategories[i]);
+            }
+        } else if (this.mode == TestMonitor.MODE.TERMINAL) {
+            this.sendOutput(data);
+        } else {
+            this.sendOutput(data);
+            if (DEBUG) console.log("TestMonitor.receiveData(" + data + "): ignored while mode is '" + this.mode + "'");
         }
     }
 
     /**
      * receiveInput(charCode)
      *
-     * @this {TestManager}
+     * @this {TestMonitor}
      * @param {number} charCode
      */
     receiveInput(charCode)
     {
-        if (DEBUG) console.log("TestManager.receiveInput(" + charCode + ")");
-        this.sendData(charCode);
+        if (DEBUG) console.log("TestMonitor.receiveInput(" + charCode + ")");
+        if (charCode == Keys.ASCII.CTRL_T) {
+            this.setMode(this.mode == TestMonitor.MODE.TERMINAL? (this.category? TestMonitor.MODE.COMMAND : TestMonitor.MODE.PATTERN) : TestMonitor.MODE.TERMINAL);
+            return;
+        }
+        if (this.mode == TestMonitor.MODE.TERMINAL) {
+            this.sendData(charCode);
+        } else if (this.mode == TestMonitor.MODE.COMMAND) {
+            if (charCode == Keys.KEYCODE.CR) {
+                this.sendOutput(Keys.KEYCODE.LF);
+                this.checkCommand();
+            } else {
+                this.sendOutput(charCode);
+                this.commandBuffer += String.fromCharCode(charCode);
+            }
+        }
     }
 }
+
+TestMonitor.MODE = {
+    TERMINAL:   "terminal",
+    PATTERN:    "pattern",
+    COMMAND:    "command"
+};
 
 
 
@@ -78999,7 +79189,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResol
              * ES6 ALERT: Template strings.
              */
             if (!COMPILED && XMLVERSION) {
-                sXML = sXML.replace(/<xsl:variable name="APPVERSION">1.x.x<\/xsl:variable>/, `<xsl:variable name="APPVERSION">${XMLVERSION}</xsl:variable>`);
+                sXML = sXML.replace(/<xsl:variable name="APPVERSION"\/>/, `<xsl:variable name="APPVERSION">${XMLVERSION}</xsl:variable>`);
             }
         }
 
@@ -79243,7 +79433,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  * path to the XSL file, unless they choose to mirror our folder structure.
                  */
                 var sAppFolder = sAppClass;
-                if (DEBUG || sVersion == "1.x.x") {
+                if (DEBUG || !sVersion) {
                     if (sAppClass != "c1pjs") sAppFolder = "shared";
                     sXSLFile = "/modules/" + sAppFolder + "/templates/components.xsl";
                 } else {
@@ -79264,7 +79454,9 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  */
                 if (!COMPILED) {
                     var aMatch = sXML.match(/<\?xml-stylesheet[^>]* href=(['"])[^'"]*?\/([0-9.]*)\/([^'"]*)\1/);
-                    if (aMatch) XMLVERSION = aMatch[2];
+                    if (aMatch) {
+                        XMLVERSION = aMatch[2];
+                    }
                 }
 
                 var transformXML = function(sXSL, xsl) {

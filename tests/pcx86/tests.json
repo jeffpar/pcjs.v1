@@ -1,0 +1,11 @@
+{
+  "DOS": {
+    "pattern": "A>",
+    "commands": {
+      "d": {
+        "request": "dir\r",
+        "response": "*"
+      }
+    }
+  }
+}

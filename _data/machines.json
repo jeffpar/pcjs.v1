@@ -188,7 +188,7 @@
       "./modules/pcx86/lib/parallel.js",
       "./modules/pcx86/lib/serial.js",
       "./modules/pcx86/lib/testctl.js",
-      "./modules/pcx86/lib/testmgr.js",
+      "./modules/pcx86/lib/testmon.js",
       "./modules/pcx86/lib/mouse.js",
       "./modules/pcx86/lib/disk.js",
       "./modules/pcx86/lib/fdc.js",
