@@ -41,10 +41,10 @@
  * 
  * 2) PROMPT mode: data from the SerialPort is monitored for specific prompts (eg, "A>"), and
  * when one of those prompts is detected, we enter COMMAND mode, with category set to the appropriate
- * key in the current set of tests.
+ * collection of tests.
  * 
- * 3) COMMAND mode: CR-terminated lines of user input are checked against the current of commands,
- * and if a match is found, the corresponding request is set to the SerialPort.
+ * 3) COMMAND mode: CR-terminated lines of user input are checked against the current set of test
+ * commands, and if a match is found, the corresponding request is sent to the SerialPort.
  */
 
 if (NODE) {
