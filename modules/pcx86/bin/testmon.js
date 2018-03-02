@@ -73,17 +73,7 @@ class PortController {
         this.port = new SerialPort(path, options);
 
         this.port.on('data', function(data) {
-            if (controller.deliverInput) {
-                if (typeof data == "number") {
-                    controller.deliverData(data);
-                } else {
-                    for (let i = 0; i < data.length; i++) {
-                        controller.deliverData(data[i]);
-                    }
-                }
-            } else {
-                console.log("data(" + typeof data + "): ", data);
-            }
+            controller.receiveData(data);
         });
 
         this.stdin = process.stdin;
@@ -98,20 +88,14 @@ class PortController {
         this.stdin.setEncoding("utf8");
 
         this.stdin.on('data', function(data) {
-            if (data === '\u0003') {     // ctrl-c
-                process.exit();
-            }
-            if (controller.deliverInput) controller.deliverInput(data.charCodeAt(0));
-            /*
-             * Node defines the first parameter of write() as a "chunk", which can be a string, Buffer, or Uint8Array.
-             */
-            // this.stdout.write(data);
+            controller.receiveInput(data);
         });
 
         this.tests = require("../../../tests/pcx86/tests.json");
         this.deliverData = this.deliverInput = this.deliverTests = null;
-        this.monitor = new TestMonitor();
-        this.monitor.bindController(this, this.sendData, this.sendOutput, this.printf);
+        
+        let monitor = new TestMonitor();
+        monitor.bindController(this, this.sendData, this.sendOutput, this.printf);
     }
 
     /**
@@ -154,17 +138,42 @@ class PortController {
      */
     receiveData(data)
     {
-        if (typeof data == "number") {
-            this.deliverData(data);
-        }
-        else if (typeof data == "string") {
-            for (let i = 0; i < data.length; i++) this.deliverData(data.charCodeAt(i));
-        }
-        else {
-            for (let i = 0; i < data.length; i++) this.deliverData(data[i]);
+        if (this.deliverInput) {
+
+            if (typeof data == "number") {
+                this.deliverData(data);
+            }
+            else if (typeof data == "string") {
+                for (let i = 0; i < data.length; i++) this.deliverData(data.charCodeAt(i));
+            }
+            else {
+                for (let i = 0; i < data.length; i++) this.deliverData(data[i]);
+            }
+        } else {
+            console.log("data(" + typeof data + "): ", data);
         }
     }
 
+    /**
+     * receiveInput(data)
+     *
+     * @this {PortController}
+     * @param {string} data
+     */
+    receiveInput(data)
+    {
+        if (data === '\u0003') {        // ctrl-c
+            process.exit();
+        }
+        if (this.deliverInput) {
+            this.deliverInput(data.charCodeAt(0));
+        }
+        /*
+         * Node defines the first parameter of write() as a "chunk", which can be a string, Buffer, or Uint8Array.
+         */
+        // this.stdout.write(data);
+    }
+    
     /**
      * sendData(data)
      *

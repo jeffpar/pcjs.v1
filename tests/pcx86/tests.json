@@ -5,6 +5,10 @@
       "debug": {
         "request": "b:debug\r",
         "mode": "prompt"
+      },
+      "symdeb": {
+        "request": "symdeb\r",
+        "mode": "prompt"
       }
     }
   },
