@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "IBM PC (Model 5150) running IBM PC Advanced Diagnostics 1.02"
-permalink: /disks/pcx86/diags/ibm/1.02/
+permalink: /disks/pcx86/diags/ibm/5150/1.02a/
 machines:
   - id: ibm5150
     type: pcx86

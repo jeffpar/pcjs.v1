@@ -6,10 +6,10 @@ machines:
   - id: ibm5170
     type: pcx86
     debugger: true
-    config: /devices/pcx86/machine/5170/vga/4096kb/debugger/machine.xml
+    config: /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/machine.xml
     autoMount:
       A:
-        name: IBM PC Diagnostics 2.07 (AT Adv)
+        name: IBM PC AT Diagnostics 2.07 (Adv)
 ---
 
 {% include machine.html id="ibm5170" %}
