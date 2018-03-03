@@ -14,4 +14,4 @@ machines:
 
 {% include machine.html id="ibm5150" %}
 
-![IBM PC Diagnostics 2.05]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/diags/ibm/5150/2.05/IBM-DIAG-205.jpg)
+![IBM PC Diagnostics 2.05]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/diags/ibm/5150/2.05/5150-DIAG-205.jpg)
