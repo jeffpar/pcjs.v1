@@ -12,4 +12,22 @@ machines:
         name: IBM PC Diagnostics 1.02 (Adv)
 ---
 
+IBM PC Advanced Diagnostics 1.02
+--------------------------------
+
+This disk displays the following startup messages:
+
+    The IBM Personal Computer                                                       
+    ADVANCED DIAGNOSTICS                                                            
+    Version 1.02 (C)Copyright IBM Corp 1981, 1982                                   
+                                                                                    
+    SELECT AN OPTION                                                                
+                                                                                    
+    0 - RUN DIAGNOSTIC ROUTINES                                                     
+    1 - FORMAT DISKETTE                                                             
+    2 - COPY DISKETTE                                                               
+    9 - EXIT TO SYSTEM DISKETTE                                                     
+                                                                                    
+    INSERT  DIAGNOSTIC DISKETTE  IN DRIVE A AND ENTER THE ACTION DESIRED
+
 {% include machine.html id="ibm5150" %}
