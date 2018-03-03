@@ -65,7 +65,6 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 
 ### Tools
 
-* [Borland Tools](tools/borland/)
 * [IBM Tools](tools/ibm/)
 * [Microsoft Tools](tools/microsoft/)
 * [More...](tools/)

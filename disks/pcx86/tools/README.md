@@ -10,6 +10,7 @@ PC Tools
 Information is available for tools from these vendors.
 
 * [Borland](borland/)
+* [Digital Research](dresearch/)
 * [IBM](ibm/)
 * [Logitech](logitech/)
 * [Microsoft](microsoft/)
