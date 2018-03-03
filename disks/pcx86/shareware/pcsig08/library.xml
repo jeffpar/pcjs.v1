@@ -696,6 +696,15 @@
 		<disk path="/pcjs-disks/pcx86/games/microsoft/flightsim/1984/FLIGHTSIM-1984.json">MS Flight Simulator (1984)</disk>
 		<disk path="/pcjs-disks/pcx86/games/other/wizardry1/WIZARDRY1-MASTER.json">Wizardry I - Master Disk</disk>
 		<disk path="/pcjs-disks/pcx86/games/other/wizardry1/WIZARDRY1-SCENARIO.json">Wizardry I - Scenario Disk</disk>
+		<disk path="/pcjs-disks/pcx86/roms/ibm/IBM-BIOS-SRC-5150V1.json">IBM PC BIOS Sources (V1)</disk>
+		<disk path="/pcjs-disks/pcx86/roms/ibm/IBM-BIOS-SRC-5150V2.json">IBM PC BIOS Sources (V2)</disk>
+		<disk path="/pcjs-disks/pcx86/roms/ibm/IBM-BIOS-SRC-5150V3.json">IBM PC BIOS Sources (V3)</disk>
+		<disk path="/pcjs-disks/pcx86/roms/ibm/IBM-BIOS-SRC-5160V1.json">IBM PC XT BIOS Sources (V1)</disk>
+		<disk path="/pcjs-disks/pcx86/roms/ibm/IBM-BIOS-SRC-5160V2.json">IBM PC XT BIOS Sources (V2)</disk>
+		<disk path="/pcjs-disks/pcx86/roms/ibm/IBM-BIOS-SRC-5160V3.json">IBM PC XT BIOS Sources (V3)</disk>
+		<disk path="/pcjs-disks/pcx86/roms/ibm/IBM-BIOS-SRC-5170V1.json">IBM PC AT BIOS Sources (V1)</disk>
+		<disk path="/pcjs-disks/pcx86/roms/ibm/IBM-BIOS-SRC-5170V2.json">IBM PC AT BIOS Sources (V2)</disk>
+		<disk path="/pcjs-disks/pcx86/roms/ibm/IBM-BIOS-SRC-5170V3.json">IBM PC AT BIOS Sources (V3)</disk>
 		<disk path="/pcjs-disks/pcx86/shareware/pcmag/disks/VOL06N08.json">PC Magazine (Vol. 06 No. 08)</disk>
 		<disk path="/pcjs-disks/pcx86/shareware/pcmag/disks/VOL06N09.json">PC Magazine (Vol. 06 No. 09)</disk>
 		<disk path="/pcjs-disks/pcx86/shareware/pcmag/disks/VOL06N10.json">PC Magazine (Vol. 06 No. 10)</disk>

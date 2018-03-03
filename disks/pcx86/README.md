@@ -70,8 +70,9 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 * [Microsoft Tools](tools/microsoft/)
 * [More...](tools/)
 
-### Tests
+### ROMs, Diagnostics, and Tests
 
+* [PC ROM BIOS Sources](roms/ibm/)
 * [PC Diagnostics](diags/)
 * [VGA "Black Book" Tests](/tests/pcx86/vga/)
 
