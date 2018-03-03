@@ -208,4 +208,4 @@ class PortController {
     }
 }
 
-let controller = new PortController("/dev/tty.KeySerial1", {baudRate: 9600});
+let controller = new PortController("/dev/tty.KeySerial1", {baudRate: 9600, rtscts: true});

@@ -44,6 +44,7 @@ if (argv['debug'] !== undefined) fDebug = argv['debug'];
 
 var sPortName = "/dev/tty.KeySerial1";
 var baudRate = 9600;
+var rtscts = true;
 
 /**
  * printf(format, ...args)
@@ -58,7 +59,7 @@ function printf(format, ...args)
 
 printf("hello %s\n", "world");
 
-var port = new SerialPort(sPortName, {baudRate});
+var port = new SerialPort(sPortName, {baudRate, rtscts});
 
 port.on('data', function(data) {
     console.log("data(" + typeof data + "): ", data);
