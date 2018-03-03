@@ -546,6 +546,19 @@ ROMX86.BIOS = {
     ROWS:           0x484,              // PC AT: ROWS ON THE ACTIVE SCREEN (LESS 1) (byte)
     POINTS:         0x485,              // PC AT: BYTES PER CHARACTER (word)
     INFO:           0x487,              // PC AT: MODE OPTIONS (byte)
+    /*
+     * INFO BITS:
+     * 
+     *      0x80: HIGH BIT OF MODE SET, CLEAR/NOT CLEAR REGEN
+     *      0x60: 256K OF VRAM
+     *      0x40: 192K OF VRAM
+     *      0x20: 128K OF VRAM
+     *      0x10: RESERVED
+     *      0x08: EGA ACTIVE MONITOR (0), EGA NOT ACTIVE (1)
+     *      0x04: WAIT FOR DISPLAY ENABLE (1)
+     *      0x02: EGA HAS A MONOCHROME ATTACHED
+     *      0x01: SET C_TYPE EMULATE ACTIVE (0)
+     */
     INFO_3:         0x488,              // PC AT: FEATURE BIT SWITCHES (1 byte, plus 2 reserved bytes)
     /*
      * ADDITIONAL MEDIA DATA

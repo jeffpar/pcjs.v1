@@ -9,7 +9,7 @@
 	<video ref="/devices/pcx86/video/ibm/mda/ibm-mda-dual.xml"/>
 	<video ref="/devices/pcx86/video/ibm/cga/ibm-cga-dual.xml"/>
 	<fdc ref="/disks/pcx86/library.xml"/>
-	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padLeft="8px" padBottom="8px">
+	<cpu id="cpu8088" model="8088" pos="left" padLeft="8px" padBottom="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 	</cpu>

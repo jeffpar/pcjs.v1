@@ -13,4 +13,6 @@
 	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
 	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<chipset id="chipset" model="5160" sw1="01001101"/>
+	<serial id="com1" adapter="1"/>
+	<serial id="com2" adapter="2"/>
 </machine>

@@ -10,7 +10,7 @@
 	<fdc ref="/disks/pcx86/library.xml" autoMount='{A: {name: "PC-DOS 3.30 (Disk 1)"}, B: {name: "PC-DOS 3.30 (Disk 2)"}}'/>
 	<hdc ref="/disks/pcx86/drives/20mb/pcdos330-empty-at2.xml"/>
 	<keyboard ref="/devices/pcx86/keyboard/us84-softkeys.xml"/>
-	<cpu id="cpu286" model="80286" cycles="8000000" autostart="true" pos="right" padRight="8px" padBottom="8px">
+	<cpu id="cpu286" model="80286" cycles="8000000" pos="right" padRight="8px" padBottom="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 		<control type="button" binding="setSpeed">Speed</control>
