@@ -19,7 +19,8 @@ IBM PC XT ROM BIOS Sources
 --------------------------
 
 PCjs has created and archived a collection IBM PC XT ROM BIOS diskettes.  Their contents are thanks to the
-[PC DOS Retro](https://sites.google.com/site/pcdosretro/) website.  Directory listings are provided below.
+[PC DOS Retro](https://sites.google.com/site/pcdosretro/) website.  [Directory Listings](#directory-of-ibm-pc-xt-bios-sources-v1)
+and [Version Notes](#5160v1-notes-from-pc-dos-retro) are provided below.
 
 {% include machine.html id="ibm5160-msdos320" %}
 
@@ -79,3 +80,61 @@ PCjs has created and archived a collection IBM PC XT ROM BIOS diskettes.  Their 
     VIDEO    ASM    66337   8-31-14   9:35a
     XTLINK             79   8-29-14   1:19p
            16 File(s)     24576 bytes free
+
+### 5160V1 Notes (from PC DOS Retro) 
+
+    IBM PC XT BIOS dated 11/08/82 is 5964 lines based on the BIOS listings in the IBM PC XT Technical Reference dated April 1983.
+    The BIOS was likely built using the Intel ASM86 Macro Assembler V2.0.
+    
+    This BIOS must be built with ASM86, several operand constructs are used which MASM does not recognize.
+    
+    Line 233:  CODE SEGMENT AT 0F000H
+               to build with LINK remove the 'AT 0F000H'
+               LINK will not generate code for 'AT address' segments
+    Several lines in the listings are invalid:
+    Line 937:  MOV WORD PRT(1CH*4),OFFSET BLINK_INT
+    Line 3384: JMP WORD PRT CS:[SI+OFFSET M1]
+    Line 4572: MOV ES:[DI+2000H ,AH]
+    Line 5473: MOV DATA_AREA[OFFSET INTR_FLAG]
+    
+    LINK will generate an .EXE file with 1 relocation. This is due to a far jump to segment F000.
+    Unfortunately EXE2BIN will not process the EXE file as it has more than 65278 bytes of code.
+    
+    The VECTOR segment data should be entered at FFF0 as follows:
+    EA 5B E0 00 F0 31 31 2F 30 38 2F 38 32 FF FE 28
+
+### 5160V2 Notes (from PC DOS Retro)
+
+    IBM PC XT BIOS dated 01/10/86 based on the BIOS listings in the IBM PC XT Technical Reference dated March 1986.
+    The BIOS was originally built using IBM MASM 2.0.
+    
+    Notes:
+    - FILL.ASM was added to properly link the BIOS, this defines the area between the end of the main BIOS code and the ORGS data at E000.
+    
+    Additional files:
+    FILL.ASM - see above
+    XTLINK - linker response file
+    EXE2BIN - DEBUG script to convert the EXE file to a BIN file
+    
+    Steps to build the PC XT BIOS:
+    for %a in (*.asm) do masm %a;
+    link @xtlink
+    debug < exe2bin
+
+### 5160V3 Notes (from PC DOS Retro)
+
+    IBM PC XT BIOS dated 05/09/86 based on the BIOS listings in the IBM PC XT Technical Reference dated March 1986 and code disassembly.
+    The BIOS was originally built using IBM MASM 2.0.
+    
+    Notes:
+    - FILL.ASM was added to properly link the BIOS, this defines the area between the end of the main BIOS code and the ORGS data at E000.
+    
+    Additional files:
+    FILL.ASM - see above
+    XTLINK - linker response file
+    EXE2BIN - DEBUG script to convert the EXE file to a BIN file
+    
+    Steps to build the PC XT BIOS:
+    for %a in (*.asm) do masm %a;
+    link @xtlink
+    debug < exe2bin
