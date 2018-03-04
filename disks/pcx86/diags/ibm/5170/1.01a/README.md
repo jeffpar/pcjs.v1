@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "IBM PC AT (Model 5170) running IBM PC AT Advanced Diagnostics 1.01"
-permalink: /disks/pcx86/diags/ibm/1.01a/
+permalink: /disks/pcx86/diags/ibm/5170/1.01a/
 machines:
   - id: ibm5170
     type: pcx86
