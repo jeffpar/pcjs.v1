@@ -15,7 +15,7 @@ The following IBM PC Diagnostics are available.
 * [IBM PC Diagnostics 2.05](2.05/)
 * [IBM PC Diagnostics 2.07](2.07/)
 
-The following IBM PC *Advanced* Diagnostics are available.
+The following IBM PC Advanced Diagnostics are available.
 
 * [IBM PC Advanced Diagnostics 1.02](1.02a/)
 * [IBM PC Advanced Diagnostics 2.05](2.05a/)

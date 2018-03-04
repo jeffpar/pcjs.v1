@@ -15,7 +15,7 @@ The following [IBM PC Diagnostics](5150/) are available.
 * [IBM PC Diagnostics 2.05](5150/2.05/)
 * [IBM PC Diagnostics 2.07](5150/2.07/)
 
-The following IBM PC *Advanced* Diagnostics are also available.
+The following IBM PC Advanced Diagnostics are also available.
 
 * [IBM PC Advanced Diagnostics 1.02](5150/1.02a/)
 * [IBM PC Advanced Diagnostics 2.05](5150/2.05a/)
@@ -26,7 +26,7 @@ The following [IBM PC AT Diagnostics](5170/) are available.
 * [IBM PC AT Diagnostics 1.02](5170/1.02/)
 * [IBM PC AT Diagnostics 2.00](5170/2.00/)
 
-The following IBM PC AT *Advanced* Diagnostics are also available.
+The following IBM PC AT Advanced Diagnostics are also available.
 
 * [IBM PC AT Advanced Diagnostics 1.01](5170/1.01a/)
 * [IBM PC AT Advanced Diagnostics 2.07](5170/2.07a/)
