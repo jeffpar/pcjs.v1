@@ -136,7 +136,7 @@ class PC11 extends Component {
      * @this {PC11}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "list", "text", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listTapes")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -148,10 +148,11 @@ class PC11 extends Component {
         switch (sBinding) {
 
         case "listTapes":
-            this.bindings[sBinding] = control;
-            control.onchange = function onChangeListTapes(event) {
+            var controlSelect = /** @type {HTMLSelectElement} */ (control);
+            this.bindings[sBinding] = controlSelect;
+            controlSelect.onchange = function onChangeListTapes(event) {
                 var controlDesc = pc11.bindings["descTape"];
-                var controlOption = control.options[control.selectedIndex];
+                var controlOption = controlSelect.options[controlSelect.selectedIndex];
                 if (controlDesc && controlOption) {
                     var dataValue = {};
                     var sValue = controlOption.getAttribute("data-value");
@@ -198,32 +199,34 @@ class PC11 extends Component {
             return true;
 
         case "mountTape":
+            var controlInput = /** @type {Object} */ (control);
+            
             if (!this.fLocalTapes) {
                 if (DEBUG) this.log("Local tape support not available");
                 /*
                  * We could also simply hide the control; eg:
                  *
-                 *      control.style.display = "none";
+                 *      controlInput.style.display = "none";
                  *
                  * but removing the control altogether seems better.
                  */
-                control.parentNode.removeChild(/** @type {Node} */ (control));
+                controlInput.parentNode.removeChild(/** @type {Node} */ (controlInput));
                 return false;
             }
 
-            this.bindings[sBinding] = control;
+            this.bindings[sBinding] = controlInput;
 
             /*
              * Enable "Mount" button only if a file is actually selected
              */
-            control.addEventListener('change', function() {
-                var fieldset = control.children[0];
+            controlInput.addEventListener('change', function() {
+                var fieldset = controlInput.children[0];
                 var files = fieldset.children[0].files;
                 var submit = fieldset.children[1];
                 submit.disabled = !files.length;
             });
 
-            control.onsubmit = function(event) {
+            controlInput.onsubmit = function(event) {
                 var file = event.currentTarget[1].files[0];
                 if (file) {
                     var sTapePath = file.name;

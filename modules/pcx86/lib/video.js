@@ -287,7 +287,7 @@ if (NODE) {
  */
 
 /**
- * class Card
+ * @class Card
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Card extends Controller {
@@ -330,7 +330,7 @@ class Card extends Controller {
              * If a Debugger is present, we want to stash a bit more info in each Card.
              */
             if (DEBUGGER) {
-                this.dbg = video.dbg;
+                this.dbg = /** @type {DebuggerX86} */ (video.dbg);
                 this.type = specs[0];
                 this.port = specs[1];
             }
@@ -2145,7 +2145,7 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.XOR] = Card.ACCESS.
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE3] = Card.ACCESS.writeByteMode3;
 
 /**
- * class Video
+ * @class Video
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Video extends Component {
@@ -7164,7 +7164,7 @@ Video.MODEL = {
  */
 
 /**
- * @class MonitorSpecs
+ * @typedef {Object} MonitorSpecs
  * @property {number} nHorzPeriodsPerSec
  * @property {number} nHorzPeriodsPerFrame
  * @property {number} percentHorzActive
@@ -7271,7 +7271,7 @@ Video.aEGAMonitorSwitches = {
 };
 
 /**
- * @class Font
+ * @typedef {Object} Font
  * @property {number} cxCell
  * @property {number} cyCell
  * @property {Array} aCSSColors

@@ -24,7 +24,7 @@
 		<control type="file" binding="mountDisk"/>
 	</fdc>
 	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
-	<cpu id="cpu80188" model="80188" autostart="true" pos="left" padLeft="8px" padBottom="8px">
+	<cpu id="cpu80188" model="80188" pos="left" padLeft="8px" padBottom="8px">
 		<control type="button" binding="run">Run</control>
 	</cpu>
 	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>

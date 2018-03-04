@@ -43,6 +43,16 @@ if (NODE) {
  * @property {function(number,boolean):number} getInt32
  * @property {function(number,number,boolean)} setInt32
  */
+
+/**
+ * @class MemoryPDP11
+ * @property {number} id
+ * @property {number} used
+ * @property {number} size
+ * @property {Int32Array} adw
+ * @property {Object} controller
+ * @property {DebuggerPDP11} dbg
+ */
 class MemoryPDP11 {
     /**
      * MemoryPDP11(bus, addr, used, size, type, controller)

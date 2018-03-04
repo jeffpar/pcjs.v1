@@ -344,7 +344,7 @@ class Video8080 extends Component {
      * @this {Video8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -411,7 +411,7 @@ class Video8080 extends Component {
                 this.kbd.setBinding("led", s, this.ledBindings[s]);
             }
             if (this.canvasScreen) {
-                this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "screen", this.inputScreen);
+                this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "screen", /** @type {HTMLElement} */ (this.inputScreen));
             }
         }
 
