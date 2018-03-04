@@ -16,7 +16,7 @@
 		<control type="button" binding="loadDisk">Load</control>
 		<control type="description" binding="descDisk" padLeft="8px"/>
 	</fdc>
-	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padLeft="8px" padBottom="8px">
+	<cpu id="cpu8088" model="8088" pos="left" padLeft="8px" padBottom="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 	</cpu>

@@ -36,3 +36,7 @@ cross-development capability was likely frequently used internally at Microsoft 
 
 > The IBM PC XENIX came with rudimentary networking capabilities, namely uucp and micnet, though little is known about
 their specifications.
+
+![IBM PC XENIX 1.0 Extensions Disk 1]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/unix/ibm/xenix/1.0/IBM-XENIX-100-EXT1.jpg)
+
+![IBM PC XENIX 1.0 Extensions Disk 2]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/unix/ibm/xenix/1.0/IBM-XENIX-100-EXT2.jpg)

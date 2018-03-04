@@ -191,14 +191,17 @@ Last but not least, run `bundle update` periodically to keep Jekyll up-to-date.
 ### Building PCjs
 
 Unlike a typical project, where you have to *build* or *configure* or *make* something, PCjs is "ready to run".
-That's because both the compiled and uncompiled versions of PCjs emulation modules are checked into the project,
-making deployment to a web server easy.
+That's because both the compiled and uncompiled versions of the PCjs emulation modules are checked into the project,
+making deployment to a web server easier.
 
-However, in order to build and test PCjs modifications, you'll want to use [gulp](https://gulpjs.com/) and the
-gulp tasks defined by [gulpfile.js](gulpfile.js).
+However, in order to build and test PCjs modifications, you'll want to use [Gulp](https://gulpjs.com/) and the
+Gulp tasks defined by [gulpfile.js](gulpfile.js).  If you already ran `npm install --production` as described above,
+then you should re-run it *without* the `--production` option:
 
-Although gulp was installed locally when you ran `npm install`, you'll also want to install the command-line
-interface to gulp. You can install that locally as well, but it's recommended you install it globally with *-g*;
+	npm install
+
+to get all the development dependencies, including Gulp.  You'll probably also want to install the command-line
+interface to Gulp.  You can install that locally as well, but it's recommended you install it globally with *-g*;
 OS X users may also need to preface this command with `sudo`:
 
 	npm install gulp-cli -g
@@ -213,13 +216,7 @@ in the [versions](/versions/) directory) are out-of date.
 The latest [gulpfile](gulpfile.js) now compiles all PCjs machine modules using
 Google's [JavaScript-based Closure Compiler](https://github.com/google/closure-compiler-js).
 
-Here's what I installed to get it all working:
-
-	sudo npm install -g gulp
-	npm install --save-dev gulp gulp-newer gulp-concat gulp-rename gulp-replace gulp-header gulp-foreach gulp-wrapper gulp-sourcemaps run-sequence
-	npm install --save-dev google-closure-compiler-js
-
-Running `gulp` should build a complete set of machine scripts in the [versions](/versions/) directory.
+Running `gulp` should build a complete set of "compiled" machine scripts in the [versions](/versions/) directory.
 Individual machines can be compiled as well (eg, `gulp compile/pcx86`).
 
 Using PCjs
@@ -269,7 +266,7 @@ The PCx86 client app can also be run from the command-line mode using Node, maki
 run a series of automated tests, etc:
 
     cd modules/pcx86/bin
-    node pcx86
+    node pcx86repl.js
 
 The [pcx86](modules/pcx86/bin/pcx86) script in [modules/pcx86/bin](modules/pcx86/bin) loads
 all the PCx86 browser scripts listed in [machines.json](/_data/machines.json) and then starts a Node REPL
@@ -285,7 +282,7 @@ home page.
 The command-line loader creates all the JSON-defined machine components in the same order that the browser creates
 XML-defined components.  You can also issue the "load" command directly from the command-line:
 
-    node pcx86 --cmd="load ibm5150.json"
+    node pcx86repl.js --cmd="load ibm5150.json"
 
 In fact, any number of "--cmd" arguments can be included on the command-line.  A batch file syntax will eventually be
 added, too.
@@ -364,17 +361,37 @@ where PCjs could run amok and destroy the planet.
 
 Other parameters that can be passed via the URL:
 
-- *autostart*: set it to "true" to allow all machines to start normally, "false" to prevent all machines from starting, or "no" to prevent all machines from starting *unless* they have no **Run** button; e.g.:
+- *aspect*: a numeric value >= 0.3 and <= 3.33 modifies the default aspect ratio of a machine's screen on the specified page; e.g.:
 
-	http://localhost:8088/?gort=debug&autostart=false
+	    http://localhost:8088/?aspect=2.0
 
-- *aspect*: set it to a numeric value >= 0.3 and <= 3.33 to modify the default aspect ratio of a machine's screen on the specified page; e.g.:
+- *autoMount*: overrides the machine's diskette autoMount settings; eg:
 
-	http://localhost:8088/?aspect=2.0
+	    http://localhost:8088/?autoMount={A:{name:"PC-DOS 1.10"}}
 
-- *resume*: set it to a numeric value (0-3) to override a machine's *resume* setting; e.g.:
+- *autoStart*: "true" allows all machines to start normally, "false" prevents all machines from starting, and "no" prevents all machines from starting *unless* they have no **Run** button; e.g.:
 
-	http://localhost:8088/?resume=0
+	    http://localhost:8088/?autoStart=false
+
+- *drives*: overrides the machine's hard drive settings; e.g.:
+
+        http://localhost:8088/?drives=[{name:"10Mb Hard Disk",type:3,path:"/pcjs-disks/pcx86/drives/10mb/PCDOS200-WIN101-EGA.json"}]
+
+- *autoType*: a string of keys to inject into the machine after booting; e.g.:
+
+        http://localhost:8088/?autoType=02-28-2018\r12:00\r
+
+- *mobile*: "true" or "false" to override PCjs' mobile browser detection, which affects things like soft keyboard layout; e.g.:
+
+	    http://localhost:8088/?mobile=true&softKeys=true
+
+- *resume*: a numeric value (0-3) overrides a machine's *resume* setting; e.g.:
+
+	    http://localhost:8088/?resume=0
+
+- *softKeys*: "true" to enable the machine's "soft keyboard" (if included); e.g.:
+
+        http://localhost:8088/?softKeys=true
 
 More information about the *resume* attribute is available in the [documentation](/pubs/docs/pcx86/computer/#attributes).
 
@@ -385,7 +402,7 @@ Updating PCjs
 
 To start developing features for a new version of PCjs, here are the recommended steps:
 
-1. Change the version number in the root [package.json](package.json) and [machines.json](_data/machines.json)
+1. Update the version numbers in [package.json](package.json) and [machines.json](_data/machines.json)
 2. Run the "gulp version" task to bump the version in all the machine XML files
 3. Make changes
 4. Run "gulp" to build new versions of the apps (eg, "/versions/pcx86/1.x.x/pcx86.js")

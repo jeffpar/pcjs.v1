@@ -7,7 +7,7 @@
 /**
  * @define {string}
  */
-var APPVERSION = "1.x.x";       // this @define is overridden by the Closure Compiler with the version in package.json
+var APPVERSION = "";            // this @define is overridden by the Closure Compiler with the version in machines.json
 
 var XMLVERSION = null;          // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
 
@@ -1274,8 +1274,10 @@ class Str {
     /**
      * sprintf(format, ...args)
      *
-     * Copied from the CCjs project (/ccjs/lib/stdio.js) and extended.  Far from complete let alone sprintf-compatible,
-     * but it's a start.
+     * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
+     *
+     * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
+     * specifiers that I use.
      *
      * @param {string} format
      * @param {...} args
@@ -1283,44 +1285,81 @@ class Str {
      */
     static sprintf(format, ...args)
     {
-        var parts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
-        var buffer = "";
-        var partIndex = 0;
-        for (var i = 0; i < args.length; i++) {
+        let buffer = "";
+        let aParts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
 
-            var arg = args[i], d, s;
-            buffer += parts[partIndex++];
-            var flags = parts[partIndex];
-            var minimum = +parts[partIndex+1] || 0;
-            var precision = +parts[partIndex+3] || 0;
-            var conversion = parts[partIndex+5];
+        let iArg = 0, iPart;
+        for (iPart = 0; iPart < aParts.length - 7; iPart += 7) {
+
+            buffer += aParts[iPart];
+
+            let arg = args[iArg++];
+            let flags = aParts[iPart+1];
+            let minimum = +aParts[iPart+2] || 0;
+            let precision = +aParts[iPart+4] || 0;
+            let conversion = aParts[iPart+6];
+            let ach = null, s;
 
             switch(conversion) {
             case 'd':
+                /*
+                 * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
+                 */
+                arg = Math.trunc(arg);
+                /* falls through */
+
             case 'f':
-                d = Math.trunc(arg);
-                s = d + "";
+                s = Math.trunc(arg) + "";
                 if (precision) {
                     minimum -= (precision + 1);
                 }
                 if (s.length < minimum) {
                     if (flags == '0') {
-                        if (d < 0) minimum--;
-                        s = ("0000000000" + Math.abs(d)).slice(-minimum);
-                        if (d < 0) s = '-' + s;
+                        if (arg < 0) minimum--;
+                        s = ("0000000000" + Math.abs(arg)).slice(-minimum);
+                        if (arg < 0) s = '-' + s;
                     } else {
                         s = ("          " + s).slice(-minimum);
                     }
                 }
                 if (precision) {
-                    d = Math.trunc((arg - Math.trunc(arg)) * Math.pow(10, precision));
-                    s += '.' + ("0000000000" + Math.abs(d)).slice(-precision);
+                    arg = Math.round((arg - Math.trunc(arg)) * Math.pow(10, precision));
+                    s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
                 }
                 buffer += s;
                 break;
+
+            case 'c':
+                arg = String.fromCharCode(arg);
+                /* falls through */
+
             case 's':
+                if (typeof arg == "string") {
+                    while (arg.length < minimum) {
+                        if (flags == '-') {
+                            arg += ' ';
+                        } else {
+                            arg = ' ' + arg;
+                        }
+                    }
+                }
                 buffer += arg;
                 break;
+
+            case 'X':
+                ach = Str.HexUpperCase;
+                /* falls through */
+
+            case 'x':
+                if (!ach) ach = Str.HexLowerCase;
+                s = "";
+                do {
+                    s = ach[arg & 0xf] + s;
+                    arg >>>= 4;
+                } while (--minimum > 0 || arg);
+                buffer += s;
+                break;
+
             default:
                 /*
                  * The supported ANSI C set of conversions: "dioxXucsfeEgGpn%"
@@ -1328,10 +1367,9 @@ class Str {
                 buffer += "(unrecognized printf conversion %" + conversion + ")";
                 break;
             }
-
-            partIndex += 6;
         }
-        buffer += parts[partIndex];
+
+        buffer += aParts[iPart];
         return buffer;
     }
 
@@ -1492,6 +1530,9 @@ Str.TYPES = {
     OBJECT:     7,
     ARRAY:      8
 };
+
+Str.HexLowerCase = "0123456789abcdef";
+Str.HexUpperCase = "0123456789ABCDEF";
 
 
 
@@ -1975,7 +2016,11 @@ class Web {
             return response;
         }
 
-        if (!DEBUG) {
+        if (!DEBUG && !NODE) {
+            /*
+             * TODO: Perhaps it's time for our code in netlib.js to finally add support for HTTPS; for now
+             * though, it's just as well that the NODE environment assumes all resources are available locally.
+             */
             sURL = sURL.replace(/^\/(pcjs-disks|private-disks)\//, "https://jeffpar.github.io/$1/");
         }
         else {
@@ -3288,22 +3333,20 @@ class Component {
     }
 
     /**
-     * Component.bindExternalControl(component, sControl, sBinding, sType)
+     * Component.bindExternalControl(component, sBinding, sType)
      *
      * @param {Component} component
-     * @param {string} sControl
      * @param {string} sBinding
-     * @param {string} [sType] is the external component type
+     * @param {string} [sType] is the external component type (default is "Panel")
      */
-    static bindExternalControl(component, sControl, sBinding, sType)
+    static bindExternalControl(component, sBinding, sType = "Panel")
     {
-        if (sControl) {
-            if (sType === undefined) sType = "Panel";
+        if (sBinding) {
             var target = Component.getComponentByType(sType, component.id);
             if (target) {
-                var eBinding = target.bindings[sControl];
-                if (eBinding) {
-                    component.setBinding(null, sBinding, eBinding);
+                var control = target.bindings[sBinding];
+                if (control) {
+                    component.setBinding(null, sBinding, control);
                 }
             }
         }
@@ -44055,7 +44098,7 @@ class ROMX86 extends Component {
         if (this.sFileURL) {
             var rom = this;
             var sProgress = "Loading " + this.sFileURL + "...";
-            Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
+            Web.getResource(this.sFileURL, null, true, function doneROMLoad(sURL, sResponse, nErrorCode) {
                 rom.doneLoad(sURL, sResponse, nErrorCode);
             }, function(nState) {
                 rom.println(sProgress, Component.PRINT.PROGRESS);
@@ -45375,7 +45418,7 @@ class Keyboard extends Component {
                 var sCode = sBinding.toUpperCase().replace(/-/g, '_');
                 if (Keyboard.CLICKCODES[sCode] !== undefined && sHTMLType == "button") {
                     this.bindings[id] = controlText;
-                    if (DEBUG) console.log("binding click-code '" + sCode + "'");
+                    if (MAXDEBUG) console.log("binding click-code '" + sCode + "'");
                     controlText.onclick = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingClick(event) {
                             if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.EVENT | Messages.KEY);
@@ -45398,7 +45441,7 @@ class Keyboard extends Component {
                     }
                     this.cSoftCodes++;
                     this.bindings[id] = controlText;
-                    if (DEBUG) console.log("binding soft-code '" + sBinding + "'");
+                    if (MAXDEBUG) console.log("binding soft-code '" + sBinding + "'");
                     var msLastEvent = 0, nClickState = 0;
                     var fStateKey = (Keyboard.KEYSTATES[Keyboard.SOFTCODES[sBinding]] <= Keyboard.STATE.ALL_SHIFT);
                     var fnDown = function(kbd, sKey, simCode) {
@@ -45420,7 +45463,7 @@ class Keyboard extends Component {
                                 if (nClickState < 8) {
                                     kbd.removeActiveKey(simCode);
                                 } else {
-                                    if (DEBUG) console.log("soft-locking '" + sBinding + "'");
+                                    if (MAXDEBUG) console.log("soft-locking '" + sBinding + "'");
                                     nClickState = 0;
                                 }
                             }
@@ -48219,7 +48262,7 @@ Web.onInit(Keyboard.init);
  */
 
 /**
- * class Card
+ * @class Card
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Card extends Controller {
@@ -48262,7 +48305,7 @@ class Card extends Controller {
              * If a Debugger is present, we want to stash a bit more info in each Card.
              */
             if (DEBUGGER) {
-                this.dbg = video.dbg;
+                this.dbg = /** @type {DebuggerX86} */ (video.dbg);
                 this.type = specs[0];
                 this.port = specs[1];
             }
@@ -50077,7 +50120,7 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.XOR] = Card.ACCESS.
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE3] = Card.ACCESS.writeByteMode3;
 
 /**
- * class Video
+ * @class Video
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Video extends Component {
@@ -55095,21 +55138,8 @@ Video.MODEL = {
  *  Dots        238944       326340
  */
 
-/**
- * @class MonitorSpecs
- * @property {number} nHorzPeriodsPerSec
- * @property {number} nHorzPeriodsPerFrame
- * @property {number} percentHorzActive
- * @property {number} percentVertActive
- *
- * From these monitor specs, we calculate the following values for a given Card:
- *
- *      nCyclesDefault = cpu.getBaseCyclesPerSecond();          // eg, 4772727
- *      nCyclesHorzPeriod = (nCyclesDefault / monitorSpecs.nHorzPeriodsPerSec) | 0;
- *      nCyclesHorzActive = (nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100) | 0;
- *      nCyclesVertPeriod = nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame;
- *      nCyclesVertActive = (nCyclesVertPeriod * monitorSpecs.percentVertActive / 100) | 0;
- */
+/** @typedef {{ nHorzPeriodsPerSec: number, nHorzPeriodsPerFrame: number, percentHorzActive: number, percentVertActive: number }} */
+var MonitorSpecs;
 
 /**
  * @type {Object}
@@ -55202,15 +55232,8 @@ Video.aEGAMonitorSwitches = {
     0x05: [ChipSet.MONITOR.MONO,         ChipSet.MONITOR.COLOR, false]  // "0101"
 };
 
-/**
- * @class Font
- * @property {number} cxCell
- * @property {number} cyCell
- * @property {Array} aCSSColors
- * @property {Array} aRGBColors
- * @property {Array} aColorMap
- * @property {Array} aCanvas
- */
+/** @typedef {{ cxCell: number, cyCell: number, aCSSColors: Array, aRGBColors: Array, aColorMap: Array, aCanvas: Array }} */
+var Font;
 
 /*
  * For each video mode, we need to know the following pieces of information:
@@ -55572,9 +55595,9 @@ Web.onInit(Video.init);
  * property {number} iAdapter
  * property {number} portBase
  * property {number} nIRQ
- * property {Object} controlIOBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
+ * property {Object} controlBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
  *
- * NOTE: This class declaration started as a way of informing the code inspector of the controlIOBuffer property,
+ * NOTE: This class declaration started as a way of informing the code inspector of the controlBuffer property,
  * which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
  * initializing such properties in the constructor is a better way to go -- even though it's more code -- because
  * JavaScript compilers are supposed to be happier when the underlying object structures aren't constantly changing.
@@ -55635,29 +55658,39 @@ class ParallelPort extends Component {
             return;
         }
         /**
-         * consoleOutput becomes a string that records parallel port output if the 'binding' property is set to the
+         * consoleBuffer becomes a string that records parallel port output if the 'binding' property is set to the
          * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
          * or the string length reaches a threshold (currently, 1024 characters).
          *
          * @type {string|null}
          */
-        this.consoleOutput = null;
+        this.consoleBuffer = null;
 
         /**
-         * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
+         * controlBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
          *
          * @type {Object}
          */
-        this.controlIOBuffer = null;
+        this.controlBuffer = null;
 
         var sBinding = parmsParallel['binding'];
         if (sBinding == "console") {
-            this.consoleOutput = "";
+            this.consoleBuffer = "";
         } else {
             /*
+             * If the ParallelPort wants to bind to a control (eg, "print") in a DIFFERENT component (eg, "Panel"),
+             * then it specifies the name of that control with the 'binding' property.  The ParallelPort constructor
+             * will then call bindExternalControl(), which looks up the control, and then passes it to our own
+             * setBinding() handler.
+             * 
+             * For bindExternalControl() to succeed, it also need to know the target component; for now, that's
+             * been hard-coded to "Panel", in part because that's one of the few components we can rely upon
+             * initializing before we do, but it would be a simple matter to include a component type or ID as part
+             * of the 'binding' property as well, if we need more flexibility later.
+             * 
              * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
              */
-            Component.bindExternalControl(this, sBinding, ParallelPort.sIOBuffer);
+            Component.bindExternalControl(this, sBinding);
         }
     }
 
@@ -55673,13 +55706,9 @@ class ParallelPort extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        switch (sBinding) {
-        case ParallelPort.sIOBuffer:
-            this.bindings[sBinding] = this.controlIOBuffer = control;
+        if (sHTMLType == null || sHTMLType == "textarea") {
+            this.bindings[sBinding] = this.controlBuffer = control;
             return true;
-
-        default:
-            break;
         }
         return false;
     }
@@ -55926,12 +55955,12 @@ class ParallelPort extends Component {
 
         this.printMessage("transmitByte(" + Str.toHexByte(b) + ")");
 
-        if (this.controlIOBuffer) {
+        if (this.controlBuffer) {
             if (b == 0x0D) {
                 // this.iLogicalCol = 0;
             }
             else if (b == 0x08) {
-                this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
+                this.controlBuffer.value = this.controlBuffer.value.slice(0, -1);
             }
             else {
                 /*
@@ -55955,18 +55984,18 @@ class ParallelPort extends Component {
                         b = 0x20;       // ASCII code for a space
                     }
                 }
-                this.controlIOBuffer.value += Str.toASCIICode(b);
-                this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+                this.controlBuffer.value += Str.toASCIICode(b);
+                this.controlBuffer.scrollTop = this.controlBuffer.scrollHeight;
             }
             fTransmitted = true;
         }
-        else if (this.consoleOutput != null) {
-            if (b == 0x0A || this.consoleOutput.length >= 1024) {
-                this.println(this.consoleOutput);
-                this.consoleOutput = "";
+        else if (this.consoleBuffer != null) {
+            if (b == 0x0A || this.consoleBuffer.length >= 1024) {
+                this.println(this.consoleBuffer);
+                this.consoleBuffer = "";
             }
             if (b != 0x0A) {
-                this.consoleOutput += String.fromCharCode(b);
+                this.consoleBuffer += String.fromCharCode(b);
             }
             fTransmitted = true;
         }
@@ -55993,19 +56022,6 @@ class ParallelPort extends Component {
         }
     }
 }
-
-/*
- * Internal name used for the I/O buffer control, if any, that we bind to the ParallelPort.
- *
- * Alternatively, if ParallelPort wants to use another component's control (eg, the Panel's
- * "print" control), it can specify the name of that control with the 'binding' property.
- *
- * For that binding to succeed, we also need to know the target component; for now, that's
- * been hard-coded to "Panel", in part because that's one of the few components we can rely
- * upon initializing before we do, but it would be a simple matter to include a component type
- * or ID as part of the 'binding' property as well, if we need more flexibility later.
- */
-ParallelPort.sIOBuffer = "buffer";
 
 /*
  * The "Data Register" is an input/output register at offset 0 from portBase.  The bit-to-pin mappings are:
@@ -56097,7 +56113,7 @@ Web.onInit(ParallelPort.init);
 /**
  * SerialPort class
  *
- * The class property declarations below started as a way of informing the code inspector of the controlIOBuffer
+ * The class property declarations below started as a way of informing the code inspector of the controlBuffer
  * property, which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
  * initializing such properties in the constructor is a better way to go -- even though it's more code -- because
  * JavaScript compilers are supposed to be happier when the underlying object structures aren't constantly changing.
@@ -56110,15 +56126,15 @@ Web.onInit(ParallelPort.init);
  * @property {number} iAdapter
  * @property {number} portBase
  * @property {number} nIRQ
- * @property {string|null} consoleOutput
- * @property {HTMLTextAreaElement} controlIOBuffer (DOM element bound to the port for rudimentary output; see transmitByte())
+ * @property {string|null} consoleBuffer
+ * @property {HTMLTextAreaElement} controlBuffer (DOM element bound to the port for rudimentary output; see transmitByte())
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class SerialPort extends Component {
     /**
-     * SerialPort(parmsSerial)
+     * SerialPort(parms)
      *
-     * The SerialPort component has the following component-specific (parmsSerial) properties:
+     * The SerialPort component has the following component-specific (parms) properties:
      *
      *      adapter: 1 (port 0x3F8) or 2 (port 0x2F8); 0 if not defined
      *
@@ -56147,13 +56163,13 @@ class SerialPort extends Component {
      * adapter numbers, since not all operating systems follow those naming conventions.
      *
      * @this {SerialPort}
-     * @param {Object} parmsSerial
+     * @param {Object} parms
      */
-    constructor(parmsSerial)
+    constructor(parms)
     {
-        super("SerialPort", parmsSerial, Messages.SERIAL);
+        super("SerialPort", parms, Messages.SERIAL);
 
-        this.iAdapter = parmsSerial['adapter'];
+        this.iAdapter = parms['adapter'];
 
         switch (this.iAdapter) {
         case 1:
@@ -56165,18 +56181,22 @@ class SerialPort extends Component {
             this.nIRQ = ChipSet.IRQ.COM2;
             break;
         default:
-            Component.warning("Unrecognized serial adapter #" + this.iAdapter);
-            return;
+            if (this.idComponent != "test") {
+                Component.warning("Unrecognized serial adapter #" + this.iAdapter);
+                return;
+            }
+            break;
         }
-        /**
-         * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
+        
+        /*
+         * consoleBuffer becomes a string that records serial port output if the 'binding' property is set to the
          * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
          * or the string length reaches a threshold (currently, 1024 characters).
          */
-        this.consoleOutput = null;
+        this.consoleBuffer = null;
 
-        /**
-         * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
+        /*
+         * controlBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
          *
          * Example: CTTY COM2
          *
@@ -56185,35 +56205,60 @@ class SerialPort extends Component {
          * terminal.  It further assumes that anything typed on such a terminal is NOT displayed, so as DOS *receives*
          * serial input, DOS *transmits* the appropriate characters back to the terminal via COM2.
          *
-         * As a result, controlIOBuffer only needs to be updated by the transmitByte() function.
+         * As a result, controlBuffer only needs to be updated by the transmitByte() function.
          */
-        this.controlIOBuffer = null;
+        this.controlBuffer = null;
 
         /*
-         * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
+         * If controlBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
          * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
          * number of spaces.
          *
-         * Another controlIOBuffer feature is charBOL, which, if nonzero, specifies a character to automatically output
+         * Another controlBuffer feature is charBOL, which, if nonzero, specifies a character to automatically output
          * at the beginning of every line.  This probably isn't generally useful; I use it internally to preformat serial
          * output.
          */
-        this.tabSize = parmsSerial['tabSize'] || 0;
-        this.charBOL = parmsSerial['charBOL'] || 0;
+        this.tabSize = parms['tabSize'] || 0;
+        this.charBOL = parms['charBOL'] || 0;
         this.charPrev = 0;
         this.iLogicalCol = 0;
 
         this.bMSRInit = SerialPort.MSR.CTS | SerialPort.MSR.DSR;
         this.fNullModem = true;
 
-        var sBinding = parmsSerial['binding'];
+        /*
+         * Normally, any HTML controls defined within the scope of the component's XML element are *implicitly*
+         * bound to us.  For example, in the XML below, the textarea control will automatically trigger a call to
+         * setBinding() with sBinding set to "serialWindow" and control set to an HTMLTextAreaElement.
+         * 
+	     *      <serial id="com1">
+	     *          <control type="container" class="pcjs-textarea">
+	     *      	    <control type="textarea" binding="serialWindow"/>
+	     *          </control>
+	     *      </serial>
+	     * 
+	     * However, this component also supports an *explicit* binding attribute, which can either be the hard-coded
+	     * name "console" (for routing all output to the system console) or the name of a control binding that has
+	     * been defined in another component (eg, an HTMLTextAreaElement defined as part of the Control Panel layout).
+         */
+        var sBinding = parms['binding'];
         if (sBinding == "console") {
-            this.consoleOutput = "";
+            this.consoleBuffer = "";
         } else {
             /*
+             * If the SerialPort wants to bind to a control (eg, "print") in a DIFFERENT component (eg, "Panel"),
+             * then it specifies the name of that control with the 'binding' property.  The SerialPort constructor
+             * will then call bindExternalControl(), which looks up the control, and then passes it to our own
+             * setBinding() handler.
+             * 
+             * For bindExternalControl() to succeed, it also need to know the target component; for now, that's
+             * been hard-coded to "Panel", in part because that's one of the few components we can rely upon
+             * initializing before we do, but it would be a simple matter to include a component type or ID as part
+             * of the 'binding' property as well, if we need more flexibility later.
+             * 
              * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
              */
-            Component.bindExternalControl(this, sBinding, SerialPort.sIOBuffer);
+            Component.bindExternalControl(this, sBinding);
         }
 
         /*
@@ -56223,9 +56268,10 @@ class SerialPort extends Component {
         this.connection = this.sendData = this.updateStatus = null;
 
         /*
-         * Export all functions required by initConnection().
+         * Export all functions required by bindConnection() or initConnection(), whichever is required.
          */
         this['exports'] = {
+            'bind': this.bindConnection,
             'connect': this.initConnection,
             'receiveData': this.receiveData,
             'receiveStatus': this.receiveStatus
@@ -56233,7 +56279,28 @@ class SerialPort extends Component {
     }
 
     /**
-     * attachMouse(id, mouse, fnUpdate)
+     * bindConnection(connection, receiveData)
+     * 
+     * This is basically a lighter-weight version of initConnection(), used by built-in components
+     * like TestController, as opposed to components in external machines, which require more work to connect.
+     *
+     * @this {SerialPort}
+     * @param {Component} connection
+     * @param {function()} receiveData
+     * @return {boolean}
+     */
+    bindConnection(connection, receiveData)
+    {
+        if (!this.connection) {
+            this.connection = connection;
+            this.sendData = receiveData;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * bindMouse(id, mouse, fnUpdate)
      *
      * @this {SerialPort}
      * @param {string} id
@@ -56241,7 +56308,7 @@ class SerialPort extends Component {
      * @param {function(number)} fnUpdate
      * @return {Component|null}
      */
-    attachMouse(id, mouse, fnUpdate)
+    bindMouse(id, mouse, fnUpdate)
     {
         var component = null;
         if (id == this.idComponent && !this.connection) {
@@ -56265,17 +56332,16 @@ class SerialPort extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var serial = this;
+        if (sHTMLType == null || sHTMLType == "textarea") {
 
-        switch (sBinding) {
-        case SerialPort.sIOBuffer:
-            this.bindings[sBinding] = this.controlIOBuffer = /** @type {HTMLTextAreaElement} */ (control);
+            var serial = this;
+            this.bindings[sBinding] = this.controlBuffer = /** @type {HTMLTextAreaElement} */ (control);
 
             /*
              * By establishing an onkeypress handler here, we make it possible for DOS commands like
              * "CTTY COM1" to more or less work (use "CTTY CON" to restore control to the DOS console).
              */
-            this.controlIOBuffer.onkeydown = function onKeyDown(event) {
+            this.controlBuffer.onkeydown = function onKeyDown(event) {
                 /*
                  * This is required in addition to onkeypress, because it's the only way to prevent
                  * BACKSPACE (keyCode 8) from being interpreted by the browser as a "Back" operation;
@@ -56297,7 +56363,7 @@ class SerialPort extends Component {
                 return true;
             };
 
-            this.controlIOBuffer.onkeypress = function onKeyPress(event) {
+            this.controlBuffer.onkeypress = function onKeyPress(event) {
                 /*
                  * Browser-independent keyCode extraction; refer to onKeyPress() and the other key event
                  * handlers in keyboard.js.
@@ -56321,13 +56387,17 @@ class SerialPort extends Component {
              * itself no longer needs the "readonly" attribute; we primarily need to remove it for iOS browsers,
              * so that the soft keyboard will activate, but it shouldn't hurt to remove the attribute for all browsers.
              */
-            this.controlIOBuffer.removeAttribute("readonly");
-
+            this.controlBuffer.removeAttribute("readonly");
             return true;
-
-        default:
-            break;
         }
+
+        // default:
+        //     if (!this.iAdapter) {
+        //         control.removeAttribute("readonly");
+        //     }
+        //     break;
+        // }
+        
         return false;
     }
 
@@ -56343,23 +56413,25 @@ class SerialPort extends Component {
     initBus(cmp, bus, cpu, dbg)
     {
         this.cmp = cmp;
-        this.bus = bus;
-        this.cpu = cpu;
-        this.dbg = dbg;
+        
+        if (this.iAdapter) {
+            this.bus = bus;
+            this.cpu = cpu;
+            this.dbg = dbg;
 
-        var serial = this;
-        this.timerReceiveNext = this.cpu.addTimer(this.id + ".receive", function receiveDataTimer() {
-            serial.receiveData();
-        });
-        this.timerTransmitNext = this.cpu.addTimer(this.id + ".transmit", function transmitDataTimer() {
-            serial.transmitData();
-        });
+            var serial = this;
+            this.timerReceiveNext = this.cpu.addTimer(this.id + ".receive", function receiveDataTimer() {
+                serial.receiveData();
+            });
+            this.timerTransmitNext = this.cpu.addTimer(this.id + ".transmit", function transmitDataTimer() {
+                serial.transmitData();
+            });
 
-        this.chipset = cmp.getMachineComponent("ChipSet");
+            this.chipset = cmp.getMachineComponent("ChipSet");
 
-        bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
-        bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
-
+            bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
+            bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
+        }
         this.setReady();
     }
 
@@ -56430,7 +56502,6 @@ class SerialPort extends Component {
     powerUp(data, fRepower)
     {
         if (!fRepower) {
-
             /*
              * This is as late as we can currently wait to make our first inter-machine connection attempt;
              * even so, the target machine's initialization process may still be ongoing, so any connection
@@ -56587,8 +56658,8 @@ class SerialPort extends Component {
      *
      * This replaces the old sendRBR() function, which expected an Array of bytes.  We still support that,
      * but in order to support connections with other SerialPort components (ie, the PC8080 SerialPort), we
-     * have added support for numbers and strings as well.  If no data is specified at all, then all we do is
-     * "clock" any remaining data into the receiver.
+     * have added support for numbers and strings as well.  If no data is specified at all, then all we do
+     * is "clock" any remaining data into the receiver.
      *
      * @this {SerialPort}
      * @param {number|string|Array} [data]
@@ -56938,12 +57009,12 @@ class SerialPort extends Component {
             }
         }
 
-        if (this.controlIOBuffer) {
+        if (this.controlBuffer) {
             if (b == 0x0D) {
                 this.iLogicalCol = 0;
             }
             else if (b == 0x08) {
-                this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
+                this.controlBuffer.value = this.controlBuffer.value.slice(0, -1);
                 /*
                  * TODO: Back up the correct number of columns if the character erased was a tab.
                  */
@@ -56966,20 +57037,20 @@ class SerialPort extends Component {
                     if (this.charPrev != 0x0A) s = "\n" + s;
                     if (this.charBOL) s = String.fromCharCode(this.charBOL) + s;
                 }
-                this.controlIOBuffer.value += s;
-                this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+                this.controlBuffer.value += s;
+                this.controlBuffer.scrollTop = this.controlBuffer.scrollHeight;
                 this.iLogicalCol += nChars;
             }
             this.charPrev = b;
             fTransmitted = true;
         }
-        else if (this.consoleOutput != null) {
-            if (b == 0x0A || this.consoleOutput.length >= 1024) {
-                this.println(this.consoleOutput);
-                this.consoleOutput = "";
+        else if (this.consoleBuffer != null) {
+            if (b == 0x0A || this.consoleBuffer.length >= 1024) {
+                this.println(this.consoleBuffer);
+                this.consoleBuffer = "";
             }
             if (b != 0x0A) {
-                this.consoleOutput += String.fromCharCode(b);
+                this.consoleBuffer += String.fromCharCode(b);
             }
             fTransmitted = true;
         }
@@ -57013,25 +57084,12 @@ class SerialPort extends Component {
         var aeSerial = Component.getElementsByClass(document, PCX86.APPCLASS, "serial");
         for (var iSerial = 0; iSerial < aeSerial.length; iSerial++) {
             var eSerial = aeSerial[iSerial];
-            var parmsSerial = Component.getComponentParms(eSerial);
-            var serial = new SerialPort(parmsSerial);
+            var parms = Component.getComponentParms(eSerial);
+            var serial = new SerialPort(parms);
             Component.bindComponentControls(serial, eSerial, PCX86.APPCLASS);
         }
     }
 }
-
-/*
- * Internal name used for the I/O buffer control, if any, that we bind to the SerialPort.
- *
- * Alternatively, if SerialPort wants to use another component's control (eg, the Panel's
- * "print" control), it can specify the name of that control with the 'binding' property.
- *
- * For that binding to succeed, we also need to know the target component; for now, that's
- * been hard-coded to "Panel", in part because that's one of the few components we can rely
- * upon initializing before we do, but it would be a simple matter to include a component type
- * or ID as part of the 'binding' property as well, if we need more flexibility later.
- */
-SerialPort.sIOBuffer = "buffer";
 
 /*
  * 8250 I/O register offsets (add these to a I/O base address to obtain an I/O port address)
@@ -57200,6 +57258,538 @@ Web.onInit(SerialPort.init);
 
 
 /**
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/testctl.js (C) Jeff Parsons 2012-2018
+ */
+
+/*
+ * This module provides connectivity between the TestMonitor component and whichever PCx86 SerialPort
+ * our 'binding' property indicates, if any.
+ */
+
+
+/**
+ * TestController class
+ *
+ * @class TestController
+ * @property {string|undefined urlTests
+ * @property {Object|null} tests
+ * @property {string|null} consoleBuffer
+ * @property {HTMLTextAreaElement|null} controlBuffer
+ * @property {function(...)|null} sendData
+ * @property {function(number)|null} deliverData
+ * @property {function(number)|null} deliverInput
+ * @property {function(Object)|null} deliverTests
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
+ */
+class TestController extends Component {
+    /**
+     * TestController(parms)
+     *
+     * @this {TestController}
+     * @param {Object} parms
+     */
+    constructor(parms)
+    {
+        super("TestController", parms);
+
+        this.tests = null;
+        let fLoading = false;
+        this.urlTests = parms['tests'];
+        
+        this.consoleBuffer = "";
+        this.controlBuffer = null;
+        this.sendData = null;
+        this.deliverData = this.deliverInput = this.deliverTests = null;
+        
+        let sBinding = parms['binding'];
+        if (sBinding) {
+            this.serialPort = Component.getComponentByID(sBinding, this.id);
+            if (this.serialPort) {
+                let exports = this.serialPort['exports'];
+                if (exports) {
+                    let bind = /** @function */ (exports['bind']);
+                    if (bind && bind.call(this.serialPort, this, this.receiveData)) {
+                        this.sendData = exports['receiveData'].bind(this.serialPort);
+                        if (this.urlTests) {
+                            this.loadTests(this.urlTests);
+                            fLoading = true;
+                        }
+                    }
+                }
+            }
+            if (!this.sendData) {
+                Component.warning(this.id + ": binding '" + sBinding + "' unavailable");
+            }
+        }
+        if (!fLoading) this.setReady();
+    }
+
+    /**
+     * loadTests(sURL)
+     *
+     * @this {TestController}
+     * @param {string} sURL
+     */
+    loadTests(sURL)
+    {
+        let controller = this;
+        let sProgress = "Loading " + sURL + "...";
+        Web.getResource(sURL, null, true, function(sURL, sResponse, nErrorCode) {
+            controller.doneLoad(sURL, sResponse, nErrorCode);
+        }, function(nState) {
+            controller.println(sProgress, Component.PRINT.PROGRESS);
+        });
+        
+    }
+    
+    /**
+     * doneLoad(sURL, sTestData, nErrorCode)
+     *
+     * @this {TestController}
+     * @param {string} sURL
+     * @param {string} sTestData
+     * @param {number} nErrorCode (response from server if anything other than 200)
+     */
+    doneLoad(sURL, sTestData, nErrorCode)
+    {
+        if (nErrorCode) {
+            this.notice("Unable to load tests (error " + nErrorCode + ": " + sURL + ")", nErrorCode < 0);
+        }
+        else {
+            try {
+                this.tests = /** @type {Object} */ (JSON.parse(sTestData));
+                if (this.deliverTests) {
+                    this.deliverTests(this.tests);
+                    this.tests = null;
+                }
+                Component.addMachineResource(this.idMachine, sURL, sTestData);
+            } catch (err) {
+                this.notice("Test parsing error: " + err.message);
+            }
+        }
+        this.setReady();
+    }
+
+    /**
+     * bindMonitor(monitor, deliverData, deliverInput, deliverTests)
+     *
+     * @this {TestController}
+     * @param {TestMonitor} monitor
+     * @param {function(number)} deliverData
+     * @param {function(number)} deliverInput
+     * @param {function(Object)} deliverTests
+     */
+    bindMonitor(monitor, deliverData, deliverInput, deliverTests)
+    {
+        this.deliverData = deliverData.bind(monitor);
+        this.deliverInput = deliverInput.bind(monitor);
+        this.deliverTests = deliverTests.bind(monitor);
+        if (this.tests && this.deliverTests) {
+            this.deliverTests(this.tests);
+            this.tests = null;
+        }
+    }
+
+    /**
+     * setBinding(sHTMLType, sBinding, control, sValue)
+     *
+     * @this {TestController}
+     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {string} [sValue] optional data value
+     * @return {boolean} true if binding was successful, false if unrecognized binding request
+     */
+    setBinding(sHTMLType, sBinding, control, sValue)
+    {
+        let controller = this;
+
+        if (sHTMLType == "textarea" && !this.controlBuffer) {
+
+            this.bindings[sBinding] = control;
+            this.controlBuffer = /** @type {HTMLTextAreaElement} */ (control);
+            this.consoleBuffer = null;          // we currently use one or the other: control or console
+
+            /*
+             * By establishing an onkeypress handler here, we make it possible for DOS commands like
+             * "CTTY COM1" to more or less work (use "CTTY CON" to restore control to the DOS console).
+             */
+            control.onkeydown = function onKeyDown(event) {
+                /*
+                 * This is required in addition to onkeypress, because it's the only way to prevent
+                 * BACKSPACE (keyCode 8) from being interpreted by the browser as a "Back" operation;
+                 * moreover, not all browsers generate an onkeypress notification for BACKSPACE.
+                 *
+                 * A related problem exists for Ctrl-key combinations in most Windows-based browsers
+                 * (eg, IE, Edge, Chrome for Windows, etc), because keys like Ctrl-C and Ctrl-S have
+                 * special meanings (eg, Copy, Save).  To the extent the browser will allow it, we
+                 * attempt to disable that default behavior when this control receives an onkeydown
+                 * event for one of those keys (probably the only event the browser generates for them).
+                 */
+                event = event || window.event;
+                let keyCode = event.keyCode;
+                if (keyCode === 0x08 || event.ctrlKey && keyCode >= 0x41 && keyCode <= 0x5A) {
+                    if (event.preventDefault) event.preventDefault();
+                    if (keyCode > 0x40) keyCode -= 0x40;
+                    if (controller.deliverInput) controller.deliverInput(keyCode);
+                }
+                return true;
+            };
+
+            control.onkeypress = function onKeyPress(event) {
+                /*
+                 * Browser-independent keyCode extraction; refer to onKeyPress() and the other key event
+                 * handlers in keyboard.js.
+                 */
+                event = event || window.event;
+                let keyCode = event.which || event.keyCode;
+                if (controller.deliverInput) controller.deliverInput(keyCode);
+                /*
+                 * Since we're going to remove the "readonly" attribute from the <textarea> control
+                 * (so that the soft keyboard activates on iOS), instead of calling preventDefault() for
+                 * selected keys (eg, the SPACE key, whose default behavior is to scroll the page), we must
+                 * now call it for *all* keys, so that the keyCode isn't added to the control immediately,
+                 * on top of whatever the machine is echoing back, resulting in double characters.
+                 */
+                if (event.preventDefault) event.preventDefault();
+                return true;
+            };
+
+            /*
+             * Now that we've added an onkeypress handler that calls preventDefault() for ALL keys, the control
+             * itself no longer needs the "readonly" attribute; we primarily need to remove it for iOS browsers,
+             * so that the soft keyboard will activate, but it shouldn't hurt to remove the attribute for all browsers.
+             */
+            control.removeAttribute("readonly");
+
+            if (this.sendData) {
+                let monitor = new TestMonitor();
+                monitor.bindController(this, this.sendData, this.sendOutput, this.printf);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * sendOutput(data)
+     *
+     * @this {TestController}
+     * @param {number|string|Array} data
+     */
+    sendOutput(data)
+    {
+        if (typeof data == "number") {
+            this.printf("%c", data);
+        }
+        else if (typeof data == "string") {
+            this.printf("%s", data);
+        }
+        else {
+            for (let i = 0; i < data.length; i++) this.printf("[0x%02x]", data[i]);
+        }
+    }
+
+    /**
+     * printf(format, ...args)
+     *
+     * @this {TestController}
+     * @param {string} format
+     * @param {...} args
+     */
+    printf(format, ...args)
+    {
+        let s = Str.sprintf(format, ...args);
+        
+        if (this.controlBuffer != null) {
+            if (s != '\r') {
+                if (s == '\b') {
+                    this.controlBuffer.value = this.controlBuffer.value.slice(0, -1);
+                } else {
+                    this.controlBuffer.value += s;
+                }
+                /*
+                 * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+                 */
+                if (!DEBUG && this.controlBuffer.value.length > 8192) {
+                    this.controlBuffer.value = this.controlBuffer.value.substr(this.controlBuffer.value.length - 4096);
+                }
+                this.controlBuffer.scrollTop = this.controlBuffer.scrollHeight;
+            }
+        }
+        
+        if (this.consoleBuffer != null) {
+            let i = s.lastIndexOf('\n');
+            if (i >= 0) {
+                console.log(this.consoleBuffer + s.substr(0, i));
+                this.consoleBuffer = "";
+                s = s.substr(i + 1);
+            }
+            this.consoleBuffer += s;
+        }
+    }
+
+    /**
+     * receiveData(data)
+     *
+     * @this {TestController}
+     * @param {number|string|Array} data
+     */
+    receiveData(data)
+    {
+        if (typeof data == "number") {
+            this.deliverData(data);
+        }
+        else if (typeof data == "string") {
+            for (let i = 0; i < data.length; i++) this.deliverData(data.charCodeAt(i));
+        }
+        else {
+            for (let i = 0; i < data.length; i++) this.deliverData(data[i]);
+        }
+    }
+    
+    /**
+     * TestController.init()
+     *
+     * This function operates on every HTML element of class "TestController", extracting the
+     * JSON-encoded parameters for the TestController constructor from the element's "data-value"
+     * attribute, invoking the constructor to create a TestController component, and then binding
+     * any associated HTML controls to the new component.
+     */
+    static init()
+    {
+        let aeTest = Component.getElementsByClass(document, PCX86.APPCLASS, "testctl");
+        for (let iTest = 0; iTest < aeTest.length; iTest++) {
+            let eTest = aeTest[iTest];
+            let parms = Component.getComponentParms(eTest);
+            let test = new TestController(parms);
+            Component.bindComponentControls(test, eTest, PCX86.APPCLASS);
+        }
+    }
+}
+
+/*
+ * Initialize every TestController module on the page.
+ */
+Web.onInit(TestController.init);
+
+
+
+/**
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/testmon.js (C) Jeff Parsons 2012-2018
+ */
+
+/*
+ * Overview
+ * --------
+ * 
+ * TestMonitor monitors activity on the bound SerialPort and a user I/O device (eg, a terminal,
+ * a console window, etc).  It operates in several modes:
+ * 
+ * 1) TERMINAL mode: all data received from the SerialPort is routed the user output device,
+ * and all data received from the user input device is routed to the SerialPort.  No special actions
+ * are taken, until/unless the ATTENTION key is detected from the user input device (ie, Ctrl-T).
+ * 
+ * 2) PROMPT mode: data from the SerialPort is monitored for specific prompts (eg, "A>"), and
+ * when one of those prompts is detected, we enter COMMAND mode, with category set to the appropriate
+ * collection of tests.
+ * 
+ * 3) COMMAND mode: CR-terminated lines of user input are checked against the current set of test
+ * commands, and if a match is found, the corresponding request is sent to the SerialPort.
+ */
+
+
+/**
+ * TestMonitor class
+ *
+ * @class TestMonitor
+ * @property {string} mode
+ * @property {string} promptActive
+ * @property {string} promptBuffer
+ * @property {Object|undefined} tests
+ * @property {Object|undefined} category (eg, "DOS")
+ * @property {string} commandBuffer
+ * @property {function(...)} sendData
+ * @property {function(...)} sendOutput
+ * @property {function(string,...)} printf
+ * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
+ */
+class TestMonitor {
+    /**
+     * TestMonitor()
+     *
+     * @this {TestMonitor}
+     */
+    constructor()
+    {
+        if (DEBUG) console.log("TestMonitor()");
+    }
+
+    /**
+     * bindController(controller, sendData, sendOutput, printf)
+     *
+     * @this {TestMonitor}
+     * @param {Object} controller
+     * @param {function(...)} sendData
+     * @param {function(...)} sendOutput
+     * @param {function(string,...)} printf
+     */
+    bindController(controller, sendData, sendOutput, printf)
+    {
+        this.sendData = sendData.bind(controller);
+        this.sendOutput = sendOutput.bind(controller);
+        this.printf = printf.bind(controller);
+        controller.bindMonitor(this, this.receiveData, this.receiveInput, this.receiveTests);
+        this.printf("%s TestMonitor v%s\nUse Ctrl-T to toggle terminal mode\n", APPNAME, APPVERSION || XMLVERSION);
+        this.setMode(TestMonitor.MODE.TERMINAL);
+    }
+
+    /**
+     * checkCommand()
+     *
+     * @this {TestMonitor}
+     */
+    checkCommand()
+    {
+        let suite = this.tests[this.category];
+        let commands = suite['commands'];
+        let command = commands[this.commandBuffer];
+        if (command) {
+            let request = command['request'];
+            if (DEBUG) console.log("TestMonitor.checkCommand(" + this.commandBuffer + "): request '" + request + "'");
+            this.sendData(request);
+            let mode = command['mode'];
+            if (mode) this.setMode(mode);
+        } else {
+            this.printf("unrecognized command: %s\n", this.commandBuffer);
+        }
+        this.commandBuffer = "";
+    }
+    
+    /**
+     * setMode(mode, category)
+     * 
+     * @this {TestMonitor}
+     * @param {string} mode
+     * @param {string} [category]
+     */
+    setMode(mode, category)
+    {
+        if (mode != this.mode) {
+            switch (mode) {
+            case TestMonitor.MODE.TERMINAL:
+                this.category = null;
+                break;
+
+            case TestMonitor.MODE.PROMPT:
+                this.aCategories = [];
+                this.aPrompts = [];
+                this.cchPromptLongest = 0;
+                for (let category in this.tests) {
+                    let suite = this.tests[category];
+                    let prompt = suite[TestMonitor.MODE.PROMPT];
+                    if (prompt) {
+                        this.aCategories.push(category);
+                        this.aPrompts.push(prompt);
+                        if (this.cchPromptLongest < prompt.length) {
+                            this.cchPromptLongest = prompt.length;
+                        }
+                    }
+                }
+                this.promptActive = this.promptBuffer = "";
+                this.category = null;
+                break;
+
+            case TestMonitor.MODE.COMMAND:
+                if (category) this.category = category;
+                this.commandBuffer = "";
+                break;
+
+            default:
+                this.printf("unrecognized mode: %s\n", mode);
+                return;
+            }
+
+            this.mode = mode;
+            this.printf("mode: %s\n", this.category || this.mode);
+        }
+    }
+    
+    /**
+     * receiveTests(tests)
+     *
+     * @this {TestMonitor}
+     * @param {Object} tests
+     */
+    receiveTests(tests)
+    {
+        if (DEBUG) console.log("TestMonitor.receiveTests(" + JSON.stringify(tests) + ")");
+        this.tests = tests;
+        this.setMode(TestMonitor.MODE.PROMPT);
+    }
+
+    /**
+     * receiveData(data)
+     *
+     * @this {TestMonitor}
+     * @param {number} data
+     */
+    receiveData(data)
+    {
+        if (this.mode == TestMonitor.MODE.PROMPT) {
+            if (this.promptBuffer.length >= this.cchPromptLongest) {
+                this.promptBuffer = this.promptBuffer.slice(-(this.cchPromptLongest - 1));
+            }
+            this.promptBuffer += String.fromCharCode(data);
+            if (DEBUG) console.log("TestMonitor.receiveData(" + data + "): checking prompts for '" + this.promptBuffer + "'");
+            let i = this.aPrompts.indexOf(this.promptBuffer);
+            if (i >= 0) {
+                this.setMode(TestMonitor.MODE.COMMAND, this.aCategories[i]);
+            }
+        } else if (this.mode == TestMonitor.MODE.TERMINAL) {
+            this.sendOutput(data);
+        } else {
+            this.sendOutput(data);
+            if (DEBUG) console.log("TestMonitor.receiveData(" + data + "): ignored while mode is '" + this.mode + "'");
+        }
+    }
+
+    /**
+     * receiveInput(charCode)
+     *
+     * @this {TestMonitor}
+     * @param {number} charCode
+     */
+    receiveInput(charCode)
+    {
+        if (DEBUG) console.log("TestMonitor.receiveInput(" + charCode + ")");
+        if (charCode == Keys.ASCII.CTRL_T) {
+            this.setMode(this.mode == TestMonitor.MODE.TERMINAL? (this.category? TestMonitor.MODE.COMMAND : TestMonitor.MODE.PROMPT) : TestMonitor.MODE.TERMINAL);
+            return;
+        }
+        if (this.mode == TestMonitor.MODE.TERMINAL || this.mode == TestMonitor.MODE.PROMPT) {
+            this.sendData(charCode);
+        } else if (this.mode == TestMonitor.MODE.COMMAND) {
+            if (charCode == Keys.KEYCODE.CR) {
+                this.sendOutput(Keys.KEYCODE.LF);
+                this.checkCommand();
+            } else {
+                this.sendOutput(charCode);
+                this.commandBuffer += String.fromCharCode(charCode);
+            }
+        }
+    }
+}
+
+TestMonitor.MODE = {
+    TERMINAL:   "terminal",
+    PROMPT:     "prompt",
+    COMMAND:    "command"
+};
+
+
+
+/**
  * @copyright https://www.pcjs.org/modules/pcx86/lib/mouse.js (C) Jeff Parsons 2012-2018
  */
 
@@ -57346,14 +57936,14 @@ class Mouse extends Component {
             if (this.typeDevice && !this.componentDevice) {
                 var componentDevice = null;
                 while ((componentDevice = this.cmp.getMachineComponent(this.typeDevice, componentDevice))) {
-                    if (componentDevice.attachMouse) {
-                        this.componentDevice = componentDevice.attachMouse(this.idDevice, this, this.receiveStatus);
+                    if (componentDevice.bindMouse) {
+                        this.componentDevice = componentDevice.bindMouse(this.idDevice, this, this.receiveStatus);
                         if (this.componentDevice) {
                             /*
                              * It's possible that the SerialPort we've just attached to might want to bring us "up to speed"
                              * on the device's state, which is why I envisioned a subsequent syncMouse() call.  And you would
-                             * want to do that as a separate call, not as part of attachMouse(), because componentDevice
-                             * isn't set until attachMouse() returns.
+                             * want to do that as a separate call, not as part of bindMouse(), because componentDevice
+                             * isn't set until bindMouse() returns.
                              *
                              * However, syncMouse() seems unnecessary, given that SerialPort initializes its MCR to an "inactive"
                              * state, and even when restoring a previous state, if we've done our job properly, both SerialPort
@@ -63967,8 +64557,8 @@ class HDC extends Component {
         this.aDriveConfigs = [];
 
         /*
-         * We used to eval() sDriveConfigs immediately, but now we wait until initBus()
-         * is called, so that we can check for any machine overrides.
+         * We used to eval() sDriveConfigs immediately, but now we wait until initBus() is called, so that
+         * we can check for any machine overrides.
          */
         this.sDriveConfigs = parmsHDC['drives'];
 
@@ -64078,9 +64668,15 @@ class HDC extends Component {
 
         var aDriveConfigs = cmp.getMachineParm('drives');
         if (aDriveConfigs) {
-            this.aDriveConfigs = aDriveConfigs;
+            if (typeof aDriveConfigs == "string") {
+                this.sDriveConfigs = aDriveConfigs;
+            } else {
+                this.aDriveConfigs = aDriveConfigs;
+                this.sDriveConfigs = "";
+            }
         }
-        else if (this.sDriveConfigs) {
+        
+        if (this.sDriveConfigs) {
             try {
                 /*
                  * We must take care when parsing user-supplied JSON-encoded drive data.
@@ -64090,6 +64686,7 @@ class HDC extends Component {
                  * Nothing more to do with aDriveConfigs now. initController() and autoMount() (if there are
                  * any disk image "path" properties to process) will take care of the rest.
                  */
+                this.sDriveConfigs = "";
             } catch (e) {
                 Component.error("HDC drive configuration error: " + e.message + " (" + this.sDriveConfigs + ")");
             }
@@ -69228,23 +69825,22 @@ class DebuggerX86 extends Debugger {
         switch (sBinding) {
 
         case "debugInput":
-            var controlInput = /** @type {HTMLInputElement} */ (control);
-            this.bindings[sBinding] = controlInput;
-            this.controlDebug = controlInput;
+            this.bindings[sBinding] = control;
+            this.controlDebug = /** @type {HTMLInputElement} */ (control);
             /*
              * For halted machines, this is fine, but for auto-start machines, it can be annoying.
              *
              *      controlInput.focus();
              */
-            controlInput.onkeydown = function onKeyDownDebugInput(event) {
+            control.onkeydown = function onKeyDownDebugInput(event) {
                 var sCmd;
                 if (event.keyCode == Keys.KEYCODE.CR) {
-                    sCmd = controlInput.value;
-                    controlInput.value = "";
+                    sCmd = dbg.controlDebug.value;
+                    dbg.controlDebug.value = "";
                     dbg.doCommands(sCmd, true);
                 }
                 else if (event.keyCode == Keys.KEYCODE.ESC) {
-                    controlInput.value = sCmd = "";
+                    dbg.controlDebug.value = sCmd = "";
                 }
                 else {
                     if (event.keyCode == Keys.KEYCODE.UP) {
@@ -69255,8 +69851,8 @@ class DebuggerX86 extends Debugger {
                     }
                     if (sCmd != null) {
                         var cch = sCmd.length;
-                        controlInput.value = sCmd;
-                        controlInput.setSelectionRange(cch, cch);
+                        dbg.controlDebug.value = sCmd;
+                        dbg.controlDebug.setSelectionRange(cch, cch);
                     }
                 }
                 if (sCmd != null && event.preventDefault) event.preventDefault();
@@ -76656,8 +77252,8 @@ class Computer extends Component {
             if (typeof resources == 'object' && (sParms = resources['parms'])) {
                 try {
                     parmsMachine = /** @type {Object} */ (eval("(" + sParms + ")"));    // jshint ignore:line
-                } catch(e) {
-                    Component.error(e.message + " (" + sParms + ")");
+                } catch(err) {
+                    Component.error(err.message + " (" + sParms + ")");
                 }
             }
         }
@@ -76720,8 +77316,8 @@ class Computer extends Component {
                  */
                 var ch = value.indexOf("'") >= 0? '"' : "'";
                 value = /** @type {string} */ (eval(ch + value + ch));      // jshint ignore:line
-            } catch(e) {
-                Component.error(e.message + " (" + value + ")");
+            } catch(err) {
+                Component.error(err.message + " (" + value + ")");
                 value = undefined;
             }
         }
@@ -76806,7 +77402,7 @@ class Computer extends Component {
         var computer = this;
         var aComponents = Component.getComponents(this.id);
         for (var iComponent = 0; iComponent <= aComponents.length; iComponent++) {
-            var component = (iComponent < aComponents.length ? aComponents[iComponent] : this);
+            var component = (iComponent < aComponents.length? aComponents[iComponent] : this);
             if (!component.isReady()) {
                 component.isReady(function onComponentReady() {
                     computer.wait(fn, parms);
@@ -76970,7 +77566,11 @@ class Computer extends Component {
         for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
             var component = aComponents[iComponent];
             if (component !== this && component != this.cpu) {
-                fRestore = this.powerRestore(component, stateComputer, fRepower, fRestore);
+                try {
+                    fRestore = this.powerRestore(component, stateComputer, fRepower, fRestore);
+                } catch(err) {
+                    Component.error(component.type + " power failure: " + err.message);
+                }
             }
         }
 
@@ -77615,8 +78215,8 @@ class Computer extends Component {
                 } else {
                     if (fMessages) this.printMessage(response.code + ": " + response.data);
                 }
-            } catch (e) {
-                Component.error(e.message + " (" + sResponse + ")");
+            } catch(err) {
+                Component.error(err.message + " (" + sResponse + ")");
             }
         } else {
             if (fMessages) this.printMessage("invalid response (error " + nErrorCode + ")");
@@ -78605,7 +79205,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResol
              * ES6 ALERT: Template strings.
              */
             if (!COMPILED && XMLVERSION) {
-                sXML = sXML.replace(/<xsl:variable name="APPVERSION">1.x.x<\/xsl:variable>/, `<xsl:variable name="APPVERSION">${XMLVERSION}</xsl:variable>`);
+                sXML = sXML.replace(/<xsl:variable name="APPVERSION"\/>/, `<xsl:variable name="APPVERSION">${XMLVERSION}</xsl:variable>`);
             }
         }
 
@@ -78849,7 +79449,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  * path to the XSL file, unless they choose to mirror our folder structure.
                  */
                 var sAppFolder = sAppClass;
-                if (DEBUG || sVersion == "1.x.x") {
+                if (DEBUG || !sVersion) {
                     if (sAppClass != "c1pjs") sAppFolder = "shared";
                     sXSLFile = "/modules/" + sAppFolder + "/templates/components.xsl";
                 } else {
@@ -78870,7 +79470,9 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  */
                 if (!COMPILED) {
                     var aMatch = sXML.match(/<\?xml-stylesheet[^>]* href=(['"])[^'"]*?\/([0-9.]*)\/([^'"]*)\1/);
-                    if (aMatch) XMLVERSION = aMatch[2];
+                    if (aMatch) {
+                        XMLVERSION = aMatch[2];
+                    }
                 }
 
                 var transformXML = function(sXSL, xsl) {

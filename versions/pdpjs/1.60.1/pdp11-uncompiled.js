@@ -7,7 +7,7 @@
 /**
  * @define {string}
  */
-var APPVERSION = "1.x.x";       // this @define is overridden by the Closure Compiler with the version in package.json
+var APPVERSION = "";            // this @define is overridden by the Closure Compiler with the version in machines.json
 
 var XMLVERSION = null;          // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
 
@@ -1274,8 +1274,10 @@ class Str {
     /**
      * sprintf(format, ...args)
      *
-     * Copied from the CCjs project (/ccjs/lib/stdio.js) and extended.  Far from complete let alone sprintf-compatible,
-     * but it's a start.
+     * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
+     *
+     * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
+     * specifiers that I use.
      *
      * @param {string} format
      * @param {...} args
@@ -1283,44 +1285,81 @@ class Str {
      */
     static sprintf(format, ...args)
     {
-        var parts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
-        var buffer = "";
-        var partIndex = 0;
-        for (var i = 0; i < args.length; i++) {
+        let buffer = "";
+        let aParts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
 
-            var arg = args[i], d, s;
-            buffer += parts[partIndex++];
-            var flags = parts[partIndex];
-            var minimum = +parts[partIndex+1] || 0;
-            var precision = +parts[partIndex+3] || 0;
-            var conversion = parts[partIndex+5];
+        let iArg = 0, iPart;
+        for (iPart = 0; iPart < aParts.length - 7; iPart += 7) {
+
+            buffer += aParts[iPart];
+
+            let arg = args[iArg++];
+            let flags = aParts[iPart+1];
+            let minimum = +aParts[iPart+2] || 0;
+            let precision = +aParts[iPart+4] || 0;
+            let conversion = aParts[iPart+6];
+            let ach = null, s;
 
             switch(conversion) {
             case 'd':
+                /*
+                 * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
+                 */
+                arg = Math.trunc(arg);
+                /* falls through */
+
             case 'f':
-                d = Math.trunc(arg);
-                s = d + "";
+                s = Math.trunc(arg) + "";
                 if (precision) {
                     minimum -= (precision + 1);
                 }
                 if (s.length < minimum) {
                     if (flags == '0') {
-                        if (d < 0) minimum--;
-                        s = ("0000000000" + Math.abs(d)).slice(-minimum);
-                        if (d < 0) s = '-' + s;
+                        if (arg < 0) minimum--;
+                        s = ("0000000000" + Math.abs(arg)).slice(-minimum);
+                        if (arg < 0) s = '-' + s;
                     } else {
                         s = ("          " + s).slice(-minimum);
                     }
                 }
                 if (precision) {
-                    d = Math.trunc((arg - Math.trunc(arg)) * Math.pow(10, precision));
-                    s += '.' + ("0000000000" + Math.abs(d)).slice(-precision);
+                    arg = Math.round((arg - Math.trunc(arg)) * Math.pow(10, precision));
+                    s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
                 }
                 buffer += s;
                 break;
+
+            case 'c':
+                arg = String.fromCharCode(arg);
+                /* falls through */
+
             case 's':
+                if (typeof arg == "string") {
+                    while (arg.length < minimum) {
+                        if (flags == '-') {
+                            arg += ' ';
+                        } else {
+                            arg = ' ' + arg;
+                        }
+                    }
+                }
                 buffer += arg;
                 break;
+
+            case 'X':
+                ach = Str.HexUpperCase;
+                /* falls through */
+
+            case 'x':
+                if (!ach) ach = Str.HexLowerCase;
+                s = "";
+                do {
+                    s = ach[arg & 0xf] + s;
+                    arg >>>= 4;
+                } while (--minimum > 0 || arg);
+                buffer += s;
+                break;
+
             default:
                 /*
                  * The supported ANSI C set of conversions: "dioxXucsfeEgGpn%"
@@ -1328,10 +1367,9 @@ class Str {
                 buffer += "(unrecognized printf conversion %" + conversion + ")";
                 break;
             }
-
-            partIndex += 6;
         }
-        buffer += parts[partIndex];
+
+        buffer += aParts[iPart];
         return buffer;
     }
 
@@ -1492,6 +1530,9 @@ Str.TYPES = {
     OBJECT:     7,
     ARRAY:      8
 };
+
+Str.HexLowerCase = "0123456789abcdef";
+Str.HexUpperCase = "0123456789ABCDEF";
 
 
 
@@ -1975,7 +2016,11 @@ class Web {
             return response;
         }
 
-        if (!DEBUG) {
+        if (!DEBUG && !NODE) {
+            /*
+             * TODO: Perhaps it's time for our code in netlib.js to finally add support for HTTPS; for now
+             * though, it's just as well that the NODE environment assumes all resources are available locally.
+             */
             sURL = sURL.replace(/^\/(pcjs-disks|private-disks)\//, "https://jeffpar.github.io/$1/");
         }
         else {
@@ -3288,22 +3333,20 @@ class Component {
     }
 
     /**
-     * Component.bindExternalControl(component, sControl, sBinding, sType)
+     * Component.bindExternalControl(component, sBinding, sType)
      *
      * @param {Component} component
-     * @param {string} sControl
      * @param {string} sBinding
-     * @param {string} [sType] is the external component type
+     * @param {string} [sType] is the external component type (default is "Panel")
      */
-    static bindExternalControl(component, sControl, sBinding, sType)
+    static bindExternalControl(component, sBinding, sType = "Panel")
     {
-        if (sControl) {
-            if (sType === undefined) sType = "Panel";
+        if (sBinding) {
             var target = Component.getComponentByType(sType, component.id);
             if (target) {
-                var eBinding = target.bindings[sControl];
-                if (eBinding) {
-                    component.setBinding(null, sBinding, eBinding);
+                var control = target.bindings[sBinding];
+                if (control) {
+                    component.setBinding(null, sBinding, control);
                 }
             }
         }
@@ -9385,6 +9428,16 @@ Web.onInit(DevicePDP11.init);
  * @property {function(number,boolean):number} getInt32
  * @property {function(number,number,boolean)} setInt32
  */
+
+/**
+ * @class MemoryPDP11
+ * @property {number} id
+ * @property {number} used
+ * @property {number} size
+ * @property {Int32Array} adw
+ * @property {Object} controller
+ * @property {DebuggerPDP11} dbg
+ */
 class MemoryPDP11 {
     /**
      * MemoryPDP11(bus, addr, used, size, type, controller)
@@ -12536,7 +12589,7 @@ class CPUStatePDP11 extends CPUPDP11 {
     addIRQ(vector, priority, message)
     {
         var irq = {vector: vector, priority: priority, message: message || 0, name: PDP11.VECTORS[vector], next: null};
-        this.aIRQs.push(irq);
+        this.aIRQs.push(/** @type {IRQ} */ (irq));      // TODO: Why the F*CK do I need a type override? Damn JSDoc types....
         return irq;
     }
 
@@ -17883,7 +17936,7 @@ class KeyboardPDP11 extends Component {
      * @this {KeyboardPDP11}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -18008,16 +18061,16 @@ class SerialPortPDP11 extends Component {
         this.fUpperCase = parmsSerial['upperCase'];
         if (typeof this.fUpperCase == "string") this.fUpperCase = (this.fUpperCase == "true");
         /**
-         * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
+         * consoleBuffer becomes a string that records serial port output if the 'binding' property is set to the
          * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
          * or the string length reaches a threshold (currently, 1024 characters).
          *
          * @type {string|null}
          */
-        this.consoleOutput = null;
+        this.consoleBuffer = null;
 
         /**
-         * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
+         * controlBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
          *
          * Example: CTTY COM2
          *
@@ -18026,14 +18079,14 @@ class SerialPortPDP11 extends Component {
          * terminal.  It further assumes that anything typed on such a terminal is NOT displayed, so as DOS *receives*
          * serial input, DOS *transmits* the appropriate characters back to the terminal via COM2.
          *
-         * As a result, controlIOBuffer only needs to be updated by the transmitByte() function.
+         * As a result, controlBuffer only needs to be updated by the transmitByte() function.
          *
          * @type {Object}
          */
-        this.controlIOBuffer = null;
+        this.controlBuffer = null;
 
         /*
-         * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
+         * If controlBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
          * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
          * number of spaces.
          *
@@ -18053,12 +18106,22 @@ class SerialPortPDP11 extends Component {
 
         var sBinding = parmsSerial['binding'];
         if (sBinding == "console") {
-            this.consoleOutput = "";
+            this.consoleBuffer = "";
         } else {
             /*
+             * If the SerialPort wants to bind to a control (eg, "print") in a DIFFERENT component (eg, "Panel"),
+             * then it specifies the name of that control with the 'binding' property.  The SerialPort constructor
+             * will then call bindExternalControl(), which looks up the control, and then passes it to our own
+             * setBinding() handler.
+             * 
+             * For bindExternalControl() to succeed, it also need to know the target component; for now, that's
+             * been hard-coded to "Panel", in part because that's one of the few components we can rely upon
+             * initializing before we do, but it would be a simple matter to include a component type or ID as part
+             * of the 'binding' property as well, if we need more flexibility later.
+             * 
              * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
              */
-            Component.bindExternalControl(this, sBinding, SerialPortPDP11.sIOBuffer);
+            Component.bindExternalControl(this, sBinding);
         }
 
         /*
@@ -18084,17 +18147,16 @@ class SerialPortPDP11 extends Component {
      * @this {SerialPortPDP11}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
     setBinding(sType, sBinding, control, sValue)
     {
-        var serial = this;
+        if (sType == null || sType == "textarea") {
 
-        switch (sBinding) {
-        case SerialPortPDP11.sIOBuffer:
-            this.bindings[sBinding] = this.controlIOBuffer = control;
+            var serial = this;
+            this.bindings[sBinding] = this.controlBuffer = control;
 
             /*
              * An onkeydown handler is required for certain keys that browsers tend to consume themselves;
@@ -18190,9 +18252,6 @@ class SerialPortPDP11 extends Component {
             control.removeAttribute("readonly");
 
             return true;
-
-        default:
-            break;
         }
         return false;
     }
@@ -18283,7 +18342,7 @@ class SerialPortPDP11 extends Component {
                     if (this.connection) {
                         var exports = this.connection['exports'];
                         if (exports) {
-                            var fnConnect = exports['connect'];
+                            var fnConnect = /** @function */ (exports['connect']);
                             if (fnConnect) fnConnect.call(this.connection, this.fNullModem);
                             this.sendData = exports['receiveData'];
                             if (this.sendData) {
@@ -18586,13 +18645,12 @@ class SerialPortPDP11 extends Component {
          * TODO: Why do DEC diagnostics like to output bytes with bit 7 set?
          */
         b &= 0x7F;
-
-        if (this.controlIOBuffer) {
+        if (this.controlBuffer) {
             if (b == 0x0D) {
                 this.iLogicalCol = 0;
             }
             else if (b == 0x08) {
-                this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
+                this.controlBuffer.value = this.controlBuffer.value.slice(0, -1);
                 /*
                  * TODO: Back up the correct number of columns if the character erased was a tab.
                  */
@@ -18616,19 +18674,19 @@ class SerialPortPDP11 extends Component {
                     if (this.tabSize) s = Str.pad("", nChars);
                 }
                 if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
-                this.controlIOBuffer.value += s;
-                this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+                this.controlBuffer.value += s;
+                this.controlBuffer.scrollTop = this.controlBuffer.scrollHeight;
                 this.iLogicalCol += nChars;
             }
             fTransmitted = true;
         }
-        else if (this.consoleOutput != null) {
-            if (b == 0x0A || this.consoleOutput.length >= 1024) {
-                this.println(this.consoleOutput);
-                this.consoleOutput = "";
+        else if (this.consoleBuffer != null) {
+            if (b == 0x0A || this.consoleBuffer.length >= 1024) {
+                this.println(this.consoleBuffer);
+                this.consoleBuffer = "";
             }
             if (b != 0x0A) {
-                this.consoleOutput += String.fromCharCode(b);
+                this.consoleBuffer += String.fromCharCode(b);
             }
             fTransmitted = true;
         }
@@ -18796,19 +18854,6 @@ class SerialPortPDP11 extends Component {
 }
 
 /*
- * Internal name used for the I/O buffer control, if any, that we bind to the SerialPort.
- *
- * Alternatively, if SerialPort wants to use another component's control (eg, the Panel's
- * "print" control), it can specify the name of that control with the 'binding' property.
- *
- * For that binding to succeed, we also need to know the target component; for now, that's
- * been hard-coded to "Panel", in part because that's one of the few components we can rely
- * upon initializing before we do, but it would be a simple matter to include a component type
- * or ID as part of the 'binding' property as well, if we need more flexibility later.
- */
-SerialPortPDP11.sIOBuffer = "buffer";
-
-/*
  * ES6 ALERT: As you can see below, I've finally started using computed property names.
  */
 SerialPortPDP11.UNIBUS_IOTABLE = {
@@ -18928,7 +18973,7 @@ class PC11 extends Component {
      * @this {PC11}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "list", "text", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listTapes")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -18940,10 +18985,11 @@ class PC11 extends Component {
         switch (sBinding) {
 
         case "listTapes":
-            this.bindings[sBinding] = control;
-            control.onchange = function onChangeListTapes(event) {
+            var controlSelect = /** @type {HTMLSelectElement} */ (control);
+            this.bindings[sBinding] = controlSelect;
+            controlSelect.onchange = function onChangeListTapes(event) {
                 var controlDesc = pc11.bindings["descTape"];
-                var controlOption = control.options[control.selectedIndex];
+                var controlOption = controlSelect.options[controlSelect.selectedIndex];
                 if (controlDesc && controlOption) {
                     var dataValue = {};
                     var sValue = controlOption.getAttribute("data-value");
@@ -18990,32 +19036,34 @@ class PC11 extends Component {
             return true;
 
         case "mountTape":
+            var controlInput = /** @type {Object} */ (control);
+            
             if (!this.fLocalTapes) {
                 if (DEBUG) this.log("Local tape support not available");
                 /*
                  * We could also simply hide the control; eg:
                  *
-                 *      control.style.display = "none";
+                 *      controlInput.style.display = "none";
                  *
                  * but removing the control altogether seems better.
                  */
-                control.parentNode.removeChild(/** @type {Node} */ (control));
+                controlInput.parentNode.removeChild(/** @type {Node} */ (controlInput));
                 return false;
             }
 
-            this.bindings[sBinding] = control;
+            this.bindings[sBinding] = controlInput;
 
             /*
              * Enable "Mount" button only if a file is actually selected
              */
-            control.addEventListener('change', function() {
-                var fieldset = control.children[0];
+            controlInput.addEventListener('change', function() {
+                var fieldset = controlInput.children[0];
                 var files = fieldset.children[0].files;
                 var submit = fieldset.children[1];
                 submit.disabled = !files.length;
             });
 
-            control.onsubmit = function(event) {
+            controlInput.onsubmit = function(event) {
                 var file = event.currentTarget[1].files[0];
                 if (file) {
                     var sTapePath = file.name;
@@ -21151,7 +21199,7 @@ class DriveController extends Component {
      * @this {DriveController}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "list", "text", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listDisks")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -21176,8 +21224,9 @@ class DriveController extends Component {
              * loaded in a particular drive, you could click the drive control without having to change it.
              * However, that doesn't seem to work for all browsers, so I've reverted to onchange.
              */
+            var controlSelect = /** @type {HTMLSelectElement} */ (control);
             control.onchange = function onChangeListDrives(event) {
-                var iDrive = Str.parseInt(control.value, 10);
+                var iDrive = Str.parseInt(controlSelect.value, 10);
                 if (iDrive != null) dc.displayDisk(iDrive);
             };
             return true;
@@ -21242,32 +21291,34 @@ class DriveController extends Component {
             return true;
 
         case "mountDisk":
+            var controlInput = /** @type {Object} */ (control);
+
             if (!this.fLocalDisks) {
                 if (DEBUG) this.log("Local disk support not available");
                 /*
                  * We could also simply hide the control; eg:
                  *
-                 *      control.style.display = "none";
+                 *      controlInput.style.display = "none";
                  *
                  * but removing the control altogether seems better.
                  */
-                control.parentNode.removeChild(/** @type {Node} */ (control));
+                controlInput.parentNode.removeChild(/** @type {Node} */ (controlInput));
                 return false;
             }
 
-            this.bindings[sBinding] = control;
+            this.bindings[sBinding] = controlInput;
 
             /*
              * Enable "Mount" button only if a file is actually selected
              */
-            control.addEventListener('change', function() {
-                var fieldset = control.children[0];
+            controlInput.addEventListener('change', function() {
+                var fieldset = controlInput.children[0];
                 var files = fieldset.children[0].files;
                 var submit = fieldset.children[1];
                 submit.disabled = !files.length;
             });
 
-            control.onsubmit = function(event) {
+            controlInput.onsubmit = function(event) {
                 var file = event.currentTarget[1].files[0];
                 if (file) {
                     var sDiskPath = file.name;
@@ -25653,7 +25704,7 @@ class DebuggerPDP11 extends Debugger {
 
         case "debugInput":
             this.bindings[sBinding] = control;
-            this.controlDebug = control;
+            this.controlDebug = /** @type {HTMLInputElement} */ (control);
             /*
              * For halted machines, this is fine, but for auto-start machines, it can be annoying.
              *
@@ -25662,12 +25713,12 @@ class DebuggerPDP11 extends Debugger {
             control.onkeydown = function onKeyDownDebugInput(event) {
                 var sCmd;
                 if (event.keyCode == Keys.KEYCODE.CR) {
-                    sCmd = control.value;
-                    control.value = "";
+                    sCmd = dbg.controlDebug.value;
+                    dbg.controlDebug.value = "";
                     dbg.doCommands(sCmd, true);
                 }
                 else if (event.keyCode == Keys.KEYCODE.ESC) {
-                    control.value = sCmd = "";
+                    dbg.controlDebug.value = sCmd = "";
                 }
                 else {
                     if (event.keyCode == Keys.KEYCODE.UP) {
@@ -25678,8 +25729,8 @@ class DebuggerPDP11 extends Debugger {
                     }
                     if (sCmd != null) {
                         var cch = sCmd.length;
-                        control.value = sCmd;
-                        control.setSelectionRange(cch, cch);
+                        dbg.controlDebug.value = sCmd;
+                        dbg.controlDebug.setSelectionRange(cch, cch);
                     }
                 }
                 if (sCmd != null && event.preventDefault) event.preventDefault();
@@ -30719,7 +30770,7 @@ class ComputerPDP11 extends Component {
      * @this {ComputerPDP11}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -31810,7 +31861,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResol
              * ES6 ALERT: Template strings.
              */
             if (!COMPILED && XMLVERSION) {
-                sXML = sXML.replace(/<xsl:variable name="APPVERSION">1.x.x<\/xsl:variable>/, `<xsl:variable name="APPVERSION">${XMLVERSION}</xsl:variable>`);
+                sXML = sXML.replace(/<xsl:variable name="APPVERSION"\/>/, `<xsl:variable name="APPVERSION">${XMLVERSION}</xsl:variable>`);
             }
         }
 
@@ -32054,7 +32105,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  * path to the XSL file, unless they choose to mirror our folder structure.
                  */
                 var sAppFolder = sAppClass;
-                if (DEBUG || sVersion == "1.x.x") {
+                if (DEBUG || !sVersion) {
                     if (sAppClass != "c1pjs") sAppFolder = "shared";
                     sXSLFile = "/modules/" + sAppFolder + "/templates/components.xsl";
                 } else {
@@ -32075,7 +32126,9 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  */
                 if (!COMPILED) {
                     var aMatch = sXML.match(/<\?xml-stylesheet[^>]* href=(['"])[^'"]*?\/([0-9.]*)\/([^'"]*)\1/);
-                    if (aMatch) XMLVERSION = aMatch[2];
+                    if (aMatch) {
+                        XMLVERSION = aMatch[2];
+                    }
                 }
 
                 var transformXML = function(sXSL, xsl) {

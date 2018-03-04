@@ -43,9 +43,9 @@ if (NODE) {
  * property {number} iAdapter
  * property {number} portBase
  * property {number} nIRQ
- * property {Object} controlIOBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
+ * property {Object} controlBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
  *
- * NOTE: This class declaration started as a way of informing the code inspector of the controlIOBuffer property,
+ * NOTE: This class declaration started as a way of informing the code inspector of the controlBuffer property,
  * which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
  * initializing such properties in the constructor is a better way to go -- even though it's more code -- because
  * JavaScript compilers are supposed to be happier when the underlying object structures aren't constantly changing.
@@ -106,29 +106,39 @@ class ParallelPort extends Component {
             return;
         }
         /**
-         * consoleOutput becomes a string that records parallel port output if the 'binding' property is set to the
+         * consoleBuffer becomes a string that records parallel port output if the 'binding' property is set to the
          * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
          * or the string length reaches a threshold (currently, 1024 characters).
          *
          * @type {string|null}
          */
-        this.consoleOutput = null;
+        this.consoleBuffer = null;
 
         /**
-         * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
+         * controlBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
          *
          * @type {Object}
          */
-        this.controlIOBuffer = null;
+        this.controlBuffer = null;
 
         var sBinding = parmsParallel['binding'];
         if (sBinding == "console") {
-            this.consoleOutput = "";
+            this.consoleBuffer = "";
         } else {
             /*
+             * If the ParallelPort wants to bind to a control (eg, "print") in a DIFFERENT component (eg, "Panel"),
+             * then it specifies the name of that control with the 'binding' property.  The ParallelPort constructor
+             * will then call bindExternalControl(), which looks up the control, and then passes it to our own
+             * setBinding() handler.
+             * 
+             * For bindExternalControl() to succeed, it also need to know the target component; for now, that's
+             * been hard-coded to "Panel", in part because that's one of the few components we can rely upon
+             * initializing before we do, but it would be a simple matter to include a component type or ID as part
+             * of the 'binding' property as well, if we need more flexibility later.
+             * 
              * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
              */
-            Component.bindExternalControl(this, sBinding, ParallelPort.sIOBuffer);
+            Component.bindExternalControl(this, sBinding);
         }
     }
 
@@ -144,13 +154,9 @@ class ParallelPort extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        switch (sBinding) {
-        case ParallelPort.sIOBuffer:
-            this.bindings[sBinding] = this.controlIOBuffer = control;
+        if (sHTMLType == null || sHTMLType == "textarea") {
+            this.bindings[sBinding] = this.controlBuffer = control;
             return true;
-
-        default:
-            break;
         }
         return false;
     }
@@ -397,12 +403,12 @@ class ParallelPort extends Component {
 
         this.printMessage("transmitByte(" + Str.toHexByte(b) + ")");
 
-        if (this.controlIOBuffer) {
+        if (this.controlBuffer) {
             if (b == 0x0D) {
                 // this.iLogicalCol = 0;
             }
             else if (b == 0x08) {
-                this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
+                this.controlBuffer.value = this.controlBuffer.value.slice(0, -1);
             }
             else {
                 /*
@@ -426,18 +432,18 @@ class ParallelPort extends Component {
                         b = 0x20;       // ASCII code for a space
                     }
                 }
-                this.controlIOBuffer.value += Str.toASCIICode(b);
-                this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+                this.controlBuffer.value += Str.toASCIICode(b);
+                this.controlBuffer.scrollTop = this.controlBuffer.scrollHeight;
             }
             fTransmitted = true;
         }
-        else if (this.consoleOutput != null) {
-            if (b == 0x0A || this.consoleOutput.length >= 1024) {
-                this.println(this.consoleOutput);
-                this.consoleOutput = "";
+        else if (this.consoleBuffer != null) {
+            if (b == 0x0A || this.consoleBuffer.length >= 1024) {
+                this.println(this.consoleBuffer);
+                this.consoleBuffer = "";
             }
             if (b != 0x0A) {
-                this.consoleOutput += String.fromCharCode(b);
+                this.consoleBuffer += String.fromCharCode(b);
             }
             fTransmitted = true;
         }
@@ -464,19 +470,6 @@ class ParallelPort extends Component {
         }
     }
 }
-
-/*
- * Internal name used for the I/O buffer control, if any, that we bind to the ParallelPort.
- *
- * Alternatively, if ParallelPort wants to use another component's control (eg, the Panel's
- * "print" control), it can specify the name of that control with the 'binding' property.
- *
- * For that binding to succeed, we also need to know the target component; for now, that's
- * been hard-coded to "Panel", in part because that's one of the few components we can rely
- * upon initializing before we do, but it would be a simple matter to include a component type
- * or ID as part of the 'binding' property as well, if we need more flexibility later.
- */
-ParallelPort.sIOBuffer = "buffer";
 
 /*
  * The "Data Register" is an input/output register at offset 0 from portBase.  The bit-to-pin mappings are:

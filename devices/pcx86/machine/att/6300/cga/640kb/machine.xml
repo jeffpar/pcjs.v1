@@ -7,7 +7,7 @@
 	<rom ref="/devices/pcx86/rom/att/6300/bios-143.xml"/>
 	<video ref="/devices/pcx86/video/cdp/cga/cdp-cga.xml"/>
 	<fdc ref="/disks/pcx86/library.xml"/>
-	<cpu id="cpu8086" model="8086" cycles="8000000" autostart="true" pos="left" padLeft="8px" padBottom="8px">
+	<cpu id="cpu8086" model="8086" cycles="8000000" pos="left" padLeft="8px" padBottom="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 	</cpu>

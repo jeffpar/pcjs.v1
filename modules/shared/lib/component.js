@@ -448,22 +448,20 @@ class Component {
     }
 
     /**
-     * Component.bindExternalControl(component, sControl, sBinding, sType)
+     * Component.bindExternalControl(component, sBinding, sType)
      *
      * @param {Component} component
-     * @param {string} sControl
      * @param {string} sBinding
-     * @param {string} [sType] is the external component type
+     * @param {string} [sType] is the external component type (default is "Panel")
      */
-    static bindExternalControl(component, sControl, sBinding, sType)
+    static bindExternalControl(component, sBinding, sType = "Panel")
     {
-        if (sControl) {
-            if (sType === undefined) sType = "Panel";
+        if (sBinding) {
             var target = Component.getComponentByType(sType, component.id);
             if (target) {
-                var eBinding = target.bindings[sControl];
-                if (eBinding) {
-                    component.setBinding(null, sBinding, eBinding);
+                var control = target.bindings[sBinding];
+                if (control) {
+                    component.setBinding(null, sBinding, control);
                 }
             }
         }

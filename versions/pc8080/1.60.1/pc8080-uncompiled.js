@@ -7,7 +7,7 @@
 /**
  * @define {string}
  */
-var APPVERSION = "1.x.x";       // this @define is overridden by the Closure Compiler with the version in package.json
+var APPVERSION = "";            // this @define is overridden by the Closure Compiler with the version in machines.json
 
 var XMLVERSION = null;          // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
 
@@ -1046,8 +1046,10 @@ class Str {
     /**
      * sprintf(format, ...args)
      *
-     * Copied from the CCjs project (/ccjs/lib/stdio.js) and extended.  Far from complete let alone sprintf-compatible,
-     * but it's a start.
+     * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
+     *
+     * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
+     * specifiers that I use.
      *
      * @param {string} format
      * @param {...} args
@@ -1055,44 +1057,81 @@ class Str {
      */
     static sprintf(format, ...args)
     {
-        var parts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
-        var buffer = "";
-        var partIndex = 0;
-        for (var i = 0; i < args.length; i++) {
+        let buffer = "";
+        let aParts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
 
-            var arg = args[i], d, s;
-            buffer += parts[partIndex++];
-            var flags = parts[partIndex];
-            var minimum = +parts[partIndex+1] || 0;
-            var precision = +parts[partIndex+3] || 0;
-            var conversion = parts[partIndex+5];
+        let iArg = 0, iPart;
+        for (iPart = 0; iPart < aParts.length - 7; iPart += 7) {
+
+            buffer += aParts[iPart];
+
+            let arg = args[iArg++];
+            let flags = aParts[iPart+1];
+            let minimum = +aParts[iPart+2] || 0;
+            let precision = +aParts[iPart+4] || 0;
+            let conversion = aParts[iPart+6];
+            let ach = null, s;
 
             switch(conversion) {
             case 'd':
+                /*
+                 * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
+                 */
+                arg = Math.trunc(arg);
+                /* falls through */
+
             case 'f':
-                d = Math.trunc(arg);
-                s = d + "";
+                s = Math.trunc(arg) + "";
                 if (precision) {
                     minimum -= (precision + 1);
                 }
                 if (s.length < minimum) {
                     if (flags == '0') {
-                        if (d < 0) minimum--;
-                        s = ("0000000000" + Math.abs(d)).slice(-minimum);
-                        if (d < 0) s = '-' + s;
+                        if (arg < 0) minimum--;
+                        s = ("0000000000" + Math.abs(arg)).slice(-minimum);
+                        if (arg < 0) s = '-' + s;
                     } else {
                         s = ("          " + s).slice(-minimum);
                     }
                 }
                 if (precision) {
-                    d = Math.trunc((arg - Math.trunc(arg)) * Math.pow(10, precision));
-                    s += '.' + ("0000000000" + Math.abs(d)).slice(-precision);
+                    arg = Math.round((arg - Math.trunc(arg)) * Math.pow(10, precision));
+                    s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
                 }
                 buffer += s;
                 break;
+
+            case 'c':
+                arg = String.fromCharCode(arg);
+                /* falls through */
+
             case 's':
+                if (typeof arg == "string") {
+                    while (arg.length < minimum) {
+                        if (flags == '-') {
+                            arg += ' ';
+                        } else {
+                            arg = ' ' + arg;
+                        }
+                    }
+                }
                 buffer += arg;
                 break;
+
+            case 'X':
+                ach = Str.HexUpperCase;
+                /* falls through */
+
+            case 'x':
+                if (!ach) ach = Str.HexLowerCase;
+                s = "";
+                do {
+                    s = ach[arg & 0xf] + s;
+                    arg >>>= 4;
+                } while (--minimum > 0 || arg);
+                buffer += s;
+                break;
+
             default:
                 /*
                  * The supported ANSI C set of conversions: "dioxXucsfeEgGpn%"
@@ -1100,10 +1139,9 @@ class Str {
                 buffer += "(unrecognized printf conversion %" + conversion + ")";
                 break;
             }
-
-            partIndex += 6;
         }
-        buffer += parts[partIndex];
+
+        buffer += aParts[iPart];
         return buffer;
     }
 
@@ -1264,6 +1302,9 @@ Str.TYPES = {
     OBJECT:     7,
     ARRAY:      8
 };
+
+Str.HexLowerCase = "0123456789abcdef";
+Str.HexUpperCase = "0123456789ABCDEF";
 
 
 
@@ -1747,7 +1788,11 @@ class Web {
             return response;
         }
 
-        if (!DEBUG) {
+        if (!DEBUG && !NODE) {
+            /*
+             * TODO: Perhaps it's time for our code in netlib.js to finally add support for HTTPS; for now
+             * though, it's just as well that the NODE environment assumes all resources are available locally.
+             */
             sURL = sURL.replace(/^\/(pcjs-disks|private-disks)\//, "https://jeffpar.github.io/$1/");
         }
         else {
@@ -3060,22 +3105,20 @@ class Component {
     }
 
     /**
-     * Component.bindExternalControl(component, sControl, sBinding, sType)
+     * Component.bindExternalControl(component, sBinding, sType)
      *
      * @param {Component} component
-     * @param {string} sControl
      * @param {string} sBinding
-     * @param {string} [sType] is the external component type
+     * @param {string} [sType] is the external component type (default is "Panel")
      */
-    static bindExternalControl(component, sControl, sBinding, sType)
+    static bindExternalControl(component, sBinding, sType = "Panel")
     {
-        if (sControl) {
-            if (sType === undefined) sType = "Panel";
+        if (sBinding) {
             var target = Component.getComponentByType(sType, component.id);
             if (target) {
-                var eBinding = target.bindings[sControl];
-                if (eBinding) {
-                    component.setBinding(null, sBinding, eBinding);
+                var control = target.bindings[sBinding];
+                if (control) {
+                    component.setBinding(null, sBinding, control);
                 }
             }
         }
@@ -6844,7 +6887,7 @@ class CPU8080 extends Component {
      * @this {CPU8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -7911,7 +7954,7 @@ class CPUState8080 extends CPU8080 {
      * @this {CPUState8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "AX")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -11839,7 +11882,7 @@ class ChipSet8080 extends Component {
      * @this {ChipSet8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "sw1")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -13605,7 +13648,7 @@ class Keyboard8080 extends Component {
      * @this {Keyboard8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -15303,7 +15346,7 @@ class Video8080 extends Component {
      * @this {Video8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -15370,7 +15413,7 @@ class Video8080 extends Component {
                 this.kbd.setBinding("led", s, this.ledBindings[s]);
             }
             if (this.canvasScreen) {
-                this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "screen", this.inputScreen);
+                this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "screen", /** @type {HTMLElement} */ (this.inputScreen));
             }
         }
 
@@ -16509,10 +16552,22 @@ Web.onInit(Video8080.init);
 
 
 /**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
+ * SerialPort8080 class
  *
+ * The class property declarations below started as a way of informing the code inspector of the controlBuffer
+ * property, which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
+ * initializing such properties in the constructor is a better way to go -- even though it's more code -- because
+ * JavaScript compilers are supposed to be happier when the underlying object structures aren't constantly changing.
+ *
+ * Besides, I'm not sure I want to get into documenting every property this way, for this or any/every other class,
+ * let alone getting into which ones should be considered private or protected, because PCjs isn't really a library
+ * for third-party apps.
+ * 
+ * @class SerialPort8080
+ * @property {number} iAdapter
+ * @property {number} portBase
+ * @property {number} nIRQ
+ * @property {Object} controlBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
  * @unrestricted
  */
 class SerialPort8080 extends Component {
@@ -16554,23 +16609,23 @@ class SerialPort8080 extends Component {
             return;
         }
         /**
-         * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
+         * consoleBuffer becomes a string that records serial port output if the 'binding' property is set to the
          * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
          * or the string length reaches a threshold (currently, 1024 characters).
          *
          * @type {string|null}
          */
-        this.consoleOutput = null;
+        this.consoleBuffer = null;
 
         /**
-         * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
+         * controlBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
          *
          * @type {Object}
          */
-        this.controlIOBuffer = null;
+        this.controlBuffer = null;
 
         /*
-         * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
+         * If controlBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
          * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
          * number of spaces.
          *
@@ -16595,12 +16650,22 @@ class SerialPort8080 extends Component {
 
         var sBinding = parmsSerial['binding'];
         if (sBinding == "console") {
-            this.consoleOutput = "";
+            this.consoleBuffer = "";
         } else {
             /*
+             * If the SerialPort wants to bind to a control (eg, "print") in a DIFFERENT component (eg, "Panel"),
+             * then it specifies the name of that control with the 'binding' property.  The SerialPort constructor
+             * will then call bindExternalControl(), which looks up the control, and then passes it to our own
+             * setBinding() handler.
+             * 
+             * For bindExternalControl() to succeed, it also need to know the target component; for now, that's
+             * been hard-coded to "Panel", in part because that's one of the few components we can rely upon
+             * initializing before we do, but it would be a simple matter to include a component type or ID as part
+             * of the 'binding' property as well, if we need more flexibility later.
+             * 
              * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
              */
-            Component.bindExternalControl(this, sBinding, SerialPort8080.sIOBuffer);
+            Component.bindExternalControl(this, sBinding);
         }
 
         /*
@@ -16625,17 +16690,17 @@ class SerialPort8080 extends Component {
      * @this {SerialPort8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
         var serial = this;
+        
+        if (sHTMLType == null || sHTMLType == "textarea") {
 
-        switch (sBinding) {
-        case SerialPort8080.sIOBuffer:
-            this.bindings[sBinding] = this.controlIOBuffer = control;
+            this.bindings[sBinding] = this.controlBuffer = control;
 
             /*
              * By establishing an onkeypress handler here, we make it possible for DOS commands like
@@ -16689,46 +16754,45 @@ class SerialPort8080 extends Component {
              */
             control.removeAttribute("readonly");
             return true;
-
-        default:
-            if (sValue) {
-                /*
-                 * Instead of just having a dedicated "test" control, we now treat any unrecognized control with
-                 * a "value" attribute as a test control.  The only caveat is that such controls must have binding IDs
-                 * that do not conflict with predefined controls (which, of course, is the only way you can get here).
-                 */
-                this.bindings[sBinding] = control;
-
-                /*
-                 * Backslash sequences like \n, \r, and \\ have already been converted to LF, CR and backslash
-                 * characters, by virtue of the eval() function that all our component parameter strings pass through;
-                 * eval() treats strings like "source code", so any backslash sequence that JavaScript supports is
-                 * automatically converted.
-                 *
-                 * The complete list of backslash sequences supported by JavaScript:
-                 *
-                 *      \0  \'  \"  \\  \n  \r  \v  \t  \b  \f  \uXXXX \xXX
-                 *                      ^J  ^M  ^K  ^I  ^H  ^L
-                 *
-                 * To support any other non-printable 8-bit character, such as ESC, you should use \xXX, where XX
-                 * is the ASCII code in hex.  For ESC, that would \x1B.
-                 */
-                control.onclick = function onClickTest(event) {
-                    serial.receiveData(sValue);
-                    /*
-                     * Give focus back to the machine (since clicking the button takes focus away).
-                     *
-                     *      if (serial.cmp) serial.cmp.updateFocus();
-                     *
-                     * iOS Usability Improvement: NOT calling updateFocus() keeps the soft keyboard down
-                     * (assuming it was already down).
-                     */
-                    return true;
-                };
-                return true;
-            }
-            break;
         }
+        
+        if (sValue) {
+            /*
+             * Instead of just having a dedicated "test" control, we now treat any unrecognized control with
+             * a "value" attribute as a test control.  The only caveat is that such controls must have binding IDs
+             * that do not conflict with predefined controls (which, of course, is the only way you can get here).
+             */
+            this.bindings[sBinding] = control;
+
+            /*
+             * Backslash sequences like \n, \r, and \\ have already been converted to LF, CR and backslash
+             * characters, by virtue of the eval() function that all our component parameter strings pass through;
+             * eval() treats strings like "source code", so any backslash sequence that JavaScript supports is
+             * automatically converted.
+             *
+             * The complete list of backslash sequences supported by JavaScript:
+             *
+             *      \0  \'  \"  \\  \n  \r  \v  \t  \b  \f  \uXXXX \xXX
+             *                      ^J  ^M  ^K  ^I  ^H  ^L
+             *
+             * To support any other non-printable 8-bit character, such as ESC, you should use \xXX, where XX
+             * is the ASCII code in hex.  For ESC, that would \x1B.
+             */
+            control.onclick = function onClickTest(event) {
+                serial.receiveData(sValue);
+                /*
+                 * Give focus back to the machine (since clicking the button takes focus away).
+                 *
+                 *      if (serial.cmp) serial.cmp.updateFocus();
+                 *
+                 * iOS Usability Improvement: NOT calling updateFocus() keeps the soft keyboard down
+                 * (assuming it was already down).
+                 */
+                return true;
+            };
+            return true;
+        }
+        
         return false;
     }
 
@@ -16743,9 +16807,9 @@ class SerialPort8080 extends Component {
     {
         var fEchoed = false;
 
-        if (this.controlIOBuffer) {
+        if (this.controlBuffer) {
             if (b == 0x08) {
-                this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
+                this.controlBuffer.value = this.controlBuffer.value.slice(0, -1);
                 /*
                  * TODO: Back up the correct number of columns if the character erased was a tab.
                  */
@@ -16764,19 +16828,19 @@ class SerialPort8080 extends Component {
                     s = "\n";
                 }
                 if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
-                this.controlIOBuffer.value += s;
-                this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+                this.controlBuffer.value += s;
+                this.controlBuffer.scrollTop = this.controlBuffer.scrollHeight;
                 this.iLogicalCol += nChars;
             }
             fEchoed = true;
         }
-        else if (this.consoleOutput != null) {
-            if (b == 0x0A || this.consoleOutput.length >= 1024) {
-                this.println(this.consoleOutput);
-                this.consoleOutput = "";
+        else if (this.consoleBuffer != null) {
+            if (b == 0x0A || this.consoleBuffer.length >= 1024) {
+                this.println(this.consoleBuffer);
+                this.consoleBuffer = "";
             }
             if (b != 0x0A) {
-                this.consoleOutput += String.fromCharCode(b);
+                this.consoleBuffer += String.fromCharCode(b);
             }
             fEchoed = true;
         }
@@ -16852,7 +16916,7 @@ class SerialPort8080 extends Component {
                     if (this.connection) {
                         var exports = this.connection['exports'];
                         if (exports) {
-                            var fnConnect = exports['connect'];
+                            var fnConnect = /** @function */ (exports['connect']);
                             if (fnConnect) fnConnect.call(this.connection, this.fNullModem);
                             this.sendData = exports['receiveData'];
                             if (this.sendData) {
@@ -17296,23 +17360,6 @@ class SerialPort8080 extends Component {
     }
 }
 
-/*
- * class SerialPort8080
- * property {number} iAdapter
- * property {number} portBase
- * property {number} nIRQ
- * property {Object} controlIOBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
- *
- * NOTE: This class declaration started as a way of informing the code inspector of the controlIOBuffer property,
- * which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
- * initializing such properties in the constructor is a better way to go -- even though it's more code -- because
- * JavaScript compilers are supposed to be happier when the underlying object structures aren't constantly changing.
- *
- * Besides, I'm not sure I want to get into documenting every property this way, for this or any/every other class,
- * let alone getting into which ones should be considered private or protected, because PCjs isn't really a library
- * for third-party apps.
- */
-
 SerialPort8080.UART8251 = {
     /*
      * Format of MODE byte written to CONTROL port 0x1
@@ -17399,19 +17446,6 @@ SerialPort8080.UART8251.INIT = [
     SerialPort8080.UART8251.COMMAND.INIT,
     SerialPort8080.UART8251.BAUDRATES.INIT
 ];
-
-/*
- * Internal name used for the I/O buffer control, if any, that we bind to a SerialPort8080.
- *
- * Alternatively, if SerialPort8080 wants to use another component's control (eg, the Panel's
- * "print" control), it can specify the name of that control with the 'binding' property.
- *
- * For that binding to succeed, we also need to know the target component; for now, that's
- * been hard-coded to "Panel", in part because that's one of the few components we can rely
- * upon initializing before we do, but it would be a simple matter to include a component type
- * or ID as part of the 'binding' property as well, if we need more flexibility later.
- */
-SerialPort8080.sIOBuffer = "buffer";
 
 /*
  * Port input notification table
@@ -18946,7 +18980,7 @@ class Debugger8080 extends Debugger {
      * @this {Debugger8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "debugInput")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -18957,7 +18991,7 @@ class Debugger8080 extends Debugger {
 
         case "debugInput":
             this.bindings[sBinding] = control;
-            this.controlDebug = control;
+            this.controlDebug = /** @type {HTMLInputElement} */ (control);
             /*
              * For halted machines, this is fine, but for auto-start machines, it can be annoying.
              *
@@ -18966,12 +19000,12 @@ class Debugger8080 extends Debugger {
             control.onkeydown = function onKeyDownDebugInput(event) {
                 var sCmd;
                 if (event.keyCode == Keys.KEYCODE.CR) {
-                    sCmd = control.value;
-                    control.value = "";
+                    sCmd = dbg.controlDebug.value;
+                    dbg.controlDebug.value = "";
                     dbg.doCommands(sCmd, true);
                 }
                 else if (event.keyCode == Keys.KEYCODE.ESC) {
-                    control.value = sCmd = "";
+                    dbg.controlDebug.value = sCmd = "";
                 }
                 else {
                     if (event.keyCode == Keys.KEYCODE.UP) {
@@ -18982,8 +19016,8 @@ class Debugger8080 extends Debugger {
                     }
                     if (sCmd != null) {
                         var cch = sCmd.length;
-                        control.value = sCmd;
-                        control.setSelectionRange(cch, cch);
+                        dbg.controlDebug.value = sCmd;
+                        dbg.controlDebug.setSelectionRange(cch, cch);
                     }
                 }
                 if (sCmd != null && event.preventDefault) event.preventDefault();
@@ -24103,7 +24137,7 @@ class Computer8080 extends Component {
      * @this {Computer8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -25243,7 +25277,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResol
              * ES6 ALERT: Template strings.
              */
             if (!COMPILED && XMLVERSION) {
-                sXML = sXML.replace(/<xsl:variable name="APPVERSION">1.x.x<\/xsl:variable>/, `<xsl:variable name="APPVERSION">${XMLVERSION}</xsl:variable>`);
+                sXML = sXML.replace(/<xsl:variable name="APPVERSION"\/>/, `<xsl:variable name="APPVERSION">${XMLVERSION}</xsl:variable>`);
             }
         }
 
@@ -25487,7 +25521,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  * path to the XSL file, unless they choose to mirror our folder structure.
                  */
                 var sAppFolder = sAppClass;
-                if (DEBUG || sVersion == "1.x.x") {
+                if (DEBUG || !sVersion) {
                     if (sAppClass != "c1pjs") sAppFolder = "shared";
                     sXSLFile = "/modules/" + sAppFolder + "/templates/components.xsl";
                 } else {
@@ -25508,7 +25542,9 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  */
                 if (!COMPILED) {
                     var aMatch = sXML.match(/<\?xml-stylesheet[^>]* href=(['"])[^'"]*?\/([0-9.]*)\/([^'"]*)\1/);
-                    if (aMatch) XMLVERSION = aMatch[2];
+                    if (aMatch) {
+                        XMLVERSION = aMatch[2];
+                    }
                 }
 
                 var transformXML = function(sXSL, xsl) {

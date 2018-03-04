@@ -1,5 +1,5 @@
 /**
- * @fileoverview Compile-time definitions used by C1Pjs and PCjs.
+ * @fileoverview PCjs compile-time definitions.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
@@ -31,7 +31,7 @@
 /**
  * @define {string}
  */
-var APPVERSION = "1.x.x";       // this @define is overridden by the Closure Compiler with the version in package.json
+var APPVERSION = "";            // this @define is overridden by the Closure Compiler with the version in machines.json
 
 var XMLVERSION = null;          // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
 

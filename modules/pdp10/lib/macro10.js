@@ -1061,7 +1061,7 @@ class Macro10 {
      *
      * @this {Macro10}
      * @param {string} sExp
-     * @param {Array} [aUndefined]
+     * @param {Array|undefined} [aUndefined]
      * @param {number|undefined} [nLocation]
      * @param {number|undefined} [nLine]
      * @return {number|undefined}

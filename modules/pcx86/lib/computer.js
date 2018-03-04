@@ -494,8 +494,8 @@ class Computer extends Component {
             if (typeof resources == 'object' && (sParms = resources['parms'])) {
                 try {
                     parmsMachine = /** @type {Object} */ (eval("(" + sParms + ")"));    // jshint ignore:line
-                } catch(e) {
-                    Component.error(e.message + " (" + sParms + ")");
+                } catch(err) {
+                    Component.error(err.message + " (" + sParms + ")");
                 }
             }
         }
@@ -558,8 +558,8 @@ class Computer extends Component {
                  */
                 var ch = value.indexOf("'") >= 0? '"' : "'";
                 value = /** @type {string} */ (eval(ch + value + ch));      // jshint ignore:line
-            } catch(e) {
-                Component.error(e.message + " (" + value + ")");
+            } catch(err) {
+                Component.error(err.message + " (" + value + ")");
                 value = undefined;
             }
         }
@@ -644,7 +644,7 @@ class Computer extends Component {
         var computer = this;
         var aComponents = Component.getComponents(this.id);
         for (var iComponent = 0; iComponent <= aComponents.length; iComponent++) {
-            var component = (iComponent < aComponents.length ? aComponents[iComponent] : this);
+            var component = (iComponent < aComponents.length? aComponents[iComponent] : this);
             if (!component.isReady()) {
                 component.isReady(function onComponentReady() {
                     computer.wait(fn, parms);
@@ -808,7 +808,11 @@ class Computer extends Component {
         for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
             var component = aComponents[iComponent];
             if (component !== this && component != this.cpu) {
-                fRestore = this.powerRestore(component, stateComputer, fRepower, fRestore);
+                try {
+                    fRestore = this.powerRestore(component, stateComputer, fRepower, fRestore);
+                } catch(err) {
+                    Component.error(component.type + " power failure: " + err.message);
+                }
             }
         }
 
@@ -1453,8 +1457,8 @@ class Computer extends Component {
                 } else {
                     if (fMessages) this.printMessage(response.code + ": " + response.data);
                 }
-            } catch (e) {
-                Component.error(e.message + " (" + sResponse + ")");
+            } catch(err) {
+                Component.error(err.message + " (" + sResponse + ")");
             }
         } else {
             if (fMessages) this.printMessage("invalid response (error " + nErrorCode + ")");

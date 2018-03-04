@@ -324,7 +324,7 @@ BufferPF.prototype.toString = function(format)
 /**
  * DiskDump()
  *
- * TODO: If sServerRoot is set, make sure sDiskPath refers to something in either /apps/ or /disks/,
+ * TODO: If sServerRoot is set, make sure sDiskPath refers to something in either /apps/ or /pcjs-disks/,
  * to prevent random enumeration of other server resources.
  *
  * @constructor
@@ -655,7 +655,7 @@ DiskDump.asTextFileExts = [".MD", ".ME", ".ASM", ".TXT", ".XML"];
  *
  * Examples
  * ---
- *      node modules/diskdump/bin/diskdump --disk=../jsmachines/disks/pcx86/games/infocom/zork1/zork1.dsk
+ *      node modules/diskdump/bin/diskdump --disk=../pcjs/disks/pcx86/games/infocom/zork1/zork1.dsk
  *      node modules/diskdump/bin/diskdump --dir=./apps/pcx86/1981/visicalc/ --format=img --output=./apps/pcx86/1981/visicalc/disk.img
  *      node modules/diskdump/bin/diskdump --path=./apps/pcx86/1981/visicalc/bin/vc.com;../README.md --format=json --output=./apps/pcx86/1981/visicalc/disk.json
  */
@@ -967,15 +967,10 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         sXML += '</manifest>';
     }
 
-    i = sOutputFile.indexOf("/disks/");
-    if (i > 0) {
-        sOutputFile = sOutputFile.substr(i);
-    } else {
-        i = sOutputFile.indexOf("/apps/");
-        if (i > 0) {
-            sOutputFile = sOutputFile.substr(i);
-        }
-    }
+    i = sOutputFile.indexOf("/pcjs-disks/");
+    if (i < 0) i = sOutputFile.indexOf("/private-disks/");
+    if (i < 0) i = sOutputFile.indexOf("/apps/");
+    if (i > 0) sOutputFile = sOutputFile.substr(i);
 
     var match = sXML.match(new RegExp('[ \t]*<disk ([^>]*href="' + sOutputFile + '"[^>]*?)(>[\\s\\S]*?</disk>|/>)[ \t]*\n?'));
     if (match) {

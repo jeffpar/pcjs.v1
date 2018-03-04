@@ -1022,7 +1022,7 @@ class CPUStatePDP11 extends CPUPDP11 {
     addIRQ(vector, priority, message)
     {
         var irq = {vector: vector, priority: priority, message: message || 0, name: PDP11.VECTORS[vector], next: null};
-        this.aIRQs.push(irq);
+        this.aIRQs.push(/** @type {IRQ} */ (irq));      // TODO: Why the F*CK do I need a type override? Damn JSDoc types....
         return irq;
     }
 
