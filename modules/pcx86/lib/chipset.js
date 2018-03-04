@@ -5803,7 +5803,7 @@ ChipSet.CMOS = {
         RTC_WEEK_DAY:   0x06,
         RTC_MONTH_DAY:  0x07,
         RTC_MONTH:      0x08,
-        RTC_YEAR:       0x09,
+        RTC_YEAR:       0x09,   // 2-digit year (eg, 0x82 for 1982 if BCD mode)
         STATUSA:        0x0A,
         STATUSB:        0x0B,
         STATUSC:        0x0C,
@@ -5823,7 +5823,7 @@ ChipSet.CMOS = {
         CHKSUM_LO:      0x2F,   // CMOS bytes included in the checksum calculation: 0x10-0x2D
         EXTMEM2_LO:     0x30,
         EXTMEM2_HI:     0x31,
-        CENTURY_DATE:   0x32,   // BCD value for the current century (eg, 0x19 for 20th century, 0x20 for 21st century)
+        CENTURY_DATE:   0x32,   // 2-digit century value in BCD (eg, 0x19 for 20th century, 0x20 for 21st century)
         BOOT_INFO:      0x33,   // 0x80 if 128Kb expansion memory installed, 0x40 if Setup Utility wants an initial setup message
         MASK:           0x3F,
         TOTAL:          0x40,
