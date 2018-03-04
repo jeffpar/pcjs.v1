@@ -1,7 +1,7 @@
 ---
 layout: page
-title: "IBM PC (Model 5160) with 256K EGA running IBM EGA FantasyLand Demo"
-permalink: /disks/pcx86/diags/ibm/fland/
+title: IBM EGA Demos and Utilities
+permalink: /disks/pcx86/diags/ibm/ega/
 machines:
   - id: ibm5160
     type: pcx86
