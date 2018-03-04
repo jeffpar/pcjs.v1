@@ -15,6 +15,37 @@ machines:
     autoType: $date\r$time\rB:\rFLAND\r
 ---
 
+IBM EGA "FantasyLand" Demo
+--------------------------
+
+In the October 1986 issue of [PC Tech Journal](http://www.pcjs.org/pubs/pc/magazines/pctj/), John T. Cockerham wrote
+the article "[Evaluating the EGA: The EGA Standard](http://www.pcjs.org/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2053.pdf&page=53&total=228)",
+which described IBM's "FantasyLand" demo:
+
+> IBM wrote FantasyLand in 1984 in order to demonstrate some of the more obscure features of the EGA.
+The program was distributed very selectively to dealers and sales representatives; it has never been a product
+intended for sale.
+
+> FantasyLand builds a large, 150-by-400-character virtual text screen in the EGA video RAM. The screen uses custom
+fonts to create a map of an imaginary continent, complete with rivers, lakes, mountains, and fantastic creatures
+like dragons and sea serpents. The illusion of bit-mapped graphics is great, but all the drawings actually are done
+with custom characters from a 25-by-80 window into the larger virtual text screen. The program allows vertical and
+horizontal smooth scrolling throughout the map by using the cursor keys, allowing the user to tour FantasyLand. Help
+screens are implemented with the EGA's split-screen abilities and scroll smoothly up from the bottom of the screen when
+requested.
+
+> To make the test even more rigorous, FantasyLand uses the EGA's switchable fonts to create animation effects.
+The program loads several copies of a custom font into memory, and an interrupt service routine cycles through the
+copies every four system clock ticks. Certain characters in the custom font have slight differences across the copies
+so that, when cycled, they give the illusion of motion--a dragon flaps his wings, smoke billows from a chimney, grass
+waves in the wind. By tying the animation directly to the system's 8253 timer interrupt, font switching happens
+continuously, independent of CPU speed and divorced from other program operations. Rapid ongoing font changes, along
+with fast smooth scrolling in both directions, test subtle timing dependencies between subunits of the EGA.
+
+Thanks to Eric, a friend of PCjs, we finally have a copy of the FantasyLand program, along with an assortment of other
+EGA utilities that he kindly provided.  Sadly, FantasyLand doesn't yet work in the PCx86 emulator, but it's on our
+"to-do" list.  Stay tuned!
+
 {% include machine.html id="ibm5160" %}
 
 ### Directory of IBM EGA FantasyLand Demo
