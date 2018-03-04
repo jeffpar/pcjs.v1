@@ -288,11 +288,11 @@ class CPU extends Component {
          */
         if (this.flags.autoStart || (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
             /*
-             * We used to also set fUpdateFocus when calling startCPU(), on the assumption that in the "auto-starting"
-             * context, a machine without focus is like a day without sunshine, but in reality, focus should only be
-             * forced when the user takes some other machine-related action.
+             * Setting fUpdateFocus when calling startCPU() is a double-edged sword (or at least, it used to be),
+             * because it could auto-scroll the page to bring the machine into view, which might interfere with the
+             * user's attention.
              */
-            return this.startCPU();
+            return this.startCPU(true);
         }
         return false;
     }
