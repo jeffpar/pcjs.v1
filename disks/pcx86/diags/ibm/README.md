@@ -1,6 +1,6 @@
 ---
 layout: page
-title: IBM PC Diagnostics
+title: IBM PC Diagnostics and Demos
 permalink: /disks/pcx86/diags/ibm/
 ---
 
@@ -31,7 +31,7 @@ The following IBM PC AT *Advanced* Diagnostics are also available.
 * [IBM PC AT Advanced Diagnostics 1.01](5170/1.01a/)
 * [IBM PC AT Advanced Diagnostics 2.07](5170/2.07a/)
 
-IBM Video Demonstrations
-------------------------
+IBM EGA Demos and Utilities
+---------------------------
 
 * [IBM EGA FantasyLand Demo and Utilities](fland/)
