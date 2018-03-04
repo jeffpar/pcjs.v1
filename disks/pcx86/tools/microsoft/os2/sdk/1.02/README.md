@@ -1267,7 +1267,7 @@ at Microsoft for many years.  It was renamed to the **Microsoft Editor** (M or M
 Environment (IDE) that came with Microsoft C 6.0.
 
 While we don't have the SDK documentation, we *have* unearthed a copy of the
-"[User's Guide to the Z Editor](/disks/pcx86/tools/microsoft/misc/root/Z.TXT)" by Mark Zbikowski, August 4, 1986,
+"[User's Guide to the Z Editor](/disks/pcx86/tools/microsoft/misc/Z.TXT)" by Mark Zbikowski, August 4, 1986,
 included below.
 
 
