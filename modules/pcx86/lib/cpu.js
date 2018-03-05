@@ -51,8 +51,7 @@ class CPU extends Component {
      *      multiplier: base cycle multiplier; default is 1.
      *
      *      autoStart: true to automatically start, false to not, or null if "it depends"; null is the default,
-     *      which means do not autostart UNLESS there is no Debugger and no "Run" button (ie, no way to manually
-     *      start the machine).
+     *      which means autostart UNLESS there is a Debugger present.
      *
      *      csStart: the number of cycles that runCPU() must wait before generating checksum records;
      *      -1 if disabled.  checksum records are a diagnostic aid used to help compare one CPU run to another.
@@ -284,13 +283,12 @@ class CPU extends Component {
             return true;
         }
         /*
-         * Start running automatically on power-up, assuming there's no Debugger and no "Run" button.
+         * Start running automatically on power-up, assuming there's no Debugger.  
          */
-        if (this.flags.autoStart || (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
+        if (this.flags.autoStart || this.flags.autoStart == null && !this.dbg) {
             /*
-             * Setting fUpdateFocus when calling startCPU() is a double-edged sword (or at least, it used to be),
-             * because it could auto-scroll the page to bring the machine into view, which might interfere with the
-             * user's attention.
+             * Automatically updating focus when calling startCPU() is a double-edged sword, because it might
+             * auto-scroll the page to bring the machine into view, potentially interfering with the user's attention.
              */
             return this.startCPU(true);
         }
