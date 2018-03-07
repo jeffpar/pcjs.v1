@@ -2731,17 +2731,17 @@ class Video extends Component {
     lockPointer(fLock)
     {
         var fSuccess = false;
-        if (this.inputScreen) {
+        if (this.inputScreen && this.mouse) {
             if (fLock) {
                 if (this.inputScreen.lockPointer) {
                     this.inputScreen.lockPointer();
-                    if (this.mouse) this.mouse.notifyPointerLocked(true);
+                    this.mouse.notifyPointerLocked(true);
                     fSuccess = true;
                 }
             } else {
                 if (this.inputScreen.unlockPointer) {
                     this.inputScreen.unlockPointer();
-                    if (this.mouse) this.mouse.notifyPointerLocked(false);
+                    this.mouse.notifyPointerLocked(false);
                     fSuccess = true;
                 }
             }

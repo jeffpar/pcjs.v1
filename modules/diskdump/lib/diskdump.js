@@ -616,7 +616,7 @@ DiskDump.asExclusions = [".*", ".IMG"];
  * NOTE: This list used to include .BAS files, but they aren't always ASCII, so that extension has been removed;
  * also, a warning is now displayed whenever we replace line endings in *any* file being copied to a disk image.
  */
-DiskDump.asTextFileExts = [".MD", ".ME", ".ASM", ".TXT", ".XML"];
+DiskDump.asTextFileExts = [".MD", ".ME", ".BAT", ".ASM", ".TXT", ".XML"];
 
 /*
  * Class methods

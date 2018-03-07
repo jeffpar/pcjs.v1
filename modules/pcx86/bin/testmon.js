@@ -43,8 +43,15 @@ var fDebug = false;
 var args = Proc.getArgs();
 var argv = args.argv;
 
+var baudRate = 9600;
+var rtscts = true;
+
 if (argv['debug'] !== undefined) {
     fDebug = argv['debug'];
+}
+if (argv['baud'] !== undefined) {
+    baudRate = +argv['baud'];
+    console.log("opening with baudRate " + baudRate);
 }
 if (global.DEBUG !== undefined) {
     global.DEBUG = fDebug;
@@ -74,6 +81,15 @@ class PortController {
 
         this.port.on('data', function(data) {
             controller.receiveData(data);
+        });
+
+        this.port.on('open', function() {
+            console.log("Connected to: ",controller.port.path);
+            controller.port.get(function(error, status){
+                console.log('get() results:');
+                console.log(error);
+                console.log(status);
+            });
         });
 
         this.stdin = process.stdin;
@@ -165,6 +181,7 @@ class PortController {
         if (data === '\u0003') {        // ctrl-c
             process.exit();
         }
+        
         if (this.deliverInput) {
             this.deliverInput(data.charCodeAt(0));
         }
@@ -208,4 +225,4 @@ class PortController {
     }
 }
 
-let controller = new PortController("/dev/tty.KeySerial1", {baudRate: 9600, rtscts: true});
+let controller = new PortController("/dev/tty.KeySerial1", {baudRate, rtscts});

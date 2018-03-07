@@ -2,17 +2,13 @@
   "DOS": {
     "prompt": "A>",
     "commands": {
-      "debug": {
-        "request": "b:debug\r",
-        "mode": "prompt"
-      },
       "symdeb": {
         "request": "symdeb\r",
         "mode": "prompt"
       }
     }
   },
-  "DEBUG": {
+  "SYMDEB": {
     "prompt": "\n-",
     "commands": {
       "dos": {
@@ -20,7 +16,7 @@
         "mode": "prompt"
       },
       "reboot": {
-        "request": "a\rjmp ffff:0\r\rg\r",
+        "request": "a cs:ip\rjmp ffff:0\r\rg\r",
         "response": "*"
       }
     }

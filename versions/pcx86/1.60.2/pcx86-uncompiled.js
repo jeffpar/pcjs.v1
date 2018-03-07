@@ -12309,10 +12309,11 @@ class CPU extends Component {
          */
         if (this.flags.autoStart || this.flags.autoStart == null && !this.dbg) {
             /*
-             * Automatically updating focus when calling startCPU() is a double-edged sword, because it might
-             * auto-scroll the page to bring the machine into view, potentially interfering with the user's attention.
+             * Automatically updating focus when calling startCPU() is a double-edged sword, potentially interfering
+             * with the user's attention, which is why we also set fQuiet, to try to prevent the page from "auto-scrolling"
+             * the newly focused machine into view. 
              */
-            return this.startCPU(true);
+            return this.startCPU(true, true);
         }
         return false;
     }
@@ -13320,7 +13321,7 @@ class CPU extends Component {
         if (controlRun) controlRun.textContent = "Halt";
         if (this.cmp) {
             this.cmp.updateStatus(true);
-            if (fUpdateFocus) this.cmp.updateFocus(true);
+            if (fUpdateFocus) this.cmp.updateFocus(!fQuiet);
             this.cmp.start(this.counts.msStartRun, this.getCycles());
         }
 
@@ -50717,17 +50718,17 @@ class Video extends Component {
     lockPointer(fLock)
     {
         var fSuccess = false;
-        if (this.inputScreen) {
+        if (this.inputScreen && this.mouse) {
             if (fLock) {
                 if (this.inputScreen.lockPointer) {
                     this.inputScreen.lockPointer();
-                    if (this.mouse) this.mouse.notifyPointerLocked(true);
+                    this.mouse.notifyPointerLocked(true);
                     fSuccess = true;
                 }
             } else {
                 if (this.inputScreen.unlockPointer) {
                     this.inputScreen.unlockPointer();
-                    if (this.mouse) this.mouse.notifyPointerLocked(false);
+                    this.mouse.notifyPointerLocked(false);
                     fSuccess = true;
                 }
             }
@@ -78417,6 +78418,7 @@ class Computer extends Component {
             this.reset();
             if (this.cpu) this.cpu.autoStart();
         }
+        this.updateFocus(true);
     }
 
     /**
