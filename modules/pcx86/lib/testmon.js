@@ -109,13 +109,34 @@ class TestMonitor {
     {
         let suite = this.tests[this.category];
         let commands = suite['commands'];
-        let command = commands[this.commandBuffer];
+        let aCommandParts = this.commandBuffer.split(' ');
+        let command = commands[aCommandParts[0]];
         if (command) {
-            let request = command['request'];
-            if (DEBUG) console.log("TestMonitor.checkCommand(" + this.commandBuffer + "): request '" + request + "'");
-            this.sendData(request);
-            let mode = command['mode'];
-            if (mode) this.setMode(mode);
+            let request = command['req'];
+            if (request) {
+                let errorMessage = "";
+                request = request.replace(/\$([0-9]+)/g, function(match, index, offset, s) {
+                    let i = +index;
+                    let result = "";
+                    if (i > aCommandParts.length) {
+                        result = '$' + index;
+                        errorMessage = "missing value for " + result;
+                    } else {
+                        result = (i? aCommandParts[i-1] : this.commandBuffer);
+                    }
+                    return result;
+                });
+                if (errorMessage) {
+                    this.printf("%s\n", errorMessage);
+                } else {
+                    if (DEBUG) console.log("TestMonitor.checkCommand(" + this.commandBuffer + "): request '" + request + "'");
+                    this.sendData(request);
+                    let mode = command['mode'];
+                    if (mode) this.setMode(mode);
+                }
+            } else {
+                this.printf("missing request for command: %s\n", aCommandParts[0]);
+            }
         } else {
             this.printf("unrecognized command: %s\n", this.commandBuffer);
         }
@@ -214,7 +235,10 @@ class TestMonitor {
         } else if (this.mode == TestMonitor.MODE.TERMINAL) {
             this.sendOutput(data);
         } else {
-            this.sendOutput(data);
+            /*
+             * TODO: This is where we need to collect the response to any commands we have issued.
+             */
+            // this.sendOutput(data);
             if (DEBUG) console.log("TestMonitor.receiveData(" + data + "): ignored while mode is '" + this.mode + "'");
         }
     }
@@ -240,7 +264,13 @@ class TestMonitor {
                 this.checkCommand();
             } else {
                 this.sendOutput(charCode);
-                this.commandBuffer += String.fromCharCode(charCode);
+                if (charCode == 8) {
+                    if (this.commandBuffer.length) {
+                        this.commandBuffer = this.commandBuffer.slice(0, -1);
+                    }
+                } else {
+                    this.commandBuffer += String.fromCharCode(charCode);
+                }
             }
         }
     }

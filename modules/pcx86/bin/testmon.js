@@ -43,7 +43,7 @@ var fDebug = false;
 var args = Proc.getArgs();
 var argv = args.argv;
 
-var baudRate = 9600;
+var baudRate = 2400;
 var rtscts = true;
 
 if (argv['debug'] !== undefined) {
