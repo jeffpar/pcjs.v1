@@ -21,7 +21,8 @@ COMIRQ	equ	3
 
 prev14	dd	0			; previous INT 14h handler
 comID	dw	-1			; 0-based index of our COM port in BIOS data area
-rtsFlag	db	1			; internal RTS flag (0=off, 1=on)
+rtsFlg	db	1			; internal RTS flag (0=off, 1=on)
+pollFlg	db	0			; polling mode (0=off, 1=on); set by /P
 
 MAXBUF	equ	16
 inBuf	db	MAXBUF dup (?)
@@ -52,49 +53,6 @@ log1:	mov	byte ptr cs:[bx],'.'
 	pop	bx
 	endm
 
-inthw	proc	far
-	sti
-	push	ax
-	push	bx
-	push	dx
-	push	ds
-	push	cs
-	pop	ds
-	assume	ds:code
-	push	es
-	mov	bx,40h
-	mov	es,bx
-	mov	bx,comID
-	add	bx,bx
-	mov	dx,es:[bx]
-	push	dx
-	inc	dx
-	inc	dx			; DX -> IIR
-	in	al,dx
-	pop	dx
-	log	'H',al
-
-	cmp	al,02h			; THRE condition?
-	jne	hw1			; no
-	call	tryOut			; yes, so see if we have something to write
-	jmp	short hw9
-
-hw1:	cmp	al,04h			; DR condition?
-	jne	hw9
-	call	tryIn
-
-hw9:	cli
-	mov	al,20h			; EOI command
-	out	20h,al
-	pop	es
-	pop	ds
-	assume	ds:nothing
-	pop	dx
-	pop	bx
-	pop	ax
-	iret
-inthw	endp
-
 int14	proc	far
 	cmp	dx,comID		; request for our COM port?
 	je	i14a			; yes
@@ -120,10 +78,15 @@ i14c:	cmp	ah,2			; READ function?
 	iret
 
 i14d:	cmp	ah,3			; STATUS function?
-	jne	i14x			; no, jump to previous handler
+	jne	i14e			; no, jump to previous handler
 	call	status
 	log	'S',al
 	log	's',ah
+	iret
+
+i14e:	cmp	ah,0AAh			; quick-and-dirty installation check
+	jne	i14x
+	not	ah
 	iret
 
 i14x:	jmp	dword ptr [prev14]
@@ -152,7 +115,9 @@ fakeLSR	proc	near
 	;
 	; See if outBuf still has room, and set the THRE bit if it does.
 	;
-lsr1:	and	al,not 20h
+lsr1:	cmp	pollFlg,0
+	jne	lsr9
+	and	al,not 20h
 	mov	bx,outHead
 	call	incPtr
 	cmp	bx,outTail
@@ -233,7 +198,7 @@ setDTR	endp
 ;
 ; setRTS
 ;
-; Sets the physical RTS bit according to the internal rtsFlag.
+; Sets the physical RTS bit according to the internal rtsFlg.
 ;
 setRTS	proc	near
 	assume	ds:code
@@ -243,7 +208,7 @@ setRTS	proc	near
 	in	al,dx
 	jmp	$+2
 	or	al,02h			; RTS == 02h
-	cmp	rtsFlag,0
+	cmp	rtsFlg,0
 	jne	rts9
 	and	al,not 02h
 rts9:	out	dx,al
@@ -278,6 +243,7 @@ incPtr	endp
 ;
 tryIn	proc	near
 	assume	ds:code
+	push	ax
 	push	dx
 	add	dx,5			; DX -> LSR
 	in	al,dx
@@ -294,12 +260,15 @@ tryIn	proc	near
 	je	ti8			; buffer full, dropping the data
 	mov	inHead,bx
 	inc	inTot
+	cmp	pollFlg,0
+	jne	ti8
 	cmp	inTot,MAXBUF/2		; have we reached the half-way point?
 	jne	ti8			; no
-	mov	rtsFlag,0		; yes, so let's try turning RTS off
+	mov	rtsFlg,0		; yes, so let's try turning RTS off
 	call	setRTS			; and hope the sender give us some space
 ti8:	pop	bx
-ti9:	ret
+ti9:	pop	ax
+	ret
 tryIn	endp
 
 ;
@@ -354,9 +323,11 @@ init	proc	near
 	mov	inTail,offset inBuf
 	mov	outHead,offset outBuf
 	mov	outTail,offset outBuf
+	cmp	pollFlg,0
+	jne	i1
 	call	setIER
-	call	setDTR
-	mov	rtsFlag,1
+i1:	call	setDTR
+	mov	rtsFlg,1
 	call	setRTS
 	pop	ax
 	pop	es
@@ -407,16 +378,20 @@ w1:	call	getMSR
 	xchg	ah,al
 	jmp	short w9
 
-w2:	sub	cx,cx
-w3:	call	getLSR
+w2:	cmp	pollFlg,0		; in polling mode, we take
+	je	w3			; every opportunity to check for input
+	call	tryIn
+
+w3:	sub	cx,cx
+w4:	call	getLSR
 	test	al,20h			; checking THRE
-	jnz	w4
-	loop	w3
+	jnz	w5
+	loop	w4
 	or	al,80h			; signal a time-out error
 	xchg	ah,al
 	jmp	short w9
 
-w4:	cli
+w5:	cli
 	sub	al,al
 	xchg	al,ah			; recover the output data in AL and zero AH
 	mov	bx,outHead
@@ -458,24 +433,34 @@ read	proc	near
 	add	bx,bx
 	mov	dx,es:[bx]
 
-	xchg	ah,al
-	call	getLSR
-	xchg	al,ah
+	cmp	pollFlg,0		; in polling mode, we take
+	je	r1			; every opportunity to check for input
+	call	tryIn
+	mov	rtsFlg,0
+	call	setRTS			; after a polled read, let's turn RTS off
+
+r1:	sub	ax,ax
+	call	fakeLSR
+	mov	ah,al
 
 	mov	bx,inTail
 	cmp	bx,inHead
-	jne	r1
+	jne	r3
 	or	ah,80h
 	jmp	short r9
 
-r1:	mov	al,[bx]
+r3:	mov	al,[bx]
 	call	incPtr
 	mov	inTail,bx
+
+	cmp	pollFlg,0
+	jne	r4
 	cmp	inTot,MAXBUF/2		; are we at the half-way point?
-	jne	r8			; no
-	mov	rtsFlag,1		; yes, so we must have turned RTS off
+	jne	r4			; no
+	mov	rtsFlg,1		; yes, so we must have turned RTS off
 	call	setRTS			; so let's turn RTS back on
-r8:	dec	inTot
+
+r4:	dec	inTot
 
 r9:	pop	es
 	pop	ds
@@ -517,10 +502,23 @@ status	proc	near
 	mov	bx,comID
 	add	bx,bx
 	mov	dx,es:[bx]
-	call	fakeLSR
+
+	cmp	pollFlg,0		; in polling mode, we take
+	je	s1			; every opportunity to check for input
+	call	tryIn
+
+s1:	call	fakeLSR
 	mov	ah,al			; AH = LSR bits
 	call	getMSR			; AL = MSR bits
-	pop	es
+
+	cmp	pollFlg,0
+	je	s9
+	cmp	rtsFlg,0		; in polling mode, if RTS isn't already on
+	jne	s9			; turn it on
+	inc	rtsFlg
+	call	setRTS
+
+s9:	pop	es
 	pop	ds
 	assume	ds:nothing
 	pop	dx
@@ -528,43 +526,115 @@ status	proc	near
 	ret
 status	endp
 
+intHW	proc	far
+	sti
+	push	ax
+	push	bx
+	push	dx
+	push	ds
+	push	cs
+	pop	ds
+	assume	ds:code
+	push	es
+	mov	bx,40h
+	mov	es,bx
+	mov	bx,comID
+	add	bx,bx
+	mov	dx,es:[bx]
+	push	dx
+	inc	dx
+	inc	dx			; DX -> IIR
+	in	al,dx
+	pop	dx
+	log	'H',al
+
+	cmp	al,02h			; THRE condition?
+	jne	hw1			; no
+	call	tryOut			; yes, so see if we have something to write
+	jmp	short hw9
+
+hw1:	cmp	al,04h			; DR condition?
+	jne	hw9
+	call	tryIn
+
+hw9:	cli
+	mov	al,20h			; EOI command
+	out	20h,al
+	pop	es
+	pop	ds
+	assume	ds:nothing
+	pop	dx
+	pop	bx
+	pop	ax
+	iret
+intHW	endp
+
 	even
 endRes	label	byte			; end of resident code/data
 
-comMsg	db	"COM? handlers installed",13,10,'$'
+comMsg	db	"COM? handlers installed$"
+pollMsg	db	" in polled mode$"
+endMsg	db	13,10,'$'
+insMsg	db	"Handlers already installed",13,10,'$'
 errMsg	db	"COM port not found",13,10,'$'
 
 install	proc	near
 	assume	ds:code, es:code, ss:code
-	sub	ax,ax
+	;
+	; Let's look for a /P switch to determine polled mode
+	;
+	cld
+	mov	si,80h			; DS:SI -> command line
+	lodsb
+	cbw
+	xchg	cx,ax			; CX == line length (as a fail-safe)
+ins1:	lodsb
+	dec	cx
+	cmp	al,0Dh			; end of command-line?
+	je	ins3			; yes
+	cmp	al,'/'
+	jne	ins2
+	lodsb
+	dec	cx
+	and	al,not 20h
+	cmp	al,'P'			; /P?
+	jne	ins2			; no
+	inc	pollFlg			; yes, set pollFlg to non-zero
+ins2:	test	cx,cx			; any more command-line characters?
+	jg	ins1			; yes
+
+ins3:	sub	ax,ax
 	mov	es,ax
 	assume	es:nothing		; since ES is zero
 
-	mov	bx,400h			; we'll access the RBDA at 0:400 instead of 40:0
+	mov	bx,400h			; access RBDA @0:400 instead of 40:0
 	sub	dx,dx
-i1:	cmp	word ptr es:[bx],COMADR	; match?
-	je	i2			; yes
+ins4:	cmp	word ptr es:[bx],COMADR	; matching port?
+	je	ins5			; yes
 	inc	bx
 	inc	bx
 	inc	dx
 	cmp	dl,4
-	jb	i1
-	mov	dx,offset errMsg
+	jb	ins4
+	mov	dx,offset errMsg	; no matching port was found; abort
 	mov	ah,09h
 	int	21h
 	int	20h
 
-i2:	mov	comID,dx
-	mov	word ptr es:[(08h+COMIRQ)*4],offset inthw
-	mov	es:[(08h+COMIRQ)*4+2],cs
-	mov	dx,es:[bx]
-	call	setIER
+ins5:	mov	comID,dx		; comID is 0 for COM1, 1 for COM2, etc.
+	mov	ah,0AAh			; quick-and-dirty installation check
+	int	14h
+	not	ah
+	cmp	ah,0AAh
+	jne	ins6
+	mov	dx,offset insMsg	; already installed for that port
+	mov	ah,09h
+	int	21h
+	int	20h			; abort
+
+ins6:	mov	dx,es:[bx]		; DX is port (ie, 2F8h)
 	call	setDTR
-	call	setRTS			; rtsFlag is initially 1
-	in	al,21h
-	jmp	$+2
-	and	al,not (1 shl COMIRQ)
-	out	21h,al			; unmask the appropriate COM IRQ
+	call	setRTS			; rtsFlg is initially 1
 
 	mov	ax,offset int14
 	xchg	ax,es:[14h*4]
@@ -573,14 +643,34 @@ i2:	mov	comID,dx
 	xchg	ax,es:[14h*4+2]
 	mov	word ptr prev14+2,ax
 
-	mov	dx,comID
+	mov	bx,offset intHW
+	cmp	pollFlg,0
+	jne	ins7
+	mov	word ptr es:[(08h+COMIRQ)*4],bx
+	mov	es:[(08h+COMIRQ)*4+2],cs
+	call	setIER			; make sure DX still contains the port
+	in	al,21h
+	jmp	$+2
+	and	al,not (1 shl COMIRQ)
+	out	21h,al			; unmask the appropriate COM IRQ
+	mov	bx,offset endRes
+
+ins7:	mov	dx,comID
 	add	dl,'1'
 	mov	comMsg+3,dl
 	mov	dx,offset comMsg
 	mov	ah,09h
 	int	21h
+	cmp	pollFlg,0
+	je	ins9
+	mov	dx,offset pollMsg
+	mov	ah,09h
+	int	21h
+ins9:	mov	dx,offset endMsg
+	mov	ah,09h
+	int	21h
 
-	mov	dx,offset endRes
+	mov	dx,bx			; DX -> end of resident code/data
 	int	27h
 install	endp
 
