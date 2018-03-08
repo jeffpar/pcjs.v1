@@ -628,7 +628,8 @@ DiskDump.asTextFileExts = [".MD", ".ME", ".BAT", ".ASM", ".TXT", ".XML"];
  * Provides the command-line interface for the diskdump module.
  *
  * Usage
- * ---
+ * -----
+ * 
  *      diskdump --dir={directory} [--format=json|data|hex|bytes|img] [--comments] [--output={file}]
  *      diskdump --disk={disk image} [--format=json|data|hex|bytes|img] [--comments] [--output={file}]
  *      diskdump --path={file[;file]...} [--format=json|data|hex|bytes|img] [--comments] [--output={file}]
@@ -636,7 +637,8 @@ DiskDump.asTextFileExts = [".MD", ".ME", ".BAT", ".ASM", ".TXT", ".XML"];
  *      NOTE: --img is permitted as an alias for --disk
  *
  * Arguments
- * ---
+ * ---------
+ * 
  *      The default format is "json", which generates an array of signed 32-bit decimal values; "hex" is an older
  *      text format that consists entirely of 2-character hex values (deprecated), and "bytes" is a JSON-like format
  *      that also uses hex values (but with "0x" prefixes) and is normally used only when comments are enabled.
@@ -654,7 +656,8 @@ DiskDump.asTextFileExts = [".MD", ".ME", ".BAT", ".ASM", ".TXT", ".XML"];
  *          --xdf: enable support for XDF-formatted disk images (experimental)
  *
  * Examples
- * ---
+ * --------
+ * 
  *      node modules/diskdump/bin/diskdump --disk=../pcjs/disks/pcx86/games/infocom/zork1/zork1.dsk
  *      node modules/diskdump/bin/diskdump --dir=./apps/pcx86/1981/visicalc/ --format=img --output=./apps/pcx86/1981/visicalc/disk.img
  *      node modules/diskdump/bin/diskdump --path=./apps/pcx86/1981/visicalc/bin/vc.com;../README.md --format=json --output=./apps/pcx86/1981/visicalc/disk.json
