@@ -47,10 +47,7 @@ var usr         = require("../../shared/lib/usrlib");
 var DiskDump    = require("../../diskdump");
 var FileDump    = require("../../filedump");
 
-/**
- * @type {HTMLOut}
- */
-var HTMLOut;
+var HTMLOut     = require("./HTMLOut");
 
 /**
  * sServerRoot is the root directory of the web server; it can (and should) be overridden using by the Express
@@ -283,7 +280,7 @@ HTTPAPI.hasAPICommand = function(req, asCommands)
  * @param {Object} vol
  * @param {number} fd
  * @param {number} cbInit
- * @param {function(nResponse:number,sResponse:string,fd:number)} done
+ * @param {function(nResponse:number,sResponse:string,fd:(number|null))} done
  */
 HTTPAPI.initUserVolume = function(vol, fd, cbInit, done)
 {
@@ -337,7 +334,7 @@ HTTPAPI.initUserVolume = function(vol, fd, cbInit, done)
  * @param {string} sUser
  * @param {string} sMode
  * @param {number} cbInit
- * @param {function(nResponse:number,sResponse:string,fd:number)} done
+ * @param {function(nResponse:number,sResponse:string,fd:(number|null))} done
  */
 HTTPAPI.openUserVolume = function(sPath, sMachine, sUser, sMode, cbInit, done)
 {

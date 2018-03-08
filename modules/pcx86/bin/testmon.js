@@ -83,14 +83,14 @@ class PortController {
             controller.receiveData(data);
         });
 
-        this.port.on('open', function() {
-            console.log("Connected to: ",controller.port.path);
-            controller.port.get(function(error, status){
-                console.log('get() results:');
-                console.log(error);
-                console.log(status);
-            });
-        });
+        // this.port.on('open', function() {
+        //     console.log("Connected to: ",controller.port.path);
+        //     controller.port.get(function(error, status){
+        //         console.log('get() results:');
+        //         console.log(error);
+        //         console.log(status);
+        //     });
+        // });
 
         this.stdin = process.stdin;
         this.stdout = process.stdout;
@@ -107,7 +107,7 @@ class PortController {
             controller.receiveInput(data);
         });
 
-        this.tests = require("../../../tests/pcx86/tests.json");
+        this.tests = require("../../../tests/pcx86/testmon/tests.json");
         this.deliverData = this.deliverInput = this.deliverTests = null;
         
         let monitor = new TestMonitor();

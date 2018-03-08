@@ -1,6 +1,6 @@
 {
   "DOS": {
-    "prompt": "A>",
+    "prompt": ["A>", "C:\\>"],
     "commands": {
       "symdeb": {
         "request": "symdeb\r",

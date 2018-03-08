@@ -145,10 +145,18 @@ class TestMonitor {
                     let suite = this.tests[category];
                     let prompt = suite[TestMonitor.MODE.PROMPT];
                     if (prompt) {
-                        this.aCategories.push(category);
-                        this.aPrompts.push(prompt);
-                        if (this.cchPromptLongest < prompt.length) {
-                            this.cchPromptLongest = prompt.length;
+                        /*
+                         * The 'prompt' property is allowed to contain a string or array of strings.
+                         */
+                        if (typeof prompt == "string") {
+                            prompt = [prompt];
+                        }
+                        for (let i = 0; i < prompt.length; i++) {
+                            this.aCategories.push(category);
+                            this.aPrompts.push(prompt[i]);
+                            if (this.cchPromptLongest < prompt[i].length) {
+                                this.cchPromptLongest = prompt[i].length;
+                            }
                         }
                     }
                 }
@@ -196,6 +204,7 @@ class TestMonitor {
             if (this.promptBuffer.length >= this.cchPromptLongest) {
                 this.promptBuffer = this.promptBuffer.slice(-(this.cchPromptLongest - 1));
             }
+            if (data == 10) this.promptBuffer = "";
             this.promptBuffer += String.fromCharCode(data);
             if (DEBUG) console.log("TestMonitor.receiveData(" + data + "): checking prompts for '" + this.promptBuffer + "'");
             let i = this.aPrompts.indexOf(this.promptBuffer);
