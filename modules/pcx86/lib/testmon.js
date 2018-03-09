@@ -82,21 +82,23 @@ class TestMonitor {
     }
 
     /**
-     * bindController(controller, sendData, sendOutput, printf)
+     * bindController(controller, sendData, sendOutput, printf, sBinding)
      *
      * @this {TestMonitor}
      * @param {Object} controller
      * @param {function(...)} sendData
      * @param {function(...)} sendOutput
      * @param {function(string,...)} printf
+     * @param {string} [sBinding]
      */
-    bindController(controller, sendData, sendOutput, printf)
+    bindController(controller, sendData, sendOutput, printf, sBinding)
     {
         this.sendData = sendData.bind(controller);
         this.sendOutput = sendOutput.bind(controller);
         this.printf = printf.bind(controller);
         controller.bindMonitor(this, this.receiveData, this.receiveInput, this.receiveTests);
-        this.printf("%s TestMonitor v%s\nUse Ctrl-T to toggle terminal mode\n", APPNAME, APPVERSION || XMLVERSION);
+        this.printf("%s TestMonitor v%s\n", APPNAME, APPVERSION || XMLVERSION);
+        this.printf("Use Ctrl-T to toggle terminal mode%s\n", (sBinding? " (" + sBinding.toUpperCase() + ")" : ""));
         this.setMode(TestMonitor.MODE.TERMINAL);
     }
 

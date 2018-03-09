@@ -83,12 +83,15 @@ class SerialPort extends Component {
      * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use parseInt(),
      * and as an added benefit, we don't need to worry about whether a hex or decimal format was used.
      *
-     * This hard-coded approach mimics the original IBM PC Asynchronous Adapter configuration, which contained a
-     * pair of "shunt modules" that allowed the user to select a port address of either 0x3F8 ("Primary") or 0x2F8
-     * ("Secondary").
+     * This hard-coded approach mimics the original IBM PC Asynchronous Adapter configuration, which contained
+     * a pair of "shunt modules" that allowed the user to select a port address/IRQ combo of either 0x3F8/IRQ4
+     * ("Primary") or 0x2F8/IRQ3 ("Secondary").
      *
-     * DOS typically names the Primary adapter "COM1" and the Secondary adapter "COM2", but I prefer to stick to
-     * adapter numbers, since not all operating systems follow those naming conventions.
+     * DOS names the first adapter listed by the ROM BIOS as "COM1", even if that adapter is a secondary adapter,
+     * so don't assume that COM1 always maps to port 0x3F8/IRQ4.  Internally, I try avoid confusion by always
+     * starting with a primary adapter and giving that adapter an ID of "com1".  But different operating systems
+     * may follow different device enumeration and naming conventions, so don't make too much of my internally
+     * assigned IDs.
      *
      * @this {SerialPort}
      * @param {Object} parms
