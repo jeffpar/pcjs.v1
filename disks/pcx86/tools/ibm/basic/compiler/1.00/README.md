@@ -1,7 +1,7 @@
 ---
 layout: page
 title: IBM BASIC Compiler 1.00
-permalink: /disks/pcx86/tools/ibm/bascom/1.00/
+permalink: /disks/pcx86/tools/ibm/basic/compiler/1.00/
 ---
 
 IBM BASIC Compiler 1.00
