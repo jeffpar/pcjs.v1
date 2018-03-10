@@ -79,6 +79,19 @@ class TestMonitor {
     constructor()
     {
         if (DEBUG) console.log("TestMonitor()");
+        /*
+         * Operations are added to the following queue by addOperation(), which ensures that as soon as it
+         * transitions from empty to non-empty, a timeout handler is established to begin draining the queue.
+         * 
+         * While this approach is more complicated than simply sending operations (via sendData()) as they
+         * arrive, it has at least one important advantage: special operations, such as "wait" (eg, wait for a
+         * key to be pressed), are easier to implement, because control of the draining process can be switched
+         * from a timeout handler to an appropriate event handler.
+         */
+        this.aOperations = [];
+        this.idTimeout = 0;
+        this.fnRemoveOperation = this.removeOperation.bind(this);
+        this.fWaitPending = false;
     }
 
     /**
@@ -103,46 +116,187 @@ class TestMonitor {
     }
 
     /**
-     * checkCommand()
+     * addCommand(commandLine)
      *
      * @this {TestMonitor}
+     * @param {string} commandLine
+     * @return {boolean} (true if successful, false if error)
      */
-    checkCommand()
+    addCommand(commandLine)
     {
+        if (!commandLine) return true;
+        
         let suite = this.tests[this.category];
         let commands = suite['commands'];
-        let aCommandParts = this.commandBuffer.split(' ');
-        let command = commands[aCommandParts[0]];
+        let commandParts = commandLine.split(' ');
+        
+        /*
+         * Check for a matching built-in command first.
+         */
+        let command = commandParts[0];
+        if (TestMonitor.COMMANDS.indexOf(command) >= 0) {
+            this.addOperation(command, commandParts[1]);
+            return true;
+        }
+        
+        /*
+         * Check for a matching command in the current "test suite" category next.
+         */
+        command = commands[command];
         if (command) {
-            let request = command['req'];
-            if (request) {
+            let op, mode;
+            if (typeof command == "string") {
+                op = command;
+            } else {
+                let loop = command['loop'];
+                if (loop) {
+                    return this.addLoop(loop);
+                }
+                op = command['op'];
+                mode = command['mode'];
+            }
+            if (op) {
                 let errorMessage = "";
-                request = request.replace(/\$([0-9]+)/g, function(match, index, offset, s) {
+                op = op.replace(/\$([0-9]+)/g, function(match, index, offset, s) {
                     let i = +index;
                     let result = "";
-                    if (i > aCommandParts.length) {
+                    if (i >= commandParts.length) {
                         result = '$' + index;
                         errorMessage = "missing value for " + result;
                     } else {
-                        result = (i? aCommandParts[i-1] : this.commandBuffer);
+                        result = (i? commandParts[i] : commandLine);
                     }
                     return result;
                 });
                 if (errorMessage) {
                     this.printf("%s\n", errorMessage);
                 } else {
-                    if (DEBUG) console.log("TestMonitor.checkCommand(" + this.commandBuffer + "): request '" + request + "'");
-                    this.sendData(request);
-                    let mode = command['mode'];
-                    if (mode) this.setMode(mode);
+                    if (DEBUG) console.log("TestMonitor.addCommand(" + commandLine + "): op '" + op + "'");
+                    this.addOperation(op, mode);
+                    return true;
                 }
             } else {
-                this.printf("missing request for command: %s\n", aCommandParts[0]);
+                this.printf("missing operation for command: %s\n", commandParts[0]);
             }
         } else {
-            this.printf("unrecognized command: %s\n", this.commandBuffer);
+            this.printf("unrecognized command: %s\n", commandLine);
         }
-        this.commandBuffer = "";
+        return false;
+    }
+
+    /**
+     * addLoop(sLoop)
+     * 
+     * @this {TestMonitor}
+     * @param {string} sLoop
+     * @return {boolean}
+     */
+    addLoop(sLoop)
+    {
+        let fSuccess = false;
+        let match = sLoop.match(/^\s*for\s+([a-z]+)\s*=\s*([0-9]+)\s+to\s+([0-9]+)\s*:\s*(.*)$/i);
+        if (match) {
+            fSuccess = true;
+            let symbol = match[1];
+            let initial = +match[2];
+            let final = +match[3];
+            let commands = match[4].split(';');
+            for (let value = initial; value <= final && fSuccess; value++) {
+                for (let i = 0; i < commands.length; i++) {
+                    let commandLine = commands[i].trim();
+                    if (!commandLine) continue;
+                    commandLine = commandLine.replace(new RegExp("\\$" + symbol, 'g'), value.toString());
+                    if (!this.addCommand(commandLine)) {
+                        fSuccess = false;
+                        break;
+                    }
+                }
+            }
+        } else {
+            this.printf("unrecognized loop: %s\n", sLoop);
+        }
+        return fSuccess;
+    }
+
+    /**
+     * addOperation(op, mode)
+     * 
+     * @this {TestMonitor}
+     * @param {string} op
+     * @param {string} [mode]
+     */
+    addOperation(op, mode)
+    {
+        this.aOperations.push(mode? [op, mode] : op);
+        this.nextOperation();
+    }
+
+    /**
+     * flushOperations()
+     *
+     * @this {TestMonitor}
+     */
+    flushOperations()
+    {
+        if (this.idTimeout) {
+            clearTimeout(this.idTimeout);
+            this.idTimeout = 0;
+        }
+        this.aOperations = [];
+        this.fWaitPending = false;
+    }
+
+    /**
+     * nextOperation(msDelay)
+     *
+     * @this {TestMonitor}
+     * @param {number} [msDelay]
+     * @return {boolean}
+     */
+    nextOperation(msDelay)
+    {
+        this.fWaitPending = false;
+        if (this.aOperations.length) {
+            if (!this.idTimeout) {
+                this.idTimeout = setTimeout(this.fnRemoveOperation, msDelay || 0);
+            }
+            return true;
+        }
+        this.printf("done\n");
+        return false;
+    }
+    
+    /**
+     * removeOperation()
+     *
+     * @this {TestMonitor}
+     */
+    removeOperation()
+    {
+        this.idTimeout = 0;
+        let op = this.aOperations.shift();
+        if (op) {
+            let mode;
+            if (typeof op != "string") {
+                mode = op[1]; op = op[0];
+            }
+            if (op == TestMonitor.COMMAND.WAIT) {
+                if (mode) {
+                    this.nextOperation(+mode);
+                    return;
+                }
+                this.printf("press a key to continue...");
+                this.fWaitPending = true;
+                return;
+            }
+            this.sendData(op);
+            if (mode) {
+                this.flushOperations();
+                this.setMode(mode);
+                return;
+            }
+            this.nextOperation();
+        }
     }
     
     /**
@@ -261,9 +415,16 @@ class TestMonitor {
         if (this.mode == TestMonitor.MODE.TERMINAL || this.mode == TestMonitor.MODE.PROMPT) {
             this.sendData(charCode);
         } else if (this.mode == TestMonitor.MODE.COMMAND) {
+            if (this.fWaitPending) {
+                this.sendOutput(Keys.KEYCODE.LF);
+                this.nextOperation();
+                return;
+            }
             if (charCode == Keys.KEYCODE.CR) {
                 this.sendOutput(Keys.KEYCODE.LF);
-                this.checkCommand();
+                this.flushOperations();
+                this.addCommand(this.commandBuffer);
+                this.commandBuffer = "";
             } else {
                 this.sendOutput(charCode);
                 if (charCode == 8) {
@@ -283,5 +444,13 @@ TestMonitor.MODE = {
     PROMPT:     "prompt",
     COMMAND:    "command"
 };
+
+TestMonitor.COMMAND = {
+    WAIT:       "wait"
+};
+
+TestMonitor.COMMANDS = [
+    TestMonitor.COMMAND.WAIT
+];
 
 if (NODE) module.exports = TestMonitor;

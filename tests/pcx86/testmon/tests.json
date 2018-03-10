@@ -3,7 +3,7 @@
     "prompt": ["A>", "C:\\>"],
     "commands": {
       "symdeb": {
-        "req": "symdeb\r",
+        "op": "symdeb\r",
         "mode": "prompt"
       }
     }
@@ -12,18 +12,15 @@
     "prompt": "\n-",
     "commands": {
       "dos": {
-        "req": "q\r",
+        "op": "q\r",
         "mode": "prompt"
       },
-      "curstart": {
-        "req": "o 3d4 a\ro 3d5 $2\r"
+      "curstart": "o 3d4 a\ro 3d5 $1\r",
+      "curend": "o 3d4 b\ro 3d5 $1\r",
+      "curtest": {
+        "loop": "for i=0 to 13: curstart $i; wait 200;"
       },
-      "curend": {
-        "req": "o 3d4 b\ro 3d5 $2\r"
-      },
-      "reboot": {
-        "req": "a cs:ip\rjmp ffff:0\r\rg\r"
-      }
+      "reboot": "a cs:ip\rjmp ffff:0\r\rg\r"
     }
   }
 }

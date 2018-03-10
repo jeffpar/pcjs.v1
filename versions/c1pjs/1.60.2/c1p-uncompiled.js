@@ -2416,6 +2416,7 @@ Web.onPageEvent(Web.isUserAgent("iOS")? 'onpagehide' : (Web.isUserAgent("Opera")
  */
 
 
+
 /**
  * Since the Closure Compiler treats ES6 classes as @struct rather than @dict by default,
  * it deters us from defining named properties on our components; eg:
@@ -3715,6 +3716,30 @@ class Component {
             }
         }
         return false;
+    }
+
+    /**
+     * printf(format, ...args)
+     *
+     * @this {Component}
+     * @param {string} format
+     * @param {...} args
+     */
+    printf(format, ...args)
+    {
+        if (DEBUGGER && this.dbg) {
+            if (this.messageEnabled()) {
+                let s = Str.sprintf(format, ...args);
+                /*
+                 * Since dbg.message() calls println(), we strip any ending linefeed.
+                 * 
+                 * We could bypass the Debugger and go straight to this.print(), but we would lose
+                 * the benefits of debugger messages (eg, automatic buffering, halting, yielding, etc).
+                 */
+                if (s.slice(-1) == '\n') s = s.slice(0, -1);
+                this.dbg.message(s);
+            }
+        }
     }
 
     /**
