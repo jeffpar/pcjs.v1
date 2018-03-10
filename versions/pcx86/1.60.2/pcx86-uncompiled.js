@@ -57715,72 +57715,86 @@ class TestMonitor {
         let suite = this.tests[this.category];
         let commands = suite['commands'];
         let commandParts = commandLine.split(' ');
+        let command = commandParts[0];
         
         /*
-         * Check for a matching built-in command first.
+         * Check for a matching command in the current "test suite" category.
          */
-        let command = commandParts[0];
-        if (TestMonitor.COMMANDS.indexOf(command) >= 0) {
-            this.addOperation(command, commandParts[1]);
-            return true;
+        let fExists = false;
+        if (commands[command]) {
+            fExists = true;
+            command = commands[command];
         }
         
-        /*
-         * Check for a matching command in the current "test suite" category next.
-         */
-        command = commands[command];
-        if (command) {
-            let op, mode;
-            if (typeof command == "string") {
-                op = command;
-            } else {
-                let loop = command['loop'];
-                if (loop) {
-                    return this.addLoop(loop);
-                }
-                op = command['op'];
-                mode = command['mode'];
-            }
-            if (op) {
-                let errorMessage = "";
-                op = op.replace(/\$([0-9]+)/g, function(match, index, offset, s) {
-                    let i = +index;
-                    let result = "";
-                    if (i >= commandParts.length) {
-                        result = '$' + index;
-                        errorMessage = "missing value for " + result;
-                    } else {
-                        result = (i? commandParts[i] : commandLine);
-                    }
-                    return result;
-                });
-                if (errorMessage) {
-                    this.printf("%s\n", errorMessage);
+        let op, mode;
+        if (typeof command == "string") {
+            op = command;
+            /*
+             * If you don't want any special op processing (eg, for-loop), then use an explicit 'op' property.
+             */
+            if (this.addForLoop(op)) return true;
+        } else {
+            op = command['op'];
+            mode = command['mode'];
+        }
+        
+        if (op) {
+            let errorMessage = "";
+            op = op.replace(/\$([0-9]+)/g, function(match, index, offset, s) {
+                let i = +index;
+                let result = "";
+                if (i >= commandParts.length) {
+                    result = '$' + index;
+                    errorMessage = "missing value for " + result;
                 } else {
+                    result = (i? commandParts[i] : commandLine);
+                }
+                return result;
+            });
+            if (errorMessage) {
+                this.printf("%s\n", errorMessage);
+            } else {
+                let i = op.indexOf('(');
+                command = (i > 0? op.substr(0, i) : "");
+                if (TestMonitor.COMMANDS.indexOf(command) >= 0) {
+                    if (!fExists) op = commandLine;
+                    fExists = true;
+                    let j = op.lastIndexOf(')');
+                    if (j > 0) {
+                        mode = op.substr(i+1, j-i-1);
+                        op = command;
+                    }
+                }
+                else {
+                    if (TestMonitor.COMMANDS.indexOf(op) >= 0) {
+                        fExists = true;
+                        mode = commandParts[1];
+                    }
+                }
+                if (fExists) {
                     if (DEBUG) console.log("TestMonitor.addCommand(" + commandLine + "): op '" + op + "'");
                     this.addOperation(op, mode);
                     return true;
                 }
-            } else {
-                this.printf("missing operation for command: %s\n", commandParts[0]);
+                this.printf("unrecognized command: %s\n", commandLine);
             }
         } else {
-            this.printf("unrecognized command: %s\n", commandLine);
+            this.printf("missing operation for command: %s\n", commandParts[0]);
         }
         return false;
     }
 
     /**
-     * addLoop(sLoop)
+     * addForLoop(sLoop)
      * 
      * @this {TestMonitor}
      * @param {string} sLoop
      * @return {boolean}
      */
-    addLoop(sLoop)
+    addForLoop(sLoop)
     {
         let fSuccess = false;
-        let match = sLoop.match(/^\s*for\s+([a-z]+)\s*=\s*([0-9]+)\s+to\s+([0-9]+)\s*:\s*(.*)$/i);
+        let match = sLoop.match(/^\s*for\s+([a-z]+)\s*=\s*([0-9]+)\s+to\s+([0-9]+)\s*{\s*(.*?)\s*}\s*$/i);
         if (match) {
             fSuccess = true;
             let symbol = match[1];
@@ -57798,8 +57812,6 @@ class TestMonitor {
                     }
                 }
             }
-        } else {
-            this.printf("unrecognized loop: %s\n", sLoop);
         }
         return fSuccess;
     }
@@ -57866,7 +57878,20 @@ class TestMonitor {
             if (typeof op != "string") {
                 mode = op[1]; op = op[0];
             }
-            if (op == TestMonitor.COMMAND.WAIT) {
+            if (op == TestMonitor.COMMAND.PRINTF) {
+                if (mode) {
+                    let parms = mode.match(/^\s*"([^"]*)"\s*,?\s*(.*)$/);
+                    if (parms) {
+                        let format = parms[1];
+                        parms = parms[2].split(',');
+                        this.printf(format, ...parms);
+                        return;
+                    }
+                }
+                this.printf("nothing to print\n");
+                return;
+            }
+            else if (op == TestMonitor.COMMAND.WAIT) {
                 if (mode) {
                     this.nextOperation(+mode);
                     return;
@@ -57875,11 +57900,13 @@ class TestMonitor {
                 this.fWaitPending = true;
                 return;
             }
-            this.sendData(op);
-            if (mode) {
-                this.flushOperations();
-                this.setMode(mode);
-                return;
+            else {
+                this.sendData(op);
+                if (mode) {
+                    this.flushOperations();
+                    this.setMode(mode);
+                    return;
+                }
             }
             this.nextOperation();
         }
@@ -58009,7 +58036,7 @@ class TestMonitor {
             if (charCode == Keys.KEYCODE.CR) {
                 this.sendOutput(Keys.KEYCODE.LF);
                 this.flushOperations();
-                this.addCommand(this.commandBuffer);
+                this.addCommand(this.commandBuffer.replace(/\\n/g, "\n"));
                 this.commandBuffer = "";
             } else {
                 this.sendOutput(charCode);
@@ -58032,10 +58059,12 @@ TestMonitor.MODE = {
 };
 
 TestMonitor.COMMAND = {
+    PRINTF:     "printf",
     WAIT:       "wait"
 };
 
 TestMonitor.COMMANDS = [
+    TestMonitor.COMMAND.PRINTF,
     TestMonitor.COMMAND.WAIT
 ];
 
