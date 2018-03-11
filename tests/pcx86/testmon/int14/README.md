@@ -12,8 +12,8 @@ whose I/O address is 0x2F8.  If one is found, then the utility installs replacem
 Also, unless the /P option ("polled mode") is specified, the utility also installs a hardware interrupt handler for IRQ
 3 (the traditional IRQ for a port at address 0x2F8), and enables interrupt-driven I/O for the COM port.
 
-INT14.COM is designed to be built with [Microsoft Macro Assembler 4.00](/disks/pcx86/tools/microsoft/masm/4.00/) using
-the following commands:
+[INT14.COM](INT14.COM) and [INT14.LST](INT14.LST) were built with [Microsoft Macro Assembler 4.00](/disks/pcx86/tools/microsoft/masm/4.00/)
+using the following commands:
 
     masm int14,,int14;
     link int14;
