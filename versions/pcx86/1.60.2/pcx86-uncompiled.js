@@ -1304,6 +1304,9 @@ class Str {
             case 'd':
                 /*
                  * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
+                 * 
+                 * Also, unlike the 'X' and 'x' hexadecimal cases, there's no need to explicitly check for a string
+                 * arguments, because the call to trunc() automatically coerces any string value to a (decimal) number.
                  */
                 arg = Math.trunc(arg);
                 /* falls through */
@@ -1353,6 +1356,13 @@ class Str {
             case 'x':
                 if (!ach) ach = Str.HexLowerCase;
                 s = "";
+                if (typeof arg == "string") {
+                    /*
+                     * Since we're advised to ALWAYS pass a radix to parseInt(), we must detect explicitly
+                     * hex values ourselves, because using a radix of 10 with any "0x..." value always returns 0.
+                     */
+                    arg = Number.parseInt(arg, arg.indexOf("0x") == 0? 16 : 10);
+                } 
                 do {
                     s = ach[arg & 0xf] + s;
                     arg >>>= 4;
@@ -2934,6 +2944,7 @@ Web.onPageEvent(Web.isUserAgent("iOS")? 'onpagehide' : (Web.isUserAgent("Opera")
  */
 
 
+
 /**
  * Since the Closure Compiler treats ES6 classes as @struct rather than @dict by default,
  * it deters us from defining named properties on our components; eg:
@@ -4233,6 +4244,30 @@ class Component {
             }
         }
         return false;
+    }
+
+    /**
+     * printf(format, ...args)
+     *
+     * @this {Component}
+     * @param {string} format
+     * @param {...} args
+     */
+    printf(format, ...args)
+    {
+        if (DEBUGGER && this.dbg) {
+            if (this.messageEnabled()) {
+                let s = Str.sprintf(format, ...args);
+                /*
+                 * Since dbg.message() calls println(), we strip any ending linefeed.
+                 * 
+                 * We could bypass the Debugger and go straight to this.print(), but we would lose
+                 * the benefits of debugger messages (eg, automatic buffering, halting, yielding, etc).
+                 */
+                if (s.slice(-1) == '\n') s = s.slice(0, -1);
+                this.dbg.message(s);
+            }
+        }
     }
 
     /**
@@ -12073,8 +12108,7 @@ class CPU extends Component {
      *      multiplier: base cycle multiplier; default is 1.
      *
      *      autoStart: true to automatically start, false to not, or null if "it depends"; null is the default,
-     *      which means do not autostart UNLESS there is no Debugger and no "Run" button (ie, no way to manually
-     *      start the machine).
+     *      which means autostart UNLESS there is a Debugger present.
      *
      *      csStart: the number of cycles that runCPU() must wait before generating checksum records;
      *      -1 if disabled.  checksum records are a diagnostic aid used to help compare one CPU run to another.
@@ -12306,15 +12340,15 @@ class CPU extends Component {
             return true;
         }
         /*
-         * Start running automatically on power-up, assuming there's no Debugger and no "Run" button.
+         * Start running automatically on power-up, assuming there's no Debugger.  
          */
-        if (this.flags.autoStart || (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
+        if (this.flags.autoStart || this.flags.autoStart == null && !this.dbg) {
             /*
-             * Setting fUpdateFocus when calling startCPU() is a double-edged sword (or at least, it used to be),
-             * because it could auto-scroll the page to bring the machine into view, which might interfere with the
-             * user's attention.
+             * Automatically updating focus when calling startCPU() is a double-edged sword, potentially interfering
+             * with the user's attention, which is why we also set fQuiet, to try to prevent the page from "auto-scrolling"
+             * the newly focused machine into view. 
              */
-            return this.startCPU(true);
+            return this.startCPU(true, true);
         }
         return false;
     }
@@ -13322,7 +13356,7 @@ class CPU extends Component {
         if (controlRun) controlRun.textContent = "Halt";
         if (this.cmp) {
             this.cmp.updateStatus(true);
-            if (fUpdateFocus) this.cmp.updateFocus(true);
+            if (fUpdateFocus) this.cmp.updateFocus(!fQuiet);
             this.cmp.start(this.counts.msStartRun, this.getCycles());
         }
 
@@ -50719,17 +50753,17 @@ class Video extends Component {
     lockPointer(fLock)
     {
         var fSuccess = false;
-        if (this.inputScreen) {
+        if (this.inputScreen && this.mouse) {
             if (fLock) {
                 if (this.inputScreen.lockPointer) {
                     this.inputScreen.lockPointer();
-                    if (this.mouse) this.mouse.notifyPointerLocked(true);
+                    this.mouse.notifyPointerLocked(true);
                     fSuccess = true;
                 }
             } else {
                 if (this.inputScreen.unlockPointer) {
                     this.inputScreen.unlockPointer();
-                    if (this.mouse) this.mouse.notifyPointerLocked(false);
+                    this.mouse.notifyPointerLocked(false);
                     fSuccess = true;
                 }
             }
@@ -52054,7 +52088,8 @@ class Video extends Component {
         var bCursorStart = bCursorFlags & Card.CRTC.CURSTART_SLMASK;
         var bCursorEnd = card.regCRTData[Card.CRTC.CUREND] & Card.CRTCMASKS[Card.CRTC.CUREND];
         var bCursorMax = card.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
-
+        var oCursorStart = bCursorStart, oCursorEnd = bCursorEnd;
+        
         /*
          * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to
          * detect that particular combination of bad values and automatically fix them (we're so thoughtful!)
@@ -52123,7 +52158,7 @@ class Video extends Component {
             // let colFrom = (this.iCellCursor % this.nCols);
             // let rowTo = (iCellCursor / this.nCols)|0;
             // let colTo = (iCellCursor % this.nCols);
-            // this.printMessage(Str.sprintf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo));
+            // this.printf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo);
             // this.removeCursor();
             //
             this.iCellCursor = iCellCursor;
@@ -52144,7 +52179,7 @@ class Video extends Component {
          * cyCursor values are relative to when it's time to scale them.
          */
         if (this.yCursor != bCursorStart || this.cyCursor != bCursorSize) {
-            this.printMessage(Str.sprintf("checkCursor(): cursor shape changed from %d,%d to %d,%d\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize));
+            this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d (0x%02x-0x%02x)\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize, oCursorStart, oCursorEnd);
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
             /*
@@ -52199,7 +52234,7 @@ class Video extends Component {
                          */
                         this.updateChar(col, row, data);
                     }
-                    this.printMessage(Str.sprintf("removeCursor(): removed from %d,%d\n", row, col));
+                    this.printf("removeCursor(): removed from %d,%d\n", row, col);
                     this.aCellCache[this.iCellCursor] = data;
                 }
             }
@@ -52336,7 +52371,7 @@ class Video extends Component {
         var card = this.cardActive;
         if (card && nAccess != null && nAccess != card.nAccess) {
 
-            this.printMessage(Str.sprintf("setCardAccess(0x%04x)\n", nAccess));
+            this.printf("setCardAccess(0x%04x)\n", nAccess);
 
             card.setMemoryAccess(nAccess);
 
@@ -54822,15 +54857,16 @@ class Video extends Component {
     dumpVideo(asArgs)
     {
         if (DEBUGGER) {
+            var component = /** @type {Component} */ (this.dbg);
             if (!this.cardActive) {
-                this.dbg.println("no active video card");
+                component.println("no active video card");
                 return;
             }
             if (asArgs[0]) {
                 this.cardActive.dumpVideoBuffer(asArgs);
                 return;
             }
-            this.dbg.println("BIOSMODE: " + Str.toHexByte(this.nMode));
+            component.println("BIOSMODE: " + Str.toHexByte(this.nMode));
             this.cardActive.dumpVideoCard();
         }
     }
@@ -56168,12 +56204,15 @@ class SerialPort extends Component {
      * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use parseInt(),
      * and as an added benefit, we don't need to worry about whether a hex or decimal format was used.
      *
-     * This hard-coded approach mimics the original IBM PC Asynchronous Adapter configuration, which contained a
-     * pair of "shunt modules" that allowed the user to select a port address of either 0x3F8 ("Primary") or 0x2F8
-     * ("Secondary").
+     * This hard-coded approach mimics the original IBM PC Asynchronous Adapter configuration, which contained
+     * a pair of "shunt modules" that allowed the user to select a port address/IRQ combo of either 0x3F8/IRQ4
+     * ("Primary") or 0x2F8/IRQ3 ("Secondary").
      *
-     * DOS typically names the Primary adapter "COM1" and the Secondary adapter "COM2", but I prefer to stick to
-     * adapter numbers, since not all operating systems follow those naming conventions.
+     * DOS names the first adapter listed by the ROM BIOS as "COM1", even if that adapter is a secondary adapter,
+     * so don't assume that COM1 always maps to port 0x3F8/IRQ4.  Internally, I try avoid confusion by always
+     * starting with a primary adapter and giving that adapter an ID of "com1".  But different operating systems
+     * may follow different device enumeration and naming conventions, so don't make too much of my internally
+     * assigned IDs.
      *
      * @this {SerialPort}
      * @param {Object} parms
@@ -57314,9 +57353,9 @@ class TestController extends Component {
         this.sendData = null;
         this.deliverData = this.deliverInput = this.deliverTests = null;
         
-        let sBinding = parms['binding'];
-        if (sBinding) {
-            this.serialPort = Component.getComponentByID(sBinding, this.id);
+        this.sBinding = parms['binding'];
+        if (this.sBinding) {
+            this.serialPort = Component.getComponentByID(this.sBinding, this.id);
             if (this.serialPort) {
                 let exports = this.serialPort['exports'];
                 if (exports) {
@@ -57331,7 +57370,7 @@ class TestController extends Component {
                 }
             }
             if (!this.sendData) {
-                Component.warning(this.id + ": binding '" + sBinding + "' unavailable");
+                Component.warning(this.id + ": binding '" + this.sBinding + "' unavailable");
             }
         }
         if (!fLoading) this.setReady();
@@ -57477,7 +57516,7 @@ class TestController extends Component {
 
             if (this.sendData) {
                 let monitor = new TestMonitor();
-                monitor.bindController(this, this.sendData, this.sendOutput, this.printf);
+                monitor.bindController(this, this.sendData, this.sendOutput, this.printf, this.sBinding);
             }
             return true;
         }
@@ -57636,47 +57675,251 @@ class TestMonitor {
     constructor()
     {
         if (DEBUG) console.log("TestMonitor()");
+        /*
+         * Operations are added to the following queue by addOperation(), which ensures that as soon as it
+         * transitions from empty to non-empty, a timeout handler is established to begin draining the queue.
+         * 
+         * While this approach is more complicated than simply sending operations (via sendData()) as they
+         * arrive, it has at least one important advantage: special operations, such as "wait" (eg, wait for a
+         * key to be pressed), are easier to implement, because control of the draining process can be switched
+         * from a timeout handler to an appropriate event handler.
+         */
+        this.aOperations = [];
+        this.idTimeout = 0;
+        this.fnRemoveOperation = this.removeOperation.bind(this);
+        this.fWaitPending = false;
     }
 
     /**
-     * bindController(controller, sendData, sendOutput, printf)
+     * bindController(controller, sendData, sendOutput, printf, sBinding)
      *
      * @this {TestMonitor}
      * @param {Object} controller
      * @param {function(...)} sendData
      * @param {function(...)} sendOutput
      * @param {function(string,...)} printf
+     * @param {string} [sBinding]
      */
-    bindController(controller, sendData, sendOutput, printf)
+    bindController(controller, sendData, sendOutput, printf, sBinding)
     {
         this.sendData = sendData.bind(controller);
         this.sendOutput = sendOutput.bind(controller);
         this.printf = printf.bind(controller);
         controller.bindMonitor(this, this.receiveData, this.receiveInput, this.receiveTests);
-        this.printf("%s TestMonitor v%s\nUse Ctrl-T to toggle terminal mode\n", APPNAME, APPVERSION || XMLVERSION);
+        this.printf("%s TestMonitor v%s\n", APPNAME, APPVERSION || XMLVERSION);
+        this.printf("Use Ctrl-T to toggle terminal mode%s\n", (sBinding? " (" + sBinding.toUpperCase() + ")" : ""));
         this.setMode(TestMonitor.MODE.TERMINAL);
     }
 
     /**
-     * checkCommand()
+     * addCommand(commandLine)
+     *
+     * @this {TestMonitor}
+     * @param {string} commandLine
+     * @return {boolean} (true if successful, false if error)
+     */
+    addCommand(commandLine)
+    {
+        if (!commandLine) return true;
+        
+        let suite = this.tests[this.category];
+        let commands = suite['commands'];
+        let commandParts = commandLine.split(' ');
+        let command = commandParts[0];
+        
+        /*
+         * Check for a matching command in the current "test suite" category.
+         */
+        let fExists = false;
+        if (commands[command]) {
+            fExists = true;
+            command = commands[command];
+        }
+        
+        let op, mode;
+        if (typeof command == "string") {
+            op = command;
+            /*
+             * If you don't want any special op processing (eg, for-loop), then use an explicit 'op' property.
+             */
+            if (this.addForLoop(op)) return true;
+        } else {
+            op = command['op'];
+            mode = command['mode'];
+        }
+        
+        if (op) {
+            let errorMessage = "";
+            op = op.replace(/([$%])([0-9]+)/g, function(match, p1, p2, offset, s) {
+                let i = +p2;
+                let result = "";
+                if (i >= commandParts.length) {
+                    result = p1 + p2;
+                    errorMessage = "missing value for " + result;
+                } else if (!i) {
+                    result = commandLine;
+                } else if (p1 == '$') {
+                    result = commandParts[i];
+                } else {        // p1 must be '%', which means convert the value to hex
+                    result = Str.sprintf("%x", commandParts[i]);
+                }
+                return result;
+            });
+            if (errorMessage) {
+                this.printf("%s\n", errorMessage);
+            } else {
+                let i = op.indexOf('(');
+                command = (i > 0? op.substr(0, i) : "");
+                if (TestMonitor.COMMANDS.indexOf(command) >= 0) {
+                    if (!fExists) op = commandLine;
+                    fExists = true;
+                    let j = op.lastIndexOf(')');
+                    if (j > 0) {
+                        mode = op.substr(i+1, j-i-1);
+                        op = command;
+                    }
+                }
+                else if (TestMonitor.COMMANDS.indexOf(op) >= 0) {
+                    fExists = true;
+                    mode = commandParts[1];
+                }
+                if (fExists) {
+                    if (DEBUG) console.log("TestMonitor.addCommand(" + commandLine + "): op '" + op + "'");
+                    this.addOperation(op, mode);
+                    return true;
+                }
+                this.printf("unrecognized command: %s\n", commandLine);
+            }
+        } else {
+            this.printf("missing operation for command: %s\n", commandParts[0]);
+        }
+        return false;
+    }
+
+    /**
+     * addForLoop(commandLine)
+     * 
+     * @this {TestMonitor}
+     * @param {string} commandLine
+     * @return {boolean}
+     */
+    addForLoop(commandLine)
+    {
+        let fSuccess = false;
+        let match = commandLine.match(/^\s*for\s+([a-z]+)\s*=\s*([0-9]+)\s+to\s+([0-9]+)\s*{\s*([\s\S]*?)\s*}\s*$/i);
+        if (match) {
+            fSuccess = true;
+            let symbol = match[1];
+            let initial = +match[2];
+            let final = +match[3];
+            let commands = match[4].split(';');
+            for (let value = initial; value <= final && fSuccess; value++) {
+                for (let i = 0; i < commands.length; i++) {
+                    let commandLine = commands[i].trim();
+                    if (!commandLine) continue;
+                    commandLine = commandLine.replace(new RegExp("\\$" + symbol, 'g'), value.toString());
+                    if (!this.addCommand(commandLine)) {
+                        fSuccess = false;
+                        break;
+                    }
+                }
+            }
+        }
+        return fSuccess;
+    }
+
+    /**
+     * addOperation(op, mode)
+     * 
+     * @this {TestMonitor}
+     * @param {string} op
+     * @param {string} [mode]
+     */
+    addOperation(op, mode)
+    {
+        this.aOperations.push(mode? [op, mode] : op);
+        this.nextOperation();
+    }
+
+    /**
+     * flushOperations()
      *
      * @this {TestMonitor}
      */
-    checkCommand()
+    flushOperations()
     {
-        let suite = this.tests[this.category];
-        let commands = suite['commands'];
-        let command = commands[this.commandBuffer];
-        if (command) {
-            let request = command['request'];
-            if (DEBUG) console.log("TestMonitor.checkCommand(" + this.commandBuffer + "): request '" + request + "'");
-            this.sendData(request);
-            let mode = command['mode'];
-            if (mode) this.setMode(mode);
-        } else {
-            this.printf("unrecognized command: %s\n", this.commandBuffer);
+        if (this.idTimeout) {
+            clearTimeout(this.idTimeout);
+            this.idTimeout = 0;
         }
-        this.commandBuffer = "";
+        this.aOperations = [];
+        this.fWaitPending = false;
+    }
+
+    /**
+     * nextOperation(msDelay)
+     *
+     * @this {TestMonitor}
+     * @param {number} [msDelay]
+     * @return {boolean}
+     */
+    nextOperation(msDelay)
+    {
+        this.fWaitPending = false;
+        if (this.aOperations.length) {
+            if (!this.idTimeout) {
+                this.idTimeout = setTimeout(this.fnRemoveOperation, msDelay || 0);
+            }
+            return true;
+        }
+        this.printf("done\n");
+        return false;
+    }
+    
+    /**
+     * removeOperation()
+     *
+     * @this {TestMonitor}
+     */
+    removeOperation()
+    {
+        this.idTimeout = 0;
+        let op = this.aOperations.shift();
+        if (op) {
+            let mode;
+            if (typeof op != "string") {
+                mode = op[1]; op = op[0];
+            }
+            if (op == TestMonitor.COMMAND.PRINTF) {
+                let format = "nothing to print", args = [];
+                if (mode) {
+                    let parms = mode.match(/^\s*(["'])([\s\S]*?)\1\s*,?\s*([\s\S]*)$/);
+                    if (parms) {
+                        format = parms[2];
+                        args = parms[3].split(',');
+                    }
+                }
+                this.printf(format, ...args);
+            }
+            else if (op == TestMonitor.COMMAND.WAIT) {
+                if (mode) {
+                    this.nextOperation(+mode);
+                    return;
+                }
+                this.printf("press a key to continue...");
+                this.fWaitPending = true;
+                return;
+            }
+            else {
+                this.sendData(op);
+                if (mode) {
+                    this.flushOperations();
+                    this.setMode(mode);
+                    return;
+                }
+            }
+            this.nextOperation();
+        }
     }
     
     /**
@@ -57702,10 +57945,18 @@ class TestMonitor {
                     let suite = this.tests[category];
                     let prompt = suite[TestMonitor.MODE.PROMPT];
                     if (prompt) {
-                        this.aCategories.push(category);
-                        this.aPrompts.push(prompt);
-                        if (this.cchPromptLongest < prompt.length) {
-                            this.cchPromptLongest = prompt.length;
+                        /*
+                         * The 'prompt' property is allowed to contain a string or array of strings.
+                         */
+                        if (typeof prompt == "string") {
+                            prompt = [prompt];
+                        }
+                        for (let i = 0; i < prompt.length; i++) {
+                            this.aCategories.push(category);
+                            this.aPrompts.push(prompt[i]);
+                            if (this.cchPromptLongest < prompt[i].length) {
+                                this.cchPromptLongest = prompt[i].length;
+                            }
                         }
                     }
                 }
@@ -57753,6 +58004,7 @@ class TestMonitor {
             if (this.promptBuffer.length >= this.cchPromptLongest) {
                 this.promptBuffer = this.promptBuffer.slice(-(this.cchPromptLongest - 1));
             }
+            if (data == 10) this.promptBuffer = "";
             this.promptBuffer += String.fromCharCode(data);
             if (DEBUG) console.log("TestMonitor.receiveData(" + data + "): checking prompts for '" + this.promptBuffer + "'");
             let i = this.aPrompts.indexOf(this.promptBuffer);
@@ -57762,7 +58014,10 @@ class TestMonitor {
         } else if (this.mode == TestMonitor.MODE.TERMINAL) {
             this.sendOutput(data);
         } else {
-            this.sendOutput(data);
+            /*
+             * TODO: This is where we need to collect the response to any commands we have issued.
+             */
+            // this.sendOutput(data);
             if (DEBUG) console.log("TestMonitor.receiveData(" + data + "): ignored while mode is '" + this.mode + "'");
         }
     }
@@ -57783,12 +58038,25 @@ class TestMonitor {
         if (this.mode == TestMonitor.MODE.TERMINAL || this.mode == TestMonitor.MODE.PROMPT) {
             this.sendData(charCode);
         } else if (this.mode == TestMonitor.MODE.COMMAND) {
+            if (this.fWaitPending) {
+                this.sendOutput(Keys.KEYCODE.LF);
+                this.nextOperation();
+                return;
+            }
             if (charCode == Keys.KEYCODE.CR) {
                 this.sendOutput(Keys.KEYCODE.LF);
-                this.checkCommand();
+                this.flushOperations();
+                this.addCommand(this.commandBuffer.replace(/\\n/g, "\n"));
+                this.commandBuffer = "";
             } else {
                 this.sendOutput(charCode);
-                this.commandBuffer += String.fromCharCode(charCode);
+                if (charCode == 8) {
+                    if (this.commandBuffer.length) {
+                        this.commandBuffer = this.commandBuffer.slice(0, -1);
+                    }
+                } else {
+                    this.commandBuffer += String.fromCharCode(charCode);
+                }
             }
         }
     }
@@ -57799,6 +58067,16 @@ TestMonitor.MODE = {
     PROMPT:     "prompt",
     COMMAND:    "command"
 };
+
+TestMonitor.COMMAND = {
+    PRINTF:     "printf",
+    WAIT:       "wait"
+};
+
+TestMonitor.COMMANDS = [
+    TestMonitor.COMMAND.PRINTF,
+    TestMonitor.COMMAND.WAIT
+];
 
 
 
@@ -78419,6 +78697,7 @@ class Computer extends Component {
             this.reset();
             if (this.cpu) this.cpu.autoStart();
         }
+        this.updateFocus(true);
     }
 
     /**

@@ -74,9 +74,9 @@ class TestController extends Component {
         this.sendData = null;
         this.deliverData = this.deliverInput = this.deliverTests = null;
         
-        let sBinding = parms['binding'];
-        if (sBinding) {
-            this.serialPort = Component.getComponentByID(sBinding, this.id);
+        this.sBinding = parms['binding'];
+        if (this.sBinding) {
+            this.serialPort = Component.getComponentByID(this.sBinding, this.id);
             if (this.serialPort) {
                 let exports = this.serialPort['exports'];
                 if (exports) {
@@ -91,7 +91,7 @@ class TestController extends Component {
                 }
             }
             if (!this.sendData) {
-                Component.warning(this.id + ": binding '" + sBinding + "' unavailable");
+                Component.warning(this.id + ": binding '" + this.sBinding + "' unavailable");
             }
         }
         if (!fLoading) this.setReady();
@@ -237,7 +237,7 @@ class TestController extends Component {
 
             if (this.sendData) {
                 let monitor = new TestMonitor();
-                monitor.bindController(this, this.sendData, this.sendOutput, this.printf);
+                monitor.bindController(this, this.sendData, this.sendOutput, this.printf, this.sBinding);
             }
             return true;
         }

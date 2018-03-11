@@ -13,6 +13,7 @@ machines:
         name: None
       B:
         name: IBM PC XT BIOS Sources (V1)
+    autoStart: true
 ---
 
 IBM PC XT ROM BIOS Sources

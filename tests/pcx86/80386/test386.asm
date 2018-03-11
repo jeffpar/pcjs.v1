@@ -1,9 +1,8 @@
 ;
 ;   test386.asm
-;   Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
+;   Copyright © 2012-2018 Jeff Parsons <Jeff@pcjs.org>
 ;
-;   This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
-;   at <http://jsmachines.net/> and <http://pcjs.org/>.
+;   This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
 ;
 ;   PCjs is free software: you can redistribute it and/or modify it under the terms of the
 ;   GNU General Public License as published by the Free Software Foundation, either version 3

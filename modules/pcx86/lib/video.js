@@ -2731,17 +2731,17 @@ class Video extends Component {
     lockPointer(fLock)
     {
         var fSuccess = false;
-        if (this.inputScreen) {
+        if (this.inputScreen && this.mouse) {
             if (fLock) {
                 if (this.inputScreen.lockPointer) {
                     this.inputScreen.lockPointer();
-                    if (this.mouse) this.mouse.notifyPointerLocked(true);
+                    this.mouse.notifyPointerLocked(true);
                     fSuccess = true;
                 }
             } else {
                 if (this.inputScreen.unlockPointer) {
                     this.inputScreen.unlockPointer();
-                    if (this.mouse) this.mouse.notifyPointerLocked(false);
+                    this.mouse.notifyPointerLocked(false);
                     fSuccess = true;
                 }
             }
@@ -4066,7 +4066,8 @@ class Video extends Component {
         var bCursorStart = bCursorFlags & Card.CRTC.CURSTART_SLMASK;
         var bCursorEnd = card.regCRTData[Card.CRTC.CUREND] & Card.CRTCMASKS[Card.CRTC.CUREND];
         var bCursorMax = card.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
-
+        var oCursorStart = bCursorStart, oCursorEnd = bCursorEnd;
+        
         /*
          * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to
          * detect that particular combination of bad values and automatically fix them (we're so thoughtful!)
@@ -4135,7 +4136,7 @@ class Video extends Component {
             // let colFrom = (this.iCellCursor % this.nCols);
             // let rowTo = (iCellCursor / this.nCols)|0;
             // let colTo = (iCellCursor % this.nCols);
-            // this.printMessage(Str.sprintf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo));
+            // this.printf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo);
             // this.removeCursor();
             //
             this.iCellCursor = iCellCursor;
@@ -4156,7 +4157,7 @@ class Video extends Component {
          * cyCursor values are relative to when it's time to scale them.
          */
         if (this.yCursor != bCursorStart || this.cyCursor != bCursorSize) {
-            this.printMessage(Str.sprintf("checkCursor(): cursor shape changed from %d,%d to %d,%d\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize));
+            this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d (0x%02x-0x%02x)\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize, oCursorStart, oCursorEnd);
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
             /*
@@ -4211,7 +4212,7 @@ class Video extends Component {
                          */
                         this.updateChar(col, row, data);
                     }
-                    this.printMessage(Str.sprintf("removeCursor(): removed from %d,%d\n", row, col));
+                    this.printf("removeCursor(): removed from %d,%d\n", row, col);
                     this.aCellCache[this.iCellCursor] = data;
                 }
             }
@@ -4348,7 +4349,7 @@ class Video extends Component {
         var card = this.cardActive;
         if (card && nAccess != null && nAccess != card.nAccess) {
 
-            this.printMessage(Str.sprintf("setCardAccess(0x%04x)\n", nAccess));
+            this.printf("setCardAccess(0x%04x)\n", nAccess);
 
             card.setMemoryAccess(nAccess);
 
@@ -6834,15 +6835,16 @@ class Video extends Component {
     dumpVideo(asArgs)
     {
         if (DEBUGGER) {
+            var component = /** @type {Component} */ (this.dbg);
             if (!this.cardActive) {
-                this.dbg.println("no active video card");
+                component.println("no active video card");
                 return;
             }
             if (asArgs[0]) {
                 this.cardActive.dumpVideoBuffer(asArgs);
                 return;
             }
-            this.dbg.println("BIOSMODE: " + Str.toHexByte(this.nMode));
+            component.println("BIOSMODE: " + Str.toHexByte(this.nMode));
             this.cardActive.dumpVideoCard();
         }
     }
