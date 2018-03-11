@@ -2,19 +2,15 @@
   "dos": {
     "prompt": ["\nA>", "\nC:\\>"],
     "commands": {
-      "symdeb": {
-        "op": "symdeb\r",
-        "mode": "prompt"
-      }
+      "dir": "dir $1>con\r",
+      "mode0e": "symdeb\ra\rmov ax,e\rint 10\rint 3\r\rg\rq\rdir c:\\dos>con\r",
+      "symdeb": { "op": "symdeb\r", "mode": "prompt" }
     }
   },
   "symdeb": {
     "prompt": "\n-",
     "commands": {
-      "dos": {
-        "op": "q\r",
-        "mode": "prompt"
-      },
+      "dos": { "op": "q\r", "mode": "prompt" },
       "print": "printf(\"you typed %d\n\", $1)",
       "curstart": "o 3d4 a\ro 3d5 %1\r",
       "curend": "o 3d4 b\ro 3d5 %1\r",

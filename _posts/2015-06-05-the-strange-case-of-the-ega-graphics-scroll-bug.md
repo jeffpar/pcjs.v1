@@ -4,26 +4,39 @@ title: The Strange Case of the EGA Graphics Scroll Bug
 date: 2015-06-05 11:00:00
 category: Video
 permalink: /blog/2015/06/05/
+machines:
+  - id: ibm5170
+    type: pcx86
+    config: /devices/pcx86/machine/5170/ega/640kb/rev1/machine.xml
+    drives: '[{name:"10Mb Hard Disk",type:1,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'
+    autoMount:
+      A:
+        name: None
+      B:
+        name: None
 ---
 
-I was playing with different video modes using this [IBM PC AT w/EGA](/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/),
-and I discovered an odd problem.
+I was playing with different video modes using an [IBM PC AT w/EGA](/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/)
+and I discovered an odd problem.  NOTE: In the machine below, you can also switch control to the TestController window using
+the "CTTY COM2" DOS command and then type the TestController's "mode0e" command to replicate the SYMDEB sequence described below.
+
+{% include machine.html id="ibm5170" %}
 
 For example, when I ran this code:
 
-	A>b:debug
+	C:\>SYMDEB
     -a
-    0CE0:0100  mov ax,e
-    0CE0:0103  int 10
-    0CE0:0105  int 3
-    0CE0:0106  
+    1962:0100  mov ax,e
+    1962:0103  int 10
+    1962:0105  int 3
+    1962:0106  
     -g
 
 the following "text" correctly appeared at the top of the screen, in 640x200 16-color graphics mode 0x0E:
 
-    AX=0B01  BX=0000  CX=0000  DX=0000  SP=FFEE  BP=0000  SI=0000  DI=0000  
-    DS=0CE0  ES=0CE0  SS=0CE0  CS=0CE0  IP=0105   NV UP EI PL NZ NA PO NC 
-    0CE0:0105 CC            INT     3                                  
+    AX=0B01  BX=0000  CX=0000  DX=0000  SP=E58D  BP=0000  SI=0000  DI=0000  
+    DS=1962  ES=1962  SS=1962  CS=1962  IP=0105   NV UP EI PL NZ NA PO NC 
+    1962:0105 CC             INT    3                                  
     -
 
 And when I typed "q", then "cls" and finally "dir", the screen filled with DOS directory contents.

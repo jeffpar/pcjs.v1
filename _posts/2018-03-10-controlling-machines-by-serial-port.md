@@ -21,6 +21,8 @@ commands to a PCjs machine via a serial port.  TestMonitor is built into PCx86, 
 [command-line utility](/modules/pcx86/bin/testmon.js) to issue commands to a *physical* machine, making it easy to compare
 operations between simulated and actual hardware.
 
+More information on [Controlling Real PCs](#controlling-real-pcs) is available below.
+
 You can test it with the PCjs machine below, which has been configured with a [TestController](/modules/pcx86/lib/testctl.js)
 window, as well as a hard disk with [MS-DOS 3.20](/disks/pcx86/dos/microsoft/3.20/) and [SYMDEB 4.00](/blog/2018/02/25/)
 pre-installed.  After the "CTTY COM2" DOS command is entered, all further DOS input/output is redirected to COM2, which is
@@ -83,6 +85,60 @@ At this point, this is mostly just proof-of-concept stuff.  Phase Two of TestMon
 adding command verification checks, to determine whether a command was performed successfully and with the desired
 result(s), and Phase Three will involve creating a series of low-level tests, exercising CPU features on both real
 and simulated hardware in parallel and verifying that both sets of results match.
+
+Controlling Real PCs
+--------------------
+
+Here's the general procedure for controlling a *real* PC using a serial port connection:
+
+- Turn on your PC
+- Boot DOS 2.00 or later
+- Load the [PCjs INT14 TSR](/tests/pcx86/testmon/int14/): "INT14"
+- Run the DOS CTTY command: "CTTY COM2"
+- On your connected machine, run the [PCjs TestMonitor utility](/modules/pcx86/bin/testmon.js): "node testmon.js"
+
+You should now be able to control the PC using the TestMonitor utility, in your choice of either "terminal mode" or
+"command mode".
+
+It's important to install the [INT14 TSR](/tests/pcx86/testmon/int14/) on the PC, because the INT 14h services
+that IBM created are incredibly lame and potentially broken: they only operate in "polled mode", making it very likely
+that incoming characters will be missed, and they do unusual things with the control lines.  For example, every time
+the ROM prepares to send a character, it enables both **DTR** and **RTS**.  Maybe in 1981, that was how people used
+**RTS**, but everything I've read says that **RTS** is intended to signal that the adapter is ready to *receive* data,
+not *send* data.
+
+To address the limitations of the ROM's INT 14h services, I wrote [INT14.ASM](INT14.ASM).  It's a
+Terminate-and-Stay-Resident (TSR) utility that scans the ROM BIOS Data Area for a COM port whose I/O address is 0x2F8.
+If one is found, then the utility installs replacement INT 14h services for that COM port.  Also, unless the /P option
+("polled mode") is specified, the utility also installs a hardware interrupt handler for IRQ 3 (the traditional IRQ
+for a serial adapter at address 0x2F8), and enables interrupt-driven I/O for the adapter.
+
+Note that INT14.COM is currently hard-coded to look for a serial adapter whose address is 0x2F8, and that adapter will
+normally be named "COM2", but not always.  For example, if it's the only adapter in the PC, then DOS will name it "COM1"
+even if it's using the traditional COM2 address.
+
+Also note that some serial port adapters don't support interrupt-driven I/O, either because:
+
+- The adapter is broken
+- The adapter's IRQ has been disabled
+
+If yours doesn't seem to work, then try installing INT14.COM with /P for "polled mode":
+
+    INT14 /P
+
+In "polled mode", no hardware interrupt handler is installed.  Instead, the INT 14h functions attempt to control
+the flow of incoming characters by toggling the RTS line.  However, that may not be sufficient for high speeds (e.g.,
+9600 baud), so it's recommended that you use the PC's COM port at the default speed of 2400 baud, which you can also
+set with the DOS **MODE** command:
+
+    MODE COM2:2400,N,8,1
+
+testmon.js uses the same default speed of 2400 baud, which you can explicitly set or change as needed:
+
+    node testmon.js --baud=2400
+
+There are currently no `parity`, `databits`, or `stopbits` overrides, so you should always use "N,8,1" with the DOS
+**MODE** command.
 
 {% include machine.html id="ibm5170" %}
 
