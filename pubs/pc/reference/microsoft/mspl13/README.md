@@ -47,7 +47,7 @@ are part of the Microsoft Programmer's Library 1.3 CD-ROM.
 	- [Advanced MS-DOS Programming](msdos/advdos/)
 	- [MS-DOS 3.3 Programmer's Reference](msdos/dosref33/)
 	- [MS-DOS 4.0 Programmer's Reference](msdos/dosref40/)
-	- [The MS-DOS Encyclopedia](msdos/encyc/)
+	- [The MS-DOS Encyclopedia](msdos/encyclopedia/)
 	- [The New Peter Norton Programmer's Guide](msdos/norton/)
 - MS Systems Journal
 - Network References
