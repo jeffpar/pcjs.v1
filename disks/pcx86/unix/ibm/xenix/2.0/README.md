@@ -26,7 +26,7 @@ IBM PC XENIX 2.0
 
 ![IBM PC XENIX 2.0 Disk 3]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/unix/ibm/xenix/2.0/IBM-XENIX-200-DISK3.jpg)
 
-![IBM PC XENIX 2.0 Installation Disk]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/unix/ibm/xenix/1.0/IBM-XENIX-100-INSTALL.jpg)
+![IBM PC XENIX 2.0 Installation Disk]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/unix/ibm/xenix/2.0/IBM-XENIX-200-INSTALL.jpg)
 
 ![IBM PC XENIX 2.0 SDK 1]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/unix/ibm/xenix/2.0/IBM-XENIX-200-SDK1.jpg)
 
