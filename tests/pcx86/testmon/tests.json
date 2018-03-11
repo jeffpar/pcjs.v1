@@ -1,6 +1,6 @@
 {
   "DOS": {
-    "prompt": ["A>", "C:\\>"],
+    "prompt": ["\nA>", "\nC:\\>"],
     "commands": {
       "symdeb": {
         "op": "symdeb\r",
@@ -18,7 +18,7 @@
       "print": "printf(\"you typed %d\n\", $1)",
       "curstart": "o 3d4 a\ro 3d5 $1\r",
       "curend": "o 3d4 b\ro 3d5 $1\r",
-      "curtest": "for i=0 to 13 { curstart $i; wait 200; }",
+      "curtest": "for i=0 to 13 { curstart $i; printf('curstart=%d\n',$i); wait; }",
       "reboot": "a cs:ip\rjmp ffff:0\r\rg\r"
     }
   }

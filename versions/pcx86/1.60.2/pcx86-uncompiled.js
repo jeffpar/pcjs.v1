@@ -57765,11 +57765,9 @@ class TestMonitor {
                         op = command;
                     }
                 }
-                else {
-                    if (TestMonitor.COMMANDS.indexOf(op) >= 0) {
-                        fExists = true;
-                        mode = commandParts[1];
-                    }
+                else if (TestMonitor.COMMANDS.indexOf(op) >= 0) {
+                    fExists = true;
+                    mode = commandParts[1];
                 }
                 if (fExists) {
                     if (DEBUG) console.log("TestMonitor.addCommand(" + commandLine + "): op '" + op + "'");
@@ -57785,16 +57783,16 @@ class TestMonitor {
     }
 
     /**
-     * addForLoop(sLoop)
+     * addForLoop(commandLine)
      * 
      * @this {TestMonitor}
-     * @param {string} sLoop
+     * @param {string} commandLine
      * @return {boolean}
      */
-    addForLoop(sLoop)
+    addForLoop(commandLine)
     {
         let fSuccess = false;
-        let match = sLoop.match(/^\s*for\s+([a-z]+)\s*=\s*([0-9]+)\s+to\s+([0-9]+)\s*{\s*(.*?)\s*}\s*$/i);
+        let match = commandLine.match(/^\s*for\s+([a-z]+)\s*=\s*([0-9]+)\s+to\s+([0-9]+)\s*{\s*([\s\S]*?)\s*}\s*$/i);
         if (match) {
             fSuccess = true;
             let symbol = match[1];
@@ -57879,17 +57877,15 @@ class TestMonitor {
                 mode = op[1]; op = op[0];
             }
             if (op == TestMonitor.COMMAND.PRINTF) {
+                let format = "nothing to print", args = [];
                 if (mode) {
-                    let parms = mode.match(/^\s*"([^"]*)"\s*,?\s*(.*)$/);
+                    let parms = mode.match(/^\s*(["'])([\s\S]*?)\1\s*,?\s*([\s\S]*)$/);
                     if (parms) {
-                        let format = parms[1];
-                        parms = parms[2].split(',');
-                        this.printf(format, ...parms);
-                        return;
+                        format = parms[2];
+                        args = parms[3].split(',');
                     }
                 }
-                this.printf("nothing to print\n");
-                return;
+                this.printf(format, ...args);
             }
             else if (op == TestMonitor.COMMAND.WAIT) {
                 if (mode) {
