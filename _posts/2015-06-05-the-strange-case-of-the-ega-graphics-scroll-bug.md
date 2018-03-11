@@ -4,10 +4,17 @@ title: The Strange Case of the EGA Graphics Scroll Bug
 date: 2015-06-05 11:00:00
 category: Video
 permalink: /blog/2015/06/05/
+machines:
+  - id: ibm5170
+    type: pcx86
+    config: /devices/pcx86/machine/5170/ega/640kb/rev1/machine.xml
 ---
 
-I was playing with different video modes using this [IBM PC AT w/EGA](/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/),
-and I discovered an odd problem.
+I was playing with different video modes using an [IBM PC AT w/EGA](/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/)
+and I discovered an odd problem.  NOTE: In the machine below, you can also switch control to the TestController window using
+the "CTTY COM2" DOS command and then type the TestController's "mode0e" command to replicate the DEBUG sequence described below.
+
+{% include machine.html id="ibm5170" %}
 
 For example, when I ran this code:
 
