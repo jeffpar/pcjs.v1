@@ -13,6 +13,7 @@ machines:
         name: None
       B:
         name: IBM PC AT BIOS Sources (V1)
+    autoStart: true
 ---
 
 IBM PC AT ROM BIOS Sources

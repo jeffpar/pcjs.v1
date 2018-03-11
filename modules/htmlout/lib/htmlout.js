@@ -1009,7 +1009,7 @@ HTMLOut.prototype.getPCPath = function(sToken, sIndent, aParms)
      * SIDEBAR: We must use a regular expression to replace all forward slashes with backslashes, because
      * the string form of JavaScript's replace() method replaces only the FIRST occurrence of the search string.
      */
-    var s = this.req.path.replace(/\//g, "\\").toUpperCase();
+    var s = this.req.path.replace(/\//g, "\\").replace(/-[0-9a-z]{32}/, "").toUpperCase();
     /*
      * Remove any trailing backslash from the final result.
      */

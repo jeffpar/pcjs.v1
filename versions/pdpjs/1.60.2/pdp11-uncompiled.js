@@ -1304,6 +1304,9 @@ class Str {
             case 'd':
                 /*
                  * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
+                 * 
+                 * Also, unlike the 'X' and 'x' hexadecimal cases, there's no need to explicitly check for a string
+                 * arguments, because the call to trunc() automatically coerces any string value to a (decimal) number.
                  */
                 arg = Math.trunc(arg);
                 /* falls through */
@@ -1353,6 +1356,13 @@ class Str {
             case 'x':
                 if (!ach) ach = Str.HexLowerCase;
                 s = "";
+                if (typeof arg == "string") {
+                    /*
+                     * Since we're advised to ALWAYS pass a radix to parseInt(), we must detect explicitly
+                     * hex values ourselves, because using a radix of 10 with any "0x..." value always returns 0.
+                     */
+                    arg = Number.parseInt(arg, arg.indexOf("0x") == 0? 16 : 10);
+                } 
                 do {
                     s = ach[arg & 0xf] + s;
                     arg >>>= 4;
@@ -2934,6 +2944,7 @@ Web.onPageEvent(Web.isUserAgent("iOS")? 'onpagehide' : (Web.isUserAgent("Opera")
  */
 
 
+
 /**
  * Since the Closure Compiler treats ES6 classes as @struct rather than @dict by default,
  * it deters us from defining named properties on our components; eg:
@@ -4233,6 +4244,30 @@ class Component {
             }
         }
         return false;
+    }
+
+    /**
+     * printf(format, ...args)
+     *
+     * @this {Component}
+     * @param {string} format
+     * @param {...} args
+     */
+    printf(format, ...args)
+    {
+        if (DEBUGGER && this.dbg) {
+            if (this.messageEnabled()) {
+                let s = Str.sprintf(format, ...args);
+                /*
+                 * Since dbg.message() calls println(), we strip any ending linefeed.
+                 * 
+                 * We could bypass the Debugger and go straight to this.print(), but we would lose
+                 * the benefits of debugger messages (eg, automatic buffering, halting, yielding, etc).
+                 */
+                if (s.slice(-1) == '\n') s = s.slice(0, -1);
+                this.dbg.message(s);
+            }
+        }
     }
 
     /**

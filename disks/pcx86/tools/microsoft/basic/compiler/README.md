@@ -12,7 +12,7 @@ The only version of the Microsoft BASIC Compiler we have added to the project so
 It is not an original distribution disk, and it contains a number of unrelated files, including sample files
 from a demo version of BetterBASIC, a competing product from Summit Software Technology, Inc.
 
-See the [IBM BASIC Compiler](/disks/pcx86/tools/ibm/bascom/), which was also produced by Microsoft.
+See the [IBM BASIC Compiler](/disks/pcx86/tools/ibm/basic/compiler/), which was also produced by Microsoft.
 
 ### Directory of MS BASIC Compiler 5.36 
 

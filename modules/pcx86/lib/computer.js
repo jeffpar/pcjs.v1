@@ -1648,6 +1648,7 @@ class Computer extends Component {
             this.reset();
             if (this.cpu) this.cpu.autoStart();
         }
+        this.updateFocus(true);
     }
 
     /**
