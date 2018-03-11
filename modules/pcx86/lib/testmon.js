@@ -154,14 +154,18 @@ class TestMonitor {
         
         if (op) {
             let errorMessage = "";
-            op = op.replace(/\$([0-9]+)/g, function(match, index, offset, s) {
-                let i = +index;
+            op = op.replace(/([$%])([0-9]+)/g, function(match, p1, p2, offset, s) {
+                let i = +p2;
                 let result = "";
                 if (i >= commandParts.length) {
-                    result = '$' + index;
+                    result = p1 + p2;
                     errorMessage = "missing value for " + result;
-                } else {
-                    result = (i? commandParts[i] : commandLine);
+                } else if (!i) {
+                    result = commandLine;
+                } else if (p1 == '$') {
+                    result = commandParts[i];
+                } else {        // p1 must be '%', which means convert the value to hex
+                    result = Str.sprintf("%x", commandParts[i]);
                 }
                 return result;
             });
