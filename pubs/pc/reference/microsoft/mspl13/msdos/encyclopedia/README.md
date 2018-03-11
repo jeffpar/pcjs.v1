@@ -35,6 +35,7 @@ The MS-DOS Encyclopedia
 * [Appendix M: 8086/8088 Software Compatibility Issues](appendix-m/)
 * [Appendix N: An Object Module Dump Utility](appendix-n/)
 * [Appendix O: IBM PC BIOS Calls](appendix-o/)
+* [Figures](figures/)
 * [Indexes](indexes/)
 
 ### Contents
