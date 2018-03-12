@@ -3,7 +3,7 @@ layout: page
 title: Microsoft Windows 3.10 with Debugger
 permalink: /disks/pcx86/windows/3.10/debugger/
 machines:
-  - id: ibm5170-win310
+  - id: ibm5170
     type: pcx86
     debugger: true
     config: /devices/pcx86/machine/5170/vga/2048kb/debugger/machine.xml

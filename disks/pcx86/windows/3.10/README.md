@@ -5,7 +5,7 @@ permalink: /disks/pcx86/windows/3.10/
 redirect_from:
   - /disks/pc/windows/3.10/
 machines:
-  - id: ibm5170-win310
+  - id: ibm5170
     type: pcx86
     config: /devices/pcx86/machine/5170/vga/2048kb/machine.xml
     drives: '[{name:"20Mb Hard Disk",type:2,path:"/pcjs-disks/pcx86/drives/20mb/PCDOS330-WIN310-VGA.json"}]'
