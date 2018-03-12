@@ -8,11 +8,15 @@ PCx86 INT 14h TSR
 -----------------
 
 [INT14.ASM](INT14.ASM) is a Terminate-and-Stay-Resident (TSR) utility that scans the ROM BIOS Data Area for a COM port
-whose I/O address is 0x2F8.  If one is found, then the utility installs replacement INT 14h services for that COM port.
-Also, unless the /P option ("polled mode") is specified, the utility also installs a hardware interrupt handler for IRQ
-3 (the traditional IRQ for a port at address 0x2F8), and enables interrupt-driven I/O for the COM port.
+whose I/O address is 0x2F8 (or 0x3F8 if the /1 option is specified).  If the port is found, then the utility installs
+replacement INT 14h services for that port.  Also, unless the /P option ("polled mode") is specified, the utility also
+installs a hardware interrupt handler for IRQ3 (or IRQ4 if /1 is specified) and enables interrupt-driven I/O for the
+COM port.
 
-[INT14.COM](INT14.COM) and [INT14.LST](INT14.LST) were built with [Microsoft Macro Assembler 4.00](/disks/pcx86/tools/microsoft/masm/4.00/)
+Note that a serial adapter with address 0x2F8 is normally named "COM2", but not always.  For example, if it's the only
+adapter in the PC, then DOS will name it "COM1" even if it's using the traditional COM2 address.
+
+[INT14.COM](INT14.COM) and [INT14.LST](INT14.TXT) were built with [Microsoft Macro Assembler 4.00](/disks/pcx86/tools/microsoft/masm/4.00/)
 using the following commands:
 
     masm int14,,int14;
@@ -31,12 +35,7 @@ command-line utility can be used to control the PC.  Here's the procedure:
 You should now be able to control the PC using the TestMonitor utility, in your choice of either "terminal mode" or
 "command mode".
 
-WARNING: Not all serial port adapters support interrupt-driven I/O, either because:
-
-- The adapter is broken
-- The adapter's IRQ has been disabled
-
-If yours doesn't seem to work, then install INT14.COM with /P for "polled mode":
+If interrupt-driven I/O doesn't seem to be working, then try installing INT14.COM with /P for "polled mode":
 
     INT14 /P
 

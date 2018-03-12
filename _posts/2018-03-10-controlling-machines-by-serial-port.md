@@ -108,21 +108,15 @@ the ROM prepares to send a character, it enables both **DTR** and **RTS**.  Mayb
 not *send* data.
 
 To address the limitations of the ROM's INT 14h services, I wrote [INT14.ASM](INT14.ASM).  It's a
-Terminate-and-Stay-Resident (TSR) utility that scans the ROM BIOS Data Area for a COM port whose I/O address is 0x2F8.
-If one is found, then the utility installs replacement INT 14h services for that COM port.  Also, unless the /P option
-("polled mode") is specified, the utility also installs a hardware interrupt handler for IRQ 3 (the traditional IRQ
-for a serial adapter at address 0x2F8), and enables interrupt-driven I/O for the adapter.
+Terminate-and-Stay-Resident (TSR) utility that scans the ROM BIOS Data Area for a COM port whose I/O address is 0x2F8
+(or 0x3F8 if the /1 option is specified).  If the port is found, then the utility installs replacement INT 14h services
+for that port.  Also, unless the /P option ("polled mode") is specified, the utility also installs a hardware interrupt
+handler for IRQ3 (or IRQ4 is /1 is specified) and enables interrupt-driven I/O for the adapter.
 
-Note that INT14.COM is currently hard-coded to look for a serial adapter whose address is 0x2F8, and that adapter will
-normally be named "COM2", but not always.  For example, if it's the only adapter in the PC, then DOS will name it "COM1"
-even if it's using the traditional COM2 address.
+Note that a serial adapter with address 0x2F8 is normally named "COM2", but not always.  For example, if it's the only
+adapter in the PC, then DOS will name it "COM1" even if it's using the traditional COM2 address.
 
-Also note that some serial port adapters don't support interrupt-driven I/O, either because:
-
-- The adapter is broken
-- The adapter's IRQ has been disabled
-
-If yours doesn't seem to work, then try installing INT14.COM with /P for "polled mode":
+If interrupt-driven I/O doesn't seem to be working, then try installing INT14.COM with /P for "polled mode":
 
     INT14 /P
 
