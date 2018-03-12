@@ -21,7 +21,9 @@ Microsoft Windows 3.10
 
 The PCjs machine below starts Microsoft Windows 3.10, using an IBM PC AT running PC-DOS 3.30.
 
-Directory listings of the seven 1.2Mb distribution diskettes are provided below.
+The machine is also available with the [PCjs Debugger](debugger/).
+
+Directory listings of the seven 1.2Mb distribution diskettes are provided [below](#directory-of-windows-3-10-disk-1).
 
 {% include machine.html id="ibm5170-win310" %}
 
