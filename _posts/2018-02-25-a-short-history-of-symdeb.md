@@ -15,7 +15,7 @@ machines:
         name: None
 ---
 
-The first version of SYMDEB that I came to know and love was probably Version 4.00, released with
+The first version of SYMDEB I used was probably Version 4.00, released with
 [Microsoft Macro Assembler 4.00](/disks/pcx86/tools/microsoft/masm/4.00/):
 
 	SYMDEB   EXE     37021 10-16-85   4:00a
