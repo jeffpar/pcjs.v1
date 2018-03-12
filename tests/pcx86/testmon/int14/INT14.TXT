@@ -1,0 +1,1025 @@
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Page     1-1
+                                                            
+
+                                	title	int14.asm 
+                                	page	,120 
+                                 
+                                ;	By Jeff Parsons (@jeffpar) 2018-03-06 
+                                ;	Installs interrupt handlers for the COM port associated with I/O address 0x2F8 (and IR
+				Q 3). 
+                                 
+ 0000                           code	segment word public 'code' 
+                                 
+ 0100                           	org	100h 
+                                 
+                                	assume	cs:code, ds:code, es:code, ss:code 
+                                 
+ 0100                           main	proc	near 
+ 0100  E9 06A9 R                	jmp	install 
+                                main	endp 
+                                 
+                                	assume	cs:code, ds:nothing, es:nothing, ss:nothing 
+                                 
+ 0103  90                       	even 
+ 0104  00 00 00 00              prev14	dd	0			; previous INT 14h handler 
+ 0108  01                       rtsFlg	db	1			; internal RTS flag (0=off, 1=on) 
+ 0109  00                       pollFlg	db	0			; polling mode (0=off, 1=on); set by /P 
+ 010A  FFFF                     comID	dw	-1			; 0-based index of COM port in BIOS data area 
+ 010C  0003                     comIRQ	dw	3 
+ 010E  02F8                     comAddr	dw	2F8h 
+                                 
+ = 0010                         MAXBUF	equ	16 
+ 0110  0010[                    inBuf	db	MAXBUF dup (?) 
+            ??                  
+                         ]      
+                                
+ 0120  0010[                    outBuf	db	MAXBUF dup (?) 
+            ??                  
+                         ]      
+                                
+ 0130  0000                     inTot	dw	0			; counts the total number of input bytes buffered 
+ 0132  0110 R                   inHead	dw	offset inBuf 
+ 0134  0110 R                   inTail	dw	offset inBuf 
+ 0136  0120 R                   outHead	dw	offset outBuf 
+ 0138  0120 R                   outTail	dw	offset outBuf 
+                                 
+ = 0100                         MAXLOG	equ	256 
+ 013A  0100[                    logBuff	db	MAXLOG dup (0) 
+            00                  
+                         ]      
+                                
+ 023A  013A R                   logNext	dw	offset logBuff 
+                                 
+                                log	macro	c,d 
+                                	local	log1 
+                                	push	bx 
+                                	mov	bx,logNext 
+                                	mov	byte ptr cs:[bx],c 
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Page     1-2
+                                                            
+
+                                	mov	byte ptr cs:[bx+1],d 
+                                	add	bx,2 
+                                	cmp	bx,offset logBuff + MAXLOG 
+                                	jb	log1 
+                                	mov	bx,offset logBuff 
+                                log1:	mov	byte ptr cs:[bx],'.' 
+                                	mov	byte ptr cs:[bx+1],'.' 
+                                	mov	logNext,bx 
+                                	pop	bx 
+                                	endm 
+                                 
+ 023C                           int14	proc	far 
+ 023C  2E: 3B 16 010A R         	cmp	dx,comID		; request for our COM port? 
+ 0241  74 03                    	je	i14a			; yes 
+ 0243  E9 0367 R                	jmp	i14x			; no 
+                                 
+ 0246  84 E4                    i14a:	test	ah,ah			; INIT function? 
+ 0248  75 2D                    	jne	i14b			; no 
+                                	log	'N',al 
+ 024A  53                     1 	push	bx
+ 024B  2E: 8B 1E 023A R       1 	mov	bx,logNext
+ 0250  2E: C6 07 4E           1 	mov	byte ptr cs:[bx],'N'
+ 0254  2E: 88 47 01           1 	mov	byte ptr cs:[bx+1],al
+ 0258  83 C3 02               1 	add	bx,2
+ 025B  81 FB 023A R           1 	cmp	bx,offset logBuff + MAXLOG
+ 025F  72 03                  1 	jb	??0000
+ 0261  BB 013A R              1 	mov	bx,offset logBuff
+ 0264  2E: C6 07 2E           1 ??0000:	mov	byte ptr cs:[bx],'.'
+ 0268  2E: C6 47 01 2E        1 	mov	byte ptr cs:[bx+1],'.'
+ 026D  2E: 89 1E 023A R       1 	mov	logNext,bx
+ 0272  5B                     1 	pop	bx
+ 0273  E8 04C5 R                	call	init 
+ 0276  CF                       	iret 
+                                 
+ 0277  80 FC 01                 i14b:	cmp	ah,1			; WRITE function? 
+ 027A  75 2D                    	jne	i14c			; no 
+                                	log	'W',al 
+ 027C  53                     1 	push	bx
+ 027D  2E: 8B 1E 023A R       1 	mov	bx,logNext
+ 0282  2E: C6 07 57           1 	mov	byte ptr cs:[bx],'W'
+ 0286  2E: 88 47 01           1 	mov	byte ptr cs:[bx+1],al
+ 028A  83 C3 02               1 	add	bx,2
+ 028D  81 FB 023A R           1 	cmp	bx,offset logBuff + MAXLOG
+ 0291  72 03                  1 	jb	??0001
+ 0293  BB 013A R              1 	mov	bx,offset logBuff
+ 0296  2E: C6 07 2E           1 ??0001:	mov	byte ptr cs:[bx],'.'
+ 029A  2E: C6 47 01 2E        1 	mov	byte ptr cs:[bx+1],'.'
+ 029F  2E: 89 1E 023A R       1 	mov	logNext,bx
+ 02A4  5B                     1 	pop	bx
+ 02A5  E8 050C R                	call	write			; add the character in AL to outBuf 
+ 02A8  CF                       	iret 
+                                 
+ 02A9  80 FC 02                 i14c:	cmp	ah,2			; READ function? 
+ 02AC  75 56                    	jne	i14d			; no 
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Page     1-3
+                                                            
+
+ 02AE  E8 056F R                	call	read			; remove next char from inBuf into AL 
+                                	log	'R',al 
+ 02B1  53                     1 	push	bx
+ 02B2  2E: 8B 1E 023A R       1 	mov	bx,logNext
+ 02B7  2E: C6 07 52           1 	mov	byte ptr cs:[bx],'R'
+ 02BB  2E: 88 47 01           1 	mov	byte ptr cs:[bx+1],al
+ 02BF  83 C3 02               1 	add	bx,2
+ 02C2  81 FB 023A R           1 	cmp	bx,offset logBuff + MAXLOG
+ 02C6  72 03                  1 	jb	??0002
+ 02C8  BB 013A R              1 	mov	bx,offset logBuff
+ 02CB  2E: C6 07 2E           1 ??0002:	mov	byte ptr cs:[bx],'.'
+ 02CF  2E: C6 47 01 2E        1 	mov	byte ptr cs:[bx+1],'.'
+ 02D4  2E: 89 1E 023A R       1 	mov	logNext,bx
+ 02D9  5B                     1 	pop	bx
+                                	log	'r',ah 
+ 02DA  53                     1 	push	bx
+ 02DB  2E: 8B 1E 023A R       1 	mov	bx,logNext
+ 02E0  2E: C6 07 72           1 	mov	byte ptr cs:[bx],'r'
+ 02E4  2E: 88 67 01           1 	mov	byte ptr cs:[bx+1],ah
+ 02E8  83 C3 02               1 	add	bx,2
+ 02EB  81 FB 023A R           1 	cmp	bx,offset logBuff + MAXLOG
+ 02EF  72 03                  1 	jb	??0003
+ 02F1  BB 013A R              1 	mov	bx,offset logBuff
+ 02F4  2E: C6 07 2E           1 ??0003:	mov	byte ptr cs:[bx],'.'
+ 02F8  2E: C6 47 01 2E        1 	mov	byte ptr cs:[bx+1],'.'
+ 02FD  2E: 89 1E 023A R       1 	mov	logNext,bx
+ 0302  5B                     1 	pop	bx
+ 0303  CF                       	iret 
+                                 
+ 0304  80 FC 03                 i14d:	cmp	ah,3			; STATUS function? 
+ 0307  75 56                    	jne	i14e			; no, jump to previous handler 
+ 0309  E8 05C7 R                	call	status 
+                                	log	'S',al 
+ 030C  53                     1 	push	bx
+ 030D  2E: 8B 1E 023A R       1 	mov	bx,logNext
+ 0312  2E: C6 07 53           1 	mov	byte ptr cs:[bx],'S'
+ 0316  2E: 88 47 01           1 	mov	byte ptr cs:[bx+1],al
+ 031A  83 C3 02               1 	add	bx,2
+ 031D  81 FB 023A R           1 	cmp	bx,offset logBuff + MAXLOG
+ 0321  72 03                  1 	jb	??0004
+ 0323  BB 013A R              1 	mov	bx,offset logBuff
+ 0326  2E: C6 07 2E           1 ??0004:	mov	byte ptr cs:[bx],'.'
+ 032A  2E: C6 47 01 2E        1 	mov	byte ptr cs:[bx+1],'.'
+ 032F  2E: 89 1E 023A R       1 	mov	logNext,bx
+ 0334  5B                     1 	pop	bx
+                                	log	's',ah 
+ 0335  53                     1 	push	bx
+ 0336  2E: 8B 1E 023A R       1 	mov	bx,logNext
+ 033B  2E: C6 07 73           1 	mov	byte ptr cs:[bx],'s'
+ 033F  2E: 88 67 01           1 	mov	byte ptr cs:[bx+1],ah
+ 0343  83 C3 02               1 	add	bx,2
+ 0346  81 FB 023A R           1 	cmp	bx,offset logBuff + MAXLOG
+ 034A  72 03                  1 	jb	??0005
+ 034C  BB 013A R              1 	mov	bx,offset logBuff
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Page     1-4
+                                                            
+
+ 034F  2E: C6 07 2E           1 ??0005:	mov	byte ptr cs:[bx],'.'
+ 0353  2E: C6 47 01 2E        1 	mov	byte ptr cs:[bx+1],'.'
+ 0358  2E: 89 1E 023A R       1 	mov	logNext,bx
+ 035D  5B                     1 	pop	bx
+ 035E  CF                       	iret 
+                                 
+ 035F  80 FC AA                 i14e:	cmp	ah,0AAh			; quick-and-dirty installation check 
+ 0362  75 03                    	jne	i14x 
+ 0364  F6 D4                    	not	ah 
+ 0366  CF                       	iret 
+                                 
+ 0367  2E: FF 2E 0104 R         i14x:	jmp	dword ptr [prev14] 
+                                 
+                                int14	endp 
+                                 
+                                ; 
+                                ; fakeLSR 
+                                ; 
+                                ; Returns fake LSR in AL. 
+                                ; 
+ 036C                           fakeLSR	proc	near 
+                                	assume	ds:code 
+ 036C  53                       	push	bx 
+ 036D  52                       	push	dx 
+ 036E  83 C2 05                 	add	dx,5			; DX -> LSR 
+ 0371  EC                       	in	al,dx 
+                                	; 
+                                	; See if inBuf contains data, and set the DR bit if it does. 
+                                	; 
+ 0372  24 FE                    	and	al,not 01h 
+ 0374  8B 1E 0132 R             	mov	bx,inHead 
+ 0378  3B 1E 0134 R             	cmp	bx,inTail 
+ 037C  74 02                    	je	lsr1 
+ 037E  0C 01                    	or	al,01h 
+                                	; 
+                                	; See if outBuf still has room, and set the THRE bit if it does. 
+                                	; 
+ 0380  80 3E 0109 R 00          lsr1:	cmp	pollFlg,0 
+ 0385  75 11                    	jne	lsr9 
+ 0387  24 DF                    	and	al,not 20h 
+ 0389  8B 1E 0136 R             	mov	bx,outHead 
+ 038D  E8 0404 R                	call	incPtr 
+ 0390  3B 1E 0138 R             	cmp	bx,outTail 
+ 0394  74 02                    	je	lsr9 
+ 0396  0C 20                    	or	al,20h 
+                                 
+ 0398  5A                       lsr9:	pop	dx 
+ 0399  5B                       	pop	bx 
+ 039A  C3                       	ret 
+                                fakeLSR	endp 
+                                 
+                                ; 
+                                ; getLSR 
+                                ; 
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Page     1-5
+                                                            
+
+                                ; Returns LSR in AL. 
+                                ; 
+ 039B                           getLSR	proc	near 
+                                	assume	ds:code 
+ 039B  52                       	push	dx 
+ 039C  83 C2 05                 	add	dx,5			; DX -> LSR 
+ 039F  EC                       	in	al,dx			; AL = LSR bits 
+ 03A0  5A                       	pop	dx 
+ 03A1  C3                       	ret 
+                                getLSR	endp 
+                                 
+                                ; 
+                                ; getMSR 
+                                ; 
+                                ; Returns MSR in AL. 
+                                ; 
+ 03A2                           getMSR	proc	near 
+                                	assume	ds:code 
+ 03A2  52                       	push	dx 
+ 03A3  83 C2 06                 	add	dx,6			; DX -> MSR 
+ 03A6  EC                       	in	al,dx			; AL = MSR bits 
+ 03A7  5A                       	pop	dx 
+ 03A8  C3                       	ret 
+                                getMSR	endp 
+                                 
+                                ; 
+                                ; setIER 
+                                ; 
+                                ; Sets the physical IER bits. 
+                                ; 
+ 03A9                           setIER	proc	near 
+                                	assume	ds:code 
+ 03A9  52                       	push	dx 
+ 03AA  83 C2 03                 	add	dx,3			; DX -> LCR 
+ 03AD  EC                       	in	al,dx 
+ 03AE  EB 00                    	jmp	$+2 
+ 03B0  24 7F                    	and	al,not 80h		; make sure the DLAB is not set, so that we can set IER 
+ 03B2  EE                       	out	dx,al 
+ 03B3  4A                       	dec	dx 
+ 03B4  4A                       	dec	dx			; DX -> IER 
+ 03B5  B0 03                    	mov	al,03h			; enable RBR (01h) and THR (02h) COM interrupts 
+ 03B7  EE                       	out	dx,al 
+ 03B8  5A                       	pop	dx 
+ 03B9  C3                       	ret 
+                                setIER	endp 
+                                 
+                                ; 
+                                ; setDTR 
+                                ; 
+                                ; Sets the physical DTR bit. 
+                                ; 
+ 03BA                           setDTR	proc	near 
+                                	assume	ds:code 
+ 03BA  52                       	push	dx 
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Page     1-6
+                                                            
+
+ 03BB  83 C2 04                 	add	dx,4			; DX -> MCR 
+ 03BE  EC                       	in	al,dx 
+ 03BF  EB 00                    	jmp	$+2 
+ 03C1  0C 01                    	or	al,01h			; DTR == 01h 
+ 03C3  EE                       	out	dx,al 
+ 03C4  5A                       	pop	dx 
+ 03C5  C3                       	ret 
+                                setDTR	endp 
+                                 
+                                ; 
+                                ; setRTS 
+                                ; 
+                                ; Sets the physical RTS bit according to the internal rtsFlg. 
+                                ; 
+ 03C6                           setRTS	proc	near 
+                                	assume	ds:code 
+ 03C6  50                       	push	ax 
+ 03C7  52                       	push	dx 
+ 03C8  83 C2 04                 	add	dx,4			; DX -> MCR 
+ 03CB  EC                       	in	al,dx 
+ 03CC  EB 00                    	jmp	$+2 
+ 03CE  0C 02                    	or	al,02h			; RTS == 02h 
+ 03D0  80 3E 0108 R 00          	cmp	rtsFlg,0 
+ 03D5  75 02                    	jne	rts9 
+ 03D7  24 FD                    	and	al,not 02h 
+ 03D9  EE                       rts9:	out	dx,al 
+                                	log	'T',al 
+ 03DA  53                     1 	push	bx
+ 03DB  8B 1E 023A R           1 	mov	bx,logNext
+ 03DF  2E: C6 07 54           1 	mov	byte ptr cs:[bx],'T'
+ 03E3  2E: 88 47 01           1 	mov	byte ptr cs:[bx+1],al
+ 03E7  83 C3 02               1 	add	bx,2
+ 03EA  81 FB 023A R           1 	cmp	bx,offset logBuff + MAXLOG
+ 03EE  72 03                  1 	jb	??0006
+ 03F0  BB 013A R              1 	mov	bx,offset logBuff
+ 03F3  2E: C6 07 2E           1 ??0006:	mov	byte ptr cs:[bx],'.'
+ 03F7  2E: C6 47 01 2E        1 	mov	byte ptr cs:[bx+1],'.'
+ 03FC  89 1E 023A R           1 	mov	logNext,bx
+ 0400  5B                     1 	pop	bx
+ 0401  5A                       	pop	dx 
+ 0402  58                       	pop	ax 
+ 0403  C3                       	ret 
+                                setRTS	endp 
+                                 
+                                ; 
+                                ; incPtr 
+                                ; 
+                                ; Updates BX to next buffer position. 
+                                ; 
+ 0404                           incPtr	proc	near 
+                                	assume	ds:code 
+ 0404  43                       	inc	bx 
+ 0405  81 FB 0120 R             	cmp	bx,offset inBuf + MAXBUF 
+ 0409  75 04                    	jne	inc1 
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Page     1-7
+                                                            
+
+ 040B  BB 0110 R                	mov	bx,offset inBuf 
+ 040E  C3                       inc0:	ret 
+ 040F  81 FB 0130 R             inc1:	cmp	bx,offset outBuf + MAXBUF 
+ 0413  75 F9                    	jne	inc0 
+ 0415  BB 0120 R                	mov	bx,offset outBuf 
+ 0418  C3                       	ret 
+                                incPtr	endp 
+                                 
+                                ; 
+                                ; tryIn 
+                                ; 
+                                ; If the DR bit is set, see if we can buffer the data. 
+                                ; 
+ 0419                           tryIn	proc	near 
+                                	assume	ds:code 
+ 0419  50                       	push	ax 
+ 041A  52                       	push	dx 
+ 041B  83 C2 05                 	add	dx,5			; DX -> LSR 
+ 041E  EC                       	in	al,dx 
+ 041F  5A                       	pop	dx 
+ 0420  A8 01                    	test	al,01h			; DR set? 
+ 0422  74 57                    	jz	ti9 
+ 0424  EC                       	in	al,dx			; AL == new data 
+                                	log	'I',al 
+ 0425  53                     1 	push	bx
+ 0426  8B 1E 023A R           1 	mov	bx,logNext
+ 042A  2E: C6 07 49           1 	mov	byte ptr cs:[bx],'I'
+ 042E  2E: 88 47 01           1 	mov	byte ptr cs:[bx+1],al
+ 0432  83 C3 02               1 	add	bx,2
+ 0435  81 FB 023A R           1 	cmp	bx,offset logBuff + MAXLOG
+ 0439  72 03                  1 	jb	??0007
+ 043B  BB 013A R              1 	mov	bx,offset logBuff
+ 043E  2E: C6 07 2E           1 ??0007:	mov	byte ptr cs:[bx],'.'
+ 0442  2E: C6 47 01 2E        1 	mov	byte ptr cs:[bx+1],'.'
+ 0447  89 1E 023A R           1 	mov	logNext,bx
+ 044B  5B                     1 	pop	bx
+ 044C  53                       	push	bx 
+ 044D  8B 1E 0132 R             	mov	bx,inHead 
+ 0451  88 07                    	mov	[bx],al 
+ 0453  E8 0404 R                	call	incPtr 
+ 0456  3B 1E 0134 R             	cmp	bx,inTail 
+ 045A  74 1E                    	je	ti8			; buffer full, dropping the data 
+ 045C  89 1E 0132 R             	mov	inHead,bx 
+ 0460  FF 06 0130 R             	inc	inTot 
+ 0464  80 3E 0109 R 00          	cmp	pollFlg,0 
+ 0469  75 0F                    	jne	ti8 
+ 046B  83 3E 0130 R 08          	cmp	inTot,MAXBUF/2		; have we reached the half-way point? 
+ 0470  75 08                    	jne	ti8			; no 
+ 0472  C6 06 0108 R 00          	mov	rtsFlg,0		; yes, so let's try turning RTS off 
+ 0477  E8 03C6 R                	call	setRTS			; and hope the sender give us some space 
+ 047A  5B                       ti8:	pop	bx 
+ 047B  58                       ti9:	pop	ax 
+ 047C  C3                       	ret 
+                                tryIn	endp 
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Page     1-8
+                                                            
+
+                                 
+                                ; 
+                                ; tryOut 
+                                ; 
+                                ; If we have some buffered data, and the THRE bit is set, output more data. 
+                                ; 
+ 047D                           tryOut	proc	near 
+                                	assume	ds:code 
+ 047D  53                       	push	bx 
+ 047E  8B 1E 0138 R             	mov	bx,outTail 
+ 0482  3B 1E 0136 R             	cmp	bx,outHead 
+ 0486  74 3B                    	je	to9 
+ 0488  52                       	push	dx 
+ 0489  83 C2 05                 	add	dx,5			; DX -> LSR 
+ 048C  EC                       	in	al,dx 
+ 048D  5A                       	pop	dx 
+ 048E  A8 20                    	test	al,20h			; THRE set? 
+ 0490  74 31                    	jz	to9			; no 
+ 0492  8A 07                    	mov	al,[bx] 
+ 0494  EE                       	out	dx,al 
+                                	log	'O',al 
+ 0495  53                     1 	push	bx
+ 0496  8B 1E 023A R           1 	mov	bx,logNext
+ 049A  2E: C6 07 4F           1 	mov	byte ptr cs:[bx],'O'
+ 049E  2E: 88 47 01           1 	mov	byte ptr cs:[bx+1],al
+ 04A2  83 C3 02               1 	add	bx,2
+ 04A5  81 FB 023A R           1 	cmp	bx,offset logBuff + MAXLOG
+ 04A9  72 03                  1 	jb	??0008
+ 04AB  BB 013A R              1 	mov	bx,offset logBuff
+ 04AE  2E: C6 07 2E           1 ??0008:	mov	byte ptr cs:[bx],'.'
+ 04B2  2E: C6 47 01 2E        1 	mov	byte ptr cs:[bx+1],'.'
+ 04B7  89 1E 023A R           1 	mov	logNext,bx
+ 04BB  5B                     1 	pop	bx
+ 04BC  E8 0404 R                	call	incPtr 
+ 04BF  89 1E 0138 R             	mov	outTail,bx 
+ 04C3  5B                       to9:	pop	bx 
+ 04C4  C3                       	ret 
+                                tryOut	endp 
+                                 
+                                ; 
+                                ; init 
+                                ; 
+                                ; Handles INIT requests from INT 14h. 
+                                ; 
+ 04C5                           init	proc	near 
+ 04C5  53                       	push	bx 
+ 04C6  52                       	push	dx 
+ 04C7  1E                       	push	ds 
+ 04C8  0E                       	push	cs 
+ 04C9  1F                       	pop	ds 
+                                	assume	ds:code 
+ 04CA  9C                       	pushf 
+ 04CB  FF 1E 0104 R             	call	dword ptr [prev14] 
+ 04CF  50                       	push	ax 
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Page     1-9
+                                                            
+
+ 04D0  8B 16 010E R             	mov	dx,comAddr 
+ 04D4  C7 06 0130 R 0000        	mov	inTot,0 
+ 04DA  C7 06 0132 R 0110 R      	mov	inHead,offset inBuf 
+ 04E0  C7 06 0134 R 0110 R      	mov	inTail,offset inBuf 
+ 04E6  C7 06 0136 R 0120 R      	mov	outHead,offset outBuf 
+ 04EC  C7 06 0138 R 0120 R      	mov	outTail,offset outBuf 
+ 04F2  80 3E 0109 R 00          	cmp	pollFlg,0 
+ 04F7  75 03                    	jne	i1 
+ 04F9  E8 03A9 R                	call	setIER 
+ 04FC  E8 03BA R                i1:	call	setDTR 
+ 04FF  C6 06 0108 R 01          	mov	rtsFlg,1 
+ 0504  E8 03C6 R                	call	setRTS 
+ 0507  58                       	pop	ax 
+ 0508  1F                       	pop	ds 
+                                	assume	ds:nothing 
+ 0509  5A                       	pop	dx 
+ 050A  5B                       	pop	bx 
+ 050B  C3                       	ret 
+                                init	endp 
+                                 
+                                ; 
+                                ; write 
+                                ; 
+                                ; Handles WRITE requests from INT 14h. 
+                                ; 
+                                ; If AH == 1 (the normal INT 14h write scenario), mimicking the ROM BIOS 
+                                ; requires that we wait for DSR, then CTS, and finally THRE.  I would prefer 
+                                ; to do that by spin-waiting for MSR-based and LSR-based interrupt triggers, 
+                                ; rather than adopting the ROM's totally arbitrary "let's loop 64K times" for 
+                                ; each condition.  But, as I'm sure the ROM BIOS authors originally thought 
+                                ; too, this approach is easier. 
+                                ; 
+ 050C                           write	proc	near 
+ 050C  53                       	push	bx 
+ 050D  51                       	push	cx 
+ 050E  52                       	push	dx 
+ 050F  1E                       	push	ds 
+ 0510  0E                       	push	cs 
+ 0511  1F                       	pop	ds 
+                                	assume	ds:code 
+ 0512  8B 16 010E R             	mov	dx,comAddr 
+                                 
+ 0516  FB                       	sti 
+ 0517  86 E0                    	xchg	ah,al			; stash the output data in AH 
+ 0519  2B C9                    	sub	cx,cx 
+ 051B  E8 03A2 R                w1:	call	getMSR 
+ 051E  24 30                    	and	al,30h			; we're "cheating" and checking for both 
+ 0520  3C 30                    	cmp	al,30h			; DSR and CTS at once, instead of the ROM's 
+ 0522  74 0B                    	je	w2			; "one after the other" approach 
+ 0524  E2 F5                    	loop	w1 
+ 0526  E8 039B R                	call	getLSR 
+ 0529  0C 80                    	or	al,80h			; signal a time-out error 
+ 052B  86 E0                    	xchg	ah,al 
+ 052D  EB 3B                    	jmp	short w9 
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Page     1-10
+                                                            
+
+                                 
+ 052F  80 3E 0109 R 00          w2:	cmp	pollFlg,0		; in polling mode, we take 
+ 0534  74 03                    	je	w3			; every opportunity to check for input 
+ 0536  E8 0419 R                	call	tryIn 
+                                 
+ 0539  2B C9                    w3:	sub	cx,cx 
+ 053B  E8 039B R                w4:	call	getLSR 
+ 053E  A8 20                    	test	al,20h			; checking THRE 
+ 0540  75 08                    	jnz	w5 
+ 0542  E2 F7                    	loop	w4 
+ 0544  0C 80                    	or	al,80h			; signal a time-out error 
+ 0546  86 E0                    	xchg	ah,al 
+ 0548  EB 20                    	jmp	short w9 
+                                 
+ 054A  FA                       w5:	cli 
+ 054B  2A C0                    	sub	al,al 
+ 054D  86 C4                    	xchg	al,ah			; recover the output data in AL and zero AH 
+ 054F  8B 1E 0136 R             	mov	bx,outHead 
+ 0553  88 07                    	mov	[bx],al 
+ 0555  E8 0404 R                	call	incPtr 
+ 0558  3B 1E 0138 R             	cmp	bx,outTail 
+ 055C  75 05                    	jne	w8 
+ 055E  80 CC 80                 	or	ah,80h			; buffer full, so we pretend it's a time-out 
+ 0561  EB 07                    	jmp	short w9 
+                                 
+ 0563  89 1E 0136 R             w8:	mov	outHead,bx		; there was room, so update the head ptr 
+ 0567  E8 047D R                	call	tryOut			; and since THRE was set, call tryOut 
+                                 
+ 056A  1F                       w9:	pop	ds 
+                                	assume	ds:nothing 
+ 056B  5A                       	pop	dx 
+ 056C  59                       	pop	cx 
+ 056D  5B                       	pop	bx 
+ 056E  C3                       	ret 
+                                write	endp 
+                                 
+                                ; 
+                                ; read 
+                                ; 
+                                ; Handles READ requests from INT 14h. 
+                                ; 
+ 056F                           read	proc	near 
+ 056F  53                       	push	bx 
+ 0570  52                       	push	dx 
+ 0571  1E                       	push	ds 
+ 0572  0E                       	push	cs 
+ 0573  1F                       	pop	ds 
+                                	assume	ds:code 
+ 0574  8B 16 010E R             	mov	dx,comAddr 
+                                 
+ 0578  80 3E 0109 R 00          	cmp	pollFlg,0		; in polling mode, we take 
+ 057D  74 0B                    	je	r1			; every opportunity to check for input 
+ 057F  E8 0419 R                	call	tryIn 
+ 0582  C6 06 0108 R 00          	mov	rtsFlg,0 
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Page     1-11
+                                                            
+
+ 0587  E8 03C6 R                	call	setRTS			; after a polled read, let's turn RTS off 
+                                 
+ 058A  2B C0                    r1:	sub	ax,ax 
+ 058C  E8 036C R                	call	fakeLSR 
+ 058F  8A E0                    	mov	ah,al 
+                                 
+ 0591  8B 1E 0134 R             	mov	bx,inTail 
+ 0595  3B 1E 0132 R             	cmp	bx,inHead 
+ 0599  75 05                    	jne	r3 
+ 059B  80 CC 80                 	or	ah,80h 
+ 059E  EB 23                    	jmp	short r9 
+                                 
+ 05A0  8A 07                    r3:	mov	al,[bx] 
+ 05A2  E8 0404 R                	call	incPtr 
+ 05A5  89 1E 0134 R             	mov	inTail,bx 
+                                 
+ 05A9  80 3E 0109 R 00          	cmp	pollFlg,0 
+ 05AE  75 0F                    	jne	r4 
+ 05B0  83 3E 0130 R 08          	cmp	inTot,MAXBUF/2		; are we at the half-way point? 
+ 05B5  75 08                    	jne	r4			; no 
+ 05B7  C6 06 0108 R 01          	mov	rtsFlg,1		; yes, so we must have turned RTS off 
+ 05BC  E8 03C6 R                	call	setRTS			; so let's turn RTS back on 
+                                 
+ 05BF  FF 0E 0130 R             r4:	dec	inTot 
+                                 
+ 05C3  1F                       r9:	pop	ds 
+                                	assume	ds:nothing 
+ 05C4  5A                       	pop	dx 
+ 05C5  5B                       	pop	bx 
+ 05C6  C3                       	ret 
+                                read	endp 
+                                 
+                                ; 
+                                ; status 
+                                ; 
+                                ; Handles STATUS requests from INT 14h. 
+                                ; 
+                                ; We could pass STATUS requests on to the previous handler, but that would 
+                                ; return the port's "raw" state, whereas we need to return our own simulated 
+                                ; "buffered" state: LSR (reg #5) bits in AH, MSR (reg #6) bits in AL. 
+                                ; 
+                                ; It's worth noting what DOS really cares about from this call.  Prior to 
+                                ; reading serial input, DOS calls the STATUS function and then requires that 
+                                ; both AH bit 0 (LSR Data Ready: 0x01) and AL bit 5 (MSR Data Set Ready: 0x20) 
+                                ; be set before it will call READ. 
+                                ; 
+                                ; Also, in some cases (eg, the CTTY case), DOS requires that both AH bit 5 
+                                ; (LSR Transmitter Holding Register Empty: 0x20) and AL bit 5 (MSR Data Set 
+                                ; Ready: 0x20) be set before it calls WRITE, while in other cases (eg, output 
+                                ; redirection), DOS simply calls WRITE and hopes for the best. 
+                                ; 
+ 05C7                           status	proc	near 
+ 05C7  53                       	push	bx 
+ 05C8  52                       	push	dx 
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Page     1-12
+                                                            
+
+ 05C9  1E                       	push	ds 
+ 05CA  0E                       	push	cs 
+ 05CB  1F                       	pop	ds 
+                                	assume	ds:code 
+ 05CC  8B 16 010E R             	mov	dx,comAddr 
+                                 
+ 05D0  80 3E 0109 R 00          	cmp	pollFlg,0		; in polling mode, we take 
+ 05D5  74 03                    	je	s1			; every opportunity to check for input 
+ 05D7  E8 0419 R                	call	tryIn 
+                                 
+ 05DA  E8 036C R                s1:	call	fakeLSR 
+ 05DD  8A E0                    	mov	ah,al			; AH = LSR bits 
+ 05DF  E8 03A2 R                	call	getMSR			; AL = MSR bits 
+                                 
+ 05E2  80 3E 0109 R 00          	cmp	pollFlg,0 
+ 05E7  74 0E                    	je	s9 
+ 05E9  80 3E 0108 R 00          	cmp	rtsFlg,0		; in polling mode, if RTS isn't already on 
+ 05EE  75 07                    	jne	s9			; turn it on 
+ 05F0  FE 06 0108 R             	inc	rtsFlg 
+ 05F4  E8 03C6 R                	call	setRTS 
+                                 
+ 05F7  1F                       s9:	pop	ds 
+                                	assume	ds:nothing 
+ 05F8  5A                       	pop	dx 
+ 05F9  5B                       	pop	bx 
+ 05FA  C3                       	ret 
+                                status	endp 
+                                 
+ 05FB                           intHW	proc	far 
+ 05FB  FB                       	sti 
+ 05FC  50                       	push	ax 
+ 05FD  53                       	push	bx 
+ 05FE  52                       	push	dx 
+ 05FF  1E                       	push	ds 
+ 0600  0E                       	push	cs 
+ 0601  1F                       	pop	ds 
+                                	assume	ds:code 
+ 0602  8B 16 010E R             	mov	dx,comAddr 
+                                 
+ 0606  52                       	push	dx 
+ 0607  42                       	inc	dx 
+ 0608  42                       	inc	dx			; DX -> IIR 
+ 0609  EC                       	in	al,dx 
+ 060A  5A                       	pop	dx 
+                                	log	'H',al 
+ 060B  53                     1 	push	bx
+ 060C  8B 1E 023A R           1 	mov	bx,logNext
+ 0610  2E: C6 07 48           1 	mov	byte ptr cs:[bx],'H'
+ 0614  2E: 88 47 01           1 	mov	byte ptr cs:[bx+1],al
+ 0618  83 C3 02               1 	add	bx,2
+ 061B  81 FB 023A R           1 	cmp	bx,offset logBuff + MAXLOG
+ 061F  72 03                  1 	jb	??0009
+ 0621  BB 013A R              1 	mov	bx,offset logBuff
+ 0624  2E: C6 07 2E           1 ??0009:	mov	byte ptr cs:[bx],'.'
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Page     1-13
+                                                            
+
+ 0628  2E: C6 47 01 2E        1 	mov	byte ptr cs:[bx+1],'.'
+ 062D  89 1E 023A R           1 	mov	logNext,bx
+ 0631  5B                     1 	pop	bx
+                                 
+ 0632  3C 02                    	cmp	al,02h			; THRE condition? 
+ 0634  75 05                    	jne	hw1			; no 
+ 0636  E8 047D R                	call	tryOut			; yes, so see if we have something to write 
+ 0639  EB 07                    	jmp	short hw9 
+                                 
+ 063B  3C 04                    hw1:	cmp	al,04h			; DR condition? 
+ 063D  75 03                    	jne	hw9 
+ 063F  E8 0419 R                	call	tryIn 
+                                 
+ 0642  FA                       hw9:	cli 
+ 0643  B0 20                    	mov	al,20h			; EOI command 
+ 0645  E6 20                    	out	20h,al 
+                                 
+ 0647  1F                       	pop	ds 
+                                	assume	ds:nothing 
+ 0648  5A                       	pop	dx 
+ 0649  5B                       	pop	bx 
+ 064A  58                       	pop	ax 
+ 064B  CF                       	iret 
+                                intHW	endp 
+                                 
+                                	even 
+ 064C                           endRes	label	byte			; end of resident code/data 
+                                 
+ 064C  43 4F 4D 3F 20 68 61     comMsg	db	"COM? handlers installed$" 
+       6E 64 6C 65 72 73 20     
+       69 6E 73 74 61 6C 6C     
+       65 64 24                 
+ 0664  20 69 6E 20 70 6F 6C     pollMsg	db	" in polled mode$" 
+       6C 65 64 20 6D 6F 64     
+       65 24                    
+ 0674  0D 0A 24                 endMsg	db	13,10,'$' 
+ 0677  48 61 6E 64 6C 65 72     insMsg	db	"Handlers already installed",13,10,'$' 
+       73 20 61 6C 72 65 61     
+       64 79 20 69 6E 73 74     
+       61 6C 6C 65 64 0D 0A     
+       24                       
+ 0694  43 4F 4D 20 70 6F 72     errMsg	db	"COM port not found",13,10,'$' 
+       74 20 6E 6F 74 20 66     
+       6F 75 6E 64 0D 0A 24     
+                                 
+ 06A9                           install	proc	near 
+                                	assume	ds:code, es:code, ss:code 
+                                	; 
+                                	; Let's look for a /P switch to determine polled mode, 
+                                	; along with /1 to select adapter #1 at port 3F8h instead of 2F8h. 
+                                	; 
+ 06A9  FC                       	cld 
+ 06AA  BE 0080                  	mov	si,80h			; DS:SI -> command line 
+ 06AD  AC                       	lodsb 
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Page     1-14
+                                                            
+
+ 06AE  98                       	cbw 
+ 06AF  91                       	xchg	cx,ax			; CX == line length (as a fail-safe) 
+ 06B0  AC                       ins0:	lodsb 
+ 06B1  49                       	dec	cx 
+ 06B2  3C 0D                    	cmp	al,0Dh			; end of command-line? 
+ 06B4  74 22                    	je	ins3			; yes 
+ 06B6  3C 2F                    	cmp	al,'/' 
+ 06B8  75 1A                    	jne	ins2 
+ 06BA  AC                       	lodsb 
+ 06BB  49                       	dec	cx 
+ 06BC  3C 31                    	cmp	al,'1'			; /1? 
+ 06BE  75 0A                    	jne	ins1			; no 
+ 06C0  81 06 010E R 0100        	add	comAddr,100h		; bump 2F8h to 3F8h 
+ 06C6  FF 06 010C R             	inc	comIRQ			; bump IRQ3 to IRQ4 
+ 06CA  24 DF                    ins1:	and	al,not 20h 
+ 06CC  3C 50                    	cmp	al,'P'			; /P? 
+ 06CE  75 04                    	jne	ins2			; no 
+ 06D0  FE 06 0109 R             	inc	pollFlg			; yes, set pollFlg to non-zero 
+ 06D4  85 C9                    ins2:	test	cx,cx			; any more command-line characters? 
+ 06D6  7F D8                    	jg	ins0			; yes 
+                                 
+ 06D8  2B C0                    ins3:	sub	ax,ax 
+ 06DA  8E C0                    	mov	es,ax 
+                                	assume	es:nothing		; since ES is zero 
+ 06DC  A1 010E R                	mov	ax,comAddr 
+                                 
+ 06DF  BB 0400                  	mov	bx,400h			; access RBDA @0:400 instead of 40:0 
+ 06E2  2B D2                    	sub	dx,dx 
+ 06E4  26: 39 07                ins4:	cmp	word ptr es:[bx],ax	; matching port? 
+ 06E7  74 11                    	je	ins5			; yes 
+ 06E9  43                       	inc	bx 
+ 06EA  43                       	inc	bx 
+ 06EB  42                       	inc	dx 
+ 06EC  80 FA 04                 	cmp	dl,4 
+ 06EF  72 F3                    	jb	ins4 
+ 06F1  BA 0694 R                	mov	dx,offset errMsg	; no matching port was found; abort 
+ 06F4  B4 09                    	mov	ah,09h 
+ 06F6  CD 21                    	int	21h 
+ 06F8  CD 20                    	int	20h 
+                                 
+ 06FA  89 16 010A R             ins5:	mov	comID,dx		; comID is 0 for COM1, 1 for COM2, etc. 
+ 06FE  B4 AA                    	mov	ah,0AAh			; quick-and-dirty installation check 
+ 0700  CD 14                    	int	14h 
+ 0702  F6 D4                    	not	ah 
+ 0704  80 FC AA                 	cmp	ah,0AAh 
+ 0707  75 09                    	jne	ins6 
+ 0709  BA 0677 R                	mov	dx,offset insMsg	; already installed for that port 
+ 070C  B4 09                    	mov	ah,09h 
+ 070E  CD 21                    	int	21h 
+ 0710  CD 20                    	int	20h			; abort 
+                                 
+ 0712  26: 8B 17                ins6:	mov	dx,es:[bx]		; DX is port (ie, 2F8h) 
+ 0715  E8 03BA R                	call	setDTR 
+ 0718  E8 03C6 R                	call	setRTS			; rtsFlg is initially 1 
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Page     1-15
+                                                            
+
+                                 
+ 071B  B8 023C R                	mov	ax,offset int14 
+ 071E  26: 87 06 0050           	xchg	ax,es:[14h*4] 
+ 0723  A3 0104 R                	mov	word ptr prev14,ax 
+ 0726  8C C8                    	mov	ax,cs 
+ 0728  26: 87 06 0052           	xchg	ax,es:[14h*4+2] 
+ 072D  A3 0106 R                	mov	word ptr prev14+2,ax 
+                                 
+ 0730  BB 05FB R                	mov	bx,offset intHW 
+ 0733  80 3E 0109 R 00          	cmp	pollFlg,0 
+ 0738  75 28                    	jne	ins7 
+ 073A  8B 3E 010C R             	mov	di,comIRQ		; convert IRQ... 
+ 073E  83 C7 08                 	add	di,8			; ...to vector 
+ 0741  03 FF                    	add	di,di			; and multiply vector by 4 
+ 0743  03 FF                    	add	di,di 
+ 0745  26: 89 1D                	mov	word ptr es:[di],bx 
+ 0748  26: 8C 4D 02             	mov	es:[di+2],cs 
+ 074C  E8 03A9 R                	call	setIER			; make sure DX still contains the port 
+ 074F  E4 21                    	in	al,21h 
+ 0751  8A 0E 010C R             	mov	cl,byte ptr comIRQ 
+ 0755  B4 01                    	mov	ah,1 
+ 0757  D2 E4                    	shl	ah,cl 
+ 0759  F6 D4                    	not	ah			; AH == NOT (1 SHL comIRQ) 
+ 075B  22 C4                    	and	al,ah 
+ 075D  E6 21                    	out	21h,al			; unmask the appropriate COM IRQ 
+ 075F  BB 064C R                	mov	bx,offset endRes 
+                                 
+ 0762  8B 16 010A R             ins7:	mov	dx,comID 
+ 0766  80 C2 31                 	add	dl,'1' 
+ 0769  88 16 064F R             	mov	comMsg+3,dl 
+ 076D  BA 064C R                	mov	dx,offset comMsg 
+ 0770  B4 09                    	mov	ah,09h 
+ 0772  CD 21                    	int	21h 
+ 0774  80 3E 0109 R 00          	cmp	pollFlg,0 
+ 0779  74 07                    	je	ins9 
+ 077B  BA 0664 R                	mov	dx,offset pollMsg 
+ 077E  B4 09                    	mov	ah,09h 
+ 0780  CD 21                    	int	21h 
+ 0782  BA 0674 R                ins9:	mov	dx,offset endMsg 
+ 0785  B4 09                    	mov	ah,09h 
+ 0787  CD 21                    	int	21h 
+                                 
+ 0789  8B D3                    	mov	dx,bx			; DX -> end of resident code/data 
+ 078B  CD 27                    	int	27h 
+                                install	endp 
+                                 
+ 078D                           code	ends 
+                                 
+                                	end	main 
+
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Symbols-1
+                                                             
+
+Macros:
+
+		N a m e			Lines
+
+LOG  . . . . . . . . . . . . . .  	  12
+
+Segments and Groups:
+
+                N a m e         	Size	Align	Combine Class
+
+CODE . . . . . . . . . . . . . .  	078D	WORD	PUBLIC	'CODE'
+
+Symbols:            
+
+                N a m e         	Type	Value	Attr         
+
+COMADDR  . . . . . . . . . . . .  	L WORD 	010E	CODE
+COMID  . . . . . . . . . . . . .  	L WORD 	010A	CODE
+COMIRQ . . . . . . . . . . . . .  	L WORD 	010C	CODE
+COMMSG . . . . . . . . . . . . .  	L BYTE 	064C	CODE
+
+ENDMSG . . . . . . . . . . . . .  	L BYTE 	0674	CODE
+ENDRES . . . . . . . . . . . . .  	L BYTE 	064C	CODE
+ERRMSG . . . . . . . . . . . . .  	L BYTE 	0694	CODE
+
+FAKELSR  . . . . . . . . . . . .  	N PROC	036C	CODE	Length = 002F
+
+GETLSR . . . . . . . . . . . . .  	N PROC	039B	CODE	Length = 0007
+GETMSR . . . . . . . . . . . . .  	N PROC	03A2	CODE	Length = 0007
+
+HW1  . . . . . . . . . . . . . .  	L NEAR	063B	CODE
+HW9  . . . . . . . . . . . . . .  	L NEAR	0642	CODE
+
+I1 . . . . . . . . . . . . . . .  	L NEAR	04FC	CODE
+I14A . . . . . . . . . . . . . .  	L NEAR	0246	CODE
+I14B . . . . . . . . . . . . . .  	L NEAR	0277	CODE
+I14C . . . . . . . . . . . . . .  	L NEAR	02A9	CODE
+I14D . . . . . . . . . . . . . .  	L NEAR	0304	CODE
+I14E . . . . . . . . . . . . . .  	L NEAR	035F	CODE
+I14X . . . . . . . . . . . . . .  	L NEAR	0367	CODE
+INBUF  . . . . . . . . . . . . .  	L BYTE 	0110	CODE	Length = 0010
+INC0 . . . . . . . . . . . . . .  	L NEAR	040E	CODE
+INC1 . . . . . . . . . . . . . .  	L NEAR	040F	CODE
+INCPTR . . . . . . . . . . . . .  	N PROC	0404	CODE	Length = 0015
+INHEAD . . . . . . . . . . . . .  	L WORD 	0132	CODE
+INIT . . . . . . . . . . . . . .  	N PROC	04C5	CODE	Length = 0047
+INS0 . . . . . . . . . . . . . .  	L NEAR	06B0	CODE
+INS1 . . . . . . . . . . . . . .  	L NEAR	06CA	CODE
+INS2 . . . . . . . . . . . . . .  	L NEAR	06D4	CODE
+INS3 . . . . . . . . . . . . . .  	L NEAR	06D8	CODE
+INS4 . . . . . . . . . . . . . .  	L NEAR	06E4	CODE
+INS5 . . . . . . . . . . . . . .  	L NEAR	06FA	CODE
+INS6 . . . . . . . . . . . . . .  	L NEAR	0712	CODE
+INS7 . . . . . . . . . . . . . .  	L NEAR	0762	CODE
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Symbols-2
+                                                             
+
+INS9 . . . . . . . . . . . . . .  	L NEAR	0782	CODE
+INSMSG . . . . . . . . . . . . .  	L BYTE 	0677	CODE
+INSTALL  . . . . . . . . . . . .  	N PROC	06A9	CODE	Length = 00E4
+INT14  . . . . . . . . . . . . .  	F PROC	023C	CODE	Length = 0130
+INTAIL . . . . . . . . . . . . .  	L WORD 	0134	CODE
+INTHW  . . . . . . . . . . . . .  	F PROC	05FB	CODE	Length = 0051
+INTOT  . . . . . . . . . . . . .  	L WORD 	0130	CODE
+
+LOGBUFF  . . . . . . . . . . . .  	L BYTE 	013A	CODE	Length = 0100
+LOGNEXT  . . . . . . . . . . . .  	L WORD 	023A	CODE
+LSR1 . . . . . . . . . . . . . .  	L NEAR	0380	CODE
+LSR9 . . . . . . . . . . . . . .  	L NEAR	0398	CODE
+
+MAIN . . . . . . . . . . . . . .  	N PROC	0100	CODE	Length = 0003
+MAXBUF . . . . . . . . . . . . .  	Number	0010	
+MAXLOG . . . . . . . . . . . . .  	Number	0100	
+
+OUTBUF . . . . . . . . . . . . .  	L BYTE 	0120	CODE	Length = 0010
+OUTHEAD  . . . . . . . . . . . .  	L WORD 	0136	CODE
+OUTTAIL  . . . . . . . . . . . .  	L WORD 	0138	CODE
+
+POLLFLG  . . . . . . . . . . . .  	L BYTE 	0109	CODE
+POLLMSG  . . . . . . . . . . . .  	L BYTE 	0664	CODE
+PREV14 . . . . . . . . . . . . .  	L DWORD	0104	CODE
+
+R1 . . . . . . . . . . . . . . .  	L NEAR	058A	CODE
+R3 . . . . . . . . . . . . . . .  	L NEAR	05A0	CODE
+R4 . . . . . . . . . . . . . . .  	L NEAR	05BF	CODE
+R9 . . . . . . . . . . . . . . .  	L NEAR	05C3	CODE
+READ . . . . . . . . . . . . . .  	N PROC	056F	CODE	Length = 0058
+RTS9 . . . . . . . . . . . . . .  	L NEAR	03D9	CODE
+RTSFLG . . . . . . . . . . . . .  	L BYTE 	0108	CODE
+
+S1 . . . . . . . . . . . . . . .  	L NEAR	05DA	CODE
+S9 . . . . . . . . . . . . . . .  	L NEAR	05F7	CODE
+SETDTR . . . . . . . . . . . . .  	N PROC	03BA	CODE	Length = 000C
+SETIER . . . . . . . . . . . . .  	N PROC	03A9	CODE	Length = 0011
+SETRTS . . . . . . . . . . . . .  	N PROC	03C6	CODE	Length = 003E
+STATUS . . . . . . . . . . . . .  	N PROC	05C7	CODE	Length = 0034
+
+TI8  . . . . . . . . . . . . . .  	L NEAR	047A	CODE
+TI9  . . . . . . . . . . . . . .  	L NEAR	047B	CODE
+TO9  . . . . . . . . . . . . . .  	L NEAR	04C3	CODE
+TRYIN  . . . . . . . . . . . . .  	N PROC	0419	CODE	Length = 0064
+TRYOUT . . . . . . . . . . . . .  	N PROC	047D	CODE	Length = 0048
+
+W1 . . . . . . . . . . . . . . .  	L NEAR	051B	CODE
+W2 . . . . . . . . . . . . . . .  	L NEAR	052F	CODE
+W3 . . . . . . . . . . . . . . .  	L NEAR	0539	CODE
+W4 . . . . . . . . . . . . . . .  	L NEAR	053B	CODE
+W5 . . . . . . . . . . . . . . .  	L NEAR	054A	CODE
+W8 . . . . . . . . . . . . . . .  	L NEAR	0563	CODE
+W9 . . . . . . . . . . . . . . .  	L NEAR	056A	CODE
+WRITE  . . . . . . . . . . . . .  	N PROC	050C	CODE	Length = 0063
+Microsoft (R) Macro Assembler  Version 4.00                 3/12/18 10:56:16
+
+int14.asm                                                   Symbols-3
+                                                             
+
+
+??0000 . . . . . . . . . . . . .  	L NEAR	0264	CODE
+??0001 . . . . . . . . . . . . .  	L NEAR	0296	CODE
+??0002 . . . . . . . . . . . . .  	L NEAR	02CB	CODE
+??0003 . . . . . . . . . . . . .  	L NEAR	02F4	CODE
+??0004 . . . . . . . . . . . . .  	L NEAR	0326	CODE
+??0005 . . . . . . . . . . . . .  	L NEAR	034F	CODE
+??0006 . . . . . . . . . . . . .  	L NEAR	03F3	CODE
+??0007 . . . . . . . . . . . . .  	L NEAR	043E	CODE
+??0008 . . . . . . . . . . . . .  	L NEAR	04AE	CODE
+??0009 . . . . . . . . . . . . .  	L NEAR	0624	CODE
+
+
+    664 Source  Lines
+    784 Total   Lines
+    112 Symbols
+
+  47060 Bytes symbol space free
+
+      0 Warning Errors
+      0 Severe  Errors

@@ -69,7 +69,7 @@ pre a, code a {
     text-decoration: underline;
 }
 .common, .machine {
-    font-family: "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif;
+    font-family: "Titillium Web", "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif;
     font-size: 15px;
 }
 .machine {
