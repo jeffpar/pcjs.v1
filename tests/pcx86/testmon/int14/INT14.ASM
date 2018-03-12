@@ -16,13 +16,13 @@ main	endp
 
 	assume	cs:code, ds:nothing, es:nothing, ss:nothing
 
-COMADR	equ	2F8h
-COMIRQ	equ	3
-
+	even
 prev14	dd	0			; previous INT 14h handler
-comID	dw	-1			; 0-based index of our COM port in BIOS data area
 rtsFlg	db	1			; internal RTS flag (0=off, 1=on)
 pollFlg	db	0			; polling mode (0=off, 1=on); set by /P
+comID	dw	-1			; 0-based index of COM port in BIOS data area
+comIRQ	dw	3
+comAddr	dw	2F8h
 
 MAXBUF	equ	16
 inBuf	db	MAXBUF dup (?)
@@ -312,12 +312,7 @@ init	proc	near
 	pushf
 	call	dword ptr [prev14]
 	push	ax
-	push	es
-	mov	bx,40h
-	mov	es,bx
-	mov	bx,comID
-	add	bx,bx
-	mov	dx,es:[bx]
+	mov	dx,comAddr
 	mov	inTot,0
 	mov	inHead,offset inBuf
 	mov	inTail,offset inBuf
@@ -330,7 +325,6 @@ i1:	call	setDTR
 	mov	rtsFlg,1
 	call	setRTS
 	pop	ax
-	pop	es
 	pop	ds
 	assume	ds:nothing
 	pop	dx
@@ -358,12 +352,7 @@ write	proc	near
 	push	cs
 	pop	ds
 	assume	ds:code
-	push	es
-	mov	bx,40h
-	mov	es,bx
-	mov	bx,comID
-	add	bx,bx
-	mov	dx,es:[bx]
+	mov	dx,comAddr
 
 	sti
 	xchg	ah,al			; stash the output data in AH
@@ -405,8 +394,7 @@ w5:	cli
 w8:	mov	outHead,bx		; there was room, so update the head ptr
 	call	tryOut			; and since THRE was set, call tryOut
 
-w9:	pop	es
-	pop	ds
+w9:	pop	ds
 	assume	ds:nothing
 	pop	dx
 	pop	cx
@@ -426,12 +414,7 @@ read	proc	near
 	push	cs
 	pop	ds
 	assume	ds:code
-	push	es
-	mov	bx,40h
-	mov	es,bx
-	mov	bx,comID
-	add	bx,bx
-	mov	dx,es:[bx]
+	mov	dx,comAddr
 
 	cmp	pollFlg,0		; in polling mode, we take
 	je	r1			; every opportunity to check for input
@@ -462,8 +445,7 @@ r3:	mov	al,[bx]
 
 r4:	dec	inTot
 
-r9:	pop	es
-	pop	ds
+r9:	pop	ds
 	assume	ds:nothing
 	pop	dx
 	pop	bx
@@ -496,12 +478,7 @@ status	proc	near
 	push	cs
 	pop	ds
 	assume	ds:code
-	push	es
-	mov	bx,40h
-	mov	es,bx
-	mov	bx,comID
-	add	bx,bx
-	mov	dx,es:[bx]
+	mov	dx,comAddr
 
 	cmp	pollFlg,0		; in polling mode, we take
 	je	s1			; every opportunity to check for input
@@ -518,8 +495,7 @@ s1:	call	fakeLSR
 	inc	rtsFlg
 	call	setRTS
 
-s9:	pop	es
-	pop	ds
+s9:	pop	ds
 	assume	ds:nothing
 	pop	dx
 	pop	bx
@@ -535,12 +511,8 @@ intHW	proc	far
 	push	cs
 	pop	ds
 	assume	ds:code
-	push	es
-	mov	bx,40h
-	mov	es,bx
-	mov	bx,comID
-	add	bx,bx
-	mov	dx,es:[bx]
+	mov	dx,comAddr
+
 	push	dx
 	inc	dx
 	inc	dx			; DX -> IIR
@@ -560,7 +532,7 @@ hw1:	cmp	al,04h			; DR condition?
 hw9:	cli
 	mov	al,20h			; EOI command
 	out	20h,al
-	pop	es
+
 	pop	ds
 	assume	ds:nothing
 	pop	dx
@@ -581,14 +553,15 @@ errMsg	db	"COM port not found",13,10,'$'
 install	proc	near
 	assume	ds:code, es:code, ss:code
 	;
-	; Let's look for a /P switch to determine polled mode
+	; Let's look for a /P switch to determine polled mode,
+	; along with /1 to select adapter #1 at port 3F8h instead of 2F8h.
 	;
 	cld
 	mov	si,80h			; DS:SI -> command line
 	lodsb
 	cbw
 	xchg	cx,ax			; CX == line length (as a fail-safe)
-ins1:	lodsb
+ins0:	lodsb
 	dec	cx
 	cmp	al,0Dh			; end of command-line?
 	je	ins3			; yes
@@ -596,20 +569,25 @@ ins1:	lodsb
 	jne	ins2
 	lodsb
 	dec	cx
-	and	al,not 20h
+	cmp	al,'1'			; /1?
+	jne	ins1			; no
+	add	comAddr,100h		; bump 2F8h to 3F8h
+	inc	comIRQ			; bump IRQ3 to IRQ4
+ins1:	and	al,not 20h
 	cmp	al,'P'			; /P?
 	jne	ins2			; no
 	inc	pollFlg			; yes, set pollFlg to non-zero
 ins2:	test	cx,cx			; any more command-line characters?
-	jg	ins1			; yes
+	jg	ins0			; yes
 
 ins3:	sub	ax,ax
 	mov	es,ax
 	assume	es:nothing		; since ES is zero
+	mov	ax,comAddr
 
 	mov	bx,400h			; access RBDA @0:400 instead of 40:0
 	sub	dx,dx
-ins4:	cmp	word ptr es:[bx],COMADR	; matching port?
+ins4:	cmp	word ptr es:[bx],ax	; matching port?
 	je	ins5			; yes
 	inc	bx
 	inc	bx
@@ -646,12 +624,19 @@ ins6:	mov	dx,es:[bx]		; DX is port (ie, 2F8h)
 	mov	bx,offset intHW
 	cmp	pollFlg,0
 	jne	ins7
-	mov	word ptr es:[(08h+COMIRQ)*4],bx
-	mov	es:[(08h+COMIRQ)*4+2],cs
+	mov	di,comIRQ		; convert IRQ...
+	add	di,8			; ...to vector
+	add	di,di			; and multiply vector by 4
+	add	di,di
+	mov	word ptr es:[di],bx
+	mov	es:[di+2],cs
 	call	setIER			; make sure DX still contains the port
 	in	al,21h
-	jmp	$+2
-	and	al,not (1 shl COMIRQ)
+	mov	cl,byte ptr comIRQ
+	mov	ah,1
+	shl	ah,cl
+	not	ah			; AH == NOT (1 SHL comIRQ)
+	and	al,ah
 	out	21h,al			; unmask the appropriate COM IRQ
 	mov	bx,offset endRes
 

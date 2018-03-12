@@ -355,7 +355,7 @@ I'm going to assume they represent a minor subsequent revision made by Texas Ins
 This ROM has been saved as [Revised ROM (Little-endian)](ti57rev1le.bin), along with a [dump](ti57rev1le.txt).
 
 TI-57 ROM Used With PCjs
------------------------- 
+------------------------
 
 The ROM that the PCjs [TI-57 Emulator](/devices/ti57/machine/rev0/) uses is the
 [Original ROM (Little-endian)](ti57le.bin), which is the fully-corrected transcribed ROM taken from the

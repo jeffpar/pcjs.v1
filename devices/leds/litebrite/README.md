@@ -52,9 +52,10 @@ colored pegs into the appropriately marked holes.
 This simulation takes the "Lite-Brite" concept a bit farther, allowing you to add counters to each of the colored LEDs,
 making it possible to create a variety of "blinking" and "color-cycling" animations.
 
-Some of the original background images can also be turned on underneath the grid, to help you recreate them
-with LEDs.  However, it's difficult to find decent high-quality images of the original 1967 patterns, and tricky to
-get them to line up properly, so some "artistic interpretation" is required.
+[Original Lite-Brite Pictures](/blog/2017/12/10/#original-lite-brite-pictures) can be turned on
+underneath the grid, to help you recreate them with LEDs.  However, it's difficult to find decent high-quality images
+of the original 1967 patterns, and tricky to get them to line up properly, so a little "artistic interpretation" is
+required.
 
 Eventually, we'll also add recreations of some of the original black-and-white pattern images, using the original
 Lite-Brite color codes: B, G, V, R, O, P, Y, and W.

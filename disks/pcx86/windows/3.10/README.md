@@ -5,7 +5,7 @@ permalink: /disks/pcx86/windows/3.10/
 redirect_from:
   - /disks/pc/windows/3.10/
 machines:
-  - id: ibm5170-win310
+  - id: ibm5170
     type: pcx86
     config: /devices/pcx86/machine/5170/vga/2048kb/machine.xml
     drives: '[{name:"20Mb Hard Disk",type:2,path:"/pcjs-disks/pcx86/drives/20mb/PCDOS330-WIN310-VGA.json"}]'
@@ -21,9 +21,11 @@ Microsoft Windows 3.10
 
 The PCjs machine below starts Microsoft Windows 3.10, using an IBM PC AT running PC-DOS 3.30.
 
-Directory listings of the seven 1.2Mb distribution diskettes are provided below.
+The machine is also available with the [PCjs Debugger](debugger/).
 
-{% include machine.html id="ibm5170-win310" %}
+Directory listings of the seven 1.2Mb distribution diskettes are provided [below](#directory-of-windows-3-10-disk-1).
+
+{% include machine.html id="ibm5170" %}
 
 ### Directory of Windows 3.10 (Disk 1)
 
