@@ -25,7 +25,7 @@ The machine is also available with the [PCjs Debugger](debugger/).
 
 Directory listings of the seven 1.2Mb distribution diskettes are provided [below](#directory-of-windows-3-10-disk-1).
 
-{% include machine.html id="ibm5170-win310" %}
+{% include machine.html id="ibm5170" %}
 
 ### Directory of Windows 3.10 (Disk 1)
 

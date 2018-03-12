@@ -20,4 +20,4 @@ Microsoft Windows 3.10 with Debugger
 
 The PCjs machine below loads [Microsoft Windows 3.10](../) with the PCjs Debugger.
 
-{% include machine.html id="ibm5170-win310" %}
+{% include machine.html id="ibm5170" %}
