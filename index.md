@@ -95,6 +95,5 @@ More Information
 ----------------
 Learn more about the [PCjs Project](/docs/about/) and [PCx86](/docs/about/pcx86/).  To
 create your own PCx86 machines, see the [PCx86 Documentation](/docs/pcx86/) for details.
-
 If you have questions or run into any problems, feel free to [tweet](http://twitter.com/jeffpar) or
 [email](mailto:Jeff@pcjs.org).
