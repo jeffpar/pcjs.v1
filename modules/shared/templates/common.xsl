@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- author="Jeff Parsons (@jeffpar)" website="http://www.pcjs.org/" created="2012-05-05" modified="2014-02-23" license="http://www.gnu.org/licenses/gpl.html" -->
+<!-- author="Jeff Parsons (@jeffpar)" website="http://www.pcjs.org/" created="2012-05-05" modified="2018-03-13" license="http://www.gnu.org/licenses/gpl.html" -->
 <!DOCTYPE xsl:stylesheet [
 	<!-- XSLT understands these entities only: lt, gt, apos, quot, and amp.  Other required entities may be defined below (see entities.dtd). -->
 	<!ENTITY nbsp "&#160;"> <!ENTITY ne "&#8800;"> <!ENTITY le "&#8804;"> <!ENTITY ge "&#8805;">
@@ -25,7 +25,7 @@
 		<link rel="icon" type="image/png" sizes="192x192" href="/versions/icons/current/pc-icon-192.png"/>
 		<link rel="shortcut icon" type="image/x-icon" href="/versions/icons/current/favicon.ico"/>
 		<link rel="stylesheet" type="text/css" href="/modules/shared/templates/common.css"/>
-		<!-- script type="text/javascript" src="/versions/jquery/1.7.2/jquery.min.js" -->
+		<link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet"/>
 	</xsl:template>
 
 	<xsl:template name="commonTop">
@@ -36,7 +36,7 @@
 					<li><a href="/blog/">Blog</a></li>
 					<li><a href="/apps/">Apps</a></li>
 					<li><a href="/devices/">Devices</a></li>
-					<li><a href="/disks/">Disks</a></li>
+					<li><a href="/disks/pcx86/">Disks</a></li>
 					<li><a href="/pubs/docs/">Docs</a></li>
 					<li><a href="/pubs/docs/about/">About</a></li>
 				</ul>
@@ -52,7 +52,7 @@
 			<p class="common-reference"></p>
 			<p class="common-copyright">
 				<span class="common-copyright"><a href="http://www.pcjs.org/">pcjs.org</a> © 2012-2018 by <a href="http://twitter.com/jeffpar">@jeffpar</a></span><br/>
-				<span class="common-copyright"><a href="http://github.com/jeffpar/pcjs">PCjs Project</a> released under <a href="http://gnu.org/licenses/gpl.html">GPLv3</a></span>
+				<span class="common-copyright">The <a href="http://github.com/jeffpar/pcjs">PCjs Project</a> is released under <a href="http://gnu.org/licenses/gpl.html">GPLv3</a></span>
 			</p>
 		</div>
 	</xsl:template>

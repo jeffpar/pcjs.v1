@@ -5,7 +5,7 @@ permalink: /disks/pcx86/os2/microsoft/1.0/
 ---
 
 Microsoft OS/2 1.0
----
+------------------
 
 Microsoft OS/2 1.0 was released in December 1987.
 
