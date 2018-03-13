@@ -46619,9 +46619,7 @@ class Keyboard extends Component {
     /**
      * clearActiveKeys()
      *
-     * Force all active keys to "self-deactivate".
-     *
-     * TODO: Consider limiting this to non-shift keys only.
+     * Force all active keys to "deactivate".
      *
      * @this {Keyboard}
      */
@@ -46629,8 +46627,14 @@ class Keyboard extends Component {
     {
         for (var i = 0; i < this.aKeysActive.length; i++) {
             var key = this.aKeysActive[i];
-            key.fDown = false;
-            if (key.nRepeat > 0) key.nRepeat = 0;
+            /*
+             * The following code was insufficient to prevent the CTRL key from remaining stuck
+             * whenever we lost focus due to a CTRL-TAB operation.  We need to "forcibly" remove it.
+             *
+             *      key.fDown = false;
+             *      if (key.nRepeat > 0) key.nRepeat = 0;
+             */
+            this.removeActiveKey(key.simCode);
         }
     }
 

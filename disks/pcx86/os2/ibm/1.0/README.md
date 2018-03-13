@@ -39,7 +39,7 @@ IBM OS/2 1.0 has been pre-installed on this machine's 20Mb hard disk, along with
 
 {% include machine.html id="ibm5170" %}
 
-### Directory of IBM OS/2 1.0 (1.44M Install)
+### Directory of IBM OS/2 1.0 (Install)
 
 	 Volume in drive A has no label
 	 Directory of A:\
