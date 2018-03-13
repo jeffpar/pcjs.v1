@@ -17,7 +17,7 @@
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/2.20a/5150-5155-5160-DIAG-220A.json">IBM PC Diagnostics 2.20 (Adv)</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5170/1.01a/5170-DIAG-101A.json">IBM PC AT Diagnostics 1.01 (Adv)</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5170/2.07a/5170-DIAG-207A.json">IBM PC AT Diagnostics 2.07 (Adv)</disk>
-		<disk path="/pcjs-disks/pcx86/diags/ibm/ega/FLAND.json">IBM EGA FantasyLand Demo</disk>
+		<disk path="/pcjs-disks/pcx86/diags/ibm/ega/FLAND.json">IBM EGA Fantasy Land Demo</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/ega/EGA-UTILITIES.json">IBM EGA Utilities</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/1.00/5150-DIAG-100.json">IBM PC Diagnostics 1.00</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/1.02/5150-DIAG-102.json">IBM PC Diagnostics 1.02</disk>
@@ -169,10 +169,10 @@
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/6.00/1200K/DRDOS600-UPDATE-1991-12-DISK2.json">DR-DOS 6.00 (1991 Update 2)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/6.00/1200K/DRDOS600-UPDATE-1992-04-DISK1.json">DR-DOS 6.00 (1992 Update 1)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/6.00/1200K/DRDOS600-UPDATE-1992-04-DISK2.json">DR-DOS 6.00 (1992 Update 2)</disk>
-		<disk path="/pcjs-disks/pcx86/os2/ibm/1.0/OS210-INSTALL.json">IBM OS/2 1.0 (1.44M Install)</disk>
-		<disk path="/pcjs-disks/pcx86/os2/ibm/1.0/OS210-DISK1.json">IBM OS/2 1.0 (1.44M Disk 1)</disk>
-		<disk path="/pcjs-disks/pcx86/os2/ibm/1.0/OS210-DISK2.json">IBM OS/2 1.0 (1.44M Disk 2)</disk>
-		<disk path="/pcjs-disks/pcx86/os2/ibm/1.0/OS210-DISK3.json">IBM OS/2 1.0 (1.44M Disk 3)</disk>
+		<disk path="/pcjs-disks/pcx86/os2/ibm/1.0/OS210-INSTALL.json">IBM OS/2 1.0 (Install)</disk>
+		<disk path="/pcjs-disks/pcx86/os2/ibm/1.0/OS210-DISK1.json">IBM OS/2 1.0 (Disk 1)</disk>
+		<disk path="/pcjs-disks/pcx86/os2/ibm/1.0/OS210-DISK2.json">IBM OS/2 1.0 (Disk 2)</disk>
+		<disk path="/pcjs-disks/pcx86/os2/ibm/1.0/OS210-DISK3.json">IBM OS/2 1.0 (Disk 3)</disk>
 		<disk path="/pcjs-disks/pcx86/os2/ibm/1.1/OS211-INSTALL.json">IBM OS/2 1.1 (1.44M Install)</disk>
 		<disk path="/pcjs-disks/pcx86/os2/ibm/1.1/OS211-DISK01.json">IBM OS/2 1.1 (1.44M Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/os2/ibm/1.1/OS211-DISK02.json">IBM OS/2 1.1 (1.44M Disk 2)</disk>
@@ -210,7 +210,7 @@
 		<disk path="/pcjs-disks/pcx86/os2/ibm/1.3/7.77C/OS213-777C-DISK10.json">IBM OS/2 1.3 7.77C (Disk 10)</disk>
 		<disk path="/pcjs-disks/pcx86/os2/microsoft/1.0/MSOS210-INSTALL.json">MS OS/2 1.0 (1.2M Install)</disk>
 		<disk path="/pcjs-disks/pcx86/os2/microsoft/1.0/MSOS210-PROGRAM.json">MS OS/2 1.0 (1.2M Program)</disk>
-		<disk path="/pcjs-disks/pcx86/os2/microsoft/1.0/MSOS210-SUPP.json">MS OS/2 1.0 (1.2M Supp)</disk>
+		<disk path="/pcjs-disks/pcx86/os2/microsoft/1.0/MSOS210-SUPP.json">MS OS/2 1.0 (1.2M Supplemental)</disk>
 		<disk path="/pcjs-disks/pcx86/os2/microsoft/1.1/MSOS211-DISK01.json">MS OS/2 1.1 (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/os2/microsoft/1.1/MSOS211-DISK02.json">MS OS/2 1.1 (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/os2/microsoft/1.1/MSOS211-DISK03.json">MS OS/2 1.1 (Disk 3)</disk>

@@ -24,6 +24,8 @@ the hard drive has been replaced with a [10Mb Drive](/disks/pcx86/drives/10mb/) 
 [MS-DOS 3.20 with Microsoft C 4.00](/disks/pcx86/drives/10mb/msdos320-c400-xt3.xml), and then all the Modula-2 installation
 changes have been overlaid onto it.
 
+This compiler is also discussed in our "[FantasyLand](/blog/2017/07/03/)" blog post.
+
 {% include machine.html id="ibm5160-msdos320" %}
 
 For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).

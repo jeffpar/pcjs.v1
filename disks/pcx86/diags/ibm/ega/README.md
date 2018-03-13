@@ -1,6 +1,6 @@
 ---
 layout: page
-title: IBM EGA Demos and Utilities
+title: IBM EGA Fantasy Land Demo and Utilities
 permalink: /disks/pcx86/diags/ibm/ega/
 machines:
   - id: ibm5160
@@ -11,15 +11,16 @@ machines:
       A:
         name: PC-DOS 2.00 (Disk 1)
       B:
-        name: IBM EGA FantasyLand Demo
+        name: IBM EGA Fantasy Land Demo
     autoType: $date\r$time\rB:\rFLAND\r
 ---
 
-IBM EGA "FantasyLand" Demo
---------------------------
+IBM EGA Fantasy Land Demo
+-------------------------
 
-In the October 1986 issue of [PC Tech Journal](http://www.pcjs.org/pubs/pc/magazines/pctj/), John T. Cockerham wrote
-the article "[Evaluating the EGA: The EGA Standard](http://www.pcjs.org/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2053.pdf&page=53&total=228)",
+As discussed in our "[FantasyLand](/blog/2017/07/03/)" blog post, the October 1986 issue of
+[PC Tech Journal](http://www.pcjs.org/pubs/pc/magazines/pctj/) contained an article by John T. Cockerham
+titled "[Evaluating the EGA: The EGA Standard](http://www.pcjs.org/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2053.pdf&page=53&total=228)",
 which described IBM's "FantasyLand" demo:
 
 > IBM wrote FantasyLand in 1984 in order to demonstrate some of the more obscure features of the EGA.
@@ -42,13 +43,13 @@ waves in the wind. By tying the animation directly to the system's 8253 timer in
 continuously, independent of CPU speed and divorced from other program operations. Rapid ongoing font changes, along
 with fast smooth scrolling in both directions, test subtle timing dependencies between subunits of the EGA.
 
-Thanks to Eric, a friend of PCjs, we finally have a copy of the FantasyLand program, along with an assortment of other
+Thanks to Eric, a friend of PCjs, we finally have a copy of the Fantasy Land program, along with an assortment of other
 EGA utilities that he kindly provided.  Sadly, FantasyLand doesn't yet work in the PCx86 emulator, but it's on our
 "to-do" list.  Stay tuned!
 
 {% include machine.html id="ibm5160" %}
 
-### Directory of IBM EGA FantasyLand Demo
+### Directory of IBM EGA Fantasy Land Demo
 
 	 Volume in drive A has no label
 
