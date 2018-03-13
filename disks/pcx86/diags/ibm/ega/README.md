@@ -18,10 +18,10 @@ machines:
 IBM EGA Fantasy Land Demo
 -------------------------
 
-As discussed in our "[FantasyLand](/blog/2017/07/03/)" blog post, the October 1986 issue of
+As discussed in the "[FantasyLand](/blog/2017/07/03/)" PCjs blog post, the October 1986 issue of
 [PC Tech Journal](http://www.pcjs.org/pubs/pc/magazines/pctj/) contained an article by John T. Cockerham
 titled "[Evaluating the EGA: The EGA Standard](http://www.pcjs.org/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2053.pdf&page=53&total=228)",
-which described IBM's "FantasyLand" demo:
+which described IBM's Fantasy Land demo:
 
 > IBM wrote FantasyLand in 1984 in order to demonstrate some of the more obscure features of the EGA.
 The program was distributed very selectively to dealers and sales representatives; it has never been a product

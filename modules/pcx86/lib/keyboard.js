@@ -99,6 +99,7 @@ class Keyboard extends Component {
         this.cSoftCodes = 0;
         this.fSoftKeyboard = parmsKbd['softKeys'];
         this.controlSoftKeyboard = null;
+        this.controlTextKeyboard = null;
 
         /*
          * Updated by onFocusChange()
@@ -254,6 +255,9 @@ class Keyboard extends Component {
                  *
                  *      this.bindings[id] = control;
                  */
+                if (sHTMLType == "textarea") {
+                    this.controlTextKeyboard = controlText;
+                }
                 controlText.onkeydown = function onKeyDown(event) {
                     return kbd.onKeyChange(event, true);
                 };
@@ -1006,15 +1010,26 @@ class Keyboard extends Component {
     /**
      * enableSoftKeyboard(fEnable)
      *
+     * In addition to enabling or disabling our own soft keyboard (if any), this also attempts to disable or enable
+     * (as appropriate) the textarea control (if any) that machines use to trigger a touch device's built-in keyboard.
+     * 
      * @this {Keyboard}
      * @param {boolean} fEnable
      */
     enableSoftKeyboard(fEnable)
     {
-        if (!fEnable) {
-            this.controlSoftKeyboard.style.display = "none";
-        } else {
-            this.controlSoftKeyboard.style.display = "block";
+        if (this.controlSoftKeyboard) {
+            if (!fEnable) {
+                this.controlSoftKeyboard.style.display = "none";
+                if (this.controlTextKeyboard) {
+                    this.controlTextKeyboard.readOnly = false;
+                }
+            } else {
+                this.controlSoftKeyboard.style.display = "block";
+                if (this.controlTextKeyboard) {
+                    this.controlTextKeyboard.readOnly = true;
+                }
+            }
         }
         this.fSoftKeyboard = fEnable;
     }
