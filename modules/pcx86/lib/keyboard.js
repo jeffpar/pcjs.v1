@@ -161,6 +161,7 @@ class Keyboard extends Component {
         this.msInjectDefault = 150;         // number of milliseconds between injected keystrokes
         this.msInjectDelay   = 0;           // set by the initial injectKeys() call
         this.msDoubleClick   = 250;         // used by mousedown/mouseup handlers to soft-lock modifier keys
+        this.cKeysPressed    = 0;           // count of keys pressed since the last time it was reset
 
         /*
          * autoType records the machine's specified autoType sequence, if any.  At the appropriate signal(s),
@@ -310,7 +311,7 @@ class Keyboard extends Component {
                     if (MAXDEBUG) console.log("binding click-code '" + sCode + "'");
                     controlText.onclick = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingClick(event) {
-                            if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.EVENT | Messages.KEY);
+                            if (kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.EVENT | Messages.KEY);
                             event.preventDefault();                 // preventDefault() is necessary...
                             if (kbd.cmp) kbd.cmp.updateFocus();     // ...for the updateFocus() call to actually work
                             kbd.sInjectBuffer = "";                 // key events should stop any injection currently in progress
@@ -1653,7 +1654,8 @@ class Keyboard extends Component {
         if (!this.cmp.notifyKbdEvent(event, fDown)) {
             return false;
         }
-
+        
+        if (fDown) this.cKeysPressed++;
         this.sInjectBuffer = "";                        // actual key events should stop any injection in progress
         Component.processScript(this.idMachine);        // and any script, too
 
@@ -1718,7 +1720,23 @@ class Keyboard extends Component {
                  * it for all platforms, for consistency.
                  */
                 if (keyCode == Keys.KEYCODE.ALT && !(this.bitsState & Keyboard.STATE.CTRL)) {
-                    fIgnore = fDown;    // if an ALT key went down, then set fIgnore as well
+                    if (fDown) {
+                        fIgnore = true;
+                        /*
+                         * Reset cKeysPressed so that we can detect the mere "tapping" of the ALT key, which some PCjs
+                         * demos depend on (eg, Multi-tasking MS-DOS 4.0).
+                         */
+                        this.cKeysPressed = 0;
+                    } else if (!this.cKeysPressed) {
+                        /*
+                         * Since cKeysPressed is zero, the assumption here is that the ALT key (and the Alt key ALONE)
+                         * was just tapped, so as long the ALT key was not already "soft-locked" (based on bitsStateSim),
+                         * we will transform this "up" event into a "fake press" event. 
+                         */
+                        if (!(this.bitsStateSim & (Keyboard.STATE.ALT | Keyboard.STATE.RALT))) {
+                            fDown = fPress = true;
+                        }
+                    }
                 }
                 
                 /*
@@ -1807,7 +1825,7 @@ class Keyboard extends Component {
             event.preventDefault();
         }
 
-        if (!COMPILED && this.messageEnabled(Messages.EVENT | Messages.KEY)) {
+        if (this.messageEnabled(Messages.EVENT | Messages.KEY)) {
             this.printMessage("onKeyChange(" + keyCode + "): " + (fDown? "down" : "up") + (fIgnore? ",ignore" : (fPass? "" : ",consume")), true);
         }
 
@@ -1825,9 +1843,9 @@ class Keyboard extends Component {
                  * we fake an ALT activation first. 
                  */
                 if (this.bitsState & Keyboard.STATE.ALTS) {
-                    var key = Keyboard.SIMCODE.ALT;
-                    this.printMessage("onKeyChange(" + key + "): simulating ALT down", Messages.EVENT);
-                    this.addActiveKey(key);
+                    var simCodeAlt = Keyboard.SIMCODE.ALT;
+                    this.printMessage("onKeyChange(" + simCodeAlt + "): simulating ALT down", Messages.EVENT);
+                    this.addActiveKey(simCodeAlt);
                 }
                 this.addActiveKey(simCode, fPress);
             } else {
@@ -1857,6 +1875,7 @@ class Keyboard extends Component {
             return false;
         }
 
+        this.cKeysPressed++;
         this.sInjectBuffer = "";        // actual key events should stop any injection currently in progress
 
         if (this.fAllDown) {
@@ -1872,7 +1891,7 @@ class Keyboard extends Component {
 
         var fPass = !Keyboard.SIMCODES[keyCode] || !!(this.bitsState & Keyboard.STATE.CMD);
 
-        if (!COMPILED && this.messageEnabled(Messages.EVENT | Messages.KEY)) {
+        if (this.messageEnabled(Messages.EVENT | Messages.KEY)) {
             this.printMessage("onKeyPress(" + keyCode + "): " + (fPass? "true" : "false"), true);
         }
 
@@ -1883,9 +1902,9 @@ class Keyboard extends Component {
              * we fake an ALT activation first.
              */
             if (this.bitsState & Keyboard.STATE.ALTS) {
-                var key = Keyboard.SIMCODE.ALT;
-                this.printMessage("onKeyPress(" + key + "): simulating ALT down", Messages.EVENT);
-                this.addActiveKey(key);
+                var simCodeAlt = Keyboard.SIMCODE.ALT;
+                this.printMessage("onKeyPress(" + simCodeAlt + "): simulating ALT down", Messages.EVENT);
+                this.addActiveKey(simCodeAlt);
             }
             this.addActiveKey(keyCode, true);
         }

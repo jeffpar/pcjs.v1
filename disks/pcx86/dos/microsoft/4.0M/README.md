@@ -33,10 +33,8 @@ Note: The designation "4.0M" is not an official version number; it's an internal
 differentiate these disk images from those of the official MS-DOS 4.00 release in October 1988.
 
 The [IBM Model 5160](/devices/pcx86/machine/) machine configuration below boots MS-DOS 4.0M.  To access the MS-DOS
-"Session Manager" after it's booted, tap the **Alt** key.
-
-NOTE: Since the **Alt** key is not available in all browsers, you may need to click the "Keys" button and
-use the **Alt** key on the on-screen keyboard.
+"Session Manager" after it's booted, tap the **Alt** key.  Since the **Alt** key is not available in all browsers,
+you may need to click the "Keys" button and use the **Alt** key on the on-screen keyboard.
 
 {% include machine.html id="ibm5160" %}
 
@@ -45,11 +43,15 @@ Additional Information From [PC DOS Retro](https://sites.google.com/site/pcdosre
 
 Multitasking MS-DOS 4.0 was a little known and separate development of DOS done in parallel with the development
 of DOS 3.0 and 3.1 and was released in late 1985.  It should not be confused with the later retail DOS 4.0 that was
-released in 1988.  DOS 4.0 supported preemptive multitasking, shared memory, semaphores, advanced memory management,
+released in 1988.
+
+DOS 4.0 supported preemptive multitasking, shared memory, semaphores, advanced memory management,
 a session manager, imports, exports and a new executable format.  Many of the ideas and features introduced here found
 their way into OS/2.  Unfortunately DOS 4.0 was limited by the real-mode 8086 environment and the 640KB address space.
 Also programs which were not well-behaved or relied upon undocumented DOS functions would not run properly under
-DOS 4.0, particularly TSR programs.  Despite these limitations Microsoft wanted to make DOS 4.0 a retail product but
+DOS 4.0, particularly TSR programs.
+
+Despite these limitations Microsoft wanted to make DOS 4.0 a retail product but
 IBM at the time was not interested in such a version of DOS, instead they formed a joint development agreement with
 Microsoft which resulted in the development of OS/2 1.0.  Microsoft licensed DOS 4.0 to several European OEMs including
 Goupil but it was never shipped in North America.  Microsoft released an updated version, DOS 4.1 in late 1987 for
