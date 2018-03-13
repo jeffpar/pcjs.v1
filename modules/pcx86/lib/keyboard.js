@@ -333,7 +333,7 @@ class Keyboard extends Component {
                     this.bindings[id] = controlText;
                     if (MAXDEBUG) console.log("binding soft-code '" + sBinding + "'");
                     var msLastEvent = 0, nClickState = 0;
-                    var fStateKey = (Keyboard.KEYSTATES[Keyboard.SOFTCODES[sBinding]] <= Keyboard.STATE.ALL_SHIFT);
+                    var fStateKey = (Keyboard.KEYSTATES[Keyboard.SOFTCODES[sBinding]] <= Keyboard.STATE.ALL_MODIFIERS);
                     var fnDown = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingDown(event) {
                             var msDelta = event.timeStamp - msLastEvent;
@@ -1304,16 +1304,16 @@ class Keyboard extends Component {
                 if (fDown == null) {        // ie, null or undefined
                     fDown = !((fSim? this.bitsStateSim : this.bitsState) & bitState);
                 }
-                else if (!fDown) {
+                else if (!fDown && !fSim) {
                     /*
                      * In current webkit browsers, pressing and then releasing both left and right shift keys together
-                     * (or both ALT keys, or both CMD/Windows keys, or presumably both CTRL keys) results in 4 events, as
-                     * you would expect, but 3 of the 4 are "down" events; only the last of the 4 is an "up" event.
+                     * (or both ALT keys, or both CMD/Windows keys, or presumably both CTRL keys) results in 4 events,
+                     * as you would expect, but 3 of the 4 are "down" events; only the last of the 4 is an "up" event.
                      *
                      * Perhaps this is a browser accessibility feature (ie, deliberately suppressing the "up" event
                      * of one of the shift keys to implement a "sticky shift mode"?), but in any case, to maintain our
-                     * internal consistency, if this is an "up" event and the shift state bit is any of ALL_SHIFT, then
-                     * we set it to ALL_SHIFT, so that we'll automatically clear ALL shift states.
+                     * internal consistency, if this is an "up" event and the shift state bit is any of ALL_MODIFIERS,
+                     * then we set it to ALL_MODIFIERS, so that we'll automatically clear ALL shift states.
                      *
                      * TODO: The only downside to this work-around is that the simulation will still think a shift key is
                      * down.  So in effect, we have enabled a "sticky shift mode" inside the simulation, whether or not that
@@ -1321,7 +1321,7 @@ class Keyboard extends Component {
                      * and simulate the "up".  That's more work than I think the problem merits.  The user just needs to tap
                      * a single shift key to get out that mode.
                      */
-                    if (bitState & Keyboard.STATE.ALL_SHIFT) bitState = Keyboard.STATE.ALL_SHIFT;
+                    if (bitState & Keyboard.STATE.ALL_MODIFIERS) bitState = Keyboard.STATE.ALL_MODIFIERS;
                 }
                 if (!fSim) {
                     this.bitsState &= ~bitState;
@@ -1333,7 +1333,7 @@ class Keyboard extends Component {
                      * (Pause) that isn't supposed to alter the NUM-LOCK state; similarly, CTRL-SCROLL-LOCK (aka Ctrl-Break)
                      * isn't supposed to alter the SCROLL-LOCK state.
                      */
-                    if (!(this.bitsStateSim & Keyboard.STATE.ALL_SHIFT) || !(bitState & Keyboard.STATE.ALL_LOCKS)) {
+                    if (!(this.bitsStateSim & Keyboard.STATE.ALL_MODIFIERS) || !(bitState & Keyboard.STATE.ALL_LOCKS)) {
                         this.bitsStateSim &= ~bitState;
                         if (fDown) this.bitsStateSim |= bitState;
                         this.updateLEDs(bitState);
@@ -1631,7 +1631,7 @@ class Keyboard extends Component {
          * Since we can't be sure of any shift states after losing focus, we clear them all.
          */
         if (!fFocus) {
-            this.bitsState &= ~Keyboard.STATE.ALL_SHIFT;
+            this.bitsState &= ~Keyboard.STATE.ALL_MODIFIERS;
             this.clearActiveKeys();
         }
     }
@@ -1712,29 +1712,33 @@ class Keyboard extends Component {
                  * check bitsState prior to simulating any other key, and if the ALT bit is set, we simulate an
                  * active ALT key first; you'll find that check at the end of both onKeyChange() and onKeyPress().
                  * 
-                 * However, one exception to this hack is the "Sidekick" exception: if the CTRL key is also down,
-                 * we'll still simulate ALT immediately, for those users who press CTRL and then ALT to pop up Sidekick
-                 * (as opposed to pressing ALT and then CTRL, which should also work, regardless).
-                 * 
                  * NOTE: Even though this is a hack intended largely for browsers running on Windows, I'm implementing
                  * it for all platforms, for consistency.
                  */
-                if (keyCode == Keys.KEYCODE.ALT && !(this.bitsState & Keyboard.STATE.CTRL)) {
+                if (keyCode == Keys.KEYCODE.ALT) {
                     if (fDown) {
-                        fIgnore = true;
+                        /*
+                         * One exception to this hack is the "Sidekick" exception: if the CTRL key is also down,
+                         * we'll still simulate ALT immediately, for those users who press CTRL and then ALT to pop up
+                         * Sidekick (as opposed to pressing ALT and then CTRL, which should also work, regardless).
+                         */
+                        if (!(this.bitsState & Keyboard.STATE.CTRL)) fIgnore = true;
                         /*
                          * Reset cKeysPressed so that we can detect the mere "tapping" of the ALT key, which some PCjs
                          * demos depend on (eg, Multi-tasking MS-DOS 4.0).
                          */
                         this.cKeysPressed = 0;
-                    } else if (!this.cKeysPressed) {
-                        /*
-                         * Since cKeysPressed is zero, the assumption here is that the ALT key (and the Alt key ALONE)
-                         * was just tapped, so as long the ALT key was not already "soft-locked" (based on bitsStateSim),
-                         * we will transform this "up" event into a "fake press" event. 
-                         */
-                        if (!(this.bitsStateSim & (Keyboard.STATE.ALT | Keyboard.STATE.RALT))) {
-                            fDown = fPress = true;
+                    }
+                    else {
+                        if (!this.cKeysPressed) {
+                            /*
+                             * Since cKeysPressed is zero, the assumption here is that the ALT key (and the Alt key ALONE)
+                             * was just tapped, so as long the ALT key was not already "soft-locked" (based on bitsStateSim),
+                             * we will transform this "up" event into a "fake press" event. 
+                             */
+                            if (!(this.bitsStateSim & (Keyboard.STATE.ALT | Keyboard.STATE.RALT))) {
+                                fDown = fPress = true;
+                            }
                         }
                     }
                 }
@@ -2263,7 +2267,7 @@ Keyboard.STATE = {
     CMD:            0x0080,             // 101-key keyboard only
     CMDS:           0x00C0,
     ALL_RIGHT:      0x0055,             // RSHIFT | RCTRL | RALT | RCMD
-    ALL_SHIFT:      0x00FF,             // SHIFT | RSHIFT | CTRL | RCTRL | ALT | RALT | CMD | RCMD
+    ALL_MODIFIERS:  0x00FF,             // SHIFT | RSHIFT | CTRL | RCTRL | ALT | RALT | CMD | RCMD
     INSERT:         0x0100,             // TODO: Placeholder (we currently have no notion of any "insert" states)
     CAPS_LOCK:      0x0200,
     NUM_LOCK:       0x0400,
