@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- author="Jeff Parsons (@jeffpar)" website="http://www.pcjs.org/" created="2012-05-05" modified="2013-01-29" license="http://www.gnu.org/licenses/gpl.html" -->
+<!-- author="Jeff Parsons (@jeffpar)" website="http://www.pcjs.org/" created="2012-05-05" modified="2018-03-13" license="http://www.gnu.org/licenses/gpl.html" -->
 <!DOCTYPE xsl:stylesheet [
 ]>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
@@ -11,7 +11,7 @@
 
 	<xsl:variable name="MACHINETYPE">c1p</xsl:variable>
 	<xsl:variable name="APPCLASS">c1pjs</xsl:variable>
-	<xsl:variable name="APPVERSION"/>
+	<xsl:variable name="APPVERSION">1.60.3</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 	<xsl:variable name="BGNDCOLOR">#FAEBD7</xsl:variable>
 

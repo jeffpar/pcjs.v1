@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- author="Jeff Parsons (@jeffpar)" website="http://www.pcjs.org/" created="2012-05-05" modified="2016-04-15" license="http://www.gnu.org/licenses/gpl.html" -->
+<!-- author="Jeff Parsons (@jeffpar)" website="http://www.pcjs.org/" created="2012-05-05" modified="2018-03-13" license="http://www.gnu.org/licenses/gpl.html" -->
 <!DOCTYPE xsl:stylesheet [
 	<!ENTITY nbsp "&#160;"> <!ENTITY ne "&#8800;"> <!ENTITY le "&#8804;"> <!ENTITY ge "&#8805;">
 ]>
@@ -12,9 +12,9 @@
 
 	<xsl:variable name="MACHINETYPE">pc</xsl:variable>
 	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPCLASS">pdp10</xsl:variable>
+	<xsl:variable name="APPCLASS">pdp11</xsl:variable>
 	<xsl:variable name="APPNAME">PDPjs</xsl:variable>
-	<xsl:variable name="APPVERSION"/>
+	<xsl:variable name="APPVERSION">1.60.3</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 	<xsl:variable name="BGNDCOLOR">#FAEBD7</xsl:variable>
 
