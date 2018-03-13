@@ -37,8 +37,8 @@
 					<li><a href="/apps/">Apps</a></li>
 					<li><a href="/devices/">Devices</a></li>
 					<li><a href="/disks/pcx86/">Disks</a></li>
-					<li><a href="/pubs/docs/">Docs</a></li>
-					<li><a href="/pubs/docs/about/">About</a></li>
+					<li><a href="/docs/">Docs</a></li>
+					<li><a href="/docs/about/">About</a></li>
 				</ul>
 			</div>
 			<div class="common-top-right">
