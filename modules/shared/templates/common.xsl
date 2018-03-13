@@ -25,7 +25,7 @@
 		<link rel="icon" type="image/png" sizes="192x192" href="/versions/icons/current/pc-icon-192.png"/>
 		<link rel="shortcut icon" type="image/x-icon" href="/versions/icons/current/favicon.ico"/>
 		<link rel="stylesheet" type="text/css" href="/modules/shared/templates/common.css"/>
-		<link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet"/>
 	</xsl:template>
 
 	<xsl:template name="commonTop">
