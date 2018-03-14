@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Logitech Modula-2/86 Compiler 1.10
-permalink: /disks/pcx86/tools/logitech/modula2/1.10/
+title: Logitech Modula-2/86 Compiler 1.00
+permalink: /disks/pcx86/tools/logitech/modula2/1.00/
 ---
 
 Logitech Modula-2/86 Compiler 1.00
