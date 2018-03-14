@@ -55,8 +55,8 @@ There are currently no `parity`, `databits`, or `stopbits` overrides, so you sho
 
 To create disk image containing the INT14 TSR, run the following [DiskDump](/modules/diskdump/lib/) command in this directory:
 
-    diskdump --dir=. --format=img --output=INT14.img --overwrite --normalize
+    diskdump --dir=. --format=img --output=INT14.img --normalize --overwrite
 
 A disk image named "PCjs INT14 Utility" for use with PCjs machines has been created as follows:
 
-    diskdump --path="INT14.ASM;INT14.COM;INT14.TXT;MK.BAT" --format=json --output=INT14.json
+    diskdump --path="INT14.ASM;INT14.COM;INT14.TXT;MK.BAT" --format=json --output=INT14.json --normalize --overwrite
