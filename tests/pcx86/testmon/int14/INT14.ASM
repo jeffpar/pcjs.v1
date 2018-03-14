@@ -80,8 +80,8 @@ i14c:	cmp	ah,2			; READ function?
 i14d:	cmp	ah,3			; STATUS function?
 	jne	i14e			; no, jump to previous handler
 	call	status
-	log	'S',al
-	log	's',ah
+;	log	'S',al			; these generate too much "noise"
+;	log	's',ah
 	iret
 
 i14e:	cmp	ah,0AAh			; quick-and-dirty installation check
@@ -188,8 +188,10 @@ setDTR	proc	near
 	push	dx
 	add	dx,4			; DX -> MCR
 	in	al,dx
-	jmp	$+2
-	or	al,01h			; DTR == 01h
+	cmp	pollFlg,0
+	jne	dtr1
+	or	al,08h			; OUT2 == 08h (which apparently must ALSO be set enable interrupts)
+dtr1:	or	al,01h			; DTR == 01h
 	out	dx,al
 	pop	dx
 	ret
@@ -206,7 +208,6 @@ setRTS	proc	near
 	push	dx
 	add	dx,4			; DX -> MCR
 	in	al,dx
-	jmp	$+2
 	or	al,02h			; RTS == 02h
 	cmp	rtsFlg,0
 	jne	rts9
@@ -610,17 +611,14 @@ ins5:	mov	comID,dx		; comID is 0 for COM1, 1 for COM2, etc.
 	int	21h
 	int	20h			; abort
 
-ins6:	mov	dx,es:[bx]		; DX is port (ie, 2F8h)
-	call	setDTR
-	call	setRTS			; rtsFlg is initially 1
-
-	mov	ax,offset int14
+ins6:	mov	ax,offset int14
 	xchg	ax,es:[14h*4]
 	mov	word ptr prev14,ax
 	mov	ax,cs
 	xchg	ax,es:[14h*4+2]
 	mov	word ptr prev14+2,ax
 
+	mov	dx,es:[bx]		; DX is port (eg, 3F8h or 2F8h)
 	mov	bx,offset intHW
 	cmp	pollFlg,0
 	jne	ins7
@@ -630,7 +628,7 @@ ins6:	mov	dx,es:[bx]		; DX is port (ie, 2F8h)
 	add	di,di
 	mov	word ptr es:[di],bx
 	mov	es:[di+2],cs
-	call	setIER			; make sure DX still contains the port
+	call	setIER
 	in	al,21h
 	mov	cl,byte ptr comIRQ
 	mov	ah,1
@@ -640,7 +638,10 @@ ins6:	mov	dx,es:[bx]		; DX is port (ie, 2F8h)
 	out	21h,al			; unmask the appropriate COM IRQ
 	mov	bx,offset endRes
 
-ins7:	mov	dx,comID
+ins7:	call	setDTR			; set DTR (and OUT2 as needed for interrupts)
+	call	setRTS			; rtsFlg is initially 1
+
+	mov	dx,comID
 	add	dl,'1'
 	mov	comMsg+3,dl
 	mov	dx,offset comMsg

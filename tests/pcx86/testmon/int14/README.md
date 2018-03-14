@@ -16,10 +16,10 @@ COM port.
 Note that a serial adapter with address 0x2F8 is normally named "COM2", but not always.  For example, if it's the only
 adapter in the PC, then DOS will name it "COM1" even if it's using the traditional COM2 address.
 
-[INT14.COM](INT14.COM) and [INT14.LST](INT14.TXT) were built with [Microsoft Macro Assembler 4.00](/disks/pcx86/tools/microsoft/masm/4.00/)
-using the following commands:
+[INT14.COM](INT14.COM) and [INT14.TXT](INT14.TXT) were built with
+[Microsoft Macro Assembler 4.00](/disks/pcx86/tools/microsoft/masm/4.00/) using the following commands:
 
-    masm int14,,int14;
+    masm int14,,int14.txt;
     link int14;
     exe2bin int14.exe int14.com
 
@@ -52,3 +52,11 @@ testmon.js uses the same default speed of 2400 baud, which you can explicitly se
 
 There are currently no `parity`, `databits`, or `stopbits` overrides, so you should always use "N,8,1" with the DOS
 **MODE** command.
+
+To create disk image containing the INT14 TSR, run the following [DiskDump](/modules/diskdump/lib/) command in this directory:
+
+    diskdump --dir=. --format=img --output=INT14.img --overwrite --normalize
+
+A disk image named "PCjs INT14 Utility" for use with PCjs machines has been created as follows:
+
+    diskdump --path="INT14.ASM;INT14.COM;INT14.TXT;MK.BAT" --format=json --output=INT14.json

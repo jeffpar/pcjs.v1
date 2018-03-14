@@ -1114,7 +1114,7 @@ SerialPort.MCR = {
     DTR:            0x01,       // when set, DTR goes high, indicating ready to establish link (looped back to DSR in loop-back mode)
     RTS:            0x02,       // when set, RTS goes high, indicating ready to exchange data (looped back to CTS in loop-back mode)
     OUT1:           0x04,       // when set, OUT1 goes high (looped back to RI in loop-back mode)
-    OUT2:           0x08,       // when set, OUT2 goes high (looped back to RLSD in loop-back mode)
+    OUT2:           0x08,       // when set, OUT2 goes high (looped back to RLSD in loop-back mode); must also be set for most UARTs to enable interrupts (but not ours)
     LOOPBACK:       0x10,       // when set, enables loop-back mode
     UNUSED:         0xE0        // always zero
 };

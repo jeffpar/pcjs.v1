@@ -57277,7 +57277,7 @@ SerialPort.MCR = {
     DTR:            0x01,       // when set, DTR goes high, indicating ready to establish link (looped back to DSR in loop-back mode)
     RTS:            0x02,       // when set, RTS goes high, indicating ready to exchange data (looped back to CTS in loop-back mode)
     OUT1:           0x04,       // when set, OUT1 goes high (looped back to RI in loop-back mode)
-    OUT2:           0x08,       // when set, OUT2 goes high (looped back to RLSD in loop-back mode)
+    OUT2:           0x08,       // when set, OUT2 goes high (looped back to RLSD in loop-back mode); must also be set for most UARTs to enable interrupts (but not ours)
     LOOPBACK:       0x10,       // when set, enables loop-back mode
     UNUSED:         0xE0        // always zero
 };
@@ -77488,7 +77488,6 @@ class Computer extends Component {
                 if (video) {
                     var control = video.getTextArea();
                     if (control) {
-                        var agent = Web.getUserAgent();
                         /*
                          * Return the Video textarea overlay's opacity and lineHeight styles to their original values.
                          */
@@ -77497,11 +77496,9 @@ class Computer extends Component {
                         /*
                          * Setting lineHeight in IE isn't sufficient to hide the caret; we must also set fontSize to "0",
                          * and we make the change IE-specific because it can have weird side-effects in other browsers (eg,
-                         * it makes Safari on iOS over-zoom whenever the textarea receives focus).  And making it IE-specific
-                         * is, as usual, harder than it should be, because IE11 stopped identifying itself as "MSIE", hence
-                         * the additional "Trident" check.
+                         * it makes Safari on iOS over-zoom whenever the textarea receives focus).
                          */
-                        if (agent.indexOf("MSIE") >= 0 || agent.indexOf("Trident") >= 0) control.style.fontSize = "0";
+                        if (Web.isUserAgent("MSIE")) control.style.fontSize = "0";
                         control.value = "";
                     }
                 }

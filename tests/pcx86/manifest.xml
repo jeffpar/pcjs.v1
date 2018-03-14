@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.60.3/manifest.xsl"?>
+<manifest type="software">
+	<title>PCjs Test Library</title>
+	<disk id="disk01" size="163840" chs="40:1:8" path="testmon/int14/INT14.ASM;INT14.COM;INT14.TXT;MK.BAT" href="/tests/pcx86/testmon/int14/INT14.json">
+		<name>PCjs INT14 Utility</name>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" dir="vga/bin" href="/tests/pcx86/vga/VGABIN.json">
+		<name>VGA Tests (Black Book)</name>
+	</disk>
+</manifest>
