@@ -266,7 +266,7 @@ The PCx86 client app can also be run from the command-line mode using Node, maki
 run a series of automated tests, etc:
 
     cd modules/pcx86/bin
-    node pcx86repl.js
+    node pcx86
 
 The [pcx86](modules/pcx86/bin/pcx86) script in [modules/pcx86/bin](modules/pcx86/bin) loads
 all the PCx86 browser scripts listed in [machines.json](/_data/machines.json) and then starts a Node REPL
@@ -282,7 +282,7 @@ home page.
 The command-line loader creates all the JSON-defined machine components in the same order that the browser creates
 XML-defined components.  You can also issue the "load" command directly from the command-line:
 
-    node pcx86repl.js --cmd="load ibm5150.json"
+    node pcx86 --cmd="load ibm5150.json"
 
 In fact, any number of "--cmd" arguments can be included on the command-line.  A batch file syntax will eventually be
 added, too.

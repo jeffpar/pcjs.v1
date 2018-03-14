@@ -42,6 +42,7 @@ var replServer = null;
 var idAttrs = '@';
 var fConsole = false;
 var fDebug = false;
+var fGlobalsSet = false;
 var args = Proc.getArgs();
 var argv = args.argv;
 var sCmdPrev = "";
@@ -51,7 +52,8 @@ if (argv['debug'] !== undefined) fDebug = argv['debug'];
 var lib = path.join(path.dirname(fs.realpathSync(__filename)), "../lib/");
 
 try {
-    var pkg = require(lib + "../../../package.json");
+    var machines = require(lib + "../../../_data/machines.json");
+    var scriptsPDP11 = /** @type {Array.<string>} */ (machines.pdp11.scripts);
 } catch(err) {
     console.log(err.message);
 }
@@ -107,44 +109,53 @@ function loadComponents(asFiles)
         if (fDebug) console.log(sFile);
         try {
             /*
-             * We COULD load ("require") all the files on-demand, because it's only the
-             * browser initialization sequence we want to mimic in loadMachine(), but this
-             * is simpler, and it also gives us direct references to certain components
-             * we'll want to access later (eg, "component" in getComponentByType()).
+             * We COULD load ("require") all the files on-demand, because it's only the browser initialization
+             * sequence we want to mimic in loadMachine(), but this is simpler, and it also gives us direct references
+             * to certain components we'll want to access later (eg, "component" in getComponentByType()).
              */
-            var fn = require(lib + "../../../" + sFile);
-            var sSuperClass = null;
-            for (var s in aSubClasses) {
-                if (sFile.indexOf(s) >= 0) {
-                    sSuperClass = aSubClasses[s];
-                    break;
-                }
-            }
-            if (sSuperClass) {
-                for (var j = 0; j < aComponents.length; j++) {
-                    if (aComponents[j].path.indexOf(sSuperClass) >= 0) {
-                        if (fDebug) console.log("updating superclass " + aComponents[j].path + " with subclass " + sFile);
-                        aComponents[j].Create = fn;
-                        sName = null;
+            let props = 0;
+            let exports = require(lib + "../../../" + sFile);
+            let afn = (typeof exports == "function"? [exports] : exports);
+            for (let f in afn) {
+                props++;
+                let fn = afn[f];
+                if (typeof fn != "function") continue;
+                let sSuperClass = null;
+                for (let s in aSubClasses) {
+                    if (sFile.indexOf(s) >= 0) {
+                        sSuperClass = aSubClasses[s];
                         break;
                     }
                 }
+                if (sSuperClass) {
+                    for (let j = 0; j < aComponents.length; j++) {
+                        if (aComponents[j].path.indexOf(sSuperClass) >= 0) {
+                            if (fDebug) console.log("updating superclass " + aComponents[j].path + " with subclass " + sFile);
+                            aComponents[j].Create = fn;
+                            sName = null;
+                            break;
+                        }
+                    }
+                }
+                if (sName == "component") {
+                    fn.log = fn.println = function(s, type) {
+                        console.log((type !== undefined? (type + ": ") : "") + (s || ""));
+                    };      // jshint ignore:line
+                }
+                if (sName) {
+                    aComponents.push({name: sName, path: sFile, Create: fn, objects: []});
+                }
             }
-            if (sName == "component") {
-                fn.log = fn.println = function(s, type) {
-                    console.log((type !== undefined? (type + ": ") : "") + (s || ""));
-                };      // jshint ignore:line
-            }
-            if (sName) {
-                aComponents.push({name: sName, path: sFile, Create: fn, objects: []});
-            }
-            if (sName == "defines") {
-                /*
-                 * Enabling component console messages requires setting CONSOLE to true.
-                 */ 
+            /*
+             * The "defines.js" module that defines all PCjs globals (as opposed to machine-specific globals)
+             * doesn't export anything, so exports is an empty object, hence props is zero.  However, that isn't
+             * the ONLY module that doesn't export anything, so we also check for whether DEBUG has been set yet.
+             */
+            if (!props && !fGlobalsSet) {
                 if (global.DEBUG !== undefined) {
                     global.DEBUG = fDebug;
-                    global.CONSOLE = fConsole;
+                    global.APPVERSION = machines['shared']['version'];
+                    fGlobalsSet = true;
                 }
             }
         } catch(err) {
@@ -521,8 +532,8 @@ function startREPL()
     });
 }
 
-if (pkg) {
-    loadComponents(pkg.pdp11Files);
+if (scriptsPDP11) {
+    loadComponents(scriptsPDP11);
 }
 
 /*
