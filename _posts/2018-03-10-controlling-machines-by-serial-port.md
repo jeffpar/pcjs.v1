@@ -107,11 +107,11 @@ the ROM prepares to send a character, it enables both **DTR** and **RTS**.  Mayb
 **RTS**, but everything I've read says that **RTS** is intended to signal that the adapter is ready to *receive* data,
 not *send* data.
 
-To address the limitations of the ROM's INT 14h services, I wrote [INT14.ASM](INT14.ASM).  It's a
-Terminate-and-Stay-Resident (TSR) utility that scans the ROM BIOS Data Area for a COM port whose I/O address is 0x2F8
-(or 0x3F8 if the /1 option is specified).  If the port is found, then the utility installs replacement INT 14h services
-for that port.  Also, unless the /P option ("polled mode") is specified, the utility also installs a hardware interrupt
-handler for IRQ3 (or IRQ4 is /1 is specified) and enables interrupt-driven I/O for the adapter.
+To address the limitations of the ROM's INT 14h services, I wrote [INT14.ASM](/tests/pcx86/testmon/int14/INT14.ASM).
+It's a Terminate-and-Stay-Resident (TSR) utility that scans the ROM BIOS Data Area for a COM port whose I/O address is
+0x2F8 (or 0x3F8 if the /1 option is specified).  If the port is found, then the utility installs replacement INT 14h
+services for that port.  Also, unless the /P option ("polled mode") is specified, the utility also installs a hardware
+interrupt handler for IRQ3 (or IRQ4 is /1 is specified) and enables interrupt-driven I/O for the adapter.
 
 Note that a serial adapter with address 0x2F8 is normally named "COM2", but not always.  For example, if it's the only
 adapter in the PC, then DOS will name it "COM1" even if it's using the traditional COM2 address.
