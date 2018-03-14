@@ -34,4 +34,4 @@ IBM PC Diagnostics
 IBM EGA Demos and Utilities
 ---------------------------
 
-* [IBM EGA FantasyLand Demo and Utilities](ega/)
+* [IBM EGA Fantasy Land Demo and Utilities](ega/)

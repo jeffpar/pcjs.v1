@@ -18,17 +18,19 @@ machines:
 Logitech Modula-2/86 Compiler (1984)
 ------------------------------------
 
-Logitech's Modula-2 Compiler (Modula-2/86 v1.10) has been installed in the machine below.  The machine is
-an [IBM PC XT (Model 5160, 640Kb, 10Mb Drive) with EGA Display](/devices/pcx86/machine/5160/ega/640kb/), but
-the hard drive has been replaced with a [10Mb Drive](/disks/pcx86/drives/10mb/) containing
-[MS-DOS 3.20 with Microsoft C 4.00](/disks/pcx86/drives/10mb/msdos320-c400-xt3.xml), and then all the Modula-2 installation
-changes have been overlaid onto it.
+This is a demo of Logitech's [Modula-2/86 Compiler 1.10](/disks/pcx86/tools/logitech/modula2/1.10/).
 
-This compiler is also discussed in our "[FantasyLand](/blog/2017/07/03/)" blog post.
+For this demo, the compiler has been installed in an
+[IBM PC XT (Model 5160, 640Kb, 10Mb Drive) with EGA Display](/devices/pcx86/machine/5160/ega/640kb/),
+along with a [10Mb Drive](/disks/pcx86/drives/10mb/) containing
+[MS-DOS 3.20 with Microsoft C 4.00](/disks/pcx86/drives/10mb/msdos320-c400-xt3.xml).
+
+PCjs has also archived some Modula-2 sample code.  See the "[FantasyLand](/blog/2017/07/03/)" PCjs blog post
+for details.
 
 {% include machine.html id="ibm5160-msdos320" %}
 
-For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
+For more classic PC software, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
 
 References
 ----------

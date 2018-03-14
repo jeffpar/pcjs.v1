@@ -44,8 +44,7 @@ along with live demonstrations.
 * [MicroPro WordStar](apps/other/wordstar/)
 * [Microsoft Applications](apps/microsoft/)
 * [Software Arts VisiCalc](/apps/pcx86/1981/visicalc/)
-* [Sorcim SuperCalc2](apps/other/sc2/)
-* [More...](apps/other/)
+* [More...](apps/)
 
 Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 

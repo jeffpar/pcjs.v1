@@ -96,14 +96,15 @@ I've transferred the contents of that ZIP archive to a PCx86 diskette image name
 "[PC Tech Journal (1986-10)](/disks/pcx86/shareware/pctj/#directory-of-pc-tech-journal-1986-10)", which we can now
 load into the machine below, and then run "EGAMAKE.BAT" to rebuild the entire program.
 
-Unfortunately, as of this writing, while the code *mostly* compiles, it encounters a few errors along the way that
-I've not diagnosed yet.  Also, the only version of the Logitech Modula-2/86 Compiler that I've been able to find so
-far is version 1.10.  Cockerham doesn't mention what version of the compiler he used, but it may well have been a
-newer version, since that article was published almost two years after version 1.10 was released.
+Unfortunately, as of this writing, while the code *mostly* compiles, it encounters a few errors along the way
+that I've not diagnosed yet.  The closest version of the compiler I was able to find is
+[Logitech Modula-2/86 Compiler 1.10](/disks/pcx86/tools/logitech/modula2/1.10/).
+Cockerham doesn't mention what version of the compiler he used, but it may well have been a newer version, since
+that article was published almost two years after version 1.10 was released.
 
 I'm also at a bit of a disadvantage with Modula-2 itself: I've never written anything in Modula-2, I've never used
 any Logitech compilers before now, and the closest documentation I've been able to locate is the
-[Logitech Modula-2/86 v1.0 Manual](http://bitsavers.informatik.uni-stuttgart.de/pdf/logitech/modula-2/Logitech_Modula-2_86_1.0_Feb84.pdf)
+[Logitech Modula-2/86 v1.0 Manual](http://www.bitsavers.org/pdf/logitech/modula-2/Logitech_Modula-2_86_1.0_Feb84.pdf)
 (ie, the previous version).
 
 On the other hand, maybe I'm trying too hard, because Cockerham provided the final binary as well: **EGATEST.EXE**.
@@ -112,7 +113,7 @@ How well does it work?  I must confess, I don't know, because I'm too chicken to
 simulation, while good, is far from perfect, so before I dive into these tests, I want to make sure I have enough time
 set aside to debug and fix the inevitable problems.
 
-Anyway, the [Logitech Modula-2/86 Compiler v1.10](/apps/pcx86/1984/modula2/) demo machine has been recreated below,
+Anyway, the [Logitech Modula-2/86 Demo](/apps/pcx86/1984/modula2/) machine has been recreated below,
 along with the PCjs Debugger.  One nice thing about this configuration is that COM1 is connected to the Debugger's
 output window, so you can use the MS-DOS command:
 
