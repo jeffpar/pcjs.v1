@@ -28,7 +28,7 @@ into one of the following keys:
 
 {% include machine.html id="ibm5160-rogue" %}
 
-For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
+For more classic PC software, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
 
 ROGUE.DOC
 ---------

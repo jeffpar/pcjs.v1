@@ -7,6 +7,11 @@ permalink: /disks/pcx86/tools/logitech/modula2/1.10/
 Logitech Modula-2/86 Compiler 1.00
 ----------------------------------
 
+Links to [Modula-2/86 Documentation](http://www.bitsavers.org/pdf/logitech/modula-2/):
+
+- [Logitech Modula-2/86 v1.0 Manual](http://www.bitsavers.org/pdf/logitech/modula-2/Logitech_Modula-2_86_1.0_Feb84.pdf)
+- [Logitech Modula-2/86 v2.0 Manual](http://www.bitsavers.org/pdf/logitech/modula-2/Modula-2_86_Ver_2.00_Users_Manual_Apr86.pdf)
+
 NOTE: We do not have copies of the original distribution disks.  These disks have been rebuilt from ZIP archives obtained
 from [VETUSWARE](http://vetusware.com/download/MODULE%202%20_SETUP_DEBUG_COMPILER.DISCS%201.0/?id=11456).
 

@@ -12,3 +12,4 @@ Information is available for the following Microsoft applications.
 * [Microsoft Chart](chart/)
 * [Microsoft Multiplan](multiplan/)
 * [Microsoft Word](word/)
+* [Microsoft Word for Windows](winword/)
