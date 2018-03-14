@@ -29,4 +29,4 @@ This particular machine has been configured to automatically save all your chang
 of your browser's local storage), so you can close the browser in the middle of a game of DONKEY, and
 the next time you load this page, your progress (and the donkey) should be perfectly restored.
 
-For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
+For more classic PC software, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).

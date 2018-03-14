@@ -7,6 +7,20 @@ permalink: /disks/pcx86/tools/logitech/modula2/1.10/
 Logitech Modula-2/86 Compiler 1.10
 ----------------------------------
 
+Links to [Modula-2/86 Documentation](http://www.bitsavers.org/pdf/logitech/modula-2/):
+
+- [Logitech Modula-2/86 v1.0 Manual](http://www.bitsavers.org/pdf/logitech/modula-2/Logitech_Modula-2_86_1.0_Feb84.pdf)
+- [Logitech Modula-2/86 v2.0 Manual](http://www.bitsavers.org/pdf/logitech/modula-2/Modula-2_86_Ver_2.00_Users_Manual_Apr86.pdf)
+
+A machine with the compiler already installed is available [here](/apps/pcx86/1984/modula2/).  We used the same
+hard disk installation procedure described in the v1.0 manual:
+
+- At the C:\&gt; prompt: `MKDIR M2BIN`
+- Load diskette in drive A: `Modula-2/86 1.10 (1-System)`
+- Copy the M2 binary to drive C: `COPY A:M2.EXE M2BIN`
+- Run the installation batch file: `A:INSTALL1`
+- Follow the on-screen instructions
+
 ### Directory of Modula-2/86 1.10 (1-System)
 
 	 Volume in drive A has no label

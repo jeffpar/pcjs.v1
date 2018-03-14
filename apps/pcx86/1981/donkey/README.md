@@ -37,5 +37,5 @@ of your browser's local storage), so you can close the browser in the middle of 
 the next time you load this page, your progress (and the donkey) should be perfectly restored.
 
 Browse all the [BASIC Samples](../basic/) provided with [PC-DOS 1.00](/disks/pcx86/dos/ibm/1.00/), including
-[DONKEY.BAS](../basic/#donkeybas).  For more classic PC software experiences, see the PCjs collection of
+[DONKEY.BAS](../basic/#donkeybas).  For more classic PC software, see the PCjs collection of
 [IBM PC Application Demos](/apps/pcx86/).

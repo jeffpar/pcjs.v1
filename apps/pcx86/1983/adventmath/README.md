@@ -210,7 +210,7 @@ is already running.  That's the quickest method for starting the software, and i
 involved installation process, but it takes more effort to set up.  The [VisiCalc (1981)](/apps/pcx86/1981/visicalc/)
 demo is configured that way, but that's purely a matter of convenience -- and because it predates the "autoType" feature.
 
-For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
+For more classic PC software, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
 
 References
 ----------
