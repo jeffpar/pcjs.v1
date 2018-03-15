@@ -11,6 +11,7 @@
     "prompt": "\n-",
     "commands": {
       "dos": { "op": "q\r", "mode": "prompt" },
+      "nap": "a 100\rmov dx,80\rsub cx,cx\rloop 105\rdec dx\rjnz 103\rint 3\r\rrip 100\rg\r",
       "print": "printf(\"you typed %d\n\", $1)",
       "curstart": "o 3d4 a\ro 3d5 %1\r",
       "curend": "o 3d4 b\ro 3d5 %1\r",

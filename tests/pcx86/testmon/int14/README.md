@@ -53,9 +53,10 @@ testmon.js uses the same default speed of 2400 baud, which you can explicitly se
 There are currently no `parity`, `databits`, or `stopbits` overrides, so you should always use "N,8,1" with the DOS
 **MODE** command.
 
-To create disk image containing the INT14 TSR, run the following [DiskDump](/modules/diskdump/lib/) command in this directory:
+To create a disk image containing the INT14 source code, run the following [DiskDump](/modules/diskdump/lib/) command
+in this directory:
 
-    diskdump --dir=. --format=img --output=INT14.img --normalize --overwrite
+    diskdump --path=""INT14.ASM;MK.BAT" --format=img --output=INT14.img --normalize --overwrite
 
 A disk image named "PCjs INT14 Utility" for use with PCjs machines has been created as follows:
 

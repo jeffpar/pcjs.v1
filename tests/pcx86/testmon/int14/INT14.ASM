@@ -2,7 +2,9 @@
 	page	,120
 
 ;	By Jeff Parsons (@jeffpar) 2018-03-06
-;	Installs interrupt handlers for the COM port associated with I/O address 0x2F8 (and IRQ 3).
+;	Installs interrupt handlers for the specified COM port
+
+DEBUG	equ	1
 
 code	segment word public 'code'
 
@@ -20,11 +22,14 @@ main	endp
 prev14	dd	0			; previous INT 14h handler
 rtsFlg	db	1			; internal RTS flag (0=off, 1=on)
 pollFlg	db	0			; polling mode (0=off, 1=on); set by /P
+echoFlg	db	0			; set if incoming Ctrl-E has turned echo on
+
+	even
 comID	dw	-1			; 0-based index of COM port in BIOS data area
 comIRQ	dw	3
 comAddr	dw	2F8h
 
-MAXBUF	equ	16
+MAXBUF	equ	32
 inBuf	db	MAXBUF dup (?)
 outBuf	db	MAXBUF dup (?)
 inTot	dw	0			; counts the total number of input bytes buffered
@@ -33,7 +38,7 @@ inTail	dw	offset inBuf
 outHead	dw	offset outBuf
 outTail	dw	offset outBuf
 
-MAXLOG	equ	256
+MAXLOG	equ	1024
 logBuff	db	MAXLOG dup (0)
 logNext	dw	offset logBuff
 
@@ -66,15 +71,15 @@ i14a:	test	ah,ah			; INIT function?
 
 i14b:	cmp	ah,1			; WRITE function?
 	jne	i14c			; no
-	log	'W',al
+;	log	'W',al
 	call	write			; add the character in AL to outBuf
 	iret
 
 i14c:	cmp	ah,2			; READ function?
 	jne	i14d			; no
 	call	read			; remove next char from inBuf into AL
-	log	'R',al
-	log	'r',ah
+;	log	'R',al
+;	log	'r',ah
 	iret
 
 i14d:	cmp	ah,3			; STATUS function?
@@ -250,22 +255,27 @@ tryIn	proc	near
 	in	al,dx
 	pop	dx
 	test	al,01h			; DR set?
-	jz	ti9
-	in	al,dx			; AL == new data
+	jnz	ti1			; yes
+	jmp	ti9
+ti1:	in	al,dx			; AL == new data
 	log	'I',al
 	push	bx
 	mov	bx,inHead
 	mov	[bx],al
 	call	incPtr
 	cmp	bx,inTail
-	je	ti8			; buffer full, dropping the data
-	mov	inHead,bx
+	jne	ti7
+	log	'F',al
+	jmp	short ti8		; buffer full, dropping the data
+ti7:	mov	inHead,bx
 	inc	inTot
 	cmp	pollFlg,0
 	jne	ti8
-	cmp	inTot,MAXBUF/2		; have we reached the half-way point?
+	cmp	inTot,(MAXBUF/4)*3	; have we reached the 3/4 point?
 	jne	ti8			; no
-	mov	rtsFlg,0		; yes, so let's try turning RTS off
+	cmp	rtsFlg,0		; is RTS already off?
+	je	ti8			; yes
+	dec	rtsFlg			; no, so let's try turning it off now
 	call	setRTS			; and hope the sender give us some space
 ti8:	pop	bx
 ti9:	pop	ax
@@ -291,7 +301,7 @@ tryOut	proc	near
 	jz	to9			; no
 	mov	al,[bx]
 	out	dx,al
-	log	'O',al
+;	log	'O',al
 	call	incPtr
 	mov	outTail,bx
 to9:	pop	bx
@@ -356,6 +366,18 @@ write	proc	near
 	mov	dx,comAddr
 
 	sti
+
+	if	DEBUG
+	cmp	echoFlg,0
+	je	w0
+	push	ax
+	mov	ah,0Eh
+	mov	bh,0
+	int	10h
+	pop	ax
+w0:
+	endif
+
 	xchg	ah,al			; stash the output data in AH
 	sub	cx,cx
 w1:	call	getMSR
@@ -434,17 +456,21 @@ r1:	sub	ax,ax
 	jmp	short r9
 
 r3:	mov	al,[bx]
-	call	incPtr
+	cmp	al,05h			; Ctrl-E?
+	jne	r4			; no
+	xor	echoFlg,1		; toggle echo flag
+r4:	call	incPtr
 	mov	inTail,bx
 
 	cmp	pollFlg,0
-	jne	r4
-	cmp	inTot,MAXBUF/2		; are we at the half-way point?
-	jne	r4			; no
-	mov	rtsFlg,1		; yes, so we must have turned RTS off
-	call	setRTS			; so let's turn RTS back on
-
-r4:	dec	inTot
+	jne	r8
+	cmp	inTot,MAXBUF/4		; are we down to 1/4 full now?
+	jne	r8			; no
+	cmp	rtsFlg,0		; is RTS already on?
+	jne	r8			; yes
+	inc	rtsFlg			; no, so let's turn RTS back on
+	call	setRTS
+r8:	dec	inTot
 
 r9:	pop	ds
 	assume	ds:nothing

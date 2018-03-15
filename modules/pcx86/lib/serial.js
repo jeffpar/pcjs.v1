@@ -197,6 +197,7 @@ class SerialPort extends Component {
          */
         this.sDataReceived = "";
         this.connection = this.sendData = this.updateStatus = null;
+        this.fAutoFlow = false;
 
         /*
          * Export all functions required by bindConnection() or initConnection(), whichever is required.
@@ -210,7 +211,7 @@ class SerialPort extends Component {
     }
 
     /**
-     * bindConnection(connection, receiveData)
+     * bindConnection(connection, receiveData, fAutoFlow)
      * 
      * This is basically a lighter-weight version of initConnection(), used by built-in components
      * like TestController, as opposed to components in external machines, which require more work to connect.
@@ -218,13 +219,15 @@ class SerialPort extends Component {
      * @this {SerialPort}
      * @param {Component} connection
      * @param {function()} receiveData
+     * @param {boolean} [fAutoFlow] (true to enable automatic flow control; default is false)
      * @return {boolean}
      */
-    bindConnection(connection, receiveData)
+    bindConnection(connection, receiveData, fAutoFlow = false)
     {
         if (!this.connection) {
             this.connection = connection;
             this.sendData = receiveData;
+            this.fAutoFlow = fAutoFlow;
             return true;
         }
         return false;
@@ -646,10 +649,12 @@ class SerialPort extends Component {
     advanceRBR()
     {
         if (this.abReceive.length > 0 && !(this.bLSR & SerialPort.LSR.DR)) {
-            this.bRBR = this.abReceive.shift();
-            this.bLSR |= SerialPort.LSR.DR;
-            if (this.abReceive.length && this.cpu) {
-                this.cpu.setTimer(this.timerReceiveNext, this.getBaudTimeout());
+            if (!this.fAutoFlow || (this.bMCR & SerialPort.MCR.RTS)) {
+                this.bRBR = this.abReceive.shift();
+                this.bLSR |= SerialPort.LSR.DR;
+                if (this.abReceive.length && this.cpu) {
+                    this.cpu.setTimer(this.timerReceiveNext, this.getBaudTimeout());
+                }
             }
         }
         this.updateIRR();
@@ -868,6 +873,10 @@ class SerialPort extends Component {
                 }
                 this.updateStatus.call(this.connection, pins);
             }
+            /*
+             * Throw in a call to advanceRBR() for good measure, in case fAutoFlow is set and RTS was just enabled.
+             */
+            this.advanceRBR();
         }
     }
 
