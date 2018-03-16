@@ -22,6 +22,10 @@ You can also browse our collection of archived disks:
 * [Challenger 1P Disk Library](/disks/c1p/)
 * [DEC Disk Library](/disks/dec/)
 
+Last but not least, we also have a few test resources:
+
+* [IBM PC Tests](/tests/pcx86/)
+
 {% include_relative pcx86/README.md %}
 
 ---

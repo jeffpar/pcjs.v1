@@ -1757,12 +1757,12 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
             /** @type {FileInfo} */
             fileInfo = {};
             /*
-             * TODO: Verify that buildName() didn't change the name into one that already exists in this directory.
+             * TODO: Verify that buildShortName() didn't change the name into one that already exists in this directory.
              * In the normal case, the directory being read already contains files named according to DOS conventions,
              * and therefore they will automatically be unique.
              */
             if (obj.isExcluded(sFileName)) continue;
-            fileInfo.FILE_NAME = obj.buildName(sFileName);
+            fileInfo.FILE_NAME = obj.buildShortName(sFileName);
             fileInfo.FILE_PATH = sFilePath;
             aFiles.push(fileInfo);
 
@@ -1875,12 +1875,12 @@ DiskDump.prototype.readPath = function(sPath, done)
         /*
          * Ordinarily, sFileName will already be the basename, except when it has a path element like "../"
          *
-         * TODO: Verify that buildName() doesn't change the name into one that already exists.
+         * TODO: Verify that buildShortName() doesn't change the name into one that already exists.
          * This is more of a problem than in readDir(), because all these names are user-supplied.
          */
         var sBaseName = path.basename(sFileName);
         if (this.isExcluded(sBaseName)) continue;
-        fileInfo.FILE_NAME = this.buildName(sBaseName);
+        fileInfo.FILE_NAME = this.buildShortName(sBaseName);
         fileInfo.FILE_PATH = path.join(sDefaultPath, sFileName);
         fileInfo.FILE_TIME = null;
         aFiles.push(fileInfo);
@@ -1953,14 +1953,14 @@ DiskDump.prototype.readPath = function(sPath, done)
 };
 
 /**
- * buildName(sFile, fLabel)
+ * buildShortName(sFile, fLabel)
  *
  * @this {DiskDump}
  * @param {string} sFile is the basename of a file
  * @param {boolean} [fLabel]
- * @return {string} containing a corresponding FAT-compatible filename
+ * @return {string} containing a corresponding filename in FAT "8.3" format
  */
-DiskDump.prototype.buildName = function(sFile, fLabel)
+DiskDump.prototype.buildShortName = function(sFile, fLabel)
 {
     var sName = sFile.toUpperCase();
     var iExt = sName.lastIndexOf('.');
@@ -2032,7 +2032,7 @@ DiskDump.prototype.buildVolLabel = function(sDir)
     }
     if (sVolume) {
         fileInfo = {};
-        fileInfo.FILE_NAME = this.buildName(sVolume, true);
+        fileInfo.FILE_NAME = this.buildShortName(sVolume, true);
         fileInfo.FILE_ATTR = DiskAPI.ATTR.LABEL;
         /*
          * I used to initialize the volume label's date with a simple "new Date()", but because that results
@@ -2153,6 +2153,31 @@ DiskDump.prototype.buildDir = function(abDir, aFiles, dateMod, iCluster, iParent
 };
 
 /**
+ * buildDateTime(dateMod)
+ *
+ * @this {DiskDump}
+ * @param {Date} dateMod contains the modification time of a file
+ * @return {number} the time (bits 0-15) and date (bits 16-31) in FAT format
+ */
+DiskDump.prototype.buildDateTime = function(dateMod)
+{
+    var year = dateMod.getFullYear();
+    var month = dateMod.getMonth() + 1;
+    var day = dateMod.getDate();
+    var time = ((dateMod.getHours() & 0x1F) << 11) | ((dateMod.getMinutes() & 0x3F) << 5) | ((dateMod.getSeconds() >> 1) & 0x1F);
+    /*
+     * NOTE: If validateTime() is doing its job, then we should never have to do this.  This is simple paranoia.
+     */
+    if (year < 1980) {
+        year = 1980; month = 1; day = 1; time = 1;
+    } else if (year > 2099) {
+        year = 2099; month = 12; day = 31; time = 1;
+    }
+    var date = (((year - 1980) & 0x7F) << 9) | (month << 5) | day;
+    return ((date & 0xffff) << 16) | (time & 0xffff);
+};
+
+/**
  * buildDirEntry(ab, off, sFile, cbFile, bAttr, dateMod, iCluster)
  *
  * TODO: Create constants that define the various directory entry fields, including the overall size (32 bytes).
@@ -2195,23 +2220,12 @@ DiskDump.prototype.buildDirEntry = function(ab, off, sFile, cbFile, bAttr, dateM
      */
     off += 10;
     if (dateMod) {
-        var year = dateMod.getFullYear();
-        var month = dateMod.getMonth() + 1;
-        var day = dateMod.getDate();
-        var time = ((dateMod.getHours() & 0x1F) << 11) | ((dateMod.getMinutes() & 0x3F) << 5) | ((dateMod.getSeconds() >> 1) & 0x1F);
-        /*
-         * NOTE: If validateTime() is doing its job, then we should never have to do this.  This is simple paranoia.
-         */
-        if (year < 1980) {
-            year = 1980; month = 1; day = 1; time = 1;
-        } else if (year > 2099) {
-            year = 2099; month = 12; day = 31; time = 1;
-        }
-        ab[off++] = time & 0xff;
-        ab[off++] = time >> 8;
-        var date = (((year - 1980) & 0x7F) << 9) | (month << 5) | day;
-        ab[off++] = date & 0xff;
-        ab[off++] = date >> 8;
+        var dateTime = this.buildDateTime(dateMod);
+        ab[off++] = dateTime & 0xff;
+        ab[off++] = (dateTime >> 8) & 0xff;
+        dateTime >>= 16;
+        ab[off++] = dateTime & 0xff;
+        ab[off++] = (dateTime >> 8) & 0xff;
     } else {
         for (i = 0; i < 4; i++) {
             ab[off++] = 0;

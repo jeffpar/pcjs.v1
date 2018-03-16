@@ -17,11 +17,11 @@ machines:
 ---
 
 I recently added a new PCjs [TestMonitor](/modules/pcx86/lib/testmon.js) component that is able to deliver user-defined
-commands to a PCjs machine via a serial port.  TestMonitor is built into PCx86, and can also be run as a
-[command-line utility](/modules/pcx86/bin/testmon.js) to issue commands to a *physical* machine, making it easy to compare
-operations between simulated and actual hardware.
+commands to a PCjs machine via a serial port.  TestMonitor is built into PCx86, and there is also a
+[TestMonitor Utility](/tests/pcx86/testmon/testmon.js) that can issue commands to a *physical* machine, making it easy to
+compare operations between simulated and actual hardware.
 
-More information on [Controlling Real PCs](#controlling-real-pcs) is available below.
+More information on [Controlling Physical PCs](#controlling-physical-pcs) is available below.
 
 You can test it with the PCjs machine below, which has been configured with a [TestController](/modules/pcx86/lib/testctl.js)
 window, as well as a hard disk with [MS-DOS 3.20](/disks/pcx86/dos/microsoft/3.20/) and [SYMDEB 4.00](/blog/2018/02/25/)
@@ -86,16 +86,16 @@ adding command verification checks, to determine whether a command was performed
 result(s), and Phase Three will involve creating a series of low-level tests, exercising CPU features on both real
 and simulated hardware in parallel and verifying that both sets of results match.
 
-Controlling Real PCs
---------------------
+Controlling Physical PCs
+------------------------
 
 Here's the general procedure for controlling a *real* PC using a serial port connection:
 
 - Turn on your PC
 - Boot DOS 2.00 or later
-- Load the [PCjs INT14 TSR](/tests/pcx86/testmon/int14/): "INT14"
+- Load the PCjs [INT14 TSR](/tests/pcx86/testmon/int14/INT14.ASM): "INT14"
 - Run the DOS CTTY command: "CTTY COM2"
-- On your connected machine, run the [PCjs TestMonitor utility](/modules/pcx86/bin/testmon.js): "node testmon.js"
+- On your connected machine, run the PCjs [TestMonitor Utility](/tests/pcx86/testmon/testmon.js): "node testmon"
 
 You should now be able to control the PC using the TestMonitor utility, in your choice of either "terminal mode" or
 "command mode".

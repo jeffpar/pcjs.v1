@@ -397,7 +397,6 @@ class Computer extends Component {
                 if (video) {
                     var control = video.getTextArea();
                     if (control) {
-                        var agent = Web.getUserAgent();
                         /*
                          * Return the Video textarea overlay's opacity and lineHeight styles to their original values.
                          */
@@ -406,11 +405,9 @@ class Computer extends Component {
                         /*
                          * Setting lineHeight in IE isn't sufficient to hide the caret; we must also set fontSize to "0",
                          * and we make the change IE-specific because it can have weird side-effects in other browsers (eg,
-                         * it makes Safari on iOS over-zoom whenever the textarea receives focus).  And making it IE-specific
-                         * is, as usual, harder than it should be, because IE11 stopped identifying itself as "MSIE", hence
-                         * the additional "Trident" check.
+                         * it makes Safari on iOS over-zoom whenever the textarea receives focus).
                          */
-                        if (agent.indexOf("MSIE") >= 0 || agent.indexOf("Trident") >= 0) control.style.fontSize = "0";
+                        if (Web.isUserAgent("MSIE")) control.style.fontSize = "0";
                         control.value = "";
                     }
                 }
