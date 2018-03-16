@@ -189,6 +189,7 @@ m8err:	mov	dx,offset reqErr
 m9:	mov	bx,fHandle
 	test	bx,bx
 	jz	m9msg
+	push	dx
 	mov	cx,fTime		; before we close the file
 	mov	dx,fDate		; set the date/time we were given
 	mov	ax,5701h
@@ -196,6 +197,7 @@ m9:	mov	bx,fHandle
 	mov	ah,3Eh			; now go ahead and close
 	int	21h
 	mov	fHandle,0
+	pop	dx
 
 m9msg:	mov	ah,09h
 	int	21h
@@ -265,6 +267,8 @@ rb1:	mov	dx,comID		; DX == adapter #
 	mov	ah,1			; peek the keyboard
 	int	16h			; anything?
 	jz	rb1			; no
+	mov	ah,0			; read it
+	int	16h			;
 	cmp	al,1Bh			; ESC?
 	jne	rb1			; no
 	stc				; set CARRY to indicate error/abort

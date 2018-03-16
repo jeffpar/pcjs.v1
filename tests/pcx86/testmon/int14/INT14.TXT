@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Page     1-1
                                                             
@@ -57,7 +57,7 @@ int14.asm                                                   Page     1-1
  055C  015C R                   logNext	dw	offset logBuff 
                                  
                                 log	macro	c,d 
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Page     1-2
                                                             
@@ -116,7 +116,7 @@ int14.asm                                                   Page     1-2
  05AB  80 FC 03                 i14d:	cmp	ah,3			; STATUS function? 
  05AE  75 04                    	jne	i14e			; no, jump to previous handler 
  05B0  E8 0856 R                	call	status 
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Page     1-3
                                                             
@@ -175,7 +175,7 @@ int14.asm                                                   Page     1-3
                                 ; 
                                 ; Returns LSR in AL. 
                                 ; 
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Page     1-4
                                                             
@@ -234,7 +234,7 @@ int14.asm                                                   Page     1-4
  060F  52                       	push	dx 
  0610  83 C2 04                 	add	dx,4			; DX -> MCR 
  0613  EC                       	in	al,dx 
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Page     1-5
                                                             
@@ -293,7 +293,7 @@ int14.asm                                                   Page     1-5
  065F  81 FB 0132 R             	cmp	bx,offset inBuf + MAXBUF 
  0663  75 04                    	jne	inc1 
  0665  BB 0112 R                	mov	bx,offset inBuf 
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Page     1-6
                                                             
@@ -352,7 +352,7 @@ int14.asm                                                   Page     1-6
  06CA  81 FB 055C R           1 	cmp	bx,offset logBuff + MAXLOG
  06CE  72 03                  1 	jb	??0003
  06D0  BB 015C R              1 	mov	bx,offset logBuff
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Page     1-7
                                                             
@@ -411,7 +411,7 @@ int14.asm                                                   Page     1-7
                                 ; 
  072C                           init	proc	near 
  072C  53                       	push	bx 
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Page     1-8
                                                             
@@ -470,7 +470,7 @@ int14.asm                                                   Page     1-8
                                  
                                 	if	DEBUG 
  077E  80 3E 010A R 00          	cmp	echoFlg,0 
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Page     1-9
                                                             
@@ -529,7 +529,7 @@ int14.asm                                                   Page     1-9
  07E2  59                       	pop	cx 
  07E3  5B                       	pop	bx 
  07E4  C3                       	ret 
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Page     1-10
                                                             
@@ -588,7 +588,7 @@ int14.asm                                                   Page     1-10
  083E  75 0E                    	jne	r8			; no 
  0840  80 3E 0108 R 00          	cmp	rtsFlg,0		; is RTS already on? 
  0845  75 07                    	jne	r8			; yes 
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Page     1-11
                                                             
@@ -647,7 +647,7 @@ int14.asm                                                   Page     1-11
  087D  75 07                    	jne	s9			; turn it on 
  087F  FE 06 0108 R             	inc	rtsFlg 
  0883  E8 0622 R                	call	setRTS 
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Page     1-12
                                                             
@@ -706,7 +706,7 @@ int14.asm                                                   Page     1-12
                                  
  08D8  1F                       	pop	ds 
                                 	assume	ds:nothing 
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Page     1-13
                                                             
@@ -765,7 +765,7 @@ int14.asm                                                   Page     1-13
  0960  75 04                    	jne	ins2			; no 
  0962  FE 06 0109 R             	inc	pollFlg			; yes, set pollFlg to non-zero 
  0966  85 C9                    ins2:	test	cx,cx			; any more command-line characters? 
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Page     1-14
                                                             
@@ -824,7 +824,7 @@ int14.asm                                                   Page     1-14
  09DD  8A 0E 010E R             	mov	cl,byte ptr comIRQ 
  09E1  B4 01                    	mov	ah,1 
  09E3  D2 E4                    	shl	ah,cl 
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Page     1-15
                                                             
@@ -860,7 +860,7 @@ int14.asm                                                   Page     1-15
                                  
                                 	end	main 
 
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Symbols-1
                                                              
@@ -919,7 +919,7 @@ INIT . . . . . . . . . . . . . .  	N PROC	072C	CODE	Length = 0047
 INS0 . . . . . . . . . . . . . .  	L NEAR	0942	CODE
 INS1 . . . . . . . . . . . . . .  	L NEAR	095C	CODE
 INS2 . . . . . . . . . . . . . .  	L NEAR	0966	CODE
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Symbols-2
                                                              
@@ -978,7 +978,7 @@ TO9  . . . . . . . . . . . . . .  	L NEAR	072A	CODE
 TRYIN  . . . . . . . . . . . . .  	N PROC	0673	CODE	Length = 0098
 TRYOUT . . . . . . . . . . . . .  	N PROC	070B	CODE	Length = 0021
 
-Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 09:43:10
+Microsoft (R) Macro Assembler  Version 4.00                 3/16/18 13:04:41
 
 int14.asm                                                   Symbols-3
                                                              

@@ -227,6 +227,7 @@ class PortController {
 
         if (this.fFilePrompt) {
             if (data == Keys.ASCII.CTRL_M) {
+                data = 0;
                 this.fFilePrompt = false;
                 this.printf("\n");
                 if (this.sFileName) {
@@ -234,14 +235,19 @@ class PortController {
                     this.startTransfer();
                 }
             }
-            else if (data == Keys.ASCII.CTRL_H) {
+            else if (data == Keys.ASCII.CTRL_H || data == Keys.ASCII.DEL) {
+                data = 0;
                 if (this.sFileName) {
-                    this.fFileName = this.sFileName.slice(0, -1);
+                    this.sFileName = this.sFileName.slice(0, -1);
+                    this.printf("%s", "\b \b");
                 }
+            } else if (data < 32 || data > 127) {
+                data = 0;
             }
-            if (data < 32) return;
-            this.sFileName += ch;
-            this.printf("%c", data);
+            if (data) {
+                this.sFileName += ch;
+                this.printf("%c", data);
+            }
             return;
         }
 
