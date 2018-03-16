@@ -554,21 +554,22 @@ intHW	proc	far
 	assume	ds:code
 	mov	dx,comAddr
 
-	push	dx
+hw0:	push	dx
 	inc	dx
 	inc	dx			; DX -> IIR
 	in	al,dx
 	pop	dx
 	log	'H',al
 
-	cmp	al,02h			; THRE condition?
+	cmp	al,04h			; DR condition?
 	jne	hw1			; no
-	call	tryOut			; yes, so see if we have something to write
+	call	tryIn			; read data
+	jnc	hw0			; assuming we read data, check IIR again
 	jmp	short hw9
 
-hw1:	cmp	al,04h			; DR condition?
-	jne	hw9
-	call	tryIn
+hw1:	cmp	al,02h			; THRE condition?
+	jne	hw9			; no
+	call	tryOut			; yes, so see if we have something to write
 
 hw9:	cli
 	mov	al,20h			; EOI command

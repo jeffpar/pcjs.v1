@@ -3,6 +3,7 @@
     "prompt": ["\nA>", "\nC:\\>"],
     "commands": {
       "dir": "dir $1>con\r",
+      "echo": "echo now is the time for all characters to be printed\r",
       "mode0e": "symdeb\ra\rmov ax,e\rint 10\rint 3\r\rg\rq\rdir c:\\dos>con\r",
       "symdeb": { "op": "symdeb\r", "mode": "prompt" }
     }

@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Page     1-1
                                                             
@@ -18,7 +18,7 @@ int14.asm                                                   Page     1-1
                                 	assume	cs:code, ds:code, es:code, ss:code 
                                  
  0100                           main	proc	near 
- 0100  E9 0939 R                	jmp	install 
+ 0100  E9 093B R                	jmp	install 
                                 main	endp 
                                  
                                 	assume	cs:code, ds:nothing, es:nothing, ss:nothing 
@@ -57,7 +57,7 @@ int14.asm                                                   Page     1-1
  055C  015C R                   logNext	dw	offset logBuff 
                                  
                                 log	macro	c,d 
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Page     1-2
                                                             
@@ -116,7 +116,7 @@ int14.asm                                                   Page     1-2
  05AB  80 FC 03                 i14d:	cmp	ah,3			; STATUS function? 
  05AE  75 04                    	jne	i14e			; no, jump to previous handler 
  05B0  E8 0856 R                	call	status 
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Page     1-3
                                                             
@@ -175,7 +175,7 @@ int14.asm                                                   Page     1-3
                                 ; 
                                 ; Returns LSR in AL. 
                                 ; 
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Page     1-4
                                                             
@@ -234,7 +234,7 @@ int14.asm                                                   Page     1-4
  060F  52                       	push	dx 
  0610  83 C2 04                 	add	dx,4			; DX -> MCR 
  0613  EC                       	in	al,dx 
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Page     1-5
                                                             
@@ -293,7 +293,7 @@ int14.asm                                                   Page     1-5
  065F  81 FB 0132 R             	cmp	bx,offset inBuf + MAXBUF 
  0663  75 04                    	jne	inc1 
  0665  BB 0112 R                	mov	bx,offset inBuf 
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Page     1-6
                                                             
@@ -352,7 +352,7 @@ int14.asm                                                   Page     1-6
  06CA  81 FB 055C R           1 	cmp	bx,offset logBuff + MAXLOG
  06CE  72 03                  1 	jb	??0003
  06D0  BB 015C R              1 	mov	bx,offset logBuff
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Page     1-7
                                                             
@@ -411,7 +411,7 @@ int14.asm                                                   Page     1-7
                                 ; 
  072C                           init	proc	near 
  072C  53                       	push	bx 
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Page     1-8
                                                             
@@ -470,7 +470,7 @@ int14.asm                                                   Page     1-8
                                  
                                 	if	DEBUG 
  077E  80 3E 010A R 00          	cmp	echoFlg,0 
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Page     1-9
                                                             
@@ -529,7 +529,7 @@ int14.asm                                                   Page     1-9
  07E2  59                       	pop	cx 
  07E3  5B                       	pop	bx 
  07E4  C3                       	ret 
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Page     1-10
                                                             
@@ -588,7 +588,7 @@ int14.asm                                                   Page     1-10
  083E  75 0E                    	jne	r8			; no 
  0840  80 3E 0108 R 00          	cmp	rtsFlg,0		; is RTS already on? 
  0845  75 07                    	jne	r8			; yes 
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Page     1-11
                                                             
@@ -647,7 +647,7 @@ int14.asm                                                   Page     1-11
  087D  75 07                    	jne	s9			; turn it on 
  087F  FE 06 0108 R             	inc	rtsFlg 
  0883  E8 0622 R                	call	setRTS 
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Page     1-12
                                                             
@@ -671,7 +671,7 @@ int14.asm                                                   Page     1-12
                                 	assume	ds:code 
  0891  8B 16 0110 R             	mov	dx,comAddr 
                                  
- 0895  52                       	push	dx 
+ 0895  52                       hw0:	push	dx 
  0896  42                       	inc	dx 
  0897  42                       	inc	dx			; DX -> IIR 
  0898  EC                       	in	al,dx 
@@ -690,176 +690,177 @@ int14.asm                                                   Page     1-12
  08BC  89 1E 055C R           1 	mov	logNext,bx
  08C0  5B                     1 	pop	bx
                                  
- 08C1  3C 02                    	cmp	al,02h			; THRE condition? 
- 08C3  75 05                    	jne	hw1			; no 
- 08C5  E8 070B R                	call	tryOut			; yes, so see if we have something to write 
- 08C8  EB 07                    	jmp	short hw9 
+ 08C1  3C 04                    	cmp	al,04h			; DR condition? 
+ 08C3  75 07                    	jne	hw1			; no 
+ 08C5  E8 0673 R                	call	tryIn			; read data 
+ 08C8  73 CB                    	jnc	hw0			; assuming we read data, check IIR again 
+ 08CA  EB 07                    	jmp	short hw9 
                                  
- 08CA  3C 04                    hw1:	cmp	al,04h			; DR condition? 
- 08CC  75 03                    	jne	hw9 
- 08CE  E8 0673 R                	call	tryIn 
+ 08CC  3C 02                    hw1:	cmp	al,02h			; THRE condition? 
+ 08CE  75 03                    	jne	hw9			; no 
+ 08D0  E8 070B R                	call	tryOut			; yes, so see if we have something to write 
                                  
- 08D1  FA                       hw9:	cli 
- 08D2  B0 20                    	mov	al,20h			; EOI command 
- 08D4  E6 20                    	out	20h,al 
+ 08D3  FA                       hw9:	cli 
+ 08D4  B0 20                    	mov	al,20h			; EOI command 
+ 08D6  E6 20                    	out	20h,al 
                                  
- 08D6  1F                       	pop	ds 
+ 08D8  1F                       	pop	ds 
                                 	assume	ds:nothing 
- 08D7  5A                       	pop	dx 
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Page     1-13
                                                             
 
- 08D8  5B                       	pop	bx 
- 08D9  58                       	pop	ax 
- 08DA  CF                       	iret 
+ 08D9  5A                       	pop	dx 
+ 08DA  5B                       	pop	bx 
+ 08DB  58                       	pop	ax 
+ 08DC  CF                       	iret 
                                 intHW	endp 
                                  
- 08DB  90                       	even 
- 08DC                           endRes	label	byte			; end of resident code/data 
+ 08DD  90                       	even 
+ 08DE                           endRes	label	byte			; end of resident code/data 
                                  
- 08DC  43 4F 4D 3F 20 68 61     comMsg	db	"COM? handlers installed$" 
+ 08DE  43 4F 4D 3F 20 68 61     comMsg	db	"COM? handlers installed$" 
        6E 64 6C 65 72 73 20     
        69 6E 73 74 61 6C 6C     
        65 64 24                 
- 08F4  20 69 6E 20 70 6F 6C     pollMsg	db	" in polled mode$" 
+ 08F6  20 69 6E 20 70 6F 6C     pollMsg	db	" in polled mode$" 
        6C 65 64 20 6D 6F 64     
        65 24                    
- 0904  0D 0A 24                 endMsg	db	13,10,'$' 
- 0907  48 61 6E 64 6C 65 72     insMsg	db	"Handlers already installed",13,10,'$' 
+ 0906  0D 0A 24                 endMsg	db	13,10,'$' 
+ 0909  48 61 6E 64 6C 65 72     insMsg	db	"Handlers already installed",13,10,'$' 
        73 20 61 6C 72 65 61     
        64 79 20 69 6E 73 74     
        61 6C 6C 65 64 0D 0A     
        24                       
- 0924  43 4F 4D 20 70 6F 72     errMsg	db	"COM port not found",13,10,'$' 
+ 0926  43 4F 4D 20 70 6F 72     errMsg	db	"COM port not found",13,10,'$' 
        74 20 6E 6F 74 20 66     
        6F 75 6E 64 0D 0A 24     
                                  
- 0939                           install	proc	near 
+ 093B                           install	proc	near 
                                 	assume	ds:code, es:code, ss:code 
                                 	; 
                                 	; Let's look for a /P switch to determine polled mode, 
                                 	; along with /1 to select adapter #1 at port 3F8h instead of 2F8h. 
                                 	; 
- 0939  FC                       	cld 
- 093A  BE 0080                  	mov	si,80h			; DS:SI -> command line 
- 093D  AC                       	lodsb 
- 093E  98                       	cbw 
- 093F  91                       	xchg	cx,ax			; CX == line length (as a fail-safe) 
- 0940  AC                       ins0:	lodsb 
- 0941  49                       	dec	cx 
- 0942  3C 0D                    	cmp	al,0Dh			; end of command-line? 
- 0944  74 22                    	je	ins3			; yes 
- 0946  3C 2F                    	cmp	al,'/' 
- 0948  75 1A                    	jne	ins2 
- 094A  AC                       	lodsb 
- 094B  49                       	dec	cx 
- 094C  3C 31                    	cmp	al,'1'			; /1? 
- 094E  75 0A                    	jne	ins1			; no 
- 0950  81 06 0110 R 0100        	add	comAddr,100h		; bump 2F8h to 3F8h 
- 0956  FF 06 010E R             	inc	comIRQ			; bump IRQ3 to IRQ4 
- 095A  24 DF                    ins1:	and	al,not 20h 
- 095C  3C 50                    	cmp	al,'P'			; /P? 
- 095E  75 04                    	jne	ins2			; no 
- 0960  FE 06 0109 R             	inc	pollFlg			; yes, set pollFlg to non-zero 
- 0964  85 C9                    ins2:	test	cx,cx			; any more command-line characters? 
- 0966  7F D8                    	jg	ins0			; yes 
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+ 093B  FC                       	cld 
+ 093C  BE 0080                  	mov	si,80h			; DS:SI -> command line 
+ 093F  AC                       	lodsb 
+ 0940  98                       	cbw 
+ 0941  91                       	xchg	cx,ax			; CX == line length (as a fail-safe) 
+ 0942  AC                       ins0:	lodsb 
+ 0943  49                       	dec	cx 
+ 0944  3C 0D                    	cmp	al,0Dh			; end of command-line? 
+ 0946  74 22                    	je	ins3			; yes 
+ 0948  3C 2F                    	cmp	al,'/' 
+ 094A  75 1A                    	jne	ins2 
+ 094C  AC                       	lodsb 
+ 094D  49                       	dec	cx 
+ 094E  3C 31                    	cmp	al,'1'			; /1? 
+ 0950  75 0A                    	jne	ins1			; no 
+ 0952  81 06 0110 R 0100        	add	comAddr,100h		; bump 2F8h to 3F8h 
+ 0958  FF 06 010E R             	inc	comIRQ			; bump IRQ3 to IRQ4 
+ 095C  24 DF                    ins1:	and	al,not 20h 
+ 095E  3C 50                    	cmp	al,'P'			; /P? 
+ 0960  75 04                    	jne	ins2			; no 
+ 0962  FE 06 0109 R             	inc	pollFlg			; yes, set pollFlg to non-zero 
+ 0966  85 C9                    ins2:	test	cx,cx			; any more command-line characters? 
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Page     1-14
                                                             
 
+ 0968  7F D8                    	jg	ins0			; yes 
                                  
- 0968  2B C0                    ins3:	sub	ax,ax 
- 096A  8E C0                    	mov	es,ax 
+ 096A  2B C0                    ins3:	sub	ax,ax 
+ 096C  8E C0                    	mov	es,ax 
                                 	assume	es:nothing		; since ES is zero 
                                  
- 096C  A1 0110 R                	mov	ax,comAddr 
- 096F  BB 0400                  	mov	bx,400h			; access RBDA @0:400 instead of 40:0 
- 0972  2B D2                    	sub	dx,dx 
- 0974  26: 39 07                ins4:	cmp	word ptr es:[bx],ax	; matching port? 
- 0977  74 11                    	je	ins5			; yes 
- 0979  43                       	inc	bx 
- 097A  43                       	inc	bx 
- 097B  42                       	inc	dx 
- 097C  80 FA 04                 	cmp	dl,4 
- 097F  72 F3                    	jb	ins4 
- 0981  BA 0924 R                	mov	dx,offset errMsg	; no matching port was found; abort 
- 0984  B4 09                    	mov	ah,09h 
- 0986  CD 21                    	int	21h 
- 0988  CD 20                    	int	20h 
+ 096E  A1 0110 R                	mov	ax,comAddr 
+ 0971  BB 0400                  	mov	bx,400h			; access RBDA @0:400 instead of 40:0 
+ 0974  2B D2                    	sub	dx,dx 
+ 0976  26: 39 07                ins4:	cmp	word ptr es:[bx],ax	; matching port? 
+ 0979  74 11                    	je	ins5			; yes 
+ 097B  43                       	inc	bx 
+ 097C  43                       	inc	bx 
+ 097D  42                       	inc	dx 
+ 097E  80 FA 04                 	cmp	dl,4 
+ 0981  72 F3                    	jb	ins4 
+ 0983  BA 0926 R                	mov	dx,offset errMsg	; no matching port was found; abort 
+ 0986  B4 09                    	mov	ah,09h 
+ 0988  CD 21                    	int	21h 
+ 098A  CD 20                    	int	20h 
                                  
- 098A  89 16 010C R             ins5:	mov	comID,dx		; comID is 0 for COM1, 1 for COM2, etc. 
- 098E  B4 AA                    	mov	ah,0AAh			; quick-and-dirty INT14.COM installation check 
- 0990  CD 14                    	int	14h 
- 0992  F6 D4                    	not	ah 
- 0994  80 FC AA                 	cmp	ah,0AAh 
- 0997  75 09                    	jne	ins6 
- 0999  BA 0907 R                	mov	dx,offset insMsg	; already installed for that port 
- 099C  B4 09                    	mov	ah,09h 
- 099E  CD 21                    	int	21h 
- 09A0  CD 20                    	int	20h			; abort 
+ 098C  89 16 010C R             ins5:	mov	comID,dx		; comID is 0 for COM1, 1 for COM2, etc. 
+ 0990  B4 AA                    	mov	ah,0AAh			; quick-and-dirty INT14.COM installation check 
+ 0992  CD 14                    	int	14h 
+ 0994  F6 D4                    	not	ah 
+ 0996  80 FC AA                 	cmp	ah,0AAh 
+ 0999  75 09                    	jne	ins6 
+ 099B  BA 0909 R                	mov	dx,offset insMsg	; already installed for that port 
+ 099E  B4 09                    	mov	ah,09h 
+ 09A0  CD 21                    	int	21h 
+ 09A2  CD 20                    	int	20h			; abort 
                                  
- 09A2  B8 055E R                ins6:	mov	ax,offset int14 
- 09A5  26: 87 06 0050           	xchg	ax,es:[14h*4] 
- 09AA  A3 0104 R                	mov	word ptr prev14,ax 
- 09AD  8C C8                    	mov	ax,cs 
- 09AF  26: 87 06 0052           	xchg	ax,es:[14h*4+2] 
- 09B4  A3 0106 R                	mov	word ptr prev14+2,ax 
+ 09A4  B8 055E R                ins6:	mov	ax,offset int14 
+ 09A7  26: 87 06 0050           	xchg	ax,es:[14h*4] 
+ 09AC  A3 0104 R                	mov	word ptr prev14,ax 
+ 09AF  8C C8                    	mov	ax,cs 
+ 09B1  26: 87 06 0052           	xchg	ax,es:[14h*4+2] 
+ 09B6  A3 0106 R                	mov	word ptr prev14+2,ax 
                                  
- 09B7  26: 8B 17                	mov	dx,es:[bx]		; DX is port (eg, 3F8h or 2F8h) 
- 09BA  BB 088A R                	mov	bx,offset intHW 
- 09BD  80 3E 0109 R 00          	cmp	pollFlg,0 
- 09C2  75 28                    	jne	ins7 
- 09C4  8B 3E 010E R             	mov	di,comIRQ		; convert IRQ... 
- 09C8  83 C7 08                 	add	di,8			; ...to vector 
- 09CB  03 FF                    	add	di,di			; and multiply vector by 4 
- 09CD  03 FF                    	add	di,di 
- 09CF  26: 89 1D                	mov	word ptr es:[di],bx 
- 09D2  26: 8C 4D 02             	mov	es:[di+2],cs 
- 09D6  E8 05FE R                	call	setIER 
- 09D9  E4 21                    	in	al,21h 
- 09DB  8A 0E 010E R             	mov	cl,byte ptr comIRQ 
- 09DF  B4 01                    	mov	ah,1 
- 09E1  D2 E4                    	shl	ah,cl 
- 09E3  F6 D4                    	not	ah			; AH == NOT (1 SHL comIRQ) 
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+ 09B9  26: 8B 17                	mov	dx,es:[bx]		; DX is port (eg, 3F8h or 2F8h) 
+ 09BC  BB 088A R                	mov	bx,offset intHW 
+ 09BF  80 3E 0109 R 00          	cmp	pollFlg,0 
+ 09C4  75 28                    	jne	ins7 
+ 09C6  8B 3E 010E R             	mov	di,comIRQ		; convert IRQ... 
+ 09CA  83 C7 08                 	add	di,8			; ...to vector 
+ 09CD  03 FF                    	add	di,di			; and multiply vector by 4 
+ 09CF  03 FF                    	add	di,di 
+ 09D1  26: 89 1D                	mov	word ptr es:[di],bx 
+ 09D4  26: 8C 4D 02             	mov	es:[di+2],cs 
+ 09D8  E8 05FE R                	call	setIER 
+ 09DB  E4 21                    	in	al,21h 
+ 09DD  8A 0E 010E R             	mov	cl,byte ptr comIRQ 
+ 09E1  B4 01                    	mov	ah,1 
+ 09E3  D2 E4                    	shl	ah,cl 
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Page     1-15
                                                             
 
- 09E5  22 C4                    	and	al,ah 
- 09E7  E6 21                    	out	21h,al			; unmask the appropriate COM IRQ 
- 09E9  BB 08DC R                	mov	bx,offset endRes 
+ 09E5  F6 D4                    	not	ah			; AH == NOT (1 SHL comIRQ) 
+ 09E7  22 C4                    	and	al,ah 
+ 09E9  E6 21                    	out	21h,al			; unmask the appropriate COM IRQ 
+ 09EB  BB 08DE R                	mov	bx,offset endRes 
                                  
- 09EC  E8 060F R                ins7:	call	setDTR			; set DTR (and OUT2 as needed for interrupts) 
- 09EF  E8 0622 R                	call	setRTS			; rtsFlg is initially 1 
+ 09EE  E8 060F R                ins7:	call	setDTR			; set DTR (and OUT2 as needed for interrupts) 
+ 09F1  E8 0622 R                	call	setRTS			; rtsFlg is initially 1 
                                  
- 09F2  8B 16 010C R             	mov	dx,comID 
- 09F6  80 C2 31                 	add	dl,'1' 
- 09F9  88 16 08DF R             	mov	comMsg+3,dl 
- 09FD  BA 08DC R                	mov	dx,offset comMsg 
- 0A00  B4 09                    	mov	ah,09h 
- 0A02  CD 21                    	int	21h 
- 0A04  80 3E 0109 R 00          	cmp	pollFlg,0 
- 0A09  74 07                    	je	ins9 
- 0A0B  BA 08F4 R                	mov	dx,offset pollMsg 
- 0A0E  B4 09                    	mov	ah,09h 
- 0A10  CD 21                    	int	21h 
- 0A12  BA 0904 R                ins9:	mov	dx,offset endMsg 
- 0A15  B4 09                    	mov	ah,09h 
- 0A17  CD 21                    	int	21h 
+ 09F4  8B 16 010C R             	mov	dx,comID 
+ 09F8  80 C2 31                 	add	dl,'1' 
+ 09FB  88 16 08E1 R             	mov	comMsg+3,dl 
+ 09FF  BA 08DE R                	mov	dx,offset comMsg 
+ 0A02  B4 09                    	mov	ah,09h 
+ 0A04  CD 21                    	int	21h 
+ 0A06  80 3E 0109 R 00          	cmp	pollFlg,0 
+ 0A0B  74 07                    	je	ins9 
+ 0A0D  BA 08F6 R                	mov	dx,offset pollMsg 
+ 0A10  B4 09                    	mov	ah,09h 
+ 0A12  CD 21                    	int	21h 
+ 0A14  BA 0906 R                ins9:	mov	dx,offset endMsg 
+ 0A17  B4 09                    	mov	ah,09h 
+ 0A19  CD 21                    	int	21h 
                                  
- 0A19  8B D3                    	mov	dx,bx			; DX -> end of resident code/data 
- 0A1B  CD 27                    	int	27h 
+ 0A1B  8B D3                    	mov	dx,bx			; DX -> end of resident code/data 
+ 0A1D  CD 27                    	int	27h 
                                 install	endp 
                                  
- 0A1D                           code	ends 
+ 0A1F                           code	ends 
                                  
                                 	end	main 
 
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Symbols-1
                                                              
@@ -874,7 +875,7 @@ Segments and Groups:
 
                 N a m e         	Size	Align	Combine Class
 
-CODE . . . . . . . . . . . . . .  	0A1D	WORD	PUBLIC	'CODE'
+CODE . . . . . . . . . . . . . .  	0A1F	WORD	PUBLIC	'CODE'
 
 Symbols:            
 
@@ -883,23 +884,24 @@ Symbols:
 COMADDR  . . . . . . . . . . . .  	L WORD 	0110	CODE
 COMID  . . . . . . . . . . . . .  	L WORD 	010C	CODE
 COMIRQ . . . . . . . . . . . . .  	L WORD 	010E	CODE
-COMMSG . . . . . . . . . . . . .  	L BYTE 	08DC	CODE
+COMMSG . . . . . . . . . . . . .  	L BYTE 	08DE	CODE
 
 DEBUG  . . . . . . . . . . . . .  	Number	0001	
 DTR1 . . . . . . . . . . . . . .  	L NEAR	061D	CODE
 
 ECHOFLG  . . . . . . . . . . . .  	L BYTE 	010A	CODE
-ENDMSG . . . . . . . . . . . . .  	L BYTE 	0904	CODE
-ENDRES . . . . . . . . . . . . .  	L BYTE 	08DC	CODE
-ERRMSG . . . . . . . . . . . . .  	L BYTE 	0924	CODE
+ENDMSG . . . . . . . . . . . . .  	L BYTE 	0906	CODE
+ENDRES . . . . . . . . . . . . .  	L BYTE 	08DE	CODE
+ERRMSG . . . . . . . . . . . . .  	L BYTE 	0926	CODE
 
 FAKELSR  . . . . . . . . . . . .  	N PROC	05C1	CODE	Length = 002F
 
 GETLSR . . . . . . . . . . . . .  	N PROC	05F0	CODE	Length = 0007
 GETMSR . . . . . . . . . . . . .  	N PROC	05F7	CODE	Length = 0007
 
-HW1  . . . . . . . . . . . . . .  	L NEAR	08CA	CODE
-HW9  . . . . . . . . . . . . . .  	L NEAR	08D1	CODE
+HW0  . . . . . . . . . . . . . .  	L NEAR	0895	CODE
+HW1  . . . . . . . . . . . . . .  	L NEAR	08CC	CODE
+HW9  . . . . . . . . . . . . . .  	L NEAR	08D3	CODE
 
 I1 . . . . . . . . . . . . . . .  	L NEAR	0763	CODE
 I14A . . . . . . . . . . . . . .  	L NEAR	0568	CODE
@@ -914,25 +916,25 @@ INC1 . . . . . . . . . . . . . .  	L NEAR	0669	CODE
 INCPTR . . . . . . . . . . . . .  	N PROC	065E	CODE	Length = 0015
 INHEAD . . . . . . . . . . . . .  	L WORD 	0154	CODE
 INIT . . . . . . . . . . . . . .  	N PROC	072C	CODE	Length = 0047
-INS0 . . . . . . . . . . . . . .  	L NEAR	0940	CODE
-INS1 . . . . . . . . . . . . . .  	L NEAR	095A	CODE
-INS2 . . . . . . . . . . . . . .  	L NEAR	0964	CODE
-INS3 . . . . . . . . . . . . . .  	L NEAR	0968	CODE
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+INS0 . . . . . . . . . . . . . .  	L NEAR	0942	CODE
+INS1 . . . . . . . . . . . . . .  	L NEAR	095C	CODE
+INS2 . . . . . . . . . . . . . .  	L NEAR	0966	CODE
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Symbols-2
                                                              
 
-INS4 . . . . . . . . . . . . . .  	L NEAR	0974	CODE
-INS5 . . . . . . . . . . . . . .  	L NEAR	098A	CODE
-INS6 . . . . . . . . . . . . . .  	L NEAR	09A2	CODE
-INS7 . . . . . . . . . . . . . .  	L NEAR	09EC	CODE
-INS9 . . . . . . . . . . . . . .  	L NEAR	0A12	CODE
-INSMSG . . . . . . . . . . . . .  	L BYTE 	0907	CODE
-INSTALL  . . . . . . . . . . . .  	N PROC	0939	CODE	Length = 00E4
+INS3 . . . . . . . . . . . . . .  	L NEAR	096A	CODE
+INS4 . . . . . . . . . . . . . .  	L NEAR	0976	CODE
+INS5 . . . . . . . . . . . . . .  	L NEAR	098C	CODE
+INS6 . . . . . . . . . . . . . .  	L NEAR	09A4	CODE
+INS7 . . . . . . . . . . . . . .  	L NEAR	09EE	CODE
+INS9 . . . . . . . . . . . . . .  	L NEAR	0A14	CODE
+INSMSG . . . . . . . . . . . . .  	L BYTE 	0909	CODE
+INSTALL  . . . . . . . . . . . .  	N PROC	093B	CODE	Length = 00E4
 INT14  . . . . . . . . . . . . .  	F PROC	055E	CODE	Length = 0063
 INTAIL . . . . . . . . . . . . .  	L WORD 	0156	CODE
-INTHW  . . . . . . . . . . . . .  	F PROC	088A	CODE	Length = 0051
+INTHW  . . . . . . . . . . . . .  	F PROC	088A	CODE	Length = 0053
 INTOT  . . . . . . . . . . . . .  	L WORD 	0152	CODE
 
 LOGBUFF  . . . . . . . . . . . .  	L BYTE 	015C	CODE	Length = 0400
@@ -949,7 +951,7 @@ OUTHEAD  . . . . . . . . . . . .  	L WORD 	0158	CODE
 OUTTAIL  . . . . . . . . . . . .  	L WORD 	015A	CODE
 
 POLLFLG  . . . . . . . . . . . .  	L BYTE 	0109	CODE
-POLLMSG  . . . . . . . . . . . .  	L BYTE 	08F4	CODE
+POLLMSG  . . . . . . . . . . . .  	L BYTE 	08F6	CODE
 PREV14 . . . . . . . . . . . . .  	L DWORD	0104	CODE
 
 R1 . . . . . . . . . . . . . . .  	L NEAR	0808	CODE
@@ -976,12 +978,12 @@ TO9  . . . . . . . . . . . . . .  	L NEAR	072A	CODE
 TRYIN  . . . . . . . . . . . . .  	N PROC	0673	CODE	Length = 0098
 TRYOUT . . . . . . . . . . . . .  	N PROC	070B	CODE	Length = 0021
 
-W0 . . . . . . . . . . . . . . .  	L NEAR	078D	CODE
-Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 17:49:31
+Microsoft (R) Macro Assembler  Version 4.00                 3/15/18 19:50:28
 
 int14.asm                                                   Symbols-3
                                                              
 
+W0 . . . . . . . . . . . . . . .  	L NEAR	078D	CODE
 W1 . . . . . . . . . . . . . . .  	L NEAR	0791	CODE
 W2 . . . . . . . . . . . . . . .  	L NEAR	07A5	CODE
 W3 . . . . . . . . . . . . . . .  	L NEAR	07AF	CODE
@@ -998,9 +1000,9 @@ WRITE  . . . . . . . . . . . . .  	N PROC	0773	CODE	Length = 0072
 ??0004 . . . . . . . . . . . . .  	L NEAR	08B3	CODE
 
 
-    705 Source  Lines
-    765 Total   Lines
-    114 Symbols
+    706 Source  Lines
+    766 Total   Lines
+    115 Symbols
 
   47060 Bytes symbol space free
 

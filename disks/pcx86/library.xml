@@ -19,7 +19,7 @@
 		<disk path="/pubs/pc/programming/Unauthorized_Windows_95/UNAUTH-W95S.json">Unauthorized Windows 95 (SRC)</disk>
 		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2B.json">Undocumented DOS (2E BIN)</disk>
 		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2S.json">Undocumented DOS (2E SRC)</disk>
-		<disk path="/tests/pcx86/testmon/int14/INT14.json">PCjs INT14 Utility</disk>
+		<disk path="/tests/pcx86/testmon/int14/INT14.json">PCjs INT14 Utilities</disk>
 		<disk path="/tests/pcx86/vga/VGABIN.json">VGA Tests (Black Book)</disk>
 		<disk path="/pcjs-disks/pcx86/empty/EMPTY-360K.json">Empty Diskette (360K)</disk>
 		<disk path="/pcjs-disks/pcx86/empty/EMPTY-720K.json">Empty Diskette (720K)</disk>

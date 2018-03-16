@@ -58,8 +58,8 @@ There are currently no `parity`, `databits`, or `stopbits` overrides, so you sho
 To create a disk image containing the INT14 source code, run the following [DiskDump](/modules/diskdump/lib/) command
 in this directory:
 
-    diskdump --path="INT14.ASM;DOWNLOAD.ASM;MK.BAT" --format=img --output=INT14.img --normalize --overwrite
+    diskdump --path="INT14.ASM;DOWNLOAD.ASM;FAKECTTY.ASM;MK.BAT" --format=img --output=INT14.img --normalize --overwrite
 
 A disk image named "PCjs INT14 Utilities" for use with PCjs machines has been created as follows:
 
-    diskdump --path="INT14.ASM;INT14.COM;DOWNLOAD.ASM;DOWNLOAD.COM;MK.BAT" --format=json --output=INT14.json --normalize --overwrite
+    diskdump --path="INT14.ASM;INT14.COM;DOWNLOAD.ASM;DOWNLOAD.COM;FAKECTTY.ASM;FAKECTTY.COM;MK.BAT" --format=json --output=INT14.json --normalize --overwrite

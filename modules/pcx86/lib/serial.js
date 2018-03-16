@@ -638,7 +638,7 @@ class SerialPort extends Component {
         if (pins & RS232.DSR.MASK) {
             this.bMSR |= SerialPort.MSR.DSR | SerialPort.MSR.DDSR;
         }
-        if (bMSROld != this.bMSR) this.updateIRR();
+        if (bMSROld != this.bMSR) this.updateIIR();
     }
 
     /**
@@ -657,7 +657,7 @@ class SerialPort extends Component {
                 }
             }
         }
-        this.updateIRR();
+        this.updateIIR();
     }
 
     /**
@@ -704,7 +704,7 @@ class SerialPort extends Component {
     {
         var b = this.bIIR;
         /*
-         * Reading the IRR is supposed to clear the INT_THR condition (as is another write to the THR).
+         * Reading the IIR is supposed to clear the INT_THR condition (as is another write to the THR).
          */
         if (b == SerialPort.IIR.INT_THR) {
             this.bIIR = SerialPort.IIR.NO_INT;
@@ -809,7 +809,7 @@ class SerialPort extends Component {
                 return serial.transmitByte(bOut);
             });
             this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout());
-            this.updateIRR();
+            this.updateIIR();
         }
     }
 
@@ -881,11 +881,11 @@ class SerialPort extends Component {
     }
 
     /**
-     * updateIRR()
+     * updateIIR()
      *
      * @this {SerialPort}
      */
-    updateIRR()
+    updateIIR()
     {
         var bIIR = -1;
         /*
@@ -1008,7 +1008,7 @@ class SerialPort extends Component {
     transmitData()
     {
         this.bLSR |= (SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
-        this.updateIRR();
+        this.updateIIR();
     }
 
     /**
@@ -1085,7 +1085,7 @@ SerialPort.DLM = {REG: 1};      // Divisor Latch MSB (only when SerialPort.LCR.D
 /*
  * Interrupt ID Register (IIR.REG, offset 2; eg, 0x3FA or 0x2FA)
  *
- * All interrupt conditions cleared by reading the corresponding register (or, in the case of IRR_INT_THR, writing a new value to THR.REG)
+ * All interrupt conditions cleared by reading the corresponding register (or, in the case of IIR.INT_THR, writing a new value to THR.REG)
  */
 SerialPort.IIR = {
     REG:            2,          // Interrupt ID Register (read-only)
