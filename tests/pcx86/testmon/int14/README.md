@@ -23,14 +23,16 @@ adapter in the PC, then DOS will name it "COM1" even if it's using the tradition
     link int14;
     exe2bin int14.exe int14.com
 
-INT14.COM is intended to be run on an actual IBM PC/XT/AT, so that the PCjs [TestMonitor](/modules/pcx86/bin/testmon.js)
-command-line utility can be used to control the PC.  Here's the procedure:
+INT14.COM is intended to be run on an actual IBM PC/XT/AT, so that the PCjs
+[TestMonitor Utility](/tests/pcx86/testmon/testmon.js) can be used to control the PC from the command-line.
+
+Here's the procedure:
 
 - Turn on your PC
 - Boot DOS 2.00 or later
-- Load the PCjs INT14 TSR: "INT14"
+- Load the PCjs [INT14 TSR](/tests/pcx86/testmon/int14/INT14.ASM): "INT14"
 - Run the DOS CTTY command: "CTTY COM2" 
-- On your connected machine, run the PCjs TestMonitor utility: "node testmon.js"
+- On your connected machine, run the PCjs [TestMonitor Utility](/tests/pcx86/testmon/testmon.js): "node testmon"
 
 You should now be able to control the PC using the TestMonitor utility, in your choice of either "terminal mode" or
 "command mode".
@@ -56,8 +58,8 @@ There are currently no `parity`, `databits`, or `stopbits` overrides, so you sho
 To create a disk image containing the INT14 source code, run the following [DiskDump](/modules/diskdump/lib/) command
 in this directory:
 
-    diskdump --path=""INT14.ASM;MK.BAT" --format=img --output=INT14.img --normalize --overwrite
+    diskdump --path="INT14.ASM;DOWNLOAD.ASM;MK.BAT" --format=img --output=INT14.img --normalize --overwrite
 
-A disk image named "PCjs INT14 Utility" for use with PCjs machines has been created as follows:
+A disk image named "PCjs INT14 Utilities" for use with PCjs machines has been created as follows:
 
-    diskdump --path="INT14.ASM;INT14.COM;INT14.TXT;MK.BAT" --format=json --output=INT14.json --normalize --overwrite
+    diskdump --path="INT14.ASM;INT14.COM;DOWNLOAD.ASM;DOWNLOAD.COM;MK.BAT" --format=json --output=INT14.json --normalize --overwrite

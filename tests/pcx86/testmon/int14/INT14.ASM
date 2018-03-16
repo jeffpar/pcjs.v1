@@ -247,6 +247,8 @@ incPtr	endp
 ;
 ; If the DR bit is set, see if we can buffer the data.
 ;
+; CARRY returns clear if any new data was read, otherwise it's set.
+;
 tryIn	proc	near
 	assume	ds:code
 	push	ax
@@ -256,6 +258,7 @@ tryIn	proc	near
 	pop	dx
 	test	al,01h			; DR set?
 	jnz	ti1			; yes
+	stc
 	jmp	ti9
 ti1:	in	al,dx			; AL == new data
 	log	'I',al
@@ -278,6 +281,7 @@ ti7:	mov	inHead,bx
 	dec	rtsFlg			; no, so let's try turning it off now
 	call	setRTS			; and hope the sender give us some space
 ti8:	pop	bx
+	clc
 ti9:	pop	ax
 	ret
 tryIn	endp
@@ -442,11 +446,20 @@ read	proc	near
 	cmp	pollFlg,0		; in polling mode, we take
 	je	r1			; every opportunity to check for input
 	call	tryIn
-	mov	rtsFlg,0
-	call	setRTS			; after a polled read, let's turn RTS off
+	;
+	; If CARRY is set, nothing was read, so let's turn RTS on.
+	; If CARRY is clear, then something was read, so let's turn RTS off.
+	;
+	mov	al,0
+	adc	al,al
+	cmp	rtsFlg,al
+	je	r1
+	mov	rtsFlg,al
+	call	setRTS
 
 r1:	sub	ax,ax
 	call	fakeLSR
+	and	al,1Eh			; READ requests only return "error" bits
 	mov	ah,al
 
 	mov	bx,inTail
@@ -470,6 +483,7 @@ r4:	call	incPtr
 	jne	r8			; yes
 	inc	rtsFlg			; no, so let's turn RTS back on
 	call	setRTS
+
 r8:	dec	inTot
 
 r9:	pop	ds
@@ -610,8 +624,8 @@ ins2:	test	cx,cx			; any more command-line characters?
 ins3:	sub	ax,ax
 	mov	es,ax
 	assume	es:nothing		; since ES is zero
-	mov	ax,comAddr
 
+	mov	ax,comAddr
 	mov	bx,400h			; access RBDA @0:400 instead of 40:0
 	sub	dx,dx
 ins4:	cmp	word ptr es:[bx],ax	; matching port?
@@ -627,7 +641,7 @@ ins4:	cmp	word ptr es:[bx],ax	; matching port?
 	int	20h
 
 ins5:	mov	comID,dx		; comID is 0 for COM1, 1 for COM2, etc.
-	mov	ah,0AAh			; quick-and-dirty installation check
+	mov	ah,0AAh			; quick-and-dirty INT14.COM installation check
 	int	14h
 	not	ah
 	cmp	ah,0AAh
