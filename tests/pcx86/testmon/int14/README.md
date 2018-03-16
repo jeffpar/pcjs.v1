@@ -63,3 +63,36 @@ in this directory:
 A disk image named "PCjs INT14 Utilities" for use with PCjs machines has been created as follows:
 
     diskdump --path="INT14.ASM;INT14.COM;DOWNLOAD.ASM;DOWNLOAD.COM;FAKECTTY.ASM;FAKECTTY.COM;MK.BAT" --format=json --output=INT14.json --normalize --overwrite
+
+### Additional DOS Utilities
+
+The following DOS utilities require that INT14.COM be loaded first (and with the same /1 option, if any):
+
+- [DOWNLOAD.ASM](DOWNLOAD.ASM) (assembled as [DOWNLOAD.COM](DOWNLOAD.COM) and [DOWNLOAD.TXT](DOWNLOAD.TXT))
+- [FAKECTTY.ASM](FAKECTTY.ASM) (assembled as [FAKECTTY.COM](FAKECTTY.COM) and [FAKECTTY.TXT](FAKECTTY.TXT))
+
+Before using [DOWNLOAD.COM](DOWNLOAD.COM), be sure sure to heed the advice at the top of [DOWNLOAD.ASM](DOWNLOAD.ASM):
+
+	This very tiny and simplistic file downloader relies on having our
+	INT 14h	extensions TSR (INT14.COM) loaded first.  You may load INT14.COM
+	in "polled mode" (/P), but if you do, it's probably best to use the COM port
+	at its default speed of 2400 baud.  Also, if you loaded it for a non-default
+	port (/1), then make sure you run DOWNLOAD.COM with the same option (/1).
+	
+	The 'protocol" is currently very fragile, and if unusual things happen
+	(eg, a block is interrupted or comes up short), we may wait indefinitely;
+	fortunately, you should always be able to press a key (eg, ESC) to abort
+	the operation and try again.
+	
+	Currently, the only component that knows how to send files to DOWNLOAD.COM
+	is our Node test utility: https://www.pcjs.org/tests/pcx86/testmon/testmon.js:
+
+		node testmon.js [--baud=xxxx]
+	
+	After running DOWNLOAD.COM, run testmon.js and press Ctrl-F to initiate a
+	file transfer.  You can use the DOS MODE command before running DOWNLOAD.COM
+	to specify a baud rate other than 2400, eg:
+
+		MODE COM2:9600,N,8,1
+	
+	but make sure you pass the same baud rate (eg, --baud=9600) to testmon.js.

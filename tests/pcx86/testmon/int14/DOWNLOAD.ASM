@@ -1,10 +1,33 @@
 	title	download.asm
 	page	,120
-
+;
 ;	By Jeff Parsons (@jeffpar) 2018-03-15
 ;	Monitors INT 14h for file download requests
-
-DEBUG	equ	1
+;
+;	This very tiny and simplistic file downloader relies on having our
+;	INT 14h	extensions TSR (INT14.COM) loaded first.  You may load INT14.COM
+;	in "polled mode" (/P), but if you do, it's probably best to use the COM port
+;	at its default speed of 2400 baud.  Also, if you loaded it for a non-default
+;	port (/1), then make sure you run DOWNLOAD.COM with the same option (/1).
+;
+;	The 'protocol" is currently very fragile, and if unusual things happen
+;	(eg, a block is interrupted or comes up short), we may wait indefinitely;
+;	fortunately, you should always be able to press a key (eg, ESC) to abort
+;	the operation and try again.
+;
+;	Currently, the only component that knows how to send files to DOWNLOAD.COM
+;	is our Node test utility: https://www.pcjs.org/tests/pcx86/testmon/testmon.js:
+;
+;		node testmon.js [--baud=xxxx]
+;
+;	After running DOWNLOAD.COM, run testmon.js and press Ctrl-F to initiate a
+;	file transfer.  You can use the DOS MODE command before running DOWNLOAD.COM
+;	to specify a baud rate other than 2400, eg:
+;
+;		MODE COM2:9600,N,8,1
+;
+;	but make sure you pass the same baud rate (eg, --baud=9600) to testmon.js.
+;
 MAXBLK	equ	1024
 MAXNAM	equ	12
 
@@ -26,29 +49,31 @@ m1a:	int	20h			; abort
 m2:	cmp	al,06h			; Ctrl-F?
 	jne	m1			; no
 
-	mov	dx,offset begXFR	; beginning transfer message
+	mov	dx,offset begXFR	; DX -> beginning transfer message
 	mov	ah,09h
 	int	21h
 
 	call	readBlk			; read initial block (with file info)
-	jc	m3a			; on error, just start over
+	jc	m4a			; on error, just start over
 
-	lodsb
-	cmp	al,'|'
-	jne	m4x
-	mov	di,offset fName
-	mov	cx,MAXNAM
-m3:	cmp	bx,si
-m3a:	jb	m4a
-	lodsb
-	cmp	al,'|'
-	je	m4
-	dec	cx
-	jl	m3
-	stosb
-	jmp	m3
-
-m4:	mov	byte ptr [di],0		; file name complete
+	;
+	; First up: the 8.3 filename (after the first '|' separator)
+	;
+	lodsb				; get next character
+	cmp	al,'|'			; there IS a separator, right?
+	jne	m4x			; um, no, error
+	mov	di,offset fName		; DI -> filename buffer
+	mov	cx,MAXNAM		; CX == maximum filename size
+m3:	cmp	bx,si			; passed the end of buffer?
+	jb	m4a			; yes, error
+	lodsb				; get next character
+	cmp	al,'|'			; reached the next separator?
+	je	m4			; yes
+	dec	cx			; reached the 8.3 limit?
+	jl	m3			; yes, just keep looking for the separator
+	stosb				; no, save the next filename character
+	jmp	m3			; get more
+m4:	mov	byte ptr [di],0		; filename complete
 
 	;
 	; Next up: the file's size, as 8 hex digits
@@ -56,12 +81,12 @@ m4:	mov	byte ptr [di],0		; file name complete
 	mov	cx,8			; CX == # digits
 	call	getHex			; DS:SI -> hex digits, BX is still buffer limit
 m4a:	jc	m4x
-	mov	fSize,ax
-	mov	fSize+2,dx
+	mov	fSize,ax		; AX == file size (low)
+	mov	fSize+2,dx		; DX == file size (high)
 
-	lodsb
-	cmp	al,'|'
-	jne	m4x			; missing separator
+	lodsb				; get next character
+	cmp	al,'|'			; hopefully it's a separator
+	jne	m4x			; no, error
 
 	;
 	; Next up: the file's date and time, also as 8 hex digits
@@ -69,82 +94,110 @@ m4a:	jc	m4x
 	mov	cx,8			; CX == # digits
 	call	getHex			; DS:SI -> hex digits, BX is still buffer limit
 	jnc	m5
-m4x:	jmp	m8
+m4x:	jmp	m8err
 
-m5:	mov	fTime,ax
-	mov	fDate,dx
+m5:	mov	fTime,ax		; AX == file time
+	mov	fDate,dx		; DX == file date
 
-	mov	al,[si]
-	cmp	al,'|'
-	jne	m4x			; missing separator
+	mov	al,[si]			; get the FINAL character in the first block
+	cmp	al,'|'			; which should be another separator
+	jne	m4x			; but it's not :-(
 
-	cmp	bx,si			; are we exactly at the boundary now?
-	jne	m4x			; no
+	cmp	bx,si			; are we at the end of the block now?
+	jne	m4x			; no, something's wrong
 
-	mov	dx,offset goXFR
-	mov	ah,09h
+	;
+	; Display the filename we're about to download
+	;
+	mov	dx,offset doXFR		; we have enough info to begin
+	mov	ah,09h			; so let the user know
 	int	21h
 
-	mov	dx,offset fName		; DX -> file name
-	mov	cx,di			; DI still points to the end of the file name
-	sub	cx,dx			; CX == length of file name
+	mov	dx,offset fName		; DX -> filename
+	mov	cx,di			; DI still points to the end of filename
+	sub	cx,dx			; CX == length of filename
 	mov	bx,1			; BX == STDOUT
 	mov	ah,40h			; display the filename
 	int	21h
 
-	push	dx
+	push	dx			; lot of work just to display a CR/LF...
 	mov	dx,offset crLF
 	mov	ah,09h
 	int	21h
 	pop	dx
 
+	;
+	; Create the file
+	;
 	sub	cx,cx			; CX == no special attributes
 	mov	ah,3Ch			; create the file
 	int	21h
-	jnc	m5b
+	jc	m7err
 
-m5a:	mov	dx,offset filErr
-	jmp	short m8a
-
-m5b:	mov	fHandle,ax
+	mov	fHandle,ax
 	xchg	bx,ax
 
-m6:	mov	ax,010Dh		; send a Ctrl-M accepting the last
-	mov	dx,comID		; block and requesting the next block
-	int	14h
-	test	ah,80h
-	jnz	m8
+	;
+	; Start reading and writing blocks
+	;
+m6:	mov	di,3			; DI == retries + 1
+	mov	ax,010Dh		; send a Ctrl-M accepting the last block
+m6r:	mov	dx,comID		; and requesting the next block
+	int	14h			; write to COM port
+	test	ah,80h			; error?
+	jnz	m8err			; yes (weird)
+	cmp	fSize,0			; any more blocks expected?
+	jne	m7			; yes
+	cmp	fSize+2,0		; well?
+	je	m7end			; no, all done
+m7:	call	readBlk			; read next block
+	jnc	m7a			; no error
+	mov	ax,0112h		; preload AX with Ctrl-R retry command
+	dec	di			; any retries left?
+	jnz	m6r			; yes
+	jmp	short m8err		; no, report an error
+m7a:	mov	cx,bx			; calculate block size
+	sub	cx,si			;
+	inc	cx			; CX == total bytes (BX-SI+1)
+	sub	fSize,cx		; subtract from total size
+	sbb	fSize+2,0		;
+	jc	m8err			; file size error (too MUCH data?)
+	mov	bx,fHandle		; BX == handle
+	mov	dx,si			; DS:DX -> block buffer
+	mov	ah,40h			; write to file
+	int	21h			;
+	jc	m7err			; file write failed
+	jmp	m6			; read next block
 
-	cmp	fSize,0
-	jne	m7
-	cmp	fSize+2,0
-	je	m7x
+	;
+	; Download complete; close the file and print message
+	;
+m7end:	mov	dx,offset endXFR
+	jmp	short m9
 
-m7:	call	readBlk
-	jc	m8
-	mov	dx,si
-	mov	cx,bx
-	sub	cx,dx
-	inc	cx
-	mov	bx,fHandle
-	mov	ah,40h
+	;
+	; Assorted error paths (make sure any open file gets closed)
+	;
+m7err:	mov	dx,offset filErr
+	jmp	short m9
+
+m8err:	mov	dx,offset reqErr
+
+	;
+	; TODO: If the message isn't endXFR, perhaps we should delete the file
+	;
+m9:	mov	bx,fHandle
+	test	bx,bx
+	jz	m9msg
+	mov	cx,fTime		; before we close the file
+	mov	dx,fDate		; set the date/time we were given
+	mov	ax,5701h
 	int	21h
-	jc	m5a
-	sub	fSize,cx
-	sbb	fSize+2,0
-	jc	m5a			; the remaining file size underflowed
-	jmp	m6
-
-m7x:	mov	ah,3Eh			; close the file now
+	mov	ah,3Eh			; now go ahead and close
 	int	21h
-	jc	m5a
+	mov	fHandle,0
 
-	mov	dx,offset doneXFR
-	jmp	short m8a
-
-m8:	mov	dx,offset reqErr
-
-m8a:	mov	ah,09h
+m9msg:	mov	ah,09h
 	int	21h
 	jmp	m1
 main	endp
@@ -152,12 +205,12 @@ main	endp
 ;
 ; Read a block of data into our block buffer.
 ;
-; If successful, CARRY is clear and SI and BX are
-; set to the start and end of the buffer, respectively.
+; If successful, CARRY is clear and SI and BX contain the block boundaries.
 ;
 readBlk	proc	near
 	push	cx
 	push	di
+
 	call	readBB			; read block byte
 	jc	rblk9			; error, pass it on to caller
 	mov	cl,al
@@ -167,7 +220,7 @@ readBlk	proc	near
 	cmp	cx,MAXBLK+1		; too large?
 	cmc
 	jc	rblk9			; yes
-	mov	blklen,cx		; save block length
+	mov	si,cx			; save block length in SI
 	mov	ah,0			; AH == CRC
 	cld
 	mov	di,offset block		; DI -> block buffer
@@ -182,13 +235,10 @@ rblk1:	call	readBB			; read a byte
 	stc
 	jne	rblk9			; no
 
-	;
-	; Set SI and BX to the start and end of the block buffer
-	;
-	mov	si,offset block
 	mov	bx,si
-	add	bx,blklen
-	dec	bx			; BX is maximum block address
+	mov	si,offset block		; SI is starting block address
+	add	bx,si
+	dec	bx			; and BX is the maximum block address
 	clc
 
 rblk9:	pop	di
@@ -361,7 +411,6 @@ comID	dw	-1			; 0-based index of COM port in BIOS data area
 comAddr	dw	2F8h
 
 block	db	MAXBLK dup (?)
-blklen	dw	0
 fName	db	MAXNAM+1 dup (0)	; enough space for an 8.3 name plus terminating NUL
 fSize	dw	0,0
 fDate	dw	0
@@ -374,8 +423,8 @@ errMsg	db	"COM port not found",13,10,'$'
 
 begXFR	db	"Receiving transfer request..."
 crLF	db	13,10,'$'
-goXFR	db	"Downloading file: $"
-doneXFR	db	"File transfer complete",13,10,'$'
+doXFR	db	"Downloading file: $"
+endXFR	db	"File transfer complete",13,10,'$'
 
 filErr	db	"Unable to create file",13,10,'$'
 reqErr	db	"Invalid transfer request",13,10,'$'
