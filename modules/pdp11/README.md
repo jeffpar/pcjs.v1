@@ -8,7 +8,7 @@ PDPjs Support for PDP-11 Machines
 =================================
 
 Overview
----
+--------
 
 This PDPjs module for [PDP-11 Machines](/devices/pdp11/machine/) was added to the PCjs Project in 2016.
 

@@ -19,8 +19,7 @@ Logitech Modula-2/86 Compiler (1984)
 ------------------------------------
 
 This is a demo of Logitech's [Modula-2/86 Compiler 1.10](/disks/pcx86/tools/logitech/modula2/1.10/).
-
-For this demo, the compiler has been installed in an
+The compiler has been installed in an
 [IBM PC XT (Model 5160, 640Kb, 10Mb Drive) with EGA Display](/devices/pcx86/machine/5160/ega/640kb/),
 along with a [10Mb Drive](/disks/pcx86/drives/10mb/) containing
 [MS-DOS 3.20 with Microsoft C 4.00](/disks/pcx86/drives/10mb/msdos320-c400-xt3.xml).

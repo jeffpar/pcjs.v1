@@ -56360,6 +56360,7 @@ class SerialPort extends Component {
          */
         this.sDataReceived = "";
         this.connection = this.sendData = this.updateStatus = null;
+        this.fAutoFlow = false;
 
         /*
          * Export all functions required by bindConnection() or initConnection(), whichever is required.
@@ -56373,7 +56374,7 @@ class SerialPort extends Component {
     }
 
     /**
-     * bindConnection(connection, receiveData)
+     * bindConnection(connection, receiveData, fAutoFlow)
      * 
      * This is basically a lighter-weight version of initConnection(), used by built-in components
      * like TestController, as opposed to components in external machines, which require more work to connect.
@@ -56381,13 +56382,15 @@ class SerialPort extends Component {
      * @this {SerialPort}
      * @param {Component} connection
      * @param {function()} receiveData
+     * @param {boolean} [fAutoFlow] (true to enable automatic flow control; default is false)
      * @return {boolean}
      */
-    bindConnection(connection, receiveData)
+    bindConnection(connection, receiveData, fAutoFlow = false)
     {
         if (!this.connection) {
             this.connection = connection;
             this.sendData = receiveData;
+            this.fAutoFlow = fAutoFlow;
             return true;
         }
         return false;
@@ -56798,7 +56801,7 @@ class SerialPort extends Component {
         if (pins & RS232.DSR.MASK) {
             this.bMSR |= SerialPort.MSR.DSR | SerialPort.MSR.DDSR;
         }
-        if (bMSROld != this.bMSR) this.updateIRR();
+        if (bMSROld != this.bMSR) this.updateIIR();
     }
 
     /**
@@ -56809,13 +56812,15 @@ class SerialPort extends Component {
     advanceRBR()
     {
         if (this.abReceive.length > 0 && !(this.bLSR & SerialPort.LSR.DR)) {
-            this.bRBR = this.abReceive.shift();
-            this.bLSR |= SerialPort.LSR.DR;
-            if (this.abReceive.length && this.cpu) {
-                this.cpu.setTimer(this.timerReceiveNext, this.getBaudTimeout());
+            if (!this.fAutoFlow || (this.bMCR & SerialPort.MCR.RTS)) {
+                this.bRBR = this.abReceive.shift();
+                this.bLSR |= SerialPort.LSR.DR;
+                if (this.abReceive.length && this.cpu) {
+                    this.cpu.setTimer(this.timerReceiveNext, this.getBaudTimeout());
+                }
             }
         }
-        this.updateIRR();
+        this.updateIIR();
     }
 
     /**
@@ -56862,7 +56867,7 @@ class SerialPort extends Component {
     {
         var b = this.bIIR;
         /*
-         * Reading the IRR is supposed to clear the INT_THR condition (as is another write to the THR).
+         * Reading the IIR is supposed to clear the INT_THR condition (as is another write to the THR).
          */
         if (b == SerialPort.IIR.INT_THR) {
             this.bIIR = SerialPort.IIR.NO_INT;
@@ -56967,7 +56972,7 @@ class SerialPort extends Component {
                 return serial.transmitByte(bOut);
             });
             this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout());
-            this.updateIRR();
+            this.updateIIR();
         }
     }
 
@@ -57031,15 +57036,19 @@ class SerialPort extends Component {
                 }
                 this.updateStatus.call(this.connection, pins);
             }
+            /*
+             * Throw in a call to advanceRBR() for good measure, in case fAutoFlow is set and RTS was just enabled.
+             */
+            this.advanceRBR();
         }
     }
 
     /**
-     * updateIRR()
+     * updateIIR()
      *
      * @this {SerialPort}
      */
-    updateIRR()
+    updateIIR()
     {
         var bIIR = -1;
         /*
@@ -57162,7 +57171,7 @@ class SerialPort extends Component {
     transmitData()
     {
         this.bLSR |= (SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
-        this.updateIRR();
+        this.updateIIR();
     }
 
     /**
@@ -57239,7 +57248,7 @@ SerialPort.DLM = {REG: 1};      // Divisor Latch MSB (only when SerialPort.LCR.D
 /*
  * Interrupt ID Register (IIR.REG, offset 2; eg, 0x3FA or 0x2FA)
  *
- * All interrupt conditions cleared by reading the corresponding register (or, in the case of IRR_INT_THR, writing a new value to THR.REG)
+ * All interrupt conditions cleared by reading the corresponding register (or, in the case of IIR.INT_THR, writing a new value to THR.REG)
  */
 SerialPort.IIR = {
     REG:            2,          // Interrupt ID Register (read-only)
@@ -57277,7 +57286,7 @@ SerialPort.MCR = {
     DTR:            0x01,       // when set, DTR goes high, indicating ready to establish link (looped back to DSR in loop-back mode)
     RTS:            0x02,       // when set, RTS goes high, indicating ready to exchange data (looped back to CTS in loop-back mode)
     OUT1:           0x04,       // when set, OUT1 goes high (looped back to RI in loop-back mode)
-    OUT2:           0x08,       // when set, OUT2 goes high (looped back to RLSD in loop-back mode)
+    OUT2:           0x08,       // when set, OUT2 goes high (looped back to RLSD in loop-back mode); must also be set for most UARTs to enable interrupts (but not ours)
     LOOPBACK:       0x10,       // when set, enables loop-back mode
     UNUSED:         0xE0        // always zero
 };
@@ -57402,7 +57411,7 @@ class TestController extends Component {
                 let exports = this.serialPort['exports'];
                 if (exports) {
                     let bind = /** @function */ (exports['bind']);
-                    if (bind && bind.call(this.serialPort, this, this.receiveData)) {
+                    if (bind && bind.call(this.serialPort, this, this.receiveData, true)) {
                         this.sendData = exports['receiveData'].bind(this.serialPort);
                         if (this.urlTests) {
                             this.loadTests(this.urlTests);
@@ -77488,7 +77497,6 @@ class Computer extends Component {
                 if (video) {
                     var control = video.getTextArea();
                     if (control) {
-                        var agent = Web.getUserAgent();
                         /*
                          * Return the Video textarea overlay's opacity and lineHeight styles to their original values.
                          */
@@ -77497,11 +77505,9 @@ class Computer extends Component {
                         /*
                          * Setting lineHeight in IE isn't sufficient to hide the caret; we must also set fontSize to "0",
                          * and we make the change IE-specific because it can have weird side-effects in other browsers (eg,
-                         * it makes Safari on iOS over-zoom whenever the textarea receives focus).  And making it IE-specific
-                         * is, as usual, harder than it should be, because IE11 stopped identifying itself as "MSIE", hence
-                         * the additional "Trident" check.
+                         * it makes Safari on iOS over-zoom whenever the textarea receives focus).
                          */
-                        if (agent.indexOf("MSIE") >= 0 || agent.indexOf("Trident") >= 0) control.style.fontSize = "0";
+                        if (Web.isUserAgent("MSIE")) control.style.fontSize = "0";
                         control.value = "";
                     }
                 }

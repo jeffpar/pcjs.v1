@@ -81,7 +81,7 @@ class TestController extends Component {
                 let exports = this.serialPort['exports'];
                 if (exports) {
                     let bind = /** @function */ (exports['bind']);
-                    if (bind && bind.call(this.serialPort, this, this.receiveData)) {
+                    if (bind && bind.call(this.serialPort, this, this.receiveData, true)) {
                         this.sendData = exports['receiveData'].bind(this.serialPort);
                         if (this.urlTests) {
                             this.loadTests(this.urlTests);

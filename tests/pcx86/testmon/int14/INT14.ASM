@@ -2,7 +2,9 @@
 	page	,120
 
 ;	By Jeff Parsons (@jeffpar) 2018-03-06
-;	Installs interrupt handlers for the COM port associated with I/O address 0x2F8 (and IRQ 3).
+;	Installs interrupt handlers for the specified COM port
+
+DEBUG	equ	1
 
 code	segment word public 'code'
 
@@ -20,11 +22,14 @@ main	endp
 prev14	dd	0			; previous INT 14h handler
 rtsFlg	db	1			; internal RTS flag (0=off, 1=on)
 pollFlg	db	0			; polling mode (0=off, 1=on); set by /P
+echoFlg	db	0			; set if incoming Ctrl-E has turned echo on
+
+	even
 comID	dw	-1			; 0-based index of COM port in BIOS data area
 comIRQ	dw	3
 comAddr	dw	2F8h
 
-MAXBUF	equ	16
+MAXBUF	equ	32
 inBuf	db	MAXBUF dup (?)
 outBuf	db	MAXBUF dup (?)
 inTot	dw	0			; counts the total number of input bytes buffered
@@ -33,7 +38,7 @@ inTail	dw	offset inBuf
 outHead	dw	offset outBuf
 outTail	dw	offset outBuf
 
-MAXLOG	equ	256
+MAXLOG	equ	1024
 logBuff	db	MAXLOG dup (0)
 logNext	dw	offset logBuff
 
@@ -66,22 +71,22 @@ i14a:	test	ah,ah			; INIT function?
 
 i14b:	cmp	ah,1			; WRITE function?
 	jne	i14c			; no
-	log	'W',al
+;	log	'W',al
 	call	write			; add the character in AL to outBuf
 	iret
 
 i14c:	cmp	ah,2			; READ function?
 	jne	i14d			; no
 	call	read			; remove next char from inBuf into AL
-	log	'R',al
-	log	'r',ah
+;	log	'R',al
+;	log	'r',ah
 	iret
 
 i14d:	cmp	ah,3			; STATUS function?
 	jne	i14e			; no, jump to previous handler
 	call	status
-	log	'S',al
-	log	's',ah
+;	log	'S',al			; these generate too much "noise"
+;	log	's',ah
 	iret
 
 i14e:	cmp	ah,0AAh			; quick-and-dirty installation check
@@ -188,8 +193,10 @@ setDTR	proc	near
 	push	dx
 	add	dx,4			; DX -> MCR
 	in	al,dx
-	jmp	$+2
-	or	al,01h			; DTR == 01h
+	cmp	pollFlg,0
+	jne	dtr1
+	or	al,08h			; OUT2 == 08h (which apparently must ALSO be set enable interrupts)
+dtr1:	or	al,01h			; DTR == 01h
 	out	dx,al
 	pop	dx
 	ret
@@ -206,7 +213,6 @@ setRTS	proc	near
 	push	dx
 	add	dx,4			; DX -> MCR
 	in	al,dx
-	jmp	$+2
 	or	al,02h			; RTS == 02h
 	cmp	rtsFlg,0
 	jne	rts9
@@ -241,6 +247,8 @@ incPtr	endp
 ;
 ; If the DR bit is set, see if we can buffer the data.
 ;
+; CARRY returns clear if any new data was read, otherwise it's set.
+;
 tryIn	proc	near
 	assume	ds:code
 	push	ax
@@ -249,24 +257,31 @@ tryIn	proc	near
 	in	al,dx
 	pop	dx
 	test	al,01h			; DR set?
-	jz	ti9
-	in	al,dx			; AL == new data
+	jnz	ti1			; yes
+	stc
+	jmp	ti9
+ti1:	in	al,dx			; AL == new data
 	log	'I',al
 	push	bx
 	mov	bx,inHead
 	mov	[bx],al
 	call	incPtr
 	cmp	bx,inTail
-	je	ti8			; buffer full, dropping the data
-	mov	inHead,bx
+	jne	ti7
+	log	'F',al
+	jmp	short ti8		; buffer full, dropping the data
+ti7:	mov	inHead,bx
 	inc	inTot
 	cmp	pollFlg,0
 	jne	ti8
-	cmp	inTot,MAXBUF/2		; have we reached the half-way point?
+	cmp	inTot,(MAXBUF/4)*3	; have we reached the 3/4 point?
 	jne	ti8			; no
-	mov	rtsFlg,0		; yes, so let's try turning RTS off
+	cmp	rtsFlg,0		; is RTS already off?
+	je	ti8			; yes
+	dec	rtsFlg			; no, so let's try turning it off now
 	call	setRTS			; and hope the sender give us some space
 ti8:	pop	bx
+	clc
 ti9:	pop	ax
 	ret
 tryIn	endp
@@ -290,7 +305,7 @@ tryOut	proc	near
 	jz	to9			; no
 	mov	al,[bx]
 	out	dx,al
-	log	'O',al
+;	log	'O',al
 	call	incPtr
 	mov	outTail,bx
 to9:	pop	bx
@@ -355,6 +370,18 @@ write	proc	near
 	mov	dx,comAddr
 
 	sti
+
+	if	DEBUG
+	cmp	echoFlg,0
+	je	w0
+	push	ax
+	mov	ah,0Eh
+	mov	bh,0
+	int	10h
+	pop	ax
+w0:
+	endif
+
 	xchg	ah,al			; stash the output data in AH
 	sub	cx,cx
 w1:	call	getMSR
@@ -419,11 +446,20 @@ read	proc	near
 	cmp	pollFlg,0		; in polling mode, we take
 	je	r1			; every opportunity to check for input
 	call	tryIn
-	mov	rtsFlg,0
-	call	setRTS			; after a polled read, let's turn RTS off
+	;
+	; If CARRY is set, nothing was read, so let's turn RTS on.
+	; If CARRY is clear, then something was read, so let's turn RTS off.
+	;
+	mov	al,0
+	adc	al,al
+	cmp	rtsFlg,al
+	je	r1
+	mov	rtsFlg,al
+	call	setRTS
 
 r1:	sub	ax,ax
 	call	fakeLSR
+	and	al,1Eh			; READ requests only return "error" bits
 	mov	ah,al
 
 	mov	bx,inTail
@@ -433,17 +469,22 @@ r1:	sub	ax,ax
 	jmp	short r9
 
 r3:	mov	al,[bx]
-	call	incPtr
+	cmp	al,05h			; Ctrl-E?
+	jne	r4			; no
+	xor	echoFlg,1		; toggle echo flag
+r4:	call	incPtr
 	mov	inTail,bx
 
 	cmp	pollFlg,0
-	jne	r4
-	cmp	inTot,MAXBUF/2		; are we at the half-way point?
-	jne	r4			; no
-	mov	rtsFlg,1		; yes, so we must have turned RTS off
-	call	setRTS			; so let's turn RTS back on
+	jne	r8
+	cmp	inTot,MAXBUF/4		; are we down to 1/4 full now?
+	jne	r8			; no
+	cmp	rtsFlg,0		; is RTS already on?
+	jne	r8			; yes
+	inc	rtsFlg			; no, so let's turn RTS back on
+	call	setRTS
 
-r4:	dec	inTot
+r8:	dec	inTot
 
 r9:	pop	ds
 	assume	ds:nothing
@@ -513,21 +554,22 @@ intHW	proc	far
 	assume	ds:code
 	mov	dx,comAddr
 
-	push	dx
+hw0:	push	dx
 	inc	dx
 	inc	dx			; DX -> IIR
 	in	al,dx
 	pop	dx
 	log	'H',al
 
-	cmp	al,02h			; THRE condition?
+	cmp	al,04h			; DR condition?
 	jne	hw1			; no
-	call	tryOut			; yes, so see if we have something to write
+	call	tryIn			; read data
+	jnc	hw0			; assuming we read data, check IIR again
 	jmp	short hw9
 
-hw1:	cmp	al,04h			; DR condition?
-	jne	hw9
-	call	tryIn
+hw1:	cmp	al,02h			; THRE condition?
+	jne	hw9			; no
+	call	tryOut			; yes, so see if we have something to write
 
 hw9:	cli
 	mov	al,20h			; EOI command
@@ -583,8 +625,8 @@ ins2:	test	cx,cx			; any more command-line characters?
 ins3:	sub	ax,ax
 	mov	es,ax
 	assume	es:nothing		; since ES is zero
-	mov	ax,comAddr
 
+	mov	ax,comAddr
 	mov	bx,400h			; access RBDA @0:400 instead of 40:0
 	sub	dx,dx
 ins4:	cmp	word ptr es:[bx],ax	; matching port?
@@ -600,7 +642,7 @@ ins4:	cmp	word ptr es:[bx],ax	; matching port?
 	int	20h
 
 ins5:	mov	comID,dx		; comID is 0 for COM1, 1 for COM2, etc.
-	mov	ah,0AAh			; quick-and-dirty installation check
+	mov	ah,0AAh			; quick-and-dirty INT14.COM installation check
 	int	14h
 	not	ah
 	cmp	ah,0AAh
@@ -610,17 +652,14 @@ ins5:	mov	comID,dx		; comID is 0 for COM1, 1 for COM2, etc.
 	int	21h
 	int	20h			; abort
 
-ins6:	mov	dx,es:[bx]		; DX is port (ie, 2F8h)
-	call	setDTR
-	call	setRTS			; rtsFlg is initially 1
-
-	mov	ax,offset int14
+ins6:	mov	ax,offset int14
 	xchg	ax,es:[14h*4]
 	mov	word ptr prev14,ax
 	mov	ax,cs
 	xchg	ax,es:[14h*4+2]
 	mov	word ptr prev14+2,ax
 
+	mov	dx,es:[bx]		; DX is port (eg, 3F8h or 2F8h)
 	mov	bx,offset intHW
 	cmp	pollFlg,0
 	jne	ins7
@@ -630,7 +669,7 @@ ins6:	mov	dx,es:[bx]		; DX is port (ie, 2F8h)
 	add	di,di
 	mov	word ptr es:[di],bx
 	mov	es:[di+2],cs
-	call	setIER			; make sure DX still contains the port
+	call	setIER
 	in	al,21h
 	mov	cl,byte ptr comIRQ
 	mov	ah,1
@@ -640,7 +679,10 @@ ins6:	mov	dx,es:[bx]		; DX is port (ie, 2F8h)
 	out	21h,al			; unmask the appropriate COM IRQ
 	mov	bx,offset endRes
 
-ins7:	mov	dx,comID
+ins7:	call	setDTR			; set DTR (and OUT2 as needed for interrupts)
+	call	setRTS			; rtsFlg is initially 1
+
+	mov	dx,comID
 	add	dl,'1'
 	mov	comMsg+3,dl
 	mov	dx,offset comMsg

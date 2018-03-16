@@ -15,12 +15,12 @@ Well, I'm happy to report that today marks the completion of the ES6 conversion,
 
 Admittedly, I was dragging my feet a bit, because the largest and most complex machine emulator, [PCx86](/modules/pcx86/),
 was going to require a fair bit work, not to mention regression testing.  However, after converting three other
-PCjs machines ([PDPjs](/modules/pdp11/), [PC8080](/modules/pc8080/), and [C1Pjs](/modules/c1pjs/)), I had become
+PCjs machines ([PDP11](/modules/pdp11/), [PC8080](/modules/pc8080/), and [C1Pjs](/modules/c1pjs/)), I had become
 pretty proficient at the conversion, so I was able to bulldoze my way through all the PCx86 files in a few hours,
 and fixing all the Closure Compiler compilation errors only took another hour or so.
 
 It's hard to say whether the conversion was really worth the effort, since I'm still using the Closure Compiler to
-transpile the code back to ES5.  Also, since two of the emulators ([PCx86](/modules/pcx86/) and [PDPjs](/modules/pdp11/))
+transpile the code back to ES5.  Also, since two of the emulators ([PCx86](/modules/pcx86/bin/) and [PDP11](/modules/pdp11/bin/))
 can also be launched from the Node command-line, I've adopted Node's *require()* convention for importing the other
 scripts as modules, which makes them difficult to load inside a web browser if you want to test or debug the uncompiled
 code.

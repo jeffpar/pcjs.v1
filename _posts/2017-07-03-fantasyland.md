@@ -103,9 +103,8 @@ Cockerham doesn't mention what version of the compiler he used, but it may well 
 that article was published almost two years after version 1.10 was released.
 
 I'm also at a bit of a disadvantage with Modula-2 itself: I've never written anything in Modula-2, I've never used
-any Logitech compilers before now, and the closest documentation I've been able to locate is the
-[Logitech Modula-2/86 v1.0 Manual](http://www.bitsavers.org/pdf/logitech/modula-2/Logitech_Modula-2_86_1.0_Feb84.pdf)
-(ie, the previous version).
+any Logitech compilers before now, and the closest documentation I've been able to locate is for
+[Logitech Modula-2/86 Compiler 1.00](/disks/pcx86/tools/logitech/modula2/1.00/) (the previous version).
 
 On the other hand, maybe I'm trying too hard, because Cockerham provided the final binary as well: **EGATEST.EXE**.
 

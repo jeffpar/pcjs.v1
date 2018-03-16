@@ -2,6 +2,25 @@
 <fdc id="fdcNEC" pos="left" padLeft="8px" padBottom="8px">
 	<control type="list" binding="listDrives"/>
 	<control type="list" binding="listDisks">
+		<disk path="/apps/pcx86/1981/visicalc/VISICALC1981.json">VisiCalc (1981)</disk>
+		<disk path="/apps/pcx86/1982/esuite/disk.json">Executive Suite (1982)</disk>
+		<disk path="/apps/pcx86/1982/ratbas/RATBAS213.json">RatBas 2.13</disk>
+		<disk path="/apps/pcx86/1983/adventmath/ADVENTMATH100.json">Adventures in Math 1.00</disk>
+		<disk path="/apps/pcx86/1985/castle_adventure/CASTLE-ADVENTURE-1985.json">Castle Adventure (1985)</disk>
+		<disk path="/apps/pcx86/1985/rogue/disk.json">Rogue (1985)</disk>
+		<disk path="/apps/pcx86/1987/thinktank/disk.json">ThinkTank (1987)</disk>
+		<disk path="/apps/pcx86/1992/moria/disk.json">Moria 5.5 (1992)</disk>
+		<disk path="/pubs/pc/programming/DOS_Internals/DOS-INTERN.json">DOS Internals</disk>
+		<disk path="/pubs/pc/programming/The_Undocumented_PC/UNDOC.json">Undocumented PC</disk>
+		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK1.json">Undocumented DOS (1E Disk 1)</disk>
+		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK2.json">Undocumented DOS (1E Disk 2)</disk>
+		<disk path="/pubs/pc/programming/Undocumented_Windows/UNDOC-WIN.json">Undocumented Windows</disk>
+		<disk path="/pubs/pc/programming/Unauthorized_Windows_95/UNAUTH-W95B.json">Unauthorized Windows 95 (BIN)</disk>
+		<disk path="/pubs/pc/programming/Unauthorized_Windows_95/UNAUTH-W95S.json">Unauthorized Windows 95 (SRC)</disk>
+		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2B.json">Undocumented DOS (2E BIN)</disk>
+		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2S.json">Undocumented DOS (2E SRC)</disk>
+		<disk path="/tests/pcx86/testmon/int14/INT14.json">PCjs INT14 Utilities</disk>
+		<disk path="/tests/pcx86/vga/VGABIN.json">VGA Tests (Black Book)</disk>
 		<disk path="/pcjs-disks/pcx86/empty/EMPTY-360K.json">Empty Diskette (360K)</disk>
 		<disk path="/pcjs-disks/pcx86/empty/EMPTY-720K.json">Empty Diskette (720K)</disk>
 		<disk path="/pcjs-disks/pcx86/empty/EMPTY-1200K.json">Empty Diskette (1.2M)</disk>
@@ -773,6 +792,7 @@
 		<disk path="/pcjs-disks/pcx86/games/microsoft/flightsim/1984/FLIGHTSIM-1984.json">MS Flight Simulator (1984)</disk>
 		<disk path="/pcjs-disks/pcx86/games/other/wizardry1/WIZARDRY1-MASTER.json">Wizardry I - Master Disk</disk>
 		<disk path="/pcjs-disks/pcx86/games/other/wizardry1/WIZARDRY1-SCENARIO.json">Wizardry I - Scenario Disk</disk>
+		<disk path="/pcjs-disks/pcx86/personal/JEFFPAR-DISK001.json">JEFFPAR DISK001</disk>
 		<disk path="/pcjs-disks/pcx86/roms/ibm/IBM-BIOS-SRC-5150V1.json">IBM PC BIOS Sources (V1)</disk>
 		<disk path="/pcjs-disks/pcx86/roms/ibm/IBM-BIOS-SRC-5150V2.json">IBM PC BIOS Sources (V2)</disk>
 		<disk path="/pcjs-disks/pcx86/roms/ibm/IBM-BIOS-SRC-5150V3.json">IBM PC BIOS Sources (V3)</disk>
@@ -3097,25 +3117,6 @@
 		<disk path="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/shareware/pcsig08/disks/DISK2119.json">PCSIG08: DISK2119</disk>
 		<disk path="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/shareware/pcsig08/disks/DISK2120.json">PCSIG08: DISK2120</disk>
 		<disk path="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/shareware/pcsig08/disks/DISK2121.json">PCSIG08: DISK2121</disk>
-		<disk path="/pcjs-disks/pcx86/personal/JEFFPAR-DISK001.json">JEFFPAR DISK001</disk>
-		<disk path="/apps/pcx86/1981/visicalc/VISICALC1981.json">VisiCalc (1981)</disk>
-		<disk path="/apps/pcx86/1982/esuite/disk.json">Executive Suite (1982)</disk>
-		<disk path="/apps/pcx86/1982/ratbas/RATBAS213.json">RatBas 2.13</disk>
-		<disk path="/apps/pcx86/1983/adventmath/ADVENTMATH100.json">Adventures in Math 1.00</disk>
-		<disk path="/apps/pcx86/1985/castle_adventure/CASTLE-ADVENTURE-1985.json">Castle Adventure (1985)</disk>
-		<disk path="/apps/pcx86/1985/rogue/disk.json">Rogue (1985)</disk>
-		<disk path="/apps/pcx86/1987/thinktank/disk.json">ThinkTank (1987)</disk>
-		<disk path="/apps/pcx86/1992/moria/disk.json">Moria 5.5 (1992)</disk>
-		<disk path="/pubs/pc/programming/DOS_Internals/DOS-INTERN.json">DOS Internals</disk>
-		<disk path="/pubs/pc/programming/The_Undocumented_PC/UNDOC.json">Undocumented PC</disk>
-		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK1.json">Undocumented DOS (1E Disk 1)</disk>
-		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK2.json">Undocumented DOS (1E Disk 2)</disk>
-		<disk path="/pubs/pc/programming/Undocumented_Windows/UNDOC-WIN.json">Undocumented Windows</disk>
-		<disk path="/pubs/pc/programming/Unauthorized_Windows_95/UNAUTH-W95B.json">Unauthorized Windows 95 (BIN)</disk>
-		<disk path="/pubs/pc/programming/Unauthorized_Windows_95/UNAUTH-W95S.json">Unauthorized Windows 95 (SRC)</disk>
-		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2B.json">Undocumented DOS (2E BIN)</disk>
-		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2S.json">Undocumented DOS (2E SRC)</disk>
-		<disk path="/tests/pcx86/vga/VGABIN.json">VGA Tests (Black Book)</disk>
 	</control>
 	<control type="button" binding="loadDisk">Load</control>
 	<control type="button" binding="saveDisk" padRight="8px">Save</control>

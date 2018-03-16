@@ -7,11 +7,13 @@ permalink: /modules/pcx86/bin/
 Running PCx86 From The Command-Line
 -----------------------------------
 
-In this *bin* directory, run:
+This directory contains the PCx86 Node command-line "wrapper" utility [pcx86.js](pcx86.js).
 
-	node pcx86repl.js --cmd="load ibm5150.json"
+When you run it, be sure to provide a valid machine JSON file; e.g.:
 
-The following output should appear:
+	node pcx86 --cmd="load ibm5150.json"
+
+which should then produce the following output:
 
 	ibm5150.cpu8088 object created
 	ibm5150.chipset object created
