@@ -7,6 +7,7 @@ in the Front Matter of our Markdown documents, for compatibility with the Jekyll
     'name' (eg: "IBM PC (Model 5150) with Monochrome Display")
     'type' (eg: c1p, pcx86, pc8080, pdp10, pdp11, leds, ti42, ti55, ti57) ["-dbg" suffixes are DEPRECATED]
     'debugger' (default: true) [DEPRECATED along with the "-dbg" suffixes on 'type'; all debuggers are built-in now]
+    'class' (eg: "machine-left", "machine-right", etc; default: none)
     'config' (default: machine.xml)
     'template' (default: machine.xsl)
     'debug' (default: false; true enables asserts and is much slower)
@@ -71,6 +72,11 @@ The following optional machine properties will be added to the 'parms' property:
   {% else %}
     {% assign machine_autoType = "" %}
   {% endif %}
+  {% if machine.class != nil %}
+    {% capture machine_class %},'{{ machine.class }}'{% endcapture %}
+  {% else %}
+    {% assign machine_class = "" %}
+  {% endif %}
   {% if machine.drives != nil %}
     {% if machine.drives == "" %}
       {% assign machine_drives = ",drives:[]" %}
@@ -115,7 +121,7 @@ The following optional machine properties will be added to the 'parms' property:
   {% if machine_embed contains "new " %}
     <script type="text/javascript">{{ machine_embed }}('{{ machine.id }}','{{ machine_config | strip_newlines }}');</script>
   {% else %}
-    <script type="text/javascript">{{ machine_embed }}('{{ machine.id }}','{{ machine_config }}','{{ machine_template }}','{{ machine_parms }}');</script>
+    <script type="text/javascript">{{ machine_embed }}('{{ machine.id }}','{{ machine_config }}','{{ machine_template }}','{{ machine_parms }}'{{ machine_class }});</script>
   {% endif %}
   {% if machine.sticky == "top" %}
     <script type="text/javascript" src="{{ site.baseurl }}/modules/shared/lib/sticky.js"></script>
