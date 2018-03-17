@@ -80,7 +80,8 @@ since only about four months separated them):
     Version 3.01
     (C)Copyright Microsoft Corp 1984, 1985
 
-And before SYMDEB Version 3.01, there was Version 3.00, which was about six months older:
+And before that, SYMDEB Version 3.00 was bundled with [Microsoft Macro Assembler 3.00](/disks/pcx86/tools/microsoft/masm/3.00/),
+which was about six months older:
 
     SYMDEB   EXE    27136  12-07-84   1:39p
 

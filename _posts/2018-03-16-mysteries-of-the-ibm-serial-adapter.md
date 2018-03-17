@@ -130,7 +130,7 @@ And the IBM PC AT Serial/Parallel Reference Manual says:
     This bit controls-the' -Output 2' (-OUT 2) signal, which is a spare the programmer can use. Bit 3
     affects the '-OUT 2' output in the same way bit 0 affects the '-DTR' output.
 
-Yes, there *is* a tiny extra comment in the later manual (`Pin 31 controls interrupts to the system.`),
+Yes, there *is* a tiny extra comment in the later manual (`Pin 31 controls interrupts to the system`),
 but it's in the hardware section, not the programming section.  And, yes, the schematics do reveal that
 "OUT 2" controls delivery of the "INTRPT" signal:
 

@@ -1936,7 +1936,9 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
                 sScriptEmbed += 'window.' + sCreator;
                 sScriptEmbed += "('" + infoMachine['id'] + "','" + infoMachine['xml'] + "'";
                 sScriptEmbed += (infoMachine['xsl']? (",'" + infoMachine['xsl'] + "'") : ",''");
-                sScriptEmbed += (infoMachine['parms']? (",'" + infoMachine['parms'] + "'") : '') + ');';
+                sScriptEmbed += (infoMachine['parms']? (",'" + infoMachine['parms'] + "'") : '');
+                sScriptEmbed += (infoMachine['class']? (",'" + infoMachine['class'] + "'") : '');
+                sScriptEmbed += ');';
             }
             sScriptEmbed += '</script>';
         }
