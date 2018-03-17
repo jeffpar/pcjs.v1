@@ -77,12 +77,13 @@ var cAsyncMachines = 0;
  * @param {string|null|undefined} idMachine
  * @param {string|null|undefined} sAppName
  * @param {string|null|undefined} sAppClass
- * @param {string|null|undefined} sParms
+ * @param {string|null|undefined} sParms (machine parameters, if any)
+ * @param {string|null|undefined} sClass (an optional machine class name used to style the machine)
  * @param {boolean} fResolve is true to resolve any "ref" attributes
  * @param {function(string)} display
  * @param {function(string,Object)} done (string contains the unparsed XML string data, and Object contains a parsed XML object)
  */
-function loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms, fResolve, display, done)
+function loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass, fResolve, display, done)
 {
     var doneLoadXML = function(sURLName, sXML, nErrorCode) {
         if (nErrorCode) {
@@ -90,14 +91,14 @@ function loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms, fResolve, dis
             done(sXML, null);
             return;
         }
-        parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResolve, display, done);
+        parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass, fResolve, display, done);
     };
     display("Loading " + sXMLFile + "...");
     Web.getResource(sXMLFile, null, fAsync, doneLoadXML);
 }
 
 /**
- * parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResolve, display, done)
+ * parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass, fResolve, display, done)
  *
  * Generates an XML document from an XML string. This function also provides a work-around for XSLT's
  * lack of support for the document() function (at least on some browsers), by replacing every reference
@@ -108,12 +109,13 @@ function loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms, fResolve, dis
  * @param {string|null|undefined} idMachine
  * @param {string|null|undefined} sAppName
  * @param {string|null|undefined} sAppClass
- * @param {string|null|undefined} sParms
+ * @param {string|null|undefined} sParms (machine parameters, if any)
+ * @param {string|null|undefined} sClass (an optional machine class name used to style the machine)
  * @param {boolean} fResolve is true to resolve any "ref" attributes; default is false
  * @param {function(string)} display
  * @param {function(string,Object)} done (string contains the unparsed XML string data, and Object contains a parsed XML object)
  */
-function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResolve, display, done)
+function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass, fResolve, display, done)
 {
     var buildXML = function(sXML, sError) {
         if (sError) {
@@ -148,7 +150,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResol
             /*
              * Note that while we no longer generate a machine XML file with a "state" attribute (because it's
              * encoded inside the "parms" attribute), the XSL file must still cope with "state" attributes inside
-             * other XML files; for example, manifest XML files like /apps/pc/1981/visicalc/manifest.xml contain
+             * other XML files; for example, manifest XML files like /apps/pcx86/1981/visicalc/manifest.xml contain
              * machine elements with "state" attributes that must still be passed down to the computer element
              * "the old fashioned way".
              *
@@ -156,7 +158,19 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResol
              */
             if (typeof resources == 'object') sURL = null;      // turn off URL inclusion if we have embedded resources
             sParms = sParms.replace(/\$/g, "$$$$");
-            sXML = sXML.replace(/(<machine[^>]*\sid=)(['"]).*?\2/, "$1$2" + idMachine + "$2" + (sParms? " parms='" + sParms + "'" : "") + (sURL? ' url="' + sURL + '"' : ''));
+            if (sClass) {
+                /*
+                 * If there's no hard-coded "class" attribute in the machine tag, then we can set one in the final
+                 * replacement below, just like we do for sParms and sURL.  However, if a "class" attribute already
+                 * exists, then we need alter it and then zap the sClass variable.
+                 */
+                var match = sXML.match(/(<machine[^>]*\sclass=)(['"])(.*?)(\2.*?>)/);
+                if (match) {
+                    sXML = sXML.replace(match[0], match[1] + match[2] + sClass + match[4]);
+                    sClass = null;
+                }
+            }
+            sXML = sXML.replace(/(<machine[^>]*\sid=)(['"]).*?\2/, "$1$2" + idMachine + "$2" + (sClass? ' class="' + sClass + '"' : '') + (sParms? " parms='" + sParms + "'" : "") + (sURL? ' url="' + sURL + '"' : ''));
         }
 
         if (!fResolve) {
@@ -328,7 +342,7 @@ function resolveXML(sXML, display, done)
 }
 
 /**
- * embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
+ * embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFile, sParms, sClass)
  *
  * This allows to you embed a machine on a web page, by transforming the machine XML into HTML.
  *
@@ -336,12 +350,13 @@ function resolveXML(sXML, display, done)
  * @param {string} sAppClass is the app class (eg, "pcx86"); also known as the machine class
  * @param {string} sVersion is the app version (eg, "1.15.7")
  * @param {string} idMachine
- * @param {string} [sXMLFile]
- * @param {string} [sXSLFile]
- * @param {string} [sParms]
+ * @param {string|undefined} sXMLFile
+ * @param {string|undefined} sXSLFile
+ * @param {string|undefined} sParms (machine parameters, if any)
+ * @param {string|undefined} sClass (an optional machine class name used to style the machine)
  * @return {boolean} true if successful, false if error
  */
-function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
+function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFile, sParms, sClass)
 {
     var eMachine, eWarning, fSuccess = true;
 
@@ -534,13 +549,13 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                 /*
                  * NOTE: sXSLFile will never be undefined by this point, but apparently the Closure Compiler doesn't realize that.  
                  */
-                loadXML(sXSLFile || "", null, sAppName, sAppClass, null, false, displayMessage, transformXML);
+                loadXML(sXSLFile || "", null, sAppName, sAppClass, null, null, false, displayMessage, transformXML);
             };
 
             if (sXMLFile.charAt(0) != '<') {
-                loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms, true, displayMessage, processXML);
+                loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass, true, displayMessage, processXML);
             } else {
-                parseXML(sXMLFile, null, idMachine, sAppName, sAppClass, sParms, false, displayMessage, processXML);
+                parseXML(sXMLFile, null, idMachine, sAppName, sAppClass, sParms, sClass, false, displayMessage, processXML);
             }
         } else {
             displayError("missing machine element: " + idMachine);
@@ -552,77 +567,83 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
 }
 
 /**
- * embedC1P(idMachine, sXMLFile, sXSLFile)
- *
- * @param {string} idMachine
- * @param {string} [sXMLFile]
- * @param {string} [sXSLFile]
- * @return {boolean} true if successful, false if error
- */
-function embedC1P(idMachine, sXMLFile, sXSLFile)
-{
-    if (fAsync) Web.enablePageEvents(false);
-    return embedMachine("C1Pjs", "c1pjs", APPVERSION, idMachine, sXMLFile, sXSLFile);
-}
-
-/**
- * embedPCx86(idMachine, sXMLFile, sXSLFile, sParms)
+ * embedC1P(idMachine, sXMLFile, sXSLFile, sParms, sClass)
  *
  * @param {string} idMachine
  * @param {string} [sXMLFile]
  * @param {string} [sXSLFile]
  * @param {string} [sParms]
+ * @param {string} [sClass]
  * @return {boolean} true if successful, false if error
  */
-function embedPCx86(idMachine, sXMLFile, sXSLFile, sParms)
+function embedC1P(idMachine, sXMLFile, sXSLFile, sParms, sClass)
 {
     if (fAsync) Web.enablePageEvents(false);
-    return embedMachine("PCx86", "pcx86", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
+    return embedMachine("C1Pjs", "c1pjs", APPVERSION, idMachine, sXMLFile, sXSLFile, undefined, sClass);
 }
 
 /**
- * embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
+ * embedPCx86(idMachine, sXMLFile, sXSLFile, sParms, sClass)
  *
  * @param {string} idMachine
  * @param {string} [sXMLFile]
  * @param {string} [sXSLFile]
  * @param {string} [sParms]
+ * @param {string} [sClass]
  * @return {boolean} true if successful, false if error
  */
-function embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
+function embedPCx86(idMachine, sXMLFile, sXSLFile, sParms, sClass)
 {
     if (fAsync) Web.enablePageEvents(false);
-    return embedMachine("PC8080", "pc8080", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
+    return embedMachine("PCx86", "pcx86", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms, sClass);
 }
 
 /**
- * embedPDP10(idMachine, sXMLFile, sXSLFile, sParms)
+ * embedPC8080(idMachine, sXMLFile, sXSLFile, sParms, sClass)
  *
  * @param {string} idMachine
  * @param {string} [sXMLFile]
  * @param {string} [sXSLFile]
  * @param {string} [sParms]
+ * @param {string} [sClass]
  * @return {boolean} true if successful, false if error
  */
-function embedPDP10(idMachine, sXMLFile, sXSLFile, sParms)
+function embedPC8080(idMachine, sXMLFile, sXSLFile, sParms, sClass)
 {
     if (fAsync) Web.enablePageEvents(false);
-    return embedMachine("PDPjs", "pdp10", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
+    return embedMachine("PC8080", "pc8080", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms, sClass);
 }
 
 /**
- * embedPDP11(idMachine, sXMLFile, sXSLFile, sParms)
+ * embedPDP10(idMachine, sXMLFile, sXSLFile, sParms, sClass)
  *
  * @param {string} idMachine
  * @param {string} [sXMLFile]
  * @param {string} [sXSLFile]
  * @param {string} [sParms]
+ * @param {string} [sClass]
  * @return {boolean} true if successful, false if error
  */
-function embedPDP11(idMachine, sXMLFile, sXSLFile, sParms)
+function embedPDP10(idMachine, sXMLFile, sXSLFile, sParms, sClass)
 {
     if (fAsync) Web.enablePageEvents(false);
-    return embedMachine("PDPjs", "pdp11", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
+    return embedMachine("PDPjs", "pdp10", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms, sClass);
+}
+
+/**
+ * embedPDP11(idMachine, sXMLFile, sXSLFile, sParms, sClass)
+ *
+ * @param {string} idMachine
+ * @param {string} [sXMLFile]
+ * @param {string} [sXSLFile]
+ * @param {string} [sParms]
+ * @param {string} [sClass]
+ * @return {boolean} true if successful, false if error
+ */
+function embedPDP11(idMachine, sXMLFile, sXSLFile, sParms, sClass)
+{
+    if (fAsync) Web.enablePageEvents(false);
+    return embedMachine("PDPjs", "pdp11", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms, sClass);
 }
 
 /**
