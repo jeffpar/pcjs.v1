@@ -349,6 +349,7 @@ MarkOut.aHTMLEntities = {
  *      'name' (eg, "IBM PC (Model 5150) with Monochrome Display")
  *      'type' (eg, "pc" or "pc-dbg")
  *      'debugger' (eg, true)
+ *      'class' (eg, "machine-left" or "machine-right")
  *      'config' (eg, "machine.xml")
  *      'template' (eg, "machine.xsl")
  *      'uncompiled' (eg, true)
@@ -380,7 +381,7 @@ MarkOut.aFMBooleanMachineProps = {
     'autostart': "autoStart",
     'sound': "sound"
 };
-MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'config', 'template', 'uncompiled', 'autoMount', 'drives', 'parms', 'sticky'];
+MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'class', 'config', 'template', 'uncompiled', 'autoMount', 'drives', 'parms', 'sticky'];
 
 /**
  * convertMD()
@@ -1364,6 +1365,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         this.addMachine({
             'type':     sMachineType,   // eg, a machine type, such as "pcx86" or "c1p"
             'id':       sMachineID,
+            'class':    this.aMachineDefs[sMachineID] && this.aMachineDefs[sMachineID]['class'],
             'config':   this.aMachineDefs[sMachineID] && this.aMachineDefs[sMachineID]['config'],
             'xml':      sMachineXMLFile,
             'xsl':      sMachineXSLFile,
