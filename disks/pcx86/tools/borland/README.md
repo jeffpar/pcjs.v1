@@ -8,4 +8,4 @@ Borland Languages and Tools
 ---------------------------
 
 * [Borland Sidekick](sidekick/)
-* [Borland Turbo Pascal](tpascal/)
+* [Borland Turbo Pascal](pascal/)

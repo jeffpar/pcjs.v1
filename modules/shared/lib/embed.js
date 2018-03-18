@@ -162,7 +162,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass
                 /*
                  * If there's no hard-coded "class" attribute in the machine tag, then we can set one in the final
                  * replacement below, just like we do for sParms and sURL.  However, if a "class" attribute already
-                 * exists, then we need alter it and then zap the sClass variable.
+                 * exists, we need alter it and then zap the sClass variable.
                  */
                 var match = sXML.match(/(<machine[^>]*\sclass=)(['"])(.*?)(\2.*?>)/);
                 if (match) {
