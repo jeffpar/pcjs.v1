@@ -23,7 +23,6 @@ Additional files were also included the additional compilers:
 The following documentation is available online:
 
 - [Turbo Pascal Version 3.0 Reference Manual (1985)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_3.0_Reference_Manual_1985.pdf)
-- [Turbo Pascal Version 3.0 Reference Manual (1986)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_3.0_Reference_Manual_1986.pdf)
 
 ### Directory of Borland Turbo Pascal 3.01A
 
