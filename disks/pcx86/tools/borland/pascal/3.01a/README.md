@@ -7,6 +7,24 @@ permalink: /disks/pcx86/tools/borland/pascal/3.01a/
 Borland Turbo Pascal 3.01A
 --------------------------
 
+The Turbo Pascal 3.01A disk image below is from the PCjs Archives and contains all three "flavors" of the
+compiler.  According to the 1986 Reference Manual, the BCD and 8087 versions were normally sold separately.
+
+- Turbo Pascal 3.01A (`TURBO.COM`) 
+- Turbo Pascal 3.01A with BCD (`TURBOBCD.COM`) 
+- Turbo Pascal 3.01A with 8087  (`TURBO-87.COM`)
+
+Additional files were also included the additional compilers: 
+
+	HILB     PAS      6124 03-18-85   3:28p
+	TEST     PAS      1447 03-18-85   3:27p
+	BCD      PAS      1110 03-18-85   3:26p
+
+The following documentation is available online:
+
+- [Turbo Pascal Version 3.0 Reference Manual (1985)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_3.0_Reference_Manual_1985.pdf)
+- [Turbo Pascal Version 3.0 Reference Manual (1986)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_3.0_Reference_Manual_1986.pdf)
+
 ### Directory of Borland Turbo Pascal 3.01A
 
 	 Volume in drive A has no label

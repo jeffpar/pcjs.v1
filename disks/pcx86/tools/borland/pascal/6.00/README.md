@@ -7,6 +7,13 @@ permalink: /disks/pcx86/tools/borland/pascal/6.00/
 Borland Turbo Pascal 6.00
 -------------------------
 
+The following documentation is available online:
+
+- [Turbo Pascal Version 6.0 User's Guide (1990)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_6.0_Users_Guide_1990.pdf)
+- [Turbo Pascal Version 6.0 Programmer's Guide (1990)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_6.0_Programmers_Guide.pdf)
+- [Turbo Pascal Version 6.0 Library Reference (1990)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_6.0_Library_Ref_1990.pdf)
+- [Turbo Pascal Version 6.0 Turbo Vision Guide (1990)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_6.0_Turbo_Vision_1990.pdf)
+
 ### Directory of Borland Turbo Pascal 6.00 (Disk 1)
 
      Volume in drive A is INSTALL    

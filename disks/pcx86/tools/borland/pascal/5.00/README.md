@@ -7,6 +7,11 @@ permalink: /disks/pcx86/tools/borland/pascal/5.00/
 Borland Turbo Pascal 5.00
 -------------------------
 
+The following documentation is available online:
+
+- [Turbo Pascal Version 5.0 User's Guide (1989)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_5.0_Users_Guide_1989.pdf)
+- [Turbo Pascal Version 5.0 Reference Guide (1989)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_5.0_Reference_Guide_1989.pdf)
+
 ### Directory of Borland Turbo Pascal 5.00 (Disk 1)
 
      Volume in drive A is  PASCAL1   

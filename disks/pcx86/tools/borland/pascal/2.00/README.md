@@ -7,6 +7,11 @@ permalink: /disks/pcx86/tools/borland/pascal/2.00/
 Borland Turbo Pascal 2.00
 -------------------------
 
+The following documentation is available online:
+
+- [Turbo Pascal Version 2.0 Reference Manual (1984)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_2.0_Reference_1984.pdf)
+- [Turbo Pascal Version 2.0 Addendum to Reference Manual and 8087 Supplement (1984)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_2.0_and_8087_Supplement_Apr84.pdf)
+
 ### Directory of Borland Turbo Pascal 2.00
 
      Volume in drive A has no label

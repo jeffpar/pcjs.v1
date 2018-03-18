@@ -7,6 +7,10 @@ permalink: /disks/pcx86/tools/borland/pascal/4.00/
 Borland Turbo Pascal 4.00
 -------------------------
 
+The following documentation is available online:
+
+- [Turbo Pascal Version 4.0 Owner's Handbook (1987)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_4.0_Owners_Manual_1987.pdf)
+
 ### Directory of Borland Turbo Pascal 4.00 (Disk 1)
 
      Volume in drive A is  PASCAL1   
