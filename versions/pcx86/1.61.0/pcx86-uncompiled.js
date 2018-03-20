@@ -52154,6 +52154,11 @@ class Video extends Component {
 
         var bCursorWrap = 0;
         if (this.nCard < Video.CARD.EGA) {
+            /*
+             * Live and learn: I originally thought that the EGA introduced funky split cursors, but it turns
+             * out that older cards did it, too (well, I've confirmed it on an actual MDA anyway; haven't tried
+             * the CGA).  I've also confirmed that the MDA did NOT have the "mod 16" EGA anomaly described below. 
+             */
             if (bCursorEnd < bCursorStart) {
                 bCursorWrap = bCursorEnd + 1;
                 bCursorEnd = bCursorMax;
@@ -52181,7 +52186,7 @@ class Video extends Component {
              * either the decimal values (4,19) or (4,21), you'll get a full block cursor, but if you set it to
              * (4,20), you get a single line cursor at row 4.  Go figure!
              */
-            if (bCursorEnd == bCursorStart % 16) {
+            if (bCursorStart == bCursorEnd % 16) {
                 bCursorEnd = bCursorStart + 1;
             }
             else if (bCursorEnd < bCursorStart) {
