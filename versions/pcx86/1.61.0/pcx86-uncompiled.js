@@ -52166,17 +52166,20 @@ class Video extends Component {
         }
         else {
             /*
-             * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to
-             * detect that particular combination of bad values and automatically fix them (we're so thoughtful!)
+             * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled; we used to
+             * detect that particular combination of bad values and automatically fix them (we're so thoughtful),
+             * but in retrospect, that doesn't seem very faithful.  Better to fix things like this 1) only if
+             * the user asks, and 2) preferably with a BIOS patch rather than monkeying with the hardware registers.
+             *
+             *  if (this.nCard == Video.CARD.EGA) {
+             *      if (bCursorMax == 7 && bCursorStart == 4 && !bCursorEnd) bCursorEnd = 7;
+             *  }
              */
-            if (this.nCard == Video.CARD.EGA) {
-                if (bCursorMax == 7 && bCursorStart == 4 && !bCursorEnd) bCursorEnd = 7;
-            }
             /*
-             * TODO: Determine if the VGA emulates this EGA anomaly, where if CURSCAN == CURSCANB mod 16, it's treated
-             * the same as if CURSCAN == CURSCANB.  For example, if you set (CURSCAN,CURSCANB) to either the decimal values
-             * (4,19) or (4,21), you'll get a full block cursor, but if you set it to (4,20), you get a single line cursor
-             * at row 4.
+             * TODO: Determine if the VGA emulates the following EGA anomaly, where if CURSCAN == CURSCANB mod 16,
+             * then it's treated the same as if CURSCAN == CURSCANB.  For example, if you set (CURSCAN,CURSCANB) to
+             * either the decimal values (4,19) or (4,21), you'll get a full block cursor, but if you set it to
+             * (4,20), you get a single line cursor at row 4.  Go figure!
              */
             if (bCursorEnd == bCursorStart % 16) {
                 bCursorEnd = bCursorStart + 1;
