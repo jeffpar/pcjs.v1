@@ -1132,11 +1132,11 @@ class Keyboard extends Component {
             }
             return false;
         }
-        var charCode = 0;
-        while (this.sInjectBuffer.length > 0 && !charCode) {
+        var simCode = 0;
+        while (this.sInjectBuffer.length > 0 && !simCode) {
             var ch = this.sInjectBuffer.charAt(0);
             this.sInjectBuffer = this.sInjectBuffer.substr(1);
-            charCode = ch.charCodeAt(0);
+            var charCode = ch.charCodeAt(0);
             /*
              * charCodes 0x01-0x1A correspond to key combinations CTRL-A through CTRL-Z, unless they
              * are \t, \n, or \r, which are reserved for TAB, LINE-FEED, and RETURN, respectively, so if
@@ -1154,32 +1154,34 @@ class Keyboard extends Component {
              * by "test;" and RETURN.
              */
             if (charCode <= Keys.ASCII.CTRL_Z) {
+                simCode = charCode;
+                /*
+                 * I could require all callers to supply CRs instead of LFs, but this is friendlier; besides,
+                 * PCs don't have a dedicated LINE-FEED key, so the LF charCode is somewhat meaningless.
+                 */
+                if (charCode == 0x0A) simCode = 0x0D;
                 if (charCode != Keys.ASCII.CTRL_I && charCode != Keys.ASCII.CTRL_J && charCode != Keys.ASCII.CTRL_M) {
-                    charCode += Keys.KEYCODE.FAKE;
+                    simCode += Keys.KEYCODE.FAKE;
                 }
             }
             else if (charCode == 0x1C) {
-                charCode = Keys.ASCII.CTRL_I + Keys.KEYCODE.FAKE;
+                simCode = Keys.ASCII.CTRL_I + Keys.KEYCODE.FAKE;
             }
             else if (charCode == 0x1D) {
-                charCode = Keys.ASCII.CTRL_J + Keys.KEYCODE.FAKE;
+                simCode = Keys.ASCII.CTRL_J + Keys.KEYCODE.FAKE;
             }
             else if (charCode == 0x1E) {
-                charCode = Keys.ASCII.CTRL_M + Keys.KEYCODE.FAKE;
+                simCode = Keys.ASCII.CTRL_M + Keys.KEYCODE.FAKE;
             }
-            else if (charCode >= 0xF0) {
+            else if (charCode < 0xF0) {
+                simCode = charCode;
+            } else {
                 this.msInjectDelay = ((charCode - 0xF0) * 100) || this.msInjectDefault;
-                charCode = 0;
                 break;
             }
         }
-        if (charCode) {
-            /*
-             * I could require all callers to supply CRs instead of LFs, but this is friendlier; besides, PCs
-             * don't have a dedicated LINE-FEED key, so the LF charCode is somewhat meaningless.
-             */
-            if (charCode == 0x0A) charCode = 0x0D;
-            this.addActiveKey(charCode, true);
+        if (simCode) {
+            this.addActiveKey(simCode, true);
         }
         if (!this.sInjectBuffer.length) {
             if (this.fnInjectReady) {
