@@ -3,15 +3,28 @@ layout: post
 title: Emulating IBM PC Cursors
 date: 2018-03-20 10:00:00
 permalink: /blog/2018/03/20/
+machines:
+  - id: ibm5160-msdos320
+    type: pcx86
+    config: /devices/pcx86/machine/5160/ega/640kb/debugger/machine.xml
+    drives: '[{name:"10Mb Hard Disk",type:3,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'
+    autoMount:
+      A:
+        name: None
+      B:
+        name: PC Magazine (Vol. 06 No. 19)
+    autoStart: true
+    autoType: B:\rDIR\rCTYPE\r 
 ---
 
 Since I'm finally in possession of a working IBM Monochrome Display, IBM Color Display, *and* IBM Enhanced Color
 Display, along with the requisite IBM Monochrome Display Adapter (MDA), IBM Color Graphics Adapter (CGA), and 256K
 IBM Enhanced Graphics Adapter (EGA), I decided it was time to start digging into some of their idiosyncrasies.
-And there are a fair number of them, quirks that most emulators don't bother with, because, you know, who cares.
-Well, I do!
+And there are a fair number of them -- quirks that many emulators don't bother with.
 
-I started with one of the simpler features that all the video cards support: cursor shapes.
+I started with one of the simpler features that all the video cards support: programmable cursor shapes.
+
+### Cursor Shapes
 
 Depending on the text mode, character cells are generally either 8 or 14 scan lines high.  The scan lines are
 numbered from top to bottom, with 0 being the top scan line, and 7 or 13 being the bottom.  Cursors are defined as
@@ -29,8 +42,8 @@ MDA and CGA video cards, the EGA draws cursor scan lines up to *but not includin
 Even IBM's own EGA Technical Reference manual gets this detail wrong.
 
 You might be tempted to think that this idiosyncrasy of the EGA means that if the Cursor Start and Cursor End register
-are equal, then no cursor at all is drawn.  But that would be incorrect: the cursor will always consist of a *single*
-scan line, regardless whether Cursor Start is equal to Cursor End *or* Cursor End + 1.
+are equal, then no cursor at all is drawn.  But no, the cursor will always consist of a *single* scan line, regardless
+whether Cursor Start is equal to Cursor End *or* Cursor End + 1.
 
 ### Cursor Visibility
 
@@ -61,3 +74,19 @@ Setting the Cursor End register to a value *less than* the Cursor Start register
 wrap around stops when the internal scan line value reaches Cursor End, thereby leaving a gap between the ending and
 starting scan lines.  The effect makes it appear as if the cursor has been "split" into two separate blocks, with the
 top block always starting at the top and the bottom block always ending at the bottom.
+
+And once again, there is slight difference between the EGA and the older cards: setting Cursor Start to 5 and Cursor End
+to 4 will result in a split cursor on the EGA with a gap of exactly one scan line, whereas those same settings on older
+cards will result in a solid cursor -- because they draw scan lines up to *and including* the line at Cursor End.
+
+### PC Magazine CTYPE and STICK Utilities
+
+The [November 10, 1987 issue of PC Magazine](https://books.google.com/books?id=x1yigTsvZxsC&lpg=PA479&pg=PA463#v=onepage&q&f=false)
+featured an article, "Getting Control of Your Cursor", by Jeff Prosise that described a utility named CTYPE, which you can
+see running in the machine below.
+
+The [November 24, 1987 issue of PC Magazine](https://books.google.com/books?id=KU7dCBpP7fsC&lpg=PA354&pg=PA349#v=onepage&q&f=false)
+featured a related article, "A Colorfast Screen and Stable Cursor", also by Jeff Prosise, that described a utility called STICK,
+which you can find on the PCjs diskette labelled "PC Magazine (Vol. 06 No. 20)". 
+
+{% include machine.html id="ibm5160-msdos320" %}
