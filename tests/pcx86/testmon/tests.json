@@ -14,8 +14,12 @@
       "dos": { "op": "q\r", "mode": "prompt" },
       "nap": "a 100\rmov dx,80\rsub cx,cx\rloop 105\rdec dx\rjnz 103\rint 3\r\rrip 100\rg\r",
       "print": "printf(\"you typed %d\n\", $1)",
-      "curstart": "o 3d4 a\ro 3d5 %1\r",
-      "curend": "o 3d4 b\ro 3d5 %1\r",
+      "cursor": "o 3d4 a\ro 3d5 %1\ro 3d4 b\ro 3d5 %2\r",
+      "curt": "o 3d4 a\ro 3d5 %1\r",
+      "curb": "o 3d4 b\ro 3d5 %1\r",
+      "mcursor": "o 3b4 a\ro 3b5 %1\ro 3b4 b\ro 3b5 %2\r",
+      "mcurt": "o 3b4 a\ro 3b5 %1\r",
+      "mcurb": "o 3b4 b\ro 3b5 %1\r",
       "curtest": "for i=0 to 13 { curstart $i; printf('curstart=%d\n',$i); wait; }",
       "reboot": "a cs:ip\rjmp ffff:0\r\rg\r"
     }

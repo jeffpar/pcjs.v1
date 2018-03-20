@@ -276,7 +276,7 @@ class TestController extends Component {
         
         if (this.controlBuffer != null) {
             if (s != '\r') {
-                if (s == '\b') {
+                if (s == '\b' || s == "\b \b") {
                     this.controlBuffer.value = this.controlBuffer.value.slice(0, -1);
                 } else {
                     this.controlBuffer.value += s;
