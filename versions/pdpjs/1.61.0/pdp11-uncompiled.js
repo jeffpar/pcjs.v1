@@ -1360,8 +1360,13 @@ class Str {
                     /*
                      * Since we're advised to ALWAYS pass a radix to parseInt(), we must detect explicitly
                      * hex values ourselves, because using a radix of 10 with any "0x..." value always returns 0.
+                     * 
+                     * And if the value CAN be interpreted as decimal, then we MUST interpret it as decimal, because
+                     * we have sprintf() calls in /modules/lib/testmon.js that depend on this code to perform decimal
+                     * to hex conversion.  We're allowed to make our own rules here, since passing numbers in string
+                     * form isn't part of the sprintf "spec". 
                      */
-                    arg = Number.parseInt(arg, arg.indexOf("0x") == 0? 16 : 10);
+                    arg = Number.parseInt(arg, arg.match(/(^0x|[a-f])/i)? 16 : 10);
                 } 
                 do {
                     s = ach[arg & 0xf] + s;

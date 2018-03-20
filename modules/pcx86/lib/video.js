@@ -233,12 +233,12 @@ if (NODE) {
  *      CRTC[0x07]: OVERFLOW        0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x3E 0x1F
  *      CRTC[0x08]: PRESCAN         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
  *      CRTC[0x09]: MAXSCAN         0x4F 0x4F 0x4F 0x4F 0xC1 0xC1 0xC1 0xC0 0xC0 0x40 0x40 0x41
- *      CRTC[0x0A]: CURSTART        0x0D 0x0D 0x0D 0x0D 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0B]: CUREND          0x0E 0x0E 0x0E 0x0E 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0C]: STARTHIGH       0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0D]: STARTLOW        0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0E]: CURHIGH         0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x00
- *      CRTC[0x0F]: CURLOW          0x19 0x19 0x41 0x41 0x19 0x19 0x41 0x19 0x41 0x41 0xE1 0xA2
+ *      CRTC[0x0A]: CURSCAN         0x0D 0x0D 0x0D 0x0D 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+ *      CRTC[0x0B]: CURSCANB        0x0E 0x0E 0x0E 0x0E 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+ *      CRTC[0x0C]: STARTHI         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+ *      CRTC[0x0D]: STARTLO         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+ *      CRTC[0x0E]: CURSORHI        0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x00
+ *      CRTC[0x0F]: CURSORLO        0x19 0x19 0x41 0x41 0x19 0x19 0x41 0x19 0x41 0x41 0xE1 0xA2
  *      CRTC[0x10]: VRSTART         0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x83 0xEA 0x9C
  *      CRTC[0x11]: VREND           0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x85 0x8C 0x8E
  *      CRTC[0x12]: VDEND           0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x5D 0xDF 0x8F
@@ -366,7 +366,7 @@ class Card extends Controller {
             this.regCRTData = data[5];
             this.nCRTCRegs  = Card.CRTC.TOTAL_REGS;
             this.asCRTCRegs = DEBUGGER? Card.CRTC.REGS : [];
-            this.offStartAddr = this.regCRTData[Card.CRTC.STARTLOW] | (this.regCRTData[Card.CRTC.STARTHIGH] << 8);
+            this.offStartAddr = this.regCRTData[Card.CRTC.STARTLO] | (this.regCRTData[Card.CRTC.STARTHI] << 8);
             this.addrMaskHigh = 0x3F;       // card-specific mask for the high (bits 8 and up) of CRTC address registers
 
             if (nCard >= Video.CARD.EGA) {
@@ -529,7 +529,7 @@ class Card extends Controller {
         this.nSetMapBits    = data[22];
         this.nColorCompare  = data[23];
         this.nColorDontCare = data[24];
-        this.offStartAddr   = data[25];     // this is the last CRTC start address latched from CRTC.STARTHIGH,CRTC.STARTLOW
+        this.offStartAddr   = data[25];     // this is the last CRTC start address latched from CRTC.STARTHI,CRTC.STARTLO
 
         this.nVertPeriods = this.nVertPeriodsStartAddr = 0;
 
@@ -924,8 +924,8 @@ class Card extends Controller {
                 bOverflowBit8 = Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT8;         // 0x01
                 if (this.nCard == Video.CARD.VGA) bOverflowBit9 = Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT9;
                 break;
-            case Card.CRTC.EGA.CURSTART.INDX:       // 0x0A
-                if (this.nCard == Video.CARD.EGA) bOverflowBit8 = Card.CRTC.EGA.OVERFLOW.CURSTART_BIT8;
+            case Card.CRTC.EGA.CURSCAN:             // 0x0A
+                if (this.nCard == Video.CARD.EGA) bOverflowBit8 = Card.CRTC.EGA.OVERFLOW.CURSCAN_BIT8;
                 break;
             case Card.CRTC.EGA.VRSTART:             // 0x10
                 bOverflowBit8 = Card.CRTC.EGA.OVERFLOW.VRSTART_BIT8;        // 0x04
@@ -1042,7 +1042,7 @@ Card.CGA = {
 /*
  * Common CRT hardware registers (ports 0x3B4/0x3B5 or 0x3D4/0x3D5)
  *
- * NOTE: In this implementation, because we have to make at least two of the registers readable (CURHIGH and CURLOW),
+ * NOTE: In this implementation, because we have to make at least two of the registers readable (CURSORHI and CURSORLO),
  * we end up making ALL the registers readable, otherwise we would have to explicitly block any register marked write-only.
  * I don't think making the CRT registers fully readable presents any serious compatibility issues, and it actually offers
  * some benefits (eg, improved debugging).
@@ -1052,97 +1052,91 @@ Card.CGA = {
  * looked into it yet.
  */
 Card.CRTC = {
-    HTOTAL:                 0x00,       // Horizontal Total
-    HDISP:                  0x01,       // Horizontal Displayed
-    HSPOS:                  0x02,       // Horizontal Sync Position
-    HSWIDTH:                0x03,       // Horizontal Sync Width
-    VTOTAL:                 0x04,       // Vertical Total
-    VTOTADJ:                0x05,       // Vertical Total Adjust
-    VDISP:                  0x06,       // Vertical Displayed
-    VSPOS:                  0x07,       // Vertical Sync Position
-    ILMODE:                 0x08,       // Interlace Mode
-    MAXSCAN:                0x09,       // Max Scan Line Address
-    CURSTART:               0x0A,       // Cursor Start
+    HTOTAL:             0x00,           // Horizontal Total
+    HDISP:              0x01,           // Horizontal Displayed
+    HSPOS:              0x02,           // Horizontal Sync Position
+    HSWIDTH:            0x03,           // Horizontal Sync Width
+    VTOTAL:             0x04,           // Vertical Total
+    VTOTADJ:            0x05,           // Vertical Total Adjust
+    VDISP:              0x06,           // Vertical Displayed
+    VSPOS:              0x07,           // Vertical Sync Position
+    ILMODE:             0x08,           // Interlace Mode
+    MAXSCAN:            0x09,           // Max Scan Line Address
+    CURSCAN:            0x0A,           // Cursor Scan Line Top
+    CURSCAN_SLMASK:         0x1F,       // Scan Line Mask
     /*
      * I don't entirely understand the cursor blink control bits.  Here's what the MC6845 datasheet says:
      *
      *      Bit 5 is the blink timing control.  When bit 5 is low, the blink frequency is 1/16 of the vertical field rate,
      *      and when bit 5 is high, the blink frequency is 1/32 of the vertical field rate.  Bit 6 is used to enable a blink.
      */
-    CURSTART_SLMASK:        0x1F,       // Scan Line Mask
-    CURSTART_BLINKON:       0x00,       // (supposedly, 0x04 has the same effect as 0x00)
-    CURSTART_BLINKOFF:      0x20,       // if blinking is disabled, the cursor is effectively hidden
-    CURSTART_BLINKFAST:     0x60,       // default is 1/16 of the frame rate; this switches to 1/32 of the frame rate
-    CUREND:                 0x0B,
-    STARTHIGH:              0x0C,
-    STARTLOW:               0x0D,
-    CURHIGH:                0x0E,
-    CURLOW:                 0x0F,
-    PENHIGH:                0x10,
-    PENLOW:                 0x11,
-    TOTAL_REGS:             0x12,       // total CRT registers on MDA/CGA
+    CURSCAN_BLINKON:        0x00,       // (supposedly, 0x40 has the same effect as 0x00?)
+    CURSCAN_BLINKOFF:       0x20,       // if blinking is disabled, the cursor is effectively hidden (TODO: CGA and VGA only?)
+    CURSCAN_BLINKFAST:      0x60,       // default is 1/16 of the frame rate; this switches to 1/32 of the frame rate (TODO: CGA only?)
+    CURSCANB:           0x0B,           // Cursor Scan Line Bottom
+    STARTHI:            0x0C,           // Start Address High
+    STARTLO:            0x0D,           // Start Address Low
+    CURSORHI:           0x0E,           // Cursor Address High
+    CURSORLO:           0x0F,           // Cursor Address Low
+    PENHI:              0x10,           // Light Pen High
+    PENLO:              0x11,           // Light Pen Low
+    TOTAL_REGS:         0x12,           // total CRT registers on MDA/CGA
     EGA: {
-        HDEND:              0x01,
-        HBSTART:            0x02,
-        HBEND:              0x03,
-        HRSTART:            0x04,
-        HREND:              0x05,
-        VTOTAL:             0x06,
+        HDEND:          0x01,
+        HBSTART:        0x02,
+        HBEND:          0x03,
+        HRSTART:        0x04,
+        HREND:          0x05,
+        VTOTAL:         0x06,
         OVERFLOW: {
-            INDX:           0x07,
+            INDX:       0x07,
             VTOTAL_BIT8:    0x01,       // bit 8 of register 0x06
             VDEND_BIT8:     0x02,       // bit 8 of register 0x12
             VRSTART_BIT8:   0x04,       // bit 8 of register 0x10
             VBSTART_BIT8:   0x08,       // bit 8 of register 0x15
             LINECOMP_BIT8:  0x10,       // bit 8 of register 0x18
-            CURSTART_BIT8:  0x20,       // bit 8 of register 0x0A (EGA only)
+            CURSCAN_BIT8:   0x20,       // bit 8 of register 0x0A (EGA only; TODO: What is this for? The CURSCAN register doesn't even use bit 7, so why would it need a bit 8?)
             VTOTAL_BIT9:    0x20,       // bit 9 of register 0x06 (VGA only)
             VDEND_BIT9:     0x40,       // bit 9 of register 0x12 (VGA only, unused on EGA)
             VRSTART_BIT9:   0x80        // bit 9 of register 0x10 (VGA only, unused on EGA)
         },
-        PRESCAN:            0x08,
+        PRESCAN:        0x08,
         /*
          * NOTE: EGA/VGA CRTC registers 0x09-0x0F are the same as the MDA/CGA CRTC registers defined above
          */
         MAXSCAN: {
-            INDX:           0x09,
+            INDX:       0x09,           // (same as MDA/CGA)
             SLMASK:         0x1F,       // Scan Line Mask
             VBSTART_BIT9:   0x20,       // (VGA only)
             LINECOMP_BIT9:  0x40,       // (VGA only)
             CONVERT400:     0x80        // 200-to-400 scan-line conversion is in effect (VGA only)
         },
-        CURSTART: {
-            INDX:           0x0A,
-            SLMASK:         0x1F,
-            BLINKON:        0x00,       // (VGA only; supposedly, 0x04 has the same effect as 0x00)
-            BLINKOFF:       0x20,       // if blinking is disabled, the cursor is effectively hidden (VGA only)
-            BLINKFAST:      0x60        // default is 1/16 of the frame rate; this switches to 1/32 of the frame rate (VGA only)
-        },
-        CUREND:             0x0B,
-        STARTHIGH:          0x0C,
-        STARTLOW:           0x0D,
-        CURHIGH:            0x0E,
-        CURLOW:             0x0F,
-        VRSTART:            0x10,
-        VREND:              0x11,
-        VDEND:              0x12,
+        CURSCAN:        0x0A,           // (same as MDA/CGA)
+        CURSCANB:       0x0B,           // (same as MDA/CGA)
+        STARTHI:        0x0C,           // (same as MDA/CGA)
+        STARTLO:        0x0D,           // (same as MDA/CGA)
+        CURSORHI:       0x0E,           // (same as MDA/CGA)
+        CURSORLO:       0x0F,           // (same as MDA/CGA)
+        VRSTART:        0x10,           // (formerly PENHI on MDA/CGA)
+        VREND:          0x11,           // (formerly PENLO on MDA/CGA; last register on the original 6845 controller)
+        VDEND:          0x12,
         /*
          * The OFFSET register (bits 0-7) specifies the logical line width of the screen.  The starting memory address
          * for the next character row is larger than the current character row by two or four times this amount.
          * The OFFSET register is programmed with a word address.  Depending on the method of clocking the CRT Controller,
          * this word address is [effectively] either a word or double-word address. #IBMVGATechRef
          */
-        OFFSET:             0x13,
+        OFFSET:         0x13,
         UNDERLINE: {
-            INDX:           0x14,
+            INDX:       0x14,
             ROWSCAN:        0x1F,
             COUNT_BY_4:     0x20,       // (VGA only)
             DWORD:          0x40        // (VGA only)
         },
-        VBSTART:            0x15,
-        VBEND:              0x16,
+        VBSTART:        0x15,
+        VBEND:          0x16,
         MODECTRL: {
-            INDX:           0x17,
+            INDX:       0x17,
             COMPAT_MODE:    0x01,       // Compatibility Mode Support (CGA A13 control)
             SEL_ROW_SCAN:   0x02,       // Select Row Scan Counter
             SEL_HRETRACE:   0x04,       // Horizontal Retrace Select
@@ -1152,20 +1146,20 @@ Card.CRTC = {
             BYTE_MODE:      0x40,       // Byte Mode (1 selects Byte Mode; 0 selects Word Mode)
             HARD_RESET:     0x80        // Hardware Reset
         },
-        LINECOMP:           0x18,
-        TOTAL_REGS:         0x19        // total CRT registers on EGA/VGA
+        LINECOMP:       0x18,
+        TOTAL_REGS:     0x19            // total CRT registers on EGA/VGA
     }
 };
 
 /*
- * TODO: These mask tables need to be card-specific.  For example, the STARTHIGH and CURHIGH registers used to be
+ * TODO: These mask tables need to be card-specific.  For example, the STARTHI and CURSORHI registers used to be
  * limited to 0x3F, because the MC6845 controller used with the original MDA and CGA cards was limited to 16Kb of RAM,
  * whereas later cards like the EGA and VGA had anywhere from 64Kb to 256Kb, so all the bits of those registers were
  * significant.  Currently, I'm doing very little masking, which means most CRTC registers are treated as full 8-bit
  * registers (and fully readable as well), which might cause some compatibility problems for any MDA/CGA apps that
  * were sloppy about how they programmed registers.
  *
- * I do make an exception, however, in the case of STARTHIGH and CURHIGH, due to the way the MC6845 controller wraps
+ * I do make an exception, however, in the case of STARTHI and CURSORHI, due to the way the MC6845 controller wraps
  * addresses around to the beginning of the buffer, because that seems like a high-risk case.  See the card-specific
  * variable addrMaskHigh.
  */
@@ -1180,26 +1174,26 @@ Card.CRTCMASKS = {
     [Card.CRTC.VSPOS]:      0x7F,       // R7
     [Card.CRTC.ILMODE]:     0x03,       // R8
     [Card.CRTC.MAXSCAN]:    0x1F,       // R9
-    [Card.CRTC.CURSTART]:   0x7F,       // R10
-    [Card.CRTC.CUREND]:     0x1F,       // R11
-    [Card.CRTC.STARTHIGH]:  0x3F,       // R12
-    [Card.CRTC.STARTLOW]:   0xFF,       // R13
-    [Card.CRTC.CURHIGH]:    0x3F,       // R14
-    [Card.CRTC.CURLOW]:     0xFF,       // R15
-    [Card.CRTC.PENHIGH]:    0x3F,       // R16
-    [Card.CRTC.PENLOW]:     0xFF        // R17
+    [Card.CRTC.CURSCAN]:    0x7F,       // R10
+    [Card.CRTC.CURSCANB]:   0x1F,       // R11
+    [Card.CRTC.STARTHI]:    0x3F,       // R12
+    [Card.CRTC.STARTLO]:    0xFF,       // R13
+    [Card.CRTC.CURSORHI]:   0x3F,       // R14
+    [Card.CRTC.CURSORLO]:   0xFF,       // R15
+    [Card.CRTC.PENHI]:      0x3F,       // R16
+    [Card.CRTC.PENLO]:      0xFF        // R17
 };
 
 if (DEBUGGER) {
     Card.CRTC.REGS = [
         "HTOTAL","HDISP","HSPOS","HSWIDTH","VTOTAL","VTOTADJ",
-        "VDISP","VSPOS","ILMODE","MAXSCAN","CURSTART","CUREND",
-        "STARTHIGH","STARTLOW","CURHIGH","CURLOW","PENHIGH","PENLOW"];
+        "VDISP","VSPOS","ILMODE","MAXSCAN","CURSCAN","CURSCANB",
+        "STARTHI","STARTLO","CURSORHI","CURSORLO","PENHI","PENLO"];
 
     Card.CRTC.EGA_REGS = [
         "HTOTAL","HDEND","HBSTART","HBEND","HRSTART","HREND",
-        "VTOTAL","OVERFLOW","PRESCAN","MAXSCAN","CURSTART","CUREND",
-        "STARTHIGH","STARTLOW","CURHIGH","CURLOW","VRSTART","VREND",
+        "VTOTAL","OVERFLOW","PRESCAN","MAXSCAN","CURSCAN","CURSCANB",
+        "STARTHI","STARTLO","CURSORHI","CURSORLO","VRSTART","VREND",
         "VDEND","OFFSET","UNDERLINE","VBSTART","VBEND","MODECTRL","LINECOMP"];
 }
 
@@ -1387,8 +1381,8 @@ Card.SEQ = {
         INDX:               0x03,       // Sequencer Character Map Select Register
         SELB:               0x03,       // 0x0: 1st 8Kb of plane 2; 0x1: 2nd 8Kb; 0x2: 3rd 8Kb; 0x3: 4th 8Kb
         SELA:               0x0C,       // 0x0: 1st 8Kb of plane 2; 0x4: 2nd 8Kb; 0x8: 3rd 8Kb; 0xC: 4th 8Kb
-        SELB_HIGH:          0x10,       // VGA only
-        SELA_HIGH:          0x20        // VGA only
+        SELB_HI:            0x10,       // VGA only
+        SELA_HI:            0x20        // VGA only
     },
     MEMMODE: {
         INDX:               0x04,       // Sequencer Memory Mode Register
@@ -3880,7 +3874,7 @@ class Video extends Component {
      * createFontColor(font, iColor, rgbColor, nDouble, offData, offSplit, cxChar, cyChar, abFontData)
      *
      * @this {Video}
-     * @param {Object} font
+     * @param {Font} font
      * @param {number} iColor
      * @param {Array} rgbColor contains the RGB values for iColor
      * @param {number} nDouble is 1 to double output font dimensions, 0 to match input dimensions
@@ -3983,7 +3977,7 @@ class Video extends Component {
      * of the hardware cursor have been modified, and any of iCellCursor, yCursor or cyCursor have been modified as a result.
      *
      * Note that the cursor always blinks when it's ON; it can only be turned OFF, moved off-screen, or its rate set to half
-     * the normal blink rate (by default, it blinks at the normal blink rate).  Bits 5-6 of the CRTC.CURSTART register can
+     * the normal blink rate (by default, it blinks at the normal blink rate).  Bits 5-6 of the CRTC.CURSCAN register can
      * be set as follows:
      *
      *    00: Cursor blinks at normal blink rate
@@ -4039,12 +4033,20 @@ class Video extends Component {
      * ROM BIOS controller settings):
      *
      *      CRTC.MAXSCAN
-     *      CRTC.CURSTART
-     *      CRTC.CUREND
-     *      CRTC.STARTHIGH
-     *      CRTC.STARTLOW
-     *      CRTC.CURHIGH
-     *      CRTC.CURLOW
+     *      CRTC.CURSCAN
+     *      CRTC.CURSCANB
+     *      CRTC.STARTHI
+     *      CRTC.STARTLO
+     *      CRTC.CURSORHI
+     *      CRTC.CURSORLO
+     * 
+     * The top of the cursor starts at CURSCAN, and the bottom is CURSCANB - 1, except that if CURSCAN == CURSCANB
+     * (or more precisely, if CURSCAN == CURSCANB mod 16), then a single scan line is still drawn.  Also, on the EGA,
+     * if CURSCANB < CURSCAN, a split cursor is drawn.
+     * 
+     * Also, at least on the EGA, if CURSCANB is set to a value > MAXSCAN (typically 13 on an EGA), cursor scan line
+     * drawing wraps around to zero and does not stop until we reach CURSCAN again.  However, this happens only when
+     * CURSCAN is <= MAXSCAN; if CURSCAN > MAXSCAN, then nothing is drawn, regardless of CURSCANB.
      *
      * @this {Video}
      * @return {boolean} true if the cursor is visible, false if not
@@ -4057,76 +4059,93 @@ class Video extends Component {
         if (!this.nFont) return false;
         
         var card = this.cardActive;
-        for (var i = Card.CRTC.CURSTART; i <= Card.CRTC.CURLOW; i++) {
+        for (var i = Card.CRTC.CURSCAN; i <= Card.CRTC.CURSORLO; i++) {
             if (card.regCRTData[i] == null)
                 return false;
         }
 
-        var bCursorFlags = card.regCRTData[Card.CRTC.CURSTART];
-        var bCursorStart = bCursorFlags & Card.CRTC.CURSTART_SLMASK;
-        var bCursorEnd = card.regCRTData[Card.CRTC.CUREND] & Card.CRTCMASKS[Card.CRTC.CUREND];
+        var bCursorFlags = card.regCRTData[Card.CRTC.CURSCAN];
+        var bCursorStart = bCursorFlags & Card.CRTC.CURSCAN_SLMASK;
+        var bCursorEnd = card.regCRTData[Card.CRTC.CURSCANB] & Card.CRTCMASKS[Card.CRTC.CURSCANB];
         var bCursorMax = card.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
         var oCursorStart = bCursorStart, oCursorEnd = bCursorEnd;
         
         /*
-         * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to
-         * detect that particular combination of bad values and automatically fix them (we're so thoughtful!)
-         */
-        if (this.nCard == Video.CARD.EGA) {
-            if (bCursorMax == 7 && bCursorStart == 4 && !bCursorEnd) bCursorEnd = 7;
-        }
-        /*
-         * Before range-checking CURSTART and CUREND, we need to see if they satisfy the disabled cursor condition,
-         * because the cursor may have been disabled with values outside the the normal range.  If so, then we simulate
-         * the disabled condition by pretending the CURSTART_BLINKOFF bit is set.
+         * Before range-checking CURSCAN and CURSCANB, let's see if the cursor is disabled by a starting value
+         * outside the visible range; if so, simulate the condition by pretending the CURSCAN_BLINKOFF bit is set.
          * 
-         * For example, on a CGA, ThinkTank sets both CURSTART and CUREND to 15, WordStar for PCjr sets CURSTART and
-         * CUREND to 12 and 13, respectively, and Rogue sets CURSTART and CUREND to 15 and 0, respectively.  Those values
-         * don't make sense when the max is 7, so what does a *real* CGA do?
-         */
-        else if (bCursorStart > bCursorEnd) {
-            bCursorFlags |= Card.CRTC.CURSTART_BLINKOFF;
-        }
-
-        /*
-         * Range-check CURSTART and CUREND against MAXSCAN now.
+         * For example, on a CGA, ThinkTank sets both CURSCAN and CURSCANB to 15, WordStar for PCjr sets CURSCAN and
+         * CURSCANB to 12 and 13, respectively, and Rogue sets CURSCAN and CURSCANB to 15 and 0, respectively.
          */
         if (bCursorStart > bCursorMax) {
-            bCursorStart = bCursorMax;
+            bCursorFlags |= Card.CRTC.CURSCAN_BLINKOFF;
         }
-        if (!bCursorEnd || bCursorEnd > bCursorMax) {
-            bCursorEnd = bCursorMax;
+
+        var bCursorWrap = 0;
+        if (this.nCard < Video.CARD.EGA) {
+            if (bCursorEnd < bCursorStart) {
+                bCursorWrap = bCursorEnd + 1;
+                bCursorEnd = bCursorMax;
+            }
+            else if (bCursorEnd > bCursorMax) {
+                bCursorStart = 0;
+                bCursorEnd = bCursorMax;
+            }
+            bCursorEnd++;
+        }
+        else {
             /*
-             * HACK: "Thicken" the cursor to two scan lines as part of the "rounding down" process.
-             * 
-             * TODO: I need a suite of cursor shape and visibility tests across all cards (MDA, CGA, EGA, and VGA),
-             * because I'm not really cool with code like this.
+             * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to
+             * detect that particular combination of bad values and automatically fix them (we're so thoughtful!)
              */
-            if (bCursorMax && bCursorStart == bCursorMax) bCursorStart = bCursorMax - 1;
+            if (this.nCard == Video.CARD.EGA) {
+                if (bCursorMax == 7 && bCursorStart == 4 && !bCursorEnd) bCursorEnd = 7;
+            }
+            /*
+             * TODO: Determine if the VGA emulates this EGA anomaly, where if CURSCAN == CURSCANB mod 16, it's treated
+             * the same as if CURSCAN == CURSCANB.  For example, if you set (CURSCAN,CURSCANB) to either the decimal values
+             * (4,19) or (4,21), you'll get a full block cursor, but if you set it to (4,20), you get a single line cursor
+             * at row 4.
+             */
+            if (bCursorEnd == bCursorStart % 16) {
+                bCursorEnd = bCursorStart + 1;
+            }
+            else if (bCursorEnd < bCursorStart) {
+                bCursorWrap = bCursorEnd;
+                bCursorEnd = bCursorMax + 1;
+                /*
+                 * The VGA didn't support funky split (aka wrap-around) cursors, so as above, we pretend that the cursor
+                 * has simply been disabled.
+                 */
+                if (this.nCard == Video.CARD.VGA) {
+                    bCursorFlags |= Card.CRTC.CURSCAN_BLINKOFF;
+                    bCursorWrap = 0;
+                }
+            }
+            else if (bCursorEnd > bCursorMax) {
+                bCursorStart = 0;
+                bCursorEnd = bCursorMax + 1;
+            }
         }
-        
-        var bCursorSize = bCursorEnd - bCursorStart + 1;
+        var bCursorSize = bCursorEnd - bCursorStart;
 
         /*
-         * One way of disabling the cursor is to set bit 5 (Card.CRTC.CURSTART_BLINKOFF) of the CRTC.CURSTART flags;
+         * One way of disabling the cursor is to set bit 5 (Card.CRTC.CURSCAN_BLINKOFF) of the CRTC.CURSCAN flags;
          * another way is setting bCursorStart > bCursorEnd, which implies that bCursorSize <= 0.
-         * 
-         * TODO: On an EGA, the second condition can generate a "split block" cursor; see p. 201 of The Programmer's Guide
-         * to the EGA, VGA, et al.
          */
-        if ((bCursorFlags & Card.CRTC.CURSTART_BLINKOFF) || bCursorSize <= 0 /* && !fEGA || bCursorStart > bCursorMax */) {
+        if ((bCursorFlags & Card.CRTC.CURSCAN_BLINKOFF) || bCursorSize <= 0) {
             this.removeCursor();
             return false;
         }
 
         /*
-         * The most compatible way of disabling the cursor is to simply move it to an off-screen position.
+         * The least tricky way of disabling (ie, hiding) the cursor is to simply move it to an off-screen position.
          */
-        var iCellCursor = card.regCRTData[Card.CRTC.CURLOW];
-        iCellCursor |= (card.regCRTData[Card.CRTC.CURHIGH] & card.addrMaskHigh) << 8;
+        var iCellCursor = card.regCRTData[Card.CRTC.CURSORLO];
+        iCellCursor |= (card.regCRTData[Card.CRTC.CURSORHI] & card.addrMaskHigh) << 8;
 
-        var offStartAddr = card.regCRTData[Card.CRTC.STARTLOW];
-        offStartAddr |= (card.regCRTData[Card.CRTC.STARTHIGH] & card.addrMaskHigh) << 8;
+        var offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
+        offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
         
         iCellCursor -= offStartAddr;
         
@@ -4156,10 +4175,11 @@ class Video extends Component {
          * We also record cyCursorCell, the hardware cell height, since we'll need to know what the yCursor and
          * cyCursor values are relative to when it's time to scale them.
          */
-        if (this.yCursor != bCursorStart || this.cyCursor != bCursorSize) {
+        if (this.yCursor !== bCursorStart || this.cyCursor !== bCursorSize || this.cyCursorWrap !== bCursorWrap) {
             this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d (0x%02x-0x%02x)\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize, oCursorStart, oCursorEnd);
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
+            this.cyCursorWrap = bCursorWrap;
             /*
              * TODO: Consider our redraw options for cursor shape changes, because invalidating cBlinkVisible won't
              * have the desired effect if the cursor is still in the same location.  The only existing mechanism for
@@ -4172,12 +4192,17 @@ class Video extends Component {
         this.cyCursorCell = bCursorMax + 1;
 
         /*
-         * This next condition is critical; WordStar for PCjr (designed for the CGA) would program CUREND to 31,
+         * This next condition is critical; WordStar for PCjr (designed for the CGA) would program CURSCANB to 31,
          * whereas MAXSCAN was 7.  This resulted in cyCursorCell of 8 and cyCursor of 32, producing elongated cursors
-         * in updateChar().  By range-checking CURSTART and CUREND against MAXSCAN above, that should no longer happen.
+         * in updateChar().  By range-checking CURSCAN and CURSCANB against MAXSCAN above, that should no longer happen.
+         * 
+         * This condition can also happen while the CRT controller is in an inconsistent state (ie, in the middle of
+         * being completely reprogrammed), so we mustn't freak out.
          */
-        this.assert(this.cyCursor <= this.cyCursorCell);
-
+        if (this.cyCursor > this.cyCursorCell) {
+            this.cyCursor = this.cyCursorCell;
+        }
+        
         this.checkBlink();
         return true;
     }
@@ -4940,7 +4965,7 @@ class Video extends Component {
      * @param {number} col
      * @param {number} row
      * @param {number} data (if text mode, character code in low byte, attribute code in high byte)
-     * @param {Object} [context]
+     * @param {CanvasRenderingContext2D} [context]
      */
     updateChar(col, row, data, context)
     {
@@ -4996,42 +5021,63 @@ class Video extends Component {
         }
 
         if (bAttr & Video.ATTRS.DRAW_CURSOR) {
-            /*
-             * Drawing the cursor with lineTo() seemed logical, but it was complicated by the fact that the
-             * TOP of the line must appear at "yDst + this.yCursor", whereas lineTo() wants to know the CENTER
-             * of the line. So it's simpler to draw the cursor with another fillRect().  Here's the old code:
-             *
-             *      this.contextScreen.strokeStyle = font.aCSSColors[iFgnd];
-             *      this.contextScreen.lineWidth = this.cyCursor;
-             *      this.contextScreen.beginPath();
-             *      this.contextScreen.moveTo(xDst, yDst + this.yCursor);
-             *      this.contextScreen.lineTo(xDst + this.cxScreenCell, yDst + this.yCursor);
-             *      this.contextScreen.stroke();
-             *
-             * Also, note that we're scaling the yCursor and cyCursor values here, instead of in checkCursor(), because
-             * this is where we have all the required information: in the first case (off-screen buffer), the scaling must
-             * be based on the font cell size (cxCell, cyCell), whereas in the second case (on-screen buffer), the scaling
-             * must be based on the screen cell size (cxScreenCell,cyScreenCell).
-             *
-             * yCursor and cyCursor are actual hardware values, both relative to another hardware value: cyCursorCell.
-             */
-            var yCursor = this.yCursor;
-            var cyCursor = this.cyCursor;
-            if (context) {
-                if (this.cyCursorCell && this.cyCursorCell !== font.cyCell) {
-                    yCursor = ((yCursor * font.cyCell) / this.cyCursorCell)|0;
-                    cyCursor = ((cyCursor * font.cyCell) / this.cyCursorCell)|0;
-                }
-                context.fillStyle = font.aCSSColors[iFgnd];
-                context.fillRect(xDst, yDst + yCursor, font.cxCell, cyCursor);
-            } else {
-                if (this.cyCursorCell && this.cyCursorCell !== this.cyScreenCell) {
-                    yCursor = ((yCursor * this.cyScreenCell) / this.cyCursorCell)|0;
-                    cyCursor = ((cyCursor * this.cyScreenCell) / this.cyCursorCell)|0;
-                }
-                this.contextScreen.fillStyle = font.aCSSColors[iFgnd];
-                this.contextScreen.fillRect(xDst, yDst + yCursor, this.cxScreenCell, cyCursor);
+            if (this.cyCursorWrap) {
+                this.drawCursor(0, this.cyCursorWrap, xDst, yDst, iFgnd, font, context);
             }
+            this.drawCursor(this.yCursor, this.cyCursor, xDst, yDst, iFgnd, font, context);
+        }
+    }
+
+    /**
+     * drawCursor(yCursor, cyCursor, xDst, yDst, iFgnd, font, context)
+     *
+     * We have factored the cursor-drawing code out of updateChar() so that we can call this function multiple times,
+     * in case we have to draw a "split cursor" (something that only happens on the EGA).
+     *
+     * @this {Video}
+     * @param {number} yCursor
+     * @param {number} cyCursor
+     * @param {number} xDst
+     * @param {number} yDst
+     * @param {number} iFgnd
+     * @param {Font} font
+     * @param {CanvasRenderingContext2D} [context]
+     */
+    drawCursor(yCursor, cyCursor, xDst, yDst, iFgnd, font, context)
+    {
+        /*
+         * Drawing the cursor with lineTo() seemed logical, but it was complicated by the fact that the
+         * TOP of the line must appear at "yDst + this.yCursor", whereas lineTo() wants to know the CENTER
+         * of the line. So it's simpler to draw the cursor with another fillRect().  Here's the old code:
+         *
+         *      this.contextScreen.strokeStyle = font.aCSSColors[iFgnd];
+         *      this.contextScreen.lineWidth = this.cyCursor;
+         *      this.contextScreen.beginPath();
+         *      this.contextScreen.moveTo(xDst, yDst + this.yCursor);
+         *      this.contextScreen.lineTo(xDst + this.cxScreenCell, yDst + this.yCursor);
+         *      this.contextScreen.stroke();
+         *
+         * Also, note that we're scaling the yCursor and cyCursor values here, instead of in checkCursor(), because
+         * this is where we have all the required information: in the first case (off-screen buffer), the scaling must
+         * be based on the font cell size (cxCell, cyCell), whereas in the second case (on-screen buffer), the scaling
+         * must be based on the screen cell size (cxScreenCell,cyScreenCell).
+         *
+         * yCursor and cyCursor are actual hardware values, both relative to another hardware value: cyCursorCell.
+         */
+        if (context) {
+            if (this.cyCursorCell && this.cyCursorCell !== font.cyCell) {
+                yCursor = ((yCursor * font.cyCell) / this.cyCursorCell)|0;
+                cyCursor = ((cyCursor * font.cyCell) / this.cyCursorCell)|0;
+            }
+            context.fillStyle = font.aCSSColors[iFgnd];
+            context.fillRect(xDst, yDst + yCursor, font.cxCell, cyCursor);
+        } else {
+            if (this.cyCursorCell && this.cyCursorCell !== this.cyScreenCell) {
+                yCursor = ((yCursor * this.cyScreenCell) / this.cyCursorCell)|0;
+                cyCursor = ((cyCursor * this.cyScreenCell) / this.cyCursorCell)|0;
+            }
+            this.contextScreen.fillStyle = font.aCSSColors[iFgnd];
+            this.contextScreen.fillRect(xDst, yDst + yCursor, this.cxScreenCell, cyCursor);
         }
     }
 
@@ -5122,7 +5168,7 @@ class Video extends Component {
         }
 
         /*
-         * HACK: The CRTC's STARTHIGH and STARTLOW registers are supposed to be "latched" into offStartAddr
+         * HACK: The CRTC's STARTHI and STARTLO registers are supposed to be "latched" into offStartAddr
          * ONLY at the start of every VRETRACE interval; this is an attempt to honor that behavior,
          * but unfortunately, updateScreen() is currently called at the CPU's discretion, not necessarily in
          * sync with nCyclesVertPeriod.  As a result, we must rely on other criteria, like the number of vertical
@@ -5137,8 +5183,8 @@ class Video extends Component {
             /*
              * PARANOIA: Don't call invalidateCache() unless the address we're about to "latch" actually changed.
              */
-            var offStartAddr = card.regCRTData[Card.CRTC.STARTLOW];
-            offStartAddr |= (card.regCRTData[Card.CRTC.STARTHIGH] & card.addrMaskHigh) << 8;
+            var offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
+            offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
             if (card.offStartAddr !== offStartAddr) {
                 card.offStartAddr = offStartAddr;
                 this.invalidateCache();
@@ -5924,8 +5970,8 @@ class Video extends Component {
              *
              * PARANOIA: Don't call invalidateCache() unless the start address we just "latched" actually changed.
              */
-            var offStartAddr = card.regCRTData[Card.CRTC.STARTLOW];
-            offStartAddr |= (card.regCRTData[Card.CRTC.STARTHIGH] & card.addrMaskHigh) << 8;
+            var offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
+            offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
             if (card.offStartAddr != offStartAddr) {
                 card.offStartAddr = offStartAddr;
                 this.invalidateCache();
@@ -6668,9 +6714,9 @@ class Video extends Component {
                 }
                 card.regCRTData[card.regCRTIndx] = bOut;
             }
-            if (card.regCRTIndx == Card.CRTC.STARTHIGH || card.regCRTIndx == Card.CRTC.STARTLOW) {
+            if (card.regCRTIndx == Card.CRTC.STARTHI || card.regCRTIndx == Card.CRTC.STARTLO) {
                 /*
-                 * Both STARTHIGH and STARTLOW are supposed to be latched at the start of every VRETRACE interval.
+                 * Both STARTHI and STARTLO are supposed to be latched at the start of every VRETRACE interval.
                  * However, since we don't have an interrupt that tells us exactly when that occurs, we used to latch
                  * them now, whenever either one was written during any RETRACE interval.  Unfortunately, one problem
                  * with that approach is that we might latch only *one* of the registers, depending on timing.

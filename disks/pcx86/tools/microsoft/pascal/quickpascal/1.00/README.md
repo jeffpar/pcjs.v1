@@ -7,7 +7,7 @@ permalink: /disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/
 Microsoft QuickPascal 1.00
 --------------------------
 
-### Directory of MS QuickPascal 1.00 (720K Disk 1)
+### Directory of MS QuickPascal 1.00 (720K Disk 1) ("Setup/Program/Utilities")
 
      Volume in drive A is QP100      
     
@@ -50,7 +50,7 @@ Microsoft QuickPascal 1.00
            27 file(s)     603574 bytes
                           112640 bytes free
 
-### Directory of MS QuickPascal 1.00 (720K Disk 2)
+### Directory of MS QuickPascal 1.00 (720K Disk 2) ("QuickPascal Advisor/QuickPascal Express")
 
      Volume in drive A is QP100      
     
@@ -77,7 +77,7 @@ Microsoft QuickPascal 1.00
            15 file(s)     688948 bytes
                            33792 bytes free
 
-### Directory of MS QuickPascal 1.00 (720K Disk 3)
+### Directory of MS QuickPascal 1.00 (720K Disk 3) ("Libraries")
 
      Volume in drive A is QP100      
     

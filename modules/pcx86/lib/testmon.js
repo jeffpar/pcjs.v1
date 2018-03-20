@@ -453,13 +453,14 @@ class TestMonitor {
                 this.addCommand(this.commandBuffer.replace(/\\n/g, "\n"));
                 this.commandBuffer = "";
             } else {
-                this.sendOutput(charCode);
-                if (charCode == 8) {
+                if (charCode == Keys.ASCII.CTRL_H || charCode == Keys.ASCII.DEL) {
                     if (this.commandBuffer.length) {
                         this.commandBuffer = this.commandBuffer.slice(0, -1);
+                        this.sendOutput("\b \b");
                     }
-                } else {
+                } else if (charCode >= 32 && charCode < 127) {
                     this.commandBuffer += String.fromCharCode(charCode);
+                    this.sendOutput(charCode);
                 }
             }
         }
