@@ -216,7 +216,7 @@
     color: white;
     font-family: Monaco, "Lucida Console", monospace;
     font-size: medium;
-    background: rgba(0, 0, 0, .5);
+    background: black;
     opacity: 0;
     line-height: 0; /* try to prevent Safari on iOS from always displaying a blinking caret */
 }

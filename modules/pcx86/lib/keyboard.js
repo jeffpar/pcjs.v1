@@ -163,6 +163,17 @@ class Keyboard extends Component {
         this.msInjectDelay   = 0;           // set by the initial injectKeys() call
         this.msDoubleClick   = 250;         // used by mousedown/mouseup handlers to soft-lock modifier keys
         this.cKeysPressed    = 0;           // count of keys pressed since the last time it was reset
+        this.softCodeKeys    = Object.keys(Keyboard.SOFTCODES);
+        /*
+         * Remove all single-character SOFTCODE keys from the softCodeKeys array, because those SOFTCODES
+         * are not supported by injectKeys().
+         */
+        for (var i = 0; i < this.softCodeKeys.length; i++) {
+            if (this.softCodeKeys[i].length < 2) {
+                this.softCodeKeys.splice(i, 1);
+                i--;
+            }
+        }
 
         /*
          * autoType records the machine's specified autoType sequence, if any.  At the appropriate signal(s),
@@ -172,6 +183,7 @@ class Keyboard extends Component {
         this.autoType = parmsKbd['autoType'];
         this.fDOSReady = false;
         this.fnDOSReady = this.fnInjectReady = null;
+        this.fInjectOnStart = false;
 
         /*
          * HACK: We set fAllDown to false to ignore all down/up events for keys not explicitly marked as ONDOWN;
@@ -495,6 +507,22 @@ class Keyboard extends Component {
     }
 
     /**
+     * start()
+     *
+     * Notification from the Computer that it's starting.
+     *
+     * @this {Keyboard}
+     */
+    start()
+    {
+        if (this.fInjectOnStart) {
+            this.fInjectOnStart = false;
+            this.injectInit();
+        }
+    }
+
+
+    /**
      * intDOS()
      *
      * Monitors selected DOS interrupts for signals to initialize 'autoType' injection.
@@ -513,7 +541,7 @@ class Keyboard extends Component {
                 this.fnDOSReady = null;
                 this.fDOSReady = false;
             } else {
-                this.injectInit(this.autoType);
+                this.injectInit();
             }
         }
         return true;
@@ -537,14 +565,25 @@ class Keyboard extends Component {
     /**
      * parseKeys(sKeys)
      *
-     * The following special sequences are recognized:
+     * The following special "macro" sequences are recognized:
      *
      *      $date:  converted to MM-DD-YYYY
      *      $time:  converted to HH:MM
+     * 
+     * In addition, property keys in the SOFTCODES tables can be prefixed with "$" if you want to specify
+     * a key by its SOFTCODE; eg:
+     * 
+     *      $f1:    the F1 function key
+     *      $alt:   the ALT key
+     * 
+     * Not all SOFTCODES are allowed; for example, SOFTCODES that begin with a digit or other non-alpha symbol,
+     * or that contain only one letter, because those SOFTCODES can already be specified as-is, WITHOUT a leading
+     * "$".  Also, all we replace here are the "macro" sequences, leaving any prefixed SOFTCODES in place so that
+     * injectKeys() can convert them on the fly.
      *
-     * If you want any of those sequences to be typed as-is, then you must specify two "$" (ie, "$$date").
+     * If you want any of those sequences to be typed as-is, then you must specify two "$" (eg, "$$date").
      * Pairs of dollar signs will be automatically converted to single dollar signs, and single dollar signs
-     * will be used as-is.
+     * will be used as-is, provided they don't precede any of the above "macro" or SOFTCODE sequences.
      *
      * WARNING: the JavaScript replace() function ALWAYS interprets "$" specially in replacement strings,
      * even when the search string is NOT a RegExp; specifically:
@@ -574,7 +613,7 @@ class Keyboard extends Component {
     parseKeys(sKeys)
     {
         if (sKeys) {
-            var match, reSpecial = /(?:^|[^$])\$([a-z]+)/g;
+            var match, reSpecial = /(?:^|[^$])\$([a-z][a-z0-9-]+)/g;
             while (match = reSpecial.exec(sKeys)) {
                 var sReplace = "";
                 switch (match[1]) {
@@ -585,11 +624,6 @@ class Keyboard extends Component {
                     sReplace = Usr.formatDate("h:i:s");
                     break;
                 default:
-                    //
-                    // Let's just leave any unrecognized sequences alone....
-                    //
-                    // this.notice("unrecognized autoType sequence: $" + match[1]);
-                    // break;
                     continue;
                 }
                 sKeys = sKeys.replace('$' + match[1], sReplace);
@@ -604,11 +638,9 @@ class Keyboard extends Component {
                  */
             }
             /*
-             * Any lingering "$$" sequences are now converted to "$"; as discussed above, replace() interprets
-             * any "$$" in the replacement string as "$", so to the casual observer, it might not look like we're
-             * downsizing the dollar signs, but we actually are.
+             * Any lingering "$$" sequences are now converted to a special code (\x1F) that injectKeys() knows about.
              */
-            sKeys = sKeys.replace(/\$\$/g, "$$");
+            sKeys = sKeys.replace(/\$\$/g, '\x1F');
         }
         return sKeys;
     }
@@ -962,13 +994,18 @@ class Keyboard extends Component {
      */
     initState(data)
     {
-        var i = 0;
+        /*
+         * Make sure the auto-injection buffer is empty (an injection could have been in progress on any reset after the first).
+         */
+        this.sInjectBuffer = "";
+
         if (!data) {
             data = [];
-            this.autoInject = null;
         } else {
-            this.autoInject = this.autoType;
+            if (this.cmp.sStatePath) this.fInjectOnStart = true;
         }
+
+        var i = 0;
         this.fClock = data[i++];
         this.fData = data[i];
         this.bCmdPending = 0;       // when non-zero, a command is pending (eg, SET_LED or SET_RATE)
@@ -984,11 +1021,6 @@ class Keyboard extends Component {
          * New scan codes are "pushed" onto abBuffer and then "shifted" off.
          */
         this.abBuffer = [];
-
-        /*
-         * Make sure the auto-injection buffer is empty (an injection could have been in progress on any reset after the first).
-         */
-        this.sInjectBuffer = "";
 
         return true;
     }
@@ -1097,16 +1129,15 @@ class Keyboard extends Component {
     }
 
     /**
-     * injectInit(sKeys)
+     * injectInit()
      *
      * @this {Keyboard}
-     * @param {string|undefined} sKeys
      * @return {boolean}
      */
-    injectInit(sKeys)
+    injectInit()
     {
-        if (!this.autoInject && sKeys) {
-            this.autoInject = sKeys;
+        if (!this.autoInject && this.autoType) {
+            this.autoInject = this.autoType;
             return this.injectKeys(this.autoInject);
         }
         return false;
@@ -1123,8 +1154,9 @@ class Keyboard extends Component {
     injectKeys(sKeys, msDelay)
     {
         if (sKeys) {
-            if (!this.sInjectBuffer) {
-                this.sInjectBuffer = this.parseKeys(sKeys);
+            var sInjectBuffer = this.parseKeys(sKeys);
+            if (sInjectBuffer) {
+                this.sInjectBuffer = sInjectBuffer;
                 if (!COMPILED) this.log("injectKeys(\"" + this.sInjectBuffer.split("\n").join("\\n") + "\")");
                 this.msInjectDelay = msDelay || this.msInjectDefault;
                 this.injectKeys();
@@ -1135,6 +1167,17 @@ class Keyboard extends Component {
         var simCode = 0;
         while (this.sInjectBuffer.length > 0 && !simCode) {
             var ch = this.sInjectBuffer.charAt(0);
+            if (ch == '$') {
+                var i;
+                for (i = 0; i < this.softCodeKeys.length; i++) {
+                    if (this.sInjectBuffer.indexOf(this.softCodeKeys[i]) == 1) {
+                        simCode = Keyboard.SOFTCODES[this.softCodeKeys[i]];
+                        this.sInjectBuffer = this.sInjectBuffer.substr(this.softCodeKeys[i].length + 1);
+                        break;
+                    }
+                }
+            }
+            if (simCode) break;
             this.sInjectBuffer = this.sInjectBuffer.substr(1);
             var charCode = ch.charCodeAt(0);
             /*
@@ -1172,6 +1215,9 @@ class Keyboard extends Component {
             }
             else if (charCode == 0x1E) {
                 simCode = Keys.ASCII.CTRL_M + Keys.KEYCODE.FAKE;
+            }
+            else if (charCode == 0x1F) {
+                simCode = Keys.ASCII['$'];
             }
             else if (charCode < 0xF0) {
                 simCode = charCode;

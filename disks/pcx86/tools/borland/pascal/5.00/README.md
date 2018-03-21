@@ -12,7 +12,7 @@ The following documentation is available online:
 - [Turbo Pascal Version 5.0 User's Guide (1989)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_5.0_Users_Guide_1989.pdf)
 - [Turbo Pascal Version 5.0 Reference Guide (1989)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_5.0_Reference_Guide_1989.pdf)
 
-### Directory of Borland Turbo Pascal 5.00 (Disk 1)
+### Directory of Borland Turbo Pascal 5.00 (Disk 1) ("INSTALL")
 
      Volume in drive A is  PASCAL1   
     
@@ -31,7 +31,7 @@ The following documentation is available online:
             7 file(s)     350772 bytes
                             7168 bytes free
 
-### Directory of Borland Turbo Pascal 5.00 (Disk 2)
+### Directory of Borland Turbo Pascal 5.00 (Disk 2) ("HELP/UTILITIES")
 
      Volume in drive A is  PASCAL2   
     
@@ -52,7 +52,7 @@ The following documentation is available online:
             9 file(s)     348522 bytes
                             9216 bytes free
 
-### Directory of Borland Turbo Pascal 5.00 (Disk 3)
+### Directory of Borland Turbo Pascal 5.00 (Disk 3) ("BGI/DEMOS/DOC/TURBO3")
 
      Volume in drive A is  PASCAL3   
     
