@@ -46160,6 +46160,7 @@ class Keyboard extends Component {
         /*
          * Make sure the auto-injection buffer is empty (an injection could have been in progress on any reset after the first).
          */
+        this.autoInject = null;
         this.sInjectBuffer = "";
 
         if (!data) {

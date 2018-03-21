@@ -90,3 +90,6 @@ featured a related article, "A Colorfast Screen and Stable Cursor", also by Jeff
 which you can find on the PCjs diskette labelled "PC Magazine (Vol. 06 No. 20)". 
 
 {% include machine.html id="ibm5160-msdos320" %}
+
+*[@jeffpar](http://twitter.com/jeffpar)*  
+*Mar 20, 2018*
