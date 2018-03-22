@@ -14,7 +14,7 @@ machines:
       B:
         name: None
     autoStart: true
-    autoType: CD QP\rQP SAMPLES\\SORTDEMO.PAS\r$20$f5I
+    autoType: CD QP\rQP\r$10$5$altF$down\r\t$down$down$down\r$tab$right$right\r$20$5$altR$down\rI
 ---
 
 Microsoft QuickPascal 1.00
@@ -24,6 +24,8 @@ PCjs has copies of the following documentation:
 
 - [QuickPascal: Up and Running](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL-100-Up_and_Running.pdf)
 - [QuickPascal: Pascal by Example](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL-100-Pascal_by_Example.pdf)
+
+Directory listings of the diskettes are provided [below](#directory-of-ms-quickpascal-100-360k-disk-1-setuputilities).
 
 {% include machine.html id="ibm5170-msdos320" %}
 

@@ -29,7 +29,7 @@ machines:
       B:
         name: None
     autoStart: true
-    autoType: CD QP\rQP SAMPLES\\SORTDEMO.PAS\r$20$f5TI
+    autoType: CD QP\rQP\r$10$5$altF$down\r\t$down$down$down\r$tab$right$right\r$20$5$altR$down\rI
 ---
 
 Below are side-by-side PCjs machines running
