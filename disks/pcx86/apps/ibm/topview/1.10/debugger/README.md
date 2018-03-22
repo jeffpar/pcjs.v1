@@ -11,7 +11,7 @@ machines:
         name: PC-DOS 2.00 (Disk 1)
       B:
         name: TopView 1.10
-    autoType: $date\r$time\rB:\rSETUP\r\xff\xff\xffy \r1\r
+    autoType: $date\r$time\rB:\rSETUP\r$30$15y \r1\r
 ---
 
 TopView 1.10 (With Debugger)

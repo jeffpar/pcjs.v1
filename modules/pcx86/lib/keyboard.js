@@ -159,11 +159,23 @@ class Keyboard extends Component {
         this.msAutoRepeat    = 500;
         this.msNextRepeat    = 100;
         this.msAutoRelease   = 50;
-        this.msInjectDefault = 150;         // number of milliseconds between injected keystrokes
+        this.msInjectDefault = 100;         // number of milliseconds between injected keystrokes
         this.msInjectDelay   = 0;           // set by the initial injectKeys() call
         this.msDoubleClick   = 250;         // used by mousedown/mouseup handlers to soft-lock modifier keys
         this.cKeysPressed    = 0;           // count of keys pressed since the last time it was reset
-
+        this.softCodeKeys    = Object.keys(Keyboard.SOFTCODES);
+        
+        /*
+         * Remove all single-character SOFTCODE keys from the softCodeKeys array, because those SOFTCODES
+         * are not supported by injectKeys(); they can be specified normally using their single-character identity.
+         */
+        for (var i = 0; i < this.softCodeKeys.length; i++) {
+            if (this.softCodeKeys[i].length < 2) {
+                this.softCodeKeys.splice(i, 1);
+                i--;
+            }
+        }
+        
         /*
          * autoType records the machine's specified autoType sequence, if any.  At the appropriate signal(s),
          * autoType will be copied to autoInject, and injection will commence.
@@ -172,6 +184,7 @@ class Keyboard extends Component {
         this.autoType = parmsKbd['autoType'];
         this.fDOSReady = false;
         this.fnDOSReady = this.fnInjectReady = null;
+        this.fInjectOnStart = false;
 
         /*
          * HACK: We set fAllDown to false to ignore all down/up events for keys not explicitly marked as ONDOWN;
@@ -495,6 +508,22 @@ class Keyboard extends Component {
     }
 
     /**
+     * start()
+     *
+     * Notification from the Computer that it's starting.
+     *
+     * @this {Keyboard}
+     */
+    start()
+    {
+        if (this.fInjectOnStart) {
+            this.fInjectOnStart = false;
+            this.injectInit();
+        }
+    }
+
+
+    /**
      * intDOS()
      *
      * Monitors selected DOS interrupts for signals to initialize 'autoType' injection.
@@ -513,7 +542,7 @@ class Keyboard extends Component {
                 this.fnDOSReady = null;
                 this.fDOSReady = false;
             } else {
-                this.injectInit(this.autoType);
+                this.injectInit();
             }
         }
         return true;
@@ -532,85 +561,6 @@ class Keyboard extends Component {
     {
         this.fEscapeDisabled = fDisabled;
         if (fAllDown !== undefined) this.fAllDown = fAllDown;
-    }
-
-    /**
-     * parseKeys(sKeys)
-     *
-     * The following special sequences are recognized:
-     *
-     *      $date:  converted to MM-DD-YYYY
-     *      $time:  converted to HH:MM
-     *
-     * If you want any of those sequences to be typed as-is, then you must specify two "$" (ie, "$$date").
-     * Pairs of dollar signs will be automatically converted to single dollar signs, and single dollar signs
-     * will be used as-is.
-     *
-     * WARNING: the JavaScript replace() function ALWAYS interprets "$" specially in replacement strings,
-     * even when the search string is NOT a RegExp; specifically:
-     *
-     *      $$  Inserts a "$"
-     *      $&  Inserts the matched substring
-     *      $`  Inserts the portion of the string that precedes the matched substring
-     *      $'  Inserts the portion of the string that follows the matched substring
-     *      $n  Where n is a positive integer less than 100, inserts the nth parenthesized sub-match string,
-     *          provided the first argument was a RegExp object
-     *
-     * Since we build machine definitions on a page from a potentially indeterminate number of string replace()
-     * operations, multiple dollar signs could eventually get reduced to a single dollar sign BEFORE we get here.
-     *
-     * To compensate, I've changed a few replace() methods, like MarkOut's convertMDMachineLinks() and HTMLOut's
-     * addFilesToHTML(), from the conventional string replace() to my own Str.replace(), and for situations like the
-     * embed.js parseXML() function, which needs to use a RegExp-style replace(), I've added a preliminary
-     * replace(/\$/g, "$$$$") to the replacement string.
-     *
-     * Unfortunately, this is something that will be extremely difficult to prevent from breaking down the road.
-     * So, heads up to future me....
-     *
-     * @this {Keyboard}
-     * @param {string|undefined} sKeys
-     * @return {string|undefined}
-     */
-    parseKeys(sKeys)
-    {
-        if (sKeys) {
-            var match, reSpecial = /(?:^|[^$])\$([a-z]+)/g;
-            while (match = reSpecial.exec(sKeys)) {
-                var sReplace = "";
-                switch (match[1]) {
-                case 'date':
-                    sReplace = Usr.formatDate("n-j-Y");
-                    break;
-                case 'time':
-                    sReplace = Usr.formatDate("h:i:s");
-                    break;
-                default:
-                    //
-                    // Let's just leave any unrecognized sequences alone....
-                    //
-                    // this.notice("unrecognized autoType sequence: $" + match[1]);
-                    // break;
-                    continue;
-                }
-                sKeys = sKeys.replace('$' + match[1], sReplace);
-                /*
-                 * Even though we did just modify the string that reSpecial is iterating over, we aren't
-                 * going to muck with lastIndex, because 1) the replacement strings are always longer than
-                 * original strings, and 2) any unrecognized sequences that we now leave in place would cause
-                 * us to loop indefinitely.  So, if you really want to do this, you will have to carefully
-                 * set lastIndex to the next unexamined character, not back to the beginning.
-                 *
-                 *      reSpecial.lastIndex = 0;
-                 */
-            }
-            /*
-             * Any lingering "$$" sequences are now converted to "$"; as discussed above, replace() interprets
-             * any "$$" in the replacement string as "$", so to the casual observer, it might not look like we're
-             * downsizing the dollar signs, but we actually are.
-             */
-            sKeys = sKeys.replace(/\$\$/g, "$$");
-        }
-        return sKeys;
     }
 
     /**
@@ -962,13 +912,19 @@ class Keyboard extends Component {
      */
     initState(data)
     {
-        var i = 0;
+        /*
+         * Make sure the auto-injection buffer is empty (an injection could have been in progress on any reset after the first).
+         */
+        this.autoInject = null;
+        this.sInjectBuffer = "";
+
         if (!data) {
             data = [];
-            this.autoInject = null;
         } else {
-            this.autoInject = this.autoType;
+            if (this.cmp.sStatePath) this.fInjectOnStart = true;
         }
+
+        var i = 0;
         this.fClock = data[i++];
         this.fData = data[i];
         this.bCmdPending = 0;       // when non-zero, a command is pending (eg, SET_LED or SET_RATE)
@@ -984,11 +940,6 @@ class Keyboard extends Component {
          * New scan codes are "pushed" onto abBuffer and then "shifted" off.
          */
         this.abBuffer = [];
-
-        /*
-         * Make sure the auto-injection buffer is empty (an injection could have been in progress on any reset after the first).
-         */
-        this.sInjectBuffer = "";
 
         return true;
     }
@@ -1097,16 +1048,15 @@ class Keyboard extends Component {
     }
 
     /**
-     * injectInit(sKeys)
+     * injectInit()
      *
      * @this {Keyboard}
-     * @param {string|undefined} sKeys
      * @return {boolean}
      */
-    injectInit(sKeys)
+    injectInit()
     {
-        if (!this.autoInject && sKeys) {
-            this.autoInject = sKeys;
+        if (!this.autoInject && this.autoType) {
+            this.autoInject = this.autoType;
             return this.injectKeys(this.autoInject);
         }
         return false;
@@ -1123,8 +1073,9 @@ class Keyboard extends Component {
     injectKeys(sKeys, msDelay)
     {
         if (sKeys) {
-            if (!this.sInjectBuffer) {
-                this.sInjectBuffer = this.parseKeys(sKeys);
+            var sInjectBuffer = this.parseKeys(sKeys);
+            if (sInjectBuffer) {
+                this.sInjectBuffer = sInjectBuffer;
                 if (!COMPILED) this.log("injectKeys(\"" + this.sInjectBuffer.split("\n").join("\\n") + "\")");
                 this.msInjectDelay = msDelay || this.msInjectDefault;
                 this.injectKeys();
@@ -1135,6 +1086,39 @@ class Keyboard extends Component {
         var simCode = 0;
         while (this.sInjectBuffer.length > 0 && !simCode) {
             var ch = this.sInjectBuffer.charAt(0);
+            if (ch == '$') {
+                /*
+                 * $<number> pauses injection by the specified number of tenths of a second; eg,
+                 * $5 pauses for 1/2 second.  $0 reverts the default injection delay (eg, 100ms).
+                 */
+                var digits = this.sInjectBuffer.match(/^\$([0-9]+)/);
+                if (digits) {
+                    this.msInjectDelay = (+digits[1] * 100) || this.msInjectDefault;
+                    this.sInjectBuffer = this.sInjectBuffer.substr(digits[0].length);
+                    break;
+                }
+                /*
+                 * Yes, this code is slow and gross, but it's simple, and key injection doesn't have
+                 * to be that fast anyway.  The added check for SOFTCODES that have omitted the 'num-'
+                 * prefix adds to the slowness, but it's a nice convenience, allowing you to specify
+                 * non-ASCII keys like 'num-right' or 'num-up' more succinctly as  "$right" or "$up". 
+                 */
+                for (var i = 0; i < this.softCodeKeys.length; i++) {
+                    var name = this.softCodeKeys[i];
+                    if (this.sInjectBuffer.indexOf(name) == 1) {
+                        simCode = Keyboard.SOFTCODES[name];
+                        this.sInjectBuffer = this.sInjectBuffer.substr(name.length + 1);
+                        break;
+                    }
+                    var shortName = (name.indexOf('num-') == 0? name.substr(4) : "");
+                    if (shortName && this.sInjectBuffer.indexOf(shortName) == 1) {
+                        simCode = Keyboard.SOFTCODES[name];
+                        this.sInjectBuffer = this.sInjectBuffer.substr(shortName.length + 1);
+                        break;
+                    }
+                }
+            }
+            if (simCode) break;
             this.sInjectBuffer = this.sInjectBuffer.substr(1);
             var charCode = ch.charCodeAt(0);
             /*
@@ -1143,15 +1127,6 @@ class Keyboard extends Component {
              * you need to simulate CTRL-I, CTRL-J, or CTRL-M, those must be specified using \x1C, \x1D,
              * or \x1E, respectively.  Also, since PCs have no dedicated LINE-FEED key, and since \n is
              * often used instead of \r, we map LINE-FEED (LF) to RETURN (CR) below.
-             *
-             * charCodes 0xF1-0xFF establish a new delay of 100-1500ms between keys; 0xF0 reverts to
-             * the default delay.  For example:
-             *
-             *      \r\rb:\rrt\r\xff\xf0test;\r
-             *
-             * performs two RETURN key presses, then "b:" followed by RETURN, "rt" followed by RETURN,
-             * then a delay of 1500ms, then a reversion to the default delay (normally 150ms), followed
-             * by "test;" and RETURN.
              */
             if (charCode <= Keys.ASCII.CTRL_Z) {
                 simCode = charCode;
@@ -1173,16 +1148,20 @@ class Keyboard extends Component {
             else if (charCode == 0x1E) {
                 simCode = Keys.ASCII.CTRL_M + Keys.KEYCODE.FAKE;
             }
-            else if (charCode < 0xF0) {
+            else if (charCode == 0x1F) {
+                simCode = Keys.ASCII['$'];
+            }
+            else if (charCode <= 0x7F) {
                 simCode = charCode;
-            } else {
-                this.msInjectDelay = ((charCode - 0xF0) * 100) || this.msInjectDefault;
-                break;
             }
         }
+        
         if (simCode) {
-            this.addActiveKey(simCode, true);
+            var fPress = (Keyboard.MODIFIERS[simCode] === undefined); 
+            this.addActiveKey(simCode, fPress);
+            if (fPress) this.clearActiveKeys(true);
         }
+        
         if (!this.sInjectBuffer.length) {
             if (this.fnInjectReady) {
                 this.fnInjectReady();
@@ -1192,6 +1171,89 @@ class Keyboard extends Component {
             this.cpu.setTimer(this.timerInject, this.msInjectDelay);
         }
         return true;
+    }
+
+    /**
+     * parseKeys(sKeys)
+     *
+     * The following special "macro" sequences are recognized:
+     *
+     *      $date:  converted to MM-DD-YYYY
+     *      $time:  converted to HH:MM
+     *
+     * In addition, property keys in the SOFTCODES tables can be prefixed with "$" if you want to specify
+     * a key by its SOFTCODE; eg:
+     *
+     *      $f1:    the F1 function key
+     *      $alt:   the ALT key
+     *
+     * Not all SOFTCODES are allowed; for example, SOFTCODES that begin with a digit or other non-alpha symbol,
+     * or that contain only one letter, because those SOFTCODES can already be specified as-is, WITHOUT a leading
+     * "$".  Also, all we replace here are the "macro" sequences, leaving any prefixed SOFTCODES in place so that
+     * injectKeys() can convert them on the fly.
+     *
+     * If you want any of those sequences to be typed as-is, then you must specify two "$" (eg, "$$date").
+     * Pairs of dollar signs will be automatically converted to single dollar signs, and single dollar signs
+     * will be used as-is, provided they don't precede any of the above "macro" or SOFTCODE sequences.
+     *
+     * WARNING: the JavaScript replace() function ALWAYS interprets "$" specially in replacement strings,
+     * even when the search string is NOT a RegExp; specifically:
+     *
+     *      $$  Inserts a "$"
+     *      $&  Inserts the matched substring
+     *      $`  Inserts the portion of the string that precedes the matched substring
+     *      $'  Inserts the portion of the string that follows the matched substring
+     *      $n  Where n is a positive integer less than 100, inserts the nth parenthesized sub-match string,
+     *          provided the first argument was a RegExp object
+     *
+     * Since we build machine definitions on a page from a potentially indeterminate number of string replace()
+     * operations, multiple dollar signs could eventually get reduced to a single dollar sign BEFORE we get here.
+     *
+     * To compensate, I've changed a few replace() methods, like MarkOut's convertMDMachineLinks() and HTMLOut's
+     * addFilesToHTML(), from the conventional string replace() to my own Str.replace(), and for situations like the
+     * embed.js parseXML() function, which needs to use a RegExp-style replace(), I've added a preliminary
+     * replace(/\$/g, "$$$$") to the replacement string.
+     *
+     * Unfortunately, this is something that will be extremely difficult to prevent from breaking down the road.
+     * So, heads up to future me....
+     *
+     * @this {Keyboard}
+     * @param {string|undefined} sKeys
+     * @return {string|undefined}
+     */
+    parseKeys(sKeys)
+    {
+        if (sKeys) {
+            var match, reSpecial = /(?:^|[^$])\$([a-z0-9][a-z0-9-]+)/g;
+            while (match = reSpecial.exec(sKeys)) {
+                var sReplace = "";
+                switch (match[1]) {
+                case 'date':
+                    sReplace = Usr.formatDate("n-j-Y");
+                    break;
+                case 'time':
+                    sReplace = Usr.formatDate("h:i:s");
+                    break;
+                default:
+                    continue;
+                }
+                sKeys = sKeys.replace('$' + match[1], sReplace);
+                /*
+                 * Even though we did just modify the string that reSpecial is iterating over, we aren't
+                 * going to muck with lastIndex, because 1) the replacement strings are always longer than
+                 * original strings, and 2) any unrecognized sequences that we now leave in place would cause
+                 * us to loop indefinitely.  So, if you really want to do this, you will have to carefully
+                 * set lastIndex to the next unexamined character, not back to the beginning.
+                 *
+                 *      reSpecial.lastIndex = 0;
+                 */
+            }
+            /*
+             * Any lingering "$$" sequences are now converted to a special code (\x1F) that injectKeys() knows about.
+             */
+            sKeys = sKeys.replace(/\$\$/g, '\x1F');
+        }
+        return sKeys;
     }
 
     /**
@@ -1476,24 +1538,19 @@ class Keyboard extends Component {
     }
 
     /**
-     * clearActiveKeys()
+     * clearActiveKeys(fModifiers)
      *
-     * Force all active keys to "deactivate".
+     * Force all active keys to "deactivate" (or, optionally, just any modifiers)
      *
      * @this {Keyboard}
+     * @param {boolean} [fModifiers] (true to clear modifier keys only; default is ALL keys)
      */
-    clearActiveKeys()
+    clearActiveKeys(fModifiers)
     {
         for (var i = 0; i < this.aKeysActive.length; i++) {
             var key = this.aKeysActive[i];
-            /*
-             * The following code was insufficient to prevent the CTRL key from remaining stuck
-             * whenever we lost focus due to a CTRL-TAB operation.  We need to "forcibly" remove it.
-             *
-             *      key.fDown = false;
-             *      if (key.nRepeat > 0) key.nRepeat = 0;
-             */
-            this.removeActiveKey(key.simCode);
+            if (fModifiers && !Keyboard.MODIFIERS[key.simCode]) continue;
+            if (this.removeActiveKey(key.simCode)) i--;
         }
     }
 
@@ -1653,7 +1710,7 @@ class Keyboard extends Component {
          */
         if (!fFocus) {
             this.bitsState &= ~Keyboard.STATE.ALL_MODIFIERS;
-            this.clearActiveKeys();
+            this.clearActiveKeys(true);
         }
     }
 
@@ -2296,33 +2353,44 @@ Keyboard.STATE = {
     ALL_LOCKS:      0x0E00              // CAPS_LOCK | NUM_LOCK | SCROLL_LOCK
 };
 
-/**
- * Maps KEYCODES of shift/modifier keys to their corresponding (default) STATES bit above.
- *
- * @enum {number}
+/*
+ * Maps KEYCODES of modifier keys to their corresponding (default) STATES bit above.
  */
-Keyboard.KEYSTATES = {};
-Keyboard.KEYSTATES[Keyboard.SIMCODE.RSHIFT]      = Keyboard.STATE.RSHIFT;
-Keyboard.KEYSTATES[Keyboard.SIMCODE.SHIFT]       = Keyboard.STATE.SHIFT;
-Keyboard.KEYSTATES[Keyboard.SIMCODE.CTRL]        = Keyboard.STATE.CTRL;
-Keyboard.KEYSTATES[Keyboard.SIMCODE.ALT]         = Keyboard.STATE.ALT;
-Keyboard.KEYSTATES[Keyboard.SIMCODE.RALT]        = Keyboard.STATE.ALT;
-Keyboard.KEYSTATES[Keyboard.SIMCODE.CMD]         = Keyboard.STATE.CMD;
-Keyboard.KEYSTATES[Keyboard.SIMCODE.RCMD]        = Keyboard.STATE.RCMD;
-Keyboard.KEYSTATES[Keyboard.SIMCODE.FF_CMD]      = Keyboard.STATE.CMD;
-Keyboard.KEYSTATES[Keyboard.SIMCODE.CAPS_LOCK]   = Keyboard.STATE.CAPS_LOCK;
-Keyboard.KEYSTATES[Keyboard.SIMCODE.NUM_LOCK]    = Keyboard.STATE.NUM_LOCK;
-Keyboard.KEYSTATES[Keyboard.SIMCODE.SCROLL_LOCK] = Keyboard.STATE.SCROLL_LOCK;
+Keyboard.MODIFIERS = {
+    [Keyboard.SIMCODE.RSHIFT]:      Keyboard.STATE.RSHIFT,
+    [Keyboard.SIMCODE.SHIFT]:       Keyboard.STATE.SHIFT,
+    [Keyboard.SIMCODE.CTRL]:        Keyboard.STATE.CTRL,
+    [Keyboard.SIMCODE.ALT]:         Keyboard.STATE.ALT,
+    [Keyboard.SIMCODE.RALT]:        Keyboard.STATE.ALT,
+    [Keyboard.SIMCODE.CMD]:         Keyboard.STATE.CMD,
+    [Keyboard.SIMCODE.RCMD]:        Keyboard.STATE.RCMD,
+    [Keyboard.SIMCODE.FF_CMD]:      Keyboard.STATE.CMD
+};
 
-/**
+/*
+ * Maps KEYCODES of all modifier and lock keys to their corresponding (default) STATES bit above.
+ */
+Keyboard.KEYSTATES = {
+    [Keyboard.SIMCODE.RSHIFT]:      Keyboard.STATE.RSHIFT,
+    [Keyboard.SIMCODE.SHIFT]:       Keyboard.STATE.SHIFT,
+    [Keyboard.SIMCODE.CTRL]:        Keyboard.STATE.CTRL,
+    [Keyboard.SIMCODE.ALT]:         Keyboard.STATE.ALT,
+    [Keyboard.SIMCODE.RALT]:        Keyboard.STATE.ALT,
+    [Keyboard.SIMCODE.CMD]:         Keyboard.STATE.CMD,
+    [Keyboard.SIMCODE.RCMD]:        Keyboard.STATE.RCMD,
+    [Keyboard.SIMCODE.FF_CMD]:      Keyboard.STATE.CMD,
+    [Keyboard.SIMCODE.CAPS_LOCK]:   Keyboard.STATE.CAPS_LOCK,
+    [Keyboard.SIMCODE.NUM_LOCK]:    Keyboard.STATE.NUM_LOCK,
+    [Keyboard.SIMCODE.SCROLL_LOCK]: Keyboard.STATE.SCROLL_LOCK
+};
+
+/*
  * Maps CLICKCODE (string) to SIMCODE (number).
  *
  * NOTE: Unlike SOFTCODES, CLICKCODES are upper-case and use underscores instead of dashes, so that this
  * and other components can reference them using "dot" property syntax; using upper-case merely adheres to
  * our convention for constants.  setBinding() will automatically convert any incoming CLICKCODE bindings
  * that use lower-case and dashes to upper-case and underscores before performing property lookup.
- *
- * @enum {number}
  */
 Keyboard.CLICKCODES = {
     'TAB':              Keyboard.SIMCODE.TAB,
@@ -2360,7 +2428,7 @@ Keyboard.CLICKCODES = {
     'CTRL_ALT_ENTER':   Keyboard.SIMCODE.CTRL_ALT_ENTER
 };
 
-/**
+/*
  * Maps SOFTCODE (string) to SIMCODE (number) -- which may be the same as KEYCODE for ASCII keys.
  *
  * We define identifiers for all possible keys, based on their primary (unshifted) character or function.
@@ -2391,17 +2459,22 @@ Keyboard.CLICKCODES = {
  *      and 'prtsc'; when pressed with 'shift' or 'ctrl', it generates only 0xe0 0x37; and when pressed with
  *      'alt', it generates only 0x54 (to simulate 'sys-req').
  *
- *      TODO: Implement the above behaviors.
+ * TODO: Implement the above behaviors, whenever we get around to actually supporting 101-key keyboards.
  *
  * All key identifiers must be quotable using single-quotes, because that's how components.xsl will encode them
  * *inside* the "data-value" attribute of the corresponding HTML control.  Which, in turn, is why the single-quote
  * key is defined as 'quote' rather than "'".  Similarly, if there was unshifted "double-quote" key, it could
  * not be called '"', because components.xsl quotes the *entire* "data-value" attribute using double-quotes.
  *
- * In the (commented) numbering of keys below, two keys are deliberately numbered 84, reflecting the fact that
- * the 'sys-req' key was added to the 84-key keyboard but then dropped from the 101-key keyboard as a stand-alone key.
- *
- * @enum {number}
+ * The (commented) numbering of keys below is purely for my own reference.  Two keys are deliberately numbered 84,
+ * reflecting the fact that the 'sys-req' key was added to the 84-key keyboard but later dropped from the 101-key
+ * keyboard (as a stand-alone key, that is).
+ * 
+ * With the introduction of the PC AT and the 84-key keyboard, IBM developed a new key numbering scheme and
+ * key code generation; the 8042 keyboard controller would then convert those key codes into the PC scan codes
+ * defined by the older 83-key keyboard.  That's a layer of complexity we currently bypass; instead, we continue
+ * to convert browser key codes directly into PC scan codes, which is what our 8042 controller implementation
+ * assumes we're doing.
  */
 Keyboard.SOFTCODES = {
     /*  1 */    'esc':          Keyboard.SIMCODE.ESC,
@@ -2474,6 +2547,18 @@ Keyboard.SOFTCODES = {
     /* 68 */    'f10':          Keyboard.SIMCODE.F10,
     /* 69 */    'num-lock':     Keyboard.SIMCODE.NUM_LOCK,
     /* 70 */    'scroll-lock':  Keyboard.SIMCODE.SCROLL_LOCK,   // TODO: 0xe046 on 101-key keyboards?
+    
+    /*
+     * Yes, distinguishing keys 71 through 83 with the 'num-' prefix seems like overkill, but it was
+     * intended to be future-proofing, for the day when we might eventually add support for 101-key keyboards,
+     * because they have their own dedicated non-numeric-keypad versions of these keys (in other words, they
+     * account for most of the bloat on the 101-key keyboard, a trend that more modern keyboards have gradually
+     * been reversing).
+     * 
+     * To offset 'num-' prefix overkill, injectKeys() allows SOFTCODES to be used with or without the prefix,
+     * on the theory that key injection users won't really care precisely which version of the key is used.
+     */
+    
     /* 71 */    'num-home':     Keyboard.SIMCODE.HOME,          // formerly "home"
     /* 72 */    'num-up':       Keyboard.SIMCODE.UP,            // formerly "up-arrow"
     /* 73 */    'num-pgup':     Keyboard.SIMCODE.PGUP,          // formerly "page-up"
@@ -2514,15 +2599,14 @@ Keyboard.SOFTCODES = {
 //  /* 99 */    'pgdn':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_PGDN << 8),
 //  /*100 */    'ins':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_INS << 8),
 //  /*101 */    'del':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_DEL << 8),
-//              'win':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.WIN << 8),
-//              'right-win':    Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.RWIN << 8),
-//              'menu':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.MENU << 8)
+    
+//  /*102 */    'win':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.WIN << 8),
+//  /*103 */    'right-win':    Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.RWIN << 8),
+//  /*104 */    'menu':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.MENU << 8)
 };
 
-/**
+/*
  * Maps "soft-key" definitions (above) of shift/modifier keys to their corresponding (default) STATES bit.
- *
- * @enum {number}
  */
 Keyboard.LEDSTATES = {
     'caps-lock':    Keyboard.STATE.CAPS_LOCK,
@@ -2530,7 +2614,7 @@ Keyboard.LEDSTATES = {
     'scroll-lock':  Keyboard.STATE.SCROLL_LOCK
 };
 
-/**
+/*
  * Maps SIMCODE (number) to SCANCODE (number(s)).
  *
  * This array is used by keySimulate() to lookup a given SIMCODE and convert it to a SCANCODE
@@ -2546,206 +2630,206 @@ Keyboard.LEDSTATES = {
  * state for the same character on the "target" keyboard.  And since this code is inherited from C1Pjs,
  * we've inherited the same solution: keySimulate() has the ability to "undo" any states in bitsState
  * that conflict with the state(s) required for the character in question.
- *
- * @enum {number}
  */
-Keyboard.SIMCODES = {};
-Keyboard.SIMCODES[Keyboard.SIMCODE.ESC]         = Keyboard.SCANCODE.ESC;
-Keyboard.SIMCODES[Keys.ASCII['1']]              = Keyboard.SCANCODE.ONE;
-Keyboard.SIMCODES[Keys.ASCII['!']]              = Keyboard.SCANCODE.ONE    | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII['2']]              = Keyboard.SCANCODE.TWO;
-Keyboard.SIMCODES[Keys.ASCII['@']]              = Keyboard.SCANCODE.TWO    | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII['3']]              = Keyboard.SCANCODE.THREE;
-Keyboard.SIMCODES[Keys.ASCII['#']]              = Keyboard.SCANCODE.THREE  | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII['4']]              = Keyboard.SCANCODE.FOUR;
-Keyboard.SIMCODES[Keys.ASCII['$']]              = Keyboard.SCANCODE.FOUR   | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII['5']]              = Keyboard.SCANCODE.FIVE;
-Keyboard.SIMCODES[Keys.ASCII['%']]              = Keyboard.SCANCODE.FIVE   | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII['6']]              = Keyboard.SCANCODE.SIX;
-Keyboard.SIMCODES[Keys.ASCII['^']]              = Keyboard.SCANCODE.SIX    | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII['7']]              = Keyboard.SCANCODE.SEVEN;
-Keyboard.SIMCODES[Keys.ASCII['&']]              = Keyboard.SCANCODE.SEVEN  | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII['8']]              = Keyboard.SCANCODE.EIGHT;
-Keyboard.SIMCODES[Keys.ASCII['*']]              = Keyboard.SCANCODE.EIGHT  | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII['9']]              = Keyboard.SCANCODE.NINE;
-Keyboard.SIMCODES[Keys.ASCII['(']]              = Keyboard.SCANCODE.NINE   | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII['0']]              = Keyboard.SCANCODE.ZERO;
-Keyboard.SIMCODES[Keys.ASCII[')']]              = Keyboard.SCANCODE.ZERO   | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII['-']]              = Keyboard.SCANCODE.DASH;
-Keyboard.SIMCODES[Keys.ASCII['_']]              = Keyboard.SCANCODE.DASH   | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII['=']]              = Keyboard.SCANCODE.EQUALS;
-Keyboard.SIMCODES[Keys.ASCII['+']]              = Keyboard.SCANCODE.EQUALS | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.BS]          = Keyboard.SCANCODE.BS;
-Keyboard.SIMCODES[Keyboard.SIMCODE.TAB]         = Keyboard.SCANCODE.TAB;
-Keyboard.SIMCODES[Keys.ASCII.q]                 = Keyboard.SCANCODE.Q;
-Keyboard.SIMCODES[Keys.ASCII.Q]                 = Keyboard.SCANCODE.Q      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.w]                 = Keyboard.SCANCODE.W;
-Keyboard.SIMCODES[Keys.ASCII.W]                 = Keyboard.SCANCODE.W      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.e]                 = Keyboard.SCANCODE.E;
-Keyboard.SIMCODES[Keys.ASCII.E]                 = Keyboard.SCANCODE.E      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.r]                 = Keyboard.SCANCODE.R;
-Keyboard.SIMCODES[Keys.ASCII.R]                 = Keyboard.SCANCODE.R      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.t]                 = Keyboard.SCANCODE.T;
-Keyboard.SIMCODES[Keys.ASCII.T]                 = Keyboard.SCANCODE.T      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.y]                 = Keyboard.SCANCODE.Y;
-Keyboard.SIMCODES[Keys.ASCII.Y]                 = Keyboard.SCANCODE.Y      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.u]                 = Keyboard.SCANCODE.U;
-Keyboard.SIMCODES[Keys.ASCII.U]                 = Keyboard.SCANCODE.U      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.i]                 = Keyboard.SCANCODE.I;
-Keyboard.SIMCODES[Keys.ASCII.I]                 = Keyboard.SCANCODE.I      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.o]                 = Keyboard.SCANCODE.O;
-Keyboard.SIMCODES[Keys.ASCII.O]                 = Keyboard.SCANCODE.O      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.p]                 = Keyboard.SCANCODE.P;
-Keyboard.SIMCODES[Keys.ASCII.P]                 = Keyboard.SCANCODE.P      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII['[']]              = Keyboard.SCANCODE.LBRACK;
-Keyboard.SIMCODES[Keys.ASCII['{']]              = Keyboard.SCANCODE.LBRACK | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII[']']]              = Keyboard.SCANCODE.RBRACK;
-Keyboard.SIMCODES[Keys.ASCII['}']]              = Keyboard.SCANCODE.RBRACK | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.KEYCODE.CR]              = Keyboard.SCANCODE.ENTER;
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL]        = Keyboard.SCANCODE.CTRL;
-Keyboard.SIMCODES[Keys.ASCII.a]                 = Keyboard.SCANCODE.A;
-Keyboard.SIMCODES[Keys.ASCII.A]                 = Keyboard.SCANCODE.A      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.s]                 = Keyboard.SCANCODE.S;
-Keyboard.SIMCODES[Keys.ASCII.S]                 = Keyboard.SCANCODE.S      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.d]                 = Keyboard.SCANCODE.D;
-Keyboard.SIMCODES[Keys.ASCII.D]                 = Keyboard.SCANCODE.D      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.f]                 = Keyboard.SCANCODE.F;
-Keyboard.SIMCODES[Keys.ASCII.F]                 = Keyboard.SCANCODE.F      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.g]                 = Keyboard.SCANCODE.G;
-Keyboard.SIMCODES[Keys.ASCII.G]                 = Keyboard.SCANCODE.G      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.h]                 = Keyboard.SCANCODE.H;
-Keyboard.SIMCODES[Keys.ASCII.H]                 = Keyboard.SCANCODE.H      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.j]                 = Keyboard.SCANCODE.J;
-Keyboard.SIMCODES[Keys.ASCII.J]                 = Keyboard.SCANCODE.J      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.k]                 = Keyboard.SCANCODE.K;
-Keyboard.SIMCODES[Keys.ASCII.K]                 = Keyboard.SCANCODE.K      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.l]                 = Keyboard.SCANCODE.L;
-Keyboard.SIMCODES[Keys.ASCII.L]                 = Keyboard.SCANCODE.L      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII[';']]              = Keyboard.SCANCODE.SEMI;
-Keyboard.SIMCODES[Keys.ASCII[':']]              = Keyboard.SCANCODE.SEMI   | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII["'"]]              = Keyboard.SCANCODE.QUOTE;
-Keyboard.SIMCODES[Keys.ASCII['"']]              = Keyboard.SCANCODE.QUOTE  | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII['`']]              = Keyboard.SCANCODE.BQUOTE;
-Keyboard.SIMCODES[Keys.ASCII['~']]              = Keyboard.SCANCODE.BQUOTE | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.SHIFT]       = Keyboard.SCANCODE.SHIFT;
-Keyboard.SIMCODES[Keys.ASCII['\\']]             = Keyboard.SCANCODE.BSLASH;
-Keyboard.SIMCODES[Keys.ASCII['|']]              = Keyboard.SCANCODE.BSLASH | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.z]                 = Keyboard.SCANCODE.Z;
-Keyboard.SIMCODES[Keys.ASCII.Z]                 = Keyboard.SCANCODE.Z      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.x]                 = Keyboard.SCANCODE.X;
-Keyboard.SIMCODES[Keys.ASCII.X]                 = Keyboard.SCANCODE.X      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.c]                 = Keyboard.SCANCODE.C;
-Keyboard.SIMCODES[Keys.ASCII.C]                 = Keyboard.SCANCODE.C      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.v]                 = Keyboard.SCANCODE.V;
-Keyboard.SIMCODES[Keys.ASCII.V]                 = Keyboard.SCANCODE.V      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.b]                 = Keyboard.SCANCODE.B;
-Keyboard.SIMCODES[Keys.ASCII.B]                 = Keyboard.SCANCODE.B      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.n]                 = Keyboard.SCANCODE.N;
-Keyboard.SIMCODES[Keys.ASCII.N]                 = Keyboard.SCANCODE.N      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII.m]                 = Keyboard.SCANCODE.M;
-Keyboard.SIMCODES[Keys.ASCII.M]                 = Keyboard.SCANCODE.M      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII[',']]              = Keyboard.SCANCODE.COMMA;
-Keyboard.SIMCODES[Keys.ASCII['<']]              = Keyboard.SCANCODE.COMMA  | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII['.']]              = Keyboard.SCANCODE.PERIOD;
-Keyboard.SIMCODES[Keys.ASCII['>']]              = Keyboard.SCANCODE.PERIOD | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keys.ASCII['/']]              = Keyboard.SCANCODE.SLASH;
-Keyboard.SIMCODES[Keys.ASCII['?']]              = Keyboard.SCANCODE.SLASH  | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.RSHIFT]      = Keyboard.SCANCODE.RSHIFT;
-Keyboard.SIMCODES[Keyboard.SIMCODE.PRTSC]       = Keyboard.SCANCODE.PRTSC;
-Keyboard.SIMCODES[Keyboard.SIMCODE.ALT]         = Keyboard.SCANCODE.ALT;
-Keyboard.SIMCODES[Keyboard.SIMCODE.RALT]        = Keyboard.SCANCODE.ALT;
-Keyboard.SIMCODES[Keyboard.SIMCODE.SPACE]       = Keyboard.SCANCODE.SPACE;
-Keyboard.SIMCODES[Keyboard.SIMCODE.CAPS_LOCK]   = Keyboard.SCANCODE.CAPS_LOCK;
-Keyboard.SIMCODES[Keyboard.SIMCODE.F1]          = Keyboard.SCANCODE.F1;
-Keyboard.SIMCODES[Keyboard.SIMCODE.F2]          = Keyboard.SCANCODE.F2;
-Keyboard.SIMCODES[Keyboard.SIMCODE.F3]          = Keyboard.SCANCODE.F3;
-Keyboard.SIMCODES[Keyboard.SIMCODE.F4]          = Keyboard.SCANCODE.F4;
-Keyboard.SIMCODES[Keyboard.SIMCODE.F5]          = Keyboard.SCANCODE.F5;
-Keyboard.SIMCODES[Keyboard.SIMCODE.F6]          = Keyboard.SCANCODE.F6;
-Keyboard.SIMCODES[Keyboard.SIMCODE.F7]          = Keyboard.SCANCODE.F7;
-Keyboard.SIMCODES[Keyboard.SIMCODE.F8]          = Keyboard.SCANCODE.F8;
-Keyboard.SIMCODES[Keyboard.SIMCODE.F9]          = Keyboard.SCANCODE.F9;
-Keyboard.SIMCODES[Keyboard.SIMCODE.F10]         = Keyboard.SCANCODE.F10;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_LOCK]    = Keyboard.SCANCODE.NUM_LOCK;
-Keyboard.SIMCODES[Keyboard.SIMCODE.SCROLL_LOCK] = Keyboard.SCANCODE.SCROLL_LOCK;
-Keyboard.SIMCODES[Keyboard.SIMCODE.HOME]        = Keyboard.SCANCODE.NUM_HOME;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_HOME]    = Keyboard.SCANCODE.NUM_HOME;
-Keyboard.SIMCODES[Keyboard.SIMCODE.UP]          = Keyboard.SCANCODE.NUM_UP;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_UP]      = Keyboard.SCANCODE.NUM_UP;
-Keyboard.SIMCODES[Keyboard.SIMCODE.PGUP]        = Keyboard.SCANCODE.NUM_PGUP;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_PGUP]    = Keyboard.SCANCODE.NUM_PGUP;
-Keyboard.SIMCODES[Keyboard.SIMCODE.LEFT]        = Keyboard.SCANCODE.NUM_LEFT;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_LEFT]    = Keyboard.SCANCODE.NUM_LEFT;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_CENTER]  = Keyboard.SCANCODE.NUM_CENTER;
-Keyboard.SIMCODES[Keyboard.SIMCODE.RIGHT]       = Keyboard.SCANCODE.NUM_RIGHT;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_RIGHT]   = Keyboard.SCANCODE.NUM_RIGHT;
-Keyboard.SIMCODES[Keyboard.SIMCODE.END]         = Keyboard.SCANCODE.NUM_END;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_END]     = Keyboard.SCANCODE.NUM_END;
-Keyboard.SIMCODES[Keyboard.SIMCODE.DOWN]        = Keyboard.SCANCODE.NUM_DOWN;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_DOWN]    = Keyboard.SCANCODE.NUM_DOWN;
-Keyboard.SIMCODES[Keyboard.SIMCODE.PGDN]        = Keyboard.SCANCODE.NUM_PGDN;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_PGDN]    = Keyboard.SCANCODE.NUM_PGDN;
-Keyboard.SIMCODES[Keyboard.SIMCODE.INS]         = Keyboard.SCANCODE.NUM_INS;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_INS]     = Keyboard.SCANCODE.NUM_INS;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_ADD]     = Keyboard.SCANCODE.NUM_ADD;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_SUB]     = Keyboard.SCANCODE.NUM_SUB;
-Keyboard.SIMCODES[Keyboard.SIMCODE.DEL]         = Keyboard.SCANCODE.NUM_DEL;
-Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_DEL]     = Keyboard.SCANCODE.NUM_DEL;
-Keyboard.SIMCODES[Keyboard.SIMCODE.SYS_REQ]     = Keyboard.SCANCODE.SYS_REQ;
-/*
- * Entries beyond this point are for keys that existed only on 101-key keyboards (well, except for 'sys-req',
- * which also existed on the 84-key keyboard), which ALSO means that these keys essentially did not exist
- * for a MODEL_5150 or MODEL_5160 machine, because those machines could use only 83-key keyboards.  Remember
- * that IBM machines and IBM keyboards are our reference point here, so while there were undoubtedly 5150/5160
- * clones that could use newer keyboards, as well as 3rd-party keyboards that could work with older machines,
- * support for non-IBM configurations is left for another day.
- *
- * TODO: The only relevance of newer keyboards to older machines is the fact that you're probably using a newer
- * keyboard with your browser, which raises the question of what to do with newer keys that older machines
- * wouldn't understand.  I don't attempt to filter out any of the entries below based on machine model, but that
- * would seem like a wise thing to do.
- *
- * TODO: Add entries for 'num-mul', 'num-div', 'num-enter', the stand-alone arrow keys, etc, AND at the same time,
- * make sure that keys with multi-byte sequences (eg, 0xe0 0x1c) work properly.
- */
-Keyboard.SIMCODES[Keyboard.SIMCODE.F11]         = Keyboard.SCANCODE.F11;
-Keyboard.SIMCODES[Keyboard.SIMCODE.F12]         = Keyboard.SCANCODE.F12;
-Keyboard.SIMCODES[Keyboard.SIMCODE.CMD]         = Keyboard.SCANCODE.WIN;
-Keyboard.SIMCODES[Keyboard.SIMCODE.RCMD]        = Keyboard.SCANCODE.MENU;
-Keyboard.SIMCODES[Keyboard.SIMCODE.FF_CMD]      = Keyboard.SCANCODE.WIN;
-
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_A]          = Keyboard.SCANCODE.A           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_B]          = Keyboard.SCANCODE.B           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_C]          = Keyboard.SCANCODE.C           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_D]          = Keyboard.SCANCODE.D           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_E]          = Keyboard.SCANCODE.E           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_F]          = Keyboard.SCANCODE.F           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_G]          = Keyboard.SCANCODE.G           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_H]          = Keyboard.SCANCODE.H           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_I]          = Keyboard.SCANCODE.I           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_J]          = Keyboard.SCANCODE.J           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_K]          = Keyboard.SCANCODE.K           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_L]          = Keyboard.SCANCODE.L           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_M]          = Keyboard.SCANCODE.M           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_N]          = Keyboard.SCANCODE.N           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_O]          = Keyboard.SCANCODE.O           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_P]          = Keyboard.SCANCODE.P           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_Q]          = Keyboard.SCANCODE.Q           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_R]          = Keyboard.SCANCODE.R           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_S]          = Keyboard.SCANCODE.S           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_T]          = Keyboard.SCANCODE.T           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_U]          = Keyboard.SCANCODE.U           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_V]          = Keyboard.SCANCODE.V           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_W]          = Keyboard.SCANCODE.W           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_X]          = Keyboard.SCANCODE.X           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_Y]          = Keyboard.SCANCODE.Y           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_Z]          = Keyboard.SCANCODE.Z           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_BREAK]      = Keyboard.SCANCODE.SCROLL_LOCK | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_DEL]    = Keyboard.SCANCODE.NUM_DEL     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_INS]    = Keyboard.SCANCODE.NUM_INS     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_ADD]    = Keyboard.SCANCODE.NUM_ADD     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_SUB]    = Keyboard.SCANCODE.NUM_SUB     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
-Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_ENTER]  = Keyboard.SCANCODE.ENTER       | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
+Keyboard.SIMCODES = {
+    [Keyboard.SIMCODE.ESC]:         Keyboard.SCANCODE.ESC,
+    [Keys.ASCII['1']]:              Keyboard.SCANCODE.ONE,
+    [Keys.ASCII['!']]:              Keyboard.SCANCODE.ONE    | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII['2']]:              Keyboard.SCANCODE.TWO,
+    [Keys.ASCII['@']]:              Keyboard.SCANCODE.TWO    | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII['3']]:              Keyboard.SCANCODE.THREE,
+    [Keys.ASCII['#']]:              Keyboard.SCANCODE.THREE  | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII['4']]:              Keyboard.SCANCODE.FOUR,
+    [Keys.ASCII['$']]:              Keyboard.SCANCODE.FOUR   | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII['5']]:              Keyboard.SCANCODE.FIVE,
+    [Keys.ASCII['%']]:              Keyboard.SCANCODE.FIVE   | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII['6']]:              Keyboard.SCANCODE.SIX,
+    [Keys.ASCII['^']]:              Keyboard.SCANCODE.SIX    | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII['7']]:              Keyboard.SCANCODE.SEVEN,
+    [Keys.ASCII['&']]:              Keyboard.SCANCODE.SEVEN  | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII['8']]:              Keyboard.SCANCODE.EIGHT,
+    [Keys.ASCII['*']]:              Keyboard.SCANCODE.EIGHT  | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII['9']]:              Keyboard.SCANCODE.NINE,
+    [Keys.ASCII['(']]:              Keyboard.SCANCODE.NINE   | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII['0']]:              Keyboard.SCANCODE.ZERO,
+    [Keys.ASCII[')']]:              Keyboard.SCANCODE.ZERO   | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII['-']]:              Keyboard.SCANCODE.DASH,
+    [Keys.ASCII['_']]:              Keyboard.SCANCODE.DASH   | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII['=']]:              Keyboard.SCANCODE.EQUALS,
+    [Keys.ASCII['+']]:              Keyboard.SCANCODE.EQUALS | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keyboard.SIMCODE.BS]:          Keyboard.SCANCODE.BS,
+    [Keyboard.SIMCODE.TAB]:         Keyboard.SCANCODE.TAB,
+    [Keys.ASCII.q]:                 Keyboard.SCANCODE.Q,
+    [Keys.ASCII.Q]:                 Keyboard.SCANCODE.Q      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.w]:                 Keyboard.SCANCODE.W,
+    [Keys.ASCII.W]:                 Keyboard.SCANCODE.W      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.e]:                 Keyboard.SCANCODE.E,
+    [Keys.ASCII.E]:                 Keyboard.SCANCODE.E      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.r]:                 Keyboard.SCANCODE.R,
+    [Keys.ASCII.R]:                 Keyboard.SCANCODE.R      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.t]:                 Keyboard.SCANCODE.T,
+    [Keys.ASCII.T]:                 Keyboard.SCANCODE.T      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.y]:                 Keyboard.SCANCODE.Y,
+    [Keys.ASCII.Y]:                 Keyboard.SCANCODE.Y      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.u]:                 Keyboard.SCANCODE.U,
+    [Keys.ASCII.U]:                 Keyboard.SCANCODE.U      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.i]:                 Keyboard.SCANCODE.I,
+    [Keys.ASCII.I]:                 Keyboard.SCANCODE.I      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.o]:                 Keyboard.SCANCODE.O,
+    [Keys.ASCII.O]:                 Keyboard.SCANCODE.O      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.p]:                 Keyboard.SCANCODE.P,
+    [Keys.ASCII.P]:                 Keyboard.SCANCODE.P      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII['[']]:              Keyboard.SCANCODE.LBRACK,
+    [Keys.ASCII['{']]:              Keyboard.SCANCODE.LBRACK | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII[']']]:              Keyboard.SCANCODE.RBRACK,
+    [Keys.ASCII['}']]:              Keyboard.SCANCODE.RBRACK | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.KEYCODE.CR]:              Keyboard.SCANCODE.ENTER,
+    [Keyboard.SIMCODE.CTRL]:        Keyboard.SCANCODE.CTRL,
+    [Keys.ASCII.a]:                 Keyboard.SCANCODE.A,
+    [Keys.ASCII.A]:                 Keyboard.SCANCODE.A      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.s]:                 Keyboard.SCANCODE.S,
+    [Keys.ASCII.S]:                 Keyboard.SCANCODE.S      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.d]:                 Keyboard.SCANCODE.D,
+    [Keys.ASCII.D]:                 Keyboard.SCANCODE.D      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.f]:                 Keyboard.SCANCODE.F,
+    [Keys.ASCII.F]:                 Keyboard.SCANCODE.F      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.g]:                 Keyboard.SCANCODE.G,
+    [Keys.ASCII.G]:                 Keyboard.SCANCODE.G      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.h]:                 Keyboard.SCANCODE.H,
+    [Keys.ASCII.H]:                 Keyboard.SCANCODE.H      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.j]:                 Keyboard.SCANCODE.J,
+    [Keys.ASCII.J]:                 Keyboard.SCANCODE.J      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.k]:                 Keyboard.SCANCODE.K,
+    [Keys.ASCII.K]:                 Keyboard.SCANCODE.K      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.l]:                 Keyboard.SCANCODE.L,
+    [Keys.ASCII.L]:                 Keyboard.SCANCODE.L      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII[';']]:              Keyboard.SCANCODE.SEMI,
+    [Keys.ASCII[':']]:              Keyboard.SCANCODE.SEMI   | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII["'"]]:              Keyboard.SCANCODE.QUOTE,
+    [Keys.ASCII['"']]:              Keyboard.SCANCODE.QUOTE  | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII['`']]:              Keyboard.SCANCODE.BQUOTE,
+    [Keys.ASCII['~']]:              Keyboard.SCANCODE.BQUOTE | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keyboard.SIMCODE.SHIFT]:       Keyboard.SCANCODE.SHIFT,
+    [Keys.ASCII['\\']]:             Keyboard.SCANCODE.BSLASH,
+    [Keys.ASCII['|']]:              Keyboard.SCANCODE.BSLASH | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.z]:                 Keyboard.SCANCODE.Z,
+    [Keys.ASCII.Z]:                 Keyboard.SCANCODE.Z      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.x]:                 Keyboard.SCANCODE.X,
+    [Keys.ASCII.X]:                 Keyboard.SCANCODE.X      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.c]:                 Keyboard.SCANCODE.C,
+    [Keys.ASCII.C]:                 Keyboard.SCANCODE.C      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.v]:                 Keyboard.SCANCODE.V,
+    [Keys.ASCII.V]:                 Keyboard.SCANCODE.V      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.b]:                 Keyboard.SCANCODE.B,
+    [Keys.ASCII.B]:                 Keyboard.SCANCODE.B      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.n]:                 Keyboard.SCANCODE.N,
+    [Keys.ASCII.N]:                 Keyboard.SCANCODE.N      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII.m]:                 Keyboard.SCANCODE.M,
+    [Keys.ASCII.M]:                 Keyboard.SCANCODE.M      | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII[',']]:              Keyboard.SCANCODE.COMMA,
+    [Keys.ASCII['<']]:              Keyboard.SCANCODE.COMMA  | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII['.']]:              Keyboard.SCANCODE.PERIOD,
+    [Keys.ASCII['>']]:              Keyboard.SCANCODE.PERIOD | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keys.ASCII['/']]:              Keyboard.SCANCODE.SLASH,
+    [Keys.ASCII['?']]:              Keyboard.SCANCODE.SLASH  | (Keyboard.SCANCODE.SHIFT << 8),
+    [Keyboard.SIMCODE.RSHIFT]:      Keyboard.SCANCODE.RSHIFT,
+    [Keyboard.SIMCODE.PRTSC]:       Keyboard.SCANCODE.PRTSC,
+    [Keyboard.SIMCODE.ALT]:         Keyboard.SCANCODE.ALT,
+    [Keyboard.SIMCODE.RALT]:        Keyboard.SCANCODE.ALT,
+    [Keyboard.SIMCODE.SPACE]:       Keyboard.SCANCODE.SPACE,
+    [Keyboard.SIMCODE.CAPS_LOCK]:   Keyboard.SCANCODE.CAPS_LOCK,
+    [Keyboard.SIMCODE.F1]:          Keyboard.SCANCODE.F1,
+    [Keyboard.SIMCODE.F2]:          Keyboard.SCANCODE.F2,
+    [Keyboard.SIMCODE.F3]:          Keyboard.SCANCODE.F3,
+    [Keyboard.SIMCODE.F4]:          Keyboard.SCANCODE.F4,
+    [Keyboard.SIMCODE.F5]:          Keyboard.SCANCODE.F5,
+    [Keyboard.SIMCODE.F6]:          Keyboard.SCANCODE.F6,
+    [Keyboard.SIMCODE.F7]:          Keyboard.SCANCODE.F7,
+    [Keyboard.SIMCODE.F8]:          Keyboard.SCANCODE.F8,
+    [Keyboard.SIMCODE.F9]:          Keyboard.SCANCODE.F9,
+    [Keyboard.SIMCODE.F10]:         Keyboard.SCANCODE.F10,
+    [Keyboard.SIMCODE.NUM_LOCK]:    Keyboard.SCANCODE.NUM_LOCK,
+    [Keyboard.SIMCODE.SCROLL_LOCK]: Keyboard.SCANCODE.SCROLL_LOCK,
+    [Keyboard.SIMCODE.HOME]:        Keyboard.SCANCODE.NUM_HOME,
+    [Keyboard.SIMCODE.NUM_HOME]:    Keyboard.SCANCODE.NUM_HOME,
+    [Keyboard.SIMCODE.UP]:          Keyboard.SCANCODE.NUM_UP,
+    [Keyboard.SIMCODE.NUM_UP]:      Keyboard.SCANCODE.NUM_UP,
+    [Keyboard.SIMCODE.PGUP]:        Keyboard.SCANCODE.NUM_PGUP,
+    [Keyboard.SIMCODE.NUM_PGUP]:    Keyboard.SCANCODE.NUM_PGUP,
+    [Keyboard.SIMCODE.LEFT]:        Keyboard.SCANCODE.NUM_LEFT,
+    [Keyboard.SIMCODE.NUM_LEFT]:    Keyboard.SCANCODE.NUM_LEFT,
+    [Keyboard.SIMCODE.NUM_CENTER]:  Keyboard.SCANCODE.NUM_CENTER,
+    [Keyboard.SIMCODE.RIGHT]:       Keyboard.SCANCODE.NUM_RIGHT,
+    [Keyboard.SIMCODE.NUM_RIGHT]:   Keyboard.SCANCODE.NUM_RIGHT,
+    [Keyboard.SIMCODE.END]:         Keyboard.SCANCODE.NUM_END,
+    [Keyboard.SIMCODE.NUM_END]:     Keyboard.SCANCODE.NUM_END,
+    [Keyboard.SIMCODE.DOWN]:        Keyboard.SCANCODE.NUM_DOWN,
+    [Keyboard.SIMCODE.NUM_DOWN]:    Keyboard.SCANCODE.NUM_DOWN,
+    [Keyboard.SIMCODE.PGDN]:        Keyboard.SCANCODE.NUM_PGDN,
+    [Keyboard.SIMCODE.NUM_PGDN]:    Keyboard.SCANCODE.NUM_PGDN,
+    [Keyboard.SIMCODE.INS]:         Keyboard.SCANCODE.NUM_INS,
+    [Keyboard.SIMCODE.NUM_INS]:     Keyboard.SCANCODE.NUM_INS,
+    [Keyboard.SIMCODE.NUM_ADD]:     Keyboard.SCANCODE.NUM_ADD,
+    [Keyboard.SIMCODE.NUM_SUB]:     Keyboard.SCANCODE.NUM_SUB,
+    [Keyboard.SIMCODE.DEL]:         Keyboard.SCANCODE.NUM_DEL,
+    [Keyboard.SIMCODE.NUM_DEL]:     Keyboard.SCANCODE.NUM_DEL,
+    [Keyboard.SIMCODE.SYS_REQ]:     Keyboard.SCANCODE.SYS_REQ,
+    /*
+     * Entries beyond this point are for keys that existed only on 101-key keyboards (well, except for 'sys-req',
+     * which also existed on the 84-key keyboard), which ALSO means that these keys essentially did not exist
+     * for a MODEL_5150 or MODEL_5160 machine, because those machines could use only 83-key keyboards.  Remember
+     * that IBM machines and IBM keyboards are our reference point here, so while there were undoubtedly 5150/5160
+     * clones that could use newer keyboards, as well as 3rd-party keyboards that could work with older machines,
+     * support for non-IBM configurations is left for another day.
+     *
+     * TODO: The only relevance of newer keyboards to older machines is the fact that you're probably using a newer
+     * keyboard with your browser, which raises the question of what to do with newer keys that older machines
+     * wouldn't understand.  I don't attempt to filter out any of the entries below based on machine model, but that
+     * would seem like a wise thing to do.
+     *
+     * TODO: Add entries for 'num-mul', 'num-div', 'num-enter', the stand-alone arrow keys, etc, AND at the same time,
+     * make sure that keys with multi-byte sequences (eg, 0xe0 0x1c) work properly.
+     */
+    [Keyboard.SIMCODE.F11]:         Keyboard.SCANCODE.F11,
+    [Keyboard.SIMCODE.F12]:         Keyboard.SCANCODE.F12,
+    [Keyboard.SIMCODE.CMD]:         Keyboard.SCANCODE.WIN,
+    [Keyboard.SIMCODE.RCMD]:        Keyboard.SCANCODE.MENU,
+    [Keyboard.SIMCODE.FF_CMD]:      Keyboard.SCANCODE.WIN,
+    
+    [Keyboard.SIMCODE.CTRL_A]:      Keyboard.SCANCODE.A           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_B]:      Keyboard.SCANCODE.B           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_C]:      Keyboard.SCANCODE.C           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_D]:      Keyboard.SCANCODE.D           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_E]:      Keyboard.SCANCODE.E           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_F]:      Keyboard.SCANCODE.F           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_G]:      Keyboard.SCANCODE.G           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_H]:      Keyboard.SCANCODE.H           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_I]:      Keyboard.SCANCODE.I           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_J]:      Keyboard.SCANCODE.J           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_K]:      Keyboard.SCANCODE.K           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_L]:      Keyboard.SCANCODE.L           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_M]:      Keyboard.SCANCODE.M           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_N]:      Keyboard.SCANCODE.N           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_O]:      Keyboard.SCANCODE.O           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_P]:      Keyboard.SCANCODE.P           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_Q]:      Keyboard.SCANCODE.Q           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_R]:      Keyboard.SCANCODE.R           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_S]:      Keyboard.SCANCODE.S           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_T]:      Keyboard.SCANCODE.T           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_U]:      Keyboard.SCANCODE.U           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_V]:      Keyboard.SCANCODE.V           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_W]:      Keyboard.SCANCODE.W           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_X]:      Keyboard.SCANCODE.X           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_Y]:      Keyboard.SCANCODE.Y           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_Z]:      Keyboard.SCANCODE.Z           | (Keyboard.SCANCODE.CTRL << 8),
+    [Keyboard.SIMCODE.CTRL_BREAK]:  Keyboard.SCANCODE.SCROLL_LOCK | (Keyboard.SCANCODE.CTRL << 8),
+    
+    [Keyboard.SIMCODE.CTRL_ALT_DEL]:    Keyboard.SCANCODE.NUM_DEL | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16),
+    [Keyboard.SIMCODE.CTRL_ALT_INS]:    Keyboard.SCANCODE.NUM_INS | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16),
+    [Keyboard.SIMCODE.CTRL_ALT_ADD]:    Keyboard.SCANCODE.NUM_ADD | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16),
+    [Keyboard.SIMCODE.CTRL_ALT_SUB]:    Keyboard.SCANCODE.NUM_SUB | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16),
+    [Keyboard.SIMCODE.CTRL_ALT_ENTER]:  Keyboard.SCANCODE.ENTER   | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16)
+};
 
 /**
  * Commands that can be sent to the Keyboard via the 8042; see receiveCmd()

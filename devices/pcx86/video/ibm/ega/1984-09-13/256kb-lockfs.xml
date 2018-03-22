@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<video id="videoEGA" model="ega" memory="0x40000" screenWidth="1280" screenHeight="700" scale="true" smoothing="false" touchScreen="mouse" pos="center" padding="8px">
+<video id="videoEGA" model="ega" memory="0x40000" screenWidth="1280" screenHeight="700" smoothing="false" touchScreen="mouse" pos="center" padding="8px">
 	<comment>
 		If [Wikipedia](https://en.wikipedia.org/wiki/Enhanced_Graphics_Adapter) is correct that the IBM EGA
 		(presumably when paired with an IBM 5154 EGA monitor) has a "pixel aspect ratio" of 1:1.37 at its highest
