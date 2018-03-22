@@ -64,7 +64,10 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 
 ### Tools
 
+* [Borland Tools](tools/borland/)
+* [Digital Research Tools](tools/dresearch/)
 * [IBM Tools](tools/ibm/)
+* [Logitech Tools](tools/logitech/)
 * [Microsoft Tools](tools/microsoft/)
 * [More...](tools/)
 
