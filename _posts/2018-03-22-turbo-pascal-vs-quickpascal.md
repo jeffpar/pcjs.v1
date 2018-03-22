@@ -16,7 +16,7 @@ machines:
       B:
         name: None
     autoStart: true
-    autoType: CD TP\rTURBO\r\xF8$altF$right$right$right$right$right$right$right
+    autoType: CD TP\rTURBO\r$10$altF$right$right$right$right$right$right$right
   - id: ibm5170-msdos320-2
     type: pcx86
     class: machine-right
@@ -29,7 +29,7 @@ machines:
       B:
         name: None
     autoStart: true
-    autoType: CD QP\rQP SAMPLES\\SORTDEMO.PAS\r\xFF$f5I
+    autoType: CD QP\rQP SAMPLES\\SORTDEMO.PAS\r$20$f5I
 ---
 
 {% include machine.html id="ibm5170-msdos320-1" %}

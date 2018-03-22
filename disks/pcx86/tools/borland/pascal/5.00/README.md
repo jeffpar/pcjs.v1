@@ -14,7 +14,7 @@ machines:
       B:
         name: None
     autoStart: true
-    autoType: CD TP\rTURBO\r$altF\r\r
+    autoType: CD TP\rTURBO\r$10$altF$right$right$right$right$right$right$right
 ---
 
 Borland Turbo Pascal 5.00

@@ -14,7 +14,7 @@ machines:
       B:
         name: None
     autoStart: true
-    autoType: CD QP\rQP SAMPLES\\SORTDEMO.PAS\r\xFF$f5I
+    autoType: CD QP\rQP SAMPLES\\SORTDEMO.PAS\r$20$f5I
 ---
 
 Microsoft QuickPascal 1.00

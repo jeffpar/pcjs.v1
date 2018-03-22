@@ -1685,7 +1685,7 @@ class FDC extends Component {
             /*
              * When FDC.REG_OUTPUT.ENABLE transitions from 0 to 1, generate an interrupt (assuming INT_ENABLE is set).
              */
-            this.requestInterrupt(true);
+            this.requestInterrupt();
         }
         /*
          * This no longer updates the internally selected drive (this.iDrive) based on regOutput, because (a) there seems
@@ -2105,7 +2105,30 @@ class FDC extends Component {
          * TODO: Technically, interrupt request status should be cleared by the FDC.REG_DATA.CMD.SENSE_INT command; in fact,
          * if that command is issued and no interrupt was pending, then FDC.REG_DATA.RES.INVALID should be returned (via ST0).
          */
-        this.requestInterrupt(drive && !(drive.resCode & FDC.REG_DATA.RES.NOT_READY) && fIRQ);
+        
+        /*
+         * When the Windows 95 HSFLOP ("High-Speed Floppy") VxD performs its diskette change-line detection logic
+         * ("determine_changeline"), it sets a special callback ("dcl_callback_int_entry") for its interrupt handler
+         * to invoke, then issues a READ_ID command, and then sets a bit telling its interrupt handler to expect an
+         * interrupt ("FLP_NEC_INT_EXPECTED").
+         * 
+         * Technically, it should have set *both* "dcl_callback_int_entry" *and* "FLP_NEC_INT_EXPECTED" *before*
+         * issuing the READ_ID command, but I imagine the author assumed all was fine, since interrupts had been
+         * disabled with a "cli" beforehand and had not been re-enabled with an "sti" yet.  But alas, the function
+         * used to the issue the READ_ID command ("NecOut") immediately re-enabled interrupts.
+         * 
+         * So, if we request an interrupt immediately after the READ_ID command, the interrupt handler will think
+         * our interrupt is spurious (ie, not EXPECTED).  In this particular case, there are only about 10 instructions
+         * executed from the time READ_ID is issued until the "FLP_NEC_INT_EXPECTED" bit is set, but I'm going to
+         * add a little padding to that, in part because I wouldn't be surprised if there are other places where a
+         * similar assumption exists (ie, either that "NecOut" leaves interrupts disabled, or simply that the floppy
+         * controller is an inherently slow device).
+         * 
+         * TODO: Determine why the Football prototype disk fails to boot if we specify a larger delay (eg, 32) and
+         * why TopView 1.10 hangs when the delay is set to 16.  I've worked around those questions for now, by simply
+         * limiting the delay
+         */
+        this.requestInterrupt(drive && fIRQ && !(drive.resCode & FDC.REG_DATA.RES.NOT_READY), bCmdMasked == FDC.REG_DATA.CMD.READ_ID? 16 : 0);
     }
 
     /**
@@ -2199,37 +2222,18 @@ class FDC extends Component {
     }
 
     /**
-     * requestInterrupt(fCondition)
+     * requestInterrupt(fCondition, nDelay)
      * 
      * Request an FDC interrupt, as long as INT_ENABLE is set (and the optional supplied condition, if any, is true).
      * 
      * @this {FDC}
      * @param {boolean} [fCondition]
+     * @param {number} [nDelay]
      */
-    requestInterrupt(fCondition)
+    requestInterrupt(fCondition = true, nDelay = 0)
     {
-        if ((this.regOutput & FDC.REG_OUTPUT.INT_ENABLE) && fCondition) {
-            /*
-             * When the Windows 95 HSFLOP ("High-Speed Floppy") VxD performs its diskette change-line detection logic
-             * ("determine_changeline"), it sets a special callback ("dcl_callback_int_entry") for its interrupt handler
-             * to invoke, then issues a READ_ID command, and then sets a bit telling its interrupt handler to expect an
-             * interrupt ("FLP_NEC_INT_EXPECTED").
-             * 
-             * Technically, it should have set *both* "dcl_callback_int_entry" *and* "FLP_NEC_INT_EXPECTED" *before*
-             * issuing the READ_ID command, but I imagine the author assumed all was fine, since interrupts had been
-             * disabled with a "cli" beforehand and had not been re-enabled with an "sti" yet.  But alas, the function
-             * used to the issue the READ_ID command ("NecOut") immediately re-enabled interrupts.
-             * 
-             * So, if we request an interrupt immediately after the READ_ID command, the interrupt handler will think
-             * our interrupt is spurious (ie, not EXPECTED).  In this particular case, there are only about 10 instructions
-             * executed from the time READ_ID is issued until the "FLP_NEC_INT_EXPECTED" bit is set, but I'm going to
-             * add a little padding to that, in part because I wouldn't be surprised if there are other places where a
-             * similar assumption exists (ie, either that "NecOut" leaves interrupts disabled, or simply that the floppy
-             * controller is an inherently slow device).
-             * 
-             * TODO: Determine why the Football prototype disk fails to boot if we specify a larger delay (eg, 32).
-             */
-            if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.FDC, 16);
+        if (fCondition && (this.regOutput & FDC.REG_OUTPUT.INT_ENABLE)) {
+            if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.FDC, nDelay);
         }
     }
     

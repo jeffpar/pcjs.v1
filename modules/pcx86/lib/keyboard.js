@@ -159,7 +159,7 @@ class Keyboard extends Component {
         this.msAutoRepeat    = 500;
         this.msNextRepeat    = 100;
         this.msAutoRelease   = 50;
-        this.msInjectDefault = 150;         // number of milliseconds between injected keystrokes
+        this.msInjectDefault = 100;         // number of milliseconds between injected keystrokes
         this.msInjectDelay   = 0;           // set by the initial injectKeys() call
         this.msDoubleClick   = 250;         // used by mousedown/mouseup handlers to soft-lock modifier keys
         this.cKeysPressed    = 0;           // count of keys pressed since the last time it was reset
@@ -1087,14 +1087,23 @@ class Keyboard extends Component {
         while (this.sInjectBuffer.length > 0 && !simCode) {
             var ch = this.sInjectBuffer.charAt(0);
             if (ch == '$') {
-                var i;
+                /*
+                 * $<number> pauses injection by the specified number of tenths of a second; eg,
+                 * $5 pauses for 1/2 second.  $0 reverts the default injection delay (eg, 100ms).
+                 */
+                var digits = this.sInjectBuffer.match(/^\$([0-9]+)/);
+                if (digits) {
+                    this.msInjectDelay = (+digits[1] * 100) || this.msInjectDefault;
+                    this.sInjectBuffer = this.sInjectBuffer.substr(digits[0].length);
+                    break;
+                }
                 /*
                  * Yes, this code is slow and gross, but it's simple, and key injection doesn't have
                  * to be that fast anyway.  The added check for SOFTCODES that have omitted the 'num-'
                  * prefix adds to the slowness, but it's a nice convenience, allowing you to specify
                  * non-ASCII keys like 'num-right' or 'num-up' more succinctly as  "$right" or "$up". 
                  */
-                for (i = 0; i < this.softCodeKeys.length; i++) {
+                for (var i = 0; i < this.softCodeKeys.length; i++) {
                     var name = this.softCodeKeys[i];
                     if (this.sInjectBuffer.indexOf(name) == 1) {
                         simCode = Keyboard.SOFTCODES[name];
@@ -1118,15 +1127,6 @@ class Keyboard extends Component {
              * you need to simulate CTRL-I, CTRL-J, or CTRL-M, those must be specified using \x1C, \x1D,
              * or \x1E, respectively.  Also, since PCs have no dedicated LINE-FEED key, and since \n is
              * often used instead of \r, we map LINE-FEED (LF) to RETURN (CR) below.
-             *
-             * charCodes 0xF1-0xFF establish a new delay of 100-1500ms between keys; 0xF0 reverts to
-             * the default delay.  For example:
-             *
-             *      \r\rb:\rrt\r\xff\xf0test;\r
-             *
-             * performs two RETURN key presses, then "b:" followed by RETURN, "rt" followed by RETURN,
-             * then a delay of 1500ms, then a reversion to the default delay (normally 150ms), followed
-             * by "test;" and RETURN.
              */
             if (charCode <= Keys.ASCII.CTRL_Z) {
                 simCode = charCode;
@@ -1151,11 +1151,8 @@ class Keyboard extends Component {
             else if (charCode == 0x1F) {
                 simCode = Keys.ASCII['$'];
             }
-            else if (charCode < 0xF0) {
+            else if (charCode <= 0x7F) {
                 simCode = charCode;
-            } else {
-                this.msInjectDelay = ((charCode - 0xF0) * 100) || this.msInjectDefault;
-                break;
             }
         }
         
@@ -1227,7 +1224,7 @@ class Keyboard extends Component {
     parseKeys(sKeys)
     {
         if (sKeys) {
-            var match, reSpecial = /(?:^|[^$])\$([a-z][a-z0-9-]+)/g;
+            var match, reSpecial = /(?:^|[^$])\$([a-z0-9][a-z0-9-]+)/g;
             while (match = reSpecial.exec(sKeys)) {
                 var sReplace = "";
                 switch (match[1]) {
