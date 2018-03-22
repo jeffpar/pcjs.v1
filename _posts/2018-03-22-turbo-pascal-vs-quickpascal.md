@@ -29,9 +29,13 @@ machines:
       B:
         name: None
     autoStart: true
-    autoType: CD QP\rQP SAMPLES\\SORTDEMO.PAS\r$20$f5I
+    autoType: CD QP\rQP SAMPLES\\SORTDEMO.PAS\r$20$f5TI
 ---
 
+Below are side-by-side PCjs machines running
+[Borland Turbo Pascal 5.00](/disks/pcx86/tools/borland/pascal/5.00/) and
+[Microsoft QuickPascal 1.00](/disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/).
+ 
 {% include machine.html id="ibm5170-msdos320-1" %}
 
 {% include machine.html id="ibm5170-msdos320-2" %}
