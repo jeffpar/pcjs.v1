@@ -39,6 +39,10 @@ The following IBM MDA configuration files are currently available:
  - [ibm-mda.xml](ibm-mda.xml)
  - [ibm-mda-dual.xml](ibm-mda-dual.xml)
 
+The only difference between the first (single display) configuration and the second (dual display) configuration is
+that the *model* attribute is explicitly set to "mda" in the latter.  This informs the machine that it cannot dynamically
+change the type of video card based on motherboard switches; it's effectively "locked in" as an MDA video card.
+
 ### IBM MDA Character ROM
 
 There is only one known MDA Character ROM ([ibm-mda.json](ibm-mda.json)), and it is identical to the CGA Character ROM,

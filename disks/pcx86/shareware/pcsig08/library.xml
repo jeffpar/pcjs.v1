@@ -753,6 +753,11 @@
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/compiler/4.00/PASCAL400-DISK7.json">MS Pascal 4.00 (Disk 7)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/compiler/4.00/PASCAL400-DISK8.json">MS Pascal 4.00 (Disk 8)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/compiler/4.00/PASCAL400-DISK9.json">MS Pascal 4.00 (Disk 9)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL-100-DISK1.json">MS QuickPascal 1.00 (Disk 1)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL-100-DISK2.json">MS QuickPascal 1.00 (Disk 2)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL-100-DISK3.json">MS QuickPascal 1.00 (Disk 3)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL-100-DISK4.json">MS QuickPascal 1.00 (Disk 4)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL-100-DISK5.json">MS QuickPascal 1.00 (Disk 5)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL100-720K-DISK1-SETUP.json">MS QuickPascal 1.00 (720K Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL100-720K-DISK2-ADVISOR.json">MS QuickPascal 1.00 (720K Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL100-720K-DISK3-LIBRARIES.json">MS QuickPascal 1.00 (720K Disk 3)</disk>
