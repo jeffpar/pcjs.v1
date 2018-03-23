@@ -29,7 +29,7 @@ machines:
       B:
         name: None
     autoStart: true
-    autoType: CD QP\rQP\r$10$ctrl$f4$1$altf$down\r\\tp\r\t\r\r$10$altr$down\r
+    autoType: CD QP\rQP\r$10$ctrl$f4$1$altf$down\r&#92;&#92;tp\r\t\r\r$10$altr$down\r
 ---
 
 Below are side-by-side PCjs machines running
