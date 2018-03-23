@@ -46246,6 +46246,9 @@ class Keyboard extends Component {
             }
             return false;
         }
+        /*
+         * Any delay of one second or more ($10 and up) is automatically reverted to the default.
+         */
         if (this.msInjectDelay >= 1000) {
             this.msInjectDelay = this.msInjectDefault;
         }
@@ -46256,6 +46259,9 @@ class Keyboard extends Component {
                 /*
                  * $<number> pauses injection by the specified number of tenths of a second; eg,
                  * $5 pauses for 1/2 second.  $0 reverts the default injection delay (eg, 100ms).
+                 * Also, you may end the number with a period if you need to avoid an injected digit
+                 * being misinterpreted as part of the delay (eg, $5.1) pauses for 1/2 second and
+                 * then injects "1").
                  */
                 var digits = this.sInjectBuffer.match(/^\$([0-9]+)\.?/);
                 if (digits) {
