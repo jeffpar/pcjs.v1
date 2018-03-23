@@ -16,7 +16,7 @@ machines:
       B:
         name: None
     autoStart: true
-    autoType: CD TP\rTURBO\r$10$altF$right$right$right$right$right$right$right
+    autoType: CD TP\rTURBO\r$9$altF$right$right$right$right$right$right$right
   - id: ibm5170-msdos320-2
     type: pcx86
     class: machine-right

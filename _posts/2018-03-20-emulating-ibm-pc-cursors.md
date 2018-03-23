@@ -58,8 +58,8 @@ MDA and CGA video cards, the EGA draws cursor scan lines up to *but not includin
 Even IBM's own EGA Technical Reference manual gets this detail wrong.
 
 You might be tempted to think that this idiosyncrasy of the EGA means that if the *Cursor Start* and *Cursor End*
-register are equal, then no cursor at all is drawn.  But no, the hardware always draws at least one scan line before
-deciding whether to draw more.
+register are equal, then no cursor at all is drawn.  But no, assuming the cursor is visible, the hardware always draws
+at least one scan line before deciding whether to draw more.
 
 ### Cursor Visibility
 

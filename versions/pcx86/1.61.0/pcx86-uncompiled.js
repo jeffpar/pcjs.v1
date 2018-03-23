@@ -3752,7 +3752,7 @@ class Component {
             }
 
             if (!fSuccess) {
-                Component.alertUser("Script error: '" + sCommand + (fnCommand? " failed" : " unrecognized"));
+                Component.alertUser("Script error: '" + sCommand + "' command " + (fnCommand? " failed" : " not recognized"));
                 break;
             }
         }
@@ -45340,14 +45340,13 @@ class Keyboard extends Component {
         }
         
         /*
-         * autoType records the machine's specified autoType sequence, if any.  At the appropriate signal(s),
-         * autoType will be copied to autoInject, and injection will commence.
+         * autoType records the machine's specified autoType sequence, if any, and when injectInit() is called
+         * with the appropriate INJECTION signal, injectInit() pass autoType to injectKeys().
          */
-        this.autoInject = null;
         this.autoType = parmsKbd['autoType'];
         this.fDOSReady = false;
         this.fnDOSReady = this.fnInjectReady = null;
-        this.fInjectOnStart = false;
+        this.nInjection = Keyboard.INJECTION.ON_INPUT;
 
         /*
          * HACK: We set fAllDown to false to ignore all down/up events for keys not explicitly marked as ONDOWN;
@@ -45679,12 +45678,8 @@ class Keyboard extends Component {
      */
     start()
     {
-        if (this.fInjectOnStart) {
-            this.fInjectOnStart = false;
-            this.injectInit();
-        }
+        this.injectInit(Keyboard.INJECTION.ON_START);
     }
-
 
     /**
      * intDOS()
@@ -45705,7 +45700,7 @@ class Keyboard extends Component {
                 this.fnDOSReady = null;
                 this.fDOSReady = false;
             } else {
-                this.injectInit();
+                this.injectInit(Keyboard.INJECTION.ON_INPUT);
             }
         }
         return true;
@@ -46076,15 +46071,20 @@ class Keyboard extends Component {
     initState(data)
     {
         /*
-         * Make sure the auto-injection buffer is empty (an injection could have been in progress on any reset after the first).
+         * Empty the injection buffer (an injection could have been in progress on any reset after the first).
          */
-        this.autoInject = null;
         this.sInjectBuffer = "";
+        this.nInjection = Keyboard.INJECTION.ON_INPUT;
 
         if (!data) {
             data = [];
         } else {
-            if (this.cmp.sStatePath) this.fInjectOnStart = true;
+            /*
+             * If there is a predefined state for this machine, then the assumption is that any injection
+             * sequence can be injected as soon as the machine starts.  Any other kind of state must disable
+             * injection, because injection depends on the machine being in a known state.
+             */
+            this.nInjection = this.cmp.sStatePath? Keyboard.INJECTION.ON_START : Keyboard.INJECTION.NONE;
         }
 
         var i = 0;
@@ -46211,18 +46211,17 @@ class Keyboard extends Component {
     }
 
     /**
-     * injectInit()
+     * injectInit(nCondition)
      *
      * @this {Keyboard}
-     * @return {boolean}
+     * @param {number} nCondition
      */
-    injectInit()
+    injectInit(nCondition)
     {
-        if (!this.autoInject && this.autoType) {
-            this.autoInject = this.autoType;
-            return this.injectKeys(this.autoInject);
+        if (this.nInjection == nCondition) {
+            this.nInjection = Keyboard.INJECTION.NONE;
+            if (this.autoType) this.injectKeys(this.autoType);
         }
-        return false;
     }
 
     /**
@@ -46238,6 +46237,7 @@ class Keyboard extends Component {
         if (sKeys) {
             var sInjectBuffer = this.parseKeys(sKeys);
             if (sInjectBuffer) {
+                this.nInjection = Keyboard.INJECTION.NONE;
                 this.sInjectBuffer = sInjectBuffer;
                 if (!COMPILED) this.log("injectKeys(\"" + this.sInjectBuffer.split("\n").join("\\n") + "\")");
                 this.msInjectDelay = msDelay || this.msInjectDefault;
@@ -46245,6 +46245,9 @@ class Keyboard extends Component {
                 return true;
             }
             return false;
+        }
+        if (this.msInjectDelay >= 1000) {
+            this.msInjectDelay = this.msInjectDefault;
         }
         var simCode = 0;
         while (this.sInjectBuffer.length > 0 && !simCode) {
@@ -46254,7 +46257,7 @@ class Keyboard extends Component {
                  * $<number> pauses injection by the specified number of tenths of a second; eg,
                  * $5 pauses for 1/2 second.  $0 reverts the default injection delay (eg, 100ms).
                  */
-                var digits = this.sInjectBuffer.match(/^\$([0-9]+)/);
+                var digits = this.sInjectBuffer.match(/^\$([0-9]+)\.?/);
                 if (digits) {
                     this.msInjectDelay = (+digits[1] * 100) || this.msInjectDefault;
                     this.sInjectBuffer = this.sInjectBuffer.substr(digits[0].length);
@@ -46780,7 +46783,7 @@ class Keyboard extends Component {
         }
 
         if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.KEY)) {
-            this.printMessage((msTimer? '\n' : "") + "updateActiveKey(" + key.simCode + (msTimer? "," + msTimer + "ms" : "") + "): " + (key.fDown? "down" : "up"), true);
+            this.printMessage("updateActiveKey(" + key.simCode + (msTimer? "," + msTimer + "ms" : "") + "): " + (key.fDown? "down" : "up"), true);
         }
 
         if (msTimer && key.nRepeat < 0) {
@@ -48184,6 +48187,12 @@ Keyboard.CMDRES = {
 
 Keyboard.LIMIT = {
     MAX_SCANCODES: 20   // TODO: Verify this limit for newer keyboards (84-key and up)
+};
+
+Keyboard.INJECTION = {
+    NONE:       0,
+    ON_START:   1,
+    ON_INPUT:   2
 };
 
 /*
