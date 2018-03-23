@@ -29,11 +29,14 @@ I decided it was time to start digging into some of their idiosyncrasies.
 And there are a fair number of them.  These are little quirks that emulators often don't bother with.
 I started with one of the simpler features that all the video cards support: *programmable cursor shapes*.
 
-### What Cursor?
+### Hardware Cursor
 
 For purposes of this blog post, the term "cursor" refers to the blinking cursor that any of the above video
-cards display in a text mode.  It's also referred to as a "hardware cursor", because the video hardware automatically
+cards display in a text mode.  It's also known as the "hardware cursor", because the video hardware automatically
 draws it, erases it, and redraws it multiple times per second, all without any assistance from the processor.
+
+{% include screenshot.html src="/blog/images/MDA-FAST.gif" width="104" height="88" title="MDA Cursor (Normal Blink)" %}
+
 However, by writing to the appropriate video card registers, the processor *does* have the ability to:
  
 - Move the cursor anywhere on (or off) the screen
@@ -61,6 +64,11 @@ You might be tempted to think that this idiosyncrasy of the EGA means that if th
 register are equal, then no cursor at all is drawn.  But no, assuming the cursor is visible, the hardware always draws
 at least one scan line before deciding whether to draw more.
 
+Below are screenshots of the default (11-12) MDA cursor, along with a thinner (11-11) cursor.
+
+{% include screenshot.html src="/blog/images/MDA-11-12.png" width="156" height="82" title="MDA Cursor 11-12" %}
+{% include screenshot.html src="/blog/images/MDA-11-11.png" width="156" height="82" title="MDA Cursor 11-11" %}
+
 ### Cursor Visibility
 
 There are number of ways to "hide" the cursor:
@@ -84,6 +92,8 @@ There is one unusual exception to this behavior on the EGA: if the value in the 
 to the *Cursor Start* register, then the cursor is drawn as if *Cursor Start* was *equal to* *Cursor End*, which (as described
 above) results in a single scan line.
 
+{% include screenshot.html src="/blog/images/MDA-11-14.png" width="156" height="82" title="MDA Block Cursor 11-14" %}
+
 ### Cursor Wrap Around with Split
 
 Setting the *Cursor End* register to a value *less than* the *Cursor Start* register also causes wrap around, but the
@@ -93,7 +103,53 @@ top block always starting at the top and the bottom block always ending at the b
 
 And once again, there is slight difference between the EGA and the older cards: setting *Cursor Start* to 5 and *Cursor End*
 to 4 will result in a split cursor on the EGA with a gap of exactly one scan line, whereas those same settings on older
-cards will result in a solid cursor -- because they draw scan lines up to *and including* the line at *Cursor End*.
+cards will result in a solid cursor, since they draw scan lines up to *and including* the line at *Cursor End*.
+
+{% include screenshot.html src="/blog/images/MDA-11-04.png" width="156" height="82" title="MDA Split Cursor 11-04" %}
+
+### Order Matters
+
+On the MDA card, let's assume the default cursor is displayed:
+
+- *Cursor Start*: 11
+- *Cursor End*: 12
+
+Now if you set *Cursor Start* to 14, the cursor disappears, and if you THEN set *Cursor End* to 15, the cursor
+is still gone.
+
+If you start over and set *Cursor End* to 15 first, you'll get the wrap-around block cursor, and if you THEN set
+*Cursor Start* to 14, the cursor is still a block.
+
+So, at the end of both of those scenarios, the results are different, even though BOTH *Cursor Start* and *Cursor End*
+were programmed with EXACTLY the same values (14 and 15, respectively).
+
+The easiest way to think about this behavior is to assume that whenever one register is "out of bounds" (i.e., set to
+a value greater than or equal the cell height), any writes to the *other* register are effectively ignored.
+
+### About That Blink Bit
+
+I mentioned earlier that bit 5 of the *Cursor Start* register was a "blink" bit.  That was a "bit" of an
+oversimplification.  Here's what a Motorola 6845 CRT Controller datasheet has to say about the entire register:
+
+    Cursor Start Register (R10) - This 7 bit write-only register controls the cursor format.
+    Bit 5 is the blink timing control. When bit 5 is low, the blink frequency is 1/16 of the
+    vertical field rate, and when bit 5 is high, the blink frequency is 1/32 of the vertical
+    field rate. Bit 6 is used to enable a blink. The cursor start scan line is set by the
+    lower 5 bits.
+
+The datasheet notwithstanding, the behavior of bits 5 and 6 is really card specific.  On the MDA, here is what I
+observed (bit 6 is the left digit, bit 5 is the right):
+
+- 00: normal blinking (*off* and *on* periods equal)
+- 01: no blinking
+- 10: no blinking
+- 11: slower blinking (*off* period longer than *on* period)
+
+So, it's not really accurate to say that bit 5 is the "blink" bit, unless you ensure that bit 6 is always clear as well.
+
+Here's what the slower blinking cursor looks like:
+
+{% include screenshot.html src="/blog/images/MDA-SLOW.gif" width="104" height="88" title="MDA Cursor (Slower Blink)" %}
 
 ### PC Magazine CTYPE and STICK Utilities
 

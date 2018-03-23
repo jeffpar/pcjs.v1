@@ -1101,7 +1101,7 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
         while ((option = reOptions.exec(aMatch[1]))) {
             aOptions[option[1]] = option[3];
         }
-        var sReplacement = "![" + aOptions['title'] + "](" + aOptions['src'] + ' "link:' + aOptions['link'] + ':' + aOptions['width'] + ':' + aOptions['height'] + '")';
+        var sReplacement = "![" + aOptions['title'] + "](" + aOptions['src'] + ' "link:' + (aOptions['link'] || "") + ':' + aOptions['width'] + ':' + aOptions['height'] + '")';
         sBlock = sBlock.replace(aMatch[0], sReplacement);
         reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over
     }
