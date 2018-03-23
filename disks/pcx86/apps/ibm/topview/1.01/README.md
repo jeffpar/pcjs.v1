@@ -5,7 +5,7 @@ permalink: /disks/pcx86/apps/ibm/topview/1.01/
 machines:
   - id: ibm5160
     type: pcx86
-    config: /devices/pcx86/machine/5160/cga/640kb/machine.xml
+    config: /devices/pcx86/machine/5160/cga/640kb/mouse/machine.xml
     autoMount:
       A:
         name: PC-DOS 2.00 (Disk 1)
@@ -22,12 +22,12 @@ machineScripts:
     wait Keyboard;
     sleep 1000;
     select FDC listDrives "A:";
-    select FDC listDisks "MS Mouse 5.00 (System)";
+    select FDC listDisks "MS Mouse 5.00 (SYSTEM)";
     loadDisk FDC;
     wait FDC;
     type Keyboard "MOUSE\r";
-    sleep 5000;
-    type Keyboard "B:\rTV\r";
+    sleep 7000;
+    type Keyboard "B:\rSETUP\r$50.3\r$20n\r$20y\r$20\r$20\r$20.1\r";
 ---
 
 TopView 1.01
@@ -47,9 +47,9 @@ concurrent execution of multiple applications.
 > - User may cut/copy and paste between windows.
 > - Interactive tutorial and HELP text included.
 
-The machine below is configured to automatically start TopView 1.01 on top of PC-DOS 2.00.  No mouse driver is loaded,
-so you must use TopView's "Keyboard Mouse" support: arrow keys move the cursor and **Home**, **PgUp**, and **Alt**
-act as mouse buttons.  The machine is also available with the [PCjs Debugger](debugger/).
+The machine below is configured to automatically start TopView 1.01 on top of PC-DOS 2.00.  If you don't use a mouse,
+then you must use TopView's "Keyboard Mouse" support: arrow keys move the cursor, and **Home**, **PgUp**, and **Alt** act
+as mouse buttons.  Mouse support is automatically loaded in the [PCjs Debugger](debugger/) configuration.
 
 Directory listings of the original [Program](#directory-of-topview-101-program) and [Tutorial](#directory-of-topview-101-tutorial)
 disks are provided below.

@@ -20,3 +20,7 @@ IBM Diagnostics for PC and PC XT
 * [IBM PC Advanced Diagnostics 1.02](1.02a/)
 * [IBM PC Advanced Diagnostics 2.05](2.05a/)
 * [IBM PC Advanced Diagnostics 2.20](2.20a/)
+
+### Exploring the IBM PC
+
+* [Exploring the IBM PC 1.00](exploring/1.00/)

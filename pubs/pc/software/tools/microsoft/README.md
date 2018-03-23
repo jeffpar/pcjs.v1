@@ -9,3 +9,4 @@ Microsoft Tools Documentation
 
 * [Microsoft C Compiler](c/)
 * [Microsoft Macro Assembler](masm/)
+* [Microsoft QuickPascal](pascal/quickpascal/1.00/)

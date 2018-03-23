@@ -19,6 +19,4 @@
 		<control type="description" binding="swdesc" left="0px"/>
 	</chipset>
 	<serial id="com1" adapter="1" binding="print"/>
-	<serial id="com2" adapter="2"/>
-	<mouse serial="com2"/>
 </machine>
