@@ -44,6 +44,8 @@
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/2.07/5150-DIAG-207.json">IBM PC Diagnostics 2.07</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5170/1.02/5170-DIAG-102.json">IBM PC AT Diagnostics 1.02</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5170/2.00/5170-DIAG-200.json">IBM PC AT Diagnostics 2.00</disk>
+		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/exploring/1.00/EXPLORING-THE-IBM-PC-100.json">Exploring the IBM PC 1.00</disk>
+		<disk path="/pcjs-disks/pcx86/diags/ibm/5170/exploring/1.00/EXPLORING-THE-IBM-PC-AT-100.json">Exploring the IBM PC AT 1.00</disk>
 		<disk path="/pcjs-disks/pcx86/dos/ibm/0.90/PCDOS090.json">PC-DOS 0.90</disk>
 		<disk path="/pcjs-disks/pcx86/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
 		<disk path="/pcjs-disks/pcx86/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
@@ -753,6 +755,11 @@
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/compiler/4.00/PASCAL400-DISK7.json">MS Pascal 4.00 (Disk 7)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/compiler/4.00/PASCAL400-DISK8.json">MS Pascal 4.00 (Disk 8)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/compiler/4.00/PASCAL400-DISK9.json">MS Pascal 4.00 (Disk 9)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL-100-DISK1.json">MS QuickPascal 1.00 (360K Disk 1)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL-100-DISK2.json">MS QuickPascal 1.00 (360K Disk 2)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL-100-DISK3.json">MS QuickPascal 1.00 (360K Disk 3)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL-100-DISK4.json">MS QuickPascal 1.00 (360K Disk 4)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL-100-DISK5.json">MS QuickPascal 1.00 (360K Disk 5)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL100-720K-DISK1-SETUP.json">MS QuickPascal 1.00 (720K Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL100-720K-DISK2-ADVISOR.json">MS QuickPascal 1.00 (720K Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL100-720K-DISK3-LIBRARIES.json">MS QuickPascal 1.00 (720K Disk 3)</disk>
@@ -796,6 +803,7 @@
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/windows/sdk/3.00/720K/WIN30SDK-DISK09.json">Windows SDK 3.00 (720K Disk 09)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/windows/sdk/3.00/720K/WIN30SDK-DISK10.json">Windows SDK 3.00 (720K Disk 10)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/softlogic/carousel/2.0.3/SOFTWARE-CAROUSEL.json">Software Carousel 2.0.3</disk>
+		<disk path="/pcjs-disks/pcx86/tools/softlogic/doubledos/2.0f/DOUBLEDOS-20F.json">DoubleDOS 2.0F</disk>
 		<disk path="/pcjs-disks/pcx86/tools/softlogic/doubledos/2.0v/DOUBLEDOS-DISK1.json">DoubleDOS 2.0V (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/softlogic/doubledos/2.0v/DOUBLEDOS-DISK2.json">DoubleDOS 2.0V (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/softlogic/optimizer/2.0.3/DISK-OPTIMIZER.json">Disk Optimizer 2.0.3</disk>

@@ -31,6 +31,12 @@ IBM PC Diagnostics
 * [IBM PC AT Advanced Diagnostics 1.01](5170/1.01a/)
 * [IBM PC AT Advanced Diagnostics 2.07](5170/2.07a/)
 
+Exploring the IBM PC
+--------------------
+
+* [Exploring the IBM PC 1.00](5150/exploring/1.00/)
+* [Exploring the IBM PC AT 1.00](5170/exploring/1.00/)
+
 IBM EGA Demos and Utilities
 ---------------------------
 
