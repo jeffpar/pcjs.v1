@@ -247,7 +247,7 @@
         padding-right: 0 !important;
     }
 }
-@media screen and (min-width: 1200px) {
+@media screen and (min-width: 1024px) {
     .machine-left {
         max-width: 48%;
         float: left;
