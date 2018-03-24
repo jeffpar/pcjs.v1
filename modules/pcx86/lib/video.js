@@ -6672,19 +6672,22 @@ class Video extends Component {
         if (card.regCRTIndx < card.nCRTCRegs) {
             /*
              * To simulate how the 6845 effectively ignores changes to CURSCAN or CURSCANB whenever one is written
-             * while the other is currently >= MAXSCAN, we check for those writes now, and ignore the write as appropriate.
+             * while the other is currently > MAXSCAN, we check for those writes now, and ignore the write as appropriate.
              * 
-             * Since CURSCAN == 0xA and CURSCANB == 0xB, we can get the complementary register by XOR'ing with 0x1.
+             * Since CURSCAN == 0xA and CURSCANB == 0xB, we can get the complementary register by XOR'ing the index with 0x1.
              */
             if (card.regCRTIndx == Card.CRTC.CURSCAN || card.regCRTIndx == Card.CRTC.CURSCANB) {
-                var bCur = card.regCRTData[card.regCRTIndx ^ 0x1] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
+                var bCur = bOut & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
                 var bMax = card.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
-                if (bCur >= bMax) {
-                    if (DEBUG) {
-                        this.printf("outCRTCData(0x%02x): ignoring write to CRTC[0x%02x] since 0x%02x >= 0x%02x\n", bOut, card.regCRTIndx, bCur, bMax);
+                if (bCur > bMax) {
+                    bCur = card.regCRTData[card.regCRTIndx ^ 0x1] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
+                    if (bCur > bMax) {
+                        if (DEBUG) {
+                            this.printf("outCRTCData(0x%02x): ignoring write to CRTC[0x%02x] since 0x%02x > 0x%02x\n", bOut, card.regCRTIndx, bCur, bMax);
+                        }
+                        return;
                     }
-                    return;
-                } 
+                }
             }
             if (Video.TRAPALL || card.regCRTData[card.regCRTIndx] !== bOut) {
                 if (!addrFrom || this.messageEnabled()) {
