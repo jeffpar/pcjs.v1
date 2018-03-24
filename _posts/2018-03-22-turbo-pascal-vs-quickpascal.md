@@ -50,15 +50,33 @@ We reveal who the winner is [below the fold](#whos-the-winner).
 PCjs, obviously.  This demo shows off several PCjs improvements, including an easier way to layout side-by-side
 machines, using new `machine-left` and `machine-right` classes.
 
-There's also been some improvements to the *autoType* feature, making it easier to encode delays (from 1/10 of a second
-to any number of whole seconds) and specify special key sequences.
+There's also been some improvements to the *autoType* feature, making it easier to encode delays and specify
+special key sequences.
 
 Here's an example of "injecting" Ctrl-F4, followed by a 1/10 second delay, followed by Alt-F:
 
     autoType: $ctrl$f4$1$altf
 
-For software that needs more than just key injection, sophisticated scripts are possible.  Here's the "startMouse"
-script for IBM's [TopView 1.01](/disks/pcx86/apps/ibm/topview/1.01/debugger/):
+Any of the keys listed in the [PCx86 Keyboard's](/modules/pcx86/lib/keyboard.js) **SOFTCODES** table can be
+injected by preceding them with a `$`, such as:
+
+- `$esc`
+- `$tab` (or \t)
+- `$enter` (or \r)
+
+Modifier keys, such as:
+
+- `$ctrl`
+- `$shift`
+- `$alt`
+
+are automatically released after a non-modifier key has been injected.
+
+Delays from 1/10 to 9/10 of a second, specified with `$1` through `$9`, set the default delay between *all*
+subsequent keys, whereas delays of one second or more (eg, `$10`, `$20`, etc) set a *one-time* delay.
+
+For software that needs more than just injected keys, sophisticated scripts are possible.  Here's the "startMouse"
+script for IBM's [TopView 1.01](/disks/pcx86/apps/ibm/topview/1.01/):
 
     wait Keyboard DOS;
     type Keyboard "$date\r$time\r";
