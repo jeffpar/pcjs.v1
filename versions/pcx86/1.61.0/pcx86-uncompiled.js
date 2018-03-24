@@ -77596,6 +77596,7 @@ class Computer extends Component {
                          */
                         control.style.opacity = "1";
                         control.style.lineHeight = "1";
+                        // control.style.fontSize = "1.5vw";    // this is a nice idea, but it doesn't work well with side-by-side machines
                         this.cDiagnosticScreens++;
                     }
                 }
