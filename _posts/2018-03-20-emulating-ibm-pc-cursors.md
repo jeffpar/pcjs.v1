@@ -47,10 +47,13 @@ However, by writing to the appropriate video card registers, the processor *does
 
 Depending on the text mode, character cells are generally either 8 or 14 scan lines high.  The scan lines within
 a cell are numbered from top to bottom, with 0 being the top scan line, and 7 or 13 being the bottom.  Cursors are
-defined as ranges of scan lines, and two CRT controller registers (*Cursor Start* and *Cursor End* registers)
-determine the starting and ending scan line of the cursor.
+defined as ranges of scan lines, and two CRT controller registers determine the starting and ending scan line of the
+cursor:
 
-Here are IBM's defaults for the *Cursor Start* and *Cursor End* registers:
+- *Cursor Start*: Register 10 (0x0A)
+- *Cursor End*: Register 11 (0x0B)
+
+Here are IBM's default values for the *Cursor Start* and *Cursor End* registers, expressed as ranges:
 
 - MDA: 11-12
 - CGA: 6-7
@@ -77,20 +80,23 @@ There are number of ways to "hide" the cursor:
 - Turn the cursor's "blink" bit off
 - Set the *Cursor Start* register to a value greater than or equal to the number of scan lines
 
-The cursor's "blink" bit is bit 5 in the *Cursor Start* register.  This means that only bits 0-4 are used to define
-the starting scan line, permitting any value from 0 to 31.  Since, for example, 31 is larger than the number of character
-scan lines used on any of these cards, writing 31 to the *Cursor Start* register effectively disables ("hides") the cursor
-on any card.
+The cursor's "blink" bit is bit 5 in the *Cursor Start* register.  This means that only bits 0-4 are used to define the
+starting scan line, permitting any value from 0 to 31.  Since, for example, 31 is larger than the number of character
+scan lines used on any of these cards, writing 31 to the *Cursor Start* register effectively disables ("hides") the
+cursor on any card.
 
 ### Cursor Wrap Around
 
 Setting the *Cursor End* register to a value greater than or equal to the number of scan lines has a different effect:
-the scan line generator logic wraps around to zero and continues until it reaches the *Cursor Start* scan line, resulting
-in a block cursor equal to the full height of the character cell.
+the scan line generator logic wraps around to zero and continues until it reaches the *Cursor Start* scan line,
+resulting in a block cursor equal to the full height of the character cell.
 
-There is one unusual exception to this behavior on the EGA: if the value in the *Cursor End* register *modulo 16* is equal
-to the *Cursor Start* register, then the cursor is drawn as if *Cursor Start* was *equal to* *Cursor End*, which (as described
-above) results in a single scan line.
+There is one unusual exception to this behavior on the EGA: if the value in the *Cursor End* register *modulo 16* is
+equal to the *Cursor Start* register, then the cursor is drawn as if *Cursor Start* was *equal to* *Cursor End*, which
+(as described above) results in a single scan line.
+
+For example, if you set *Cursor Start* to 4 and *Cursor End* to 20, since 20 mod 16 == 4, the cursor will be only
+one scan line thick -- again, only on an EGA.
 
 {% include screenshot.html src="/blog/images/MDA-11-14.png" width="156" height="82" title="MDA Block Cursor 11-14" %}
 
@@ -101,18 +107,19 @@ wrap around stops when the internal scan line value reaches *Cursor End*, thereb
 starting scan lines.  The effect makes it appear as if the cursor has been "split" into two separate blocks, with the
 top block always starting at the top and the bottom block always ending at the bottom.
 
-And once again, there is slight difference between the EGA and the older cards: setting *Cursor Start* to 5 and *Cursor End*
-to 4 will result in a split cursor on the EGA with a gap of exactly one scan line, whereas those same settings on older
-cards will result in a solid cursor, since they draw scan lines up to *and including* the line at *Cursor End*.
+And once again, there is slight difference between the EGA and the older cards: setting *Cursor Start* to 5 and
+*Cursor End* to 4 will result in a split cursor on the EGA with a gap of exactly one scan line, whereas those same
+settings on older cards will result in a solid cursor, since they draw scan lines up to *and including* the line at
+*Cursor End*.
 
 {% include screenshot.html src="/blog/images/MDA-11-04.png" width="156" height="82" title="MDA Split Cursor 11-04" %}
 
 ### Order Matters
 
-On the MDA card, let's assume the default cursor is displayed:
+Let's assume the default cursor is displayed:
 
 - *Cursor Start*: 11
-- *Cursor End*: 12
+- *Cursor End*: 12 (or 13 on an EGA)
 
 Now if you set *Cursor Start* to 14, the cursor disappears, and if you THEN set *Cursor End* to 15, the cursor
 is still gone.
@@ -121,15 +128,17 @@ If you start over and set *Cursor End* to 15 first, you'll get the wrap-around b
 *Cursor Start* to 14, the cursor is still a block.
 
 So, at the end of both of those scenarios, the results are different, even though BOTH *Cursor Start* and *Cursor End*
-were programmed with EXACTLY the same values (14 and 15, respectively).
+were programmed with EXACTLY the same values (14 and 15, respectively).  Only the order in which they were programmed
+differs.
 
-The easiest way to think about this behavior is to assume that whenever one register is "out of bounds" (i.e., set to
-a value greater than or equal the cell height), any writes to the *other* register are effectively ignored.
+The easiest way to interpret this behavior is to assume that whenever one register is "out of bounds" (i.e., set to
+a value greater than or equal to the cell height), any "out of bounds" write to the *other* register is effectively
+ignored.
 
 ### About That Blink Bit
 
 I mentioned earlier that bit 5 of the *Cursor Start* register was a "blink" bit.  That was a "bit" of an
-oversimplification.  Here's what a Motorola 6845 CRT Controller datasheet has to say about the entire register:
+oversimplification.  Here's what the Motorola 6845 CRT Controller datasheet has to say about that register:
 
     Cursor Start Register (R10) - This 7 bit write-only register controls the cursor format.
     Bit 5 is the blink timing control. When bit 5 is low, the blink frequency is 1/16 of the
@@ -151,7 +160,33 @@ Here's what the slower blinking cursor looks like:
 
 {% include screenshot.html src="/blog/images/MDA-SLOW.gif" width="104" height="88" title="MDA Cursor (Slower Blink)" %}
 
+EGA and later cards don't use the original Motorola 6845, so their treatment of these bits is, um, a bit different.
+In particular, the EGA Technical Reference Manual says simply that the "blink" bits are `NOT USED`, and the IBM EGA BIOS
+claims that when, calling the "Set Cursor Type" function (0x01), `SETTING BIT 5 OR 6 WILL CAUSE ERRATIC BLINKING OR NO
+CURSOR AT ALL.`  That last comment may have referred to a pre-production model, because I tried setting those bits on a
+genuine IBM EGA board, and I saw no effect on the cursor at all.
+
+### Experimenting With Cursors
+
+A few of the PCjs machines are configured with a special TestController window that's connected to the machine's
+COM2 serial port, such as this [IBM PC AT with 640Kb RAM and EGA](/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/).
+
+After the machine finishes booting to a DOS prompt, type the DOS command `CTTY COM2`, and then you can interact with
+the machine via the TestController window.
+
+Typing `Ctrl-T` in that window toggles it between "terminal mode" and "prompt mode".  After the initial `CTTY` command,
+the TestController should detect the DOS prompt and enter "dos mode", at which point you can type the command `debug` to
+enter "debug mode", where a number of debug macros are available to you, such as:
+
+- `cursor 11 13` (programs the default EGA cursor)
+- `cursor 4 19` (programs a block cursor)
+- `cursor 4 20` (programs a single-line cursor, for reasons explained [above](#cursor-wrap-around))
+
+To see all the command modes, and the macros available in each mode, take a look at [tests.json](/tests/pcx86/testmon/tests.json). 
+
 ### PC Magazine CTYPE and STICK Utilities
+
+For more fun with cursors, take a stroll down memory lane with a few old PC Magazine utilities.
 
 The [November 10, 1987 issue of PC Magazine](https://books.google.com/books?id=x1yigTsvZxsC&lpg=PA479&pg=PA463#v=onepage&q&f=false)
 featured an article, "Getting Control of Your Cursor", by Jeff Prosise that described a utility named CTYPE, which you can

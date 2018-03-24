@@ -6670,6 +6670,25 @@ class Video extends Component {
     outCRTCData(card, port, bOut, addrFrom)
     {
         if (card.regCRTIndx < card.nCRTCRegs) {
+            /*
+             * To simulate how the 6845 effectively ignores changes to CURSCAN or CURSCANB whenever one is written
+             * while the other is currently > MAXSCAN, we check for those writes now, and ignore the write as appropriate.
+             * 
+             * Since CURSCAN == 0xA and CURSCANB == 0xB, we can get the complementary register by XOR'ing the index with 0x1.
+             */
+            if (card.regCRTIndx == Card.CRTC.CURSCAN || card.regCRTIndx == Card.CRTC.CURSCANB) {
+                var bCur = bOut & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
+                var bMax = card.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
+                if (bCur > bMax) {
+                    bCur = card.regCRTData[card.regCRTIndx ^ 0x1] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
+                    if (bCur > bMax) {
+                        if (DEBUG) {
+                            this.printf("outCRTCData(0x%02x): ignoring write to CRTC[0x%02x] since 0x%02x > 0x%02x\n", bOut, card.regCRTIndx, bCur, bMax);
+                        }
+                        return;
+                    }
+                }
+            }
             if (Video.TRAPALL || card.regCRTData[card.regCRTIndx] !== bOut) {
                 if (!addrFrom || this.messageEnabled()) {
                     this.printMessageIO(port /* card.port + 1 */, bOut, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx]);
@@ -6710,10 +6729,9 @@ class Video extends Component {
                 this.checkMode(true);
             }
             this.checkCursor();
-        } else {
-            if (DEBUG && (!addrFrom || this.messageEnabled())) {
-                this.printMessage("outCRTCData(): ignoring unexpected write to CRTC[" + Str.toHexByte(card.regCRTIndx) + "]: " + Str.toHexByte(bOut));
-            }
+        }
+        else if (DEBUG) {
+            this.printf("outCRTCData(0x%02x): ignoring unexpected write to CRTC[0x%02x]\n", bOut, card.regCRTIndx);
         }
     }
 
