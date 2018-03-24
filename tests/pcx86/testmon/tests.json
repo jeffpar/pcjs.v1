@@ -9,7 +9,7 @@
       "symdeb": { "op": "symdeb\r", "mode": "prompt" }
     }
   },
-  "symdeb": {
+  "debug": {
     "prompt": "\n-",
     "commands": {
       "dos": { "op": "q\r", "mode": "prompt" },
