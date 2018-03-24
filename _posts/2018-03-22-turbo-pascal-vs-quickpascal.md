@@ -76,7 +76,7 @@ Delays from 1/10 to 9/10 of a second, specified with `$1` through `$9`, set the 
 subsequent keys, whereas delays of one second or more (eg, `$10`, `$20`, etc) set a *one-time* delay.
 
 For software that needs more than just injected keys, sophisticated scripts are possible.  Here's the "startMouse"
-script for IBM's [TopView 1.01](/disks/pcx86/apps/ibm/topview/1.01/):
+script for IBM's [TopView 1.01](/disks/pcx86/apps/ibm/topview/1.01/debugger/):
 
     wait Keyboard DOS;
     type Keyboard "$date\r$time\r";
