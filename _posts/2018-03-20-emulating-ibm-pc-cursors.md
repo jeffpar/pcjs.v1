@@ -92,6 +92,9 @@ There is one unusual exception to this behavior on the EGA: if the value in the 
 to the *Cursor Start* register, then the cursor is drawn as if *Cursor Start* was *equal to* *Cursor End*, which (as described
 above) results in a single scan line.
 
+For example, if you set *Cursor Start* to 4 and *Cursor End* to 20, since 20 mod 16 == 4, the cursor will be only
+one scan line thick -- again, only on an EGA.
+
 {% include screenshot.html src="/blog/images/MDA-11-14.png" width="156" height="82" title="MDA Block Cursor 11-14" %}
 
 ### Cursor Wrap Around with Split
@@ -123,8 +126,8 @@ If you start over and set *Cursor End* to 15 first, you'll get the wrap-around b
 So, at the end of both of those scenarios, the results are different, even though BOTH *Cursor Start* and *Cursor End*
 were programmed with EXACTLY the same values (14 and 15, respectively).
 
-The easiest way to think about this behavior is to assume that whenever one register is "out of bounds" (i.e., set to
-a value greater than or equal the cell height), any writes to the *other* register are effectively ignored.
+The easiest way to interpret this behavior is to assume that whenever one register is "out of bounds" (i.e., set to
+a value greater than or equal to the cell height), any writes to the *other* register are effectively ignored.
 
 ### About That Blink Bit
 
@@ -150,6 +153,24 @@ So, it's not really accurate to say that bit 5 is the "blink" bit, unless you en
 Here's what the slower blinking cursor looks like:
 
 {% include screenshot.html src="/blog/images/MDA-SLOW.gif" width="104" height="88" title="MDA Cursor (Slower Blink)" %}
+
+### Experimenting With Cursors
+
+A few of the PCjs machines are configured with a special TestController window that's connected to the machine's
+COM2 serial port, such as this [IBM PC AT with 640Kb RAM and EGA](/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/).
+
+After the machine finishes booting to a DOS prompt, type the DOS command `CTTY COM2`, and then you can interact with
+the machine via the TestController window.
+
+Typing `Ctrl-T` in that window toggles it between "terminal mode" and "prompt mode".  After the initial `CTTY` command,
+the TestController should detect the DOS prompt and enter "dos mode", at which point you can type the command `debug` to
+enter "debug mode", where a number of debug macros are available to you, such as:
+
+- `cursor 11 13` (programs the default EGA cursor)
+- `cursor 4 19` (programs a block cursor)
+- `cursor 4 20` (programs a single-line cursor, for reasons explained [above](#cursor-wrap-around))
+
+To see all the command modes, and the macros available in each mode, take a look at [tests.json](/tests/pcx86/testmon/tests.json). 
 
 ### PC Magazine CTYPE and STICK Utilities
 
