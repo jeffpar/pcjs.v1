@@ -98,9 +98,6 @@ equal to the *Cursor Start* register, then the cursor is drawn as if *Cursor Sta
 For example, if you set *Cursor Start* to 4 and *Cursor End* to 20, since 20 mod 16 == 4, the cursor will be only
 one scan line thick -- again, only on an EGA.
 
-For example, if you set *Cursor Start* to 4 and *Cursor End* to 20, since 20 mod 16 == 4, the cursor will be only
-one scan line thick -- again, only on an EGA.
-
 {% include screenshot.html src="/blog/images/MDA-11-14.png" width="156" height="82" title="MDA Block Cursor 11-14" %}
 
 ### Cursor Wrap Around with Split
