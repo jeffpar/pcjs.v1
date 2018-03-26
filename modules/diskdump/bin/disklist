@@ -87,11 +87,6 @@ function processManifest(sManifest)
                 printf("warning: file entry #%d incomplete\n", iFile);
                 return;
             }
-            /*
-             * Here's our template, from PC-DOS 2.00:
-             *
-             *      COMMAND  COM    17664   3-08-83  12:00p
-             */
             var sSize = matchSize[1];
             var sTime = matchTime[1];
             var sFileName = matchFileName[1].replace(/&amp;/g, "&");
@@ -102,12 +97,11 @@ function processManifest(sManifest)
                 sBaseName = sFileName.substr(0, i);
                 sExtension = sFileName.substr(i + 1);
             }
-            sBaseName = (sBaseName + "         ").substr(0, 9);
-            sExtension = (sExtension + "   ").substr(0, 3);
-            sSize = ("         " + sSize).slice(-9);
             var iMonth = +matchTime[2];
-            var sDate = ("    " + iMonth).slice(-4) + '-' + matchTime[3] + '-' + matchTime[1].substr(2);
+            var iDay = +matchTime[3];
+            var iYear = +matchTime[1] % 100;
             var iHour = +matchTime[4];
+            var iMinute = +matchTime[5];
             var sSuffix;
             if (iHour < 12) {
                 sSuffix = "a";
@@ -117,8 +111,12 @@ function processManifest(sManifest)
                 sSuffix = "p";
                 if (iHour > 12) iHour -= 12;
             }
-            var sTime = ("    " + iHour).slice(-4) + ':' + matchTime[5] + sSuffix;
-            printf("    %s\n", sBaseName + sExtension + sSize + sDate + sTime);
+            /*
+             * Here's our template, from PC-DOS 2.00:
+             *
+             *      COMMAND  COM    17664   3-08-83  12:00p
+             */
+            printf("    %-8s %-3s %8s  %2d-%02d-%02d  %2d:%02d%s\n", sBaseName, sExtension, sSize, iMonth, iDay, iYear, iHour, iMinute, sSuffix);
         }
         printf("\n");
     }
