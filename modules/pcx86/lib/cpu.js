@@ -146,7 +146,7 @@ class CPU extends Component {
 
         for (var i = 0; i < CPU.BUTTONS.length; i++) {
             var control = this.bindings[CPU.BUTTONS[i]];
-            if (control) this.cmp.setBinding(null, CPU.BUTTONS[i], control);
+            if (control) this.cmp.setBinding("", CPU.BUTTONS[i], control);
         }
 
         this.fpu = cmp.getMachineComponent("FPU");
@@ -451,7 +451,7 @@ class CPU extends Component {
      * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {CPU}
-     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value

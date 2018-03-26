@@ -1086,16 +1086,16 @@ class ComputerPDP10 extends Component {
     }
 
     /**
-     * setBinding(sType, sBinding, control, sValue)
+     * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {ComputerPDP10}
-     * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    setBinding(sType, sBinding, control, sValue)
+    setBinding(sHTMLType, sBinding, control, sValue)
     {
         var computer = this;
 

@@ -688,7 +688,7 @@ class Card extends Controller {
             if (this.nCard >= Video.CARD.EGA) {
                 this.dbg.println(" LATCHES: " + Str.toHex(this.latches));
                 this.dbg.println("  ACCESS: " + Str.toHex(this.nAccess, 4));
-                this.dbg.println("Use 'dump video [addr]' to dump video memory");
+                this.dbg.println("Use 'd video [addr]' to dump video memory");
                 /*
                  * There are few more EGA regs we could dump, like GRCPos1, GRCPos2, but does anyone care?
                  */
@@ -793,7 +793,7 @@ class Card extends Controller {
                 var sData = Str.toHex(this.addrBuffer + idw) + ":";
                 for (j = 0; j < n && idw < this.adwMemory.length; j++) {
                     var dw = this.adwMemory[idw++];
-                    sData += ' ' + ((p < 0)? Str.toHex(dw) : Str.toBin((dw >> (p << 3)), 8));
+                    sData += ' ' + ((p < 0)? Str.toHex(dw, 8) : Str.toBin((dw >> (p << 3)), 8));
                 }
                 if (fColAdjust) idw += w - n;
                 if (sDump) sDump += "\n";
@@ -1289,8 +1289,8 @@ Card.ATC = {
 
 if (DEBUGGER) {
     Card.ATC.REGS = [
-        "PAL00","PAL01","PAL02","PAL03","PAL04","PAL05","PAL06","PAL07",
-        "PAL08","PAL09","PAL0A","PAL0B","PAL0C","PAL0D","PAL0E","PAL0F", "MODE","OVERSCAN","PLANES","HPAN"];
+        "ATC00","ATC01","ATC02","ATC03","ATC04","ATC05","ATC06","ATC07",
+        "ATC08","ATC09","ATC0A","ATC0B","ATC0C","ATC0D","ATC0E","ATC0F", "ATCMODE","OVERSCAN","PLANES","HPAN"];
 }
 
 /*
@@ -1510,7 +1510,7 @@ Card.GRC = {
     TOTAL_REGS:             0x09
 };
 
-if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLORCMP","DATAROT","READMAP","MODE","MISC","COLORDC","BITMASK"];
+if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLORCMP","DATAROT","READMAP","GRCMODE","GRCMISC","COLORDC","BITMASK"];
 
 /*
  * EGA Memory Access Functions
@@ -2361,13 +2361,13 @@ class Video extends Component {
                 if (sEvent) {
                     var sFullScreen = Web.findProperty(document, 'fullscreenElement') || Web.findProperty(document, 'fullScreenElement');
                     document.addEventListener(sEvent, function onFullScreenChange() {
-                        video.notifyFullScreen(!!sFullScreen);
+                        video.notifyFullScreen(document[sFullScreen] != null);
                     }, false);
                 }
                 sEvent = Web.findProperty(document, 'on', 'fullscreenerror');
                 if (sEvent) {
                     document.addEventListener(sEvent, function onFullScreenError() {
-                        video.notifyFullScreen(null);
+                        video.notifyFullScreen();
                     }, false);
                 }
             }
@@ -2537,7 +2537,7 @@ class Video extends Component {
      * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {Video}
-     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
@@ -2712,7 +2712,7 @@ class Video extends Component {
      * notifyFullScreen(fFullScreen)
      *
      * @this {Video}
-     * @param {boolean|null} fFullScreen (null if there was a full-screen error)
+     * @param {boolean|undefined} [fFullScreen] (undefined if there was a full-screen error)
      */
     notifyFullScreen(fFullScreen)
     {
@@ -2723,8 +2723,8 @@ class Video extends Component {
                 this.canvasScreen.style.width = this.canvasScreen.style.height = "";
             }
         }
-        this.printMessage("notifyFullScreen(" + fFullScreen + ")", true);
-        if (this.kbd) this.kbd.notifyEscape(fFullScreen);
+        if (DEBUG) this.printMessage("notifyFullScreen(" + fFullScreen + ")", true);
+        if (this.kbd) this.kbd.notifyEscape(fFullScreen == true);
     }
 
     /**

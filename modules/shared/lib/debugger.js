@@ -1055,7 +1055,7 @@ class Debugger extends Component
      *
      * @this {Debugger}
      * @param {string|undefined} sValue
-     * @param {string|null} [sName] is the name of the value, if any
+     * @param {string|null|*} [sName] is the name of the value, if any
      * @param {Array|undefined|boolean} [fQuiet]
      * @param {number} [nUnary] (0 for none, 1 for negate, 2 for complement, 3 for leading zeros)
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid

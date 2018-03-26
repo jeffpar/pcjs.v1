@@ -69,7 +69,7 @@ if (NODE) {
  */
 
 /**
- * class FPUX86
+ * @class FPUX86
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class FPUX86 extends Component {
@@ -1547,1653 +1547,6 @@ class FPUX86 extends Component {
      */
 
     /**
-     * F2XM1()
-     *
-     * F2XM1 (2 to the x minus 1) calculates the function 2^x - 1 and returns the result to ST(0).
-     *
-     * On the 8087 and 80287, the value in ST(0) must satisfy the inequality 0 <= ST(0) <= 0.5.  On the 80287XL and
-     * later coprocessors, the permissible range is greater, and ST(0) must satisfy the inequality -1 <= ST(0) <= 1.
-     * If ST(0) is out of range, the result is undefined, even though no exception is raised.
-     *
-     * The F2XM1 instruction is designed to provide an accurate result even when x is close to zero. To obtain 2^x,
-     * simply add 1.0 to the result returned by F2XM1.
-     *
-     * This instruction is useful in performing exponentiation of values other than 2 as shown in the following formulas:
-     *
-     *      10^x = 2^(x * log2(10))
-     *      e^x = 2^(x * log2(e))
-     *      y^x = 2^(x * log2(y))
-     *
-     * Note that the NPX has dedicated instructions for loading the constants log2(10) and log2(e).  The FYL2X instruction
-     * may be used to calculate x * log2(y).
-     *
-     * See also: FYL2X, FLDL2T, FLDL2E.
-     *
-     * @this {FPUX86}
-     */
-    static F2XM1()
-    {
-        this.setST(0, Math.pow(2, this.getST(0)) - 1);
-    }
-
-    /**
-     * FABS()
-     *
-     * @this {FPUX86}
-     */
-    static FABS()
-    {
-        /*
-         * TODO: This could be implemented more efficiently by simply clearing the sign bit of ST(0).
-         */
-        this.setST(0, Math.abs(this.getST(0)));
-    }
-
-    /**
-     * FADDlr()
-     *
-     * @this {FPUX86}
-     */
-    static FADDlr()
-    {
-        this.setST(0, this.doAdd(this.getST(0), this.getLRFromEA()));
-    }
-
-    /**
-     * FADDsr()
-     *
-     * Encoding 0xD8,reg=0x00 ("FADD short-real"): ST(0) <- ST(0) + REAL32
-     *
-     * @this {FPUX86}
-     */
-    static FADDsr()
-    {
-        this.setST(0, this.doAdd(this.getST(0), this.getSRFromEA()));
-    }
-
-    /**
-     * FADDst()
-     *
-     * @this {FPUX86}
-     */
-    static FADDst()
-    {
-        this.setST(0, this.doAdd(this.getST(0), this.getST(this.iStack)));
-    }
-
-    /**
-     * FADDsti()
-     *
-     * @this {FPUX86}
-     */
-    static FADDsti()
-    {
-        this.setST(this.iStack, this.doAdd(this.getST(this.iStack), this.getST(0)));
-    }
-
-    /**
-     * FADDPsti()
-     *
-     * @this {FPUX86}
-     */
-    static FADDPsti()
-    {
-        if (this.setST(this.iStack, this.doAdd(this.getST(this.iStack), this.getST(0)))) this.popValue();
-    }
-
-    /**
-     * FBLDpd()
-     *
-     * @this {FPUX86}
-     */
-    static FBLDpd()
-    {
-        var a = this.getTRFromEA();
-        /*
-         * a[0] contains the 8 least-significant BCD digits, a[1] contains the next 8, and a[2] contains
-         * the next 2 (bit 15 of a[2] is the sign bit, and bits 8-14 of a[2] are unused).
-         */
-        var v = this.decodeBCD(a[0], 8) + this.decodeBCD(a[1], 8) * 100000000 + this.decodeBCD(a[2], 2) * 10000000000000000;
-        if (a[2] & 0x8000) v = -v;
-        this.pushValue(v);
-    }
-
-    /**
-     * FBSTPpd()
-     *
-     * @this {FPUX86}
-     */
-    static FBSTPpd()
-    {
-        /*
-         * TODO: Verify the operation of FBSTP (eg, does it signal an exception if abs(value) >= 1000000000000000000?)
-         */
-        var v = this.roundValue(this.popValue());
-        if (v != null) {
-            /*
-             * intTmpTR[0] will contain the 8 least-significant BCD digits, intTmpTR[1] will contain the next 8,
-             * and intTmpTR[2] will contain the next 2 (bit 15 of intTmpTR[2] will be the sign bit, and bits 8-14 of
-             * intTmpTR[2] will be unused).
-             */
-            this.intTmpTR[0] = this.encodeBCD(v, 8);
-            this.intTmpTR[1] = this.encodeBCD(v / 100000000, 8);
-            this.intTmpTR[2] = this.encodeBCD(v / 10000000000000000, 2);
-            if (v < 0) this.intTmpTR[2] |= 0x8000;
-            this.setEAFromTR();
-        }
-    }
-
-    /**
-     * FCHS()
-     *
-     * @this {FPUX86}
-     */
-    static FCHS()
-    {
-        /*
-         * TODO: This could be implemented more efficiently by simply inverting the sign bit of ST(0).
-         */
-        this.setST(0, -this.getST(0));
-    }
-
-    /**
-     * FCLEX()
-     *
-     * NOTE: Although we explicitly clear the BUSY bit, there shouldn't be any code setting it, because
-     * we're never "busy" (all floating-point operations are performed synchronously).  Conversely, there's
-     * no need to explicitly clear the ES bit, because clearStatus() will call checkException(), which
-     * updates ES and clears/sets FPU interrupt status as appropriate.
-     *
-     * @this {FPUX86}
-     */
-    static FCLEX()
-    {
-        this.clearStatus(X86.FPU.STATUS.EXC | X86.FPU.STATUS.BUSY);
-    }
-
-    /**
-     * FCOMlr()
-     *
-     * Encoding 0xDC,mod<3,reg=2 ("FCOM long-real"): Evaluate ST(0) - REAL64
-     *
-     * @this {FPUX86}
-     */
-    static FCOMlr()
-    {
-        this.doCompare(this.getST(0), this.getLRFromEA());
-    }
-
-    /**
-     * FCOMsr()
-     *
-     * Encoding 0xD8,mod<3,reg=2 ("FCOM short-real"): Evaluate ST(0) - REAL32
-     *
-     * @this {FPUX86}
-     */
-    static FCOMsr()
-    {
-        this.doCompare(this.getST(0), this.getSRFromEA());
-    }
-
-    /**
-     * FCOMst()
-     *
-     * Encoding 0xD8,mod=3,reg=2 ("FCOM ST(i)"): Evaluate ST(0) - ST(i)
-     *
-     * @this {FPUX86}
-     */
-    static FCOMst()
-    {
-        this.doCompare(this.getST(0), this.getST(this.iStack));
-    }
-
-    /**
-     * FCOM8087()
-     *
-     * NOTE: This is used with encoding(s) (0xDC,0xD0-0xD7) that were valid for the 8087 and 80287
-     * but may no longer be valid as of the 80387.
-     *
-     * TODO: Determine if this form subtracted the operands in the same order, or if it requires an FCOMsti(),
-     * which, like the other *sti() functions, uses ST(0) as the second operand rather than the first.
-     *
-     * @this {FPUX86}
-     */
-    static FCOM8087()
-    {
-        this.opObsolete();
-        FPUX86.FCOMst.call(this);
-    }
-
-    /**
-     * FCOMPlr()
-     *
-     * Encoding 0xDC,mod<3,reg=3 ("FCOM long-real"): Evaluate ST(0) - REAL64, POP
-     *
-     * @this {FPUX86}
-     */
-    static FCOMPlr()
-    {
-        if (this.doCompare(this.getST(0), this.getLRFromEA())) this.popValue();
-    }
-
-    /**
-     * FCOMPsr()
-     *
-     * Encoding 0xD8,mod<3,reg=3 ("FCOM short-real"): Evaluate ST(0) - REAL32, POP
-     *
-     * @this {FPUX86}
-     */
-    static FCOMPsr()
-    {
-        if (this.doCompare(this.getST(0), this.getSRFromEA())) this.popValue();
-    }
-
-    /**
-     * FCOMPst()
-     *
-     * Encoding 0xD8,mod=3,reg=3 ("FCOMP ST(i)"): Evaluate ST(0) - ST(i), POP
-     *
-     * @this {FPUX86}
-     */
-    static FCOMPst()
-    {
-        if (this.doCompare(this.getST(0), this.getST(this.iStack))) this.popValue();
-    }
-
-    /**
-     * FCOMP8087()
-     *
-     * NOTE: This is used with encodings (0xDC,0xD8-0xDF and 0xDE,0xD0-0xD7) that were valid for the 8087
-     * and 80287 but may no longer be valid as of the 80387.
-     *
-     * TODO: Determine if this form subtracted the operands in the same order, or if it requires an FCOMPsti(),
-     * which, like the other *sti() functions, uses ST(0) as the second operand rather than the first.
-     *
-     * @this {FPUX86}
-     */
-    static FCOMP8087()
-    {
-        this.opObsolete();
-        FPUX86.FCOMPst.call(this);
-    }
-
-    /**
-     * FCOMPP()
-     *
-     * @this {FPUX86}
-     */
-    static FCOMPP()
-    {
-        if (this.doCompare(this.getST(0), this.getST(1)) && this.popValue() != null) this.popValue();
-    }
-
-    /**
-     * FDECSTP()
-     *
-     * @this {FPUX86}
-     */
-    static FDECSTP()
-    {
-        this.iST = (this.iST - 1) & 0x7;
-        this.regStatus &= ~X86.FPU.STATUS.C1;
-    }
-
-    /**
-     * FDISI8087()
-     *
-     * @this {FPUX86}
-     */
-    static FDISI8087()
-    {
-        if (this.isModel(X86.FPU.MODEL_8087)) {
-            this.regControl |= X86.FPU.CONTROL.IEM;
-        }
-    }
-
-    /**
-     * FDIVlr()
-     *
-     * @this {FPUX86}
-     */
-    static FDIVlr()
-    {
-        this.setST(0, this.doDivide(this.getST(0), this.getLRFromEA()));
-    }
-
-    /**
-     * FDIVsr()
-     *
-     * @this {FPUX86}
-     */
-    static FDIVsr()
-    {
-        this.setST(0, this.doDivide(this.getST(0), this.getSRFromEA()));
-    }
-
-    /**
-     * FDIVst()
-     *
-     * Encoding 0xD8,0xF0-0xF7 ("FDIV ST,ST(i)"): ST(0) <- ST(0) / ST(i)
-     *
-     * @this {FPUX86}
-     */
-    static FDIVst()
-    {
-        this.setST(0, this.doDivide(this.getST(0), this.getST(this.iStack)));
-    }
-
-    /**
-     * FDIVsti()
-     *
-     * Encoding 0xDC,0xF8-0xFF ("FDIV ST(i),ST"): ST(i) <- ST(i) / ST(0)
-     *
-     * @this {FPUX86}
-     */
-    static FDIVsti()
-    {
-        this.setST(this.iStack, this.doDivide(this.getST(this.iStack), this.getST(0)));
-    }
-
-    /**
-     * FDIVPsti()
-     *
-     * Encoding 0xDE,0xF8-0xFF ("FDIVP ST(i),ST"): ST(i) <- ST(i) / ST(0), POP
-     *
-     * @this {FPUX86}
-     */
-    static FDIVPsti()
-    {
-        if (this.setST(this.iStack, this.doDivide(this.getST(this.iStack), this.getST(0)))) this.popValue();
-    }
-
-    /**
-     * FDIVRlr()
-     *
-     * @this {FPUX86}
-     */
-    static FDIVRlr()
-    {
-        this.setST(0, this.doDivide(this.getLRFromEA(), this.getST(0)));
-    }
-
-    /**
-     * FDIVRsr()
-     *
-     * @this {FPUX86}
-     */
-    static FDIVRsr()
-    {
-        this.setST(0, this.doDivide(this.getSRFromEA(), this.getST(0)));
-    }
-
-    /**
-     * FDIVRst()
-     *
-     * Encoding 0xD8,0xF8-0xFF ("FDIVR ST,ST(i)"): ST(0) <- ST(i) / ST(0)
-     *
-     * @this {FPUX86}
-     */
-    static FDIVRst()
-    {
-        this.setST(0, this.doDivide(this.getST(this.iStack), this.getST(0)));
-    }
-
-    /**
-     * FDIVRsti()
-     *
-     * Encoding 0xDC,0xF0-0xF7 ("FDIVR ST(i),ST"): ST(i) <- ST(0) / ST(i)
-     *
-     * @this {FPUX86}
-     */
-    static FDIVRsti()
-    {
-        this.setST(this.iStack, this.doDivide(this.getST(0), this.getST(this.iStack)));
-    }
-
-    /**
-     * FDIVRPsti()
-     *
-     * Encoding 0xDE,0xF0-0xE7 ("FDIVRP ST(i),ST"): ST(i) <- ST(0) / ST(i), POP
-     *
-     * @this {FPUX86}
-     */
-    static FDIVRPsti()
-    {
-        if (this.setST(this.iStack, this.doDivide(this.getST(0), this.getST(this.iStack)))) this.popValue();
-    }
-
-    /**
-     * FENI8087()
-     *
-     * @this {FPUX86}
-     */
-    static FENI8087()
-    {
-        if (this.isModel(X86.FPU.MODEL_8087)) {
-            this.regControl &= ~X86.FPU.CONTROL.IEM;
-        }
-    }
-
-    /**
-     * FFREEsti()
-     *
-     * @this {FPUX86}
-     */
-    static FFREEsti()
-    {
-        this.setTag(this.iST, X86.FPU.TAGS.EMPTY);
-    }
-
-    /**
-     * FFREEP8087()
-     *
-     * NOTE: This is used with an encoding (0xDF,0xC0-0xC7) that was valid for the 8087 and 80287
-     * but may no longer be valid as of the 80387.  Also, if the older documentation is to be believed,
-     * this instruction has no modern counterpart, as FFREE doesn't pop the stack.
-     *
-     * @this {FPUX86}
-     */
-    static FFREEP8087()
-    {
-        this.opObsolete();
-        FPUX86.FFREEsti.call(this);
-        this.popValue();
-    }
-
-    /**
-     * FIADD16()
-     *
-     * @this {FPUX86}
-     */
-    static FIADD16()
-    {
-        this.setST(0, this.doAdd(this.getST(0), this.getWIFromEA()));
-    }
-
-    /**
-     * FIADD32()
-     *
-     * @this {FPUX86}
-     */
-    static FIADD32()
-    {
-        this.setST(0, this.doAdd(this.getST(0), this.getSIFromEA()));
-    }
-
-    /**
-     * FICOM16()
-     *
-     * @this {FPUX86}
-     */
-    static FICOM16()
-    {
-        this.doCompare(this.getST(0), this.getWIFromEA());
-    }
-
-    /**
-     * FICOM32()
-     *
-     * @this {FPUX86}
-     */
-    static FICOM32()
-    {
-        this.doCompare(this.getST(0), this.getSIFromEA());
-    }
-
-    /**
-     * FICOMP16()
-     *
-     * @this {FPUX86}
-     */
-    static FICOMP16()
-    {
-        if (this.doCompare(this.getST(0), this.getWIFromEA())) this.popValue();
-    }
-
-    /**
-     * FICOMP32()
-     *
-     * @this {FPUX86}
-     */
-    static FICOMP32()
-    {
-        if (this.doCompare(this.getST(0), this.getSIFromEA())) this.popValue();
-    }
-
-    /**
-     * FIDIV16()
-     *
-     * @this {FPUX86}
-     */
-    static FIDIV16()
-    {
-        this.setST(0, this.doDivide(this.getST(0), this.getWIFromEA()));
-    }
-
-    /**
-     * FIDIV32()
-     *
-     * @this {FPUX86}
-     */
-    static FIDIV32()
-    {
-        this.setST(0, this.doDivide(this.getST(0), this.getSIFromEA()));
-    }
-
-    /**
-     * FIDIVR16()
-     *
-     * @this {FPUX86}
-     */
-    static FIDIVR16()
-    {
-        this.setST(0, this.doDivide(this.getWIFromEA(), this.getST(0)));
-    }
-
-    /**
-     * FIDIVR32()
-     *
-     * @this {FPUX86}
-     */
-    static FIDIVR32()
-    {
-        this.setST(0, this.doDivide(this.getSIFromEA(), this.getST(0)));
-    }
-
-    /**
-     * FILD16()
-     *
-     * @this {FPUX86}
-     */
-    static FILD16()
-    {
-        this.pushValue(this.getWIFromEA());
-    }
-
-    /**
-     * FILD32()
-     *
-     * @this {FPUX86}
-     */
-    static FILD32()
-    {
-        this.pushValue(this.getSIFromEA());
-    }
-
-    /**
-     * FILD64()
-     *
-     * @this {FPUX86}
-     */
-    static FILD64()
-    {
-        this.pushValue(this.getLIFromEA());
-    }
-
-    /**
-     * FIMUL16()
-     *
-     * @this {FPUX86}
-     */
-    static FIMUL16()
-    {
-        this.setST(0, this.doMultiply(this.getST(0), this.getWIFromEA()));
-    }
-
-    /**
-     * FIMUL32()
-     *
-     * @this {FPUX86}
-     */
-    static FIMUL32()
-    {
-        this.setST(0, this.doMultiply(this.getST(0), this.getSIFromEA()));
-    }
-
-    /**
-     * FINCSTP()
-     *
-     * @this {FPUX86}
-     */
-    static FINCSTP()
-    {
-        this.iST = (this.iST + 1) & 0x7;
-        this.regStatus &= ~X86.FPU.STATUS.C1;
-    }
-
-    /**
-     * FINIT()
-     *
-     * @this {FPUX86}
-     */
-    static FINIT()
-    {
-        this.resetFPU();
-    }
-
-    /**
-     * FIST16()
-     *
-     * @this {FPUX86}
-     */
-    static FIST16()
-    {
-        if (this.getWI(0)) this.setEAFromWI();
-    }
-
-    /**
-     * FIST32()
-     *
-     * @this {FPUX86}
-     */
-    static FIST32()
-    {
-        if (this.getSI(0)) this.setEAFromSI();
-    }
-
-    /**
-     * FISTP16()
-     *
-     * @this {FPUX86}
-     */
-    static FISTP16()
-    {
-        if (this.getWI(0)) {
-            this.setEAFromWI();
-            this.popValue();
-        }
-    }
-
-    /**
-     * FISTP32()
-     *
-     * @this {FPUX86}
-     */
-    static FISTP32()
-    {
-        if (this.getSI(0)) {
-            this.setEAFromSI();
-            this.popValue();
-        }
-    }
-
-    /**
-     * FISTP64()
-     *
-     * @this {FPUX86}
-     */
-    static FISTP64()
-    {
-        if (this.getLI(0)) {
-            this.setEAFromLI();
-            this.popValue();
-        }
-    }
-
-    /**
-     * FISUB16()
-     *
-     * @this {FPUX86}
-     */
-    static FISUB16()
-    {
-        this.setST(0, this.doSubtract(this.getST(0), this.getWIFromEA()));
-    }
-
-    /**
-     * FISUB32()
-     *
-     * @this {FPUX86}
-     */
-    static FISUB32()
-    {
-        this.setST(0, this.doSubtract(this.getST(0), this.getSIFromEA()));
-    }
-
-    /**
-     * FISUBR16()
-     *
-     * @this {FPUX86}
-     */
-    static FISUBR16()
-    {
-        this.setST(0, this.doSubtract(this.getWIFromEA(), this.getST(0)));
-    }
-
-    /**
-     * FISUBR32()
-     *
-     * @this {FPUX86}
-     */
-    static FISUBR32()
-    {
-        this.setST(0, this.doSubtract(this.getSIFromEA(), this.getST(0)));
-    }
-
-    /**
-     * FLDlr()
-     *
-     * The FLD instruction loads the source operand, converts it to temporary real format (if required),
-     * and pushes the resulting value onto the floating-point stack.
-     *
-     * The load operation is accomplished by decrementing the top-of-stack pointer (TOP) and copying the
-     * source operand to the new stack top. If the source operand is a float ing-point register, the index of
-     * the register is taken before TOP is changed. The source operand may also be a short real, long real,
-     * or temporary real memory operand. Short real and long real operands are converted automatically.
-     *
-     * Note that coding the instruction FLD ST(0) duplicates the value at the stack top.
-     *
-     * On the 8087 and 80287, the FLD real80 instruction will raise the denormal exception if the memory
-     * operand is a denormal. The 80287XL and later coprocessors will not, since the operation is not arithmetic.
-     *
-     * On the 8087 and 80287, a denormal will be converted to an unnormal by FLD; on the 80287XL and later
-     * coprocessors, the number will be converted to temporary real. If the next instruction is an FXTRACT or FXAM,
-     * the 8087/80827 and 80287XL/80387/ 80486 results will be different.
-     *
-     * On the 8087 and 80287, the FLD real32 and FLD real64 instructions will not raise an exception when loading
-     * a signaling NaN; on the 80287XL and later coprocessors, loading a signaling NaN raises the invalid operation
-     * exception.
-     *
-     * @this {FPUX86}
-     */
-    static FLDlr()
-    {
-        this.pushValue(this.getLRFromEA());
-    }
-
-    /**
-     * FLDsr()
-     *
-     * @this {FPUX86}
-     */
-    static FLDsr()
-    {
-        this.pushValue(this.getSRFromEA());
-    }
-
-    /**
-     * FLDsti()
-     *
-     * @this {FPUX86}
-     */
-    static FLDsti()
-    {
-        this.pushValue(this.getST(this.iStack));
-    }
-
-    /**
-     * FLDtr()
-     *
-     * @this {FPUX86}
-     */
-    static FLDtr()
-    {
-        this.pushValue(this.getLRFromTR(this.getTRFromEA()));
-    }
-
-    /**
-     * FLDCW()
-     *
-     * @this {FPUX86}
-     */
-    static FLDCW()
-    {
-        this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
-        this.setControl(this.cpu.getShort(this.cpu.regEA));
-    }
-
-    /**
-     * FLDENV()
-     *
-     * @this {FPUX86}
-     */
-    static FLDENV()
-    {
-        this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
-        this.loadEnv(this.cpu.regEA);
-    }
-
-    /**
-     * FLD1()
-     *
-     * The FLD1 instruction loads the constant +1.0 from the NPX's constant ROM and pushes the value onto the
-     * floating-point stack.
-     *
-     * The constant is stored internally in temporary real format and is simply moved to the stack.
-     *
-     * See also: FLDLG2, FLDLN2, FLDL2E, FLDL2T, FLDPI, and FLD1.
-     *
-     * @this {FPUX86}
-     */
-    static FLD1()
-    {
-        this.pushValue(1.0);
-    }
-
-    /**
-     * FLDL2T()
-     *
-     * The FLDL2T instruction loads the constant log2(10) from the NPX's constant ROM and pushes the value onto the
-     * floating-point stack.
-     *
-     * The constant is stored internally in temporary real format and is simply moved to the stack.
-     *
-     * On the 8087 and 80287, rounding control is not in effect for the loading of this constant.  On the 80287XL and
-     * later coprocessors, rounding control is in effect.  If RC is set for chop (round toward 0), round down (toward
-     * -infinity), or round to nearest or even, the result will be the same as on the 8087 and 80287.  If RC is set for
-     * round up (toward +infinity), the result will differ by one in the least significant bit of the mantissa.
-     *
-     * See also: FLDLG2, FLDLN2, FLDL2E, FLDPI, FLD1, and FLDZ.
-     *
-     * @this {FPUX86}
-     */
-    static FLDL2T()
-    {
-        this.pushValue(FPUX86.regL2T);
-    }
-
-    /**
-     * FLDL2E()
-     *
-     * The FLDL2E instruction loads the constant log2(e) from the NPX's constant ROM and pushes the value onto the
-     * floating-point stack.
-     *
-     * The constant is stored internally in temporary real format and is simply moved to the stack.
-     *
-     * On the 8087 and 80287, rounding control is not in effect for the loading of this constant.  On the 80287XL and
-     * later coprocessors, rounding control is in effect.  If RC is set for chop (round toward 0) or round down (toward
-     * -infinity), the result is the same as on the 8087 and 80827.  If RC is set for round to nearest or even, or round
-     * up (toward +infinity), the result will differ by one in the least significant bit of the mantissa.
-     *
-     * See also: FLDLG2, FLDLN2, FLDL2T, FLDPI, FLD1, and FLDZ.
-     *
-     * @this {FPUX86}
-     */
-    static FLDL2E()
-    {
-        this.pushValue(FPUX86.regL2E);
-    }
-
-    /**
-     * FLDPI()
-     *
-     * The FLDPI instruction loads the constant Pi from the NPX's constant ROM and pushes the value onto the
-     * floating-point stack.
-     *
-     * The constant is stored internally in temporary real format and is simply moved to the stack.
-     *
-     * On the 8087 and 80287, rounding control is not in effect for the loading of these constants.  On the 80287XL and
-     * later coprocessors, rounding control is in effect.  If RC is set for chop (round toward 0) or round down (toward
-     * -infinity), the result is the same as on the 8087 and 80827.  If RC is set for round to nearest or even, or round
-     * up (toward +infinity), the result will differ by one in the least significant bit of the mantissa.
-     *
-     * See also: FLDLG2, FLDLN2, FLDL2E, FLDL2T, FLD1, and FLDZ.
-     *
-     * @this {FPUX86}
-     */
-    static FLDPI()
-    {
-        this.pushValue(FPUX86.regPI);
-    }
-
-    /**
-     * FLDLG2()
-     *
-     * The FLDLG2 instruction loads the constant log10(2) from the NPX's constant ROM and pushes the value onto the
-     * floating-point stack.
-     *
-     * The constant is stored internally in temporary real format and is simply moved to the stack.
-     *
-     * On the 8087 and 80287, rounding control is not in effect for the loading of this constant.  On the 80287XL and
-     * later coprocessors, rounding control is in effect.  If RC is set for chop (round toward 0) or round down (toward
-     * -infinity), the result is the same as on the 8087 and 80827.  If RC is set for round to nearest or even, or round
-     * up (toward +infinity), the result will differ by one in the least significant bit of the mantissa.
-     *
-     * See also: FLDLN2, FLDL2E, FLDL2T, FLDPI, FLD1, and FLDZ.
-     *
-     * @this {FPUX86}
-     */
-    static FLDLG2()
-    {
-        this.pushValue(FPUX86.regLG2);
-    }
-
-    /**
-     * FLDLN2()
-     *
-     * The FLDLN2 instruction loads the constant loge(2) from the NPX's constant ROM and pushes the value onto the
-     * floating-point stack.
-     *
-     * The constant is stored internally in temporary real format and is simply moved to the stack.
-     *
-     * On the 8087 and 80287, rounding control is not in effect for the loading of this constant.  On the 80287XL and
-     * later coprocessors, rounding control is in effect.  If RC is set for chop (round toward 0) or round down (toward
-     * -infinity), the result will be the same as on the 8087 and 80827.  If RC is set for round to nearest or even, or
-     * round up (toward +infinity), the result will differ by one in the least significant bit of the mantissa.
-     *
-     * See also: FLDLG2, FLDL2E, FLDL2T, FLDPI, FLD1, and FLDZ.
-     *
-     * @this {FPUX86}
-     */
-    static FLDLN2()
-    {
-        this.pushValue(FPUX86.regLN2);
-    }
-
-    /**
-     * FLDZ()
-     *
-     * The FLDZ instruction loads the constant +0.0 from the NPX's constant ROM and pushes the value onto the
-     * floating-point stack.
-     *
-     * The constant is stored internally in temporary real format and is simply moved to the stack.
-     *
-     * See also: FLDLG2, FLDLN2, FLDL2E, FLDL2T, FLDPI, and FLD1.
-     *
-     * @this {FPUX86}
-     */
-    static FLDZ()
-    {
-        this.pushValue(0.0);
-    }
-
-    /**
-     * FMULlr()
-     *
-     * @this {FPUX86}
-     */
-    static FMULlr()
-    {
-        this.setST(0, this.doMultiply(this.getST(0), this.getLRFromEA()));
-    }
-
-    /**
-     * FMULsr()
-     *
-     * Encoding 0xD8,reg=0x01 ("FMUL short-real"): ST(0) <- ST(0) * REAL32
-     *
-     * @this {FPUX86}
-     */
-    static FMULsr()
-    {
-        this.setST(0, this.doMultiply(this.getST(0), this.getSRFromEA()));
-    }
-
-    /**
-     * FMULst()
-     *
-     * @this {FPUX86}
-     */
-    static FMULst()
-    {
-        this.setST(0, this.doMultiply(this.getST(0), this.getST(this.iStack)));
-    }
-
-    /**
-     * FMULsti()
-     *
-     * @this {FPUX86}
-     */
-    static FMULsti()
-    {
-        this.setST(this.iStack, this.doMultiply(this.getST(this.iStack), this.getST(0)));
-    }
-
-    /**
-     * FMULPsti()
-     *
-     * @this {FPUX86}
-     */
-    static FMULPsti()
-    {
-        if (this.setST(this.iStack, this.doMultiply(this.getST(this.iStack), this.getST(0)))) this.popValue();
-    }
-
-    /**
-     * FNOP()
-     *
-     * @this {FPUX86}
-     */
-    static FNOP()
-    {
-    }
-
-    /**
-     * FPATAN()
-     *
-     * FPATAN calculates the partial arctangent of ST(0) divided by ST(1):
-     *
-     *      ST(1) = tan^-1( ST(1) / ST(0) )
-     *
-     * On the 8087 and 80287, the arguments must satisfy the inequality 0 <= ST(1) < ST(0) < +infinity.
-     * On the 80287XL and later coprocessors, the range of the operands is unrestricted.  The result is
-     * returned to ST(1), and the stack is popped, destroying both operands and leaving the result in ST(0).
-     *
-     * @this {FPUX86}
-     */
-    static FPATAN()
-    {
-        if (this.setST(1, Math.atan2(this.getST(1), this.getST(0)))) this.popValue();
-    }
-
-    /**
-     * FPTAN()
-     *
-     * FPTAN calculates the partial tangent of ST(0):
-     *
-     *      y / x = tan( ST(0) )
-     *
-     * The result of the operation is a ratio.  y replaces the argument on the stack, and x is pushed onto the stack,
-     * where it becomes the new ST(0).
-     *
-     * On the 8087 and 80287, the FPTAN function assumes that its argument is valid and in-range.  No argument checking
-     * is performed.  The value of ST(0) must satisfy the inequality -pi/4 <= ST(0) <= pi/4.  In the case of an invalid
-     * argument, the result is undefined and no error is signaled.
-     *
-     * On the 80287XL and later coprocessors, if value of ST(0) satisfies the condition -2^63 < ST(0) < 2^63, it will
-     * automatically be reduced to within range.  If the operand is outside this range, however, C2 is set to 1 to indicate
-     * that the function is incomplete, and ST(0) is left unchanged.
-     *
-     * The 80287XL, 80387, and 80486 always push a value of +1.0 for x. The value of x pushed by the 8087 and 80287 may be
-     * any real number.  In either case, the ratio is the same. The cotangent can be calculated by executing FDIVR immediately
-     * after FPTAN.  The following code will leave the 8087 and 80287 in the same state as the later coprocessors:
-     *
-     *      FDIV
-     *      FLD1
-     *
-     * ST(7) must be empty before this instruction is executed to avoid an invalid operation exception.  If the invalid
-     * operation exception is masked, the 8087 and 80287 leave the original operand unchanged, but push it to ST(1).  On the
-     * 80287XL and later coprocessors, both ST(0) and ST(1) will contain quiet NaNs.  On the 80287XL and later coprocessors,
-     * if condition code bit C2 is 0 and the precision exception is raised, then C1=1 if the last bit was rounded up. C1 is
-     * undefined for the 8087 and 80287.
-     *
-     * @this {FPUX86}
-     */
-    static FPTAN()
-    {
-        if (this.setST(0, Math.tan(this.getST(0)))) this.pushValue(1.0);
-    }
-
-    /**
-     * FPREM()
-     *
-     * FPREM performs modulo division of ST(0) by ST(1) and returns the result to ST(0).
-     *
-     * The FPREM instruction is used to reduce the real operand in ST(0) to a value whose magnitude is less than the
-     * magnitude of ST(1).  FPREM produces an exact result, so the precision exception is never raised and the rounding
-     * control has no effect.  The sign of the remainder is the same as the sign of the original operand.
-     *
-     * The remaindering operation is performed by iterative scaled subtractions and can reduce the exponent of ST(0) by
-     * no more than 63 in one execution.  If the remainder is less than ST(1) (the modulus), the function is complete and
-     * C2 in the status word is cleared.
-     *
-     * If the modulo function is incomplete, C2 is set to 1, and the result in ST(0) is termed the partial remainder.
-     * C2 can be inspected by storing the status word and re-executing the instruction until C2 is clear. Alternately,
-     * ST(0) can be compared to ST(1).  If ST(0) > ST(1), then FPREM must be executed again.  If ST(0) = ST(1), then the
-     * remainder is 0.
-     *
-     * FPREM is important for reducing arguments to the periodic transcendental functions such as FPTAN.  Because FPREM
-     * produces an exact result, no round-off error is introduced into the calculation.
-     *
-     * When reduction is complete, the three least-significant bits of the quotient are stored in the condition code bits
-     * C3, C1, and C0, respectively.  When arguments to the tangent function are reduced by pi/4, this result can be used
-     * to identify the octant that contained the original angle.
-     *
-     * The FPREM function operates differently than specified by the IEEE 754 standard when rounding the quotient to form
-     * a partial remainder (see the algorithm).  The FPREM1 function (80287XL and up) is provided for compatibility with
-     * that standard.
-     *
-     * The FPREM instruction can also be used to normalize ST(0).  If ST(0) is unnormal and ST(1) is greater than ST(0),
-     * FPREM will normalize ST(0).  On the 8087 and 80287, operation on a denormal operand raises the invalid operation
-     * exception.  Underflow is not possible.  On the 80287XL and later coprocessors, operation on a denormal is supported
-     * and an underflow exception can occur.
-     *
-     * ALGORITHM:
-     *
-     *      t = EXPONENT(ST) - EXPONENT(ST(1))
-     *      IF (t < 64) THEN
-     *          q = R0UND(ST(0) / ST(1), CHOP)
-     *          ST(0) = ST(0) - (ST(1) * q)
-     *          C2 = 0
-     *          C0 = BIT 2 of q
-     *          C1 = BIT 1 of q
-     *          C3 = BIT 0 of q
-     *      ELSE
-     *          n = a number between 32 and 63
-     *          q = ROUND((ST(0) / ST(1)) / 2^(t-n), CHOP)
-     *          ST(0) = ST(0) - (ST(1) * q * 2^(t-n))
-     *          C2 = 1
-     *      ENDIF
-     *
-     * TODO: Determine the extent to which the JavaScript MOD operator differs from the above algorithm.
-     *
-     * ERRATA: On the 8087 and 80287, the condition code bits C3, C1, and C0 are incorrect when performing a reduction of
-     * 64^n + m, where n >= 1, and m=1 or m=2.  A bug fix should be implemented in software.
-     *
-     * @this {FPUX86}
-     */
-    static FPREM()
-    {
-        this.setST(0, this.getST(0) % this.getST(1));
-    }
-
-    /**
-     * FRSTOR()
-     *
-     * @this {FPUX86}
-     */
-    static FRSTOR()
-    {
-        var cpu = this.cpu;
-        var addr = this.loadEnv(cpu.regEA);
-        var a = this.intTmpTR;
-        for (var i = 0; i < this.regStack.length; i++) {
-            a[0] = cpu.getLong(addr);
-            a[1] = cpu.getLong(addr += 4);
-            a[2] = cpu.getShort(addr += 4);
-            this.setTR(i, a);
-            addr += 2;
-        }
-    }
-
-    /**
-     * FRNDINT()
-     *
-     * @this {FPUX86}
-     */
-    static FRNDINT()
-    {
-        this.setST(0, this.roundValue(this.getST(0), FPUX86.MAX_INT64));
-    }
-
-    /**
-     * FSAVE()
-     *
-     * @this {FPUX86}
-     */
-    static FSAVE()
-    {
-        var cpu = this.cpu;
-        var addr = this.saveEnv(cpu.regEA);
-        for (var i = 0; i < this.regStack.length; i++) {
-            var a = this.getTR(i, true);
-            cpu.setLong(addr, a[0]);
-            cpu.setLong(addr += 4, a[1]);
-            cpu.setShort(addr += 4, a[2]);
-            addr += 2;
-        }
-        this.resetFPU();
-    }
-
-    /**
-     * FSCALE()
-     *
-     * FSCALE interprets the value in ST(1) as an integer and adds this number to the exponent of the number in ST(0).
-     *
-     * The FSCALE instruction provides a means of quickly performing multiplication or division by powers of two.
-     * This operation is often required when scaling array indexes.
-     *
-     * On the 8087 and 80287, FSCALE assumes that the scale factor in ST(1) is an integer that satisfies the inequality
-     * -2^15 <= ST(1) < +2^15.  If ST(1) is not an integer value, the value is chopped to the next smallest integer in
-     * magnitude (chopped toward zero).  If the value is out of range or 0 < ST(1) < 1, FSCALE produces an undefined
-     * result and doesn't signal an exception.  Typically, the value in ST(0) is unchanged but should not be depended on.
-     *
-     * On the 80287XL and later coprocessors, there is no limit on the range of the scale factor in ST(1). The value in
-     * ST(1) is still chopped toward zero.  If ST(1) is 0, ST(0) is unchanged.
-     *
-     * @this {FPUX86}
-     */
-    static FSCALE()
-    {
-        var x = this.getST(0);
-        var y = this.getST(1);
-        if (x != null && y != null) this.setST(0, x * Math.pow(2, this.truncateValue(y)));
-    }
-
-    /**
-     * FSETPM287()
-     *
-     * @this {FPUX86}
-     */
-    static FSETPM287()
-    {
-        if (this.isModel(X86.FPU.MODEL_80287)) {
-            this.opUnimplemented();
-        }
-    }
-
-    /**
-     * FSINCOS387()
-     *
-     * @this {FPUX86}
-     */
-    static FSINCOS387()
-    {
-        if (this.isAtLeastModel(X86.FPU.MODEL_80287XL)) {
-            this.opUnimplemented();
-        }
-    }
-
-    /**
-     * FSQRT()
-     *
-     * @this {FPUX86}
-     */
-    static FSQRT()
-    {
-        this.setST(0, this.doSquareRoot(this.getST(0)));
-    }
-
-    /**
-     * FSTlr()
-     *
-     * @this {FPUX86}
-     */
-    static FSTlr()
-    {
-        if (this.getLR(0)) this.setEAFromLR();
-    }
-
-    /**
-     * FSTsr()
-     *
-     * @this {FPUX86}
-     */
-    static FSTsr()
-    {
-        if (this.getSR(0)) this.setEAFromSR();
-    }
-
-    /**
-     * FSTsti()
-     *
-     * @this {FPUX86}
-     */
-    static FSTsti()
-    {
-        this.setST(this.iStack, this.getST(0));
-    }
-
-    /**
-     * FSTENV()
-     *
-     * @this {FPUX86}
-     */
-    static FSTENV()
-    {
-        this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
-        this.saveEnv(this.cpu.regEA);
-        this.regControl |= X86.FPU.CONTROL.EXC;     // mask all exceptions (but do not set IEM)
-    }
-
-    /**
-     * FSTPlr()
-     *
-     * @this {FPUX86}
-     */
-    static FSTPlr()
-    {
-        if (this.getLR(0)) {
-            this.setEAFromLR();
-            this.popValue();
-        }
-    }
-
-    /**
-     * FSTPsr()
-     *
-     * @this {FPUX86}
-     */
-    static FSTPsr()
-    {
-        if (this.getSR(0)) {
-            this.setEAFromSR();
-            this.popValue();
-        }
-    }
-
-    /**
-     * FSTPsti()
-     *
-     * @this {FPUX86}
-     */
-    static FSTPsti()
-    {
-        if (this.setST(this.iStack, this.getST(0))) this.popValue();
-    }
-
-    /**
-     * FSTP8087()
-     *
-     * NOTE: This is used with encodings (0xD9,0xD8-0xDF and 0xDF,0xD0-0xDF) that were valid for the 8087 and 80287
-     * but may no longer be valid as of the 80387.
-     *
-     * @this {FPUX86}
-     */
-    static FSTP8087()
-    {
-        this.opObsolete();
-        FPUX86.FSTPsti.call(this);
-    }
-
-    /**
-     * FSTPtr()
-     *
-     * @this {FPUX86}
-     */
-    static FSTPtr()
-    {
-        if (this.getTR(0)) {
-            this.setEAFromTR();
-            this.popValue();
-        }
-    }
-
-    /**
-     * FSTCW()
-     *
-     * @this {FPUX86}
-     */
-    static FSTCW()
-    {
-        this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
-        this.cpu.setShort(this.cpu.regEA, this.regControl);
-    }
-
-    /**
-     * FSTSW()
-     *
-     * @this {FPUX86}
-     */
-    static FSTSW()
-    {
-        this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
-        this.cpu.setShort(this.cpu.regEA, this.getStatus());
-    }
-
-    /**
-     * FSTSWAX287()
-     *
-     * @this {FPUX86}
-     */
-    static FSTSWAX287()
-    {
-        if (this.isAtLeastModel(X86.FPU.MODEL_80287)) {
-            this.cpu.regEAX = (this.cpu.regEAX & ~0xffff) | this.getStatus();
-        }
-    }
-
-    /**
-     * FSUBlr()
-     *
-     * @this {FPUX86}
-     */
-    static FSUBlr()
-    {
-        this.setST(0, this.doSubtract(this.getST(0), this.getLRFromEA()));
-    }
-
-    /**
-     * FSUBsr()
-     *
-     * @this {FPUX86}
-     */
-    static FSUBsr()
-    {
-        this.setST(0, this.doSubtract(this.getST(0), this.getSRFromEA()));
-    }
-
-    /**
-     * FSUBst()
-     *
-     * Encoding 0xD8,0xE0-0xE7 ("FSUB ST,ST(i)"): ST(0) <- ST(0) - ST(i)
-     *
-     * @this {FPUX86}
-     */
-    static FSUBst()
-    {
-        this.setST(0, this.doSubtract(this.getST(0), this.getST(this.iStack)));
-    }
-
-    /**
-     * FSUBsti()
-     *
-     * Encoding 0xDC,0xE8-0xEF ("FSUB ST(i),ST"): ST(i) <- ST(i) - ST(0)
-     *
-     * @this {FPUX86}
-     */
-    static FSUBsti()
-    {
-        this.setST(this.iStack, this.doSubtract(this.getST(this.iStack), this.getST(0)));
-    }
-
-    /**
-     * FSUBPsti()
-     *
-     * Encoding 0xDE,0xE8-0xEF ("FSUBP ST(i),ST"): ST(i) <- ST(i) - ST(0), POP
-     *
-     * @this {FPUX86}
-     */
-    static FSUBPsti()
-    {
-        if (this.setST(this.iStack, this.doSubtract(this.getST(this.iStack), this.getST(0)))) this.popValue();
-    }
-
-    /**
-     * FSUBRlr()
-     *
-     * @this {FPUX86}
-     */
-    static FSUBRlr()
-    {
-        this.setST(0, this.doSubtract(this.getLRFromEA(), this.getST(0)));
-    }
-
-    /**
-     * FSUBRsr()
-     *
-     * @this {FPUX86}
-     */
-    static FSUBRsr()
-    {
-        this.setST(0, this.doSubtract(this.getSRFromEA(), this.getST(0)));
-    }
-
-    /**
-     * FSUBRst()
-     *
-     * Encoding 0xD8,0xE8-0xEF ("FSUBR ST,ST(i)"): ST(0) <- ST(i) - ST(0)
-     *
-     * @this {FPUX86}
-     */
-    static FSUBRst()
-    {
-        this.setST(0, this.doSubtract(this.getST(this.iStack), this.getST(0)));
-    }
-
-    /**
-     * FSUBRsti()
-     *
-     * Encoding 0xDC,0xE0-0xE7 ("FSUBR ST(i),ST"): ST(i) <- ST(0) - ST(i)
-     *
-     * @this {FPUX86}
-     */
-    static FSUBRsti()
-    {
-        this.setST(this.iStack, this.doSubtract(this.getST(0), this.getST(this.iStack)));
-    }
-
-    /**
-     * FSUBRPsti()
-     *
-     * Encoding 0xDE,0xE0-0xE7 ("FSUBRP ST(i),ST"): ST(i) <- ST(0) - ST(i), POP
-     *
-     * @this {FPUX86}
-     */
-    static FSUBRPsti()
-    {
-        if (this.setST(this.iStack, this.doSubtract(this.getST(0), this.getST(this.iStack)))) this.popValue();
-    }
-
-    /**
-     * FTST()
-     *
-     * @this {FPUX86}
-     */
-    static FTST()
-    {
-        this.doCompare(this.getST(0), 0);
-    }
-
-    /**
-     * FXAM()
-     *
-     * @this {FPUX86}
-     */
-    static FXAM()
-    {
-        this.regStatus &= ~X86.FPU.STATUS.CC;
-
-        if (this.getSTSign(0)) {
-            this.regStatus |= X86.FPU.STATUS.C1;
-        }
-        if (this.getTag(this.iST) == X86.FPU.TAGS.EMPTY) {
-            this.regStatus |= X86.FPU.STATUS.C0 | X86.FPU.STATUS.C3;
-        }
-        else {
-            var v = this.getST(0);
-            if (isNaN(v)) {
-                this.regStatus |= X86.FPU.STATUS.C0;
-            }
-            else if (v === 0) {                                 // this equals -0, too (WTF, strict equality?)
-                this.regStatus |= X86.FPU.STATUS.C3;
-            }
-            else if (v === Infinity || v === -Infinity) {       // these are so divergent that even non-strict equality doesn't consider them equal
-                this.regStatus |= X86.FPU.STATUS.C0 | X86.FPU.STATUS.C2;
-            }
-            else {
-                this.regStatus |= X86.FPU.STATUS.C2;
-            }
-        }
-    }
-
-    /**
-     * FXCHsti()
-     *
-     * @this {FPUX86}
-     */
-    static FXCHsti()
-    {
-        var tmp = this.getST(0);
-        this.setST(0, this.getST(this.iStack));
-        this.setST(this.iStack, tmp);
-    }
-
-    /**
-     * FXCH8087()
-     *
-     * NOTE: This is used with encodings (0xDD,0xC8-0xCF and 0xDF,0xC8-0xCF) that were valid for the 8087 and 80287
-     * but may no longer be valid as of the 80387.
-     *
-     * @this {FPUX86}
-     */
-    static FXCH8087()
-    {
-        this.opObsolete();
-        FPUX86.FXCHsti.call(this);
-    }
-
-    /**
-     * FXTRACT()
-     *
-     * FXTRACT splits the value encoded in ST(0) into two separate numbers representing the actual value of the
-     * fraction (mantissa) and exponent fields.
-     *
-     * The FXTRACT instruction is used to decompose the two fields of the temporary real number in ST(0).  The exponent
-     * replaces the value in ST(0), then the fraction is pushed onto the stack.  When execution is complete, ST(0)
-     * contains the original fraction, expressed as a real number with a true exponent of 0 (0x3FFF in biased form),
-     * and ST(1) contains the value of the original operand's true (unbiased) exponent expressed as a real number.
-     *
-     * If ST(0) is 0, the 8087 and 80287 will leave zeros in both ST(0) and ST(1); both zeros will have the same sign as
-     * the original operand.  If ST(0) is +infinity, the invalid operation exception is raised.
-     *
-     * On the 80287XL and later coprocessors, if ST(0) is 0, the zero-divide exception is reported and ST(1) is set to
-     * -infinity.  If ST(0) is +infinity, no exception is reported.
-     *
-     * The FXTRACT instruction may be thought of as the complement to the FSCALE instruction, which combines a separate
-     * fraction and exponent into a single value.
-     *
-     * ALGORITHM:
-     *
-     *      IF (ST(0) = 0) THEN
-     *          DEC TOP
-     *          ST(0) = ST(1)
-     *      ELSE
-     *          temp = ST(0)
-     *          ST(0) = EXPONENT(ST(0))     ; stored as true exponent
-     *          DEC TOP
-     *          ST(0) = FRACTION(ST(0))
-     *      ENDIF
-     *
-     * @this {FPUX86}
-     */
-    static FXTRACT()
-    {
-        var v = this.getST(0);
-        if (v != null) {
-            this.regTmpLR[0] = v;
-            this.setST(0, ((this.intTmpLR[1] >> 20) & 0x7ff) - 0x3ff);
-            this.intTmpLR[1] = (this.intTmpLR[1] | 0x3ff00000) & ~0x40000000;
-            this.pushValue(this.regTmpLR[0]);
-        }
-    }
-
-    /**
-     * FYL2X()
-     *
-     * FYL2X (y log base 2 of x) calculates:
-     *
-     *      ST(1) = ST(1) * log2(ST(0))
-     *
-     * The operands must satisfy the inequalities 0 < ST(0) < +infinity and -infinity < ST(1) < +infinity.  FYL2X pops
-     * the stack and returns the result to the new ST(0).  Both original operands are destroyed.
-     *
-     * The FYL2X function is designed to optimize the calculation of a log to a base, n, other than two.  In such a case,
-     * the following multiplication is required; ie:
-     *
-     *      logn(x) = logn(2) * log2(x)
-     *
-     * @this {FPUX86}
-     */
-    static FYL2X()
-    {
-        if (this.setST(1, this.getST(1) * Math.log(this.getST(0)) / Math.LN2)) this.popValue();
-    }
-
-    /**
-     * FYL2XP1()
-     *
-     * FYL2XP1 (y log base 2 of x plus 1) calculates:
-     *
-     *      ST(1) = ST(1) * log2(ST(0) + 1)
-     *
-     * The operands must satisfy the inequalities -(1-sqrt(2)/2) < ST(0) < (1-sqrt(2)/2) and -infinity < ST(1) < +infinity.
-     * FYL2XP1 pops the stack and returns the result to the new ST(0).  Both original operands are destroyed.
-     *
-     * The FYL2XP1 function provides greater accuracy than FYL2X in computing the log of a number that is very close to 1.
-     *
-     * FYL2XP1 is typically used when computing compound interest, for example, which requires the calculation of a logarithm
-     * of 1.0 + n where 0 < n < 0.29.  If 1.0 was added to n, significant digits might be lost.  By using FYL2XP1, the result
-     * will be as accurate as n to within three units of temporary real precision.
-     *
-     * @this {FPUX86}
-     */
-    static FYL2XP1()
-    {
-        if (this.setST(1, this.getST(1) * Math.log(this.getST(0) + 1.0) / Math.LN2)) this.popValue();
-    }
-
-    /**
      * FPUX86.init()
      *
      * This function operates on every HTML element of class "fpu", extracting the
@@ -3212,6 +1565,1653 @@ class FPUX86 extends Component {
         }
     }
 }
+
+/**
+ * F2XM1()
+ *
+ * F2XM1 (2 to the x minus 1) calculates the function 2^x - 1 and returns the result to ST(0).
+ *
+ * On the 8087 and 80287, the value in ST(0) must satisfy the inequality 0 <= ST(0) <= 0.5.  On the 80287XL and
+ * later coprocessors, the permissible range is greater, and ST(0) must satisfy the inequality -1 <= ST(0) <= 1.
+ * If ST(0) is out of range, the result is undefined, even though no exception is raised.
+ *
+ * The F2XM1 instruction is designed to provide an accurate result even when x is close to zero. To obtain 2^x,
+ * simply add 1.0 to the result returned by F2XM1.
+ *
+ * This instruction is useful in performing exponentiation of values other than 2 as shown in the following formulas:
+ *
+ *      10^x = 2^(x * log2(10))
+ *      e^x = 2^(x * log2(e))
+ *      y^x = 2^(x * log2(y))
+ *
+ * Note that the NPX has dedicated instructions for loading the constants log2(10) and log2(e).  The FYL2X instruction
+ * may be used to calculate x * log2(y).
+ *
+ * See also: FYL2X, FLDL2T, FLDL2E.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.F2XM1 = function()
+{
+    this.setST(0, Math.pow(2, this.getST(0)) - 1);
+};
+
+/**
+ * FABS()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FABS = function()
+{
+    /*
+     * TODO: This could be implemented more efficiently by simply clearing the sign bit of ST(0).
+     */
+    this.setST(0, Math.abs(this.getST(0)));
+};
+
+/**
+ * FADDlr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FADDlr = function()
+{
+    this.setST(0, this.doAdd(this.getST(0), this.getLRFromEA()));
+};
+
+/**
+ * FADDsr()
+ *
+ * Encoding 0xD8,reg=0x00 ("FADD short-real"): ST(0) <- ST(0) + REAL32
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FADDsr = function()
+{
+    this.setST(0, this.doAdd(this.getST(0), this.getSRFromEA()));
+};
+
+/**
+ * FADDst()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FADDst = function()
+{
+    this.setST(0, this.doAdd(this.getST(0), this.getST(this.iStack)));
+};
+
+/**
+ * FADDsti()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FADDsti = function()
+{
+    this.setST(this.iStack, this.doAdd(this.getST(this.iStack), this.getST(0)));
+};
+
+/**
+ * FADDPsti()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FADDPsti = function()
+{
+    if (this.setST(this.iStack, this.doAdd(this.getST(this.iStack), this.getST(0)))) this.popValue();
+};
+
+/**
+ * FBLDpd()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FBLDpd = function()
+{
+    var a = this.getTRFromEA();
+    /*
+     * a[0] contains the 8 least-significant BCD digits, a[1] contains the next 8, and a[2] contains
+     * the next 2 (bit 15 of a[2] is the sign bit, and bits 8-14 of a[2] are unused).
+     */
+    var v = this.decodeBCD(a[0], 8) + this.decodeBCD(a[1], 8) * 100000000 + this.decodeBCD(a[2], 2) * 10000000000000000;
+    if (a[2] & 0x8000) v = -v;
+    this.pushValue(v);
+};
+
+/**
+ * FBSTPpd()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FBSTPpd = function()
+{
+    /*
+     * TODO: Verify the operation of FBSTP (eg, does it signal an exception if abs(value) >= 1000000000000000000?)
+     */
+    var v = this.roundValue(this.popValue());
+    if (v != null) {
+        /*
+         * intTmpTR[0] will contain the 8 least-significant BCD digits, intTmpTR[1] will contain the next 8,
+         * and intTmpTR[2] will contain the next 2 (bit 15 of intTmpTR[2] will be the sign bit, and bits 8-14 of
+         * intTmpTR[2] will be unused).
+         */
+        this.intTmpTR[0] = this.encodeBCD(v, 8);
+        this.intTmpTR[1] = this.encodeBCD(v / 100000000, 8);
+        this.intTmpTR[2] = this.encodeBCD(v / 10000000000000000, 2);
+        if (v < 0) this.intTmpTR[2] |= 0x8000;
+        this.setEAFromTR();
+    }
+};
+
+/**
+ * FCHS()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FCHS = function()
+{
+    /*
+     * TODO: This could be implemented more efficiently by simply inverting the sign bit of ST(0).
+     */
+    this.setST(0, -this.getST(0));
+};
+
+/**
+ * FCLEX()
+ *
+ * NOTE: Although we explicitly clear the BUSY bit, there shouldn't be any code setting it, because
+ * we're never "busy" (all floating-point operations are performed synchronously).  Conversely, there's
+ * no need to explicitly clear the ES bit, because clearStatus() will call checkException(), which
+ * updates ES and clears/sets FPU interrupt status as appropriate.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FCLEX = function()
+{
+    this.clearStatus(X86.FPU.STATUS.EXC | X86.FPU.STATUS.BUSY);
+};
+
+/**
+ * FCOMlr()
+ *
+ * Encoding 0xDC,mod<3,reg=2 ("FCOM long-real"): Evaluate ST(0) - REAL64
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FCOMlr = function()
+{
+    this.doCompare(this.getST(0), this.getLRFromEA());
+};
+
+/**
+ * FCOMsr()
+ *
+ * Encoding 0xD8,mod<3,reg=2 ("FCOM short-real"): Evaluate ST(0) - REAL32
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FCOMsr = function()
+{
+    this.doCompare(this.getST(0), this.getSRFromEA());
+};
+
+/**
+ * FCOMst()
+ *
+ * Encoding 0xD8,mod=3,reg=2 ("FCOM ST(i)"): Evaluate ST(0) - ST(i)
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FCOMst = function()
+{
+    this.doCompare(this.getST(0), this.getST(this.iStack));
+};
+
+/**
+ * FCOM8087()
+ *
+ * NOTE: This is used with encoding(s) (0xDC,0xD0-0xD7) that were valid for the 8087 and 80287
+ * but may no longer be valid as of the 80387.
+ *
+ * TODO: Determine if this form subtracted the operands in the same order, or if it requires an FCOMsti(),
+ * which, like the other *sti() functions, uses ST(0) as the second operand rather than the first.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FCOM8087 = function()
+{
+    this.opObsolete();
+    FPUX86.FCOMst.call(this);
+};
+
+/**
+ * FCOMPlr()
+ *
+ * Encoding 0xDC,mod<3,reg=3 ("FCOM long-real"): Evaluate ST(0) - REAL64, POP
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FCOMPlr = function()
+{
+    if (this.doCompare(this.getST(0), this.getLRFromEA())) this.popValue();
+};
+
+/**
+ * FCOMPsr()
+ *
+ * Encoding 0xD8,mod<3,reg=3 ("FCOM short-real"): Evaluate ST(0) - REAL32, POP
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FCOMPsr = function()
+{
+    if (this.doCompare(this.getST(0), this.getSRFromEA())) this.popValue();
+};
+
+/**
+ * FCOMPst()
+ *
+ * Encoding 0xD8,mod=3,reg=3 ("FCOMP ST(i)"): Evaluate ST(0) - ST(i), POP
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FCOMPst = function()
+{
+    if (this.doCompare(this.getST(0), this.getST(this.iStack))) this.popValue();
+};
+
+/**
+ * FCOMP8087()
+ *
+ * NOTE: This is used with encodings (0xDC,0xD8-0xDF and 0xDE,0xD0-0xD7) that were valid for the 8087
+ * and 80287 but may no longer be valid as of the 80387.
+ *
+ * TODO: Determine if this form subtracted the operands in the same order, or if it requires an FCOMPsti(),
+ * which, like the other *sti() functions, uses ST(0) as the second operand rather than the first.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FCOMP8087 = function()
+{
+    this.opObsolete();
+    FPUX86.FCOMPst.call(this);
+};
+
+/**
+ * FCOMPP()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FCOMPP = function()
+{
+    if (this.doCompare(this.getST(0), this.getST(1)) && this.popValue() != null) this.popValue();
+};
+
+/**
+ * FDECSTP()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FDECSTP = function()
+{
+    this.iST = (this.iST - 1) & 0x7;
+    this.regStatus &= ~X86.FPU.STATUS.C1;
+};
+
+/**
+ * FDISI8087()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FDISI8087 = function()
+{
+    if (this.isModel(X86.FPU.MODEL_8087)) {
+        this.regControl |= X86.FPU.CONTROL.IEM;
+    }
+};
+
+/**
+ * FDIVlr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FDIVlr = function()
+{
+    this.setST(0, this.doDivide(this.getST(0), this.getLRFromEA()));
+};
+
+/**
+ * FDIVsr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FDIVsr = function()
+{
+    this.setST(0, this.doDivide(this.getST(0), this.getSRFromEA()));
+};
+
+/**
+ * FDIVst()
+ *
+ * Encoding 0xD8,0xF0-0xF7 ("FDIV ST,ST(i)"): ST(0) <- ST(0) / ST(i)
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FDIVst = function()
+{
+    this.setST(0, this.doDivide(this.getST(0), this.getST(this.iStack)));
+};
+
+/**
+ * FDIVsti()
+ *
+ * Encoding 0xDC,0xF8-0xFF ("FDIV ST(i),ST"): ST(i) <- ST(i) / ST(0)
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FDIVsti = function()
+{
+    this.setST(this.iStack, this.doDivide(this.getST(this.iStack), this.getST(0)));
+};
+
+/**
+ * FDIVPsti()
+ *
+ * Encoding 0xDE,0xF8-0xFF ("FDIVP ST(i),ST"): ST(i) <- ST(i) / ST(0), POP
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FDIVPsti = function()
+{
+    if (this.setST(this.iStack, this.doDivide(this.getST(this.iStack), this.getST(0)))) this.popValue();
+};
+
+/**
+ * FDIVRlr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FDIVRlr = function()
+{
+    this.setST(0, this.doDivide(this.getLRFromEA(), this.getST(0)));
+};
+
+/**
+ * FDIVRsr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FDIVRsr = function()
+{
+    this.setST(0, this.doDivide(this.getSRFromEA(), this.getST(0)));
+};
+
+/**
+ * FDIVRst()
+ *
+ * Encoding 0xD8,0xF8-0xFF ("FDIVR ST,ST(i)"): ST(0) <- ST(i) / ST(0)
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FDIVRst = function()
+{
+    this.setST(0, this.doDivide(this.getST(this.iStack), this.getST(0)));
+};
+
+/**
+ * FDIVRsti()
+ *
+ * Encoding 0xDC,0xF0-0xF7 ("FDIVR ST(i),ST"): ST(i) <- ST(0) / ST(i)
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FDIVRsti = function()
+{
+    this.setST(this.iStack, this.doDivide(this.getST(0), this.getST(this.iStack)));
+};
+
+/**
+ * FDIVRPsti()
+ *
+ * Encoding 0xDE,0xF0-0xE7 ("FDIVRP ST(i),ST"): ST(i) <- ST(0) / ST(i), POP
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FDIVRPsti = function()
+{
+    if (this.setST(this.iStack, this.doDivide(this.getST(0), this.getST(this.iStack)))) this.popValue();
+};
+
+/**
+ * FENI8087()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FENI8087 = function()
+{
+    if (this.isModel(X86.FPU.MODEL_8087)) {
+        this.regControl &= ~X86.FPU.CONTROL.IEM;
+    }
+};
+
+/**
+ * FFREEsti()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FFREEsti = function()
+{
+    this.setTag(this.iST, X86.FPU.TAGS.EMPTY);
+};
+
+/**
+ * FFREEP8087()
+ *
+ * NOTE: This is used with an encoding (0xDF,0xC0-0xC7) that was valid for the 8087 and 80287
+ * but may no longer be valid as of the 80387.  Also, if the older documentation is to be believed,
+ * this instruction has no modern counterpart, as FFREE doesn't pop the stack.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FFREEP8087 = function()
+{
+    this.opObsolete();
+    FPUX86.FFREEsti.call(this);
+    this.popValue();
+};
+
+/**
+ * FIADD16()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FIADD16 = function()
+{
+    this.setST(0, this.doAdd(this.getST(0), this.getWIFromEA()));
+};
+
+/**
+ * FIADD32()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FIADD32 = function()
+{
+    this.setST(0, this.doAdd(this.getST(0), this.getSIFromEA()));
+};
+
+/**
+ * FICOM16()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FICOM16 = function()
+{
+    this.doCompare(this.getST(0), this.getWIFromEA());
+};
+
+/**
+ * FICOM32()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FICOM32 = function()
+{
+    this.doCompare(this.getST(0), this.getSIFromEA());
+};
+
+/**
+ * FICOMP16()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FICOMP16 = function()
+{
+    if (this.doCompare(this.getST(0), this.getWIFromEA())) this.popValue();
+};
+
+/**
+ * FICOMP32()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FICOMP32 = function()
+{
+    if (this.doCompare(this.getST(0), this.getSIFromEA())) this.popValue();
+};
+
+/**
+ * FIDIV16()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FIDIV16 = function()
+{
+    this.setST(0, this.doDivide(this.getST(0), this.getWIFromEA()));
+};
+
+/**
+ * FIDIV32()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FIDIV32 = function()
+{
+    this.setST(0, this.doDivide(this.getST(0), this.getSIFromEA()));
+};
+
+/**
+ * FIDIVR16()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FIDIVR16 = function()
+{
+    this.setST(0, this.doDivide(this.getWIFromEA(), this.getST(0)));
+};
+
+/**
+ * FIDIVR32()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FIDIVR32 = function()
+{
+    this.setST(0, this.doDivide(this.getSIFromEA(), this.getST(0)));
+};
+
+/**
+ * FILD16()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FILD16 = function()
+{
+    this.pushValue(this.getWIFromEA());
+};
+
+/**
+ * FILD32()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FILD32 = function()
+{
+    this.pushValue(this.getSIFromEA());
+};
+
+/**
+ * FILD64()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FILD64 = function()
+{
+    this.pushValue(this.getLIFromEA());
+};
+
+/**
+ * FIMUL16()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FIMUL16 = function()
+{
+    this.setST(0, this.doMultiply(this.getST(0), this.getWIFromEA()));
+};
+
+/**
+ * FIMUL32()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FIMUL32 = function()
+{
+    this.setST(0, this.doMultiply(this.getST(0), this.getSIFromEA()));
+};
+
+/**
+ * FINCSTP()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FINCSTP = function()
+{
+    this.iST = (this.iST + 1) & 0x7;
+    this.regStatus &= ~X86.FPU.STATUS.C1;
+};
+
+/**
+ * FINIT()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FINIT = function()
+{
+    this.resetFPU();
+};
+
+/**
+ * FIST16()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FIST16 = function()
+{
+    if (this.getWI(0)) this.setEAFromWI();
+};
+
+/**
+ * FIST32()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FIST32 = function()
+{
+    if (this.getSI(0)) this.setEAFromSI();
+};
+
+/**
+ * FISTP16()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FISTP16 = function()
+{
+    if (this.getWI(0)) {
+        this.setEAFromWI();
+        this.popValue();
+    }
+};
+
+/**
+ * FISTP32()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FISTP32 = function()
+{
+    if (this.getSI(0)) {
+        this.setEAFromSI();
+        this.popValue();
+    }
+};
+
+/**
+ * FISTP64()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FISTP64 = function()
+{
+    if (this.getLI(0)) {
+        this.setEAFromLI();
+        this.popValue();
+    }
+};
+
+/**
+ * FISUB16()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FISUB16 = function()
+{
+    this.setST(0, this.doSubtract(this.getST(0), this.getWIFromEA()));
+};
+
+/**
+ * FISUB32()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FISUB32 = function()
+{
+    this.setST(0, this.doSubtract(this.getST(0), this.getSIFromEA()));
+};
+
+/**
+ * FISUBR16()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FISUBR16 = function()
+{
+    this.setST(0, this.doSubtract(this.getWIFromEA(), this.getST(0)));
+};
+
+/**
+ * FISUBR32()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FISUBR32 = function()
+{
+    this.setST(0, this.doSubtract(this.getSIFromEA(), this.getST(0)));
+};
+
+/**
+ * FLDlr()
+ *
+ * The FLD instruction loads the source operand, converts it to temporary real format (if required),
+ * and pushes the resulting value onto the floating-point stack.
+ *
+ * The load operation is accomplished by decrementing the top-of-stack pointer (TOP) and copying the
+ * source operand to the new stack top. If the source operand is a float ing-point register, the index of
+ * the register is taken before TOP is changed. The source operand may also be a short real, long real,
+ * or temporary real memory operand. Short real and long real operands are converted automatically.
+ *
+ * Note that coding the instruction FLD ST(0) duplicates the value at the stack top.
+ *
+ * On the 8087 and 80287, the FLD real80 instruction will raise the denormal exception if the memory
+ * operand is a denormal. The 80287XL and later coprocessors will not, since the operation is not arithmetic.
+ *
+ * On the 8087 and 80287, a denormal will be converted to an unnormal by FLD; on the 80287XL and later
+ * coprocessors, the number will be converted to temporary real. If the next instruction is an FXTRACT or FXAM,
+ * the 8087/80827 and 80287XL/80387/ 80486 results will be different.
+ *
+ * On the 8087 and 80287, the FLD real32 and FLD real64 instructions will not raise an exception when loading
+ * a signaling NaN; on the 80287XL and later coprocessors, loading a signaling NaN raises the invalid operation
+ * exception.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FLDlr = function()
+{
+    this.pushValue(this.getLRFromEA());
+};
+
+/**
+ * FLDsr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FLDsr = function()
+{
+    this.pushValue(this.getSRFromEA());
+};
+
+/**
+ * FLDsti()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FLDsti = function()
+{
+    this.pushValue(this.getST(this.iStack));
+};
+
+/**
+ * FLDtr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FLDtr = function()
+{
+    this.pushValue(this.getLRFromTR(this.getTRFromEA()));
+};
+
+/**
+ * FLDCW()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FLDCW = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.setControl(this.cpu.getShort(this.cpu.regEA));
+};
+
+/**
+ * FLDENV()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FLDENV = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.loadEnv(this.cpu.regEA);
+};
+
+/**
+ * FLD1()
+ *
+ * The FLD1 instruction loads the constant +1.0 from the NPX's constant ROM and pushes the value onto the
+ * floating-point stack.
+ *
+ * The constant is stored internally in temporary real format and is simply moved to the stack.
+ *
+ * See also: FLDLG2, FLDLN2, FLDL2E, FLDL2T, FLDPI, and FLD1.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FLD1 = function()
+{
+    this.pushValue(1.0);
+};
+
+/**
+ * FLDL2T()
+ *
+ * The FLDL2T instruction loads the constant log2(10) from the NPX's constant ROM and pushes the value onto the
+ * floating-point stack.
+ *
+ * The constant is stored internally in temporary real format and is simply moved to the stack.
+ *
+ * On the 8087 and 80287, rounding control is not in effect for the loading of this constant.  On the 80287XL and
+ * later coprocessors, rounding control is in effect.  If RC is set for chop (round toward 0), round down (toward
+ * -infinity), or round to nearest or even, the result will be the same as on the 8087 and 80287.  If RC is set for
+ * round up (toward +infinity), the result will differ by one in the least significant bit of the mantissa.
+ *
+ * See also: FLDLG2, FLDLN2, FLDL2E, FLDPI, FLD1, and FLDZ.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FLDL2T = function()
+{
+    this.pushValue(FPUX86.regL2T);
+};
+
+/**
+ * FLDL2E()
+ *
+ * The FLDL2E instruction loads the constant log2(e) from the NPX's constant ROM and pushes the value onto the
+ * floating-point stack.
+ *
+ * The constant is stored internally in temporary real format and is simply moved to the stack.
+ *
+ * On the 8087 and 80287, rounding control is not in effect for the loading of this constant.  On the 80287XL and
+ * later coprocessors, rounding control is in effect.  If RC is set for chop (round toward 0) or round down (toward
+ * -infinity), the result is the same as on the 8087 and 80827.  If RC is set for round to nearest or even, or round
+ * up (toward +infinity), the result will differ by one in the least significant bit of the mantissa.
+ *
+ * See also: FLDLG2, FLDLN2, FLDL2T, FLDPI, FLD1, and FLDZ.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FLDL2E = function()
+{
+    this.pushValue(FPUX86.regL2E);
+};
+
+/**
+ * FLDPI()
+ *
+ * The FLDPI instruction loads the constant Pi from the NPX's constant ROM and pushes the value onto the
+ * floating-point stack.
+ *
+ * The constant is stored internally in temporary real format and is simply moved to the stack.
+ *
+ * On the 8087 and 80287, rounding control is not in effect for the loading of these constants.  On the 80287XL and
+ * later coprocessors, rounding control is in effect.  If RC is set for chop (round toward 0) or round down (toward
+ * -infinity), the result is the same as on the 8087 and 80827.  If RC is set for round to nearest or even, or round
+ * up (toward +infinity), the result will differ by one in the least significant bit of the mantissa.
+ *
+ * See also: FLDLG2, FLDLN2, FLDL2E, FLDL2T, FLD1, and FLDZ.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FLDPI = function()
+{
+    this.pushValue(FPUX86.regPI);
+};
+
+/**
+ * FLDLG2()
+ *
+ * The FLDLG2 instruction loads the constant log10(2) from the NPX's constant ROM and pushes the value onto the
+ * floating-point stack.
+ *
+ * The constant is stored internally in temporary real format and is simply moved to the stack.
+ *
+ * On the 8087 and 80287, rounding control is not in effect for the loading of this constant.  On the 80287XL and
+ * later coprocessors, rounding control is in effect.  If RC is set for chop (round toward 0) or round down (toward
+ * -infinity), the result is the same as on the 8087 and 80827.  If RC is set for round to nearest or even, or round
+ * up (toward +infinity), the result will differ by one in the least significant bit of the mantissa.
+ *
+ * See also: FLDLN2, FLDL2E, FLDL2T, FLDPI, FLD1, and FLDZ.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FLDLG2 = function()
+{
+    this.pushValue(FPUX86.regLG2);
+};
+
+/**
+ * FLDLN2()
+ *
+ * The FLDLN2 instruction loads the constant loge(2) from the NPX's constant ROM and pushes the value onto the
+ * floating-point stack.
+ *
+ * The constant is stored internally in temporary real format and is simply moved to the stack.
+ *
+ * On the 8087 and 80287, rounding control is not in effect for the loading of this constant.  On the 80287XL and
+ * later coprocessors, rounding control is in effect.  If RC is set for chop (round toward 0) or round down (toward
+ * -infinity), the result will be the same as on the 8087 and 80827.  If RC is set for round to nearest or even, or
+ * round up (toward +infinity), the result will differ by one in the least significant bit of the mantissa.
+ *
+ * See also: FLDLG2, FLDL2E, FLDL2T, FLDPI, FLD1, and FLDZ.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FLDLN2 = function()
+{
+    this.pushValue(FPUX86.regLN2);
+};
+
+/**
+ * FLDZ()
+ *
+ * The FLDZ instruction loads the constant +0.0 from the NPX's constant ROM and pushes the value onto the
+ * floating-point stack.
+ *
+ * The constant is stored internally in temporary real format and is simply moved to the stack.
+ *
+ * See also: FLDLG2, FLDLN2, FLDL2E, FLDL2T, FLDPI, and FLD1.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FLDZ = function()
+{
+    this.pushValue(0.0);
+};
+
+/**
+ * FMULlr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FMULlr = function()
+{
+    this.setST(0, this.doMultiply(this.getST(0), this.getLRFromEA()));
+};
+
+/**
+ * FMULsr()
+ *
+ * Encoding 0xD8,reg=0x01 ("FMUL short-real"): ST(0) <- ST(0) * REAL32
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FMULsr = function()
+{
+    this.setST(0, this.doMultiply(this.getST(0), this.getSRFromEA()));
+};
+
+/**
+ * FMULst()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FMULst = function()
+{
+    this.setST(0, this.doMultiply(this.getST(0), this.getST(this.iStack)));
+};
+
+/**
+ * FMULsti()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FMULsti = function()
+{
+    this.setST(this.iStack, this.doMultiply(this.getST(this.iStack), this.getST(0)));
+};
+
+/**
+ * FMULPsti()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FMULPsti = function()
+{
+    if (this.setST(this.iStack, this.doMultiply(this.getST(this.iStack), this.getST(0)))) this.popValue();
+};
+
+/**
+ * FNOP()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FNOP = function()
+{
+};
+
+/**
+ * FPATAN()
+ *
+ * FPATAN calculates the partial arctangent of ST(0) divided by ST(1):
+ *
+ *      ST(1) = tan^-1( ST(1) / ST(0) )
+ *
+ * On the 8087 and 80287, the arguments must satisfy the inequality 0 <= ST(1) < ST(0) < +infinity.
+ * On the 80287XL and later coprocessors, the range of the operands is unrestricted.  The result is
+ * returned to ST(1), and the stack is popped, destroying both operands and leaving the result in ST(0).
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FPATAN = function()
+{
+    if (this.setST(1, Math.atan2(this.getST(1), this.getST(0)))) this.popValue();
+};
+
+/**
+ * FPTAN()
+ *
+ * FPTAN calculates the partial tangent of ST(0):
+ *
+ *      y / x = tan( ST(0) )
+ *
+ * The result of the operation is a ratio.  y replaces the argument on the stack, and x is pushed onto the stack,
+ * where it becomes the new ST(0).
+ *
+ * On the 8087 and 80287, the FPTAN function assumes that its argument is valid and in-range.  No argument checking
+ * is performed.  The value of ST(0) must satisfy the inequality -pi/4 <= ST(0) <= pi/4.  In the case of an invalid
+ * argument, the result is undefined and no error is signaled.
+ *
+ * On the 80287XL and later coprocessors, if value of ST(0) satisfies the condition -2^63 < ST(0) < 2^63, it will
+ * automatically be reduced to within range.  If the operand is outside this range, however, C2 is set to 1 to indicate
+ * that the function is incomplete, and ST(0) is left unchanged.
+ *
+ * The 80287XL, 80387, and 80486 always push a value of +1.0 for x. The value of x pushed by the 8087 and 80287 may be
+ * any real number.  In either case, the ratio is the same. The cotangent can be calculated by executing FDIVR immediately
+ * after FPTAN.  The following code will leave the 8087 and 80287 in the same state as the later coprocessors:
+ *
+ *      FDIV
+ *      FLD1
+ *
+ * ST(7) must be empty before this instruction is executed to avoid an invalid operation exception.  If the invalid
+ * operation exception is masked, the 8087 and 80287 leave the original operand unchanged, but push it to ST(1).  On the
+ * 80287XL and later coprocessors, both ST(0) and ST(1) will contain quiet NaNs.  On the 80287XL and later coprocessors,
+ * if condition code bit C2 is 0 and the precision exception is raised, then C1=1 if the last bit was rounded up. C1 is
+ * undefined for the 8087 and 80287.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FPTAN = function()
+{
+    if (this.setST(0, Math.tan(this.getST(0)))) this.pushValue(1.0);
+};
+
+/**
+ * FPREM()
+ *
+ * FPREM performs modulo division of ST(0) by ST(1) and returns the result to ST(0).
+ *
+ * The FPREM instruction is used to reduce the real operand in ST(0) to a value whose magnitude is less than the
+ * magnitude of ST(1).  FPREM produces an exact result, so the precision exception is never raised and the rounding
+ * control has no effect.  The sign of the remainder is the same as the sign of the original operand.
+ *
+ * The remaindering operation is performed by iterative scaled subtractions and can reduce the exponent of ST(0) by
+ * no more than 63 in one execution.  If the remainder is less than ST(1) (the modulus), the function is complete and
+ * C2 in the status word is cleared.
+ *
+ * If the modulo function is incomplete, C2 is set to 1, and the result in ST(0) is termed the partial remainder.
+ * C2 can be inspected by storing the status word and re-executing the instruction until C2 is clear. Alternately,
+ * ST(0) can be compared to ST(1).  If ST(0) > ST(1), then FPREM must be executed again.  If ST(0) = ST(1), then the
+ * remainder is 0.
+ *
+ * FPREM is important for reducing arguments to the periodic transcendental functions such as FPTAN.  Because FPREM
+ * produces an exact result, no round-off error is introduced into the calculation.
+ *
+ * When reduction is complete, the three least-significant bits of the quotient are stored in the condition code bits
+ * C3, C1, and C0, respectively.  When arguments to the tangent function are reduced by pi/4, this result can be used
+ * to identify the octant that contained the original angle.
+ *
+ * The FPREM function operates differently than specified by the IEEE 754 standard when rounding the quotient to form
+ * a partial remainder (see the algorithm).  The FPREM1 function (80287XL and up) is provided for compatibility with
+ * that standard.
+ *
+ * The FPREM instruction can also be used to normalize ST(0).  If ST(0) is unnormal and ST(1) is greater than ST(0),
+ * FPREM will normalize ST(0).  On the 8087 and 80287, operation on a denormal operand raises the invalid operation
+ * exception.  Underflow is not possible.  On the 80287XL and later coprocessors, operation on a denormal is supported
+ * and an underflow exception can occur.
+ *
+ * ALGORITHM:
+ *
+ *      t = EXPONENT(ST) - EXPONENT(ST(1))
+ *      IF (t < 64) THEN
+ *          q = R0UND(ST(0) / ST(1), CHOP)
+ *          ST(0) = ST(0) - (ST(1) * q)
+ *          C2 = 0
+ *          C0 = BIT 2 of q
+ *          C1 = BIT 1 of q
+ *          C3 = BIT 0 of q
+ *      ELSE
+ *          n = a number between 32 and 63
+ *          q = ROUND((ST(0) / ST(1)) / 2^(t-n), CHOP)
+ *          ST(0) = ST(0) - (ST(1) * q * 2^(t-n))
+ *          C2 = 1
+ *      ENDIF
+ *
+ * TODO: Determine the extent to which the JavaScript MOD operator differs from the above algorithm.
+ *
+ * ERRATA: On the 8087 and 80287, the condition code bits C3, C1, and C0 are incorrect when performing a reduction of
+ * 64^n + m, where n >= 1, and m=1 or m=2.  A bug fix should be implemented in software.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FPREM = function()
+{
+    this.setST(0, this.getST(0) % this.getST(1));
+};
+
+/**
+ * FRSTOR()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FRSTOR = function()
+{
+    var cpu = this.cpu;
+    var addr = this.loadEnv(cpu.regEA);
+    var a = this.intTmpTR;
+    for (var i = 0; i < this.regStack.length; i++) {
+        a[0] = cpu.getLong(addr);
+        a[1] = cpu.getLong(addr += 4);
+        a[2] = cpu.getShort(addr += 4);
+        this.setTR(i, a);
+        addr += 2;
+    }
+};
+
+/**
+ * FRNDINT()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FRNDINT = function()
+{
+    this.setST(0, this.roundValue(this.getST(0), FPUX86.MAX_INT64));
+};
+
+/**
+ * FSAVE()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSAVE = function()
+{
+    var cpu = this.cpu;
+    var addr = this.saveEnv(cpu.regEA);
+    for (var i = 0; i < this.regStack.length; i++) {
+        var a = this.getTR(i, true);
+        cpu.setLong(addr, a[0]);
+        cpu.setLong(addr += 4, a[1]);
+        cpu.setShort(addr += 4, a[2]);
+        addr += 2;
+    }
+    this.resetFPU();
+};
+
+/**
+ * FSCALE()
+ *
+ * FSCALE interprets the value in ST(1) as an integer and adds this number to the exponent of the number in ST(0).
+ *
+ * The FSCALE instruction provides a means of quickly performing multiplication or division by powers of two.
+ * This operation is often required when scaling array indexes.
+ *
+ * On the 8087 and 80287, FSCALE assumes that the scale factor in ST(1) is an integer that satisfies the inequality
+ * -2^15 <= ST(1) < +2^15.  If ST(1) is not an integer value, the value is chopped to the next smallest integer in
+ * magnitude (chopped toward zero).  If the value is out of range or 0 < ST(1) < 1, FSCALE produces an undefined
+ * result and doesn't signal an exception.  Typically, the value in ST(0) is unchanged but should not be depended on.
+ *
+ * On the 80287XL and later coprocessors, there is no limit on the range of the scale factor in ST(1). The value in
+ * ST(1) is still chopped toward zero.  If ST(1) is 0, ST(0) is unchanged.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSCALE = function()
+{
+    var x = this.getST(0);
+    var y = this.getST(1);
+    if (x != null && y != null) this.setST(0, x * Math.pow(2, this.truncateValue(y)));
+};
+
+/**
+ * FSETPM287()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSETPM287 = function()
+{
+    if (this.isModel(X86.FPU.MODEL_80287)) {
+        this.opUnimplemented();
+    }
+};
+
+/**
+ * FSINCOS387()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSINCOS387 = function()
+{
+    if (this.isAtLeastModel(X86.FPU.MODEL_80287XL)) {
+        this.opUnimplemented();
+    }
+};
+
+/**
+ * FSQRT()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSQRT = function()
+{
+    this.setST(0, this.doSquareRoot(this.getST(0)));
+};
+
+/**
+ * FSTlr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSTlr = function()
+{
+    if (this.getLR(0)) this.setEAFromLR();
+};
+
+/**
+ * FSTsr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSTsr = function()
+{
+    if (this.getSR(0)) this.setEAFromSR();
+};
+
+/**
+ * FSTsti()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSTsti = function()
+{
+    this.setST(this.iStack, this.getST(0));
+};
+
+/**
+ * FSTENV()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSTENV = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.saveEnv(this.cpu.regEA);
+    this.regControl |= X86.FPU.CONTROL.EXC;     // mask all exceptions (but do not set IEM)
+};
+
+/**
+ * FSTPlr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSTPlr = function()
+{
+    if (this.getLR(0)) {
+        this.setEAFromLR();
+        this.popValue();
+    }
+};
+
+/**
+ * FSTPsr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSTPsr = function()
+{
+    if (this.getSR(0)) {
+        this.setEAFromSR();
+        this.popValue();
+    }
+};
+
+/**
+ * FSTPsti()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSTPsti = function()
+{
+    if (this.setST(this.iStack, this.getST(0))) this.popValue();
+};
+
+/**
+ * FSTP8087()
+ *
+ * NOTE: This is used with encodings (0xD9,0xD8-0xDF and 0xDF,0xD0-0xDF) that were valid for the 8087 and 80287
+ * but may no longer be valid as of the 80387.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSTP8087 = function()
+{
+    this.opObsolete();
+    FPUX86.FSTPsti.call(this);
+};
+
+/**
+ * FSTPtr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSTPtr = function()
+{
+    if (this.getTR(0)) {
+        this.setEAFromTR();
+        this.popValue();
+    }
+};
+
+/**
+ * FSTCW()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSTCW = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.cpu.setShort(this.cpu.regEA, this.regControl);
+};
+
+/**
+ * FSTSW()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSTSW = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.cpu.setShort(this.cpu.regEA, this.getStatus());
+};
+
+/**
+ * FSTSWAX287()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSTSWAX287 = function()
+{
+    if (this.isAtLeastModel(X86.FPU.MODEL_80287)) {
+        this.cpu.regEAX = (this.cpu.regEAX & ~0xffff) | this.getStatus();
+    }
+};
+
+/**
+ * FSUBlr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSUBlr = function()
+{
+    this.setST(0, this.doSubtract(this.getST(0), this.getLRFromEA()));
+};
+
+/**
+ * FSUBsr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSUBsr = function()
+{
+    this.setST(0, this.doSubtract(this.getST(0), this.getSRFromEA()));
+};
+
+/**
+ * FSUBst()
+ *
+ * Encoding 0xD8,0xE0-0xE7 ("FSUB ST,ST(i)"): ST(0) <- ST(0) - ST(i)
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSUBst = function()
+{
+    this.setST(0, this.doSubtract(this.getST(0), this.getST(this.iStack)));
+};
+
+/**
+ * FSUBsti()
+ *
+ * Encoding 0xDC,0xE8-0xEF ("FSUB ST(i),ST"): ST(i) <- ST(i) - ST(0)
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSUBsti = function()
+{
+    this.setST(this.iStack, this.doSubtract(this.getST(this.iStack), this.getST(0)));
+};
+
+/**
+ * FSUBPsti()
+ *
+ * Encoding 0xDE,0xE8-0xEF ("FSUBP ST(i),ST"): ST(i) <- ST(i) - ST(0), POP
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSUBPsti = function()
+{
+    if (this.setST(this.iStack, this.doSubtract(this.getST(this.iStack), this.getST(0)))) this.popValue();
+};
+
+/**
+ * FSUBRlr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSUBRlr = function()
+{
+    this.setST(0, this.doSubtract(this.getLRFromEA(), this.getST(0)));
+};
+
+/**
+ * FSUBRsr()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSUBRsr = function()
+{
+    this.setST(0, this.doSubtract(this.getSRFromEA(), this.getST(0)));
+};
+
+/**
+ * FSUBRst()
+ *
+ * Encoding 0xD8,0xE8-0xEF ("FSUBR ST,ST(i)"): ST(0) <- ST(i) - ST(0)
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSUBRst = function()
+{
+    this.setST(0, this.doSubtract(this.getST(this.iStack), this.getST(0)));
+};
+
+/**
+ * FSUBRsti()
+ *
+ * Encoding 0xDC,0xE0-0xE7 ("FSUBR ST(i),ST"): ST(i) <- ST(0) - ST(i)
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSUBRsti = function()
+{
+    this.setST(this.iStack, this.doSubtract(this.getST(0), this.getST(this.iStack)));
+};
+
+/**
+ * FSUBRPsti()
+ *
+ * Encoding 0xDE,0xE0-0xE7 ("FSUBRP ST(i),ST"): ST(i) <- ST(0) - ST(i), POP
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FSUBRPsti = function()
+{
+    if (this.setST(this.iStack, this.doSubtract(this.getST(0), this.getST(this.iStack)))) this.popValue();
+};
+
+/**
+ * FTST()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FTST = function()
+{
+    this.doCompare(this.getST(0), 0);
+};
+
+/**
+ * FXAM()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FXAM = function()
+{
+    this.regStatus &= ~X86.FPU.STATUS.CC;
+
+    if (this.getSTSign(0)) {
+        this.regStatus |= X86.FPU.STATUS.C1;
+    }
+    if (this.getTag(this.iST) == X86.FPU.TAGS.EMPTY) {
+        this.regStatus |= X86.FPU.STATUS.C0 | X86.FPU.STATUS.C3;
+    }
+    else {
+        var v = this.getST(0);
+        if (isNaN(v)) {
+            this.regStatus |= X86.FPU.STATUS.C0;
+        }
+        else if (v === 0) {                                 // this equals -0, too (WTF, strict equality?)
+            this.regStatus |= X86.FPU.STATUS.C3;
+        }
+        else if (v === Infinity || v === -Infinity) {       // these are so divergent that even non-strict equality doesn't consider them equal
+            this.regStatus |= X86.FPU.STATUS.C0 | X86.FPU.STATUS.C2;
+        }
+        else {
+            this.regStatus |= X86.FPU.STATUS.C2;
+        }
+    }
+};
+
+/**
+ * FXCHsti()
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FXCHsti = function()
+{
+    var tmp = this.getST(0);
+    this.setST(0, this.getST(this.iStack));
+    this.setST(this.iStack, tmp);
+};
+
+/**
+ * FXCH8087()
+ *
+ * NOTE: This is used with encodings (0xDD,0xC8-0xCF and 0xDF,0xC8-0xCF) that were valid for the 8087 and 80287
+ * but may no longer be valid as of the 80387.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FXCH8087 = function()
+{
+    this.opObsolete();
+    FPUX86.FXCHsti.call(this);
+};
+
+/**
+ * FXTRACT()
+ *
+ * FXTRACT splits the value encoded in ST(0) into two separate numbers representing the actual value of the
+ * fraction (mantissa) and exponent fields.
+ *
+ * The FXTRACT instruction is used to decompose the two fields of the temporary real number in ST(0).  The exponent
+ * replaces the value in ST(0), then the fraction is pushed onto the stack.  When execution is complete, ST(0)
+ * contains the original fraction, expressed as a real number with a true exponent of 0 (0x3FFF in biased form),
+ * and ST(1) contains the value of the original operand's true (unbiased) exponent expressed as a real number.
+ *
+ * If ST(0) is 0, the 8087 and 80287 will leave zeros in both ST(0) and ST(1); both zeros will have the same sign as
+ * the original operand.  If ST(0) is +infinity, the invalid operation exception is raised.
+ *
+ * On the 80287XL and later coprocessors, if ST(0) is 0, the zero-divide exception is reported and ST(1) is set to
+ * -infinity.  If ST(0) is +infinity, no exception is reported.
+ *
+ * The FXTRACT instruction may be thought of as the complement to the FSCALE instruction, which combines a separate
+ * fraction and exponent into a single value.
+ *
+ * ALGORITHM:
+ *
+ *      IF (ST(0) = 0) THEN
+ *          DEC TOP
+ *          ST(0) = ST(1)
+ *      ELSE
+ *          temp = ST(0)
+ *          ST(0) = EXPONENT(ST(0))     ; stored as true exponent
+ *          DEC TOP
+ *          ST(0) = FRACTION(ST(0))
+ *      ENDIF
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FXTRACT = function()
+{
+    var v = this.getST(0);
+    if (v != null) {
+        this.regTmpLR[0] = v;
+        this.setST(0, ((this.intTmpLR[1] >> 20) & 0x7ff) - 0x3ff);
+        this.intTmpLR[1] = (this.intTmpLR[1] | 0x3ff00000) & ~0x40000000;
+        this.pushValue(this.regTmpLR[0]);
+    }
+};
+
+/**
+ * FYL2X()
+ *
+ * FYL2X (y log base 2 of x) calculates:
+ *
+ *      ST(1) = ST(1) * log2(ST(0))
+ *
+ * The operands must satisfy the inequalities 0 < ST(0) < +infinity and -infinity < ST(1) < +infinity.  FYL2X pops
+ * the stack and returns the result to the new ST(0).  Both original operands are destroyed.
+ *
+ * The FYL2X function is designed to optimize the calculation of a log to a base, n, other than two.  In such a case,
+ * the following multiplication is required; ie:
+ *
+ *      logn(x) = logn(2) * log2(x)
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FYL2X = function()
+{
+    if (this.setST(1, this.getST(1) * Math.log(this.getST(0)) / Math.LN2)) this.popValue();
+};
+
+/**
+ * FYL2XP1()
+ *
+ * FYL2XP1 (y log base 2 of x plus 1) calculates:
+ *
+ *      ST(1) = ST(1) * log2(ST(0) + 1)
+ *
+ * The operands must satisfy the inequalities -(1-sqrt(2)/2) < ST(0) < (1-sqrt(2)/2) and -infinity < ST(1) < +infinity.
+ * FYL2XP1 pops the stack and returns the result to the new ST(0).  Both original operands are destroyed.
+ *
+ * The FYL2XP1 function provides greater accuracy than FYL2X in computing the log of a number that is very close to 1.
+ *
+ * FYL2XP1 is typically used when computing compound interest, for example, which requires the calculation of a logarithm
+ * of 1.0 + n where 0 < n < 0.29.  If 1.0 was added to n, significant digits might be lost.  By using FYL2XP1, the result
+ * will be as accurate as n to within three units of temporary real precision.
+ *
+ * @this {FPUX86}
+ */
+FPUX86.FYL2XP1 = function()
+{
+    if (this.setST(1, this.getST(1) * Math.log(this.getST(0) + 1.0) / Math.LN2)) this.popValue();
+};
 
 /*
  * Class constants

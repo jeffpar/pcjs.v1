@@ -857,7 +857,7 @@ class Str {
      *
      * Displays the given number as an unsigned integer using the specified radix and number of digits.
      *
-     * @param {number|null|undefined} n
+     * @param {number|*} n
      * @param {number} radix (ie, the base)
      * @param {number} cch (the desired number of digits)
      * @param {string} [sPrefix] (default is none)
@@ -867,17 +867,17 @@ class Str {
     static toBase(n, radix, cch, sPrefix = "", nGrouping = 0)
     {
         /*
-         * An initial "falsey" check for null takes care of both null and undefined;
-         * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+         * We can't rely entirely on isNaN(), because isNaN(null) returns false, and we can't rely
+         * entirely on typeof either, because typeof Nan returns "number".  Sigh.
          *
          * Alternatively, we could mask and shift n regardless of whether it's null/undefined/NaN,
          * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
          * values displayed differently.
          */
         var s = "";
-        if (isNaN(n)) {
+        if (isNaN(n) || typeof n != "number") {
             n = null;
-        } else if (n != null) {
+        } else {
             /*
              * Callers that produced an input by dividing by a power of two rather than shifting (in order
              * to access more than 32 bits) may produce a fractional result, which ordinarily we would simply
@@ -920,7 +920,7 @@ class Str {
      *
      * Converts an integer to binary, with the specified number of digits (up to a maximum of 36).
      *
-     * @param {number|null|undefined} n (supports integers up to 36 bits now)
+     * @param {number|*} n (supports integers up to 36 bits now)
      * @param {number} [cch] is the desired number of binary digits (0 or undefined for default of either 8, 18, or 36)
      * @param {number} [nGrouping]
      * @return {string} the binary representation of n
@@ -972,7 +972,7 @@ class Str {
      * doesn't properly convert negative values.  Moreover, if n is undefined, n.toString() will throw
      * an exception, whereas this function will return '?' characters.
      *
-     * @param {number|null|undefined} n (supports integers up to 36 bits now)
+     * @param {number|*} n (supports integers up to 36 bits now)
      * @param {number} [cch] is the desired number of octal digits (0 or undefined for default of either 6, 8, or 12)
      * @param {boolean} [fPrefix]
      * @return {string} the octal representation of n
@@ -1002,7 +1002,7 @@ class Str {
      * doesn't properly convert negative values.  Moreover, if n is undefined, n.toString() will throw
      * an exception, whereas this function will return '?' characters.
      *
-     * @param {number|null|undefined} n (supports integers up to 36 bits now)
+     * @param {number|*} n (supports integers up to 36 bits now)
      * @param {number} [cch] is the desired number of decimal digits (0 or undefined for default of either 5 or 11)
      * @return {string} the decimal representation of n
      */
@@ -1037,7 +1037,7 @@ class Str {
      *      s = "00000000".substr(0, 8 - s.length) + s;
      *      s = s.substr(0, cch).toUpperCase();
      *
-     * @param {number|null|undefined} n (supports integers up to 36 bits now)
+     * @param {number|*} n (supports integers up to 36 bits now)
      * @param {number} [cch] is the desired number of hex digits (0 or undefined for default of either 4, 8, or 9)
      * @param {boolean} [fPrefix]
      * @return {string} the hex representation of n
@@ -3367,7 +3367,7 @@ class Component {
             if (target) {
                 var control = target.bindings[sBinding];
                 if (control) {
-                    component.setBinding(null, sBinding, control);
+                    component.setBinding("", sBinding, control);
                 }
             }
         }
@@ -3855,7 +3855,7 @@ class Component {
      * Component's setBinding() method is intended to be overridden by subclasses.
      *
      * @this {Component}
-     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, 'print')
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
@@ -4308,10 +4308,10 @@ class Component {
      *
      * @this {Component}
      * @param {number} port
-     * @param {number|null} bOut if an output operation
-     * @param {number|null} [addrFrom]
-     * @param {string|null} [name] of the port, if any
-     * @param {number|null} [bIn] is the input value, if known, on an input operation
+     * @param {number|null|*} bOut if an output operation
+     * @param {number|null|*} [addrFrom]
+     * @param {string|null|*} [name] of the port, if any
+     * @param {number|null|*} [bIn] is the input value, if known, on an input operation
      * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      */
     printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage)
@@ -5758,7 +5758,7 @@ class PanelPDP11 extends Component {
     }
 
     /**
-     * setBinding(sType, sBinding, control, sValue)
+     * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * Some panel layouts don't have bindings of their own, and even when they do, there may still be some
      * components (eg, the CPU) that prefer to update their own bindings, so we pass along all binding requests
@@ -5766,23 +5766,17 @@ class PanelPDP11 extends Component {
      * component that doesn't recognize the specified binding should simply ignore it.
      *
      * @this {PanelPDP11}
-     * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    setBinding(sType, sBinding, control, sValue)
+    setBinding(sHTMLType, sBinding, control, sValue)
     {
-        if (this.cmp && this.cmp.setBinding(sType, sBinding, control, sValue)) {
-            return true;
-        }
-        if (this.cpu && this.cpu.setBinding(sType, sBinding, control, sValue)) {
-            return true;
-        }
-        if (DEBUGGER && this.dbg && this.dbg.setBinding(sType, sBinding, control, sValue)) {
-            return true;
-        }
+        if (this.cmp && this.cmp.setBinding(sHTMLType, sBinding, control, sValue)) return true;
+        if (this.cpu && this.cpu.setBinding(sHTMLType, sBinding, control, sValue)) return true;
+        if (DEBUGGER && this.dbg && this.dbg.setBinding(sHTMLType, sBinding, control, sValue)) return true;
 
         switch (sBinding) {
         case 'R0':
@@ -5810,7 +5804,7 @@ class PanelPDP11 extends Component {
              *
              * Only *type* and *binding* attributes are required; if *value* is omitted, the default value is 0 ("off").
              */
-            if (sType == "led" || sType == "rled") {
+            if (sHTMLType == "led" || sHTMLType == "rled") {
                 this.bindings[sBinding] = control;
                 this.leds[sBinding] = sValue? 1 : 0;
                 this.cLiveRegs++;
@@ -5826,7 +5820,7 @@ class PanelPDP11 extends Component {
              * Currently, there is no XML attribute to indicate whether a switch is "momentary"; only recognized switches
              * in our internal table can have that attribute.
              */
-            if (sType == "switch") {
+            if (sHTMLType == "switch") {
                 /*
                  * Like LEDs, we allow unrecognized switches to be defined as well, but they won't do anything useful,
                  * since only recognized switches will have handlers that perform the appropriate operations.
@@ -5860,7 +5854,7 @@ class PanelPDP11 extends Component {
                 }(this, sBinding);
                 return true;
             }
-            return super.setBinding(sType, sBinding, control, sValue);
+            return super.setBinding(sHTMLType, sBinding, control, sValue);
         }
     }
 
@@ -10563,7 +10557,7 @@ class CPUPDP11 extends Component {
         this.panel = cmp.panel;
         for (var i = 0; i < CPUPDP11.BUTTONS.length; i++) {
             var control = this.bindings[CPUPDP11.BUTTONS[i]];
-            if (control) this.cmp.setBinding(null, CPUPDP11.BUTTONS[i], control);
+            if (control) this.cmp.setBinding("", CPUPDP11.BUTTONS[i], control);
         }
         this.setReady();
     }
@@ -10813,16 +10807,16 @@ class CPUPDP11 extends Component {
     }
 
     /**
-     * setBinding(sType, sBinding, control, sValue)
+     * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {CPUPDP11}
-     * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    setBinding(sType, sBinding, control, sValue)
+    setBinding(sHTMLType, sBinding, control, sValue)
     {
         var cpu = this;
 
@@ -17976,16 +17970,16 @@ class KeyboardPDP11 extends Component {
     }
 
     /**
-     * setBinding(sType, sBinding, control, sValue)
+     * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {KeyboardPDP11}
-     * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    setBinding(sType, sBinding, control, sValue)
+    setBinding(sHTMLType, sBinding, control, sValue)
     {
         return false;
     }
@@ -18187,18 +18181,18 @@ class SerialPortPDP11 extends Component {
     }
 
     /**
-     * setBinding(sType, sBinding, control, sValue)
+     * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {SerialPortPDP11}
-     * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    setBinding(sType, sBinding, control, sValue)
+    setBinding(sHTMLType, sBinding, control, sValue)
     {
-        if (sType == null || sType == "textarea") {
+        if (!sHTMLType || sHTMLType == "textarea") {
 
             var serial = this;
             this.bindings[sBinding] = this.controlBuffer = control;
@@ -19013,16 +19007,16 @@ class PC11 extends Component {
     }
 
     /**
-     * setBinding(sType, sBinding, control, sValue)
+     * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {PC11}
-     * @param {string|null} sType is the type of the HTML control (eg, "button", "list", "text", etc)
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "list", "text", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listTapes")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    setBinding(sType, sBinding, control, sValue)
+    setBinding(sHTMLType, sBinding, control, sValue)
     {
         var pc11 = this;
         var nTapeTarget = PC11.TARGET.NONE;
@@ -21239,16 +21233,16 @@ class DriveController extends Component {
     }
 
     /**
-     * setBinding(sType, sBinding, control, sValue)
+     * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {DriveController}
-     * @param {string|null} sType is the type of the HTML control (eg, "button", "list", "text", etc)
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "list", "text", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listDisks")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    setBinding(sType, sBinding, control, sValue)
+    setBinding(sHTMLType, sBinding, control, sValue)
     {
         var dc = this;
 
@@ -25145,7 +25139,7 @@ class Debugger extends Component
      *
      * @this {Debugger}
      * @param {string|undefined} sValue
-     * @param {string|null} [sName] is the name of the value, if any
+     * @param {string|null|*} [sName] is the name of the value, if any
      * @param {Array|undefined|boolean} [fQuiet]
      * @param {number} [nUnary] (0 for none, 1 for negate, 2 for complement, 3 for leading zeros)
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
@@ -25733,16 +25727,16 @@ class DebuggerPDP11 extends Debugger {
     }
 
     /**
-     * setBinding(sType, sBinding, control, sValue)
+     * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {DebuggerPDP11}
-     * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "debugInput")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    setBinding(sType, sBinding, control, sValue)
+    setBinding(sHTMLType, sBinding, control, sValue)
     {
         var dbg = this;
         switch (sBinding) {
@@ -30810,16 +30804,16 @@ class ComputerPDP11 extends Component {
     }
 
     /**
-     * setBinding(sType, sBinding, control, sValue)
+     * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {ComputerPDP11}
-     * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    setBinding(sType, sBinding, control, sValue)
+    setBinding(sHTMLType, sBinding, control, sValue)
     {
         var computer = this;
 

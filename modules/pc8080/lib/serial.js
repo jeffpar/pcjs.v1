@@ -174,7 +174,7 @@ class SerialPort8080 extends Component {
      * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {SerialPort8080}
-     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
@@ -184,7 +184,7 @@ class SerialPort8080 extends Component {
     {
         var serial = this;
         
-        if (sHTMLType == null || sHTMLType == "textarea") {
+        if (!sHTMLType || sHTMLType == "textarea") {
 
             this.bindings[sBinding] = this.controlBuffer = control;
 

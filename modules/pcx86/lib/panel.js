@@ -243,7 +243,7 @@ class Panel extends Component {
      * that doesn't recognize the specified binding should simply ignore it.
      *
      * @this {Panel}
-     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
@@ -887,7 +887,7 @@ class Panel extends Component {
      *
      * @this {Panel}
      * @param {string} sText
-     * @param {number|null} [nValue]
+     * @param {number|null|*} [nValue]
      * @param {number} [nColsSkip]
      * @param {number} [nLinesSkip]
      */

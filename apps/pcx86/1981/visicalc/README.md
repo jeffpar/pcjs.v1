@@ -13,7 +13,6 @@ machines:
         name: PC-DOS 1.00
       B:
         name: VisiCalc (1981)
-    autoType: $date\rb:\rvc\r
 ---
 
 VisiCalc (1981)

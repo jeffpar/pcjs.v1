@@ -557,7 +557,7 @@ class Mouse extends Component {
      *      Byte 3  X   0   Y5  Y4  Y3  Y2  Y1  Y0
      *
      * @this {Mouse}
-     * @param {string|null} [sDiag] diagnostic message
+     * @param {string|null|*} [sDiag] diagnostic message
      * @param {number} [xDiag] original x-coordinate (optional; for diagnostic use only)
      * @param {number} [yDiag] original y-coordinate (optional; for diagnostic use only)
      */

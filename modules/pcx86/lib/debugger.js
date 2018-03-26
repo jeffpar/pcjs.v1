@@ -890,7 +890,7 @@ class DebuggerX86 extends Debugger {
      * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {DebuggerX86}
-     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "debugInput")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
@@ -4183,7 +4183,7 @@ class DebuggerX86 extends Debugger {
      *
      * @this {DebuggerX86}
      * @param {string} sName
-     * @param {number|null} sel
+     * @param {number|null|*} sel
      * @param {number} addr
      * @param {number} addrLimit
      * @return {string}
@@ -4378,7 +4378,7 @@ class DebuggerX86 extends Debugger {
      * @param {number} nSegment (zero if undefined)
      * @param {number} sel (the default segment/selector for all symbols in this group)
      * @param {number} off (from the base of the given selector)
-     * @param {number|null} addr (physical address where the symbols are located, if the memory is physical; eg, ROM)
+     * @param {number|null|*} addr (physical address where the symbols are located, if the memory is physical; eg, ROM)
      * @param {number} len (the size of the region, in bytes)
      * @param {Object} aSymbols (collection of symbols in this group; the format of this collection is described below)
      */
@@ -4434,7 +4434,7 @@ class DebuggerX86 extends Debugger {
      * removeSymbols(sModule, nSegment)
      *
      * @this {DebuggerX86}
-     * @param {string|null} sModule
+     * @param {string|null|*} sModule
      * @param {number} [nSegment] (segment # if sModule set, selector if sModule clear)
      * @return {string|null} name of the module removed, or null if no module was found
      */
