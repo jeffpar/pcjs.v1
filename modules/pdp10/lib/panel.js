@@ -296,7 +296,7 @@ class PanelPDP10 extends Component {
     }
 
     /**
-     * setBinding(sType, sBinding, control, sValue)
+     * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * Some panel layouts don't have bindings of their own, and even when they do, there may still be some
      * components (eg, the CPU) that prefer to update their own bindings, so we pass along all binding requests
@@ -304,23 +304,17 @@ class PanelPDP10 extends Component {
      * component that doesn't recognize the specified binding should simply ignore it.
      *
      * @this {PanelPDP10}
-     * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    setBinding(sType, sBinding, control, sValue)
+    setBinding(sHTMLType, sBinding, control, sValue)
     {
-        if (this.cmp && this.cmp.setBinding(sType, sBinding, control, sValue)) {
-            return true;
-        }
-        if (this.cpu && this.cpu.setBinding(sType, sBinding, control, sValue)) {
-            return true;
-        }
-        if (DEBUGGER && this.dbg && this.dbg.setBinding(sType, sBinding, control, sValue)) {
-            return true;
-        }
+        if (this.cmp && this.cmp.setBinding(sHTMLType, sBinding, control, sValue)) return true;
+        if (this.cpu && this.cpu.setBinding(sHTMLType, sBinding, control, sValue)) return true;
+        if (DEBUGGER && this.dbg && this.dbg.setBinding(sHTMLType, sBinding, control, sValue)) return true;
 
         switch (sBinding) {
         case 'PC':
@@ -336,7 +330,7 @@ class PanelPDP10 extends Component {
              *
              * Only *type* and *binding* attributes are required; if *value* is omitted, the default value is 0 ("off").
              */
-            if (sType == "led" || sType == "rled") {
+            if (sHTMLType == "led" || sHTMLType == "rled") {
                 this.bindings[sBinding] = control;
                 this.leds[sBinding] = sValue? 1 : 0;
                 this.cLiveRegs++;
@@ -352,7 +346,7 @@ class PanelPDP10 extends Component {
              * Currently, there is no XML attribute to indicate whether a switch is "momentary"; only recognized switches
              * in our internal table can have that attribute.
              */
-            if (sType == "switch") {
+            if (sHTMLType == "switch") {
                 /*
                  * Like LEDs, we allow unrecognized switches to be defined as well, but they won't do anything useful,
                  * since only recognized switches will have handlers that perform the appropriate operations.
@@ -386,7 +380,7 @@ class PanelPDP10 extends Component {
                 }(this, sBinding);
                 return true;
             }
-            return super.setBinding(sType, sBinding, control, sValue);
+            return super.setBinding(sHTMLType, sBinding, control, sValue);
         }
     }
 

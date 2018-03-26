@@ -48,9 +48,11 @@ class Proc {
     {
         var argc = 0;
         var argv = {};
+        argv[argc++] = process.argv[1];
         for (var i = 2; i < process.argv.length; i++) {
             var j, sSep;
             var sArg = process.argv[i];
+            argv[argc++] = sArg;
             if (!sArg.indexOf(sSep = "--") || !sArg.indexOf(sSep = "—")) {
                 sArg = sArg.substr(sSep.length);
                 var sValue = true;

@@ -119,7 +119,7 @@ class HDC extends Component {
      * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {HDC}
-     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listDisks")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
@@ -1132,7 +1132,7 @@ class HDC extends Component {
                      * simplistic MRU logic.  If that fails, the worst that will (or should) happen is we'll burn through
                      * more BackTrack wrapper objects than necessary, and risk running out.
                      */
-                    var bto = hdc.bus.addBackTrackObject(obj, null, off);
+                    var bto = hdc.bus.addBackTrackObject(obj, /** @type BackTrack */ (null), off);
                     hdc.cpu.backTrack.btiIO = hdc.bus.getBackTrackIndex(bto, off);
                 }
             });

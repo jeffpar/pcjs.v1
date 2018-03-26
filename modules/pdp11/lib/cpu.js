@@ -146,7 +146,7 @@ class CPUPDP11 extends Component {
         this.panel = cmp.panel;
         for (var i = 0; i < CPUPDP11.BUTTONS.length; i++) {
             var control = this.bindings[CPUPDP11.BUTTONS[i]];
-            if (control) this.cmp.setBinding(null, CPUPDP11.BUTTONS[i], control);
+            if (control) this.cmp.setBinding("", CPUPDP11.BUTTONS[i], control);
         }
         this.setReady();
     }
@@ -396,16 +396,16 @@ class CPUPDP11 extends Component {
     }
 
     /**
-     * setBinding(sType, sBinding, control, sValue)
+     * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {CPUPDP11}
-     * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    setBinding(sType, sBinding, control, sValue)
+    setBinding(sHTMLType, sBinding, control, sValue)
     {
         var cpu = this;
 
