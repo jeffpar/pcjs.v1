@@ -48808,11 +48808,18 @@ class Card extends Controller {
                 this.dbg.println(sName + ": " + Str.toHex(iReg, 2));
                 return;
             }
-            var i, cchMax = 18, s = "";
-            for (i = 0; i < asRegs.length; i++) {
+            var i, cchMax = 17, s = "";
+            var nRegs = (asRegs? asRegs.length : aRegs.length);
+            for (i = 0; i < nRegs; i++) {
+                /*
+                 * In the case of the CRTC, we call the helper function getCRTCReg() to automatically concatenate
+                 * the extended bits of certain registers, so that we don't have to "mentally" concatenate them.
+                 */
                 var reg = (aRegs === this.regCRTData)? this.getCRTCReg(i) : aRegs[i];
                 if (s) s += '\n';
-                s += sName + "[" + Str.toHex(i, 2) + "]: " + Str.pad(asRegs[i], cchMax) + (i === iReg? '*' : ' ') + Str.toHex(reg, reg > 0xff? 4 : 2);
+                var sRegName = Str.pad((asRegs? asRegs[i] : sName.substr(1) + Str.toDec(i, 3)), cchMax);
+                var cchReg = (asRegs? (reg < 0x100? 2 : 4) : 6);
+                s += sName + "[" + Str.toHex(i, 2) + "]: " + sRegName + (i === iReg? '*' : ' ') + Str.toHex(reg, cchReg);
                 if (reg != null) s += " (" + reg + ".)";
             }
             this.dbg.println(s);
@@ -48844,6 +48851,9 @@ class Card extends Controller {
                 /*
                  * There are few more EGA regs we could dump, like GRCPos1, GRCPos2, but does anyone care?
                  */
+                if (this.nCard == Video.CARD.VGA) {
+                    this.dumpRegs(" DAC", this.regDACAddr, this.regDACData);
+                }
             }
 
             /*
@@ -51818,7 +51828,7 @@ class Video extends Component {
                  * we go with a default EGA-compatible 16-color palette.  We'll also use the DAC if there is one
                  * (ie, this is actually a VGA) and it appears to be initialized (ie, the VGA BIOS has been run).
                  */
-                var fDAC = (aDAC && aDAC[255]);
+                var fDAC = (aDAC && aDAC[255] != null);
                 aRegs = (card.regATCData[15] != null? card.regATCData : Video.aEGAPalDef);
                 for (i = 0; i < 16; i++) {
                     b = aRegs[i] & Card.ATC.PALETTE.MASK;
