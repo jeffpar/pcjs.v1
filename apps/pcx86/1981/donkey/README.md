@@ -19,7 +19,6 @@ machines:
         name: PC-DOS 1.00
       B:
         name: None
-    autoType: $date\rbasica donkey\r
 ---
 
 IBM PC Running DONKEY.BAS

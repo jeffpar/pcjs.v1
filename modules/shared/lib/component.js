@@ -465,7 +465,7 @@ class Component {
             if (target) {
                 var control = target.bindings[sBinding];
                 if (control) {
-                    component.setBinding(null, sBinding, control);
+                    component.setBinding("", sBinding, control);
                 }
             }
         }
@@ -953,7 +953,7 @@ class Component {
      * Component's setBinding() method is intended to be overridden by subclasses.
      *
      * @this {Component}
-     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, 'print')
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
@@ -1406,10 +1406,10 @@ class Component {
      *
      * @this {Component}
      * @param {number} port
-     * @param {number|null} bOut if an output operation
-     * @param {number|null} [addrFrom]
-     * @param {string|null} [name] of the port, if any
-     * @param {number|null} [bIn] is the input value, if known, on an input operation
+     * @param {number|null|*} bOut if an output operation
+     * @param {number|null|*} [addrFrom]
+     * @param {string|null|*} [name] of the port, if any
+     * @param {number|null|*} [bIn] is the input value, if known, on an input operation
      * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      */
     printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage)
