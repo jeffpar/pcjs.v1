@@ -75,7 +75,7 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 
 * [PC ROM BIOS Sources](roms/ibm/)
 * [PC Diagnostics and Demos](diags/)
-* [VGA "Black Book" Tests](/tests/pcx86/vga/)
+* [PC Test Resources (CPU, Video, etc)](/tests/pcx86/)
 
 ### Fixed Disks
 

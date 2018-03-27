@@ -24,7 +24,7 @@ You can also browse our collection of archived disks:
 
 Last but not least, we also have a few test resources:
 
-* [IBM PC Tests](/tests/pcx86/)
+* [IBM PC Test Resources](/tests/pcx86/)
 
 {% include_relative pcx86/README.md %}
 
