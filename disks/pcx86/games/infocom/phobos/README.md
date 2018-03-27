@@ -26,7 +26,7 @@ From [MobyGames](http://www.mobygames.com/game/dos/leather-goddesses-of-phobos):
 
 {% include machine.html id="ibm5150-phobos" %}
 
-For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
+For more classic PC software, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
 
 References
 ----------

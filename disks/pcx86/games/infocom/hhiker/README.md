@@ -17,7 +17,7 @@ The Hitchhiker's Guide to the Galaxy (1984)
 
 {% include machine.html id="ibm5150-hhiker" %}
 
-For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
+For more classic PC software, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
 
 References
 ----------
