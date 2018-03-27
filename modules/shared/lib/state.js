@@ -65,7 +65,7 @@ class State {
         this.json = "";
         this.state = {};
         this.fLoaded = this.fParsed = false;
-        this.key = State.key(component, sVersion, sSuffix);
+        this.key = State.getKey(component, sVersion, sSuffix);
         this.unload(component.parms);
     }
 
@@ -250,7 +250,7 @@ class State {
     }
 
     /**
-     * State.key(component, sVersion, sSuffix)
+     * State.getKey(component, sVersion, sSuffix)
      *
      * This encapsulates the key generation code.
      *
@@ -259,7 +259,7 @@ class State {
      * @param {string} [sSuffix] is used to append any additional suffixes to the key
      * @return {string} key
      */
-    static key(component, sVersion, sSuffix)
+    static getKey(component, sVersion, sSuffix)
     {
         var key = component.id;
         if (sVersion) {

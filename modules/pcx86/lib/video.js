@@ -2722,7 +2722,7 @@ class Video extends Component {
      * notifyFullScreen(fFullScreen)
      *
      * @this {Video}
-     * @param {boolean|undefined} [fFullScreen] (undefined if there was a full-screen error)
+     * @param {boolean} [fFullScreen] (undefined if there was a full-screen error)
      */
     notifyFullScreen(fFullScreen)
     {

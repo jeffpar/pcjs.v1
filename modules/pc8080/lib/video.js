@@ -212,13 +212,13 @@ class Video8080 extends Component {
                 if (sEvent) {
                     var sFullScreen = Web.findProperty(document, 'fullscreenElement') || Web.findProperty(document, 'fullScreenElement');
                     document.addEventListener(sEvent, function onFullScreenChange() {
-                        video.notifyFullScreen(!!sFullScreen);
+                        video.notifyFullScreen(document[sFullScreen] != null);
                     }, false);
                 }
                 sEvent = Web.findProperty(document, 'on', 'fullscreenerror');
                 if (sEvent) {
                     document.addEventListener(sEvent, function onFullScreenError() {
-                        video.notifyFullScreen(null);
+                        video.notifyFullScreen();
                     }, false);
                 }
             }
@@ -874,7 +874,7 @@ class Video8080 extends Component {
      * notifyFullScreen(fFullScreen)
      *
      * @this {Video8080}
-     * @param {boolean|null} fFullScreen (null if there was a full-screen error)
+     * @param {boolean} [fFullScreen] (undefined if there was a full-screen error)
      */
     notifyFullScreen(fFullScreen)
     {

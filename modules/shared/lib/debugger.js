@@ -1114,7 +1114,7 @@ class Debugger extends Component
      * printValue(sVar, value)
      *
      * @this {Debugger}
-     * @param {string|null} sVar
+     * @param {string|null|*} sVar
      * @param {number|undefined} value
      * @return {boolean} true if value defined, false if not
      */

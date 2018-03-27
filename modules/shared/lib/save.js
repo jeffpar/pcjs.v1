@@ -90,7 +90,7 @@ function downloadCSS(sURL, sPCJS, nErrorCode, aMachineInfo)
             /*
              * This is probably a bad idea (ie, allowing downloadPC() to proceed with our stylesheet)...
              */
-            downloadPC(sURL, null, 0, aMachineInfo);
+            downloadPC(sURL, "", 0, aMachineInfo);
         } else {
             Web.getResource(sCSSFile, null, true, function(sURL, sResponse, nErrorCode) {
                 downloadPC(sURL, sResponse, nErrorCode, aMachineInfo);
@@ -105,7 +105,7 @@ function downloadCSS(sURL, sPCJS, nErrorCode, aMachineInfo)
  * downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
  *
  * @param {string} sURL
- * @param {string|null} sCSS
+ * @param {string} sCSS
  * @param {number} nErrorCode
  * @param {Array} aMachineInfo ([0] = idMachine, [1] = sScript, [2] = sParms, [3] = sState, [4] = sPCJS)
  */
