@@ -49,7 +49,7 @@ var lib = path.join(path.dirname(fs.realpathSync(__filename)), "../lib/");
 
 try {
     var machines = require(lib + "../../../_data/machines.json");
-    var scriptsPCx86 = /** @type {Array.<string>} */ (machines.pcx86.scripts);
+    var scriptsPCx86 = /** @type {Array.<string>} */ (machines['pcx86'].scripts);
 } catch(err) {
     console.log(err.message);
 }
