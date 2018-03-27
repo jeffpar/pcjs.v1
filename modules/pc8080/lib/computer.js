@@ -1214,7 +1214,7 @@ class Computer8080 extends Component {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(Computer8080.STATE_USERID + " for load: " + this.sUserID);
             }
-            sStatePath = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.key(this, PC8080.APPVERSION);
+            sStatePath = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, PC8080.APPVERSION);
         } else {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(Computer8080.STATE_USERID + " unavailable");
@@ -1282,7 +1282,7 @@ class Computer8080 extends Component {
         var dataPost = {};
         dataPost[UserAPI.QUERY.REQ] = UserAPI.REQ.STORE;
         dataPost[UserAPI.QUERY.USER] = sUserID;
-        dataPost[UserAPI.QUERY.STATE] = State.key(this, PC8080.APPVERSION);
+        dataPost[UserAPI.QUERY.STATE] = State.getKey(this, PC8080.APPVERSION);
         dataPost[UserAPI.QUERY.DATA] = sState;
         var sRequest = Web.getHost() + UserAPI.ENDPOINT;
         if (!fSync) {

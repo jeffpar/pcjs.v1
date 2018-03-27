@@ -57,13 +57,13 @@ if (NODE) {
  */
 function State(component, sVersion, sSuffix) {
     this.id = component.id;
-    this.key = State.key(component, sVersion, sSuffix);
+    this.key = State.getKey(component, sVersion, sSuffix);
     this.dbg = component.dbg;
     this.unload(component.parms);
 }
 
 /**
- * State.key(component, sVersion, sSuffix)
+ * State.getKey(component, sVersion, sSuffix)
  *
  * This encapsulates the key generation code.
  *
@@ -72,7 +72,7 @@ function State(component, sVersion, sSuffix) {
  * @param {string} [sSuffix] is used to append any additional suffixes to the key
  * @return {string} key
  */
-State.key = function(component, sVersion, sSuffix) {
+State.getKey = function(component, sVersion, sSuffix) {
     var key = component.id;
     if (sVersion) {
         var i = sVersion.indexOf('.');

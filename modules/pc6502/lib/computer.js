@@ -1211,7 +1211,7 @@ Computer.prototype.getServerStatePath = function()
         if (DEBUG && this.messageEnabled()) {
             this.printMessage(Computer.STATE_USERID + " for load: " + this.sUserID);
         }
-        sStatePath = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.key(this, Computer.APPVERSION);
+        sStatePath = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, Computer.APPVERSION);
     } else {
         if (DEBUG && this.messageEnabled()) {
             this.printMessage(Computer.STATE_USERID + " unavailable");
@@ -1279,7 +1279,7 @@ Computer.prototype.storeServerState = function(sUserID, sState, fSync)
     var dataPost = {};
     dataPost[UserAPI.QUERY.REQ] = UserAPI.REQ.STORE;
     dataPost[UserAPI.QUERY.USER] = sUserID;
-    dataPost[UserAPI.QUERY.STATE] = State.key(this, Computer.APPVERSION);
+    dataPost[UserAPI.QUERY.STATE] = State.getKey(this, Computer.APPVERSION);
     dataPost[UserAPI.QUERY.DATA] = sState;
     var sRequest = web.getHost() + UserAPI.ENDPOINT;
     if (!fSync) {
