@@ -37,7 +37,7 @@
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5170/1.01a/5170-DIAG-101A.json">IBM PC AT Diagnostics 1.01 (Adv)</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5170/2.07a/5170-DIAG-207A.json">IBM PC AT Diagnostics 2.07 (Adv)</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/ega/FLAND.json">IBM EGA Fantasy Land Demo</disk>
-		<disk path="/pcjs-disks/pcx86/diags/ibm/ega/EGA-UTILITIES.json">IBM EGA Utilities</disk>
+		<disk path="/pcjs-disks/pcx86/diags/ibm/ega/EGA-UTILS.json">IBM EGA Utilities</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/1.00/5150-DIAG-100.json">IBM PC Diagnostics 1.00</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/1.02/5150-DIAG-102.json">IBM PC Diagnostics 1.02</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/2.02/5150-DIAG-202.json">IBM PC Diagnostics 2.02</disk>
