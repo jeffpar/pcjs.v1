@@ -168,21 +168,16 @@ genuine IBM EGA board, and I saw no effect on the cursor at all.
 
 ### Experimenting With Cursors
 
-A few of the PCjs machines are configured with a special TestController window that's connected to the machine's
-COM2 serial port, such as this [IBM PC AT with 640Kb RAM and EGA](/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/).
+A few PCjs machines have enabled [TestMonitor Support](/tests/pcx86/testmon/), which allows you to use
+one of the machine's serial ports (usually COM2) to control and issue commands to the machine.
 
-After the machine finishes booting to a DOS prompt, type the DOS command `CTTY COM2`, and then you can interact with
-the machine via the TestController window.
-
-Typing `Ctrl-T` in that window toggles it between "terminal mode" and "prompt mode".  After the initial `CTTY` command,
-the TestController should detect the DOS prompt and enter "dos mode", at which point you can type the command `debug` to
-enter "debug mode", where a number of debug macros are available to you, such as:
+Some of the video-specific TestMonitor commands include:
 
 - `cursor 11 13` (programs the default EGA cursor)
 - `cursor 4 19` (programs a block cursor)
 - `cursor 4 20` (programs a single-line cursor, for reasons explained [above](#cursor-wrap-around))
 
-To see all the command modes, and the macros available in each mode, take a look at [tests.json](/tests/pcx86/testmon/tests.json). 
+For more information, go to the [TestMonitor Support](/tests/pcx86/testmon/) page.
 
 ### PC Magazine CTYPE and STICK Utilities
 
