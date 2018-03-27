@@ -14,6 +14,7 @@ redirect_from:
 machines:
   - id: ibm5160-cga-win101
     type: pcx86
+    resume: 1
     state: /disks/pcx86/windows/1.01/cga/state.json
     config: /devices/pcx86/machine/5160/cga/256kb/machine.xml
     drives: '[{name:"10Mb Hard Disk",type:3,path:"/pcjs-disks/pcx86/drives/10mb/PCDOS200-WIN101-CGA.json"}]'

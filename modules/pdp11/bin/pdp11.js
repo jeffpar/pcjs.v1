@@ -53,7 +53,7 @@ var lib = path.join(path.dirname(fs.realpathSync(__filename)), "../lib/");
 
 try {
     var machines = require(lib + "../../../_data/machines.json");
-    var scriptsPDP11 = /** @type {Array.<string>} */ (machines.pdp11.scripts);
+    var scriptsPDP11 = /** @type {Array.<string>} */ (machines['pdp11'].scripts);
 } catch(err) {
     console.log(err.message);
 }
