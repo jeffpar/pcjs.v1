@@ -10,12 +10,12 @@
 	<video ref="/devices/pcx86/video/ibm/ega/1984-09-13/128kb-autolockfs.xml"/>
 	<fdc ref="/disks/pcx86/library.xml" autoMount='{A:{name:"PC-DOS 3.20 (Disk 1)"},B:{name:"PC-DOS 3.20 (Disk 2)"}}'/>
 	<hdc ref="/disks/pcx86/drives/10mb/pcdos200-empty-xt3.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<cpu id="cpu8088" model="8088" pos="right" padRight="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 		<control type="button" binding="setSpeed">Speed</control>
 	</cpu>
-	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<chipset id="chipset" model="5160" sw1="01001101"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2"/>
