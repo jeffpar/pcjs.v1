@@ -79,7 +79,7 @@ EGA utilities that he kindly provided.  Sadly, FantasyLand doesn't yet work in t
 
 ### Directory of IBM EGA Utilities
 
-	 Volume in drive A is EGA-UTILITI
+	 Volume in drive A is EGA-UTILS
 
 	Directory of A:\
 

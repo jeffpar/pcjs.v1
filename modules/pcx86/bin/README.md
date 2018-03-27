@@ -11,7 +11,7 @@ This directory contains the PCx86 Node command-line "wrapper" utility [pcx86.js]
 
 When you run it, be sure to provide a valid machine JSON file; e.g.:
 
-	node pcx86 --cmd="load ibm5150.json"
+	node pcx86.js --cmd="load ibm5150.json"
 
 which should then produce the following output:
 
