@@ -5101,13 +5101,13 @@ class Video extends Component {
         }
 
         /*
-         * If cBlinks is "enabled" (ie, >= 0), then advance it once every 16 updateScreen() calls
-         * (assuming an updateScreen() frequency of 60 per second; see Video.UPDATES_PER_SECOND).
+         * If cBlinks is "enabled" (ie, >= 0), then advance it once every 10 updateScreen() calls;
+         * this assumes an updateScreen() frequency of 60 per second; see Video.UPDATES_PER_SECOND.
          *
          * We assume that the CPU is calling us whenever fForce is undefined.
          */
         var fBlinkUpdate = false;
-        if (!fForce && !(++this.cUpdates & 0xf) && this.cBlinks >= 0) {
+        if (!fForce && !(++this.cUpdates % 10) && this.cBlinks >= 0) {
             this.cBlinks++;
             fBlinkUpdate = true;
         }
