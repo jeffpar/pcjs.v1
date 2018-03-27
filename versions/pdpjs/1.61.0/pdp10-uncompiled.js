@@ -19256,7 +19256,7 @@ class Debugger extends Component
      * printValue(sVar, value)
      *
      * @this {Debugger}
-     * @param {string|null} sVar
+     * @param {string|null|*} sVar
      * @param {number|undefined} value
      * @return {boolean} true if value defined, false if not
      */
@@ -27100,7 +27100,7 @@ class ComputerPDP10 extends Component {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(ComputerPDP10.STATE_USERID + " for load: " + this.sUserID);
             }
-            sStatePath = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.key(this, PDP10.APPVERSION);
+            sStatePath = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, PDP10.APPVERSION);
         } else {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(ComputerPDP10.STATE_USERID + " unavailable");
@@ -27169,7 +27169,7 @@ class ComputerPDP10 extends Component {
         var dataPost = {};
         dataPost[UserAPI.QUERY.REQ] = UserAPI.REQ.STORE;
         dataPost[UserAPI.QUERY.USER] = sUserID;
-        dataPost[UserAPI.QUERY.STATE] = State.key(this, PDP10.APPVERSION);
+        dataPost[UserAPI.QUERY.STATE] = State.getKey(this, PDP10.APPVERSION);
         dataPost[UserAPI.QUERY.DATA] = sState;
         var sRequest = Web.getHost() + UserAPI.ENDPOINT;
         if (!fSync) {
@@ -27536,7 +27536,7 @@ class State {
         this.json = "";
         this.state = {};
         this.fLoaded = this.fParsed = false;
-        this.key = State.key(component, sVersion, sSuffix);
+        this.key = State.getKey(component, sVersion, sSuffix);
         this.unload(component.parms);
     }
 
@@ -27721,7 +27721,7 @@ class State {
     }
 
     /**
-     * State.key(component, sVersion, sSuffix)
+     * State.getKey(component, sVersion, sSuffix)
      *
      * This encapsulates the key generation code.
      *
@@ -27730,7 +27730,7 @@ class State {
      * @param {string} [sSuffix] is used to append any additional suffixes to the key
      * @return {string} key
      */
-    static key(component, sVersion, sSuffix)
+    static getKey(component, sVersion, sSuffix)
     {
         var key = component.id;
         if (sVersion) {
@@ -27888,7 +27888,7 @@ var fAsync = true;
 var cAsyncMachines = 0;
 
 /**
- * loadXML(sFile, idMachine, sAppName, sAppClass, sParms, fResolve, display, done)
+ * loadXML(sFile, idMachine, sAppName, sAppClass, sParms, sClass, fResolve, display, done)
  *
  * This is the preferred way to load all XML and XSL files. It uses getResource()
  * to load them as strings, which parseXML() can massage before parsing/transforming them.
@@ -27912,11 +27912,11 @@ var cAsyncMachines = 0;
  * JavaScript XSLT support. Is it broken, is it a security issue, or am I just calling it wrong?
  *
  * @param {string} sXMLFile
- * @param {string|null|undefined} idMachine
- * @param {string|null|undefined} sAppName
- * @param {string|null|undefined} sAppClass
- * @param {string|null|undefined} sParms (machine parameters, if any)
- * @param {string|null|undefined} sClass (an optional machine class name used to style the machine)
+ * @param {string} idMachine
+ * @param {string} sAppName
+ * @param {string} sAppClass
+ * @param {string} sParms (machine parameters, if any)
+ * @param {string} sClass (an optional machine class name used to style the machine)
  * @param {boolean} fResolve is true to resolve any "ref" attributes
  * @param {function(string)} display
  * @param {function(string,Object)} done (string contains the unparsed XML string data, and Object contains a parsed XML object)
@@ -27943,12 +27943,12 @@ function loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass, fReso
  * tag (ie, a tag with a "ref" attribute) with the contents of the referenced file.
  *
  * @param {string} sXML
- * @param {string|null} sXMLFile
- * @param {string|null|undefined} idMachine
- * @param {string|null|undefined} sAppName
- * @param {string|null|undefined} sAppClass
- * @param {string|null|undefined} sParms (machine parameters, if any)
- * @param {string|null|undefined} sClass (an optional machine class name used to style the machine)
+ * @param {string} sXMLFile
+ * @param {string} idMachine
+ * @param {string} sAppName
+ * @param {string} sAppClass
+ * @param {string} sParms (machine parameters, if any)
+ * @param {string} sClass (an optional machine class name used to style the machine)
  * @param {boolean} fResolve is true to resolve any "ref" attributes; default is false
  * @param {function(string)} display
  * @param {function(string,Object)} done (string contains the unparsed XML string data, and Object contains a parsed XML object)
@@ -28005,7 +28005,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass
                 var match = sXML.match(/(<machine[^>]*\sclass=)(['"])(.*?)(\2.*?>)/);
                 if (match) {
                     sXML = sXML.replace(match[0], match[1] + match[2] + sClass + match[4]);
-                    sClass = null;
+                    sClass = "";
                 }
             }
             sXML = sXML.replace(/(<machine[^>]*\sid=)(['"]).*?\2/, "$1$2" + idMachine + "$2" + (sClass? ' class="' + sClass + '"' : '') + (sParms? " parms='" + sParms + "'" : "") + (sURL? ' url="' + sURL + '"' : ''));
@@ -28087,7 +28087,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass
             resolveXML(sXML, display, buildXML);
             return;
         }
-        buildXML(sXML, null);
+        buildXML(sXML, "");
         return;
     }
     done("no data" + (sXMLFile? " for file: " + sXMLFile : ""), null);
@@ -28104,7 +28104,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass
  *
  * @param {string} sXML
  * @param {function(string)} display
- * @param {function(string,(string|null))} done (the first string contains the resolved XML data, the second is for any error message)
+ * @param {function(string,string)} done (the first string contains the resolved XML data, the second is for any error message)
  */
 function resolveXML(sXML, display, done)
 {
@@ -28176,7 +28176,7 @@ function resolveXML(sXML, display, done)
         Web.getResource(sRefFile, null, fAsync, doneReadXML);
         return;
     }
-    done(sXML, null);
+    done(sXML, "");
 }
 
 /**
@@ -28188,10 +28188,10 @@ function resolveXML(sXML, display, done)
  * @param {string} sAppClass is the app class (eg, "pcx86"); also known as the machine class
  * @param {string} sVersion is the app version (eg, "1.15.7")
  * @param {string} idMachine
- * @param {string|undefined} sXMLFile
- * @param {string|undefined} sXSLFile
- * @param {string|undefined} sParms (machine parameters, if any)
- * @param {string|undefined} sClass (an optional machine class name used to style the machine)
+ * @param {string} [sXMLFile]
+ * @param {string} [sXSLFile]
+ * @param {string} [sParms] (machine parameters, if any)
+ * @param {string} [sClass] (an optional machine class name used to style the machine)
  * @return {boolean} true if successful, false if error
  */
 function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFile, sParms, sClass)
@@ -28387,13 +28387,13 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                 /*
                  * NOTE: sXSLFile will never be undefined by this point, but apparently the Closure Compiler doesn't realize that.  
                  */
-                loadXML(sXSLFile || "", null, sAppName, sAppClass, null, null, false, displayMessage, transformXML);
+                loadXML(sXSLFile || "", "", sAppName, sAppClass, "", "", false, displayMessage, transformXML);
             };
 
             if (sXMLFile.charAt(0) != '<') {
-                loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass, true, displayMessage, processXML);
+                loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms || "", sClass || "", true, displayMessage, processXML);
             } else {
-                parseXML(sXMLFile, null, idMachine, sAppName, sAppClass, sParms, sClass, false, displayMessage, processXML);
+                parseXML(sXMLFile, "", idMachine, sAppName, sAppClass, sParms || "", sClass || "", false, displayMessage, processXML);
             }
         } else {
             displayError("missing machine element: " + idMachine);

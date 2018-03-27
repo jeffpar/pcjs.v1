@@ -1235,9 +1235,9 @@ class DebuggerX86 extends Debugger {
      * Returns a NEW DbgAddrX86 object, initialized with specified values and/or defaults.
      *
      * @this {DebuggerX86}
-     * @param {number|null|undefined} [off] (default is zero)
-     * @param {number|null|undefined} [sel] (default is undefined)
-     * @param {number|null|undefined} [addr] (default is undefined)
+     * @param {number|null} [off] (default is zero)
+     * @param {number|null} [sel] (default is undefined)
+     * @param {number|null} [addr] (default is undefined)
      * @param {number} [type] (default is based on current CPU mode)
      * @param {boolean} [fData32] (default is the current CPU operand size)
      * @param {boolean} [fAddr32] (default is the current CPU address size)
@@ -1287,9 +1287,9 @@ class DebuggerX86 extends Debugger {
      *
      * @this {DebuggerX86}
      * @param {DbgAddrX86} dbgAddr
-     * @param {number|null|undefined} [off] (default is zero)
-     * @param {number|null|undefined} [sel] (default is undefined)
-     * @param {number|null|undefined} [addr] (default is undefined)
+     * @param {number|null} [off] (default is zero)
+     * @param {number|null} [sel] (default is undefined)
+     * @param {number|null} [addr] (default is undefined)
      * @param {number} [type] (default is based on current CPU mode)
      * @param {boolean} [fData32] (default is the current CPU operand size)
      * @param {boolean} [fAddr32] (default is the current CPU address size)

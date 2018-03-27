@@ -25,9 +25,9 @@ with a [Debugger](debugger/) or a [CGA Display](cga/).
 
 A demo of an earlier pre-release version, [Windows 1.0 ("Premiere Edition")](../1.00/), is also available.
 
-{% include machine.html id="ibm5160-ega-win101" %}
+[Directory Listings](#directory-listings) of the five 360Kb distribution diskettes are provided below.
 
-Directory listings of the five 360Kb distribution diskettes are provided [below](#directory-listings). 
+{% include machine.html id="ibm5160-ega-win101" %}
 
 Directory Listings
 ------------------

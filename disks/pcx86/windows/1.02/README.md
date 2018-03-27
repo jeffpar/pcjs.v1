@@ -5,7 +5,7 @@ permalink: /disks/pcx86/windows/1.02/
 ---
 
 Microsoft Windows 1.02
----
+----------------------
 
 Directory listings of the six 360Kb distribution diskettes are provided below.
 

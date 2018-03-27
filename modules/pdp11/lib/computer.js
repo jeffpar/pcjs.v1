@@ -1276,7 +1276,7 @@ class ComputerPDP11 extends Component {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(ComputerPDP11.STATE_USERID + " for load: " + this.sUserID);
             }
-            sStatePath = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.key(this, PDP11.APPVERSION);
+            sStatePath = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, PDP11.APPVERSION);
         } else {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(ComputerPDP11.STATE_USERID + " unavailable");
@@ -1345,7 +1345,7 @@ class ComputerPDP11 extends Component {
         var dataPost = {};
         dataPost[UserAPI.QUERY.REQ] = UserAPI.REQ.STORE;
         dataPost[UserAPI.QUERY.USER] = sUserID;
-        dataPost[UserAPI.QUERY.STATE] = State.key(this, PDP11.APPVERSION);
+        dataPost[UserAPI.QUERY.STATE] = State.getKey(this, PDP11.APPVERSION);
         dataPost[UserAPI.QUERY.DATA] = sState;
         var sRequest = Web.getHost() + UserAPI.ENDPOINT;
         if (!fSync) {
