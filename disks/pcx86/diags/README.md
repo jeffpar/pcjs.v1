@@ -1,13 +1,13 @@
 ---
 layout: page
-title: PC Diagnostics and Demos
+title: PC Diagnostics and Utilities
 permalink: /disks/pcx86/diags/
 ---
 
-PC Diagnostics and Demos
-------------------------
+PC Diagnostics and Utilities
+----------------------------
 
-Information is available for PC diagnostics and demos from these vendors:
+PCjs has archived diagnostics and utilities from the following vendors.
 
-* COMPAQ
+* [COMPAQ](compaq/)
 * [IBM](ibm/)
