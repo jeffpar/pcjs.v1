@@ -8,9 +8,11 @@ COMPAQ Diagnostics
 ------------------
 
 * [COMPAQ Diagnostics 5.08](5.08/)
+* [COMPAQ Diagnostics 6.12](6.12/)
 
 COMPAQ Utilities
 ----------------
 
-* [COMPAQ DeskPro 386](deskpro386/)
-* [COMPAQ Utilities 5.06](5.06/)
+* [COMPAQ User Programs (1986)](utilities/1986/)
+* [COMPAQ User Programs (1987)](utilities/1987/)
+* [COMPAQ User Programs (1989)](utilities/1989/)

@@ -27,12 +27,19 @@ From `README.CPQ`:
     
          3.  Information about the ROMREV program.
 
-### Directory Listing of COMPAQ Diagnostics 5.08
+### Directory of COMPAQ Diagnostics 5.08
 
      Volume in drive A has no label
      Directory of A:\
     
+    IBMBIO   COM        23,591  09-16-87 12:00p
+    IBMDOS   COM        30,632  09-16-87 12:00p
+    COMMAND  COM        25,332  09-16-87 12:00p
+    AUTOEXEC BAT            33  01-29-88 12:00p
+    CONFIG   SYS            12  01-29-88 12:00p
+    DISKCOPY COM         6,264  09-16-87 12:00p
     ROMREV   COM         1,248  01-29-88 12:00p
+    USER     EXE       193,264  01-29-88 12:00p
     TEST     COM         1,984  01-29-88 12:00p
     SETUP    EXE        39,968  01-29-88 12:00p
     README   CPQ         1,464  01-29-88 12:00p
@@ -42,7 +49,7 @@ From `README.CPQ`:
     TEST     SCR           549  01-29-88 12:00p
     SETUP    SCR           652  01-29-88 12:00p
     ROMREV   SCR           518  01-29-88 12:00p
-            10 file(s)         46,596 bytes
+            17 file(s)        325,724 bytes
              0 dir(s)          16,384 bytes free
 
 ![COMPAQ Diagnostics 5.08]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/diags/compaq/5.08/COMPAQ-DIAGS-508-012988-REVK.jpg)

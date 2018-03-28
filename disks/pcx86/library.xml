@@ -46,9 +46,11 @@
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5170/2.00/5170-DIAG-200.json">IBM PC AT Diagnostics 2.00</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/exploring/1.00/EXPLORING-THE-IBM-PC-100.json">Exploring the IBM PC 1.00</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5170/exploring/1.00/EXPLORING-THE-IBM-PC-AT-100.json">Exploring the IBM PC AT 1.00</disk>
-		<disk path="/pcjs-disks/pcx86/diags/compaq/5.06/COMPAQ-UTILS-506-110387-REVG.json">COMPAQ Utilities 5.06</disk>
 		<disk path="/pcjs-disks/pcx86/diags/compaq/5.08/COMPAQ-DIAGS-508-012988-REVK.json">COMPAQ Diagnostics 5.08</disk>
-		<disk path="/pcjs-disks/pcx86/diags/compaq/deskpro386/COMPAQ-DESKPRO386-SUPP-1986-08-08.json">COMPAQ DeskPro 386 (1986)</disk>
+		<disk path="/pcjs-disks/pcx86/diags/compaq/6.12/COMPAQ-DIAGS-612-062189.json">COMPAQ Diagnostics 6.12</disk>
+		<disk path="/pcjs-disks/pcx86/diags/compaq/utilities/1986/COMPAQ-DESKPRO386-SUPP-1986-08-08.json">COMPAQ DeskPro 386 (1986)</disk>
+		<disk path="/pcjs-disks/pcx86/diags/compaq/utilities/1987/COMPAQ-UTILS-506-110387-REVG.json">COMPAQ User Programs (1987)</disk>
+		<disk path="/pcjs-disks/pcx86/diags/compaq/utilities/1989/COMPAQ-UTILS-072789.json">COMPAQ User Programs (1989)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/ibm/0.90/PCDOS090.json">PC-DOS 0.90</disk>
 		<disk path="/pcjs-disks/pcx86/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
 		<disk path="/pcjs-disks/pcx86/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
@@ -166,9 +168,6 @@
 		<disk path="/pcjs-disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK1.json">COMPAQ MS-DOS 3.31 (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json">COMPAQ MS-DOS 3.31 (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK3.json">COMPAQ MS-DOS 3.31 (Disk 3)</disk>
-		<disk path="/pcjs-disks/pcx86/dos/compaq/3.31/COMPAQ-USER-072789.json">COMPAQ MS-DOS 4.01 (User)</disk>
-		<disk path="/pcjs-disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-SETUP608.json">COMPAQ MS-DOS 3.31 (Setup v6)</disk>
-		<disk path="/pcjs-disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-SETUP505.json">COMPAQ MS-DOS 3.31 (Setup v5)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK1.json">COMPAQ MS-DOS 3.31G (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK2.json">COMPAQ MS-DOS 3.31G (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK3.json">COMPAQ MS-DOS 3.31G (Disk 3)</disk>

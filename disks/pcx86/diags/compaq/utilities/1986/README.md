@@ -1,18 +1,18 @@
 ---
 layout: page
-title: COMPAQ DeskPro 386 Supplemental User Programs
-permalink: /disks/pcx86/diags/compaq/deskpro386/
+title: "COMPAQ User Programs (1986)"
+permalink: /disks/pcx86/diags/compaq/utilities/1986/
 ---
 
-COMPAQ DeskPro 386 Supplemental User Programs
----------------------------------------------
+COMPAQ User Programs (1986)
+---------------------------
+
+### COMPAQ DeskPro 386 (1986)
 
 Of particular interest here is the copy of `CEMM` that PCjs has unearthed, the first (known) publicly available
 utility to make use of V86-mode on the 80386.
 
 More information about CEMM is available at the [OS/2 Museum](http://www.os2museum.com/wp/original-cemm-unearthed/).
-
-### COMPAQ DeskPro 386 (1986)
 
 From `README.CPQ`:
 

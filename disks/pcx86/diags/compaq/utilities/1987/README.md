@@ -1,11 +1,11 @@
 ---
 layout: page
-title: COMPAQ Utilities 5.06
-permalink: /disks/pcx86/diags/compaq/5.06/
+title: "COMPAQ User Programs (1987)"
+permalink: /disks/pcx86/diags/compaq/utilities/1987/
 ---
 
-COMPAQ Utilities 5.06
----------------------
+COMPAQ User Programs (1987)
+---------------------------
 
 From `README.CPQ`:
 
@@ -30,7 +30,7 @@ From `README.CPQ`:
     
     SETUP is located on the COMPAQ USER DIAGNOSTICS diskette.
 
-### Directory Listing of COMPAQ Utilities 5.06
+### Directory of COMPAQ User Programs (1987)
 
      Volume in drive A is USER 110387
      Directory of A:\
@@ -72,4 +72,4 @@ From `README.CPQ`:
             34 file(s)        213,019 bytes
              0 dir(s)          45,056 bytes free
 
-![COMPAQ Utilities 5.06]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/diags/compaq/5.06/COMPAQ-UTILS-506-110387-REVG.jpg)
+![COMPAQ User Programs (1987)]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/diags/compaq/utilities/1987/COMPAQ-UTILS-506-110387-REVG.jpg)
