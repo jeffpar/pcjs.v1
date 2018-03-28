@@ -30,13 +30,6 @@ This was the first version of DOS to support 32-bit logical sector numbers, enab
 and partitions that extended beyond the first 32Mb of disk space.  These features were soon added to DOS 4.0 and
 OS/2 1.1 as well.
 
-[Directory Listings](#directory-of-compaq-ms-dos-331-disk-1) of the distribution diskettes are provided below.
-
-The `FASTART` program on Disk 1 expects a "USER PROGRAMS" disk, which we have filed under
-[COMPAQ Diagnostics and Utilities](/disks/pcx86/diags/compaq/).  You could, for example, use the
-"[COMPAQ User Programs (1989)](/disks/pcx86/diags/compaq/utilities/1989/)" diskette, which was part of a later
-COMPAQ MS-DOS 4.01 release, since COMPAQ states that the disk "supersedes earlier versions".
-
 A slightly older version of COMPAQ MS-DOS 3.31 can be found on the
 [COMPAQ Diagnostics 5.08](/disks/pcx86/diags/compaq/5.08/) diskette, a 360Kb disk image from the PCjs Archives that
 contains hidden MS-DOS 3.31 files dated September 1987.  The disk displays a different boot message:
@@ -53,6 +46,13 @@ have disks from 1988 or later.
 Later revisions of COMPAQ MS-DOS 3.31 were released as well.  We have archived three
 "[Rev. G](#compaq-ms-dos-331-rev-g)" disks obtained from [WinWorld](https://winworldpc.com/product/ms-dos/331)
 (see "Microsoft MS-DOS 3.31 [Compaq OEM Rev G] (3.5-720k)").  All the files on those disks are dated May 1990.
+
+The `FASTART` program on Disk 1 expects a "USER PROGRAMS" disk, which we have filed under
+[COMPAQ Diagnostics and Utilities](/disks/pcx86/diags/compaq/).  You could, for example, use the
+"[COMPAQ User Programs (1989)](/disks/pcx86/diags/compaq/utilities/1989/)" diskette, which was part of a later
+COMPAQ MS-DOS 4.01 release, since COMPAQ states that the disk "supersedes earlier versions".
+
+[Directory Listings](#directory-of-compaq-ms-dos-331-disk-1) of the distribution diskettes are provided below.
 
 {% include machine.html id="deskpro386" %}
 
