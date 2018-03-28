@@ -74,7 +74,7 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 ### ROMs, Diagnostics, Demos, and More
 
 * [PC ROM BIOS Sources](roms/ibm/)
-* [PC Diagnostics and Demos](diags/)
+* [PC Diagnostics and Utilities](diags/)
 * [PC Test Resources (CPU, Video, etc)](/tests/pcx86/)
 
 ### Fixed Disks
