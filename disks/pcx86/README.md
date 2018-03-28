@@ -71,10 +71,10 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 * [Microsoft Tools](tools/microsoft/)
 * [More...](tools/)
 
-### ROMs, Diagnostics, Demos, and More
+### Diagnostics and More
 
-* [PC ROM BIOS Sources](roms/ibm/)
 * [PC Diagnostics and Utilities](diags/)
+* [PC ROM BIOS Sources](roms/ibm/)
 * [PC Test Resources (CPU, Video, etc)](/tests/pcx86/)
 
 ### Fixed Disks
