@@ -365,25 +365,21 @@ class Bus extends Component {
     }
 
     /**
-     * cleanMemory(addr, size, fNoScrub)
+     * cleanMemory(addr, size, fScrub)
      *
      * @this {Bus}
      * @param {number} addr
      * @param {number} size
-     * @param {boolean} [fNoScrub] (by default, all blocks are "scrubbed" in the process)
-     * @return {boolean} (true if all blocks were clean, false if dirty)
+     * @param {boolean} [fScrub] (true to "scrub" blocks as well)
+     * @return {boolean} (true if all blocks were clean, false otherwise)
      */
-    cleanMemory(addr, size, fNoScrub)
+    cleanMemory(addr, size, fScrub)
     {
         var fClean = true;
         var iBlock = addr >>> this.nBlockShift;
         var sizeBlock = this.nBlockSize - (addr & this.nBlockLimit);
         while (size > 0 && iBlock < this.aMemBlocks.length) {
-            if (this.aMemBlocks[iBlock].fDirty) {
-                if (!fNoScrub) {
-                    this.aMemBlocks[iBlock].fDirty = false;
-                    this.aMemBlocks[iBlock].fDirtyEver = true;
-                }
+            if (!this.aMemBlocks[iBlock].clean(fScrub)) {
                 fClean = false;
             }
             size -= sizeBlock;
@@ -1132,12 +1128,7 @@ class Bus extends Component {
     /**
      * saveMemory(fAll)
      *
-     * The only memory blocks we save are those marked as dirty, but most likely all of RAM will have been marked dirty,
-     * and even if our dirty-memory flags were as smart as our dirty-sector flags (ie, were set only when a write changed
-     * what was already there), it's unlikely that would reduce the number of RAM blocks we must save/restore.  At least
-     * all the ROM blocks should be clean (except in the unlikely event that the Debugger was used to modify them).
-     *
-     * All dirty blocks will be stored in a single array, as pairs of block numbers and data arrays, like so:
+     * All blocks will be stored in a single array, as pairs of block numbers and data arrays, like so:
      *
      *      [iBlock0, [dw0, dw1, ...], iBlock1, [dw0, dw1, ...], ...]
      *
@@ -1155,10 +1146,10 @@ class Bus extends Component {
      * helper methods compress() and decompress() to create and expand the compressed data arrays.
      *
      * @this {Bus}
-     * @param {boolean} [fAll] (true to save all non-ROM memory blocks, regardless of their dirty flags)
+     * @param {boolean} [fAll] (true to save all non-ROM memory blocks, regardless of their modified() state)
      * @return {Array} a
      */
-    saveMemory(fAll)
+    saveMemory(fAll = true)
     {
         var i = 0;
         var a = [];
@@ -1172,14 +1163,11 @@ class Bus extends Component {
 
         for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
             var block = this.aMemBlocks[iBlock];
-            /*
-             * We have to check both fDirty and fDirtyEver, because we may have called cleanMemory() on some of
-             * the memory blocks (eg, video memory), and while cleanMemory() will clear a dirty block's fDirty flag,
-             * it also sets the dirty block's fDirtyEver flag, which is left set for the lifetime of the machine.
-             */
-            if (fAll && block.type != Memory.TYPE.ROM || block.fDirty || block.fDirtyEver) {
-                a[i++] = iBlock;
-                a[i++] = State.compress(block.save());
+            if (block.size) {
+                if (fAll && block.type != Memory.TYPE.ROM || block.modified()) {
+                    a[i++] = iBlock;
+                    a[i++] = State.compress(block.save());
+                }
             }
         }
 

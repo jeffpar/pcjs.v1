@@ -369,7 +369,10 @@ class Card extends Controller {
             this.offStartAddr = this.regCRTData[Card.CRTC.STARTLO] | (this.regCRTData[Card.CRTC.STARTHI] << 8);
             this.addrMaskHigh = 0x3F;       // card-specific mask for the high (bits 8 and up) of CRTC address registers
 
-            if (nCard >= Video.CARD.EGA) {
+            if (nCard < Video.CARD.EGA) {
+                this.initMemory(data[6]);
+                this.setMemoryAccess(Card.ACCESS.READ.THRU | Card.ACCESS.WRITE.THRU);
+            } else {
                 this.addrMaskHigh = 0xFF;
                 this.nCRTCRegs = Card.CRTC.EGA.TOTAL_REGS;
                 this.asCRTCRegs = DEBUGGER? Card.CRTC.EGA_REGS : [];
@@ -430,7 +433,7 @@ class Card extends Controller {
                 /*11*/  new Array(Card.GRC.TOTAL_REGS),
                 /*12*/  0,
                 /*13*/  [this.addrBuffer, this.sizeBuffer, this.cbMemory],
-                /*14*/  new Array(this.cbMemory >> 2),      // divide cbMemory by 4 since this is an array of DWORDs (8 bits for each of 4 planes)
+                /*14*/  null,
                 /*
                  * Card.ACCESS.WRITE.MODE0 by itself is a pretty good default, but if we choose to "randomize" the screen with
                  * text characters prior to starting the machine, defaulting to Card.ACCESS.WRITE.EVENODD is more faithful to how
@@ -492,11 +495,7 @@ class Card extends Controller {
         this.sizeBuffer = a[1];
         this.video.assert(this.cbMemory === a[2]);
 
-        var cdw = this.cbMemory >> 2;
-        this.adwMemory  = data[14];
-        if (this.adwMemory && this.adwMemory.length < cdw) {
-            this.adwMemory = State.decompressEvenOdd(this.adwMemory, cdw);
-        }
+        this.initMemory(data[14]);
 
         var nAccess = data[15];
         if (nAccess) {
@@ -544,6 +543,24 @@ class Card extends Controller {
     }
 
     /**
+     * initMemory()
+     *
+     * @this {Card}
+     * @param {Array|null} data
+     */
+    initMemory(data)
+    {
+        var cdw = this.cbMemory >> 2;
+        this.adwMemory = data;
+        if (!this.adwMemory) {
+            this.adwMemory = new Array(cdw);
+        }
+        else if (this.adwMemory.length < cdw) {
+            this.adwMemory = State.decompressEvenOdd(this.adwMemory, cdw);
+        }
+    }
+    
+    /**
      * saveCard()
      *
      * @this {Card}
@@ -559,9 +576,7 @@ class Card extends Controller {
             data[3] = this.regStatus;
             data[4] = this.regCRTIndx | (this.regCRTPrev << 8);
             data[5] = this.regCRTData;
-            if (this.nCard >= Video.CARD.EGA) {
-                data[6] = this.saveEGA();
-            }
+            data[6] = (this.nCard < Video.CARD.EGA? State.compressEvenOdd(this.adwMemory) : this.saveEGA());
             data[7] = this.nInitCycles;
         }
         return data;
@@ -1536,8 +1551,8 @@ if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLORCMP","DATAROT","READMAP"
  * Also, the EGA includes a set of latches, one for each plane, which must be updated on most reads/writes;
  * we rely on the Memory object's "this.controller" property to give us access to the Card's state.
  *
- * And we take a little extra time to conditionally set fDirty on writes, meaning if a write did not actually
- * change the value of the memory, we will not set fDirty.  The default write functions in memory.js don't take
+ * And we take a little extra time to conditionally set DIRTY on writes, meaning if a write did not actually
+ * change the value of the memory, we will not set DIRTY.  The default write functions in memory.js don't take
  * that performance hit, but here, it may be worthwhile, because if it results in fewer dirty blocks, display
  * updates may be faster.
  *
@@ -1594,6 +1609,7 @@ Card.ACCESS = {
     READ: {                             // READ values are designed to be OR'ed with WRITE values
         MODE0:              0x0400,
         MODE1:              0x0500,
+        THRU:               0x0800,
         EVENODD:            0x1000,
         CHAIN4:             0x4000,
         MASK:               0xFF00
@@ -1604,6 +1620,7 @@ Card.ACCESS = {
         MODE2:              0x0002,
         MODE3:              0x0003,     // VGA only
         CHAIN4:             0x0004,
+        THRU:               0x0008,
         EVENODD:            0x0010,
         ROT:                0x0020,
         AND:                0x0060,
@@ -1632,6 +1649,20 @@ Card.ACCESS.V1[0x2000] = Card.ACCESS.WRITE.MODE2;
 Card.ACCESS.V1[0x6000] = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.AND;
 Card.ACCESS.V1[0xA000] = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.OR;
 Card.ACCESS.V1[0xE000] = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.XOR;
+
+/**
+ * readByte(off, addr)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} [addr]
+ * @return {number}
+ */
+Card.ACCESS.readByte = function readByte(off, addr)
+{
+    off += this.offset;
+    return ((this.adw[off >> 2] >>> ((off & 0x3) << 3)) & 0xff);
+};
 
 /**
  * readByteMode0(off, addr)
@@ -1725,6 +1756,26 @@ Card.ACCESS.readByteMode1 = function readByteMode1(off, addr)
 };
 
 /**
+ * writeByte(off, b, addr)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} b (which should already be pre-masked to 8 bits; see cpu.setByte())
+ * @param {number} [addr]
+ */
+Card.ACCESS.writeByte = function writeByte(off, b, addr)
+{
+    off += this.offset;
+    var idw = off >> 2;
+    var nShift = (off & 0x3) << 3;
+    var dw = (this.adw[idw] & ~(0xff << nShift)) | (b << nShift);
+    if (this.adw[idw] != dw) {
+        this.adw[idw] = dw;
+        this.flags |= Memory.FLAGS.DIRTY;
+    }
+};
+
+/**
  * writeByteMode0(off, b, addr)
  *
  * Supporting Set/Reset means that for every plane for which Set/Reset is enabled, we must
@@ -1754,7 +1805,7 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
-        this.fDirty = true;
+        this.flags |= Memory.FLAGS.DIRTY;
     }
     if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
         this.controller.video.printMessage("writeByteMode0(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
@@ -1807,7 +1858,7 @@ Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
     var dw = ((b << shift) & this.controller.nSeqMapMask) | (this.adw[idw] & ~((0xff << shift) & this.controller.nSeqMapMask));
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
-        this.fDirty = true;
+        this.flags |= Memory.FLAGS.DIRTY;
     }
     if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
         this.controller.video.printMessage("writeByteMode0Chain4(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
@@ -1836,7 +1887,7 @@ Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b, addr)
     dw = (dw & maskMaps) | (this.adw[idw] & ~maskMaps);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
-        this.fDirty = true;
+        this.flags |= Memory.FLAGS.DIRTY;
     }
     if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
         this.controller.video.printMessage("writeByteMode0EvenOdd(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
@@ -1861,7 +1912,7 @@ Card.ACCESS.writeByteMode0Rot = function writeByteMode0Rot(off, b, addr)
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
-        this.fDirty = true;
+        this.flags |= Memory.FLAGS.DIRTY;
     }
     if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
         this.controller.video.printMessage("writeByteMode0Rot(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
@@ -1887,7 +1938,7 @@ Card.ACCESS.writeByteMode0And = function writeByteMode0And(off, b, addr)
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
-        this.fDirty = true;
+        this.flags |= Memory.FLAGS.DIRTY;
     }
     if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
         this.controller.video.printMessage("writeByteMode0And(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
@@ -1913,7 +1964,7 @@ Card.ACCESS.writeByteMode0Or = function writeByteMode0Or(off, b, addr)
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
-        this.fDirty = true;
+        this.flags |= Memory.FLAGS.DIRTY;
     }
     if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
         this.controller.video.printMessage("writeByteMode0Or(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
@@ -1939,7 +1990,7 @@ Card.ACCESS.writeByteMode0Xor = function writeByteMode0Xor(off, b, addr)
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
-        this.fDirty = true;
+        this.flags |= Memory.FLAGS.DIRTY;
     }
     if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
         this.controller.video.printMessage("writeByteMode0Xor(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
@@ -1960,7 +2011,7 @@ Card.ACCESS.writeByteMode1 = function writeByteMode1(off, b, addr)
     var dw = (this.adw[idw] & ~this.controller.nSeqMapMask) | (this.controller.latches & this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
-        this.fDirty = true;
+        this.flags |= Memory.FLAGS.DIRTY;
     }
     if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
         this.controller.video.printMessage("writeByteMode1(" + Str.toHexLong(addr) + "): " + Str.toHexLong(dw));
@@ -1991,7 +2042,7 @@ Card.ACCESS.writeByteMode1EvenOdd = function writeByteMode1EvenOdd(off, b, addr)
     var dw = (this.adw[idw] & ~maskMaps) | (this.controller.latches & maskMaps);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
-        this.fDirty = true;
+        this.flags |= Memory.FLAGS.DIRTY;
     }
     if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
         this.controller.video.printMessage("writeByteMode1EvenOdd(" + Str.toHexLong(addr) + "): " + Str.toHexByte(dw));
@@ -2014,7 +2065,7 @@ Card.ACCESS.writeByteMode2 = function writeByteMode2(off, b, addr)
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
-        this.fDirty = true;
+        this.flags |= Memory.FLAGS.DIRTY;
     }
     if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
         this.controller.video.printMessage("writeByteMode2(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
@@ -2038,7 +2089,7 @@ Card.ACCESS.writeByteMode2And = function writeByteMode2And(off, b, addr)
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
-        this.fDirty = true;
+        this.flags |= Memory.FLAGS.DIRTY;
     }
     if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
         this.controller.video.printMessage("writeByteMode2And(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
@@ -2062,7 +2113,7 @@ Card.ACCESS.writeByteMode2Or = function writeByteMode2Or(off, b, addr)
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
-        this.fDirty = true;
+        this.flags |= Memory.FLAGS.DIRTY;
     }
     if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
         this.controller.video.printMessage("writeByteMode2Or(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
@@ -2086,7 +2137,7 @@ Card.ACCESS.writeByteMode2Xor = function writeByteMode2Xor(off, b, addr)
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
-        this.fDirty = true;
+        this.flags |= Memory.FLAGS.DIRTY;
     }
     if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
         this.controller.video.printMessage("writeByteMode2Xor(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
@@ -2117,7 +2168,7 @@ Card.ACCESS.writeByteMode3 = function writeByteMode3(off, b, addr)
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
-        this.fDirty = true;
+        this.flags |= Memory.FLAGS.DIRTY;
     }
     if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
         this.controller.video.printMessage("writeByteMode3(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
@@ -2133,6 +2184,7 @@ Card.ACCESS.afn[Card.ACCESS.READ.MODE0]  = Card.ACCESS.readByteMode0;
 Card.ACCESS.afn[Card.ACCESS.READ.MODE0  |  Card.ACCESS.READ.CHAIN4]  = Card.ACCESS.readByteMode0Chain4;
 Card.ACCESS.afn[Card.ACCESS.READ.MODE0  |  Card.ACCESS.READ.EVENODD] = Card.ACCESS.readByteMode0EvenOdd;
 Card.ACCESS.afn[Card.ACCESS.READ.MODE1]  = Card.ACCESS.readByteMode1;
+Card.ACCESS.afn[Card.ACCESS.READ.THRU]   = Card.ACCESS.readByte;
 
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0] = Card.ACCESS.writeByteMode0;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.ROT] = Card.ACCESS.writeByteMode0Rot;
@@ -2148,6 +2200,7 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.AND] = Card.ACCESS.
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.OR]  = Card.ACCESS.writeByteMode2Or;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.XOR] = Card.ACCESS.writeByteMode2Xor;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE3] = Card.ACCESS.writeByteMode3;
+Card.ACCESS.afn[Card.ACCESS.WRITE.THRU]  = Card.ACCESS.writeByte;
 
 /**
  * @class Video
@@ -4266,115 +4319,117 @@ class Video extends Component {
      * getCardAccess()
      *
      * @this {Video}
-     * @return {number|undefined} current memory access setting, or undefined if unknown
+     * @return {number} current memory access setting
      */
     getCardAccess()
     {
-        var nAccess;
         var card = this.cardActive;
+        var nAccess = Card.ACCESS.READ.THRU | Card.ACCESS.WRITE.THRU;
 
-        this.fColor256 = false;
-        var regGRCMode = card.regGRCData[Card.GRC.MODE.INDX];
-        if (regGRCMode != null) {
-            var nReadAccess = Card.ACCESS.READ.MODE0;
-            var nWriteAccess = Card.ACCESS.WRITE.MODE0;
-            var nWriteMode = regGRCMode & Card.GRC.MODE.WRITE.MASK;
-            var regDataRotate = card.regGRCData[Card.GRC.DATAROT.INDX] & Card.GRC.DATAROT.MASK;
-            switch (nWriteMode) {
-            case Card.GRC.MODE.WRITE.MODE0:
-                if (regDataRotate) {
-                    nWriteAccess = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.ROT;
+        if (card.nCard >= Video.CARD.EGA) {
+            this.fColor256 = false;
+            var regGRCMode = card.regGRCData[Card.GRC.MODE.INDX];
+            if (regGRCMode != null) {
+                var nReadAccess = Card.ACCESS.READ.MODE0;
+                var nWriteAccess = Card.ACCESS.WRITE.MODE0;
+                var nWriteMode = regGRCMode & Card.GRC.MODE.WRITE.MASK;
+                var regDataRotate = card.regGRCData[Card.GRC.DATAROT.INDX] & Card.GRC.DATAROT.MASK;
+                switch (nWriteMode) {
+                case Card.GRC.MODE.WRITE.MODE0:
+                    if (regDataRotate) {
+                        nWriteAccess = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.ROT;
+                        switch (regDataRotate & Card.GRC.DATAROT.FUNC) {
+                        case Card.GRC.DATAROT.AND:
+                            nWriteAccess = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.AND;
+                            break;
+                        case Card.GRC.DATAROT.OR:
+                            nWriteAccess = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.OR;
+                            break;
+                        case Card.GRC.DATAROT.XOR:
+                            nWriteAccess = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.XOR;
+                            break;
+                        default:
+                            break;
+                        }
+                        card.nDataRotate = regDataRotate & Card.GRC.DATAROT.COUNT;
+                    }
+                    break;
+                case Card.GRC.MODE.WRITE.MODE1:
+                    nWriteAccess = Card.ACCESS.WRITE.MODE1;
+                    break;
+                case Card.GRC.MODE.WRITE.MODE2:
                     switch (regDataRotate & Card.GRC.DATAROT.FUNC) {
+                    default:
+                        nWriteAccess = Card.ACCESS.WRITE.MODE2;
+                        break;
                     case Card.GRC.DATAROT.AND:
-                        nWriteAccess = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.AND;
+                        nWriteAccess = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.AND;
                         break;
                     case Card.GRC.DATAROT.OR:
-                        nWriteAccess = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.OR;
+                        nWriteAccess = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.OR;
                         break;
                     case Card.GRC.DATAROT.XOR:
-                        nWriteAccess = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.XOR;
-                        break;
-                    default:
+                        nWriteAccess = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.XOR;
                         break;
                     }
-                    card.nDataRotate = regDataRotate & Card.GRC.DATAROT.COUNT;
-                }
-                break;
-            case Card.GRC.MODE.WRITE.MODE1:
-                nWriteAccess = Card.ACCESS.WRITE.MODE1;
-                break;
-            case Card.GRC.MODE.WRITE.MODE2:
-                switch (regDataRotate & Card.GRC.DATAROT.FUNC) {
+                    break;
+                case Card.GRC.MODE.WRITE.MODE3:
+                    if (this.nCard == Video.CARD.VGA) {
+                        nWriteAccess = Card.ACCESS.WRITE.MODE3;
+                        card.nDataRotate = regDataRotate & Card.GRC.DATAROT.COUNT;
+                    }
+                    break;
                 default:
-                    nWriteAccess = Card.ACCESS.WRITE.MODE2;
-                    break;
-                case Card.GRC.DATAROT.AND:
-                    nWriteAccess = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.AND;
-                    break;
-                case Card.GRC.DATAROT.OR:
-                    nWriteAccess = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.OR;
-                    break;
-                case Card.GRC.DATAROT.XOR:
-                    nWriteAccess = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.XOR;
-                    break;
-                }
-                break;
-            case Card.GRC.MODE.WRITE.MODE3:
-                if (this.nCard == Video.CARD.VGA) {
-                    nWriteAccess = Card.ACCESS.WRITE.MODE3;
-                    card.nDataRotate = regDataRotate & Card.GRC.DATAROT.COUNT;
-                }
-                break;
-            default:
-                if (DEBUG && this.messageEnabled()) {
-                    this.printMessage("getCardAccess(): invalid GRC mode (" + Str.toHexByte(regGRCMode) + ")");
-                }
-                break;
-            }
-            if (regGRCMode & Card.GRC.MODE.READ.MODE1) {
-                nReadAccess = Card.ACCESS.READ.MODE1;
-            }
-            /*
-             * I discovered that when the IBM EGA ROM scrolls the screen in graphics modes 0x0D and 0x0E, it
-             * reprograms this register for WRITE.MODE1 (which is fine) *and* EVENODD (which is, um, very odd).
-             * Moreover, it does NOT make the complementary change to the SEQ.MEMMODE.SEQUENTIAL bit; under
-             * normal circumstances, those two bits are always supposed to programmed oppositely.
-             *
-             * Until I can perform some tests on real hardware, I have to assume that the EGA scroll operation
-             * is supposed to actually WORK in modes 0x0D and 0x0E, so I've decided to tie the trigger for my own
-             * EVENODD functions to SEQ.MEMMODE.SEQUENTIAL being clear, instead of GRC.MODE.EVENODD being set.
-             *
-             * It's also possible that my EVENODD read/write functions are not implemented properly; when EVENODD
-             * is in effect, which addresses get latched by a read, and to which addresses are latches written?
-             * If EVENODD has no effect on the effective address used with the latches, then I should change the
-             * EVENODD read/write functions accordingly.
-             *
-             * However, I've also done some limited testing with an emulated VGA running in text mode, and I've
-             * discovered that toggling the GRC.MODE.EVENODD bit *alone* doesn't seem to affect the delivery of
-             * text mode attributes from plane 1.  So maybe this is the wiser change after all.
-             *
-             * TODO: Perform some tests on actual EGA/VGA hardware, to determine the proper course of action.
-             *
-             *  if (regGRCMode & Card.GRC.MODE.EVENODD) {
-             *      nReadAccess |= Card.ACCESS.READ.EVENODD;
-             *      nWriteAccess |= Card.ACCESS.WRITE.EVENODD;
-             *  }
-             */
-            var regSEQMode = card.regSEQData[Card.SEQ.MEMMODE.INDX];
-            if (regSEQMode != null) {
-                if (!(regSEQMode & Card.SEQ.MEMMODE.SEQUENTIAL)) {
-                    nReadAccess |= Card.ACCESS.READ.EVENODD;
-                    nWriteAccess |= Card.ACCESS.WRITE.EVENODD;
-                }
-                if (regGRCMode & Card.GRC.MODE.COLOR256) {
-                    if (regSEQMode & Card.SEQ.MEMMODE.CHAIN4) {
-                        nReadAccess |= Card.ACCESS.READ.CHAIN4;
-                        nWriteAccess |= Card.ACCESS.WRITE.CHAIN4;
+                    if (DEBUG && this.messageEnabled()) {
+                        this.printMessage("getCardAccess(): invalid GRC mode (" + Str.toHexByte(regGRCMode) + ")");
                     }
-                    this.fColor256 = true;
+                    break;
                 }
+                if (regGRCMode & Card.GRC.MODE.READ.MODE1) {
+                    nReadAccess = Card.ACCESS.READ.MODE1;
+                }
+                /*
+                 * I discovered that when the IBM EGA ROM scrolls the screen in graphics modes 0x0D and 0x0E, it
+                 * reprograms this register for WRITE.MODE1 (which is fine) *and* EVENODD (which is, um, very odd).
+                 * Moreover, it does NOT make the complementary change to the SEQ.MEMMODE.SEQUENTIAL bit; under
+                 * normal circumstances, those two bits are always supposed to programmed oppositely.
+                 *
+                 * Until I can perform some tests on real hardware, I have to assume that the EGA scroll operation
+                 * is supposed to actually WORK in modes 0x0D and 0x0E, so I've decided to tie the trigger for my own
+                 * EVENODD functions to SEQ.MEMMODE.SEQUENTIAL being clear, instead of GRC.MODE.EVENODD being set.
+                 *
+                 * It's also possible that my EVENODD read/write functions are not implemented properly; when EVENODD
+                 * is in effect, which addresses get latched by a read, and to which addresses are latches written?
+                 * If EVENODD has no effect on the effective address used with the latches, then I should change the
+                 * EVENODD read/write functions accordingly.
+                 *
+                 * However, I've also done some limited testing with an emulated VGA running in text mode, and I've
+                 * discovered that toggling the GRC.MODE.EVENODD bit *alone* doesn't seem to affect the delivery of
+                 * text mode attributes from plane 1.  So maybe this is the wiser change after all.
+                 *
+                 * TODO: Perform some tests on actual EGA/VGA hardware, to determine the proper course of action.
+                 *
+                 *  if (regGRCMode & Card.GRC.MODE.EVENODD) {
+                 *      nReadAccess |= Card.ACCESS.READ.EVENODD;
+                 *      nWriteAccess |= Card.ACCESS.WRITE.EVENODD;
+                 *  }
+                 */
+                var regSEQMode = card.regSEQData[Card.SEQ.MEMMODE.INDX];
+                if (regSEQMode != null) {
+                    if (!(regSEQMode & Card.SEQ.MEMMODE.SEQUENTIAL)) {
+                        nReadAccess |= Card.ACCESS.READ.EVENODD;
+                        nWriteAccess |= Card.ACCESS.WRITE.EVENODD;
+                    }
+                    if (regGRCMode & Card.GRC.MODE.COLOR256) {
+                        if (regSEQMode & Card.SEQ.MEMMODE.CHAIN4) {
+                            nReadAccess |= Card.ACCESS.READ.CHAIN4;
+                            nWriteAccess |= Card.ACCESS.WRITE.CHAIN4;
+                        }
+                        this.fColor256 = true;
+                    }
+                }
+                nAccess = nReadAccess | nWriteAccess;
             }
-            nAccess = nReadAccess | nWriteAccess;
         }
         return nAccess;
     }
@@ -4566,7 +4621,6 @@ class Video extends Component {
      */
     checkMode(fForce)
     {
-        var nAccess;
         var nMode = this.nMode;
         var card = this.cardActive;
 
@@ -4714,7 +4768,6 @@ class Video extends Component {
                             }
                         }
                     }
-                    nAccess = this.getCardAccess();
                 }
             }
             else if (card.regMode & Card.CGA.MODE.VIDEO_ENABLE) {
@@ -4761,9 +4814,9 @@ class Video extends Component {
 
         /*
          * NOTE: If setMode() remaps the video memory, that will trigger calls to setCardAccess() to also update the
-         * memory's access functions.  However, if the memory access setting (nAccess) is about to change as well, those
-         * changes will be moot until the setCardAccess() call that follows.  Basically, whenever both memory mapping AND
-         * access functions are changing, the memory will be in an inconsistent state until both setMode() and setCardAccess()
+         * memory's access functions.  However, if the memory access setting is about to change as well, those changes
+         * will be moot until the setCardAccess() call that follows.  Basically, whenever both memory mapping AND access
+         * functions are changing, the memory will be in an inconsistent state until both setMode() and setCardAccess()
          * are finished.
          *
          * The setMode() call takes precedence; if we called setCardAccess() first, it might attempt to modify memory access
@@ -4772,7 +4825,7 @@ class Video extends Component {
          */
         if (!this.setMode(nMode, fForce)) return false;
 
-        this.setCardAccess(nAccess);
+        this.setCardAccess(this.getCardAccess());
 
         return true;
     }
@@ -4842,9 +4895,7 @@ class Video extends Component {
                     this.printMessage("setMode(" + Str.toHexByte(nMode) + "): adding " + Str.toHexLong(this.sizeBuffer) + " bytes to " + Str.toHexLong(this.addrBuffer));
                 }
 
-                var controller = (card === this.cardEGA? card : null);
-
-                if (!this.bus.addMemory(card.addrBuffer, card.sizeBuffer, Memory.TYPE.VIDEO, controller)) {
+                if (!this.bus.addMemory(card.addrBuffer, card.sizeBuffer, Memory.TYPE.VIDEO, card)) {
                     /*
                      * TODO: Force this failure case and see how well the Video component deals with it.
                      */
@@ -5227,9 +5278,9 @@ class Video extends Component {
             if (cBlinkOrig < 0) this.cBlinkVisible = -1;
             cCells += this.updateScreenCells(addrBuffer, addrScreenWrap, cbScreenWrap, iCell, nCells, fForce, fBlinkUpdate);
             this.cBlinkVisible += cBlinkNew;
-            this.bus.cleanMemory(addrScreenWrap, cbScreenWrap);
+            this.bus.cleanMemory(addrScreenWrap, cbScreenWrap, true);
         }
-        this.bus.cleanMemory(addrScreen, cbScreen);
+        this.bus.cleanMemory(addrScreen, cbScreen, true);
         if (cCells) this.fCellCacheValid = true;
     }
 
@@ -5261,7 +5312,7 @@ class Video extends Component {
          * no visible cursor, then we're done; simply return.  Otherwise, if there's only a blinking
          * cursor, then update JUST that one cell.
          */
-        if (!fForce && this.fCellCacheValid && this.bus.cleanMemory(addrScreen, cbScreen, true)) {
+        if (!fForce && this.fCellCacheValid && this.bus.cleanMemory(addrScreen, cbScreen)) {
             if (!fBlinkUpdate && this.cBlinkVisible >= 0) {
                 return cCells;
             }
@@ -5346,7 +5397,7 @@ class Video extends Component {
             dataMask &= ~dataBlink;
             if (!(this.cBlinks & 0x2)) dataMask &= ~dataDraw;
         }
-
+        
         this.cBlinkVisible = 0;
         while (addrScreen < addrScreenLimit && iCell < nCells) {
             var data = this.bus.getShortDirect(addrScreen);
@@ -7539,8 +7590,8 @@ Video.aEGADWToByte[0x80808080|0] = 0xf;
  * to access the buffer directly, instead of going through the Bus memory interface.
  */
 Video.cardSpecs = [];
-Video.cardSpecs[Video.CARD.MDA] = ["MDA", Card.MDA.CRTC.INDX.PORT, 0xB0000, 0x01000, 0, ChipSet.MONITOR.MONO];
-Video.cardSpecs[Video.CARD.CGA] = ["CGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04000, 0, ChipSet.MONITOR.COLOR];
+Video.cardSpecs[Video.CARD.MDA] = ["MDA", Card.MDA.CRTC.INDX.PORT, 0xB0000, 0x01000, 0x01000, ChipSet.MONITOR.MONO];
+Video.cardSpecs[Video.CARD.CGA] = ["CGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04000, 0x04000, ChipSet.MONITOR.COLOR];
 Video.cardSpecs[Video.CARD.EGA] = ["EGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04000, 0x10000, ChipSet.MONITOR.EGACOLOR];
 Video.cardSpecs[Video.CARD.VGA] = ["VGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04000, 0x40000, ChipSet.MONITOR.VGACOLOR];
 
