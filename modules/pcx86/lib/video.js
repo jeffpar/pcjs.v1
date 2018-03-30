@@ -1652,6 +1652,8 @@ Card.ACCESS.V1[0xE000] = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.XOR;
 
 /**
  * readByte(off, addr)
+ * 
+ * Used for MDA/CGA "THRU" access (ie, byte is passed through without any controller-imposed overhead)
  *
  * @this {Memory}
  * @param {number} off
@@ -1757,6 +1759,8 @@ Card.ACCESS.readByteMode1 = function readByteMode1(off, addr)
 
 /**
  * writeByte(off, b, addr)
+ *
+ * Used for MDA/CGA "THRU" access (ie, byte is passed through without any controller-imposed overhead)
  *
  * @this {Memory}
  * @param {number} off
@@ -2243,9 +2247,8 @@ class Video extends Component {
      * buffers into the associated screen canvas, via either updateChar() or setPixel().
      *
      * Thanks to the Bus' new block-based memory manager that allows us to sparse-allocate memory
-     * (in 4Kb increments on 20-bit buses, 16Kb increments on 24-bit buses), updateScreen()
-     * can also ask the CPU for the "dirty" state of all the blocks underlying the video buffer,
-     * bypassing the update completely if the buffer is still clean.
+     * (in 4Kb increments), updateScreen() can also ask the CPU for the "dirty" state of all the
+     * blocks underlying the video buffer, bypassing the update completely if the buffer is still clean.
      *
      * Sadly, that optimization is defeated if the count of active blink elements is non-zero,
      * because we must rescan the entire buffer to locate and redraw them all; I'm assuming for now

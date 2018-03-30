@@ -115,8 +115,10 @@ class Memory {
         /*
          * Dirty block tracking is now controller-specific.  As noted in the paged block handlers (eg, writeBytePLE),
          * the original purposes were to allow saveMemory() to save only dirty blocks and to enable the Video component
-         * to quickly detect changes to the video buffer.  But the benefit to saveMemory() is minimal, and the Video
-         * component now uses a custom memory controller for all video modes, which performs its own dirty block tracking.
+         * to quickly detect changes to the video buffer.  But saveMemory() has since been changed to save (and compress)
+         * all memory blocks by default, and the Video component now uses a custom memory controller for all video modes,
+         * which performs its own dirty block tracking, so general-purpose memory blocks no longer need to pay this
+         * penalty.
          */
         this.flags = Memory.FLAGS.CLEAN;
 

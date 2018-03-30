@@ -203,7 +203,7 @@ class ChipSet extends Component {
 
         this.kbd = cmp.getMachineComponent("Keyboard");
 
-        let sound = cmp.getMachineParm("sound");
+        let sound = cmp.getMachineParm('sound');
         if (sound != null) {
             let volume = +sound || 0;
             this.volumeInit = (sound == "true" || volume < 0 || volume > 1? 0.5 : volume);
