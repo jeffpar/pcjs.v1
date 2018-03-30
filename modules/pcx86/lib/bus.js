@@ -1151,29 +1151,28 @@ class Bus extends Component {
      */
     saveMemory(fAll = true)
     {
-        var i = 0;
-        var a = [];
-
         /*
          * A quick-and-dirty work-around for 32-bit bus machines, to ensure that all blocks in the 2nd Mb are
          * mapped in before we save.  We do this by forcing A20 on, and then turning it off again before we leave.
          */
         var fA20 = this.getA20();
         if (!fA20) this.setA20(true);
-
+        
+        var i = 0, a = [];
         for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
             var block = this.aMemBlocks[iBlock];
             if (block.size) {
                 if (fAll && block.type != Memory.TYPE.ROM || block.modified()) {
-                    a[i++] = iBlock;
-                    a[i++] = State.compress(block.save());
+                    var adw = block.save();
+                    if (adw) {
+                        a[i++] = iBlock;
+                        a[i++] = State.compress(adw);
+                    }
                 }
             }
         }
-
         if (!fA20) this.setA20(false);
         a[i] = fA20;
-
         return a;
     }
 

@@ -345,7 +345,7 @@ class Memory {
          * If this block has its own controller, then that controller is responsible for performing the
          * restore, since we don't know the underlying memory format.  However, we no longer blow off the
          * restore if data is provided, because old machine states may still try to restore video memory
-         * blocks for MDA and CGA cards, and in those cases, the memory formats should be compatible.
+         * blocks for MDA and CGA video buffers (and in those cases, the memory formats should be compatible).
          */
         var i;
         if (this.controller) {

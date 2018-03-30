@@ -9760,29 +9760,28 @@ class Bus extends Component {
      */
     saveMemory(fAll = true)
     {
-        var i = 0;
-        var a = [];
-
         /*
          * A quick-and-dirty work-around for 32-bit bus machines, to ensure that all blocks in the 2nd Mb are
          * mapped in before we save.  We do this by forcing A20 on, and then turning it off again before we leave.
          */
         var fA20 = this.getA20();
         if (!fA20) this.setA20(true);
-
+        
+        var i = 0, a = [];
         for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
             var block = this.aMemBlocks[iBlock];
             if (block.size) {
                 if (fAll && block.type != Memory.TYPE.ROM || block.modified()) {
-                    a[i++] = iBlock;
-                    a[i++] = State.compress(block.save());
+                    var adw = block.save();
+                    if (adw) {
+                        a[i++] = iBlock;
+                        a[i++] = State.compress(adw);
+                    }
                 }
             }
         }
-
         if (!fA20) this.setA20(false);
         a[i] = fA20;
-
         return a;
     }
 
@@ -10690,7 +10689,7 @@ class Memory {
          * If this block has its own controller, then that controller is responsible for performing the
          * restore, since we don't know the underlying memory format.  However, we no longer blow off the
          * restore if data is provided, because old machine states may still try to restore video memory
-         * blocks for MDA and CGA cards, and in those cases, the memory formats should be compatible.
+         * blocks for MDA and CGA video buffers (and in those cases, the memory formats should be compatible).
          */
         var i;
         if (this.controller) {
@@ -53597,7 +53596,7 @@ class Video extends Component {
             dataMask &= ~dataBlink;
             if (!(this.cBlinks & 0x2)) dataMask &= ~dataDraw;
         }
-
+        
         this.cBlinkVisible = 0;
         while (addrScreen < addrScreenLimit && iCell < nCells) {
             var data = this.bus.getShortDirect(addrScreen);
