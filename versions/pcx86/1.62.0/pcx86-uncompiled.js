@@ -53124,7 +53124,7 @@ class Video extends Component {
                 /*
                  * As https://www.seasip.info/VintagePC/mda.html explains, the MDA's 4K buffer address is not
                  * fully decoded; it is also addressible at every 4K interval within a 32K (0x8000) address range.
-                 * We must simulate that now, and not just for purely theoretical reasons: the original monochrome-
+                 * We simulate that now, and not just for purely theoretical reasons: the original monochrome-
                  * specific version of "Exploring the IBM Personal Computer":
                  * 
                  *      https://www.pcjs.org/disks/pcx86/diags/ibm/5150/exploring/1.00/mda/
@@ -53133,8 +53133,14 @@ class Video extends Component {
                  * call, where the top left (CX) and bottom right (DX) coordinates are reversed, resulting in a
                  * scroll with negative coordinates that the BIOS converts into large positive off-screen coordinates,
                  * which just so happens to clear the video buffer anyway, because it's repeatedly addressible.
+                 * 
+                 * The CGA's 16K buffer has a similar feature, but owing to its larger size, its buffer repeats only
+                 * once within a 32K address range.  And yes, the color version of "Exploring the IBM Personal Computer"
+                 * has a similar INT 10h scroll bug; the app is using graphics mode 0x04, so it's requesting a graphics
+                 * scroll rather than a text scroll to clear the screen, but once again, the coordinates are reversed,
+                 * so much of the memory it zeroes is above the first 16K.
                  */
-                if (card.nCard == Video.CARD.MDA) {
+                if (card.nCard < Video.CARD.EGA) {
                     var addrBuffer = this.addrBuffer;
                     var aBlocks = this.bus.getMemoryBlocks(addrBuffer, this.sizeBuffer);
                     while ((addrBuffer += this.sizeBuffer) < card.addrBuffer + 0x8000) {
@@ -55839,24 +55845,29 @@ Video.KEYGRID = [
 
 /*
  * Port input/output notification tables
- *
- * TODO: At one point, I'd added some "duplicate" entries for the MDA because, according to docs I'd read,
- * MDA ports are decoded at multiple addresses.  However, if this is important, then it should be verified
- * and implemented consistently (eg, for CGA as well).  For now, I'm decoding only the standard port addresses.
- *
- * For example, 0x3B5 is apparently also decoded at 0x3B1, 0x3B3, and 0x3B7, while 0x3B4 is also decoded at
- * 0x3B0, 0x3B2, and 0x3B6.
  */
 Video.aMDAPortInput = {
+    0x3B0: Video.prototype.inMDAIndx,           // duplicate of 0x3B4
+    0x3B1: Video.prototype.inMDAData,           // duplicate of 0x3B5
+    0x3B2: Video.prototype.inMDAIndx,           // duplicate of 0x3B4
+    0x3B3: Video.prototype.inMDAData,           // duplicate of 0x3B5
     0x3B4: Video.prototype.inMDAIndx,           // technically, not actually readable, but I want the Debugger to be able to read this
     0x3B5: Video.prototype.inMDAData,           // technically, the only CRTC Data registers that are readable are R14-R17
+    0x3B6: Video.prototype.inMDAIndx,           // duplicate of 0x3B4
+    0x3B7: Video.prototype.inMDAData,           // duplicate of 0x3B5
     0x3B8: Video.prototype.inMDAMode,           // technically, not actually readable, but I want the Debugger to be able to read this
     0x3BA: Video.prototype.inMDAStatus
 };
 
 Video.aMDAPortOutput = {
+    0x3B0: Video.prototype.outMDAIndx,          // duplicate of 0x3B4
+    0x3B1: Video.prototype.outMDAData,          // duplicate of 0x3B5
+    0x3B2: Video.prototype.outMDAIndx,          // duplicate of 0x3B4
+    0x3B3: Video.prototype.outMDAData,          // duplicate of 0x3B5
     0x3B4: Video.prototype.outMDAIndx,
     0x3B5: Video.prototype.outMDAData,
+    0x3B6: Video.prototype.outMDAIndx,          // duplicate of 0x3B4
+    0x3B7: Video.prototype.outMDAData,          // duplicate of 0x3B5
     0x3B8: Video.prototype.outMDAMode
 };
 
@@ -56159,7 +56170,7 @@ class ParallelPort extends Component {
     {
         var i = 0;
         if (data === undefined) {
-            data = [0, ParallelPort.STATUS.NERR, 0];
+            data = [0, ParallelPort.STATUS.NERR | ParallelPort.STATUS.ALWAYS_SET, ParallelPort.CONTROL.ALWAYS_SET];
         }
         this.bData = data[i++];
         this.bStatus = data[i++];
@@ -56265,7 +56276,7 @@ class ParallelPort extends Component {
     outControl(port, bOut, addrFrom)
     {
         this.printMessageIO(port, bOut, addrFrom, "CTRL");
-        this.bControl = bOut;
+        this.bControl = bOut | ParallelPort.CONTROL.ALWAYS_SET;
         this.updateIRR();
     }
 
@@ -56389,9 +56400,9 @@ ParallelPort.DATA = {           // (read/write)
  *
  *      Bit     Pin
  *      ---     ---
- *       0       -              // 0x01
- *       1       -              // 0x02
- *       2       -              // 0x04
+ *       0       -              // 0x01 (always set on MDA printer port)
+ *       1       -              // 0x02 (always set on MDA printer port)
+ *       2       -              // 0x04 (always set on MDA printer port)
  *       3       !15            // 0x08 (Error)
  *       4       13             // 0x10 (Select)
  *       5       12             // 0x20 (Out of Paper)
@@ -56400,11 +56411,12 @@ ParallelPort.DATA = {           // (read/write)
  */
 ParallelPort.STATUS = {         // (read)
     REG:        1,
+    ALWAYS_SET: 0x07,           // (always set on MDA printer port)
     NERR:       0x08,           // when this bit is clear, I/O error (inverted by the ROM BIOS INT 17h Status function)
     SELECT:     0x10,           // when this bit is set, printer selected
     PAPER:      0x20,           // when this bit is set, out of paper
     NACK:       0x40,           // when this bit is clear, data acknowledged (and optionally, interrupt requested; inverted by the ROM BIOS INT 17h Status function)
-    NBUSY:      0x80            // when this bit is clear, printer busy
+    NBUSY:      0x80            // when this bit is clear, printer busy (TODO: Is this really inverted? https://www.seasip.info/VintagePC/mda.htm doesn't show it that way; perhaps it's simply that the signal from the printer is typically inverted)
 };
 
 /*
@@ -56421,7 +56433,12 @@ ParallelPort.STATUS = {         // (read)
  */
 ParallelPort.CONTROL = {        // (read/write)
     REG:        2,
-    IRQ_ENABLE: 0x10            // set to enable interrupts
+    NSTROBE:    0x01,           // !Strobe
+    NAUTOFEED:  0x02,           // !Auto feed
+    INIT:       0x04,           // Initialize printer
+    NSELECT:    0x08,           // !Select input
+    IRQ_ENABLE: 0x10,           // set to enable interrupts (when printer clears NACK)
+    ALWAYS_SET: 0xE0            // (always set on MDA printer port when reading)
 };
 
 /*
