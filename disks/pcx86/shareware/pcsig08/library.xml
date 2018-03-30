@@ -21,6 +21,9 @@
 		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2S.json">Undocumented DOS (2E SRC)</disk>
 		<disk path="/tests/pcx86/testmon/int14/INT14.json">PCjs INT14 Utilities</disk>
 		<disk path="/tests/pcx86/vga/VGABIN.json">VGA Tests (Black Book)</disk>
+		<disk path="/pcjs-disks/pcx86/empty/EMPTY-160K.json">Empty Diskette (160K)</disk>
+		<disk path="/pcjs-disks/pcx86/empty/EMPTY-320K.json">Empty Diskette (320K)</disk>
+		<disk path="/pcjs-disks/pcx86/empty/EMPTY-180K.json">Empty Diskette (180K)</disk>
 		<disk path="/pcjs-disks/pcx86/empty/EMPTY-360K.json">Empty Diskette (360K)</disk>
 		<disk path="/pcjs-disks/pcx86/empty/EMPTY-720K.json">Empty Diskette (720K)</disk>
 		<disk path="/pcjs-disks/pcx86/empty/EMPTY-1200K.json">Empty Diskette (1.2M)</disk>
