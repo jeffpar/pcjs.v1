@@ -394,7 +394,7 @@ class SerialPort extends Component {
     initConnection(fNullModem)
     {
         if (!this.connection) {
-            var sConnection = this.cmp.getMachineParm("connection");
+            var sConnection = this.cmp.getMachineParm('connection');
             if (sConnection) {
                 var asParts = sConnection.split('->');
                 if (asParts.length == 2) {
