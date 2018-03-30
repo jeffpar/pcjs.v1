@@ -264,7 +264,7 @@ class ParallelPort extends Component {
     {
         var i = 0;
         if (data === undefined) {
-            data = [0, ParallelPort.STATUS.NERR, 0];
+            data = [0, ParallelPort.STATUS.NERR | ParallelPort.STATUS.ALWAYS_SET, ParallelPort.CONTROL.ALWAYS_SET];
         }
         this.bData = data[i++];
         this.bStatus = data[i++];
@@ -370,7 +370,7 @@ class ParallelPort extends Component {
     outControl(port, bOut, addrFrom)
     {
         this.printMessageIO(port, bOut, addrFrom, "CTRL");
-        this.bControl = bOut;
+        this.bControl = bOut | ParallelPort.CONTROL.ALWAYS_SET;
         this.updateIRR();
     }
 
@@ -494,9 +494,9 @@ ParallelPort.DATA = {           // (read/write)
  *
  *      Bit     Pin
  *      ---     ---
- *       0       -              // 0x01
- *       1       -              // 0x02
- *       2       -              // 0x04
+ *       0       -              // 0x01 (always set on MDA printer port)
+ *       1       -              // 0x02 (always set on MDA printer port)
+ *       2       -              // 0x04 (always set on MDA printer port)
  *       3       !15            // 0x08 (Error)
  *       4       13             // 0x10 (Select)
  *       5       12             // 0x20 (Out of Paper)
@@ -505,11 +505,12 @@ ParallelPort.DATA = {           // (read/write)
  */
 ParallelPort.STATUS = {         // (read)
     REG:        1,
+    ALWAYS_SET: 0x07,           // (always set on MDA printer port)
     NERR:       0x08,           // when this bit is clear, I/O error (inverted by the ROM BIOS INT 17h Status function)
     SELECT:     0x10,           // when this bit is set, printer selected
     PAPER:      0x20,           // when this bit is set, out of paper
     NACK:       0x40,           // when this bit is clear, data acknowledged (and optionally, interrupt requested; inverted by the ROM BIOS INT 17h Status function)
-    NBUSY:      0x80            // when this bit is clear, printer busy
+    NBUSY:      0x80            // when this bit is clear, printer busy (TODO: Is this really inverted? https://www.seasip.info/VintagePC/mda.htm doesn't show it that way; perhaps it's simply that the signal from the printer is typically inverted)
 };
 
 /*
@@ -526,7 +527,12 @@ ParallelPort.STATUS = {         // (read)
  */
 ParallelPort.CONTROL = {        // (read/write)
     REG:        2,
-    IRQ_ENABLE: 0x10            // set to enable interrupts
+    NSTROBE:    0x01,           // !Strobe
+    NAUTOFEED:  0x02,           // !Auto feed
+    INIT:       0x04,           // Initialize printer
+    NSELECT:    0x08,           // !Select input
+    IRQ_ENABLE: 0x10,           // set to enable interrupts (when printer clears NACK)
+    ALWAYS_SET: 0xE0            // (always set on MDA printer port when reading)
 };
 
 /*
