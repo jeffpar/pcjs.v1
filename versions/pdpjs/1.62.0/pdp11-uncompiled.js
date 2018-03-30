@@ -31661,20 +31661,18 @@ class State {
      * State.decompress(aComp)
      *
      * @param {Array.<number>} aComp
-     * @param {number} nLength is expected length of decompressed data
+     * @param {number} [nLength] (expected length of decompressed data)
      * @return {Array.<number>}
      */
     static decompress(aComp, nLength)
     {
         var iDst = 0;
-        var aDst = new Array(nLength);
+        var aDst = nLength? new Array(nLength) : [];
         var iComp = 0;
         while (iComp < aComp.length - 1) {
             var c = aComp[iComp++];
             var n = aComp[iComp++];
-            while (c--) {
-                aDst[iDst++] = n;
-            }
+            while (c--) aDst[iDst++] = n;
         }
 
         return aDst;

@@ -8762,11 +8762,13 @@ class Bus extends Component {
          * requirements.  Your choices, for the moment, are either to ensure the allocations are performed in
          * order, or to choose smaller nBlockShift values (at the expense of a generating a larger block array).
          *
-         * Note that if PAGEBLOCKS is set, then for a bus width of 32 bits, the block size is fixed at 4Kb.
+         * UPDATE: The above is mostly historical thinking, because the new default block size is 4K (assuming
+         * PAGEBLOCKS is set, which it always is now).  We really need the lower granularity for all machines,
+         * because the original IBM MDA video card needs to be able to do 4K-granular aliasing.
          */
         this.addrTotal = Math.pow(2, this.nBusWidth);
         this.nBusLimit = this.nBusMask = (this.addrTotal - 1) | 0;
-        this.nBlockShift = (PAGEBLOCKS && this.nBusWidth == 32 || this.nBusWidth <= 20)? 12 : (this.nBusWidth <= 24? 14 : 15);
+        this.nBlockShift = (PAGEBLOCKS /* && this.nBusWidth == 32 */ || this.nBusWidth <= 20)? 12 : (this.nBusWidth <= 24? 14 : 15);
         this.nBlockSize = 1 << this.nBlockShift;
         this.nBlockLen = this.nBlockSize >> 2;
         this.nBlockLimit = this.nBlockSize - 1;
@@ -9804,22 +9806,46 @@ class Bus extends Component {
      */
     restoreMemory(a)
     {
-        var i;
+        var i, scale = 1;
         for (i = 0; i < a.length - 1; i += 2) {
-            var iBlock = a[i];
-            var adw = a[i+1];
-            if (adw && adw.length < this.nBlockLen) {
-                adw = State.decompress(adw, this.nBlockLen);
-            }
-            var block = this.aMemBlocks[iBlock];
-            if (!block || !block.restore(adw)) {
-                /*
-                 * Either the block to restore hasn't been allocated, indicating a change in the machine
-                 * configuration since it was last saved (the most likely explanation) or there's some internal
-                 * inconsistency (eg, the block size is wrong).
-                 */
-                Component.error("Unable to restore memory block " + iBlock);
-                return false;
+            var iBlock = a[i] * scale, adw = a[i+1];
+            /*
+             * One wrinkle here is dealing with blocks that were saved when the machine was using an
+             * older (larger) block size, because now I would like to ALWAYS use a block size of 4K, whereas
+             * some older machine configurations could use larger block sizes (16K or 32K).  My choices are:
+             * 1) assume that none of those older configurations have saved states "in the wild", or 2)
+             * divide those larger blocks into multiple sequential 4K blocks and hope for the best.
+             * 
+             * I'm going with #2, which means omitting the expected length parameter from decompress(), then
+             * dividing the returned length by the current nBlockLen, and iterating over the number of blocks.
+             * 
+             * Also, if/when we encounter this situation, we must also scale the incoming block numbers, since
+             * they are numbering larger (fewer) blocks than we're currently using.
+             * 
+             * And if it turns out that #1 was a perfectly valid assumption, that's fine, because none of the
+             * new splicing and scaling code should ever kick in.
+             */
+            if (adw) {
+                if (adw.length < this.nBlockLen) {
+                    adw = State.decompress(adw);
+                }
+                var nBlocks = (adw.length / this.nBlockLen)|0;
+                if (nBlocks && scale == 1) scale = nBlocks;
+                while (nBlocks > 0) {
+                    var adwBlock = nBlocks > 1? adw.splice(0, this.nBlockLen) : adw;
+                    var block = this.aMemBlocks[iBlock];
+                    if (!block || !block.restore(adwBlock)) {
+                        /*
+                         * Either the block to restore hasn't been allocated, indicating a change in the machine
+                         * configuration since it was last saved (the most likely explanation) or there's some internal
+                         * inconsistency (eg, the block size is wrong).
+                         */
+                        Component.error("Unable to restore memory block " + iBlock);
+                        return false;
+                    }
+                    nBlocks--;
+                    iBlock++;
+                }
             }
         }
         if (a[i] !== undefined) this.setA20(a[i]);
@@ -10680,38 +10706,32 @@ class Memory {
      * restored and thus all Memory blocks have been allocated by their respective components.
      *
      * @this {Memory}
-     * @param {Array|null} adw
+     * @param {Array} adw
      * @return {boolean} true if successful, false if block size mismatch
      */
     restore(adw)
     {
         /*
          * If this block has its own controller, then that controller is responsible for performing the
-         * restore, since we don't know the underlying memory format.  However, we no longer blow off the
-         * restore if data is provided, because old machine states may still try to restore video memory
-         * blocks for MDA and CGA video buffers (and in those cases, the memory formats should be compatible).
+         * restore, since we don't know the underlying memory format.  However, we no longer blow off these
+         * restore calls, because old machine states may still try to restore video memory blocks for MDA
+         * and CGA video buffers (and in those cases, the memory formats should be compatible).
          */
-        var i;
+        var i, off;
         if (this.controller) {
-            if (adw) {
-                for (i = 0; i < adw.length; i++) this.adw[i + (this.offset >> 2)] = adw[i];
+            if (this.adw) {
+                for (i = 0; i < adw.length; i++) {
+                    off = (this.offset >> 2) + i;
+                    if (off >= this.adw.length) break;
+                    this.adw[off] = adw[i];
+                }
                 this.flags |= Memory.FLAGS.DIRTY;
             }
             return true;
         }
-        
-        /*
-         * At this point, it's a consistency error for adw to be null; it's happened once already,
-         * when there was a restore bug in the Video component that added the frame buffer at the video
-         * card's "spec'ed" address instead of the programmed address, so there were no controller-owned
-         * memory blocks installed at the programmed address, and so we arrived here at a block with
-         * no controller AND no data.
-         */
-
-
-        if (adw && this.size == adw.length << 2) {
+        if (this.size == adw.length << 2) {
             if (BYTEARRAYS) {
-                var off = 0;
+                off = 0;
                 for (i = 0; i < adw.length; i++) {
                     this.ab[off] = adw[i] & 0xff;
                     this.ab[off + 1] = (adw[i] >> 8) & 0xff;
@@ -53100,6 +53120,27 @@ class Video extends Component {
                      */
                     return false;
                 }
+                
+                /*
+                 * As https://www.seasip.info/VintagePC/mda.html explains, the MDA's 4K buffer address is not
+                 * fully decoded; it is also addressible at every 4K interval within a 32K (0x8000) address range.
+                 * We must simulate that now, and not just for purely theoretical reasons: the original monochrome-
+                 * specific version of "Exploring the IBM Personal Computer":
+                 * 
+                 *      https://www.pcjs.org/disks/pcx86/diags/ibm/5150/exploring/1.00/mda/
+                 *      
+                 * has a bug where it attempts to clear one of the intro screens with a faulty INT 10h Scroll Up
+                 * call, where the top left (CX) and bottom right (DX) coordinates are reversed, resulting in a
+                 * scroll with negative coordinates that the BIOS converts into large positive off-screen coordinates,
+                 * which just so happens to clear the video buffer anyway, because it's repeatedly addressible.
+                 */
+                if (card.nCard == Video.CARD.MDA) {
+                    var addrBuffer = this.addrBuffer;
+                    var aBlocks = this.bus.getMemoryBlocks(addrBuffer, this.sizeBuffer);
+                    while ((addrBuffer += this.sizeBuffer) < card.addrBuffer + 0x8000) {
+                        this.bus.setMemoryBlocks(addrBuffer, this.sizeBuffer, aBlocks);
+                    }
+                }
             }
             this.setDimensions();
             this.invalidateCache(true);
@@ -73045,9 +73086,7 @@ class DebuggerX86 extends Debugger {
                 }
             }
         }
-
         this.nSuppressBreaks--;
-
         return fBreak;
     }
 
@@ -79523,20 +79562,18 @@ class State {
      * State.decompress(aComp)
      *
      * @param {Array.<number>} aComp
-     * @param {number} nLength is expected length of decompressed data
+     * @param {number} [nLength] (expected length of decompressed data)
      * @return {Array.<number>}
      */
     static decompress(aComp, nLength)
     {
         var iDst = 0;
-        var aDst = new Array(nLength);
+        var aDst = nLength? new Array(nLength) : [];
         var iComp = 0;
         while (iComp < aComp.length - 1) {
             var c = aComp[iComp++];
             var n = aComp[iComp++];
-            while (c--) {
-                aDst[iDst++] = n;
-            }
+            while (c--) aDst[iDst++] = n;
         }
 
         return aDst;

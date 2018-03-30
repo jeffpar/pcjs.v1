@@ -336,38 +336,32 @@ class Memory {
      * restored and thus all Memory blocks have been allocated by their respective components.
      *
      * @this {Memory}
-     * @param {Array|null} adw
+     * @param {Array} adw
      * @return {boolean} true if successful, false if block size mismatch
      */
     restore(adw)
     {
         /*
          * If this block has its own controller, then that controller is responsible for performing the
-         * restore, since we don't know the underlying memory format.  However, we no longer blow off the
-         * restore if data is provided, because old machine states may still try to restore video memory
-         * blocks for MDA and CGA video buffers (and in those cases, the memory formats should be compatible).
+         * restore, since we don't know the underlying memory format.  However, we no longer blow off these
+         * restore calls, because old machine states may still try to restore video memory blocks for MDA
+         * and CGA video buffers (and in those cases, the memory formats should be compatible).
          */
-        var i;
+        var i, off;
         if (this.controller) {
-            if (adw) {
-                for (i = 0; i < adw.length; i++) this.adw[i + (this.offset >> 2)] = adw[i];
+            if (this.adw) {
+                for (i = 0; i < adw.length; i++) {
+                    off = (this.offset >> 2) + i;
+                    if (off >= this.adw.length) break;
+                    this.adw[off] = adw[i];
+                }
                 this.flags |= Memory.FLAGS.DIRTY;
             }
             return true;
         }
-        
-        /*
-         * At this point, it's a consistency error for adw to be null; it's happened once already,
-         * when there was a restore bug in the Video component that added the frame buffer at the video
-         * card's "spec'ed" address instead of the programmed address, so there were no controller-owned
-         * memory blocks installed at the programmed address, and so we arrived here at a block with
-         * no controller AND no data.
-         */
-        Component.assert(adw != null);
-
-        if (adw && this.size == adw.length << 2) {
+        if (this.size == adw.length << 2) {
             if (BYTEARRAYS) {
-                var off = 0;
+                off = 0;
                 for (i = 0; i < adw.length; i++) {
                     this.ab[off] = adw[i] & 0xff;
                     this.ab[off + 1] = (adw[i] >> 8) & 0xff;

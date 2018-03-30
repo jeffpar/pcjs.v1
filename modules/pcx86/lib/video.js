@@ -4901,6 +4901,27 @@ class Video extends Component {
                      */
                     return false;
                 }
+                
+                /*
+                 * As https://www.seasip.info/VintagePC/mda.html explains, the MDA's 4K buffer address is not
+                 * fully decoded; it is also addressible at every 4K interval within a 32K (0x8000) address range.
+                 * We must simulate that now, and not just for purely theoretical reasons: the original monochrome-
+                 * specific version of "Exploring the IBM Personal Computer":
+                 * 
+                 *      https://www.pcjs.org/disks/pcx86/diags/ibm/5150/exploring/1.00/mda/
+                 *      
+                 * has a bug where it attempts to clear one of the intro screens with a faulty INT 10h Scroll Up
+                 * call, where the top left (CX) and bottom right (DX) coordinates are reversed, resulting in a
+                 * scroll with negative coordinates that the BIOS converts into large positive off-screen coordinates,
+                 * which just so happens to clear the video buffer anyway, because it's repeatedly addressible.
+                 */
+                if (card.nCard == Video.CARD.MDA) {
+                    var addrBuffer = this.addrBuffer;
+                    var aBlocks = this.bus.getMemoryBlocks(addrBuffer, this.sizeBuffer);
+                    while ((addrBuffer += this.sizeBuffer) < card.addrBuffer + 0x8000) {
+                        this.bus.setMemoryBlocks(addrBuffer, this.sizeBuffer, aBlocks);
+                    }
+                }
             }
             this.setDimensions();
             this.invalidateCache(true);
