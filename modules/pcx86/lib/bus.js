@@ -153,11 +153,13 @@ class Bus extends Component {
          * requirements.  Your choices, for the moment, are either to ensure the allocations are performed in
          * order, or to choose smaller nBlockShift values (at the expense of a generating a larger block array).
          *
-         * Note that if PAGEBLOCKS is set, then for a bus width of 32 bits, the block size is fixed at 4Kb.
+         * UPDATE: The above is mostly historical thinking, because the new default block size is 4K (assuming
+         * PAGEBLOCKS is set, which it always is now).  We really need the lower granularity for all machines,
+         * because the original IBM MDA video card needs to be able to do 4K-granular aliasing.
          */
         this.addrTotal = Math.pow(2, this.nBusWidth);
         this.nBusLimit = this.nBusMask = (this.addrTotal - 1) | 0;
-        this.nBlockShift = (PAGEBLOCKS && this.nBusWidth == 32 || this.nBusWidth <= 20)? 12 : (this.nBusWidth <= 24? 14 : 15);
+        this.nBlockShift = (PAGEBLOCKS /* && this.nBusWidth == 32 */ || this.nBusWidth <= 20)? 12 : (this.nBusWidth <= 24? 14 : 15);
         this.nBlockSize = 1 << this.nBlockShift;
         this.nBlockLen = this.nBlockSize >> 2;
         this.nBlockLimit = this.nBlockSize - 1;
@@ -365,25 +367,21 @@ class Bus extends Component {
     }
 
     /**
-     * cleanMemory(addr, size, fNoScrub)
+     * cleanMemory(addr, size, fScrub)
      *
      * @this {Bus}
      * @param {number} addr
      * @param {number} size
-     * @param {boolean} [fNoScrub] (by default, all blocks are "scrubbed" in the process)
-     * @return {boolean} (true if all blocks were clean, false if dirty)
+     * @param {boolean} [fScrub] (true to "scrub" blocks as well)
+     * @return {boolean} (true if all blocks were clean, false otherwise)
      */
-    cleanMemory(addr, size, fNoScrub)
+    cleanMemory(addr, size, fScrub)
     {
         var fClean = true;
         var iBlock = addr >>> this.nBlockShift;
         var sizeBlock = this.nBlockSize - (addr & this.nBlockLimit);
         while (size > 0 && iBlock < this.aMemBlocks.length) {
-            if (this.aMemBlocks[iBlock].fDirty) {
-                if (!fNoScrub) {
-                    this.aMemBlocks[iBlock].fDirty = false;
-                    this.aMemBlocks[iBlock].fDirtyEver = true;
-                }
+            if (!this.aMemBlocks[iBlock].clean(fScrub)) {
                 fClean = false;
             }
             size -= sizeBlock;
@@ -1132,12 +1130,7 @@ class Bus extends Component {
     /**
      * saveMemory(fAll)
      *
-     * The only memory blocks we save are those marked as dirty, but most likely all of RAM will have been marked dirty,
-     * and even if our dirty-memory flags were as smart as our dirty-sector flags (ie, were set only when a write changed
-     * what was already there), it's unlikely that would reduce the number of RAM blocks we must save/restore.  At least
-     * all the ROM blocks should be clean (except in the unlikely event that the Debugger was used to modify them).
-     *
-     * All dirty blocks will be stored in a single array, as pairs of block numbers and data arrays, like so:
+     * All blocks will be stored in a single array, as pairs of block numbers and data arrays, like so:
      *
      *      [iBlock0, [dw0, dw1, ...], iBlock1, [dw0, dw1, ...], ...]
      *
@@ -1155,37 +1148,33 @@ class Bus extends Component {
      * helper methods compress() and decompress() to create and expand the compressed data arrays.
      *
      * @this {Bus}
-     * @param {boolean} [fAll] (true to save all non-ROM memory blocks, regardless of their dirty flags)
+     * @param {boolean} [fAll] (true to save all non-ROM memory blocks, regardless of their modified() state)
      * @return {Array} a
      */
-    saveMemory(fAll)
+    saveMemory(fAll = true)
     {
-        var i = 0;
-        var a = [];
-
         /*
          * A quick-and-dirty work-around for 32-bit bus machines, to ensure that all blocks in the 2nd Mb are
          * mapped in before we save.  We do this by forcing A20 on, and then turning it off again before we leave.
          */
         var fA20 = this.getA20();
         if (!fA20) this.setA20(true);
-
+        
+        var i = 0, a = [];
         for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
             var block = this.aMemBlocks[iBlock];
-            /*
-             * We have to check both fDirty and fDirtyEver, because we may have called cleanMemory() on some of
-             * the memory blocks (eg, video memory), and while cleanMemory() will clear a dirty block's fDirty flag,
-             * it also sets the dirty block's fDirtyEver flag, which is left set for the lifetime of the machine.
-             */
-            if (fAll && block.type != Memory.TYPE.ROM || block.fDirty || block.fDirtyEver) {
-                a[i++] = iBlock;
-                a[i++] = State.compress(block.save());
+            if (block.size) {
+                if (fAll && block.type != Memory.TYPE.ROM || block.modified()) {
+                    var adw = block.save();
+                    if (adw) {
+                        a[i++] = iBlock;
+                        a[i++] = State.compress(adw);
+                    }
+                }
             }
         }
-
         if (!fA20) this.setA20(false);
         a[i] = fA20;
-
         return a;
     }
 
@@ -1208,22 +1197,46 @@ class Bus extends Component {
      */
     restoreMemory(a)
     {
-        var i;
+        var i, scale = 1;
         for (i = 0; i < a.length - 1; i += 2) {
-            var iBlock = a[i];
-            var adw = a[i+1];
-            if (adw && adw.length < this.nBlockLen) {
-                adw = State.decompress(adw, this.nBlockLen);
-            }
-            var block = this.aMemBlocks[iBlock];
-            if (!block || !block.restore(adw)) {
-                /*
-                 * Either the block to restore hasn't been allocated, indicating a change in the machine
-                 * configuration since it was last saved (the most likely explanation) or there's some internal
-                 * inconsistency (eg, the block size is wrong).
-                 */
-                Component.error("Unable to restore memory block " + iBlock);
-                return false;
+            var iBlock = a[i] * scale, adw = a[i+1];
+            /*
+             * One wrinkle here is dealing with blocks that were saved when the machine was using an
+             * older (larger) block size, because now I would like to ALWAYS use a block size of 4K, whereas
+             * some older machine configurations could use larger block sizes (16K or 32K).  My choices are:
+             * 1) assume that none of those older configurations have saved states "in the wild", or 2)
+             * divide those larger blocks into multiple sequential 4K blocks and hope for the best.
+             * 
+             * I'm going with #2, which means omitting the expected length parameter from decompress(), then
+             * dividing the returned length by the current nBlockLen, and iterating over the number of blocks.
+             * 
+             * Also, if/when we encounter this situation, we must also scale the incoming block numbers, since
+             * they are numbering larger (fewer) blocks than we're currently using.
+             * 
+             * And if it turns out that #1 was a perfectly valid assumption, that's fine, because none of the
+             * new splicing and scaling code should ever kick in.
+             */
+            if (adw) {
+                if (adw.length < this.nBlockLen) {
+                    adw = State.decompress(adw);
+                }
+                var nBlocks = (adw.length / this.nBlockLen)|0;
+                if (nBlocks && scale == 1) scale = nBlocks;
+                while (nBlocks > 0) {
+                    var adwBlock = nBlocks > 1? adw.splice(0, this.nBlockLen) : adw;
+                    var block = this.aMemBlocks[iBlock];
+                    if (!block || !block.restore(adwBlock)) {
+                        /*
+                         * Either the block to restore hasn't been allocated, indicating a change in the machine
+                         * configuration since it was last saved (the most likely explanation) or there's some internal
+                         * inconsistency (eg, the block size is wrong).
+                         */
+                        Component.error("Unable to restore memory block " + iBlock);
+                        return false;
+                    }
+                    nBlocks--;
+                    iBlock++;
+                }
             }
         }
         if (a[i] !== undefined) this.setA20(a[i]);

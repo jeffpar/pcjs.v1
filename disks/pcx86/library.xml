@@ -21,6 +21,9 @@
 		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS2S.json">Undocumented DOS (2E SRC)</disk>
 		<disk path="/tests/pcx86/testmon/int14/INT14.json">PCjs INT14 Utilities</disk>
 		<disk path="/tests/pcx86/vga/VGABIN.json">VGA Tests (Black Book)</disk>
+		<disk path="/pcjs-disks/pcx86/empty/EMPTY-160K.json">Empty Diskette (160K)</disk>
+		<disk path="/pcjs-disks/pcx86/empty/EMPTY-320K.json">Empty Diskette (320K)</disk>
+		<disk path="/pcjs-disks/pcx86/empty/EMPTY-180K.json">Empty Diskette (180K)</disk>
 		<disk path="/pcjs-disks/pcx86/empty/EMPTY-360K.json">Empty Diskette (360K)</disk>
 		<disk path="/pcjs-disks/pcx86/empty/EMPTY-720K.json">Empty Diskette (720K)</disk>
 		<disk path="/pcjs-disks/pcx86/empty/EMPTY-1200K.json">Empty Diskette (1.2M)</disk>
@@ -44,7 +47,8 @@
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/2.07/5150-DIAG-207.json">IBM PC Diagnostics 2.07</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5170/1.02/5170-DIAG-102.json">IBM PC AT Diagnostics 1.02</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5170/2.00/5170-DIAG-200.json">IBM PC AT Diagnostics 2.00</disk>
-		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/exploring/1.00/EXPLORING-THE-IBM-PC-100.json">Exploring the IBM PC 1.00</disk>
+		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/exploring/1.00/mda/EXPLORING-THE-IBM-PC-100-MDA.json">Exploring the IBM PC 1.00 (MDA)</disk>
+		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/exploring/1.00/cga/EXPLORING-THE-IBM-PC-100-CGA.json">Exploring the IBM PC 1.00 (CGA)</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5170/exploring/1.00/EXPLORING-THE-IBM-PC-AT-100.json">Exploring the IBM PC AT 1.00</disk>
 		<disk path="/pcjs-disks/pcx86/diags/compaq/5.08/COMPAQ-DIAGS-508-012988-REVK.json">COMPAQ Diagnostics 5.08</disk>
 		<disk path="/pcjs-disks/pcx86/diags/compaq/6.12/COMPAQ-DIAGS-612-062189.json">COMPAQ Diagnostics 6.12</disk>
