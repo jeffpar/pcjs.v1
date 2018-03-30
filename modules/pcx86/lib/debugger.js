@@ -3564,9 +3564,7 @@ class DebuggerX86 extends Debugger {
                 }
             }
         }
-
         this.nSuppressBreaks--;
-
         return fBreak;
     }
 

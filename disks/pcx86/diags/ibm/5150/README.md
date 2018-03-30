@@ -23,4 +23,5 @@ IBM Diagnostics for PC and PC XT
 
 ### Exploring the IBM PC
 
-* [Exploring the IBM PC 1.00](exploring/1.00/)
+* [Exploring the IBM PC 1.00 (Color Version)](exploring/1.00/cga/)
+* [Exploring the IBM PC 1.00 (Monochrome Version)](exploring/1.00/mda/)

@@ -1844,7 +1844,7 @@ class CPUX86 extends CPU {
         state.set(1, a);
         state.set(2, [this.segData.sName, this.segStack.sName, this.opFlags, this.opPrefixes, this.intFlags, this.regEA, this.regEAWrite]);
         state.set(3, [0, this.nTotalCycles, this.getSpeed(), fRunning, this.saveTimers()]);
-        state.set(4, this.bus.saveMemory(this.isPagingEnabled()));
+        state.set(4, this.bus.saveMemory());
         return state.data();
     }
 

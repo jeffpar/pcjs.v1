@@ -113,18 +113,12 @@ class Memory {
         this.copyBreakpoints();     // initialize the block's Debugger info (eg, breakpoint totals); the caller will reinitialize
 
         /*
-         * TODO: Study the impact of dirty block tracking.  As noted in the paged block handlers (eg, writeBytePLE),
-         * the original purposes were to allow saveMemory() to save only dirty blocks, and to enable the Video component
+         * Dirty block tracking is now controller-specific.  As noted in the paged block handlers (eg, writeBytePLE),
+         * the original purposes were to allow saveMemory() to save only dirty blocks and to enable the Video component
          * to quickly detect changes to the video buffer.  But the benefit to saveMemory() is minimal, and the Video
-         * component has other options; for example, it now uses a custom memory controller for all EGA/VGA video modes,
-         * which performs its own dirty block tracking, and that could easily be extended to the older MDA/CGA video modes,
-         * which still use conventional memory blocks.  Alternatively, we could restrict the use of dirty block tracking
-         * to certain memory types (eg, VIDEO memory).
-         *
-         * However, a quick test with dirty block tracking disabled didn't yield a noticeable improvement in performance,
-         * so I think the overhead of our block-based architecture is swamping the impact of these micro-updates.
+         * component now uses a custom memory controller for all video modes, which performs its own dirty block tracking.
          */
-        this.fDirty = this.fDirtyEver = false;
+        this.flags = Memory.FLAGS.CLEAN;
 
         if (BACKTRACK) {
             if (!size || controller) {
@@ -212,6 +206,35 @@ class Memory {
     init(addr)
     {
         this.addr = addr;
+    }
+
+    /**
+     * clean(fScrub)
+     *
+     * @this {Memory}
+     * @param {boolean} [fScrub]
+     * @return {boolean} (true if block is not dirty, false otherwise)
+     */
+    clean(fScrub)
+    {
+        if (this.flags & Memory.FLAGS.DIRTY) {
+            if (fScrub) {
+                this.flags = (this.flags & ~Memory.FLAGS.DIRTY) | Memory.FLAGS.MODIFIED;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * modified()
+     *
+     * @this {Memory}
+     * @return {boolean} (true if block is dirty and/or modified, false otherwise)
+     */
+    modified()
+    {
+        return (this.flags & (Memory.FLAGS.DIRTY | Memory.FLAGS.MODIFIED)) != 0;
     }
 
     /**
@@ -308,33 +331,37 @@ class Memory {
     /**
      * restore(adw)
      *
-     * This restores the contents of a Memory block from an array of 32-bit values;
-     * used by Bus.restoreMemory(), which is called by CPUX86.restore(), after all other
-     * components have been restored and thus all Memory blocks have been allocated
-     * by their respective components.
+     * This restores the contents of a Memory block from an array of 32-bit values; used by
+     * Bus.restoreMemory(), which is called by CPUX86.restore(), after all other components have been
+     * restored and thus all Memory blocks have been allocated by their respective components.
      *
      * @this {Memory}
-     * @param {Array|null} adw
+     * @param {Array} adw
      * @return {boolean} true if successful, false if block size mismatch
      */
     restore(adw)
     {
-        if (this.controller) {
-            return (adw == null);
-        }
         /*
-         * At this point, it's a consistency error for adw to be null; it's happened once already,
-         * when there was a restore bug in the Video component that added the frame buffer at the video
-         * card's "spec'ed" address instead of the programmed address, so there were no controller-owned
-         * memory blocks installed at the programmed address, and so we arrived here at a block with
-         * no controller AND no data.
+         * If this block has its own controller, then that controller is responsible for performing the
+         * restore, since we don't know the underlying memory format.  However, we no longer blow off these
+         * restore calls, because old machine states may still try to restore video memory blocks for MDA
+         * and CGA video buffers (and in those cases, the memory formats should be compatible).
          */
-        Component.assert(adw != null);
-
-        if (adw && this.size == adw.length << 2) {
-            var i;
+        var i, off;
+        if (this.controller) {
+            if (this.adw) {
+                for (i = 0; i < adw.length; i++) {
+                    off = (this.offset >> 2) + i;
+                    if (off >= this.adw.length) break;
+                    this.adw[off] = adw[i];
+                }
+                this.flags |= Memory.FLAGS.DIRTY;
+            }
+            return true;
+        }
+        if (this.size == adw.length << 2) {
             if (BYTEARRAYS) {
-                var off = 0;
+                off = 0;
                 for (i = 0; i < adw.length; i++) {
                     this.ab[off] = adw[i] & 0xff;
                     this.ab[off + 1] = (adw[i] >> 8) & 0xff;
@@ -349,7 +376,7 @@ class Memory {
             } else {
                 this.adw = adw;
             }
-            this.fDirty = true;
+            this.flags |= Memory.FLAGS.DIRTY;
             return true;
         }
         return false;
@@ -791,7 +818,7 @@ class Memory {
             var nShift = (off & 0x3) << 3;
             this.adw[idw] = (this.adw[idw] & ~(0xff << nShift)) | (b << nShift);
         }
-        this.fDirty = true;
+        // this.flags |= Memory.FLAGS.DIRTY;
     }
 
     /**
@@ -818,7 +845,7 @@ class Memory {
                 this.adw[idw] = (this.adw[idw] & (0xffffff00|0)) | (w >> 8);
             }
         }
-        this.fDirty = true;
+        // this.flags |= Memory.FLAGS.DIRTY;
     }
 
     /**
@@ -848,7 +875,7 @@ class Memory {
                 this.adw[idw] = (this.adw[idw] & mask) | (l >>> (32 - nShift));
             }
         }
-        this.fDirty = true;
+        // this.flags |= Memory.FLAGS.DIRTY;
     }
 
     /**
@@ -1276,13 +1303,12 @@ class Memory {
         this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
         this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED;
         /*
-         * TODO: Review this performance hack.  Basically, after the first read of a page,
-         * we redirect the default read handler to a faster handler.  However, if operating
-         * systems clear the PDE/PTE bits without reloading CR3, they won't get set again.
+         * TODO: Review this performance hack.  Basically, after the first read of a page, we redirect the default
+         * read handler to a faster handler.  However, if operating systems clear the PDE/PTE bits without reloading
+         * CR3, they won't get set again.
          *
-         * We should look into creating special write handlers for pages containing PDE/PTE
-         * entries, and whenever those entries are written, reset the read/write handlers
-         * for the corresponding pages.
+         * We should look into creating special write handlers for pages containing PDE/PTE entries, and whenever
+         * those entries are written, reset the read/write handlers for the corresponding pages.
          */
         this.readLong = this.readLongLE;
         return (off & 0x3)? (this.ab[off] | (this.ab[off+1] << 8) | (this.ab[off+2] << 16) | (this.ab[off+3] << 24)) : this.adw[off >> 2];
@@ -1299,7 +1325,7 @@ class Memory {
     writeByteBE(off, b, addr)
     {
         this.ab[off] = b;
-        this.fDirty = true;
+        // this.flags |= Memory.FLAGS.DIRTY;
     }
 
     /**
@@ -1313,7 +1339,7 @@ class Memory {
     writeByteLE(off, b, addr)
     {
         this.ab[off] = b;
-        this.fDirty = true;
+        // this.flags |= Memory.FLAGS.DIRTY;
     }
 
     /**
@@ -1330,23 +1356,22 @@ class Memory {
         this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
         this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED | X86.PTE.DIRTY;
         /*
-         * TODO: Review this performance hack.  Basically, after the first write of a page,
-         * we redirect the default write handler to a faster handler.  However, if operating
-         * systems clear the PDE/PTE bits without reloading CR3, they won't get set again.
+         * TODO: Review this performance hack.  Basically, after the first write of a page, we redirect the default
+         * write handler to a faster handler.  However, if operating systems clear the PDE/PTE bits without reloading
+         * CR3, they won't get set again.
          *
-         * We should look into creating special write handlers for pages containing PDE/PTE
-         * entries, and whenever those entries are written, reset the read/write handlers
-         * for the corresponding pages.
+         * We should look into creating special write handlers for pages containing PDE/PTE entries, and whenever
+         * those entries are written, reset the read/write handlers for the corresponding pages.
          */
         this.writeByte = this.writeByteLE;
         /*
-         * NOTE: Technically, we should be setting the fDirty flag on blockPDE and blockPTE as well, but let's
-         * consider the two sole uses of fDirty.  First, we have cleanMemory(), which is currently used only by
-         * the Video component, and video memory should never contain page directories or page tables, so no
-         * worries there.  Second, we have saveMemory(), but the CPU now asks that function to save all physical
-         * memory blocks whenever paging is enabled, so no worries there either.
+         * NOTE: Technically, we should be setting the DIRTY flag on blockPDE and blockPTE as well, but let's consider
+         * the two sole uses of DIRTY.  First, we have cleanMemory(), which is currently used only by the Video component,
+         * and video memory should never contain page directories or page tables, so no worries there.  Second, we have
+         * saveMemory(), but the CPU now asks that function to save all physical memory blocks whenever paging is enabled,
+         * so no worries there either.
          */
-        this.blockPhys.fDirty = true;
+        // this.blockPhys.flags |= Memory.FLAGS.DIRTY;
     }
 
     /**
@@ -1360,7 +1385,7 @@ class Memory {
     writeShortBE(off, w, addr)
     {
         this.dv.setUint16(off, w, true);
-        this.fDirty = true;
+        // this.flags |= Memory.FLAGS.DIRTY;
     }
 
     /**
@@ -1383,7 +1408,7 @@ class Memory {
         } else {
             this.aw[off >> 1] = w;
         }
-        this.fDirty = true;
+        // this.flags |= Memory.FLAGS.DIRTY;
     }
 
     /**
@@ -1419,13 +1444,13 @@ class Memory {
          */
         this.writeShort = this.writeShortLE;
         /*
-         * NOTE: Technically, we should be setting the fDirty flag on blockPDE and blockPTE as well, but let's
-         * consider the two sole uses of fDirty.  First, we have cleanMemory(), which is currently used only by
+         * NOTE: Technically, we should be setting the DIRTY flag on blockPDE and blockPTE as well, but let's
+         * consider the two sole uses of DIRTY.  First, we have cleanMemory(), which is currently used only by
          * the Video component, and video memory should never contain page directories or page tables, so no
          * worries there.  Second, we have saveMemory(), but the CPU now asks that function to save all physical
          * memory blocks whenever paging is enabled, so no worries there either.
          */
-        this.blockPhys.fDirty = true;
+        // this.blockPhys.flags |= Memory.FLAGS.DIRTY;
     }
 
     /**
@@ -1439,7 +1464,7 @@ class Memory {
     writeLongBE(off, l, addr)
     {
         this.dv.setInt32(off, l, true);
-        this.fDirty = true;
+        // this.flags |= Memory.FLAGS.DIRTY;
     }
 
     /**
@@ -1464,7 +1489,7 @@ class Memory {
         } else {
             this.adw[off >> 2] = l;
         }
-        this.fDirty = true;
+        // this.flags |= Memory.FLAGS.DIRTY;
     }
 
     /**
@@ -1502,13 +1527,13 @@ class Memory {
          */
         this.writeLong = this.writeLongLE;
         /*
-         * NOTE: Technically, we should be setting the fDirty flag on blockPDE and blockPTE as well, but let's
-         * consider the two sole uses of fDirty.  First, we have cleanMemory(), which is currently used only by
+         * NOTE: Technically, we should be setting the DIRTY flag on blockPDE and blockPTE as well, but let's
+         * consider the two sole uses of DIRTY.  First, we have cleanMemory(), which is currently used only by
          * the Video component, and video memory should never contain page directories or page tables, so no
          * worries there.  Second, we have saveMemory(), but the CPU now asks that function to save all physical
          * memory blocks whenever paging is enabled, so no worries there either.
          */
-        this.blockPhys.fDirty = true;
+        // this.blockPhys.flags |= Memory.FLAGS.DIRTY;
     }
 
     /**
@@ -1648,6 +1673,12 @@ Memory.TYPE = {
     PAGED:      6,
     COLORS:     ["black", "blue", "green", "cyan"],
     NAMES:      ["NONE",  "RAM",  "ROM",   "VIDEO", "H/W", "UNPAGED", "PAGED"]
+};
+
+Memory.FLAGS = {
+    CLEAN:      0x0,
+    DIRTY:      0x1,
+    MODIFIED:   0x2
 };
 
 /*

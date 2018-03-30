@@ -34,7 +34,8 @@ IBM PC Diagnostics
 Exploring the IBM PC
 --------------------
 
-* [Exploring the IBM PC 1.00](5150/exploring/1.00/)
+* [Exploring the IBM PC 1.00 (Color Version)](5150/exploring/1.00/cga/)
+* [Exploring the IBM PC 1.00 (Monochrome Version)](5150/exploring/1.00/mda/)
 * [Exploring the IBM PC AT 1.00](5170/exploring/1.00/)
 
 IBM EGA Demos and Utilities
