@@ -1640,10 +1640,7 @@ X86.opINSb = function()
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP();
     }
 };
 
@@ -1692,10 +1689,7 @@ X86.opINSw = function()
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP();
     }
 };
 
@@ -1740,10 +1734,7 @@ X86.opOUTSb = function()
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP();
     }
 };
 
@@ -1791,10 +1782,7 @@ X86.opOUTSw = function()
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP();
     }
 };
 
@@ -2717,10 +2705,7 @@ X86.opMOVSb = function()
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + nInc) & maskAddr);
         this.nStepCycles -= nCycles;
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
-        if (nReps) {
-            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP(true);
     }
 };
 
@@ -2754,10 +2739,7 @@ X86.opMOVSw = function()
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + nInc) & maskAddr);
         this.nStepCycles -= nCycles;
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
-        if (nReps) {
-            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP(true);
     }
 };
 
@@ -2802,10 +2784,7 @@ X86.opCMPSb = function()
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
          * two values are equal, we must continue.
          */
-        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) this.rewindIP(true);
     }
 };
 
@@ -2850,10 +2829,7 @@ X86.opCMPSw = function()
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
          * two values are equal, we must continue.
          */
-        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) this.rewindIP(true);
     }
 };
 
@@ -2930,10 +2906,7 @@ X86.opSTOSb = function()
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
 
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP();
     }
 };
 
@@ -2970,10 +2943,7 @@ X86.opSTOSw = function()
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP();
     }
 };
 
@@ -3007,10 +2977,7 @@ X86.opLODSb = function()
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP(true);
     }
 };
 
@@ -3046,10 +3013,7 @@ X86.opLODSw = function()
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP(true);
     }
 };
 
@@ -3092,10 +3056,7 @@ X86.opSCASb = function()
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
          * two values are equal, we must continue.
          */
-        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) this.rewindIP();
     }
 };
 
@@ -3138,10 +3099,7 @@ X86.opSCASw = function()
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
          * two values are equal, we must continue.
          */
-        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) this.rewindIP();
     }
 };
 
@@ -4207,7 +4165,7 @@ X86.opHLT = function()
      * REALLY halt the CPU, on the theory that whoever's using the Debugger would like to see HLTs.
      */
     if (DEBUGGER && this.dbg && this.messageEnabled(Messages.CPU | Messages.HALT)) {
-        this.resetIP(-1);       // this is purely for the Debugger's benefit, to show the HLT
+        this.resetIP();         // this is purely for the Debugger's benefit, to show the HLT
         this.dbg.stopCPU();
         return;
     }
@@ -4216,7 +4174,7 @@ X86.opHLT = function()
      * the water (yes, we support NMIs, but none of our devices are going to generate an NMI at this point).
      */
     if (!this.getIF()) {
-        if (DEBUGGER && this.dbg) this.resetIP(-1);
+        if (DEBUGGER && this.dbg) this.resetIP();
         this.stopCPU();
     }
 };

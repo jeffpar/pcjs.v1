@@ -842,6 +842,7 @@ class CPUX86 extends CPU {
 
             if (this.model >= X86.MODEL_80286) {
 
+                var i;
                 this.PS_SET = X86.PS.BIT1;      // on the 80286, only BIT1 of Processor Status (flags) is always set
                 this.PS_DIRECT |= X86.PS.IOPL.MASK | X86.PS.NT;
 
@@ -849,26 +850,37 @@ class CPUX86 extends CPU {
 
                 this.aOps[0x0F] = X86.op0F;
                 this.aOps0F = X86.aOps0F.slice();
-                for (var i = 0; i < this.aOps0F.length; i++) {
+                for (i = 0; i < this.aOps0F.length; i++) {
                     if (!this.aOps0F[i]) this.aOps0F[i] = X86.opUndefined;
                 }
                 this.aOps[X86.OPCODE.PUSHSP] = X86.opPUSHSP;    // 0x54
                 this.aOps[X86.OPCODE.ARPL]   = X86.opARPL;      // 0x63
 
-                if (I386 && this.model >= X86.MODEL_80386) {
-                    var bOpcode;
-                    this.PS_CLEAR_RM = 0;       // NOTE: This allows the 80386 to modify X86.PS.NT in real-mode (which is presumably OK)
-                    this.PS_DIRECT |= X86.PS.RF | X86.PS.VM;
-                    this.aOps[X86.OPCODE.FS] = X86.opFS;        // 0x64
-                    this.aOps[X86.OPCODE.GS] = X86.opGS;        // 0x65
-                    this.aOps[X86.OPCODE.OS] = X86.opOS;        // 0x66
-                    this.aOps[X86.OPCODE.AS] = X86.opAS;        // 0x67
-                    for (bOpcode in X86.aOps0F386) {
-                        this.aOps0F[+bOpcode] = X86.aOps0F386[+bOpcode];
-                    }
-                    if (this.stepping >= X86.STEPPING_80386_A0 && this.stepping <= X86.STEPPING_80386_B0) {
-                        this.aOps0F[0xA6] = X86.opXBTS;
-                        this.aOps0F[0xA7] = X86.opIBTS;
+                if (I386) {
+                    if (this.model >= X86.MODEL_80386) {
+                        var bOpcode;
+                        this.PS_CLEAR_RM = 0;   // NOTE: This allows the 80386 to modify X86.PS.NT in real-mode (which is presumably OK)
+                        this.PS_DIRECT |= X86.PS.RF | X86.PS.VM;
+                        this.aOps[X86.OPCODE.FS] = X86.opFS;    // 0x64
+                        this.aOps[X86.OPCODE.GS] = X86.opGS;    // 0x65
+                        this.aOps[X86.OPCODE.OS] = X86.opOS;    // 0x66
+                        this.aOps[X86.OPCODE.AS] = X86.opAS;    // 0x67
+                        for (bOpcode in X86.aOps0F386) {
+                            this.aOps0F[+bOpcode] = X86.aOps0F386[+bOpcode];
+                        }
+                        if (this.stepping >= X86.STEPPING_80386_A0 && this.stepping <= X86.STEPPING_80386_B0) {
+                            this.aOps0F[0xA6] = X86.opXBTS;
+                            this.aOps0F[0xA7] = X86.opIBTS;
+                        }
+                    } else {
+                        /*
+                         * Let's make any "undefined" 80286 0x0F opcode handler "invalid" instead IFF the opcode
+                         * is defined on the 80386.  Whereas if someone is using an opcode that isn't defined on ANY
+                         * of these processors, then I want to know about it; ie, leave it set to opUndefined().
+                         */
+                        for (i = 0; i < X86.aOps0F386.length; i++) {
+                            if (X86.aOps0F386[i] && this.aOps0F[i] == X86.opUndefined) this.aOps0F[i] = X86.opInvalid;
+                        }
                     }
                 }
             }
@@ -2290,40 +2302,49 @@ class CPUX86 extends CPU {
     }
 
     /**
-     * resetIP(dec)
-     *
-     * This "rewinds" IP to the beginning of the current instruction (eg, an instruction with a REP prefix)
+     * resetIP()
      *
      * @this {CPUX86}
-     * @param {number} dec (negative)
      */
-    resetIP(dec)
+    resetIP()
     {
-        if (BUGS_8086) {
-            this.regLIP = (this.regLIP + dec)|0;
+        if (PREFETCH) {
+            this.cbPrefetch += this.regLIP - this.opLIP;
+            this.regLIP = this.opLIP;
             /*
-             * This assertion is intended to fail if/when we encounter a "buggy" instruction (see BUGS_8086)
+             * If the reset produces a prefetch total greater than the allocated amount, then we must have
+             * refilled the queue somewhere in the middle of the rewound instruction, so we need to refill the
+             * queue all over again; otherwise, the next repetition may fetch future data instead of past data.
+             *
+             * That's the bad news; the good news is that this extra refill should only hurt performance of the
+             * first repetition.
              */
-            this.assert(this.regLIP == this.opLIP);
+            if (this.cbPrefetch > CPUX86.PFINFO.LENGTH) this.refillPrefetch();
         } else {
-            if (PREFETCH) {
-                this.cbPrefetch += this.regLIP - this.opLIP;
-                this.regLIP = this.opLIP;
-                /*
-                 * If "rewinding" produces a prefetch total greater than the allocated amount, then we must have
-                 * refilled the queue somewhere in the middle of the rewound instruction, so we need to refill the
-                 * queue all over again; otherwise, the next repetition may fetch future data instead of past data.
-                 *
-                 * That's the bad news; the good news is that this extra refill should only hurt performance of the
-                 * first repetition.
-                 */
-                if (this.cbPrefetch > CPUX86.PFINFO.LENGTH) this.refillPrefetch();
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.regLIP = this.opLIP;
         }
     }
 
+    /**
+     * rewindIP(fCheckSeg)
+     *
+     * This "rewinds" IP to the beginning of the current instruction (ie, the REP prefix of a string instruction);
+     * this also sets the REPSEG flag to record string instructions with multiple prefixes (ie, a segment override),
+     * so that checkINTR() has the option to simulate the 8086/8088's failure to properly restart such an instruction
+     * after a hardware interrupt (which became known as a "feature", hence not part of BUGS_8086). 
+     *
+     * @this {CPUX86}
+     * @param {boolean} [fCheckSeg]
+     */
+    rewindIP(fCheckSeg = false)
+    {
+        if (fCheckSeg && (this.opPrefixes & X86.OPFLAG.SEG)) {
+            this.opFlags |= X86.OPFLAG.REPSEG;
+        }
+        this.opFlags |= X86.OPFLAG.REPEAT;
+        this.resetIP();
+    }
+    
     /**
      * getSP()
      *
@@ -4095,6 +4116,15 @@ class CPUX86 extends CPU {
                             this.intFlags &= ~X86.INTFLAG.INTR;
                             if (nIDT >= 0) {
                                 this.intFlags &= ~X86.INTFLAG.HALT;
+                                /*
+                                 * This is a hack that simulates the 8086/8088's failure to preserve more than one prefix
+                                 * when a string instruction is interrupted.  TODO: Faithful simulation would require maintaining
+                                 * a prefix byte count, whereas we simply maintain a special flag (REPSEG) that indicates multiple
+                                 * prefixes were detected, so we simply "skip over" one of them.
+                                 */
+                                if (this.model <= X86.MODEL_8088 && (this.opFlags & X86.OPFLAG.REPSEG)) {
+                                    this.regLIP = (this.regLIP + 1)|0;
+                                }
                                 X86.helpInterrupt.call(this, nIDT);
                                 return true;
                             }

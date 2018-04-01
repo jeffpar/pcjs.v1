@@ -991,17 +991,16 @@ X86.fnIMUL32 = function(dst, src)
 X86.fnIMULb = function(dst, src)
 {
     var result = (((this.regEAX << 24) >> 24) * ((dst << 24) >> 24))|0;
-
     this.regMDLo = result & 0xffff;
-
     if (result > 127 || result < -128) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
     }
-
+    if (this.model <= X86.MODEL_8088) {
+        this.clearZF();         // differentiate ourselves from a NEC V20
+    }
     this.fMDSet = true;
-
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulBR : this.cycleCounts.nOpCyclesIMulBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -1040,15 +1039,15 @@ X86.fnIMULw = function(dst, src)
         X86.fnIMUL32.call(this, dst, this.regEAX);
         fOverflow = (this.regMDHi != (this.regMDLo >> 31));
     }
-
     if (fOverflow) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
     }
-
+    if (this.model <= X86.MODEL_8088) {
+        this.clearZF();         // differentiate ourselves from a NEC V20
+    }
     this.fMDSet = true;
-
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulWR : this.cycleCounts.nOpCyclesIMulWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -1747,15 +1746,15 @@ X86.fnMOVwsr = function(dst, src)
 X86.fnMULb = function(dst, src)
 {
     this.regMDLo = ((this.regEAX & 0xff) * dst) & 0xffff;
-
     if (this.regMDLo & 0xff00) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
     }
-
+    if (this.model <= X86.MODEL_8088) {
+        this.clearZF();         // differentiate ourselves from a NEC V20
+    }
     this.fMDSet = true;
-
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMulBR : this.cycleCounts.nOpCyclesMulBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -1834,9 +1833,10 @@ X86.fnMULw = function(dst, src)
     } else {
         this.clearCF(); this.clearOF();
     }
-
+    if (this.model <= X86.MODEL_8088) {
+        this.clearZF();         // differentiate ourselves from a NEC V20
+    }
     this.fMDSet = true;
-
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMulWR : this.cycleCounts.nOpCyclesMulWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;

@@ -438,7 +438,8 @@ var X86 = {
         DATASIZE:   0x0400,     // data size override
         ADDRSIZE:   0x0800,     // address size override
         FAULT:      0x1000,     // a fault occurred during the current instruction
-        DBEXC:      0x2000      // a DB_EXC exception occurred during the current instruction
+        DBEXC:      0x2000,     // a DB_EXC exception occurred during the current instruction
+        REPSEG:     0x4000      // an instruction is being repeated with a segment prefix (used for 8086/8088 "feature" simulation)
     },
     /*
      * Bit values for intFlags

@@ -1202,22 +1202,20 @@ class Bus extends Component {
             var iBlock = a[i] * scale, adw = a[i+1];
             /*
              * One wrinkle here is dealing with blocks that were saved when the machine was using an
-             * older (larger) block size, because now I would like to ALWAYS use a block size of 4K, whereas
-             * some older machine configurations could use larger block sizes (16K or 32K).  My choices are:
-             * 1) assume that none of those older configurations have saved states "in the wild", or 2)
-             * divide those larger blocks into multiple sequential 4K blocks and hope for the best.
+             * older (larger) block size (eg, 16K or 32K), because now I ALWAYS use a block size of 4K.
              * 
-             * I'm going with #2, which means omitting the expected length parameter from decompress(), then
-             * dividing the returned length by the current nBlockLen, and iterating over the number of blocks.
+             * Detecting that situation is a little tricky, because our memory states don't include the
+             * block size that was in effect, and the blocks themselves could be compressed; in a worst
+             * case scenario, the very first block of a machine using 16K blocks might have been compressed
+             * to exactly 4K, and we'd have no idea if that block should be decompressed or used as-is.
              * 
-             * Also, if/when we encounter this situation, we must also scale the incoming block numbers, since
-             * they are numbering larger (fewer) blocks than we're currently using.
-             * 
-             * And if it turns out that #1 was a perfectly valid assumption, that's fine, because none of the
-             * new splicing and scaling code should ever kick in.
+             * So, if the length of the block is less than our default length, we know we must decompress,
+             * but furthermore, if the length is not a power-of-two, that's another clue.  Checking for
+             * a power-of-two is a simple matter of AND'ing the value with one less than the value; if
+             * the result is non-zero, it's not a power-of-two.
              */
             if (adw) {
-                if (adw.length < this.nBlockLen) {
+                if (adw.length < this.nBlockLen * scale || (adw.length & (adw.length - 1))) {
                     adw = State.decompress(adw);
                 }
                 var nBlocks = (adw.length / this.nBlockLen)|0;
