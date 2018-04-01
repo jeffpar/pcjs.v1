@@ -2822,6 +2822,16 @@ class Web {
     };
 
     /**
+     * onError(sMessage)
+     *
+     * @param {string} sMessage
+     */
+    static onError(sMessage)
+    {
+        Web.notice(sMessage + "\n\nIf it happens again, please send the URL to support@pcjs.org. Thanks.");
+    }
+    
+    /**
      * onExit(fn)
      *
      * @param {function()} fn
@@ -2846,7 +2856,7 @@ class Web {
                     afn[i]();
                 }
             } catch (e) {
-                Web.notice("An unexpected error occurred: " + e.message + "\n\nIf it happens again, please send this information to support@pcjs.org. Thanks.");
+                Web.onError("An unexpected error occurred: " + e.message);
             }
         }
     };
@@ -4523,8 +4533,11 @@ var SYMBOLS = DEBUGGER;
  *
  * BUGS_8086 enables support for known 8086 bugs.  It's turned off by default, because 1) it adds overhead, and
  * 2) it's hard to imagine any software actually being dependent on any of the bugs covered by this (eg, the failure
- * to properly restart string instructions with multiple prefixes, or the failure to inhibit hardware interrupts
- * following SS segment loads).
+ * to inhibit hardware interrupts following SS segment loads).
+ * 
+ * This does NOT enable what must be regarded as 8086 "features", such as failing to properly restart string
+ * instructions with multiple prefixes after a hardware interrupt, which we simulate regardless, because some software
+ * (eg, Central Point Software's PC Tools) uses that to differentiate processors (eg, the Intel 8088 from the NEC V20).
  */
 var BUGS_8086 = false;
 
@@ -5000,7 +5013,8 @@ var X86 = {
         DATASIZE:   0x0400,     // data size override
         ADDRSIZE:   0x0800,     // address size override
         FAULT:      0x1000,     // a fault occurred during the current instruction
-        DBEXC:      0x2000      // a DB_EXC exception occurred during the current instruction
+        DBEXC:      0x2000,     // a DB_EXC exception occurred during the current instruction
+        REPSEG:     0x4000      // an instruction is being repeated with a segment prefix (used for 8086/8088 "feature" simulation)
     },
     /*
      * Bit values for intFlags
@@ -9811,22 +9825,20 @@ class Bus extends Component {
             var iBlock = a[i] * scale, adw = a[i+1];
             /*
              * One wrinkle here is dealing with blocks that were saved when the machine was using an
-             * older (larger) block size, because now I would like to ALWAYS use a block size of 4K, whereas
-             * some older machine configurations could use larger block sizes (16K or 32K).  My choices are:
-             * 1) assume that none of those older configurations have saved states "in the wild", or 2)
-             * divide those larger blocks into multiple sequential 4K blocks and hope for the best.
+             * older (larger) block size (eg, 16K or 32K), because now I ALWAYS use a block size of 4K.
              * 
-             * I'm going with #2, which means omitting the expected length parameter from decompress(), then
-             * dividing the returned length by the current nBlockLen, and iterating over the number of blocks.
+             * Detecting that situation is a little tricky, because our memory states don't include the
+             * block size that was in effect, and the blocks themselves could be compressed; in a worst
+             * case scenario, the very first block of a machine using 16K blocks might have been compressed
+             * to exactly 4K, and we'd have no idea if that block should be decompressed or used as-is.
              * 
-             * Also, if/when we encounter this situation, we must also scale the incoming block numbers, since
-             * they are numbering larger (fewer) blocks than we're currently using.
-             * 
-             * And if it turns out that #1 was a perfectly valid assumption, that's fine, because none of the
-             * new splicing and scaling code should ever kick in.
+             * So, if the length of the block is less than our default length, we know we must decompress,
+             * but furthermore, if the length is not a power-of-two, that's another clue.  Checking for
+             * a power-of-two is a simple matter of AND'ing the value with one less than the value; if
+             * the result is non-zero, it's not a power-of-two.
              */
             if (adw) {
-                if (adw.length < this.nBlockLen) {
+                if (adw.length < this.nBlockLen * scale || (adw.length & (adw.length - 1))) {
                     adw = State.decompress(adw);
                 }
                 var nBlocks = (adw.length / this.nBlockLen)|0;
@@ -10485,8 +10497,10 @@ class Memory {
         /*
          * Dirty block tracking is now controller-specific.  As noted in the paged block handlers (eg, writeBytePLE),
          * the original purposes were to allow saveMemory() to save only dirty blocks and to enable the Video component
-         * to quickly detect changes to the video buffer.  But the benefit to saveMemory() is minimal, and the Video
-         * component now uses a custom memory controller for all video modes, which performs its own dirty block tracking.
+         * to quickly detect changes to the video buffer.  But saveMemory() has since been changed to save (and compress)
+         * all memory blocks by default, and the Video component now uses a custom memory controller for all video modes,
+         * which performs its own dirty block tracking, so general-purpose memory blocks no longer need to pay this
+         * penalty.
          */
         this.flags = Memory.FLAGS.CLEAN;
 
@@ -14332,6 +14346,7 @@ class CPUX86 extends CPU {
 
             if (this.model >= X86.MODEL_80286) {
 
+                var i;
                 this.PS_SET = X86.PS.BIT1;      // on the 80286, only BIT1 of Processor Status (flags) is always set
                 this.PS_DIRECT |= X86.PS.IOPL.MASK | X86.PS.NT;
 
@@ -14339,26 +14354,37 @@ class CPUX86 extends CPU {
 
                 this.aOps[0x0F] = X86.op0F;
                 this.aOps0F = X86.aOps0F.slice();
-                for (var i = 0; i < this.aOps0F.length; i++) {
+                for (i = 0; i < this.aOps0F.length; i++) {
                     if (!this.aOps0F[i]) this.aOps0F[i] = X86.opUndefined;
                 }
                 this.aOps[X86.OPCODE.PUSHSP] = X86.opPUSHSP;    // 0x54
                 this.aOps[X86.OPCODE.ARPL]   = X86.opARPL;      // 0x63
 
-                if (I386 && this.model >= X86.MODEL_80386) {
-                    var bOpcode;
-                    this.PS_CLEAR_RM = 0;       // NOTE: This allows the 80386 to modify X86.PS.NT in real-mode (which is presumably OK)
-                    this.PS_DIRECT |= X86.PS.RF | X86.PS.VM;
-                    this.aOps[X86.OPCODE.FS] = X86.opFS;        // 0x64
-                    this.aOps[X86.OPCODE.GS] = X86.opGS;        // 0x65
-                    this.aOps[X86.OPCODE.OS] = X86.opOS;        // 0x66
-                    this.aOps[X86.OPCODE.AS] = X86.opAS;        // 0x67
-                    for (bOpcode in X86.aOps0F386) {
-                        this.aOps0F[+bOpcode] = X86.aOps0F386[+bOpcode];
-                    }
-                    if (this.stepping >= X86.STEPPING_80386_A0 && this.stepping <= X86.STEPPING_80386_B0) {
-                        this.aOps0F[0xA6] = X86.opXBTS;
-                        this.aOps0F[0xA7] = X86.opIBTS;
+                if (I386) {
+                    if (this.model >= X86.MODEL_80386) {
+                        var bOpcode;
+                        this.PS_CLEAR_RM = 0;   // NOTE: This allows the 80386 to modify X86.PS.NT in real-mode (which is presumably OK)
+                        this.PS_DIRECT |= X86.PS.RF | X86.PS.VM;
+                        this.aOps[X86.OPCODE.FS] = X86.opFS;    // 0x64
+                        this.aOps[X86.OPCODE.GS] = X86.opGS;    // 0x65
+                        this.aOps[X86.OPCODE.OS] = X86.opOS;    // 0x66
+                        this.aOps[X86.OPCODE.AS] = X86.opAS;    // 0x67
+                        for (bOpcode in X86.aOps0F386) {
+                            this.aOps0F[+bOpcode] = X86.aOps0F386[+bOpcode];
+                        }
+                        if (this.stepping >= X86.STEPPING_80386_A0 && this.stepping <= X86.STEPPING_80386_B0) {
+                            this.aOps0F[0xA6] = X86.opXBTS;
+                            this.aOps0F[0xA7] = X86.opIBTS;
+                        }
+                    } else {
+                        /*
+                         * Let's make any "undefined" 80286 0x0F opcode handler "invalid" instead IFF the opcode
+                         * is defined on the 80386.  Whereas if someone is using an opcode that isn't defined on ANY
+                         * of these processors, then I want to know about it; ie, leave it set to opUndefined().
+                         */
+                        for (i = 0; i < X86.aOps0F386.length; i++) {
+                            if (X86.aOps0F386[i] && this.aOps0F[i] == X86.opUndefined) this.aOps0F[i] = X86.opInvalid;
+                        }
                     }
                 }
             }
@@ -15780,40 +15806,49 @@ class CPUX86 extends CPU {
     }
 
     /**
-     * resetIP(dec)
-     *
-     * This "rewinds" IP to the beginning of the current instruction (eg, an instruction with a REP prefix)
+     * resetIP()
      *
      * @this {CPUX86}
-     * @param {number} dec (negative)
      */
-    resetIP(dec)
+    resetIP()
     {
-        if (BUGS_8086) {
-            this.regLIP = (this.regLIP + dec)|0;
+        if (PREFETCH) {
+            this.cbPrefetch += this.regLIP - this.opLIP;
+            this.regLIP = this.opLIP;
             /*
-             * This assertion is intended to fail if/when we encounter a "buggy" instruction (see BUGS_8086)
+             * If the reset produces a prefetch total greater than the allocated amount, then we must have
+             * refilled the queue somewhere in the middle of the rewound instruction, so we need to refill the
+             * queue all over again; otherwise, the next repetition may fetch future data instead of past data.
+             *
+             * That's the bad news; the good news is that this extra refill should only hurt performance of the
+             * first repetition.
              */
-
+            if (this.cbPrefetch > CPUX86.PFINFO.LENGTH) this.refillPrefetch();
         } else {
-            if (PREFETCH) {
-                this.cbPrefetch += this.regLIP - this.opLIP;
-                this.regLIP = this.opLIP;
-                /*
-                 * If "rewinding" produces a prefetch total greater than the allocated amount, then we must have
-                 * refilled the queue somewhere in the middle of the rewound instruction, so we need to refill the
-                 * queue all over again; otherwise, the next repetition may fetch future data instead of past data.
-                 *
-                 * That's the bad news; the good news is that this extra refill should only hurt performance of the
-                 * first repetition.
-                 */
-                if (this.cbPrefetch > CPUX86.PFINFO.LENGTH) this.refillPrefetch();
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.regLIP = this.opLIP;
         }
     }
 
+    /**
+     * rewindIP(fCheckSeg)
+     *
+     * This "rewinds" IP to the beginning of the current instruction (ie, the REP prefix of a string instruction);
+     * this also sets the REPSEG flag to record string instructions with multiple prefixes (ie, a segment override),
+     * so that checkINTR() has the option to simulate the 8086/8088's failure to properly restart such an instruction
+     * after a hardware interrupt (which became known as a "feature", hence not part of BUGS_8086). 
+     *
+     * @this {CPUX86}
+     * @param {boolean} [fCheckSeg]
+     */
+    rewindIP(fCheckSeg = false)
+    {
+        if (fCheckSeg && (this.opPrefixes & X86.OPFLAG.SEG)) {
+            this.opFlags |= X86.OPFLAG.REPSEG;
+        }
+        this.opFlags |= X86.OPFLAG.REPEAT;
+        this.resetIP();
+    }
+    
     /**
      * getSP()
      *
@@ -17585,6 +17620,15 @@ class CPUX86 extends CPU {
                             this.intFlags &= ~X86.INTFLAG.INTR;
                             if (nIDT >= 0) {
                                 this.intFlags &= ~X86.INTFLAG.HALT;
+                                /*
+                                 * This is a hack that simulates the 8086/8088's failure to preserve more than one prefix
+                                 * when a string instruction is interrupted.  TODO: Faithful simulation would require maintaining
+                                 * a prefix byte count, whereas we simply maintain a special flag (REPSEG) that indicates multiple
+                                 * prefixes were detected, so we simply "skip over" one of them.
+                                 */
+                                if (this.model <= X86.MODEL_8088 && (this.opFlags & X86.OPFLAG.REPSEG)) {
+                                    this.regLIP = (this.regLIP + 1)|0;
+                                }
                                 X86.helpInterrupt.call(this, nIDT);
                                 return true;
                             }
@@ -17907,7 +17951,7 @@ class CPUX86 extends CPU {
              */
 
             this.aOps[this.getIPByte()].call(this);
-
+            
             /*
             if (PREFETCH) {
                 var nSpareCycles = (this.nSnapCycles - this.nStepCycles) - this.nBusCycles;
@@ -24017,17 +24061,16 @@ X86.fnIMUL32 = function(dst, src)
 X86.fnIMULb = function(dst, src)
 {
     var result = (((this.regEAX << 24) >> 24) * ((dst << 24) >> 24))|0;
-
     this.regMDLo = result & 0xffff;
-
     if (result > 127 || result < -128) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
     }
-
+    if (this.model <= X86.MODEL_8088) {
+        this.clearZF();         // differentiate ourselves from a NEC V20
+    }
     this.fMDSet = true;
-
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulBR : this.cycleCounts.nOpCyclesIMulBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -24066,15 +24109,15 @@ X86.fnIMULw = function(dst, src)
         X86.fnIMUL32.call(this, dst, this.regEAX);
         fOverflow = (this.regMDHi != (this.regMDLo >> 31));
     }
-
     if (fOverflow) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
     }
-
+    if (this.model <= X86.MODEL_8088) {
+        this.clearZF();         // differentiate ourselves from a NEC V20
+    }
     this.fMDSet = true;
-
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulWR : this.cycleCounts.nOpCyclesIMulWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -24773,15 +24816,15 @@ X86.fnMOVwsr = function(dst, src)
 X86.fnMULb = function(dst, src)
 {
     this.regMDLo = ((this.regEAX & 0xff) * dst) & 0xffff;
-
     if (this.regMDLo & 0xff00) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
     }
-
+    if (this.model <= X86.MODEL_8088) {
+        this.clearZF();         // differentiate ourselves from a NEC V20
+    }
     this.fMDSet = true;
-
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMulBR : this.cycleCounts.nOpCyclesMulBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -24860,9 +24903,10 @@ X86.fnMULw = function(dst, src)
     } else {
         this.clearCF(); this.clearOF();
     }
-
+    if (this.model <= X86.MODEL_8088) {
+        this.clearZF();         // differentiate ourselves from a NEC V20
+    }
     this.fMDSet = true;
-
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMulWR : this.cycleCounts.nOpCyclesMulWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -33198,10 +33242,7 @@ X86.opINSb = function()
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP();
     }
 };
 
@@ -33250,10 +33291,7 @@ X86.opINSw = function()
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP();
     }
 };
 
@@ -33298,10 +33336,7 @@ X86.opOUTSb = function()
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP();
     }
 };
 
@@ -33349,10 +33384,7 @@ X86.opOUTSw = function()
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP();
     }
 };
 
@@ -34275,10 +34307,7 @@ X86.opMOVSb = function()
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + nInc) & maskAddr);
         this.nStepCycles -= nCycles;
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
-        if (nReps) {
-            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP(true);
     }
 };
 
@@ -34312,10 +34341,7 @@ X86.opMOVSw = function()
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + nInc) & maskAddr);
         this.nStepCycles -= nCycles;
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
-        if (nReps) {
-            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP(true);
     }
 };
 
@@ -34360,10 +34386,7 @@ X86.opCMPSb = function()
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
          * two values are equal, we must continue.
          */
-        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) this.rewindIP(true);
     }
 };
 
@@ -34408,10 +34431,7 @@ X86.opCMPSw = function()
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
          * two values are equal, we must continue.
          */
-        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) this.rewindIP(true);
     }
 };
 
@@ -34488,10 +34508,7 @@ X86.opSTOSb = function()
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
 
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP();
     }
 };
 
@@ -34528,10 +34545,7 @@ X86.opSTOSw = function()
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP();
     }
 };
 
@@ -34565,10 +34579,7 @@ X86.opLODSb = function()
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP(true);
     }
 };
 
@@ -34604,10 +34615,7 @@ X86.opLODSw = function()
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
-        if (nReps) {
-            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps) this.rewindIP(true);
     }
 };
 
@@ -34650,10 +34658,7 @@ X86.opSCASb = function()
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
          * two values are equal, we must continue.
          */
-        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) this.rewindIP();
     }
 };
 
@@ -34696,10 +34701,7 @@ X86.opSCASw = function()
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
          * two values are equal, we must continue.
          */
-        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-            this.resetIP(-2);
-            this.opFlags |= X86.OPFLAG.REPEAT;
-        }
+        if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) this.rewindIP();
     }
 };
 
@@ -35765,7 +35767,7 @@ X86.opHLT = function()
      * REALLY halt the CPU, on the theory that whoever's using the Debugger would like to see HLTs.
      */
     if (DEBUGGER && this.dbg && this.messageEnabled(Messages.CPU | Messages.HALT)) {
-        this.resetIP(-1);       // this is purely for the Debugger's benefit, to show the HLT
+        this.resetIP();         // this is purely for the Debugger's benefit, to show the HLT
         this.dbg.stopCPU();
         return;
     }
@@ -35774,7 +35776,7 @@ X86.opHLT = function()
      * the water (yes, we support NMIs, but none of our devices are going to generate an NMI at this point).
      */
     if (!this.getIF()) {
-        if (DEBUGGER && this.dbg) this.resetIP(-1);
+        if (DEBUGGER && this.dbg) this.resetIP();
         this.stopCPU();
     }
 };
@@ -38095,7 +38097,7 @@ class ChipSet extends Component {
 
         this.kbd = cmp.getMachineComponent("Keyboard");
 
-        let sound = cmp.getMachineParm("sound");
+        let sound = cmp.getMachineParm('sound');
         if (sound != null) {
             let volume = +sound || 0;
             this.volumeInit = (sound == "true" || volume < 0 || volume > 1? 0.5 : volume);
@@ -49871,6 +49873,8 @@ Card.ACCESS.V1[0xE000] = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.XOR;
 
 /**
  * readByte(off, addr)
+ * 
+ * Used for MDA/CGA "THRU" access (ie, byte is passed through without any controller-imposed overhead)
  *
  * @this {Memory}
  * @param {number} off
@@ -49976,6 +49980,8 @@ Card.ACCESS.readByteMode1 = function readByteMode1(off, addr)
 
 /**
  * writeByte(off, b, addr)
+ *
+ * Used for MDA/CGA "THRU" access (ie, byte is passed through without any controller-imposed overhead)
  *
  * @this {Memory}
  * @param {number} off
@@ -50462,9 +50468,8 @@ class Video extends Component {
      * buffers into the associated screen canvas, via either updateChar() or setPixel().
      *
      * Thanks to the Bus' new block-based memory manager that allows us to sparse-allocate memory
-     * (in 4Kb increments on 20-bit buses, 16Kb increments on 24-bit buses), updateScreen()
-     * can also ask the CPU for the "dirty" state of all the blocks underlying the video buffer,
-     * bypassing the update completely if the buffer is still clean.
+     * (in 4Kb increments), updateScreen() can also ask the CPU for the "dirty" state of all the
+     * blocks underlying the video buffer, bypassing the update completely if the buffer is still clean.
      *
      * Sadly, that optimization is defeated if the count of active blink elements is non-zero,
      * because we must rescan the entire buffer to locate and redraw them all; I'm assuming for now
@@ -56826,7 +56831,7 @@ class SerialPort extends Component {
     initConnection(fNullModem)
     {
         if (!this.connection) {
-            var sConnection = this.cmp.getMachineParm("connection");
+            var sConnection = this.cmp.getMachineParm('connection');
             if (sConnection) {
                 var asParts = sConnection.split('->');
                 if (asParts.length == 2) {
@@ -78441,9 +78446,15 @@ class Computer extends Component {
     powerReport(stateComputer)
     {
         if (!this.flags.unloading) {
-            if (Component.confirmUser("There may be a problem with your " + PCX86.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PCX86.APPNAME + " machine state to http://" + SITEHOST + ".")) {
-                Web.sendReport(PCX86.APPNAME, PCX86.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
-            }
+            //
+            // This is all we can realistically do for now.
+            //
+            Web.onError("There may be a problem with your " + PCX86.APPNAME + " machine.");
+            //
+            // if (Component.confirmUser("There may be a problem with your " + PCX86.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PCX86.APPNAME + " machine state to http://" + SITEHOST + ".")) {
+            //     Web.sendReport(PCX86.APPNAME, PCX86.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
+            // }
+            //
             return true;
         }
         return false;

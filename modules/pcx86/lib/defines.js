@@ -109,8 +109,11 @@ var SYMBOLS = DEBUGGER;
  *
  * BUGS_8086 enables support for known 8086 bugs.  It's turned off by default, because 1) it adds overhead, and
  * 2) it's hard to imagine any software actually being dependent on any of the bugs covered by this (eg, the failure
- * to properly restart string instructions with multiple prefixes, or the failure to inhibit hardware interrupts
- * following SS segment loads).
+ * to inhibit hardware interrupts following SS segment loads).
+ * 
+ * This does NOT enable what must be regarded as 8086 "features", such as failing to properly restart string
+ * instructions with multiple prefixes after a hardware interrupt, which we simulate regardless, because some software
+ * (eg, Central Point Software's PC Tools) uses that to differentiate processors (eg, the Intel 8088 from the NEC V20).
  */
 var BUGS_8086 = false;
 
