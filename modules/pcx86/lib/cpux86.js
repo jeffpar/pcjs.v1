@@ -4447,7 +4447,7 @@ class CPUX86 extends CPU {
              */
 
             this.aOps[this.getIPByte()].call(this);
-
+            
             /*
             if (PREFETCH) {
                 var nSpareCycles = (this.nSnapCycles - this.nStepCycles) - this.nBusCycles;

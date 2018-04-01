@@ -4537,7 +4537,7 @@ var SYMBOLS = DEBUGGER;
  * 
  * This does NOT enable what must be regarded as 8086 "features", such as failing to properly restart string
  * instructions with multiple prefixes after a hardware interrupt, which we simulate regardless, because some software
- * (eg, Central Point Software's PC Tools) uses to differentiate processors (eg, the Intel 8088 from the NEC V20).
+ * (eg, Central Point Software's PC Tools) uses that to differentiate processors (eg, the Intel 8088 from the NEC V20).
  */
 var BUGS_8086 = false;
 
@@ -5014,7 +5014,7 @@ var X86 = {
         ADDRSIZE:   0x0800,     // address size override
         FAULT:      0x1000,     // a fault occurred during the current instruction
         DBEXC:      0x2000,     // a DB_EXC exception occurred during the current instruction
-        REPSEG:     0x4000      // an instruction is being repeated with a segment prefix (used for 8086/8088 bug simulation)
+        REPSEG:     0x4000      // an instruction is being repeated with a segment prefix (used for 8086/8088 "feature" simulation)
     },
     /*
      * Bit values for intFlags
@@ -17951,7 +17951,7 @@ class CPUX86 extends CPU {
              */
 
             this.aOps[this.getIPByte()].call(this);
-
+            
             /*
             if (PREFETCH) {
                 var nSpareCycles = (this.nSnapCycles - this.nStepCycles) - this.nBusCycles;

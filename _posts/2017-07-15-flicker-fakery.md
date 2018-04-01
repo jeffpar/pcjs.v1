@@ -24,7 +24,7 @@ speed should be.  Even professional emulators like Oracle's [VirtualBox](https:/
 only very limited speed controls, such as a processor "Execution Cap", which is defined as a percentage of the
 emulator's maximum speed (whatever that may be), and which is too granular to recreate any specific CPU speed.
 
-### Visual Veracity
+### Visual Authenticity
 
 Beyond speed accuracy, the next commonly short-changed feature is visual authenticity.  Most emulators do a good 
 job faithfully emulating video hardware features, sometimes even obscure features that were used by only a handful
