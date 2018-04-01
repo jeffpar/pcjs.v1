@@ -1069,9 +1069,15 @@ class Computer extends Component {
     powerReport(stateComputer)
     {
         if (!this.flags.unloading) {
-            if (Component.confirmUser("There may be a problem with your " + PCX86.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PCX86.APPNAME + " machine state to http://" + SITEHOST + ".")) {
-                Web.sendReport(PCX86.APPNAME, PCX86.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
-            }
+            //
+            // This is all we can realistically do for now.
+            //
+            Web.onError("There may be a problem with your " + PCX86.APPNAME + " machine.");
+            //
+            // if (Component.confirmUser("There may be a problem with your " + PCX86.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PCX86.APPNAME + " machine state to http://" + SITEHOST + ".")) {
+            //     Web.sendReport(PCX86.APPNAME, PCX86.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
+            // }
+            //
             return true;
         }
         return false;

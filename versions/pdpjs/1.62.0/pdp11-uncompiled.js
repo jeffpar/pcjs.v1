@@ -2822,6 +2822,16 @@ class Web {
     };
 
     /**
+     * onError(sMessage)
+     *
+     * @param {string} sMessage
+     */
+    static onError(sMessage)
+    {
+        Web.notice(sMessage + "\n\nIf it happens again, please send the URL to support@pcjs.org. Thanks.");
+    }
+    
+    /**
      * onExit(fn)
      *
      * @param {function()} fn
@@ -2846,7 +2856,7 @@ class Web {
                     afn[i]();
                 }
             } catch (e) {
-                Web.notice("An unexpected error occurred: " + e.message + "\n\nIf it happens again, please send this information to support@pcjs.org. Thanks.");
+                Web.onError("An unexpected error occurred: " + e.message);
             }
         }
     };

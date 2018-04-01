@@ -815,6 +815,8 @@
 		<disk path="/pcjs-disks/pcx86/tools/other/enhdebug/ENHDEBUG.json">Enhanced DEBUG 1.32a</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/flickerfree/FLICKERFREE.json">FlickerFree 1.0</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/omniview/4.30/OMNIVIEW386-430.json">Omniview 386 4.30</disk>
+		<disk path="/pcjs-disks/pcx86/tools/other/pctools/1.03/PCTOOLS103.json">PC Tools 1.03</disk>
+		<disk path="/pcjs-disks/pcx86/tools/other/pctools/4.30/PCTOOLS430.json">PC Tools 4.30</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/qemm386/4.10/QEMM386-410.json">QEMM-386 4.10</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/qemm386/4.23/QEMM386-423.json">QEMM-386 4.23</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/qemm386/5.13/QEMM386-513.json">QEMM-386 5.13</disk>
