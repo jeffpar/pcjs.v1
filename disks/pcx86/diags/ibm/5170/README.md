@@ -16,7 +16,3 @@ IBM Diagnostics for PC AT
 
 * [IBM PC AT Advanced Diagnostics 1.01](1.01a/)
 * [IBM PC AT Advanced Diagnostics 2.07](2.07a/)
-
-### Exploring the IBM PC AT
-
-* [Exploring the IBM PC AT 1.00](exploring/1.00/)

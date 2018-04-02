@@ -9,4 +9,5 @@ IBM Applications
 
 Information is available for the following IBM applications.
 
+* [Exploring the IBM Personal Computer](exploring/)
 * [TopView](topview/)
