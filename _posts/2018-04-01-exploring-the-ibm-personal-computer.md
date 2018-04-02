@@ -53,9 +53,9 @@ could still attempt to load states with an older (larger) block size, so I also 
 a non-4K block was detected.
 
 The good news is that, after dealing with all these ripple effects, [Exploring The IBM Personal Computer](/disks/pcx86/apps/ibm/exploring/)
-now runs as intended.  Well, except for the awful sound it makes, which I'll be looking into a later date.
+now runs as intended.  Well, except for the awful sound it makes, which I'll be looking into at a later date.
 
-For now, turn your volume down (and appreciate the fact that you *can* turn your volume down, because the PC speaker on
+For now, turn your volume down (and appreciate the fact that you *can* turn your volume down, because the speaker on
 an IBM PC had no such feature), and enjoy exploring the IBM Personal Computer.
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
