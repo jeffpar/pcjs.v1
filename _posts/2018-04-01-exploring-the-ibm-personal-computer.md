@@ -10,7 +10,7 @@ A rather ~~ghastly~~ quaint piece of early IBM PC software was a program called
 and marketed by IBM, it was designed to walk you through the "ins and outs" of your shiny new IBM PC, and it came in
 two flavors: [Monochrome](/disks/pcx86/apps/ibm/exploring/5150/mda/) and [Color](/disks/pcx86/apps/ibm/exploring/5150/cga/).
 
-![Exploring the IBM PC (Intro]({{ site.pcjs-disks.baseurl }}/blog/images/exploring-the-ibm-pc-intro.jpg)
+![Exploring the IBM PC (Intro](/blog/images/exploring-the-ibm-pc-intro.jpg)
 
 After playing some truly awful "music" through the PC's speaker -- for which I must also apologize, because the limited
 PC speaker support in PCjs manages to make it sound even worse -- the software begins with a tour of your IBM PC's
@@ -19,7 +19,7 @@ keyboard.
 In the screenshot below, notice the painstaking detail with which even the coiled cord of the PC's keyboard is lovingly
 rendered.
 
-![Exploring the IBM PC (Keyboard)]({{ site.pcjs-disks.baseurl }}/blog/images/exploring-the-ibm-pc-keyboard.gif)
+![Exploring the IBM PC (Keyboard)](/blog/images/exploring-the-ibm-pc-keyboard.gif)
 
 Amazingly, this software was even updated for the [IBM PC AT](/disks/pcx86/apps/ibm/exploring/5170/) -- not once but
 [twice](/disks/pcx86/apps/ibm/exploring/5170/2.00/)!  On the bright side though, the second version did eliminate the "music".
@@ -27,7 +27,7 @@ Amazingly, this software was even updated for the [IBM PC AT](/disks/pcx86/apps/
 Unfortunately, when I first ran this program on PCjs, the introductory screen wasn't fully erased, leaving most of
 the block characters around the border of screen.
 
-![Exploring the IBM PC (Bug)]({{ site.pcjs-disks.baseurl }}/blog/images/exploring-the-ibm-pc-intro-bug.png)
+![Exploring the IBM PC (Bug)](/blog/images/exploring-the-ibm-pc-intro-bug.png)
 
 This was due to a bug in their call to the ROM's INT 10h "Scroll Up" function:
 
