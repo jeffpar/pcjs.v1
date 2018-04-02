@@ -47,9 +47,6 @@
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/2.07/5150-DIAG-207.json">IBM PC Diagnostics 2.07</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5170/1.02/5170-DIAG-102.json">IBM PC AT Diagnostics 1.02</disk>
 		<disk path="/pcjs-disks/pcx86/diags/ibm/5170/2.00/5170-DIAG-200.json">IBM PC AT Diagnostics 2.00</disk>
-		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/exploring/1.00/mda/EXPLORING-THE-IBM-PC-100-MDA.json">Exploring the IBM PC 1.00 (MDA)</disk>
-		<disk path="/pcjs-disks/pcx86/diags/ibm/5150/exploring/1.00/cga/EXPLORING-THE-IBM-PC-100-CGA.json">Exploring the IBM PC 1.00 (CGA)</disk>
-		<disk path="/pcjs-disks/pcx86/diags/ibm/5170/exploring/1.00/EXPLORING-THE-IBM-PC-AT-100.json">Exploring the IBM PC AT 1.00</disk>
 		<disk path="/pcjs-disks/pcx86/diags/compaq/5.08/COMPAQ-DIAGS-508-012988-REVK.json">COMPAQ Diagnostics 5.08</disk>
 		<disk path="/pcjs-disks/pcx86/diags/compaq/6.12/COMPAQ-DIAGS-612-062189.json">COMPAQ Diagnostics 6.12</disk>
 		<disk path="/pcjs-disks/pcx86/diags/compaq/utilities/1986/COMPAQ-DESKPRO386-SUPP-1986-08-08.json">COMPAQ DeskPro 386 (1986)</disk>
@@ -535,6 +532,10 @@
 		<disk path="/pcjs-disks/pcx86/unix/sco/xenix/386/2.3.4h/X3.json">SCO Xenix 386 2.3.4h (X3)</disk>
 		<disk path="/pcjs-disks/pcx86/unix/sco/xenix/386/2.3.4h/X4.json">SCO Xenix 386 2.3.4h (X4)</disk>
 		<disk path="/pcjs-disks/pcx86/unix/sco/xenix/386/2.3.4h/GAMES.json">SCO Xenix 386 2.3.4h (GAMES)</disk>
+		<disk path="/pcjs-disks/pcx86/apps/ibm/exploring/5150/mda/EXPLORING-THE-IBM-PC-100-MDA.json">Exploring the IBM PC (MDA)</disk>
+		<disk path="/pcjs-disks/pcx86/apps/ibm/exploring/5150/cga/EXPLORING-THE-IBM-PC-100-CGA.json">Exploring the IBM PC (CGA)</disk>
+		<disk path="/pcjs-disks/pcx86/apps/ibm/exploring/5170/1.00/EXPLORING-THE-IBM-PC-AT-100.json">Exploring the IBM PC AT (1.00)</disk>
+		<disk path="/pcjs-disks/pcx86/apps/ibm/exploring/5170/2.00/EXPLORING-THE-IBM-PC-AT-200.json">Exploring the IBM PC AT (2.00)</disk>
 		<disk path="/pcjs-disks/pcx86/apps/ibm/topview/1.01/TOPVIEW101-PROGRAM.json">TopView 1.01 (Program)</disk>
 		<disk path="/pcjs-disks/pcx86/apps/ibm/topview/1.01/TOPVIEW101-TUTORIAL.json">TopView 1.01 (Tutorial)</disk>
 		<disk path="/pcjs-disks/pcx86/apps/ibm/topview/1.10/TOPVIEW110.json">TopView 1.10</disk>
@@ -816,7 +817,7 @@
 		<disk path="/pcjs-disks/pcx86/tools/other/flickerfree/FLICKERFREE.json">FlickerFree 1.0</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/omniview/4.30/OMNIVIEW386-430.json">Omniview 386 4.30</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/pctools/1.03/PCTOOLS103.json">PC Tools 1.03</disk>
-		<disk path="/pcjs-disks/pcx86/tools/other/pctools/4.30/PCTOOLS430.json">PC Tools 4.30</disk>
+		<disk path="/pcjs-disks/pcx86/tools/other/pctools/4.30/PCTOOLS430.json">PC Tools Deluxe 4.30</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/qemm386/4.10/QEMM386-410.json">QEMM-386 4.10</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/qemm386/4.23/QEMM386-423.json">QEMM-386 4.23</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/qemm386/5.13/QEMM386-513.json">QEMM-386 5.13</disk>
