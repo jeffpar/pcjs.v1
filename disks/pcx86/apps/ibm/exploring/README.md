@@ -9,4 +9,5 @@ Exploring the IBM Personal Computer
 
 * [Exploring the IBM PC (Color Version)](5150/cga/)
 * [Exploring the IBM PC (Monochrome Version)](5150/mda/)
-* [Exploring the IBM PC AT (1.00)](5170/)
+* [Exploring the IBM PC AT (1.00)](5170/1.00/)
+* [Exploring the IBM PC AT (2.00)](5170/2.00/)
