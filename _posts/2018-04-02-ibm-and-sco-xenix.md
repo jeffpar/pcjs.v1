@@ -5,7 +5,7 @@ date: 2018-04-02 10:00:00
 permalink: /blog/2018/04/02/
 ---
 
-Thanks to a friend and former co-worker, I was able to add a small collection of early XENIX distributions to the PCjs
+Thanks to a friend and former co-worker, I was able to add a small collection of early Xenix distributions to the PCjs
 archives recently:
 
 - [IBM PC XENIX 1.0](/disks/pcx86/unix/ibm/xenix/1.0/)
