@@ -18,9 +18,32 @@ machines:
 IBM PC XENIX 1.0
 ----------------
 
+IBM PC XENIX was the first protected-mode operating system available for the IBM PC AT, and one of the first 286
+operating systems.  It was a multi-tasking, multi-user operating system which, unlike PC/IX on the IBM PC XT,
+could replace a modest UNIX workstation.
+
+Some "[Quick Start](#notes-from-the-os2-museum)" notes that XENIX newbies (myself included) will probably find useful
+are provided below.
+
 {% include machine.html id="ibm5170" %}
 
-From [OS/2 Museum](http://www.os2museum.com/wp/ibm-pc-xenix/):
+### Notes from The OS/2 Museum
+
+> First, you're supposed to run `fd /etc/badtrack` directly from the boot loader prompt on the installation diskette.
+To boot the kernel from floppy, run `fd /xenix.fd` (not just `fd /xenix`) from the boot loader prompt. If you manage
+to boot to the maintenance shell, the next step is `hdinit` which should set up the hard disk and take it from there.
+The system should be shut down with `haltsys`.  Once `hdinit` is done, the system should be able to boot from the hard
+drive. The last step should be `install base` once booted from hard disk.
+
+Related [OS/2 Museum](http://www.os2museum.com/) posts include:
+
+- [IBM PC XENIX (October 26, 2012)](http://www.os2museum.com/wp/ibm-pc-xenix/)
+- [Forward Compatibility, Landmines (September 20, 2014)](http://www.os2museum.com/wp/forward-compatibility-landmines/)
+- [IBM XENIX: One Step Forward, One Step Back (March 29, 2015)](http://www.os2museum.com/wp/ibm-xenix-one-step-forward-one-step-back/)
+- [IBM XENIX 1.0 Incompatibility Details (February 7, 2017)](http://www.os2museum.com/wp/ibm-xenix-1-0-incompatibility-details/)
+- [IBM XENIX: Two Steps Forward (March 16, 2017)](http://www.os2museum.com/wp/ibm-xenix-two-steps-forward/)
+
+Here's an excerpt from ["IBM PC XENIX" (October 26, 2012)](http://www.os2museum.com/wp/ibm-pc-xenix/):
 
 > The IBM PC XENIX was based on AT&amp;T’s UNIX System III (rather than the newer System V) with a number of BSD
 enhancements. The latter included vi, C shell, and termcap/curses. Microsoft also implemented several enhancements,

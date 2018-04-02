@@ -19,8 +19,6 @@ machines:
 SCO Xenix System V Release 2.1.3 for i8086
 ------------------------------------------
 
-{% include machine.html id="ibm5160" %}
-
 To (re)install this version of Xenix, load the "SCO Xenix 8086 (N1-BOOT)" diskette into drive A: and reboot.
 
 When prompted, use the following serial number and activation key:  
@@ -28,4 +26,6 @@ When prompted, use the following serial number and activation key:
 	Serial number: sco005312
 	Activation key: thmjvbqz
 
-Note: This version of Xenix doesn't work with a VGA.  Use a machine with a Monochrome, CGA, or EGA video card.
+Note: The machine below is configured with a CGA.  Monochrome and EGA video cards should work as well (not VGA).
+
+{% include machine.html id="ibm5160" %}
