@@ -1,13 +1,13 @@
 ---
 layout: page
-title: SPACEMAKER 1.06
+title: Spacemaker 1.06
 permalink: /disks/pcx86/tools/other/spacemaker/1.06/
 ---
 
-SPACEMAKER 1.06
+Spacemaker 1.06
 ---------------
 
-### Directory of SPACEMAKER 1.06
+### Directory of Spacemaker 1.06
 
      Volume in drive A has no label
      Directory of  A:\

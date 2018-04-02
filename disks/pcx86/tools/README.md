@@ -4,10 +4,10 @@ title: PC Tools
 permalink: /disks/pcx86/tools/
 ---
 
-PC Tools
---------
+PC Utilities
+------------
 
-Information is available for tools from these vendors.
+Information is available for utilities from these vendors.
 
 * [Borland](borland/)
 * [Digital Research](dresearch/)

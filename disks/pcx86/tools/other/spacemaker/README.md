@@ -1,12 +1,14 @@
 ---
 layout: page
-title: SPACEMAKER
+title: Spacemaker
 permalink: /disks/pcx86/tools/other/spacemaker/
 ---
 
-SPACEMAKER
+Spacemaker
 ----------
 
-SPACEMAKER was an EXE compression utility created by Realia Inc.
+Spacemaker was an EXE compression utility created by Realia Inc.
 
-* [SPACEMAKER 1.06](1.06/)
+* [Spacemaker 1.06](1.06/)
+
+![Spacemaker 1983]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/tools/other/spacemaker/PC-Magazine-1983-08-p498.jpg)

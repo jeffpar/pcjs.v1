@@ -62,13 +62,13 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 * [PC Tech Journal (1985-1989)](shareware/pctj/)
 * [More...](shareware/)
 
-### Tools
+### Utilities
 
-* [Borland Tools](tools/borland/)
-* [Digital Research Tools](tools/dresearch/)
-* [IBM Tools](tools/ibm/)
-* [Logitech Tools](tools/logitech/)
-* [Microsoft Tools](tools/microsoft/)
+* [Borland](tools/borland/)
+* [Digital Research](tools/dresearch/)
+* [IBM](tools/ibm/)
+* [Logitech](tools/logitech/)
+* [Microsoft](tools/microsoft/)
 * [More...](tools/)
 
 ### Diagnostics and More
