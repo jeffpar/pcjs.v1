@@ -1,13 +1,13 @@
 ---
 layout: page
-title: PC Tools Deluxe 4.30
+title: Central Point PC Tools Deluxe 4.30
 permalink: /disks/pcx86/tools/other/pctools/4.30/
 ---
 
-PC Tools Deluxe 4.30
---------------------
+Central Point PC Tools Deluxe 4.30
+----------------------------------
 
-### Directory of PC Tools Deluxe 4.30
+### Directory of Central Point PC Tools 4.30
 
 	 Volume in drive A has no label
 
