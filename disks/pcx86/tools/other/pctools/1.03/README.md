@@ -1,13 +1,13 @@
 ---
 layout: page
-title: PC Tools 1.03
+title: Central Point PC Tools 1.03
 permalink: /disks/pcx86/tools/other/pctools/1.03/
 ---
 
-PC Tools 1.03
--------------
+Central Point PC Tools 1.03
+---------------------------
 
-### Directory of PC Tools 1.03
+### Directory of Central Point PC Tools 1.03
  
 	 Volume in drive A has no label
 
