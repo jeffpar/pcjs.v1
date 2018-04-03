@@ -6873,7 +6873,7 @@ class Video extends Component {
     inCardStatus(card, addrFrom)
     {
         var b = this.getRetraceBits(card);
-
+        
         if (card === this.cardEGA) {
             /*
              * STATUS1 diagnostic bits 5 and 4 are set according to the Card.ATC.PLANES.MUX bits:
@@ -6938,7 +6938,7 @@ class Video extends Component {
              */
             b = (card.regStatus ^= (Card.CGA.STATUS.RETRACE | Card.CGA.STATUS.VRETRACE)) | 0xF0;
         }
-
+        
         card.regStatus = b;
         this.printMessageIO(card.port + 6, null, addrFrom, (card === this.cardEGA? "STATUS1" : "STATUS"), b);
         return b;

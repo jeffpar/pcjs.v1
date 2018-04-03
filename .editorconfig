@@ -30,12 +30,12 @@ trim_trailing_whitespace = true
 [modules/**.js]
 indent_style = space
 indent_size = 4
-trim_trailing_whitespace = false
+trim_trailing_whitespace = true
 
 [*.json]
 indent_style = space
 indent_size = 2
-trim_trailing_whitespace = false
+trim_trailing_whitespace = true
 
 [*.map]
 indent_style = space

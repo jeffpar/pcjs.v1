@@ -548,7 +548,7 @@ ROMX86.BIOS = {
     INFO:           0x487,              // PC AT: MODE OPTIONS (byte)
     /*
      * INFO BITS:
-     * 
+     *
      *      0x80: HIGH BIT OF MODE SET, CLEAR/NOT CLEAR REGEN
      *      0x60: 256K OF VRAM
      *      0x40: 192K OF VRAM
@@ -560,6 +560,38 @@ ROMX86.BIOS = {
      *      0x01: SET C_TYPE EMULATE ACTIVE (0)
      */
     INFO_3:         0x488,              // PC AT: FEATURE BIT SWITCHES (1 byte, plus 2 reserved bytes)
+    /*
+     *     40:88  byte  PCjr: third keyboard status byte
+     *                  EGA feature bit switches, emulated on VGA
+     *
+     *         |7|6|5|4|3|2|1|0| EGA feature bit switches (EGA+)
+     *          | | | | | | | `-- EGA SW1 config (1=off)
+     *          | | | | | | `--- EGA SW2 config (1=off)
+     *          | | | | | `---- EGA SW3 config (1=off)
+     *          | | | | `----- EGA SW4 config (1=off)
+     *          | | | `------ Input FEAT0 (ISR0 bit 5) after output on FCR0
+     *          | | `------- Input FEAT0 (ISR0 bit 6) after output on FCR0
+     *          | `-------- Input FEAT1 (ISR0 bit 5) after output on FCR1
+     *          `--------- Input FEAT1 (ISR0 bit 6) after output on FCR1
+     *
+     *     40:89  byte  Video display data area (MCGA and VGA)
+     *
+     *         |7|6|5|4|3|2|1|0| Video display data area (MCGA and VGA)
+     *          | | | | | | | `-- 1=VGA is active
+     *          | | | | | | `--- 1=gray scale is enabled
+     *          | | | | | `---- 1=using monochrome monitor
+     *          | | | | `----- 1=default palette loading is disabled
+     *          | | | `------ see table below
+     *          | | `------- reserved
+     *          | `--------  1=display switching enabled
+     *          `--------- alphanumeric scan lines (see table below)
+     *
+     *           Bit7    Bit4   Scan Lines
+     *             0       0    350 line mode
+     *             0       1    400 line mode
+     *             1       0    200 line mode
+     *             1       1    reserved
+     */
     /*
      * ADDITIONAL MEDIA DATA
      */
