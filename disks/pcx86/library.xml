@@ -618,10 +618,10 @@
 		<disk path="/pcjs-disks/pcx86/apps/other/wordstar/pcjr/WSPCJR100-DISK3.json">WordStar for PCjr (Disk 3)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/borland/sidekick/1.11c/SIDEKICK-111C.json">Borland Sidekick 1.11C</disk>
 		<disk path="/pcjs-disks/pcx86/tools/borland/sidekick/1.56/SIDEKICK-156.json">Borland Sidekick 1.56</disk>
-		<disk path="/pcjs-disks/pcx86/tools/borland/skplus/1.00a/SIDEKICK-PLUS-100A-INSTALL1.json">Borland SideKick Plus 1.00A (Disk1)</disk>
-		<disk path="/pcjs-disks/pcx86/tools/borland/skplus/1.00a/SIDEKICK-PLUS-100A-INSTALL2.json">Borland SideKick Plus 1.00A (Disk2)</disk>
-		<disk path="/pcjs-disks/pcx86/tools/borland/skplus/1.00a/SIDEKICK-PLUS-100A-HELP.json">Borland SideKick Plus 1.00A (Disk3)</disk>
-		<disk path="/pcjs-disks/pcx86/tools/borland/skplus/1.00a/SIDEKICK-PLUS-100A-EXAMPLES.json">Borland SideKick Plus 1.00A (Disk4)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/borland/skplus/1.00a/SIDEKICK-PLUS-100A-INSTALL1.json">Borland SideKick Plus 1.00A (Disk 1)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/borland/skplus/1.00a/SIDEKICK-PLUS-100A-INSTALL2.json">Borland SideKick Plus 1.00A (Disk 2)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/borland/skplus/1.00a/SIDEKICK-PLUS-100A-HELP.json">Borland SideKick Plus 1.00A (Disk 3)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/borland/skplus/1.00a/SIDEKICK-PLUS-100A-EXAMPLES.json">Borland SideKick Plus 1.00A (Disk 4)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/borland/pascal/2.00/TURBO-PASCAL-200.json">Borland Turbo Pascal 2.00</disk>
 		<disk path="/pcjs-disks/pcx86/tools/borland/pascal/3.00b/TURBO-PASCAL-300B.json">Borland Turbo Pascal 3.00B</disk>
 		<disk path="/pcjs-disks/pcx86/tools/borland/pascal/3.01a/TURBO-PASCAL-301A.json">Borland Turbo Pascal 3.01A</disk>
