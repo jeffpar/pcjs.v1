@@ -6,7 +6,7 @@ machines:
   - id: ibm5160-msdos320
     type: pcx86
     state: /apps/pcx86/1984/modula2/state.json
-    config: /devices/pcx86/machine/5160/ega/640kb/machine.xml
+    config: /devices/pcx86/machine/5160/ega/256kb/machine.xml
     drives: '[{name:"10Mb Hard Disk",type:3,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'
     autoMount:
       A:

@@ -7,7 +7,7 @@ machines:
   - id: ibm5160-msdos320
     type: pcx86
     state: /apps/pcx86/1984/modula2/state.json
-    config: /devices/pcx86/machine/5160/ega/640kb/debugger/machine.xml
+    config: /devices/pcx86/machine/5160/ega/256kb/debugger/machine.xml
     drives: '[{name:"10Mb Hard Disk",type:3,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'
     autoMount:
       A:
@@ -53,11 +53,9 @@ Due to the "very selective" distribution of the program, **FantasyLand** has bee
 Even Cockerham seemed reluctant to tell us *too* much about the program.  My *guess* is that
 [Page 48](http://www.pcjs.org/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2052.pdf&page=52&total=228)
 of the October 1986 issue displays a zoomed-in section of a **FantasyLand** screen, but it's unattributed, so who knows.
+If you come across a copy of **FantasyLand**, *please* let me know.
 
-> **SIDEBAR**: If you come across a copy of **FantasyLand**, *please* let me know.  I'll even pay a bounty of, say,
-$25 (via PayPal) to the first person to find a copy and contact me, just to make it worth your time to look.  Seriously.
-
-So, given that **FantasyLand** is currently unattainable, I turned my attention to Cockerham's own **EGATEST**.
+So, given that **FantasyLand** seemed unattainable, I next turned my attention to Cockerham's own **EGATEST**.
 
 The [October 1986](http://www.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1986-10/) issue contains the **EGATEST** program listing,
 starting on [Page 64](http://www.pcjs.org/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2068.pdf&page=68&total=228),
@@ -90,17 +88,19 @@ equipment and service. As always, we invite your comments and suggestions for PC
 As it turns out, the simplest means of obtaining all the code was finding it in another online archive.  A website
 called [The Programmer's Corner](https://www.pcorner.com) contains a [Magazine File Archive](https://www.pcorner.com/list/MAG),
 and in that archive, a file named [PCTJ1086.ZIP](https://www.pcorner.com/list/MAG/PCTJ1086.ZIP/INFO/) appears to
-contain all of Cockerham's EGATEST files.
+contain all of Cockerham's **EGATEST** files.
 
 I've transferred the contents of that ZIP archive to a PCx86 diskette image named
 "[PC Tech Journal (1986-10)](/disks/pcx86/shareware/pctj/#directory-of-pc-tech-journal-1986-10)", which we can now
 load into the machine below, and then run "EGAMAKE.BAT" to rebuild the entire program.
 
-Unfortunately, as of this writing, while the code *mostly* compiles, it encounters a few errors along the way
-that I've not diagnosed yet.  The closest version of the compiler I was able to find is
-[Logitech Modula-2/86 Compiler 1.10](/disks/pcx86/tools/logitech/modula2/1.10/).
-Cockerham doesn't mention what version of the compiler he used, but it may well have been a newer version, since
-that article was published almost two years after version 1.10 was released.
+### Building EGATEST
+
+Unfortunately, as of this writing, while the **EGATEST** code *mostly* compiles, it encounters a few errors along the way
+that I've not resolved yet (like a missing `TimeDate` module).  And the closest version of the compiler I was able to find
+is [Logitech Modula-2/86 Compiler 1.10](/disks/pcx86/tools/logitech/modula2/1.10/).  Cockerham doesn't mention what version
+of the compiler he used, but it may well have been a newer version (2.00?), since that article was published almost two
+years after version 1.10 was released.
 
 I'm also at a bit of a disadvantage with Modula-2 itself: I've never written anything in Modula-2, I've never used
 any Logitech compilers before now, and the closest documentation I've been able to locate is for
