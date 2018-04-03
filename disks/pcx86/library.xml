@@ -618,6 +618,10 @@
 		<disk path="/pcjs-disks/pcx86/apps/other/wordstar/pcjr/WSPCJR100-DISK3.json">WordStar for PCjr (Disk 3)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/borland/sidekick/1.11c/SIDEKICK-111C.json">Borland Sidekick 1.11C</disk>
 		<disk path="/pcjs-disks/pcx86/tools/borland/sidekick/1.56/SIDEKICK-156.json">Borland Sidekick 1.56</disk>
+		<disk path="/pcjs-disks/pcx86/tools/borland/skplus/1.00a/SIDEKICK-PLUS-100A-INSTALL1.json">Borland SideKick Plus 1.00A (Disk1)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/borland/skplus/1.00a/SIDEKICK-PLUS-100A-INSTALL2.json">Borland SideKick Plus 1.00A (Disk2)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/borland/skplus/1.00a/SIDEKICK-PLUS-100A-HELP.json">Borland SideKick Plus 1.00A (Disk3)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/borland/skplus/1.00a/SIDEKICK-PLUS-100A-EXAMPLES.json">Borland SideKick Plus 1.00A (Disk4)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/borland/pascal/2.00/TURBO-PASCAL-200.json">Borland Turbo Pascal 2.00</disk>
 		<disk path="/pcjs-disks/pcx86/tools/borland/pascal/3.00b/TURBO-PASCAL-300B.json">Borland Turbo Pascal 3.00B</disk>
 		<disk path="/pcjs-disks/pcx86/tools/borland/pascal/3.01a/TURBO-PASCAL-301A.json">Borland Turbo Pascal 3.01A</disk>
@@ -816,13 +820,13 @@
 		<disk path="/pcjs-disks/pcx86/tools/other/enhdebug/ENHDEBUG.json">Enhanced DEBUG 1.32a</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/flickerfree/FLICKERFREE.json">FlickerFree 1.0</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/omniview/4.30/OMNIVIEW386-430.json">Omniview 386 4.30</disk>
-		<disk path="/pcjs-disks/pcx86/tools/other/pctools/1.03/PCTOOLS103.json">PC Tools 1.03</disk>
-		<disk path="/pcjs-disks/pcx86/tools/other/pctools/4.30/PCTOOLS430.json">PC Tools Deluxe 4.30</disk>
+		<disk path="/pcjs-disks/pcx86/tools/other/pctools/1.03/PCTOOLS103.json">Central Point PC Tools 1.03</disk>
+		<disk path="/pcjs-disks/pcx86/tools/other/pctools/4.30/PCTOOLS430.json">Central Point PC Tools Deluxe 4.30</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/qemm386/4.10/QEMM386-410.json">QEMM-386 4.10</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/qemm386/4.23/QEMM386-423.json">QEMM-386 4.23</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/qemm386/5.13/QEMM386-513.json">QEMM-386 5.13</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/qemm386/6.02/QEMM386-602.json">QEMM-386 6.02</disk>
-		<disk path="/pcjs-disks/pcx86/tools/other/spacemaker/1.06/SM106.json">Spacemaker 1.06</disk>
+		<disk path="/pcjs-disks/pcx86/tools/other/spacemaker/1.06/SM106.json">Realia Spacemaker 1.06</disk>
 		<disk path="/pcjs-disks/pcx86/games/id/wolf3d/1WOLF14.json">Wolfenstein 3D 1.4</disk>
 		<disk path="/pcjs-disks/pcx86/games/microsoft/flightsim/1982/FLIGHTSIM-1982.json">MS Flight Simulator (1982)</disk>
 		<disk path="/pcjs-disks/pcx86/games/microsoft/flightsim/1984/FLIGHTSIM-1984.json">MS Flight Simulator (1984)</disk>
