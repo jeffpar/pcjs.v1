@@ -60,26 +60,26 @@ machine:
 which should cause the machine to reboot.
 
 Another example is the "curtest" (cursor test) command, which uses a simple for-loop to repeatedly change the starting
-scan-line of the cursor, and then waits for you to press a key after each change:
+and ending scan-line of the cursor, and then waits for you to press a key after each change:
 
-    "curtest": "for i=0 to 13 { curstart $i; printf('curstart=%d\n',$i); wait; }"
+    "curtest": "for i=0 to 13 { cursor $i $i; printf('cursor %d %d\n',$i,$i); wait; }",
 
-The "curtest" command relies on the "curstart" command:
+The "curtest" command relies on the "cursor" command:
 
-    "curstart": "o 3d4 a\ro 3d5 %1\r"
+    "cursor": "o 3d4 a\ro 3d5 %1\ro 3d4 b\ro 3d5 %2\r",
 
-which issues a pair of SYMDEB output ("o") commands to the machine's CRT controller.
+which issues two pairs of SYMDEB output ("o") commands to the machine's CRT controller.
 
 Note that for-loops use `$variable` substitution and printf() calls use traditional `%specifier` substitution,
 while other commands use either `$argument` or `%argument` substitution, depending on whether the corresponding
 argument should be replaced as-is or converted to a hexadecimal value first.
 
-Since "curstart" expects a single hexadecimal argument, and since the for-loop is producing decimal values, the command
-uses `%1` to ensure that the first argument is converted to hex before it is substituted.  This means the following
-commands are equivalent, replacing all occurrences of `%1` with `a`: 
+Since "cursor" expects a pair of hexadecimal arguments, and since the for-loop is producing decimal values, the command
+uses `%1` and `%2` to ensure that the arguments are converted to hex before they are substituted.  This means the following
+commands are equivalent:
 
-    curstart 10
-    curstart 0xa
+    cursor 10 10
+    cursor 0xa 0xa
 
 At this point, this is mostly just proof-of-concept stuff.  Phase Two of TestMonitor development will involve
 adding command verification checks, to determine whether a command was performed successfully and with the desired
