@@ -6,6 +6,7 @@ machines:
   - id: ibm5160
     type: pcx86
     debugger: true
+    commands: bp &0A9C:014F
     config: /devices/pcx86/machine/5160/ega/256kb/debugger/machine.xml
     autoMount:
       A:

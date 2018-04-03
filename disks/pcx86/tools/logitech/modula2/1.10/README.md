@@ -6,7 +6,7 @@ machines:
   - id: ibm5160-msdos320
     type: pcx86
     state: /apps/pcx86/1984/modula2/state.json
-    config: /devices/pcx86/machine/5160/ega/640kb/machine.xml
+    config: /devices/pcx86/machine/5160/ega/256kb/machine.xml
     drives: '[{name:"10Mb Hard Disk",type:3,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'
     autoMount:
       A:
@@ -30,7 +30,14 @@ hard disk installation procedure described in the v1.0 manual:
 - Load diskette in drive A: `Modula-2/86 1.10 (1-System)`
 - Copy the M2 binary to drive C: `COPY A:M2.EXE M2BIN`
 - Run the installation batch file: `A:INSTALL1`
-- Follow the on-screen instructions
+- Follow the on-screen instructions (e.g., `A:INSTALL2`)
+
+Afterward, AUTOEXEC.BAT was modified to include `C:\M2BIN` in the PATH, along with the following `SET` commands:
+
+    SET M2SYM=C:\M2LIB\SYM
+    SET M2LNK=C:\M2LIB\LNK
+    SET M2REF=C:\M2LIB\REF
+    SET M2MAP=C:\M2LIB\MAP
 
 Directory listings of the distribution diskettes are also provided [below](#directory-of-modula-286-110-1-system).
 
