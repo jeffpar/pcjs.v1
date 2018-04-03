@@ -52,30 +52,55 @@ The following optional machine properties will be added to the 'parms' property:
     {% assign machine_config = machine.config %}
   {% endunless %}
   {% capture machine_embed %}{{ machine_data.creator }}{% endcapture %}
-  {% if machine.autoMount == "" %}
+  {% if machine.autoMount == nil %}
     {% assign machine_autoMount = "autoMount:{}" %}
   {% else %}
     {% capture machine_autoMount %}autoMount:{{ machine.autoMount|jsonify }}{% endcapture %}
   {% endif %}
-  {% if machine.autoScript != nil %}
-    {% capture machine_autoScript %},autoScript:"{{ page.machineScripts[machine.autoScript] | strip_newlines | replace:'"':"\\\\&quot;" | replace:"\r":"\\\\r" | replace:"\n":"\\\\n" | replace:"\t":"\\\\t" | replace:"\x":"\\\\x" }}"{% endcapture %}
-  {% else %}
+  {% if machine.autoScript == nil %}
     {% assign machine_autoScript = "" %}
-  {% endif %}
-  {% if machine.autoStart != nil %}
-    {% capture machine_autoStart %},autoStart:{{ machine.autoStart }}{% endcapture %}
   {% else %}
+    {% capture machine_autoScript %},autoScript:"{{ page.machineScripts[machine.autoScript] | strip_newlines | replace:'"':"\\\\&quot;" | replace:"\r":"\\\\r" | replace:"\n":"\\\\n" | replace:"\t":"\\\\t" | replace:"\x":"\\\\x" }}"{% endcapture %}
+  {% endif %}
+  {% if machine.autoStart == nil %}
     {% assign machine_autoStart = "" %}
-  {% endif %}
-  {% if machine.autoType != nil %}
-    {% capture machine_autoType %},autoType:"{{ machine.autoType | replace:"\r":"\\\\r" | replace:"\n":"\\\\n" | replace:"\t":"\\\\t" | replace:"\x":"\\\\x" }}"{% endcapture %}
   {% else %}
+    {% capture machine_autoStart %},autoStart:{{ machine.autoStart }}{% endcapture %}
+  {% endif %}
+  {% if machine.autoType == nil %}
     {% assign machine_autoType = "" %}
-  {% endif %}
-  {% if machine.class != nil %}
-    {% capture machine_class %},'{{ machine.class }}'{% endcapture %}
   {% else %}
+    {% capture machine_autoType %},autoType:"{{ machine.autoType | replace:"\r":"\\\\r" | replace:"\n":"\\\\n" | replace:"\t":"\\\\t" | replace:"\x":"\\\\x" }}"{% endcapture %}
+  {% endif %}
+  {% if machine.class == nil %}
     {% assign machine_class = "" %}
+  {% else %}
+    {% capture machine_class %},'{{ machine.class }}'{% endcapture %}
+  {% endif %}
+  {% if machine.resume == nil %}
+    {% assign machine_resume = "" %}
+  {% else %}
+    {% capture machine_resume %},"{{ machine.resume }}"{% endcapture %}
+  {% endif %}
+  {% if machine.sound == nil %}
+    {% assign machine_sound = "" %}
+  {% else %}
+    {% capture machine_sound %},sound:{{ machine.sound }}{% endcapture %}
+  {% endif %}
+  {% if machine.state == nil %}
+    {% assign machine_state = "" %}
+  {% else %}
+    {% capture machine_state %},"{{ machine.state }}"{% endcapture %}
+  {% endif %}
+  {% if machine.commands == nil %}
+    {% assign machine_commands = "" %}
+  {% else %}
+    {% capture machine_commands %},commands:"{{ machine.commands | replace:"&":"&amp;" | replace:"#":"&#35;" }}"{% endcapture %}
+  {% endif %}
+  {% if machine.messages == nil %}
+    {% assign machine_messages = "" %}
+  {% else %}
+    {% capture machine_messages %},messages:"{{ machine.messages }}"{% endcapture %}
   {% endif %}
   {% if machine.drives != nil %}
     {% if machine.drives == "" %}
@@ -86,17 +111,17 @@ The following optional machine properties will be added to the 'parms' property:
   {% else %}
     {% assign machine_drives = "" %}
   {% endif %}
-  {% if machine.sound != nil %}
-    {% capture machine_sound %},sound:{{ machine.sound }}{% endcapture %}
+  {% if machine.connection == nil %}
+    {% assign machine_connection = "" %}
   {% else %}
-    {% assign machine_sound = "" %}
+    {% capture machine_connection %},"{{ machine.connection }}"{% endcapture %}
   {% endif %}
   {% unless machine.template %}
     {% assign machine_template = "" %}
   {% else %}
     {% assign machine_template = machine.template %}
   {% endunless %}
-  {% capture machine_parms %}{{ site.left_brace }}{{ machine_autoMount }}{{ machine_autoScript }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_drives }}{{ machine_sound }},resume:"{{ machine.resume }}",state:"{{ machine.state }}",commands:"{{ machine.commands }}",messages:"{{ machine.messages }}",connection:"{{ machine.connection }}"{{ site.right_brace }}{% endcapture %}
+  {% capture machine_parms %}{{ site.left_brace }}{{ machine_autoMount }}{{ machine_autoScript }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_drives }}{{ machine_resume }}{{ machine_sound }}{{ machine_state }}{{ machine_commands }}{{ machine_messages }}{{ machine_connection }}{{ site.right_brace }}{% endcapture %}
   {% if site.pcjs.compiled == true and machine.uncompiled != true %}
     {% capture page_script %}
       <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/{{ machine_type }}.js"></script>{% endcapture %}
