@@ -7,6 +7,7 @@ machines:
     type: pcx86
     debugger: true
     commands: bp &0A9C:014F
+    messages: video
     config: /devices/pcx86/machine/5160/ega/256kb/debugger/machine.xml
     autoMount:
       A:
