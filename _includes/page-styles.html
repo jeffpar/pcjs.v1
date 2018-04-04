@@ -1,19 +1,19 @@
-{% if page.styles != nil %}
+{%- if page.styles != nil -%}
   <style type="text/css">
-  {% for id in page.styles %}
-    {% if id[0] contains "_" %}
+  {%- for id in page.styles -%}
+    {%- if id[0] contains "_" -%}
       #{{ id[0] | remove_first:"_" }} {
-        {% for style in id[1] %}{{ style[0] }}: {{ style[1] }}{% endfor %}
+        {%- for style in id[1] -%}{{ style[0] }}: {{ style[1] }}{%- endfor -%}
       }
-    {% elsif id[0] == "font-face" %}
+    {%- elsif id[0] == "font-face" -%}
       @{{ id[0] }} {
-        {% for style in id[1] %}{{ style[0] }}: {{ style[1] }}{% endfor %}
+        {%- for style in id[1] -%}{{ style[0] }}: {{ style[1] }}{%- endfor -%}
       }
-    {% else %}
+    {%- else -%}
       {{ id[0] }} {
-        {% for style in id[1] %}{{ style[0] }}: {{ style[1] }}{% endfor %}
+        {%- for style in id[1] -%}{{ style[0] }}: {{ style[1] }}{%- endfor -%}
       }
-    {% endif %}
-  {% endfor %}
+    {%- endif -%}
+  {%- endfor -%}
   </style>
-{% endif %}
+{%- endif -%}

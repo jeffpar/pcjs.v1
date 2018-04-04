@@ -4,7 +4,7 @@
 
     <div class="footer-col-wrapper">
       
-      {% comment %}
+      {%- comment -%}
       
       <div class="footer-col  footer-col-1">
         <ul class="contact-list">
@@ -15,7 +15,7 @@
 
       <div class="footer-col  footer-col-2">
         <ul class="social-media-list">
-          {% if site.github_username %}
+          {%- if site.github_username -%}
           <li>
             <a href="https://github.com/{{ site.github_username }}">
               <span class="icon  icon--github">
@@ -27,9 +27,9 @@
               <span class="username">{{ site.github_username }}</span>
             </a>
           </li>
-          {% endif %}
+          {%- endif -%}
 
-          {% if site.twitter_username %}
+          {%- if site.twitter_username -%}
           <li>
             <a href="https://twitter.com/{{ site.twitter_username }}">
               <span class="icon  icon--twitter">
@@ -42,11 +42,11 @@
               <span class="username">{{ site.twitter_username }}</span>
             </a>
           </li>
-          {% endif %}
+          {%- endif -%}
         </ul>
       </div>
 
-      {% endcomment %}
+      {%- endcomment -%}
       
       <div class="footer-col  footer-col-3">
         <p class="text">

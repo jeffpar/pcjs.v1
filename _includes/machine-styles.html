@@ -1,30 +1,30 @@
-{% for machine in page.machines %}
-  {% capture machine_type %}{{ machine.type | remove:"-dbg" }}{% endcapture %}
-  {% assign machine_data = site.data.machines[machine_type] %}
-  {% if machine_data.alias != nil %}
-    {% assign machine_data = site.data.machines[machine_data.alias] %}
-  {% endif %}
-  {% assign machine_folder = machine_data.folder %}
-  {% if machine_data.version != nil %}
-    {% capture machine_version %}{{ machine_data.version }}{% endcapture %}
-  {% else %}
-    {% capture machine_version %}{{ site.data.machines.shared.version }}{% endcapture %}
-  {% endif %}
-  {% if machine_data.styles != nil %}
-    {% assign machine_styles = machine_data.styles %}
-  {% else %}
-    {% assign machine_styles = site.data.machines.shared.styles %}
-  {% endif %}
-  {% for machine_style in machine_styles %}
-    {% unless site.pcjs.compiled == true and machine.uncompiled != true %}
-      {% capture machine_url %}{{ site.baseurl }}{{ machine_style | replace:"./":"/" }}{% endcapture %}
-    {% else %}
-      {% comment %} -- A Jekyll "basename" filter would be SOOOO nice, instead of hard-coding to components.css -- {% endcomment %}
-      {% capture machine_url %}{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/components.css{% endcapture %}
-    {% endunless %}
-    {% unless machine_urls contains machine_url %}
+{%- for machine in page.machines -%}
+  {%- capture machine_type -%}{{ machine.type | remove:"-dbg" }}{%- endcapture -%}
+  {%- assign machine_data = site.data.machines[machine_type] -%}
+  {%- if machine_data.alias != nil -%}
+    {%- assign machine_data = site.data.machines[machine_data.alias] -%}
+  {%- endif -%}
+  {%- assign machine_folder = machine_data.folder -%}
+  {%- if machine_data.version != nil -%}
+    {%- capture machine_version -%}{{ machine_data.version }}{%- endcapture -%}
+  {%- else -%}
+    {%- capture machine_version -%}{{ site.data.machines.shared.version }}{%- endcapture -%}
+  {%- endif -%}
+  {%- if machine_data.styles != nil -%}
+    {%- assign machine_styles = machine_data.styles -%}
+  {%- else -%}
+    {%- assign machine_styles = site.data.machines.shared.styles -%}
+  {%- endif -%}
+  {%- for machine_style in machine_styles -%}
+    {%- unless site.pcjs.compiled == true and machine.uncompiled != true -%}
+      {%- capture machine_url -%}{{ site.baseurl }}{{ machine_style | replace:"./":"/" }}{%- endcapture -%}
+    {%- else -%}
+      {%- comment -%} -- A Jekyll "basename" filter would be SOOOO nice, instead of hard-coding to components.css -- {%- endcomment -%}
+      {%- capture machine_url -%}{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/components.css{%- endcapture -%}
+    {%- endunless -%}
+    {%- unless machine_urls contains machine_url -%}
 	  <link rel="stylesheet" type="text/css" href="{{ machine_url }}">
-    {% endunless %}
-    {% capture machine_urls %}{{ machine_urls }}{{ machine_url }}{% endcapture %}
-  {% endfor %}
-{% endfor %}
+    {%- endunless -%}
+    {%- capture machine_urls -%}{{ machine_urls }}{{ machine_url }}{%- endcapture -%}
+  {%- endfor -%}
+{%- endfor -%}

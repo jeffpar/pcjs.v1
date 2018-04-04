@@ -10,21 +10,21 @@
                _/ |    
               |__/     
   -->
-  {% comment %}
+  {%- comment -%}
     Website © 2012-2018 by Jeff Parsons (@jeffpar)
     ASCII art from http://patorjk.com/software/taag/#p=testall&f=Graffiti&t=PCjs
-  {% endcomment %}
-  {% include head.html %}
+  {%- endcomment -%}
+  {%- include head.html -%}
   <body>
-    {% include body-header.html %}
+    {%- include body-header.html -%}
     <div class="page-content">
       <div class="wrapper">
         {{ content }}
       </div>
     </div>
-    {% include body-footer.html %}
-    {% include machine-engines.html %}
-    {% include page-scripts.html %}
-    {% include google-analytics.html %}
+    {%- include body-footer.html -%}
+    {%- include machine-engines.html -%}
+    {%- include page-scripts.html -%}
+    {%- include google-analytics.html -%}
   </body>
 </html>

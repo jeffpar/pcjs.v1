@@ -1,17 +1,17 @@
-{% capture page_url_without_index_html %}{{ page.url | remove: "/index.html" | remove: "/404.html" }}{% endcapture %}
-{% assign splitted_url_parts = page_url_without_index_html | split: '/' %}
-{% capture forLoopMaxInt %}{{ splitted_url_parts.size | minus:1 }}{% endcapture %}
-{% for i in (1..forLoopMaxInt) %}
-  {% capture url %}{{ url }}{{ splitted_url_parts[i] }}/{% endcapture %}
-  {% if page.sitemap != false %}
-    {% assign visible_part = splitted_url_parts[i] %}
-  {% else %}
-    {% assign visible_parts = splitted_url_parts[i] | split: '-' %}
-    {% assign visible_part = visible_parts | first %}
-  {% endif %}
-  {% capture path %}{{ path }}\<a href="/{{ url }}">{{ visible_part | upcase }}</a>{% endcapture %}
-  {% if splitted_url_parts[i] == "blog" %}
-    {% break %}
-  {% endif %}
-{% endfor %}
+{%- capture page_url_without_index_html -%}{{ page.url | remove: "/index.html" | remove: "/404.html" }}{%- endcapture -%}
+{%- assign splitted_url_parts = page_url_without_index_html | split: '/' -%}
+{%- capture forLoopMaxInt -%}{{ splitted_url_parts.size | minus:1 }}{%- endcapture -%}
+{%- for i in (1..forLoopMaxInt) -%}
+  {%- capture url -%}{{ url }}{{ splitted_url_parts[i] }}/{%- endcapture -%}
+  {%- if page.sitemap != false -%}
+    {%- assign visible_part = splitted_url_parts[i] -%}
+  {%- else -%}
+    {%- assign visible_parts = splitted_url_parts[i] | split: '-' -%}
+    {%- assign visible_part = visible_parts | first -%}
+  {%- endif -%}
+  {%- capture path -%}{{ path }}\<a href="/{{ url }}">{{ visible_part | upcase }}</a>{%- endcapture -%}
+  {%- if splitted_url_parts[i] == "blog" -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
 <h4>Directory of C:\<a href="{{ site.baseurl }}/">PCJS.ORG</a>{{ path }}</h4>

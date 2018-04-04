@@ -14,19 +14,19 @@
       </a>
 
       <div class="trigger">
-        {% assign sorted_pages = site.pages | sort:"menu_order" %}
-        {% for page in sorted_pages %}
-          {% if page.menu_title %}
+        {%- assign sorted_pages = site.pages | sort:"menu_order" -%}
+        {%- for page in sorted_pages -%}
+          {%- if page.menu_title -%}
           <a class="page-link" href="{{ page.url | prepend: site.baseurl }}">{{ page.menu_title }}</a>
-          {% endif %}
-        {% endfor %}
+          {%- endif -%}
+        {%- endfor -%}
       </div>
     </nav>
 
   </div>
   
   <div class="wrapper">
-    {% include body-header-breadcrumbs.html %}
+    {%- include body-header-breadcrumbs.html -%}
   </div>
 
 </header>
