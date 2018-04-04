@@ -359,12 +359,14 @@ MarkOut.aHTMLEntities = {
  *
  * Non-reserved properties include:
  *
+ *      'autoStart' (eg, true)
  *      'state' (eg, "state.json")
- *      'messages' (eg, "disk")
- *      'autostart' (eg, true)
+ *      'commands' (eg, "bp &0A9C:014F")
+ *      'messages' (eg, "mem|video")
+ *      'connection' (eg, "serialPort->vt100a.serialPort")
  *      'resume' (eg, "0", "1", "2", "3", or "state.json")
  *      'sound' (eg, false)
- *
+*
  * and any other string-based property you wish to pass through to PCjs (via the embedPC() sParms parameter).
  *
  * As for any other NON-string-based property you might want to pass through sParms, like 'autostart', add it to the
@@ -522,6 +524,9 @@ MarkOut.prototype.convertMD = function(sIndent)
                         if (sProp == 'automount') sProp = 'autoMount';  // for backward compatibility
                         if (sProp == 'autoType' || sProp == 'autoScript') {
                             sValue = sValue.replace(/\\/g, "&#92;");    // automatically "double" any backslashes
+                        }
+                        if (sProp == 'commands') {
+                            sValue = sValue.replace(/&/g, "&amp;").replace(/#/g, "&#35;");
                         }
                         if (!id && sProp == 'id') {
                             id = sValue;
@@ -1119,7 +1124,7 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
     var sBlockOrig = sBlock;
     var re = /!\[(.*?)]\((.*?)(?:\s*"(.*?)"\)|\))/g;
     while ((aMatch = re.exec(sBlockOrig))) {
-        
+
         /*
          * See if there are any Liquid-style replacements (in case this Markdown file is part of a Jekyll
          * installation) and remove them.
@@ -1129,7 +1134,7 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
          * that's low priority.
          */
         aMatch[2] = aMatch[2].replace(/{{.*?}}/g, "");
-        
+
         var sImage = '<img src="' + net.encodeURL(aMatch[2], this.req, this.fDebug) + '" alt="' + aMatch[1] + '"';
         if (aMatch[3]) {
             /*

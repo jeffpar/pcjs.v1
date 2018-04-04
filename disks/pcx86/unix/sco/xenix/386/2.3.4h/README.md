@@ -14,7 +14,7 @@ machines:
         name: None
     autoStart: true
     messages: fault
-    commands: bp &#35;003F:00000054
+    commands: bp #003F:00000054
 ---
 
 SCO Xenix 386 v2.3.4h
