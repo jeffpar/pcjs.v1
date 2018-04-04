@@ -12,7 +12,7 @@ description: >
   emulators of classic programmable calculators, like the TI-57.  PCjs (formerly JSMachines) also provides an archive
   of selected historical PC software, publications, and reference materials.
 baseurl: ""
-url: "http://www.pcjs.org"
+url: "https://www.pcjs.org"
 twitter_username: jeffpar
 github_username:  jeffpar
 
