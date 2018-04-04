@@ -22,9 +22,9 @@
       {%- comment -%} -- A Jekyll "basename" filter would be SOOOO nice, instead of hard-coding to components.css -- {%- endcomment -%}
       {%- capture machine_url -%}{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/components.css{%- endcapture -%}
     {%- endunless -%}
-    {%- unless machine_urls contains machine_url -%}
+    {% unless machine_urls contains machine_url %}
 	  <link rel="stylesheet" type="text/css" href="{{ machine_url }}">
-    {%- endunless -%}
+    {% endunless %}
     {%- capture machine_urls -%}{{ machine_urls }}{{ machine_url }}{%- endcapture -%}
   {%- endfor -%}
 {%- endfor -%}

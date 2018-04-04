@@ -1,20 +1,20 @@
-{% assign include_width = "" %}
-{% assign include_height = "" %}
-{% if include.width %}
+{%- assign include_width = "" -%}
+{%- assign include_height = "" -%}
+{%- if include.width -%}
   {% capture include_width %} width="{{ include.width }}"{% endcapture %}
-{% endif %}
-{% if include.height %}
+{%- endif -%}
+{%- if include.height -%}
   {% capture include_height %} height="{{ include.height }}"{% endcapture %}
-{% endif %}
+{%- endif -%}
 <div class="screenshot-frame">
 	<div class="screenshot-image">
-	  {% if include.link %}
+	  {%- if include.link -%}
 		<a href="{{ site.baseurl }}{{ include.link }}">
 			<img src="{{ site.baseurl }}{{ include.src }}"{{ include_width }}{{ include_height }} alt="{{ include.title }}"/>
 		</a>
-	  {% else %}
+	  {%- else -%}
 		<img src="{{ site.baseurl }}{{ include.src }}"{{ include_width }}{{ include_height }} alt="{{ include.title }}"/>
-	  {% endif %}
+	  {%- endif -%}
 	</div>
 	<span class="screenshot-label">{{ include.title }}</span>
 </div>
