@@ -83,8 +83,8 @@ class CPUX86 extends CPU {
      */
     constructor(parmsCPU)
     {
-        var nCyclesDefault;
-        var model = +parmsCPU['model'] || X86.MODEL_8088;
+        let nCyclesDefault;
+        let model = +parmsCPU['model'] || X86.MODEL_8088;
 
         switch(model) {
         case X86.MODEL_8088:
@@ -108,7 +108,7 @@ class CPUX86 extends CPU {
          * a single value that's unique for any given CPU stepping.  If no stepping is provided, then stepping
          * is equal to model.
          */
-        var stepping = parmsCPU['stepping'];
+        let stepping = parmsCPU['stepping'];
         this.stepping = model + (stepping? Str.parseInt(stepping, 16) : 0);
 
         /*
@@ -273,8 +273,8 @@ class CPUX86 extends CPU {
     addMemBreak(addr, fWrite, fPhysical)
     {
         if (DEBUGGER) {
-            var iBlock = addr >>> this.nBlockShift;
-            var aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
+            let iBlock = addr >>> this.nBlockShift;
+            let aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
             aBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite);
             /*
              * When a physical memory breakpoint is added, a fresh setPhysBlock() call is REQUIRED for any
@@ -300,8 +300,8 @@ class CPUX86 extends CPU {
     removeMemBreak(addr, fWrite, fPhysical)
     {
         if (DEBUGGER) {
-            var iBlock = addr >>> this.nBlockShift;
-            var aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
+            let iBlock = addr >>> this.nBlockShift;
+            let aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
             aBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
             /*
              * When a physical memory breakpoint is removed, a fresh setPhysBlock() call is RECOMMENDED for any
@@ -329,7 +329,7 @@ class CPUX86 extends CPU {
      */
     addMemCheck(addr, fWrite)
     {
-        var iBlock = addr >>> this.nBlockShift;
+        let iBlock = addr >>> this.nBlockShift;
         this.aMemBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite, this);
     }
 
@@ -342,7 +342,7 @@ class CPUX86 extends CPU {
      */
     removeMemCheck(addr, fWrite)
     {
-        var iBlock = addr >>> this.nBlockShift;
+        let iBlock = addr >>> this.nBlockShift;
         this.aMemBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
     }
 
@@ -369,7 +369,7 @@ class CPUX86 extends CPU {
             this.setError("PAGEBLOCKS support required");
             return;
         }
-        var iBlock;
+        let iBlock;
         if (this.aMemBlocks === this.aBusBlocks) {
             this.aMemBlocks = new Array(this.nBlockTotal);
             /*
@@ -417,7 +417,7 @@ class CPUX86 extends CPU {
              * entries in the array.  I'm assuming we won't run into any system software that relies on
              * a constrained TLB -- at least not from the 80386 era, which is all we're emulating.
              */
-            for (var i = 0; i < this.aBlocksPaged.length; i++) {
+            for (let i = 0; i < this.aBlocksPaged.length; i++) {
                 iBlock = this.aBlocksPaged[i];
                 this.releasePageBlock(this.aMemBlocks[iBlock]);
                 this.aMemBlocks[iBlock] = this.blockUnpaged;
@@ -451,7 +451,7 @@ class CPUX86 extends CPU {
      */
     acquirePageBlock(addr)
     {
-        var block;
+        let block;
         if (this.iCacheBlocks > 0) {
             block = this.aCacheBlocks[--this.iCacheBlocks];
             /*
@@ -518,15 +518,15 @@ class CPUX86 extends CPU {
      */
     mapPageBlock(addr, fWrite, fSuppress)
     {
-        var offPDE = (addr & X86.LADDR.PDE.MASK) >>> X86.LADDR.PDE.SHIFT;
-        var addrPDE = this.regCR3 + offPDE;
+        let offPDE = (addr & X86.LADDR.PDE.MASK) >>> X86.LADDR.PDE.SHIFT;
+        let addrPDE = this.regCR3 + offPDE;
 
         /*
          * bus.getLong(addrPDE) would be simpler, but setPhysBlock() needs to know blockPDE and offPDE, too.
          * TODO: Since we're immediately shifting addrPDE by nBlockShift, then we could also skip adding offPDE.
          */
-        var blockPDE = this.aBusBlocks[(addrPDE & this.nBusMask) >>> this.nBlockShift];
-        var pde = blockPDE.readLong(offPDE);
+        let blockPDE = this.aBusBlocks[(addrPDE & this.nBusMask) >>> this.nBlockShift];
+        let pde = blockPDE.readLong(offPDE);
 
         if (!(pde & X86.PTE.PRESENT)) {
             if (!fSuppress) X86.helpPageFault.call(this, addr, false, fWrite);
@@ -538,15 +538,15 @@ class CPUX86 extends CPU {
             return this.memEmpty;
         }
 
-        var offPTE = (addr & X86.LADDR.PTE.MASK) >>> X86.LADDR.PTE.SHIFT;
-        var addrPTE = (pde & X86.PTE.FRAME) + offPTE;
+        let offPTE = (addr & X86.LADDR.PTE.MASK) >>> X86.LADDR.PTE.SHIFT;
+        let addrPTE = (pde & X86.PTE.FRAME) + offPTE;
 
         /*
          * bus.getLong(addrPTE) would be simpler, but setPhysBlock() needs to know blockPTE and offPTE, too.
          * TODO: Since we're immediately shifting addrPDE by nBlockShift, then we could also skip adding offPTE.
          */
-        var blockPTE = this.aBusBlocks[(addrPTE & this.nBusMask) >>> this.nBlockShift];
-        var pte = blockPTE.readLong(offPTE);
+        let blockPTE = this.aBusBlocks[(addrPTE & this.nBusMask) >>> this.nBlockShift];
+        let pte = blockPTE.readLong(offPTE);
 
         if (!(pte & X86.PTE.PRESENT)) {
             if (!fSuppress) X86.helpPageFault.call(this, addr, false, fWrite);
@@ -558,22 +558,22 @@ class CPUX86 extends CPU {
             return this.memEmpty;
         }
 
-        var addrPhys = (pte & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);
+        let addrPhys = (pte & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);
         /*
          * TODO: Since we're immediately shifting addrPhys by nBlockShift, we could also skip adding the addr's offset.
          */
-        var blockPhys = this.aBusBlocks[(addrPhys & this.nBusMask) >>> this.nBlockShift];
+        let blockPhys = this.aBusBlocks[(addrPhys & this.nBusMask) >>> this.nBlockShift];
         if (fSuppress) return blockPhys;
 
-        var iBlock = addr >>> this.nBlockShift;
-        var block = this.aMemBlocks[iBlock];
+        let iBlock = addr >>> this.nBlockShift;
+        let block = this.aMemBlocks[iBlock];
 
         /*
          * So we have the block containing the physical memory corresponding to the given linear address.
          *
          * Now we can create a new PAGED Memory block and record the physical block info using setPhysBlock().
          */
-        var blockPage = this.acquirePageBlock(addr & ~X86.LADDR.OFFSET);
+        let blockPage = this.acquirePageBlock(addr & ~X86.LADDR.OFFSET);
         blockPage.setPhysBlock(blockPhys, blockPDE, offPDE, blockPTE, offPTE);
         blockPage.copyBreakpoints(this.dbg, block);
 
@@ -608,7 +608,7 @@ class CPUX86 extends CPU {
      */
     isPagingEnabled()
     {
-        var fPaging = !!(this.regCR0 & X86.CR0.PG);
+        let fPaging = !!(this.regCR0 & X86.CR0.PG);
         this.assert((this.aMemBlocks !== this.aBusBlocks) === fPaging);
         return fPaging;
     }
@@ -842,7 +842,7 @@ class CPUX86 extends CPU {
 
             if (this.model >= X86.MODEL_80286) {
 
-                var i;
+                let i;
                 this.PS_SET = X86.PS.BIT1;      // on the 80286, only BIT1 of Processor Status (flags) is always set
                 this.PS_DIRECT |= X86.PS.IOPL.MASK | X86.PS.NT;
 
@@ -858,7 +858,7 @@ class CPUX86 extends CPU {
 
                 if (I386) {
                     if (this.model >= X86.MODEL_80386) {
-                        var bOpcode;
+                        let bOpcode;
                         this.PS_CLEAR_RM = 0;   // NOTE: This allows the 80386 to modify X86.PS.NT in real-mode (which is presumably OK)
                         this.PS_DIRECT |= X86.PS.RF | X86.PS.VM;
                         this.aOps[X86.OPCODE.FS] = X86.opFS;    // 0x64
@@ -908,7 +908,7 @@ class CPUX86 extends CPU {
      */
     getReg(i)
     {
-        var reg;
+        let reg;
         switch(i) {
         case 0x0:
             reg = this.regEAX;
@@ -1461,7 +1461,7 @@ class CPUX86 extends CPU {
      */
     getChecksum()
     {
-        var sum = (this.regEAX + this.regEBX + this.regECX + this.regEDX + this.getSP() + this.regEBP + this.regESI + this.regEDI)|0;
+        let sum = (this.regEAX + this.regEBX + this.regECX + this.regEDX + this.getSP() + this.regEBP + this.regESI + this.regEDI)|0;
         sum = (sum + this.getIP() + this.getCS() + this.getDS() + this.getSS() + this.getES() + this.getPS())|0;
         return sum;
     }
@@ -1498,9 +1498,9 @@ class CPUX86 extends CPU {
      */
     checkIntNotify(nInt)
     {
-        var aNotify = this.aIntNotify[nInt];
+        let aNotify = this.aIntNotify[nInt];
         if (aNotify !== undefined) {
-            for (var i = 0; i < aNotify.length; i++) {
+            for (let i = 0; i < aNotify.length; i++) {
                 if (!aNotify[i](this.regLIP)) {
                     return false;
                 }
@@ -1572,7 +1572,7 @@ class CPUX86 extends CPU {
      */
     checkIntReturn(addr)
     {
-        var fn = this.aIntReturn[addr];
+        let fn = this.aIntReturn[addr];
         if (fn != null) {
             fn(--this.cIntReturn);
             delete this.aIntReturn[addr];
@@ -1600,16 +1600,16 @@ class CPUX86 extends CPU {
          * Similarly, we make a copy of regDR7 in bitsDR7 and shift the latter right 4 bits at a time, so that
          * the RW and LEN bits for the next Debug register are always in positions 1-0 and 3-2, respectively.
          */
-        var regDR7 = this.regDR[7];
-        var bitsDR7 = regDR7 >> 16;
+        let regDR7 = this.regDR[7];
+        let bitsDR7 = regDR7 >> 16;
 
-        for (var i = 0; i < 4; i++) {
+        for (let i = 0; i < 4; i++) {
             if (regDR7 & (X86.DR7.L0 | X86.DR7.G0)) {
                 /*
                  * We look only to the low bit of the RW field to determine if we should be watching for a write.
                  * FYI, if the low bit is clear but the high bit is set, that's "undefined"; we treat it as a read.
                  */
-                var fWrite = !!(bitsDR7 & 0x1);
+                let fWrite = !!(bitsDR7 & 0x1);
                 /*
                  * The address in regDR[i] should already be masked with ~0x1 for 2-byte accesses (LEN == 0x1) or
                  * with ~0x3 for 4-byte accesses (LEN == 0x3), but if the client forgets, the hardware supposedly
@@ -1618,8 +1618,8 @@ class CPUX86 extends CPU {
                  * FYI, if LEN is set to the "undefined" value of (0x2), we still apply a mask to the address, albeit
                  * a nonsensical mask of ~0x2 or 0xfffffffd.  That's how we define that particular "undefined" LEN.
                  */
-                var addr = this.regDR[i];
-                var len = ((bitsDR7 >> 2) & 0x3);
+                let addr = this.regDR[i];
+                let len = ((bitsDR7 >> 2) & 0x3);
                 addr &= ~len;       // NOTE: if LEN == 0x0, we don't need to mask, but ~0x0 is equivalent to no mask
                 if (fEnable) {
                     this.addMemCheck(addr, fWrite);
@@ -1664,18 +1664,18 @@ class CPUX86 extends CPU {
              * Similarly, we make a copy of regDR7 in bitsDR7 and shift the latter right 4 bits at a time, so that
              * the RW and LEN bits for the next Debug register are always in positions 1-0 and 3-2, respectively.
              */
-            var regDR7 = this.regDR[7];
-            var bitsDR7 = regDR7 >> 16;
+            let regDR7 = this.regDR[7];
+            let bitsDR7 = regDR7 >> 16;
 
-            var bitsRWMask = X86.DR7.RW0 >> 16;
-            var bitsRWRequired = (fWrite? 0x1 : (fWrite == false? 0x3 : 0x0));
+            let bitsRWMask = X86.DR7.RW0 >> 16;
+            let bitsRWRequired = (fWrite? 0x1 : (fWrite == false? 0x3 : 0x0));
 
-            for (var i = 0; i < 4; i++) {
+            for (let i = 0; i < 4; i++) {
                 if ((regDR7 & (X86.DR7.L0 | X86.DR7.G0)) && (bitsDR7 & bitsRWMask) == bitsRWRequired) {
                     /*
                      * NOTE: We reduced nb from 1-4 to 0-3 above, so we don't need to add 1 to len either.
                      */
-                    var len = (bitsDR7 >> 2);
+                    let len = (bitsDR7 >> 2);
                     /*
                      * Time to determine if addr through addr + nb overlaps regDR[i] through regDR[i] + len.
                      */
@@ -1774,7 +1774,7 @@ class CPUX86 extends CPU {
     saveProtMode()
     {
         if (this.addrGDT != null) {
-            var a = [
+            let a = [
                 this.regCR0,
                 this.addrGDT,
                 this.addrGDTLimit,
@@ -1846,9 +1846,9 @@ class CPUX86 extends CPU {
      */
     save(fRunning)
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, [this.regEAX, this.regEBX, this.regECX, this.regEDX, this.getSP(), this.regEBP, this.regESI, this.regEDI]);
-        var a = [this.getIP(), this.segCS.save(), this.segDS.save(), this.segSS.save(), this.segES.save(), this.saveProtMode(), this.getPS()];
+        let a = [this.getIP(), this.segCS.save(), this.segDS.save(), this.segSS.save(), this.segES.save(), this.saveProtMode(), this.getPS()];
         if (I386 && this.model >= X86.MODEL_80386) {
             a.push(this.segFS.save());
             a.push(this.segGS.save());
@@ -1871,12 +1871,12 @@ class CPUX86 extends CPU {
      */
     restore(data)
     {
-        var a = data[0];
+        let a = data[0];
         this.regEAX = a[0];
         this.regEBX = a[1];
         this.regECX = a[2];
         this.regEDX = a[3];
-        var regESP = a[4];
+        let regESP = a[4];
         this.regEBP = a[5];
         this.regESI = a[6];
         this.regEDI = a[7];
@@ -1893,7 +1893,7 @@ class CPUX86 extends CPU {
          * The introduction of protected-mode requires us to restore memory contents sooner than we used to
          * (ie, before we load any segment registers).
          */
-        var fRestored = false;
+        let fRestored = false;
 
         if (this.bus.restoreMemory(data[4])) {
             /*
@@ -2046,8 +2046,8 @@ class CPUX86 extends CPU {
      */
     setSS(sel, fInterruptable)
     {
-        var regESP = this.getSP();
-        var regLSP = this.segSS.load(sel);
+        let regESP = this.getSP();
+        let regLSP = this.segSS.load(sel);
         if (regLSP !== X86.ADDR_INVALID) {
             /*
              * The safest way to update regLSP after a potential change to segSS.base is to call setSP() with the
@@ -2058,16 +2058,16 @@ class CPUX86 extends CPU {
              * 16-bit stacks began inadvertently using ESP instead of SP.  The moral: don't be needlessly clever.
              */
             this.setSP(regESP);
-            
+
             /*
              * The desire to use a linear stack pointer (regLSP) for internal stack operations has some pitfalls;
              * one involves these upper and lower limit calculations.  Example: Xenix 386 creates a (non-expand-down)
              * 32-bit data segment for all of DS, ES, and SS, which uses a limit of "-1"; ie:
-             * 
+             *
              *      SS=0018[ED800000,FFFFFFFF] DS=0018[ED800000,FFFFFFFF] ES=0018[ED800000,FFFFFFFF]
              *
              * so we end up calculating an upper limit of 0xED7FFFFF, which is lower than the lower limit of 0xED800000.
-             * 
+             *
              * For now, these "limit wrap-around" situations are resolved by using unsigned values and then applying
              * a linear address ceiling.  TODO: Come up with a simple solution for properly dealing with limit wrap-around.
              */
@@ -2078,10 +2078,10 @@ class CPUX86 extends CPU {
                 this.regLSPLimit = (this.segSS.base >>> 0) + (this.segSS.limit >>> 0);
                 this.regLSPLimitLow = (this.segSS.base >>> 0);
             }
-            
+
             this.regLSPLimit = Math.min(this.regLSPLimit, this.nMemMask >>> 0);
             this.regLSPLimitLow = Math.min(this.regLSPLimitLow, this.nMemMask >>> 0);
-            
+
             if (!BUGS_8086 && !fInterruptable) this.opFlags |= X86.OPFLAG.NOINTR;
             return true;
         }
@@ -2242,7 +2242,7 @@ class CPUX86 extends CPU {
         /*
          * Setting IP needs to occur AFTER loadCode(), because it may differ from the given IP if sel refers to a gate.
          */
-        var base = this.segCS.loadCode(off, sel, fCall);
+        let base = this.segCS.loadCode(off, sel, fCall);
         if (base !== X86.ADDR_INVALID) {
             this.setLIP(base + (this.segCS.offIP & (I386? this.segCS.maskData : 0xffff)));
             return this.segCS.fStackSwitch;
@@ -2260,7 +2260,7 @@ class CPUX86 extends CPU {
      */
     setCSBase(addr)
     {
-        var regIP = this.getIP();
+        let regIP = this.getIP();
         addr = this.segCS.setBase(addr);
         this.regLIP = (addr + regIP)|0;
         this.regLIPMax = (addr >>> 0) + (this.segCS.limit >>> 0) + 1;
@@ -2285,7 +2285,7 @@ class CPUX86 extends CPU {
      */
     checkIP(inc)
     {
-        var newLIP = (this.regLIP >>> 0) + inc;
+        let newLIP = (this.regLIP >>> 0) + inc;
         if (newLIP > this.regLIPMax) {
             /*
              * There's no such thing as a GP fault on the 8086/8088, and I'm now assuming that,
@@ -2331,7 +2331,7 @@ class CPUX86 extends CPU {
      * This "rewinds" IP to the beginning of the current instruction (ie, the REP prefix of a string instruction);
      * this also sets the REPSEG flag to record string instructions with multiple prefixes (ie, a segment override),
      * so that checkINTR() has the option to simulate the 8086/8088's failure to properly restart such an instruction
-     * after a hardware interrupt (which became known as a "feature", hence not part of BUGS_8086). 
+     * after a hardware interrupt (which became known as a "feature", hence not part of BUGS_8086).
      *
      * @this {CPUX86}
      * @param {boolean} [fCheckSeg]
@@ -2344,7 +2344,7 @@ class CPUX86 extends CPU {
         this.opFlags |= X86.OPFLAG.REPEAT;
         this.resetIP();
     }
-    
+
     /**
      * getSP()
      *
@@ -2402,7 +2402,7 @@ class CPUX86 extends CPU {
     setArithResult(dst, src, value, type, fSubtract)
     {
         if ((type & X86.RESULT.ALL) != X86.RESULT.ALL && type != this.resultType) {
-            var diff = ((type ^ this.resultType) & this.resultType);
+            let diff = ((type ^ this.resultType) & this.resultType);
             if (diff) {
                 if (diff & X86.RESULT.CF) this.getCF();
                 if (diff & X86.RESULT.PF) this.getPF();
@@ -2981,13 +2981,13 @@ class CPUX86 extends CPU {
      */
     checkIOPM(port, nPorts, fInput)
     {
-        var bitsPorts = 0;
+        let bitsPorts = 0;
         if (I386 && (this.regCR0 & X86.CR0.MSW.PE) && (this.nCPL > this.nIOPL || (this.regPS & X86.PS.VM)) && this.segTSS.addrIOPM) {
-            var offIOPM = port >>> 3;
-            var addrIOPM = this.segTSS.addrIOPM + offIOPM;
+            let offIOPM = port >>> 3;
+            let addrIOPM = this.segTSS.addrIOPM + offIOPM;
             bitsPorts = ((1 << nPorts) - 1) << (port & 0x7);
             while (bitsPorts && addrIOPM <= this.segTSS.addrIOPMLimit) {
-                var bits = this.getByte(addrIOPM);
+                let bits = this.getByte(addrIOPM);
                 if (bits & bitsPorts) break;
                 bitsPorts >>>= 8;
                 addrIOPM++;
@@ -3013,7 +3013,7 @@ class CPUX86 extends CPU {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var fBound = false;
+        let fBound = false;
         switch (sBinding) {
         case "EAX":
         case "EBX":
@@ -3084,12 +3084,12 @@ class CPUX86 extends CPU {
      */
     probeAddr(addr, size, fPhysical)
     {
-        var aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
-        var block = aBlocks[(addr & this.nMemMask) >>> this.nBlockShift];
+        let aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
+        let block = aBlocks[(addr & this.nMemMask) >>> this.nBlockShift];
         if (block && block.type == Memory.TYPE.UNPAGED) block = this.mapPageBlock(addr, false, true);
 
         if (block) {
-            var off = addr & this.nBlockLimit;
+            let off = addr & this.nBlockLimit;
             if (!size || size == 1) {
                 return block.readByteDirect(off, addr);
             }
@@ -3149,8 +3149,8 @@ class CPUX86 extends CPU {
      */
     getShort(addr)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
         /*
          * On the 8088, it takes 4 cycles to read the additional byte REGARDLESS whether the address is odd or even.
          * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
@@ -3164,7 +3164,7 @@ class CPUX86 extends CPU {
         if (off < this.nBlockLimit) {
             return this.aMemBlocks[iBlock].readShort(off, addr);
         }
-        var w = this.aMemBlocks[iBlock].readByte(off, addr);
+        let w = this.aMemBlocks[iBlock].readByte(off, addr);
         if (!(this.opFlags & X86.OPFLAG.FAULT)) {
             w |= this.aMemBlocks[(iBlock + 1) & this.nBlockMask].readByte(0, addr + 1) << 8;
         }
@@ -3183,8 +3183,8 @@ class CPUX86 extends CPU {
      */
     getLong(addr)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
         if (BACKTRACK) {
             this.backTrack.btiMem0 = this.bus.readBackTrack(addr);
             this.backTrack.btiMem1 = this.bus.readBackTrack(addr + 1);
@@ -3200,9 +3200,9 @@ class CPUX86 extends CPU {
          * which may have also created some undesirable side-effects for custom memory controllers.
          * This simpler (and probably more reliable) approach is to simply read the long as individual bytes.
          */
-        var l = 0;
-        var cb = 4, nShift = 0;
-        var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+        let l = 0;
+        let cb = 4, nShift = 0;
+        let cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
         while (cb--) {
             l |= (this.aMemBlocks[iBlock].readByte(off++, addr++) << nShift);
             if (this.opFlags & X86.OPFLAG.FAULT) break;
@@ -3243,8 +3243,8 @@ class CPUX86 extends CPU {
      */
     setShort(addr, w)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
         /*
          * On the 8088, it takes 4 cycles to write the additional byte REGARDLESS whether the address is odd or even.
          * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
@@ -3276,8 +3276,8 @@ class CPUX86 extends CPU {
      */
     setLong(addr, l)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
         this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
 
         if (BACKTRACK) {
@@ -3296,8 +3296,8 @@ class CPUX86 extends CPU {
          * block), which may have also created some undesirable side-effects for custom memory controllers.
          * This simpler (and probably more reliable) approach is to simply write the long as individual bytes.
          */
-        var cb = 4;
-        var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+        let cb = 4;
+        let cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
         while (cb--) {
             this.aMemBlocks[iBlock].writeByte(off++, l & 0xff, addr++);
             if (this.opFlags & X86.OPFLAG.FAULT) return;
@@ -3323,7 +3323,7 @@ class CPUX86 extends CPU {
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = seg.checkRead(this.offEA, 1);
         if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-        var b = this.getByte(this.regEA);
+        let b = this.getByte(this.regEA);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMem0;
         return b;
     }
@@ -3362,7 +3362,7 @@ class CPUX86 extends CPU {
      */
     getEAWord(seg, off)
     {
-        var w;
+        let w;
         this.segEA = seg;
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = seg.checkRead(this.offEA, (I386? this.sizeData : 2));
@@ -3393,7 +3393,7 @@ class CPUX86 extends CPU {
      */
     getEAShortData(off)
     {
-        var w;
+        let w;
         this.segEA = this.segData;
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = this.segEA.checkRead(this.offEA, 2);
@@ -3425,7 +3425,7 @@ class CPUX86 extends CPU {
      */
     getEAShortStack(off)
     {
-        var w;
+        let w;
         this.segEA = this.segStack;
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = this.segEA.checkRead(this.offEA, 2);
@@ -3461,7 +3461,7 @@ class CPUX86 extends CPU {
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = this.segEA.checkRead(this.offEA, 4);
         if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-        var w = this.getLong(this.regEA);
+        let w = this.getLong(this.regEA);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiMem0;
             this.backTrack.btiEAHi = this.backTrack.btiMem1;
@@ -3482,7 +3482,7 @@ class CPUX86 extends CPU {
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = this.segEA.checkRead(this.offEA, 4);
         if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-        var w = this.getLong(this.regEA);
+        let w = this.getLong(this.regEA);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiMem0;
             this.backTrack.btiEAHi = this.backTrack.btiMem1;
@@ -3516,7 +3516,7 @@ class CPUX86 extends CPU {
             this.backTrack.btiMem0 = this.backTrack.btiEALo;
             this.backTrack.btiMem1 = this.backTrack.btiEAHi;
         }
-        var addr = this.segEA.checkWrite(this.offEA, 2);
+        let addr = this.segEA.checkWrite(this.offEA, 2);
         if (this.opFlags & X86.OPFLAG.WRAP) {
             /*
              * The WRAP flag must have been set by checkWriteReal(), so we also know that we're dealing with
@@ -3560,7 +3560,7 @@ class CPUX86 extends CPU {
             this.backTrack.btiMem0 = this.backTrack.btiEALo;
             this.backTrack.btiMem1 = this.backTrack.btiEAHi;
         }
-        var addr = this.segEA.checkWrite(this.offEA, this.sizeData);
+        let addr = this.segEA.checkWrite(this.offEA, this.sizeData);
         if (this.opFlags & X86.OPFLAG.WRAP) {
             /*
              * The WRAP flag must have been set by checkWriteReal(), so we also know that we're dealing with
@@ -3602,8 +3602,8 @@ class CPUX86 extends CPU {
      */
     getSOWord(seg, off)
     {
-        var w;
-        var addr = seg.checkRead(off, this.sizeData);
+        let w;
+        let addr = seg.checkRead(off, this.sizeData);
         if (this.opFlags & X86.OPFLAG.WRAP) {
             /*
              * The WRAP flag must have been set by checkReadReal(), so we also know that we're dealing with
@@ -3645,7 +3645,7 @@ class CPUX86 extends CPU {
      */
     setSOWord(seg, off, w)
     {
-        var addr = seg.checkWrite(off, this.sizeData);
+        let addr = seg.checkWrite(off, this.sizeData);
         if (this.opFlags & X86.OPFLAG.WRAP) {
             /*
              * The WRAP flag must have been set by checkWriteReal(), so we also know that we're dealing with
@@ -3672,7 +3672,7 @@ class CPUX86 extends CPU {
             this.refillPrefetch();
             if (!this.cbPrefetch) return this.getByte(this.regLIP);
         }
-        var b = (this.adwPrefetch[this.regLIP & CPUX86.PFINFO.IP_MASK] >> ((this.regLIP & 0x3) << 3)) & 0xff;
+        let b = (this.adwPrefetch[this.regLIP & CPUX86.PFINFO.IP_MASK] >> ((this.regLIP & 0x3) << 3)) & 0xff;
         this.assert(b === this.getByte(this.regLIP));
         this.cbPrefetch--;
         return b;
@@ -3693,8 +3693,8 @@ class CPUX86 extends CPU {
                 return this.getShort(this.regLIP);
             }
         }
-        var shift = (this.regLIP & 0x3) << 3;
-        var w = (this.adwPrefetch[this.regLIP & CPUX86.PFINFO.IP_MASK] >>> shift) & 0xffff;
+        let shift = (this.regLIP & 0x3) << 3;
+        let w = (this.adwPrefetch[this.regLIP & CPUX86.PFINFO.IP_MASK] >>> shift) & 0xffff;
         if (shift > 16) w |= (this.adwPrefetch[(this.regLIP + 4) & CPUX86.PFINFO.IP_MASK] & 0xff) << 8;
         this.assert(w === this.getShort(this.regLIP));
         this.cbPrefetch -= 2;
@@ -3716,8 +3716,8 @@ class CPUX86 extends CPU {
                 return this.getLong(this.regLIP);
             }
         }
-        var shift = (this.regLIP & 0x3) << 3;
-        var l = (this.adwPrefetch[this.regLIP & CPUX86.PFINFO.IP_MASK] >>> shift)|0;
+        let shift = (this.regLIP & 0x3) << 3;
+        let l = (this.adwPrefetch[this.regLIP & CPUX86.PFINFO.IP_MASK] >>> shift)|0;
         if (shift) l |= this.adwPrefetch[(this.regLIP + 4) & CPUX86.PFINFO.IP_MASK] << (32 - shift);
         this.assert(l === this.getLong(this.regLIP));
         this.cbPrefetch -= 4;
@@ -3752,18 +3752,19 @@ class CPUX86 extends CPU {
      */
     refillPrefetch()
     {
-        var aBlocks = this.aMemBlocks;
-        var regLIP = this.regLIP & ~0x3;
-        var block = aBlocks[(regLIP & this.nMemMask) >>> this.nBlockShift];
+        let aBlocks = this.aMemBlocks;
+        let regLIP = this.regLIP & ~0x3;
+        let block = aBlocks[(regLIP & this.nMemMask) >>> this.nBlockShift];
         if (block && block.type == Memory.TYPE.UNPAGED) {
             block = this.mapPageBlock(regLIP, false, true);
             if (block === this.memEmpty) block = null;
         }
         if (block) {
-            var off = regLIP & this.nBlockLimit;
-            var cbMax = this.nBlockSize - off;
+            let i = 0;
+            let off = regLIP & this.nBlockLimit;
+            let cbMax = this.nBlockSize - off;
             if (cbMax > CPUX86.PFINFO.LENGTH) cbMax = CPUX86.PFINFO.LENGTH;
-            for (var i = 0; i < cbMax; i += 4) {
+            for (; i < cbMax; i += 4) {
                 this.adwPrefetch[regLIP & CPUX86.PFINFO.IP_MASK] = block.readLongDirect(off, regLIP);
                 off += 4; regLIP += 4;
             }
@@ -3782,8 +3783,8 @@ class CPUX86 extends CPU {
      */
     getIPByte()
     {
-        var newLIP = this.checkIP(1);
-        var b = (PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP));
+        let newLIP = this.checkIP(1);
+        let b = (PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP));
         if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
         this.regLIP = newLIP;
         return b;
@@ -3797,8 +3798,8 @@ class CPUX86 extends CPU {
      */
     getIPShort()
     {
-        var w;
-        var newLIP = this.checkIP(2);
+        let w;
+        let newLIP = this.checkIP(2);
         if (PREFETCH) {
             w = this.getShortPrefetch();
         } else if (!(this.opFlags & X86.OPFLAG.WRAP)) {
@@ -3827,8 +3828,8 @@ class CPUX86 extends CPU {
      */
     getIPAddr()
     {
-        var w;
-        var newLIP = this.checkIP(this.sizeAddr);
+        let w;
+        let newLIP = this.checkIP(this.sizeAddr);
         if (PREFETCH) {
             w = this.getAddr();
         } else if (!(this.opFlags & X86.OPFLAG.WRAP)) {
@@ -3857,8 +3858,8 @@ class CPUX86 extends CPU {
      */
     getIPWord()
     {
-        var w;
-        var newLIP = this.checkIP(this.sizeData);
+        let w;
+        let newLIP = this.checkIP(this.sizeData);
         if (PREFETCH) {
             w = this.getWordPrefetch();
         } else if (!(this.opFlags & X86.OPFLAG.WRAP)) {
@@ -3887,8 +3888,8 @@ class CPUX86 extends CPU {
      */
     getIPDisp()
     {
-        var newLIP = this.checkIP(1);
-        var w = ((PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP)) << 24) >> 24;
+        let newLIP = this.checkIP(1);
+        let w = ((PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP)) << 24) >> 24;
         if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
         this.regLIP = newLIP;
         return w;
@@ -3913,11 +3914,11 @@ class CPUX86 extends CPU {
      */
     popWord()
     {
-        var data = this.getWord(this.regLSP);
-        var width = I386? this.sizeData : 2;
+        let data = this.getWord(this.regLSP);
+        let width = I386? this.sizeData : 2;
         this.regLSP = (this.regLSP + width)|0;
-        
-        var delta = this.regLSPLimit - (this.regLSP >>> 0);
+
+        let delta = this.regLSPLimit - (this.regLSP >>> 0);
         if (delta < 0) {
             /*
              * There's no such thing as an SS fault on the 8086/8088, and in fact, we have to support the
@@ -3989,9 +3990,9 @@ class CPUX86 extends CPU {
     {
         this.assert((width == 2 || width == 4) && (size > 0 && size <= width));
 
-        var regLSP = (this.regLSP - width)|0;
-        
-        var delta = (regLSP >>> 0) - this.regLSPLimitLow;
+        let regLSP = (this.regLSP - width)|0;
+
+        let delta = (regLSP >>> 0) - this.regLSPLimitLow;
         if (delta < 0) {
             /*
              * There's no such thing as an SS fault on the 8086/8088, and in fact, we have to support the
@@ -4106,12 +4107,12 @@ class CPUX86 extends CPU {
              * As discussed above, the 8086/8088 give hardware interrupts higher priority than the TRAP interrupt,
              * whereas the 80286 and up give TRAPs higher priority.
              */
-            var iPriority = (this.model < X86.MODEL_80286? 0 : 1);
-            for (var cPriorities = 0; cPriorities < 2; cPriorities++) {
+            let iPriority = (this.model < X86.MODEL_80286? 0 : 1);
+            for (let cPriorities = 0; cPriorities < 2; cPriorities++) {
                 switch(iPriority) {
                 case 0:
                     if ((this.intFlags & X86.INTFLAG.INTR) && (this.regPS & X86.PS.IF)) {
-                        var nIDT = this.chipset.getIRRVector();
+                        let nIDT = this.chipset.getIRRVector();
                         if (nIDT >= -1) {
                             this.intFlags &= ~X86.INTFLAG.INTR;
                             if (nIDT >= 0) {
@@ -4213,7 +4214,7 @@ class CPUX86 extends CPU {
      */
     updateReg(sReg, nValue)
     {
-        var cch = 4;
+        let cch = 4;
         if (sReg.length == 1) {
             cch = 1;
             nValue = nValue? 1 : 0;
@@ -4256,7 +4257,7 @@ class CPUX86 extends CPU {
                 this.updateReg("SS", this.getSS());
                 this.updateReg("ES", this.getES());
                 this.updateReg("EIP", this.getIP());
-                var regPS = this.getPS();
+                let regPS = this.getPS();
                 this.updateReg("PS", regPS);
                 this.updateReg("V", (regPS & X86.PS.OF));
                 this.updateReg("D", (regPS & X86.PS.DF));
@@ -4277,7 +4278,7 @@ class CPUX86 extends CPU {
             }
         }
 
-        var controlSpeed = this.bindings["speed"];
+        let controlSpeed = this.bindings["speed"];
         if (controlSpeed) controlSpeed.textContent = this.getSpeedCurrent();
     }
 
@@ -4319,7 +4320,7 @@ class CPUX86 extends CPU {
         /*
          * fDebugCheck is true if we need to "check" every instruction with the Debugger.
          */
-        var fDebugCheck = this.flags.debugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
+        let fDebugCheck = this.flags.debugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
 
         /*
          * nDebugState is checked only when fDebugCheck is true, and its sole purpose is to tell the first call
@@ -4329,7 +4330,7 @@ class CPUX86 extends CPU {
          * Once we snap fStarting, we clear it, because technically, we've moved beyond "starting" and have
          * officially "started" now.
          */
-        var nDebugState = (!nMinCycles)? -1 : (this.flags.starting? 0 : 1);
+        let nDebugState = (!nMinCycles)? -1 : (this.flags.starting? 0 : 1);
         this.flags.starting = false;
 
         /*
@@ -4361,7 +4362,7 @@ class CPUX86 extends CPU {
         if (!nMinCycles && !this.messageEnabled(Messages.PIC)) this.opFlags |= X86.OPFLAG.NOINTR;
 
         do {
-            var opPrefixes = this.opFlags & X86.OPFLAG_PREFIXES;
+            let opPrefixes = this.opFlags & X86.OPFLAG_PREFIXES;
             if (opPrefixes) {
                 this.opPrefixes |= opPrefixes;
             } else {
@@ -4405,23 +4406,23 @@ class CPUX86 extends CPU {
                          * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction, because the
                          * entire machine relies on the steady advance of the overall cycle count, to ensure that timer
                          * updates, video updates, etc, all continue to occur at the expected rates.
-                         * 
+                         *
                          * So opHLT() sets X86.INTFLAG.HALT, signalling that we should not execute any more instructions
-                         * until checkINTR() detects a hardware interrupt and clears X86.INTFLAG.HALT. 
-                         * 
+                         * until checkINTR() detects a hardware interrupt and clears X86.INTFLAG.HALT.
+                         *
                          * Ideally, we would also end the current burst; ie:
                          *
                          *      this.nStepCycles = 0;
                          *      this.opFlags = 0;
                          *      break;
-                         * 
+                         *
                          * and save the browser a bunch of work, which would translate into power savings for the host
                          * operating system, just as HLT was intended to do for the guest operating system.  Unfortunately,
                          * that screws up up our dynamic speed recalculations, because it makes it appear that a single
                          * instruction (HLT) performed the work of many.
                          *
                          * We could certainly add more cycle bookkeeping to compensate for HLT's lack of work, but for now,
-                         * it's simpler to re-execute the HLT as long as X86.INTFLAG.HALT is set. 
+                         * it's simpler to re-execute the HLT as long as X86.INTFLAG.HALT is set.
                          */
                         X86.opHLT.call(this);
                         continue;
@@ -4447,10 +4448,10 @@ class CPUX86 extends CPU {
              */
 
             this.aOps[this.getIPByte()].call(this);
-            
+
             /*
             if (PREFETCH) {
-                var nSpareCycles = (this.nSnapCycles - this.nStepCycles) - this.nBusCycles;
+                let nSpareCycles = (this.nSnapCycles - this.nStepCycles) - this.nBusCycles;
                 if (nSpareCycles >= 4) {
                     this.fillPrefetch(nSpareCycles >> 2);   // for every 4 spare cycles, fetch 1 instruction byte
                 }
@@ -4504,8 +4505,8 @@ class CPUX86 extends CPU {
      *
      getIPLong()
      {
-         var newLIP = this.checkIP(4);
-         var l = (PREFETCH? this.getLongPrefetch() : this.getLong(this.regLIP));
+         let newLIP = this.checkIP(4);
+         let l = (PREFETCH? this.getLongPrefetch() : this.getLong(this.regLIP));
          if (BACKTRACK) {
              this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
              this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
@@ -4548,11 +4549,11 @@ class CPUX86 extends CPU {
      */
     static init()
     {
-        var aeCPUs = Component.getElementsByClass(document, PCX86.APPCLASS, "cpu");
-        for (var iCPU = 0; iCPU < aeCPUs.length; iCPU++) {
-            var eCPU = aeCPUs[iCPU];
-            var parmsCPU = Component.getComponentParms(eCPU);
-            var cpu = new CPUX86(parmsCPU);
+        let aeCPUs = Component.getElementsByClass(document, PCX86.APPCLASS, "cpu");
+        for (let iCPU = 0; iCPU < aeCPUs.length; iCPU++) {
+            let eCPU = aeCPUs[iCPU];
+            let parmsCPU = Component.getComponentParms(eCPU);
+            let cpu = new CPUX86(parmsCPU);
             Component.bindComponentControls(cpu, eCPU, PCX86.APPCLASS);
         }
     }

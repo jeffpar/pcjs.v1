@@ -111,7 +111,7 @@ if (NODE) {
  * VGA support further piggy-backs on the existing EGA support, by adding the extra registers, I/O port
  * handlers, etc, that the VGA requires; any differences in registers common to both EGA and VGA are handled on
  * a case-by-case basis, usually according to the Video.CARD value stored in nCard.
- * 
+ *
  * More will be said here about PCjs VGA support later.  But first, a word from IBM: "Video Graphics Array [VGA]
  * Programming Considerations":
  *
@@ -310,7 +310,7 @@ class Card extends Controller {
     constructor(video, nCard, data, cbMemory)
     {
         super();
-        
+
         /*
          * If a card was originally not present (eg, EGA), then the state will be empty,
          * so we need to detect that case and continue indicating that the card is not present.
@@ -319,8 +319,8 @@ class Card extends Controller {
 
             this.video = video;
 
-            var specs = Video.cardSpecs[nCard];
-            var nMonitorType = video.nMonitorType || specs[5];
+            let specs = Video.cardSpecs[nCard];
+            let nMonitorType = video.nMonitorType || specs[5];
 
             if (!data || data.length < 6) {
                 data = [false, 0, null, null, 0, new Array(nCard < Video.CARD.EGA? Card.CRTC.TOTAL_REGS : Card.CRTC.EGA.TOTAL_REGS)];
@@ -379,9 +379,9 @@ class Card extends Controller {
                 this.initEGA(data[6], nMonitorType);
             }
 
-            var monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
+            let monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
 
-            var nCyclesDefault = video.cpu.getBaseCyclesPerSecond();    // eg, 4772727
+            let nCyclesDefault = video.cpu.getBaseCyclesPerSecond();    // eg, 4772727
             this.nCyclesHorzPeriod = (nCyclesDefault / monitorSpecs.nHorzPeriodsPerSec)|0;
             this.nCyclesHorzActive = (this.nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100)|0;
             this.nCyclesVertPeriod = (this.nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame)|0;
@@ -487,7 +487,7 @@ class Card extends Controller {
          * not prepared to shoehorn in a call to checkMode() here, and potentially create more issues, for an
          * old problem that will eventually disappear anyway.
          */
-        var a = data[13];
+        let a = data[13];
         if (typeof a == "number") {
             a = [this.addrBuffer, this.sizeBuffer, a];
         }
@@ -497,7 +497,7 @@ class Card extends Controller {
 
         this.initMemory(data[14]);
 
-        var nAccess = data[15];
+        let nAccess = data[15];
         if (nAccess) {
             if (nAccess & Card.ACCESS.V2) {
                 nAccess &= ~Card.ACCESS.V2;
@@ -550,7 +550,7 @@ class Card extends Controller {
      */
     initMemory(data)
     {
-        var cdw = this.cbMemory >> 2;
+        let cdw = this.cbMemory >> 2;
         this.adwMemory = data;
         if (!this.adwMemory) {
             this.adwMemory = new Array(cdw);
@@ -559,7 +559,7 @@ class Card extends Controller {
             this.adwMemory = State.decompressEvenOdd(this.adwMemory, cdw);
         }
     }
-    
+
     /**
      * saveCard()
      *
@@ -568,7 +568,7 @@ class Card extends Controller {
      */
     saveCard()
     {
-        var data = [];
+        let data = [];
         if (this.nCard !== undefined) {
             data[0] = this.fActive;
             data[1] = this.regMode;
@@ -590,7 +590,7 @@ class Card extends Controller {
      */
     saveEGA()
     {
-        var data = [];
+        let data = [];
         data[0]  = this.fATCData;
         data[1]  = this.regATCIndx;
         data[2]  = this.regATCData;
@@ -648,17 +648,17 @@ class Card extends Controller {
                 this.dbg.println(sName + ": " + Str.toHex(iReg, 2));
                 return;
             }
-            var i, cchMax = 17, s = "";
-            var nRegs = (asRegs? asRegs.length : aRegs.length);
+            let i, cchMax = 17, s = "";
+            let nRegs = (asRegs? asRegs.length : aRegs.length);
             for (i = 0; i < nRegs; i++) {
                 /*
                  * In the case of the CRTC, we call the helper function getCRTCReg() to automatically concatenate
                  * the extended bits of certain registers, so that we don't have to "mentally" concatenate them.
                  */
-                var reg = (aRegs === this.regCRTData)? this.getCRTCReg(i) : aRegs[i];
+                let reg = (aRegs === this.regCRTData)? this.getCRTCReg(i) : aRegs[i];
                 if (s) s += '\n';
-                var sRegName = Str.pad((asRegs? asRegs[i] : sName.substr(1) + Str.toDec(i, 3)), cchMax);
-                var cchReg = (asRegs? (reg < 0x100? 2 : 4) : 6);
+                let sRegName = Str.pad((asRegs? asRegs[i] : sName.substr(1) + Str.toDec(i, 3)), cchMax);
+                let cchReg = (asRegs? (reg < 0x100? 2 : 4) : 6);
                 s += sName + "[" + Str.toHex(i, 2) + "]: " + sRegName + (i === iReg? '*' : ' ') + Str.toHex(reg, cchReg);
                 if (reg != null) s += " (" + reg + ".)";
             }
@@ -771,18 +771,18 @@ class Card extends Controller {
                 return;
             }
 
-            var i, j, idw, fColAdjust = false;
-            var l = 8, n = 8, p = -1, w = this.video.nCols >> 3;
+            let i, j, idw, fColAdjust = false;
+            let l = 8, n = 8, p = -1, w = this.video.nCols >> 3;
 
             for (i = 0; i < asArgs.length; i++) {
 
-                var s = asArgs[i];
+                let s = asArgs[i];
                 if (!i) {
                     idw = Str.parseInt(s, 16);
                     continue;
                 }
 
-                var ch = s.charAt(0);
+                let ch = s.charAt(0);
                 j = Str.parseInt(s.substr(1), 16);
 
                 switch(ch) {
@@ -813,11 +813,11 @@ class Card extends Controller {
                 idw -= this.addrBuffer;
             }
 
-            var sDump = "";
+            let sDump = "";
             for (i = 0; i < l; i++) {
-                var sData = Str.toHex(this.addrBuffer + idw) + ":";
+                let sData = Str.toHex(this.addrBuffer + idw) + ":";
                 for (j = 0; j < n && idw < this.adwMemory.length; j++) {
-                    var dw = this.adwMemory[idw++];
+                    let dw = this.adwMemory[idw++];
                     sData += ' ' + ((p < 0)? Str.toHex(dw, 8) : Str.toBin((dw >> (p << 3)), 8));
                 }
                 if (fColAdjust) idw += w - n;
@@ -875,8 +875,8 @@ class Card extends Controller {
     {
         if (nAccess != null && nAccess != this.nAccess) {
 
-            var nReadAccess = nAccess & Card.ACCESS.READ.MASK;
-            var fnReadByte = Card.ACCESS.afn[nReadAccess];
+            let nReadAccess = nAccess & Card.ACCESS.READ.MASK;
+            let fnReadByte = Card.ACCESS.afn[nReadAccess];
             if (!fnReadByte) {
                 if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.VIDEO)) {
                     this.dbg.message("Card.setMemoryAccess(" + Str.toHexWord(nAccess) + "): missing readByte handler");
@@ -900,8 +900,8 @@ class Card extends Controller {
                     fnReadByte = Card.ACCESS.afn[Card.ACCESS.READ.EVENODD];
                 }
             }
-            var nWriteAccess = nAccess & Card.ACCESS.WRITE.MASK;
-            var fnWriteByte = Card.ACCESS.afn[nWriteAccess];
+            let nWriteAccess = nAccess & Card.ACCESS.WRITE.MASK;
+            let fnWriteByte = Card.ACCESS.afn[nWriteAccess];
             if (!fnWriteByte) {
                 if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.VIDEO)) {
                     this.dbg.message("Card.setMemoryAccess(" + Str.toHexWord(nAccess) + "): missing writeByte handler");
@@ -941,9 +941,9 @@ class Card extends Controller {
      */
     getCRTCReg(iReg)
     {
-        var reg = this.regCRTData[iReg];
+        let reg = this.regCRTData[iReg];
         if (reg != null && this.nCard >= Video.CARD.EGA) {
-            var bOverflowBit8 = 0, bOverflowBit9 = 0, bMaxScanBit9 = 0;
+            let bOverflowBit8 = 0, bOverflowBit9 = 0, bMaxScanBit9 = 0;
             switch(iReg) {
             case Card.CRTC.EGA.VTOTAL:              // 0x06
                 bOverflowBit8 = Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT8;         // 0x01
@@ -1652,7 +1652,7 @@ Card.ACCESS.V1[0xE000] = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.XOR;
 
 /**
  * readByte(off, addr)
- * 
+ *
  * Used for MDA/CGA "THRU" access (ie, byte is passed through without any controller-imposed overhead)
  *
  * @this {Memory}
@@ -1677,7 +1677,7 @@ Card.ACCESS.readByte = function readByte(off, addr)
 Card.ACCESS.readByteMode0 = function readByteMode0(off, addr)
 {
     off += this.offset;
-    var dw = this.controller.latches = this.adw[off];
+    let dw = this.controller.latches = this.adw[off];
     return (dw >> this.controller.nReadMapShift) & 0xff;
 };
 
@@ -1693,8 +1693,8 @@ Card.ACCESS.readByteMode0 = function readByteMode0(off, addr)
  */
 Card.ACCESS.readByteMode0Chain4 = function readByteMode0Chain4(off, addr)
 {
-    var idw = (off & ~0x3) + this.offset;
-    var shift = (off & 0x3) << 3;
+    let idw = (off & ~0x3) + this.offset;
+    let shift = (off & 0x3) << 3;
     return ((this.controller.latches = this.adw[idw]) >> shift) & 0xff;
 };
 
@@ -1710,12 +1710,12 @@ Card.ACCESS.readByteMode0EvenOdd = function readByteMode0EvenOdd(off, addr)
 {
     /*
      * TODO: As discussed in getCardAccess(), we need to run some tests on real EGA/VGA hardware to determine
-     * exactly what gets latched (ie, from which address) when EVENODD is in effect.  Whatever we learn may
-     * also dictate a special EVENODD function for READ.MODE1 as well.
+     * exactly what gets latched (ie, from which address) when EVENODD is in effect.  Whatever we learn may also
+     * dictate a special EVENODD function for READ.MODE1 as well.
      */
     off += this.offset;
-    var idw = off & ~0x1;
-    var dw = this.controller.latches = this.adw[idw];
+    let idw = off & ~0x1;
+    let dw = this.controller.latches = this.adw[idw];
     return (!(off & 1)? dw : (dw >> 8)) & 0xff;
 };
 
@@ -1742,14 +1742,14 @@ Card.ACCESS.readByteMode0EvenOdd = function readByteMode0EvenOdd(off, addr)
 Card.ACCESS.readByteMode1 = function readByteMode1(off, addr)
 {
     off += this.offset;
-    var dw = this.controller.latches = this.adw[off];
+    let dw = this.controller.latches = this.adw[off];
     /*
      * Minor optimization: we could pre-mask nColorCompare with nColorDontCare, whenever either register
      * is updated, but that's a drop in the bucket compared to all the other work this function must do.
      */
-    var mask = this.controller.nColorDontCare;
-    var color = this.controller.nColorCompare & mask;
-    var b = 0, bit = 0x80;
+    let mask = this.controller.nColorDontCare;
+    let color = this.controller.nColorCompare & mask;
+    let b = 0, bit = 0x80;
     while (bit) {
         if ((dw & mask) == color) b |= bit;
         color >>>= 1;  mask >>>= 1;  bit >>= 1;
@@ -1770,9 +1770,9 @@ Card.ACCESS.readByteMode1 = function readByteMode1(off, addr)
 Card.ACCESS.writeByte = function writeByte(off, b, addr)
 {
     off += this.offset;
-    var idw = off >> 2;
-    var nShift = (off & 0x3) << 3;
-    var dw = (this.adw[idw] & ~(0xff << nShift)) | (b << nShift);
+    let idw = off >> 2;
+    let nShift = (off & 0x3) << 3;
+    let dw = (this.adw[idw] & ~(0xff << nShift)) | (b << nShift);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
@@ -1792,8 +1792,8 @@ Card.ACCESS.writeByte = function writeByte(off, b, addr)
  *
  *      dw = (dw & this.controller.nSetMapMask) | (this.controller.nSetMapData & ~this.controller.nSetMapMask)
  *
- * but by maintaining nSetMapBits equal to (nSetMapData & ~nSetMapMask), we are able to make
- * the writes slightly more efficient.
+ * but by maintaining nSetMapBits equal to (nSetMapData & ~nSetMapMask), we are able to make the
+ * writes slightly more efficient.
  *
  * @this {Memory}
  * @param {number} off
@@ -1802,8 +1802,8 @@ Card.ACCESS.writeByte = function writeByte(off, b, addr)
  */
 Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
 {
-    var idw = off + this.offset;
-    var dw = b | (b << 8) | (b << 16) | (b << 24);
+    let idw = off + this.offset;
+    let dw = b | (b << 8) | (b << 16) | (b << 24);
     dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
@@ -1853,13 +1853,13 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
  */
 Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
 {
-    var idw = (off & ~0x3) + this.offset;
-    var shift = (off & 0x3) << 3;
+    let idw = (off & ~0x3) + this.offset;
+    let shift = (off & 0x3) << 3;
     /*
      * TODO: Consider adding a separate "unmasked" version of this CHAIN4 write function when nSeqMapMask is -1
      * (or removing nSeqMapMask from the equation altogether, if CHAIN4 is never used with any planes disabled).
      */
-    var dw = ((b << shift) & this.controller.nSeqMapMask) | (this.adw[idw] & ~((0xff << shift) & this.controller.nSeqMapMask));
+    let dw = ((b << shift) & this.controller.nSeqMapMask) | (this.adw[idw] & ~((0xff << shift) & this.controller.nSeqMapMask));
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
@@ -1880,14 +1880,14 @@ Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
 Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b, addr)
 {
     off += this.offset;
-    var dw = b | (b << 8) | (b << 16) | (b << 24);
+    let dw = b | (b << 8) | (b << 16) | (b << 24);
     /*
      * When even/odd addressing is enabled, nSeqMapMask must be cleared for planes 1
      * and 3 if the address is even, and cleared for planes 0 and 2 if the address is odd.
      */
-    var idw = off & ~0x1;
+    let idw = off & ~0x1;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
-    var maskMaps = this.controller.nSeqMapMask & (idw == off? 0x00ff00ff : (0xff00ff00|0));
+    let maskMaps = this.controller.nSeqMapMask & (idw == off? 0x00ff00ff : (0xff00ff00|0));
     dw = (dw & maskMaps) | (this.adw[idw] & ~maskMaps);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
@@ -1908,9 +1908,9 @@ Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b, addr)
  */
 Card.ACCESS.writeByteMode0Rot = function writeByteMode0Rot(off, b, addr)
 {
-    var idw = off + this.offset;
+    let idw = off + this.offset;
     b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
-    var dw = b | (b << 8) | (b << 16) | (b << 24);
+    let dw = b | (b << 8) | (b << 16) | (b << 24);
     dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
@@ -1933,9 +1933,9 @@ Card.ACCESS.writeByteMode0Rot = function writeByteMode0Rot(off, b, addr)
  */
 Card.ACCESS.writeByteMode0And = function writeByteMode0And(off, b, addr)
 {
-    var idw = off + this.offset;
+    let idw = off + this.offset;
     b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
-    var dw = b | (b << 8) | (b << 16) | (b << 24);
+    let dw = b | (b << 8) | (b << 16) | (b << 24);
     dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
     dw &= this.controller.latches;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
@@ -1959,9 +1959,9 @@ Card.ACCESS.writeByteMode0And = function writeByteMode0And(off, b, addr)
  */
 Card.ACCESS.writeByteMode0Or = function writeByteMode0Or(off, b, addr)
 {
-    var idw = off + this.offset;
+    let idw = off + this.offset;
     b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
-    var dw = b | (b << 8) | (b << 16) | (b << 24);
+    let dw = b | (b << 8) | (b << 16) | (b << 24);
     dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
     dw |= this.controller.latches;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
@@ -1985,9 +1985,9 @@ Card.ACCESS.writeByteMode0Or = function writeByteMode0Or(off, b, addr)
  */
 Card.ACCESS.writeByteMode0Xor = function writeByteMode0Xor(off, b, addr)
 {
-    var idw = off + this.offset;
+    let idw = off + this.offset;
     b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
-    var dw = b | (b << 8) | (b << 16) | (b << 24);
+    let dw = b | (b << 8) | (b << 16) | (b << 24);
     dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
     dw ^= this.controller.latches;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
@@ -2011,8 +2011,8 @@ Card.ACCESS.writeByteMode0Xor = function writeByteMode0Xor(off, b, addr)
  */
 Card.ACCESS.writeByteMode1 = function writeByteMode1(off, b, addr)
 {
-    var idw = off + this.offset;
-    var dw = (this.adw[idw] & ~this.controller.nSeqMapMask) | (this.controller.latches & this.controller.nSeqMapMask);
+    let idw = off + this.offset;
+    let dw = (this.adw[idw] & ~this.controller.nSeqMapMask) | (this.controller.latches & this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
@@ -2041,9 +2041,9 @@ Card.ACCESS.writeByteMode1EvenOdd = function writeByteMode1EvenOdd(off, b, addr)
     // When even/odd addressing is enabled, nSeqMapMask must be cleared for planes 1 and 3 if
     // the address is even, and cleared for planes 0 and 2 if the address is odd.
     //
-    var idw = off & ~0x1;
-    var maskMaps = this.controller.nSeqMapMask & (idw == off? 0x00ff00ff : (0xff00ff00|0));
-    var dw = (this.adw[idw] & ~maskMaps) | (this.controller.latches & maskMaps);
+    let idw = off & ~0x1;
+    let maskMaps = this.controller.nSeqMapMask & (idw == off? 0x00ff00ff : (0xff00ff00|0));
+    let dw = (this.adw[idw] & ~maskMaps) | (this.controller.latches & maskMaps);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
@@ -2063,8 +2063,8 @@ Card.ACCESS.writeByteMode1EvenOdd = function writeByteMode1EvenOdd(off, b, addr)
  */
 Card.ACCESS.writeByteMode2 = function writeByteMode2(off, b, addr)
 {
-    var idw = off + this.offset;
-    var dw = Video.aEGAByteToDW[b & 0xf];
+    let idw = off + this.offset;
+    let dw = Video.aEGAByteToDW[b & 0xf];
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
@@ -2086,8 +2086,8 @@ Card.ACCESS.writeByteMode2 = function writeByteMode2(off, b, addr)
  */
 Card.ACCESS.writeByteMode2And = function writeByteMode2And(off, b, addr)
 {
-    var idw = off + this.offset;
-    var dw = Video.aEGAByteToDW[b & 0xf];
+    let idw = off + this.offset;
+    let dw = Video.aEGAByteToDW[b & 0xf];
     dw &= this.controller.latches;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
@@ -2110,8 +2110,8 @@ Card.ACCESS.writeByteMode2And = function writeByteMode2And(off, b, addr)
  */
 Card.ACCESS.writeByteMode2Or = function writeByteMode2Or(off, b, addr)
 {
-    var idw = off + this.offset;
-    var dw = Video.aEGAByteToDW[b & 0xf];
+    let idw = off + this.offset;
+    let dw = Video.aEGAByteToDW[b & 0xf];
     dw |= this.controller.latches;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
@@ -2134,8 +2134,8 @@ Card.ACCESS.writeByteMode2Or = function writeByteMode2Or(off, b, addr)
  */
 Card.ACCESS.writeByteMode2Xor = function writeByteMode2Xor(off, b, addr)
 {
-    var idw = off + this.offset;
-    var dw = Video.aEGAByteToDW[b & 0xf];
+    let idw = off + this.offset;
+    let dw = Video.aEGAByteToDW[b & 0xf];
     dw ^= this.controller.latches;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
@@ -2164,10 +2164,10 @@ Card.ACCESS.writeByteMode2Xor = function writeByteMode2Xor(off, b, addr)
  */
 Card.ACCESS.writeByteMode3 = function writeByteMode3(off, b, addr)
 {
-    var idw = off + this.offset;
+    let idw = off + this.offset;
     b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
-    var dw = b | (b << 8) | (b << 16) | (b << 24);
-    var dwMask = (dw & this.controller.nBitMapMask);
+    let dw = b | (b << 8) | (b << 16) | (b << 24);
+    let dwMask = (dw & this.controller.nBitMapMask);
     dw = (this.controller.nSetMapData & dwMask) | (this.controller.latches & ~dwMask);
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
@@ -2268,7 +2268,7 @@ class Video extends Component {
     {
         super("Video", parmsVideo, Messages.VIDEO);
 
-        var video = this, sProp, sEvent;
+        let video = this, sProp, sEvent;
         this.fGecko = Web.isUserAgent("Gecko/");
 
         /*
@@ -2277,7 +2277,7 @@ class Video extends Component {
          * (since those motherboard switches tell us only the type of monitor, not the type of card).
          */
         this.model = parmsVideo['model'];
-        var aModelDefaults = Video.MODEL[this.model] || Video.MODEL['mda'];
+        let aModelDefaults = Video.MODEL[this.model] || Video.MODEL['mda'];
 
         this.nCard = aModelDefaults[0];
         this.cbMemory = parmsVideo['memory'] || 0;  // zero means fallback to the cardSpec's default size
@@ -2314,18 +2314,18 @@ class Video extends Component {
          * The font 'scale' parameter is deprecated (we ALWAYS scale now), and the internal fDoubleFont
          * setting is now always true, but it is retained in case we want to revisit the benefits (or lack
          * thereof) of font-doubling.
-         * 
+         *
+         *      this.fScaleFont = parmsVideo['scale'];
+         *
          * When fScaleFont was false, one key difference was these additional lines in setDimensions():
-         * 
+         *
          *      if (!this.fScaleFont) {
          *          this.cxScreenCell = font.cxCell;
          *          this.cyScreenCell = font.cyCell;
          *      }
-         * 
+         *
          * which meant that if the font was only 8 pixels wide (instead of 16), then 40-column mode would
          * simply display normal size characters with large black borders on either of the screen.
-         *
-         *      this.fScaleFont = parmsVideo['scale'];
          */
         this.fDoubleFont = true;
 
@@ -2355,8 +2355,8 @@ class Video extends Component {
          * on this.  I see other options emerging, like the CSS property "image-rendering: pixelated"
          * that's apparently been added to Chrome.  Sigh.
          */
-        var fSmoothing = parmsVideo['smoothing'];
-        var sSmoothing = Web.getURLParm('smoothing');
+        let fSmoothing = parmsVideo['smoothing'];
+        let sSmoothing = Web.getURLParm('smoothing');
         if (sSmoothing) fSmoothing = (sSmoothing == "true");
         if (fSmoothing != null) {
             sProp = Web.findProperty(this.contextScreen, 'imageSmoothingEnabled');
@@ -2425,7 +2425,7 @@ class Video extends Component {
                 this.container.doFullScreen = container[sProp];
                 sEvent = Web.findProperty(document, 'on', 'fullscreenchange');
                 if (sEvent) {
-                    var sFullScreen = Web.findProperty(document, 'fullscreenElement') || Web.findProperty(document, 'fullScreenElement');
+                    let sFullScreen = Web.findProperty(document, 'fullscreenElement') || Web.findProperty(document, 'fullScreenElement');
                     document.addEventListener(sEvent, function onFullScreenChange() {
                         video.notifyFullScreen(document[sFullScreen] != null);
                     }, false);
@@ -2454,9 +2454,9 @@ class Video extends Component {
             if (this.inputScreen.lockPointer) {
                 sEvent = Web.findProperty(document, 'on', 'pointerlockchange');
                 if (sEvent) {
-                    var sPointerLock = Web.findProperty(document, 'pointerLockElement');
+                    let sPointerLock = Web.findProperty(document, 'pointerLockElement');
                     document.addEventListener(sEvent, function onPointerLockChange() {
-                        var fLocked = !!(sPointerLock && document[sPointerLock] === video.inputScreen);
+                        let fLocked = !!(sPointerLock && document[sPointerLock] === video.inputScreen);
                         video.notifyPointerLocked(fLocked);
                     }, false);
                 }
@@ -2466,7 +2466,7 @@ class Video extends Component {
         this.sFileURL = parmsVideo['fontROM'];
 
         if (this.sFileURL) {
-            var sFileExt = Str.getExtension(this.sFileURL);
+            let sFileExt = Str.getExtension(this.sFileURL);
             if (sFileExt != "json") {
                 this.sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFileURL + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
             }
@@ -2487,19 +2487,19 @@ class Video extends Component {
      */
     initBus(cmp, bus, cpu, dbg)
     {
-        var video = this;
+        let video = this;
 
         this.bus = bus;
         this.cpu = cpu;
         this.dbg = dbg;
 
-        var nRandomize = +cmp.getMachineParm('randomize');
+        let nRandomize = +cmp.getMachineParm('randomize');
         if (nRandomize >= 0 && nRandomize <= 1) this.nRandomize = nRandomize;
 
         /*
          * nCard will be undefined if no model was explicitly set (whereas this.nCard is ALWAYS defined).
          */
-        var aModel = Video.MODEL[this.model], nCard = aModel && aModel[0];
+        let aModel = Video.MODEL[this.model], nCard = aModel && aModel[0];
 
         /*
          * The only time we do NOT want to trap MDA ports is when the model has been explicitly set to CGA.
@@ -2549,7 +2549,7 @@ class Video extends Component {
          */
         this.kbd = cmp.getMachineComponent("Keyboard");
         if (this.kbd && this.canvasScreen) {
-            for (var s in this.bindings) {
+            for (let s in this.bindings) {
                 if (s.indexOf("lock") > 0) this.kbd.setBinding("led", s, this.bindings[s]);
             }
             this.kbd.setBinding(this.inputTextArea? "textarea" : "canvas", "screen", this.inputScreen);
@@ -2586,7 +2586,7 @@ class Video extends Component {
         }
 
         if (this.sFileURL) {
-            var sProgress = "Loading " + this.sFileURL + "...";
+            let sProgress = "Loading " + this.sFileURL + "...";
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
                 video.doneLoad(sURL, sResponse, nErrorCode);
             }, function(nState) {
@@ -2611,7 +2611,7 @@ class Video extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var video = this;
+        let video = this;
 
         if (!this.bindings[sBinding]) {
 
@@ -2710,7 +2710,7 @@ class Video extends Component {
      */
     goFullScreen()
     {
-        var fSuccess = false;
+        let fSuccess = false;
         if (this.container) {
             if (this.container.doFullScreen) {
                 /*
@@ -2727,11 +2727,11 @@ class Video extends Component {
                  * for height works equally well, so I'm sticking with it, because "auto" is also consistent with how I've
                  * implemented a responsive canvas when the browser window is being resized.
                  */
-                var sWidth = "100%";
-                var sHeight = "auto";
+                let sWidth = "100%";
+                let sHeight = "auto";
                 if (screen && screen.width && screen.height) {
-                    var aspectPhys = screen.width / screen.height;
-                    var aspectVirt = this.cxScreen / this.cyScreen;
+                    let aspectPhys = screen.width / screen.height;
+                    let aspectVirt = this.cxScreen / this.cyScreen;
                     if (aspectPhys > aspectVirt) {
                         sWidth = Math.round(aspectVirt / aspectPhys * 100) + '%';
                     }
@@ -2802,7 +2802,7 @@ class Video extends Component {
      */
     lockPointer(fLock)
     {
-        var fSuccess = false;
+        let fSuccess = false;
         if (this.inputScreen && this.mouse) {
             if (fLock) {
                 if (this.inputScreen.lockPointer) {
@@ -2849,7 +2849,7 @@ class Video extends Component {
             this.mouse.notifyPointerLocked(fLocked);
             if (this.kbd) this.kbd.notifyEscape(fLocked);
         }
-        var control = this.bindings["lockPointer"];
+        let control = this.bindings["lockPointer"];
         if (control) control.textContent = (fLocked? "Press Esc to Unlock Pointer" : this.sLockMessage);
     }
 
@@ -2861,14 +2861,14 @@ class Video extends Component {
      */
     captureTouch(nTouchConfig)
     {
-        var control = this.inputScreen;
+        let control = this.inputScreen;
         if (control) {
-            var video = this;
+            let video = this;
             if (!this.nTouchConfig) {
 
                 this.nTouchConfig = nTouchConfig;
-                
-                var addPassive = false;
+
+                let addPassive = false;
                 if (nTouchConfig != Video.TOUCH.MOUSE) {
                     /*
                      * If we're not capturing touch events for mouse event simulation, then we won't be calling
@@ -2878,7 +2878,7 @@ class Video extends Component {
                      * the browser supports that feature, we have to probe for it first.
                      */
                     try {
-                        var opts = Object.defineProperty({}, 'passive', {
+                        let opts = Object.defineProperty({}, 'passive', {
                             get: function() {
                                 addPassive = true;
                             }
@@ -3036,7 +3036,7 @@ class Video extends Component {
      */
     processTouchEvent(event, fStart)
     {
-        var xTouch, yTouch;
+        let xTouch, yTouch;
 
         // if (!event) event = window.event;
 
@@ -3052,9 +3052,9 @@ class Video extends Component {
          * TODO: Determine whether the getBoundingClientRect() code used in panel.js for mouse events can also
          * be used here to simplify this annoyingly complicated code for touch events.
          */
-        var xTouchOffset = 0;
-        var yTouchOffset = 0;
-        var eCurrent = this.canvasScreen;
+        let xTouchOffset = 0;
+        let yTouchOffset = 0;
+        let eCurrent = this.canvasScreen;
 
         do {
             if (!isNaN(eCurrent.offsetLeft)) {
@@ -3067,8 +3067,8 @@ class Video extends Component {
          * Due to the responsive nature of our pages, the displayed size of the canvas may be smaller than the
          * allocated size, and the coordinates we receive from touch events are based on the currently displayed size.
          */
-        var xScale =  this.cxScreen / this.canvasScreen.offsetWidth;
-        var yScale = this.cyScreen / this.canvasScreen.offsetHeight;
+        let xScale =  this.cxScreen / this.canvasScreen.offsetWidth;
+        let yScale = this.cyScreen / this.canvasScreen.offsetHeight;
 
         /**
          * @name Event
@@ -3096,8 +3096,8 @@ class Video extends Component {
              */
             if (fStart) {
 
-                var xThird = (xTouch / (this.cxScreen / 3)) | 0;
-                var yThird = (yTouch / (this.cyScreen / 3)) | 0;
+                let xThird = (xTouch / (this.cxScreen / 3)) | 0;
+                let yThird = (yTouch / (this.cyScreen / 3)) | 0;
 
                 /*
                  * At this point, xThird and yThird should both be one of 0, 1 or 2, indicating which horizontal and
@@ -3115,8 +3115,8 @@ class Video extends Component {
                  * second (500ms) after the last touchstart, with no intervening touchmove events, fTouchDefault
                  * is allowed to become true.
                  */
-                var fTouchDefault = this.fTouchDefault;
-                var timeDelta = event.timeStamp - this.timeTouch;
+                let fTouchDefault = this.fTouchDefault;
+                let timeDelta = event.timeStamp - this.timeTouch;
 
                 if (fStart === true) {
                     this.fTouchDefault = (timeDelta > 500);
@@ -3164,8 +3164,8 @@ class Video extends Component {
                     this.xTouch = xTouch;
                     this.yTouch = yTouch;
                 }
-                var xDelta = Math.round(xTouch - this.xTouch);
-                var yDelta = Math.round(yTouch - this.yTouch);
+                let xDelta = Math.round(xTouch - this.xTouch);
+                let yDelta = Math.round(yTouch - this.yTouch);
                 this.xTouch = xTouch;
                 this.yTouch = yTouch;
                 // this.println("moveMouse(" + xDelta + "," + yDelta + ")");
@@ -3244,7 +3244,7 @@ class Video extends Component {
      */
     reset()
     {
-        var nMonitorType = ChipSet.MONITOR.NONE;
+        let nMonitorType = ChipSet.MONITOR.NONE;
 
         /*
          * We'll ask the ChipSet what SW1 indicates for monitor type, but we may override it if a specific
@@ -3271,7 +3271,7 @@ class Video extends Component {
             nMonitorType = ChipSet.MONITOR.VGACOLOR;
             break;
         case Video.CARD.EGA:
-            var aMonitors = Video.aEGAMonitorSwitches[this.bEGASwitches];
+            let aMonitors = Video.aEGAMonitorSwitches[this.bEGASwitches];
             /*
              * TODO: Figure out how to deal with aMonitors[2], the boolean which indicates
              * whether the EGA is driving the primary monitor (true) or the secondary monitor (false).
@@ -3330,10 +3330,10 @@ class Video extends Component {
              * physical limit.  Also, as noted in updateScreen(), this simplistic calculation of the extent of visible
              * screen memory is valid only for text modes; in general, it's safer to use cardActive.sizeBuffer as the extent.
              */
-            var addrScreenLimit = this.cardActive.addrBuffer + this.cbScreen;
-            for (var addrScreen = this.cardActive.addrBuffer; addrScreen < addrScreenLimit; addrScreen += 2) {
-                var dataRandom = (Math.random() * 0x10000)|0;
-                var bChar, bAttr;
+            let addrScreenLimit = this.cardActive.addrBuffer + this.cbScreen;
+            for (let addrScreen = this.cardActive.addrBuffer; addrScreen < addrScreenLimit; addrScreen += 2) {
+                let dataRandom = (Math.random() * 0x10000)|0;
+                let bChar, bAttr;
                 if (this.nMonitorType == ChipSet.MONITOR.EGACOLOR || this.nMonitorType == ChipSet.MONITOR.VGACOLOR) {
                     /*
                      * For the EGA, we choose sequential characters; for random characters, copy the MDA/CGA code below.
@@ -3381,7 +3381,7 @@ class Video extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, this.cardMDA.saveCard());
         state.set(1, this.cardCGA.saveCard());
         state.set(2, [this.nMonitorType, this.nModeDefault, this.nMode]);
@@ -3400,7 +3400,7 @@ class Video extends Component {
      */
     restore(data)
     {
-        var a = data[2];
+        let a = data[2];
         this.nMonitorType = a[0];
         this.nModeDefault = a[1];
         this.nMode = a[2];
@@ -3461,9 +3461,9 @@ class Video extends Component {
             /*
              * The most likely source of any exception will be right here, where we're parsing the JSON-encoded data.
              */
-            var abFontData = eval("(" + sFontData + ")");
+            let abFontData = eval("(" + sFontData + ")");
 
-            var ab = abFontData['bytes'] || abFontData;
+            let ab = /** @type {Array} */ (abFontData['bytes'] || abFontData);
 
             if (!ab.length) {
                 Component.error("Empty font ROM: " + sURL);
@@ -3654,16 +3654,16 @@ class Video extends Component {
              * color set; on an EGA, I synthesize a fake CGA regColor value, until I (TODO:) figure out exactly how
              * the EGA simulates the CGA color palette.
              */
-            var regColor = this.cardActive.regColor;
+            let regColor = this.cardActive.regColor;
             if (this.cardActive === this.cardEGA) {
-                var bBackground = this.cardEGA.regATCData[0];
+                let bBackground = this.cardEGA.regATCData[0];
                 regColor = bBackground & Card.CGA.COLOR.BORDER;
                 if (bBackground & Card.ATC.PALETTE.BRIGHT) regColor |= Card.CGA.COLOR.BRIGHT;
                 if (this.cardEGA.regATCData[1] != 0x12) regColor |= Card.CGA.COLOR.COLORSET2;
             }
             this.aRGB[0] = Video.aCGAColors[regColor & (Card.CGA.COLOR.BORDER | Card.CGA.COLOR.BRIGHT)];
-            var aColorSet = (regColor & Card.CGA.COLOR.COLORSET2)? Video.aCGAColorSet2 : Video.aCGAColorSet1;
-            for (var iColor = 0; iColor < aColorSet.length; iColor++) {
+            let aColorSet = (regColor & Card.CGA.COLOR.COLORSET2)? Video.aCGAColorSet2 : Video.aCGAColorSet1;
+            for (let iColor = 0; iColor < aColorSet.length; iColor++) {
                 this.aRGB[iColor+1] = Video.aCGAColors[aColorSet[iColor]];
             }
             return this.aRGB;
@@ -3684,9 +3684,9 @@ class Video extends Component {
 
         if (!this.fRGBValid) {
 
-            var card = this.cardEGA;
-            var aDAC = card.regDACData;
-            var aRegs, i, dw, b, bRed, bGreen, bBlue;
+            let card = this.cardEGA;
+            let aDAC = card.regDACData;
+            let aRegs, i, dw, b, bRed, bGreen, bBlue;
 
             if (nBitsPerPixel == 8) {
                 /*
@@ -3709,7 +3709,7 @@ class Video extends Component {
                  * we go with a default EGA-compatible 16-color palette.  We'll also use the DAC if there is one
                  * (ie, this is actually a VGA) and it appears to be initialized (ie, the VGA BIOS has been run).
                  */
-                var fDAC = (aDAC && aDAC[255] != null);
+                let fDAC = (aDAC && aDAC[255] != null);
                 aRegs = (card.regATCData[15] != null? card.regATCData : Video.aEGAPalDef);
                 for (i = 0; i < 16; i++) {
                     b = aRegs[i] & Card.ATC.PALETTE.MASK;
@@ -3759,10 +3759,10 @@ class Video extends Component {
      * originally just a crutch to help get EGA support bootstrapped.
      *
      * Also, for the MDA/CGA, we should be discarding the font data after the first buildFonts() call, because we
-     * should not need to ever rebuild the fonts for those cards (both their font patterns and colors were hard-coded).
+     * should never need to rebuild the fonts for those cards (both their font patterns and colors were hard-coded).
      *
      * @this {Video}
-     * @param {*} abFontData is the raw font data, from the ROM font file
+     * @param {Array.<number>} abFontData is the raw font data, from the ROM font file
      * @param {Array.<number>} aFontOffsets contains offsets into abFontData: [0] for CGA, [1] for MDA
      * @param {number} [cxFontChar] is a fixed character width to use for all fonts; undefined to use MDA/CGA defaults
      */
@@ -3791,7 +3791,7 @@ class Video extends Component {
      *
      * Supporting dynamic EGA fonts should not be hard though.  We can get rid of abFontData and simply build a
      * temporary snapshot of all the font bytes in plane 2 of the EGA's video buffer (adwMemory), and pass that on to
-     * buildFont() instead.  We'll also need to either invalidate the existing font's color (to trigger a rebuild) or
+     * createFont() instead.  We'll also need to either invalidate the existing font's color (to trigger a rebuild) or
      * pass a new "force rebuild" flag.
      *
      * Once that's done, an added benefit will be that we can build just the font(s) that have been loaded into plane 2,
@@ -3804,7 +3804,7 @@ class Video extends Component {
      */
     buildFonts(fRebuild)
     {
-        var fChanges = false;
+        let fChanges = false;
 
         /*
          * There's no point building fonts if this is a non-windowed (command-line) environment
@@ -3815,25 +3815,20 @@ class Video extends Component {
          */
         if (window && this.abFontData && (!fRebuild || this.nFont)) {
 
-            var offSplit = 0x0000;
-            var cxChar = this.cxFontChar? this.cxFontChar : 8;
-            var aRGBColors = this.getCardColors();
+            let aRGBColors = this.getCardColors();
 
             if (this.aFontOffsets[0] != null) {
-                if (this.buildFont(Video.FONT.CGA, this.aFontOffsets[0], offSplit, cxChar, 8, this.abFontData, aRGBColors)) {
+                if (this.createFont(Video.FONT.CGA, this.cxFontChar || 8, 8, this.aFontOffsets[0], 0x0000, this.abFontData, aRGBColors)) {
                     fChanges = true;
                 }
             }
 
-            offSplit = this.cxFontChar? 0 : 0x0800;
-            cxChar = this.cxFontChar? this.cxFontChar : 9;
-
             if (this.aFontOffsets[1] != null) {
-                if (this.buildFont(Video.FONT.MDA, this.aFontOffsets[1], offSplit, cxChar, 14, this.abFontData, Video.aMDAColors, Video.aMDAColorMap)) {
+                if (this.createFont(Video.FONT.MDA, this.cxFontChar || 9, 14, this.aFontOffsets[1], this.cxFontChar? 0 : 0x0800, this.abFontData, Video.aMDAColors, Video.aMDAColorMap)) {
                     fChanges = true;
                 }
                 if (this.cxFontChar) {
-                    if (this.buildFont(this.nCard, this.aFontOffsets[1], 0, this.cxFontChar, 14, this.abFontData, aRGBColors)) {
+                    if (this.createFont(this.nCard, this.cxFontChar, 14, fRebuild? 0 : this.aFontOffsets[1], 0, fRebuild? null : this.abFontData, aRGBColors)) {
                         fChanges = true;
                     }
                 }
@@ -3851,38 +3846,7 @@ class Video extends Component {
     }
 
     /**
-     * buildFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)
-     *
-     * This is a wrapper for createFont() which also takes care loading double-size fonts when fDoubleFont is set.
-     *
-     * @this {Video}
-     * @param {number} nFont
-     * @param {number|null} offData is the offset of the font data, null if none
-     * @param {number} offSplit is the offset of any split font data, or zero if not split
-     * @param {number} cxChar is the width of the font characters
-     * @param {number} cyChar is the height of the font characters
-     * @param {*} abFontData is the raw font data, from the ROM font file
-     * @param {Array} aRGBColors is an array of color RGB variations, corresponding to supported FGND attribute values
-     * @param {Array} [aColorMap] contains color indexes corresponding to attribute values (if not supplied, the mapping is assumed to be 1-1)
-     * @return {boolean} true if any or all fonts were (re)built, false if nothing changed
-     */
-    buildFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)
-    {
-        var fChanges = false;
-
-        if (offData != null) {
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont][0] + " font");
-            }
-            if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) {
-                fChanges = true;
-            }
-        }
-        return fChanges;
-    }
-
-    /**
-     * createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)
+     * createFont(nFont, cxChar, cyChar, offData, offSplit, abFontData, aRGBColors, aColorMap)
      *
      * All color variations are stored on the same font canvas, arranged vertically as a series of grids, where each
      * grid is a 16x16 character glyph array.
@@ -3894,21 +3858,23 @@ class Video extends Component {
      *
      * @this {Video}
      * @param {number} nFont
-     * @param {number} offData is the offset of the font data
-     * @param {number} offSplit is the offset of any split font data, or zero if not split
      * @param {number} cxChar is the width of the font characters
      * @param {number} cyChar is the height of the font characters
-     * @param {*} abFontData is the raw font data, from the ROM font file
+     * @param {number} offData is the offset of the font data
+     * @param {number} offSplit is the offset of any split font data, or zero if not split
+     * @param {Array.<number>|null} abFontData is the raw font data, from the ROM font file
      * @param {Array} aRGBColors is an array of color RGB variations, corresponding to supported FGND attribute values
-     * @param {Array|undefined} aColorMap contains color indexes corresponding to attribute values (if not supplied, the mapping is assumed to be 1-1)
+     * @param {Array} [aColorMap] contains color indexes corresponding to attribute values (if not supplied, the mapping is assumed to be 1-1)
      * @return {boolean} true if any or all fonts were (re)created, false if nothing changed
      */
-    createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)
+    createFont(nFont, cxChar, cyChar, offData, offSplit, abFontData, aRGBColors, aColorMap)
     {
-        var fChanges = false;
-        var nDouble = (this.fDoubleFont? 1 : 0);
-        var font = this.aFonts[nFont];
-        var nColors = (aRGBColors.length < 16? aRGBColors.length : 16);
+        if (DEBUG) this.printf("createFont(%d): creating %s font", nFont, Video.cardSpecs[nFont][0]);
+
+        let fChanges = false;
+        let nDouble = (this.fDoubleFont? 1 : 0);
+        let font = this.aFonts[nFont];
+        let nColors = (aRGBColors.length < 16? aRGBColors.length : 16);
         if (!font) {
             font = {
                 cxCell:     cxChar << nDouble,
@@ -3919,13 +3885,10 @@ class Video extends Component {
                 aCanvas:    new Array(nColors)
             };
         }
-        for (var iColor = 0; iColor < nColors; iColor++) {
-            var rgbColor = aRGBColors[iColor];
-            var rgbColorOrig = font.aCSSColors[iColor]? font.aRGBColors[iColor] : [];
+        for (let iColor = 0; iColor < nColors; iColor++) {
+            let rgbColor = aRGBColors[iColor];
+            let rgbColorOrig = font.aCSSColors[iColor]? font.aRGBColors[iColor] : [];
             if (rgbColor[0] !== rgbColorOrig[0] || rgbColor[1] !== rgbColorOrig[1] || rgbColor[2] !== rgbColorOrig[2]) {
-                if (DEBUG && this.messageEnabled()) {
-                    this.printMessage("creating font color " + iColor + " for font " + nFont);
-                }
                 this.createFontColor(font, iColor, rgbColor, nDouble, offData, offSplit, cxChar, cyChar, abFontData);
                 fChanges = true;
             }
@@ -3952,7 +3915,7 @@ class Video extends Component {
      *
      * This also yields better performance, since drawImage() is much faster than putImageData().
      * We still have to use putImageData() to build the font canvas, but that's a one-time operation.
-     * 
+     *
      * @this {Video}
      * @param {Font} font
      * @param {number} iColor
@@ -3962,31 +3925,53 @@ class Video extends Component {
      * @param {number} offSplit is the offset of any split font data, or zero if not split
      * @param {number} cxChar is the width of the font characters
      * @param {number} cyChar is the height of the font characters
-     * @param {*} abFontData is the raw font data, from the ROM font file
+     * @param {Array.<number>|null} abFontData is the raw font data, from the ROM font file
      */
     createFontColor(font, iColor, rgbColor, nDouble, offData, offSplit, cxChar, cyChar, abFontData)
     {
-        var rgbOff = [0x00, 0x00, 0x00, 0x00];
-        var canvasFont = document.createElement("canvas");
+        if (DEBUG) this.printf("createFontColor(%d): [%s]\n", iColor, rgbColor);
+
+        let rgbOff = [0x00, 0x00, 0x00, 0x00];
+        let canvasFont = document.createElement("canvas");
         canvasFont.width = font.cxCell << 4;
         canvasFont.height = (font.cyCell << 4);
-        var contextFont = canvasFont.getContext("2d");
+        let contextFont = canvasFont.getContext("2d");
 
-        var iChar, x, y;
-        var cyLimit = (cyChar < 8 || !offSplit)? cyChar : 8;
-        var imageChar = contextFont.createImageData(font.cxCell, font.cyCell);
+        let iChar, x, y;
+        let imageChar = contextFont.createImageData(font.cxCell, font.cyCell);
+        /*
+         * If abFontData is null, we will use font data from plane 2 of video memory, which has a "hard-wired" layout
+         * of 32 bytes per character (which, for 256 characters, amounts to 8Kb).  Note that up to 4 font "banks" can be
+         * stored in plane 2, since each bank has a "hard-wired" length of 16Kb, so two banks requires 32Kb of plane 2
+         * memory (which means a 4-plane total of 128K) and four banks requires 64Kb of plane 2 memory (which means a
+         * 4-plane total of 256K).
+         *
+         * Those requirements could have been cut in half (and up to 8 banks supported) if the EGA had started each bank
+         * on an 8Kb boundary instead of 16Kb (each bank can't use more than 8Kb anyway).  Of course, that would have also
+         * required the Sequencer's Character Map Select register to assign 3 bits rather than 2 bits to each of the Map
+         * Select A and B values.
+         */
+        let adwMemory = this.cardActive && this.cardActive.adwMemory;
+        let cyLimit = abFontData? ((cyChar < 8 || !offSplit)? cyChar : 8) : 32;
 
         for (iChar = 0; iChar < 256; iChar++) {
+            let offChar = offData + iChar * cyLimit;
             for (y = 0; y < cyChar; y++) {
+
                 /*
                  * fUnderline should be true only in the FONT_MDA case, and only for the odd color variations
                  * (1 and 3, out of variations 0 to 4), and only for the two bottom-most rows of the character cell
                  * (which I still need to confirm).
                  */
-                var fUnderline = (font.aColorMap && (iColor & 0x1) && y >= cyChar - 2);
-                var offChar = (y < cyLimit? offData + iChar * cyLimit + y : offSplit + iChar * cyLimit + y - cyLimit);
-                var b = abFontData[offChar];
-                for (var nRowDoubler = 0; nRowDoubler <= nDouble; nRowDoubler++) {
+                let fUnderline = (font.aColorMap && (iColor & 0x1) && y >= cyChar - 2);
+                let offScan = (y < cyLimit? offChar + y : offSplit + iChar * cyLimit + y - cyLimit);
+
+                /*
+                 * If abFontData is null, then we must extract the next byte of font data from plane 2 of video memory.
+                 */
+                let b = abFontData? abFontData[offScan] : ((adwMemory[offScan] >> 16) & 0xff);
+
+                for (let nRowDoubler = 0; nRowDoubler <= nDouble; nRowDoubler++) {
                     for (x = 0; x < cxChar; x++) {
                         /*
                          * This "bit" of logic takes care of those characters (0xC0-0xDF) whose 9th bit must mirror the 8th bit;
@@ -3996,10 +3981,10 @@ class Video extends Component {
                          * TODO: For EGA/VGA, replication of the 9th dot needs to be based on the TEXT_9DOT bit of the ATC.MODE
                          * register, which is particularly important for user-defined fonts that do not want that bit replicated.
                          */
-                        var bit = (fUnderline? 1 : (b & (0x80 >> (x >= 8 && iChar >= 0xC0 && iChar <= 0xDF? 7 : x))));
-                        var xDst = (x << nDouble);
-                        var yDst = (y << nDouble) + nRowDoubler;
-                        var rgb = (bit? rgbColor : rgbOff);
+                        let bit = (fUnderline? 1 : (b & (0x80 >> (x >= 8 && iChar >= 0xC0 && iChar <= 0xDF? 7 : x))));
+                        let xDst = (x << nDouble);
+                        let yDst = (y << nDouble) + nRowDoubler;
+                        let rgb = (bit? rgbColor : rgbOff);
                         this.setPixel(imageChar, xDst, yDst, rgb);
                         if (nDouble) this.setPixel(imageChar, xDst + 1, yDst, rgb);
                     }
@@ -4021,7 +4006,7 @@ class Video extends Component {
          * Enable this code if you want to see what the generated font looks like....
          *
         if (MAXDEBUG) {
-            var iSrcColor = (iColor == 15? 0 : iColor + 1);
+            let iSrcColor = (iColor == 15? 0 : iColor + 1);
             this.contextScreen.fillStyle = aCSSColors[iSrcColor];
             this.contextScreen.fillRect(iColor*(font.cxCell<<2), 0, canvasFont.width>>2, font.cyCell<<4);
             this.contextScreen.drawImage(canvasFont, 0, iColor*(font.cyCell<<4), canvasFont.width>>2, font.cyCell<<4, iColor*(font.cxCell<<2), 0, canvasFont.width>>2, font.cyCell<<4);
@@ -4102,11 +4087,11 @@ class Video extends Component {
      *      CRTC.STARTLO
      *      CRTC.CURSORHI
      *      CRTC.CURSORLO
-     * 
+     *
      * The top of the cursor starts at CURSCAN, and the bottom is CURSCANB - 1, except that if CURSCAN == CURSCANB
      * (or more precisely, if CURSCAN == CURSCANB mod 16), then a single scan line is still drawn.  Also, on the EGA,
      * if CURSCANB < CURSCAN, a split cursor is drawn.
-     * 
+     *
      * Also, at least on the EGA, if CURSCANB is set to a value > MAXSCAN (typically 13 on an EGA), cursor scan line
      * drawing wraps around to zero and does not stop until we reach CURSCAN again.  However, this happens only when
      * CURSCAN is <= MAXSCAN; if CURSCAN > MAXSCAN, then nothing is drawn, regardless of CURSCANB.
@@ -4120,23 +4105,23 @@ class Video extends Component {
          * The "hardware cursor" is never visible in graphics modes.
          */
         if (!this.nFont) return false;
-        
-        var card = this.cardActive;
-        for (var i = Card.CRTC.CURSCAN; i <= Card.CRTC.CURSORLO; i++) {
+
+        let card = this.cardActive;
+        for (let i = Card.CRTC.CURSCAN; i <= Card.CRTC.CURSORLO; i++) {
             if (card.regCRTData[i] == null)
                 return false;
         }
 
-        var bCursorFlags = card.regCRTData[Card.CRTC.CURSCAN];
-        var bCursorStart = bCursorFlags & Card.CRTC.CURSCAN_SLMASK;
-        var bCursorEnd = card.regCRTData[Card.CRTC.CURSCANB] & Card.CRTCMASKS[Card.CRTC.CURSCANB];
-        var bCursorMax = card.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
-        var oCursorStart = bCursorStart, oCursorEnd = bCursorEnd;
-        
+        let bCursorFlags = card.regCRTData[Card.CRTC.CURSCAN];
+        let bCursorStart = bCursorFlags & Card.CRTC.CURSCAN_SLMASK;
+        let bCursorEnd = card.regCRTData[Card.CRTC.CURSCANB] & Card.CRTCMASKS[Card.CRTC.CURSCANB];
+        let bCursorMax = card.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
+        let oCursorStart = bCursorStart, oCursorEnd = bCursorEnd;
+
         /*
          * Before range-checking CURSCAN and CURSCANB, let's see if the cursor is disabled by a starting value
          * outside the visible range; if so, simulate the condition by pretending the CURSCAN_BLINKOFF bit is set.
-         * 
+         *
          * For example, on a CGA, ThinkTank sets both CURSCAN and CURSCANB to 15, WordStar for PCjr sets CURSCAN and
          * CURSCANB to 12 and 13, respectively, and Rogue sets CURSCAN and CURSCANB to 15 and 0, respectively.
          */
@@ -4144,13 +4129,13 @@ class Video extends Component {
             bCursorFlags |= Card.CRTC.CURSCAN_BLINKOFF;
         }
 
-        var bCursorWrap = 0;
-        
+        let bCursorWrap = 0;
+
         if (this.nCard != Video.CARD.EGA) {
             /*
              * Live and learn: I originally thought that the EGA introduced funky split cursors, but it turns
              * out that older cards did it, too (well, I've confirmed it on an actual MDA anyway; haven't tried
-             * the CGA).  I've also confirmed that the MDA did NOT have the "mod 16" EGA anomaly described below. 
+             * the CGA).  I've also confirmed that the MDA did NOT have the "mod 16" EGA anomaly described below.
              */
             if (bCursorEnd < bCursorStart) {
                 bCursorWrap = bCursorEnd + 1;
@@ -4199,8 +4184,8 @@ class Video extends Component {
                 bCursorEnd = bCursorMax + 1;
             }
         }
-        
-        var bCursorSize = bCursorEnd - bCursorStart;
+
+        let bCursorSize = bCursorEnd - bCursorStart;
 
         /*
          * One way of disabling the cursor is to set bit 5 (Card.CRTC.CURSCAN_BLINKOFF) of the CRTC.CURSCAN flags;
@@ -4214,21 +4199,21 @@ class Video extends Component {
         /*
          * The least tricky way of disabling (ie, hiding) the cursor is to simply move it to an off-screen position.
          */
-        var iCellCursor = card.regCRTData[Card.CRTC.CURSORLO];
+        let iCellCursor = card.regCRTData[Card.CRTC.CURSORLO];
         iCellCursor |= (card.regCRTData[Card.CRTC.CURSORHI] & card.addrMaskHigh) << 8;
 
-        var offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
+        let offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
         offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
-        
+
         iCellCursor -= offStartAddr;
-        
+
         if (this.iCellCursor != iCellCursor) {
             //
             // let rowFrom = (this.iCellCursor / this.nCols)|0;
             // let colFrom = (this.iCellCursor % this.nCols);
             // let rowTo = (iCellCursor / this.nCols)|0;
             // let colTo = (iCellCursor % this.nCols);
-            // this.printf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo);
+            // if (DEBUG) this.printf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo);
             // this.removeCursor();
             //
             this.iCellCursor = iCellCursor;
@@ -4249,7 +4234,7 @@ class Video extends Component {
          * cyCursor values are relative to when it's time to scale them.
          */
         if (this.yCursor !== bCursorStart || this.cyCursor !== bCursorSize || this.cyCursorWrap !== bCursorWrap) {
-            this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d (0x%02x-0x%02x)\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize, oCursorStart, oCursorEnd);
+            if (DEBUG) this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d (0x%02x-0x%02x)\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize, oCursorStart, oCursorEnd);
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
             this.cyCursorWrap = bCursorWrap;
@@ -4261,21 +4246,21 @@ class Video extends Component {
              */
             // if (this.cBlinkVisible >= 0) this.fCellCacheValid = false;
         }
-        
+
         this.cyCursorCell = bCursorMax + 1;
 
         /*
          * This next condition is critical; WordStar for PCjr (designed for the CGA) would program CURSCANB to 31,
          * whereas MAXSCAN was 7.  This resulted in cyCursorCell of 8 and cyCursor of 32, producing elongated cursors
          * in updateChar().  By range-checking CURSCAN and CURSCANB against MAXSCAN above, that should no longer happen.
-         * 
+         *
          * This condition can also happen while the CRT controller is in an inconsistent state (ie, in the middle of
          * being completely reprogrammed), so we mustn't freak out.
          */
         if (this.cyCursor > this.cyCursorCell) {
             this.cyCursor = this.cyCursorCell;
         }
-        
+
         this.checkBlink();
         return true;
     }
@@ -4289,12 +4274,12 @@ class Video extends Component {
     {
         if (this.iCellCursor >= 0) {
             if (this.aCellCache !== undefined && this.iCellCursor < this.aCellCache.length) {
-                var drawCursor = (Video.ATTRS.DRAW_CURSOR << 8);
-                var data = this.aCellCache[this.iCellCursor];
+                let drawCursor = (Video.ATTRS.DRAW_CURSOR << 8);
+                let data = this.aCellCache[this.iCellCursor];
                 if (data & drawCursor) {
                     data &= ~drawCursor;
-                    var col = this.iCellCursor % this.nCols;
-                    var row = (this.iCellCursor / this.nCols)|0;
+                    let col = this.iCellCursor % this.nCols;
+                    let row = (this.iCellCursor / this.nCols)|0;
                     if (this.nFont && this.aFonts[this.nFont]) {
                         /*
                          * If we're using an off-screen buffer in text mode, then we need to keep it in sync with "reality".
@@ -4310,7 +4295,7 @@ class Video extends Component {
                          */
                         this.updateChar(col, row, data);
                     }
-                    this.printf("removeCursor(): removed from %d,%d\n", row, col);
+                    if (DEBUG) this.printf("removeCursor(): removed from %d,%d\n", row, col);
                     this.aCellCache[this.iCellCursor] = data;
                 }
             }
@@ -4326,17 +4311,17 @@ class Video extends Component {
      */
     getCardAccess()
     {
-        var card = this.cardActive;
-        var nAccess = Card.ACCESS.READ.THRU | Card.ACCESS.WRITE.THRU;
+        let card = this.cardActive;
+        let nAccess = Card.ACCESS.READ.THRU | Card.ACCESS.WRITE.THRU;
 
         if (card.nCard >= Video.CARD.EGA) {
             this.fColor256 = false;
-            var regGRCMode = card.regGRCData[Card.GRC.MODE.INDX];
+            let regGRCMode = card.regGRCData[Card.GRC.MODE.INDX];
             if (regGRCMode != null) {
-                var nReadAccess = Card.ACCESS.READ.MODE0;
-                var nWriteAccess = Card.ACCESS.WRITE.MODE0;
-                var nWriteMode = regGRCMode & Card.GRC.MODE.WRITE.MASK;
-                var regDataRotate = card.regGRCData[Card.GRC.DATAROT.INDX] & Card.GRC.DATAROT.MASK;
+                let nReadAccess = Card.ACCESS.READ.MODE0;
+                let nWriteAccess = Card.ACCESS.WRITE.MODE0;
+                let nWriteMode = regGRCMode & Card.GRC.MODE.WRITE.MASK;
+                let regDataRotate = card.regGRCData[Card.GRC.DATAROT.INDX] & Card.GRC.DATAROT.MASK;
                 switch (nWriteMode) {
                 case Card.GRC.MODE.WRITE.MODE0:
                     if (regDataRotate) {
@@ -4417,7 +4402,7 @@ class Video extends Component {
                  *      nWriteAccess |= Card.ACCESS.WRITE.EVENODD;
                  *  }
                  */
-                var regSEQMode = card.regSEQData[Card.SEQ.MEMMODE.INDX];
+                let regSEQMode = card.regSEQData[Card.SEQ.MEMMODE.INDX];
                 if (regSEQMode != null) {
                     if (!(regSEQMode & Card.SEQ.MEMMODE.SEQUENTIAL)) {
                         nReadAccess |= Card.ACCESS.READ.EVENODD;
@@ -4446,10 +4431,10 @@ class Video extends Component {
      */
     setCardAccess(nAccess)
     {
-        var card = this.cardActive;
+        let card = this.cardActive;
         if (card && nAccess != null && nAccess != card.nAccess) {
 
-            this.printf("setCardAccess(0x%04x)\n", nAccess);
+            if (DEBUG) this.printf("setCardAccess(0x%04x)\n", nAccess);
 
             card.setMemoryAccess(nAccess);
 
@@ -4481,8 +4466,8 @@ class Video extends Component {
         this.nColsLogical = this.nCols;
         this.nCellsPerWord = Video.aModeParms[Video.MODE.MDA_80X25][2];
 
-        var cbPadding = 0;
-        var modeParms = Video.aModeParms[this.nMode];
+        let cbPadding = 0;
+        let modeParms = Video.aModeParms[this.nMode];
         if (modeParms) {
 
             this.nCols = modeParms[0];
@@ -4543,7 +4528,7 @@ class Video extends Component {
         this.cyScreenCell = (this.cyScreen / this.nRows)|0;
 
         if (this.nFont) {
-            var font = this.aFonts[this.nFont];
+            let font = this.aFonts[this.nFont];
             if (!font) {
                 this.assert(false);
                 return;
@@ -4596,8 +4581,8 @@ class Video extends Component {
         this.cxScreenOffset = this.cxScreen;
         this.cyScreenOffset = this.cyScreen;
 
-        var cxBorder = this.cxScreen - (this.nCols * this.cxScreenCell);
-        var cyBorder = this.cyScreen - (this.nRows * this.cyScreenCell);
+        let cxBorder = this.cxScreen - (this.nCols * this.cxScreenCell);
+        let cyBorder = this.cyScreen - (this.nRows * this.cyScreenCell);
         if (cxBorder > 0) {
             this.xScreenOffset = (cxBorder >> 1);
             this.cxScreenOffset -= cxBorder;
@@ -4624,8 +4609,8 @@ class Video extends Component {
      */
     checkMode(fForce)
     {
-        var nMode = this.nMode;
-        var card = this.cardActive;
+        let nMode = this.nMode;
+        let card = this.cardActive;
 
         if (!card) {
             /*
@@ -4650,10 +4635,10 @@ class Video extends Component {
                  * presumably mode 0x10, on an EGA card with only 64Kb).
                  */
                 nMode = null;
-                var cbBuffer = card.cbMemory >> 2;
-                var cbBufferText = (cbBuffer > 0x8000? 0x8000 : cbBuffer);
+                let cbBuffer = card.cbMemory >> 2;
+                let cbBufferText = (cbBuffer > 0x8000? 0x8000 : cbBuffer);
 
-                var regGRCMisc = card.regGRCData[Card.GRC.MISC.INDX];
+                let regGRCMisc = card.regGRCData[Card.GRC.MISC.INDX];
                 if (regGRCMisc != null) {
 
                     switch(regGRCMisc & Card.GRC.MISC.MAPMEM) {
@@ -4689,7 +4674,7 @@ class Video extends Component {
                      * One of the problems with the current approach is that it depends on the card's registers being programmed
                      * in at least roughly the same order that the IBM EGA and VGA ROMs program them.
                      */
-                    var regGRCMode = card.regGRCData[Card.GRC.MODE.INDX];
+                    let regGRCMode = card.regGRCData[Card.GRC.MODE.INDX];
 
                     /*
                      * This text/graphics hybrid test detects the way Windows 95 reprograms the VGA on boot; ie, switching
@@ -4698,7 +4683,7 @@ class Video extends Component {
                      * finally reprogramming regGRCMode and regGRCMisc to move the frame buffer back to its original text mode
                      * location.
                      */
-                    var fTextGraphicsHybrid = (regGRCMode & (Card.GRC.MODE.COLOR256 | Card.GRC.MODE.EVENODD)) == (Card.GRC.MODE.COLOR256 | Card.GRC.MODE.EVENODD);
+                    let fTextGraphicsHybrid = (regGRCMode & (Card.GRC.MODE.COLOR256 | Card.GRC.MODE.EVENODD)) == (Card.GRC.MODE.COLOR256 | Card.GRC.MODE.EVENODD);
                     if (fTextGraphicsHybrid) {
                         /*
                          * When fTextGraphicsHybrid is true, we should be at the end of the above process, so addrBuffer
@@ -4710,11 +4695,11 @@ class Video extends Component {
                         }
                     }
 
-                    var nCRTCVertTotal = card.getCRTCReg(Card.CRTC.EGA.VTOTAL);
-                    var nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAXSCAN.INDX];
-                    var nCRTCModeCtrl = card.regCRTData[Card.CRTC.EGA.MODECTRL.INDX];
+                    let nCRTCVertTotal = card.getCRTCReg(Card.CRTC.EGA.VTOTAL);
+                    let nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAXSCAN.INDX];
+                    let nCRTCModeCtrl = card.regCRTData[Card.CRTC.EGA.MODECTRL.INDX];
 
-                    var fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
+                    let fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
 
                     if (nMode != Video.MODE.UNKNOWN) {
                         if (!(regGRCMisc & Card.GRC.MISC.GRAPHICS)) {
@@ -4867,7 +4852,7 @@ class Video extends Component {
              * (MDA or CGA) don't allocate/manage their own memory buffer, but even then, it's still a good idea
              * to always force this operation (eg, in case a switch setting changed the active video card).
              */
-            var card = this.cardActive || (nMode == Video.MODE.MDA_80X25? this.cardMono : this.cardColor);
+            let card = this.cardActive || (nMode == Video.MODE.MDA_80X25? this.cardMono : this.cardColor);
 
             if (card != this.cardActive || card.addrBuffer != this.addrBuffer || card.sizeBuffer != this.sizeBuffer) {
 
@@ -4904,20 +4889,20 @@ class Video extends Component {
                      */
                     return false;
                 }
-                
+
                 /*
                  * As https://www.seasip.info/VintagePC/mda.html explains, the MDA's 4K buffer address is not
                  * fully decoded; it is also addressible at every 4K interval within a 32K (0x8000) address range.
                  * We simulate that now, and not just for purely theoretical reasons: the original monochrome-
                  * specific version of "Exploring the IBM Personal Computer":
-                 * 
+                 *
                  *      https://www.pcjs.org/disks/pcx86/diags/ibm/5150/exploring/1.00/mda/
-                 *      
+                 *
                  * has a bug where it attempts to clear one of the intro screens with a faulty INT 10h Scroll Up
                  * call, where the top left (CX) and bottom right (DX) coordinates are reversed, resulting in a
                  * scroll with negative coordinates that the BIOS converts into large positive off-screen coordinates,
                  * which just so happens to clear the video buffer anyway, because it's repeatedly addressible.
-                 * 
+                 *
                  * The CGA's 16K buffer has a similar feature, but owing to its larger size, its buffer repeats only
                  * once within a 32K address range.  And yes, the color version of "Exploring the IBM Personal Computer"
                  * has a similar INT 10h scroll bug; the app is using graphics mode 0x04, so it's requesting a graphics
@@ -4925,8 +4910,8 @@ class Video extends Component {
                  * so much of the memory it zeroes is above the first 16K.
                  */
                 if (card.nCard < Video.CARD.EGA) {
-                    var addrBuffer = this.addrBuffer;
-                    var aBlocks = this.bus.getMemoryBlocks(addrBuffer, this.sizeBuffer);
+                    let addrBuffer = this.addrBuffer;
+                    let aBlocks = this.bus.getMemoryBlocks(addrBuffer, this.sizeBuffer);
                     while ((addrBuffer += this.sizeBuffer) < card.addrBuffer + 0x8000) {
                         this.bus.setMemoryBlocks(addrBuffer, this.sizeBuffer, aBlocks);
                     }
@@ -4952,7 +4937,7 @@ class Video extends Component {
      */
     setPixel(imageData, x, y, rgb)
     {
-        var index = (x + y * imageData.width) * rgb.length;
+        let index = (x + y * imageData.width) * rgb.length;
         imageData.data[index]   = rgb[0];
         imageData.data[index+1] = rgb[1];
         imageData.data[index+2] = rgb[2];
@@ -4972,9 +4957,9 @@ class Video extends Component {
      */
     initCache()
     {
-        this.cBlinkVisible = -1;                // force updateScreen() to recount visible blinking characters 
+        this.cBlinkVisible = -1;                // force updateScreen() to recount visible blinking characters
         this.fCellCacheValid = false;
-        var nCells = this.nCellCache;
+        let nCells = this.nCellCache;
         if (this.aCellCache === undefined || this.aCellCache.length != nCells) {
             this.aCellCache = new Array(nCells);
         }
@@ -5026,18 +5011,18 @@ class Video extends Component {
         /*
          * The caller MUST promise this.nFont is defined, and that the font in this.aFonts[this.nFont] has been loaded.
          */
-        var bChar = data & 0xff;
-        var bAttr = data >> 8;
-        var iFgnd = bAttr & 0xf;
-        var font = this.aFonts[this.nFont];
+        let bChar = data & 0xff;
+        let bAttr = data >> 8;
+        let iFgnd = bAttr & 0xf;
+        let font = this.aFonts[this.nFont];
         if (font.aColorMap) iFgnd = font.aColorMap[iFgnd];
 
         /*
          * Just as aColorMap maps the foreground attribute to the appropriate foreground character grid,
          * it also maps the background attribute to the appropriate background color.
          */
-        var xDst, yDst;
-        var iBgnd = (bAttr >> 4) & 0xf;
+        let xDst, yDst;
+        let iBgnd = (bAttr >> 4) & 0xf;
         if (font.aColorMap) iBgnd = font.aColorMap[iBgnd];
 
         if (context) {
@@ -5060,8 +5045,8 @@ class Video extends Component {
             /*
              * (bChar & 0xf) is the equivalent of (bChar % 16), and (bChar >> 4) is the equivalent of Math.floor(bChar / 16)
              */
-            var xSrcFgnd = (bChar & 0xf) * font.cxCell;
-            var ySrcFgnd = (bChar >> 4) * font.cyCell;
+            let xSrcFgnd = (bChar & 0xf) * font.cxCell;
+            let ySrcFgnd = (bChar >> 4) * font.cyCell;
 
             if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.BUFFER)) {
                 this.log("updateCharFgnd(" + col + "," + row + "," + bChar + "): draw from " + xSrcFgnd + "," + ySrcFgnd + " (" + font.cxCell + "," + font.cyCell + ") to " + xDst + "," + yDst);
@@ -5156,8 +5141,8 @@ class Video extends Component {
          * If the card's video signal is disabled (eg, during a mode change), then skip the update,
          * unless fForce is set.
          */
-        var fEnabled = false;
-        var card = this.cardActive;
+        let fEnabled = false;
+        let card = this.cardActive;
 
         if (card) {
             if (card !== this.cardEGA) {
@@ -5187,14 +5172,14 @@ class Video extends Component {
          *
          * We assume that the CPU is calling us whenever fForce is undefined.
          */
-        var fBlinkUpdate = false;
+        let fBlinkUpdate = false;
         if (!fForce && !(++this.cUpdates % 10) && this.cBlinks >= 0) {
             this.cBlinks++;
             fBlinkUpdate = true;
         }
 
-        var iCell = 0;
-        var nCells = this.nCells;
+        let iCell = 0;
+        let nCells = this.nCells;
 
         /*
          * Calculate the VISIBLE start of screen memory (addrScreen), not merely the PHYSICAL start,
@@ -5202,9 +5187,9 @@ class Video extends Component {
          * FYI, in these calculations, offScreen does not refer to "off-screen" memory, but rather the "offset"
          * of the start of visible screen memory.
          */
-        var addrBuffer = this.addrBuffer;
-        var addrScreen = addrBuffer;
-        var addrScreenLimit = addrScreen + this.sizeBuffer;
+        let addrBuffer = this.addrBuffer;
+        let addrScreen = addrBuffer;
+        let addrScreenLimit = addrScreen + this.sizeBuffer;
 
         /*
          * HACK: To deal with the fTextGraphicsHybrid 320x400 mode that Windows 95 uses (ie, when the buffer
@@ -5237,7 +5222,7 @@ class Video extends Component {
             /*
              * PARANOIA: Don't call invalidateCache() unless the address we're about to "latch" actually changed.
              */
-            var offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
+            let offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
             offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
             if (card.offStartAddr !== offStartAddr) {
                 card.offStartAddr = offStartAddr;
@@ -5251,7 +5236,7 @@ class Video extends Component {
          * TODO: Come up with a more robust method of deciding when any screen offset should be doubled.
          */
         addrScreen += card.offStartAddr << (this.nFont? 1 : 0);
-        var cbScreen = this.cbScreen;
+        let cbScreen = this.cbScreen;
 
         if (this.nCard >= Video.CARD.EGA && card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
             /*
@@ -5276,7 +5261,7 @@ class Video extends Component {
          * (addrScreenLimit), then the assumption is that we will have to do a second update operation that
          * wraps around to addrBuffer.
          */
-        var addrScreenWrap = 0, cbScreenWrap = 0;
+        let addrScreenWrap = 0, cbScreenWrap = 0;
         if (addrScreen + cbScreen > addrScreenLimit) {
             /*
              * There are two possibilities here: addrScreen itself is at or beyond addrScreenLimit, or just a
@@ -5300,11 +5285,11 @@ class Video extends Component {
          * of the screen until both subsets have been updated, otherwise the second update may erroneously think
          * that nothing changed if it happens to share any blocks with the first.
          */
-        var cBlinkOrig = this.cBlinkVisible;
-        var cCells = this.updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, nCells, fForce, fBlinkUpdate);
+        let cBlinkOrig = this.cBlinkVisible;
+        let cCells = this.updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, nCells, fForce, fBlinkUpdate);
         if (cbScreenWrap) {
             iCell += cCells;
-            var cBlinkNew = this.cBlinkVisible;
+            let cBlinkNew = this.cBlinkVisible;
             if (cBlinkOrig < 0) this.cBlinkVisible = -1;
             cCells += this.updateScreenCells(addrBuffer, addrScreenWrap, cbScreenWrap, iCell, nCells, fForce, fBlinkUpdate);
             this.cBlinkVisible += cBlinkNew;
@@ -5329,9 +5314,9 @@ class Video extends Component {
      */
     updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, nCells, fForce, fBlinkUpdate)
     {
-        var cCells = cbScreen >> 1;
+        let cCells = cbScreen >> 1;
         if (cCells > nCells) cCells = nCells;
-        var addrScreenLimit = addrScreen + cbScreen;
+        let addrScreenLimit = addrScreen + cbScreen;
 
         /*
          * This next bit of code can be completely disabled if we discover problems with the dirty
@@ -5350,7 +5335,7 @@ class Video extends Component {
                 /*
                  * iCellCursor may be negative if the cursor is hidden or if it's not on the visible screen.
                  */
-                var iCellCursor = this.iCellCursor - iCell;
+                let iCellCursor = this.iCellCursor - iCell;
                 if (iCellCursor < 0) {
                     return cCells;
                 }
@@ -5413,11 +5398,11 @@ class Video extends Component {
          * If MDA.MODE.BLINK_ENABLE is clear, then we always set ATTRS.DRAW_FGND and never mask the blink
          * bit in a cell's attributes bits, since it's actually an intensity bit in that case.
          */
-        var cCells = 0, cUpdated = 0;
-        var dataBlink = 0;
-        var dataDraw = (Video.ATTRS.DRAW_FGND << 8);
-        var dataMask = 0xfffff;
-        var fBlinkEnable = (this.cardActive.regMode & Card.MDA.MODE.BLINK_ENABLE);
+        let cCells = 0, cUpdated = 0;
+        let dataBlink = 0;
+        let dataDraw = (Video.ATTRS.DRAW_FGND << 8);
+        let dataMask = 0xfffff;
+        let fBlinkEnable = (this.cardActive.regMode & Card.MDA.MODE.BLINK_ENABLE);
         if (this.nCard >= Video.CARD.EGA) {
             fBlinkEnable = (this.cardActive.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.BLINK_ENABLE);
         }
@@ -5427,10 +5412,10 @@ class Video extends Component {
             dataMask &= ~dataBlink;
             if (!(this.cBlinks & 0x2)) dataMask &= ~dataDraw;
         }
-        
+
         this.cBlinkVisible = 0;
         while (addrScreen < addrScreenLimit && iCell < nCells) {
-            var data = this.bus.getShortDirect(addrScreen);
+            let data = this.bus.getShortDirect(addrScreen);
             data |= dataDraw;
             if (data & dataBlink) {
                 this.cBlinkVisible++;
@@ -5441,8 +5426,8 @@ class Video extends Component {
             }
             this.assert(iCell < this.aCellCache.length);
             if (!this.fCellCacheValid || data !== this.aCellCache[iCell]) {
-                var col = iCell % this.nCols;
-                var row = (iCell / this.nCols)|0;
+                let col = iCell % this.nCols;
+                let row = (iCell / this.nCols)|0;
                 /*
                  * The following code is useful for setting a breakpoint (on the non-destructive "cUpdated |= 0" line)
                  * when debugging the "FlickerFree" utility while doing a series of "DIR" listings on the screen.  When
@@ -5472,7 +5457,7 @@ class Video extends Component {
         if (cUpdated && this.contextBuffer) {
             this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.cxBuffer, this.cyBuffer, this.xScreenOffset, this.yScreenOffset, this.cxScreenOffset, this.cyScreenOffset);
         }
-        
+
         this.checkBlink();
         return cCells;
     }
@@ -5490,29 +5475,29 @@ class Video extends Component {
         /*
          * This is the CGA graphics-mode update case, where cells are pixels spread across two halves of the buffer.
          */
-        var cCells = (addrScreenLimit - addrScreen) >> 1;
-        var iCell = 0, nPixelsPerCell = this.nCellsPerWord;
-        var addr = addrScreen;
-        var wPixelMask = (nPixelsPerCell == 16? 0x10000 : 0x30000);
-        var nPixelShift = (nPixelsPerCell == 16? 1 : 2);
-        var aPixelColors = this.getCardColors(nPixelShift);
+        let cCells = (addrScreenLimit - addrScreen) >> 1;
+        let iCell = 0, nPixelsPerCell = this.nCellsPerWord;
+        let addr = addrScreen;
+        let wPixelMask = (nPixelsPerCell == 16? 0x10000 : 0x30000);
+        let nPixelShift = (nPixelsPerCell == 16? 1 : 2);
+        let aPixelColors = this.getCardColors(nPixelShift);
 
-        var x = 0, y = 0;
-        var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
+        let x = 0, y = 0;
+        let xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
 
         this.cBlinkVisible = 0;
         while (addr < addrScreenLimit) {
-            var data = this.bus.getShortDirect(addr);
+            let data = this.bus.getShortDirect(addr);
             this.assert(iCell < this.aCellCache.length);
             if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
                 x += nPixelsPerCell;
             } else {
                 this.aCellCache[iCell] = data;
-                var wPixels = (data >> 8) | ((data & 0xff) << 8);
-                var wMask = wPixelMask, nShift = 16;
+                let wPixels = (data >> 8) | ((data & 0xff) << 8);
+                let wMask = wPixelMask, nShift = 16;
                 if (x < xDirty) xDirty = x;
-                for (var iPixel = 0; iPixel < nPixelsPerCell; iPixel++) {
-                    var bPixel = (wPixels & (wMask >>= nPixelShift)) >> (nShift -= nPixelShift);
+                for (let iPixel = 0; iPixel < nPixelsPerCell; iPixel++) {
+                    let bPixel = (wPixels & (wMask >>= nPixelShift)) >> (nShift -= nPixelShift);
                     this.setPixel(this.imageBuffer, x++, y, aPixelColors[bPixel]);
                 }
                 if (x > xMaxDirty) xMaxDirty = x;
@@ -5539,8 +5524,8 @@ class Video extends Component {
          * the update (well, to the extent that the canvas APIs permit).
          */
         if (xDirty < this.nCols) {
-            var cxDirty = xMaxDirty - xDirty;
-            var cyDirty = yMaxDirty - yDirty;
+            let cxDirty = xMaxDirty - xDirty;
+            let cyDirty = yMaxDirty - yDirty;
             // this.contextBuffer.putImageData(this.imageBuffer, 0, 0);
             this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
             /*
@@ -5551,10 +5536,10 @@ class Video extends Component {
              * artifacts along the edges of those rectangles.  So it appears I must continue to redraw the entire canvasBuffer
              * on every change.
              *
-            var xScreen = (((xDirty * this.cxScreen) / this.nCols) | 0);
-            var yScreen = (((yDirty * this.cyScreen) / this.nRows) | 0);
-            var cxScreen = (((cxDirty * this.cxScreen) / this.nCols) | 0);
-            var cyScreen = (((cyDirty * this.cyScreen) / this.nRows) | 0);
+            let xScreen = (((xDirty * this.cxScreen) / this.nCols) | 0);
+            let yScreen = (((yDirty * this.cyScreen) / this.nRows) | 0);
+            let cxScreen = (((cxDirty * this.cxScreen) / this.nCols) | 0);
+            let cyScreen = (((cyDirty * this.cyScreen) / this.nRows) | 0);
             this.contextScreen.drawImage(this.canvasBuffer, xDirty, yDirty, cxDirty, cyDirty, xScreen, yScreen, cxScreen, cyScreen);
              */
             this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
@@ -5575,31 +5560,31 @@ class Video extends Component {
      */
     updateScreenGraphicsEGA(addrBuffer, addrScreen, addrScreenLimit)
     {
-        var iCell = 0;
-        var cCells = addrScreenLimit - addrScreen;
-        var addr = addrScreen;
-        var aPixelColors = this.getCardColors();
-        var adwMemory = this.cardActive.adwMemory;
+        let iCell = 0;
+        let cCells = addrScreenLimit - addrScreen;
+        let addr = addrScreen;
+        let aPixelColors = this.getCardColors();
+        let adwMemory = this.cardActive.adwMemory;
 
-        var x = 0, y = 0;
-        var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
-        var iPixelFirst = this.cardActive.regATCData[Card.ATC.HPAN.INDX] & Card.ATC.HPAN.SHIFT_LEFT;
+        let x = 0, y = 0;
+        let xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
+        let iPixelFirst = this.cardActive.regATCData[Card.ATC.HPAN.INDX] & Card.ATC.HPAN.SHIFT_LEFT;
 
         /*
          * TODO: What should happen if the card is programmed such that nColsLogical is LESS THAN nCols?
          */
-        var nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
+        let nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
 
         this.cBlinkVisible = 0;
         while (addr < addrScreenLimit) {
-            var idw = addr++ - addrBuffer;
+            let idw = addr++ - addrBuffer;
             this.assert(idw >= 0 && idw < adwMemory.length);
-            var data = adwMemory[idw];
+            let data = adwMemory[idw];
 
             /*
              * Figure out how many visible pixels this data represents; usually 8, unless panning is being used.
              */
-            var iPixel, nPixels = 8;
+            let iPixel, nPixels = 8;
 
             if (iPixelFirst) {
                 /*
@@ -5638,7 +5623,7 @@ class Video extends Component {
                      * number, and therefore outside the normal 32-bit integer range; however, the AND operator guarantees
                      * that the result will be a 32-bit value, so it doesn't matter.
                      */
-                    var dwPixel = data & 0x80808080;
+                    let dwPixel = data & 0x80808080;
                     this.assert(Video.aEGADWToByte[dwPixel] !== undefined);
                     /*
                      * Since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also ensuring
@@ -5649,7 +5634,7 @@ class Video extends Component {
                      * former is a POSITIVE index that is outside the 32-bit integer range, whereas the latter is a NEGATIVE
                      * index, which is what this code requires.
                      */
-                    var bPixel = Video.aEGADWToByte[dwPixel] || 0;
+                    let bPixel = Video.aEGADWToByte[dwPixel] || 0;
                     this.setPixel(this.imageBuffer, x++, y, aPixelColors[bPixel]);
                     data <<= 1;
                 }
@@ -5673,8 +5658,8 @@ class Video extends Component {
          * For a fascinating discussion of the best way to update the screen canvas at this point, see updateScreenGraphicsCGA().
          */
         if (xDirty < this.nCols) {
-            var cxDirty = xMaxDirty - xDirty;
-            var cyDirty = yMaxDirty - yDirty;
+            let cxDirty = xMaxDirty - xDirty;
+            let cyDirty = yMaxDirty - yDirty;
             this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
             this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
         }
@@ -5700,32 +5685,32 @@ class Video extends Component {
      */
     updateScreenGraphicsVGA(addrBuffer, addrScreen, addrScreenLimit)
     {
-        var iCell = 0;
-        var cCells = addrScreenLimit - addrScreen;
-        var addr = addrScreen;
-        var aPixelColors = this.getCardColors(8);
-        var adwMemory = this.cardActive.adwMemory;
+        let iCell = 0;
+        let cCells = addrScreenLimit - addrScreen;
+        let addr = addrScreen;
+        let aPixelColors = this.getCardColors(8);
+        let adwMemory = this.cardActive.adwMemory;
 
-        var x = 0, y = 0;
-        var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
-        var cbInc = (this.cardActive.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.CHAIN4)? 4 : 1;
-        var iPixelFirst = this.cardActive.regATCData[Card.ATC.HPAN.INDX] & Card.ATC.HPAN.SHIFT_LEFT;
+        let x = 0, y = 0;
+        let xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
+        let cbInc = (this.cardActive.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.CHAIN4)? 4 : 1;
+        let iPixelFirst = this.cardActive.regATCData[Card.ATC.HPAN.INDX] & Card.ATC.HPAN.SHIFT_LEFT;
 
         /*
          * TODO: What should happen if the card is programmed such that nColsLogical is LESS THAN nCols?
          */
-        var nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
+        let nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
 
         this.cBlinkVisible = 0;
         while (addr < addrScreenLimit) {
-            var idw = addr - addrBuffer;
+            let idw = addr - addrBuffer;
             this.assert(idw >= 0 && idw < adwMemory.length);
-            var data = adwMemory[idw];
+            let data = adwMemory[idw];
 
             /*
              * Figure out how many visible pixels this data represents; usually 4, unless panning is being used.
              */
-            var iPixel, nPixels = 4;
+            let iPixel, nPixels = 4;
 
             if (iPixelFirst) {
                 /*
@@ -5770,8 +5755,8 @@ class Video extends Component {
          * For a fascinating discussion of the best way to update the screen canvas at this point, see updateScreenGraphicsCGA().
          */
         if (xDirty < this.nCols) {
-            var cxDirty = xMaxDirty - xDirty;
-            var cyDirty = yMaxDirty - yDirty;
+            let cxDirty = xMaxDirty - xDirty;
+            let cyDirty = yMaxDirty - yDirty;
             this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
             this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
         }
@@ -5797,16 +5782,16 @@ class Video extends Component {
          * TODO: Verify that when a saved machine state is restored, both the CPU's cycle count AND the card's nInitCycles
          * are properly restored.  It's probably not a big deal, but details like that bother me.
          */
-        var b = 0;
-        var nCycles = this.cpu.getCycles();
-        var nElapsedCycles = nCycles - card.nInitCycles;
+        let b = 0;
+        let nCycles = this.cpu.getCycles();
+        let nElapsedCycles = nCycles - card.nInitCycles;
         if (nElapsedCycles < 0) {           // perhaps the CPU decided to reset its cycle count?
             card.nInitCycles = nElapsedCycles;
             nElapsedCycles = -nElapsedCycles|0;
         }
-        var nCyclesHorzRemain = nElapsedCycles % card.nCyclesHorzPeriod;
+        let nCyclesHorzRemain = nElapsedCycles % card.nCyclesHorzPeriod;
         if (nCyclesHorzRemain > card.nCyclesHorzActive) b |= Card.CGA.STATUS.RETRACE;
-        var nCyclesVertRemain = nElapsedCycles % card.nCyclesVertPeriod;
+        let nCyclesVertRemain = nElapsedCycles % card.nCyclesVertPeriod;
         if (nCyclesVertRemain > card.nCyclesVertActive) b |= Card.CGA.STATUS.VRETRACE | Card.CGA.STATUS.RETRACE;
         /*
          * Some callers also want to know how many vertical retrace periods have occurred since the last time they checked,
@@ -5937,7 +5922,7 @@ class Video extends Component {
      */
     inATCIndx(port, addrFrom)
     {
-        var b = this.cardEGA.regATCIndx;
+        let b = this.cardEGA.regATCIndx;
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.ATC.PORT, null, addrFrom, "ATC.INDX", b);
         }
@@ -5958,7 +5943,7 @@ class Video extends Component {
      */
     inATCData(port, addrFrom)
     {
-        var b = this.cardEGA.regATCData[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK];
+        let b = this.cardEGA.regATCData[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK];
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.ATC.PORT, null, addrFrom, "ATC." + this.cardEGA.asATCRegs[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK], b);
         }
@@ -5975,8 +5960,8 @@ class Video extends Component {
      */
     outATC(port, bOut, addrFrom)
     {
-        var card = this.cardEGA;
-        var fPalEnabled = (card.regATCIndx & Card.ATC.INDX_PAL_ENABLE);
+        let card = this.cardEGA;
+        let fPalEnabled = (card.regATCIndx & Card.ATC.INDX_PAL_ENABLE);
         if (!card.fATCData) {
             card.regATCIndx = bOut;
             this.printMessageIO(port, bOut, addrFrom, "ATC.INDX");
@@ -6024,7 +6009,7 @@ class Video extends Component {
              *
              * PARANOIA: Don't call invalidateCache() unless the start address we just "latched" actually changed.
              */
-            var offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
+            let offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
             offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
             if (card.offStartAddr != offStartAddr) {
                 card.offStartAddr = offStartAddr;
@@ -6033,7 +6018,7 @@ class Video extends Component {
             card.nVertPeriodsStartAddr = 0;
         } else {
             card.fATCData = false;
-            var iReg = card.regATCIndx & Card.ATC.INDX_MASK;
+            let iReg = card.regATCIndx & Card.ATC.INDX_MASK;
             if (iReg >= Card.ATC.PALETTE_REGS || !fPalEnabled) {
                 if (Video.TRAPALL || card.regATCData[iReg] !== bOut) {
                     if (!addrFrom || this.messageEnabled()) {
@@ -6056,9 +6041,9 @@ class Video extends Component {
      */
     inStatus0(port, addrFrom)
     {
-        var bSWBit = 0;
+        let bSWBit = 0;
         if (this.nCard == Video.CARD.EGA) {
-            var iBit = 3 - ((this.cardEGA.regMisc & Card.MISC.CLOCK_SELECT) >> 2);    // this is the desired SW # (0-3)
+            let iBit = 3 - ((this.cardEGA.regMisc & Card.MISC.CLOCK_SELECT) >> 2);    // this is the desired SW # (0-3)
             bSWBit = (this.bEGASwitches & (1 << iBit)) << (Card.STATUS0.SWSENSE_SHIFT - iBit);
         } else {
             /*
@@ -6094,12 +6079,12 @@ class Video extends Component {
              * In other words, for a monochrome monitor, set SWSENSE only when DAC register #0 matches the first and last
              * sets of values.
              */
-            var dwDAC = this.cardEGA.regDACData[0];
+            let dwDAC = this.cardEGA.regDACData[0];
             if ((dwDAC & 0x3f) != 0x2d && (dwDAC & (0x3f << 6)) != (0x2d << 6) && (dwDAC & (0x3f << 12)) != (0x2d << 12)) {
                 bSWBit |= Card.STATUS0.SWSENSE;
             }
         }
-        var b = ((this.cardEGA.regStatus0 & ~Card.STATUS0.SWSENSE) | bSWBit);
+        let b = ((this.cardEGA.regStatus0 & ~Card.STATUS0.SWSENSE) | bSWBit);
         /*
          * TODO: Figure out where Card.STATUS0.FEAT bits should come from....
          */
@@ -6131,7 +6116,7 @@ class Video extends Component {
      */
     inVGAEnable(port, addrFrom)
     {
-        var b = this.cardEGA.regVGAEnable;
+        let b = this.cardEGA.regVGAEnable;
         this.printMessageIO(Card.VGA_ENABLE.PORT, null, addrFrom, "VGA_ENABLE", b);
         return b;
     }
@@ -6160,7 +6145,7 @@ class Video extends Component {
      */
     inSEQIndx(port, addrFrom)
     {
-        var b = this.cardEGA.regSEQIndx;
+        let b = this.cardEGA.regSEQIndx;
         this.printMessageIO(Card.SEQ.INDX.PORT, null, addrFrom, "SEQ.INDX", b);
         return b;
     }
@@ -6189,7 +6174,7 @@ class Video extends Component {
      */
     inSEQData(port, addrFrom)
     {
-        var b = this.cardEGA.regSEQData[this.cardEGA.regSEQIndx];
+        let b = this.cardEGA.regSEQData[this.cardEGA.regSEQIndx];
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.SEQ.DATA.PORT, null, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx], b);
         }
@@ -6259,7 +6244,7 @@ class Video extends Component {
      */
     inDACMask(port, addrFrom)
     {
-        var b = this.cardEGA.regDACMask;
+        let b = this.cardEGA.regDACMask;
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.DAC.MASK.PORT, null, addrFrom, "DAC.MASK", b);
         }
@@ -6294,7 +6279,7 @@ class Video extends Component {
      */
     inDACState(port, addrFrom)
     {
-        var b = this.cardEGA.regDACState;
+        let b = this.cardEGA.regDACState;
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.DAC.STATE.PORT, null, addrFrom, "DAC.STATE", b);
         }
@@ -6347,7 +6332,7 @@ class Video extends Component {
      */
     inDACData(port, addrFrom)
     {
-        var b = (this.cardEGA.regDACData[this.cardEGA.regDACAddr] >> this.cardEGA.regDACShift) & 0x3f;
+        let b = (this.cardEGA.regDACData[this.cardEGA.regDACAddr] >> this.cardEGA.regDACShift) & 0x3f;
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.DAC.DATA.PORT, null, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]", b);
         }
@@ -6369,11 +6354,11 @@ class Video extends Component {
      */
     outDACData(port, bOut, addrFrom)
     {
-        var dw = this.cardEGA.regDACData[this.cardEGA.regDACAddr];
+        let dw = this.cardEGA.regDACData[this.cardEGA.regDACAddr];
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.DAC.DATA.PORT, bOut, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]");
         }
-        var dwNew = (dw & ~(0x3f << this.cardEGA.regDACShift)) | ((bOut & 0x3f) << this.cardEGA.regDACShift);
+        let dwNew = (dw & ~(0x3f << this.cardEGA.regDACShift)) | ((bOut & 0x3f) << this.cardEGA.regDACShift);
         if (dw !== dwNew) {
             this.cardEGA.regDACData[this.cardEGA.regDACAddr] = dwNew;
             this.invalidateCache(false);
@@ -6395,7 +6380,7 @@ class Video extends Component {
      */
     inVGAFeat(port, addrFrom)
     {
-        var b = this.cardEGA.regFeat;
+        let b = this.cardEGA.regFeat;
         this.printMessageIO(Card.FEAT_CTRL.PORT_READ, null, addrFrom, "FEAT", b);
         return b;
     }
@@ -6429,7 +6414,7 @@ class Video extends Component {
      */
     inVGAMisc(port, addrFrom)
     {
-        var b = this.cardEGA.regMisc;
+        let b = this.cardEGA.regMisc;
         this.printMessageIO(Card.MISC.PORT_READ, null, addrFrom, "MISC", b);
         return b;
     }
@@ -6466,7 +6451,7 @@ class Video extends Component {
      */
     inGRCIndx(port, addrFrom)
     {
-        var b = this.cardEGA.regGRCIndx;
+        let b = this.cardEGA.regGRCIndx;
         this.printMessageIO(Card.GRC.INDX.PORT, null, addrFrom, "GRC.INDX", b);
         return b;
     }
@@ -6495,7 +6480,7 @@ class Video extends Component {
      */
     inGRCData(port, addrFrom)
     {
-        var b = this.cardEGA.regGRCData[this.cardEGA.regGRCIndx];
+        let b = this.cardEGA.regGRCData[this.cardEGA.regGRCIndx];
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.GRC.DATA.PORT, null, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.regGRCIndx], b);
         }
@@ -6639,7 +6624,7 @@ class Video extends Component {
      */
     inCGAColor(port, addrFrom)
     {
-        var b = this.cardColor.regColor;
+        let b = this.cardColor.regColor;
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(port /* this.cardColor.port + 5 */, null, addrFrom, this.cardColor.type + ".COLOR", b);
         }
@@ -6689,7 +6674,7 @@ class Video extends Component {
      */
     inCRTCIndx(card, port, addrFrom)
     {
-        var b;
+        let b;
         /*
          * The IBM VGA ROM makes some hardware determinations based on how the CRTC controller responds when
          * the IO_SELECT bit in the Miscellaneous Output Register is cleared; normally, that would mean ports
@@ -6732,7 +6717,7 @@ class Video extends Component {
      */
     inCRTCData(card, port, addrFrom)
     {
-        var b;
+        let b;
         /*
          * The IBM VGA ROM makes some hardware determinations based on how the CRTC controller responds when
          * the IO_SELECT bit in the Miscellaneous Output Register is cleared; normally, that would mean ports
@@ -6765,18 +6750,16 @@ class Video extends Component {
             /*
              * To simulate how the 6845 effectively ignores changes to CURSCAN or CURSCANB whenever one is written
              * while the other is currently > MAXSCAN, we check for those writes now, and ignore the write as appropriate.
-             * 
+             *
              * Since CURSCAN == 0xA and CURSCANB == 0xB, we can get the complementary register by XOR'ing the index with 0x1.
              */
             if (card.regCRTIndx == Card.CRTC.CURSCAN || card.regCRTIndx == Card.CRTC.CURSCANB) {
-                var bCur = bOut & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
-                var bMax = card.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
+                let bCur = bOut & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
+                let bMax = card.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
                 if (bCur > bMax) {
                     bCur = card.regCRTData[card.regCRTIndx ^ 0x1] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
                     if (bCur > bMax) {
-                        if (DEBUG) {
-                            this.printf("outCRTCData(0x%02x): ignoring write to CRTC[0x%02x] since 0x%02x > 0x%02x\n", bOut, card.regCRTIndx, bCur, bMax);
-                        }
+                        if (DEBUG) this.printf("outCRTCData(0x%02x): ignoring write to CRTC[0x%02x] since 0x%02x > 0x%02x\n", bOut, card.regCRTIndx, bCur, bMax);
                         return;
                     }
                 }
@@ -6837,7 +6820,7 @@ class Video extends Component {
      */
     inCardMode(card, addrFrom)
     {
-        var b = card.regMode;
+        let b = card.regMode;
         this.printMessageIO(card.port + 4, null, addrFrom, "MODE", b);
         return b;
     }
@@ -6872,8 +6855,8 @@ class Video extends Component {
      */
     inCardStatus(card, addrFrom)
     {
-        var b = this.getRetraceBits(card);
-        
+        let b = this.getRetraceBits(card);
+
         if (card === this.cardEGA) {
             /*
              * STATUS1 diagnostic bits 5 and 4 are set according to the Card.ATC.PLANES.MUX bits:
@@ -6938,7 +6921,7 @@ class Video extends Component {
              */
             b = (card.regStatus ^= (Card.CGA.STATUS.RETRACE | Card.CGA.STATUS.VRETRACE)) | 0xF0;
         }
-        
+
         card.regStatus = b;
         this.printMessageIO(card.port + 6, null, addrFrom, (card === this.cardEGA? "STATUS1" : "STATUS"), b);
         return b;
@@ -6953,7 +6936,7 @@ class Video extends Component {
     dumpVideo(asArgs)
     {
         if (DEBUGGER) {
-            var component = /** @type {Component} */ (this.dbg);
+            let component = /** @type {Component} */ (this.dbg);
             if (!this.cardActive) {
                 component.println("no active video card");
                 return;
@@ -7003,12 +6986,12 @@ class Video extends Component {
      */
     static init()
     {
-        var aElement = Component.getElementsByClass(document, PCX86.APPCLASS, "video");
-        for (var iVideo = 0; iVideo < aElement.length; iVideo++) {
-            var element = aElement[iVideo];
-            var parmsVideo = Component.getComponentParms(element);
+        let aElement = Component.getElementsByClass(document, PCX86.APPCLASS, "video");
+        for (let iVideo = 0; iVideo < aElement.length; iVideo++) {
+            let element = aElement[iVideo];
+            let parmsVideo = Component.getComponentParms(element);
 
-            var canvas = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
+            let canvas = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
             if (canvas === undefined || !canvas.getContext) {
                 element.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
                 return;
@@ -7048,7 +7031,7 @@ class Video extends Component {
              * until we figure out a better UI.  And note that we use our Web.onPageEvent() helper function to make
              * sure we don't trample any other 'onresize' handler(s) attached to the window object.
              */
-            var aspect = +(Web.getURLParm('aspect') || parmsVideo['aspect']);
+            let aspect = +(Web.getURLParm('aspect') || parmsVideo['aspect']);
             /*
              * No 'aspect' parameter yields NaN, which is falsey, and anything else must satisfy my arbitrary
              * constraints of 0.3 <= aspect <= 3.33, to prevent any useless (or worse, browser-blowing) results.
@@ -7096,14 +7079,14 @@ class Video extends Component {
              * clearly see the overlaid semi-transparent input field, but none of the input characters were passed along,
              * with the exception of the "Go" (Enter) key.
              *
-             *      var input = document.createElement("input");
+             *      let input = document.createElement("input");
              *      input.setAttribute("type", "password");
              *      input.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0.5");
              *      element.appendChild(input);
              *
              * See this Chromium issue for more information: https://code.google.com/p/chromium/issues/detail?id=118639
              */
-            var textarea = /** @type {HTMLTextAreaElement} */ (document.createElement("textarea"));
+            let textarea = /** @type {HTMLTextAreaElement} */ (document.createElement("textarea"));
 
             /*
              * As noted in keyboard.js, the keyboard on an iOS device tends to pop up with the SHIFT key depressed,
@@ -7128,8 +7111,8 @@ class Video extends Component {
             /*
              * Now we can create the Video object, record it, and wire it up to the associated document elements.
              */
-            var context = /** @type {CanvasRenderingContext2D} */ (canvas.getContext("2d"));
-            var video = new Video(parmsVideo, canvas, context, textarea /* || input */, element);
+            let context = /** @type {CanvasRenderingContext2D} */ (canvas.getContext("2d"));
+            let video = new Video(parmsVideo, canvas, context, textarea /* || input */, element);
 
             /*
              * Bind any video-specific controls (eg, the Refresh button). There are no essential controls, however;

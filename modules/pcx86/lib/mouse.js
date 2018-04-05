@@ -121,7 +121,7 @@ class Mouse extends Component {
         /*
          * Enumerate all the Video components that we may need to interact with.
          */
-        for (var video = null; (video = cmp.getMachineComponent("Video", video));) {
+        for (let video = null; (video = cmp.getMachineComponent("Video", video));) {
             this.aVideo.push(video);
         }
         if (this.sType == Mouse.TYPE.BUS) {
@@ -178,7 +178,7 @@ class Mouse extends Component {
                 if (!this.restore(data)) return false;
             }
             if (this.typeDevice && !this.componentDevice) {
-                var componentDevice = null;
+                let componentDevice = null;
                 while ((componentDevice = this.cmp.getMachineComponent(this.typeDevice, componentDevice))) {
                     if (componentDevice.bindMouse) {
                         this.componentDevice = componentDevice.bindMouse(this.idDevice, this, this.receiveStatus);
@@ -201,8 +201,8 @@ class Mouse extends Component {
                 }
                 if (this.componentDevice) {
                     this.aScreens = [];     // ensure the screen array is empty before (re)filling it
-                    for (var i = 0; i < this.aVideo.length; i++) {
-                        var screen = this.aVideo[i].getScreen(this);
+                    for (let i = 0; i < this.aVideo.length; i++) {
+                        let screen = this.aVideo[i].getScreen(this);
                         if (screen) this.aScreens.push(screen);
                     }
                 } else {
@@ -251,7 +251,7 @@ class Mouse extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, this.saveState());
         return state.data();
     }
@@ -279,7 +279,7 @@ class Mouse extends Component {
      */
     initState(data)
     {
-        var i = 0;
+        let i = 0;
         if (data === undefined) data = [false, -1, -1, 0, 0, false, false, 0];
         this.setActive(data[i++]);
         this.xMouse = data[i++];
@@ -307,8 +307,8 @@ class Mouse extends Component {
      */
     saveState()
     {
-        var i = 0;
-        var data = [];
+        let i = 0;
+        let data = [];
         data[i++] = this.fActive;
         data[i++] = this.xMouse;
         data[i++] = this.yMouse;
@@ -339,7 +339,7 @@ class Mouse extends Component {
     captureAll()
     {
         if (!this.fCaptured) {
-            for (var i = 0; i < this.aScreens.length; i++) {
+            for (let i = 0; i < this.aScreens.length; i++) {
                 if (this.captureMouse(this.aScreens[i])) this.fCaptured = true;
             }
         }
@@ -353,7 +353,7 @@ class Mouse extends Component {
     releaseAll()
     {
         if (this.fCaptured) {
-            for (var i = 0; i < this.aScreens.length; i++) {
+            for (let i = 0; i < this.aScreens.length; i++) {
                 if (this.releaseMouse(this.aScreens[i])) this.fCaptured = false;
             }
         }
@@ -372,7 +372,7 @@ class Mouse extends Component {
     captureMouse(control)
     {
         if (control) {
-            var mouse = this;
+            let mouse = this;
             control.addEventListener(
                 'mousemove',
                 function onMouseMove(event) {
@@ -455,7 +455,7 @@ class Mouse extends Component {
              * All we really care about are deltas.  We record screenX and screenY (as xMouse and yMouse)
              * merely to calculate xDelta and yDelta.
              */
-            var xDelta, yDelta;
+            let xDelta, yDelta;
             if (this.xMouse < 0 || this.yMouse < 0) {
                 this.xMouse = event.screenX;
                 this.yMouse = event.screenY;
@@ -483,7 +483,7 @@ class Mouse extends Component {
     clickMouse(iButton, fDown)
     {
         if (this.isActive()) {
-            var sDiag = DEBUGGER? ("mouse button" + iButton + ' ' + (fDown? "dn" : "up")) : null;
+            let sDiag = DEBUGGER? ("mouse button" + iButton + ' ' + (fDown? "dn" : "up")) : null;
             switch (iButton) {
             case Mouse.BUTTON.LEFT:
                 if (this.fButton1 != fDown) {
@@ -526,8 +526,8 @@ class Mouse extends Component {
              * non-zero value (thanks to Math.sign() again).  This ensures that tiniest movement of the physical
              * mouse always results in at least the tiniest movement of the virtual mouse.
              */
-            var xScaled = (Math.round(Math.abs(xDelta) * this.scale) * Math.sign(xDelta)) || Math.sign(xDelta);
-            var yScaled = (Math.round(Math.abs(yDelta) * this.scale) * Math.sign(yDelta)) || Math.sign(yDelta);
+            let xScaled = (Math.round(Math.abs(xDelta) * this.scale) * Math.sign(xDelta)) || Math.sign(xDelta);
+            let yScaled = (Math.round(Math.abs(yDelta) * this.scale) * Math.sign(yDelta)) || Math.sign(yDelta);
             if (xScaled || yScaled) {
                 if (this.messageEnabled(Messages.MOUSE)) {
                     this.printMessage("moveMouse(" + xScaled + "," + yScaled + ")");
@@ -563,9 +563,9 @@ class Mouse extends Component {
      */
     sendPacket(sDiag, xDiag, yDiag)
     {
-        var b1 = 0x40 | (this.fButton1? 0x20 : 0) | (this.fButton2? 0x10 : 0) | ((this.yDelta & 0xC0) >> 4) | ((this.xDelta & 0xC0) >> 6);
-        var b2 = this.xDelta & 0x3F;
-        var b3 = this.yDelta & 0x3F;
+        let b1 = 0x40 | (this.fButton1? 0x20 : 0) | (this.fButton2? 0x10 : 0) | ((this.yDelta & 0xC0) >> 4) | ((this.xDelta & 0xC0) >> 6);
+        let b2 = this.xDelta & 0x3F;
+        let b3 = this.yDelta & 0x3F;
         if (this.messageEnabled(Messages.SERIAL)) {
             this.printMessage((sDiag? (sDiag + ": ") : "") + (yDiag !== undefined? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + Str.toHexByte(b1) + "," + Str.toHexByte(b2) + "," + Str.toHexByte(b3) + "]", 0, true);
         }
@@ -593,10 +593,10 @@ class Mouse extends Component {
      */
     receiveStatus(pins)
     {
-        var fActive = ((pins & (RS232.DTR.MASK | RS232.RTS.MASK)) == (RS232.DTR.MASK | RS232.RTS.MASK));
+        let fActive = ((pins & (RS232.DTR.MASK | RS232.RTS.MASK)) == (RS232.DTR.MASK | RS232.RTS.MASK));
         if (fActive) {
             if (!this.fActive) {
-                var fIdentify = false;
+                let fIdentify = false;
                 if (!(this.pins & RS232.RTS.MASK)) {
                     this.reset();
                     this.printMessage("serial mouse reset");
@@ -665,7 +665,7 @@ class Mouse extends Component {
      */
     inBusData(port, addrFrom)
     {
-        var b = 0;
+        let b = 0;
         this.printMessageIO(port, null, addrFrom, "DATA", b);
         return b;
     }
@@ -680,7 +680,7 @@ class Mouse extends Component {
      */
     inBusTPPI(port, addrFrom)
     {
-        var b = 0;
+        let b = 0;
         this.printMessageIO(port, null, addrFrom, "TPPI", b);
         return b;
     }
@@ -695,7 +695,7 @@ class Mouse extends Component {
      */
     inBusCtrl(port, addrFrom)
     {
-        var b = 0;
+        let b = 0;
         this.printMessageIO(port, null, addrFrom, "CTRL", b);
         return b;
     }
@@ -710,7 +710,7 @@ class Mouse extends Component {
      */
     inBusCPPI(port, addrFrom)
     {
-        var b = 0;
+        let b = 0;
         this.printMessageIO(port, null, addrFrom, "CPPI", b);
         return b;
     }
@@ -777,11 +777,11 @@ class Mouse extends Component {
      */
     static init()
     {
-        var aeMouse = Component.getElementsByClass(document, PCX86.APPCLASS, "mouse");
-        for (var iMouse = 0; iMouse < aeMouse.length; iMouse++) {
-            var eMouse = aeMouse[iMouse];
-            var parmsMouse = Component.getComponentParms(eMouse);
-            var mouse = new Mouse(parmsMouse);
+        let aeMouse = Component.getElementsByClass(document, PCX86.APPCLASS, "mouse");
+        for (let iMouse = 0; iMouse < aeMouse.length; iMouse++) {
+            let eMouse = aeMouse[iMouse];
+            let parmsMouse = Component.getComponentParms(eMouse);
+            let mouse = new Mouse(parmsMouse);
             Component.bindComponentControls(mouse, eMouse, PCX86.APPCLASS);
         }
     }

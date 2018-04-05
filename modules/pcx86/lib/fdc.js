@@ -208,15 +208,15 @@ class FDC extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var fdc = this;
+        let fdc = this;
         /*
          * TODO: Making copies of control that are simply cast to different types seems silly, but it doesn't
          * really cost anything and it's cleaner than doing a lot MORE type overrides inline.  However, it still
          * doesn't solve all my problems: controlForm should really be cast as HTMLFormElement, but JavaScript
          * inspections refuse to believe there's an 'onsubmit' property on an HTMLFormElement that I can override.
          */
-        var controlForm = /** @type {Object} */ (control);
-        var controlSelect = /** @type {HTMLSelectElement} */ (control);
+        let controlForm = /** @type {Object} */ (control);
+        let controlSelect = /** @type {HTMLSelectElement} */ (control);
 
         switch (sBinding) {
 
@@ -231,7 +231,7 @@ class FDC extends Component {
              * middle.
              */
             if (this.sortBy) {
-                var i, aOptions = [];
+                let i, aOptions = [];
                 /*
                  * NOTE: All this monkeying around with copying the elements from control.options to aOptions
                  * and then back again is necessary because control.options isn't a *real* Array (at least not
@@ -285,7 +285,7 @@ class FDC extends Component {
              * However, that doesn't seem to work for all browsers, so I've reverted to onchange.
              */
             controlSelect.onchange = function onChangeListDrives(event) {
-                var iDrive = Str.parseInt(controlSelect.value, 10);
+                let iDrive = Str.parseInt(controlSelect.value, 10);
                 if (iDrive != null) fdc.displayDiskette(iDrive);
             };
             return true;
@@ -317,19 +317,19 @@ class FDC extends Component {
             }
             this.bindings[sBinding] = control;
             control.onclick = function onClickSaveDisk(event) {
-                var controlDrives = fdc.bindings["listDrives"];
+                let controlDrives = fdc.bindings["listDrives"];
                 if (controlDrives && controlDrives.options && fdc.aDrives) {
-                    var iDriveSelected = Str.parseInt(controlDrives.value, 10) || 0;
-                    var drive = fdc.aDrives[iDriveSelected];
+                    let iDriveSelected = Str.parseInt(controlDrives.value, 10) || 0;
+                    let drive = fdc.aDrives[iDriveSelected];
                     if (drive) {
                         /*
                          * Note the similarity (and hence factoring opportunity) between this code and the HDC's
                          * "saveHD*" binding.
                          */
-                        var disk = drive.disk;
+                        let disk = drive.disk;
                         if (disk) {
                             if (DEBUG) fdc.println("saving diskette " + disk.sDiskPath + "...");
-                            var sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
+                            let sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
                             Component.alertUser(sAlert);
                         } else {
                             fdc.notice("No diskette loaded in drive.");
@@ -359,16 +359,16 @@ class FDC extends Component {
              * Enable "Mount" button only if a file is actually selected
              */
             controlForm.onchange = function onChangeMountDisk() {
-                var fieldset = controlForm.children[0];
-                var files = fieldset.children[0].files;
-                var submit = fieldset.children[1];
+                let fieldset = controlForm.children[0];
+                let files = fieldset.children[0].files;
+                let submit = fieldset.children[1];
                 submit.disabled = !files.length;
             };
             controlForm.onsubmit = function onSubmitMountDisk(event) {
-                var file = event.currentTarget[1].files[0];
+                let file = event.currentTarget[1].files[0];
                 if (file) {
-                    var sDiskettePath = file.name;
-                    var sDisketteName = Str.getBaseName(sDiskettePath, true);
+                    let sDiskettePath = file.name;
+                    let sDisketteName = Str.getBaseName(sDiskettePath, true);
                     fdc.loadSelectedDrive(sDisketteName, sDiskettePath, file);
                 }
                 /*
@@ -445,7 +445,7 @@ class FDC extends Component {
         } else {
             config = {};
         }
-        for (var sDrive in config) {
+        for (let sDrive in config) {
             if (configMerge) configMerge[sDrive] = config[sDrive];
         }
         return config;
@@ -478,14 +478,14 @@ class FDC extends Component {
             /*
              * Populate the HTML controls to match the actual (well, um, specified) number of floppy drives.
              */
-            var controlDrives;
+            let controlDrives;
             if ((controlDrives = this.bindings['listDrives'])) {
                 while (controlDrives.firstChild) {
                     controlDrives.removeChild(controlDrives.firstChild);
                 }
                 controlDrives.value = "";
-                for (var iDrive = 0; iDrive < this.nDrives; iDrive++) {
-                    var controlOption = document.createElement("option");
+                for (let iDrive = 0; iDrive < this.nDrives; iDrive++) {
+                    let controlOption = document.createElement("option");
                     controlOption.value = iDrive.toString();
                     /*
                      * TODO: This conversion of drive number to drive letter, starting with A:, is very simplistic
@@ -545,7 +545,7 @@ class FDC extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, this.saveController());
         return state.data();
     }
@@ -573,8 +573,8 @@ class FDC extends Component {
      */
     initController(data)
     {
-        var i = 0, iDrive;
-        var fSuccess = true;
+        let i = 0, iDrive;
+        let fSuccess = true;
 
         if (!data) {
             data = [0, 0, FDC.REG_STATUS.RQM, new Array(9), 0, 0, 0, []];
@@ -608,13 +608,13 @@ class FDC extends Component {
          */
         this.regDataTotal = data[i++];
         this.regOutput = data[i++];
-        var dataDrives = data[i++];
+        let dataDrives = data[i++];
 
         /*
          * Initialize the disk history (if available) before initializing the drives, so that any disk deltas can be
          * applied to disk images that are already loaded.
          */
-        var aDiskHistory = data[i++];
+        let aDiskHistory = data[i++];
         if (aDiskHistory != null) this.aDiskHistory = aDiskHistory;
 
         if (this.aDrives === undefined) {
@@ -630,14 +630,14 @@ class FDC extends Component {
         }
 
         for (iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
-            var drive = this.aDrives[iDrive];
+            let drive = this.aDrives[iDrive];
             if (drive === undefined) {
                 /*
                  * The first time each drive is initialized, we query its capacity (based on switches or CMOS) and set
                  * the drive's physical limits accordingly (ie, max tracks, max heads, and max sectors/track).
                  */
                 drive = this.aDrives[iDrive] = {};
-                var nKb = (this.chipset? this.chipset.getDIPFloppyDriveSize(iDrive) : 0);
+                let nKb = (this.chipset? this.chipset.getDIPFloppyDriveSize(iDrive) : 0);
                 switch(nKb) {
                 case 160:
                 case 180:
@@ -694,8 +694,8 @@ class FDC extends Component {
      */
     saveController()
     {
-        var i = 0;
-        var data = [];
+        let i = 0;
+        let data = [];
         data[i++] = this.iDrive;
         data[i++] = 0;
         data[i++] = this.regStatus;
@@ -725,8 +725,8 @@ class FDC extends Component {
      */
     initDrive(drive, iDrive, data)
     {
-        var i = 0;
-        var fSuccess = true;
+        let i = 0;
+        let fSuccess = true;
 
         drive.iDrive = iDrive;
         drive.fBusy = drive.fLocal = false;
@@ -770,7 +770,7 @@ class FDC extends Component {
         /*
          * Some additional drive properties/defaults that are largely for the Disk component's benefit.
          */
-        var a = data[i++];
+        let a = data[i++];
         drive.name = a[0];
         drive.nCylinders = a[1];          // cylinders
         drive.nHeads = a[2];              // heads/cylinders
@@ -843,13 +843,13 @@ class FDC extends Component {
             drive.sDiskettePath = "";           // ensure this is initialized to a default that displayDiskette() can deal with
         }
 
-        var deltas = data[i++];
+        let deltas = data[i++];
         if (deltas == 102) deltas = false;      // v1.02 backward-compatibility
 
         if (typeof deltas == "boolean") {
-            var fLocal = deltas;
-            var sDisketteName = data[i++];
-            var sDiskettePath = data[i];
+            let fLocal = deltas;
+            let sDisketteName = data[i++];
+            let sDiskettePath = data[i];
             /*
              * If we're restoring a local disk image, then the entire disk contents should be captured in aDiskHistory,
              * so all we have to do is mount a blank diskette and let disk.restore() do the rest; ie, there's nothing to
@@ -907,9 +907,9 @@ class FDC extends Component {
      */
     saveDrives()
     {
-        var i = 0;
-        var data = [];
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+        let i = 0;
+        let data = [];
+        for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
             data[i++] = this.saveDrive(this.aDrives[iDrive]);
         }
         return data;
@@ -924,8 +924,8 @@ class FDC extends Component {
      */
     saveDrive(drive)
     {
-        var i = 0;
-        var data = [];
+        let i = 0;
+        let data = [];
         data[i++] = drive.resCode;
         data[i++] = [drive.name, drive.nCylinders, drive.nHeads, drive.nSectors, drive.cbSector, drive.fRemovable, drive.nDiskCylinders, drive.nDiskHeads, drive.nDiskSectors];
         data[i++] = drive.bHead;
@@ -973,8 +973,8 @@ class FDC extends Component {
      */
     saveDeltas()
     {
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
-            var drive = this.aDrives[iDrive];
+        for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+            let drive = this.aDrives[iDrive];
             if (drive.disk) {
                 this.updateDiskHistory(drive.sDisketteName, drive.sDiskettePath, drive.disk);
             }
@@ -991,11 +991,11 @@ class FDC extends Component {
      */
     copyDrive(iDrive)
     {
-        var driveNew;
-        var driveOld = this.aDrives[iDrive];
+        let driveNew;
+        let driveOld = this.aDrives[iDrive];
         if (driveOld !== undefined) {
             driveNew = {};
-            for (var p in driveOld) {
+            for (let p in driveOld) {
                 driveNew[p] = driveOld[p];
             }
         }
@@ -1025,12 +1025,12 @@ class FDC extends Component {
     seekDrive(drive, iSector, nSectors)
     {
         if (drive.disk) {
-            var aDiskInfo = drive.disk.info();
-            var nCylinders = aDiskInfo[0];
-            var nHeads = aDiskInfo[1];
-            var nSectorsPerTrack = aDiskInfo[2];
-            var nSectorsPerCylinder = nHeads * nSectorsPerTrack;
-            var nSectorsPerDisk = nCylinders * nSectorsPerCylinder;
+            let aDiskInfo = drive.disk.info();
+            let nCylinders = aDiskInfo[0];
+            let nHeads = aDiskInfo[1];
+            let nSectorsPerTrack = aDiskInfo[2];
+            let nSectorsPerCylinder = nHeads * nSectorsPerTrack;
+            let nSectorsPerDisk = nCylinders * nSectorsPerCylinder;
             if (iSector + nSectors <= nSectorsPerDisk) {
                 drive.bCylinder = Math.floor(iSector / nSectorsPerCylinder);
                 iSector %= nSectorsPerCylinder;
@@ -1063,17 +1063,17 @@ class FDC extends Component {
     autoMount(fRemount)
     {
         if (!fRemount) this.cAutoMount = 0;
-        for (var sDrive in this.configMount) {
-            var configDrive = this.configMount[sDrive];
-            var sDiskettePath = configDrive['path'] || this.findDisketteByName(configDrive['name']);
+        for (let sDrive in this.configMount) {
+            let configDrive = this.configMount[sDrive];
+            let sDiskettePath = configDrive['path'] || this.findDisketteByName(configDrive['name']);
             if (sDiskettePath) {
                 /*
                  * WARNING: This conversion of drive letter to drive number, starting with A:, is very simplistic
                  * and is not guaranteed to match the drive mapping that DOS ultimately uses.
                  */
-                var iDrive = sDrive.charCodeAt(0) - 0x41;
+                let iDrive = sDrive.charCodeAt(0) - 0x41;
                 if (iDrive >= 0 && iDrive < this.aDrives.length) {
-                    var sDisketteName = configDrive['name'] || this.findDisketteByPath(sDiskettePath) || Str.getBaseName(sDiskettePath, true);
+                    let sDisketteName = configDrive['name'] || this.findDisketteByPath(sDiskettePath) || Str.getBaseName(sDiskettePath, true);
                     if (!this.loadDrive(iDrive, sDisketteName, sDiskettePath, true) && fRemount) {
                         this.setReady(false);
                     }
@@ -1096,10 +1096,10 @@ class FDC extends Component {
      */
     loadSelectedDisk()
     {
-        var controlDisks = this.bindings["listDisks"];
+        let controlDisks = this.bindings["listDisks"];
         if (controlDisks) {
-            var sDisketteName = controlDisks.options[controlDisks.selectedIndex].text;
-            var sDiskettePath = controlDisks.value;
+            let sDisketteName = controlDisks.options[controlDisks.selectedIndex].text;
+            let sDiskettePath = controlDisks.value;
             return this.loadSelectedDrive(sDisketteName, sDiskettePath);
         }
         return false;
@@ -1116,8 +1116,8 @@ class FDC extends Component {
      */
     loadSelectedDrive(sDisketteName, sDiskettePath, file)
     {
-        var iDrive;
-        var controlDrives = this.bindings["listDrives"];
+        let iDrive;
+        let controlDrives = this.bindings["listDrives"];
         if (controlDrives && !isNaN(iDrive = Str.parseInt(controlDrives.value, 10)) && iDrive >= 0 && iDrive < this.aDrives.length) {
 
             if (!sDiskettePath) {
@@ -1178,10 +1178,10 @@ class FDC extends Component {
      */
     mountDrive(iDrive, sDisketteName, sDiskettePath)
     {
-        var drive = this.aDrives[iDrive];
+        let drive = this.aDrives[iDrive];
         this.unloadDrive(iDrive, true, true);
         drive.fLocal = true;
-        var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
+        let disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
         this.doneLoadDrive(drive, disk, sDisketteName, sDiskettePath, true);
     }
 
@@ -1200,7 +1200,7 @@ class FDC extends Component {
      */
     loadDrive(iDrive, sDisketteName, sDiskettePath, fAutoMount, file)
     {
-        var drive = this.aDrives[iDrive];
+        let drive = this.aDrives[iDrive];
         if (sDiskettePath) {
             /*
              * The following hacks should only be necessary for (old) saved states, since all our disk manifests
@@ -1227,7 +1227,7 @@ class FDC extends Component {
                     if (this.messageEnabled()) this.printMessage("loading diskette '" + sDisketteName + "'");
                 }
                 drive.fLocal = !!file;
-                var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
+                let disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
                 if (!disk.load(sDisketteName, sDiskettePath, file, this.doneLoadDrive)) {
                     return 0;
                 }
@@ -1249,7 +1249,7 @@ class FDC extends Component {
      */
     doneLoadDrive(drive, disk, sDisketteName, sDiskettePath, fAutoMount)
     {
-        var aDiskInfo;
+        let aDiskInfo;
 
         drive.fBusy = false;
 
@@ -1361,12 +1361,12 @@ class FDC extends Component {
      */
     addDiskette(sName, sPath, fTop)
     {
-        var controlDisks = this.bindings["listDisks"];
+        let controlDisks = this.bindings["listDisks"];
         if (controlDisks && controlDisks.options) {
-            for (var i = 0; i < controlDisks.options.length; i++) {
+            for (let i = 0; i < controlDisks.options.length; i++) {
                 if (controlDisks.options[i].value == sPath) return;
             }
-            var controlOption = document.createElement("option");
+            let controlOption = document.createElement("option");
             controlOption.text = sName;
             controlOption.value = sPath;
             if (fTop && controlDisks.childNodes[0]) {
@@ -1389,10 +1389,10 @@ class FDC extends Component {
      */
     findDisketteByPath(sPath)
     {
-        var controlDisks = this.bindings["listDisks"];
+        let controlDisks = this.bindings["listDisks"];
         if (controlDisks && controlDisks.options) {
-            for (var i = 0; i < controlDisks.options.length; i++) {
-                var control = controlDisks.options[i];
+            for (let i = 0; i < controlDisks.options.length; i++) {
+                let control = controlDisks.options[i];
                 if (control.value == sPath) return control.text;
             }
         }
@@ -1412,10 +1412,10 @@ class FDC extends Component {
     findDisketteByName(sName)
     {
         if (sName) {
-            var controlDisks = this.bindings["listDisks"];
+            let controlDisks = this.bindings["listDisks"];
             if (controlDisks && controlDisks.options) {
-                for (var i = 0; i < controlDisks.options.length; i++) {
-                    var control = controlDisks.options[i];
+                for (let i = 0; i < controlDisks.options.length; i++) {
+                    let control = controlDisks.options[i];
                     if (control.text == sName) return control.value;
                 }
             }
@@ -1436,9 +1436,9 @@ class FDC extends Component {
          * First things first: validate iDrive.
          */
         if (iDrive >= 0 && iDrive < this.aDrives.length) {
-            var drive = this.aDrives[iDrive];
-            var controlDisks = this.bindings["listDisks"];
-            var controlDrives = this.bindings["listDrives"];
+            let drive = this.aDrives[iDrive];
+            let controlDisks = this.bindings["listDisks"];
+            let controlDrives = this.bindings["listDrives"];
             /*
              * Next, make sure controls for both drives and disks exist.
              */
@@ -1446,9 +1446,9 @@ class FDC extends Component {
                 /*
                  * Next, make sure the drive whose disk we're updating is the currently selected drive.
                  */
-                var i;
-                var iDriveSelected = Str.parseInt(controlDrives.value, 10);
-                var sTargetPath = (drive.fLocal? "?" : drive.sDiskettePath);
+                let i;
+                let iDriveSelected = Str.parseInt(controlDrives.value, 10);
+                let sTargetPath = (drive.fLocal? "?" : drive.sDiskettePath);
                 if (!isNaN(iDriveSelected) && iDriveSelected == iDrive) {
                     for (i = 0; i < controlDisks.options.length; i++) {
                         if (controlDisks.options[i].value == sTargetPath) {
@@ -1481,12 +1481,12 @@ class FDC extends Component {
      */
     updateSelectedDiskette()
     {
-        var control = this.bindings["listDisks"];
-        var controlDesc = this.bindings["descDisk"];
-        var controlOption = control.options[control.selectedIndex];
+        let control = this.bindings["listDisks"];
+        let controlDesc = this.bindings["descDisk"];
+        let controlOption = control.options[control.selectedIndex];
         if (controlDesc && controlOption) {
-            var dataValue = {};
-            var sValue = controlOption.getAttribute("data-value");
+            let dataValue = {};
+            let sValue = controlOption.getAttribute("data-value");
             if (sValue) {
                 try {
                     dataValue = eval("(" + sValue + ")");
@@ -1494,9 +1494,9 @@ class FDC extends Component {
                     Component.error(this.type + " option error: " + e.message);
                 }
             }
-            var sHTML = dataValue['desc'];
+            let sHTML = dataValue['desc'];
             if (sHTML === undefined) sHTML = "";
-            var sHRef = dataValue['href'];
+            let sHRef = dataValue['href'];
             if (sHRef !== undefined) sHTML = "<a href=\"" + sHRef + "\" target=\"_blank\">" + sHTML + "</a>";
             controlDesc.innerHTML = sHTML;
         }
@@ -1511,8 +1511,8 @@ class FDC extends Component {
      */
     waitDrives(fnCallReady)
     {
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
-            var drive = this.aDrives[iDrive];
+        for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+            let drive = this.aDrives[iDrive];
             if (drive && drive.fBusy) {
                 if (!drive.fnCallReady) drive.fnCallReady = fnCallReady;
                 return false;
@@ -1531,7 +1531,7 @@ class FDC extends Component {
      */
     unloadDrive(iDrive, fAutoUnload, fQuiet)
     {
-        var drive = this.aDrives[iDrive];
+        let drive = this.aDrives[iDrive];
         if (drive.disk) {
             /*
              * Before we toss the disk's information, capture any deltas that may have occurred.
@@ -1572,7 +1572,7 @@ class FDC extends Component {
         if (fDiscard) {
             this.aDiskHistory = [];
         }
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+        for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
             this.unloadDrive(iDrive, true);
         }
     }
@@ -1587,11 +1587,11 @@ class FDC extends Component {
      */
     addDiskHistory(sDisketteName, sDiskettePath, disk)
     {
-        var i;
+        let i;
         // this.assert(!!sDiskettePath);
         for (i = 0; i < this.aDiskHistory.length; i++) {
             if (this.aDiskHistory[i][1] == sDiskettePath) {
-                var nChanges = disk.restore(this.aDiskHistory[i][2]);
+                let nChanges = disk.restore(this.aDiskHistory[i][2]);
                 if (DEBUG && this.messageEnabled()) {
                     this.printMessage("disk '" + sDisketteName + "' restored from history (" + nChanges + " changes)");
                 }
@@ -1613,7 +1613,7 @@ class FDC extends Component {
      */
     removeDiskHistory(sDisketteName, sDiskettePath)
     {
-        var i;
+        let i;
         for (i = 0; i < this.aDiskHistory.length; i++) {
             if (this.aDiskHistory[i][1] == sDiskettePath) {
                 this.aDiskHistory.splice(i, 1);
@@ -1638,7 +1638,7 @@ class FDC extends Component {
      */
     updateDiskHistory(sDisketteName, sDiskettePath, disk)
     {
-        var i;
+        let i;
         for (i = 0; i < this.aDiskHistory.length; i++) {
             if (this.aDiskHistory[i][1] == sDiskettePath) {
                 this.aDiskHistory[i][2] = disk.save();
@@ -1703,7 +1703,7 @@ class FDC extends Component {
          * the ST0 result from the SENSE_INT command ALWAYS be 0xC0 (not 0xC1), so the controller must not be propagating
          * regOutput's "drive select" bits in the way I originally assumed.
          *
-         *      var iDrive = bOut & FDC.REG_OUTPUT.DS;
+         *      let iDrive = bOut & FDC.REG_OUTPUT.DS;
          *      if (bOut & (FDC.REG_OUTPUT.MOTOR_D0 << iDrive)) this.iDrive = iDrive;
          */
         this.regOutput = bOut;
@@ -1783,7 +1783,7 @@ class FDC extends Component {
      */
     inFDCDiagnostic(port, addrFrom)
     {
-        var b = 0x50;       // we simply return the expected pattern (01010000B); see code excerpt above
+        let b = 0x50;       // we simply return the expected pattern (01010000B); see code excerpt above
         this.printMessageIO(port, null, addrFrom, "DIAG", b);
         return b;
     }
@@ -1812,7 +1812,7 @@ class FDC extends Component {
      */
     inFDCData(port, addrFrom)
     {
-        var bIn = 0;
+        let bIn = 0;
         if (this.regDataIndex < this.regDataTotal) {
             bIn = this.regDataArray[this.regDataIndex];
         }
@@ -1849,8 +1849,8 @@ class FDC extends Component {
         if (this.regDataTotal < this.regDataArray.length) {
             this.regDataArray[this.regDataTotal++] = bOut;
         }
-        var bCmd = this.regDataArray[0];
-        var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
+        let bCmd = this.regDataArray[0];
+        let bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
         if (FDC.aCmdInfo[bCmdMasked] !== undefined) {
             if (this.regDataTotal >= FDC.aCmdInfo[bCmdMasked].cbReq) {
                 this.doCmd();
@@ -1873,7 +1873,7 @@ class FDC extends Component {
      */
     inFDCInput(port, addrFrom)
     {
-        var bIn = this.regInput;
+        let bIn = this.regInput;
         /*
          * TODO: Determine when the DISK_CHANGE bit is *really* cleared (this is just a guess)
          */
@@ -1903,10 +1903,10 @@ class FDC extends Component {
      */
     doCmd()
     {
-        var fIRQ = false;
+        let fIRQ = false;
         this.regDataIndex = 0;
-        var bCmd = this.popCmd();
-        var drive, bDrive, bHead, c, h, r, n;
+        let bCmd = this.popCmd();
+        let drive, bDrive, bHead, c, h, r, n;
 
         /*
          * NOTE: We currently ignore the FDC.REG_DATA.CMD.SK, FDC.REG_DATA.CMD.MF and FDC.REG_DATA.CMD.MT bits of every command.
@@ -1920,7 +1920,7 @@ class FDC extends Component {
          * with infinitely fast hardware, the simulation will never run as fast as it theoretically could, unless we opt to identify
          * those spin-loops and either patch them or skip over them.
          */
-        var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
+        let bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
 
         switch (bCmdMasked) {
         case FDC.REG_DATA.CMD.SPECIFY:                      // 0x03
@@ -2105,25 +2105,25 @@ class FDC extends Component {
          * TODO: Technically, interrupt request status should be cleared by the FDC.REG_DATA.CMD.SENSE_INT command; in fact,
          * if that command is issued and no interrupt was pending, then FDC.REG_DATA.RES.INVALID should be returned (via ST0).
          */
-        
+
         /*
          * When the Windows 95 HSFLOP ("High-Speed Floppy") VxD performs its diskette change-line detection logic
          * ("determine_changeline"), it sets a special callback ("dcl_callback_int_entry") for its interrupt handler
          * to invoke, then issues a READ_ID command, and then sets a bit telling its interrupt handler to expect an
          * interrupt ("FLP_NEC_INT_EXPECTED").
-         * 
+         *
          * Technically, it should have set *both* "dcl_callback_int_entry" *and* "FLP_NEC_INT_EXPECTED" *before*
          * issuing the READ_ID command, but I imagine the author assumed all was fine, since interrupts had been
          * disabled with a "cli" beforehand and had not been re-enabled with an "sti" yet.  But alas, the function
          * used to the issue the READ_ID command ("NecOut") immediately re-enabled interrupts.
-         * 
+         *
          * So, if we request an interrupt immediately after the READ_ID command, the interrupt handler will think
          * our interrupt is spurious (ie, not EXPECTED).  In this particular case, there are only about 10 instructions
          * executed from the time READ_ID is issued until the "FLP_NEC_INT_EXPECTED" bit is set, but I'm going to
          * add a little padding to that, in part because I wouldn't be surprised if there are other places where a
          * similar assumption exists (ie, either that "NecOut" leaves interrupts disabled, or simply that the floppy
          * controller is an inherently slow device).
-         * 
+         *
          * TODO: Determine why the Football prototype disk fails to boot if we specify a larger delay (eg, 32) and
          * why TopView 1.10 hangs when the delay is set to 16.  I've worked around those questions for now, by simply
          * limiting the delay
@@ -2160,7 +2160,7 @@ class FDC extends Component {
          * I don't do strict EOT comparisons here or elsewhere, because it allows the controller to work with a wider
          * range of disks (eg, "fake" XDF disk images that contain 23 512-byte sectors/track).
          */
-        var i = 0;
+        let i = 0;
         if (c != drive.bCylinder || h != drive.bHead) {
             i = r = 1;
         }
@@ -2185,9 +2185,9 @@ class FDC extends Component {
     popCmd(name)
     {
         this.assert((!this.regDataIndex || name !== undefined) && this.regDataIndex < this.regDataTotal);
-        var bCmd = this.regDataArray[this.regDataIndex];
+        let bCmd = this.regDataArray[this.regDataIndex];
         if (DEBUG && this.messageEnabled(Messages.PORT | Messages.FDC)) {
-            var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
+            let bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
             if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
             this.printMessage(this.idComponent + ".popCmd(" + (name || this.regDataIndex) + "): " + Str.toHexByte(bCmd), true);
         }
@@ -2223,9 +2223,9 @@ class FDC extends Component {
 
     /**
      * requestInterrupt(fCondition, nDelay)
-     * 
+     *
      * Request an FDC interrupt, as long as INT_ENABLE is set (and the optional supplied condition, if any, is true).
-     * 
+     *
      * @this {FDC}
      * @param {boolean} [fCondition]
      * @param {number} [nDelay]
@@ -2236,7 +2236,7 @@ class FDC extends Component {
             if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.FDC, nDelay);
         }
     }
-    
+
     /**
      * beginResult()
      *
@@ -2480,8 +2480,8 @@ class FDC extends Component {
      */
     readData(drive, done)
     {
-        var b = -1;
-        var obj = null, off = 0;    // these variables are purely for BACKTRACK purposes
+        let b = -1;
+        let obj = null, off = 0;    // these variables are purely for BACKTRACK purposes
 
         if (!drive.resCode && drive.disk) {
             do {
@@ -2579,7 +2579,7 @@ class FDC extends Component {
     {
         this.assert(drive.bCylinder < drive.nDiskCylinders);
         drive.bSector++;
-        var bSectorStart = 1;
+        let bSectorStart = 1;
         if (drive.bSector >= drive.nDiskSectors + bSectorStart) {
             drive.bSector = bSectorStart;
             drive.bHead++;
@@ -2611,7 +2611,7 @@ class FDC extends Component {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(this.idComponent + ".writeFormat(head=" + Str.toHexByte(drive.bHead) + ",cyl=" + Str.toHexByte(drive.bCylinder) + ",sec=" + Str.toHexByte(drive.bSector) + ",len=" + Str.toHexWord(drive.nBytes) + ")");
             }
-            for (var i = 0; i < drive.nBytes; i++) {
+            for (let i = 0; i < drive.nBytes; i++) {
                 if (this.writeData(drive, drive.bFiller) < 0) {
                     return -1;
                 }
@@ -2632,11 +2632,11 @@ class FDC extends Component {
      */
     static init()
     {
-        var aeFDC = Component.getElementsByClass(document, PCX86.APPCLASS, "fdc");
-        for (var iFDC = 0; iFDC < aeFDC.length; iFDC++) {
-            var eFDC = aeFDC[iFDC];
-            var parmsFDC = Component.getComponentParms(eFDC);
-            var fdc = new FDC(parmsFDC);
+        let aeFDC = Component.getElementsByClass(document, PCX86.APPCLASS, "fdc");
+        for (let iFDC = 0; iFDC < aeFDC.length; iFDC++) {
+            let eFDC = aeFDC[iFDC];
+            let parmsFDC = Component.getComponentParms(eFDC);
+            let fdc = new FDC(parmsFDC);
             Component.bindComponentControls(fdc, eFDC, PCX86.APPCLASS);
         }
     }
