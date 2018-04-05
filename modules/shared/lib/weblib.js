@@ -146,7 +146,7 @@ class Web {
 
     /**
      * alertUser(sMessage)
-     * 
+     *
      * NOTE: Legacy function for older modules (eg, DiskDump); see Component.alertUser().
      *
      * @param {string} sMessage
@@ -185,7 +185,7 @@ class Web {
      */
     static getResource(sURL, type = "text", fAsync = false, done, progress)
     {
-        var nErrorCode = 0, resource = null, response = null;
+        let nErrorCode = 0, resource = null, response = null;
 
         if (typeof resources == 'object' && (resource = resources[sURL])) {
             if (done) done(sURL, resource, nErrorCode);
@@ -223,14 +223,14 @@ class Web {
              *
              *      if (!Component) Component = require("./component");
              */
-            var Net = require("./netlib");
+            let Net = require("./netlib");
             return Net.getResource(sURL, type, fAsync, done);
         }
 
-        var request = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
-        var fArrayBuffer = false, fXHR2 = (typeof request.responseType === 'string');
-        
-        var callback = function() {
+        let request = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
+        let fArrayBuffer = false, fXHR2 = (typeof request.responseType === 'string');
+
+        let callback = function() {
             if (request.readyState !== 4) {
                 if (progress) progress(1);
                 return null;
@@ -246,17 +246,17 @@ class Web {
              */
             /*
              * If the request failed due to, say, a CORS policy denial; eg:
-             * 
+             *
              *      Failed to load http://www.allbootdisks.com/downloads/Disks/Windows_95_Boot_Disk_Download48/Diskette%20Images/Windows95a.img:
              *      Redirect from 'http://www.allbootdisks.com/downloads/Disks/Windows_95_Boot_Disk_Download48/Diskette%20Images/Windows95a.img' to
              *      'http://www.allbootdisks.com/' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
              *      Origin 'http://pcjs:8088' is therefore not allowed access.
-             *      
+             *
              * and our request type was "arraybuffer", attempting to access responseText may trigger an exception; eg:
-             * 
+             *
              *      Uncaught DOMException: Failed to read the 'responseText' property from 'XMLHttpRequest': The value is only accessible if the object's
              *      'responseType' is '' or 'text' (was 'arraybuffer').
-             * 
+             *
              * We could tiptoe around these potential landmines, but the safest thing to do is wrap this code with try/catch.
              */
             try {
@@ -279,7 +279,7 @@ class Web {
             if (done) done(sURL, resource, nErrorCode);
             return [resource, nErrorCode];
         };
-        
+
         if (fAsync) {
             request.onreadystatechange = callback;
         }
@@ -287,8 +287,8 @@ class Web {
         if (progress) progress(0);
 
         if (type && typeof type == "object") {
-            var sPost = "";
-            for (var p in type) {
+            let sPost = "";
+            for (let p in type) {
                 if (!type.hasOwnProperty(p)) continue;
                 if (sPost) sPost += "&";
                 sPost += p + '=' + encodeURIComponent(type[p]);
@@ -313,7 +313,7 @@ class Web {
         }
 
         if (!fAsync) {
-            request.readyState = 4;     // this may already be set for synchronous requests, but I don't want to take any chances 
+            request.readyState = 4;     // this may already be set for synchronous requests, but I don't want to take any chances
             response = callback();
         }
         return response;
@@ -345,8 +345,8 @@ class Web {
      */
     static parseMemoryResource(sURL, sData)
     {
-        var i;
-        var resource = {
+        let i;
+        let resource = {
             aBytes: null,
             aSymbols: null,
             addrLoad: null,
@@ -355,7 +355,7 @@ class Web {
 
         if (sData.charAt(0) == "[" || sData.charAt(0) == "{") {
             try {
-                var a, ib, data;
+                let a, ib, data;
 
                 if (sData.substr(0, 1) == "<") {    // if the "data" begins with a "<"...
                     /*
@@ -449,11 +449,11 @@ class Web {
             /*
              * Parse the data manually; we assume it's a series of hex byte-values separated by whitespace.
              */
-            var ab = [];
-            var sHexData = sData.replace(/\n/gm, " ").replace(/ +$/, "");
-            var asHexData = sHexData.split(" ");
+            let ab = [];
+            let sHexData = sData.replace(/\n/gm, " ").replace(/ +$/, "");
+            let asHexData = sHexData.split(" ");
             for (i = 0; i < asHexData.length; i++) {
-                var n = parseInt(asHexData[i], 16);
+                let n = parseInt(asHexData[i], 16);
                 if (isNaN(n)) {
                     Component.error("Resource data error (" + sURL + "): invalid hex byte (" + asHexData[i] + ")");
                     break;
@@ -480,14 +480,14 @@ class Web {
      */
     static sendReport(sApp, sVer, sURL, sUser, sType, sReport, sHostName)
     {
-        var dataPost = {};
+        let dataPost = {};
         dataPost[ReportAPI.QUERY.APP] = sApp;
         dataPost[ReportAPI.QUERY.VER] = sVer;
         dataPost[ReportAPI.QUERY.URL] = sURL;
         dataPost[ReportAPI.QUERY.USER] = sUser;
         dataPost[ReportAPI.QUERY.TYPE] = sType;
         dataPost[ReportAPI.QUERY.DATA] = sReport;
-        var sReportURL = (sHostName? sHostName : "http://" + SITEHOST) + ReportAPI.ENDPOINT;
+        let sReportURL = (sHostName? sHostName : "http://" + SITEHOST) + ReportAPI.ENDPOINT;
         Web.getResource(sReportURL, dataPost, true);
     }
 
@@ -541,7 +541,7 @@ class Web {
     static hasLocalStorage()
     {
         if (Web.fLocalStorage == null) {
-            var f = false;
+            let f = false;
             if (window) {
                 try {
                     window.localStorage.setItem(Web.sLocalStorageTest, Web.sLocalStorageTest);
@@ -577,7 +577,7 @@ class Web {
      */
     static getLocalStorageItem(sKey)
     {
-        var sValue;
+        let sValue;
         if (window) {
             try {
                 sValue = window.localStorage.getItem(sKey);
@@ -627,9 +627,9 @@ class Web {
      */
     static getLocalStorageKeys()
     {
-        var a = [];
+        let a = [];
         try {
-            for (var i = 0, c = window.localStorage.length; i < c; i++) {
+            for (let i = 0, c = window.localStorage.length; i < c; i++) {
                 a.push(window.localStorage.key(i));
             }
         } catch (e) {
@@ -676,7 +676,7 @@ class Web {
     static isUserAgent(s)
     {
         if (window) {
-            var userAgent = Web.getUserAgent();
+            let userAgent = Web.getUserAgent();
             /*
              * Here's one case where we have to be careful with Component, because when isUserAgent() is called by
              * the init code below, component.js hasn't been loaded yet.  The simple solution for now is to remove the call.
@@ -699,16 +699,16 @@ class Web {
      *
      *      https://developer.mozilla.org/en-US/docs/Browser_detection_using_the_user_agent
      *
-     * @param {string} [sDevice] (eg, "iPad" to check for iPad, or "!iPad" to specifically exclude it) 
+     * @param {string} [sDevice] (eg, "iPad" to check for iPad, or "!iPad" to specifically exclude it)
      * @return {boolean} is true if the browser appears to be a mobile (ie, non-desktop) web browser, false if not
      */
     static isMobile(sDevice)
     {
-        var sMobile = Web.getURLParm("mobile");
+        let sMobile = Web.getURLParm("mobile");
         if (sMobile) return sMobile == "true";
         if (Web.isUserAgent("Mobi")) {
             if (!sDevice) return true;
-            var fInvert = sDevice[0] == '!';
+            let fInvert = sDevice[0] == '!';
             if (fInvert) sDevice = sDevice.substr(1);
             return Web.isUserAgent(sDevice) != fInvert;
         }
@@ -734,11 +734,11 @@ class Web {
     static findProperty(obj, sProp, sSuffix)
     {
         if (obj) {
-            for (var i = 0; i < Web.asBrowserPrefixes.length; i++) {
-                var sName = Web.asBrowserPrefixes[i];
+            for (let i = 0; i < Web.asBrowserPrefixes.length; i++) {
+                let sName = Web.asBrowserPrefixes[i];
                 if (sSuffix) {
                     sName += sSuffix;
-                    var sEvent = sProp + sName;
+                    let sEvent = sProp + sName;
                     if (sEvent in obj) return sName;
                 } else {
                     if (!sName) {
@@ -778,7 +778,7 @@ class Web {
      */
     static parseURLParms(sParms)
     {
-        var aParms = {};
+        let aParms = {};
         if (window) {       // an alternative to "if (typeof module === 'undefined')" if require("defines") was used
             if (!sParms) {
                 /*
@@ -787,10 +787,10 @@ class Web {
                  */
                 sParms = window.location.search.substr(1);
             }
-            var match;
-            var pl = /\+/g; // RegExp for replacing addition symbol with a space
-            var search = /([^&=]+)=?([^&]*)/g;
-            var decode = function(s)
+            let match;
+            let pl = /\+/g; // RegExp for replacing addition symbol with a space
+            let search = /([^&=]+)=?([^&]*)/g;
+            let decode = function(s)
             {
                 return decodeURIComponent(s.replace(pl, " "));
             };
@@ -812,8 +812,8 @@ class Web {
      */
     static downloadFile(sData, sType, fBase64, sFileName)
     {
-        var link = null, sAlert;
-        var sURI = "data:application/" + sType + (fBase64? ";base64" : "") + ",";
+        let link = null, sAlert;
+        let sURI = "data:application/" + sType + (fBase64? ";base64" : "") + ",";
 
         if (!Web.isUserAgent("Firefox")) {
             sURI += (fBase64? sData : encodeURI(sData));
@@ -856,7 +856,7 @@ class Web {
      */
     static onCountRepeat(n, fnRepeat, fnComplete, msDelay)
     {
-        var fnTimeout = function doCountRepeat()
+        let fnTimeout = function doCountRepeat()
         {
             n -= 1;
             if (n >= 0) {
@@ -884,9 +884,9 @@ class Web {
      */
     static onClickRepeat(e, msDelay, msRepeat, fn)
     {
-        var ms = 0, timer = null, fIgnoreMouseEvents = false;
+        let ms = 0, timer = null, fIgnoreMouseEvents = false;
 
-        var fnRepeat = function doClickRepeat()
+        let fnRepeat = function doClickRepeat()
         {
             if (fn(ms === msRepeat)) {
                 timer = setTimeout(fnRepeat, ms);
@@ -958,7 +958,7 @@ class Web {
     static onPageEvent(sFunc, fn)
     {
         if (window) {
-            var fnPrev = window[sFunc];
+            let fnPrev = window[sFunc];
             if (typeof fnPrev !== 'function') {
                 window[sFunc] = fn;
             } else {
@@ -1008,7 +1008,7 @@ class Web {
     {
         Web.notice(sMessage + "\n\nIf it happens again, please send the URL to support@pcjs.org. Thanks.");
     }
-    
+
     /**
      * onExit(fn)
      *
@@ -1030,7 +1030,7 @@ class Web {
     {
         if (Web.fPageEventsEnabled) {
             try {
-                for (var i = 0; i < afn.length; i++) {
+                for (let i = 0; i < afn.length; i++) {
                     afn[i]();
                 }
             } catch (e) {

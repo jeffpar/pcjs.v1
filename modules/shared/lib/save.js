@@ -44,11 +44,11 @@ if (NODE) {
  */
 function savePC(idMachine, sPCJSFile, callback)
 {
-    var cmp = /** @type {Computer} */ (Component.getComponentByType("Computer", idMachine));
-    var dbg = false; // /** @type {Debugger} */ (Component.getComponentByType("Debugger", idMachine));
+    let cmp = /** @type {Computer} */ (Component.getComponentByType("Computer", idMachine));
+    let dbg = false; // /** @type {Debugger} */ (Component.getComponentByType("Debugger", idMachine));
     if (cmp) {
-        var sState = cmp.powerOff(true);
-        var sParms = cmp.saveMachineParms();
+        let sState = cmp.powerOff(true);
+        let sParms = cmp.saveMachineParms();
         if (!sPCJSFile) {
             if (DEBUG) {
                 sPCJSFile = "/versions/pcx86/" + (XMLVERSION || APPVERSION) + "/pcx86-uncompiled.js"
@@ -78,9 +78,9 @@ function downloadCSS(sURL, sPCJS, nErrorCode, aMachineInfo)
 {
     if (!nErrorCode && sPCJS) {
         aMachineInfo.push(sPCJS);
-        var res = Component.getMachineResources(aMachineInfo[0]);
-        var sCSSFile = null;
-        for (var sName in res) {
+        let res = Component.getMachineResources(aMachineInfo[0]);
+        let sCSSFile = null;
+        for (let sName in res) {
             if (Str.endsWith(sName, "components.xsl")) {
                 sCSSFile = sName.replace(".xsl", ".css");
                 break;
@@ -111,8 +111,8 @@ function downloadCSS(sURL, sPCJS, nErrorCode, aMachineInfo)
  */
 function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
 {
-    var matchScript, sXMLFile, sXSLFile;
-    var idMachine = aMachineInfo[0], sScript = aMachineInfo[1], sPCJS = aMachineInfo[4];
+    let matchScript, sXMLFile, sXSLFile;
+    let idMachine = aMachineInfo[0], sScript = aMachineInfo[1], sPCJS = aMachineInfo[4];
 
     /*
      * sPCJS is supposed to contain the entire PCjs script, which has been wrapped with:
@@ -152,18 +152,18 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
         }
     }
 
-    var resOld = Component.getMachineResources(idMachine), resNew = {};
-    for (var sName in resOld) {
-        var data = resOld[sName];
-        var sExt = Str.getExtension(sName);
+    let resOld = Component.getMachineResources(idMachine), resNew = {}, sName;
+    for (sName in resOld) {
+        let data = resOld[sName];
+        let sExt = Str.getExtension(sName);
         if (sExt == "xml") {
             /*
              * Look through this resource for <disk> entries whose paths do not appear as one of the
              * other machine resources, and remove those entries.
              */
-            var matchDisk, reDisk = /[ \t]*<disk [^>]*path=(['"])(.*?)\1.*?<\/disk>\n?/g;
+            let matchDisk, reDisk = /[ \t]*<disk [^>]*path=(['"])(.*?)\1.*?<\/disk>\n?/g;
             while (matchDisk = reDisk.exec(resOld[sName])) {
-                var path = matchDisk[2];
+                let path = matchDisk[2];
                 if (path) {
                     if (resOld[path]) {
                         Component.log("recording disk: '" + path + "'");
@@ -187,17 +187,17 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
     }
 
     if (aMachineInfo[2]) {
-        var sParms = resNew[sName = 'parms'] = aMachineInfo[2];
+        let sParms = resNew[sName = 'parms'] = aMachineInfo[2];
         Component.log("saving resource: '" + sName + "' (" + sParms.length + " bytes)");
     }
 
     if (aMachineInfo[3]) {
-        var sState = resNew[sName = 'state'] = aMachineInfo[3];
+        let sState = resNew[sName = 'state'] = aMachineInfo[3];
         Component.log("saving resource: '" + sName + "' (" + sState.length + " bytes)");
     }
 
     if (sXMLFile && sXSLFile) {
-        var sResources = JSON.stringify(resNew);
+        let sResources = JSON.stringify(resNew);
 
         sScript += ".js";
         sPCJS = matchScript[1] + "var resources=" + sResources + ";" + matchScript[2] + matchScript[3];
@@ -208,17 +208,17 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
          * and it seems to work fine.  And unfortunately, if we print any copyright strings containing the HTML
          * entity, the entity doesn't get translated prior to output.  So if it turns out we DO need this,
          * it's better to replace with the old-fashioned ASCII version.
-         * 
+         *
          *      sPCJS = sPCJS.replace(/\u00A9/g, "(C)");    // "&#xA9;" or "&copy;"
          */
 
-        var sAlert = Web.downloadFile(sPCJS, "javascript", false, sScript);
+        let sAlert = Web.downloadFile(sPCJS, "javascript", false, sScript);
 
         sAlert += ', copy it to your web server as "' + sScript + '", and then add the following to your web page:\n\n';
         sAlert += '<div id="' + idMachine + '"></div>\n';
         sAlert += '...\n';
         sAlert += '<script type="text/javascript" src="' + sScript + '"></script>\n';
-        
+
         /*
          * I've updated embedMachine() in embed.js to use these defaults whenever the XML file is omitted, so if our
          * values match those defaults, we can omit both the XML and XSL file parameters and display a simplified call.
@@ -229,7 +229,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
             sXMLFile = ',"' + sXMLFile + '"';
             sXSLFile = ',"' + sXSLFile + '"';
         }
-        
+
         sAlert += '<script type="text/javascript">embedPCx86("' + idMachine + '"' + sXMLFile + sXSLFile + ');</script>\n\n';
         sAlert += 'The machine should appear where the <div> is located.';
         Component.alertUser(sAlert);

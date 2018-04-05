@@ -133,7 +133,7 @@ class State {
             return true;
         }
         if (Web.hasLocalStorage()) {
-            var s = Web.getLocalStorageItem(this.key);
+            let s = Web.getLocalStorageItem(this.key);
             if (s) {
                 this.json = s;
                 this.fLoaded = true;
@@ -156,7 +156,7 @@ class State {
      */
     parse()
     {
-        var fSuccess = true;
+        let fSuccess = true;
         if (!this.fParsed) {
             try {
                 this.state = JSON.parse(this.json);
@@ -177,9 +177,9 @@ class State {
      */
     store()
     {
-        var fSuccess = true;
+        let fSuccess = true;
         if (Web.hasLocalStorage()) {
-            var s = JSON.stringify(this.state);
+            let s = JSON.stringify(this.state);
             if (Web.setLocalStorageItem(this.key, s)) {
                 if (DEBUG) Component.log("localStorage(" + this.key + "): " + s.length + " bytes stored");
             } else {
@@ -237,9 +237,9 @@ class State {
     clear(fAll)
     {
         this.unload();
-        var aKeys = Web.getLocalStorageKeys();
-        for (var i = 0; i < aKeys.length; i++) {
-            var sKey = aKeys[i];
+        let aKeys = Web.getLocalStorageKeys();
+        for (let i = 0; i < aKeys.length; i++) {
+            let sKey = aKeys[i];
             if (sKey && (fAll || sKey.substr(0, this.key.length) == this.key)) {
                 Web.removeLocalStorageItem(sKey);
                 if (DEBUG) Component.log("localStorage(" + sKey + ") removed");
@@ -261,9 +261,9 @@ class State {
      */
     static getKey(component, sVersion, sSuffix)
     {
-        var key = component.id;
+        let key = component.id;
         if (sVersion) {
-            var i = sVersion.indexOf('.');
+            let i = sVersion.indexOf('.');
             if (i > 0) key += ".v" + sVersion.substr(0, i);
         }
         if (sSuffix) {
@@ -281,13 +281,13 @@ class State {
     static compress(aSrc)
     {
         if (aSrc) {
-            var iSrc = 0;
-            var iComp = 0;
-            var aComp = [];
+            let iSrc = 0;
+            let iComp = 0;
+            let aComp = [];
             while (iSrc < aSrc.length) {
-                var n = aSrc[iSrc];
+                let n = aSrc[iSrc];
                 Component.assert(n !== undefined);
-                var iCompare = iSrc + 1;
+                let iCompare = iSrc + 1;
                 while (iCompare < aSrc.length && aSrc[iCompare] === n) iCompare++;
                 aComp[iComp++] = iCompare - iSrc;
                 aComp[iComp++] = n;
@@ -307,12 +307,12 @@ class State {
      */
     static decompress(aComp, nLength)
     {
-        var iDst = 0;
-        var aDst = nLength? new Array(nLength) : [];
-        var iComp = 0;
+        let iDst = 0;
+        let aDst = nLength? new Array(nLength) : [];
+        let iComp = 0;
         while (iComp < aComp.length - 1) {
-            var c = aComp[iComp++];
-            var n = aComp[iComp++];
+            let c = aComp[iComp++];
+            let n = aComp[iComp++];
             while (c--) aDst[iDst++] = n;
         }
         Component.assert(!nLength || aDst.length == nLength);
@@ -337,13 +337,13 @@ class State {
     static compressEvenOdd(aSrc)
     {
         if (aSrc) {
-            var iComp = 0, aComp = [];
+            let iComp = 0, aComp = [];
             if (aSrc[0] !== undefined) {
-                for (var off = 0; off < 2; off++) {
-                    var iSrc = off;
+                for (let off = 0; off < 2; off++) {
+                    let iSrc = off;
                     while (iSrc < aSrc.length) {
-                        var n = aSrc[iSrc];
-                        var iCompare = iSrc + 2;
+                        let n = aSrc[iSrc];
+                        let iCompare = iSrc + 2;
                         while (iCompare < aSrc.length && aSrc[iCompare] === n) iCompare += 2;
                         aComp[iComp++] = (iCompare - iSrc) >> 1;
                         aComp[iComp++] = n;
@@ -369,12 +369,12 @@ class State {
      */
     static decompressEvenOdd(aComp, nLength)
     {
-        var iDst = 0;
-        var aDst = new Array(nLength);
-        var iComp = 0;
+        let iDst = 0;
+        let aDst = new Array(nLength);
+        let iComp = 0;
         while (iComp < aComp.length - 1) {
-            var c = aComp[iComp++];
-            var n = aComp[iComp++];
+            let c = aComp[iComp++];
+            let n = aComp[iComp++];
             while (c--) {
                 aDst[iDst] = n;
                 iDst += 2;

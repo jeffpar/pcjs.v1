@@ -236,10 +236,10 @@ class Int36 {
      */
     toDecimal(fUnsigned)
     {
-        var s = "", fNeg = false;
-        var i36Div = new Int36(10000000000);
-        var i36Rem = new Int36();
-        var i36Tmp = new Int36(this);
+        let s = "", fNeg = false;
+        let i36Div = new Int36(10000000000);
+        let i36Rem = new Int36();
+        let i36Tmp = new Int36(this);
 
         if (!fUnsigned && i36Tmp.isNeg()) {
             i36Tmp.negate();
@@ -248,7 +248,7 @@ class Int36 {
         /*
          * Conversion of any 72-bit value should take no more than 3 divisions by 10,000,000,000.
          */
-        var nMaxDivs = 3;
+        let nMaxDivs = 3;
         do {
             i36Tmp.div(i36Div);
             /*
@@ -259,8 +259,8 @@ class Int36 {
                 s = "error";
                 break;
             }
-            var quotient = i36Tmp.value || i36Tmp.extended;
-            var nMinDigits = (quotient? 10 : 1);
+            let quotient = i36Tmp.value || i36Tmp.extended;
+            let nMinDigits = (quotient? 10 : 1);
             i36Rem.set(i36Tmp.remainder);
             do {
                 i36Rem.divNum(10);
@@ -291,11 +291,11 @@ class Int36 {
             return this.toDecimal(fUnsigned);
         }
 
-        var value = this.value;
-        var extended = this.extended;
+        let value = this.value;
+        let extended = this.extended;
 
         if (radix == 8) {
-            var s = Int36.octal(value);
+            let s = Int36.octal(value);
             if (extended != null) {
                 s = Int36.octal(extended) + ' ' + s;
             }
@@ -408,13 +408,13 @@ class Int36 {
              * using division first.  We don't need to truncate the results, because the subsequent
              * bitwise operations perform truncation automatically.
              */
-            var e = 0;
+            let e = 0;
             if (DEBUG) {
-                var v = this.value / Int36.INT_LIMIT, r = result / Int36.INT_LIMIT, o = operand / Int36.INT_LIMIT;
+                let v = this.value / Int36.INT_LIMIT, r = result / Int36.INT_LIMIT, o = operand / Int36.INT_LIMIT;
                 e = ((v ^ r) & (o ^ (fSub? v : r))) & 1;
             }
             if ((result > Int36.INT_MASK) != (this.value > Int36.INT_MASK)) {
-                var delta = result - this.value;
+                let delta = result - this.value;
                 if (Math.abs(delta) <= Int36.INT_MASK) {
                     this.error |= (delta > 0? Int36.ERROR.OVERFLOW : Int36.ERROR.UNDERFLOW);
                     if (DEBUG && (delta > 0) != !(e & v)) e = 0;
@@ -509,8 +509,8 @@ class Int36 {
      */
     mulExtended(value)
     {
-        var fNeg = false, extended;
-        var n1 = this.value, n2 = value;
+        let fNeg = false, extended;
+        let n1 = this.value, n2 = value;
 
         this.error = Int36.ERROR.NONE;
 
@@ -529,13 +529,13 @@ class Int36 {
             extended = 0;
         }
         else {
-            var n1d1 = (n1 % Int36.HALF_SHIFT);
-            var n1d2 = Math.trunc(n1 / Int36.HALF_SHIFT);
-            var n2d1 = (n2 % Int36.HALF_SHIFT);
-            var n2d2 = Math.trunc(n2 / Int36.HALF_SHIFT);
+            let n1d1 = (n1 % Int36.HALF_SHIFT);
+            let n1d2 = Math.trunc(n1 / Int36.HALF_SHIFT);
+            let n2d1 = (n2 % Int36.HALF_SHIFT);
+            let n2d2 = Math.trunc(n2 / Int36.HALF_SHIFT);
 
-            var m1d1 = n1d1 * n2d1;
-            var m1d2 = (n1d2 * n2d1) + Math.trunc(m1d1 / Int36.HALF_SHIFT);
+            let m1d1 = n1d1 * n2d1;
+            let m1d2 = (n1d2 * n2d1) + Math.trunc(m1d1 / Int36.HALF_SHIFT);
             extended = Math.trunc(m1d2 / Int36.HALF_SHIFT);
             m1d2 = (m1d2 % Int36.HALF_SHIFT) + (n1d1 * n2d2);
             value = (m1d2 * Int36.HALF_SHIFT) + (m1d1 % Int36.HALF_SHIFT);
@@ -597,7 +597,7 @@ class Int36 {
             return;
         }
 
-        var fNegQ = false, fNegR = false;
+        let fNegQ = false, fNegR = false;
 
         if (divisor > Int36.INT_MASK) {
             divisor = Int36.WORD_LIMIT - divisor;
@@ -631,10 +631,10 @@ class Int36 {
          * both the simplified syntax of arrays as well as their extensibility if we ever want/need
          * to go beyond 72 bits.
          */
-        var dRes = [0, 0];
-        var dPow = [1, 0];
-        var dDiv = [divisor, 0];
-        var dRem = [this.value, this.extended];
+        let dRes = [0, 0];
+        let dPow = [1, 0];
+        let dDiv = [divisor, 0];
+        let dRem = [this.value, this.extended];
 
         while (Int36.cmpD(dRem, dDiv) > 0) {
             Int36.addD(dDiv, dDiv);
@@ -693,18 +693,18 @@ class Int36 {
         /*
          * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
          */
-        var s = ((num << 14) >> 14) % 256;
+        let s = ((num << 14) >> 14) % 256;
 
         if (this.extended == null) {
             if (s) {
                 /*
                  * Simulate opASH()
                  */
-                var w = this.value, bitsShifted;
+                let w = this.value, bitsShifted;
                 /*
                  * Convert the unsigned word (w) to a signed value (i), for convenience.
                  */
-                var i = w > Int36.INT_MASK? -(Int36.WORD_LIMIT - w) : w;
+                let i = w > Int36.INT_MASK? -(Int36.WORD_LIMIT - w) : w;
                 if (s > 0) {
                     if (s >= 35) {
                         i = (i < 0? Int36.INT_LIMIT : 0);
@@ -761,15 +761,15 @@ class Int36 {
                  * however, what should happen if the incoming value wasn't a proper 70-bit value (ie, if the signs of value
                  * and extended didn't match)?
                  */
-                var bits;
-                var wRight = this.value;
-                var wLeft = this.extended;
+                let bits;
+                let wRight = this.value;
+                let wLeft = this.extended;
                 if (s > 0) {
                     /*
                      * Handle all the left shift cases below, which don't need to worry about sign-extension
                      * but DO need to worry about overflow.
                      */
-                    var wLeftOrig = wLeft;
+                    let wLeftOrig = wLeft;
                     if (s >= 36) {
                         /*
                          * Since all wLeft bits are being shifted out, any positive value other than zero OR any negative value
@@ -915,11 +915,11 @@ class Int36 {
         /*
          * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
          */
-        var s = ((num << 14) >> 14) % 256;
+        let s = ((num << 14) >> 14) % 256;
 
         if (this.extended == null) {
             if (s) {
-                var w = this.value;
+                let w = this.value;
                 if (s > 0) {
                     if (s >= 36) {
                         w = 0;
@@ -937,8 +937,8 @@ class Int36 {
             }
         } else {
             if (s) {
-                var wRight = this.value;
-                var wLeft = this.extended;
+                let wRight = this.value;
+                let wLeft = this.extended;
                 if (s > 0) {
                     if (s >= 36) {
                         wRight = 0;
@@ -996,7 +996,7 @@ class Int36 {
      */
     rotNum(num)
     {
-        var s;
+        let s;
         num = Int36.validate(num);
         this.error = Int36.ERROR.NONE;
 
@@ -1006,7 +1006,7 @@ class Int36 {
              */
             s = ((num << 14) >> 14) % 36;
             if (s) {
-                var w = this.value;
+                let w = this.value;
                 /*
                  * Note that a right rotation (s < 0) of s bits is equivalent to a left rotation (s > 0) of 36 + s bits.
                  */
@@ -1021,9 +1021,9 @@ class Int36 {
              */
             s = ((num << 14) >> 14) % 72;
             if (s) {
-                var wRight = this.value;
-                var wLeft = this.extended;
-                var wLeftOrig = wLeft;
+                let wRight = this.value;
+                let wLeft = this.extended;
+                let wLeftOrig = wLeft;
                 /*
                  * Note that a right rotation (s < 0) of s bits is equivalent to a left rotation (s > 0) of 72 + s bits.
                  */
@@ -1150,7 +1150,7 @@ class Int36 {
     {
         if (this.extended != null) {
 
-            var sign = this.extended - (this.extended % Int36.INT_LIMIT);
+            let sign = this.extended - (this.extended % Int36.INT_LIMIT);
 
             if (this.magnitude == 70 && n == 71) {
                 /*
@@ -1172,7 +1172,7 @@ class Int36 {
                  */
                 this.extended = ((this.extended * 2) % Int36.WORD_LIMIT) + Math.trunc(this.value / Int36.INT_LIMIT);
                 this.value = sign + (this.value % Int36.INT_LIMIT);
-                var signNew = this.extended - (this.extended % Int36.INT_LIMIT);
+                let signNew = this.extended - (this.extended % Int36.INT_LIMIT);
                 if (sign != signNew) {
                     this.extended = sign + (this.extended - signNew);
                     this.error |= Int36.ERROR.OVERFLOW;
@@ -1191,7 +1191,7 @@ class Int36 {
      */
     readBits(off, len)
     {
-        var w = this.value;
+        let w = this.value;
         if (off + len <= 32) {
             w = (w >> off) & ((1 << len) - 1);
         } else {
@@ -1209,10 +1209,10 @@ class Int36 {
      */
     writeBits(bits, off, len)
     {
-        var w = this.value;
-        var shift = Math.pow(2, off);
+        let w = this.value;
+        let shift = Math.pow(2, off);
         bits %= Math.pow(2, len);
-        var v = (w % Math.pow(2, off + len));
+        let v = (w % Math.pow(2, off + len));
         w = (w - v) + (bits * shift) + (v % shift);
         this.value = w;
     }
@@ -1267,7 +1267,7 @@ class Int36 {
      */
     static cmpD(dDst, dSrc)
     {
-        var result = dDst[1] - dSrc[1];
+        let result = dDst[1] - dSrc[1];
         if (!result) result = dDst[0] - dSrc[0];
         return result;
     }
@@ -1329,7 +1329,7 @@ class Int36 {
         if (value < 0) {
             value += Int36.WORD_LIMIT;
         }
-        var s = value.toString(8);
+        let s = value.toString(8);
         if (value >= 0 && !Math.trunc(value / Int36.WORD_LIMIT)) {
             s = "0o" + ("000000000000" + s).slice(-12);
         }
@@ -1355,7 +1355,7 @@ class Int36 {
         if (num < 0 && num >= -Int36.INT_LIMIT) {
             num += Int36.WORD_LIMIT;
         }
-        var value = Math.trunc(Math.abs(num)) % Math.pow(2, bits);
+        let value = Math.trunc(Math.abs(num)) % Math.pow(2, bits);
         if (DEBUG && num !== value) {
             console.log("Int36.validate(" + Int36.octal(num) + "): out of range, truncated to " + Int36.octal(value));
         }

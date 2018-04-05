@@ -43,8 +43,8 @@
  */
 function addStickyMachine(idMachine, sPosition)
 {
-    var topMachine = -1;
-    var prevOnScroll = window.onscroll;
+    let topMachine = -1;
+    let prevOnScroll = window.onscroll;
     window.onscroll = function() {
         /*
          * TODO: Determine if/when we can cache the machine and machineSibling elements; we already
@@ -54,9 +54,9 @@ function addStickyMachine(idMachine, sPosition)
          * Placement of the addStickyMachine() call is irrelevant, because embed.js asynchronously
          * reads all the XML files that define the machine *before* replacing the <div>.
          */
-        var machine = document.getElementById(idMachine);
+        let machine = document.getElementById(idMachine);
         if (machine) {
-            var machineSibling = machine.nextElementSibling;
+            let machineSibling = machine.nextElementSibling;
             if (machineSibling) {
                 if (topMachine < 0) {
                     topMachine = findTop(machine);
@@ -94,7 +94,7 @@ function addStickyMachine(idMachine, sPosition)
  */
 function findTop(obj)
 {
-    var curTop = 0;
+    let curTop = 0;
     if (typeof obj.offsetParent != 'undefined' && obj.offsetParent) {
         while (obj.offsetParent) {
             curTop += obj.offsetTop;

@@ -231,13 +231,13 @@ class Str {
      */
     static parseInt(s, base)
     {
-        var value;
+        let value;
 
         if (s) {
             if (!base) base = 10;
 
-            var ch, chPrefix, chSuffix;
-            var fCommas = (s.indexOf(',') > 0);
+            let ch, chPrefix, chSuffix;
+            let fCommas = (s.indexOf(',') > 0);
             if (fCommas) s = s.replace(/,/g, '');
 
             ch = chPrefix = s.charAt(0);
@@ -301,9 +301,9 @@ class Str {
              * which is a net shift of zero.  If n < 35, then a left shift of (35 - n) is required; if n > 35, then
              * a right shift of -(35 - n) is required.
              */
-            var v, shift = 0;
+            let v, shift = 0;
             if (base <= 10) {
-                var match = s.match(/(-?[0-9]+)B([0-9]*)/);
+                let match = s.match(/(-?[0-9]+)B([0-9]*)/);
                 if (match) {
                     s = match[1];
                     shift = 35 - ((match[2] || 35) & 0xff);
@@ -356,7 +356,7 @@ class Str {
          * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
          * values displayed differently.
          */
-        var s = "";
+        let s = "";
         if (isNaN(n) || typeof n != "number") {
             n = null;
         } else {
@@ -378,7 +378,7 @@ class Str {
                 cch = Math.ceil(Math.log(n) / Math.log(radix));
             }
         }
-        var g = nGrouping || -1;
+        let g = nGrouping || -1;
         while (cch-- > 0) {
             if (!g) {
                 s = ',' + s;
@@ -387,7 +387,7 @@ class Str {
             if (n == null) {
                 s = '?' + s;
             } else {
-                var d = n % radix;
+                let d = n % radix;
                 d += (d >= 0 && d <= 9? 0x30 : 0x41 - 10);
                 s = String.fromCharCode(d) + s;
                 n = Math.trunc(n / radix);
@@ -411,7 +411,7 @@ class Str {
     {
         if (!cch) {
             // cch = Math.ceil(Math.log(Math.abs(n) + 1) / Math.LN2) || 1;
-            var v = Math.abs(n);
+            let v = Math.abs(n);
             if (v <= 0b11111111) {
                 cch = 8;
             } else if (v <= 0b111111111111111111) {
@@ -435,9 +435,9 @@ class Str {
      */
     static toBinBytes(n, cb, fPrefix)
     {
-        var s = "";
+        let s = "";
         if (!cb || cb > 4) cb = 4;
-        for (var i = 0; i < cb; i++) {
+        for (let i = 0; i < cb; i++) {
             if (s) s = ',' + s;
             s = Str.toBin(n & 0xff, 8) + s;
             n >>= 8;
@@ -463,7 +463,7 @@ class Str {
     {
         if (!cch) {
             // cch = Math.ceil(Math.log(Math.abs(n) + 1) / Math.log(8)) || 1;
-            var v = Math.abs(n);
+            let v = Math.abs(n);
             if (v <= 0o777777) {
                 cch = 6;
             } else if (v <= 0o77777777) {
@@ -492,7 +492,7 @@ class Str {
     {
         if (!cch) {
             // cch = Math.ceil(Math.log(Math.abs(n) + 1) / Math.LN10) || 1;
-            var v = Math.abs(n);
+            let v = Math.abs(n);
             if (v <= 99999) {
                 cch = 5;
             } else {
@@ -528,7 +528,7 @@ class Str {
     {
         if (!cch) {
             // cch = Math.ceil(Math.log(Math.abs(n) + 1) / Math.log(16)) || 1;
-            var v = Math.abs(n);
+            let v = Math.abs(n);
             if (v <= 0xffff) {
                 cch = 4;
             } else if (v <= 0xffffffff) {
@@ -593,9 +593,9 @@ class Str {
      */
     static getBaseName(sFileName, fStripExt)
     {
-        var sBaseName = sFileName;
+        let sBaseName = sFileName;
 
-        var i = sFileName.lastIndexOf('/');
+        let i = sFileName.lastIndexOf('/');
         if (i >= 0) sBaseName = sFileName.substr(i + 1);
 
         /*
@@ -625,8 +625,8 @@ class Str {
      */
     static getExtension(sFileName)
     {
-        var sExtension = "";
-        var i = sFileName.lastIndexOf(".");
+        let sExtension = "";
+        let i = sFileName.lastIndexOf(".");
         if (i >= 0) {
             sExtension = sFileName.substr(i + 1).toLowerCase();
         }
@@ -686,7 +686,7 @@ class Str {
      */
     static replace(sSearch, sReplace, s)
     {
-        var i = s.indexOf(sSearch);
+        let i = s.indexOf(sSearch);
         if (i >= 0) {
             s = s.substr(0, i) + sReplace + s.substr(i + sSearch.length);
         }
@@ -703,7 +703,7 @@ class Str {
      */
     static replaceAll(sSearch, sReplace, s)
     {
-        var a = {};
+        let a = {};
         a[sSearch] = sReplace;
         return Str.replaceArray(a, s);
     }
@@ -717,8 +717,8 @@ class Str {
      */
     static replaceArray(a, s)
     {
-        var sMatch = "";
-        for (var k in a) {
+        let sMatch = "";
+        for (let k in a) {
             /*
              * As noted in:
              *
@@ -749,7 +749,7 @@ class Str {
      */
     static pad(s, cch, fPadLeft)
     {
-        var sPadding = "                                        ";
+        let sPadding = "                                        ";
         return fPadLeft? (sPadding + s).slice(-cch) : (s + sPadding).slice(0, cch);
     }
 
@@ -879,7 +879,7 @@ class Str {
      */
     static stripLeadingZeros(s, fPad)
     {
-        var cch = s.length;
+        let cch = s.length;
         s = s.replace(/^0+([0-9A-F]+)$/i, "$1");
         if (fPad) s = Str.pad(s, cch, true);
         return s;
@@ -907,7 +907,7 @@ class Str {
      */
     static toASCIICode(b)
     {
-        var s;
+        let s;
         if (b != Str.ASCII.CR && b != Str.ASCII.LF) {
             s = Str.ASCIICodeMap[b];
         }
@@ -1061,9 +1061,9 @@ class Usr {
      */
     static binarySearch(a, v, fnCompare)
     {
-        var left = 0;
-        var right = a.length;
-        var found = 0;
+        let left = 0;
+        let right = a.length;
+        let found = 0;
         if (fnCompare === undefined) {
             fnCompare = function(a, b)
             {
@@ -1071,8 +1071,8 @@ class Usr {
             };
         }
         while (left < right) {
-            var middle = (left + right) >> 1;
-            var compareResult;
+            let middle = (left + right) >> 1;
+            let compareResult;
             compareResult = fnCompare(v, a[middle]);
             if (compareResult > 0) {
                 left = middle + 1;
@@ -1096,7 +1096,7 @@ class Usr {
      */
     static binaryInsert(a, v, fnCompare)
     {
-        var index = Usr.binarySearch(a, v, fnCompare);
+        let index = Usr.binarySearch(a, v, fnCompare);
         if (index < 0) {
             a.splice(-(index + 1), 0, v);
         }
@@ -1131,7 +1131,7 @@ class Usr {
      */
     static getMonthDays(nMonth, nYear)
     {
-        var nDays = Usr.aMonthDays[nMonth - 1];
+        let nDays = Usr.aMonthDays[nMonth - 1];
         if (nDays == 28) {
             if ((nYear % 4) === 0 && ((nYear % 100) || (nYear % 400) === 0)) {
                 nDays++;
@@ -1170,13 +1170,13 @@ class Usr {
      */
     static formatDate(sFormat, date)
     {
-        var sDate = "";
+        let sDate = "";
         if (!date) date = new Date();
-        var iHour = date.getHours();
-        var iDay = date.getDate();
-        var iMonth = date.getMonth() + 1;
-        for (var i = 0; i < sFormat.length; i++) {
-            var ch;
+        let iHour = date.getHours();
+        let iDay = date.getDate();
+        let iMonth = date.getMonth() + 1;
+        for (let i = 0; i < sFormat.length; i++) {
+            let ch;
             switch ((ch = sFormat.charAt(i))) {
             case 'a':
                 sDate += (iHour < 12 ? "am" : "pm");
@@ -1239,7 +1239,7 @@ class Usr {
      *
      * Prepares a bit field definition for use with getBitField() and setBitField(); eg:
      *
-     *      var bfs = Usr.defineBitFields({num:20, count:8, btmod:1, type:3});
+     *      let bfs = Usr.defineBitFields({num:20, count:8, btmod:1, type:3});
      *
      * The above defines a set of bit fields containing four fields: num (bits 0-19), count (bits 20-27), btmod (bit 28), and type (bits 29-31).
      *
@@ -1252,10 +1252,10 @@ class Usr {
      */
     static defineBitFields(bfs)
     {
-        var bit = 0;
-        for (var f in bfs) {
-            var width = bfs[f];
-            var mask = ((1 << width) - 1) << bit;
+        let bit = 0;
+        for (let f in bfs) {
+            let width = bfs[f];
+            let mask = ((1 << width) - 1) << bit;
             bfs[f] = {mask: mask, shift: bit};
             bit += width;
         }
@@ -1271,8 +1271,8 @@ class Usr {
      */
     static initBitFields(bfs, var_args)
     {
-        var v = 0, i = 1;
-        for (var f in bfs) {
+        let v = 0, i = 1;
+        for (let f in bfs) {
             if (i >= arguments.length) break;
             v = Usr.setBitField(bfs[f], v, arguments[i++]);
         }
@@ -1322,7 +1322,7 @@ class Usr {
         i = i || 0;
         if (i < 0) i += a.length;
         if (i < 0) i = 0;
-        for (var n = a.length; i < n; i++) {
+        for (let n = a.length; i < n; i++) {
             if (i in a && a[i] === t) return i;
         }
         return -1;
@@ -1460,7 +1460,7 @@ class Web {
 
     /**
      * alertUser(sMessage)
-     * 
+     *
      * NOTE: Legacy function for older modules (eg, DiskDump); see Component.alertUser().
      *
      * @param {string} sMessage
@@ -1499,7 +1499,7 @@ class Web {
      */
     static getResource(sURL, type = "text", fAsync = false, done, progress)
     {
-        var nErrorCode = 0, resource = null, response = null;
+        let nErrorCode = 0, resource = null, response = null;
 
         if (typeof resources == 'object' && (resource = resources[sURL])) {
             if (done) done(sURL, resource, nErrorCode);
@@ -1531,10 +1531,10 @@ class Web {
         }
 
 
-        var request = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
-        var fArrayBuffer = false, fXHR2 = (typeof request.responseType === 'string');
-        
-        var callback = function() {
+        let request = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
+        let fArrayBuffer = false, fXHR2 = (typeof request.responseType === 'string');
+
+        let callback = function() {
             if (request.readyState !== 4) {
                 if (progress) progress(1);
                 return null;
@@ -1550,17 +1550,17 @@ class Web {
              */
             /*
              * If the request failed due to, say, a CORS policy denial; eg:
-             * 
+             *
              *      Failed to load http://www.allbootdisks.com/downloads/Disks/Windows_95_Boot_Disk_Download48/Diskette%20Images/Windows95a.img:
              *      Redirect from 'http://www.allbootdisks.com/downloads/Disks/Windows_95_Boot_Disk_Download48/Diskette%20Images/Windows95a.img' to
              *      'http://www.allbootdisks.com/' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
              *      Origin 'http://pcjs:8088' is therefore not allowed access.
-             *      
+             *
              * and our request type was "arraybuffer", attempting to access responseText may trigger an exception; eg:
-             * 
+             *
              *      Uncaught DOMException: Failed to read the 'responseText' property from 'XMLHttpRequest': The value is only accessible if the object's
              *      'responseType' is '' or 'text' (was 'arraybuffer').
-             * 
+             *
              * We could tiptoe around these potential landmines, but the safest thing to do is wrap this code with try/catch.
              */
             try {
@@ -1583,7 +1583,7 @@ class Web {
             if (done) done(sURL, resource, nErrorCode);
             return [resource, nErrorCode];
         };
-        
+
         if (fAsync) {
             request.onreadystatechange = callback;
         }
@@ -1591,8 +1591,8 @@ class Web {
         if (progress) progress(0);
 
         if (type && typeof type == "object") {
-            var sPost = "";
-            for (var p in type) {
+            let sPost = "";
+            for (let p in type) {
                 if (!type.hasOwnProperty(p)) continue;
                 if (sPost) sPost += "&";
                 sPost += p + '=' + encodeURIComponent(type[p]);
@@ -1617,7 +1617,7 @@ class Web {
         }
 
         if (!fAsync) {
-            request.readyState = 4;     // this may already be set for synchronous requests, but I don't want to take any chances 
+            request.readyState = 4;     // this may already be set for synchronous requests, but I don't want to take any chances
             response = callback();
         }
         return response;
@@ -1649,8 +1649,8 @@ class Web {
      */
     static parseMemoryResource(sURL, sData)
     {
-        var i;
-        var resource = {
+        let i;
+        let resource = {
             aBytes: null,
             aSymbols: null,
             addrLoad: null,
@@ -1659,7 +1659,7 @@ class Web {
 
         if (sData.charAt(0) == "[" || sData.charAt(0) == "{") {
             try {
-                var a, ib, data;
+                let a, ib, data;
 
                 if (sData.substr(0, 1) == "<") {    // if the "data" begins with a "<"...
                     /*
@@ -1753,11 +1753,11 @@ class Web {
             /*
              * Parse the data manually; we assume it's a series of hex byte-values separated by whitespace.
              */
-            var ab = [];
-            var sHexData = sData.replace(/\n/gm, " ").replace(/ +$/, "");
-            var asHexData = sHexData.split(" ");
+            let ab = [];
+            let sHexData = sData.replace(/\n/gm, " ").replace(/ +$/, "");
+            let asHexData = sHexData.split(" ");
             for (i = 0; i < asHexData.length; i++) {
-                var n = parseInt(asHexData[i], 16);
+                let n = parseInt(asHexData[i], 16);
                 if (isNaN(n)) {
                     Component.error("Resource data error (" + sURL + "): invalid hex byte (" + asHexData[i] + ")");
                     break;
@@ -1784,14 +1784,14 @@ class Web {
      */
     static sendReport(sApp, sVer, sURL, sUser, sType, sReport, sHostName)
     {
-        var dataPost = {};
+        let dataPost = {};
         dataPost[ReportAPI.QUERY.APP] = sApp;
         dataPost[ReportAPI.QUERY.VER] = sVer;
         dataPost[ReportAPI.QUERY.URL] = sURL;
         dataPost[ReportAPI.QUERY.USER] = sUser;
         dataPost[ReportAPI.QUERY.TYPE] = sType;
         dataPost[ReportAPI.QUERY.DATA] = sReport;
-        var sReportURL = (sHostName? sHostName : "http://" + SITEHOST) + ReportAPI.ENDPOINT;
+        let sReportURL = (sHostName? sHostName : "http://" + SITEHOST) + ReportAPI.ENDPOINT;
         Web.getResource(sReportURL, dataPost, true);
     }
 
@@ -1845,7 +1845,7 @@ class Web {
     static hasLocalStorage()
     {
         if (Web.fLocalStorage == null) {
-            var f = false;
+            let f = false;
             if (window) {
                 try {
                     window.localStorage.setItem(Web.sLocalStorageTest, Web.sLocalStorageTest);
@@ -1881,7 +1881,7 @@ class Web {
      */
     static getLocalStorageItem(sKey)
     {
-        var sValue;
+        let sValue;
         if (window) {
             try {
                 sValue = window.localStorage.getItem(sKey);
@@ -1931,9 +1931,9 @@ class Web {
      */
     static getLocalStorageKeys()
     {
-        var a = [];
+        let a = [];
         try {
-            for (var i = 0, c = window.localStorage.length; i < c; i++) {
+            for (let i = 0, c = window.localStorage.length; i < c; i++) {
                 a.push(window.localStorage.key(i));
             }
         } catch (e) {
@@ -1980,7 +1980,7 @@ class Web {
     static isUserAgent(s)
     {
         if (window) {
-            var userAgent = Web.getUserAgent();
+            let userAgent = Web.getUserAgent();
             /*
              * Here's one case where we have to be careful with Component, because when isUserAgent() is called by
              * the init code below, component.js hasn't been loaded yet.  The simple solution for now is to remove the call.
@@ -2003,16 +2003,16 @@ class Web {
      *
      *      https://developer.mozilla.org/en-US/docs/Browser_detection_using_the_user_agent
      *
-     * @param {string} [sDevice] (eg, "iPad" to check for iPad, or "!iPad" to specifically exclude it) 
+     * @param {string} [sDevice] (eg, "iPad" to check for iPad, or "!iPad" to specifically exclude it)
      * @return {boolean} is true if the browser appears to be a mobile (ie, non-desktop) web browser, false if not
      */
     static isMobile(sDevice)
     {
-        var sMobile = Web.getURLParm("mobile");
+        let sMobile = Web.getURLParm("mobile");
         if (sMobile) return sMobile == "true";
         if (Web.isUserAgent("Mobi")) {
             if (!sDevice) return true;
-            var fInvert = sDevice[0] == '!';
+            let fInvert = sDevice[0] == '!';
             if (fInvert) sDevice = sDevice.substr(1);
             return Web.isUserAgent(sDevice) != fInvert;
         }
@@ -2038,11 +2038,11 @@ class Web {
     static findProperty(obj, sProp, sSuffix)
     {
         if (obj) {
-            for (var i = 0; i < Web.asBrowserPrefixes.length; i++) {
-                var sName = Web.asBrowserPrefixes[i];
+            for (let i = 0; i < Web.asBrowserPrefixes.length; i++) {
+                let sName = Web.asBrowserPrefixes[i];
                 if (sSuffix) {
                     sName += sSuffix;
-                    var sEvent = sProp + sName;
+                    let sEvent = sProp + sName;
                     if (sEvent in obj) return sName;
                 } else {
                     if (!sName) {
@@ -2082,7 +2082,7 @@ class Web {
      */
     static parseURLParms(sParms)
     {
-        var aParms = {};
+        let aParms = {};
         if (window) {       // an alternative to "if (typeof module === 'undefined')" if require("defines") was used
             if (!sParms) {
                 /*
@@ -2091,10 +2091,10 @@ class Web {
                  */
                 sParms = window.location.search.substr(1);
             }
-            var match;
-            var pl = /\+/g; // RegExp for replacing addition symbol with a space
-            var search = /([^&=]+)=?([^&]*)/g;
-            var decode = function(s)
+            let match;
+            let pl = /\+/g; // RegExp for replacing addition symbol with a space
+            let search = /([^&=]+)=?([^&]*)/g;
+            let decode = function(s)
             {
                 return decodeURIComponent(s.replace(pl, " "));
             };
@@ -2116,8 +2116,8 @@ class Web {
      */
     static downloadFile(sData, sType, fBase64, sFileName)
     {
-        var link = null, sAlert;
-        var sURI = "data:application/" + sType + (fBase64? ";base64" : "") + ",";
+        let link = null, sAlert;
+        let sURI = "data:application/" + sType + (fBase64? ";base64" : "") + ",";
 
         if (!Web.isUserAgent("Firefox")) {
             sURI += (fBase64? sData : encodeURI(sData));
@@ -2160,7 +2160,7 @@ class Web {
      */
     static onCountRepeat(n, fnRepeat, fnComplete, msDelay)
     {
-        var fnTimeout = function doCountRepeat()
+        let fnTimeout = function doCountRepeat()
         {
             n -= 1;
             if (n >= 0) {
@@ -2188,9 +2188,9 @@ class Web {
      */
     static onClickRepeat(e, msDelay, msRepeat, fn)
     {
-        var ms = 0, timer = null, fIgnoreMouseEvents = false;
+        let ms = 0, timer = null, fIgnoreMouseEvents = false;
 
-        var fnRepeat = function doClickRepeat()
+        let fnRepeat = function doClickRepeat()
         {
             if (fn(ms === msRepeat)) {
                 timer = setTimeout(fnRepeat, ms);
@@ -2262,7 +2262,7 @@ class Web {
     static onPageEvent(sFunc, fn)
     {
         if (window) {
-            var fnPrev = window[sFunc];
+            let fnPrev = window[sFunc];
             if (typeof fnPrev !== 'function') {
                 window[sFunc] = fn;
             } else {
@@ -2312,7 +2312,7 @@ class Web {
     {
         Web.notice(sMessage + "\n\nIf it happens again, please send the URL to support@pcjs.org. Thanks.");
     }
-    
+
     /**
      * onExit(fn)
      *
@@ -2334,7 +2334,7 @@ class Web {
     {
         if (Web.fPageEventsEnabled) {
             try {
-                for (var i = 0; i < afn.length; i++) {
+                for (let i = 0; i < afn.length; i++) {
                     afn[i]();
                 }
             } catch (e) {
@@ -2515,7 +2515,7 @@ class Component {
         this.exports = this['exports'] = {};
         this.bindings = this['bindings'] = {};
 
-        var i = this.id.indexOf('.');
+        let i = this.id.indexOf('.');
         if (i < 0) {
             this.idComponent = this.id;
         } else {
@@ -2635,7 +2635,7 @@ class Component {
     {
         if (!COMPILED) {
             if (s) {
-                var sElapsed = "", sMsg = (type? (type + ": ") : "") + s;
+                let sElapsed = "", sMsg = (type? (type + ": ") : "") + s;
                 if (typeof Usr != "undefined") {
                     if (Component.msStart === undefined) {
                         Component.msStart = Component.getTime();
@@ -2683,7 +2683,7 @@ class Component {
     static print(s)
     {
         if (!COMPILED) {
-            var i = s.lastIndexOf('\n');
+            let i = s.lastIndexOf('\n');
             if (i >= 0) {
                 Component.println(s.substr(0, i));
                 s = s.substr(i + 1);
@@ -2779,7 +2779,7 @@ class Component {
      */
     static confirmUser(sPrompt)
     {
-        var fResponse = false;
+        let fResponse = false;
         if (window) {
             fResponse = window.confirm(sPrompt);
         }
@@ -2795,7 +2795,7 @@ class Component {
      */
     static promptUser(sPrompt, sDefault)
     {
-        var sResponse = null;
+        let sResponse = null;
         if (window) {
             sResponse = window.prompt(sPrompt, sDefault === undefined? "" : sDefault);
         }
@@ -2830,8 +2830,8 @@ class Component {
      */
     static replaceControl(control, sSearch, sReplace)
     {
-        var sText = control.value;
-        var i = sText.lastIndexOf(sSearch);
+        let sText = control.value;
+        let i = sText.lastIndexOf(sSearch);
         if (i < 0) {
             sText += sSearch + '\n';
         } else {
@@ -2855,9 +2855,9 @@ class Component {
     static bindExternalControl(component, sBinding, sType = "Panel")
     {
         if (sBinding) {
-            var target = Component.getComponentByType(sType, component.id);
+            let target = Component.getComponentByType(sType, component.id);
             if (target) {
-                var control = target.bindings[sBinding];
+                let control = target.bindings[sBinding];
                 if (control) {
                     component.setBinding("", sBinding, control);
                 }
@@ -2874,22 +2874,22 @@ class Component {
      */
     static bindComponentControls(component, element, sAppClass)
     {
-        var aeControls = Component.getElementsByClass(element.parentNode, sAppClass + "-control");
+        let aeControls = Component.getElementsByClass(element.parentNode, sAppClass + "-control");
 
-        for (var iControl = 0; iControl < aeControls.length; iControl++) {
+        for (let iControl = 0; iControl < aeControls.length; iControl++) {
 
-            var aeChildNodes = aeControls[iControl].childNodes;
+            let aeChildNodes = aeControls[iControl].childNodes;
 
-            for (var iNode = 0; iNode < aeChildNodes.length; iNode++) {
-                var control = aeChildNodes[iNode];
+            for (let iNode = 0; iNode < aeChildNodes.length; iNode++) {
+                let control = aeChildNodes[iNode];
                 if (control.nodeType !== 1 /* document.ELEMENT_NODE */) {
                     continue;
                 }
-                var sClass = control.getAttribute("class");
+                let sClass = control.getAttribute("class");
                 if (!sClass) continue;
-                var aClasses = sClass.split(" ");
-                for (var iClass = 0; iClass < aClasses.length; iClass++) {
-                    var parms;
+                let aClasses = sClass.split(" ");
+                for (let iClass = 0; iClass < aClasses.length; iClass++) {
+                    let parms;
                     sClass = aClasses[iClass];
                     switch (sClass) {
                         case sAppClass + "-binding":
@@ -2921,8 +2921,8 @@ class Component {
      */
     static getComponents(idRelated)
     {
-        var i;
-        var aComponents = [];
+        let i;
+        let aComponents = [];
         /*
          * getComponentByID(id, idRelated)
          *
@@ -2937,7 +2937,7 @@ class Component {
                 idRelated = "";
         }
         for (i = 0; i < Component.components.length; i++) {
-            var component = Component.components[i];
+            let component = Component.components[i];
             if (!idRelated || !component.id.indexOf(idRelated)) {
                 aComponents.push(component);
             }
@@ -2958,7 +2958,7 @@ class Component {
     static getComponentByID(id, idRelated)
     {
         if (id !== undefined) {
-            var i;
+            let i;
             /*
              * If idRelated is provided, we check it for a machine prefix, and use any
              * existing prefix to constrain matches to IDs with the same prefix, in order to
@@ -2990,7 +2990,7 @@ class Component {
     static getComponentByType(sType, idRelated, componentPrev)
     {
         if (sType !== undefined) {
-            var i;
+            let i;
             /*
              * If idRelated is provided, we check it for a machine prefix, and use any
              * existing prefix to constrain matches to IDs with the same prefix, in order to
@@ -3024,8 +3024,8 @@ class Component {
      */
     static getComponentParms(element)
     {
-        var parms = null;
-        var sParms = element.getAttribute("data-value");
+        let parms = null;
+        let sParms = element.getAttribute("data-value");
         if (sParms) {
             try {
                 parms = eval('(' + sParms + ')');   // jshint ignore:line
@@ -3067,9 +3067,9 @@ class Component {
         if (element.getElementsByClassName) {
             return element.getElementsByClassName(sClass);
         }
-        var i, j, ae = [];
-        var aeAll = element.getElementsByTagName("*");
-        var re = new RegExp('(^| )' + sClass + '( |$)');
+        let i, j, ae = [];
+        let aeAll = element.getElementsByTagName("*");
+        let re = new RegExp('(^| )' + sClass + '( |$)');
         for (i = 0, j = aeAll.length; i < j; i++) {
             if (re.test(aeAll[i].className)) {
                 ae.push(aeAll[i]);
@@ -3109,10 +3109,10 @@ class Component {
      */
     static getScriptCommands(sScript)
     {
-        var cch = sScript.length;
-        var aCommands = [], aTokens = [], sToken = "", chQuote = null;
-        for (var i = 0; i < cch; i++) {
-            var ch = sScript[i];
+        let cch = sScript.length;
+        let aCommands = [], aTokens = [], sToken = "", chQuote = null;
+        for (let i = 0; i < cch; i++) {
+            let ch = sScript[i];
             if (ch == '"' || ch == "'") {
                 if (chQuote && ch != chQuote) {
                     sToken += ch;
@@ -3165,7 +3165,7 @@ class Component {
      */
     static processScript(idMachine, sScript)
     {
-        var fSuccess = false;
+        let fSuccess = false;
         idMachine += ".machine";
         if (!sScript) {
             delete Component.commands[idMachine];
@@ -3189,15 +3189,15 @@ class Component {
      */
     static processCommands(idMachine)
     {
-        var fSuccess = true;
-        var aCommands = Component.commands[idMachine];
+        let fSuccess = true;
+        let aCommands = Component.commands[idMachine];
 
-     // var dbg = Component.getComponentByType("Debugger", idMachine);
+     // let dbg = Component.getComponentByType("Debugger", idMachine);
 
         while (aCommands && aCommands.length) {
 
-            var aTokens = aCommands.splice(0, 1)[0];
-            var sCommand = aTokens[0];
+            let aTokens = aCommands.splice(0, 1)[0];
+            let sCommand = aTokens[0];
 
             /*
              * It's possible to route this output to the Debugger window with dbg.println()
@@ -3206,7 +3206,7 @@ class Component {
              */
             Component.println(aTokens.join(' '), Component.PRINT.SCRIPT);
 
-            var fnCallReady = null;
+            let fnCallReady = null;
             if (Component.asyncCommands.indexOf(sCommand) >= 0) {
                 fnCallReady = function processNextCommand() {
                     return function() {
@@ -3215,7 +3215,7 @@ class Component {
                 }();
             }
 
-            var fnCommand = Component.globalCommands[sCommand];
+            let fnCommand = Component.globalCommands[sCommand];
             if (fnCommand) {
                 if (!fnCallReady) {
                     fSuccess = fnCommand(aTokens[1], aTokens[2], aTokens[3]);
@@ -3225,14 +3225,14 @@ class Component {
             }
             else {
                 fSuccess = false;
-                var component = Component.getComponentByType(aTokens[1], idMachine);
+                let component = Component.getComponentByType(aTokens[1], idMachine);
                 if (component) {
                     fnCommand = Component.componentCommands[sCommand];
                     if (fnCommand) {
                         fSuccess = fnCommand(component, aTokens[2], aTokens[3]);
                     }
                     else {
-                        var exports = component['exports'];
+                        let exports = component['exports'];
                         if (exports) {
                             fnCommand = exports[sCommand];
                             if (fnCommand) {
@@ -3283,11 +3283,11 @@ class Component {
      */
     static scriptSelect(component, sBinding, sValue)
     {
-        var fSuccess = false;
-        var aBindings = component['bindings'];
-        var control = aBindings[sBinding];
+        let fSuccess = false;
+        let aBindings = component['bindings'];
+        let control = aBindings[sBinding];
         if (control) {
-            for (var i = 0; i < control.options.length; i++) {
+            for (let i = 0; i < control.options.length; i++) {
                 if (control.options[i].textContent == sValue) {
                     if (control.selectedIndex != i) {
                         control.selectedIndex = i;
@@ -3332,9 +3332,9 @@ class Component {
      */
     getMachineNum()
     {
-        var nMachine = 1;
+        let nMachine = 1;
         if (this.idMachine) {
-            var aDigits = this.idMachine.match(/\d+/);
+            let aDigits = this.idMachine.match(/\d+/);
             if (aDigits !== null)
                 nMachine = parseInt(aDigits[0], 10);
         }
@@ -3370,7 +3370,7 @@ class Component {
             return true;
         case 'print':
             if (!this.bindings[sBinding]) {
-                var controlTextArea = /** @type {HTMLTextAreaElement} */(control);
+                let controlTextArea = /** @type {HTMLTextAreaElement} */(control);
                 this.bindings[sBinding] = controlTextArea;
                 /**
                  * Override this.notice() with a replacement function that eliminates the Component.alertUser() call.
@@ -3544,7 +3544,7 @@ class Component {
             /*
              * See if the associated computer, if any, is "unloading"....
              */
-            var computer = Component.getComponentByType("Computer", this.id);
+            let computer = Component.getComponentByType("Computer", this.id);
             if (computer && computer.flags.unloading) {
                 console.log("ignoring notice during unload: " + s);
                 return false;
@@ -3636,7 +3636,7 @@ class Component {
             this.flags.ready = (fReady !== false);
             if (this.flags.ready) {
                 if (MAXDEBUG /* || this.name */) this.log("ready");
-                var fnReady = this.fnReady;
+                let fnReady = this.fnReady;
                 this.fnReady = null;
                 if (fnReady) fnReady();
             }
@@ -3731,7 +3731,7 @@ class Component {
             if (this !== this.dbg) {
                 bitsMessage = bitsMessage || this.bitsMessage;
             }
-            var bitsEnabled = this.dbg.bitsMessage & bitsMessage;
+            let bitsEnabled = this.dbg.bitsMessage & bitsMessage;
             /*
              * This next "bit" of logic is for PCx86 and any other machine where we've expanded the set of
              * messages by reusing bits in the low nibbles in combination with different bits in the high nibble.
@@ -3762,7 +3762,7 @@ class Component {
                 let s = Str.sprintf(format, ...args);
                 /*
                  * Since dbg.message() calls println(), we strip any ending linefeed.
-                 * 
+                 *
                  * We could bypass the Debugger and go straight to this.print(), but we would lose
                  * the benefits of debugger messages (eg, automatic buffering, halting, yielding, etc).
                  */
@@ -3891,7 +3891,7 @@ Component.printBuffer = "";
  */
 if (!Array.prototype.indexOf) {
     Array.prototype.indexOf = function(obj, start) {
-        for (var i = (start || 0), j = this.length; i < j; i++) {
+        for (let i = (start || 0), j = this.length; i < j; i++) {
             if (this[i] === obj) { return i; }
         }
         return -1;
@@ -3916,10 +3916,10 @@ if (!Function.prototype.bind) {
             // Closest thing possible to the ECMAScript 5 internal IsCallable function
             throw new TypeError("Function.prototype.bind: non-callable object");
         }
-        var args = Array.prototype.slice.call(arguments, 1);
-        var fToBind = this;
-        var fnNOP = /** @constructor */ (function() {});
-        var fnBound = function() {
+        let args = Array.prototype.slice.call(arguments, 1);
+        let fToBind = this;
+        let fnNOP = /** @constructor */ (function() {});
+        let fnBound = function() {
             return fToBind.apply(this instanceof fnNOP && obj? this : obj, args.concat(/** @type {Array} */(Array.prototype.slice.call(arguments))));
         };
         fnNOP.prototype = this.prototype;
@@ -14180,7 +14180,7 @@ var cAsyncMachines = 0;
  */
 function loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass, fResolve, display, done)
 {
-    var doneLoadXML = function(sURLName, sXML, nErrorCode) {
+    let doneLoadXML = function(sURLName, sXML, nErrorCode) {
         if (nErrorCode) {
             if (!sXML) sXML = "unable to load " + sXMLFile + " (" + nErrorCode + ")";
             done(sXML, null);
@@ -14212,7 +14212,7 @@ function loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass, fReso
  */
 function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass, fResolve, display, done)
 {
-    var buildXML = function(sXML, sError) {
+    let buildXML = function(sXML, sError) {
         if (sError) {
             done(sError, null);
             return;
@@ -14225,7 +14225,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass
              */
             Component.addMachineResource(idMachine, sXMLFile, sXML);
 
-            var sURL = sXMLFile;
+            let sURL = sXMLFile;
             if (sURL && sURL.indexOf('/') < 0 && window.location.pathname.slice(-1) == '/') {
                 sURL = window.location.pathname + sURL;
             }
@@ -14259,7 +14259,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass
                  * replacement below, just like we do for sParms and sURL.  However, if a "class" attribute already
                  * exists, we need alter it and then zap the sClass variable.
                  */
-                var match = sXML.match(/(<machine[^>]*\sclass=)(['"])(.*?)(\2.*?>)/);
+                let match = sXML.match(/(<machine[^>]*\sclass=)(['"])(.*?)(\2.*?>)/);
                 if (match) {
                     sXML = sXML.replace(match[0], match[1] + match[2] + sClass + match[4]);
                     sClass = "";
@@ -14301,7 +14301,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass
          * The best I can do at this stage (assuming Web.getResource() didn't drop any error information on the floor)
          * is verify that the requested resource "looks like" valid XML (in other words, it begins with a '<').
          */
-        var xmlDoc = null;
+        let xmlDoc = null;
         if (sXML.charAt(0) == '<') {
             try {
                 /*
@@ -14365,14 +14365,14 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass
  */
 function resolveXML(sXML, display, done)
 {
-    var matchRef;
-    var reRef = /<([a-z]+)\s+ref="(.*?)"(.*?)\/>/g;
+    let matchRef;
+    let reRef = /<([a-z]+)\s+ref="(.*?)"(.*?)\/>/g;
 
     if ((matchRef = reRef.exec(sXML))) {
 
-        var sRefFile = matchRef[2];
+        let sRefFile = matchRef[2];
 
-        var doneReadXML = function(sURLName, sXMLRef, nErrorCode) {
+        let doneReadXML = function(sURLName, sXMLRef, nErrorCode) {
             if (nErrorCode || !sXMLRef) {
                 done(sXML, "unable to resolve XML reference: " + matchRef[0] + " (" + nErrorCode + ")");
                 return;
@@ -14382,16 +14382,16 @@ function resolveXML(sXML, display, done)
              * into the "referred" XML tag; attributes that don't exist in the referred tag should be
              * appended, and attributes that DO exist should be overwritten.
              */
-            var sRefAttrs = matchRef[3];
+            let sRefAttrs = matchRef[3];
             if (sRefAttrs) {
-                var aXMLRefTag = sXMLRef.match(new RegExp("<" + matchRef[1] + "[^>]*>"));
+                let aXMLRefTag = sXMLRef.match(new RegExp("<" + matchRef[1] + "[^>]*>"));
                 if (aXMLRefTag) {
-                    var sXMLNewTag = aXMLRefTag[0];
+                    let sXMLNewTag = aXMLRefTag[0];
                     /*
                      * Iterate over all the attributes in the "referring" XML tag (sRefAttrs)
                      */
-                    var matchAttr;
-                    var reAttr = /( [a-z]+=)(['"])(.*?)\2/gi;
+                    let matchAttr;
+                    let reAttr = /( [a-z]+=)(['"])(.*?)\2/gi;
                     while ((matchAttr = reAttr.exec(sRefAttrs))) {
                         if (sXMLNewTag.toLowerCase().indexOf(matchAttr[1].toLowerCase()) < 0) {
                             /*
@@ -14453,31 +14453,31 @@ function resolveXML(sXML, display, done)
  */
 function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFile, sParms, sClass)
 {
-    var eMachine, eWarning, fSuccess = true;
+    let eMachine, eWarning, fSuccess = true;
 
     if (!sXMLFile) {
         sXMLFile = "machine.xml";
         if (!sXSLFile) sXSLFile = "components.xsl";
     }
-    
+
     cAsyncMachines++;
     Component.addMachine(idMachine);
 
-    var doneMachine = function() {
+    let doneMachine = function() {
 
         if (!--cAsyncMachines) {
             if (fAsync) Web.enablePageEvents(true);
         }
     };
 
-    var displayError = function(sError) {
+    let displayError = function(sError) {
         Component.log(sError);
         displayMessage("Error: " + sError);
         if (fSuccess) doneMachine();
         fSuccess = false;
     };
 
-    var displayMessage = function(sMessage) {
+    let displayMessage = function(sMessage) {
         if (eWarning === undefined) {
             /*
              * Our MarkOut module (in convertMDMachineLinks()) creates machine containers that look like:
@@ -14491,7 +14491,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
              * Note that it is the HTMLOut module (in processMachines()) that ultimately decides which scripts to
              * include and then generates the embedXXX() call.
              */
-            var aeWarning = (eMachine && Component.getElementsByClass(eMachine, "machine-warning"));
+            let aeWarning = (eMachine && Component.getElementsByClass(eMachine, "machine-warning"));
             eWarning = (aeWarning && aeWarning[0]) || eMachine;
         }
         if (eWarning) eWarning.innerHTML = Str.escapeHTML(sMessage);
@@ -14504,10 +14504,10 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
             /*
              * If we have a 'css' resource, add it to the page first.
              */
-            var css;
+            let css;
             if (typeof resources == "object" && (css = resources['css'])) {
-                var head = document.head || document.getElementsByTagName('head')[0];
-                var style = document.createElement('style');
+                let head = document.head || document.getElementsByTagName('head')[0];
+                let style = document.createElement('style');
                 style.type = 'text/css';
                 // noinspection JSDeprecatedSymbols
                 if (style.styleSheet) {
@@ -14527,7 +14527,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  * Third-party sites that don't use the PCjs server will ALWAYS want to specify a fully-qualified
                  * path to the XSL file, unless they choose to mirror our folder structure.
                  */
-                var sAppFolder = sAppClass;
+                let sAppFolder = sAppClass;
                 if (DEBUG || !sVersion) {
                     if (sAppClass != "c1pjs") sAppFolder = "shared";
                     sXSLFile = "/modules/" + sAppFolder + "/templates/components.xsl";
@@ -14537,7 +14537,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                 }
             }
 
-            var processXML = function(sXML, xml) {
+            let processXML = function(sXML, xml) {
                 if (!xml) {
                     displayError(sXML);
                     return;
@@ -14548,13 +14548,13 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  * we don't need this code in COMPILED (non-DEBUG) releases, because APPVERSION is hard-coded into them.
                  */
                 if (!COMPILED) {
-                    var aMatch = sXML.match(/<\?xml-stylesheet[^>]* href=(['"])[^'"]*?\/([0-9.]*)\/([^'"]*)\1/);
+                    let aMatch = sXML.match(/<\?xml-stylesheet[^>]* href=(['"])[^'"]*?\/([0-9.]*)\/([^'"]*)\1/);
                     if (aMatch) {
                         XMLVERSION = aMatch[2];
                     }
                 }
 
-                var transformXML = function(sXSL, xsl) {
+                let transformXML = function(sXSL, xsl) {
                     if (!xsl) {
                         displayError(sXSL);
                         return;
@@ -14562,8 +14562,8 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
 
                     /*
                      * Record the XSL file, in case someone wants to save the entire machine later.
-                     * 
-                     * NOTE: sXSLFile will never be undefined by this point, but apparently the Closure Compiler doesn't realize that.  
+                     *
+                     * NOTE: sXSLFile will never be undefined by this point, but apparently the Closure Compiler doesn't realize that.
                      */
                     Component.addMachineResource(idMachine, sXSLFile || "", sXSL);
 
@@ -14588,7 +14588,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                      * we want to continue supporting older Internet Explorer browsers (ie, back to IE9).
                      */
                     if (window.ActiveXObject || 'ActiveXObject' in window) {        // second test is required for IE11 on Windows 8.1
-                        var sFragment = xml['transformNode'](xsl);
+                        let sFragment = xml['transformNode'](xsl);
                         if (sFragment) {
                             eMachine.outerHTML = sFragment;
                             doneMachine();
@@ -14597,14 +14597,14 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                         }
                     }
                     else if (document.implementation && document.implementation.createDocument) {
-                        var xsltProcessor = new XSLTProcessor();
+                        let xsltProcessor = new XSLTProcessor();
                         xsltProcessor['importStylesheet'](xsl);
-                        var eFragment = xsltProcessor['transformToFragment'](xml, document);
+                        let eFragment = xsltProcessor['transformToFragment'](xml, document);
                         if (eFragment) {
                             /*
                              * This fails in Microsoft Edge...
                              *
-                            var machine = eFragment.getElementById(idMachine);
+                            let machine = eFragment.getElementById(idMachine);
                             if (!machine) {
                                 displayError("machine generation failed: " + idMachine);
                             } else
@@ -14642,7 +14642,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                     }
                 };
                 /*
-                 * NOTE: sXSLFile will never be undefined by this point, but apparently the Closure Compiler doesn't realize that.  
+                 * NOTE: sXSLFile will never be undefined by this point, but apparently the Closure Compiler doesn't realize that.
                  */
                 loadXML(sXSLFile || "", "", sAppName, sAppClass, "", "", false, displayMessage, transformXML);
             };
@@ -14778,11 +14778,11 @@ function commandMachine(control, fSingle, idMachine, sComponent, sCommand, sValu
         return false;
     }
     if (sComponent) {
-        var component = Component.getComponentByType(sComponent, idMachine + ".machine");
+        let component = Component.getComponentByType(sComponent, idMachine + ".machine");
         if (component) {
-            var exports = component['exports'];
+            let exports = component['exports'];
             if (exports) {
-                var fnCommand = exports[sCommand];
+                let fnCommand = exports[sCommand];
                 if (fnCommand) {
                     if (fnCommand.call(component, sValue)) {
                         if (fSingle) control.disabled = true;
