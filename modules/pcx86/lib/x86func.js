@@ -43,7 +43,7 @@ if (NODE) {
  */
 X86.fnADCb = function(dst, src)
 {
-    var b = (dst + src + this.getCarry())|0;
+    let b = (dst + src + this.getCarry())|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return b & 0xff;
@@ -59,7 +59,7 @@ X86.fnADCb = function(dst, src)
  */
 X86.fnADCw = function(dst, src)
 {
-    var w = (dst + src + this.getCarry())|0;
+    let w = (dst + src + this.getCarry())|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return w & this.maskData;
@@ -75,7 +75,7 @@ X86.fnADCw = function(dst, src)
  */
 X86.fnADDb = function(dst, src)
 {
-    var b = (dst + src)|0;
+    let b = (dst + src)|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return b & 0xff;
@@ -91,7 +91,7 @@ X86.fnADDb = function(dst, src)
  */
 X86.fnADDw = function(dst, src)
 {
-    var w = (dst + src)|0;
+    let w = (dst + src)|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return w & this.maskData;
@@ -107,7 +107,7 @@ X86.fnADDw = function(dst, src)
  */
 X86.fnANDb = function(dst, src)
 {
-    var b = dst & src;
+    let b = dst & src;
     this.setLogicResult(b, X86.RESULT.BYTE);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return b;
@@ -167,9 +167,9 @@ X86.fnBOUND = function(dst, src)
     /*
      * Note that BOUND performs signed comparisons, so we must transform all arguments into signed values.
      */
-    var wIndex = dst;
-    var wLower = this.getWord(this.regEA);
-    var wUpper = this.getWord(this.regEA + this.sizeData);
+    let wIndex = dst;
+    let wLower = this.getWord(this.regEA);
+    let wUpper = this.getWord(this.regEA + this.sizeData);
     if (this.sizeData == 2) {
         wIndex = (dst << 16) >> 16;
         wLower = (wLower << 16) >> 16;
@@ -206,12 +206,12 @@ X86.fnBOUND = function(dst, src)
  */
 X86.fnBSF = function(dst, src)
 {
-    var n = 0;
+    let n = 0;
     if (!src) {
         this.setZF();
     } else {
         this.clearZF();
-        var bit = 0x1;
+        let bit = 0x1;
         while (bit & this.maskData) {
             if (src & bit) {
                 dst = n;
@@ -242,12 +242,12 @@ X86.fnBSF = function(dst, src)
  */
 X86.fnBSR = function(dst, src)
 {
-    var n = 0;
+    let n = 0;
     if (!src) {
         this.setZF();
     } else {
         this.clearZF();
-        var i = (this.sizeData == 2? 15 : 31), bit = 1 << i;
+        let i = (this.sizeData == 2? 15 : 31), bit = 1 << i;
         while (bit) {
             if (src & bit) {
                 dst = i;
@@ -275,7 +275,7 @@ X86.fnBSR = function(dst, src)
  */
 X86.fnBT = function(dst, src)
 {
-    var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
+    let bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & bit) this.setCF(); else this.clearCF();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 6);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -295,7 +295,7 @@ X86.fnBT = function(dst, src)
  */
 X86.fnBTC = function(dst, src)
 {
-    var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
+    let bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & bit) this.setCF(); else this.clearCF();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 6 : 8);
     return dst ^ bit;
@@ -314,7 +314,7 @@ X86.fnBTC = function(dst, src)
  */
 X86.fnBTR = function(dst, src)
 {
-    var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
+    let bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & bit) this.setCF(); else this.clearCF();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 6 : 8);
     return dst & ~bit;
@@ -333,7 +333,7 @@ X86.fnBTR = function(dst, src)
  */
 X86.fnBTS = function(dst, src)
 {
-    var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
+    let bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & bit) this.setCF(); else this.clearCF();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 6 : 8);
     return dst | bit;
@@ -362,14 +362,14 @@ X86.fnBTMem = function(dst, src)
      * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
      * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
      */
-    var max = this.sizeData << 3;
+    let max = this.sizeData << 3;
     if (src >= max || src < -max) {
         /*
          * Now we need to divide src by 16 or 32, according to the OPERAND size, which means shifting it right
          * by either 4 or 5 bits.  That gives us a short or long INDEX, which we then multiply by the OPERAND size
          * to obtain to the corresponding short or long OFFSET that we must add to the original EA offset.
          */
-        var i = src >> (this.sizeData == 2? 4 : 5);
+        let i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
@@ -403,14 +403,14 @@ X86.fnBTCMem = function(dst, src)
      * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
      * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
      */
-    var max = this.sizeData << 3;
+    let max = this.sizeData << 3;
     if (src >= max || src < -max) {
         /*
          * Now we need to divide src by 16 or 32, according to the OPERAND size, which means shifting it right
          * by either 4 or 5 bits.  That gives us a short or long INDEX, which we then multiply by the OPERAND size
          * to obtain to the corresponding short or long OFFSET that we must add to the original EA offset.
          */
-        var i = src >> (this.sizeData == 2? 4 : 5);
+        let i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
@@ -443,14 +443,14 @@ X86.fnBTRMem = function(dst, src)
      * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
      * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
      */
-    var max = this.sizeData << 3;
+    let max = this.sizeData << 3;
     if (src >= max || src < -max) {
         /*
          * Now we need to divide src by 16 or 32, according to the OPERAND size, which means shifting it right
          * by either 4 or 5 bits.  That gives us a short or long INDEX, which we then multiply by the OPERAND size
          * to obtain to the corresponding short or long OFFSET that we must add to the original EA offset.
          */
-        var i = src >> (this.sizeData == 2? 4 : 5);
+        let i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
@@ -483,14 +483,14 @@ X86.fnBTSMem = function(dst, src)
      * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
      * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
      */
-    var max = this.sizeData << 3;
+    let max = this.sizeData << 3;
     if (src >= max || src < -max) {
         /*
          * Now we need to divide src by 16 or 32, according to the OPERAND size, which means shifting it right
          * by either 4 or 5 bits.  That gives us a short or long INDEX, which we then multiply by the OPERAND size
          * to obtain to the corresponding short or long OFFSET that we must add to the original EA offset.
          */
-        var i = src >> (this.sizeData == 2? 4 : 5);
+        let i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
@@ -558,7 +558,7 @@ X86.fnCALLFdw = function(dst, src)
  */
 X86.fnCMPb = function(dst, src)
 {
-    var b = (dst - src)|0;
+    let b = (dst - src)|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesCompareRM) : this.cycleCounts.nOpCyclesArithRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -575,7 +575,7 @@ X86.fnCMPb = function(dst, src)
  */
 X86.fnCMPw = function(dst, src)
 {
-    var w = (dst - src)|0;
+    let w = (dst - src)|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesCompareRM) : this.cycleCounts.nOpCyclesArithRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -592,7 +592,7 @@ X86.fnCMPw = function(dst, src)
  */
 X86.fnDECb = function(dst, src)
 {
-    var b = (dst - 1)|0;
+    let b = (dst - 1)|0;
     this.setArithResult(dst, 1, b, X86.RESULT.BYTE | X86.RESULT.NOTCF, true);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIncR : this.cycleCounts.nOpCyclesIncM);
     return b & 0xff;
@@ -608,7 +608,7 @@ X86.fnDECb = function(dst, src)
  */
 X86.fnDECw = function(dst, src)
 {
-    var w = (dst - 1)|0;
+    let w = (dst - 1)|0;
     this.setArithResult(dst, 1, w, this.typeData | X86.RESULT.NOTCF, true);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIncR : this.cycleCounts.nOpCyclesIncM);
     return w & this.maskData;
@@ -635,7 +635,7 @@ X86.fnDIVb = function(dst, src)
     /*
      * Detect too-small divisor (quotient overflow)
      */
-    var result = ((src = this.regEAX & 0xffff) / dst);
+    let result = ((src = this.regEAX & 0xffff) / dst);
     if (result > 0xff) {
         X86.helpDIVOverflow.call(this);
         return dst;
@@ -675,7 +675,7 @@ X86.fnDIVw = function(dst, src)
          * to force JavaScript to create a floating-point value that won't suffer from 32-bit-math side-effects.
          */
         src = (this.regEDX & 0xffff) * 0x10000 + (this.regEAX & 0xffff);
-        var result = (src / dst);
+        let result = (src / dst);
         if (result >= 0x10000) {
             X86.helpDIVOverflow.call(this);
             return dst;
@@ -791,8 +791,8 @@ X86.fnIDIVb = function(dst, src)
     /*
      * Detect too-small divisor (quotient overflow)
      */
-    var div = ((dst << 24) >> 24);
-    var result = ((src = (this.regEAX << 16) >> 16) / div)|0;
+    let div = ((dst << 24) >> 24);
+    let result = ((src = (this.regEAX << 16) >> 16) / div)|0;
 
     /*
      * Note the following difference, from "AP-186: Introduction to the 80186 Microprocessor, March 1983":
@@ -838,8 +838,8 @@ X86.fnIDIVw = function(dst, src)
         /*
          * Detect too-small divisor (quotient overflow)
          */
-        var div = ((dst << 16) >> 16);
-        var result = ((src = (this.regEDX << 16) | (this.regEAX & 0xffff)) / div)|0;
+        let div = ((dst << 16) >> 16);
+        let result = ((src = (this.regEDX << 16) | (this.regEAX & 0xffff)) / div)|0;
 
         /*
          * Note the following difference, from "AP-186: Introduction to the 80186 Microprocessor, March 1983":
@@ -897,7 +897,7 @@ X86.fnIMUL8 = function(dst, src)
      * NOTE: getIPDisp() already sign-extends the dst parameter, so fnIMULrw() needlessly sign-extends it again;
      * a small price to pay for a common function.
      */
-    var result = X86.fnIMULrw.call(this, this.getIPDisp(), src);
+    let result = X86.fnIMULrw.call(this, this.getIPDisp(), src);
 
     /*
      * NOTE: The above function already accounted for the 80386 cycle count, so we are simply accounting for the
@@ -926,7 +926,7 @@ X86.fnIMUL8 = function(dst, src)
  */
 X86.fnIMULn = function(dst, src)
 {
-    var result;
+    let result;
     dst = this.getIPWord();
 
     if (this.sizeData == 2) {
@@ -954,7 +954,7 @@ X86.fnIMULn = function(dst, src)
  */
 X86.fnIMUL32 = function(dst, src)
 {
-    var fNeg = false;
+    let fNeg = false;
     if (src < 0) {
         src = -src|0;
         fNeg = !fNeg;
@@ -990,7 +990,7 @@ X86.fnIMUL32 = function(dst, src)
  */
 X86.fnIMULb = function(dst, src)
 {
-    var result = (((this.regEAX << 24) >> 24) * ((dst << 24) >> 24))|0;
+    let result = (((this.regEAX << 24) >> 24) * ((dst << 24) >> 24))|0;
     this.regMDLo = result & 0xffff;
     if (result > 127 || result < -128) {
         this.setCF(); this.setOF();
@@ -1028,10 +1028,10 @@ X86.fnIMULb = function(dst, src)
  */
 X86.fnIMULw = function(dst, src)
 {
-    var fOverflow;
+    let fOverflow;
     if (this.sizeData == 2) {
         src = this.regEAX & 0xffff;
-        var result = (((src << 16) >> 16) * ((dst << 16) >> 16))|0;
+        let result = (((src << 16) >> 16) * ((dst << 16) >> 16))|0;
         this.regMDLo = result & 0xffff;
         this.regMDHi = (result >> 16) & 0xffff;
         fOverflow = (result > 32767 || result < -32768);
@@ -1070,7 +1070,7 @@ X86.fnIMULrw = function(dst, src)
      * Unlike fnIMULrd() below, we can use normal JavaScript multiplication, because there's no danger of
      * overflowing the floating-point result and losing accuracy in the bottom 16 bits.
      */
-    var result = (((dst << 16) >> 16) * ((src << 16) >> 16))|0;
+    let result = (((dst << 16) >> 16) * ((src << 16) >> 16))|0;
     if (result > 32767 || result < -32768) {
         this.setCF(); this.setOF();
     } else {
@@ -1103,7 +1103,7 @@ X86.fnIMULrd = function(dst, src)
      * accuracy in the bottom 32 bits, which would defeat what we're trying to achieve here.  So we must use the
      * slower fnIMUL32() function.
      *
-     *      var result = dst * src;
+     *      let result = dst * src;
      *      if (result > 2147483647 || result < -2147483648) {
      *          this.setCF(); this.setOF();
      *      } else {
@@ -1112,7 +1112,7 @@ X86.fnIMULrd = function(dst, src)
      *      result |= 0;
      */
     X86.fnIMUL32.call(this, dst, src);
-    var fOverflow = (this.regMDHi != (this.regMDLo >> 31));
+    let fOverflow = (this.regMDHi != (this.regMDLo >> 31));
     if (fOverflow) {
         this.setCF(); this.setOF();
     } else {
@@ -1132,7 +1132,7 @@ X86.fnIMULrd = function(dst, src)
  */
 X86.fnINCb = function(dst, src)
 {
-    var b = (dst + 1)|0;
+    let b = (dst + 1)|0;
     this.setArithResult(dst, 1, b, X86.RESULT.BYTE | X86.RESULT.NOTCF);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIncR : this.cycleCounts.nOpCyclesIncM);
     return b & 0xff;
@@ -1148,7 +1148,7 @@ X86.fnINCb = function(dst, src)
  */
 X86.fnINCw = function(dst, src)
 {
-    var w = (dst + 1)|0;
+    let w = (dst + 1)|0;
     this.setArithResult(dst, 1, w, this.typeData | X86.RESULT.NOTCF);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIncR : this.cycleCounts.nOpCyclesIncM);
     return w & this.maskData;
@@ -1481,7 +1481,7 @@ X86.fnLSL = function(dst, src)
      * are there any other instructions that were, um, less explicit but also require a non-null selector?
      */
     if ((src & X86.SEL.MASK) && this.segVER.load(src) !== X86.ADDR_INVALID) {
-        var fConforming = ((this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING);
+        let fConforming = ((this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING);
         if ((fConforming || this.segVER.dpl >= this.nCPL) && this.segVER.dpl >= (src & X86.SEL.RPL)) {
             this.setZF();
             return this.segVER.limit;
@@ -1569,7 +1569,7 @@ X86.fnMOVXb = function(dst, src)
      *      110:    DH      ->      110:    SI
      *      111:    BH      ->      111:    DI
      */
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x4:
@@ -1630,7 +1630,7 @@ X86.fnMOVn = function(dst, src)
  */
 X86.fnMOVsrw = function(dst, src)
 {
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -1684,7 +1684,7 @@ X86.fnMOVsrw = function(dst, src)
  */
 X86.fnMOVwsr = function(dst, src)
 {
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch (reg) {
     case 0x0:
@@ -1779,14 +1779,14 @@ X86.fnMUL32 = function(dst, src)
         this.regMDHi = 0;
     }
     else {
-        var srcLo = src & 0xffff;
-        var srcHi = src >>> 16;
-        var dstLo = dst & 0xffff;
-        var dstHi = dst >>> 16;
+        let srcLo = src & 0xffff;
+        let srcHi = src >>> 16;
+        let dstLo = dst & 0xffff;
+        let dstHi = dst >>> 16;
 
-        var mul00 = srcLo * dstLo;
-        var mul16 = ((mul00 >>> 16) + (srcHi * dstLo));
-        var mul32 = mul16 >>> 16;
+        let mul00 = srcLo * dstLo;
+        let mul16 = ((mul00 >>> 16) + (srcHi * dstLo));
+        let mul32 = mul16 >>> 16;
         mul16 = ((mul16 & 0xffff) + (srcLo * dstHi));
         mul32 += ((mul16 >>> 16) + (srcHi * dstHi));
 
@@ -1809,7 +1809,7 @@ X86.fnMULw = function(dst, src)
 {
     if (this.sizeData == 2) {
         src = this.regEAX & 0xffff;
-        var result = (src * dst)|0;
+        let result = (src * dst)|0;
         this.regMDLo = result & 0xffff;
         this.regMDHi = (result >> 16) & 0xffff;
     } else {
@@ -1852,7 +1852,7 @@ X86.fnMULw = function(dst, src)
  */
 X86.fnNEGb = function(dst, src)
 {
-    var b = (-dst)|0;
+    let b = (-dst)|0;
     this.setArithResult(0, dst, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesNegR : this.cycleCounts.nOpCyclesNegM);
     return b & 0xff;
@@ -1868,7 +1868,7 @@ X86.fnNEGb = function(dst, src)
  */
 X86.fnNEGw = function(dst, src)
 {
-    var w = (-dst)|0;
+    let w = (-dst)|0;
     this.setArithResult(0, dst, w, this.typeData | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesNegR : this.cycleCounts.nOpCyclesNegM);
     return w & this.maskData;
@@ -1954,7 +1954,7 @@ X86.fnPOPw = function(dst, src)
  */
 X86.fnPUSHw = function(dst, src)
 {
-    var w = dst;
+    let w = dst;
     if (this.opFlags & X86.OPFLAG.PUSHSP) {
         /*
          * This is the one case where must actually modify dst, so that the ModRM function will
@@ -1986,10 +1986,10 @@ X86.fnPUSHw = function(dst, src)
  */
 X86.fnRCLb = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = this.getCarry();
+        let carry = this.getCarry();
         count %= 9;
         if (!count) {
             carry <<= 7;
@@ -2012,10 +2012,10 @@ X86.fnRCLb = function(dst, src)
  */
 X86.fnRCLw = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = this.getCarry();
+        let carry = this.getCarry();
         count %= 17;
         if (!count) {
             carry <<= 15;
@@ -2038,10 +2038,10 @@ X86.fnRCLw = function(dst, src)
  */
 X86.fnRCLd = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
+    let result = dst;
+    let count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
     if (count) {
-        var carry = this.getCarry();
+        let carry = this.getCarry();
         /*
          * JavaScript Alert: much like a post-8086 Intel CPU, JavaScript shift counts are mod 32,
          * so "dst >>> 32" is equivalent to "dst >>> 0", which doesn't shift any bits at all.  To
@@ -2064,10 +2064,10 @@ X86.fnRCLd = function(dst, src)
  */
 X86.fnRCRb = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = this.getCarry();
+        let carry = this.getCarry();
         count %= 9;
         if (!count) {
             carry <<= 7;
@@ -2090,10 +2090,10 @@ X86.fnRCRb = function(dst, src)
  */
 X86.fnRCRw = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = this.getCarry();
+        let carry = this.getCarry();
         count %= 17;
         if (!count) {
             carry <<= 15;
@@ -2116,10 +2116,10 @@ X86.fnRCRw = function(dst, src)
  */
 X86.fnRCRd = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
+    let result = dst;
+    let count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
     if (count) {
-        var carry = this.getCarry();
+        let carry = this.getCarry();
         /*
          * JavaScript Alert: much like a post-8086 Intel CPU, JavaScript shift counts are mod 32,
          * so "dst << 32" is equivalent to "dst << 0", which doesn't shift any bits at all.  To
@@ -2142,10 +2142,10 @@ X86.fnRCRd = function(dst, src)
  */
 X86.fnROLb = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry;
+        let carry;
         count &= 0x7;
         if (!count) {
             carry = dst << 7;
@@ -2168,10 +2168,10 @@ X86.fnROLb = function(dst, src)
  */
 X86.fnROLw = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry;
+        let carry;
         count &= 0xf;
         if (!count) {
             carry = dst << 15;
@@ -2194,10 +2194,10 @@ X86.fnROLw = function(dst, src)
  */
 X86.fnROLd = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = dst << (count - 1);
+        let carry = dst << (count - 1);
         result = (dst << count) | (dst >>> (32 - count));
         this.setRotateResult(result, carry, X86.RESULT.DWORD);
     }
@@ -2214,10 +2214,10 @@ X86.fnROLd = function(dst, src)
  */
 X86.fnRORb = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry;
+        let carry;
         count &= 0x7;
         if (!count) {
             carry = dst;
@@ -2240,10 +2240,10 @@ X86.fnRORb = function(dst, src)
  */
 X86.fnRORw = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry;
+        let carry;
         count &= 0xf;
         if (!count) {
             carry = dst;
@@ -2266,10 +2266,10 @@ X86.fnRORw = function(dst, src)
  */
 X86.fnRORd = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = dst << (32 - count);
+        let carry = dst << (32 - count);
         result = (dst >>> count) | carry;
         this.setRotateResult(result, carry, X86.RESULT.DWORD);
     }
@@ -2286,10 +2286,10 @@ X86.fnRORd = function(dst, src)
  */
 X86.fnSARb = function(dst, src)
 {
-    var count = src & this.nShiftCountMask;
+    let count = src & this.nShiftCountMask;
     if (count) {
         if (count > 9) count = 9;
-        var carry = ((dst << 24) >> 24) >> (count - 1);
+        let carry = ((dst << 24) >> 24) >> (count - 1);
         dst = (carry >> 1) & 0xff;
         this.setLogicResult(dst, X86.RESULT.BYTE, carry & 0x1);
     }
@@ -2306,10 +2306,10 @@ X86.fnSARb = function(dst, src)
  */
 X86.fnSARw = function(dst, src)
 {
-    var count = src & this.nShiftCountMask;
+    let count = src & this.nShiftCountMask;
     if (count) {
         if (count > 17) count = 17;
-        var carry = ((dst << 16) >> 16) >> (count - 1);
+        let carry = ((dst << 16) >> 16) >> (count - 1);
         dst = (carry >> 1) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, carry & 0x1);
     }
@@ -2326,9 +2326,9 @@ X86.fnSARw = function(dst, src)
  */
 X86.fnSARd = function(dst, src)
 {
-    var count = src & this.nShiftCountMask;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = dst >> (count - 1);
+        let carry = dst >> (count - 1);
         dst = (carry >> 1);
         this.setLogicResult(dst, X86.RESULT.DWORD, carry & 0x1);
     }
@@ -2345,7 +2345,7 @@ X86.fnSARd = function(dst, src)
  */
 X86.fnSBBb = function(dst, src)
 {
-    var b = (dst - src - this.getCarry())|0;
+    let b = (dst - src - this.getCarry())|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return b & 0xff;
@@ -2361,7 +2361,7 @@ X86.fnSBBb = function(dst, src)
  */
 X86.fnSBBw = function(dst, src)
 {
-    var w = (dst - src - this.getCarry())|0;
+    let w = (dst - src - this.getCarry())|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return w & this.maskData;
@@ -2597,7 +2597,7 @@ X86.fnSGDT = function(dst, src)
         dst = this.addrGDTLimit - this.addrGDT;
         this.assert(!(dst & ~0xffff));
 
-        var addr = this.addrGDT;
+        let addr = this.addrGDT;
         if (this.model == X86.MODEL_80286) {
             /*
              * We previously left the 6th byte of the target operand "undefined".  But it turns out we have to set
@@ -2681,10 +2681,10 @@ X86.fnSGDT = function(dst, src)
  */
 X86.fnSHLb = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = 0;
+        let carry = 0;
         if (count > 8) {
             result = 0;
         } else {
@@ -2706,10 +2706,10 @@ X86.fnSHLb = function(dst, src)
  */
 X86.fnSHLw = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = 0;
+        let carry = 0;
         if (count > 16) {
             result = 0;
         } else {
@@ -2731,10 +2731,10 @@ X86.fnSHLw = function(dst, src)
  */
 X86.fnSHLd = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
+    let result = dst;
+    let count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
     if (count) {
-        var carry = dst << (count - 1);
+        let carry = dst << (count - 1);
         result = (carry << 1);
         this.setLogicResult(result, X86.RESULT.DWORD, carry & X86.RESULT.DWORD, (result ^ carry) & X86.RESULT.DWORD);
     }
@@ -2803,9 +2803,9 @@ X86.fnSHLDdCL = function(dst, src)
  */
 X86.fnSHRb = function(dst, src)
 {
-    var count = src & this.nShiftCountMask;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = (count > 8? 0 : (dst >>> (count - 1)));
+        let carry = (count > 8? 0 : (dst >>> (count - 1)));
         dst = (carry >>> 1) & 0xff;
         this.setLogicResult(dst, X86.RESULT.BYTE, carry & 0x1, dst & X86.RESULT.BYTE);
     }
@@ -2822,9 +2822,9 @@ X86.fnSHRb = function(dst, src)
  */
 X86.fnSHRw = function(dst, src)
 {
-    var count = src & this.nShiftCountMask;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = (count > 16? 0 : (dst >>> (count - 1)));
+        let carry = (count > 16? 0 : (dst >>> (count - 1)));
         dst = (carry >>> 1) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, carry & 0x1, dst & X86.RESULT.WORD);
     }
@@ -2841,9 +2841,9 @@ X86.fnSHRw = function(dst, src)
  */
 X86.fnSHRd = function(dst, src)
 {
-    var count = src & this.nShiftCountMask;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = (dst >>> (count - 1));
+        let carry = (dst >>> (count - 1));
         dst = (carry >>> 1);
         this.setLogicResult(dst, X86.RESULT.DWORD, carry & 0x1, dst & X86.RESULT.DWORD);
     }
@@ -2927,7 +2927,7 @@ X86.fnSIDT = function(dst, src)
          * As with SGDT, the 6th byte is technically "undefined" on an 80286, but we now set it to 0xFF, for the
          * same reasons discussed in SGDT (above).
          */
-        var addr = this.addrIDT;
+        let addr = this.addrIDT;
         if (this.model == X86.MODEL_80286) {
             addr |= (0xff000000|0);
         }
@@ -3011,7 +3011,7 @@ X86.fnSTR = function(dst, src)
  */
 X86.fnSUBb = function(dst, src)
 {
-    var b = (dst - src)|0;
+    let b = (dst - src)|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return b & 0xff;
@@ -3027,7 +3027,7 @@ X86.fnSUBb = function(dst, src)
  */
 X86.fnSUBw = function(dst, src)
 {
-    var w = (dst - src)|0;
+    let w = (dst - src)|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return w & this.maskData;
@@ -3197,8 +3197,8 @@ X86.fnVERW = function(dst, src)
  */
 X86.fnIBTS = function(dst, src)
 {
-    var shift = (this.regEAX & this.maskData);
-    var mask = ((1 << (this.regECX & 0x1f)) - 1);
+    let shift = (this.regEAX & this.maskData);
+    let mask = ((1 << (this.regECX & 0x1f)) - 1);
     return (dst & ~(mask << shift)) | ((src & mask) << shift);
 };
 
@@ -3374,7 +3374,7 @@ X86.fnXCHGrw = function(dst, src)
  */
 X86.fnXORb = function(dst, src)
 {
-    var b = dst ^ src;
+    let b = dst ^ src;
     this.setLogicResult(b, X86.RESULT.BYTE);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return b;

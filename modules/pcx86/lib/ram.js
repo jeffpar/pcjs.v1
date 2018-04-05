@@ -159,7 +159,7 @@ class RAM extends Component {
     reset()
     {
         if (!this.addrRAM && !this.fInstalled && this.chipset) {
-            var baseRAM = this.chipset.getDIPMemorySize() * 1024;
+            let baseRAM = this.chipset.getDIPMemorySize() * 1024;
             if (this.sizeRAM && baseRAM != this.sizeRAM) {
                 this.bus.removeMemory(this.addrRAM, this.sizeRAM);
                 this.fAllocated = false;
@@ -224,7 +224,7 @@ class RAM extends Component {
             Component.error("No RAM allocated");
         }
     }
-    
+
     /**
      * save()
      *
@@ -235,7 +235,7 @@ class RAM extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         if (this.controller) state.set(0, this.controller.save());
         return state.data();
     }
@@ -265,11 +265,11 @@ class RAM extends Component {
      */
     static init()
     {
-        var aeRAM = Component.getElementsByClass(document, PCX86.APPCLASS, "ram");
-        for (var iRAM = 0; iRAM < aeRAM.length; iRAM++) {
-            var eRAM = aeRAM[iRAM];
-            var parmsRAM = Component.getComponentParms(eRAM);
-            var ram = new RAM(parmsRAM);
+        let aeRAM = Component.getElementsByClass(document, PCX86.APPCLASS, "ram");
+        for (let iRAM = 0; iRAM < aeRAM.length; iRAM++) {
+            let eRAM = aeRAM[iRAM];
+            let parmsRAM = Component.getComponentParms(eRAM);
+            let ram = new RAM(parmsRAM);
             Component.bindComponentControls(ram, eRAM, PCX86.APPCLASS);
         }
     }
@@ -316,7 +316,7 @@ class CompaqController extends Controller {
     constructor(ram)
     {
         super();
-        
+
         this.ram = ram;
         this.wMappings = CompaqController.MAPPINGS.DEFAULT;
         /*
@@ -369,7 +369,7 @@ class CompaqController extends Controller {
          * Offsets 0-3 correspond to reads from 0x80C00000-0x80C00003; anything outside that range
          * returns our standard non-responsive value of 0xff.
          */
-        var b = 0xff;
+        let b = 0xff;
         if (off < 0x02) {
             b = (off & 0x1)? (this.wSettings >> 8) : (this.wSettings & 0xff);
         }
@@ -393,7 +393,7 @@ class CompaqController extends Controller {
              * This is a write to 0x80C00000
              */
             if (b != (this.wMappings & 0xff)) {
-                var bus = this.ram.bus;
+                let bus = this.ram.bus;
                 if (!(b & CompaqController.MAPPINGS.UNMAPPED)) {
                     if (!this.aBlocksDst) {
                         this.aBlocksDst = bus.getMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE);
@@ -404,8 +404,8 @@ class CompaqController extends Controller {
                      * from the mapping feature.  We could avoid executing this code as well by checking the
                      * current read-write state, but this is an infrequent operation, so there's no point.
                      */
-                    var aBlocks = bus.getMemoryBlocks(CompaqController.MAP_SRC, CompaqController.MAP_SIZE);
-                    var type = (b & CompaqController.MAPPINGS.READWRITE)? Memory.TYPE.RAM : Memory.TYPE.ROM;
+                    let aBlocks = bus.getMemoryBlocks(CompaqController.MAP_SRC, CompaqController.MAP_SIZE);
+                    let type = (b & CompaqController.MAPPINGS.READWRITE)? Memory.TYPE.RAM : Memory.TYPE.ROM;
                     bus.setMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE, aBlocks, type);
                 }
                 else {
@@ -464,7 +464,7 @@ class CompaqController extends Controller {
      */
     static readByte(off, addr)
     {
-        var b = this.controller.getByte(off);
+        let b = this.controller.getByte(off);
         if (DEBUG) {
             this.controller.ram.printMessage("CompaqController.readByte(" + Str.toHexWord(off) + ") returned " + Str.toHexByte(b), 0, true);
         }

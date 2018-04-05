@@ -39,7 +39,7 @@ if (NODE) {
  */
 X86.opGRP6 = function()
 {
-    var bModRM = this.peekIPByte();
+    let bModRM = this.peekIPByte();
     if ((bModRM & 0x38) < 0x10) {   // possible reg values: 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38
         this.opFlags |= X86.OPFLAG.NOREAD;
     }
@@ -53,7 +53,7 @@ X86.opGRP6 = function()
  */
 X86.opGRP7 = function()
 {
-    var bModRM = this.peekIPByte();
+    let bModRM = this.peekIPByte();
     if (!(bModRM & 0x10)) {
         this.opFlags |= X86.OPFLAG.NOREAD;
     }
@@ -312,15 +312,15 @@ X86.opLOADALL386 = function()
         X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0, 0, true);
         return;
     }
-    var addr = this.segES.checkRead(this.regEDI & this.maskAddr, 0xCC);
+    let addr = this.segES.checkRead(this.regEDI & this.maskAddr, 0xCC);
     if (addr !== X86.ADDR_INVALID) {
         X86.helpLoadCR0.call(this, this.getLong(addr));
         /*
          * We need to call setPS() before loading any segment registers, because if the Virtual 8086 Mode (VM)
          * bit is set in EFLAGS, the segment registers need to know that.
          */
-        var accSS = this.getLong(addr + 0xA8);
-        var cpl = (accSS & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
+        let accSS = this.getLong(addr + 0xA8);
+        let cpl = (accSS & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
         this.setPS(this.getLong(addr + 0x04), cpl);
         /*
          * TODO: We have no use for the GDT(AR) at offset 0x6C or the IDT(AR) at offset 0x60, because
@@ -399,8 +399,8 @@ X86.opMOVrc = function()
         return;
     }
 
-    var reg;
-    var bModRM = this.getIPByte();
+    let reg;
+    let bModRM = this.getIPByte();
     switch((bModRM & 0x38) >> 3) {
     case 0x0:
         reg = this.regCR0;
@@ -448,8 +448,8 @@ X86.opMOVrd = function()
         return;
     }
 
-    var bModRM = this.getIPByte();
-    var iSrc = (bModRM & 0x38) >> 3;
+    let bModRM = this.getIPByte();
+    let iSrc = (bModRM & 0x38) >> 3;
 
     if (iSrc == 4 || iSrc == 5) {
         X86.opUndefined.call(this);
@@ -497,8 +497,8 @@ X86.opMOVcr = function()
         return;
     }
 
-    var bModRM = this.getIPByte();
-    var reg = this.getReg(bModRM & 0x7);
+    let bModRM = this.getIPByte();
+    let reg = this.getReg(bModRM & 0x7);
 
     switch((bModRM & 0x38) >> 3) {
     case 0x0:
@@ -546,15 +546,15 @@ X86.opMOVdr = function()
         return;
     }
 
-    var bModRM = this.getIPByte();
-    var iDst = (bModRM & 0x38) >> 3;
+    let bModRM = this.getIPByte();
+    let iDst = (bModRM & 0x38) >> 3;
 
     if (iDst == 4 || iDst == 5) {
         X86.opUndefined.call(this);
         return;
     }
 
-    var regDR = this.getReg(bModRM & 0x7);
+    let regDR = this.getReg(bModRM & 0x7);
 
     if (regDR != this.regDR[iDst]) {
         this.checkDebugRegisters(false);
@@ -592,8 +592,8 @@ X86.opMOVrt = function()
         return;
     }
 
-    var bModRM = this.getIPByte();
-    var iSrc = (bModRM & 0x38) >> 3;
+    let bModRM = this.getIPByte();
+    let iSrc = (bModRM & 0x38) >> 3;
 
     /*
      * Only TR6 and TR7 are defined, and only for the 80386 and 80486.  From the PC Magazine Prog. TechRef, p.64:
@@ -638,8 +638,8 @@ X86.opMOVtr = function()
         return;
     }
 
-    var bModRM = this.getIPByte();
-    var iDst = (bModRM & 0x38) >> 3;
+    let bModRM = this.getIPByte();
+    let iDst = (bModRM & 0x38) >> 3;
 
     /*
      * Only TR6 and TR7 are defined, and only for the 80386 and 80486.  From the PC Magazine Prog. TechRef, p.64:
@@ -691,7 +691,7 @@ X86.opMOVtr = function()
  */
 X86.opJOw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -709,7 +709,7 @@ X86.opJOw = function()
  */
 X86.opJNOw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -727,7 +727,7 @@ X86.opJNOw = function()
  */
 X86.opJCw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (this.getCF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -745,7 +745,7 @@ X86.opJCw = function()
  */
 X86.opJNCw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getCF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -763,7 +763,7 @@ X86.opJNCw = function()
  */
 X86.opJZw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -781,7 +781,7 @@ X86.opJZw = function()
  */
 X86.opJNZw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -799,7 +799,7 @@ X86.opJNZw = function()
  */
 X86.opJBEw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (this.getCF() || this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -817,7 +817,7 @@ X86.opJBEw = function()
  */
 X86.opJNBEw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getCF() && !this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -835,7 +835,7 @@ X86.opJNBEw = function()
  */
 X86.opJSw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (this.getSF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -853,7 +853,7 @@ X86.opJSw = function()
  */
 X86.opJNSw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getSF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -871,7 +871,7 @@ X86.opJNSw = function()
  */
 X86.opJPw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (this.getPF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -889,7 +889,7 @@ X86.opJPw = function()
  */
 X86.opJNPw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getPF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -907,7 +907,7 @@ X86.opJNPw = function()
  */
 X86.opJLw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getSF() != !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -925,7 +925,7 @@ X86.opJLw = function()
  */
 X86.opJNLw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getSF() == !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -943,7 +943,7 @@ X86.opJNLw = function()
  */
 X86.opJLEw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (this.getZF() || !this.getSF() != !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -961,7 +961,7 @@ X86.opJLEw = function()
  */
 X86.opJNLEw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getZF() && !this.getSF() == !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -1423,7 +1423,7 @@ X86.opLGS = function()
 X86.opMOVZXb = function()
 {
     this.decodeModRegByte.call(this, X86.fnMOVXb);
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
     switch(reg) {
     case 0x0:
         this.regEAX = (this.regEAX & ~this.maskData) | (this.regEAX & 0xff);
@@ -1554,7 +1554,7 @@ X86.opBSR = function()
 X86.opMOVSXb = function()
 {
     this.decodeModRegByte.call(this, X86.fnMOVXb);
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
     switch(reg) {
     case 0x0:
         this.regEAX = (this.regEAX & ~this.maskData) | ((((this.regEAX & 0xff) << 24) >> 24) & this.maskData);

@@ -121,7 +121,7 @@ class ParallelPort extends Component {
          */
         this.controlBuffer = null;
 
-        var sBinding = parmsParallel['binding'];
+        let sBinding = parmsParallel['binding'];
         if (sBinding == "console") {
             this.consoleBuffer = "";
         } else {
@@ -130,12 +130,12 @@ class ParallelPort extends Component {
              * then it specifies the name of that control with the 'binding' property.  The ParallelPort constructor
              * will then call bindExternalControl(), which looks up the control, and then passes it to our own
              * setBinding() handler.
-             * 
+             *
              * For bindExternalControl() to succeed, it also need to know the target component; for now, that's
              * been hard-coded to "Panel", in part because that's one of the few components we can rely upon
              * initializing before we do, but it would be a simple matter to include a component type or ID as part
              * of the 'binding' property as well, if we need more flexibility later.
-             * 
+             *
              * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
              */
             Component.bindExternalControl(this, sBinding);
@@ -234,7 +234,7 @@ class ParallelPort extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, this.saveRegisters());
         return state.data();
     }
@@ -262,7 +262,7 @@ class ParallelPort extends Component {
      */
     initState(data)
     {
-        var i = 0;
+        let i = 0;
         if (data === undefined) {
             data = [0, ParallelPort.STATUS.NERR | ParallelPort.STATUS.ALWAYS_SET, ParallelPort.CONTROL.ALWAYS_SET];
         }
@@ -280,8 +280,8 @@ class ParallelPort extends Component {
      */
     saveRegisters()
     {
-        var i = 0;
-        var data = [];
+        let i = 0;
+        let data = [];
         data[i++] = this.bData;
         data[i++] = this.bStatus;
         data[i]   = this.bControl;
@@ -298,7 +298,7 @@ class ParallelPort extends Component {
      */
     inData(port, addrFrom)
     {
-        var b = this.bData;
+        let b = this.bData;
         this.printMessageIO(port, null, addrFrom, "DATA", b);
         return b;
     }
@@ -313,7 +313,7 @@ class ParallelPort extends Component {
      */
     inStatus(port, addrFrom)
     {
-        var b = this.bStatus;
+        let b = this.bStatus;
         this.bStatus |= (ParallelPort.STATUS.NACK | ParallelPort.STATUS.NBUSY);
         this.printMessageIO(port, null, addrFrom, "STAT", b);
         this.updateIRR();
@@ -330,7 +330,7 @@ class ParallelPort extends Component {
      */
     inControl(port, addrFrom)
     {
-        var b = this.bControl;
+        let b = this.bControl;
         this.printMessageIO(port, null, addrFrom, "CTRL", b);
         return b;
     }
@@ -345,7 +345,7 @@ class ParallelPort extends Component {
      */
     outData(port, bOut, addrFrom)
     {
-        var parallel = this;
+        let parallel = this;
         this.printMessageIO(port, bOut, addrFrom, "DATA");
         this.bData = bOut;
         this.cpu.nonCPU(function() {
@@ -399,7 +399,7 @@ class ParallelPort extends Component {
      */
     transmitByte(b)
     {
-        var fTransmitted = false;
+        let fTransmitted = false;
 
         this.printMessage("transmitByte(" + Str.toHexByte(b) + ")");
 
@@ -461,11 +461,11 @@ class ParallelPort extends Component {
      */
     static init()
     {
-        var aeParallel = Component.getElementsByClass(document, PCX86.APPCLASS, "parallel");
-        for (var iParallel = 0; iParallel < aeParallel.length; iParallel++) {
-            var eParallel = aeParallel[iParallel];
-            var parmsParallel = Component.getComponentParms(eParallel);
-            var parallel = new ParallelPort(parmsParallel);
+        let aeParallel = Component.getElementsByClass(document, PCX86.APPCLASS, "parallel");
+        for (let iParallel = 0; iParallel < aeParallel.length; iParallel++) {
+            let eParallel = aeParallel[iParallel];
+            let parmsParallel = Component.getComponentParms(eParallel);
+            let parallel = new ParallelPort(parmsParallel);
             Component.bindComponentControls(parallel, eParallel, PCX86.APPCLASS);
         }
     }

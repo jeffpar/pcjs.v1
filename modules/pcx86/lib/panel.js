@@ -152,7 +152,7 @@ class Rectangle {
      */
     subDivide(units, unitsTotal, fHorizontal)
     {
-        var rect;
+        let rect;
         if (fHorizontal === undefined) {
             fHorizontal = units >= (unitsTotal >> 2);
         }
@@ -225,7 +225,7 @@ class Panel extends Component {
      */
     initBus(cmp, bus, cpu, dbg)
     {
-        var panel = this;
+        let panel = this;
 
         this.cmp = cmp;
         this.bus = bus;
@@ -258,8 +258,8 @@ class Panel extends Component {
 
         if (!this.canvas && sHTMLType == "canvas") {
 
-            var panel = this;
-            var fPanel = false;
+            let panel = this;
+            let fPanel = false;
 
             if (BACKTRACK && sBinding == "btpanel") {
                 this.fBackTrack = fPanel = true;
@@ -348,7 +348,7 @@ class Panel extends Component {
     startTimer()
     {
         if (this.timer < 0 && this.canvas && this.cpu) {
-            var panel = this;
+            let panel = this;
             this.timer = this.cpu.addTimer(this.id, function updateAnimationTimer() {
                 panel.updateAnimation();
             }, 1000 / Panel.UPDATES_PER_SECOND);
@@ -434,12 +434,12 @@ class Panel extends Component {
          * Due to the responsive nature of our pages, the displayed size of the canvas may be smaller than the
          * allocated size, and the coordinates we receive from mouse events are based on the currently displayed size.
          */
-        var xScale = Panel.LIVECANVAS.CX / this.canvas.offsetWidth;
-        var yScale = Panel.LIVECANVAS.CY / this.canvas.offsetHeight;
+        let xScale = Panel.LIVECANVAS.CX / this.canvas.offsetWidth;
+        let yScale = Panel.LIVECANVAS.CY / this.canvas.offsetHeight;
 
-        var rect = this.canvas.getBoundingClientRect();
-        var x = ((event.clientX - rect.left) * xScale) | 0;
-        var y = ((event.clientY - rect.top) * yScale) | 0;
+        let rect = this.canvas.getBoundingClientRect();
+        let x = ((event.clientX - rect.left) * xScale) | 0;
+        let y = ((event.clientY - rect.top) * yScale) | 0;
 
         if (fDown == null) {
             if (!this.lockMouse) {
@@ -461,7 +461,7 @@ class Panel extends Component {
             /*
              * Convert the mouse position into the corresponding memory address, assuming it's over the live memory area
              */
-            var addr = this.findAddress(x, y);
+            let addr = this.findAddress(x, y);
             if (addr !== X86.ADDR_INVALID) {
                 addr &= ~0xf;
                 if (addr != this.addrDumpLast) {
@@ -483,16 +483,16 @@ class Panel extends Component {
     findAddress(x, y)
     {
         if (x < Panel.LIVEMEM.CX && this.busInfo && this.busInfo.aRects) {
-            var i, rect;
+            let i, rect;
             for (i = 0; i < this.busInfo.aRects.length; i++) {
                 rect = this.busInfo.aRects[i];
                 if (rect.contains(x, y)) {
                     x -= rect.x;
                     y -= rect.y;
-                    var region = this.busInfo.aRegions[i];
-                    var iBlock = Usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.num), this.busInfo.aBlocks[region.iBlock]);
-                    var addr = iBlock * this.bus.nBlockSize;
-                    var addrLimit = (iBlock + region.cBlocks) * this.bus.nBlockSize - 1;
+                    let region = this.busInfo.aRegions[i];
+                    let iBlock = Usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.num), this.busInfo.aBlocks[region.iBlock]);
+                    let addr = iBlock * this.bus.nBlockSize;
+                    let addrLimit = (iBlock + region.cBlocks) * this.bus.nBlockSize - 1;
 
                     /*
                      * If you want memory to be arranged "vertically" instead of "horizontally", do this:
@@ -546,13 +546,13 @@ class Panel extends Component {
                      * subDivide() makes a simple horizontal or vertical slicing decision based on the ratio of region blocks
                      * to remaining blocks.
                      */
-                    var i, rect;
-                    var rectAvail = new Rectangle(0, 0, this.canvasLiveMem.width, this.canvasLiveMem.height);
+                    let i, rect;
+                    let rectAvail = new Rectangle(0, 0, this.canvasLiveMem.width, this.canvasLiveMem.height);
                     this.busInfo.aRects = [];
-                    var cBlocksRemaining = this.busInfo.cBlocks;
+                    let cBlocksRemaining = this.busInfo.cBlocks;
 
                     for (i = 0; i < this.busInfo.cRegions; i++) {
-                        var cBlocksRegion = this.busInfo.aRegions[i].cBlocks;
+                        let cBlocksRegion = this.busInfo.aRegions[i].cBlocks;
                         this.busInfo.aRects.push(rect = rectAvail.subDivide(cBlocksRegion, cBlocksRemaining, !i));
                         if (MAXDEBUG) this.log("region " + i + " rectangle: (" + rect.x + "," + rect.y + " " + rect.cx + "," + rect.cy + ")");
                         cBlocksRemaining -= cBlocksRegion;
@@ -568,7 +568,7 @@ class Panel extends Component {
                      * Now draw all the rectangles produced by the series of subDivide() calls.
                      */
                     for (i = 0; i < this.busInfo.aRects.length; i++) {
-                        var region = this.busInfo.aRegions[i];
+                        let region = this.busInfo.aRegions[i];
                         rect = this.busInfo.aRects[i];
                         rect.drawWith(this.contextLiveMem, Memory.TYPE.COLORS[region.type]);
                         this.centerPen(rect);
@@ -617,18 +617,18 @@ class Panel extends Component {
      */
     findRegions()
     {
-        var checksum = 0;
+        let checksum = 0;
         this.busInfo.cRegions = 0;
         if (!this.busInfo.aRegions) this.busInfo.aRegions = [];
 
-        var typeRegion = -1, iBlockRegion = 0, addrRegion = 0, nBlockPrev = -1;
+        let typeRegion = -1, iBlock = 0, iBlockRegion = 0, addrRegion = 0, nBlockPrev = -1;
 
-        for (var iBlock = 0; iBlock < this.busInfo.cBlocks; iBlock++) {
-            var blockInfo = this.busInfo.aBlocks[iBlock];
-            var typeBlock = Usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.type), blockInfo);
-            var nBlockCurr = Usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.num), blockInfo);
+        for (; iBlock < this.busInfo.cBlocks; iBlock++) {
+            let blockInfo = this.busInfo.aBlocks[iBlock];
+            let typeBlock = Usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.type), blockInfo);
+            let nBlockCurr = Usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.num), blockInfo);
             if (typeBlock != typeRegion || nBlockCurr != nBlockPrev + 1) {
-                var cBlocks = iBlock - iBlockRegion;
+                let cBlocks = iBlock - iBlockRegion;
                 if (cBlocks) {
                     checksum += this.addRegion(addrRegion, iBlockRegion, cBlocks, typeRegion);
                 }
@@ -641,7 +641,7 @@ class Panel extends Component {
 
         checksum += this.addRegion(addrRegion, iBlockRegion, iBlock - iBlockRegion, typeRegion);
 
-        var fChanged = (this.busInfo.checksumRegions != checksum);
+        let fChanged = (this.busInfo.checksumRegions != checksum);
         this.busInfo.checksumRegions = checksum;
         return fChanged;
     }
@@ -674,8 +674,8 @@ class Panel extends Component {
     {
         if (this.context && this.canvasLiveRegs && this.contextLiveRegs) {
 
-            var cpu = this.cpu;
-            var x = 0, y = 0, cx = this.canvasLiveRegs.width, cy = this.canvasLiveRegs.height;
+            let cpu = this.cpu;
+            let x = 0, y = 0, cx = this.canvasLiveRegs.width, cy = this.canvasLiveRegs.height;
 
             this.contextLiveRegs.fillStyle = Panel.LIVEREGS.COLOR;
             this.contextLiveRegs.fillRect(x, y, cx, cy);
@@ -704,7 +704,7 @@ class Panel extends Component {
             this.drawText("SS", cpu.getSS(), 0, 1);
             this.drawText("IP", cpu.getIP(), 2);
             this.drawText("SP", cpu.getSP(), 0, 1.5);
-            var regPS;
+            let regPS;
             this.drawText("PS", regPS = cpu.getPS(), 2);
             this.drawText("BP", cpu.regEBP, 0, 1.5);
             if (cpu.model >= X86.MODEL_80386) {
@@ -741,7 +741,7 @@ class Panel extends Component {
     {
         if (this.context && this.canvasLiveRegs && this.contextLiveRegs) {
 
-            var x = 0, y = Panel.LIVEREGS.CY - Panel.LIVEDUMP.CY, cx = this.canvasLiveRegs.width, cy = Panel.LIVEDUMP.CY;
+            let x = 0, y = Panel.LIVEREGS.CY - Panel.LIVEDUMP.CY, cx = this.canvasLiveRegs.width, cy = Panel.LIVEDUMP.CY;
 
             this.contextLiveRegs.fillStyle = Panel.LIVEREGS.COLOR;
             this.contextLiveRegs.fillRect(x, y, cx, cy);
@@ -752,10 +752,10 @@ class Panel extends Component {
                 this.drawText("Mouse over memory to dump");
             } else {
                 this.drawText(Str.toHexLong(addr), null, 0, 1);
-                for (var iLine = 1; iLine <= 16; iLine++) {
-                    var sChars = "";
-                    for (var iCol = 1; iCol <= 8; iCol++) {
-                        var b = this.bus.getByteDirect(addr++);
+                for (let iLine = 1; iLine <= 16; iLine++) {
+                    let sChars = "";
+                    for (let iCol = 1; iCol <= 8; iCol++) {
+                        let b = this.bus.getByteDirect(addr++);
                         this.drawText(Str.toHex(b, 2), null, 1);
                         sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
                     }
@@ -817,9 +817,9 @@ class Panel extends Component {
     {
         this.fontText = this.fontDefault;
         this.heightText = this.heightDefault;
-        var x = rect.x + (rect.cx >> 1);
-        var y = rect.y + (rect.cy >> 1);
-        var maxText = rect.cy;
+        let x = rect.x + (rect.cx >> 1);
+        let y = rect.y + (rect.cy >> 1);
+        let maxText = rect.cy;
         if (rect.cx < rect.cy) {
             maxText = rect.cx;
             this.fVerticalText = true;
@@ -898,7 +898,7 @@ class Panel extends Component {
         this.contextText.fillText(sText, this.xText, this.yText);
         this.xText += this.cxColumn;
         if (nValue != null) {
-            var sValue;
+            let sValue;
             if (this.nDefaultBase != 16) {
                 sValue = nValue.toString();
             } else {
@@ -930,7 +930,7 @@ class Panel extends Component {
     centerText(sText)
     {
         this.contextText.font = this.fontText;
-        var tm = this.contextText.measureText(sText);
+        let tm = this.contextText.measureText(sText);
         this.xText -= tm.width >> 1;
         this.yText += (this.heightText >> 1) - 2;
         this.drawText(sText);
@@ -959,12 +959,12 @@ class Panel extends Component {
      */
     static init()
     {
-        var fReady = false;
-        var aePanels = Component.getElementsByClass(document, PCX86.APPCLASS, "panel");
-        for (var iPanel=0; iPanel < aePanels.length; iPanel++) {
-            var ePanel = aePanels[iPanel];
-            var parmsPanel = Component.getComponentParms(ePanel);
-            var panel = Component.getComponentByID(parmsPanel['id']);
+        let fReady = false;
+        let aePanels = Component.getElementsByClass(document, PCX86.APPCLASS, "panel");
+        for (let iPanel=0; iPanel < aePanels.length; iPanel++) {
+            let ePanel = aePanels[iPanel];
+            let parmsPanel = Component.getComponentParms(ePanel);
+            let panel = Component.getComponentByID(parmsPanel['id']);
             if (!panel) {
                 fReady = true;
                 panel = new Panel(parmsPanel);

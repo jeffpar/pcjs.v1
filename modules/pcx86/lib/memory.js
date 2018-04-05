@@ -46,7 +46,7 @@ if (NODE) {
  */
 
 var littleEndian = (TYPEDARRAYS? (function() {
-    var buffer = new ArrayBuffer(2);
+    let buffer = new ArrayBuffer(2);
     new DataView(buffer).setUint16(0, 256, true);
     return new Uint16Array(buffer)[0] === 256;
 })() : false);
@@ -99,7 +99,7 @@ class Memory {
      */
     constructor(addr, used, size, type, controller, cpu)
     {
-        var i;
+        let i;
         this.id = (Memory.idBlock += 2);
         this.adw = null;
         this.offset = 0;
@@ -153,7 +153,7 @@ class Memory {
          */
         if (controller) {
             this.controller = controller;
-            var a = controller.getMemoryBuffer(addr|0);
+            let a = controller.getMemoryBuffer(addr|0);
             this.adw = a[0];
             this.offset = a[1];
             this.setAccess(controller.getMemoryAccess());
@@ -296,13 +296,13 @@ class Memory {
      */
     save()
     {
-        var adw, i;
+        let adw, i;
         if (this.controller) {
             adw = null;
         }
         else if (BYTEARRAYS) {
             adw = new Array(this.size >> 2);
-            var off = 0;
+            let off = 0;
             for (i = 0; i < adw.length; i++) {
                 adw[i] = this.ab[off] | (this.ab[off + 1] << 8) | (this.ab[off + 2] << 16) | (this.ab[off + 3] << 24);
                 off += 4;
@@ -349,7 +349,7 @@ class Memory {
          * restore calls, because old machine states may still try to restore video memory blocks for MDA
          * and CGA video buffers (and in those cases, the memory formats should be compatible).
          */
-        var i, off;
+        let i, off;
         if (this.controller) {
             if (this.adw) {
                 for (i = 0; i < adw.length; i++) {
@@ -768,10 +768,10 @@ class Memory {
         if (BYTEARRAYS) {
             return this.ab[off] | (this.ab[off + 1] << 8);
         }
-        var w;
-        var idw = off >> 2;
-        var nShift = (off & 0x3) << 3;
-        var dw = (this.adw[idw] >> nShift);
+        let w;
+        let idw = off >> 2;
+        let nShift = (off & 0x3) << 3;
+        let dw = (this.adw[idw] >> nShift);
         if (nShift < 24) {
             w = dw & 0xffff;
         } else {
@@ -793,9 +793,9 @@ class Memory {
         if (BYTEARRAYS) {
             return this.ab[off] | (this.ab[off + 1] << 8) | (this.ab[off + 2] << 16) | (this.ab[off + 3] << 24);
         }
-        var idw = off >> 2;
-        var nShift = (off & 0x3) << 3;
-        var l = this.adw[idw];
+        let idw = off >> 2;
+        let nShift = (off & 0x3) << 3;
+        let l = this.adw[idw];
         if (nShift) {
             l >>>= nShift;
             l |= this.adw[idw + 1] << (32 - nShift);
@@ -816,8 +816,8 @@ class Memory {
         if (BYTEARRAYS) {
             this.ab[off] = b;
         } else {
-            var idw = off >> 2;
-            var nShift = (off & 0x3) << 3;
+            let idw = off >> 2;
+            let nShift = (off & 0x3) << 3;
             this.adw[idw] = (this.adw[idw] & ~(0xff << nShift)) | (b << nShift);
         }
         // this.flags |= Memory.FLAGS.DIRTY;
@@ -837,8 +837,8 @@ class Memory {
             this.ab[off] = (w & 0xff);
             this.ab[off + 1] = (w >> 8);
         } else {
-            var idw = off >> 2;
-            var nShift = (off & 0x3) << 3;
+            let idw = off >> 2;
+            let nShift = (off & 0x3) << 3;
             if (nShift < 24) {
                 this.adw[idw] = (this.adw[idw] & ~(0xffff << nShift)) | (w << nShift);
             } else {
@@ -866,12 +866,12 @@ class Memory {
             this.ab[off + 2] = (l >> 16) & 0xff;
             this.ab[off + 3] = (l >> 24) & 0xff;
         } else {
-            var idw = off >> 2;
-            var nShift = (off & 0x3) << 3;
+            let idw = off >> 2;
+            let nShift = (off & 0x3) << 3;
             if (!nShift) {
                 this.adw[idw] = l;
             } else {
-                var mask = (0xffffffff|0) << nShift;
+                let mask = (0xffffffff|0) << nShift;
                 this.adw[idw] = (this.adw[idw] & ~mask) | (l << nShift);
                 idw++;
                 this.adw[idw] = (this.adw[idw] & mask) | (l >>> (32 - nShift));
@@ -1594,7 +1594,7 @@ class Memory {
      */
     writeBackTrackIndex(off, bti)
     {
-        var btiPrev;
+        let btiPrev;
         btiPrev = this.abtIndexes[off];
         this.abtIndexes[off] = bti;
         return btiPrev;
@@ -1609,7 +1609,7 @@ class Memory {
      */
     modBackTrackIndex(fMod)
     {
-        var fModPrev = this.fModBackTrack;
+        let fModPrev = this.fModBackTrack;
         this.fModBackTrack = fMod;
         return fModPrev;
     }

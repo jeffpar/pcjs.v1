@@ -334,8 +334,8 @@ class Disk extends Component {
          * changes and then close the connection.
          */
         if (this.fRemote) {
-            var response;
-            var nErrorCode = 0;
+            let response;
+            let nErrorCode = 0;
             if (this.fWriteInProgress) {
                 /*
                  * TODO: Verify that the Computer's powerOff() handler will actually honor a false return value.
@@ -392,12 +392,12 @@ class Disk extends Component {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage("blank disk for \"" + this.sDiskName + "\": " + this.nCylinders + " cylinders, " + this.nHeads + " head(s)");
             }
-            var aCylinders = new Array(this.nCylinders);
-            for (var iCylinder = 0; iCylinder < aCylinders.length; iCylinder++) {
-                var aHeads = new Array(this.nHeads);
-                for (var iHead = 0; iHead < aHeads.length; iHead++) {
-                    var aSectors = new Array(this.nSectors);
-                    for (var iSector = 1; iSector <= aSectors.length; iSector++) {
+            let aCylinders = new Array(this.nCylinders);
+            for (let iCylinder = 0; iCylinder < aCylinders.length; iCylinder++) {
+                let aHeads = new Array(this.nHeads);
+                for (let iHead = 0; iHead < aHeads.length; iHead++) {
+                    let aSectors = new Array(this.nSectors);
+                    for (let iSector = 1; iSector <= aSectors.length; iSector++) {
                         /*
                          * Now that our read() and write() functions can deal with unallocated data
                          * arrays, and can read/write the specified pattern on-the-fly, we no longer need
@@ -444,13 +444,13 @@ class Disk extends Component {
      */
     load(sDiskName, sDiskPath, file, fnNotify, controller)
     {
-        var sDiskURL = sDiskPath;
+        let sDiskURL = sDiskPath;
 
         /*
          * We could use this.log() as well, but it wouldn't display which component initiated the load.
          */
         if (DEBUG) {
-            var sMessage = 'load("' + sDiskName + '","' + sDiskPath + '")';
+            let sMessage = 'load("' + sDiskName + '","' + sDiskPath + '")';
             this.controller.log(sMessage);
             this.printMessage(sMessage);
         }
@@ -465,12 +465,12 @@ class Disk extends Component {
         this.sDiskFile = Str.getBaseName(sDiskPath);
         this.sFormat = "json";
 
-        var disk = this;
+        let disk = this;
         this.fnNotify = fnNotify;
         this.controllerNotify = controller || this.controller;
 
         if (file) {
-            var reader = new FileReader();
+            let reader = new FileReader();
             reader.onload = function() {
                 disk.buildDisk(reader.result, true);
             };
@@ -488,7 +488,7 @@ class Disk extends Component {
              * JSON-encoded disk image, so we load it as-is; otherwise, we ask our server-side disk image
              * converter to return the corresponding JSON-encoded data.
              */
-            var sDiskExt = Str.getExtension(sDiskPath);
+            let sDiskExt = Str.getExtension(sDiskPath);
             if (sDiskExt == DumpAPI.FORMAT.JSON || sDiskExt == DumpAPI.FORMAT.JSON_GZ) {
                 sDiskURL = encodeURI(sDiskPath);
             } else {
@@ -499,8 +499,8 @@ class Disk extends Component {
                     this.sFormat = "arraybuffer";
                 }
                 // else {
-                //     var sDiskParm = DumpAPI.QUERY.PATH;
-                //     var sSizeParm = '&' + DumpAPI.QUERY.MBHD + "=10";
+                //     let sDiskParm = DumpAPI.QUERY.PATH;
+                //     let sSizeParm = '&' + DumpAPI.QUERY.MBHD + "=10";
                 //     /*
                 //      * 'mbhd' is a new parm added for hard drive support.  In the case of 'file' or 'dir' requests,
                 //      * 'mbhd' informs DumpAPI.ENDPOINT that it should create a hard disk image, and one not larger than
@@ -532,7 +532,7 @@ class Disk extends Component {
                 // }
             }
         }
-        var sProgress = "Loading " + sDiskURL + "...";
+        let sProgress = "Loading " + sDiskURL + "...";
         return !!Web.getResource(sDiskURL, this.sFormat, true, function loadDone(sURL, sResponse, nErrorCode) {
             disk.doneLoad(sURL, sResponse, nErrorCode);
         }, function(nState) {
@@ -546,14 +546,14 @@ class Disk extends Component {
      * Builds a disk image from an ArrayBuffer (eg, from a FileReader object), rather than from JSON-encoded data.
      *
      * @this {Disk}
-     * @param {?} buffer (technically, this is always an ArrayBuffer, because we tell FileReader to use readAsArrayBuffer, but the Closure Compiler doesn't realize that) 
+     * @param {?} buffer (technically, this is always an ArrayBuffer, because we tell FileReader to use readAsArrayBuffer, but the Closure Compiler doesn't realize that)
      * @param {boolean} [fModified] is true if we should mark the entire disk modified (to ensure that we save/restore it)
      */
     buildDisk(buffer, fModified)
     {
-        var disk;
-        var cbDiskData = buffer? buffer.byteLength : 0;
-        var diskFormat = DiskAPI.GEOMETRIES[cbDiskData];
+        let disk;
+        let cbDiskData = buffer? buffer.byteLength : 0;
+        let diskFormat = DiskAPI.GEOMETRIES[cbDiskData];
 
         if (diskFormat) {
             this.nCylinders = diskFormat[0];
@@ -561,20 +561,20 @@ class Disk extends Component {
             this.nSectors = diskFormat[2];
             this.cbSector = (diskFormat[3] || 512);
 
-            var cdw = this.cbSector >> 2, dwPattern = 0, dwChecksum = 0;
-            var ib = 0;
-            var dv = new DataView(buffer, 0, cbDiskData);
+            let cdw = this.cbSector >> 2, dwPattern = 0, dwChecksum = 0;
+            let ib = 0;
+            let dv = new DataView(buffer, 0, cbDiskData);
 
             this.aDiskData = new Array(this.nCylinders);
-            for (var iCylinder = 0; iCylinder < this.aDiskData.length; iCylinder++) {
-                var cylinder = this.aDiskData[iCylinder] = new Array(this.nHeads);
-                for (var iHead = 0; iHead < cylinder.length; iHead++) {
-                    var head = cylinder[iHead] = new Array(this.nSectors);
-                    for (var iSector = 0; iSector < head.length; iSector++) {
-                        var sector = this.initSector(null, iCylinder, iHead, iSector + 1, this.cbSector, dwPattern);
-                        var adw = sector['data'];
-                        for (var idw = 0; idw < cdw; idw++, ib += 4) {
-                            var dw = adw[idw] = dv.getInt32(ib, true);
+            for (let iCylinder = 0; iCylinder < this.aDiskData.length; iCylinder++) {
+                let cylinder = this.aDiskData[iCylinder] = new Array(this.nHeads);
+                for (let iHead = 0; iHead < cylinder.length; iHead++) {
+                    let head = cylinder[iHead] = new Array(this.nSectors);
+                    for (let iSector = 0; iSector < head.length; iSector++) {
+                        let sector = this.initSector(null, iCylinder, iHead, iSector + 1, this.cbSector, dwPattern);
+                        let adw = sector['data'];
+                        for (let idw = 0; idw < cdw; idw++, ib += 4) {
+                            let dw = adw[idw] = dv.getInt32(ib, true);
                             dwChecksum = (dwChecksum + dw) & (0xffffffff|0);
                         }
                         if (fModified) sector.cModify = cdw;
@@ -607,9 +607,9 @@ class Disk extends Component {
      */
     doneLoad(sURL, diskData, nErrorCode)
     {
-        var disk = null;
+        let disk = null;
         this.fWriteProtected = false;
-        var fPrintOnly = !!(nErrorCode < 0 && this.cmp && !this.cmp.flags.powered);
+        let fPrintOnly = !!(nErrorCode < 0 && this.cmp && !this.cmp.flags.powered);
 
         if (this.fOnDemand) {
             if (!nErrorCode) {
@@ -645,7 +645,7 @@ class Disk extends Component {
                 this.buildDisk(diskData);
                 return;
             }
-            
+
             try {
                 /*
                  * The following code was a hack to turn on write-protection for a disk image if there was
@@ -656,13 +656,13 @@ class Disk extends Component {
                  * TODO: Provide some UI for turning write-protection on/off for disks at will, and provide
                  * an XML-based solution (ie, a per-disk XML configuration option) for controlling it as well.
                  */
-                var sBaseName = Str.getBaseName(this.sDiskFile, true).toLowerCase();
+                let sBaseName = Str.getBaseName(this.sDiskFile, true).toLowerCase();
                 if (sBaseName.indexOf("-readonly") > 0) {
                     this.fWriteProtected = true;
                 } else {
-                    var iEOL = diskData.indexOf("\n");
+                    let iEOL = diskData.indexOf("\n");
                     if (iEOL > 0 && iEOL < 1024) {
-                        var sConfig = diskData.substring(0, iEOL);
+                        let sConfig = diskData.substring(0, iEOL);
                         if (sConfig.indexOf("write-protected") > 0) {
                             this.fWriteProtected = true;
                         }
@@ -671,7 +671,7 @@ class Disk extends Component {
                 /*
                  * The most likely source of any exception will be here, where we're parsing the disk data.
                  */
-                var aDiskData;
+                let aDiskData;
                 if (diskData.substr(0, 1) == "<") {        // if the "data" begins with a "<"...
                     /*
                      * Early server configs reported an error (via the nErrorCode parameter) if a disk URL was invalid,
@@ -738,11 +738,11 @@ class Disk extends Component {
                  */
                 else {
                     if (DEBUG && this.messageEnabled(Messages.DISK | Messages.DATA)) {
-                        var sCylinders = aDiskData.length + " track" + (aDiskData.length > 1 ? "s" : "");
-                        var nHeads = aDiskData[0].length;
-                        var sHeads = nHeads + " head" + (nHeads > 1 ? "s" : "");
-                        var nSectorsPerTrack = aDiskData[0][0].length;
-                        var sSectorsPerTrack = nSectorsPerTrack + " sector" + (nSectorsPerTrack > 1 ? "s" : "") + "/track";
+                        let sCylinders = aDiskData.length + " track" + (aDiskData.length > 1 ? "s" : "");
+                        let nHeads = aDiskData[0].length;
+                        let sHeads = nHeads + " head" + (nHeads > 1 ? "s" : "");
+                        let nSectorsPerTrack = aDiskData[0][0].length;
+                        let sSectorsPerTrack = nSectorsPerTrack + " sector" + (nSectorsPerTrack > 1 ? "s" : "") + "/track";
                         this.printMessage(sCylinders + ", " + sHeads + ", " + sSectorsPerTrack);
                     }
                     /*
@@ -755,27 +755,27 @@ class Disk extends Component {
                     this.nCylinders = aDiskData.length;
                     this.nHeads = aDiskData[0].length;
                     this.nSectors = aDiskData[0][0].length;
-                    var sector = aDiskData[0][0][0];
+                    let sector = aDiskData[0][0][0];
                     this.cbSector = (sector && sector['length']) || 512;
 
-                    var dwChecksum = 0;
-                    for (var iCylinder = 0; iCylinder < this.nCylinders; iCylinder++) {
-                        for (var iHead = 0; iHead < this.nHeads; iHead++) {
-                            for (var iSector = 0; iSector < this.nSectors; iSector++) {
+                    let dwChecksum = 0;
+                    for (let iCylinder = 0; iCylinder < this.nCylinders; iCylinder++) {
+                        for (let iHead = 0; iHead < this.nHeads; iHead++) {
+                            for (let iSector = 0; iSector < this.nSectors; iSector++) {
                                 sector = aDiskData[iCylinder][iHead][iSector];
                                 if (!sector) continue;          // non-standard (eg, XDF) disk images may have "unused" (null) sectors
-                                var length = sector['length'];
+                                let length = sector['length'];
                                 if (length === undefined) {     // provide backward-compatibility with older JSON...
                                     length = sector['length'] = 512;
                                 }
                                 length >>= 2;                   // convert length from a byte-length to a dword-length
-                                var dwPattern = sector['pattern'];
+                                let dwPattern = sector['pattern'];
                                 if (dwPattern === undefined) {
                                     dwPattern = sector['pattern'] = 0;
                                 }
-                                var adw = sector['data'];
+                                let adw = sector['data'];
                                 if (adw === undefined) {
-                                    var ab = sector['bytes'];
+                                    let ab = sector['bytes'];
                                     if (ab === undefined || !ab.length) {
                                         /*
                                          * If there is neither a 'bytes' nor 'data' array, then our job is simple:
@@ -798,9 +798,9 @@ class Disk extends Component {
                                          * to fully "inflate" the sector, eliminating the possibility of partial dwords and
                                          * saving any code downstream from dealing with byte-size patterns.
                                          */
-                                        var cb = length << 2;
+                                        let cb = length << 2;
                                         this.assert((dwPattern & 0xff) == dwPattern);
-                                        for (var ib = ab.length; ib < cb; ib++) {
+                                        for (let ib = ab.length; ib < cb; ib++) {
                                             ab[ib] = dwPattern;         // the pattern for byte-arrays was only a byte
                                         }
                                         this.fill(sector, ab, 0);
@@ -816,7 +816,7 @@ class Disk extends Component {
                                  * Pattern-filling of sectors is deferred until absolutely necessary (eg, when a sector is
                                  * being written).  So all we need to do at this point is checksum all the initial sector data.
                                  */
-                                for (var idw = 0; idw < adw.length; idw++) {
+                                for (let idw = 0; idw < adw.length; idw++) {
                                     dwChecksum = (dwChecksum + adw[idw]) & (0xffffffff|0);
                                 }
                             }
@@ -831,7 +831,7 @@ class Disk extends Component {
                 Component.error("Disk image error (" + sURL + "): " + e.message);
                 diskData = null;
             }
-            
+
             if (diskData) {
                 Component.addMachineResource(this.controller.idMachine, sURL, diskData);
             }
@@ -869,18 +869,18 @@ class Disk extends Component {
     {
         if (BACKTRACK || SYMBOLS) {
 
-            var i, off, dir = {}, iSector;
+            let i, off, dir = {}, iSector;
 
             if (this.aFileTable && this.aFileTable.length) {
                 /*
                  * In order for buildFileTable() to rebuild an existing table (eg, after deltas have been
                  * applied), we need to zap any and all existing file table references in the sector data.
                  */
-                var aDiskData = this.aDiskData;
-                for (var iCylinder = 0; iCylinder < aDiskData.length; iCylinder++) {
-                    for (var iHead = 0; iHead < aDiskData[iCylinder].length; iHead++) {
+                let aDiskData = this.aDiskData;
+                for (let iCylinder = 0; iCylinder < aDiskData.length; iCylinder++) {
+                    for (let iHead = 0; iHead < aDiskData[iCylinder].length; iHead++) {
                         for (iSector = 0; iSector < aDiskData[iCylinder][iHead].length; iSector++) {
-                            var sector = aDiskData[iCylinder][iHead][iSector];
+                            let sector = aDiskData[iCylinder][iHead][iSector];
                             if (sector) {
                                 delete sector['file'];
                                 delete sector.offFile;
@@ -894,7 +894,7 @@ class Disk extends Component {
 
             dir.pbaVolume = dir.lbaTotal = 0;
 
-            var cbDisk = this.nCylinders * this.nHeads * this.nSectors * this.cbSector;
+            let cbDisk = this.nCylinders * this.nHeads * this.nSectors * this.cbSector;
 
             /*
              * At this point, if this is a remote disk, you may see some warning messages in your browser's console,
@@ -909,7 +909,7 @@ class Disk extends Component {
              */
             if (this.fRemote) this.log("ignore any synchronous XMLHttpRequest warnings here (for now)");
 
-            var sectorBoot = this.getSector(0);
+            let sectorBoot = this.getSector(0);
             if (!sectorBoot) {
                 if (DEBUG && this.messageEnabled()) {
                     this.printMessage("buildFileTable(): unable to read boot sector");
@@ -919,7 +919,7 @@ class Disk extends Component {
 
             dir.cbSector = this.getSectorData(sectorBoot, DiskAPI.BPB.SECTOR_BYTES, 2);
 
-            var fValid = true;
+            let fValid = true;
             if (dir.cbSector != this.cbSector) {
                 /*
                  * When the first sector doesn't appear to contain a valid BPB, the most likely explanations are:
@@ -957,7 +957,7 @@ class Disk extends Component {
                      */
                     off = DiskAPI.MBR.PARTITIONS.OFFSET;
                     for (i = 0; i < 4; i++) {
-                        var bStatus = this.getSectorData(sectorBoot, off + DiskAPI.MBR.PARTITIONS.ENTRY.STATUS, 1);
+                        let bStatus = this.getSectorData(sectorBoot, off + DiskAPI.MBR.PARTITIONS.ENTRY.STATUS, 1);
                         if (bStatus == DiskAPI.MBR.PARTITIONS.STATUS.ACTIVE) {
                             dir.pbaVolume = this.getSectorData(sectorBoot, off + DiskAPI.MBR.PARTITIONS.ENTRY.LBA_FIRST, 4);
                             sectorBoot = this.getSector(dir.pbaVolume);
@@ -1032,15 +1032,15 @@ class Disk extends Component {
              */
             this.assert(!((dir.nEntries * DiskAPI.DIRENT.LENGTH) % dir.cbSector));
 
-            var apba = [];
-            for (var lba = dir.lbaRoot; lba < dir.lbaData; lba++) apba.push(dir.pbaVolume + lba);
+            let apba = [];
+            for (let lba = dir.lbaRoot; lba < dir.lbaData; lba++) apba.push(dir.pbaVolume + lba);
             this.getDir(dir, this.sDiskFile, "", apba);
 
             /*
              * Create the sector-to-file mappings now.
              */
             for (i = 0; i < this.aFileTable.length; i++) {
-                var file = this.aFileTable[i];
+                let file = this.aFileTable[i];
                 off = 0;
                 for (iSector = 0; iSector < file.apba.length; iSector++) {
                     this.updateSector(file, file.apba[iSector], off);
@@ -1064,15 +1064,15 @@ class Disk extends Component {
      */
     getModuleInfo(sModule, nSegment)
     {
-        var aSymbols = {};
+        let aSymbols = {};
         if (SYMBOLS && this.aFileTable) {
-            for (var iFile = 0; iFile < this.aFileTable.length; iFile++) {
-                var file = this.aFileTable[iFile];
+            for (let iFile = 0; iFile < this.aFileTable.length; iFile++) {
+                let file = this.aFileTable[iFile];
                 if (file.sModule != sModule) continue;
-                var segment = file.aSegments[nSegment];
+                let segment = file.aSegments[nSegment];
                 if (!segment) continue;
-                for (var iOrdinal in segment.aEntries) {
-                    var entry = segment.aEntries[iOrdinal];
+                for (let iOrdinal in segment.aEntries) {
+                    let entry = segment.aEntries[iOrdinal];
                     /*
                      * entry[1] is the symbol name, which becomes the index, and entry[0] is the offset.
                      */
@@ -1099,15 +1099,15 @@ class Disk extends Component {
      */
     getSymbolInfo(sSymbol)
     {
-        var aInfo = [];
+        let aInfo = [];
         if (SYMBOLS && this.aFileTable) {
-            var sSymbolUpper = sSymbol.toUpperCase();
-            for (var iFile = 0; iFile < this.aFileTable.length; iFile++) {
-                var file = this.aFileTable[iFile];
-                for (var iSegment in file.aSegments) {
-                    var segment = file.aSegments[iSegment];
-                    for (var iOrdinal in segment.aEntries) {
-                        var entry = segment.aEntries[iOrdinal];
+            let sSymbolUpper = sSymbol.toUpperCase();
+            for (let iFile = 0; iFile < this.aFileTable.length; iFile++) {
+                let file = this.aFileTable[iFile];
+                for (let iSegment in file.aSegments) {
+                    let segment = file.aSegments[iSegment];
+                    for (let iOrdinal in segment.aEntries) {
+                        let entry = segment.aEntries[iOrdinal];
                         if (entry[1] && entry[1].indexOf(sSymbolUpper) >= 0) {
                             aInfo.push([entry[1], file.sName, iSegment, entry[0], segment.offEnd - segment.offStart]);
                         }
@@ -1129,23 +1129,23 @@ class Disk extends Component {
      */
     getDir(dir, sDisk, sDir, apba)
     {
-        var file;
-        var iStart = this.aFileTable.length;
-        var nEntriesPerSector = (dir.cbSector / DiskAPI.DIRENT.LENGTH) | 0;
+        let file;
+        let iStart = this.aFileTable.length;
+        let nEntriesPerSector = (dir.cbSector / DiskAPI.DIRENT.LENGTH) | 0;
 
         dir.sDir = sDir + "\\";
 
         if (DEBUG && this.messageEnabled()) this.printMessage('getDir("' + sDisk + '","' + dir.sDir + '")');
 
-        for (var iSector = 0; iSector < apba.length; iSector++) {
-            var pba = apba[iSector];
-            for (var iEntry = 0; iEntry < nEntriesPerSector; iEntry++) {
+        for (let iSector = 0; iSector < apba.length; iSector++) {
+            let pba = apba[iSector];
+            for (let iEntry = 0; iEntry < nEntriesPerSector; iEntry++) {
                 if (!this.getDirEntry(dir, pba, iEntry)) {
                     iSector = apba.length;
                     break;
                 }
                 if (dir.sName == null || dir.sName == "." || dir.sName == "..") continue;
-                var sPath = dir.sDir + dir.sName;
+                let sPath = dir.sDir + dir.sName;
                 if (DEBUG && this.messageEnabled(Messages.DISK | Messages.DATA)) {
                     this.printMessage('"' + sPath + '" size=' + dir.cbSize + ' cluster=' + dir.iCluster + ' sectors=' + JSON.stringify(dir.apba));
                     if (dir.apba.length) this.printMessage(this.dumpSector(this.getSector(dir.apba[0]), dir.apba[0], sPath));
@@ -1155,9 +1155,9 @@ class Disk extends Component {
             }
         }
 
-        var iEnd = this.aFileTable.length;
+        let iEnd = this.aFileTable.length;
 
-        for (var i = iStart; i < iEnd; i++) {
+        for (let i = iStart; i < iEnd; i++) {
             file = this.aFileTable[i];
             if (file.bAttr & DiskAPI.ATTR.SUBDIR && file.apba.length) this.getDir(dir, sDisk, sDir + "\\" + file.sName, file.apba);
         }
@@ -1208,8 +1208,8 @@ class Disk extends Component {
             }
         }
         if (dir.sectorDirCache) {
-            var off = i * DiskAPI.DIRENT.LENGTH;
-            var b = this.getSectorData(dir.sectorDirCache, off, 1);
+            let off = i * DiskAPI.DIRENT.LENGTH;
+            let b = this.getSectorData(dir.sectorDirCache, off, 1);
             if (b == DiskAPI.DIRENT.UNUSED) {
                 return false;
             }
@@ -1218,7 +1218,7 @@ class Disk extends Component {
                 return true;
             }
             dir.sName = Str.trim(this.getSectorString(dir.sectorDirCache, off + DiskAPI.DIRENT.NAME, 8));
-            var s = Str.trim(this.getSectorString(dir.sectorDirCache, off + DiskAPI.DIRENT.EXT, 3));
+            let s = Str.trim(this.getSectorString(dir.sectorDirCache, off + DiskAPI.DIRENT.EXT, 3));
             if (s.length) dir.sName += '.' + s;
             dir.bAttr = this.getSectorData(dir.sectorDirCache, off + DiskAPI.DIRENT.ATTR, 1);
             dir.cbSize = this.getSectorData(dir.sectorDirCache, off + DiskAPI.DIRENT.SIZE, 2);
@@ -1238,16 +1238,16 @@ class Disk extends Component {
      */
     convertClusterToSectors(dir)
     {
-        var apba = [];
-        var iCluster = dir.iCluster;
+        let apba = [];
+        let iCluster = dir.iCluster;
         if (iCluster) {
             do {
                 if (iCluster < DiskAPI.FAT12.CLUSNUM_MIN) {
                     this.assert(false);
                     break;
                 }
-                var lba = dir.lbaData + ((iCluster - DiskAPI.FAT12.CLUSNUM_MIN) * dir.nClusterSecs);
-                for (var i = 0; i < dir.nClusterSecs; i++) {
+                let lba = dir.lbaData + ((iCluster - DiskAPI.FAT12.CLUSNUM_MIN) * dir.nClusterSecs);
+                for (let i = 0; i < dir.nClusterSecs; i++) {
                     apba.push(dir.pbaVolume + lba++);
                 }
                 iCluster = this.getClusterEntry(dir, iCluster, 0) | this.getClusterEntry(dir, iCluster, 1);
@@ -1268,17 +1268,17 @@ class Disk extends Component {
      */
     getClusterEntry(dir, iCluster, iByte)
     {
-        var w = 0;
-        var cbitsSector = dir.cbSector * 8;
-        var offBits = dir.nFATBits * iCluster + (iByte? 8 : 0);
-        var iSector = (offBits / cbitsSector) | 0;
+        let w = 0;
+        let cbitsSector = dir.cbSector * 8;
+        let offBits = dir.nFATBits * iCluster + (iByte? 8 : 0);
+        let iSector = (offBits / cbitsSector) | 0;
         if (!dir.sectorFATCache || !dir.lbaFATCache || dir.lbaFATCache != dir.lbaFAT + iSector) {
             dir.lbaFATCache = dir.lbaFAT + iSector;
             dir.sectorFATCache = this.getSector(dir.pbaVolume + dir.lbaFATCache);
         }
         if (dir.sectorFATCache) {
             offBits = (offBits % cbitsSector) | 0;
-            var off = (offBits >> 3);
+            let off = (offBits >> 3);
             w = this.getSectorData(dir.sectorFATCache, off, 1);
             if (!iByte) {
                 if (offBits & 0x7) w >>= 4;
@@ -1307,15 +1307,15 @@ class Disk extends Component {
      */
     getSector(pba)
     {
-        var nSectorsPerCylinder = this.nHeads * this.nSectors;
-        var iCylinder = (pba / nSectorsPerCylinder) | 0;
+        let nSectorsPerCylinder = this.nHeads * this.nSectors;
+        let iCylinder = (pba / nSectorsPerCylinder) | 0;
         if (iCylinder < this.nCylinders) {
-            var nSectorsRemaining = (pba % nSectorsPerCylinder);
-            var iHead = (nSectorsRemaining / this.nSectors) | 0;
+            let nSectorsRemaining = (pba % nSectorsPerCylinder);
+            let iHead = (nSectorsRemaining / this.nSectors) | 0;
             /*
              * PBA numbers are 0-based, but the sector numbers in CHS addressing are 1-based, so add one to iSector
              */
-            var iSector = (nSectorsRemaining % this.nSectors) + 1;
+            let iSector = (nSectorsRemaining % this.nSectors) + 1;
             return this.seek(iCylinder, iHead, iSector);
         }
         return null;
@@ -1338,12 +1338,12 @@ class Disk extends Component {
      */
     getSectorData(sector, off, len)
     {
-        var dw = 0;
-        var nShift = 0;
+        let dw = 0;
+        let nShift = 0;
         this.assert(len > 0 && len <= 4);
         while (len--) {
             this.assert(off < sector['length']);
-            var b = this.read(sector, off++);
+            let b = this.read(sector, off++);
             this.assert(b >= 0);
             if (b < 0) break;
             dw |= (b << nShift);
@@ -1365,9 +1365,9 @@ class Disk extends Component {
      */
     getSectorString(sector, off, len)
     {
-        var s = "";
+        let s = "";
         while (len--) {
-            var b = this.read(sector, off++);
+            let b = this.read(sector, off++);
             if (b <= 0) break;
             s += String.fromCharCode(b);
         }
@@ -1387,12 +1387,12 @@ class Disk extends Component {
      */
     updateSector(file, pba, off)
     {
-        var nSectorsPerCylinder = this.nHeads * this.nSectors;
-        var iCylinder = (pba / nSectorsPerCylinder) | 0;
-        var nSectorsRemaining = (pba % nSectorsPerCylinder);
-        var iHead = (nSectorsRemaining / this.nSectors) | 0;
-        var iSector = (nSectorsRemaining % this.nSectors);
-        var cylinder, head, sector;
+        let nSectorsPerCylinder = this.nHeads * this.nSectors;
+        let iCylinder = (pba / nSectorsPerCylinder) | 0;
+        let nSectorsRemaining = (pba % nSectorsPerCylinder);
+        let iHead = (nSectorsRemaining / this.nSectors) | 0;
+        let iSector = (nSectorsRemaining % this.nSectors);
+        let cylinder, head, sector;
         if ((cylinder = this.aDiskData[iCylinder]) && (head = cylinder[iHead]) && (sector = head[iSector])) {
             this.assert(sector['sector'] == iSector +1);
             if (sector['file']) {
@@ -1460,7 +1460,7 @@ class Disk extends Component {
      */
     connectRemoteDisk(sDiskPath)
     {
-        var sParms = DiskAPI.QUERY.ACTION + '=' + DiskAPI.ACTION.OPEN;
+        let sParms = DiskAPI.QUERY.ACTION + '=' + DiskAPI.ACTION.OPEN;
         sParms += '&' + DiskAPI.QUERY.VOLUME + '=' + sDiskPath;
         sParms += '&' + DiskAPI.QUERY.MODE + '=' + this.mode;
         sParms += '&' + DiskAPI.QUERY.CHS + '=' + this.nCylinders + ':' + this.nHeads + ':' + this.nSectors + ':' + this.cbSector;
@@ -1487,14 +1487,14 @@ class Disk extends Component {
         }
 
         if (this.fRemote) {
-            var sParms = DiskAPI.QUERY.ACTION + '=' + DiskAPI.ACTION.READ;
+            let sParms = DiskAPI.QUERY.ACTION + '=' + DiskAPI.ACTION.READ;
             sParms += '&' + DiskAPI.QUERY.VOLUME + '=' + this.sDiskPath;
             sParms += '&' + DiskAPI.QUERY.CHS + '=' + this.nCylinders + ':' + this.nHeads + ':' + this.nSectors + ':' + this.cbSector;
             sParms += '&' + DiskAPI.QUERY.ADDR + '=' + iCylinder + ':' + iHead + ':' + iSector + ':' + nSectors;
             sParms += '&' + DiskAPI.QUERY.MACHINE + '=' + this.controller.getMachineID();
             sParms += '&' + DiskAPI.QUERY.USER + '=' + this.controller.getUserID();
-            var disk = this;
-            var sDiskURL = Web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
+            let disk = this;
+            let sDiskURL = Web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
             Web.getResource(sDiskURL, null, fAsync, function(sURL, sResponse, nErrorCode) {
                 disk.doneReadRemoteSectors(sURL, sResponse, nErrorCode, [iCylinder, iHead, iSector, nSectors, fAsync, done]);
             });
@@ -1514,16 +1514,16 @@ class Disk extends Component {
      */
     doneReadRemoteSectors(sURLName, sURLData, nErrorCode, aRequest)
     {
-        var fAsync = false;
+        let fAsync = false;
 
-        var iCylinder = aRequest[0];
-        var iHead = aRequest[1];
-        var iSector = aRequest[2];
-        var nSectors = aRequest[3];
+        let iCylinder = aRequest[0];
+        let iHead = aRequest[1];
+        let iSector = aRequest[2];
+        let nSectors = aRequest[3];
 
         if (!nErrorCode) {
-            var abData = JSON.parse(sURLData);
-            var offData = 0;
+            let abData = JSON.parse(sURLData);
+            let offData = 0;
             while (nSectors--) {
                 /*
                  * We call seek with fWrite == true to prevent seek() from triggering another call
@@ -1534,7 +1534,7 @@ class Disk extends Component {
                  *
                  * We KNOW this is an uninitialized sector, because we're about to initialize it.
                  */
-                var sector = this.seek(iCylinder, iHead, iSector, true);
+                let sector = this.seek(iCylinder, iHead, iSector, true);
                 if (!sector) {
                     if (DEBUG && this.messageEnabled()) {
                         this.printMessage("doneReadRemoteSectors(): seek(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ") failed");
@@ -1555,7 +1555,7 @@ class Disk extends Component {
                 this.printMessage("doneReadRemoteSectors(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ",N=" + nSectors + ") returned error " + nErrorCode);
             }
         }
-        var done = aRequest[5];
+        let done = aRequest[5];
         if (done) done(nErrorCode, fAsync);
     }
 
@@ -1587,7 +1587,7 @@ class Disk extends Component {
         }
 
         if (this.fRemote) {
-            var dataPost = {};
+            let dataPost = {};
             this.fWriteInProgress = true;
             dataPost[DiskAPI.QUERY.ACTION] = DiskAPI.ACTION.WRITE;
             dataPost[DiskAPI.QUERY.VOLUME] = this.sDiskPath;
@@ -1596,8 +1596,8 @@ class Disk extends Component {
             dataPost[DiskAPI.QUERY.MACHINE] = this.controller.getMachineID();
             dataPost[DiskAPI.QUERY.USER] = this.controller.getUserID();
             dataPost[DiskAPI.QUERY.DATA] = JSON.stringify(abSectors);
-            var disk = this;
-            var sDiskURL = Web.getHost() + DiskAPI.ENDPOINT;
+            let disk = this;
+            let sDiskURL = Web.getHost() + DiskAPI.ENDPOINT;
             Web.getResource(sDiskURL, dataPost, fAsync, function(sURL, sResponse, nErrorCode) {
                 disk.doneWriteRemoteSectors(sURL, sResponse, nErrorCode, [iCylinder, iHead, iSector, nSectors, fAsync]);
             });
@@ -1616,16 +1616,16 @@ class Disk extends Component {
      */
     doneWriteRemoteSectors(sURLName, sURLData, nErrorCode, aRequest)
     {
-        var iCylinder = aRequest[0];
-        var iHead = aRequest[1];
-        var iSector = aRequest[2];
-        var nSectors = aRequest[3];
-        var fAsync = aRequest[4];
+        let iCylinder = aRequest[0];
+        let iHead = aRequest[1];
+        let iSector = aRequest[2];
+        let nSectors = aRequest[3];
+        let fAsync = aRequest[4];
         this.fWriteInProgress = false;
 
         if (iCylinder >= 0 && iCylinder < this.aDiskData.length && iHead >= 0 && iHead < this.aDiskData[iCylinder].length) {
-            for (var i = iSector - 1; nSectors-- > 0 && i >= 0 && i < this.aDiskData[iCylinder][iHead].length; i++) {
-                var sector = this.aDiskData[iCylinder][iHead][i];
+            for (let i = iSector - 1; nSectors-- > 0 && i >= 0 && i < this.aDiskData[iCylinder][iHead].length; i++) {
+                let sector = this.aDiskData[iCylinder][iHead][i];
 
                 if (!nErrorCode) {
                     if (!sector.fDirty) {
@@ -1653,11 +1653,11 @@ class Disk extends Component {
     disconnectRemoteDisk()
     {
         if (this.fRemote) {
-            var sParms = DiskAPI.QUERY.ACTION + '=' + DiskAPI.ACTION.CLOSE;
+            let sParms = DiskAPI.QUERY.ACTION + '=' + DiskAPI.ACTION.CLOSE;
             sParms += '&' + DiskAPI.QUERY.VOLUME + '=' + this.sDiskPath;
             sParms += '&' + DiskAPI.QUERY.MACHINE + '=' + this.controller.getMachineID();
             sParms += '&' + DiskAPI.QUERY.USER + '=' + this.controller.getUserID();
-            var sDiskURL = Web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
+            let sDiskURL = Web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
             Web.getResource(sDiskURL, null, true);
             this.fRemote = false;
         }
@@ -1684,7 +1684,7 @@ class Disk extends Component {
     {
         sector.fDirty = true;
 
-        var j = this.aDirtySectors.indexOf(sector);
+        let j = this.aDirtySectors.indexOf(sector);
         if (j >= 0) {
             this.aDirtySectors.splice(j, 1);
             this.aDirtyTimestamps.splice(j, 1);
@@ -1711,7 +1711,7 @@ class Disk extends Component {
     updateWriteTimer()
     {
         if (this.aDirtySectors.length) {
-            var msWrite = this.aDirtyTimestamps[0] + Disk.REMOTE_WRITE_DELAY;
+            let msWrite = this.aDirtyTimestamps[0] + Disk.REMOTE_WRITE_DELAY;
             if (this.timerWrite) {
                 if (this.msTimerWrite < msWrite) {
                     clearTimeout(this.timerWrite);
@@ -1719,9 +1719,9 @@ class Disk extends Component {
                 }
             }
             if (!this.timerWrite) {
-                var obj = this;
-                var msNow = Usr.getTime();
-                var msDelay = msWrite - msNow;
+                let obj = this;
+                let msNow = Usr.getTime();
+                let msDelay = msWrite - msNow;
                 if (msDelay < 0) msDelay = 0;
                 if (msDelay > Disk.REMOTE_WRITE_DELAY) msDelay = Disk.REMOTE_WRITE_DELAY;
                 this.timerWrite = setTimeout(function() {
@@ -1753,17 +1753,17 @@ class Disk extends Component {
         if (fAsync) {
             this.timerWrite = null;
         }
-        var sector = this.aDirtySectors[0];
+        let sector = this.aDirtySectors[0];
         if (sector) {
-            var iCylinder = sector.iCylinder;
-            var iHead = sector.iHead;
-            var iSector = sector['sector'];
-            var nSectors = 0;
-            var abSectors = [];
-            for (var i = iSector - 1; i < this.aDiskData[iCylinder][iHead].length; i++) {
-                var sectorNext = this.aDiskData[iCylinder][iHead][i];
+            let iCylinder = sector.iCylinder;
+            let iHead = sector.iHead;
+            let iSector = sector['sector'];
+            let nSectors = 0;
+            let abSectors = [];
+            for (let i = iSector - 1; i < this.aDiskData[iCylinder][iHead].length; i++) {
+                let sectorNext = this.aDiskData[iCylinder][iHead][i];
                 if (!sectorNext.fDirty) break;
-                var j = this.aDirtySectors.indexOf(sectorNext);
+                let j = this.aDirtySectors.indexOf(sectorNext);
                 this.assert(j >= 0, "findDirtySectors(CHS=" + iCylinder + ':' + iHead + ':' + sectorNext['sector'] + ") missing from aDirtySectors");
                 if (DEBUG && this.messageEnabled()) {
                     this.printMessage("findDirtySectors(CHS=" + iCylinder + ':' + iHead + ':' + sectorNext['sector'] + ")");
@@ -1775,7 +1775,7 @@ class Disk extends Component {
                 nSectors++;
             }
             this.assert(!!abSectors.length, "no data for dirty sector (CHS=" + iCylinder + ':' + iHead + ':' + sector['sector'] + ")");
-            var response = this.writeRemoteSectors(iCylinder, iHead, iSector, nSectors, abSectors, fAsync);
+            let response = this.writeRemoteSectors(iCylinder, iHead, iSector, nSectors, abSectors, fAsync);
             return fAsync || response;
         }
         return false;
@@ -1817,12 +1817,12 @@ class Disk extends Component {
      */
     seek(iCylinder, iHead, iSector, fWrite, done)
     {
-        var sector = null;
-        var drive = this.drive;
-        var cylinder = this.aDiskData[iCylinder];
+        let sector = null;
+        let drive = this.drive;
+        let cylinder = this.aDiskData[iCylinder];
         if (cylinder) {
-            var i;
-            var track = cylinder[iHead];
+            let i;
+            let track = cylinder[iHead];
             /*
              * The following code allows a single-sided diskette image to be reformatted (ie, "expanded")
              * as a double-sided image, provided the drive has more than one head (see drive.nHeads).
@@ -1855,7 +1855,7 @@ class Disk extends Component {
                                  */
                                 sector['pattern'] = 0;
                             } else {
-                                var nSectors = 1;
+                                let nSectors = 1;
                                 /*
                                  * We know we need to read at least 1 sector, but let's count the number of trailing sectors
                                  * on the same track that may also be required.
@@ -1903,9 +1903,9 @@ class Disk extends Component {
      */
     fill(sector, ab, off)
     {
-        var cdw = sector['length'] >> 2;
-        var adw = new Array(cdw);
-        for (var idw = 0; idw < cdw; idw++) {
+        let cdw = sector['length'] >> 2;
+        let adw = new Array(cdw);
+        for (let idw = 0; idw < cdw; idw++) {
             adw[idw] = ab[off] | (ab[off + 1] << 8) | (ab[off + 2] << 16) | (ab[off + 3] << 24);
             off += 4;
         }
@@ -1925,14 +1925,14 @@ class Disk extends Component {
      */
     toBytes(sector)
     {
-        var cb = sector['length'];
-        var ab = new Array(cb);
-        var ib = 0;
-        var cdw = cb >> 2;
-        var adw = sector['data'];
-        var dwPattern = sector['pattern'];
-        for (var idw = 0; idw < cdw; idw++) {
-            var dw = (idw < adw.length? adw[idw] : dwPattern);
+        let cb = sector['length'];
+        let ab = new Array(cb);
+        let ib = 0;
+        let cdw = cb >> 2;
+        let adw = sector['data'];
+        let dwPattern = sector['pattern'];
+        for (let idw = 0; idw < cdw; idw++) {
+            let dw = (idw < adw.length? adw[idw] : dwPattern);
             ab[ib++] = dw & 0xff;
             ab[ib++] = (dw >> 8) & 0xff;
             ab[ib++] = (dw >> 16) & 0xff;
@@ -1952,15 +1952,15 @@ class Disk extends Component {
      */
     read(sector, ibSector, fCompare)
     {
-        var b = -1;
+        let b = -1;
         if (sector) {
             if (DEBUG && !ibSector && !fCompare && this.messageEnabled()) {
                 this.printMessage('read("' + this.sDiskFile + '",CHS=' + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + ')');
             }
             if (ibSector < sector['length']) {
-                var adw = sector['data'];
-                var idw = ibSector >> 2;
-                var dw = (idw < adw.length ? adw[idw] : sector['pattern']);
+                let adw = sector['data'];
+                let idw = ibSector >> 2;
+                let dw = (idw < adw.length ? adw[idw] : sector['pattern']);
                 b = ((dw >> ((ibSector & 0x3) << 3)) & 0xff);
             }
         }
@@ -1987,15 +1987,15 @@ class Disk extends Component {
 
         if (ibSector < sector['length']) {
             if (b != this.read(sector, ibSector, true)) {
-                var adw = sector['data'];
-                var dwPattern = sector['pattern'];
-                var idw = ibSector >> 2;
-                var nShift = (ibSector & 0x3) << 3;
+                let adw = sector['data'];
+                let dwPattern = sector['pattern'];
+                let idw = ibSector >> 2;
+                let nShift = (ibSector & 0x3) << 3;
 
                 /*
                  * Ensure every byte up to the specified byte is properly initialized.
                  */
-                for (var i = adw.length; i <= idw; i++) adw[i] = dwPattern;
+                for (let i = adw.length; i <= idw; i++) adw[i] = dwPattern;
 
                 if (!sector.cModify) {
                     sector.iModify = idw;
@@ -2026,9 +2026,9 @@ class Disk extends Component {
         /*
          * Gross, but simple; more importantly, it works -- at least for disks of typical floppy magnitude.
          */
-        var s = "", pba = 0, sector;
+        let s = "", pba = 0, sector;
         while ((sector = this.getSector(pba++))) {
-            for (var off = 0, len = sector['length']; off < len; off++) {
+            for (let off = 0, len = sector['length']; off < len; off++) {
                 s += String.fromCharCode(this.getSectorData(sector, off, 1));
             }
         }
@@ -2053,18 +2053,18 @@ class Disk extends Component {
      */
     save()
     {
-        var i = 0;
-        var deltas = [];
+        let i = 0;
+        let deltas = [];
         deltas[i++] = [this.sDiskPath, this.dwChecksum, this.nCylinders, this.nHeads, this.nSectors, this.cbSector];
         if (!this.fRemote && !this.fWriteProtected) {
-            var aDiskData = this.aDiskData;
-            for (var iCylinder = 0; iCylinder < aDiskData.length; iCylinder++) {
-                for (var iHead = 0; iHead < aDiskData[iCylinder].length; iHead++) {
-                    for (var iSector = 0; iSector < aDiskData[iCylinder][iHead].length; iSector++) {
-                        var sector = aDiskData[iCylinder][iHead][iSector];
+            let aDiskData = this.aDiskData;
+            for (let iCylinder = 0; iCylinder < aDiskData.length; iCylinder++) {
+                for (let iHead = 0; iHead < aDiskData[iCylinder].length; iHead++) {
+                    for (let iSector = 0; iSector < aDiskData[iCylinder][iHead].length; iSector++) {
+                        let sector = aDiskData[iCylinder][iHead][iSector];
                         if (sector && sector.cModify) {
-                            var mods = [], n = 0;
-                            var iModify = sector.iModify, iModifyLimit = sector.iModify + sector.cModify;
+                            let mods = [], n = 0;
+                            let iModify = sector.iModify, iModifyLimit = sector.iModify + sector.cModify;
                             while (iModify < iModifyLimit) {
                                 mods[n++] = sector['data'][iModify++];
                             }
@@ -2103,8 +2103,8 @@ class Disk extends Component {
          * If deltas is undefined, that's not necessarily an error;  the controller may simply be (re)initializing
          * itself (although neither controller should be calling restore() under those conditions anymore).
          */
-        var nChanges = 0;
-        var sReason = "unsupported restore format";
+        let nChanges = 0;
+        let sReason = "unsupported restore format";
         /*
          * I originally added a check for aDiskData here on the assumption that if there was an error loading
          * a disk image, we will have already notified the user, so any additional errors about differing checksums,
@@ -2115,8 +2115,8 @@ class Disk extends Component {
          */
         if (deltas && deltas.length > 0) {
 
-            var i = 0;
-            var aDiskInfo = deltas[i++];
+            let i = 0;
+            let aDiskInfo = deltas[i++];
 
             if (aDiskInfo && aDiskInfo.length >= 2) {
                 /*
@@ -2162,11 +2162,11 @@ class Disk extends Component {
             if (!this.aDiskData.length) nChanges = -1;
 
             while (i < deltas.length && nChanges >= 0) {
-                var m = 0;
-                var mod = deltas[i++];
-                var iCylinder = mod[m++];
-                var iHead = mod[m++];
-                var iSector = mod[m++];
+                let m = 0;
+                let mod = deltas[i++];
+                let iCylinder = mod[m++];
+                let iHead = mod[m++];
+                let iSector = mod[m++];
                 /*
                  * Note the buried test for write-protection.  Yes, an invariant condition should be tested
                  * outside the loop, not inside, but (a) it's a trivial test, (b) the test should never fail
@@ -2183,21 +2183,21 @@ class Disk extends Component {
                     nChanges = -1;
                     break;
                 }
-                var iModify = mod[m++];
-                var mods = mod[m++];
-                var iModifyLimit = iModify + mods.length;
-                var sector = this.aDiskData[iCylinder][iHead][iSector];
+                let iModify = mod[m++];
+                let mods = mod[m++];
+                let iModifyLimit = iModify + mods.length;
+                let sector = this.aDiskData[iCylinder][iHead][iSector];
                 if (!sector) continue;
                 /*
                  * Since write() now deals with empty/partial sectors, we no longer need to completely "inflate"
                  * the sector prior to applying modifications.  So let's just make sure that the sector is "inflated"
                  * up to iModify.
                  */
-                var idw = sector['data'].length;
+                let idw = sector['data'].length;
                 while (idw < iModify) {
                     sector['data'][idw++] = sector['pattern'];
                 }
-                var n = 0;
+                let n = 0;
                 sector.iModify = iModify;
                 sector.cModify = mods.length;
                 while (iModify < iModifyLimit) {
@@ -2244,7 +2244,7 @@ class Disk extends Component {
      */
     convertToJSON(fFormatted)
     {
-        var s, pba = 0, sector, sectorLast;
+        let s, pba = 0, sector, sectorLast;
 
         while ((sector = this.getSector(pba++))) {
             this.deflateSector(sector);
@@ -2300,11 +2300,11 @@ class Disk extends Component {
      */
     deflateSector(sector)
     {
-        var adw = sector['data'];
-        var cdw = adw.length;
+        let adw = sector['data'];
+        let cdw = adw.length;
         if ((cdw << 2) == sector['length']) {
-            var idw = cdw - 1;
-            var dwPattern = adw[idw], cDupes = 0;
+            let idw = cdw - 1;
+            let dwPattern = adw[idw], cDupes = 0;
             while (idw--) {
                 if (adw[idw] !== dwPattern) break;
                 cDupes++;
@@ -2327,24 +2327,24 @@ class Disk extends Component {
      */
     dumpSector(sector, pba, sDesc)
     {
-        var sDump = "";
+        let sDump = "";
         if (DEBUG && sector) {
             if (pba != null) sDump += "sector " + pba + (sDesc? (" for " + sDesc) : "") + ':';
-            var sBytes = "", sChars = "";
-            var cbSector = sector['length'];
-            var cdwData = sector['data'].length;
-            var dw = 0;
-            for (var i = 0; i < cbSector; i++) {
+            let sBytes = "", sChars = "";
+            let cbSector = sector['length'];
+            let cdwData = sector['data'].length;
+            let dw = 0;
+            for (let i = 0; i < cbSector; i++) {
                 if ((i % 16) === 0) {
                     if (sDump) sDump += sBytes + ' ' + sChars + '\n';
                     sDump += Str.toHex(i, 4) + ": ";
                     sBytes = sChars = "";
                 }
                 if ((i % 4) === 0) {
-                    var idw = i >> 2;
+                    let idw = i >> 2;
                     dw = (idw < cdwData? sector['data'][idw] : sector['pattern']);
                 }
-                var b = dw & 0xff;
+                let b = dw & 0xff;
                 dw >>>= 8;
                 sBytes += Str.toHex(b, 2) + (i % 16 == 7? "-" : " ");
                 sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
@@ -2433,11 +2433,11 @@ class FileInfo {
      */
     loadValue(offset, length)
     {
-        var l;
+        let l;
         length = length || 2;
-        var iSector = offset >> 9;
-        var offSector = offset & 0x1ff;
-        var sector = this.disk.getSector(this.apba[iSector]);
+        let iSector = offset >> 9;
+        let offSector = offset & 0x1ff;
+        let sector = this.disk.getSector(this.apba[iSector]);
         if (sector) {
             /*
              * If the read is wholly contained within a sector, read it with one call.
@@ -2449,7 +2449,7 @@ class FileInfo {
              * The spans a sector boundary, so we just call ourselves one byte at a time.
              */
             l = 0;
-            var shift = 0;
+            let shift = 0;
             while (length--) {
                 l |= this.loadValue(offset++, 1) << shift;
                 shift += 8;
@@ -2468,10 +2468,10 @@ class FileInfo {
      */
     loadString(offset, length)
     {
-        var s = "";
+        let s = "";
         if (!length) length = -1;
         while (length--) {
-            var b = this.loadValue(offset++, 1);
+            let b = this.loadValue(offset++, 1);
             if (!b) break;
             s += String.fromCharCode(b);
         }
@@ -2504,7 +2504,7 @@ class FileInfo {
         /*
          * Read the Segment Table entries now.
          */
-        var iSegment = 1;
+        let iSegment = 1;
         this.aSegments = [];
         this.aOrdinals = [];                // this is an optional array for quick ordinal-to-segment lookup
 
@@ -2513,9 +2513,9 @@ class FileInfo {
         }
 
         while (nEntries--) {
-            var offSegment = this.loadValue(offEntries) << nSegOffShift;
+            let offSegment = this.loadValue(offEntries) << nSegOffShift;
             if (offSegment) {
-                var lenSegment = this.loadValue(offEntries + 2) || 0x10000;       // 0 means 64K
+                let lenSegment = this.loadValue(offEntries + 2) || 0x10000;       // 0 means 64K
 
                 if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
                     this.disk.printMessage("segment " + iSegment + ": offStart=" + Str.toHexLong(offSegment) + " offEnd=" + Str.toHexLong(offSegment + lenSegment));
@@ -2559,7 +2559,7 @@ class FileInfo {
      */
     loadEntryTable(offEntries, offEntriesEnd)
     {
-        var iOrdinal = 1;
+        let iOrdinal = 1;
 
         if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
             this.disk.printMessage("loadEntryTable(" + Str.toHexLong(offEntries) + "," + Str.toHexLong(offEntriesEnd) + ")");
@@ -2567,10 +2567,10 @@ class FileInfo {
 
         while (offEntries < offEntriesEnd) {
 
-            var w = this.loadValue(offEntries);
-            var bEntries = w & 0xff;
+            let w = this.loadValue(offEntries);
+            let bEntries = w & 0xff;
             if (!bEntries) break;
-            var bSegment = w >> 8, iSegment;
+            let bSegment = w >> 8, iSegment;
 
             if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
                 this.disk.printMessage("bundle for segment " + bSegment + ": " + bEntries + " entries @" + Str.toHex(offEntries));
@@ -2591,9 +2591,9 @@ class FileInfo {
                  * byte contains flags indicating exported (0x1) and/or global/shared (0x2) data, and the
                  * next word is the offset within the segment.
                  */
-                var offEntry;
-                var offDebug = offEntries;
-                var bFlags = this.loadValue(offEntries, 1);
+                let offEntry;
+                let offDebug = offEntries;
+                let bFlags = this.loadValue(offEntries, 1);
 
                 if (bSegment <= 0xFE) {
                     iSegment = bSegment;
@@ -2637,7 +2637,7 @@ class FileInfo {
      */
     loadNameTable(offEntries, offEntriesEnd)
     {
-        var cNames = 0;
+        let cNames = 0;
 
         if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
             this.disk.printMessage("loadNameTable(" + Str.toHexLong(offEntries) + (offEntriesEnd? ("," + Str.toHexLong(offEntriesEnd)) : "") + ")");
@@ -2645,11 +2645,11 @@ class FileInfo {
 
         while (!offEntriesEnd || offEntries < offEntriesEnd) {
 
-            var offDebug = offEntries;
-            var bLength = this.loadValue(offEntries, 1);
+            let offDebug = offEntries;
+            let bLength = this.loadValue(offEntries, 1);
             if (!bLength) break;
 
-            var sSymbol = this.loadString(offEntries + 1, bLength);
+            let sSymbol = this.loadString(offEntries + 1, bLength);
             if (!sSymbol) break;                    // an error must have occurred (this is not a natural way to end)
             offEntries += 1 + bLength;
 
@@ -2661,12 +2661,12 @@ class FileInfo {
                 }
             }
             else {
-                var iOrdinal = this.loadValue(offEntries);
-                var tuple = this.aOrdinals[iOrdinal];
+                let iOrdinal = this.loadValue(offEntries);
+                let tuple = this.aOrdinals[iOrdinal];
                 if (tuple) {
-                    var iSegment = tuple[0];        // tuple[0] is the segment number and tuple[1] is the corresponding offEntry
+                    let iSegment = tuple[0];        // tuple[0] is the segment number and tuple[1] is the corresponding offEntry
                     if (this.aSegments[iSegment]) {
-                        var aEntries = this.aSegments[iSegment].aEntries[iOrdinal];
+                        let aEntries = this.aSegments[iSegment].aEntries[iOrdinal];
                         this.disk.assert(aEntries && aEntries.length == 1);
                         aEntries.push(sSymbol);
                         if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
@@ -2709,21 +2709,21 @@ class FileInfo {
             return;
         }
 
-        var offNEHeader = this.loadField(FileInfo.OE.oeNEHeader);
+        let offNEHeader = this.loadField(FileInfo.OE.oeNEHeader);
         if (this.loadField(FileInfo.NE.neSignature, offNEHeader) != FileInfo.NE.SIG) {
             return;
         }
 
-        var nEntries = this.loadField(FileInfo.NE.neSTEntries, offNEHeader);
-        var offEntries = this.loadField(FileInfo.NE.neSTOffset, offNEHeader);
-        var nSegOffShift = this.loadField(FileInfo.NE.neSegOffShift, offNEHeader);
+        let nEntries = this.loadField(FileInfo.NE.neSTEntries, offNEHeader);
+        let offEntries = this.loadField(FileInfo.NE.neSTOffset, offNEHeader);
+        let nSegOffShift = this.loadField(FileInfo.NE.neSegOffShift, offNEHeader);
 
         if (offEntries && nEntries) {
             this.loadSegmentTable(offEntries + offNEHeader, nEntries, nSegOffShift || 0);
         }
 
         offEntries = this.loadField(FileInfo.NE.neETOffset, offNEHeader);
-        var cbEntries = this.loadField(FileInfo.NE.neETSize, offNEHeader);
+        let cbEntries = this.loadField(FileInfo.NE.neETSize, offNEHeader);
         if (offEntries && cbEntries) {
             this.loadEntryTable(offEntries += offNEHeader, offEntries + cbEntries);
         }
@@ -2758,10 +2758,10 @@ class FileInfo {
      */
     getSymbol(off, fNearest)
     {
-        var sSymbol = null;
+        let sSymbol = null;
         if (this.aSegments) {
-            for (var iSegment in this.aSegments) {
-                var segment = this.aSegments[iSegment];
+            for (let iSegment in this.aSegments) {
+                let segment = this.aSegments[iSegment];
                 if (off >= segment.offStart && off <= segment.offEnd) {
                     /*
                      * This is the one and only segment we need to check, so we can make off segment-relative now.
@@ -2770,10 +2770,10 @@ class FileInfo {
                     /*
                      * To support fNearest, save the entry where (off - entry[0]) yields the smallest positive result.
                      */
-                    var cbNearest = off, entryNearest;
-                    for (var iOrdinal in segment.aEntries) {
-                        var entry = segment.aEntries[iOrdinal];
-                        var cb = off - entry[0];
+                    let cbNearest = off, entryNearest;
+                    for (let iOrdinal in segment.aEntries) {
+                        let entry = segment.aEntries[iOrdinal];
+                        let cb = off - entry[0];
                         if (!cb) {
                             sSymbol = this.sModule + '!' + entry[1];
                             break;

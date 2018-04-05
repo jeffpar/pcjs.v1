@@ -56,15 +56,15 @@ class Keyboard extends Component {
      *
      *          "US83" (default)
      *          "US84"
-     *          "US101" (not fully supported yet) 
+     *          "US101" (not fully supported yet)
      *
      *      autoType: string of keys to automatically inject when the machine is ready (undefined if none)
-     *      
+     *
      *      softKeys: boolean set to true to enable the machine's soft keyboard, if any (default is false)
      *
      * Its main purpose is to receive binding requests for various keyboard events, and to use those events
      * to simulate the PC's keyboard hardware.
-     * 
+     *
      * TODO: Consider finishing 101-key keyboard support, even though that's sort of a "PS/2" thing, and I'm not
      * really interested in taking PCjs into the PS/2 line (that's also why we still support only serial mice, not
      * "PS/2" mice).  In addition, all keyboards *after* the original PC 83-key keyboard supported their own unique
@@ -82,7 +82,7 @@ class Keyboard extends Component {
 
         this.fMobile = Web.isMobile("!iPad");
         this.printMessage("mobile keyboard support: " + (this.fMobile? "true" : "false"));
-        
+
         /*
          * This flag (formerly fMSIE, for all versions of Microsoft Internet Explorer, up to and including v11)
          * has been updated to reflect the Microsoft Windows *platform* rather than the *browser*, because it appears
@@ -164,18 +164,18 @@ class Keyboard extends Component {
         this.msDoubleClick   = 250;         // used by mousedown/mouseup handlers to soft-lock modifier keys
         this.cKeysPressed    = 0;           // count of keys pressed since the last time it was reset
         this.softCodeKeys    = Object.keys(Keyboard.SOFTCODES);
-        
+
         /*
          * Remove all single-character SOFTCODE keys from the softCodeKeys array, because those SOFTCODES
          * are not supported by injectKeys(); they can be specified normally using their single-character identity.
          */
-        for (var i = 0; i < this.softCodeKeys.length; i++) {
+        for (let i = 0; i < this.softCodeKeys.length; i++) {
             if (this.softCodeKeys[i].length < 2) {
                 this.softCodeKeys.splice(i, 1);
                 i--;
             }
         }
-        
+
         /*
          * autoType records the machine's specified autoType sequence, if any, and when injectInit() is called
          * with the appropriate INJECTION signal, injectInit() pass autoType to injectKeys().
@@ -214,10 +214,10 @@ class Keyboard extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var kbd = this;
-        var className;
-        var id = sHTMLType + '-' + sBinding;
-        var controlText = /** @type {HTMLTextAreaElement} */ (control);
+        let kbd = this;
+        let className;
+        let id = sHTMLType + '-' + sBinding;
+        let controlText = /** @type {HTMLTextAreaElement} */ (control);
 
         if (this.bindings[id] === undefined) {
             switch (sBinding) {
@@ -226,7 +226,7 @@ class Keyboard extends Component {
                     /*
                      * TODO: Fix this rather fragile code, which depends on the current structure of the given xxxx-softkeys.xml
                      */
-                    var controlSoftKeyboard = control.parentElement.parentElement.nextElementSibling;
+                    let controlSoftKeyboard = control.parentElement.parentElement.nextElementSibling;
                     className = controlSoftKeyboard.className;
                     if (this.fMobile != (className.indexOf('mobile') >= 0)) {
                         controlSoftKeyboard = controlSoftKeyboard.nextElementSibling;
@@ -252,12 +252,12 @@ class Keyboard extends Component {
                     }
                 } catch(err) {}
                 return true;
-                
+
             case "screen":
                 /*
                  * This is a special binding that the Video component uses to effectively bind its screen to the
                  * entire keyboard; eg:
-                 * 
+                 *
                  *      this.kbd.setBinding(this.inputTextArea? "textarea" : "canvas", "screen", this.inputScreen);
                  *
                  * Recording the binding ID prevents multiple controls (or components) from attempting to erroneously
@@ -321,7 +321,7 @@ class Keyboard extends Component {
                 /*
                  * Maintain support for older button codes; eg, map button code "ctrl-c" to CLICKCODE "CTRL_C"
                  */
-                var sCode = sBinding.toUpperCase().replace(/-/g, '_');
+                let sCode = sBinding.toUpperCase().replace(/-/g, '_');
                 if (Keyboard.CLICKCODES[sCode] !== undefined && sHTMLType == "button") {
                     this.bindings[id] = controlText;
                     if (MAXDEBUG) console.log("binding click-code '" + sCode + "'");
@@ -348,11 +348,11 @@ class Keyboard extends Component {
                     this.cSoftCodes++;
                     this.bindings[id] = controlText;
                     if (MAXDEBUG) console.log("binding soft-code '" + sBinding + "'");
-                    var msLastEvent = 0, nClickState = 0;
-                    var fStateKey = (Keyboard.KEYSTATES[Keyboard.SOFTCODES[sBinding]] <= Keyboard.STATE.ALL_MODIFIERS);
-                    var fnDown = function(kbd, sKey, simCode) {
+                    let msLastEvent = 0, nClickState = 0;
+                    let fStateKey = (Keyboard.KEYSTATES[Keyboard.SOFTCODES[sBinding]] <= Keyboard.STATE.ALL_MODIFIERS);
+                    let fnDown = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingDown(event) {
-                            var msDelta = event.timeStamp - msLastEvent;
+                            let msDelta = event.timeStamp - msLastEvent;
                             nClickState = (nClickState && msDelta < kbd.msDoubleClick? (nClickState << 1) : 1);
                             msLastEvent = event.timeStamp;
                             event.preventDefault();                 // preventDefault() is necessary to avoid "zooming" when you type rapidly
@@ -360,10 +360,10 @@ class Keyboard extends Component {
                             kbd.addActiveKey(simCode);
                         };
                     }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
-                    var fnUp = function(kbd, sKey, simCode) {
+                    let fnUp = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingUp(event) {
                             if (nClickState) {
-                                var msDelta = event.timeStamp - msLastEvent;
+                                let msDelta = event.timeStamp - msLastEvent;
                                 nClickState = (fStateKey && msDelta < kbd.msDoubleClick? (nClickState << 1) : 0);
                                 msLastEvent = event.timeStamp;
                                 if (nClickState < 8) {
@@ -426,9 +426,9 @@ class Keyboard extends Component {
      */
     findBinding(simCode, sType, fDown)
     {
-        var control;
+        let control;
         if (this.cSoftCodes && this.fSoftKeyboard) {
-            for (var code in Keys.SHIFTED_KEYCODES) {
+            for (let code in Keys.SHIFTED_KEYCODES) {
                 if (simCode == Keys.SHIFTED_KEYCODES[code]) {
                     simCode = +code;
                     code = Keys.NONASCII_KEYCODES[code];
@@ -458,9 +458,9 @@ class Keyboard extends Component {
             else if (simCode == Keyboard.SIMCODE.CTRL_ALT_SUB) {
                 simCode = Keyboard.SIMCODE.NUM_SUB;
             }
-            for (var sBinding in Keyboard.SOFTCODES) {
+            for (let sBinding in Keyboard.SOFTCODES) {
                 if (Keyboard.SOFTCODES[sBinding] == simCode || Keyboard.SOFTCODES[sBinding] == this.toUpperKey(simCode)) {
-                    var id = sType + '-' + sBinding;
+                    let id = sType + '-' + sBinding;
                     control = this.bindings[id];
                     if (control && fDown !== undefined) {
                         this.setSoftKeyState(control, fDown);
@@ -488,11 +488,11 @@ class Keyboard extends Component {
         this.cpu = cpu;
         this.dbg = dbg;
 
-        var kbd = this;
+        let kbd = this;
         this.timerInject = this.cpu.addTimer(this.id + ".inject", function injectKeysTimer() {
             kbd.injectKeys();
         });
-        
+
         this.timerTransmit = this.cpu.addTimer(this.id + ".transmit", function transmitDataTimer() {
             kbd.transmitData();
         });
@@ -500,7 +500,7 @@ class Keyboard extends Component {
         this.chipset = cmp.getMachineComponent("ChipSet");
         this.autoType = cmp.getMachineParm('autoType') || this.autoType;
 
-        var softKeys = cmp.getMachineParm('softKeys');
+        let softKeys = cmp.getMachineParm('softKeys');
         if (softKeys) this.enableSoftKeyboard(softKeys != "false");
 
         cpu.addIntNotify(Interrupts.DOS, this.intDOS.bind(this));
@@ -529,7 +529,7 @@ class Keyboard extends Component {
      */
     intDOS(addr)
     {
-        var AH = (this.cpu.regEAX >> 8) & 0xff;
+        let AH = (this.cpu.regEAX >> 8) & 0xff;
         if (AH == 0x0A) {
             this.fDOSReady = true;
             if (this.fnDOSReady) {
@@ -584,7 +584,7 @@ class Keyboard extends Component {
      */
     setModel(sModel)
     {
-        var iModel = 0;
+        let iModel = 0;
         this.model = null;
         if (typeof sModel == "string") {
             this.model = sModel.toUpperCase();
@@ -608,7 +608,7 @@ class Keyboard extends Component {
      */
     checkBuffer(b)
     {
-        var fReady = false;
+        let fReady = false;
         if (b) {
             /*
              * The following hack is for the 5170 ROM BIOS keyboard diagnostic, which expects the keyboard
@@ -650,7 +650,7 @@ class Keyboard extends Component {
      */
     receiveCmd(bCmd)
     {
-        var b = -1;
+        let b = -1;
 
         if (!COMPILED && this.messageEnabled()) this.printMessage("receiveCmd(" + Str.toHexByte(bCmd) + ")");
 
@@ -691,7 +691,7 @@ class Keyboard extends Component {
      * setEnabled(fData, fClock)
      *
      * This is the ChipSet's interface for toggling keyboard "data" and "clock" lines.
-     * 
+     *
      * For MODEL_5150 and MODEL_5160 machines, this function is called from the ChipSet's PPI_B
      * output handler.  For MODEL_5170 machines, this function is called when selected CMD
      * "data bytes" have been written.
@@ -703,7 +703,7 @@ class Keyboard extends Component {
      */
     setEnabled(fData, fClock)
     {
-        var fReset = false;
+        let fReset = false;
         if (this.fClock !== fClock) {
             if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
                 this.printMessage("keyboard clock line changing to " + fClock, true);
@@ -789,9 +789,9 @@ class Keyboard extends Component {
                  * (by toggling the CLOCK line), then checking for a BAT_OK response (0xAA), and then
                  * clocking in the next byte (by toggling the DATA line); if that next byte isn't 0x00,
                  * then the BIOS reports a "301" error, along with "AA" if we failed to properly flush
-                 * the BAT_OK response. 
+                 * the BAT_OK response.
                  */
-                var b = this.abBuffer.length? this.abBuffer[0] : 0; 
+                let b = this.abBuffer.length? this.abBuffer[0] : 0;
                 if (this.chipset.receiveKbdData(b)) {
                     if (!COMPILED && this.messageEnabled()) this.printMessage("keyboard data " + Str.toHexByte(b) + " delivered");
                     this.abBuffer.shift();
@@ -879,7 +879,7 @@ class Keyboard extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, this.saveState());
         return state.data();
     }
@@ -924,7 +924,7 @@ class Keyboard extends Component {
             this.nInjection = this.cmp.sStatePath? Keyboard.INJECTION.ON_START : Keyboard.INJECTION.NONE;
         }
 
-        var i = 0;
+        let i = 0;
         this.fClock = data[i++];
         this.fData = data[i];
         this.bCmdPending = 0;       // when non-zero, a command is pending (eg, SET_LED or SET_RATE)
@@ -952,7 +952,7 @@ class Keyboard extends Component {
      */
     saveState()
     {
-        var data = [];
+        let data = [];
         data[0] = this.fClock;
         data[1] = this.fData;
         return data;
@@ -963,7 +963,7 @@ class Keyboard extends Component {
      *
      * In addition to enabling or disabling our own soft keyboard (if any), this also attempts to disable or enable
      * (as appropriate) the textarea control (if any) that machines use to trigger a touch device's built-in keyboard.
-     * 
+     *
      * @this {Keyboard}
      * @param {boolean} fEnable
      */
@@ -984,7 +984,7 @@ class Keyboard extends Component {
         }
         this.fSoftKeyboard = fEnable;
     }
-    
+
     /**
      * setSoftKeyState(control, f)
      *
@@ -1023,7 +1023,7 @@ class Keyboard extends Component {
                          * the speaker bit.  And there isn't really a better time to disable it, because the
                          * COMPAQ_KEYCLICK byte is set by IBMBIO.COM initialization code in COMPAQ MS-DOS, if the
                          * machine model byte is FC (indicating PC AT):
-                         * 
+                         *
                          *      &0070:2EF7 2E               CS:
                          *      &0070:2EF8 803E442DFC       CMP      [2D44],FC
                          *      &0070:2EFD 750C             JNZ      2F0B (IBMBIO.COM+0x3174)
@@ -1072,7 +1072,7 @@ class Keyboard extends Component {
     injectKeys(sKeys, msDelay)
     {
         if (sKeys) {
-            var sInjectBuffer = this.parseKeys(sKeys);
+            let sInjectBuffer = this.parseKeys(sKeys);
             if (sInjectBuffer) {
                 this.nInjection = Keyboard.INJECTION.NONE;
                 this.sInjectBuffer = sInjectBuffer;
@@ -1089,9 +1089,9 @@ class Keyboard extends Component {
         if (this.msInjectDelay >= 1000) {
             this.msInjectDelay = this.msInjectDefault;
         }
-        var simCode = 0;
+        let simCode = 0;
         while (this.sInjectBuffer.length > 0 && !simCode) {
-            var ch = this.sInjectBuffer.charAt(0);
+            let ch = this.sInjectBuffer.charAt(0);
             if (ch == '$') {
                 /*
                  * $<number> pauses injection by the specified number of tenths of a second; eg,
@@ -1100,7 +1100,7 @@ class Keyboard extends Component {
                  * being misinterpreted as part of the delay (eg, $5.1) pauses for 1/2 second and
                  * then injects "1").
                  */
-                var digits = this.sInjectBuffer.match(/^\$([0-9]+)\.?/);
+                let digits = this.sInjectBuffer.match(/^\$([0-9]+)\.?/);
                 if (digits) {
                     this.msInjectDelay = (+digits[1] * 100) || this.msInjectDefault;
                     this.sInjectBuffer = this.sInjectBuffer.substr(digits[0].length);
@@ -1110,16 +1110,16 @@ class Keyboard extends Component {
                  * Yes, this code is slow and gross, but it's simple, and key injection doesn't have
                  * to be that fast anyway.  The added check for SOFTCODES that have omitted the 'num-'
                  * prefix adds to the slowness, but it's a nice convenience, allowing you to specify
-                 * non-ASCII keys like 'num-right' or 'num-up' more succinctly as  "$right" or "$up". 
+                 * non-ASCII keys like 'num-right' or 'num-up' more succinctly as  "$right" or "$up".
                  */
-                for (var i = 0; i < this.softCodeKeys.length; i++) {
-                    var name = this.softCodeKeys[i];
+                for (let i = 0; i < this.softCodeKeys.length; i++) {
+                    let name = this.softCodeKeys[i];
                     if (this.sInjectBuffer.indexOf(name) == 1) {
                         simCode = Keyboard.SOFTCODES[name];
                         this.sInjectBuffer = this.sInjectBuffer.substr(name.length + 1);
                         break;
                     }
-                    var shortName = (name.indexOf('num-') == 0? name.substr(4) : "");
+                    let shortName = (name.indexOf('num-') == 0? name.substr(4) : "");
                     if (shortName && this.sInjectBuffer.indexOf(shortName) == 1) {
                         simCode = Keyboard.SOFTCODES[name];
                         this.sInjectBuffer = this.sInjectBuffer.substr(shortName.length + 1);
@@ -1129,7 +1129,7 @@ class Keyboard extends Component {
             }
             if (simCode) break;
             this.sInjectBuffer = this.sInjectBuffer.substr(1);
-            var charCode = ch.charCodeAt(0);
+            let charCode = ch.charCodeAt(0);
             /*
              * charCodes 0x01-0x1A correspond to key combinations CTRL-A through CTRL-Z, unless they
              * are \t, \n, or \r, which are reserved for TAB, LINE-FEED, and RETURN, respectively, so if
@@ -1164,13 +1164,13 @@ class Keyboard extends Component {
                 simCode = charCode;
             }
         }
-        
+
         if (simCode) {
-            var fPress = (Keyboard.MODIFIERS[simCode] === undefined); 
+            let fPress = (Keyboard.MODIFIERS[simCode] === undefined);
             this.addActiveKey(simCode, fPress);
             if (fPress) this.clearActiveKeys(true);
         }
-        
+
         if (!this.sInjectBuffer.length) {
             if (this.fnInjectReady) {
                 this.fnInjectReady();
@@ -1233,9 +1233,9 @@ class Keyboard extends Component {
     parseKeys(sKeys)
     {
         if (sKeys) {
-            var match, reSpecial = /(?:^|[^$])\$([a-z0-9][a-z0-9-]+)/g;
+            let match, reSpecial = /(?:^|[^$])\$([a-z0-9][a-z0-9-]+)/g;
             while (match = reSpecial.exec(sKeys)) {
-                var sReplace = "";
+                let sReplace = "";
                 switch (match[1]) {
                 case 'date':
                     sReplace = Usr.formatDate("n-j-Y");
@@ -1275,7 +1275,7 @@ class Keyboard extends Component {
      */
     waitReady(fnCallReady, sOption)
     {
-        var fReady = false;
+        let fReady = false;
 
         switch(sOption) {
         case "DOS":
@@ -1322,10 +1322,10 @@ class Keyboard extends Component {
      */
     updateLEDs(bitState)
     {
-        var control;
-        for (var sBinding in Keyboard.LEDSTATES) {
-            var id = "led-" + sBinding;
-            var bitLED = Keyboard.LEDSTATES[sBinding];
+        let control;
+        for (let sBinding in Keyboard.LEDSTATES) {
+            let id = "led-" + sBinding;
+            let bitLED = Keyboard.LEDSTATES[sBinding];
             if ((!bitState || bitState == bitLED) && (control = this.bindings[id])) {
                 this.setLED(control, !!(this.bitsStateSim & bitLED));
             }
@@ -1377,10 +1377,10 @@ class Keyboard extends Component {
      */
     updateShiftState(simCode, fSim, fDown)
     {
-        var result = 0;
+        let result = 0;
         if (Keyboard.SIMCODES[simCode]) {
-            var fRight = (Math.floor(simCode / 1000) & 2);
-            var bitState = Keyboard.KEYSTATES[simCode] || 0;
+            let fRight = (Math.floor(simCode / 1000) & 2);
+            let bitState = Keyboard.KEYSTATES[simCode] || 0;
             if (bitState) {
                 if (fRight && !(bitState & Keyboard.STATE.ALL_RIGHT)) {
                     bitState >>= 1;
@@ -1443,7 +1443,7 @@ class Keyboard extends Component {
      */
     addActiveKey(simCode, fPress)
     {
-        var wCode = Keyboard.SIMCODES[simCode] || Keyboard.SIMCODES[simCode += Keys.KEYCODE.ONDOWN];
+        let wCode = Keyboard.SIMCODES[simCode] || Keyboard.SIMCODES[simCode += Keys.KEYCODE.ONDOWN];
 
         if (!wCode) {
             if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.KEY)) {
@@ -1464,8 +1464,8 @@ class Keyboard extends Component {
             if (this.aKeysActive[0].nRepeat > 0) this.aKeysActive[0].nRepeat = 0;
         }
 
-        var key;
-        for (var i = 0; i < this.aKeysActive.length; i++) {
+        let i, key;
+        for (i = 0; i < this.aKeysActive.length; i++) {
             key = this.aKeysActive[i];
             if (key.simCode == simCode) {
                 /*
@@ -1496,7 +1496,7 @@ class Keyboard extends Component {
             this.findBinding(simCode, "key", true);
             i++;
         }
-        
+
         if (i > 0) {
             this.aKeysActive.splice(0, 0, key);         // aka aKeysActive.unshift(key)
         }
@@ -1556,8 +1556,8 @@ class Keyboard extends Component {
      */
     clearActiveKeys(fModifiers)
     {
-        for (var i = 0; i < this.aKeysActive.length; i++) {
-            var key = this.aKeysActive[i];
+        for (let i = 0; i < this.aKeysActive.length; i++) {
+            let key = this.aKeysActive[i];
             if (fModifiers && !Keyboard.MODIFIERS[key.simCode]) continue;
             if (this.removeActiveKey(key.simCode)) i--;
         }
@@ -1584,9 +1584,9 @@ class Keyboard extends Component {
          */
         if (!fFlush && (!this.cpu || !this.cpu.isRunning())) return false;
 
-        var fRemoved = false;
-        for (var i = 0; i < this.aKeysActive.length; i++) {
-            var key = this.aKeysActive[i];
+        let fRemoved = false;
+        for (let i = 0; i < this.aKeysActive.length; i++) {
+            let key = this.aKeysActive[i];
             if (key.simCode == simCode || key.simCode == Keys.SHIFTED_KEYCODES[simCode]) {
                 this.aKeysActive.splice(i, 1);
                 if (key.timer) clearTimeout(key.timer);
@@ -1632,7 +1632,7 @@ class Keyboard extends Component {
         if (msTimer && key.nRepeat < 0) {
             key.fDown = false;
         }
-        
+
         if (!this.keySimulate(key.simCode, key.fDown) || !key.nRepeat) {
             /*
              * Why isn't there a simple return here? In order to set breakpoints on two different return conditions, of course!
@@ -1643,7 +1643,7 @@ class Keyboard extends Component {
             return;
         }
 
-        var ms;
+        let ms;
         if (key.nRepeat < 0) {
             if (!key.fDown) {
                 this.removeActiveKey(key.simCode);
@@ -1654,11 +1654,11 @@ class Keyboard extends Component {
         else {
             ms = (key.nRepeat++ == 1? this.msAutoRepeat : this.msNextRepeat);
         }
-        
+
         if (key.timer) {
             clearTimeout(key.timer);
         }
-        
+
         key.timer = setTimeout(function(kbd) {
             return function onUpdateActiveKey() {
                 kbd.updateActiveKey(key, ms);
@@ -1676,8 +1676,8 @@ class Keyboard extends Component {
      */
     getSimCode(keyCode, fShifted)
     {
-        var code;
-        var simCode = keyCode;
+        let code;
+        let simCode = keyCode;
 
         if (keyCode >= Keys.ASCII.A && keyCode <= Keys.ASCII.Z) {
             if (!(this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT | Keyboard.STATE.CAPS_LOCK)) == fShifted) {
@@ -1733,15 +1733,15 @@ class Keyboard extends Component {
      */
     onKeyChange(event, fDown)
     {
-        var fPass = true;
-        var fPress = false;
-        var fIgnore = false;
-        var keyCode = event.keyCode;
+        let fPass = true;
+        let fPress = false;
+        let fIgnore = false;
+        let keyCode = event.keyCode;
 
         if (!this.cmp.notifyKbdEvent(event, fDown)) {
             return false;
         }
-        
+
         if (fDown) this.cKeysPressed++;
         this.sInjectBuffer = "";                        // actual key events should stop any injection in progress
         Component.processScript(this.idMachine);        // and any script, too
@@ -1754,7 +1754,7 @@ class Keyboard extends Component {
          * So, to seamlessly blend "up" and "down" events with "press" events, we must convert any keyCodes we
          * receive here to a compatibly shifted simCode.
          */
-        var simCode = this.getSimCode(keyCode, true);
+        let simCode = this.getSimCode(keyCode, true);
 
         if (this.fEscapeDisabled && simCode == Keys.ASCII['`']) {
             keyCode = simCode = Keys.KEYCODE.ESC;
@@ -1767,7 +1767,7 @@ class Keyboard extends Component {
                 simCode += Keys.KEYCODE.ONRIGHT;
             }
 
-            var nShiftState = this.updateShiftState(simCode, false, fDown);
+            let nShiftState = this.updateShiftState(simCode, false, fDown);
             if (nShiftState) {
 
                 if (keyCode == Keys.KEYCODE.CAPS_LOCK || keyCode == Keys.KEYCODE.NUM_LOCK || keyCode == Keys.KEYCODE.SCROLL_LOCK) {
@@ -1786,19 +1786,19 @@ class Keyboard extends Component {
                         fDown = fPress = true;
                     }
                 }
-                
+
                 /*
                  * HACK for Windows (as the host operating system): the ALT key is often used with key combinations
                  * not meant for our machine (eg, Alt-Tab to switch to a different window, or simply tapping the ALT
                  * key by itself to switch focus to the browser's menubar).  And sadly, browsers are quite happy to
                  * give us the DOWN event for the ALT key, but not an UP event, leaving our machine with the impression
                  * that the ALT key is still down, which the user user has no easy way to detect OR correct.
-                 * 
+                 *
                  * So we still record the ALT state in bitsState as best we can, and clear it whenever we lose focus
                  * in onFocusChange(), but we no longer pass through DOWN events to our machine.  Instead, we now
                  * check bitsState prior to simulating any other key, and if the ALT bit is set, we simulate an
                  * active ALT key first; you'll find that check at the end of both onKeyChange() and onKeyPress().
-                 * 
+                 *
                  * NOTE: Even though this is a hack intended largely for browsers running on Windows, I'm implementing
                  * it for all platforms, for consistency.
                  */
@@ -1821,7 +1821,7 @@ class Keyboard extends Component {
                             /*
                              * Since cKeysPressed is zero, the assumption here is that the ALT key (and the Alt key ALONE)
                              * was just tapped, so as long the ALT key was not already "soft-locked" (based on bitsStateSim),
-                             * we will transform this "up" event into a "fake press" event. 
+                             * we will transform this "up" event into a "fake press" event.
                              */
                             if (!(this.bitsStateSim & (Keyboard.STATE.ALT | Keyboard.STATE.RALT))) {
                                 fDown = fPress = true;
@@ -1829,7 +1829,7 @@ class Keyboard extends Component {
                         }
                     }
                 }
-                
+
                 /*
                  * As a safeguard, whenever the CMD key goes up, clear all active keys, because there appear to be
                  * cases where we don't always get notification of a CMD key's companion key going up (this probably
@@ -1891,7 +1891,7 @@ class Keyboard extends Component {
                     simCode = Keyboard.SIMCODE.CTRL_ALT_SUB;    // in case your keyboard doesn't have a numeric keypad '-'
                 }
             }
-            
+
             /*
              * When I have defined system-wide CTRL-key sequences to perform common editing operations (eg, CTRL_W
              * and CTRL_Z to scroll pages of text), the browser likes to act on those operations, so let's set fPass
@@ -1931,17 +1931,17 @@ class Keyboard extends Component {
                 /*
                  * This is the companion code to the onKeyChange() hack for Windows that suppresses DOWN events
                  * for ALT keys: if we're about to activate another key and we believe that an ALT key is still down,
-                 * we fake an ALT activation first. 
+                 * we fake an ALT activation first.
                  */
                 if (this.bitsState & Keyboard.STATE.ALTS) {
-                    var simCodeAlt = Keyboard.SIMCODE.ALT;
+                    let simCodeAlt = Keyboard.SIMCODE.ALT;
                     this.printMessage("onKeyChange(" + simCodeAlt + "): simulating ALT down", Messages.EVENT);
                     this.addActiveKey(simCodeAlt);
                 }
                 this.addActiveKey(simCode, fPress);
             } else {
                 if (!this.removeActiveKey(simCode)) {
-                    var code = this.getSimCode(keyCode, false);
+                    let code = this.getSimCode(keyCode, false);
                     if (code != simCode) this.removeActiveKey(code);
                 }
             }
@@ -1960,7 +1960,7 @@ class Keyboard extends Component {
     onKeyPress(event)
     {
         event = event || window.event;
-        var keyCode = event.which || event.keyCode;
+        let keyCode = event.which || event.keyCode;
 
         if (!this.cmp.notifyKbdEvent(event)) {
             return false;
@@ -1970,7 +1970,7 @@ class Keyboard extends Component {
         this.sInjectBuffer = "";        // actual key events should stop any injection currently in progress
 
         if (this.fAllDown) {
-            var simCode = this.checkActiveKey();
+            let simCode = this.checkActiveKey();
             if (simCode && this.isAlphaKey(simCode) && this.isAlphaKey(keyCode) && simCode != keyCode) {
                 if (!COMPILED && this.messageEnabled(Messages.EVENT | Messages.KEY)) {
                     this.printMessage("onKeyPress(" + keyCode + ") out of sync with " + simCode + ", invert caps-lock", true);
@@ -1980,7 +1980,7 @@ class Keyboard extends Component {
             }
         }
 
-        var fPass = !Keyboard.SIMCODES[keyCode] || !!(this.bitsState & Keyboard.STATE.CMD);
+        let fPass = !Keyboard.SIMCODES[keyCode] || !!(this.bitsState & Keyboard.STATE.CMD);
 
         if (this.messageEnabled(Messages.EVENT | Messages.KEY)) {
             this.printMessage("onKeyPress(" + keyCode + "): " + (fPass? "true" : "false"), true);
@@ -1993,7 +1993,7 @@ class Keyboard extends Component {
              * we fake an ALT activation first.
              */
             if (this.bitsState & Keyboard.STATE.ALTS) {
-                var simCodeAlt = Keyboard.SIMCODE.ALT;
+                let simCodeAlt = Keyboard.SIMCODE.ALT;
                 this.printMessage("onKeyPress(" + simCodeAlt + "): simulating ALT down", Messages.EVENT);
                 this.addActiveKey(simCodeAlt);
             }
@@ -2013,16 +2013,16 @@ class Keyboard extends Component {
      */
     keySimulate(simCode, fDown)
     {
-        var fSimulated = false;
+        let fSimulated = false;
 
         this.updateShiftState(simCode, true, fDown);
 
-        var wCode = Keyboard.SIMCODES[simCode] || Keyboard.SIMCODES[simCode + Keys.KEYCODE.ONDOWN];
+        let wCode = Keyboard.SIMCODES[simCode] || Keyboard.SIMCODES[simCode + Keys.KEYCODE.ONDOWN];
 
         if (wCode !== undefined) {
 
-            var abScanCodes = [];
-            var bCode = wCode & 0xff;
+            let abScanCodes = [];
+            let bCode = wCode & 0xff;
 
             /*
              * TODO: Update the following restrictions to address 84-key and 101-key keyboard limitations.
@@ -2033,11 +2033,11 @@ class Keyboard extends Component {
 
             abScanCodes.push(bCode | (fDown? 0 : Keyboard.SCANCODE.BREAK));
 
-            var fAlpha = (simCode >= Keys.ASCII.A && simCode <= Keys.ASCII.Z || simCode >= Keys.ASCII.a && simCode <= Keys.ASCII.z);
+            let fAlpha = (simCode >= Keys.ASCII.A && simCode <= Keys.ASCII.Z || simCode >= Keys.ASCII.a && simCode <= Keys.ASCII.z);
 
             while (wCode >>>= 8) {
-                var bShift = 0;
-                var bScan = wCode & 0xff;
+                let bShift = 0;
+                let bScan = wCode & 0xff;
                 /*
                  * TODO: The handling of SIMCODE entries with "extended" codes still needs to be tested, and
                  * moreover, if any of them need to perform any shift-state modifications, those modifications
@@ -2073,7 +2073,7 @@ class Keyboard extends Component {
                 }
             }
 
-            for (var i = 0; i < abScanCodes.length; i++) {
+            for (let i = 0; i < abScanCodes.length; i++) {
                 this.addScanCode(abScanCodes[i]);
             }
 
@@ -2109,11 +2109,11 @@ class Keyboard extends Component {
      */
     static init()
     {
-        var aeKbd = Component.getElementsByClass(document, PCX86.APPCLASS, "keyboard");
-        for (var iKbd = 0; iKbd < aeKbd.length; iKbd++) {
-            var eKbd = aeKbd[iKbd];
-            var parmsKbd = Component.getComponentParms(eKbd);
-            var kbd = new Keyboard(parmsKbd);
+        let aeKbd = Component.getElementsByClass(document, PCX86.APPCLASS, "keyboard");
+        for (let iKbd = 0; iKbd < aeKbd.length; iKbd++) {
+            let eKbd = aeKbd[iKbd];
+            let parmsKbd = Component.getComponentParms(eKbd);
+            let kbd = new Keyboard(parmsKbd);
             Component.bindComponentControls(kbd, eKbd, PCX86.APPCLASS);
         }
     }
@@ -2478,7 +2478,7 @@ Keyboard.CLICKCODES = {
  * The (commented) numbering of keys below is purely for my own reference.  Two keys are deliberately numbered 84,
  * reflecting the fact that the 'sys-req' key was added to the 84-key keyboard but later dropped from the 101-key
  * keyboard (as a stand-alone key, that is).
- * 
+ *
  * With the introduction of the PC AT and the 84-key keyboard, IBM developed a new key numbering scheme and
  * key code generation; the 8042 keyboard controller would then convert those key codes into the PC scan codes
  * defined by the older 83-key keyboard.  That's a layer of complexity we currently bypass; instead, we continue
@@ -2556,18 +2556,18 @@ Keyboard.SOFTCODES = {
     /* 68 */    'f10':          Keyboard.SIMCODE.F10,
     /* 69 */    'num-lock':     Keyboard.SIMCODE.NUM_LOCK,
     /* 70 */    'scroll-lock':  Keyboard.SIMCODE.SCROLL_LOCK,   // TODO: 0xe046 on 101-key keyboards?
-    
+
     /*
      * Yes, distinguishing keys 71 through 83 with the 'num-' prefix seems like overkill, but it was
      * intended to be future-proofing, for the day when we might eventually add support for 101-key keyboards,
      * because they have their own dedicated non-numeric-keypad versions of these keys (in other words, they
      * account for most of the bloat on the 101-key keyboard, a trend that more modern keyboards have gradually
      * been reversing).
-     * 
+     *
      * To offset 'num-' prefix overkill, injectKeys() allows SOFTCODES to be used with or without the prefix,
      * on the theory that key injection users won't really care precisely which version of the key is used.
      */
-    
+
     /* 71 */    'num-home':     Keyboard.SIMCODE.HOME,          // formerly "home"
     /* 72 */    'num-up':       Keyboard.SIMCODE.UP,            // formerly "up-arrow"
     /* 73 */    'num-pgup':     Keyboard.SIMCODE.PGUP,          // formerly "page-up"
@@ -2582,14 +2582,14 @@ Keyboard.SOFTCODES = {
     /* 82 */    'num-ins':      Keyboard.SIMCODE.INS,           // formerly "ins"
     /* 83 */    'num-del':      Keyboard.SIMCODE.DEL,           // formerly "del"
     /* 84 */    'sys-req':      Keyboard.SIMCODE.SYS_REQ        // 84-key keyboard only (simulated with 'alt'+'prtsc' on 101-key keyboards)
-    
+
     /*
      * If I ever add 101-key keyboard support (and it's not clear that I will), then the following entries
      * will have to be converted to SIMCODE indexes, and each SIMCODE index will need an entry in the SIMCODES
      * table that defines the appropriate SCANCODE(S); as this component has evolved, SOFTCODES are no longer
      * mapped directly to SCANCODES.
      */
-    
+
 //  /* 84 */    'pause':        Keyboard.SCANCODE.PAUSE,        // 101-key keyboard only
 //  /* 85 */    'f11':          Keyboard.SCANCODE.F11,
 //  /* 86 */    'f12':          Keyboard.SCANCODE.F12,
@@ -2608,7 +2608,7 @@ Keyboard.SOFTCODES = {
 //  /* 99 */    'pgdn':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_PGDN << 8),
 //  /*100 */    'ins':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_INS << 8),
 //  /*101 */    'del':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_DEL << 8),
-    
+
 //  /*102 */    'win':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.WIN << 8),
 //  /*103 */    'right-win':    Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.RWIN << 8),
 //  /*104 */    'menu':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.MENU << 8)
@@ -2804,7 +2804,7 @@ Keyboard.SIMCODES = {
     [Keyboard.SIMCODE.CMD]:         Keyboard.SCANCODE.WIN,
     [Keyboard.SIMCODE.RCMD]:        Keyboard.SCANCODE.MENU,
     [Keyboard.SIMCODE.FF_CMD]:      Keyboard.SCANCODE.WIN,
-    
+
     [Keyboard.SIMCODE.CTRL_A]:      Keyboard.SCANCODE.A           | (Keyboard.SCANCODE.CTRL << 8),
     [Keyboard.SIMCODE.CTRL_B]:      Keyboard.SCANCODE.B           | (Keyboard.SCANCODE.CTRL << 8),
     [Keyboard.SIMCODE.CTRL_C]:      Keyboard.SCANCODE.C           | (Keyboard.SCANCODE.CTRL << 8),
@@ -2832,7 +2832,7 @@ Keyboard.SIMCODES = {
     [Keyboard.SIMCODE.CTRL_Y]:      Keyboard.SCANCODE.Y           | (Keyboard.SCANCODE.CTRL << 8),
     [Keyboard.SIMCODE.CTRL_Z]:      Keyboard.SCANCODE.Z           | (Keyboard.SCANCODE.CTRL << 8),
     [Keyboard.SIMCODE.CTRL_BREAK]:  Keyboard.SCANCODE.SCROLL_LOCK | (Keyboard.SCANCODE.CTRL << 8),
-    
+
     [Keyboard.SIMCODE.CTRL_ALT_DEL]:    Keyboard.SCANCODE.NUM_DEL | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16),
     [Keyboard.SIMCODE.CTRL_ALT_INS]:    Keyboard.SCANCODE.NUM_INS | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16),
     [Keyboard.SIMCODE.CTRL_ALT_ADD]:    Keyboard.SCANCODE.NUM_ADD | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16),
