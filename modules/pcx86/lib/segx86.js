@@ -210,9 +210,9 @@ class SegX86 {
      */
     loadProt(sel, fProbe)
     {
-        var addrDT;
-        var addrDTLimit;
-        var cpu = this.cpu;
+        let addrDT;
+        let addrDTLimit;
+        let cpu = this.cpu;
 
         /*
          * Some instructions (eg, CALLF) load a 32-bit value for the selector, while others (eg, LDS) do not;
@@ -235,7 +235,7 @@ class SegX86 {
          * Fortunately, the Debugger now has its own interface, probeDesc(), so that should no longer be a concern.
          */
         if (addrDT) {
-            var addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
+            let addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
             if ((addrDTLimit - addrDesc)|0 >= 7) {
                 /*
                  * TODO: This is the first of many steps toward accurately counting cycles in protected mode;
@@ -262,7 +262,7 @@ class SegX86 {
      */
     loadIDTReal(nIDT)
     {
-        var cpu = this.cpu;
+        let cpu = this.cpu;
         /*
          * NOTE: The COMPAQ DeskPro 386 ROM loads the IDTR for the real-mode IDT with a limit of 0xffff instead
          * of the normal 0x3ff.  A limit higher than 0x3ff is OK, since all real-mode IDT entries are 4 bytes, and
@@ -276,8 +276,8 @@ class SegX86 {
          *
          * TODO: Verify that 80286 real-mode actually enforces the above.  See http://www.pcjs.org/pubs/pc/reference/intel/80286/progref/#page-260
          */
-        var addrIDT = cpu.addrIDT + (nIDT << 2);
-        var off = cpu.getShort(addrIDT);
+        let addrIDT = cpu.addrIDT + (nIDT << 2);
+        let off = cpu.getShort(addrIDT);
         cpu.regPS &= ~(X86.PS.TF | X86.PS.IF);
         return (this.load(cpu.getShort(addrIDT + 2)) + off)|0;
     }
@@ -291,14 +291,14 @@ class SegX86 {
      */
     loadIDTProt(nIDT)
     {
-        var cpu = this.cpu;
+        let cpu = this.cpu;
         cpu.assert(nIDT >= 0 && nIDT < 256);
 
         nIDT <<= 3;
-        var addrDesc = (cpu.addrIDT + nIDT)|0;
+        let addrDesc = (cpu.addrIDT + nIDT)|0;
         if (((cpu.addrIDTLimit - addrDesc)|0) >= 7) {
             this.fCall = true;
-            var addr = this.loadDesc8(addrDesc, nIDT);
+            let addr = this.loadDesc8(addrDesc, nIDT);
             if (addr !== X86.ADDR_INVALID) addr += this.offIP;
             return addr;
         }
@@ -524,7 +524,7 @@ class SegX86 {
         this.type = (acc & X86.DESC.ACC.TYPE.MASK);
         this.ext = (acc >> 16) & (X86.DESC.EXT.BIG | X86.DESC.EXT.LIMITPAGES);
 
-        var addrDT = (sel & X86.SEL.LDT)? this.cpu.segLDT.base : this.cpu.addrGDT;
+        let addrDT = (sel & X86.SEL.LDT)? this.cpu.segLDT.base : this.cpu.addrGDT;
         this.addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
 
         /*
@@ -553,10 +553,10 @@ class SegX86 {
      */
     loadDesc6(addrDesc, sel)
     {
-        var cpu = this.cpu;
-        var acc = cpu.getShort(addrDesc + 2);
-        var base = cpu.getShort(addrDesc) | ((acc & 0xff) << 16);
-        var limit = cpu.getShort(addrDesc + 4);
+        let cpu = this.cpu;
+        let acc = cpu.getShort(addrDesc + 2);
+        let base = cpu.getShort(addrDesc) | ((acc & 0xff) << 16);
+        let limit = cpu.getShort(addrDesc + 4);
 
         this.sel = sel;
         this.base = base;
@@ -611,7 +611,7 @@ class SegX86 {
      */
     loadDesc8(addrDesc, sel, fProbe)
     {
-        var cpu = this.cpu;
+        let cpu = this.cpu;
 
         /*
          * If the previous load was a successful "probed" load of the same segment, then we simply load
@@ -639,15 +639,15 @@ class SegX86 {
         /*
          * Load the descriptor from memory.
          */
-        var limit = cpu.getShort(addrDesc + X86.DESC.LIMIT.OFFSET);
-        var acc = cpu.getShort(addrDesc + X86.DESC.ACC.OFFSET);
-        var type = (acc & X86.DESC.ACC.TYPE.MASK);
-        var base = cpu.getShort(addrDesc + X86.DESC.BASE.OFFSET) | ((acc & X86.DESC.ACC.BASE1623) << 16);
-        var ext = cpu.getShort(addrDesc + X86.DESC.EXT.OFFSET);
-        var selMasked = sel & X86.SEL.MASK;
+        let limit = cpu.getShort(addrDesc + X86.DESC.LIMIT.OFFSET), limitOrig;
+        let acc = cpu.getShort(addrDesc + X86.DESC.ACC.OFFSET);
+        let type = (acc & X86.DESC.ACC.TYPE.MASK);
+        let base = cpu.getShort(addrDesc + X86.DESC.BASE.OFFSET) | ((acc & X86.DESC.ACC.BASE1623) << 16);
+        let ext = cpu.getShort(addrDesc + X86.DESC.EXT.OFFSET);
+        let selMasked = sel & X86.SEL.MASK;
 
         if (I386 && cpu.model >= X86.MODEL_80386) {
-            var limitOrig = limit;
+            limitOrig = limit;
             base |= (ext & X86.DESC.EXT.BASE2431) << 16;
             limit |= (ext & X86.DESC.EXT.LIMIT1619) << 16;
             if (ext & X86.DESC.EXT.LIMITPAGES) limit = (limit << 12) | 0xfff;
@@ -661,7 +661,7 @@ class SegX86 {
              * NOTE: Since we are SegX86.ID.CODE, we can use this.cpl instead of the more convoluted
              * this.cpu.segCS.cpl.
              */
-            var fCall = this.fCall;
+            let fCall = this.fCall;
             this.fStackSwitch = false;
 
             /*
@@ -684,19 +684,19 @@ class SegX86 {
              * machine that we could address -- and even then, it would not be a mode-independent address.
              */
             if (fCall && sel == SegX86.CALLBREAK_SEL && this.aCallBreaks.length) {
-                var iBreak = this.offIP - 1;
-                var fnCallBreak = this.aCallBreaks[iBreak];
+                let iBreak = this.offIP - 1;
+                let fnCallBreak = this.aCallBreaks[iBreak];
                 cpu.assert(fnCallBreak);
                 if (fnCallBreak && !fnCallBreak()) {
                     return X86.ADDR_INVALID;
                 }
             }
 
-            var rpl = sel & X86.SEL.RPL;
-            var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
+            let rpl = sel & X86.SEL.RPL;
+            let dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
 
-            var sizeGate = -1, selCode, cplOld, cplNew, fIDT;
-            var addrTSS, offSP, lenSP, regSPPrev, regSSPrev, regPSClear, regSP;
+            let sizeGate = -1, selCode, cplOld, cplNew, fIDT;
+            let addrTSS, offSP, lenSP, regSPPrev, regSSPrev, regPSClear, regSP;
 
             if (!selMasked) {
                 /*
@@ -845,7 +845,7 @@ class SegX86 {
                         limit = limitOrig | (ext << 16);
                     }
 
-                    var selStack = 0, offStack = 0;
+                    let selStack = 0, offStack = 0;
                     cplNew = (selCode & X86.SEL.RPL);
 
                     /*
@@ -905,7 +905,7 @@ class SegX86 {
                     /*
                      * Now that we're past all the probes, it should be safe to clear all flags that need clearing.
                      */
-                    var regPS = cpu.regPS;
+                    let regPS = cpu.regPS;
                     cpu.regPS &= ~regPSClear;
                     if (regPS & X86.PS.VM) {
                         cpu.setProtMode(true, false);
@@ -933,7 +933,7 @@ class SegX86 {
                         }
 
                         regSP = cpu.getSP();
-                        var i = 0, nWords = (acc & 0x1f);
+                        let i = 0, nWords = (acc & 0x1f);
                         while (nWords--) {
                             this.awParms[i++] = cpu.getSOWord(cpu.segSS, regSP);
                             regSP += 2;
@@ -1055,7 +1055,7 @@ class SegX86 {
             break;
 
         case SegX86.ID.TSS:
-            var typeTSS = type & ~X86.DESC.ACC.TYPE.TSS_BUSY;
+            let typeTSS = type & ~X86.DESC.ACC.TYPE.TSS_BUSY;
             if (!selMasked || typeTSS != X86.DESC.ACC.TYPE.TSS286 && typeTSS != X86.DESC.ACC.TYPE.TSS386) {
                 X86.helpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
                 return X86.ADDR_INVALID;
@@ -1159,12 +1159,12 @@ class SegX86 {
      */
     switchTSS(selNew, fNest)
     {
-        var cpu = this.cpu;
+        let cpu = this.cpu;
         cpu.assert(this === cpu.segCS);
 
-        var cplOld = this.cpl;
-        var selOld = cpu.segTSS.sel;
-        var addrOld = cpu.segTSS.base;
+        let cplOld = this.cpl;
+        let selOld = cpu.segTSS.sel;
+        let addrOld = cpu.segTSS.base;
 
         if (!fNest) {
             /*
@@ -1184,7 +1184,7 @@ class SegX86 {
             return false;
         }
 
-        var addrNew = cpu.segTSS.base;
+        let addrNew = cpu.segTSS.base;
         if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.TSS)) {
             this.dbg.message((fNest? "Task switch" : "Task return") + ": TR " + Str.toHexWord(selOld) + " (%" + Str.toHex(addrOld, 6) + "), new TR " + Str.toHexWord(selNew) + " (%" + Str.toHex(addrNew, 6) + ")");
         }
@@ -1206,7 +1206,7 @@ class SegX86 {
         /*
          * Update the old TSS
          */
-        var offSS, offSP;
+        let offSS, offSP;
         if (cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS286 || cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS286_BUSY) {
             cpu.setShort(addrOld + X86.TSS286.TASK_IP, cpu.getIP());
             cpu.setShort(addrOld + X86.TSS286.TASK_PS, cpu.getPS());
@@ -1508,8 +1508,8 @@ class SegX86 {
                      * for other purposes, on the assumption that that descriptor is completely unused.
                      */
                     if ((this.sel & ~X86.SEL.RPL) && this.addrDesc !== X86.ADDR_INVALID) {
-                        var addrType = this.addrDesc + X86.DESC.ACC.TYPE.OFFSET;
-                        var bType = this.cpu.getByte(addrType);
+                        let addrType = this.addrDesc + X86.DESC.ACC.TYPE.OFFSET;
+                        let bType = this.cpu.getByte(addrType);
                         /*
                          * This code used to ALWAYS call setByte(), but that's a waste of time if ACCESSED is already
                          * set.  TODO: It would also be nice if we could simply use the cached type value, and eliminate
@@ -1574,8 +1574,8 @@ class SegX86 {
     {
         if (DEBUG) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.SEG)) {
-                var ch = (this.sName.length < 3? " " : "");
-                var sDPL = " dpl=" + this.dpl;
+                let ch = (this.sName.length < 3? " " : "");
+                let sDPL = " dpl=" + this.dpl;
                 if (this.id == SegX86.ID.CODE) sDPL += " cpl=" + this.cpl;
                 this.dbg.message("loadSeg(" + this.sName + "):" + ch + "sel=" + Str.toHexWord(sel) + " base=" + Str.toHex(base) + " limit=" + Str.toHexWord(limit) + " type=" + Str.toHexWord(type) + sDPL, true);
             }
@@ -1606,9 +1606,9 @@ class SegX86 {
     probeDesc(sel)
     {
         if (DEBUGGER) {
-            var addrDT;
-            var addrDTLimit;
-            var cpu = this.cpu;
+            let addrDT;
+            let addrDTLimit;
+            let cpu = this.cpu;
 
             sel &= 0xffff;
 
@@ -1620,18 +1620,18 @@ class SegX86 {
                 addrDTLimit = (addrDT + cpu.segLDT.limit)|0;
             }
 
-            var addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
+            let addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
 
             if ((addrDTLimit - addrDesc)|0 >= 7) {
 
                 /*
                  * Load the descriptor from memory using probeAddr().
                  */
-                var limit = cpu.probeAddr(addrDesc + X86.DESC.LIMIT.OFFSET, 2);
-                var acc = cpu.probeAddr(addrDesc + X86.DESC.ACC.OFFSET, 2);
-                var type = (acc & X86.DESC.ACC.TYPE.MASK);
-                var base = cpu.probeAddr(addrDesc + X86.DESC.BASE.OFFSET, 2) | ((acc & X86.DESC.ACC.BASE1623) << 16);
-                var ext = cpu.probeAddr(addrDesc + X86.DESC.EXT.OFFSET, 2);
+                let limit = cpu.probeAddr(addrDesc + X86.DESC.LIMIT.OFFSET, 2);
+                let acc = cpu.probeAddr(addrDesc + X86.DESC.ACC.OFFSET, 2);
+                let type = (acc & X86.DESC.ACC.TYPE.MASK);
+                let base = cpu.probeAddr(addrDesc + X86.DESC.BASE.OFFSET, 2) | ((acc & X86.DESC.ACC.BASE1623) << 16);
+                let ext = cpu.probeAddr(addrDesc + X86.DESC.EXT.OFFSET, 2);
 
                 if (I386 && cpu.model >= X86.MODEL_80386) {
                     base |= (ext & X86.DESC.EXT.BASE2431) << 16;
@@ -1664,9 +1664,9 @@ class SegX86 {
      *
      loadAcc(sel, fGDT)
      {
-         var addrDT;
-         var addrDTLimit;
-         var cpu = this.cpu;
+         let addrDT;
+         let addrDTLimit;
+         let cpu = this.cpu;
 
          if (!(sel & X86.SEL.LDT)) {
              addrDT = cpu.addrGDT;
@@ -1676,7 +1676,7 @@ class SegX86 {
              addrDTLimit = (addrDT + cpu.segLDT.limit)|0;
          }
          if (addrDT !== undefined) {
-             var addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
+             let addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
              if (((addrDTLimit - addrDesc)|0) >= 7) {
                  return cpu.getShort(addrDesc + X86.DESC.ACC.OFFSET);
              }

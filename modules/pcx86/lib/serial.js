@@ -118,7 +118,7 @@ class SerialPort extends Component {
             }
             break;
         }
-        
+
         /*
          * consoleBuffer becomes a string that records serial port output if the 'binding' property is set to the
          * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
@@ -161,18 +161,18 @@ class SerialPort extends Component {
          * Normally, any HTML controls defined within the scope of the component's XML element are *implicitly*
          * bound to us.  For example, in the XML below, the textarea control will automatically trigger a call to
          * setBinding() with sBinding set to "serialWindow" and control set to an HTMLTextAreaElement.
-         * 
+         *
 	     *      <serial id="com1">
 	     *          <control type="container" class="pcjs-textarea">
 	     *      	    <control type="textarea" binding="serialWindow"/>
 	     *          </control>
 	     *      </serial>
-	     * 
+	     *
 	     * However, this component also supports an *explicit* binding attribute, which can either be the hard-coded
 	     * name "console" (for routing all output to the system console) or the name of a control binding that has
 	     * been defined in another component (eg, an HTMLTextAreaElement defined as part of the Control Panel layout).
          */
-        var sBinding = parms['binding'];
+        let sBinding = parms['binding'];
         if (sBinding == "console") {
             this.consoleBuffer = "";
         } else {
@@ -181,12 +181,12 @@ class SerialPort extends Component {
              * then it specifies the name of that control with the 'binding' property.  The SerialPort constructor
              * will then call bindExternalControl(), which looks up the control, and then passes it to our own
              * setBinding() handler.
-             * 
+             *
              * For bindExternalControl() to succeed, it also need to know the target component; for now, that's
              * been hard-coded to "Panel", in part because that's one of the few components we can rely upon
              * initializing before we do, but it would be a simple matter to include a component type or ID as part
              * of the 'binding' property as well, if we need more flexibility later.
-             * 
+             *
              * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
              */
             Component.bindExternalControl(this, sBinding);
@@ -212,7 +212,7 @@ class SerialPort extends Component {
 
     /**
      * bindConnection(connection, receiveData, fAutoFlow)
-     * 
+     *
      * This is basically a lighter-weight version of initConnection(), used by built-in components
      * like TestController, as opposed to components in external machines, which require more work to connect.
      *
@@ -244,7 +244,7 @@ class SerialPort extends Component {
      */
     bindMouse(id, mouse, fnUpdate)
     {
-        var component = null;
+        let component = null;
         if (id == this.idComponent && !this.connection) {
             this.connection = mouse;
             this.updateStatus = fnUpdate;
@@ -268,7 +268,7 @@ class SerialPort extends Component {
     {
         if (!sHTMLType || sHTMLType == "textarea") {
 
-            var serial = this;
+            let serial = this;
             this.bindings[sBinding] = this.controlBuffer = /** @type {HTMLTextAreaElement} */ (control);
 
             /*
@@ -288,7 +288,7 @@ class SerialPort extends Component {
                  * event for one of those keys (probably the only event the browser generates for them).
                  */
                 event = event || window.event;
-                var keyCode = event.keyCode;
+                let keyCode = event.keyCode;
                 if (keyCode === 0x08 || event.ctrlKey && keyCode >= 0x41 && keyCode <= 0x5A) {
                     if (event.preventDefault) event.preventDefault();
                     if (keyCode > 0x40) keyCode -= 0x40;
@@ -303,7 +303,7 @@ class SerialPort extends Component {
                  * handlers in keyboard.js.
                  */
                 event = event || window.event;
-                var keyCode = event.which || event.keyCode;
+                let keyCode = event.which || event.keyCode;
                 serial.receiveData(keyCode);
                 /*
                  * Since we're going to remove the "readonly" attribute from the <textarea> control
@@ -331,7 +331,7 @@ class SerialPort extends Component {
         //     }
         //     break;
         // }
-        
+
         return false;
     }
 
@@ -347,13 +347,13 @@ class SerialPort extends Component {
     initBus(cmp, bus, cpu, dbg)
     {
         this.cmp = cmp;
-        
+
         if (this.iAdapter) {
             this.bus = bus;
             this.cpu = cpu;
             this.dbg = dbg;
 
-            var serial = this;
+            let serial = this;
             this.timerReceiveNext = this.cpu.addTimer(this.id + ".receive", function receiveDataTimer() {
                 serial.receiveData();
             });
@@ -394,18 +394,18 @@ class SerialPort extends Component {
     initConnection(fNullModem)
     {
         if (!this.connection) {
-            var sConnection = this.cmp.getMachineParm('connection');
+            let sConnection = this.cmp.getMachineParm('connection');
             if (sConnection) {
-                var asParts = sConnection.split('->');
+                let asParts = sConnection.split('->');
                 if (asParts.length == 2) {
-                    var sSourceID = Str.trim(asParts[0]);
+                    let sSourceID = Str.trim(asParts[0]);
                     if (sSourceID != this.idComponent) return;  // this connection string is intended for another instance
-                    var sTargetID = Str.trim(asParts[1]);
+                    let sTargetID = Str.trim(asParts[1]);
                     this.connection = Component.getComponentByID(sTargetID);
                     if (this.connection) {
-                        var exports = this.connection['exports'];
+                        let exports = this.connection['exports'];
                         if (exports) {
-                            var fnConnect = /** @function */ (exports['connect']);
+                            let fnConnect = /** @function */ (exports['connect']);
                             if (fnConnect) fnConnect.call(this.connection, this.fNullModem);
                             this.sendData = exports['receiveData'];
                             if (this.sendData) {
@@ -486,7 +486,7 @@ class SerialPort extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, this.saveRegisters());
         return state.data();
     }
@@ -519,7 +519,7 @@ class SerialPort extends Component {
          * but I think we can safely assume zeros.  Similarly, we reset the baud rate Divisor Latch (wDL)
          * to an arbitrary but consistent default (DL_DEFAULT).
          */
-        var i = 0;
+        let i = 0;
         if (data === undefined) {
             data = [
                 0,                                          // RBR
@@ -555,8 +555,8 @@ class SerialPort extends Component {
      */
     saveRegisters()
     {
-        var i = 0;
-        var data = [];
+        let i = 0;
+        let data = [];
         data[i++] = this.bRBR;
         data[i++] = this.bTHR;
         data[i++] = this.wDL;
@@ -583,7 +583,7 @@ class SerialPort extends Component {
      */
     getBaudTimeout()
     {
-        var nBytesPerSecond = 1843200 / ((this.wDL || 1) << 7);
+        let nBytesPerSecond = 1843200 / ((this.wDL || 1) << 7);
         return (1000 / nBytesPerSecond)|0;
     }
 
@@ -606,7 +606,7 @@ class SerialPort extends Component {
                 this.abReceive.push(data);
             }
             else if (typeof data == "string") {
-                for (var i = 0; i < data.length; i++) {
+                for (let i = 0; i < data.length; i++) {
                     this.abReceive.push(data.charCodeAt(i));
                 }
             }
@@ -630,7 +630,7 @@ class SerialPort extends Component {
      */
     receiveStatus(pins)
     {
-        var bMSROld = this.bMSR;
+        let bMSROld = this.bMSR;
         this.bMSR &= ~(SerialPort.MSR.CTS | SerialPort.MSR.DSR);
         if (pins & RS232.CTS.MASK) {
             this.bMSR |= SerialPort.MSR.CTS | SerialPort.MSR.DCTS;
@@ -670,7 +670,7 @@ class SerialPort extends Component {
      */
     inRBR(port, addrFrom)
     {
-        var b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL & 0xff) : this.bRBR);
+        let b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL & 0xff) : this.bRBR);
         this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "RBR", b);
         this.bLSR &= ~SerialPort.LSR.DR;
         this.advanceRBR();
@@ -687,7 +687,7 @@ class SerialPort extends Component {
      */
     inIER(port, addrFrom)
     {
-        var b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL >> 8) : this.bIER);
+        let b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL >> 8) : this.bIER);
         this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER", b);
         return b;
     }
@@ -702,7 +702,7 @@ class SerialPort extends Component {
      */
     inIIR(port, addrFrom)
     {
-        var b = this.bIIR;
+        let b = this.bIIR;
         /*
          * Reading the IIR is supposed to clear the INT_THR condition (as is another write to the THR).
          */
@@ -723,7 +723,7 @@ class SerialPort extends Component {
      */
     inLCR(port, addrFrom)
     {
-        var b = this.bLCR;
+        let b = this.bLCR;
         this.printMessageIO(port, null, addrFrom, "LCR", b);
         return b;
     }
@@ -738,7 +738,7 @@ class SerialPort extends Component {
      */
     inMCR(port, addrFrom)
     {
-        var b = this.bMCR;
+        let b = this.bMCR;
         this.printMessageIO(port, null, addrFrom, "MCR", b);
         return b;
     }
@@ -753,7 +753,7 @@ class SerialPort extends Component {
      */
     inLSR(port, addrFrom)
     {
-        var b = this.bLSR;
+        let b = this.bLSR;
         this.printMessageIO(port, null, addrFrom, "LSR", b);
         return b;
     }
@@ -768,7 +768,7 @@ class SerialPort extends Component {
      */
     inMSR(port, addrFrom)
     {
-        var b = this.bMSR;
+        let b = this.bMSR;
         this.bMSR &= ~(SerialPort.MSR.DCTS | SerialPort.MSR.DDSR);
         this.printMessageIO(port, null, addrFrom, "MSR", b);
         return b;
@@ -784,7 +784,7 @@ class SerialPort extends Component {
      */
     outTHR(port, bOut, addrFrom)
     {
-        var serial = this;
+        let serial = this;
         this.printMessageIO(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "THR");
         if (this.bLCR & SerialPort.LCR.DLAB) {
             this.wDL = (this.wDL & ~0xff) | bOut;
@@ -855,7 +855,7 @@ class SerialPort extends Component {
      */
     outMCR(port, bOut, addrFrom)
     {
-        var delta = (bOut ^ this.bMCR);
+        let delta = (bOut ^ this.bMCR);
         this.printMessageIO(port, bOut, addrFrom, "MCR");
         this.bMCR = bOut;
         /*
@@ -863,7 +863,7 @@ class SerialPort extends Component {
          */
         if (delta & (SerialPort.MCR.DTR | SerialPort.MCR.RTS)) {
             if (this.updateStatus) {
-                var pins = 0;
+                let pins = 0;
                 if (this.fNullModem) {
                     pins |= (bOut & SerialPort.MCR.RTS)? RS232.CTS.MASK : 0;
                     pins |= (bOut & SerialPort.MCR.DTR)? (RS232.DSR.MASK | RS232.CD.MASK): 0;
@@ -887,7 +887,7 @@ class SerialPort extends Component {
      */
     updateIIR()
     {
-        var bIIR = -1;
+        let bIIR = -1;
         /*
          * We check all the interrupt conditions in priority order.  TODO: Add INT_LSR.
          */
@@ -939,7 +939,7 @@ class SerialPort extends Component {
      */
     transmitByte(b)
     {
-        var fTransmitted = false;
+        let fTransmitted = false;
 
         this.printMessage("transmitByte(" + Str.toHexByte(b) + ")");
 
@@ -961,11 +961,11 @@ class SerialPort extends Component {
                 if (this.iLogicalCol > 0) this.iLogicalCol--;
             }
             else {
-                var s = Str.toASCIICode(b); // formerly: String.fromCharCode(b);
-                var nChars = s.length;      // formerly: (b >= 0x20? 1 : 0);
+                let s = Str.toASCIICode(b); // formerly: String.fromCharCode(b);
+                let nChars = s.length;      // formerly: (b >= 0x20? 1 : 0);
                 if (b < 0x20 && nChars == 1) nChars = 0;
                 if (b == 0x09) {
-                    var tabSize = this.tabSize || 8;
+                    let tabSize = this.tabSize || 8;
                     nChars = tabSize - (this.iLogicalCol % tabSize);
                     if (this.tabSize) s = Str.pad("", nChars);
                 }
@@ -1021,11 +1021,11 @@ class SerialPort extends Component {
      */
     static init()
     {
-        var aeSerial = Component.getElementsByClass(document, PCX86.APPCLASS, "serial");
-        for (var iSerial = 0; iSerial < aeSerial.length; iSerial++) {
-            var eSerial = aeSerial[iSerial];
-            var parms = Component.getComponentParms(eSerial);
-            var serial = new SerialPort(parms);
+        let aeSerial = Component.getElementsByClass(document, PCX86.APPCLASS, "serial");
+        for (let iSerial = 0; iSerial < aeSerial.length; iSerial++) {
+            let eSerial = aeSerial[iSerial];
+            let parms = Component.getComponentParms(eSerial);
+            let serial = new SerialPort(parms);
             Component.bindComponentControls(serial, eSerial, PCX86.APPCLASS);
         }
     }

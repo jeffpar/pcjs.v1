@@ -63,7 +63,7 @@ X86.helpAdd64 = function(r64Dst, r64Src)
  */
 X86.helpCmp64 = function(r64Dst, r64Src)
 {
-    var result = r64Dst[1] - r64Src[1];
+    let result = r64Dst[1] - r64Src[1];
     if (!result) result = r64Dst[0] - r64Src[0];
     return result;
 };
@@ -126,7 +126,7 @@ X86.helpSub64 = function(r64Dst, r64Src)
  */
 X86.helpDECreg = function(w)
 {
-    var result = (w - 1)|0;
+    let result = (w - 1)|0;
     this.setArithResult(w, 1, result, this.typeData | X86.RESULT.NOTCF, true);
     this.nStepCycles -= 2;                          // the register form of DEC takes 2 cycles on all CPUs
     return (w & ~this.maskData) | (result & this.maskData);
@@ -153,10 +153,10 @@ X86.helpDIV32 = function(dstLo, dstHi, src)
         return false;
     }
 
-    var result = 0, bit = 1;
+    let result = 0, bit = 1;
 
-    var r64Div = X86.helpSet64(this.r64Div, src, 0);
-    var r64Rem = X86.helpSet64(this.r64Rem, dstLo, dstHi);
+    let r64Div = X86.helpSet64(this.r64Div, src, 0);
+    let r64Rem = X86.helpSet64(this.r64Rem, dstLo, dstHi);
 
     while (X86.helpCmp64(r64Rem, r64Div) > 0) {
         X86.helpAdd64(r64Div, r64Div);
@@ -193,7 +193,7 @@ X86.helpDIV32 = function(dstLo, dstHi, src)
  */
 X86.helpIDIV32 = function(dstLo, dstHi, src)
 {
-    var bNegLo = 0, bNegHi = 0;
+    let bNegLo = 0, bNegHi = 0;
     /*
      *      dividend    divisor       quotient    remainder
      *        (dst)      (src)          (lo)         (hi)
@@ -230,7 +230,7 @@ X86.helpIDIV32 = function(dstLo, dstHi, src)
  */
 X86.helpINCreg = function(w)
 {
-    var result = (w + 1)|0;
+    let result = (w + 1)|0;
     this.setArithResult(w, 1, result, this.typeData | X86.RESULT.NOTCF);
     this.nStepCycles -= 2;                          // the register form of INC takes 2 cycles on all CPUs
     return (w & ~this.maskData) | (result & this.maskData);
@@ -309,7 +309,7 @@ X86.helpSHLDw = function(dst, src, count)
             dst = src;
             count -= 16;
         }
-        var carry = dst << (count - 1);
+        let carry = dst << (count - 1);
         dst = ((carry << 1) | (src >>> (16 - count))) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, carry & X86.RESULT.WORD);
     }
@@ -328,7 +328,7 @@ X86.helpSHLDw = function(dst, src, count)
 X86.helpSHLDd = function(dst, src, count)
 {
     if (count) {
-        var carry = dst << (count - 1);
+        let carry = dst << (count - 1);
         dst = (carry << 1) | (src >>> (32 - count));
         this.setLogicResult(dst, X86.RESULT.DWORD, carry & X86.RESULT.DWORD);
     }
@@ -351,7 +351,7 @@ X86.helpSHRDw = function(dst, src, count)
             dst = src;
             count -= 16;
         }
-        var carry = dst >>> (count - 1);
+        let carry = dst >>> (count - 1);
         dst = ((carry >>> 1) | (src << (16 - count))) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, carry & 0x1);
     }
@@ -370,7 +370,7 @@ X86.helpSHRDw = function(dst, src, count)
 X86.helpSHRDd = function(dst, src, count)
 {
     if (count) {
-        var carry = dst >>> (count - 1);
+        let carry = dst >>> (count - 1);
         dst = (carry >>> 1) | (src << (32 - count));
         this.setLogicResult(dst, X86.RESULT.DWORD, carry & 0x1);
     }
@@ -397,7 +397,7 @@ X86.helpSRC1 = function()
  */
 X86.helpSRCCL = function()
 {
-    var count = this.regECX & 0xff;
+    let count = this.regECX & 0xff;
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftCR : this.cycleCounts.nOpCyclesShiftCM) + (count << this.cycleCounts.nOpCyclesShiftCS);
     return count;
 };
@@ -410,7 +410,7 @@ X86.helpSRCCL = function()
  */
 X86.helpSRCByte = function()
 {
-    var count = this.getIPByte();
+    let count = this.getIPByte();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftCR : this.cycleCounts.nOpCyclesShiftCM) + (count << this.cycleCounts.nOpCyclesShiftCS);
     return count;
 };
@@ -470,8 +470,8 @@ X86.helpCALLF = function(off, sel)
     this.opCS = this.getCS();
     this.opSS = this.getSS();
     this.opLSP = this.regLSP;
-    var oldIP = this.getIP();
-    var oldSize = (I386? this.sizeData : 2);
+    let oldIP = this.getIP();
+    let oldSize = (I386? this.sizeData : 2);
     if (this.setCSIP(off, sel, true) != null) {
         /*
          * When the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4, write the selector
@@ -503,10 +503,10 @@ X86.helpINT = function(nIDT, nError, nCycles)
      * TODO: We assess the cycle cost up front, because otherwise, if loadIDT() fails, no cost may be assessed.
      */
     this.nStepCycles -= this.cycleCounts.nOpCyclesInt + (nCycles || 0);
-    var oldPS = this.getPS();
-    var oldCS = this.getCS();
-    var oldIP = this.getIP();
-    var addr = this.segCS.loadIDT(nIDT);
+    let oldPS = this.getPS();
+    let oldCS = this.getCS();
+    let oldIP = this.getIP();
+    let addr = this.segCS.loadIDT(nIDT);
     if (addr !== X86.ADDR_INVALID) {
         /*
          * TODO: Determine if we should use pushData() instead of pushWord() for oldCS and nError, to deal with
@@ -539,19 +539,19 @@ X86.helpIRET = function()
     this.nStepCycles -= this.cycleCounts.nOpCyclesIRet;
 
     if ((this.regCR0 & X86.CR0.MSW.PE) && (this.regPS & X86.PS.NT)) {
-        var addrNew = this.segTSS.base;
+        let addrNew = this.segTSS.base;
         /*
          * Fortunately, X86.TSS286.PREV_TSS and X86.TSS386.PREV_TSS refer to the same TSS offset.
          * TODO: Update switchTS() to assess a cycle cost; currently, all we assess is what's shown above.
          */
-        var sel = this.getShort(addrNew + X86.TSS286.PREV_TSS);
+        let sel = this.getShort(addrNew + X86.TSS286.PREV_TSS);
         this.segCS.switchTSS(sel, false);
     }
     else {
-        var cpl = this.nCPL;
-        var newIP = this.popWord();
-        var newCS = this.popWord();
-        var newPS = this.popWord();
+        let cpl = this.nCPL;
+        let newIP = this.popWord();
+        let newCS = this.popWord();
+        let newPS = this.popWord();
 
         if (I386) {
             if (this.regPS & X86.PS.VM) {
@@ -585,12 +585,12 @@ X86.helpIRET = function()
                      * pop the rest, while we're still in protected-mode, before the switch to V86-mode alters the current
                      * operand size (among other things).
                      */
-                    var newSP = this.popWord();
-                    var newSS = this.popWord();
-                    var newES = this.popWord();
-                    var newDS = this.popWord();
-                    var newFS = this.popWord();
-                    var newGS = this.popWord();
+                    let newSP = this.popWord();
+                    let newSS = this.popWord();
+                    let newES = this.popWord();
+                    let newDS = this.popWord();
+                    let newFS = this.popWord();
+                    let newGS = this.popWord();
                     this.setProtMode(true, true);       // flip the switch to V86-mode now
                     this.setSS(newSS);
                     this.setSP(newSP);
@@ -627,8 +627,8 @@ X86.helpRETF = function(n)
     this.opSS = this.getSS();
     this.opLSP = this.regLSP;
 
-    var newIP = this.popWord();
-    var newCS = this.popWord();
+    let newIP = this.popWord();
+    let newCS = this.popWord();
 
     if (n) this.setSP(this.getSP() + n);            // TODO: optimize
 
@@ -731,7 +731,7 @@ X86.helpTrap = function(nIDT, nCycles)
  */
 X86.helpFault = function(nFault, nError, nCycles, fHalt)
 {
-    var fDispatch = false;
+    let fDispatch = false;
 
     if (!this.flags.complete) {
         /*
@@ -801,7 +801,7 @@ X86.helpFault = function(nFault, nError, nCycles, fHalt)
              * the triple-fault.  However, regardless what helpCheckFault() returns, we must leave via "throw -1",
              * because we need to blow off whatever context triggered the triple-fault; that was less critical when
              * all we dealt with were 80286-based triple-faults (at least the "normal" triple-faults that OS/2 would
-             * generate), but for any other unexpected triple-faults, "dispatching" a throw is critical. 
+             * generate), but for any other unexpected triple-faults, "dispatching" a throw is critical.
              */
             nError = 0;
             nFault = -1;
@@ -879,7 +879,7 @@ X86.helpFault = function(nFault, nError, nCycles, fHalt)
 X86.helpPageFault = function(addr, fPresent, fWrite)
 {
     this.regCR2 = addr;
-    var nError = 0;
+    let nError = 0;
     if (fPresent) nError |= X86.PTE.PRESENT;
     if (fWrite) nError |= X86.PTE.READWRITE;
     if (this.nCPL == 3) nError |= X86.PTE.USER;
@@ -905,9 +905,9 @@ X86.helpPageFault = function(addr, fPresent, fWrite)
  */
 X86.helpCheckFault = function(nFault, nError, fHalt)
 {
-    var bitsMessage = Messages.FAULT;
+    let bitsMessage = Messages.FAULT;
 
-    var bOpcode = this.probeAddr(this.regLIP);
+    let bOpcode = this.probeAddr(this.regLIP);
 
     /*
      * OS/2 1.0 uses an INT3 (0xCC) opcode in conjunction with an invalid IDT to trigger a triple-fault
@@ -976,8 +976,8 @@ X86.helpCheckFault = function(nFault, nError, fHalt)
 
     if (this.messageEnabled(bitsMessage) || fHalt) {
 
-        var fRunning = this.flags.running;
-        var sMessage = "Fault " + Str.toHexByte(nFault) + (nError != null? " (" + Str.toHexWord(nError) + ")" : "") + " on opcode " + Str.toHexByte(bOpcode);
+        let fRunning = this.flags.running;
+        let sMessage = "Fault " + Str.toHexByte(nFault) + (nError != null? " (" + Str.toHexWord(nError) + ")" : "") + " on opcode " + Str.toHexByte(bOpcode);
         if (fHalt && fRunning) sMessage += " (blocked)";
 
         if (DEBUGGER && this.dbg) {
@@ -1017,7 +1017,7 @@ X86.helpCheckFault = function(nFault, nError, fHalt)
  */
 X86.zeroSeg = function(seg)
 {
-    var acc = seg.acc & X86.DESC.ACC.TYPE.CODE_OR_DATA;
+    let acc = seg.acc & X86.DESC.ACC.TYPE.CODE_OR_DATA;
     if (seg.sel & X86.SEL.MASK) {
         if (acc == X86.DESC.ACC.TYPE.CODE_EXECONLY ||           // non-readable code segment (not allowed)
             acc == X86.DESC.ACC.TYPE.CODE_CONFORMING ||         // non-readable code segment (not allowed)

@@ -95,7 +95,7 @@ class FPUX86 extends Component {
          * a single value that's unique for any given CPU stepping.  If no stepping is provided, then stepping
          * is equal to model.
          */
-        var stepping = parmsFPU['stepping'];
+        let stepping = parmsFPU['stepping'];
         this.stepping = this.model + (stepping? Str.parseInt(stepping, 16) : 0);
 
         /*
@@ -244,8 +244,8 @@ class FPUX86 extends Component {
      */
     save()
     {
-        var state = new State(this);
-        var a = [], i = 0;
+        let state = new State(this);
+        let a = [], i = 0;
         a[i++] = this.regControl;
         a[i++] = this.getStatus();
         a[i++] = this.getTags();
@@ -254,7 +254,7 @@ class FPUX86 extends Component {
          * order (0-7) rather than their logical order (ST0-ST7).  Moreover, FSAVE() and FRSTOR() use the "temp-real" (TR)
          * format, whereas we use the current native format -- which, sadly, is only a 64-bit "long-real" (LR) format.
          */
-        for (var iReg = 0; iReg < this.regStack.length; iReg++) {
+        for (let iReg = 0; iReg < this.regStack.length; iReg++) {
             a[i++] = this.regStack[iReg];
         }
         state.set(0, a);
@@ -272,11 +272,11 @@ class FPUX86 extends Component {
      */
     restore(data)
     {
-        var a = data[0], i = 0;
+        let a = data[0], i = 0;
         this.setControl(a[i++]);
         this.setStatus(a[i++]);
         this.setTags(a[i++]);
-        for (var iReg = 0; iReg < this.regStack.length; iReg++) {
+        for (let iReg = 0; iReg < this.regStack.length; iReg++) {
             this.regStack[iReg] = a[i++];
         }
         return true;
@@ -304,7 +304,7 @@ class FPUX86 extends Component {
              * All the registers were tagged "unused" above, which is all that would normally happen, but debugging is
              * a little easier if we zero all the registers as well.
              */
-            for (var iReg = 0; iReg < this.regStack.length; iReg++) {
+            for (let iReg = 0; iReg < this.regStack.length; iReg++) {
                 this.regStack[iReg] = 0.0;
             }
         }
@@ -357,7 +357,7 @@ class FPUX86 extends Component {
     opStop(fError)
     {
         if (DEBUG) {
-            var cpu = this.cpu;
+            let cpu = this.cpu;
             if (fError || cpu.isRunning()) {
                 cpu.setIP(cpu.opLIP - cpu.segCS.base);
                 cpu.stopCPU();
@@ -572,7 +572,7 @@ class FPUX86 extends Component {
      */
     doAdd(operand1, operand2)
     {
-        var result = null;
+        let result = null;
         if (operand1 != null && operand2 != null) {
             result = operand1 + operand2;
             if (!this.checkResult(result)) result = null;
@@ -590,7 +590,7 @@ class FPUX86 extends Component {
      */
     doSubtract(operand1, operand2)
     {
-        var result = null;
+        let result = null;
         if (operand1 != null && operand2 != null) {
             result = operand1 - operand2;
             if (!this.checkResult(result)) result = null;
@@ -608,7 +608,7 @@ class FPUX86 extends Component {
      */
     doMultiply(operand1, operand2)
     {
-        var result = null;
+        let result = null;
         if (operand1 != null && operand2 != null) {
             result = operand1 * operand2;
             if (!this.checkResult(result)) result = null;
@@ -628,7 +628,7 @@ class FPUX86 extends Component {
      */
     doDivide(dividend, divisor)
     {
-        var quotient = null;
+        let quotient = null;
         if (dividend != null && divisor != null) {
             if (divisor || !this.setException(X86.FPU.STATUS.DE)) {
                 quotient = dividend / divisor;
@@ -649,9 +649,9 @@ class FPUX86 extends Component {
     doCompare(operand1, operand2)
     {
         if (operand1 != null && operand2 != null) {
-            var cc = 0;             // default value used when result > 0
+            let cc = 0;             // default value used when result > 0
             if (!isNaN(operand1) && !isNaN(operand2)) {
-                var result = operand1 - operand2;
+                let result = operand1 - operand2;
                 if (result < 0) {
                     cc = X86.FPU.STATUS.C0;
                 } else if (result === 0) {
@@ -675,7 +675,7 @@ class FPUX86 extends Component {
      */
     doSquareRoot(operand)
     {
-        var result = null;
+        let result = null;
         /*
          * Happily, -0 is ALSO >= 0.  Also happily, Math.sqrt(-0) returns -0.
          */
@@ -703,7 +703,7 @@ class FPUX86 extends Component {
     {
         if (operand == null) return null;
 
-        var rc = (this.regControl & X86.FPU.CONTROL.RC.MASK), result;
+        let rc = (this.regControl & X86.FPU.CONTROL.RC.MASK), result;
 
         if (rc == X86.FPU.CONTROL.RC.NEAR) {
             result = Math.round(operand);
@@ -755,10 +755,10 @@ class FPUX86 extends Component {
      */
     getTag(iReg)
     {
-        var bitUsed = (1 << iReg);
-        var tag = X86.FPU.TAGS.EMPTY;
+        let bitUsed = (1 << iReg);
+        let tag = X86.FPU.TAGS.EMPTY;
         if (this.regUsed & bitUsed) {
-            var f = this.regStack[iReg];
+            let f = this.regStack[iReg];
             tag = X86.FPU.TAGS.VALID;
             if (f === 0.0) {
                 tag = X86.FPU.TAGS.ZERO;
@@ -778,8 +778,8 @@ class FPUX86 extends Component {
      */
     getTags()
     {
-        var tags = 0;
-        for (var iReg = this.regStack.length - 1; iReg >= 0; iReg--) {
+        let tags = 0;
+        for (let iReg = this.regStack.length - 1; iReg >= 0; iReg--) {
             tags <<= 2;
             tags |= this.getTag(iReg);
         }
@@ -811,8 +811,8 @@ class FPUX86 extends Component {
     setTags(n)
     {
         this.regUsed = 0;
-        for (var bitUsed = 0x1; bitUsed <= 0x80; bitUsed <<= 1) {
-            var tag = n & X86.FPU.TAGS.MASK;
+        for (let bitUsed = 0x1; bitUsed <= 0x80; bitUsed <<= 1) {
+            let tag = n & X86.FPU.TAGS.MASK;
             if (tag != X86.FPU.TAGS.EMPTY) {
                 this.regUsed |= bitUsed;
             }
@@ -871,7 +871,7 @@ class FPUX86 extends Component {
      */
     getSR(i)
     {
-        var iReg = (this.iST + i) & 7;
+        let iReg = (this.iST + i) & 7;
         if (this.regUsed & (1 << iReg)) {
             this.regTmpSR[0] = this.regStack[iReg];
             return true;
@@ -891,7 +891,7 @@ class FPUX86 extends Component {
      */
     getLR(i)
     {
-        var iReg = (this.iST + i) & 7;
+        let iReg = (this.iST + i) & 7;
         if (this.regUsed & (1 << iReg)) {
             this.regTmpLR[0] = this.regStack[iReg];
             return true;
@@ -911,8 +911,8 @@ class FPUX86 extends Component {
      */
     getST(i)
     {
-        var v = null;
-        var iReg = (this.iST + i) & 7;
+        let v = null;
+        let iReg = (this.iST + i) & 7;
         if (this.regUsed & (1 << iReg)) {
             v = this.regStack[iReg];
         } else if (!this.setException(X86.FPU.STATUS.IE)) {
@@ -935,7 +935,7 @@ class FPUX86 extends Component {
      */
     getSTSign(i)
     {
-        var iInt = ((this.iST + i) & 7) << 1;
+        let iInt = ((this.iST + i) & 7) << 1;
         return this.intStack[iInt + 1] & (0x80000000|0);
     }
 
@@ -950,7 +950,7 @@ class FPUX86 extends Component {
     setST(i, v)
     {
         if (v != null && this.checkOperand(v)) {
-            var iReg = (this.iST + i) & 7;
+            let iReg = (this.iST + i) & 7;
             this.regStack[iReg] = v;
             this.regUsed |= (1 << iReg);
             return true;
@@ -968,10 +968,10 @@ class FPUX86 extends Component {
      */
     getTR(i, fSafe)
     {
-        var a = null;
-        var iReg = (this.iST + i) & 7;
+        let a = null;
+        let iReg = (this.iST + i) & 7;
         if (fSafe || this.regUsed & (1 << iReg) || !this.setException(X86.FPU.STATUS.IE)) {
-            var iInt = iReg << 1;
+            let iInt = iReg << 1;
             a = this.getTRFromLR(this.intStack[iInt], this.intStack[iInt + 1]);
         }
         return a;
@@ -1030,8 +1030,8 @@ class FPUX86 extends Component {
     getLIFromEA()
     {
         this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
-        var lo = this.cpu.getLong(this.cpu.regEA);
-        var hi = this.cpu.getLong(this.cpu.regEA + 4);
+        let lo = this.cpu.getLong(this.cpu.regEA);
+        let hi = this.cpu.getLong(this.cpu.regEA + 4);
         return (hi * 0x100000000) + (lo >>> 0);
     }
 
@@ -1152,12 +1152,12 @@ class FPUX86 extends Component {
      */
     getLRFromTR(a)
     {
-        var loTR = a[0], hiTR = a[1];
-        var signLR = (a[2] & 0x8000) >> 4, expLR = a[2] & 0x7fff;
+        let loTR = a[0], hiTR = a[1];
+        let signLR = (a[2] & 0x8000) >> 4, expLR = a[2] & 0x7fff;
         /*
          * We have no choice but to chop off the bottom 11 TR bits in order to fit in an LR....
          */
-        var loLR = (loTR >>> 11) | (hiTR << 21), hiLR = (hiTR >> 11) & 0xfffff;
+        let loLR = (loTR >>> 11) | (hiTR << 21), hiLR = (hiTR >> 11) & 0xfffff;
 
         if (expLR == 0x7fff) {
             /*
@@ -1199,9 +1199,9 @@ class FPUX86 extends Component {
      */
     getTRFromLR(loLR, hiLR)
     {
-        var expTR = (hiLR >> 20) & 0x07ff;
-        var signTR = (hiLR >> 16) & 0x8000;
-        var loTR = loLR << 11, hiTR = 0x80000000 | ((hiLR & 0x000fffff) << 11) | (loLR >>> 21);
+        let expTR = (hiLR >> 20) & 0x07ff;
+        let signTR = (hiLR >> 16) & 0x8000;
+        let loTR = loLR << 11, hiTR = 0x80000000 | ((hiLR & 0x000fffff) << 11) | (loLR >>> 21);
 
         if (expTR == 0x07ff) {
             /*
@@ -1245,10 +1245,10 @@ class FPUX86 extends Component {
      */
     decodeBCD(i, n)
     {
-        var v = 0, m = 1;
+        let v = 0, m = 1;
         this.assert(n > 0 && n <= 8);
         while (n--) {
-            var d = i & 0xf;
+            let d = i & 0xf;
             this.assert(d <= 9);
             v += d * m;
             m *= 10;
@@ -1267,7 +1267,7 @@ class FPUX86 extends Component {
      */
     encodeBCD(v, n)
     {
-        var i = 0, s = 0;
+        let i = 0, s = 0;
         this.assert(n > 0 && n <= 8);
         while (n--) {
             i |= (v % 10) << s;
@@ -1285,8 +1285,8 @@ class FPUX86 extends Component {
      */
     popValue()
     {
-        var v = null;
-        var bitUsed = (1 << this.iST);
+        let v = null;
+        let bitUsed = (1 << this.iST);
         if (!(this.regUsed & bitUsed)) {
             this.regStatus &= ~X86.FPU.STATUS.C1;       // clear C1 to indicate stack underflow (80287XL and up)
             if (this.setException(X86.FPU.STATUS.SF | X86.FPU.STATUS.IE)) return v;
@@ -1306,8 +1306,8 @@ class FPUX86 extends Component {
     pushValue(v)
     {
         if (v == null) return;
-        var iReg = (this.iST - 1) & 7;
-        var bitUsed = (1 << iReg);
+        let iReg = (this.iST - 1) & 7;
+        let bitUsed = (1 << iReg);
         if (this.regUsed & bitUsed) {
             this.regStatus |= X86.FPU.STATUS.C1;        // set C1 to indicate stack overflow (80287XL and up)
             if (this.setException(X86.FPU.STATUS.SF | X86.FPU.STATUS.IE)) return;
@@ -1329,8 +1329,8 @@ class FPUX86 extends Component {
      */
     loadEnv(addr)
     {
-        var w;
-        var cpu = this.cpu;
+        let w;
+        let cpu = this.cpu;
 
         this.setControl(cpu.getWord(addr));
         this.setStatus(cpu.getWord(addr += cpu.sizeData));
@@ -1365,14 +1365,14 @@ class FPUX86 extends Component {
      */
     saveEnv(addr)
     {
-        var cpu = this.cpu;
+        let cpu = this.cpu;
 
         cpu.setWord(addr, this.regControl);
         cpu.setWord(addr += cpu.sizeData, this.getStatus());
         cpu.setWord(addr += cpu.sizeData, this.getTags());
 
         if (!(cpu.regCR0 & X86.CR0.MSW.PE) || (cpu.regPS & X86.PS.VM)) {
-            var off = (this.regCodeSel << 4) + this.regCodeOff;
+            let off = (this.regCodeSel << 4) + this.regCodeOff;
             cpu.setWord(addr += cpu.sizeData, off);
             cpu.setWord(addr += cpu.sizeData, ((off >> 4) & ~0xfff) | this.regOpcode);
             off = (this.regDataSel << 4) + this.regDataOff;
@@ -1400,15 +1400,15 @@ class FPUX86 extends Component {
      */
     opFPU(bOpcode, bModRM, dst, src)
     {
-        var mod = (bModRM >> 6) & 3;
-        var reg = (bModRM >> 3) & 7;
+        let mod = (bModRM >> 6) & 3;
+        let reg = (bModRM >> 3) & 7;
         this.iStack = (bModRM & 7);
 
         /*
          * Combine mod and reg into one decodable value: put mod in the high nibble
          * and reg in the low nibble, after first collapsing all mod values < 3 to zero.
          */
-        var modReg = (mod < 3? 0 : 0x30) + reg;
+        let modReg = (mod < 3? 0 : 0x30) + reg;
 
         /*
          * All values >= 0x34 imply mod == 3 and reg >= 4, so now we shift reg into the high
@@ -1418,15 +1418,15 @@ class FPUX86 extends Component {
             modReg = (reg << 4) | this.iStack;
         }
 
-        var fnOp = FPUX86.aaOps[bOpcode][modReg];
+        let fnOp = FPUX86.aaOps[bOpcode][modReg];
         if (fnOp) {
             /*
              * A handful of FPU instructions must preserve (at least some of) the "exception" registers,
              * so if the current function is NOT one of those, then update all the "exception" registers.
              */
             if (FPUX86.afnPreserveExceptions.indexOf(fnOp) < 0) {
-                var cpu = this.cpu;
-                var off = cpu.opLIP;
+                let cpu = this.cpu;
+                let off = cpu.opLIP;
                 /*
                  * WARNING: opLIP points to any prefixes preceding the ESC instruction, but the 8087 always
                  * points to the ESC instruction.  Technically, that's a bug, but it's also a reality, so we
@@ -1503,17 +1503,17 @@ class FPUX86 extends Component {
      */
     readFPUStack(i)
     {
-        var a = null;
+        let a = null;
         if (i < this.regStack.length) {
             a = [];
-            var iReg = (this.iST + i) & 7;
+            let iReg = (this.iST + i) & 7;
             a[0] = iReg;
             a[1] = this.getTag(iReg);
             a[2] = this.regStack[iReg];
-            var iInt = iReg << 1;
+            let iInt = iReg << 1;
             a[3] = this.intStack[iInt];
             a[4] = this.intStack[iInt + 1];
-            var aTR = this.getTRFromLR(a[3], a[4]);
+            let aTR = this.getTRFromLR(a[3], a[4]);
             a[5] = aTR[0]; a[6] = aTR[1]; a[7] = aTR[2];
         }
         return a;
@@ -1556,11 +1556,11 @@ class FPUX86 extends Component {
      */
     static init()
     {
-        var aeFPUs = Component.getElementsByClass(document, PCX86.APPCLASS, "fpu");
-        for (var iFPU = 0; iFPU < aeFPUs.length; iFPU++) {
-            var eFPU = aeFPUs[iFPU];
-            var parmsFPU = Component.getComponentParms(eFPU);
-            var fpu = new FPUX86(parmsFPU);
+        let aeFPUs = Component.getElementsByClass(document, PCX86.APPCLASS, "fpu");
+        for (let iFPU = 0; iFPU < aeFPUs.length; iFPU++) {
+            let eFPU = aeFPUs[iFPU];
+            let parmsFPU = Component.getComponentParms(eFPU);
+            let fpu = new FPUX86(parmsFPU);
             Component.bindComponentControls(fpu, eFPU, PCX86.APPCLASS);
         }
     }
@@ -1668,12 +1668,12 @@ FPUX86.FADDPsti = function()
  */
 FPUX86.FBLDpd = function()
 {
-    var a = this.getTRFromEA();
+    let a = this.getTRFromEA();
     /*
      * a[0] contains the 8 least-significant BCD digits, a[1] contains the next 8, and a[2] contains
      * the next 2 (bit 15 of a[2] is the sign bit, and bits 8-14 of a[2] are unused).
      */
-    var v = this.decodeBCD(a[0], 8) + this.decodeBCD(a[1], 8) * 100000000 + this.decodeBCD(a[2], 2) * 10000000000000000;
+    let v = this.decodeBCD(a[0], 8) + this.decodeBCD(a[1], 8) * 100000000 + this.decodeBCD(a[2], 2) * 10000000000000000;
     if (a[2] & 0x8000) v = -v;
     this.pushValue(v);
 };
@@ -1688,7 +1688,7 @@ FPUX86.FBSTPpd = function()
     /*
      * TODO: Verify the operation of FBSTP (eg, does it signal an exception if abs(value) >= 1000000000000000000?)
      */
-    var v = this.roundValue(this.popValue());
+    let v = this.roundValue(this.popValue());
     if (v != null) {
         /*
          * intTmpTR[0] will contain the 8 least-significant BCD digits, intTmpTR[1] will contain the next 8,
@@ -2704,10 +2704,10 @@ FPUX86.FPREM = function()
  */
 FPUX86.FRSTOR = function()
 {
-    var cpu = this.cpu;
-    var addr = this.loadEnv(cpu.regEA);
-    var a = this.intTmpTR;
-    for (var i = 0; i < this.regStack.length; i++) {
+    let cpu = this.cpu;
+    let addr = this.loadEnv(cpu.regEA);
+    let a = this.intTmpTR;
+    for (let i = 0; i < this.regStack.length; i++) {
         a[0] = cpu.getLong(addr);
         a[1] = cpu.getLong(addr += 4);
         a[2] = cpu.getShort(addr += 4);
@@ -2733,10 +2733,10 @@ FPUX86.FRNDINT = function()
  */
 FPUX86.FSAVE = function()
 {
-    var cpu = this.cpu;
-    var addr = this.saveEnv(cpu.regEA);
-    for (var i = 0; i < this.regStack.length; i++) {
-        var a = this.getTR(i, true);
+    let cpu = this.cpu;
+    let addr = this.saveEnv(cpu.regEA);
+    for (let i = 0; i < this.regStack.length; i++) {
+        let a = this.getTR(i, true);
         cpu.setLong(addr, a[0]);
         cpu.setLong(addr += 4, a[1]);
         cpu.setShort(addr += 4, a[2]);
@@ -2765,8 +2765,8 @@ FPUX86.FSAVE = function()
  */
 FPUX86.FSCALE = function()
 {
-    var x = this.getST(0);
-    var y = this.getST(1);
+    let x = this.getST(0);
+    let y = this.getST(1);
     if (x != null && y != null) this.setST(0, x * Math.pow(2, this.truncateValue(y)));
 };
 
@@ -3081,7 +3081,7 @@ FPUX86.FXAM = function()
         this.regStatus |= X86.FPU.STATUS.C0 | X86.FPU.STATUS.C3;
     }
     else {
-        var v = this.getST(0);
+        let v = this.getST(0);
         if (isNaN(v)) {
             this.regStatus |= X86.FPU.STATUS.C0;
         }
@@ -3104,7 +3104,7 @@ FPUX86.FXAM = function()
  */
 FPUX86.FXCHsti = function()
 {
-    var tmp = this.getST(0);
+    let tmp = this.getST(0);
     this.setST(0, this.getST(this.iStack));
     this.setST(this.iStack, tmp);
 };
@@ -3159,7 +3159,7 @@ FPUX86.FXCH8087 = function()
  */
 FPUX86.FXTRACT = function()
 {
-    var v = this.getST(0);
+    let v = this.getST(0);
     if (v != null) {
         this.regTmpLR[0] = v;
         this.setST(0, ((this.intTmpLR[1] >> 20) & 0x7ff) - 0x3ff);

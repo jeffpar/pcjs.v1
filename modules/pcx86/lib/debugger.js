@@ -4967,12 +4967,12 @@ class DebuggerX86 extends Debugger {
         var cb = (size * len) || 128;
         var cLines = ((cb + 15) >> 4) || 1;
         var cbLine = (size == 4? 16 : this.nBase);  // the base also happens to be a reasonable number of bytes/line
-        
+
         /*
          * The "da" variation uses a line size of 160 bytes, because that's the number of characters
          * per line in a text frame buffer; if no ending address or length is specified, the number of
          * lines defaults to 25 (the typical number of visible lines in a frame buffer).
-         * 
+         *
          * Beyond that, the command doesn't make any other assumptions about the memory format.  Video
          * frame buffers usually dump nicely because all the attribute bytes tend to be non-ASCII.
          */
@@ -4982,7 +4982,7 @@ class DebuggerX86 extends Debugger {
             cLines = (len <= 1? 25 : Math.ceil(len / cbLine));
             cb = cLines * cbLine;
         }
-        
+
         while (cLines-- && cb > 0) {
             var data = 0, iByte = 0, i;
             var sData = "", sChars = "";
@@ -5463,9 +5463,7 @@ class DebuggerX86 extends Debugger {
                     }
                     fCriteria = false;
                     if (bitsMessage == Messages.BUFFER) {
-                        for (var i = 0; i < this.aMessageBuffer.length; i++) {
-                            this.println(this.aMessageBuffer[i]);
-                        }
+                        this.println(this.aMessageBuffer.join('\n'));
                         this.aMessageBuffer = [];
                     }
                 }

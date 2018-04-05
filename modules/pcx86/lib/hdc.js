@@ -100,7 +100,7 @@ class HDC extends Component {
          * defaults.  For example, the default XT drive type is 3 (for a 10Mb disk drive), whereas the default
          * AT drive type is 2 (for a 20Mb disk drive).
          */
-        var sType = parmsHDC['type'];
+        let sType = parmsHDC['type'];
         this.fATC = sType && sType.toUpperCase() == "AT" || false;
 
         /*
@@ -127,7 +127,7 @@ class HDC extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var hdc = this;
+        let hdc = this;
 
         switch (sBinding) {
 
@@ -153,7 +153,7 @@ class HDC extends Component {
             this.bindings[sBinding] = control;
             control.onclick = function(iDrive) {
                 return function onClickSaveDrive(event) {
-                    var drive = hdc.aDrives && hdc.aDrives[iDrive];
+                    let drive = hdc.aDrives && hdc.aDrives[iDrive];
                     if (drive && drive.disk) {
                         /*
                          * Note the similarity (and hence factoring opportunity) between this code and the FDC's
@@ -165,13 +165,13 @@ class HDC extends Component {
                          * disk's sDiskFile/sDiskPath properties may be undefined.  sDiskName should always be defined
                          * though, defaulting to the name of the drive (eg, "10Mb Hard Disk").
                          */
-                        var disk = drive.disk;
-                        var sDiskName = disk.sDiskFile || disk.sDiskName;
-                        var i = sDiskName.lastIndexOf('.');
+                        let disk = drive.disk;
+                        let sDiskName = disk.sDiskFile || disk.sDiskName;
+                        let i = sDiskName.lastIndexOf('.');
                         if (i >= 0) sDiskName = sDiskName.substr(0, i);
                         sDiskName += ".img";
                         if (DEBUG) hdc.println("saving disk " + sDiskName + "...");
-                        var sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, sDiskName);
+                        let sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, sDiskName);
                         Component.alertUser(sAlert);
                     } else {
                         hdc.notice("Hard drive " + iDrive + " is not available.");
@@ -199,7 +199,7 @@ class HDC extends Component {
         this.dbg = dbg;
         this.cmp = cmp;
 
-        var aDriveConfigs = cmp.getMachineParm('drives');
+        let aDriveConfigs = cmp.getMachineParm('drives');
         if (aDriveConfigs) {
             if (typeof aDriveConfigs == "string") {
                 this.sDriveConfigs = aDriveConfigs;
@@ -208,7 +208,7 @@ class HDC extends Component {
                 this.sDriveConfigs = "";
             }
         }
-        
+
         if (this.sDriveConfigs) {
             try {
                 /*
@@ -346,7 +346,7 @@ class HDC extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, this.saveController());
         return state.data();
     }
@@ -375,8 +375,8 @@ class HDC extends Component {
      */
     initController(data, fHard)
     {
-        var i = 0;
-        var fSuccess = true;
+        let i = 0;
+        let fSuccess = true;
 
         /*
          * TODO: This is used to re-select the controller's active drive whenever the machine is restored, but alas,
@@ -415,7 +415,7 @@ class HDC extends Component {
             this.regCommand = data[i++];
             this.regFDR     = data[i++];
             if (typeof this.regFDR == "object") {
-                var a = this.regFDR;
+                let a = this.regFDR;
                 this.regFDR = a[0];
                 this.iDrive = a[1];
             }
@@ -436,7 +436,7 @@ class HDC extends Component {
              * Initialize iDriveAllowFail only if it's never been initialized, otherwise its entire purpose will be defeated.
              * See the related HACK in intBIOSDisk() for more details.
              */
-            var iDriveAllowFail = data[i++];
+            let iDriveAllowFail = data[i++];
             if (iDriveAllowFail !== undefined) {
                 this.iDriveAllowFail = iDriveAllowFail;
             } else {
@@ -448,15 +448,15 @@ class HDC extends Component {
             this.aDrives = new Array(this.aDriveConfigs.length);
         }
 
-        var dataDrives = data[i];
+        let dataDrives = data[i];
         if (dataDrives === undefined) dataDrives = [];
 
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+        for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
             if (this.aDrives[iDrive] === undefined) {
                 this.aDrives[iDrive] = {};
             }
-            var drive = this.aDrives[iDrive];
-            var driveConfig = this.aDriveConfigs[iDrive];
+            let drive = this.aDrives[iDrive];
+            let driveConfig = this.aDriveConfigs[iDrive];
             if (!this.initDrive(iDrive, drive, driveConfig, dataDrives[iDrive], fHard)) {
                 fSuccess = false;
             }
@@ -488,8 +488,8 @@ class HDC extends Component {
      */
     saveController()
     {
-        var i = 0;
-        var data = [];
+        let i = 0;
+        let data = [];
         if (this.fATC) {
             data[i++] = this.regError;
             data[i++] = this.regWPreC;
@@ -533,8 +533,8 @@ class HDC extends Component {
      */
     initDrive(iDrive, drive, driveConfig, data, fHard)
     {
-        var i = 0;
-        var fSuccess = true;
+        let i = 0;
+        let fSuccess = true;
         if (data === undefined) data = [HDC.XTC.DATA.ERR.NONE, 0, false, new Array(8)];
 
         drive.iDrive = iDrive;
@@ -588,7 +588,7 @@ class HDC extends Component {
         drive.type = driveConfig['type'];
         if (drive.type === undefined || HDC.aDriveTypes[this.iDriveTable][drive.type] === undefined) drive.type = this.iDriveTypeDefault;
 
-        var driveType = HDC.aDriveTypes[this.iDriveTable][drive.type];
+        let driveType = HDC.aDriveTypes[this.iDriveTable][drive.type];
         drive.nSectors = driveType[2] || 17;    // sectors/track
         drive.cbSector = driveType[3] || 512;   // bytes/sector (default is 512 if unspecified in the table)
 
@@ -624,7 +624,7 @@ class HDC extends Component {
         drive.sector = null;                    // initialized to null by worker, and then set to the next sector satisfying the request
 
         if (drive.disk) {
-            var deltas = data[i];
+            let deltas = data[i];
             if (deltas !== undefined && drive.disk.restore(deltas) < 0) {
                 fSuccess = false;
             }
@@ -643,9 +643,9 @@ class HDC extends Component {
      */
     saveDrives()
     {
-        var i = 0;
-        var data = [];
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+        let i = 0;
+        let data = [];
+        for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
             data[i++] = this.saveDrive(this.aDrives[iDrive]);
         }
         return data;
@@ -659,8 +659,8 @@ class HDC extends Component {
      */
     saveDrive(drive)
     {
-        var i = 0;
-        var data = [];
+        let i = 0;
+        let data = [];
         data[i++] = drive.errorCode;
         data[i++] = drive.senseCode;
         data[i++] = drive.fRemovable;
@@ -686,11 +686,11 @@ class HDC extends Component {
      */
     copyDrive(iDrive)
     {
-        var driveNew;
-        var driveOld = this.aDrives[iDrive];
+        let driveNew;
+        let driveOld = this.aDrives[iDrive];
         if (driveOld !== undefined) {
             driveNew = {};
-            for (var p in driveOld) {
+            for (let p in driveOld) {
                 driveNew[p] = driveOld[p];
             }
         }
@@ -712,7 +712,7 @@ class HDC extends Component {
     verifyDrive(drive, type)
     {
         if (drive) {
-            var nHeads = 0, nCylinders = 0;
+            let nHeads = 0, nCylinders = 0;
             if (type == null) {
                 /*
                  * If the caller wants us to use the programmed drive parameters, we use those,
@@ -742,7 +742,7 @@ class HDC extends Component {
                  *
                  * Do these values agree with those for the given drive type?  Even if they don't, all we do is warn.
                  */
-                var driveType = HDC.aDriveTypes[this.iDriveTable][drive.type];
+                let driveType = HDC.aDriveTypes[this.iDriveTable][drive.type];
                 if (driveType) {
                     if (nCylinders != driveType[0] && nHeads != driveType[1]) {
                         this.notice("Warning: drive parameters (" + nCylinders + "," + nHeads + ") do not match drive type " + drive.type + " (" + driveType[0] + "," + driveType[1] + ")");
@@ -780,16 +780,16 @@ class HDC extends Component {
     seekDrive(drive, iSector, nSectors)
     {
         if (drive.disk) {
-            var aDiskInfo = drive.disk.info();
-            var nCylinders = aDiskInfo[0];
+            let aDiskInfo = drive.disk.info();
+            let nCylinders = aDiskInfo[0];
             /*
              * If nCylinders is zero, we probably have an empty disk image, awaiting initialization (see verifyDrive())
              */
             if (nCylinders) {
-                var nHeads = aDiskInfo[1];
-                var nSectorsPerTrack = aDiskInfo[2];
-                var nSectorsPerCylinder = nHeads * nSectorsPerTrack;
-                var nSectorsPerDisk = nCylinders * nSectorsPerCylinder;
+                let nHeads = aDiskInfo[1];
+                let nSectorsPerTrack = aDiskInfo[2];
+                let nSectorsPerCylinder = nHeads * nSectorsPerTrack;
+                let nSectorsPerDisk = nCylinders * nSectorsPerCylinder;
                 if (iSector + nSectors <= nSectorsPerDisk) {
                     drive.wCylinder = Math.floor(iSector / nSectorsPerCylinder);
                     iSector %= nSectorsPerCylinder;
@@ -829,8 +829,8 @@ class HDC extends Component {
     {
         if (!fRemount) this.cAutoMount = 0;
 
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
-            var drive = this.aDrives[iDrive];
+        for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+            let drive = this.aDrives[iDrive];
             if (drive.name && drive.path) {
 
                 if (fRemount && drive.disk && drive.disk.isRemote()) {
@@ -867,7 +867,7 @@ class HDC extends Component {
      */
     loadDisk(iDrive, sDiskName, sDiskPath, fAutoMount)
     {
-        var drive = this.aDrives[iDrive];
+        let drive = this.aDrives[iDrive];
         if (drive.fBusy) {
             this.notice("Drive " + iDrive + " busy");
             return true;
@@ -878,7 +878,7 @@ class HDC extends Component {
             this.cAutoMount++;
             if (this.messageEnabled()) this.printMessage("loading " + sDiskName);
         }
-        var disk = drive.disk || new Disk(this, drive, drive.mode);
+        let disk = drive.disk || new Disk(this, drive, drive.mode);
         /*
          * The following hacks should only be necessary for (old) saved states, since all our disk manifests
          * should no longer be using any of these old paths.
@@ -915,7 +915,7 @@ class HDC extends Component {
              */
             this.notice("Mounted disk \"" + sDiskName + "\" in drive " + String.fromCharCode(0x43 + drive.iDrive), drive.fAutoMount);
 
-            var aDiskInfo = disk.info();
+            let aDiskInfo = disk.info();
             if (aDiskInfo[0] != drive.nCylinders || aDiskInfo[1] != drive.nHeads || aDiskInfo[2] != drive.nSectors || aDiskInfo[3] != drive.cbSector) {
                 /*
                  * TODO: Decide how to deal with this problem; ie, either disallow disk access altogether, or automatically
@@ -941,7 +941,7 @@ class HDC extends Component {
      */
     inXTCData(port, addrFrom)
     {
-        var bIn = 0;
+        let bIn = 0;
         if (this.regDataIndex < this.regDataTotal) {
             bIn = this.regDataArray[this.regDataIndex];
         }
@@ -970,8 +970,8 @@ class HDC extends Component {
         if (this.regDataTotal < this.regDataArray.length) {
             this.regDataArray[this.regDataTotal++] = bOut;
         }
-        var bCmd = this.regDataArray[0];
-        var cbCmd = (bCmd != HDC.XTC.DATA.CMD.INIT_DRIVE? 6 : this.regDataArray.length);
+        let bCmd = this.regDataArray[0];
+        let cbCmd = (bCmd != HDC.XTC.DATA.CMD.INIT_DRIVE? 6 : this.regDataArray.length);
         if (this.regDataTotal == 6) {
             /*
              * XTC.STATUS.REQ must be CLEAR following any 6-byte command sequence that the HDC BIOS "COMMAND" function outputs,
@@ -1000,7 +1000,7 @@ class HDC extends Component {
      */
     inXTCStatus(port, addrFrom)
     {
-        var b = this.regStatus;
+        let b = this.regStatus;
         this.printMessageIO(port, null, addrFrom, "STATUS", b);
         /*
          * HACK: The HDC BIOS will not finish the HDC.XTC.DATA.CMD.INIT_DRIVE sequence unless it sees XTC.STATUS.REQ set again, nor will
@@ -1110,7 +1110,7 @@ class HDC extends Component {
      */
     inATCByte(port, addrFrom)
     {
-        var bIn = -1;
+        let bIn = -1;
 
         if (this.drive) {
             /*
@@ -1119,7 +1119,7 @@ class HDC extends Component {
              * the pump; all we can do is assert that the pump has something in it.  If bIn is inexplicably negative,
              * well, then the caller will get 0xff.
              */
-            var hdc = this;
+            let hdc = this;
             bIn = this.readData(this.drive, function onATCReadData(b, fAsync, obj, off) {
                 hdc.assert(!fAsync);
                 if (BACKTRACK) {
@@ -1132,7 +1132,7 @@ class HDC extends Component {
                      * simplistic MRU logic.  If that fails, the worst that will (or should) happen is we'll burn through
                      * more BackTrack wrapper objects than necessary, and risk running out.
                      */
-                    var bto = hdc.bus.addBackTrackObject(obj, /** @type BackTrack */ (null), off);
+                    let bto = hdc.bus.addBackTrackObject(obj, /** @type BackTrack */ (null), off);
                     hdc.cpu.backTrack.btiIO = hdc.bus.getBackTrackIndex(bto, off);
                 }
             });
@@ -1148,7 +1148,7 @@ class HDC extends Component {
                 }
                 if (this.drive.ibSector > 1) {      // in other words, if this.drive.ibSector == this.drive.cbSector...
                     if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
-                        var sDump = this.drive.disk.dumpSector(this.drive.sector);
+                        let sDump = this.drive.disk.dumpSector(this.drive.sector);
                         if (sDump) this.dbg.message(sDump);
                     }
                     /*
@@ -1257,7 +1257,7 @@ class HDC extends Component {
                     }
                     if (this.drive.ibSector > 1) {      // in other words, if this.drive.ibSector == this.drive.cbSector...
                         if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
-                            var sDump = this.drive.disk.dumpSector(this.drive.sector);
+                            let sDump = this.drive.disk.dumpSector(this.drive.sector);
                             if (sDump) this.dbg.message(sDump);
                         }
                         this.drive.nBytes -= this.drive.cbSector;
@@ -1315,7 +1315,7 @@ class HDC extends Component {
      */
     inATCError(port, addrFrom)
     {
-        var bIn = this.regError;
+        let bIn = this.regError;
         this.printMessageIO(port, null, addrFrom, "ERROR", bIn);
         return bIn;
     }
@@ -1344,7 +1344,7 @@ class HDC extends Component {
      */
     inATCSecCnt(port, addrFrom)
     {
-        var bIn = this.regSecCnt;
+        let bIn = this.regSecCnt;
         this.printMessageIO(port, null, addrFrom, "SECCNT", bIn);
         return bIn;
     }
@@ -1373,7 +1373,7 @@ class HDC extends Component {
      */
     inATCSecNum(port, addrFrom)
     {
-        var bIn = this.regSecNum;
+        let bIn = this.regSecNum;
         this.printMessageIO(port, null, addrFrom, "SECNUM", bIn);
         return bIn;
     }
@@ -1402,7 +1402,7 @@ class HDC extends Component {
      */
     inATCCylLo(port, addrFrom)
     {
-        var bIn = this.regCylLo;
+        let bIn = this.regCylLo;
         this.printMessageIO(port, null, addrFrom, "CYLLO", bIn);
         return bIn;
     }
@@ -1431,7 +1431,7 @@ class HDC extends Component {
      */
     inATCCylHi(port, addrFrom)
     {
-        var bIn = this.regCylHi;
+        let bIn = this.regCylHi;
         this.printMessageIO(port, null, addrFrom, "CYLHI", bIn);
         return bIn;
     }
@@ -1460,7 +1460,7 @@ class HDC extends Component {
      */
     inATCDrvHd(port, addrFrom)
     {
-        var bIn = this.regDrvHd;
+        let bIn = this.regDrvHd;
         this.printMessageIO(port, null, addrFrom, "DRVHD", bIn);
         return bIn;
     }
@@ -1496,7 +1496,7 @@ class HDC extends Component {
          * a quick retest of the MODEL_5170_REV3 BIOS suggests that it's happy with that change, so it's quite likely
          * that was the appropriate change all along.
          */
-        var iDrive = (this.regDrvHd & HDC.ATC.DRVHD.DRIVE_MASK? 1 : 0);
+        let iDrive = (this.regDrvHd & HDC.ATC.DRVHD.DRIVE_MASK? 1 : 0);
         if (this.aDrives[iDrive]) {
             this.regStatus |= HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
         } else {
@@ -1514,7 +1514,7 @@ class HDC extends Component {
      */
     inATCStatus(port, addrFrom)
     {
-        var bIn = this.regStatus;
+        let bIn = this.regStatus;
         this.printMessageIO(port, null, addrFrom, "STATUS", bIn);
         /*
          * Despite what IBM's documentation for the "Personal Computer AT Fixed Disk and Diskette Drive Adapter"
@@ -1585,21 +1585,21 @@ class HDC extends Component {
      */
     doATC()
     {
-        var hdc = this;
-        var fInterrupt = false;
-        var bCmd = this.regCommand;
-        var iDrive = (this.regDrvHd & HDC.ATC.DRVHD.DRIVE_MASK? 1 : 0);
-        var nHead = this.regDrvHd & HDC.ATC.DRVHD.HEAD_MASK;
-        var nCylinder = this.regCylLo | ((this.regCylHi & HDC.ATC.CYLHI.MASK) << 8);
-        var nSector = this.regSecNum;
-        var nSectors = this.regSecCnt || 256;
+        let hdc = this;
+        let fInterrupt = false;
+        let bCmd = this.regCommand;
+        let iDrive = (this.regDrvHd & HDC.ATC.DRVHD.DRIVE_MASK? 1 : 0);
+        let nHead = this.regDrvHd & HDC.ATC.DRVHD.HEAD_MASK;
+        let nCylinder = this.regCylLo | ((this.regCylHi & HDC.ATC.CYLHI.MASK) << 8);
+        let nSector = this.regSecNum;
+        let nSectors = this.regSecCnt || 256;
 
         this.iDrive = -1;
         this.drive = null;
         this.regError = HDC.ATC.ERROR.NONE;
         this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
 
-        var drive = this.aDrives[iDrive];
+        let drive = this.aDrives[iDrive];
         if (!drive) {
             bCmd = -1;
         } else {
@@ -1785,25 +1785,25 @@ class HDC extends Component {
      */
     doXTC()
     {
-        var hdc = this;
+        let hdc = this;
         this.regDataIndex = 0;
 
-        var bCmd = this.popCmd();
-        var bCmdOrig = bCmd;
-        var b1 = this.popCmd();
-        var bDrive = b1 & 0x20;
-        var iDrive = (bDrive >> 5);
+        let bCmd = this.popCmd();
+        let bCmdOrig = bCmd;
+        let b1 = this.popCmd();
+        let bDrive = b1 & 0x20;
+        let iDrive = (bDrive >> 5);
 
-        var bHead = b1 & 0x1f;
-        var b2 = this.popCmd();
-        var b3 = this.popCmd();
-        var wCylinder = ((b2 << 2) & 0x300) | b3;
-        var bSector = b2 & 0x3f;
-        var bCount = this.popCmd();             // block count or interleave count, depending on the command
-        var bControl = this.popCmd();
-        var bParm, bDataStatus;
+        let bHead = b1 & 0x1f;
+        let b2 = this.popCmd();
+        let b3 = this.popCmd();
+        let wCylinder = ((b2 << 2) & 0x300) | b3;
+        let bSector = b2 & 0x3f;
+        let bCount = this.popCmd();             // block count or interleave count, depending on the command
+        let bControl = this.popCmd();
+        let bParm, bDataStatus;
 
-        var drive = this.aDrives[iDrive];
+        let drive = this.aDrives[iDrive];
         if (drive) {
             drive.wCylinder = wCylinder;
             drive.bHead = bHead;
@@ -1843,7 +1843,7 @@ class HDC extends Component {
              * Pop off all the extra "Initialize Drive Characteristics" bytes and store them, for the benefit of
              * other functions, like verifyDrive().
              */
-            var i = 0;
+            let i = 0;
             while ((bParm = this.popCmd()) >= 0) {
                 if (drive && i < drive.abDriveParms.length) {
                     drive.abDriveParms[i++] = bParm;
@@ -1944,8 +1944,8 @@ class HDC extends Component {
      */
     popCmd()
     {
-        var bCmd = -1;
-        var bCmdIndex = this.regDataIndex;
+        let bCmd = -1;
+        let bCmdIndex = this.regDataIndex;
         if (bCmdIndex < this.regDataTotal) {
             bCmd = this.regDataArray[this.regDataIndex++];
             if (DEBUG && this.messageEnabled((bCmdIndex > 0? Messages.PORT : 0) | Messages.HDC)) {
@@ -2229,15 +2229,15 @@ class HDC extends Component {
      */
     readData(drive, done, fAutoInc)
     {
-        var b = -1;
-        var obj = null, off = 0;    // these variables are purely for BACKTRACK purposes
+        let b = -1;
+        let obj = null, off = 0;    // these variables are purely for BACKTRACK purposes
 
         if (drive.errorCode) {
             if (done) done(b, false, obj, off);
             return b;
         }
 
-        var inc = (fAutoInc !== false? 1 : 0);
+        let inc = (fAutoInc !== false? 1 : 0);
 
         if (drive.sector) {
             off = drive.ibSector;
@@ -2258,7 +2258,7 @@ class HDC extends Component {
          * but it seems preferable to keep the image format consistent and controller-independent.
          */
         if (done) {
-            var hdc = this;
+            let hdc = this;
             if (drive.disk) {
                 drive.disk.seek(drive.wCylinder, drive.bHead, drive.bSector + drive.bSectorBias, false, function onReadDataSeek(sector, fAsync) {
                     if ((drive.sector = sector)) {
@@ -2359,7 +2359,7 @@ class HDC extends Component {
     {
         this.assert(drive.wCylinder < drive.nCylinders);
         drive.bSector++;
-        var bSectorStart = (1 - drive.bSectorBias);
+        let bSectorStart = (1 - drive.bSectorBias);
         if (drive.bSector >= drive.nSectors + bSectorStart) {
             drive.bSector = bSectorStart;
             drive.bHead++;
@@ -2421,7 +2421,7 @@ class HDC extends Component {
                 this.printMessage(this.idComponent + ".writeFormat(" + drive.wCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
             }
 
-            for (var i = 0; i < drive.nBytes; i++) {
+            for (let i = 0; i < drive.nBytes; i++) {
                 if (this.writeData(drive, drive.bFiller) < 0) {
                     return -1;
                 }
@@ -2464,8 +2464,8 @@ class HDC extends Component {
      */
     intBIOSDisk(addr)
     {
-        var AH = this.cpu.regEAX >> 8;
-        var DL = this.cpu.regEDX & 0xff;
+        let AH = this.cpu.regEAX >> 8;
+        let DL = this.cpu.regEDX & 0xff;
         if (!AH && DL > 0x80) this.iDriveAllowFail = DL - 0x80;
         return true;
     }
@@ -2501,7 +2501,7 @@ class HDC extends Component {
      */
     intBIOSDiskette(addr)
     {
-        var AH = this.cpu.regEAX >> 8;
+        let AH = this.cpu.regEAX >> 8;
         if ((!AH && this.chipset && this.chipset.checkIMR(ChipSet.IRQ.FDC))) {
             if (DEBUG) this.printMessage(this.idComponent + ".intBIOSDiskette(): skipping useless INT 0x40 diskette reset");
             return false;
@@ -2596,11 +2596,11 @@ class HDC extends Component {
      */
     static init()
     {
-        var aeHDC = Component.getElementsByClass(document, PCX86.APPCLASS, "hdc");
-        for (var iHDC = 0; iHDC < aeHDC.length; iHDC++) {
-            var eHDC = aeHDC[iHDC];
-            var parmsHDC = Component.getComponentParms(eHDC);
-            var hdc = new HDC(parmsHDC);
+        let aeHDC = Component.getElementsByClass(document, PCX86.APPCLASS, "hdc");
+        for (let iHDC = 0; iHDC < aeHDC.length; iHDC++) {
+            let eHDC = aeHDC[iHDC];
+            let parmsHDC = Component.getComponentParms(eHDC);
+            let hdc = new HDC(parmsHDC);
             Component.bindComponentControls(hdc, eHDC, PCX86.APPCLASS);
         }
     }
@@ -2614,7 +2614,7 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
 /*
  * Starting with the IBM PC XT, the ROM defined a "Fixed Disk Parameter Table" (FD_TBL) that contained 16 bytes
  * at the following offsets for each of 4 drive types (see IBM 5160 Tech Ref, April 1983, p. A-94):
- * 
+ *
  *      0: maximum number of cylinders (word)
  *      2: maximum number of heads
  *      3: starting reduced write current cylinder (word)
@@ -2632,10 +2632,10 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
  *      D: reserved
  *      E: reserved
  *      F: reserved
- *      
+ *
  * Starting with the IBM PC AT, the ROM defined a "Fixed Disk Parameter Table" (FD_TBL) that contained 16 bytes
  * at the following offsets for each of 47 drive types (see IBM 5170 Tech Ref, March 1986, p. 5-185):
- * 
+ *
  *      0: maximum number of cylinders (word)
  *      2: maximum number of heads
  *      3: not used
@@ -2651,21 +2651,21 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
  *      C: landing zone (word)
  *      E: number of sectors/track (NOTE: all PC AT drive types specified 17 sectors/track)
  *      F: reserved
- *      
+ *
  * NOTE: While drive type 0 was a valid type in the PC XT, it was NOT a valid drive type in the PC AT; zero was used
  * to indicate that no hard drive was installed.
- * 
+ *
  * Of the 47 PC AT drive types, the first 14 (1-E) could be selected by 4 bits in CMOS byte 0x12.  Drive type 15 was not
  * a valid type but rather an indicator that CMOS byte 0x19 (or 0x1A) contained the actual drive type, which technically
  * could contain any value from 0-255, but was documented as being limited to values 16-255.  And in fact, the ROM only
  * contained entries for drive types 1-47, and of those, only drive types 1-14 and 16-23 were valid; the rest (15 and 24-47)
  * were marked "RESERVED" and contained zeros.
- * 
+ *
  * If a system needed a drive type that wasn't defined by the ROM, it could be placed in RAM, as the ROM explained:
- * 
+ *
  *      To dynamically define a set of parameters, build a table for up to 15 types and place
  *      the corresponding vector into interrupt 0x41 for drive 0 and interrupt 0x46 for drive 1.
- *      
+ *
  * To make PCjs easier to configure, we have three drive tables (for XT, AT, and COMPAQ machines), each of which
  * contains DriveArrays for the various DriveTypes supported by each machine.  Each DriveArray contains the following
  * subset of "Fixed Disk Parameter Table" information:
@@ -2683,7 +2683,7 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
  * Apparently, in 1998, it was decided that a kilobyte should be 1,000 bytes and a megabyte should be 1,000,000 bytes,
  * and that if you really meant 2^10 (1,024) or 2^20 (1,048,576), you should use "kibibyte" (KiB) or "mebibyte" (MiB)
  * instead.  But since PCjs simulates machines that pre-date 1998, I have chosen to retain the more "traditional"
- * understanding of Kb and Mb; I never use KiB or MiB. 
+ * understanding of Kb and Mb; I never use KiB or MiB.
  */
 
 /*

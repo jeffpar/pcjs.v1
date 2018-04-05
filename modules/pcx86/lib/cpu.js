@@ -74,9 +74,9 @@ class CPU extends Component {
     {
         super("CPU", parmsCPU, Messages.CPU);
 
-        var nCycles = parmsCPU['cycles'] || nCyclesDefault;
+        let nCycles = parmsCPU['cycles'] || nCyclesDefault;
 
-        var nMultiplier = parmsCPU['multiplier'] || 1;
+        let nMultiplier = parmsCPU['multiplier'] || 1;
 
         this.counts = {};
         this.counts.nBaseCyclesPerSecond = nCycles;
@@ -144,8 +144,8 @@ class CPU extends Component {
         this.bus = bus;
         this.dbg = dbg;
 
-        for (var i = 0; i < CPU.BUTTONS.length; i++) {
-            var control = this.bindings[CPU.BUTTONS[i]];
+        for (let i = 0; i < CPU.BUTTONS.length; i++) {
+            let control = this.bindings[CPU.BUTTONS[i]];
             if (control) this.cmp.setBinding("", CPU.BUTTONS[i], control);
         }
 
@@ -162,7 +162,7 @@ class CPU extends Component {
         /*
          * We've already saved the parmsCPU 'autoStart' setting, but there may be a machine (or URL) override.
          */
-        var sAutoStart = cmp.getMachineParm('autoStart');
+        let sAutoStart = cmp.getMachineParm('autoStart');
         if (sAutoStart != null) {
             this.flags.autoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
         }
@@ -266,7 +266,7 @@ class CPU extends Component {
          *
          *      this.flags.powered = false;
          */
-        var fRunning = this.flags.running;
+        let fRunning = this.flags.running;
         if (fShutdown) this.stopCPU();
         return fSave? this.save(fRunning) : true;
     }
@@ -283,13 +283,13 @@ class CPU extends Component {
             return true;
         }
         /*
-         * Start running automatically on power-up, assuming there's no Debugger.  
+         * Start running automatically on power-up, assuming there's no Debugger.
          */
         if (this.flags.autoStart || this.flags.autoStart == null && !this.dbg) {
             /*
              * Automatically updating focus when calling startCPU() is a double-edged sword, potentially interfering
              * with the user's attention, which is why we also set fQuiet, to try to prevent the page from "auto-scrolling"
-             * the newly focused machine into view. 
+             * the newly focused machine into view.
              */
             return this.startCPU(true, true);
         }
@@ -380,7 +380,7 @@ class CPU extends Component {
             /*
              * Get a 32-bit summation of the current CPU state and add it to our running 32-bit checksum
              */
-            var fDisplay = false;
+            let fDisplay = false;
             this.counts.nChecksum = (this.counts.nChecksum + this.getChecksum())|0;
             this.counts.nCyclesChecksumNext -= nCycles;
             if (this.counts.nCyclesChecksumNext <= 0) {
@@ -431,7 +431,7 @@ class CPU extends Component {
                 this.setError("Value for " + sLabel + " is invalid");
                 this.stopCPU();
             }
-            var sVal;
+            let sVal;
             if (!this.flags.running || this.flags.displayLiveRegs) {
                 sVal = Str.toHex(nValue, cch);
             } else {
@@ -459,8 +459,8 @@ class CPU extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var cpu = this;
-        var fBound = false;
+        let cpu = this;
+        let fBound = false;
 
         switch (sBinding) {
         case "power":
@@ -477,7 +477,7 @@ class CPU extends Component {
         case "run":
             this.bindings[sBinding] = control;
             control.onclick = function onClickRun() {
-                var fRunning = cpu.flags.running;
+                let fRunning = cpu.flags.running;
                 if (!cpu.cmp || !cpu.cmp.checkPower()) return;
                 /*
                  * We snapped the CPU's running flag before calling checkPower() because there are rare (REPOWER)
@@ -527,7 +527,7 @@ class CPU extends Component {
     setBurstCycles(nCycles)
     {
         if (this.flags.running) {
-            var nDelta = this.nStepCycles - nCycles;
+            let nDelta = this.nStepCycles - nCycles;
             /*
              * NOTE: If nDelta is negative, we will actually be increasing nStepCycles and nBurstCycles.
              * Which is OK, but if we're also taking snapshots of the cycle counts, to make sure that instruction
@@ -567,7 +567,7 @@ class CPU extends Component {
      */
     calcCycles()
     {
-        var nMultiplier = this.counts.mhzCurrent / this.counts.mhzBase;
+        let nMultiplier = this.counts.mhzCurrent / this.counts.mhzBase;
         if (!nMultiplier || nMultiplier > this.counts.nTargetMultiplier) {
             nMultiplier = this.counts.nTargetMultiplier;
         }
@@ -594,7 +594,7 @@ class CPU extends Component {
      */
     getCycles(fScaled)
     {
-        var nCycles = this.nTotalCycles + this.nRunCycles + this.nBurstCycles - this.nStepCycles;
+        let nCycles = this.nTotalCycles + this.nRunCycles + this.nBurstCycles - this.nStepCycles;
         if (fScaled && this.counts.nTargetMultiplier > 1 && this.counts.mhzCurrent > this.counts.mhzBase) {
             /*
              * We could scale the current cycle count by the current speed (this.counts.mhzCurrent); eg:
@@ -708,7 +708,7 @@ class CPU extends Component {
      */
     setSpeed(nMultiplier, fUpdateFocus)
     {
-        var fSuccess = true;
+        let fSuccess = true;
         if (nMultiplier !== undefined) {
             /*
              * If we haven't reached 90% (0.9) of the current target speed, revert to the default multiplier.
@@ -719,11 +719,11 @@ class CPU extends Component {
             }
             this.counts.mhzCurrent = 0;
             this.counts.nTargetMultiplier = nMultiplier;
-            var mhzTarget = this.counts.mhzBase * this.counts.nTargetMultiplier;
+            let mhzTarget = this.counts.mhzBase * this.counts.nTargetMultiplier;
             if (this.counts.mhzTarget != mhzTarget) {
                 this.counts.mhzTarget = mhzTarget;
-                var sSpeed = this.getSpeedTarget();
-                var controlSpeed = this.bindings["setSpeed"];
+                let sSpeed = this.getSpeedTarget();
+                let controlSpeed = this.bindings["setSpeed"];
                 if (controlSpeed) controlSpeed.textContent = sSpeed;
                 this.println("target speed: " + sSpeed);
             }
@@ -796,7 +796,7 @@ class CPU extends Component {
          * "snapshot" to occur sooner; it's unclear, however, whether that will really improve the CPU's ability
          * to hit its target speed, since any instruction that displays a message is unavoidably slooooow.
          */
-        var msDelta = 0;
+        let msDelta = 0;
         if (this.counts.msEndThisRun) {
             msDelta = this.counts.msStartThisRun - this.counts.msEndThisRun;
             if (msDelta > this.counts.msPerYield) {
@@ -829,7 +829,7 @@ class CPU extends Component {
             this.counts.msStartThisRun += this.counts.msDiscount;
         }
 
-        var msYield = this.counts.msPerYield;
+        let msYield = this.counts.msPerYield;
         if (this.counts.nCyclesThisRun) {
             /*
              * Normally, we would assume we executed a full quota of work over msPerYield, but since the CPU
@@ -840,8 +840,8 @@ class CPU extends Component {
             msYield = Math.round(msYield * this.counts.nCyclesThisRun / this.counts.nCyclesPerYield);
         }
 
-        var msElapsedThisRun = this.counts.msEndThisRun - this.counts.msStartThisRun;
-        var msRemainsThisRun = msYield - msElapsedThisRun;
+        let msElapsedThisRun = this.counts.msEndThisRun - this.counts.msStartThisRun;
+        let msRemainsThisRun = msYield - msElapsedThisRun;
 
         /*
          * We could pass only "this run" results to calcSpeed():
@@ -851,8 +851,8 @@ class CPU extends Component {
          *
          * but it seems preferable to use longer time periods and hopefully get a more accurate speed.
          */
-        var nCycles = this.nRunCycles;
-        var msElapsed = this.counts.msEndThisRun - this.counts.msStartRun;
+        let nCycles = this.nRunCycles;
+        let msElapsed = this.counts.msEndThisRun - this.counts.msStartRun;
 
         if (MAXDEBUG && msRemainsThisRun < 0 && this.counts.nTargetMultiplier > 1) {
             this.println("warning: updates @" + msElapsedThisRun + "ms (prefer " + Math.round(msYield) + "ms)");
@@ -929,7 +929,7 @@ class CPU extends Component {
      */
     addTimer(id, callBack, ms = -1)
     {
-        var iTimer = this.aTimers.length;
+        let iTimer = this.aTimers.length;
         this.aTimers.push([id, -1, ms, callBack]);
         if (ms >= 0) this.setTimer(iTimer, ms);
         return iTimer;
@@ -962,8 +962,8 @@ class CPU extends Component {
      */
     findTimer(id)
     {
-        for (var iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
-            var timer = this.aTimers[iTimer];
+        for (let iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
+            let timer = this.aTimers[iTimer];
             if (timer[0] == id) return timer;
         }
         return null;
@@ -1007,9 +1007,9 @@ class CPU extends Component {
      */
     setTimer(iTimer, ms, fReset)
     {
-        var nCycles = -1;
+        let nCycles = -1;
         if (iTimer >= 0 && iTimer < this.aTimers.length) {
-            var timer = this.aTimers[iTimer];
+            let timer = this.aTimers[iTimer];
             if (fReset || timer[1] < 0) {
                 nCycles = this.getMSCycles(ms);
                 /*
@@ -1040,7 +1040,7 @@ class CPU extends Component {
     setTimerCycles(iTimer, nCycles)
     {
         if (iTimer >= 0 && iTimer < this.aTimers.length) {
-            var timer = this.aTimers[iTimer];
+            let timer = this.aTimers[iTimer];
             /*
              * If the CPU is currently executing a burst of cycles, the number of cycles it has executed in
              * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
@@ -1077,8 +1077,8 @@ class CPU extends Component {
      */
     getBurstCycles(nCycles)
     {
-        for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            var timer = this.aTimers[iTimer];
+        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            let timer = this.aTimers[iTimer];
             this.assert(!isNaN(timer[1]));
             if (timer[1] < 0) continue;
             if (nCycles > timer[1]) {
@@ -1096,9 +1096,9 @@ class CPU extends Component {
      */
     saveTimers()
     {
-        var aTimerStates = [];
-        for (var iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
-            var timer = this.aTimers[iTimer];
+        let aTimerStates = [];
+        for (let iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
+            let timer = this.aTimers[iTimer];
             aTimerStates.push([timer[0], timer[1], timer[2]]);
         }
         return aTimerStates;
@@ -1112,9 +1112,9 @@ class CPU extends Component {
      */
     restoreTimers(aTimerStates)
     {
-        for (var iTimerState = 0; iTimerState < aTimerStates.length; iTimerState++) {
-            var state = aTimerStates[iTimerState];
-            var timer = this.findTimer(state[0]);
+        for (let iTimerState = 0; iTimerState < aTimerStates.length; iTimerState++) {
+            let state = aTimerStates[iTimerState];
+            let timer = this.findTimer(state[0]);
             if (timer) {
                 timer[1] = state[1];
                 timer[2] = state[2];
@@ -1133,8 +1133,8 @@ class CPU extends Component {
      */
     resetTimers()
     {
-        for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            var timer = this.aTimers[iTimer];
+        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            let timer = this.aTimers[iTimer];
             if (timer[2] >= 0) this.setTimer(iTimer, timer[2], true);
         }
     }
@@ -1151,8 +1151,8 @@ class CPU extends Component {
      */
     updateTimers(nCycles)
     {
-        for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            var timer = this.aTimers[iTimer];
+        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            let timer = this.aTimers[iTimer];
             this.assert(!isNaN(timer[1]));
             if (timer[1] < 0) continue;
             timer[1] -= nCycles;
@@ -1180,7 +1180,7 @@ class CPU extends Component {
      */
     endBurst()
     {
-        var nCycles = this.nBurstCycles - this.nStepCycles;
+        let nCycles = this.nBurstCycles - this.nStepCycles;
         this.nBurstCycles = this.nStepCycles = 0;
         this.counts.nCyclesThisRun += nCycles;
         this.nRunCycles += nCycles;
@@ -1210,7 +1210,7 @@ class CPU extends Component {
                  * be less than getCurrentCyclesPerSecond(), because at the very least, our own timer fires more than
                  * once per second.
                  */
-                var nCycles = this.getBurstCycles(this.flags.checksum? 1 : this.getCurrentCyclesPerSecond());
+                let nCycles = this.getBurstCycles(this.flags.checksum? 1 : this.getCurrentCyclesPerSecond());
 
                 if (this.chipset) {
                     this.chipset.updateAllTimers();
@@ -1295,7 +1295,7 @@ class CPU extends Component {
         this.flags.running = true;
         this.flags.starting = true;
         if (this.chipset) this.chipset.start();
-        var controlRun = this.bindings["run"];
+        let controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Halt";
         if (this.cmp) {
             this.cmp.updateStatus(true);
@@ -1332,14 +1332,14 @@ class CPU extends Component {
      */
     stopCPU(fComplete)
     {
-        var fStopped = false;
+        let fStopped = false;
         if (this.flags.running) {
             this.endBurst();
             this.addCycles(this.nRunCycles);
             this.nRunCycles = 0;
             this.flags.running = false;
             if (this.chipset) this.chipset.stop();
-            var controlRun = this.bindings["run"];
+            let controlRun = this.bindings["run"];
             if (controlRun) controlRun.textContent = "Run";
             if (this.cmp) {
                 this.cmp.stop(Component.getTime(), this.getCycles());
@@ -1364,9 +1364,9 @@ class CPU extends Component {
      */
     nonCPU(fn)
     {
-        var msStart = Usr.getTime();
+        let msStart = Usr.getTime();
         if (fn()) {
-            var msStop = Usr.getTime();
+            let msStop = Usr.getTime();
             this.counts.msDiscount += msStop - msStart;
             return true;
         }

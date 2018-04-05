@@ -1304,7 +1304,7 @@ class Str {
             case 'd':
                 /*
                  * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
-                 * 
+                 *
                  * Also, unlike the 'X' and 'x' hexadecimal cases, there's no need to explicitly check for a string
                  * arguments, because the call to trunc() automatically coerces any string value to a (decimal) number.
                  */
@@ -1346,7 +1346,7 @@ class Str {
                         }
                     }
                 }
-                buffer += arg;
+                buffer += arg.toString();
                 break;
 
             case 'X':
@@ -1360,14 +1360,14 @@ class Str {
                     /*
                      * Since we're advised to ALWAYS pass a radix to parseInt(), we must detect explicitly
                      * hex values ourselves, because using a radix of 10 with any "0x..." value always returns 0.
-                     * 
+                     *
                      * And if the value CAN be interpreted as decimal, then we MUST interpret it as decimal, because
                      * we have sprintf() calls in /modules/lib/testmon.js that depend on this code to perform decimal
                      * to hex conversion.  We're allowed to make our own rules here, since passing numbers in string
-                     * form isn't part of the sprintf "spec". 
+                     * form isn't part of the sprintf "spec".
                      */
                     arg = Number.parseInt(arg, arg.match(/(^0x|[a-f])/i)? 16 : 10);
-                } 
+                }
                 do {
                     s = ach[arg & 0xf] + s;
                     arg >>>= 4;
@@ -7784,7 +7784,7 @@ class Rectangle {
      */
     subDivide(units, unitsTotal, fHorizontal)
     {
-        var rect;
+        let rect;
         if (fHorizontal === undefined) {
             fHorizontal = units >= (unitsTotal >> 2);
         }
@@ -7857,7 +7857,7 @@ class Panel extends Component {
      */
     initBus(cmp, bus, cpu, dbg)
     {
-        var panel = this;
+        let panel = this;
 
         this.cmp = cmp;
         this.bus = bus;
@@ -7890,8 +7890,8 @@ class Panel extends Component {
 
         if (!this.canvas && sHTMLType == "canvas") {
 
-            var panel = this;
-            var fPanel = false;
+            let panel = this;
+            let fPanel = false;
 
             if (BACKTRACK && sBinding == "btpanel") {
                 this.fBackTrack = fPanel = true;
@@ -7980,7 +7980,7 @@ class Panel extends Component {
     startTimer()
     {
         if (this.timer < 0 && this.canvas && this.cpu) {
-            var panel = this;
+            let panel = this;
             this.timer = this.cpu.addTimer(this.id, function updateAnimationTimer() {
                 panel.updateAnimation();
             }, 1000 / Panel.UPDATES_PER_SECOND);
@@ -8066,12 +8066,12 @@ class Panel extends Component {
          * Due to the responsive nature of our pages, the displayed size of the canvas may be smaller than the
          * allocated size, and the coordinates we receive from mouse events are based on the currently displayed size.
          */
-        var xScale = Panel.LIVECANVAS.CX / this.canvas.offsetWidth;
-        var yScale = Panel.LIVECANVAS.CY / this.canvas.offsetHeight;
+        let xScale = Panel.LIVECANVAS.CX / this.canvas.offsetWidth;
+        let yScale = Panel.LIVECANVAS.CY / this.canvas.offsetHeight;
 
-        var rect = this.canvas.getBoundingClientRect();
-        var x = ((event.clientX - rect.left) * xScale) | 0;
-        var y = ((event.clientY - rect.top) * yScale) | 0;
+        let rect = this.canvas.getBoundingClientRect();
+        let x = ((event.clientX - rect.left) * xScale) | 0;
+        let y = ((event.clientY - rect.top) * yScale) | 0;
 
         if (fDown == null) {
             if (!this.lockMouse) {
@@ -8093,7 +8093,7 @@ class Panel extends Component {
             /*
              * Convert the mouse position into the corresponding memory address, assuming it's over the live memory area
              */
-            var addr = this.findAddress(x, y);
+            let addr = this.findAddress(x, y);
             if (addr !== X86.ADDR_INVALID) {
                 addr &= ~0xf;
                 if (addr != this.addrDumpLast) {
@@ -8115,16 +8115,16 @@ class Panel extends Component {
     findAddress(x, y)
     {
         if (x < Panel.LIVEMEM.CX && this.busInfo && this.busInfo.aRects) {
-            var i, rect;
+            let i, rect;
             for (i = 0; i < this.busInfo.aRects.length; i++) {
                 rect = this.busInfo.aRects[i];
                 if (rect.contains(x, y)) {
                     x -= rect.x;
                     y -= rect.y;
-                    var region = this.busInfo.aRegions[i];
-                    var iBlock = Usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.num), this.busInfo.aBlocks[region.iBlock]);
-                    var addr = iBlock * this.bus.nBlockSize;
-                    var addrLimit = (iBlock + region.cBlocks) * this.bus.nBlockSize - 1;
+                    let region = this.busInfo.aRegions[i];
+                    let iBlock = Usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.num), this.busInfo.aBlocks[region.iBlock]);
+                    let addr = iBlock * this.bus.nBlockSize;
+                    let addrLimit = (iBlock + region.cBlocks) * this.bus.nBlockSize - 1;
 
                     /*
                      * If you want memory to be arranged "vertically" instead of "horizontally", do this:
@@ -8178,13 +8178,13 @@ class Panel extends Component {
                      * subDivide() makes a simple horizontal or vertical slicing decision based on the ratio of region blocks
                      * to remaining blocks.
                      */
-                    var i, rect;
-                    var rectAvail = new Rectangle(0, 0, this.canvasLiveMem.width, this.canvasLiveMem.height);
+                    let i, rect;
+                    let rectAvail = new Rectangle(0, 0, this.canvasLiveMem.width, this.canvasLiveMem.height);
                     this.busInfo.aRects = [];
-                    var cBlocksRemaining = this.busInfo.cBlocks;
+                    let cBlocksRemaining = this.busInfo.cBlocks;
 
                     for (i = 0; i < this.busInfo.cRegions; i++) {
-                        var cBlocksRegion = this.busInfo.aRegions[i].cBlocks;
+                        let cBlocksRegion = this.busInfo.aRegions[i].cBlocks;
                         this.busInfo.aRects.push(rect = rectAvail.subDivide(cBlocksRegion, cBlocksRemaining, !i));
                         if (MAXDEBUG) this.log("region " + i + " rectangle: (" + rect.x + "," + rect.y + " " + rect.cx + "," + rect.cy + ")");
                         cBlocksRemaining -= cBlocksRegion;
@@ -8200,7 +8200,7 @@ class Panel extends Component {
                      * Now draw all the rectangles produced by the series of subDivide() calls.
                      */
                     for (i = 0; i < this.busInfo.aRects.length; i++) {
-                        var region = this.busInfo.aRegions[i];
+                        let region = this.busInfo.aRegions[i];
                         rect = this.busInfo.aRects[i];
                         rect.drawWith(this.contextLiveMem, Memory.TYPE.COLORS[region.type]);
                         this.centerPen(rect);
@@ -8249,18 +8249,18 @@ class Panel extends Component {
      */
     findRegions()
     {
-        var checksum = 0;
+        let checksum = 0;
         this.busInfo.cRegions = 0;
         if (!this.busInfo.aRegions) this.busInfo.aRegions = [];
 
-        var typeRegion = -1, iBlockRegion = 0, addrRegion = 0, nBlockPrev = -1;
+        let typeRegion = -1, iBlock = 0, iBlockRegion = 0, addrRegion = 0, nBlockPrev = -1;
 
-        for (var iBlock = 0; iBlock < this.busInfo.cBlocks; iBlock++) {
-            var blockInfo = this.busInfo.aBlocks[iBlock];
-            var typeBlock = Usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.type), blockInfo);
-            var nBlockCurr = Usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.num), blockInfo);
+        for (; iBlock < this.busInfo.cBlocks; iBlock++) {
+            let blockInfo = this.busInfo.aBlocks[iBlock];
+            let typeBlock = Usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.type), blockInfo);
+            let nBlockCurr = Usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.num), blockInfo);
             if (typeBlock != typeRegion || nBlockCurr != nBlockPrev + 1) {
-                var cBlocks = iBlock - iBlockRegion;
+                let cBlocks = iBlock - iBlockRegion;
                 if (cBlocks) {
                     checksum += this.addRegion(addrRegion, iBlockRegion, cBlocks, typeRegion);
                 }
@@ -8273,7 +8273,7 @@ class Panel extends Component {
 
         checksum += this.addRegion(addrRegion, iBlockRegion, iBlock - iBlockRegion, typeRegion);
 
-        var fChanged = (this.busInfo.checksumRegions != checksum);
+        let fChanged = (this.busInfo.checksumRegions != checksum);
         this.busInfo.checksumRegions = checksum;
         return fChanged;
     }
@@ -8306,8 +8306,8 @@ class Panel extends Component {
     {
         if (this.context && this.canvasLiveRegs && this.contextLiveRegs) {
 
-            var cpu = this.cpu;
-            var x = 0, y = 0, cx = this.canvasLiveRegs.width, cy = this.canvasLiveRegs.height;
+            let cpu = this.cpu;
+            let x = 0, y = 0, cx = this.canvasLiveRegs.width, cy = this.canvasLiveRegs.height;
 
             this.contextLiveRegs.fillStyle = Panel.LIVEREGS.COLOR;
             this.contextLiveRegs.fillRect(x, y, cx, cy);
@@ -8336,7 +8336,7 @@ class Panel extends Component {
             this.drawText("SS", cpu.getSS(), 0, 1);
             this.drawText("IP", cpu.getIP(), 2);
             this.drawText("SP", cpu.getSP(), 0, 1.5);
-            var regPS;
+            let regPS;
             this.drawText("PS", regPS = cpu.getPS(), 2);
             this.drawText("BP", cpu.regEBP, 0, 1.5);
             if (cpu.model >= X86.MODEL_80386) {
@@ -8373,7 +8373,7 @@ class Panel extends Component {
     {
         if (this.context && this.canvasLiveRegs && this.contextLiveRegs) {
 
-            var x = 0, y = Panel.LIVEREGS.CY - Panel.LIVEDUMP.CY, cx = this.canvasLiveRegs.width, cy = Panel.LIVEDUMP.CY;
+            let x = 0, y = Panel.LIVEREGS.CY - Panel.LIVEDUMP.CY, cx = this.canvasLiveRegs.width, cy = Panel.LIVEDUMP.CY;
 
             this.contextLiveRegs.fillStyle = Panel.LIVEREGS.COLOR;
             this.contextLiveRegs.fillRect(x, y, cx, cy);
@@ -8384,10 +8384,10 @@ class Panel extends Component {
                 this.drawText("Mouse over memory to dump");
             } else {
                 this.drawText(Str.toHexLong(addr), null, 0, 1);
-                for (var iLine = 1; iLine <= 16; iLine++) {
-                    var sChars = "";
-                    for (var iCol = 1; iCol <= 8; iCol++) {
-                        var b = this.bus.getByteDirect(addr++);
+                for (let iLine = 1; iLine <= 16; iLine++) {
+                    let sChars = "";
+                    for (let iCol = 1; iCol <= 8; iCol++) {
+                        let b = this.bus.getByteDirect(addr++);
                         this.drawText(Str.toHex(b, 2), null, 1);
                         sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
                     }
@@ -8449,9 +8449,9 @@ class Panel extends Component {
     {
         this.fontText = this.fontDefault;
         this.heightText = this.heightDefault;
-        var x = rect.x + (rect.cx >> 1);
-        var y = rect.y + (rect.cy >> 1);
-        var maxText = rect.cy;
+        let x = rect.x + (rect.cx >> 1);
+        let y = rect.y + (rect.cy >> 1);
+        let maxText = rect.cy;
         if (rect.cx < rect.cy) {
             maxText = rect.cx;
             this.fVerticalText = true;
@@ -8530,7 +8530,7 @@ class Panel extends Component {
         this.contextText.fillText(sText, this.xText, this.yText);
         this.xText += this.cxColumn;
         if (nValue != null) {
-            var sValue;
+            let sValue;
             if (this.nDefaultBase != 16) {
                 sValue = nValue.toString();
             } else {
@@ -8562,7 +8562,7 @@ class Panel extends Component {
     centerText(sText)
     {
         this.contextText.font = this.fontText;
-        var tm = this.contextText.measureText(sText);
+        let tm = this.contextText.measureText(sText);
         this.xText -= tm.width >> 1;
         this.yText += (this.heightText >> 1) - 2;
         this.drawText(sText);
@@ -8591,12 +8591,12 @@ class Panel extends Component {
      */
     static init()
     {
-        var fReady = false;
-        var aePanels = Component.getElementsByClass(document, PCX86.APPCLASS, "panel");
-        for (var iPanel=0; iPanel < aePanels.length; iPanel++) {
-            var ePanel = aePanels[iPanel];
-            var parmsPanel = Component.getComponentParms(ePanel);
-            var panel = Component.getComponentByID(parmsPanel['id']);
+        let fReady = false;
+        let aePanels = Component.getElementsByClass(document, PCX86.APPCLASS, "panel");
+        for (let iPanel=0; iPanel < aePanels.length; iPanel++) {
+            let ePanel = aePanels[iPanel];
+            let parmsPanel = Component.getComponentParms(ePanel);
+            let panel = Component.getComponentByID(parmsPanel['id']);
             if (!panel) {
                 fReady = true;
                 panel = new Panel(parmsPanel);
@@ -8663,7 +8663,7 @@ Web.onInit(Panel.init);
 /**
  * Think of this Controller class definition as an interface definition, implemented by the Video Card
  * class and the RAM CompaqController class.
- * 
+ *
  * class Controller
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
@@ -8678,7 +8678,7 @@ class Controller {
     {
         return [];
     }
-    
+
     /**
      * getMemoryBuffer(addr)
      *
@@ -8847,10 +8847,10 @@ class Bus extends Component {
      */
     initMemory()
     {
-        var block = new Memory();
+        let block = new Memory();
         block.copyBreakpoints(this.dbg);
         this.aMemBlocks = new Array(this.nBlockTotal);
-        for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
+        for (let iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
             this.aMemBlocks[iBlock] = block;
         }
         this.cpu.initMemory(this.aMemBlocks, this.nBlockShift);
@@ -8924,15 +8924,15 @@ class Bus extends Component {
      */
     addMemory(addr, size, type, controller)
     {
-        var addrNext = addr;
-        var sizeLeft = size;
-        var iBlock = addrNext >>> this.nBlockShift;
+        let addrNext = addr;
+        let sizeLeft = size;
+        let iBlock = addrNext >>> this.nBlockShift;
 
         while (sizeLeft > 0 && iBlock < this.aMemBlocks.length) {
 
-            var block = this.aMemBlocks[iBlock];
-            var addrBlock = iBlock * this.nBlockSize;
-            var sizeBlock = this.nBlockSize - (addrNext - addrBlock);
+            let block = this.aMemBlocks[iBlock];
+            let addrBlock = iBlock * this.nBlockSize;
+            let sizeBlock = this.nBlockSize - (addrNext - addrBlock);
             if (sizeBlock > sizeLeft) sizeBlock = sizeLeft;
 
             if (block && block.size) {
@@ -8949,7 +8949,7 @@ class Bus extends Component {
                         return true;
                     }
                     if (addrNext >= block.addr + block.used) {
-                        var sizeAvail = block.size - (addrNext - addrBlock);
+                        let sizeAvail = block.size - (addrNext - addrBlock);
                         if (sizeAvail > sizeLeft) sizeAvail = sizeLeft;
                         block.used = addrNext - block.addr + sizeAvail;
                         addrNext = addrBlock + this.nBlockSize;
@@ -8961,7 +8961,7 @@ class Bus extends Component {
                 return this.reportError(Bus.ERROR.ADD_MEM_INUSE, addrNext, sizeLeft);
             }
 
-            var blockNew = new Memory(addrNext, sizeBlock, this.nBlockSize, type, controller);
+            let blockNew = new Memory(addrNext, sizeBlock, this.nBlockSize, type, controller);
             blockNew.copyBreakpoints(this.dbg, block);
             this.aMemBlocks[iBlock++] = blockNew;
 
@@ -8980,8 +8980,8 @@ class Bus extends Component {
              */
             this.cpu.flushPageBlocks();
             if (!this.cpu.isRunning()) {        // allocation messages at "run time" are bit too much
-                var kb = (size / 1024)|0;
-                var sb = kb? (kb + "Kb ") : (size + " bytes ");
+                let kb = (size / 1024)|0;
+                let sb = kb? (kb + "Kb ") : (size + " bytes ");
                 this.status(sb + Memory.TYPE.NAMES[type] + " at " + Str.toHex(addr));
             }
             return true;
@@ -9000,9 +9000,9 @@ class Bus extends Component {
      */
     cleanMemory(addr, size, fScrub)
     {
-        var fClean = true;
-        var iBlock = addr >>> this.nBlockShift;
-        var sizeBlock = this.nBlockSize - (addr & this.nBlockLimit);
+        let fClean = true;
+        let iBlock = addr >>> this.nBlockShift;
+        let sizeBlock = this.nBlockSize - (addr & this.nBlockLimit);
         while (size > 0 && iBlock < this.aMemBlocks.length) {
             if (!this.aMemBlocks[iBlock].clean(fScrub)) {
                 fClean = false;
@@ -9031,16 +9031,16 @@ class Bus extends Component {
         if (size == null) size = (this.addrTotal - addr) | 0;
         if (info == null) info = {cbTotal: 0, cBlocks: 0, aBlocks: []};
 
-        var iBlock = addr >>> this.nBlockShift;
-        var iBlockMax = ((addr + size - 1) >>> this.nBlockShift);
+        let iBlock = addr >>> this.nBlockShift;
+        let iBlockMax = ((addr + size - 1) >>> this.nBlockShift);
 
         info.cbTotal = 0;
         info.cBlocks = 0;
         while (iBlock <= iBlockMax) {
-            var block = this.aMemBlocks[iBlock];
+            let block = this.aMemBlocks[iBlock];
             info.cbTotal += block.size;
             if (block.size) {
-                var btmod = (BACKTRACK && block.modBackTrack(false)? 1 : 0);
+                let btmod = (BACKTRACK && block.modBackTrack(false)? 1 : 0);
                 info.aBlocks.push(Usr.initBitFields(Bus.BlockInfo, iBlock, 0, btmod, block.type));
                 info.cBlocks++
             }
@@ -9094,7 +9094,7 @@ class Bus extends Component {
             }
         }
         else if (this.nBusWidth > 20) {
-            var addrMask = (this.nBusMask & ~0x100000) | (fEnable? 0x100000 : 0);
+            let addrMask = (this.nBusMask & ~0x100000) | (fEnable? 0x100000 : 0);
             if (addrMask != this.nBusMask) {
                 this.nBusMask = addrMask;
                 if (this.cpu) this.cpu.setAddressMask(addrMask);
@@ -9130,9 +9130,9 @@ class Bus extends Component {
     setMemoryAccess(addr, size, afn, fQuiet)
     {
         if (!(addr & this.nBlockLimit) && size && !(size & this.nBlockLimit)) {
-            var iBlock = addr >>> this.nBlockShift;
+            let iBlock = addr >>> this.nBlockShift;
             while (size > 0) {
-                var block = this.aMemBlocks[iBlock];
+                let block = this.aMemBlocks[iBlock];
                 if (!block.controller) {
                     return this.reportError(Bus.ERROR.SET_MEM_NOCTRL, addr, size, fQuiet);
                 }
@@ -9160,10 +9160,10 @@ class Bus extends Component {
     removeMemory(addr, size)
     {
         if (!(addr & this.nBlockLimit) && size && !(size & this.nBlockLimit)) {
-            var iBlock = addr >>> this.nBlockShift;
+            let iBlock = addr >>> this.nBlockShift;
             while (size > 0) {
-                var blockOld = this.aMemBlocks[iBlock];
-                var blockNew = new Memory(addr);
+                let blockOld = this.aMemBlocks[iBlock];
+                let blockNew = new Memory(addr);
                 blockNew.copyBreakpoints(this.dbg, blockOld);
                 this.aMemBlocks[iBlock++] = blockNew;
                 addr = iBlock * this.nBlockSize;
@@ -9194,8 +9194,8 @@ class Bus extends Component {
      */
     getMemoryBlocks(addr, size)
     {
-        var aBlocks = [];
-        var iBlock = addr >>> this.nBlockShift;
+        let aBlocks = [];
+        let iBlock = addr >>> this.nBlockShift;
         while (size > 0 && iBlock < this.aMemBlocks.length) {
             aBlocks.push(this.aMemBlocks[iBlock++]);
             size -= this.nBlockSize;
@@ -9220,14 +9220,14 @@ class Bus extends Component {
      */
     setMemoryBlocks(addr, size, aBlocks, type)
     {
-        var i = 0;
-        var iBlock = addr >>> this.nBlockShift;
+        let i = 0;
+        let iBlock = addr >>> this.nBlockShift;
         while (size > 0 && iBlock < this.aMemBlocks.length) {
-            var block = aBlocks[i++];
+            let block = aBlocks[i++];
 
             if (!block) break;
             if (type !== undefined) {
-                var blockNew = new Memory(addr);
+                let blockNew = new Memory(addr);
                 blockNew.clone(block, type, this.dbg);
                 block = blockNew;
             }
@@ -9275,8 +9275,8 @@ class Bus extends Component {
      */
     getShort(addr)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
         if (off != this.nBlockLimit) {
             return this.aMemBlocks[iBlock].readShort(off, addr);
         }
@@ -9294,8 +9294,8 @@ class Bus extends Component {
      */
     getShortDirect(addr)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
         if (off != this.nBlockLimit) {
             return this.aMemBlocks[iBlock].readShortDirect(off, addr);
         }
@@ -9313,8 +9313,8 @@ class Bus extends Component {
      */
     getLong(addr)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
         if (off < this.nBlockLimit - 2) {
             return this.aMemBlocks[iBlock].readLong(off, addr);
         }
@@ -9324,9 +9324,9 @@ class Bus extends Component {
          * which may have also created some undesirable side-effects for custom memory controllers.
          * This simpler (and probably more reliable) approach is to simply read the long as individual bytes.
          */
-        var l = 0;
-        var cb = 4, nShift = 0;
-        var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+        let l = 0;
+        let cb = 4, nShift = 0;
+        let cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
         while (cb--) {
             l |= (this.aMemBlocks[iBlock].readByte(off++, addr++) << nShift);
             if (!--cbBlock) {
@@ -9378,8 +9378,8 @@ class Bus extends Component {
      */
     setShort(addr, w)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
         if (off != this.nBlockLimit) {
             this.aMemBlocks[iBlock].writeShort(off, w & 0xffff, addr);
             return;
@@ -9400,8 +9400,8 @@ class Bus extends Component {
      */
     setShortDirect(addr, w)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
         if (off != this.nBlockLimit) {
             this.aMemBlocks[iBlock].writeShortDirect(off, w & 0xffff, addr);
             return;
@@ -9421,8 +9421,8 @@ class Bus extends Component {
      */
     setLong(addr, l)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
         if (off < this.nBlockLimit - 2) {
             this.aMemBlocks[iBlock].writeLong(off, l);
             return;
@@ -9433,8 +9433,8 @@ class Bus extends Component {
          * block), which may have also created some undesirable side-effects for custom memory controllers.
          * This simpler (and probably more reliable) approach is to simply write the long as individual bytes.
          */
-        var cb = 4;
-        var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+        let cb = 4;
+        let cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
         while (cb--) {
             this.aMemBlocks[iBlock].writeByte(off++, l & 0xff, addr++);
             if (!--cbBlock) {
@@ -9462,7 +9462,7 @@ class Bus extends Component {
     addBackTrackObject(obj, bto, off)
     {
         if (BACKTRACK && obj) {
-            var cbtObjects = this.abtObjects.length;
+            let cbtObjects = this.abtObjects.length;
             if (!bto) {
                 /*
                  * Try the most recently created bto, on the off-chance it's what the caller needs
@@ -9473,12 +9473,12 @@ class Bus extends Component {
 
                 bto = {obj: obj, off: off, slot: 0, refs: 0};
 
-                var slot;
+                let slot;
                 if (!this.cbtDeletions) {
                     slot = cbtObjects;
                 } else {
                     for (slot = this.ibtLastDelete; slot < cbtObjects; slot++) {
-                        var btoTest = this.abtObjects[slot];
+                        let btoTest = this.abtObjects[slot];
                         if (!btoTest || !btoTest.refs && !this.isBackTrackWeak(slot << Bus.BTINFO.SLOT_SHIFT)) {
                             this.ibtLastDelete = slot + 1;
                             this.cbtDeletions--;
@@ -9535,7 +9535,7 @@ class Bus extends Component {
      */
     getBackTrackIndex(bto, off)
     {
-        var bti = 0;
+        let bti = 0;
         if (BACKTRACK && bto) {
             bti = (bto.slot << Bus.BTINFO.SLOT_SHIFT) | Bus.BTINFO.TYPE_DATA | (off - bto.off);
         }
@@ -9554,7 +9554,7 @@ class Bus extends Component {
     {
         if (BACKTRACK && bto) {
 
-            var bti = (bto.slot << Bus.BTINFO.SLOT_SHIFT) | Bus.BTINFO.TYPE_DATA | (off - bto.off);
+            let bti = (bto.slot << Bus.BTINFO.SLOT_SHIFT) | Bus.BTINFO.TYPE_DATA | (off - bto.off);
             this.writeBackTrack(addr, bti);
         }
     }
@@ -9584,14 +9584,14 @@ class Bus extends Component {
     writeBackTrack(addr, bti)
     {
         if (BACKTRACK) {
-            var slot = bti >>> Bus.BTINFO.SLOT_SHIFT;
-            var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
-            var btiPrev = this.aMemBlocks[iBlock].writeBackTrack(addr & this.nBlockLimit, bti);
-            var slotPrev = btiPrev >>> Bus.BTINFO.SLOT_SHIFT;
+            let slot = bti >>> Bus.BTINFO.SLOT_SHIFT;
+            let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+            let btiPrev = this.aMemBlocks[iBlock].writeBackTrack(addr & this.nBlockLimit, bti);
+            let slotPrev = btiPrev >>> Bus.BTINFO.SLOT_SHIFT;
             if (slot != slotPrev) {
                 this.aMemBlocks[iBlock].modBackTrack(true);
                 if (btiPrev && slotPrev) {
-                    var btoPrev = this.abtObjects[slotPrev-1];
+                    let btoPrev = this.abtObjects[slotPrev-1];
                     if (!btoPrev) {
                         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.WARN)) {
                             this.dbg.message("writeBackTrack(%" + Str.toHex(addr) + ',' + Str.toHex(bti) + "): previous index (" + Str.toHex(btiPrev) + ") refers to empty slot (" + slotPrev + ")");
@@ -9633,7 +9633,7 @@ class Bus extends Component {
                     }
                 }
                 if (bti && slot) {
-                    var bto = this.abtObjects[slot-1];
+                    let bto = this.abtObjects[slot-1];
                     if (bto) {
 
                         bto.refs++;
@@ -9651,8 +9651,8 @@ class Bus extends Component {
      */
     isBackTrackWeak(bti)
     {
-        var bt = this.cpu.backTrack;
-        var slot = bti >> Bus.BTINFO.SLOT_SHIFT;
+        let bt = this.cpu.backTrack;
+        let slot = bti >> Bus.BTINFO.SLOT_SHIFT;
         return (bt.btiAL   >> Bus.BTINFO.SLOT_SHIFT == slot ||
                 bt.btiAH   >> Bus.BTINFO.SLOT_SHIFT == slot ||
                 bt.btiBL   >> Bus.BTINFO.SLOT_SHIFT == slot ||
@@ -9701,7 +9701,7 @@ class Bus extends Component {
     getBackTrackObject(bti)
     {
         if (BACKTRACK) {
-            var slot = bti >>> Bus.BTINFO.SLOT_SHIFT;
+            let slot = bti >>> Bus.BTINFO.SLOT_SHIFT;
             if (slot) return this.abtObjects[slot-1];
         }
         return null;
@@ -9719,10 +9719,10 @@ class Bus extends Component {
     getBackTrackInfo(bti, fSymbol, fNearest)
     {
         if (BACKTRACK) {
-            var bto = this.getBackTrackObject(bti);
+            let bto = this.getBackTrackObject(bti);
             if (bto) {
-                var off = bti & Bus.BTINFO.OFF_MASK;
-                var file = bto.obj.file;
+                let off = bti & Bus.BTINFO.OFF_MASK;
+                let file = bto.obj.file;
                 if (file) {
 
                     return file.getSymbol(bto.obj.offFile + off, fNearest);
@@ -9780,15 +9780,15 @@ class Bus extends Component {
          * A quick-and-dirty work-around for 32-bit bus machines, to ensure that all blocks in the 2nd Mb are
          * mapped in before we save.  We do this by forcing A20 on, and then turning it off again before we leave.
          */
-        var fA20 = this.getA20();
+        let fA20 = this.getA20();
         if (!fA20) this.setA20(true);
-        
-        var i = 0, a = [];
-        for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
-            var block = this.aMemBlocks[iBlock];
+
+        let i = 0, a = [];
+        for (let iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
+            let block = this.aMemBlocks[iBlock];
             if (block.size) {
                 if (fAll && block.type != Memory.TYPE.ROM || block.modified()) {
-                    var adw = block.save();
+                    let adw = block.save();
                     if (adw) {
                         a[i++] = iBlock;
                         a[i++] = State.compress(adw);
@@ -9820,18 +9820,18 @@ class Bus extends Component {
      */
     restoreMemory(a)
     {
-        var i, scale = 1;
+        let i, scale = 1;
         for (i = 0; i < a.length - 1; i += 2) {
-            var iBlock = a[i] * scale, adw = a[i+1];
+            let iBlock = a[i] * scale, adw = a[i+1];
             /*
              * One wrinkle here is dealing with blocks that were saved when the machine was using an
              * older (larger) block size (eg, 16K or 32K), because now I ALWAYS use a block size of 4K.
-             * 
+             *
              * Detecting that situation is a little tricky, because our memory states don't include the
              * block size that was in effect, and the blocks themselves could be compressed; in a worst
              * case scenario, the very first block of a machine using 16K blocks might have been compressed
              * to exactly 4K, and we'd have no idea if that block should be decompressed or used as-is.
-             * 
+             *
              * So, if the length of the block is less than our default length, we know we must decompress,
              * but furthermore, if the length is not a power-of-two, that's another clue.  Checking for
              * a power-of-two is a simple matter of AND'ing the value with one less than the value; if
@@ -9841,11 +9841,11 @@ class Bus extends Component {
                 if (adw.length < this.nBlockLen * scale || (adw.length & (adw.length - 1))) {
                     adw = State.decompress(adw);
                 }
-                var nBlocks = (adw.length / this.nBlockLen)|0;
+                let nBlocks = (adw.length / this.nBlockLen)|0;
                 if (nBlocks && scale == 1) scale = nBlocks;
                 while (nBlocks > 0) {
-                    var adwBlock = nBlocks > 1? adw.splice(0, this.nBlockLen) : adw;
-                    var block = this.aMemBlocks[iBlock];
+                    let adwBlock = nBlocks > 1? adw.splice(0, this.nBlockLen) : adw;
+                    let block = this.aMemBlocks[iBlock];
                     if (!block || !block.restore(adwBlock)) {
                         /*
                          * Either the block to restore hasn't been allocated, indicating a change in the machine
@@ -9897,7 +9897,7 @@ class Bus extends Component {
     addPortInputNotify(start, end, fn)
     {
         if (fn !== undefined) {
-            for (var port = start; port <= end; port++) {
+            for (let port = start; port <= end; port++) {
                 if (this.aPortInputNotify[port] !== undefined) {
                     Component.warning("Input port " + Str.toHexWord(port) + " already registered");
                     continue;
@@ -9921,7 +9921,7 @@ class Bus extends Component {
     addPortInputTable(component, table, offset)
     {
         if (offset === undefined) offset = 0;
-        for (var port in table) {
+        for (let port in table) {
             this.addPortInputNotify(+port + offset, +port + offset, table[port].bind(component));
         }
     }
@@ -9954,14 +9954,14 @@ class Bus extends Component {
      */
     checkPortInputNotify(port, size, addrLIP)
     {
-        var data = 0, shift = 0;
+        let data = 0, shift = 0;
 
         while (size > 0) {
 
-            var aNotify = this.aPortInputNotify[port];
-            var sizePort = this.aPortInputWidth[port] || 1;
-            var maskPort = (sizePort == 1? 0xff : (sizePort == 2? 0xffff : -1));
-            var dataPort = maskPort;
+            let aNotify = this.aPortInputNotify[port];
+            let sizePort = this.aPortInputWidth[port] || 1;
+            let maskPort = (sizePort == 1? 0xff : (sizePort == 2? 0xffff : -1));
+            let dataPort = maskPort;
 
             /*
              * TODO: We need to decide what to do about 8-bit I/O to a 16-bit port (ditto for 16-bit I/O
@@ -10039,7 +10039,7 @@ class Bus extends Component {
     addPortOutputNotify(start, end, fn)
     {
         if (fn !== undefined) {
-            for (var port = start; port <= end; port++) {
+            for (let port = start; port <= end; port++) {
                 if (this.aPortOutputNotify[port] !== undefined) {
                     Component.warning("Output port " + Str.toHexWord(port) + " already registered");
                     continue;
@@ -10063,7 +10063,7 @@ class Bus extends Component {
     addPortOutputTable(component, table, offset)
     {
         if (offset === undefined) offset = 0;
-        for (var port in table) {
+        for (let port in table) {
             this.addPortOutputNotify(+port + offset, +port + offset, table[port].bind(component));
         }
     }
@@ -10093,14 +10093,14 @@ class Bus extends Component {
      */
     checkPortOutputNotify(port, size, data, addrLIP)
     {
-        var shift = 0;
+        let shift = 0;
 
         while (size > 0) {
 
-            var aNotify = this.aPortOutputNotify[port];
-            var sizePort = this.aPortOutputWidth[port] || 1;
-            var maskPort = (sizePort == 1? 0xff : (sizePort == 2? 0xffff : -1));
-            var dataPort = (data >>>= shift) & maskPort;
+            let aNotify = this.aPortOutputNotify[port];
+            let sizePort = this.aPortOutputWidth[port] || 1;
+            let maskPort = (sizePort == 1? 0xff : (sizePort == 2? 0xffff : -1));
+            let dataPort = (data >>>= shift) & maskPort;
 
             /*
              * TODO: We need to decide what to do about 8-bit I/O to a 16-bit port (ditto for 16-bit I/O
@@ -10145,7 +10145,7 @@ class Bus extends Component {
      */
     reportError(op, addr, size, fQuiet)
     {
-        var sError = "Memory block error (" + op + ": " + Str.toHex(addr) + "," + Str.toHex(size) + ")";
+        let sError = "Memory block error (" + op + ": " + Str.toHex(addr) + "," + Str.toHex(size) + ")";
         if (fQuiet) {
             if (this.dbg) {
                 this.dbg.message(sError);
@@ -10169,8 +10169,8 @@ class Bus extends Component {
      *
      getLongDirect(addr)
      {
-         var off = addr & this.nBlockLimit;
-         var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+         let off = addr & this.nBlockLimit;
+         let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
          if (off < this.nBlockLimit - 2) {
              return this.aMemBlocks[iBlock].readLongDirect(off, addr);
          }
@@ -10180,9 +10180,9 @@ class Bus extends Component {
          // which may have also created some undesirable side-effects for custom memory controllers.
          // This simpler (and probably more reliable) approach is to simply read the long as individual bytes.
          //
-         var l = 0;
-         var cb = 4, nShift = 0;
-         var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+         let l = 0;
+         let cb = 4, nShift = 0;
+         let cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
          while (cb--) {
              l |= (this.aMemBlocks[iBlock].readByteDirect(off++, addr++) << nShift);
              if (!--cbBlock) {
@@ -10207,8 +10207,8 @@ class Bus extends Component {
      *
      setLongDirect(addr, l)
      {
-         var off = addr & this.nBlockLimit;
-         var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+         let off = addr & this.nBlockLimit;
+         let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
          if (off < this.nBlockLimit - 2) {
              this.aMemBlocks[iBlock].writeLongDirect(off, l, addr);
              return;
@@ -10219,8 +10219,8 @@ class Bus extends Component {
          // block), which may have also created some undesirable side-effects for custom memory controllers.
          // This simpler (and probably more reliable) approach is to simply write the long as individual bytes.
          //
-         var cb = 4;
-         var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+         let cb = 4;
+         let cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
          while (cb--) {
              this.aMemBlocks[iBlock].writeByteDirect(off++, l & 0xff, addr++);
              if (!--cbBlock) {
@@ -10269,7 +10269,7 @@ class Bus extends Component {
      *
      removePortInputNotify(start, end)
      {
-         for (var port = start; port < end; port++) {
+         for (let port = start; port < end; port++) {
              if (this.aPortInputNotify[port]) {
                  delete this.aPortInputNotify[port];
              }
@@ -10288,7 +10288,7 @@ class Bus extends Component {
      *
      removePortOutputNotify(start, end)
      {
-         for (var port = start; port < end; port++) {
+         for (let port = start; port < end; port++) {
              if (this.aPortOutputNotify[port]) {
                  delete this.aPortOutputNotify[port];
              }
@@ -10428,7 +10428,7 @@ Bus.ERROR = {
  */
 
 var littleEndian = (TYPEDARRAYS? (function() {
-    var buffer = new ArrayBuffer(2);
+    let buffer = new ArrayBuffer(2);
     new DataView(buffer).setUint16(0, 256, true);
     return new Uint16Array(buffer)[0] === 256;
 })() : false);
@@ -10481,7 +10481,7 @@ class Memory {
      */
     constructor(addr, used, size, type, controller, cpu)
     {
-        var i;
+        let i;
         this.id = (Memory.idBlock += 2);
         this.adw = null;
         this.offset = 0;
@@ -10535,7 +10535,7 @@ class Memory {
          */
         if (controller) {
             this.controller = controller;
-            var a = controller.getMemoryBuffer(addr|0);
+            let a = controller.getMemoryBuffer(addr|0);
             this.adw = a[0];
             this.offset = a[1];
             this.setAccess(controller.getMemoryAccess());
@@ -10678,13 +10678,13 @@ class Memory {
      */
     save()
     {
-        var adw, i;
+        let adw, i;
         if (this.controller) {
             adw = null;
         }
         else if (BYTEARRAYS) {
             adw = new Array(this.size >> 2);
-            var off = 0;
+            let off = 0;
             for (i = 0; i < adw.length; i++) {
                 adw[i] = this.ab[off] | (this.ab[off + 1] << 8) | (this.ab[off + 2] << 16) | (this.ab[off + 3] << 24);
                 off += 4;
@@ -10731,7 +10731,7 @@ class Memory {
          * restore calls, because old machine states may still try to restore video memory blocks for MDA
          * and CGA video buffers (and in those cases, the memory formats should be compatible).
          */
-        var i, off;
+        let i, off;
         if (this.controller) {
             if (this.adw) {
                 for (i = 0; i < adw.length; i++) {
@@ -11150,10 +11150,10 @@ class Memory {
         if (BYTEARRAYS) {
             return this.ab[off] | (this.ab[off + 1] << 8);
         }
-        var w;
-        var idw = off >> 2;
-        var nShift = (off & 0x3) << 3;
-        var dw = (this.adw[idw] >> nShift);
+        let w;
+        let idw = off >> 2;
+        let nShift = (off & 0x3) << 3;
+        let dw = (this.adw[idw] >> nShift);
         if (nShift < 24) {
             w = dw & 0xffff;
         } else {
@@ -11175,9 +11175,9 @@ class Memory {
         if (BYTEARRAYS) {
             return this.ab[off] | (this.ab[off + 1] << 8) | (this.ab[off + 2] << 16) | (this.ab[off + 3] << 24);
         }
-        var idw = off >> 2;
-        var nShift = (off & 0x3) << 3;
-        var l = this.adw[idw];
+        let idw = off >> 2;
+        let nShift = (off & 0x3) << 3;
+        let l = this.adw[idw];
         if (nShift) {
             l >>>= nShift;
             l |= this.adw[idw + 1] << (32 - nShift);
@@ -11198,8 +11198,8 @@ class Memory {
         if (BYTEARRAYS) {
             this.ab[off] = b;
         } else {
-            var idw = off >> 2;
-            var nShift = (off & 0x3) << 3;
+            let idw = off >> 2;
+            let nShift = (off & 0x3) << 3;
             this.adw[idw] = (this.adw[idw] & ~(0xff << nShift)) | (b << nShift);
         }
         // this.flags |= Memory.FLAGS.DIRTY;
@@ -11219,8 +11219,8 @@ class Memory {
             this.ab[off] = (w & 0xff);
             this.ab[off + 1] = (w >> 8);
         } else {
-            var idw = off >> 2;
-            var nShift = (off & 0x3) << 3;
+            let idw = off >> 2;
+            let nShift = (off & 0x3) << 3;
             if (nShift < 24) {
                 this.adw[idw] = (this.adw[idw] & ~(0xffff << nShift)) | (w << nShift);
             } else {
@@ -11248,12 +11248,12 @@ class Memory {
             this.ab[off + 2] = (l >> 16) & 0xff;
             this.ab[off + 3] = (l >> 24) & 0xff;
         } else {
-            var idw = off >> 2;
-            var nShift = (off & 0x3) << 3;
+            let idw = off >> 2;
+            let nShift = (off & 0x3) << 3;
             if (!nShift) {
                 this.adw[idw] = l;
             } else {
-                var mask = (0xffffffff|0) << nShift;
+                let mask = (0xffffffff|0) << nShift;
                 this.adw[idw] = (this.adw[idw] & ~mask) | (l << nShift);
                 idw++;
                 this.adw[idw] = (this.adw[idw] & mask) | (l >>> (32 - nShift));
@@ -11976,7 +11976,7 @@ class Memory {
      */
     writeBackTrackIndex(off, bti)
     {
-        var btiPrev;
+        let btiPrev;
         btiPrev = this.abtIndexes[off];
         this.abtIndexes[off] = bti;
         return btiPrev;
@@ -11991,7 +11991,7 @@ class Memory {
      */
     modBackTrackIndex(fMod)
     {
-        var fModPrev = this.fModBackTrack;
+        let fModPrev = this.fModBackTrack;
         this.fModBackTrack = fMod;
         return fModPrev;
     }
@@ -12199,9 +12199,9 @@ class CPU extends Component {
     {
         super("CPU", parmsCPU, Messages.CPU);
 
-        var nCycles = parmsCPU['cycles'] || nCyclesDefault;
+        let nCycles = parmsCPU['cycles'] || nCyclesDefault;
 
-        var nMultiplier = parmsCPU['multiplier'] || 1;
+        let nMultiplier = parmsCPU['multiplier'] || 1;
 
         this.counts = {};
         this.counts.nBaseCyclesPerSecond = nCycles;
@@ -12269,8 +12269,8 @@ class CPU extends Component {
         this.bus = bus;
         this.dbg = dbg;
 
-        for (var i = 0; i < CPU.BUTTONS.length; i++) {
-            var control = this.bindings[CPU.BUTTONS[i]];
+        for (let i = 0; i < CPU.BUTTONS.length; i++) {
+            let control = this.bindings[CPU.BUTTONS[i]];
             if (control) this.cmp.setBinding("", CPU.BUTTONS[i], control);
         }
 
@@ -12287,7 +12287,7 @@ class CPU extends Component {
         /*
          * We've already saved the parmsCPU 'autoStart' setting, but there may be a machine (or URL) override.
          */
-        var sAutoStart = cmp.getMachineParm('autoStart');
+        let sAutoStart = cmp.getMachineParm('autoStart');
         if (sAutoStart != null) {
             this.flags.autoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
         }
@@ -12391,7 +12391,7 @@ class CPU extends Component {
          *
          *      this.flags.powered = false;
          */
-        var fRunning = this.flags.running;
+        let fRunning = this.flags.running;
         if (fShutdown) this.stopCPU();
         return fSave? this.save(fRunning) : true;
     }
@@ -12408,13 +12408,13 @@ class CPU extends Component {
             return true;
         }
         /*
-         * Start running automatically on power-up, assuming there's no Debugger.  
+         * Start running automatically on power-up, assuming there's no Debugger.
          */
         if (this.flags.autoStart || this.flags.autoStart == null && !this.dbg) {
             /*
              * Automatically updating focus when calling startCPU() is a double-edged sword, potentially interfering
              * with the user's attention, which is why we also set fQuiet, to try to prevent the page from "auto-scrolling"
-             * the newly focused machine into view. 
+             * the newly focused machine into view.
              */
             return this.startCPU(true, true);
         }
@@ -12505,7 +12505,7 @@ class CPU extends Component {
             /*
              * Get a 32-bit summation of the current CPU state and add it to our running 32-bit checksum
              */
-            var fDisplay = false;
+            let fDisplay = false;
             this.counts.nChecksum = (this.counts.nChecksum + this.getChecksum())|0;
             this.counts.nCyclesChecksumNext -= nCycles;
             if (this.counts.nCyclesChecksumNext <= 0) {
@@ -12556,7 +12556,7 @@ class CPU extends Component {
                 this.setError("Value for " + sLabel + " is invalid");
                 this.stopCPU();
             }
-            var sVal;
+            let sVal;
             if (!this.flags.running || this.flags.displayLiveRegs) {
                 sVal = Str.toHex(nValue, cch);
             } else {
@@ -12584,8 +12584,8 @@ class CPU extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var cpu = this;
-        var fBound = false;
+        let cpu = this;
+        let fBound = false;
 
         switch (sBinding) {
         case "power":
@@ -12602,7 +12602,7 @@ class CPU extends Component {
         case "run":
             this.bindings[sBinding] = control;
             control.onclick = function onClickRun() {
-                var fRunning = cpu.flags.running;
+                let fRunning = cpu.flags.running;
                 if (!cpu.cmp || !cpu.cmp.checkPower()) return;
                 /*
                  * We snapped the CPU's running flag before calling checkPower() because there are rare (REPOWER)
@@ -12652,7 +12652,7 @@ class CPU extends Component {
     setBurstCycles(nCycles)
     {
         if (this.flags.running) {
-            var nDelta = this.nStepCycles - nCycles;
+            let nDelta = this.nStepCycles - nCycles;
             /*
              * NOTE: If nDelta is negative, we will actually be increasing nStepCycles and nBurstCycles.
              * Which is OK, but if we're also taking snapshots of the cycle counts, to make sure that instruction
@@ -12692,7 +12692,7 @@ class CPU extends Component {
      */
     calcCycles()
     {
-        var nMultiplier = this.counts.mhzCurrent / this.counts.mhzBase;
+        let nMultiplier = this.counts.mhzCurrent / this.counts.mhzBase;
         if (!nMultiplier || nMultiplier > this.counts.nTargetMultiplier) {
             nMultiplier = this.counts.nTargetMultiplier;
         }
@@ -12719,7 +12719,7 @@ class CPU extends Component {
      */
     getCycles(fScaled)
     {
-        var nCycles = this.nTotalCycles + this.nRunCycles + this.nBurstCycles - this.nStepCycles;
+        let nCycles = this.nTotalCycles + this.nRunCycles + this.nBurstCycles - this.nStepCycles;
         if (fScaled && this.counts.nTargetMultiplier > 1 && this.counts.mhzCurrent > this.counts.mhzBase) {
             /*
              * We could scale the current cycle count by the current speed (this.counts.mhzCurrent); eg:
@@ -12833,7 +12833,7 @@ class CPU extends Component {
      */
     setSpeed(nMultiplier, fUpdateFocus)
     {
-        var fSuccess = true;
+        let fSuccess = true;
         if (nMultiplier !== undefined) {
             /*
              * If we haven't reached 90% (0.9) of the current target speed, revert to the default multiplier.
@@ -12844,11 +12844,11 @@ class CPU extends Component {
             }
             this.counts.mhzCurrent = 0;
             this.counts.nTargetMultiplier = nMultiplier;
-            var mhzTarget = this.counts.mhzBase * this.counts.nTargetMultiplier;
+            let mhzTarget = this.counts.mhzBase * this.counts.nTargetMultiplier;
             if (this.counts.mhzTarget != mhzTarget) {
                 this.counts.mhzTarget = mhzTarget;
-                var sSpeed = this.getSpeedTarget();
-                var controlSpeed = this.bindings["setSpeed"];
+                let sSpeed = this.getSpeedTarget();
+                let controlSpeed = this.bindings["setSpeed"];
                 if (controlSpeed) controlSpeed.textContent = sSpeed;
                 this.println("target speed: " + sSpeed);
             }
@@ -12921,7 +12921,7 @@ class CPU extends Component {
          * "snapshot" to occur sooner; it's unclear, however, whether that will really improve the CPU's ability
          * to hit its target speed, since any instruction that displays a message is unavoidably slooooow.
          */
-        var msDelta = 0;
+        let msDelta = 0;
         if (this.counts.msEndThisRun) {
             msDelta = this.counts.msStartThisRun - this.counts.msEndThisRun;
             if (msDelta > this.counts.msPerYield) {
@@ -12954,7 +12954,7 @@ class CPU extends Component {
             this.counts.msStartThisRun += this.counts.msDiscount;
         }
 
-        var msYield = this.counts.msPerYield;
+        let msYield = this.counts.msPerYield;
         if (this.counts.nCyclesThisRun) {
             /*
              * Normally, we would assume we executed a full quota of work over msPerYield, but since the CPU
@@ -12965,8 +12965,8 @@ class CPU extends Component {
             msYield = Math.round(msYield * this.counts.nCyclesThisRun / this.counts.nCyclesPerYield);
         }
 
-        var msElapsedThisRun = this.counts.msEndThisRun - this.counts.msStartThisRun;
-        var msRemainsThisRun = msYield - msElapsedThisRun;
+        let msElapsedThisRun = this.counts.msEndThisRun - this.counts.msStartThisRun;
+        let msRemainsThisRun = msYield - msElapsedThisRun;
 
         /*
          * We could pass only "this run" results to calcSpeed():
@@ -12976,8 +12976,8 @@ class CPU extends Component {
          *
          * but it seems preferable to use longer time periods and hopefully get a more accurate speed.
          */
-        var nCycles = this.nRunCycles;
-        var msElapsed = this.counts.msEndThisRun - this.counts.msStartRun;
+        let nCycles = this.nRunCycles;
+        let msElapsed = this.counts.msEndThisRun - this.counts.msStartRun;
 
         if (MAXDEBUG && msRemainsThisRun < 0 && this.counts.nTargetMultiplier > 1) {
             this.println("warning: updates @" + msElapsedThisRun + "ms (prefer " + Math.round(msYield) + "ms)");
@@ -13054,7 +13054,7 @@ class CPU extends Component {
      */
     addTimer(id, callBack, ms = -1)
     {
-        var iTimer = this.aTimers.length;
+        let iTimer = this.aTimers.length;
         this.aTimers.push([id, -1, ms, callBack]);
         if (ms >= 0) this.setTimer(iTimer, ms);
         return iTimer;
@@ -13087,8 +13087,8 @@ class CPU extends Component {
      */
     findTimer(id)
     {
-        for (var iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
-            var timer = this.aTimers[iTimer];
+        for (let iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
+            let timer = this.aTimers[iTimer];
             if (timer[0] == id) return timer;
         }
         return null;
@@ -13132,9 +13132,9 @@ class CPU extends Component {
      */
     setTimer(iTimer, ms, fReset)
     {
-        var nCycles = -1;
+        let nCycles = -1;
         if (iTimer >= 0 && iTimer < this.aTimers.length) {
-            var timer = this.aTimers[iTimer];
+            let timer = this.aTimers[iTimer];
             if (fReset || timer[1] < 0) {
                 nCycles = this.getMSCycles(ms);
                 /*
@@ -13165,7 +13165,7 @@ class CPU extends Component {
     setTimerCycles(iTimer, nCycles)
     {
         if (iTimer >= 0 && iTimer < this.aTimers.length) {
-            var timer = this.aTimers[iTimer];
+            let timer = this.aTimers[iTimer];
             /*
              * If the CPU is currently executing a burst of cycles, the number of cycles it has executed in
              * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
@@ -13202,8 +13202,8 @@ class CPU extends Component {
      */
     getBurstCycles(nCycles)
     {
-        for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            var timer = this.aTimers[iTimer];
+        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            let timer = this.aTimers[iTimer];
 
             if (timer[1] < 0) continue;
             if (nCycles > timer[1]) {
@@ -13221,9 +13221,9 @@ class CPU extends Component {
      */
     saveTimers()
     {
-        var aTimerStates = [];
-        for (var iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
-            var timer = this.aTimers[iTimer];
+        let aTimerStates = [];
+        for (let iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
+            let timer = this.aTimers[iTimer];
             aTimerStates.push([timer[0], timer[1], timer[2]]);
         }
         return aTimerStates;
@@ -13237,9 +13237,9 @@ class CPU extends Component {
      */
     restoreTimers(aTimerStates)
     {
-        for (var iTimerState = 0; iTimerState < aTimerStates.length; iTimerState++) {
-            var state = aTimerStates[iTimerState];
-            var timer = this.findTimer(state[0]);
+        for (let iTimerState = 0; iTimerState < aTimerStates.length; iTimerState++) {
+            let state = aTimerStates[iTimerState];
+            let timer = this.findTimer(state[0]);
             if (timer) {
                 timer[1] = state[1];
                 timer[2] = state[2];
@@ -13258,8 +13258,8 @@ class CPU extends Component {
      */
     resetTimers()
     {
-        for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            var timer = this.aTimers[iTimer];
+        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            let timer = this.aTimers[iTimer];
             if (timer[2] >= 0) this.setTimer(iTimer, timer[2], true);
         }
     }
@@ -13276,8 +13276,8 @@ class CPU extends Component {
      */
     updateTimers(nCycles)
     {
-        for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            var timer = this.aTimers[iTimer];
+        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            let timer = this.aTimers[iTimer];
 
             if (timer[1] < 0) continue;
             timer[1] -= nCycles;
@@ -13305,7 +13305,7 @@ class CPU extends Component {
      */
     endBurst()
     {
-        var nCycles = this.nBurstCycles - this.nStepCycles;
+        let nCycles = this.nBurstCycles - this.nStepCycles;
         this.nBurstCycles = this.nStepCycles = 0;
         this.counts.nCyclesThisRun += nCycles;
         this.nRunCycles += nCycles;
@@ -13335,7 +13335,7 @@ class CPU extends Component {
                  * be less than getCurrentCyclesPerSecond(), because at the very least, our own timer fires more than
                  * once per second.
                  */
-                var nCycles = this.getBurstCycles(this.flags.checksum? 1 : this.getCurrentCyclesPerSecond());
+                let nCycles = this.getBurstCycles(this.flags.checksum? 1 : this.getCurrentCyclesPerSecond());
 
                 if (this.chipset) {
                     this.chipset.updateAllTimers();
@@ -13420,7 +13420,7 @@ class CPU extends Component {
         this.flags.running = true;
         this.flags.starting = true;
         if (this.chipset) this.chipset.start();
-        var controlRun = this.bindings["run"];
+        let controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Halt";
         if (this.cmp) {
             this.cmp.updateStatus(true);
@@ -13457,14 +13457,14 @@ class CPU extends Component {
      */
     stopCPU(fComplete)
     {
-        var fStopped = false;
+        let fStopped = false;
         if (this.flags.running) {
             this.endBurst();
             this.addCycles(this.nRunCycles);
             this.nRunCycles = 0;
             this.flags.running = false;
             if (this.chipset) this.chipset.stop();
-            var controlRun = this.bindings["run"];
+            let controlRun = this.bindings["run"];
             if (controlRun) controlRun.textContent = "Run";
             if (this.cmp) {
                 this.cmp.stop(Component.getTime(), this.getCycles());
@@ -13489,9 +13489,9 @@ class CPU extends Component {
      */
     nonCPU(fn)
     {
-        var msStart = Usr.getTime();
+        let msStart = Usr.getTime();
         if (fn()) {
-            var msStop = Usr.getTime();
+            let msStop = Usr.getTime();
             this.counts.msDiscount += msStop - msStart;
             return true;
         }
@@ -13587,8 +13587,8 @@ class CPUX86 extends CPU {
      */
     constructor(parmsCPU)
     {
-        var nCyclesDefault;
-        var model = +parmsCPU['model'] || X86.MODEL_8088;
+        let nCyclesDefault;
+        let model = +parmsCPU['model'] || X86.MODEL_8088;
 
         switch(model) {
         case X86.MODEL_8088:
@@ -13612,7 +13612,7 @@ class CPUX86 extends CPU {
          * a single value that's unique for any given CPU stepping.  If no stepping is provided, then stepping
          * is equal to model.
          */
-        var stepping = parmsCPU['stepping'];
+        let stepping = parmsCPU['stepping'];
         this.stepping = model + (stepping? Str.parseInt(stepping, 16) : 0);
 
         /*
@@ -13777,8 +13777,8 @@ class CPUX86 extends CPU {
     addMemBreak(addr, fWrite, fPhysical)
     {
         if (DEBUGGER) {
-            var iBlock = addr >>> this.nBlockShift;
-            var aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
+            let iBlock = addr >>> this.nBlockShift;
+            let aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
             aBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite);
             /*
              * When a physical memory breakpoint is added, a fresh setPhysBlock() call is REQUIRED for any
@@ -13804,8 +13804,8 @@ class CPUX86 extends CPU {
     removeMemBreak(addr, fWrite, fPhysical)
     {
         if (DEBUGGER) {
-            var iBlock = addr >>> this.nBlockShift;
-            var aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
+            let iBlock = addr >>> this.nBlockShift;
+            let aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
             aBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
             /*
              * When a physical memory breakpoint is removed, a fresh setPhysBlock() call is RECOMMENDED for any
@@ -13833,7 +13833,7 @@ class CPUX86 extends CPU {
      */
     addMemCheck(addr, fWrite)
     {
-        var iBlock = addr >>> this.nBlockShift;
+        let iBlock = addr >>> this.nBlockShift;
         this.aMemBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite, this);
     }
 
@@ -13846,7 +13846,7 @@ class CPUX86 extends CPU {
      */
     removeMemCheck(addr, fWrite)
     {
-        var iBlock = addr >>> this.nBlockShift;
+        let iBlock = addr >>> this.nBlockShift;
         this.aMemBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
     }
 
@@ -13873,7 +13873,7 @@ class CPUX86 extends CPU {
             this.setError("PAGEBLOCKS support required");
             return;
         }
-        var iBlock;
+        let iBlock;
         if (this.aMemBlocks === this.aBusBlocks) {
             this.aMemBlocks = new Array(this.nBlockTotal);
             /*
@@ -13921,7 +13921,7 @@ class CPUX86 extends CPU {
              * entries in the array.  I'm assuming we won't run into any system software that relies on
              * a constrained TLB -- at least not from the 80386 era, which is all we're emulating.
              */
-            for (var i = 0; i < this.aBlocksPaged.length; i++) {
+            for (let i = 0; i < this.aBlocksPaged.length; i++) {
                 iBlock = this.aBlocksPaged[i];
                 this.releasePageBlock(this.aMemBlocks[iBlock]);
                 this.aMemBlocks[iBlock] = this.blockUnpaged;
@@ -13955,7 +13955,7 @@ class CPUX86 extends CPU {
      */
     acquirePageBlock(addr)
     {
-        var block;
+        let block;
         if (this.iCacheBlocks > 0) {
             block = this.aCacheBlocks[--this.iCacheBlocks];
             /*
@@ -14022,15 +14022,15 @@ class CPUX86 extends CPU {
      */
     mapPageBlock(addr, fWrite, fSuppress)
     {
-        var offPDE = (addr & X86.LADDR.PDE.MASK) >>> X86.LADDR.PDE.SHIFT;
-        var addrPDE = this.regCR3 + offPDE;
+        let offPDE = (addr & X86.LADDR.PDE.MASK) >>> X86.LADDR.PDE.SHIFT;
+        let addrPDE = this.regCR3 + offPDE;
 
         /*
          * bus.getLong(addrPDE) would be simpler, but setPhysBlock() needs to know blockPDE and offPDE, too.
          * TODO: Since we're immediately shifting addrPDE by nBlockShift, then we could also skip adding offPDE.
          */
-        var blockPDE = this.aBusBlocks[(addrPDE & this.nBusMask) >>> this.nBlockShift];
-        var pde = blockPDE.readLong(offPDE);
+        let blockPDE = this.aBusBlocks[(addrPDE & this.nBusMask) >>> this.nBlockShift];
+        let pde = blockPDE.readLong(offPDE);
 
         if (!(pde & X86.PTE.PRESENT)) {
             if (!fSuppress) X86.helpPageFault.call(this, addr, false, fWrite);
@@ -14042,15 +14042,15 @@ class CPUX86 extends CPU {
             return this.memEmpty;
         }
 
-        var offPTE = (addr & X86.LADDR.PTE.MASK) >>> X86.LADDR.PTE.SHIFT;
-        var addrPTE = (pde & X86.PTE.FRAME) + offPTE;
+        let offPTE = (addr & X86.LADDR.PTE.MASK) >>> X86.LADDR.PTE.SHIFT;
+        let addrPTE = (pde & X86.PTE.FRAME) + offPTE;
 
         /*
          * bus.getLong(addrPTE) would be simpler, but setPhysBlock() needs to know blockPTE and offPTE, too.
          * TODO: Since we're immediately shifting addrPDE by nBlockShift, then we could also skip adding offPTE.
          */
-        var blockPTE = this.aBusBlocks[(addrPTE & this.nBusMask) >>> this.nBlockShift];
-        var pte = blockPTE.readLong(offPTE);
+        let blockPTE = this.aBusBlocks[(addrPTE & this.nBusMask) >>> this.nBlockShift];
+        let pte = blockPTE.readLong(offPTE);
 
         if (!(pte & X86.PTE.PRESENT)) {
             if (!fSuppress) X86.helpPageFault.call(this, addr, false, fWrite);
@@ -14062,22 +14062,22 @@ class CPUX86 extends CPU {
             return this.memEmpty;
         }
 
-        var addrPhys = (pte & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);
+        let addrPhys = (pte & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);
         /*
          * TODO: Since we're immediately shifting addrPhys by nBlockShift, we could also skip adding the addr's offset.
          */
-        var blockPhys = this.aBusBlocks[(addrPhys & this.nBusMask) >>> this.nBlockShift];
+        let blockPhys = this.aBusBlocks[(addrPhys & this.nBusMask) >>> this.nBlockShift];
         if (fSuppress) return blockPhys;
 
-        var iBlock = addr >>> this.nBlockShift;
-        var block = this.aMemBlocks[iBlock];
+        let iBlock = addr >>> this.nBlockShift;
+        let block = this.aMemBlocks[iBlock];
 
         /*
          * So we have the block containing the physical memory corresponding to the given linear address.
          *
          * Now we can create a new PAGED Memory block and record the physical block info using setPhysBlock().
          */
-        var blockPage = this.acquirePageBlock(addr & ~X86.LADDR.OFFSET);
+        let blockPage = this.acquirePageBlock(addr & ~X86.LADDR.OFFSET);
         blockPage.setPhysBlock(blockPhys, blockPDE, offPDE, blockPTE, offPTE);
         blockPage.copyBreakpoints(this.dbg, block);
 
@@ -14112,7 +14112,7 @@ class CPUX86 extends CPU {
      */
     isPagingEnabled()
     {
-        var fPaging = !!(this.regCR0 & X86.CR0.PG);
+        let fPaging = !!(this.regCR0 & X86.CR0.PG);
 
         return fPaging;
     }
@@ -14346,7 +14346,7 @@ class CPUX86 extends CPU {
 
             if (this.model >= X86.MODEL_80286) {
 
-                var i;
+                let i;
                 this.PS_SET = X86.PS.BIT1;      // on the 80286, only BIT1 of Processor Status (flags) is always set
                 this.PS_DIRECT |= X86.PS.IOPL.MASK | X86.PS.NT;
 
@@ -14362,7 +14362,7 @@ class CPUX86 extends CPU {
 
                 if (I386) {
                     if (this.model >= X86.MODEL_80386) {
-                        var bOpcode;
+                        let bOpcode;
                         this.PS_CLEAR_RM = 0;   // NOTE: This allows the 80386 to modify X86.PS.NT in real-mode (which is presumably OK)
                         this.PS_DIRECT |= X86.PS.RF | X86.PS.VM;
                         this.aOps[X86.OPCODE.FS] = X86.opFS;    // 0x64
@@ -14412,7 +14412,7 @@ class CPUX86 extends CPU {
      */
     getReg(i)
     {
-        var reg;
+        let reg;
         switch(i) {
         case 0x0:
             reg = this.regEAX;
@@ -14965,7 +14965,7 @@ class CPUX86 extends CPU {
      */
     getChecksum()
     {
-        var sum = (this.regEAX + this.regEBX + this.regECX + this.regEDX + this.getSP() + this.regEBP + this.regESI + this.regEDI)|0;
+        let sum = (this.regEAX + this.regEBX + this.regECX + this.regEDX + this.getSP() + this.regEBP + this.regESI + this.regEDI)|0;
         sum = (sum + this.getIP() + this.getCS() + this.getDS() + this.getSS() + this.getES() + this.getPS())|0;
         return sum;
     }
@@ -15002,9 +15002,9 @@ class CPUX86 extends CPU {
      */
     checkIntNotify(nInt)
     {
-        var aNotify = this.aIntNotify[nInt];
+        let aNotify = this.aIntNotify[nInt];
         if (aNotify !== undefined) {
-            for (var i = 0; i < aNotify.length; i++) {
+            for (let i = 0; i < aNotify.length; i++) {
                 if (!aNotify[i](this.regLIP)) {
                     return false;
                 }
@@ -15076,7 +15076,7 @@ class CPUX86 extends CPU {
      */
     checkIntReturn(addr)
     {
-        var fn = this.aIntReturn[addr];
+        let fn = this.aIntReturn[addr];
         if (fn != null) {
             fn(--this.cIntReturn);
             delete this.aIntReturn[addr];
@@ -15104,16 +15104,16 @@ class CPUX86 extends CPU {
          * Similarly, we make a copy of regDR7 in bitsDR7 and shift the latter right 4 bits at a time, so that
          * the RW and LEN bits for the next Debug register are always in positions 1-0 and 3-2, respectively.
          */
-        var regDR7 = this.regDR[7];
-        var bitsDR7 = regDR7 >> 16;
+        let regDR7 = this.regDR[7];
+        let bitsDR7 = regDR7 >> 16;
 
-        for (var i = 0; i < 4; i++) {
+        for (let i = 0; i < 4; i++) {
             if (regDR7 & (X86.DR7.L0 | X86.DR7.G0)) {
                 /*
                  * We look only to the low bit of the RW field to determine if we should be watching for a write.
                  * FYI, if the low bit is clear but the high bit is set, that's "undefined"; we treat it as a read.
                  */
-                var fWrite = !!(bitsDR7 & 0x1);
+                let fWrite = !!(bitsDR7 & 0x1);
                 /*
                  * The address in regDR[i] should already be masked with ~0x1 for 2-byte accesses (LEN == 0x1) or
                  * with ~0x3 for 4-byte accesses (LEN == 0x3), but if the client forgets, the hardware supposedly
@@ -15122,8 +15122,8 @@ class CPUX86 extends CPU {
                  * FYI, if LEN is set to the "undefined" value of (0x2), we still apply a mask to the address, albeit
                  * a nonsensical mask of ~0x2 or 0xfffffffd.  That's how we define that particular "undefined" LEN.
                  */
-                var addr = this.regDR[i];
-                var len = ((bitsDR7 >> 2) & 0x3);
+                let addr = this.regDR[i];
+                let len = ((bitsDR7 >> 2) & 0x3);
                 addr &= ~len;       // NOTE: if LEN == 0x0, we don't need to mask, but ~0x0 is equivalent to no mask
                 if (fEnable) {
                     this.addMemCheck(addr, fWrite);
@@ -15168,18 +15168,18 @@ class CPUX86 extends CPU {
              * Similarly, we make a copy of regDR7 in bitsDR7 and shift the latter right 4 bits at a time, so that
              * the RW and LEN bits for the next Debug register are always in positions 1-0 and 3-2, respectively.
              */
-            var regDR7 = this.regDR[7];
-            var bitsDR7 = regDR7 >> 16;
+            let regDR7 = this.regDR[7];
+            let bitsDR7 = regDR7 >> 16;
 
-            var bitsRWMask = X86.DR7.RW0 >> 16;
-            var bitsRWRequired = (fWrite? 0x1 : (fWrite == false? 0x3 : 0x0));
+            let bitsRWMask = X86.DR7.RW0 >> 16;
+            let bitsRWRequired = (fWrite? 0x1 : (fWrite == false? 0x3 : 0x0));
 
-            for (var i = 0; i < 4; i++) {
+            for (let i = 0; i < 4; i++) {
                 if ((regDR7 & (X86.DR7.L0 | X86.DR7.G0)) && (bitsDR7 & bitsRWMask) == bitsRWRequired) {
                     /*
                      * NOTE: We reduced nb from 1-4 to 0-3 above, so we don't need to add 1 to len either.
                      */
-                    var len = (bitsDR7 >> 2);
+                    let len = (bitsDR7 >> 2);
                     /*
                      * Time to determine if addr through addr + nb overlaps regDR[i] through regDR[i] + len.
                      */
@@ -15278,7 +15278,7 @@ class CPUX86 extends CPU {
     saveProtMode()
     {
         if (this.addrGDT != null) {
-            var a = [
+            let a = [
                 this.regCR0,
                 this.addrGDT,
                 this.addrGDTLimit,
@@ -15350,9 +15350,9 @@ class CPUX86 extends CPU {
      */
     save(fRunning)
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, [this.regEAX, this.regEBX, this.regECX, this.regEDX, this.getSP(), this.regEBP, this.regESI, this.regEDI]);
-        var a = [this.getIP(), this.segCS.save(), this.segDS.save(), this.segSS.save(), this.segES.save(), this.saveProtMode(), this.getPS()];
+        let a = [this.getIP(), this.segCS.save(), this.segDS.save(), this.segSS.save(), this.segES.save(), this.saveProtMode(), this.getPS()];
         if (I386 && this.model >= X86.MODEL_80386) {
             a.push(this.segFS.save());
             a.push(this.segGS.save());
@@ -15375,12 +15375,12 @@ class CPUX86 extends CPU {
      */
     restore(data)
     {
-        var a = data[0];
+        let a = data[0];
         this.regEAX = a[0];
         this.regEBX = a[1];
         this.regECX = a[2];
         this.regEDX = a[3];
-        var regESP = a[4];
+        let regESP = a[4];
         this.regEBP = a[5];
         this.regESI = a[6];
         this.regEDI = a[7];
@@ -15397,7 +15397,7 @@ class CPUX86 extends CPU {
          * The introduction of protected-mode requires us to restore memory contents sooner than we used to
          * (ie, before we load any segment registers).
          */
-        var fRestored = false;
+        let fRestored = false;
 
         if (this.bus.restoreMemory(data[4])) {
             /*
@@ -15550,8 +15550,8 @@ class CPUX86 extends CPU {
      */
     setSS(sel, fInterruptable)
     {
-        var regESP = this.getSP();
-        var regLSP = this.segSS.load(sel);
+        let regESP = this.getSP();
+        let regLSP = this.segSS.load(sel);
         if (regLSP !== X86.ADDR_INVALID) {
             /*
              * The safest way to update regLSP after a potential change to segSS.base is to call setSP() with the
@@ -15562,16 +15562,16 @@ class CPUX86 extends CPU {
              * 16-bit stacks began inadvertently using ESP instead of SP.  The moral: don't be needlessly clever.
              */
             this.setSP(regESP);
-            
+
             /*
              * The desire to use a linear stack pointer (regLSP) for internal stack operations has some pitfalls;
              * one involves these upper and lower limit calculations.  Example: Xenix 386 creates a (non-expand-down)
              * 32-bit data segment for all of DS, ES, and SS, which uses a limit of "-1"; ie:
-             * 
+             *
              *      SS=0018[ED800000,FFFFFFFF] DS=0018[ED800000,FFFFFFFF] ES=0018[ED800000,FFFFFFFF]
              *
              * so we end up calculating an upper limit of 0xED7FFFFF, which is lower than the lower limit of 0xED800000.
-             * 
+             *
              * For now, these "limit wrap-around" situations are resolved by using unsigned values and then applying
              * a linear address ceiling.  TODO: Come up with a simple solution for properly dealing with limit wrap-around.
              */
@@ -15582,10 +15582,10 @@ class CPUX86 extends CPU {
                 this.regLSPLimit = (this.segSS.base >>> 0) + (this.segSS.limit >>> 0);
                 this.regLSPLimitLow = (this.segSS.base >>> 0);
             }
-            
+
             this.regLSPLimit = Math.min(this.regLSPLimit, this.nMemMask >>> 0);
             this.regLSPLimitLow = Math.min(this.regLSPLimitLow, this.nMemMask >>> 0);
-            
+
             if (!BUGS_8086 && !fInterruptable) this.opFlags |= X86.OPFLAG.NOINTR;
             return true;
         }
@@ -15746,7 +15746,7 @@ class CPUX86 extends CPU {
         /*
          * Setting IP needs to occur AFTER loadCode(), because it may differ from the given IP if sel refers to a gate.
          */
-        var base = this.segCS.loadCode(off, sel, fCall);
+        let base = this.segCS.loadCode(off, sel, fCall);
         if (base !== X86.ADDR_INVALID) {
             this.setLIP(base + (this.segCS.offIP & (I386? this.segCS.maskData : 0xffff)));
             return this.segCS.fStackSwitch;
@@ -15764,7 +15764,7 @@ class CPUX86 extends CPU {
      */
     setCSBase(addr)
     {
-        var regIP = this.getIP();
+        let regIP = this.getIP();
         addr = this.segCS.setBase(addr);
         this.regLIP = (addr + regIP)|0;
         this.regLIPMax = (addr >>> 0) + (this.segCS.limit >>> 0) + 1;
@@ -15789,7 +15789,7 @@ class CPUX86 extends CPU {
      */
     checkIP(inc)
     {
-        var newLIP = (this.regLIP >>> 0) + inc;
+        let newLIP = (this.regLIP >>> 0) + inc;
         if (newLIP > this.regLIPMax) {
             /*
              * There's no such thing as a GP fault on the 8086/8088, and I'm now assuming that,
@@ -15835,7 +15835,7 @@ class CPUX86 extends CPU {
      * This "rewinds" IP to the beginning of the current instruction (ie, the REP prefix of a string instruction);
      * this also sets the REPSEG flag to record string instructions with multiple prefixes (ie, a segment override),
      * so that checkINTR() has the option to simulate the 8086/8088's failure to properly restart such an instruction
-     * after a hardware interrupt (which became known as a "feature", hence not part of BUGS_8086). 
+     * after a hardware interrupt (which became known as a "feature", hence not part of BUGS_8086).
      *
      * @this {CPUX86}
      * @param {boolean} [fCheckSeg]
@@ -15848,7 +15848,7 @@ class CPUX86 extends CPU {
         this.opFlags |= X86.OPFLAG.REPEAT;
         this.resetIP();
     }
-    
+
     /**
      * getSP()
      *
@@ -15906,7 +15906,7 @@ class CPUX86 extends CPU {
     setArithResult(dst, src, value, type, fSubtract)
     {
         if ((type & X86.RESULT.ALL) != X86.RESULT.ALL && type != this.resultType) {
-            var diff = ((type ^ this.resultType) & this.resultType);
+            let diff = ((type ^ this.resultType) & this.resultType);
             if (diff) {
                 if (diff & X86.RESULT.CF) this.getCF();
                 if (diff & X86.RESULT.PF) this.getPF();
@@ -16485,13 +16485,13 @@ class CPUX86 extends CPU {
      */
     checkIOPM(port, nPorts, fInput)
     {
-        var bitsPorts = 0;
+        let bitsPorts = 0;
         if (I386 && (this.regCR0 & X86.CR0.MSW.PE) && (this.nCPL > this.nIOPL || (this.regPS & X86.PS.VM)) && this.segTSS.addrIOPM) {
-            var offIOPM = port >>> 3;
-            var addrIOPM = this.segTSS.addrIOPM + offIOPM;
+            let offIOPM = port >>> 3;
+            let addrIOPM = this.segTSS.addrIOPM + offIOPM;
             bitsPorts = ((1 << nPorts) - 1) << (port & 0x7);
             while (bitsPorts && addrIOPM <= this.segTSS.addrIOPMLimit) {
-                var bits = this.getByte(addrIOPM);
+                let bits = this.getByte(addrIOPM);
                 if (bits & bitsPorts) break;
                 bitsPorts >>>= 8;
                 addrIOPM++;
@@ -16517,7 +16517,7 @@ class CPUX86 extends CPU {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var fBound = false;
+        let fBound = false;
         switch (sBinding) {
         case "EAX":
         case "EBX":
@@ -16588,12 +16588,12 @@ class CPUX86 extends CPU {
      */
     probeAddr(addr, size, fPhysical)
     {
-        var aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
-        var block = aBlocks[(addr & this.nMemMask) >>> this.nBlockShift];
+        let aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
+        let block = aBlocks[(addr & this.nMemMask) >>> this.nBlockShift];
         if (block && block.type == Memory.TYPE.UNPAGED) block = this.mapPageBlock(addr, false, true);
 
         if (block) {
-            var off = addr & this.nBlockLimit;
+            let off = addr & this.nBlockLimit;
             if (!size || size == 1) {
                 return block.readByteDirect(off, addr);
             }
@@ -16653,8 +16653,8 @@ class CPUX86 extends CPU {
      */
     getShort(addr)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
         /*
          * On the 8088, it takes 4 cycles to read the additional byte REGARDLESS whether the address is odd or even.
          * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
@@ -16668,7 +16668,7 @@ class CPUX86 extends CPU {
         if (off < this.nBlockLimit) {
             return this.aMemBlocks[iBlock].readShort(off, addr);
         }
-        var w = this.aMemBlocks[iBlock].readByte(off, addr);
+        let w = this.aMemBlocks[iBlock].readByte(off, addr);
         if (!(this.opFlags & X86.OPFLAG.FAULT)) {
             w |= this.aMemBlocks[(iBlock + 1) & this.nBlockMask].readByte(0, addr + 1) << 8;
         }
@@ -16687,8 +16687,8 @@ class CPUX86 extends CPU {
      */
     getLong(addr)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
         if (BACKTRACK) {
             this.backTrack.btiMem0 = this.bus.readBackTrack(addr);
             this.backTrack.btiMem1 = this.bus.readBackTrack(addr + 1);
@@ -16704,9 +16704,9 @@ class CPUX86 extends CPU {
          * which may have also created some undesirable side-effects for custom memory controllers.
          * This simpler (and probably more reliable) approach is to simply read the long as individual bytes.
          */
-        var l = 0;
-        var cb = 4, nShift = 0;
-        var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+        let l = 0;
+        let cb = 4, nShift = 0;
+        let cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
         while (cb--) {
             l |= (this.aMemBlocks[iBlock].readByte(off++, addr++) << nShift);
             if (this.opFlags & X86.OPFLAG.FAULT) break;
@@ -16747,8 +16747,8 @@ class CPUX86 extends CPU {
      */
     setShort(addr, w)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
         /*
          * On the 8088, it takes 4 cycles to write the additional byte REGARDLESS whether the address is odd or even.
          * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
@@ -16780,8 +16780,8 @@ class CPUX86 extends CPU {
      */
     setLong(addr, l)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
         this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
 
         if (BACKTRACK) {
@@ -16800,8 +16800,8 @@ class CPUX86 extends CPU {
          * block), which may have also created some undesirable side-effects for custom memory controllers.
          * This simpler (and probably more reliable) approach is to simply write the long as individual bytes.
          */
-        var cb = 4;
-        var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+        let cb = 4;
+        let cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
         while (cb--) {
             this.aMemBlocks[iBlock].writeByte(off++, l & 0xff, addr++);
             if (this.opFlags & X86.OPFLAG.FAULT) return;
@@ -16827,7 +16827,7 @@ class CPUX86 extends CPU {
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = seg.checkRead(this.offEA, 1);
         if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-        var b = this.getByte(this.regEA);
+        let b = this.getByte(this.regEA);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMem0;
         return b;
     }
@@ -16866,7 +16866,7 @@ class CPUX86 extends CPU {
      */
     getEAWord(seg, off)
     {
-        var w;
+        let w;
         this.segEA = seg;
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = seg.checkRead(this.offEA, (I386? this.sizeData : 2));
@@ -16897,7 +16897,7 @@ class CPUX86 extends CPU {
      */
     getEAShortData(off)
     {
-        var w;
+        let w;
         this.segEA = this.segData;
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = this.segEA.checkRead(this.offEA, 2);
@@ -16929,7 +16929,7 @@ class CPUX86 extends CPU {
      */
     getEAShortStack(off)
     {
-        var w;
+        let w;
         this.segEA = this.segStack;
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = this.segEA.checkRead(this.offEA, 2);
@@ -16965,7 +16965,7 @@ class CPUX86 extends CPU {
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = this.segEA.checkRead(this.offEA, 4);
         if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-        var w = this.getLong(this.regEA);
+        let w = this.getLong(this.regEA);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiMem0;
             this.backTrack.btiEAHi = this.backTrack.btiMem1;
@@ -16986,7 +16986,7 @@ class CPUX86 extends CPU {
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = this.segEA.checkRead(this.offEA, 4);
         if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-        var w = this.getLong(this.regEA);
+        let w = this.getLong(this.regEA);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiMem0;
             this.backTrack.btiEAHi = this.backTrack.btiMem1;
@@ -17020,7 +17020,7 @@ class CPUX86 extends CPU {
             this.backTrack.btiMem0 = this.backTrack.btiEALo;
             this.backTrack.btiMem1 = this.backTrack.btiEAHi;
         }
-        var addr = this.segEA.checkWrite(this.offEA, 2);
+        let addr = this.segEA.checkWrite(this.offEA, 2);
         if (this.opFlags & X86.OPFLAG.WRAP) {
             /*
              * The WRAP flag must have been set by checkWriteReal(), so we also know that we're dealing with
@@ -17064,7 +17064,7 @@ class CPUX86 extends CPU {
             this.backTrack.btiMem0 = this.backTrack.btiEALo;
             this.backTrack.btiMem1 = this.backTrack.btiEAHi;
         }
-        var addr = this.segEA.checkWrite(this.offEA, this.sizeData);
+        let addr = this.segEA.checkWrite(this.offEA, this.sizeData);
         if (this.opFlags & X86.OPFLAG.WRAP) {
             /*
              * The WRAP flag must have been set by checkWriteReal(), so we also know that we're dealing with
@@ -17106,8 +17106,8 @@ class CPUX86 extends CPU {
      */
     getSOWord(seg, off)
     {
-        var w;
-        var addr = seg.checkRead(off, this.sizeData);
+        let w;
+        let addr = seg.checkRead(off, this.sizeData);
         if (this.opFlags & X86.OPFLAG.WRAP) {
             /*
              * The WRAP flag must have been set by checkReadReal(), so we also know that we're dealing with
@@ -17149,7 +17149,7 @@ class CPUX86 extends CPU {
      */
     setSOWord(seg, off, w)
     {
-        var addr = seg.checkWrite(off, this.sizeData);
+        let addr = seg.checkWrite(off, this.sizeData);
         if (this.opFlags & X86.OPFLAG.WRAP) {
             /*
              * The WRAP flag must have been set by checkWriteReal(), so we also know that we're dealing with
@@ -17176,7 +17176,7 @@ class CPUX86 extends CPU {
             this.refillPrefetch();
             if (!this.cbPrefetch) return this.getByte(this.regLIP);
         }
-        var b = (this.adwPrefetch[this.regLIP & CPUX86.PFINFO.IP_MASK] >> ((this.regLIP & 0x3) << 3)) & 0xff;
+        let b = (this.adwPrefetch[this.regLIP & CPUX86.PFINFO.IP_MASK] >> ((this.regLIP & 0x3) << 3)) & 0xff;
 
         this.cbPrefetch--;
         return b;
@@ -17197,8 +17197,8 @@ class CPUX86 extends CPU {
                 return this.getShort(this.regLIP);
             }
         }
-        var shift = (this.regLIP & 0x3) << 3;
-        var w = (this.adwPrefetch[this.regLIP & CPUX86.PFINFO.IP_MASK] >>> shift) & 0xffff;
+        let shift = (this.regLIP & 0x3) << 3;
+        let w = (this.adwPrefetch[this.regLIP & CPUX86.PFINFO.IP_MASK] >>> shift) & 0xffff;
         if (shift > 16) w |= (this.adwPrefetch[(this.regLIP + 4) & CPUX86.PFINFO.IP_MASK] & 0xff) << 8;
 
         this.cbPrefetch -= 2;
@@ -17220,8 +17220,8 @@ class CPUX86 extends CPU {
                 return this.getLong(this.regLIP);
             }
         }
-        var shift = (this.regLIP & 0x3) << 3;
-        var l = (this.adwPrefetch[this.regLIP & CPUX86.PFINFO.IP_MASK] >>> shift)|0;
+        let shift = (this.regLIP & 0x3) << 3;
+        let l = (this.adwPrefetch[this.regLIP & CPUX86.PFINFO.IP_MASK] >>> shift)|0;
         if (shift) l |= this.adwPrefetch[(this.regLIP + 4) & CPUX86.PFINFO.IP_MASK] << (32 - shift);
 
         this.cbPrefetch -= 4;
@@ -17256,18 +17256,19 @@ class CPUX86 extends CPU {
      */
     refillPrefetch()
     {
-        var aBlocks = this.aMemBlocks;
-        var regLIP = this.regLIP & ~0x3;
-        var block = aBlocks[(regLIP & this.nMemMask) >>> this.nBlockShift];
+        let aBlocks = this.aMemBlocks;
+        let regLIP = this.regLIP & ~0x3;
+        let block = aBlocks[(regLIP & this.nMemMask) >>> this.nBlockShift];
         if (block && block.type == Memory.TYPE.UNPAGED) {
             block = this.mapPageBlock(regLIP, false, true);
             if (block === this.memEmpty) block = null;
         }
         if (block) {
-            var off = regLIP & this.nBlockLimit;
-            var cbMax = this.nBlockSize - off;
+            let i = 0;
+            let off = regLIP & this.nBlockLimit;
+            let cbMax = this.nBlockSize - off;
             if (cbMax > CPUX86.PFINFO.LENGTH) cbMax = CPUX86.PFINFO.LENGTH;
-            for (var i = 0; i < cbMax; i += 4) {
+            for (; i < cbMax; i += 4) {
                 this.adwPrefetch[regLIP & CPUX86.PFINFO.IP_MASK] = block.readLongDirect(off, regLIP);
                 off += 4; regLIP += 4;
             }
@@ -17286,8 +17287,8 @@ class CPUX86 extends CPU {
      */
     getIPByte()
     {
-        var newLIP = this.checkIP(1);
-        var b = (PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP));
+        let newLIP = this.checkIP(1);
+        let b = (PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP));
         if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
         this.regLIP = newLIP;
         return b;
@@ -17301,8 +17302,8 @@ class CPUX86 extends CPU {
      */
     getIPShort()
     {
-        var w;
-        var newLIP = this.checkIP(2);
+        let w;
+        let newLIP = this.checkIP(2);
         if (PREFETCH) {
             w = this.getShortPrefetch();
         } else if (!(this.opFlags & X86.OPFLAG.WRAP)) {
@@ -17331,8 +17332,8 @@ class CPUX86 extends CPU {
      */
     getIPAddr()
     {
-        var w;
-        var newLIP = this.checkIP(this.sizeAddr);
+        let w;
+        let newLIP = this.checkIP(this.sizeAddr);
         if (PREFETCH) {
             w = this.getAddr();
         } else if (!(this.opFlags & X86.OPFLAG.WRAP)) {
@@ -17361,8 +17362,8 @@ class CPUX86 extends CPU {
      */
     getIPWord()
     {
-        var w;
-        var newLIP = this.checkIP(this.sizeData);
+        let w;
+        let newLIP = this.checkIP(this.sizeData);
         if (PREFETCH) {
             w = this.getWordPrefetch();
         } else if (!(this.opFlags & X86.OPFLAG.WRAP)) {
@@ -17391,8 +17392,8 @@ class CPUX86 extends CPU {
      */
     getIPDisp()
     {
-        var newLIP = this.checkIP(1);
-        var w = ((PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP)) << 24) >> 24;
+        let newLIP = this.checkIP(1);
+        let w = ((PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP)) << 24) >> 24;
         if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
         this.regLIP = newLIP;
         return w;
@@ -17417,11 +17418,11 @@ class CPUX86 extends CPU {
      */
     popWord()
     {
-        var data = this.getWord(this.regLSP);
-        var width = I386? this.sizeData : 2;
+        let data = this.getWord(this.regLSP);
+        let width = I386? this.sizeData : 2;
         this.regLSP = (this.regLSP + width)|0;
-        
-        var delta = this.regLSPLimit - (this.regLSP >>> 0);
+
+        let delta = this.regLSPLimit - (this.regLSP >>> 0);
         if (delta < 0) {
             /*
              * There's no such thing as an SS fault on the 8086/8088, and in fact, we have to support the
@@ -17493,9 +17494,9 @@ class CPUX86 extends CPU {
     {
 
 
-        var regLSP = (this.regLSP - width)|0;
-        
-        var delta = (regLSP >>> 0) - this.regLSPLimitLow;
+        let regLSP = (this.regLSP - width)|0;
+
+        let delta = (regLSP >>> 0) - this.regLSPLimitLow;
         if (delta < 0) {
             /*
              * There's no such thing as an SS fault on the 8086/8088, and in fact, we have to support the
@@ -17610,12 +17611,12 @@ class CPUX86 extends CPU {
              * As discussed above, the 8086/8088 give hardware interrupts higher priority than the TRAP interrupt,
              * whereas the 80286 and up give TRAPs higher priority.
              */
-            var iPriority = (this.model < X86.MODEL_80286? 0 : 1);
-            for (var cPriorities = 0; cPriorities < 2; cPriorities++) {
+            let iPriority = (this.model < X86.MODEL_80286? 0 : 1);
+            for (let cPriorities = 0; cPriorities < 2; cPriorities++) {
                 switch(iPriority) {
                 case 0:
                     if ((this.intFlags & X86.INTFLAG.INTR) && (this.regPS & X86.PS.IF)) {
-                        var nIDT = this.chipset.getIRRVector();
+                        let nIDT = this.chipset.getIRRVector();
                         if (nIDT >= -1) {
                             this.intFlags &= ~X86.INTFLAG.INTR;
                             if (nIDT >= 0) {
@@ -17717,7 +17718,7 @@ class CPUX86 extends CPU {
      */
     updateReg(sReg, nValue)
     {
-        var cch = 4;
+        let cch = 4;
         if (sReg.length == 1) {
             cch = 1;
             nValue = nValue? 1 : 0;
@@ -17760,7 +17761,7 @@ class CPUX86 extends CPU {
                 this.updateReg("SS", this.getSS());
                 this.updateReg("ES", this.getES());
                 this.updateReg("EIP", this.getIP());
-                var regPS = this.getPS();
+                let regPS = this.getPS();
                 this.updateReg("PS", regPS);
                 this.updateReg("V", (regPS & X86.PS.OF));
                 this.updateReg("D", (regPS & X86.PS.DF));
@@ -17781,7 +17782,7 @@ class CPUX86 extends CPU {
             }
         }
 
-        var controlSpeed = this.bindings["speed"];
+        let controlSpeed = this.bindings["speed"];
         if (controlSpeed) controlSpeed.textContent = this.getSpeedCurrent();
     }
 
@@ -17823,7 +17824,7 @@ class CPUX86 extends CPU {
         /*
          * fDebugCheck is true if we need to "check" every instruction with the Debugger.
          */
-        var fDebugCheck = this.flags.debugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
+        let fDebugCheck = this.flags.debugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
 
         /*
          * nDebugState is checked only when fDebugCheck is true, and its sole purpose is to tell the first call
@@ -17833,7 +17834,7 @@ class CPUX86 extends CPU {
          * Once we snap fStarting, we clear it, because technically, we've moved beyond "starting" and have
          * officially "started" now.
          */
-        var nDebugState = (!nMinCycles)? -1 : (this.flags.starting? 0 : 1);
+        let nDebugState = (!nMinCycles)? -1 : (this.flags.starting? 0 : 1);
         this.flags.starting = false;
 
         /*
@@ -17865,7 +17866,7 @@ class CPUX86 extends CPU {
         if (!nMinCycles && !this.messageEnabled(Messages.PIC)) this.opFlags |= X86.OPFLAG.NOINTR;
 
         do {
-            var opPrefixes = this.opFlags & X86.OPFLAG_PREFIXES;
+            let opPrefixes = this.opFlags & X86.OPFLAG_PREFIXES;
             if (opPrefixes) {
                 this.opPrefixes |= opPrefixes;
             } else {
@@ -17909,23 +17910,23 @@ class CPUX86 extends CPU {
                          * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction, because the
                          * entire machine relies on the steady advance of the overall cycle count, to ensure that timer
                          * updates, video updates, etc, all continue to occur at the expected rates.
-                         * 
+                         *
                          * So opHLT() sets X86.INTFLAG.HALT, signalling that we should not execute any more instructions
-                         * until checkINTR() detects a hardware interrupt and clears X86.INTFLAG.HALT. 
-                         * 
+                         * until checkINTR() detects a hardware interrupt and clears X86.INTFLAG.HALT.
+                         *
                          * Ideally, we would also end the current burst; ie:
                          *
                          *      this.nStepCycles = 0;
                          *      this.opFlags = 0;
                          *      break;
-                         * 
+                         *
                          * and save the browser a bunch of work, which would translate into power savings for the host
                          * operating system, just as HLT was intended to do for the guest operating system.  Unfortunately,
                          * that screws up up our dynamic speed recalculations, because it makes it appear that a single
                          * instruction (HLT) performed the work of many.
                          *
                          * We could certainly add more cycle bookkeeping to compensate for HLT's lack of work, but for now,
-                         * it's simpler to re-execute the HLT as long as X86.INTFLAG.HALT is set. 
+                         * it's simpler to re-execute the HLT as long as X86.INTFLAG.HALT is set.
                          */
                         X86.opHLT.call(this);
                         continue;
@@ -17951,10 +17952,10 @@ class CPUX86 extends CPU {
              */
 
             this.aOps[this.getIPByte()].call(this);
-            
+
             /*
             if (PREFETCH) {
-                var nSpareCycles = (this.nSnapCycles - this.nStepCycles) - this.nBusCycles;
+                let nSpareCycles = (this.nSnapCycles - this.nStepCycles) - this.nBusCycles;
                 if (nSpareCycles >= 4) {
                     this.fillPrefetch(nSpareCycles >> 2);   // for every 4 spare cycles, fetch 1 instruction byte
                 }
@@ -18008,8 +18009,8 @@ class CPUX86 extends CPU {
      *
      getIPLong()
      {
-         var newLIP = this.checkIP(4);
-         var l = (PREFETCH? this.getLongPrefetch() : this.getLong(this.regLIP));
+         let newLIP = this.checkIP(4);
+         let l = (PREFETCH? this.getLongPrefetch() : this.getLong(this.regLIP));
          if (BACKTRACK) {
              this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
              this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
@@ -18052,11 +18053,11 @@ class CPUX86 extends CPU {
      */
     static init()
     {
-        var aeCPUs = Component.getElementsByClass(document, PCX86.APPCLASS, "cpu");
-        for (var iCPU = 0; iCPU < aeCPUs.length; iCPU++) {
-            var eCPU = aeCPUs[iCPU];
-            var parmsCPU = Component.getComponentParms(eCPU);
-            var cpu = new CPUX86(parmsCPU);
+        let aeCPUs = Component.getElementsByClass(document, PCX86.APPCLASS, "cpu");
+        for (let iCPU = 0; iCPU < aeCPUs.length; iCPU++) {
+            let eCPU = aeCPUs[iCPU];
+            let parmsCPU = Component.getComponentParms(eCPU);
+            let cpu = new CPUX86(parmsCPU);
             Component.bindComponentControls(cpu, eCPU, PCX86.APPCLASS);
         }
     }
@@ -18145,7 +18146,7 @@ class FPUX86 extends Component {
          * a single value that's unique for any given CPU stepping.  If no stepping is provided, then stepping
          * is equal to model.
          */
-        var stepping = parmsFPU['stepping'];
+        let stepping = parmsFPU['stepping'];
         this.stepping = this.model + (stepping? Str.parseInt(stepping, 16) : 0);
 
         /*
@@ -18294,8 +18295,8 @@ class FPUX86 extends Component {
      */
     save()
     {
-        var state = new State(this);
-        var a = [], i = 0;
+        let state = new State(this);
+        let a = [], i = 0;
         a[i++] = this.regControl;
         a[i++] = this.getStatus();
         a[i++] = this.getTags();
@@ -18304,7 +18305,7 @@ class FPUX86 extends Component {
          * order (0-7) rather than their logical order (ST0-ST7).  Moreover, FSAVE() and FRSTOR() use the "temp-real" (TR)
          * format, whereas we use the current native format -- which, sadly, is only a 64-bit "long-real" (LR) format.
          */
-        for (var iReg = 0; iReg < this.regStack.length; iReg++) {
+        for (let iReg = 0; iReg < this.regStack.length; iReg++) {
             a[i++] = this.regStack[iReg];
         }
         state.set(0, a);
@@ -18322,11 +18323,11 @@ class FPUX86 extends Component {
      */
     restore(data)
     {
-        var a = data[0], i = 0;
+        let a = data[0], i = 0;
         this.setControl(a[i++]);
         this.setStatus(a[i++]);
         this.setTags(a[i++]);
-        for (var iReg = 0; iReg < this.regStack.length; iReg++) {
+        for (let iReg = 0; iReg < this.regStack.length; iReg++) {
             this.regStack[iReg] = a[i++];
         }
         return true;
@@ -18354,7 +18355,7 @@ class FPUX86 extends Component {
              * All the registers were tagged "unused" above, which is all that would normally happen, but debugging is
              * a little easier if we zero all the registers as well.
              */
-            for (var iReg = 0; iReg < this.regStack.length; iReg++) {
+            for (let iReg = 0; iReg < this.regStack.length; iReg++) {
                 this.regStack[iReg] = 0.0;
             }
         }
@@ -18407,7 +18408,7 @@ class FPUX86 extends Component {
     opStop(fError)
     {
         if (DEBUG) {
-            var cpu = this.cpu;
+            let cpu = this.cpu;
             if (fError || cpu.isRunning()) {
                 cpu.setIP(cpu.opLIP - cpu.segCS.base);
                 cpu.stopCPU();
@@ -18622,7 +18623,7 @@ class FPUX86 extends Component {
      */
     doAdd(operand1, operand2)
     {
-        var result = null;
+        let result = null;
         if (operand1 != null && operand2 != null) {
             result = operand1 + operand2;
             if (!this.checkResult(result)) result = null;
@@ -18640,7 +18641,7 @@ class FPUX86 extends Component {
      */
     doSubtract(operand1, operand2)
     {
-        var result = null;
+        let result = null;
         if (operand1 != null && operand2 != null) {
             result = operand1 - operand2;
             if (!this.checkResult(result)) result = null;
@@ -18658,7 +18659,7 @@ class FPUX86 extends Component {
      */
     doMultiply(operand1, operand2)
     {
-        var result = null;
+        let result = null;
         if (operand1 != null && operand2 != null) {
             result = operand1 * operand2;
             if (!this.checkResult(result)) result = null;
@@ -18678,7 +18679,7 @@ class FPUX86 extends Component {
      */
     doDivide(dividend, divisor)
     {
-        var quotient = null;
+        let quotient = null;
         if (dividend != null && divisor != null) {
             if (divisor || !this.setException(X86.FPU.STATUS.DE)) {
                 quotient = dividend / divisor;
@@ -18699,9 +18700,9 @@ class FPUX86 extends Component {
     doCompare(operand1, operand2)
     {
         if (operand1 != null && operand2 != null) {
-            var cc = 0;             // default value used when result > 0
+            let cc = 0;             // default value used when result > 0
             if (!isNaN(operand1) && !isNaN(operand2)) {
-                var result = operand1 - operand2;
+                let result = operand1 - operand2;
                 if (result < 0) {
                     cc = X86.FPU.STATUS.C0;
                 } else if (result === 0) {
@@ -18725,7 +18726,7 @@ class FPUX86 extends Component {
      */
     doSquareRoot(operand)
     {
-        var result = null;
+        let result = null;
         /*
          * Happily, -0 is ALSO >= 0.  Also happily, Math.sqrt(-0) returns -0.
          */
@@ -18753,7 +18754,7 @@ class FPUX86 extends Component {
     {
         if (operand == null) return null;
 
-        var rc = (this.regControl & X86.FPU.CONTROL.RC.MASK), result;
+        let rc = (this.regControl & X86.FPU.CONTROL.RC.MASK), result;
 
         if (rc == X86.FPU.CONTROL.RC.NEAR) {
             result = Math.round(operand);
@@ -18805,10 +18806,10 @@ class FPUX86 extends Component {
      */
     getTag(iReg)
     {
-        var bitUsed = (1 << iReg);
-        var tag = X86.FPU.TAGS.EMPTY;
+        let bitUsed = (1 << iReg);
+        let tag = X86.FPU.TAGS.EMPTY;
         if (this.regUsed & bitUsed) {
-            var f = this.regStack[iReg];
+            let f = this.regStack[iReg];
             tag = X86.FPU.TAGS.VALID;
             if (f === 0.0) {
                 tag = X86.FPU.TAGS.ZERO;
@@ -18828,8 +18829,8 @@ class FPUX86 extends Component {
      */
     getTags()
     {
-        var tags = 0;
-        for (var iReg = this.regStack.length - 1; iReg >= 0; iReg--) {
+        let tags = 0;
+        for (let iReg = this.regStack.length - 1; iReg >= 0; iReg--) {
             tags <<= 2;
             tags |= this.getTag(iReg);
         }
@@ -18861,8 +18862,8 @@ class FPUX86 extends Component {
     setTags(n)
     {
         this.regUsed = 0;
-        for (var bitUsed = 0x1; bitUsed <= 0x80; bitUsed <<= 1) {
-            var tag = n & X86.FPU.TAGS.MASK;
+        for (let bitUsed = 0x1; bitUsed <= 0x80; bitUsed <<= 1) {
+            let tag = n & X86.FPU.TAGS.MASK;
             if (tag != X86.FPU.TAGS.EMPTY) {
                 this.regUsed |= bitUsed;
             }
@@ -18921,7 +18922,7 @@ class FPUX86 extends Component {
      */
     getSR(i)
     {
-        var iReg = (this.iST + i) & 7;
+        let iReg = (this.iST + i) & 7;
         if (this.regUsed & (1 << iReg)) {
             this.regTmpSR[0] = this.regStack[iReg];
             return true;
@@ -18941,7 +18942,7 @@ class FPUX86 extends Component {
      */
     getLR(i)
     {
-        var iReg = (this.iST + i) & 7;
+        let iReg = (this.iST + i) & 7;
         if (this.regUsed & (1 << iReg)) {
             this.regTmpLR[0] = this.regStack[iReg];
             return true;
@@ -18961,8 +18962,8 @@ class FPUX86 extends Component {
      */
     getST(i)
     {
-        var v = null;
-        var iReg = (this.iST + i) & 7;
+        let v = null;
+        let iReg = (this.iST + i) & 7;
         if (this.regUsed & (1 << iReg)) {
             v = this.regStack[iReg];
         } else if (!this.setException(X86.FPU.STATUS.IE)) {
@@ -18985,7 +18986,7 @@ class FPUX86 extends Component {
      */
     getSTSign(i)
     {
-        var iInt = ((this.iST + i) & 7) << 1;
+        let iInt = ((this.iST + i) & 7) << 1;
         return this.intStack[iInt + 1] & (0x80000000|0);
     }
 
@@ -19000,7 +19001,7 @@ class FPUX86 extends Component {
     setST(i, v)
     {
         if (v != null && this.checkOperand(v)) {
-            var iReg = (this.iST + i) & 7;
+            let iReg = (this.iST + i) & 7;
             this.regStack[iReg] = v;
             this.regUsed |= (1 << iReg);
             return true;
@@ -19018,10 +19019,10 @@ class FPUX86 extends Component {
      */
     getTR(i, fSafe)
     {
-        var a = null;
-        var iReg = (this.iST + i) & 7;
+        let a = null;
+        let iReg = (this.iST + i) & 7;
         if (fSafe || this.regUsed & (1 << iReg) || !this.setException(X86.FPU.STATUS.IE)) {
-            var iInt = iReg << 1;
+            let iInt = iReg << 1;
             a = this.getTRFromLR(this.intStack[iInt], this.intStack[iInt + 1]);
         }
         return a;
@@ -19080,8 +19081,8 @@ class FPUX86 extends Component {
     getLIFromEA()
     {
 
-        var lo = this.cpu.getLong(this.cpu.regEA);
-        var hi = this.cpu.getLong(this.cpu.regEA + 4);
+        let lo = this.cpu.getLong(this.cpu.regEA);
+        let hi = this.cpu.getLong(this.cpu.regEA + 4);
         return (hi * 0x100000000) + (lo >>> 0);
     }
 
@@ -19202,12 +19203,12 @@ class FPUX86 extends Component {
      */
     getLRFromTR(a)
     {
-        var loTR = a[0], hiTR = a[1];
-        var signLR = (a[2] & 0x8000) >> 4, expLR = a[2] & 0x7fff;
+        let loTR = a[0], hiTR = a[1];
+        let signLR = (a[2] & 0x8000) >> 4, expLR = a[2] & 0x7fff;
         /*
          * We have no choice but to chop off the bottom 11 TR bits in order to fit in an LR....
          */
-        var loLR = (loTR >>> 11) | (hiTR << 21), hiLR = (hiTR >> 11) & 0xfffff;
+        let loLR = (loTR >>> 11) | (hiTR << 21), hiLR = (hiTR >> 11) & 0xfffff;
 
         if (expLR == 0x7fff) {
             /*
@@ -19249,9 +19250,9 @@ class FPUX86 extends Component {
      */
     getTRFromLR(loLR, hiLR)
     {
-        var expTR = (hiLR >> 20) & 0x07ff;
-        var signTR = (hiLR >> 16) & 0x8000;
-        var loTR = loLR << 11, hiTR = 0x80000000 | ((hiLR & 0x000fffff) << 11) | (loLR >>> 21);
+        let expTR = (hiLR >> 20) & 0x07ff;
+        let signTR = (hiLR >> 16) & 0x8000;
+        let loTR = loLR << 11, hiTR = 0x80000000 | ((hiLR & 0x000fffff) << 11) | (loLR >>> 21);
 
         if (expTR == 0x07ff) {
             /*
@@ -19295,10 +19296,10 @@ class FPUX86 extends Component {
      */
     decodeBCD(i, n)
     {
-        var v = 0, m = 1;
+        let v = 0, m = 1;
 
         while (n--) {
-            var d = i & 0xf;
+            let d = i & 0xf;
 
             v += d * m;
             m *= 10;
@@ -19317,7 +19318,7 @@ class FPUX86 extends Component {
      */
     encodeBCD(v, n)
     {
-        var i = 0, s = 0;
+        let i = 0, s = 0;
 
         while (n--) {
             i |= (v % 10) << s;
@@ -19335,8 +19336,8 @@ class FPUX86 extends Component {
      */
     popValue()
     {
-        var v = null;
-        var bitUsed = (1 << this.iST);
+        let v = null;
+        let bitUsed = (1 << this.iST);
         if (!(this.regUsed & bitUsed)) {
             this.regStatus &= ~X86.FPU.STATUS.C1;       // clear C1 to indicate stack underflow (80287XL and up)
             if (this.setException(X86.FPU.STATUS.SF | X86.FPU.STATUS.IE)) return v;
@@ -19356,8 +19357,8 @@ class FPUX86 extends Component {
     pushValue(v)
     {
         if (v == null) return;
-        var iReg = (this.iST - 1) & 7;
-        var bitUsed = (1 << iReg);
+        let iReg = (this.iST - 1) & 7;
+        let bitUsed = (1 << iReg);
         if (this.regUsed & bitUsed) {
             this.regStatus |= X86.FPU.STATUS.C1;        // set C1 to indicate stack overflow (80287XL and up)
             if (this.setException(X86.FPU.STATUS.SF | X86.FPU.STATUS.IE)) return;
@@ -19379,8 +19380,8 @@ class FPUX86 extends Component {
      */
     loadEnv(addr)
     {
-        var w;
-        var cpu = this.cpu;
+        let w;
+        let cpu = this.cpu;
 
         this.setControl(cpu.getWord(addr));
         this.setStatus(cpu.getWord(addr += cpu.sizeData));
@@ -19415,14 +19416,14 @@ class FPUX86 extends Component {
      */
     saveEnv(addr)
     {
-        var cpu = this.cpu;
+        let cpu = this.cpu;
 
         cpu.setWord(addr, this.regControl);
         cpu.setWord(addr += cpu.sizeData, this.getStatus());
         cpu.setWord(addr += cpu.sizeData, this.getTags());
 
         if (!(cpu.regCR0 & X86.CR0.MSW.PE) || (cpu.regPS & X86.PS.VM)) {
-            var off = (this.regCodeSel << 4) + this.regCodeOff;
+            let off = (this.regCodeSel << 4) + this.regCodeOff;
             cpu.setWord(addr += cpu.sizeData, off);
             cpu.setWord(addr += cpu.sizeData, ((off >> 4) & ~0xfff) | this.regOpcode);
             off = (this.regDataSel << 4) + this.regDataOff;
@@ -19450,15 +19451,15 @@ class FPUX86 extends Component {
      */
     opFPU(bOpcode, bModRM, dst, src)
     {
-        var mod = (bModRM >> 6) & 3;
-        var reg = (bModRM >> 3) & 7;
+        let mod = (bModRM >> 6) & 3;
+        let reg = (bModRM >> 3) & 7;
         this.iStack = (bModRM & 7);
 
         /*
          * Combine mod and reg into one decodable value: put mod in the high nibble
          * and reg in the low nibble, after first collapsing all mod values < 3 to zero.
          */
-        var modReg = (mod < 3? 0 : 0x30) + reg;
+        let modReg = (mod < 3? 0 : 0x30) + reg;
 
         /*
          * All values >= 0x34 imply mod == 3 and reg >= 4, so now we shift reg into the high
@@ -19468,15 +19469,15 @@ class FPUX86 extends Component {
             modReg = (reg << 4) | this.iStack;
         }
 
-        var fnOp = FPUX86.aaOps[bOpcode][modReg];
+        let fnOp = FPUX86.aaOps[bOpcode][modReg];
         if (fnOp) {
             /*
              * A handful of FPU instructions must preserve (at least some of) the "exception" registers,
              * so if the current function is NOT one of those, then update all the "exception" registers.
              */
             if (FPUX86.afnPreserveExceptions.indexOf(fnOp) < 0) {
-                var cpu = this.cpu;
-                var off = cpu.opLIP;
+                let cpu = this.cpu;
+                let off = cpu.opLIP;
                 /*
                  * WARNING: opLIP points to any prefixes preceding the ESC instruction, but the 8087 always
                  * points to the ESC instruction.  Technically, that's a bug, but it's also a reality, so we
@@ -19553,17 +19554,17 @@ class FPUX86 extends Component {
      */
     readFPUStack(i)
     {
-        var a = null;
+        let a = null;
         if (i < this.regStack.length) {
             a = [];
-            var iReg = (this.iST + i) & 7;
+            let iReg = (this.iST + i) & 7;
             a[0] = iReg;
             a[1] = this.getTag(iReg);
             a[2] = this.regStack[iReg];
-            var iInt = iReg << 1;
+            let iInt = iReg << 1;
             a[3] = this.intStack[iInt];
             a[4] = this.intStack[iInt + 1];
-            var aTR = this.getTRFromLR(a[3], a[4]);
+            let aTR = this.getTRFromLR(a[3], a[4]);
             a[5] = aTR[0]; a[6] = aTR[1]; a[7] = aTR[2];
         }
         return a;
@@ -19606,11 +19607,11 @@ class FPUX86 extends Component {
      */
     static init()
     {
-        var aeFPUs = Component.getElementsByClass(document, PCX86.APPCLASS, "fpu");
-        for (var iFPU = 0; iFPU < aeFPUs.length; iFPU++) {
-            var eFPU = aeFPUs[iFPU];
-            var parmsFPU = Component.getComponentParms(eFPU);
-            var fpu = new FPUX86(parmsFPU);
+        let aeFPUs = Component.getElementsByClass(document, PCX86.APPCLASS, "fpu");
+        for (let iFPU = 0; iFPU < aeFPUs.length; iFPU++) {
+            let eFPU = aeFPUs[iFPU];
+            let parmsFPU = Component.getComponentParms(eFPU);
+            let fpu = new FPUX86(parmsFPU);
             Component.bindComponentControls(fpu, eFPU, PCX86.APPCLASS);
         }
     }
@@ -19718,12 +19719,12 @@ FPUX86.FADDPsti = function()
  */
 FPUX86.FBLDpd = function()
 {
-    var a = this.getTRFromEA();
+    let a = this.getTRFromEA();
     /*
      * a[0] contains the 8 least-significant BCD digits, a[1] contains the next 8, and a[2] contains
      * the next 2 (bit 15 of a[2] is the sign bit, and bits 8-14 of a[2] are unused).
      */
-    var v = this.decodeBCD(a[0], 8) + this.decodeBCD(a[1], 8) * 100000000 + this.decodeBCD(a[2], 2) * 10000000000000000;
+    let v = this.decodeBCD(a[0], 8) + this.decodeBCD(a[1], 8) * 100000000 + this.decodeBCD(a[2], 2) * 10000000000000000;
     if (a[2] & 0x8000) v = -v;
     this.pushValue(v);
 };
@@ -19738,7 +19739,7 @@ FPUX86.FBSTPpd = function()
     /*
      * TODO: Verify the operation of FBSTP (eg, does it signal an exception if abs(value) >= 1000000000000000000?)
      */
-    var v = this.roundValue(this.popValue());
+    let v = this.roundValue(this.popValue());
     if (v != null) {
         /*
          * intTmpTR[0] will contain the 8 least-significant BCD digits, intTmpTR[1] will contain the next 8,
@@ -20754,10 +20755,10 @@ FPUX86.FPREM = function()
  */
 FPUX86.FRSTOR = function()
 {
-    var cpu = this.cpu;
-    var addr = this.loadEnv(cpu.regEA);
-    var a = this.intTmpTR;
-    for (var i = 0; i < this.regStack.length; i++) {
+    let cpu = this.cpu;
+    let addr = this.loadEnv(cpu.regEA);
+    let a = this.intTmpTR;
+    for (let i = 0; i < this.regStack.length; i++) {
         a[0] = cpu.getLong(addr);
         a[1] = cpu.getLong(addr += 4);
         a[2] = cpu.getShort(addr += 4);
@@ -20783,10 +20784,10 @@ FPUX86.FRNDINT = function()
  */
 FPUX86.FSAVE = function()
 {
-    var cpu = this.cpu;
-    var addr = this.saveEnv(cpu.regEA);
-    for (var i = 0; i < this.regStack.length; i++) {
-        var a = this.getTR(i, true);
+    let cpu = this.cpu;
+    let addr = this.saveEnv(cpu.regEA);
+    for (let i = 0; i < this.regStack.length; i++) {
+        let a = this.getTR(i, true);
         cpu.setLong(addr, a[0]);
         cpu.setLong(addr += 4, a[1]);
         cpu.setShort(addr += 4, a[2]);
@@ -20815,8 +20816,8 @@ FPUX86.FSAVE = function()
  */
 FPUX86.FSCALE = function()
 {
-    var x = this.getST(0);
-    var y = this.getST(1);
+    let x = this.getST(0);
+    let y = this.getST(1);
     if (x != null && y != null) this.setST(0, x * Math.pow(2, this.truncateValue(y)));
 };
 
@@ -21131,7 +21132,7 @@ FPUX86.FXAM = function()
         this.regStatus |= X86.FPU.STATUS.C0 | X86.FPU.STATUS.C3;
     }
     else {
-        var v = this.getST(0);
+        let v = this.getST(0);
         if (isNaN(v)) {
             this.regStatus |= X86.FPU.STATUS.C0;
         }
@@ -21154,7 +21155,7 @@ FPUX86.FXAM = function()
  */
 FPUX86.FXCHsti = function()
 {
-    var tmp = this.getST(0);
+    let tmp = this.getST(0);
     this.setST(0, this.getST(this.iStack));
     this.setST(this.iStack, tmp);
 };
@@ -21209,7 +21210,7 @@ FPUX86.FXCH8087 = function()
  */
 FPUX86.FXTRACT = function()
 {
-    var v = this.getST(0);
+    let v = this.getST(0);
     if (v != null) {
         this.regTmpLR[0] = v;
         this.setST(0, ((this.intTmpLR[1] >> 20) & 0x7ff) - 0x3ff);
@@ -21606,9 +21607,9 @@ class SegX86 {
      */
     loadProt(sel, fProbe)
     {
-        var addrDT;
-        var addrDTLimit;
-        var cpu = this.cpu;
+        let addrDT;
+        let addrDTLimit;
+        let cpu = this.cpu;
 
         /*
          * Some instructions (eg, CALLF) load a 32-bit value for the selector, while others (eg, LDS) do not;
@@ -21631,7 +21632,7 @@ class SegX86 {
          * Fortunately, the Debugger now has its own interface, probeDesc(), so that should no longer be a concern.
          */
         if (addrDT) {
-            var addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
+            let addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
             if ((addrDTLimit - addrDesc)|0 >= 7) {
                 /*
                  * TODO: This is the first of many steps toward accurately counting cycles in protected mode;
@@ -21658,7 +21659,7 @@ class SegX86 {
      */
     loadIDTReal(nIDT)
     {
-        var cpu = this.cpu;
+        let cpu = this.cpu;
         /*
          * NOTE: The COMPAQ DeskPro 386 ROM loads the IDTR for the real-mode IDT with a limit of 0xffff instead
          * of the normal 0x3ff.  A limit higher than 0x3ff is OK, since all real-mode IDT entries are 4 bytes, and
@@ -21672,8 +21673,8 @@ class SegX86 {
          *
          * TODO: Verify that 80286 real-mode actually enforces the above.  See http://www.pcjs.org/pubs/pc/reference/intel/80286/progref/#page-260
          */
-        var addrIDT = cpu.addrIDT + (nIDT << 2);
-        var off = cpu.getShort(addrIDT);
+        let addrIDT = cpu.addrIDT + (nIDT << 2);
+        let off = cpu.getShort(addrIDT);
         cpu.regPS &= ~(X86.PS.TF | X86.PS.IF);
         return (this.load(cpu.getShort(addrIDT + 2)) + off)|0;
     }
@@ -21687,14 +21688,14 @@ class SegX86 {
      */
     loadIDTProt(nIDT)
     {
-        var cpu = this.cpu;
+        let cpu = this.cpu;
 
 
         nIDT <<= 3;
-        var addrDesc = (cpu.addrIDT + nIDT)|0;
+        let addrDesc = (cpu.addrIDT + nIDT)|0;
         if (((cpu.addrIDTLimit - addrDesc)|0) >= 7) {
             this.fCall = true;
-            var addr = this.loadDesc8(addrDesc, nIDT);
+            let addr = this.loadDesc8(addrDesc, nIDT);
             if (addr !== X86.ADDR_INVALID) addr += this.offIP;
             return addr;
         }
@@ -21920,7 +21921,7 @@ class SegX86 {
         this.type = (acc & X86.DESC.ACC.TYPE.MASK);
         this.ext = (acc >> 16) & (X86.DESC.EXT.BIG | X86.DESC.EXT.LIMITPAGES);
 
-        var addrDT = (sel & X86.SEL.LDT)? this.cpu.segLDT.base : this.cpu.addrGDT;
+        let addrDT = (sel & X86.SEL.LDT)? this.cpu.segLDT.base : this.cpu.addrGDT;
         this.addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
 
         /*
@@ -21949,10 +21950,10 @@ class SegX86 {
      */
     loadDesc6(addrDesc, sel)
     {
-        var cpu = this.cpu;
-        var acc = cpu.getShort(addrDesc + 2);
-        var base = cpu.getShort(addrDesc) | ((acc & 0xff) << 16);
-        var limit = cpu.getShort(addrDesc + 4);
+        let cpu = this.cpu;
+        let acc = cpu.getShort(addrDesc + 2);
+        let base = cpu.getShort(addrDesc) | ((acc & 0xff) << 16);
+        let limit = cpu.getShort(addrDesc + 4);
 
         this.sel = sel;
         this.base = base;
@@ -22007,7 +22008,7 @@ class SegX86 {
      */
     loadDesc8(addrDesc, sel, fProbe)
     {
-        var cpu = this.cpu;
+        let cpu = this.cpu;
 
         /*
          * If the previous load was a successful "probed" load of the same segment, then we simply load
@@ -22035,15 +22036,15 @@ class SegX86 {
         /*
          * Load the descriptor from memory.
          */
-        var limit = cpu.getShort(addrDesc + X86.DESC.LIMIT.OFFSET);
-        var acc = cpu.getShort(addrDesc + X86.DESC.ACC.OFFSET);
-        var type = (acc & X86.DESC.ACC.TYPE.MASK);
-        var base = cpu.getShort(addrDesc + X86.DESC.BASE.OFFSET) | ((acc & X86.DESC.ACC.BASE1623) << 16);
-        var ext = cpu.getShort(addrDesc + X86.DESC.EXT.OFFSET);
-        var selMasked = sel & X86.SEL.MASK;
+        let limit = cpu.getShort(addrDesc + X86.DESC.LIMIT.OFFSET), limitOrig;
+        let acc = cpu.getShort(addrDesc + X86.DESC.ACC.OFFSET);
+        let type = (acc & X86.DESC.ACC.TYPE.MASK);
+        let base = cpu.getShort(addrDesc + X86.DESC.BASE.OFFSET) | ((acc & X86.DESC.ACC.BASE1623) << 16);
+        let ext = cpu.getShort(addrDesc + X86.DESC.EXT.OFFSET);
+        let selMasked = sel & X86.SEL.MASK;
 
         if (I386 && cpu.model >= X86.MODEL_80386) {
-            var limitOrig = limit;
+            limitOrig = limit;
             base |= (ext & X86.DESC.EXT.BASE2431) << 16;
             limit |= (ext & X86.DESC.EXT.LIMIT1619) << 16;
             if (ext & X86.DESC.EXT.LIMITPAGES) limit = (limit << 12) | 0xfff;
@@ -22057,7 +22058,7 @@ class SegX86 {
              * NOTE: Since we are SegX86.ID.CODE, we can use this.cpl instead of the more convoluted
              * this.cpu.segCS.cpl.
              */
-            var fCall = this.fCall;
+            let fCall = this.fCall;
             this.fStackSwitch = false;
 
             /*
@@ -22080,19 +22081,19 @@ class SegX86 {
              * machine that we could address -- and even then, it would not be a mode-independent address.
              */
             if (fCall && sel == SegX86.CALLBREAK_SEL && this.aCallBreaks.length) {
-                var iBreak = this.offIP - 1;
-                var fnCallBreak = this.aCallBreaks[iBreak];
+                let iBreak = this.offIP - 1;
+                let fnCallBreak = this.aCallBreaks[iBreak];
 
                 if (fnCallBreak && !fnCallBreak()) {
                     return X86.ADDR_INVALID;
                 }
             }
 
-            var rpl = sel & X86.SEL.RPL;
-            var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
+            let rpl = sel & X86.SEL.RPL;
+            let dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
 
-            var sizeGate = -1, selCode, cplOld, cplNew, fIDT;
-            var addrTSS, offSP, lenSP, regSPPrev, regSSPrev, regPSClear, regSP;
+            let sizeGate = -1, selCode, cplOld, cplNew, fIDT;
+            let addrTSS, offSP, lenSP, regSPPrev, regSSPrev, regPSClear, regSP;
 
             if (!selMasked) {
                 /*
@@ -22241,7 +22242,7 @@ class SegX86 {
                         limit = limitOrig | (ext << 16);
                     }
 
-                    var selStack = 0, offStack = 0;
+                    let selStack = 0, offStack = 0;
                     cplNew = (selCode & X86.SEL.RPL);
 
                     /*
@@ -22301,7 +22302,7 @@ class SegX86 {
                     /*
                      * Now that we're past all the probes, it should be safe to clear all flags that need clearing.
                      */
-                    var regPS = cpu.regPS;
+                    let regPS = cpu.regPS;
                     cpu.regPS &= ~regPSClear;
                     if (regPS & X86.PS.VM) {
                         cpu.setProtMode(true, false);
@@ -22329,7 +22330,7 @@ class SegX86 {
                         }
 
                         regSP = cpu.getSP();
-                        var i = 0, nWords = (acc & 0x1f);
+                        let i = 0, nWords = (acc & 0x1f);
                         while (nWords--) {
                             this.awParms[i++] = cpu.getSOWord(cpu.segSS, regSP);
                             regSP += 2;
@@ -22451,7 +22452,7 @@ class SegX86 {
             break;
 
         case SegX86.ID.TSS:
-            var typeTSS = type & ~X86.DESC.ACC.TYPE.TSS_BUSY;
+            let typeTSS = type & ~X86.DESC.ACC.TYPE.TSS_BUSY;
             if (!selMasked || typeTSS != X86.DESC.ACC.TYPE.TSS286 && typeTSS != X86.DESC.ACC.TYPE.TSS386) {
                 X86.helpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
                 return X86.ADDR_INVALID;
@@ -22555,12 +22556,12 @@ class SegX86 {
      */
     switchTSS(selNew, fNest)
     {
-        var cpu = this.cpu;
+        let cpu = this.cpu;
 
 
-        var cplOld = this.cpl;
-        var selOld = cpu.segTSS.sel;
-        var addrOld = cpu.segTSS.base;
+        let cplOld = this.cpl;
+        let selOld = cpu.segTSS.sel;
+        let addrOld = cpu.segTSS.base;
 
         if (!fNest) {
             /*
@@ -22580,7 +22581,7 @@ class SegX86 {
             return false;
         }
 
-        var addrNew = cpu.segTSS.base;
+        let addrNew = cpu.segTSS.base;
         if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.TSS)) {
             this.dbg.message((fNest? "Task switch" : "Task return") + ": TR " + Str.toHexWord(selOld) + " (%" + Str.toHex(addrOld, 6) + "), new TR " + Str.toHexWord(selNew) + " (%" + Str.toHex(addrNew, 6) + ")");
         }
@@ -22602,7 +22603,7 @@ class SegX86 {
         /*
          * Update the old TSS
          */
-        var offSS, offSP;
+        let offSS, offSP;
         if (cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS286 || cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS286_BUSY) {
             cpu.setShort(addrOld + X86.TSS286.TASK_IP, cpu.getIP());
             cpu.setShort(addrOld + X86.TSS286.TASK_PS, cpu.getPS());
@@ -22904,8 +22905,8 @@ class SegX86 {
                      * for other purposes, on the assumption that that descriptor is completely unused.
                      */
                     if ((this.sel & ~X86.SEL.RPL) && this.addrDesc !== X86.ADDR_INVALID) {
-                        var addrType = this.addrDesc + X86.DESC.ACC.TYPE.OFFSET;
-                        var bType = this.cpu.getByte(addrType);
+                        let addrType = this.addrDesc + X86.DESC.ACC.TYPE.OFFSET;
+                        let bType = this.cpu.getByte(addrType);
                         /*
                          * This code used to ALWAYS call setByte(), but that's a waste of time if ACCESSED is already
                          * set.  TODO: It would also be nice if we could simply use the cached type value, and eliminate
@@ -22970,8 +22971,8 @@ class SegX86 {
     {
         if (DEBUG) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.SEG)) {
-                var ch = (this.sName.length < 3? " " : "");
-                var sDPL = " dpl=" + this.dpl;
+                let ch = (this.sName.length < 3? " " : "");
+                let sDPL = " dpl=" + this.dpl;
                 if (this.id == SegX86.ID.CODE) sDPL += " cpl=" + this.cpl;
                 this.dbg.message("loadSeg(" + this.sName + "):" + ch + "sel=" + Str.toHexWord(sel) + " base=" + Str.toHex(base) + " limit=" + Str.toHexWord(limit) + " type=" + Str.toHexWord(type) + sDPL, true);
             }
@@ -23002,9 +23003,9 @@ class SegX86 {
     probeDesc(sel)
     {
         if (DEBUGGER) {
-            var addrDT;
-            var addrDTLimit;
-            var cpu = this.cpu;
+            let addrDT;
+            let addrDTLimit;
+            let cpu = this.cpu;
 
             sel &= 0xffff;
 
@@ -23016,18 +23017,18 @@ class SegX86 {
                 addrDTLimit = (addrDT + cpu.segLDT.limit)|0;
             }
 
-            var addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
+            let addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
 
             if ((addrDTLimit - addrDesc)|0 >= 7) {
 
                 /*
                  * Load the descriptor from memory using probeAddr().
                  */
-                var limit = cpu.probeAddr(addrDesc + X86.DESC.LIMIT.OFFSET, 2);
-                var acc = cpu.probeAddr(addrDesc + X86.DESC.ACC.OFFSET, 2);
-                var type = (acc & X86.DESC.ACC.TYPE.MASK);
-                var base = cpu.probeAddr(addrDesc + X86.DESC.BASE.OFFSET, 2) | ((acc & X86.DESC.ACC.BASE1623) << 16);
-                var ext = cpu.probeAddr(addrDesc + X86.DESC.EXT.OFFSET, 2);
+                let limit = cpu.probeAddr(addrDesc + X86.DESC.LIMIT.OFFSET, 2);
+                let acc = cpu.probeAddr(addrDesc + X86.DESC.ACC.OFFSET, 2);
+                let type = (acc & X86.DESC.ACC.TYPE.MASK);
+                let base = cpu.probeAddr(addrDesc + X86.DESC.BASE.OFFSET, 2) | ((acc & X86.DESC.ACC.BASE1623) << 16);
+                let ext = cpu.probeAddr(addrDesc + X86.DESC.EXT.OFFSET, 2);
 
                 if (I386 && cpu.model >= X86.MODEL_80386) {
                     base |= (ext & X86.DESC.EXT.BASE2431) << 16;
@@ -23060,9 +23061,9 @@ class SegX86 {
      *
      loadAcc(sel, fGDT)
      {
-         var addrDT;
-         var addrDTLimit;
-         var cpu = this.cpu;
+         let addrDT;
+         let addrDTLimit;
+         let cpu = this.cpu;
 
          if (!(sel & X86.SEL.LDT)) {
              addrDT = cpu.addrGDT;
@@ -23072,7 +23073,7 @@ class SegX86 {
              addrDTLimit = (addrDT + cpu.segLDT.limit)|0;
          }
          if (addrDT !== undefined) {
-             var addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
+             let addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
              if (((addrDTLimit - addrDesc)|0) >= 7) {
                  return cpu.getShort(addrDesc + X86.DESC.ACC.OFFSET);
              }
@@ -23113,7 +23114,7 @@ SegX86.CALLBREAK_SEL = 0x0001;
  */
 X86.fnADCb = function(dst, src)
 {
-    var b = (dst + src + this.getCarry())|0;
+    let b = (dst + src + this.getCarry())|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return b & 0xff;
@@ -23129,7 +23130,7 @@ X86.fnADCb = function(dst, src)
  */
 X86.fnADCw = function(dst, src)
 {
-    var w = (dst + src + this.getCarry())|0;
+    let w = (dst + src + this.getCarry())|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return w & this.maskData;
@@ -23145,7 +23146,7 @@ X86.fnADCw = function(dst, src)
  */
 X86.fnADDb = function(dst, src)
 {
-    var b = (dst + src)|0;
+    let b = (dst + src)|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return b & 0xff;
@@ -23161,7 +23162,7 @@ X86.fnADDb = function(dst, src)
  */
 X86.fnADDw = function(dst, src)
 {
-    var w = (dst + src)|0;
+    let w = (dst + src)|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return w & this.maskData;
@@ -23177,7 +23178,7 @@ X86.fnADDw = function(dst, src)
  */
 X86.fnANDb = function(dst, src)
 {
-    var b = dst & src;
+    let b = dst & src;
     this.setLogicResult(b, X86.RESULT.BYTE);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return b;
@@ -23237,9 +23238,9 @@ X86.fnBOUND = function(dst, src)
     /*
      * Note that BOUND performs signed comparisons, so we must transform all arguments into signed values.
      */
-    var wIndex = dst;
-    var wLower = this.getWord(this.regEA);
-    var wUpper = this.getWord(this.regEA + this.sizeData);
+    let wIndex = dst;
+    let wLower = this.getWord(this.regEA);
+    let wUpper = this.getWord(this.regEA + this.sizeData);
     if (this.sizeData == 2) {
         wIndex = (dst << 16) >> 16;
         wLower = (wLower << 16) >> 16;
@@ -23276,12 +23277,12 @@ X86.fnBOUND = function(dst, src)
  */
 X86.fnBSF = function(dst, src)
 {
-    var n = 0;
+    let n = 0;
     if (!src) {
         this.setZF();
     } else {
         this.clearZF();
-        var bit = 0x1;
+        let bit = 0x1;
         while (bit & this.maskData) {
             if (src & bit) {
                 dst = n;
@@ -23312,12 +23313,12 @@ X86.fnBSF = function(dst, src)
  */
 X86.fnBSR = function(dst, src)
 {
-    var n = 0;
+    let n = 0;
     if (!src) {
         this.setZF();
     } else {
         this.clearZF();
-        var i = (this.sizeData == 2? 15 : 31), bit = 1 << i;
+        let i = (this.sizeData == 2? 15 : 31), bit = 1 << i;
         while (bit) {
             if (src & bit) {
                 dst = i;
@@ -23345,7 +23346,7 @@ X86.fnBSR = function(dst, src)
  */
 X86.fnBT = function(dst, src)
 {
-    var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
+    let bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & bit) this.setCF(); else this.clearCF();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 6);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -23365,7 +23366,7 @@ X86.fnBT = function(dst, src)
  */
 X86.fnBTC = function(dst, src)
 {
-    var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
+    let bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & bit) this.setCF(); else this.clearCF();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 6 : 8);
     return dst ^ bit;
@@ -23384,7 +23385,7 @@ X86.fnBTC = function(dst, src)
  */
 X86.fnBTR = function(dst, src)
 {
-    var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
+    let bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & bit) this.setCF(); else this.clearCF();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 6 : 8);
     return dst & ~bit;
@@ -23403,7 +23404,7 @@ X86.fnBTR = function(dst, src)
  */
 X86.fnBTS = function(dst, src)
 {
-    var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
+    let bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & bit) this.setCF(); else this.clearCF();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 6 : 8);
     return dst | bit;
@@ -23432,14 +23433,14 @@ X86.fnBTMem = function(dst, src)
      * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
      * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
      */
-    var max = this.sizeData << 3;
+    let max = this.sizeData << 3;
     if (src >= max || src < -max) {
         /*
          * Now we need to divide src by 16 or 32, according to the OPERAND size, which means shifting it right
          * by either 4 or 5 bits.  That gives us a short or long INDEX, which we then multiply by the OPERAND size
          * to obtain to the corresponding short or long OFFSET that we must add to the original EA offset.
          */
-        var i = src >> (this.sizeData == 2? 4 : 5);
+        let i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
@@ -23473,14 +23474,14 @@ X86.fnBTCMem = function(dst, src)
      * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
      * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
      */
-    var max = this.sizeData << 3;
+    let max = this.sizeData << 3;
     if (src >= max || src < -max) {
         /*
          * Now we need to divide src by 16 or 32, according to the OPERAND size, which means shifting it right
          * by either 4 or 5 bits.  That gives us a short or long INDEX, which we then multiply by the OPERAND size
          * to obtain to the corresponding short or long OFFSET that we must add to the original EA offset.
          */
-        var i = src >> (this.sizeData == 2? 4 : 5);
+        let i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
@@ -23513,14 +23514,14 @@ X86.fnBTRMem = function(dst, src)
      * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
      * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
      */
-    var max = this.sizeData << 3;
+    let max = this.sizeData << 3;
     if (src >= max || src < -max) {
         /*
          * Now we need to divide src by 16 or 32, according to the OPERAND size, which means shifting it right
          * by either 4 or 5 bits.  That gives us a short or long INDEX, which we then multiply by the OPERAND size
          * to obtain to the corresponding short or long OFFSET that we must add to the original EA offset.
          */
-        var i = src >> (this.sizeData == 2? 4 : 5);
+        let i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
@@ -23553,14 +23554,14 @@ X86.fnBTSMem = function(dst, src)
      * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
      * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
      */
-    var max = this.sizeData << 3;
+    let max = this.sizeData << 3;
     if (src >= max || src < -max) {
         /*
          * Now we need to divide src by 16 or 32, according to the OPERAND size, which means shifting it right
          * by either 4 or 5 bits.  That gives us a short or long INDEX, which we then multiply by the OPERAND size
          * to obtain to the corresponding short or long OFFSET that we must add to the original EA offset.
          */
-        var i = src >> (this.sizeData == 2? 4 : 5);
+        let i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
@@ -23628,7 +23629,7 @@ X86.fnCALLFdw = function(dst, src)
  */
 X86.fnCMPb = function(dst, src)
 {
-    var b = (dst - src)|0;
+    let b = (dst - src)|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesCompareRM) : this.cycleCounts.nOpCyclesArithRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -23645,7 +23646,7 @@ X86.fnCMPb = function(dst, src)
  */
 X86.fnCMPw = function(dst, src)
 {
-    var w = (dst - src)|0;
+    let w = (dst - src)|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesCompareRM) : this.cycleCounts.nOpCyclesArithRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -23662,7 +23663,7 @@ X86.fnCMPw = function(dst, src)
  */
 X86.fnDECb = function(dst, src)
 {
-    var b = (dst - 1)|0;
+    let b = (dst - 1)|0;
     this.setArithResult(dst, 1, b, X86.RESULT.BYTE | X86.RESULT.NOTCF, true);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIncR : this.cycleCounts.nOpCyclesIncM);
     return b & 0xff;
@@ -23678,7 +23679,7 @@ X86.fnDECb = function(dst, src)
  */
 X86.fnDECw = function(dst, src)
 {
-    var w = (dst - 1)|0;
+    let w = (dst - 1)|0;
     this.setArithResult(dst, 1, w, this.typeData | X86.RESULT.NOTCF, true);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIncR : this.cycleCounts.nOpCyclesIncM);
     return w & this.maskData;
@@ -23705,7 +23706,7 @@ X86.fnDIVb = function(dst, src)
     /*
      * Detect too-small divisor (quotient overflow)
      */
-    var result = ((src = this.regEAX & 0xffff) / dst);
+    let result = ((src = this.regEAX & 0xffff) / dst);
     if (result > 0xff) {
         X86.helpDIVOverflow.call(this);
         return dst;
@@ -23745,7 +23746,7 @@ X86.fnDIVw = function(dst, src)
          * to force JavaScript to create a floating-point value that won't suffer from 32-bit-math side-effects.
          */
         src = (this.regEDX & 0xffff) * 0x10000 + (this.regEAX & 0xffff);
-        var result = (src / dst);
+        let result = (src / dst);
         if (result >= 0x10000) {
             X86.helpDIVOverflow.call(this);
             return dst;
@@ -23861,8 +23862,8 @@ X86.fnIDIVb = function(dst, src)
     /*
      * Detect too-small divisor (quotient overflow)
      */
-    var div = ((dst << 24) >> 24);
-    var result = ((src = (this.regEAX << 16) >> 16) / div)|0;
+    let div = ((dst << 24) >> 24);
+    let result = ((src = (this.regEAX << 16) >> 16) / div)|0;
 
     /*
      * Note the following difference, from "AP-186: Introduction to the 80186 Microprocessor, March 1983":
@@ -23908,8 +23909,8 @@ X86.fnIDIVw = function(dst, src)
         /*
          * Detect too-small divisor (quotient overflow)
          */
-        var div = ((dst << 16) >> 16);
-        var result = ((src = (this.regEDX << 16) | (this.regEAX & 0xffff)) / div)|0;
+        let div = ((dst << 16) >> 16);
+        let result = ((src = (this.regEDX << 16) | (this.regEAX & 0xffff)) / div)|0;
 
         /*
          * Note the following difference, from "AP-186: Introduction to the 80186 Microprocessor, March 1983":
@@ -23967,7 +23968,7 @@ X86.fnIMUL8 = function(dst, src)
      * NOTE: getIPDisp() already sign-extends the dst parameter, so fnIMULrw() needlessly sign-extends it again;
      * a small price to pay for a common function.
      */
-    var result = X86.fnIMULrw.call(this, this.getIPDisp(), src);
+    let result = X86.fnIMULrw.call(this, this.getIPDisp(), src);
 
     /*
      * NOTE: The above function already accounted for the 80386 cycle count, so we are simply accounting for the
@@ -23996,7 +23997,7 @@ X86.fnIMUL8 = function(dst, src)
  */
 X86.fnIMULn = function(dst, src)
 {
-    var result;
+    let result;
     dst = this.getIPWord();
 
     if (this.sizeData == 2) {
@@ -24024,7 +24025,7 @@ X86.fnIMULn = function(dst, src)
  */
 X86.fnIMUL32 = function(dst, src)
 {
-    var fNeg = false;
+    let fNeg = false;
     if (src < 0) {
         src = -src|0;
         fNeg = !fNeg;
@@ -24060,7 +24061,7 @@ X86.fnIMUL32 = function(dst, src)
  */
 X86.fnIMULb = function(dst, src)
 {
-    var result = (((this.regEAX << 24) >> 24) * ((dst << 24) >> 24))|0;
+    let result = (((this.regEAX << 24) >> 24) * ((dst << 24) >> 24))|0;
     this.regMDLo = result & 0xffff;
     if (result > 127 || result < -128) {
         this.setCF(); this.setOF();
@@ -24098,10 +24099,10 @@ X86.fnIMULb = function(dst, src)
  */
 X86.fnIMULw = function(dst, src)
 {
-    var fOverflow;
+    let fOverflow;
     if (this.sizeData == 2) {
         src = this.regEAX & 0xffff;
-        var result = (((src << 16) >> 16) * ((dst << 16) >> 16))|0;
+        let result = (((src << 16) >> 16) * ((dst << 16) >> 16))|0;
         this.regMDLo = result & 0xffff;
         this.regMDHi = (result >> 16) & 0xffff;
         fOverflow = (result > 32767 || result < -32768);
@@ -24140,7 +24141,7 @@ X86.fnIMULrw = function(dst, src)
      * Unlike fnIMULrd() below, we can use normal JavaScript multiplication, because there's no danger of
      * overflowing the floating-point result and losing accuracy in the bottom 16 bits.
      */
-    var result = (((dst << 16) >> 16) * ((src << 16) >> 16))|0;
+    let result = (((dst << 16) >> 16) * ((src << 16) >> 16))|0;
     if (result > 32767 || result < -32768) {
         this.setCF(); this.setOF();
     } else {
@@ -24173,7 +24174,7 @@ X86.fnIMULrd = function(dst, src)
      * accuracy in the bottom 32 bits, which would defeat what we're trying to achieve here.  So we must use the
      * slower fnIMUL32() function.
      *
-     *      var result = dst * src;
+     *      let result = dst * src;
      *      if (result > 2147483647 || result < -2147483648) {
      *          this.setCF(); this.setOF();
      *      } else {
@@ -24182,7 +24183,7 @@ X86.fnIMULrd = function(dst, src)
      *      result |= 0;
      */
     X86.fnIMUL32.call(this, dst, src);
-    var fOverflow = (this.regMDHi != (this.regMDLo >> 31));
+    let fOverflow = (this.regMDHi != (this.regMDLo >> 31));
     if (fOverflow) {
         this.setCF(); this.setOF();
     } else {
@@ -24202,7 +24203,7 @@ X86.fnIMULrd = function(dst, src)
  */
 X86.fnINCb = function(dst, src)
 {
-    var b = (dst + 1)|0;
+    let b = (dst + 1)|0;
     this.setArithResult(dst, 1, b, X86.RESULT.BYTE | X86.RESULT.NOTCF);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIncR : this.cycleCounts.nOpCyclesIncM);
     return b & 0xff;
@@ -24218,7 +24219,7 @@ X86.fnINCb = function(dst, src)
  */
 X86.fnINCw = function(dst, src)
 {
-    var w = (dst + 1)|0;
+    let w = (dst + 1)|0;
     this.setArithResult(dst, 1, w, this.typeData | X86.RESULT.NOTCF);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIncR : this.cycleCounts.nOpCyclesIncM);
     return w & this.maskData;
@@ -24551,7 +24552,7 @@ X86.fnLSL = function(dst, src)
      * are there any other instructions that were, um, less explicit but also require a non-null selector?
      */
     if ((src & X86.SEL.MASK) && this.segVER.load(src) !== X86.ADDR_INVALID) {
-        var fConforming = ((this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING);
+        let fConforming = ((this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING);
         if ((fConforming || this.segVER.dpl >= this.nCPL) && this.segVER.dpl >= (src & X86.SEL.RPL)) {
             this.setZF();
             return this.segVER.limit;
@@ -24639,7 +24640,7 @@ X86.fnMOVXb = function(dst, src)
      *      110:    DH      ->      110:    SI
      *      111:    BH      ->      111:    DI
      */
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x4:
@@ -24700,7 +24701,7 @@ X86.fnMOVn = function(dst, src)
  */
 X86.fnMOVsrw = function(dst, src)
 {
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -24754,7 +24755,7 @@ X86.fnMOVsrw = function(dst, src)
  */
 X86.fnMOVwsr = function(dst, src)
 {
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch (reg) {
     case 0x0:
@@ -24849,14 +24850,14 @@ X86.fnMUL32 = function(dst, src)
         this.regMDHi = 0;
     }
     else {
-        var srcLo = src & 0xffff;
-        var srcHi = src >>> 16;
-        var dstLo = dst & 0xffff;
-        var dstHi = dst >>> 16;
+        let srcLo = src & 0xffff;
+        let srcHi = src >>> 16;
+        let dstLo = dst & 0xffff;
+        let dstHi = dst >>> 16;
 
-        var mul00 = srcLo * dstLo;
-        var mul16 = ((mul00 >>> 16) + (srcHi * dstLo));
-        var mul32 = mul16 >>> 16;
+        let mul00 = srcLo * dstLo;
+        let mul16 = ((mul00 >>> 16) + (srcHi * dstLo));
+        let mul32 = mul16 >>> 16;
         mul16 = ((mul16 & 0xffff) + (srcLo * dstHi));
         mul32 += ((mul16 >>> 16) + (srcHi * dstHi));
 
@@ -24879,7 +24880,7 @@ X86.fnMULw = function(dst, src)
 {
     if (this.sizeData == 2) {
         src = this.regEAX & 0xffff;
-        var result = (src * dst)|0;
+        let result = (src * dst)|0;
         this.regMDLo = result & 0xffff;
         this.regMDHi = (result >> 16) & 0xffff;
     } else {
@@ -24922,7 +24923,7 @@ X86.fnMULw = function(dst, src)
  */
 X86.fnNEGb = function(dst, src)
 {
-    var b = (-dst)|0;
+    let b = (-dst)|0;
     this.setArithResult(0, dst, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesNegR : this.cycleCounts.nOpCyclesNegM);
     return b & 0xff;
@@ -24938,7 +24939,7 @@ X86.fnNEGb = function(dst, src)
  */
 X86.fnNEGw = function(dst, src)
 {
-    var w = (-dst)|0;
+    let w = (-dst)|0;
     this.setArithResult(0, dst, w, this.typeData | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesNegR : this.cycleCounts.nOpCyclesNegM);
     return w & this.maskData;
@@ -25024,7 +25025,7 @@ X86.fnPOPw = function(dst, src)
  */
 X86.fnPUSHw = function(dst, src)
 {
-    var w = dst;
+    let w = dst;
     if (this.opFlags & X86.OPFLAG.PUSHSP) {
         /*
          * This is the one case where must actually modify dst, so that the ModRM function will
@@ -25056,10 +25057,10 @@ X86.fnPUSHw = function(dst, src)
  */
 X86.fnRCLb = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = this.getCarry();
+        let carry = this.getCarry();
         count %= 9;
         if (!count) {
             carry <<= 7;
@@ -25082,10 +25083,10 @@ X86.fnRCLb = function(dst, src)
  */
 X86.fnRCLw = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = this.getCarry();
+        let carry = this.getCarry();
         count %= 17;
         if (!count) {
             carry <<= 15;
@@ -25108,10 +25109,10 @@ X86.fnRCLw = function(dst, src)
  */
 X86.fnRCLd = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
+    let result = dst;
+    let count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
     if (count) {
-        var carry = this.getCarry();
+        let carry = this.getCarry();
         /*
          * JavaScript Alert: much like a post-8086 Intel CPU, JavaScript shift counts are mod 32,
          * so "dst >>> 32" is equivalent to "dst >>> 0", which doesn't shift any bits at all.  To
@@ -25134,10 +25135,10 @@ X86.fnRCLd = function(dst, src)
  */
 X86.fnRCRb = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = this.getCarry();
+        let carry = this.getCarry();
         count %= 9;
         if (!count) {
             carry <<= 7;
@@ -25160,10 +25161,10 @@ X86.fnRCRb = function(dst, src)
  */
 X86.fnRCRw = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = this.getCarry();
+        let carry = this.getCarry();
         count %= 17;
         if (!count) {
             carry <<= 15;
@@ -25186,10 +25187,10 @@ X86.fnRCRw = function(dst, src)
  */
 X86.fnRCRd = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
+    let result = dst;
+    let count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
     if (count) {
-        var carry = this.getCarry();
+        let carry = this.getCarry();
         /*
          * JavaScript Alert: much like a post-8086 Intel CPU, JavaScript shift counts are mod 32,
          * so "dst << 32" is equivalent to "dst << 0", which doesn't shift any bits at all.  To
@@ -25212,10 +25213,10 @@ X86.fnRCRd = function(dst, src)
  */
 X86.fnROLb = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry;
+        let carry;
         count &= 0x7;
         if (!count) {
             carry = dst << 7;
@@ -25238,10 +25239,10 @@ X86.fnROLb = function(dst, src)
  */
 X86.fnROLw = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry;
+        let carry;
         count &= 0xf;
         if (!count) {
             carry = dst << 15;
@@ -25264,10 +25265,10 @@ X86.fnROLw = function(dst, src)
  */
 X86.fnROLd = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = dst << (count - 1);
+        let carry = dst << (count - 1);
         result = (dst << count) | (dst >>> (32 - count));
         this.setRotateResult(result, carry, X86.RESULT.DWORD);
     }
@@ -25284,10 +25285,10 @@ X86.fnROLd = function(dst, src)
  */
 X86.fnRORb = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry;
+        let carry;
         count &= 0x7;
         if (!count) {
             carry = dst;
@@ -25310,10 +25311,10 @@ X86.fnRORb = function(dst, src)
  */
 X86.fnRORw = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry;
+        let carry;
         count &= 0xf;
         if (!count) {
             carry = dst;
@@ -25336,10 +25337,10 @@ X86.fnRORw = function(dst, src)
  */
 X86.fnRORd = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = dst << (32 - count);
+        let carry = dst << (32 - count);
         result = (dst >>> count) | carry;
         this.setRotateResult(result, carry, X86.RESULT.DWORD);
     }
@@ -25356,10 +25357,10 @@ X86.fnRORd = function(dst, src)
  */
 X86.fnSARb = function(dst, src)
 {
-    var count = src & this.nShiftCountMask;
+    let count = src & this.nShiftCountMask;
     if (count) {
         if (count > 9) count = 9;
-        var carry = ((dst << 24) >> 24) >> (count - 1);
+        let carry = ((dst << 24) >> 24) >> (count - 1);
         dst = (carry >> 1) & 0xff;
         this.setLogicResult(dst, X86.RESULT.BYTE, carry & 0x1);
     }
@@ -25376,10 +25377,10 @@ X86.fnSARb = function(dst, src)
  */
 X86.fnSARw = function(dst, src)
 {
-    var count = src & this.nShiftCountMask;
+    let count = src & this.nShiftCountMask;
     if (count) {
         if (count > 17) count = 17;
-        var carry = ((dst << 16) >> 16) >> (count - 1);
+        let carry = ((dst << 16) >> 16) >> (count - 1);
         dst = (carry >> 1) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, carry & 0x1);
     }
@@ -25396,9 +25397,9 @@ X86.fnSARw = function(dst, src)
  */
 X86.fnSARd = function(dst, src)
 {
-    var count = src & this.nShiftCountMask;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = dst >> (count - 1);
+        let carry = dst >> (count - 1);
         dst = (carry >> 1);
         this.setLogicResult(dst, X86.RESULT.DWORD, carry & 0x1);
     }
@@ -25415,7 +25416,7 @@ X86.fnSARd = function(dst, src)
  */
 X86.fnSBBb = function(dst, src)
 {
-    var b = (dst - src - this.getCarry())|0;
+    let b = (dst - src - this.getCarry())|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return b & 0xff;
@@ -25431,7 +25432,7 @@ X86.fnSBBb = function(dst, src)
  */
 X86.fnSBBw = function(dst, src)
 {
-    var w = (dst - src - this.getCarry())|0;
+    let w = (dst - src - this.getCarry())|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return w & this.maskData;
@@ -25667,7 +25668,7 @@ X86.fnSGDT = function(dst, src)
         dst = this.addrGDTLimit - this.addrGDT;
 
 
-        var addr = this.addrGDT;
+        let addr = this.addrGDT;
         if (this.model == X86.MODEL_80286) {
             /*
              * We previously left the 6th byte of the target operand "undefined".  But it turns out we have to set
@@ -25751,10 +25752,10 @@ X86.fnSGDT = function(dst, src)
  */
 X86.fnSHLb = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = 0;
+        let carry = 0;
         if (count > 8) {
             result = 0;
         } else {
@@ -25776,10 +25777,10 @@ X86.fnSHLb = function(dst, src)
  */
 X86.fnSHLw = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;
+    let result = dst;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = 0;
+        let carry = 0;
         if (count > 16) {
             result = 0;
         } else {
@@ -25801,10 +25802,10 @@ X86.fnSHLw = function(dst, src)
  */
 X86.fnSHLd = function(dst, src)
 {
-    var result = dst;
-    var count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
+    let result = dst;
+    let count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
     if (count) {
-        var carry = dst << (count - 1);
+        let carry = dst << (count - 1);
         result = (carry << 1);
         this.setLogicResult(result, X86.RESULT.DWORD, carry & X86.RESULT.DWORD, (result ^ carry) & X86.RESULT.DWORD);
     }
@@ -25873,9 +25874,9 @@ X86.fnSHLDdCL = function(dst, src)
  */
 X86.fnSHRb = function(dst, src)
 {
-    var count = src & this.nShiftCountMask;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = (count > 8? 0 : (dst >>> (count - 1)));
+        let carry = (count > 8? 0 : (dst >>> (count - 1)));
         dst = (carry >>> 1) & 0xff;
         this.setLogicResult(dst, X86.RESULT.BYTE, carry & 0x1, dst & X86.RESULT.BYTE);
     }
@@ -25892,9 +25893,9 @@ X86.fnSHRb = function(dst, src)
  */
 X86.fnSHRw = function(dst, src)
 {
-    var count = src & this.nShiftCountMask;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = (count > 16? 0 : (dst >>> (count - 1)));
+        let carry = (count > 16? 0 : (dst >>> (count - 1)));
         dst = (carry >>> 1) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, carry & 0x1, dst & X86.RESULT.WORD);
     }
@@ -25911,9 +25912,9 @@ X86.fnSHRw = function(dst, src)
  */
 X86.fnSHRd = function(dst, src)
 {
-    var count = src & this.nShiftCountMask;
+    let count = src & this.nShiftCountMask;
     if (count) {
-        var carry = (dst >>> (count - 1));
+        let carry = (dst >>> (count - 1));
         dst = (carry >>> 1);
         this.setLogicResult(dst, X86.RESULT.DWORD, carry & 0x1, dst & X86.RESULT.DWORD);
     }
@@ -25997,7 +25998,7 @@ X86.fnSIDT = function(dst, src)
          * As with SGDT, the 6th byte is technically "undefined" on an 80286, but we now set it to 0xFF, for the
          * same reasons discussed in SGDT (above).
          */
-        var addr = this.addrIDT;
+        let addr = this.addrIDT;
         if (this.model == X86.MODEL_80286) {
             addr |= (0xff000000|0);
         }
@@ -26081,7 +26082,7 @@ X86.fnSTR = function(dst, src)
  */
 X86.fnSUBb = function(dst, src)
 {
-    var b = (dst - src)|0;
+    let b = (dst - src)|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return b & 0xff;
@@ -26097,7 +26098,7 @@ X86.fnSUBb = function(dst, src)
  */
 X86.fnSUBw = function(dst, src)
 {
-    var w = (dst - src)|0;
+    let w = (dst - src)|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return w & this.maskData;
@@ -26267,8 +26268,8 @@ X86.fnVERW = function(dst, src)
  */
 X86.fnIBTS = function(dst, src)
 {
-    var shift = (this.regEAX & this.maskData);
-    var mask = ((1 << (this.regECX & 0x1f)) - 1);
+    let shift = (this.regEAX & this.maskData);
+    let mask = ((1 << (this.regECX & 0x1f)) - 1);
     return (dst & ~(mask << shift)) | ((src & mask) << shift);
 };
 
@@ -26444,7 +26445,7 @@ X86.fnXCHGrw = function(dst, src)
  */
 X86.fnXORb = function(dst, src)
 {
-    var b = dst ^ src;
+    let b = dst ^ src;
     this.setLogicResult(b, X86.RESULT.BYTE);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return b;
@@ -26498,7 +26499,7 @@ X86.helpAdd64 = function(r64Dst, r64Src)
  */
 X86.helpCmp64 = function(r64Dst, r64Src)
 {
-    var result = r64Dst[1] - r64Src[1];
+    let result = r64Dst[1] - r64Src[1];
     if (!result) result = r64Dst[0] - r64Src[0];
     return result;
 };
@@ -26561,7 +26562,7 @@ X86.helpSub64 = function(r64Dst, r64Src)
  */
 X86.helpDECreg = function(w)
 {
-    var result = (w - 1)|0;
+    let result = (w - 1)|0;
     this.setArithResult(w, 1, result, this.typeData | X86.RESULT.NOTCF, true);
     this.nStepCycles -= 2;                          // the register form of DEC takes 2 cycles on all CPUs
     return (w & ~this.maskData) | (result & this.maskData);
@@ -26588,10 +26589,10 @@ X86.helpDIV32 = function(dstLo, dstHi, src)
         return false;
     }
 
-    var result = 0, bit = 1;
+    let result = 0, bit = 1;
 
-    var r64Div = X86.helpSet64(this.r64Div, src, 0);
-    var r64Rem = X86.helpSet64(this.r64Rem, dstLo, dstHi);
+    let r64Div = X86.helpSet64(this.r64Div, src, 0);
+    let r64Rem = X86.helpSet64(this.r64Rem, dstLo, dstHi);
 
     while (X86.helpCmp64(r64Rem, r64Div) > 0) {
         X86.helpAdd64(r64Div, r64Div);
@@ -26628,7 +26629,7 @@ X86.helpDIV32 = function(dstLo, dstHi, src)
  */
 X86.helpIDIV32 = function(dstLo, dstHi, src)
 {
-    var bNegLo = 0, bNegHi = 0;
+    let bNegLo = 0, bNegHi = 0;
     /*
      *      dividend    divisor       quotient    remainder
      *        (dst)      (src)          (lo)         (hi)
@@ -26665,7 +26666,7 @@ X86.helpIDIV32 = function(dstLo, dstHi, src)
  */
 X86.helpINCreg = function(w)
 {
-    var result = (w + 1)|0;
+    let result = (w + 1)|0;
     this.setArithResult(w, 1, result, this.typeData | X86.RESULT.NOTCF);
     this.nStepCycles -= 2;                          // the register form of INC takes 2 cycles on all CPUs
     return (w & ~this.maskData) | (result & this.maskData);
@@ -26744,7 +26745,7 @@ X86.helpSHLDw = function(dst, src, count)
             dst = src;
             count -= 16;
         }
-        var carry = dst << (count - 1);
+        let carry = dst << (count - 1);
         dst = ((carry << 1) | (src >>> (16 - count))) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, carry & X86.RESULT.WORD);
     }
@@ -26763,7 +26764,7 @@ X86.helpSHLDw = function(dst, src, count)
 X86.helpSHLDd = function(dst, src, count)
 {
     if (count) {
-        var carry = dst << (count - 1);
+        let carry = dst << (count - 1);
         dst = (carry << 1) | (src >>> (32 - count));
         this.setLogicResult(dst, X86.RESULT.DWORD, carry & X86.RESULT.DWORD);
     }
@@ -26786,7 +26787,7 @@ X86.helpSHRDw = function(dst, src, count)
             dst = src;
             count -= 16;
         }
-        var carry = dst >>> (count - 1);
+        let carry = dst >>> (count - 1);
         dst = ((carry >>> 1) | (src << (16 - count))) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, carry & 0x1);
     }
@@ -26805,7 +26806,7 @@ X86.helpSHRDw = function(dst, src, count)
 X86.helpSHRDd = function(dst, src, count)
 {
     if (count) {
-        var carry = dst >>> (count - 1);
+        let carry = dst >>> (count - 1);
         dst = (carry >>> 1) | (src << (32 - count));
         this.setLogicResult(dst, X86.RESULT.DWORD, carry & 0x1);
     }
@@ -26832,7 +26833,7 @@ X86.helpSRC1 = function()
  */
 X86.helpSRCCL = function()
 {
-    var count = this.regECX & 0xff;
+    let count = this.regECX & 0xff;
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftCR : this.cycleCounts.nOpCyclesShiftCM) + (count << this.cycleCounts.nOpCyclesShiftCS);
     return count;
 };
@@ -26845,7 +26846,7 @@ X86.helpSRCCL = function()
  */
 X86.helpSRCByte = function()
 {
-    var count = this.getIPByte();
+    let count = this.getIPByte();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftCR : this.cycleCounts.nOpCyclesShiftCM) + (count << this.cycleCounts.nOpCyclesShiftCS);
     return count;
 };
@@ -26905,8 +26906,8 @@ X86.helpCALLF = function(off, sel)
     this.opCS = this.getCS();
     this.opSS = this.getSS();
     this.opLSP = this.regLSP;
-    var oldIP = this.getIP();
-    var oldSize = (I386? this.sizeData : 2);
+    let oldIP = this.getIP();
+    let oldSize = (I386? this.sizeData : 2);
     if (this.setCSIP(off, sel, true) != null) {
         /*
          * When the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4, write the selector
@@ -26938,10 +26939,10 @@ X86.helpINT = function(nIDT, nError, nCycles)
      * TODO: We assess the cycle cost up front, because otherwise, if loadIDT() fails, no cost may be assessed.
      */
     this.nStepCycles -= this.cycleCounts.nOpCyclesInt + (nCycles || 0);
-    var oldPS = this.getPS();
-    var oldCS = this.getCS();
-    var oldIP = this.getIP();
-    var addr = this.segCS.loadIDT(nIDT);
+    let oldPS = this.getPS();
+    let oldCS = this.getCS();
+    let oldIP = this.getIP();
+    let addr = this.segCS.loadIDT(nIDT);
     if (addr !== X86.ADDR_INVALID) {
         /*
          * TODO: Determine if we should use pushData() instead of pushWord() for oldCS and nError, to deal with
@@ -26974,19 +26975,19 @@ X86.helpIRET = function()
     this.nStepCycles -= this.cycleCounts.nOpCyclesIRet;
 
     if ((this.regCR0 & X86.CR0.MSW.PE) && (this.regPS & X86.PS.NT)) {
-        var addrNew = this.segTSS.base;
+        let addrNew = this.segTSS.base;
         /*
          * Fortunately, X86.TSS286.PREV_TSS and X86.TSS386.PREV_TSS refer to the same TSS offset.
          * TODO: Update switchTS() to assess a cycle cost; currently, all we assess is what's shown above.
          */
-        var sel = this.getShort(addrNew + X86.TSS286.PREV_TSS);
+        let sel = this.getShort(addrNew + X86.TSS286.PREV_TSS);
         this.segCS.switchTSS(sel, false);
     }
     else {
-        var cpl = this.nCPL;
-        var newIP = this.popWord();
-        var newCS = this.popWord();
-        var newPS = this.popWord();
+        let cpl = this.nCPL;
+        let newIP = this.popWord();
+        let newCS = this.popWord();
+        let newPS = this.popWord();
 
         if (I386) {
             if (this.regPS & X86.PS.VM) {
@@ -27020,12 +27021,12 @@ X86.helpIRET = function()
                      * pop the rest, while we're still in protected-mode, before the switch to V86-mode alters the current
                      * operand size (among other things).
                      */
-                    var newSP = this.popWord();
-                    var newSS = this.popWord();
-                    var newES = this.popWord();
-                    var newDS = this.popWord();
-                    var newFS = this.popWord();
-                    var newGS = this.popWord();
+                    let newSP = this.popWord();
+                    let newSS = this.popWord();
+                    let newES = this.popWord();
+                    let newDS = this.popWord();
+                    let newFS = this.popWord();
+                    let newGS = this.popWord();
                     this.setProtMode(true, true);       // flip the switch to V86-mode now
                     this.setSS(newSS);
                     this.setSP(newSP);
@@ -27062,8 +27063,8 @@ X86.helpRETF = function(n)
     this.opSS = this.getSS();
     this.opLSP = this.regLSP;
 
-    var newIP = this.popWord();
-    var newCS = this.popWord();
+    let newIP = this.popWord();
+    let newCS = this.popWord();
 
     if (n) this.setSP(this.getSP() + n);            // TODO: optimize
 
@@ -27166,7 +27167,7 @@ X86.helpTrap = function(nIDT, nCycles)
  */
 X86.helpFault = function(nFault, nError, nCycles, fHalt)
 {
-    var fDispatch = false;
+    let fDispatch = false;
 
     if (!this.flags.complete) {
         /*
@@ -27236,7 +27237,7 @@ X86.helpFault = function(nFault, nError, nCycles, fHalt)
              * the triple-fault.  However, regardless what helpCheckFault() returns, we must leave via "throw -1",
              * because we need to blow off whatever context triggered the triple-fault; that was less critical when
              * all we dealt with were 80286-based triple-faults (at least the "normal" triple-faults that OS/2 would
-             * generate), but for any other unexpected triple-faults, "dispatching" a throw is critical. 
+             * generate), but for any other unexpected triple-faults, "dispatching" a throw is critical.
              */
             nError = 0;
             nFault = -1;
@@ -27314,7 +27315,7 @@ X86.helpFault = function(nFault, nError, nCycles, fHalt)
 X86.helpPageFault = function(addr, fPresent, fWrite)
 {
     this.regCR2 = addr;
-    var nError = 0;
+    let nError = 0;
     if (fPresent) nError |= X86.PTE.PRESENT;
     if (fWrite) nError |= X86.PTE.READWRITE;
     if (this.nCPL == 3) nError |= X86.PTE.USER;
@@ -27340,9 +27341,9 @@ X86.helpPageFault = function(addr, fPresent, fWrite)
  */
 X86.helpCheckFault = function(nFault, nError, fHalt)
 {
-    var bitsMessage = Messages.FAULT;
+    let bitsMessage = Messages.FAULT;
 
-    var bOpcode = this.probeAddr(this.regLIP);
+    let bOpcode = this.probeAddr(this.regLIP);
 
     /*
      * OS/2 1.0 uses an INT3 (0xCC) opcode in conjunction with an invalid IDT to trigger a triple-fault
@@ -27411,8 +27412,8 @@ X86.helpCheckFault = function(nFault, nError, fHalt)
 
     if (this.messageEnabled(bitsMessage) || fHalt) {
 
-        var fRunning = this.flags.running;
-        var sMessage = "Fault " + Str.toHexByte(nFault) + (nError != null? " (" + Str.toHexWord(nError) + ")" : "") + " on opcode " + Str.toHexByte(bOpcode);
+        let fRunning = this.flags.running;
+        let sMessage = "Fault " + Str.toHexByte(nFault) + (nError != null? " (" + Str.toHexWord(nError) + ")" : "") + " on opcode " + Str.toHexByte(bOpcode);
         if (fHalt && fRunning) sMessage += " (blocked)";
 
         if (DEBUGGER && this.dbg) {
@@ -27452,7 +27453,7 @@ X86.helpCheckFault = function(nFault, nError, fHalt)
  */
 X86.zeroSeg = function(seg)
 {
-    var acc = seg.acc & X86.DESC.ACC.TYPE.CODE_OR_DATA;
+    let acc = seg.acc & X86.DESC.ACC.TYPE.CODE_OR_DATA;
     if (seg.sel & X86.SEL.MASK) {
         if (acc == X86.DESC.ACC.TYPE.CODE_EXECONLY ||           // non-readable code segment (not allowed)
             acc == X86.DESC.ACC.TYPE.CODE_CONFORMING ||         // non-readable code segment (not allowed)
@@ -27496,8 +27497,8 @@ X86.zeroSeg = function(seg)
  */
 X86.modRegByte16 = function(fn)
 {
-    var dst, src;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+    let dst, src;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -27634,7 +27635,7 @@ X86.modRegByte16 = function(fn)
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -27666,7 +27667,7 @@ X86.modRegByte16 = function(fn)
         break;
     }
 
-    var b = fn.call(this, dst, src);
+    let b = fn.call(this, dst, src);
 
     switch(reg) {
     case 0x0:
@@ -27712,8 +27713,8 @@ X86.modRegByte16 = function(fn)
  */
 X86.modMemByte16 = function(fn)
 {
-    var dst, src;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+    let dst, src;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -27842,7 +27843,7 @@ X86.modMemByte16 = function(fn)
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -27882,7 +27883,7 @@ X86.modMemByte16 = function(fn)
         break;
     }
 
-    var b = fn.call(this, dst, src);
+    let b = fn.call(this, dst, src);
 
     switch(bModRM) {
     case 0x00:
@@ -27975,9 +27976,10 @@ X86.modMemByte16 = function(fn)
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
-X86.modGrpByte16 = function(afnGrp, fnSrc) {
-    var dst;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+X86.modGrpByte16 = function(afnGrp, fnSrc)
+{
+    let dst;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -28106,9 +28108,9 @@ X86.modGrpByte16 = function(afnGrp, fnSrc) {
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
-    var b = afnGrp[reg].call(this, dst, fnSrc.call(this));
+    let b = afnGrp[reg].call(this, dst, fnSrc.call(this));
 
     switch(bModRM) {
     case 0x00:
@@ -28191,8 +28193,8 @@ X86.modGrpByte16 = function(afnGrp, fnSrc) {
  */
 X86.modRegShort16 = function(fn)
 {
-    var dst, src;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+    let dst, src;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -28345,7 +28347,7 @@ X86.modRegShort16 = function(fn)
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -28377,7 +28379,7 @@ X86.modRegShort16 = function(fn)
         break;
     }
 
-    var w = fn.call(this, dst, src);
+    let w = fn.call(this, dst, src);
 
     switch(reg) {
     case 0x0:
@@ -28436,8 +28438,8 @@ X86.modRegShort16 = function(fn)
  */
 X86.modMemShort16 = function(fn)
 {
-    var dst, src;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+    let dst, src;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -28566,7 +28568,7 @@ X86.modMemShort16 = function(fn)
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -28622,7 +28624,7 @@ X86.modMemShort16 = function(fn)
         break;
     }
 
-    var w = fn.call(this, dst, src);
+    let w = fn.call(this, dst, src);
 
     switch(bModRM) {
     case 0x00:
@@ -28728,9 +28730,10 @@ X86.modMemShort16 = function(fn)
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
-X86.modGrpShort16 = function(afnGrp, fnSrc) {
-    var dst;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+X86.modGrpShort16 = function(afnGrp, fnSrc)
+{
+    let dst;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -28859,9 +28862,9 @@ X86.modGrpShort16 = function(afnGrp, fnSrc) {
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
-    var w = afnGrp[reg].call(this, dst, fnSrc.call(this));
+    let w = afnGrp[reg].call(this, dst, fnSrc.call(this));
 
     switch(bModRM) {
     case 0x00:
@@ -28944,8 +28947,8 @@ X86.modGrpShort16 = function(afnGrp, fnSrc) {
  */
 X86.modRegLong16 = function(fn)
 {
-    var dst, src;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+    let dst, src;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -29098,7 +29101,7 @@ X86.modRegLong16 = function(fn)
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -29130,7 +29133,7 @@ X86.modRegLong16 = function(fn)
         break;
     }
 
-    var l = fn.call(this, dst, src);
+    let l = fn.call(this, dst, src);
 
     switch(reg) {
     case 0x0:
@@ -29189,8 +29192,8 @@ X86.modRegLong16 = function(fn)
  */
 X86.modMemLong16 = function(fn)
 {
-    var dst, src;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+    let dst, src;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -29319,7 +29322,7 @@ X86.modMemLong16 = function(fn)
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -29375,7 +29378,7 @@ X86.modMemLong16 = function(fn)
         break;
     }
 
-    var l = fn.call(this, dst, src);
+    let l = fn.call(this, dst, src);
 
     switch(bModRM) {
     case 0x00:
@@ -29481,9 +29484,10 @@ X86.modMemLong16 = function(fn)
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
-X86.modGrpLong16 = function(afnGrp, fnSrc) {
-    var dst;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+X86.modGrpLong16 = function(afnGrp, fnSrc)
+{
+    let dst;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -29611,9 +29615,9 @@ X86.modGrpLong16 = function(afnGrp, fnSrc) {
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
-    var l = afnGrp[reg].call(this, dst, fnSrc.call(this));
+    let l = afnGrp[reg].call(this, dst, fnSrc.call(this));
 
     switch(bModRM) {
     case 0x00:
@@ -29696,8 +29700,8 @@ X86.modGrpLong16 = function(afnGrp, fnSrc) {
  */
 X86.modRegByte32 = function(fn)
 {
-    var dst, src;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+    let dst, src;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -29810,7 +29814,7 @@ X86.modRegByte32 = function(fn)
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -29842,7 +29846,7 @@ X86.modRegByte32 = function(fn)
         break;
     }
 
-    var b = fn.call(this, dst, src);
+    let b = fn.call(this, dst, src);
 
     switch(reg) {
     case 0x0:
@@ -29888,8 +29892,8 @@ X86.modRegByte32 = function(fn)
  */
 X86.modMemByte32 = function(fn)
 {
-    var dst, src;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+    let dst, src;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -30018,7 +30022,7 @@ X86.modMemByte32 = function(fn)
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -30058,7 +30062,7 @@ X86.modMemByte32 = function(fn)
         break;
     }
 
-    var b = fn.call(this, dst, src);
+    let b = fn.call(this, dst, src);
 
     switch(bModRM) {
     case 0xC0:
@@ -30106,9 +30110,10 @@ X86.modMemByte32 = function(fn)
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
-X86.modGrpByte32 = function(afnGrp, fnSrc) {
-    var dst;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+X86.modGrpByte32 = function(afnGrp, fnSrc)
+{
+    let dst;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -30237,9 +30242,9 @@ X86.modGrpByte32 = function(afnGrp, fnSrc) {
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
-    var b = afnGrp[reg].call(this, dst, fnSrc.call(this));
+    let b = afnGrp[reg].call(this, dst, fnSrc.call(this));
 
     switch(bModRM) {
     case 0xC0:
@@ -30280,8 +30285,8 @@ X86.modGrpByte32 = function(afnGrp, fnSrc) {
  */
 X86.modRegShort32 = function(fn)
 {
-    var dst, src;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+    let dst, src;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -30410,7 +30415,7 @@ X86.modRegShort32 = function(fn)
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -30442,7 +30447,7 @@ X86.modRegShort32 = function(fn)
         break;
     }
 
-    var w = fn.call(this, dst, src);
+    let w = fn.call(this, dst, src);
 
     switch(reg) {
     case 0x0:
@@ -30501,8 +30506,8 @@ X86.modRegShort32 = function(fn)
  */
 X86.modMemShort32 = function(fn)
 {
-    var dst, src;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+    let dst, src;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -30631,7 +30636,7 @@ X86.modMemShort32 = function(fn)
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -30687,7 +30692,7 @@ X86.modMemShort32 = function(fn)
         break;
     }
 
-    var w = fn.call(this, dst, src);
+    let w = fn.call(this, dst, src);
 
     switch(bModRM) {
     case 0xC0:
@@ -30748,9 +30753,10 @@ X86.modMemShort32 = function(fn)
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
-X86.modGrpShort32 = function(afnGrp, fnSrc) {
-    var dst;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+X86.modGrpShort32 = function(afnGrp, fnSrc)
+{
+    let dst;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -30879,9 +30885,9 @@ X86.modGrpShort32 = function(afnGrp, fnSrc) {
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
-    var w = afnGrp[reg].call(this, dst, fnSrc.call(this));
+    let w = afnGrp[reg].call(this, dst, fnSrc.call(this));
 
     switch(bModRM) {
     case 0xC0:
@@ -30922,8 +30928,8 @@ X86.modGrpShort32 = function(afnGrp, fnSrc) {
  */
 X86.modRegLong32 = function(fn)
 {
-    var dst, src;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+    let dst, src;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -31052,7 +31058,7 @@ X86.modRegLong32 = function(fn)
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -31084,7 +31090,7 @@ X86.modRegLong32 = function(fn)
         break;
     }
 
-    var l = fn.call(this, dst, src);
+    let l = fn.call(this, dst, src);
 
     switch(reg) {
     case 0x0:
@@ -31143,8 +31149,8 @@ X86.modRegLong32 = function(fn)
  */
 X86.modMemLong32 = function(fn)
 {
-    var dst, src;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+    let dst, src;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -31273,7 +31279,7 @@ X86.modMemLong32 = function(fn)
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -31329,7 +31335,7 @@ X86.modMemLong32 = function(fn)
         break;
     }
 
-    var l = fn.call(this, dst, src);
+    let l = fn.call(this, dst, src);
 
     switch(bModRM) {
     case 0xC0:
@@ -31390,9 +31396,10 @@ X86.modMemLong32 = function(fn)
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
-X86.modGrpLong32 = function(afnGrp, fnSrc) {
-    var dst;
-    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+X86.modGrpLong32 = function(afnGrp, fnSrc)
+{
+    let dst;
+    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -31521,9 +31528,9 @@ X86.modGrpLong32 = function(afnGrp, fnSrc) {
         break;
     }
 
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
 
-    var l = afnGrp[reg].call(this, dst, fnSrc.call(this));
+    let l = afnGrp[reg].call(this, dst, fnSrc.call(this));
 
     switch(bModRM) {
     case 0xC0:
@@ -31565,8 +31572,8 @@ X86.modGrpLong32 = function(afnGrp, fnSrc) {
  */
 X86.modSIB = function(mod)
 {
-    var bSIB = this.getIPByte();
-    var scale = bSIB >> 6, index, base;
+    let bSIB = this.getIPByte();
+    let scale = bSIB >> 6, index, base;
 
     switch((bSIB >> 3) & 0x7) {
     case 0:
@@ -32153,9 +32160,9 @@ X86.opES = function()
  */
 X86.opDAA = function()
 {
-    var AL = this.regEAX & 0xff;
-    var AF = this.getAF();
-    var CF = this.getCF();
+    let AL = this.regEAX & 0xff;
+    let AF = this.getAF();
+    let CF = this.getCF();
     if ((AL & 0xf) > 9 || AF) {
         AL += 0x6;
         AF = X86.PS.AF;
@@ -32168,7 +32175,7 @@ X86.opDAA = function()
     } else {
         CF = 0;
     }
-    var b = (AL & 0xff);
+    let b = (AL & 0xff);
     this.regEAX = (this.regEAX & ~0xff) | b;
     this.setLogicResult(b, X86.RESULT.BYTE);
     if (CF) this.setCF(); else this.clearCF();
@@ -32261,9 +32268,9 @@ X86.opCS = function()
  */
 X86.opDAS = function()
 {
-    var AL = this.regEAX & 0xff;
-    var AF = this.getAF();
-    var CF = this.getCF();
+    let AL = this.regEAX & 0xff;
+    let AF = this.getAF();
+    let CF = this.getCF();
     if ((AL & 0xf) > 9 || AF) {
         AL -= 0x6;
         AF = X86.PS.AF;
@@ -32276,7 +32283,7 @@ X86.opDAS = function()
     } else {
         CF = 0;
     }
-    var b = (AL & 0xff);
+    let b = (AL & 0xff);
     this.regEAX = (this.regEAX & ~0xff) | b;
     this.setLogicResult(b, X86.RESULT.BYTE);
     if (CF) this.setCF(); else this.clearCF();
@@ -32369,9 +32376,9 @@ X86.opSS = function()
  */
 X86.opAAA = function()
 {
-    var CF, AF;
-    var AL = this.regEAX & 0xff;
-    var AH = (this.regEAX >> 8) & 0xff;
+    let CF, AF;
+    let AL = this.regEAX & 0xff;
+    let AH = (this.regEAX >> 8) & 0xff;
     if ((AL & 0xf) > 9 || this.getAF()) {
         AL += 6;
         /*
@@ -32470,9 +32477,9 @@ X86.opDS = function()
  */
 X86.opAAS = function()
 {
-    var CF, AF;
-    var AL = this.regEAX & 0xff;
-    var AH = (this.regEAX >> 8) & 0xff;
+    let CF, AF;
+    let AL = this.regEAX & 0xff;
+    let AH = (this.regEAX >> 8) & 0xff;
     if ((AL & 0xf) > 9 || this.getAF()) {
         AL = (AL - 0x6) & 0xf;
         AH = (AH - 1) & 0xff;
@@ -32755,7 +32762,7 @@ X86.opPUSHBX = function()
  */
 X86.opPUSHSP_8086 = function()
 {
-    var w = (this.getSP() - 2) & 0xffff;
+    let w = (this.getSP() - 2) & 0xffff;
     this.pushWord(w);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
@@ -32937,7 +32944,7 @@ X86.opPUSHA = function()
     /*
      * TODO: regLSP needs to be pre-bounds-checked against regLSPLimitLow
      */
-    var temp = this.getSP() & this.maskData;
+    let temp = this.getSP() & this.maskData;
     if (BACKTRACK) {
         this.backTrack.btiMem0 = this.backTrack.btiAL; this.backTrack.btiMem1 = this.backTrack.btiAH;
     }
@@ -33208,16 +33215,16 @@ X86.opIMUL8 = function()
  */
 X86.opINSb = function()
 {
-    var nReps = 1;
-    var nDelta = 0;
-    var maskAddr = this.maskAddr;
+    let nReps = 1;
+    let nDelta = 0;
+    let maskAddr = this.maskAddr;
 
     /*
      * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
      * an unrepeated INS, and 8 + 8n for a repeated INS.  However, accurate cycle times for the 80186/80188 is
      * low priority.
      */
-    var nCycles = 5;
+    let nCycles = 5;
 
     /*
      * The (normal) REP prefix, if used, is REPNZ (0xf2), but either one works....
@@ -33229,9 +33236,9 @@ X86.opINSb = function()
     }
 
     if (nReps--) {
-        var port = this.regEDX & 0xffff;
+        let port = this.regEDX & 0xffff;
         if (!this.checkIOPM(port, 1, true)) return;
-        var b = this.bus.checkPortInputNotify(port, 1, this.regLIP - nDelta - 1);
+        let b = this.bus.checkPortInputNotify(port, 1, this.regLIP - nDelta - 1);
         this.setSOByte(this.segES, this.regEDI & maskAddr, b);
         /*
          * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
@@ -33255,16 +33262,16 @@ X86.opINSb = function()
  */
 X86.opINSw = function()
 {
-    var nReps = 1;
-    var nDelta = 0;
-    var maskAddr = this.maskAddr;
+    let nReps = 1;
+    let nDelta = 0;
+    let maskAddr = this.maskAddr;
 
     /*
      * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
      * an unrepeated INS, and 8 + 8n for a repeated INS.  However, accurate cycle times for the 80186/80188 is
      * low priority.
      */
-    var nCycles = 5;
+    let nCycles = 5;
 
     /*
      * The (normal) REP prefix, if used, is REPNZ (0xf2), but either one works....
@@ -33275,9 +33282,9 @@ X86.opINSw = function()
         if (this.opPrefixes & X86.OPFLAG.REPEAT) nCycles = 4;
     }
     if (nReps--) {
-        var port = this.regEDX & 0xffff;
+        let port = this.regEDX & 0xffff;
         if (!this.checkIOPM(port, this.sizeData, true)) return;
-        var w = this.bus.checkPortInputNotify(port, this.sizeData, this.regLIP - nDelta - 1);
+        let w = this.bus.checkPortInputNotify(port, this.sizeData, this.regLIP - nDelta - 1);
         if (BACKTRACK) {
             this.backTrack.btiMem0 = this.backTrack.btiIO;
             this.backTrack.btiMem1 = this.backTrack.btiIO;
@@ -33304,15 +33311,15 @@ X86.opINSw = function()
  */
 X86.opOUTSb = function()
 {
-    var nReps = 1;
-    var nDelta = 0;
-    var maskAddr = this.maskAddr;
+    let nReps = 1;
+    let nDelta = 0;
+    let maskAddr = this.maskAddr;
 
     /*
      * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
      * an unrepeated INS, and 8 + 8n for a repeated INS.  TODO: Fix this someday.
      */
-    var nCycles = 5;
+    let nCycles = 5;
 
     /*
      * The (normal) REP prefix, if used, is REPNZ (0xf2), but either one works....
@@ -33323,9 +33330,9 @@ X86.opOUTSb = function()
         if (this.opPrefixes & X86.OPFLAG.REPEAT) nCycles = 4;
     }
     if (nReps--) {
-        var port = this.regEDX & 0xffff;
+        let port = this.regEDX & 0xffff;
         if (!this.checkIOPM(port, 1, false)) return;
-        var b = this.getSOByte(this.segDS, this.regESI & maskAddr);
+        let b = this.getSOByte(this.segDS, this.regESI & maskAddr);
         /*
          * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
@@ -33349,15 +33356,15 @@ X86.opOUTSb = function()
  */
 X86.opOUTSw = function()
 {
-    var nReps = 1;
-    var nDelta = 0;
-    var maskAddr = this.maskAddr;
+    let nReps = 1;
+    let nDelta = 0;
+    let maskAddr = this.maskAddr;
 
     /*
      * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
      * an unrepeated INS, and 8 + 8n for a repeated INS.  TODO: Fix this someday.
      */
-    var nCycles = 5;
+    let nCycles = 5;
 
     /*
      * The (normal) REP prefix, if used, is REPNZ (0xf2), but either one works....
@@ -33368,13 +33375,13 @@ X86.opOUTSw = function()
         if (this.opPrefixes & X86.OPFLAG.REPEAT) nCycles = 4;
     }
     if (nReps--) {
-        var w = this.getSOWord(this.segDS, this.regESI & maskAddr);
+        let w = this.getSOWord(this.segDS, this.regESI & maskAddr);
         /*
          * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        var port = this.regEDX & 0xffff;
+        let port = this.regEDX & 0xffff;
         if (!this.checkIOPM(port, this.sizeData, false)) return;
         if (BACKTRACK) {
             this.backTrack.btiIO = this.backTrack.btiMem0;
@@ -33395,7 +33402,7 @@ X86.opOUTSw = function()
  */
 X86.opJO = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33411,7 +33418,7 @@ X86.opJO = function()
  */
 X86.opJNO = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (!this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33427,7 +33434,7 @@ X86.opJNO = function()
  */
 X86.opJC = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (this.getCF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33443,7 +33450,7 @@ X86.opJC = function()
  */
 X86.opJNC = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (!this.getCF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33459,7 +33466,7 @@ X86.opJNC = function()
  */
 X86.opJZ = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33475,7 +33482,7 @@ X86.opJZ = function()
  */
 X86.opJNZ = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (!this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33491,7 +33498,7 @@ X86.opJNZ = function()
  */
 X86.opJBE = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (this.getCF() || this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33507,7 +33514,7 @@ X86.opJBE = function()
  */
 X86.opJNBE = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (!this.getCF() && !this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33523,7 +33530,7 @@ X86.opJNBE = function()
  */
 X86.opJS = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (this.getSF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33539,7 +33546,7 @@ X86.opJS = function()
  */
 X86.opJNS = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (!this.getSF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33555,7 +33562,7 @@ X86.opJNS = function()
  */
 X86.opJP = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (this.getPF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33571,7 +33578,7 @@ X86.opJP = function()
  */
 X86.opJNP = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (!this.getPF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33587,7 +33594,7 @@ X86.opJNP = function()
  */
 X86.opJL = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (!this.getSF() != !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33603,7 +33610,7 @@ X86.opJL = function()
  */
 X86.opJNL = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (!this.getSF() == !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33619,7 +33626,7 @@ X86.opJNL = function()
  */
 X86.opJLE = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (this.getZF() || !this.getSF() != !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33635,7 +33642,7 @@ X86.opJLE = function()
  */
 X86.opJNLE = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (!this.getZF() && !this.getSF() == !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -33727,7 +33734,7 @@ X86.opXCHGrb = function()
      *
      *      opModRegByteF2: function(fn)
      *      {
-     *          var b = fn.call(this, this.regEDX >> 8, this.regEDX & 0xff);
+     *          let b = fn.call(this, this.regEDX >> 8, this.regEDX & 0xff);
      *          this.regEDX = (this.regEDX & 0xff) | (b << 8);
      *      }
      */
@@ -33835,7 +33842,7 @@ X86.opLEA = function()
  */
 X86.opMOVsrw = function()
 {
-    var sel;
+    let sel;
     this.decodeModRegWord.call(this, X86.fnMOVsrw);
     switch ((this.bModRM >> 3) & 0x7) {
     case 0x0:
@@ -33945,7 +33952,7 @@ X86.opNOP = function()
  */
 X86.opXCHGCX = function()
 {
-    var temp = this.regEAX;
+    let temp = this.regEAX;
     this.regEAX = (I386? (this.regEAX & ~this.maskData) | (this.regECX & this.maskData) : this.regECX);
     this.regECX = (I386? (this.regECX & ~this.maskData) | (temp & this.maskData) : temp);
     if (BACKTRACK) {
@@ -33962,7 +33969,7 @@ X86.opXCHGCX = function()
  */
 X86.opXCHGDX = function()
 {
-    var temp = this.regEAX;
+    let temp = this.regEAX;
     this.regEAX = (I386? (this.regEAX & ~this.maskData) | (this.regEDX & this.maskData) : this.regEDX);
     this.regEDX = (I386? (this.regEDX & ~this.maskData) | (temp & this.maskData) : temp);
     if (BACKTRACK) {
@@ -33979,7 +33986,7 @@ X86.opXCHGDX = function()
  */
 X86.opXCHGBX = function()
 {
-    var temp = this.regEAX;
+    let temp = this.regEAX;
     this.regEAX = (I386? (this.regEAX & ~this.maskData) | (this.regEBX & this.maskData) : this.regEBX);
     this.regEBX = (I386? (this.regEBX & ~this.maskData) | (temp & this.maskData) : temp);
     if (BACKTRACK) {
@@ -33996,8 +34003,8 @@ X86.opXCHGBX = function()
  */
 X86.opXCHGSP = function()
 {
-    var temp = this.regEAX;
-    var regESP = this.getSP();
+    let temp = this.regEAX;
+    let regESP = this.getSP();
     this.regEAX = (I386? (this.regEAX & ~this.maskData) | (regESP & this.maskData) : regESP);
     this.setSP((I386? (regESP & ~this.maskData) | (temp & this.maskData) : temp));
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiAH = 0;
@@ -34011,7 +34018,7 @@ X86.opXCHGSP = function()
  */
 X86.opXCHGBP = function()
 {
-    var temp = this.regEAX;
+    let temp = this.regEAX;
     this.regEAX = (I386? (this.regEAX & ~this.maskData) | (this.regEBP & this.maskData) : this.regEBP);
     this.regEBP = (I386? (this.regEBP & ~this.maskData) | (temp & this.maskData) : temp);
     if (BACKTRACK) {
@@ -34028,7 +34035,7 @@ X86.opXCHGBP = function()
  */
 X86.opXCHGSI = function()
 {
-    var temp = this.regEAX;
+    let temp = this.regEAX;
     this.regEAX = (I386? (this.regEAX & ~this.maskData) | (this.regESI & this.maskData) : this.regESI);
     this.regESI = (I386? (this.regESI & ~this.maskData) | (temp & this.maskData) : temp);
     if (BACKTRACK) {
@@ -34045,7 +34052,7 @@ X86.opXCHGSI = function()
  */
 X86.opXCHGDI = function()
 {
-    var temp = this.regEAX;
+    let temp = this.regEAX;
     this.regEAX = (I386? (this.regEAX & ~this.maskData) | (this.regEDI & this.maskData) : this.regEDI);
     this.regEDI = (I386? (this.regEDI & ~this.maskData) | (temp & this.maskData) : temp);
     if (BACKTRACK) {
@@ -34128,7 +34135,7 @@ X86.opPUSHF = function()
     /*
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
      */
-    var regPS = this.getPS();
+    let regPS = this.getPS();
     if (I386) {
         if ((regPS & X86.PS.VM) && this.nIOPL < 3) {
             if (DEBUG) this.printMessage("PUSHF in v86-mode (IOPL < 3)", this.bitsMessage, true);
@@ -34173,7 +34180,7 @@ X86.opPOPF = function()
     /*
      * Regardless of mode, VM and RF (the only defined EFLAGS bit above bit 15) are never changed by POPFD.
      */
-    var newPS = this.popWord();
+    let newPS = this.popWord();
     if (I386) newPS = (newPS & 0xffff) | (this.regPS & ~0xffff);
     this.setPS(newPS);
     /*
@@ -34198,7 +34205,7 @@ X86.opSAHF = function()
      * and beyond setting the arithmetic and logical flags, so on balance, the code below may be more
      * efficient, and may also avoid unexpected side-effects of updating the entire PS register.
      */
-    var ah = (this.regEAX >> 8) & 0xff;
+    let ah = (this.regEAX >> 8) & 0xff;
     if (ah & X86.PS.CF) this.setCF(); else this.clearCF();
     if (ah & X86.PS.PF) this.setPF(); else this.clearPF();
     if (ah & X86.PS.AF) this.setAF(); else this.clearAF();
@@ -34284,11 +34291,11 @@ X86.opMOVmAX = function()
  */
 X86.opMOVSb = function()
 {
-    var nReps = 1;
-    var nDelta = 0;
-    var maskAddr = this.maskAddr;
+    let nReps = 1;
+    let nDelta = 0;
+    let maskAddr = this.maskAddr;
 
-    var nCycles = this.cycleCounts.nOpCyclesMovS;
+    let nCycles = this.cycleCounts.nOpCyclesMovS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX & maskAddr;
         nDelta = 1;
@@ -34302,7 +34309,7 @@ X86.opMOVSb = function()
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        var nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
+        let nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + nInc) & maskAddr);
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + nInc) & maskAddr);
         this.nStepCycles -= nCycles;
@@ -34318,11 +34325,11 @@ X86.opMOVSb = function()
  */
 X86.opMOVSw = function()
 {
-    var nReps = 1;
-    var nDelta = 0;
-    var maskAddr = this.maskAddr;
+    let nReps = 1;
+    let nDelta = 0;
+    let maskAddr = this.maskAddr;
 
-    var nCycles = this.cycleCounts.nOpCyclesMovS;
+    let nCycles = this.cycleCounts.nOpCyclesMovS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX & maskAddr;
         nDelta = 1;
@@ -34336,7 +34343,7 @@ X86.opMOVSw = function()
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        var nInc = ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData);
+        let nInc = ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData);
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + nInc) & maskAddr);
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + nInc) & maskAddr);
         this.nStepCycles -= nCycles;
@@ -34352,11 +34359,11 @@ X86.opMOVSw = function()
  */
 X86.opCMPSb = function()
 {
-    var nReps = 1;
-    var nDelta = 0;
-    var maskAddr = this.maskAddr;
+    let nReps = 1;
+    let nDelta = 0;
+    let maskAddr = this.maskAddr;
 
-    var nCycles = this.cycleCounts.nOpCyclesCmpS;
+    let nCycles = this.cycleCounts.nOpCyclesCmpS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX & maskAddr;
         nDelta = 1;
@@ -34364,8 +34371,8 @@ X86.opCMPSb = function()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesCmpSr0;
     }
     if (nReps--) {
-        var bDst = this.getEAByte(this.segData, this.regESI);
-        var bSrc = this.getEAByte(this.segES, this.regEDI);
+        let bDst = this.getEAByte(this.segData, this.regESI);
+        let bSrc = this.getEAByte(this.segES, this.regEDI);
         this.regEAWrite = this.regEA;           // TODO: Is this necessary?
         /*
          * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
@@ -34373,7 +34380,7 @@ X86.opCMPSb = function()
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
         X86.fnCMPb.call(this, bDst, bSrc);
-        var nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
+        let nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + nInc) & maskAddr);
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + nInc) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
@@ -34397,11 +34404,11 @@ X86.opCMPSb = function()
  */
 X86.opCMPSw = function()
 {
-    var nReps = 1;
-    var nDelta = 0;
-    var maskAddr = this.maskAddr;
+    let nReps = 1;
+    let nDelta = 0;
+    let maskAddr = this.maskAddr;
 
-    var nCycles = this.cycleCounts.nOpCyclesCmpS;
+    let nCycles = this.cycleCounts.nOpCyclesCmpS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX & maskAddr;
         nDelta = 1;
@@ -34409,8 +34416,8 @@ X86.opCMPSw = function()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesCmpSr0;
     }
     if (nReps--) {
-        var wDst = this.getEAWord(this.segData, this.regESI & maskAddr);
-        var wSrc = this.getEAWord(this.segES, this.regEDI & maskAddr);
+        let wDst = this.getEAWord(this.segData, this.regESI & maskAddr);
+        let wSrc = this.getEAWord(this.segES, this.regEDI & maskAddr);
         this.regEAWrite = this.regEA;           // TODO: Is this necessary?
         /*
          * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
@@ -34418,7 +34425,7 @@ X86.opCMPSw = function()
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
         X86.fnCMPw.call(this, wDst, wSrc);
-        var nInc = ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData);
+        let nInc = ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData);
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + nInc) & maskAddr);
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + nInc) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
@@ -34466,11 +34473,11 @@ X86.opTESTAX = function()
  */
 X86.opSTOSb = function()
 {
-    var nReps = 1;
-    var nDelta = 0;
-    var maskAddr = this.maskAddr;
+    let nReps = 1;
+    let nDelta = 0;
+    let maskAddr = this.maskAddr;
 
-    var nCycles = this.cycleCounts.nOpCyclesStoS;
+    let nCycles = this.cycleCounts.nOpCyclesStoS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX & maskAddr;
         nDelta = 1;
@@ -34487,7 +34494,7 @@ X86.opSTOSb = function()
         if (BACKTRACK) this.backTrack.btiMem0 = this.backTrack.btiAL;
 
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
-        
+
         /*
          * Implement 80386 B1 Errata #7, to the extent that Windows 95 checked for it.  This test doesn't
          * detect every possible variation (for example, the ADDRESS override on the next instruction, if
@@ -34521,11 +34528,11 @@ X86.opSTOSb = function()
  */
 X86.opSTOSw = function()
 {
-    var nReps = 1;
-    var nDelta = 0;
-    var maskAddr = this.maskAddr;
+    let nReps = 1;
+    let nDelta = 0;
+    let maskAddr = this.maskAddr;
 
-    var nCycles = this.cycleCounts.nOpCyclesStoS;
+    let nCycles = this.cycleCounts.nOpCyclesStoS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX & maskAddr;
         nDelta = 1;
@@ -34556,11 +34563,11 @@ X86.opSTOSw = function()
  */
 X86.opLODSb = function()
 {
-    var nReps = 1;
-    var nDelta = 0;
-    var maskAddr = this.maskAddr;
+    let nReps = 1;
+    let nDelta = 0;
+    let maskAddr = this.maskAddr;
 
-    var nCycles = this.cycleCounts.nOpCyclesLodS;
+    let nCycles = this.cycleCounts.nOpCyclesLodS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX & maskAddr;
         nDelta = 1;
@@ -34568,7 +34575,7 @@ X86.opLODSb = function()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesLodSr0;
     }
     if (nReps--) {
-        var b = this.getSOByte(this.segData, this.regESI & maskAddr);
+        let b = this.getSOByte(this.segData, this.regESI & maskAddr);
         /*
          * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
@@ -34590,11 +34597,11 @@ X86.opLODSb = function()
  */
 X86.opLODSw = function()
 {
-    var nReps = 1;
-    var nDelta = 0;
-    var maskAddr = this.maskAddr;
+    let nReps = 1;
+    let nDelta = 0;
+    let maskAddr = this.maskAddr;
 
-    var nCycles = this.cycleCounts.nOpCyclesLodS;
+    let nCycles = this.cycleCounts.nOpCyclesLodS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX & maskAddr;
         nDelta = 1;
@@ -34602,7 +34609,7 @@ X86.opLODSw = function()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesLodSr0;
     }
     if (nReps--) {
-        var w = this.getSOWord(this.segData, this.regESI & maskAddr);
+        let w = this.getSOWord(this.segData, this.regESI & maskAddr);
         /*
          * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
@@ -34626,11 +34633,11 @@ X86.opLODSw = function()
  */
 X86.opSCASb = function()
 {
-    var nReps = 1;
-    var nDelta = 0;
-    var maskAddr = this.maskAddr;
+    let nReps = 1;
+    let nDelta = 0;
+    let maskAddr = this.maskAddr;
 
-    var nCycles = this.cycleCounts.nOpCyclesScaS;
+    let nCycles = this.cycleCounts.nOpCyclesScaS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX & maskAddr;
         nDelta = 1;
@@ -34638,8 +34645,8 @@ X86.opSCASb = function()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesScaSr0;
     }
     if (nReps--) {
-        var bDst = this.regEAX & 0xff;
-        var bSrc = this.getEAByte(this.segES, this.regEDI);
+        let bDst = this.regEAX & 0xff;
+        let bSrc = this.getEAByte(this.segES, this.regEDI);
         this.regEAWrite = this.regEA;           // TODO: Is this necessary?
         X86.fnCMPb.call(this, bDst, bSrc);
         /*
@@ -34669,11 +34676,11 @@ X86.opSCASb = function()
  */
 X86.opSCASw = function()
 {
-    var nReps = 1;
-    var nDelta = 0;
-    var maskAddr = this.maskAddr;
+    let nReps = 1;
+    let nDelta = 0;
+    let maskAddr = this.maskAddr;
 
-    var nCycles = this.cycleCounts.nOpCyclesScaS;
+    let nCycles = this.cycleCounts.nOpCyclesScaS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX & maskAddr;
         nDelta = 1;
@@ -34681,8 +34688,8 @@ X86.opSCASw = function()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesScaSr0;
     }
     if (nReps--) {
-        var wDst = this.regEAX & this.maskData;
-        var wSrc = this.getEAWord(this.segES, this.regEDI & maskAddr);
+        let wDst = this.regEAX & this.maskData;
+        let wSrc = this.getEAWord(this.segES, this.regEDI & maskAddr);
         this.regEAWrite = this.regEA;           // TODO: Is this necessary?
         X86.fnCMPw.call(this, wDst, wSrc);
         /*
@@ -34937,8 +34944,8 @@ X86.opGRP2wn = function()
  */
 X86.opRETn = function()
 {
-    var n = this.getIPShort();
-    var newIP = this.popWord();
+    let n = this.getIPShort();
+    let newIP = this.popWord();
     this.setIP(newIP);
     if (n) this.setSP(this.getSP() + n);            // TODO: optimize
     this.nStepCycles -= this.cycleCounts.nOpCyclesRetn;
@@ -34951,7 +34958,7 @@ X86.opRETn = function()
  */
 X86.opRET = function()
 {
-    var newIP = this.popWord();
+    let newIP = this.popWord();
     this.setIP(newIP);
     this.nStepCycles -= this.cycleCounts.nOpCyclesRet;
 };
@@ -35020,15 +35027,15 @@ X86.opENTER = function()
      */
     this.opLSP = this.regLSP;
 
-    var wLocal = this.getIPShort();
-    var bLevel = this.getIPByte() & 0x1f;
+    let wLocal = this.getIPShort();
+    let bLevel = this.getIPByte() & 0x1f;
     /*
      * NOTE: 11 is the minimum cycle time for the 80286; the 80186/80188 has different cycle times: 15, 25 and
      * 22 + 16 * (bLevel - 1) for bLevel 0, 1 and > 1, respectively.  TODO: Fix this someday.
      */
     this.nStepCycles -= 11;
     this.pushWord(this.regEBP);
-    var wFrame = this.getSP() & this.maskData;
+    let wFrame = this.getSP() & this.maskData;
     if (bLevel > 0) {
         this.nStepCycles -= (bLevel << 2) + (bLevel > 1? 1 : 0);
         while (--bLevel) {
@@ -35119,7 +35126,7 @@ X86.opINT3 = function()
  */
 X86.opINTn = function()
 {
-    var nInt = this.getIPByte();
+    let nInt = this.getIPByte();
     /*
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
      */
@@ -35262,12 +35269,12 @@ X86.opGRP2wCL = function()
  */
 X86.opAAM = function()
 {
-    var b = this.getIPByte();
+    let b = this.getIPByte();
     if (!b) {
         X86.helpDIVOverflow.call(this);
         return;
     }
-    var AL = this.regEAX & 0xff;
+    let AL = this.regEAX & 0xff;
     this.regEAX = (this.regEAX & ~0xffff) | ((AL / b) << 8) | (AL % b);
     /*
      * setLogicResult() is perfect, because it ensures that CF and OF are cleared as well (see above for why).
@@ -35311,9 +35318,9 @@ X86.opAAM = function()
  */
 X86.opAAD = function()
 {
-    var dst = (this.regEAX & 0xff);
-    var src = (((this.regEAX >> 8) & 0xff) * this.getIPByte())|0;
-    var result = (dst + src)|0;
+    let dst = (this.regEAX & 0xff);
+    let src = (((this.regEAX >> 8) & 0xff) * this.getIPByte())|0;
+    let result = (dst + src)|0;
     this.regEAX = (this.regEAX & ~0xffff) | (result & 0xff);
     this.setArithResult(dst, src, result, X86.RESULT.BYTE | X86.RESULT.ALL);
     this.nStepCycles -= this.cycleCounts.nOpCyclesAAD;
@@ -35451,8 +35458,8 @@ X86.opESC7 = function()
  */
 X86.opLOOPNZ = function()
 {
-    var disp = this.getIPDisp();
-    var n = (this.regECX - 1) & this.maskAddr;
+    let disp = this.getIPDisp();
+    let n = (this.regECX - 1) & this.maskAddr;
     this.regECX = (this.regECX & ~this.maskAddr) | n;
     if (n && !this.getZF()) {
         this.setIP(this.getIP() + disp);
@@ -35473,8 +35480,8 @@ X86.opLOOPNZ = function()
  */
 X86.opLOOPZ = function()
 {
-    var disp = this.getIPDisp();
-    var n = (this.regECX - 1) & this.maskAddr;
+    let disp = this.getIPDisp();
+    let n = (this.regECX - 1) & this.maskAddr;
     this.regECX = (this.regECX & ~this.maskAddr) | n;
     if (n && this.getZF()) {
         this.setIP(this.getIP() + disp);
@@ -35495,8 +35502,8 @@ X86.opLOOPZ = function()
  */
 X86.opLOOP = function()
 {
-    var disp = this.getIPDisp();
-    var n = (this.regECX - 1) & this.maskAddr;
+    let disp = this.getIPDisp();
+    let n = (this.regECX - 1) & this.maskAddr;
     this.regECX = (this.regECX & ~this.maskAddr) | n;
     if (n) {
         this.setIP(this.getIP() + disp);
@@ -35517,7 +35524,7 @@ X86.opLOOP = function()
  */
 X86.opJCXZ = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     if (!(this.regECX & this.maskAddr)) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesLoopZ;
@@ -35533,7 +35540,7 @@ X86.opJCXZ = function()
  */
 X86.opINb = function()
 {
-    var port = this.getIPByte();
+    let port = this.getIPByte();
     if (!this.checkIOPM(port, 1, true)) return;
     this.regEAX = (this.regEAX & ~0xff) | (this.bus.checkPortInputNotify(port, 1, this.regLIP - 2) & 0xff);
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
@@ -35547,7 +35554,7 @@ X86.opINb = function()
  */
 X86.opINw = function()
 {
-    var port = this.getIPByte();
+    let port = this.getIPByte();
     if (!this.checkIOPM(port, this.sizeData, true)) return;
     this.regEAX = (this.regEAX & ~this.maskData) | (this.bus.checkPortInputNotify(port, this.sizeData, this.regLIP - 2) & this.maskData);
     if (BACKTRACK) {
@@ -35564,7 +35571,7 @@ X86.opINw = function()
  */
 X86.opOUTb = function()
 {
-    var port = this.getIPByte();
+    let port = this.getIPByte();
     if (!this.checkIOPM(port, 1, false)) return;
     this.bus.checkPortOutputNotify(port, 1, this.regEAX & 0xff, this.regLIP - 2);
     this.nStepCycles -= this.cycleCounts.nOpCyclesOutP;
@@ -35577,7 +35584,7 @@ X86.opOUTb = function()
  */
 X86.opOUTw = function()
 {
-    var port = this.getIPByte();
+    let port = this.getIPByte();
     if (!this.checkIOPM(port, this.sizeData, false)) return;
     this.bus.checkPortOutputNotify(port, this.sizeData, this.regEAX & this.maskData, this.regLIP - 2);
     this.nStepCycles -= this.cycleCounts.nOpCyclesOutP;
@@ -35590,9 +35597,9 @@ X86.opOUTw = function()
  */
 X86.opCALL = function()
 {
-    var disp = this.getIPWord();
-    var oldIP = this.getIP();
-    var newIP = oldIP + disp;
+    let disp = this.getIPWord();
+    let oldIP = this.getIP();
+    let newIP = oldIP + disp;
     this.pushWord(oldIP);
     this.setIP(newIP);
     this.nStepCycles -= this.cycleCounts.nOpCyclesCall;
@@ -35605,7 +35612,7 @@ X86.opCALL = function()
  */
 X86.opJMP = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     this.setIP(this.getIP() + disp);
     this.nStepCycles -= this.cycleCounts.nOpCyclesJmp;
 };
@@ -35628,7 +35635,7 @@ X86.opJMPF = function()
  */
 X86.opJMPs = function()
 {
-    var disp = this.getIPDisp();
+    let disp = this.getIPDisp();
     this.setIP(this.getIP() + disp);
     this.nStepCycles -= this.cycleCounts.nOpCyclesJmp;
 };
@@ -35640,7 +35647,7 @@ X86.opJMPs = function()
  */
 X86.opINDXb = function()
 {
-    var port = this.regEDX & 0xffff;
+    let port = this.regEDX & 0xffff;
     if (!this.checkIOPM(port, 1, true)) return;
     this.regEAX = (this.regEAX & ~0xff) | (this.bus.checkPortInputNotify(port, 1, this.regLIP - 1) & 0xff);
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
@@ -35654,7 +35661,7 @@ X86.opINDXb = function()
  */
 X86.opINDXw = function()
 {
-    var port = this.regEDX & 0xffff;
+    let port = this.regEDX & 0xffff;
     if (!this.checkIOPM(port, this.sizeData, true)) return;
     this.regEAX = (this.regEAX & ~this.maskData) | (this.bus.checkPortInputNotify(port, this.sizeData, this.regLIP - 1) & this.maskData);
     if (BACKTRACK) {
@@ -35671,7 +35678,7 @@ X86.opINDXw = function()
  */
 X86.opOUTDXb = function()
 {
-    var port = this.regEDX & 0xffff;
+    let port = this.regEDX & 0xffff;
     if (!this.checkIOPM(port, 1, false)) return;
     if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiAL;
     this.bus.checkPortOutputNotify(port, 1, this.regEAX & 0xff, this.regLIP - 1);
@@ -35685,7 +35692,7 @@ X86.opOUTDXb = function()
  */
 X86.opOUTDXw = function()
 {
-    var port = this.regEDX & 0xffff;
+    let port = this.regEDX & 0xffff;
     if (!this.checkIOPM(port, 2, false)) return;
     if (BACKTRACK) {
         this.backTrack.btiIO = this.backTrack.btiAL;
@@ -36185,7 +36192,7 @@ X86.aOpGrp4w = [
  */
 X86.opGRP6 = function()
 {
-    var bModRM = this.peekIPByte();
+    let bModRM = this.peekIPByte();
     if ((bModRM & 0x38) < 0x10) {   // possible reg values: 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38
         this.opFlags |= X86.OPFLAG.NOREAD;
     }
@@ -36199,7 +36206,7 @@ X86.opGRP6 = function()
  */
 X86.opGRP7 = function()
 {
-    var bModRM = this.peekIPByte();
+    let bModRM = this.peekIPByte();
     if (!(bModRM & 0x10)) {
         this.opFlags |= X86.OPFLAG.NOREAD;
     }
@@ -36458,15 +36465,15 @@ X86.opLOADALL386 = function()
         X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0, 0, true);
         return;
     }
-    var addr = this.segES.checkRead(this.regEDI & this.maskAddr, 0xCC);
+    let addr = this.segES.checkRead(this.regEDI & this.maskAddr, 0xCC);
     if (addr !== X86.ADDR_INVALID) {
         X86.helpLoadCR0.call(this, this.getLong(addr));
         /*
          * We need to call setPS() before loading any segment registers, because if the Virtual 8086 Mode (VM)
          * bit is set in EFLAGS, the segment registers need to know that.
          */
-        var accSS = this.getLong(addr + 0xA8);
-        var cpl = (accSS & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
+        let accSS = this.getLong(addr + 0xA8);
+        let cpl = (accSS & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
         this.setPS(this.getLong(addr + 0x04), cpl);
         /*
          * TODO: We have no use for the GDT(AR) at offset 0x6C or the IDT(AR) at offset 0x60, because
@@ -36545,8 +36552,8 @@ X86.opMOVrc = function()
         return;
     }
 
-    var reg;
-    var bModRM = this.getIPByte();
+    let reg;
+    let bModRM = this.getIPByte();
     switch((bModRM & 0x38) >> 3) {
     case 0x0:
         reg = this.regCR0;
@@ -36594,8 +36601,8 @@ X86.opMOVrd = function()
         return;
     }
 
-    var bModRM = this.getIPByte();
-    var iSrc = (bModRM & 0x38) >> 3;
+    let bModRM = this.getIPByte();
+    let iSrc = (bModRM & 0x38) >> 3;
 
     if (iSrc == 4 || iSrc == 5) {
         X86.opUndefined.call(this);
@@ -36643,8 +36650,8 @@ X86.opMOVcr = function()
         return;
     }
 
-    var bModRM = this.getIPByte();
-    var reg = this.getReg(bModRM & 0x7);
+    let bModRM = this.getIPByte();
+    let reg = this.getReg(bModRM & 0x7);
 
     switch((bModRM & 0x38) >> 3) {
     case 0x0:
@@ -36692,15 +36699,15 @@ X86.opMOVdr = function()
         return;
     }
 
-    var bModRM = this.getIPByte();
-    var iDst = (bModRM & 0x38) >> 3;
+    let bModRM = this.getIPByte();
+    let iDst = (bModRM & 0x38) >> 3;
 
     if (iDst == 4 || iDst == 5) {
         X86.opUndefined.call(this);
         return;
     }
 
-    var regDR = this.getReg(bModRM & 0x7);
+    let regDR = this.getReg(bModRM & 0x7);
 
     if (regDR != this.regDR[iDst]) {
         this.checkDebugRegisters(false);
@@ -36738,8 +36745,8 @@ X86.opMOVrt = function()
         return;
     }
 
-    var bModRM = this.getIPByte();
-    var iSrc = (bModRM & 0x38) >> 3;
+    let bModRM = this.getIPByte();
+    let iSrc = (bModRM & 0x38) >> 3;
 
     /*
      * Only TR6 and TR7 are defined, and only for the 80386 and 80486.  From the PC Magazine Prog. TechRef, p.64:
@@ -36784,8 +36791,8 @@ X86.opMOVtr = function()
         return;
     }
 
-    var bModRM = this.getIPByte();
-    var iDst = (bModRM & 0x38) >> 3;
+    let bModRM = this.getIPByte();
+    let iDst = (bModRM & 0x38) >> 3;
 
     /*
      * Only TR6 and TR7 are defined, and only for the 80386 and 80486.  From the PC Magazine Prog. TechRef, p.64:
@@ -36837,7 +36844,7 @@ X86.opMOVtr = function()
  */
 X86.opJOw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -36855,7 +36862,7 @@ X86.opJOw = function()
  */
 X86.opJNOw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -36873,7 +36880,7 @@ X86.opJNOw = function()
  */
 X86.opJCw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (this.getCF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -36891,7 +36898,7 @@ X86.opJCw = function()
  */
 X86.opJNCw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getCF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -36909,7 +36916,7 @@ X86.opJNCw = function()
  */
 X86.opJZw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -36927,7 +36934,7 @@ X86.opJZw = function()
  */
 X86.opJNZw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -36945,7 +36952,7 @@ X86.opJNZw = function()
  */
 X86.opJBEw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (this.getCF() || this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -36963,7 +36970,7 @@ X86.opJBEw = function()
  */
 X86.opJNBEw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getCF() && !this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -36981,7 +36988,7 @@ X86.opJNBEw = function()
  */
 X86.opJSw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (this.getSF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -36999,7 +37006,7 @@ X86.opJSw = function()
  */
 X86.opJNSw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getSF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -37017,7 +37024,7 @@ X86.opJNSw = function()
  */
 X86.opJPw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (this.getPF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -37035,7 +37042,7 @@ X86.opJPw = function()
  */
 X86.opJNPw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getPF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -37053,7 +37060,7 @@ X86.opJNPw = function()
  */
 X86.opJLw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getSF() != !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -37071,7 +37078,7 @@ X86.opJLw = function()
  */
 X86.opJNLw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getSF() == !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -37089,7 +37096,7 @@ X86.opJNLw = function()
  */
 X86.opJLEw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (this.getZF() || !this.getSF() != !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -37107,7 +37114,7 @@ X86.opJLEw = function()
  */
 X86.opJNLEw = function()
 {
-    var disp = this.getIPWord();
+    let disp = this.getIPWord();
     if (!this.getZF() && !this.getSF() == !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -37569,7 +37576,7 @@ X86.opLGS = function()
 X86.opMOVZXb = function()
 {
     this.decodeModRegByte.call(this, X86.fnMOVXb);
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
     switch(reg) {
     case 0x0:
         this.regEAX = (this.regEAX & ~this.maskData) | (this.regEAX & 0xff);
@@ -37700,7 +37707,7 @@ X86.opBSR = function()
 X86.opMOVSXb = function()
 {
     this.decodeModRegByte.call(this, X86.fnMOVXb);
-    var reg = (this.bModRM >> 3) & 0x7;
+    let reg = (this.bModRM >> 3) & 0x7;
     switch(reg) {
     case 0x0:
         this.regEAX = (this.regEAX & ~this.maskData) | ((((this.regEAX & 0xff) << 24) >> 24) & this.maskData);
@@ -44143,7 +44150,7 @@ class ROMX86 extends Component {
         this.idNotify = parmsROM['notify'];
         this.aNotifyParms = null;
         if (this.idNotify) {
-            var i = this.idNotify.indexOf('[');
+            let i = this.idNotify.indexOf('[');
             if (i > 0) {
                 try {
                     this.aNotifyParms = eval(this.idNotify.substr(i));
@@ -44155,14 +44162,14 @@ class ROMX86 extends Component {
         this.sFileURL = this.sFilePath = parmsROM['file'];
 
         if (this.sFileURL) {
-            var sFileName = Str.getBaseName(this.sFileURL);
+            let sFileName = Str.getBaseName(this.sFileURL);
             if (DEBUG) this.log('load("' + this.sFileURL + '")');
             /*
              * If the selected ROM file has a ".json" extension, then we assume it's pre-converted
              * JSON-encoded ROM data, so we load it as-is; ditto for ROM files with a ".hex" extension.
              * Otherwise, we ask our server-side ROM converter to return the file in a JSON-compatible format.
              */
-            var sFileExt = Str.getExtension(sFileName);
+            let sFileExt = Str.getExtension(sFileName);
             if (sFileExt != DumpAPI.FORMAT.JSON && sFileExt != DumpAPI.FORMAT.HEX) {
                 this.sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
             }
@@ -44186,8 +44193,8 @@ class ROMX86 extends Component {
         this.dbg = dbg;
 
         if (this.sFileURL) {
-            var rom = this;
-            var sProgress = "Loading " + this.sFileURL + "...";
+            let rom = this;
+            let sProgress = "Loading " + this.sFileURL + "...";
             Web.getResource(this.sFileURL, null, true, function doneROMLoad(sURL, sResponse, nErrorCode) {
                 rom.doneLoad(sURL, sResponse, nErrorCode);
             }, function(nState) {
@@ -44259,13 +44266,13 @@ class ROMX86 extends Component {
                 /*
                  * The most likely source of any exception will be here: parsing the JSON-encoded ROM data.
                  */
-                var rom = eval("(" + sROMData + ")");
-                var ab = rom['bytes'];
+                let rom = eval("(" + sROMData + ")");
+                let ab = rom['bytes'];
                 /*
                  * Resource 'longs' should always be 32-bit DWORD values, whereas 'data' bit lengths
                  * will vary according to the machine architecture for which the resource was designed.
                  */
-                var adw = rom['longs'] || rom['data'];
+                let adw = rom['longs'] || rom['data'];
 
                 if (ab) {
                     this.abROM = ab;
@@ -44275,7 +44282,7 @@ class ROMX86 extends Component {
                      * Convert all the DWORDs into BYTEs, so that subsequent code only has to deal with abROM.
                      */
                     this.abROM = new Array(adw.length * 4);
-                    for (var idw = 0, ib = 0; idw < adw.length; idw++) {
+                    for (let idw = 0, ib = 0; idw < adw.length; idw++) {
                         this.abROM[ib++] = adw[idw] & 0xff;
                         this.abROM[ib++] = (adw[idw] >> 8) & 0xff;
                         this.abROM[ib++] = (adw[idw] >> 16) & 0xff;
@@ -44306,10 +44313,10 @@ class ROMX86 extends Component {
              * Parse the ROM data manually; we assume it's in "simplified" hex form (a series of hex byte-values
              * separated by whitespace).
              */
-            var sHexData = sROMData.replace(/\n/gm, " ").replace(/ +$/, "");
-            var asHexData = sHexData.split(" ");
+            let sHexData = sROMData.replace(/\n/gm, " ").replace(/ +$/, "");
+            let asHexData = sHexData.split(" ");
             this.abROM = new Array(asHexData.length);
-            for (var i = 0; i < asHexData.length; i++) {
+            for (let i = 0; i < asHexData.length; i++) {
                 this.abROM[i] = Str.parseInt(asHexData[i], 16);
             }
         }
@@ -44349,13 +44356,13 @@ class ROMX86 extends Component {
                 }
                 else if (this.addROM(this.addrROM)) {
 
-                    var aliases = [];
+                    let aliases = [];
                     if (typeof this.addrAlias == "number") {
                         aliases.push(this.addrAlias);
                     } else if (this.addrAlias != null && this.addrAlias.length) {
                         aliases = this.addrAlias;
                     }
-                    for (var i = 0; i < aliases.length; i++) {
+                    for (let i = 0; i < aliases.length; i++) {
                         this.cloneROM(aliases[i]);
                     }
                     /*
@@ -44364,7 +44371,7 @@ class ROMX86 extends Component {
                      * option is the Video component, and only when the associated ROM contains font data that it needs.
                      */
                     if (this.idNotify) {
-                        var component = Component.getComponentByID(this.idNotify, this.id);
+                        let component = Component.getComponentByID(this.idNotify, this.id);
                         if (component) {
                             component.onROMLoad(this.abROM, this.aNotifyParms);
                         } else {
@@ -44399,8 +44406,8 @@ class ROMX86 extends Component {
     {
         if (this.bus.addMemory(addr, this.sizeROM, Memory.TYPE.ROM)) {
             if (DEBUG) this.log("addROM(): copying ROM to " + Str.toHexLong(addr) + " (" + Str.toHexLong(this.abROM.length) + " bytes)");
-            var bto = null;
-            for (var off = 0; off < this.abROM.length; off++) {
+            let bto = null;
+            for (let off = 0; off < this.abROM.length; off++) {
                 this.bus.setByteDirect(addr + off, this.abROM[off]);
                 if (BACKTRACK) {
                     bto = this.bus.addBackTrackObject(this, bto, off);
@@ -44430,7 +44437,7 @@ class ROMX86 extends Component {
      */
     cloneROM(addr)
     {
-        var aBlocks = this.bus.getMemoryBlocks(this.addrROM, this.sizeROM);
+        let aBlocks = this.bus.getMemoryBlocks(this.addrROM, this.sizeROM);
         this.bus.setMemoryBlocks(addr, this.sizeROM, aBlocks);
     }
 
@@ -44444,11 +44451,11 @@ class ROMX86 extends Component {
      */
     static init()
     {
-        var aeROM = Component.getElementsByClass(document, PCX86.APPCLASS, "rom");
-        for (var iROM = 0; iROM < aeROM.length; iROM++) {
-            var eROM = aeROM[iROM];
-            var parmsROM = Component.getComponentParms(eROM);
-            var rom = new ROMX86(parmsROM);
+        let aeROM = Component.getElementsByClass(document, PCX86.APPCLASS, "rom");
+        for (let iROM = 0; iROM < aeROM.length; iROM++) {
+            let eROM = aeROM[iROM];
+            let parmsROM = Component.getComponentParms(eROM);
+            let rom = new ROMX86(parmsROM);
             Component.bindComponentControls(rom, eROM, PCX86.APPCLASS);
         }
     }
@@ -44596,7 +44603,7 @@ ROMX86.BIOS = {
     INFO:           0x487,              // PC AT: MODE OPTIONS (byte)
     /*
      * INFO BITS:
-     * 
+     *
      *      0x80: HIGH BIT OF MODE SET, CLEAR/NOT CLEAR REGEN
      *      0x60: 256K OF VRAM
      *      0x40: 192K OF VRAM
@@ -44608,6 +44615,38 @@ ROMX86.BIOS = {
      *      0x01: SET C_TYPE EMULATE ACTIVE (0)
      */
     INFO_3:         0x488,              // PC AT: FEATURE BIT SWITCHES (1 byte, plus 2 reserved bytes)
+    /*
+     *     40:88  byte  PCjr: third keyboard status byte
+     *                  EGA feature bit switches, emulated on VGA
+     *
+     *         |7|6|5|4|3|2|1|0| EGA feature bit switches (EGA+)
+     *          | | | | | | | `-- EGA SW1 config (1=off)
+     *          | | | | | | `--- EGA SW2 config (1=off)
+     *          | | | | | `---- EGA SW3 config (1=off)
+     *          | | | | `----- EGA SW4 config (1=off)
+     *          | | | `------ Input FEAT0 (ISR0 bit 5) after output on FCR0
+     *          | | `------- Input FEAT0 (ISR0 bit 6) after output on FCR0
+     *          | `-------- Input FEAT1 (ISR0 bit 5) after output on FCR1
+     *          `--------- Input FEAT1 (ISR0 bit 6) after output on FCR1
+     *
+     *     40:89  byte  Video display data area (MCGA and VGA)
+     *
+     *         |7|6|5|4|3|2|1|0| Video display data area (MCGA and VGA)
+     *          | | | | | | | `-- 1=VGA is active
+     *          | | | | | | `--- 1=gray scale is enabled
+     *          | | | | | `---- 1=using monochrome monitor
+     *          | | | | `----- 1=default palette loading is disabled
+     *          | | | `------ see table below
+     *          | | `------- reserved
+     *          | `--------  1=display switching enabled
+     *          `--------- alphanumeric scan lines (see table below)
+     *
+     *           Bit7    Bit4   Scan Lines
+     *             0       0    350 line mode
+     *             0       1    400 line mode
+     *             1       0    200 line mode
+     *             1       1    reserved
+     */
     /*
      * ADDITIONAL MEDIA DATA
      */
@@ -44810,7 +44849,7 @@ class RAM extends Component {
     reset()
     {
         if (!this.addrRAM && !this.fInstalled && this.chipset) {
-            var baseRAM = this.chipset.getDIPMemorySize() * 1024;
+            let baseRAM = this.chipset.getDIPMemorySize() * 1024;
             if (this.sizeRAM && baseRAM != this.sizeRAM) {
                 this.bus.removeMemory(this.addrRAM, this.sizeRAM);
                 this.fAllocated = false;
@@ -44875,7 +44914,7 @@ class RAM extends Component {
             Component.error("No RAM allocated");
         }
     }
-    
+
     /**
      * save()
      *
@@ -44886,7 +44925,7 @@ class RAM extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         if (this.controller) state.set(0, this.controller.save());
         return state.data();
     }
@@ -44916,11 +44955,11 @@ class RAM extends Component {
      */
     static init()
     {
-        var aeRAM = Component.getElementsByClass(document, PCX86.APPCLASS, "ram");
-        for (var iRAM = 0; iRAM < aeRAM.length; iRAM++) {
-            var eRAM = aeRAM[iRAM];
-            var parmsRAM = Component.getComponentParms(eRAM);
-            var ram = new RAM(parmsRAM);
+        let aeRAM = Component.getElementsByClass(document, PCX86.APPCLASS, "ram");
+        for (let iRAM = 0; iRAM < aeRAM.length; iRAM++) {
+            let eRAM = aeRAM[iRAM];
+            let parmsRAM = Component.getComponentParms(eRAM);
+            let ram = new RAM(parmsRAM);
             Component.bindComponentControls(ram, eRAM, PCX86.APPCLASS);
         }
     }
@@ -44967,7 +45006,7 @@ class CompaqController extends Controller {
     constructor(ram)
     {
         super();
-        
+
         this.ram = ram;
         this.wMappings = CompaqController.MAPPINGS.DEFAULT;
         /*
@@ -45020,7 +45059,7 @@ class CompaqController extends Controller {
          * Offsets 0-3 correspond to reads from 0x80C00000-0x80C00003; anything outside that range
          * returns our standard non-responsive value of 0xff.
          */
-        var b = 0xff;
+        let b = 0xff;
         if (off < 0x02) {
             b = (off & 0x1)? (this.wSettings >> 8) : (this.wSettings & 0xff);
         }
@@ -45044,7 +45083,7 @@ class CompaqController extends Controller {
              * This is a write to 0x80C00000
              */
             if (b != (this.wMappings & 0xff)) {
-                var bus = this.ram.bus;
+                let bus = this.ram.bus;
                 if (!(b & CompaqController.MAPPINGS.UNMAPPED)) {
                     if (!this.aBlocksDst) {
                         this.aBlocksDst = bus.getMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE);
@@ -45055,8 +45094,8 @@ class CompaqController extends Controller {
                      * from the mapping feature.  We could avoid executing this code as well by checking the
                      * current read-write state, but this is an infrequent operation, so there's no point.
                      */
-                    var aBlocks = bus.getMemoryBlocks(CompaqController.MAP_SRC, CompaqController.MAP_SIZE);
-                    var type = (b & CompaqController.MAPPINGS.READWRITE)? Memory.TYPE.RAM : Memory.TYPE.ROM;
+                    let aBlocks = bus.getMemoryBlocks(CompaqController.MAP_SRC, CompaqController.MAP_SIZE);
+                    let type = (b & CompaqController.MAPPINGS.READWRITE)? Memory.TYPE.RAM : Memory.TYPE.ROM;
                     bus.setMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE, aBlocks, type);
                 }
                 else {
@@ -45115,7 +45154,7 @@ class CompaqController extends Controller {
      */
     static readByte(off, addr)
     {
-        var b = this.controller.getByte(off);
+        let b = this.controller.getByte(off);
         if (DEBUG) {
             this.controller.ram.printMessage("CompaqController.readByte(" + Str.toHexWord(off) + ") returned " + Str.toHexByte(b), 0, true);
         }
@@ -45270,15 +45309,15 @@ class Keyboard extends Component {
      *
      *          "US83" (default)
      *          "US84"
-     *          "US101" (not fully supported yet) 
+     *          "US101" (not fully supported yet)
      *
      *      autoType: string of keys to automatically inject when the machine is ready (undefined if none)
-     *      
+     *
      *      softKeys: boolean set to true to enable the machine's soft keyboard, if any (default is false)
      *
      * Its main purpose is to receive binding requests for various keyboard events, and to use those events
      * to simulate the PC's keyboard hardware.
-     * 
+     *
      * TODO: Consider finishing 101-key keyboard support, even though that's sort of a "PS/2" thing, and I'm not
      * really interested in taking PCjs into the PS/2 line (that's also why we still support only serial mice, not
      * "PS/2" mice).  In addition, all keyboards *after* the original PC 83-key keyboard supported their own unique
@@ -45296,7 +45335,7 @@ class Keyboard extends Component {
 
         this.fMobile = Web.isMobile("!iPad");
         this.printMessage("mobile keyboard support: " + (this.fMobile? "true" : "false"));
-        
+
         /*
          * This flag (formerly fMSIE, for all versions of Microsoft Internet Explorer, up to and including v11)
          * has been updated to reflect the Microsoft Windows *platform* rather than the *browser*, because it appears
@@ -45378,18 +45417,18 @@ class Keyboard extends Component {
         this.msDoubleClick   = 250;         // used by mousedown/mouseup handlers to soft-lock modifier keys
         this.cKeysPressed    = 0;           // count of keys pressed since the last time it was reset
         this.softCodeKeys    = Object.keys(Keyboard.SOFTCODES);
-        
+
         /*
          * Remove all single-character SOFTCODE keys from the softCodeKeys array, because those SOFTCODES
          * are not supported by injectKeys(); they can be specified normally using their single-character identity.
          */
-        for (var i = 0; i < this.softCodeKeys.length; i++) {
+        for (let i = 0; i < this.softCodeKeys.length; i++) {
             if (this.softCodeKeys[i].length < 2) {
                 this.softCodeKeys.splice(i, 1);
                 i--;
             }
         }
-        
+
         /*
          * autoType records the machine's specified autoType sequence, if any, and when injectInit() is called
          * with the appropriate INJECTION signal, injectInit() pass autoType to injectKeys().
@@ -45428,10 +45467,10 @@ class Keyboard extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var kbd = this;
-        var className;
-        var id = sHTMLType + '-' + sBinding;
-        var controlText = /** @type {HTMLTextAreaElement} */ (control);
+        let kbd = this;
+        let className;
+        let id = sHTMLType + '-' + sBinding;
+        let controlText = /** @type {HTMLTextAreaElement} */ (control);
 
         if (this.bindings[id] === undefined) {
             switch (sBinding) {
@@ -45440,7 +45479,7 @@ class Keyboard extends Component {
                     /*
                      * TODO: Fix this rather fragile code, which depends on the current structure of the given xxxx-softkeys.xml
                      */
-                    var controlSoftKeyboard = control.parentElement.parentElement.nextElementSibling;
+                    let controlSoftKeyboard = control.parentElement.parentElement.nextElementSibling;
                     className = controlSoftKeyboard.className;
                     if (this.fMobile != (className.indexOf('mobile') >= 0)) {
                         controlSoftKeyboard = controlSoftKeyboard.nextElementSibling;
@@ -45466,12 +45505,12 @@ class Keyboard extends Component {
                     }
                 } catch(err) {}
                 return true;
-                
+
             case "screen":
                 /*
                  * This is a special binding that the Video component uses to effectively bind its screen to the
                  * entire keyboard; eg:
-                 * 
+                 *
                  *      this.kbd.setBinding(this.inputTextArea? "textarea" : "canvas", "screen", this.inputScreen);
                  *
                  * Recording the binding ID prevents multiple controls (or components) from attempting to erroneously
@@ -45535,7 +45574,7 @@ class Keyboard extends Component {
                 /*
                  * Maintain support for older button codes; eg, map button code "ctrl-c" to CLICKCODE "CTRL_C"
                  */
-                var sCode = sBinding.toUpperCase().replace(/-/g, '_');
+                let sCode = sBinding.toUpperCase().replace(/-/g, '_');
                 if (Keyboard.CLICKCODES[sCode] !== undefined && sHTMLType == "button") {
                     this.bindings[id] = controlText;
                     if (MAXDEBUG) console.log("binding click-code '" + sCode + "'");
@@ -45562,11 +45601,11 @@ class Keyboard extends Component {
                     this.cSoftCodes++;
                     this.bindings[id] = controlText;
                     if (MAXDEBUG) console.log("binding soft-code '" + sBinding + "'");
-                    var msLastEvent = 0, nClickState = 0;
-                    var fStateKey = (Keyboard.KEYSTATES[Keyboard.SOFTCODES[sBinding]] <= Keyboard.STATE.ALL_MODIFIERS);
-                    var fnDown = function(kbd, sKey, simCode) {
+                    let msLastEvent = 0, nClickState = 0;
+                    let fStateKey = (Keyboard.KEYSTATES[Keyboard.SOFTCODES[sBinding]] <= Keyboard.STATE.ALL_MODIFIERS);
+                    let fnDown = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingDown(event) {
-                            var msDelta = event.timeStamp - msLastEvent;
+                            let msDelta = event.timeStamp - msLastEvent;
                             nClickState = (nClickState && msDelta < kbd.msDoubleClick? (nClickState << 1) : 1);
                             msLastEvent = event.timeStamp;
                             event.preventDefault();                 // preventDefault() is necessary to avoid "zooming" when you type rapidly
@@ -45574,10 +45613,10 @@ class Keyboard extends Component {
                             kbd.addActiveKey(simCode);
                         };
                     }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
-                    var fnUp = function(kbd, sKey, simCode) {
+                    let fnUp = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingUp(event) {
                             if (nClickState) {
-                                var msDelta = event.timeStamp - msLastEvent;
+                                let msDelta = event.timeStamp - msLastEvent;
                                 nClickState = (fStateKey && msDelta < kbd.msDoubleClick? (nClickState << 1) : 0);
                                 msLastEvent = event.timeStamp;
                                 if (nClickState < 8) {
@@ -45640,9 +45679,9 @@ class Keyboard extends Component {
      */
     findBinding(simCode, sType, fDown)
     {
-        var control;
+        let control;
         if (this.cSoftCodes && this.fSoftKeyboard) {
-            for (var code in Keys.SHIFTED_KEYCODES) {
+            for (let code in Keys.SHIFTED_KEYCODES) {
                 if (simCode == Keys.SHIFTED_KEYCODES[code]) {
                     simCode = +code;
                     code = Keys.NONASCII_KEYCODES[code];
@@ -45672,9 +45711,9 @@ class Keyboard extends Component {
             else if (simCode == Keyboard.SIMCODE.CTRL_ALT_SUB) {
                 simCode = Keyboard.SIMCODE.NUM_SUB;
             }
-            for (var sBinding in Keyboard.SOFTCODES) {
+            for (let sBinding in Keyboard.SOFTCODES) {
                 if (Keyboard.SOFTCODES[sBinding] == simCode || Keyboard.SOFTCODES[sBinding] == this.toUpperKey(simCode)) {
-                    var id = sType + '-' + sBinding;
+                    let id = sType + '-' + sBinding;
                     control = this.bindings[id];
                     if (control && fDown !== undefined) {
                         this.setSoftKeyState(control, fDown);
@@ -45702,11 +45741,11 @@ class Keyboard extends Component {
         this.cpu = cpu;
         this.dbg = dbg;
 
-        var kbd = this;
+        let kbd = this;
         this.timerInject = this.cpu.addTimer(this.id + ".inject", function injectKeysTimer() {
             kbd.injectKeys();
         });
-        
+
         this.timerTransmit = this.cpu.addTimer(this.id + ".transmit", function transmitDataTimer() {
             kbd.transmitData();
         });
@@ -45714,7 +45753,7 @@ class Keyboard extends Component {
         this.chipset = cmp.getMachineComponent("ChipSet");
         this.autoType = cmp.getMachineParm('autoType') || this.autoType;
 
-        var softKeys = cmp.getMachineParm('softKeys');
+        let softKeys = cmp.getMachineParm('softKeys');
         if (softKeys) this.enableSoftKeyboard(softKeys != "false");
 
         cpu.addIntNotify(Interrupts.DOS, this.intDOS.bind(this));
@@ -45743,7 +45782,7 @@ class Keyboard extends Component {
      */
     intDOS(addr)
     {
-        var AH = (this.cpu.regEAX >> 8) & 0xff;
+        let AH = (this.cpu.regEAX >> 8) & 0xff;
         if (AH == 0x0A) {
             this.fDOSReady = true;
             if (this.fnDOSReady) {
@@ -45798,7 +45837,7 @@ class Keyboard extends Component {
      */
     setModel(sModel)
     {
-        var iModel = 0;
+        let iModel = 0;
         this.model = null;
         if (typeof sModel == "string") {
             this.model = sModel.toUpperCase();
@@ -45822,7 +45861,7 @@ class Keyboard extends Component {
      */
     checkBuffer(b)
     {
-        var fReady = false;
+        let fReady = false;
         if (b) {
             /*
              * The following hack is for the 5170 ROM BIOS keyboard diagnostic, which expects the keyboard
@@ -45864,7 +45903,7 @@ class Keyboard extends Component {
      */
     receiveCmd(bCmd)
     {
-        var b = -1;
+        let b = -1;
 
         if (!COMPILED && this.messageEnabled()) this.printMessage("receiveCmd(" + Str.toHexByte(bCmd) + ")");
 
@@ -45905,7 +45944,7 @@ class Keyboard extends Component {
      * setEnabled(fData, fClock)
      *
      * This is the ChipSet's interface for toggling keyboard "data" and "clock" lines.
-     * 
+     *
      * For MODEL_5150 and MODEL_5160 machines, this function is called from the ChipSet's PPI_B
      * output handler.  For MODEL_5170 machines, this function is called when selected CMD
      * "data bytes" have been written.
@@ -45917,7 +45956,7 @@ class Keyboard extends Component {
      */
     setEnabled(fData, fClock)
     {
-        var fReset = false;
+        let fReset = false;
         if (this.fClock !== fClock) {
             if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
                 this.printMessage("keyboard clock line changing to " + fClock, true);
@@ -46003,9 +46042,9 @@ class Keyboard extends Component {
                  * (by toggling the CLOCK line), then checking for a BAT_OK response (0xAA), and then
                  * clocking in the next byte (by toggling the DATA line); if that next byte isn't 0x00,
                  * then the BIOS reports a "301" error, along with "AA" if we failed to properly flush
-                 * the BAT_OK response. 
+                 * the BAT_OK response.
                  */
-                var b = this.abBuffer.length? this.abBuffer[0] : 0; 
+                let b = this.abBuffer.length? this.abBuffer[0] : 0;
                 if (this.chipset.receiveKbdData(b)) {
                     if (!COMPILED && this.messageEnabled()) this.printMessage("keyboard data " + Str.toHexByte(b) + " delivered");
                     this.abBuffer.shift();
@@ -46093,7 +46132,7 @@ class Keyboard extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, this.saveState());
         return state.data();
     }
@@ -46138,7 +46177,7 @@ class Keyboard extends Component {
             this.nInjection = this.cmp.sStatePath? Keyboard.INJECTION.ON_START : Keyboard.INJECTION.NONE;
         }
 
-        var i = 0;
+        let i = 0;
         this.fClock = data[i++];
         this.fData = data[i];
         this.bCmdPending = 0;       // when non-zero, a command is pending (eg, SET_LED or SET_RATE)
@@ -46166,7 +46205,7 @@ class Keyboard extends Component {
      */
     saveState()
     {
-        var data = [];
+        let data = [];
         data[0] = this.fClock;
         data[1] = this.fData;
         return data;
@@ -46177,7 +46216,7 @@ class Keyboard extends Component {
      *
      * In addition to enabling or disabling our own soft keyboard (if any), this also attempts to disable or enable
      * (as appropriate) the textarea control (if any) that machines use to trigger a touch device's built-in keyboard.
-     * 
+     *
      * @this {Keyboard}
      * @param {boolean} fEnable
      */
@@ -46198,7 +46237,7 @@ class Keyboard extends Component {
         }
         this.fSoftKeyboard = fEnable;
     }
-    
+
     /**
      * setSoftKeyState(control, f)
      *
@@ -46237,7 +46276,7 @@ class Keyboard extends Component {
                          * the speaker bit.  And there isn't really a better time to disable it, because the
                          * COMPAQ_KEYCLICK byte is set by IBMBIO.COM initialization code in COMPAQ MS-DOS, if the
                          * machine model byte is FC (indicating PC AT):
-                         * 
+                         *
                          *      &0070:2EF7 2E               CS:
                          *      &0070:2EF8 803E442DFC       CMP      [2D44],FC
                          *      &0070:2EFD 750C             JNZ      2F0B (IBMBIO.COM+0x3174)
@@ -46286,7 +46325,7 @@ class Keyboard extends Component {
     injectKeys(sKeys, msDelay)
     {
         if (sKeys) {
-            var sInjectBuffer = this.parseKeys(sKeys);
+            let sInjectBuffer = this.parseKeys(sKeys);
             if (sInjectBuffer) {
                 this.nInjection = Keyboard.INJECTION.NONE;
                 this.sInjectBuffer = sInjectBuffer;
@@ -46303,9 +46342,9 @@ class Keyboard extends Component {
         if (this.msInjectDelay >= 1000) {
             this.msInjectDelay = this.msInjectDefault;
         }
-        var simCode = 0;
+        let simCode = 0;
         while (this.sInjectBuffer.length > 0 && !simCode) {
-            var ch = this.sInjectBuffer.charAt(0);
+            let ch = this.sInjectBuffer.charAt(0);
             if (ch == '$') {
                 /*
                  * $<number> pauses injection by the specified number of tenths of a second; eg,
@@ -46314,7 +46353,7 @@ class Keyboard extends Component {
                  * being misinterpreted as part of the delay (eg, $5.1) pauses for 1/2 second and
                  * then injects "1").
                  */
-                var digits = this.sInjectBuffer.match(/^\$([0-9]+)\.?/);
+                let digits = this.sInjectBuffer.match(/^\$([0-9]+)\.?/);
                 if (digits) {
                     this.msInjectDelay = (+digits[1] * 100) || this.msInjectDefault;
                     this.sInjectBuffer = this.sInjectBuffer.substr(digits[0].length);
@@ -46324,16 +46363,16 @@ class Keyboard extends Component {
                  * Yes, this code is slow and gross, but it's simple, and key injection doesn't have
                  * to be that fast anyway.  The added check for SOFTCODES that have omitted the 'num-'
                  * prefix adds to the slowness, but it's a nice convenience, allowing you to specify
-                 * non-ASCII keys like 'num-right' or 'num-up' more succinctly as  "$right" or "$up". 
+                 * non-ASCII keys like 'num-right' or 'num-up' more succinctly as  "$right" or "$up".
                  */
-                for (var i = 0; i < this.softCodeKeys.length; i++) {
-                    var name = this.softCodeKeys[i];
+                for (let i = 0; i < this.softCodeKeys.length; i++) {
+                    let name = this.softCodeKeys[i];
                     if (this.sInjectBuffer.indexOf(name) == 1) {
                         simCode = Keyboard.SOFTCODES[name];
                         this.sInjectBuffer = this.sInjectBuffer.substr(name.length + 1);
                         break;
                     }
-                    var shortName = (name.indexOf('num-') == 0? name.substr(4) : "");
+                    let shortName = (name.indexOf('num-') == 0? name.substr(4) : "");
                     if (shortName && this.sInjectBuffer.indexOf(shortName) == 1) {
                         simCode = Keyboard.SOFTCODES[name];
                         this.sInjectBuffer = this.sInjectBuffer.substr(shortName.length + 1);
@@ -46343,7 +46382,7 @@ class Keyboard extends Component {
             }
             if (simCode) break;
             this.sInjectBuffer = this.sInjectBuffer.substr(1);
-            var charCode = ch.charCodeAt(0);
+            let charCode = ch.charCodeAt(0);
             /*
              * charCodes 0x01-0x1A correspond to key combinations CTRL-A through CTRL-Z, unless they
              * are \t, \n, or \r, which are reserved for TAB, LINE-FEED, and RETURN, respectively, so if
@@ -46378,13 +46417,13 @@ class Keyboard extends Component {
                 simCode = charCode;
             }
         }
-        
+
         if (simCode) {
-            var fPress = (Keyboard.MODIFIERS[simCode] === undefined); 
+            let fPress = (Keyboard.MODIFIERS[simCode] === undefined);
             this.addActiveKey(simCode, fPress);
             if (fPress) this.clearActiveKeys(true);
         }
-        
+
         if (!this.sInjectBuffer.length) {
             if (this.fnInjectReady) {
                 this.fnInjectReady();
@@ -46447,9 +46486,9 @@ class Keyboard extends Component {
     parseKeys(sKeys)
     {
         if (sKeys) {
-            var match, reSpecial = /(?:^|[^$])\$([a-z0-9][a-z0-9-]+)/g;
+            let match, reSpecial = /(?:^|[^$])\$([a-z0-9][a-z0-9-]+)/g;
             while (match = reSpecial.exec(sKeys)) {
-                var sReplace = "";
+                let sReplace = "";
                 switch (match[1]) {
                 case 'date':
                     sReplace = Usr.formatDate("n-j-Y");
@@ -46489,7 +46528,7 @@ class Keyboard extends Component {
      */
     waitReady(fnCallReady, sOption)
     {
-        var fReady = false;
+        let fReady = false;
 
         switch(sOption) {
         case "DOS":
@@ -46536,10 +46575,10 @@ class Keyboard extends Component {
      */
     updateLEDs(bitState)
     {
-        var control;
-        for (var sBinding in Keyboard.LEDSTATES) {
-            var id = "led-" + sBinding;
-            var bitLED = Keyboard.LEDSTATES[sBinding];
+        let control;
+        for (let sBinding in Keyboard.LEDSTATES) {
+            let id = "led-" + sBinding;
+            let bitLED = Keyboard.LEDSTATES[sBinding];
             if ((!bitState || bitState == bitLED) && (control = this.bindings[id])) {
                 this.setLED(control, !!(this.bitsStateSim & bitLED));
             }
@@ -46591,10 +46630,10 @@ class Keyboard extends Component {
      */
     updateShiftState(simCode, fSim, fDown)
     {
-        var result = 0;
+        let result = 0;
         if (Keyboard.SIMCODES[simCode]) {
-            var fRight = (Math.floor(simCode / 1000) & 2);
-            var bitState = Keyboard.KEYSTATES[simCode] || 0;
+            let fRight = (Math.floor(simCode / 1000) & 2);
+            let bitState = Keyboard.KEYSTATES[simCode] || 0;
             if (bitState) {
                 if (fRight && !(bitState & Keyboard.STATE.ALL_RIGHT)) {
                     bitState >>= 1;
@@ -46657,7 +46696,7 @@ class Keyboard extends Component {
      */
     addActiveKey(simCode, fPress)
     {
-        var wCode = Keyboard.SIMCODES[simCode] || Keyboard.SIMCODES[simCode += Keys.KEYCODE.ONDOWN];
+        let wCode = Keyboard.SIMCODES[simCode] || Keyboard.SIMCODES[simCode += Keys.KEYCODE.ONDOWN];
 
         if (!wCode) {
             if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.KEY)) {
@@ -46678,8 +46717,8 @@ class Keyboard extends Component {
             if (this.aKeysActive[0].nRepeat > 0) this.aKeysActive[0].nRepeat = 0;
         }
 
-        var key;
-        for (var i = 0; i < this.aKeysActive.length; i++) {
+        let i, key;
+        for (i = 0; i < this.aKeysActive.length; i++) {
             key = this.aKeysActive[i];
             if (key.simCode == simCode) {
                 /*
@@ -46710,7 +46749,7 @@ class Keyboard extends Component {
             this.findBinding(simCode, "key", true);
             i++;
         }
-        
+
         if (i > 0) {
             this.aKeysActive.splice(0, 0, key);         // aka aKeysActive.unshift(key)
         }
@@ -46770,8 +46809,8 @@ class Keyboard extends Component {
      */
     clearActiveKeys(fModifiers)
     {
-        for (var i = 0; i < this.aKeysActive.length; i++) {
-            var key = this.aKeysActive[i];
+        for (let i = 0; i < this.aKeysActive.length; i++) {
+            let key = this.aKeysActive[i];
             if (fModifiers && !Keyboard.MODIFIERS[key.simCode]) continue;
             if (this.removeActiveKey(key.simCode)) i--;
         }
@@ -46798,9 +46837,9 @@ class Keyboard extends Component {
          */
         if (!fFlush && (!this.cpu || !this.cpu.isRunning())) return false;
 
-        var fRemoved = false;
-        for (var i = 0; i < this.aKeysActive.length; i++) {
-            var key = this.aKeysActive[i];
+        let fRemoved = false;
+        for (let i = 0; i < this.aKeysActive.length; i++) {
+            let key = this.aKeysActive[i];
             if (key.simCode == simCode || key.simCode == Keys.SHIFTED_KEYCODES[simCode]) {
                 this.aKeysActive.splice(i, 1);
                 if (key.timer) clearTimeout(key.timer);
@@ -46846,7 +46885,7 @@ class Keyboard extends Component {
         if (msTimer && key.nRepeat < 0) {
             key.fDown = false;
         }
-        
+
         if (!this.keySimulate(key.simCode, key.fDown) || !key.nRepeat) {
             /*
              * Why isn't there a simple return here? In order to set breakpoints on two different return conditions, of course!
@@ -46857,7 +46896,7 @@ class Keyboard extends Component {
             return;
         }
 
-        var ms;
+        let ms;
         if (key.nRepeat < 0) {
             if (!key.fDown) {
                 this.removeActiveKey(key.simCode);
@@ -46868,11 +46907,11 @@ class Keyboard extends Component {
         else {
             ms = (key.nRepeat++ == 1? this.msAutoRepeat : this.msNextRepeat);
         }
-        
+
         if (key.timer) {
             clearTimeout(key.timer);
         }
-        
+
         key.timer = setTimeout(function(kbd) {
             return function onUpdateActiveKey() {
                 kbd.updateActiveKey(key, ms);
@@ -46890,8 +46929,8 @@ class Keyboard extends Component {
      */
     getSimCode(keyCode, fShifted)
     {
-        var code;
-        var simCode = keyCode;
+        let code;
+        let simCode = keyCode;
 
         if (keyCode >= Keys.ASCII.A && keyCode <= Keys.ASCII.Z) {
             if (!(this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT | Keyboard.STATE.CAPS_LOCK)) == fShifted) {
@@ -46947,15 +46986,15 @@ class Keyboard extends Component {
      */
     onKeyChange(event, fDown)
     {
-        var fPass = true;
-        var fPress = false;
-        var fIgnore = false;
-        var keyCode = event.keyCode;
+        let fPass = true;
+        let fPress = false;
+        let fIgnore = false;
+        let keyCode = event.keyCode;
 
         if (!this.cmp.notifyKbdEvent(event, fDown)) {
             return false;
         }
-        
+
         if (fDown) this.cKeysPressed++;
         this.sInjectBuffer = "";                        // actual key events should stop any injection in progress
         Component.processScript(this.idMachine);        // and any script, too
@@ -46968,7 +47007,7 @@ class Keyboard extends Component {
          * So, to seamlessly blend "up" and "down" events with "press" events, we must convert any keyCodes we
          * receive here to a compatibly shifted simCode.
          */
-        var simCode = this.getSimCode(keyCode, true);
+        let simCode = this.getSimCode(keyCode, true);
 
         if (this.fEscapeDisabled && simCode == Keys.ASCII['`']) {
             keyCode = simCode = Keys.KEYCODE.ESC;
@@ -46981,7 +47020,7 @@ class Keyboard extends Component {
                 simCode += Keys.KEYCODE.ONRIGHT;
             }
 
-            var nShiftState = this.updateShiftState(simCode, false, fDown);
+            let nShiftState = this.updateShiftState(simCode, false, fDown);
             if (nShiftState) {
 
                 if (keyCode == Keys.KEYCODE.CAPS_LOCK || keyCode == Keys.KEYCODE.NUM_LOCK || keyCode == Keys.KEYCODE.SCROLL_LOCK) {
@@ -47000,19 +47039,19 @@ class Keyboard extends Component {
                         fDown = fPress = true;
                     }
                 }
-                
+
                 /*
                  * HACK for Windows (as the host operating system): the ALT key is often used with key combinations
                  * not meant for our machine (eg, Alt-Tab to switch to a different window, or simply tapping the ALT
                  * key by itself to switch focus to the browser's menubar).  And sadly, browsers are quite happy to
                  * give us the DOWN event for the ALT key, but not an UP event, leaving our machine with the impression
                  * that the ALT key is still down, which the user user has no easy way to detect OR correct.
-                 * 
+                 *
                  * So we still record the ALT state in bitsState as best we can, and clear it whenever we lose focus
                  * in onFocusChange(), but we no longer pass through DOWN events to our machine.  Instead, we now
                  * check bitsState prior to simulating any other key, and if the ALT bit is set, we simulate an
                  * active ALT key first; you'll find that check at the end of both onKeyChange() and onKeyPress().
-                 * 
+                 *
                  * NOTE: Even though this is a hack intended largely for browsers running on Windows, I'm implementing
                  * it for all platforms, for consistency.
                  */
@@ -47035,7 +47074,7 @@ class Keyboard extends Component {
                             /*
                              * Since cKeysPressed is zero, the assumption here is that the ALT key (and the Alt key ALONE)
                              * was just tapped, so as long the ALT key was not already "soft-locked" (based on bitsStateSim),
-                             * we will transform this "up" event into a "fake press" event. 
+                             * we will transform this "up" event into a "fake press" event.
                              */
                             if (!(this.bitsStateSim & (Keyboard.STATE.ALT | Keyboard.STATE.RALT))) {
                                 fDown = fPress = true;
@@ -47043,7 +47082,7 @@ class Keyboard extends Component {
                         }
                     }
                 }
-                
+
                 /*
                  * As a safeguard, whenever the CMD key goes up, clear all active keys, because there appear to be
                  * cases where we don't always get notification of a CMD key's companion key going up (this probably
@@ -47105,7 +47144,7 @@ class Keyboard extends Component {
                     simCode = Keyboard.SIMCODE.CTRL_ALT_SUB;    // in case your keyboard doesn't have a numeric keypad '-'
                 }
             }
-            
+
             /*
              * When I have defined system-wide CTRL-key sequences to perform common editing operations (eg, CTRL_W
              * and CTRL_Z to scroll pages of text), the browser likes to act on those operations, so let's set fPass
@@ -47145,17 +47184,17 @@ class Keyboard extends Component {
                 /*
                  * This is the companion code to the onKeyChange() hack for Windows that suppresses DOWN events
                  * for ALT keys: if we're about to activate another key and we believe that an ALT key is still down,
-                 * we fake an ALT activation first. 
+                 * we fake an ALT activation first.
                  */
                 if (this.bitsState & Keyboard.STATE.ALTS) {
-                    var simCodeAlt = Keyboard.SIMCODE.ALT;
+                    let simCodeAlt = Keyboard.SIMCODE.ALT;
                     this.printMessage("onKeyChange(" + simCodeAlt + "): simulating ALT down", Messages.EVENT);
                     this.addActiveKey(simCodeAlt);
                 }
                 this.addActiveKey(simCode, fPress);
             } else {
                 if (!this.removeActiveKey(simCode)) {
-                    var code = this.getSimCode(keyCode, false);
+                    let code = this.getSimCode(keyCode, false);
                     if (code != simCode) this.removeActiveKey(code);
                 }
             }
@@ -47174,7 +47213,7 @@ class Keyboard extends Component {
     onKeyPress(event)
     {
         event = event || window.event;
-        var keyCode = event.which || event.keyCode;
+        let keyCode = event.which || event.keyCode;
 
         if (!this.cmp.notifyKbdEvent(event)) {
             return false;
@@ -47184,7 +47223,7 @@ class Keyboard extends Component {
         this.sInjectBuffer = "";        // actual key events should stop any injection currently in progress
 
         if (this.fAllDown) {
-            var simCode = this.checkActiveKey();
+            let simCode = this.checkActiveKey();
             if (simCode && this.isAlphaKey(simCode) && this.isAlphaKey(keyCode) && simCode != keyCode) {
                 if (!COMPILED && this.messageEnabled(Messages.EVENT | Messages.KEY)) {
                     this.printMessage("onKeyPress(" + keyCode + ") out of sync with " + simCode + ", invert caps-lock", true);
@@ -47194,7 +47233,7 @@ class Keyboard extends Component {
             }
         }
 
-        var fPass = !Keyboard.SIMCODES[keyCode] || !!(this.bitsState & Keyboard.STATE.CMD);
+        let fPass = !Keyboard.SIMCODES[keyCode] || !!(this.bitsState & Keyboard.STATE.CMD);
 
         if (this.messageEnabled(Messages.EVENT | Messages.KEY)) {
             this.printMessage("onKeyPress(" + keyCode + "): " + (fPass? "true" : "false"), true);
@@ -47207,7 +47246,7 @@ class Keyboard extends Component {
              * we fake an ALT activation first.
              */
             if (this.bitsState & Keyboard.STATE.ALTS) {
-                var simCodeAlt = Keyboard.SIMCODE.ALT;
+                let simCodeAlt = Keyboard.SIMCODE.ALT;
                 this.printMessage("onKeyPress(" + simCodeAlt + "): simulating ALT down", Messages.EVENT);
                 this.addActiveKey(simCodeAlt);
             }
@@ -47227,16 +47266,16 @@ class Keyboard extends Component {
      */
     keySimulate(simCode, fDown)
     {
-        var fSimulated = false;
+        let fSimulated = false;
 
         this.updateShiftState(simCode, true, fDown);
 
-        var wCode = Keyboard.SIMCODES[simCode] || Keyboard.SIMCODES[simCode + Keys.KEYCODE.ONDOWN];
+        let wCode = Keyboard.SIMCODES[simCode] || Keyboard.SIMCODES[simCode + Keys.KEYCODE.ONDOWN];
 
         if (wCode !== undefined) {
 
-            var abScanCodes = [];
-            var bCode = wCode & 0xff;
+            let abScanCodes = [];
+            let bCode = wCode & 0xff;
 
             /*
              * TODO: Update the following restrictions to address 84-key and 101-key keyboard limitations.
@@ -47247,11 +47286,11 @@ class Keyboard extends Component {
 
             abScanCodes.push(bCode | (fDown? 0 : Keyboard.SCANCODE.BREAK));
 
-            var fAlpha = (simCode >= Keys.ASCII.A && simCode <= Keys.ASCII.Z || simCode >= Keys.ASCII.a && simCode <= Keys.ASCII.z);
+            let fAlpha = (simCode >= Keys.ASCII.A && simCode <= Keys.ASCII.Z || simCode >= Keys.ASCII.a && simCode <= Keys.ASCII.z);
 
             while (wCode >>>= 8) {
-                var bShift = 0;
-                var bScan = wCode & 0xff;
+                let bShift = 0;
+                let bScan = wCode & 0xff;
                 /*
                  * TODO: The handling of SIMCODE entries with "extended" codes still needs to be tested, and
                  * moreover, if any of them need to perform any shift-state modifications, those modifications
@@ -47287,7 +47326,7 @@ class Keyboard extends Component {
                 }
             }
 
-            for (var i = 0; i < abScanCodes.length; i++) {
+            for (let i = 0; i < abScanCodes.length; i++) {
                 this.addScanCode(abScanCodes[i]);
             }
 
@@ -47323,11 +47362,11 @@ class Keyboard extends Component {
      */
     static init()
     {
-        var aeKbd = Component.getElementsByClass(document, PCX86.APPCLASS, "keyboard");
-        for (var iKbd = 0; iKbd < aeKbd.length; iKbd++) {
-            var eKbd = aeKbd[iKbd];
-            var parmsKbd = Component.getComponentParms(eKbd);
-            var kbd = new Keyboard(parmsKbd);
+        let aeKbd = Component.getElementsByClass(document, PCX86.APPCLASS, "keyboard");
+        for (let iKbd = 0; iKbd < aeKbd.length; iKbd++) {
+            let eKbd = aeKbd[iKbd];
+            let parmsKbd = Component.getComponentParms(eKbd);
+            let kbd = new Keyboard(parmsKbd);
             Component.bindComponentControls(kbd, eKbd, PCX86.APPCLASS);
         }
     }
@@ -47692,7 +47731,7 @@ Keyboard.CLICKCODES = {
  * The (commented) numbering of keys below is purely for my own reference.  Two keys are deliberately numbered 84,
  * reflecting the fact that the 'sys-req' key was added to the 84-key keyboard but later dropped from the 101-key
  * keyboard (as a stand-alone key, that is).
- * 
+ *
  * With the introduction of the PC AT and the 84-key keyboard, IBM developed a new key numbering scheme and
  * key code generation; the 8042 keyboard controller would then convert those key codes into the PC scan codes
  * defined by the older 83-key keyboard.  That's a layer of complexity we currently bypass; instead, we continue
@@ -47770,18 +47809,18 @@ Keyboard.SOFTCODES = {
     /* 68 */    'f10':          Keyboard.SIMCODE.F10,
     /* 69 */    'num-lock':     Keyboard.SIMCODE.NUM_LOCK,
     /* 70 */    'scroll-lock':  Keyboard.SIMCODE.SCROLL_LOCK,   // TODO: 0xe046 on 101-key keyboards?
-    
+
     /*
      * Yes, distinguishing keys 71 through 83 with the 'num-' prefix seems like overkill, but it was
      * intended to be future-proofing, for the day when we might eventually add support for 101-key keyboards,
      * because they have their own dedicated non-numeric-keypad versions of these keys (in other words, they
      * account for most of the bloat on the 101-key keyboard, a trend that more modern keyboards have gradually
      * been reversing).
-     * 
+     *
      * To offset 'num-' prefix overkill, injectKeys() allows SOFTCODES to be used with or without the prefix,
      * on the theory that key injection users won't really care precisely which version of the key is used.
      */
-    
+
     /* 71 */    'num-home':     Keyboard.SIMCODE.HOME,          // formerly "home"
     /* 72 */    'num-up':       Keyboard.SIMCODE.UP,            // formerly "up-arrow"
     /* 73 */    'num-pgup':     Keyboard.SIMCODE.PGUP,          // formerly "page-up"
@@ -47796,14 +47835,14 @@ Keyboard.SOFTCODES = {
     /* 82 */    'num-ins':      Keyboard.SIMCODE.INS,           // formerly "ins"
     /* 83 */    'num-del':      Keyboard.SIMCODE.DEL,           // formerly "del"
     /* 84 */    'sys-req':      Keyboard.SIMCODE.SYS_REQ        // 84-key keyboard only (simulated with 'alt'+'prtsc' on 101-key keyboards)
-    
+
     /*
      * If I ever add 101-key keyboard support (and it's not clear that I will), then the following entries
      * will have to be converted to SIMCODE indexes, and each SIMCODE index will need an entry in the SIMCODES
      * table that defines the appropriate SCANCODE(S); as this component has evolved, SOFTCODES are no longer
      * mapped directly to SCANCODES.
      */
-    
+
 //  /* 84 */    'pause':        Keyboard.SCANCODE.PAUSE,        // 101-key keyboard only
 //  /* 85 */    'f11':          Keyboard.SCANCODE.F11,
 //  /* 86 */    'f12':          Keyboard.SCANCODE.F12,
@@ -47822,7 +47861,7 @@ Keyboard.SOFTCODES = {
 //  /* 99 */    'pgdn':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_PGDN << 8),
 //  /*100 */    'ins':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_INS << 8),
 //  /*101 */    'del':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_DEL << 8),
-    
+
 //  /*102 */    'win':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.WIN << 8),
 //  /*103 */    'right-win':    Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.RWIN << 8),
 //  /*104 */    'menu':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.MENU << 8)
@@ -48018,7 +48057,7 @@ Keyboard.SIMCODES = {
     [Keyboard.SIMCODE.CMD]:         Keyboard.SCANCODE.WIN,
     [Keyboard.SIMCODE.RCMD]:        Keyboard.SCANCODE.MENU,
     [Keyboard.SIMCODE.FF_CMD]:      Keyboard.SCANCODE.WIN,
-    
+
     [Keyboard.SIMCODE.CTRL_A]:      Keyboard.SCANCODE.A           | (Keyboard.SCANCODE.CTRL << 8),
     [Keyboard.SIMCODE.CTRL_B]:      Keyboard.SCANCODE.B           | (Keyboard.SCANCODE.CTRL << 8),
     [Keyboard.SIMCODE.CTRL_C]:      Keyboard.SCANCODE.C           | (Keyboard.SCANCODE.CTRL << 8),
@@ -48046,7 +48085,7 @@ Keyboard.SIMCODES = {
     [Keyboard.SIMCODE.CTRL_Y]:      Keyboard.SCANCODE.Y           | (Keyboard.SCANCODE.CTRL << 8),
     [Keyboard.SIMCODE.CTRL_Z]:      Keyboard.SCANCODE.Z           | (Keyboard.SCANCODE.CTRL << 8),
     [Keyboard.SIMCODE.CTRL_BREAK]:  Keyboard.SCANCODE.SCROLL_LOCK | (Keyboard.SCANCODE.CTRL << 8),
-    
+
     [Keyboard.SIMCODE.CTRL_ALT_DEL]:    Keyboard.SCANCODE.NUM_DEL | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16),
     [Keyboard.SIMCODE.CTRL_ALT_INS]:    Keyboard.SCANCODE.NUM_INS | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16),
     [Keyboard.SIMCODE.CTRL_ALT_ADD]:    Keyboard.SCANCODE.NUM_ADD | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16),
@@ -48332,7 +48371,7 @@ Web.onInit(Keyboard.init);
  * VGA support further piggy-backs on the existing EGA support, by adding the extra registers, I/O port
  * handlers, etc, that the VGA requires; any differences in registers common to both EGA and VGA are handled on
  * a case-by-case basis, usually according to the Video.CARD value stored in nCard.
- * 
+ *
  * More will be said here about PCjs VGA support later.  But first, a word from IBM: "Video Graphics Array [VGA]
  * Programming Considerations":
  *
@@ -48531,7 +48570,7 @@ class Card extends Controller {
     constructor(video, nCard, data, cbMemory)
     {
         super();
-        
+
         /*
          * If a card was originally not present (eg, EGA), then the state will be empty,
          * so we need to detect that case and continue indicating that the card is not present.
@@ -48540,8 +48579,8 @@ class Card extends Controller {
 
             this.video = video;
 
-            var specs = Video.cardSpecs[nCard];
-            var nMonitorType = video.nMonitorType || specs[5];
+            let specs = Video.cardSpecs[nCard];
+            let nMonitorType = video.nMonitorType || specs[5];
 
             if (!data || data.length < 6) {
                 data = [false, 0, null, null, 0, new Array(nCard < Video.CARD.EGA? Card.CRTC.TOTAL_REGS : Card.CRTC.EGA.TOTAL_REGS)];
@@ -48600,9 +48639,9 @@ class Card extends Controller {
                 this.initEGA(data[6], nMonitorType);
             }
 
-            var monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
+            let monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
 
-            var nCyclesDefault = video.cpu.getBaseCyclesPerSecond();    // eg, 4772727
+            let nCyclesDefault = video.cpu.getBaseCyclesPerSecond();    // eg, 4772727
             this.nCyclesHorzPeriod = (nCyclesDefault / monitorSpecs.nHorzPeriodsPerSec)|0;
             this.nCyclesHorzActive = (this.nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100)|0;
             this.nCyclesVertPeriod = (this.nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame)|0;
@@ -48708,7 +48747,7 @@ class Card extends Controller {
          * not prepared to shoehorn in a call to checkMode() here, and potentially create more issues, for an
          * old problem that will eventually disappear anyway.
          */
-        var a = data[13];
+        let a = data[13];
         if (typeof a == "number") {
             a = [this.addrBuffer, this.sizeBuffer, a];
         }
@@ -48718,7 +48757,7 @@ class Card extends Controller {
 
         this.initMemory(data[14]);
 
-        var nAccess = data[15];
+        let nAccess = data[15];
         if (nAccess) {
             if (nAccess & Card.ACCESS.V2) {
                 nAccess &= ~Card.ACCESS.V2;
@@ -48771,7 +48810,7 @@ class Card extends Controller {
      */
     initMemory(data)
     {
-        var cdw = this.cbMemory >> 2;
+        let cdw = this.cbMemory >> 2;
         this.adwMemory = data;
         if (!this.adwMemory) {
             this.adwMemory = new Array(cdw);
@@ -48780,7 +48819,7 @@ class Card extends Controller {
             this.adwMemory = State.decompressEvenOdd(this.adwMemory, cdw);
         }
     }
-    
+
     /**
      * saveCard()
      *
@@ -48789,7 +48828,7 @@ class Card extends Controller {
      */
     saveCard()
     {
-        var data = [];
+        let data = [];
         if (this.nCard !== undefined) {
             data[0] = this.fActive;
             data[1] = this.regMode;
@@ -48811,7 +48850,7 @@ class Card extends Controller {
      */
     saveEGA()
     {
-        var data = [];
+        let data = [];
         data[0]  = this.fATCData;
         data[1]  = this.regATCIndx;
         data[2]  = this.regATCData;
@@ -48869,17 +48908,17 @@ class Card extends Controller {
                 this.dbg.println(sName + ": " + Str.toHex(iReg, 2));
                 return;
             }
-            var i, cchMax = 17, s = "";
-            var nRegs = (asRegs? asRegs.length : aRegs.length);
+            let i, cchMax = 17, s = "";
+            let nRegs = (asRegs? asRegs.length : aRegs.length);
             for (i = 0; i < nRegs; i++) {
                 /*
                  * In the case of the CRTC, we call the helper function getCRTCReg() to automatically concatenate
                  * the extended bits of certain registers, so that we don't have to "mentally" concatenate them.
                  */
-                var reg = (aRegs === this.regCRTData)? this.getCRTCReg(i) : aRegs[i];
+                let reg = (aRegs === this.regCRTData)? this.getCRTCReg(i) : aRegs[i];
                 if (s) s += '\n';
-                var sRegName = Str.pad((asRegs? asRegs[i] : sName.substr(1) + Str.toDec(i, 3)), cchMax);
-                var cchReg = (asRegs? (reg < 0x100? 2 : 4) : 6);
+                let sRegName = Str.pad((asRegs? asRegs[i] : sName.substr(1) + Str.toDec(i, 3)), cchMax);
+                let cchReg = (asRegs? (reg < 0x100? 2 : 4) : 6);
                 s += sName + "[" + Str.toHex(i, 2) + "]: " + sRegName + (i === iReg? '*' : ' ') + Str.toHex(reg, cchReg);
                 if (reg != null) s += " (" + reg + ".)";
             }
@@ -48992,18 +49031,18 @@ class Card extends Controller {
                 return;
             }
 
-            var i, j, idw, fColAdjust = false;
-            var l = 8, n = 8, p = -1, w = this.video.nCols >> 3;
+            let i, j, idw, fColAdjust = false;
+            let l = 8, n = 8, p = -1, w = this.video.nCols >> 3;
 
             for (i = 0; i < asArgs.length; i++) {
 
-                var s = asArgs[i];
+                let s = asArgs[i];
                 if (!i) {
                     idw = Str.parseInt(s, 16);
                     continue;
                 }
 
-                var ch = s.charAt(0);
+                let ch = s.charAt(0);
                 j = Str.parseInt(s.substr(1), 16);
 
                 switch(ch) {
@@ -49034,11 +49073,11 @@ class Card extends Controller {
                 idw -= this.addrBuffer;
             }
 
-            var sDump = "";
+            let sDump = "";
             for (i = 0; i < l; i++) {
-                var sData = Str.toHex(this.addrBuffer + idw) + ":";
+                let sData = Str.toHex(this.addrBuffer + idw) + ":";
                 for (j = 0; j < n && idw < this.adwMemory.length; j++) {
-                    var dw = this.adwMemory[idw++];
+                    let dw = this.adwMemory[idw++];
                     sData += ' ' + ((p < 0)? Str.toHex(dw, 8) : Str.toBin((dw >> (p << 3)), 8));
                 }
                 if (fColAdjust) idw += w - n;
@@ -49096,8 +49135,8 @@ class Card extends Controller {
     {
         if (nAccess != null && nAccess != this.nAccess) {
 
-            var nReadAccess = nAccess & Card.ACCESS.READ.MASK;
-            var fnReadByte = Card.ACCESS.afn[nReadAccess];
+            let nReadAccess = nAccess & Card.ACCESS.READ.MASK;
+            let fnReadByte = Card.ACCESS.afn[nReadAccess];
             if (!fnReadByte) {
                 if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.VIDEO)) {
                     this.dbg.message("Card.setMemoryAccess(" + Str.toHexWord(nAccess) + "): missing readByte handler");
@@ -49121,8 +49160,8 @@ class Card extends Controller {
                     fnReadByte = Card.ACCESS.afn[Card.ACCESS.READ.EVENODD];
                 }
             }
-            var nWriteAccess = nAccess & Card.ACCESS.WRITE.MASK;
-            var fnWriteByte = Card.ACCESS.afn[nWriteAccess];
+            let nWriteAccess = nAccess & Card.ACCESS.WRITE.MASK;
+            let fnWriteByte = Card.ACCESS.afn[nWriteAccess];
             if (!fnWriteByte) {
                 if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.VIDEO)) {
                     this.dbg.message("Card.setMemoryAccess(" + Str.toHexWord(nAccess) + "): missing writeByte handler");
@@ -49162,9 +49201,9 @@ class Card extends Controller {
      */
     getCRTCReg(iReg)
     {
-        var reg = this.regCRTData[iReg];
+        let reg = this.regCRTData[iReg];
         if (reg != null && this.nCard >= Video.CARD.EGA) {
-            var bOverflowBit8 = 0, bOverflowBit9 = 0, bMaxScanBit9 = 0;
+            let bOverflowBit8 = 0, bOverflowBit9 = 0, bMaxScanBit9 = 0;
             switch(iReg) {
             case Card.CRTC.EGA.VTOTAL:              // 0x06
                 bOverflowBit8 = Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT8;         // 0x01
@@ -49873,7 +49912,7 @@ Card.ACCESS.V1[0xE000] = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.XOR;
 
 /**
  * readByte(off, addr)
- * 
+ *
  * Used for MDA/CGA "THRU" access (ie, byte is passed through without any controller-imposed overhead)
  *
  * @this {Memory}
@@ -49898,7 +49937,7 @@ Card.ACCESS.readByte = function readByte(off, addr)
 Card.ACCESS.readByteMode0 = function readByteMode0(off, addr)
 {
     off += this.offset;
-    var dw = this.controller.latches = this.adw[off];
+    let dw = this.controller.latches = this.adw[off];
     return (dw >> this.controller.nReadMapShift) & 0xff;
 };
 
@@ -49914,8 +49953,8 @@ Card.ACCESS.readByteMode0 = function readByteMode0(off, addr)
  */
 Card.ACCESS.readByteMode0Chain4 = function readByteMode0Chain4(off, addr)
 {
-    var idw = (off & ~0x3) + this.offset;
-    var shift = (off & 0x3) << 3;
+    let idw = (off & ~0x3) + this.offset;
+    let shift = (off & 0x3) << 3;
     return ((this.controller.latches = this.adw[idw]) >> shift) & 0xff;
 };
 
@@ -49931,12 +49970,12 @@ Card.ACCESS.readByteMode0EvenOdd = function readByteMode0EvenOdd(off, addr)
 {
     /*
      * TODO: As discussed in getCardAccess(), we need to run some tests on real EGA/VGA hardware to determine
-     * exactly what gets latched (ie, from which address) when EVENODD is in effect.  Whatever we learn may
-     * also dictate a special EVENODD function for READ.MODE1 as well.
+     * exactly what gets latched (ie, from which address) when EVENODD is in effect.  Whatever we learn may also
+     * dictate a special EVENODD function for READ.MODE1 as well.
      */
     off += this.offset;
-    var idw = off & ~0x1;
-    var dw = this.controller.latches = this.adw[idw];
+    let idw = off & ~0x1;
+    let dw = this.controller.latches = this.adw[idw];
     return (!(off & 1)? dw : (dw >> 8)) & 0xff;
 };
 
@@ -49963,14 +50002,14 @@ Card.ACCESS.readByteMode0EvenOdd = function readByteMode0EvenOdd(off, addr)
 Card.ACCESS.readByteMode1 = function readByteMode1(off, addr)
 {
     off += this.offset;
-    var dw = this.controller.latches = this.adw[off];
+    let dw = this.controller.latches = this.adw[off];
     /*
      * Minor optimization: we could pre-mask nColorCompare with nColorDontCare, whenever either register
      * is updated, but that's a drop in the bucket compared to all the other work this function must do.
      */
-    var mask = this.controller.nColorDontCare;
-    var color = this.controller.nColorCompare & mask;
-    var b = 0, bit = 0x80;
+    let mask = this.controller.nColorDontCare;
+    let color = this.controller.nColorCompare & mask;
+    let b = 0, bit = 0x80;
     while (bit) {
         if ((dw & mask) == color) b |= bit;
         color >>>= 1;  mask >>>= 1;  bit >>= 1;
@@ -49991,9 +50030,9 @@ Card.ACCESS.readByteMode1 = function readByteMode1(off, addr)
 Card.ACCESS.writeByte = function writeByte(off, b, addr)
 {
     off += this.offset;
-    var idw = off >> 2;
-    var nShift = (off & 0x3) << 3;
-    var dw = (this.adw[idw] & ~(0xff << nShift)) | (b << nShift);
+    let idw = off >> 2;
+    let nShift = (off & 0x3) << 3;
+    let dw = (this.adw[idw] & ~(0xff << nShift)) | (b << nShift);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
@@ -50013,8 +50052,8 @@ Card.ACCESS.writeByte = function writeByte(off, b, addr)
  *
  *      dw = (dw & this.controller.nSetMapMask) | (this.controller.nSetMapData & ~this.controller.nSetMapMask)
  *
- * but by maintaining nSetMapBits equal to (nSetMapData & ~nSetMapMask), we are able to make
- * the writes slightly more efficient.
+ * but by maintaining nSetMapBits equal to (nSetMapData & ~nSetMapMask), we are able to make the
+ * writes slightly more efficient.
  *
  * @this {Memory}
  * @param {number} off
@@ -50023,8 +50062,8 @@ Card.ACCESS.writeByte = function writeByte(off, b, addr)
  */
 Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
 {
-    var idw = off + this.offset;
-    var dw = b | (b << 8) | (b << 16) | (b << 24);
+    let idw = off + this.offset;
+    let dw = b | (b << 8) | (b << 16) | (b << 24);
     dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
@@ -50074,13 +50113,13 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
  */
 Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
 {
-    var idw = (off & ~0x3) + this.offset;
-    var shift = (off & 0x3) << 3;
+    let idw = (off & ~0x3) + this.offset;
+    let shift = (off & 0x3) << 3;
     /*
      * TODO: Consider adding a separate "unmasked" version of this CHAIN4 write function when nSeqMapMask is -1
      * (or removing nSeqMapMask from the equation altogether, if CHAIN4 is never used with any planes disabled).
      */
-    var dw = ((b << shift) & this.controller.nSeqMapMask) | (this.adw[idw] & ~((0xff << shift) & this.controller.nSeqMapMask));
+    let dw = ((b << shift) & this.controller.nSeqMapMask) | (this.adw[idw] & ~((0xff << shift) & this.controller.nSeqMapMask));
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
@@ -50101,14 +50140,14 @@ Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
 Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b, addr)
 {
     off += this.offset;
-    var dw = b | (b << 8) | (b << 16) | (b << 24);
+    let dw = b | (b << 8) | (b << 16) | (b << 24);
     /*
      * When even/odd addressing is enabled, nSeqMapMask must be cleared for planes 1
      * and 3 if the address is even, and cleared for planes 0 and 2 if the address is odd.
      */
-    var idw = off & ~0x1;
+    let idw = off & ~0x1;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
-    var maskMaps = this.controller.nSeqMapMask & (idw == off? 0x00ff00ff : (0xff00ff00|0));
+    let maskMaps = this.controller.nSeqMapMask & (idw == off? 0x00ff00ff : (0xff00ff00|0));
     dw = (dw & maskMaps) | (this.adw[idw] & ~maskMaps);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
@@ -50129,9 +50168,9 @@ Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b, addr)
  */
 Card.ACCESS.writeByteMode0Rot = function writeByteMode0Rot(off, b, addr)
 {
-    var idw = off + this.offset;
+    let idw = off + this.offset;
     b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
-    var dw = b | (b << 8) | (b << 16) | (b << 24);
+    let dw = b | (b << 8) | (b << 16) | (b << 24);
     dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
@@ -50154,9 +50193,9 @@ Card.ACCESS.writeByteMode0Rot = function writeByteMode0Rot(off, b, addr)
  */
 Card.ACCESS.writeByteMode0And = function writeByteMode0And(off, b, addr)
 {
-    var idw = off + this.offset;
+    let idw = off + this.offset;
     b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
-    var dw = b | (b << 8) | (b << 16) | (b << 24);
+    let dw = b | (b << 8) | (b << 16) | (b << 24);
     dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
     dw &= this.controller.latches;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
@@ -50180,9 +50219,9 @@ Card.ACCESS.writeByteMode0And = function writeByteMode0And(off, b, addr)
  */
 Card.ACCESS.writeByteMode0Or = function writeByteMode0Or(off, b, addr)
 {
-    var idw = off + this.offset;
+    let idw = off + this.offset;
     b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
-    var dw = b | (b << 8) | (b << 16) | (b << 24);
+    let dw = b | (b << 8) | (b << 16) | (b << 24);
     dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
     dw |= this.controller.latches;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
@@ -50206,9 +50245,9 @@ Card.ACCESS.writeByteMode0Or = function writeByteMode0Or(off, b, addr)
  */
 Card.ACCESS.writeByteMode0Xor = function writeByteMode0Xor(off, b, addr)
 {
-    var idw = off + this.offset;
+    let idw = off + this.offset;
     b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
-    var dw = b | (b << 8) | (b << 16) | (b << 24);
+    let dw = b | (b << 8) | (b << 16) | (b << 24);
     dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
     dw ^= this.controller.latches;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
@@ -50232,8 +50271,8 @@ Card.ACCESS.writeByteMode0Xor = function writeByteMode0Xor(off, b, addr)
  */
 Card.ACCESS.writeByteMode1 = function writeByteMode1(off, b, addr)
 {
-    var idw = off + this.offset;
-    var dw = (this.adw[idw] & ~this.controller.nSeqMapMask) | (this.controller.latches & this.controller.nSeqMapMask);
+    let idw = off + this.offset;
+    let dw = (this.adw[idw] & ~this.controller.nSeqMapMask) | (this.controller.latches & this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
@@ -50262,9 +50301,9 @@ Card.ACCESS.writeByteMode1EvenOdd = function writeByteMode1EvenOdd(off, b, addr)
     // When even/odd addressing is enabled, nSeqMapMask must be cleared for planes 1 and 3 if
     // the address is even, and cleared for planes 0 and 2 if the address is odd.
     //
-    var idw = off & ~0x1;
-    var maskMaps = this.controller.nSeqMapMask & (idw == off? 0x00ff00ff : (0xff00ff00|0));
-    var dw = (this.adw[idw] & ~maskMaps) | (this.controller.latches & maskMaps);
+    let idw = off & ~0x1;
+    let maskMaps = this.controller.nSeqMapMask & (idw == off? 0x00ff00ff : (0xff00ff00|0));
+    let dw = (this.adw[idw] & ~maskMaps) | (this.controller.latches & maskMaps);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
@@ -50284,8 +50323,8 @@ Card.ACCESS.writeByteMode1EvenOdd = function writeByteMode1EvenOdd(off, b, addr)
  */
 Card.ACCESS.writeByteMode2 = function writeByteMode2(off, b, addr)
 {
-    var idw = off + this.offset;
-    var dw = Video.aEGAByteToDW[b & 0xf];
+    let idw = off + this.offset;
+    let dw = Video.aEGAByteToDW[b & 0xf];
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
@@ -50307,8 +50346,8 @@ Card.ACCESS.writeByteMode2 = function writeByteMode2(off, b, addr)
  */
 Card.ACCESS.writeByteMode2And = function writeByteMode2And(off, b, addr)
 {
-    var idw = off + this.offset;
-    var dw = Video.aEGAByteToDW[b & 0xf];
+    let idw = off + this.offset;
+    let dw = Video.aEGAByteToDW[b & 0xf];
     dw &= this.controller.latches;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
@@ -50331,8 +50370,8 @@ Card.ACCESS.writeByteMode2And = function writeByteMode2And(off, b, addr)
  */
 Card.ACCESS.writeByteMode2Or = function writeByteMode2Or(off, b, addr)
 {
-    var idw = off + this.offset;
-    var dw = Video.aEGAByteToDW[b & 0xf];
+    let idw = off + this.offset;
+    let dw = Video.aEGAByteToDW[b & 0xf];
     dw |= this.controller.latches;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
@@ -50355,8 +50394,8 @@ Card.ACCESS.writeByteMode2Or = function writeByteMode2Or(off, b, addr)
  */
 Card.ACCESS.writeByteMode2Xor = function writeByteMode2Xor(off, b, addr)
 {
-    var idw = off + this.offset;
-    var dw = Video.aEGAByteToDW[b & 0xf];
+    let idw = off + this.offset;
+    let dw = Video.aEGAByteToDW[b & 0xf];
     dw ^= this.controller.latches;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
@@ -50385,10 +50424,10 @@ Card.ACCESS.writeByteMode2Xor = function writeByteMode2Xor(off, b, addr)
  */
 Card.ACCESS.writeByteMode3 = function writeByteMode3(off, b, addr)
 {
-    var idw = off + this.offset;
+    let idw = off + this.offset;
     b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
-    var dw = b | (b << 8) | (b << 16) | (b << 24);
-    var dwMask = (dw & this.controller.nBitMapMask);
+    let dw = b | (b << 8) | (b << 16) | (b << 24);
+    let dwMask = (dw & this.controller.nBitMapMask);
     dw = (this.controller.nSetMapData & dwMask) | (this.controller.latches & ~dwMask);
     dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
@@ -50489,7 +50528,7 @@ class Video extends Component {
     {
         super("Video", parmsVideo, Messages.VIDEO);
 
-        var video = this, sProp, sEvent;
+        let video = this, sProp, sEvent;
         this.fGecko = Web.isUserAgent("Gecko/");
 
         /*
@@ -50498,7 +50537,7 @@ class Video extends Component {
          * (since those motherboard switches tell us only the type of monitor, not the type of card).
          */
         this.model = parmsVideo['model'];
-        var aModelDefaults = Video.MODEL[this.model] || Video.MODEL['mda'];
+        let aModelDefaults = Video.MODEL[this.model] || Video.MODEL['mda'];
 
         this.nCard = aModelDefaults[0];
         this.cbMemory = parmsVideo['memory'] || 0;  // zero means fallback to the cardSpec's default size
@@ -50535,18 +50574,18 @@ class Video extends Component {
          * The font 'scale' parameter is deprecated (we ALWAYS scale now), and the internal fDoubleFont
          * setting is now always true, but it is retained in case we want to revisit the benefits (or lack
          * thereof) of font-doubling.
-         * 
+         *
+         *      this.fScaleFont = parmsVideo['scale'];
+         *
          * When fScaleFont was false, one key difference was these additional lines in setDimensions():
-         * 
+         *
          *      if (!this.fScaleFont) {
          *          this.cxScreenCell = font.cxCell;
          *          this.cyScreenCell = font.cyCell;
          *      }
-         * 
+         *
          * which meant that if the font was only 8 pixels wide (instead of 16), then 40-column mode would
          * simply display normal size characters with large black borders on either of the screen.
-         *
-         *      this.fScaleFont = parmsVideo['scale'];
          */
         this.fDoubleFont = true;
 
@@ -50576,8 +50615,8 @@ class Video extends Component {
          * on this.  I see other options emerging, like the CSS property "image-rendering: pixelated"
          * that's apparently been added to Chrome.  Sigh.
          */
-        var fSmoothing = parmsVideo['smoothing'];
-        var sSmoothing = Web.getURLParm('smoothing');
+        let fSmoothing = parmsVideo['smoothing'];
+        let sSmoothing = Web.getURLParm('smoothing');
         if (sSmoothing) fSmoothing = (sSmoothing == "true");
         if (fSmoothing != null) {
             sProp = Web.findProperty(this.contextScreen, 'imageSmoothingEnabled');
@@ -50646,7 +50685,7 @@ class Video extends Component {
                 this.container.doFullScreen = container[sProp];
                 sEvent = Web.findProperty(document, 'on', 'fullscreenchange');
                 if (sEvent) {
-                    var sFullScreen = Web.findProperty(document, 'fullscreenElement') || Web.findProperty(document, 'fullScreenElement');
+                    let sFullScreen = Web.findProperty(document, 'fullscreenElement') || Web.findProperty(document, 'fullScreenElement');
                     document.addEventListener(sEvent, function onFullScreenChange() {
                         video.notifyFullScreen(document[sFullScreen] != null);
                     }, false);
@@ -50675,9 +50714,9 @@ class Video extends Component {
             if (this.inputScreen.lockPointer) {
                 sEvent = Web.findProperty(document, 'on', 'pointerlockchange');
                 if (sEvent) {
-                    var sPointerLock = Web.findProperty(document, 'pointerLockElement');
+                    let sPointerLock = Web.findProperty(document, 'pointerLockElement');
                     document.addEventListener(sEvent, function onPointerLockChange() {
-                        var fLocked = !!(sPointerLock && document[sPointerLock] === video.inputScreen);
+                        let fLocked = !!(sPointerLock && document[sPointerLock] === video.inputScreen);
                         video.notifyPointerLocked(fLocked);
                     }, false);
                 }
@@ -50687,7 +50726,7 @@ class Video extends Component {
         this.sFileURL = parmsVideo['fontROM'];
 
         if (this.sFileURL) {
-            var sFileExt = Str.getExtension(this.sFileURL);
+            let sFileExt = Str.getExtension(this.sFileURL);
             if (sFileExt != "json") {
                 this.sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFileURL + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
             }
@@ -50708,19 +50747,19 @@ class Video extends Component {
      */
     initBus(cmp, bus, cpu, dbg)
     {
-        var video = this;
+        let video = this;
 
         this.bus = bus;
         this.cpu = cpu;
         this.dbg = dbg;
 
-        var nRandomize = +cmp.getMachineParm('randomize');
+        let nRandomize = +cmp.getMachineParm('randomize');
         if (nRandomize >= 0 && nRandomize <= 1) this.nRandomize = nRandomize;
 
         /*
          * nCard will be undefined if no model was explicitly set (whereas this.nCard is ALWAYS defined).
          */
-        var aModel = Video.MODEL[this.model], nCard = aModel && aModel[0];
+        let aModel = Video.MODEL[this.model], nCard = aModel && aModel[0];
 
         /*
          * The only time we do NOT want to trap MDA ports is when the model has been explicitly set to CGA.
@@ -50770,7 +50809,7 @@ class Video extends Component {
          */
         this.kbd = cmp.getMachineComponent("Keyboard");
         if (this.kbd && this.canvasScreen) {
-            for (var s in this.bindings) {
+            for (let s in this.bindings) {
                 if (s.indexOf("lock") > 0) this.kbd.setBinding("led", s, this.bindings[s]);
             }
             this.kbd.setBinding(this.inputTextArea? "textarea" : "canvas", "screen", this.inputScreen);
@@ -50807,7 +50846,7 @@ class Video extends Component {
         }
 
         if (this.sFileURL) {
-            var sProgress = "Loading " + this.sFileURL + "...";
+            let sProgress = "Loading " + this.sFileURL + "...";
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
                 video.doneLoad(sURL, sResponse, nErrorCode);
             }, function(nState) {
@@ -50832,7 +50871,7 @@ class Video extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var video = this;
+        let video = this;
 
         if (!this.bindings[sBinding]) {
 
@@ -50931,7 +50970,7 @@ class Video extends Component {
      */
     goFullScreen()
     {
-        var fSuccess = false;
+        let fSuccess = false;
         if (this.container) {
             if (this.container.doFullScreen) {
                 /*
@@ -50948,11 +50987,11 @@ class Video extends Component {
                  * for height works equally well, so I'm sticking with it, because "auto" is also consistent with how I've
                  * implemented a responsive canvas when the browser window is being resized.
                  */
-                var sWidth = "100%";
-                var sHeight = "auto";
+                let sWidth = "100%";
+                let sHeight = "auto";
                 if (screen && screen.width && screen.height) {
-                    var aspectPhys = screen.width / screen.height;
-                    var aspectVirt = this.cxScreen / this.cyScreen;
+                    let aspectPhys = screen.width / screen.height;
+                    let aspectVirt = this.cxScreen / this.cyScreen;
                     if (aspectPhys > aspectVirt) {
                         sWidth = Math.round(aspectVirt / aspectPhys * 100) + '%';
                     }
@@ -51023,7 +51062,7 @@ class Video extends Component {
      */
     lockPointer(fLock)
     {
-        var fSuccess = false;
+        let fSuccess = false;
         if (this.inputScreen && this.mouse) {
             if (fLock) {
                 if (this.inputScreen.lockPointer) {
@@ -51070,7 +51109,7 @@ class Video extends Component {
             this.mouse.notifyPointerLocked(fLocked);
             if (this.kbd) this.kbd.notifyEscape(fLocked);
         }
-        var control = this.bindings["lockPointer"];
+        let control = this.bindings["lockPointer"];
         if (control) control.textContent = (fLocked? "Press Esc to Unlock Pointer" : this.sLockMessage);
     }
 
@@ -51082,14 +51121,14 @@ class Video extends Component {
      */
     captureTouch(nTouchConfig)
     {
-        var control = this.inputScreen;
+        let control = this.inputScreen;
         if (control) {
-            var video = this;
+            let video = this;
             if (!this.nTouchConfig) {
 
                 this.nTouchConfig = nTouchConfig;
-                
-                var addPassive = false;
+
+                let addPassive = false;
                 if (nTouchConfig != Video.TOUCH.MOUSE) {
                     /*
                      * If we're not capturing touch events for mouse event simulation, then we won't be calling
@@ -51099,7 +51138,7 @@ class Video extends Component {
                      * the browser supports that feature, we have to probe for it first.
                      */
                     try {
-                        var opts = Object.defineProperty({}, 'passive', {
+                        let opts = Object.defineProperty({}, 'passive', {
                             get: function() {
                                 addPassive = true;
                             }
@@ -51257,7 +51296,7 @@ class Video extends Component {
      */
     processTouchEvent(event, fStart)
     {
-        var xTouch, yTouch;
+        let xTouch, yTouch;
 
         // if (!event) event = window.event;
 
@@ -51273,9 +51312,9 @@ class Video extends Component {
          * TODO: Determine whether the getBoundingClientRect() code used in panel.js for mouse events can also
          * be used here to simplify this annoyingly complicated code for touch events.
          */
-        var xTouchOffset = 0;
-        var yTouchOffset = 0;
-        var eCurrent = this.canvasScreen;
+        let xTouchOffset = 0;
+        let yTouchOffset = 0;
+        let eCurrent = this.canvasScreen;
 
         do {
             if (!isNaN(eCurrent.offsetLeft)) {
@@ -51288,8 +51327,8 @@ class Video extends Component {
          * Due to the responsive nature of our pages, the displayed size of the canvas may be smaller than the
          * allocated size, and the coordinates we receive from touch events are based on the currently displayed size.
          */
-        var xScale =  this.cxScreen / this.canvasScreen.offsetWidth;
-        var yScale = this.cyScreen / this.canvasScreen.offsetHeight;
+        let xScale =  this.cxScreen / this.canvasScreen.offsetWidth;
+        let yScale = this.cyScreen / this.canvasScreen.offsetHeight;
 
         /**
          * @name Event
@@ -51317,8 +51356,8 @@ class Video extends Component {
              */
             if (fStart) {
 
-                var xThird = (xTouch / (this.cxScreen / 3)) | 0;
-                var yThird = (yTouch / (this.cyScreen / 3)) | 0;
+                let xThird = (xTouch / (this.cxScreen / 3)) | 0;
+                let yThird = (yTouch / (this.cyScreen / 3)) | 0;
 
                 /*
                  * At this point, xThird and yThird should both be one of 0, 1 or 2, indicating which horizontal and
@@ -51336,8 +51375,8 @@ class Video extends Component {
                  * second (500ms) after the last touchstart, with no intervening touchmove events, fTouchDefault
                  * is allowed to become true.
                  */
-                var fTouchDefault = this.fTouchDefault;
-                var timeDelta = event.timeStamp - this.timeTouch;
+                let fTouchDefault = this.fTouchDefault;
+                let timeDelta = event.timeStamp - this.timeTouch;
 
                 if (fStart === true) {
                     this.fTouchDefault = (timeDelta > 500);
@@ -51385,8 +51424,8 @@ class Video extends Component {
                     this.xTouch = xTouch;
                     this.yTouch = yTouch;
                 }
-                var xDelta = Math.round(xTouch - this.xTouch);
-                var yDelta = Math.round(yTouch - this.yTouch);
+                let xDelta = Math.round(xTouch - this.xTouch);
+                let yDelta = Math.round(yTouch - this.yTouch);
                 this.xTouch = xTouch;
                 this.yTouch = yTouch;
                 // this.println("moveMouse(" + xDelta + "," + yDelta + ")");
@@ -51465,7 +51504,7 @@ class Video extends Component {
      */
     reset()
     {
-        var nMonitorType = ChipSet.MONITOR.NONE;
+        let nMonitorType = ChipSet.MONITOR.NONE;
 
         /*
          * We'll ask the ChipSet what SW1 indicates for monitor type, but we may override it if a specific
@@ -51492,7 +51531,7 @@ class Video extends Component {
             nMonitorType = ChipSet.MONITOR.VGACOLOR;
             break;
         case Video.CARD.EGA:
-            var aMonitors = Video.aEGAMonitorSwitches[this.bEGASwitches];
+            let aMonitors = Video.aEGAMonitorSwitches[this.bEGASwitches];
             /*
              * TODO: Figure out how to deal with aMonitors[2], the boolean which indicates
              * whether the EGA is driving the primary monitor (true) or the secondary monitor (false).
@@ -51551,10 +51590,10 @@ class Video extends Component {
              * physical limit.  Also, as noted in updateScreen(), this simplistic calculation of the extent of visible
              * screen memory is valid only for text modes; in general, it's safer to use cardActive.sizeBuffer as the extent.
              */
-            var addrScreenLimit = this.cardActive.addrBuffer + this.cbScreen;
-            for (var addrScreen = this.cardActive.addrBuffer; addrScreen < addrScreenLimit; addrScreen += 2) {
-                var dataRandom = (Math.random() * 0x10000)|0;
-                var bChar, bAttr;
+            let addrScreenLimit = this.cardActive.addrBuffer + this.cbScreen;
+            for (let addrScreen = this.cardActive.addrBuffer; addrScreen < addrScreenLimit; addrScreen += 2) {
+                let dataRandom = (Math.random() * 0x10000)|0;
+                let bChar, bAttr;
                 if (this.nMonitorType == ChipSet.MONITOR.EGACOLOR || this.nMonitorType == ChipSet.MONITOR.VGACOLOR) {
                     /*
                      * For the EGA, we choose sequential characters; for random characters, copy the MDA/CGA code below.
@@ -51602,7 +51641,7 @@ class Video extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, this.cardMDA.saveCard());
         state.set(1, this.cardCGA.saveCard());
         state.set(2, [this.nMonitorType, this.nModeDefault, this.nMode]);
@@ -51621,7 +51660,7 @@ class Video extends Component {
      */
     restore(data)
     {
-        var a = data[2];
+        let a = data[2];
         this.nMonitorType = a[0];
         this.nModeDefault = a[1];
         this.nMode = a[2];
@@ -51682,9 +51721,9 @@ class Video extends Component {
             /*
              * The most likely source of any exception will be right here, where we're parsing the JSON-encoded data.
              */
-            var abFontData = eval("(" + sFontData + ")");
+            let abFontData = eval("(" + sFontData + ")");
 
-            var ab = abFontData['bytes'] || abFontData;
+            let ab = /** @type {Array} */ (abFontData['bytes'] || abFontData);
 
             if (!ab.length) {
                 Component.error("Empty font ROM: " + sURL);
@@ -51875,16 +51914,16 @@ class Video extends Component {
              * color set; on an EGA, I synthesize a fake CGA regColor value, until I (TODO:) figure out exactly how
              * the EGA simulates the CGA color palette.
              */
-            var regColor = this.cardActive.regColor;
+            let regColor = this.cardActive.regColor;
             if (this.cardActive === this.cardEGA) {
-                var bBackground = this.cardEGA.regATCData[0];
+                let bBackground = this.cardEGA.regATCData[0];
                 regColor = bBackground & Card.CGA.COLOR.BORDER;
                 if (bBackground & Card.ATC.PALETTE.BRIGHT) regColor |= Card.CGA.COLOR.BRIGHT;
                 if (this.cardEGA.regATCData[1] != 0x12) regColor |= Card.CGA.COLOR.COLORSET2;
             }
             this.aRGB[0] = Video.aCGAColors[regColor & (Card.CGA.COLOR.BORDER | Card.CGA.COLOR.BRIGHT)];
-            var aColorSet = (regColor & Card.CGA.COLOR.COLORSET2)? Video.aCGAColorSet2 : Video.aCGAColorSet1;
-            for (var iColor = 0; iColor < aColorSet.length; iColor++) {
+            let aColorSet = (regColor & Card.CGA.COLOR.COLORSET2)? Video.aCGAColorSet2 : Video.aCGAColorSet1;
+            for (let iColor = 0; iColor < aColorSet.length; iColor++) {
                 this.aRGB[iColor+1] = Video.aCGAColors[aColorSet[iColor]];
             }
             return this.aRGB;
@@ -51905,9 +51944,9 @@ class Video extends Component {
 
         if (!this.fRGBValid) {
 
-            var card = this.cardEGA;
-            var aDAC = card.regDACData;
-            var aRegs, i, dw, b, bRed, bGreen, bBlue;
+            let card = this.cardEGA;
+            let aDAC = card.regDACData;
+            let aRegs, i, dw, b, bRed, bGreen, bBlue;
 
             if (nBitsPerPixel == 8) {
                 /*
@@ -51930,7 +51969,7 @@ class Video extends Component {
                  * we go with a default EGA-compatible 16-color palette.  We'll also use the DAC if there is one
                  * (ie, this is actually a VGA) and it appears to be initialized (ie, the VGA BIOS has been run).
                  */
-                var fDAC = (aDAC && aDAC[255] != null);
+                let fDAC = (aDAC && aDAC[255] != null);
                 aRegs = (card.regATCData[15] != null? card.regATCData : Video.aEGAPalDef);
                 for (i = 0; i < 16; i++) {
                     b = aRegs[i] & Card.ATC.PALETTE.MASK;
@@ -51980,10 +52019,10 @@ class Video extends Component {
      * originally just a crutch to help get EGA support bootstrapped.
      *
      * Also, for the MDA/CGA, we should be discarding the font data after the first buildFonts() call, because we
-     * should not need to ever rebuild the fonts for those cards (both their font patterns and colors were hard-coded).
+     * should never need to rebuild the fonts for those cards (both their font patterns and colors were hard-coded).
      *
      * @this {Video}
-     * @param {*} abFontData is the raw font data, from the ROM font file
+     * @param {Array.<number>} abFontData is the raw font data, from the ROM font file
      * @param {Array.<number>} aFontOffsets contains offsets into abFontData: [0] for CGA, [1] for MDA
      * @param {number} [cxFontChar] is a fixed character width to use for all fonts; undefined to use MDA/CGA defaults
      */
@@ -52012,7 +52051,7 @@ class Video extends Component {
      *
      * Supporting dynamic EGA fonts should not be hard though.  We can get rid of abFontData and simply build a
      * temporary snapshot of all the font bytes in plane 2 of the EGA's video buffer (adwMemory), and pass that on to
-     * buildFont() instead.  We'll also need to either invalidate the existing font's color (to trigger a rebuild) or
+     * createFont() instead.  We'll also need to either invalidate the existing font's color (to trigger a rebuild) or
      * pass a new "force rebuild" flag.
      *
      * Once that's done, an added benefit will be that we can build just the font(s) that have been loaded into plane 2,
@@ -52025,7 +52064,7 @@ class Video extends Component {
      */
     buildFonts(fRebuild)
     {
-        var fChanges = false;
+        let fChanges = false;
 
         /*
          * There's no point building fonts if this is a non-windowed (command-line) environment
@@ -52036,25 +52075,20 @@ class Video extends Component {
          */
         if (window && this.abFontData && (!fRebuild || this.nFont)) {
 
-            var offSplit = 0x0000;
-            var cxChar = this.cxFontChar? this.cxFontChar : 8;
-            var aRGBColors = this.getCardColors();
+            let aRGBColors = this.getCardColors();
 
             if (this.aFontOffsets[0] != null) {
-                if (this.buildFont(Video.FONT.CGA, this.aFontOffsets[0], offSplit, cxChar, 8, this.abFontData, aRGBColors)) {
+                if (this.createFont(Video.FONT.CGA, this.cxFontChar || 8, 8, this.aFontOffsets[0], 0x0000, this.abFontData, aRGBColors)) {
                     fChanges = true;
                 }
             }
 
-            offSplit = this.cxFontChar? 0 : 0x0800;
-            cxChar = this.cxFontChar? this.cxFontChar : 9;
-
             if (this.aFontOffsets[1] != null) {
-                if (this.buildFont(Video.FONT.MDA, this.aFontOffsets[1], offSplit, cxChar, 14, this.abFontData, Video.aMDAColors, Video.aMDAColorMap)) {
+                if (this.createFont(Video.FONT.MDA, this.cxFontChar || 9, 14, this.aFontOffsets[1], this.cxFontChar? 0 : 0x0800, this.abFontData, Video.aMDAColors, Video.aMDAColorMap)) {
                     fChanges = true;
                 }
                 if (this.cxFontChar) {
-                    if (this.buildFont(this.nCard, this.aFontOffsets[1], 0, this.cxFontChar, 14, this.abFontData, aRGBColors)) {
+                    if (this.createFont(this.nCard, this.cxFontChar, 14, fRebuild? 0 : this.aFontOffsets[1], 0, fRebuild? null : this.abFontData, aRGBColors)) {
                         fChanges = true;
                     }
                 }
@@ -52072,38 +52106,7 @@ class Video extends Component {
     }
 
     /**
-     * buildFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)
-     *
-     * This is a wrapper for createFont() which also takes care loading double-size fonts when fDoubleFont is set.
-     *
-     * @this {Video}
-     * @param {number} nFont
-     * @param {number|null} offData is the offset of the font data, null if none
-     * @param {number} offSplit is the offset of any split font data, or zero if not split
-     * @param {number} cxChar is the width of the font characters
-     * @param {number} cyChar is the height of the font characters
-     * @param {*} abFontData is the raw font data, from the ROM font file
-     * @param {Array} aRGBColors is an array of color RGB variations, corresponding to supported FGND attribute values
-     * @param {Array} [aColorMap] contains color indexes corresponding to attribute values (if not supplied, the mapping is assumed to be 1-1)
-     * @return {boolean} true if any or all fonts were (re)built, false if nothing changed
-     */
-    buildFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)
-    {
-        var fChanges = false;
-
-        if (offData != null) {
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont][0] + " font");
-            }
-            if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) {
-                fChanges = true;
-            }
-        }
-        return fChanges;
-    }
-
-    /**
-     * createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)
+     * createFont(nFont, cxChar, cyChar, offData, offSplit, abFontData, aRGBColors, aColorMap)
      *
      * All color variations are stored on the same font canvas, arranged vertically as a series of grids, where each
      * grid is a 16x16 character glyph array.
@@ -52115,21 +52118,23 @@ class Video extends Component {
      *
      * @this {Video}
      * @param {number} nFont
-     * @param {number} offData is the offset of the font data
-     * @param {number} offSplit is the offset of any split font data, or zero if not split
      * @param {number} cxChar is the width of the font characters
      * @param {number} cyChar is the height of the font characters
-     * @param {*} abFontData is the raw font data, from the ROM font file
+     * @param {number} offData is the offset of the font data
+     * @param {number} offSplit is the offset of any split font data, or zero if not split
+     * @param {Array.<number>|null} abFontData is the raw font data, from the ROM font file
      * @param {Array} aRGBColors is an array of color RGB variations, corresponding to supported FGND attribute values
-     * @param {Array|undefined} aColorMap contains color indexes corresponding to attribute values (if not supplied, the mapping is assumed to be 1-1)
+     * @param {Array} [aColorMap] contains color indexes corresponding to attribute values (if not supplied, the mapping is assumed to be 1-1)
      * @return {boolean} true if any or all fonts were (re)created, false if nothing changed
      */
-    createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)
+    createFont(nFont, cxChar, cyChar, offData, offSplit, abFontData, aRGBColors, aColorMap)
     {
-        var fChanges = false;
-        var nDouble = (this.fDoubleFont? 1 : 0);
-        var font = this.aFonts[nFont];
-        var nColors = (aRGBColors.length < 16? aRGBColors.length : 16);
+        if (DEBUG) this.printf("createFont(%d): creating %s font", nFont, Video.cardSpecs[nFont][0]);
+
+        let fChanges = false;
+        let nDouble = (this.fDoubleFont? 1 : 0);
+        let font = this.aFonts[nFont];
+        let nColors = (aRGBColors.length < 16? aRGBColors.length : 16);
         if (!font) {
             font = {
                 cxCell:     cxChar << nDouble,
@@ -52140,13 +52145,10 @@ class Video extends Component {
                 aCanvas:    new Array(nColors)
             };
         }
-        for (var iColor = 0; iColor < nColors; iColor++) {
-            var rgbColor = aRGBColors[iColor];
-            var rgbColorOrig = font.aCSSColors[iColor]? font.aRGBColors[iColor] : [];
+        for (let iColor = 0; iColor < nColors; iColor++) {
+            let rgbColor = aRGBColors[iColor];
+            let rgbColorOrig = font.aCSSColors[iColor]? font.aRGBColors[iColor] : [];
             if (rgbColor[0] !== rgbColorOrig[0] || rgbColor[1] !== rgbColorOrig[1] || rgbColor[2] !== rgbColorOrig[2]) {
-                if (DEBUG && this.messageEnabled()) {
-                    this.printMessage("creating font color " + iColor + " for font " + nFont);
-                }
                 this.createFontColor(font, iColor, rgbColor, nDouble, offData, offSplit, cxChar, cyChar, abFontData);
                 fChanges = true;
             }
@@ -52173,7 +52175,7 @@ class Video extends Component {
      *
      * This also yields better performance, since drawImage() is much faster than putImageData().
      * We still have to use putImageData() to build the font canvas, but that's a one-time operation.
-     * 
+     *
      * @this {Video}
      * @param {Font} font
      * @param {number} iColor
@@ -52183,31 +52185,53 @@ class Video extends Component {
      * @param {number} offSplit is the offset of any split font data, or zero if not split
      * @param {number} cxChar is the width of the font characters
      * @param {number} cyChar is the height of the font characters
-     * @param {*} abFontData is the raw font data, from the ROM font file
+     * @param {Array.<number>|null} abFontData is the raw font data, from the ROM font file
      */
     createFontColor(font, iColor, rgbColor, nDouble, offData, offSplit, cxChar, cyChar, abFontData)
     {
-        var rgbOff = [0x00, 0x00, 0x00, 0x00];
-        var canvasFont = document.createElement("canvas");
+        if (DEBUG) this.printf("createFontColor(%d): [%s]\n", iColor, rgbColor);
+
+        let rgbOff = [0x00, 0x00, 0x00, 0x00];
+        let canvasFont = document.createElement("canvas");
         canvasFont.width = font.cxCell << 4;
         canvasFont.height = (font.cyCell << 4);
-        var contextFont = canvasFont.getContext("2d");
+        let contextFont = canvasFont.getContext("2d");
 
-        var iChar, x, y;
-        var cyLimit = (cyChar < 8 || !offSplit)? cyChar : 8;
-        var imageChar = contextFont.createImageData(font.cxCell, font.cyCell);
+        let iChar, x, y;
+        let imageChar = contextFont.createImageData(font.cxCell, font.cyCell);
+        /*
+         * If abFontData is null, we will use font data from plane 2 of video memory, which has a "hard-wired" layout
+         * of 32 bytes per character (which, for 256 characters, amounts to 8Kb).  Note that up to 4 font "banks" can be
+         * stored in plane 2, since each bank has a "hard-wired" length of 16Kb, so two banks requires 32Kb of plane 2
+         * memory (which means a 4-plane total of 128K) and four banks requires 64Kb of plane 2 memory (which means a
+         * 4-plane total of 256K).
+         *
+         * Those requirements could have been cut in half (and up to 8 banks supported) if the EGA had started each bank
+         * on an 8Kb boundary instead of 16Kb (each bank can't use more than 8Kb anyway).  Of course, that would have also
+         * required the Sequencer's Character Map Select register to assign 3 bits rather than 2 bits to each of the Map
+         * Select A and B values.
+         */
+        let adwMemory = this.cardActive && this.cardActive.adwMemory;
+        let cyLimit = abFontData? ((cyChar < 8 || !offSplit)? cyChar : 8) : 32;
 
         for (iChar = 0; iChar < 256; iChar++) {
+            let offChar = offData + iChar * cyLimit;
             for (y = 0; y < cyChar; y++) {
+
                 /*
                  * fUnderline should be true only in the FONT_MDA case, and only for the odd color variations
                  * (1 and 3, out of variations 0 to 4), and only for the two bottom-most rows of the character cell
                  * (which I still need to confirm).
                  */
-                var fUnderline = (font.aColorMap && (iColor & 0x1) && y >= cyChar - 2);
-                var offChar = (y < cyLimit? offData + iChar * cyLimit + y : offSplit + iChar * cyLimit + y - cyLimit);
-                var b = abFontData[offChar];
-                for (var nRowDoubler = 0; nRowDoubler <= nDouble; nRowDoubler++) {
+                let fUnderline = (font.aColorMap && (iColor & 0x1) && y >= cyChar - 2);
+                let offScan = (y < cyLimit? offChar + y : offSplit + iChar * cyLimit + y - cyLimit);
+
+                /*
+                 * If abFontData is null, then we must extract the next byte of font data from plane 2 of video memory.
+                 */
+                let b = abFontData? abFontData[offScan] : ((adwMemory[offScan] >> 16) & 0xff);
+
+                for (let nRowDoubler = 0; nRowDoubler <= nDouble; nRowDoubler++) {
                     for (x = 0; x < cxChar; x++) {
                         /*
                          * This "bit" of logic takes care of those characters (0xC0-0xDF) whose 9th bit must mirror the 8th bit;
@@ -52217,10 +52241,10 @@ class Video extends Component {
                          * TODO: For EGA/VGA, replication of the 9th dot needs to be based on the TEXT_9DOT bit of the ATC.MODE
                          * register, which is particularly important for user-defined fonts that do not want that bit replicated.
                          */
-                        var bit = (fUnderline? 1 : (b & (0x80 >> (x >= 8 && iChar >= 0xC0 && iChar <= 0xDF? 7 : x))));
-                        var xDst = (x << nDouble);
-                        var yDst = (y << nDouble) + nRowDoubler;
-                        var rgb = (bit? rgbColor : rgbOff);
+                        let bit = (fUnderline? 1 : (b & (0x80 >> (x >= 8 && iChar >= 0xC0 && iChar <= 0xDF? 7 : x))));
+                        let xDst = (x << nDouble);
+                        let yDst = (y << nDouble) + nRowDoubler;
+                        let rgb = (bit? rgbColor : rgbOff);
                         this.setPixel(imageChar, xDst, yDst, rgb);
                         if (nDouble) this.setPixel(imageChar, xDst + 1, yDst, rgb);
                     }
@@ -52242,7 +52266,7 @@ class Video extends Component {
          * Enable this code if you want to see what the generated font looks like....
          *
         if (MAXDEBUG) {
-            var iSrcColor = (iColor == 15? 0 : iColor + 1);
+            let iSrcColor = (iColor == 15? 0 : iColor + 1);
             this.contextScreen.fillStyle = aCSSColors[iSrcColor];
             this.contextScreen.fillRect(iColor*(font.cxCell<<2), 0, canvasFont.width>>2, font.cyCell<<4);
             this.contextScreen.drawImage(canvasFont, 0, iColor*(font.cyCell<<4), canvasFont.width>>2, font.cyCell<<4, iColor*(font.cxCell<<2), 0, canvasFont.width>>2, font.cyCell<<4);
@@ -52323,11 +52347,11 @@ class Video extends Component {
      *      CRTC.STARTLO
      *      CRTC.CURSORHI
      *      CRTC.CURSORLO
-     * 
+     *
      * The top of the cursor starts at CURSCAN, and the bottom is CURSCANB - 1, except that if CURSCAN == CURSCANB
      * (or more precisely, if CURSCAN == CURSCANB mod 16), then a single scan line is still drawn.  Also, on the EGA,
      * if CURSCANB < CURSCAN, a split cursor is drawn.
-     * 
+     *
      * Also, at least on the EGA, if CURSCANB is set to a value > MAXSCAN (typically 13 on an EGA), cursor scan line
      * drawing wraps around to zero and does not stop until we reach CURSCAN again.  However, this happens only when
      * CURSCAN is <= MAXSCAN; if CURSCAN > MAXSCAN, then nothing is drawn, regardless of CURSCANB.
@@ -52341,23 +52365,23 @@ class Video extends Component {
          * The "hardware cursor" is never visible in graphics modes.
          */
         if (!this.nFont) return false;
-        
-        var card = this.cardActive;
-        for (var i = Card.CRTC.CURSCAN; i <= Card.CRTC.CURSORLO; i++) {
+
+        let card = this.cardActive;
+        for (let i = Card.CRTC.CURSCAN; i <= Card.CRTC.CURSORLO; i++) {
             if (card.regCRTData[i] == null)
                 return false;
         }
 
-        var bCursorFlags = card.regCRTData[Card.CRTC.CURSCAN];
-        var bCursorStart = bCursorFlags & Card.CRTC.CURSCAN_SLMASK;
-        var bCursorEnd = card.regCRTData[Card.CRTC.CURSCANB] & Card.CRTCMASKS[Card.CRTC.CURSCANB];
-        var bCursorMax = card.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
-        var oCursorStart = bCursorStart, oCursorEnd = bCursorEnd;
-        
+        let bCursorFlags = card.regCRTData[Card.CRTC.CURSCAN];
+        let bCursorStart = bCursorFlags & Card.CRTC.CURSCAN_SLMASK;
+        let bCursorEnd = card.regCRTData[Card.CRTC.CURSCANB] & Card.CRTCMASKS[Card.CRTC.CURSCANB];
+        let bCursorMax = card.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
+        let oCursorStart = bCursorStart, oCursorEnd = bCursorEnd;
+
         /*
          * Before range-checking CURSCAN and CURSCANB, let's see if the cursor is disabled by a starting value
          * outside the visible range; if so, simulate the condition by pretending the CURSCAN_BLINKOFF bit is set.
-         * 
+         *
          * For example, on a CGA, ThinkTank sets both CURSCAN and CURSCANB to 15, WordStar for PCjr sets CURSCAN and
          * CURSCANB to 12 and 13, respectively, and Rogue sets CURSCAN and CURSCANB to 15 and 0, respectively.
          */
@@ -52365,13 +52389,13 @@ class Video extends Component {
             bCursorFlags |= Card.CRTC.CURSCAN_BLINKOFF;
         }
 
-        var bCursorWrap = 0;
-        
+        let bCursorWrap = 0;
+
         if (this.nCard != Video.CARD.EGA) {
             /*
              * Live and learn: I originally thought that the EGA introduced funky split cursors, but it turns
              * out that older cards did it, too (well, I've confirmed it on an actual MDA anyway; haven't tried
-             * the CGA).  I've also confirmed that the MDA did NOT have the "mod 16" EGA anomaly described below. 
+             * the CGA).  I've also confirmed that the MDA did NOT have the "mod 16" EGA anomaly described below.
              */
             if (bCursorEnd < bCursorStart) {
                 bCursorWrap = bCursorEnd + 1;
@@ -52420,8 +52444,8 @@ class Video extends Component {
                 bCursorEnd = bCursorMax + 1;
             }
         }
-        
-        var bCursorSize = bCursorEnd - bCursorStart;
+
+        let bCursorSize = bCursorEnd - bCursorStart;
 
         /*
          * One way of disabling the cursor is to set bit 5 (Card.CRTC.CURSCAN_BLINKOFF) of the CRTC.CURSCAN flags;
@@ -52435,21 +52459,21 @@ class Video extends Component {
         /*
          * The least tricky way of disabling (ie, hiding) the cursor is to simply move it to an off-screen position.
          */
-        var iCellCursor = card.regCRTData[Card.CRTC.CURSORLO];
+        let iCellCursor = card.regCRTData[Card.CRTC.CURSORLO];
         iCellCursor |= (card.regCRTData[Card.CRTC.CURSORHI] & card.addrMaskHigh) << 8;
 
-        var offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
+        let offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
         offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
-        
+
         iCellCursor -= offStartAddr;
-        
+
         if (this.iCellCursor != iCellCursor) {
             //
             // let rowFrom = (this.iCellCursor / this.nCols)|0;
             // let colFrom = (this.iCellCursor % this.nCols);
             // let rowTo = (iCellCursor / this.nCols)|0;
             // let colTo = (iCellCursor % this.nCols);
-            // this.printf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo);
+            // if (DEBUG) this.printf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo);
             // this.removeCursor();
             //
             this.iCellCursor = iCellCursor;
@@ -52470,7 +52494,7 @@ class Video extends Component {
          * cyCursor values are relative to when it's time to scale them.
          */
         if (this.yCursor !== bCursorStart || this.cyCursor !== bCursorSize || this.cyCursorWrap !== bCursorWrap) {
-            this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d (0x%02x-0x%02x)\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize, oCursorStart, oCursorEnd);
+            if (DEBUG) this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d (0x%02x-0x%02x)\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize, oCursorStart, oCursorEnd);
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
             this.cyCursorWrap = bCursorWrap;
@@ -52482,21 +52506,21 @@ class Video extends Component {
              */
             // if (this.cBlinkVisible >= 0) this.fCellCacheValid = false;
         }
-        
+
         this.cyCursorCell = bCursorMax + 1;
 
         /*
          * This next condition is critical; WordStar for PCjr (designed for the CGA) would program CURSCANB to 31,
          * whereas MAXSCAN was 7.  This resulted in cyCursorCell of 8 and cyCursor of 32, producing elongated cursors
          * in updateChar().  By range-checking CURSCAN and CURSCANB against MAXSCAN above, that should no longer happen.
-         * 
+         *
          * This condition can also happen while the CRT controller is in an inconsistent state (ie, in the middle of
          * being completely reprogrammed), so we mustn't freak out.
          */
         if (this.cyCursor > this.cyCursorCell) {
             this.cyCursor = this.cyCursorCell;
         }
-        
+
         this.checkBlink();
         return true;
     }
@@ -52510,12 +52534,12 @@ class Video extends Component {
     {
         if (this.iCellCursor >= 0) {
             if (this.aCellCache !== undefined && this.iCellCursor < this.aCellCache.length) {
-                var drawCursor = (Video.ATTRS.DRAW_CURSOR << 8);
-                var data = this.aCellCache[this.iCellCursor];
+                let drawCursor = (Video.ATTRS.DRAW_CURSOR << 8);
+                let data = this.aCellCache[this.iCellCursor];
                 if (data & drawCursor) {
                     data &= ~drawCursor;
-                    var col = this.iCellCursor % this.nCols;
-                    var row = (this.iCellCursor / this.nCols)|0;
+                    let col = this.iCellCursor % this.nCols;
+                    let row = (this.iCellCursor / this.nCols)|0;
                     if (this.nFont && this.aFonts[this.nFont]) {
                         /*
                          * If we're using an off-screen buffer in text mode, then we need to keep it in sync with "reality".
@@ -52531,7 +52555,7 @@ class Video extends Component {
                          */
                         this.updateChar(col, row, data);
                     }
-                    this.printf("removeCursor(): removed from %d,%d\n", row, col);
+                    if (DEBUG) this.printf("removeCursor(): removed from %d,%d\n", row, col);
                     this.aCellCache[this.iCellCursor] = data;
                 }
             }
@@ -52547,17 +52571,17 @@ class Video extends Component {
      */
     getCardAccess()
     {
-        var card = this.cardActive;
-        var nAccess = Card.ACCESS.READ.THRU | Card.ACCESS.WRITE.THRU;
+        let card = this.cardActive;
+        let nAccess = Card.ACCESS.READ.THRU | Card.ACCESS.WRITE.THRU;
 
         if (card.nCard >= Video.CARD.EGA) {
             this.fColor256 = false;
-            var regGRCMode = card.regGRCData[Card.GRC.MODE.INDX];
+            let regGRCMode = card.regGRCData[Card.GRC.MODE.INDX];
             if (regGRCMode != null) {
-                var nReadAccess = Card.ACCESS.READ.MODE0;
-                var nWriteAccess = Card.ACCESS.WRITE.MODE0;
-                var nWriteMode = regGRCMode & Card.GRC.MODE.WRITE.MASK;
-                var regDataRotate = card.regGRCData[Card.GRC.DATAROT.INDX] & Card.GRC.DATAROT.MASK;
+                let nReadAccess = Card.ACCESS.READ.MODE0;
+                let nWriteAccess = Card.ACCESS.WRITE.MODE0;
+                let nWriteMode = regGRCMode & Card.GRC.MODE.WRITE.MASK;
+                let regDataRotate = card.regGRCData[Card.GRC.DATAROT.INDX] & Card.GRC.DATAROT.MASK;
                 switch (nWriteMode) {
                 case Card.GRC.MODE.WRITE.MODE0:
                     if (regDataRotate) {
@@ -52638,7 +52662,7 @@ class Video extends Component {
                  *      nWriteAccess |= Card.ACCESS.WRITE.EVENODD;
                  *  }
                  */
-                var regSEQMode = card.regSEQData[Card.SEQ.MEMMODE.INDX];
+                let regSEQMode = card.regSEQData[Card.SEQ.MEMMODE.INDX];
                 if (regSEQMode != null) {
                     if (!(regSEQMode & Card.SEQ.MEMMODE.SEQUENTIAL)) {
                         nReadAccess |= Card.ACCESS.READ.EVENODD;
@@ -52667,10 +52691,10 @@ class Video extends Component {
      */
     setCardAccess(nAccess)
     {
-        var card = this.cardActive;
+        let card = this.cardActive;
         if (card && nAccess != null && nAccess != card.nAccess) {
 
-            this.printf("setCardAccess(0x%04x)\n", nAccess);
+            if (DEBUG) this.printf("setCardAccess(0x%04x)\n", nAccess);
 
             card.setMemoryAccess(nAccess);
 
@@ -52702,8 +52726,8 @@ class Video extends Component {
         this.nColsLogical = this.nCols;
         this.nCellsPerWord = Video.aModeParms[Video.MODE.MDA_80X25][2];
 
-        var cbPadding = 0;
-        var modeParms = Video.aModeParms[this.nMode];
+        let cbPadding = 0;
+        let modeParms = Video.aModeParms[this.nMode];
         if (modeParms) {
 
             this.nCols = modeParms[0];
@@ -52764,7 +52788,7 @@ class Video extends Component {
         this.cyScreenCell = (this.cyScreen / this.nRows)|0;
 
         if (this.nFont) {
-            var font = this.aFonts[this.nFont];
+            let font = this.aFonts[this.nFont];
             if (!font) {
 
                 return;
@@ -52817,8 +52841,8 @@ class Video extends Component {
         this.cxScreenOffset = this.cxScreen;
         this.cyScreenOffset = this.cyScreen;
 
-        var cxBorder = this.cxScreen - (this.nCols * this.cxScreenCell);
-        var cyBorder = this.cyScreen - (this.nRows * this.cyScreenCell);
+        let cxBorder = this.cxScreen - (this.nCols * this.cxScreenCell);
+        let cyBorder = this.cyScreen - (this.nRows * this.cyScreenCell);
         if (cxBorder > 0) {
             this.xScreenOffset = (cxBorder >> 1);
             this.cxScreenOffset -= cxBorder;
@@ -52845,8 +52869,8 @@ class Video extends Component {
      */
     checkMode(fForce)
     {
-        var nMode = this.nMode;
-        var card = this.cardActive;
+        let nMode = this.nMode;
+        let card = this.cardActive;
 
         if (!card) {
             /*
@@ -52871,10 +52895,10 @@ class Video extends Component {
                  * presumably mode 0x10, on an EGA card with only 64Kb).
                  */
                 nMode = null;
-                var cbBuffer = card.cbMemory >> 2;
-                var cbBufferText = (cbBuffer > 0x8000? 0x8000 : cbBuffer);
+                let cbBuffer = card.cbMemory >> 2;
+                let cbBufferText = (cbBuffer > 0x8000? 0x8000 : cbBuffer);
 
-                var regGRCMisc = card.regGRCData[Card.GRC.MISC.INDX];
+                let regGRCMisc = card.regGRCData[Card.GRC.MISC.INDX];
                 if (regGRCMisc != null) {
 
                     switch(regGRCMisc & Card.GRC.MISC.MAPMEM) {
@@ -52910,7 +52934,7 @@ class Video extends Component {
                      * One of the problems with the current approach is that it depends on the card's registers being programmed
                      * in at least roughly the same order that the IBM EGA and VGA ROMs program them.
                      */
-                    var regGRCMode = card.regGRCData[Card.GRC.MODE.INDX];
+                    let regGRCMode = card.regGRCData[Card.GRC.MODE.INDX];
 
                     /*
                      * This text/graphics hybrid test detects the way Windows 95 reprograms the VGA on boot; ie, switching
@@ -52919,7 +52943,7 @@ class Video extends Component {
                      * finally reprogramming regGRCMode and regGRCMisc to move the frame buffer back to its original text mode
                      * location.
                      */
-                    var fTextGraphicsHybrid = (regGRCMode & (Card.GRC.MODE.COLOR256 | Card.GRC.MODE.EVENODD)) == (Card.GRC.MODE.COLOR256 | Card.GRC.MODE.EVENODD);
+                    let fTextGraphicsHybrid = (regGRCMode & (Card.GRC.MODE.COLOR256 | Card.GRC.MODE.EVENODD)) == (Card.GRC.MODE.COLOR256 | Card.GRC.MODE.EVENODD);
                     if (fTextGraphicsHybrid) {
                         /*
                          * When fTextGraphicsHybrid is true, we should be at the end of the above process, so addrBuffer
@@ -52931,11 +52955,11 @@ class Video extends Component {
                         }
                     }
 
-                    var nCRTCVertTotal = card.getCRTCReg(Card.CRTC.EGA.VTOTAL);
-                    var nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAXSCAN.INDX];
-                    var nCRTCModeCtrl = card.regCRTData[Card.CRTC.EGA.MODECTRL.INDX];
+                    let nCRTCVertTotal = card.getCRTCReg(Card.CRTC.EGA.VTOTAL);
+                    let nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAXSCAN.INDX];
+                    let nCRTCModeCtrl = card.regCRTData[Card.CRTC.EGA.MODECTRL.INDX];
 
-                    var fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
+                    let fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
 
                     if (nMode != Video.MODE.UNKNOWN) {
                         if (!(regGRCMisc & Card.GRC.MISC.GRAPHICS)) {
@@ -53088,7 +53112,7 @@ class Video extends Component {
              * (MDA or CGA) don't allocate/manage their own memory buffer, but even then, it's still a good idea
              * to always force this operation (eg, in case a switch setting changed the active video card).
              */
-            var card = this.cardActive || (nMode == Video.MODE.MDA_80X25? this.cardMono : this.cardColor);
+            let card = this.cardActive || (nMode == Video.MODE.MDA_80X25? this.cardMono : this.cardColor);
 
             if (card != this.cardActive || card.addrBuffer != this.addrBuffer || card.sizeBuffer != this.sizeBuffer) {
 
@@ -53125,20 +53149,20 @@ class Video extends Component {
                      */
                     return false;
                 }
-                
+
                 /*
                  * As https://www.seasip.info/VintagePC/mda.html explains, the MDA's 4K buffer address is not
                  * fully decoded; it is also addressible at every 4K interval within a 32K (0x8000) address range.
                  * We simulate that now, and not just for purely theoretical reasons: the original monochrome-
                  * specific version of "Exploring the IBM Personal Computer":
-                 * 
+                 *
                  *      https://www.pcjs.org/disks/pcx86/diags/ibm/5150/exploring/1.00/mda/
-                 *      
+                 *
                  * has a bug where it attempts to clear one of the intro screens with a faulty INT 10h Scroll Up
                  * call, where the top left (CX) and bottom right (DX) coordinates are reversed, resulting in a
                  * scroll with negative coordinates that the BIOS converts into large positive off-screen coordinates,
                  * which just so happens to clear the video buffer anyway, because it's repeatedly addressible.
-                 * 
+                 *
                  * The CGA's 16K buffer has a similar feature, but owing to its larger size, its buffer repeats only
                  * once within a 32K address range.  And yes, the color version of "Exploring the IBM Personal Computer"
                  * has a similar INT 10h scroll bug; the app is using graphics mode 0x04, so it's requesting a graphics
@@ -53146,8 +53170,8 @@ class Video extends Component {
                  * so much of the memory it zeroes is above the first 16K.
                  */
                 if (card.nCard < Video.CARD.EGA) {
-                    var addrBuffer = this.addrBuffer;
-                    var aBlocks = this.bus.getMemoryBlocks(addrBuffer, this.sizeBuffer);
+                    let addrBuffer = this.addrBuffer;
+                    let aBlocks = this.bus.getMemoryBlocks(addrBuffer, this.sizeBuffer);
                     while ((addrBuffer += this.sizeBuffer) < card.addrBuffer + 0x8000) {
                         this.bus.setMemoryBlocks(addrBuffer, this.sizeBuffer, aBlocks);
                     }
@@ -53173,7 +53197,7 @@ class Video extends Component {
      */
     setPixel(imageData, x, y, rgb)
     {
-        var index = (x + y * imageData.width) * rgb.length;
+        let index = (x + y * imageData.width) * rgb.length;
         imageData.data[index]   = rgb[0];
         imageData.data[index+1] = rgb[1];
         imageData.data[index+2] = rgb[2];
@@ -53193,9 +53217,9 @@ class Video extends Component {
      */
     initCache()
     {
-        this.cBlinkVisible = -1;                // force updateScreen() to recount visible blinking characters 
+        this.cBlinkVisible = -1;                // force updateScreen() to recount visible blinking characters
         this.fCellCacheValid = false;
-        var nCells = this.nCellCache;
+        let nCells = this.nCellCache;
         if (this.aCellCache === undefined || this.aCellCache.length != nCells) {
             this.aCellCache = new Array(nCells);
         }
@@ -53247,18 +53271,18 @@ class Video extends Component {
         /*
          * The caller MUST promise this.nFont is defined, and that the font in this.aFonts[this.nFont] has been loaded.
          */
-        var bChar = data & 0xff;
-        var bAttr = data >> 8;
-        var iFgnd = bAttr & 0xf;
-        var font = this.aFonts[this.nFont];
+        let bChar = data & 0xff;
+        let bAttr = data >> 8;
+        let iFgnd = bAttr & 0xf;
+        let font = this.aFonts[this.nFont];
         if (font.aColorMap) iFgnd = font.aColorMap[iFgnd];
 
         /*
          * Just as aColorMap maps the foreground attribute to the appropriate foreground character grid,
          * it also maps the background attribute to the appropriate background color.
          */
-        var xDst, yDst;
-        var iBgnd = (bAttr >> 4) & 0xf;
+        let xDst, yDst;
+        let iBgnd = (bAttr >> 4) & 0xf;
         if (font.aColorMap) iBgnd = font.aColorMap[iBgnd];
 
         if (context) {
@@ -53281,8 +53305,8 @@ class Video extends Component {
             /*
              * (bChar & 0xf) is the equivalent of (bChar % 16), and (bChar >> 4) is the equivalent of Math.floor(bChar / 16)
              */
-            var xSrcFgnd = (bChar & 0xf) * font.cxCell;
-            var ySrcFgnd = (bChar >> 4) * font.cyCell;
+            let xSrcFgnd = (bChar & 0xf) * font.cxCell;
+            let ySrcFgnd = (bChar >> 4) * font.cyCell;
 
             if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.BUFFER)) {
                 this.log("updateCharFgnd(" + col + "," + row + "," + bChar + "): draw from " + xSrcFgnd + "," + ySrcFgnd + " (" + font.cxCell + "," + font.cyCell + ") to " + xDst + "," + yDst);
@@ -53377,8 +53401,8 @@ class Video extends Component {
          * If the card's video signal is disabled (eg, during a mode change), then skip the update,
          * unless fForce is set.
          */
-        var fEnabled = false;
-        var card = this.cardActive;
+        let fEnabled = false;
+        let card = this.cardActive;
 
         if (card) {
             if (card !== this.cardEGA) {
@@ -53408,14 +53432,14 @@ class Video extends Component {
          *
          * We assume that the CPU is calling us whenever fForce is undefined.
          */
-        var fBlinkUpdate = false;
+        let fBlinkUpdate = false;
         if (!fForce && !(++this.cUpdates % 10) && this.cBlinks >= 0) {
             this.cBlinks++;
             fBlinkUpdate = true;
         }
 
-        var iCell = 0;
-        var nCells = this.nCells;
+        let iCell = 0;
+        let nCells = this.nCells;
 
         /*
          * Calculate the VISIBLE start of screen memory (addrScreen), not merely the PHYSICAL start,
@@ -53423,9 +53447,9 @@ class Video extends Component {
          * FYI, in these calculations, offScreen does not refer to "off-screen" memory, but rather the "offset"
          * of the start of visible screen memory.
          */
-        var addrBuffer = this.addrBuffer;
-        var addrScreen = addrBuffer;
-        var addrScreenLimit = addrScreen + this.sizeBuffer;
+        let addrBuffer = this.addrBuffer;
+        let addrScreen = addrBuffer;
+        let addrScreenLimit = addrScreen + this.sizeBuffer;
 
         /*
          * HACK: To deal with the fTextGraphicsHybrid 320x400 mode that Windows 95 uses (ie, when the buffer
@@ -53458,7 +53482,7 @@ class Video extends Component {
             /*
              * PARANOIA: Don't call invalidateCache() unless the address we're about to "latch" actually changed.
              */
-            var offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
+            let offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
             offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
             if (card.offStartAddr !== offStartAddr) {
                 card.offStartAddr = offStartAddr;
@@ -53472,7 +53496,7 @@ class Video extends Component {
          * TODO: Come up with a more robust method of deciding when any screen offset should be doubled.
          */
         addrScreen += card.offStartAddr << (this.nFont? 1 : 0);
-        var cbScreen = this.cbScreen;
+        let cbScreen = this.cbScreen;
 
         if (this.nCard >= Video.CARD.EGA && card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
             /*
@@ -53497,7 +53521,7 @@ class Video extends Component {
          * (addrScreenLimit), then the assumption is that we will have to do a second update operation that
          * wraps around to addrBuffer.
          */
-        var addrScreenWrap = 0, cbScreenWrap = 0;
+        let addrScreenWrap = 0, cbScreenWrap = 0;
         if (addrScreen + cbScreen > addrScreenLimit) {
             /*
              * There are two possibilities here: addrScreen itself is at or beyond addrScreenLimit, or just a
@@ -53521,11 +53545,11 @@ class Video extends Component {
          * of the screen until both subsets have been updated, otherwise the second update may erroneously think
          * that nothing changed if it happens to share any blocks with the first.
          */
-        var cBlinkOrig = this.cBlinkVisible;
-        var cCells = this.updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, nCells, fForce, fBlinkUpdate);
+        let cBlinkOrig = this.cBlinkVisible;
+        let cCells = this.updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, nCells, fForce, fBlinkUpdate);
         if (cbScreenWrap) {
             iCell += cCells;
-            var cBlinkNew = this.cBlinkVisible;
+            let cBlinkNew = this.cBlinkVisible;
             if (cBlinkOrig < 0) this.cBlinkVisible = -1;
             cCells += this.updateScreenCells(addrBuffer, addrScreenWrap, cbScreenWrap, iCell, nCells, fForce, fBlinkUpdate);
             this.cBlinkVisible += cBlinkNew;
@@ -53550,9 +53574,9 @@ class Video extends Component {
      */
     updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, nCells, fForce, fBlinkUpdate)
     {
-        var cCells = cbScreen >> 1;
+        let cCells = cbScreen >> 1;
         if (cCells > nCells) cCells = nCells;
-        var addrScreenLimit = addrScreen + cbScreen;
+        let addrScreenLimit = addrScreen + cbScreen;
 
         /*
          * This next bit of code can be completely disabled if we discover problems with the dirty
@@ -53571,7 +53595,7 @@ class Video extends Component {
                 /*
                  * iCellCursor may be negative if the cursor is hidden or if it's not on the visible screen.
                  */
-                var iCellCursor = this.iCellCursor - iCell;
+                let iCellCursor = this.iCellCursor - iCell;
                 if (iCellCursor < 0) {
                     return cCells;
                 }
@@ -53634,11 +53658,11 @@ class Video extends Component {
          * If MDA.MODE.BLINK_ENABLE is clear, then we always set ATTRS.DRAW_FGND and never mask the blink
          * bit in a cell's attributes bits, since it's actually an intensity bit in that case.
          */
-        var cCells = 0, cUpdated = 0;
-        var dataBlink = 0;
-        var dataDraw = (Video.ATTRS.DRAW_FGND << 8);
-        var dataMask = 0xfffff;
-        var fBlinkEnable = (this.cardActive.regMode & Card.MDA.MODE.BLINK_ENABLE);
+        let cCells = 0, cUpdated = 0;
+        let dataBlink = 0;
+        let dataDraw = (Video.ATTRS.DRAW_FGND << 8);
+        let dataMask = 0xfffff;
+        let fBlinkEnable = (this.cardActive.regMode & Card.MDA.MODE.BLINK_ENABLE);
         if (this.nCard >= Video.CARD.EGA) {
             fBlinkEnable = (this.cardActive.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.BLINK_ENABLE);
         }
@@ -53648,10 +53672,10 @@ class Video extends Component {
             dataMask &= ~dataBlink;
             if (!(this.cBlinks & 0x2)) dataMask &= ~dataDraw;
         }
-        
+
         this.cBlinkVisible = 0;
         while (addrScreen < addrScreenLimit && iCell < nCells) {
-            var data = this.bus.getShortDirect(addrScreen);
+            let data = this.bus.getShortDirect(addrScreen);
             data |= dataDraw;
             if (data & dataBlink) {
                 this.cBlinkVisible++;
@@ -53662,8 +53686,8 @@ class Video extends Component {
             }
 
             if (!this.fCellCacheValid || data !== this.aCellCache[iCell]) {
-                var col = iCell % this.nCols;
-                var row = (iCell / this.nCols)|0;
+                let col = iCell % this.nCols;
+                let row = (iCell / this.nCols)|0;
                 /*
                  * The following code is useful for setting a breakpoint (on the non-destructive "cUpdated |= 0" line)
                  * when debugging the "FlickerFree" utility while doing a series of "DIR" listings on the screen.  When
@@ -53693,7 +53717,7 @@ class Video extends Component {
         if (cUpdated && this.contextBuffer) {
             this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.cxBuffer, this.cyBuffer, this.xScreenOffset, this.yScreenOffset, this.cxScreenOffset, this.cyScreenOffset);
         }
-        
+
         this.checkBlink();
         return cCells;
     }
@@ -53711,29 +53735,29 @@ class Video extends Component {
         /*
          * This is the CGA graphics-mode update case, where cells are pixels spread across two halves of the buffer.
          */
-        var cCells = (addrScreenLimit - addrScreen) >> 1;
-        var iCell = 0, nPixelsPerCell = this.nCellsPerWord;
-        var addr = addrScreen;
-        var wPixelMask = (nPixelsPerCell == 16? 0x10000 : 0x30000);
-        var nPixelShift = (nPixelsPerCell == 16? 1 : 2);
-        var aPixelColors = this.getCardColors(nPixelShift);
+        let cCells = (addrScreenLimit - addrScreen) >> 1;
+        let iCell = 0, nPixelsPerCell = this.nCellsPerWord;
+        let addr = addrScreen;
+        let wPixelMask = (nPixelsPerCell == 16? 0x10000 : 0x30000);
+        let nPixelShift = (nPixelsPerCell == 16? 1 : 2);
+        let aPixelColors = this.getCardColors(nPixelShift);
 
-        var x = 0, y = 0;
-        var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
+        let x = 0, y = 0;
+        let xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
 
         this.cBlinkVisible = 0;
         while (addr < addrScreenLimit) {
-            var data = this.bus.getShortDirect(addr);
+            let data = this.bus.getShortDirect(addr);
 
             if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
                 x += nPixelsPerCell;
             } else {
                 this.aCellCache[iCell] = data;
-                var wPixels = (data >> 8) | ((data & 0xff) << 8);
-                var wMask = wPixelMask, nShift = 16;
+                let wPixels = (data >> 8) | ((data & 0xff) << 8);
+                let wMask = wPixelMask, nShift = 16;
                 if (x < xDirty) xDirty = x;
-                for (var iPixel = 0; iPixel < nPixelsPerCell; iPixel++) {
-                    var bPixel = (wPixels & (wMask >>= nPixelShift)) >> (nShift -= nPixelShift);
+                for (let iPixel = 0; iPixel < nPixelsPerCell; iPixel++) {
+                    let bPixel = (wPixels & (wMask >>= nPixelShift)) >> (nShift -= nPixelShift);
                     this.setPixel(this.imageBuffer, x++, y, aPixelColors[bPixel]);
                 }
                 if (x > xMaxDirty) xMaxDirty = x;
@@ -53760,8 +53784,8 @@ class Video extends Component {
          * the update (well, to the extent that the canvas APIs permit).
          */
         if (xDirty < this.nCols) {
-            var cxDirty = xMaxDirty - xDirty;
-            var cyDirty = yMaxDirty - yDirty;
+            let cxDirty = xMaxDirty - xDirty;
+            let cyDirty = yMaxDirty - yDirty;
             // this.contextBuffer.putImageData(this.imageBuffer, 0, 0);
             this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
             /*
@@ -53772,10 +53796,10 @@ class Video extends Component {
              * artifacts along the edges of those rectangles.  So it appears I must continue to redraw the entire canvasBuffer
              * on every change.
              *
-            var xScreen = (((xDirty * this.cxScreen) / this.nCols) | 0);
-            var yScreen = (((yDirty * this.cyScreen) / this.nRows) | 0);
-            var cxScreen = (((cxDirty * this.cxScreen) / this.nCols) | 0);
-            var cyScreen = (((cyDirty * this.cyScreen) / this.nRows) | 0);
+            let xScreen = (((xDirty * this.cxScreen) / this.nCols) | 0);
+            let yScreen = (((yDirty * this.cyScreen) / this.nRows) | 0);
+            let cxScreen = (((cxDirty * this.cxScreen) / this.nCols) | 0);
+            let cyScreen = (((cyDirty * this.cyScreen) / this.nRows) | 0);
             this.contextScreen.drawImage(this.canvasBuffer, xDirty, yDirty, cxDirty, cyDirty, xScreen, yScreen, cxScreen, cyScreen);
              */
             this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
@@ -53796,31 +53820,31 @@ class Video extends Component {
      */
     updateScreenGraphicsEGA(addrBuffer, addrScreen, addrScreenLimit)
     {
-        var iCell = 0;
-        var cCells = addrScreenLimit - addrScreen;
-        var addr = addrScreen;
-        var aPixelColors = this.getCardColors();
-        var adwMemory = this.cardActive.adwMemory;
+        let iCell = 0;
+        let cCells = addrScreenLimit - addrScreen;
+        let addr = addrScreen;
+        let aPixelColors = this.getCardColors();
+        let adwMemory = this.cardActive.adwMemory;
 
-        var x = 0, y = 0;
-        var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
-        var iPixelFirst = this.cardActive.regATCData[Card.ATC.HPAN.INDX] & Card.ATC.HPAN.SHIFT_LEFT;
+        let x = 0, y = 0;
+        let xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
+        let iPixelFirst = this.cardActive.regATCData[Card.ATC.HPAN.INDX] & Card.ATC.HPAN.SHIFT_LEFT;
 
         /*
          * TODO: What should happen if the card is programmed such that nColsLogical is LESS THAN nCols?
          */
-        var nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
+        let nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
 
         this.cBlinkVisible = 0;
         while (addr < addrScreenLimit) {
-            var idw = addr++ - addrBuffer;
+            let idw = addr++ - addrBuffer;
 
-            var data = adwMemory[idw];
+            let data = adwMemory[idw];
 
             /*
              * Figure out how many visible pixels this data represents; usually 8, unless panning is being used.
              */
-            var iPixel, nPixels = 8;
+            let iPixel, nPixels = 8;
 
             if (iPixelFirst) {
                 /*
@@ -53859,7 +53883,7 @@ class Video extends Component {
                      * number, and therefore outside the normal 32-bit integer range; however, the AND operator guarantees
                      * that the result will be a 32-bit value, so it doesn't matter.
                      */
-                    var dwPixel = data & 0x80808080;
+                    let dwPixel = data & 0x80808080;
 
                     /*
                      * Since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also ensuring
@@ -53870,7 +53894,7 @@ class Video extends Component {
                      * former is a POSITIVE index that is outside the 32-bit integer range, whereas the latter is a NEGATIVE
                      * index, which is what this code requires.
                      */
-                    var bPixel = Video.aEGADWToByte[dwPixel] || 0;
+                    let bPixel = Video.aEGADWToByte[dwPixel] || 0;
                     this.setPixel(this.imageBuffer, x++, y, aPixelColors[bPixel]);
                     data <<= 1;
                 }
@@ -53894,8 +53918,8 @@ class Video extends Component {
          * For a fascinating discussion of the best way to update the screen canvas at this point, see updateScreenGraphicsCGA().
          */
         if (xDirty < this.nCols) {
-            var cxDirty = xMaxDirty - xDirty;
-            var cyDirty = yMaxDirty - yDirty;
+            let cxDirty = xMaxDirty - xDirty;
+            let cyDirty = yMaxDirty - yDirty;
             this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
             this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
         }
@@ -53921,32 +53945,32 @@ class Video extends Component {
      */
     updateScreenGraphicsVGA(addrBuffer, addrScreen, addrScreenLimit)
     {
-        var iCell = 0;
-        var cCells = addrScreenLimit - addrScreen;
-        var addr = addrScreen;
-        var aPixelColors = this.getCardColors(8);
-        var adwMemory = this.cardActive.adwMemory;
+        let iCell = 0;
+        let cCells = addrScreenLimit - addrScreen;
+        let addr = addrScreen;
+        let aPixelColors = this.getCardColors(8);
+        let adwMemory = this.cardActive.adwMemory;
 
-        var x = 0, y = 0;
-        var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
-        var cbInc = (this.cardActive.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.CHAIN4)? 4 : 1;
-        var iPixelFirst = this.cardActive.regATCData[Card.ATC.HPAN.INDX] & Card.ATC.HPAN.SHIFT_LEFT;
+        let x = 0, y = 0;
+        let xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
+        let cbInc = (this.cardActive.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.CHAIN4)? 4 : 1;
+        let iPixelFirst = this.cardActive.regATCData[Card.ATC.HPAN.INDX] & Card.ATC.HPAN.SHIFT_LEFT;
 
         /*
          * TODO: What should happen if the card is programmed such that nColsLogical is LESS THAN nCols?
          */
-        var nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
+        let nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
 
         this.cBlinkVisible = 0;
         while (addr < addrScreenLimit) {
-            var idw = addr - addrBuffer;
+            let idw = addr - addrBuffer;
 
-            var data = adwMemory[idw];
+            let data = adwMemory[idw];
 
             /*
              * Figure out how many visible pixels this data represents; usually 4, unless panning is being used.
              */
-            var iPixel, nPixels = 4;
+            let iPixel, nPixels = 4;
 
             if (iPixelFirst) {
                 /*
@@ -53991,8 +54015,8 @@ class Video extends Component {
          * For a fascinating discussion of the best way to update the screen canvas at this point, see updateScreenGraphicsCGA().
          */
         if (xDirty < this.nCols) {
-            var cxDirty = xMaxDirty - xDirty;
-            var cyDirty = yMaxDirty - yDirty;
+            let cxDirty = xMaxDirty - xDirty;
+            let cyDirty = yMaxDirty - yDirty;
             this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
             this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
         }
@@ -54018,16 +54042,16 @@ class Video extends Component {
          * TODO: Verify that when a saved machine state is restored, both the CPU's cycle count AND the card's nInitCycles
          * are properly restored.  It's probably not a big deal, but details like that bother me.
          */
-        var b = 0;
-        var nCycles = this.cpu.getCycles();
-        var nElapsedCycles = nCycles - card.nInitCycles;
+        let b = 0;
+        let nCycles = this.cpu.getCycles();
+        let nElapsedCycles = nCycles - card.nInitCycles;
         if (nElapsedCycles < 0) {           // perhaps the CPU decided to reset its cycle count?
             card.nInitCycles = nElapsedCycles;
             nElapsedCycles = -nElapsedCycles|0;
         }
-        var nCyclesHorzRemain = nElapsedCycles % card.nCyclesHorzPeriod;
+        let nCyclesHorzRemain = nElapsedCycles % card.nCyclesHorzPeriod;
         if (nCyclesHorzRemain > card.nCyclesHorzActive) b |= Card.CGA.STATUS.RETRACE;
-        var nCyclesVertRemain = nElapsedCycles % card.nCyclesVertPeriod;
+        let nCyclesVertRemain = nElapsedCycles % card.nCyclesVertPeriod;
         if (nCyclesVertRemain > card.nCyclesVertActive) b |= Card.CGA.STATUS.VRETRACE | Card.CGA.STATUS.RETRACE;
         /*
          * Some callers also want to know how many vertical retrace periods have occurred since the last time they checked,
@@ -54158,7 +54182,7 @@ class Video extends Component {
      */
     inATCIndx(port, addrFrom)
     {
-        var b = this.cardEGA.regATCIndx;
+        let b = this.cardEGA.regATCIndx;
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.ATC.PORT, null, addrFrom, "ATC.INDX", b);
         }
@@ -54179,7 +54203,7 @@ class Video extends Component {
      */
     inATCData(port, addrFrom)
     {
-        var b = this.cardEGA.regATCData[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK];
+        let b = this.cardEGA.regATCData[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK];
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.ATC.PORT, null, addrFrom, "ATC." + this.cardEGA.asATCRegs[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK], b);
         }
@@ -54196,8 +54220,8 @@ class Video extends Component {
      */
     outATC(port, bOut, addrFrom)
     {
-        var card = this.cardEGA;
-        var fPalEnabled = (card.regATCIndx & Card.ATC.INDX_PAL_ENABLE);
+        let card = this.cardEGA;
+        let fPalEnabled = (card.regATCIndx & Card.ATC.INDX_PAL_ENABLE);
         if (!card.fATCData) {
             card.regATCIndx = bOut;
             this.printMessageIO(port, bOut, addrFrom, "ATC.INDX");
@@ -54245,7 +54269,7 @@ class Video extends Component {
              *
              * PARANOIA: Don't call invalidateCache() unless the start address we just "latched" actually changed.
              */
-            var offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
+            let offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
             offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
             if (card.offStartAddr != offStartAddr) {
                 card.offStartAddr = offStartAddr;
@@ -54254,7 +54278,7 @@ class Video extends Component {
             card.nVertPeriodsStartAddr = 0;
         } else {
             card.fATCData = false;
-            var iReg = card.regATCIndx & Card.ATC.INDX_MASK;
+            let iReg = card.regATCIndx & Card.ATC.INDX_MASK;
             if (iReg >= Card.ATC.PALETTE_REGS || !fPalEnabled) {
                 if (Video.TRAPALL || card.regATCData[iReg] !== bOut) {
                     if (!addrFrom || this.messageEnabled()) {
@@ -54277,9 +54301,9 @@ class Video extends Component {
      */
     inStatus0(port, addrFrom)
     {
-        var bSWBit = 0;
+        let bSWBit = 0;
         if (this.nCard == Video.CARD.EGA) {
-            var iBit = 3 - ((this.cardEGA.regMisc & Card.MISC.CLOCK_SELECT) >> 2);    // this is the desired SW # (0-3)
+            let iBit = 3 - ((this.cardEGA.regMisc & Card.MISC.CLOCK_SELECT) >> 2);    // this is the desired SW # (0-3)
             bSWBit = (this.bEGASwitches & (1 << iBit)) << (Card.STATUS0.SWSENSE_SHIFT - iBit);
         } else {
             /*
@@ -54315,12 +54339,12 @@ class Video extends Component {
              * In other words, for a monochrome monitor, set SWSENSE only when DAC register #0 matches the first and last
              * sets of values.
              */
-            var dwDAC = this.cardEGA.regDACData[0];
+            let dwDAC = this.cardEGA.regDACData[0];
             if ((dwDAC & 0x3f) != 0x2d && (dwDAC & (0x3f << 6)) != (0x2d << 6) && (dwDAC & (0x3f << 12)) != (0x2d << 12)) {
                 bSWBit |= Card.STATUS0.SWSENSE;
             }
         }
-        var b = ((this.cardEGA.regStatus0 & ~Card.STATUS0.SWSENSE) | bSWBit);
+        let b = ((this.cardEGA.regStatus0 & ~Card.STATUS0.SWSENSE) | bSWBit);
         /*
          * TODO: Figure out where Card.STATUS0.FEAT bits should come from....
          */
@@ -54352,7 +54376,7 @@ class Video extends Component {
      */
     inVGAEnable(port, addrFrom)
     {
-        var b = this.cardEGA.regVGAEnable;
+        let b = this.cardEGA.regVGAEnable;
         this.printMessageIO(Card.VGA_ENABLE.PORT, null, addrFrom, "VGA_ENABLE", b);
         return b;
     }
@@ -54381,7 +54405,7 @@ class Video extends Component {
      */
     inSEQIndx(port, addrFrom)
     {
-        var b = this.cardEGA.regSEQIndx;
+        let b = this.cardEGA.regSEQIndx;
         this.printMessageIO(Card.SEQ.INDX.PORT, null, addrFrom, "SEQ.INDX", b);
         return b;
     }
@@ -54410,7 +54434,7 @@ class Video extends Component {
      */
     inSEQData(port, addrFrom)
     {
-        var b = this.cardEGA.regSEQData[this.cardEGA.regSEQIndx];
+        let b = this.cardEGA.regSEQData[this.cardEGA.regSEQIndx];
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.SEQ.DATA.PORT, null, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx], b);
         }
@@ -54480,7 +54504,7 @@ class Video extends Component {
      */
     inDACMask(port, addrFrom)
     {
-        var b = this.cardEGA.regDACMask;
+        let b = this.cardEGA.regDACMask;
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.DAC.MASK.PORT, null, addrFrom, "DAC.MASK", b);
         }
@@ -54515,7 +54539,7 @@ class Video extends Component {
      */
     inDACState(port, addrFrom)
     {
-        var b = this.cardEGA.regDACState;
+        let b = this.cardEGA.regDACState;
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.DAC.STATE.PORT, null, addrFrom, "DAC.STATE", b);
         }
@@ -54568,7 +54592,7 @@ class Video extends Component {
      */
     inDACData(port, addrFrom)
     {
-        var b = (this.cardEGA.regDACData[this.cardEGA.regDACAddr] >> this.cardEGA.regDACShift) & 0x3f;
+        let b = (this.cardEGA.regDACData[this.cardEGA.regDACAddr] >> this.cardEGA.regDACShift) & 0x3f;
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.DAC.DATA.PORT, null, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]", b);
         }
@@ -54590,11 +54614,11 @@ class Video extends Component {
      */
     outDACData(port, bOut, addrFrom)
     {
-        var dw = this.cardEGA.regDACData[this.cardEGA.regDACAddr];
+        let dw = this.cardEGA.regDACData[this.cardEGA.regDACAddr];
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.DAC.DATA.PORT, bOut, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]");
         }
-        var dwNew = (dw & ~(0x3f << this.cardEGA.regDACShift)) | ((bOut & 0x3f) << this.cardEGA.regDACShift);
+        let dwNew = (dw & ~(0x3f << this.cardEGA.regDACShift)) | ((bOut & 0x3f) << this.cardEGA.regDACShift);
         if (dw !== dwNew) {
             this.cardEGA.regDACData[this.cardEGA.regDACAddr] = dwNew;
             this.invalidateCache(false);
@@ -54616,7 +54640,7 @@ class Video extends Component {
      */
     inVGAFeat(port, addrFrom)
     {
-        var b = this.cardEGA.regFeat;
+        let b = this.cardEGA.regFeat;
         this.printMessageIO(Card.FEAT_CTRL.PORT_READ, null, addrFrom, "FEAT", b);
         return b;
     }
@@ -54650,7 +54674,7 @@ class Video extends Component {
      */
     inVGAMisc(port, addrFrom)
     {
-        var b = this.cardEGA.regMisc;
+        let b = this.cardEGA.regMisc;
         this.printMessageIO(Card.MISC.PORT_READ, null, addrFrom, "MISC", b);
         return b;
     }
@@ -54687,7 +54711,7 @@ class Video extends Component {
      */
     inGRCIndx(port, addrFrom)
     {
-        var b = this.cardEGA.regGRCIndx;
+        let b = this.cardEGA.regGRCIndx;
         this.printMessageIO(Card.GRC.INDX.PORT, null, addrFrom, "GRC.INDX", b);
         return b;
     }
@@ -54716,7 +54740,7 @@ class Video extends Component {
      */
     inGRCData(port, addrFrom)
     {
-        var b = this.cardEGA.regGRCData[this.cardEGA.regGRCIndx];
+        let b = this.cardEGA.regGRCData[this.cardEGA.regGRCIndx];
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(Card.GRC.DATA.PORT, null, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.regGRCIndx], b);
         }
@@ -54860,7 +54884,7 @@ class Video extends Component {
      */
     inCGAColor(port, addrFrom)
     {
-        var b = this.cardColor.regColor;
+        let b = this.cardColor.regColor;
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(port /* this.cardColor.port + 5 */, null, addrFrom, this.cardColor.type + ".COLOR", b);
         }
@@ -54910,7 +54934,7 @@ class Video extends Component {
      */
     inCRTCIndx(card, port, addrFrom)
     {
-        var b;
+        let b;
         /*
          * The IBM VGA ROM makes some hardware determinations based on how the CRTC controller responds when
          * the IO_SELECT bit in the Miscellaneous Output Register is cleared; normally, that would mean ports
@@ -54953,7 +54977,7 @@ class Video extends Component {
      */
     inCRTCData(card, port, addrFrom)
     {
-        var b;
+        let b;
         /*
          * The IBM VGA ROM makes some hardware determinations based on how the CRTC controller responds when
          * the IO_SELECT bit in the Miscellaneous Output Register is cleared; normally, that would mean ports
@@ -54986,18 +55010,16 @@ class Video extends Component {
             /*
              * To simulate how the 6845 effectively ignores changes to CURSCAN or CURSCANB whenever one is written
              * while the other is currently > MAXSCAN, we check for those writes now, and ignore the write as appropriate.
-             * 
+             *
              * Since CURSCAN == 0xA and CURSCANB == 0xB, we can get the complementary register by XOR'ing the index with 0x1.
              */
             if (card.regCRTIndx == Card.CRTC.CURSCAN || card.regCRTIndx == Card.CRTC.CURSCANB) {
-                var bCur = bOut & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
-                var bMax = card.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
+                let bCur = bOut & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
+                let bMax = card.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
                 if (bCur > bMax) {
                     bCur = card.regCRTData[card.regCRTIndx ^ 0x1] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
                     if (bCur > bMax) {
-                        if (DEBUG) {
-                            this.printf("outCRTCData(0x%02x): ignoring write to CRTC[0x%02x] since 0x%02x > 0x%02x\n", bOut, card.regCRTIndx, bCur, bMax);
-                        }
+                        if (DEBUG) this.printf("outCRTCData(0x%02x): ignoring write to CRTC[0x%02x] since 0x%02x > 0x%02x\n", bOut, card.regCRTIndx, bCur, bMax);
                         return;
                     }
                 }
@@ -55058,7 +55080,7 @@ class Video extends Component {
      */
     inCardMode(card, addrFrom)
     {
-        var b = card.regMode;
+        let b = card.regMode;
         this.printMessageIO(card.port + 4, null, addrFrom, "MODE", b);
         return b;
     }
@@ -55093,7 +55115,7 @@ class Video extends Component {
      */
     inCardStatus(card, addrFrom)
     {
-        var b = this.getRetraceBits(card);
+        let b = this.getRetraceBits(card);
 
         if (card === this.cardEGA) {
             /*
@@ -55174,7 +55196,7 @@ class Video extends Component {
     dumpVideo(asArgs)
     {
         if (DEBUGGER) {
-            var component = /** @type {Component} */ (this.dbg);
+            let component = /** @type {Component} */ (this.dbg);
             if (!this.cardActive) {
                 component.println("no active video card");
                 return;
@@ -55224,12 +55246,12 @@ class Video extends Component {
      */
     static init()
     {
-        var aElement = Component.getElementsByClass(document, PCX86.APPCLASS, "video");
-        for (var iVideo = 0; iVideo < aElement.length; iVideo++) {
-            var element = aElement[iVideo];
-            var parmsVideo = Component.getComponentParms(element);
+        let aElement = Component.getElementsByClass(document, PCX86.APPCLASS, "video");
+        for (let iVideo = 0; iVideo < aElement.length; iVideo++) {
+            let element = aElement[iVideo];
+            let parmsVideo = Component.getComponentParms(element);
 
-            var canvas = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
+            let canvas = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
             if (canvas === undefined || !canvas.getContext) {
                 element.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
                 return;
@@ -55269,7 +55291,7 @@ class Video extends Component {
              * until we figure out a better UI.  And note that we use our Web.onPageEvent() helper function to make
              * sure we don't trample any other 'onresize' handler(s) attached to the window object.
              */
-            var aspect = +(Web.getURLParm('aspect') || parmsVideo['aspect']);
+            let aspect = +(Web.getURLParm('aspect') || parmsVideo['aspect']);
             /*
              * No 'aspect' parameter yields NaN, which is falsey, and anything else must satisfy my arbitrary
              * constraints of 0.3 <= aspect <= 3.33, to prevent any useless (or worse, browser-blowing) results.
@@ -55317,14 +55339,14 @@ class Video extends Component {
              * clearly see the overlaid semi-transparent input field, but none of the input characters were passed along,
              * with the exception of the "Go" (Enter) key.
              *
-             *      var input = document.createElement("input");
+             *      let input = document.createElement("input");
              *      input.setAttribute("type", "password");
              *      input.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0.5");
              *      element.appendChild(input);
              *
              * See this Chromium issue for more information: https://code.google.com/p/chromium/issues/detail?id=118639
              */
-            var textarea = /** @type {HTMLTextAreaElement} */ (document.createElement("textarea"));
+            let textarea = /** @type {HTMLTextAreaElement} */ (document.createElement("textarea"));
 
             /*
              * As noted in keyboard.js, the keyboard on an iOS device tends to pop up with the SHIFT key depressed,
@@ -55349,8 +55371,8 @@ class Video extends Component {
             /*
              * Now we can create the Video object, record it, and wire it up to the associated document elements.
              */
-            var context = /** @type {CanvasRenderingContext2D} */ (canvas.getContext("2d"));
-            var video = new Video(parmsVideo, canvas, context, textarea /* || input */, element);
+            let context = /** @type {CanvasRenderingContext2D} */ (canvas.getContext("2d"));
+            let video = new Video(parmsVideo, canvas, context, textarea /* || input */, element);
 
             /*
              * Bind any video-specific controls (eg, the Refresh button). There are no essential controls, however;
@@ -56032,7 +56054,7 @@ class ParallelPort extends Component {
          */
         this.controlBuffer = null;
 
-        var sBinding = parmsParallel['binding'];
+        let sBinding = parmsParallel['binding'];
         if (sBinding == "console") {
             this.consoleBuffer = "";
         } else {
@@ -56041,12 +56063,12 @@ class ParallelPort extends Component {
              * then it specifies the name of that control with the 'binding' property.  The ParallelPort constructor
              * will then call bindExternalControl(), which looks up the control, and then passes it to our own
              * setBinding() handler.
-             * 
+             *
              * For bindExternalControl() to succeed, it also need to know the target component; for now, that's
              * been hard-coded to "Panel", in part because that's one of the few components we can rely upon
              * initializing before we do, but it would be a simple matter to include a component type or ID as part
              * of the 'binding' property as well, if we need more flexibility later.
-             * 
+             *
              * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
              */
             Component.bindExternalControl(this, sBinding);
@@ -56145,7 +56167,7 @@ class ParallelPort extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, this.saveRegisters());
         return state.data();
     }
@@ -56173,7 +56195,7 @@ class ParallelPort extends Component {
      */
     initState(data)
     {
-        var i = 0;
+        let i = 0;
         if (data === undefined) {
             data = [0, ParallelPort.STATUS.NERR | ParallelPort.STATUS.ALWAYS_SET, ParallelPort.CONTROL.ALWAYS_SET];
         }
@@ -56191,8 +56213,8 @@ class ParallelPort extends Component {
      */
     saveRegisters()
     {
-        var i = 0;
-        var data = [];
+        let i = 0;
+        let data = [];
         data[i++] = this.bData;
         data[i++] = this.bStatus;
         data[i]   = this.bControl;
@@ -56209,7 +56231,7 @@ class ParallelPort extends Component {
      */
     inData(port, addrFrom)
     {
-        var b = this.bData;
+        let b = this.bData;
         this.printMessageIO(port, null, addrFrom, "DATA", b);
         return b;
     }
@@ -56224,7 +56246,7 @@ class ParallelPort extends Component {
      */
     inStatus(port, addrFrom)
     {
-        var b = this.bStatus;
+        let b = this.bStatus;
         this.bStatus |= (ParallelPort.STATUS.NACK | ParallelPort.STATUS.NBUSY);
         this.printMessageIO(port, null, addrFrom, "STAT", b);
         this.updateIRR();
@@ -56241,7 +56263,7 @@ class ParallelPort extends Component {
      */
     inControl(port, addrFrom)
     {
-        var b = this.bControl;
+        let b = this.bControl;
         this.printMessageIO(port, null, addrFrom, "CTRL", b);
         return b;
     }
@@ -56256,7 +56278,7 @@ class ParallelPort extends Component {
      */
     outData(port, bOut, addrFrom)
     {
-        var parallel = this;
+        let parallel = this;
         this.printMessageIO(port, bOut, addrFrom, "DATA");
         this.bData = bOut;
         this.cpu.nonCPU(function() {
@@ -56310,7 +56332,7 @@ class ParallelPort extends Component {
      */
     transmitByte(b)
     {
-        var fTransmitted = false;
+        let fTransmitted = false;
 
         this.printMessage("transmitByte(" + Str.toHexByte(b) + ")");
 
@@ -56372,11 +56394,11 @@ class ParallelPort extends Component {
      */
     static init()
     {
-        var aeParallel = Component.getElementsByClass(document, PCX86.APPCLASS, "parallel");
-        for (var iParallel = 0; iParallel < aeParallel.length; iParallel++) {
-            var eParallel = aeParallel[iParallel];
-            var parmsParallel = Component.getComponentParms(eParallel);
-            var parallel = new ParallelPort(parmsParallel);
+        let aeParallel = Component.getElementsByClass(document, PCX86.APPCLASS, "parallel");
+        for (let iParallel = 0; iParallel < aeParallel.length; iParallel++) {
+            let eParallel = aeParallel[iParallel];
+            let parmsParallel = Component.getComponentParms(eParallel);
+            let parallel = new ParallelPort(parmsParallel);
             Component.bindComponentControls(parallel, eParallel, PCX86.APPCLASS);
         }
     }
@@ -56555,7 +56577,7 @@ class SerialPort extends Component {
             }
             break;
         }
-        
+
         /*
          * consoleBuffer becomes a string that records serial port output if the 'binding' property is set to the
          * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
@@ -56598,18 +56620,18 @@ class SerialPort extends Component {
          * Normally, any HTML controls defined within the scope of the component's XML element are *implicitly*
          * bound to us.  For example, in the XML below, the textarea control will automatically trigger a call to
          * setBinding() with sBinding set to "serialWindow" and control set to an HTMLTextAreaElement.
-         * 
+         *
 	     *      <serial id="com1">
 	     *          <control type="container" class="pcjs-textarea">
 	     *      	    <control type="textarea" binding="serialWindow"/>
 	     *          </control>
 	     *      </serial>
-	     * 
+	     *
 	     * However, this component also supports an *explicit* binding attribute, which can either be the hard-coded
 	     * name "console" (for routing all output to the system console) or the name of a control binding that has
 	     * been defined in another component (eg, an HTMLTextAreaElement defined as part of the Control Panel layout).
          */
-        var sBinding = parms['binding'];
+        let sBinding = parms['binding'];
         if (sBinding == "console") {
             this.consoleBuffer = "";
         } else {
@@ -56618,12 +56640,12 @@ class SerialPort extends Component {
              * then it specifies the name of that control with the 'binding' property.  The SerialPort constructor
              * will then call bindExternalControl(), which looks up the control, and then passes it to our own
              * setBinding() handler.
-             * 
+             *
              * For bindExternalControl() to succeed, it also need to know the target component; for now, that's
              * been hard-coded to "Panel", in part because that's one of the few components we can rely upon
              * initializing before we do, but it would be a simple matter to include a component type or ID as part
              * of the 'binding' property as well, if we need more flexibility later.
-             * 
+             *
              * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
              */
             Component.bindExternalControl(this, sBinding);
@@ -56649,7 +56671,7 @@ class SerialPort extends Component {
 
     /**
      * bindConnection(connection, receiveData, fAutoFlow)
-     * 
+     *
      * This is basically a lighter-weight version of initConnection(), used by built-in components
      * like TestController, as opposed to components in external machines, which require more work to connect.
      *
@@ -56681,7 +56703,7 @@ class SerialPort extends Component {
      */
     bindMouse(id, mouse, fnUpdate)
     {
-        var component = null;
+        let component = null;
         if (id == this.idComponent && !this.connection) {
             this.connection = mouse;
             this.updateStatus = fnUpdate;
@@ -56705,7 +56727,7 @@ class SerialPort extends Component {
     {
         if (!sHTMLType || sHTMLType == "textarea") {
 
-            var serial = this;
+            let serial = this;
             this.bindings[sBinding] = this.controlBuffer = /** @type {HTMLTextAreaElement} */ (control);
 
             /*
@@ -56725,7 +56747,7 @@ class SerialPort extends Component {
                  * event for one of those keys (probably the only event the browser generates for them).
                  */
                 event = event || window.event;
-                var keyCode = event.keyCode;
+                let keyCode = event.keyCode;
                 if (keyCode === 0x08 || event.ctrlKey && keyCode >= 0x41 && keyCode <= 0x5A) {
                     if (event.preventDefault) event.preventDefault();
                     if (keyCode > 0x40) keyCode -= 0x40;
@@ -56740,7 +56762,7 @@ class SerialPort extends Component {
                  * handlers in keyboard.js.
                  */
                 event = event || window.event;
-                var keyCode = event.which || event.keyCode;
+                let keyCode = event.which || event.keyCode;
                 serial.receiveData(keyCode);
                 /*
                  * Since we're going to remove the "readonly" attribute from the <textarea> control
@@ -56768,7 +56790,7 @@ class SerialPort extends Component {
         //     }
         //     break;
         // }
-        
+
         return false;
     }
 
@@ -56784,13 +56806,13 @@ class SerialPort extends Component {
     initBus(cmp, bus, cpu, dbg)
     {
         this.cmp = cmp;
-        
+
         if (this.iAdapter) {
             this.bus = bus;
             this.cpu = cpu;
             this.dbg = dbg;
 
-            var serial = this;
+            let serial = this;
             this.timerReceiveNext = this.cpu.addTimer(this.id + ".receive", function receiveDataTimer() {
                 serial.receiveData();
             });
@@ -56831,18 +56853,18 @@ class SerialPort extends Component {
     initConnection(fNullModem)
     {
         if (!this.connection) {
-            var sConnection = this.cmp.getMachineParm('connection');
+            let sConnection = this.cmp.getMachineParm('connection');
             if (sConnection) {
-                var asParts = sConnection.split('->');
+                let asParts = sConnection.split('->');
                 if (asParts.length == 2) {
-                    var sSourceID = Str.trim(asParts[0]);
+                    let sSourceID = Str.trim(asParts[0]);
                     if (sSourceID != this.idComponent) return;  // this connection string is intended for another instance
-                    var sTargetID = Str.trim(asParts[1]);
+                    let sTargetID = Str.trim(asParts[1]);
                     this.connection = Component.getComponentByID(sTargetID);
                     if (this.connection) {
-                        var exports = this.connection['exports'];
+                        let exports = this.connection['exports'];
                         if (exports) {
-                            var fnConnect = /** @function */ (exports['connect']);
+                            let fnConnect = /** @function */ (exports['connect']);
                             if (fnConnect) fnConnect.call(this.connection, this.fNullModem);
                             this.sendData = exports['receiveData'];
                             if (this.sendData) {
@@ -56923,7 +56945,7 @@ class SerialPort extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, this.saveRegisters());
         return state.data();
     }
@@ -56956,7 +56978,7 @@ class SerialPort extends Component {
          * but I think we can safely assume zeros.  Similarly, we reset the baud rate Divisor Latch (wDL)
          * to an arbitrary but consistent default (DL_DEFAULT).
          */
-        var i = 0;
+        let i = 0;
         if (data === undefined) {
             data = [
                 0,                                          // RBR
@@ -56992,8 +57014,8 @@ class SerialPort extends Component {
      */
     saveRegisters()
     {
-        var i = 0;
-        var data = [];
+        let i = 0;
+        let data = [];
         data[i++] = this.bRBR;
         data[i++] = this.bTHR;
         data[i++] = this.wDL;
@@ -57020,7 +57042,7 @@ class SerialPort extends Component {
      */
     getBaudTimeout()
     {
-        var nBytesPerSecond = 1843200 / ((this.wDL || 1) << 7);
+        let nBytesPerSecond = 1843200 / ((this.wDL || 1) << 7);
         return (1000 / nBytesPerSecond)|0;
     }
 
@@ -57043,7 +57065,7 @@ class SerialPort extends Component {
                 this.abReceive.push(data);
             }
             else if (typeof data == "string") {
-                for (var i = 0; i < data.length; i++) {
+                for (let i = 0; i < data.length; i++) {
                     this.abReceive.push(data.charCodeAt(i));
                 }
             }
@@ -57067,7 +57089,7 @@ class SerialPort extends Component {
      */
     receiveStatus(pins)
     {
-        var bMSROld = this.bMSR;
+        let bMSROld = this.bMSR;
         this.bMSR &= ~(SerialPort.MSR.CTS | SerialPort.MSR.DSR);
         if (pins & RS232.CTS.MASK) {
             this.bMSR |= SerialPort.MSR.CTS | SerialPort.MSR.DCTS;
@@ -57107,7 +57129,7 @@ class SerialPort extends Component {
      */
     inRBR(port, addrFrom)
     {
-        var b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL & 0xff) : this.bRBR);
+        let b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL & 0xff) : this.bRBR);
         this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "RBR", b);
         this.bLSR &= ~SerialPort.LSR.DR;
         this.advanceRBR();
@@ -57124,7 +57146,7 @@ class SerialPort extends Component {
      */
     inIER(port, addrFrom)
     {
-        var b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL >> 8) : this.bIER);
+        let b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL >> 8) : this.bIER);
         this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER", b);
         return b;
     }
@@ -57139,7 +57161,7 @@ class SerialPort extends Component {
      */
     inIIR(port, addrFrom)
     {
-        var b = this.bIIR;
+        let b = this.bIIR;
         /*
          * Reading the IIR is supposed to clear the INT_THR condition (as is another write to the THR).
          */
@@ -57160,7 +57182,7 @@ class SerialPort extends Component {
      */
     inLCR(port, addrFrom)
     {
-        var b = this.bLCR;
+        let b = this.bLCR;
         this.printMessageIO(port, null, addrFrom, "LCR", b);
         return b;
     }
@@ -57175,7 +57197,7 @@ class SerialPort extends Component {
      */
     inMCR(port, addrFrom)
     {
-        var b = this.bMCR;
+        let b = this.bMCR;
         this.printMessageIO(port, null, addrFrom, "MCR", b);
         return b;
     }
@@ -57190,7 +57212,7 @@ class SerialPort extends Component {
      */
     inLSR(port, addrFrom)
     {
-        var b = this.bLSR;
+        let b = this.bLSR;
         this.printMessageIO(port, null, addrFrom, "LSR", b);
         return b;
     }
@@ -57205,7 +57227,7 @@ class SerialPort extends Component {
      */
     inMSR(port, addrFrom)
     {
-        var b = this.bMSR;
+        let b = this.bMSR;
         this.bMSR &= ~(SerialPort.MSR.DCTS | SerialPort.MSR.DDSR);
         this.printMessageIO(port, null, addrFrom, "MSR", b);
         return b;
@@ -57221,7 +57243,7 @@ class SerialPort extends Component {
      */
     outTHR(port, bOut, addrFrom)
     {
-        var serial = this;
+        let serial = this;
         this.printMessageIO(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "THR");
         if (this.bLCR & SerialPort.LCR.DLAB) {
             this.wDL = (this.wDL & ~0xff) | bOut;
@@ -57292,7 +57314,7 @@ class SerialPort extends Component {
      */
     outMCR(port, bOut, addrFrom)
     {
-        var delta = (bOut ^ this.bMCR);
+        let delta = (bOut ^ this.bMCR);
         this.printMessageIO(port, bOut, addrFrom, "MCR");
         this.bMCR = bOut;
         /*
@@ -57300,7 +57322,7 @@ class SerialPort extends Component {
          */
         if (delta & (SerialPort.MCR.DTR | SerialPort.MCR.RTS)) {
             if (this.updateStatus) {
-                var pins = 0;
+                let pins = 0;
                 if (this.fNullModem) {
                     pins |= (bOut & SerialPort.MCR.RTS)? RS232.CTS.MASK : 0;
                     pins |= (bOut & SerialPort.MCR.DTR)? (RS232.DSR.MASK | RS232.CD.MASK): 0;
@@ -57324,7 +57346,7 @@ class SerialPort extends Component {
      */
     updateIIR()
     {
-        var bIIR = -1;
+        let bIIR = -1;
         /*
          * We check all the interrupt conditions in priority order.  TODO: Add INT_LSR.
          */
@@ -57376,7 +57398,7 @@ class SerialPort extends Component {
      */
     transmitByte(b)
     {
-        var fTransmitted = false;
+        let fTransmitted = false;
 
         this.printMessage("transmitByte(" + Str.toHexByte(b) + ")");
 
@@ -57398,11 +57420,11 @@ class SerialPort extends Component {
                 if (this.iLogicalCol > 0) this.iLogicalCol--;
             }
             else {
-                var s = Str.toASCIICode(b); // formerly: String.fromCharCode(b);
-                var nChars = s.length;      // formerly: (b >= 0x20? 1 : 0);
+                let s = Str.toASCIICode(b); // formerly: String.fromCharCode(b);
+                let nChars = s.length;      // formerly: (b >= 0x20? 1 : 0);
                 if (b < 0x20 && nChars == 1) nChars = 0;
                 if (b == 0x09) {
-                    var tabSize = this.tabSize || 8;
+                    let tabSize = this.tabSize || 8;
                     nChars = tabSize - (this.iLogicalCol % tabSize);
                     if (this.tabSize) s = Str.pad("", nChars);
                 }
@@ -57458,11 +57480,11 @@ class SerialPort extends Component {
      */
     static init()
     {
-        var aeSerial = Component.getElementsByClass(document, PCX86.APPCLASS, "serial");
-        for (var iSerial = 0; iSerial < aeSerial.length; iSerial++) {
-            var eSerial = aeSerial[iSerial];
-            var parms = Component.getComponentParms(eSerial);
-            var serial = new SerialPort(parms);
+        let aeSerial = Component.getElementsByClass(document, PCX86.APPCLASS, "serial");
+        for (let iSerial = 0; iSerial < aeSerial.length; iSerial++) {
+            let eSerial = aeSerial[iSerial];
+            let parms = Component.getComponentParms(eSerial);
+            let serial = new SerialPort(parms);
             Component.bindComponentControls(serial, eSerial, PCX86.APPCLASS);
         }
     }
@@ -58494,7 +58516,7 @@ class Mouse extends Component {
         /*
          * Enumerate all the Video components that we may need to interact with.
          */
-        for (var video = null; (video = cmp.getMachineComponent("Video", video));) {
+        for (let video = null; (video = cmp.getMachineComponent("Video", video));) {
             this.aVideo.push(video);
         }
         if (this.sType == Mouse.TYPE.BUS) {
@@ -58551,7 +58573,7 @@ class Mouse extends Component {
                 if (!this.restore(data)) return false;
             }
             if (this.typeDevice && !this.componentDevice) {
-                var componentDevice = null;
+                let componentDevice = null;
                 while ((componentDevice = this.cmp.getMachineComponent(this.typeDevice, componentDevice))) {
                     if (componentDevice.bindMouse) {
                         this.componentDevice = componentDevice.bindMouse(this.idDevice, this, this.receiveStatus);
@@ -58574,8 +58596,8 @@ class Mouse extends Component {
                 }
                 if (this.componentDevice) {
                     this.aScreens = [];     // ensure the screen array is empty before (re)filling it
-                    for (var i = 0; i < this.aVideo.length; i++) {
-                        var screen = this.aVideo[i].getScreen(this);
+                    for (let i = 0; i < this.aVideo.length; i++) {
+                        let screen = this.aVideo[i].getScreen(this);
                         if (screen) this.aScreens.push(screen);
                     }
                 } else {
@@ -58624,7 +58646,7 @@ class Mouse extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, this.saveState());
         return state.data();
     }
@@ -58652,7 +58674,7 @@ class Mouse extends Component {
      */
     initState(data)
     {
-        var i = 0;
+        let i = 0;
         if (data === undefined) data = [false, -1, -1, 0, 0, false, false, 0];
         this.setActive(data[i++]);
         this.xMouse = data[i++];
@@ -58680,8 +58702,8 @@ class Mouse extends Component {
      */
     saveState()
     {
-        var i = 0;
-        var data = [];
+        let i = 0;
+        let data = [];
         data[i++] = this.fActive;
         data[i++] = this.xMouse;
         data[i++] = this.yMouse;
@@ -58712,7 +58734,7 @@ class Mouse extends Component {
     captureAll()
     {
         if (!this.fCaptured) {
-            for (var i = 0; i < this.aScreens.length; i++) {
+            for (let i = 0; i < this.aScreens.length; i++) {
                 if (this.captureMouse(this.aScreens[i])) this.fCaptured = true;
             }
         }
@@ -58726,7 +58748,7 @@ class Mouse extends Component {
     releaseAll()
     {
         if (this.fCaptured) {
-            for (var i = 0; i < this.aScreens.length; i++) {
+            for (let i = 0; i < this.aScreens.length; i++) {
                 if (this.releaseMouse(this.aScreens[i])) this.fCaptured = false;
             }
         }
@@ -58745,7 +58767,7 @@ class Mouse extends Component {
     captureMouse(control)
     {
         if (control) {
-            var mouse = this;
+            let mouse = this;
             control.addEventListener(
                 'mousemove',
                 function onMouseMove(event) {
@@ -58828,7 +58850,7 @@ class Mouse extends Component {
              * All we really care about are deltas.  We record screenX and screenY (as xMouse and yMouse)
              * merely to calculate xDelta and yDelta.
              */
-            var xDelta, yDelta;
+            let xDelta, yDelta;
             if (this.xMouse < 0 || this.yMouse < 0) {
                 this.xMouse = event.screenX;
                 this.yMouse = event.screenY;
@@ -58856,7 +58878,7 @@ class Mouse extends Component {
     clickMouse(iButton, fDown)
     {
         if (this.isActive()) {
-            var sDiag = DEBUGGER? ("mouse button" + iButton + ' ' + (fDown? "dn" : "up")) : null;
+            let sDiag = DEBUGGER? ("mouse button" + iButton + ' ' + (fDown? "dn" : "up")) : null;
             switch (iButton) {
             case Mouse.BUTTON.LEFT:
                 if (this.fButton1 != fDown) {
@@ -58899,8 +58921,8 @@ class Mouse extends Component {
              * non-zero value (thanks to Math.sign() again).  This ensures that tiniest movement of the physical
              * mouse always results in at least the tiniest movement of the virtual mouse.
              */
-            var xScaled = (Math.round(Math.abs(xDelta) * this.scale) * Math.sign(xDelta)) || Math.sign(xDelta);
-            var yScaled = (Math.round(Math.abs(yDelta) * this.scale) * Math.sign(yDelta)) || Math.sign(yDelta);
+            let xScaled = (Math.round(Math.abs(xDelta) * this.scale) * Math.sign(xDelta)) || Math.sign(xDelta);
+            let yScaled = (Math.round(Math.abs(yDelta) * this.scale) * Math.sign(yDelta)) || Math.sign(yDelta);
             if (xScaled || yScaled) {
                 if (this.messageEnabled(Messages.MOUSE)) {
                     this.printMessage("moveMouse(" + xScaled + "," + yScaled + ")");
@@ -58936,9 +58958,9 @@ class Mouse extends Component {
      */
     sendPacket(sDiag, xDiag, yDiag)
     {
-        var b1 = 0x40 | (this.fButton1? 0x20 : 0) | (this.fButton2? 0x10 : 0) | ((this.yDelta & 0xC0) >> 4) | ((this.xDelta & 0xC0) >> 6);
-        var b2 = this.xDelta & 0x3F;
-        var b3 = this.yDelta & 0x3F;
+        let b1 = 0x40 | (this.fButton1? 0x20 : 0) | (this.fButton2? 0x10 : 0) | ((this.yDelta & 0xC0) >> 4) | ((this.xDelta & 0xC0) >> 6);
+        let b2 = this.xDelta & 0x3F;
+        let b3 = this.yDelta & 0x3F;
         if (this.messageEnabled(Messages.SERIAL)) {
             this.printMessage((sDiag? (sDiag + ": ") : "") + (yDiag !== undefined? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + Str.toHexByte(b1) + "," + Str.toHexByte(b2) + "," + Str.toHexByte(b3) + "]", 0, true);
         }
@@ -58966,10 +58988,10 @@ class Mouse extends Component {
      */
     receiveStatus(pins)
     {
-        var fActive = ((pins & (RS232.DTR.MASK | RS232.RTS.MASK)) == (RS232.DTR.MASK | RS232.RTS.MASK));
+        let fActive = ((pins & (RS232.DTR.MASK | RS232.RTS.MASK)) == (RS232.DTR.MASK | RS232.RTS.MASK));
         if (fActive) {
             if (!this.fActive) {
-                var fIdentify = false;
+                let fIdentify = false;
                 if (!(this.pins & RS232.RTS.MASK)) {
                     this.reset();
                     this.printMessage("serial mouse reset");
@@ -59038,7 +59060,7 @@ class Mouse extends Component {
      */
     inBusData(port, addrFrom)
     {
-        var b = 0;
+        let b = 0;
         this.printMessageIO(port, null, addrFrom, "DATA", b);
         return b;
     }
@@ -59053,7 +59075,7 @@ class Mouse extends Component {
      */
     inBusTPPI(port, addrFrom)
     {
-        var b = 0;
+        let b = 0;
         this.printMessageIO(port, null, addrFrom, "TPPI", b);
         return b;
     }
@@ -59068,7 +59090,7 @@ class Mouse extends Component {
      */
     inBusCtrl(port, addrFrom)
     {
-        var b = 0;
+        let b = 0;
         this.printMessageIO(port, null, addrFrom, "CTRL", b);
         return b;
     }
@@ -59083,7 +59105,7 @@ class Mouse extends Component {
      */
     inBusCPPI(port, addrFrom)
     {
-        var b = 0;
+        let b = 0;
         this.printMessageIO(port, null, addrFrom, "CPPI", b);
         return b;
     }
@@ -59150,11 +59172,11 @@ class Mouse extends Component {
      */
     static init()
     {
-        var aeMouse = Component.getElementsByClass(document, PCX86.APPCLASS, "mouse");
-        for (var iMouse = 0; iMouse < aeMouse.length; iMouse++) {
-            var eMouse = aeMouse[iMouse];
-            var parmsMouse = Component.getComponentParms(eMouse);
-            var mouse = new Mouse(parmsMouse);
+        let aeMouse = Component.getElementsByClass(document, PCX86.APPCLASS, "mouse");
+        for (let iMouse = 0; iMouse < aeMouse.length; iMouse++) {
+            let eMouse = aeMouse[iMouse];
+            let parmsMouse = Component.getComponentParms(eMouse);
+            let mouse = new Mouse(parmsMouse);
             Component.bindComponentControls(mouse, eMouse, PCX86.APPCLASS);
         }
     }
@@ -59663,8 +59685,8 @@ class Disk extends Component {
          * changes and then close the connection.
          */
         if (this.fRemote) {
-            var response;
-            var nErrorCode = 0;
+            let response;
+            let nErrorCode = 0;
             if (this.fWriteInProgress) {
                 /*
                  * TODO: Verify that the Computer's powerOff() handler will actually honor a false return value.
@@ -59721,12 +59743,12 @@ class Disk extends Component {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage("blank disk for \"" + this.sDiskName + "\": " + this.nCylinders + " cylinders, " + this.nHeads + " head(s)");
             }
-            var aCylinders = new Array(this.nCylinders);
-            for (var iCylinder = 0; iCylinder < aCylinders.length; iCylinder++) {
-                var aHeads = new Array(this.nHeads);
-                for (var iHead = 0; iHead < aHeads.length; iHead++) {
-                    var aSectors = new Array(this.nSectors);
-                    for (var iSector = 1; iSector <= aSectors.length; iSector++) {
+            let aCylinders = new Array(this.nCylinders);
+            for (let iCylinder = 0; iCylinder < aCylinders.length; iCylinder++) {
+                let aHeads = new Array(this.nHeads);
+                for (let iHead = 0; iHead < aHeads.length; iHead++) {
+                    let aSectors = new Array(this.nSectors);
+                    for (let iSector = 1; iSector <= aSectors.length; iSector++) {
                         /*
                          * Now that our read() and write() functions can deal with unallocated data
                          * arrays, and can read/write the specified pattern on-the-fly, we no longer need
@@ -59773,13 +59795,13 @@ class Disk extends Component {
      */
     load(sDiskName, sDiskPath, file, fnNotify, controller)
     {
-        var sDiskURL = sDiskPath;
+        let sDiskURL = sDiskPath;
 
         /*
          * We could use this.log() as well, but it wouldn't display which component initiated the load.
          */
         if (DEBUG) {
-            var sMessage = 'load("' + sDiskName + '","' + sDiskPath + '")';
+            let sMessage = 'load("' + sDiskName + '","' + sDiskPath + '")';
             this.controller.log(sMessage);
             this.printMessage(sMessage);
         }
@@ -59794,12 +59816,12 @@ class Disk extends Component {
         this.sDiskFile = Str.getBaseName(sDiskPath);
         this.sFormat = "json";
 
-        var disk = this;
+        let disk = this;
         this.fnNotify = fnNotify;
         this.controllerNotify = controller || this.controller;
 
         if (file) {
-            var reader = new FileReader();
+            let reader = new FileReader();
             reader.onload = function() {
                 disk.buildDisk(reader.result, true);
             };
@@ -59817,7 +59839,7 @@ class Disk extends Component {
              * JSON-encoded disk image, so we load it as-is; otherwise, we ask our server-side disk image
              * converter to return the corresponding JSON-encoded data.
              */
-            var sDiskExt = Str.getExtension(sDiskPath);
+            let sDiskExt = Str.getExtension(sDiskPath);
             if (sDiskExt == DumpAPI.FORMAT.JSON || sDiskExt == DumpAPI.FORMAT.JSON_GZ) {
                 sDiskURL = encodeURI(sDiskPath);
             } else {
@@ -59828,8 +59850,8 @@ class Disk extends Component {
                     this.sFormat = "arraybuffer";
                 }
                 // else {
-                //     var sDiskParm = DumpAPI.QUERY.PATH;
-                //     var sSizeParm = '&' + DumpAPI.QUERY.MBHD + "=10";
+                //     let sDiskParm = DumpAPI.QUERY.PATH;
+                //     let sSizeParm = '&' + DumpAPI.QUERY.MBHD + "=10";
                 //     /*
                 //      * 'mbhd' is a new parm added for hard drive support.  In the case of 'file' or 'dir' requests,
                 //      * 'mbhd' informs DumpAPI.ENDPOINT that it should create a hard disk image, and one not larger than
@@ -59861,7 +59883,7 @@ class Disk extends Component {
                 // }
             }
         }
-        var sProgress = "Loading " + sDiskURL + "...";
+        let sProgress = "Loading " + sDiskURL + "...";
         return !!Web.getResource(sDiskURL, this.sFormat, true, function loadDone(sURL, sResponse, nErrorCode) {
             disk.doneLoad(sURL, sResponse, nErrorCode);
         }, function(nState) {
@@ -59875,14 +59897,14 @@ class Disk extends Component {
      * Builds a disk image from an ArrayBuffer (eg, from a FileReader object), rather than from JSON-encoded data.
      *
      * @this {Disk}
-     * @param {?} buffer (technically, this is always an ArrayBuffer, because we tell FileReader to use readAsArrayBuffer, but the Closure Compiler doesn't realize that) 
+     * @param {?} buffer (technically, this is always an ArrayBuffer, because we tell FileReader to use readAsArrayBuffer, but the Closure Compiler doesn't realize that)
      * @param {boolean} [fModified] is true if we should mark the entire disk modified (to ensure that we save/restore it)
      */
     buildDisk(buffer, fModified)
     {
-        var disk;
-        var cbDiskData = buffer? buffer.byteLength : 0;
-        var diskFormat = DiskAPI.GEOMETRIES[cbDiskData];
+        let disk;
+        let cbDiskData = buffer? buffer.byteLength : 0;
+        let diskFormat = DiskAPI.GEOMETRIES[cbDiskData];
 
         if (diskFormat) {
             this.nCylinders = diskFormat[0];
@@ -59890,20 +59912,20 @@ class Disk extends Component {
             this.nSectors = diskFormat[2];
             this.cbSector = (diskFormat[3] || 512);
 
-            var cdw = this.cbSector >> 2, dwPattern = 0, dwChecksum = 0;
-            var ib = 0;
-            var dv = new DataView(buffer, 0, cbDiskData);
+            let cdw = this.cbSector >> 2, dwPattern = 0, dwChecksum = 0;
+            let ib = 0;
+            let dv = new DataView(buffer, 0, cbDiskData);
 
             this.aDiskData = new Array(this.nCylinders);
-            for (var iCylinder = 0; iCylinder < this.aDiskData.length; iCylinder++) {
-                var cylinder = this.aDiskData[iCylinder] = new Array(this.nHeads);
-                for (var iHead = 0; iHead < cylinder.length; iHead++) {
-                    var head = cylinder[iHead] = new Array(this.nSectors);
-                    for (var iSector = 0; iSector < head.length; iSector++) {
-                        var sector = this.initSector(null, iCylinder, iHead, iSector + 1, this.cbSector, dwPattern);
-                        var adw = sector['data'];
-                        for (var idw = 0; idw < cdw; idw++, ib += 4) {
-                            var dw = adw[idw] = dv.getInt32(ib, true);
+            for (let iCylinder = 0; iCylinder < this.aDiskData.length; iCylinder++) {
+                let cylinder = this.aDiskData[iCylinder] = new Array(this.nHeads);
+                for (let iHead = 0; iHead < cylinder.length; iHead++) {
+                    let head = cylinder[iHead] = new Array(this.nSectors);
+                    for (let iSector = 0; iSector < head.length; iSector++) {
+                        let sector = this.initSector(null, iCylinder, iHead, iSector + 1, this.cbSector, dwPattern);
+                        let adw = sector['data'];
+                        for (let idw = 0; idw < cdw; idw++, ib += 4) {
+                            let dw = adw[idw] = dv.getInt32(ib, true);
                             dwChecksum = (dwChecksum + dw) & (0xffffffff|0);
                         }
                         if (fModified) sector.cModify = cdw;
@@ -59936,9 +59958,9 @@ class Disk extends Component {
      */
     doneLoad(sURL, diskData, nErrorCode)
     {
-        var disk = null;
+        let disk = null;
         this.fWriteProtected = false;
-        var fPrintOnly = !!(nErrorCode < 0 && this.cmp && !this.cmp.flags.powered);
+        let fPrintOnly = !!(nErrorCode < 0 && this.cmp && !this.cmp.flags.powered);
 
         if (this.fOnDemand) {
             if (!nErrorCode) {
@@ -59974,7 +59996,7 @@ class Disk extends Component {
                 this.buildDisk(diskData);
                 return;
             }
-            
+
             try {
                 /*
                  * The following code was a hack to turn on write-protection for a disk image if there was
@@ -59985,13 +60007,13 @@ class Disk extends Component {
                  * TODO: Provide some UI for turning write-protection on/off for disks at will, and provide
                  * an XML-based solution (ie, a per-disk XML configuration option) for controlling it as well.
                  */
-                var sBaseName = Str.getBaseName(this.sDiskFile, true).toLowerCase();
+                let sBaseName = Str.getBaseName(this.sDiskFile, true).toLowerCase();
                 if (sBaseName.indexOf("-readonly") > 0) {
                     this.fWriteProtected = true;
                 } else {
-                    var iEOL = diskData.indexOf("\n");
+                    let iEOL = diskData.indexOf("\n");
                     if (iEOL > 0 && iEOL < 1024) {
-                        var sConfig = diskData.substring(0, iEOL);
+                        let sConfig = diskData.substring(0, iEOL);
                         if (sConfig.indexOf("write-protected") > 0) {
                             this.fWriteProtected = true;
                         }
@@ -60000,7 +60022,7 @@ class Disk extends Component {
                 /*
                  * The most likely source of any exception will be here, where we're parsing the disk data.
                  */
-                var aDiskData;
+                let aDiskData;
                 if (diskData.substr(0, 1) == "<") {        // if the "data" begins with a "<"...
                     /*
                      * Early server configs reported an error (via the nErrorCode parameter) if a disk URL was invalid,
@@ -60067,11 +60089,11 @@ class Disk extends Component {
                  */
                 else {
                     if (DEBUG && this.messageEnabled(Messages.DISK | Messages.DATA)) {
-                        var sCylinders = aDiskData.length + " track" + (aDiskData.length > 1 ? "s" : "");
-                        var nHeads = aDiskData[0].length;
-                        var sHeads = nHeads + " head" + (nHeads > 1 ? "s" : "");
-                        var nSectorsPerTrack = aDiskData[0][0].length;
-                        var sSectorsPerTrack = nSectorsPerTrack + " sector" + (nSectorsPerTrack > 1 ? "s" : "") + "/track";
+                        let sCylinders = aDiskData.length + " track" + (aDiskData.length > 1 ? "s" : "");
+                        let nHeads = aDiskData[0].length;
+                        let sHeads = nHeads + " head" + (nHeads > 1 ? "s" : "");
+                        let nSectorsPerTrack = aDiskData[0][0].length;
+                        let sSectorsPerTrack = nSectorsPerTrack + " sector" + (nSectorsPerTrack > 1 ? "s" : "") + "/track";
                         this.printMessage(sCylinders + ", " + sHeads + ", " + sSectorsPerTrack);
                     }
                     /*
@@ -60084,27 +60106,27 @@ class Disk extends Component {
                     this.nCylinders = aDiskData.length;
                     this.nHeads = aDiskData[0].length;
                     this.nSectors = aDiskData[0][0].length;
-                    var sector = aDiskData[0][0][0];
+                    let sector = aDiskData[0][0][0];
                     this.cbSector = (sector && sector['length']) || 512;
 
-                    var dwChecksum = 0;
-                    for (var iCylinder = 0; iCylinder < this.nCylinders; iCylinder++) {
-                        for (var iHead = 0; iHead < this.nHeads; iHead++) {
-                            for (var iSector = 0; iSector < this.nSectors; iSector++) {
+                    let dwChecksum = 0;
+                    for (let iCylinder = 0; iCylinder < this.nCylinders; iCylinder++) {
+                        for (let iHead = 0; iHead < this.nHeads; iHead++) {
+                            for (let iSector = 0; iSector < this.nSectors; iSector++) {
                                 sector = aDiskData[iCylinder][iHead][iSector];
                                 if (!sector) continue;          // non-standard (eg, XDF) disk images may have "unused" (null) sectors
-                                var length = sector['length'];
+                                let length = sector['length'];
                                 if (length === undefined) {     // provide backward-compatibility with older JSON...
                                     length = sector['length'] = 512;
                                 }
                                 length >>= 2;                   // convert length from a byte-length to a dword-length
-                                var dwPattern = sector['pattern'];
+                                let dwPattern = sector['pattern'];
                                 if (dwPattern === undefined) {
                                     dwPattern = sector['pattern'] = 0;
                                 }
-                                var adw = sector['data'];
+                                let adw = sector['data'];
                                 if (adw === undefined) {
-                                    var ab = sector['bytes'];
+                                    let ab = sector['bytes'];
                                     if (ab === undefined || !ab.length) {
                                         /*
                                          * If there is neither a 'bytes' nor 'data' array, then our job is simple:
@@ -60127,9 +60149,9 @@ class Disk extends Component {
                                          * to fully "inflate" the sector, eliminating the possibility of partial dwords and
                                          * saving any code downstream from dealing with byte-size patterns.
                                          */
-                                        var cb = length << 2;
+                                        let cb = length << 2;
 
-                                        for (var ib = ab.length; ib < cb; ib++) {
+                                        for (let ib = ab.length; ib < cb; ib++) {
                                             ab[ib] = dwPattern;         // the pattern for byte-arrays was only a byte
                                         }
                                         this.fill(sector, ab, 0);
@@ -60145,7 +60167,7 @@ class Disk extends Component {
                                  * Pattern-filling of sectors is deferred until absolutely necessary (eg, when a sector is
                                  * being written).  So all we need to do at this point is checksum all the initial sector data.
                                  */
-                                for (var idw = 0; idw < adw.length; idw++) {
+                                for (let idw = 0; idw < adw.length; idw++) {
                                     dwChecksum = (dwChecksum + adw[idw]) & (0xffffffff|0);
                                 }
                             }
@@ -60160,7 +60182,7 @@ class Disk extends Component {
                 Component.error("Disk image error (" + sURL + "): " + e.message);
                 diskData = null;
             }
-            
+
             if (diskData) {
                 Component.addMachineResource(this.controller.idMachine, sURL, diskData);
             }
@@ -60198,18 +60220,18 @@ class Disk extends Component {
     {
         if (BACKTRACK || SYMBOLS) {
 
-            var i, off, dir = {}, iSector;
+            let i, off, dir = {}, iSector;
 
             if (this.aFileTable && this.aFileTable.length) {
                 /*
                  * In order for buildFileTable() to rebuild an existing table (eg, after deltas have been
                  * applied), we need to zap any and all existing file table references in the sector data.
                  */
-                var aDiskData = this.aDiskData;
-                for (var iCylinder = 0; iCylinder < aDiskData.length; iCylinder++) {
-                    for (var iHead = 0; iHead < aDiskData[iCylinder].length; iHead++) {
+                let aDiskData = this.aDiskData;
+                for (let iCylinder = 0; iCylinder < aDiskData.length; iCylinder++) {
+                    for (let iHead = 0; iHead < aDiskData[iCylinder].length; iHead++) {
                         for (iSector = 0; iSector < aDiskData[iCylinder][iHead].length; iSector++) {
-                            var sector = aDiskData[iCylinder][iHead][iSector];
+                            let sector = aDiskData[iCylinder][iHead][iSector];
                             if (sector) {
                                 delete sector['file'];
                                 delete sector.offFile;
@@ -60223,7 +60245,7 @@ class Disk extends Component {
 
             dir.pbaVolume = dir.lbaTotal = 0;
 
-            var cbDisk = this.nCylinders * this.nHeads * this.nSectors * this.cbSector;
+            let cbDisk = this.nCylinders * this.nHeads * this.nSectors * this.cbSector;
 
             /*
              * At this point, if this is a remote disk, you may see some warning messages in your browser's console,
@@ -60238,7 +60260,7 @@ class Disk extends Component {
              */
             if (this.fRemote) this.log("ignore any synchronous XMLHttpRequest warnings here (for now)");
 
-            var sectorBoot = this.getSector(0);
+            let sectorBoot = this.getSector(0);
             if (!sectorBoot) {
                 if (DEBUG && this.messageEnabled()) {
                     this.printMessage("buildFileTable(): unable to read boot sector");
@@ -60248,7 +60270,7 @@ class Disk extends Component {
 
             dir.cbSector = this.getSectorData(sectorBoot, DiskAPI.BPB.SECTOR_BYTES, 2);
 
-            var fValid = true;
+            let fValid = true;
             if (dir.cbSector != this.cbSector) {
                 /*
                  * When the first sector doesn't appear to contain a valid BPB, the most likely explanations are:
@@ -60286,7 +60308,7 @@ class Disk extends Component {
                      */
                     off = DiskAPI.MBR.PARTITIONS.OFFSET;
                     for (i = 0; i < 4; i++) {
-                        var bStatus = this.getSectorData(sectorBoot, off + DiskAPI.MBR.PARTITIONS.ENTRY.STATUS, 1);
+                        let bStatus = this.getSectorData(sectorBoot, off + DiskAPI.MBR.PARTITIONS.ENTRY.STATUS, 1);
                         if (bStatus == DiskAPI.MBR.PARTITIONS.STATUS.ACTIVE) {
                             dir.pbaVolume = this.getSectorData(sectorBoot, off + DiskAPI.MBR.PARTITIONS.ENTRY.LBA_FIRST, 4);
                             sectorBoot = this.getSector(dir.pbaVolume);
@@ -60361,15 +60383,15 @@ class Disk extends Component {
              */
 
 
-            var apba = [];
-            for (var lba = dir.lbaRoot; lba < dir.lbaData; lba++) apba.push(dir.pbaVolume + lba);
+            let apba = [];
+            for (let lba = dir.lbaRoot; lba < dir.lbaData; lba++) apba.push(dir.pbaVolume + lba);
             this.getDir(dir, this.sDiskFile, "", apba);
 
             /*
              * Create the sector-to-file mappings now.
              */
             for (i = 0; i < this.aFileTable.length; i++) {
-                var file = this.aFileTable[i];
+                let file = this.aFileTable[i];
                 off = 0;
                 for (iSector = 0; iSector < file.apba.length; iSector++) {
                     this.updateSector(file, file.apba[iSector], off);
@@ -60393,15 +60415,15 @@ class Disk extends Component {
      */
     getModuleInfo(sModule, nSegment)
     {
-        var aSymbols = {};
+        let aSymbols = {};
         if (SYMBOLS && this.aFileTable) {
-            for (var iFile = 0; iFile < this.aFileTable.length; iFile++) {
-                var file = this.aFileTable[iFile];
+            for (let iFile = 0; iFile < this.aFileTable.length; iFile++) {
+                let file = this.aFileTable[iFile];
                 if (file.sModule != sModule) continue;
-                var segment = file.aSegments[nSegment];
+                let segment = file.aSegments[nSegment];
                 if (!segment) continue;
-                for (var iOrdinal in segment.aEntries) {
-                    var entry = segment.aEntries[iOrdinal];
+                for (let iOrdinal in segment.aEntries) {
+                    let entry = segment.aEntries[iOrdinal];
                     /*
                      * entry[1] is the symbol name, which becomes the index, and entry[0] is the offset.
                      */
@@ -60428,15 +60450,15 @@ class Disk extends Component {
      */
     getSymbolInfo(sSymbol)
     {
-        var aInfo = [];
+        let aInfo = [];
         if (SYMBOLS && this.aFileTable) {
-            var sSymbolUpper = sSymbol.toUpperCase();
-            for (var iFile = 0; iFile < this.aFileTable.length; iFile++) {
-                var file = this.aFileTable[iFile];
-                for (var iSegment in file.aSegments) {
-                    var segment = file.aSegments[iSegment];
-                    for (var iOrdinal in segment.aEntries) {
-                        var entry = segment.aEntries[iOrdinal];
+            let sSymbolUpper = sSymbol.toUpperCase();
+            for (let iFile = 0; iFile < this.aFileTable.length; iFile++) {
+                let file = this.aFileTable[iFile];
+                for (let iSegment in file.aSegments) {
+                    let segment = file.aSegments[iSegment];
+                    for (let iOrdinal in segment.aEntries) {
+                        let entry = segment.aEntries[iOrdinal];
                         if (entry[1] && entry[1].indexOf(sSymbolUpper) >= 0) {
                             aInfo.push([entry[1], file.sName, iSegment, entry[0], segment.offEnd - segment.offStart]);
                         }
@@ -60458,23 +60480,23 @@ class Disk extends Component {
      */
     getDir(dir, sDisk, sDir, apba)
     {
-        var file;
-        var iStart = this.aFileTable.length;
-        var nEntriesPerSector = (dir.cbSector / DiskAPI.DIRENT.LENGTH) | 0;
+        let file;
+        let iStart = this.aFileTable.length;
+        let nEntriesPerSector = (dir.cbSector / DiskAPI.DIRENT.LENGTH) | 0;
 
         dir.sDir = sDir + "\\";
 
         if (DEBUG && this.messageEnabled()) this.printMessage('getDir("' + sDisk + '","' + dir.sDir + '")');
 
-        for (var iSector = 0; iSector < apba.length; iSector++) {
-            var pba = apba[iSector];
-            for (var iEntry = 0; iEntry < nEntriesPerSector; iEntry++) {
+        for (let iSector = 0; iSector < apba.length; iSector++) {
+            let pba = apba[iSector];
+            for (let iEntry = 0; iEntry < nEntriesPerSector; iEntry++) {
                 if (!this.getDirEntry(dir, pba, iEntry)) {
                     iSector = apba.length;
                     break;
                 }
                 if (dir.sName == null || dir.sName == "." || dir.sName == "..") continue;
-                var sPath = dir.sDir + dir.sName;
+                let sPath = dir.sDir + dir.sName;
                 if (DEBUG && this.messageEnabled(Messages.DISK | Messages.DATA)) {
                     this.printMessage('"' + sPath + '" size=' + dir.cbSize + ' cluster=' + dir.iCluster + ' sectors=' + JSON.stringify(dir.apba));
                     if (dir.apba.length) this.printMessage(this.dumpSector(this.getSector(dir.apba[0]), dir.apba[0], sPath));
@@ -60484,9 +60506,9 @@ class Disk extends Component {
             }
         }
 
-        var iEnd = this.aFileTable.length;
+        let iEnd = this.aFileTable.length;
 
-        for (var i = iStart; i < iEnd; i++) {
+        for (let i = iStart; i < iEnd; i++) {
             file = this.aFileTable[i];
             if (file.bAttr & DiskAPI.ATTR.SUBDIR && file.apba.length) this.getDir(dir, sDisk, sDir + "\\" + file.sName, file.apba);
         }
@@ -60537,8 +60559,8 @@ class Disk extends Component {
             }
         }
         if (dir.sectorDirCache) {
-            var off = i * DiskAPI.DIRENT.LENGTH;
-            var b = this.getSectorData(dir.sectorDirCache, off, 1);
+            let off = i * DiskAPI.DIRENT.LENGTH;
+            let b = this.getSectorData(dir.sectorDirCache, off, 1);
             if (b == DiskAPI.DIRENT.UNUSED) {
                 return false;
             }
@@ -60547,7 +60569,7 @@ class Disk extends Component {
                 return true;
             }
             dir.sName = Str.trim(this.getSectorString(dir.sectorDirCache, off + DiskAPI.DIRENT.NAME, 8));
-            var s = Str.trim(this.getSectorString(dir.sectorDirCache, off + DiskAPI.DIRENT.EXT, 3));
+            let s = Str.trim(this.getSectorString(dir.sectorDirCache, off + DiskAPI.DIRENT.EXT, 3));
             if (s.length) dir.sName += '.' + s;
             dir.bAttr = this.getSectorData(dir.sectorDirCache, off + DiskAPI.DIRENT.ATTR, 1);
             dir.cbSize = this.getSectorData(dir.sectorDirCache, off + DiskAPI.DIRENT.SIZE, 2);
@@ -60567,16 +60589,16 @@ class Disk extends Component {
      */
     convertClusterToSectors(dir)
     {
-        var apba = [];
-        var iCluster = dir.iCluster;
+        let apba = [];
+        let iCluster = dir.iCluster;
         if (iCluster) {
             do {
                 if (iCluster < DiskAPI.FAT12.CLUSNUM_MIN) {
 
                     break;
                 }
-                var lba = dir.lbaData + ((iCluster - DiskAPI.FAT12.CLUSNUM_MIN) * dir.nClusterSecs);
-                for (var i = 0; i < dir.nClusterSecs; i++) {
+                let lba = dir.lbaData + ((iCluster - DiskAPI.FAT12.CLUSNUM_MIN) * dir.nClusterSecs);
+                for (let i = 0; i < dir.nClusterSecs; i++) {
                     apba.push(dir.pbaVolume + lba++);
                 }
                 iCluster = this.getClusterEntry(dir, iCluster, 0) | this.getClusterEntry(dir, iCluster, 1);
@@ -60597,17 +60619,17 @@ class Disk extends Component {
      */
     getClusterEntry(dir, iCluster, iByte)
     {
-        var w = 0;
-        var cbitsSector = dir.cbSector * 8;
-        var offBits = dir.nFATBits * iCluster + (iByte? 8 : 0);
-        var iSector = (offBits / cbitsSector) | 0;
+        let w = 0;
+        let cbitsSector = dir.cbSector * 8;
+        let offBits = dir.nFATBits * iCluster + (iByte? 8 : 0);
+        let iSector = (offBits / cbitsSector) | 0;
         if (!dir.sectorFATCache || !dir.lbaFATCache || dir.lbaFATCache != dir.lbaFAT + iSector) {
             dir.lbaFATCache = dir.lbaFAT + iSector;
             dir.sectorFATCache = this.getSector(dir.pbaVolume + dir.lbaFATCache);
         }
         if (dir.sectorFATCache) {
             offBits = (offBits % cbitsSector) | 0;
-            var off = (offBits >> 3);
+            let off = (offBits >> 3);
             w = this.getSectorData(dir.sectorFATCache, off, 1);
             if (!iByte) {
                 if (offBits & 0x7) w >>= 4;
@@ -60636,15 +60658,15 @@ class Disk extends Component {
      */
     getSector(pba)
     {
-        var nSectorsPerCylinder = this.nHeads * this.nSectors;
-        var iCylinder = (pba / nSectorsPerCylinder) | 0;
+        let nSectorsPerCylinder = this.nHeads * this.nSectors;
+        let iCylinder = (pba / nSectorsPerCylinder) | 0;
         if (iCylinder < this.nCylinders) {
-            var nSectorsRemaining = (pba % nSectorsPerCylinder);
-            var iHead = (nSectorsRemaining / this.nSectors) | 0;
+            let nSectorsRemaining = (pba % nSectorsPerCylinder);
+            let iHead = (nSectorsRemaining / this.nSectors) | 0;
             /*
              * PBA numbers are 0-based, but the sector numbers in CHS addressing are 1-based, so add one to iSector
              */
-            var iSector = (nSectorsRemaining % this.nSectors) + 1;
+            let iSector = (nSectorsRemaining % this.nSectors) + 1;
             return this.seek(iCylinder, iHead, iSector);
         }
         return null;
@@ -60667,12 +60689,12 @@ class Disk extends Component {
      */
     getSectorData(sector, off, len)
     {
-        var dw = 0;
-        var nShift = 0;
+        let dw = 0;
+        let nShift = 0;
 
         while (len--) {
 
-            var b = this.read(sector, off++);
+            let b = this.read(sector, off++);
 
             if (b < 0) break;
             dw |= (b << nShift);
@@ -60694,9 +60716,9 @@ class Disk extends Component {
      */
     getSectorString(sector, off, len)
     {
-        var s = "";
+        let s = "";
         while (len--) {
-            var b = this.read(sector, off++);
+            let b = this.read(sector, off++);
             if (b <= 0) break;
             s += String.fromCharCode(b);
         }
@@ -60716,12 +60738,12 @@ class Disk extends Component {
      */
     updateSector(file, pba, off)
     {
-        var nSectorsPerCylinder = this.nHeads * this.nSectors;
-        var iCylinder = (pba / nSectorsPerCylinder) | 0;
-        var nSectorsRemaining = (pba % nSectorsPerCylinder);
-        var iHead = (nSectorsRemaining / this.nSectors) | 0;
-        var iSector = (nSectorsRemaining % this.nSectors);
-        var cylinder, head, sector;
+        let nSectorsPerCylinder = this.nHeads * this.nSectors;
+        let iCylinder = (pba / nSectorsPerCylinder) | 0;
+        let nSectorsRemaining = (pba % nSectorsPerCylinder);
+        let iHead = (nSectorsRemaining / this.nSectors) | 0;
+        let iSector = (nSectorsRemaining % this.nSectors);
+        let cylinder, head, sector;
         if ((cylinder = this.aDiskData[iCylinder]) && (head = cylinder[iHead]) && (sector = head[iSector])) {
 
             if (sector['file']) {
@@ -60789,7 +60811,7 @@ class Disk extends Component {
      */
     connectRemoteDisk(sDiskPath)
     {
-        var sParms = DiskAPI.QUERY.ACTION + '=' + DiskAPI.ACTION.OPEN;
+        let sParms = DiskAPI.QUERY.ACTION + '=' + DiskAPI.ACTION.OPEN;
         sParms += '&' + DiskAPI.QUERY.VOLUME + '=' + sDiskPath;
         sParms += '&' + DiskAPI.QUERY.MODE + '=' + this.mode;
         sParms += '&' + DiskAPI.QUERY.CHS + '=' + this.nCylinders + ':' + this.nHeads + ':' + this.nSectors + ':' + this.cbSector;
@@ -60816,14 +60838,14 @@ class Disk extends Component {
         }
 
         if (this.fRemote) {
-            var sParms = DiskAPI.QUERY.ACTION + '=' + DiskAPI.ACTION.READ;
+            let sParms = DiskAPI.QUERY.ACTION + '=' + DiskAPI.ACTION.READ;
             sParms += '&' + DiskAPI.QUERY.VOLUME + '=' + this.sDiskPath;
             sParms += '&' + DiskAPI.QUERY.CHS + '=' + this.nCylinders + ':' + this.nHeads + ':' + this.nSectors + ':' + this.cbSector;
             sParms += '&' + DiskAPI.QUERY.ADDR + '=' + iCylinder + ':' + iHead + ':' + iSector + ':' + nSectors;
             sParms += '&' + DiskAPI.QUERY.MACHINE + '=' + this.controller.getMachineID();
             sParms += '&' + DiskAPI.QUERY.USER + '=' + this.controller.getUserID();
-            var disk = this;
-            var sDiskURL = Web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
+            let disk = this;
+            let sDiskURL = Web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
             Web.getResource(sDiskURL, null, fAsync, function(sURL, sResponse, nErrorCode) {
                 disk.doneReadRemoteSectors(sURL, sResponse, nErrorCode, [iCylinder, iHead, iSector, nSectors, fAsync, done]);
             });
@@ -60843,16 +60865,16 @@ class Disk extends Component {
      */
     doneReadRemoteSectors(sURLName, sURLData, nErrorCode, aRequest)
     {
-        var fAsync = false;
+        let fAsync = false;
 
-        var iCylinder = aRequest[0];
-        var iHead = aRequest[1];
-        var iSector = aRequest[2];
-        var nSectors = aRequest[3];
+        let iCylinder = aRequest[0];
+        let iHead = aRequest[1];
+        let iSector = aRequest[2];
+        let nSectors = aRequest[3];
 
         if (!nErrorCode) {
-            var abData = JSON.parse(sURLData);
-            var offData = 0;
+            let abData = JSON.parse(sURLData);
+            let offData = 0;
             while (nSectors--) {
                 /*
                  * We call seek with fWrite == true to prevent seek() from triggering another call
@@ -60863,7 +60885,7 @@ class Disk extends Component {
                  *
                  * We KNOW this is an uninitialized sector, because we're about to initialize it.
                  */
-                var sector = this.seek(iCylinder, iHead, iSector, true);
+                let sector = this.seek(iCylinder, iHead, iSector, true);
                 if (!sector) {
                     if (DEBUG && this.messageEnabled()) {
                         this.printMessage("doneReadRemoteSectors(): seek(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ") failed");
@@ -60884,7 +60906,7 @@ class Disk extends Component {
                 this.printMessage("doneReadRemoteSectors(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ",N=" + nSectors + ") returned error " + nErrorCode);
             }
         }
-        var done = aRequest[5];
+        let done = aRequest[5];
         if (done) done(nErrorCode, fAsync);
     }
 
@@ -60916,7 +60938,7 @@ class Disk extends Component {
         }
 
         if (this.fRemote) {
-            var dataPost = {};
+            let dataPost = {};
             this.fWriteInProgress = true;
             dataPost[DiskAPI.QUERY.ACTION] = DiskAPI.ACTION.WRITE;
             dataPost[DiskAPI.QUERY.VOLUME] = this.sDiskPath;
@@ -60925,8 +60947,8 @@ class Disk extends Component {
             dataPost[DiskAPI.QUERY.MACHINE] = this.controller.getMachineID();
             dataPost[DiskAPI.QUERY.USER] = this.controller.getUserID();
             dataPost[DiskAPI.QUERY.DATA] = JSON.stringify(abSectors);
-            var disk = this;
-            var sDiskURL = Web.getHost() + DiskAPI.ENDPOINT;
+            let disk = this;
+            let sDiskURL = Web.getHost() + DiskAPI.ENDPOINT;
             Web.getResource(sDiskURL, dataPost, fAsync, function(sURL, sResponse, nErrorCode) {
                 disk.doneWriteRemoteSectors(sURL, sResponse, nErrorCode, [iCylinder, iHead, iSector, nSectors, fAsync]);
             });
@@ -60945,16 +60967,16 @@ class Disk extends Component {
      */
     doneWriteRemoteSectors(sURLName, sURLData, nErrorCode, aRequest)
     {
-        var iCylinder = aRequest[0];
-        var iHead = aRequest[1];
-        var iSector = aRequest[2];
-        var nSectors = aRequest[3];
-        var fAsync = aRequest[4];
+        let iCylinder = aRequest[0];
+        let iHead = aRequest[1];
+        let iSector = aRequest[2];
+        let nSectors = aRequest[3];
+        let fAsync = aRequest[4];
         this.fWriteInProgress = false;
 
         if (iCylinder >= 0 && iCylinder < this.aDiskData.length && iHead >= 0 && iHead < this.aDiskData[iCylinder].length) {
-            for (var i = iSector - 1; nSectors-- > 0 && i >= 0 && i < this.aDiskData[iCylinder][iHead].length; i++) {
-                var sector = this.aDiskData[iCylinder][iHead][i];
+            for (let i = iSector - 1; nSectors-- > 0 && i >= 0 && i < this.aDiskData[iCylinder][iHead].length; i++) {
+                let sector = this.aDiskData[iCylinder][iHead][i];
 
                 if (!nErrorCode) {
                     if (!sector.fDirty) {
@@ -60982,11 +61004,11 @@ class Disk extends Component {
     disconnectRemoteDisk()
     {
         if (this.fRemote) {
-            var sParms = DiskAPI.QUERY.ACTION + '=' + DiskAPI.ACTION.CLOSE;
+            let sParms = DiskAPI.QUERY.ACTION + '=' + DiskAPI.ACTION.CLOSE;
             sParms += '&' + DiskAPI.QUERY.VOLUME + '=' + this.sDiskPath;
             sParms += '&' + DiskAPI.QUERY.MACHINE + '=' + this.controller.getMachineID();
             sParms += '&' + DiskAPI.QUERY.USER + '=' + this.controller.getUserID();
-            var sDiskURL = Web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
+            let sDiskURL = Web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
             Web.getResource(sDiskURL, null, true);
             this.fRemote = false;
         }
@@ -61013,7 +61035,7 @@ class Disk extends Component {
     {
         sector.fDirty = true;
 
-        var j = this.aDirtySectors.indexOf(sector);
+        let j = this.aDirtySectors.indexOf(sector);
         if (j >= 0) {
             this.aDirtySectors.splice(j, 1);
             this.aDirtyTimestamps.splice(j, 1);
@@ -61040,7 +61062,7 @@ class Disk extends Component {
     updateWriteTimer()
     {
         if (this.aDirtySectors.length) {
-            var msWrite = this.aDirtyTimestamps[0] + Disk.REMOTE_WRITE_DELAY;
+            let msWrite = this.aDirtyTimestamps[0] + Disk.REMOTE_WRITE_DELAY;
             if (this.timerWrite) {
                 if (this.msTimerWrite < msWrite) {
                     clearTimeout(this.timerWrite);
@@ -61048,9 +61070,9 @@ class Disk extends Component {
                 }
             }
             if (!this.timerWrite) {
-                var obj = this;
-                var msNow = Usr.getTime();
-                var msDelay = msWrite - msNow;
+                let obj = this;
+                let msNow = Usr.getTime();
+                let msDelay = msWrite - msNow;
                 if (msDelay < 0) msDelay = 0;
                 if (msDelay > Disk.REMOTE_WRITE_DELAY) msDelay = Disk.REMOTE_WRITE_DELAY;
                 this.timerWrite = setTimeout(function() {
@@ -61082,17 +61104,17 @@ class Disk extends Component {
         if (fAsync) {
             this.timerWrite = null;
         }
-        var sector = this.aDirtySectors[0];
+        let sector = this.aDirtySectors[0];
         if (sector) {
-            var iCylinder = sector.iCylinder;
-            var iHead = sector.iHead;
-            var iSector = sector['sector'];
-            var nSectors = 0;
-            var abSectors = [];
-            for (var i = iSector - 1; i < this.aDiskData[iCylinder][iHead].length; i++) {
-                var sectorNext = this.aDiskData[iCylinder][iHead][i];
+            let iCylinder = sector.iCylinder;
+            let iHead = sector.iHead;
+            let iSector = sector['sector'];
+            let nSectors = 0;
+            let abSectors = [];
+            for (let i = iSector - 1; i < this.aDiskData[iCylinder][iHead].length; i++) {
+                let sectorNext = this.aDiskData[iCylinder][iHead][i];
                 if (!sectorNext.fDirty) break;
-                var j = this.aDirtySectors.indexOf(sectorNext);
+                let j = this.aDirtySectors.indexOf(sectorNext);
 
                 if (DEBUG && this.messageEnabled()) {
                     this.printMessage("findDirtySectors(CHS=" + iCylinder + ':' + iHead + ':' + sectorNext['sector'] + ")");
@@ -61104,7 +61126,7 @@ class Disk extends Component {
                 nSectors++;
             }
 
-            var response = this.writeRemoteSectors(iCylinder, iHead, iSector, nSectors, abSectors, fAsync);
+            let response = this.writeRemoteSectors(iCylinder, iHead, iSector, nSectors, abSectors, fAsync);
             return fAsync || response;
         }
         return false;
@@ -61146,12 +61168,12 @@ class Disk extends Component {
      */
     seek(iCylinder, iHead, iSector, fWrite, done)
     {
-        var sector = null;
-        var drive = this.drive;
-        var cylinder = this.aDiskData[iCylinder];
+        let sector = null;
+        let drive = this.drive;
+        let cylinder = this.aDiskData[iCylinder];
         if (cylinder) {
-            var i;
-            var track = cylinder[iHead];
+            let i;
+            let track = cylinder[iHead];
             /*
              * The following code allows a single-sided diskette image to be reformatted (ie, "expanded")
              * as a double-sided image, provided the drive has more than one head (see drive.nHeads).
@@ -61184,7 +61206,7 @@ class Disk extends Component {
                                  */
                                 sector['pattern'] = 0;
                             } else {
-                                var nSectors = 1;
+                                let nSectors = 1;
                                 /*
                                  * We know we need to read at least 1 sector, but let's count the number of trailing sectors
                                  * on the same track that may also be required.
@@ -61232,9 +61254,9 @@ class Disk extends Component {
      */
     fill(sector, ab, off)
     {
-        var cdw = sector['length'] >> 2;
-        var adw = new Array(cdw);
-        for (var idw = 0; idw < cdw; idw++) {
+        let cdw = sector['length'] >> 2;
+        let adw = new Array(cdw);
+        for (let idw = 0; idw < cdw; idw++) {
             adw[idw] = ab[off] | (ab[off + 1] << 8) | (ab[off + 2] << 16) | (ab[off + 3] << 24);
             off += 4;
         }
@@ -61254,14 +61276,14 @@ class Disk extends Component {
      */
     toBytes(sector)
     {
-        var cb = sector['length'];
-        var ab = new Array(cb);
-        var ib = 0;
-        var cdw = cb >> 2;
-        var adw = sector['data'];
-        var dwPattern = sector['pattern'];
-        for (var idw = 0; idw < cdw; idw++) {
-            var dw = (idw < adw.length? adw[idw] : dwPattern);
+        let cb = sector['length'];
+        let ab = new Array(cb);
+        let ib = 0;
+        let cdw = cb >> 2;
+        let adw = sector['data'];
+        let dwPattern = sector['pattern'];
+        for (let idw = 0; idw < cdw; idw++) {
+            let dw = (idw < adw.length? adw[idw] : dwPattern);
             ab[ib++] = dw & 0xff;
             ab[ib++] = (dw >> 8) & 0xff;
             ab[ib++] = (dw >> 16) & 0xff;
@@ -61281,15 +61303,15 @@ class Disk extends Component {
      */
     read(sector, ibSector, fCompare)
     {
-        var b = -1;
+        let b = -1;
         if (sector) {
             if (DEBUG && !ibSector && !fCompare && this.messageEnabled()) {
                 this.printMessage('read("' + this.sDiskFile + '",CHS=' + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + ')');
             }
             if (ibSector < sector['length']) {
-                var adw = sector['data'];
-                var idw = ibSector >> 2;
-                var dw = (idw < adw.length ? adw[idw] : sector['pattern']);
+                let adw = sector['data'];
+                let idw = ibSector >> 2;
+                let dw = (idw < adw.length ? adw[idw] : sector['pattern']);
                 b = ((dw >> ((ibSector & 0x3) << 3)) & 0xff);
             }
         }
@@ -61316,15 +61338,15 @@ class Disk extends Component {
 
         if (ibSector < sector['length']) {
             if (b != this.read(sector, ibSector, true)) {
-                var adw = sector['data'];
-                var dwPattern = sector['pattern'];
-                var idw = ibSector >> 2;
-                var nShift = (ibSector & 0x3) << 3;
+                let adw = sector['data'];
+                let dwPattern = sector['pattern'];
+                let idw = ibSector >> 2;
+                let nShift = (ibSector & 0x3) << 3;
 
                 /*
                  * Ensure every byte up to the specified byte is properly initialized.
                  */
-                for (var i = adw.length; i <= idw; i++) adw[i] = dwPattern;
+                for (let i = adw.length; i <= idw; i++) adw[i] = dwPattern;
 
                 if (!sector.cModify) {
                     sector.iModify = idw;
@@ -61355,9 +61377,9 @@ class Disk extends Component {
         /*
          * Gross, but simple; more importantly, it works -- at least for disks of typical floppy magnitude.
          */
-        var s = "", pba = 0, sector;
+        let s = "", pba = 0, sector;
         while ((sector = this.getSector(pba++))) {
-            for (var off = 0, len = sector['length']; off < len; off++) {
+            for (let off = 0, len = sector['length']; off < len; off++) {
                 s += String.fromCharCode(this.getSectorData(sector, off, 1));
             }
         }
@@ -61382,18 +61404,18 @@ class Disk extends Component {
      */
     save()
     {
-        var i = 0;
-        var deltas = [];
+        let i = 0;
+        let deltas = [];
         deltas[i++] = [this.sDiskPath, this.dwChecksum, this.nCylinders, this.nHeads, this.nSectors, this.cbSector];
         if (!this.fRemote && !this.fWriteProtected) {
-            var aDiskData = this.aDiskData;
-            for (var iCylinder = 0; iCylinder < aDiskData.length; iCylinder++) {
-                for (var iHead = 0; iHead < aDiskData[iCylinder].length; iHead++) {
-                    for (var iSector = 0; iSector < aDiskData[iCylinder][iHead].length; iSector++) {
-                        var sector = aDiskData[iCylinder][iHead][iSector];
+            let aDiskData = this.aDiskData;
+            for (let iCylinder = 0; iCylinder < aDiskData.length; iCylinder++) {
+                for (let iHead = 0; iHead < aDiskData[iCylinder].length; iHead++) {
+                    for (let iSector = 0; iSector < aDiskData[iCylinder][iHead].length; iSector++) {
+                        let sector = aDiskData[iCylinder][iHead][iSector];
                         if (sector && sector.cModify) {
-                            var mods = [], n = 0;
-                            var iModify = sector.iModify, iModifyLimit = sector.iModify + sector.cModify;
+                            let mods = [], n = 0;
+                            let iModify = sector.iModify, iModifyLimit = sector.iModify + sector.cModify;
                             while (iModify < iModifyLimit) {
                                 mods[n++] = sector['data'][iModify++];
                             }
@@ -61432,8 +61454,8 @@ class Disk extends Component {
          * If deltas is undefined, that's not necessarily an error;  the controller may simply be (re)initializing
          * itself (although neither controller should be calling restore() under those conditions anymore).
          */
-        var nChanges = 0;
-        var sReason = "unsupported restore format";
+        let nChanges = 0;
+        let sReason = "unsupported restore format";
         /*
          * I originally added a check for aDiskData here on the assumption that if there was an error loading
          * a disk image, we will have already notified the user, so any additional errors about differing checksums,
@@ -61444,8 +61466,8 @@ class Disk extends Component {
          */
         if (deltas && deltas.length > 0) {
 
-            var i = 0;
-            var aDiskInfo = deltas[i++];
+            let i = 0;
+            let aDiskInfo = deltas[i++];
 
             if (aDiskInfo && aDiskInfo.length >= 2) {
                 /*
@@ -61491,11 +61513,11 @@ class Disk extends Component {
             if (!this.aDiskData.length) nChanges = -1;
 
             while (i < deltas.length && nChanges >= 0) {
-                var m = 0;
-                var mod = deltas[i++];
-                var iCylinder = mod[m++];
-                var iHead = mod[m++];
-                var iSector = mod[m++];
+                let m = 0;
+                let mod = deltas[i++];
+                let iCylinder = mod[m++];
+                let iHead = mod[m++];
+                let iSector = mod[m++];
                 /*
                  * Note the buried test for write-protection.  Yes, an invariant condition should be tested
                  * outside the loop, not inside, but (a) it's a trivial test, (b) the test should never fail
@@ -61512,21 +61534,21 @@ class Disk extends Component {
                     nChanges = -1;
                     break;
                 }
-                var iModify = mod[m++];
-                var mods = mod[m++];
-                var iModifyLimit = iModify + mods.length;
-                var sector = this.aDiskData[iCylinder][iHead][iSector];
+                let iModify = mod[m++];
+                let mods = mod[m++];
+                let iModifyLimit = iModify + mods.length;
+                let sector = this.aDiskData[iCylinder][iHead][iSector];
                 if (!sector) continue;
                 /*
                  * Since write() now deals with empty/partial sectors, we no longer need to completely "inflate"
                  * the sector prior to applying modifications.  So let's just make sure that the sector is "inflated"
                  * up to iModify.
                  */
-                var idw = sector['data'].length;
+                let idw = sector['data'].length;
                 while (idw < iModify) {
                     sector['data'][idw++] = sector['pattern'];
                 }
-                var n = 0;
+                let n = 0;
                 sector.iModify = iModify;
                 sector.cModify = mods.length;
                 while (iModify < iModifyLimit) {
@@ -61573,7 +61595,7 @@ class Disk extends Component {
      */
     convertToJSON(fFormatted)
     {
-        var s, pba = 0, sector, sectorLast;
+        let s, pba = 0, sector, sectorLast;
 
         while ((sector = this.getSector(pba++))) {
             this.deflateSector(sector);
@@ -61629,11 +61651,11 @@ class Disk extends Component {
      */
     deflateSector(sector)
     {
-        var adw = sector['data'];
-        var cdw = adw.length;
+        let adw = sector['data'];
+        let cdw = adw.length;
         if ((cdw << 2) == sector['length']) {
-            var idw = cdw - 1;
-            var dwPattern = adw[idw], cDupes = 0;
+            let idw = cdw - 1;
+            let dwPattern = adw[idw], cDupes = 0;
             while (idw--) {
                 if (adw[idw] !== dwPattern) break;
                 cDupes++;
@@ -61656,24 +61678,24 @@ class Disk extends Component {
      */
     dumpSector(sector, pba, sDesc)
     {
-        var sDump = "";
+        let sDump = "";
         if (DEBUG && sector) {
             if (pba != null) sDump += "sector " + pba + (sDesc? (" for " + sDesc) : "") + ':';
-            var sBytes = "", sChars = "";
-            var cbSector = sector['length'];
-            var cdwData = sector['data'].length;
-            var dw = 0;
-            for (var i = 0; i < cbSector; i++) {
+            let sBytes = "", sChars = "";
+            let cbSector = sector['length'];
+            let cdwData = sector['data'].length;
+            let dw = 0;
+            for (let i = 0; i < cbSector; i++) {
                 if ((i % 16) === 0) {
                     if (sDump) sDump += sBytes + ' ' + sChars + '\n';
                     sDump += Str.toHex(i, 4) + ": ";
                     sBytes = sChars = "";
                 }
                 if ((i % 4) === 0) {
-                    var idw = i >> 2;
+                    let idw = i >> 2;
                     dw = (idw < cdwData? sector['data'][idw] : sector['pattern']);
                 }
-                var b = dw & 0xff;
+                let b = dw & 0xff;
                 dw >>>= 8;
                 sBytes += Str.toHex(b, 2) + (i % 16 == 7? "-" : " ");
                 sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
@@ -61762,11 +61784,11 @@ class FileInfo {
      */
     loadValue(offset, length)
     {
-        var l;
+        let l;
         length = length || 2;
-        var iSector = offset >> 9;
-        var offSector = offset & 0x1ff;
-        var sector = this.disk.getSector(this.apba[iSector]);
+        let iSector = offset >> 9;
+        let offSector = offset & 0x1ff;
+        let sector = this.disk.getSector(this.apba[iSector]);
         if (sector) {
             /*
              * If the read is wholly contained within a sector, read it with one call.
@@ -61778,7 +61800,7 @@ class FileInfo {
              * The spans a sector boundary, so we just call ourselves one byte at a time.
              */
             l = 0;
-            var shift = 0;
+            let shift = 0;
             while (length--) {
                 l |= this.loadValue(offset++, 1) << shift;
                 shift += 8;
@@ -61797,10 +61819,10 @@ class FileInfo {
      */
     loadString(offset, length)
     {
-        var s = "";
+        let s = "";
         if (!length) length = -1;
         while (length--) {
-            var b = this.loadValue(offset++, 1);
+            let b = this.loadValue(offset++, 1);
             if (!b) break;
             s += String.fromCharCode(b);
         }
@@ -61833,7 +61855,7 @@ class FileInfo {
         /*
          * Read the Segment Table entries now.
          */
-        var iSegment = 1;
+        let iSegment = 1;
         this.aSegments = [];
         this.aOrdinals = [];                // this is an optional array for quick ordinal-to-segment lookup
 
@@ -61842,9 +61864,9 @@ class FileInfo {
         }
 
         while (nEntries--) {
-            var offSegment = this.loadValue(offEntries) << nSegOffShift;
+            let offSegment = this.loadValue(offEntries) << nSegOffShift;
             if (offSegment) {
-                var lenSegment = this.loadValue(offEntries + 2) || 0x10000;       // 0 means 64K
+                let lenSegment = this.loadValue(offEntries + 2) || 0x10000;       // 0 means 64K
 
                 if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
                     this.disk.printMessage("segment " + iSegment + ": offStart=" + Str.toHexLong(offSegment) + " offEnd=" + Str.toHexLong(offSegment + lenSegment));
@@ -61888,7 +61910,7 @@ class FileInfo {
      */
     loadEntryTable(offEntries, offEntriesEnd)
     {
-        var iOrdinal = 1;
+        let iOrdinal = 1;
 
         if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
             this.disk.printMessage("loadEntryTable(" + Str.toHexLong(offEntries) + "," + Str.toHexLong(offEntriesEnd) + ")");
@@ -61896,10 +61918,10 @@ class FileInfo {
 
         while (offEntries < offEntriesEnd) {
 
-            var w = this.loadValue(offEntries);
-            var bEntries = w & 0xff;
+            let w = this.loadValue(offEntries);
+            let bEntries = w & 0xff;
             if (!bEntries) break;
-            var bSegment = w >> 8, iSegment;
+            let bSegment = w >> 8, iSegment;
 
             if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
                 this.disk.printMessage("bundle for segment " + bSegment + ": " + bEntries + " entries @" + Str.toHex(offEntries));
@@ -61920,9 +61942,9 @@ class FileInfo {
                  * byte contains flags indicating exported (0x1) and/or global/shared (0x2) data, and the
                  * next word is the offset within the segment.
                  */
-                var offEntry;
-                var offDebug = offEntries;
-                var bFlags = this.loadValue(offEntries, 1);
+                let offEntry;
+                let offDebug = offEntries;
+                let bFlags = this.loadValue(offEntries, 1);
 
                 if (bSegment <= 0xFE) {
                     iSegment = bSegment;
@@ -61966,7 +61988,7 @@ class FileInfo {
      */
     loadNameTable(offEntries, offEntriesEnd)
     {
-        var cNames = 0;
+        let cNames = 0;
 
         if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
             this.disk.printMessage("loadNameTable(" + Str.toHexLong(offEntries) + (offEntriesEnd? ("," + Str.toHexLong(offEntriesEnd)) : "") + ")");
@@ -61974,11 +61996,11 @@ class FileInfo {
 
         while (!offEntriesEnd || offEntries < offEntriesEnd) {
 
-            var offDebug = offEntries;
-            var bLength = this.loadValue(offEntries, 1);
+            let offDebug = offEntries;
+            let bLength = this.loadValue(offEntries, 1);
             if (!bLength) break;
 
-            var sSymbol = this.loadString(offEntries + 1, bLength);
+            let sSymbol = this.loadString(offEntries + 1, bLength);
             if (!sSymbol) break;                    // an error must have occurred (this is not a natural way to end)
             offEntries += 1 + bLength;
 
@@ -61990,12 +62012,12 @@ class FileInfo {
                 }
             }
             else {
-                var iOrdinal = this.loadValue(offEntries);
-                var tuple = this.aOrdinals[iOrdinal];
+                let iOrdinal = this.loadValue(offEntries);
+                let tuple = this.aOrdinals[iOrdinal];
                 if (tuple) {
-                    var iSegment = tuple[0];        // tuple[0] is the segment number and tuple[1] is the corresponding offEntry
+                    let iSegment = tuple[0];        // tuple[0] is the segment number and tuple[1] is the corresponding offEntry
                     if (this.aSegments[iSegment]) {
-                        var aEntries = this.aSegments[iSegment].aEntries[iOrdinal];
+                        let aEntries = this.aSegments[iSegment].aEntries[iOrdinal];
 
                         aEntries.push(sSymbol);
                         if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
@@ -62038,21 +62060,21 @@ class FileInfo {
             return;
         }
 
-        var offNEHeader = this.loadField(FileInfo.OE.oeNEHeader);
+        let offNEHeader = this.loadField(FileInfo.OE.oeNEHeader);
         if (this.loadField(FileInfo.NE.neSignature, offNEHeader) != FileInfo.NE.SIG) {
             return;
         }
 
-        var nEntries = this.loadField(FileInfo.NE.neSTEntries, offNEHeader);
-        var offEntries = this.loadField(FileInfo.NE.neSTOffset, offNEHeader);
-        var nSegOffShift = this.loadField(FileInfo.NE.neSegOffShift, offNEHeader);
+        let nEntries = this.loadField(FileInfo.NE.neSTEntries, offNEHeader);
+        let offEntries = this.loadField(FileInfo.NE.neSTOffset, offNEHeader);
+        let nSegOffShift = this.loadField(FileInfo.NE.neSegOffShift, offNEHeader);
 
         if (offEntries && nEntries) {
             this.loadSegmentTable(offEntries + offNEHeader, nEntries, nSegOffShift || 0);
         }
 
         offEntries = this.loadField(FileInfo.NE.neETOffset, offNEHeader);
-        var cbEntries = this.loadField(FileInfo.NE.neETSize, offNEHeader);
+        let cbEntries = this.loadField(FileInfo.NE.neETSize, offNEHeader);
         if (offEntries && cbEntries) {
             this.loadEntryTable(offEntries += offNEHeader, offEntries + cbEntries);
         }
@@ -62087,10 +62109,10 @@ class FileInfo {
      */
     getSymbol(off, fNearest)
     {
-        var sSymbol = null;
+        let sSymbol = null;
         if (this.aSegments) {
-            for (var iSegment in this.aSegments) {
-                var segment = this.aSegments[iSegment];
+            for (let iSegment in this.aSegments) {
+                let segment = this.aSegments[iSegment];
                 if (off >= segment.offStart && off <= segment.offEnd) {
                     /*
                      * This is the one and only segment we need to check, so we can make off segment-relative now.
@@ -62099,10 +62121,10 @@ class FileInfo {
                     /*
                      * To support fNearest, save the entry where (off - entry[0]) yields the smallest positive result.
                      */
-                    var cbNearest = off, entryNearest;
-                    for (var iOrdinal in segment.aEntries) {
-                        var entry = segment.aEntries[iOrdinal];
-                        var cb = off - entry[0];
+                    let cbNearest = off, entryNearest;
+                    for (let iOrdinal in segment.aEntries) {
+                        let entry = segment.aEntries[iOrdinal];
+                        let cb = off - entry[0];
                         if (!cb) {
                             sSymbol = this.sModule + '!' + entry[1];
                             break;
@@ -62435,15 +62457,15 @@ class FDC extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var fdc = this;
+        let fdc = this;
         /*
          * TODO: Making copies of control that are simply cast to different types seems silly, but it doesn't
          * really cost anything and it's cleaner than doing a lot MORE type overrides inline.  However, it still
          * doesn't solve all my problems: controlForm should really be cast as HTMLFormElement, but JavaScript
          * inspections refuse to believe there's an 'onsubmit' property on an HTMLFormElement that I can override.
          */
-        var controlForm = /** @type {Object} */ (control);
-        var controlSelect = /** @type {HTMLSelectElement} */ (control);
+        let controlForm = /** @type {Object} */ (control);
+        let controlSelect = /** @type {HTMLSelectElement} */ (control);
 
         switch (sBinding) {
 
@@ -62458,7 +62480,7 @@ class FDC extends Component {
              * middle.
              */
             if (this.sortBy) {
-                var i, aOptions = [];
+                let i, aOptions = [];
                 /*
                  * NOTE: All this monkeying around with copying the elements from control.options to aOptions
                  * and then back again is necessary because control.options isn't a *real* Array (at least not
@@ -62512,7 +62534,7 @@ class FDC extends Component {
              * However, that doesn't seem to work for all browsers, so I've reverted to onchange.
              */
             controlSelect.onchange = function onChangeListDrives(event) {
-                var iDrive = Str.parseInt(controlSelect.value, 10);
+                let iDrive = Str.parseInt(controlSelect.value, 10);
                 if (iDrive != null) fdc.displayDiskette(iDrive);
             };
             return true;
@@ -62544,19 +62566,19 @@ class FDC extends Component {
             }
             this.bindings[sBinding] = control;
             control.onclick = function onClickSaveDisk(event) {
-                var controlDrives = fdc.bindings["listDrives"];
+                let controlDrives = fdc.bindings["listDrives"];
                 if (controlDrives && controlDrives.options && fdc.aDrives) {
-                    var iDriveSelected = Str.parseInt(controlDrives.value, 10) || 0;
-                    var drive = fdc.aDrives[iDriveSelected];
+                    let iDriveSelected = Str.parseInt(controlDrives.value, 10) || 0;
+                    let drive = fdc.aDrives[iDriveSelected];
                     if (drive) {
                         /*
                          * Note the similarity (and hence factoring opportunity) between this code and the HDC's
                          * "saveHD*" binding.
                          */
-                        var disk = drive.disk;
+                        let disk = drive.disk;
                         if (disk) {
                             if (DEBUG) fdc.println("saving diskette " + disk.sDiskPath + "...");
-                            var sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
+                            let sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
                             Component.alertUser(sAlert);
                         } else {
                             fdc.notice("No diskette loaded in drive.");
@@ -62586,16 +62608,16 @@ class FDC extends Component {
              * Enable "Mount" button only if a file is actually selected
              */
             controlForm.onchange = function onChangeMountDisk() {
-                var fieldset = controlForm.children[0];
-                var files = fieldset.children[0].files;
-                var submit = fieldset.children[1];
+                let fieldset = controlForm.children[0];
+                let files = fieldset.children[0].files;
+                let submit = fieldset.children[1];
                 submit.disabled = !files.length;
             };
             controlForm.onsubmit = function onSubmitMountDisk(event) {
-                var file = event.currentTarget[1].files[0];
+                let file = event.currentTarget[1].files[0];
                 if (file) {
-                    var sDiskettePath = file.name;
-                    var sDisketteName = Str.getBaseName(sDiskettePath, true);
+                    let sDiskettePath = file.name;
+                    let sDisketteName = Str.getBaseName(sDiskettePath, true);
                     fdc.loadSelectedDrive(sDisketteName, sDiskettePath, file);
                 }
                 /*
@@ -62672,7 +62694,7 @@ class FDC extends Component {
         } else {
             config = {};
         }
-        for (var sDrive in config) {
+        for (let sDrive in config) {
             if (configMerge) configMerge[sDrive] = config[sDrive];
         }
         return config;
@@ -62705,14 +62727,14 @@ class FDC extends Component {
             /*
              * Populate the HTML controls to match the actual (well, um, specified) number of floppy drives.
              */
-            var controlDrives;
+            let controlDrives;
             if ((controlDrives = this.bindings['listDrives'])) {
                 while (controlDrives.firstChild) {
                     controlDrives.removeChild(controlDrives.firstChild);
                 }
                 controlDrives.value = "";
-                for (var iDrive = 0; iDrive < this.nDrives; iDrive++) {
-                    var controlOption = document.createElement("option");
+                for (let iDrive = 0; iDrive < this.nDrives; iDrive++) {
+                    let controlOption = document.createElement("option");
                     controlOption.value = iDrive.toString();
                     /*
                      * TODO: This conversion of drive number to drive letter, starting with A:, is very simplistic
@@ -62772,7 +62794,7 @@ class FDC extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, this.saveController());
         return state.data();
     }
@@ -62800,8 +62822,8 @@ class FDC extends Component {
      */
     initController(data)
     {
-        var i = 0, iDrive;
-        var fSuccess = true;
+        let i = 0, iDrive;
+        let fSuccess = true;
 
         if (!data) {
             data = [0, 0, FDC.REG_STATUS.RQM, new Array(9), 0, 0, 0, []];
@@ -62835,13 +62857,13 @@ class FDC extends Component {
          */
         this.regDataTotal = data[i++];
         this.regOutput = data[i++];
-        var dataDrives = data[i++];
+        let dataDrives = data[i++];
 
         /*
          * Initialize the disk history (if available) before initializing the drives, so that any disk deltas can be
          * applied to disk images that are already loaded.
          */
-        var aDiskHistory = data[i++];
+        let aDiskHistory = data[i++];
         if (aDiskHistory != null) this.aDiskHistory = aDiskHistory;
 
         if (this.aDrives === undefined) {
@@ -62857,14 +62879,14 @@ class FDC extends Component {
         }
 
         for (iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
-            var drive = this.aDrives[iDrive];
+            let drive = this.aDrives[iDrive];
             if (drive === undefined) {
                 /*
                  * The first time each drive is initialized, we query its capacity (based on switches or CMOS) and set
                  * the drive's physical limits accordingly (ie, max tracks, max heads, and max sectors/track).
                  */
                 drive = this.aDrives[iDrive] = {};
-                var nKb = (this.chipset? this.chipset.getDIPFloppyDriveSize(iDrive) : 0);
+                let nKb = (this.chipset? this.chipset.getDIPFloppyDriveSize(iDrive) : 0);
                 switch(nKb) {
                 case 160:
                 case 180:
@@ -62921,8 +62943,8 @@ class FDC extends Component {
      */
     saveController()
     {
-        var i = 0;
-        var data = [];
+        let i = 0;
+        let data = [];
         data[i++] = this.iDrive;
         data[i++] = 0;
         data[i++] = this.regStatus;
@@ -62952,8 +62974,8 @@ class FDC extends Component {
      */
     initDrive(drive, iDrive, data)
     {
-        var i = 0;
-        var fSuccess = true;
+        let i = 0;
+        let fSuccess = true;
 
         drive.iDrive = iDrive;
         drive.fBusy = drive.fLocal = false;
@@ -62997,7 +63019,7 @@ class FDC extends Component {
         /*
          * Some additional drive properties/defaults that are largely for the Disk component's benefit.
          */
-        var a = data[i++];
+        let a = data[i++];
         drive.name = a[0];
         drive.nCylinders = a[1];          // cylinders
         drive.nHeads = a[2];              // heads/cylinders
@@ -63070,13 +63092,13 @@ class FDC extends Component {
             drive.sDiskettePath = "";           // ensure this is initialized to a default that displayDiskette() can deal with
         }
 
-        var deltas = data[i++];
+        let deltas = data[i++];
         if (deltas == 102) deltas = false;      // v1.02 backward-compatibility
 
         if (typeof deltas == "boolean") {
-            var fLocal = deltas;
-            var sDisketteName = data[i++];
-            var sDiskettePath = data[i];
+            let fLocal = deltas;
+            let sDisketteName = data[i++];
+            let sDiskettePath = data[i];
             /*
              * If we're restoring a local disk image, then the entire disk contents should be captured in aDiskHistory,
              * so all we have to do is mount a blank diskette and let disk.restore() do the rest; ie, there's nothing to
@@ -63134,9 +63156,9 @@ class FDC extends Component {
      */
     saveDrives()
     {
-        var i = 0;
-        var data = [];
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+        let i = 0;
+        let data = [];
+        for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
             data[i++] = this.saveDrive(this.aDrives[iDrive]);
         }
         return data;
@@ -63151,8 +63173,8 @@ class FDC extends Component {
      */
     saveDrive(drive)
     {
-        var i = 0;
-        var data = [];
+        let i = 0;
+        let data = [];
         data[i++] = drive.resCode;
         data[i++] = [drive.name, drive.nCylinders, drive.nHeads, drive.nSectors, drive.cbSector, drive.fRemovable, drive.nDiskCylinders, drive.nDiskHeads, drive.nDiskSectors];
         data[i++] = drive.bHead;
@@ -63200,8 +63222,8 @@ class FDC extends Component {
      */
     saveDeltas()
     {
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
-            var drive = this.aDrives[iDrive];
+        for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+            let drive = this.aDrives[iDrive];
             if (drive.disk) {
                 this.updateDiskHistory(drive.sDisketteName, drive.sDiskettePath, drive.disk);
             }
@@ -63218,11 +63240,11 @@ class FDC extends Component {
      */
     copyDrive(iDrive)
     {
-        var driveNew;
-        var driveOld = this.aDrives[iDrive];
+        let driveNew;
+        let driveOld = this.aDrives[iDrive];
         if (driveOld !== undefined) {
             driveNew = {};
-            for (var p in driveOld) {
+            for (let p in driveOld) {
                 driveNew[p] = driveOld[p];
             }
         }
@@ -63252,12 +63274,12 @@ class FDC extends Component {
     seekDrive(drive, iSector, nSectors)
     {
         if (drive.disk) {
-            var aDiskInfo = drive.disk.info();
-            var nCylinders = aDiskInfo[0];
-            var nHeads = aDiskInfo[1];
-            var nSectorsPerTrack = aDiskInfo[2];
-            var nSectorsPerCylinder = nHeads * nSectorsPerTrack;
-            var nSectorsPerDisk = nCylinders * nSectorsPerCylinder;
+            let aDiskInfo = drive.disk.info();
+            let nCylinders = aDiskInfo[0];
+            let nHeads = aDiskInfo[1];
+            let nSectorsPerTrack = aDiskInfo[2];
+            let nSectorsPerCylinder = nHeads * nSectorsPerTrack;
+            let nSectorsPerDisk = nCylinders * nSectorsPerCylinder;
             if (iSector + nSectors <= nSectorsPerDisk) {
                 drive.bCylinder = Math.floor(iSector / nSectorsPerCylinder);
                 iSector %= nSectorsPerCylinder;
@@ -63290,17 +63312,17 @@ class FDC extends Component {
     autoMount(fRemount)
     {
         if (!fRemount) this.cAutoMount = 0;
-        for (var sDrive in this.configMount) {
-            var configDrive = this.configMount[sDrive];
-            var sDiskettePath = configDrive['path'] || this.findDisketteByName(configDrive['name']);
+        for (let sDrive in this.configMount) {
+            let configDrive = this.configMount[sDrive];
+            let sDiskettePath = configDrive['path'] || this.findDisketteByName(configDrive['name']);
             if (sDiskettePath) {
                 /*
                  * WARNING: This conversion of drive letter to drive number, starting with A:, is very simplistic
                  * and is not guaranteed to match the drive mapping that DOS ultimately uses.
                  */
-                var iDrive = sDrive.charCodeAt(0) - 0x41;
+                let iDrive = sDrive.charCodeAt(0) - 0x41;
                 if (iDrive >= 0 && iDrive < this.aDrives.length) {
-                    var sDisketteName = configDrive['name'] || this.findDisketteByPath(sDiskettePath) || Str.getBaseName(sDiskettePath, true);
+                    let sDisketteName = configDrive['name'] || this.findDisketteByPath(sDiskettePath) || Str.getBaseName(sDiskettePath, true);
                     if (!this.loadDrive(iDrive, sDisketteName, sDiskettePath, true) && fRemount) {
                         this.setReady(false);
                     }
@@ -63323,10 +63345,10 @@ class FDC extends Component {
      */
     loadSelectedDisk()
     {
-        var controlDisks = this.bindings["listDisks"];
+        let controlDisks = this.bindings["listDisks"];
         if (controlDisks) {
-            var sDisketteName = controlDisks.options[controlDisks.selectedIndex].text;
-            var sDiskettePath = controlDisks.value;
+            let sDisketteName = controlDisks.options[controlDisks.selectedIndex].text;
+            let sDiskettePath = controlDisks.value;
             return this.loadSelectedDrive(sDisketteName, sDiskettePath);
         }
         return false;
@@ -63343,8 +63365,8 @@ class FDC extends Component {
      */
     loadSelectedDrive(sDisketteName, sDiskettePath, file)
     {
-        var iDrive;
-        var controlDrives = this.bindings["listDrives"];
+        let iDrive;
+        let controlDrives = this.bindings["listDrives"];
         if (controlDrives && !isNaN(iDrive = Str.parseInt(controlDrives.value, 10)) && iDrive >= 0 && iDrive < this.aDrives.length) {
 
             if (!sDiskettePath) {
@@ -63405,10 +63427,10 @@ class FDC extends Component {
      */
     mountDrive(iDrive, sDisketteName, sDiskettePath)
     {
-        var drive = this.aDrives[iDrive];
+        let drive = this.aDrives[iDrive];
         this.unloadDrive(iDrive, true, true);
         drive.fLocal = true;
-        var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
+        let disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
         this.doneLoadDrive(drive, disk, sDisketteName, sDiskettePath, true);
     }
 
@@ -63427,7 +63449,7 @@ class FDC extends Component {
      */
     loadDrive(iDrive, sDisketteName, sDiskettePath, fAutoMount, file)
     {
-        var drive = this.aDrives[iDrive];
+        let drive = this.aDrives[iDrive];
         if (sDiskettePath) {
             /*
              * The following hacks should only be necessary for (old) saved states, since all our disk manifests
@@ -63454,7 +63476,7 @@ class FDC extends Component {
                     if (this.messageEnabled()) this.printMessage("loading diskette '" + sDisketteName + "'");
                 }
                 drive.fLocal = !!file;
-                var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
+                let disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
                 if (!disk.load(sDisketteName, sDiskettePath, file, this.doneLoadDrive)) {
                     return 0;
                 }
@@ -63476,7 +63498,7 @@ class FDC extends Component {
      */
     doneLoadDrive(drive, disk, sDisketteName, sDiskettePath, fAutoMount)
     {
-        var aDiskInfo;
+        let aDiskInfo;
 
         drive.fBusy = false;
 
@@ -63588,12 +63610,12 @@ class FDC extends Component {
      */
     addDiskette(sName, sPath, fTop)
     {
-        var controlDisks = this.bindings["listDisks"];
+        let controlDisks = this.bindings["listDisks"];
         if (controlDisks && controlDisks.options) {
-            for (var i = 0; i < controlDisks.options.length; i++) {
+            for (let i = 0; i < controlDisks.options.length; i++) {
                 if (controlDisks.options[i].value == sPath) return;
             }
-            var controlOption = document.createElement("option");
+            let controlOption = document.createElement("option");
             controlOption.text = sName;
             controlOption.value = sPath;
             if (fTop && controlDisks.childNodes[0]) {
@@ -63616,10 +63638,10 @@ class FDC extends Component {
      */
     findDisketteByPath(sPath)
     {
-        var controlDisks = this.bindings["listDisks"];
+        let controlDisks = this.bindings["listDisks"];
         if (controlDisks && controlDisks.options) {
-            for (var i = 0; i < controlDisks.options.length; i++) {
-                var control = controlDisks.options[i];
+            for (let i = 0; i < controlDisks.options.length; i++) {
+                let control = controlDisks.options[i];
                 if (control.value == sPath) return control.text;
             }
         }
@@ -63639,10 +63661,10 @@ class FDC extends Component {
     findDisketteByName(sName)
     {
         if (sName) {
-            var controlDisks = this.bindings["listDisks"];
+            let controlDisks = this.bindings["listDisks"];
             if (controlDisks && controlDisks.options) {
-                for (var i = 0; i < controlDisks.options.length; i++) {
-                    var control = controlDisks.options[i];
+                for (let i = 0; i < controlDisks.options.length; i++) {
+                    let control = controlDisks.options[i];
                     if (control.text == sName) return control.value;
                 }
             }
@@ -63663,9 +63685,9 @@ class FDC extends Component {
          * First things first: validate iDrive.
          */
         if (iDrive >= 0 && iDrive < this.aDrives.length) {
-            var drive = this.aDrives[iDrive];
-            var controlDisks = this.bindings["listDisks"];
-            var controlDrives = this.bindings["listDrives"];
+            let drive = this.aDrives[iDrive];
+            let controlDisks = this.bindings["listDisks"];
+            let controlDrives = this.bindings["listDrives"];
             /*
              * Next, make sure controls for both drives and disks exist.
              */
@@ -63673,9 +63695,9 @@ class FDC extends Component {
                 /*
                  * Next, make sure the drive whose disk we're updating is the currently selected drive.
                  */
-                var i;
-                var iDriveSelected = Str.parseInt(controlDrives.value, 10);
-                var sTargetPath = (drive.fLocal? "?" : drive.sDiskettePath);
+                let i;
+                let iDriveSelected = Str.parseInt(controlDrives.value, 10);
+                let sTargetPath = (drive.fLocal? "?" : drive.sDiskettePath);
                 if (!isNaN(iDriveSelected) && iDriveSelected == iDrive) {
                     for (i = 0; i < controlDisks.options.length; i++) {
                         if (controlDisks.options[i].value == sTargetPath) {
@@ -63708,12 +63730,12 @@ class FDC extends Component {
      */
     updateSelectedDiskette()
     {
-        var control = this.bindings["listDisks"];
-        var controlDesc = this.bindings["descDisk"];
-        var controlOption = control.options[control.selectedIndex];
+        let control = this.bindings["listDisks"];
+        let controlDesc = this.bindings["descDisk"];
+        let controlOption = control.options[control.selectedIndex];
         if (controlDesc && controlOption) {
-            var dataValue = {};
-            var sValue = controlOption.getAttribute("data-value");
+            let dataValue = {};
+            let sValue = controlOption.getAttribute("data-value");
             if (sValue) {
                 try {
                     dataValue = eval("(" + sValue + ")");
@@ -63721,9 +63743,9 @@ class FDC extends Component {
                     Component.error(this.type + " option error: " + e.message);
                 }
             }
-            var sHTML = dataValue['desc'];
+            let sHTML = dataValue['desc'];
             if (sHTML === undefined) sHTML = "";
-            var sHRef = dataValue['href'];
+            let sHRef = dataValue['href'];
             if (sHRef !== undefined) sHTML = "<a href=\"" + sHRef + "\" target=\"_blank\">" + sHTML + "</a>";
             controlDesc.innerHTML = sHTML;
         }
@@ -63738,8 +63760,8 @@ class FDC extends Component {
      */
     waitDrives(fnCallReady)
     {
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
-            var drive = this.aDrives[iDrive];
+        for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+            let drive = this.aDrives[iDrive];
             if (drive && drive.fBusy) {
                 if (!drive.fnCallReady) drive.fnCallReady = fnCallReady;
                 return false;
@@ -63758,7 +63780,7 @@ class FDC extends Component {
      */
     unloadDrive(iDrive, fAutoUnload, fQuiet)
     {
-        var drive = this.aDrives[iDrive];
+        let drive = this.aDrives[iDrive];
         if (drive.disk) {
             /*
              * Before we toss the disk's information, capture any deltas that may have occurred.
@@ -63799,7 +63821,7 @@ class FDC extends Component {
         if (fDiscard) {
             this.aDiskHistory = [];
         }
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+        for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
             this.unloadDrive(iDrive, true);
         }
     }
@@ -63814,11 +63836,11 @@ class FDC extends Component {
      */
     addDiskHistory(sDisketteName, sDiskettePath, disk)
     {
-        var i;
+        let i;
         //
         for (i = 0; i < this.aDiskHistory.length; i++) {
             if (this.aDiskHistory[i][1] == sDiskettePath) {
-                var nChanges = disk.restore(this.aDiskHistory[i][2]);
+                let nChanges = disk.restore(this.aDiskHistory[i][2]);
                 if (DEBUG && this.messageEnabled()) {
                     this.printMessage("disk '" + sDisketteName + "' restored from history (" + nChanges + " changes)");
                 }
@@ -63840,7 +63862,7 @@ class FDC extends Component {
      */
     removeDiskHistory(sDisketteName, sDiskettePath)
     {
-        var i;
+        let i;
         for (i = 0; i < this.aDiskHistory.length; i++) {
             if (this.aDiskHistory[i][1] == sDiskettePath) {
                 this.aDiskHistory.splice(i, 1);
@@ -63865,7 +63887,7 @@ class FDC extends Component {
      */
     updateDiskHistory(sDisketteName, sDiskettePath, disk)
     {
-        var i;
+        let i;
         for (i = 0; i < this.aDiskHistory.length; i++) {
             if (this.aDiskHistory[i][1] == sDiskettePath) {
                 this.aDiskHistory[i][2] = disk.save();
@@ -63930,7 +63952,7 @@ class FDC extends Component {
          * the ST0 result from the SENSE_INT command ALWAYS be 0xC0 (not 0xC1), so the controller must not be propagating
          * regOutput's "drive select" bits in the way I originally assumed.
          *
-         *      var iDrive = bOut & FDC.REG_OUTPUT.DS;
+         *      let iDrive = bOut & FDC.REG_OUTPUT.DS;
          *      if (bOut & (FDC.REG_OUTPUT.MOTOR_D0 << iDrive)) this.iDrive = iDrive;
          */
         this.regOutput = bOut;
@@ -64010,7 +64032,7 @@ class FDC extends Component {
      */
     inFDCDiagnostic(port, addrFrom)
     {
-        var b = 0x50;       // we simply return the expected pattern (01010000B); see code excerpt above
+        let b = 0x50;       // we simply return the expected pattern (01010000B); see code excerpt above
         this.printMessageIO(port, null, addrFrom, "DIAG", b);
         return b;
     }
@@ -64039,7 +64061,7 @@ class FDC extends Component {
      */
     inFDCData(port, addrFrom)
     {
-        var bIn = 0;
+        let bIn = 0;
         if (this.regDataIndex < this.regDataTotal) {
             bIn = this.regDataArray[this.regDataIndex];
         }
@@ -64076,8 +64098,8 @@ class FDC extends Component {
         if (this.regDataTotal < this.regDataArray.length) {
             this.regDataArray[this.regDataTotal++] = bOut;
         }
-        var bCmd = this.regDataArray[0];
-        var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
+        let bCmd = this.regDataArray[0];
+        let bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
         if (FDC.aCmdInfo[bCmdMasked] !== undefined) {
             if (this.regDataTotal >= FDC.aCmdInfo[bCmdMasked].cbReq) {
                 this.doCmd();
@@ -64100,7 +64122,7 @@ class FDC extends Component {
      */
     inFDCInput(port, addrFrom)
     {
-        var bIn = this.regInput;
+        let bIn = this.regInput;
         /*
          * TODO: Determine when the DISK_CHANGE bit is *really* cleared (this is just a guess)
          */
@@ -64130,10 +64152,10 @@ class FDC extends Component {
      */
     doCmd()
     {
-        var fIRQ = false;
+        let fIRQ = false;
         this.regDataIndex = 0;
-        var bCmd = this.popCmd();
-        var drive, bDrive, bHead, c, h, r, n;
+        let bCmd = this.popCmd();
+        let drive, bDrive, bHead, c, h, r, n;
 
         /*
          * NOTE: We currently ignore the FDC.REG_DATA.CMD.SK, FDC.REG_DATA.CMD.MF and FDC.REG_DATA.CMD.MT bits of every command.
@@ -64147,7 +64169,7 @@ class FDC extends Component {
          * with infinitely fast hardware, the simulation will never run as fast as it theoretically could, unless we opt to identify
          * those spin-loops and either patch them or skip over them.
          */
-        var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
+        let bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
 
         switch (bCmdMasked) {
         case FDC.REG_DATA.CMD.SPECIFY:                      // 0x03
@@ -64332,25 +64354,25 @@ class FDC extends Component {
          * TODO: Technically, interrupt request status should be cleared by the FDC.REG_DATA.CMD.SENSE_INT command; in fact,
          * if that command is issued and no interrupt was pending, then FDC.REG_DATA.RES.INVALID should be returned (via ST0).
          */
-        
+
         /*
          * When the Windows 95 HSFLOP ("High-Speed Floppy") VxD performs its diskette change-line detection logic
          * ("determine_changeline"), it sets a special callback ("dcl_callback_int_entry") for its interrupt handler
          * to invoke, then issues a READ_ID command, and then sets a bit telling its interrupt handler to expect an
          * interrupt ("FLP_NEC_INT_EXPECTED").
-         * 
+         *
          * Technically, it should have set *both* "dcl_callback_int_entry" *and* "FLP_NEC_INT_EXPECTED" *before*
          * issuing the READ_ID command, but I imagine the author assumed all was fine, since interrupts had been
          * disabled with a "cli" beforehand and had not been re-enabled with an "sti" yet.  But alas, the function
          * used to the issue the READ_ID command ("NecOut") immediately re-enabled interrupts.
-         * 
+         *
          * So, if we request an interrupt immediately after the READ_ID command, the interrupt handler will think
          * our interrupt is spurious (ie, not EXPECTED).  In this particular case, there are only about 10 instructions
          * executed from the time READ_ID is issued until the "FLP_NEC_INT_EXPECTED" bit is set, but I'm going to
          * add a little padding to that, in part because I wouldn't be surprised if there are other places where a
          * similar assumption exists (ie, either that "NecOut" leaves interrupts disabled, or simply that the floppy
          * controller is an inherently slow device).
-         * 
+         *
          * TODO: Determine why the Football prototype disk fails to boot if we specify a larger delay (eg, 32) and
          * why TopView 1.10 hangs when the delay is set to 16.  I've worked around those questions for now, by simply
          * limiting the delay
@@ -64387,7 +64409,7 @@ class FDC extends Component {
          * I don't do strict EOT comparisons here or elsewhere, because it allows the controller to work with a wider
          * range of disks (eg, "fake" XDF disk images that contain 23 512-byte sectors/track).
          */
-        var i = 0;
+        let i = 0;
         if (c != drive.bCylinder || h != drive.bHead) {
             i = r = 1;
         }
@@ -64412,9 +64434,9 @@ class FDC extends Component {
     popCmd(name)
     {
 
-        var bCmd = this.regDataArray[this.regDataIndex];
+        let bCmd = this.regDataArray[this.regDataIndex];
         if (DEBUG && this.messageEnabled(Messages.PORT | Messages.FDC)) {
-            var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
+            let bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
             if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
             this.printMessage(this.idComponent + ".popCmd(" + (name || this.regDataIndex) + "): " + Str.toHexByte(bCmd), true);
         }
@@ -64450,9 +64472,9 @@ class FDC extends Component {
 
     /**
      * requestInterrupt(fCondition, nDelay)
-     * 
+     *
      * Request an FDC interrupt, as long as INT_ENABLE is set (and the optional supplied condition, if any, is true).
-     * 
+     *
      * @this {FDC}
      * @param {boolean} [fCondition]
      * @param {number} [nDelay]
@@ -64463,7 +64485,7 @@ class FDC extends Component {
             if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.FDC, nDelay);
         }
     }
-    
+
     /**
      * beginResult()
      *
@@ -64707,8 +64729,8 @@ class FDC extends Component {
      */
     readData(drive, done)
     {
-        var b = -1;
-        var obj = null, off = 0;    // these variables are purely for BACKTRACK purposes
+        let b = -1;
+        let obj = null, off = 0;    // these variables are purely for BACKTRACK purposes
 
         if (!drive.resCode && drive.disk) {
             do {
@@ -64806,7 +64828,7 @@ class FDC extends Component {
     {
 
         drive.bSector++;
-        var bSectorStart = 1;
+        let bSectorStart = 1;
         if (drive.bSector >= drive.nDiskSectors + bSectorStart) {
             drive.bSector = bSectorStart;
             drive.bHead++;
@@ -64838,7 +64860,7 @@ class FDC extends Component {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(this.idComponent + ".writeFormat(head=" + Str.toHexByte(drive.bHead) + ",cyl=" + Str.toHexByte(drive.bCylinder) + ",sec=" + Str.toHexByte(drive.bSector) + ",len=" + Str.toHexWord(drive.nBytes) + ")");
             }
-            for (var i = 0; i < drive.nBytes; i++) {
+            for (let i = 0; i < drive.nBytes; i++) {
                 if (this.writeData(drive, drive.bFiller) < 0) {
                     return -1;
                 }
@@ -64859,11 +64881,11 @@ class FDC extends Component {
      */
     static init()
     {
-        var aeFDC = Component.getElementsByClass(document, PCX86.APPCLASS, "fdc");
-        for (var iFDC = 0; iFDC < aeFDC.length; iFDC++) {
-            var eFDC = aeFDC[iFDC];
-            var parmsFDC = Component.getComponentParms(eFDC);
-            var fdc = new FDC(parmsFDC);
+        let aeFDC = Component.getElementsByClass(document, PCX86.APPCLASS, "fdc");
+        for (let iFDC = 0; iFDC < aeFDC.length; iFDC++) {
+            let eFDC = aeFDC[iFDC];
+            let parmsFDC = Component.getComponentParms(eFDC);
+            let fdc = new FDC(parmsFDC);
             Component.bindComponentControls(fdc, eFDC, PCX86.APPCLASS);
         }
     }
@@ -65188,7 +65210,7 @@ class HDC extends Component {
          * defaults.  For example, the default XT drive type is 3 (for a 10Mb disk drive), whereas the default
          * AT drive type is 2 (for a 20Mb disk drive).
          */
-        var sType = parmsHDC['type'];
+        let sType = parmsHDC['type'];
         this.fATC = sType && sType.toUpperCase() == "AT" || false;
 
         /*
@@ -65215,7 +65237,7 @@ class HDC extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var hdc = this;
+        let hdc = this;
 
         switch (sBinding) {
 
@@ -65241,7 +65263,7 @@ class HDC extends Component {
             this.bindings[sBinding] = control;
             control.onclick = function(iDrive) {
                 return function onClickSaveDrive(event) {
-                    var drive = hdc.aDrives && hdc.aDrives[iDrive];
+                    let drive = hdc.aDrives && hdc.aDrives[iDrive];
                     if (drive && drive.disk) {
                         /*
                          * Note the similarity (and hence factoring opportunity) between this code and the FDC's
@@ -65253,13 +65275,13 @@ class HDC extends Component {
                          * disk's sDiskFile/sDiskPath properties may be undefined.  sDiskName should always be defined
                          * though, defaulting to the name of the drive (eg, "10Mb Hard Disk").
                          */
-                        var disk = drive.disk;
-                        var sDiskName = disk.sDiskFile || disk.sDiskName;
-                        var i = sDiskName.lastIndexOf('.');
+                        let disk = drive.disk;
+                        let sDiskName = disk.sDiskFile || disk.sDiskName;
+                        let i = sDiskName.lastIndexOf('.');
                         if (i >= 0) sDiskName = sDiskName.substr(0, i);
                         sDiskName += ".img";
                         if (DEBUG) hdc.println("saving disk " + sDiskName + "...");
-                        var sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, sDiskName);
+                        let sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, sDiskName);
                         Component.alertUser(sAlert);
                     } else {
                         hdc.notice("Hard drive " + iDrive + " is not available.");
@@ -65287,7 +65309,7 @@ class HDC extends Component {
         this.dbg = dbg;
         this.cmp = cmp;
 
-        var aDriveConfigs = cmp.getMachineParm('drives');
+        let aDriveConfigs = cmp.getMachineParm('drives');
         if (aDriveConfigs) {
             if (typeof aDriveConfigs == "string") {
                 this.sDriveConfigs = aDriveConfigs;
@@ -65296,7 +65318,7 @@ class HDC extends Component {
                 this.sDriveConfigs = "";
             }
         }
-        
+
         if (this.sDriveConfigs) {
             try {
                 /*
@@ -65434,7 +65456,7 @@ class HDC extends Component {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, this.saveController());
         return state.data();
     }
@@ -65463,8 +65485,8 @@ class HDC extends Component {
      */
     initController(data, fHard)
     {
-        var i = 0;
-        var fSuccess = true;
+        let i = 0;
+        let fSuccess = true;
 
         /*
          * TODO: This is used to re-select the controller's active drive whenever the machine is restored, but alas,
@@ -65503,7 +65525,7 @@ class HDC extends Component {
             this.regCommand = data[i++];
             this.regFDR     = data[i++];
             if (typeof this.regFDR == "object") {
-                var a = this.regFDR;
+                let a = this.regFDR;
                 this.regFDR = a[0];
                 this.iDrive = a[1];
             }
@@ -65524,7 +65546,7 @@ class HDC extends Component {
              * Initialize iDriveAllowFail only if it's never been initialized, otherwise its entire purpose will be defeated.
              * See the related HACK in intBIOSDisk() for more details.
              */
-            var iDriveAllowFail = data[i++];
+            let iDriveAllowFail = data[i++];
             if (iDriveAllowFail !== undefined) {
                 this.iDriveAllowFail = iDriveAllowFail;
             } else {
@@ -65536,15 +65558,15 @@ class HDC extends Component {
             this.aDrives = new Array(this.aDriveConfigs.length);
         }
 
-        var dataDrives = data[i];
+        let dataDrives = data[i];
         if (dataDrives === undefined) dataDrives = [];
 
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+        for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
             if (this.aDrives[iDrive] === undefined) {
                 this.aDrives[iDrive] = {};
             }
-            var drive = this.aDrives[iDrive];
-            var driveConfig = this.aDriveConfigs[iDrive];
+            let drive = this.aDrives[iDrive];
+            let driveConfig = this.aDriveConfigs[iDrive];
             if (!this.initDrive(iDrive, drive, driveConfig, dataDrives[iDrive], fHard)) {
                 fSuccess = false;
             }
@@ -65576,8 +65598,8 @@ class HDC extends Component {
      */
     saveController()
     {
-        var i = 0;
-        var data = [];
+        let i = 0;
+        let data = [];
         if (this.fATC) {
             data[i++] = this.regError;
             data[i++] = this.regWPreC;
@@ -65621,8 +65643,8 @@ class HDC extends Component {
      */
     initDrive(iDrive, drive, driveConfig, data, fHard)
     {
-        var i = 0;
-        var fSuccess = true;
+        let i = 0;
+        let fSuccess = true;
         if (data === undefined) data = [HDC.XTC.DATA.ERR.NONE, 0, false, new Array(8)];
 
         drive.iDrive = iDrive;
@@ -65676,7 +65698,7 @@ class HDC extends Component {
         drive.type = driveConfig['type'];
         if (drive.type === undefined || HDC.aDriveTypes[this.iDriveTable][drive.type] === undefined) drive.type = this.iDriveTypeDefault;
 
-        var driveType = HDC.aDriveTypes[this.iDriveTable][drive.type];
+        let driveType = HDC.aDriveTypes[this.iDriveTable][drive.type];
         drive.nSectors = driveType[2] || 17;    // sectors/track
         drive.cbSector = driveType[3] || 512;   // bytes/sector (default is 512 if unspecified in the table)
 
@@ -65712,7 +65734,7 @@ class HDC extends Component {
         drive.sector = null;                    // initialized to null by worker, and then set to the next sector satisfying the request
 
         if (drive.disk) {
-            var deltas = data[i];
+            let deltas = data[i];
             if (deltas !== undefined && drive.disk.restore(deltas) < 0) {
                 fSuccess = false;
             }
@@ -65731,9 +65753,9 @@ class HDC extends Component {
      */
     saveDrives()
     {
-        var i = 0;
-        var data = [];
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+        let i = 0;
+        let data = [];
+        for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
             data[i++] = this.saveDrive(this.aDrives[iDrive]);
         }
         return data;
@@ -65747,8 +65769,8 @@ class HDC extends Component {
      */
     saveDrive(drive)
     {
-        var i = 0;
-        var data = [];
+        let i = 0;
+        let data = [];
         data[i++] = drive.errorCode;
         data[i++] = drive.senseCode;
         data[i++] = drive.fRemovable;
@@ -65774,11 +65796,11 @@ class HDC extends Component {
      */
     copyDrive(iDrive)
     {
-        var driveNew;
-        var driveOld = this.aDrives[iDrive];
+        let driveNew;
+        let driveOld = this.aDrives[iDrive];
         if (driveOld !== undefined) {
             driveNew = {};
-            for (var p in driveOld) {
+            for (let p in driveOld) {
                 driveNew[p] = driveOld[p];
             }
         }
@@ -65800,7 +65822,7 @@ class HDC extends Component {
     verifyDrive(drive, type)
     {
         if (drive) {
-            var nHeads = 0, nCylinders = 0;
+            let nHeads = 0, nCylinders = 0;
             if (type == null) {
                 /*
                  * If the caller wants us to use the programmed drive parameters, we use those,
@@ -65830,7 +65852,7 @@ class HDC extends Component {
                  *
                  * Do these values agree with those for the given drive type?  Even if they don't, all we do is warn.
                  */
-                var driveType = HDC.aDriveTypes[this.iDriveTable][drive.type];
+                let driveType = HDC.aDriveTypes[this.iDriveTable][drive.type];
                 if (driveType) {
                     if (nCylinders != driveType[0] && nHeads != driveType[1]) {
                         this.notice("Warning: drive parameters (" + nCylinders + "," + nHeads + ") do not match drive type " + drive.type + " (" + driveType[0] + "," + driveType[1] + ")");
@@ -65868,16 +65890,16 @@ class HDC extends Component {
     seekDrive(drive, iSector, nSectors)
     {
         if (drive.disk) {
-            var aDiskInfo = drive.disk.info();
-            var nCylinders = aDiskInfo[0];
+            let aDiskInfo = drive.disk.info();
+            let nCylinders = aDiskInfo[0];
             /*
              * If nCylinders is zero, we probably have an empty disk image, awaiting initialization (see verifyDrive())
              */
             if (nCylinders) {
-                var nHeads = aDiskInfo[1];
-                var nSectorsPerTrack = aDiskInfo[2];
-                var nSectorsPerCylinder = nHeads * nSectorsPerTrack;
-                var nSectorsPerDisk = nCylinders * nSectorsPerCylinder;
+                let nHeads = aDiskInfo[1];
+                let nSectorsPerTrack = aDiskInfo[2];
+                let nSectorsPerCylinder = nHeads * nSectorsPerTrack;
+                let nSectorsPerDisk = nCylinders * nSectorsPerCylinder;
                 if (iSector + nSectors <= nSectorsPerDisk) {
                     drive.wCylinder = Math.floor(iSector / nSectorsPerCylinder);
                     iSector %= nSectorsPerCylinder;
@@ -65917,8 +65939,8 @@ class HDC extends Component {
     {
         if (!fRemount) this.cAutoMount = 0;
 
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
-            var drive = this.aDrives[iDrive];
+        for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+            let drive = this.aDrives[iDrive];
             if (drive.name && drive.path) {
 
                 if (fRemount && drive.disk && drive.disk.isRemote()) {
@@ -65955,7 +65977,7 @@ class HDC extends Component {
      */
     loadDisk(iDrive, sDiskName, sDiskPath, fAutoMount)
     {
-        var drive = this.aDrives[iDrive];
+        let drive = this.aDrives[iDrive];
         if (drive.fBusy) {
             this.notice("Drive " + iDrive + " busy");
             return true;
@@ -65966,7 +65988,7 @@ class HDC extends Component {
             this.cAutoMount++;
             if (this.messageEnabled()) this.printMessage("loading " + sDiskName);
         }
-        var disk = drive.disk || new Disk(this, drive, drive.mode);
+        let disk = drive.disk || new Disk(this, drive, drive.mode);
         /*
          * The following hacks should only be necessary for (old) saved states, since all our disk manifests
          * should no longer be using any of these old paths.
@@ -66003,7 +66025,7 @@ class HDC extends Component {
              */
             this.notice("Mounted disk \"" + sDiskName + "\" in drive " + String.fromCharCode(0x43 + drive.iDrive), drive.fAutoMount);
 
-            var aDiskInfo = disk.info();
+            let aDiskInfo = disk.info();
             if (aDiskInfo[0] != drive.nCylinders || aDiskInfo[1] != drive.nHeads || aDiskInfo[2] != drive.nSectors || aDiskInfo[3] != drive.cbSector) {
                 /*
                  * TODO: Decide how to deal with this problem; ie, either disallow disk access altogether, or automatically
@@ -66029,7 +66051,7 @@ class HDC extends Component {
      */
     inXTCData(port, addrFrom)
     {
-        var bIn = 0;
+        let bIn = 0;
         if (this.regDataIndex < this.regDataTotal) {
             bIn = this.regDataArray[this.regDataIndex];
         }
@@ -66058,8 +66080,8 @@ class HDC extends Component {
         if (this.regDataTotal < this.regDataArray.length) {
             this.regDataArray[this.regDataTotal++] = bOut;
         }
-        var bCmd = this.regDataArray[0];
-        var cbCmd = (bCmd != HDC.XTC.DATA.CMD.INIT_DRIVE? 6 : this.regDataArray.length);
+        let bCmd = this.regDataArray[0];
+        let cbCmd = (bCmd != HDC.XTC.DATA.CMD.INIT_DRIVE? 6 : this.regDataArray.length);
         if (this.regDataTotal == 6) {
             /*
              * XTC.STATUS.REQ must be CLEAR following any 6-byte command sequence that the HDC BIOS "COMMAND" function outputs,
@@ -66088,7 +66110,7 @@ class HDC extends Component {
      */
     inXTCStatus(port, addrFrom)
     {
-        var b = this.regStatus;
+        let b = this.regStatus;
         this.printMessageIO(port, null, addrFrom, "STATUS", b);
         /*
          * HACK: The HDC BIOS will not finish the HDC.XTC.DATA.CMD.INIT_DRIVE sequence unless it sees XTC.STATUS.REQ set again, nor will
@@ -66198,7 +66220,7 @@ class HDC extends Component {
      */
     inATCByte(port, addrFrom)
     {
-        var bIn = -1;
+        let bIn = -1;
 
         if (this.drive) {
             /*
@@ -66207,7 +66229,7 @@ class HDC extends Component {
              * the pump; all we can do is assert that the pump has something in it.  If bIn is inexplicably negative,
              * well, then the caller will get 0xff.
              */
-            var hdc = this;
+            let hdc = this;
             bIn = this.readData(this.drive, function onATCReadData(b, fAsync, obj, off) {
 
                 if (BACKTRACK) {
@@ -66220,7 +66242,7 @@ class HDC extends Component {
                      * simplistic MRU logic.  If that fails, the worst that will (or should) happen is we'll burn through
                      * more BackTrack wrapper objects than necessary, and risk running out.
                      */
-                    var bto = hdc.bus.addBackTrackObject(obj, /** @type BackTrack */ (null), off);
+                    let bto = hdc.bus.addBackTrackObject(obj, /** @type BackTrack */ (null), off);
                     hdc.cpu.backTrack.btiIO = hdc.bus.getBackTrackIndex(bto, off);
                 }
             });
@@ -66236,7 +66258,7 @@ class HDC extends Component {
                 }
                 if (this.drive.ibSector > 1) {      // in other words, if this.drive.ibSector == this.drive.cbSector...
                     if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
-                        var sDump = this.drive.disk.dumpSector(this.drive.sector);
+                        let sDump = this.drive.disk.dumpSector(this.drive.sector);
                         if (sDump) this.dbg.message(sDump);
                     }
                     /*
@@ -66345,7 +66367,7 @@ class HDC extends Component {
                     }
                     if (this.drive.ibSector > 1) {      // in other words, if this.drive.ibSector == this.drive.cbSector...
                         if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
-                            var sDump = this.drive.disk.dumpSector(this.drive.sector);
+                            let sDump = this.drive.disk.dumpSector(this.drive.sector);
                             if (sDump) this.dbg.message(sDump);
                         }
                         this.drive.nBytes -= this.drive.cbSector;
@@ -66403,7 +66425,7 @@ class HDC extends Component {
      */
     inATCError(port, addrFrom)
     {
-        var bIn = this.regError;
+        let bIn = this.regError;
         this.printMessageIO(port, null, addrFrom, "ERROR", bIn);
         return bIn;
     }
@@ -66432,7 +66454,7 @@ class HDC extends Component {
      */
     inATCSecCnt(port, addrFrom)
     {
-        var bIn = this.regSecCnt;
+        let bIn = this.regSecCnt;
         this.printMessageIO(port, null, addrFrom, "SECCNT", bIn);
         return bIn;
     }
@@ -66461,7 +66483,7 @@ class HDC extends Component {
      */
     inATCSecNum(port, addrFrom)
     {
-        var bIn = this.regSecNum;
+        let bIn = this.regSecNum;
         this.printMessageIO(port, null, addrFrom, "SECNUM", bIn);
         return bIn;
     }
@@ -66490,7 +66512,7 @@ class HDC extends Component {
      */
     inATCCylLo(port, addrFrom)
     {
-        var bIn = this.regCylLo;
+        let bIn = this.regCylLo;
         this.printMessageIO(port, null, addrFrom, "CYLLO", bIn);
         return bIn;
     }
@@ -66519,7 +66541,7 @@ class HDC extends Component {
      */
     inATCCylHi(port, addrFrom)
     {
-        var bIn = this.regCylHi;
+        let bIn = this.regCylHi;
         this.printMessageIO(port, null, addrFrom, "CYLHI", bIn);
         return bIn;
     }
@@ -66548,7 +66570,7 @@ class HDC extends Component {
      */
     inATCDrvHd(port, addrFrom)
     {
-        var bIn = this.regDrvHd;
+        let bIn = this.regDrvHd;
         this.printMessageIO(port, null, addrFrom, "DRVHD", bIn);
         return bIn;
     }
@@ -66584,7 +66606,7 @@ class HDC extends Component {
          * a quick retest of the MODEL_5170_REV3 BIOS suggests that it's happy with that change, so it's quite likely
          * that was the appropriate change all along.
          */
-        var iDrive = (this.regDrvHd & HDC.ATC.DRVHD.DRIVE_MASK? 1 : 0);
+        let iDrive = (this.regDrvHd & HDC.ATC.DRVHD.DRIVE_MASK? 1 : 0);
         if (this.aDrives[iDrive]) {
             this.regStatus |= HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
         } else {
@@ -66602,7 +66624,7 @@ class HDC extends Component {
      */
     inATCStatus(port, addrFrom)
     {
-        var bIn = this.regStatus;
+        let bIn = this.regStatus;
         this.printMessageIO(port, null, addrFrom, "STATUS", bIn);
         /*
          * Despite what IBM's documentation for the "Personal Computer AT Fixed Disk and Diskette Drive Adapter"
@@ -66673,21 +66695,21 @@ class HDC extends Component {
      */
     doATC()
     {
-        var hdc = this;
-        var fInterrupt = false;
-        var bCmd = this.regCommand;
-        var iDrive = (this.regDrvHd & HDC.ATC.DRVHD.DRIVE_MASK? 1 : 0);
-        var nHead = this.regDrvHd & HDC.ATC.DRVHD.HEAD_MASK;
-        var nCylinder = this.regCylLo | ((this.regCylHi & HDC.ATC.CYLHI.MASK) << 8);
-        var nSector = this.regSecNum;
-        var nSectors = this.regSecCnt || 256;
+        let hdc = this;
+        let fInterrupt = false;
+        let bCmd = this.regCommand;
+        let iDrive = (this.regDrvHd & HDC.ATC.DRVHD.DRIVE_MASK? 1 : 0);
+        let nHead = this.regDrvHd & HDC.ATC.DRVHD.HEAD_MASK;
+        let nCylinder = this.regCylLo | ((this.regCylHi & HDC.ATC.CYLHI.MASK) << 8);
+        let nSector = this.regSecNum;
+        let nSectors = this.regSecCnt || 256;
 
         this.iDrive = -1;
         this.drive = null;
         this.regError = HDC.ATC.ERROR.NONE;
         this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
 
-        var drive = this.aDrives[iDrive];
+        let drive = this.aDrives[iDrive];
         if (!drive) {
             bCmd = -1;
         } else {
@@ -66873,25 +66895,25 @@ class HDC extends Component {
      */
     doXTC()
     {
-        var hdc = this;
+        let hdc = this;
         this.regDataIndex = 0;
 
-        var bCmd = this.popCmd();
-        var bCmdOrig = bCmd;
-        var b1 = this.popCmd();
-        var bDrive = b1 & 0x20;
-        var iDrive = (bDrive >> 5);
+        let bCmd = this.popCmd();
+        let bCmdOrig = bCmd;
+        let b1 = this.popCmd();
+        let bDrive = b1 & 0x20;
+        let iDrive = (bDrive >> 5);
 
-        var bHead = b1 & 0x1f;
-        var b2 = this.popCmd();
-        var b3 = this.popCmd();
-        var wCylinder = ((b2 << 2) & 0x300) | b3;
-        var bSector = b2 & 0x3f;
-        var bCount = this.popCmd();             // block count or interleave count, depending on the command
-        var bControl = this.popCmd();
-        var bParm, bDataStatus;
+        let bHead = b1 & 0x1f;
+        let b2 = this.popCmd();
+        let b3 = this.popCmd();
+        let wCylinder = ((b2 << 2) & 0x300) | b3;
+        let bSector = b2 & 0x3f;
+        let bCount = this.popCmd();             // block count or interleave count, depending on the command
+        let bControl = this.popCmd();
+        let bParm, bDataStatus;
 
-        var drive = this.aDrives[iDrive];
+        let drive = this.aDrives[iDrive];
         if (drive) {
             drive.wCylinder = wCylinder;
             drive.bHead = bHead;
@@ -66931,7 +66953,7 @@ class HDC extends Component {
              * Pop off all the extra "Initialize Drive Characteristics" bytes and store them, for the benefit of
              * other functions, like verifyDrive().
              */
-            var i = 0;
+            let i = 0;
             while ((bParm = this.popCmd()) >= 0) {
                 if (drive && i < drive.abDriveParms.length) {
                     drive.abDriveParms[i++] = bParm;
@@ -67032,8 +67054,8 @@ class HDC extends Component {
      */
     popCmd()
     {
-        var bCmd = -1;
-        var bCmdIndex = this.regDataIndex;
+        let bCmd = -1;
+        let bCmdIndex = this.regDataIndex;
         if (bCmdIndex < this.regDataTotal) {
             bCmd = this.regDataArray[this.regDataIndex++];
             if (DEBUG && this.messageEnabled((bCmdIndex > 0? Messages.PORT : 0) | Messages.HDC)) {
@@ -67317,15 +67339,15 @@ class HDC extends Component {
      */
     readData(drive, done, fAutoInc)
     {
-        var b = -1;
-        var obj = null, off = 0;    // these variables are purely for BACKTRACK purposes
+        let b = -1;
+        let obj = null, off = 0;    // these variables are purely for BACKTRACK purposes
 
         if (drive.errorCode) {
             if (done) done(b, false, obj, off);
             return b;
         }
 
-        var inc = (fAutoInc !== false? 1 : 0);
+        let inc = (fAutoInc !== false? 1 : 0);
 
         if (drive.sector) {
             off = drive.ibSector;
@@ -67346,7 +67368,7 @@ class HDC extends Component {
          * but it seems preferable to keep the image format consistent and controller-independent.
          */
         if (done) {
-            var hdc = this;
+            let hdc = this;
             if (drive.disk) {
                 drive.disk.seek(drive.wCylinder, drive.bHead, drive.bSector + drive.bSectorBias, false, function onReadDataSeek(sector, fAsync) {
                     if ((drive.sector = sector)) {
@@ -67447,7 +67469,7 @@ class HDC extends Component {
     {
 
         drive.bSector++;
-        var bSectorStart = (1 - drive.bSectorBias);
+        let bSectorStart = (1 - drive.bSectorBias);
         if (drive.bSector >= drive.nSectors + bSectorStart) {
             drive.bSector = bSectorStart;
             drive.bHead++;
@@ -67509,7 +67531,7 @@ class HDC extends Component {
                 this.printMessage(this.idComponent + ".writeFormat(" + drive.wCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
             }
 
-            for (var i = 0; i < drive.nBytes; i++) {
+            for (let i = 0; i < drive.nBytes; i++) {
                 if (this.writeData(drive, drive.bFiller) < 0) {
                     return -1;
                 }
@@ -67552,8 +67574,8 @@ class HDC extends Component {
      */
     intBIOSDisk(addr)
     {
-        var AH = this.cpu.regEAX >> 8;
-        var DL = this.cpu.regEDX & 0xff;
+        let AH = this.cpu.regEAX >> 8;
+        let DL = this.cpu.regEDX & 0xff;
         if (!AH && DL > 0x80) this.iDriveAllowFail = DL - 0x80;
         return true;
     }
@@ -67589,7 +67611,7 @@ class HDC extends Component {
      */
     intBIOSDiskette(addr)
     {
-        var AH = this.cpu.regEAX >> 8;
+        let AH = this.cpu.regEAX >> 8;
         if ((!AH && this.chipset && this.chipset.checkIMR(ChipSet.IRQ.FDC))) {
             if (DEBUG) this.printMessage(this.idComponent + ".intBIOSDiskette(): skipping useless INT 0x40 diskette reset");
             return false;
@@ -67684,11 +67706,11 @@ class HDC extends Component {
      */
     static init()
     {
-        var aeHDC = Component.getElementsByClass(document, PCX86.APPCLASS, "hdc");
-        for (var iHDC = 0; iHDC < aeHDC.length; iHDC++) {
-            var eHDC = aeHDC[iHDC];
-            var parmsHDC = Component.getComponentParms(eHDC);
-            var hdc = new HDC(parmsHDC);
+        let aeHDC = Component.getElementsByClass(document, PCX86.APPCLASS, "hdc");
+        for (let iHDC = 0; iHDC < aeHDC.length; iHDC++) {
+            let eHDC = aeHDC[iHDC];
+            let parmsHDC = Component.getComponentParms(eHDC);
+            let hdc = new HDC(parmsHDC);
             Component.bindComponentControls(hdc, eHDC, PCX86.APPCLASS);
         }
     }
@@ -67702,7 +67724,7 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
 /*
  * Starting with the IBM PC XT, the ROM defined a "Fixed Disk Parameter Table" (FD_TBL) that contained 16 bytes
  * at the following offsets for each of 4 drive types (see IBM 5160 Tech Ref, April 1983, p. A-94):
- * 
+ *
  *      0: maximum number of cylinders (word)
  *      2: maximum number of heads
  *      3: starting reduced write current cylinder (word)
@@ -67720,10 +67742,10 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
  *      D: reserved
  *      E: reserved
  *      F: reserved
- *      
+ *
  * Starting with the IBM PC AT, the ROM defined a "Fixed Disk Parameter Table" (FD_TBL) that contained 16 bytes
  * at the following offsets for each of 47 drive types (see IBM 5170 Tech Ref, March 1986, p. 5-185):
- * 
+ *
  *      0: maximum number of cylinders (word)
  *      2: maximum number of heads
  *      3: not used
@@ -67739,21 +67761,21 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
  *      C: landing zone (word)
  *      E: number of sectors/track (NOTE: all PC AT drive types specified 17 sectors/track)
  *      F: reserved
- *      
+ *
  * NOTE: While drive type 0 was a valid type in the PC XT, it was NOT a valid drive type in the PC AT; zero was used
  * to indicate that no hard drive was installed.
- * 
+ *
  * Of the 47 PC AT drive types, the first 14 (1-E) could be selected by 4 bits in CMOS byte 0x12.  Drive type 15 was not
  * a valid type but rather an indicator that CMOS byte 0x19 (or 0x1A) contained the actual drive type, which technically
  * could contain any value from 0-255, but was documented as being limited to values 16-255.  And in fact, the ROM only
  * contained entries for drive types 1-47, and of those, only drive types 1-14 and 16-23 were valid; the rest (15 and 24-47)
  * were marked "RESERVED" and contained zeros.
- * 
+ *
  * If a system needed a drive type that wasn't defined by the ROM, it could be placed in RAM, as the ROM explained:
- * 
+ *
  *      To dynamically define a set of parameters, build a table for up to 15 types and place
  *      the corresponding vector into interrupt 0x41 for drive 0 and interrupt 0x46 for drive 1.
- *      
+ *
  * To make PCjs easier to configure, we have three drive tables (for XT, AT, and COMPAQ machines), each of which
  * contains DriveArrays for the various DriveTypes supported by each machine.  Each DriveArray contains the following
  * subset of "Fixed Disk Parameter Table" information:
@@ -67771,7 +67793,7 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
  * Apparently, in 1998, it was decided that a kilobyte should be 1,000 bytes and a megabyte should be 1,000,000 bytes,
  * and that if you really meant 2^10 (1,024) or 2^20 (1,048,576), you should use "kibibyte" (KiB) or "mebibyte" (MiB)
  * instead.  But since PCjs simulates machines that pre-date 1998, I have chosen to retain the more "traditional"
- * understanding of Kb and Mb; I never use KiB or MiB. 
+ * understanding of Kb and Mb; I never use KiB or MiB.
  */
 
 /*
@@ -74511,12 +74533,12 @@ class DebuggerX86 extends Debugger {
         var cb = (size * len) || 128;
         var cLines = ((cb + 15) >> 4) || 1;
         var cbLine = (size == 4? 16 : this.nBase);  // the base also happens to be a reasonable number of bytes/line
-        
+
         /*
          * The "da" variation uses a line size of 160 bytes, because that's the number of characters
          * per line in a text frame buffer; if no ending address or length is specified, the number of
          * lines defaults to 25 (the typical number of visible lines in a frame buffer).
-         * 
+         *
          * Beyond that, the command doesn't make any other assumptions about the memory format.  Video
          * frame buffers usually dump nicely because all the attribute bytes tend to be non-ASCII.
          */
@@ -74526,7 +74548,7 @@ class DebuggerX86 extends Debugger {
             cLines = (len <= 1? 25 : Math.ceil(len / cbLine));
             cb = cLines * cbLine;
         }
-        
+
         while (cLines-- && cb > 0) {
             var data = 0, iByte = 0, i;
             var sData = "", sChars = "";
@@ -75007,9 +75029,7 @@ class DebuggerX86 extends Debugger {
                     }
                     fCriteria = false;
                     if (bitsMessage == Messages.BUFFER) {
-                        for (var i = 0; i < this.aMessageBuffer.length; i++) {
-                            this.println(this.aMessageBuffer[i]);
-                        }
+                        this.println(this.aMessageBuffer.join('\n'));
                         this.aMessageBuffer = [];
                     }
                 }
@@ -77519,7 +77539,7 @@ class Computer extends Component {
     {
         super("Computer", parmsComputer, Messages.COMPUTER);
 
-        var cmp = this;
+        let cmp = this;
         this.setMachineParms(parmsMachine);
 
         this.fAutoPower = this.getMachineParm('autoPower', parmsComputer);
@@ -77569,7 +77589,7 @@ class Computer extends Component {
          * Enumerate all the Video components for diagnostic displays, focus changes, and updateStatus() calls.
          */
         this.aVideo = [];
-        for (var video = null; (video = this.getMachineComponent("Video", video));) {
+        for (let video = null; (video = this.getMachineComponent("Video", video));) {
             this.aVideo.push(video);
         }
 
@@ -77582,8 +77602,8 @@ class Computer extends Component {
          * Iterate through all the components and override their notice() and println() methods
          * so that their output can be rerouted to a Diagnostic Display or Control Panel, if any.
          */
-        var iComponent, component;
-        var aComponents = Component.getComponents(this.id);
+        let iComponent, component;
+        let aComponents = Component.getComponents(this.id);
 
         this.panel = /** @type {Panel} */ (Component.getComponentByType("Panel", this.id));
         this.controlPanel = this.panel && this.panel.bindings['print'];
@@ -77637,8 +77657,8 @@ class Computer extends Component {
             cmp.updateStatus(false);
         }, 1000 / Computer.UPDATES_PER_SECOND);
 
-        var sStatePath = null;
-        var sResume = this.getMachineParm('resume');
+        let sStatePath = null;
+        let sResume = this.getMachineParm('resume');
         if (sResume !== undefined) {
             /*
              * Decide whether the 'resume' property is a number or the path of a state file to resume.
@@ -77664,8 +77684,8 @@ class Computer extends Component {
          * OVERRIDES everything; it overrides any 'state' Computer parameter AND it disables resume of any saved state in
          * localStorage (in other words, it prevents fAllowResume from being true, and forcing resume off).
          */
-        var fAllowResume = false;
-        var sState = Web.getURLParm('state');
+        let fAllowResume = false;
+        let sState = Web.getURLParm('state');
         if (!sState) {
             fAllowResume = true;
             sState = this.getMachineParm('state', parmsComputer);
@@ -77700,7 +77720,7 @@ class Computer extends Component {
         if (!this.sStateURL) {
             this.setReady();
         } else {
-            var sProgress = "Loading " + this.sStateURL + "...";
+            let sProgress = "Loading " + this.sStateURL + "...";
             Web.getResource(this.sStateURL, null, true, function(sURL, sResource, nErrorCode) {
                 cmp.doneLoad(sURL, sResource, nErrorCode);
             }, function(nState) {
@@ -77736,10 +77756,10 @@ class Computer extends Component {
     enableDiagnostics()
     {
         if (!this.cDiagnosticScreens) {
-            for (var i = 0; i < this.aVideo.length; i++) {
-                var video = this.aVideo[i];
+            for (let i = 0; i < this.aVideo.length; i++) {
+                let video = this.aVideo[i];
                 if (video) {
-                    var control = video.getTextArea();
+                    let control = video.getTextArea();
                     if (control) {
                         /*
                          * By default, the Video textarea overlay has opacity and lineHeight styles set to "0"
@@ -77770,10 +77790,10 @@ class Computer extends Component {
                 this.println("Press any key to continue...");
                 return false;
             }
-            for (var i = 0; i < this.aVideo.length; i++) {
-                var video = this.aVideo[i];
+            for (let i = 0; i < this.aVideo.length; i++) {
+                let video = this.aVideo[i];
                 if (video) {
-                    var control = video.getTextArea();
+                    let control = video.getTextArea();
                     if (control) {
                         /*
                          * Return the Video textarea overlay's opacity and lineHeight styles to their original values.
@@ -77806,10 +77826,10 @@ class Computer extends Component {
     outputDiagnostics(sMessage, sType)
     {
         if (this.cDiagnosticScreens) {
-            for (var i = 0; i < this.aVideo.length; i++) {
-                var video = this.aVideo[i];
+            for (let i = 0; i < this.aVideo.length; i++) {
+                let video = this.aVideo[i];
                 if (video) {
-                    var control = video.getTextArea();
+                    let control = video.getTextArea();
                     if (control) {
                         if (sType != Component.PRINT.PROGRESS || sMessage.slice(-3) != "...") {
                             Component.appendControl(control, sMessage + '\n');
@@ -77835,7 +77855,7 @@ class Computer extends Component {
      */
     notifyKbdEvent(event, fDown)
     {
-        var nDiagnostics = this.nDiagnostics;
+        let nDiagnostics = this.nDiagnostics;
         if (this.nDiagnostics == 3) {
             this.nDiagnostics++;
             this.setReady();    // this may trigger a call to disableDiagnostics(), which is why we snapshot nDiagnostics
@@ -77865,7 +77885,7 @@ class Computer extends Component {
     setMachineParms(parmsMachine)
     {
         if (!parmsMachine) {
-            var sParms;
+            let sParms;
             if (typeof resources == 'object' && (sParms = resources['parms'])) {
                 try {
                     parmsMachine = /** @type {Object} */ (eval("(" + sParms + ")"));    // jshint ignore:line
@@ -77899,7 +77919,7 @@ class Computer extends Component {
      */
     getMachineParm(sParm, parmsComponent)
     {
-        var value = Web.getURLParm(sParm);
+        let value = Web.getURLParm(sParm);
         if (value) {
             try {
                 /*
@@ -77931,7 +77951,7 @@ class Computer extends Component {
                  * Finally, while the user should escape any quotation characters, just to be safe, we will try to
                  * choose the safest quoting character for the overall string.
                  */
-                var ch = value.indexOf("'") >= 0? '"' : "'";
+                let ch = value.indexOf("'") >= 0? '"' : "'";
                 value = /** @type {string} */ (eval(ch + value + ch));      // jshint ignore:line
             } catch(err) {
                 Component.error(err.message + " (" + value + ")");
@@ -78016,10 +78036,10 @@ class Computer extends Component {
      */
     wait(fn, parms)
     {
-        var computer = this;
-        var aComponents = Component.getComponents(this.id);
-        for (var iComponent = 0; iComponent <= aComponents.length; iComponent++) {
-            var component = (iComponent < aComponents.length? aComponents[iComponent] : this);
+        let computer = this;
+        let aComponents = Component.getComponents(this.id);
+        for (let iComponent = 0; iComponent <= aComponents.length; iComponent++) {
+            let component = (iComponent < aComponents.length? aComponents[iComponent] : this);
             if (!component.isReady()) {
                 component.isReady(function onComponentReady() {
                     computer.wait(fn, parms);
@@ -78042,11 +78062,11 @@ class Computer extends Component {
      */
     validateState(stateComputer)
     {
-        var fValid = true;
-        var stateValidate = new State(this, PCX86.APPVERSION, Computer.STATE_VALIDATE);
+        let fValid = true;
+        let stateValidate = new State(this, PCX86.APPVERSION, Computer.STATE_VALIDATE);
         if (stateValidate.load() && stateValidate.parse()) {
-            var sTimestampValidate = stateValidate.get(Computer.STATE_TIMESTAMP);
-            var sTimestampComputer = stateComputer ? stateComputer.get(Computer.STATE_TIMESTAMP) : "unknown";
+            let sTimestampValidate = stateValidate.get(Computer.STATE_TIMESTAMP);
+            let sTimestampComputer = stateComputer ? stateComputer.get(Computer.STATE_TIMESTAMP) : "unknown";
             if (sTimestampValidate != sTimestampComputer) {
                 this.notice("Machine state may be out-of-date\n(" + sTimestampValidate + " vs. " + sTimestampComputer + ")\nCheck your browser's local storage limits");
                 fValid = false;
@@ -78083,10 +78103,10 @@ class Computer extends Component {
         }
         this.nPowerChange++;
 
-        var fRepower = false;
-        var fRestore = false;
+        let fRepower = false;
+        let fRestore = false;
         this.fRestoreError = false;
-        var stateComputer = this.stateComputer || new State(this, PCX86.APPVERSION);
+        let stateComputer = this.stateComputer || new State(this, PCX86.APPVERSION);
 
         if (resume == Computer.RESUME_REPOWER) {
             fRepower = true;
@@ -78118,12 +78138,12 @@ class Computer extends Component {
                 this.stateFailSafe.set(Computer.STATE_TIMESTAMP, Usr.getTimestamp());
                 this.stateFailSafe.store();
 
-                var fValidate = this.resume && !this.fServerState;
+                let fValidate = this.resume && !this.fServerState;
                 if (resume == Computer.RESUME_AUTO || Component.confirmUser("Click OK to restore the previous " + PCX86.APPNAME + " machine state.")) {
                     fRestore = stateComputer.parse();
                     if (fRestore) {
-                        var sCode = stateComputer.get(UserAPI.RES.CODE);
-                        var sData = stateComputer.get(UserAPI.RES.DATA);
+                        let sCode = stateComputer.get(UserAPI.RES.CODE);
+                        let sData = stateComputer.get(UserAPI.RES.DATA);
                         if (sCode) {
                             if (sCode == UserAPI.CODE.OK) {
                                 stateComputer.load(/** @type {string} */ (sData));
@@ -78179,9 +78199,9 @@ class Computer extends Component {
          * Start powering all components, including any data they may need to restore their state;
          * we restore power to the CPU last.
          */
-        var aComponents = Component.getComponents(this.id);
-        for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
-            var component = aComponents[iComponent];
+        let aComponents = Component.getComponents(this.id);
+        for (let iComponent = 0; iComponent < aComponents.length; iComponent++) {
+            let component = aComponents[iComponent];
             if (component !== this && component != this.cpu) {
                 try {
                     fRestore = this.powerRestore(component, stateComputer, fRepower, fRestore);
@@ -78196,7 +78216,7 @@ class Computer extends Component {
          * have marked themselves as "not ready" again (eg, the FDC component, if the restore forced it
          * to mount one or more additional disk images).
          */
-        var aParms = [stateComputer, resume, fRestore];
+        let aParms = [stateComputer, resume, fRestore];
 
         if (resume != Computer.RESUME_REPOWER) {
             this.wait(this.donePowerOn, aParms);
@@ -78223,7 +78243,7 @@ class Computer extends Component {
 
             if (component.powerUp) {
 
-                var data = null;
+                let data = null;
                 if (fRestore) {
                     data = stateComputer.get(component.id);
                     if (!data) {
@@ -78302,8 +78322,8 @@ class Computer extends Component {
             component.flags.initDone = true;
 
             if (!fRepower && component.comment) {
-                var asComments = component.comment.split("|");
-                for (var i = 0; i < asComments.length; i++) {
+                let asComments = component.comment.split("|");
+                for (let i = 0; i < asComments.length; i++) {
                     component.status(asComments[i]);
                 }
             }
@@ -78334,11 +78354,11 @@ class Computer extends Component {
             this.printMessage("Computer.donePowerOn(): redundant");
         }
 
-        var stateComputer = aParms[0];
-        var fRepower = (aParms[1] < 0);
-        var fRestore = aParms[2];
+        let stateComputer = aParms[0];
+        let fRepower = (aParms[1] < 0);
+        let fRestore = aParms[2];
 
-        var controlPower = this.bindings["power"];
+        let controlPower = this.bindings["power"];
         if (controlPower) controlPower.textContent = "Shutdown";
 
         this.flags.powered = true;
@@ -78406,8 +78426,8 @@ class Computer extends Component {
 
         if (this.flags.powered) return true;
 
-        var component = null, iComponent;
-        var aComponents = Component.getComponents(this.id);
+        let component = null, iComponent;
+        let aComponents = Component.getComponents(this.id);
         for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
             component = aComponents[iComponent];
             if (component !== this && !component.flags.ready) break;
@@ -78419,7 +78439,7 @@ class Computer extends Component {
             }
         }
         if (iComponent == aComponents.length) component = this;
-        var s = "The " + component.type + " component (" + component.id + ") is not " + (!component.flags.ready? "ready yet" + (component.fnReady? " (waiting for notification)" : "") : "powered yet") + ".";
+        let s = "The " + component.type + " component (" + component.id + ") is not " + (!component.flags.ready? "ready yet" + (component.fnReady? " (waiting for notification)" : "") : "powered yet") + ".";
         Component.alertUser(s);
         return false;
     }
@@ -78493,8 +78513,8 @@ class Computer extends Component {
      */
     powerOff(fSave, fShutdown)
     {
-        var data;
-        var sState = "none";
+        let data;
+        let sState = "none";
 
         if (DEBUG && this.messageEnabled()) {
             this.printMessage("Computer.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
@@ -78505,10 +78525,10 @@ class Computer extends Component {
         }
         this.nPowerChange--;
 
-        var stateComputer = new State(this, PCX86.APPVERSION);
-        var stateValidate = new State(this, PCX86.APPVERSION, Computer.STATE_VALIDATE);
+        let stateComputer = new State(this, PCX86.APPVERSION);
+        let stateValidate = new State(this, PCX86.APPVERSION, Computer.STATE_VALIDATE);
 
-        var sTimestamp = Usr.getTimestamp();
+        let sTimestamp = Usr.getTimestamp();
         stateValidate.set(Computer.STATE_TIMESTAMP, sTimestamp);
         stateComputer.set(Computer.STATE_TIMESTAMP, sTimestamp);
         stateComputer.set(Computer.STATE_VERSION, APPVERSION);
@@ -78528,9 +78548,9 @@ class Computer extends Component {
             }
         }
 
-        var aComponents = Component.getComponents(this.id);
-        for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
-            var component = aComponents[iComponent];
+        let aComponents = Component.getComponents(this.id);
+        for (let iComponent = 0; iComponent < aComponents.length; iComponent++) {
+            let component = aComponents[iComponent];
             if (component.flags.powered) {
                 if (component.powerDown) {
                     data = component.powerDown(fSave, fShutdown);
@@ -78545,8 +78565,8 @@ class Computer extends Component {
 
         if (sState) {
             if (fShutdown) {
-                var fClear = false;
-                var fClearAll = false;
+                let fClear = false;
+                let fClearAll = false;
                 if (fSave) {
                     if (this.sUserID) {
                         this.saveServerState(this.sUserID, stateComputer.toString());
@@ -78591,7 +78611,7 @@ class Computer extends Component {
 
         if (fShutdown) {
             this.flags.powered = false;
-            var controlPower = this.bindings["power"];
+            let controlPower = this.bindings["power"];
             if (controlPower) controlPower.textContent = "Power";
         }
 
@@ -78617,9 +78637,9 @@ class Computer extends Component {
             this.printMessage("Resetting " + this.bus.type);
             this.bus.reset();
         }
-        var aComponents = Component.getComponents(this.id);
-        for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
-            var component = aComponents[iComponent];
+        let aComponents = Component.getComponents(this.id);
+        for (let iComponent = 0; iComponent < aComponents.length; iComponent++) {
+            let component = aComponents[iComponent];
             if (component !== this && component !== this.bus && component.reset) {
                 this.printMessage("Resetting " + component.type);
                 component.reset();
@@ -78641,9 +78661,9 @@ class Computer extends Component {
      */
     start(ms, nCycles)
     {
-        var aComponents = Component.getComponents(this.id);
-        for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
-            var component = aComponents[iComponent];
+        let aComponents = Component.getComponents(this.id);
+        for (let iComponent = 0; iComponent < aComponents.length; iComponent++) {
+            let component = aComponents[iComponent];
             if (component.type == "CPU" || component === this) continue;
             if (component.start) {
                 component.start(ms, nCycles);
@@ -78665,9 +78685,9 @@ class Computer extends Component {
      */
     stop(ms, nCycles)
     {
-        var aComponents = Component.getComponents(this.id);
-        for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
-            var component = aComponents[iComponent];
+        let aComponents = Component.getComponents(this.id);
+        for (let iComponent = 0; iComponent < aComponents.length; iComponent++) {
+            let component = aComponents[iComponent];
             if (component.type == "CPU" || component === this) continue;
             if (component.stop) {
                 component.stop(ms, nCycles);
@@ -78687,7 +78707,7 @@ class Computer extends Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var computer = this;
+        let computer = this;
 
         switch (sBinding) {
         case "power":
@@ -78730,7 +78750,7 @@ class Computer extends Component {
             }
             this.bindings[sBinding] = control;
             control.onclick = function onClickSave() {
-                var sUserID = computer.queryUserID(true);
+                let sUserID = computer.queryUserID(true);
                 if (sUserID) {
                     /*
                      * I modified the test to include a check for sStatePath so that I could save new states
@@ -78739,8 +78759,8 @@ class Computer extends Component {
                      * one work-around, but it's not appropriate for some machines, as their state is simply
                      * too large (for localStorage anyway, which is the default storage solution).
                      */
-                    var fSave = !!(computer.resume && !computer.sResumePath || computer.sStatePath);
-                    var sState = computer.powerOff(fSave);
+                    let fSave = !!(computer.resume && !computer.sResumePath || computer.sStatePath);
+                    let sState = computer.powerOff(fSave);
                     if (fSave) {
                         computer.saveServerState(sUserID, sState);
                     } else {
@@ -78750,7 +78770,7 @@ class Computer extends Component {
                 /*
                  * This seemed like a handy alternative, but it turned out to be a no-go, at least for large states:
                  *
-                 *      var sState = computer.powerOff(true);
+                 *      let sState = computer.powerOff(true);
                  *      if (sState) {
                  *          sState = "data:text/json;charset=utf-8," + encodeURIComponent(sState);
                  *          window.open(sState);
@@ -78789,7 +78809,7 @@ class Computer extends Component {
      */
     queryUserID(fPrompt)
     {
-        var sUserID = this.sUserID;
+        let sUserID = this.sUserID;
         if (!sUserID) {
             sUserID = Web.getLocalStorageItem(Computer.STATE_USERID);
             if (sUserID !== undefined) {
@@ -78822,12 +78842,12 @@ class Computer extends Component {
     verifyUserID(sUserID)
     {
         this.sUserID = null;
-        var fMessages = DEBUG && this.messageEnabled();
+        let fMessages = DEBUG && this.messageEnabled();
         if (fMessages) this.printMessage("verifyUserID(" + sUserID + ")");
-        var sRequest = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
-        var response = Web.getResource(sRequest);
-        var nErrorCode = response[0];
-        var sResponse = response[1];
+        let sRequest = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
+        let response = Web.getResource(sRequest);
+        let nErrorCode = response[0];
+        let sResponse = response[1];
         if (!nErrorCode && sResponse) {
             try {
                 response = eval("(" + sResponse + ")"); // jshint ignore:line
@@ -78855,7 +78875,7 @@ class Computer extends Component {
      */
     getServerStatePath()
     {
-        var sStatePath = null;
+        let sStatePath = null;
         if (this.sUserID) {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(Computer.STATE_USERID + " for load: " + this.sUserID);
@@ -78888,11 +78908,11 @@ class Computer extends Component {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage("size of server state: " + sState.length + " bytes");
             }
-            var response = this.storeServerState(sUserID, sState, true);
+            let response = this.storeServerState(sUserID, sState, true);
             if (response && response[UserAPI.RES.CODE] == UserAPI.CODE.OK) {
                 this.notice("Machine state saved to server");
             } else if (sState) {
-                var sError = (response && response[UserAPI.RES.DATA]) || UserAPI.FAIL.BADSTORE;
+                let sError = (response && response[UserAPI.RES.DATA]) || UserAPI.FAIL.BADSTORE;
                 if (response[UserAPI.RES.CODE] == UserAPI.CODE.FAIL) {
                     sError = "Error: " + sError;
                 } else {
@@ -78926,20 +78946,20 @@ class Computer extends Component {
          * TODO: Determine whether or not any browsers cancel our request if we're called during a browser "shutdown" event,
          * and whether or not it matters if we do an async request (currently, we're not, to try to ensure the request goes through).
          */
-        var dataPost = {};
+        let dataPost = {};
         dataPost[UserAPI.QUERY.REQ] = UserAPI.REQ.STORE;
         dataPost[UserAPI.QUERY.USER] = sUserID;
         dataPost[UserAPI.QUERY.STATE] = State.getKey(this, PCX86.APPVERSION);
         dataPost[UserAPI.QUERY.DATA] = sState;
-        var sRequest = Web.getHost() + UserAPI.ENDPOINT;
+        let sRequest = Web.getHost() + UserAPI.ENDPOINT;
         if (!fSync) {
             Web.getResource(sRequest, dataPost, true);
         } else {
-            var response = Web.getResource(sRequest, dataPost);
-            var sResponse = response[0];
+            let response = Web.getResource(sRequest, dataPost);
+            let sResponse = response[0];
             if (response[1]) {
                 if (sResponse) {
-                    var i = sResponse.indexOf('\n');
+                    let i = sResponse.indexOf('\n');
                     if (i > 0) sResponse = sResponse.substr(0, i);
                     if (!sResponse.indexOf("Error: ")) sResponse = sResponse.substr(7);
                 }
@@ -79004,7 +79024,7 @@ class Computer extends Component {
              * I used to bypass the prompt if this.resume == Computer.RESUME_AUTO, setting fSave to true automatically,
              * but that gives the user no means of resetting a resumable machine that contains errors in its resume state.
              */
-            var fSave = (/* this.resume == Computer.RESUME_AUTO || */ this.flags.unloading || !Component.confirmUser("Click OK to reset this " + PCX86.APPNAME + " machine and discard all disk modifications."));
+            let fSave = (/* this.resume == Computer.RESUME_AUTO || */ this.flags.unloading || !Component.confirmUser("Click OK to reset this " + PCX86.APPNAME + " machine and discard all disk modifications."));
             this.powerOff(fSave, true);
             /*
              * Forcing the page to reload is an expedient option, but ugly. It's preferable to call powerOn()
@@ -79042,10 +79062,10 @@ class Computer extends Component {
      */
     getMachineComponent(sType, componentPrev)
     {
-        var componentLast = componentPrev;
-        var aComponents = Component.getComponents(this.id);
-        for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
-            var component = aComponents[iComponent];
+        let componentLast = componentPrev;
+        let aComponents = Component.getComponents(this.id);
+        for (let iComponent = 0; iComponent < aComponents.length; iComponent++) {
+            let component = aComponents[iComponent];
             if (componentPrev) {
                 if (componentPrev == component) componentPrev = null;
                 continue;
@@ -79076,7 +79096,7 @@ class Computer extends Component {
              * into view.  The CPU is not a visual component, so when the CPU wants to set focus, the primary intent
              * is to ensure that keyboard input is fielded properly.
              */
-            var x = 0, y = 0;
+            let x = 0, y = 0;
             if (!fScroll && window) {
                 x = window.scrollX;
                 y = window.scrollY;
@@ -79132,7 +79152,7 @@ class Computer extends Component {
          * subtly interfere with the Video component's normal refresh rate.
          */
         if (fForce !== false) {
-            for (var i = 0; i < this.aVideo.length; i++) {
+            for (let i = 0; i < this.aVideo.length; i++) {
                 this.aVideo[i].updateScreen(fForce);
             }
         }
@@ -79153,25 +79173,25 @@ class Computer extends Component {
          */
         if (!COMPILED && XMLVERSION) PCX86.APPVERSION = XMLVERSION;
 
-        var aeMachines = Component.getElementsByClass(document, PCX86.APPCLASS + "-machine");
+        let aeMachines = Component.getElementsByClass(document, PCX86.APPCLASS + "-machine");
 
-        for (var iMachine = 0; iMachine < aeMachines.length; iMachine++) {
+        for (let iMachine = 0; iMachine < aeMachines.length; iMachine++) {
 
-            var eMachine = aeMachines[iMachine];
-            var parmsMachine = Component.getComponentParms(eMachine);
+            let eMachine = aeMachines[iMachine];
+            let parmsMachine = Component.getComponentParms(eMachine);
 
-            var aeComputers = Component.getElementsByClass(eMachine, PCX86.APPCLASS, "computer");
+            let aeComputers = Component.getElementsByClass(eMachine, PCX86.APPCLASS, "computer");
 
-            for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
+            for (let iComputer = 0; iComputer < aeComputers.length; iComputer++) {
 
-                var eComputer = aeComputers[iComputer];
-                var parmsComputer = Component.getComponentParms(eComputer);
+                let eComputer = aeComputers[iComputer];
+                let parmsComputer = Component.getComponentParms(eComputer);
 
                 /*
                  * We set fSuspended in the Computer constructor because we want to "power up" the
                  * computer ourselves, after any/all bindings are in place.
                  */
-                var computer = new Computer(parmsComputer, parmsMachine, true);
+                let computer = new Computer(parmsComputer, parmsMachine, true);
 
                 if (DEBUG && computer.messageEnabled()) {
                     computer.printMessage("onInit(" + computer.flags.powered + ")");
@@ -79203,11 +79223,11 @@ class Computer extends Component {
      */
     static show()
     {
-        var aeComputers = Component.getElementsByClass(document, PCX86.APPCLASS, "computer");
-        for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
-            var eComputer = aeComputers[iComputer];
-            var parmsComputer = Component.getComponentParms(eComputer);
-            var computer = /** @type {Computer} */ (Component.getComponentByType("Computer", parmsComputer['id']));
+        let aeComputers = Component.getElementsByClass(document, PCX86.APPCLASS, "computer");
+        for (let iComputer = 0; iComputer < aeComputers.length; iComputer++) {
+            let eComputer = aeComputers[iComputer];
+            let parmsComputer = Component.getComponentParms(eComputer);
+            let computer = /** @type {Computer} */ (Component.getComponentByType("Computer", parmsComputer['id']));
             if (computer) {
 
                 /*
@@ -79257,11 +79277,11 @@ class Computer extends Component {
      */
     static exit()
     {
-        var aeComputers = Component.getElementsByClass(document, PCX86.APPCLASS, "computer");
-        for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
-            var eComputer = aeComputers[iComputer];
-            var parmsComputer = Component.getComponentParms(eComputer);
-            var computer = /** @type {Computer} */ (Component.getComponentByType("Computer", parmsComputer['id']));
+        let aeComputers = Component.getElementsByClass(document, PCX86.APPCLASS, "computer");
+        for (let iComputer = 0; iComputer < aeComputers.length; iComputer++) {
+            let eComputer = aeComputers[iComputer];
+            let parmsComputer = Component.getComponentParms(eComputer);
+            let computer = /** @type {Computer} */ (Component.getComponentByType("Computer", parmsComputer['id']));
             if (computer) {
 
                 /*

@@ -95,7 +95,7 @@ class ROMX86 extends Component {
         this.idNotify = parmsROM['notify'];
         this.aNotifyParms = null;
         if (this.idNotify) {
-            var i = this.idNotify.indexOf('[');
+            let i = this.idNotify.indexOf('[');
             if (i > 0) {
                 try {
                     this.aNotifyParms = eval(this.idNotify.substr(i));
@@ -107,14 +107,14 @@ class ROMX86 extends Component {
         this.sFileURL = this.sFilePath = parmsROM['file'];
 
         if (this.sFileURL) {
-            var sFileName = Str.getBaseName(this.sFileURL);
+            let sFileName = Str.getBaseName(this.sFileURL);
             if (DEBUG) this.log('load("' + this.sFileURL + '")');
             /*
              * If the selected ROM file has a ".json" extension, then we assume it's pre-converted
              * JSON-encoded ROM data, so we load it as-is; ditto for ROM files with a ".hex" extension.
              * Otherwise, we ask our server-side ROM converter to return the file in a JSON-compatible format.
              */
-            var sFileExt = Str.getExtension(sFileName);
+            let sFileExt = Str.getExtension(sFileName);
             if (sFileExt != DumpAPI.FORMAT.JSON && sFileExt != DumpAPI.FORMAT.HEX) {
                 this.sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
             }
@@ -138,8 +138,8 @@ class ROMX86 extends Component {
         this.dbg = dbg;
 
         if (this.sFileURL) {
-            var rom = this;
-            var sProgress = "Loading " + this.sFileURL + "...";
+            let rom = this;
+            let sProgress = "Loading " + this.sFileURL + "...";
             Web.getResource(this.sFileURL, null, true, function doneROMLoad(sURL, sResponse, nErrorCode) {
                 rom.doneLoad(sURL, sResponse, nErrorCode);
             }, function(nState) {
@@ -211,13 +211,13 @@ class ROMX86 extends Component {
                 /*
                  * The most likely source of any exception will be here: parsing the JSON-encoded ROM data.
                  */
-                var rom = eval("(" + sROMData + ")");
-                var ab = rom['bytes'];
+                let rom = eval("(" + sROMData + ")");
+                let ab = rom['bytes'];
                 /*
                  * Resource 'longs' should always be 32-bit DWORD values, whereas 'data' bit lengths
                  * will vary according to the machine architecture for which the resource was designed.
                  */
-                var adw = rom['longs'] || rom['data'];
+                let adw = rom['longs'] || rom['data'];
 
                 if (ab) {
                     this.abROM = ab;
@@ -227,7 +227,7 @@ class ROMX86 extends Component {
                      * Convert all the DWORDs into BYTEs, so that subsequent code only has to deal with abROM.
                      */
                     this.abROM = new Array(adw.length * 4);
-                    for (var idw = 0, ib = 0; idw < adw.length; idw++) {
+                    for (let idw = 0, ib = 0; idw < adw.length; idw++) {
                         this.abROM[ib++] = adw[idw] & 0xff;
                         this.abROM[ib++] = (adw[idw] >> 8) & 0xff;
                         this.abROM[ib++] = (adw[idw] >> 16) & 0xff;
@@ -258,10 +258,10 @@ class ROMX86 extends Component {
              * Parse the ROM data manually; we assume it's in "simplified" hex form (a series of hex byte-values
              * separated by whitespace).
              */
-            var sHexData = sROMData.replace(/\n/gm, " ").replace(/ +$/, "");
-            var asHexData = sHexData.split(" ");
+            let sHexData = sROMData.replace(/\n/gm, " ").replace(/ +$/, "");
+            let asHexData = sHexData.split(" ");
             this.abROM = new Array(asHexData.length);
-            for (var i = 0; i < asHexData.length; i++) {
+            for (let i = 0; i < asHexData.length; i++) {
                 this.abROM[i] = Str.parseInt(asHexData[i], 16);
             }
         }
@@ -301,13 +301,13 @@ class ROMX86 extends Component {
                 }
                 else if (this.addROM(this.addrROM)) {
 
-                    var aliases = [];
+                    let aliases = [];
                     if (typeof this.addrAlias == "number") {
                         aliases.push(this.addrAlias);
                     } else if (this.addrAlias != null && this.addrAlias.length) {
                         aliases = this.addrAlias;
                     }
-                    for (var i = 0; i < aliases.length; i++) {
+                    for (let i = 0; i < aliases.length; i++) {
                         this.cloneROM(aliases[i]);
                     }
                     /*
@@ -316,7 +316,7 @@ class ROMX86 extends Component {
                      * option is the Video component, and only when the associated ROM contains font data that it needs.
                      */
                     if (this.idNotify) {
-                        var component = Component.getComponentByID(this.idNotify, this.id);
+                        let component = Component.getComponentByID(this.idNotify, this.id);
                         if (component) {
                             component.onROMLoad(this.abROM, this.aNotifyParms);
                         } else {
@@ -351,8 +351,8 @@ class ROMX86 extends Component {
     {
         if (this.bus.addMemory(addr, this.sizeROM, Memory.TYPE.ROM)) {
             if (DEBUG) this.log("addROM(): copying ROM to " + Str.toHexLong(addr) + " (" + Str.toHexLong(this.abROM.length) + " bytes)");
-            var bto = null;
-            for (var off = 0; off < this.abROM.length; off++) {
+            let bto = null;
+            for (let off = 0; off < this.abROM.length; off++) {
                 this.bus.setByteDirect(addr + off, this.abROM[off]);
                 if (BACKTRACK) {
                     bto = this.bus.addBackTrackObject(this, bto, off);
@@ -382,7 +382,7 @@ class ROMX86 extends Component {
      */
     cloneROM(addr)
     {
-        var aBlocks = this.bus.getMemoryBlocks(this.addrROM, this.sizeROM);
+        let aBlocks = this.bus.getMemoryBlocks(this.addrROM, this.sizeROM);
         this.bus.setMemoryBlocks(addr, this.sizeROM, aBlocks);
     }
 
@@ -396,11 +396,11 @@ class ROMX86 extends Component {
      */
     static init()
     {
-        var aeROM = Component.getElementsByClass(document, PCX86.APPCLASS, "rom");
-        for (var iROM = 0; iROM < aeROM.length; iROM++) {
-            var eROM = aeROM[iROM];
-            var parmsROM = Component.getComponentParms(eROM);
-            var rom = new ROMX86(parmsROM);
+        let aeROM = Component.getElementsByClass(document, PCX86.APPCLASS, "rom");
+        for (let iROM = 0; iROM < aeROM.length; iROM++) {
+            let eROM = aeROM[iROM];
+            let parmsROM = Component.getComponentParms(eROM);
+            let rom = new ROMX86(parmsROM);
             Component.bindComponentControls(rom, eROM, PCX86.APPCLASS);
         }
     }
