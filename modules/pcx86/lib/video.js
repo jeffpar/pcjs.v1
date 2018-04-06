@@ -258,7 +258,7 @@ if (NODE) {
  *       GRC[0x07]: COLORDC         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x0F 0x0F 0x0F 0x0F 0x0F
  *       GRC[0x08]: BITMASK         0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF
  *       SEQ[0x00]: RESET           0x03 0x03 0x03 0x03 0x03 0x03 0x03 0x03 0x03 0x03 0x03 0x03
- *       SEQ[0x01]: CLOCKING        0x08 0x08 0x00 0x00 0x09 0x09 0x01 0x09 0x01 0x01 0x01 0x01
+ *       SEQ[0x01]: CLKMODE         0x08 0x08 0x00 0x00 0x09 0x09 0x01 0x09 0x01 0x01 0x01 0x01
  *       SEQ[0x02]: MAPMASK         0x03 0x03 0x03 0x03 0x03 0x03 0x01 0x0F 0x0F 0x0F 0x0F 0x0F
  *       SEQ[0x03]: CHARMAP         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
  *       SEQ[0x04]: MEMMODE         0x03 0x03 0x03 0x03 0x02 0x02 0x06 0x06 0x06 0x06 0x06 0x0E
@@ -1384,7 +1384,7 @@ Card.SEQ = {
         ASYNC:              0x01,
         SYNC:               0x02
     },
-    CLOCKING: {
+    CLKMODE: {
         INDX:               0x01,       // Sequencer Clocking Mode Register
         DOTS8:              0x01,       // 1: 8 dots; 0: 9 dots
         BANDWIDTH:          0x02,       // 0: CRTC has access 4 out of every 5 cycles (for high-res modes); 1: CRTC has access 2 out of 5 (VGA: reserved)
@@ -1420,7 +1420,7 @@ Card.SEQ = {
     TOTAL_REGS:             0x05
 };
 
-if (DEBUGGER) Card.SEQ.REGS = ["RESET","CLOCKING","MAPMASK","CHARMAP","MEMMODE"];
+if (DEBUGGER) Card.SEQ.REGS = ["RESET","CLKMODE","MAPMASK","CHARMAP","MEMMODE"];
 
 /*
  * VGA Digital-to-Analog Converter (DAC) Registers (regDACMask, regDACState, regDACAddr, and regDACData)
@@ -1433,7 +1433,7 @@ if (DEBUGGER) Card.SEQ.REGS = ["RESET","CLOCKING","MAPMASK","CHARMAP","MEMMODE"]
  *
  * DAC.STATE.PORT and DAC.ADDR.PORT_WRITE can be read at any time and will not interfere with a read or write operation
  * in progress.  To prevent "snow", reading or writing DAC values should be limited to retrace intervals (see regStatus1),
- * or by using the SCREEN_OFF bit in the SEQ.CLOCKING register.
+ * or by using the SCREEN_OFF bit in the SEQ.CLKMODE register.
  */
 Card.DAC = {
     MASK: {
@@ -2280,6 +2280,7 @@ class Video extends Component {
         let aModelDefaults = Video.MODEL[this.model] || Video.MODEL['mda'];
 
         this.nCard = aModelDefaults[0];
+        this.nCardFont = 0;
         this.cbMemory = parmsVideo['memory'] || 0;  // zero means fallback to the cardSpec's default size
         this.sSwitches = parmsVideo['switches'];
         this.nRandomize = parmsVideo['randomize'];
@@ -3786,18 +3787,6 @@ class Video extends Component {
      * Calls to buildFonts() should not be expensive though: the underlying createFont() function rebuilds a font only
      * if its color has actually changed.
      *
-     * TODO: Our font code is still written with the assumption that, like the MDA/CGA, the underlying font data never
-     * changes.  The EGA, however, stores its fonts in plane 2, which means fonts are dynamic; this needs to be fixed.
-     *
-     * Supporting dynamic EGA fonts should not be hard though.  We can get rid of abFontData and simply build a
-     * temporary snapshot of all the font bytes in plane 2 of the EGA's video buffer (adwMemory), and pass that on to
-     * createFont() instead.  We'll also need to either invalidate the existing font's color (to trigger a rebuild) or
-     * pass a new "force rebuild" flag.
-     *
-     * Once that's done, an added benefit will be that we can build just the font(s) that have been loaded into plane 2,
-     * instead of the multitude of fonts that we now build on a just-in-case basis (eg, the MDA font, the 8x8 CGA font
-     * for 43-line mode, and so on).
-     *
      * @this {Video}
      * @param {boolean} [fRebuild] (true if this is a rebuild, not an initial build)
      * @return {boolean} true if any or all fonts were (re)built, false if nothing changed
@@ -3805,33 +3794,55 @@ class Video extends Component {
     buildFonts(fRebuild)
     {
         let fChanges = false;
-
         /*
          * There's no point building fonts if this is a non-windowed (command-line) environment
          * OR no font data is available (OR this is a rebuild AND we're currently in a graphics mode).
-         *
-         * In other words, build fonts if this IS a windowed environment AND font data is available
-         * AND this is not a rebuild, OR it IS a rebuild but we're in a graphics mode (ie, nFont is zero).
          */
-        if (window && this.abFontData && (!fRebuild || this.nFont)) {
+        if (window && this.abFontData && (!fRebuild || this.nCardFont)) {
 
-            let aRGBColors = this.getCardColors();
+            /*
+             * Build whatever font(s) we need for the current card.  In the case of the EGA/VGA, that can mean up to
+             * 4 fonts, if all four font "banks" in plane 2 have been loaded with font data, but if we don't yet know
+             * which bank is active, we'll build the default font, using the available font data (ie, abFontData).
+             */
+            let aRGBColors;
+            let offData = this.aFontOffsets[1];
+            let abFontData = this.abFontData;
 
-            if (this.aFontOffsets[0] != null) {
-                if (this.createFont(Video.FONT.CGA, this.cxFontChar || 8, 8, this.aFontOffsets[0], 0x0000, this.abFontData, aRGBColors)) {
-                    fChanges = true;
-                }
-            }
-
-            if (this.aFontOffsets[1] != null) {
-                if (this.createFont(Video.FONT.MDA, this.cxFontChar || 9, 14, this.aFontOffsets[1], this.cxFontChar? 0 : 0x0800, this.abFontData, Video.aMDAColors, Video.aMDAColorMap)) {
-                    fChanges = true;
-                }
-                if (this.cxFontChar) {
-                    if (this.createFont(this.nCard, this.cxFontChar, 14, fRebuild? 0 : this.aFontOffsets[1], 0, fRebuild? null : this.abFontData, aRGBColors)) {
+            switch(this.nCard) {
+            case Video.CARD.MDA:
+                if (offData != null) {
+                    if (this.createFont(Video.CARD.MDA, this.cxFontChar || 9, 14, offData, this.cxFontChar? 0 : 0x0800, abFontData, Video.aMDAColors, Video.aMDAColorMap)) {
                         fChanges = true;
                     }
                 }
+                break;
+
+            case Video.CARD.CGA:
+                aRGBColors = this.getCardColors();
+                if (this.aFontOffsets[0] != null) {
+                    if (this.createFont(Video.CARD.CGA, this.cxFontChar || 8, 8, this.aFontOffsets[0], 0x0000, abFontData, aRGBColors)) {
+                        fChanges = true;
+                    }
+                }
+                break;
+
+            default:
+                aRGBColors = this.getCardColors();
+                let cxChar = this.cxFontChar || 8;
+                let cyChar = 14;
+                if (fRebuild) {
+                    cxChar = (this.cardEGA.regSEQData[Card.SEQ.CLKMODE.INDX] & Card.SEQ.CLKMODE.DOTS8)? 8: 9;
+                    cyChar = (this.cardEGA.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN]) + 1;
+                    offData = 0;
+                    abFontData = null;
+                }
+                if (offData != null) {
+                    if (this.createFont(this.nCard, cxChar, cyChar, offData, 0, abFontData, aRGBColors)) {
+                        fChanges = true;
+                    }
+                }
+                break;
             }
         }
         if (!fRebuild) {
@@ -3872,23 +3883,32 @@ class Video extends Component {
         if (DEBUG) this.printf("createFont(%d): creating %s font", nFont, Video.cardSpecs[nFont][0]);
 
         let fChanges = false;
-        let nDouble = (this.fDoubleFont? 1 : 0);
         let font = this.aFonts[nFont];
         let nColors = (aRGBColors.length < 16? aRGBColors.length : 16);
-        if (!font) {
+        if (!font || nColors != font.aRGBColors.length) {
             font = {
-                cxCell:     cxChar << nDouble,
-                cyCell:     cyChar << nDouble,
+                cxCell:     0,
+                cyCell:     0,
                 aCSSColors: new Array(nColors),
-                aRGBColors: aRGBColors.slice(0, nColors),   // using the Array slice() method to simply make a copy
+                aRGBColors: aRGBColors.slice(0, nColors),   // make a copy of aRGBColors using slice()
                 aColorMap:  aColorMap,
                 aCanvas:    new Array(nColors)
             };
         }
+        let nDouble = (this.fDoubleFont? 1 : 0);
+        let cxCell = cxChar << nDouble;
+        let cyCell = cyChar << nDouble;
+        let fNewSize = false;
+        if (font.cxCell != cxCell || font.cyCell != cyCell) {
+            font.cxCell = cxCell;
+            font.cyCell = cyCell;
+            fNewSize = true;
+        }
         for (let iColor = 0; iColor < nColors; iColor++) {
             let rgbColor = aRGBColors[iColor];
             let rgbColorOrig = font.aCSSColors[iColor]? font.aRGBColors[iColor] : [];
-            if (rgbColor[0] !== rgbColorOrig[0] || rgbColor[1] !== rgbColorOrig[1] || rgbColor[2] !== rgbColorOrig[2]) {
+            let fNewColor = (rgbColor[0] !== rgbColorOrig[0] || rgbColor[1] !== rgbColorOrig[1] || rgbColor[2] !== rgbColorOrig[2]);
+            if (fNewColor || fNewSize) {
                 this.createFontColor(font, iColor, rgbColor, nDouble, offData, offSplit, cxChar, cyChar, abFontData);
                 fChanges = true;
             }
@@ -3939,17 +3959,15 @@ class Video extends Component {
 
         let iChar, x, y;
         let imageChar = contextFont.createImageData(font.cxCell, font.cyCell);
+
         /*
          * If abFontData is null, we will use font data from plane 2 of video memory, which has a "hard-wired" layout
-         * of 32 bytes per character (which, for 256 characters, amounts to 8Kb).  Note that up to 4 font "banks" can be
-         * stored in plane 2, since each bank has a "hard-wired" length of 16Kb, so two banks requires 32Kb of plane 2
-         * memory (which means a 4-plane total of 128K) and four banks requires 64Kb of plane 2 memory (which means a
-         * 4-plane total of 256K).
+         * of 32 bytes per character (which, for 256 characters, amounts to 8Kb).  Note that on an EGA, up to 4 font
+         * "banks" can be stored in plane 2, since each EGA font bank has a "hard-wired" length of 16Kb, whereas on a VGA,
+         * up to 8 font banks can be stored in plane 2, since each VGA font bank has a "hard-wired" length of 8Kb.
          *
-         * Those requirements could have been cut in half (and up to 8 banks supported) if the EGA had started each bank
-         * on an 8Kb boundary instead of 16Kb (each bank can't use more than 8Kb anyway).  Of course, that would have also
-         * required the Sequencer's Character Map Select register to assign 3 bits rather than 2 bits to each of the Map
-         * Select A and B values.
+         * Note that for backward compatibility with the EGA, the VGA's additional 4 font banks are interleaved with the
+         * EGA's original 4.
          */
         let adwMemory = this.cardActive && this.cardActive.adwMemory;
         let cyLimit = abFontData? ((cyChar < 8 || !offSplit)? cyChar : 8) : 32;
@@ -3991,7 +4009,7 @@ class Video extends Component {
                 }
             }
             /*
-             * (iChar >> 4) performs the integer equivalent of Math.floor(iChar / 16), and (iChar & 0xf) is the equivalent of (iChar % 16).
+             * (iChar >> 4) is the equivalent of Math.floor(iChar / 16), and (iChar & 0xf) is the equivalent of (iChar % 16).
              */
             contextFont.putImageData(imageChar, x = (iChar & 0xf) * font.cxCell, y = (iChar >> 4) * font.cyCell);
         }
@@ -4001,18 +4019,6 @@ class Video extends Component {
          */
         font.aCSSColors[iColor] = "#" + Str.toHex(rgbColor[0], 2) + Str.toHex(rgbColor[1], 2) + Str.toHex(rgbColor[2], 2);
         font.aRGBColors[iColor] = rgbColor;
-
-        /*
-         * Enable this code if you want to see what the generated font looks like....
-         *
-        if (MAXDEBUG) {
-            let iSrcColor = (iColor == 15? 0 : iColor + 1);
-            this.contextScreen.fillStyle = aCSSColors[iSrcColor];
-            this.contextScreen.fillRect(iColor*(font.cxCell<<2), 0, canvasFont.width>>2, font.cyCell<<4);
-            this.contextScreen.drawImage(canvasFont, 0, iColor*(font.cyCell<<4), canvasFont.width>>2, font.cyCell<<4, iColor*(font.cxCell<<2), 0, canvasFont.width>>2, font.cyCell<<4);
-        }
-         */
-
         font.aCanvas[iColor] = canvasFont;
     }
 
@@ -4104,7 +4110,7 @@ class Video extends Component {
         /*
          * The "hardware cursor" is never visible in graphics modes.
          */
-        if (!this.nFont) return false;
+        if (!this.nCardFont) return false;
 
         let card = this.cardActive;
         for (let i = Card.CRTC.CURSCAN; i <= Card.CRTC.CURSORLO; i++) {
@@ -4158,14 +4164,13 @@ class Video extends Component {
         else {
             /*
              * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled; we used to
-             * detect that particular combination of bad values and automatically fix them (we're so thoughtful),
+             * detect that particular combination of bad values and automatically fix them (see below),
              * but in retrospect, that doesn't seem very faithful.  Better to fix things like this 1) only if
              * the user asks, and 2) preferably with a BIOS patch rather than monkeying with the hardware registers.
              *
              *      if (this.nCard == Video.CARD.EGA) {
              *          if (bCursorMax == 7 && bCursorStart == 4 && !bCursorEnd) bCursorEnd = 7;
              *      }
-             */
             /*
              * Here's another strange EGA anomaly: if CURSCAN == CURSCANB mod 16, then it's treated the same as if
              * CURSCAN == CURSCANB.  For example, if you set (CURSCAN,CURSCANB) to either the decimal values
@@ -4280,7 +4285,7 @@ class Video extends Component {
                     data &= ~drawCursor;
                     let col = this.iCellCursor % this.nCols;
                     let row = (this.iCellCursor / this.nCols)|0;
-                    if (this.nFont && this.aFonts[this.nFont]) {
+                    if (this.nCardFont && this.aFonts[this.nCardFont]) {
                         /*
                          * If we're using an off-screen buffer in text mode, then we need to keep it in sync with "reality".
                          */
@@ -4460,13 +4465,13 @@ class Video extends Component {
      */
     setDimensions()
     {
-        this.nFont = 0;
+        this.nCardFont = 0;
         this.nCols = this.nColsDefault;
         this.nRows = this.nRowsDefault;
         this.nColsLogical = this.nCols;
         this.nCellsPerWord = Video.aModeParms[Video.MODE.MDA_80X25][2];
 
-        let cbPadding = 0;
+        let cbPadding = 0, cxCell = 0, cyCell = 0;
         let modeParms = Video.aModeParms[this.nMode];
         if (modeParms) {
 
@@ -4474,36 +4479,53 @@ class Video extends Component {
             this.nRows = modeParms[1];
             this.nCellsPerWord = modeParms[2];
             cbPadding = modeParms[3];       // undefined for EGA/VGA graphics modes only
-            this.nFont = modeParms[4];      // this will be undefined for all graphics modes
+            this.nCardFont = modeParms[4];  // this will be undefined for all graphics modes
 
-            if (this.nMonitorType == ChipSet.MONITOR.EGACOLOR || this.nMonitorType == ChipSet.MONITOR.VGACOLOR) {
-                /*
-                 * When an EGA is connected to a CGA monitor, the old aModeParms table is correct: we must
-                 * use the hard-coded 8x8 "CGA_80" font.  But when it's connected to an EGA monitor, we want
-                 * to use the 9x14 "EGA" color font instead.
-                 *
-                 * TODO: Can an EGA with a monochrome monitor be programmed for 43-line mode as well?  If so,
-                 * then we'll need to load another MDA font variation, because we only load the 9x14 font for MDA.
-                 */
-                if (this.cardActive === this.cardEGA && this.nFont == Video.FONT.CGA) {
-                    if ((this.cardEGA.regCRTData[Card.CRTC.EGA.MAXSCAN.INDX] & Card.CRTC.EGA.MAXSCAN.SLMASK) == 7) {
-                        /*
-                         * Vertical resolution of 350 divided by 8 (ie, scan lines 0-7) yields 43 whole rows.
-                         */
-                        this.nRows = this.cardEGA.getCRTCReg(Card.CRTC.EGA.VDEND) < 350? 43 : 50;
-                    }
+            /*
+             * When an EGA is connected to a CGA monitor, the old aModeParms table is correct: we must
+             * use the hard-coded 8x8 "CGA_80" font.  But when it's connected to an EGA monitor, we want
+             * to use the 9x14 "EGA" color font instead.
+             *
+             * TODO: Can an EGA with a monochrome monitor be programmed for 43-line mode as well?  If so,
+             * then we'll need to load another MDA font variation, because we only load the 9x14 font for MDA.
+             */
+            if (this.nCardFont) {
+                let cxChar = 0, cyChar = 0;
+                if (this.cardActive === this.cardEGA) {
                     /*
-                     * Since we can also be called before any hardware registers have been initialized,
-                     * it may be best to not perform the following test (which is why it's commented out).
+                     * We can be called BEFORE the card has been fully programmed (for the initialization screen),
+                     * so if it looks like that's the case, then we'll fall back to defaults based on the prebuilt
+                     * font for this card (assuming it has one).
+                     *
+                     * Any card programming needs to take precedence over font properties, because we may not have
+                     * rebuilt the font(s) yet; it's something of a chicken-and-egg problem.
                      */
-                    else /* if (this.cardEGA.regCRTData[Card.CRTC.EGA.MAXSCAN.INDX] == 13) */ {
-                        /*
-                         * Vertical resolution of 350 divided by 14 (ie, scan lines 0-13) yields exactly 25 rows.
-                         *
-                         * Note that a card's default font matches its card ID (eg, Video.CARD.EGA == Video.FONT.EGA,
-                         * and Video.CARD.VGA == Video.FONT.VGA)
-                         */
-                        this.nFont = this.nCard;
+                    let cyScreen = this.cardEGA.getCRTCReg(Card.CRTC.EGA.VDEND);
+                    if (cyScreen++) {
+                        cxChar = (this.cardEGA.regSEQData[Card.SEQ.CLKMODE.INDX] & Card.SEQ.CLKMODE.DOTS8)? 8: 9;
+                        cyChar = (this.cardEGA.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN]);
+                        if (cyChar++) {
+                            let nRows = (cyScreen / cyChar)|0;
+                            if (nRows) this.nRows = nRows;
+                            cxCell = cxChar;
+                            cyCell = cyChar;
+                            if (this.fDoubleFont) {
+                                cxCell <<= 1;
+                                cyCell <<= 1;
+                            }
+                        }
+                    }
+                    this.nCardFont = this.nCard;
+                }
+                if (!cyChar) {
+                    /*
+                     * Like I said above: fall-back time.  At this point, all we're really trying to do is calculate
+                     * appropriate cell dimensions for the off-screen buffer.
+                     */
+                    let font = this.aFonts[this.nCardFont];
+                    if (font) {
+                        cxCell = font.cxCell;
+                        cyCell = font.cyCell;
                     }
                 }
             }
@@ -4515,7 +4537,8 @@ class Video extends Component {
         this.cbSplit = 0;
 
         if (cbPadding !== undefined) {
-            this.cbScreen = ((this.cbScreen << 1) + cbPadding)|0;
+            this.cbScreen <<= 1;
+            this.cbScreen = (this.cbScreen + cbPadding)|0;
             this.cbSplit = (this.cbScreen + cbPadding) >> 1;
         }
 
@@ -4527,24 +4550,9 @@ class Video extends Component {
         this.cxScreenCell = (this.cxScreen / this.nCols)|0;
         this.cyScreenCell = (this.cyScreen / this.nRows)|0;
 
-        if (this.nFont) {
-            let font = this.aFonts[this.nFont];
-            if (!font) {
-                this.assert(false);
-                return;
-            }
-            /*
-             * In text modes, we have the option of setting all the *Buffer variables to null instead of
-             * allocating them, because updateChar(), as currently written, is capable of writing characters to
-             * either an off-screen or on-screen context.
-             *
-             *      this.imageBuffer = this.canvasBuffer = this.contextBuffer = null;
-             */
-            this.cxBuffer = this.cyBuffer = 0;
-            if (font) {
-                this.cxBuffer = this.nCols * font.cxCell;
-                this.cyBuffer = this.nRows * font.cyCell;
-            }
+        if (this.nCardFont) {
+            this.cxBuffer = this.nCols * cxCell;
+            this.cyBuffer = this.nRows * cyCell;
         } else {
             /*
              * CGA graphics modes have their "cells" (pixels) split evenly across two halves of the video buffer, with
@@ -4558,7 +4566,7 @@ class Video extends Component {
              * single scan line, and redraw one scan line at a time, but given how EVEN and ODD scan lines are spread across the
              * entire buffer, it's not clear there would be enough unchanged scan lines on average to make that approach faster.
              */
-            this.cxScreenCell = this.cyScreenCell = 1;  // in graphics mode, a cell is exactly one pixel
+            this.cxScreenCell = this.cyScreenCell = 1;  // in graphics modes, a cell is one pixel
             this.cxBuffer = this.nCols;
             this.cyBuffer = this.nRows;
         }
@@ -4698,8 +4706,7 @@ class Video extends Component {
                     let nCRTCVertTotal = card.getCRTCReg(Card.CRTC.EGA.VTOTAL);
                     let nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAXSCAN.INDX];
                     let nCRTCModeCtrl = card.regCRTData[Card.CRTC.EGA.MODECTRL.INDX];
-
-                    let fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
+                    let fSEQDotClock = (card.regSEQData[Card.SEQ.CLKMODE.INDX] & Card.SEQ.CLKMODE.DOTCLOCK);
 
                     if (nMode != Video.MODE.UNKNOWN) {
                         if (!(regGRCMisc & Card.GRC.MISC.GRAPHICS)) {
@@ -5009,12 +5016,12 @@ class Video extends Component {
     updateChar(col, row, data, context)
     {
         /*
-         * The caller MUST promise this.nFont is defined, and that the font in this.aFonts[this.nFont] has been loaded.
+         * this.nCardFont MUST be defined, and the font in this.aFonts[this.nCardFont] MUST be loaded.
          */
         let bChar = data & 0xff;
         let bAttr = data >> 8;
         let iFgnd = bAttr & 0xf;
-        let font = this.aFonts[this.nFont];
+        let font = this.aFonts[this.nCardFont];
         if (font.aColorMap) iFgnd = font.aColorMap[iFgnd];
 
         /*
@@ -5235,7 +5242,7 @@ class Video extends Component {
          * Any screen (aka "page") offset must be doubled for text modes, due to the attribute bytes.
          * TODO: Come up with a more robust method of deciding when any screen offset should be doubled.
          */
-        addrScreen += card.offStartAddr << (this.nFont? 1 : 0);
+        addrScreen += card.offStartAddr << (this.nCardFont? 1 : 0);
         let cbScreen = this.cbScreen;
 
         if (this.nCard >= Video.CARD.EGA && card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
@@ -5251,7 +5258,7 @@ class Video extends Component {
              * notion of cell has a slightly different meaning for EGA and VGA-specific modes.  nCellsPerWord should
              * not be overloaded like that.
              */
-            this.nColsLogical = card.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nFont? 1 : (card.regCRTData[Card.CRTC.EGA.UNDERLINE.INDX] & Card.CRTC.EGA.UNDERLINE.DWORD)? 3 : 4);
+            this.nColsLogical = card.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nCardFont? 1 : (card.regCRTData[Card.CRTC.EGA.UNDERLINE.INDX] & Card.CRTC.EGA.UNDERLINE.DWORD)? 3 : 4);
             cbScreen = ((this.nColsLogical * (this.nRows-1) + this.nCols) / this.nCellsPerWord)|0;
             if (this.nMode <= Video.MODE.MDA_80X25) cbScreen <<= 1;
         }
@@ -5346,12 +5353,12 @@ class Video extends Component {
             // else if (this.cBlinks & 0x1) return;
         }
 
-        if (this.nFont) {
+        if (this.nCardFont) {
             /*
              * This is the text-mode update case.  We're required to FIRST verify that the current font
              * has been successfully loaded, because we're not allowed to call updateChar() if there's no font.
              */
-            if (this.aFonts[this.nFont]) {
+            if (this.aFonts[this.nCardFont]) {
                 this.updateScreenText(addrScreen, addrScreenLimit, iCell, nCells);
             }
         }
@@ -5520,7 +5527,7 @@ class Video extends Component {
 
         /*
          * Instead of blasting the ENTIRE imageBuffer into contextBuffer, and then blasting the ENTIRE
-         * canvasBuffer onto contextScreen, even for the smallest change, let's try to be a bit smarter about
+         * canvasBuffer onto contextScreen, e{ven for the smallest change, let's try to be a bit smarter about
          * the update (well, to the extent that the canvas APIs permit).
          */
         if (xDirty < this.nCols) {
@@ -6923,7 +6930,7 @@ class Video extends Component {
         }
 
         card.regStatus = b;
-        this.printMessageIO(card.port + 6, null, addrFrom, (card === this.cardEGA? "STATUS1" : "STATUS"), b);
+        if (MAXDEBUG) this.printMessageIO(card.port + 6, null, addrFrom, (card === this.cardEGA? "STATUS1" : "STATUS"), b);
         return b;
     }
 
@@ -7126,6 +7133,35 @@ class Video extends Component {
 Video.TRAPALL = true;           // monitor all I/O by default (not just deltas)
 
 /*
+ * Supported Cards (and associated fonts)
+ *
+ * These IDs are also used to identify which "slots" in the aFonts[] array contain fonts, which is why
+ * there are gaps between the numbers.  The MDA and CGA use a single supplied font, so they will always
+ * use font slot 1 or 2, respectively, but the EGA supports up to 4 font "banks", so depending on which
+ * bank is being used, font slots 4-7 may be used.  Similarly, the VGA supports up to 8 font "banks",
+ * using font slots 8-15.
+ *
+ * Once we've finished loading the standard 8K font file, aFonts[] should contain at least one of the
+ * entries listed below.  For the standard MDA/CGA font ROM, the first (MDA) font resides in the first 4Kb,
+ * and the second and third (CGA) fonts reside in the two 2K halves of the second 4Kb.
+ *
+ * Additional notes from the IBM EGA Manual (p.5):
+ *
+ *     "In alphanumeric modes, characters are formed from one of two ROM (Read Only Memory) character
+ *      generators on the adapter. One character generator defines 7x9 characters in a 9x14 character box.
+ *      For Enhanced Color Display support, the 9x14 character set is modified to provide an 8x14 character set.
+ *      The second character generator defines 7x7 characters in an 8x8 character box. These generators contain
+ *      dot patterns for 256 different characters. The character sets are identical to those provided by the
+ *      IBM Monochrome Display Adapter and the IBM Color/Graphics Monitor Adapter."
+ */
+Video.CARD = {
+    MDA:    1,          // uses 9x14 monochrome font
+    CGA:    2,          // uses 8x8 color font
+    EGA:    4,          // uses 8x14 color font (by default)
+    VGA:    8           // uses 8x16 color font (by default)
+};
+
+/*
  * Supported Modes
  *
  * Although this component is designed to be a video hardware emulation, not a BIOS simulation, we DO
@@ -7174,45 +7210,6 @@ Video.MODE = {
 };
 
 Video.UPDATES_PER_SECOND = 60;
-
-/*
- * Supported Fonts
- *
- * Once we've finished loading the standard 8K font file, aFonts[] should contain one or more of the
- * entries listed below.  For the standard MDA/CGA font ROM, the first (MDA) font resides in the first 4Kb,
- * and the second and third (CGA) fonts reside in the two 2K halves of the second 4Kb.
- *
- * It may seem odd that the cell size for FONT_CGAD is *larger* than the cell size for FONT_CGA,
- * since 40-column mode is actually lower resolution, but since we don't shrink the screen canvas when we
- * shrink the mode, the characters must be drawn larger, and they look better if we don't have to scale them.
- *
- * From the IBM EGA Manual (p.5):
- *
- *     "In alphanumeric modes, characters are formed from one of two ROM (Read Only Memory) character
- *      generators on the adapter. One character generator defines 7x9 characters in a 9x14 character box.
- *      For Enhanced Color Display support, the 9x14 character set is modified to provide an 8x14 character set.
- *      The second character generator defines 7x7 characters in an 8x8 character box. These generators contain
- *      dot patterns for 256 different characters. The character sets are identical to those provided by the
- *      IBM Monochrome Display Adapter and the IBM Color/Graphics Monitor Adapter."
- */
-Video.FONT = {
-    MDA:    1,          // 9x14 monochrome font
-    CGA:    2,          // 8x8 color font
-    EGA:    3,          // 8x14 color font
-    VGA:    4           // 8x16 color font
-};
-
-/*
- * Supported Cards
- *
- * Note that we choose card IDs that match the default font ID for each card as well, for convenience.
- */
-Video.CARD = {
-    MDA: Video.FONT.MDA,
-    CGA: Video.FONT.CGA,
-    EGA: Video.FONT.EGA,
-    VGA: Video.FONT.VGA
-};
 
 /*
  * Supported Models
@@ -7396,11 +7393,11 @@ Video.aEGAMonitorSwitches = {
  * containing 32 bits of pixel data.
  */
 Video.aModeParms = [];                                                                              // Mode
-Video.aModeParms[Video.MODE.CGA_40X25]          = [ 40,  25,  1,   0, Video.FONT.CGA];              // 0x01
-Video.aModeParms[Video.MODE.CGA_80X25]          = [ 80,  25,  1,   0, Video.FONT.CGA];              // 0x03
+Video.aModeParms[Video.MODE.CGA_40X25]          = [ 40,  25,  1,   0, Video.CARD.CGA];              // 0x01
+Video.aModeParms[Video.MODE.CGA_80X25]          = [ 80,  25,  1,   0, Video.CARD.CGA];              // 0x03
 Video.aModeParms[Video.MODE.CGA_320X200]        = [320, 200,  8, 192];                              // 0x04
 Video.aModeParms[Video.MODE.CGA_640X200]        = [640, 200, 16, 192];                              // 0x06
-Video.aModeParms[Video.MODE.MDA_80X25]          = [ 80,  25,  1,   0, Video.FONT.MDA];              // 0x07
+Video.aModeParms[Video.MODE.MDA_80X25]          = [ 80,  25,  1,   0, Video.CARD.MDA];              // 0x07
 Video.aModeParms[Video.MODE.EGA_320X200]        = [320, 200,  8];                                   // 0x0D
 Video.aModeParms[Video.MODE.EGA_640X200]        = [640, 200,  8];                                   // 0x0E
 Video.aModeParms[Video.MODE.EGA_640X350_MONO]   = [640, 350,  8];                                   // 0x0F
