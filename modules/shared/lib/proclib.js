@@ -46,16 +46,16 @@ class Proc {
      */
     static getArgs()
     {
-        var argc = 0;
-        var argv = {};
+        let argc = 0;
+        let argv = {};
         argv[argc++] = process.argv[1];
-        for (var i = 2; i < process.argv.length; i++) {
-            var j, sSep;
-            var sArg = process.argv[i];
+        for (let i = 2; i < process.argv.length; i++) {
+            let j, sSep;
+            let sArg = process.argv[i];
             argv[argc++] = sArg;
             if (!sArg.indexOf(sSep = "--") || !sArg.indexOf(sSep = "—")) {
                 sArg = sArg.substr(sSep.length);
-                var sValue = true;
+                let sValue = true;
                 j = sArg.indexOf("=");
                 if (j > 0) {
                     sValue = sArg.substr(j + 1);
@@ -74,7 +74,7 @@ class Proc {
                 }
             } else if (!sArg.indexOf("-")) {
                 for (j = 1; j < sArg.length; j++) {
-                    var ch = sArg.charAt(j);
+                    let ch = sArg.charAt(j);
                     if (argv[ch] === undefined) {
                         argv[ch] = true;
                         argc++;

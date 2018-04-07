@@ -121,7 +121,7 @@ class Component {
         this.exports = this['exports'] = {};
         this.bindings = this['bindings'] = {};
 
-        var i = this.id.indexOf('.');
+        let i = this.id.indexOf('.');
         if (i < 0) {
             this.idComponent = this.id;
         } else {
@@ -241,7 +241,7 @@ class Component {
     {
         if (!COMPILED) {
             if (s) {
-                var sElapsed = "", sMsg = (type? (type + ": ") : "") + s;
+                let sElapsed = "", sMsg = (type? (type + ": ") : "") + s;
                 if (typeof Usr != "undefined") {
                     if (Component.msStart === undefined) {
                         Component.msStart = Component.getTime();
@@ -289,7 +289,7 @@ class Component {
     static print(s)
     {
         if (!COMPILED) {
-            var i = s.lastIndexOf('\n');
+            let i = s.lastIndexOf('\n');
             if (i >= 0) {
                 Component.println(s.substr(0, i));
                 s = s.substr(i + 1);
@@ -385,7 +385,7 @@ class Component {
      */
     static confirmUser(sPrompt)
     {
-        var fResponse = false;
+        let fResponse = false;
         if (window) {
             fResponse = window.confirm(sPrompt);
         }
@@ -401,7 +401,7 @@ class Component {
      */
     static promptUser(sPrompt, sDefault)
     {
-        var sResponse = null;
+        let sResponse = null;
         if (window) {
             sResponse = window.prompt(sPrompt, sDefault === undefined? "" : sDefault);
         }
@@ -436,8 +436,8 @@ class Component {
      */
     static replaceControl(control, sSearch, sReplace)
     {
-        var sText = control.value;
-        var i = sText.lastIndexOf(sSearch);
+        let sText = control.value;
+        let i = sText.lastIndexOf(sSearch);
         if (i < 0) {
             sText += sSearch + '\n';
         } else {
@@ -461,9 +461,9 @@ class Component {
     static bindExternalControl(component, sBinding, sType = "Panel")
     {
         if (sBinding) {
-            var target = Component.getComponentByType(sType, component.id);
+            let target = Component.getComponentByType(sType, component.id);
             if (target) {
-                var control = target.bindings[sBinding];
+                let control = target.bindings[sBinding];
                 if (control) {
                     component.setBinding("", sBinding, control);
                 }
@@ -480,22 +480,22 @@ class Component {
      */
     static bindComponentControls(component, element, sAppClass)
     {
-        var aeControls = Component.getElementsByClass(element.parentNode, sAppClass + "-control");
+        let aeControls = Component.getElementsByClass(element.parentNode, sAppClass + "-control");
 
-        for (var iControl = 0; iControl < aeControls.length; iControl++) {
+        for (let iControl = 0; iControl < aeControls.length; iControl++) {
 
-            var aeChildNodes = aeControls[iControl].childNodes;
+            let aeChildNodes = aeControls[iControl].childNodes;
 
-            for (var iNode = 0; iNode < aeChildNodes.length; iNode++) {
-                var control = aeChildNodes[iNode];
+            for (let iNode = 0; iNode < aeChildNodes.length; iNode++) {
+                let control = aeChildNodes[iNode];
                 if (control.nodeType !== 1 /* document.ELEMENT_NODE */) {
                     continue;
                 }
-                var sClass = control.getAttribute("class");
+                let sClass = control.getAttribute("class");
                 if (!sClass) continue;
-                var aClasses = sClass.split(" ");
-                for (var iClass = 0; iClass < aClasses.length; iClass++) {
-                    var parms;
+                let aClasses = sClass.split(" ");
+                for (let iClass = 0; iClass < aClasses.length; iClass++) {
+                    let parms;
                     sClass = aClasses[iClass];
                     switch (sClass) {
                         case sAppClass + "-binding":
@@ -527,8 +527,8 @@ class Component {
      */
     static getComponents(idRelated)
     {
-        var i;
-        var aComponents = [];
+        let i;
+        let aComponents = [];
         /*
          * getComponentByID(id, idRelated)
          *
@@ -543,7 +543,7 @@ class Component {
                 idRelated = "";
         }
         for (i = 0; i < Component.components.length; i++) {
-            var component = Component.components[i];
+            let component = Component.components[i];
             if (!idRelated || !component.id.indexOf(idRelated)) {
                 aComponents.push(component);
             }
@@ -564,7 +564,7 @@ class Component {
     static getComponentByID(id, idRelated)
     {
         if (id !== undefined) {
-            var i;
+            let i;
             /*
              * If idRelated is provided, we check it for a machine prefix, and use any
              * existing prefix to constrain matches to IDs with the same prefix, in order to
@@ -596,7 +596,7 @@ class Component {
     static getComponentByType(sType, idRelated, componentPrev)
     {
         if (sType !== undefined) {
-            var i;
+            let i;
             /*
              * If idRelated is provided, we check it for a machine prefix, and use any
              * existing prefix to constrain matches to IDs with the same prefix, in order to
@@ -630,8 +630,8 @@ class Component {
      */
     static getComponentParms(element)
     {
-        var parms = null;
-        var sParms = element.getAttribute("data-value");
+        let parms = null;
+        let sParms = element.getAttribute("data-value");
         if (sParms) {
             try {
                 parms = eval('(' + sParms + ')');   // jshint ignore:line
@@ -673,9 +673,9 @@ class Component {
         if (element.getElementsByClassName) {
             return element.getElementsByClassName(sClass);
         }
-        var i, j, ae = [];
-        var aeAll = element.getElementsByTagName("*");
-        var re = new RegExp('(^| )' + sClass + '( |$)');
+        let i, j, ae = [];
+        let aeAll = element.getElementsByTagName("*");
+        let re = new RegExp('(^| )' + sClass + '( |$)');
         for (i = 0, j = aeAll.length; i < j; i++) {
             if (re.test(aeAll[i].className)) {
                 ae.push(aeAll[i]);
@@ -715,10 +715,10 @@ class Component {
      */
     static getScriptCommands(sScript)
     {
-        var cch = sScript.length;
-        var aCommands = [], aTokens = [], sToken = "", chQuote = null;
-        for (var i = 0; i < cch; i++) {
-            var ch = sScript[i];
+        let cch = sScript.length;
+        let aCommands = [], aTokens = [], sToken = "", chQuote = null;
+        for (let i = 0; i < cch; i++) {
+            let ch = sScript[i];
             if (ch == '"' || ch == "'") {
                 if (chQuote && ch != chQuote) {
                     sToken += ch;
@@ -771,7 +771,7 @@ class Component {
      */
     static processScript(idMachine, sScript)
     {
-        var fSuccess = false;
+        let fSuccess = false;
         idMachine += ".machine";
         if (!sScript) {
             delete Component.commands[idMachine];
@@ -795,15 +795,15 @@ class Component {
      */
     static processCommands(idMachine)
     {
-        var fSuccess = true;
-        var aCommands = Component.commands[idMachine];
+        let fSuccess = true;
+        let aCommands = Component.commands[idMachine];
 
-     // var dbg = Component.getComponentByType("Debugger", idMachine);
+     // let dbg = Component.getComponentByType("Debugger", idMachine);
 
         while (aCommands && aCommands.length) {
 
-            var aTokens = aCommands.splice(0, 1)[0];
-            var sCommand = aTokens[0];
+            let aTokens = aCommands.splice(0, 1)[0];
+            let sCommand = aTokens[0];
 
             /*
              * It's possible to route this output to the Debugger window with dbg.println()
@@ -812,7 +812,7 @@ class Component {
              */
             Component.println(aTokens.join(' '), Component.PRINT.SCRIPT);
 
-            var fnCallReady = null;
+            let fnCallReady = null;
             if (Component.asyncCommands.indexOf(sCommand) >= 0) {
                 fnCallReady = function processNextCommand() {
                     return function() {
@@ -821,7 +821,7 @@ class Component {
                 }();
             }
 
-            var fnCommand = Component.globalCommands[sCommand];
+            let fnCommand = Component.globalCommands[sCommand];
             if (fnCommand) {
                 if (!fnCallReady) {
                     fSuccess = fnCommand(aTokens[1], aTokens[2], aTokens[3]);
@@ -831,14 +831,14 @@ class Component {
             }
             else {
                 fSuccess = false;
-                var component = Component.getComponentByType(aTokens[1], idMachine);
+                let component = Component.getComponentByType(aTokens[1], idMachine);
                 if (component) {
                     fnCommand = Component.componentCommands[sCommand];
                     if (fnCommand) {
                         fSuccess = fnCommand(component, aTokens[2], aTokens[3]);
                     }
                     else {
-                        var exports = component['exports'];
+                        let exports = component['exports'];
                         if (exports) {
                             fnCommand = exports[sCommand];
                             if (fnCommand) {
@@ -889,11 +889,11 @@ class Component {
      */
     static scriptSelect(component, sBinding, sValue)
     {
-        var fSuccess = false;
-        var aBindings = component['bindings'];
-        var control = aBindings[sBinding];
+        let fSuccess = false;
+        let aBindings = component['bindings'];
+        let control = aBindings[sBinding];
         if (control) {
-            for (var i = 0; i < control.options.length; i++) {
+            for (let i = 0; i < control.options.length; i++) {
                 if (control.options[i].textContent == sValue) {
                     if (control.selectedIndex != i) {
                         control.selectedIndex = i;
@@ -938,9 +938,9 @@ class Component {
      */
     getMachineNum()
     {
-        var nMachine = 1;
+        let nMachine = 1;
         if (this.idMachine) {
-            var aDigits = this.idMachine.match(/\d+/);
+            let aDigits = this.idMachine.match(/\d+/);
             if (aDigits !== null)
                 nMachine = parseInt(aDigits[0], 10);
         }
@@ -976,7 +976,7 @@ class Component {
             return true;
         case 'print':
             if (!this.bindings[sBinding]) {
-                var controlTextArea = /** @type {HTMLTextAreaElement} */(control);
+                let controlTextArea = /** @type {HTMLTextAreaElement} */(control);
                 this.bindings[sBinding] = controlTextArea;
                 /**
                  * Override this.notice() with a replacement function that eliminates the Component.alertUser() call.
@@ -1150,7 +1150,7 @@ class Component {
             /*
              * See if the associated computer, if any, is "unloading"....
              */
-            var computer = Component.getComponentByType("Computer", this.id);
+            let computer = Component.getComponentByType("Computer", this.id);
             if (computer && computer.flags.unloading) {
                 console.log("ignoring notice during unload: " + s);
                 return false;
@@ -1242,7 +1242,7 @@ class Component {
             this.flags.ready = (fReady !== false);
             if (this.flags.ready) {
                 if (MAXDEBUG /* || this.name */) this.log("ready");
-                var fnReady = this.fnReady;
+                let fnReady = this.fnReady;
                 this.fnReady = null;
                 if (fnReady) fnReady();
             }
@@ -1337,7 +1337,7 @@ class Component {
             if (this !== this.dbg) {
                 bitsMessage = bitsMessage || this.bitsMessage;
             }
-            var bitsEnabled = this.dbg.bitsMessage & bitsMessage;
+            let bitsEnabled = this.dbg.bitsMessage & bitsMessage;
             /*
              * This next "bit" of logic is for PCx86 and any other machine where we've expanded the set of
              * messages by reusing bits in the low nibbles in combination with different bits in the high nibble.
@@ -1368,7 +1368,7 @@ class Component {
                 let s = Str.sprintf(format, ...args);
                 /*
                  * Since dbg.message() calls println(), we strip any ending linefeed.
-                 * 
+                 *
                  * We could bypass the Debugger and go straight to this.print(), but we would lose
                  * the benefits of debugger messages (eg, automatic buffering, halting, yielding, etc).
                  */
@@ -1497,7 +1497,7 @@ Component.printBuffer = "";
  */
 if (!Array.prototype.indexOf) {
     Array.prototype.indexOf = function(obj, start) {
-        for (var i = (start || 0), j = this.length; i < j; i++) {
+        for (let i = (start || 0), j = this.length; i < j; i++) {
             if (this[i] === obj) { return i; }
         }
         return -1;
@@ -1522,10 +1522,10 @@ if (!Function.prototype.bind) {
             // Closest thing possible to the ECMAScript 5 internal IsCallable function
             throw new TypeError("Function.prototype.bind: non-callable object");
         }
-        var args = Array.prototype.slice.call(arguments, 1);
-        var fToBind = this;
-        var fnNOP = /** @constructor */ (function() {});
-        var fnBound = function() {
+        let args = Array.prototype.slice.call(arguments, 1);
+        let fToBind = this;
+        let fnNOP = /** @constructor */ (function() {});
+        let fnBound = function() {
             return fToBind.apply(this instanceof fnNOP && obj? this : obj, args.concat(/** @type {Array} */(Array.prototype.slice.call(arguments))));
         };
         fnNOP.prototype = this.prototype;

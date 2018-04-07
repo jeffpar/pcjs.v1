@@ -77,13 +77,13 @@ class Str {
      */
     static parseInt(s, base)
     {
-        var value;
+        let value;
 
         if (s) {
             if (!base) base = 10;
 
-            var ch, chPrefix, chSuffix;
-            var fCommas = (s.indexOf(',') > 0);
+            let ch, chPrefix, chSuffix;
+            let fCommas = (s.indexOf(',') > 0);
             if (fCommas) s = s.replace(/,/g, '');
 
             ch = chPrefix = s.charAt(0);
@@ -147,9 +147,9 @@ class Str {
              * which is a net shift of zero.  If n < 35, then a left shift of (35 - n) is required; if n > 35, then
              * a right shift of -(35 - n) is required.
              */
-            var v, shift = 0;
+            let v, shift = 0;
             if (base <= 10) {
-                var match = s.match(/(-?[0-9]+)B([0-9]*)/);
+                let match = s.match(/(-?[0-9]+)B([0-9]*)/);
                 if (match) {
                     s = match[1];
                     shift = 35 - ((match[2] || 35) & 0xff);
@@ -202,7 +202,7 @@ class Str {
          * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
          * values displayed differently.
          */
-        var s = "";
+        let s = "";
         if (isNaN(n) || typeof n != "number") {
             n = null;
         } else {
@@ -224,7 +224,7 @@ class Str {
                 cch = Math.ceil(Math.log(n) / Math.log(radix));
             }
         }
-        var g = nGrouping || -1;
+        let g = nGrouping || -1;
         while (cch-- > 0) {
             if (!g) {
                 s = ',' + s;
@@ -233,7 +233,7 @@ class Str {
             if (n == null) {
                 s = '?' + s;
             } else {
-                var d = n % radix;
+                let d = n % radix;
                 d += (d >= 0 && d <= 9? 0x30 : 0x41 - 10);
                 s = String.fromCharCode(d) + s;
                 n = Math.trunc(n / radix);
@@ -257,7 +257,7 @@ class Str {
     {
         if (!cch) {
             // cch = Math.ceil(Math.log(Math.abs(n) + 1) / Math.LN2) || 1;
-            var v = Math.abs(n);
+            let v = Math.abs(n);
             if (v <= 0b11111111) {
                 cch = 8;
             } else if (v <= 0b111111111111111111) {
@@ -281,9 +281,9 @@ class Str {
      */
     static toBinBytes(n, cb, fPrefix)
     {
-        var s = "";
+        let s = "";
         if (!cb || cb > 4) cb = 4;
-        for (var i = 0; i < cb; i++) {
+        for (let i = 0; i < cb; i++) {
             if (s) s = ',' + s;
             s = Str.toBin(n & 0xff, 8) + s;
             n >>= 8;
@@ -309,7 +309,7 @@ class Str {
     {
         if (!cch) {
             // cch = Math.ceil(Math.log(Math.abs(n) + 1) / Math.log(8)) || 1;
-            var v = Math.abs(n);
+            let v = Math.abs(n);
             if (v <= 0o777777) {
                 cch = 6;
             } else if (v <= 0o77777777) {
@@ -338,7 +338,7 @@ class Str {
     {
         if (!cch) {
             // cch = Math.ceil(Math.log(Math.abs(n) + 1) / Math.LN10) || 1;
-            var v = Math.abs(n);
+            let v = Math.abs(n);
             if (v <= 99999) {
                 cch = 5;
             } else {
@@ -374,7 +374,7 @@ class Str {
     {
         if (!cch) {
             // cch = Math.ceil(Math.log(Math.abs(n) + 1) / Math.log(16)) || 1;
-            var v = Math.abs(n);
+            let v = Math.abs(n);
             if (v <= 0xffff) {
                 cch = 4;
             } else if (v <= 0xffffffff) {
@@ -439,9 +439,9 @@ class Str {
      */
     static getBaseName(sFileName, fStripExt)
     {
-        var sBaseName = sFileName;
+        let sBaseName = sFileName;
 
-        var i = sFileName.lastIndexOf('/');
+        let i = sFileName.lastIndexOf('/');
         if (i >= 0) sBaseName = sFileName.substr(i + 1);
 
         /*
@@ -471,8 +471,8 @@ class Str {
      */
     static getExtension(sFileName)
     {
-        var sExtension = "";
-        var i = sFileName.lastIndexOf(".");
+        let sExtension = "";
+        let i = sFileName.lastIndexOf(".");
         if (i >= 0) {
             sExtension = sFileName.substr(i + 1).toLowerCase();
         }
@@ -532,7 +532,7 @@ class Str {
      */
     static replace(sSearch, sReplace, s)
     {
-        var i = s.indexOf(sSearch);
+        let i = s.indexOf(sSearch);
         if (i >= 0) {
             s = s.substr(0, i) + sReplace + s.substr(i + sSearch.length);
         }
@@ -549,7 +549,7 @@ class Str {
      */
     static replaceAll(sSearch, sReplace, s)
     {
-        var a = {};
+        let a = {};
         a[sSearch] = sReplace;
         return Str.replaceArray(a, s);
     }
@@ -563,8 +563,8 @@ class Str {
      */
     static replaceArray(a, s)
     {
-        var sMatch = "";
-        for (var k in a) {
+        let sMatch = "";
+        for (let k in a) {
             /*
              * As noted in:
              *
@@ -595,7 +595,7 @@ class Str {
      */
     static pad(s, cch, fPadLeft)
     {
-        var sPadding = "                                        ";
+        let sPadding = "                                        ";
         return fPadLeft? (sPadding + s).slice(-cch) : (s + sPadding).slice(0, cch);
     }
 
@@ -725,7 +725,7 @@ class Str {
      */
     static stripLeadingZeros(s, fPad)
     {
-        var cch = s.length;
+        let cch = s.length;
         s = s.replace(/^0+([0-9A-F]+)$/i, "$1");
         if (fPad) s = Str.pad(s, cch, true);
         return s;
@@ -753,7 +753,7 @@ class Str {
      */
     static toASCIICode(b)
     {
-        var s;
+        let s;
         if (b != Str.ASCII.CR && b != Str.ASCII.LF) {
             s = Str.ASCIICodeMap[b];
         }

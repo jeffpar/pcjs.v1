@@ -52,9 +52,9 @@ class Usr {
      */
     static binarySearch(a, v, fnCompare)
     {
-        var left = 0;
-        var right = a.length;
-        var found = 0;
+        let left = 0;
+        let right = a.length;
+        let found = 0;
         if (fnCompare === undefined) {
             fnCompare = function(a, b)
             {
@@ -62,8 +62,8 @@ class Usr {
             };
         }
         while (left < right) {
-            var middle = (left + right) >> 1;
-            var compareResult;
+            let middle = (left + right) >> 1;
+            let compareResult;
             compareResult = fnCompare(v, a[middle]);
             if (compareResult > 0) {
                 left = middle + 1;
@@ -87,7 +87,7 @@ class Usr {
      */
     static binaryInsert(a, v, fnCompare)
     {
-        var index = Usr.binarySearch(a, v, fnCompare);
+        let index = Usr.binarySearch(a, v, fnCompare);
         if (index < 0) {
             a.splice(-(index + 1), 0, v);
         }
@@ -122,7 +122,7 @@ class Usr {
      */
     static getMonthDays(nMonth, nYear)
     {
-        var nDays = Usr.aMonthDays[nMonth - 1];
+        let nDays = Usr.aMonthDays[nMonth - 1];
         if (nDays == 28) {
             if ((nYear % 4) === 0 && ((nYear % 100) || (nYear % 400) === 0)) {
                 nDays++;
@@ -161,13 +161,13 @@ class Usr {
      */
     static formatDate(sFormat, date)
     {
-        var sDate = "";
+        let sDate = "";
         if (!date) date = new Date();
-        var iHour = date.getHours();
-        var iDay = date.getDate();
-        var iMonth = date.getMonth() + 1;
-        for (var i = 0; i < sFormat.length; i++) {
-            var ch;
+        let iHour = date.getHours();
+        let iDay = date.getDate();
+        let iMonth = date.getMonth() + 1;
+        for (let i = 0; i < sFormat.length; i++) {
+            let ch;
             switch ((ch = sFormat.charAt(i))) {
             case 'a':
                 sDate += (iHour < 12 ? "am" : "pm");
@@ -230,7 +230,7 @@ class Usr {
      *
      * Prepares a bit field definition for use with getBitField() and setBitField(); eg:
      *
-     *      var bfs = Usr.defineBitFields({num:20, count:8, btmod:1, type:3});
+     *      let bfs = Usr.defineBitFields({num:20, count:8, btmod:1, type:3});
      *
      * The above defines a set of bit fields containing four fields: num (bits 0-19), count (bits 20-27), btmod (bit 28), and type (bits 29-31).
      *
@@ -243,10 +243,10 @@ class Usr {
      */
     static defineBitFields(bfs)
     {
-        var bit = 0;
-        for (var f in bfs) {
-            var width = bfs[f];
-            var mask = ((1 << width) - 1) << bit;
+        let bit = 0;
+        for (let f in bfs) {
+            let width = bfs[f];
+            let mask = ((1 << width) - 1) << bit;
             bfs[f] = {mask: mask, shift: bit};
             bit += width;
         }
@@ -262,8 +262,8 @@ class Usr {
      */
     static initBitFields(bfs, var_args)
     {
-        var v = 0, i = 1;
-        for (var f in bfs) {
+        let v = 0, i = 1;
+        for (let f in bfs) {
             if (i >= arguments.length) break;
             v = Usr.setBitField(bfs[f], v, arguments[i++]);
         }
@@ -313,7 +313,7 @@ class Usr {
         i = i || 0;
         if (i < 0) i += a.length;
         if (i < 0) i = 0;
-        for (var n = a.length; i < n; i++) {
+        for (let n = a.length; i < n; i++) {
             if (i in a && a[i] === t) return i;
         }
         return -1;
