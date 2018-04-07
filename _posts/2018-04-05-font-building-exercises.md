@@ -13,8 +13,8 @@ virtue of hard-coded ROM font offsets that all PCjs machines were passing to the
 
 After the Video ROM is loaded, the Video component is passed an array containing two addresses:
 
-- [0]: 0x378D, the offset of the 8x8 ROM font in the ROM
-- [1]: 0x3F8D, the offset of the 8x14 ROM font in the ROM
+- \[0\]: 0x378D, the offset of the 8x8 ROM font in the ROM
+- \[1\]: 0x3F8D, the offset of the 8x14 ROM font in the ROM
 
 For example, if we want to look at the 8x8 data for the character `0` (ASCII 0x30), we can dump it as binary,
 using the PCjs Debugger:
