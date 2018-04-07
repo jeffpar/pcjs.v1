@@ -209,7 +209,7 @@ class Debugger extends Component
      */
     getNextCommand()
     {
-        var sCmd;
+        let sCmd;
         if (this.iPrevCmd > 0) {
             sCmd = this.aPrevCmds[--this.iPrevCmd];
         } else {
@@ -227,7 +227,7 @@ class Debugger extends Component
      */
     getPrevCommand()
     {
-        var sCmd = null;
+        let sCmd = null;
         if (this.iPrevCmd < this.aPrevCmds.length - 1) {
             sCmd = this.aPrevCmds[++this.iPrevCmd];
         }
@@ -263,14 +263,14 @@ class Debugger extends Component
                 this.iPrevCmd--;
             }
         }
-        var a = [];
+        let a = [];
         if (sCmd) {
             /*
              * With the introduction of breakpoint commands (ie, quoted command sequences
              * associated with a breakpoint), we can no longer perform simplistic splitting.
              *
              *      a = sCmd.split(chSep || ';');
-             *      for (var i = 0; i < a.length; i++) a[i] = Str.trim(a[i]);
+             *      for (let i = 0; i < a.length; i++) a[i] = Str.trim(a[i]);
              *
              * We may now split on semi-colons ONLY if they are outside a quoted sequence.
              *
@@ -279,8 +279,8 @@ class Debugger extends Component
              */
             sCmd = sCmd.replace(/""/g, "'");
 
-            var iPrev = 0;
-            var chQuote = null;
+            let iPrev = 0;
+            let chQuote = null;
             chSep = chSep || ';';
             /*
              * NOTE: Processing charAt() up to and INCLUDING length is not a typo; we're taking
@@ -289,8 +289,8 @@ class Debugger extends Component
              *
              * In a sense, it allows us to pretend that the string ends with a zero terminator.
              */
-            for (var i = 0; i <= sCmd.length; i++) {
-                var ch = sCmd.charAt(i);
+            for (let i = 0; i <= sCmd.length; i++) {
+                let ch = sCmd.charAt(i);
                 if (ch == '"' || ch == "'") {
                     if (!chQuote) {
                         chQuote = ch;
@@ -440,7 +440,7 @@ class Debugger extends Component
      */
     truncate(v, nBits, fUnsigned)
     {
-        var limit, vNew = v;
+        let limit, vNew = v;
         nBits = nBits || this.nBits;
 
         if (fUnsigned) {
@@ -515,11 +515,11 @@ class Debugger extends Component
     evalOps(aVals, aOps, cOps = -1)
     {
         while (cOps-- && aOps.length) {
-            var chOp = aOps.pop();
+            let chOp = aOps.pop();
             if (aVals.length < 2) return false;
-            var valNew;
-            var val2 = aVals.pop();
-            var val1 = aVals.pop();
+            let valNew;
+            let val2 = aVals.pop();
+            let val1 = aVals.pop();
             switch(chOp) {
             case '*':
                 valNew = this.evalMUL(val1, val2);
@@ -638,17 +638,17 @@ class Debugger extends Component
      */
     parseArray(asValues, iValue, iLimit, nBase, aUndefined)
     {
-        var value;
-        var sValue, sOp;
-        var fError = false;
-        var nUnary = 0;
-        var aVals = [], aOps = [];
+        let value;
+        let sValue, sOp;
+        let fError = false;
+        let nUnary = 0;
+        let aVals = [], aOps = [];
 
-        var nBasePrev = this.nBase;
+        let nBasePrev = this.nBase;
         this.nBase = nBase;
 
         while (iValue < iLimit) {
-            var v;
+            let v;
             sValue = asValues[iValue++].trim();
             sOp = (iValue < iLimit? asValues[iValue++] : "");
 
@@ -656,8 +656,8 @@ class Debugger extends Component
                 v = this.parseValue(sValue, null, aUndefined, nUnary);
             } else {
                 if (sOp == '{') {
-                    var cOpen = 1;
-                    var iStart = iValue;
+                    let cOpen = 1;
+                    let iStart = iValue;
                     while (iValue < iLimit) {
                         sValue = asValues[iValue++].trim();
                         sOp = (iValue < asValues.length? asValues[iValue++] : "");
@@ -751,7 +751,7 @@ class Debugger extends Component
 
             if (!sOp) break;
 
-            var aBinOp = (this.achGroup[0] == '<'? Debugger.aDECOpPrecedence : Debugger.aBinOpPrecedence);
+            let aBinOp = (this.achGroup[0] == '<'? Debugger.aDECOpPrecedence : Debugger.aBinOpPrecedence);
             if (!aBinOp[sOp]) {
                 fError = true;
                 break;
@@ -796,20 +796,20 @@ class Debugger extends Component
      */
     parseASCII(sExp, chDelim, nBits, cchMax)
     {
-        var i;
+        let i;
         while ((i = sExp.indexOf(chDelim)) >= 0) {
-            var v = 0;
-            var j = i + 1;
-            var cch = cchMax;
+            let v = 0;
+            let j = i + 1;
+            let cch = cchMax;
             while (j < sExp.length) {
-                var ch = sExp[j++];
+                let ch = sExp[j++];
                 if (ch == chDelim) {
                     cch = -1;
                     break;
                 }
                 if (!cch) break;
                 cch--;
-                var c = ch.charCodeAt(0);
+                let c = ch.charCodeAt(0);
                 if (nBits == 7) {
                     c &= 0x7F;
                 } else {
@@ -858,9 +858,9 @@ class Debugger extends Component
      */
     parseExpression(sExp, fQuiet)
     {
-        var value = undefined;
-        var fPrint = (fQuiet === false);
-        var aUndefined = Array.isArray(fQuiet)? fQuiet : undefined;
+        let value = undefined;
+        let fPrint = (fQuiet === false);
+        let aUndefined = Array.isArray(fQuiet)? fQuiet : undefined;
 
         if (sExp) {
 
@@ -922,11 +922,11 @@ class Debugger extends Component
              * to remove spaces entirely, because if an operator-less expression like "A B" was passed in, we would want
              * that to generate an error; if we converted it to "AB", evaluation might inadvertently succeed.
              */
-            var regExp = /({|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|\^\/|\/|\*|,,| )/;
+            let regExp = /({|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|\^\/|\/|\*|,,| )/;
             if (this.nBase != 16) {
                 sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_").replace(/\s+/g, ' ');
             }
-            var asValues = sExp.split(regExp);
+            let asValues = sExp.split(regExp);
             value = this.parseArray(asValues, 0, asValues.length, this.nBase, aUndefined);
             if (value !== undefined && fPrint) {
                 this.printValue(null, value);
@@ -948,17 +948,17 @@ class Debugger extends Component
      */
     parseReference(s)
     {
-        var a;
-        var chOpen = this.achGroup[0];
-        var chClose = this.achGroup[1];
-        var chEscape = (chOpen == '(' || chOpen == '{' || chOpen == '[')? '\\' : '';
-        var chInnerEscape = (chOpen == '['? '\\' : '');
-        var reSubExp = new RegExp(chEscape + chOpen + "([^" + chInnerEscape + chOpen + chInnerEscape + chClose + "]+)" + chEscape + chClose);
+        let a;
+        let chOpen = this.achGroup[0];
+        let chClose = this.achGroup[1];
+        let chEscape = (chOpen == '(' || chOpen == '{' || chOpen == '[')? '\\' : '';
+        let chInnerEscape = (chOpen == '['? '\\' : '');
+        let reSubExp = new RegExp(chEscape + chOpen + "([^" + chInnerEscape + chOpen + chInnerEscape + chClose + "]+)" + chEscape + chClose);
         while (a = s.match(reSubExp)) {
-            var value = this.parseExpression(a[1]);
+            let value = this.parseExpression(a[1]);
             if (value === undefined) return undefined;
-            var sSearch = chOpen + a[1] + chClose;
-            var sReplace = value != null? this.toStrBase(value) : "undefined";
+            let sSearch = chOpen + a[1] + chClose;
+            let sReplace = value != null? this.toStrBase(value) : "undefined";
             /*
              * Note that by default, the String replace() method only replaces the FIRST occurrence,
              * and there MIGHT be more than one occurrence of the expression we just parsed, so we could
@@ -997,9 +997,9 @@ class Debugger extends Component
      */
     parseSysVars(s)
     {
-        var a;
+        let a;
         while (a = s.match(/\$([a-z]+)/i)) {
-            var v = null;
+            let v = null;
             switch(a[1].toLowerCase()) {
             case "ops":
                 v = this.cOpcodes - this.cOpcodesStart;
@@ -1040,7 +1040,7 @@ class Debugger extends Component
                 value = this.evalXOR(value, -1);        // this is easier than adding an evalNOT()...
                 break;
             case 3:
-                var bit = 35;                           // simple left-to-right zero-bit-counting loop...
+                let bit = 35;                           // simple left-to-right zero-bit-counting loop...
                 while (bit >= 0 && !this.evalAND(value, Math.pow(2, bit))) bit--;
                 value = 35 - bit;
                 break;
@@ -1062,22 +1062,22 @@ class Debugger extends Component
      */
     parseValue(sValue, sName, fQuiet, nUnary = 0)
     {
-        var value;
-        var aUndefined = Array.isArray(fQuiet)? fQuiet : undefined;
+        let value;
+        let aUndefined = Array.isArray(fQuiet)? fQuiet : undefined;
 
         if (sValue != null) {
-            var iReg = this.getRegIndex(sValue);
+            let iReg = this.getRegIndex(sValue);
             if (iReg >= 0) {
                 value = this.getRegValue(iReg);
             } else {
                 value = this.getVariable(sValue);
                 if (value != null) {
-                    var sUndefined = this.getVariableFixup(sValue);
+                    let sUndefined = this.getVariableFixup(sValue);
                     if (sUndefined) {
                         if (aUndefined) {
                             aUndefined.push(sUndefined);
                         } else {
-                            var valueUndefined = this.parseExpression(sUndefined, fQuiet);
+                            let valueUndefined = this.parseExpression(sUndefined, fQuiet);
                             if (valueUndefined !== undefined) {
                                 value += valueUndefined;
                             } else {
@@ -1120,8 +1120,8 @@ class Debugger extends Component
      */
     printValue(sVar, value)
     {
-        var sValue;
-        var fDefined = false;
+        let sValue;
+        let fDefined = false;
         if (value !== undefined) {
             fDefined = true;
             if (this.nBase == 8) {
@@ -1146,7 +1146,7 @@ class Debugger extends Component
      */
     resetVariables()
     {
-        var a = this.aVariables;
+        let a = this.aVariables;
         this.aVariables = {};
         return a;
     }
@@ -1171,14 +1171,14 @@ class Debugger extends Component
      */
     printVariable(sVar)
     {
-        var cVariables = 0;
+        let cVariables = 0;
         if (this.aVariables) {
             if (sVar) {
                 return this.printValue(sVar, this.aVariables[sVar] && this.aVariables[sVar].value);
             }
-            var aVars = Object.keys(this.aVariables);
+            let aVars = Object.keys(this.aVariables);
             aVars.sort();
-            for (var i = 0; i < aVars.length; i++) {
+            for (let i = 0; i < aVars.length; i++) {
                 this.printValue(aVars[i], this.aVariables[aVars[i]].value);
                 cVariables++;
             }
@@ -1264,7 +1264,7 @@ class Debugger extends Component
      */
     toStrBase(n, nBits = 0, nBase = 0, nGrouping = 0)
     {
-        var s;
+        let s;
         switch(nBase || this.nBase) {
         case 2:
             s = Str.toBin(n, nBits > 0? nBits : 0, nGrouping);

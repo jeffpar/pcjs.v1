@@ -85,7 +85,7 @@ var cAsyncMachines = 0;
  */
 function loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass, fResolve, display, done)
 {
-    var doneLoadXML = function(sURLName, sXML, nErrorCode) {
+    let doneLoadXML = function(sURLName, sXML, nErrorCode) {
         if (nErrorCode) {
             if (!sXML) sXML = "unable to load " + sXMLFile + " (" + nErrorCode + ")";
             done(sXML, null);
@@ -117,7 +117,7 @@ function loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass, fReso
  */
 function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass, fResolve, display, done)
 {
-    var buildXML = function(sXML, sError) {
+    let buildXML = function(sXML, sError) {
         if (sError) {
             done(sError, null);
             return;
@@ -130,7 +130,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass
              */
             Component.addMachineResource(idMachine, sXMLFile, sXML);
 
-            var sURL = sXMLFile;
+            let sURL = sXMLFile;
             if (sURL && sURL.indexOf('/') < 0 && window.location.pathname.slice(-1) == '/') {
                 sURL = window.location.pathname + sURL;
             }
@@ -164,7 +164,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass
                  * replacement below, just like we do for sParms and sURL.  However, if a "class" attribute already
                  * exists, we need alter it and then zap the sClass variable.
                  */
-                var match = sXML.match(/(<machine[^>]*\sclass=)(['"])(.*?)(\2.*?>)/);
+                let match = sXML.match(/(<machine[^>]*\sclass=)(['"])(.*?)(\2.*?>)/);
                 if (match) {
                     sXML = sXML.replace(match[0], match[1] + match[2] + sClass + match[4]);
                     sClass = "";
@@ -206,7 +206,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass
          * The best I can do at this stage (assuming Web.getResource() didn't drop any error information on the floor)
          * is verify that the requested resource "looks like" valid XML (in other words, it begins with a '<').
          */
-        var xmlDoc = null;
+        let xmlDoc = null;
         if (sXML.charAt(0) == '<') {
             try {
                 /*
@@ -270,14 +270,14 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, sClass
  */
 function resolveXML(sXML, display, done)
 {
-    var matchRef;
-    var reRef = /<([a-z]+)\s+ref="(.*?)"(.*?)\/>/g;
+    let matchRef;
+    let reRef = /<([a-z]+)\s+ref="(.*?)"(.*?)\/>/g;
 
     if ((matchRef = reRef.exec(sXML))) {
 
-        var sRefFile = matchRef[2];
+        let sRefFile = matchRef[2];
 
-        var doneReadXML = function(sURLName, sXMLRef, nErrorCode) {
+        let doneReadXML = function(sURLName, sXMLRef, nErrorCode) {
             if (nErrorCode || !sXMLRef) {
                 done(sXML, "unable to resolve XML reference: " + matchRef[0] + " (" + nErrorCode + ")");
                 return;
@@ -287,16 +287,16 @@ function resolveXML(sXML, display, done)
              * into the "referred" XML tag; attributes that don't exist in the referred tag should be
              * appended, and attributes that DO exist should be overwritten.
              */
-            var sRefAttrs = matchRef[3];
+            let sRefAttrs = matchRef[3];
             if (sRefAttrs) {
-                var aXMLRefTag = sXMLRef.match(new RegExp("<" + matchRef[1] + "[^>]*>"));
+                let aXMLRefTag = sXMLRef.match(new RegExp("<" + matchRef[1] + "[^>]*>"));
                 if (aXMLRefTag) {
-                    var sXMLNewTag = aXMLRefTag[0];
+                    let sXMLNewTag = aXMLRefTag[0];
                     /*
                      * Iterate over all the attributes in the "referring" XML tag (sRefAttrs)
                      */
-                    var matchAttr;
-                    var reAttr = /( [a-z]+=)(['"])(.*?)\2/gi;
+                    let matchAttr;
+                    let reAttr = /( [a-z]+=)(['"])(.*?)\2/gi;
                     while ((matchAttr = reAttr.exec(sRefAttrs))) {
                         if (sXMLNewTag.toLowerCase().indexOf(matchAttr[1].toLowerCase()) < 0) {
                             /*
@@ -358,31 +358,31 @@ function resolveXML(sXML, display, done)
  */
 function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFile, sParms, sClass)
 {
-    var eMachine, eWarning, fSuccess = true;
+    let eMachine, eWarning, fSuccess = true;
 
     if (!sXMLFile) {
         sXMLFile = "machine.xml";
         if (!sXSLFile) sXSLFile = "components.xsl";
     }
-    
+
     cAsyncMachines++;
     Component.addMachine(idMachine);
 
-    var doneMachine = function() {
+    let doneMachine = function() {
         Component.assert(cAsyncMachines > 0);
         if (!--cAsyncMachines) {
             if (fAsync) Web.enablePageEvents(true);
         }
     };
 
-    var displayError = function(sError) {
+    let displayError = function(sError) {
         Component.log(sError);
         displayMessage("Error: " + sError);
         if (fSuccess) doneMachine();
         fSuccess = false;
     };
 
-    var displayMessage = function(sMessage) {
+    let displayMessage = function(sMessage) {
         if (eWarning === undefined) {
             /*
              * Our MarkOut module (in convertMDMachineLinks()) creates machine containers that look like:
@@ -396,7 +396,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
              * Note that it is the HTMLOut module (in processMachines()) that ultimately decides which scripts to
              * include and then generates the embedXXX() call.
              */
-            var aeWarning = (eMachine && Component.getElementsByClass(eMachine, "machine-warning"));
+            let aeWarning = (eMachine && Component.getElementsByClass(eMachine, "machine-warning"));
             eWarning = (aeWarning && aeWarning[0]) || eMachine;
         }
         if (eWarning) eWarning.innerHTML = Str.escapeHTML(sMessage);
@@ -409,10 +409,10 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
             /*
              * If we have a 'css' resource, add it to the page first.
              */
-            var css;
+            let css;
             if (typeof resources == "object" && (css = resources['css'])) {
-                var head = document.head || document.getElementsByTagName('head')[0];
-                var style = document.createElement('style');
+                let head = document.head || document.getElementsByTagName('head')[0];
+                let style = document.createElement('style');
                 style.type = 'text/css';
                 // noinspection JSDeprecatedSymbols
                 if (style.styleSheet) {
@@ -432,7 +432,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  * Third-party sites that don't use the PCjs server will ALWAYS want to specify a fully-qualified
                  * path to the XSL file, unless they choose to mirror our folder structure.
                  */
-                var sAppFolder = sAppClass;
+                let sAppFolder = sAppClass;
                 if (DEBUG || !sVersion) {
                     if (sAppClass != "c1pjs") sAppFolder = "shared";
                     sXSLFile = "/modules/" + sAppFolder + "/templates/components.xsl";
@@ -442,7 +442,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                 }
             }
 
-            var processXML = function(sXML, xml) {
+            let processXML = function(sXML, xml) {
                 if (!xml) {
                     displayError(sXML);
                     return;
@@ -453,13 +453,13 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  * we don't need this code in COMPILED (non-DEBUG) releases, because APPVERSION is hard-coded into them.
                  */
                 if (!COMPILED) {
-                    var aMatch = sXML.match(/<\?xml-stylesheet[^>]* href=(['"])[^'"]*?\/([0-9.]*)\/([^'"]*)\1/);
+                    let aMatch = sXML.match(/<\?xml-stylesheet[^>]* href=(['"])[^'"]*?\/([0-9.]*)\/([^'"]*)\1/);
                     if (aMatch) {
                         XMLVERSION = aMatch[2];
                     }
                 }
 
-                var transformXML = function(sXSL, xsl) {
+                let transformXML = function(sXSL, xsl) {
                     if (!xsl) {
                         displayError(sXSL);
                         return;
@@ -467,8 +467,8 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
 
                     /*
                      * Record the XSL file, in case someone wants to save the entire machine later.
-                     * 
-                     * NOTE: sXSLFile will never be undefined by this point, but apparently the Closure Compiler doesn't realize that.  
+                     *
+                     * NOTE: sXSLFile will never be undefined by this point, but apparently the Closure Compiler doesn't realize that.
                      */
                     Component.addMachineResource(idMachine, sXSLFile || "", sXSL);
 
@@ -493,7 +493,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                      * we want to continue supporting older Internet Explorer browsers (ie, back to IE9).
                      */
                     if (window.ActiveXObject || 'ActiveXObject' in window) {        // second test is required for IE11 on Windows 8.1
-                        var sFragment = xml['transformNode'](xsl);
+                        let sFragment = xml['transformNode'](xsl);
                         if (sFragment) {
                             eMachine.outerHTML = sFragment;
                             doneMachine();
@@ -502,14 +502,14 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                         }
                     }
                     else if (document.implementation && document.implementation.createDocument) {
-                        var xsltProcessor = new XSLTProcessor();
+                        let xsltProcessor = new XSLTProcessor();
                         xsltProcessor['importStylesheet'](xsl);
-                        var eFragment = xsltProcessor['transformToFragment'](xml, document);
+                        let eFragment = xsltProcessor['transformToFragment'](xml, document);
                         if (eFragment) {
                             /*
                              * This fails in Microsoft Edge...
                              *
-                            var machine = eFragment.getElementById(idMachine);
+                            let machine = eFragment.getElementById(idMachine);
                             if (!machine) {
                                 displayError("machine generation failed: " + idMachine);
                             } else
@@ -547,7 +547,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                     }
                 };
                 /*
-                 * NOTE: sXSLFile will never be undefined by this point, but apparently the Closure Compiler doesn't realize that.  
+                 * NOTE: sXSLFile will never be undefined by this point, but apparently the Closure Compiler doesn't realize that.
                  */
                 loadXML(sXSLFile || "", "", sAppName, sAppClass, "", "", false, displayMessage, transformXML);
             };
@@ -683,11 +683,11 @@ function commandMachine(control, fSingle, idMachine, sComponent, sCommand, sValu
         return false;
     }
     if (sComponent) {
-        var component = Component.getComponentByType(sComponent, idMachine + ".machine");
+        let component = Component.getComponentByType(sComponent, idMachine + ".machine");
         if (component) {
-            var exports = component['exports'];
+            let exports = component['exports'];
             if (exports) {
-                var fnCommand = exports[sCommand];
+                let fnCommand = exports[sCommand];
                 if (fnCommand) {
                     if (fnCommand.call(component, sValue)) {
                         if (fSingle) control.disabled = true;

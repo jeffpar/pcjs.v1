@@ -228,7 +228,7 @@ class DebuggerX86 extends Debugger {
              *      pcx86('h')
              *      ...
              */
-            var dbg = this;
+            let dbg = this;
             if (window) {
                 if (window[PCX86.APPCLASS] === undefined) {
                     window[PCX86.APPCLASS] = function(s) { return dbg.doCommands(s); };
@@ -265,7 +265,7 @@ class DebuggerX86 extends Debugger {
         /*
          * Re-initialize Debugger message and command support as needed
          */
-        var sMessages = cmp.getMachineParm('messages');
+        let sMessages = cmp.getMachineParm('messages');
         if (sMessages) this.messageInit(sMessages);
         this.sCommandsInit = cmp.getMachineParm('commands') || this.sCommandsInit;
 
@@ -331,15 +331,15 @@ class DebuggerX86 extends Debugger {
      */
     addSegmentInfo(dbgAddr, nSegment, sel, fCode, fPrint)
     {
-        var sModule = this.getSZ(dbgAddr);
-        var seg = this.getSegment(sel);
-        var len = seg? seg.limit + 1 : 0;
-        var sSection = (fCode? "_CODE" : "_DATA") + Str.toHex(nSegment, 2);
+        let sModule = this.getSZ(dbgAddr);
+        let seg = this.getSegment(sel);
+        let len = seg? seg.limit + 1 : 0;
+        let sSection = (fCode? "_CODE" : "_DATA") + Str.toHex(nSegment, 2);
         if (fPrint && this.messageEnabled(Messages.MEM)) {
             this.message(sModule + ' ' + (fCode? "code" : "data") + '(' + Str.toHex(nSegment, 4) + ")=#" + Str.toHex(sel, 4) + " len " + Str.toHex(len));
         }
-        var off = 0;
-        var aSymbols = this.findModuleInfo(sModule, nSegment);
+        let off = 0;
+        let aSymbols = this.findModuleInfo(sModule, nSegment);
         aSymbols[sModule + sSection] = off;
         this.addSymbols(sModule, nSegment, sel, off, null, len, aSymbols);
     }
@@ -355,7 +355,7 @@ class DebuggerX86 extends Debugger {
      */
     removeSegmentInfo(sel, fPrint)
     {
-        var sModuleRemoved = this.removeSymbols(null, sel);
+        let sModuleRemoved = this.removeSymbols(null, sel);
         if (fPrint && this.messageEnabled(Messages.MEM)) {
             if (sModuleRemoved) {
                 this.message(sModuleRemoved + " #" + Str.toHex(sel, 4) + " removed");
@@ -386,21 +386,21 @@ class DebuggerX86 extends Debugger {
      */
     addSectionInfo(dbgAddr, fCode, fPrint)
     {
-        var nSegment = this.getShort(dbgAddr, 2);
-        var sel = this.getShort(dbgAddr, 2);
-        var off = this.getLong(dbgAddr, 4);
-        var len = this.getLong(dbgAddr, 4);
-        var dbgAddrModule = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
-        var dbgAddrParent = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
+        let nSegment = this.getShort(dbgAddr, 2);
+        let sel = this.getShort(dbgAddr, 2);
+        let off = this.getLong(dbgAddr, 4);
+        let len = this.getLong(dbgAddr, 4);
+        let dbgAddrModule = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
+        let dbgAddrParent = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
         // sel = this.getShort(dbgAddr, 2) || sel;
-        var sParent = this.getSZ(dbgAddrParent).toUpperCase();
-        var sModule = this.getSZ(dbgAddrModule).toUpperCase();
+        let sParent = this.getSZ(dbgAddrParent).toUpperCase();
+        let sModule = this.getSZ(dbgAddrModule).toUpperCase();
         if (sParent == sModule) {
             sParent = "";
         } else {
             sParent += '!';
         }
-        var sSection = (fCode? "_CODE" : "_DATA") + Str.toHex(nSegment, 2);
+        let sSection = (fCode? "_CODE" : "_DATA") + Str.toHex(nSegment, 2);
         if (fPrint && this.messageEnabled(Messages.MEM)) {
             /*
              * Mimics WDEB386 output, except that WDEB386 only displays a linear address, omitting the selector.
@@ -411,7 +411,7 @@ class DebuggerX86 extends Debugger {
          * TODO: Add support for 32-bit symbols; findModuleInfo() relies on Disk.getModuleInfo(), and the Disk
          * component doesn't yet know how to parse 32-bit executables.
          */
-        var aSymbols = this.findModuleInfo(sModule, nSegment);
+        let aSymbols = this.findModuleInfo(sModule, nSegment);
         aSymbols[sModule + sSection] = off;
         this.addSymbols(sModule, nSegment, sel, off, null, len, aSymbols);
     }
@@ -428,8 +428,8 @@ class DebuggerX86 extends Debugger {
      */
     removeSectionInfo(nSegment, dbgAddr, fPrint)
     {
-        var sModule = this.getSZ(dbgAddr).toUpperCase();
-        var sModuleRemoved = this.removeSymbols(sModule, nSegment);
+        let sModule = this.getSZ(dbgAddr).toUpperCase();
+        let sModuleRemoved = this.removeSymbols(sModule, nSegment);
         if (fPrint && this.messageEnabled(Messages.MEM)) {
             if (sModuleRemoved) {
                 this.message(sModule + ' ' + Str.toHex(nSegment, 4) + " removed");
@@ -471,14 +471,14 @@ class DebuggerX86 extends Debugger {
      */
     intWindowsCallBack(addr)
     {
-        var cpu = this.cpu;
+        let cpu = this.cpu;
 
         if (this.fWinDbg != null && cpu.regEAX == 0x002A002A) {
 
-            var DX = cpu.regEDX & 0xffff;
-            var SI = cpu.regESI & 0xffff;
-            var dbgAddr = this.newAddr(cpu.getSP() + 0x0C, cpu.getSS());
-            var EAX = this.getLong(dbgAddr);
+            let DX = cpu.regEDX & 0xffff;
+            let SI = cpu.regESI & 0xffff;
+            let dbgAddr = this.newAddr(cpu.getSP() + 0x0C, cpu.getSS());
+            let EAX = this.getLong(dbgAddr);
 
             switch(EAX) {
             case Interrupts.WINDBG.LOADSEG32:
@@ -517,15 +517,15 @@ class DebuggerX86 extends Debugger {
      */
     intWindowsDebugger(addr)
     {
-        var dbgAddr;
-        var cpu = this.cpu;
-        var AX = cpu.regEAX & 0xffff;
-        var BX = cpu.regEBX & 0xffff;
-        var CX = cpu.regECX & 0xffff;
-        var DX = cpu.regEDX & 0xffff;
-        var SI = cpu.regESI & 0xffff;
-        var DI = cpu.regEDI & 0xffff;
-        var ES = cpu.segES.sel;
+        let dbgAddr;
+        let cpu = this.cpu;
+        let AX = cpu.regEAX & 0xffff;
+        let BX = cpu.regEBX & 0xffff;
+        let CX = cpu.regECX & 0xffff;
+        let DX = cpu.regEDX & 0xffff;
+        let SI = cpu.regESI & 0xffff;
+        let DI = cpu.regEDI & 0xffff;
+        let ES = cpu.segES.sel;
 
         if (this.fWinDbg == null) {
             if (AX == Interrupts.WINDBG.IS_LOADED) {
@@ -693,14 +693,14 @@ class DebuggerX86 extends Debugger {
      */
     intWindowsDebuggerRM(addr)
     {
-        var cpu = this.cpu;
-        var AL = cpu.regEAX & 0xff;
-        var AH = (cpu.regEAX >> 8) & 0xff;
-        var BX = cpu.regEBX & 0xffff;
-        var CX = cpu.regECX & 0xffff;
-        var DX = cpu.regEDX & 0xffff;
-        var DI = cpu.regEDI & 0xffff;
-        var ES = cpu.segES.sel;
+        let cpu = this.cpu;
+        let AL = cpu.regEAX & 0xff;
+        let AH = (cpu.regEAX >> 8) & 0xff;
+        let BX = cpu.regEBX & 0xffff;
+        let CX = cpu.regECX & 0xffff;
+        let DX = cpu.regEDX & 0xffff;
+        let DI = cpu.regEDI & 0xffff;
+        let ES = cpu.segES.sel;
 
         if (this.fWinDbgRM == null) {
             if (AH == Interrupts.WINDBGRM.IS_LOADED) {
@@ -762,7 +762,7 @@ class DebuggerX86 extends Debugger {
                  * Use our fancy new "call break" mechanism to obtain a special address that will
                  * trap all calls, routing control to the specified function (callWindowsDebuggerPMInit).
                  */
-                var a = cpu.segCS.addCallBreak(this.callWindowsDebuggerPMInit.bind(this));
+                let a = cpu.segCS.addCallBreak(this.callWindowsDebuggerPMInit.bind(this));
                 if (a) {
                     cpu.regEDI = a[0];              // ES:EDI receives the "call break" address
                     cpu.setES(a[1]);
@@ -876,8 +876,8 @@ class DebuggerX86 extends Debugger {
      */
     callWindowsDebuggerPMInit()
     {
-        var cpu = this.cpu;
-        var AL = cpu.regEAX & 0xff;
+        let cpu = this.cpu;
+        let AL = cpu.regEAX & 0xff;
         if (MAXDEBUG) this.println("INT 0x68 callback: " + Str.toHexByte(AL));
         if (AL == 5) {
             cpu.regECX = cpu.regESI = 0;                // our in-machine debugger footprint is zero
@@ -898,7 +898,7 @@ class DebuggerX86 extends Debugger {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var dbg = this;
+        let dbg = this;
         switch (sBinding) {
 
         case "debugInput":
@@ -910,7 +910,7 @@ class DebuggerX86 extends Debugger {
              *      controlInput.focus();
              */
             control.onkeydown = function onKeyDownDebugInput(event) {
-                var sCmd;
+                let sCmd;
                 if (event.keyCode == Keys.KEYCODE.CR) {
                     sCmd = dbg.controlDebug.value;
                     dbg.controlDebug.value = "";
@@ -927,7 +927,7 @@ class DebuggerX86 extends Debugger {
                         sCmd = dbg.getNextCommand();
                     }
                     if (sCmd != null) {
-                        var cch = sCmd.length;
+                        let cch = sCmd.length;
                         dbg.controlDebug.value = sCmd;
                         dbg.controlDebug.setSelectionRange(cch, cch);
                     }
@@ -943,7 +943,7 @@ class DebuggerX86 extends Debugger {
                 500, 100,
                 function onClickDebugEnter(fRepeat) {
                     if (dbg.controlDebug) {
-                        var sCommands = dbg.controlDebug.value;
+                        let sCommands = dbg.controlDebug.value;
                         dbg.controlDebug.value = "";
                         dbg.doCommands(sCommands, true);
                         return true;
@@ -960,7 +960,7 @@ class DebuggerX86 extends Debugger {
                 control,
                 500, 100,
                 function onClickStep(fRepeat) {
-                    var fCompleted = false;
+                    let fCompleted = false;
                     if (!dbg.isBusy(true)) {
                         dbg.setBusy(true);
                         fCompleted = dbg.stepCPU(fRepeat? 1 : 0);
@@ -1025,7 +1025,7 @@ class DebuggerX86 extends Debugger {
      */
     getSegment(sel, type)
     {
-        var typeDefault = this.getAddressType();
+        let typeDefault = this.getAddressType();
 
         if (!type) type = typeDefault;
 
@@ -1044,7 +1044,7 @@ class DebuggerX86 extends Debugger {
              */
             if (this.nSuppressBreaks && type == DebuggerX86.ADDRTYPE.PROT || !this.segDebugger) return null;
         }
-        var seg = this.segDebugger;
+        let seg = this.segDebugger;
         if (type != DebuggerX86.ADDRTYPE.PROT) {
             seg.loadReal(sel);
             seg.limit = 0xffff;         // although an ACTUAL real-mode segment load would not modify the limit,
@@ -1072,14 +1072,14 @@ class DebuggerX86 extends Debugger {
          * whose linear address must always be (re)calculated based on current machine state (mode, active
          * descriptor tables, etc).
          */
-        var addr = dbgAddr && dbgAddr.addr;
+        let addr = dbgAddr && dbgAddr.addr;
         if (addr == null) {
             addr = X86.ADDR_INVALID;
             if (dbgAddr) {
                 /*
                  * TODO: We should try to cache the seg inside dbgAddr, to avoid unnecessary calls to getSegment().
                  */
-                var seg = this.getSegment(dbgAddr.sel, dbgAddr.type);
+                let seg = this.getSegment(dbgAddr.sel, dbgAddr.type);
                 if (seg) {
                     if (!fWrite) {
                         addr = seg.checkReadDebugger(dbgAddr.off || 0, nb || 1);
@@ -1105,8 +1105,8 @@ class DebuggerX86 extends Debugger {
      */
     getByte(dbgAddr, inc)
     {
-        var b = 0xff;
-        var addr = this.getAddr(dbgAddr, false, 1);
+        let b = 0xff;
+        let addr = this.getAddr(dbgAddr, false, 1);
         if (addr !== X86.ADDR_INVALID) {
             /*
              * TODO: Determine what we should do about the fact that we're masking any error from probeAddr()
@@ -1140,8 +1140,8 @@ class DebuggerX86 extends Debugger {
      */
     getShort(dbgAddr, inc)
     {
-        var w = 0xffff;
-        var addr = this.getAddr(dbgAddr, false, 2);
+        let w = 0xffff;
+        let addr = this.getAddr(dbgAddr, false, 2);
         if (addr !== X86.ADDR_INVALID) {
             /*
              * TODO: Determine what we should do about the fact that we're masking any error from probeAddr()
@@ -1162,8 +1162,8 @@ class DebuggerX86 extends Debugger {
      */
     getLong(dbgAddr, inc)
     {
-        var l = -1;
-        var addr = this.getAddr(dbgAddr, false, 4);
+        let l = -1;
+        let addr = this.getAddr(dbgAddr, false, 4);
         if (addr !== X86.ADDR_INVALID) {
             /*
              * TODO: Determine what we should do about the fact that we're masking any error from probeAddr()
@@ -1190,7 +1190,7 @@ class DebuggerX86 extends Debugger {
      */
     setByte(dbgAddr, b, inc, fNoUpdate)
     {
-        var addr = this.getAddr(dbgAddr, true, 1);
+        let addr = this.getAddr(dbgAddr, true, 1);
         if (addr !== X86.ADDR_INVALID) {
             if (dbgAddr.type != DebuggerX86.ADDRTYPE.PHYSICAL) {
                 this.cpu.setByte(addr, b);
@@ -1217,7 +1217,7 @@ class DebuggerX86 extends Debugger {
      */
     setShort(dbgAddr, w, inc)
     {
-        var addr = this.getAddr(dbgAddr, true, 2);
+        let addr = this.getAddr(dbgAddr, true, 2);
         if (addr !== X86.ADDR_INVALID) {
             if (dbgAddr.type != DebuggerX86.ADDRTYPE.PHYSICAL) {
                 this.cpu.setShort(addr, w);
@@ -1257,7 +1257,7 @@ class DebuggerX86 extends Debugger {
      */
     getAddrPrefix(dbgAddr)
     {
-        var ch;
+        let ch;
 
         switch (dbgAddr.type) {
         case DebuggerX86.ADDRTYPE.REAL:
@@ -1348,9 +1348,9 @@ class DebuggerX86 extends Debugger {
     checkLimit(dbgAddr, fUpdate)
     {
         if (dbgAddr.sel != null) {
-            var seg = this.getSegment(dbgAddr.sel, dbgAddr.type);
+            let seg = this.getSegment(dbgAddr.sel, dbgAddr.type);
             if (seg) {
-                var off = dbgAddr.off & seg.maskAddr;
+                let off = dbgAddr.off & seg.maskAddr;
                 if (!seg.fExpDown) {
                     if ((off >>> 0) >= seg.offMax) {
                         return false;
@@ -1402,18 +1402,18 @@ class DebuggerX86 extends Debugger {
      */
     parseAddr(sAddr, fCode, fNoChecks, fQuiet)
     {
-        var dbgAddr;
-        var dbgAddrNext = (fCode? this.dbgAddrNextCode : this.dbgAddrNextData);
+        let dbgAddr;
+        let dbgAddrNext = (fCode? this.dbgAddrNextCode : this.dbgAddrNextData);
 
-        var type = fNoChecks? DebuggerX86.ADDRTYPE.NONE : dbgAddrNext.type;
-        var off = dbgAddrNext.off, sel = dbgAddrNext.sel, addr = dbgAddrNext.addr;
+        let type = fNoChecks? DebuggerX86.ADDRTYPE.NONE : dbgAddrNext.type;
+        let off = dbgAddrNext.off, sel = dbgAddrNext.sel, addr = dbgAddrNext.addr;
 
         if (sAddr !== undefined) {
 
             sAddr = this.parseReference(sAddr);
 
-            var ch = sAddr.charAt(0);
-            var iColon = sAddr.indexOf(':');
+            let ch = sAddr.charAt(0);
+            let iColon = sAddr.indexOf(':');
 
             switch(ch) {
             case '&':
@@ -1482,7 +1482,7 @@ class DebuggerX86 extends Debugger {
     parseAddrOptions(dbgAddr, sOptions)
     {
         if (sOptions) {
-            var a = sOptions.match(/(['"])(.*?)\1/);
+            let a = sOptions.match(/(['"])(.*?)\1/);
             if (a) {
                 dbgAddr.aCmds = this.parseCommand(dbgAddr.sCmd = a[2]);
             }
@@ -1501,7 +1501,7 @@ class DebuggerX86 extends Debugger {
      */
     parseAddrReference(s, sAddr)
     {
-        var dbgAddr = this.parseAddr(sAddr);
+        let dbgAddr = this.parseAddr(sAddr);
         return s.replace('[' + sAddr + ']', dbgAddr? Str.toHex(this.getWord(dbgAddr), dbgAddr.fData32? 8 : 4) : "undefined");
     }
 
@@ -1553,7 +1553,7 @@ class DebuggerX86 extends Debugger {
      */
     toHexAddr(dbgAddr)
     {
-        var ch = this.getAddrPrefix(dbgAddr);
+        let ch = this.getAddrPrefix(dbgAddr);
         /*
          * TODO: Revisit the decision to check sel == null; I would rather see these decisions based on type.
          */
@@ -1574,10 +1574,10 @@ class DebuggerX86 extends Debugger {
      */
     getSZ(dbgAddr, cchMax)
     {
-        var s = "";
+        let s = "";
         cchMax = cchMax || 256;
         while (s.length < cchMax) {
-            var b = this.getByte(dbgAddr, 1);
+            let b = this.getByte(dbgAddr, 1);
             if (!b || b == 0x24 || b >= 127) break;
             s += (b >= 32? String.fromCharCode(b) : '.');
         }
@@ -1592,14 +1592,14 @@ class DebuggerX86 extends Debugger {
      */
     dumpBackTrack(asArgs)
     {
-        var sInfo = "no information";
+        let sInfo = "no information";
         if (BACKTRACK) {
-            var sAddr = asArgs[0];
-            var dbgAddr = this.parseAddr(sAddr, true, true, true);
+            let sAddr = asArgs[0];
+            let dbgAddr = this.parseAddr(sAddr, true, true, true);
             if (dbgAddr) {
-                var addr = this.getAddr(dbgAddr);
+                let addr = this.getAddr(dbgAddr);
                 if (dbgAddr.type != DebuggerX86.ADDRTYPE.PHYSICAL) {
-                    var pageInfo = this.getPageInfo(addr);
+                    let pageInfo = this.getPageInfo(addr);
                     if (pageInfo) {
                         dbgAddr.addr = pageInfo.addrPhys;
                         dbgAddr.type = DebuggerX86.ADDRTYPE.PHYSICAL;
@@ -1607,13 +1607,13 @@ class DebuggerX86 extends Debugger {
                 }
                 sInfo = this.toHexAddr(dbgAddr) + ": " + (this.bus.getSymbol(addr, true) || sInfo);
             } else {
-                var component, componentPrev = null;
+                let component, componentPrev = null;
                 while (component = this.cmp.getMachineComponent("Disk", componentPrev)) {
-                    var aInfo = component.getSymbolInfo(sAddr);
+                    let aInfo = component.getSymbolInfo(sAddr);
                     if (aInfo.length) {
                         sInfo = "";
-                        for (var i in aInfo) {
-                            var a = aInfo[i];
+                        for (let i in aInfo) {
+                            let a = aInfo[i];
                             if (sInfo) sInfo += '\n';
                             sInfo += a[0] + ": " + a[1] + ' ' + Str.toHex(a[2], 4) + ':' + Str.toHex(a[3], 4) + " len " + Str.toHexWord(a[4]);
                         }
@@ -1635,7 +1635,7 @@ class DebuggerX86 extends Debugger {
      */
     dumpBlocks(aBlocks, sAddr, fLinear)
     {
-        var addr = 0, i = 0, n = aBlocks.length;
+        let addr = 0, i = 0, n = aBlocks.length;
 
         if (sAddr) {
             addr = this.getAddr(this.parseAddr(sAddr));
@@ -1650,9 +1650,9 @@ class DebuggerX86 extends Debugger {
         this.println("blockid   " + (fLinear? "linear  " : "physical") + "   blockaddr   used    size    type");
         this.println("--------  ---------  ----------  ------  ------  ----");
 
-        var typePrev = -1, cPrev = 0;
+        let typePrev = -1, cPrev = 0;
         while (n--) {
-            var block = aBlocks[i];
+            let block = aBlocks[i];
             /*
              * We need to replicate a portion of what probeAddr() does, which is to "peek" at the
              * underlying physical block of any UNPAGED block.  An UNPAGED block doesn't imply
@@ -1671,7 +1671,7 @@ class DebuggerX86 extends Debugger {
                 if (!cPrev++) this.println("...");
             } else {
                 typePrev = block.type;
-                var sType = Memory.TYPE.NAMES[typePrev];
+                let sType = Memory.TYPE.NAMES[typePrev];
                 if (typePrev == Memory.TYPE.PAGED) {
                     block = block.blockPhys;
                     this.assert(block);
@@ -1713,8 +1713,8 @@ class DebuggerX86 extends Debugger {
      */
     dumpDOS(asArgs)
     {
-        var mcb;
-        var sMCB = asArgs[0];
+        let mcb;
+        let sMCB = asArgs[0];
         if (sMCB) {
             mcb = this.parseValue(sMCB);
         }
@@ -1724,10 +1724,10 @@ class DebuggerX86 extends Debugger {
         }
         this.println("dumpMCB(" + Str.toHexWord(mcb) + ')');
         while (mcb) {
-            var dbgAddr = this.newAddr(0, mcb);
-            var bSig = this.getByte(dbgAddr, 1);
-            var wPID = this.getShort(dbgAddr, 2);
-            var wParas = this.getShort(dbgAddr, 5);
+            let dbgAddr = this.newAddr(0, mcb);
+            let bSig = this.getByte(dbgAddr, 1);
+            let wPID = this.getShort(dbgAddr, 2);
+            let wParas = this.getShort(dbgAddr, 5);
             if (bSig != 0x4D && bSig != 0x5A) break;
             this.println(this.toHexOffset(0, mcb) + ": '" + String.fromCharCode(bSig) + "' PID=" + Str.toHexWord(wPID) + " LEN=" + Str.toHexWord(wParas) + ' "' + this.getSZ(dbgAddr, 8) + '"');
             mcb += 1 + wParas;
@@ -1744,26 +1744,26 @@ class DebuggerX86 extends Debugger {
      */
     dumpIDT(asArgs)
     {
-        var sIDT = asArgs[0];
+        let sIDT = asArgs[0];
 
         if (!sIDT) {
             this.println("no IDT vector");
             return;
         }
 
-        var nIDT = this.parseValue(sIDT);
+        let nIDT = this.parseValue(sIDT);
         if (nIDT === undefined || nIDT < 0 || nIDT > 255) {
             this.println("invalid vector: " + sIDT);
             return;
         }
 
-        var ch = '&', fProt = this.cpu.isProtMode(), fAddr32 = false;
-        var addrIDT = this.cpu.addrIDT + (nIDT << (fProt? 3 : 2));
-        var off = this.cpu.getShort(addrIDT + X86.DESC.LIMIT.OFFSET);
-        var sel = this.cpu.getShort(addrIDT + X86.DESC.BASE.OFFSET);
+        let ch = '&', fProt = this.cpu.isProtMode(), fAddr32 = false;
+        let addrIDT = this.cpu.addrIDT + (nIDT << (fProt? 3 : 2));
+        let off = this.cpu.getShort(addrIDT + X86.DESC.LIMIT.OFFSET);
+        let sel = this.cpu.getShort(addrIDT + X86.DESC.BASE.OFFSET);
         if (fProt) {
             ch = '#';
-            var acc = this.cpu.getShort(addrIDT + X86.DESC.ACC.OFFSET);
+            let acc = this.cpu.getShort(addrIDT + X86.DESC.ACC.OFFSET);
             if (acc & X86.DESC.ACC.TYPE.NONSEG_386) {
                 fAddr32 = true;
                 off |= this.cpu.getShort(addrIDT + X86.DESC.EXT.OFFSET) << 16;
@@ -1797,7 +1797,7 @@ class DebuggerX86 extends Debugger {
      */
     getPageEntry(addrPE, lPE, fPTE)
     {
-        var s = Str.toHex(addrPE) + ' ' + Str.toHex(lPE) + ' ';
+        let s = Str.toHex(addrPE) + ' ' + Str.toHex(lPE) + ' ';
         s += (fPTE && (lPE & X86.PTE.DIRTY))? 'D' : '-';
         s += (lPE & X86.PTE.ACCESSED)? 'A' : '-';
         s += (lPE & X86.PTE.USER)? 'U' : 'S';
@@ -1815,9 +1815,9 @@ class DebuggerX86 extends Debugger {
      */
     getPageInfo(addr)
     {
-        var pageInfo = null;
+        let pageInfo = null;
         if (I386 && this.cpu.model >= X86.MODEL_80386) {
-            var bus = this.bus;
+            let bus = this.bus;
             /*
              * Here begins code remarkably similar to mapPageBlock() (with fSuppress set).
              */
@@ -1831,7 +1831,7 @@ class DebuggerX86 extends Debugger {
             pageInfo.blockPTE = bus.aMemBlocks[(pageInfo.addrPTE & bus.nBusMask) >>> bus.nBlockShift];
             pageInfo.lPTE = pageInfo.blockPTE.readLong(pageInfo.offPTE);
             pageInfo.addrPhys = (pageInfo.lPTE & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);
-            //var blockPhys = bus.aMemBlocks[(addrPhys & bus.nBusMask) >>> bus.nBlockShift];
+            //let blockPhys = bus.aMemBlocks[(addrPhys & bus.nBusMask) >>> bus.nBlockShift];
         }
         return pageInfo;
     }
@@ -1846,19 +1846,19 @@ class DebuggerX86 extends Debugger {
      */
     dumpPage(asArgs)
     {
-        var sAddr = asArgs[0];
+        let sAddr = asArgs[0];
         if (!sAddr) {
             this.println("missing address");
             return;
         }
 
-        var addr = this.getAddr(this.parseAddr(sAddr));
+        let addr = this.getAddr(this.parseAddr(sAddr));
         if (addr === X86.ADDR_INVALID) {
             this.println("invalid address: " + sAddr);
             return;
         }
 
-        var pageInfo = this.getPageInfo(addr);
+        let pageInfo = this.getPageInfo(addr);
         if (!pageInfo) {
             this.println("unsupported operation");
             return;
@@ -1866,7 +1866,7 @@ class DebuggerX86 extends Debugger {
 
         this.println("linear     PDE addr   PDE             PTE addr   PTE             physical" );
         this.println("---------  ---------- --------        ---------- --------        ----------");
-        var s = '%' + Str.toHex(addr);
+        let s = '%' + Str.toHex(addr);
         s += "  %%" + this.getPageEntry(pageInfo.addrPDE, pageInfo.lPDE);
         s += "  %%" + this.getPageEntry(pageInfo.addrPTE, pageInfo.lPTE, true);
         s += "  %%" + Str.toHex(pageInfo.addrPhys);
@@ -1883,25 +1883,25 @@ class DebuggerX86 extends Debugger {
      */
     dumpSel(asArgs)
     {
-        var sSel = asArgs[0];
+        let sSel = asArgs[0];
 
         if (!sSel) {
             this.println("no selector");
             return;
         }
 
-        var sel = this.parseValue(sSel);
+        let sel = this.parseValue(sSel);
         if (sel === undefined) {
             this.println("invalid selector: " + sSel);
             return;
         }
 
-        var seg = this.getSegment(sel, DebuggerX86.ADDRTYPE.PROT);
+        let seg = this.getSegment(sel, DebuggerX86.ADDRTYPE.PROT);
         this.println("dumpSel(" + Str.toHexWord(seg? seg.sel : sel) + "): %" + Str.toHex(seg? seg.addrDesc : null, this.cchAddr));
         if (!seg) return;
 
-        var sType;
-        var fGate = false;
+        let sType;
+        let fGate = false;
         if (seg.type & X86.DESC.ACC.TYPE.SEG) {
             if (seg.type & X86.DESC.ACC.TYPE.CODE) {
                 sType = "code";
@@ -1916,7 +1916,7 @@ class DebuggerX86 extends Debugger {
             if (seg.type & X86.DESC.ACC.TYPE.ACCESSED) sType += ",accessed";
         }
         else {
-            var sysDesc = DebuggerX86.SYSDESCS[seg.type];
+            let sysDesc = DebuggerX86.SYSDESCS[seg.type];
             if (sysDesc) {
                 sType = sysDesc[0];
                 fGate = sysDesc[1];
@@ -1925,7 +1925,7 @@ class DebuggerX86 extends Debugger {
 
         if (sType && !(seg.acc & X86.DESC.ACC.PRESENT)) sType += ",not present";
 
-        var sDump;
+        let sDump;
         if (fGate) {
             sDump = "seg=" + Str.toHexWord(seg.base & 0xffff) + " off=" + Str.toHexWord(seg.limit);
         } else {
@@ -1953,14 +1953,14 @@ class DebuggerX86 extends Debugger {
      */
     dumpHistory(sPrev, sLines, sComment = "history")
     {
-        var sMore = "";
-        var cHistory = 0;
-        var iHistory = this.iOpcodeHistory;
-        var aHistory = this.aOpcodeHistory;
+        let sMore = "";
+        let cHistory = 0;
+        let iHistory = this.iOpcodeHistory;
+        let aHistory = this.aOpcodeHistory;
 
         if (aHistory.length) {
-            var nPrev = +sPrev || this.nextHistory;
-            var nLines = +sLines || 10;
+            let nPrev = +sPrev || this.nextHistory;
+            let nLines = +sLines || 10;
 
             if (isNaN(nPrev)) {
                 nPrev = nLines;
@@ -1986,7 +1986,7 @@ class DebuggerX86 extends Debugger {
                 }
             }
 
-            var aFilters = [];
+            let aFilters = [];
             if (sLines == "call") {
                 nLines = 100000;
                 aFilters = ["CALL"];
@@ -2010,21 +2010,21 @@ class DebuggerX86 extends Debugger {
              */
             while (nLines > 0 && iHistory != this.iOpcodeHistory) {
 
-                var dbgAddr = aHistory[iHistory++];
+                let dbgAddr = aHistory[iHistory++];
                 if (dbgAddr.sel == null) break;
 
                 /*
                  * We must create a new dbgAddr from the address in aHistory, because dbgAddr was
                  * a reference, not a copy, and we don't want getInstruction() modifying the original.
                  */
-                var dbgAddrNew = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
+                let dbgAddrNew = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
 
-                var nSequence = nPrev--;
+                let nSequence = nPrev--;
                 if (dbgAddr.cycleCount != null && sComment == "cycles") {
                     nSequence = dbgAddr.cycleCount;
                 }
 
-                var sInstruction = this.getInstruction(dbgAddrNew, sComment, nSequence);
+                let sInstruction = this.getInstruction(dbgAddrNew, sComment, nSequence);
 
                 if (!aFilters.length || sInstruction.indexOf(aFilters[0]) >= 0) {
                     this.println(sInstruction);
@@ -2066,13 +2066,13 @@ class DebuggerX86 extends Debugger {
      */
     dumpTSS(asArgs)
     {
-        var seg;
-        var sSel = asArgs[0];
+        let seg, sel;
+        let sSel = asArgs[0];
 
         if (!sSel) {
             seg = this.cpu.segTSS;
         } else {
-            var sel = this.parseValue(sSel);
+            sel = this.parseValue(sSel);
             if (sel === undefined) {
                 this.println("invalid task selector: " + sSel);
                 return;
@@ -2083,12 +2083,12 @@ class DebuggerX86 extends Debugger {
         this.println("dumpTSS(" + Str.toHexWord(seg? seg.sel : sel) + "): %" + Str.toHex(seg? seg.base : null, this.cchAddr));
         if (!seg) return;
 
-        var sDump = "";
-        var type = seg.type & ~X86.DESC.ACC.TYPE.TSS_BUSY;
-        var cch = (type == X86.DESC.ACC.TYPE.TSS286? 4 : 8);
-        var aTSSFields = (type == X86.DESC.ACC.TYPE.TSS286? DebuggerX86.TSS286 : DebuggerX86.TSS386);
-        var off, addr, v;
-        for (var sField in aTSSFields) {
+        let sDump = "";
+        let type = seg.type & ~X86.DESC.ACC.TYPE.TSS_BUSY;
+        let cch = (type == X86.DESC.ACC.TYPE.TSS286? 4 : 8);
+        let aTSSFields = (type == X86.DESC.ACC.TYPE.TSS286? DebuggerX86.TSS286 : DebuggerX86.TSS386);
+        let off, addr, v;
+        for (let sField in aTSSFields) {
             off = aTSSFields[sField];
             addr = seg.base + off;
             v = this.cpu.probeAddr(addr, 2);
@@ -2099,7 +2099,7 @@ class DebuggerX86 extends Debugger {
             sDump += Str.toHexWord(off) + ' ' + Str.pad(sField + ':', 11) + Str.toHex(v, cch);
         }
         if (type == X86.DESC.ACC.TYPE.TSS386) {
-            var iPort = 0;
+            let iPort = 0;
             off = (v >>> 16);
             /*
              * We arbitrarily cut the IOPM dump off at port 0x3FF; we're not currently interested in anything above that.
@@ -2127,9 +2127,9 @@ class DebuggerX86 extends Debugger {
      */
     findModuleInfo(sModule, nSegment)
     {
-        var aSymbols = [];
+        let aSymbols = [];
         if (SYMBOLS) {
-            var component, componentPrev = null;
+            let component, componentPrev = null;
             while (component = this.cmp.getMachineComponent("Disk", componentPrev)) {
                 aSymbols = component.getModuleInfo(sModule, nSegment);
                 if (aSymbols.length) break;
@@ -2151,10 +2151,10 @@ class DebuggerX86 extends Debugger {
         this.bitsMessage = Messages.WARN;
         this.sMessagePrev = null;
         this.aMessageBuffer = [];
-        var aEnable = this.parseCommand(sEnable, false, '|');
+        let aEnable = this.parseCommand(sEnable, false, '|');
         if (aEnable.length) {
             this.bitsMessage = Messages.NONE;       // when specific messages are being enabled, WARN must be explicitly set
-            for (var m in Messages.CATEGORIES) {
+            for (let m in Messages.CATEGORIES) {
                 if (Usr.indexOf(aEnable, m) >= 0) {
                     this.bitsMessage |= Messages.CATEGORIES[m];
                     this.println(m + " messages enabled");
@@ -2174,7 +2174,7 @@ class DebuggerX86 extends Debugger {
      */
     messageDump(bitMessage, fnDumper)
     {
-        for (var m in Messages.CATEGORIES) {
+        for (let m in Messages.CATEGORIES) {
             if (bitMessage == Messages.CATEGORIES[m]) {
                 this.afnDumpers[m] = fnDumper;
                 return true;
@@ -2193,7 +2193,7 @@ class DebuggerX86 extends Debugger {
      */
     getRegIndex(sReg, off)
     {
-        var i;
+        let i;
         sReg = sReg.toUpperCase();
         if (off == null) {
             i = Usr.indexOf(DebuggerX86.REGS, sReg);
@@ -2213,8 +2213,8 @@ class DebuggerX86 extends Debugger {
      */
     getRegString(iReg)
     {
-        var cch = 0;
-        var n = this.getRegValue(iReg);
+        let cch = 0;
+        let n = this.getRegValue(iReg);
         if (n != null) {
             switch(iReg) {
             case DebuggerX86.REG_AL:
@@ -2276,9 +2276,9 @@ class DebuggerX86 extends Debugger {
      */
     getRegValue(iReg)
     {
-        var n;
+        let n;
         if (iReg >= 0) {
-            var cpu = this.cpu;
+            let cpu = this.cpu;
             switch(iReg) {
             case DebuggerX86.REG_AL:
                 n = cpu.regEAX & 0xff;
@@ -2425,10 +2425,10 @@ class DebuggerX86 extends Debugger {
         /*
          * Replace every @XX (or @XXX), where XX (or XXX) is a register, with the register's value.
          */
-        var i = 0;
-        var b, sChar, sAddr, dbgAddr, sReplace;
+        let i = 0;
+        let b, sChar, sAddr, dbgAddr, sReplace;
         while ((i = s.indexOf('@', i)) >= 0) {
-            var iReg = this.getRegIndex(s, i + 1);
+            let iReg = this.getRegIndex(s, i + 1);
             if (iReg >= 0) {
                 s = s.substr(0, i) + this.getRegString(iReg) + s.substr(i + 1 + DebuggerX86.REGS[iReg].length);
             }
@@ -2533,8 +2533,9 @@ class DebuggerX86 extends Debugger {
      */
     messageInt(nInt, addr, fForce)
     {
-        var AH, DL;
-        var fMessage = fForce;
+        let AH, DL;
+        let fMessage = fForce;
+        let nCategory;
 
         /*
          * We currently arrive here only because the CPU has already determined that INT messages are enabled,
@@ -2553,7 +2554,7 @@ class DebuggerX86 extends Debugger {
                 /*
                  * Alternatively, display this software interrupt if its corresponding message category is enabled.
                  */
-                var nCategory = DebuggerX86.INT_MESSAGES[nInt];
+                nCategory = DebuggerX86.INT_MESSAGES[nInt];
                 if (nCategory) {
                     if (this.messageEnabled(nCategory)) {
                         fMessage = true;
@@ -2578,8 +2579,8 @@ class DebuggerX86 extends Debugger {
             }
         }
         if (fMessage) {
-            var aFuncs = Interrupts.FUNCS[nInt];
-            var sFunc = (aFuncs && aFuncs[AH]) || "";
+            let aFuncs = Interrupts.FUNCS[nInt];
+            let sFunc = (aFuncs && aFuncs[AH]) || "";
             if (sFunc) sFunc = ' ' + this.replaceRegs(sFunc);
             /*
              * For display purposes only, rewind addr to the address of the responsible "INT n" instruction;
@@ -2623,7 +2624,7 @@ class DebuggerX86 extends Debugger {
         bitsMessage |= Messages.PORT;
         if (!name) bitsMessage |= Messages.WARN;        // we don't want to see "unknown" I/O messages unless WARN is enabled
         if (addrFrom == null || (this.bitsMessage & bitsMessage) == bitsMessage) {
-            var selFrom = null;
+            let selFrom = null;
             if (addrFrom != null) {
                 selFrom = this.cpu.getCS();
                 addrFrom -= this.cpu.segCS.base;
@@ -2642,7 +2643,7 @@ class DebuggerX86 extends Debugger {
         this.println("Type ? for help with PCx86 Debugger commands");
         this.updateStatus();
         if (this.sCommandsInit) {
-            var sCommands = this.sCommandsInit;
+            let sCommands = this.sCommandsInit;
             this.sCommandsInit = null;
             this.doCommands(sCommands);
         }
@@ -2663,7 +2664,7 @@ class DebuggerX86 extends Debugger {
      */
     historyInit(fQuiet)
     {
-        var i;
+        let i;
         if (!this.checksEnabled()) {
             if (this.aOpcodeHistory && this.aOpcodeHistory.length && !fQuiet) {
                 this.println("instruction history buffer freed");
@@ -2738,7 +2739,7 @@ class DebuggerX86 extends Debugger {
              * For our typically tiny bursts (usually single instructions), mimic what runCPU() does.
              */
             try {
-                var nCyclesStep = this.cpu.stepCPU(nCycles);
+                let nCyclesStep = this.cpu.stepCPU(nCycles);
                 if (nCyclesStep > 0) {
                     this.nCycles += nCyclesStep;
                     this.cpu.addCycles(nCyclesStep, true);
@@ -2748,7 +2749,7 @@ class DebuggerX86 extends Debugger {
             }
             catch(exception) {
                 if (typeof exception != "number") {
-                    var e = exception;
+                    let e = exception;
                     this.nCycles = 0;
                     this.cpu.setError(e.stack || e.message);
                 }
@@ -2889,7 +2890,7 @@ class DebuggerX86 extends Debugger {
      */
     save()
     {
-        var state = new State(this);
+        let state = new State(this);
         state.set(0, this.packAddr(this.dbgAddrNextCode));
         state.set(1, this.packAddr(this.dbgAddrNextData));
         state.set(2, this.packAddr(this.dbgAddrAssemble));
@@ -2910,7 +2911,7 @@ class DebuggerX86 extends Debugger {
      */
     restore(data)
     {
-        var i = 0;
+        let i = 0;
         if (data[i]) this.dbgAddrNextCode = this.unpackAddr(data[i++]);
         /*
          * dbgAddrNextData wasn't saved until there were at least 6 elements, hence the check for data[5] instead of data[i]
@@ -2921,7 +2922,7 @@ class DebuggerX86 extends Debugger {
             this.aPrevCmds = data[i][0];
             if (typeof this.aPrevCmds == "string") this.aPrevCmds = [this.aPrevCmds];
             this.fAssemble = data[i][1];
-            var bits = data[i][2];
+            let bits = data[i][2];
             /*
              * We supplement the message bits only the incoming bits adhere to the new format (ie, if bits exist in both the high
              * nibble and one of the low nibbles).
@@ -2974,10 +2975,10 @@ class DebuggerX86 extends Debugger {
             this.flags.running = false;
             this.nCycles = nCycles - this.nCyclesStart;
             if (!this.nStep) {
-                var sStopped = "stopped";
+                let sStopped = "stopped";
                 if (this.nCycles) {
-                    var msTotal = ms - this.msStart;
-                    var nCyclesPerSecond = (msTotal > 0? Math.round(this.nCycles * 1000 / msTotal) : 0);
+                    let msTotal = ms - this.msStart;
+                    let nCyclesPerSecond = (msTotal > 0? Math.round(this.nCycles * 1000 / msTotal) : 0);
                     sStopped += " (";
                     if (this.checksEnabled()) {
                         sStopped += this.cOpcodes + " opcodes, ";
@@ -2991,7 +2992,7 @@ class DebuggerX86 extends Debugger {
                     }
                     sStopped += this.nCycles + " cycles, " + msTotal + " ms, " + nCyclesPerSecond + " hz)";
                     if (MAXDEBUG && this.chipset) {
-                        var i, c, n;
+                        let i, c, n;
                         for (i = 0; i < this.chipset.acInterrupts.length; i++) {
                             c = this.chipset.acInterrupts[i];
                             if (!c) continue;
@@ -3008,7 +3009,7 @@ class DebuggerX86 extends Debugger {
                         }
                         n = 0;
                         for (i = 0; i < this.chipset.acTimer0Counts.length; i++) {
-                            var a = this.chipset.acTimer0Counts[i];
+                            let a = this.chipset.acTimer0Counts[i];
                             n += a[0];
                             this.println("TIMER0 update #" + i + ": [" + a[0] + ',' + a[1] + ',' + a[2] + ']');
                         }
@@ -3064,7 +3065,7 @@ class DebuggerX86 extends Debugger {
      */
     checkInstruction(addr, nState)
     {
-        var cpu = this.cpu;
+        let cpu = this.cpu;
 
         if (nState > 0) {
             if (this.nBreakIns && !--this.nBreakIns) {
@@ -3090,10 +3091,10 @@ class DebuggerX86 extends Debugger {
          */
         if (nState >= 0 && this.aaOpcodeCounts.length) {
             this.cOpcodes++;
-            var bOpcode = cpu.probeAddr(addr);
+            let bOpcode = cpu.probeAddr(addr);
             if (bOpcode != null) {
                 this.aaOpcodeCounts[bOpcode][1]++;
-                var dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
+                let dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
                 this.setAddr(dbgAddr, cpu.getIP(), cpu.getCS());
                 dbgAddr.cycleCount = cpu.getCycles();
                 if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
@@ -3201,7 +3202,7 @@ class DebuggerX86 extends Debugger {
      */
     clearBreakpoints()
     {
-        var i, dbgAddr;
+        let i, dbgAddr;
         this.aBreakExec = ["bp"];
         if (this.aBreakRead !== undefined) {
             for (i = 1; i < this.aBreakRead.length; i++) {
@@ -3255,7 +3256,7 @@ class DebuggerX86 extends Debugger {
      */
     addBreakpoint(aBreak, dbgAddr, fTempBreak, fQuiet)
     {
-        var fSuccess = true;
+        let fSuccess = true;
 
         // this.nSuppressBreaks++;
 
@@ -3272,7 +3273,7 @@ class DebuggerX86 extends Debugger {
         }
 
         if (aBreak != this.aBreakExec) {
-            var addr = this.getAddr(dbgAddr);
+            let addr = this.getAddr(dbgAddr);
             if (addr === X86.ADDR_INVALID) {
                 this.println("invalid address: " + this.toHexAddr(dbgAddr));
                 fSuccess = false;
@@ -3318,10 +3319,10 @@ class DebuggerX86 extends Debugger {
      */
     findBreakpoint(aBreak, dbgAddr, fRemove, fTempBreak, fQuiet)
     {
-        var fFound = false;
-        var addr = this.mapBreakpoint(this.getAddr(dbgAddr));
-        for (var i = 1; i < aBreak.length; i++) {
-            var dbgAddrBreak = aBreak[i];
+        let fFound = false;
+        let addr = this.mapBreakpoint(this.getAddr(dbgAddr));
+        for (let i = 1; i < aBreak.length; i++) {
+            let dbgAddrBreak = aBreak[i];
             if (addr !== X86.ADDR_INVALID && addr == this.mapBreakpoint(this.getAddr(dbgAddrBreak)) ||
                 addr === X86.ADDR_INVALID && dbgAddr.sel == dbgAddrBreak.sel && dbgAddr.off == dbgAddrBreak.off) {
                 if (!fTempBreak || dbgAddrBreak.fTempBreak) {
@@ -3360,7 +3361,7 @@ class DebuggerX86 extends Debugger {
      */
     listBreakpoints(aBreak)
     {
-        for (var i = 1; i < aBreak.length; i++) {
+        for (let i = 1; i < aBreak.length; i++) {
             this.printBreakpoint(aBreak, i);
         }
         return aBreak.length - 1;
@@ -3378,7 +3379,7 @@ class DebuggerX86 extends Debugger {
      */
     printBreakpoint(aBreak, i, sAction)
     {
-        var dbgAddr = aBreak[i];
+        let dbgAddr = aBreak[i];
         this.println(aBreak[0] + ' ' + this.toHexAddr(dbgAddr) + (sAction? (' ' + sAction) : (dbgAddr.sCmd? (' "' + dbgAddr.sCmd + '"') : '')));
     }
 
@@ -3392,8 +3393,8 @@ class DebuggerX86 extends Debugger {
     restoreBreakpoints(aBreak, aDbgAddr)
     {
         if (aDbgAddr[0] != aBreak[0]) return;
-        for (var i = 1; i < aDbgAddr.length; i++) {
-            var dbgAddr = aDbgAddr[i];
+        for (let i = 1; i < aDbgAddr.length; i++) {
+            let dbgAddr = aDbgAddr[i];
             this.addBreakpoint(aBreak, dbgAddr, dbgAddr.fTempBreak, true);
         }
     }
@@ -3421,8 +3422,8 @@ class DebuggerX86 extends Debugger {
             this.checkBreakpoint(addr, 1, this.aBreakExec, true);
             this.nStep = 0;
         } else {
-            for (var i = 1; i < this.aBreakExec.length; i++) {
-                var dbgAddrBreak = this.aBreakExec[i];
+            for (let i = 1; i < this.aBreakExec.length; i++) {
+                let dbgAddrBreak = this.aBreakExec[i];
                 if (dbgAddrBreak.fTempBreak) {
                     if (!this.findBreakpoint(this.aBreakExec, dbgAddrBreak, true, true)) break;
                     i = 0;
@@ -3449,7 +3450,7 @@ class DebuggerX86 extends Debugger {
          * in the top 16Mb, yet after the first inter-segment JMP, you will be running in the first 1Mb.
          */
         if (addr !== X86.ADDR_INVALID) {
-            var mask = (this.maskAddr & ~0xffff);
+            let mask = (this.maskAddr & ~0xffff);
             if ((addr & mask) == mask) addr &= 0x000fffff;
         }
         return addr;
@@ -3471,7 +3472,7 @@ class DebuggerX86 extends Debugger {
          * Time to check for execution breakpoints; note that this should be done BEFORE updating frequency
          * or history data (see checkInstruction), since we might not actually execute the current instruction.
          */
-        var fBreak = false;
+        let fBreak = false;
 
         if (!this.nSuppressBreaks++) {
 
@@ -3488,9 +3489,9 @@ class DebuggerX86 extends Debugger {
                 }
             }
 
-            for (var i = 1; !fBreak && i < aBreak.length; i++) {
+            for (let i = 1; !fBreak && i < aBreak.length; i++) {
 
-                var dbgAddrBreak = aBreak[i];
+                let dbgAddrBreak = aBreak[i];
 
                 if (fTempBreak && !dbgAddrBreak.fTempBreak) continue;
 
@@ -3512,10 +3513,10 @@ class DebuggerX86 extends Debugger {
                  * If you want to create a real-mode breakpoint that will break regardless of mode,
                  * use the physical address of the real-mode memory location instead.
                  */
-                var addrBreak = this.mapBreakpoint(this.getAddr(dbgAddrBreak));
-                for (var n = 0; n < nb; n++) {
+                let addrBreak = this.mapBreakpoint(this.getAddr(dbgAddrBreak));
+                for (let n = 0; n < nb; n++) {
                     if (addr + n == addrBreak) {
-                        var a;
+                        let a;
                         fBreak = true;
                         if (dbgAddrBreak.fTempBreak) {
                             this.findBreakpoint(aBreak, dbgAddrBreak, true, true);
@@ -3533,13 +3534,13 @@ class DebuggerX86 extends Debugger {
                              * we abort.
                              */
                             fBreak = false;
-                            for (var j = 0; j < a.length; j++) {
+                            for (let j = 0; j < a.length; j++) {
                                 if (!this.doCommand(a[j], true)) {
                                     if (a[j].indexOf("if")) {
                                         fBreak = true;          // the failed command wasn't "if", so abort
                                         break;
                                     }
-                                    var k = j + 1;
+                                    let k = j + 1;
                                     for (; k < a.length; k++) {
                                         if (!a[k].indexOf("else")) break;
                                         j++;
@@ -3579,9 +3580,9 @@ class DebuggerX86 extends Debugger {
      */
     getInstruction(dbgAddr, sComment, nSequence)
     {
-        var dbgAddrIns = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr, dbgAddr.type);
+        let dbgAddrIns = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr, dbgAddr.type);
 
-        var bOpcode = this.getByte(dbgAddr, 1);
+        let bOpcode = this.getByte(dbgAddr, 1);
 
         /*
          * Incorporate OPERAND and ADDRESS size prefixes into the current instruction.
@@ -3590,8 +3591,8 @@ class DebuggerX86 extends Debugger {
          * see opOS() and opAS() for details.  We limit the amount of redundancy to something
          * reasonable (ie, 4).
          */
-        var cMaxOverrides = 4, cOverrides = 0;
-        var fDataPrefix = false, fAddrPrefix = false;
+        let cMaxOverrides = 4, cOverrides = 0;
+        let fDataPrefix = false, fAddrPrefix = false;
 
         while ((bOpcode == X86.OPCODE.OS || bOpcode == X86.OPCODE.AS) && cMaxOverrides--) {
             if (bOpcode == X86.OPCODE.OS) {
@@ -3610,13 +3611,13 @@ class DebuggerX86 extends Debugger {
             bOpcode = this.getByte(dbgAddr, 1);
         }
 
-        var bModRM = -1;
-        var asOpcodes = DebuggerX86.INS_NAMES;
-        var aOpDesc = this.aaOpDescs[bOpcode];
-        var iIns = aOpDesc[0];
+        let bModRM = -1;
+        let asOpcodes = DebuggerX86.INS_NAMES;
+        let aOpDesc = this.aaOpDescs[bOpcode];
+        let iIns = aOpDesc[0];
 
         if (iIns == DebuggerX86.INS.OP0F) {
-            var b = this.getByte(dbgAddr, 1);
+            let b = this.getByte(dbgAddr, 1);
             aOpDesc = DebuggerX86.aaOp0FDescs[b] || DebuggerX86.aOpDescUndefined;
             bOpcode |= (b << 8);
             iIns = aOpDesc[0];
@@ -3624,7 +3625,7 @@ class DebuggerX86 extends Debugger {
 
         if (iIns == DebuggerX86.INS.ESC) {
             bModRM = this.getByte(dbgAddr, 1);
-            var aOpFPUDesc = this.getFPUInstruction(bOpcode, bModRM);
+            let aOpFPUDesc = this.getFPUInstruction(bOpcode, bModRM);
             if (aOpFPUDesc) {
                 asOpcodes = DebuggerX86.FINS_NAMES;
                 aOpDesc = aOpFPUDesc;
@@ -3638,9 +3639,9 @@ class DebuggerX86 extends Debugger {
             iIns = aOpDesc[0];
         }
 
-        var sOpcode = asOpcodes[iIns];
-        var cOperands = aOpDesc.length - 1;
-        var sOperands = "";
+        let sOpcode = asOpcodes[iIns];
+        let cOperands = aOpDesc.length - 1;
+        let sOperands = "";
 
         if (dbgAddr.fData32) {
             if (iIns == DebuggerX86.INS.CBW) {
@@ -3658,14 +3659,14 @@ class DebuggerX86 extends Debugger {
             if (dbgAddr.fData32 && sOpcode.slice(-1) == 'W') sOpcode = sOpcode.slice(0, -1) + 'D';
         }
 
-        var typeCPU = -1;
-        var fComplete = true;
+        let typeCPU = -1;
+        let fComplete = true;
 
-        for (var iOperand = 1; iOperand <= cOperands; iOperand++) {
+        for (let iOperand = 1; iOperand <= cOperands; iOperand++) {
 
-            var disp, off, cch;
-            var sOperand = "";
-            var type = aOpDesc[iOperand];
+            let disp, off, cch;
+            let sOperand = "";
+            let type = aOpDesc[iOperand];
             if (type === undefined) continue;
 
             if (typeCPU < 0) typeCPU = type >> DebuggerX86.TYPE_CPU_SHIFT;
@@ -3678,7 +3679,7 @@ class DebuggerX86 extends Debugger {
                 }
             }
 
-            var typeSize = type & DebuggerX86.TYPE_SIZE;
+            let typeSize = type & DebuggerX86.TYPE_SIZE;
             if (typeSize == DebuggerX86.TYPE_NONE) {
                 continue;
             }
@@ -3686,7 +3687,7 @@ class DebuggerX86 extends Debugger {
                 fComplete = false;
                 continue;
             }
-            var typeMode = type & DebuggerX86.TYPE_MODE;
+            let typeMode = type & DebuggerX86.TYPE_MODE;
             if (typeMode >= DebuggerX86.TYPE_MODRM) {
                 if (bModRM < 0) {
                     bModRM = this.getByte(dbgAddr, 1);
@@ -3741,7 +3742,7 @@ class DebuggerX86 extends Debugger {
                 }
                 off = (dbgAddr.off + disp) & (dbgAddr.fData32? -1 : 0xffff);
                 sOperand = Str.toHex(off, dbgAddr.fData32? 8: 4);
-                var aSymbol = this.findSymbol(this.newAddr(off, dbgAddr.sel));
+                let aSymbol = this.findSymbol(this.newAddr(off, dbgAddr.sel));
                 if (aSymbol[0]) sOperand += " (" + aSymbol[0] + ")";
             }
             else if (typeMode == DebuggerX86.TYPE_IMPREG) {
@@ -3770,8 +3771,8 @@ class DebuggerX86 extends Debugger {
             sOperands += (sOperand || "???");
         }
 
-        var sBytes = "";
-        var sLine = this.toHexAddr(dbgAddrIns) + ' ';
+        let sBytes = "";
+        let sLine = this.toHexAddr(dbgAddrIns) + ' ';
         if (dbgAddrIns.addr !== X86.ADDR_INVALID && dbgAddr.addr !== X86.ADDR_INVALID) {
             do {
                 sBytes += Str.toHex(this.getByte(dbgAddrIns, 1), 2);
@@ -3792,7 +3793,7 @@ class DebuggerX86 extends Debugger {
             if (!this.cpu.flags.checksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
-                var nCycles = this.cpu.getCycles();
+                let nCycles = this.cpu.getCycles();
                 sLine += "cycles=" + nCycles.toString() + " cs=" + Str.toHex(this.cpu.counts.nChecksum);
             }
         }
@@ -3811,18 +3812,18 @@ class DebuggerX86 extends Debugger {
      */
     getFPUInstruction(bOpcode, bModRM)
     {
-        var aOpDesc = null;
+        let aOpDesc = null;
 
-        var mod = (bModRM >> 6) & 0x3;
-        var reg = (bModRM >> 3) & 0x7;
-        var r_m = (bModRM & 0x7);
+        let mod = (bModRM >> 6) & 0x3;
+        let reg = (bModRM >> 3) & 0x7;
+        let r_m = (bModRM & 0x7);
 
         /*
          * Similar to how opFPU() decodes FPU instructions, we combine mod and reg into one
          * decodable value: put mod in the high nibble and reg in the low nibble, after first
          * collapsing all mod values < 3 to zero.
          */
-        var modReg = (mod < 3? 0 : 0x30) + reg;
+        let modReg = (mod < 3? 0 : 0x30) + reg;
 
         /*
          * All values >= 0x34 imply mod == 3 and reg >= 4, so now we shift reg into the high
@@ -3832,7 +3833,7 @@ class DebuggerX86 extends Debugger {
             modReg = (reg << 4) | r_m;
         }
 
-        var aaOpDesc = DebuggerX86.aaaOpFPUDescs[bOpcode];
+        let aaOpDesc = DebuggerX86.aaaOpFPUDescs[bOpcode];
         if (aaOpDesc) aOpDesc = aaOpDesc[modReg];
 
         return aOpDesc;
@@ -3848,8 +3849,8 @@ class DebuggerX86 extends Debugger {
      */
     getImmOperand(type, dbgAddr)
     {
-        var sOperand = ' ';
-        var typeSize = type & DebuggerX86.TYPE_SIZE;
+        let sOperand = ' ';
+        let typeSize = type & DebuggerX86.TYPE_SIZE;
 
         switch (typeSize) {
         case DebuggerX86.TYPE_BYTE:
@@ -3877,7 +3878,7 @@ class DebuggerX86 extends Debugger {
         case DebuggerX86.TYPE_FARP:
             dbgAddr = this.newAddr(this.getWord(dbgAddr, true), this.getShort(dbgAddr, 2), null, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
             sOperand = this.toHexAddr(dbgAddr);
-            var aSymbol = this.findSymbol(dbgAddr);
+            let aSymbol = this.findSymbol(dbgAddr);
             if (aSymbol[0]) sOperand += " (" + aSymbol[0] + ")";
             break;
         default:
@@ -3898,7 +3899,7 @@ class DebuggerX86 extends Debugger {
      */
     getRegOperand(bReg, type, dbgAddr)
     {
-        var typeMode = type & DebuggerX86.TYPE_MODE;
+        let typeMode = type & DebuggerX86.TYPE_MODE;
         if (typeMode == DebuggerX86.TYPE_SEGREG) {
             if (bReg > DebuggerX86.REG_GS ||
                 bReg >= DebuggerX86.REG_FS && this.cpu.model < X86.MODEL_80386) return "??";
@@ -3914,7 +3915,7 @@ class DebuggerX86 extends Debugger {
             bReg += DebuggerX86.REG_TR0;
         }
         else {
-            var typeSize = type & DebuggerX86.TYPE_SIZE;
+            let typeSize = type & DebuggerX86.TYPE_SIZE;
             if (typeSize >= DebuggerX86.TYPE_SHORT) {
                 if (bReg < DebuggerX86.REG_AX) {
                     bReg += DebuggerX86.REG_AX - DebuggerX86.REG_AL;
@@ -3937,11 +3938,11 @@ class DebuggerX86 extends Debugger {
      */
     getSIBOperand(bMod, dbgAddr)
     {
-        var bSIB = this.getByte(dbgAddr, 1);
-        var bScale = bSIB >> 6;
-        var bIndex = (bSIB >> 3) & 0x7;
-        var bBase = bSIB & 0x7;
-        var sOperand = "";
+        let bSIB = this.getByte(dbgAddr, 1);
+        let bScale = bSIB >> 6;
+        let bIndex = (bSIB >> 3) & 0x7;
+        let bBase = bSIB & 0x7;
+        let sOperand = "";
         /*
          * Unless bMod is zero AND bBase is 5, there's always a base register.
          */
@@ -3976,12 +3977,12 @@ class DebuggerX86 extends Debugger {
      */
     getModRMOperand(sOpcode, bModRM, type, cOperands, dbgAddr)
     {
-        var sOperand = "";
-        var bMod = bModRM >> 6;
-        var bRM = bModRM & 0x7;
+        let sOperand = "";
+        let bMod = bModRM >> 6;
+        let bRM = bModRM & 0x7;
         if (bMod < 3) {
-            var disp;
-            var fInteger = (sOpcode.indexOf("FI") == 0);
+            let disp;
+            let fInteger = (sOpcode.indexOf("FI") == 0);
             if (!bMod && (!dbgAddr.fAddr32 && bRM == 6 || dbgAddr.fAddr32 && bRM == 5)) {
                 bMod = 2;
             } else {
@@ -4016,7 +4017,7 @@ class DebuggerX86 extends Debugger {
             }
             sOperand = '[' + sOperand + ']';
             if (cOperands == 1) {
-                var sPrefix = "";
+                let sPrefix = "";
                 type &= DebuggerX86.TYPE_SIZE;
                 if (type == DebuggerX86.TYPE_WORD) {
                     type = (dbgAddr.fData32? DebuggerX86.TYPE_LONG : DebuggerX86.TYPE_SHORT);
@@ -4086,7 +4087,7 @@ class DebuggerX86 extends Debugger {
      */
     parseInstruction(sOp, sOperand, dbgAddr)
     {
-        var aOpBytes = [];
+        let aOpBytes = [];
         this.println("not supported yet");
         return aOpBytes;
     }
@@ -4100,7 +4101,7 @@ class DebuggerX86 extends Debugger {
      */
     getFlagOutput(sFlag)
     {
-        var b;
+        let b;
         switch (sFlag) {
         case 'V':
             b = this.cpu.getOF();
@@ -4158,7 +4159,7 @@ class DebuggerX86 extends Debugger {
     getRegOutput(iReg)
     {
         if (iReg >= DebuggerX86.REG_AX && iReg <= DebuggerX86.REG_DI && this.cchReg > 4) iReg += DebuggerX86.REG_EAX - DebuggerX86.REG_AX;
-        var sReg = DebuggerX86.REGS[iReg];
+        let sReg = DebuggerX86.REGS[iReg];
         if (iReg == DebuggerX86.REG_CR0 && this.cpu.model == X86.MODEL_80286) sReg = "MS";
         return sReg + '=' + this.getRegString(iReg) + ' ';
     }
@@ -4237,7 +4238,7 @@ class DebuggerX86 extends Debugger {
      */
     getRegDump(fProt)
     {
-        var s;
+        let s;
         if (fProt === undefined) fProt = this.getCPUMode();
 
         s = this.getRegOutput(DebuggerX86.REG_AX) +
@@ -4253,8 +4254,8 @@ class DebuggerX86 extends Debugger {
             this.getSegOutput(this.cpu.segES, fProt) + ' ';
 
         if (fProt) {
-            var sTR = "TR=" + Str.toHex(this.cpu.segTSS.sel, 4);
-            var sA20 = "A20=" + (this.bus.getA20()? "ON " : "OFF ");
+            let sTR = "TR=" + Str.toHex(this.cpu.segTSS.sel, 4);
+            let sA20 = "A20=" + (this.bus.getA20()? "ON " : "OFF ");
             if (this.cpu.model < X86.MODEL_80386) {
                 sTR = '\n' + sTR;
                 s += sA20; sA20 = '';
@@ -4382,16 +4383,16 @@ class DebuggerX86 extends Debugger {
      */
     addSymbols(sModule, nSegment, sel, off, addr, len, aSymbols)
     {
-        var dbgAddr = {};
-        var aOffsets = [];
-        for (var sSymbol in aSymbols) {
-            var symbol = aSymbols[sSymbol];
+        let dbgAddr = {};
+        let aOffsets = [];
+        for (let sSymbol in aSymbols) {
+            let symbol = aSymbols[sSymbol];
             if (typeof symbol == "number") {
                 aSymbols[sSymbol] = symbol = {'o': symbol};
             }
-            var offSymbol = symbol['o'];
-            var selSymbol = symbol['s'];
-            var sAnnotation = symbol['a'];
+            let offSymbol = symbol['o'];
+            let selSymbol = symbol['s'];
+            let sAnnotation = symbol['a'];
             if (offSymbol !== undefined) {
                 if (selSymbol !== undefined) {
                     dbgAddr.off = offSymbol;
@@ -4415,7 +4416,7 @@ class DebuggerX86 extends Debugger {
             }
             if (sAnnotation) symbol['a'] = sAnnotation.replace(/''/g, "\"");
         }
-        var symbolTable = {
+        let symbolTable = {
             sModule: sModule,
             nSegment: nSegment,
             sel: sel,
@@ -4438,9 +4439,9 @@ class DebuggerX86 extends Debugger {
      */
     removeSymbols(sModule, nSegment)
     {
-        var sModuleRemoved = null;
-        for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
-            var symbolTable = this.aSymbolTable[iTable];
+        let sModuleRemoved = null;
+        for (let iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
+            let symbolTable = this.aSymbolTable[iTable];
             if (sModule && symbolTable.sModule != sModule) continue;
             if (sModule && nSegment == symbolTable.nSegment || !sModule && nSegment == symbolTable.sel) {
                 sModuleRemoved = symbolTable.sModule;
@@ -4461,16 +4462,16 @@ class DebuggerX86 extends Debugger {
      */
     dumpSymbols()
     {
-        for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
-            var symbolTable = this.aSymbolTable[iTable];
-            for (var sSymbol in symbolTable.aSymbols) {
+        for (let iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
+            let symbolTable = this.aSymbolTable[iTable];
+            for (let sSymbol in symbolTable.aSymbols) {
                 if (sSymbol.charAt(0) == '.') continue;
-                var symbol = symbolTable.aSymbols[sSymbol];
-                var offSymbol = symbol['o'];
+                let symbol = symbolTable.aSymbols[sSymbol];
+                let offSymbol = symbol['o'];
                 if (offSymbol === undefined) continue;
-                var selSymbol = symbol['s'];
+                let selSymbol = symbol['s'];
                 if (selSymbol === undefined) selSymbol = symbolTable.sel;
-                var sSymbolOrig = symbolTable.aSymbols[sSymbol]['l'];
+                let sSymbolOrig = symbolTable.aSymbols[sSymbol]['l'];
                 if (sSymbolOrig) sSymbol = sSymbolOrig;
                 this.println(this.toHexOffset(offSymbol, selSymbol) + ' ' + sSymbol);
             }
@@ -4492,19 +4493,19 @@ class DebuggerX86 extends Debugger {
      */
     findSymbol(dbgAddr, fNearest)
     {
-        var aSymbol = [];
-        var offSymbol = dbgAddr.off >>> 0;
-        var addrSymbol = this.getAddr(dbgAddr) >>> 0;
-        for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
-            var symbolTable = this.aSymbolTable[iTable];
-            var sel = symbolTable.sel;
-            var off = symbolTable.off >>> 0;
-            var addr = symbolTable.addr;
+        let aSymbol = [];
+        let offSymbol = dbgAddr.off >>> 0;
+        let addrSymbol = this.getAddr(dbgAddr) >>> 0;
+        for (let iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
+            let symbolTable = this.aSymbolTable[iTable];
+            let sel = symbolTable.sel;
+            let off = symbolTable.off >>> 0;
+            let addr = symbolTable.addr;
             if (addr != null) addr >>>= 0;
-            var len = symbolTable.len;
+            let len = symbolTable.len;
             if (sel == 0x30) sel = 0x28;        // TODO: Remove this hack once we're able to differentiate Windows 95 ring 0 code and data
             if (sel == dbgAddr.sel && offSymbol >= off && offSymbol < off + len || addr != null && addrSymbol >= addr && addrSymbol < addr + len) {
-                var result = Usr.binarySearch(symbolTable.aOffsets, [offSymbol], this.comparePairs);
+                let result = Usr.binarySearch(symbolTable.aOffsets, [offSymbol], this.comparePairs);
                 if (result >= 0) {
                     this.returnSymbol(iTable, result, aSymbol);
                 }
@@ -4517,7 +4518,7 @@ class DebuggerX86 extends Debugger {
             }
         }
         if (!aSymbol.length) {
-            var sSymbol = this.bus.getSymbol(addrSymbol, true);
+            let sSymbol = this.bus.getSymbol(addrSymbol, true);
             if (sSymbol) {
                 aSymbol.push(sSymbol);
                 aSymbol.push(addrSymbol);
@@ -4537,14 +4538,14 @@ class DebuggerX86 extends Debugger {
      */
     findSymbolAddr(sSymbol)
     {
-        var dbgAddr;
+        let dbgAddr;
         if (sSymbol.match(/^[a-z_][a-z0-9_]*$/i)) {
-            var sUpperCase = sSymbol.toUpperCase();
-            for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
-                var symbolTable = this.aSymbolTable[iTable];
-                var symbol = symbolTable.aSymbols[sUpperCase];
+            let sUpperCase = sSymbol.toUpperCase();
+            for (let iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
+                let symbolTable = this.aSymbolTable[iTable];
+                let symbol = symbolTable.aSymbols[sUpperCase];
                 if (symbol !== undefined) {
-                    var offSymbol = symbol['o'];
+                    let offSymbol = symbol['o'];
                     if (offSymbol !== undefined) {
                         /*
                          * We assume that every ROM is ORG'ed at 0x0000, and therefore unless the symbol has an
@@ -4552,7 +4553,7 @@ class DebuggerX86 extends Debugger {
                          * a ROM, that segment is normally "addrROM >>> 4".  Down the road, we may want/need to
                          * support a special symbol entry (eg, ".ORG") that defines an alternate origin.
                          */
-                        var selSymbol = symbol['s'];
+                        let selSymbol = symbol['s'];
                         if (selSymbol === undefined) selSymbol = symbolTable.sel;
                         dbgAddr = this.newAddr(offSymbol, selSymbol, symbol['p']);
                     }
@@ -4578,9 +4579,9 @@ class DebuggerX86 extends Debugger {
      */
     returnSymbol(iTable, iOffset, aSymbol)
     {
-        var symbol = {};
-        var aOffsets = this.aSymbolTable[iTable].aOffsets;
-        var offset = 0, sSymbol = null;
+        let symbol = {};
+        let aOffsets = this.aSymbolTable[iTable].aOffsets;
+        let offset = 0, sSymbol = null;
         if (iOffset >= 0 && iOffset < aOffsets.length) {
             offset = aOffsets[iOffset][0];
             sSymbol = aOffsets[iOffset][1];
@@ -4602,8 +4603,8 @@ class DebuggerX86 extends Debugger {
      */
     doHelp()
     {
-        var s = "commands:";
-        for (var sCommand in DebuggerX86.COMMANDS) {
+        let s = "commands:";
+        for (let sCommand in DebuggerX86.COMMANDS) {
             s += '\n' + Str.pad(sCommand, 7) + DebuggerX86.COMMANDS[sCommand];
         }
         if (!this.checksEnabled()) s += "\nnote: frequency/history disabled if no exec breakpoints";
@@ -4642,7 +4643,7 @@ class DebuggerX86 extends Debugger {
      */
     doAssemble(asArgs)
     {
-        var dbgAddr = this.parseAddr(asArgs[1], true);
+        let dbgAddr = this.parseAddr(asArgs[1], true);
         if (!dbgAddr) return;
 
         this.dbgAddrAssemble = dbgAddr;
@@ -4653,9 +4654,9 @@ class DebuggerX86 extends Debugger {
             return;
         }
 
-        var aOpBytes = this.parseInstruction(asArgs[2], asArgs[3], dbgAddr);
+        let aOpBytes = this.parseInstruction(asArgs[2], asArgs[3], dbgAddr);
         if (aOpBytes.length) {
-            for (var i = 0; i < aOpBytes.length; i++) {
+            for (let i = 0; i < aOpBytes.length; i++) {
                 this.setByte(dbgAddr, aOpBytes[i], 1);
             }
             /*
@@ -4709,9 +4710,9 @@ class DebuggerX86 extends Debugger {
             this.println("\tbn [n]\tbreak after [n] instruction(s)");
             return;
         }
-        var sParm = sCmd.charAt(1);
+        let sParm = sCmd.charAt(1);
         if (sParm == 'l') {
-            var cBreaks = 0;
+            let cBreaks = 0;
             cBreaks += this.listBreakpoints(this.aBreakExec);
             cBreaks += this.listBreakpoints(this.aBreakRead);
             cBreaks += this.listBreakpoints(this.aBreakWrite);
@@ -4727,7 +4728,7 @@ class DebuggerX86 extends Debugger {
             this.println("missing breakpoint address");
             return;
         }
-        var dbgAddr = {};
+        let dbgAddr = {};
         if (sAddr != '*') {
             dbgAddr = this.parseAddr(sAddr, true, true);
             if (!dbgAddr) return;
@@ -4802,14 +4803,14 @@ class DebuggerX86 extends Debugger {
      */
     doDump(asArgs)
     {
-        var m;
-        var sCmd = asArgs[0];
-        var sAddr = asArgs[1];
-        var sLen = asArgs[2];
-        var sBytes = asArgs[3];
+        let m;
+        let sCmd = asArgs[0];
+        let sAddr = asArgs[1];
+        let sLen = asArgs[2];
+        let sBytes = asArgs[3];
 
         if (sAddr == '?') {
-            var sDumpers = "";
+            let sDumpers = "";
             for (m in Messages.CATEGORIES) {
                 if (this.afnDumpers[m]) {
                     if (sDumpers) sDumpers += ',';
@@ -4828,12 +4829,13 @@ class DebuggerX86 extends Debugger {
             if (BACKTRACK) {
                 this.println("\tdt [a]        dump backtrack info for address");
             }
+            this.println("\tdby,dwy,ddy   dump data in binary");
             if (sDumpers.length) this.println("dump extension commands:\n\t" + sDumpers);
             return;
         }
 
         if (sAddr == "state") {
-            var sState = this.cmp.powerOff(true);
+            let sState = this.cmp.powerOff(true);
             if (!sState) {
                 this.println("powerOff() error");
             }
@@ -4842,7 +4844,7 @@ class DebuggerX86 extends Debugger {
                  * Console buffers are notoriously small, and even the following code, which breaks the
                  * data into parts (eg, "d state console 1", "d state console 2", etc) just isn't that helpful.
                  *
-                 *      var nPart = +sBytes;
+                 *      let nPart = +sBytes;
                  *      if (nPart) sState = sState.substr(1000000 * (nPart-1), 1000000);
                  *
                  * So, the best way to capture a large machine state is to use the new "Save Machine" link
@@ -4899,7 +4901,7 @@ class DebuggerX86 extends Debugger {
             }
             for (m in Messages.CATEGORIES) {
                 if (asArgs[1] == m) {
-                    var fnDumper = this.afnDumpers[m];
+                    let fnDumper = this.afnDumpers[m];
                     if (fnDumper) {
                         asArgs.shift();
                         asArgs.shift();
@@ -4926,7 +4928,7 @@ class DebuggerX86 extends Debugger {
 
         if (sCmd == "dt") {
             asArgs.shift();
-            var sInfo = this.dumpBackTrack(asArgs);
+            let sInfo = this.dumpBackTrack(asArgs);
             this.println(sInfo);
             return;
         }
@@ -4938,16 +4940,16 @@ class DebuggerX86 extends Debugger {
 
         this.sCmdDumpPrev = sCmd;
 
-        var dbgAddr = this.parseAddr(sAddr);
+        let dbgAddr = this.parseAddr(sAddr);
         if (!dbgAddr || dbgAddr.sel == null && dbgAddr.addr == null) return;
 
-        var len = 0;
+        let len = 0;
         if (sLen) {
             if (sLen.charAt(0) == 'l') {
                 sLen = sLen.substr(1) || sBytes;
                 len = this.parseValue(sLen);
             } else {
-                var dbgAddrEnd = this.parseAddr(sLen);
+                let dbgAddrEnd = this.parseAddr(sLen);
                 if (!dbgAddrEnd) return;
                 /*
                  * To be more DEBUG-like, when an ending address is used instead of a length, we treat it inclusively, hence the "+ 1".
@@ -4961,12 +4963,11 @@ class DebuggerX86 extends Debugger {
             if (len < 0 || len > 0x10000) len = 0;
         }
 
-        var sDump = "";
-        var fASCII = false;
-        var size = (sCmd == "dd"? 4 : (sCmd == "dw"? 2 : 1));
-        var cb = (size * len) || 128;
-        var cLines = ((cb + 15) >> 4) || 1;
-        var cbLine = (size == 4? 16 : this.nBase);  // the base also happens to be a reasonable number of bytes/line
+        let sDump = "", fASCII = false, cchBinary = 0;
+        let size = (sCmd[1] == 'd'? 4 : (sCmd[1] == 'w'? 2 : 1));
+        let cb = (size * len) || 128;
+        let cLines = ((cb + 15) >> 4) || 1;
+        let cbLine = (size == 4? 16 : this.nBase);  // the base also happens to be a reasonable number of bytes/line
 
         /*
          * The "da" variation uses a line size of 160 bytes, because that's the number of characters
@@ -4982,20 +4983,27 @@ class DebuggerX86 extends Debugger {
             cLines = (len <= 1? 25 : Math.ceil(len / cbLine));
             cb = cLines * cbLine;
         }
+        else if (sCmd[2] == 'y') {
+            cbLine = size;
+            if (!len) cb = 8;
+            cLines = cb;
+            cchBinary = size * 8;
+        }
 
         while (cLines-- && cb > 0) {
-            var data = 0, iByte = 0, i;
-            var sData = "", sChars = "";
+            let data = 0, iByte = 0, i;
+            let sData = "", sChars = "";
             sAddr = this.toHexAddr(dbgAddr);
             for (i = cbLine; i > 0 && cb > 0; i--) {
-                var b = this.getByte(dbgAddr, 1);
+                let b = this.getByte(dbgAddr, 1);
                 data |= (b << (iByte++ << 3));
                 if (iByte == size) {
                     sData += (this.nBase == 8? Str.toOct(data, size * 3) : Str.toHex(data, size * 2));
                     sData += (size == 1? (i == 9? '-' : ' ') : "  ");
+                    if (cchBinary) sChars += Str.toBin(data, cchBinary);
                     data = iByte = 0;
                 }
-                sChars += (b >= 32 && b < 127? String.fromCharCode(b) : (fASCII? '' : '.'));
+                if (!cchBinary) sChars += (b >= 32 && b < 127? String.fromCharCode(b) : (fASCII? '' : '.'));
                 cb--;
             }
             if (sDump) sDump += '\n';
@@ -5017,19 +5025,19 @@ class DebuggerX86 extends Debugger {
      */
     doEdit(asArgs)
     {
-        var size = 1;
-        var mask = 0xff;
-        var fnGet = this.getByte;
-        var fnSet = this.setByte;
+        let size = 1;
+        let mask = 0xff;
+        let fnGet = this.getByte;
+        let fnSet = this.setByte;
         if (asArgs[0] == "ew") {
             size = 2;
             mask = 0xffff;
             fnGet = this.getShort;
             fnSet = this.setShort;
         }
-        var cch = size << 1;
+        let cch = size << 1;
 
-        var sAddr = asArgs[1];
+        let sAddr = asArgs[1];
         if (sAddr == null) {
             this.println("edit memory commands:");
             this.println("\teb [a] [...]  edit bytes at address a");
@@ -5037,11 +5045,11 @@ class DebuggerX86 extends Debugger {
             return;
         }
 
-        var dbgAddr = this.parseAddr(sAddr);
+        let dbgAddr = this.parseAddr(sAddr);
         if (!dbgAddr) return;
 
-        for (var i = 2; i < asArgs.length; i++) {
-            var vNew = this.parseExpression(asArgs[i]);
+        for (let i = 2; i < asArgs.length; i++) {
+            let vNew = this.parseExpression(asArgs[i]);
             if (vNew === undefined) {
                 this.println("unrecognized value: " + asArgs[i]);
                 break;
@@ -5049,7 +5057,7 @@ class DebuggerX86 extends Debugger {
             if (vNew & ~mask) {
                 this.println("warning: " + Str.toHex(vNew) + " exceeds " + size + "-byte value");
             }
-            var vOld = fnGet.call(this, dbgAddr);
+            let vOld = fnGet.call(this, dbgAddr);
             this.println("changing " + this.toHexAddr(dbgAddr) + " from " + Str.toHex(vOld, cch, true) + " to " + Str.toHex(vNew, cch, true));
             fnSet.call(this, dbgAddr, vNew, size);
         }
@@ -5068,8 +5076,8 @@ class DebuggerX86 extends Debugger {
             this.println("\tclear\tclear all frequency counts");
             return;
         }
-        var i;
-        var cData = 0;
+        let i;
+        let cData = 0;
         if (this.aaOpcodeCounts) {
             if (sParm == "clear") {
                 for (i = 0; i < this.aaOpcodeCounts.length; i++)
@@ -5082,13 +5090,13 @@ class DebuggerX86 extends Debugger {
                 cData++;
             }
             else {
-                var aaSortedOpcodeCounts = this.aaOpcodeCounts.slice();
+                let aaSortedOpcodeCounts = this.aaOpcodeCounts.slice();
                 aaSortedOpcodeCounts.sort(function(p, q) {
                     return q[1] - p[1];
                 });
                 for (i = 0; i < aaSortedOpcodeCounts.length; i++) {
-                    var bOpcode = aaSortedOpcodeCounts[i][0];
-                    var cFreq = aaSortedOpcodeCounts[i][1];
+                    let bOpcode = aaSortedOpcodeCounts[i][0];
+                    let cFreq = aaSortedOpcodeCounts[i][1];
                     if (cFreq) {
                         this.println((DebuggerX86.INS_NAMES[this.aaOpDescs[bOpcode][0]] + "  ").substr(0, 5) + " (" + Str.toHexByte(bOpcode) + "): " + cFreq + " times");
                         cData++;
@@ -5182,9 +5190,9 @@ class DebuggerX86 extends Debugger {
             this.println("warning: port accesses can affect hardware state");
             return;
         }
-        var port = this.parseValue(sPort);
+        let port = this.parseValue(sPort);
         if (port !== undefined) {
-            var bIn = this.bus.checkPortInputNotify(port, 1);
+            let bIn = this.bus.checkPortInputNotify(port, 1);
             this.println(Str.toHexWord(port) + ": " + Str.toHexByte(bIn));
         }
     }
@@ -5224,7 +5232,7 @@ class DebuggerX86 extends Debugger {
      * operators, registers, symbols, other variables, or nothing at all; in the latter case, the variable, if
      * any, is deleted.
      *
-     * Other supported shorthand: "var" with no parameters prints the values of all variables, and "var {variable}"
+     * Other supported shorthand: "var" with no parameters prints the values of all variables, and "let {variable}"
      * prints the value of the specified variable.
      *
      * @this {DebuggerX86}
@@ -5233,7 +5241,7 @@ class DebuggerX86 extends Debugger {
      */
     doVar(sCmd)
     {
-        var a = sCmd.match(/^\s*([A-Z_]?[A-Z0-9_]*)\s*(=?)\s*(.*)$/i);
+        let a = sCmd.match(/^\s*([A-Z_]?[A-Z0-9_]*)\s*(=?)\s*(.*)$/i);
         if (a) {
             if (!a[1]) {
                 if (!this.printVariable()) this.println("no variables");
@@ -5246,7 +5254,7 @@ class DebuggerX86 extends Debugger {
                 this.delVariable(a[1]);
                 return true;    // it's not considered an error to delete a variable that didn't exist
             }
-            var v = this.parseExpression(a[3]);
+            let v = this.parseExpression(a[3]);
             if (v !== undefined) {
                 this.setVariable(a[1], v);
                 return true;
@@ -5267,19 +5275,19 @@ class DebuggerX86 extends Debugger {
      */
     doList(sAddr, fPrint)
     {
-        var sSymbol = null;
+        let sSymbol = null;
 
-        var dbgAddr = this.parseAddr(sAddr, true);
+        let dbgAddr = this.parseAddr(sAddr, true);
         if (dbgAddr) {
 
-            var addr = this.getAddr(dbgAddr);
+            let addr = this.getAddr(dbgAddr);
             if (MAXDEBUG && fPrint) {
                 this.println(this.toHexAddr(dbgAddr) + " (%" + Str.toHex(addr, this.cchAddr) + ')');
             }
 
-            var aSymbol = this.findSymbol(dbgAddr, true);
+            let aSymbol = this.findSymbol(dbgAddr, true);
             if (aSymbol.length) {
-                var nDelta, sDelta, s;
+                let nDelta, sDelta, s;
                 if (aSymbol[0]) {
                     sDelta = "";
                     nDelta = dbgAddr.off - aSymbol[1];
@@ -5332,10 +5340,10 @@ class DebuggerX86 extends Debugger {
             return;
         }
 
-        var fJSON = (asArgs[1] == "json");
-        var iDrive, iSector = 0, nSectors = 0;
+        let fJSON = (asArgs[1] == "json");
+        let iDrive, iSector = 0, nSectors = 0;
 
-        var dbgAddr = (fJSON? {} : this.parseAddr(asArgs[1]));
+        let dbgAddr = (fJSON? {} : this.parseAddr(asArgs[1]));
         if (!dbgAddr) return;
 
         iDrive = this.parseValue(asArgs[2], "drive #");
@@ -5359,13 +5367,13 @@ class DebuggerX86 extends Debugger {
          * this point (ie, if the disk is uninitialized and unformatted), but that will only affect whether the
          * read succeeds or not.
          */
-        var dc = this.fdc;
+        let dc = this.fdc;
         if (iDrive >= 2 && this.hdc) {
             iDrive -= 2;
             dc = this.hdc;
         }
         if (dc) {
-            var drive = dc.copyDrive(iDrive);
+            let drive = dc.copyDrive(iDrive);
             if (drive) {
                 if (drive.disk) {
                     if (fJSON) {
@@ -5379,9 +5387,9 @@ class DebuggerX86 extends Debugger {
                         return;
                     }
                     if (dc.seekDrive(drive, iSector, nSectors)) {
-                        var cb = 0;
-                        var fAbort = false;
-                        var sAddr = this.toHexAddr(dbgAddr);
+                        let cb = 0;
+                        let fAbort = false;
+                        let sAddr = this.toHexAddr(dbgAddr);
                         while (!fAbort && drive.nBytes-- > 0) {
                             (function(dbg, dbgAddrCur) {
                                 dc.readData(drive, function(b, fAsync) {
@@ -5507,12 +5515,12 @@ class DebuggerX86 extends Debugger {
     doMouse(sAction, sDelta)
     {
         if (this.mouse) {
-            var sign = 1;
+            let sign = 1;
             if (sDelta.charAt(0) == '-') {
                 sign = -1;
                 sDelta = sDelta.substr(1);
             }
-            var n = this.parseValue(sDelta, sAction);
+            let n = this.parseValue(sDelta, sAction);
             if (n === undefined) return;
             n = (n * sign)|0;
             switch(sAction) {
@@ -5553,7 +5561,7 @@ class DebuggerX86 extends Debugger {
         }
         switch (asArgs[1]) {
         case "cs":
-            var nCycles;
+            let nCycles;
             if (asArgs[3] !== undefined) nCycles = +asArgs[3];          // warning: decimal instead of hex conversion
             switch (asArgs[2]) {
                 case "int":
@@ -5613,8 +5621,8 @@ class DebuggerX86 extends Debugger {
             this.println("warning: port accesses can affect hardware state");
             return;
         }
-        var port = this.parseValue(sPort, "port #");
-        var bOut = this.parseValue(sByte);
+        let port = this.parseValue(sPort, "port #");
+        let bOut = this.parseValue(sByte);
         if (port !== undefined && bOut !== undefined) {
             this.bus.checkPortOutputNotify(port, 1, bOut);
             this.println(Str.toHexWord(port) + ": " + Str.toHexByte(bOut));
@@ -5639,11 +5647,11 @@ class DebuggerX86 extends Debugger {
             return;
         }
 
-        var fProt;
+        let fProt;
         if (fInstruction == null) fInstruction = true;
 
         if (asArgs != null && asArgs.length > 1) {
-            var sReg = asArgs[1];
+            let sReg = asArgs[1];
             if (this.fpu && sReg == "fp") {
                 this.doFPURegisters(asArgs);
                 return;
@@ -5653,8 +5661,8 @@ class DebuggerX86 extends Debugger {
             }
             else {
              // fInstruction = false;
-                var sValue = null;
-                var i = sReg.indexOf('=');
+                let sValue = null;
+                let i = sReg.indexOf('=');
                 if (i > 0) {
                     sValue = sReg.substr(i + 1);
                     sReg = sReg.substr(0, i);
@@ -5667,11 +5675,11 @@ class DebuggerX86 extends Debugger {
                     return;
                 }
 
-                var w = this.parseExpression(sValue);
+                let w = this.parseExpression(sValue);
                 if (w === undefined) return;
 
-                var fValid = true;
-                var sRegMatch = sReg.toUpperCase();
+                let fValid = true;
+                let sRegMatch = sReg.toUpperCase();
                 if (sRegMatch.charAt(0) == 'E' && this.cchReg <= 4) {
                     sRegMatch = null;
                 }
@@ -5788,7 +5796,7 @@ class DebuggerX86 extends Debugger {
                     if (w) this.cpu.setOF(); else this.cpu.clearOF();
                     break;
                 default:
-                    var fUnknown = true;
+                    let fUnknown = true;
                     if (this.cpu.model >= X86.MODEL_80286) {
                         fUnknown = false;
                         switch(sRegMatch){
@@ -5903,13 +5911,13 @@ class DebuggerX86 extends Debugger {
      */
     doFPURegisters(asArgs)
     {
-        var fpu = this.fpu;
+        let fpu = this.fpu;
         this.assert(fpu);
-        var wStatus = fpu.getStatus(), wControl = fpu.getControl();
-        for (var i = 0; i < 8; i++) {
-            var a = fpu.readFPUStack(i);
+        let wStatus = fpu.getStatus(), wControl = fpu.getControl();
+        for (let i = 0; i < 8; i++) {
+            let a = fpu.readFPUStack(i);
             if (!a) break;
-            var sValue = Str.pad(a[2].toFixed(15), 24, true);
+            let sValue = Str.pad(a[2].toFixed(15), 24, true);
             this.println("ST" + i + ": " + sValue + "  " + Str.toHex(a[4]) + "," + Str.toHex(a[3]) + "  [" + a[0] + ":" + DebuggerX86.FPU_TAGS[a[1]] + "]");
             // this.println("  REG" + a[0] + " " + Str.toBin(a[7], 16) + Str.toBin(a[6]) + Str.toBin(a[5]));
         }
@@ -5932,7 +5940,7 @@ class DebuggerX86 extends Debugger {
             this.fIgnoreNextCheckFault = true;
         }
         if (sAddr !== undefined) {
-            var dbgAddr = this.parseAddr(sAddr, true);
+            let dbgAddr = this.parseAddr(sAddr, true);
             if (!dbgAddr) return;
             this.parseAddrOptions(dbgAddr, sOptions);
             this.setTempBreakpoint(dbgAddr);
@@ -5952,7 +5960,7 @@ class DebuggerX86 extends Debugger {
     doPrint(sCmd)
     {
         sCmd = Str.trim(sCmd);
-        var a = sCmd.match(/^(['"])(.*?)\1$/);
+        let a = sCmd.match(/^(['"])(.*?)\1$/);
         if (!a) {
             this.parseExpression(sCmd, false);
         } else {
@@ -5968,20 +5976,20 @@ class DebuggerX86 extends Debugger {
      */
     doStep(sCmd)
     {
-        var fCallStep = true;
-        var nRegs = (sCmd == "pr"? 1 : 0);
+        let fCallStep = true;
+        let nRegs = (sCmd == "pr"? 1 : 0);
         /*
          * Set up the value for this.nStep (ie, 1 or 2) depending on whether the user wants
          * a subsequent register dump ("pr") or not ("p").
          */
-        var nStep = 1 + nRegs;
+        let nStep = 1 + nRegs;
         if (!this.nStep) {
-            var fPrefix;
-            var fRepeat = false;
-            var dbgAddr = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
+            let fPrefix;
+            let fRepeat = false;
+            let dbgAddr = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
             do {
                 fPrefix = false;
-                var bOpcode = this.getByte(dbgAddr);
+                let bOpcode = this.getByte(dbgAddr);
                 switch (bOpcode) {
                 case X86.OPCODE.ES:
                 case X86.OPCODE.CS:
@@ -6021,7 +6029,7 @@ class DebuggerX86 extends Debugger {
                     break;
                 case X86.OPCODE.GRP4W:
                     if (fCallStep) {
-                        var w = this.getWord(dbgAddr) & X86.OPCODE.CALLMASK;
+                        let w = this.getWord(dbgAddr) & X86.OPCODE.CALLMASK;
                         if (w == X86.OPCODE.CALLW || w == X86.OPCODE.CALLFDW) {
                             this.nStep = nStep;
                             this.getInstruction(dbgAddr);       // advance dbgAddr past this variable-length CALL
@@ -6089,14 +6097,14 @@ class DebuggerX86 extends Debugger {
      */
     getCall(dbgAddr, fFar)
     {
-        var sCall = null;
-        var off = dbgAddr.off;
-        var offOrig = off;
-        for (var n = 1; n <= 6 && !!off; n++) {
+        let sCall = null;
+        let off = dbgAddr.off;
+        let offOrig = off;
+        for (let n = 1; n <= 6 && !!off; n++) {
             if (n > 2) {
                 dbgAddr.off = off;
                 dbgAddr.addr = null;
-                var s = this.getInstruction(dbgAddr);
+                let s = this.getInstruction(dbgAddr);
                 if (s.indexOf("CALL") >= 0 || fFar && s.indexOf("INT") >= 0) {
                     /*
                      * Verify that the length of this CALL (or INT), when added to the address of the CALL (or INT),
@@ -6104,8 +6112,8 @@ class DebuggerX86 extends Debugger {
                      * subtracting that from the string index of the next space, and dividing that difference by two,
                      * to yield the length of the CALL (or INT) instruction, in bytes.
                      */
-                    var i = s.indexOf(' ');
-                    var j = s.indexOf(' ', i+1);
+                    let i = s.indexOf(' ');
+                    let j = s.indexOf(' ', i+1);
                     if (off + (j - i - 1)/2 == offOrig) {
                         sCall = s;
                         break;
@@ -6136,14 +6144,14 @@ class DebuggerX86 extends Debugger {
             return;
         }
 
-        var nFrames = 10, cFrames = 0;
-        var selCode = this.cpu.segCS.sel;
-        var dbgAddrCall = this.newAddr();
-        var dbgAddrStack = this.newAddr(this.cpu.getSP(), this.cpu.getSS());
+        let nFrames = 10, cFrames = 0;
+        let selCode = this.cpu.segCS.sel;
+        let dbgAddrCall = this.newAddr();
+        let dbgAddrStack = this.newAddr(this.cpu.getSP(), this.cpu.getSS());
         this.println("stack trace for " + this.toHexAddr(dbgAddrStack));
 
         while (cFrames < nFrames) {
-            var sCall = null, sCallPrev = null, cTests = 256;
+            let sCall = null, sCallPrev = null, cTests = 256;
             while ((dbgAddrStack.off >>> 0) < this.cpu.regLSPLimit) {
                 dbgAddrCall.off = this.getWord(dbgAddrStack, true);
                 /*
@@ -6173,9 +6181,9 @@ class DebuggerX86 extends Debugger {
              * being one of them, but it's rare that we're debugging recursive code.
              */
             if (!sCall || sCall == sCallPrev) break;
-            var sSymbol = null;
+            let sSymbol = null;
             if (sCmd == "ks") {
-                var a = sCall.match(/[0-9A-F]+$/);
+                let a = sCall.match(/[0-9A-F]+$/);
                 if (a) sSymbol = this.doList(a[0]);
             }
             sCall = Str.pad(sCall, 50) + "  ;" + (sSymbol || "stack=" + this.toHexAddr(dbgAddrStack)); // + " return=" + this.toHexAddr(dbgAddrCall));
@@ -6208,10 +6216,10 @@ class DebuggerX86 extends Debugger {
      */
     doTrace(sCmd, sCount)
     {
-        var dbg = this;
-        var fRegs = (sCmd != "t");
-        var nCount = this.parseValue(sCount, null, true) || 1;
-        var nCycles = (nCount == 1? 0 : 1);
+        let dbg = this;
+        let fRegs = (sCmd != "t");
+        let nCount = this.parseValue(sCount, null, true) || 1;
+        let nCycles = (nCount == 1? 0 : 1);
         if (sCmd == "tc") {
             nCycles = nCount;
             nCount = 1;
@@ -6290,15 +6298,15 @@ class DebuggerX86 extends Debugger {
      */
     doUnassemble(sAddr, sAddrEnd, n)
     {
-        var dbgAddr = this.parseAddr(sAddr, true);
+        let dbgAddr = this.parseAddr(sAddr, true);
         if (!dbgAddr) return;
 
         if (n === undefined) n = 1;
 
-        var cb = 0x100;
+        let cb = 0x100;
         if (sAddrEnd !== undefined) {
 
-            var dbgAddrEnd = this.parseAddr(sAddrEnd, true);
+            let dbgAddrEnd = this.parseAddr(sAddrEnd, true);
             if (!dbgAddrEnd || dbgAddrEnd.off < dbgAddr.off) return;
 
             /*
@@ -6313,21 +6321,21 @@ class DebuggerX86 extends Debugger {
             n = -1;
         }
 
-        var cLines = 0;
-        var sInstruction;
+        let cLines = 0;
+        let sInstruction;
         this.initAddrSize(dbgAddr, true);
 
         while (cb > 0 && n--) {
 
-            var nSequence = (this.isBusy(false) || this.nStep)? this.nCycles : null;
-            var sComment = (nSequence != null? "cycles" : null);
-            var aSymbol = this.findSymbol(dbgAddr);
+            let nSequence = (this.isBusy(false) || this.nStep)? this.nCycles : null;
+            let sComment = (nSequence != null? "cycles" : null);
+            let aSymbol = this.findSymbol(dbgAddr);
 
-            var addr = dbgAddr.addr;    // we snap dbgAddr.addr *after* calling findSymbol(), which re-evaluates it
+            let addr = dbgAddr.addr;    // we snap dbgAddr.addr *after* calling findSymbol(), which re-evaluates it
 
             if (aSymbol[0] && n) {
                 if (!cLines && n || aSymbol[0].indexOf('+') < 0) {
-                    var sLabel = aSymbol[0] + ':';
+                    let sLabel = aSymbol[0] + ':';
                     if (aSymbol[2]) sLabel += ' ' + aSymbol[2];
                     this.println(sLabel);
                 }
@@ -6379,14 +6387,14 @@ class DebuggerX86 extends Debugger {
                 this.iPrevCmd--;
             }
         }
-        var a = [];
+        let a = [];
         if (sCmd) {
             /*
              * With the introduction of breakpoint commands (ie, quoted command sequences
              * associated with a breakpoint), we can no longer perform simplistic splitting.
              *
              *      a = sCmd.split(chSep || ';');
-             *      for (var i = 0; i < a.length; i++) a[i] = Str.trim(a[i]);
+             *      for (let i = 0; i < a.length; i++) a[i] = Str.trim(a[i]);
              *
              * We may now split on semi-colons ONLY if they are outside a quoted sequence.
              *
@@ -6395,8 +6403,8 @@ class DebuggerX86 extends Debugger {
              */
             sCmd = sCmd.toLowerCase().replace(/""/g, "'");
 
-            var iPrev = 0;
-            var chQuote = null;
+            let iPrev = 0;
+            let chQuote = null;
             chSep = chSep || ';';
             /*
              * NOTE: Processing charAt() up to and INCLUDING length is not a typo; we're taking
@@ -6405,8 +6413,8 @@ class DebuggerX86 extends Debugger {
              *
              * In a sense, it allows us to pretend that the string ends with a zero terminator.
              */
-            for (var i = 0; i <= sCmd.length; i++) {
-                var ch = sCmd.charAt(i);
+            for (let i = 0; i <= sCmd.length; i++) {
+                let ch = sCmd.charAt(i);
                 if (ch == '"' || ch == "'") {
                     if (!chQuote) {
                         chQuote = ch;
@@ -6439,10 +6447,10 @@ class DebuggerX86 extends Debugger {
     shiftArgs(asArgs)
     {
         if (asArgs && asArgs.length) {
-            var s0 = asArgs[0];
-            var ch0 = s0.charAt(0);
-            for (var i = 1; i < s0.length; i++) {
-                var ch = s0.charAt(i);
+            let s0 = asArgs[0];
+            let ch0 = s0.charAt(0);
+            for (let i = 1; i < s0.length; i++) {
+                let ch = s0.charAt(i);
                 if (ch0 == '?' || ch0 == 'r' || ch < 'a' || ch > 'z') {
                     asArgs[0] = s0.substr(i);
                     asArgs.unshift(s0.substr(0, i));
@@ -6463,7 +6471,7 @@ class DebuggerX86 extends Debugger {
      */
     doCommand(sCmd, fQuiet)
     {
-        var result = true;
+        let result = true;
 
         try {
             if (!sCmd.length || sCmd == "end") {
@@ -6475,14 +6483,14 @@ class DebuggerX86 extends Debugger {
                 sCmd = "";
             }
             else if (!fQuiet) {
-                var sPrompt = ">> ";
+                let sPrompt = ">> ";
                 if (this.cpu.regCR0 & X86.CR0.MSW.PE) {
                     sPrompt = (this.cpu.regPS & X86.PS.VM)? "-- " : "## ";
                 }
                 this.println(sPrompt + sCmd);
             }
 
-            var ch = sCmd.charAt(0);
+            let ch = sCmd.charAt(0);
             if (ch == '"' || ch == "'") return true;
 
             /*
@@ -6499,7 +6507,7 @@ class DebuggerX86 extends Debugger {
                     sCmd = "a " + this.toHexAddr(this.dbgAddrAssemble) + ' ' + sCmd;
                 }
 
-                var asArgs = this.shiftArgs(sCmd.replace(/ +/g, ' ').split(' '));
+                let asArgs = this.shiftArgs(sCmd.replace(/ +/g, ' ').split(' '));
 
                 switch (asArgs[0].charAt(0)) {
                 case 'a':
@@ -6638,8 +6646,8 @@ class DebuggerX86 extends Debugger {
      */
     doCommands(sCommands, fSave)
     {
-        var a = this.parseCommand(sCommands, fSave);
-        for (var s in a) {
+        let a = this.parseCommand(sCommands, fSave);
+        for (let s in a) {
             if (!this.doCommand(a[+s])) return false;
         }
         return true;
@@ -6655,11 +6663,11 @@ class DebuggerX86 extends Debugger {
      */
     static init()
     {
-        var aeDbg = Component.getElementsByClass(document, PCX86.APPCLASS, "debugger");
-        for (var iDbg = 0; iDbg < aeDbg.length; iDbg++) {
-            var eDbg = aeDbg[iDbg];
-            var parmsDbg = Component.getComponentParms(eDbg);
-            var dbg = new DebuggerX86(parmsDbg);
+        let aeDbg = Component.getElementsByClass(document, PCX86.APPCLASS, "debugger");
+        for (let iDbg = 0; iDbg < aeDbg.length; iDbg++) {
+            let eDbg = aeDbg[iDbg];
+            let parmsDbg = Component.getComponentParms(eDbg);
+            let dbg = new DebuggerX86(parmsDbg);
             Component.bindComponentControls(dbg, eDbg, PCX86.APPCLASS);
         }
     }

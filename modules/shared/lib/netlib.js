@@ -74,19 +74,19 @@ class Net {
     static propagateParms(sURL, req)
     {
         if (sURL !== null && sURL.indexOf('?') < 0) {
-            var i;
-            var sHash = "";
+            let i;
+            let sHash = "";
             if ((i = sURL.indexOf('#')) >= 0) {
                 sHash = sURL.substr(i);
                 sURL = sURL.substr(0, i);
             }
-            var match = sURL.match(/^([a-z])+:(.*)/);
+            let match = sURL.match(/^([a-z])+:(.*)/);
             if (!match && req && req.query) {
                 for (i = 0; i < Net.asPropagate.length; i++) {
-                    var sQuery = Net.asPropagate[i];
-                    var sValue;
+                    let sQuery = Net.asPropagate[i];
+                    let sValue;
                     if ((sValue = req.query[sQuery])) {
-                        var sParm = (sURL.indexOf('?') < 0 ? '?' : '&');
+                        let sParm = (sURL.indexOf('?') < 0 ? '?' : '&');
                         sParm += sQuery + '=';
                         if (sURL.indexOf(sParm) < 0) sURL += sParm + encodeURIComponent(sValue);
                     }
@@ -157,13 +157,13 @@ class Net {
      */
     static getStat(sURL, done)
     {
-        var options = url.parse(sURL);
+        let options = url.parse(sURL);
         options.method = "HEAD";
         options.path = options.pathname;    // TODO: Determine the necessity of aliasing this
-        var req = http.request(options, function(res)
+        let req = http.request(options, function(res)
         {
-            var err = null;
-            var stat = null;
+            let err = null;
+            let stat = null;
             // console.log(JSON.stringify(res.headers));
             if (res.statusCode == 200) {
                 /*
@@ -171,8 +171,8 @@ class Net {
                  * lots of amusing whining by certain people in the Node community), which seems like
                  * a good thing, because that means I can do two simple key look-ups.
                  */
-                var sLength = res.headers['content-length'];
-                var sModified = res.headers['last-modified'];
+                let sLength = res.headers['content-length'];
+                let sModified = res.headers['last-modified'];
                 stat = {
                     size: sLength ? parseInt(sLength, 10) : -1,
                     mtime: sModified ? new Date(sModified) : null,
@@ -213,8 +213,8 @@ class Net {
          * WARNING: Even when an encoding is provided, we don't make any attempt to verify that the incoming
          * data matches that encoding.
          */
-        var sFile = "";
-        var bufFile = null;
+        let sFile = "";
+        let bufFile = null;
         http.get(sURL, function(res)
         {
             res.on('data', function(data)
@@ -272,7 +272,7 @@ class Net {
      */
     static downloadFile(sURL, sFile, done)
     {
-        var file = fs.createWriteStream(sFile);
+        let file = fs.createWriteStream(sFile);
 
         /*
          * http.get() accepts a "url" string in lieu of an "options" object; it automatically builds
@@ -319,7 +319,7 @@ class Net {
      */
     static getResource(sURL, dataPost, fAsync, done)
     {
-        var nErrorCode = -1, sResource = null, response = null;
+        let nErrorCode = -1, sResource = null, response = null;
 
         if (Net.isRemote(sURL)) {
             /*
@@ -339,7 +339,7 @@ class Net {
             if (!Net.sServerRoot) {
                 Net.sServerRoot = path.join(path.dirname(fs.realpathSync(__filename)), "../../../");
             }
-            var sFile = path.join(Net.sServerRoot, sURL);
+            let sFile = path.join(Net.sServerRoot, sURL);
             if (fAsync) {
                 fs.readFile(sFile, {encoding: "utf8"}, function(err, s)
                 {
