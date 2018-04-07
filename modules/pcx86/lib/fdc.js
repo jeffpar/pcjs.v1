@@ -2126,9 +2126,20 @@ class FDC extends Component {
          *
          * TODO: Determine why the Football prototype disk fails to boot if we specify a larger delay (eg, 32) and
          * why TopView 1.10 hangs when the delay is set to 16.  I've worked around those questions for now, by simply
-         * limiting the delay
+         * limiting the delay to the READ_ID command.
+         *
+         * UPDATE: Those aforementioned issues with Football and TopView may have been entirely due to a problem
+         * with the initial version of requestInterrupt(), which had an additional fCondition parameter into which I
+         * was passing the entire "drive && fIRQ && !(drive.resCode & FDC.REG_DATA.RES.NOT_READY)" expression.  Note
+         * that if "drive" was undefined, the entire expression would be "undefined", which I assumed would translate
+         * to a "falsey" fCondition, but the fCondition parameter was also declared with a default value of true,
+         * and default values are used not only when NO value is supplied but ALSO when an "undefined" value is supplied.
+         *
+         * Oops.
          */
-        this.requestInterrupt(drive && fIRQ && !(drive.resCode & FDC.REG_DATA.RES.NOT_READY), bCmdMasked == FDC.REG_DATA.CMD.READ_ID? 16 : 0);
+        if (drive && fIRQ && !(drive.resCode & FDC.REG_DATA.RES.NOT_READY)) {
+            this.requestInterrupt(bCmdMasked == FDC.REG_DATA.CMD.READ_ID? 16 : 0);
+        }
     }
 
     /**
@@ -2222,17 +2233,16 @@ class FDC extends Component {
     }
 
     /**
-     * requestInterrupt(fCondition, nDelay)
+     * requestInterrupt(nDelay)
      *
      * Request an FDC interrupt, as long as INT_ENABLE is set (and the optional supplied condition, if any, is true).
      *
      * @this {FDC}
-     * @param {boolean} [fCondition]
      * @param {number} [nDelay]
      */
-    requestInterrupt(fCondition = true, nDelay = 0)
+    requestInterrupt(nDelay)
     {
-        if (fCondition && (this.regOutput & FDC.REG_OUTPUT.INT_ENABLE)) {
+        if (this.regOutput & FDC.REG_OUTPUT.INT_ENABLE) {
             if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.FDC, nDelay);
         }
     }
