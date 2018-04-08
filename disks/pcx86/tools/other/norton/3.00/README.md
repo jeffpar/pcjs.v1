@@ -9,7 +9,7 @@ Norton Utilities 3.00
 
 ### Directory of Norton Utilities 3.00 (1985-01-14)
 
-	 Volume in drive A is NU300-1985-
+	 Volume in drive A is NU30-850114
 
 	Directory of A:\
 
