@@ -1318,8 +1318,12 @@ class FDC extends Component {
              *
              * WARNING: This conversion of drive number to drive letter, starting with A:, is very simplistic
              * and will not match the drive mappings that DOS ultimately uses (ie, for drives beyond B:).
+             *
+             * TODO: Consider adding support for non-modal notices that appear briefly over the machine and then fade,
+             * because these modal alerts quickly become annoying.  In the meantime, I now set fPrintOnly to true, on the
+             * theory no message is a good sign, while load errors in disk.js should continue to trigger notifications.
              */
-            if (!drive.fnCallReady) this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), drive.fAutoMount || fAutoMount);
+            if (!drive.fnCallReady) this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), true /* drive.fAutoMount || fAutoMount */);
 
             /*
              * Update the drive's current media parameters to match the disk's.
