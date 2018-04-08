@@ -48805,14 +48805,20 @@ class Card extends Controller {
             this.regDACData     = data[31];
         }
         /*
-         * This records the "dirtiness" of the EGA's four bit planes: if any of bits 0-7 are set, then plane 0 is dirty; if
-         * any of bits 8-15 are set, then plane 1 is dirty; and so on.  Support for this evolving, so don't expect it to be
-         * 100% accurate (ie, set bits should reliably indicate dirtiness, but clear bits do NOT reliably indicate cleanliness).
+         * nDirtyPlanes records the "dirtiness" of the EGA's four bit planes: if any of bits 0-7 are set, then plane 0
+         * is dirty; if any of bits 8-15 are set, then plane 1 is dirty; and so on.  Support for this evolving, so don't
+         * expect it to be 100% accurate (ie, set bits should reliably indicate dirtiness, but clear bits do NOT
+         * reliably indicate cleanliness).
          *
-         * At the moment, all we really care about is detecting when font data in plane 2 may have been modified, so dirtiness
-         * will tend to be tracked ONLY when the card is in a state typically used by the ROM BIOS for updating font data.
+         * At the moment, all we really care about is detecting when font data in plane 2 may have been modified, so
+         * dirtiness will tend to be tracked ONLY when the card is in a state typically used by the ROM BIOS for updating
+         * font data.
+         *
+         * Also, whenever plane 2 is modified in nDirtyPlanes, one of bits 0-7 of nDirtyBanks is modified as well, indicating
+         * which of the corresponding font "banks" was modified.  The EGA supported only four font banks (0, 2, 4, and 6),
+         * while the VGA added support for four additional "interleaved" banks (1, 3, 5, and 7).
          */
-        this.nDirtyPlanes = 0;
+        this.nDirtyPlanes = this.nDirtyBanks = 0;
     }
 
     /**
@@ -50080,10 +50086,12 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
     dw = (dw & card.nSetMapMask) | card.nSetMapBits;
     dw = (dw & card.nBitMapMask) | (card.latches & ~card.nBitMapMask);
     dw = (dw & card.nSeqMapMask) | (this.adw[idw] & ~card.nSeqMapMask);
-    if (this.adw[idw] != dw) {
-        this.flags |= Memory.FLAGS.DIRTY;
-        card.nDirtyPlanes |= (this.adw[idw] ^ dw);
+    let delta = (this.adw[idw] ^ dw);
+    if (delta) {        // if (this.adw[idw] != dw) ...
         this.adw[idw] = dw;
+        this.flags |= Memory.FLAGS.DIRTY;
+        card.nDirtyPlanes |= delta;
+        if (delta & 0x00ff0000) card.nDirtyBanks |= (1 << ((idw >> 13) & 7));
     }
     if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
         card.video.printMessage("writeByteMode0(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
@@ -63580,8 +63588,12 @@ class FDC extends Component {
              *
              * WARNING: This conversion of drive number to drive letter, starting with A:, is very simplistic
              * and will not match the drive mappings that DOS ultimately uses (ie, for drives beyond B:).
+             *
+             * TODO: Consider adding support for non-modal notices that appear briefly over the machine and then fade,
+             * because these modal alerts quickly become annoying.  In the meantime, I now set fPrintOnly to true, on the
+             * theory no message is a good sign, while load errors in disk.js should continue to trigger notifications.
              */
-            if (!drive.fnCallReady) this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), drive.fAutoMount || fAutoMount);
+            if (!drive.fnCallReady) this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), true /* drive.fAutoMount || fAutoMount */);
 
             /*
              * Update the drive's current media parameters to match the disk's.
