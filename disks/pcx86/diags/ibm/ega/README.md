@@ -6,7 +6,7 @@ machines:
   - id: ibm5160
     type: pcx86
     debugger: true
-    commands: bp &0A9C:014F
+    commands: bp &0AC6:019B
     messages: video
     config: /devices/pcx86/machine/5160/ega/256kb/debugger/machine.xml
     autoMount:
@@ -50,6 +50,13 @@ EGA utilities that he kindly provided.  Sadly, FantasyLand doesn't yet work in t
 "to-do" list.  Stay tuned!
 
 {% include machine.html id="ibm5160" %}
+
+<div>
+  <canvas id="ibm5160.videoEGA.font0" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
+  <canvas id="ibm5160.videoEGA.font1" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
+  <canvas id="ibm5160.videoEGA.font2" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
+  <canvas id="ibm5160.videoEGA.font3" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
+</div>
 
 ### Directory of IBM EGA Fantasy Land Demo
 

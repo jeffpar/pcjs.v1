@@ -545,20 +545,19 @@ class Card extends Controller {
             this.regDACData     = data[31];
         }
         /*
-         * nDirtyPlanes records the "dirtiness" of the EGA's four bit planes: if any of bits 0-7 are set, then plane 0
-         * is dirty; if any of bits 8-15 are set, then plane 1 is dirty; and so on.  Support for this evolving, so don't
-         * expect it to be 100% accurate (ie, set bits should reliably indicate dirtiness, but clear bits do NOT
-         * reliably indicate cleanliness).
+         * While every Video memory block maintains its own DIRTY flag, used by the Bus cleanMemory() function to
+         * quickly determine if anything changed within a given block, we supplement that information at the Card level
+         * in certain memory controller functions that we know are used to modify font data.
          *
-         * At the moment, all we really care about is detecting when font data in plane 2 may have been modified, so
-         * dirtiness will tend to be tracked ONLY when the card is in a state typically used by the ROM BIOS for updating
-         * font data.
+         * Whenever plane 2 is modified, one of bits 0-7 in bitsDirtyBanks is modified as well, indicating which of
+         * the corresponding font "banks" was modified.  The EGA supports only four font banks (0, 2, 4, and 6), while
+         * the VGA supports four additional "interleaved" banks (1, 3, 5, and 7).
          *
-         * Also, whenever plane 2 is modified in nDirtyPlanes, one of bits 0-7 of nDirtyBanks is modified as well, indicating
-         * which of the corresponding font "banks" was modified.  The EGA supported only four font banks (0, 2, 4, and 6),
-         * while the VGA added support for four additional "interleaved" banks (1, 3, 5, and 7).
+         * NOTE: Our bank numbers (0-7) should not be confused with EGA INT 10h (AH=11h) "Character Generator Routine"
+         * block numbers 0 to 3, which must be multiplied by 2 to obtain the corresponding bank number; VGA block numbers
+         * 4 to 7 must also be multiplied by 2 and then reduced by 7 to produce the correct interleaved bank number.
          */
-        this.nDirtyPlanes = this.nDirtyBanks = 0;
+        this.bitsDirtyBanks = 0;
     }
 
     /**
@@ -1827,14 +1826,22 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
     dw = (dw & card.nBitMapMask) | (card.latches & ~card.nBitMapMask);
     dw = (dw & card.nSeqMapMask) | (this.adw[idw] & ~card.nSeqMapMask);
     let delta = (this.adw[idw] ^ dw);
-    if (delta) {        // if (this.adw[idw] != dw) ...
+    if (delta) {
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
-        card.nDirtyPlanes |= delta;
-        if (delta & 0x00ff0000) card.nDirtyBanks |= (1 << ((idw >> 13) & 7));
+        // card.nDirtyPlanes |= delta;          // we no longer track dirty planes, just dirty font banks
+        if (delta & 0x00ff0000) {               // if any plane 2 bits were modified, mark the appropriate font bank dirty
+            let bitDirtyBank = (1 << ((idw >> 13) & 7));
+            if (!(card.bitsDirtyBanks & bitDirtyBank)) {
+                card.bitsDirtyBanks |= bitDirtyBank;
+                if (DEBUG && card.video.messageEnabled(Messages.VIDEO)) {
+                    card.video.printf("writeByteMode0(0x%08X): modified font bank 0x%02X\n", addr, bitDirtyBank);
+                }
+            }
+        }
     }
     if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode0(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
+        card.video.printf("writeByteMode0(0x%08X): 0x%02X -> 0x%08X%s\n", addr, b, dw);
     }
 };
 
@@ -2244,7 +2251,7 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.THRU]  = Card.ACCESS.writeByte;
  */
 class Video extends Component {
     /**
-     * Video(parmsVideo, canvas, context, textarea, container)
+     * Video(parmsVideo, canvas, context, textarea, container, aDiagElements)
      *
      * The Video component can be configured with the following (parmsVideo) properties:
      *
@@ -2295,8 +2302,9 @@ class Video extends Component {
      * @param {CanvasRenderingContext2D} [context]
      * @param {HTMLTextAreaElement} [textarea]
      * @param {HTMLElement} [container]
+     * @param {Array.<HTMLElement>} [aDiagElements]
      */
-    constructor(parmsVideo, canvas, context, textarea, container)
+    constructor(parmsVideo, canvas, context, textarea, container, aDiagElements)
     {
         super("Video", parmsVideo, Messages.VIDEO);
 
@@ -2505,6 +2513,22 @@ class Video extends Component {
             let sFileExt = Str.getExtension(this.sFileURL);
             if (sFileExt != "json") {
                 this.sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFileURL + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
+            }
+        }
+
+        /*
+         * TODO: A complete list of what we want to support in terms of "diagnostic elements" needs to be fleshed out
+         * at some point.  For now, all I do is save the contexts of all supplied canvas elements and use them in createFont()
+         * to display the font data (for as many font banks as there are canvas elements) whenever the font(s) get rebuilt.
+         */
+        this.aDiagContexts = [];
+        if (aDiagElements) {
+            for (let i = 0; i < aDiagElements.length; i++) {
+                let element = aDiagElements[i];
+                if (element.tagName == "CANVAS") {
+                    let context = element.getContext("2d");
+                    this.aDiagContexts.push(context);
+                }
             }
         }
     }
@@ -3809,8 +3833,13 @@ class Video extends Component {
      *
      * We're also called whenever EGA palette registers are modified, since one or more fonts will likely need
      * to be rebuilt (this is because our fonts contain pre-rendered images of all glyphs for all 16 active colors).
+     *
      * Calls to buildFonts() should not be expensive though: the underlying createFont() function rebuilds a font only
-     * if its color has actually changed.
+     * if one or more of the following is true:
+     *
+     *  1) the font shape has changed
+     *  2) the font colors have changed (only affected colors are rebuilt, if there are no other changes)
+     *  3) the font data has changed
      *
      * @this {Video}
      * @param {boolean} [fRebuild] (true if this is a rebuild; default is false)
@@ -3831,12 +3860,13 @@ class Video extends Component {
              * which bank is active, we'll build the default font, using the available font data (ie, abFontData).
              */
             let aRGBColors;
+            let nFonts = 0;
             let abFontData = this.abFontData;
 
             switch(this.nCardFont) {
             case Video.CARD.MDA:
                 if (this.aFontOffsets[1] != null) {
-                    if (this.createFont(Video.CARD.MDA, this.cxFontChar || 9, 14, this.aFontOffsets[1], this.cxFontChar? 0 : 0x0800, abFontData, false, Video.aMDAColors, Video.aMDAColorMap)) {
+                    if (this.createFont(this.nCardFont, this.cxFontChar || 9, 14, this.aFontOffsets[1], this.cxFontChar? 0 : 0x0800, abFontData, false, Video.aMDAColors, Video.aMDAColorMap)) {
                         fChanges = true;
                     }
                 }
@@ -3845,19 +3875,24 @@ class Video extends Component {
             case Video.CARD.CGA:
                 aRGBColors = this.getCardColors();
                 if (this.aFontOffsets[0] != null) {
-                    if (this.createFont(Video.CARD.CGA, this.cxFontChar || 8, 8, this.aFontOffsets[0], 0x0000, abFontData, false, aRGBColors)) {
+                    if (this.createFont(this.nCardFont, this.cxFontChar || 8, 8, this.aFontOffsets[0], 0x0000, abFontData, false, aRGBColors)) {
                         fChanges = true;
                     }
                 }
                 break;
 
-            case Video.CARD.EGA:
             case Video.CARD.VGA:
+                nFonts += 4;
+                /* falls through */
+
+            case Video.CARD.EGA:
+                nFonts += 4;
                 aRGBColors = this.getCardColors();
                 let cxChar = this.cxFontChar || 8;
                 let cyChar = 14;
                 let fNewData = false;
                 let offData = this.aFontOffsets[1];
+                let bitsBanks = 0x1;
                 let cx = (this.cardEGA.regSEQData[Card.SEQ.CLKMODE.INDX] & Card.SEQ.CLKMODE.DOTS8)? 8 : 9;
                 let cy = (this.cardEGA.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN]);
                 if (cy++) {
@@ -3865,14 +3900,23 @@ class Video extends Component {
                     cyChar = cy;
                     offData = 0;
                     abFontData = null;
-                    if (this.cardEGA.nDirtyPlanes & 0x00ff0000) {
-                        this.cardEGA.nDirtyPlanes &= ~0x00ff0000;
-                        fNewData = true;
+                    if (bitsBanks = this.cardEGA.bitsDirtyBanks) {
+                        if (DEBUG) this.printf("buildFonts(): dirty font data detected (0x%02X)\n", bitsBanks);
+                        this.cardEGA.bitsDirtyBanks = 0;
                     }
                 }
                 if (offData != null) {
-                    if (this.createFont(this.nCardFont, cxChar, cyChar, offData, 0, abFontData, fNewData, aRGBColors)) {
-                        fChanges = true;
+                    /*
+                     * We process banks in a specific order (0, 2, 4, 6, 1, 3, 5, 7), with the last four on VGA only.
+                     */
+                    if (abFontData) nFonts = 1;
+                    for (let iBank = 0, iFont = 0; iFont < nFonts; iBank += 2, iFont++) {
+                        let bit = 0x1 << iBank;
+                        if (!abFontData) offData = iBank * 8192;
+                        if (this.createFont(this.nCardFont + iFont, cxChar, cyChar, offData, 0, abFontData, !!(bitsBanks & bit), aRGBColors)) {
+                            fChanges = true;
+                        }
+                        if (iBank == 6) iBank = -1;
                     }
                 }
                 break;
@@ -3940,35 +3984,69 @@ class Video extends Component {
         let nDouble = (this.fDoubleFont? 1 : 0);
         let cxCell = cxChar << nDouble;
         let cyCell = cyChar << nDouble;
-        let fNewSize = false;
+        let fNewShape = false;
         if (font.cxCell != cxCell || font.cyCell != cyCell) {
             font.cxChar = cxChar;
             font.cyChar = cyChar;
             font.cxCell = cxCell;
             font.cyCell = cyCell;
-            fNewSize = true;
+            fNewShape = true;
         }
 
         for (let iColor = 0; iColor < nColors; iColor++) {
             let rgbColor = aRGBColors[iColor];
             /*
-             * If any of the font's size, data, or color has changed, then recreate it.  Also, we don't need to check
+             * If any of the font's shape, data, or color has changed, then recreate it.  Also, we don't need to check
              * for a color change if we already know there was a size or data change.
              */
-            let fChanged = fNewSize || fNewData;
+            let fChanged = fNewShape || fNewData;
             if (!fChanged) {
                 let rgbColorOrig = font.aCSSColors[iColor]? font.aRGBColors[iColor] : [];
                 fChanged = (rgbColor[0] !== rgbColorOrig[0] || rgbColor[1] !== rgbColorOrig[1] || rgbColor[2] !== rgbColorOrig[2]);
             }
             if (fChanged) {
                 if (DEBUG && !fChanges) {
-                    this.printf("createFont(%d): creating %s font (%d,%d)\n", nFont, Video.cardSpecs[nFont][0], cxChar, cyChar);
+                    this.printf("createFont(%d): creating %s font (%d,%d)\n", nFont, Video.cardSpecs[this.nCardFont][0], cxChar, cyChar);
                 }
                 if (DEBUG) this.printf("createFontColor(%d): [%s]\n", iColor, rgbColor);
-                this.createFontColor(font, iColor, rgbColor, nDouble, offData, offSplit, cxChar, cyChar, abFontData);
+                if (!this.createFontColor(font, iColor, rgbColor, nDouble, offData, offSplit, cxChar, cyChar, abFontData)) {
+                    this.printf("createFont(%d): no font data found\n", nFont);
+                    this.assert(!fChanges);     // the lack of any font data should be detected on the very first color
+                    font = null;
+                    break;
+                }
                 fChanges = true;
             }
         }
+
+        if (fChanges) {
+            if (this.aDiagContexts.length) {
+                let contextDst = this.aDiagContexts[nFont - this.nCardFont];
+                if (contextDst) {
+                    let canvasDst = contextDst.canvas;
+                    let cxDstColor = (canvasDst.width / nColors) | 0;
+                    let cyDstColor = canvasDst.height;
+                    let aspectDst = canvasDst.width / canvasDst.height;
+                    for (let iColor = 0; iColor < nColors; iColor++) {
+                        let canvasSrc = font.aCanvas[iColor];
+                        contextDst.fillStyle = font.aCSSColors[(iColor + 9) % nColors];
+                        contextDst.fillRect(iColor * cxDstColor, 0, cxDstColor, cyDstColor);
+                        /*
+                         * We want to draw whatever vertical slice of the font canvas will fit in the destination slice
+                         * without altering the aspect ratio.  So the source and destination heights will be 100% of their
+                         * respective canvases, while the source width will be multiplied by the ratio of the heights and
+                         * then chopped.
+                         */
+                        let ratioHeight = canvasDst.height / canvasSrc.height;
+                        let cxSrc = (canvasSrc.width * ratioHeight) | 0;
+                        if (cxSrc > cxDstColor) cxSrc = cxDstColor;
+                        let cySrc = canvasSrc.height;
+                        contextDst.drawImage(canvasSrc, 0, 0, cxSrc, cySrc, iColor * cxDstColor, 0, cxDstColor, cyDstColor);
+                    }
+                }
+            }
+        }
+
         this.aFonts[nFont] = font;
         return fChanges;
     }
@@ -4002,6 +4080,7 @@ class Video extends Component {
      * @param {number} cxChar is the width of the font characters
      * @param {number} cyChar is the height of the font characters
      * @param {Array.<number>|null} abFontData is the raw font data, from the ROM font file
+     * @return {boolean} true if font created, false if not
      */
     createFontColor(font, iColor, rgbColor, nDouble, offData, offSplit, cxChar, cyChar, abFontData)
     {
@@ -4011,7 +4090,6 @@ class Video extends Component {
         canvasFont.height = (font.cyCell << 4);
         let contextFont = canvasFont.getContext("2d");
 
-        let iChar, x, y;
         let imageChar = contextFont.createImageData(font.cxCell, font.cyCell);
 
         /*
@@ -4023,8 +4101,28 @@ class Video extends Component {
          * Note that for backward compatibility with the EGA, the VGA's additional 4 font banks are interleaved with the
          * EGA's original 4.
          */
+        let iChar, y, x;
+        let cyLimit = 32;
         let adwMemory = this.cardActive && this.cardActive.adwMemory;
-        let cyLimit = abFontData? ((cyChar < 8 || !offSplit)? cyChar : 8) : 32;
+        if (abFontData) {
+            cyLimit = (cyChar < 8 || !offSplit)? cyChar : 8;
+        }
+        else {
+            /*
+             * When font data must be extracted from VRAM (instead of the supplied abFontData), we first do a "pre-scan"
+             * to see if any font data actually exists.  For example. the video card's BIOS might zero ALL the font banks
+             * (thereby making them "dirty") but then load only the first bank.
+             */
+            for (iChar = 0; iChar < 256; iChar++) {
+                let offChar = offData + iChar * cyLimit;
+                for (y = 0; y < cyChar; y++) {
+                    let b = (adwMemory[offChar + y] >> 16) & 0xff;
+                    if (b) break;
+                }
+                if (y < cyChar) break;
+            }
+            if (iChar == 256) return false;
+        }
 
         for (iChar = 0; iChar < 256; iChar++) {
             let offChar = offData + iChar * cyLimit;
@@ -4071,9 +4169,10 @@ class Video extends Component {
         /*
          * The colors for cell backgrounds and cursor elements must be converted to CSS color strings.
          */
-        font.aCSSColors[iColor] = "#" + Str.toHex(rgbColor[0], 2) + Str.toHex(rgbColor[1], 2) + Str.toHex(rgbColor[2], 2);
+        font.aCSSColors[iColor] = Str.sprintf("#%02X%02X%02X", rgbColor[0], rgbColor[1], rgbColor[2]);
         font.aRGBColors[iColor] = rgbColor;
         font.aCanvas[iColor] = canvasFont;
+        return true;
     }
 
     /**
@@ -4293,7 +4392,7 @@ class Video extends Component {
          * cyCursor values are relative to when it's time to scale them.
          */
         if (this.yCursor !== bCursorStart || this.cyCursor !== bCursorSize || this.cyCursorWrap !== bCursorWrap) {
-            if (DEBUG) this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d (0x%02x-0x%02x)\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize, oCursorStart, oCursorEnd);
+            if (DEBUG) this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d (0x%02X-0x%02X)\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize, oCursorStart, oCursorEnd);
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
             this.cyCursorWrap = bCursorWrap;
@@ -4493,7 +4592,7 @@ class Video extends Component {
         let card = this.cardActive;
         if (card && nAccess != null && nAccess != card.nAccess) {
 
-            if (MAXDEBUG) this.printf("setCardAccess(0x%04x)\n", nAccess);
+            if (DEBUG) this.printf("setCardAccess(0x%04X)\n", nAccess);
 
             card.setMemoryAccess(nAccess);
 
@@ -4601,6 +4700,8 @@ class Video extends Component {
             this.cxBuffer = this.nCols;
             this.cyBuffer = this.nRows;
         }
+
+        if (!this.cxBuffer || !this.cyBuffer) return;   // failsafe
 
         if (this.fSmoothing != null && this.sSmoothing) {
             this.contextScreen[this.sSmoothing] = this.nCardFont? true : this.fSmoothing;
@@ -4902,7 +5003,7 @@ class Video extends Component {
 
                 if (this.addrBuffer) {
 
-                    if (DEBUG) this.printf("setMode(0x%02x): removing 0x%08x bytes from 0x%08x\n", nMode, this.sizeBuffer, this.addrBuffer);
+                    if (DEBUG) this.printf("setMode(0x%02X): removing 0x%08X bytes from 0x%08X\n", nMode, this.sizeBuffer, this.addrBuffer);
 
                     if (!this.bus.removeMemory(this.addrBuffer, this.sizeBuffer)) {
                         /*
@@ -4919,7 +5020,7 @@ class Video extends Component {
                 this.addrBuffer = card.addrBuffer;
                 this.sizeBuffer = card.sizeBuffer;
 
-                if (DEBUG) this.printf("setMode(0x%02x): adding 0x%08x bytes to 0x%08x\n", nMode, this.sizeBuffer, this.addrBuffer);
+                if (DEBUG) this.printf("setMode(0x%02X): adding 0x%08X bytes to 0x%08X\n", nMode, this.sizeBuffer, this.addrBuffer);
 
                 if (!this.bus.addMemory(card.addrBuffer, card.sizeBuffer, Memory.TYPE.VIDEO, card)) {
                     /*
@@ -6790,7 +6891,7 @@ class Video extends Component {
                 if (bCur > bMax) {
                     bCur = card.regCRTData[card.regCRTIndx ^ 0x1] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
                     if (bCur > bMax) {
-                        if (DEBUG) this.printf("outCRTCData(0x%02x): ignoring write to CRTC[0x%02x] since 0x%02x > 0x%02x\n", bOut, card.regCRTIndx, bCur, bMax);
+                        if (DEBUG) this.printf("outCRTCData(0x%02X): ignoring write to CRTC[0x%02X] since 0x%02X > 0x%02X\n", bOut, card.regCRTIndx, bCur, bMax);
                         return;
                     }
                 }
@@ -6837,7 +6938,7 @@ class Video extends Component {
             this.checkCursor();
         }
         else if (DEBUG) {
-            this.printf("outCRTCData(0x%02x): ignoring unexpected write to CRTC[0x%02x]\n", bOut, card.regCRTIndx);
+            this.printf("outCRTCData(0x%02X): ignoring unexpected write to CRTC[0x%02X]\n", bOut, card.regCRTIndx);
         }
     }
 
@@ -6976,7 +7077,8 @@ class Video extends Component {
                 this.cardActive.dumpVideoBuffer(asArgs);
                 return;
             }
-            component.println("BIOSMODE: " + Str.toHexByte(this.nMode));
+            component.println("    MODE: " + Str.toHexByte(this.nMode));
+            component.println("  BUFFER: " + Str.toHexLong(this.cardActive.addrBuffer));
             this.cardActive.dumpVideoCard();
         }
     }
@@ -7140,10 +7242,15 @@ class Video extends Component {
             element.appendChild(textarea);
 
             /*
+             * See if there are any "diagnostic" elements we should pass along, too.
+             */
+            let aDiagElements = /** @type {Array.<HTMLElement>} */ (Component.getElementsByClass(document, PCX86.APPCLASS + "-video-diagnostic"));
+
+            /*
              * Now we can create the Video object, record it, and wire it up to the associated document elements.
              */
             let context = /** @type {CanvasRenderingContext2D} */ (canvas.getContext("2d"));
-            let video = new Video(parmsVideo, canvas, context, textarea /* || input */, element);
+            let video = new Video(parmsVideo, canvas, context, textarea /* || input */, element, aDiagElements);
 
             /*
              * Bind any video-specific controls (eg, the Refresh button). There are no essential controls, however;
