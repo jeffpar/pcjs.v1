@@ -52152,7 +52152,7 @@ class Video extends Component {
                 let cyChar = 14;
                 let fNewData = false;
                 let offData = this.aFontOffsets[1];
-                let bitsBanks = 0x1;
+                let bitsBanks = 0;
                 let cx = (this.cardEGA.regSEQData[Card.SEQ.CLKMODE.INDX] & Card.SEQ.CLKMODE.DOTS8)? 8 : 9;
                 let cy = (this.cardEGA.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN]);
                 if (cy++) {
