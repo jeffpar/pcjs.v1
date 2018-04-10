@@ -53797,7 +53797,7 @@ class Video extends Component {
              * has been successfully loaded, because we're not allowed to call updateChar() if there's no font.
              */
             if (this.aFonts[this.nCardFont]) {
-                this.updateScreenText(addrScreen, addrScreenLimit, iCell, nCells);
+                this.updateScreenText(addrBuffer, addrScreen, addrScreenLimit, iCell, nCells);
             }
         }
         else if (this.cbSplit) {
@@ -53822,16 +53822,17 @@ class Video extends Component {
     }
 
     /**
-     * updateScreenText(addrScreen, addrScreenLimit, iCell, nCells)
+     * updateScreenText(addrBuffer, addrScreen, addrScreenLimit, iCell, nCells)
      *
      * @this {Video}
+     * @param {number} addrBuffer
      * @param {number} addrScreen
      * @param {number} addrScreenLimit
      * @param {number} iCell
      * @param {number} nCells
      * @return {number} (number of cells processed)
      */
-    updateScreenText(addrScreen, addrScreenLimit, iCell, nCells)
+    updateScreenText(addrBuffer, addrScreen, addrScreenLimit, iCell, nCells)
     {
         /*
          * If MDA.MODE.BLINK_ENABLE is set and a cell's blink bit is set, then if (cBlinks & 0x2) != 0,
@@ -53847,6 +53848,10 @@ class Video extends Component {
         let dataBlink = 0;
         let dataDraw = (Video.ATTRS.DRAW_FGND << 8);
         let dataMask = 0xfffff;
+        let adwMemory = this.cardActive.adwMemory;
+
+        let nShift = (this.cardActive.nAccess & Card.ACCESS.WRITE.THRU)? 1 : 0;
+
         let fBlinkEnable = (this.cardActive.regMode & Card.MDA.MODE.BLINK_ENABLE);
         if (this.nCard >= Video.CARD.EGA) {
             fBlinkEnable = (this.cardActive.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.BLINK_ENABLE);
@@ -53860,7 +53865,13 @@ class Video extends Component {
 
         this.cBlinkVisible = 0;
         while (addrScreen < addrScreenLimit && iCell < nCells) {
-            let data = this.bus.getShortDirect(addrScreen);
+
+            let idw = (addrScreen - addrBuffer) >>> nShift;
+
+
+            let data = (adwMemory[idw] & 0xffff);
+            // let data = this.bus.getShortDirect(addrScreen);
+
             data |= dataDraw;
             if (data & dataBlink) {
                 this.cBlinkVisible++;
@@ -53869,6 +53880,8 @@ class Video extends Component {
             if (iCell == this.iCellCursor) {
                 data |= ((this.cBlinks & 0x1)? (Video.ATTRS.DRAW_CURSOR << 8) : 0);
             }
+
+
 
             if (!this.fCellCacheValid || data !== this.aCellCache[iCell]) {
                 let col = iCell % this.nCols;
@@ -54007,7 +54020,6 @@ class Video extends Component {
     {
         let iCell = 0;
         let cCells = addrScreenLimit - addrScreen;
-        let addr = addrScreen;
         let aPixelColors = this.getCardColors();
         let adwMemory = this.cardActive.adwMemory;
 
@@ -54021,8 +54033,8 @@ class Video extends Component {
         let nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
 
         this.cBlinkVisible = 0;
-        while (addr < addrScreenLimit) {
-            let idw = addr++ - addrBuffer;
+        while (addrScreen < addrScreenLimit) {
+            let idw = addrScreen++ - addrBuffer;
 
             let data = adwMemory[idw];
 
@@ -54093,7 +54105,7 @@ class Video extends Component {
             if (x >= this.nCols) {
                 x = 0;
                 if (++y > this.nRows) break;
-                addr += nRowAdjust;
+                addrScreen += nRowAdjust;
             }
         }
 
@@ -55777,11 +55789,11 @@ Video.monitorSpecs[ChipSet.MONITOR.VGACOLOR] = {
  */
 Video.aEGAMonitorSwitches = {
     0x06: [ChipSet.MONITOR.TV,           ChipSet.MONITOR.MONO,  true],  // "1001"
-    0x07: [ChipSet.MONITOR.COLOR,        ChipSet.MONITOR.MONO,  true],  // "0001"
+    0x07: [ChipSet.MONITOR.COLOR,        ChipSet.MONITOR.MONO,  true],  // "0001" [used by 5153 monitor configs]
     0x08: [ChipSet.MONITOR.EGAEMULATION, ChipSet.MONITOR.MONO,  true],  // "1110"
-    0x09: [ChipSet.MONITOR.EGACOLOR,     ChipSet.MONITOR.MONO,  true],  // "0110" [our default; see bEGASwitches below]
+    0x09: [ChipSet.MONITOR.EGACOLOR,     ChipSet.MONITOR.MONO,  true],  // "0110" [used by 5154 monitor configs (default; see bEGASwitches below)]
     0x0a: [ChipSet.MONITOR.MONO,         ChipSet.MONITOR.TV,    true],  // "1010"
-    0x0b: [ChipSet.MONITOR.MONO,         ChipSet.MONITOR.COLOR, true],  // "0010"
+    0x0b: [ChipSet.MONITOR.MONO,         ChipSet.MONITOR.COLOR, true],  // "0010" [used by 5151 monitor configs]
     0x00: [ChipSet.MONITOR.TV,           ChipSet.MONITOR.MONO,  false], // "1111"
     0x01: [ChipSet.MONITOR.COLOR,        ChipSet.MONITOR.MONO,  false], // "0111"
     0x02: [ChipSet.MONITOR.EGAEMULATION, ChipSet.MONITOR.MONO,  false], // "1011"
