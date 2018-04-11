@@ -4653,7 +4653,6 @@ class Video extends Component {
         this.nCardFont = 0;
         this.nCols = this.nColsDefault;
         this.nRows = this.nRowsDefault;
-        this.nColsLogical = this.nCols;
         this.nCellsPerWord = Video.aModeParms[Video.MODE.MDA_80X25][2];
 
         let cbPadding = 0, cxCell = 0, cyCell = 0;
@@ -4817,11 +4816,24 @@ class Video extends Component {
                 let regGRCMisc = card.regGRCData[Card.GRC.MISC.INDX];
                 if (regGRCMisc != null) {
 
+                    let nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAXSCAN.INDX];
+
                     switch(regGRCMisc & Card.GRC.MISC.MAPMEM) {
                     case Card.GRC.MISC.MAPA0128:
                         card.addrBuffer = 0xA0000;
                         card.sizeBuffer = cbBuffer;     // 0x20000
-                        nMode = Video.MODE.UNKNOWN;     // no BIOS mode uses this mapping, but we don't want to leave nMode null if we've come this far
+                        if ((nCRTCMaxScan & Card.CRTC.EGA.MAXSCAN.SLMASK) <= 1) {
+                            nMode = Video.MODE.UNKNOWN;     // no BIOS mode uses this mapping, but we don't want to leave nMode null if we've come this far
+                        } else {
+                            /*
+                             * This mapping is used by Fantasy Land.
+                             *
+                             * TODO: Generalize this logic, outside of the context of the GRC.MISC mapping bits.
+                             * For example, can we assume that as long as (MAXSCAN & SLMASK) > 1, we're always in text mode?
+                             * And to what extent can we rely on the GRC.MISC.GRAPHICS bit?
+                             */
+                            nMode = (this.nMonitorType == ChipSet.MONITOR.MONO? Video.MODE.CGA_80X25_BW : Video.MODE.CGA_80X25);
+                        }
                         break;
                     case Card.GRC.MISC.MAPA064:
                         card.addrBuffer = 0xA0000;
@@ -4860,19 +4872,20 @@ class Video extends Component {
                      * location.
                      */
                     let fTextGraphicsHybrid = (regGRCMode & (Card.GRC.MODE.COLOR256 | Card.GRC.MODE.EVENODD)) == (Card.GRC.MODE.COLOR256 | Card.GRC.MODE.EVENODD);
-                    if (fTextGraphicsHybrid) {
-                        /*
-                         * When fTextGraphicsHybrid is true, we should be at the end of the above process, so addrBuffer
-                         * will have changed.  Since we don't (yet) assign a special mode to that configuration, we must at
-                         * least set fForce to true, so that setMode() will notice the buffer address change and remap it.
-                         */
-                        if (card.addrBuffer != this.addrBuffer || card.sizeBuffer != this.sizeBuffer) {
-                            fForce = true;
-                        }
+
+                    /*
+                     * When fTextGraphicsHybrid is true, we should be at the end of the above process, so addrBuffer
+                     * will have changed.  Since we don't (yet) assign a special mode to that configuration, we must at
+                     * least set fForce to true, so that setMode() will notice the buffer address change and remap it.
+                     *
+                     * We have a similar situation when Fantasy Land selects the MAPA0128 buffer mapping, so this test is no
+                     * longer limited to fTextGraphicsHybrid being true.
+                     */
+                    if (card.addrBuffer != this.addrBuffer || card.sizeBuffer != this.sizeBuffer) {
+                        fForce = true;
                     }
 
                     let nCRTCVertTotal = card.getCRTCReg(Card.CRTC.EGA.VTOTAL);
-                    let nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAXSCAN.INDX];
                     let nCRTCModeCtrl = card.regCRTData[Card.CRTC.EGA.MODECTRL.INDX];
                     let fSEQDotClock = (card.regSEQData[Card.SEQ.CLKMODE.INDX] & Card.SEQ.CLKMODE.DOTCLOCK);
 
@@ -5408,6 +5421,7 @@ class Video extends Component {
         addrScreen += card.offStartAddr << (this.nCardFont? 1 : 0);
         let cbScreen = this.cbScreen;
 
+        this.nColsLogical = this.nCols;
         if (this.nCard >= Video.CARD.EGA && card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
             /*
              * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows, but since
@@ -5575,7 +5589,8 @@ class Video extends Component {
         let dataMask = 0xfffff;
         let adwMemory = this.cardActive.adwMemory;
 
-        let nShift = (this.cardActive.nAccess & Card.ACCESS.WRITE.THRU)? 1 : 0;
+        let nShift = !(this.cardActive.nAccess & Card.ACCESS.WRITE.EVENODD)? 1 : 0;
+        let nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols /* - iCellFirst */) << 1) : 0);
 
         let fBlinkEnable = (this.cardActive.regMode & Card.MDA.MODE.BLINK_ENABLE);
         if (this.nCard >= Video.CARD.EGA) {
@@ -5589,6 +5604,9 @@ class Video extends Component {
         }
 
         this.cBlinkVisible = 0;
+        let col = iCell % this.nCols;
+        let row = (iCell / this.nCols)|0;
+
         while (addrScreen < addrScreenLimit && iCell < nCells) {
 
             let idw = (addrScreen - addrBuffer) >>> nShift;
@@ -5609,8 +5627,6 @@ class Video extends Component {
             this.assert(iCell < this.aCellCache.length);
 
             if (!this.fCellCacheValid || data !== this.aCellCache[iCell]) {
-                let col = iCell % this.nCols;
-                let row = (iCell / this.nCols)|0;
                 /*
                  * The following code is useful for setting a breakpoint (on the non-destructive "cUpdated |= 0" line)
                  * when debugging the "FlickerFree" utility while doing a series of "DIR" listings on the screen.  When
@@ -5632,9 +5648,16 @@ class Video extends Component {
                 this.aCellCache[iCell] = data;
                 cUpdated++;
             }
-            addrScreen += 2;
+
             cCells++;
             iCell++;
+
+            addrScreen += 2;
+            if (++col >= this.nCols) {
+                col = 0;
+                if (++row >= this.nRows) break;
+                addrScreen += nRowAdjust;
+            }
         }
 
         if (cUpdated && this.contextBuffer) {
@@ -5808,8 +5831,7 @@ class Video extends Component {
                     let dwPixel = data & 0x80808080;
                     this.assert(Video.aEGADWToByte[dwPixel] !== undefined);
                     /*
-                     * Since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also ensuring
-                     * that bPixel will default to 0 if an undefined value ever slips through again.
+                     * We now ensure that bPixel will default to 0 if an undefined value ever slips through again.
                      *
                      * How did an undefined value slip through?  We had (incorrectly) initialized entries in aEGADWToByte;
                      * for example, we used to set aEGADWToByte[0x80808080] instead of aEGADWToByte[0x80808080|0].  The
@@ -5829,7 +5851,7 @@ class Video extends Component {
 
             if (x >= this.nCols) {
                 x = 0;
-                if (++y > this.nRows) break;
+                if (++y >= this.nRows) break;
                 addrScreen += nRowAdjust;
             }
         }
@@ -5926,7 +5948,7 @@ class Video extends Component {
 
             if (x >= this.nCols) {
                 x = 0;
-                if (++y > this.nRows) break;
+                if (++y >= this.nRows) break;
                 addr += nRowAdjust;
             }
         }
