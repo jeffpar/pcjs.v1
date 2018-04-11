@@ -47,7 +47,7 @@ var usr         = require("../../shared/lib/usrlib");
 var DiskDump    = require("../../diskdump");
 var FileDump    = require("../../filedump");
 
-var HTMLOut     = require("./HTMLOut");
+var HTMLOut     = require("./htmlout");
 
 /**
  * sServerRoot is the root directory of the web server; it can (and should) be overridden using by the Express
