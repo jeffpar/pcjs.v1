@@ -48646,7 +48646,7 @@ class Card extends Controller {
 
             if (nCard < Video.CARD.EGA) {
                 this.initMemory(data[6], data[8]);
-                this.setMemoryAccess(Card.ACCESS.READ.THRU | Card.ACCESS.WRITE.THRU);
+                this.setMemoryAccess(Card.ACCESS.READ.PAIRS | Card.ACCESS.WRITE.PAIRS);
             } else {
                 this.addrMaskHigh = 0xFF;
                 this.nCRTCRegs = Card.CRTC.EGA.TOTAL_REGS;
@@ -48717,9 +48717,9 @@ class Card extends Controller {
                  *      Card.ACCESS.READ.MODE0 | Card.ACCESS.READ.EVENODD | Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.EVENODD | Card.ACCESS.V2
                  *
                  * Unfortunately, a typical ROM BIOS will almost immediately write to one of the original MDA or CGA mode registers,
-                 * changing the default mode, so we may as well initialize the card to "THRU" access.
+                 * changing the default mode, so we may as well initialize the card to byte-pair access.
                  */
-                /*15*/  Card.ACCESS.READ.THRU  | Card.ACCESS.WRITE.THRU   | Card.ACCESS.V2,
+                /*15*/  Card.ACCESS.READ.PAIRS | Card.ACCESS.WRITE.PAIRS  | Card.ACCESS.V2,
                 /*16*/  0,
                 /*17*/  0xffffffff|0,
                 /*18*/  0,
@@ -49926,7 +49926,7 @@ Card.ACCESS = {
     READ: {                             // READ values are designed to be OR'ed with WRITE values
         MODE0:              0x0400,
         MODE1:              0x0500,
-        THRU:               0x0800,
+        PAIRS:              0x0800,
         EVENODD:            0x1000,
         CHAIN4:             0x4000,
         MASK:               0xFF00
@@ -49937,7 +49937,7 @@ Card.ACCESS = {
         MODE2:              0x0002,
         MODE3:              0x0003,     // VGA only
         CHAIN4:             0x0004,
-        THRU:               0x0008,
+        PAIRS:              0x0008,
         EVENODD:            0x0010,
         ROT:                0x0020,
         AND:                0x0060,
@@ -49968,16 +49968,20 @@ Card.ACCESS.V1[0xA000] = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.OR;
 Card.ACCESS.V1[0xE000] = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.XOR;
 
 /**
- * readByteThru(off, addr)
+ * readBytePairs(off, addr)
  *
- * Used for MDA/CGA "THRU" access (ie, byte is passed through without any controller-imposed overhead)
+ * Used for MDA/CGA byte-pair access (ie, pairs of bytes stored in a single dword).
+ *
+ * Externally, this makes the buffer look like a linear series of byte pairs, perfect for emulating MDA and CGA
+ * character/attribute text modes, while internally, it looks similar to an EvenOdd arrangement, except that odd
+ * dwords not skipped (ie, wasted).  This similarity makes life simpler for updateScreenText().
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} [addr]
  * @return {number}
  */
-Card.ACCESS.readByteThru = function readByte(off, addr)
+Card.ACCESS.readBytePairs = function readByte(off, addr)
 {
     off += this.offset;
     return ((this.adw[off >> 1] >>> ((off & 0x1) << 3)) & 0xff);
@@ -50074,16 +50078,20 @@ Card.ACCESS.readByteMode1 = function readByteMode1(off, addr)
 };
 
 /**
- * writeByteThru(off, b, addr)
+ * writeBytePairs(off, b, addr)
  *
- * Used for MDA/CGA "THRU" access (ie, byte is passed through without any controller-imposed overhead)
+ * Used for MDA/CGA byte-pair access (ie, pairs of bytes stored in a single dword).
+ *
+ * Externally, this makes the buffer look like a linear series of byte pairs, perfect for emulating MDA and CGA
+ * character/attribute text modes, while internally, it looks similar to an EvenOdd arrangement, except that odd
+ * dwords not skipped (ie, wasted).  This similarity makes life simpler for updateScreenText().
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} b (which should already be pre-masked to 8 bits; see cpu.setByte())
  * @param {number} [addr]
  */
-Card.ACCESS.writeByteThru = function writeByte(off, b, addr)
+Card.ACCESS.writeBytePairs = function writeByte(off, b, addr)
 {
     off += this.offset;
     let idw = off >> 1;
@@ -50526,7 +50534,7 @@ Card.ACCESS.afn[Card.ACCESS.READ.MODE0]  = Card.ACCESS.readByteMode0;
 Card.ACCESS.afn[Card.ACCESS.READ.MODE0  |  Card.ACCESS.READ.CHAIN4]  = Card.ACCESS.readByteMode0Chain4;
 Card.ACCESS.afn[Card.ACCESS.READ.MODE0  |  Card.ACCESS.READ.EVENODD] = Card.ACCESS.readByteMode0EvenOdd;
 Card.ACCESS.afn[Card.ACCESS.READ.MODE1]  = Card.ACCESS.readByteMode1;
-Card.ACCESS.afn[Card.ACCESS.READ.THRU]   = Card.ACCESS.readByteThru;
+Card.ACCESS.afn[Card.ACCESS.READ.PAIRS]  = Card.ACCESS.readBytePairs;
 
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0] = Card.ACCESS.writeByteMode0;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.ROT] = Card.ACCESS.writeByteMode0Rot;
@@ -50542,7 +50550,7 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.AND] = Card.ACCESS.
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.OR]  = Card.ACCESS.writeByteMode2Or;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.XOR] = Card.ACCESS.writeByteMode2Xor;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE3] = Card.ACCESS.writeByteMode3;
-Card.ACCESS.afn[Card.ACCESS.WRITE.THRU]  = Card.ACCESS.writeByteThru;
+Card.ACCESS.afn[Card.ACCESS.WRITE.PAIRS] = Card.ACCESS.writeBytePairs;
 
 /**
  * @class Video
@@ -50620,6 +50628,7 @@ class Video extends Component {
 
         this.nCard = aModelDefaults[0];
         this.nCardFont = 0;
+        this.aFontSelect = [0, 0];                  // current set of selectable logical fonts
         this.cbMemory = parmsVideo['memory'] || 0;  // zero means fallback to the cardSpec's default size
         this.sSwitches = parmsVideo['switches'];
         this.nRandomize = parmsVideo['randomize'];
@@ -51629,6 +51638,7 @@ class Video extends Component {
         case Video.CARD.VGA:
             nMonitorType = ChipSet.MONITOR.VGACOLOR;
             break;
+
         case Video.CARD.EGA:
             let aMonitors = Video.aEGAMonitorSwitches[this.bEGASwitches];
             /*
@@ -51636,14 +51646,21 @@ class Video extends Component {
              * whether the EGA is driving the primary monitor (true) or the secondary monitor (false).
              */
             if (aMonitors) nMonitorType = aMonitors[0];
-            if (!nMonitorType) nMonitorType = ChipSet.MONITOR.EGACOLOR;
-            break;
+            if (!nMonitorType) {
+                nMonitorType = ChipSet.MONITOR.EGACOLOR;
+                break;
+            }
+            if (nMonitorType != ChipSet.MONITOR.MONO) break;
+            /* falls through */
+
         case Video.CARD.MDA:
             nMonitorType = ChipSet.MONITOR.MONO;
             this.nModeDefault = Video.MODE.MDA_80X25;
             break;
+
         case Video.CARD.CGA:
             /* falls through */
+
         default:
             nMonitorType = ChipSet.MONITOR.COLOR;
             break;
@@ -52107,7 +52124,7 @@ class Video extends Component {
      * from plane 2 of video memory, instead of relying on the original font data in ROM.  Relying on the ROM data was
      * originally just a crutch to help get EGA support bootstrapped.
      *
-     * Also, for the MDA/CGA, we should be discarding the font data after the first buildFonts() call, because we
+     * Also, for the MDA/CGA, we should be discarding the font data after the first buildFont() call, because we
      * should never need to rebuild the fonts for those cards (both their font patterns and colors were hard-coded).
      *
      * @this {Video}
@@ -52123,17 +52140,17 @@ class Video extends Component {
     }
 
     /**
-     * buildFonts()
+     * buildFont(fRebuild)
      *
-     * buildFonts() is called whenever the Video component is reset or restored; we used to build the fonts as soon
-     * as the ROM containing them was loaded, and then throw away the underlying font data, but with the EGA's ability
+     * buildFont() is called whenever the Video component is reset or restored; we used to build fonts as soon as
+     * the ROM containing them was loaded, and then throw away the underlying font data, but with the EGA's ability
      * to change the color or content of any font, font building must now be deferred until the reset or restore
      * notifications, ensuring we have access to the card's colors and other programmed state.
      *
      * We're also called whenever setDimensions() must update character cell dimensions and whenever EGA palette
      * registers are modified, in case one or more font colors changed.
      *
-     * Calls to buildFonts() should not be expensive though: the underlying createFont() function rebuilds a font only
+     * Calls to buildFont() should not be expensive though: the underlying createFont() function rebuilds a font only
      * if one or more of the following is true:
      *
      *  1) the font shape has changed (usually accompanied by a font data change)
@@ -52144,28 +52161,35 @@ class Video extends Component {
      * @param {boolean} [fRebuild] (true if this is a rebuild; default is false)
      * @return {boolean} true if any or all fonts were (re)built, false if nothing changed
      */
-    buildFonts(fRebuild = false)
+    buildFont(fRebuild = false)
     {
         let fChanges = false;
         /*
          * There's no point building fonts unless we're in a windowed (non-command-line) environment, we're
          * in a font-based mode (nCardFont is set), and font data has been supplied (or can be extracted from RAM).
          */
-        if (window && this.nCardFont && (fRebuild || this.abFontData)) {
+        if (window && this.nCardFont) {
 
             /*
              * Build whatever font(s) we need for the current card.  In the case of the EGA/VGA, that can mean up to
              * 4 fonts, if all four font "banks" in plane 2 have been loaded with font data, but if we don't yet know
              * which bank is active, we'll build the default font, using the available font data (ie, abFontData).
              */
-            let aRGBColors;
             let nFonts = 0;
             let abFontData = this.abFontData;
+
+            let aRGBColors, aColorMap;
+            if (this.nCardFont == Video.CARD.MDA || this.nMonitorType == ChipSet.MONITOR.MONO) {
+                aRGBColors = Video.aMDAColors;
+                aColorMap = Video.aMDAColorMap;
+            } else {
+                aRGBColors = this.getCardColors();
+            }
 
             switch(this.nCardFont) {
             case Video.CARD.MDA:
                 if (this.aFontOffsets[1] != null) {
-                    if (this.createFont(this.nCardFont, this.cxFontChar || 9, 14, this.aFontOffsets[1], this.cxFontChar? 0 : 0x0800, abFontData, false, Video.aMDAColors, Video.aMDAColorMap)) {
+                    if (this.createFont(this.nCardFont, this.cxFontChar || 9, 14, this.aFontOffsets[1], this.cxFontChar? 0 : 0x0800, abFontData, false, aRGBColors, aColorMap)) {
                         fChanges = true;
                     }
                 }
@@ -52174,7 +52198,7 @@ class Video extends Component {
             case Video.CARD.CGA:
                 aRGBColors = this.getCardColors();
                 if (this.aFontOffsets[0] != null) {
-                    if (this.createFont(this.nCardFont, this.cxFontChar || 8, 8, this.aFontOffsets[0], 0x0000, abFontData, false, aRGBColors)) {
+                    if (this.createFont(this.nCardFont, this.cxFontChar || 8, 8, this.aFontOffsets[0], 0x0000, abFontData, false, aRGBColors, aColorMap)) {
                         fChanges = true;
                     }
                 }
@@ -52189,7 +52213,6 @@ class Video extends Component {
                 aRGBColors = this.getCardColors();
                 let cxChar = this.cxFontChar || 8;
                 let cyChar = 14;
-                let fNewData = false;
                 let offData = this.aFontOffsets[1];
                 let bitsBanks = 0;
                 let cx = (this.cardEGA.regSEQData[Card.SEQ.CLKMODE.INDX] & Card.SEQ.CLKMODE.DOTS8)? 8 : 9;
@@ -52200,42 +52223,55 @@ class Video extends Component {
                     offData = 0;
                     abFontData = null;
                     if (bitsBanks = this.cardEGA.bitsDirtyBanks) {
-                        if (DEBUG) this.printf("buildFonts(): dirty font data detected (0x%02X)\n", bitsBanks);
+                        if (DEBUG) this.printf("buildFont(%s): dirty font data detected (0x%02X)\n", fRebuild, bitsBanks);
                         this.cardEGA.bitsDirtyBanks = 0;
                     }
+                    let bSelect = this.cardEGA.regSEQData[Card.SEQ.CHARMAP.INDX];
+                    if (this.nCard < Video.CARD.VGA) {
+                        bSelect &= (Card.SEQ.CHARMAP.SELA | Card.SEQ.CHARMAP.SELB);
+                    }
+                    if (!(this.cardEGA.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.EXT)) {
+                        bSelect &= ~(Card.SEQ.CHARMAP.SELA | Card.SEQ.CHARMAP.SELB);
+                    }
+                    this.aFontSelect[0] = (bSelect & Card.SEQ.CHARMAP.SELA) | ((bSelect & Card.SEQ.CHARMAP.SELA_HI) >> 3);
+                    this.aFontSelect[1] = (bSelect & Card.SEQ.CHARMAP.SELB) | ((bSelect & Card.SEQ.CHARMAP.SELB_HI) >> 2);
                 }
                 if (offData != null) {
                     /*
-                     * We process banks in a specific order (0, 2, 4, 6, 1, 3, 5, 7), with the last four on VGA only.
+                     * Logical fonts 0-3 (0-7 on the VGA) refer to banks in the following order: 0, 2, 4, 6, 1, 3, 5, 7.
+                     *
+                     * Note that we no longer build all possible fonts; we build ONLY those fonts that are currently selectable.
                      */
-                    if (abFontData) nFonts = 1;
-                    for (let iBank = 0, iFont = 0; iFont < nFonts; iBank += 2, iFont++) {
-                        let bit = 0x1 << iBank;
+                    for (let i = 0, iFontPrev = -1; i < this.aFontSelect.length; i++) {
+                        let iFont = this.aFontSelect[i];
+                        if (iFont == iFontPrev) continue;
+                        let iBank = (iFont << 1) - (iFont < 4? 0 : 7);
                         if (!abFontData) offData = iBank * 8192;
-                        if (this.createFont(this.nCardFont + iFont, cxChar, cyChar, offData, 0, abFontData, !!(bitsBanks & bit), aRGBColors)) {
+                        let fNewData = !!(bitsBanks & (0x1 << iBank));
+                        if (this.createFont(this.nCardFont + iFont, cxChar, cyChar, offData, 0, abFontData, fNewData, aRGBColors, aColorMap)) {
                             fChanges = true;
                         }
-                        if (iBank == 6) iBank = -1;
+                        iFontPrev = iFont;
                     }
                 }
                 break;
 
             default:
-                if (DEBUG) this.printf("buildFonts(): unrecognized card font (%d)\n", this.nCardFont);
+                if (DEBUG) this.printf("buildFont(): unrecognized card font (%d)\n", this.nCardFont);
                 break;
             }
-        }
 
-        if (!fRebuild) {
-            /*
-             * Perform some additional initialization common to both reset() and restore() sequences.
-             */
-            this.iCellCursor = -1;  // initially, there is no visible cursor cell
-            this.cBlinks = -1;      // initially, blinking is not active
-            this.cBlinkVisible = 0; // no visible blinking characters (yet)
-        }
+            if (!fRebuild) {
+                /*
+                 * Perform some additional initialization common to both reset() and restore() sequences.
+                 */
+                this.iCellCursor = -1;  // initially, there is no visible cursor cell
+                this.cBlinks = -1;      // initially, blinking is not active
+                this.cBlinkVisible = 0; // no visible blinking characters (yet)
+            }
 
-        if (DEBUG) this.printf("buildFonts(%s): %sfont changes detected\n", fRebuild, fChanges? "" : "no ");
+            if (DEBUG) this.printf("buildFont(%s): %sfont changes detected\n", fRebuild, fChanges? "" : "no ");
+        }
 
         return fChanges;
     }
@@ -52305,7 +52341,7 @@ class Video extends Component {
             }
             if (fChanged) {
                 if (!this.createFontColor(font, iColor, rgbColor, nDouble, offData, offSplit, cxChar, cyChar, abFontData)) {
-                    // this.printf("createFont(%d): no font data found\n", nFont);
+                    this.printf("createFont(%d): no font data found\n", nFont);
 
                     font = null;
                     break;
@@ -52777,7 +52813,7 @@ class Video extends Component {
     getCardAccess()
     {
         let card = this.cardActive;
-        let nAccess = Card.ACCESS.READ.THRU | Card.ACCESS.WRITE.THRU;
+        let nAccess = Card.ACCESS.READ.PAIRS | Card.ACCESS.WRITE.PAIRS;
 
         if (card.nCard >= Video.CARD.EGA) {
             this.fColor256 = false;
@@ -52891,13 +52927,13 @@ class Video extends Component {
      * setCardAccess(nAccess)
      *
      * @this {Video}
-     * @param {number|undefined} nAccess (one of the Card.ACCESS.* constants)
+     * @param {number} nAccess (one of the Card.ACCESS.* constants)
      * @return {boolean} true if access may have changed, false if not
      */
     setCardAccess(nAccess)
     {
         let card = this.cardActive;
-        if (card && nAccess != null && nAccess != card.nAccess) {
+        if (card && nAccess != card.nAccess) {
 
             if (DEBUG) this.printf("setCardAccess(0x%04X)\n", nAccess);
 
@@ -52943,7 +52979,7 @@ class Video extends Component {
             if (this.nCardFont) {
                 /*
                  * When an EGA is connected to a CGA monitor, the modeParms table entry is correct: we must
-                 * use the 8x8 CGA font.  But when it's connected to an EGA monitor, we need to use the 9x14 EGA
+                 * use the 8x8 CGA font.  But when it's connected to an EGA monitor, we need to use the 8x14 EGA
                  * color font instead.
                  *
                  * TODO: Can an EGA with a monochrome monitor be programmed for 43-line mode as well?  If so,
@@ -52951,7 +52987,7 @@ class Video extends Component {
                  */
                 if (this.nCard > this.nCardFont) this.nCardFont = this.nCard;
 
-                this.buildFonts();
+                this.buildFont();
 
                 let font = this.aFonts[this.nCardFont];
                 if (font) {
@@ -53059,6 +53095,7 @@ class Video extends Component {
      */
     checkMode(fForce)
     {
+        let fRemap = false;
         let nMode = this.nMode;
         let card = this.cardActive;
 
@@ -53157,7 +53194,7 @@ class Video extends Component {
                      * longer limited to fTextGraphicsHybrid being true.
                      */
                     if (card.addrBuffer != this.addrBuffer || card.sizeBuffer != this.sizeBuffer) {
-                        fForce = true;
+                        fRemap = true;
                     }
 
                     let nCRTCVertTotal = card.getCRTCReg(Card.CRTC.EGA.VTOTAL);
@@ -53274,7 +53311,7 @@ class Video extends Component {
          * functions based on the card's addrBuffer setting, and if that doesn't match what's currently mapped, assertions
          * will be triggered (probably not fatal, but it would defeat the point of the assertions).
          */
-        if (!this.setMode(nMode, fForce)) return false;
+        if (!this.setMode(nMode, fForce, fRemap)) return false;
 
         this.setCardAccess(this.getCardAccess());
 
@@ -53282,19 +53319,21 @@ class Video extends Component {
     }
 
     /**
-     * setMode(nMode, fForce)
+     * setMode(nMode, fForce, fRemap)
      *
      * Set fForce to true to update the mode regardless of previous mode, or false to perform a normal update
      * that bypasses updateScreen() but still calls initCache().
      *
      * @this {Video}
      * @param {number|null} nMode
-     * @param {boolean|undefined} [fForce] is set when checkMode() wants to force a mode update
+     * @param {boolean} [fForce] is set when checkMode() wants to force a mode update
+     * @param {boolean} [fRemap] is set when checkMode() detects a change in the buffer mapping
      * @return {boolean} true if successful, false if failure
      */
-    setMode(nMode, fForce)
+    setMode(nMode, fForce, fRemap)
     {
-        if (nMode != null && (nMode != this.nMode || fForce)) {
+        let fReset = nMode != null && (nMode != this.nMode || fForce);
+        if (fReset || fRemap) {
 
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage("setMode(" + Str.toHexByte(nMode) + (fForce? ",force" : "") + ")", true, true);
@@ -53376,9 +53415,11 @@ class Video extends Component {
                     }
                 }
             }
+
             this.setDimensions();
             this.invalidateCache(true);
-            this.updateScreen();
+
+            if (fReset) this.updateScreen();
         }
         return true;
     }
@@ -54446,7 +54487,7 @@ class Video extends Component {
             this.printMessageIO(port, bOut, addrFrom, "ATC.INDX");
             card.fATCData = true;
             if ((bOut & Card.ATC.INDX_PAL_ENABLE) && !fPalEnabled) {
-                if (this.buildFonts(true)) {
+                if (this.buildFont(true)) {
                     this.updateScreen(true);
                 }
             }
@@ -54995,7 +55036,7 @@ class Video extends Component {
             this.cardEGA.nReadMapShift = (bOut & Card.GRC.READMAP.NUM) << 3;
             break;
         case Card.GRC.MISC.INDX:
-            this.checkMode(false);
+            this.checkMode();
             break;
         case Card.GRC.COLORDC.INDX:
             this.cardEGA.nColorDontCare = Video.aEGAByteToDW[bOut & 0xf] & (0x80808080|0);
@@ -55236,7 +55277,8 @@ class Video extends Component {
                     }
                 }
             }
-            if (Video.TRAPALL || card.regCRTData[card.regCRTIndx] !== bOut) {
+            let fModified = (card.regCRTData[card.regCRTIndx] !== bOut);
+            if (fModified || Video.TRAPALL) {
                 if (!addrFrom || this.messageEnabled()) {
                     this.printMessageIO(port /* card.port + 1 */, bOut, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx]);
                 }
@@ -55272,10 +55314,12 @@ class Video extends Component {
              * but if I don't, then some spurious mode changes are triggered (eg, when Windows 1.0 switches from
              * CGA graphics mode 0x06 to an EGA graphics mode).
              */
-            if (card.regCRTIndx == Card.CRTC.MAXSCAN && card.regCRTPrev != Card.CRTC.MAXSCAN-1 || card.regCRTIndx == Card.CRTC.EGA.VDEND && bOut == 0xDF) {
-                this.checkMode(true);
+            if (fModified) {
+                if (card.regCRTIndx == Card.CRTC.MAXSCAN && card.regCRTPrev != Card.CRTC.MAXSCAN - 1 || card.regCRTIndx == Card.CRTC.EGA.VDEND && bOut == 0xDF) {
+                    this.checkMode(true);
+                }
+                this.checkCursor();
             }
-            this.checkCursor();
         }
         else if (DEBUG) {
             this.printf("outCRTCData(0x%02X): ignoring unexpected write to CRTC[0x%02X]\n", bOut, card.regCRTIndx);
@@ -55309,7 +55353,7 @@ class Video extends Component {
     {
         this.printMessageIO(card.port + 4, bOut, addrFrom, "MODE");
         card.regMode = bOut;
-        this.checkMode(false);
+        this.checkMode();
     }
 
     /**
@@ -55629,7 +55673,7 @@ Video.CARD = {
     MDA:    1,          // uses 9x14 monochrome font
     CGA:    2,          // uses 8x8 color font
     EGA:    4,          // uses 8x14 color font (by default)
-    VGA:    8           // uses 8x16 color font (by default)
+    VGA:    8           // uses 9x16 color font (by default)
 };
 
 /*
@@ -78435,7 +78479,7 @@ class Computer extends Component {
                 try {
                     fRestore = this.powerRestore(component, stateComputer, fRepower, fRestore);
                 } catch(err) {
-                    Component.error(component.type + " power failure: " + err.message);
+                    Component.error(component.type + " restore failure: " + err.message);
                 }
             }
         }

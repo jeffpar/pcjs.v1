@@ -37,7 +37,7 @@ I assume something similar was done on the CD-ROM that accompanied the Black Boo
 book or its CD-ROM, I'm extracting the source code directly from the Markdown text, and then "tabifying" it with 8-column
 tab stops.
 
-Development of PCjs VGA support has just begun (June 2015), so don't expect everything here to to run properly yet.
+Development of PCjs VGA support began June 2015, and not everything here runs properly inside PCjs yet.
 
 ---
 
