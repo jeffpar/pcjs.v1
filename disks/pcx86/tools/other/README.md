@@ -11,6 +11,7 @@ Information is available for these additional PC utilities.
 
 * [Enhanced DEBUG](enhdebug/)
 * [FlickerFree](flickerfree/)
+* [Norton Utilities](norton/)
 * [Omniview](omniview/)
 * [PC Tools](pctools/)
 * [QEMM-386](qemm386/)

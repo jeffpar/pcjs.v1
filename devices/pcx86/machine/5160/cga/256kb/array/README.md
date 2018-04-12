@@ -1,6 +1,6 @@
 ---
 layout: page
-title: IBM PC XT (Model 5160, 256Kb, 10Mb Drive) Machine Array with CGA Displays
+title: IBM PC XT (256K RAM, 10Mb Drive) Machine Array with Color Displays
 permalink: /devices/pcx86/machine/5160/cga/256kb/array/
 machines:
   - id: ibm5160-1
@@ -9,8 +9,8 @@ machines:
     type: pcx86
 ---
 
-IBM PC XT Machine Array with CGA Displays
------------------------------------------
+IBM PC XT Machine Array with Color Displays
+-------------------------------------------
 
 ### Demonstration of Multiple IBM PCs on a Single Web Page
 

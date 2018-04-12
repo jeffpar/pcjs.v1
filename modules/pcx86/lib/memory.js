@@ -352,10 +352,25 @@ class Memory {
         let i, off;
         if (this.controller) {
             if (this.adw) {
-                for (i = 0; i < adw.length; i++) {
-                    off = (this.offset >> 2) + i;
-                    if (off >= this.adw.length) break;
-                    this.adw[off] = adw[i];
+                /*
+                 * If the controller memory buffer appears to be for either an MDA using 2048 16-bit values
+                 * or a CGA using 8192 16-bit values, then split up the saved 32-bit values accordingly.  Otherwise,
+                 * do a 1-for-1 restore and hope for the best.
+                 */
+                if (this.adw.length == 2048 || this.adw.length == 8192) {
+                    off = (this.offset >> 1);
+                    for (i = 0; i < adw.length; i++) {
+                        if (off >= this.adw.length) break;
+                        this.adw[off++] = adw[i] & 0xffff;
+                        this.adw[off++] = (adw[i] >> 16) & 0xffff;
+                    }
+                }
+                else {
+                    off = (this.offset >> 2);
+                    for (i = 0; i < adw.length; i++) {
+                        if (off >= this.adw.length) break;
+                        this.adw[off++] = adw[i];
+                    }
                 }
                 this.flags |= Memory.FLAGS.DIRTY;
             }

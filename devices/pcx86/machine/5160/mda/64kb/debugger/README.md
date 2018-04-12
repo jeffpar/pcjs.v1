@@ -1,6 +1,6 @@
 ---
 layout: page
-title: IBM PC XT (Model 5160, 64Kb, 10Mb Drive) with Monochrome Display and Debugger
+title: IBM PC XT (64K RAM, 10Mb Drive) with Monochrome Display and Debugger
 permalink: /devices/pcx86/machine/5160/mda/64kb/debugger/
 redirect_from:
   - /configs/pc/machines/5160/mda/64kb/debugger/index.xml/
