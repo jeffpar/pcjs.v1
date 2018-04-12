@@ -8,7 +8,7 @@ machines:
     debugger: true
     commands: bp &0AC6:019B
     messages: video
-    config: /devices/pcx86/machine/5160/ega/256kb/debugger/machine.xml
+    config: /devices/pcx86/machine/5160/ega/256kb/color/debugger/machine.xml
     autoMount:
       A:
         name: PC-DOS 2.00 (Disk 1)
@@ -46,8 +46,52 @@ continuously, independent of CPU speed and divorced from other program operation
 with fast smooth scrolling in both directions, test subtle timing dependencies between subunits of the EGA.
 
 Thanks to Eric, a friend of PCjs, we finally have a copy of the Fantasy Land program, along with an assortment of other
-EGA utilities that he kindly provided.  Sadly, FantasyLand doesn't yet work in the PCx86 emulator, but it's on our
-"to-do" list.  Stay tuned!
+EGA utilities that he kindly included.
+
+Now that we've had an opportunity to examine the program, three things became apparent:
+
+1. The program's name was spelled "Fantasy Land"
+2. The program was designed for a Color Display (it used 8x8 fonts)
+3. The program required an EGA with a full 256K of RAM
+
+EGA users with an Enhanced Color Display (Model 5154) would normally have their EGA's switches set to "Enhanced Color
+Mode", which uses high resolution (8x14) fonts:
+
+    SW1   SW2   SW3   SW4
+    ---   ---   ---   ---
+    OFF   ON    ON    OFF
+
+so to run Fantasy Land, you would either need to change your EGA's settings to "Normal Color Mode", which defaults to
+the same font resolution (8x8) as the Color Display Adapter (CGA):
+
+    SW1   SW2   SW3   SW4
+    ---   ---   ---   ---
+    ON    ON    ON    OFF
+
+or connect your EGA to an older IBM Color Display (Model 5153) and set the EGA switches as follows:
+
+    SW1   SW2   SW3   SW4
+    ---   ---   ---   ---
+    OFF   OFF   OFF   ON
+
+The machine below uses the last option (ie, a Color Display configuration).
+
+Fantasy Land still has some issues running in the PCx86 emulator, but we're working on them.  You'll notice there
+are some additional "diagnostic" windows below the machine, which are essentially live representations of the four
+EGA "font banks" that Fantasy Land loads as part of its initialization.
+
+The EGA supported fonts with character heights up to 32 scan lines, so the maximum font size for a complete set of
+256 characters was 8K.  Unfortunately, the EGA required each font to be loaded on a 16K boundary in plane 2, so if
+you wanted to load 4 fonts, you had to have 64K of plane 2 memory, which in turn meant that all 4 planes had to have
+64K, for a total of 256K.
+
+In Fantasy Land's case, the amount of font data was fairly small: each of its four 8x8 fonts used only 2K, for a
+total of 8K.  But that didn't matter.  To load four fonts of *any* size, your EGA board had to be fully populated with
+256K.
+
+The VGA made some amends for this design oddity, by supporting 4 additional 8K font banks between the EGA's original
+4 banks.  It didn't change the fact that first 4 font banks still required a full 64K in plane 2, but by that time,
+it was a moot point, since all VGAs included 256K anyway.
 
 {% include machine.html id="ibm5160" %}
 

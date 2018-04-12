@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.63.0/machine.xsl"?>
 <machine id="ibm5160" type="pcx86" border="1" pos="center" background="default">
-	<name pos="center">IBM PC XT (Model 5160), CGA, 640K, 10Mb Drive (Formatted)</name>
+	<name pos="center">IBM PC XT, Color Display, 640K RAM, 10Mb Drive (Formatted)</name>
 	<computer id="xt-cga-640k" name="IBM PC XT"/>
 	<ram id="ramLow" addr="0x00000" test="false" size="0xa0000" comment="0xa0000 (640Kb) size overrides SW1|ROM BIOS memory test has been disabled"/>
 	<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pcx86/hdc/ibm-xebec-1982.json"/>

@@ -8,7 +8,7 @@
 	<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pcx86/hdc/ibm-xebec-1982.json"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5160/basic/BASIC110.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5160/1982-11-08/XTBIOS-REV1.json"/>
-	<video ref="/devices/pcx86/video/ibm/ega/1984-09-13/ibm-ega-5153-256k.xml"/>
+	<video ref="/devices/pcx86/video/ibm/ega/1984-09-13/ibm-ega-5154-256k.xml"/>
 	<fdc ref="/disks/pcx86/library.xml"/>
 	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
 	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>

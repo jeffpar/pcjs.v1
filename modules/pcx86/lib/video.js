@@ -3921,7 +3921,6 @@ class Video extends Component {
                 break;
 
             case Video.CARD.CGA:
-                aRGBColors = this.getCardColors();
                 if (this.aFontOffsets[0] != null) {
                     if (this.createFont(this.nCardFont, this.cxFontChar || 8, 8, this.aFontOffsets[0], 0x0000, abFontData, false, aRGBColors, aColorMap)) {
                         fChanges = true;
@@ -3935,7 +3934,6 @@ class Video extends Component {
 
             case Video.CARD.EGA:
                 nFonts += 4;
-                aRGBColors = this.getCardColors();
                 let cxChar = this.cxFontChar || 8;
                 let cyChar = 14;
                 let offData = this.aFontOffsets[1];
@@ -4770,8 +4768,13 @@ class Video extends Component {
 
         if (!this.cxBuffer || !this.cyBuffer) return;   // failsafe
 
-        if (this.fSmoothing != null && this.sSmoothing) {
-            this.contextScreen[this.sSmoothing] = this.nCardFont? true : this.fSmoothing;
+        /*
+         * Our 'smoothing' parameter defaults to null (which we treat the same as undefined), which means that
+         * image smoothing will be selectively enabled (ie, true for text modes, false for graphics modes); otherwise,
+         * we'll set image smoothing to whatever value was provided for ALL modes -- assuming the browser supports it.
+         */
+        if (this.sSmoothing) {
+            this.contextScreen[this.sSmoothing] = (this.fSmoothing == null? (this.nCardFont? true : this.fSmoothing) : this.fSmoothing);
         }
 
         /*
