@@ -59,7 +59,7 @@ var fPrivate = (args.argv['private'] === undefined? false : args.argv['private']
 var fRebuild = (args.argv['rebuild'] === undefined? false : args.argv['rebuild']);
 var fSockets = (args.argv['sockets'] === undefined? false : args.argv['sockets']);
 
-var HTMLOut  = require("./modules/htmlout");
+var HTMLOut  = require("./modules/htmlout/lib/htmlout");
 
 var sServerRoot = __dirname;
 HTMLOut.setRoot(sServerRoot);

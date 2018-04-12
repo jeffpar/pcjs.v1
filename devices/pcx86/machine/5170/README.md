@@ -7,14 +7,14 @@ permalink: /devices/pcx86/machine/5170/
 IBM PC AT (Model 5170) Machines
 -------------------------------
 
-Our IBM PC AT 5170 configurations include:
+Our IBM PC AT configurations include:
 
 * [IBM PC AT with MDA Display](/devices/pcx86/machine/5170/mda/)
 * [IBM PC AT with CGA Display](/devices/pcx86/machine/5170/cga/)
 * [IBM PC AT with EGA Display](/devices/pcx86/machine/5170/ega/)
 * [IBM PC AT with VGA Display](/devices/pcx86/machine/5170/vga/)
 
-The IBM PC AT 5170 came in a variety of its own models over a three-year period.
+The IBM PC AT came in a variety of its own "sub-models" over a three-year period.
 
 ### 5170 Models 68 and 99
 
@@ -59,7 +59,7 @@ Models 319 and 339 were introduced in April 1986:
 	- Enhanced 101-key keyboard
 
 IBM PC AT 5170 Configuration Options
----
+------------------------------------
 
 The IBM PC AT 5170 doesn't have DIP switches like previous models, but it still has a few switches and jumpers.
 

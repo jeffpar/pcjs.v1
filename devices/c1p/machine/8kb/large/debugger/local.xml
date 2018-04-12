@@ -18,7 +18,7 @@
 	<rom id="romNull" size="0x8000"/>
 	<rom id="romBasic" size="0x2000" image="../../../../rom/basic-gcpatch.hex"/>
 	<rom id="romSystem" size="0x0800" image="../../../../rom/system.hex"/>
-	<video id="video" screenWidth="1024" screenHeight="800" cols="32" rows="32" smoothing="false" charSet="../../../../video/chargen4x.png" width="512px" padding="8px">
+	<video id="video" screenWidth="1024" screenHeight="800" cols="32" rows="32" charSet="../../../../video/chargen4x.png" width="512px" padding="8px">
 		<name>Video Display</name>
 	</video>
 	<keyboard id="keyboard" padLeft="8px">

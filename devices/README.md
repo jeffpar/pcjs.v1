@@ -15,7 +15,8 @@ PCjs includes device configurations for the following machines:
 
 * [6502](c1p/) [Challenger 1P](c1p/machine/)
 * [8080](pc8080/) [Space Invaders](pc8080/machine/invaders/) and [VT100 Terminal](pc8080/machine/vt100/)
-* [8086](pcx86/) [IBM PC](pcx86/machine/5150/), [PC XT](pcx86/machine/5160/) and [Compatibles](pcx86/machine/)
+* [8088](pcx86/) [IBM PC](pcx86/machine/5150/) and [Compatibles](pcx86/machine/)
+* [8088](pcx86/) [IBM PC XT](pcx86/machine/5160/)
 * [80286](pcx86/) [IBM PC AT](pcx86/machine/5170/)
 * [80386](pcx86/) [COMPAQ DeskPro 386](pcx86/machine/compaq/)
 * [PDP-10](pdp10/) (e.g., [Model KA10](pdp10/machine/ka10/))

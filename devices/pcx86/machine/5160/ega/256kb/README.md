@@ -1,6 +1,6 @@
 ---
 layout: page
-title: IBM PC XT (Model 5160, 256Kb, 10Mb Drive) with EGA Display
+title: IBM PC XT (256K EGA, 256K RAM, 10Mb Drive) with Enhanced Color Display
 permalink: /devices/pcx86/machine/5160/ega/256kb/
 redirect_from:
   - /configs/pc/machines/5160/ega/256kb/

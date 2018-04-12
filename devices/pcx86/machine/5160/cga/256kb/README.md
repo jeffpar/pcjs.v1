@@ -15,8 +15,8 @@ IBM PC XT (256Kb) with Color Display
 
 All our 256Kb Model 5160, aka IBM PC XT, configurations are located here, including:
 
-* [IBM PC XT (256Kb, 10Mb Drive) Machine Array with CGA Displays](/devices/pcx86/machine/5160/cga/256kb/array/)
-* [IBM PC XT (256Kb, 10Mb Drive) with Color Display and Debugger](/devices/pcx86/machine/5160/cga/256kb/debugger/)
+* [IBM PC XT (256K RAM, 10Mb Drive) Machine Array with Color Displays](/devices/pcx86/machine/5160/cga/256kb/array/)
+* [IBM PC XT (256K RAM, 10Mb Drive) with Color Display and Debugger](/devices/pcx86/machine/5160/cga/256kb/debugger/)
 
 {% include machine.html id="ibm5160" %}
 

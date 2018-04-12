@@ -48,6 +48,25 @@ along with live demonstrations.
 
 Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 
+### Languages
+
+* [Borland](tools/borland/)
+* [Digital Research](tools/dresearch/)
+* [IBM](tools/ibm/)
+* [Logitech](tools/logitech/)
+* [Microsoft](tools/microsoft/)
+
+### Utilities
+
+* [Enhanced DEBUG](tools/other/enhdebug/)
+* [FlickerFree](tools/other/flickerfree/)
+* [Norton Utilities](tools/other/norton/)
+* [Omniview](tools/other/omniview/)
+* [PC Tools](tools/other/pctools/)
+* [QEMM-386](tools/other/qemm386/)
+* [SoftLogic](tools/softlogic/)
+* [Spacemaker](tools/other/spacemaker/)
+
 ### Games
 
 * [id Software](games/id/)
@@ -61,15 +80,6 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 * [PC Magazine (Vols. 6-14)](shareware/pcmag/)
 * [PC Tech Journal (1985-1989)](shareware/pctj/)
 * [More...](shareware/)
-
-### Utilities
-
-* [Borland](tools/borland/)
-* [Digital Research](tools/dresearch/)
-* [IBM](tools/ibm/)
-* [Logitech](tools/logitech/)
-* [Microsoft](tools/microsoft/)
-* [More...](tools/)
 
 ### Diagnostics and More
 

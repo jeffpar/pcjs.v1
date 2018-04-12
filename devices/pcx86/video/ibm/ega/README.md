@@ -13,17 +13,17 @@ The easiest way for a machine to include an EGA *[Video](/docs/pcx86/video/)* co
 is to reference one of the project's predefined EGA configuration files, using the *ref* attribute; eg:
 
 ```xml
-<video ref="/devices/pcx86/video/ibm/ega/1984-09-13/64kb.xml"/>
+<video ref="/devices/pcx86/video/ibm/ega/1984-09-13/ibm-ega-5154-64k.xml"/>
 ```
 
 The referenced XML file automatically defines visual elements (eg, dimensions of the display window and other
 visual indicators), display behaviors (eg, touchscreen support, mouse pointer locking), the ROM to load (and where
 to load it), and other video card hardware features (eg, *memory* and *switches*).
 
-Here's what *64kb.xml* currently looks like:
+Here's what *ibm-ega-5154-64k.xml* currently looks like:
 
 ```xml
-<video id="videoEGA" model="ega" memory="0x10000" screenwidth="640" screenheight="350" touchscreen="mouse" pos="center" padding="8px">
+<video id="videoEGA" model="ega" memory="0x10000" screenwidth="1280" screenheight="700" touchscreen="mouse" pos="center" padding="8px">
     <menu>
         <title>IBM Enhanced Color Display</title>
         <control type="container" pos="right">
@@ -38,13 +38,17 @@ Here's what *64kb.xml* currently looks like:
 
 The following IBM EGA configuration files are currently available:
 
- - [64kb.xml](1984-09-13/64kb.xml)
- - [128kb-autolock640.xml](1984-09-13/128kb-autolock640.xml)
- - [128kb-autolockfs.xml](1984-09-13/128kb-autolockfs.xml)
- - [128kb-lockfs.xml](1984-09-13/128kb-lockfs.xml)
- - [256kb-autolock640.xml](1984-09-13/256kb-autolock640.xml)
- - [256kb-autolockfs.xml](1984-09-13/256kb-autolockfs.xml)
- - [256kb-lockfs.xml](1984-09-13/256kb-lockfs.xml)
+ - [ibm-ega-5151-256k.xml](1984-09-13/ibm-ega-5151-256k.xml)
+ - [ibm-ega-5153-256k.xml](1984-09-13/ibm-ega-5153-256k.xml)
+ - [ibm-ega-5154-64k.xml](1984-09-13/ibm-ega-5154-64k.xml)
+ - [ibm-ega-5154-128k.xml](1984-09-13/ibm-ega-5154-128k.xml)
+ - [ibm-ega-5154-128k-autolock640.xml](1984-09-13/ibm-ega-5154-128k-autolock640.xml)
+ - [ibm-ega-5154-128k-autolockfs.xml](1984-09-13/ibm-ega-5154-128k-autolockfs.xml)
+ - [ibm-ega-5154-128k-lockfs.xml](1984-09-13/ibm-ega-5154-128k-lockfs.xml)
+ - [ibm-ega-5154-256k.xml](1984-09-13/ibm-ega-5154-256k.xml)
+ - [ibm-ega-5154-256k-autolock640.xml](1984-09-13/ibm-ega-5154-256k-autolock640.xml)
+ - [ibm-ega-5154-256k-autolockfs.xml](1984-09-13/ibm-ega-5154-256k-autolockfs.xml)
+ - [ibm-ega-5154-256k-lockfs.xml](1984-09-13/ibm-ega-5154-256k-lockfs.xml)
 
 ### IBM EGA ROM
 

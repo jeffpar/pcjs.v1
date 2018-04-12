@@ -13,14 +13,14 @@ The easiest way for a machine to include an VGA *[Video](/docs/pcx86/video/)* co
 is to reference one of the project's VGA configuration files, using the *ref* attribute; eg:
 
 ```xml
-<video ref="/devices/pcx86/video/ibm/vga/1986-10-27/256kb-autolockfs.xml"/>
+<video ref="/devices/pcx86/video/ibm/vga/1986-10-27/ibm-vga-autolockfs.xml"/>
 ```
 
 The referenced XML file automatically defines visual elements (eg, dimensions of the display window and other
 visual indicators), display behaviors (eg, touchscreen support, mouse pointer locking), the ROM to load (and where
 to load it), and other video card hardware features (eg, *memory* and *switches*).
 
-Here's what *256kb-autolockfs.xml* currently looks like:
+Here's what *ibm-vga-autolockfs.xml* currently looks like:
 
 ```xml
 <video id="videoVGA" model="vga" screenwidth="1280" screenheight="960" scale="true" touchscreen="mouse" autolock="true" pos="center" padding="8px">
@@ -39,8 +39,8 @@ Here's what *256kb-autolockfs.xml* currently looks like:
 
 The following IBM VGA configuration files are currently available:
 
- - [256kb-autolockfs.xml](1986-10-27/256kb-autolockfs.xml)
- - [256kb-lockfs.xml](1986-10-27/256kb-lockfs.xml)
+ - [ibm-vga-autolockfs.xml](1986-10-27/ibm-vga-autolockfs.xml)
+ - [ibm-vga-lockfs.xml](1986-10-27/ibm-vga-lockfs.xml)
 
 ### IBM VGA ROM
 

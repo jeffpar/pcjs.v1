@@ -809,7 +809,7 @@ class Computer extends Component {
                 try {
                     fRestore = this.powerRestore(component, stateComputer, fRepower, fRestore);
                 } catch(err) {
-                    Component.error(component.type + " power failure: " + err.message);
+                    Component.error(component.type + " restore failure: " + err.message);
                 }
             }
         }

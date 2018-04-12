@@ -6371,7 +6371,7 @@ class DebuggerX86 extends Debugger {
      * @param {string} [chSep] is the command separator character (default is ';')
      * @return {Array.<string>}
      */
-    parseCommand(sCmd, fSave, chSep)
+    parseCommand(sCmd, fSave, chSep = ';')
     {
         if (fSave) {
             if (!sCmd) {
@@ -6393,7 +6393,7 @@ class DebuggerX86 extends Debugger {
              * With the introduction of breakpoint commands (ie, quoted command sequences
              * associated with a breakpoint), we can no longer perform simplistic splitting.
              *
-             *      a = sCmd.split(chSep || ';');
+             *      a = sCmd.split(chSep);
              *      for (let i = 0; i < a.length; i++) a[i] = Str.trim(a[i]);
              *
              * We may now split on semi-colons ONLY if they are outside a quoted sequence.
@@ -6405,7 +6405,6 @@ class DebuggerX86 extends Debugger {
 
             let iPrev = 0;
             let chQuote = null;
-            chSep = chSep || ';';
             /*
              * NOTE: Processing charAt() up to and INCLUDING length is not a typo; we're taking
              * advantage of the fact that charAt() with an invalid index returns an empty string,
