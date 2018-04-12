@@ -68,7 +68,7 @@ the same font resolution (8x8) as the Color Display Adapter (CGA):
     ---   ---   ---   ---
     ON    ON    ON    OFF
 
-or connect your EGA to an older IBM Color Display (Model 5153) and set the EGA switches as follows:
+or connect your EGA to the older Color Display (Model 5153) and set the EGA switches as follows:
 
     SW1   SW2   SW3   SW4
     ---   ---   ---   ---
@@ -76,29 +76,36 @@ or connect your EGA to an older IBM Color Display (Model 5153) and set the EGA s
 
 The machine below uses the last option (ie, a Color Display configuration).
 
-Fantasy Land still has some issues running in the PCx86 emulator, but we're working on them.  You'll notice there
-are some additional "diagnostic" windows below the machine, which are essentially live representations of the four
-EGA "font banks" that Fantasy Land loads as part of its initialization.
+Fantasy Land still has some issues running in the PCx86 emulator, but we're working on them.  You'll notice some
+additional "diagnostic" windows below the machine, which are essentially live representations of the 4 EGA "font
+banks" that Fantasy Land loads as part of its initialization.  Since every font can also be rendered in any of 16
+colors, each window shows 16 "slices" of the font in each of the 16 active colors.
 
 The EGA supported fonts with character heights up to 32 scan lines, so the maximum font size for a complete set of
-256 characters was 8K.  Unfortunately, the EGA required each font to be loaded on a 16K boundary in plane 2, so if
-you wanted to load 4 fonts, you had to have 64K of plane 2 memory, which in turn meant that all 4 planes had to have
-64K, for a total of 256K.
+256 characters was 8K.  However, the EGA required each font to be loaded on a 16K boundary in plane 2, so if
+you wanted to load 4 fonts, you had to have 64K of plane 2 memory, which in turn meant that all 4 planes had
+to have 64K, for a total of 256K.
 
-In Fantasy Land's case, the amount of font data was fairly small: each of its four 8x8 fonts used only 2K, for a
-total of 8K.  But that didn't matter.  To load four fonts of *any* size, your EGA board had to be fully populated with
+In Fantasy Land's case, the amount of font data was fairly small: each of its 4 8x8 fonts used only 2K, for a
+total of 8K.  But size doesn't matter.  To load 4 fonts of *any* size, your EGA board had to be fully populated with
 256K.
 
 The VGA made some amends for this design oddity, by supporting 4 additional 8K font banks between the EGA's original
-4 banks.  It didn't change the fact that first 4 font banks still required a full 64K in plane 2, but by that time,
-it was a moot point, since all VGAs included 256K anyway.
+4 banks.  It didn't change the fact that first 4 font banks were still spread across 64K of plane 2 memory, but by
+that time, it was a moot point, since all VGAs included 256K anyway.  Also, considering how few programs used more
+than *one* font, and that neither card could make simultaneous use of more than *two* fonts at a time, one wonders if
+there was any real-world software that actually needed the ability to load *eight* fonts.
 
 {% include machine.html id="ibm5160" %}
 
 <div>
+  <p>Font 0</p>
   <canvas id="ibm5160.videoEGA.font0" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
+  <p>Font 1</p>
   <canvas id="ibm5160.videoEGA.font1" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
+  <p>Font 2</p>
   <canvas id="ibm5160.videoEGA.font2" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
+  <p>Font 3</p>
   <canvas id="ibm5160.videoEGA.font3" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
 </div>
 
