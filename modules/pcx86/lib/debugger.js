@@ -51,8 +51,8 @@ if (DEBUGGER) {
  * Debugger Address Object
  *
  *      off             offset, if any
- *      sel             selector, if any (if null, addr should be set to a linear address)
- *      addr            linear address, if any (if null, addr will be recomputed from sel:off)
+ *      sel             selector, if any (if undefined, addr should be set to a linear address)
+ *      addr            linear address, if any (if undefined, addr will be recomputed from sel:off)
  *      type            one of the DebuggerX86.ADDRTYPE values
  *      fData32         true if 32-bit operand size in effect
  *      fAddr32         true if 32-bit address size in effect
@@ -65,9 +65,9 @@ if (DEBUGGER) {
  *      aCmds           preprocessed commands (from sCmd)
  *
  * @typedef {{
- *      off:(number|null|undefined),
- *      sel:(number|null|undefined),
- *      addr:(number|null|undefined),
+ *      off:(number|undefined),
+ *      sel:(number|undefined),
+ *      addr:(number|undefined),
  *      type:(number|undefined),
  *      fData32:(boolean|undefined),
  *      fAddr32:(boolean|undefined),
@@ -1019,7 +1019,7 @@ class DebuggerX86 extends Debugger {
      * should be done only as a last resort.
      *
      * @this {DebuggerX86}
-     * @param {number|null|undefined} sel
+     * @param {number|undefined} sel
      * @param {number} [type] (defaults to getAddressType())
      * @return {SegX86|null} seg
      */
@@ -1059,7 +1059,7 @@ class DebuggerX86 extends Debugger {
      * getAddr(dbgAddr, fWrite, nb)
      *
      * @this {DebuggerX86}
-     * @param {DbgAddrX86|null|undefined} dbgAddr
+     * @param {DbgAddrX86|undefined} dbgAddr
      * @param {boolean} [fWrite]
      * @param {number} [nb] number of bytes to check (1, 2 or 4); default is 1
      * @return {number} is the corresponding linear address, or X86.ADDR_INVALID
@@ -1073,7 +1073,7 @@ class DebuggerX86 extends Debugger {
          * descriptor tables, etc).
          */
         let addr = dbgAddr && dbgAddr.addr;
-        if (addr == null) {
+        if (addr == undefined) {
             addr = X86.ADDR_INVALID;
             if (dbgAddr) {
                 /*
@@ -1235,9 +1235,9 @@ class DebuggerX86 extends Debugger {
      * Returns a NEW DbgAddrX86 object, initialized with specified values and/or defaults.
      *
      * @this {DebuggerX86}
-     * @param {number|null} [off] (default is zero)
-     * @param {number|null} [sel] (default is undefined)
-     * @param {number|null} [addr] (default is undefined)
+     * @param {number} [off] (default is zero)
+     * @param {number} [sel] (default is undefined)
+     * @param {number} [addr] (default is undefined)
      * @param {number} [type] (default is based on current CPU mode)
      * @param {boolean} [fData32] (default is the current CPU operand size)
      * @param {boolean} [fAddr32] (default is the current CPU address size)
@@ -1287,9 +1287,9 @@ class DebuggerX86 extends Debugger {
      *
      * @this {DebuggerX86}
      * @param {DbgAddrX86} dbgAddr
-     * @param {number|null} [off] (default is zero)
-     * @param {number|null} [sel] (default is undefined)
-     * @param {number|null} [addr] (default is undefined)
+     * @param {number} [off] (default is zero)
+     * @param {number} [sel] (default is undefined)
+     * @param {number} [addr] (default is undefined)
      * @param {number} [type] (default is based on current CPU mode)
      * @param {boolean} [fData32] (default is the current CPU operand size)
      * @param {boolean} [fAddr32] (default is the current CPU address size)
@@ -1301,8 +1301,8 @@ class DebuggerX86 extends Debugger {
         dbgAddr.sel = sel;
         dbgAddr.addr = addr;
         dbgAddr.type = type || this.getAddressType();
-        dbgAddr.fData32 = (fData32 != null)? fData32 : !!(this.cpu && this.cpu.segCS.sizeData == 4);
-        dbgAddr.fAddr32 = (fAddr32 != null)? fAddr32 : !!(this.cpu && this.cpu.segCS.sizeAddr == 4);
+        dbgAddr.fData32 = (fData32 != undefined)? fData32 : !!(this.cpu && this.cpu.segCS.sizeData == 4);
+        dbgAddr.fAddr32 = (fAddr32 != undefined)? fAddr32 : !!(this.cpu && this.cpu.segCS.sizeAddr == 4);
         dbgAddr.fTempBreak = false;
         return dbgAddr;
     }
@@ -1347,7 +1347,7 @@ class DebuggerX86 extends Debugger {
      */
     checkLimit(dbgAddr, fUpdate)
     {
-        if (dbgAddr.sel != null) {
+        if (dbgAddr.sel != undefined) {
             let seg = this.getSegment(dbgAddr.sel, dbgAddr.type);
             if (seg) {
                 let off = dbgAddr.off & seg.maskAddr;
@@ -1375,8 +1375,7 @@ class DebuggerX86 extends Debugger {
      * parseAddr(sAddr, fCode, fNoChecks, fQuiet)
      *
      * As discussed above, dbgAddr variables contain one or more of: off, sel, and addr.  They represent
-     * a segmented address (sel:off) when sel is defined or a linear address (addr) when sel is undefined
-     * (or null).
+     * a segmented address (sel:off) when sel is defined or a linear address (addr) when sel is undefined.
      *
      * To create a segmented address, specify two values separated by ':'; for a linear address, use
      * a '%' prefix.  We check for ':' after '%', so if for some strange reason you specify both, the
@@ -1398,7 +1397,7 @@ class DebuggerX86 extends Debugger {
      * @param {boolean} [fCode] (true if target is code, false if target is data)
      * @param {boolean} [fNoChecks] (true when setting breakpoints that may not be valid now, but will be later)
      * @param {boolean} [fQuiet]
-     * @return {DbgAddrX86|null|undefined}
+     * @return {DbgAddrX86|undefined}
      */
     parseAddr(sAddr, fCode, fNoChecks, fQuiet)
     {
@@ -1430,7 +1429,7 @@ class DebuggerX86 extends Debugger {
                     ch += ch;
                 }
                 off = addr = 0;
-                sel = null;             // we still have code that relies on this crutch, instead of the type field
+                sel = undefined;        // we still have code that relies on this crutch, instead of the type field
                 break;
             default:
                 if (iColon >= 0) type = DebuggerX86.ADDRTYPE.NONE;
@@ -1447,26 +1446,26 @@ class DebuggerX86 extends Debugger {
             if (dbgAddr) return dbgAddr;
 
             if (iColon < 0) {
-                if (sel != null) {
+                if (sel != undefined) {
                     off = this.parseExpression(sAddr, fQuiet);
-                    addr = null;
+                    addr = undefined;
                 } else {
                     addr = this.parseExpression(sAddr, fQuiet);
-                    if (addr == null) off = null;
+                    if (addr == undefined) off = undefined;
                 }
             }
             else {
                 sel = this.parseExpression(sAddr.substring(0, iColon), fQuiet);
                 off = this.parseExpression(sAddr.substring(iColon + 1), fQuiet);
-                addr = null;
+                addr = undefined;
             }
         }
 
-        if (off != null) {
+        if (off != undefined) {
             dbgAddr = this.newAddr(off, sel, addr, type);
             if (!fNoChecks && !this.checkLimit(dbgAddr, true)) {
                 this.println("invalid offset: " + this.toHexAddr(dbgAddr));
-                dbgAddr = null;
+                dbgAddr = undefined;
             }
         }
         return dbgAddr;
@@ -1515,14 +1514,14 @@ class DebuggerX86 extends Debugger {
     incAddr(dbgAddr, inc)
     {
         inc = inc || 1;
-        if (dbgAddr.addr != null) {
+        if (dbgAddr.addr != undefined) {
             dbgAddr.addr += inc;
         }
-        if (dbgAddr.sel != null) {
+        if (dbgAddr.sel != undefined) {
             dbgAddr.off += inc;
             if (!this.checkLimit(dbgAddr)) {
                 dbgAddr.off = 0;
-                dbgAddr.addr = null;
+                dbgAddr.addr = undefined;
             }
         }
     }
@@ -1531,14 +1530,14 @@ class DebuggerX86 extends Debugger {
      * toHexOffset(off, sel, fAddr32)
      *
      * @this {DebuggerX86}
-     * @param {number|null|undefined} [off]
-     * @param {number|null|undefined} [sel]
+     * @param {number|undefined} [off]
+     * @param {number|undefined} [sel]
      * @param {boolean} [fAddr32] is true for 32-bit ADDRESS size
      * @return {string} the hex representation of off (or sel:off)
      */
     toHexOffset(off, sel, fAddr32)
     {
-        if (sel != null) {
+        if (sel != undefined) {
             return Str.toHex(sel, 4) + ':' + Str.toHex(off, (off & ~0xffff) || fAddr32? 8 : 4);
         }
         return Str.toHex(off);
@@ -1555,9 +1554,9 @@ class DebuggerX86 extends Debugger {
     {
         let ch = this.getAddrPrefix(dbgAddr);
         /*
-         * TODO: Revisit the decision to check sel == null; I would rather see these decisions based on type.
+         * TODO: Revisit the decision to check sel == undefined; I would rather see these decisions based on type.
          */
-        return (dbgAddr.type >= DebuggerX86.ADDRTYPE.LINEAR || dbgAddr.sel == null)? (ch + Str.toHex(dbgAddr.addr)) : (ch + this.toHexOffset(dbgAddr.off, dbgAddr.sel, dbgAddr.fAddr32));
+        return (dbgAddr.type >= DebuggerX86.ADDRTYPE.LINEAR || dbgAddr.sel == undefined)? (ch + Str.toHex(dbgAddr.addr)) : (ch + this.toHexOffset(dbgAddr.off, dbgAddr.sel, dbgAddr.fAddr32));
     }
 
     /**
@@ -2623,9 +2622,9 @@ class DebuggerX86 extends Debugger {
     {
         bitsMessage |= Messages.PORT;
         if (!name) bitsMessage |= Messages.WARN;        // we don't want to see "unknown" I/O messages unless WARN is enabled
-        if (addrFrom == null || (this.bitsMessage & bitsMessage) == bitsMessage) {
-            let selFrom = null;
-            if (addrFrom != null) {
+        if (addrFrom == undefined || (this.bitsMessage & bitsMessage) == bitsMessage) {
+            let selFrom = undefined;
+            if (addrFrom != undefined) {
                 selFrom = this.cpu.getCS();
                 addrFrom -= this.cpu.segCS.base;
             }
@@ -3292,7 +3291,7 @@ class DebuggerX86 extends Debugger {
                  * TODO: Unfortunately, this will fail to "step" over a call in segment that moves during the call;
                  * consider alternatives.
                  */
-                if (dbgAddr.addr != null) dbgAddr.sel = null;
+                if (dbgAddr.addr != undefined) dbgAddr.sel = undefined;
                 dbgAddr.fTempBreak = true;
             }
             else {
@@ -3876,7 +3875,7 @@ class DebuggerX86 extends Debugger {
             sOperand = Str.toHex(this.getShort(dbgAddr, 2), 4);
             break;
         case DebuggerX86.TYPE_FARP:
-            dbgAddr = this.newAddr(this.getWord(dbgAddr, true), this.getShort(dbgAddr, 2), null, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
+            dbgAddr = this.newAddr(this.getWord(dbgAddr, true), this.getShort(dbgAddr, 2), undefined, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
             sOperand = this.toHexAddr(dbgAddr);
             let aSymbol = this.findSymbol(dbgAddr);
             if (aSymbol[0]) sOperand += " (" + aSymbol[0] + ")";
@@ -4397,7 +4396,7 @@ class DebuggerX86 extends Debugger {
                 if (selSymbol !== undefined) {
                     dbgAddr.off = offSymbol;
                     dbgAddr.sel = selSymbol;
-                    dbgAddr.addr = null;
+                    dbgAddr.addr = undefined;
                     /*
                      * getAddr() computes the corresponding physical address and saves it in dbgAddr.addr.
                      */
@@ -6103,7 +6102,7 @@ class DebuggerX86 extends Debugger {
         for (let n = 1; n <= 6 && !!off; n++) {
             if (n > 2) {
                 dbgAddr.off = off;
-                dbgAddr.addr = null;
+                dbgAddr.addr = undefined;
                 let s = this.getInstruction(dbgAddr);
                 if (s.indexOf("CALL") >= 0 || fFar && s.indexOf("INT") >= 0) {
                     /*

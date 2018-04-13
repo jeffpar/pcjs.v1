@@ -6,7 +6,7 @@ machines:
   - id: deskpro386
     type: pcx86
     debugger: true
-    state: /disks/pcx86/windows/win95/4.00.950/deskpro386.json
+    state: /disks/pcx86/windows/win95/4.00.950/state.json
     config: /devices/pcx86/machine/compaq/deskpro386/vga/4096kb/debugger/machine.xml
     drives: '[{name:"68Mb Hard Disk",type:4,path:"/pcjs-disks/pcx86/drives/68mb/WIN95.json"}]'
     autoMount:

@@ -1447,8 +1447,8 @@ Card.SEQ = {
     },
     CHARMAP: {
         INDX:               0x03,       // Sequencer Character Map Select Register
-        SELB:               0x03,       // 0x0: 1st 8Kb of plane 2; 0x1: 2nd 8Kb; 0x2: 3rd 8Kb; 0x3: 4th 8Kb
-        SELA:               0x0C,       // 0x0: 1st 8Kb of plane 2; 0x4: 2nd 8Kb; 0x8: 3rd 8Kb; 0xC: 4th 8Kb
+        SELB:               0x03,       // 0x0: 1st 8Kb of plane 2; 0x1: 2nd 8Kb; 0x2: 3rd 8Kb; 0x3: 4th 8Kb (used when attribute bit 3 is 0)
+        SELA:               0x0C,       // 0x0: 1st 8Kb of plane 2; 0x4: 2nd 8Kb; 0x8: 3rd 8Kb; 0xC: 4th 8Kb (used when attribute bit 3 is 1)
         SELB_HI:            0x10,       // VGA only
         SELA_HI:            0x20        // VGA only
     },
@@ -2353,7 +2353,7 @@ class Video extends Component {
 
         this.nCard = aModelDefaults[0];
         this.nCardFont = 0;
-        this.aFontSelect = [0, 0];                  // current set of selectable logical fonts
+        this.nFontSelect = 0;                       // current set of selectable logical fonts
         this.cbMemory = parmsVideo['memory'] || 0;  // zero means fallback to the cardSpec's default size
         this.sSwitches = parmsVideo['switches'];
         this.nRandomize = parmsVideo['randomize'];
@@ -3716,7 +3716,7 @@ class Video extends Component {
      *
      * @this {Video}
      * @param {number} [nBitsPerPixel]
-     * @returns {Array}
+     * @return {Array}
      */
     getCardColors(nBitsPerPixel)
     {
@@ -3840,6 +3840,26 @@ class Video extends Component {
     }
 
     /**
+     * getSelectedFonts()
+     *
+     * @this {Video}
+     * @return {number} (low byte is "SELB" font number, used when attribute bit 3 is 0; high byte is "SELA" font number)
+     */
+    getSelectedFonts()
+    {
+        let bSelect = this.cardEGA.regSEQData[Card.SEQ.CHARMAP.INDX];
+        if (this.nCard < Video.CARD.VGA) {
+            bSelect &= (Card.SEQ.CHARMAP.SELA | Card.SEQ.CHARMAP.SELB);
+        }
+        if (!(this.cardEGA.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.EXT)) {
+            bSelect &= ~(Card.SEQ.CHARMAP.SELA | Card.SEQ.CHARMAP.SELB);
+        }
+        let nFontSelect0 = (bSelect & Card.SEQ.CHARMAP.SELB) | ((bSelect & Card.SEQ.CHARMAP.SELB_HI) >> 2);
+        let nFontSelect1 = ((bSelect & Card.SEQ.CHARMAP.SELA) >> 2) | ((bSelect & Card.SEQ.CHARMAP.SELA_HI) >> 3);
+        return nFontSelect0 | (nFontSelect1 << 8);
+    }
+
+    /**
      * setFontData(abFontData, aFontOffsets, cxFontChar)
      *
      * To support partial font rebuilds (required for the EGA), we now preserve the original font data (abFontData),
@@ -3949,15 +3969,7 @@ class Video extends Component {
                         if (DEBUG) this.printf("buildFont(%s): dirty font data detected (0x%02X)\n", fRebuild, bitsBanks);
                         this.cardEGA.bitsDirtyBanks = 0;
                     }
-                    let bSelect = this.cardEGA.regSEQData[Card.SEQ.CHARMAP.INDX];
-                    if (this.nCard < Video.CARD.VGA) {
-                        bSelect &= (Card.SEQ.CHARMAP.SELA | Card.SEQ.CHARMAP.SELB);
-                    }
-                    if (!(this.cardEGA.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.EXT)) {
-                        bSelect &= ~(Card.SEQ.CHARMAP.SELA | Card.SEQ.CHARMAP.SELB);
-                    }
-                    this.aFontSelect[0] = (bSelect & Card.SEQ.CHARMAP.SELA) | ((bSelect & Card.SEQ.CHARMAP.SELA_HI) >> 3);
-                    this.aFontSelect[1] = (bSelect & Card.SEQ.CHARMAP.SELB) | ((bSelect & Card.SEQ.CHARMAP.SELB_HI) >> 2);
+                    this.nFontSelect = this.getSelectedFonts();
                 }
                 if (offData != null) {
                     /*
@@ -3965,8 +3977,8 @@ class Video extends Component {
                      *
                      * Note that we no longer build all possible fonts; we build ONLY those fonts that are currently selectable.
                      */
-                    for (let i = 0, iFontPrev = -1; i < this.aFontSelect.length; i++) {
-                        let iFont = this.aFontSelect[i];
+                    for (let nShift = 0, iFontPrev = -1; nShift < 16; nShift += 8) {
+                        let iFont = (this.nFontSelect >> nShift) & 0xff;
                         if (iFont == iFontPrev) continue;
                         let iBank = (iFont << 1) - (iFont < 4? 0 : 7);
                         if (!abFontData) offData = iBank * 8192;
@@ -5203,7 +5215,7 @@ class Video extends Component {
      * For example, when the palette is being cycled, the screen is being panned, the page is being flipped, etc.
      *
      * @this {Video}
-     * @param {boolean} [fModified] (true if the buffer may have been modified, false if only color(s) may have changed)
+     * @param {boolean} [fModified] (true if the buffer may have been modified, false if only font(s) or color(s) may have changed)
      */
     invalidateCache(fModified)
     {
@@ -6439,9 +6451,29 @@ class Video extends Component {
             this.cardEGA.regSEQData[this.cardEGA.regSEQIndx] = bOut;
         }
         switch(this.cardEGA.regSEQIndx) {
+
         case Card.SEQ.MAPMASK.INDX:
             this.cardEGA.nSeqMapMask = Video.aEGAByteToDW[bOut & Card.SEQ.MAPMASK.MAPS];
             break;
+
+        case Card.SEQ.CHARMAP.INDX:
+            let nFontSelect = this.getSelectedFonts();
+            if (this.nFontSelect !== nFontSelect) {
+                if (DEBUG) {
+                    this.printf("outSEQData(0x%02X): font selections changing from 0x%04X to 0x%04X\n", bOut, this.nFontSelect, nFontSelect);
+                    // this.cpu.stopCPU();
+                }
+                this.nFontSelect = nFontSelect;
+                this.buildFont(true);
+                if ((nFontSelect & 0xff) != (nFontSelect >> 8)) {
+                    if (DEBUG) {
+                        this.printf("outSEQData(0x%02X): low font (0x%02X) differs from high font (0x%02X)\n", bOut, nFontSelect & 0xff, nFontSelect >> 8);
+                        this.cpu.stopCPU();
+                    }
+                }
+            }
+            break;
+
         case Card.SEQ.MEMMODE.INDX:
             if (this.setCardAccess(this.getCardAccess())) {
                 /*
@@ -6470,6 +6502,7 @@ class Video extends Component {
                 this.updateScreen(true);
             }
             break;
+
         default:
             break;
         }
