@@ -1405,7 +1405,7 @@ DiskDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
  * @this {DiskDump}
  * @param {string} sTrackSig
  * @param {number} nTrackNum
- * @param {number|null} nTrackType
+ * @param {Number} nTrackType
  * @param {number} [nTrackLoad]
  * @return {string}
  */
@@ -1428,11 +1428,11 @@ DiskDump.prototype.dumpTrackOSI = function(sTrackSig, nTrackNum, nTrackType, nTr
  * Dumps sector data for an OSI disk sector
  *
  * @this {DiskDump}
- * @param {number|null} nSectorSig
+ * @param {Number} nSectorSig
  * @param {number} nSectorNum
  * @param {number} nSectorPages
  * @param {Buffer} bufSector
- * @param {string|null} sSectorEndSig
+ * @param {String} sSectorEndSig
  * @param {number} nSectorOffset
  * @return {string}
  */

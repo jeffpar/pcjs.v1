@@ -87,7 +87,7 @@ var sDefaultFile = "./README.md";
  *
  * @constructor
  * @param {string} sMD containing markdown
- * @param {string|null} [sIndent] sets the overall indentation of the document
+ * @param {String} [sIndent] sets the overall indentation of the document
  * @param {Object} [req] is the web server's (ie, Express) request object, if any
  * @param {Array.<string>|null} [aParms] is an array of overrides to use (see below)
  * @param {boolean} [fDebug] turns on debugging features (eg, debug comments, special URL encodings, etc)

@@ -250,7 +250,7 @@ var nBlogExcerpts = 100;
  *
  * @constructor
  * @param {string} sPath is a fully-qualified web server directory or file
- * @param {string|null} sFile is an optional template path (relative to sPath)
+ * @param {String} sFile is an optional template path (relative to sPath)
  * @param {boolean} fRebuild (this overrides the module's normal fRebuild setting)
  * @param {Object} req
  * @param {function(Error,string)} done
@@ -1720,7 +1720,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
  * @param {string} [sToken]
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
- * @param {string|null} [sPrevious] is text, if any, that should precede the file
+ * @param {String} [sPrevious] is text, if any, that should precede the file
  * @param {string} [sXMLFile] name (if any) of a default machine.xml
  * @param {string} [sStateFile] name (if any) of a default state file
  */
@@ -1736,7 +1736,7 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
         if (err) {
             /*
              * HACK to look for a "machine.md" if our attempt to load a "README.md" failed.
-             * 
+             *
              * NOTE: I've since renamed all the "machine.md" files to "README.md", but I've decided to leave this as an option.
              */
             if (sFile.indexOf(sReadMeFile) >= 0) {
