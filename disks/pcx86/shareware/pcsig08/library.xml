@@ -3180,6 +3180,7 @@
 		<disk path="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/shareware/pcsig08/disks/DISK2119.json">PCSIG08: DISK2119</disk>
 		<disk path="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/shareware/pcsig08/disks/DISK2120.json">PCSIG08: DISK2120</disk>
 		<disk path="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/shareware/pcsig08/disks/DISK2121.json">PCSIG08: DISK2121</disk>
+		<disk path="/pcjs-games/pcx86/gambling/1988/TRUMP-CASTLE-120.json">Trump Castle 1.20 (1988)</disk>
 	</control>
 	<control type="button" binding="loadDisk">Load</control>
 	<control type="button" binding="saveDisk" padRight="8px">Save</control>
