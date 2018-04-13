@@ -248,7 +248,7 @@ class Int36 {
         /*
          * Conversion of any 72-bit value should take no more than 3 divisions by 10,000,000,000.
          */
-        let nMaxDivs = 3;
+        let nMaxDivs = 3, quotient, minDigits;
         do {
             i36Tmp.div(i36Div);
             /*
@@ -259,8 +259,8 @@ class Int36 {
                 s = "error";
                 break;
             }
-            let quotient = i36Tmp.value || i36Tmp.extended;
-            let nMinDigits = (quotient? 10 : 1);
+            quotient = i36Tmp.value || i36Tmp.extended;
+            let minDigits = (quotient? 10 : 1);
             i36Rem.set(i36Tmp.remainder);
             do {
                 i36Rem.divNum(10);
@@ -270,7 +270,7 @@ class Int36 {
                     break;
                 }
                 s = String.fromCharCode(0x30 + i36Rem.remainder) + s;
-            } while (--nMinDigits > 0 || i36Rem.value);
+            } while (--minDigits > 0 || i36Rem.value);
         } while (quotient);
 
         if (fNeg) s = '-' + s;
