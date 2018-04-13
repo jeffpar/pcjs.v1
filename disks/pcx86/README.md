@@ -85,7 +85,9 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 
 * [PC Diagnostics and Utilities](diags/)
 * [PC ROM BIOS Sources](roms/ibm/)
-* [PC Test Resources (CPU, Video, etc)](/tests/pcx86/)
+* [PCx86 TestMonitor Support](/tests/pcx86/testmon/)
+* [Michael Abrash's VGA "Black Book" Tests](/tests/pcx86/vga/)
+* [More...](/tests/pcx86/)
 
 ### Fixed Disks
 
