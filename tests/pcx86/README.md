@@ -10,4 +10,4 @@ PCx86 Test Resources
 * [80386 Tests](80386/)
 * [TestMonitor Support](testmon/)
 * [Trace Utility](trace/)
-* [VGA "Black Book" Tests](vga/)
+* [Michael Abrash's VGA "Black Book" Tests](vga/)
