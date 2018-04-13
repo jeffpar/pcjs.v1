@@ -1,6 +1,6 @@
 ---
 layout: page
-title: VGA "Black Book" Tests
+title: Michael Abrash's VGA "Black Book" Tests
 permalink: /tests/pcx86/vga/
 machines:
   - id: deskpro386
@@ -14,8 +14,8 @@ machines:
         name: VGA Tests (Black Book)
 ---
 
-VGA "Black Book" Tests
-----------------------
+Michael Abrash's VGA "Black Book" Tests
+---------------------------------------
 
 To aid in the development of PCjs VGA support, I've added some VGA tests to the project.
 For now, the only "tests" are samples taken directly from
@@ -34,32 +34,41 @@ The name of each source code file matches the name displayed in the text (eg, [L
 from [Chapter 23](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-23.md)).
 
 I assume something similar was done on the CD-ROM that accompanied the Black Book, but since I don't have the original
-book or its CD-ROM, I'm extracting the source code directly from the Markdown text, and then "tabifying" it with 8-column
+book or its CD-ROM, I've extracted the source code directly from the Markdown text and then "tabified" it with 8-column
 tab stops.
+
+The PCjs [Library](/disks/pcx86/library.xml) disk collection has been updated to include a disk containing executables
+built from the sources in this directory.  The "VGA Tests (Black Book)" disk image was built using [DiskDump](/modules/diskdump/)
+and the *--normalize* option, which automatically converts linefeeds in known text files (including ASM files) into
+DOS-compatible CR/LF sequences:
+
+	diskdump --dir=bin --format=json --output=VGABIN.json --normalize
 
 Development of PCjs VGA support began June 2015, and not everything here runs properly inside PCjs yet.  For example:
 
-- L29-4: doesn't actually blank the screen (then again, other emulators don't bother blanking it, either)
-- L30-1: no split-screen support yet
-- L30-2: no split-screen support yet
-- L32-1: not built yet
-- L32-2: not built yet
-- L35-2: not built yet
-- L47-1: not built yet
-- L47-2: not built yet
-- L47-3: not built yet
-- L47-7: not built yet
+- L29-4 doesn't actually blank the screen (then again, other emulators don't bother blanking it, either)
+- L30-1 and L30-2 require split-screen support
 
----
+VGA "Black Book" Test Machine
+-----------------------------
+
+The [Compaq DeskPro 386](/devices/pcx86/machine/compaq/deskpro386/vga/2048kb/) machine below loads the
+"VGA Tests (Black Book)" disk from the PCjs [Library](/disks/pcx86/library.xml) disk collection into Drive B.
+Click the **Run** button to start the machine.
+
+{% include machine.html id="deskpro386" %}
+
+Selected VGA "Black Book" Samples 
+---------------------------------
 
 List of VGA Samples from [Michael Abrash's Graphics Programming Black Book](https://github.com/jeffpar/abrash-black-book):
 
  * [Chapter 23: Bones and Sinew](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-23.md)
 	 * [L23-1.ASM: Animates four balls bouncing around a playfield by using page flipping and panning](L23-1.ASM)
-	 * ![L32-1](L23-1.png) 
+	 * ![L32-1](L23-1.png)
  * [Chapter 24: Parallel Processing with the VGA](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-24.md)
 	 * [L24-1.ASM: Illustrates operation of ALUs and latches of the VGA's Graphics Controller](L24-1.ASM) 
-	 * ![L24-1](L24-1.png) 
+	 * ![L24-1](L24-1.png)
  * [Chapter 25: VGA Data Machinery](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-25.md)
 	 * [L25-1.ASM: Illustrates operation of data rotate and bit mask features of Graphics Controller](L25-1.ASM) 
 	 * ![L25-1](L25-1.png) 
@@ -133,43 +142,9 @@ List of VGA Samples from [Michael Abrash's Graphics Programming Black Book](http
 	 * [L47-5.ASM: Mode X (320x240, 256 colors) rectangle fill routine (medium)](L47-5.ASM)
 	 * [L47-6.ASM: Mode X (320x240, 256 colors) rectangle fill routine (fast)](L47-6.ASM)
 	 * [L47-7.C: Program to demonstrate mode X (320x240, 256-colors) rectangle fill](L47-7.C)
- * [Chapter 48: ](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-48.md)
-	 * [L48-1.C: ](L48-1.C)
-	 * [L48-2.ASM: ](L48-2.ASM)
+ * [Chapter 48: Mode X Marks the Latch](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-48.md)
+	 * [L48-1.C: Mode X (320x240, 256 colors) patterned rectangle fills](L48-1.C)
+	 * [L48-2.ASM: Mode X (320x240, 256 colors) rectangle 4x4 pattern fill routine](L48-2.ASM)
 	 * ![L48-2](L48-2.png) 
-	 * [L48-3.ASM: ](L48-3.ASM)
-	 * [L48-4.ASM: ](L48-4.ASM)
-
----
-
-Also, I've updated the PCjs [Library](/disks/pcx86/library.xml) disk collection to include a disk containing executables
-built from the sources in this directory:
-
-```xml
-<disk path="/tests/pcx86/vga/VGABIN.json">VGA Tests (Black Book)</disk>
-```
-
-The "VGA Tests (Black Book)" disk image (VGABIN) was built with this command:
-
-	diskdump --dir=bin --format=json --output=VGABIN.json --normalize
-
-Alternatively, if *path* refers to a directory (ending with a slash) instead of a disk image, the PCjs client will ask
-the PCjs web server to enumerate the contents of that directory and send back a JSON-encoded disk image containing all
-the files in that directory (including any subdirectories) every time that disk is requested.  Since this puts an added
-burden on the server, it's best to do this only when running PCjs from a local PCjs web server.
-
-```xml
-<disk path="/tests/pcx86/vga/">VGA Tests (Black Book)</disk>
-```
-
-One advantage of using [DiskDump](/modules/diskdump/) with *--normalize* is that it automatically converts linefeeds
-in known text files (including ASM files) into DOS-compatible CR/LF sequences.
-
-VGA "Black Book" Test Machine
------------------------------
-
-The [Compaq DeskPro 386](/devices/pcx86/machine/compaq/deskpro386/vga/2048kb/) machine below loads the
-"VGA Tests (Black Book)" disk from the PCjs [Library](/disks/pcx86/library.xml) disk collection into Drive B.
-Click the **Run** button to start the machine.
-
-{% include machine.html id="deskpro386" %}
+	 * [L48-3.ASM: Mode X (320x240, 256 colors) display memory to display memory copy](L48-3.ASM)
+	 * [L48-4.ASM: Mode X (320x240, 256 colors) system memory to display memory copy](L48-4.ASM)

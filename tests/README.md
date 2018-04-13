@@ -7,4 +7,4 @@ permalink: /tests/
 Test Resources
 --------------
 
-An assortment of [PCx86 Tests](pcx86/) is available.
+An assortment of [PCx86 Test Resources](pcx86/) are available.
