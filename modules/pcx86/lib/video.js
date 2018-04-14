@@ -4853,7 +4853,7 @@ class Video extends Component {
          * we'll set image smoothing to whatever value was provided for ALL modes -- assuming the browser supports it.
          */
         if (this.sSmoothing) {
-            this.contextScreen[this.sSmoothing] = (this.fSmoothing == null? (this.nCardFont? true : this.fSmoothing) : this.fSmoothing);
+            this.contextScreen[this.sSmoothing] = (this.fSmoothing == null? (this.nCardFont? true : false) : this.fSmoothing);
         }
 
         /*

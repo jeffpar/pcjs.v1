@@ -1209,6 +1209,7 @@ class FDC extends Component {
             sDiskettePath = sDiskettePath.replace("/disks/pc/", "/disks/pcx86/");
             sDiskettePath = sDiskettePath.replace("/disks/pcx86/private/", "/private-disks/pcx86/");
             sDiskettePath = sDiskettePath.replace("/disks/pcx86/", "/pcjs-disks/pcx86/");
+            sDiskettePath = sDiskettePath.replace("/pcjs-disks/pcx86/games/", "/pcjs-games/pcx86/");
             /*
              * TODO: Machines with saved states may be using lower-case disk image names, whereas we now use
              * UPPER-CASE names for disk images, so we lower-case both before comparing.  The only problem with
