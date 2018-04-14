@@ -174,10 +174,8 @@ class Video8080 extends Component {
         var fSmoothing = parmsVideo['smoothing'];
         var sSmoothing = Web.getURLParm('smoothing');
         if (sSmoothing) fSmoothing = (sSmoothing == "true");
-        if (fSmoothing != null) {
-            sProp = Web.findProperty(this.contextScreen, 'imageSmoothingEnabled');
-            if (sProp) this.contextScreen[sProp] = fSmoothing;
-        }
+        this.fSmoothing = fSmoothing;
+        this.sSmoothing = Web.findProperty(this.contextScreen, 'imageSmoothingEnabled');
 
         this.rotateScreen = parmsVideo['screenRotate'];
         if (this.rotateScreen) {
@@ -335,6 +333,16 @@ class Video8080 extends Component {
 
             this.abLineBuffer = new Array(this.nColsBuffer);
         }
+
+        /*
+         * Our 'smoothing' parameter defaults to null (which we treat the same as undefined), which means that
+         * image smoothing will be selectively enabled (ie, true for text modes, false for graphics modes); otherwise,
+         * we'll set image smoothing to whatever value was provided for ALL modes -- assuming the browser supports it.
+         */
+        if (this.sSmoothing) {
+            this.contextScreen[this.sSmoothing] = (this.fSmoothing == null? false /* (this.nFormat == Video8080.FORMAT.VT100? true : false) */ : this.fSmoothing);
+        }
+
         return true;
     }
 
