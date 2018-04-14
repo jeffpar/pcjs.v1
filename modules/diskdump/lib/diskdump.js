@@ -629,7 +629,7 @@ DiskDump.asTextFileExts = [".MD", ".ME", ".BAT", ".ASM", ".TXT", ".XML"];
  *
  * Usage
  * -----
- * 
+ *
  *      diskdump --dir={directory} [--format=json|data|hex|bytes|img] [--comments] [--output={file}]
  *      diskdump --disk={disk image} [--format=json|data|hex|bytes|img] [--comments] [--output={file}]
  *      diskdump --path={file[;file]...} [--format=json|data|hex|bytes|img] [--comments] [--output={file}]
@@ -638,7 +638,7 @@ DiskDump.asTextFileExts = [".MD", ".ME", ".BAT", ".ASM", ".TXT", ".XML"];
  *
  * Arguments
  * ---------
- * 
+ *
  *      The default format is "json", which generates an array of signed 32-bit decimal values; "hex" is an older
  *      text format that consists entirely of 2-character hex values (deprecated), and "bytes" is a JSON-like format
  *      that also uses hex values (but with "0x" prefixes) and is normally used only when comments are enabled.
@@ -657,7 +657,7 @@ DiskDump.asTextFileExts = [".MD", ".ME", ".BAT", ".ASM", ".TXT", ".XML"];
  *
  * Examples
  * --------
- * 
+ *
  *      node modules/diskdump/bin/diskdump --disk=../pcjs/disks/pcx86/games/infocom/zork1/zork1.dsk
  *      node modules/diskdump/bin/diskdump --dir=./apps/pcx86/1981/visicalc/ --format=img --output=./apps/pcx86/1981/visicalc/disk.img
  *      node modules/diskdump/bin/diskdump --path=./apps/pcx86/1981/visicalc/bin/vc.com;../README.md --format=json --output=./apps/pcx86/1981/visicalc/disk.json
@@ -970,7 +970,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         sXML += '</manifest>';
     }
 
-    i = sOutputFile.indexOf("/pcjs-disks/");
+    i = sOutputFile.indexOf("/pcjs-");      // eg, "/pcjs-disks", "pcjs-games", and any similar future disk repos
     if (i < 0) i = sOutputFile.indexOf("/private-disks/");
     if (i < 0) i = sOutputFile.indexOf("/apps/");
     if (i > 0) sOutputFile = sOutputFile.substr(i);
@@ -1035,15 +1035,15 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         if (sName) {
             sXMLDisk += '\t\t<name>' + sName + '</name>\n';
         }
-        
+
         if (sMatchDisk && (match = sMatchDisk.match(/<link[^>]*>[^<]*<\/link>/))) {
             sXMLDisk += '\t\t' + match[0] + '\n';
         }
-        
+
         if (sMatchDisk && (match = sMatchDisk.match(/<from [^>]*?\/>/))) {
             sXMLDisk += '\t\t' + match[0] + '\n';
         }
-        
+
         var sBaseDir = null;
         for (i = 0; i < disk.aManifestInfo.length; i++) {
             var sAttrs = "";
@@ -1405,7 +1405,7 @@ DiskDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
  * @this {DiskDump}
  * @param {string} sTrackSig
  * @param {number} nTrackNum
- * @param {number|null} nTrackType
+ * @param {Number} nTrackType
  * @param {number} [nTrackLoad]
  * @return {string}
  */
@@ -1428,11 +1428,11 @@ DiskDump.prototype.dumpTrackOSI = function(sTrackSig, nTrackNum, nTrackType, nTr
  * Dumps sector data for an OSI disk sector
  *
  * @this {DiskDump}
- * @param {number|null} nSectorSig
+ * @param {Number} nSectorSig
  * @param {number} nSectorNum
  * @param {number} nSectorPages
  * @param {Buffer} bufSector
- * @param {string|null} sSectorEndSig
+ * @param {String} sSectorEndSig
  * @param {number} nSectorOffset
  * @return {string}
  */
@@ -1503,7 +1503,7 @@ DiskDump.prototype.trimSector = function(buf, len)
  *      FILE_SIZE: the size of the file, in bytes (or -1, in which case FILE_DATA is another aFiles array)
  *      FILE_DATA: the file's data (either a string or a Buffer), which may either be pre-read or deferred to buildClusters()
  *      FILE_CLUS: the cluster to be assigned to the file, if any
- * 
+ *
  * @class FileInfo
  * @property {string} FILE_NAME
  * @property {string} FILE_PATH
@@ -1637,7 +1637,7 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
  * isDST(time)
  *
  * See: https://stackoverflow.com/questions/11887934/how-to-check-if-the-dst-daylight-saving-time-is-in-effect-and-if-it-is-whats
- * 
+ *
  * NOTE: This code uses the fact that getTimezoneOffset() returns different values inside and outside of DST,
  * and compares the difference between the two (for example, New York returns -5 outside DST and -4 inside DST).
  *

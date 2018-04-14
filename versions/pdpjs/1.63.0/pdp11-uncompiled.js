@@ -2036,7 +2036,7 @@ class Web {
              * TODO: Perhaps it's time for our code in netlib.js to finally add support for HTTPS; for now
              * though, it's just as well that the NODE environment assumes all resources are available locally.
              */
-            sURL = sURL.replace(/^\/(pcjs-disks|private-disks)\//, "https://jeffpar.github.io/$1/");
+            sURL = sURL.replace(/^\/(pcjs-disks|pcjs-games|private-disks)\//, "https://jeffpar.github.io/$1/");
         }
         else {
             /*
@@ -2045,7 +2045,7 @@ class Web {
              * NOTE: "http://archive.pcjs.org" is now "https://s3-us-west-2.amazonaws.com/archive.pcjs.org"
              */
             sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^\/]*)$/, "$2/archive/$3");
-            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-disks|private-disks)\/(.*)$/, "/$1/$2");
+            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-disks|pcjs-games|private-disks)\/(.*)$/, "/$1/$2");
         }
 
 

@@ -90,7 +90,7 @@ class Memory {
      * is available).
      *
      * @this {Memory}
-     * @param {number|null} [addr] of lowest used address in block
+     * @param {number} [addr] of lowest used address in block
      * @param {number} [used] portion of block in bytes (0 for none); must be a multiple of 4
      * @param {number} [size] of block's buffer in bytes (0 for none); must be a multiple of 4
      * @param {number} [type] is one of the Memory.TYPE constants (default is Memory.TYPE.NONE)

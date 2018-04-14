@@ -2036,7 +2036,7 @@ class Web {
              * TODO: Perhaps it's time for our code in netlib.js to finally add support for HTTPS; for now
              * though, it's just as well that the NODE environment assumes all resources are available locally.
              */
-            sURL = sURL.replace(/^\/(pcjs-disks|private-disks)\//, "https://jeffpar.github.io/$1/");
+            sURL = sURL.replace(/^\/(pcjs-disks|pcjs-games|private-disks)\//, "https://jeffpar.github.io/$1/");
         }
         else {
             /*
@@ -2045,7 +2045,7 @@ class Web {
              * NOTE: "http://archive.pcjs.org" is now "https://s3-us-west-2.amazonaws.com/archive.pcjs.org"
              */
             sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^\/]*)$/, "$2/archive/$3");
-            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-disks|private-disks)\/(.*)$/, "/$1/$2");
+            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-disks|pcjs-games|private-disks)\/(.*)$/, "/$1/$2");
         }
 
 
@@ -10472,7 +10472,7 @@ class Memory {
      * is available).
      *
      * @this {Memory}
-     * @param {number|null} [addr] of lowest used address in block
+     * @param {number} [addr] of lowest used address in block
      * @param {number} [used] portion of block in bytes (0 for none); must be a multiple of 4
      * @param {number} [size] of block's buffer in bytes (0 for none); must be a multiple of 4
      * @param {number} [type] is one of the Memory.TYPE constants (default is Memory.TYPE.NONE)
@@ -13911,7 +13911,7 @@ class CPUX86 extends CPU {
              * registers, then enables paging, do all the previous Debug register addresses automatically
              * become linear addresses?  I'm guessing they do.
              */
-            this.blockUnpaged = new Memory(null, 0, 0, Memory.TYPE.UNPAGED, null, this);
+            this.blockUnpaged = new Memory(undefined, 0, 0, Memory.TYPE.UNPAGED, null, this);
             this.blockUnpaged.copyBreakpoints(this.dbg);
             for (iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
                 this.aMemBlocks[iBlock] = this.blockUnpaged;
@@ -49722,8 +49722,8 @@ Card.SEQ = {
     },
     CHARMAP: {
         INDX:               0x03,       // Sequencer Character Map Select Register
-        SELB:               0x03,       // 0x0: 1st 8Kb of plane 2; 0x1: 2nd 8Kb; 0x2: 3rd 8Kb; 0x3: 4th 8Kb
-        SELA:               0x0C,       // 0x0: 1st 8Kb of plane 2; 0x4: 2nd 8Kb; 0x8: 3rd 8Kb; 0xC: 4th 8Kb
+        SELB:               0x03,       // 0x0: 1st 8Kb of plane 2; 0x1: 2nd 8Kb; 0x2: 3rd 8Kb; 0x3: 4th 8Kb (used when attribute bit 3 is 0)
+        SELA:               0x0C,       // 0x0: 1st 8Kb of plane 2; 0x4: 2nd 8Kb; 0x8: 3rd 8Kb; 0xC: 4th 8Kb (used when attribute bit 3 is 1)
         SELB_HI:            0x10,       // VGA only
         SELA_HI:            0x20        // VGA only
     },
@@ -50628,7 +50628,8 @@ class Video extends Component {
 
         this.nCard = aModelDefaults[0];
         this.nCardFont = 0;
-        this.aFontSelect = [0, 0];                  // current set of selectable logical fonts
+        this.nActiveFont = 0;
+        this.nFontSelect = 0;                       // current set of selectable logical fonts
         this.cbMemory = parmsVideo['memory'] || 0;  // zero means fallback to the cardSpec's default size
         this.sSwitches = parmsVideo['switches'];
         this.nRandomize = parmsVideo['randomize'];
@@ -50749,6 +50750,13 @@ class Video extends Component {
         this.aFonts = [];
 
         /*
+         * aFontDiff entries are created by createFontDiff(), and each entry is a 256-element array of either
+         * 0 (no difference) or -1 for every character code that differs between the fonts that correspond to
+         * the aFontDiff index.
+         */
+        this.aFontDiff = [];
+
+        /*
          * Instead of (re)allocating a new color array every time getCardColors() is called, we preallocate
          * an array and simply update the entries as needed.  Note that for an EGA (or a VGA operating in an
          * EGA-compatible mode), only the first 16 entries get used (derived from the ATC); only when a VGA
@@ -50756,6 +50764,10 @@ class Video extends Component {
          */
         this.aRGB = new Array(this.nCard == Video.CARD.VGA? 256 : 16);
         this.fRGBValid = false;     // whenever this is false, it signals getCardColors() to rebuild aRGB
+
+        this.aCellCache = [];
+        this.nCellCache = 0;
+        this.iCellCacheValid = 0;   // 0: invalid, 1: partially valid, 2: completely valid
 
         /*
          * Since I've not found clear documentation on a reliable way to check whether a particular DOM element
@@ -51987,11 +51999,36 @@ class Video extends Component {
     }
 
     /**
+     * setFontData(abFontData, aFontOffsets, cxFontChar)
+     *
+     * To support partial font rebuilds (required for the EGA), we now preserve the original font data (abFontData),
+     * font offsets (aFontOffsets), and font character width (8 for the EGA, undefined for the MDA/CGA).
+     *
+     * TODO: Ultimately, we want to have exactly one dedicated font for the EGA, the data for which we'll read directly
+     * from plane 2 of video memory, instead of relying on the original font data in ROM.  Relying on the ROM data was
+     * originally just a crutch to help get EGA support bootstrapped.
+     *
+     * Also, for the MDA/CGA, we should be discarding the font data after the first buildFont() call, because we
+     * should never need to rebuild the fonts for those cards (both their font patterns and colors were hard-coded).
+     *
+     * @this {Video}
+     * @param {Array.<number>} abFontData is the raw font data, from the ROM font file
+     * @param {Array.<number>} aFontOffsets contains offsets into abFontData: [0] for CGA, [1] for MDA
+     * @param {number} [cxFontChar] is a fixed character width to use for all fonts; undefined to use MDA/CGA defaults
+     */
+    setFontData(abFontData, aFontOffsets, cxFontChar)
+    {
+        this.abFontData = abFontData;
+        this.aFontOffsets = aFontOffsets;
+        this.cxFontChar = cxFontChar;
+    }
+
+    /**
      * getCardColors(nBitsPerPixel)
      *
      * @this {Video}
      * @param {number} [nBitsPerPixel]
-     * @returns {Array}
+     * @return {Array}
      */
     getCardColors(nBitsPerPixel)
     {
@@ -52115,28 +52152,23 @@ class Video extends Component {
     }
 
     /**
-     * setFontData(abFontData, aFontOffsets, cxFontChar)
-     *
-     * To support partial font rebuilds (required for the EGA), we now preserve the original font data (abFontData),
-     * font offsets (aFontOffsets), and font character width (8 for the EGA, undefined for the MDA/CGA).
-     *
-     * TODO: Ultimately, we want to have exactly one dedicated font for the EGA, the data for which we'll read directly
-     * from plane 2 of video memory, instead of relying on the original font data in ROM.  Relying on the ROM data was
-     * originally just a crutch to help get EGA support bootstrapped.
-     *
-     * Also, for the MDA/CGA, we should be discarding the font data after the first buildFont() call, because we
-     * should never need to rebuild the fonts for those cards (both their font patterns and colors were hard-coded).
+     * getSelectedFonts()
      *
      * @this {Video}
-     * @param {Array.<number>} abFontData is the raw font data, from the ROM font file
-     * @param {Array.<number>} aFontOffsets contains offsets into abFontData: [0] for CGA, [1] for MDA
-     * @param {number} [cxFontChar] is a fixed character width to use for all fonts; undefined to use MDA/CGA defaults
+     * @return {number} (low byte is "SELB" font number, used when attribute bit 3 is 0; high byte is "SELA" font number)
      */
-    setFontData(abFontData, aFontOffsets, cxFontChar)
+    getSelectedFonts()
     {
-        this.abFontData = abFontData;
-        this.aFontOffsets = aFontOffsets;
-        this.cxFontChar = cxFontChar;
+        let bSelect = this.cardEGA.regSEQData[Card.SEQ.CHARMAP.INDX];
+        if (this.nCard < Video.CARD.VGA) {
+            bSelect &= (Card.SEQ.CHARMAP.SELA | Card.SEQ.CHARMAP.SELB);
+        }
+        if (!(this.cardEGA.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.EXT)) {
+            bSelect &= ~(Card.SEQ.CHARMAP.SELA | Card.SEQ.CHARMAP.SELB);
+        }
+        let nFontSelect0 = (bSelect & Card.SEQ.CHARMAP.SELB) | ((bSelect & Card.SEQ.CHARMAP.SELB_HI) >> 2);
+        let nFontSelect1 = ((bSelect & Card.SEQ.CHARMAP.SELA) >> 2) | ((bSelect & Card.SEQ.CHARMAP.SELA_HI) >> 3);
+        return nFontSelect0 | (nFontSelect1 << 8);
     }
 
     /**
@@ -52159,11 +52191,13 @@ class Video extends Component {
      *
      * @this {Video}
      * @param {boolean} [fRebuild] (true if this is a rebuild; default is false)
-     * @return {boolean} true if any or all fonts were (re)built, false if nothing changed
+     * @return {boolean}
      */
     buildFont(fRebuild = false)
     {
         let fChanges = false;
+        this.nActiveFont = this.nCardFont;
+
         /*
          * There's no point building fonts unless we're in a windowed (non-command-line) environment, we're
          * in a font-based mode (nCardFont is set), and font data has been supplied (or can be extracted from RAM).
@@ -52224,15 +52258,8 @@ class Video extends Component {
                         if (DEBUG) this.printf("buildFont(%s): dirty font data detected (0x%02X)\n", fRebuild, bitsBanks);
                         this.cardEGA.bitsDirtyBanks = 0;
                     }
-                    let bSelect = this.cardEGA.regSEQData[Card.SEQ.CHARMAP.INDX];
-                    if (this.nCard < Video.CARD.VGA) {
-                        bSelect &= (Card.SEQ.CHARMAP.SELA | Card.SEQ.CHARMAP.SELB);
-                    }
-                    if (!(this.cardEGA.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.EXT)) {
-                        bSelect &= ~(Card.SEQ.CHARMAP.SELA | Card.SEQ.CHARMAP.SELB);
-                    }
-                    this.aFontSelect[0] = (bSelect & Card.SEQ.CHARMAP.SELA) | ((bSelect & Card.SEQ.CHARMAP.SELA_HI) >> 3);
-                    this.aFontSelect[1] = (bSelect & Card.SEQ.CHARMAP.SELB) | ((bSelect & Card.SEQ.CHARMAP.SELB_HI) >> 2);
+                    this.nFontSelect = this.getSelectedFonts();
+                    this.nActiveFont = this.nCardFont + (this.nFontSelect & 0xff);
                 }
                 if (offData != null) {
                     /*
@@ -52240,22 +52267,47 @@ class Video extends Component {
                      *
                      * Note that we no longer build all possible fonts; we build ONLY those fonts that are currently selectable.
                      */
-                    for (let i = 0, iFontPrev = -1; i < this.aFontSelect.length; i++) {
-                        let iFont = this.aFontSelect[i];
+                    for (let nShift = 0, iFontPrev = -1; nShift < 16; nShift += 8) {
+                        let iFont = (this.nFontSelect >> nShift) & 0xff;
                         if (iFont == iFontPrev) continue;
+                        iFontPrev = iFont;
                         let iBank = (iFont << 1) - (iFont < 4? 0 : 7);
                         if (!abFontData) offData = iBank * 8192;
                         let fNewData = !!(bitsBanks & (0x1 << iBank));
                         if (this.createFont(this.nCardFont + iFont, cxChar, cyChar, offData, 0, abFontData, fNewData, aRGBColors, aColorMap)) {
                             fChanges = true;
+                            if (abFontData) continue;
+                            /*
+                             * Since a programmable font was changed, we need to update the aFontDiff array.  For the EGA,
+                             * that array looks like this:
+                             *
+                             *      [0]: diffs between font 1 and 0     0 = 1 * (1 - 1) / 2
+                             *      [1]: diffs between font 2 and 0     1 = 2 * (2 - 1) / 2
+                             *      [2]: diffs between font 2 and 1
+                             *      [3]: diffs between font 3 and 0     3 = 3 * (3 - 1) / 2
+                             *      [4]: diffs between font 3 and 1
+                             *      [5]: diffs between font 3 and 2
+                             *
+                             * The VGA continues that progression:
+                             *
+                             *      [6]: diffs between font 4 and 0     6 = 4 * (4 - 1) / 2
+                             *      [7]: diffs between font 4 and 1
+                             *      [8]: diffs between font 4 and 2
+                             *      [9]: diffs between font 4 and 3
+                             *      ...
+                             *
+                             * So for a given logical font number (0-3 for the EGA or 0-7 for the VGA), the starting index of
+                             * "differable" fonts is n * (n - 1) / 2.
+                             */
+                            if (iFont) {
+                                let iDiff = (iFont * (iFont - 1)) >> 1;
+                                for (let iFontDiffer = 0; iFontDiffer < iFont; iFontDiffer++) {
+                                    this.createFontDiff(iDiff++, iFont, iFontDiffer, cyChar);
+                                }
+                            }
                         }
-                        iFontPrev = iFont;
                     }
                 }
-                break;
-
-            default:
-                if (DEBUG) this.printf("buildFont(): unrecognized card font (%d)\n", this.nCardFont);
                 break;
             }
 
@@ -52268,7 +52320,7 @@ class Video extends Component {
                 this.cBlinkVisible = 0; // no visible blinking characters (yet)
             }
 
-            if (DEBUG) this.printf("buildFont(%s): %sfont changes detected\n", fRebuild, fChanges? "" : "no ");
+            if (DEBUG && fChanges) this.printf("buildFont(%s): font changes detected\n", fRebuild);
         }
 
         return fChanges;
@@ -52302,6 +52354,7 @@ class Video extends Component {
         let fChanges = false;
         let font = this.aFonts[nFont];
         let nColors = (aRGBColors.length < 16? aRGBColors.length : 16);
+
         if (!font || nColors != font.aRGBColors.length) {
             font = {
                 cxChar:     cxChar,
@@ -52314,9 +52367,11 @@ class Video extends Component {
                 aCanvas:    new Array(nColors)
             };
         }
+
         let nDouble = (this.fDoubleFont? 1 : 0);
         let cxCell = cxChar << nDouble;
         let cyCell = cyChar << nDouble;
+
         let fNewShape = false;
         if (font.cxCell != cxCell || font.cyCell != cyCell) {
             font.cxChar = cxChar;
@@ -52330,7 +52385,7 @@ class Video extends Component {
             let rgbColor = aRGBColors[iColor];
             /*
              * If any of the font's shape, data, or color has changed, then recreate it.  Also, we don't need to check
-             * for a color change if we already know there was a size or data change.
+             * for a color change if we already know there was a shape or data change.
              */
             let fChanged = fNewShape || fNewData;
             if (!fChanged) {
@@ -52514,6 +52569,35 @@ class Video extends Component {
         font.aRGBColors[iColor] = rgbColor;
         font.aCanvas[iColor] = canvasFont;
         return true;
+    }
+
+    /**
+     * createFontDiff(iDiff, iFont, iFontDiffer, cyChar, cyLimit)
+     *
+     * @this {Video}
+     * @param {number} iDiff (aFontDiff index)
+     * @param {number} iFont
+     * @param {number} iFontDiffer
+     * @param {number} cyChar (height of every character in both fonts)
+     * @param {number} [cyLimit] (default is 32)
+     */
+    createFontDiff(iDiff, iFont, iFontDiffer, cyChar, cyLimit = 32)
+    {
+        let adwMemory = this.cardEGA.adwMemory;
+        let aDiff = this.aFontDiff[iDiff] || new Array(256);
+        let iBank = (iFont << 1) - (iFont < 4? 0 : 7), offData = iBank * 8192;
+        let iBankDiffer = (iFontDiffer << 1) - (iFontDiffer < 4? 0 : 7), offDataDiffer = iBankDiffer * 8192;
+        for (let iChar = 0; iChar < 256; iChar++) {
+            aDiff[iChar] = 0;
+            let offChar = offData + iChar * cyLimit, offCharDiffer = offDataDiffer + iChar * cyLimit;
+            for (let y = 0; y < cyChar; y++) {
+                if (((adwMemory[offChar++] >> 16) & 0xff) !== ((adwMemory[offCharDiffer++] >> 16) & 0xff)) {
+                    aDiff[iChar] = -1;
+                    break;
+                }
+            }
+        }
+        this.aFontDiff[iDiff] = aDiff;
     }
 
     /**
@@ -52740,10 +52824,10 @@ class Video extends Component {
             /*
              * TODO: Consider our redraw options for cursor shape changes, because invalidating cBlinkVisible won't
              * have the desired effect if the cursor is still in the same location.  The only existing mechanism for
-             * making this happen would be to invalidate the cell cache (reset fCellCacheValid), which is rather drastic.
+             * making this happen would be to invalidate the cell cache (reset iCellCacheValid), which is rather drastic.
              * Note that we don't have to worry about this if the cursor has ALSO just moved (ie, this.cBlinkVisible < 0).
              */
-            // if (this.cBlinkVisible >= 0) this.fCellCacheValid = false;
+            // if (this.cBlinkVisible >= 0) this.iCellCacheValid = 0;
         }
 
         this.cyCursorCell = bCursorMax + 1;
@@ -52779,7 +52863,7 @@ class Video extends Component {
                     data &= ~drawCursor;
                     let col = this.iCellCursor % this.nCols;
                     let row = (this.iCellCursor / this.nCols)|0;
-                    if (this.nCardFont && this.aFonts[this.nCardFont]) {
+                    if (this.nActiveFont && this.aFonts[this.nActiveFont]) {
                         /*
                          * If we're using an off-screen buffer in text mode, then we need to keep it in sync with "reality".
                          */
@@ -52959,7 +53043,7 @@ class Video extends Component {
      */
     setDimensions()
     {
-        this.nCardFont = 0;
+        this.nCardFont = this.nActiveFont = 0;
         this.nCols = this.nColsDefault;
         this.nRows = this.nRowsDefault;
         this.nCellsPerWord = Video.aModeParms[Video.MODE.MDA_80X25][2];
@@ -52976,17 +53060,12 @@ class Video extends Component {
 
             if (this.nCardFont) {
                 /*
-                 * When an EGA is connected to a CGA monitor, the modeParms table entry is correct: we must
-                 * use the 8x8 CGA font.  But when it's connected to an EGA monitor, we need to use the 8x14 EGA
-                 * color font instead.
-                 *
-                 * TODO: Can an EGA with a monochrome monitor be programmed for 43-line mode as well?  If so,
-                 * then we'll need to load another MDA font variation, because we only load the 9x14 font for MDA.
+                 * Color text modes originally used an 8x8 font, but beginning with the EGA, they use whatever
+                 * font is stored in plane 2, so if the card is "newer" than the default font, update the default
+                 * to match the card.
                  */
                 if (this.nCard > this.nCardFont) this.nCardFont = this.nCard;
-
                 this.buildFont();
-
                 let font = this.aFonts[this.nCardFont];
                 if (font) {
                     cxCell = font.cxCell;
@@ -53325,7 +53404,7 @@ class Video extends Component {
      * setMode(nMode, fForce, fRemap)
      *
      * Set fForce to true to update the mode regardless of previous mode, or false to perform a normal update
-     * that bypasses updateScreen() but still calls initCache().
+     * that bypasses updateScreen() but still calls initCellCache().
      *
      * @this {Video}
      * @param {number|null} nMode
@@ -53420,7 +53499,7 @@ class Video extends Component {
             }
 
             this.setDimensions();
-            this.invalidateCache(true);
+            this.invalidateCellCache(true);
 
             if (fReset) this.updateScreen();
         }
@@ -53448,28 +53527,30 @@ class Video extends Component {
     }
 
     /**
-     * initCache()
+     * initCellCache()
      *
      * Initializes the contents of our internal cell cache.
      *
      * TODO: Consider changing this to a cache of RGB values, so that when the buffer is merely being color-cycled,
-     * we don't have to update the entire screen.  This will also allow invalidateCache() to honor the fModified flag,
-     * bypassing initCache() when it is false.
+     * we don't have to update the entire screen.  This will also allow invalidateCellCache() to honor the fModified
+     * flag, bypassing initCellCache() when it is false.
      *
      * @this {Video}
+     * @return {number}
      */
-    initCache()
+    initCellCache()
     {
         this.cBlinkVisible = -1;                // force updateScreen() to recount visible blinking characters
-        this.fCellCacheValid = false;
+        this.iCellCacheValid = 0;
         let nCells = this.nCellCache;
         if (this.aCellCache === undefined || this.aCellCache.length != nCells) {
             this.aCellCache = new Array(nCells);
         }
+        return nCells;
     }
 
     /**
-     * invalidateCache(fModified)
+     * invalidateCellCache(fModified, iFont, iFontPrev)
      *
      * Ensure that the next updateScreen() will update every cell; intended for situations where the entire screen needs
      * to be redrawn, even though the underlying data in the video buffer has not changed (and therefore cleanMemory() will
@@ -53478,12 +53559,42 @@ class Video extends Component {
      * For example, when the palette is being cycled, the screen is being panned, the page is being flipped, etc.
      *
      * @this {Video}
-     * @param {boolean} [fModified] (true if the buffer may have been modified, false if only color(s) may have changed)
+     * @param {boolean} [fModified] (true if the buffer may have been modified, false if only font(s) or color(s) may have changed)
+     * @param {number} [iFont]
+     * @param {number} [iFontPrev]
+     * @return {number} (number of cells invalidated; used for diagnostic purposes only)
      */
-    invalidateCache(fModified)
+    invalidateCellCache(fModified, iFont, iFontPrev)
     {
+        if (this.iCellCacheValid && iFont != undefined) {
+            /*
+             * We want to do a "smart" (aka selective) invalidation of the cell cache, invalidating only
+             * those cells containing characters whose current font data differs from the previous font data.
+             */
+            let i, nCells = 0;
+            if (iFont == iFontPrev) return 0;
+            if (iFont < iFontPrev) {
+                i = iFont;
+                iFont = iFontPrev;
+                iFontPrev = i;
+            }
+            let iDiff = ((iFont * (iFont - 1)) >> 1) + iFontPrev;
+            let aCellCache = this.aCellCache;
+            let aFontDiff = this.aFontDiff[iDiff];
+            if (aCellCache && aFontDiff) {
+                for (i = 0; i < aCellCache.length; i++) {
+                    let data = aCellCache[i];
+                    if (data >= 0) {
+                        aCellCache[i] |= aFontDiff[data & 0xff];
+                        if (DEBUG) nCells += (aFontDiff[data & 0xff] < 0? 1 : 0);
+                    }
+                }
+                this.iCellCacheValid = 1;
+                return nCells;
+            }
+        }
         if (!fModified) this.fRGBValid = false;
-        this.initCache();
+        return this.initCellCache();
     }
 
     /**
@@ -53511,13 +53622,10 @@ class Video extends Component {
      */
     updateChar(col, row, data, context)
     {
-        /*
-         * this.nCardFont MUST be defined, and the font in this.aFonts[this.nCardFont] MUST be loaded.
-         */
         let bChar = data & 0xff;
         let bAttr = data >> 8;
         let iFgnd = bAttr & 0xf;
-        let font = this.aFonts[this.nCardFont];
+        let font = this.aFonts[this.nActiveFont];
         if (font.aColorMap) iFgnd = font.aColorMap[iFgnd];
 
         /*
@@ -53658,7 +53766,7 @@ class Video extends Component {
         if (!fEnabled && !fForce) return;
 
         if (fForce) {
-            this.initCache();
+            this.initCellCache();
         }
         else {
             /*
@@ -53722,13 +53830,13 @@ class Video extends Component {
          */
         if ((this.getRetraceBits(card) & Card.CGA.STATUS.VRETRACE) || card.nVertPeriodsStartAddr && card.nVertPeriodsStartAddr < card.nVertPeriods) {
             /*
-             * PARANOIA: Don't call invalidateCache() unless the address we're about to "latch" actually changed.
+             * PARANOIA: Don't call invalidateCellCache() unless the address we're about to "latch" actually changed.
              */
             let offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
             offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
             if (card.offStartAddr !== offStartAddr) {
                 card.offStartAddr = offStartAddr;
-                this.invalidateCache();
+                this.invalidateCellCache();
             }
             card.nVertPeriodsStartAddr = 0;
         }
@@ -53799,7 +53907,7 @@ class Video extends Component {
             this.bus.cleanMemory(addrScreenWrap, cbScreenWrap, true);
         }
         this.bus.cleanMemory(addrScreen, cbScreen, true);
-        if (cCells) this.fCellCacheValid = true;
+        if (cCells) this.iCellCacheValid = 2;
     }
 
     /**
@@ -53830,7 +53938,7 @@ class Video extends Component {
          * no visible cursor, then we're done; simply return.  Otherwise, if there's only a blinking
          * cursor, then update JUST that one cell.
          */
-        if (!fForce && this.fCellCacheValid && this.bus.cleanMemory(addrScreen, cbScreen)) {
+        if (!fForce && this.iCellCacheValid == 2 && this.bus.cleanMemory(addrScreen, cbScreen)) {
             if (!fBlinkUpdate && this.cBlinkVisible >= 0) {
                 return cCells;
             }
@@ -53849,14 +53957,11 @@ class Video extends Component {
             // else if (this.cBlinks & 0x1) return;
         }
 
-        if (this.nCardFont) {
+        if (this.nActiveFont) {
             /*
-             * This is the text-mode update case.  We're required to FIRST verify that the current font
-             * has been successfully loaded, because we're not allowed to call updateChar() if there's no font.
+             * This is the text-mode update case.
              */
-            if (this.aFonts[this.nCardFont]) {
-                this.updateScreenText(addrBuffer, addrScreen, addrScreenLimit, iCell, nCells);
-            }
+            this.updateScreenText(addrBuffer, addrScreen, addrScreenLimit, iCell, nCells);
         }
         else if (this.cbSplit) {
             /*
@@ -53892,6 +53997,8 @@ class Video extends Component {
      */
     updateScreenText(addrBuffer, addrScreen, addrScreenLimit, iCell, nCells)
     {
+        if (!this.aFonts[this.nActiveFont]) return 0;
+
         /*
          * If MDA.MODE.BLINK_ENABLE is set and a cell's blink bit is set, then if (cBlinks & 0x2) != 0,
          * we want the foreground element of the cell to be drawn; otherwise we don't.  So every 16-bit
@@ -53945,7 +54052,7 @@ class Video extends Component {
 
 
 
-            if (!this.fCellCacheValid || data !== this.aCellCache[iCell]) {
+            if (!this.iCellCacheValid || data !== this.aCellCache[iCell]) {
                 /*
                  * The following code is useful for setting a breakpoint (on the non-destructive "cUpdated |= 0" line)
                  * when debugging the "FlickerFree" utility while doing a series of "DIR" listings on the screen.  When
@@ -54014,7 +54121,7 @@ class Video extends Component {
         while (addr < addrScreenLimit) {
             let data = this.bus.getShortDirect(addr);
 
-            if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
+            if (this.iCellCacheValid && data === this.aCellCache[iCell]) {
                 x += nPixelsPerCell;
             } else {
                 this.aCellCache[iCell] = data;
@@ -54123,14 +54230,14 @@ class Video extends Component {
                      * This is as good a place as any to invalidate the cell cache when panning is active; this ensures
                      * we don't rely on stale cache contents once panning stops.
                      */
-                    this.fCellCacheValid = false;
+                    this.iCellCacheValid = 0;
                 } else {
                     iPixel = this.nCols - x;
                     if (nPixels > iPixel) nPixels = iPixel;
                 }
             } else {
 
-                if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
+                if (this.iCellCacheValid && data === this.aCellCache[iCell]) {
                     x += nPixels;
                     nPixels = 0;
                 } else {
@@ -54175,7 +54282,7 @@ class Video extends Component {
             }
         }
 
-        if (iPixelFirst) cCells = 0;    // zero the cell count to inhibit setting fCellCacheValid
+        if (iPixelFirst) cCells = 0;    // zero the cell count to inhibit setting iCellCacheValid
 
         /*
          * For a fascinating discussion of the best way to update the screen canvas at this point, see updateScreenGraphicsCGA().
@@ -54241,7 +54348,7 @@ class Video extends Component {
                  */
             } else {
 
-                if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
+                if (this.iCellCacheValid && data === this.aCellCache[iCell]) {
                     x += nPixels;
                     nPixels = 0;
                 } else {
@@ -54272,7 +54379,7 @@ class Video extends Component {
             }
         }
 
-        if (iPixelFirst) cCells = 0;    // zero the cell count to inhibit setting fCellCacheValid
+        if (iPixelFirst) cCells = 0;    // zero the cell count to inhibit setting iCellCacheValid
 
         /*
          * For a fascinating discussion of the best way to update the screen canvas at this point, see updateScreenGraphicsCGA().
@@ -54490,6 +54597,10 @@ class Video extends Component {
             this.printMessageIO(port, bOut, addrFrom, "ATC.INDX");
             card.fATCData = true;
             if ((bOut & Card.ATC.INDX_PAL_ENABLE) && !fPalEnabled) {
+                /*
+                 * TODO: Consider whether it's really necessary (or desirable) to immediately update the screen
+                 * on a font change, or if it's sufficient to simply wait until the next normal periodic update.
+                 */
                 if (this.buildFont(true)) {
                     this.updateScreen(true);
                 }
@@ -54523,13 +54634,13 @@ class Video extends Component {
              * HACK: offStartAddr is supposed to be "latched" ONLY at the start of every VRETRACE interval, but
              * other "triggers" are helpful; see updateScreen() for details.
              *
-             * PARANOIA: Don't call invalidateCache() unless the start address we just "latched" actually changed.
+             * PARANOIA: Don't call invalidateCellCache() unless the start address we just "latched" actually changed.
              */
             let offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
             offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
             if (card.offStartAddr != offStartAddr) {
                 card.offStartAddr = offStartAddr;
-                this.invalidateCache();
+                this.invalidateCellCache();
             }
             card.nVertPeriodsStartAddr = 0;
         } else {
@@ -54541,7 +54652,7 @@ class Video extends Component {
                         this.printMessageIO(port, bOut, addrFrom, "ATC." + card.asATCRegs[iReg]);
                     }
                     card.regATCData[iReg] = bOut;
-                    this.invalidateCache(false);
+                    this.invalidateCellCache(false);
                 }
             }
         }
@@ -54714,9 +54825,36 @@ class Video extends Component {
             this.cardEGA.regSEQData[this.cardEGA.regSEQIndx] = bOut;
         }
         switch(this.cardEGA.regSEQIndx) {
+
         case Card.SEQ.MAPMASK.INDX:
             this.cardEGA.nSeqMapMask = Video.aEGAByteToDW[bOut & Card.SEQ.MAPMASK.MAPS];
             break;
+
+        case Card.SEQ.CHARMAP.INDX:
+            let nFontSelect = this.getSelectedFonts();
+            if (nFontSelect != this.nFontSelect) {
+                if (DEBUG) {
+                    if ((nFontSelect & 0xff) == (nFontSelect >> 8)) {
+                        if (this.messageEnabled(Messages.VIDEO | Messages.PORT)) {
+                            this.printf("outSEQData(0x%02X): font selection changing from 0x%04X to 0x%04X\n", bOut, this.nFontSelect, nFontSelect);
+                        }
+                    } else {
+                        this.printf("outSEQData(0x%02X): low font (0x%02X) differs from high font (0x%02X)\n", bOut, nFontSelect & 0xff, nFontSelect >> 8);
+                        this.cpu.stopCPU();
+                    }
+                }
+                let iFont = nFontSelect & 0xff;
+                let iFontPrev = this.nFontSelect & 0xff;
+                this.buildFont(true);
+
+                this.invalidateCellCache(false, iFont, iFontPrev);
+                /*
+                 * TODO: Consider whether this code should, like outATC(), immediately update the screen
+                 * on a font change, or if it's sufficient to simply wait until the next normal periodic update.
+                 */
+            }
+            break;
+
         case Card.SEQ.MEMMODE.INDX:
             if (this.setCardAccess(this.getCardAccess())) {
                 /*
@@ -54745,6 +54883,7 @@ class Video extends Component {
                 this.updateScreen(true);
             }
             break;
+
         default:
             break;
         }
@@ -54877,7 +55016,7 @@ class Video extends Component {
         let dwNew = (dw & ~(0x3f << this.cardEGA.regDACShift)) | ((bOut & 0x3f) << this.cardEGA.regDACShift);
         if (dw !== dwNew) {
             this.cardEGA.regDACData[this.cardEGA.regDACAddr] = dwNew;
-            this.invalidateCache(false);
+            this.invalidateCellCache(false);
         }
         this.cardEGA.regDACShift += 6;
         if (this.cardEGA.regDACShift > 12) {
@@ -55162,7 +55301,7 @@ class Video extends Component {
         }
         if (this.cardColor.regColor !== bOut) {
             this.cardColor.regColor = bOut;
-            this.invalidateCache(false);
+            this.invalidateCellCache(false);
         }
     }
 
@@ -69886,8 +70025,8 @@ if (DEBUGGER) {
  * Debugger Address Object
  *
  *      off             offset, if any
- *      sel             selector, if any (if null, addr should be set to a linear address)
- *      addr            linear address, if any (if null, addr will be recomputed from sel:off)
+ *      sel             selector, if any (if undefined, addr should be set to a linear address)
+ *      addr            linear address, if any (if undefined, addr will be recomputed from sel:off)
  *      type            one of the DebuggerX86.ADDRTYPE values
  *      fData32         true if 32-bit operand size in effect
  *      fAddr32         true if 32-bit address size in effect
@@ -69900,9 +70039,9 @@ if (DEBUGGER) {
  *      aCmds           preprocessed commands (from sCmd)
  *
  * @typedef {{
- *      off:(number|null|undefined),
- *      sel:(number|null|undefined),
- *      addr:(number|null|undefined),
+ *      off:(number|undefined),
+ *      sel:(number|undefined),
+ *      addr:(number|undefined),
  *      type:(number|undefined),
  *      fData32:(boolean|undefined),
  *      fAddr32:(boolean|undefined),
@@ -70854,7 +70993,7 @@ class DebuggerX86 extends Debugger {
      * should be done only as a last resort.
      *
      * @this {DebuggerX86}
-     * @param {number|null|undefined} sel
+     * @param {number|undefined} sel
      * @param {number} [type] (defaults to getAddressType())
      * @return {SegX86|null} seg
      */
@@ -70894,7 +71033,7 @@ class DebuggerX86 extends Debugger {
      * getAddr(dbgAddr, fWrite, nb)
      *
      * @this {DebuggerX86}
-     * @param {DbgAddrX86|null|undefined} dbgAddr
+     * @param {DbgAddrX86|undefined} dbgAddr
      * @param {boolean} [fWrite]
      * @param {number} [nb] number of bytes to check (1, 2 or 4); default is 1
      * @return {number} is the corresponding linear address, or X86.ADDR_INVALID
@@ -70908,7 +71047,7 @@ class DebuggerX86 extends Debugger {
          * descriptor tables, etc).
          */
         let addr = dbgAddr && dbgAddr.addr;
-        if (addr == null) {
+        if (addr == undefined) {
             addr = X86.ADDR_INVALID;
             if (dbgAddr) {
                 /*
@@ -71070,9 +71209,9 @@ class DebuggerX86 extends Debugger {
      * Returns a NEW DbgAddrX86 object, initialized with specified values and/or defaults.
      *
      * @this {DebuggerX86}
-     * @param {number|null} [off] (default is zero)
-     * @param {number|null} [sel] (default is undefined)
-     * @param {number|null} [addr] (default is undefined)
+     * @param {number} [off] (default is zero)
+     * @param {number} [sel] (default is undefined)
+     * @param {number} [addr] (default is undefined)
      * @param {number} [type] (default is based on current CPU mode)
      * @param {boolean} [fData32] (default is the current CPU operand size)
      * @param {boolean} [fAddr32] (default is the current CPU address size)
@@ -71122,9 +71261,9 @@ class DebuggerX86 extends Debugger {
      *
      * @this {DebuggerX86}
      * @param {DbgAddrX86} dbgAddr
-     * @param {number|null} [off] (default is zero)
-     * @param {number|null} [sel] (default is undefined)
-     * @param {number|null} [addr] (default is undefined)
+     * @param {number} [off] (default is zero)
+     * @param {number} [sel] (default is undefined)
+     * @param {number} [addr] (default is undefined)
      * @param {number} [type] (default is based on current CPU mode)
      * @param {boolean} [fData32] (default is the current CPU operand size)
      * @param {boolean} [fAddr32] (default is the current CPU address size)
@@ -71136,8 +71275,8 @@ class DebuggerX86 extends Debugger {
         dbgAddr.sel = sel;
         dbgAddr.addr = addr;
         dbgAddr.type = type || this.getAddressType();
-        dbgAddr.fData32 = (fData32 != null)? fData32 : !!(this.cpu && this.cpu.segCS.sizeData == 4);
-        dbgAddr.fAddr32 = (fAddr32 != null)? fAddr32 : !!(this.cpu && this.cpu.segCS.sizeAddr == 4);
+        dbgAddr.fData32 = (fData32 != undefined)? fData32 : !!(this.cpu && this.cpu.segCS.sizeData == 4);
+        dbgAddr.fAddr32 = (fAddr32 != undefined)? fAddr32 : !!(this.cpu && this.cpu.segCS.sizeAddr == 4);
         dbgAddr.fTempBreak = false;
         return dbgAddr;
     }
@@ -71182,7 +71321,7 @@ class DebuggerX86 extends Debugger {
      */
     checkLimit(dbgAddr, fUpdate)
     {
-        if (dbgAddr.sel != null) {
+        if (dbgAddr.sel != undefined) {
             let seg = this.getSegment(dbgAddr.sel, dbgAddr.type);
             if (seg) {
                 let off = dbgAddr.off & seg.maskAddr;
@@ -71210,8 +71349,7 @@ class DebuggerX86 extends Debugger {
      * parseAddr(sAddr, fCode, fNoChecks, fQuiet)
      *
      * As discussed above, dbgAddr variables contain one or more of: off, sel, and addr.  They represent
-     * a segmented address (sel:off) when sel is defined or a linear address (addr) when sel is undefined
-     * (or null).
+     * a segmented address (sel:off) when sel is defined or a linear address (addr) when sel is undefined.
      *
      * To create a segmented address, specify two values separated by ':'; for a linear address, use
      * a '%' prefix.  We check for ':' after '%', so if for some strange reason you specify both, the
@@ -71233,7 +71371,7 @@ class DebuggerX86 extends Debugger {
      * @param {boolean} [fCode] (true if target is code, false if target is data)
      * @param {boolean} [fNoChecks] (true when setting breakpoints that may not be valid now, but will be later)
      * @param {boolean} [fQuiet]
-     * @return {DbgAddrX86|null|undefined}
+     * @return {DbgAddrX86|undefined}
      */
     parseAddr(sAddr, fCode, fNoChecks, fQuiet)
     {
@@ -71265,7 +71403,7 @@ class DebuggerX86 extends Debugger {
                     ch += ch;
                 }
                 off = addr = 0;
-                sel = null;             // we still have code that relies on this crutch, instead of the type field
+                sel = undefined;        // we still have code that relies on this crutch, instead of the type field
                 break;
             default:
                 if (iColon >= 0) type = DebuggerX86.ADDRTYPE.NONE;
@@ -71282,26 +71420,26 @@ class DebuggerX86 extends Debugger {
             if (dbgAddr) return dbgAddr;
 
             if (iColon < 0) {
-                if (sel != null) {
+                if (sel != undefined) {
                     off = this.parseExpression(sAddr, fQuiet);
-                    addr = null;
+                    addr = undefined;
                 } else {
                     addr = this.parseExpression(sAddr, fQuiet);
-                    if (addr == null) off = null;
+                    if (addr == undefined) off = undefined;
                 }
             }
             else {
                 sel = this.parseExpression(sAddr.substring(0, iColon), fQuiet);
                 off = this.parseExpression(sAddr.substring(iColon + 1), fQuiet);
-                addr = null;
+                addr = undefined;
             }
         }
 
-        if (off != null) {
+        if (off != undefined) {
             dbgAddr = this.newAddr(off, sel, addr, type);
             if (!fNoChecks && !this.checkLimit(dbgAddr, true)) {
                 this.println("invalid offset: " + this.toHexAddr(dbgAddr));
-                dbgAddr = null;
+                dbgAddr = undefined;
             }
         }
         return dbgAddr;
@@ -71350,14 +71488,14 @@ class DebuggerX86 extends Debugger {
     incAddr(dbgAddr, inc)
     {
         inc = inc || 1;
-        if (dbgAddr.addr != null) {
+        if (dbgAddr.addr != undefined) {
             dbgAddr.addr += inc;
         }
-        if (dbgAddr.sel != null) {
+        if (dbgAddr.sel != undefined) {
             dbgAddr.off += inc;
             if (!this.checkLimit(dbgAddr)) {
                 dbgAddr.off = 0;
-                dbgAddr.addr = null;
+                dbgAddr.addr = undefined;
             }
         }
     }
@@ -71366,14 +71504,14 @@ class DebuggerX86 extends Debugger {
      * toHexOffset(off, sel, fAddr32)
      *
      * @this {DebuggerX86}
-     * @param {number|null|undefined} [off]
-     * @param {number|null|undefined} [sel]
+     * @param {number|undefined} [off]
+     * @param {number|undefined} [sel]
      * @param {boolean} [fAddr32] is true for 32-bit ADDRESS size
      * @return {string} the hex representation of off (or sel:off)
      */
     toHexOffset(off, sel, fAddr32)
     {
-        if (sel != null) {
+        if (sel != undefined) {
             return Str.toHex(sel, 4) + ':' + Str.toHex(off, (off & ~0xffff) || fAddr32? 8 : 4);
         }
         return Str.toHex(off);
@@ -71390,9 +71528,9 @@ class DebuggerX86 extends Debugger {
     {
         let ch = this.getAddrPrefix(dbgAddr);
         /*
-         * TODO: Revisit the decision to check sel == null; I would rather see these decisions based on type.
+         * TODO: Revisit the decision to check sel == undefined; I would rather see these decisions based on type.
          */
-        return (dbgAddr.type >= DebuggerX86.ADDRTYPE.LINEAR || dbgAddr.sel == null)? (ch + Str.toHex(dbgAddr.addr)) : (ch + this.toHexOffset(dbgAddr.off, dbgAddr.sel, dbgAddr.fAddr32));
+        return (dbgAddr.type >= DebuggerX86.ADDRTYPE.LINEAR || dbgAddr.sel == undefined)? (ch + Str.toHex(dbgAddr.addr)) : (ch + this.toHexOffset(dbgAddr.off, dbgAddr.sel, dbgAddr.fAddr32));
     }
 
     /**
@@ -72458,9 +72596,9 @@ class DebuggerX86 extends Debugger {
     {
         bitsMessage |= Messages.PORT;
         if (!name) bitsMessage |= Messages.WARN;        // we don't want to see "unknown" I/O messages unless WARN is enabled
-        if (addrFrom == null || (this.bitsMessage & bitsMessage) == bitsMessage) {
-            let selFrom = null;
-            if (addrFrom != null) {
+        if (addrFrom == undefined || (this.bitsMessage & bitsMessage) == bitsMessage) {
+            let selFrom = undefined;
+            if (addrFrom != undefined) {
                 selFrom = this.cpu.getCS();
                 addrFrom -= this.cpu.segCS.base;
             }
@@ -73127,7 +73265,7 @@ class DebuggerX86 extends Debugger {
                  * TODO: Unfortunately, this will fail to "step" over a call in segment that moves during the call;
                  * consider alternatives.
                  */
-                if (dbgAddr.addr != null) dbgAddr.sel = null;
+                if (dbgAddr.addr != undefined) dbgAddr.sel = undefined;
                 dbgAddr.fTempBreak = true;
             }
             else {
@@ -73711,7 +73849,7 @@ class DebuggerX86 extends Debugger {
             sOperand = Str.toHex(this.getShort(dbgAddr, 2), 4);
             break;
         case DebuggerX86.TYPE_FARP:
-            dbgAddr = this.newAddr(this.getWord(dbgAddr, true), this.getShort(dbgAddr, 2), null, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
+            dbgAddr = this.newAddr(this.getWord(dbgAddr, true), this.getShort(dbgAddr, 2), undefined, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
             sOperand = this.toHexAddr(dbgAddr);
             let aSymbol = this.findSymbol(dbgAddr);
             if (aSymbol[0]) sOperand += " (" + aSymbol[0] + ")";
@@ -74232,7 +74370,7 @@ class DebuggerX86 extends Debugger {
                 if (selSymbol !== undefined) {
                     dbgAddr.off = offSymbol;
                     dbgAddr.sel = selSymbol;
-                    dbgAddr.addr = null;
+                    dbgAddr.addr = undefined;
                     /*
                      * getAddr() computes the corresponding physical address and saves it in dbgAddr.addr.
                      */
@@ -75938,7 +76076,7 @@ class DebuggerX86 extends Debugger {
         for (let n = 1; n <= 6 && !!off; n++) {
             if (n > 2) {
                 dbgAddr.off = off;
-                dbgAddr.addr = null;
+                dbgAddr.addr = undefined;
                 let s = this.getInstruction(dbgAddr);
                 if (s.indexOf("CALL") >= 0 || fFar && s.indexOf("INT") >= 0) {
                     /*

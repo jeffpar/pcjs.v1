@@ -392,7 +392,7 @@ class CPUX86 extends CPU {
              * registers, then enables paging, do all the previous Debug register addresses automatically
              * become linear addresses?  I'm guessing they do.
              */
-            this.blockUnpaged = new Memory(null, 0, 0, Memory.TYPE.UNPAGED, null, this);
+            this.blockUnpaged = new Memory(undefined, 0, 0, Memory.TYPE.UNPAGED, null, this);
             this.blockUnpaged.copyBreakpoints(this.dbg);
             for (iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
                 this.aMemBlocks[iBlock] = this.blockUnpaged;

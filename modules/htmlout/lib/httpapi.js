@@ -280,7 +280,7 @@ HTTPAPI.hasAPICommand = function(req, asCommands)
  * @param {Object} vol
  * @param {number} fd
  * @param {number} cbInit
- * @param {function(nResponse:number,sResponse:string,fd:(number|null))} done
+ * @param {function(nResponse:number,sResponse:string,fd:Number)} done
  */
 HTTPAPI.initUserVolume = function(vol, fd, cbInit, done)
 {
@@ -334,7 +334,7 @@ HTTPAPI.initUserVolume = function(vol, fd, cbInit, done)
  * @param {string} sUser
  * @param {string} sMode
  * @param {number} cbInit
- * @param {function(nResponse:number,sResponse:string,fd:(number|null))} done
+ * @param {function(nResponse:number,sResponse:string,fd:Number)} done
  */
 HTTPAPI.openUserVolume = function(sPath, sMachine, sUser, sMode, cbInit, done)
 {
@@ -1083,7 +1083,7 @@ HTTPAPI.createUserDir = function(sUser)
  * verifyUserDir(sUser, done)
  *
  * @param {string} sUser
- * @param {function(string|null)} done
+ * @param {function(String)} done
  */
 HTTPAPI.verifyUserDir = function(sUser, done)
 {

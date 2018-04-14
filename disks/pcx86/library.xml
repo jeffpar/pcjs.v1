@@ -1059,6 +1059,7 @@
 		<disk path="/pcjs-disks/pcx86/shareware/pctj/disks/PCTJ8901.json">PC Tech Journal (1989-01)</disk>
 		<disk path="/pcjs-disks/pcx86/shareware/pctj/disks/PCTBENCH.json">PC Tech Journal (Benchmarks)</disk>
 		<disk path="/pcjs-disks/pcx86/shareware/pctj/disks/PCTJBEST.json">PC Tech Journal (Best Of)</disk>
+		<disk path="/pcjs-games/pcx86/gambling/1988/TRUMP-CASTLE-120.json">Trump Castle 1.20 (1988)</disk>
 	</control>
 	<control type="button" binding="loadDisk">Load</control>
 	<control type="button" binding="saveDisk" padRight="8px">Save</control>

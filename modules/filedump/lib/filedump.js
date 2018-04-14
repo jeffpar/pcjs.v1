@@ -460,7 +460,7 @@ FileDump.prototype.dumpLine = function(nIndent, sLine, sComment)
  * dumpBuffer(sKey, buf, len, cbItem, offDump, nWidthDump)
  *
  * @this {FileDump}
- * @param {string|null} sKey is name of buffer data element
+ * @param {String} sKey is name of buffer data element
  * @param {Buffer} buf is a Buffer containing the bytes to dump
  * @param {number} len is the number of bytes to dump
  * @param {number} cbItem is either 1 or 4, to dump bytes or dwords respectively
@@ -553,7 +553,7 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidth
  *
  * @this {FileDump}
  * @param {string} sMapFile
- * @param {function(Error,string)} done
+ * @param {function(Error,String)} done
  */
 FileDump.prototype.loadMap = function(sMapFile, done)
 {
@@ -647,7 +647,7 @@ FileDump.prototype.loadMap = function(sMapFile, done)
                     for (var iLine = 0; iLine < asLines.length; iLine++){
                         var s = asLines[iLine].trim();
                         if (!s || s.charAt(0) == ';') continue;
-                        var match = s.match(/^\s*([0-9A-Z:]+)\s+([=124@\.\+])\s*(.*?)\s*$/i);
+                        var match = s.match(/^\s*([0-9A-Z:]+)\s+([=124@.+])\s*(.*?)\s*$/i);
                         if (match) {
                             var sValue = match[1];
                             var sSegment = null;

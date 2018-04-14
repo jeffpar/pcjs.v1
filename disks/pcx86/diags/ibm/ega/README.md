@@ -6,7 +6,6 @@ machines:
   - id: ibm5160
     type: pcx86
     debugger: true
-    commands: bp &0AC6:019B
     messages: video
     config: /devices/pcx86/machine/5160/ega/256kb/color/debugger/machine.xml
     autoMount:
@@ -99,13 +98,13 @@ there was any real-world software that actually needed the ability to load *eigh
 {% include machine.html id="ibm5160" %}
 
 <div>
-  <p>Font 0</p>
+  <p>Font Bank 0</p>
   <canvas id="ibm5160.videoEGA.font0" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
-  <p>Font 1</p>
+  <p>Font Bank 1</p>
   <canvas id="ibm5160.videoEGA.font1" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
-  <p>Font 2</p>
+  <p>Font Bank 2</p>
   <canvas id="ibm5160.videoEGA.font2" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
-  <p>Font 3</p>
+  <p>Font Bank 3</p>
   <canvas id="ibm5160.videoEGA.font3" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
 </div>
 
