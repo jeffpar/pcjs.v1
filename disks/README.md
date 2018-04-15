@@ -86,12 +86,44 @@ contain the multi-dimensional "CHS" data described above; eg:
 Future additions to the metadata may, for example, include a `sectorLength` property that allows a non-default sector
 length to be set for the entire disk, eliminating the need for each *sector* to specify its own `length`.
 
+### Creating PCjs Disk Images
+
+PCjs disk images are created with the [DiskDump](/modules/diskdump) utility.  It is normally run as a Node command-line
+utility; eg:
+
+	node modules/diskdump/bin/diskdump --disk=PCDOS100.img --format=json --output=PCDOS100.json
+
+Alternatively, if you're running the PCjs Node [web server](/server.js), then you can also use the built-in
+[DiskDump API](/api/v1/dump) to creates PCjs disk images:
+	
+	{{ site.url }}/api/v1/dump?disk=(file|url)&format=json
+
+For example, if you wanted to convert **PCDOS100.img**:
+
+	https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.img
+
+you could issue the following request, save the resulting JSON file to a folder on your server, and then update your
+machine XML file(s) to use **PCDOS100.json**:
+
+	{{ site.url }}/api/v1/dump?disk=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.img&format=json
+
+Although PCx86 will accept IMG disk image files, it must call the [DiskDump API](/api/v1/dump) to convert the
+image every time it's loaded, which is slower than using pre-converted JSON-encoded disk images and will only work
+with the PCjs Node [web server](/server.js).
+
+Remember that PC and PC XT machines supported only 160Kb diskettes (on any version of PC-DOS), 320Kb diskettes
+(on PC-DOS 1.1 and higher), and 180Kb and 360Kb diskettes (on PC-DOS 2.0 and higher).
+
+The 1.2Mb diskette format was introduced with the PC AT, and 720Kb and 1.44Mb diskette formats were supported later
+on 8Mhz PC AT and PS/2 models.  So, when using any of these larger formats, be sure you're also using a compatible
+machine configuration.
+
 ### Saving PCjs Disk Images
 
 There are several ways you can convert a PCjs **JSON** disk image back into a binary **IMG** file:
 
 - Load the disk into a PCjs machine and click **Save** (PCx86 machines only)
-- Use the [DiskDump API](/api/v1/dump) (available only with the [PCjs Node Web Server](#saving-disks-with-the-diskdump-api))
+- Use the [DiskDump API](/api/v1/dump) (requires a PCjs Node web server; see [below](#saving-disks-with-the-diskdump-api))
 - Use the [DiskDump Command-line Utility](/modules/diskdump/) (requires Node)
 
 Note that whenever you **Save** a disk being used by a PCjs machine, it is saved exactly as it exists
@@ -100,16 +132,14 @@ in your saved copy.  Otherwise, the disk image should be an exact copy of the or
 
 ### Saving Disks with the DiskDump API
 
-If you're running the PCjs Node Web Server locally, then you also have the option of using the
-[DiskDump API](/api/v1/dump).  Set the *format* parameter set to `img` instead of `json`.  For example:
+If you're running the PCjs Node [web server](/server.js) locally, then you also have the option of using the
+[DiskDump API](/api/v1/dump) to convert a JSON disk image back into an IMG file.  Set the *format* parameter
+set to `img` instead of `json`.  For example:
 
-	http://localhost:8088/api/v1/dump?disk=/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
+	{{ site.url }}/api/v1/dump?disk={{ site.url }}/disks/pcx86/dos/ibm/1.00/PCDOS100.json&format=img
 
 The [HTMLOut Component](https://github.com/jeffpar/pcjs/blob/master/modules/htmlout/lib/htmlout.js)
-of the PCjs Node Web Server also generates "onclick" handlers for links to **JSON** disk
-images that automatically invoke the API for you.
+of the PCjs Node web server also generates "onclick" handlers for links to **JSON** disk images that automatically
+invoke the API for you.
 
-Instructions for running the PCjs Node Web Server can be found in the [PCjs Repository](https://github.com/jeffpar/pcjs#installing-pcjs-with-node).
-  
-Also see [Creating PCx86-Compatible Disk Images](/docs/pcx86/#creating-pcx86-compatible-disk-images)
-in the [PCx86 Documentation](/docs/pcx86/) for more information about supported disks and formats.
+Instructions for running the PCjs Node web server can be found in the [PCjs Repository](https://github.com/jeffpar/pcjs#installing-pcjs-with-node).
