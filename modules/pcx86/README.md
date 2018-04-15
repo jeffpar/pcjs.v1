@@ -28,8 +28,8 @@ Examples of non-device components include visual components like [panel.js](lib/
 which separate the CPU functionality of [x86.js](lib/x86.js) into more manageable pieces.
 
 These components should always be loaded or compiled in the order listed by the *pcx86.scripts* property in
-[machines.json](../../_data/machines.json), which includes all the necessary [shared components](../shared/lib/) as
-well.
+[machines.json](https://github.com/jeffpar/pcjs/blob/master/_data/machines.json), which includes all the necessary
+[shared components](../shared/lib/) as well.
 
 At the time of this writing, the recommended order is:
 

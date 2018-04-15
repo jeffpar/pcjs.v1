@@ -31,7 +31,7 @@ and assorted mobile browsers.
 
 {% include machine.html id="ibm5150" %}
 
-The [JavaScript Machine](/devices/pcx86/machine/5150/mda/64kb/) above uses [PCx86](/pubs/docs/pcx86/) configured with
+The PCjs [machine](/devices/pcx86/machine/5150/mda/64kb/) above uses [PCx86](/pubs/docs/pcx86/) configured with
 an Intel 8088 running at 4.77Mhz, with 64Kb of RAM and an IBM Monochrome Display Adapter.  The machine is also available
 with a [Control Panel](/devices/pcx86/machine/5150/mda/64kb/debugger/) featuring the built-in PCx86 Debugger.
 For even greater control, build your own PC. The [PCx86 Documentation](/pubs/docs/pcx86/) will help you get started.

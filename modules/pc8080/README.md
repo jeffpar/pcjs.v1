@@ -15,8 +15,8 @@ PC8080 is our 8080-based machine emulation module.  The code is derived from [PC
 See the list of available [PC8080 Machines](/devices/pc8080/machine/), which includes
 [Space Invaders (1978)](/devices/pc8080/machine/invaders/) and the [DEC VT100 Terminal](/devices/pc8080/machine/vt100/).
 
-PC8080 is comprised of the following non-shared components, as listed in [machines.json](../../_data/machines.json)
-(see the *pc8080.scripts* property):
+PC8080 is comprised of the following non-shared components, as listed in
+[machines.json](https://github.com/jeffpar/pcjs/blob/master/_data/machines.json) (see the *pc8080.scripts* property):
 
 * [defines.js](/modules/pc8080/lib/defines.js)
 * [cpudef.js](/modules/pc8080/lib/cpudef.js)
