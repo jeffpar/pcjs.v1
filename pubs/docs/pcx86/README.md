@@ -172,38 +172,11 @@ See the *state* property on the [Computer](computer/) component for more informa
 
 ### Running PCx86 On Your Own Server
 			
-All of the examples described above are available for [download](/apps/pcx86/examples/).
+All of the examples described above can be [downloaded](/apps/pcx86/examples/) onto your own web server.
+
+If you don't have your own web server and want to try the PCjs Node [web server](/server.js), setup instructions can be
+found in the [PCjs Repository](https://github.com/jeffpar/pcjs#installing-pcjs-with-node).
 
 ### Creating PCx86-Compatible Disk Images
 
-If you have (or find) an IMG disk image file on a server, the PCjs Node web server provides a
-[DiskDump API](/api/v1/dump) via endpoint "/api/v1/dump" that creates PCx86-compatible disks in JSON:
-	
-	{{ site.url }}/api/v1/dump?disk=(file|url)&format=json
-
-For example, let's say you found a disk image online, such as:
-
-	https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.img
-
-To convert it to a PCx86-compatible JSON format, issue the following
-[request](/api/v1/dump?disk=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.img&format=json),
-save the resulting JSON file to a folder on your server, and then update your machine XML file(s) to use that file.
-
-	{{ site.url }}/api/v1/dump?disk=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.img&format=json
-
-If necessary, you can also reverse the process and convert a JSON disk image back into an IMG file, with the
-this [request](/api/v1/dump?disk=http://www.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.json&format=img):
-
-	{{ site.url }}/api/v1/dump?disk={{ site.url }}/disks/pcx86/dos/ibm/1.00/PCDOS100.json&format=img
-
-Although PCx86 will accept IMG disk image files, it must call the [DiskDump API](/api/v1/dump) to convert the image
-every time it's loaded, so it's *much* faster and more efficient to use pre-converted JSON-encoded disk images.
-
-Remember that PC and PC XT machines supported only 160Kb diskettes (on any version of PC-DOS),
-320Kb diskettes (on PC-DOS 1.1 and higher), and 180Kb and 360Kb diskettes (on PC-DOS 2.0 and higher).
-
-The 1.2Mb diskette format was introduced with the PC AT, and 720Kb and 1.44Mb diskette formats were
-supported later on 8Mhz PC AT and PS/2 models.  So, when using any of these larger formats, be sure you're
-also using a compatible machine configuration.
-
-Learn more about PCx86 disk images [here](/disks/).
+See [PCjs Disk Formats](/disks/#pcjs-disk-formats) for information on PCjs disk images and how to create them.

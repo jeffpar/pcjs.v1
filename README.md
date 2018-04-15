@@ -48,12 +48,12 @@ Demos
 -----
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, OS/2, and other assorted software.
 
+![IBM PC AT w/EGA, OS/2 1.0](/disks/pcx86/os2/ibm/1.0/thumbnail.jpg "link:/disks/pcx86/os2/ibm/1.0/:200:120")
 ![IBM PC running VisiCalc](/apps/pcx86/1981/visicalc/thumbnail.jpg "link:/apps/pcx86/1981/visicalc/:200:120")
 ![IBM PC running DONKEY.BAS](/apps/pcx86/1981/donkey/thumbnail.jpg "link:/apps/pcx86/1981/donkey/:200:120")
 ![IBM PC XT w/EGA, Windows 1.0](/disks/pcx86/windows/1.00/thumbnail.jpg "link:/disks/pcx86/windows/1.00/:200:120")
 ![IBM PC XT w/CGA, Windows 1.01](/disks/pcx86/windows/1.01/cga/thumbnail.jpg "link:/disks/pcx86/windows/1.01/cga/:200:120")
 ![IBM PC XT w/EGA, Windows 1.01](/disks/pcx86/windows/1.01/thumbnail.jpg "link:/disks/pcx86/windows/1.01/:200:120")
-![IBM PC AT w/EGA, OS/2 1.0](/disks/pcx86/os2/ibm/1.0/thumbnail.jpg "link:/disks/pcx86/os2/ibm/1.0/:200:120")
 ![COMPAQ DeskPro 386, Windows/386](/disks/pcx86/windows/2.0x/thumbnail.jpg "link:/disks/pcx86/windows/2.0x/:200:120")
 ![IBM PC AT w/EGA, Windows 3.0](/disks/pcx86/windows/3.00/thumbnail.jpg "link:/disks/pcx86/windows/3.00/:200:120")
 ![IBM PC AT w/VGA, Windows 3.1](/disks/pcx86/windows/3.10/thumbnail.jpg "link:/disks/pcx86/windows/3.10/:200:120")
