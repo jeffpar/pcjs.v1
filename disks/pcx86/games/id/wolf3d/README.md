@@ -5,7 +5,7 @@ permalink: /disks/pcx86/games/id/wolf3d/
 ---
 
 Wolfenstein 3D
----
+--------------
 
 ### Directory of Wolfenstein 3D 1.4
 

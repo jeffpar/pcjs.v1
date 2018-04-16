@@ -46175,26 +46175,24 @@ class Keyboard extends Component {
      */
     initState(data)
     {
-        /*
-         * Empty the injection buffer (an injection could have been in progress on any reset after the first).
-         */
-        this.sInjectBuffer = "";
-        this.nInjection = Keyboard.INJECTION.ON_INPUT;
-
         if (!data) {
-            data = [];
+            data = [false, false, Keyboard.INJECTION.ON_INPUT];
         } else {
             /*
              * If there is a predefined state for this machine, then the assumption is that any injection
              * sequence can be injected as soon as the machine starts.  Any other kind of state must disable
              * injection, because injection depends on the machine being in a known state.
              */
-            this.nInjection = this.cmp.sStatePath? Keyboard.INJECTION.ON_START : Keyboard.INJECTION.NONE;
+            data[2] = this.cmp.sStatePath? Keyboard.INJECTION.ON_START : (data[2] || Keyboard.INJECTION.NONE);
         }
 
         let i = 0;
         this.fClock = data[i++];
-        this.fData = data[i];
+        this.fData = data[i++];
+        this.nInjection = data[i++];
+        this.sInjectBuffer = data[i++] || "";
+        this.msInjectDelay = data[i] || this.msInjectDefault;
+
         this.bCmdPending = 0;       // when non-zero, a command is pending (eg, SET_LED or SET_RATE)
 
         /*
@@ -46220,9 +46218,12 @@ class Keyboard extends Component {
      */
     saveState()
     {
-        let data = [];
-        data[0] = this.fClock;
-        data[1] = this.fData;
+        let data = [], i = 0;
+        data[i++] = this.fClock;
+        data[i++] = this.fData;
+        data[i++] = this.nInjection;
+        data[i++] = this.sInjectBuffer;
+        data[i] = this.msInjectDelay;
         return data;
     }
 
@@ -53456,15 +53457,15 @@ class Video extends Component {
             this.fRGBValid = false;
 
             /*
-             * On an EGA, it's CRITICAL that a reset() invalidate cardActive, to ensure that the code below
-             * releases the previous video buffer and installs a new one, even if there was no change in the
-             * video buffer address or size, because otherwise the Memory blocks installed at the video buffer
-             * address may still be using blocks of the EGA's previous memory buffer.
+             * It's CRITICAL that a reset() invalidate cardActive, to ensure that the code below releases the
+             * previous video buffer and installs a new one, even if there was no change in the video buffer
+             * address or size, because otherwise memory blocks installed at the video buffer address may still
+             * be using blocks of the previous memory buffer.
              *
-             * When the EGA is reinitialized, a new memory buffer (adwMemory) is allocated (see initEGA()), and
-             * this is where the mapping of that EGA memory buffer to the video buffer occurs.  Other cards
-             * (MDA or CGA) don't allocate/manage their own memory buffer, but even then, it's still a good idea
-             * to always force this operation (eg, in case a switch setting changed the active video card).
+             * When an EGA is reinitialized, a new memory buffer (adwMemory) is allocated (see initEGA()), and
+             * this is where the mapping of that EGA memory buffer to the video buffer occurs.  Even if a card
+             * (MDA or CGA) never reallocates its memory buffer, it's still a good idea to always force this operation
+             * (eg, in case a switch setting changed the active video card).
              */
             let card = this.cardActive || (nMode == Video.MODE.MDA_80X25? this.cardMono : this.cardColor);
 

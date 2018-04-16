@@ -6,14 +6,14 @@ machines:
   - id: ibm5160
     type: pcx86
     debugger: true
-    messages: video
+    state: state.json
     config: /devices/pcx86/machine/5160/ega/256kb/color/debugger/machine.xml
     autoMount:
       A:
         name: PC-DOS 2.00 (Disk 1)
       B:
         name: IBM EGA Fantasy Land Demo
-    autoType: $date\r$time\rB:\rFLAND\r
+    autoTypeNone: $date\r$time\rB:\rFLAND\r
 ---
 
 IBM EGA Fantasy Land Demo

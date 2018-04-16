@@ -907,26 +907,24 @@ class Keyboard extends Component {
      */
     initState(data)
     {
-        /*
-         * Empty the injection buffer (an injection could have been in progress on any reset after the first).
-         */
-        this.sInjectBuffer = "";
-        this.nInjection = Keyboard.INJECTION.ON_INPUT;
-
         if (!data) {
-            data = [];
+            data = [false, false, Keyboard.INJECTION.ON_INPUT];
         } else {
             /*
              * If there is a predefined state for this machine, then the assumption is that any injection
              * sequence can be injected as soon as the machine starts.  Any other kind of state must disable
              * injection, because injection depends on the machine being in a known state.
              */
-            this.nInjection = this.cmp.sStatePath? Keyboard.INJECTION.ON_START : Keyboard.INJECTION.NONE;
+            data[2] = this.cmp.sStatePath? Keyboard.INJECTION.ON_START : (data[2] || Keyboard.INJECTION.NONE);
         }
 
         let i = 0;
         this.fClock = data[i++];
-        this.fData = data[i];
+        this.fData = data[i++];
+        this.nInjection = data[i++];
+        this.sInjectBuffer = data[i++] || "";
+        this.msInjectDelay = data[i] || this.msInjectDefault;
+
         this.bCmdPending = 0;       // when non-zero, a command is pending (eg, SET_LED or SET_RATE)
 
         /*
@@ -952,9 +950,12 @@ class Keyboard extends Component {
      */
     saveState()
     {
-        let data = [];
-        data[0] = this.fClock;
-        data[1] = this.fData;
+        let data = [], i = 0;
+        data[i++] = this.fClock;
+        data[i++] = this.fData;
+        data[i++] = this.nInjection;
+        data[i++] = this.sInjectBuffer;
+        data[i] = this.msInjectDelay;
         return data;
     }
 
