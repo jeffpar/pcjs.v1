@@ -2353,7 +2353,7 @@ class Video extends Component {
 
         this.nCard = aModelDefaults[0];
         this.nCardFont = 0;
-        this.nActiveFont = 0;
+        this.nActiveFont = this.nAlternateFont = 0;
         this.nFontSelect = 0;                       // current set of selectable logical fonts
         this.cbMemory = parmsVideo['memory'] || 0;  // zero means fallback to the cardSpec's default size
         this.sSwitches = parmsVideo['switches'];
@@ -3921,7 +3921,7 @@ class Video extends Component {
     buildFont(fRebuild = false)
     {
         let fChanges = false;
-        this.nActiveFont = this.nCardFont;
+        this.nActiveFont = this.nAlternateFont = this.nCardFont;
 
         /*
          * There's no point building fonts unless we're in a windowed (non-command-line) environment, we're
@@ -3985,6 +3985,7 @@ class Video extends Component {
                     }
                     this.nFontSelect = this.getSelectedFonts();
                     this.nActiveFont = this.nCardFont + (this.nFontSelect & 0xff);
+                    this.nAlternateFont = this.nCardFont + (this.nFontSelect >> 8);
                 }
                 if (offData != null) {
                     /*
@@ -4001,34 +4002,9 @@ class Video extends Component {
                         let fNewData = !!(bitsBanks & (0x1 << iBank));
                         if (this.createFont(this.nCardFont + iFont, cxChar, cyChar, offData, 0, abFontData, fNewData, aRGBColors, aColorMap)) {
                             fChanges = true;
-                            if (abFontData) continue;
-                            /*
-                             * Since a programmable font was changed, we need to update the aFontDiff array.  For the EGA,
-                             * that array looks like this:
-                             *
-                             *      [0]: diffs between font 1 and 0     0 = 1 * (1 - 1) / 2
-                             *      [1]: diffs between font 2 and 0     1 = 2 * (2 - 1) / 2
-                             *      [2]: diffs between font 2 and 1
-                             *      [3]: diffs between font 3 and 0     3 = 3 * (3 - 1) / 2
-                             *      [4]: diffs between font 3 and 1
-                             *      [5]: diffs between font 3 and 2
-                             *
-                             * The VGA continues that progression:
-                             *
-                             *      [6]: diffs between font 4 and 0     6 = 4 * (4 - 1) / 2
-                             *      [7]: diffs between font 4 and 1
-                             *      [8]: diffs between font 4 and 2
-                             *      [9]: diffs between font 4 and 3
-                             *      ...
-                             *
-                             * So for a given logical font number (0-3 for the EGA or 0-7 for the VGA), the starting index of
-                             * "differable" fonts is n * (n - 1) / 2.
-                             */
-                            if (iFont) {
-                                let iDiff = (iFont * (iFont - 1)) >> 1;
-                                for (let iFontDiffer = 0; iFontDiffer < iFont; iFontDiffer++) {
-                                    this.createFontDiff(iDiff++, iFont, iFontDiffer, cyChar);
-                                }
+                            if (abFontData || !iFont) continue;
+                            for (let iFontPrev = 0; iFontPrev < iFont; iFontPrev++) {
+                                this.createFontDiff(iFont, iFontPrev, cyChar);
                             }
                         }
                     }
@@ -4297,32 +4273,78 @@ class Video extends Component {
     }
 
     /**
-     * createFontDiff(iDiff, iFont, iFontDiffer, cyChar, cyLimit)
+     * createFontDiff(iFont, iFontPrev, cyChar, cyLimit)
+     *
+     * Since a programmable font was changed, we need to update the aFontDiff array.  For the EGA,
+     * that array looks like this:
+     *
+     *      [0]: diffs between font 1 and 0     0 = 1 * (1 - 1) / 2
+     *      [1]: diffs between font 2 and 0     1 = 2 * (2 - 1) / 2
+     *      [2]: diffs between font 2 and 1
+     *      [3]: diffs between font 3 and 0     3 = 3 * (3 - 1) / 2
+     *      [4]: diffs between font 3 and 1
+     *      [5]: diffs between font 3 and 2
+     *
+     * The VGA continues that progression:
+     *
+     *      [6]: diffs between font 4 and 0     6 = 4 * (4 - 1) / 2
+     *      [7]: diffs between font 4 and 1
+     *      [8]: diffs between font 4 and 2
+     *      [9]: diffs between font 4 and 3
+     *      ...
+     *
+     * So for a given logical font number (0-3 for the EGA or 0-7 for the VGA), the starting index of
+     * "differable" fonts is n * (n - 1) / 2.
      *
      * @this {Video}
-     * @param {number} iDiff (aFontDiff index)
      * @param {number} iFont
-     * @param {number} iFontDiffer
+     * @param {number} iFontPrev
      * @param {number} cyChar (height of every character in both fonts)
      * @param {number} [cyLimit] (default is 32)
      */
-    createFontDiff(iDiff, iFont, iFontDiffer, cyChar, cyLimit = 32)
+    createFontDiff(iFont, iFontPrev, cyChar, cyLimit = 32)
     {
+        this.assert(iFont);
+        let i = ((iFont * (iFont - 1)) >> 1) + iFontPrev;
         let adwMemory = this.cardEGA.adwMemory;
-        let aDiff = this.aFontDiff[iDiff] || new Array(256);
+        let aDiff = this.aFontDiff[i] || new Array(256);
         let iBank = (iFont << 1) - (iFont < 4? 0 : 7), offData = iBank * 8192;
-        let iBankDiffer = (iFontDiffer << 1) - (iFontDiffer < 4? 0 : 7), offDataDiffer = iBankDiffer * 8192;
+        let iBankPrev = (iFontPrev << 1) - (iFontPrev < 4? 0 : 7), offDataPrev = iBankPrev * 8192;
         for (let iChar = 0; iChar < 256; iChar++) {
             aDiff[iChar] = 0;
-            let offChar = offData + iChar * cyLimit, offCharDiffer = offDataDiffer + iChar * cyLimit;
+            let offChar = offData + iChar * cyLimit, offCharPrev = offDataPrev + iChar * cyLimit;
             for (let y = 0; y < cyChar; y++) {
-                if (((adwMemory[offChar++] >> 16) & 0xff) !== ((adwMemory[offCharDiffer++] >> 16) & 0xff)) {
+                if (((adwMemory[offChar++] >> 16) & 0xff) !== ((adwMemory[offCharPrev++] >> 16) & 0xff)) {
                     aDiff[iChar] = -1;
                     break;
                 }
             }
         }
-        this.aFontDiff[iDiff] = aDiff;
+        this.aFontDiff[i] = aDiff;
+    }
+
+    /**
+     * getFontDiff(iFont, iFontPrev)
+     *
+     * Unlike createFontDiff(), where iFontPrev is guaranteed to be less than iFont, that may not be true
+     * for getFontDiff(), so we must swap them if iFont < iFontPrev.
+     *
+     * @this {Video}
+     * @param {number} iFont
+     * @param {number} iFontPrev
+     * @return {Array.<number>}
+     */
+    getFontDiff(iFont, iFontPrev)
+    {
+        let i;
+        if (iFont == iFontPrev) return [];
+        if (iFont < iFontPrev) {
+            i = iFont;
+            iFont = iFontPrev;
+            iFontPrev = i;
+        }
+        i = ((iFont * (iFont - 1)) >> 1) + iFontPrev;
+        return this.aFontDiff[i];
     }
 
     /**
@@ -4547,12 +4569,20 @@ class Video extends Component {
             this.cyCursor = bCursorSize;
             this.cyCursorWrap = bCursorWrap;
             /*
-             * TODO: Consider our redraw options for cursor shape changes, because invalidating cBlinkVisible won't
-             * have the desired effect if the cursor is still in the same location.  The only existing mechanism for
-             * making this happen would be to invalidate the cell cache (reset iCellCacheValid), which is rather drastic.
-             * Note that we don't have to worry about this if the cursor has ALSO just moved (ie, this.cBlinkVisible < 0).
+             * The best redraw option for cursor shape changes used to be invalidating the cell cache, since merely
+             * invalidating cBlinkVisible wouldn't have the desired effect if the cursor was still in the same location.
+             * However, that option was rather drastic.  If the cursor had ALSO just moved (ie, this.cBlinkVisible < 0),
+             * we didn't have to worry about it, so we could at least be more selective about when to invalidate the cache:
+             *
+             *      if (this.cBlinkVisible >= 0) this.iCellCacheValid = 0;
+             *
+             * But now we have the option of invalidating just a single cell (and marking the cache as "partially valid"),
+             * so that's what we do.  Granted, a lot of hand-wringing over an uncommon operation, but that's how we roll.
              */
-            // if (this.cBlinkVisible >= 0) this.iCellCacheValid = 0;
+            if (this.iCellCacheValid && this.iCellCursor >= 0 && this.iCellCursor < this.aCellCache.length) {
+                this.aCellCache[this.iCellCursor] = -1;
+                this.iCellCacheValid = 1;
+            }
         }
 
         this.cyCursorCell = bCursorMax + 1;
@@ -4768,7 +4798,7 @@ class Video extends Component {
      */
     setDimensions()
     {
-        this.nCardFont = this.nActiveFont = 0;
+        this.nCardFont = this.nActiveFont = this.nAlternateFont = 0;
         this.nCols = this.nColsDefault;
         this.nRows = this.nRowsDefault;
         this.nCellsPerWord = Video.aModeParms[Video.MODE.MDA_80X25][2];
@@ -4790,8 +4820,8 @@ class Video extends Component {
                  * to match the card.
                  */
                 if (this.nCard > this.nCardFont) this.nCardFont = this.nCard;
-                this.buildFont();
-                let font = this.aFonts[this.nCardFont];
+                this.buildFont();           // this also updates nActiveFont and nAlternateFont
+                let font = this.aFonts[this.nActiveFont];
                 if (font) {
                     cxCell = font.cxCell;
                     cyCell = font.cyCell;
@@ -4853,7 +4883,7 @@ class Video extends Component {
          * we'll set image smoothing to whatever value was provided for ALL modes -- assuming the browser supports it.
          */
         if (this.sSmoothing) {
-            this.contextScreen[this.sSmoothing] = (this.fSmoothing == null? (this.nCardFont? true : false) : this.fSmoothing);
+            this.contextScreen[this.sSmoothing] = (this.fSmoothing == null? !!this.nCardFont : this.fSmoothing);
         }
 
         /*
@@ -5224,7 +5254,7 @@ class Video extends Component {
             }
 
             this.setDimensions();
-            this.invalidateCellCache(true);
+            this.invalidateCellCache();
 
             if (fReset) this.updateScreen();
         }
@@ -5257,8 +5287,8 @@ class Video extends Component {
      * Initializes the contents of our internal cell cache.
      *
      * TODO: Consider changing this to a cache of RGB values, so that when the buffer is merely being color-cycled,
-     * we don't have to update the entire screen.  This will also allow invalidateCellCache() to honor the fModified
-     * flag, bypassing initCellCache() when it is false.
+     * we don't have to update the entire screen.  This would also allow invalidateCellCache() to honor the fColors
+     * flag and bypass initCellCache() when it's set.
      *
      * @this {Video}
      * @return {number}
@@ -5275,50 +5305,57 @@ class Video extends Component {
     }
 
     /**
-     * invalidateCellCache(fModified, iFont, iFontPrev)
+     * invalidateCellCache(fColors, nFontSelect, nFontPrev)
      *
-     * Ensure that the next updateScreen() will update every cell; intended for situations where the entire screen needs
-     * to be redrawn, even though the underlying data in the video buffer has not changed (and therefore cleanMemory() will
-     * report that the buffer is still clean, and/or all the video data still matches everything in our cell cache).
-     *
-     * For example, when the palette is being cycled, the screen is being panned, the page is being flipped, etc.
+     * Ensures the next updateScreen() will examine and update every cell as needed, even if the underlying
+     * data in the video buffer has not changed (eg, when the screen is being panned, the page is being flipped,
+     * the palette is being cycled, the font is being changed, etc).
      *
      * @this {Video}
-     * @param {boolean} [fModified] (true if the buffer may have been modified, false if only font(s) or color(s) may have changed)
-     * @param {number} [iFont]
-     * @param {number} [iFontPrev]
+     * @param {boolean} [fColors] (true if color(s) *may* have changed)
+     * @param {number} [nFontSelect] (set along with nFontPrev if font(s) *may* have changed)
+     * @param {number} [nFontPrev]
      * @return {number} (number of cells invalidated; used for diagnostic purposes only)
      */
-    invalidateCellCache(fModified, iFont, iFontPrev)
+    invalidateCellCache(fColors, nFontSelect, nFontPrev)
     {
-        if (this.iCellCacheValid && iFont != undefined) {
+        if (this.iCellCacheValid && nFontSelect != undefined) {
             /*
              * We want to do a "smart" (aka selective) invalidation of the cell cache, invalidating only
              * those cells containing characters whose current font data differs from the previous font data.
              */
-            let i, nCells = 0;
-            if (iFont == iFontPrev) return 0;
-            if (iFont < iFontPrev) {
-                i = iFont;
-                iFont = iFontPrev;
-                iFontPrev = i;
-            }
-            let iDiff = ((iFont * (iFont - 1)) >> 1) + iFontPrev;
+            if (nFontSelect == nFontPrev) return 0;
             let aCellCache = this.aCellCache;
-            let aFontDiff = this.aFontDiff[iDiff];
-            if (aCellCache && aFontDiff) {
-                for (i = 0; i < aCellCache.length; i++) {
+            if (aCellCache) {
+                let nCells = 0;
+                /*
+                 * getFontDiff() returns an empty array if the current and previous fonts are the same, which
+                 * is OK for the code below, because using the "|" operator with undefined values coerces them
+                 * to zero, resulting in no change.  If BOTH FontDiff arrays were empty, then we could skip this
+                 * code altogether, but we've already eliminated that possibility above, when we checked for
+                 * nFontSelect == nFontPrev, so at least one of these arrays will NOT be empty.
+                 */
+                let aFontDiff0 = this.getFontDiff(nFontSelect & 0xff, nFontPrev & 0xff);
+                let aFontDiff1 = this.getFontDiff(nFontSelect >> 8, nFontPrev >> 8);
+                for (let i = 0; i < aCellCache.length; i++) {
                     let data = aCellCache[i];
                     if (data >= 0) {
-                        aCellCache[i] |= aFontDiff[data & 0xff];
-                        if (DEBUG) nCells += (aFontDiff[data & 0xff] < 0? 1 : 0);
+                        /*
+                         * The font referenced by any given cell data *usually* only depends on low 8 bits (ie, the
+                         * character data), but when the active and alternate fonts differ, bit 3 of the attribute data
+                         * must be examined as well, and if it's set, then the alternate font must be used.
+                         */
+                        let aFontDiff = (data & 0x800)? aFontDiff1 : aFontDiff0;
+                        if ((aCellCache[i] |= aFontDiff[data & 0xff]) < 0) {
+                            this.iCellCacheValid = 1;
+                            nCells++;
+                        }
                     }
                 }
-                this.iCellCacheValid = 1;
                 return nCells;
             }
         }
-        if (!fModified) this.fRGBValid = false;
+        if (fColors) this.fRGBValid = false;
         return this.initCellCache();
     }
 
@@ -5349,8 +5386,17 @@ class Video extends Component {
     {
         let bChar = data & 0xff;
         let bAttr = data >> 8;
-        let iFgnd = bAttr & 0xf;
+        /*
+         * The font referenced by any given cell data *usually* only depends on low 8 bits (ie, the
+         * character data), but when the active and alternate fonts differ, bit 3 of the attribute data
+         * must be examined as well, and if it's set, then the alternate font must be used.
+         */
         let font = this.aFonts[this.nActiveFont];
+        if ((bAttr & 0x08) && this.nActiveFont != this.nAlternateFont) {
+            font = this.aFonts[this.nAlternateFont];
+            bAttr &= ~0x08;
+        }
+        let iFgnd = bAttr & 0x0f;
         if (font.aColorMap) iFgnd = font.aColorMap[iFgnd];
 
         /*
@@ -5358,7 +5404,7 @@ class Video extends Component {
          * it also maps the background attribute to the appropriate background color.
          */
         let xDst, yDst;
-        let iBgnd = (bAttr >> 4) & 0xf;
+        let iBgnd = (bAttr >> 4) & 0x0f;
         if (font.aColorMap) iBgnd = font.aColorMap[iBgnd];
 
         if (context) {
@@ -6377,7 +6423,7 @@ class Video extends Component {
                         this.printMessageIO(port, bOut, addrFrom, "ATC." + card.asATCRegs[iReg]);
                     }
                     card.regATCData[iReg] = bOut;
-                    this.invalidateCellCache(false);
+                    this.invalidateCellCache(true);
                 }
             }
         }
@@ -6549,6 +6595,7 @@ class Video extends Component {
             }
             this.cardEGA.regSEQData[this.cardEGA.regSEQIndx] = bOut;
         }
+
         switch(this.cardEGA.regSEQIndx) {
 
         case Card.SEQ.MAPMASK.INDX:
@@ -6568,11 +6615,10 @@ class Video extends Component {
                         this.cpu.stopCPU();
                     }
                 }
-                let iFont = nFontSelect & 0xff;
-                let iFontPrev = this.nFontSelect & 0xff;
+                let nFontPrev = this.nFontSelect;
                 this.buildFont(true);
                 this.assert(this.nFontSelect == nFontSelect);
-                this.invalidateCellCache(false, iFont, iFontPrev);
+                this.invalidateCellCache(false, nFontSelect, nFontPrev);
                 /*
                  * TODO: Consider whether this code should, like outATC(), immediately update the screen
                  * on a font change, or if it's sufficient to simply wait until the next normal periodic update.
@@ -6741,7 +6787,7 @@ class Video extends Component {
         let dwNew = (dw & ~(0x3f << this.cardEGA.regDACShift)) | ((bOut & 0x3f) << this.cardEGA.regDACShift);
         if (dw !== dwNew) {
             this.cardEGA.regDACData[this.cardEGA.regDACAddr] = dwNew;
-            this.invalidateCellCache(false);
+            this.invalidateCellCache(true);
         }
         this.cardEGA.regDACShift += 6;
         if (this.cardEGA.regDACShift > 12) {
@@ -7026,7 +7072,7 @@ class Video extends Component {
         }
         if (this.cardColor.regColor !== bOut) {
             this.cardColor.regColor = bOut;
-            this.invalidateCellCache(false);
+            this.invalidateCellCache(true);
         }
     }
 
