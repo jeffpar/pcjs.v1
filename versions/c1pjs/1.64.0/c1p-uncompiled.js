@@ -3356,6 +3356,7 @@ class Component {
     setBinding(sHTMLType, sBinding, control, sValue)
     {
         switch (sBinding) {
+
         case 'clear':
             if (!this.bindings[sBinding]) {
                 this.bindings[sBinding] = control;
@@ -3368,6 +3369,7 @@ class Component {
                 }(this));
             }
             return true;
+
         case 'print':
             if (!this.bindings[sBinding]) {
                 let controlTextArea = /** @type {HTMLTextAreaElement} */(control);
@@ -3406,6 +3408,7 @@ class Component {
                 }(this, controlTextArea);
             }
             return true;
+
         default:
             return false;
         }

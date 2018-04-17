@@ -2342,6 +2342,7 @@ class Video extends Component {
 
         let video = this, sProp, sEvent;
         this.fGecko = Web.isUserAgent("Gecko/");
+        this.bindingsExternal = [];
 
         /*
          * This records the model specified (eg, "mda", "cga", "ega", "vga" or "" if none specified);
@@ -2653,11 +2654,15 @@ class Video extends Component {
          * gets focus and receives input.
          */
         this.kbd = cmp.getMachineComponent("Keyboard");
-        if (this.kbd && this.canvasScreen) {
-            for (let s in this.bindings) {
-                if (s.indexOf("lock") > 0) this.kbd.setBinding("led", s, this.bindings[s]);
-            }
+        if (this.kbd && this.inputScreen) {
             this.kbd.setBinding(this.inputTextArea? "textarea" : "canvas", "screen", this.inputScreen);
+        }
+
+        this.panel = cmp.getMachineComponent("Panel");
+        for (let i = 0; i < this.bindingsExternal.length; i++) {
+            let binding = this.bindingsExternal[i];
+            if (this.kbd && this.kbd.setBinding(...binding)) continue;
+            if (this.panel && this.panel.setBinding(...binding)) continue;
         }
 
         this.bEGASwitches = 0x09;   // our default "switches" setting (see aEGAMonitorSwitches)
@@ -2763,6 +2768,8 @@ class Video extends Component {
                 return true;
 
             default:
+                this.bindingsExternal.push([sHTMLType, sBinding, control, sValue]);
+                delete this.bindings[sBinding];
                 break;
             }
         }

@@ -38,6 +38,7 @@ if (NODE) {
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
     var Disk        = require("./disk");
+    var Panel       = require("./panel");
 }
 
 /*
@@ -403,6 +404,8 @@ class FDC extends Component {
         this.chipset = cmp.getMachineComponent("ChipSet");
         this.parseConfig(this.cmp.getMachineParm('autoMount'), this.configMount);
 
+        this.panel = cmp.getMachineComponent("Panel");
+
         /*
          * If we didn't need auto-mount support, we could defer controller initialization until we received a powerUp() notification,
          * at which point reset() would call initController(), or restore() would restore the controller; in that case, all we'd need
@@ -418,6 +421,19 @@ class FDC extends Component {
         this.addDiskette("Remote Disk", "??");
 
         if (!this.autoMount()) this.setReady();
+    }
+
+    /**
+     * setLED(color)
+     *
+     * @this {FDC}
+     * @param {string} [color]
+     */
+    setLED(color)
+    {
+        if (this.panel) {
+            this.panel.setLED("fdcState", color);
+        }
     }
 
     /**
@@ -1925,6 +1941,7 @@ class FDC extends Component {
          * with infinitely fast hardware, the simulation will never run as fast as it theoretically could, unless we opt to identify
          * those spin-loops and either patch them or skip over them.
          */
+        let ledState;
         let bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
 
         switch (bCmdMasked) {
@@ -1947,7 +1964,11 @@ class FDC extends Component {
             break;
 
         case FDC.REG_DATA.CMD.WRITE_DATA:                   // 0x05
+            ledState = Panel.STATE.WRITE;
+            /* fall through */
+
         case FDC.REG_DATA.CMD.READ_DATA:                    // 0x06
+            if (!ledState) ledState = Panel.STATE.READ;
             bDrive = this.popCmd(FDC.TERMS.DS);             // Drive Select
             bHead = (bDrive >> 2) & 0x1;                    // isolate HD (Head Select) bits
             this.iDrive = (bDrive & 0x3);                   // isolate DS (Drive Select, aka Unit Select) bits
@@ -1966,6 +1987,7 @@ class FDC extends Component {
             drive.bSectorEnd = this.popCmd(FDC.TERMS.EOT);  // EOT (final sector number on a cylinder)
             this.popCmd(FDC.TERMS.GPL);                     // GPL (spacing between sectors, excluding VCO Sync Field; 3)
             this.popCmd(FDC.TERMS.DTL);                     // DTL (when N is 0, DTL stands for the data length to read out or write into the sector)
+            this.setLED(ledState);
             if (bCmdMasked == FDC.REG_DATA.CMD.READ_DATA)
                 this.doRead(drive);
             else
@@ -2259,6 +2281,7 @@ class FDC extends Component {
      */
     beginResult()
     {
+        this.setLED();
         this.regDataIndex = this.regDataTotal = 0;
     }
 
