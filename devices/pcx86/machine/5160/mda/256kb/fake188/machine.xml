@@ -14,7 +14,7 @@
 			<manifest ref="/pcjs-disks/pcx86/dos/ibm/1.00/manifest.xml" disk="*"/>
 			<manifest ref="/pcjs-disks/pcx86/dos/ibm/1.10/manifest.xml" disk="*"/>
 			<manifest ref="/pcjs-disks/pcx86/dos/ibm/2.00/manifest.xml" disk="*"/>
-			<manifest ref="/pcjs-disks/pcx86/games/microsoft/adventure/manifest.xml" disk="*"/>
+			<manifest ref="/pcjs-games/pcx86/microsoft/adventure/manifest.xml" disk="*"/>
 			<manifest ref="/apps/pcx86/1981/visicalc/manifest.xml" disk="*"/>
 			<manifest ref="/apps/pcx86/1982/esuite/manifest.xml" disk="*"/>
 		</control>
