@@ -5,7 +5,7 @@ permalink: /pubs/pc/reference/intel/
 ---
 
 Intel CPU Documentation
----
+-----------------------
 
 ### [8086 CPU](8086/)
  

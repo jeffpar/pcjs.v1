@@ -26,6 +26,8 @@ parameters are identical in both types of machines:
 yielding a capacity of 49,090,560 bytes (940 * 6 * 17 * 512), or approximately 47Mb
 (since PCjs considers 1 megabyte to be 1,048,576 bytes).
 
+See the [COMPAQ DeskPro 386 Fixed Disk Drive Parameter Table Values](/pubs/pc/reference/compaq/deskpro386/#fixed-disk-drive-parameter-table-values) for more information.
+
 However, when you install [COMPAQ MS-DOS 3.31](/disks/pcx86/dos/compaq/3.31/) using their `FASTART` utility,
 it will report "Format complete" after formatting 939 cylinders (0-938), presumably reserving the final cylinder
 for diagnostic purposes and/or "head parking".  It will then report "48,834,560 bytes available on disk" and

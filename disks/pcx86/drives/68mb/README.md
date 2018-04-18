@@ -27,9 +27,12 @@ January 8, 1988), the characteristics of drive type 4 come from that ROM's Fixed
 yielding a capacity of 71,233,536 bytes (1023 * 8 * 17 * 512), or approximately 68Mb
 (since PCjs considers 1 megabyte to be 1,048,576 bytes).
 
+See the [COMPAQ DeskPro 386 Fixed Disk Drive Parameter Table Values](/pubs/pc/reference/compaq/deskpro386/#fixed-disk-drive-parameter-table-values) for more information.
+
 NOTE: There is a discrepancy between the ROM and the COMPAQ Technical Reference; the latter claims that a Type 4 drive
 supports 1024 cylinders rather than 1023.  However, it's possible that the larger total included a cylinder at the end
-of the disk reserved for diagnostic operations and "head parking".  Further investigation is required.
+of the disk reserved for diagnostic operations and "head parking", which was typical for hard disks from that era.
+Further investigation is required.
 
 Also note that when using this disk with an IBM PC AT, only 62Mb can be accessed, because the IBM PC AT ROM defines
 a Type 4 drive as having 940 cylinders rather than 1023. 

@@ -1,11 +1,11 @@
 ---
 layout: page
-title: Microsoft PC References
+title: Microsoft Reference Materials
 permalink: /pubs/pc/reference/microsoft/
 ---
 
-Microsoft PC References
------------------------
+Microsoft Reference Materials
+-----------------------------
 
 ### Microsoft KnowledgeBase
 
