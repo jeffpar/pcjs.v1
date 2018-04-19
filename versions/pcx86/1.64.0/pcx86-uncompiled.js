@@ -48478,6 +48478,75 @@ Web.onInit(Keyboard.init);
  * Color Display).  P3 can switch all the I/O ports from 0x3nn to 0x2nn; the default is 0x3nn, and
  * that's the only port range the EGA ROM supports as well.
  *
+ * For quick reference, IBM EGA register values for the standard EGA modes, from pages 63-68 of the
+ * "IBM Enhanced Graphics Adapter" (http://minuszerodegrees.net/oa/OA - IBM Enhanced Graphics Adapter.pdf).
+ *
+ * WARNING: Some of these value are not programmed exactly as-is; for example, the CURSCANB values must
+ * be adjusted by +1 in most cases, due to an EGA idiosyncrasy that IBM may not have originally intended.
+ *
+ *      INT 0x10 Mode Requested:    00  01  02  03  04  05  06  07  0D  0E  0F  10  0F^ 10^ 00* 01* 02* 03*
+ *
+ *      BIOSMODE:                   01  01  03  03  04  04  06  07  0D  0E  0F  10  0F  10  01  01  03  03
+ *      CRTC[0x00]: HTOTAL          37  37  70  70  37  37  70  60  37  70  60  5B  60  5B  2D  2D  5B  5B
+ *      CRTC[0x01]: HDEND           27  27  4F  4F  27  27  4F  4F  27  4F  4F  4F  4F  4F  27  27  4F  4F
+ *      CRTC[0x02]: HBSTART         2D  2D  5C  %C  2D  2D  59  56  2D  56  56  53  56  53  2B  2B  53  53
+ *      CRTC[0x03]: HBEND           37  37  2F  2F  37  37  2D  3A  37  2D  1A  17  3A  37  2D  2D  37  37
+ *      CRTC[0x04]: HRSTART         31  31  5F  5F  30  30  5E  51  30  5E  50  50  50  52  28  28  51  51
+ *      CRTC[0x05]: HREND           15  15  07  07  14  14  06  60  14  06  E0  BA  60  00  6D  6D  5B  5B
+ *      CRTC[0x06]: VTOTAL          04  04  04  04  04  04  04  70  04  04  70  6C  70  6C  6C  6C  6C  6C
+ *      CRTC[0x07]: OVERFLOW        11  11  11  11  11  11  11  1F  11  11  1F  1F  1F  1F  1F  1F  1F  1F
+ *      CRTC[0x08]: PRESCAN         00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *      CRTC[0x09]: MAXSCAN         07  07  07  07  01  01  01  0D  00  00  00  00  00  00  0D  0D  0D  0D
+ *      CRTC[0x0A]: CURSCAN         06  06  06  06  00  00  00  0B  00  00  00  00  00  00  0B  0B  0B  0B
+ *      CRTC[0x0B]: CURSCANB        07  07  07  07  00  00  00  0C  00  00  00  00  00  00  0C  0C  0C  0C
+ *      CRTC[0x0C]: STARTHI         --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --
+ *      CRTC[0x0D]: STARTLO         --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --
+ *      CRTC[0x0E]: CURSORHI        --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --
+ *      CRTC[0x0F]: CURSORLO        --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --
+ *      CRTC[0x10]: VRSTART         E1  E1  E1  E1  E1  E1  E0  5E  E1  E0  5E  5E  5E  5E  5E  5E  5E  5E
+ *      CRTC[0x11]: VREND           24  24  24  24  24  24  23  2E  24  23  2E  2B  2E  2B  2B  2B  2B  2B
+ *      CRTC[0x12]: VDEND           C7  C7  C7  C7  C7  C7  C7  5D  C7  C7  5D  5D  5D  5D  5D  5D  5D  5D
+ *      CRTC[0x13]: OFFSET          14  14  28  28  14  14  28  28  14  28  14  14  28  28  14  14  28  28
+ *      CRTC[0x14]: UNDERLINE       08  08  08  08  00  00  00  0D  00  00  0D  0F  0D  0F  0F  0F  0F  0F
+ *      CRTC[0x15]: VBSTART         E0  E0  E0  E0  E0  E0  DF  5E  E0  DF  5E  5F  5E  5F  5E  5E  5E  5E
+ *      CRTC[0x16]: VBEND           F0  F0  F0  F0  F0  F0  EF  6E  F0  EF  6E  0A  6E  0A  0A  0A  0A  0A
+ *      CRTC[0x17]: MODECTRL        A3  A3  A3  A3  A2  A2  C2  A3  E3  E3  8B  8B  E3  E3  A3  A3  A3  A3
+ *      CRTC[0x18]: LINECOMP        FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF
+ *       GRC[0x00]: SRESET          00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x01]: ESRESET         00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x02]: COLORCOMP       00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x03]: DATAROT         00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x04]: READMAP         00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x05]: MODE            10  10  10  10  30  30  00  10  00  00  10  10  00  00  10  10  10  10
+ *       GRC[0x06]: MISC            0E  0E  0E  0E  0F  0F  0D  0A  05  05  07  07  05  05  0E  0E  0E  0E
+ *       GRC[0x07]: COLORDC         00  00  00  00  00  00  00  00  0F  0F  0F  0F  0F  0F  00  00  00  00
+ *       GRC[0x08]: BITMASK         FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF
+ *       SEQ[0x00]: RESET           03  03  03  03  03  03  03  03  03  03  03  03  03  03  03  03  03  03
+ *       SEQ[0x01]: CLKMODE         0B  0B  01  01  0B  0B  01  00  0B  01  05  05  01  01  0B  0B  01  01
+ *       SEQ[0x02]: MAPMASK         03  03  03  03  03  03  01  03  0F  0F  0F  0F  0F  0F  03  03  03  03
+ *       SEQ[0x03]: CHARMAP         00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       SEQ[0x04]: MEMMODE         03  03  03  03  02  02  06  03  06  06  00  00  06  06  03  03  03  03
+ *       ATC[0x00]: PAL00           00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       ATC[0x01]: PAL01           01  01  01  01  13  13  17  08  01  01  08  01  08  01  01  01  01  01
+ *       ATC[0x02]: PAL02           02  02  02  02  15  15  17  08  02  02  00  00  00  02  02  02  02  02
+ *       ATC[0x03]: PAL03           03  03  03  03  17  17  17  08  03  03  00  00  00  03  03  03  03  03
+ *       ATC[0x04]: PAL04           04  04  04  04  02  02  17  08  04  04  18  04  18  04  04  04  04  04
+ *       ATC[0x05]: PAL05           05  05  05  05  04  04  17  08  05  05  18  07  18  05  05  05  05  05
+ *       ATC[0x06]: PAL06           06  06  06  06  06  06  17  08  06  06  00  00  00  06  14  14  14  14
+ *       ATC[0x07]: PAL07           07  07  07  07  07  07  17  08  07  07  00  00  00  07  07  07  07  07
+ *       ATC[0x08]: PAL08           10  10  10  10  10  10  17  10  10  10  00  00  00  38  38  38  38  38
+ *       ATC[0x09]: PAL09           11  11  11  11  11  11  17  18  11  11  08  01  08  39  39  39  39  39
+ *       ATC[0x0A]: PAL0A           12  12  12  12  12  12  17  18  12  12  00  00  00  3A  3A  3A  3A  3A
+ *       ATC[0x0B]: PAL0B           13  13  13  13  13  13  17  18  13  13  00  00  00  3B  3B  3B  3B  3B
+ *       ATC[0x0C]: PAL0C           14  14  14  14  14  14  17  18  14  14  00  04  00  3C  3C  3C  3C  3C
+ *       ATC[0x0D]: PAL0D           15  15  15  15  15  15  17  18  15  15  18  07  18  3D  3D  3D  3D  3D
+ *       ATC[0x0E]: PAL0E           16  16  16  16  16  16  17  18  16  16  00  00  00  3E  3E  3E  3E  3E
+ *       ATC[0x0F]: PAL0F           17  17  17  17  17  17  18  17  17  00  00  00  3F  3F  3F  3F  3F  3F
+ *       ATC[0x10]: MODE            08  08  08  08  01  01  01  0E  01  01  0B  0B  0B  01  08  08  08  08
+ *       ATC[0x11]: OVERSCAN        00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       ATC[0x12]: PLANES          0F  0F  0F  0F  03  03  01  0F  0F  0F  05  05  05  0F  0F  0F  0F  0F
+ *       ATC[0x13]: HPAN            00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *
  * VGA Support
  * -----------
  *
@@ -48593,70 +48662,68 @@ Web.onInit(Keyboard.init);
  *
  * Also, for quick reference, IBM VGA register values for the standard VGA modes (from http://www.pcjs.org/blog/2015/06/01/):
  *
- *      INT 0x10 Mode Requested:    0x00 0x01 0x02 0x03 0x04 0x05 0x06 0x0D 0x0E 0x10 0x12 0x13
+ *      INT 0x10 Mode Requested:    00  01  02  03  04  05  06  0D  0E  10  12  13
  *
- *      BIOSMODE:                   0x01 0x01 0x03 0x03 0x04 0x04 0x06 0x0D 0x0E 0x10 0x12 0x13
- *      CRTC[0x00]: HTOTAL          0x2D 0x2D 0x5F 0x5F 0x2D 0x2D 0x5F 0x2D 0x5F 0x5F 0x5F 0x5F
- *      CRTC[0x01]: HDEND           0x27 0x27 0x4F 0x4F 0x27 0x27 0x4F 0x27 0x4F 0x4F 0x4F 0x4F
- *      CRTC[0x02]: HBSTART         0x28 0x28 0x50 0x50 0x28 0x28 0x50 0x28 0x50 0x50 0x50 0x50
- *      CRTC[0x03]: HBEND           0x90 0x90 0x82 0x82 0x90 0x90 0x82 0x90 0x82 0x82 0x82 0x82
- *      CRTC[0x04]: HRSTART         0x2B 0x2B 0x55 0x55 0x2B 0x2B 0x54 0x2B 0x54 0x54 0x54 0x54
- *      CRTC[0x05]: HREND           0xA0 0xA0 0x81 0x81 0x80 0x80 0x80 0x80 0x80 0x80 0x80 0x80
- *      CRTC[0x06]: VTOTAL          0xBF 0xBF 0xBF 0xBF 0xBF 0xBF 0xBF 0xBF 0xBF 0xBF 0x0B 0xBF
- *      CRTC[0x07]: OVERFLOW        0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x3E 0x1F
- *      CRTC[0x08]: PRESCAN         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x09]: MAXSCAN         0x4F 0x4F 0x4F 0x4F 0xC1 0xC1 0xC1 0xC0 0xC0 0x40 0x40 0x41
- *      CRTC[0x0A]: CURSCAN         0x0D 0x0D 0x0D 0x0D 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0B]: CURSCANB        0x0E 0x0E 0x0E 0x0E 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0C]: STARTHI         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0D]: STARTLO         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0E]: CURSORHI        0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x00
- *      CRTC[0x0F]: CURSORLO        0x19 0x19 0x41 0x41 0x19 0x19 0x41 0x19 0x41 0x41 0xE1 0xA2
- *      CRTC[0x10]: VRSTART         0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x83 0xEA 0x9C
- *      CRTC[0x11]: VREND           0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x85 0x8C 0x8E
- *      CRTC[0x12]: VDEND           0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x5D 0xDF 0x8F
- *      CRTC[0x13]: OFFSET          0x14 0x14 0x28 0x28 0x14 0x14 0x28 0x14 0x28 0x28 0x28 0x28
- *      CRTC[0x14]: UNDERLINE       0x1F 0x1F 0x1F 0x1F 0x00 0x00 0x00 0x00 0x00 0x0F 0x00 0x40
- *      CRTC[0x15]: VBSTART         0x96 0x96 0x96 0x96 0x96 0x96 0x96 0x96 0x96 0x63 0xE7 0x96
- *      CRTC[0x16]: VBEND           0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xBA 0x04 0xB9
- *      CRTC[0x17]: MODECTRL        0xA3 0xA3 0xA3 0xA3 0xA2 0xA2 0xC2 0xE3 0xE3 0xE3 0xE3 0xA3
- *      CRTC[0x18]: LINECOMP        0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF
- *       GRC[0x00]: SRESET          0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       GRC[0x01]: ESRESET         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       GRC[0x02]: COLORCOMP       0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       GRC[0x03]: DATAROT         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       GRC[0x04]: READMAP         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       GRC[0x05]: MODE            0x10 0x10 0x10 0x10 0x30 0x30 0x00 0x00 0x00 0x00 0x00 0x40
- *       GRC[0x06]: MISC            0x0E 0x0E 0x0E 0x0E 0x0F 0x0F 0x0D 0x05 0x05 0x05 0x05 0x05
- *       GRC[0x07]: COLORDC         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x0F 0x0F 0x0F 0x0F 0x0F
- *       GRC[0x08]: BITMASK         0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF
- *       SEQ[0x00]: RESET           0x03 0x03 0x03 0x03 0x03 0x03 0x03 0x03 0x03 0x03 0x03 0x03
- *       SEQ[0x01]: CLKMODE         0x08 0x08 0x00 0x00 0x09 0x09 0x01 0x09 0x01 0x01 0x01 0x01
- *       SEQ[0x02]: MAPMASK         0x03 0x03 0x03 0x03 0x03 0x03 0x01 0x0F 0x0F 0x0F 0x0F 0x0F
- *       SEQ[0x03]: CHARMAP         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       SEQ[0x04]: MEMMODE         0x03 0x03 0x03 0x03 0x02 0x02 0x06 0x06 0x06 0x06 0x06 0x0E
- *       ATC[0x00]: PAL00           0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       ATC[0x01]: PAL01           0x01 0x01 0x01 0x01 0x13 0x13 0x17 0x01 0x01 0x01 0x01 0x01
- *       ATC[0x02]: PAL02           0x02 0x02 0x02 0x02 0x15 0x15 0x17 0x02 0x02 0x02 0x02 0x02
- *       ATC[0x03]: PAL03           0x03 0x03 0x03 0x03 0x17 0x17 0x17 0x03 0x03 0x03 0x03 0x03
- *       ATC[0x04]: PAL04           0x04 0x04 0x04 0x04 0x02 0x02 0x17 0x04 0x04 0x04 0x04 0x04
- *       ATC[0x05]: PAL05           0x05 0x05 0x05 0x05 0x04 0x04 0x17 0x05 0x05 0x05 0x05 0x05
- *       ATC[0x06]: PAL06           0x14 0x14 0x14 0x14 0x06 0x06 0x17 0x06 0x06 0x14 0x14 0x06
- *       ATC[0x07]: PAL07           0x07 0x07 0x07 0x07 0x07 0x07 0x17 0x07 0x07 0x07 0x07 0x07
- *       ATC[0x08]: PAL08           0x38 0x38 0x38 0x38 0x10 0x10 0x17 0x10 0x10 0x38 0x38 0x08
- *       ATC[0x09]: PAL09           0x39 0x39 0x39 0x39 0x11 0x11 0x17 0x11 0x11 0x39 0x39 0x09
- *       ATC[0x0A]: PAL0A           0x3A 0x3A 0x3A 0x3A 0x12 0x12 0x17 0x12 0x12 0x3A 0x3A 0x0A
- *       ATC[0x0B]: PAL0B           0x3B 0x3B 0x3B 0x3B 0x13 0x13 0x17 0x13 0x13 0x3B 0x3B 0x0B
- *       ATC[0x0C]: PAL0C           0x3C 0x3C 0x3C 0x3C 0x14 0x14 0x17 0x14 0x14 0x3C 0x3C 0x0C
- *       ATC[0x0D]: PAL0D           0x3D 0x3D 0x3D 0x3D 0x15 0x15 0x17 0x15 0x15 0x3D 0x3D 0x0D
- *       ATC[0x0E]: PAL0E           0x3E 0x3E 0x3E 0x3E 0x16 0x16 0x17 0x16 0x16 0x3E 0x3E 0x0E
- *       ATC[0x0F]: PAL0F           0x3F 0x3F 0x3F 0x3F 0x17 0x17 0x17 0x17 0x17 0x3F 0x3F 0x0F
- *       ATC[0x10]: MODE            0x0C 0x0C 0x0C 0x0C 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x41
- *       ATC[0x11]: OVERSCAN        0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       ATC[0x12]: PLANES          0x0F 0x0F 0x0F 0x0F 0x03 0x03 0x01 0x0F 0x0F 0x0F 0x0F 0x0F
- *       ATC[0x13]: HPAN            0x08 0x08 0x08 0x08 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *
- * TODO: Build a similar table for the IBM EGA, and then work on rationalizing the mode detection logic in checkMode().
+ *      BIOSMODE:                   01  01  03  03  04  04  06  0D  0E  10  12  13
+ *      CRTC[0x00]: HTOTAL          2D  2D  5F  5F  2D  2D  5F  2D  5F  5F  5F  5F
+ *      CRTC[0x01]: HDEND           27  27  4F  4F  27  27  4F  27  4F  4F  4F  4F
+ *      CRTC[0x02]: HBSTART         28  28  50  50  28  28  50  28  50  50  50  50
+ *      CRTC[0x03]: HBEND           90  90  82  82  90  90  82  90  82  82  82  82
+ *      CRTC[0x04]: HRSTART         2B  2B  55  55  2B  2B  54  2B  54  54  54  54
+ *      CRTC[0x05]: HREND           A0  A0  81  81  80  80  80  80  80  80  80  80
+ *      CRTC[0x06]: VTOTAL          BF  BF  BF  BF  BF  BF  BF  BF  BF  BF  0B  BF
+ *      CRTC[0x07]: OVERFLOW        1F  1F  1F  1F  1F  1F  1F  1F  1F  1F  3E  1F
+ *      CRTC[0x08]: PRESCAN         00  00  00  00  00  00  00  00  00  00  00  00
+ *      CRTC[0x09]: MAXSCAN         4F  4F  4F  4F  C1  C1  C1  C0  C0  40  40  41
+ *      CRTC[0x0A]: CURSCAN         0D  0D  0D  0D  00  00  00  00  00  00  00  00
+ *      CRTC[0x0B]: CURSCANB        0E  0E  0E  0E  00  00  00  00  00  00  00  00
+ *      CRTC[0x0C]: STARTHI         00  00  00  00  00  00  00  00  00  00  00  00
+ *      CRTC[0x0D]: STARTLO         00  00  00  00  00  00  00  00  00  00  00  00
+ *      CRTC[0x0E]: CURSORHI        01  01  01  01  01  01  01  01  01  01  01  00
+ *      CRTC[0x0F]: CURSORLO        19  19  41  41  19  19  41  19  41  41  E1  A2
+ *      CRTC[0x10]: VRSTART         9C  9C  9C  9C  9C  9C  9C  9C  9C  83  EA  9C
+ *      CRTC[0x11]: VREND           8E  8E  8E  8E  8E  8E  8E  8E  8E  85  8C  8E
+ *      CRTC[0x12]: VDEND           8F  8F  8F  8F  8F  8F  8F  8F  8F  5D  DF  8F
+ *      CRTC[0x13]: OFFSET          14  14  28  28  14  14  28  14  28  28  28  28
+ *      CRTC[0x14]: UNDERLINE       1F  1F  1F  1F  00  00  00  00  00  0F  00  40
+ *      CRTC[0x15]: VBSTART         96  96  96  96  96  96  96  96  96  63  E7  96
+ *      CRTC[0x16]: VBEND           B9  B9  B9  B9  B9  B9  B9  B9  B9  BA  04  B9
+ *      CRTC[0x17]: MODECTRL        A3  A3  A3  A3  A2  A2  C2  E3  E3  E3  E3  A3
+ *      CRTC[0x18]: LINECOMP        FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF
+ *       GRC[0x00]: SRESET          00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x01]: ESRESET         00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x02]: COLORCOMP       00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x03]: DATAROT         00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x04]: READMAP         00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x05]: MODE            10  10  10  10  30  30  00  00  00  00  00  40
+ *       GRC[0x06]: MISC            0E  0E  0E  0E  0F  0F  0D  05  05  05  05  05
+ *       GRC[0x07]: COLORDC         00  00  00  00  00  00  00  0F  0F  0F  0F  0F
+ *       GRC[0x08]: BITMASK         FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF
+ *       SEQ[0x00]: RESET           03  03  03  03  03  03  03  03  03  03  03  03
+ *       SEQ[0x01]: CLKMODE         08  08  00  00  09  09  01  09  01  01  01  01
+ *       SEQ[0x02]: MAPMASK         03  03  03  03  03  03  01  0F  0F  0F  0F  0F
+ *       SEQ[0x03]: CHARMAP         00  00  00  00  00  00  00  00  00  00  00  00
+ *       SEQ[0x04]: MEMMODE         03  03  03  03  02  02  06  06  06  06  06  0E
+ *       ATC[0x00]: PAL00           00  00  00  00  00  00  00  00  00  00  00  00
+ *       ATC[0x01]: PAL01           01  01  01  01  13  13  17  01  01  01  01  01
+ *       ATC[0x02]: PAL02           02  02  02  02  15  15  17  02  02  02  02  02
+ *       ATC[0x03]: PAL03           03  03  03  03  17  17  17  03  03  03  03  03
+ *       ATC[0x04]: PAL04           04  04  04  04  02  02  17  04  04  04  04  04
+ *       ATC[0x05]: PAL05           05  05  05  05  04  04  17  05  05  05  05  05
+ *       ATC[0x06]: PAL06           14  14  14  14  06  06  17  06  06  14  14  06
+ *       ATC[0x07]: PAL07           07  07  07  07  07  07  17  07  07  07  07  07
+ *       ATC[0x08]: PAL08           38  38  38  38  10  10  17  10  10  38  38  08
+ *       ATC[0x09]: PAL09           39  39  39  39  11  11  17  11  11  39  39  09
+ *       ATC[0x0A]: PAL0A           3A  3A  3A  3A  12  12  17  12  12  3A  3A  0A
+ *       ATC[0x0B]: PAL0B           3B  3B  3B  3B  13  13  17  13  13  3B  3B  0B
+ *       ATC[0x0C]: PAL0C           3C  3C  3C  3C  14  14  17  14  14  3C  3C  0C
+ *       ATC[0x0D]: PAL0D           3D  3D  3D  3D  15  15  17  15  15  3D  3D  0D
+ *       ATC[0x0E]: PAL0E           3E  3E  3E  3E  16  16  17  16  16  3E  3E  0E
+ *       ATC[0x0F]: PAL0F           3F  3F  3F  3F  17  17  17  17  17  3F  3F  0F
+ *       ATC[0x10]: MODE            0C  0C  0C  0C  01  01  01  01  01  01  01  41
+ *       ATC[0x11]: OVERSCAN        00  00  00  00  00  00  00  00  00  00  00  00
+ *       ATC[0x12]: PLANES          0F  0F  0F  0F  03  03  01  0F  0F  0F  0F  0F
+ *       ATC[0x13]: HPAN            08  08  08  08  00  00  00  00  00  00  00  00
  */
 
 /**
@@ -49128,6 +49195,7 @@ class Card extends Controller {
             if (this.nCard >= Video.CARD.EGA) {
                 this.dbg.println(" LATCHES: " + Str.toHex(this.latches));
                 this.dbg.println("  ACCESS: " + Str.toHex(this.nAccess, 4));
+                this.dbg.println("  PLANE2: " + Str.toHex(this.bitsDirtyBanks, 2));
                 this.dbg.println("Use 'd video [addr]' to dump video memory");
                 /*
                  * There are few more EGA regs we could dump, like GRCPos1, GRCPos2, but does anyone care?
@@ -50234,7 +50302,7 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
     if (delta) {
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
-        // card.nDirtyPlanes |= delta;          // we no longer track dirty planes, just dirty font banks
+        // card.bitsDirtyPlanes |= delta;       // we no longer track dirty planes, just dirty font banks
         if (delta & 0x00ff0000) {               // if any plane 2 bits were modified, mark the appropriate font bank dirty
             let bitDirtyBank = (1 << ((idw >> 13) & 7));
             if (!(card.bitsDirtyBanks & bitDirtyBank)) {
@@ -53992,30 +54060,38 @@ class Video extends Component {
             card.nVertPeriodsStartAddr = 0;
         }
 
-        /*
-         * Any screen (aka "page") offset must be doubled for text modes, due to the attribute bytes.
-         * TODO: Come up with a more robust method of deciding when any screen offset should be doubled.
-         */
-        addrScreen += card.offStartAddr << (this.nCardFont? 1 : 0);
         let cbScreen = this.cbScreen;
 
         this.nColsLogical = this.nCols;
-        if (this.nCard >= Video.CARD.EGA && card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
+        if (this.nCard < Video.CARD.EGA) {
             /*
-             * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows, but since
-             * then, the logical width of screen memory (nColsLogical) can differ from the visible width (nCols).
-             * We now calculate the logical width, and the compute a new cbScreen in much the same way the original
-             * cbScreen was computed (but without any CGA-related padding considerations).
-             *
-             * TODO: I'm taking a lot of shortcuts in this calculation (eg, relying on nFont to detect text modes,
-             * ignoring MODECTRL.BYTE_MODE, etc); generalize this someday.  In addition, dividing the total number of
-             * cells by nCellsPerWord yields total WORDS, not BYTES, so we need to double cbScreen -- EXCEPT that the
-             * notion of cell has a slightly different meaning for EGA and VGA-specific modes.  nCellsPerWord should
-             * not be overloaded like that.
+             * Any screen (aka "page") offset must be doubled for text modes, due to the attribute bytes.
              */
-            this.nColsLogical = card.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nCardFont? 1 : (card.regCRTData[Card.CRTC.EGA.UNDERLINE.INDX] & Card.CRTC.EGA.UNDERLINE.DWORD)? 3 : 4);
-            cbScreen = ((this.nColsLogical * (this.nRows-1) + this.nCols) / this.nCellsPerWord)|0;
-            if (this.nMode <= Video.MODE.MDA_80X25) cbScreen <<= 1;
+            addrScreen += card.offStartAddr << (this.nCardFont? 1 : 0);
+        } else {
+            /*
+             * For the EGA/VGA, we must make offset-doubling dependent on attribute (odd) byte addressibility.
+             */
+            let fDouble = ((card.regSEQData[Card.SEQ.MEMMODE.INDX] & (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.EXT | Card.SEQ.MEMMODE.SEQUENTIAL)) == (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.EXT));
+            addrScreen += card.offStartAddr << (fDouble? 1 : 0);
+
+            if (card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
+                /*
+                 * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows, but since
+                 * then, the logical width of screen memory (nColsLogical) can differ from the visible width (nCols).
+                 * We now calculate the logical width, and the compute a new cbScreen in much the same way the original
+                 * cbScreen was computed (but without any CGA-related padding considerations).
+                 *
+                 * TODO: I'm taking a lot of shortcuts in this calculation (eg, relying on nFont to detect text modes,
+                 * ignoring MODECTRL.BYTE_MODE, etc); generalize this someday.  In addition, dividing the total number of
+                 * cells by nCellsPerWord yields total WORDS, not BYTES, so we need to double cbScreen -- EXCEPT that the
+                 * notion of cell has a slightly different meaning for EGA and VGA-specific modes.  nCellsPerWord should
+                 * not be overloaded like that.
+                 */
+                this.nColsLogical = card.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nCardFont? 1 : (card.regCRTData[Card.CRTC.EGA.UNDERLINE.INDX] & Card.CRTC.EGA.UNDERLINE.DWORD)? 3 : 4);
+                cbScreen = ((this.nColsLogical * (this.nRows - 1) + this.nCols) / this.nCellsPerWord) | 0;
+                if (this.nMode <= Video.MODE.MDA_80X25) cbScreen <<= 1;
+            }
         }
 
         /*
