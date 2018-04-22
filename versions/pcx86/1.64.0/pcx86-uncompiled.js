@@ -1279,6 +1279,10 @@ class Str {
      * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
      * specifiers that I use.
      *
+     * TODO: The %c and %s specifiers support a negative width (for left-justified output), but the numeric specifiers
+     * (eg, %d and %x) do not; they support only positive widths and right-justified output.  That's one of the more
+     * glaring omissions at the moment.
+     *
      * @param {string} format
      * @param {...} args
      * @return {string}
@@ -1286,21 +1290,29 @@ class Str {
     static sprintf(format, ...args)
     {
         let buffer = "";
-        let aParts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
+        let aParts = format.split(/%([-+ 0#]*)([0-9]*|\*)(\.[0-9]+|)([hlL]?)([A-Za-z%])/);
 
         let iArg = 0, iPart;
-        for (iPart = 0; iPart < aParts.length - 7; iPart += 7) {
+        for (iPart = 0; iPart < aParts.length - 6; iPart += 6) {
 
             buffer += aParts[iPart];
 
             let arg = args[iArg++];
             let flags = aParts[iPart+1];
-            let minimum = +aParts[iPart+2] || 0;
-            let precision = +aParts[iPart+4] || 0;
-            let conversion = aParts[iPart+6];
+            let width = aParts[iPart+2];
+            if (width == '*') {
+                width = arg;
+                arg = args[iArg++];
+            } else {
+                width = +width || 0;
+            }
+            let precision = aParts[iPart+3];
+            precision = precision? +precision.substr(1) : -1;
+            let prefix = aParts[iPart+4];
+            let type = aParts[iPart+5];
             let ach = null, s;
 
-            switch(conversion) {
+            switch(type) {
             case 'd':
                 /*
                  * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
@@ -1313,19 +1325,19 @@ class Str {
 
             case 'f':
                 s = Math.trunc(arg) + "";
-                if (precision) {
-                    minimum -= (precision + 1);
+                if (precision > 0) {
+                    width -= (precision + 1);
                 }
-                if (s.length < minimum) {
-                    if (flags == '0') {
-                        if (arg < 0) minimum--;
-                        s = ("0000000000" + Math.abs(arg)).slice(-minimum);
+                if (s.length < width) {
+                    if (flags.indexOf('0') >= 0) {
+                        if (arg < 0) width--;
+                        s = ("0000000000" + Math.abs(arg)).slice(-width);
                         if (arg < 0) s = '-' + s;
                     } else {
-                        s = ("          " + s).slice(-minimum);
+                        s = ("          " + s).slice(-width);
                     }
                 }
-                if (precision) {
+                if (precision > 0) {
                     arg = Math.round((arg - Math.trunc(arg)) * Math.pow(10, precision));
                     s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
                 }
@@ -1338,8 +1350,8 @@ class Str {
 
             case 's':
                 if (typeof arg == "string") {
-                    while (arg.length < minimum) {
-                        if (flags == '-') {
+                    while (arg.length < width) {
+                        if (flags.indexOf('-') >= 0) {
                             arg += ' ';
                         } else {
                             arg = ' ' + arg;
@@ -1362,24 +1374,29 @@ class Str {
                      * hex values ourselves, because using a radix of 10 with any "0x..." value always returns 0.
                      *
                      * And if the value CAN be interpreted as decimal, then we MUST interpret it as decimal, because
-                     * we have sprintf() calls in /modules/lib/testmon.js that depend on this code to perform decimal
-                     * to hex conversion.  We're allowed to make our own rules here, since passing numbers in string
-                     * form isn't part of the sprintf "spec".
+                     * we have sprintf() calls in /modules/pcx86/lib/testmon.js that depend on this code to perform
+                     * decimal to hex conversion.  We're going to make our own rules here, since passing numbers in
+                     * string form isn't part of the sprintf "spec".
                      */
                     arg = Number.parseInt(arg, arg.match(/(^0x|[a-f])/i)? 16 : 10);
                 }
                 do {
-                    s = ach[arg & 0xf] + s;
+                    let d = arg & 0xf;
                     arg >>>= 4;
-                } while (--minimum > 0 || arg);
+                    if (flags.indexOf('0') >= 0 || s == "" || d || arg) {
+                        s = ach[d] + s;
+                    } else if (width) {
+                        s = ' ' + s;
+                    }
+                } while (--width > 0 || arg);
                 buffer += s;
                 break;
 
             default:
                 /*
-                 * The supported ANSI C set of conversions: "dioxXucsfeEgGpn%"
+                 * The supported ANSI C set of types: "dioxXucsfeEgGpn%"
                  */
-                buffer += "(unrecognized printf conversion %" + conversion + ")";
+                buffer += "(unrecognized printf type %" + type + ")";
                 break;
             }
         }
@@ -12483,7 +12500,7 @@ class CPU extends Component {
          *
          *      this.flags.powered = true;
          */
-        this.updateCPU();
+        this.updateCPU(false);
         return true;
     }
 
@@ -49130,7 +49147,7 @@ class Card extends Controller {
                 this.dbg.println(sName + ": " + Str.toHex(iReg, 2));
                 return;
             }
-            let i, cchMax = 17, s = "";
+            let i, s = "";
             let nRegs = (asRegs? asRegs.length : aRegs.length);
             for (i = 0; i < nRegs; i++) {
                 /*
@@ -49139,10 +49156,8 @@ class Card extends Controller {
                  */
                 let reg = (aRegs === this.regCRTData)? this.getCRTCReg(i) : aRegs[i];
                 if (s) s += '\n';
-                let sRegName = Str.pad((asRegs? asRegs[i] : sName.substr(1) + Str.toDec(i, 3)), cchMax);
-                let cchReg = (asRegs? (reg < 0x100? 2 : 4) : 6);
-                s += sName + "[" + Str.toHex(i, 2) + "]: " + sRegName + (i === iReg? '*' : ' ') + Str.toHex(reg, cchReg);
-                if (reg != null) s += " (" + reg + ".)";
+                let sRegName = (asRegs? asRegs[i] : sName.substr(1) + Str.toDec(i, 3));
+                s += Str.sprintf("%s[%02X]: %-12s %*X%s (%*d)", sName, i, sRegName, (asRegs? 4 : 6), reg, (i === iReg? '*' : ' '), (asRegs? 4 : 6), reg);
             }
             this.dbg.println(s);
         }
@@ -53249,7 +53264,8 @@ class Video extends Component {
         this.nCardFont = this.nActiveFont = this.nAlternateFont = 0;
         this.nCols = this.nColsDefault;
         this.nRows = this.nRowsDefault;
-        this.nCellsPerWord = Video.aModeParms[Video.MODE.MDA_80X25][2];
+        this.nPointsPerCell = Video.aModeParms[Video.MODE.MDA_80X25][2];
+        this.nPointsPerByte = Video.aModeParms[Video.MODE.MDA_80X25][3];
 
         let cbPadding = 0, cxCell = 0, cyCell = 0;
         let modeParms = Video.aModeParms[this.nMode];
@@ -53257,9 +53273,10 @@ class Video extends Component {
 
             this.nCols = modeParms[0];
             this.nRows = modeParms[1];
-            this.nCellsPerWord = modeParms[2];
-            cbPadding = modeParms[3];       // undefined for EGA/VGA graphics modes only
-            this.nCardFont = modeParms[4];  // this will be undefined for all graphics modes
+            this.nPointsPerCell = modeParms[2];
+            this.nPointsPerByte = modeParms[3];
+            cbPadding = modeParms[4];       // undefined for EGA/VGA graphics modes only
+            this.nCardFont = modeParms[5];  // this will be undefined for all graphics modes
 
             if (this.nCardFont) {
                 /*
@@ -53289,7 +53306,7 @@ class Video extends Component {
         }
 
         this.nCells = (this.nCols * this.nRows)|0;
-        this.nCellCache = (this.nCells / this.nCellsPerWord)|0;
+        this.nCellCache = (this.nCells / this.nPointsPerCell)|0;
         this.cbScreen = this.nCellCache;
         this.cbSplit = 0;
 
@@ -54061,8 +54078,8 @@ class Video extends Component {
         }
 
         let cbScreen = this.cbScreen;
-
         this.nColsLogical = this.nCols;
+
         if (this.nCard < Video.CARD.EGA) {
             /*
              * Any screen (aka "page") offset must be doubled for text modes, due to the attribute bytes.
@@ -54072,8 +54089,8 @@ class Video extends Component {
             /*
              * For the EGA/VGA, we must make offset-doubling dependent on attribute (odd) byte addressibility.
              */
-            let fDouble = ((card.regSEQData[Card.SEQ.MEMMODE.INDX] & (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.EXT | Card.SEQ.MEMMODE.SEQUENTIAL)) == (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.EXT));
-            addrScreen += card.offStartAddr << (fDouble? 1 : 0);
+            let nShift = ((card.regSEQData[Card.SEQ.MEMMODE.INDX] & (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.SEQUENTIAL)) == Card.SEQ.MEMMODE.ALPHA)? 1 : 0;
+            addrScreen += card.offStartAddr << nShift;
 
             if (card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
                 /*
@@ -54083,14 +54100,10 @@ class Video extends Component {
                  * cbScreen was computed (but without any CGA-related padding considerations).
                  *
                  * TODO: I'm taking a lot of shortcuts in this calculation (eg, relying on nFont to detect text modes,
-                 * ignoring MODECTRL.BYTE_MODE, etc); generalize this someday.  In addition, dividing the total number of
-                 * cells by nCellsPerWord yields total WORDS, not BYTES, so we need to double cbScreen -- EXCEPT that the
-                 * notion of cell has a slightly different meaning for EGA and VGA-specific modes.  nCellsPerWord should
-                 * not be overloaded like that.
+                 * ignoring MODECTRL.BYTE_MODE, etc); generalize this someday.
                  */
                 this.nColsLogical = card.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nCardFont? 1 : (card.regCRTData[Card.CRTC.EGA.UNDERLINE.INDX] & Card.CRTC.EGA.UNDERLINE.DWORD)? 3 : 4);
-                cbScreen = ((this.nColsLogical * (this.nRows - 1) + this.nCols) / this.nCellsPerWord) | 0;
-                if (this.nMode <= Video.MODE.MDA_80X25) cbScreen <<= 1;
+                cbScreen = ((this.nColsLogical * (this.nRows - 1) + this.nCols) / this.nPointsPerByte)|0;
             }
         }
 
@@ -54152,7 +54165,12 @@ class Video extends Component {
      */
     updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, nCells, fForce, fBlinkUpdate)
     {
-        let cCells = cbScreen >> 1;
+        /*
+         * When determining the number of cells this update may affect, it is NOT simply cbScreen/2,
+         * because cbScreen includes any and all off-screen cells, too.
+         */
+        let cCells = cbScreen * this.nPointsPerByte;
+        cCells = Math.trunc(cCells / this.nColsLogical) * this.nCols + (cCells % this.nCols);
         if (cCells > nCells) cCells = nCells;
         let addrScreenLimit = addrScreen + cbScreen;
 
@@ -54242,12 +54260,13 @@ class Video extends Component {
         let dataMask = 0xfffff;
         let adwMemory = this.cardActive.adwMemory;
 
-        let nShift = !(this.cardActive.nAccess & Card.ACCESS.WRITE.EVENODD)? 1 : 0;
-        let nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols /* - iCellFirst */) << 1) : 0);
+        let nbCharExtra = 1;
+        let nShift = (this.cardActive.nAccess & Card.ACCESS.WRITE.PAIRS)? 1 : 0;
 
         let fBlinkEnable = (this.cardActive.regMode & Card.MDA.MODE.BLINK_ENABLE);
         if (this.nCard >= Video.CARD.EGA) {
             fBlinkEnable = (this.cardActive.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.BLINK_ENABLE);
+            if (this.cardActive.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.SEQUENTIAL) nbCharExtra = 0;
         }
 
         if (fBlinkEnable) {
@@ -54259,6 +54278,7 @@ class Video extends Component {
         this.cBlinkVisible = 0;
         let col = iCell % this.nCols;
         let row = (iCell / this.nCols)|0;
+        let nbRowExtra = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols /* - iCellFirst */) << nbCharExtra) : 0);
 
         while (addrScreen < addrScreenLimit && iCell < nCells) {
 
@@ -54304,12 +54324,11 @@ class Video extends Component {
 
             cCells++;
             iCell++;
-
-            addrScreen += 2;
+            addrScreen += 1 + nbCharExtra;
             if (++col >= this.nCols) {
                 col = 0;
                 if (++row >= this.nRows) break;
-                addrScreen += nRowAdjust;
+                addrScreen += nbRowExtra;
             }
         }
 
@@ -54335,7 +54354,7 @@ class Video extends Component {
          * This is the CGA graphics-mode update case, where cells are pixels spread across two halves of the buffer.
          */
         let cCells = (addrScreenLimit - addrScreen) >> 1;
-        let iCell = 0, nPixelsPerCell = this.nCellsPerWord;
+        let iCell = 0, nPixelsPerCell = this.nPointsPerCell;
         let addr = addrScreen;
         let wPixelMask = (nPixelsPerCell == 16? 0x10000 : 0x30000);
         let nPixelShift = (nPixelsPerCell == 16? 1 : 2);
@@ -54588,7 +54607,7 @@ class Video extends Component {
                 if (x < xDirty) xDirty = x;
                 for (iPixel = 0; iPixel < nPixels; iPixel++) {
                     this.setPixel(this.imageBuffer, x++, y, aPixelColors[data & 0xff]);
-                    data >>= 8;
+                    data >>>= 8;
                 }
                 if (x > xMaxDirty) xMaxDirty = x;
                 if (y < yDirty) yDirty = y;
@@ -56245,9 +56264,13 @@ var Font;
  *
  *      0: # of columns (nCols)
  *      1: # of rows (nRows)
- *      2: # cells per word (nCellsPerWord: # of characters or pixels per word)
- *      3: # bytes of visible screen padding, if any (used for CGA graphics modes only)
- *      4: font ID (nFont: undefined if graphics mode)
+ *      2: # points per cell (nPointsPerCell: # of points per cell cache entry)
+ *      3: # points per byte (nPointsPerByte: # of points per frame buffer byte)
+ *      4: # bytes of visible screen padding, if any (used for CGA graphics modes only)
+ *      5: font ID (nFont: undefined if graphics mode)
+ *
+ * The 3rd entry used to be nCellsPerWord, but it is now nPointsPerCell.  nCols * nRows yields total
+ * (viewable) points, and dividing that by nPointsPerCell yields the size of the cell cache (nCellCache).
  *
  * For MDA and CGA modes, a "word" of memory is 16 bits of CPU-addressable data, so by calculating
  * ([0] * [1]) / [2], we obtain the number of words that mode actively displays; for example, the
@@ -56257,20 +56280,20 @@ var Font;
  * containing 32 bits of pixel data.
  */
 Video.aModeParms = [];                                                                              // Mode
-Video.aModeParms[Video.MODE.CGA_40X25]          = [ 40,  25,  1,   0, Video.CARD.CGA];              // 0x01
-Video.aModeParms[Video.MODE.CGA_80X25]          = [ 80,  25,  1,   0, Video.CARD.CGA];              // 0x03
-Video.aModeParms[Video.MODE.CGA_320X200]        = [320, 200,  8, 192];                              // 0x04
-Video.aModeParms[Video.MODE.CGA_640X200]        = [640, 200, 16, 192];                              // 0x06
-Video.aModeParms[Video.MODE.MDA_80X25]          = [ 80,  25,  1,   0, Video.CARD.MDA];              // 0x07
-Video.aModeParms[Video.MODE.EGA_320X200]        = [320, 200,  8];                                   // 0x0D
-Video.aModeParms[Video.MODE.EGA_640X200]        = [640, 200,  8];                                   // 0x0E
-Video.aModeParms[Video.MODE.EGA_640X350_MONO]   = [640, 350,  8];                                   // 0x0F
-Video.aModeParms[Video.MODE.EGA_640X350]        = [640, 350,  8];                                   // 0x10
-Video.aModeParms[Video.MODE.VGA_640X480_MONO]   = [640, 480,  8];                                   // 0x11
-Video.aModeParms[Video.MODE.VGA_640X480]        = [640, 480,  8];                                   // 0x12
-Video.aModeParms[Video.MODE.VGA_320X200]        = [320, 200,  1];                                   // 0x13
-Video.aModeParms[Video.MODE.VGA_320X240]        = [320, 240,  4];                                   // 0x14
-Video.aModeParms[Video.MODE.VGA_320X400]        = [320, 400,  4];                                   // 0x15
+Video.aModeParms[Video.MODE.CGA_40X25]          = [ 40,  25,  1, 0.5,   0, Video.CARD.CGA];         // 0x01
+Video.aModeParms[Video.MODE.CGA_80X25]          = [ 80,  25,  1, 0.5,   0, Video.CARD.CGA];         // 0x03
+Video.aModeParms[Video.MODE.CGA_320X200]        = [320, 200,  8,   4, 192];                         // 0x04
+Video.aModeParms[Video.MODE.CGA_640X200]        = [640, 200, 16,   8, 192];                         // 0x06
+Video.aModeParms[Video.MODE.MDA_80X25]          = [ 80,  25,  1, 0.5,   0, Video.CARD.MDA];         // 0x07
+Video.aModeParms[Video.MODE.EGA_320X200]        = [320, 200,  8,   8];                              // 0x0D
+Video.aModeParms[Video.MODE.EGA_640X200]        = [640, 200,  8,   8];                              // 0x0E
+Video.aModeParms[Video.MODE.EGA_640X350_MONO]   = [640, 350,  8,   8];                              // 0x0F
+Video.aModeParms[Video.MODE.EGA_640X350]        = [640, 350,  8,   8];                              // 0x10
+Video.aModeParms[Video.MODE.VGA_640X480_MONO]   = [640, 480,  8,   8];                              // 0x11
+Video.aModeParms[Video.MODE.VGA_640X480]        = [640, 480,  8,   8];                              // 0x12
+Video.aModeParms[Video.MODE.VGA_320X200]        = [320, 200,  4,   1];                              // 0x13
+Video.aModeParms[Video.MODE.VGA_320X240]        = [320, 240,  4,   4];                              // 0x14
+Video.aModeParms[Video.MODE.VGA_320X400]        = [320, 400,  4,   4];                              // 0x15
 Video.aModeParms[Video.MODE.CGA_40X25_BW]       = Video.aModeParms[Video.MODE.CGA_40X25];           // 0x00
 Video.aModeParms[Video.MODE.CGA_80X25_BW]       = Video.aModeParms[Video.MODE.CGA_80X25];           // 0x02
 Video.aModeParms[Video.MODE.CGA_320X200_BW]     = Video.aModeParms[Video.MODE.CGA_320X200];         // 0x05
@@ -72984,7 +73007,7 @@ class DebuggerX86 extends Debugger {
          * and then update our own state.  Normally, the only time fUpdateCPU will be false is when doTrace()
          * is calling us in a loop, in which case it will perform its own updateCPU() when it's done.
          */
-        if (fUpdateCPU !== false) this.cpu.updateCPU();
+        if (fUpdateCPU !== false) this.cpu.updateCPU(true);
 
         this.updateStatus(fRegs || false);
         return (this.nCycles > 0);
@@ -76458,7 +76481,7 @@ class DebuggerX86 extends Debugger {
                  * calling updateCPU() can be very slow, especially when fDisplayLiveRegs is true,
                  * so once the repeat count has been exhausted, we must perform a final updateCPU().
                  */
-                dbg.cpu.updateCPU();
+                dbg.cpu.updateCPU(true);
                 dbg.setBusy(false);
             }
         );
@@ -78318,7 +78341,7 @@ class Computer extends Component {
          * calls are now our own responsibility.
          */
         this.cpu.addTimer(this.id, function updateStatusTimer() {
-            cmp.updateStatus(false);
+            cmp.updateStatus();
         }, 1000 / Computer.UPDATES_PER_SECOND);
 
         let sStatePath = null;
@@ -79815,7 +79838,7 @@ class Computer extends Component {
          * explicitly set to false, and in those cases, we should avoid performing screen updates, because it may
          * subtly interfere with the Video component's normal refresh rate.
          */
-        if (fForce !== false) {
+        if (fForce !== undefined) {
             for (let i = 0; i < this.aVideo.length; i++) {
                 this.aVideo[i].updateScreen(fForce);
             }
