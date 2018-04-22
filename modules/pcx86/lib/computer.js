@@ -257,7 +257,7 @@ class Computer extends Component {
          * calls are now our own responsibility.
          */
         this.cpu.addTimer(this.id, function updateStatusTimer() {
-            cmp.updateStatus(false);
+            cmp.updateStatus();
         }, 1000 / Computer.UPDATES_PER_SECOND);
 
         let sStatePath = null;
@@ -1754,7 +1754,7 @@ class Computer extends Component {
          * explicitly set to false, and in those cases, we should avoid performing screen updates, because it may
          * subtly interfere with the Video component's normal refresh rate.
          */
-        if (fForce !== false) {
+        if (fForce !== undefined) {
             for (let i = 0; i < this.aVideo.length; i++) {
                 this.aVideo[i].updateScreen(fForce);
             }

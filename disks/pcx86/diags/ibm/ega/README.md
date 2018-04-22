@@ -58,20 +58,20 @@ Mode", which uses high resolution (8x14) fonts:
 
     SW1   SW2   SW3   SW4
     ---   ---   ---   ---
-    OFF   ON    ON    OFF
+    OFF    ON    ON   OFF
 
 so to run Fantasy Land, you would either need to change your EGA's settings to "Normal Color Mode", which defaults to
 the same font resolution (8x8) as the Color Display Adapter (CGA):
 
     SW1   SW2   SW3   SW4
     ---   ---   ---   ---
-    ON    ON    ON    OFF
+     ON    ON    ON   OFF
 
 or connect your EGA to the older Color Display (Model 5153) and set the EGA switches as follows:
 
     SW1   SW2   SW3   SW4
     ---   ---   ---   ---
-    OFF   OFF   OFF   ON
+    OFF   OFF   OFF    ON
 
 The machine below uses the last option (ie, a Color Display configuration).
 
