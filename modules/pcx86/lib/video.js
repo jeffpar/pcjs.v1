@@ -5776,8 +5776,8 @@ class Video extends Component {
     updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, nCells, fForce, fBlinkUpdate)
     {
         /*
-         * When determining the number of cells this update may affect, it is NOT simply cbScreen/2,
-         * because cbScreen includes any and all off-screen cells, too.
+         * When determining the number of cells this update may affect, it is NOT simply cbScreen
+         * multiplied by nPointsPerByte, because cbScreen includes any and all off-screen cells, too.
          */
         let cCells = cbScreen * this.nPointsPerByte;
         cCells = Math.trunc(cCells / this.nColsLogical) * this.nCols + (cCells % this.nCols);
