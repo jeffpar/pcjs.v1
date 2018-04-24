@@ -91,9 +91,9 @@ character data, not 14, leaving 6 bytes of "stale" font data in place for every 
 Fantasy Land's characters looked "damaged".
 
 If this wasn't a bug, Fantasy Land must have assumed that the screen was *already* operating with a lower-resolution (8x8)
-font.  This suggested that Fantasy Land had likely been designed for use with IBM's older CGA-based "Personal Color Display"
-rather than the newer "Enhanced Color Display".  Since Fantasy Land was one of the earliest programs created for the EGA,
-it's possible that the newer monitor was in short supply, so the author (Joel Gould) simply targeted the older display.
+font.  This suggested that Fantasy Land had likely been designed for use with IBM's older CGA-based "Personal Computer Color
+Display" rather than the newer "Enhanced Color Display".  Since Fantasy Land was one of the earliest programs created for
+the EGA, it's possible that the newer monitor was in short supply, so the author (Joel Gould) simply targeted the older display.
 
 This theory is reinforced by Fantasy Land's README:
 
@@ -198,7 +198,7 @@ To resolve this second problem, I decided to auto-mount the disk in *both* the A
 
 Although more work is required in PCjs to get [Fantasy Land](/disks/pcx86/diags/ibm/ega/) running in all its original glory,
 you can already get a good sense of what the map looked like, and enjoy all little animated touches that Joel Gould and his
-wife, Daphne Gould created, using the newfound power of character cell animation made possible by IBM's Enhanced Graphics
+wife Daphne Gould created, using the newfound power of character cell animation made possible by IBM's Enhanced Graphics
 Adapter.
 
 You can watch Fantasy Land run through its automated tour in the [machine below](#ibm-ega-fantasy-land-demo).  After you "PRESS
@@ -209,6 +209,19 @@ the bottom of the screen.  Adding split-screen and pixel-panning support are the
 ### IBM EGA Fantasy Land Demo
 
 {% include machine.html id="ibm5160" %}
+
+### PCjs Diagnostic Font Bank Displays
+
+<div>
+  <p>Font Bank 0</p>
+  <canvas id="ibm5160.videoEGA.font0" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
+  <p>Font Bank 1</p>
+  <canvas id="ibm5160.videoEGA.font1" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
+  <p>Font Bank 2</p>
+  <canvas id="ibm5160.videoEGA.font2" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
+  <p>Font Bank 3</p>
+  <canvas id="ibm5160.videoEGA.font3" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
+</div>
 
 ### Fantasy Land Screenshots from PCjs
 

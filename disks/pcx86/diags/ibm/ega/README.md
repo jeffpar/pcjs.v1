@@ -67,7 +67,7 @@ to the same font resolution (8x8) used by the Color Graphics Adapter (CGA):
     ---   ---   ---   ---
      ON    ON    ON   OFF
 
-or connect your EGA to the older Color Display (Model 5153) and set the EGA switches as follows:
+or connect your EGA to the older Personal Computer Color Display (Model 5153) and set the EGA switches as follows:
 
     SW1   SW2   SW3   SW4
     ---   ---   ---   ---
