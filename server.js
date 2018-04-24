@@ -73,7 +73,10 @@ HTMLOut.setOptions({'cache': fCache, 'console': fConsole, 'debug': fDebug, 'priv
 
 var app = express();
 app.enable("strict routing");
-app.set('port', args.argv['port'] || process.env.PORT || 8088);
+var appPort = args.argv['port'] || process.env.PORT || 8088;
+app.set('port', appPort);
+
+console.log('server on ' + appPort);
 
 /*
  * For more information about express.logger():
