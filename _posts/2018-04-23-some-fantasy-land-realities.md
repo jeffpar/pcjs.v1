@@ -68,12 +68,13 @@ My first guess was that I needed to add more RAM to my EGA.  A quick look at the
 	READ     ME        834 07-23-84  12:32p
 	       16 file(s)     333582 bytes
 
-suggested that it used 4 fonts ("character sets") named FL1.CS through FL4.CS, and if one assumed that the software
-required all four fonts to be loaded into EGA RAM simultaneously (as opposed to swapping them in and out of memory),
-then it was clear that my 128K EGA was under-populated.  I needed to find some EGA expansion RAM.
+revealed 4 fonts ("character sets") named FL1.CS through FL4.CS, and assuming the software required all four fonts
+to be loaded into EGA RAM simultaneously, then my 128K EGA was definitely inadequate.  The EGA requires each font to
+be loaded into plane 2, and moreover, fonts must be loaded at 16K intervals, so 4 fonts require 64K, which in turn
+requires that *all 4 planes* have 64K.  I needed to find an EGA with 256K.
 
 Fortunately, I had recently been talking to another friend and former co-worker named Anthony, and as luck would have it,
-he had a spare IBM EGA board fully-populated with 256K of RAM, which he kindly shared with me.  Another stroke of luck.
+he had a spare IBM EGA with a full 256K of RAM on the daughterboard that he was happy to share.
 
 Alas, the extra RAM was not a complete cure.  It eliminated the flickering, but the text on the screen still
 looked truncated, and most of the characters were still occasionally garbled.
@@ -93,7 +94,7 @@ Fantasy Land's characters looked "damaged".
 If this wasn't a bug, Fantasy Land must have assumed that the screen was *already* operating with a lower-resolution (8x8)
 font.  This suggested that Fantasy Land had likely been designed for use with IBM's older CGA-based "Personal Computer Color
 Display" rather than the newer "Enhanced Color Display".  Since Fantasy Land was one of the earliest programs created for
-the EGA, it's possible that the newer monitor was in short supply, so the author (Joel Gould) simply targeted the older display.
+the EGA, it's possible that the newer monitor was in short supply at the time.
 
 This theory is reinforced by Fantasy Land's README:
 
@@ -133,7 +134,8 @@ This theory is reinforced by Fantasy Land's README:
     command "AUTOEXEC".
 
 Notice that one of the requirements is an "RGB color display", which is a little ambiguous, but I think it's safe to
-say that if an "Enhanced Color Display" was required, then the README would have said exactly that -- and it didn't.
+say that if an "Enhanced Color Display" was required or even recommended, then the README would have said exactly that --
+and it didn't.
 
 Most EGA users with an Enhanced Color Display (myself included) would normally have their EGA's switches set to "Enhanced
 Color Mode", which uses high-resolution (8x14) fonts:
@@ -149,7 +151,7 @@ same font resolution (8x8) used by the Color Graphics Adapter (CGA):
     ---   ---   ---   ---
      ON    ON    ON   OFF
 
-And at long last, I could finally see what Fantasy Land was *supposed* to look like.
+At long last, I could finally see what Fantasy Land was *supposed* to look like.
 
 ![Fantasy Land Good EGA Switches](/blog/images/fland-good-ega-switches.png)
 
@@ -197,20 +199,23 @@ To resolve this second problem, I decided to auto-mount the disk in *both* the A
 ### Getting The Lay Of The Land
 
 Although more work is required in PCjs to get [Fantasy Land](/disks/pcx86/diags/ibm/ega/) running in all its original glory,
-you can already get a good sense of what the map looked like, and enjoy all little animated touches that Joel Gould and his
-wife Daphne Gould created, using the newfound power of character cell animation made possible by IBM's Enhanced Graphics
+we can already get a good sense of what the map looked like, and enjoy all the little animated touches that Joel Gould and his
+wife Daphne created, using the newfound power of character cell animation made possible by IBM's Enhanced Graphics
 Adapter.
 
-You can watch Fantasy Land run through its automated tour in the [machine below](#ibm-ega-fantasy-land-demo).  After you "PRESS
+Watch Fantasy Land run through its automated tour in the [machine below](#ibm-ega-fantasy-land-demo).  After you "PRESS
 ANY KEY TO CONTINUE", wait a minute for the automated tour to start.  What you're currently unable to see (except for occasional
-flickering glimpses) are all the Fantasy Land messages that would normally scroll up (literally, on a scroll) automatically from
-the bottom of the screen.  Adding split-screen and pixel-panning support are the very next things on my PCjs "To Do" list.
+flickering glimpses) are all the Fantasy Land messages that would normally scroll up (literally, on a scroll) from the bottom of
+the screen, using the EGA's split-screen feature -- one of the next things on my PCjs "To Do" list.
 
 ### IBM EGA Fantasy Land Demo
 
 {% include machine.html id="ibm5160" %}
 
 ### PCjs Diagnostic Font Bank Displays
+
+The next 4 windows are "live" views of the EGA's four font banks.  They were helpful when I was working on PCjs programmable
+font support, and they still provide a nice visual insight into the active fonts and colors used by Fantasy Land and the EGA.
 
 <div>
   <p>Font Bank 0</p>
