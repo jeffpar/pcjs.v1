@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Some Fantasy Land Realities
+title: The Realities of Fantasy Land
 date: 2018-04-23 10:00:00
 permalink: /blog/2018/04/23/
 machines:
