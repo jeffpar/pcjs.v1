@@ -5,9 +5,7 @@ permalink: /disks/pcx86/diags/ibm/ega/
 machines:
   - id: ibm5160
     type: pcx86
-    debugger: true
-    messages: dos|int
-    config: /devices/pcx86/machine/5160/ega/256kb/color/debugger/machine.xml
+    config: /devices/pcx86/machine/5160/ega/256kb/color/machine.xml
     autoMount:
       A:
         name: IBM EGA Fantasy Land Demo
@@ -73,7 +71,8 @@ or connect your EGA to the older Personal Computer Color Display (Model 5153) an
     ---   ---   ---   ---
     OFF   OFF   OFF    ON
 
-The machine below uses the last option (ie, a Color Display configuration).
+The machine below uses the last option (ie, a Color Display configuration).  A configuration with the
+[PCjs Debugger](debugger/) is available as well.
 
 Fantasy Land still has some issues running in the PCx86 emulator, but we're working on them.  You'll notice some
 additional "diagnostic" windows below the machine, which are essentially live representations of the 4 EGA "font
@@ -96,17 +95,6 @@ than *one* font, and that neither card could make simultaneous use of more than 
 there was any real-world software that actually needed the ability to load *eight* fonts.
 
 {% include machine.html id="ibm5160" %}
-
-<div>
-  <p>Font Bank 0</p>
-  <canvas id="ibm5160.videoEGA.font0" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
-  <p>Font Bank 1</p>
-  <canvas id="ibm5160.videoEGA.font1" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
-  <p>Font Bank 2</p>
-  <canvas id="ibm5160.videoEGA.font2" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
-  <p>Font Bank 3</p>
-  <canvas id="ibm5160.videoEGA.font3" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
-</div>
 
 ### Directory of IBM EGA Fantasy Land Demo
 
