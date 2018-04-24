@@ -1,0 +1,41 @@
+---
+layout: page
+title: IBM EGA Fantasy Land Demo with Debugger
+permalink: /disks/pcx86/diags/ibm/ega/debugger/
+machines:
+  - id: ibm5160
+    type: pcx86
+    debugger: true
+    config: /devices/pcx86/machine/5160/ega/256kb/color/debugger/machine.xml
+    state: state.json
+    autoMount:
+      A:
+        name: IBM EGA Fantasy Land Demo
+      B:
+        name: IBM EGA Fantasy Land Demo
+    autoTypeNone: $date\r$time\rFLAND\r
+---
+
+IBM EGA Fantasy Land Demo with Debugger
+---------------------------------------
+
+This configuration of the [IBM EGA Fantasy Land Demo](../) includes the PCjs Debugger and
+[Diagnostic Font Bank Displays](#pcjs-diagnostic-font-bank-displays).
+
+{% include machine.html id="ibm5160" %}
+
+### PCjs Diagnostic Font Bank Displays
+
+The next 4 windows are "live" views of the EGA's four font banks.  They were helpful when I was working on PCjs programmable
+font support, and they still provide a nice visual insight into the active fonts and colors used by Fantasy Land and the EGA.
+
+<div>
+  <p>Font Bank 0</p>
+  <canvas id="ibm5160.videoEGA.font0" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
+  <p>Font Bank 1</p>
+  <canvas id="ibm5160.videoEGA.font1" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
+  <p>Font Bank 2</p>
+  <canvas id="ibm5160.videoEGA.font2" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
+  <p>Font Bank 3</p>
+  <canvas id="ibm5160.videoEGA.font3" class="pcx86-video-diagnostic" width="1024" height="512" style="width:100%;background-color:black;"></canvas>
+</div>
