@@ -5,7 +5,7 @@ permalink: /pubs/pc/reference/ibm/
 ---
 
 IBM PC Reference Manuals
----
+------------------------
 
 * [IBM 5150](5150/)
 * [IBM 5160](5160/)

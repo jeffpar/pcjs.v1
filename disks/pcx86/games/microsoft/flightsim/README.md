@@ -5,7 +5,7 @@ permalink: /disks/pcx86/games/microsoft/flightsim/
 ---
 
 Microsoft Flight Simulator
----
+--------------------------
 
 ### Directory of MS Flight Simulator (1984)
 

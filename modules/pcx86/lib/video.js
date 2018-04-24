@@ -105,6 +105,75 @@ if (NODE) {
  * Color Display).  P3 can switch all the I/O ports from 0x3nn to 0x2nn; the default is 0x3nn, and
  * that's the only port range the EGA ROM supports as well.
  *
+ * For quick reference, IBM EGA register values for the standard EGA modes, from pages 63-68 of the
+ * "IBM Enhanced Graphics Adapter" (http://minuszerodegrees.net/oa/OA - IBM Enhanced Graphics Adapter.pdf).
+ *
+ * WARNING: Some of these value are not programmed exactly as-is; for example, the CURSCANB values must
+ * be adjusted by +1 in most cases, due to an EGA idiosyncrasy that IBM may not have originally intended.
+ *
+ *      INT 0x10 Mode Requested:    00  01  02  03  04  05  06  07  0D  0E  0F  10  0F^ 10^ 00* 01* 02* 03*
+ *
+ *      BIOSMODE:                   01  01  03  03  04  04  06  07  0D  0E  0F  10  0F  10  01  01  03  03
+ *      CRTC[0x00]: HTOTAL          37  37  70  70  37  37  70  60  37  70  60  5B  60  5B  2D  2D  5B  5B
+ *      CRTC[0x01]: HDEND           27  27  4F  4F  27  27  4F  4F  27  4F  4F  4F  4F  4F  27  27  4F  4F
+ *      CRTC[0x02]: HBSTART         2D  2D  5C  %C  2D  2D  59  56  2D  56  56  53  56  53  2B  2B  53  53
+ *      CRTC[0x03]: HBEND           37  37  2F  2F  37  37  2D  3A  37  2D  1A  17  3A  37  2D  2D  37  37
+ *      CRTC[0x04]: HRSTART         31  31  5F  5F  30  30  5E  51  30  5E  50  50  50  52  28  28  51  51
+ *      CRTC[0x05]: HREND           15  15  07  07  14  14  06  60  14  06  E0  BA  60  00  6D  6D  5B  5B
+ *      CRTC[0x06]: VTOTAL          04  04  04  04  04  04  04  70  04  04  70  6C  70  6C  6C  6C  6C  6C
+ *      CRTC[0x07]: OVERFLOW        11  11  11  11  11  11  11  1F  11  11  1F  1F  1F  1F  1F  1F  1F  1F
+ *      CRTC[0x08]: PRESCAN         00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *      CRTC[0x09]: MAXSCAN         07  07  07  07  01  01  01  0D  00  00  00  00  00  00  0D  0D  0D  0D
+ *      CRTC[0x0A]: CURSCAN         06  06  06  06  00  00  00  0B  00  00  00  00  00  00  0B  0B  0B  0B
+ *      CRTC[0x0B]: CURSCANB        07  07  07  07  00  00  00  0C  00  00  00  00  00  00  0C  0C  0C  0C
+ *      CRTC[0x0C]: STARTHI         --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --
+ *      CRTC[0x0D]: STARTLO         --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --
+ *      CRTC[0x0E]: CURSORHI        --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --
+ *      CRTC[0x0F]: CURSORLO        --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --
+ *      CRTC[0x10]: VRSTART         E1  E1  E1  E1  E1  E1  E0  5E  E1  E0  5E  5E  5E  5E  5E  5E  5E  5E
+ *      CRTC[0x11]: VREND           24  24  24  24  24  24  23  2E  24  23  2E  2B  2E  2B  2B  2B  2B  2B
+ *      CRTC[0x12]: VDEND           C7  C7  C7  C7  C7  C7  C7  5D  C7  C7  5D  5D  5D  5D  5D  5D  5D  5D
+ *      CRTC[0x13]: OFFSET          14  14  28  28  14  14  28  28  14  28  14  14  28  28  14  14  28  28
+ *      CRTC[0x14]: UNDERLINE       08  08  08  08  00  00  00  0D  00  00  0D  0F  0D  0F  0F  0F  0F  0F
+ *      CRTC[0x15]: VBSTART         E0  E0  E0  E0  E0  E0  DF  5E  E0  DF  5E  5F  5E  5F  5E  5E  5E  5E
+ *      CRTC[0x16]: VBEND           F0  F0  F0  F0  F0  F0  EF  6E  F0  EF  6E  0A  6E  0A  0A  0A  0A  0A
+ *      CRTC[0x17]: MODECTRL        A3  A3  A3  A3  A2  A2  C2  A3  E3  E3  8B  8B  E3  E3  A3  A3  A3  A3
+ *      CRTC[0x18]: LINECOMP        FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF
+ *       GRC[0x00]: SRESET          00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x01]: ESRESET         00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x02]: COLORCOMP       00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x03]: DATAROT         00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x04]: READMAP         00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x05]: MODE            10  10  10  10  30  30  00  10  00  00  10  10  00  00  10  10  10  10
+ *       GRC[0x06]: MISC            0E  0E  0E  0E  0F  0F  0D  0A  05  05  07  07  05  05  0E  0E  0E  0E
+ *       GRC[0x07]: COLORDC         00  00  00  00  00  00  00  00  0F  0F  0F  0F  0F  0F  00  00  00  00
+ *       GRC[0x08]: BITMASK         FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF
+ *       SEQ[0x00]: RESET           03  03  03  03  03  03  03  03  03  03  03  03  03  03  03  03  03  03
+ *       SEQ[0x01]: CLKMODE         0B  0B  01  01  0B  0B  01  00  0B  01  05  05  01  01  0B  0B  01  01
+ *       SEQ[0x02]: MAPMASK         03  03  03  03  03  03  01  03  0F  0F  0F  0F  0F  0F  03  03  03  03
+ *       SEQ[0x03]: CHARMAP         00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       SEQ[0x04]: MEMMODE         03  03  03  03  02  02  06  03  06  06  00  00  06  06  03  03  03  03
+ *       ATC[0x00]: PAL00           00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       ATC[0x01]: PAL01           01  01  01  01  13  13  17  08  01  01  08  01  08  01  01  01  01  01
+ *       ATC[0x02]: PAL02           02  02  02  02  15  15  17  08  02  02  00  00  00  02  02  02  02  02
+ *       ATC[0x03]: PAL03           03  03  03  03  17  17  17  08  03  03  00  00  00  03  03  03  03  03
+ *       ATC[0x04]: PAL04           04  04  04  04  02  02  17  08  04  04  18  04  18  04  04  04  04  04
+ *       ATC[0x05]: PAL05           05  05  05  05  04  04  17  08  05  05  18  07  18  05  05  05  05  05
+ *       ATC[0x06]: PAL06           06  06  06  06  06  06  17  08  06  06  00  00  00  06  14  14  14  14
+ *       ATC[0x07]: PAL07           07  07  07  07  07  07  17  08  07  07  00  00  00  07  07  07  07  07
+ *       ATC[0x08]: PAL08           10  10  10  10  10  10  17  10  10  10  00  00  00  38  38  38  38  38
+ *       ATC[0x09]: PAL09           11  11  11  11  11  11  17  18  11  11  08  01  08  39  39  39  39  39
+ *       ATC[0x0A]: PAL0A           12  12  12  12  12  12  17  18  12  12  00  00  00  3A  3A  3A  3A  3A
+ *       ATC[0x0B]: PAL0B           13  13  13  13  13  13  17  18  13  13  00  00  00  3B  3B  3B  3B  3B
+ *       ATC[0x0C]: PAL0C           14  14  14  14  14  14  17  18  14  14  00  04  00  3C  3C  3C  3C  3C
+ *       ATC[0x0D]: PAL0D           15  15  15  15  15  15  17  18  15  15  18  07  18  3D  3D  3D  3D  3D
+ *       ATC[0x0E]: PAL0E           16  16  16  16  16  16  17  18  16  16  00  00  00  3E  3E  3E  3E  3E
+ *       ATC[0x0F]: PAL0F           17  17  17  17  17  17  18  17  17  00  00  00  3F  3F  3F  3F  3F  3F
+ *       ATC[0x10]: MODE            08  08  08  08  01  01  01  0E  01  01  0B  0B  0B  01  08  08  08  08
+ *       ATC[0x11]: OVERSCAN        00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *       ATC[0x12]: PLANES          0F  0F  0F  0F  03  03  01  0F  0F  0F  05  05  05  0F  0F  0F  0F  0F
+ *       ATC[0x13]: HPAN            00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
+ *
  * VGA Support
  * -----------
  *
@@ -220,70 +289,68 @@ if (NODE) {
  *
  * Also, for quick reference, IBM VGA register values for the standard VGA modes (from http://www.pcjs.org/blog/2015/06/01/):
  *
- *      INT 0x10 Mode Requested:    0x00 0x01 0x02 0x03 0x04 0x05 0x06 0x0D 0x0E 0x10 0x12 0x13
+ *      INT 0x10 Mode Requested:    00  01  02  03  04  05  06  0D  0E  10  12  13
  *
- *      BIOSMODE:                   0x01 0x01 0x03 0x03 0x04 0x04 0x06 0x0D 0x0E 0x10 0x12 0x13
- *      CRTC[0x00]: HTOTAL          0x2D 0x2D 0x5F 0x5F 0x2D 0x2D 0x5F 0x2D 0x5F 0x5F 0x5F 0x5F
- *      CRTC[0x01]: HDEND           0x27 0x27 0x4F 0x4F 0x27 0x27 0x4F 0x27 0x4F 0x4F 0x4F 0x4F
- *      CRTC[0x02]: HBSTART         0x28 0x28 0x50 0x50 0x28 0x28 0x50 0x28 0x50 0x50 0x50 0x50
- *      CRTC[0x03]: HBEND           0x90 0x90 0x82 0x82 0x90 0x90 0x82 0x90 0x82 0x82 0x82 0x82
- *      CRTC[0x04]: HRSTART         0x2B 0x2B 0x55 0x55 0x2B 0x2B 0x54 0x2B 0x54 0x54 0x54 0x54
- *      CRTC[0x05]: HREND           0xA0 0xA0 0x81 0x81 0x80 0x80 0x80 0x80 0x80 0x80 0x80 0x80
- *      CRTC[0x06]: VTOTAL          0xBF 0xBF 0xBF 0xBF 0xBF 0xBF 0xBF 0xBF 0xBF 0xBF 0x0B 0xBF
- *      CRTC[0x07]: OVERFLOW        0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x3E 0x1F
- *      CRTC[0x08]: PRESCAN         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x09]: MAXSCAN         0x4F 0x4F 0x4F 0x4F 0xC1 0xC1 0xC1 0xC0 0xC0 0x40 0x40 0x41
- *      CRTC[0x0A]: CURSCAN         0x0D 0x0D 0x0D 0x0D 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0B]: CURSCANB        0x0E 0x0E 0x0E 0x0E 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0C]: STARTHI         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0D]: STARTLO         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0E]: CURSORHI        0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x00
- *      CRTC[0x0F]: CURSORLO        0x19 0x19 0x41 0x41 0x19 0x19 0x41 0x19 0x41 0x41 0xE1 0xA2
- *      CRTC[0x10]: VRSTART         0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x83 0xEA 0x9C
- *      CRTC[0x11]: VREND           0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x85 0x8C 0x8E
- *      CRTC[0x12]: VDEND           0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x5D 0xDF 0x8F
- *      CRTC[0x13]: OFFSET          0x14 0x14 0x28 0x28 0x14 0x14 0x28 0x14 0x28 0x28 0x28 0x28
- *      CRTC[0x14]: UNDERLINE       0x1F 0x1F 0x1F 0x1F 0x00 0x00 0x00 0x00 0x00 0x0F 0x00 0x40
- *      CRTC[0x15]: VBSTART         0x96 0x96 0x96 0x96 0x96 0x96 0x96 0x96 0x96 0x63 0xE7 0x96
- *      CRTC[0x16]: VBEND           0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xBA 0x04 0xB9
- *      CRTC[0x17]: MODECTRL        0xA3 0xA3 0xA3 0xA3 0xA2 0xA2 0xC2 0xE3 0xE3 0xE3 0xE3 0xA3
- *      CRTC[0x18]: LINECOMP        0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF
- *       GRC[0x00]: SRESET          0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       GRC[0x01]: ESRESET         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       GRC[0x02]: COLORCOMP       0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       GRC[0x03]: DATAROT         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       GRC[0x04]: READMAP         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       GRC[0x05]: MODE            0x10 0x10 0x10 0x10 0x30 0x30 0x00 0x00 0x00 0x00 0x00 0x40
- *       GRC[0x06]: MISC            0x0E 0x0E 0x0E 0x0E 0x0F 0x0F 0x0D 0x05 0x05 0x05 0x05 0x05
- *       GRC[0x07]: COLORDC         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x0F 0x0F 0x0F 0x0F 0x0F
- *       GRC[0x08]: BITMASK         0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF
- *       SEQ[0x00]: RESET           0x03 0x03 0x03 0x03 0x03 0x03 0x03 0x03 0x03 0x03 0x03 0x03
- *       SEQ[0x01]: CLKMODE         0x08 0x08 0x00 0x00 0x09 0x09 0x01 0x09 0x01 0x01 0x01 0x01
- *       SEQ[0x02]: MAPMASK         0x03 0x03 0x03 0x03 0x03 0x03 0x01 0x0F 0x0F 0x0F 0x0F 0x0F
- *       SEQ[0x03]: CHARMAP         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       SEQ[0x04]: MEMMODE         0x03 0x03 0x03 0x03 0x02 0x02 0x06 0x06 0x06 0x06 0x06 0x0E
- *       ATC[0x00]: PAL00           0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       ATC[0x01]: PAL01           0x01 0x01 0x01 0x01 0x13 0x13 0x17 0x01 0x01 0x01 0x01 0x01
- *       ATC[0x02]: PAL02           0x02 0x02 0x02 0x02 0x15 0x15 0x17 0x02 0x02 0x02 0x02 0x02
- *       ATC[0x03]: PAL03           0x03 0x03 0x03 0x03 0x17 0x17 0x17 0x03 0x03 0x03 0x03 0x03
- *       ATC[0x04]: PAL04           0x04 0x04 0x04 0x04 0x02 0x02 0x17 0x04 0x04 0x04 0x04 0x04
- *       ATC[0x05]: PAL05           0x05 0x05 0x05 0x05 0x04 0x04 0x17 0x05 0x05 0x05 0x05 0x05
- *       ATC[0x06]: PAL06           0x14 0x14 0x14 0x14 0x06 0x06 0x17 0x06 0x06 0x14 0x14 0x06
- *       ATC[0x07]: PAL07           0x07 0x07 0x07 0x07 0x07 0x07 0x17 0x07 0x07 0x07 0x07 0x07
- *       ATC[0x08]: PAL08           0x38 0x38 0x38 0x38 0x10 0x10 0x17 0x10 0x10 0x38 0x38 0x08
- *       ATC[0x09]: PAL09           0x39 0x39 0x39 0x39 0x11 0x11 0x17 0x11 0x11 0x39 0x39 0x09
- *       ATC[0x0A]: PAL0A           0x3A 0x3A 0x3A 0x3A 0x12 0x12 0x17 0x12 0x12 0x3A 0x3A 0x0A
- *       ATC[0x0B]: PAL0B           0x3B 0x3B 0x3B 0x3B 0x13 0x13 0x17 0x13 0x13 0x3B 0x3B 0x0B
- *       ATC[0x0C]: PAL0C           0x3C 0x3C 0x3C 0x3C 0x14 0x14 0x17 0x14 0x14 0x3C 0x3C 0x0C
- *       ATC[0x0D]: PAL0D           0x3D 0x3D 0x3D 0x3D 0x15 0x15 0x17 0x15 0x15 0x3D 0x3D 0x0D
- *       ATC[0x0E]: PAL0E           0x3E 0x3E 0x3E 0x3E 0x16 0x16 0x17 0x16 0x16 0x3E 0x3E 0x0E
- *       ATC[0x0F]: PAL0F           0x3F 0x3F 0x3F 0x3F 0x17 0x17 0x17 0x17 0x17 0x3F 0x3F 0x0F
- *       ATC[0x10]: MODE            0x0C 0x0C 0x0C 0x0C 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x41
- *       ATC[0x11]: OVERSCAN        0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *       ATC[0x12]: PLANES          0x0F 0x0F 0x0F 0x0F 0x03 0x03 0x01 0x0F 0x0F 0x0F 0x0F 0x0F
- *       ATC[0x13]: HPAN            0x08 0x08 0x08 0x08 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *
- * TODO: Build a similar table for the IBM EGA, and then work on rationalizing the mode detection logic in checkMode().
+ *      BIOSMODE:                   01  01  03  03  04  04  06  0D  0E  10  12  13
+ *      CRTC[0x00]: HTOTAL          2D  2D  5F  5F  2D  2D  5F  2D  5F  5F  5F  5F
+ *      CRTC[0x01]: HDEND           27  27  4F  4F  27  27  4F  27  4F  4F  4F  4F
+ *      CRTC[0x02]: HBSTART         28  28  50  50  28  28  50  28  50  50  50  50
+ *      CRTC[0x03]: HBEND           90  90  82  82  90  90  82  90  82  82  82  82
+ *      CRTC[0x04]: HRSTART         2B  2B  55  55  2B  2B  54  2B  54  54  54  54
+ *      CRTC[0x05]: HREND           A0  A0  81  81  80  80  80  80  80  80  80  80
+ *      CRTC[0x06]: VTOTAL          BF  BF  BF  BF  BF  BF  BF  BF  BF  BF  0B  BF
+ *      CRTC[0x07]: OVERFLOW        1F  1F  1F  1F  1F  1F  1F  1F  1F  1F  3E  1F
+ *      CRTC[0x08]: PRESCAN         00  00  00  00  00  00  00  00  00  00  00  00
+ *      CRTC[0x09]: MAXSCAN         4F  4F  4F  4F  C1  C1  C1  C0  C0  40  40  41
+ *      CRTC[0x0A]: CURSCAN         0D  0D  0D  0D  00  00  00  00  00  00  00  00
+ *      CRTC[0x0B]: CURSCANB        0E  0E  0E  0E  00  00  00  00  00  00  00  00
+ *      CRTC[0x0C]: STARTHI         00  00  00  00  00  00  00  00  00  00  00  00
+ *      CRTC[0x0D]: STARTLO         00  00  00  00  00  00  00  00  00  00  00  00
+ *      CRTC[0x0E]: CURSORHI        01  01  01  01  01  01  01  01  01  01  01  00
+ *      CRTC[0x0F]: CURSORLO        19  19  41  41  19  19  41  19  41  41  E1  A2
+ *      CRTC[0x10]: VRSTART         9C  9C  9C  9C  9C  9C  9C  9C  9C  83  EA  9C
+ *      CRTC[0x11]: VREND           8E  8E  8E  8E  8E  8E  8E  8E  8E  85  8C  8E
+ *      CRTC[0x12]: VDEND           8F  8F  8F  8F  8F  8F  8F  8F  8F  5D  DF  8F
+ *      CRTC[0x13]: OFFSET          14  14  28  28  14  14  28  14  28  28  28  28
+ *      CRTC[0x14]: UNDERLINE       1F  1F  1F  1F  00  00  00  00  00  0F  00  40
+ *      CRTC[0x15]: VBSTART         96  96  96  96  96  96  96  96  96  63  E7  96
+ *      CRTC[0x16]: VBEND           B9  B9  B9  B9  B9  B9  B9  B9  B9  BA  04  B9
+ *      CRTC[0x17]: MODECTRL        A3  A3  A3  A3  A2  A2  C2  E3  E3  E3  E3  A3
+ *      CRTC[0x18]: LINECOMP        FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF
+ *       GRC[0x00]: SRESET          00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x01]: ESRESET         00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x02]: COLORCOMP       00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x03]: DATAROT         00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x04]: READMAP         00  00  00  00  00  00  00  00  00  00  00  00
+ *       GRC[0x05]: MODE            10  10  10  10  30  30  00  00  00  00  00  40
+ *       GRC[0x06]: MISC            0E  0E  0E  0E  0F  0F  0D  05  05  05  05  05
+ *       GRC[0x07]: COLORDC         00  00  00  00  00  00  00  0F  0F  0F  0F  0F
+ *       GRC[0x08]: BITMASK         FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF  FF
+ *       SEQ[0x00]: RESET           03  03  03  03  03  03  03  03  03  03  03  03
+ *       SEQ[0x01]: CLKMODE         08  08  00  00  09  09  01  09  01  01  01  01
+ *       SEQ[0x02]: MAPMASK         03  03  03  03  03  03  01  0F  0F  0F  0F  0F
+ *       SEQ[0x03]: CHARMAP         00  00  00  00  00  00  00  00  00  00  00  00
+ *       SEQ[0x04]: MEMMODE         03  03  03  03  02  02  06  06  06  06  06  0E
+ *       ATC[0x00]: PAL00           00  00  00  00  00  00  00  00  00  00  00  00
+ *       ATC[0x01]: PAL01           01  01  01  01  13  13  17  01  01  01  01  01
+ *       ATC[0x02]: PAL02           02  02  02  02  15  15  17  02  02  02  02  02
+ *       ATC[0x03]: PAL03           03  03  03  03  17  17  17  03  03  03  03  03
+ *       ATC[0x04]: PAL04           04  04  04  04  02  02  17  04  04  04  04  04
+ *       ATC[0x05]: PAL05           05  05  05  05  04  04  17  05  05  05  05  05
+ *       ATC[0x06]: PAL06           14  14  14  14  06  06  17  06  06  14  14  06
+ *       ATC[0x07]: PAL07           07  07  07  07  07  07  17  07  07  07  07  07
+ *       ATC[0x08]: PAL08           38  38  38  38  10  10  17  10  10  38  38  08
+ *       ATC[0x09]: PAL09           39  39  39  39  11  11  17  11  11  39  39  09
+ *       ATC[0x0A]: PAL0A           3A  3A  3A  3A  12  12  17  12  12  3A  3A  0A
+ *       ATC[0x0B]: PAL0B           3B  3B  3B  3B  13  13  17  13  13  3B  3B  0B
+ *       ATC[0x0C]: PAL0C           3C  3C  3C  3C  14  14  17  14  14  3C  3C  0C
+ *       ATC[0x0D]: PAL0D           3D  3D  3D  3D  15  15  17  15  15  3D  3D  0D
+ *       ATC[0x0E]: PAL0E           3E  3E  3E  3E  16  16  17  16  16  3E  3E  0E
+ *       ATC[0x0F]: PAL0F           3F  3F  3F  3F  17  17  17  17  17  3F  3F  0F
+ *       ATC[0x10]: MODE            0C  0C  0C  0C  01  01  01  01  01  01  01  41
+ *       ATC[0x11]: OVERSCAN        00  00  00  00  00  00  00  00  00  00  00  00
+ *       ATC[0x12]: PLANES          0F  0F  0F  0F  03  03  01  0F  0F  0F  0F  0F
+ *       ATC[0x13]: HPAN            08  08  08  08  00  00  00  00  00  00  00  00
  */
 
 /**
@@ -690,7 +757,7 @@ class Card extends Controller {
                 this.dbg.println(sName + ": " + Str.toHex(iReg, 2));
                 return;
             }
-            let i, cchMax = 17, s = "";
+            let i, s = "";
             let nRegs = (asRegs? asRegs.length : aRegs.length);
             for (i = 0; i < nRegs; i++) {
                 /*
@@ -699,10 +766,8 @@ class Card extends Controller {
                  */
                 let reg = (aRegs === this.regCRTData)? this.getCRTCReg(i) : aRegs[i];
                 if (s) s += '\n';
-                let sRegName = Str.pad((asRegs? asRegs[i] : sName.substr(1) + Str.toDec(i, 3)), cchMax);
-                let cchReg = (asRegs? (reg < 0x100? 2 : 4) : 6);
-                s += sName + "[" + Str.toHex(i, 2) + "]: " + sRegName + (i === iReg? '*' : ' ') + Str.toHex(reg, cchReg);
-                if (reg != null) s += " (" + reg + ".)";
+                let sRegName = (asRegs? asRegs[i] : sName.substr(1) + Str.toDec(i, 3));
+                s += Str.sprintf("%s[%02X]: %-12s %*X%s (%*d)", sName, i, sRegName, (asRegs? 4 : 6), reg, (i === iReg? '*' : ' '), (asRegs? 4 : 6), reg);
             }
             this.dbg.println(s);
         }
@@ -755,6 +820,7 @@ class Card extends Controller {
             if (this.nCard >= Video.CARD.EGA) {
                 this.dbg.println(" LATCHES: " + Str.toHex(this.latches));
                 this.dbg.println("  ACCESS: " + Str.toHex(this.nAccess, 4));
+                this.dbg.println("  PLANE2: " + Str.toHex(this.bitsDirtyBanks, 2));
                 this.dbg.println("Use 'd video [addr]' to dump video memory");
                 /*
                  * There are few more EGA regs we could dump, like GRCPos1, GRCPos2, but does anyone care?
@@ -1861,7 +1927,7 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
     if (delta) {
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
-        // card.nDirtyPlanes |= delta;          // we no longer track dirty planes, just dirty font banks
+        // card.bitsDirtyPlanes |= delta;       // we no longer track dirty planes, just dirty font banks
         if (delta & 0x00ff0000) {               // if any plane 2 bits were modified, mark the appropriate font bank dirty
             let bitDirtyBank = (1 << ((idw >> 13) & 7));
             if (!(card.bitsDirtyBanks & bitDirtyBank)) {
@@ -2342,6 +2408,7 @@ class Video extends Component {
 
         let video = this, sProp, sEvent;
         this.fGecko = Web.isUserAgent("Gecko/");
+        this.bindingsExternal = [];
 
         /*
          * This records the model specified (eg, "mda", "cga", "ega", "vga" or "" if none specified);
@@ -2353,7 +2420,7 @@ class Video extends Component {
 
         this.nCard = aModelDefaults[0];
         this.nCardFont = 0;
-        this.nActiveFont = 0;
+        this.nActiveFont = this.nAlternateFont = 0;
         this.nFontSelect = 0;                       // current set of selectable logical fonts
         this.cbMemory = parmsVideo['memory'] || 0;  // zero means fallback to the cardSpec's default size
         this.sSwitches = parmsVideo['switches'];
@@ -2653,11 +2720,15 @@ class Video extends Component {
          * gets focus and receives input.
          */
         this.kbd = cmp.getMachineComponent("Keyboard");
-        if (this.kbd && this.canvasScreen) {
-            for (let s in this.bindings) {
-                if (s.indexOf("lock") > 0) this.kbd.setBinding("led", s, this.bindings[s]);
-            }
+        if (this.kbd && this.inputScreen) {
             this.kbd.setBinding(this.inputTextArea? "textarea" : "canvas", "screen", this.inputScreen);
+        }
+
+        this.panel = cmp.getMachineComponent("Panel");
+        for (let i = 0; i < this.bindingsExternal.length; i++) {
+            let binding = this.bindingsExternal[i];
+            if (this.kbd && this.kbd.setBinding(...binding)) continue;
+            if (this.panel && this.panel.setBinding(...binding)) continue;
         }
 
         this.bEGASwitches = 0x09;   // our default "switches" setting (see aEGAMonitorSwitches)
@@ -2763,6 +2834,8 @@ class Video extends Component {
                 return true;
 
             default:
+                this.bindingsExternal.push([sHTMLType, sBinding, control, sValue]);
+                delete this.bindings[sBinding];
                 break;
             }
         }
@@ -3921,7 +3994,7 @@ class Video extends Component {
     buildFont(fRebuild = false)
     {
         let fChanges = false;
-        this.nActiveFont = this.nCardFont;
+        this.nActiveFont = this.nAlternateFont = this.nCardFont;
 
         /*
          * There's no point building fonts unless we're in a windowed (non-command-line) environment, we're
@@ -3985,6 +4058,7 @@ class Video extends Component {
                     }
                     this.nFontSelect = this.getSelectedFonts();
                     this.nActiveFont = this.nCardFont + (this.nFontSelect & 0xff);
+                    this.nAlternateFont = this.nCardFont + (this.nFontSelect >> 8);
                 }
                 if (offData != null) {
                     /*
@@ -4001,34 +4075,9 @@ class Video extends Component {
                         let fNewData = !!(bitsBanks & (0x1 << iBank));
                         if (this.createFont(this.nCardFont + iFont, cxChar, cyChar, offData, 0, abFontData, fNewData, aRGBColors, aColorMap)) {
                             fChanges = true;
-                            if (abFontData) continue;
-                            /*
-                             * Since a programmable font was changed, we need to update the aFontDiff array.  For the EGA,
-                             * that array looks like this:
-                             *
-                             *      [0]: diffs between font 1 and 0     0 = 1 * (1 - 1) / 2
-                             *      [1]: diffs between font 2 and 0     1 = 2 * (2 - 1) / 2
-                             *      [2]: diffs between font 2 and 1
-                             *      [3]: diffs between font 3 and 0     3 = 3 * (3 - 1) / 2
-                             *      [4]: diffs between font 3 and 1
-                             *      [5]: diffs between font 3 and 2
-                             *
-                             * The VGA continues that progression:
-                             *
-                             *      [6]: diffs between font 4 and 0     6 = 4 * (4 - 1) / 2
-                             *      [7]: diffs between font 4 and 1
-                             *      [8]: diffs between font 4 and 2
-                             *      [9]: diffs between font 4 and 3
-                             *      ...
-                             *
-                             * So for a given logical font number (0-3 for the EGA or 0-7 for the VGA), the starting index of
-                             * "differable" fonts is n * (n - 1) / 2.
-                             */
-                            if (iFont) {
-                                let iDiff = (iFont * (iFont - 1)) >> 1;
-                                for (let iFontDiffer = 0; iFontDiffer < iFont; iFontDiffer++) {
-                                    this.createFontDiff(iDiff++, iFont, iFontDiffer, cyChar);
-                                }
+                            if (abFontData || !iFont) continue;
+                            for (let iFontPrev = 0; iFontPrev < iFont; iFontPrev++) {
+                                this.createFontDiff(iFont, iFontPrev, cyChar);
                             }
                         }
                     }
@@ -4297,32 +4346,78 @@ class Video extends Component {
     }
 
     /**
-     * createFontDiff(iDiff, iFont, iFontDiffer, cyChar, cyLimit)
+     * createFontDiff(iFont, iFontPrev, cyChar, cyLimit)
+     *
+     * Since a programmable font was changed, we need to update the aFontDiff array.  For the EGA,
+     * that array looks like this:
+     *
+     *      [0]: diffs between font 1 and 0     0 = 1 * (1 - 1) / 2
+     *      [1]: diffs between font 2 and 0     1 = 2 * (2 - 1) / 2
+     *      [2]: diffs between font 2 and 1
+     *      [3]: diffs between font 3 and 0     3 = 3 * (3 - 1) / 2
+     *      [4]: diffs between font 3 and 1
+     *      [5]: diffs between font 3 and 2
+     *
+     * The VGA continues that progression:
+     *
+     *      [6]: diffs between font 4 and 0     6 = 4 * (4 - 1) / 2
+     *      [7]: diffs between font 4 and 1
+     *      [8]: diffs between font 4 and 2
+     *      [9]: diffs between font 4 and 3
+     *      ...
+     *
+     * So for a given logical font number (0-3 for the EGA or 0-7 for the VGA), the starting index of
+     * "differable" fonts is n * (n - 1) / 2.
      *
      * @this {Video}
-     * @param {number} iDiff (aFontDiff index)
      * @param {number} iFont
-     * @param {number} iFontDiffer
+     * @param {number} iFontPrev
      * @param {number} cyChar (height of every character in both fonts)
      * @param {number} [cyLimit] (default is 32)
      */
-    createFontDiff(iDiff, iFont, iFontDiffer, cyChar, cyLimit = 32)
+    createFontDiff(iFont, iFontPrev, cyChar, cyLimit = 32)
     {
+        this.assert(iFont);
+        let i = ((iFont * (iFont - 1)) >> 1) + iFontPrev;
         let adwMemory = this.cardEGA.adwMemory;
-        let aDiff = this.aFontDiff[iDiff] || new Array(256);
+        let aDiff = this.aFontDiff[i] || new Array(256);
         let iBank = (iFont << 1) - (iFont < 4? 0 : 7), offData = iBank * 8192;
-        let iBankDiffer = (iFontDiffer << 1) - (iFontDiffer < 4? 0 : 7), offDataDiffer = iBankDiffer * 8192;
+        let iBankPrev = (iFontPrev << 1) - (iFontPrev < 4? 0 : 7), offDataPrev = iBankPrev * 8192;
         for (let iChar = 0; iChar < 256; iChar++) {
             aDiff[iChar] = 0;
-            let offChar = offData + iChar * cyLimit, offCharDiffer = offDataDiffer + iChar * cyLimit;
+            let offChar = offData + iChar * cyLimit, offCharPrev = offDataPrev + iChar * cyLimit;
             for (let y = 0; y < cyChar; y++) {
-                if (((adwMemory[offChar++] >> 16) & 0xff) !== ((adwMemory[offCharDiffer++] >> 16) & 0xff)) {
+                if (((adwMemory[offChar++] >> 16) & 0xff) !== ((adwMemory[offCharPrev++] >> 16) & 0xff)) {
                     aDiff[iChar] = -1;
                     break;
                 }
             }
         }
-        this.aFontDiff[iDiff] = aDiff;
+        this.aFontDiff[i] = aDiff;
+    }
+
+    /**
+     * getFontDiff(iFont, iFontPrev)
+     *
+     * Unlike createFontDiff(), where iFontPrev is guaranteed to be less than iFont, that may not be true
+     * for getFontDiff(), so we must swap them if iFont < iFontPrev.
+     *
+     * @this {Video}
+     * @param {number} iFont
+     * @param {number} iFontPrev
+     * @return {Array.<number>}
+     */
+    getFontDiff(iFont, iFontPrev)
+    {
+        let i;
+        if (iFont == iFontPrev) return [];
+        if (iFont < iFontPrev) {
+            i = iFont;
+            iFont = iFontPrev;
+            iFontPrev = i;
+        }
+        i = ((iFont * (iFont - 1)) >> 1) + iFontPrev;
+        return this.aFontDiff[i];
     }
 
     /**
@@ -4547,12 +4642,20 @@ class Video extends Component {
             this.cyCursor = bCursorSize;
             this.cyCursorWrap = bCursorWrap;
             /*
-             * TODO: Consider our redraw options for cursor shape changes, because invalidating cBlinkVisible won't
-             * have the desired effect if the cursor is still in the same location.  The only existing mechanism for
-             * making this happen would be to invalidate the cell cache (reset iCellCacheValid), which is rather drastic.
-             * Note that we don't have to worry about this if the cursor has ALSO just moved (ie, this.cBlinkVisible < 0).
+             * The best redraw option for cursor shape changes used to be invalidating the cell cache, since merely
+             * invalidating cBlinkVisible wouldn't have the desired effect if the cursor was still in the same location.
+             * However, that option was rather drastic.  If the cursor had ALSO just moved (ie, this.cBlinkVisible < 0),
+             * we didn't have to worry about it, so we could at least be more selective about when to invalidate the cache:
+             *
+             *      if (this.cBlinkVisible >= 0) this.iCellCacheValid = 0;
+             *
+             * But now we have the option of invalidating just a single cell (and marking the cache as "partially valid"),
+             * so that's what we do.  Granted, a lot of hand-wringing over an uncommon operation, but that's how we roll.
              */
-            // if (this.cBlinkVisible >= 0) this.iCellCacheValid = 0;
+            if (this.iCellCacheValid && this.iCellCursor >= 0 && this.iCellCursor < this.aCellCache.length) {
+                this.aCellCache[this.iCellCursor] = -1;
+                this.iCellCacheValid = 1;
+            }
         }
 
         this.cyCursorCell = bCursorMax + 1;
@@ -4768,10 +4871,11 @@ class Video extends Component {
      */
     setDimensions()
     {
-        this.nCardFont = this.nActiveFont = 0;
+        this.nCardFont = this.nActiveFont = this.nAlternateFont = 0;
         this.nCols = this.nColsDefault;
         this.nRows = this.nRowsDefault;
-        this.nCellsPerWord = Video.aModeParms[Video.MODE.MDA_80X25][2];
+        this.nPointsPerCell = Video.aModeParms[Video.MODE.MDA_80X25][2];
+        this.nPointsPerByte = Video.aModeParms[Video.MODE.MDA_80X25][3];
 
         let cbPadding = 0, cxCell = 0, cyCell = 0;
         let modeParms = Video.aModeParms[this.nMode];
@@ -4779,9 +4883,10 @@ class Video extends Component {
 
             this.nCols = modeParms[0];
             this.nRows = modeParms[1];
-            this.nCellsPerWord = modeParms[2];
-            cbPadding = modeParms[3];       // undefined for EGA/VGA graphics modes only
-            this.nCardFont = modeParms[4];  // this will be undefined for all graphics modes
+            this.nPointsPerCell = modeParms[2];
+            this.nPointsPerByte = modeParms[3];
+            cbPadding = modeParms[4];       // undefined for EGA/VGA graphics modes only
+            this.nCardFont = modeParms[5];  // this will be undefined for all graphics modes
 
             if (this.nCardFont) {
                 /*
@@ -4790,8 +4895,8 @@ class Video extends Component {
                  * to match the card.
                  */
                 if (this.nCard > this.nCardFont) this.nCardFont = this.nCard;
-                this.buildFont();
-                let font = this.aFonts[this.nCardFont];
+                this.buildFont();           // this also updates nActiveFont and nAlternateFont
+                let font = this.aFonts[this.nActiveFont];
                 if (font) {
                     cxCell = font.cxCell;
                     cyCell = font.cyCell;
@@ -4811,7 +4916,7 @@ class Video extends Component {
         }
 
         this.nCells = (this.nCols * this.nRows)|0;
-        this.nCellCache = (this.nCells / this.nCellsPerWord)|0;
+        this.nCellCache = (this.nCells / this.nPointsPerCell)|0;
         this.cbScreen = this.nCellCache;
         this.cbSplit = 0;
 
@@ -4853,7 +4958,7 @@ class Video extends Component {
          * we'll set image smoothing to whatever value was provided for ALL modes -- assuming the browser supports it.
          */
         if (this.sSmoothing) {
-            this.contextScreen[this.sSmoothing] = (this.fSmoothing == null? (this.nCardFont? true : false) : this.fSmoothing);
+            this.contextScreen[this.sSmoothing] = (this.fSmoothing == null? !!this.nCardFont : this.fSmoothing);
         }
 
         /*
@@ -5151,15 +5256,15 @@ class Video extends Component {
             this.fRGBValid = false;
 
             /*
-             * On an EGA, it's CRITICAL that a reset() invalidate cardActive, to ensure that the code below
-             * releases the previous video buffer and installs a new one, even if there was no change in the
-             * video buffer address or size, because otherwise the Memory blocks installed at the video buffer
-             * address may still be using blocks of the EGA's previous memory buffer.
+             * It's CRITICAL that a reset() invalidate cardActive, to ensure that the code below releases the
+             * previous video buffer and installs a new one, even if there was no change in the video buffer
+             * address or size, because otherwise memory blocks installed at the video buffer address may still
+             * be using blocks of the previous memory buffer.
              *
-             * When the EGA is reinitialized, a new memory buffer (adwMemory) is allocated (see initEGA()), and
-             * this is where the mapping of that EGA memory buffer to the video buffer occurs.  Other cards
-             * (MDA or CGA) don't allocate/manage their own memory buffer, but even then, it's still a good idea
-             * to always force this operation (eg, in case a switch setting changed the active video card).
+             * When an EGA is reinitialized, a new memory buffer (adwMemory) is allocated (see initEGA()), and
+             * this is where the mapping of that EGA memory buffer to the video buffer occurs.  Even if a card
+             * (MDA or CGA) never reallocates its memory buffer, it's still a good idea to always force this operation
+             * (eg, in case a switch setting changed the active video card).
              */
             let card = this.cardActive || (nMode == Video.MODE.MDA_80X25? this.cardMono : this.cardColor);
 
@@ -5224,7 +5329,7 @@ class Video extends Component {
             }
 
             this.setDimensions();
-            this.invalidateCellCache(true);
+            this.invalidateCellCache();
 
             if (fReset) this.updateScreen();
         }
@@ -5257,8 +5362,8 @@ class Video extends Component {
      * Initializes the contents of our internal cell cache.
      *
      * TODO: Consider changing this to a cache of RGB values, so that when the buffer is merely being color-cycled,
-     * we don't have to update the entire screen.  This will also allow invalidateCellCache() to honor the fModified
-     * flag, bypassing initCellCache() when it is false.
+     * we don't have to update the entire screen.  This would also allow invalidateCellCache() to honor the fColors
+     * flag and bypass initCellCache() when it's set.
      *
      * @this {Video}
      * @return {number}
@@ -5275,50 +5380,57 @@ class Video extends Component {
     }
 
     /**
-     * invalidateCellCache(fModified, iFont, iFontPrev)
+     * invalidateCellCache(fColors, nFontSelect, nFontPrev)
      *
-     * Ensure that the next updateScreen() will update every cell; intended for situations where the entire screen needs
-     * to be redrawn, even though the underlying data in the video buffer has not changed (and therefore cleanMemory() will
-     * report that the buffer is still clean, and/or all the video data still matches everything in our cell cache).
-     *
-     * For example, when the palette is being cycled, the screen is being panned, the page is being flipped, etc.
+     * Ensures the next updateScreen() will examine and update every cell as needed, even if the underlying
+     * data in the video buffer has not changed (eg, when the screen is being panned, the page is being flipped,
+     * the palette is being cycled, the font is being changed, etc).
      *
      * @this {Video}
-     * @param {boolean} [fModified] (true if the buffer may have been modified, false if only font(s) or color(s) may have changed)
-     * @param {number} [iFont]
-     * @param {number} [iFontPrev]
+     * @param {boolean} [fColors] (true if color(s) *may* have changed)
+     * @param {number} [nFontSelect] (set along with nFontPrev if font(s) *may* have changed)
+     * @param {number} [nFontPrev]
      * @return {number} (number of cells invalidated; used for diagnostic purposes only)
      */
-    invalidateCellCache(fModified, iFont, iFontPrev)
+    invalidateCellCache(fColors, nFontSelect, nFontPrev)
     {
-        if (this.iCellCacheValid && iFont != undefined) {
+        if (this.iCellCacheValid && nFontSelect != undefined) {
             /*
              * We want to do a "smart" (aka selective) invalidation of the cell cache, invalidating only
              * those cells containing characters whose current font data differs from the previous font data.
              */
-            let i, nCells = 0;
-            if (iFont == iFontPrev) return 0;
-            if (iFont < iFontPrev) {
-                i = iFont;
-                iFont = iFontPrev;
-                iFontPrev = i;
-            }
-            let iDiff = ((iFont * (iFont - 1)) >> 1) + iFontPrev;
+            if (nFontSelect == nFontPrev) return 0;
             let aCellCache = this.aCellCache;
-            let aFontDiff = this.aFontDiff[iDiff];
-            if (aCellCache && aFontDiff) {
-                for (i = 0; i < aCellCache.length; i++) {
+            if (aCellCache) {
+                let nCells = 0;
+                /*
+                 * getFontDiff() returns an empty array if the current and previous fonts are the same, which
+                 * is OK for the code below, because using the "|" operator with undefined values coerces them
+                 * to zero, resulting in no change.  If BOTH FontDiff arrays were empty, then we could skip this
+                 * code altogether, but we've already eliminated that possibility above, when we checked for
+                 * nFontSelect == nFontPrev, so at least one of these arrays will NOT be empty.
+                 */
+                let aFontDiff0 = this.getFontDiff(nFontSelect & 0xff, nFontPrev & 0xff);
+                let aFontDiff1 = this.getFontDiff(nFontSelect >> 8, nFontPrev >> 8);
+                for (let i = 0; i < aCellCache.length; i++) {
                     let data = aCellCache[i];
                     if (data >= 0) {
-                        aCellCache[i] |= aFontDiff[data & 0xff];
-                        if (DEBUG) nCells += (aFontDiff[data & 0xff] < 0? 1 : 0);
+                        /*
+                         * The font referenced by any given cell data *usually* only depends on low 8 bits (ie, the
+                         * character data), but when the active and alternate fonts differ, bit 3 of the attribute data
+                         * must be examined as well, and if it's set, then the alternate font must be used.
+                         */
+                        let aFontDiff = (data & 0x800)? aFontDiff1 : aFontDiff0;
+                        if ((aCellCache[i] |= aFontDiff[data & 0xff]) < 0) {
+                            this.iCellCacheValid = 1;
+                            nCells++;
+                        }
                     }
                 }
-                this.iCellCacheValid = 1;
                 return nCells;
             }
         }
-        if (!fModified) this.fRGBValid = false;
+        if (fColors) this.fRGBValid = false;
         return this.initCellCache();
     }
 
@@ -5349,8 +5461,17 @@ class Video extends Component {
     {
         let bChar = data & 0xff;
         let bAttr = data >> 8;
-        let iFgnd = bAttr & 0xf;
+        /*
+         * The font referenced by any given cell data *usually* only depends on low 8 bits (ie, the
+         * character data), but when the active and alternate fonts differ, bit 3 of the attribute data
+         * must be examined as well, and if it's set, then the alternate font must be used.
+         */
         let font = this.aFonts[this.nActiveFont];
+        if ((bAttr & 0x08) && this.nActiveFont != this.nAlternateFont) {
+            font = this.aFonts[this.nAlternateFont];
+            bAttr &= ~0x08;
+        }
+        let iFgnd = bAttr & 0x0f;
         if (font.aColorMap) iFgnd = font.aColorMap[iFgnd];
 
         /*
@@ -5358,7 +5479,7 @@ class Video extends Component {
          * it also maps the background attribute to the appropriate background color.
          */
         let xDst, yDst;
-        let iBgnd = (bAttr >> 4) & 0xf;
+        let iBgnd = (bAttr >> 4) & 0x0f;
         if (font.aColorMap) iBgnd = font.aColorMap[iBgnd];
 
         if (context) {
@@ -5566,30 +5687,34 @@ class Video extends Component {
             card.nVertPeriodsStartAddr = 0;
         }
 
-        /*
-         * Any screen (aka "page") offset must be doubled for text modes, due to the attribute bytes.
-         * TODO: Come up with a more robust method of deciding when any screen offset should be doubled.
-         */
-        addrScreen += card.offStartAddr << (this.nCardFont? 1 : 0);
         let cbScreen = this.cbScreen;
-
         this.nColsLogical = this.nCols;
-        if (this.nCard >= Video.CARD.EGA && card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
+
+        if (this.nCard < Video.CARD.EGA) {
             /*
-             * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows, but since
-             * then, the logical width of screen memory (nColsLogical) can differ from the visible width (nCols).
-             * We now calculate the logical width, and the compute a new cbScreen in much the same way the original
-             * cbScreen was computed (but without any CGA-related padding considerations).
-             *
-             * TODO: I'm taking a lot of shortcuts in this calculation (eg, relying on nFont to detect text modes,
-             * ignoring MODECTRL.BYTE_MODE, etc); generalize this someday.  In addition, dividing the total number of
-             * cells by nCellsPerWord yields total WORDS, not BYTES, so we need to double cbScreen -- EXCEPT that the
-             * notion of cell has a slightly different meaning for EGA and VGA-specific modes.  nCellsPerWord should
-             * not be overloaded like that.
+             * Any screen (aka "page") offset must be doubled for text modes, due to the attribute bytes.
              */
-            this.nColsLogical = card.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nCardFont? 1 : (card.regCRTData[Card.CRTC.EGA.UNDERLINE.INDX] & Card.CRTC.EGA.UNDERLINE.DWORD)? 3 : 4);
-            cbScreen = ((this.nColsLogical * (this.nRows-1) + this.nCols) / this.nCellsPerWord)|0;
-            if (this.nMode <= Video.MODE.MDA_80X25) cbScreen <<= 1;
+            addrScreen += card.offStartAddr << (this.nCardFont? 1 : 0);
+        } else {
+            /*
+             * For the EGA/VGA, we must make offset-doubling dependent on attribute (odd) byte addressibility.
+             */
+            let nShift = ((card.regSEQData[Card.SEQ.MEMMODE.INDX] & (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.SEQUENTIAL)) == Card.SEQ.MEMMODE.ALPHA)? 1 : 0;
+            addrScreen += card.offStartAddr << nShift;
+
+            if (card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
+                /*
+                 * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows, but since
+                 * then, the logical width of screen memory (nColsLogical) can differ from the visible width (nCols).
+                 * We now calculate the logical width, and the compute a new cbScreen in much the same way the original
+                 * cbScreen was computed (but without any CGA-related padding considerations).
+                 *
+                 * TODO: I'm taking a lot of shortcuts in this calculation (eg, relying on nFont to detect text modes,
+                 * ignoring MODECTRL.BYTE_MODE, etc); generalize this someday.
+                 */
+                this.nColsLogical = card.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nCardFont? 1 : (card.regCRTData[Card.CRTC.EGA.UNDERLINE.INDX] & Card.CRTC.EGA.UNDERLINE.DWORD)? 3 : 4);
+                cbScreen = ((this.nColsLogical * (this.nRows - 1) + this.nCols) / this.nPointsPerByte)|0;
+            }
         }
 
         /*
@@ -5650,7 +5775,12 @@ class Video extends Component {
      */
     updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, nCells, fForce, fBlinkUpdate)
     {
-        let cCells = cbScreen >> 1;
+        /*
+         * When determining the number of cells this update may affect, it is NOT simply cbScreen/2,
+         * because cbScreen includes any and all off-screen cells, too.
+         */
+        let cCells = cbScreen * this.nPointsPerByte;
+        cCells = Math.trunc(cCells / this.nColsLogical) * this.nCols + (cCells % this.nCols);
         if (cCells > nCells) cCells = nCells;
         let addrScreenLimit = addrScreen + cbScreen;
 
@@ -5740,12 +5870,13 @@ class Video extends Component {
         let dataMask = 0xfffff;
         let adwMemory = this.cardActive.adwMemory;
 
-        let nShift = !(this.cardActive.nAccess & Card.ACCESS.WRITE.EVENODD)? 1 : 0;
-        let nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols /* - iCellFirst */) << 1) : 0);
+        let nbCharExtra = 1;
+        let nShift = (this.cardActive.nAccess & Card.ACCESS.WRITE.PAIRS)? 1 : 0;
 
         let fBlinkEnable = (this.cardActive.regMode & Card.MDA.MODE.BLINK_ENABLE);
         if (this.nCard >= Video.CARD.EGA) {
             fBlinkEnable = (this.cardActive.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.BLINK_ENABLE);
+            if (this.cardActive.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.SEQUENTIAL) nbCharExtra = 0;
         }
 
         if (fBlinkEnable) {
@@ -5757,6 +5888,7 @@ class Video extends Component {
         this.cBlinkVisible = 0;
         let col = iCell % this.nCols;
         let row = (iCell / this.nCols)|0;
+        let nbRowExtra = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols /* - iCellFirst */) << nbCharExtra) : 0);
 
         while (addrScreen < addrScreenLimit && iCell < nCells) {
 
@@ -5802,12 +5934,11 @@ class Video extends Component {
 
             cCells++;
             iCell++;
-
-            addrScreen += 2;
+            addrScreen += 1 + nbCharExtra;
             if (++col >= this.nCols) {
                 col = 0;
                 if (++row >= this.nRows) break;
-                addrScreen += nRowAdjust;
+                addrScreen += nbRowExtra;
             }
         }
 
@@ -5833,7 +5964,7 @@ class Video extends Component {
          * This is the CGA graphics-mode update case, where cells are pixels spread across two halves of the buffer.
          */
         let cCells = (addrScreenLimit - addrScreen) >> 1;
-        let iCell = 0, nPixelsPerCell = this.nCellsPerWord;
+        let iCell = 0, nPixelsPerCell = this.nPointsPerCell;
         let addr = addrScreen;
         let wPixelMask = (nPixelsPerCell == 16? 0x10000 : 0x30000);
         let nPixelShift = (nPixelsPerCell == 16? 1 : 2);
@@ -6086,7 +6217,7 @@ class Video extends Component {
                 if (x < xDirty) xDirty = x;
                 for (iPixel = 0; iPixel < nPixels; iPixel++) {
                     this.setPixel(this.imageBuffer, x++, y, aPixelColors[data & 0xff]);
-                    data >>= 8;
+                    data >>>= 8;
                 }
                 if (x > xMaxDirty) xMaxDirty = x;
                 if (y < yDirty) yDirty = y;
@@ -6377,7 +6508,7 @@ class Video extends Component {
                         this.printMessageIO(port, bOut, addrFrom, "ATC." + card.asATCRegs[iReg]);
                     }
                     card.regATCData[iReg] = bOut;
-                    this.invalidateCellCache(false);
+                    this.invalidateCellCache(true);
                 }
             }
         }
@@ -6549,6 +6680,7 @@ class Video extends Component {
             }
             this.cardEGA.regSEQData[this.cardEGA.regSEQIndx] = bOut;
         }
+
         switch(this.cardEGA.regSEQIndx) {
 
         case Card.SEQ.MAPMASK.INDX:
@@ -6568,11 +6700,10 @@ class Video extends Component {
                         this.cpu.stopCPU();
                     }
                 }
-                let iFont = nFontSelect & 0xff;
-                let iFontPrev = this.nFontSelect & 0xff;
+                let nFontPrev = this.nFontSelect;
                 this.buildFont(true);
                 this.assert(this.nFontSelect == nFontSelect);
-                this.invalidateCellCache(false, iFont, iFontPrev);
+                this.invalidateCellCache(false, nFontSelect, nFontPrev);
                 /*
                  * TODO: Consider whether this code should, like outATC(), immediately update the screen
                  * on a font change, or if it's sufficient to simply wait until the next normal periodic update.
@@ -6741,7 +6872,7 @@ class Video extends Component {
         let dwNew = (dw & ~(0x3f << this.cardEGA.regDACShift)) | ((bOut & 0x3f) << this.cardEGA.regDACShift);
         if (dw !== dwNew) {
             this.cardEGA.regDACData[this.cardEGA.regDACAddr] = dwNew;
-            this.invalidateCellCache(false);
+            this.invalidateCellCache(true);
         }
         this.cardEGA.regDACShift += 6;
         if (this.cardEGA.regDACShift > 12) {
@@ -7026,7 +7157,7 @@ class Video extends Component {
         }
         if (this.cardColor.regColor !== bOut) {
             this.cardColor.regColor = bOut;
-            this.invalidateCellCache(false);
+            this.invalidateCellCache(true);
         }
     }
 
@@ -7765,9 +7896,13 @@ Video.aEGAMonitorSwitches = {
  *
  *      0: # of columns (nCols)
  *      1: # of rows (nRows)
- *      2: # cells per word (nCellsPerWord: # of characters or pixels per word)
- *      3: # bytes of visible screen padding, if any (used for CGA graphics modes only)
- *      4: font ID (nFont: undefined if graphics mode)
+ *      2: # points per cell (nPointsPerCell: # of points per cell cache entry)
+ *      3: # points per byte (nPointsPerByte: # of points per frame buffer byte)
+ *      4: # bytes of visible screen padding, if any (used for CGA graphics modes only)
+ *      5: font ID (nFont: undefined if graphics mode)
+ *
+ * The 3rd entry used to be nCellsPerWord, but it is now nPointsPerCell.  nCols * nRows yields total
+ * (viewable) points, and dividing that by nPointsPerCell yields the size of the cell cache (nCellCache).
  *
  * For MDA and CGA modes, a "word" of memory is 16 bits of CPU-addressable data, so by calculating
  * ([0] * [1]) / [2], we obtain the number of words that mode actively displays; for example, the
@@ -7777,20 +7912,20 @@ Video.aEGAMonitorSwitches = {
  * containing 32 bits of pixel data.
  */
 Video.aModeParms = [];                                                                              // Mode
-Video.aModeParms[Video.MODE.CGA_40X25]          = [ 40,  25,  1,   0, Video.CARD.CGA];              // 0x01
-Video.aModeParms[Video.MODE.CGA_80X25]          = [ 80,  25,  1,   0, Video.CARD.CGA];              // 0x03
-Video.aModeParms[Video.MODE.CGA_320X200]        = [320, 200,  8, 192];                              // 0x04
-Video.aModeParms[Video.MODE.CGA_640X200]        = [640, 200, 16, 192];                              // 0x06
-Video.aModeParms[Video.MODE.MDA_80X25]          = [ 80,  25,  1,   0, Video.CARD.MDA];              // 0x07
-Video.aModeParms[Video.MODE.EGA_320X200]        = [320, 200,  8];                                   // 0x0D
-Video.aModeParms[Video.MODE.EGA_640X200]        = [640, 200,  8];                                   // 0x0E
-Video.aModeParms[Video.MODE.EGA_640X350_MONO]   = [640, 350,  8];                                   // 0x0F
-Video.aModeParms[Video.MODE.EGA_640X350]        = [640, 350,  8];                                   // 0x10
-Video.aModeParms[Video.MODE.VGA_640X480_MONO]   = [640, 480,  8];                                   // 0x11
-Video.aModeParms[Video.MODE.VGA_640X480]        = [640, 480,  8];                                   // 0x12
-Video.aModeParms[Video.MODE.VGA_320X200]        = [320, 200,  1];                                   // 0x13
-Video.aModeParms[Video.MODE.VGA_320X240]        = [320, 240,  4];                                   // 0x14
-Video.aModeParms[Video.MODE.VGA_320X400]        = [320, 400,  4];                                   // 0x15
+Video.aModeParms[Video.MODE.CGA_40X25]          = [ 40,  25,  1, 0.5,   0, Video.CARD.CGA];         // 0x01
+Video.aModeParms[Video.MODE.CGA_80X25]          = [ 80,  25,  1, 0.5,   0, Video.CARD.CGA];         // 0x03
+Video.aModeParms[Video.MODE.CGA_320X200]        = [320, 200,  8,   4, 192];                         // 0x04
+Video.aModeParms[Video.MODE.CGA_640X200]        = [640, 200, 16,   8, 192];                         // 0x06
+Video.aModeParms[Video.MODE.MDA_80X25]          = [ 80,  25,  1, 0.5,   0, Video.CARD.MDA];         // 0x07
+Video.aModeParms[Video.MODE.EGA_320X200]        = [320, 200,  8,   8];                              // 0x0D
+Video.aModeParms[Video.MODE.EGA_640X200]        = [640, 200,  8,   8];                              // 0x0E
+Video.aModeParms[Video.MODE.EGA_640X350_MONO]   = [640, 350,  8,   8];                              // 0x0F
+Video.aModeParms[Video.MODE.EGA_640X350]        = [640, 350,  8,   8];                              // 0x10
+Video.aModeParms[Video.MODE.VGA_640X480_MONO]   = [640, 480,  8,   8];                              // 0x11
+Video.aModeParms[Video.MODE.VGA_640X480]        = [640, 480,  8,   8];                              // 0x12
+Video.aModeParms[Video.MODE.VGA_320X200]        = [320, 200,  4,   1];                              // 0x13
+Video.aModeParms[Video.MODE.VGA_320X240]        = [320, 240,  4,   4];                              // 0x14
+Video.aModeParms[Video.MODE.VGA_320X400]        = [320, 400,  4,   4];                              // 0x15
 Video.aModeParms[Video.MODE.CGA_40X25_BW]       = Video.aModeParms[Video.MODE.CGA_40X25];           // 0x00
 Video.aModeParms[Video.MODE.CGA_80X25_BW]       = Video.aModeParms[Video.MODE.CGA_80X25];           // 0x02
 Video.aModeParms[Video.MODE.CGA_320X200_BW]     = Video.aModeParms[Video.MODE.CGA_320X200];         // 0x05

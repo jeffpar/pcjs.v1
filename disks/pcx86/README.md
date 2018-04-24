@@ -83,8 +83,10 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 
 ### Diagnostics and More
 
-* [PC Diagnostics and Utilities](diags/)
-* [PC ROM BIOS Sources](roms/ibm/)
+* [COMPAQ Diagnostics and Utilities](diags/compaq/)
+* [IBM Diagnostics and Utilities](diags/ibm/)
+* [IBM EGA Fantasy Land Demo and Utilities](diags/ibm/ega/)
+* [IBM ROM BIOS Sources](roms/ibm/)
 * [PCx86 TestMonitor Support](/tests/pcx86/testmon/)
 * [Michael Abrash's VGA "Black Book" Tests](/tests/pcx86/vga/)
 * [More...](/tests/pcx86/)

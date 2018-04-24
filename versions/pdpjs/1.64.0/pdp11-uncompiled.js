@@ -1279,6 +1279,10 @@ class Str {
      * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
      * specifiers that I use.
      *
+     * TODO: The %c and %s specifiers support a negative width (for left-justified output), but the numeric specifiers
+     * (eg, %d and %x) do not; they support only positive widths and right-justified output.  That's one of the more
+     * glaring omissions at the moment.
+     *
      * @param {string} format
      * @param {...} args
      * @return {string}
@@ -1286,21 +1290,29 @@ class Str {
     static sprintf(format, ...args)
     {
         let buffer = "";
-        let aParts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
+        let aParts = format.split(/%([-+ 0#]*)([0-9]*|\*)(\.[0-9]+|)([hlL]?)([A-Za-z%])/);
 
         let iArg = 0, iPart;
-        for (iPart = 0; iPart < aParts.length - 7; iPart += 7) {
+        for (iPart = 0; iPart < aParts.length - 6; iPart += 6) {
 
             buffer += aParts[iPart];
 
             let arg = args[iArg++];
             let flags = aParts[iPart+1];
-            let minimum = +aParts[iPart+2] || 0;
-            let precision = +aParts[iPart+4] || 0;
-            let conversion = aParts[iPart+6];
+            let width = aParts[iPart+2];
+            if (width == '*') {
+                width = arg;
+                arg = args[iArg++];
+            } else {
+                width = +width || 0;
+            }
+            let precision = aParts[iPart+3];
+            precision = precision? +precision.substr(1) : -1;
+            let prefix = aParts[iPart+4];
+            let type = aParts[iPart+5];
             let ach = null, s;
 
-            switch(conversion) {
+            switch(type) {
             case 'd':
                 /*
                  * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
@@ -1313,19 +1325,19 @@ class Str {
 
             case 'f':
                 s = Math.trunc(arg) + "";
-                if (precision) {
-                    minimum -= (precision + 1);
+                if (precision > 0) {
+                    width -= (precision + 1);
                 }
-                if (s.length < minimum) {
-                    if (flags == '0') {
-                        if (arg < 0) minimum--;
-                        s = ("0000000000" + Math.abs(arg)).slice(-minimum);
+                if (s.length < width) {
+                    if (flags.indexOf('0') >= 0) {
+                        if (arg < 0) width--;
+                        s = ("0000000000" + Math.abs(arg)).slice(-width);
                         if (arg < 0) s = '-' + s;
                     } else {
-                        s = ("          " + s).slice(-minimum);
+                        s = ("          " + s).slice(-width);
                     }
                 }
-                if (precision) {
+                if (precision > 0) {
                     arg = Math.round((arg - Math.trunc(arg)) * Math.pow(10, precision));
                     s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
                 }
@@ -1338,8 +1350,8 @@ class Str {
 
             case 's':
                 if (typeof arg == "string") {
-                    while (arg.length < minimum) {
-                        if (flags == '-') {
+                    while (arg.length < width) {
+                        if (flags.indexOf('-') >= 0) {
                             arg += ' ';
                         } else {
                             arg = ' ' + arg;
@@ -1362,24 +1374,29 @@ class Str {
                      * hex values ourselves, because using a radix of 10 with any "0x..." value always returns 0.
                      *
                      * And if the value CAN be interpreted as decimal, then we MUST interpret it as decimal, because
-                     * we have sprintf() calls in /modules/lib/testmon.js that depend on this code to perform decimal
-                     * to hex conversion.  We're allowed to make our own rules here, since passing numbers in string
-                     * form isn't part of the sprintf "spec".
+                     * we have sprintf() calls in /modules/pcx86/lib/testmon.js that depend on this code to perform
+                     * decimal to hex conversion.  We're going to make our own rules here, since passing numbers in
+                     * string form isn't part of the sprintf "spec".
                      */
                     arg = Number.parseInt(arg, arg.match(/(^0x|[a-f])/i)? 16 : 10);
                 }
                 do {
-                    s = ach[arg & 0xf] + s;
+                    let d = arg & 0xf;
                     arg >>>= 4;
-                } while (--minimum > 0 || arg);
+                    if (flags.indexOf('0') >= 0 || s == "" || d || arg) {
+                        s = ach[d] + s;
+                    } else if (width) {
+                        s = ' ' + s;
+                    }
+                } while (--width > 0 || arg);
                 buffer += s;
                 break;
 
             default:
                 /*
-                 * The supported ANSI C set of conversions: "dioxXucsfeEgGpn%"
+                 * The supported ANSI C set of types: "dioxXucsfeEgGpn%"
                  */
-                buffer += "(unrecognized printf conversion %" + conversion + ")";
+                buffer += "(unrecognized printf type %" + type + ")";
                 break;
             }
         }
@@ -3874,6 +3891,7 @@ class Component {
     setBinding(sHTMLType, sBinding, control, sValue)
     {
         switch (sBinding) {
+
         case 'clear':
             if (!this.bindings[sBinding]) {
                 this.bindings[sBinding] = control;
@@ -3886,6 +3904,7 @@ class Component {
                 }(this));
             }
             return true;
+
         case 'print':
             if (!this.bindings[sBinding]) {
                 let controlTextArea = /** @type {HTMLTextAreaElement} */(control);
@@ -3924,6 +3943,7 @@ class Component {
                 }(this, controlTextArea);
             }
             return true;
+
         default:
             return false;
         }

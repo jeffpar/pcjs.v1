@@ -6,14 +6,14 @@ machines:
   - id: ibm5160
     type: pcx86
     debugger: true
-    messages: video
+    messages: dos|int
     config: /devices/pcx86/machine/5160/ega/256kb/color/debugger/machine.xml
     autoMount:
       A:
-        name: PC-DOS 2.00 (Disk 1)
+        name: IBM EGA Fantasy Land Demo
       B:
         name: IBM EGA Fantasy Land Demo
-    autoType: $date\r$time\rB:\rFLAND\r
+    autoType: $date\r$time\rFLAND\r
 ---
 
 IBM EGA Fantasy Land Demo
@@ -45,7 +45,7 @@ continuously, independent of CPU speed and divorced from other program operation
 with fast smooth scrolling in both directions, test subtle timing dependencies between subunits of the EGA.
 
 Thanks to Eric, a friend of PCjs, we finally have a copy of the Fantasy Land program, along with an assortment of other
-EGA utilities that he kindly included.
+[EGA utilities](#directory-of-ibm-ega-utilities) that he kindly included.
 
 Now that we've had an opportunity to examine the program, three things became apparent:
 
@@ -58,20 +58,20 @@ Mode", which uses high resolution (8x14) fonts:
 
     SW1   SW2   SW3   SW4
     ---   ---   ---   ---
-    OFF   ON    ON    OFF
+    OFF    ON    ON   OFF
 
-so to run Fantasy Land, you would either need to change your EGA's settings to "Normal Color Mode", which defaults to
-the same font resolution (8x8) as the Color Display Adapter (CGA):
+so to run Fantasy Land, you would either need to change your EGA's switch settings to "Normal Color Mode", which defaults
+to the same font resolution (8x8) used by the Color Graphics Adapter (CGA):
 
     SW1   SW2   SW3   SW4
     ---   ---   ---   ---
-    ON    ON    ON    OFF
+     ON    ON    ON   OFF
 
 or connect your EGA to the older Color Display (Model 5153) and set the EGA switches as follows:
 
     SW1   SW2   SW3   SW4
     ---   ---   ---   ---
-    OFF   OFF   OFF   ON
+    OFF   OFF   OFF    ON
 
 The machine below uses the last option (ie, a Color Display configuration).
 

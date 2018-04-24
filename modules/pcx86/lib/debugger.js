@@ -2760,7 +2760,7 @@ class DebuggerX86 extends Debugger {
          * and then update our own state.  Normally, the only time fUpdateCPU will be false is when doTrace()
          * is calling us in a loop, in which case it will perform its own updateCPU() when it's done.
          */
-        if (fUpdateCPU !== false) this.cpu.updateCPU();
+        if (fUpdateCPU !== false) this.cpu.updateCPU(true);
 
         this.updateStatus(fRegs || false);
         return (this.nCycles > 0);
@@ -6234,7 +6234,7 @@ class DebuggerX86 extends Debugger {
                  * calling updateCPU() can be very slow, especially when fDisplayLiveRegs is true,
                  * so once the repeat count has been exhausted, we must perform a final updateCPU().
                  */
-                dbg.cpu.updateCPU();
+                dbg.cpu.updateCPU(true);
                 dbg.setBusy(false);
             }
         );

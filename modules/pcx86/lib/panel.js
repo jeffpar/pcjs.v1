@@ -127,6 +127,7 @@ class Rectangle {
     /**
      * contains(x, y)
      *
+     * @this {Rectangle}
      * @param {number} x
      * @param {number} y
      * @return {boolean} true if (x,y) lies within the rectangle, false if not
@@ -173,6 +174,7 @@ class Rectangle {
     /**
      * drawWith(context, color)
      *
+     * @this {Rectangle}
      * @param {Object} context
      * @param {Color|string} [color]
      */
@@ -183,6 +185,59 @@ class Rectangle {
         context.strokeRect(this.x, this.y, this.cx, this.cy);
         context.fillStyle = (typeof color == "string"? color : color.toString());
         context.fillRect(this.x, this.y, this.cx, this.cy);
+    }
+}
+
+class LED {
+    /**
+     * LED(control, color)
+     *
+     * @this {LED}
+     * @param {HTMLElement} control
+     * @param {string} [color]
+     */
+    constructor(control, color)
+    {
+        this.active = false;
+        this.control = control;
+        this.colorActive = null;
+        this.color = control.style.backgroundColor;
+        this.setColor(color);
+        this.draw();
+    }
+
+    /**
+     * draw()
+     *
+     * @this {LED}
+     */
+    draw()
+    {
+        if (this.colorActive != this.color) {
+            this.colorActive = this.color;
+            this.control.style.backgroundColor = this.color || Panel.COLOR.BLACK;
+        }
+        else if (!this.active) {
+            this.color = null;
+        }
+    }
+
+    /**
+     * setColor(color)
+     *
+     * Components are allowed to call this, via Panel.setLED(), as frequently as they like; we
+     *
+     * @this {LED}
+     * @param {string} [color] (omit to turn LED "off")
+     */
+    setColor(color)
+    {
+        if (color) {
+            this.color = color;
+            this.active = true;
+        } else {
+            this.active = false;
+        }
     }
 }
 
@@ -203,6 +258,8 @@ class Panel extends Component {
     {
         super("Panel", parmsPanel);
 
+        this.leds = {};
+        this.cLEDs = 0;
         this.canvas = null;
         this.lockMouse = -1;
         this.fMouseDown = false;
@@ -225,8 +282,6 @@ class Panel extends Component {
      */
     initBus(cmp, bus, cpu, dbg)
     {
-        let panel = this;
-
         this.cmp = cmp;
         this.bus = bus;
         this.cpu = cpu;
@@ -255,6 +310,13 @@ class Panel extends Component {
         if (this.cpu && this.cpu.setBinding(sHTMLType, sBinding, control, sValue)) return true;
         if (this.kbd && this.kbd.setBinding(sHTMLType, sBinding, control, sValue)) return true;
         if (DEBUGGER && this.dbg && this.dbg.setBinding(sHTMLType, sBinding, control, sValue)) return true;
+
+        if (sHTMLType.substr(-3, 3) == "led") {
+            this.leds[sBinding] = new LED(control, sValue);
+            this.cLEDs++;
+            this.startTimer();
+            return true;
+        }
 
         if (!this.canvas && sHTMLType == "canvas") {
 
@@ -337,6 +399,19 @@ class Panel extends Component {
     }
 
     /**
+     * setLED(sBinding, color)
+     *
+     * @this {Panel}
+     * @param {string} sBinding
+     * @param {string} [color] (omit to turn LED "off")
+     */
+    setLED(sBinding, color)
+    {
+        let led = this.leds[sBinding];
+        if (led) led.setColor(color);
+    }
+
+    /**
      * startTimer()
      *
      * This timer replaces the CPU's old dedicated VIDEO_UPDATES_PER_SECOND logic, which periodically called
@@ -347,7 +422,7 @@ class Panel extends Component {
      */
     startTimer()
     {
-        if (this.timer < 0 && this.canvas && this.cpu) {
+        if (this.timer < 0 && (this.cLEDs || this.canvas) && this.cpu) {
             let panel = this;
             this.timer = this.cpu.addTimer(this.id, function updateAnimationTimer() {
                 panel.updateAnimation();
@@ -522,6 +597,11 @@ class Panel extends Component {
      */
     updateAnimation()
     {
+        for (let s in this.leds ) {
+            let led = this.leds[s];
+            led.draw();
+        }
+
         if (this.fRedraw) {
 
             this.initPen(10, Panel.LIVECANVAS.FONT.CY, this.canvasLiveMem, this.contextLiveMem, this.canvas.style.color);
@@ -768,18 +848,18 @@ class Panel extends Component {
     }
 
     /**
-     * initPen(xLeft, yTop, canvas, context, sColor, cyFont, sFontFace)
+     * initPen(xLeft, yTop, canvas, context, color, cyFont, sFontFace)
      *
      * @this {Panel}
      * @param {number} xLeft
      * @param {number} yTop
      * @param {HTMLCanvasElement} [canvas]
      * @param {Object} [context]
-     * @param {string} [sColor]
+     * @param {string} [color]
      * @param {number} [cyFont]
      * @param {string} [sFontFace]
      */
-    initPen(xLeft, yTop, canvas, context, sColor, cyFont, sFontFace)
+    initPen(xLeft, yTop, canvas, context, color, cyFont, sFontFace)
     {
         this.setPen(this.xLeftMargin = xLeft, yTop);
         this.heightText = this.heightDefault = cyFont || Panel.LIVECANVAS.FONT.CY;
@@ -790,7 +870,7 @@ class Panel extends Component {
         }
         if (context) {
             this.contextText = context;
-            this.colorText = sColor || "white";
+            this.colorText = color || "white";
         }
     }
 
@@ -974,6 +1054,20 @@ class Panel extends Component {
         }
     }
 }
+
+Panel.COLOR = {
+    BLACK:  "#000000",
+    RED:    "#ff0000",
+    BLUE:   "#0000ff",
+    GREEN:  "#00ff00"
+};
+
+Panel.STATE = {
+    NONE:   Panel.COLOR.BLACK,
+    WRITE:  Panel.COLOR.RED,
+    READ:   Panel.COLOR.GREEN,
+    SEEK:   Panel.COLOR.BLUE
+};
 
 /*
  * The "Live" canvases that we create internally have the following fixed dimensions, to make drawing

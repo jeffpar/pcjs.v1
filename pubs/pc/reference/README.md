@@ -9,6 +9,7 @@ PC Reference Manuals
 
 An assortment of PC reference manuals, including:
 
-* [IBM PC Manuals](ibm/)
-* [Intel CPU Documents](intel/)
-* [Microsoft PC References](microsoft/)
+* [COMPAQ Reference Manuals](compaq/)
+* [IBM PC Reference Manuals](ibm/)
+* [Intel CPU Documentation](intel/)
+* [Microsoft Reference Materials](microsoft/)

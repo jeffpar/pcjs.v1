@@ -246,7 +246,7 @@ class CPU extends Component {
          *
          *      this.flags.powered = true;
          */
-        this.updateCPU();
+        this.updateCPU(false);
         return true;
     }
 
