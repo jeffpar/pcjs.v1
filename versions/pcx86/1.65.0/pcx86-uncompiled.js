@@ -54132,8 +54132,9 @@ class Video extends Component {
             let bMemMode = this.cardEGA.regSEQData[Card.SEQ.MEMMODE.INDX] & (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.SEQUENTIAL);
             if (bMemMode == Card.SEQ.MEMMODE.ALPHA) {
                 nShift = 1;
+                this.nPointsPerByte = 0.5;
             } else if (bMemMode == (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.SEQUENTIAL)) {
-                this.nPointsPerByte = 1;
+                this.nPointsPerByte = 1.0;
             }
             addrScreen += card.offStartAddr << nShift;
             if (card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
@@ -54172,6 +54173,26 @@ class Video extends Component {
                 cbScreenWrap -= cbScreen;
             }
         }
+        else if (this.nCard >= Video.CARD.EGA) {
+            /*
+             * We can leverage our screen wrap support to handle split-screen views as well; we must calculate
+             * the number of WHOLE + PARTIAL rows we can draw (which may reduce cbScreen).  TODO: We must also pass
+             * along the height of any PARTIAL row, so that pixel-level split-screens can eventually be supported.
+             */
+            let nRowsHidden = card.getCRTCReg(Card.CRTC.EGA.VDEND) - card.getCRTCReg(Card.CRTC.EGA.LINECOMP);
+            if (nRowsHidden > 0) {
+                let font = this.aFonts[this.nActiveFont];
+                if (font) {
+                    nRowsHidden = (nRowsHidden / font.cyChar)|0;
+                }
+                if (nRowsHidden > 0) {
+                    cbScreenWrap = ((this.nColsLogical * (nRowsHidden - 1) + this.nCols) / this.nPointsPerByte)|0;
+                    cbScreen -= ((this.nColsLogical * nRowsHidden) / this.nPointsPerByte)|0;
+                    addrScreenWrap = addrBuffer;
+                }
+            }
+        }
+
         /*
          * updateScreenCells() no longer "scrubs" the screen buffer itself; we call cleanMemory() afterward
          * to take care of that.  This has two benefits: 1) if this was a "forced" updated (or an update to make
@@ -54214,7 +54235,7 @@ class Video extends Component {
          * multiplied by nPointsPerByte, because cbScreen includes any and all off-screen cells, too.
          */
         let cCells = cbScreen * this.nPointsPerByte;
-        cCells = Math.trunc(cCells / this.nColsLogical) * this.nCols + (cCells % this.nCols);
+        cCells = Math.trunc(cCells / this.nColsLogical) * this.nCols + (cCells % this.nColsLogical);
         if (cCells > nCells) cCells = nCells;
         let addrScreenLimit = addrScreen + cbScreen;
 
@@ -54316,9 +54337,6 @@ class Video extends Component {
         let fBlinkEnable = (card.regMode & Card.MDA.MODE.BLINK_ENABLE);
         if (this.nCard >= Video.CARD.EGA) {
             fBlinkEnable = (card.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.BLINK_ENABLE);
-            if (card.getCRTCReg(Card.CRTC.EGA.LINECOMP) < card.getCRTCReg(Card.CRTC.EGA.VDEND)) {
-                dataBlink |= 0;
-            }
         }
 
         if (fBlinkEnable) {
@@ -55732,6 +55750,13 @@ class Video extends Component {
                         if (this.chipset) this.chipset.clearIRR(this.nIRQ);
                     }
                 }
+            }
+
+            /*
+             * If a split-screen condition has been modified, then partially invalidate the cell cache.
+             */
+            if (card.regCRTIndx == Card.CRTC.EGA.LINECOMP && fModified) {
+                this.iCellCacheValid = 1;
             }
 
             if (card.regCRTIndx == Card.CRTC.STARTHI || card.regCRTIndx == Card.CRTC.STARTLO) {

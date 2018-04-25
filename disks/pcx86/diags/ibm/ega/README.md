@@ -17,7 +17,22 @@ machines:
 IBM EGA Fantasy Land Demo
 -------------------------
 
-As discussed in the "[FantasyLand](/blog/2017/07/03/)" PCjs blog post, the October 1986 issue of
+This software was first discussed in the "[FantasyLand](/blog/2017/07/03/)" PCjs blog post, and later in 
+"[The Realities of Fantasy Land](/blog/2018/04/23/)".  The software was originally referred to in print as
+"FantasyLand", but the correct spelling is "Fantasy Land".
+
+A detailed [description](#description-of-fantasy-land) of the software, along with some
+[configuration details](#configuration-details) and a [directory listing](#directory-of-ibm-ega-fantasy-land-demo),
+are provided below.
+
+Fantasy Land still has some issues running in the PCx86 emulator; the most obvious one is the lack of pixel
+panning in text mode, but hopefully that will be added in the near future.
+
+{% include machine.html id="ibm5160" %}
+
+### Description of Fantasy Land
+
+In the October 1986 issue of
 [PC Tech Journal](http://www.pcjs.org/pubs/pc/magazines/pctj/) contained an article by John T. Cockerham
 titled "[Evaluating the EGA: The EGA Standard](http://www.pcjs.org/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2053.pdf&page=53&total=228)",
 which described IBM's Fantasy Land demo:
@@ -45,11 +60,15 @@ with fast smooth scrolling in both directions, test subtle timing dependencies b
 Thanks to Eric, a friend of PCjs, we finally have a copy of the Fantasy Land program, along with an assortment of other
 [EGA utilities](#directory-of-ibm-ega-utilities) that he kindly included.
 
+### Configuration Details
+
 Now that we've had an opportunity to examine the program, three things became apparent:
 
-1. The program's name was spelled "Fantasy Land"
-2. The program was designed for a Color Display (it used 8x8 fonts)
-3. The program required an EGA with a full 256K of RAM
+1. The program's correct name is "Fantasy Land"
+2. The program was designed for the original IBM Color Display (Model 5153)
+3. The program requires an EGA with a full 256K of RAM
+
+
 
 EGA users with an Enhanced Color Display (Model 5154) would normally have their EGA's switches set to "Enhanced Color
 Mode", which uses high resolution (8x14) fonts:
@@ -71,13 +90,8 @@ or connect your EGA to the older Personal Computer Color Display (Model 5153) an
     ---   ---   ---   ---
     OFF   OFF   OFF    ON
 
-The machine below uses the last option (ie, a Color Display configuration).  A configuration with the
+The machine above uses the last option (ie, a Color Display configuration).  A configuration with the
 [PCjs Debugger](debugger/) is available as well.
-
-Fantasy Land still has some issues running in the PCx86 emulator, but we're working on them.  You'll notice some
-additional "diagnostic" windows below the machine, which are essentially live representations of the 4 EGA "font
-banks" that Fantasy Land loads as part of its initialization.  Since every font can also be rendered in any of 16
-colors, each window shows 16 "slices" of the font in each of the 16 active colors.
 
 The EGA supported fonts with character heights up to 32 scan lines, so the maximum font size for a complete set of
 256 characters was 8K.  However, the EGA required each font to be loaded on a 16K boundary in plane 2, so if
@@ -90,11 +104,11 @@ total of 8K.  But size doesn't matter.  To load 4 fonts of *any* size, your EGA 
 
 The VGA made some amends for this design oddity, by supporting 4 additional 8K font banks between the EGA's original
 4 banks.  It didn't change the fact that first 4 font banks were still spread across 64K of plane 2 memory, but by
-that time, it was a moot point, since all VGAs included 256K anyway.  Also, considering how few programs used more
-than *one* font, and that neither card could make simultaneous use of more than *two* fonts at a time, one wonders if
-there was any real-world software that actually needed the ability to load *eight* fonts.
+that time, it was a moot point, since all VGAs included 256K anyway.
 
-{% include machine.html id="ibm5160" %}
+Considering how few programs used more than *one* font, and that neither card could make simultaneous use of more than
+*two* fonts, one wonders why IBM bothered to upgrade the VGA to support *eight* fonts.  Perhaps they were hoping someone
+would write "Fantasy Land II"!
 
 ### Directory of IBM EGA Fantasy Land Demo
 

@@ -36,9 +36,9 @@ and eventually the actual diskette.
 
 Based on John T. Cockerham's October 1986 PC Tech Journal article
 "[Evaluating the EGA: The EGA Standard](http://www.pcjs.org/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2053.pdf&page=53&total=228)",
-I knew the software would fail miserably in PCjs, because it made use of programmable fonts and
-split-screen and pixel-panning features, none of which PCjs supported yet.  So I first tried running it on a
-genuine IBM PC with an original IBM EGA.
+I knew the software would not run properly in PCjs, because it made use of programmable fonts, split screens,
+pixel panning, and vertical retrace interrupts -- all features that PCjs did not support yet.  So I first tried
+running it on a genuine IBM PC with an original IBM EGA.
 
 Unfortunately, the screen was a garbled flickering mess.  Something was clearly wrong, and my initial fear was that
 something was corrupted in the disk image Eric had sent me.  However, even after he sent me the original diskette, the
@@ -191,23 +191,22 @@ The program ignores the failure and uses the error code (2) as a file handle.  N
 	4: Standard Printer Device (STDPRN)
 
 but for purposes of a file read operation, any handle from 0 to 2 operates as a console handle, so the read operation blocks
-until some console input is provided.  To continue, you must press the Enter key twice, because the 64K file is read twice,
-in two 32K chunks.
+until some console input is provided.  To continue, this bug requires you to press the Enter key twice (because the 64K file
+is read in two 32K chunks).
 
-To resolve this second problem, I decided to auto-mount the disk in *both* the A and B drives, so that no batch file or
+To avoid this second problem, I decided to auto-mount the disk in *both* the A and B drives, so that no batch file or
 `ASSIGN` command is required.
 
 ### Getting The Lay Of The Land
 
 Although more work is required in PCjs to get [Fantasy Land](/disks/pcx86/diags/ibm/ega/) running in all its original glory,
-we can already get a good sense of what the map looked like, and enjoy all the little animated touches that Joel Gould and his
+you can already get a good sense of what the map looked like, and enjoy all the little animated touches that Joel Gould and his
 wife Daphne created, using the newfound power of character cell animation made possible by IBM's Enhanced Graphics
 Adapter.
 
-Watch Fantasy Land run through its automated tour in the [machine below](#ibm-ega-fantasy-land-demo).  After you "PRESS
-ANY KEY TO CONTINUE", wait a minute for the automated tour to start.  What you're currently unable to see (except for occasional
-flickering glimpses) are all the Fantasy Land messages that would normally scroll up (literally, on a scroll) from the bottom of
-the screen, using the EGA's split-screen feature -- one of the next things on my PCjs "To Do" list.
+Watch Fantasy Land run through its automated tour in the [machine below](#ibm-ega-fantasy-land-demo).  Until PCx86 supports
+pixel panning in text modes yet, none of Fantasy Land's scrolling operations will be as smooth as they should be.
+This will be addressed in a future PCjs update.
 
 ### IBM EGA Fantasy Land Demo
 
@@ -215,8 +214,11 @@ the screen, using the EGA's split-screen feature -- one of the next things on my
 
 ### PCjs Diagnostic Font Bank Displays
 
-The next 4 windows are "live" views of the EGA's four font banks.  They were helpful when I was working on PCjs programmable
-font support, and they still provide a nice visual insight into the active fonts and colors used by Fantasy Land and the EGA.
+The next 4 windows are "live" views of the EGA's four font banks.  Since every font can also be rendered in any of
+16 colors, each window shows 16 "slices" of the font in each of the 16 active colors.
+
+These windows were helpful when I was working on PCjs programmable font support, and they still provide a nice visual
+insight into the active fonts and colors used by Fantasy Land and the EGA.
 
 <div>
   <p>Font Bank 0</p>
