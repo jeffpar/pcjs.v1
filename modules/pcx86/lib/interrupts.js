@@ -29,18 +29,39 @@
 "use strict";
 
 var Interrupts = {
+    /*
+     * The original ROM BIOS defined vectors 0x08-0x1F with a table at F000:FEF3 (VECTOR_TABLE).
+     */
     VIDEO:      0x10,
+    EQUIPMENT:  0x11,
+    MEM_SIZE:   0x12,
     DISK:       0x13,
+    SERIAL:     0x14,
     CASSETTE:   0x15,
-    KBD:        0x16,
-    RTC:        0x1A,
-    ALT_TIMER:  0x1C,               // invoked by the BIOS timer interrupt handler (vector 0x08)
+    KEYBOARD:   0x16,
+    PARALLEL:   0x17,
+    BASIC:      0x18,               // normally F600:0000
+    BOOTSTRAP:  0x19,
+    TIMER:      0x1A,
+    KBD_BREAK:  0x1B,
+    TMR_BREAK:  0x1C,               // invoked by the BIOS timer interrupt handler (normally vector 0x08)
+    VID_PARMS:  0x1D,
+    DSK_PARMS:  0x1E,
+    /*
+     * For characters 0x00-0x7F, the original ROM BIOS used a built-in table at F000:FA6E (CRT_CHAR_GEN),
+     * since the MDA/CGA font ROM was not CPU-addressable, but presumably there wasn't enough room in the
+     * ROM BIOS for all 256 characters, so if software wanted to draw any characters 0x80-0xFF in graphics
+     * mode, it was up to software to provide the font data and set the VID_EXT vector to point to it.
+     */
+    VID_EXT:    0x1F,               // graphics characters 0x80-0xFF (aka EXT_PTR)
     DOS:        0x21,
     DOS_IDLE:   0x28,
     DOS_NETBIOS:0x2A,
     MOUSE:      0x33,
-    ALT_DISK:   0x40,               // HDC BIOS saves original FDC BIOS vector here
+    ALT_DISK:   0x40,               // HDC ROM saves original FDC vector here
     HD0_PARMS:  0x41,               // parameter table for hard drive 0
+    VID_PLANAR: 0x42,               // EGA ROM saves original VIDEO ("planar ROM") vector here
+    EGA_GRX:    0x43,               // EGA ROM provides a complete set of mode-appropriate font data here (0000:010C)
     HD1_PARMS:  0x46,               // parameter table for hard drive 1
     HD_PARMS: {
         MAX_CYL:    0x00,           // maximum cylinders (2 bytes)
@@ -51,7 +72,7 @@ var Interrupts = {
         PARK_CYL:   0x0C,           // landing zone cylinder (2 bytes)
         SEC_TRACK:  0x0E            // sectors per track (1 byte)
     },
-    ALT_VIDEO:  0x6D,               // IBM VGA BIOS saves original video BIOS vector here
+    ALT_VIDEO:  0x6D,               // VGA ROM saves original VIDEO vector here (one wonders what was wrong with VID_PLANAR)
     WINCB: {
         VECTOR:     0x30            // Windows PM call-back interface (aka Transfer Space Fault)
     },
@@ -164,7 +185,7 @@ if (DEBUGGER) {
         0x4A1:  ["NET",7],              // RESERVED FOR NETWORK ADAPTERS
         0x4A8:  ["SAVE_PTR",4]          // POINTER TO EGA PARAMETER CONTROL BLOCK
     };
-    
+
     /*
      * See DebuggerX86.prototype.replaceRegs() for the rules governing how register contents are replaced in the strings below.
      *
@@ -194,7 +215,7 @@ if (DEBUGGER) {
         0x0D: "read dot (row=@DX,col=@CX)",
         0x0E: "write tty (@AL)"
     };
-    
+
     Interrupts.FUNCS[Interrupts.DISK] = {
         0x00: "disk reset",
         0x01: "get status",
@@ -235,7 +256,7 @@ if (DEBUGGER) {
          *      CTL_DIAGNOSTIC: 0x14
          */
     };
-    
+
     Interrupts.FUNCS[Interrupts.CASSETTE] = {
         0x80: "open device",
         0x81: "close device",
@@ -250,7 +271,7 @@ if (DEBUGGER) {
         0x90: "device busy loop",
         0x91: "interrupt complete flag set"
     };
-    
+
     Interrupts.FUNCS[Interrupts.DOS] = {
         0x00: "terminate program",
         0x01: "read character (AL) from stdin with echo",
@@ -346,7 +367,7 @@ if (DEBUGGER) {
         0x63: "get lead byte table (@AL)",                                      // DOS 2.25 and 3.20+
         0x6C: "extended open file $@DS:@SI"                                     // DOS 4.00+
     };
-    
+
     Interrupts.FUNCS[Interrupts.WINDBG.VECTOR] = {
         0x004F: "check debugger loaded"         // WINDBG.IS_LOADED returns WINDBG.LOADED (0xF386) if debugger loaded
     };

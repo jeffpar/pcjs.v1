@@ -26,8 +26,11 @@ This configuration of the [IBM EGA Fantasy Land Demo](../) includes the PCjs Deb
 
 ### PCjs Diagnostic Font Bank Displays
 
-The next 4 windows are "live" views of the EGA's four font banks.  They were helpful when I was working on PCjs programmable
-font support, and they still provide a nice visual insight into the active fonts and colors used by Fantasy Land and the EGA.
+The next 4 windows are "live" views of the EGA's four font banks.  Since every font can also be rendered in any of
+16 colors, each window shows 16 "slices" of the font in each of the 16 active colors.
+
+These windows were helpful when I was working on PCjs programmable font support, and they still provide a nice visual
+insight into the active fonts and colors used by Fantasy Land and the EGA.
 
 <div>
   <p>Font Bank 0</p>

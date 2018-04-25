@@ -6217,7 +6217,7 @@ class DebuggerX86 extends Debugger {
     {
         let dbg = this;
         let fRegs = (sCmd != "t");
-        let nCount = this.parseValue(sCount, null, true) || 1;
+        let nCount = this.parseValue(sCount, undefined, true) || 1;
         let nCycles = (nCount == 1? 0 : 1);
         if (sCmd == "tc") {
             nCycles = nCount;
@@ -6705,7 +6705,7 @@ if (DEBUGGER) {
      * note that some of these can still be enabled if you really want them (eg, RTC can be turned on
      * with RTC messages, ALT_TIMER with TIMER messages, etc).
      */
-    DebuggerX86.INT_ANNOYING = [Interrupts.RTC, Interrupts.ALT_TIMER, Interrupts.DOS_IDLE, Interrupts.DOS_NETBIOS, Interrupts.ALT_VIDEO];
+    DebuggerX86.INT_ANNOYING = [Interrupts.TIMER, Interrupts.TMR_BREAK, Interrupts.DOS_IDLE, Interrupts.DOS_NETBIOS, Interrupts.ALT_VIDEO];
 
     DebuggerX86.COMMANDS = {
         '?':     "help/print",

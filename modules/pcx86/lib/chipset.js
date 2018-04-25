@@ -259,7 +259,7 @@ class ChipSet extends Component {
                     });
                 }
             }
-            cpu.addIntNotify(Interrupts.RTC, this.intBIOSRTC.bind(this));
+            cpu.addIntNotify(Interrupts.TIMER, this.intBIOSTimer.bind(this));
         }
         this.setReady();
     }
@@ -1732,7 +1732,7 @@ class ChipSet extends Component {
                      * also receive an Event object; however, IE reportedly requires that we examine a global (window.event)
                      * instead.  If that's true, and if we ever care to get more details about the click event, then define
                      * a local var; eg:
-                     * 
+                     *
                      *      let event = window.event || e;
                      */
                     return function onClickSwitch() {
@@ -2906,7 +2906,7 @@ class ChipSet extends Component {
 
                 if (bIR & bIRNext) {
 
-                    if (!iPIC && nIRL == ChipSet.IRQ.SLAVE) {
+                    if (!iPIC && nIRL == ChipSet.IRQ.SLAVE && this.aPICs.length > 1) {
                         /*
                          * Slave interrupts are tied to the master PIC on IRQ2; query the slave PIC for the vector #
                          */
@@ -3578,7 +3578,7 @@ class ChipSet extends Component {
 
     /**
      * outMFGTest(port, bOut, addrFrom)
-     * 
+     *
      * This is test port on the PCjr (MODEL_4860) only.
      *
      * @this {ChipSet}
@@ -3880,7 +3880,7 @@ class ChipSet extends Component {
      *
      * Moreover, we also call kbd.checkBuffer() to let the Keyboard know that we just pulled
      * data, so that it can reset its internal timer controlling the delivery of additional data.
-     * 
+     *
      * Note that there are applications like BASICA that install a keyboard interrupt handler
      * that reads OUTBUFF, does some scan code preprocessing, and then passes control on to the
      * ROM's interrupt handler.  As a result, OUTBUFF is read multiple times during a single
@@ -4106,7 +4106,7 @@ class ChipSet extends Component {
         /*
          * I added this for Windows 95's VMM keyboard driver for DOS sessions, which differs from the keyboard
          * driver for protected-mode applications (see the keyboard's setEnabled() function for more details).
-         * 
+         *
          * The Windows 95 VMM driver doesn't do what EITHER the ROM or the protected-mode driver typically does
          * after receiving a scan code (ie, toggle the keyboard's enable state).  Instead, the VMM simply checks
          * this status port one more time, perhaps to confirm that the OUTBUFF_FULL bit is clear.  It then
@@ -4635,7 +4635,7 @@ class ChipSet extends Component {
     }
 
     /**
-     * intBIOSRTC(addr)
+     * intBIOSTimer(addr)
      *
      * INT 0x1A Quick Reference:
      *
@@ -4654,10 +4654,10 @@ class ChipSet extends Component {
      * @param {number} addr
      * @return {boolean} true to proceed with the INT 0x1A software interrupt, false to skip
      */
-    intBIOSRTC(addr)
+    intBIOSTimer(addr)
     {
         if (DEBUGGER) {
-            if (this.messageEnabled(Messages.INT) && this.dbg.messageInt(Interrupts.RTC, addr)) {
+            if (this.messageEnabled(Messages.INT) && this.dbg.messageInt(Interrupts.TIMER, addr)) {
                 /*
                  * By computing AH now, we get the incoming AH value; if we computed it below, along with
                  * the rest of the register values, we'd get the outgoing AH value, which is not what we want.
@@ -4677,7 +4677,7 @@ class ChipSet extends Component {
                         sResult = " CX(year)=" + Str.toHexWord(chipset.cpu.regECX) + " DH(month)=" + Str.toHexByte(DH) + " DL(day)=" + Str.toHexByte(DL);
                     }
                     let nCyclesDelta = -nCycles + (nCycles = chipset.cpu.getCycles());
-                    chipset.dbg.messageIntReturn(Interrupts.RTC, nLevel, nCyclesDelta, sResult);
+                    chipset.dbg.messageIntReturn(Interrupts.TIMER, nLevel, nCyclesDelta, sResult);
                 });
             }
         }
@@ -4696,7 +4696,7 @@ class ChipSet extends Component {
         if (fEnable !== undefined) {
             fOn = fEnable;
             if (fOn != this.fSpeakerEnabled) {
-                // 
+                //
                 // Yielding doesn't seem to help the simulation of sound via rapid speaker toggling.
                 //
                 // if (this.cpu) {
@@ -4722,7 +4722,7 @@ class ChipSet extends Component {
                  * setValueAtTime() method, with a time of zero, as a work-around to avoid the "easing" (aka
                  * "de-zippering") of the frequency that browsers like to do.  Supposedly de-zippering is an
                  * attempt to avoid "pops" if the frequency is altered while the wave is still rising or falling.
-                 * 
+                 *
                  * Ditto for the gain's 'value'.
                  */
                 // this.oscillatorAudio['frequency']['value'] = freq;
@@ -5245,6 +5245,7 @@ ChipSet.PIC_HI = {              // ChipSet.PIC1.PORT_HI or ChipSet.PIC2.PORT_HI
 ChipSet.IRQ = {
     TIMER0:             0x00,
     KBD:                0x01,
+    VID:                0x02,   // EGA vertical retrace (arrives via IRQ 9 on MODEL_5170)
     SLAVE:              0x02,   // MODEL_5170
     COM2:               0x03,
     COM1:               0x04,
@@ -5357,7 +5358,7 @@ ChipSet.PPI_C = {               // this.bPPIC (port 0x62)
     NO_DISKETTE:        0x04,   // MODEL_4860 only (set if no Diskette Drive Adapter installed)
     NO_MEMEXP:          0x08,   // MODEL_4860 only (set if no 64Kb Memory Expansion installed)
     SW:                 0x0F,   // MODEL_5150: SW2[1-4] or SW2[5], depending on whether PPI_B.ENABLE_SW2 is set or clear; MODEL_5160: SW1[1-4] or SW1[5-8], depending on whether PPI_B.ENABLE_SW_HI is clear or set
-    CASS_DATA_IN:       0x10,   // MODEL_4860 and MODEL_5150 
+    CASS_DATA_IN:       0x10,   // MODEL_4860 and MODEL_5150
     TIMER2_OUT:         0x20,   // MODEL_4860 and up (timer 2 output)
     KBD_DATA:           0x40,   // MODEL_4860 only: data from either the keyboard cable or the IR receiver
     NO_KBD_CABLE:       0x80,   // MODEL_4860 only: (set if keyboard cable not connected)
@@ -5951,11 +5952,11 @@ ChipSet.CMOS = {
 
 /*
  * NMI Mask Register (port 0xA0)
- * 
+ *
  * On the MODEL_5150 and MODEL_5160, this is a write-only register, and the only valid bit is ENABLE.
- * 
+ *
  * On the MODEL_4860, this is a read-write register; the following bit definitions apply to writes, whereas
- * reads are defined as merely clearing the PCjr's keyboard NMI latch (which we maintain here in bit 0).  
+ * reads are defined as merely clearing the PCjr's keyboard NMI latch (which we maintain here in bit 0).
  */
 ChipSet.NMI = {                 // this.bNMI
     PORT:               0xA0,   //
@@ -6089,7 +6090,7 @@ ChipSet.aPortOutput = {
 };
 
 ChipSet.aPortOutput4860 = {
-    0x10: ChipSet.prototype.outMFGTest,     // a manufacturing test port that we don't really care about     
+    0x10: ChipSet.prototype.outMFGTest,     // a manufacturing test port that we don't really care about
     0x60: ChipSet.prototype.outPPIA,
     0x61: ChipSet.prototype.outPPIB,
     0x62: ChipSet.prototype.outPPIC,

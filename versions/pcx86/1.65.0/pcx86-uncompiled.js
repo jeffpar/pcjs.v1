@@ -5494,18 +5494,39 @@ X86.OPFLAG_PREFIXES = (X86.OPFLAG.SEG | X86.OPFLAG.LOCK | X86.OPFLAG.REPZ | X86.
  */
 
 var Interrupts = {
+    /*
+     * The original ROM BIOS defined vectors 0x08-0x1F with a table at F000:FEF3 (VECTOR_TABLE).
+     */
     VIDEO:      0x10,
+    EQUIPMENT:  0x11,
+    MEM_SIZE:   0x12,
     DISK:       0x13,
+    SERIAL:     0x14,
     CASSETTE:   0x15,
-    KBD:        0x16,
-    RTC:        0x1A,
-    ALT_TIMER:  0x1C,               // invoked by the BIOS timer interrupt handler (vector 0x08)
+    KEYBOARD:   0x16,
+    PARALLEL:   0x17,
+    BASIC:      0x18,               // normally F600:0000
+    BOOTSTRAP:  0x19,
+    TIMER:      0x1A,
+    KBD_BREAK:  0x1B,
+    TMR_BREAK:  0x1C,               // invoked by the BIOS timer interrupt handler (normally vector 0x08)
+    VID_PARMS:  0x1D,
+    DSK_PARMS:  0x1E,
+    /*
+     * For characters 0x00-0x7F, the original ROM BIOS used a built-in table at F000:FA6E (CRT_CHAR_GEN),
+     * since the MDA/CGA font ROM was not CPU-addressable, but presumably there wasn't enough room in the
+     * ROM BIOS for all 256 characters, so if software wanted to draw any characters 0x80-0xFF in graphics
+     * mode, it was up to software to provide the font data and set the VID_EXT vector to point to it.
+     */
+    VID_EXT:    0x1F,               // graphics characters 0x80-0xFF (aka EXT_PTR)
     DOS:        0x21,
     DOS_IDLE:   0x28,
     DOS_NETBIOS:0x2A,
     MOUSE:      0x33,
-    ALT_DISK:   0x40,               // HDC BIOS saves original FDC BIOS vector here
+    ALT_DISK:   0x40,               // HDC ROM saves original FDC vector here
     HD0_PARMS:  0x41,               // parameter table for hard drive 0
+    VID_PLANAR: 0x42,               // EGA ROM saves original VIDEO ("planar ROM") vector here
+    EGA_GRX:    0x43,               // EGA ROM provides a complete set of mode-appropriate font data here (0000:010C)
     HD1_PARMS:  0x46,               // parameter table for hard drive 1
     HD_PARMS: {
         MAX_CYL:    0x00,           // maximum cylinders (2 bytes)
@@ -5516,7 +5537,7 @@ var Interrupts = {
         PARK_CYL:   0x0C,           // landing zone cylinder (2 bytes)
         SEC_TRACK:  0x0E            // sectors per track (1 byte)
     },
-    ALT_VIDEO:  0x6D,               // IBM VGA BIOS saves original video BIOS vector here
+    ALT_VIDEO:  0x6D,               // VGA ROM saves original VIDEO vector here (one wonders what was wrong with VID_PLANAR)
     WINCB: {
         VECTOR:     0x30            // Windows PM call-back interface (aka Transfer Space Fault)
     },
@@ -5629,7 +5650,7 @@ if (DEBUGGER) {
         0x4A1:  ["NET",7],              // RESERVED FOR NETWORK ADAPTERS
         0x4A8:  ["SAVE_PTR",4]          // POINTER TO EGA PARAMETER CONTROL BLOCK
     };
-    
+
     /*
      * See DebuggerX86.prototype.replaceRegs() for the rules governing how register contents are replaced in the strings below.
      *
@@ -5659,7 +5680,7 @@ if (DEBUGGER) {
         0x0D: "read dot (row=@DX,col=@CX)",
         0x0E: "write tty (@AL)"
     };
-    
+
     Interrupts.FUNCS[Interrupts.DISK] = {
         0x00: "disk reset",
         0x01: "get status",
@@ -5700,7 +5721,7 @@ if (DEBUGGER) {
          *      CTL_DIAGNOSTIC: 0x14
          */
     };
-    
+
     Interrupts.FUNCS[Interrupts.CASSETTE] = {
         0x80: "open device",
         0x81: "close device",
@@ -5715,7 +5736,7 @@ if (DEBUGGER) {
         0x90: "device busy loop",
         0x91: "interrupt complete flag set"
     };
-    
+
     Interrupts.FUNCS[Interrupts.DOS] = {
         0x00: "terminate program",
         0x01: "read character (AL) from stdin with echo",
@@ -5811,7 +5832,7 @@ if (DEBUGGER) {
         0x63: "get lead byte table (@AL)",                                      // DOS 2.25 and 3.20+
         0x6C: "extended open file $@DS:@SI"                                     // DOS 4.00+
     };
-    
+
     Interrupts.FUNCS[Interrupts.WINDBG.VECTOR] = {
         0x004F: "check debugger loaded"         // WINDBG.IS_LOADED returns WINDBG.LOADED (0xF386) if debugger loaded
     };
@@ -38289,7 +38310,7 @@ class ChipSet extends Component {
                     });
                 }
             }
-            cpu.addIntNotify(Interrupts.RTC, this.intBIOSRTC.bind(this));
+            cpu.addIntNotify(Interrupts.TIMER, this.intBIOSTimer.bind(this));
         }
         this.setReady();
     }
@@ -39762,7 +39783,7 @@ class ChipSet extends Component {
                      * also receive an Event object; however, IE reportedly requires that we examine a global (window.event)
                      * instead.  If that's true, and if we ever care to get more details about the click event, then define
                      * a local var; eg:
-                     * 
+                     *
                      *      let event = window.event || e;
                      */
                     return function onClickSwitch() {
@@ -40936,7 +40957,7 @@ class ChipSet extends Component {
 
                 if (bIR & bIRNext) {
 
-                    if (!iPIC && nIRL == ChipSet.IRQ.SLAVE) {
+                    if (!iPIC && nIRL == ChipSet.IRQ.SLAVE && this.aPICs.length > 1) {
                         /*
                          * Slave interrupts are tied to the master PIC on IRQ2; query the slave PIC for the vector #
                          */
@@ -41608,7 +41629,7 @@ class ChipSet extends Component {
 
     /**
      * outMFGTest(port, bOut, addrFrom)
-     * 
+     *
      * This is test port on the PCjr (MODEL_4860) only.
      *
      * @this {ChipSet}
@@ -41910,7 +41931,7 @@ class ChipSet extends Component {
      *
      * Moreover, we also call kbd.checkBuffer() to let the Keyboard know that we just pulled
      * data, so that it can reset its internal timer controlling the delivery of additional data.
-     * 
+     *
      * Note that there are applications like BASICA that install a keyboard interrupt handler
      * that reads OUTBUFF, does some scan code preprocessing, and then passes control on to the
      * ROM's interrupt handler.  As a result, OUTBUFF is read multiple times during a single
@@ -42136,7 +42157,7 @@ class ChipSet extends Component {
         /*
          * I added this for Windows 95's VMM keyboard driver for DOS sessions, which differs from the keyboard
          * driver for protected-mode applications (see the keyboard's setEnabled() function for more details).
-         * 
+         *
          * The Windows 95 VMM driver doesn't do what EITHER the ROM or the protected-mode driver typically does
          * after receiving a scan code (ie, toggle the keyboard's enable state).  Instead, the VMM simply checks
          * this status port one more time, perhaps to confirm that the OUTBUFF_FULL bit is clear.  It then
@@ -42665,7 +42686,7 @@ class ChipSet extends Component {
     }
 
     /**
-     * intBIOSRTC(addr)
+     * intBIOSTimer(addr)
      *
      * INT 0x1A Quick Reference:
      *
@@ -42684,10 +42705,10 @@ class ChipSet extends Component {
      * @param {number} addr
      * @return {boolean} true to proceed with the INT 0x1A software interrupt, false to skip
      */
-    intBIOSRTC(addr)
+    intBIOSTimer(addr)
     {
         if (DEBUGGER) {
-            if (this.messageEnabled(Messages.INT) && this.dbg.messageInt(Interrupts.RTC, addr)) {
+            if (this.messageEnabled(Messages.INT) && this.dbg.messageInt(Interrupts.TIMER, addr)) {
                 /*
                  * By computing AH now, we get the incoming AH value; if we computed it below, along with
                  * the rest of the register values, we'd get the outgoing AH value, which is not what we want.
@@ -42707,7 +42728,7 @@ class ChipSet extends Component {
                         sResult = " CX(year)=" + Str.toHexWord(chipset.cpu.regECX) + " DH(month)=" + Str.toHexByte(DH) + " DL(day)=" + Str.toHexByte(DL);
                     }
                     let nCyclesDelta = -nCycles + (nCycles = chipset.cpu.getCycles());
-                    chipset.dbg.messageIntReturn(Interrupts.RTC, nLevel, nCyclesDelta, sResult);
+                    chipset.dbg.messageIntReturn(Interrupts.TIMER, nLevel, nCyclesDelta, sResult);
                 });
             }
         }
@@ -42726,7 +42747,7 @@ class ChipSet extends Component {
         if (fEnable !== undefined) {
             fOn = fEnable;
             if (fOn != this.fSpeakerEnabled) {
-                // 
+                //
                 // Yielding doesn't seem to help the simulation of sound via rapid speaker toggling.
                 //
                 // if (this.cpu) {
@@ -42752,7 +42773,7 @@ class ChipSet extends Component {
                  * setValueAtTime() method, with a time of zero, as a work-around to avoid the "easing" (aka
                  * "de-zippering") of the frequency that browsers like to do.  Supposedly de-zippering is an
                  * attempt to avoid "pops" if the frequency is altered while the wave is still rising or falling.
-                 * 
+                 *
                  * Ditto for the gain's 'value'.
                  */
                 // this.oscillatorAudio['frequency']['value'] = freq;
@@ -43275,6 +43296,7 @@ ChipSet.PIC_HI = {              // ChipSet.PIC1.PORT_HI or ChipSet.PIC2.PORT_HI
 ChipSet.IRQ = {
     TIMER0:             0x00,
     KBD:                0x01,
+    VID:                0x02,   // EGA vertical retrace (arrives via IRQ 9 on MODEL_5170)
     SLAVE:              0x02,   // MODEL_5170
     COM2:               0x03,
     COM1:               0x04,
@@ -43387,7 +43409,7 @@ ChipSet.PPI_C = {               // this.bPPIC (port 0x62)
     NO_DISKETTE:        0x04,   // MODEL_4860 only (set if no Diskette Drive Adapter installed)
     NO_MEMEXP:          0x08,   // MODEL_4860 only (set if no 64Kb Memory Expansion installed)
     SW:                 0x0F,   // MODEL_5150: SW2[1-4] or SW2[5], depending on whether PPI_B.ENABLE_SW2 is set or clear; MODEL_5160: SW1[1-4] or SW1[5-8], depending on whether PPI_B.ENABLE_SW_HI is clear or set
-    CASS_DATA_IN:       0x10,   // MODEL_4860 and MODEL_5150 
+    CASS_DATA_IN:       0x10,   // MODEL_4860 and MODEL_5150
     TIMER2_OUT:         0x20,   // MODEL_4860 and up (timer 2 output)
     KBD_DATA:           0x40,   // MODEL_4860 only: data from either the keyboard cable or the IR receiver
     NO_KBD_CABLE:       0x80,   // MODEL_4860 only: (set if keyboard cable not connected)
@@ -43981,11 +44003,11 @@ ChipSet.CMOS = {
 
 /*
  * NMI Mask Register (port 0xA0)
- * 
+ *
  * On the MODEL_5150 and MODEL_5160, this is a write-only register, and the only valid bit is ENABLE.
- * 
+ *
  * On the MODEL_4860, this is a read-write register; the following bit definitions apply to writes, whereas
- * reads are defined as merely clearing the PCjr's keyboard NMI latch (which we maintain here in bit 0).  
+ * reads are defined as merely clearing the PCjr's keyboard NMI latch (which we maintain here in bit 0).
  */
 ChipSet.NMI = {                 // this.bNMI
     PORT:               0xA0,   //
@@ -44119,7 +44141,7 @@ ChipSet.aPortOutput = {
 };
 
 ChipSet.aPortOutput4860 = {
-    0x10: ChipSet.prototype.outMFGTest,     // a manufacturing test port that we don't really care about     
+    0x10: ChipSet.prototype.outMFGTest,     // a manufacturing test port that we don't really care about
     0x60: ChipSet.prototype.outPPIA,
     0x61: ChipSet.prototype.outPPIB,
     0x62: ChipSet.prototype.outPPIC,
@@ -49641,7 +49663,12 @@ Card.CRTC = {
         CURSORHI:       0x0E,           // (same as MDA/CGA)
         CURSORLO:       0x0F,           // (same as MDA/CGA)
         VRSTART:        0x10,           // (formerly PENHI on MDA/CGA)
-        VREND:          0x11,           // (formerly PENLO on MDA/CGA; last register on the original 6845 controller)
+        VREND:          {               // (formerly PENLO on MDA/CGA; last register on the original 6845 controller)
+            INDX:       0x11,
+            HSCAN:          0x0F,       // the horizontal scan count value when the vertical retrace output signal becomes inactive
+            UNCLEAR_VRINT:  0x10,       // clear vertical retrace interrupt if NOT set
+            DISABLE_VRINT:  0x20        // enable vertical retrace interrupt if NOT set
+        },
         VDEND:          0x12,
         /*
          * The OFFSET register (bits 0-7) specifies the logical line width of the screen.  The starting memory address
@@ -50809,6 +50836,8 @@ class Video extends Component {
         let aModelDefaults = Video.MODEL[this.model] || Video.MODEL['mda'];
 
         this.nCard = aModelDefaults[0];
+        this.nIRQ = (this.nCard >= Video.CARD.EGA)? ChipSet.IRQ.VID : undefined;
+
         this.nCardFont = 0;
         this.nActiveFont = this.nAlternateFont = 0;
         this.nFontSelect = 0;                       // current set of selectable logical fonts
@@ -51161,6 +51190,12 @@ class Video extends Component {
         }
 
         this.cpu.addTimer(this.id, function updateScreenTimer() {
+            if (video.nIRQ) {
+                let card = video.cardActive;
+                if (!(card.regCRTData[Card.CRTC.EGA.VREND.INDX] & Card.CRTC.EGA.VREND.DISABLE_VRINT)) {
+                    if (video.chipset) video.chipset.setIRR(video.nIRQ);
+                }
+            }
             video.updateScreen();
         }, 1000 / Video.UPDATES_PER_SECOND);
     }
@@ -54088,10 +54123,20 @@ class Video extends Component {
         } else {
             /*
              * For the EGA/VGA, we must make offset-doubling dependent on attribute (odd) byte addressibility.
+             * For example, Fantasy Land uses a text-mode buffer mapped at 0xA0000 without odd/even addressing.
+             *
+             * TODO: Setting nPointsPerByte properly would ideally be taken care of in setDimensions(), but there's
+             * no guarantee this particular controller tweak will be made BEFORE we detect and initiate a mode change.
              */
-            let nShift = ((card.regSEQData[Card.SEQ.MEMMODE.INDX] & (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.SEQUENTIAL)) == Card.SEQ.MEMMODE.ALPHA)? 1 : 0;
+            let nShift = 0;
+            let bMemMode = this.cardEGA.regSEQData[Card.SEQ.MEMMODE.INDX] & (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.SEQUENTIAL);
+            if (bMemMode == Card.SEQ.MEMMODE.ALPHA) {
+                nShift = 1;
+                this.nPointsPerByte = 0.5;
+            } else if (bMemMode == (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.SEQUENTIAL)) {
+                this.nPointsPerByte = 1.0;
+            }
             addrScreen += card.offStartAddr << nShift;
-
             if (card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
                 /*
                  * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows, but since
@@ -54128,6 +54173,26 @@ class Video extends Component {
                 cbScreenWrap -= cbScreen;
             }
         }
+        else if (this.nCard >= Video.CARD.EGA) {
+            /*
+             * We can leverage our screen wrap support to handle split-screen views as well; we must calculate
+             * the number of WHOLE + PARTIAL rows we can draw (which may reduce cbScreen).  TODO: We must also pass
+             * along the height of any PARTIAL row, so that pixel-level split-screens can eventually be supported.
+             */
+            let nRowsHidden = card.getCRTCReg(Card.CRTC.EGA.VDEND) - card.getCRTCReg(Card.CRTC.EGA.LINECOMP);
+            if (nRowsHidden > 0) {
+                let font = this.aFonts[this.nActiveFont];
+                if (font) {
+                    nRowsHidden = (nRowsHidden / font.cyChar)|0;
+                }
+                if (nRowsHidden > 0) {
+                    cbScreenWrap = ((this.nColsLogical * (nRowsHidden - 1) + this.nCols) / this.nPointsPerByte)|0;
+                    cbScreen -= ((this.nColsLogical * nRowsHidden) / this.nPointsPerByte)|0;
+                    addrScreenWrap = addrBuffer;
+                }
+            }
+        }
+
         /*
          * updateScreenCells() no longer "scrubs" the screen buffer itself; we call cleanMemory() afterward
          * to take care of that.  This has two benefits: 1) if this was a "forced" updated (or an update to make
@@ -54166,11 +54231,11 @@ class Video extends Component {
     updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, nCells, fForce, fBlinkUpdate)
     {
         /*
-         * When determining the number of cells this update may affect, it is NOT simply cbScreen/2,
-         * because cbScreen includes any and all off-screen cells, too.
+         * When determining the number of cells this update may affect, it is NOT simply cbScreen
+         * multiplied by nPointsPerByte, because cbScreen includes any and all off-screen cells, too.
          */
         let cCells = cbScreen * this.nPointsPerByte;
-        cCells = Math.trunc(cCells / this.nColsLogical) * this.nCols + (cCells % this.nCols);
+        cCells = Math.trunc(cCells / this.nColsLogical) * this.nCols + (cCells % this.nColsLogical);
         if (cCells > nCells) cCells = nCells;
         let addrScreenLimit = addrScreen + cbScreen;
 
@@ -54254,19 +54319,24 @@ class Video extends Component {
          * If MDA.MODE.BLINK_ENABLE is clear, then we always set ATTRS.DRAW_FGND and never mask the blink
          * bit in a cell's attributes bits, since it's actually an intensity bit in that case.
          */
+        let card = this.cardActive;
         let cCells = 0, cUpdated = 0;
         let dataBlink = 0;
         let dataDraw = (Video.ATTRS.DRAW_FGND << 8);
         let dataMask = 0xfffff;
-        let adwMemory = this.cardActive.adwMemory;
+        let adwMemory = card.adwMemory;
 
-        let nbCharExtra = 1;
-        let nShift = (this.cardActive.nAccess & Card.ACCESS.WRITE.PAIRS)? 1 : 0;
+        /*
+         * Normally, cbCell will be 2, when attribute bytes are addressible (interleaved) with character bytes,
+         * but Fantasy Land is an exception.  Which is another great reason why the loop below needs to get both
+         * bytes directly from adwMemory, because reading them with bus.getShortDirect(addrScreen) won't always work.
+         */
+        let cbCell = (1 / this.nPointsPerByte)|0;
+        let nShift = (card.nAccess & Card.ACCESS.WRITE.PAIRS)? 1 : 0;
 
-        let fBlinkEnable = (this.cardActive.regMode & Card.MDA.MODE.BLINK_ENABLE);
+        let fBlinkEnable = (card.regMode & Card.MDA.MODE.BLINK_ENABLE);
         if (this.nCard >= Video.CARD.EGA) {
-            fBlinkEnable = (this.cardActive.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.BLINK_ENABLE);
-            if (this.cardActive.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.SEQUENTIAL) nbCharExtra = 0;
+            fBlinkEnable = (card.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.BLINK_ENABLE);
         }
 
         if (fBlinkEnable) {
@@ -54278,7 +54348,7 @@ class Video extends Component {
         this.cBlinkVisible = 0;
         let col = iCell % this.nCols;
         let row = (iCell / this.nCols)|0;
-        let nbRowExtra = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols /* - iCellFirst */) << nbCharExtra) : 0);
+        let nbRowExtra = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols /* - iCellFirst */) << (cbCell-1)) : 0);
 
         while (addrScreen < addrScreenLimit && iCell < nCells) {
 
@@ -54286,7 +54356,6 @@ class Video extends Component {
 
 
             let data = (adwMemory[idw] & 0xffff);
-            // let data = this.bus.getShortDirect(addrScreen);
 
             data |= dataDraw;
             if (data & dataBlink) {
@@ -54324,7 +54393,7 @@ class Video extends Component {
 
             cCells++;
             iCell++;
-            addrScreen += 1 + nbCharExtra;
+            addrScreen += cbCell;
             if (++col >= this.nCols) {
                 col = 0;
                 if (++row >= this.nRows) break;
@@ -55648,6 +55717,7 @@ class Video extends Component {
     outCRTCData(card, port, bOut, addrFrom)
     {
         if (card.regCRTIndx < card.nCRTCRegs) {
+
             /*
              * To simulate how the 6845 effectively ignores changes to CURSCAN or CURSCANB whenever one is written
              * while the other is currently > MAXSCAN, we check for those writes now, and ignore the write as appropriate.
@@ -55665,6 +55735,7 @@ class Video extends Component {
                     }
                 }
             }
+
             let fModified = (card.regCRTData[card.regCRTIndx] !== bOut);
             if (fModified || Video.TRAPALL) {
                 if (!addrFrom || this.messageEnabled()) {
@@ -55672,6 +55743,22 @@ class Video extends Component {
                 }
                 card.regCRTData[card.regCRTIndx] = bOut;
             }
+
+            if (card.regCRTIndx == Card.CRTC.EGA.VREND.INDX) {
+                if (this.nIRQ) {
+                    if (!(bOut & Card.CRTC.EGA.VREND.UNCLEAR_VRINT)) {
+                        if (this.chipset) this.chipset.clearIRR(this.nIRQ);
+                    }
+                }
+            }
+
+            /*
+             * If a split-screen condition has been modified, then partially invalidate the cell cache.
+             */
+            if (card.regCRTIndx == Card.CRTC.EGA.LINECOMP && fModified) {
+                this.iCellCacheValid = 1;
+            }
+
             if (card.regCRTIndx == Card.CRTC.STARTHI || card.regCRTIndx == Card.CRTC.STARTLO) {
                 /*
                  * Both STARTHI and STARTLO are supposed to be latched at the start of every VRETRACE interval.
@@ -55685,6 +55772,7 @@ class Video extends Component {
                 this.getRetraceBits(card);
                 card.nVertPeriodsStartAddr = card.nVertPeriods;
             }
+
             /*
              * During mode changes on the EGA, all the CRTC regs are typically programmed in sequence,
              * and if that's all that's happening with Card.CRTC.MAXSCAN, then we don't want to treat
@@ -69577,7 +69665,7 @@ class Debugger extends Component
             sOp = (iValue < iLimit? asValues[iValue++] : "");
 
             if (sValue) {
-                v = this.parseValue(sValue, null, aUndefined, nUnary);
+                v = this.parseValue(sValue, undefined, aUndefined, nUnary);
             } else {
                 if (sOp == '{') {
                     let cOpen = 1;
@@ -69978,9 +70066,9 @@ class Debugger extends Component
      * parseValue(sValue, sName, fQuiet, nUnary)
      *
      * @this {Debugger}
-     * @param {string|undefined} sValue
-     * @param {string|null|*} [sName] is the name of the value, if any
-     * @param {Array|undefined|boolean} [fQuiet]
+     * @param {string} [sValue]
+     * @param {string} [sName] is the name of the value, if any
+     * @param {Array|boolean} [fQuiet]
      * @param {number} [nUnary] (0 for none, 1 for negate, 2 for complement, 3 for leading zeros)
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
      */
@@ -69989,13 +70077,13 @@ class Debugger extends Component
         let value;
         let aUndefined = Array.isArray(fQuiet)? fQuiet : undefined;
 
-        if (sValue != null) {
+        if (sValue != undefined) {
             let iReg = this.getRegIndex(sValue);
             if (iReg >= 0) {
                 value = this.getRegValue(iReg);
             } else {
                 value = this.getVariable(sValue);
-                if (value != null) {
+                if (value != undefined) {
                     let sUndefined = this.getVariableFixup(sValue);
                     if (sUndefined) {
                         if (aUndefined) {
@@ -70019,7 +70107,7 @@ class Debugger extends Component
                     value = Str.parseInt(sValue, sValue.length > 1 || this.nBase > 10? this.nBase : 10);
                 }
             }
-            if (value != null) {
+            if (value != undefined) {
                 value = this.truncate(this.parseUnary(value, nUnary));
             } else {
                 if (!fQuiet) {
@@ -76464,7 +76552,7 @@ class DebuggerX86 extends Debugger {
     {
         let dbg = this;
         let fRegs = (sCmd != "t");
-        let nCount = this.parseValue(sCount, null, true) || 1;
+        let nCount = this.parseValue(sCount, undefined, true) || 1;
         let nCycles = (nCount == 1? 0 : 1);
         if (sCmd == "tc") {
             nCycles = nCount;
@@ -76952,7 +77040,7 @@ if (DEBUGGER) {
      * note that some of these can still be enabled if you really want them (eg, RTC can be turned on
      * with RTC messages, ALT_TIMER with TIMER messages, etc).
      */
-    DebuggerX86.INT_ANNOYING = [Interrupts.RTC, Interrupts.ALT_TIMER, Interrupts.DOS_IDLE, Interrupts.DOS_NETBIOS, Interrupts.ALT_VIDEO];
+    DebuggerX86.INT_ANNOYING = [Interrupts.TIMER, Interrupts.TMR_BREAK, Interrupts.DOS_IDLE, Interrupts.DOS_NETBIOS, Interrupts.ALT_VIDEO];
 
     DebuggerX86.COMMANDS = {
         '?':     "help/print",

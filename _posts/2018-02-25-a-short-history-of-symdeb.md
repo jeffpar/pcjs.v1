@@ -18,7 +18,11 @@ machines:
 The first version of SYMDEB I used was probably Version 4.00, released with
 [Microsoft Macro Assembler 4.00](/disks/pcx86/tools/microsoft/masm/4.00/):
 
-	SYMDEB   EXE     37021 10-16-85   4:00a
+     Volume in drive A has no label
+     Directory of  A:\
+    
+    SYMDEB   EXE    37021  10-16-85   4:00a
+            1 File(s)     69632 bytes free
 
 SYMDEB was a big improvement over the DOS DEBUG utility, which was clearly not getting enough love in the
 mid 1980's.  For example, PC-DOS 3.00 was released in conjunction with the 80286-based IBM PC AT, and yet the
@@ -71,7 +75,11 @@ Output from SYMDEB Version 4.00:
 Earlier versions of SYMDEB existed, too.  For example, it was part of
 [Microsoft Macro Assembler 3.01](/disks/pcx86/tools/microsoft/masm/3.01/):
 
-    SYMDEB   EXE     36538 06-07-85   4:26p
+     Volume in drive A has no label
+     Directory of  A:\
+    
+    SYMDEB   EXE    36538   6-07-85   4:26p
+            1 File(s)     74752 bytes free
 
 Here's the banner from SYMDEB Version 3.01 (the help menu was identical to 4.00, which isn't too surprising,
 since only about four months separated them):
@@ -83,7 +91,11 @@ since only about four months separated them):
 And before that, SYMDEB Version 3.00 was bundled with [Microsoft Macro Assembler 3.00](/disks/pcx86/tools/microsoft/masm/3.00/),
 which was about six months older:
 
+     Volume in drive A has no label
+     Directory of  A:\
+    
     SYMDEB   EXE    27136  12-07-84   1:39p
+            1 File(s)    138240 bytes free
 
 Here's the banner and help menu from SYMDEB Version 3.00:
 
@@ -121,14 +133,31 @@ If there was a SYMDEB Version 1.xx or 2.xx, I've never seen it.  It's possible t
 the first (public) version, and since it would have started as a fork of the DOS DEBUG utility, the initial version
 may have simply mirrored the contemporaneous version of DOS, which in mid-1984, would have been DOS Version 3.00.
 
-Other early versions of SYMDEB were also bundled with Windows SDKs.  The Windows 1.01 SDK came with:
+Other early versions of SYMDEB were also bundled with Windows SDKs.  In the Windows 1.01 SDK:
+
+	 Volume in drive A is WINDEV1    
+	 Directory of  A:\BIN
+
+	SYMDEB   EXE    37371   7-18-85   9:02a
+	        1 File(s)     44032 bytes free
+
+SYMDEB reported itself as "Version 3.Windows":
 
     Microsoft Windows Debugger
     Version 3.Windows
     (C) Copyright Microsoft Corp 1984, 1985
 
-but despite the weird version number, the help menu was identical to SYMDEB 3.01.  However, in subsequent
-versions of the Windows SDK, the "Windows" version of SYMDEB began to diverge more noticeably.  In the Windows 1.03 SDK,
+but despite the weird version number, the help menu was identical to SYMDEB 3.01.
+
+In subsequent versions of the Windows SDK, the "Windows" version of SYMDEB began to diverge more noticeably.
+In the Windows 1.03 SDK:
+
+	 Volume in drive A is WINDEV1    
+	 Directory of  A:\
+
+	SYMDEB   EXE    41269   8-27-86   2:14p
+	        1 File(s)     37888 bytes free
+
 SYMDEB reported itself as "Windows Version 2.00":
 
     Microsoft Symbolic Debug Utility
@@ -141,13 +170,21 @@ and included several Windows-specific commands, such as:
     DG - Displays global heap for Windows
     DQ - Displays [*] HQ - HTASK    CHANGEBITS WAKEBITS WAKEMASK
 
-The Windows 3.00 SDK was bundled with SYMDEB "Windows Version 3.00":
+In the Windows 3.00 SDK:
+ 
+     Volume in drive A is WIN30SDK02 
+     Directory of  A:\DBGTOOLS
+    
+    SYMDEB   EXE    44573   6-01-90   3:00a
+            1 File(s)     34816 bytes free
+
+SYMDEB reported itself as "Windows Version 3.00":
 
 	Microsoft Symbolic Debug Utility
 	Windows Version 3.00
 	(C) Copyright Microsoft Corp 1984-1990
 
-and included more Windows-specific commands:
+and included even more Windows-specific commands:
 
 	DH - Displays local heap for current DS
 	DG - Displays global heap for Windows

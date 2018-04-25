@@ -88,22 +88,22 @@ function addStickyMachine(idMachine, sPosition)
 }
 
 /**
- * findTop(obj)
+ * findTop(element)
  *
- * @param {Object} obj
+ * @param {HTMLElement} element
  */
-function findTop(obj)
+function findTop(element)
 {
     let curTop = 0;
-    if (typeof obj.offsetParent != 'undefined' && obj.offsetParent) {
-        while (obj.offsetParent) {
-            curTop += obj.offsetTop;
-            obj = obj.offsetParent;
+    if (typeof element.offsetParent != 'undefined' && element.offsetParent) {
+        while (element.offsetParent) {
+            curTop += element.offsetTop;
+            element = element.offsetParent;
         }
-        curTop += obj.offsetTop;
+        curTop += element.offsetTop;
     }
-    else if (obj.y) {
-        curTop += obj.y;
+    else if (element['y']) {
+        curTop += element['y'];
     }
     return curTop;
 }
