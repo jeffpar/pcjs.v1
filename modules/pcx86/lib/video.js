@@ -1251,7 +1251,12 @@ Card.CRTC = {
         CURSORHI:       0x0E,           // (same as MDA/CGA)
         CURSORLO:       0x0F,           // (same as MDA/CGA)
         VRSTART:        0x10,           // (formerly PENHI on MDA/CGA)
-        VREND:          0x11,           // (formerly PENLO on MDA/CGA; last register on the original 6845 controller)
+        VREND:          {               // (formerly PENLO on MDA/CGA; last register on the original 6845 controller)
+            INDX:       0x11,
+            HSCAN:          0x0F,       // the horizontal scan count value when the vertical retrace output signal becomes inactive
+            UNCLEAR_VRINT:  0x10,       // clear vertical retrace interrupt if NOT set
+            DISABLE_VRINT:  0x20        // enable vertical retrace interrupt if NOT set
+        },
         VDEND:          0x12,
         /*
          * The OFFSET register (bits 0-7) specifies the logical line width of the screen.  The starting memory address
@@ -2419,6 +2424,8 @@ class Video extends Component {
         let aModelDefaults = Video.MODEL[this.model] || Video.MODEL['mda'];
 
         this.nCard = aModelDefaults[0];
+        this.nIRQ = (this.nCard >= Video.CARD.EGA)? ChipSet.IRQ.VID : undefined;
+
         this.nCardFont = 0;
         this.nActiveFont = this.nAlternateFont = 0;
         this.nFontSelect = 0;                       // current set of selectable logical fonts
@@ -2771,6 +2778,12 @@ class Video extends Component {
         }
 
         this.cpu.addTimer(this.id, function updateScreenTimer() {
+            if (video.nIRQ) {
+                let card = video.cardActive;
+                if (!(card.regCRTData[Card.CRTC.EGA.VREND.INDX] & Card.CRTC.EGA.VREND.DISABLE_VRINT)) {
+                    if (video.chipset) video.chipset.setIRR(video.nIRQ);
+                }
+            }
             video.updateScreen();
         }, 1000 / Video.UPDATES_PER_SECOND);
     }
@@ -5698,10 +5711,20 @@ class Video extends Component {
         } else {
             /*
              * For the EGA/VGA, we must make offset-doubling dependent on attribute (odd) byte addressibility.
+             * For example, Fantasy Land uses a text-mode buffer mapped at 0xA0000 without odd/even addressing.
+             *
+             * TODO: Setting nPointsPerByte properly would ideally be taken care of in setDimensions(), but there's
+             * no guarantee this particular controller tweak will be made BEFORE we detect and initiate a mode change.
              */
-            let nShift = ((card.regSEQData[Card.SEQ.MEMMODE.INDX] & (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.SEQUENTIAL)) == Card.SEQ.MEMMODE.ALPHA)? 1 : 0;
+            let nShift = 0;
+            let bMemMode = this.cardEGA.regSEQData[Card.SEQ.MEMMODE.INDX] & (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.SEQUENTIAL);
+            if (bMemMode == Card.SEQ.MEMMODE.ALPHA) {
+                nShift = 1;
+                this.nPointsPerByte = 0.5;
+            } else if (bMemMode == (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.SEQUENTIAL)) {
+                this.nPointsPerByte = 1.0;
+            }
             addrScreen += card.offStartAddr << nShift;
-
             if (card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
                 /*
                  * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows, but since
@@ -5864,19 +5887,27 @@ class Video extends Component {
          * If MDA.MODE.BLINK_ENABLE is clear, then we always set ATTRS.DRAW_FGND and never mask the blink
          * bit in a cell's attributes bits, since it's actually an intensity bit in that case.
          */
+        let card = this.cardActive;
         let cCells = 0, cUpdated = 0;
         let dataBlink = 0;
         let dataDraw = (Video.ATTRS.DRAW_FGND << 8);
         let dataMask = 0xfffff;
-        let adwMemory = this.cardActive.adwMemory;
+        let adwMemory = card.adwMemory;
 
-        let nbCharExtra = 1;
-        let nShift = (this.cardActive.nAccess & Card.ACCESS.WRITE.PAIRS)? 1 : 0;
+        /*
+         * Normally, cbCell will be 2, when attribute bytes are addressible (interleaved) with character bytes,
+         * but Fantasy Land is an exception.  Which is another great reason why the loop below needs to get both
+         * bytes directly from adwMemory, because reading them with bus.getShortDirect(addrScreen) won't always work.
+         */
+        let cbCell = (1 / this.nPointsPerByte)|0;
+        let nShift = (card.nAccess & Card.ACCESS.WRITE.PAIRS)? 1 : 0;
 
-        let fBlinkEnable = (this.cardActive.regMode & Card.MDA.MODE.BLINK_ENABLE);
+        let fBlinkEnable = (card.regMode & Card.MDA.MODE.BLINK_ENABLE);
         if (this.nCard >= Video.CARD.EGA) {
-            fBlinkEnable = (this.cardActive.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.BLINK_ENABLE);
-            if (this.cardActive.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.SEQUENTIAL) nbCharExtra = 0;
+            fBlinkEnable = (card.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.BLINK_ENABLE);
+            if (card.getCRTCReg(Card.CRTC.EGA.LINECOMP) < card.getCRTCReg(Card.CRTC.EGA.VDEND)) {
+                dataBlink |= 0;
+            }
         }
 
         if (fBlinkEnable) {
@@ -5888,7 +5919,7 @@ class Video extends Component {
         this.cBlinkVisible = 0;
         let col = iCell % this.nCols;
         let row = (iCell / this.nCols)|0;
-        let nbRowExtra = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols /* - iCellFirst */) << nbCharExtra) : 0);
+        let nbRowExtra = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols /* - iCellFirst */) << (cbCell-1)) : 0);
 
         while (addrScreen < addrScreenLimit && iCell < nCells) {
 
@@ -5896,7 +5927,6 @@ class Video extends Component {
             this.assert(idw >= 0 && idw < adwMemory.length);
 
             let data = (adwMemory[idw] & 0xffff);
-            // let data = this.bus.getShortDirect(addrScreen);
 
             data |= dataDraw;
             if (data & dataBlink) {
@@ -5934,7 +5964,7 @@ class Video extends Component {
 
             cCells++;
             iCell++;
-            addrScreen += 1 + nbCharExtra;
+            addrScreen += cbCell;
             if (++col >= this.nCols) {
                 col = 0;
                 if (++row >= this.nRows) break;
@@ -7258,6 +7288,7 @@ class Video extends Component {
     outCRTCData(card, port, bOut, addrFrom)
     {
         if (card.regCRTIndx < card.nCRTCRegs) {
+
             /*
              * To simulate how the 6845 effectively ignores changes to CURSCAN or CURSCANB whenever one is written
              * while the other is currently > MAXSCAN, we check for those writes now, and ignore the write as appropriate.
@@ -7275,6 +7306,7 @@ class Video extends Component {
                     }
                 }
             }
+
             let fModified = (card.regCRTData[card.regCRTIndx] !== bOut);
             if (fModified || Video.TRAPALL) {
                 if (!addrFrom || this.messageEnabled()) {
@@ -7282,6 +7314,15 @@ class Video extends Component {
                 }
                 card.regCRTData[card.regCRTIndx] = bOut;
             }
+
+            if (card.regCRTIndx == Card.CRTC.EGA.VREND.INDX) {
+                if (this.nIRQ) {
+                    if (!(bOut & Card.CRTC.EGA.VREND.UNCLEAR_VRINT)) {
+                        if (this.chipset) this.chipset.clearIRR(this.nIRQ);
+                    }
+                }
+            }
+
             if (card.regCRTIndx == Card.CRTC.STARTHI || card.regCRTIndx == Card.CRTC.STARTLO) {
                 /*
                  * Both STARTHI and STARTLO are supposed to be latched at the start of every VRETRACE interval.
@@ -7295,6 +7336,7 @@ class Video extends Component {
                 this.getRetraceBits(card);
                 card.nVertPeriodsStartAddr = card.nVertPeriods;
             }
+
             /*
              * During mode changes on the EGA, all the CRTC regs are typically programmed in sequence,
              * and if that's all that's happening with Card.CRTC.MAXSCAN, then we don't want to treat

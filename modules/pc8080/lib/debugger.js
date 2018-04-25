@@ -3507,7 +3507,7 @@ class Debugger8080 extends Debugger {
     {
         var dbg = this;
         var fRegs = (sCmd != "t");
-        var nCount = this.parseValue(sCount, null, true) || 1;
+        var nCount = this.parseValue(sCount, undefined, true) || 1;
         var nCycles = (nCount == 1? 0 : 1);
         if (sCmd == "tc") {
             nCycles = nCount;

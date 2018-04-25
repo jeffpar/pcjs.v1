@@ -40,7 +40,7 @@ class Net {
      * hasParm(sParm, sValue, req)
      *
      * @param {string} sParm
-     * @param {String} sValue (pass null to check for the presence of ANY sParm)
+     * @param {string} [sValue] (pass undefined to check for the presence of ANY sParm)
      * @param {Object} [req] is the web server's (ie, Express) request object, if any
      * @return {boolean} true if the request Object contains the specified parameter/value, false if not
      *

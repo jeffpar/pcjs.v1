@@ -3682,7 +3682,7 @@ class DebuggerPDP11 extends Debugger {
 
         var dbg = this;
         var fRegs = (sCmd != "t");
-        var nCount = this.parseValue(sCount, null, true) || 1;
+        var nCount = this.parseValue(sCount, undefined, true) || 1;
 
         /*
          * We used to set nCycles to 1 when a count > 1 was specified, because nCycles set
