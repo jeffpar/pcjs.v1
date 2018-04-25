@@ -18180,7 +18180,7 @@ class Debugger extends Component
             sOp = (iValue < iLimit? asValues[iValue++] : "");
 
             if (sValue) {
-                v = this.parseValue(sValue, null, aUndefined, nUnary);
+                v = this.parseValue(sValue, undefined, aUndefined, nUnary);
             } else {
                 if (sOp == '{') {
                     let cOpen = 1;
@@ -18581,9 +18581,9 @@ class Debugger extends Component
      * parseValue(sValue, sName, fQuiet, nUnary)
      *
      * @this {Debugger}
-     * @param {string|undefined} sValue
-     * @param {string|null|*} [sName] is the name of the value, if any
-     * @param {Array|undefined|boolean} [fQuiet]
+     * @param {string} [sValue]
+     * @param {string} [sName] is the name of the value, if any
+     * @param {Array|boolean} [fQuiet]
      * @param {number} [nUnary] (0 for none, 1 for negate, 2 for complement, 3 for leading zeros)
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
      */
@@ -18592,13 +18592,13 @@ class Debugger extends Component
         let value;
         let aUndefined = Array.isArray(fQuiet)? fQuiet : undefined;
 
-        if (sValue != null) {
+        if (sValue != undefined) {
             let iReg = this.getRegIndex(sValue);
             if (iReg >= 0) {
                 value = this.getRegValue(iReg);
             } else {
                 value = this.getVariable(sValue);
-                if (value != null) {
+                if (value != undefined) {
                     let sUndefined = this.getVariableFixup(sValue);
                     if (sUndefined) {
                         if (aUndefined) {
@@ -18622,7 +18622,7 @@ class Debugger extends Component
                     value = Str.parseInt(sValue, sValue.length > 1 || this.nBase > 10? this.nBase : 10);
                 }
             }
-            if (value != null) {
+            if (value != undefined) {
                 value = this.truncate(this.parseUnary(value, nUnary));
             } else {
                 if (!fQuiet) {
@@ -22359,7 +22359,7 @@ class Debugger8080 extends Debugger {
     {
         var dbg = this;
         var fRegs = (sCmd != "t");
-        var nCount = this.parseValue(sCount, null, true) || 1;
+        var nCount = this.parseValue(sCount, undefined, true) || 1;
         var nCycles = (nCount == 1? 0 : 1);
         if (sCmd == "tc") {
             nCycles = nCount;

@@ -300,7 +300,7 @@ function HTMLOut(sPath, sFile, fRebuild, req, done)
      * Check the global cache setting, as well as the presence of ANY special commands
      * that we would never want to cache.
      */
-    if (!fCache || fServerDebug || net.hasParm(net.GORT_COMMAND, null, req) || net.hasParm(net.REVEAL_COMMAND, null, req)) {
+    if (!fCache || fServerDebug || net.hasParm(net.GORT_COMMAND, undefined, req) || net.hasParm(net.REVEAL_COMMAND, undefined, req)) {
         this.loadFile(this.sTemplateFile, true);
         return;
     }
@@ -1386,7 +1386,7 @@ HTMLOut.prototype.getHTMLFile = function(sToken, sIndent, aParms)
      * so currently our only bypass option is to set the token replacement value to an empty string, otherwise
      * replaceTokens() won't think we're done.
      */
-    if (fServerDebug || net.hasParm(net.GORT_COMMAND, null, this.req)) {
+    if (fServerDebug || net.hasParm(net.GORT_COMMAND, undefined, this.req)) {
         this.aTokens[sToken] = "";
         return;
     }
