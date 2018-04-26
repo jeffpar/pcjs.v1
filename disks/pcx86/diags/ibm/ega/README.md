@@ -23,7 +23,7 @@ This software was first discussed in the "[FantasyLand](/blog/2017/07/03/)" PCjs
 
 A detailed [description](#description-of-fantasy-land) of the software, along with some
 [configuration details](#configuration-details) and a [directory listing](#directory-of-ibm-ega-fantasy-land-demo),
-are provided below.
+are provided below.  A configuration with the [PCjs Debugger](debugger/) is available as well.
 
 Fantasy Land still has some issues running in the PCx86 emulator; the most obvious one is the lack of pixel
 panning in text mode, but hopefully that will be added in the near future.
@@ -90,8 +90,7 @@ or connect your EGA to the older Personal Computer Color Display (Model 5153) an
     ---   ---   ---   ---
     OFF   OFF   OFF    ON
 
-The machine above uses the last option (ie, a Color Display configuration).  A configuration with the
-[PCjs Debugger](debugger/) is available as well.
+The machine above uses the last option (ie, a Color Display configuration).
 
 The EGA supported fonts with character heights up to 32 scan lines, so the maximum font size for a complete set of
 256 characters was 8K.  However, the EGA required each font to be loaded on a 16K boundary in plane 2, so if
