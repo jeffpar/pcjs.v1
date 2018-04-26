@@ -204,9 +204,11 @@ you can already get a good sense of what the map looked like, and enjoy all the 
 wife Daphne created, using the newfound power of character cell animation made possible by IBM's Enhanced Graphics
 Adapter.
 
-Watch Fantasy Land run through its automated tour in the [machine below](#ibm-ega-fantasy-land-demo).  Until PCx86 supports
-pixel panning in text modes yet, none of Fantasy Land's scrolling operations will be as smooth as they should be.
-This will be addressed in a future PCjs update.
+Watch Fantasy Land run through its automated tour in the machine below.  Wait for the introductory screen to
+display "PRESS ANY KEY TO CONTINUE", press a key, and then the tour will begin.
+
+Until PCx86 supports pixel panning in text modes, Fantasy Land's scrolling operations will not be as smooth as they
+should be, but that will be addressed in a future PCjs update.
 
 ### IBM EGA Fantasy Land Demo
 
