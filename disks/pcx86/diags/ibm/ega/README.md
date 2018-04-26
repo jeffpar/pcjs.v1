@@ -25,8 +25,11 @@ A detailed [description](#description-of-fantasy-land) of the software, along wi
 [configuration details](#configuration-details) and a [directory listing](#directory-of-ibm-ega-fantasy-land-demo),
 are provided below.  A configuration with the [PCjs Debugger](debugger/) is available as well.
 
-Fantasy Land still has some issues running in the PCx86 emulator; the most obvious one is the lack of pixel
-panning in text mode, but hopefully that will be added in the near future.
+Watch Fantasy Land run through its automated tour in the machine below.  Wait for the introductory screen to
+display "PRESS ANY KEY TO CONTINUE", press a key, and then the tour will begin.
+
+Until PCx86 supports pixel panning in text modes, Fantasy Land's scrolling operations will not be as smooth as they
+should be, but that will be addressed in a future PCjs update.
 
 {% include machine.html id="ibm5160" %}
 
