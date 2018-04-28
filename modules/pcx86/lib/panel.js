@@ -252,7 +252,7 @@ class Panel extends Component {
      * The Panel component has no required (parmsPanel) properties.
      *
      * @this {Panel}
-     * @param {Object} parmsPanel
+     * @param {Object} [parmsPanel]
      */
     constructor(parmsPanel)
     {
@@ -1051,6 +1051,24 @@ class Panel extends Component {
             }
             Component.bindComponentControls(panel, ePanel, PCX86.APPCLASS);
             if (fReady) panel.setReady();
+        }
+        if (!fReady) {
+            /*
+             * If no panel was created for this invocation, then there must be a machine without
+             * a panel; find it and give it a panel now.  Panels used to be optional, but now they
+             * provide services to other components, so every machine gets one now, even if there
+             * was no <panel> element and associated controls.
+             */
+            let aMachines = Component.getMachines();
+            for (let i in aMachines) {
+                let idPanel = aMachines[+i] + ".panel";
+                let panel = Component.getComponentByType("Panel", idPanel);
+                if (!panel) {
+                    panel = new Panel({'id': idPanel});
+                    panel.setReady();
+                    break;
+                }
+            }
         }
     }
 }

@@ -2,6 +2,9 @@
 layout: page
 title: "TI-57 Programmable Calculator (with Original ROM)"
 permalink: /devices/ti57/machine/
+preview: /devices/ti57/images/ti57-icon.png
+icons:
+  - /devices/ti57/images/ti57-icon-180x180.png
 machines:
   - id: ti57
     type: ti57
@@ -75,7 +78,7 @@ If you want any of those features, visit the [TI-57 Resources](../) page.
 {% include machine.html id="ti57" config="json" %}
 
 <div id="ti57">
-  <img id="imageTI57" src="/devices/ti57/images/TI-57.png" alt="TI-57 Calculator"/>
+  <img id="imageTI57" src="/devices/ti57/images/ti57.png" alt="TI-57 Calculator"/>
   <div id="displayTI57"></div>
   <div id="ind2nd" class="indTI57">2nd</div>
   <div id="indINV" class="indTI57">INV</div>

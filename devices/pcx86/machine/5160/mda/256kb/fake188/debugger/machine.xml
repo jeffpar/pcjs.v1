@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.65.0/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.66.0/machine.xsl"?>
 <machine id="ibm5160" type="pcx86" border="1" width="740px" pos="center" background="default">
 	<name pos="center">IBM PC XT (80188 CPU), Monochrome Display, 256K RAM, 10Mb Drive</name>
 	<computer id="xt188-mda-256k" name="IBM PC XT"/>
