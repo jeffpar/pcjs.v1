@@ -135,7 +135,7 @@ One enterprising person, [Sean Riddle](http://seanriddle.com/tms1500.html), had 
 of a [Decapped TMS-1500 Chip](http://seanriddle.com/ti57rombits.jpg) and created a "transcript" of all the ROM bits.
 To get some idea of how tedious that process is, here's a small section of that ROM image:
 
-![TI-57 ROM Image](/devices/ti57/images/TI-57-ROM.png)
+![TI-57 ROM Image](/devices/ti57/images/ti57-rom.png)
 
 So, how to be sure that that transcript was accurate?  I decided to make my own independent transcript of all 26,624
 ones and zeros, and then compare the results:
@@ -185,7 +185,7 @@ backward-compatibility.
 {% include machine.html id="ti57" config="json" %}
 
 <div id="ti57">
-  <img id="imageTI57" src="/devices/ti57/images/TI-57.png" alt="TI-57 Calculator"/>
+  <img id="imageTI57" src="/devices/ti57/images/ti57.png" alt="TI-57 Calculator"/>
   <div id="displayTI57"></div>
   <div id="ind2nd" class="indTI57">2nd</div>
   <div id="indINV" class="indTI57">INV</div>

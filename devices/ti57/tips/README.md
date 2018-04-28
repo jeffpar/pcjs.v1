@@ -151,7 +151,7 @@ etc.)
 {% include machine.html id="ti57" config="json" %}
 
 <div id="ti57">
-  <img id="imageTI57" src="/devices/ti57/images/TI-57.png"/>
+  <img id="imageTI57" src="/devices/ti57/images/ti57.png"/>
   <div id="displayTI57"></div>
   <button id="powerTI57">Power</button>
 </div>

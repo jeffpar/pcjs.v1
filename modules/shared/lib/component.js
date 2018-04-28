@@ -123,6 +123,7 @@ class Component {
 
         let i = this.id.indexOf('.');
         if (i < 0) {
+            this.idMachine = "PCjs";
             this.idComponent = this.id;
         } else {
             this.idMachine = this.id.substr(0, i);
@@ -188,6 +189,16 @@ class Component {
     static addMachine(idMachine)
     {
         Component.machines[idMachine] = {};
+    }
+
+    /**
+     * Component.getMachines()
+     *
+     * @return {Array.<string>}
+     */
+    static getMachines()
+    {
+        return Object.keys(Component.machines);
     }
 
     /**

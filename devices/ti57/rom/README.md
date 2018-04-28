@@ -54,7 +54,7 @@ was created, by carefully examining a photograph of the ROM array inside the chi
 
 The chip was labelled "TMC1501NC DI 7741".  Here's what a section of its ROM array looks like:
 
-![TI-57 ROM Section](/devices/ti57/images/TI-57-ROM.png)
+![TI-57 ROM Section](/devices/ti57/images/ti57-rom.png)
 
 Using the entire [ROM Array Photo](http://seanriddle.com/ti57rombits.jpg), and using the TI patents for comparison
 purposes, Sean created the following resources: 
