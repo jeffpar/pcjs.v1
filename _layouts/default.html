@@ -16,7 +16,7 @@
   {%- endcomment -%}
   {%- include head.html -%}
   <body>
-    {%- include body-header.html -%}
+    {%- if page.layout != "pwa" -%}{%- include body-header.html -%}{%- endif -%}
     <div class="page-content">
       <div class="wrapper">
         {{ content }}

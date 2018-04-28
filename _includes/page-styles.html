@@ -1,5 +1,5 @@
 {% if page.styles != nil %}
-  <style type="text/css">
+    <style type="text/css">
   {%- for id in page.styles -%}
     {% if id[0] contains "_" %}
       #{{ id[0] | remove_first:"_" }} {
@@ -15,5 +15,5 @@
       }
     {% endif %}
   {%- endfor -%}
-  </style>
+    </style>
 {% endif %}

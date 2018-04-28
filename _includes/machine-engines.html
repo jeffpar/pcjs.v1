@@ -123,8 +123,9 @@ The following optional machine properties will be added to the 'parms' property:
   {%- endunless -%}
   {%- capture machine_parms -%}{{ site.left_brace }}{{ machine_autoMount }}{{ machine_autoScript }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_drives }}{{ machine_resume }}{{ machine_sound }}{{ machine_state }}{{ machine_commands }}{{ machine_messages }}{{ machine_connection }}{{ site.right_brace }}{%- endcapture -%}
   {%- if site.pcjs.compiled == true and machine.uncompiled != true -%}
-    {%- capture page_script -%}
-      <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/{{ machine_type }}.js"></script>{%- endcapture -%}
+    {% capture page_script %}
+      <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/{{ machine_type }}.js"></script>
+    {% endcapture %}
     {%- unless page_scripts contains page_script -%}
       {{ page_script }}
     {%- endunless -%}
@@ -133,8 +134,9 @@ The following optional machine properties will be added to the 'parms' property:
       {%- capture machine_template -%}{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/components.xsl{%- endcapture -%}
     {%- endif -%}
   {%- else -%}
-    {%- capture page_script -%}
-    <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/{{ machine_type }}-uncompiled.js"></script>{%- endcapture -%}
+    {% capture page_script %}
+    <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/{{ machine_type }}-uncompiled.js"></script>
+    {% endcapture %}
     {%- unless page_scripts contains page_script -%}
       {{ page_script }}
     {%- endunless -%}
