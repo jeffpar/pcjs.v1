@@ -1,14 +1,20 @@
 ---
-layout: page
+layout: pwa
 title: "TI-57 Programmable Calculator (with Original ROM)"
-permalink: /devices/ti57/machine/
-preview: /devices/ti57/images/ti57-icon.png
+permalink: /devices/ti57/machine/webapp/
+preview: /devices/ti57/images/ti57.png
+iconList:
+  - size: 180x180
+    url: /devices/ti57/images/ti57-icon-180x180.png
+iconTitle: TI-57
 machines:
   - id: ti57
     type: ti57
     name: TI-57 Programmable Calculator
-    config: rev0/ti57.json
+    config: ../rev0/ti57.json
 styles:
+  .page-content:
+    padding: 0;
   _ti57:
     position: relative;
     display: inline-block;
@@ -65,14 +71,6 @@ styles:
     height: 5%;
     opacity: 0;
 ---
-
-TI-57 Programmable Calculator (with Original ROM)
--------------------------------------------------
-
-This is a demonstration of the PCjs TI-57 Emulator with no diagnostic features enabled.
-Visit the [TI-57 Resources](../) page for more options.
-
-The TI-57 Emulator is also available as a [Web Application](webapp/).
 
 {% include machine.html id="ti57" config="json" %}
 
