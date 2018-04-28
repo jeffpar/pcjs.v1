@@ -48,4 +48,4 @@ The back of every TI-57 also mentions these patents:
 	       3855577    4014013
 	       4005293
 
-![TI-57 Back](../images/TI-57-Back.jpg)
+![TI-57 Back](../images/ti57-back.jpg)

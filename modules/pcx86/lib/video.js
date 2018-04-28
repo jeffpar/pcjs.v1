@@ -4660,8 +4660,6 @@ class Video extends Component {
              * However, that option was rather drastic.  If the cursor had ALSO just moved (ie, this.cBlinkVisible < 0),
              * we didn't have to worry about it, so we could at least be more selective about when to invalidate the cache:
              *
-             *      if (this.cBlinkVisible >= 0) this.iCellCacheValid = 0;
-             *
              * But now we have the option of invalidating just a single cell (and marking the cache as "partially valid"),
              * so that's what we do.  Granted, a lot of hand-wringing over an uncommon operation, but that's how we roll.
              */
@@ -5407,14 +5405,17 @@ class Video extends Component {
      */
     invalidateCellCache(fColors, nFontSelect, nFontPrev)
     {
-        if (this.iCellCacheValid && nFontSelect != undefined) {
-            /*
-             * We want to do a "smart" (aka selective) invalidation of the cell cache, invalidating only
-             * those cells containing characters whose current font data differs from the previous font data.
-             */
-            if (nFontSelect == nFontPrev) return 0;
-            let aCellCache = this.aCellCache;
-            if (aCellCache) {
+        if (this.iCellCacheValid) {
+            if (fColors !== false) {
+                this.fRGBValid = false;
+            }
+            else if (nFontSelect !== undefined) {
+                /*
+                 * We want to do a "smart" (aka selective) invalidation of the cell cache, invalidating only
+                 * those cells containing characters whose current font data differs from the previous font data.
+                 */
+                if (nFontSelect == nFontPrev) return 0;
+                let aCellCache = this.aCellCache;
                 let nCells = 0;
                 /*
                  * getFontDiff() returns an empty array if the current and previous fonts are the same, which
@@ -5441,9 +5442,15 @@ class Video extends Component {
                     }
                 }
                 return nCells;
+            } else {
+                /*
+                 * When no color change AND no font change has occurred, since the cache was at least partially
+                 * valid already, we make sure it's partially valid.
+                 */
+                this.iCellCacheValid = 1;
+                return 0;
             }
         }
-        if (fColors) this.fRGBValid = false;
         return this.initCellCache();
     }
 
@@ -5695,7 +5702,7 @@ class Video extends Component {
             offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
             if (card.offStartAddr !== offStartAddr) {
                 card.offStartAddr = offStartAddr;
-                this.invalidateCellCache();
+                this.invalidateCellCache(false);
             }
             card.nVertPeriodsStartAddr = 0;
         }
@@ -6543,19 +6550,24 @@ class Video extends Component {
             offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
             if (card.offStartAddr != offStartAddr) {
                 card.offStartAddr = offStartAddr;
-                this.invalidateCellCache();
+                this.invalidateCellCache(false);
             }
             card.nVertPeriodsStartAddr = 0;
         } else {
             card.fATCData = false;
             let iReg = card.regATCIndx & Card.ATC.INDX_MASK;
             if (iReg >= Card.ATC.PALETTE_REGS || !fPalEnabled) {
-                if (Video.TRAPALL || card.regATCData[iReg] !== bOut) {
+                let fModified = (card.regATCData[iReg] !== bOut);
+                if (Video.TRAPALL || fModified) {
                     if (!addrFrom || this.messageEnabled()) {
                         this.printMessageIO(port, bOut, addrFrom, "ATC." + card.asATCRegs[iReg]);
                     }
+                }
+                if (fModified) {
                     card.regATCData[iReg] = bOut;
-                    this.invalidateCellCache(true);
+                    if (iReg != Card.ATC.OVERSCAN.INDX && iReg != Card.ATC.HPAN.INDX) {
+                        this.invalidateCellCache(true);
+                    }
                 }
             }
         }
@@ -7344,7 +7356,7 @@ class Video extends Component {
              * If a split-screen condition has been modified, then partially invalidate the cell cache.
              */
             if (card.regCRTIndx == Card.CRTC.EGA.LINECOMP && fModified) {
-                this.iCellCacheValid = 1;
+                this.invalidateCellCache(false);
             }
 
             if (card.regCRTIndx == Card.CRTC.STARTHI || card.regCRTIndx == Card.CRTC.STARTLO) {

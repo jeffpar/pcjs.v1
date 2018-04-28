@@ -186,7 +186,7 @@ NOTE: It's possible I don't have the TI-55 Emulator properly clocked yet, becaus
 {% include machine.html id="ti57" config="json" %}
 
 <div id="ti57">
-  <img id="imageTI57" src="/devices/ti57/images/TI-57.png" alt="TI-57 Calculator"/>
+  <img id="imageTI57" src="/devices/ti57/images/ti57.png" alt="TI-57 Calculator"/>
   <div id="displayTI57"></div>
   <div id="ind2ndTI57" class="indTI57">2nd</div>
   <div id="indINVTI57" class="indTI57">INV</div>
