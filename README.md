@@ -63,7 +63,9 @@ Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, 
 ![Microsoft Adventure (1981)](/disks/pcx86/games/microsoft/adventure/thumbnail.jpg "link:/disks/pcx86/games/microsoft/adventure/:200:120")
 ![Executive Suite (1982)](/apps/pcx86/1982/esuite/thumbnail.jpg "link:/apps/pcx86/1982/esuite/:200:120")
 ![Zork I (1982)](/disks/pcx86/games/infocom/zork1/thumbnail.jpg "link:/disks/pcx86/games/infocom/zork1/:200:120")
+![Exploring the IBM PC (1983)](/disks/pcx86/apps/ibm/exploring/5150/mda/thumbnail.jpg "link:/disks/pcx86/apps/ibm/exploring/5150/mda/:200:120")
 ![Adventures in Math (1983)](/apps/pcx86/1983/adventmath/thumbnail.jpg "link:/apps/pcx86/1983/adventmath/:200:120")
+![Fantasy Land (1984)](/disks/pcx86/apps/ibm/fland/thumbnail.jpg "link:/disks/pcx86/apps/ibm/fland/:200:120")
 ![Rogue (1985)](/apps/pcx86/1985/rogue/thumbnail.jpg "link:/apps/pcx86/1985/rogue/:200:120")
 
 There are many more [PCx86 Demos](/devices/pcx86/machine/#ready-to-run-app-demos), including an

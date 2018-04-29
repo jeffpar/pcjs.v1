@@ -51177,7 +51177,6 @@ class Video extends Component {
             let binding = this.bindingsExternal[i];
             if (this.kbd && this.kbd.setBinding(...binding)) continue;
             if (this.panel && this.panel.setBinding(...binding)) continue;
-
         }
 
         this.bEGASwitches = 0x09;   // our default "switches" setting (see aEGAMonitorSwitches)

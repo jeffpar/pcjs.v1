@@ -39,6 +39,7 @@ along with live demonstrations.
 ### Applications
 
 * [Ashton-Tate dBase II](apps/other/dbase2/)
+* [IBM Fantasy Land EGA Demo](apps/ibm/fland/)
 * [IBM TopView](apps/ibm/topview/)
 * [Lotus 1-2-3](apps/lotus/123/)
 * [MicroPro WordStar](apps/other/wordstar/)
@@ -85,7 +86,6 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 
 * [COMPAQ Diagnostics and Utilities](diags/compaq/)
 * [IBM Diagnostics and Utilities](diags/ibm/)
-* [IBM EGA Fantasy Land Demo and Utilities](diags/ibm/ega/)
 * [IBM ROM BIOS Sources](roms/ibm/)
 * [PCx86 TestMonitor Support](/tests/pcx86/testmon/)
 * [Michael Abrash's VGA "Black Book" Tests](/tests/pcx86/vga/)

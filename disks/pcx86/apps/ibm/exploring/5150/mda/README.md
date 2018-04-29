@@ -2,6 +2,7 @@
 layout: page
 title: "Exploring the IBM Personal Computer 1.00 (Monochrome Version)"
 permalink: /disks/pcx86/apps/ibm/exploring/5150/mda/
+preview: /blog/images/exploring-the-ibm-pc-intro.jpg
 machines:
   - id: ibm5150
     type: pcx86
