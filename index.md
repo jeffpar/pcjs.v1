@@ -60,7 +60,9 @@ Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, 
 {% include screenshot.html src="/disks/pcx86/games/microsoft/adventure/thumbnail.jpg" width="200" height="120" title="Microsoft Adventure (1981)" link="/disks/pcx86/games/microsoft/adventure/" %}
 {% include screenshot.html src="/apps/pcx86/1982/esuite/thumbnail.jpg" width="200" height="120" title="Executive Suite (1982)" link="/apps/pcx86/1982/esuite/" %}
 {% include screenshot.html src="/disks/pcx86/games/infocom/zork1/thumbnail.jpg" width="200" height="120" title="Zork I (1982)" link="/disks/pcx86/games/infocom/zork1/" %}
+{% include screenshot.html src="/disks/pcx86/apps/ibm/exploring/5150/mda/thumbnail.jpg" width="200" height="120" title="Exploring the IBM PC (1983)" link="/disks/pcx86/apps/ibm/exploring/5150/mda/" %}
 {% include screenshot.html src="/apps/pcx86/1983/adventmath/thumbnail.jpg" width="200" height="120" title="Adventures in Math (1983)" link="/apps/pcx86/1983/adventmath/" %}
+{% include screenshot.html src="/disks/pcx86/apps/ibm/fland/thumbnail.jpg" width="200" height="120" title="Fantasy Land (1984)" link="/disks/pcx86/apps/ibm/fland/" %}
 {% include screenshot.html src="/apps/pcx86/1985/rogue/thumbnail.jpg" width="200" height="120" title="Rogue (1985)" link="/apps/pcx86/1985/rogue/" %}
 
 There are many more [PCx86 Demos](/devices/pcx86/machine/#ready-to-run-app-demos), including an
