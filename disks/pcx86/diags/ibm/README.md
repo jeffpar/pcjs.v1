@@ -30,8 +30,3 @@ IBM PC Diagnostics
 
 * [IBM PC AT Advanced Diagnostics 1.01](5170/1.01a/)
 * [IBM PC AT Advanced Diagnostics 2.07](5170/2.07a/)
-
-IBM EGA Demos and Utilities
----------------------------
-
-* [IBM EGA Fantasy Land Demo and Utilities](ega/)

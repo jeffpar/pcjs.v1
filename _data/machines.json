@@ -1,6 +1,6 @@
 {
   "shared": {
-    "version": "1.66.0",
+    "version": "1.66.1",
     "externs": [
       "./modules/shared/lib/externs.js"
     ],
