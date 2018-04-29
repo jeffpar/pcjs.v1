@@ -1,20 +1,26 @@
-<head>
+  <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>{% if page.title %}PCjs: {{ page.title }}{% else %}{{ site.title }}{% endif %}</title>
     <meta name="description" content="{{ site.description | rstrip }}">
-    {% if page.iconTitle != nil %}<meta name="apple-mobile-web-app-title" content="{{ page.iconTitle }}">{% endif %}
-    {% if page.layout == "pwa" %}<meta name="apple-mobile-web-app-capable" content="yes">{% endif %}
-    {% if page.preview != nil %}<meta property="og:image" content="{{ page.preview }}">{% endif %}
+    {%- if page.iconTitle != nil %}
+    <meta name="apple-mobile-web-app-title" content="{{ page.iconTitle }}">
+    {%- endif %}
+    {%- if page.layout == "pwa" %}
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    {%- endif %}
+    {%- if page.preview != nil %}
+    <meta property="og:image" content="{{ page.preview }}">
+    {%- endif %}
     <link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet">
     <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}">
     <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
-    {%- if page.iconList != nil -%}
-      {% for icon in page.iconList %}
+    {%- if page.iconList != nil %}
+      {%- for icon in page.iconList %}
     <link rel="apple-touch-icon" sizes="{{ icon.size }}" href="{{ site.baseurl }}{{ icon.url }}">
-      {% endfor %}
-    {%- else -%}
+      {%- endfor %}
+    {%- else %}
     <link rel="apple-touch-icon" sizes="57x57" href="{{ site.baseurl }}/versions/icons/current/pc-icon-57.png">
     <link rel="apple-touch-icon" sizes="72x72" href="{{ site.baseurl }}/versions/icons/current/pc-icon-72.png">
     <link rel="apple-touch-icon" sizes="76x76" href="{{ site.baseurl }}/versions/icons/current/pc-icon-76.png">
@@ -25,9 +31,9 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ site.baseurl }}/versions/icons/current/pc-icon-180.png">
     <link rel="apple-touch-icon" sizes="192x192" href="{{ site.baseurl }}/versions/icons/current/pc-icon-192.png">
     <link rel="apple-touch-icon" href="{{ site.baseurl }}/versions/icons/current/apple-touch-icon.png">
-    {%- endif -%}
+    {%- endif %}
     <link rel="icon" type="image/png" sizes="192x192" href="{{ site.baseurl }}/versions/icons/current/pc-icon-192.png">
     <link rel="shortcut icon" type="image/x-icon" href="{{ site.baseurl }}/versions/icons/current/favicon.ico">
-    {%- include machine-styles.html -%}
-    {%- include page-styles.html -%}
-</head>
+    {%- include machine-styles.html %}
+    {%- include page-styles.html %}
+  </head>
