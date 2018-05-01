@@ -77,8 +77,7 @@ var DbgAddr;
  *
  * @unrestricted
  */
-class Debugger extends Component
-{
+class Debugger extends Component {
     /**
      * Debugger(parmsDbg)
      *
