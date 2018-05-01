@@ -48845,7 +48845,8 @@ class Card extends Controller {
 
             this.nCard = nCard;
             this.addrBuffer = specs[2];     // default (physical) video buffer address
-            this.sizeBuffer = specs[3];     // default video buffer length (this is the total size, not the current visible size; this.cbScreen is calculated on the fly to reflect the latter)
+            this.sizeBuffer = specs[3];     // default video buffer length (this is the total size, not the current visible size;
+                                            // this.cbScreen is calculated on the fly to reflect the latter)
 
             /*
              * If no memory size is specified, then setMode() will use addMemory() to automatically add enough
@@ -48866,7 +48867,9 @@ class Card extends Controller {
             }
 
             this.fActive    = data[0];
-            this.regMode    = data[1];      // see MDA.MODE* or CGA.MODE_* (use (MDA.MODE.HIRES | MDA.MODE.VIDEO_ENABLE | MDA.MODE.BLINK_ENABLE) if you want to test blinking immediately after the initial power-on reset)
+            this.regMode    = data[1];      // see MDA.MODE* or CGA.MODE_*
+                                            // use MDA.MODE.HIRES | MDA.MODE.VIDEO_ENABLE | MDA.MODE.BLINK_ENABLE
+                                            // if you want to test blinking immediately after the initial power-on reset)
             this.regColor   = data[2];      // see CGA.COLOR.* (undefined on MDA)
             this.regStatus  = data[3];      // see MDA.STATUS.* or CGA.STATUS.*
             this.regCRTIndx = data[4] & 0xff;
@@ -49708,7 +49711,7 @@ Card.CRTC = {
         OFFSET:         0x13,
         UNDERLINE: {
             INDX:       0x14,
-            ROWSCAN:        0x1F,
+            SLMASK:         0x1F,
             COUNT_BY_4:     0x20,       // (VGA only)
             DWORD:          0x40        // (VGA only)
         },
@@ -50793,7 +50796,8 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.PAIRS] = Card.ACCESS.writeBytePairs;
  * @class Video
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
-class Video extends Component {
+class Video extends Component
+{
     /**
      * Video(parmsVideo, canvas, context, textarea, container, aDiagElements)
      *
@@ -51008,6 +51012,8 @@ class Video extends Component {
         this.aCellCache = [];
         this.nCellCache = 0;
         this.iCellCacheValid = 0;   // 0: invalid, 1: partially valid, 2: completely valid
+        this.fShifted = false;      // set to true whenever the image has been shifted by one or more pixels
+        this.nShiftLeft = this.nShiftUp = 0;
 
         /*
          * Since I've not found clear documentation on a reliable way to check whether a particular DOM element
@@ -51517,12 +51523,15 @@ class Video extends Component {
                         });
                         window.addEventListener("testPassive", null, opts);
                         window.removeEventListener("testPassive", null, opts);
-                    } catch (e) {}
+                    } catch (e) {
+                    }
                 }
 
                 control.addEventListener(
                     'touchstart',
-                    function onTouchStart(event) { video.onTouchStart(event); },
+                    function onTouchStart(event) {
+                        video.onTouchStart(event);
+                    },
                     addPassive? {passive: true} : false
                 );
 
@@ -51532,13 +51541,17 @@ class Video extends Component {
 
                 control.addEventListener(
                     'touchmove',
-                    function onTouchMove(event) { video.onTouchMove(event); },
+                    function onTouchMove(event) {
+                        video.onTouchMove(event);
+                    },
                     addPassive? {passive: true} : true
                 );
 
                 control.addEventListener(
                     'touchend',
-                    function onTouchEnd(event) { video.onTouchEnd(event); },
+                    function onTouchEnd(event) {
+                        video.onTouchEnd(event);
+                    },
                     false                   // we'll specify false for the 'useCapture' parameter for now...
                 );
 
@@ -51548,17 +51561,23 @@ class Video extends Component {
                 if (MAXDEBUG) {
                     control.addEventListener(
                         'mousedown',
-                        function onMouseDown(event) { video.onTouchStart(event); },
+                        function onMouseDown(event) {
+                            video.onTouchStart(event);
+                        },
                         false               // we'll specify false for the 'useCapture' parameter for now...
                     );
                     control.addEventListener(
                         'mousemove',
-                        function onMouseMove(event) { video.onTouchMove(event); },
+                        function onMouseMove(event) {
+                            video.onTouchMove(event);
+                        },
                         true
                     );
                     control.addEventListener(
                         'mouseup',
-                        function onMouseUp(event) { video.onTouchEnd(event); },
+                        function onMouseUp(event) {
+                            video.onTouchEnd(event);
+                        },
                         false               // we'll specify false for the 'useCapture' parameter for now...
                     );
                 }
@@ -51582,7 +51601,9 @@ class Video extends Component {
                  */
                 this.hLongTouch = null;
                 this.fLongTouch = false;
-                this.onLongTouch = function onLongTouch() { video.startLongTouch(); };
+                this.onLongTouch = function onLongTouch() {
+                    video.startLongTouch();
+                };
             }
         }
     }
@@ -51699,7 +51720,7 @@ class Video extends Component {
          * Due to the responsive nature of our pages, the displayed size of the canvas may be smaller than the
          * allocated size, and the coordinates we receive from touch events are based on the currently displayed size.
          */
-        let xScale =  this.cxScreen / this.canvasScreen.offsetWidth;
+        let xScale = this.cxScreen / this.canvasScreen.offsetWidth;
         let yScale = this.cyScreen / this.canvasScreen.offsetHeight;
 
         /**
@@ -51967,7 +51988,7 @@ class Video extends Component {
              */
             let addrScreenLimit = this.cardActive.addrBuffer + this.cbScreen;
             for (let addrScreen = this.cardActive.addrBuffer; addrScreen < addrScreenLimit; addrScreen += 2) {
-                let dataRandom = (Math.random() * 0x10000)|0;
+                let dataRandom = (Math.random() * 0x10000) | 0;
                 let bChar, bAttr;
                 if (this.nMonitorType == ChipSet.MONITOR.EGACOLOR || this.nMonitorType == ChipSet.MONITOR.VGACOLOR) {
                     /*
@@ -51980,7 +52001,9 @@ class Video extends Component {
                     }
                 } else {
                     bChar = dataRandom & 0xff;
-                    bAttr = ((dataRandom & 0x100)? (Video.ATTRS.FGND_WHITE | Video.ATTRS.BGND_BLACK) : (Video.ATTRS.FGND_BLACK | Video.ATTRS.BGND_WHITE)) | ((Video.ATTRS.FGND_BRIGHT /* | Video.ATTRS.BGND_BLINK */) & (dataRandom >> 8));
+                    bAttr = ((dataRandom & 0x100)?
+                        (Video.ATTRS.FGND_WHITE | Video.ATTRS.BGND_BLACK) :
+                        (Video.ATTRS.FGND_BLACK | Video.ATTRS.BGND_WHITE)) | ((Video.ATTRS.FGND_BRIGHT /* | Video.ATTRS.BGND_BLINK */) & (dataRandom >> 8));
                 }
                 this.bus.setShortDirect(addrScreen, bChar | (bAttr << 8));
             }
@@ -52319,7 +52342,7 @@ class Video extends Component {
             this.aRGB[0] = Video.aCGAColors[regColor & (Card.CGA.COLOR.BORDER | Card.CGA.COLOR.BRIGHT)];
             let aColorSet = (regColor & Card.CGA.COLOR.COLORSET2)? Video.aCGAColorSet2 : Video.aCGAColorSet1;
             for (let iColor = 0; iColor < aColorSet.length; iColor++) {
-                this.aRGB[iColor+1] = Video.aCGAColors[aColorSet[iColor]];
+                this.aRGB[iColor + 1] = Video.aCGAColors[aColorSet[iColor]];
             }
             return this.aRGB;
         }
@@ -52353,9 +52376,9 @@ class Video extends Component {
                 for (i = 0; i < 256; i++) {
                     dw = aDAC[i] || 0;
 
-                    bRed =   (dw << 2) & 0xfc;
+                    bRed = (dw << 2) & 0xfc;
                     bGreen = (dw >> 4) & 0xfc;
-                    bBlue =  (dw >> 10) & 0xfc;
+                    bBlue = (dw >> 10) & 0xfc;
                     this.aRGB[i] = [bRed, bGreen, bBlue, 0xff];
                 }
             } else {
@@ -52386,13 +52409,13 @@ class Video extends Component {
 
                         dw = aDAC[b];
 
-                        bRed =   (dw << 2) & 0xfc;
+                        bRed = (dw << 2) & 0xfc;
                         bGreen = (dw >> 4) & 0xfc;
-                        bBlue =  (dw >> 10) & 0xfc;
+                        bBlue = (dw >> 10) & 0xfc;
                     } else {
-                        bRed =   (((b & 0x04)? 0xaa : 0) | ((b & 0x20)? 0x55 : 0));
+                        bRed = (((b & 0x04)? 0xaa : 0) | ((b & 0x20)? 0x55 : 0));
                         bGreen = (((b & 0x02)? 0xaa : 0) | ((b & 0x10)? 0x55 : 0));
-                        bBlue =  (((b & 0x01)? 0xaa : 0) | ((b & 0x08)? 0x55 : 0));
+                        bBlue = (((b & 0x01)? 0xaa : 0) | ((b & 0x08)? 0x55 : 0));
                     }
                     this.aRGB[i] = [bRed, bGreen, bBlue, 0xff];
                 }
@@ -52472,7 +52495,7 @@ class Video extends Component {
                 aRGBColors = this.getCardColors();
             }
 
-            switch(this.nCardFont) {
+            switch (this.nCardFont) {
             case Video.CARD.MDA:
                 if (this.aFontOffsets[1] != null) {
                     if (this.createFont(this.nCardFont, this.cxFontChar || 9, 14, this.aFontOffsets[1], this.cxFontChar? 0 : 0x0800, abFontData, false, aRGBColors, aColorMap)) {
@@ -53056,13 +53079,10 @@ class Video extends Component {
         /*
          * The least tricky way of disabling (ie, hiding) the cursor is to simply move it to an off-screen position.
          */
-        let iCellCursor = card.regCRTData[Card.CRTC.CURSORLO];
-        iCellCursor |= (card.regCRTData[Card.CRTC.CURSORHI] & card.addrMaskHigh) << 8;
+        let offCursor = card.regCRTData[Card.CRTC.CURSORLO] | ((card.regCRTData[Card.CRTC.CURSORHI] & card.addrMaskHigh) << 8);
+        offCursor -= (card.regCRTData[Card.CRTC.STARTLO] | ((card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8));
 
-        let offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
-        offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
-
-        iCellCursor -= offStartAddr;
+        let iCellCursor = Math.trunc(offCursor / this.nColsLogical) * (this.nColsBuffer) + (offCursor % this.nColsLogical);
 
         if (this.iCellCursor != iCellCursor) {
             //
@@ -53141,8 +53161,8 @@ class Video extends Component {
                 let data = this.aCellCache[this.iCellCursor];
                 if (data & drawCursor) {
                     data &= ~drawCursor;
-                    let col = this.iCellCursor % this.nCols;
-                    let row = (this.iCellCursor / this.nCols)|0;
+                    let col = this.iCellCursor % this.nColsBuffer;
+                    let row = (this.iCellCursor / this.nColsBuffer) | 0;
                     if (this.nActiveFont && this.aFonts[this.nActiveFont]) {
                         /*
                          * If we're using an off-screen buffer in text mode, then we need to keep it in sync with "reality".
@@ -53328,8 +53348,10 @@ class Video extends Component {
         this.nRows = this.nRowsDefault;
         this.nPointsPerCell = Video.aModeParms[Video.MODE.MDA_80X25][2];
         this.nPointsPerByte = Video.aModeParms[Video.MODE.MDA_80X25][3];
+        this.cxScreenCell = this.cyScreenCell = 1;
+        this.fOverBuffer = false;
 
-        let cbPadding = 0, cxCell = 0, cyCell = 0;
+        let cbPadding = 0, cxCell = 1, cyCell = 1;
         let modeParms = Video.aModeParms[this.nMode];
         if (modeParms) {
 
@@ -53362,47 +53384,41 @@ class Video extends Component {
                             let nRows = (cyScreen / font.cyChar) | 0;
                             if (nRows) this.nRows = nRows;
                         }
+                        /*
+                         * For now, fOverBuffer is disabled until we have improved vertical retrace synchronization.
+                         */
+                        // this.fOverBuffer = true;
                     }
                 }
+                this.cxScreenCell = (this.cxScreen / this.nCols) | 0;
+                this.cyScreenCell = (this.cyScreen / this.nRows) | 0;
             }
         }
 
-        this.nCells = (this.nCols * this.nRows)|0;
-        this.nCellCache = (this.nCells / this.nPointsPerCell)|0;
+        this.nColsBuffer = this.nColsLogical = this.nCols;
+        this.nRowsBuffer = this.nRows;
+        if (this.fOverBuffer) {
+            this.nColsBuffer++;
+            this.nRowsBuffer++;
+        }
+        this.nCells = (this.nColsBuffer * this.nRowsBuffer) | 0;
+        this.nCellCache = (this.nCells / this.nPointsPerCell) | 0;
         this.cbScreen = this.nCellCache;
         this.cbSplit = 0;
 
         if (cbPadding !== undefined) {
             this.cbScreen <<= 1;
-            this.cbScreen = (this.cbScreen + cbPadding)|0;
+            this.cbScreen = (this.cbScreen + cbPadding) | 0;
             this.cbSplit = (this.cbScreen + cbPadding) >> 1;
         }
 
-        this.cxScreenCell = (this.cxScreen / this.nCols)|0;
-        this.cyScreenCell = (this.cyScreen / this.nRows)|0;
+        this.cxBuffer = this.nColsBuffer * cxCell;
+        this.cyBuffer = this.nRowsBuffer * cyCell;
 
-        if (this.nCardFont) {
-            this.cxBuffer = this.nCols * cxCell;
-            this.cyBuffer = this.nRows * cyCell;
-        } else {
-            /*
-             * CGA graphics modes have their "cells" (pixels) split evenly across two halves of the video buffer, with
-             * EVEN scan lines in the first half and ODD scan lines in the second half, so unlike text modes, we can't set a
-             * limit of what's visible on-screen to "columns * rows", so the screen limit is set to match the buffer limit.
-             *
-             * In addition, updateScreen() requires an off-screen imageData buffer that matches the size of the entire screen,
-             * so that updateScreen() can set all pixels that have changed and then update the screen with a single drawImage().
-             *
-             * An alternative approach, with a smaller footprint, would be to allocate an off-screen buffer large enough for a
-             * single scan line, and redraw one scan line at a time, but given how EVEN and ODD scan lines are spread across the
-             * entire buffer, it's not clear there would be enough unchanged scan lines on average to make that approach faster.
-             */
-            this.cxScreenCell = this.cyScreenCell = 1;  // in graphics modes, a cell is one pixel
-            this.cxBuffer = this.nCols;
-            this.cyBuffer = this.nRows;
-        }
-
-        if (!this.cxBuffer || !this.cyBuffer) return;   // failsafe
+        /*
+         * Beyond calculating the theoretical dimensions, there's nothing more to do if we're in a "headless" mode.
+         */
+        if (!this.contextScreen) return;
 
         /*
          * Our 'smoothing' parameter defaults to null (which we treat the same as undefined), which means that
@@ -53424,8 +53440,8 @@ class Video extends Component {
 
         /*
          * Since cxCell and cyCell were originally defined in terms of cxScreen/nCols and cyScreen/nRows, you might think
-         * these border calculations would always be zero, but that would mean you overlooked the code above which tries to
-         * avoid stretching 40-column modes into an unpleasantly wide shape.
+         * these border calculations would always be zero, but we used to have code that tried to avoid stretching 40-column
+         * modes into an unpleasantly wide shape, so this code is being retained (for now).
          */
         this.xScreenOffset = this.yScreenOffset = 0;
         this.cxScreenOffset = this.cxScreen;
@@ -53494,7 +53510,7 @@ class Video extends Component {
 
                     let nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAXSCAN.INDX];
 
-                    switch(regGRCMisc & Card.GRC.MISC.MAPMEM) {
+                    switch (regGRCMisc & Card.GRC.MISC.MAPMEM) {
                     case Card.GRC.MISC.MAPA0128:
                         card.addrBuffer = 0xA0000;
                         card.sizeBuffer = cbBuffer;     // 0x20000
@@ -53802,10 +53818,10 @@ class Video extends Component {
     setPixel(imageData, x, y, rgb)
     {
         let index = (x + y * imageData.width) * rgb.length;
-        imageData.data[index]   = rgb[0];
-        imageData.data[index+1] = rgb[1];
-        imageData.data[index+2] = rgb[2];
-        imageData.data[index+3] = rgb[3];
+        imageData.data[index] = rgb[0];
+        imageData.data[index + 1] = rgb[1];
+        imageData.data[index + 2] = rgb[2];
+        imageData.data[index + 3] = rgb[3];
     }
 
     /**
@@ -54039,6 +54055,26 @@ class Video extends Component {
     }
 
     /**
+     * latchStartAddress()
+     *
+     * @this {Video}
+     */
+    latchStartAddress()
+    {
+        let card = this.cardActive;
+        let offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
+        offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
+        /*
+         * PARANOIA: Don't call invalidateCellCache() unless the start address we just "latched" actually changed.
+         */
+        if (card.offStartAddr !== offStartAddr) {
+            card.offStartAddr = offStartAddr;
+            this.invalidateCellCache(false);
+        }
+        card.nVertPeriodsStartAddr = 0;
+    }
+
+    /**
      * updateScreen(fForce)
      *
      * Propagates the video buffer to the cell cache and updates the screen with any changes.  Forced updates
@@ -54136,16 +54172,7 @@ class Video extends Component {
          * multi-display configuration.
          */
         if ((this.getRetraceBits(card) & Card.CGA.STATUS.VRETRACE) || card.nVertPeriodsStartAddr && card.nVertPeriodsStartAddr < card.nVertPeriods) {
-            /*
-             * PARANOIA: Don't call invalidateCellCache() unless the address we're about to "latch" actually changed.
-             */
-            let offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
-            offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
-            if (card.offStartAddr !== offStartAddr) {
-                card.offStartAddr = offStartAddr;
-                this.invalidateCellCache(false);
-            }
-            card.nVertPeriodsStartAddr = 0;
+            this.latchStartAddress();
         }
 
         let cbScreen = this.cbScreen;
@@ -54164,27 +54191,34 @@ class Video extends Component {
              * TODO: Setting nPointsPerByte properly would ideally be taken care of in setDimensions(), but there's
              * no guarantee this particular controller tweak will be made BEFORE we detect and initiate a mode change.
              */
-            let nShift = 0;
+            let shiftAddr = 0, shiftCols = 0;
             let bMemMode = this.cardEGA.regSEQData[Card.SEQ.MEMMODE.INDX] & (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.SEQUENTIAL);
             if (bMemMode == Card.SEQ.MEMMODE.ALPHA) {
-                nShift = 1;
+                shiftAddr = shiftCols = 1;
                 this.nPointsPerByte = 0.5;
             } else if (bMemMode == (Card.SEQ.MEMMODE.ALPHA | Card.SEQ.MEMMODE.SEQUENTIAL)) {
+                shiftCols = 1;
                 this.nPointsPerByte = 1.0;
             }
-            addrScreen += card.offStartAddr << nShift;
+            addrScreen += card.offStartAddr << shiftAddr;
             if (card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
                 /*
                  * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows, but since
                  * then, the logical width of screen memory (nColsLogical) can differ from the visible width (nCols).
                  * We now calculate the logical width, and the compute a new cbScreen in much the same way the original
                  * cbScreen was computed (but without any CGA-related padding considerations).
-                 *
-                 * TODO: I'm taking a lot of shortcuts in this calculation (eg, relying on nFont to detect text modes,
-                 * ignoring MODECTRL.BYTE_MODE, etc); generalize this someday.
                  */
-                this.nColsLogical = card.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nCardFont? 1 : (card.regCRTData[Card.CRTC.EGA.UNDERLINE.INDX] & Card.CRTC.EGA.UNDERLINE.DWORD)? 3 : 4);
-                cbScreen = ((this.nColsLogical * (this.nRows - 1) + this.nCols) / this.nPointsPerByte)|0;
+                this.nColsLogical = card.regCRTData[Card.CRTC.EGA.OFFSET] << (shiftCols || ((card.regCRTData[Card.CRTC.EGA.UNDERLINE.INDX] & Card.CRTC.EGA.UNDERLINE.DWORD)? 3 : 4));
+                cbScreen = ((this.nColsLogical * (this.nRowsBuffer - 1) + this.nColsBuffer) / this.nPointsPerByte)|0;
+                /*
+                 * If nRowsBuffer is larger than nRows (ie, over-buffering is enabled), we run the risk of attempting
+                 * to render past the limit of the frame buffer (addrScreenLimit); we're ONLY over-buffering in case the
+                 * the app decides to pan vertically, revealing pixels below the last full row, and obviously if there
+                 * isn't an additional row of data below that last full row, then we shouldn't over-buffer this time.
+                 */
+                if (this.nRowsBuffer > this.nRows && addrScreen + cbScreen > addrScreenLimit) {
+                    cbScreen = ((this.nColsLogical * (this.nRows - 1) + this.nColsBuffer) / this.nPointsPerByte)|0;
+                }
             }
         }
 
@@ -54222,7 +54256,7 @@ class Video extends Component {
                     nRowsHidden = (nRowsHidden / font.cyChar)|0;
                 }
                 if (nRowsHidden > 0) {
-                    cbScreenWrap = ((this.nColsLogical * (nRowsHidden - 1) + this.nCols) / this.nPointsPerByte)|0;
+                    cbScreenWrap = ((this.nColsLogical * (nRowsHidden - 1) + this.nColsBuffer) / this.nPointsPerByte)|0;
                     cbScreen -= ((this.nColsLogical * nRowsHidden) / this.nPointsPerByte)|0;
                     addrScreenWrap = addrBuffer;
                 }
@@ -54271,13 +54305,13 @@ class Video extends Component {
          * multiplied by nPointsPerByte, because cbScreen includes any and all off-screen cells, too.
          */
         let cCells = cbScreen * this.nPointsPerByte;
-        cCells = Math.trunc(cCells / this.nColsLogical) * this.nCols + (cCells % this.nColsLogical);
+        cCells = Math.trunc(cCells / this.nColsLogical) * this.nColsBuffer + (cCells % this.nColsLogical);
         if (cCells > nCells) cCells = nCells;
         let addrScreenLimit = addrScreen + cbScreen;
 
         /*
          * This next bit of code can be completely disabled if we discover problems with the dirty
-         * memory block tracking feature, or if we need to remove or disable that feature in the future.
+         * memory block tracking feature or we need to remove or disable that feature in the future.
          *
          * We use cleanMemory() to check the video buffer's dirty state.  If the buffer is clean
          * AND there are no visible blinking characters (as of the last updateScreen) AND there is
@@ -54286,21 +54320,25 @@ class Video extends Component {
          */
         if (!fForce && this.iCellCacheValid == 2 && this.bus.cleanMemory(addrScreen, cbScreen)) {
             if (!fBlinkUpdate && this.cBlinkVisible >= 0) {
-                return cCells;
+                if (!this.fShifted) return cCells;
+                iCell = nCells;
             }
-            if (!this.cBlinkVisible) {
+            else if (!this.cBlinkVisible) {
                 /*
                  * iCellCursor may be negative if the cursor is hidden or if it's not on the visible screen.
                  */
                 let iCellCursor = this.iCellCursor - iCell;
                 if (iCellCursor < 0) {
-                    return cCells;
+                    if (!this.fShifted) return cCells;
+                    iCell = nCells;
                 }
-                addrScreen += (iCellCursor << 1);
-                iCell += iCellCursor;
-                nCells = iCell + 1;
+                else {
+                    addrScreen += (iCellCursor << 1);
+                    iCell += iCellCursor;
+                    nCells = iCell + 1;
+                }
             }
-            // else if (this.cBlinks & 0x1) return;
+            // else if (this.cBlinks & 0x1) return cCells;
         }
 
         if (this.nActiveFont) {
@@ -54327,11 +54365,14 @@ class Video extends Component {
              */
             cCells = this.updateScreenGraphicsVGA(addrBuffer, addrScreen, addrScreenLimit);
         }
+
+        this.fShifted = false;
+
         return cCells;
     }
 
     /**
-     * updateScreenText(addrBuffer, addrScreen, addrScreenLimit, iCell, nCells)
+     * updateScreenText(addrBuffer, addrScreen, addrScreenLimit, iCell, nCells, fModified)
      *
      * @this {Video}
      * @param {number} addrBuffer
@@ -54343,7 +54384,8 @@ class Video extends Component {
      */
     updateScreenText(addrBuffer, addrScreen, addrScreenLimit, iCell, nCells)
     {
-        if (!this.aFonts[this.nActiveFont]) return 0;
+        let font = this.aFonts[this.nActiveFont];
+        if (!font) return 0;
 
         /*
          * If MDA.MODE.BLINK_ENABLE is set and a cell's blink bit is set, then if (cBlinks & 0x2) != 0,
@@ -54367,7 +54409,7 @@ class Video extends Component {
          * but Fantasy Land is an exception.  Which is another great reason why the loop below needs to get both
          * bytes directly from adwMemory, because reading them with bus.getShortDirect(addrScreen) won't always work.
          */
-        let cbCell = (1 / this.nPointsPerByte)|0;
+        let cbCell = (1 / this.nPointsPerByte) | 0;
         let nShift = (card.nAccess & Card.ACCESS.WRITE.PAIRS)? 1 : 0;
 
         let fBlinkEnable = (card.regMode & Card.MDA.MODE.BLINK_ENABLE);
@@ -54382,9 +54424,9 @@ class Video extends Component {
         }
 
         this.cBlinkVisible = 0;
-        let col = iCell % this.nCols;
-        let row = (iCell / this.nCols)|0;
-        let nbRowExtra = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols /* - iCellFirst */) << (cbCell-1)) : 0);
+        let col = iCell % this.nColsBuffer;
+        let row = (iCell / this.nColsBuffer) | 0;
+        let nbRowExtra = (this.nColsLogical - this.nColsBuffer /* - iCellFirst */) << (cbCell - 1);
 
         while (addrScreen < addrScreenLimit && iCell < nCells) {
 
@@ -54430,15 +54472,30 @@ class Video extends Component {
             cCells++;
             iCell++;
             addrScreen += cbCell;
-            if (++col >= this.nCols) {
+            if (++col >= this.nColsBuffer) {
                 col = 0;
-                if (++row >= this.nRows) break;
+                if (++row >= this.nRowsBuffer) break;
                 addrScreen += nbRowExtra;
             }
         }
 
-        if (cUpdated && this.contextBuffer) {
-            this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.cxBuffer, this.cyBuffer, this.xScreenOffset, this.yScreenOffset, this.cxScreenOffset, this.cyScreenOffset);
+        if (this.contextBuffer && (cUpdated || this.fShifted)) {
+            let xBuffer = 0, yBuffer = 0;
+            let cxBuffer = this.cxBuffer;
+            let cyBuffer = this.cyBuffer;
+            if (this.fOverBuffer) {
+                let xShift = this.nShiftLeft;
+                let yShift = this.nShiftUp;
+                if (this.fDoubleFont) {
+                    xShift <<= 1;
+                    yShift <<= 1;
+                }
+                xBuffer += xShift;
+                yBuffer += yShift;
+                cxBuffer -= font.cxCell;
+                cyBuffer -= font.cyCell;
+            }
+            this.contextScreen.drawImage(this.canvasBuffer, xBuffer, yBuffer, cxBuffer, cyBuffer, this.xScreenOffset, this.yScreenOffset, this.cxScreenOffset, this.cyScreenOffset);
         }
 
         this.checkBlink();
@@ -54984,17 +55041,10 @@ class Video extends Component {
             /*
              * HACK: offStartAddr is supposed to be "latched" ONLY at the start of every VRETRACE interval, but
              * other "triggers" are helpful; see updateScreen() for details.
-             *
-             * PARANOIA: Don't call invalidateCellCache() unless the start address we just "latched" actually changed.
              */
-            let offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
-            offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
-            if (card.offStartAddr != offStartAddr) {
-                card.offStartAddr = offStartAddr;
-                this.invalidateCellCache(false);
-            }
-            card.nVertPeriodsStartAddr = 0;
-        } else {
+            this.latchStartAddress();
+        }
+        else {
             card.fATCData = false;
             let iReg = card.regATCIndx & Card.ATC.INDX_MASK;
             if (iReg >= Card.ATC.PALETTE_REGS || !fPalEnabled) {
@@ -55006,7 +55056,18 @@ class Video extends Component {
                 }
                 if (fModified) {
                     card.regATCData[iReg] = bOut;
-                    if (iReg != Card.ATC.OVERSCAN.INDX && iReg != Card.ATC.HPAN.INDX) {
+                    if (iReg == Card.ATC.HPAN.INDX) {
+                        if (this.fOverBuffer) {
+                            this.fShifted = true;
+                            /*
+                             * TODO: The SHIFT_LEFT value apparently has a slightly different interpretation in
+                             * monochrome mode (ie, when font.cxChar == 9, 8 means no shift and 0-7 means 1-8 shifts).
+                             */
+                            this.nShiftLeft = bOut & Card.ATC.HPAN.SHIFT_LEFT;
+                            this.latchStartAddress();   // TODO: Determine whether this really helps with jitter
+                        }
+                    }
+                    else if (iReg != Card.ATC.OVERSCAN.INDX) {
                         this.invalidateCellCache(true);
                     }
                 }
@@ -55785,19 +55846,36 @@ class Video extends Component {
                 card.regCRTData[card.regCRTIndx] = bOut;
             }
 
-            if (card.regCRTIndx == Card.CRTC.EGA.VREND.INDX) {
-                if (this.nIRQ) {
-                    if (!(bOut & Card.CRTC.EGA.VREND.UNCLEAR_VRINT)) {
-                        if (this.chipset) this.chipset.clearIRR(this.nIRQ);
+            if (card == this.cardEGA) {
+                if (card.regCRTIndx == Card.CRTC.EGA.VREND.INDX) {
+                    if (this.nIRQ) {
+                        if (!(bOut & Card.CRTC.EGA.VREND.UNCLEAR_VRINT)) {
+                            if (this.chipset) this.chipset.clearIRR(this.nIRQ);
+                        }
                     }
                 }
-            }
-
-            /*
-             * If a split-screen condition has been modified, then partially invalidate the cell cache.
-             */
-            if (card.regCRTIndx == Card.CRTC.EGA.LINECOMP && fModified) {
-                this.invalidateCellCache(false);
+                else if (fModified) {
+                    /*
+                     * If the Preset Row Scan register has been modified, mark the image shifted.
+                     */
+                    if (card.regCRTIndx == Card.CRTC.EGA.PRESCAN) {
+                        if (this.fOverBuffer) {
+                            this.fShifted = true;
+                            this.nShiftUp = bOut & Card.CRTC.EGA.MAXSCAN.SLMASK;
+                            this.latchStartAddress();   // TODO: Determine whether this really helps with jitter
+                        }
+                    }
+                    /*
+                     * If the split-screen state has been modified, then partially invalidate the cell cache.
+                     *
+                     * TODO: This register is also used in conjunction with one overflow bit in the OVERFLOW register
+                     * and another overflow bit in the MAXSCAN register (VGA only), so technically, if either of those
+                     * bits change, then again, the cache should be invalidated.
+                     */
+                    else if (card.regCRTIndx == Card.CRTC.EGA.LINECOMP) {
+                        this.invalidateCellCache(false);
+                    }
+                }
             }
 
             if (card.regCRTIndx == Card.CRTC.STARTHI || card.regCRTIndx == Card.CRTC.STARTLO) {
