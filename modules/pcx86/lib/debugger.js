@@ -2742,6 +2742,7 @@ class DebuggerX86 extends Debugger {
                 if (nCyclesStep > 0) {
                     this.nCycles += nCyclesStep;
                     this.cpu.addCycles(nCyclesStep, true);
+                    this.cpu.updateTimers(nCyclesStep);
                     this.cpu.updateChecksum(nCyclesStep);
                     this.cOpcodes++;
                 }

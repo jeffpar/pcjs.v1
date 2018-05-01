@@ -4342,7 +4342,7 @@ class CPUX86 extends CPU {
 
         /*
          * NOTE: Even though runCPU() calls updateAllTimers(), we need an additional call here if we're being
-         * called from the Debugger, so that any single-stepping will update the timers as well.
+         * called from the Debugger, so that single-stepping will update timers as well.  TODO: What about RTC?
          */
         if (this.chipset && !nMinCycles) this.chipset.updateAllTimers();
 

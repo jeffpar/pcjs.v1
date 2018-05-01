@@ -518,27 +518,27 @@ class CPU extends Component {
     /**
      * setBurstCycles(nCycles)
      *
-     * This function is used by the ChipSet component whenever a very low timer count is set.
+     * This function is used by the ChipSet component whenever (for example) a very low timer count is set.
      *
      * @this {CPU}
-     * @param {number} nCycles is the target number of cycles to drop the current burst to
+     * @param {number} nCycles (the target number of cycles to drop the current burst)
      * @return {boolean}
      */
     setBurstCycles(nCycles)
     {
         if (this.flags.running) {
-            let nDelta = this.nStepCycles - nCycles;
-            /*
-             * NOTE: If nDelta is negative, we will actually be increasing nStepCycles and nBurstCycles.
-             * Which is OK, but if we're also taking snapshots of the cycle counts, to make sure that instruction
-             * costs are being properly assessed, then we need to update nSnapCycles as well.
-             *
-             * TODO: If the delta is negative, we could simply ignore the request, but we must first carefully
-             * consider the impact on the ChipSet timers.
-             */
-            this.nStepCycles -= nDelta;
-            this.nBurstCycles -= nDelta;
-            return true;
+            let delta = this.nStepCycles - nCycles;
+            if (delta > 0) {
+                /*
+                 * NOTE: If the delta is negative, we would actually be increasing nStepCycles and nBurstCycles.
+                 * Which used to be OK, but now that we have CPU timers that calculate and rely upon maximum bursts,
+                 * this can no longer be allowed.  TODO: Determine if there are any, um, negative side-effects on
+                 * ChipSet timers if we don't allow negative deltas.
+                 */
+                this.nStepCycles -= delta;
+                this.nBurstCycles -= delta;
+                return true;
+            }
         }
         return false;
     }
@@ -913,7 +913,7 @@ class CPU extends Component {
      *
      *      [0]: timer ID
      *      [1]: countdown value, in cycles
-     *      [2]: automatic setTimer value, if any, in milliseconds
+     *      [2]: setTimer value: milliseconds if positive, cycles if negative, zero if not used
      *      [3]: callback function
      *
      * A timer is initially dormant; dormant timers have a countdown value of -1 (although any negative number
@@ -924,14 +924,14 @@ class CPU extends Component {
      * @this {CPU}
      * @param {string} id
      * @param {function()} callBack
-     * @param {number} [ms] (if set, enables automatic setTimer calls)
+     * @param {number} [ms] (setTimer value: milliseconds if positive, cycles if negative, zero if not used)
      * @return {number} timer index
      */
-    addTimer(id, callBack, ms = -1)
+    addTimer(id, callBack, ms = 0)
     {
         let iTimer = this.aTimers.length;
         this.aTimers.push([id, -1, ms, callBack]);
-        if (ms >= 0) this.setTimer(iTimer, ms);
+        if (ms) this.setTimer(iTimer, ms);
         return iTimer;
     }
 
@@ -996,12 +996,12 @@ class CPU extends Component {
      * interrupts at 9600 baud).
      *
      * Ideally, the only function that would use setTimeout() is runCPU(), while the rest of the components
-     * use setTimer(); however, due to legacy code (ie, code that predates these functions) and/or laziness,
+     * use setTimer(); however, due to legacy code (ie, code that predates these functions and/or laziness),
      * that may not be the case.
      *
      * @this {CPU}
      * @param {number} iTimer
-     * @param {number} ms (converted into a cycle countdown internally)
+     * @param {number} ms (number of milliseconds if positive, cycles otherwise)
      * @param {boolean} [fReset] (true if the timer should be reset even if already armed)
      * @return {number} (number of cycles used to arm timer, or -1 if error)
      */
@@ -1011,7 +1011,7 @@ class CPU extends Component {
         if (iTimer >= 0 && iTimer < this.aTimers.length) {
             let timer = this.aTimers[iTimer];
             if (fReset || timer[1] < 0) {
-                nCycles = this.getMSCycles(ms);
+                nCycles = ms > 0? this.getMSCycles(ms) : -ms;
                 /*
                  * If the CPU is currently executing a burst of cycles, the number of cycles it has executed in
                  * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
@@ -1025,35 +1025,6 @@ class CPU extends Component {
             }
         }
         return nCycles;
-    }
-
-    /**
-     * setTimerCycles(iTimer, nCycles)
-     *
-     * A cycle-based version of setTimer(), used to help wean components off of functions like setBurstCycles().
-     *
-     * @this {CPU}
-     * @param {number} iTimer
-     * @param {number} nCycles
-     * @return {boolean}
-     */
-    setTimerCycles(iTimer, nCycles)
-    {
-        if (iTimer >= 0 && iTimer < this.aTimers.length) {
-            let timer = this.aTimers[iTimer];
-            /*
-             * If the CPU is currently executing a burst of cycles, the number of cycles it has executed in
-             * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
-             * way to resolve that is to immediately call endBurst() and bias the cycle timeout by the number
-             * of cycles that the burst executed.
-             */
-            if (this.flags.running) {
-                nCycles += this.endBurst();
-            }
-            timer[1] = nCycles;
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -1135,7 +1106,7 @@ class CPU extends Component {
     {
         for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
             let timer = this.aTimers[iTimer];
-            if (timer[2] >= 0) this.setTimer(iTimer, timer[2], true);
+            if (timer[2]) this.setTimer(iTimer, timer[2], true);
         }
     }
 
@@ -1162,7 +1133,7 @@ class CPU extends Component {
                 }
                 timer[1] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
                 timer[3]();         // safe to invoke the callback function now
-                if (timer[2] >= 0) {
+                if (timer[2]) {
                     this.setTimer(iTimer, timer[2]);
                     if (DEBUG && this.messageEnabled(Messages.CPU | Messages.TIMER)) {  // CPU TIMER message (as opposed to CHIPSET TIMER message)
                         this.printMessage("updateTimer(" + nCycles + "): rearming " + timer[0] + " for " + timer[2] + "ms (" + timer[1] + " cycles)");
@@ -1217,7 +1188,6 @@ class CPU extends Component {
                     nCycles = this.chipset.getTimerCycleLimit(0, nCycles);
                     nCycles = this.chipset.getRTCCycleLimit(nCycles);
                 }
-
                 /*
                  * Execute the burst.
                  */

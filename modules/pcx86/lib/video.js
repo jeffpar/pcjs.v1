@@ -108,8 +108,8 @@ if (NODE) {
  * For quick reference, IBM EGA register values for the standard EGA modes, from pages 63-68 of the
  * "IBM Enhanced Graphics Adapter" (http://minuszerodegrees.net/oa/OA - IBM Enhanced Graphics Adapter.pdf).
  *
- * WARNING: Some of these value are not programmed exactly as-is; for example, the CURSCANB values must
- * be adjusted by +1 in most cases, due to an EGA idiosyncrasy that IBM may not have originally intended.
+ * WARNING: Some of these value are not programmed exactly as-is; for example, the CURSCANB values are
+ * adjusted +1 by the ROM BIOS in most cases, due to an EGA idiosyncrasy that IBM may not have intended.
  *
  *      INT 0x10 Mode Requested:    00  01  02  03  04  05  06  07  0D  0E  0F  10  0F^ 10^ 00* 01* 02* 03*
  *
@@ -451,12 +451,29 @@ class Card extends Controller {
 
             let monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
 
+            /*
+             * Let's look at an example of the following calculations:
+             *
+             *      nCyclesDefault:     4772727
+             *      nCyclesHorzPeriod:  (4772727 / 15700 nHorzPeriodsPerSec) = 303
+             *      nCyclesHorzActive:  (303 * 85%) = 257
+             *      nCyclesVertPeriod:  (303 * 208 nHorzPeriodsPerFrame) = 63024
+             *      nCyclesVertActive:  (63024 * 96%) = 60503
+             *
+             * getRetraceBits() calculated elapsedCycles % 63024 (nCyclesVertPeriod), and whenever that
+             * remainder was > 60503 (nCyclesVertActive), we were deemed in the "inactive" retrace period.
+             *
+             * That logic has been superseded by a startVerticalRetrace() timer that fires every nCyclesVertPeriod,
+             * which then snaps the current cycle count in nCyclesVertRetrace.  Whenever getRetraceBits() is called,
+             * it too examines the current cycle count, and when the cycle count delta exceeds nCyclesVertPeriod -
+             * nCyclesVertActive, vertical retrace has ended.
+             */
             let nCyclesDefault = video.cpu.getBaseCyclesPerSecond();    // eg, 4772727
             this.nCyclesHorzPeriod = (nCyclesDefault / monitorSpecs.nHorzPeriodsPerSec)|0;
             this.nCyclesHorzActive = (this.nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100)|0;
             this.nCyclesVertPeriod = (this.nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame)|0;
             this.nCyclesVertActive = (this.nCyclesVertPeriod * monitorSpecs.percentVertActive / 100)|0;
-            this.nInitCycles = (data[7] || 0);
+            this.nCyclesVertRetrace = (data[7] || 0);
         }
     }
 
@@ -604,8 +621,6 @@ class Card extends Controller {
         this.nColorDontCare = data[24];
         this.offStartAddr   = data[25];     // this is the last CRTC start address latched from CRTC.STARTHI,CRTC.STARTLO
 
-        this.nVertPeriods = this.nVertPeriodsStartAddr = 0;
-
         if (this.nCard == Video.CARD.VGA) {
             this.regVGAEnable   = data[26];
             this.regDACMask     = data[27];
@@ -688,7 +703,7 @@ class Card extends Controller {
             data[4] = this.regCRTIndx | (this.regCRTPrev << 8);
             data[5] = this.regCRTData;
             data[6] = (this.nCard < Video.CARD.EGA? State.compressEvenOdd(this.adwMemory) : this.saveEGA());
-            data[7] = this.nInitCycles;
+            data[7] = this.nCyclesVertRetrace;
             data[8] = this.adwMemory.length;
         }
         return data;
@@ -1092,6 +1107,9 @@ class Card extends Controller {
 
 /*
  * MDA Registers (ports 0x3B4, 0x3B5, 0x3B8, and 0x3BA)
+ *
+ * NOTE: All monochrome cards (at least all IBM cards) included a parallel interface at ports 0x3BC/0x3BD/0x3BE;
+ * for the same functionality in PCx86, you must include a properly configured ParallelPort component.
  */
 Card.MDA = {
     CRTC: {
@@ -1113,18 +1131,6 @@ Card.MDA = {
         PORT:               0x3BA,
         HDRIVE:             0x01,
         BWVIDEO:            0x08
-    },
-    /*
-     * TODO: Add support for parallel port(s) someday....
-     */
-    PRT_DATA: {
-        PORT:               0x3BC
-    },
-    PRT_STATUS: {
-        PORT:               0x3BD
-    },
-    PRT_CTRL: {
-        PORT:               0x3BE
     }
 };
 
@@ -2355,8 +2361,7 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.PAIRS] = Card.ACCESS.writeBytePairs;
  * @class Video
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
-class Video extends Component
-{
+class Video extends Component {
     /**
      * Video(parmsVideo, canvas, context, textarea, container, aDiagElements)
      *
@@ -2782,16 +2787,6 @@ class Video extends Component
                 video.println(sProgress, Component.PRINT.PROGRESS);
             });
         }
-
-        this.cpu.addTimer(this.id, function updateScreenTimer() {
-            if (video.nIRQ) {
-                let card = video.cardActive;
-                if (!(card.regCRTData[Card.CRTC.EGA.VREND.INDX] & Card.CRTC.EGA.VREND.DISABLE_VRINT)) {
-                    if (video.chipset) video.chipset.setIRR(video.nIRQ);
-                }
-            }
-            video.updateScreen();
-        }, 1000 / Video.UPDATES_PER_SECOND);
     }
 
     /**
@@ -3428,6 +3423,56 @@ class Video extends Component
                 this.reset();
             } else {
                 if (!this.restore(data)) return false;
+            }
+            if (this.timerRetrace == undefined) {
+                /*
+                 * Note that startVerticalRetrace() will fire every nCyclesVertPeriod, ensuring predictability
+                 * and repeatability regardless of the machine's current speed multiplier or the whether the machine
+                 * is achieving the desired target number of cycles per second.
+                 *
+                 * The only downside is that when the machine is recalibrating (or the multiplier is being increased),
+                 * we may be called more than 60Hz (msUpdateNormal or 16.667ms).  So we don't allow the next update
+                 * until at least msUpdateInterval has passed.  msUpdateInterval is initialized to msUpdateNormal, but
+                 * can be increased if the updates are taking too long (eg, too many on-screen changes).
+                 */
+                this.msUpdateNormal = (1000 / Video.UPDATES_PER_SECOND)|0;
+                this.msUpdateInterval = this.msUpdateNormal;
+                this.msUpdatePrev = this.cmsUpdate = 0;
+                let video = this;
+                this.timerRetrace = this.cpu.addTimer(this.id, function startVerticalRetrace() {
+                    let card = video.cardActive;
+                    card.nCyclesVertRetrace = video.cpu.getCycles();
+                    video.printf("vertical retrace timer fired (%d cycles)\n", card.nCyclesVertRetrace);
+                    if (video.nIRQ) {
+                        if (!(card.regCRTData[Card.CRTC.EGA.VREND.INDX] & Card.CRTC.EGA.VREND.DISABLE_VRINT)) {
+                            if (video.chipset) video.chipset.setIRR(video.nIRQ);
+                        }
+                    }
+                    let msUpdate = Date.now();
+                    let msDelta = msUpdate - video.msUpdatePrev;
+                    if (msDelta >= video.msUpdateInterval) {
+                        let fUpdated = video.updateScreen();
+                        let cmsUpdate = Date.now() - msUpdate;
+                        if (fUpdated) {
+                            if (video.cUpdates == 1) {
+                                video.cmsUpdate = cmsUpdate;
+                            } else {
+                                video.cmsUpdate += cmsUpdate;
+                                cmsUpdate = video.cmsUpdate / video.cUpdates;
+                            }
+                            if (cmsUpdate > (video.msUpdateInterval >> 1)) {
+                                video.msUpdateInterval += video.msUpdateNormal;
+                            }
+                            else if (cmsUpdate < (video.msUpdateNormal >> 1)) {
+                                video.msUpdateInterval = video.msUpdateNormal;
+                            }
+                        }
+                        video.msUpdatePrev = msUpdate;
+                    } else {
+                        video.printf("skipping update (%dms)\n", msDelta);
+                    }
+                    video.latchStartAddress();
+                }, -this.cardActive.nCyclesVertPeriod);
             }
         }
         return true;
@@ -4943,10 +4988,7 @@ class Video extends Component
                             let nRows = (cyScreen / font.cyChar) | 0;
                             if (nRows) this.nRows = nRows;
                         }
-                        /*
-                         * For now, fOverBuffer is disabled until we have improved vertical retrace synchronization.
-                         */
-                        // this.fOverBuffer = true;
+                        this.fOverBuffer = true;
                     }
                 }
                 this.cxScreenCell = (this.cxScreen / this.nCols) | 0;
@@ -5623,14 +5665,10 @@ class Video extends Component
         let card = this.cardActive;
         let offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
         offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
-        /*
-         * PARANOIA: Don't call invalidateCellCache() unless the start address we just "latched" actually changed.
-         */
         if (card.offStartAddr !== offStartAddr) {
             card.offStartAddr = offStartAddr;
             this.invalidateCellCache(false);
         }
-        card.nVertPeriodsStartAddr = 0;
     }
 
     /**
@@ -5642,20 +5680,21 @@ class Video extends Component
      *
      * @this {Video}
      * @param {boolean} [fForce] is used by setMode() to reset the cell cache and force a redraw
+     * @return {boolean}
      */
     updateScreen(fForce = false)
     {
         /*
          * The Computer component maintains the fPowered setting on our behalf, so we use it.
          */
-        if (!this.flags.powered) return;
+        if (!this.flags.powered) return false;
 
         /*
          * If the card's video signal is disabled (eg, during a mode change), then skip the update,
          * unless fForce is set.
          */
         let card = this.cardActive;
-        if (!card) return;
+        if (!card) return false;
 
         let fEnabled = false;
         if (card !== this.cardEGA) {
@@ -5665,7 +5704,7 @@ class Video extends Component
             if (card.regATCIndx & Card.ATC.INDX_PAL_ENABLE) fEnabled = true;
         }
 
-        if (!fEnabled && !fForce) return;
+        if (!fEnabled && !fForce) return false;
 
         if (fForce) {
             this.initCellCache();
@@ -5675,17 +5714,17 @@ class Video extends Component
              * This should never happen, but since updateScreen() is also called by Computer.updateStatus(),
              * better safe than sorry.
              */
-            if (this.aCellCache === undefined) return;
+            if (this.aCellCache === undefined) return false;
         }
 
         /*
-         * If cBlinks is "enabled" (ie, >= 0), then advance it once every 10 updateScreen() calls;
+         * If cBlinks is "enabled" (ie, >= 0), then advance it once every 8 updateScreen() calls;
          * this assumes an updateScreen() frequency of 60 per second; see Video.UPDATES_PER_SECOND.
          *
          * We assume that the CPU is calling us whenever fForce is undefined.
          */
         let fBlinkUpdate = false;
-        if (!fForce && !(++this.cUpdates % 10) && this.cBlinks >= 0) {
+        if (!fForce && !(++this.cUpdates % 8) && this.cBlinks >= 0) {
             this.cBlinks++;
             fBlinkUpdate = true;
         }
@@ -5716,22 +5755,6 @@ class Video extends Component
         if (this.nMode >= Video.MODE.VGA_320X200) {
             addrBuffer = addrScreen = 0xA0000;
             addrScreenLimit = addrScreen + 0x10000;
-        }
-
-        /*
-         * HACK: The CRTC's STARTHI and STARTLO registers are supposed to be "latched" into offStartAddr
-         * ONLY at the start of every VRETRACE interval; this is an attempt to honor that behavior,
-         * but unfortunately, updateScreen() is currently called at the CPU's discretion, not necessarily in
-         * sync with nCyclesVertPeriod.  As a result, we must rely on other criteria, like the number of vertical
-         * periods that have elapsed since the last CRTC write, writes to the ATC (see outATC()), etc.
-         *
-         * TODO: Consider matching the CPU's nCyclesNextVideoUpdate to the card's nCyclesVertPeriod, ensuring
-         * that CPU bursts are in sync with VRETRACE.  Note, however, that that will be complicated by other
-         * factors, such as the horizontal retrace interval, and the timing requirements of other cards in a
-         * multi-display configuration.
-         */
-        if ((this.getRetraceBits(card) & Card.CGA.STATUS.VRETRACE) || card.nVertPeriodsStartAddr && card.nVertPeriodsStartAddr < card.nVertPeriods) {
-            this.latchStartAddress();
         }
 
         let cbScreen = this.cbScreen;
@@ -5842,6 +5865,7 @@ class Video extends Component
         }
         this.bus.cleanMemory(addrScreen, cbScreen, true);
         if (cCells) this.iCellCacheValid = 2;
+        return true;
     }
 
     /**
@@ -5931,7 +5955,7 @@ class Video extends Component
     }
 
     /**
-     * updateScreenText(addrBuffer, addrScreen, addrScreenLimit, iCell, nCells, fModified)
+     * updateScreenText(addrBuffer, addrScreen, addrScreenLimit, iCell, nCells)
      *
      * @this {Video}
      * @param {number} addrBuffer
@@ -6372,29 +6396,29 @@ class Video extends Component
     getRetraceBits(card)
     {
         /*
-         * NOTE: The CGA bits CGA.STATUS.RETRACE (0x01) and CGA.STATUS.VRETRACE (0x08) match the EGA definitions,
-         * and they also correspond to the MDA bits MDA.STATUS.HDRIVE (0x01) and MDA.STATUS.BWVIDEO (0x08); I'm not sure
-         * why the MDA uses different designations, but the bits appear to serve the same purpose.
-         *
-         * TODO: Verify that when a saved machine state is restored, both the CPU's cycle count AND the card's nInitCycles
-         * are properly restored.  It's probably not a big deal, but details like that bother me.
+         * NOTE: The bits CGA.STATUS.RETRACE (0x01) and CGA.STATUS.VRETRACE (0x08) match the EGA definitions,
+         * and they also correspond to the MDA bits MDA.STATUS.HDRIVE (0x01) and MDA.STATUS.BWVIDEO (0x08); it's
+         * unclear why the MDA uses different designations, but the bits appear to serve the same purpose.
          */
         let b = 0;
         let nCycles = this.cpu.getCycles();
-        let nElapsedCycles = nCycles - card.nInitCycles;
-        if (nElapsedCycles < 0) {           // perhaps the CPU decided to reset its cycle count?
-            card.nInitCycles = nElapsedCycles;
-            nElapsedCycles = -nElapsedCycles|0;
+        let nCyclesElapsed = nCycles - card.nCyclesVertRetrace;
+        if (nCyclesElapsed < 0) {       // perhaps the CPU decided to reset its cycle count?
+            card.nCyclesVertRetrace = nCycles;
+            nCyclesElapsed = 0;
         }
-        let nCyclesHorzRemain = nElapsedCycles % card.nCyclesHorzPeriod;
-        if (nCyclesHorzRemain > card.nCyclesHorzActive) b |= Card.CGA.STATUS.RETRACE;
-        let nCyclesVertRemain = nElapsedCycles % card.nCyclesVertPeriod;
-        if (nCyclesVertRemain > card.nCyclesVertActive) b |= Card.CGA.STATUS.VRETRACE | Card.CGA.STATUS.RETRACE;
-        /*
-         * Some callers also want to know how many vertical retrace periods have occurred since the last time they checked,
-         * so we compute that now.
-         */
-        card.nVertPeriods = (nElapsedCycles / card.nCyclesVertPeriod)|0;
+        if (nCyclesElapsed < card.nCyclesVertPeriod - card.nCyclesVertActive) {
+            b |= Card.CGA.STATUS.VRETRACE | Card.CGA.STATUS.RETRACE;
+            // this.printf("vertical retrace (%d cycles)\n", nCyclesElapsed);
+        } else {
+            let nCyclesHorzRemain = nCyclesElapsed % card.nCyclesHorzPeriod;
+            if (nCyclesHorzRemain > card.nCyclesHorzActive) {
+                b |= Card.CGA.STATUS.RETRACE;
+                // this.printf("horizontal retrace (%d cycles)\n", nCyclesElapsed);
+            } else {
+                // this.printf("no retrace (%d cycles)\n", nCyclesElapsed);
+            }
+        }
         return b;
     }
 
@@ -6597,11 +6621,6 @@ class Video extends Component
                  * someone REALLY wants to recreate the ugly flickering scroll of a CGA...?
                  */
             }
-            /*
-             * HACK: offStartAddr is supposed to be "latched" ONLY at the start of every VRETRACE interval, but
-             * other "triggers" are helpful; see updateScreen() for details.
-             */
-            this.latchStartAddress();
         }
         else {
             card.fATCData = false;
@@ -6623,7 +6642,6 @@ class Video extends Component
                              * monochrome mode (ie, when font.cxChar == 9, 8 means no shift and 0-7 means 1-8 shifts).
                              */
                             this.nShiftLeft = bOut & Card.ATC.HPAN.SHIFT_LEFT;
-                            this.latchStartAddress();   // TODO: Determine whether this really helps with jitter
                         }
                     }
                     else if (iReg != Card.ATC.OVERSCAN.INDX) {
@@ -6843,9 +6861,6 @@ class Video extends Component
                  *
                  * My solution was to change setCardAccess() to indicate whether it actually altered the video buffer
                  * address and/or format, and if so, then force another screen update.
-                 *
-                 * TODO: This scenario does not seem unique; it suggests that we should generally force a screen update
-                 * whenever the video buffer has undergone a significant change.
                  *
                  * UPDATE: This change was NOT sufficient to resolve the OS/2 screen-switching bug described above; in fact,
                  * it's apparently not even necessary, because the REAL problem was caused by PAGED blocks with stale
@@ -7421,7 +7436,6 @@ class Video extends Component
                         if (this.fOverBuffer) {
                             this.fShifted = true;
                             this.nShiftUp = bOut & Card.CRTC.EGA.MAXSCAN.SLMASK;
-                            this.latchStartAddress();   // TODO: Determine whether this really helps with jitter
                         }
                     }
                     /*
@@ -7435,20 +7449,6 @@ class Video extends Component
                         this.invalidateCellCache(false);
                     }
                 }
-            }
-
-            if (card.regCRTIndx == Card.CRTC.STARTHI || card.regCRTIndx == Card.CRTC.STARTLO) {
-                /*
-                 * Both STARTHI and STARTLO are supposed to be latched at the start of every VRETRACE interval.
-                 * However, since we don't have an interrupt that tells us exactly when that occurs, we used to latch
-                 * them now, whenever either one was written during any RETRACE interval.  Unfortunately, one problem
-                 * with that approach is that we might latch only *one* of the registers, depending on timing.
-                 *
-                 * So now, we still call getRetraceBits(card), but only to recalculate the card's nVertPeriods value,
-                 * which we then snapshot in card.nVertPeriodsStartAddr.
-                 */
-                this.getRetraceBits(card);
-                card.nVertPeriodsStartAddr = card.nVertPeriods;
             }
 
             /*
@@ -8269,10 +8269,6 @@ Video.aEGADWToByte[0x80808080|0] = 0xf;
  * to the address space; otherwise, we will allocate an internal buffer (adwMemory) and tell addMemory()
  * to map it to the video buffer address.  The latter approach gives us total control over the buffer;
  * refer to getMemoryAccess().
- *
- * TODO: Consider allocating our own buffer for all video cards, not just EGA/VGA.  For MDA/CGA, I'm not
- * sure it would offer any benefits, other than allowing our internal update functions, like updateScreen(),
- * to access the buffer directly, instead of going through the Bus memory interface.
  */
 Video.cardSpecs = [];
 Video.cardSpecs[Video.CARD.MDA] = ["MDA", Card.MDA.CRTC.INDX.PORT, 0xB0000, 0x01000, 0x01000, ChipSet.MONITOR.MONO];
