@@ -234,7 +234,7 @@ aMachines.forEach(function(machineType) {
                         sType += sProps + " }} */\nvar " + type + ";";
                         return sType;
                     }))
-                    .pipe(gulpReplace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
+                    .pipe(gulpReplace(/[ \t]*(if *\(DEBUG\) *|)[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
                 }))        
             .pipe(gulpConcat(machineUncompiledFile))
             .pipe(gulpHeader('"use strict";\n\n'))
