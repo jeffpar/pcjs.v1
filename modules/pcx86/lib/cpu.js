@@ -985,6 +985,62 @@ class CPU extends Component {
     }
 
     /**
+     * resetTimers()
+     *
+     * When the target CPU speed multiplier is altered, it's a good idea to run through all the timers that
+     * have a fixed millisecond period and re-arm them, because the timers are using cycle counts that were based
+     * on a previous multiplier.
+     *
+     * @this {CPU}
+     */
+    resetTimers()
+    {
+        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            let timer = this.aTimers[iTimer];
+            if (timer[2]) this.setTimer(iTimer, timer[2], true);
+        }
+    }
+
+    /**
+     * restoreTimers(aTimerStates)
+     *
+     * @this {CPU}
+     * @param {Array} aTimerStates
+     */
+    restoreTimers(aTimerStates)
+    {
+        for (let iTimerState = 0; iTimerState < aTimerStates.length; iTimerState++) {
+            let state = aTimerStates[iTimerState];
+            let timer = this.findTimer(state[0]);
+            if (timer) {
+                timer[1] = state[1];
+                timer[2] = (state[3] && timer[2] >= -1 || state[2] > 0)? state[2] : timer[2];
+            }
+        }
+    }
+
+    /**
+     * saveTimers()
+     *
+     * @this {CPU}
+     * @return {Array}
+     */
+    saveTimers()
+    {
+        let aTimerStates = [];
+        for (let iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
+            let timer = this.aTimers[iTimer];
+            /*
+             * We now push a 4th element (true) to indicate that this is a new timer state, where timer[2]
+             * is tri-state value (positive for milliseconds, negative for cycles, zero for none); previously,
+             * it was negative (-1) for none or else some number of milliseconds.
+             */
+            aTimerStates.push([timer[0], timer[1], timer[2], true]);
+        }
+        return aTimerStates;
+    }
+
+    /**
      * setTimer(iTimer, ms, fReset)
      *
      * Using the timer index from a previous addTimer() call, this sets that timer to fire after the
@@ -1028,6 +1084,39 @@ class CPU extends Component {
     }
 
     /**
+     * updateTimers(nCycles)
+     *
+     * Used by runCPU() to reduce all active timer countdown values by the number of cycles just executed;
+     * this is the function that actually "fires" any timer(s) whose countdown has reached (or dropped below)
+     * zero, invoking their callback function.
+     *
+     * @this {CPU}
+     * @param {number} nCycles (number of cycles actually executed)
+     */
+    updateTimers(nCycles)
+    {
+        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            let timer = this.aTimers[iTimer];
+            if (DEBUG) this.assert(!isNaN(timer[1]));
+            if (timer[1] < 0) continue;
+            timer[1] -= nCycles;
+            if (timer[1] <= 0) {
+                if (DEBUG && this.messageEnabled(Messages.CPU | Messages.TIMER)) {      // CPU TIMER message (as opposed to CHIPSET TIMER message)
+                    this.printMessage("updateTimer(" + nCycles + "): firing " + timer[0] + " with only " + (timer[1] + nCycles) + " cycles left");
+                }
+                timer[1] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
+                timer[3]();         // safe to invoke the callback function now
+                if (timer[2]) {
+                    this.setTimer(iTimer, timer[2]);
+                    if (DEBUG && this.messageEnabled(Messages.CPU | Messages.TIMER)) {  // CPU TIMER message (as opposed to CHIPSET TIMER message)
+                        this.printMessage("updateTimer(" + nCycles + "): rearming " + timer[0] + " for " + timer[2] + "ms (" + timer[1] + " cycles)");
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * getMSCycles(ms)
      *
      * @this {CPU}
@@ -1050,97 +1139,13 @@ class CPU extends Component {
     {
         for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
             let timer = this.aTimers[iTimer];
-            this.assert(!isNaN(timer[1]));
+            if (DEBUG) this.assert(!isNaN(timer[1]));
             if (timer[1] < 0) continue;
             if (nCycles > timer[1]) {
                 nCycles = timer[1];
             }
         }
         return nCycles;
-    }
-
-    /**
-     * saveTimers()
-     *
-     * @this {CPU}
-     * @return {Array}
-     */
-    saveTimers()
-    {
-        let aTimerStates = [];
-        for (let iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
-            let timer = this.aTimers[iTimer];
-            aTimerStates.push([timer[0], timer[1], timer[2]]);
-        }
-        return aTimerStates;
-    }
-
-    /**
-     * restoreTimers(aTimerStates)
-     *
-     * @this {CPU}
-     * @param {Array} aTimerStates
-     */
-    restoreTimers(aTimerStates)
-    {
-        for (let iTimerState = 0; iTimerState < aTimerStates.length; iTimerState++) {
-            let state = aTimerStates[iTimerState];
-            let timer = this.findTimer(state[0]);
-            if (timer) {
-                timer[1] = state[1];
-                timer[2] = state[2];
-            }
-        }
-    }
-
-    /**
-     * resetTimers()
-     *
-     * When the target CPU speed multiplier is altered, it's a good idea to run through all the timers that
-     * have a fixed millisecond period and re-arm them, because the timers are using cycle counts that were based
-     * on a previous multiplier.
-     *
-     * @this {CPU}
-     */
-    resetTimers()
-    {
-        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            let timer = this.aTimers[iTimer];
-            if (timer[2]) this.setTimer(iTimer, timer[2], true);
-        }
-    }
-
-    /**
-     * updateTimers(nCycles)
-     *
-     * Used by runCPU() to reduce all active timer countdown values by the number of cycles just executed;
-     * this is the function that actually "fires" any timer(s) whose countdown has reached (or dropped below)
-     * zero, invoking their callback function.
-     *
-     * @this {CPU}
-     * @param {number} nCycles (number of cycles actually executed)
-     */
-    updateTimers(nCycles)
-    {
-        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            let timer = this.aTimers[iTimer];
-            this.assert(!isNaN(timer[1]));
-            if (timer[1] < 0) continue;
-            timer[1] -= nCycles;
-            if (timer[1] <= 0) {
-                if (DEBUG && this.messageEnabled(Messages.CPU | Messages.TIMER)) {      // CPU TIMER message (as opposed to CHIPSET TIMER message)
-                    this.printMessage("updateTimer(" + nCycles + "): firing " + timer[0] + " with only " + (timer[1] + nCycles) + " cycles left");
-                }
-                timer[1] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
-                timer[3]();         // safe to invoke the callback function now
-                if (timer[2]) {
-                    this.setTimer(iTimer, timer[2]);
-                    if (DEBUG && this.messageEnabled(Messages.CPU | Messages.TIMER)) {  // CPU TIMER message (as opposed to CHIPSET TIMER message)
-                        this.printMessage("updateTimer(" + nCycles + "): rearming " + timer[0] + " for " + timer[2] + "ms (" + timer[1] + " cycles)");
-                    }
-                }
-            }
-        }
     }
 
     /**

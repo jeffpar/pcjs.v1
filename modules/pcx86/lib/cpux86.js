@@ -2209,7 +2209,8 @@ class CPUX86 extends CPU {
          */
         this.nCPL = this.segCS.cpl;             // cache the current CPL where it's more convenient
 
-        if (I386) this.resetSizes();
+        if (I386 && this.model >= X86.MODEL_80386) this.resetSizes();
+
         /*
          * Here, we need to additionally test whether the prefetch buffer (adwPrefetch) has been allocated yet,
          * because when resetRegs() is first called, the Bus hasn't been initialized yet, so there's nothing to fetch.

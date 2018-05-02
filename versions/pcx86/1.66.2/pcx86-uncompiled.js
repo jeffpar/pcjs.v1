@@ -4549,7 +4549,7 @@ var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
  * TODO: BACKTRACK support is currently completely disabled until we have a chance to investigate the problem
  * discussed in Bus.addBackTrackObject().
  */
-var BACKTRACK = !COMPILED && DEBUGGER;
+var BACKTRACK = DEBUG && DEBUGGER;
 
 /**
  * @define {boolean}
@@ -4565,7 +4565,7 @@ var SYMBOLS = DEBUGGER;
  * BUGS_8086 enables support for known 8086 bugs.  It's turned off by default, because 1) it adds overhead, and
  * 2) it's hard to imagine any software actually being dependent on any of the bugs covered by this (eg, the failure
  * to inhibit hardware interrupts following SS segment loads).
- * 
+ *
  * This does NOT enable what must be regarded as 8086 "features", such as failing to properly restart string
  * instructions with multiple prefixes after a hardware interrupt, which we simulate regardless, because some software
  * (eg, Central Point Software's PC Tools) uses that to differentiate processors (eg, the Intel 8088 from the NEC V20).
@@ -13289,6 +13289,62 @@ class CPU extends Component {
     }
 
     /**
+     * resetTimers()
+     *
+     * When the target CPU speed multiplier is altered, it's a good idea to run through all the timers that
+     * have a fixed millisecond period and re-arm them, because the timers are using cycle counts that were based
+     * on a previous multiplier.
+     *
+     * @this {CPU}
+     */
+    resetTimers()
+    {
+        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            let timer = this.aTimers[iTimer];
+            if (timer[2]) this.setTimer(iTimer, timer[2], true);
+        }
+    }
+
+    /**
+     * restoreTimers(aTimerStates)
+     *
+     * @this {CPU}
+     * @param {Array} aTimerStates
+     */
+    restoreTimers(aTimerStates)
+    {
+        for (let iTimerState = 0; iTimerState < aTimerStates.length; iTimerState++) {
+            let state = aTimerStates[iTimerState];
+            let timer = this.findTimer(state[0]);
+            if (timer) {
+                timer[1] = state[1];
+                timer[2] = (state[3] && timer[2] >= -1 || state[2] > 0)? state[2] : timer[2];
+            }
+        }
+    }
+
+    /**
+     * saveTimers()
+     *
+     * @this {CPU}
+     * @return {Array}
+     */
+    saveTimers()
+    {
+        let aTimerStates = [];
+        for (let iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
+            let timer = this.aTimers[iTimer];
+            /*
+             * We now push a 4th element (true) to indicate that this is a new timer state, where timer[2]
+             * is tri-state value (positive for milliseconds, negative for cycles, zero for none); previously,
+             * it was negative (-1) for none or else some number of milliseconds.
+             */
+            aTimerStates.push([timer[0], timer[1], timer[2], true]);
+        }
+        return aTimerStates;
+    }
+
+    /**
      * setTimer(iTimer, ms, fReset)
      *
      * Using the timer index from a previous addTimer() call, this sets that timer to fire after the
@@ -13332,89 +13388,6 @@ class CPU extends Component {
     }
 
     /**
-     * getMSCycles(ms)
-     *
-     * @this {CPU}
-     * @param {number} ms
-     * @return {number} number of corresponding cycles
-     */
-    getMSCycles(ms)
-    {
-        return ((this.counts.nBaseCyclesPerSecond * this.counts.nCurrentMultiplier) / 1000 * ms)|0;
-    }
-
-    /**
-     * getBurstCycles(nCycles)
-     *
-     * @this {CPU}
-     * @param {number} nCycles (maximum number of cycles to execute)
-     * @return {number}
-     */
-    getBurstCycles(nCycles)
-    {
-        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            let timer = this.aTimers[iTimer];
-
-            if (timer[1] < 0) continue;
-            if (nCycles > timer[1]) {
-                nCycles = timer[1];
-            }
-        }
-        return nCycles;
-    }
-
-    /**
-     * saveTimers()
-     *
-     * @this {CPU}
-     * @return {Array}
-     */
-    saveTimers()
-    {
-        let aTimerStates = [];
-        for (let iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
-            let timer = this.aTimers[iTimer];
-            aTimerStates.push([timer[0], timer[1], timer[2]]);
-        }
-        return aTimerStates;
-    }
-
-    /**
-     * restoreTimers(aTimerStates)
-     *
-     * @this {CPU}
-     * @param {Array} aTimerStates
-     */
-    restoreTimers(aTimerStates)
-    {
-        for (let iTimerState = 0; iTimerState < aTimerStates.length; iTimerState++) {
-            let state = aTimerStates[iTimerState];
-            let timer = this.findTimer(state[0]);
-            if (timer) {
-                timer[1] = state[1];
-                timer[2] = state[2];
-            }
-        }
-    }
-
-    /**
-     * resetTimers()
-     *
-     * When the target CPU speed multiplier is altered, it's a good idea to run through all the timers that
-     * have a fixed millisecond period and re-arm them, because the timers are using cycle counts that were based
-     * on a previous multiplier.
-     *
-     * @this {CPU}
-     */
-    resetTimers()
-    {
-        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            let timer = this.aTimers[iTimer];
-            if (timer[2]) this.setTimer(iTimer, timer[2], true);
-        }
-    }
-
-    /**
      * updateTimers(nCycles)
      *
      * Used by runCPU() to reduce all active timer countdown values by the number of cycles just executed;
@@ -13445,6 +13418,38 @@ class CPU extends Component {
                 }
             }
         }
+    }
+
+    /**
+     * getMSCycles(ms)
+     *
+     * @this {CPU}
+     * @param {number} ms
+     * @return {number} number of corresponding cycles
+     */
+    getMSCycles(ms)
+    {
+        return ((this.counts.nBaseCyclesPerSecond * this.counts.nCurrentMultiplier) / 1000 * ms)|0;
+    }
+
+    /**
+     * getBurstCycles(nCycles)
+     *
+     * @this {CPU}
+     * @param {number} nCycles (maximum number of cycles to execute)
+     * @return {number}
+     */
+    getBurstCycles(nCycles)
+    {
+        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            let timer = this.aTimers[iTimer];
+
+            if (timer[1] < 0) continue;
+            if (nCycles > timer[1]) {
+                nCycles = timer[1];
+            }
+        }
+        return nCycles;
     }
 
     /**
@@ -15862,7 +15867,8 @@ class CPUX86 extends CPU {
          */
         this.nCPL = this.segCS.cpl;             // cache the current CPL where it's more convenient
 
-        if (I386) this.resetSizes();
+        if (I386 && this.model >= X86.MODEL_80386) this.resetSizes();
+
         /*
          * Here, we need to additionally test whether the prefetch buffer (adwPrefetch) has been allocated yet,
          * because when resetRegs() is first called, the Bus hasn't been initialized yet, so there's nothing to fetch.
@@ -48766,6 +48772,7 @@ Web.onInit(Keyboard.init);
 
 /**
  * @class Card
+ * @property {DebuggerX86} dbg
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Card extends Controller {
@@ -48808,7 +48815,7 @@ class Card extends Controller {
              * If a Debugger is present, we want to stash a bit more info in each Card.
              */
             if (DEBUGGER) {
-                this.dbg = /** @type {DebuggerX86} */ (video.dbg);
+                this.dbg = video.dbg;
                 this.type = specs[0];
                 this.port = specs[1];
             }
@@ -48847,7 +48854,8 @@ class Card extends Controller {
             this.regCRTData = data[5];
             this.nCRTCRegs  = Card.CRTC.TOTAL_REGS;
             this.asCRTCRegs = DEBUGGER? Card.CRTC.REGS : [];
-            this.offStartAddr = this.regCRTData[Card.CRTC.STARTLO] | (this.regCRTData[Card.CRTC.STARTHI] << 8);
+            this.offStart   = this.regCRTData[Card.CRTC.STARTLO] | (this.regCRTData[Card.CRTC.STARTHI] << 8);
+            this.rowStart   = 0;            // initialize to zero and let the first latchStartAddress() call update it
             this.addrMaskHigh = 0x3F;       // card-specific mask for the high (bits 8 and up) of CRTC address registers
 
             if (nCard < Video.CARD.EGA) {
@@ -49030,7 +49038,7 @@ class Card extends Controller {
         this.nSetMapBits    = data[22];
         this.nColorCompare  = data[23];
         this.nColorDontCare = data[24];
-        this.offStartAddr   = data[25];     // this is the last CRTC start address latched from CRTC.STARTHI,CRTC.STARTLO
+        this.offStart       = data[25];     // this is the last CRTC start address latched from CRTC.STARTHI,CRTC.STARTLO
 
         if (this.nCard == Video.CARD.VGA) {
             this.regVGAEnable   = data[26];
@@ -49040,6 +49048,7 @@ class Card extends Controller {
             this.regDACState    = data[30];
             this.regDACData     = data[31];
         }
+
         /*
          * While every Video memory block maintains its own DIRTY flag, used by the Bus cleanMemory() function to
          * quickly determine if anything changed within a given block, we supplement that information at the Card level
@@ -49154,7 +49163,7 @@ class Card extends Controller {
         data[22] = this.nSetMapBits;
         data[23] = this.nColorCompare;
         data[24] = this.nColorDontCare;
-        data[25] = this.offStartAddr;
+        data[25] = this.offStart;
 
         if (this.nCard == Video.CARD.VGA) {
             data[26] = this.regVGAEnable;
@@ -51859,28 +51868,42 @@ class Video extends Component {
                             if (video.chipset) video.chipset.setIRR(video.nIRQ);
                         }
                     }
+                    /*
+                     * For simplicity, let's imagine that the normal screen update interval is 15ms.  If retraces are
+                     * happening a bit too fast (eg, every 10ms), we'll skip the update on the first retrace, do it on
+                     * the second retrace, skip on the third, and so on.  That's clearly too many skips, so when we
+                     * do the second retrace, we should "bank" the extra 5ms by rewinding msUpdatePrev that amount.
+                     * Just make sure we never "bank" too much (for example, on the first update, when msUpdatePrev is
+                     * zero).
+                     */
                     let msUpdate = Date.now();
-                    let msDelta = msUpdate - video.msUpdatePrev;
-                    if (msDelta >= video.msUpdateInterval) {
+                    let msDelta = (msUpdate - video.msUpdatePrev) - video.msUpdateInterval;
+                    if (msDelta >= 0) {
                         let fUpdated = video.updateScreen();
-                        let cmsUpdate = Date.now() - msUpdate;
                         if (fUpdated) {
-                            if (video.cUpdates == 1) {
+                            let cmsUpdate = Date.now() - msUpdate;
+                            if (video.cUpdates % 60 == 1) {
+                                video.cUpdates = 1;
                                 video.cmsUpdate = cmsUpdate;
                             } else {
                                 video.cmsUpdate += cmsUpdate;
                                 cmsUpdate = video.cmsUpdate / video.cUpdates;
                             }
-                            if (cmsUpdate > (video.msUpdateInterval >> 1)) {
-                                video.msUpdateInterval += video.msUpdateNormal;
+                            /*
+                             * If cmsUpdate is taking more than 25% of the update interval (eg, 4ms of a 16ms interval),
+                             * then we want to increase the interval, so that updates are a smaller percentage of the overall
+                             * workload.
+                             */
+                            if (cmsUpdate >= video.msUpdateInterval / 4) {
+                                video.msUpdateInterval = video.msUpdateNormal * 2;
                             }
-                            else if (cmsUpdate < (video.msUpdateNormal >> 1)) {
+                            else if (cmsUpdate < video.msUpdateNormal / 4) {
                                 video.msUpdateInterval = video.msUpdateNormal;
                             }
                         }
-                        video.msUpdatePrev = msUpdate;
+                        video.msUpdatePrev = msUpdate - (msDelta >= video.msUpdateInterval? 0 : msDelta);
                     } else {
-                        video.printf("skipping update (%dms)\n", msDelta);
+                        video.printf("skipping update (%dms too soon)\n", -msDelta);
                     }
                     video.latchStartAddress();
                 }, -this.cardActive.nCyclesVertPeriod);
@@ -54074,12 +54097,22 @@ class Video extends Component {
     latchStartAddress()
     {
         let card = this.cardActive;
-        let offStartAddr = card.regCRTData[Card.CRTC.STARTLO];
-        offStartAddr |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
-        if (card.offStartAddr !== offStartAddr) {
-            card.offStartAddr = offStartAddr;
+        let offStart = card.regCRTData[Card.CRTC.STARTLO];
+        offStart |= (card.regCRTData[Card.CRTC.STARTHI] & card.addrMaskHigh) << 8;
+        if (card.offStart !== offStart) {
+            card.offStart = offStart;
             this.invalidateCellCache(false);
         }
+        let rowStart = (card == this.cardEGA? (card.regCRTData[Card.CRTC.EGA.PRESCAN] & Card.CRTC.EGA.MAXSCAN.SLMASK) : 0);
+        if (card.rowStart !== rowStart) {
+            card.rowStart = rowStart;
+            this.nShiftUp = 0;
+            if (this.fOverBuffer) {
+                this.fShifted = true;
+                this.nShiftUp = rowStart & Card.CRTC.EGA.MAXSCAN.SLMASK;
+            }
+        }
+
     }
 
     /**
@@ -54175,7 +54208,7 @@ class Video extends Component {
             /*
              * Any screen (aka "page") offset must be doubled for text modes, due to the attribute bytes.
              */
-            addrScreen += card.offStartAddr << (this.nCardFont? 1 : 0);
+            addrScreen += card.offStart << (this.nCardFont? 1 : 0);
         } else {
             /*
              * For the EGA/VGA, we must make offset-doubling dependent on attribute (odd) byte addressibility.
@@ -54193,7 +54226,7 @@ class Video extends Component {
                 shiftCols = 1;
                 this.nPointsPerByte = 1.0;
             }
-            addrScreen += card.offStartAddr << shiftAddr;
+            addrScreen += card.offStart << shiftAddr;
             if (card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
                 /*
                  * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows, but since
@@ -55841,22 +55874,13 @@ class Video extends Component {
                 }
                 else if (fModified) {
                     /*
-                     * If the Preset Row Scan register has been modified, mark the image shifted.
-                     */
-                    if (card.regCRTIndx == Card.CRTC.EGA.PRESCAN) {
-                        if (this.fOverBuffer) {
-                            this.fShifted = true;
-                            this.nShiftUp = bOut & Card.CRTC.EGA.MAXSCAN.SLMASK;
-                        }
-                    }
-                    /*
                      * If the split-screen state has been modified, then partially invalidate the cell cache.
                      *
                      * TODO: This register is also used in conjunction with one overflow bit in the OVERFLOW register
                      * and another overflow bit in the MAXSCAN register (VGA only), so technically, if either of those
                      * bits change, then again, the cache should be invalidated.
                      */
-                    else if (card.regCRTIndx == Card.CRTC.EGA.LINECOMP) {
+                    if (card.regCRTIndx == Card.CRTC.EGA.LINECOMP) {
                         this.invalidateCellCache(false);
                     }
                 }
@@ -56613,10 +56637,10 @@ Video.aCGAColorSet2 = [Video.ATTRS.FGND_CYAN,  Video.ATTRS.FGND_MAGENTA, Video.A
 Video.aEGAPalDef = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x14, 0x07, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F];
 
 Video.aEGAByteToDW = [
-      0x00000000,   0x000000ff,   0x0000ff00,   0x0000ffff,
-      0x00ff0000,   0x00ff00ff,   0x00ffff00,   0x00ffffff,
-      0xff000000|0, 0xff0000ff|0, 0xff00ff00|0, 0xff00ffff|0,
-      0xffff0000|0, 0xffff00ff|0, 0xffffff00|0, 0xffffffff|0
+    0x00000000,   0x000000ff,   0x0000ff00,   0x0000ffff,
+    0x00ff0000,   0x00ff00ff,   0x00ffff00,   0x00ffffff,
+    0xff000000|0, 0xff0000ff|0, 0xff00ff00|0, 0xff00ffff|0,
+    0xffff0000|0, 0xffff00ff|0, 0xffffff00|0, 0xffffffff|0
 ];
 
 Video.aEGADWToByte = [];
