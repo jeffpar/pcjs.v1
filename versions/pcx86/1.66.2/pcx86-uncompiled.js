@@ -51858,6 +51858,7 @@ class Video extends Component {
                 this.msUpdateNormal = (1000 / Video.UPDATES_PER_SECOND)|0;
                 this.msUpdateInterval = this.msUpdateNormal;
                 this.msUpdatePrev = this.cmsUpdate = 0;
+
                 let video = this;
                 this.timerRetrace = this.cpu.addTimer(this.id, function startVerticalRetrace() {
                     let card = video.cardActive;
@@ -51882,7 +51883,12 @@ class Video extends Component {
                         let fUpdated = video.updateScreen();
                         if (fUpdated) {
                             let cmsUpdate = Date.now() - msUpdate;
-                            if (video.cUpdates % 60 == 1) {
+                            /*
+                             * Make sure that the modulo number here is always a multiple of the blink modulo in
+                             * updateScreen(), so that we don't create blink irregularity every time we reset our
+                             * average update time (cmsUpdate).
+                             */
+                            if (video.cUpdates % 120 == 1) {
                                 video.cUpdates = 1;
                                 video.cmsUpdate = cmsUpdate;
                             } else {
