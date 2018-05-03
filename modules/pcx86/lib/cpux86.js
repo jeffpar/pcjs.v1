@@ -3788,10 +3788,12 @@ class CPUX86 extends CPU {
         let b = (PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP));
         if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
         /*
-         * With the following cycle penalty (which really only affects 8086/8088 CPUs), PC Tools 4.30 now
+         * With the following cycle penalty (which really only affects 8086/8088 CPUs), PC Tools 4.30
          * correctly reports an IBM PC-relative speed of 100% (assuming you're using a 4.77Mhz configuration).
+         *
+         * TODO: This can't be enabled until we resolve the monitor timing issues it triggers in the EGA BIOS.
          */
-        this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
+        // this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
         this.regLIP = newLIP;
         return b;
     }
