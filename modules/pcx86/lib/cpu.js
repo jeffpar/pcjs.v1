@@ -564,6 +564,7 @@ class CPU extends Component {
      * Calculate the maximum number of cycles we should attempt to process before the next yield.
      *
      * @this {CPU}
+     * @return {boolean} (true if there was a change to the multiplier, false if not)
      */
     calcCycles()
     {
@@ -572,7 +573,11 @@ class CPU extends Component {
             nMultiplier = this.counts.nTargetMultiplier;
         }
         this.counts.nCyclesPerYield = Math.floor(this.counts.nBaseCyclesPerSecond / CPU.YIELDS_PER_SECOND * nMultiplier);
-        this.counts.nCurrentMultiplier = nMultiplier;
+        if (this.counts.nCurrentMultiplier !== nMultiplier) {
+            this.counts.nCurrentMultiplier = nMultiplier;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -732,8 +737,9 @@ class CPU extends Component {
         this.addCycles(this.nRunCycles);
         this.nRunCycles = 0;
         this.counts.msStartRun = this.counts.msEndThisRun = 0;
-        this.calcCycles();      // calculate a new value for the current cycle multiplier
-        this.resetTimers();     // and then update all the fixed-period timers using the new cycle multiplier
+        if (this.calcCycles()) {    // if a new value was calculated for the current cycle multiplier
+            this.resetTimers();     // then update all the fixed-period timers using the new cycle multiplier
+        }
         return fSuccess;
     }
 
@@ -1213,16 +1219,15 @@ class CPU extends Component {
                 }
 
                 /*
-                 * Terminate the burst, returning the number of cycles that stepCPU() actually ran.
+                 * Terminate the burst, returning the number of cycles that stepCPU() actually ran.  If this
+                 * returns zero, then presumably someone already called endBurst(), such as stopCPU(), and already
+                 * took care of all the timers.
                  */
                 nCycles = this.endBurst();
-
-                /*
-                 * Update all timers, firing those whose cycle countdowns have reached (or dropped below) zero.
-                 */
-                this.updateTimers(nCycles);
-                this.updateChecksum(nCycles);
-
+                if (nCycles) {
+                    this.updateTimers(nCycles);
+                    this.updateChecksum(nCycles);
+                }
             } while (this.flags.running && !this.flags.yield);
         }
         catch (e) {
@@ -1309,7 +1314,11 @@ class CPU extends Component {
     {
         let fStopped = false;
         if (this.flags.running) {
-            this.endBurst();
+            let nCycles = this.endBurst();
+            if (nCycles) {
+                this.updateTimers(nCycles);
+                this.updateChecksum(nCycles);
+            }
             this.addCycles(this.nRunCycles);
             this.nRunCycles = 0;
             this.flags.running = false;

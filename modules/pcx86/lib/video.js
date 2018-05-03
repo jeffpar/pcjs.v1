@@ -41,6 +41,7 @@ if (NODE) {
     var Keyboard    = require("./keyboard");
     var Mouse       = require("./mouse");
     var Controller  = require("./bus").Controller;
+    var X86         = require("./x86");
 }
 
 /*
@@ -451,7 +452,16 @@ class Card extends Controller {
                 this.initEGA(data[6], nMonitorType);
             }
 
-            let monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
+            let monitorSpecs;
+            /*
+             * This is only necessary for machines that apply this.cycleCounts.nWordCyclePenalty
+             * to getIPByte(); currently, we're not doing that, so this work-around is not required.
+             *
+             *  if (video.cpu.model <= X86.MODEL_8088) monitorSpecs = Video.monitorSpecsXT[nMonitorType];
+             */
+            if (!monitorSpecs) {
+                monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
+            }
 
             /*
              * Let's look at an example of the calculations below for the COLOR monitor on an IBM PC:
@@ -7982,12 +7992,13 @@ Video.MODEL = {
  * @type {Object}
  */
 Video.monitorSpecs = {};
+Video.monitorSpecsXT = {};
 
 /**
  * NOTE: Based on trial-and-error, 208 is the magic number of horizontal syncs per vertical sync that
  * yielded the necessary number of "horizontal enables" (200 or 0xC8) in the EGA ROM BIOS at C000:03D0.
  *
- * @type {{MonitorSpecs}}
+ * @type {MonitorSpecs}
  */
 Video.monitorSpecs[ChipSet.MONITOR.COLOR] = {
     nHorzPeriodsPerSec: 15700,
@@ -8000,7 +8011,7 @@ Video.monitorSpecs[ChipSet.MONITOR.COLOR] = {
  * NOTE: Based on trial-and-error, 364 is the magic number of horizontal syncs per vertical sync that
  * yielded the necessary number of "horizontal enables" (350 or 0x15E) in the EGA ROM BIOS at C000:03D0.
  *
- * @type {{MonitorSpecs}}
+ * @type {MonitorSpecs}
  */
 Video.monitorSpecs[ChipSet.MONITOR.MONO] = {
     nHorzPeriodsPerSec: 18432,
@@ -8009,8 +8020,15 @@ Video.monitorSpecs[ChipSet.MONITOR.MONO] = {
     percentVertActive: 96
 };
 
+Video.monitorSpecsXT[ChipSet.MONITOR.MONO] = {
+    nHorzPeriodsPerSec: 18432,
+    nHorzPeriodsPerFrame: 365,
+    percentHorzActive: 77,
+    percentVertActive: 96
+};
+
 /**
- * @type {{MonitorSpecs}}
+ * @type {MonitorSpecs}
  */
 Video.monitorSpecs[ChipSet.MONITOR.EGACOLOR] = {
     nHorzPeriodsPerSec: 21850,
@@ -8020,10 +8038,20 @@ Video.monitorSpecs[ChipSet.MONITOR.EGACOLOR] = {
 };
 
 /**
+ * @type {MonitorSpecs}
+ */
+Video.monitorSpecsXT[ChipSet.MONITOR.EGACOLOR] = {
+    nHorzPeriodsPerSec: 21850,
+    nHorzPeriodsPerFrame: 365,
+    percentHorzActive: 77,
+    percentVertActive: 96
+};
+
+/**
  * NOTE: As above, the following values are based purely on trial-and-error, to yield results that fall
  * squarely within the bounds of the IBM VGA ROM timing requirements; see the IBM VGA ROM code at C000:024A.
  *
- * @type {{MonitorSpecs}}
+ * @type {MonitorSpecs}
  */
 Video.monitorSpecs[ChipSet.MONITOR.VGACOLOR] = {
     nHorzPeriodsPerSec: 16700,
