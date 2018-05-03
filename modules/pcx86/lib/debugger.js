@@ -48,39 +48,24 @@ if (DEBUGGER) {
 }
 
 /**
- * Debugger Address Object
- *
- *      off             offset, if any
- *      sel             selector, if any (if undefined, addr should be set to a linear address)
- *      addr            linear address, if any (if undefined, addr will be recomputed from sel:off)
- *      type            one of the DebuggerX86.ADDRTYPE values
- *      fData32         true if 32-bit operand size in effect
- *      fAddr32         true if 32-bit address size in effect
- *      fData32Orig     original fData32 value, if any
- *      fAddr32Orig     original fAddr32 value, if any
- *      cOverrides      non-zero if any overrides were processed with this address
- *      fComplete       true if a complete instruction was processed with this address
- *      fTempBreak      true if this is a temporary breakpoint address
- *      sCmd            set for breakpoint addresses if there's an associated command string
- *      aCmds           preprocessed commands (from sCmd)
- *
- * @typedef {{
- *      off:(number|undefined),
- *      sel:(number|undefined),
- *      addr:(number|undefined),
- *      type:(number|undefined),
- *      fData32:(boolean|undefined),
- *      fAddr32:(boolean|undefined),
- *      fData32Orig:(boolean|undefined),
- *      fAddr32Orig:(boolean|undefined),
- *      cOverrides:(number|undefined),
- *      fComplete:(boolean|undefined),
- *      fTempBreak:(boolean|undefined),
- *      sCmd:(string|undefined),
- *      aCmds:(Array.<string>|undefined)
- * }} DbgAddrX86
+ * @typedef {Object}    DbgAddrX86
+ * @property {number}   [off]
+ * @property {number}   [sel]
+ * @property {number}   [addr]
+ * @property {number}   [type]
+ * @property {boolean}  [fData32]
+ * @property {boolean}  [fAddr32]
+ * @property {boolean}  [fData32Orig]
+ * @property {boolean}  [fAddr32Orig]
+ * @property {number}   [cOverrides]
+ * @property {boolean}  [fComplete]
+ * @property {boolean}  [fTempBreak]
+ * @property {string}   [sCmd]
+ * @property {Array.<string>} [aCmds]
+ * @property {number}   [nCPUCycles]    (added to DbgAddrX86 objects stored in history buffer)
+ * @property {number}   [nVideoCycles]  (added to DbgAddrX86 objects stored in history buffer)
+ * @property {number}   [nVideoState]   (added to DbgAddrX86 objects stored in history buffer)
  */
-var DbgAddrX86;
 
 /*
  * Debugger Breakpoint Tips
@@ -260,6 +245,9 @@ class DebuggerX86 extends Debugger {
         this.hdc = cmp.getMachineComponent("HDC");
         this.fpu = cmp.getMachineComponent("FPU");
         this.mouse = cmp.getMachineComponent("Mouse");
+
+        // this.video = cmp.getMachineComponent("Video");
+
         if (MAXDEBUG) this.chipset = cmp.getMachineComponent("ChipSet");
 
         /*
@@ -1958,6 +1946,7 @@ class DebuggerX86 extends Debugger {
         let aHistory = this.aOpcodeHistory;
 
         if (aHistory.length) {
+
             let nPrev = +sPrev || this.nextHistory;
             let nLines = +sLines || 10;
 
@@ -1995,6 +1984,10 @@ class DebuggerX86 extends Debugger {
                 this.println(nPrev + " instructions earlier:");
             }
 
+            let sBuffer = "";
+            let nCyclesPrev = 0;
+            let fDumpCycles = (sComment == "cycles");
+
             /*
              * TODO: The following is necessary to prevent dumpHistory() from causing additional (or worse, recursive)
              * faults due to segmented addresses that are no longer valid, but the only alternative is to dramatically
@@ -2019,14 +2012,22 @@ class DebuggerX86 extends Debugger {
                 let dbgAddrNew = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
 
                 let nSequence = nPrev--;
-                if (dbgAddr.cycleCount != null && sComment == "cycles") {
-                    nSequence = dbgAddr.cycleCount;
+                if (fDumpCycles) {
+                    nSequence = nCyclesPrev;
+                    if (dbgAddr.nCPUCycles != null) {
+                        nSequence = dbgAddr.nCPUCycles - nCyclesPrev;
+                        nCyclesPrev = dbgAddr.nCPUCycles;
+                    }
                 }
 
                 let sInstruction = this.getInstruction(dbgAddrNew, sComment, nSequence);
 
+                if (dbgAddr.nVideoCycles != null) {
+                    sInstruction += " (" + dbgAddr.nVideoCycles + "," + Str.toHexByte(dbgAddr.nVideoState) + ")";
+                }
+
                 if (!aFilters.length || sInstruction.indexOf(aFilters[0]) >= 0) {
-                    this.println(sInstruction);
+                    sBuffer += (sBuffer? '\n' : '') + sInstruction;
                 }
 
                 /*
@@ -2042,6 +2043,9 @@ class DebuggerX86 extends Debugger {
                 cHistory++;
                 nLines--;
             }
+
+            if (sBuffer) this.println(sBuffer);
+
             /*
              * See comments above.
              *
@@ -3096,7 +3100,21 @@ class DebuggerX86 extends Debugger {
                 this.aaOpcodeCounts[bOpcode][1]++;
                 let dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
                 this.setAddr(dbgAddr, cpu.getIP(), cpu.getCS());
-                dbgAddr.cycleCount = cpu.getCycles();
+                dbgAddr.nCPUCycles = cpu.getCycles();
+                /*
+                 * For debugging video timing (eg, retrace) issues, it's helpful to record the state of the Video
+                 * component's countdown timer.  timerVideo will be set to null if there's no Video component or the
+                 * timer doesn't exist, so findTimer() should be called at most once.
+                 */
+                if (this.video) {
+                    if (this.timerVideo === undefined) {
+                        this.timerVideo = cpu.findTimer(this.video.id);
+                    }
+                    if (this.timerVideo) {
+                        dbgAddr.nVideoCycles = this.timerVideo[1];
+                        dbgAddr.nVideoState = this.video.getRetraceBits(this.video.cardActive);
+                    }
+                }
                 if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
             }
         }
