@@ -17446,10 +17446,12 @@ class CPUX86 extends CPU {
         let b = (PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP));
         if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
         /*
-         * With the following cycle penalty (which really only affects 8086/8088 CPUs), PC Tools 4.30 now
+         * With the following cycle penalty (which really only affects 8086/8088 CPUs), PC Tools 4.30
          * correctly reports an IBM PC-relative speed of 100% (assuming you're using a 4.77Mhz configuration).
+         *
+         * TODO: This can't be enabled until we resolve the monitor timing issues it triggers in the EGA BIOS.
          */
-        this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
+        // this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
         this.regLIP = newLIP;
         return b;
     }
@@ -48876,7 +48878,7 @@ class Card extends Controller {
             let monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
 
             /*
-             * Let's look at an example of the following calculations:
+             * Let's look at an example of the calculations below for the COLOR monitor on an IBM PC:
              *
              *      nCyclesDefault:     4772727
              *      nCyclesHorzPeriod:  (4772727 / 15700 nHorzPeriodsPerSec) = 303
@@ -48891,8 +48893,16 @@ class Card extends Controller {
              * which then snaps the current cycle count in nCyclesVertRetrace.  Whenever getRetraceBits() is called,
              * it too examines the current cycle count, and when the cycle count delta exceeds nCyclesVertPeriod -
              * nCyclesVertActive, vertical retrace has ended.
+             *
+             * Here's another example of the calculations below for the EGACOLOR monitor on an IBM PC:
+             *
+             *      nCyclesDefault:     4772727
+             *      nCyclesHorzPeriod:  (4772727 / 21850 nHorzPeriodsPerSec) = 218
+             *      nCyclesHorzActive:  (218 * 85%) = 185
+             *      nCyclesVertPeriod:  (218 * 364 nHorzPeriodsPerFrame) = 79352
+             *      nCyclesVertActive:  (79352 * 96%) = 76177
              */
-            let nCyclesDefault = video.cpu.getBaseCyclesPerSecond();    // eg, 4772727
+            let nCyclesDefault = video.cpu.getBaseCyclesPerSecond();
             this.nCyclesHorzPeriod = (nCyclesDefault / monitorSpecs.nHorzPeriodsPerSec)|0;
             this.nCyclesHorzActive = (this.nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100)|0;
             this.nCyclesVertPeriod = (this.nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame)|0;
@@ -50784,6 +50794,8 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.PAIRS] = Card.ACCESS.writeBytePairs;
 
 /**
  * @class Video
+ * @property {CPUX86} cpu
+ * @property {DebuggerX86} dbg
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Video extends Component {
