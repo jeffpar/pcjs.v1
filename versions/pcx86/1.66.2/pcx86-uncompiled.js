@@ -12868,6 +12868,7 @@ class CPU extends Component {
      * Calculate the maximum number of cycles we should attempt to process before the next yield.
      *
      * @this {CPU}
+     * @return {boolean} (true if there was a change to the multiplier, false if not)
      */
     calcCycles()
     {
@@ -12876,7 +12877,11 @@ class CPU extends Component {
             nMultiplier = this.counts.nTargetMultiplier;
         }
         this.counts.nCyclesPerYield = Math.floor(this.counts.nBaseCyclesPerSecond / CPU.YIELDS_PER_SECOND * nMultiplier);
-        this.counts.nCurrentMultiplier = nMultiplier;
+        if (this.counts.nCurrentMultiplier !== nMultiplier) {
+            this.counts.nCurrentMultiplier = nMultiplier;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -13036,8 +13041,9 @@ class CPU extends Component {
         this.addCycles(this.nRunCycles);
         this.nRunCycles = 0;
         this.counts.msStartRun = this.counts.msEndThisRun = 0;
-        this.calcCycles();      // calculate a new value for the current cycle multiplier
-        this.resetTimers();     // and then update all the fixed-period timers using the new cycle multiplier
+        if (this.calcCycles()) {    // if a new value was calculated for the current cycle multiplier
+            this.resetTimers();     // then update all the fixed-period timers using the new cycle multiplier
+        }
         return fSuccess;
     }
 
@@ -13517,16 +13523,15 @@ class CPU extends Component {
                 }
 
                 /*
-                 * Terminate the burst, returning the number of cycles that stepCPU() actually ran.
+                 * Terminate the burst, returning the number of cycles that stepCPU() actually ran.  If this
+                 * returns zero, then presumably someone already called endBurst(), such as stopCPU(), and already
+                 * took care of all the timers.
                  */
                 nCycles = this.endBurst();
-
-                /*
-                 * Update all timers, firing those whose cycle countdowns have reached (or dropped below) zero.
-                 */
-                this.updateTimers(nCycles);
-                this.updateChecksum(nCycles);
-
+                if (nCycles) {
+                    this.updateTimers(nCycles);
+                    this.updateChecksum(nCycles);
+                }
             } while (this.flags.running && !this.flags.yield);
         }
         catch (e) {
@@ -13613,7 +13618,11 @@ class CPU extends Component {
     {
         let fStopped = false;
         if (this.flags.running) {
-            this.endBurst();
+            let nCycles = this.endBurst();
+            if (nCycles) {
+                this.updateTimers(nCycles);
+                this.updateChecksum(nCycles);
+            }
             this.addCycles(this.nRunCycles);
             this.nRunCycles = 0;
             this.flags.running = false;
@@ -17445,13 +17454,17 @@ class CPUX86 extends CPU {
         let newLIP = this.checkIP(1);
         let b = (PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP));
         if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
+
         /*
          * With the following cycle penalty (which really only affects 8086/8088 CPUs), PC Tools 4.30
          * correctly reports an IBM PC-relative speed of 100% (assuming you're using a 4.77Mhz configuration).
          *
-         * TODO: This can't be enabled until we resolve the monitor timing issues it triggers in the EGA BIOS.
+         * However, this creates monitor timing issues in the Video component; there's a work-around for that
+         * (see monitorSpecsXT) but this also slows the machine down much more than I would have expected, so
+         * for now, it's disabled.
          */
         // this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
+
         this.regLIP = newLIP;
         return b;
     }
@@ -48875,7 +48888,16 @@ class Card extends Controller {
                 this.initEGA(data[6], nMonitorType);
             }
 
-            let monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
+            let monitorSpecs;
+            /*
+             * This is only necessary for machines that apply this.cycleCounts.nWordCyclePenalty
+             * to getIPByte(); currently, we're not doing that, so this work-around is not required.
+             *
+             *  if (video.cpu.model <= X86.MODEL_8088) monitorSpecs = Video.monitorSpecsXT[nMonitorType];
+             */
+            if (!monitorSpecs) {
+                monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
+            }
 
             /*
              * Let's look at an example of the calculations below for the COLOR monitor on an IBM PC:
@@ -56393,12 +56415,13 @@ var MonitorSpecs;
  * @type {Object}
  */
 Video.monitorSpecs = {};
+Video.monitorSpecsXT = {};
 
 /**
  * NOTE: Based on trial-and-error, 208 is the magic number of horizontal syncs per vertical sync that
  * yielded the necessary number of "horizontal enables" (200 or 0xC8) in the EGA ROM BIOS at C000:03D0.
  *
- * @type {{MonitorSpecs}}
+ * @type {MonitorSpecs}
  */
 Video.monitorSpecs[ChipSet.MONITOR.COLOR] = {
     nHorzPeriodsPerSec: 15700,
@@ -56411,7 +56434,7 @@ Video.monitorSpecs[ChipSet.MONITOR.COLOR] = {
  * NOTE: Based on trial-and-error, 364 is the magic number of horizontal syncs per vertical sync that
  * yielded the necessary number of "horizontal enables" (350 or 0x15E) in the EGA ROM BIOS at C000:03D0.
  *
- * @type {{MonitorSpecs}}
+ * @type {MonitorSpecs}
  */
 Video.monitorSpecs[ChipSet.MONITOR.MONO] = {
     nHorzPeriodsPerSec: 18432,
@@ -56420,8 +56443,15 @@ Video.monitorSpecs[ChipSet.MONITOR.MONO] = {
     percentVertActive: 96
 };
 
+Video.monitorSpecsXT[ChipSet.MONITOR.MONO] = {
+    nHorzPeriodsPerSec: 18432,
+    nHorzPeriodsPerFrame: 365,
+    percentHorzActive: 77,
+    percentVertActive: 96
+};
+
 /**
- * @type {{MonitorSpecs}}
+ * @type {MonitorSpecs}
  */
 Video.monitorSpecs[ChipSet.MONITOR.EGACOLOR] = {
     nHorzPeriodsPerSec: 21850,
@@ -56431,10 +56461,20 @@ Video.monitorSpecs[ChipSet.MONITOR.EGACOLOR] = {
 };
 
 /**
+ * @type {MonitorSpecs}
+ */
+Video.monitorSpecsXT[ChipSet.MONITOR.EGACOLOR] = {
+    nHorzPeriodsPerSec: 21850,
+    nHorzPeriodsPerFrame: 365,
+    percentHorzActive: 77,
+    percentVertActive: 96
+};
+
+/**
  * NOTE: As above, the following values are based purely on trial-and-error, to yield results that fall
  * squarely within the bounds of the IBM VGA ROM timing requirements; see the IBM VGA ROM code at C000:024A.
  *
- * @type {{MonitorSpecs}}
+ * @type {MonitorSpecs}
  */
 Video.monitorSpecs[ChipSet.MONITOR.VGACOLOR] = {
     nHorzPeriodsPerSec: 16700,
@@ -70513,39 +70553,7 @@ if (DEBUGGER) {
 if (DEBUGGER) {
 }
 
-/**
- * Debugger Address Object
- *
- *      off             offset, if any
- *      sel             selector, if any (if undefined, addr should be set to a linear address)
- *      addr            linear address, if any (if undefined, addr will be recomputed from sel:off)
- *      type            one of the DebuggerX86.ADDRTYPE values
- *      fData32         true if 32-bit operand size in effect
- *      fAddr32         true if 32-bit address size in effect
- *      fData32Orig     original fData32 value, if any
- *      fAddr32Orig     original fAddr32 value, if any
- *      cOverrides      non-zero if any overrides were processed with this address
- *      fComplete       true if a complete instruction was processed with this address
- *      fTempBreak      true if this is a temporary breakpoint address
- *      sCmd            set for breakpoint addresses if there's an associated command string
- *      aCmds           preprocessed commands (from sCmd)
- *
- * @typedef {{
- *      off:(number|undefined),
- *      sel:(number|undefined),
- *      addr:(number|undefined),
- *      type:(number|undefined),
- *      fData32:(boolean|undefined),
- *      fAddr32:(boolean|undefined),
- *      fData32Orig:(boolean|undefined),
- *      fAddr32Orig:(boolean|undefined),
- *      cOverrides:(number|undefined),
- *      fComplete:(boolean|undefined),
- *      fTempBreak:(boolean|undefined),
- *      sCmd:(string|undefined),
- *      aCmds:(Array.<string>|undefined)
- * }} DbgAddrX86
- */
+/** @typedef {{ off: (number|undefined), sel: (number|undefined), addr: (number|undefined), type: (number|undefined), fData32: (boolean|undefined), fAddr32: (boolean|undefined), fData32Orig: (boolean|undefined), fAddr32Orig: (boolean|undefined), cOverrides: (number|undefined), fComplete: (boolean|undefined), fTempBreak: (boolean|undefined), sCmd: (string|undefined), aCmds: (Array.<string>|undefined), nCPUCycles: (number|undefined), nVideoCycles: (number|undefined), nVideoState: (number|undefined) }} */
 var DbgAddrX86;
 
 /*
@@ -70726,6 +70734,9 @@ class DebuggerX86 extends Debugger {
         this.hdc = cmp.getMachineComponent("HDC");
         this.fpu = cmp.getMachineComponent("FPU");
         this.mouse = cmp.getMachineComponent("Mouse");
+
+        // this.video = cmp.getMachineComponent("Video");
+
         if (MAXDEBUG) this.chipset = cmp.getMachineComponent("ChipSet");
 
         /*
@@ -72424,6 +72435,7 @@ class DebuggerX86 extends Debugger {
         let aHistory = this.aOpcodeHistory;
 
         if (aHistory.length) {
+
             let nPrev = +sPrev || this.nextHistory;
             let nLines = +sLines || 10;
 
@@ -72461,6 +72473,10 @@ class DebuggerX86 extends Debugger {
                 this.println(nPrev + " instructions earlier:");
             }
 
+            let sBuffer = "";
+            let nCyclesPrev = 0;
+            let fDumpCycles = (sComment == "cycles");
+
             /*
              * TODO: The following is necessary to prevent dumpHistory() from causing additional (or worse, recursive)
              * faults due to segmented addresses that are no longer valid, but the only alternative is to dramatically
@@ -72485,14 +72501,22 @@ class DebuggerX86 extends Debugger {
                 let dbgAddrNew = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
 
                 let nSequence = nPrev--;
-                if (dbgAddr.cycleCount != null && sComment == "cycles") {
-                    nSequence = dbgAddr.cycleCount;
+                if (fDumpCycles) {
+                    nSequence = nCyclesPrev;
+                    if (dbgAddr.nCPUCycles != null) {
+                        nSequence = dbgAddr.nCPUCycles - nCyclesPrev;
+                        nCyclesPrev = dbgAddr.nCPUCycles;
+                    }
                 }
 
                 let sInstruction = this.getInstruction(dbgAddrNew, sComment, nSequence);
 
+                if (dbgAddr.nVideoCycles != null) {
+                    sInstruction += " (" + dbgAddr.nVideoCycles + "," + Str.toHexByte(dbgAddr.nVideoState) + ")";
+                }
+
                 if (!aFilters.length || sInstruction.indexOf(aFilters[0]) >= 0) {
-                    this.println(sInstruction);
+                    sBuffer += (sBuffer? '\n' : '') + sInstruction;
                 }
 
                 /*
@@ -72508,6 +72532,9 @@ class DebuggerX86 extends Debugger {
                 cHistory++;
                 nLines--;
             }
+
+            if (sBuffer) this.println(sBuffer);
+
             /*
              * See comments above.
              *
@@ -73562,7 +73589,21 @@ class DebuggerX86 extends Debugger {
                 this.aaOpcodeCounts[bOpcode][1]++;
                 let dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
                 this.setAddr(dbgAddr, cpu.getIP(), cpu.getCS());
-                dbgAddr.cycleCount = cpu.getCycles();
+                dbgAddr.nCPUCycles = cpu.getCycles();
+                /*
+                 * For debugging video timing (eg, retrace) issues, it's helpful to record the state of the Video
+                 * component's countdown timer.  timerVideo will be set to null if there's no Video component or the
+                 * timer doesn't exist, so findTimer() should be called at most once.
+                 */
+                if (this.video) {
+                    if (this.timerVideo === undefined) {
+                        this.timerVideo = cpu.findTimer(this.video.id);
+                    }
+                    if (this.timerVideo) {
+                        dbgAddr.nVideoCycles = this.timerVideo[1];
+                        dbgAddr.nVideoState = this.video.getRetraceBits(this.video.cardActive);
+                    }
+                }
                 if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
             }
         }

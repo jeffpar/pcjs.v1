@@ -9,10 +9,10 @@ IBM PC AT (Model 5170) Machines
 
 Our IBM PC AT configurations include:
 
-* [IBM PC AT with MDA Display](/devices/pcx86/machine/5170/mda/)
-* [IBM PC AT with CGA Display](/devices/pcx86/machine/5170/cga/)
-* [IBM PC AT with EGA Display](/devices/pcx86/machine/5170/ega/)
-* [IBM PC AT with VGA Display](/devices/pcx86/machine/5170/vga/)
+* [IBM PC AT with Monochrome Display Adapter (MDA)](/devices/pcx86/machine/5170/mda/)
+* [IBM PC AT with Color Graphics Adapter (CGA)](/devices/pcx86/machine/5170/cga/)
+* [IBM PC AT with Enhanced Graphics Adapter (EGA)](/devices/pcx86/machine/5170/ega/)
+* [IBM PC AT with Video Graphics Array (VGA)](/devices/pcx86/machine/5170/vga/)
 
 The IBM PC AT came in a variety of its own "sub-models" over a three-year period.
 
