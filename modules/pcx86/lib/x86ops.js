@@ -2613,7 +2613,10 @@ X86.opSAHF = function()
  */
 X86.opLAHF = function()
 {
-    this.regEAX = (this.regEAX & ~0xff00) | (this.getPS() & X86.PS_SAHF) << 8;
+    /*
+     * Apparently, this simply uses the low 8 bits of PS as-is (ie, we don't need to mask with PS_SAHF).
+     */
+    this.regEAX = (this.regEAX & ~0xff00) | (this.getPS() & 0xff) << 8;
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
