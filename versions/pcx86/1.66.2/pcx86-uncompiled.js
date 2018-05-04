@@ -46674,6 +46674,7 @@ class Keyboard extends Component {
             let match, reSpecial = /(?:^|[^$])\$([a-z0-9][a-z0-9-]+)/g;
             while (match = reSpecial.exec(sKeys)) {
                 let sReplace = "";
+                if (reSpecial.lastIndex) reSpecial.lastIndex--;
                 switch (match[1]) {
                 case 'date':
                     sReplace = Usr.formatDate("n-j-Y");
@@ -46685,15 +46686,6 @@ class Keyboard extends Component {
                     continue;
                 }
                 sKeys = sKeys.replace('$' + match[1], sReplace);
-                /*
-                 * Even though we did just modify the string that reSpecial is iterating over, we aren't
-                 * going to muck with lastIndex, because 1) the replacement strings are always longer than
-                 * original strings, and 2) any unrecognized sequences that we now leave in place would cause
-                 * us to loop indefinitely.  So, if you really want to do this, you will have to carefully
-                 * set lastIndex to the next unexamined character, not back to the beginning.
-                 *
-                 *      reSpecial.lastIndex = 0;
-                 */
             }
             /*
              * Any lingering "$$" sequences are now converted to a special code (\x1F) that injectKeys() knows about.
