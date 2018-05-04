@@ -1020,7 +1020,12 @@ class CPU extends Component {
             let timer = this.findTimer(state[0]);
             if (timer) {
                 timer[1] = state[1];
-                timer[2] = (state[3] && timer[2] >= -1 || state[2] > 0)? state[2] : timer[2];
+                /*
+                 * When restoring from a new state (ie, when state[3] is true), the theory was we could use
+                 * state[2] as-is, but in reality, overriding a component's timeout value is problematic, especially
+                 * if a component wants to start using a new value (ie, we don't want an old value trumping it).
+                 */
+                // if (state[3] || state[2] > 0) timer[2] = state[2];
             }
         }
     }
@@ -1037,9 +1042,9 @@ class CPU extends Component {
         for (let iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
             let timer = this.aTimers[iTimer];
             /*
-             * We now push a 4th element (true) to indicate that this is a new timer state, where timer[2]
-             * is tri-state value (positive for milliseconds, negative for cycles, zero for none); previously,
-             * it was negative (-1) for none or else some number of milliseconds.
+             * We now push a 4th element (true) to indicate that this is a new timer state, where timer[2] is
+             * a tri-state value (positive for milliseconds, negative for cycles, zero for none); previously, it
+             * was negative (-1) for none or else some number of milliseconds.
              */
             aTimerStates.push([timer[0], timer[1], timer[2], true]);
         }
@@ -1393,7 +1398,7 @@ class CPU extends Component {
     }
 }
 
-CPU.YIELDS_PER_SECOND = 30;
+CPU.YIELDS_PER_SECOND = 60;
 
 CPU.BUTTONS = ["power", "reset"];
 
