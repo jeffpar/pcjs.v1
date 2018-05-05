@@ -1,7 +1,7 @@
 ---
 layout: page
-title: "IBM TopView 1.01 (With Debugger)"
-permalink: /disks/pcx86/apps/ibm/topview/1.01/debugger/
+title: "IBM TopView 1.00 (With Debugger)"
+permalink: /disks/pcx86/apps/ibm/topview/1.00/debugger/
 machines:
   - id: ibm5160
     type: pcx86
@@ -10,7 +10,7 @@ machines:
       A:
         name: PC-DOS 2.00 (Disk 1)
       B:
-        name: IBM TopView 1.01 (Program)
+        name: IBM TopView 1.00 (Program)
     autoScript: startMouse
 machineScripts:
   startKbd: |
@@ -30,7 +30,7 @@ machineScripts:
     type Keyboard "B:\rSETUP\r$50.3\r$20n\r$20y\r$20\r$20\r$20.1\r";
 ---
 
-IBM TopView 1.01 (With Debugger)
+IBM TopView 1.00 (With Debugger)
 --------------------------------
 
 {% include machine.html id="ibm5160" %}
