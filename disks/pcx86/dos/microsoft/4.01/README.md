@@ -14,11 +14,10 @@ machines:
 Microsoft MS-DOS 4.01
 ---------------------
 
-The PCjs machine below is running PC-DOS 4.01.
+MS-DOS 4.01 was released in April 1989.  [Directory Listings](#directory-of-ms-dos-401-disk-1) of the six
+360Kb distribution diskettes are provided below.
 
 {% include machine.html id="ibm5170-msdos401" %}
-
-MS-DOS 4.01 was released in April 1989.  The contents of the six 360Kb distribution diskettes are shown below.
 
 ### Directory of MS-DOS 4.01 (Disk 1)
 

@@ -6,7 +6,7 @@ permalink: /blog/2018/03/10/
 machines:
   - id: ibm5170
     type: pcx86
-    config: /devices/pcx86/machine/5170/ega/640kb/rev1/machine.xml
+    config: /devices/pcx86/machine/5170/ega/640kb/rev1/testmon/machine.xml
     drives: '[{name:"10Mb Hard Disk",type:1,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'
     autoMount:
       A:
@@ -23,10 +23,10 @@ compare operations between simulated and actual hardware.
 
 More information on [Controlling Physical PCs](#controlling-physical-pcs) is available below.
 
-You can test it with the PCjs machine below, which has been configured with a [TestController](/modules/pcx86/lib/testctl.js)
+You can test it with the PCjs machine below, which has been configured with a [TestMonitor](/modules/pcx86/lib/testctl.js)
 window, as well as a hard disk with [MS-DOS 3.20](/disks/pcx86/dos/microsoft/3.20/) and [SYMDEB 4.00](/blog/2018/02/25/)
 pre-installed.  After the "CTTY COM2" DOS command is entered, all further DOS input/output is redirected to COM2, which is
-connected to the TestController window.
+connected to the TestMonitor window.
 
 If you want to interact with DOS directly, you can press Ctrl-T to enter the TestMonitor's *terminal* mode; press it again
 to return to *prompt* mode.  In *prompt* mode, the TestMonitor monitors the serial port for recognized prompts --

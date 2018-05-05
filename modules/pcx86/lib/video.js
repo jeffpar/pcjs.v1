@@ -5969,7 +5969,9 @@ class Video extends Component {
                     iCell = nCells;
                 }
                 else {
-                    addrScreen += (iCellCursor << 1);
+                    let row = (iCellCursor / this.nColsBuffer)|0;
+                    let col = (iCellCursor % this.nColsBuffer);
+                    addrScreen += (row * this.nColsLogical + col) << 1;
                     iCell += iCellCursor;
                     nCells = iCell + 1;
                 }
@@ -6045,7 +6047,7 @@ class Video extends Component {
          * but Fantasy Land is an exception.  Which is another great reason why the loop below needs to get both
          * bytes directly from adwMemory, because reading them with bus.getShortDirect(addrScreen) won't always work.
          */
-        let cbCell = (1 / this.nPointsPerByte) | 0;
+        let cbCell = (1 / this.nPointsPerByte)|0;
         let nShift = (card.nAccess & Card.ACCESS.WRITE.PAIRS)? 1 : 0;
 
         let fBlinkEnable = (card.regMode & Card.MDA.MODE.BLINK_ENABLE);
@@ -6083,23 +6085,6 @@ class Video extends Component {
             this.assert(iCell < this.aCellCache.length);
 
             if (!this.iCellCacheValid || data !== this.aCellCache[iCell]) {
-                /*
-                 * The following code is useful for setting a breakpoint (on the non-destructive "cUpdated |= 0" line)
-                 * when debugging the "FlickerFree" utility while doing a series of "DIR" listings on the screen.  When
-                 * unusual data gets rendered past column 40, we've caught the utility clearing memory revealed by a
-                 * scroll.
-                 *
-                 *      if (col > 40 && data != 106272) {
-                 *          cUpdated |= 0;
-                 *      }
-                 *
-                 * TODO: How do we prevent that data from being displayed until the code has finished clearing it?
-                 * One trick would be to extend the current CPU burst slightly every time the STATUS register is read
-                 * with the RETRACE bit set, since it's only at the end of those bursts that we do other things like
-                 * update timers, update the screen, etc.
-                 *
-                 * FYI, to see what that "FlickerFree" code looks like, see the inCardStatus() function.
-                 */
                 this.updateChar(col, row, data, this.contextBuffer);
                 this.aCellCache[iCell] = data;
                 cUpdated++;
@@ -7611,7 +7596,7 @@ class Video extends Component {
              * Also, according to http://www.seasip.info/VintagePC/mda.html, on an MDA, bits 7-4 are always ON and
              * bits 2-1 are always OFF, hence the "OR" of 0xF0.
              *
-             * Alternatively, I *could* use the retrace bits from getRetraceBits() as-is:
+             * Currently, I use the retrace bits from getRetraceBits() as-is:
              *
              *      b |= 0xF0;
              *
@@ -7632,8 +7617,10 @@ class Video extends Component {
              * which, oddly, appears to want to write only ONE word to video memory per retrace interval.  Sticking
              * with our older, cruder, toggling code, makes that code run faster and reduce the odds that you'll see
              * old data on appear on the screen before the above code has the chance to store new data over it.
+             *
+             *      b = (card.regStatus ^= (Card.CGA.STATUS.RETRACE | Card.CGA.STATUS.VRETRACE)) | 0xF0;
              */
-            b = (card.regStatus ^= (Card.CGA.STATUS.RETRACE | Card.CGA.STATUS.VRETRACE)) | 0xF0;
+            b |= 0xF0;
         }
 
         card.regStatus = b;
