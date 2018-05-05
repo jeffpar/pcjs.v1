@@ -38,8 +38,7 @@ you may need to click the "Keys" button and use the **Alt** key on the on-screen
 
 {% include machine.html id="ibm5160" %}
 
-Additional Information From [PC DOS Retro](https://sites.google.com/site/pcdosretro/multitaskingdos4)
----
+### Additional Information From [PC DOS Retro](https://sites.google.com/site/pcdosretro/multitaskingdos4)
 
 Multitasking MS-DOS 4.0 was a little known and separate development of DOS done in parallel with the development
 of DOS 3.0 and 3.1 and was released in late 1985.  It should not be confused with the later retail DOS 4.0 that was

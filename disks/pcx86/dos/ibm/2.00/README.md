@@ -20,6 +20,99 @@ PC-DOS 2.00
 
 PC-DOS 2.00 was released in March 1983.
 
+New features:
+
+- Subdirectory support
+- Volume label support
+- Device driver support (device driver command codes 00h-0Ch)
+- File handle support
+- I/O redirection support
+- Simple memory management and MCBs
+- Environment variables (COMMAND.COM uses COMSPEC, PATH and PROMPT)
+- BIOS parameter block (BPB) support
+- 180KB single-sided and 360KB double-sided floppy disk support
+- Hard disk support up to 10MB (FAT12: partition type 01h)
+- File attributes: volume label (08h), subdirectory (10h) and archive (20h)
+- Zero byte indicates end of directory to speed up searches
+- Print spooler
+- Internal block device driver for disks
+- Parent PSP segment, job file table and environment segment added to PSP
+- Current directories are appended to each DPB
+- SYSVARS and SFT structures
+- Disk buffering
+
+New CONFIG.SYS commands:
+
+- AVAILDEV
+- BREAK
+- BUFFERS
+- DEVICE
+- FILES
+- SHELL
+- SWITCHAR
+
+New internal commands:
+
+- BREAK
+- CHDIR (CD)
+- CLS
+- CTTY
+- ECHO
+- EXIT
+- FOR
+- GOTO
+- IF
+- MKDIR (MD)
+- PATH
+- PROMPT
+- RMDIR (RD)
+- SET
+- SHIFT
+- VER
+- VERIFY
+- VOL
+
+New external commands:
+
+- ASSIGN
+- BACKUP
+- FDISK
+- FIND
+- GRAPHICS
+- MORE
+- PRINT
+- RECOVER
+- RESTORE
+- SORT
+- TREE
+
+New internal character devices:
+
+- AUX
+- CLOCK$
+- COM1
+- COM2
+- CON
+- LPT1
+- LPT2
+- LPT3
+- NUL
+- PRN
+
+New device drivers:
+
+- ANSI.SYS
+
+New functions:
+
+- INT 21h functions 2Fh-57h
+- INT 21h function 4Bh (execute or load program) implemented in COMMAND.COM
+- INT 25h, INT 26h, INT 27h now implemented in the DOS kernel
+- INT 28h idle call
+- INT 29h fast console output
+- INT 2Eh reload transient (COMMAND.COM)
+- INT 2Fh PRINT support
+
 [Directory Listings](#directory-of-pc-dos-200-disk-1) of the two 360Kb distribution diskettes are provided below.
 
 {% include machine.html id="ibm5160-pcdos200" %}

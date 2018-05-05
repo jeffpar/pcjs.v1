@@ -22,6 +22,28 @@ PC-DOS 1.10 was released in May 1982 on one single-sided (160Kb) diskette.  See 
 "[Read This First](#read-this-first)" from the [PC-DOS 1.10 Manual](/pubs/pc/software/dos/PCDOS110/)
 for important information about changes from [PC-DOS 1.00](../1.00/).
 
+New features:
+
+- Double-sided 320KB floppy disk support
+- Directory entries include the time last written in addition to the date
+- INT 24h vector saved in PSP
+- COPY supports concatenation of multiple files
+
+New internal commands:
+
+- DATE
+- DEL
+- REN
+- TIME
+
+New external commands:
+
+- EXE2BIN
+
+New functions:
+
+- INT 21h functions 1Ch, 1Fh, 2Eh
+
 The disk's [Directory Listing](#directory-of-pc-dos-110-diskette) and [Boot Sector](#pc-dos-110-boot-sector)
 are shown below.
 
@@ -471,15 +493,5 @@ The next chunk of code is identical to `check_sys_files` in the [PC-DOS 1.00 Boo
 	&0000:7D18 1F              POP      DS
 	&0000:7D19 F9              STC     
 	&0000:7D1A C3              RET     
-
-### Additional Information From [PC DOS Retro](https://sites.google.com/site/pcdosretro/doshist)
-
-- distributed on 1 160KB floppy disk
-- double-sided 320KB floppy disk support added
-- directory entries include the time last written in addition to the date
-- COPY supports concatenation of multiple files
-- new internal commands: DATE, DEL, REN, TIME
-- new external command: EXE2BIN
-- INT 21h functions 1Ch, 1Fh, 2Eh added
 
 See [PC-DOS 1.10 Documentation](/pubs/pc/software/dos/PCDOS110/) for more information.
