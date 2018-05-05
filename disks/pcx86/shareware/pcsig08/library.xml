@@ -178,6 +178,10 @@
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/3.40/DRDOS340-DISK2.json">DR-DOS 3.40 (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/3.41/DRDOS341-DISK1.json">DR-DOS 3.41 (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/3.41/DRDOS341-DISK2.json">DR-DOS 3.41 (Disk 2)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/dresearch/5.00/DRDOS500-DISK1.json">DR-DOS 5.00 (Disk 1)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/dresearch/5.00/DRDOS500-DISK2.json">DR-DOS 5.00 (Disk 2)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/dresearch/5.00/DRDOS500-DISK3.json">DR-DOS 5.00 (Disk 3)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/dresearch/5.00/DRDOS500-DISK4.json">DR-DOS 5.00 (Disk 4)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/6.00/360K/DRDOS600-DISK1.json">DR-DOS 6.00 (360K Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/6.00/360K/DRDOS600-DISK2.json">DR-DOS 6.00 (360K Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/6.00/360K/DRDOS600-DISK3.json">DR-DOS 6.00 (360K Disk 3)</disk>
