@@ -19,6 +19,13 @@ PC-DOS 5.02
 
 PC-DOS 5.02 was released in September 1992.
 
+A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-502-disk-1) of the three
+720Kb distribution diskettes, are provided below.
+
+{% include machine.html id="ibm5170-pcdos502" %}
+
+### Feature Summary
+
 New external commands:
 
 - DRVLOCK
@@ -42,10 +49,6 @@ New support files:
 New functions:
 
 - INT 2Fh multiplex functions 54h (POWER) and 56h (INTERLNK)
-
-[Directory Listings](#directory-of-pc-dos-502-disk-1) of the three 720Kb distribution diskettes are provided below.
-
-{% include machine.html id="ibm5170-pcdos502" %}
 
 ### Directory of PC-DOS 5.02 (Disk 1)
 

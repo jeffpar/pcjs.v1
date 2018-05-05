@@ -19,6 +19,13 @@ PC-DOS 5.00
 
 PC-DOS 5.00 was released in June 1991.
 
+A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-500-disk-1) of the three
+720Kb distribution diskettes, are provided below.
+
+{% include machine.html id="ibm5170-pcdos500" %}
+
+### Feature Summary
+
 New internal commands:
 
 - LOADHIGH (LH)
@@ -74,10 +81,6 @@ New functions:
 Removed functions:
 
 - INT 21h functions 3303h-3304h, 3701h, 5702h-5704h, 5D0Bh, 6Bh
-
-[Directory Listings](#directory-of-pc-dos-500-disk-1) of the three 720Kb distribution diskettes are provided below.
-
-{% include machine.html id="ibm5170-pcdos500" %}
 
 ### Directory of PC-DOS 5.00 (Disk 1)
 

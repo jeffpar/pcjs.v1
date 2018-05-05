@@ -21,6 +21,13 @@ PC-DOS 3.20
 PC-DOS 3.20 was first announced on March 18, 1986 and released April 1986.  Read the early
 [PC Magazine Review](#pc-magazine-review) below.
 
+A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-320-disk-1) of the two
+360Kb distribution diskettes, are provided below.  This version of PC-DOS was also available on one 720Kb diskette.
+
+{% include machine.html id="ibm5170-pcdos320" %}
+
+### Feature Summary
+
 New features:
 
 - 720KB 3.5" floppy disk support
@@ -49,11 +56,6 @@ New functions:
 - INT 21h functions 440Ch-440Fh, 64h
 - INT 2Fh multiplex functions 08h (IBMBIO/DRIVER.SYS), 13h (IBMBIO)
 - Device driver command codes 13h, 17h, 18h
-
-[Directory Listings](#directory-of-pc-dos-320-disk-1) of the two 360Kb distribution diskettes are provided below.
-This version of PC-DOS was also available on one 720Kb diskette.
-
-{% include machine.html id="ibm5170-pcdos320" %}
 
 ### Directory of PC-DOS 3.20 (Disk 1)
 
