@@ -22,6 +22,13 @@ PC-DOS 1.10 was released in May 1982 on one single-sided (160Kb) diskette.  See 
 "[Read This First](#read-this-first)" from the [PC-DOS 1.10 Manual](/pubs/pc/software/dos/PCDOS110/)
 for important information about changes from [PC-DOS 1.00](../1.00/).
 
+A [Feature Summary](#feature-summary), along with the disk's [Directory Listing](#directory-of-pc-dos-110-diskette)
+and [Boot Sector](#pc-dos-110-boot-sector), are provided below.
+
+{% include machine.html id="ibm5150-pcdos110" %}
+
+### Feature Summary
+
 New features:
 
 - Double-sided 320KB floppy disk support
@@ -43,11 +50,6 @@ New external commands:
 New functions:
 
 - INT 21h functions 1Ch, 1Fh, 2Eh
-
-The disk's [Directory Listing](#directory-of-pc-dos-110-diskette) and [Boot Sector](#pc-dos-110-boot-sector)
-are shown below.
-
-{% include machine.html id="ibm5150-pcdos110" %}
 
 ### Read This First
 

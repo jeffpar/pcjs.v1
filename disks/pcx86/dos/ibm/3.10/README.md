@@ -21,28 +21,9 @@ PC-DOS 3.10
 PC-DOS 3.10 was announced on August 14, 1984 (along with [PC-DOS 3.00](/disks/pcx86/dos/ibm/3.00/)) and released
 on April 2, 1985.
 
-New external commands:
+A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-310-disk-1) of the two
+360Kb distribution diskettes, are provided below.
 
-- JOIN
-- LABEL (MS-DOS)
-- SUBST
-
-Removed CONFIG.SYS commands:
-
-- STRING
-
-New functions:
-
-- SYSVARS table changed
-- DOS swappable data area changed (first version recognized by redirectors)
-- INT 21h functions 3302h, 5D07h-5D0Ah
-- INT 2Fh multiplex functions 02h (REDIR print), 06h (ASSIGN)
-
-Removed functions:
-
-- INT 21h function 61h
-
-[Directory Listings](#directory-of-pc-dos-310-disk-1) of the two 360Kb distribution diskettes are provided below.
 Another variation of the first disk has been found, which I've called [Patched Disk 1](#directory-of-pc-dos-310-patched-disk-1).
 It contains a modified IBMDOS.COM, along with updated `KEYBxx` "Load Keyboard" programs.  The modified IBMDOS.COM was patched
 with 4 NOP (0x90) bytes as follows:
@@ -67,6 +48,29 @@ of old diskettes with PCjs, which included, among other things, IBM's "patched" 
 "unpatched" disk images were obtained from [WinWorld](https://winworldpc.com/product/pc-dos/3x).
 
 {% include machine.html id="ibm5170-pcdos310" %}
+
+### Feature Summary
+
+New external commands:
+
+- JOIN
+- LABEL (MS-DOS)
+- SUBST
+
+Removed CONFIG.SYS commands:
+
+- STRING
+
+New functions:
+
+- SYSVARS table changed
+- DOS swappable data area changed (first version recognized by redirectors)
+- INT 21h functions 3302h, 5D07h-5D0Ah
+- INT 2Fh multiplex functions 02h (REDIR print), 06h (ASSIGN)
+
+Removed functions:
+
+- INT 21h function 61h
 
 ### Directory of PC-DOS 3.10 (Disk 1)
 

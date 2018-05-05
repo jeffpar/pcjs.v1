@@ -18,6 +18,13 @@ PC-DOS 4.00
 
 PC-DOS 4.00 was released in July 1988.
 
+A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-400-disk-1) of the five
+360Kb distribution diskettes, are provided below.
+
+{% include machine.html id="ibm5170-pcdos400" %}
+
+### Feature Summary
+
 New features:
 
 - SHARE loaded for FCB operations on hard disks greater than 32MB
@@ -65,10 +72,6 @@ New functions:
 
 - INT 21h functions 3305h, 5D0Bh, 5F05h-5F08h, 6507h, 6520h-6523h, 65A0h-65A3h, 69h-6Ch
 - INT 2Fh multiplex function 1Ah (ANSI.SYS)
-
-Directory listings of the five 360Kb distribution diskettes are provided below.
-
-{% include machine.html id="ibm5170-pcdos400" %}
 
 ### Directory of PC-DOS 4.00 (Disk 1)
 

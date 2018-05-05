@@ -20,6 +20,13 @@ PC-DOS 3.30
 
 PC-DOS 3.30 was announced and released on April 2, 1987, along with the first PS/2 models. 
 
+A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-330-disk-1) of the two
+360Kb distribution diskettes, are provided below.  This version of PC-DOS was also available on one 720Kb diskette.
+
+{% include machine.html id="ibm5170-pcdos330" %}
+
+### Feature Summary
+
 New features:
 
 - 1.44MB 3.5" floppy disk support
@@ -73,11 +80,6 @@ New functions:
 
 - INT 21h functions 65h-68h
 - INT 2Fh multiplex functions 14h (NLSFUNC), ADh (DISPLAY.SYS/KEYB), AEh (APPEND), B0h (GRAFTABL), B7h (APPEND)
-
-[Directory Listings](#directory-of-pc-dos-330-disk-1) of the two 360Kb distribution diskettes are provided below.
-This version of PC-DOS was also available on one 720Kb diskette.
-
-{% include machine.html id="ibm5170-pcdos330" %}
 
 ### Directory of PC-DOS 3.30 (Disk 1)
 
