@@ -72,9 +72,14 @@
 		<disk path="/pcjs-disks/pcx86/dos/ibm/4.00/PCDOS400-DISK3.json">PC-DOS 4.00 (Disk 3)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/ibm/4.00/PCDOS400-DISK4.json">PC-DOS 4.00 (Disk 4)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/ibm/4.00/PCDOS400-DISK5.json">PC-DOS 4.00 (Disk 5)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/ibm/4.01/PCDOS401-DISK1.json">PC-DOS 4.01 (Disk 1)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/ibm/4.01/PCDOS401-DISK2.json">PC-DOS 4.01 (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/ibm/5.00/PCDOS500-DISK1-720K.json">PC-DOS 5.00 (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/ibm/5.00/PCDOS500-DISK2-720K.json">PC-DOS 5.00 (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/ibm/5.00/PCDOS500-DISK3-720K.json">PC-DOS 5.00 (Disk 3)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/ibm/5.02/PCDOS502-DISK1.json">PC-DOS 5.02 (Disk 1)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/ibm/5.02/PCDOS502-DISK2.json">PC-DOS 5.02 (Disk 2)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/ibm/5.02/PCDOS502-DISK3.json">PC-DOS 5.02 (Disk 3)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/ibm/6.10/PCDOS610-DISK1-1440K.json">PC-DOS 6.10 (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/ibm/6.10/PCDOS610-DISK2-1440K.json">PC-DOS 6.10 (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/ibm/6.10/PCDOS610-DISK3-1440K.json">PC-DOS 6.10 (Disk 3)</disk>
@@ -825,7 +830,7 @@
 		<disk path="/pcjs-disks/pcx86/tools/softlogic/doubledos/2.0v/DOUBLEDOS-DISK1.json">DoubleDOS 2.0V (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/softlogic/doubledos/2.0v/DOUBLEDOS-DISK2.json">DoubleDOS 2.0V (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/softlogic/optimizer/2.0.3/DISK-OPTIMIZER.json">Disk Optimizer 2.0.3</disk>
-		<disk path="/pcjs-disks/pcx86/tools/other/enhdebug/ENHDEBUG.json">Enhanced DEBUG 1.32a</disk>
+		<disk path="/pcjs-disks/pcx86/tools/other/enhdebug/ENHDEBUG.json">Enhanced DEBUG 1.32b</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/flickerfree/FLICKERFREE.json">FlickerFree 1.0</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/norton/3.00/1985-01-14/NU300-1985-01-14.json">Norton Utilities 3.00 (1985-01-14)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/norton/3.00/1985-01-21/NU300-1985-01-21.json">Norton Utilities 3.00 (1985-01-21)</disk>

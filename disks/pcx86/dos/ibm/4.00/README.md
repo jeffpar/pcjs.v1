@@ -16,7 +16,55 @@ machines:
 PC-DOS 4.00
 -----------
 
-PC-DOS 4.00 was released in July 1988. 
+PC-DOS 4.00 was released in July 1988.
+
+New features:
+
+- SHARE loaded for FCB operations on hard disks greater than 32MB
+- IFS driver support
+- Disk buffers could be allocated in expanded memory (BUFFERS /X)
+- DPB, SFT and CDS structures extended
+- New internal version table
+- DOS swappable data area changed
+- Program names added to MCBs
+- System block sub-MCB headers added (used by MEM)
+- Most commands use new message retriever (allows message text separation for translation purposes)
+
+New internal commands:
+
+- TRUENAME
+
+New external commands:
+
+- FILESYS
+- FORMAT /F (to specify disk size to format)
+- IFSFUNC
+- MEM
+
+New CONFIG.SYS commands:
+
+- COMMENT
+- CPSW
+- IFS
+- INSTALL
+- MULTITRACK
+- REM
+- SWITCHES
+
+New device drivers:
+
+- SMARTDRV.SYS (MS-DOS)
+- XMA2EMS.SYS
+- XMAEM.SYS
+
+New support files:
+
+- GRAPHICS.PRO
+
+New functions:
+
+- INT 21h functions 3305h, 5D0Bh, 5F05h-5F08h, 6507h, 6520h-6523h, 65A0h-65A3h, 69h-6Ch
+- INT 2Fh multiplex function 1Ah (ANSI.SYS)
 
 Directory listings of the five 360Kb distribution diskettes are provided below.
 
