@@ -19,6 +19,62 @@ PC-DOS 5.00
 
 PC-DOS 5.00 was released in June 1991.
 
+New internal commands:
+
+- LOADHIGH (LH)
+
+New external commands:
+
+- DOSKEY
+- EDIT
+- EMM386
+- HELP
+- LOADFIX
+- MIRROR
+- QBASIC
+- SETVER
+- UNDELETE
+- UNFORMAT
+
+Removed external commands:
+
+- FILESYS
+- GWBASIC
+- IFSFUNC
+- LINK
+- SELECT
+
+New CONFIG.SYS commands:
+
+- DEVICEHIGH
+- DOS
+
+Removed CONFIG.SYS commands:
+
+- CPSW
+- IFS
+
+New device drivers:
+
+- EMM386.EXE
+- HIMEM.SYS
+- SETVER.EXE
+
+Removed device drivers:
+
+- VDISK.SYS (PC-DOS)
+- XMA2EMS.SYS
+- XMAEM.SYS
+
+New functions:
+
+- INT 21h functions 3306h, 4410h-4411h, 4B05h, 5802h-5803h
+- INT 2Fh multiplex functions 43h (HIMEM.SYS), 48h (DOSKEY), 4Ah (IBMBIO), 55h (COMMAND), ACh (GRAPHICS)
+
+Removed functions:
+
+- INT 21h functions 3303h-3304h, 3701h, 5702h-5704h, 5D0Bh, 6Bh
+
 [Directory Listings](#directory-of-pc-dos-500-disk-1) of the three 720Kb distribution diskettes are provided below.
 
 {% include machine.html id="ibm5170-pcdos500" %}

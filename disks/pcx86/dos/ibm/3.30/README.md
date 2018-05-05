@@ -20,6 +20,60 @@ PC-DOS 3.30
 
 PC-DOS 3.30 was announced and released on April 2, 1987, along with the first PS/2 models. 
 
+New features:
+
+- 1.44MB 3.5" floppy disk support
+- Extended partition support (partition type 05h)
+- National language support
+- Code page switching support
+- Per-line batch file echo suppression added (@)
+- Hardware interrupt stack switching support can be disabled (STACKS=0,0)
+- 102-byte buffer reserved at 800h (70h:100h) for programs using 80286 LOADALL
+
+New internal commands:
+
+- CALL
+- CHCP
+
+New external commands:
+
+- APPEND (PC-DOS)
+- ATTRIB /S (to recurse subdirectories)
+- COMP (MS-DOS)
+- FASTOPEN
+- KEYB
+- NLSFUNC
+- SELECT (MS-DOS)
+
+Removed external commands:
+
+- KEYBFR, KEYBGR, KEYBIT, KEYBSP, KEYBUK (replaced by KEYB)
+
+New internal devices:
+
+- COM3
+- COM4
+
+New CONFIG.SYS commands:
+
+- STACKS (replaced STACK)
+
+New device drivers:
+
+- DISPLAY.SYS
+- PRINTER.SYS
+
+New support files:
+
+- COUNTRY.SYS
+- EGA.CPI
+- KEYBOARD.SYS
+
+New functions:
+
+- INT 21h functions 65h-68h
+- INT 2Fh multiplex functions 14h (NLSFUNC), ADh (DISPLAY.SYS/KEYB), AEh (APPEND), B0h (GRAFTABL), B7h (APPEND)
+
 [Directory Listings](#directory-of-pc-dos-330-disk-1) of the two 360Kb distribution diskettes are provided below.
 This version of PC-DOS was also available on one 720Kb diskette.
 

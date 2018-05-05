@@ -20,6 +20,55 @@ PC-DOS 3.00
 
 PC-DOS 3.00 was announced on August 14, 1984 and released in September 1984.
 
+New features:
+
+- 1.2MB floppy disk support
+- Hard disk support up to 32MB (original FAT16: partition type 04h)
+- Redirector support
+- File sharing and locking support
+- Date and time set from CMOS real-time clock
+- DOS swappable data area
+- CDS and FCB-SFT structures
+- Job file table may be relocated via new PSP fields allowing more than 20 handles
+- Program loading and execution now implemented in the DOS kernel
+- Fully qualified program name added to environment block
+- Interrupt vectors 20h-3Fh initialized by the DOS kernel
+
+New external commands:
+
+- ATTRIB
+- GRAFTABL
+- KEYBFR, KEYBGR, KEYBIT, KEYBSP, KEYBUK
+- LABEL
+- SELECT
+- SHARE
+
+New CONFIG.SYS commands:
+
+- FCBS
+- LASTDRIVE
+- STRING
+
+Removed CONFIG.SYS commands:
+
+- AVAILDEV
+- SWITCHAR
+
+New device drivers:
+
+VDISK.SYS (PC-DOS)
+
+New functions:
+
+- INT 21h functions 4408h-440Bh, 59h-63h
+- INT 2Ah networking and critical section functions added
+- INT 2Fh multiplex functions 01h (PRINT), 05h (REDIR error text), 10h (SHARE), 11h (REDIR), 12h (IBMDOS)
+- Device driver command codes 0Dh-10h added
+
+Removed functions:
+
+- INT 21h functions 3702h-3703h
+
 [Directory Listings](#directory-of-pc-dos-300-disk-1) of the two 360Kb distribution diskettes are provided below.
 
 {% include machine.html id="ibm5170-pcdos300" %}
