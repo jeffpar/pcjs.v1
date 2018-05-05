@@ -7,6 +7,10 @@ permalink: /disks/pcx86/diags/compaq/5.08/
 COMPAQ Diagnostics 5.08
 -----------------------
 
+This early COMPAQ Diagnostics diskette from the PCjs archives is noteworthy because it contains
+[COMPAQ MS-DOS 3.31](/disks/pcx86/dos/compaq/3.31/) system files that are more than *one year older*
+than any other release of COMPAQ MS-DOS 3.31 we've seen.
+
 From `README.CPQ`:
 
         C O M P A Q (R)   P E R S O N A L   C O M P U T E R S

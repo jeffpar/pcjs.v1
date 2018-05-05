@@ -1,6 +1,6 @@
 ---
 layout: page
-title: TopView 1.10
+title: IBM TopView 1.10
 permalink: /disks/pcx86/apps/ibm/topview/1.10/
 machines:
   - id: ibm5160
@@ -10,12 +10,12 @@ machines:
       A:
         name: PC-DOS 2.00 (Disk 1)
       B:
-        name: TopView 1.10
+        name: IBM TopView 1.10
     autoType: $date\r$time\rB:\rSETUP\r$30$15y \r$15.1\r
 ---
 
-TopView 1.10
-------------
+IBM TopView 1.10
+----------------
 
 The machine below is configured to automatically start TopView 1.10 on top of PC-DOS 2.00.  No mouse driver is loaded,
 so you must use TopView's "Keyboard Mouse" support: arrow keys move the cursor and **Home**, **PgUp**, and **Alt**
@@ -29,7 +29,7 @@ second (Tutorial) disk, but we don't have a copy of it.  The machine below is al
 
 {% include machine.html id="ibm5160" %}
 
-### Directory of TopView 1.10
+### Directory of IBM TopView 1.10
 
 	 Volume in drive A is TVP022086  
 	 Directory of  A:\

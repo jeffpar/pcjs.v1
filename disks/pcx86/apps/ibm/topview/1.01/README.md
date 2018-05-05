@@ -1,6 +1,6 @@
 ---
 layout: page
-title: TopView 1.01
+title: IBM TopView 1.01
 permalink: /disks/pcx86/apps/ibm/topview/1.01/
 machines:
   - id: ibm5160
@@ -10,7 +10,7 @@ machines:
       A:
         name: PC-DOS 2.00 (Disk 1)
       B:
-        name: TopView 1.01 (Program)
+        name: IBM TopView 1.01 (Program)
     autoScript: startKbd
 machineScripts:
   startKbd: |
@@ -30,8 +30,8 @@ machineScripts:
     type Keyboard "B:\rSETUP\r$50.3\r$20n\r$20y\r$20\r$20\r$20.1\r";
 ---
 
-TopView 1.01
-------------
+IBM TopView 1.01
+----------------
 
 From IBM's [August 14, 1984 Announcement Letter](http://www-01.ibm.com/common/ssi/ShowDoc.wss?docURL=/common/ssi/rep_ca/2/897/ENUS284-282/index.html&lang=en&request_locale=en):
 
@@ -51,7 +51,7 @@ The machine below is configured to automatically start TopView 1.01 on top of PC
 then you must use TopView's "Keyboard Mouse" support: arrow keys move the cursor, and **Home**, **PgUp**, and **Alt** act
 as mouse buttons.  Mouse support is automatically loaded in the [PCjs Debugger](debugger/) configuration.
 
-Directory listings of the original [Program](#directory-of-topview-101-program) and [Tutorial](#directory-of-topview-101-tutorial)
+Directory listings of the original [Program](#directory-of-ibm-topview-101-program) and [Tutorial](#directory-of-ibm-topview-101-tutorial)
 disks are provided below.
 
 {% include machine.html id="ibm5160" %}
@@ -60,7 +60,7 @@ disks are provided below.
 To manually start TopView: {% include machine-command.html type='button' label='Load' machine='ibm5160' command='startKbd' %}
 {% endcomment %}
 
-### Directory of TopView 1.01 (Program)
+### Directory of IBM TopView 1.01 (Program)
 
 	 Volume in drive A is TV101032885
 
@@ -114,7 +114,7 @@ To manually start TopView: {% include machine-command.html type='button' label='
 	       42 file(s)     276865 bytes
 	                       57344 bytes free
 
-### Directory of TopView 1.01 (Tutorial)
+### Directory of IBM TopView 1.01 (Tutorial)
 
 	 Volume in drive A is TUT110784  
 

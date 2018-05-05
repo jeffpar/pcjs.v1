@@ -15,10 +15,10 @@ A few PCjs machines, such as the one below, have enabled [TestMonitor](/modules/
 allowing you to use one of the machine's serial ports (usually COM2) to control and issue commands to the machine.
 
 After the machine finishes booting to a DOS prompt, type the DOS command `CTTY COM2`, and then you can interact with
-the machine via the [TestController](/modules/pcx86/lib/testctl.js) window.
+the machine via the [TestMonitor](/modules/pcx86/lib/testctl.js) window.
 
 Typing `Ctrl-T` in that window toggles it between "terminal mode" and "prompt mode".  After the initial `CTTY` command,
-the TestController should detect the DOS prompt and enter "dos mode", at which point you can type the command `debug` to
+the TestMonitor should detect the DOS prompt and enter "dos mode", at which point you can type the command `debug` to
 enter "debug mode", where a number of debug macros are available to you, such as:
 
 - `cursor 11 13` (programs the default EGA cursor)

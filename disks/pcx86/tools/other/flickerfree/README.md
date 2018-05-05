@@ -5,7 +5,7 @@ permalink: /disks/pcx86/tools/other/flickerfree/
 machines:
   - id: ibm5150
     type: pcx86
-    config: /devices/pcx86/machine/5150/cga/256kb/debugger/machine.xml
+    config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       B:
         name: FlickerFree 1.0

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "TopView 1.10 (With Debugger)"
+title: "IBM TopView 1.10 (With Debugger)"
 permalink: /disks/pcx86/apps/ibm/topview/1.10/debugger/
 machines:
   - id: ibm5160
@@ -10,11 +10,11 @@ machines:
       A:
         name: PC-DOS 2.00 (Disk 1)
       B:
-        name: TopView 1.10
+        name: IBM TopView 1.10
     autoType: $date\r$time\rB:\rSETUP\r$30$15y \r$15.1\r
 ---
 
-TopView 1.10 (With Debugger)
-----------------------------
+IBM TopView 1.10 (With Debugger)
+--------------------------------
 
 {% include machine.html id="ibm5160" %}

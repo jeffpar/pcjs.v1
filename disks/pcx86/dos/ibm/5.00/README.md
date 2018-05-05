@@ -19,7 +19,7 @@ PC-DOS 5.00
 
 PC-DOS 5.00 was released in June 1991.
 
-Directory listings of the three 720Kb distribution diskettes are provided below.
+[Directory Listings](#directory-of-pc-dos-500-disk-1) of the three 720Kb distribution diskettes are provided below.
 
 {% include machine.html id="ibm5170-pcdos500" %}
 
