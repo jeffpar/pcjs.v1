@@ -14,11 +14,10 @@ machines:
 Microsoft MS-DOS 4.00
 ---------------------
 
-The PCjs machine below is running PC-DOS 4.00.
+MS-DOS 4.00 was released in October 1988.  [Directory Listings](#directory-of-ms-dos-400-disk-1) of the six
+360Kb distribution diskettes are provided below.
 
 {% include machine.html id="ibm5170-msdos400" %}
-
-MS-DOS 4.00 was released in October 1988.  The contents of the six 360Kb distribution diskettes are shown below.
 
 ### Directory of MS-DOS 4.00 (Disk 1)
 

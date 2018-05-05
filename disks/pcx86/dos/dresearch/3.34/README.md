@@ -17,3 +17,19 @@ Digital Research DR-DOS 3.34
 ----------------------------
 
 {% include machine.html id="ibm5170-drdos334" %}
+
+### Directory of DR-DOS 3.34
+
+	 Volume in drive A has no label
+
+	Directory of A:\
+
+	DRBIOS   SYS     15792 09-28-88   3:34a
+	DRBDOS   SYS     38465 09-28-88   3:34a
+	COMMAND  COM     32448 09-28-88   3:34a
+	SYS      COM      9704 09-28-88   3:34a
+	        4 file(s)      96409 bytes
+
+	Total files listed:
+	        4 file(s)      96409 bytes
+	                      264192 bytes free

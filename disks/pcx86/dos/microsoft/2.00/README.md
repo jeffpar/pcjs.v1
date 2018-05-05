@@ -26,6 +26,10 @@ museum remain a mystery.  Instead, the museum released a ZIP archive with the co
 two folders, `v20object` and `v20source`, with no clear indication which files came from which disk, why some files
 were renamed (and what the original names were), and what (if anything) was omitted.
 
+To underscore how poorly this release was handled, some [WordStar 3.20](/disks/pcx86/apps/other/wordstar/3.20/)
+distribution files were included in the `v20source` folder, completely unrelated to MS-DOS and also completely useless,
+since the main executable, `WS.COM`, was *not* included.  
+
 We have divided the contents of the `v20object` folder into two 320Kb "binary" disk images and the contents of the
 `v20source` folder into six 320Kb "source" disk images, to make it easier to inspect all the files from "virtually" any
 PCjs machine.

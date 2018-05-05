@@ -2,10 +2,21 @@
 layout: page
 title: Microsoft MS-DOS 6.20 (1.44M Disks)
 permalink: /disks/pcx86/dos/microsoft/6.20/1440K/
+machines:
+  - id: ibm5170-msdos620
+    type: pcx86
+    config: /devices/pcx86/machine/5170/ega/640kb/rev3/machine.xml
+    autoMount:
+      A:
+        name: MS-DOS 6.20 (1.44M Disk 1)
 ---
 
 Microsoft MS-DOS 6.20 (1.44M Disks)
 -----------------------------------
+
+[Directory Listings](#directory-of-ms-dos-620-144m-disk-1) of the four 1.44M distribution diskettes are provided below.
+
+{% include machine.html id="ibm5170-msdos620" %}
 
 ### Directory of MS-DOS 6.20 (1.44M Disk 1)
 

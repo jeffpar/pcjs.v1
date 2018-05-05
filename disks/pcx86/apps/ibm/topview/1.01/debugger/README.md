@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "TopView 1.01 (With Debugger)"
+title: "IBM TopView 1.01 (With Debugger)"
 permalink: /disks/pcx86/apps/ibm/topview/1.01/debugger/
 machines:
   - id: ibm5160
@@ -10,7 +10,7 @@ machines:
       A:
         name: PC-DOS 2.00 (Disk 1)
       B:
-        name: TopView 1.01 (Program)
+        name: IBM TopView 1.01 (Program)
     autoScript: startMouse
 machineScripts:
   startKbd: |
@@ -30,7 +30,7 @@ machineScripts:
     type Keyboard "B:\rSETUP\r$50.3\r$20n\r$20y\r$20\r$20\r$20.1\r";
 ---
 
-TopView 1.01 (With Debugger)
-----------------------------
+IBM TopView 1.01 (With Debugger)
+--------------------------------
 
 {% include machine.html id="ibm5160" %}

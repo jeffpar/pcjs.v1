@@ -178,6 +178,10 @@
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/3.40/DRDOS340-DISK2.json">DR-DOS 3.40 (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/3.41/DRDOS341-DISK1.json">DR-DOS 3.41 (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/3.41/DRDOS341-DISK2.json">DR-DOS 3.41 (Disk 2)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/dresearch/5.00/DRDOS500-DISK1.json">DR-DOS 5.00 (Disk 1)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/dresearch/5.00/DRDOS500-DISK2.json">DR-DOS 5.00 (Disk 2)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/dresearch/5.00/DRDOS500-DISK3.json">DR-DOS 5.00 (Disk 3)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/dresearch/5.00/DRDOS500-DISK4.json">DR-DOS 5.00 (Disk 4)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/6.00/360K/DRDOS600-DISK1.json">DR-DOS 6.00 (360K Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/6.00/360K/DRDOS600-DISK2.json">DR-DOS 6.00 (360K Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/6.00/360K/DRDOS600-DISK3.json">DR-DOS 6.00 (360K Disk 3)</disk>
@@ -538,9 +542,11 @@
 		<disk path="/pcjs-disks/pcx86/apps/ibm/fland/EGA-UTILS.json">IBM EGA Utilities</disk>
 		<disk path="/pcjs-disks/pcx86/apps/ibm/tobias/1.00/TOBIAS100-PCJR-DISK1.json">Andrew Tobias Money 1.00 (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/apps/ibm/tobias/1.00/TOBIAS100-PCJR-DISK2.json">Andrew Tobias Money 1.00 (Disk 2)</disk>
-		<disk path="/pcjs-disks/pcx86/apps/ibm/topview/1.01/TOPVIEW101-PROGRAM.json">TopView 1.01 (Program)</disk>
-		<disk path="/pcjs-disks/pcx86/apps/ibm/topview/1.01/TOPVIEW101-TUTORIAL.json">TopView 1.01 (Tutorial)</disk>
-		<disk path="/pcjs-disks/pcx86/apps/ibm/topview/1.10/TOPVIEW110.json">TopView 1.10</disk>
+		<disk path="/pcjs-disks/pcx86/apps/ibm/topview/1.00/TOPVIEW100-PROGRAM.json">IBM TopView 1.00 (Program)</disk>
+		<disk path="/pcjs-disks/pcx86/apps/ibm/topview/1.00/TOPVIEW100-TUTORIAL.json">IBM TopView 1.00 (Tutorial)</disk>
+		<disk path="/pcjs-disks/pcx86/apps/ibm/topview/1.01/TOPVIEW101-PROGRAM.json">IBM TopView 1.01 (Program)</disk>
+		<disk path="/pcjs-disks/pcx86/apps/ibm/topview/1.01/TOPVIEW101-TUTORIAL.json">IBM TopView 1.01 (Tutorial)</disk>
+		<disk path="/pcjs-disks/pcx86/apps/ibm/topview/1.10/TOPVIEW110.json">IBM TopView 1.10</disk>
 		<disk path="/pcjs-disks/pcx86/apps/lotus/123/1a/123-DISK1-SYSTEM-PATCHED.json">Lotus 1-2-3 1A (1-System)</disk>
 		<disk path="/pcjs-disks/pcx86/apps/lotus/123/1a/123-DISK2-UTILITY.json">Lotus 1-2-3 1A (2-Utility)</disk>
 		<disk path="/pcjs-disks/pcx86/apps/lotus/123/1a/123-DISK3-GRAPH.json">Lotus 1-2-3 1A (3-Graph)</disk>

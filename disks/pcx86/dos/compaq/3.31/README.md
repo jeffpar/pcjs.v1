@@ -6,12 +6,12 @@ machines:
   - id: deskpro386
     type: pcx86
     debugger: true
-    config: /devices/pcx86/machine/compaq/deskpro386/ega/2048kb/debugger/machine.xml
+    config: /devices/pcx86/machine/compaq/deskpro386/ega/2048kb/machine.xml
     autoMount:
       A:
         name: COMPAQ MS-DOS 3.31 (Disk 1)
       B:
-        name: None
+        name: COMPAQ MS-DOS 3.31 (Disk 2)
     autoStart: true
 ---
 
@@ -30,7 +30,7 @@ This was the first version of DOS to support 32-bit logical sector numbers, enab
 and partitions that extended beyond the first 32Mb of disk space.  These features were soon added to DOS 4.0 and
 OS/2 1.1 as well.
 
-A slightly older version of COMPAQ MS-DOS 3.31 can be found on the
+An older version of COMPAQ MS-DOS 3.31 can be found on the
 [COMPAQ Diagnostics 5.08](/disks/pcx86/diags/compaq/5.08/) diskette, a 360Kb disk image from the PCjs Archives that
 contains hidden MS-DOS 3.31 files dated September 1987.  The disk displays a different boot message:
 
@@ -40,8 +40,8 @@ contains hidden MS-DOS 3.31 files dated September 1987.  The disk displays a dif
     (C) Copyright Compaq Computer Corp. 1982, 1987                             
     (C) Copyright Microsoft Corp. 1981, 1987   
 
-making it clear that the diskette *is* a COMPAQ MS-DOS 3.31 diskette from 1987; all the other sources we've checked only
-have disks from 1988 or later.
+making it clear that the diskette *is* a COMPAQ MS-DOS 3.31 diskette from 1987; all the other sources we've
+checked only have disks from 1988 or later.
 
 Later revisions of COMPAQ MS-DOS 3.31 were released as well.  We have archived three
 "[Rev. G](#compaq-ms-dos-331-rev-g)" disks obtained from [WinWorld](https://winworldpc.com/product/ms-dos/331)
