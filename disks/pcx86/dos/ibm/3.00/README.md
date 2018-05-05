@@ -20,6 +20,13 @@ PC-DOS 3.00
 
 PC-DOS 3.00 was announced on August 14, 1984 and released in September 1984.
 
+A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-300-disk-1) of the two
+360Kb distribution diskettes, are provided below.
+
+{% include machine.html id="ibm5170-pcdos300" %}
+
+### Feature Summary
+
 New features:
 
 - 1.2MB floppy disk support
@@ -68,10 +75,6 @@ New functions:
 Removed functions:
 
 - INT 21h functions 3702h-3703h
-
-[Directory Listings](#directory-of-pc-dos-300-disk-1) of the two 360Kb distribution diskettes are provided below.
-
-{% include machine.html id="ibm5170-pcdos300" %}
 
 ### Directory of PC-DOS 3.00 (Disk 1)
 

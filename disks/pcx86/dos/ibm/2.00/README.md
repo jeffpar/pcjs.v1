@@ -20,6 +20,13 @@ PC-DOS 2.00
 
 PC-DOS 2.00 was released in March 1983.
 
+A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-200-disk-1) of the two
+360Kb distribution diskettes, are provided below.
+
+{% include machine.html id="ibm5160-pcdos200" %}
+
+### Feature Summary
+
 New features:
 
 - Subdirectory support
@@ -112,10 +119,6 @@ New functions:
 - INT 29h fast console output
 - INT 2Eh reload transient (COMMAND.COM)
 - INT 2Fh PRINT support
-
-[Directory Listings](#directory-of-pc-dos-200-disk-1) of the two 360Kb distribution diskettes are provided below.
-
-{% include machine.html id="ibm5160-pcdos200" %}
 
 ### Directory of PC-DOS 2.00 (Disk 1)
 
