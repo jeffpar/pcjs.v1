@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC DOS 7.00
+title: IBM PC DOS 7.00
 permalink: /disks/pcx86/dos/ibm/7.00/
 machines:
   - id: ibm5170-pcdos700
@@ -13,8 +13,8 @@ machines:
         name: None
 ---
 
-PC DOS 7.00
------------
+IBM PC DOS 7.00
+---------------
 
 PC DOS 7.00 was released in April 1995.  The disks used the [XDF Format](/blog/2014/10/28/).
 

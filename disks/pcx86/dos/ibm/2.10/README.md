@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC DOS 2.10
+title: IBM PC DOS 2.10
 permalink: /disks/pcx86/dos/ibm/2.10/
 machines:
   - id: ibm5160-pcdos210
@@ -15,8 +15,8 @@ machines:
     autoType: $date\r$time\r
 ---
 
-PC DOS 2.10
------------
+IBM PC DOS 2.10
+---------------
 
 PC DOS 2.10 was finalized in October 1983 and released on November 1, 1983.
 

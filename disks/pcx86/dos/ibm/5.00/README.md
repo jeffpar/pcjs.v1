@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC DOS 5.00
+title: IBM PC DOS 5.00
 permalink: /disks/pcx86/dos/ibm/5.00/
 machines:
   - id: ibm5170-pcdos500
@@ -14,8 +14,8 @@ machines:
         name: None
 ---
 
-PC DOS 5.00
------------
+IBM PC DOS 5.00
+---------------
 
 PC DOS 5.00 was released in June 1991.
 

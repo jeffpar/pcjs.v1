@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC DOS 3.10
+title: IBM PC DOS 3.10
 permalink: /disks/pcx86/dos/ibm/3.10/
 machines:
   - id: ibm5170-pcdos310
@@ -15,8 +15,8 @@ machines:
     autoType: \r\r
 ---
 
-PC DOS 3.10
------------
+IBM PC DOS 3.10
+---------------
 
 PC DOS 3.10 was announced on August 14, 1984 (along with [PC DOS 3.00](/disks/pcx86/dos/ibm/3.00/)) and released
 on April 2, 1985.
