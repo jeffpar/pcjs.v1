@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC DOS 6.10
+title: IBM PC DOS 6.10
 permalink: /disks/pcx86/dos/ibm/6.10/
 machines:
   - id: ibm5170-pcdos610
@@ -13,8 +13,8 @@ machines:
         name: None
 ---
 
-PC DOS 6.10
------------
+IBM PC DOS 6.10
+---------------
 
 PC DOS 6.10 was released in June 1993.
 

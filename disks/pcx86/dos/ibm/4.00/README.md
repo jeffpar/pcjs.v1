@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC DOS 4.00
+title: IBM PC DOS 4.00
 permalink: /disks/pcx86/dos/ibm/4.00/
 machines:
   - id: ibm5170-pcdos400
@@ -13,8 +13,8 @@ machines:
         name: None
 ---
 
-PC DOS 4.00
------------
+IBM PC DOS 4.00
+---------------
 
 PC DOS 4.00 was released in July 1988.
 
@@ -36,6 +36,16 @@ New features:
 - Program names added to MCBs
 - System block sub-MCB headers added (used by MEM)
 - Most commands use new message retriever (allows message text separation for translation purposes)
+
+Another significant change in DOS 4.00 was the ability to update the system files (IBMBIO.COM and IBMDOS.COM in
+PC DOS, or IO.SYS and MSDOS.SYS in MS-DOS) of any boot disk, by moving the first two directory entries (and the contents
+of the first three data sectors) as needed to make room for the new system files.
+
+The SYS command in older versions of DOS would report "No room for system on destination disk" if the first
+two directory entries (or the first three data sectors) were unavailable.  However, after using the DOS 4.00
+SYS command, it usually became possible to install older DOS versions as well.
+
+Learn more about the history of the SYS command from [Microsoft Support](https://jeffpar.github.io/kbarchive/kb/066/Q66530/).
 
 New internal commands:
 

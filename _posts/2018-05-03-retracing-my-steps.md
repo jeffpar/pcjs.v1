@@ -84,7 +84,7 @@ For example, one of [Michael Abrash's VGA "Black Book" Tests](/tests/pcx86/vga/)
 relied on a couple of critical features of the EGA:
 
 - Changes to the CRT Controller Start Address take effect *only* at the start of vertical retrace
-- Safely modifying the Start Address is best performed by waiting for the start of horizontal retrace
+- Safely modifying the Start Address is best performed by waiting for the *end* of horizontal retrace
 
 However, if we're just toggling the retrace bits "willy-nilly", then we're not really helping the app, and more
 importantly, we're not helping ourselves know when we should honor (or not honor) the contents of registers like the

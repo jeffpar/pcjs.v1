@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC DOS 3.20
+title: IBM PC DOS 3.20
 permalink: /disks/pcx86/dos/ibm/3.20/
 machines:
   - id: ibm5170-pcdos320
@@ -15,8 +15,8 @@ machines:
     autoType: \r\r
 ---
 
-PC DOS 3.20
------------
+IBM PC DOS 3.20
+---------------
 
 PC DOS 3.20 was first announced on March 18, 1986 and released April 1986.  Read the early
 [PC Magazine Review](#pc-magazine-review) below.

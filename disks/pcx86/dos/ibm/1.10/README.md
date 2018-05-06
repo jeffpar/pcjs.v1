@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC DOS 1.10
+title: IBM PC DOS 1.10
 permalink: /disks/pcx86/dos/ibm/1.10/
 machines:
   - id: ibm5150-pcdos110
@@ -15,8 +15,8 @@ machines:
     autoType: $date\r$time\r
 ---
 
-PC DOS 1.10
------------
+IBM PC DOS 1.10
+---------------
 
 PC DOS 1.10 was released in May 1982 on one single-sided (160Kb) diskette.  See IBM's
 "[Read This First](#read-this-first)" from the [PC DOS 1.10 Manual](/pubs/pc/software/dos/PCDOS110/)

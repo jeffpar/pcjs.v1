@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC DOS 1.00
+title: IBM PC DOS 1.00
 permalink: /disks/pcx86/dos/ibm/1.00/
 redirect_from:
   - /disks/pc/dos/ibm/1.00/
@@ -17,8 +17,8 @@ machines:
     autoType: $date\r
 ---
 
-PC DOS 1.00
------------
+IBM PC DOS 1.00
+---------------
 
 PC DOS 1.00 was completed in August 1981 and announced at an IBM press conference on August 12, 1981,
 when IBM introduced the original IBM PC (Model 5150).  It was released on one single-sided (160Kb) diskette.

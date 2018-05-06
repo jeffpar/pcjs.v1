@@ -14,6 +14,10 @@ machines:
 Microsoft MS-DOS 3.30
 ---------------------
 
+MS-DOS 3.30 was released in February 1988.
+
+See the [PC DOS 3.30 Feature Summary](/disks/pcx86/dos/ibm/3.30/#feature-summary) for more details.
+
 [Directory Listings](#directory-of-ms-dos-330-disk-1) of the two 360Kb distribution diskettes are provided below.
 
 {% include machine.html id="ibm5170-msdos330" %}

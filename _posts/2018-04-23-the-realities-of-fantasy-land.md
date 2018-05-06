@@ -17,7 +17,7 @@ machines:
 ---
 
 On February 19, 2018, I received a pleasantly surprising email from a person named Eric, who had stumbled across
-an [old PCjs post](/blog/2017/07/03/) where I was lamenting the disappearance of an old IBM PC program
+a PCjs [blog post](/blog/2017/07/03/) where I was lamenting the disappearance of an old IBM EGA demonstration program
 called "[Fantasy Land](/disks/pcx86/apps/ibm/fland/)":
 
     From: Eric
@@ -37,8 +37,8 @@ and eventually the actual diskette.
 Based on John T. Cockerham's October 1986 PC Tech Journal article
 "[Evaluating the EGA: The EGA Standard](http://www.pcjs.org/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2053.pdf&page=53&total=228)",
 I knew the software would not run properly in PCjs, because it made use of programmable fonts, split screens,
-pixel panning, and vertical retrace interrupts -- all features that PCjs did not support yet.  So I first tried
-running it on a genuine IBM PC with an original IBM EGA.
+and text-mode pixel panning -- all features that PCjs did not support yet.  So I first tried running it on a genuine
+IBM PC with an original IBM EGA.
 
 Unfortunately, the screen was a garbled flickering mess.  Something was clearly wrong, and my initial fear was that
 something was corrupted in the disk image Eric had sent me.  However, even after he sent me the original diskette, the
