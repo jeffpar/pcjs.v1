@@ -10,7 +10,7 @@ Microsoft BASIC
 Microsoft has built numerous versions of BASIC for the PC over the years, including:
 
 * [Cassette BASIC](/devices/pcx86/rom/5150/basic/)
-* Disk BASIC and Advanced BASIC (for PC-DOS)
+* Disk BASIC and Advanced BASIC (for PC DOS)
 * GW-BASIC (for MS-DOS)
 * [Microsoft BASIC Compiler](compiler/) (also available as the IBM BASIC Compiler)
 * [QuickBASIC](quickbasic/)

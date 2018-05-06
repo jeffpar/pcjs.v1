@@ -10,7 +10,7 @@ machines:
     resume: 1
     autoMount:
       A:
-        name: PC-DOS 1.00
+        name: PC DOS 1.00
       B:
         name: Adventures in Math 1.00
     autoType: $date\rB:\rA:BASICA CASTLE\r

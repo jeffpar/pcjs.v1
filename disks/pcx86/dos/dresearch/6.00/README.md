@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Digital Research DR-DOS 6.00
+title: Digital Research DR DOS 6.00
 permalink: /disks/pcx86/dos/dresearch/6.00/
 machines:
   - id: ibm5170-drdos600
@@ -8,17 +8,17 @@ machines:
     config: /devices/pcx86/machine/5170/ega/1152kb/rev1/debugger/machine.xml
     autoMount:
       A:
-        name: DR-DOS 6.00 (1.2M Disk 1)
+        name: DR DOS 6.00 (1.2M Disk 1)
       B:
-        name: DR-DOS 6.00 (1.2M Disk 2)
+        name: DR DOS 6.00 (1.2M Disk 2)
 ---
 
-Digital Research DR-DOS 6.00
+Digital Research DR DOS 6.00
 ----------------------------
 
 {% include machine.html id="ibm5170-drdos600" %}
 
-### Directory of DR-DOS 6.00 (360K Disk 1)
+### Directory of DR DOS 6.00 (360K Disk 1)
 
 	 Volume in drive A is DRDOS6-1   
 
@@ -50,7 +50,7 @@ Digital Research DR-DOS 6.00
 	       20 file(s)     327127 bytes
 	                       23552 bytes free
 
-### Directory of DR-DOS 6.00 (360K Disk 2)
+### Directory of DR DOS 6.00 (360K Disk 2)
 
 	 Volume in drive A is DRDOS6-2   
 
@@ -82,7 +82,7 @@ Digital Research DR-DOS 6.00
 	       20 file(s)     329477 bytes
 	                       21504 bytes free
 
-### Directory of DR-DOS 6.00 (360K Disk 3)
+### Directory of DR DOS 6.00 (360K Disk 3)
 
 	 Volume in drive A is DRDOS6-3   
 
@@ -111,7 +111,7 @@ Digital Research DR-DOS 6.00
 	       17 file(s)     345836 bytes
 	                        6144 bytes free
 
-### Directory of DR-DOS 6.00 (360K Disk 4)
+### Directory of DR DOS 6.00 (360K Disk 4)
 
 	 Volume in drive A is DRDOS6-4   
 
@@ -142,7 +142,7 @@ Digital Research DR-DOS 6.00
 	       19 file(s)     338465 bytes
 	                       15360 bytes free
 
-### Directory of DR-DOS 6.00 (360K Disk 5)
+### Directory of DR DOS 6.00 (360K Disk 5)
 
 	 Volume in drive A is DRDOS6-5   
 
@@ -157,7 +157,7 @@ Digital Research DR-DOS 6.00
 	        3 file(s)     335844 bytes
 	                       24576 bytes free
 
-### Directory of DR-DOS 6.00 (360K Disk 6)
+### Directory of DR DOS 6.00 (360K Disk 6)
 
 	 Volume in drive A is DRDOS6-6   
 
@@ -193,7 +193,7 @@ Digital Research DR-DOS 6.00
 	       24 file(s)     342213 bytes
 	                       10240 bytes free
 
-### Directory of DR-DOS 6.00 (1.2M Disk 1)
+### Directory of DR DOS 6.00 (1.2M Disk 1)
 
 	 Volume in drive A is STARTUP    
 
@@ -279,7 +279,7 @@ Digital Research DR-DOS 6.00
 	       74 file(s)    1160149 bytes
 	                       33792 bytes free
 
-### Directory of DR-DOS 6.00 (1.2M Disk 2)
+### Directory of DR DOS 6.00 (1.2M Disk 2)
 
 	 Volume in drive A is VMAX       
 
@@ -341,7 +341,7 @@ Digital Research DR-DOS 6.00
 	       46 file(s)    1128145 bytes
 	                       74240 bytes free
 
-### Directory of DR-DOS 6.00 (1991 Update 1)
+### Directory of DR DOS 6.00 (1991 Update 1)
 
 	 Volume in drive A has no label
 
@@ -382,7 +382,7 @@ Digital Research DR-DOS 6.00
 	       21 file(s)     335542 bytes
 	                       17408 bytes free
 
-### Directory of DR-DOS 6.00 (1991 Update 2)
+### Directory of DR DOS 6.00 (1991 Update 2)
 
 	 Volume in drive A has no label
 
@@ -477,7 +477,7 @@ Digital Research DR-DOS 6.00
 	       51 file(s)     248271 bytes
 	                       93184 bytes free
 
-### Directory of DR-DOS 6.00 (1992 Update 1)
+### Directory of DR DOS 6.00 (1992 Update 1)
 
 	 Volume in drive A has no label
 
@@ -518,7 +518,7 @@ Digital Research DR-DOS 6.00
 	       21 file(s)     337196 bytes
 	                       16384 bytes free
 
-### Directory of DR-DOS 6.00 (1992 Update 2)
+### Directory of DR DOS 6.00 (1992 Update 2)
 
 	 Volume in drive A has no label
 
@@ -616,14 +616,14 @@ Digital Research DR-DOS 6.00
 
 ---
 
-![DR-DOS 6.00 StartUp Disk]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/dos/dresearch/6.00/DRDOS-600-STARTUP.jpg)
+![DR DOS 6.00 StartUp Disk]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/dos/dresearch/6.00/DRDOS-600-STARTUP.jpg)
 
-![DR-DOS 6.00 ViewMAX Disk]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/dos/dresearch/6.00/DRDOS-600-VIEWMAX.jpg)
+![DR DOS 6.00 ViewMAX Disk]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/dos/dresearch/6.00/DRDOS-600-VIEWMAX.jpg)
 
-![DR-DOS 6.00 1991 Update Disk 1]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/dos/dresearch/6.00/DRDOS-600-1991-UPDATE1.jpg)
+![DR DOS 6.00 1991 Update Disk 1]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/dos/dresearch/6.00/DRDOS-600-1991-UPDATE1.jpg)
 
-![DR-DOS 6.00 1991 Update Disk 2]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/dos/dresearch/6.00/DRDOS-600-1991-UPDATE2.jpg)
+![DR DOS 6.00 1991 Update Disk 2]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/dos/dresearch/6.00/DRDOS-600-1991-UPDATE2.jpg)
 
-![DR-DOS 6.00 1992 Update Disk 1]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/dos/dresearch/6.00/DRDOS-600-1992-UPDATE1.jpg)
+![DR DOS 6.00 1992 Update Disk 1]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/dos/dresearch/6.00/DRDOS-600-1992-UPDATE1.jpg)
 
-![DR-DOS 6.00 1992 Update Disk 2]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/dos/dresearch/6.00/DRDOS-600-1992-UPDATE2.jpg)
+![DR DOS 6.00 1992 Update Disk 2]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/dos/dresearch/6.00/DRDOS-600-1992-UPDATE2.jpg)

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 2.00
+title: PC DOS 2.00
 permalink: /disks/pcx86/dos/ibm/2.00/
 machines:
   - id: ibm5160-pcdos200
@@ -9,16 +9,16 @@ machines:
     resume: 1
     autoMount:
       A:
-        name: PC-DOS 2.00 (Disk 1)
+        name: PC DOS 2.00 (Disk 1)
       B:
-        name: PC-DOS 2.00 (Disk 2)
+        name: PC DOS 2.00 (Disk 2)
     autoType: $date\r$time\r
 ---
 
-PC-DOS 2.00
+PC DOS 2.00
 -----------
 
-PC-DOS 2.00 was released in March 1983.
+PC DOS 2.00 was released in March 1983.
 
 A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-200-disk-1) of the two
 360Kb distribution diskettes, are provided below.
@@ -120,7 +120,7 @@ New functions:
 - INT 2Eh reload transient (COMMAND.COM)
 - INT 2Fh PRINT support
 
-### Directory of PC-DOS 2.00 (Disk 1)
+### Directory of PC DOS 2.00 (Disk 1)
 
 	 Volume in drive A has no label
 	 Directory of  A:\
@@ -152,7 +152,7 @@ New functions:
 	BASICA   COM    25984   3-08-83  12:00p
 	       25 File(s)     31232 bytes free
 
-### Directory of PC-DOS 2.00 (Disk 2)
+### Directory of PC DOS 2.00 (Disk 2)
 
 	 Volume in drive A has no label
 	 Directory of  A:\

@@ -9,7 +9,7 @@ machines:
     config: /devices/pcx86/machine/5160/cga/640kb/machine.xml
     autoMount:
       A:
-        name: PC-DOS 2.00 (Disk 1)
+        name: PC DOS 2.00 (Disk 1)
       B:
         name: Castle Adventure (1985)
     autoType: $date\r$time\rb:\rcastle\r

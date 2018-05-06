@@ -16,7 +16,7 @@ which was a shorthand version of:
     MODE CON: LINES=43
 
 I don't know why it took DOS so long to add support for such a simple feature.  IBM introduced the EGA in 1984, and yet
-PC-DOS 7.00, introduced *eleven years later*, still couldn't perform this simple function, at least not without help:
+PC DOS 7.00, introduced *eleven years later*, still couldn't perform this simple function, at least not without help:
 
     ANSI.SYS must be installed to perform requested function
 

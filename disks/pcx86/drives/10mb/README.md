@@ -10,9 +10,9 @@ permalink: /disks/pcx86/drives/10mb/
 This folder contains a variety of 10Mb (PC XT Type 3) fixed disk configurations:
  
 * [Unformatted 10Mb Disk](unformatted-xt3.xml)
-* [PC-DOS 2.00 Formatted 10Mb Disk (Empty)](pcdos200-empty-xt3.xml)
-* [PC-DOS 2.00 with Windows 1.01 for CGA](pcdos200-win101-cga-xt3.xml)
-* [PC-DOS 2.00 with Windows 1.01 for EGA](pcdos200-win101-ega-xt3.xml)
+* [PC DOS 2.00 Formatted 10Mb Disk (Empty)](pcdos200-empty-xt3.xml)
+* [PC DOS 2.00 with Windows 1.01 for CGA](pcdos200-win101-cga-xt3.xml)
+* [PC DOS 2.00 with Windows 1.01 for EGA](pcdos200-win101-ega-xt3.xml)
 * [MS-DOS 3.20 with Microsoft C 4.00](msdos320-c400-xt3.xml)
 
 Note that in order to use an unformatted fixed disk with DOS, it must first be partitioned using `FDISK` and then
@@ -54,12 +54,12 @@ will load the following PC AT controller configuration and disk image:
 
 ### Notes Regarding 10Mb Disks
 
-The [PC-DOS 2.00 Formatted Disk (Empty)](pcdos200-empty-xt3.xml) is *completely* empty.  It was partitioned with the PC-DOS
-2.00 **FDISK** utility, allocating the entire disk to a single DOS partition, and then it was formatted with the PC-DOS
+The [PC DOS 2.00 Formatted Disk (Empty)](pcdos200-empty-xt3.xml) is *completely* empty.  It was partitioned with the PC DOS
+2.00 **FDISK** utility, allocating the entire disk to a single DOS partition, and then it was formatted with the PC DOS
 2.00 **FORMAT** utility.  Neither the **FORMAT** "/S" option nor the **SYS** command were used, so no system files were
 transferred, leaving the disk completely empty and unbootable.
 
-After formatting, PC-DOS 2.00 reports:
+After formatting, PC DOS 2.00 reports:
 
 	10592256 bytes total disk space
 	10592256 bytes available on disk

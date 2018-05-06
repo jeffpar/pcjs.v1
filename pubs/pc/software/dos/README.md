@@ -4,7 +4,7 @@ title: DOS Documentation
 permalink: /pubs/pc/software/dos/
 ---
 
-IBM PC-DOS Documentation
+IBM PC DOS Documentation
 ------------------------
 
 * [IBM PC Disk Operating System v1.00](PCDOS100/)

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "PC-DOS 1.00 BASIC Samples"
+title: "PC DOS 1.00 BASIC Samples"
 permalink: /apps/pcx86/1981/basic/
 machines:
   - id: ibm5150
@@ -8,16 +8,16 @@ machines:
     config: /devices/pcx86/machine/5150/cga/64kb/debugger/machine.xml
     autoMount:
       A:
-        name: PC-DOS 1.00
+        name: PC DOS 1.00
       B:
         name: None
     autoType: $date\r
 ---
 
-PC-DOS 1.00 BASIC Samples
+PC DOS 1.00 BASIC Samples
 -------------------------
 
-Using the PCx86 machine below, all the BASIC samples distributed with PC-DOS 1.00 were captured and saved here.
+Using the PCx86 machine below, all the BASIC samples distributed with PC DOS 1.00 were captured and saved here.
 
 The procedure is simple.  For example, to capture [MUSIC.BAS](#musicbas):
 
@@ -32,7 +32,7 @@ has been configured with one serial port (COM1) bound to the text window inside 
 specifying "COM1" redirects the program listing to that window.  One parallel port has been added to the machine and
 bound to the same window as well, so you can also use "LPT1".
 
-Except for the [Music Samples](#music-samples), IBM stored all the BASIC files on the PC-DOS 1.00 diskette as *BINARY*
+Except for the [Music Samples](#music-samples), IBM stored all the BASIC files on the PC DOS 1.00 diskette as *BINARY*
 files, to reduce their size; otherwise, one or more of the samples would have had to be removed, since there wasn't
 enough space on a single-sided 160Kb diskette.
 

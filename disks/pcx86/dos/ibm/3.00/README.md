@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 3.00
+title: PC DOS 3.00
 permalink: /disks/pcx86/dos/ibm/3.00/
 machines:
   - id: ibm5170-pcdos300
@@ -9,16 +9,16 @@ machines:
     resume: 1
     autoMount:
       A:
-        name: PC-DOS 3.00 (Disk 1)
+        name: PC DOS 3.00 (Disk 1)
       B:
-        name: PC-DOS 3.00 (Disk 2)
+        name: PC DOS 3.00 (Disk 2)
     autoType: \r\r
 ---
 
-PC-DOS 3.00
+PC DOS 3.00
 -----------
 
-PC-DOS 3.00 was announced on August 14, 1984 and released in September 1984.
+PC DOS 3.00 was announced on August 14, 1984 and released in September 1984.
 
 A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-300-disk-1) of the two
 360Kb distribution diskettes, are provided below.
@@ -63,7 +63,7 @@ Removed CONFIG.SYS commands:
 
 New device drivers:
 
-VDISK.SYS (PC-DOS)
+VDISK.SYS (PC DOS)
 
 New functions:
 
@@ -76,7 +76,7 @@ Removed functions:
 
 - INT 21h functions 3702h-3703h
 
-### Directory of PC-DOS 3.00 (Disk 1)
+### Directory of PC DOS 3.00 (Disk 1)
 
 	 Volume in drive A has no label
 	 Directory of  A:\
@@ -119,7 +119,7 @@ Removed functions:
 	GRAFTABL COM     1169   8-14-84   8:00a
 	       36 File(s)    103424 bytes free
 
-### Directory of PC-DOS 3.00 (Disk 2)
+### Directory of PC DOS 3.00 (Disk 2)
 
 	 Volume in drive A has no label
 	 Directory of  A:\

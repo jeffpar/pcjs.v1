@@ -97,12 +97,12 @@ disks at will, we'll include some UI controls.
 
 ```xml
 <machine id="ibm" class="pc" width="720px">
-    <fdc id="fdcNEC" autoMount="{A: {name: 'PC-DOS 1.0', path: 'pcdos-1.00.json'}}">
+    <fdc id="fdcNEC" autoMount="{A: {name: 'PC DOS 1.0', path: 'pcdos-1.00.json'}}">
         <control type="container">
             <control type="list" class="input" binding="listDrives"/>
             <control type="list" class="input" binding="listDisks">
                 <disk path="">None</disk>
-                <disk path="pcdos-1.00.json">PC-DOS 1.0</disk>
+                <disk path="pcdos-1.00.json">PC DOS 1.0</disk>
             </control>
             <control type="button" class="input" binding="loadDisk">Load</control>
         </control>

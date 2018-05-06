@@ -9,7 +9,7 @@ machines:
     resume: 1
     autoMount:
       A:
-        name: PC-DOS 1.00
+        name: PC DOS 1.00
       B:
         name: Adventures in Math 1.00
     autoType: $date\rB:\rA:BASICA CASTLE\r
@@ -103,7 +103,7 @@ So at some point, unrelated "MONOPOLY" files were mingled with this game.  I del
 
 Another unexpected file was **BASICA.EXE** (54277 bytes) from 1999.  It seems unlikely that IBM would have distributed
 *any* BASIC binary with this game, because DOS was a prerequisite, and at the time, all versions of DOS included BASIC.
-IBM's PC-DOS shipped with **BASICA.COM** and OEM versions of DOS shipped with either **GWBASIC.EXE** or **BASIC.EXE**.
+IBM's PC DOS shipped with **BASICA.COM** and OEM versions of DOS shipped with either **GWBASIC.EXE** or **BASIC.EXE**.
 
 Unsurprisingly, this **BASICA.EXE** is neither from 1999 nor from IBM.  It's virtually identical to the circa 1983
 **BASICA.EXE** found in [COMPAQ DOS 1.11](/disks/pcx86/dos/compaq/1.11/), and it's 5 bytes larger only because the
@@ -175,7 +175,7 @@ Here's a directory listing of the resulting 160Kb disk image:
 This disk has now been added to the PCjs [IBM PC Disk Library](/disks/pcx86/) as "Adventures in Math (1983)".
 
 To run the game, I originally selected an [IBM PC (Model 5150, 64Kb) with Color Display](/devices/pcx86/machine/5150/cga/64kb/),
-which boots PC-DOS 2.00 by default.  However, in the course of starting the game, it crashed:
+which boots PC DOS 2.00 by default.  However, in the course of starting the game, it crashed:
 
 ![ADVENTMATH-CRASH](ADVENTMATH-CRASH.png)
 
@@ -187,9 +187,9 @@ It appeared to run fine with 256Kb of RAM, but these were IBM's "System Requirem
 
 > One diskette drive
 
-so I reconfigured the machine to boot PC-DOS 1.00, which requires less RAM than PC-DOS 2.00, and that worked.
-Note that the game was released in October 1983, well after the March 1983 release of PC-DOS 2.00, so it should
-have been tested with PC-DOS 2.00 on a 64Kb machine, but perhaps it wasn't.
+so I reconfigured the machine to boot PC DOS 1.00, which requires less RAM than PC DOS 2.00, and that worked.
+Note that the game was released in October 1983, well after the March 1983 release of PC DOS 2.00, so it should
+have been tested with PC DOS 2.00 on a 64Kb machine, but perhaps it wasn't.
 
 The machine on this page is configured with the following "autoType" sequence:
  

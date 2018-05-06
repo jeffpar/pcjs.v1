@@ -68,7 +68,7 @@ However, the `PrtSc` key did have several useful functions:
 - `Ctrl-PrtSc` (enables echo of DOS output to LPT1)
 
 While `Shift-PrtSc` is handled entirely by the PC ROM BIOS, `Ctrl-PrtSc` is simply passed on to DOS, which converts
-the key internally to `Ctrl-P`.  PC-DOS uses `Ctrl-P` to toggle printer echo, while other OEM versions of DOS
+the key internally to `Ctrl-P`.  PC DOS uses `Ctrl-P` to toggle printer echo, while other OEM versions of DOS
 use `Ctrl-P` to enable printer echo and `Ctrl-N` to disable it.
 
 The problem of "untypable" keys can be worsened by whatever operating system and browser combination you're using.  For

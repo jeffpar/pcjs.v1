@@ -113,7 +113,7 @@ with the 4.x releases prompted Microsoft to produce this updated 3.31 release.
 	       60 file(s)     740807 bytes
 	                      700928 bytes free
 
-NOTE: Like most of the directory listings PCjs provides, the above listing was produced by PC-DOS 5.00.  However,
+NOTE: Like most of the directory listings PCjs provides, the above listing was produced by PC DOS 5.00.  However,
 when MS-DOS 3.31 displays its own directory (see below), a time is not displayed for most of the files.
 
 This is because those files have a 0x0000 timestamp, which technically is equivalent to midnight, but early versions

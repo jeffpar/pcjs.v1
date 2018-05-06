@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 3.30
+title: PC DOS 3.30
 permalink: /disks/pcx86/dos/ibm/3.30/
 machines:
   - id: ibm5170-pcdos330
@@ -9,19 +9,19 @@ machines:
     resume: 1
     autoMount:
       A:
-        name: PC-DOS 3.30 (Disk 1)
+        name: PC DOS 3.30 (Disk 1)
       B:
-        name: PC-DOS 3.30 (Disk 2)
+        name: PC DOS 3.30 (Disk 2)
     autoType: \r\r
 ---
 
-PC-DOS 3.30
+PC DOS 3.30
 -----------
 
-PC-DOS 3.30 was announced and released on April 2, 1987, along with the first PS/2 models. 
+PC DOS 3.30 was announced and released on April 2, 1987, along with the first PS/2 models. 
 
 A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-330-disk-1) of the two
-360Kb distribution diskettes, are provided below.  This version of PC-DOS was also available on one 720Kb diskette.
+360Kb distribution diskettes, are provided below.  This version of PC DOS was also available on one 720Kb diskette.
 
 {% include machine.html id="ibm5170-pcdos330" %}
 
@@ -44,7 +44,7 @@ New internal commands:
 
 New external commands:
 
-- APPEND (PC-DOS)
+- APPEND (PC DOS)
 - ATTRIB /S (to recurse subdirectories)
 - COMP (MS-DOS)
 - FASTOPEN
@@ -81,7 +81,7 @@ New functions:
 - INT 21h functions 65h-68h
 - INT 2Fh multiplex functions 14h (NLSFUNC), ADh (DISPLAY.SYS/KEYB), AEh (APPEND), B0h (GRAFTABL), B7h (APPEND)
 
-### Directory of PC-DOS 3.30 (Disk 1)
+### Directory of PC DOS 3.30 (Disk 1)
 
 	 Volume in drive A has no label
 	 Directory of  A:\
@@ -112,7 +112,7 @@ New functions:
 	5202     CPI      459   3-17-87  12:00p
 	       22 File(s)      9216 bytes free
 
-### Directory of PC-DOS 3.30 (Disk 2)
+### Directory of PC DOS 3.30 (Disk 2)
 
 	 Volume in drive A has no label
 	 Directory of  A:\

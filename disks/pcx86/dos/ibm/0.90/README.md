@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 0.90
+title: PC DOS 0.90
 permalink: /disks/pcx86/dos/ibm/0.90/
 machines:
   - id: ibm5150-pcdos090
@@ -8,28 +8,28 @@ machines:
     config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       A:
-        name: PC-DOS 0.90
+        name: PC DOS 0.90
       B:
         name: None
 ---
 
-PC-DOS 0.90
+PC DOS 0.90
 -----------
 
-There was no PC-DOS 0.90 product *per se*.  It has been dubbed version 0.90 simply because it predates
-[PC-DOS 1.00](../1.00/) by several months.  More information about this preliminary version of PC-DOS can
+There was no PC DOS 0.90 product *per se*.  It has been dubbed version 0.90 simply because it predates
+[PC DOS 1.00](../1.00/) by several months.  More information about this preliminary version of PC DOS can
 be found at the [OS/2 Museum](http://www.os2museum.com/wp/pc-dos-1-0-but-not-quite/).
 
-Below is an IBM PC (Model 5150) with an original IBM ROM BIOS and Color (CGA) Display that will boot PC-DOS 0.90.
+Below is an IBM PC (Model 5150) with an original IBM ROM BIOS and Color (CGA) Display that will boot PC DOS 0.90.
 The machine is configured to run at 4.77Mhz, so the ROM BIOS memory test has been disabled, since a PC with 256Kb
 was rather slow to boot.  A similar configuration with [Monochrome Display and Debugger](debugger/) is also available.
 
-PC-DOS 0.90 files were distributed on one single-sided (160Kb) diskette.  A [Directory Listing](#directory-of-pc-dos-090-diskette)
+PC DOS 0.90 files were distributed on one single-sided (160Kb) diskette.  A [Directory Listing](#directory-of-pc-dos-090-diskette)
 of the disk is provided below.
 
 {% include machine.html id="ibm5150-pcdos090" %}
 
-### Directory of PC-DOS 0.90 Diskette
+### Directory of PC DOS 0.90 Diskette
 
 	 Volume in drive A has no label
 	 Directory of A:\
@@ -72,9 +72,9 @@ of the disk is provided below.
 	       35 file(s)     144458 bytes
 	                        8192 bytes free
 
-### PC-DOS 0.90 Boot Sector
+### PC DOS 0.90 Boot Sector
 
-The boot sector of the original PC-DOS 0.90 disk image contained the following bytes:
+The boot sector of the original PC DOS 0.90 disk image contained the following bytes:
 
 	00000000  eb 2f 14 00 00 00 60 00  20 37 2d 4d 61 79 2d 38  |./....`. 7-May-8|
 	00000010  31 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |1...............|

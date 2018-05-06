@@ -8,7 +8,7 @@ machines:
     config: /devices/pcx86/machine/5160/cga/640kb/mouse/machine.xml
     autoMount:
       A:
-        name: PC-DOS 2.00 (Disk 1)
+        name: PC DOS 2.00 (Disk 1)
       B:
         name: IBM TopView 1.01 (Program)
     autoScript: startKbd
@@ -47,7 +47,7 @@ concurrent execution of multiple applications.
 > - User may cut/copy and paste between windows.
 > - Interactive tutorial and HELP text included.
 
-The machine below is configured to automatically start TopView 1.01 on top of PC-DOS 2.00.  If you don't use a mouse,
+The machine below is configured to automatically start TopView 1.01 on top of PC DOS 2.00.  If you don't use a mouse,
 then you must use TopView's "Keyboard Mouse" support: arrow keys move the cursor, and **Home**, **PgUp**, and **Alt** act
 as mouse buttons.  Mouse support is automatically loaded in the [PCjs Debugger](debugger/) configuration.
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 7.00
+title: PC DOS 7.00
 permalink: /disks/pcx86/dos/ibm/7.00/
 machines:
   - id: ibm5170-pcdos700
@@ -8,21 +8,21 @@ machines:
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/machine.xml
     autoMount:
       A:
-        name: PC-DOS 7.00 (Disk 1)
+        name: PC DOS 7.00 (Disk 1)
       B:
         name: None
 ---
 
-PC-DOS 7.00
+PC DOS 7.00
 -----------
 
-PC-DOS 7.00 was released in April 1995.  The disks used the [XDF Format](/blog/2014/10/28/).
+PC DOS 7.00 was released in April 1995.  The disks used the [XDF Format](/blog/2014/10/28/).
 
 Directory listings of the five 1.44Mb distribution diskettes are provided below.
 
 {% include machine.html id="ibm5170-pcdos700" %}
 
-### Directory of PC-DOS 7.00 (Disk 1)
+### Directory of PC DOS 7.00 (Disk 1)
 
 	 Volume in drive A is DISK      1
 	 Volume Serial Number is 2635-130C
@@ -75,7 +75,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	       44 file(s)    1390283 bytes
 	                       56320 bytes free
 
-### Directory of PC-DOS 7.00 (Disk 2)
+### Directory of PC DOS 7.00 (Disk 2)
 
 	 Volume in drive A is DISK      2
 	 Directory of A:\
@@ -89,7 +89,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	        6 file(s)    1785168 bytes
 	                       75776 bytes free
 
-### Directory of PC-DOS 7.00 (Disk 3)
+### Directory of PC DOS 7.00 (Disk 3)
 
 	 Volume in drive A is DISK      3
 	 Directory of A:\
@@ -102,7 +102,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	        5 file(s)    1781907 bytes
 	                       79872 bytes free
 
-### Directory of PC-DOS 7.00 (Disk 4)
+### Directory of PC DOS 7.00 (Disk 4)
 
 	 Volume in drive A is DISK      4
 	 Directory of A:\
@@ -115,7 +115,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	        5 file(s)    1759188 bytes
 	                      102400 bytes free
 
-### Directory of PC-DOS 7.00 (Disk 5)
+### Directory of PC DOS 7.00 (Disk 5)
 
 	 Volume in drive A is DISK      5
 	 Directory of A:\

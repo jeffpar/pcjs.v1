@@ -33,8 +33,8 @@ which should then produce the following output:
 	ibm5150.pc-mda-64k object created
 	PCx86> Bus: 8Kb ROM at 000FE000
 	Bus: 32Kb ROM at 000F6000
-	notice: Mounted diskette "PC-DOS 2.00 (Disk 1)" in drive A
-	notice: Mounted diskette "PC-DOS 2.00 (Disk 2)" in drive B
+	notice: Mounted diskette "PC DOS 2.00 (Disk 1)" in drive A
+	notice: Mounted diskette "PC DOS 2.00 (Disk 2)" in drive B
 	Bus: 576Kb RAM at 0000
 	Bus: 4Kb VIDEO at 000B0000
 	Type ? for help with PCx86 Debugger commands

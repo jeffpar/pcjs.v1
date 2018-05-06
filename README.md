@@ -370,7 +370,7 @@ Other parameters that can be passed via the URL:
 
 - *autoMount*: overrides the machine's diskette autoMount settings; eg:
 
-	    http://localhost:8088/?autoMount={A:{name:"PC-DOS 1.10"}}
+	    http://localhost:8088/?autoMount={A:{name:"PC DOS 1.10"}}
 
 - *autoStart*: "true" allows all machines to start normally, "false" prevents all machines from starting, and "no" prevents all machines from starting *unless* they have no **Run** button; e.g.:
 

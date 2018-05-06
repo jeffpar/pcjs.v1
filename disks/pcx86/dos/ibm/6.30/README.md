@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 6.30
+title: PC DOS 6.30
 permalink: /disks/pcx86/dos/ibm/6.30/
 machines:
   - id: ibm5170-pcdos630
@@ -8,21 +8,21 @@ machines:
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/machine.xml
     autoMount:
       A:
-        name: PC-DOS 6.30 (Disk 1)
+        name: PC DOS 6.30 (Disk 1)
       B:
         name: None
 ---
 
-PC-DOS 6.30
+PC DOS 6.30
 -----------
 
-PC-DOS 6.30 was released in December 1993.
+PC DOS 6.30 was released in December 1993.
 
 Directory listings of the five 1.44Mb distribution diskettes are provided below.
 
 {% include machine.html id="ibm5170-pcdos630" %}
 
-### Directory of PC-DOS 6.30 (Disk 1)
+### Directory of PC DOS 6.30 (Disk 1)
 
 	 Volume in drive A is DISK      1
 	 Volume Serial Number is 0E37-2211
@@ -120,7 +120,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	       89 file(s)    1405190 bytes
 	                       30208 bytes free
 
-### Directory of PC-DOS 6.30 (Disk 2)
+### Directory of PC DOS 6.30 (Disk 2)
 
 	 Volume in drive A is DISK      2
 	 Volume Serial Number is 0302-6E69
@@ -215,7 +215,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	       86 file(s)    1186866 bytes
 	                      249344 bytes free
 
-### Directory of PC-DOS 6.30 (Disk 3)
+### Directory of PC DOS 6.30 (Disk 3)
 
 	 Volume in drive A is DISK      3
 	 Volume Serial Number is 0302-6E69
@@ -280,7 +280,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	       56 file(s)    1274633 bytes
 	                      169472 bytes free
 
-### Directory of PC-DOS 6.30 (Disk 4)
+### Directory of PC DOS 6.30 (Disk 4)
 
 	 Volume in drive A is DISK      4
 	 Volume Serial Number is 0302-6E69
@@ -355,7 +355,7 @@ Directory listings of the five 1.44Mb distribution diskettes are provided below.
 	       66 file(s)    1270480 bytes
 	                      169984 bytes free
 
-### Directory of PC-DOS 6.30 (Disk 5)
+### Directory of PC DOS 6.30 (Disk 5)
 
 	 Volume in drive A is DISK      5
 	 Volume Serial Number is 0302-6E69

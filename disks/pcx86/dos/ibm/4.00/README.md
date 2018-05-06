@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 4.00
+title: PC DOS 4.00
 permalink: /disks/pcx86/dos/ibm/4.00/
 machines:
   - id: ibm5170-pcdos400
@@ -8,15 +8,15 @@ machines:
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/machine.xml
     autoMount:
       A:
-        name: PC-DOS 4.00 (Disk 1)
+        name: PC DOS 4.00 (Disk 1)
       B:
         name: None
 ---
 
-PC-DOS 4.00
+PC DOS 4.00
 -----------
 
-PC-DOS 4.00 was released in July 1988.
+PC DOS 4.00 was released in July 1988.
 
 A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-400-disk-1) of the five
 360Kb distribution diskettes, are provided below.
@@ -73,7 +73,7 @@ New functions:
 - INT 21h functions 3305h, 5D0Bh, 5F05h-5F08h, 6507h, 6520h-6523h, 65A0h-65A3h, 69h-6Ch
 - INT 2Fh multiplex function 1Ah (ANSI.SYS)
 
-### Directory of PC-DOS 4.00 (Disk 1)
+### Directory of PC DOS 4.00 (Disk 1)
 
 	 Volume in drive A has no label
 	 Volume Serial Number is 1D53-17EC
@@ -101,7 +101,7 @@ New functions:
 	       19 file(s)     338398 bytes
 	                       17408 bytes free
 
-### Directory of PC-DOS 4.00 (Disk 2)
+### Directory of PC DOS 4.00 (Disk 2)
 
 	 Volume in drive A has no label
 	 Volume Serial Number is 203D-10CC
@@ -134,7 +134,7 @@ New functions:
 	       24 file(s)     324303 bytes
 	                       30208 bytes free
 
-### Directory of PC-DOS 4.00 (Disk 3)
+### Directory of PC DOS 4.00 (Disk 3)
 
 	 Volume in drive A has no label
 	 Volume Serial Number is 234D-10CB
@@ -158,7 +158,7 @@ New functions:
 	       15 file(s)     321693 bytes
 	                       36352 bytes free
 
-### Directory of PC-DOS 4.00 (Disk 4)
+### Directory of PC DOS 4.00 (Disk 4)
 
 	 Volume in drive A has no label
 	 Volume Serial Number is 1821-17E7
@@ -190,7 +190,7 @@ New functions:
 	       23 file(s)     324945 bytes
 	                       30720 bytes free
 
-### Directory of PC-DOS 4.00 (Disk 5)
+### Directory of PC DOS 4.00 (Disk 5)
 
 	 Volume in drive A has no label
 	 Volume Serial Number is 363D-10CB

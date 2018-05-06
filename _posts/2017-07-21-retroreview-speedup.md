@@ -10,7 +10,7 @@ machines:
     config: /disks/pcx86/shareware/pcsig08/debugger/machine.xml
     autoMount:
       A:
-        name: "PC-DOS 1.00"
+        name: PC DOS 1.00
       B:
         name: "PCSIG08: DISK0011"
 ---
@@ -70,7 +70,7 @@ Fortunately, we don't have to type the program in.  If you skim our archived cop
 in the [Directory of PCSIG08: DISK0011](/disks/pcx86/shareware/pcsig08/#directory-of-pcsig08-disk0011).
 
 So, fire up the [PC-SIG Machine (with Debugger)](/disks/pcx86/shareware/pcsig08/debugger/).  Or use the machine
-below, which has conveniently pre-loaded "PC-DOS 1.00" in drive A and "PCSIG80: DISK0011" in drive B.
+below, which has conveniently pre-loaded "PC DOS 1.00" in drive A and "PCSIG80: DISK0011" in drive B.
 
 At the DOS prompt, run `BASIC` and type `LOAD "B:SPEEDUP.BAS"`.
 
@@ -113,10 +113,10 @@ to verify that the program was created:
 	SPEEDUP   COM        128  07-21-17
 
 You'll notice that BASIC created a 128-byte file, even though it wrote only 37 bytes.  This is an
-artifact of PC-DOS 1.00 and BASIC Version D1.00, which were limited to File Control Block (FCB) DOS
+artifact of PC DOS 1.00 and BASIC Version D1.00, which were limited to File Control Block (FCB) DOS
 functions that operated on files using 128-byte "records".
 
-Alternatively, if we boot from "PC-DOS 2.00 (Disk 1)" and run BASIC Version D2.00, loading and running
+Alternatively, if we boot from "PC DOS 2.00 (Disk 1)" and run BASIC Version D2.00, loading and running
 `SPEEDUP.BAS` will produce the following `SPEEDUP.COM`:
 
 	 Volume in drive A has no label
@@ -125,7 +125,7 @@ Alternatively, if we boot from "PC-DOS 2.00 (Disk 1)" and run BASIC Version D2.0
 	SPEEDUP  COM       37   7-21-17  12:00a
 			1 File(s)     30720 bytes free
 
-Let's take a closer look at this 37-byte program, using the `DEBUG` program on "PC-DOS 2.00 (Disk 2)":
+Let's take a closer look at this 37-byte program, using the `DEBUG` program on "PC DOS 2.00 (Disk 2)":
 
 	A>B:DEBUG SPEEDUP.COM
 	-u100
@@ -153,7 +153,7 @@ bytes of the PSP plus an additional 0Bh bytes containing the new diskette parame
 Note that this TSR program doesn't actually want to retain the first 12h bytes of the PSP, but it must leave
 those bytes in place so that the program will exit correctly.
 
-In PC-DOS 1.00 (August 1981), the first 12h bytes of the PSP were used as follows:
+In PC DOS 1.00 (August 1981), the first 12h bytes of the PSP were used as follows:
 
 	00h-01h     2 bytes (code)      CP/M exit (always contains INT 20h)
 	02h-03h     2 bytes             Segment of the first byte beyond the memory allocated to the program
@@ -171,38 +171,38 @@ with bytes 12h-5Bh marked "Reserved" and the remaining PSP bytes defined as:
 	
 	NOTE: The 128 bytes at offset 80h are also used as the default DOS Disk Transfer Area (DTA). 
 	
-In May 1982, PC-DOS 1.10 added:
+In May 1982, PC DOS 1.10 added:
 
 	12h-15h     4 bytes             Critical error address of previous program (old INT 24h)
 	16h-17h     2 bytes             Parent's PSP segment (usually COMMAND.COM - internal)
 
-In March 1983, PC-DOS 2.00 added:
+In March 1983, PC DOS 2.00 added:
 
 	18h-2Bh     20 bytes            Job File Table (JFT) (internal)
 	2Ch-2Dh     2 bytes             Environment segment
 	2Eh-31h     4 bytes             SS:SP on entry to last INT 21h call (internal)
 
-And in August 1984, PC-DOS 3.00 added:
+And in August 1984, PC DOS 3.00 added:
 
 	32h-33h     2 bytes             JFT size (internal)
 	34h-37h     4 bytes             Pointer to JFT (internal)
 
-This explains why, when I first ran `SPEEDUP` on PC-DOS 2.00, it crashed.  In fact, the *only* version
+This explains why, when I first ran `SPEEDUP` on PC DOS 2.00, it crashed.  In fact, the *only* version
 of DOS that supports `SPEEDUP` is version 1.00.  It crashes on all other versions of DOS because it "trashes"
 critical PSP bytes; specifically, the Parent's PSP segment at offset 16h.  The author of `SPEEDUP` ignored IBM's
 warning that PSP bytes at offset 12h and higher were "reserved" and used them anyway.
 
 > NOTE: Other sites, like [PC DOS Retro](https://sites.google.com/site/pcdosretro/doshist), suggest that
-the "Parent's PSP segment" at offset 16h wasn't introduced until PC-DOS 2.00, but that's incorrect.  Even though
-the PC-DOS 1.10 Manual (p. E-6) mentions only the addition of the "Critical Error Exit Address" at offset 12h,
-both fields were in fact added in PC-DOS 1.10.
+the "Parent's PSP segment" at offset 16h wasn't introduced until PC DOS 2.00, but that's incorrect.  Even though
+the PC DOS 1.10 Manual (p. E-6) mentions only the addition of the "Critical Error Exit Address" at offset 12h,
+both fields were in fact added in PC DOS 1.10.
 
 Sadly, the history of the IBM PC and DOS is littered with examples of programmers ignoring the "reserved"
 admonitions of others -- even IBM, when they designed the IBM PC to use interrupt vectors that Intel had "reserved"
 for future use.  This is apparently normal human thinking: "If something isn't a problem today, then let's punt 
 any foreseeable problems to future generations, because we've got more important things to do."
 
-And on PC-DOS 1.00, does `SPEEDUP` actually speed things up?  In the real world, it presumably did, but in
+And on PC DOS 1.00, does `SPEEDUP` actually speed things up?  In the real world, it presumably did, but in
 the world of emulation, there isn't any measurable difference, because hardware features like stepping rates and
 head settling times are rarely simulated.  As I suggested in my [last blog post](/blog/2017/07/15/), this is a
 degree of authenticity that all emulators should strive for, and PCjs emulators are no exception to that rule -- I

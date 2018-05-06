@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 3.10
+title: PC DOS 3.10
 permalink: /disks/pcx86/dos/ibm/3.10/
 machines:
   - id: ibm5170-pcdos310
@@ -9,16 +9,16 @@ machines:
     resume: 1
     autoMount:
       A:
-        name: PC-DOS 3.10 (Disk 1)
+        name: PC DOS 3.10 (Disk 1)
       B:
-        name: PC-DOS 3.10 (Disk 2)
+        name: PC DOS 3.10 (Disk 2)
     autoType: \r\r
 ---
 
-PC-DOS 3.10
+PC DOS 3.10
 -----------
 
-PC-DOS 3.10 was announced on August 14, 1984 (along with [PC-DOS 3.00](/disks/pcx86/dos/ibm/3.00/)) and released
+PC DOS 3.10 was announced on August 14, 1984 (along with [PC DOS 3.00](/disks/pcx86/dos/ibm/3.00/)) and released
 on April 2, 1985.
 
 A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-310-disk-1) of the two
@@ -38,13 +38,13 @@ with 4 NOP (0x90) bytes as follows:
 Different websites (e.g.,
 [16BitOS](http://16bitos.com/310ibm.htm),
 [PC DOS Retro](https://sites.google.com/site/pcdosretro/disklistings#TOC-PCDOS310))
-list different "authoritative" directory listings for PC-DOS 3.10, which helps confirm that both variations of Disk 1
+list different "authoritative" directory listings for PC DOS 3.10, which helps confirm that both variations of Disk 1
 are authentic (as opposed to someone's random changes) and that IBM quietly slipped in these last-minute changes during
 the first month of its release.  And "quietly" seems to be a fair assessment, since I've so far been unable to locate
-any contemporary reports (e.g., press releases or magazine articles) regarding these PC-DOS 3.10 variations.
+any contemporary reports (e.g., press releases or magazine articles) regarding these PC DOS 3.10 variations.
 
 Also, a note of thanks to [Jeff Duntemann](https://www.contrapositivediary.com/?p=2107) for sharing his collection
-of old diskettes with PCjs, which included, among other things, IBM's "patched" version of PC-DOS 3.10.  The earlier
+of old diskettes with PCjs, which included, among other things, IBM's "patched" version of PC DOS 3.10.  The earlier
 "unpatched" disk images were obtained from [WinWorld](https://winworldpc.com/product/pc-dos/3x).
 
 {% include machine.html id="ibm5170-pcdos310" %}
@@ -72,7 +72,7 @@ Removed functions:
 
 - INT 21h function 61h
 
-### Directory of PC-DOS 3.10 (Disk 1)
+### Directory of PC DOS 3.10 (Disk 1)
 
 	 Volume in drive A has no label
 	 Directory of  A:\
@@ -117,7 +117,7 @@ Removed functions:
 	VDISK    SYS     3307   3-07-85   1:43p
 	       38 File(s)     61440 bytes free
 
-### Directory of PC-DOS 3.10 (Disk 2)
+### Directory of PC DOS 3.10 (Disk 2)
 
 	 Volume in drive A has no label
 	 Directory of  A:\
@@ -142,7 +142,7 @@ Removed functions:
 	VDISK    LST   136313   3-07-85   1:43p
 	       18 File(s)    108544 bytes free
 
-### Directory of PC-DOS 3.10 (Patched Disk 1)
+### Directory of PC DOS 3.10 (Patched Disk 1)
 
      Volume in drive A has no label
      Directory of A:\

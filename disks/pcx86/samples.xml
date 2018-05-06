@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fdc id="fdcNEC" autoMount='{A:{name:"PC-DOS 2.00 (Disk 1)"}, B:{name:"PC-DOS 2.00 (Disk 2)"}}' pos="left" padLeft="8px" padBottom="8px">
+<fdc id="fdcNEC" autoMount='{A:{name:"PC DOS 2.00 (Disk 1)"}, B:{name:"PC DOS 2.00 (Disk 2)"}}' pos="left" padLeft="8px" padBottom="8px">
 	<control type="list" binding="listDrives"/>
 	<control type="list" binding="listDisks">
-		<disk path="/pcjs-disks/pcx86/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
-		<disk path="/pcjs-disks/pcx86/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
-		<disk path="/pcjs-disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json">PC-DOS 2.00 (Disk 1)</disk>
-		<disk path="/pcjs-disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json">PC-DOS 2.00 (Disk 2)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/ibm/1.00/PCDOS100.json">PC DOS 1.00</disk>
+		<disk path="/pcjs-disks/pcx86/dos/ibm/1.10/PCDOS110.json">PC DOS 1.10</disk>
+		<disk path="/pcjs-disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json">PC DOS 2.00 (Disk 1)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json">PC DOS 2.00 (Disk 2)</disk>
 		<disk path="/pcjs-games/pcx86/microsoft/adventure/ADVENTURE-1981.json">Microsoft Adventure</disk>
 		<disk path="/pcjs-games/pcx86/infocom/hhiker/HHIKER-READONLY.json">Hitchhiker's Guide</disk>
 		<disk path="/pcjs-games/pcx86/infocom/phobos/PHOBOS.json">Leather Goddesses of Phobos</disk>

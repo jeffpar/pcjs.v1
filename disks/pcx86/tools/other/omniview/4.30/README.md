@@ -10,7 +10,7 @@ machines:
     config: /devices/pcx86/machine/compaq/deskpro386/vga/4096kb/machine.xml
     autoMount:
       A:
-        name: PC-DOS 3.30 (720K)
+        name: PC DOS 3.30 (720K)
       B:
         name: Omniview 386 4.30
 ---

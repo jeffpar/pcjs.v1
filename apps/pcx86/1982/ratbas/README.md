@@ -8,7 +8,7 @@ machines:
     config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       A:
-        name: PC-DOS 1.10
+        name: PC DOS 1.10
       B:
         name: RatBas 2.13
     autoType: $date\r$time\rB:\rRT\r$15TEST;\r
@@ -27,7 +27,7 @@ shareware CD-ROM titled "[PC-SIG Library Eighth Edition From PC-SIG (April 1990)
 on [DISK0003](http://cd.textfiles.com/pcsig08/001_100/DISK0003/).
 
 We have archived it as [RatBas 2.13](#directory-listing-of-ratbas-213).  It has been loaded into drive B: in
-the machine below, which is running [PC-DOS 1.10](/disks/pcx86/dos/ibm/1.10/), the most recent version of PC-DOS
+the machine below, which is running [PC DOS 1.10](/disks/pcx86/dos/ibm/1.10/), the most recent version of PC DOS
 at the time of this RatBas release.
 
 {% include machine.html id="ibm5150-ratbas" %}
