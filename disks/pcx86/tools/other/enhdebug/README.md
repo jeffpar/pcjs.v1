@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Enhanced DEBUG for PC-DOS and MS-DOS
+title: Enhanced DEBUG for PC DOS and MS-DOS
 permalink: /disks/pcx86/tools/other/enhdebug/
 machines:
   - id: ibm5160-pcdos200
@@ -9,13 +9,13 @@ machines:
     resume: 1
     autoMount:
       A:
-        name: PC-DOS 2.00 (Disk 1)
+        name: PC DOS 2.00 (Disk 1)
       B:
         name: Enhanced DEBUG 1.32b
     autoType: $date\r$time\rB:DEBUGX /F\r?\r$20\r$10v\r$10\r
 ---
 
-Enhanced DEBUG for PC-DOS and MS-DOS
+Enhanced DEBUG for PC DOS and MS-DOS
 ------------------------------------
 
 The [PC DOS Retro](https://sites.google.com/site/pcdosretro/) website has documentation for

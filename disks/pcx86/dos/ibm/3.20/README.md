@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 3.20
+title: PC DOS 3.20
 permalink: /disks/pcx86/dos/ibm/3.20/
 machines:
   - id: ibm5170-pcdos320
@@ -9,20 +9,20 @@ machines:
     resume: 1
     autoMount:
       A:
-        name: PC-DOS 3.20 (Disk 1)
+        name: PC DOS 3.20 (Disk 1)
       B:
-        name: PC-DOS 3.20 (Disk 2)
+        name: PC DOS 3.20 (Disk 2)
     autoType: \r\r
 ---
 
-PC-DOS 3.20
+PC DOS 3.20
 -----------
 
-PC-DOS 3.20 was first announced on March 18, 1986 and released April 1986.  Read the early
+PC DOS 3.20 was first announced on March 18, 1986 and released April 1986.  Read the early
 [PC Magazine Review](#pc-magazine-review) below.
 
 A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-320-disk-1) of the two
-360Kb distribution diskettes, are provided below.  This version of PC-DOS was also available on one 720Kb diskette.
+360Kb distribution diskettes, are provided below.  This version of PC DOS was also available on one 720Kb diskette.
 
 {% include machine.html id="ibm5170-pcdos320" %}
 
@@ -57,7 +57,7 @@ New functions:
 - INT 2Fh multiplex functions 08h (IBMBIO/DRIVER.SYS), 13h (IBMBIO)
 - Device driver command codes 13h, 17h, 18h
 
-### Directory of PC-DOS 3.20 (Disk 1)
+### Directory of PC DOS 3.20 (Disk 1)
 
 	 Volume in drive A has no label
 	 Directory of  A:\
@@ -105,7 +105,7 @@ New functions:
 	XCOPY    EXE    11200  12-30-85  12:00p
 	       41 File(s)     22528 bytes free
 
-### Directory of PC-DOS 3.20 (Disk 2)
+### Directory of PC DOS 3.20 (Disk 2)
 
 	 Volume in drive A has no label
 	 Directory of  A:\

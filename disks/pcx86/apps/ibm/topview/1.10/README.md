@@ -8,7 +8,7 @@ machines:
     config: /devices/pcx86/machine/5160/cga/640kb/mouse/machine.xml
     autoMount:
       A:
-        name: PC-DOS 2.00 (Disk 1)
+        name: PC DOS 2.00 (Disk 1)
       B:
         name: IBM TopView 1.10
     autoType: $date\r$time\rB:\rSETUP\r$30$15y \r$15.1\r
@@ -17,7 +17,7 @@ machines:
 IBM TopView 1.10
 ----------------
 
-The machine below is configured to automatically start TopView 1.10 on top of PC-DOS 2.00.  No mouse driver is loaded,
+The machine below is configured to automatically start TopView 1.10 on top of PC DOS 2.00.  No mouse driver is loaded,
 so you must use TopView's "Keyboard Mouse" support: arrow keys move the cursor and **Home**, **PgUp**, and **Alt**
 act as mouse buttons.  The machine is also available with the [PCjs Debugger](debugger/).
 

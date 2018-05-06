@@ -9,7 +9,7 @@ machines:
     config: /disks/pcx86/games/infocom/machine.xml
     autoMount:
       A:
-        name: PC-DOS 2.00 (Disk 1)
+        name: PC DOS 2.00 (Disk 1)
       B:
         name: Leather Goddesses of Phobos
     autoType: $date\r$time\rb:\rleather\r

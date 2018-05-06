@@ -25,8 +25,8 @@ The first version of SYMDEB I used was probably Version 4.00, released with
             1 File(s)     69632 bytes free
 
 SYMDEB was a big improvement over the DOS DEBUG utility, which was clearly not getting enough love in the
-mid 1980's.  For example, PC-DOS 3.00 was released in conjunction with the 80286-based IBM PC AT, and yet the
-DEBUG utility that shipped with PC-DOS 3.00 didn't understand *any* 80286-specific instructions.
+mid 1980's.  For example, PC DOS 3.00 was released in conjunction with the 80286-based IBM PC AT, and yet the
+DEBUG utility that shipped with PC DOS 3.00 didn't understand *any* 80286-specific instructions.
 
 And I'm not just talking about "esoteric" instructions that most users wouldn't have cared about anyway, like
 **LGDT** or **LIDT**.  No, even instructions introduced by the 80286's predecessor, the 80186, such as shift,

@@ -8,7 +8,7 @@ machines:
     config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       A:
-        name: PC-DOS 2.00 (Disk 1)
+        name: PC DOS 2.00 (Disk 1)
       B:
         name: SuperCalc2 1.0
     autoType: $date\r$time\rb:\rsc2\r

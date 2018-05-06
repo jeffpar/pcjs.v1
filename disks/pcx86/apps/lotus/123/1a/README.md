@@ -22,7 +22,7 @@ whereas [Release 1A\*](/disks/pcx86/apps/lotus/123/1as/) contained files dated `
 WARNING: These disk images are from [WinWorld](https://winworldpc.com/product/lotus-1-2-3/1x) and are not exact
 copies of the original distribution disks.  We've tried to recreate the System Disk as it was originally distributed
 (aside from the [Copy-Protection Patch](#copy-protection-patch)), but the other disks have been left as we found them:
-original Lotus 1-2-3 files dated `6-07-83` along with a random mixture of PC-DOS 1.10 and PC-DOS 2.10 binaries
+original Lotus 1-2-3 files dated `6-07-83` along with a random mixture of PC DOS 1.10 and PC DOS 2.10 binaries
 (eg, `COMMAND.COM`, `DISKCOPY.COM`, `DISKCOMP.COM`, etc.)
 
 {% include machine.html id="ibm5150-123-1a" %}

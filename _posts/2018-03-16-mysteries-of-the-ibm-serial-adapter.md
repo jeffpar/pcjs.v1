@@ -31,7 +31,7 @@ the number 65536, the speed of the 8088 CPU, and real-world serial communication
 
 ### DOS 2.0 and the CTTY Command
 
-Long before I ever wanted to control a PC with a serial port, there was [PC-DOS 2.00](/disks/pcx86/dos/ibm/2.00/)
+Long before I ever wanted to control a PC with a serial port, there was [PC DOS 2.00](/disks/pcx86/dos/ibm/2.00/)
 and the **CTTY** command, which allowed you to redirect all DOS screen and keyboard I/O to the serial port of your
 choice; e.g.:
 

@@ -7,7 +7,7 @@ permalink: /blog/2014/09/13/
 ---
 
 My first IBM PC AT (Model 5170) [Test Configuration](/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/) finally
-boots to a PC-DOS prompt.  The configuration uses the original [IBM Model 5170 ROM BIOS](/devices/pcx86/rom/5170/),
+boots to a PC DOS prompt.  The configuration uses the original [IBM Model 5170 ROM BIOS](/devices/pcx86/rom/5170/),
 dated January 10, 1984.
  
 Getting through the BIOS "POST" (Power-On Self Test) diagnostics was like running an obstacle course, with various
@@ -60,7 +60,7 @@ I believe is significantly different from the XT hard drive controller), and the
 Keyboard Controller and AT keyboard had a number of features that older PC/XT keyboards did not (like LEDs and
 programmable repeat rate).
 
-And there are plenty of issues to investigate.  For example, PC-DOS is picking up the correct RTC time, but not the
+And there are plenty of issues to investigate.  For example, PC DOS is picking up the correct RTC time, but not the
 date (PCjs initializes the RTC to the browser's current date/time, unless a hard-coded date/time is specified in the
 machine XML).  And diskette I/O seems a bit slow; I'm concerned that the BIOS is spinning its wheels somewhere
 unnecessarily.  And even though the test machine is configured with 640Kb of RAM, the BIOS is reporting only 64Kb.

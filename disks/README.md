@@ -111,8 +111,8 @@ Although PCx86 will accept IMG disk image files, it must call the [DiskDump API]
 image every time it's loaded, which is slower than using pre-converted JSON-encoded disk images and will only work
 with the PCjs Node [web server](/server.js).
 
-Remember that PC and PC XT machines supported only 160Kb diskettes (on any version of PC-DOS), 320Kb diskettes
-(on PC-DOS 1.1 and higher), and 180Kb and 360Kb diskettes (on PC-DOS 2.0 and higher).
+Remember that PC and PC XT machines supported only 160Kb diskettes (on any version of PC DOS), 320Kb diskettes
+(on PC DOS 1.1 and higher), and 180Kb and 360Kb diskettes (on PC DOS 2.0 and higher).
 
 The 1.2Mb diskette format was introduced with the PC AT, and 720Kb and 1.44Mb diskette formats were supported later
 on 8Mhz PC AT and PS/2 models.  So, when using any of these larger formats, be sure you're also using a compatible

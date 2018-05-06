@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 2.10
+title: PC DOS 2.10
 permalink: /disks/pcx86/dos/ibm/2.10/
 machines:
   - id: ibm5160-pcdos210
@@ -9,22 +9,22 @@ machines:
     resume: 1
     autoMount:
       A:
-        name: PC-DOS 2.10 (Disk 1)
+        name: PC DOS 2.10 (Disk 1)
       B:
-        name: PC-DOS 2.10 (Disk 2)
+        name: PC DOS 2.10 (Disk 2)
     autoType: $date\r$time\r
 ---
 
-PC-DOS 2.10
+PC DOS 2.10
 -----------
 
-PC-DOS 2.10 was finalized in October 1983 and released on November 1, 1983.
+PC DOS 2.10 was finalized in October 1983 and released on November 1, 1983.
 
 [Directory Listings](#directory-of-pc-dos-210-disk-1) of the two 360Kb distribution diskettes are provided below.
 
 {% include machine.html id="ibm5160-pcdos210" %}
 
-### Directory of PC-DOS 2.10 (Disk 1)
+### Directory of PC DOS 2.10 (Disk 1)
 
 	 Volume in drive A has no label
 	 Directory of  A:\
@@ -56,7 +56,7 @@ PC-DOS 2.10 was finalized in October 1983 and released on November 1, 1983.
 	BASICA   COM    26112  10-20-83  12:00p
 	       25 File(s)     28672 bytes free
 
-### Directory of PC-DOS 2.10 (Disk 2)
+### Directory of PC DOS 2.10 (Disk 2)
 
 	 Volume in drive A has no label
 	 Directory of  A:\

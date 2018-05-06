@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 1.00
+title: PC DOS 1.00
 permalink: /disks/pcx86/dos/ibm/1.00/
 redirect_from:
   - /disks/pc/dos/ibm/1.00/
@@ -11,25 +11,25 @@ machines:
     resume: 1
     autoMount:
       A:
-        name: PC-DOS 1.00
+        name: PC DOS 1.00
       B:
         name: None
     autoType: $date\r
 ---
 
-PC-DOS 1.00
+PC DOS 1.00
 -----------
 
-PC-DOS 1.00 was completed in August 1981 and announced at an IBM press conference on August 12, 1981,
+PC DOS 1.00 was completed in August 1981 and announced at an IBM press conference on August 12, 1981,
 when IBM introduced the original IBM PC (Model 5150).  It was released on one single-sided (160Kb) diskette.
 The disk's [Directory Listing](#directory-of-pc-dos-100-diskette) and [Boot Sector](#pc-dos-100-boot-sector)
 are provided below.
 
-To learn how to use PC-DOS 1.00, see the [Documentation](/pubs/pc/software/dos/PCDOS100/).
+To learn how to use PC DOS 1.00, see the [Documentation](/pubs/pc/software/dos/PCDOS100/).
 
 {% include machine.html id="ibm5150-pcdos100" %}
 
-### Directory of PC-DOS 1.00 Diskette
+### Directory of PC DOS 1.00 Diskette
 
 	IBMBIO    COM        1920  07-23-81
 	IBMDOS    COM        6400  08-13-81
@@ -78,9 +78,9 @@ CHKDSK reports:
 	      160256 bytes total disk space
 	        6144 bytes remain available
 
-### PC-DOS 1.00 Boot Sector
+### PC DOS 1.00 Boot Sector
 
-The boot sector of the PC-DOS 1.00 disk image contains the following bytes:
+The boot sector of the PC DOS 1.00 disk image contains the following bytes:
 
 	00000000  eb 2f 14 00 00 00 60 00  20 37 2d 4d 61 79 2d 38  |./....`. 7-May-8|
 	00000010  31 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |1...............|
@@ -115,7 +115,7 @@ The boot sector of the PC-DOS 1.00 disk image contains the following bytes:
 	000001e0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	000001f0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 
-A number of people have already delved into the guts of the PC-DOS 1.00 boot sector, including:
+A number of people have already delved into the guts of the PC DOS 1.00 boot sector, including:
 
 * [Reverse-Engineering DOS 1.0 – Part 1: The Boot Sector (May 7, 2009 by Michael Steil)](http://www.pagetable.com/?p=165)
 * [The Boot Sector of IBM® Personal Computer™ DOS Version 1.00 (August 2, 2005 by Daniel B. Sedory)](http://thestarman.pcministry.com/DOS/ibm100/Boot.htm)
@@ -474,9 +474,9 @@ And finally, `IBMBIO_COM` (0x7D76) and `IBMDOS_COM` (0x7D82):
 	&7D88  20 20 63 6F 6D B0 C9 00-00 00 00 00 00 00 00 00    com...........
 
 Interestingly, the [COMPAQ MS-DOS 1.11 Boot Sector](/disks/pcx86/dos/compaq/1.11/#compaq-ms-dos-111-boot-sector)
-is completely different from all PC-DOS 1.x boot sectors.  The COMPAQ boot sector supports both 160Kb and 320Kb
+is completely different from all PC DOS 1.x boot sectors.  The COMPAQ boot sector supports both 160Kb and 320Kb
 formats with less code and without requiring "patches", although that flexibility did require reading the first
-FAT sector, which PC-DOS 1.x boot sectors did not do.
+FAT sector, which PC DOS 1.x boot sectors did not do.
 
 ### Additional Information From [PC DOS Retro](https://sites.google.com/site/pcdosretro/doshist)
 

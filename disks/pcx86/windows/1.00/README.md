@@ -10,9 +10,9 @@ machines:
     drives: '[{name:"10Mb Hard Disk",type:3,path:"/pcjs-disks/pcx86/drives/10mb/PCDOS310-WIN100-EGA.json"}]'
     autoMount:
       A:
-        name: PC-DOS 3.10 (Disk 1)
+        name: PC DOS 3.10 (Disk 1)
       B:
-        name: PC-DOS 3.10 (Disk 2)
+        name: PC DOS 3.10 (Disk 2)
 ---
 
 Microsoft Windows 1.0 ("Premiere Edition")

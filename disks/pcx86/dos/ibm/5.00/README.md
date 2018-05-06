@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 5.00
+title: PC DOS 5.00
 permalink: /disks/pcx86/dos/ibm/5.00/
 machines:
   - id: ibm5170-pcdos500
@@ -9,15 +9,15 @@ machines:
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/machine.xml
     autoMount:
       A:
-        name: PC-DOS 5.00 (Disk 1)
+        name: PC DOS 5.00 (Disk 1)
       B:
         name: None
 ---
 
-PC-DOS 5.00
+PC DOS 5.00
 -----------
 
-PC-DOS 5.00 was released in June 1991.
+PC DOS 5.00 was released in June 1991.
 
 A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-500-disk-1) of the three
 720Kb distribution diskettes, are provided below.
@@ -69,7 +69,7 @@ New device drivers:
 
 Removed device drivers:
 
-- VDISK.SYS (PC-DOS)
+- VDISK.SYS (PC DOS)
 - XMA2EMS.SYS
 - XMAEM.SYS
 
@@ -82,7 +82,7 @@ Removed functions:
 
 - INT 21h functions 3303h-3304h, 3701h, 5702h-5704h, 5D0Bh, 6Bh
 
-### Directory of PC-DOS 5.00 (Disk 1)
+### Directory of PC DOS 5.00 (Disk 1)
 
 	 Volume in drive A is DISK      1
 	 Volume Serial Number is 0E37-2211
@@ -124,7 +124,7 @@ Removed functions:
 	       33 file(s)     603898 bytes
 	                      106496 bytes free
 
-### Directory of PC-DOS 5.00 (Disk 2)
+### Directory of PC DOS 5.00 (Disk 2)
 
 	 Volume in drive A is DISK      2
 	 Volume Serial Number is 6319-0212
@@ -164,7 +164,7 @@ Removed functions:
 	       31 file(s)     699658 bytes
 	                       14336 bytes free
 
-### Directory of PC-DOS 5.00 (Disk 3)
+### Directory of PC DOS 5.00 (Disk 3)
 
 	 Volume in drive A is DISK      3
 	 Volume Serial Number is 0F02-2411

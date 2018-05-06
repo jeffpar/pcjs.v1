@@ -406,7 +406,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
     linear addresses that result in a TLB miss.
 
     **Workaround**: Unless paging is used, this item is not a problem. If paging is used but all I/O ports are below
-    00001000h (as in a PC-DOS system), then I/O is no problem.
+    00001000h (as in a PC DOS system), then I/O is no problem.
 
     If paging is used and I/O ports exist in the range 0000l000h-0000FFFFh, then either have the memory pages at those
     linear addresses marked "not present" (to avoid having those pages table entries cached in the TLB), or if "present,"

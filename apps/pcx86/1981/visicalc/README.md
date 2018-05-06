@@ -10,7 +10,7 @@ machines:
     state: /apps/pcx86/1981/visicalc/state.json
     autoMount:
       A:
-        name: PC-DOS 1.00
+        name: PC DOS 1.00
       B:
         name: VisiCalc (1981)
 ---

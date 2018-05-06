@@ -311,18 +311,18 @@ And then we have the assorted strings and tables:
 	&7DF4  00 00 00 00 00 00 00 00-00 00 00 00
 
 In terms of raw code (90 instructions), it's shorter than both the
-[PC-DOS 1.00 Boot Sector](/disks/pcx86/dos/ibm/1.00/#pc-dos-100-boot-sector) (99 instructions) and
-[PC-DOS 1.10 Boot Sector](/disks/pcx86/dos/ibm/1.10/#pc-dos-110-boot-sector) (116 instructions),
+[PC DOS 1.00 Boot Sector](/disks/pcx86/dos/ibm/1.00/#pc-dos-100-boot-sector) (99 instructions) and
+[PC DOS 1.10 Boot Sector](/disks/pcx86/dos/ibm/1.10/#pc-dos-110-boot-sector) (116 instructions),
 because it uses tables to describe both the different disk formats *and* the discrete read operations,
 relieving the code from dealing with head and track size calculations.
 
-It's arguably an improvement over the [PC-DOS 1.10 Boot Sector](/disks/pcx86/dos/ibm/1.10/#pc-dos-110-boot-sector),
+It's arguably an improvement over the [PC DOS 1.10 Boot Sector](/disks/pcx86/dos/ibm/1.10/#pc-dos-110-boot-sector),
 because it didn't need to be altered to support both 160Kb and 320Kb diskettes.  On the other hand, that flexibility
 also makes it slightly slower to boot, because it must read the first FAT sector to determine the diskette format.
 
 Finally, notice the letters `GAS` in the boot sector at offset 0x7D23.  Presumably, they're the initials of
 author, and somewhat less conspicuous and more modest than the `Robert O'Rear` signature in the
-[PC-DOS 1.00 Boot Sector](/disks/pcx86/dos/ibm/1.00/#pc-dos-100-boot-sector).
+[PC DOS 1.00 Boot Sector](/disks/pcx86/dos/ibm/1.00/#pc-dos-100-boot-sector).
 
 ### Mounting the COMPAQ MS-DOS 1.11 Diskette
 

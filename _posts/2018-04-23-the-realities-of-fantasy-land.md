@@ -166,16 +166,16 @@ the author of the software, or Eric, the owner of this particular diskette) had 
     fland
     assign
 
-Since the diskette is bootable (it contains PC-DOS 2.00), it seemed the intent was to insert it in drive A, reboot,
+Since the diskette is bootable (it contains PC DOS 2.00), it seemed the intent was to insert it in drive A, reboot,
 and then run `FLAND`, which would invoke the batch file, and the `ASSIGN` command would automatically redirect any requests
 for drive B to drive A.
 
-But, at least in PC-DOS 2.00, the batch file doesn't work, even if you explicitly type `FLAND.BAT`, because PC-DOS strips
+But, at least in PC DOS 2.00, the batch file doesn't work, even if you explicitly type `FLAND.BAT`, because PC DOS strips
 any extension from the file name, and then looks first for a matching `COM` file, then a matching `EXE` file, and finally
 a matching `BAT` file.  In this case, DOS *always* runs `FLAND.EXE`. 
 
 Since the application seemed designed to run from drive B, that's where I decided to auto-mount it in my
-[IBM EGA Fantasy Land Demo](/disks/pcx86/apps/ibm/fland/) test machine, along with a standard PC-DOS 2.00 boot disk
+[IBM EGA Fantasy Land Demo](/disks/pcx86/apps/ibm/fland/) test machine, along with a standard PC DOS 2.00 boot disk
 in drive A.
 
 But that didn't completely solve all the problems.  Just before FLAND.EXE begins its automated demo, it reads

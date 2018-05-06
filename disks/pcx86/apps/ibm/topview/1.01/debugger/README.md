@@ -8,7 +8,7 @@ machines:
     config: /devices/pcx86/machine/5160/cga/640kb/mouse/debugger/machine.xml
     autoMount:
       A:
-        name: PC-DOS 2.00 (Disk 1)
+        name: PC DOS 2.00 (Disk 1)
       B:
         name: IBM TopView 1.01 (Program)
     autoScript: startMouse
