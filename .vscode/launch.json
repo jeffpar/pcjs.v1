@@ -181,70 +181,70 @@
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PC-DOS 0.90",
+		  "name": "PC DOS 0.90",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/0.90/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PC-DOS 1.10 (NODEBUG)",
+		  "name": "PC DOS 1.10 (NODEBUG)",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.10/?gort=nodebug",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PC-DOS 1.00",
+		  "name": "PC DOS 1.00",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.00/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PC-DOS 1.10",
+		  "name": "PC DOS 1.10",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.10/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PC-DOS 2.00",
+		  "name": "PC DOS 2.00",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/2.00/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PC-DOS 2.10",
+		  "name": "PC DOS 2.10",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/2.10/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PC-DOS 3.00",
+		  "name": "PC DOS 3.00",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/3.00/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PC-DOS 3.10",
+		  "name": "PC DOS 3.10",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/3.10/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PC-DOS 3.20",
+		  "name": "PC DOS 3.20",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/3.20/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
-		  "name": "PC-DOS 3.30",
+		  "name": "PC DOS 3.30",
 		  "type": "chrome",
 		  "request": "launch",
 		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/3.30/",
@@ -303,7 +303,7 @@
 		  "name": "IBM PC AT: EGA, 2048Kb, COM2, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/?autoMount={A:{name:%22PC-DOS%205.00%20(Disk%201)%22}}",
+		  "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/?autoMount={A:{name:%22PC DOS%205.00%20(Disk%201)%22}}",
 		  "webRoot": "${workspaceFolder}"
 	  }
 	]
