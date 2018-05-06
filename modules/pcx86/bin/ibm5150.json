@@ -68,11 +68,11 @@
     "name": "",
     "autoMount": {
       "A": {
-        "name": "PC-DOS 2.00 (Disk 1)",
+        "name": "PC DOS 2.00 (Disk 1)",
         "path": "/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json"
       },
       "B": {
-        "name": "PC-DOS 2.00 (Disk 2)",
+        "name": "PC DOS 2.00 (Disk 2)",
         "path": "/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json"
       }
     }
