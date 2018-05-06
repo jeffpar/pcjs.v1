@@ -17,7 +17,7 @@ machines:
 Microsoft Windows 3.00
 ----------------------
 
-The PCjs machine below starts Microsoft Windows 3.00, using an IBM PC AT running PC-DOS 3.20.
+The PCjs machine below starts Microsoft Windows 3.00, using an IBM PC AT running PC DOS 3.20.
 
 Directory listings of the five 1.2Mb distribution diskettes are provided below.
 

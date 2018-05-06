@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Digital Research DR-DOS 3.40
+title: Digital Research DR DOS 3.40
 permalink: /disks/pcx86/dos/dresearch/3.40/
 machines:
   - id: ibm5170-drdos340
@@ -8,17 +8,17 @@ machines:
     config: /devices/pcx86/machine/5170/ega/640kb/rev1/machine.xml
     autoMount:
       A:
-        name: DR-DOS 3.40 (Disk 1)
+        name: DR DOS 3.40 (Disk 1)
       B:
-        name: DR-DOS 3.40 (Disk 2)
+        name: DR DOS 3.40 (Disk 2)
 ---
 
-Digital Research DR-DOS 3.40
+Digital Research DR DOS 3.40
 ----------------------------
 
 {% include machine.html id="ibm5170-drdos340" %}
 
-### Directory of DR-DOS 3.40 (Disk 1)
+### Directory of DR DOS 3.40 (Disk 1)
 
 	 Volume in drive A has no label
 
@@ -57,7 +57,7 @@ Digital Research DR-DOS 3.40
 	       27 file(s)     338443 bytes
 	                        9216 bytes free
 
-### Directory of DR-DOS 3.40 (Disk 2)
+### Directory of DR DOS 3.40 (Disk 2)
 
 	 Volume in drive A has no label
 

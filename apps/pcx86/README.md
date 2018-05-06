@@ -12,7 +12,7 @@ A list of all the software available to PCx86 machines can be found in the [IBM 
 
 * [DONKEY.BAS](/apps/pcx86/1981/donkey/)
 * [Microsoft Adventure](/disks/pcx86/games/microsoft/adventure/)
-* [PC-DOS 1.00 BASIC Samples](/apps/pcx86/1981/basic/)
+* [PC DOS 1.00 BASIC Samples](/apps/pcx86/1981/basic/)
 * [VisiCalc](/apps/pcx86/1981/visicalc/)
 
 ### [1982](/apps/pcx86/1982/)

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 1.10
+title: PC DOS 1.10
 permalink: /disks/pcx86/dos/ibm/1.10/
 machines:
   - id: ibm5150-pcdos110
@@ -9,18 +9,18 @@ machines:
     resume: 1
     autoMount:
       A:
-        name: PC-DOS 1.10
+        name: PC DOS 1.10
       B:
         name: None
     autoType: $date\r$time\r
 ---
 
-PC-DOS 1.10
+PC DOS 1.10
 -----------
 
-PC-DOS 1.10 was released in May 1982 on one single-sided (160Kb) diskette.  See IBM's
-"[Read This First](#read-this-first)" from the [PC-DOS 1.10 Manual](/pubs/pc/software/dos/PCDOS110/)
-for important information about changes from [PC-DOS 1.00](../1.00/).
+PC DOS 1.10 was released in May 1982 on one single-sided (160Kb) diskette.  See IBM's
+"[Read This First](#read-this-first)" from the [PC DOS 1.10 Manual](/pubs/pc/software/dos/PCDOS110/)
+for important information about changes from [PC DOS 1.00](../1.00/).
 
 A [Feature Summary](#feature-summary), along with the disk's [Directory Listing](#directory-of-pc-dos-110-diskette)
 and [Boot Sector](#pc-dos-110-boot-sector), are provided below.
@@ -53,7 +53,7 @@ New functions:
 
 ### Read This First
 
-From the PC-DOS 1.10 Manual:
+From the PC DOS 1.10 Manual:
 
 > Welcome to DOS Version 1.10 for your IBM Personal
 Computer. Whether you are using DOS for the first time
@@ -219,7 +219,7 @@ enhanced functions. If you are not a former user, then
 read the book anyway; it will help you get started more
 quickly.
 
-### Directory of PC-DOS 1.10 Diskette
+### Directory of PC DOS 1.10 Diskette
 
 	IBMBIO    COM        1920  05-07-82
 	IBMDOS    COM        6400  05-07-82
@@ -265,9 +265,9 @@ bytes.
 CHKDSK considers the size of IBMBIO.COM to be 2048 bytes (1920 rounded up to the nearest 512 multiple), and the
 size of IBMDOS.COM is 6656, so the total number of bytes consumed by those two files is 8704.
 
-### PC-DOS 1.10 Boot Sector
+### PC DOS 1.10 Boot Sector
 
-The boot sector of the PC-DOS 1.10 disk image contains the following bytes:
+The boot sector of the PC DOS 1.10 disk image contains the following bytes:
 
 	00000000  eb 27 90 08 00 14 00 00  00 00 00 00 00 00 00 00  |.'..............|
 	00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
@@ -302,8 +302,8 @@ The boot sector of the PC-DOS 1.10 disk image contains the following bytes:
 	000001e0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	000001f0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 
-This is also the boot sector as it appears on any other single-sided 160Kb diskette formatted by PC-DOS 1.10.
-However, PC-DOS 1.10 added supported for a second format: double-sided 320Kb diskettes.  And on those larger diskettes,
+This is also the boot sector as it appears on any other single-sided 160Kb diskette formatted by PC DOS 1.10.
+However, PC DOS 1.10 added supported for a second format: double-sided 320Kb diskettes.  And on those larger diskettes,
 the boot sector is slightly different:
 
 	1c1
@@ -314,13 +314,13 @@ the boot sector is slightly different:
 The bytes at offset 0x0003 (0x7C03 when the boot sector is loaded into memory) contain the initial sector
 and head numbers of IBMBIO.COM.  On a 160Kb diskette, the first data sector is at sector #8 and head #0, but since
 a 320Kb diskette is allocated a larger root directory (7 sectors instead of 4), that pushes the first data sector
-out to sector #3 and head #1.  The total number of sectors to read (0x14) remains the same as PC-DOS 1.00, but that
+out to sector #3 and head #1.  The total number of sectors to read (0x14) remains the same as PC DOS 1.00, but that
 value is now stored at offset 0x0005 (0x7C05) instead of 0x0002 (0x7C02).
 
 Interestingly, the [COMPAQ MS-DOS 1.11 Boot Sector](/disks/pcx86/dos/compaq/1.11/#compaq-ms-dos-111-boot-sector)
-is completely different from all PC-DOS 1.x boot sectors.  The COMPAQ boot sector supports both 160Kb and 320Kb
+is completely different from all PC DOS 1.x boot sectors.  The COMPAQ boot sector supports both 160Kb and 320Kb
 formats with less code and without requiring "patches", although that flexibility did require reading the first
-FAT sector, which PC-DOS 1.x boot sectors did not do.
+FAT sector, which PC DOS 1.x boot sectors did not do.
 
 Using the PCjs Debugger, we can examine the boot sector in its native environment:
 
@@ -438,7 +438,7 @@ operation of the boot sector or any of the code below.
 	&0000:7CB1 E80200          CALL     7CB6
 	&0000:7CB4 EBFE            JMP      7CB4
 	
-The next chunk of code is similar to `disk_error` in the [PC-DOS 1.00 Boot Sector](/disks/pcx86/dos/ibm/1.00/#pc-dos-100-boot-sector):
+The next chunk of code is similar to `disk_error` in the [PC DOS 1.00 Boot Sector](/disks/pcx86/dos/ibm/1.00/#pc-dos-100-boot-sector):
 
 	&0000:7CB6 32FF            XOR      BH,BH
 	&0000:7CB8 2E              CS:     
@@ -454,7 +454,7 @@ The next chunk of code is similar to `disk_error` in the [PC-DOS 1.00 Boot Secto
 	&0000:7CC9 C3              RET     
 	&0000:7CCA E933FF          JMP      7C00
 
-The next chunk of code is identical to `check_sys_files` in the [PC-DOS 1.00 Boot Sector](/disks/pcx86/dos/ibm/1.00/#pc-dos-100-boot-sector):
+The next chunk of code is identical to `check_sys_files` in the [PC DOS 1.00 Boot Sector](/disks/pcx86/dos/ibm/1.00/#pc-dos-100-boot-sector):
 
 	&0000:7CCD BB0000          MOV      BX,0000
 	&0000:7CD0 B90400          MOV      CX,0004
@@ -496,4 +496,4 @@ The next chunk of code is identical to `check_sys_files` in the [PC-DOS 1.00 Boo
 	&0000:7D19 F9              STC     
 	&0000:7D1A C3              RET     
 
-See [PC-DOS 1.10 Documentation](/pubs/pc/software/dos/PCDOS110/) for more information.
+See [PC DOS 1.10 Documentation](/pubs/pc/software/dos/PCDOS110/) for more information.

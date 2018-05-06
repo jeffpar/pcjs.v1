@@ -11,7 +11,7 @@ been limited to "Does the latest version still work in all current web browsers?
 
 However, at some point during the last couple months, Chrome's performance suddenly jumped through the roof.  On my
 2.8GHz Intel Core i7 MacBook Pro, Chrome v34.0.1847.131 easily punches through the 120Mhz barrier on a PCjs machine
-running PC-DOS 2.00.
+running PC DOS 2.00.
 
 That's roughly a 3x-4x increase over previous versions of Chrome.  Safari used to be the performance champ, capable
 of running a PCjs machine at a top speed of around 70-80MHz, while Chrome was less than half that, and Firefox was

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 4.01
+title: PC DOS 4.01
 permalink: /disks/pcx86/dos/ibm/4.01/
 machines:
   - id: ibm5170-pcdos401
@@ -8,21 +8,21 @@ machines:
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/machine.xml
     autoMount:
       A:
-        name: PC-DOS 4.01 (Disk 1)
+        name: PC DOS 4.01 (Disk 1)
       B:
         name: None
 ---
 
-PC-DOS 4.01
+PC DOS 4.01
 -----------
 
-PC-DOS 4.01 was released in August 1988. 
+PC DOS 4.01 was released in August 1988. 
 
 [Directory Listings](#directory-of-pc-dos-401-disk-1) of the two 720Kb distribution diskettes are provided below.
 
 {% include machine.html id="ibm5170-pcdos401" %}
 
-### Directory of PC-DOS 4.01 (Disk 1)
+### Directory of PC DOS 4.01 (Disk 1)
 
 	 Volume in drive A has no label
 	 Volume Serial Number is 3527-0FCC
@@ -71,7 +71,7 @@ PC-DOS 4.01 was released in August 1988.
 	       36 file(s)     700517 bytes
 	                       17408 bytes free
 
-### Directory of PC-DOS 4.01 (Disk 2)
+### Directory of PC DOS 4.01 (Disk 2)
 
 	 Volume in drive A has no label
 	 Volume Serial Number is 2533-07FF

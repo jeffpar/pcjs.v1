@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Digital Research DR-DOS 5.00
+title: Digital Research DR DOS 5.00
 permalink: /disks/pcx86/dos/dresearch/5.00/
 machines:
   - id: ibm5170-drdos500
@@ -8,17 +8,17 @@ machines:
     config: /devices/pcx86/machine/5170/ega/1152kb/rev1/debugger/machine.xml
     autoMount:
       A:
-        name: DR-DOS 5.00 (Disk 1)
+        name: DR DOS 5.00 (Disk 1)
       B:
-        name: DR-DOS 5.00 (Disk 2)
+        name: DR DOS 5.00 (Disk 2)
 ---
 
-Digital Research DR-DOS 5.00
+Digital Research DR DOS 5.00
 ----------------------------
 
 {% include machine.html id="ibm5170-drdos500" %}
 
-### Directory of DR-DOS 5.00 (Disk 1)
+### Directory of DR DOS 5.00 (Disk 1)
 
 	 Volume in drive A has no label
 
@@ -55,7 +55,7 @@ Digital Research DR-DOS 5.00
 	       25 file(s)     322627 bytes
 	                       26624 bytes free
 
-### Directory of DR-DOS 5.00 (Disk 2)
+### Directory of DR DOS 5.00 (Disk 2)
 
 	 Volume in drive A has no label
 
@@ -78,7 +78,7 @@ Digital Research DR-DOS 5.00
 	       11 file(s)     274414 bytes
 	                       82944 bytes free
 
-### Directory of DR-DOS 5.00 (Disk 3)
+### Directory of DR DOS 5.00 (Disk 3)
 
 	 Volume in drive A has no label
 
@@ -112,7 +112,7 @@ Digital Research DR-DOS 5.00
 	       22 file(s)     339439 bytes
 	                       13312 bytes free
 
-### Directory of DR-DOS 5.00 (Disk 4)
+### Directory of DR DOS 5.00 (Disk 4)
 
 	 Volume in drive A has no label
 

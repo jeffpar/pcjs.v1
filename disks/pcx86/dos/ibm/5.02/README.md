@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 5.02
+title: PC DOS 5.02
 permalink: /disks/pcx86/dos/ibm/5.02/
 machines:
   - id: ibm5170-pcdos502
@@ -9,15 +9,15 @@ machines:
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/machine.xml
     autoMount:
       A:
-        name: PC-DOS 5.02 (Disk 1)
+        name: PC DOS 5.02 (Disk 1)
       B:
         name: None
 ---
 
-PC-DOS 5.02
+PC DOS 5.02
 -----------
 
-PC-DOS 5.02 was released in September 1992.
+PC DOS 5.02 was released in September 1992.
 
 A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-502-disk-1) of the three
 720Kb distribution diskettes, are provided below.
@@ -50,7 +50,7 @@ New functions:
 
 - INT 2Fh multiplex functions 54h (POWER) and 56h (INTERLNK)
 
-### Directory of PC-DOS 5.02 (Disk 1)
+### Directory of PC DOS 5.02 (Disk 1)
 
 	 Volume in drive A is DISK      1
 	 Volume Serial Number is 2608-2110
@@ -97,7 +97,7 @@ New functions:
 	       34 file(s)     625379 bytes
 	                       87040 bytes free
 
-### Directory of PC-DOS 5.02 (Disk 2)
+### Directory of PC DOS 5.02 (Disk 2)
 
 	 Volume in drive A is DISK      2
 	 Volume Serial Number is 4838-300E
@@ -141,7 +141,7 @@ New functions:
 	       31 file(s)     693066 bytes
 	                       21504 bytes free
 
-### Directory of PC-DOS 5.02 (Disk 3)
+### Directory of PC DOS 5.02 (Disk 3)
 
 	 Volume in drive A is DISK      3
 	 Volume Serial Number is 2909-310E

@@ -39,7 +39,7 @@ Selected demos from our [IBM PC Application Archive](/apps/pcx86/):
 Selected demos from our [IBM PC Disk Library](/disks/pcx86/):
 
 * [CP/M-86 v1.1B](/disks/pcx86/cpm/1.1b/)
-* [IBM PC-DOS 1.00](/disks/pcx86/dos/ibm/1.00/)
+* [IBM PC DOS 1.00](/disks/pcx86/dos/ibm/1.00/)
 * [IBM PC Diagnostics](/disks/pcx86/diags/ibm/2.20/)
 * [Infocom Zork I](/disks/pcx86/games/infocom/zork1/)
 * [Microsoft Multitasking MS-DOS](/disks/pcx86/dos/microsoft/4.0M/)

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC-DOS 6.10
+title: PC DOS 6.10
 permalink: /disks/pcx86/dos/ibm/6.10/
 machines:
   - id: ibm5170-pcdos610
@@ -8,21 +8,21 @@ machines:
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/machine.xml
     autoMount:
       A:
-        name: PC-DOS 6.10 (Disk 1)
+        name: PC DOS 6.10 (Disk 1)
       B:
         name: None
 ---
 
-PC-DOS 6.10
+PC DOS 6.10
 -----------
 
-PC-DOS 6.10 was released in June 1993.
+PC DOS 6.10 was released in June 1993.
 
 Directory listings of the four 1.44Mb distribution diskettes are provided below.
 
 {% include machine.html id="ibm5170-pcdos610" %}
 
-### Directory of PC-DOS 6.10 (Disk 1)
+### Directory of PC DOS 6.10 (Disk 1)
 
 	 Volume in drive A is DISK      1
 	 Volume Serial Number is 4428-070E
@@ -125,7 +125,7 @@ Directory listings of the four 1.44Mb distribution diskettes are provided below.
 	       94 file(s)    1414619 bytes
 	                       19968 bytes free
 
-### Directory of PC-DOS 6.10 (Disk 2)
+### Directory of PC DOS 6.10 (Disk 2)
 
 	 Volume in drive A is DISK      2
 	 Volume Serial Number is 5A0A-3A11
@@ -231,7 +231,7 @@ Directory listings of the four 1.44Mb distribution diskettes are provided below.
 	       97 file(s)    1375398 bytes
 	                       57344 bytes free
 
-### Directory of PC-DOS 6.10 (Disk 3)
+### Directory of PC DOS 6.10 (Disk 3)
 
 	 Volume in drive A is DISK      3
 	 Volume Serial Number is 0333-3416
@@ -296,7 +296,7 @@ Directory listings of the four 1.44Mb distribution diskettes are provided below.
 	       56 file(s)    1407901 bytes
 	                       36864 bytes free
 
-### Directory of PC-DOS 6.10 (Disk 4)
+### Directory of PC DOS 6.10 (Disk 4)
 
 	 Volume in drive A is DISK      4
 	 Volume Serial Number is 3F18-3516

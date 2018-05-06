@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Digital Research DR-DOS 3.34
+title: Digital Research DR DOS 3.34
 permalink: /disks/pcx86/dos/dresearch/3.34/
 machines:
   - id: ibm5170-drdos334
@@ -8,17 +8,17 @@ machines:
     config: /devices/pcx86/machine/5170/ega/640kb/rev1/machine.xml
     autoMount:
       A:
-        name: DR-DOS 3.34
+        name: DR DOS 3.34
       B:
         name: None
 ---
 
-Digital Research DR-DOS 3.34
+Digital Research DR DOS 3.34
 ----------------------------
 
 {% include machine.html id="ibm5170-drdos334" %}
 
-### Directory of DR-DOS 3.34
+### Directory of DR DOS 3.34
 
 	 Volume in drive A has no label
 

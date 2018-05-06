@@ -36,7 +36,7 @@ It's also recommended that you make your **.img** files *read-only*, so that if 
 computer, neither you nor the operating system will inadvertently modify the contents of the disk.  On OS X, this is
 easily done with the **chmod** utility.
 
-For example, if you saved the disk named "PC-DOS 2.00 (Disk 1)", it should have been downloaded as "PCDOS200-DISK1.img"
+For example, if you saved the disk named "PC DOS 2.00 (Disk 1)", it should have been downloaded as "PCDOS200-DISK1.img"
 in your Downloads folder, so the OS X Terminal command `chmod -w PCDOS200-DISK1.img` will make it read-only, and
 `chmod +w PCDOS200-DISK1.img` will make it writable again.
 

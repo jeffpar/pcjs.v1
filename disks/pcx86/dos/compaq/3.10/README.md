@@ -132,7 +132,7 @@ Directory listings of the two 360Kb distribution diskettes are provided below.
 	       26 file(s)     311039 bytes
 	                       34816 bytes free
 
-### Directory of COMPAQ PC-DOS 3.20 Support Disk
+### Directory of COMPAQ PC DOS 3.20 Support Disk
 
 	 Volume in drive A has no label
 

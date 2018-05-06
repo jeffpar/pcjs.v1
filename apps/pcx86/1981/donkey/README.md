@@ -16,7 +16,7 @@ machines:
     state: /apps/pcx86/1981/donkey/state.json
     autoMount:
       A:
-        name: PC-DOS 1.00
+        name: PC DOS 1.00
       B:
         name: None
 ---
@@ -28,13 +28,13 @@ IBM PC Running DONKEY.BAS
 
 The above simulation is configured for a clock speed of 4.77Mhz, with 64Kb of RAM and a CGA display,
 using the original IBM PC Model 5150 ROM BIOS and CGA font ROM.  This configuration includes a predefined
-state, with PC-DOS 1.0 already booted and DONKEY.BAS ready to run.  A [Control Panel](debugger/) configuration
+state, with PC DOS 1.0 already booted and DONKEY.BAS ready to run.  A [Control Panel](debugger/) configuration
 is also available, featuring the built-in PCx86 Debugger.
 
 This particular machine has been configured to automatically save all your changes (subject to the limits
 of your browser's local storage), so you can close the browser in the middle of a game of DONKEY, and
 the next time you load this page, your progress (and the donkey) should be perfectly restored.
 
-Browse all the [BASIC Samples](../basic/) provided with [PC-DOS 1.00](/disks/pcx86/dos/ibm/1.00/), including
+Browse all the [BASIC Samples](../basic/) provided with [PC DOS 1.00](/disks/pcx86/dos/ibm/1.00/), including
 [DONKEY.BAS](../basic/#donkeybas).  For more classic PC software, see the PCjs collection of
 [IBM PC Application Demos](/apps/pcx86/).

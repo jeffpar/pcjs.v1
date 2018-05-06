@@ -33,7 +33,7 @@ Attributes
 	Each drive-letter property should contain, in turn, another object definition with 'name' and 'path' properties.
 	For example:
 	
-		'{A: {name: "PC-DOS 1.0", path: "pcdos-1.00.json"}}'
+		'{A: {name: "PC DOS 1.0", path: "pcdos-1.00.json"}}'
 		
 Also supports the attributes of *[Component](../component/)*.
 
@@ -61,11 +61,11 @@ Example
 -------
 
 ```xml
-<fdc id="fdcNEC" autoMount="'{A: {name: "PC-DOS 1.0", path: "pcdos-1.00.json"}}'">
+<fdc id="fdcNEC" autoMount="'{A: {name: "PC DOS 1.0", path: "pcdos-1.00.json"}}'">
     <control type="container">
         <control type="list" class="input" binding="listDrives"/>
         <control type="list" class="input" binding="listDisks">
-            <disk path="pcdos-1.00.json">PC-DOS 1.0</disk>
+            <disk path="pcdos-1.00.json">PC DOS 1.0</disk>
         </control>
         <control type="button" class="input" binding="loadDisk">Load</control>
     </control>

@@ -7,7 +7,7 @@ machines:
     type: pcx86
     autoMount:
       A:
-        name: PC-DOS 3.00 (Disk 1)
+        name: PC DOS 3.00 (Disk 1)
 ---
 
 IBM PC (Model 5150, 64Kb) with Dual Displays

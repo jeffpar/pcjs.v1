@@ -57,11 +57,11 @@ users mutter the most common of the non-obscene epithets used to describe MicroP
 
 ### Lots of Calls
 
-PC-DOS 1.1 came out a few weeks later. WordStar 3.02 did not run from PC-DOS 1.1, MicroPro blamed this on Microsoft for changing some of
+PC DOS 1.1 came out a few weeks later. WordStar 3.02 did not run from PC DOS 1.1, MicroPro blamed this on Microsoft for changing some of
 its operating system's specs without advance warning.  Whoever or whatever was to blame, the fact remained that those with double-sided
-drives had to limp along half-bakedly in PC-DOS 1.0 for months while MicroPro delved deep into the mysteries of the new disk operating system.
+drives had to limp along half-bakedly in PC DOS 1.0 for months while MicroPro delved deep into the mysteries of the new disk operating system.
 
-MicroPro undoubtedly referred a lot of callers to their dealers during this period. But when it released its PC-DOS 1.1-compatible WordStar
+MicroPro undoubtedly referred a lot of callers to their dealers during this period. But when it released its PC DOS 1.1-compatible WordStar
 3.20, did MicroPro use its address lists to send us news of the update as quickly as it got us our keytops?
 
 Nope. MicroPro also left that job to its dealers, few of whom had bothered to keep databases of information on just who had bought just
@@ -75,7 +75,7 @@ to their harried dealers, and waited an estimated "4 to 6 weeks" for version 3.2
 Version 3.20 retained some old bugs and offered some new ones of its own. Using WordStar's run command (R) while its menus were suppressed
 often created a dump of memory onto the screen--a graphics fireworks display that occasionally hung the system. The hyphenation feature
 sometimes left a useless message on the screen long after it had served its purpose. And if you accidentally inserted an illegal character
-(such as a I) in a file-name, you got a "Disk Full" error that could do nasty things to your current file and bomb you back to PC-DOS. Love
+(such as a I) in a file-name, you got a "Disk Full" error that could do nasty things to your current file and bomb you back to PC DOS. Love
 began to go sour.
 
 The 3.20's installation program offered a new menu of printers, but only daisy-wheelers were added. They had to run serially, too; the IBM
@@ -103,10 +103,10 @@ new disks.
 
 ### 3.24--Standard of the Month
 
-Version 3.24 will run from PC-DOS 1.1 or 2.0. It catches illegal characters. MicroPro supposedly has rectified the problem in SpellStar 1.24
+Version 3.24 will run from PC DOS 1.1 or 2.0. It catches illegal characters. MicroPro supposedly has rectified the problem in SpellStar 1.24
 (untested by me). The R (run) screen dump bug has also been fixed, though a message (visible only when the menus are not suppressed) warns that
 some programs may not let you back into WordStar when you're through with them--DISKCOPY being but one of many. The message implies that this
-problem won't happen with PC-DOS 2.0, but MicroPro now admits that another last minute DOS-surprise from Microsoft has rendered that implication
+problem won't happen with PC DOS 2.0, but MicroPro now admits that another last minute DOS-surprise from Microsoft has rendered that implication
 untrue.
 
 The new version's documentation includes a tantalizing sheaf of material about the non-IBM MS-DOS and CP/M-86 versions. Users with those
@@ -119,7 +119,7 @@ adds precisely one printer to the lin1ited menu: the NEC Spinwriter 3550. Many m
 installed before they'll work properly with WordStar. NEC will make the change for free, but there's no mention of this
 arrangement in the WordStar documentation. In the immortal words of MicroPro: "Ask your dealer."
 
-Finally, there's a problem with the 1.24 version of SpellStar when it's run from PC-DOS 2.0. MicroPro has provided a fix, though.
+Finally, there's a problem with the 1.24 version of SpellStar when it's run from PC DOS 2.0. MicroPro has provided a fix, though.
 For details, see Figure 1.
 
     To run properly with WordStar 3.2 or 3.24
@@ -189,7 +189,7 @@ What's new about 3.3? Quite a bit and not much. Screen handling has been greatly
 function keys are now programmable by the user. A new installation program lets you change quite a few of the WordStar defaults
 and handle a wide range of printers. Finally, and most important for new users, the manuals have been improved by orders of magnitude.
 
-The new version will run on a 64K system from PC-DOS 1.1; with PC-DOS 2.0, which takes up more space, it will require more.
+The new version will run on a 64K system from PC DOS 1.1; with PC DOS 2.0, which takes up more space, it will require more.
 Still more memory--the number appears to be 64K on top of whatever the operating system requires--is needed to take full advantage
 of all the new features, such as simultaneous printing and editing. The CP/M-86 version of 3.3, which I did not test, requires 80K.
 
@@ -389,7 +389,7 @@ control codes. This task must be done in hexadecimal format. Unless you are reas
 The installation manual, unfortunately, only adds to the confusion. It offers page upon page of incomprehensible material on protocols and
 printer drivers without ever mentioning that none of that information is the least bit relevant to installing printers that run from a parallel
 port. Although its documentation doesn't mention this, MicroPro recommended that a printer running from the IBM be configured with no protocol
-and treated as an "operating system primary list device." If this is done for a serial printer, two PC-DOS commands will be required:
+and treated as an "operating system primary list device." If this is done for a serial printer, two PC DOS commands will be required:
 
     MODE COM1:9600,N,8,1,P
     MODE LPT1:=COM1
@@ -505,7 +505,7 @@ Was that the word "arrogant" you just screamed? Or was it something worse? Remem
 about two programs that are substantially unchanged. The only reason you need them is that their old versions won't run with the new version of
 WordStar. Aside from the improved manual, WordStar itself has only one major modification.
 
-Besides, although it will run from PC-DOS 2.0, the new WordStar isn't really designed for it. Running MicroPro's programs with the PC-DOS R command
+Besides, although it will run from PC DOS 2.0, the new WordStar isn't really designed for it. Running MicroPro's programs with the PC DOS R command
 can still hang up the system. When run from hard disk, WordStar won't find its overlays or files in subdirectories, forcing you to clutter up the
 disk with multiple copies of the overlays. Clearly MicroPro will have to address this problem sometime: we can undoubtedly look for yet another
 version of WordStar down the road.
@@ -520,7 +520,7 @@ copy-protected. If you get your update from a pirate, though, MicroPro needn't d
 manufacturer planned it that way all along.
 
 MicroPro is trying to turn its software family into an integrated environment. A forthcoming product, called StarBurst, will serve as a "shell" of
-menus that will let you run various "Star" family programs, and possibly others, without ever having to look at a PC-DOS prompt. More enhancements
+menus that will let you run various "Star" family programs, and possibly others, without ever having to look at a PC DOS prompt. More enhancements
 for WordStar will be available, too. A program called StarIndex should be available for the IBM PC in July. Only the manual was available to me at
 press time, but it reveals that Starlndex will generate indexes, tables of contents, and lists of figures and tables by picking out dot commands
 embedded in the proper pages in the text. It definitely will not do footnotes. Cost: $195, but it's included free if you buy WordStar, MailMerge,
