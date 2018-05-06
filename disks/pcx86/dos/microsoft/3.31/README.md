@@ -14,9 +14,15 @@ machines:
 Microsoft MS-DOS 3.31
 ---------------------
 
-It's unclear whether this June 1989 release was actually sold by Microsoft, because the origin of this
-[1.44M Disk](#directory-of-ms-dos-331-144m-disk) is unknown.  And even though the majority of the files
-are dated June 1989, most of the copyright strings are older; e.g.:
+It's unclear where this [June 1989](#directory-of-ms-dos-331-144m-disk) release of MS-DOS 3.31 fits in the
+MS-DOS timeline, because it comes *after* [MS-DOS 4.00](/disks/pcx86/dos/microsoft/4.00/) (October 1988) and
+[MS-DOS 4.01](/disks/pcx86/dos/microsoft/4.01/) (April 1989).
+Note that [COMPAQ MS-DOS 3.31](/disks/pcx86/dos/compaq/3.31/) existed as early as October 1987,
+based on the contents of the [COMPAQ Diagnostics 5.08](/disks/pcx86/diags/compaq/5.08/) diskette, raising the question
+of whether there were *earlier* releases of Microsoft MS-DOS 3.31 as well.
+
+Even though the majority of the files are dated June 1989, most of the copyright strings are unchanged from
+[MS-DOS 3.30](/disks/pcx86/dos/microsoft/3.30/):
 
     Microsoft(R) MS-DOS(R)  Version 3.31                                            
                  (C)Copyright Microsoft Corp 1981-1987                              
@@ -28,16 +34,7 @@ Many of the utilities, such as `TREE.COM`, contain strings suggesting they are u
     Version 3.30
 
 and indeed, with the exception of a one-byte difference in the utility's DOS version check, the 3.30 and 3.31
-binaries *are* identical.
-
-Note that [COMPAQ MS-DOS 3.31](/disks/pcx86/dos/compaq/3.31/) existed as early as
-October 1987, based on contents of the [COMPAQ Diagnostics 5.08](/disks/pcx86/diags/compaq/5.08/) diskette.
-The oldest known complete release of COMPAQ MS-DOS 3.31 is from October 1988, but that still predates this
-release by 8 months.
-
-Also, [MS-DOS 4.00](/disks/pcx86/dos/microsoft/4.00/) files are dated October 1988, and
-[MS-DOS 4.01](/disks/pcx86/dos/microsoft/4.01/) files are dated April 1989.  Perhaps customer dissatisfaction
-with the 4.x releases prompted Microsoft to produce this updated 3.31 release.
+`TREE.COM` binaries *are* identical.
 
 {% include machine.html id="ibm5170-msdos331" %}
 

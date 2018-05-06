@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC DOS 5.02
+title: IBM PC DOS 5.02
 permalink: /disks/pcx86/dos/ibm/5.02/
 machines:
   - id: ibm5170-pcdos502
@@ -14,8 +14,8 @@ machines:
         name: None
 ---
 
-PC DOS 5.02
------------
+IBM PC DOS 5.02
+---------------
 
 PC DOS 5.02 was released in September 1992.
 

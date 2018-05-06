@@ -20,6 +20,8 @@ The MS-DOS 3.20 disks in the PCjs collection are the only known non-OEM copies o
 available online.  All other known MS-DOS 3.20 disk images are OEM releases (eg, HP, Zenith, Data General,
 Seiko Epson, etc.) and can be found on sites like [WinWorld](https://winworldpc.com/product/ms-dos/320).
 
+See the [PC DOS 3.20 Feature Summary](/disks/pcx86/dos/ibm/3.20/#feature-summary) for more details.
+
 [Directory Listings](#directory-listings) of the four 360Kb distribution diskettes are provided below.
 
 {% include machine.html id="ibm5170-msdos320" %}

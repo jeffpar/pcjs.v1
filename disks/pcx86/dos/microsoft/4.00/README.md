@@ -14,8 +14,11 @@ machines:
 Microsoft MS-DOS 4.00
 ---------------------
 
-MS-DOS 4.00 was released in October 1988.  [Directory Listings](#directory-of-ms-dos-400-disk-1) of the six
-360Kb distribution diskettes are provided below.
+MS-DOS 4.00 was released in October 1988.
+
+See the [PC DOS 4.00 Feature Summary](/disks/pcx86/dos/ibm/4.00/#feature-summary) for more details.
+
+[Directory Listings](#directory-of-ms-dos-400-disk-1) of the six 360Kb distribution diskettes are provided below.
 
 {% include machine.html id="ibm5170-msdos400" %}
 
@@ -155,35 +158,3 @@ MS-DOS 4.00 was released in October 1988.  [Directory Listings](#directory-of-ms
 	DOSUTIL  MEU      6660 10-06-88  12:00a
 	COMMAND  COM     37556 10-06-88  12:00a
 	       11 File(s)      36864 bytes free
-
----
-
-One important new feature of MS-DOS 4.00 was the ability to update the system files (IO.SYS and MSDOS.SYS)
-of any boot disk, by moving the first two directory entries (and the contents of the first three data sectors)
-as needed to make room for the new IO.SYS and MSDOS.SYS files.
-
-The SYS command in older versions of MS-DOS would report "No room for system on destination disk" if the first
-two directory entries (or the first three data sectors) were unavailable.  However, after using the MS-DOS 4.00
-SYS command, it usually becomes possible to install older MS-DOS versions as well.
-
-Learn more about the history of the SYS command from [Microsoft Support](https://support.microsoft.com/en-us/kb/66530).
-
-Additional details about MS-DOS 4.00 from [PC DOS Retro](https://sites.google.com/site/pcdosretro/doshist):
-
-- distributed on 2 720KB floppy disks [also released on 6 360KB diskettes; the number of 720KB diskettes needs to be verified]
-- SHARE loaded for FCB operations on hard disks greater than 32MB
-- IFS driver support added
-- MEM command added to report memory usage
-- new internal command: TRUENAME
-- new external commands: FILESYS, IFSFUNC, MEM
-- new CONFIG.SYS commands: COMMENT, CPSW, IFS, INSTALL, MULTITRACK, REM, SWITCHES
-- new device drivers: SMARTDRV.SYS (MS-DOS), XMA2EMS.SYS, XMAEM.SYS
-- new support file: GRAPHICS.PRO
-- disk buffers could be allocated in expanded memory (BUFFERS /X)
-- DPB, SFT and CDS structures extended
-- new internal version table added
-- DOS swappable data area changed
-- program names added to MCBs
-- INT 21h functions 3305h, 5D0Bh, 5F05h-5F08h, 6507h, 6520h-6523h, 65A0h-65A3h, 69h-6Ch added
-- INT 21h functions 3303h-3304h, 5702h-5704h reserved but unused
-- INT 2Fh multiplex function 1Ah (ANSI.SYS) added

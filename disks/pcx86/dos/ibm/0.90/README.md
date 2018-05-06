@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC DOS 0.90
+title: IBM PC DOS 0.90
 permalink: /disks/pcx86/dos/ibm/0.90/
 machines:
   - id: ibm5150-pcdos090
@@ -13,8 +13,8 @@ machines:
         name: None
 ---
 
-PC DOS 0.90
------------
+IBM PC DOS 0.90
+---------------
 
 There was no PC DOS 0.90 product *per se*.  It has been dubbed version 0.90 simply because it predates
 [PC DOS 1.00](../1.00/) by several months.  More information about this preliminary version of PC DOS can

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC DOS 2.00
+title: IBM PC DOS 2.00
 permalink: /disks/pcx86/dos/ibm/2.00/
 machines:
   - id: ibm5160-pcdos200
@@ -15,8 +15,8 @@ machines:
     autoType: $date\r$time\r
 ---
 
-PC DOS 2.00
------------
+IBM PC DOS 2.00
+---------------
 
 PC DOS 2.00 was released in March 1983.
 

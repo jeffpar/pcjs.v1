@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC DOS 3.00
+title: IBM PC DOS 3.00
 permalink: /disks/pcx86/dos/ibm/3.00/
 machines:
   - id: ibm5170-pcdos300
@@ -15,8 +15,8 @@ machines:
     autoType: \r\r
 ---
 
-PC DOS 3.00
------------
+IBM PC DOS 3.00
+---------------
 
 PC DOS 3.00 was announced on August 14, 1984 and released in September 1984.
 

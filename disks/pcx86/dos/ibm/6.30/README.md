@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC DOS 6.30
+title: IBM PC DOS 6.30
 permalink: /disks/pcx86/dos/ibm/6.30/
 machines:
   - id: ibm5170-pcdos630
@@ -13,8 +13,8 @@ machines:
         name: None
 ---
 
-PC DOS 6.30
------------
+IBM PC DOS 6.30
+---------------
 
 PC DOS 6.30 was released in December 1993.
 
