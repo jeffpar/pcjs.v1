@@ -314,7 +314,7 @@ MarkOut.prototype.getBuildOptions = function()
  */
 MarkOut.prototype.generateID = function(sText)
 {
-    var sID = sText.replace(/[^A-Z0-9 -]+/gi, '').replace(/^ +| +$/g, '').replace(/ +/g, '-').toLowerCase();
+    var sID = sText.replace(/&[^\s;]+;/gi, '&').replace(/[^A-Z0-9& -]+/gi, '').replace(/^ +| +$/g, '').replace(/ +/g, '-').replace(/&/g, '').toLowerCase();
     if (this.aIDs.indexOf(sID) < 0) {
         this.aIDs.push(sID);
         return sID;
