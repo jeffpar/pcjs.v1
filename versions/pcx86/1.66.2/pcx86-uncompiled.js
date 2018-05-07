@@ -45544,6 +45544,14 @@ class Keyboard extends Component {
         this.fHasFocus = true;
 
         /*
+         * This can be used to delay ALT key generation (ie, until some other key in conjunction with the
+         * ALT is pressed as well); however, it is currently off by default, because there are apps (eg, the
+         * MS-DOS Manager) that don't deal well the rapid back-to-back ALT+key generation that this work-around
+         * necessitates.
+         */
+        this.fDelayALT = false;
+
+        /*
          * This is true whenever the physical Escape key is disabled (eg, by pointer locking code),
          * giving us the opportunity to map a different physical key to machine's virtual Escape key.
          */
@@ -47232,7 +47240,7 @@ class Keyboard extends Component {
                  * NOTE: Even though this is a hack intended largely for browsers running on Windows, I'm implementing
                  * it for all platforms, for consistency.
                  */
-                if (keyCode == Keys.KEYCODE.ALT) {
+                if (this.fDelayALT && keyCode == Keys.KEYCODE.ALT) {
                     if (fDown) {
                         /*
                          * One exception to this hack is the "Sidekick" exception: if the CTRL key is also down,
@@ -47363,7 +47371,7 @@ class Keyboard extends Component {
                  * for ALT keys: if we're about to activate another key and we believe that an ALT key is still down,
                  * we fake an ALT activation first.
                  */
-                if (this.bitsState & Keyboard.STATE.ALTS) {
+                if (this.fDelayALT && (this.bitsState & Keyboard.STATE.ALTS)) {
                     let simCodeAlt = Keyboard.SIMCODE.ALT;
                     this.printMessage("onKeyChange(" + simCodeAlt + "): simulating ALT down", Messages.EVENT);
                     this.addActiveKey(simCodeAlt);
@@ -47422,7 +47430,7 @@ class Keyboard extends Component {
              * for ALT keys: if we're about to activate another key and we believe that an ALT key is still down,
              * we fake an ALT activation first.
              */
-            if (this.bitsState & Keyboard.STATE.ALTS) {
+            if (this.fDelayALT && (this.bitsState & Keyboard.STATE.ALTS)) {
                 let simCodeAlt = Keyboard.SIMCODE.ALT;
                 this.printMessage("onKeyPress(" + simCodeAlt + "): simulating ALT down", Messages.EVENT);
                 this.addActiveKey(simCodeAlt);
@@ -75542,16 +75550,45 @@ class DebuggerX86 extends Debugger {
         let dbgAddr = this.parseAddr(sAddr);
         if (!dbgAddr) return;
 
+        let fASCII = false;
         for (let i = 2; i < asArgs.length; i++) {
-            let vNew = this.parseExpression(asArgs[i]);
+            let sArg = asArgs[i];
+            /*
+             * Now that all debugger commands go through parseCommand(), we can accept interesting commands like this:
+             *
+             *      ew b800:0 "Happy Birthday"
+             *
+             * and the quoted string will arrive as a single argument.  We now parse such a string into a series of byte
+             * values, and additionally, if you're using "ew" instead of "eb", only the low byte of every word will be
+             * updated.  This is what we call ASCII replacement mode (fASCII is true), which ends as soon as we encounter
+             * the empty string that we add to the end of the series.
+             */
+            if (sArg[0] == '"' || sArg[0] == "'") {
+                let asNum = [];
+                for (let j = 1; j < sArg.length; j++) {
+                    let ch = sArg[j];
+                    if (ch == sArg[0]) break;
+                    asNum.push(Str.toHexByte(ch.charCodeAt(0)));
+                }
+                asNum.push("");
+                asArgs.splice(i, 1, ...asNum);
+                sArg = asArgs[i];
+                fASCII = true;
+            }
+            if (!sArg) {
+                fASCII = false;
+                continue;
+            }
+            let vNew = this.parseExpression(sArg);
             if (vNew === undefined) {
-                this.println("unrecognized value: " + asArgs[i]);
+                this.println("unrecognized value: " + sArg);
                 break;
             }
             if (vNew & ~mask) {
                 this.println("warning: " + Str.toHex(vNew) + " exceeds " + size + "-byte value");
             }
             let vOld = fnGet.call(this, dbgAddr);
+            if (fASCII) vNew = (vOld & ~0xff) | (vNew & 0x7f);
             this.println("changing " + this.toHexAddr(dbgAddr) + " from " + Str.toHex(vOld, cch, true) + " to " + Str.toHex(vNew, cch, true));
             fnSet.call(this, dbgAddr, vNew, size);
         }
@@ -76881,21 +76918,21 @@ class DebuggerX86 extends Debugger {
                 this.iPrevCmd--;
             }
         }
-        let a = [];
+        let asArgs = [];
         if (sCmd) {
             /*
              * With the introduction of breakpoint commands (ie, quoted command sequences
              * associated with a breakpoint), we can no longer perform simplistic splitting.
              *
-             *      a = sCmd.split(chSep);
-             *      for (let i = 0; i < a.length; i++) a[i] = Str.trim(a[i]);
+             *      asArgs = sCmd.split(chSep);
+             *      for (let i = 0; i < asArgs.length; i++) asArgs[i] = Str.trim(asArgs[i]);
              *
              * We may now split on semi-colons ONLY if they are outside a quoted sequence.
              *
              * Also, to allow quoted strings *inside* breakpoint commands, we first replace all
              * DOUBLE double-quotes with single quotes.
              */
-            sCmd = sCmd.toLowerCase().replace(/""/g, "'");
+            sCmd = sCmd.replace(/""/g, "'");
 
             let iPrev = 0;
             let chQuote = null;
@@ -76906,48 +76943,44 @@ class DebuggerX86 extends Debugger {
              *
              * In a sense, it allows us to pretend that the string ends with a zero terminator.
              */
-            for (let i = 0; i <= sCmd.length; i++) {
+            let fQuoted = false;
+            for (let i = 0, chPrev = null; i <= sCmd.length; i++) {
                 let ch = sCmd.charAt(i);
                 if (ch == '"' || ch == "'") {
                     if (!chQuote) {
                         chQuote = ch;
+                        fQuoted = true;
                     } else if (ch == chQuote) {
                         chQuote = null;
                     }
                 }
-                else if (ch == chSep && !chQuote || !ch) {
+                else if (ch == chSep && !chQuote && ch != chPrev || !ch) {
                     /*
                      * Recall that substring() accepts starting (inclusive) and ending (exclusive)
                      * indexes, whereas substr() accepts a starting index and a length.  We need the former.
                      */
-                    a.push(Str.trim(sCmd.substring(iPrev, i)));
+                    let s = Str.trim(sCmd.substring(iPrev, i));
+                    if (!fQuoted) s = s.toLowerCase();
+                    asArgs.push(s);
                     iPrev = i + 1;
+                    fQuoted = false;
                 }
+                chPrev = ch;
             }
-        }
-        return a;
-    }
-
-    /**
-     * shiftArgs(asArgs)
-     *
-     * Used with any command (eg, "r") that allows but doesn't require whitespace between command and first argument.
-     *
-     * @this {DebuggerX86}
-     * @param {Array.<string>} asArgs
-     * @return {Array.<string>}
-     */
-    shiftArgs(asArgs)
-    {
-        if (asArgs && asArgs.length) {
-            let s0 = asArgs[0];
-            let ch0 = s0.charAt(0);
-            for (let i = 1; i < s0.length; i++) {
-                let ch = s0.charAt(i);
-                if (ch0 == '?' || ch0 == 'r' || ch < 'a' || ch > 'z') {
-                    asArgs[0] = s0.substr(i);
-                    asArgs.unshift(s0.substr(0, i));
-                    break;
+            if (chSep == ' ' && asArgs.length) {
+                /*
+                 * I've folded in the old shiftArgs() code here: deal with any command (eg, "r") that allows but
+                 * doesn't require whitespace between the command and first argument, and break them apart anyway.
+                 */
+                let s0 = asArgs[0];
+                let ch0 = s0.charAt(0);
+                for (let i = 1; i < s0.length; i++) {
+                    let ch = s0.charAt(i);
+                    if (ch0 == '?' || ch0 == 'r' || ch < 'a' || ch > 'z') {
+                        asArgs[0] = s0.substr(i);
+                        asArgs.unshift(s0.substr(0, i));
+                        break;
+                    }
                 }
             }
         }
@@ -77000,7 +77033,7 @@ class DebuggerX86 extends Debugger {
                     sCmd = "a " + this.toHexAddr(this.dbgAddrAssemble) + ' ' + sCmd;
                 }
 
-                let asArgs = this.shiftArgs(sCmd.replace(/ +/g, ' ').split(' '));
+                let asArgs = this.parseCommand(sCmd, false, ' ');
 
                 switch (asArgs[0].charAt(0)) {
                 case 'a':
