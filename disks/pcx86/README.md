@@ -67,6 +67,7 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 * [QEMM-386](tools/other/qemm386/)
 * [SoftLogic](tools/softlogic/)
 * [Spacemaker](tools/other/spacemaker/)
+* [More...](tools/other/)
 
 ### Games
 
@@ -80,6 +81,7 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 * [PC-SIG Library 8th Edition CD-ROM (April 1990)](shareware/pcsig08/)
 * [PC Magazine (Vols. 6-14)](shareware/pcmag/)
 * [PC Tech Journal (1985-1989)](shareware/pctj/)
+- [Unprotect Files](shareware/unprot/)
 * [More...](shareware/)
 
 ### Diagnostics and More
