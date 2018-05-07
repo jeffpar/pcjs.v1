@@ -725,6 +725,7 @@
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/c/5.10-os2/MSC510-DISK12-UTILITY3.json">MS C 5.10-OS/2 (UTILITY3)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/c/5.10-os2/MSC510-DISK13-LIBOS2.json">MS C 5.10-OS/2 (LIBOS2)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/c/5.10-os2/MSC510-DISK14-CVOS2.json">MS C 5.10-OS/2 (CVOS2)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/dos/mgr/1.00/MSDOSMGR100.json">MS-DOS Manager 1.00</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/masm/1.00/MASM100.json">MS Macro Assembler 1.00</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/masm/3.00/MASM-016014-300.json">MS Macro Assembler 3.00</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/masm/3.01/MASM-016014-301.json">MS Macro Assembler 3.01</disk>
