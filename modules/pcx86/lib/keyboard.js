@@ -107,6 +107,14 @@ class Keyboard extends Component {
         this.fHasFocus = true;
 
         /*
+         * This can be used to delay ALT key generation (ie, until some other key in conjunction with the
+         * ALT is pressed as well); however, it is currently off by default, because there are apps (eg, the
+         * MS-DOS Manager) that don't deal well the rapid back-to-back ALT+key generation that this work-around
+         * necessitates.
+         */
+        this.fDelayALT = false;
+
+        /*
          * This is true whenever the physical Escape key is disabled (eg, by pointer locking code),
          * giving us the opportunity to map a different physical key to machine's virtual Escape key.
          */
@@ -1795,7 +1803,7 @@ class Keyboard extends Component {
                  * NOTE: Even though this is a hack intended largely for browsers running on Windows, I'm implementing
                  * it for all platforms, for consistency.
                  */
-                if (keyCode == Keys.KEYCODE.ALT) {
+                if (this.fDelayALT && keyCode == Keys.KEYCODE.ALT) {
                     if (fDown) {
                         /*
                          * One exception to this hack is the "Sidekick" exception: if the CTRL key is also down,
@@ -1926,7 +1934,7 @@ class Keyboard extends Component {
                  * for ALT keys: if we're about to activate another key and we believe that an ALT key is still down,
                  * we fake an ALT activation first.
                  */
-                if (this.bitsState & Keyboard.STATE.ALTS) {
+                if (this.fDelayALT && (this.bitsState & Keyboard.STATE.ALTS)) {
                     let simCodeAlt = Keyboard.SIMCODE.ALT;
                     this.printMessage("onKeyChange(" + simCodeAlt + "): simulating ALT down", Messages.EVENT);
                     this.addActiveKey(simCodeAlt);
@@ -1985,7 +1993,7 @@ class Keyboard extends Component {
              * for ALT keys: if we're about to activate another key and we believe that an ALT key is still down,
              * we fake an ALT activation first.
              */
-            if (this.bitsState & Keyboard.STATE.ALTS) {
+            if (this.fDelayALT && (this.bitsState & Keyboard.STATE.ALTS)) {
                 let simCodeAlt = Keyboard.SIMCODE.ALT;
                 this.printMessage("onKeyPress(" + simCodeAlt + "): simulating ALT down", Messages.EVENT);
                 this.addActiveKey(simCodeAlt);
