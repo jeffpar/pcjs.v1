@@ -13,10 +13,10 @@ index.html
 .settings
 .sass-cache
 node_modules
-src
 tmp
 /blog/*.html
 /docs
+/src
 /videos
 /web
 c64/
