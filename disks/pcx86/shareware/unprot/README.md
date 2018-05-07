@@ -15,7 +15,7 @@ For example, [LOTUS.TXT](https://raw.githubusercontent.com/jeffpar/pcjs-disks/ma
 describes how to disable the copy protection in [Lotus 1-2-3 Release 1A](/disks/pcx86/apps/lotus/123/1a/#copy-protection-patch) and
 [Lotus 1-2-3 Release 1A*](/disks/pcx86/apps/lotus/123/1as/#copy-protection-patch).
 
-The files have also been copied to the 1.2M diskette "[Unprotect Files (UNPROT-1 & 2)](#directory-of-unprotect-files-unprot-1-amp-2)",
+The files have also been copied to the 1.2M diskette "[Unprotect Files (UNPROT-1 & 2)](#directory-of-unprotect-files-unprot-1--2)",
 which can be loaded in any IBM PC AT-compatible machine.
 
 - [123.UNP](https://raw.githubusercontent.com/jeffpar/pcjs-disks/master/pcx86/shareware/unprot/disk01/unprot-1/123.UNP)
