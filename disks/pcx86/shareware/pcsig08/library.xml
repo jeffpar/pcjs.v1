@@ -866,6 +866,8 @@
 		<disk path="/pcjs-disks/pcx86/tools/other/qemm386/5.13/QEMM386-513.json">QEMM-386 5.13</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/qemm386/6.02/QEMM386-602.json">QEMM-386 6.02</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/spacemaker/1.06/SM106.json">Realia Spacemaker 1.06</disk>
+		<disk path="/pcjs-disks/pcx86/tools/other/unp/4.11/UNP411.json">UNP (Executable Unpacker) 4.11</disk>
+		<disk path="/pcjs-disks/pcx86/tools/other/unp/4.11/UNP411-SRC.json">UNP (Executable Unpacker) Source</disk>
 		<disk path="/pcjs-disks/pcx86/personal/JEFFPAR-DISK001.json">JEFFPAR DISK001</disk>
 		<disk path="/pcjs-disks/pcx86/roms/ibm/IBM-BIOS-SRC-5150V1.json">IBM PC BIOS Sources (V1)</disk>
 		<disk path="/pcjs-disks/pcx86/roms/ibm/IBM-BIOS-SRC-5150V2.json">IBM PC BIOS Sources (V2)</disk>
@@ -3191,6 +3193,7 @@
 		<disk path="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/shareware/pcsig08/disks/DISK2119.json">PCSIG08: DISK2119</disk>
 		<disk path="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/shareware/pcsig08/disks/DISK2120.json">PCSIG08: DISK2120</disk>
 		<disk path="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/shareware/pcsig08/disks/DISK2121.json">PCSIG08: DISK2121</disk>
+		<disk path="/pcjs-disks/pcx86/shareware/unprot/UNPROT.json">Unprotect Files (UNPROT-1 &amp; 2)</disk>
 		<disk path="/pcjs-games/pcx86/id/wolf3d/1WOLF14.json">Wolfenstein 3D 1.4</disk>
 		<disk path="/pcjs-games/pcx86/microsoft/flightsim/1982/FLIGHTSIM-1982.json">MS Flight Simulator (1982)</disk>
 		<disk path="/pcjs-games/pcx86/microsoft/flightsim/1984/FLIGHTSIM-1984.json">MS Flight Simulator (1984)</disk>
