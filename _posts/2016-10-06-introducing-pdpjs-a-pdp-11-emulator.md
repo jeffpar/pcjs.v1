@@ -49,5 +49,5 @@ and compare results across 1 or 2 other PDP-11 emulators.
 
 {% include machine.html id="vt100" %}
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Oct 6, 2016*

@@ -27,11 +27,11 @@ Released in 1983 by COMPAQ Computer Corp, this version of MS-DOS reports itself 
 	(C) Copyright Microsoft 1981, 82
 
 To learn more about this double-sided 320Kb diskette, see the
-[Directory Listing](#directory-of-compaq-ms-dos-112-diskette) and [Boot Sector](#compaq-ms-dos-112-boot-sector) below.
+[Directory Listing](#directory-of-compaq-ms-dos-112) and [Boot Sector](#compaq-ms-dos-112-boot-sector) below.
 
 {% include machine.html id="ibm5150-compaq112" %}
 
-### Directory of COMPAQ MS-DOS 1.12 Diskette
+### Directory of COMPAQ MS-DOS 1.12
 
 	 Volume in drive A has no label
 

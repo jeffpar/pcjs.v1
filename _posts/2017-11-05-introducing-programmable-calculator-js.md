@@ -179,7 +179,7 @@ to date), you have to be running a modern web browser.  I'll probably add an ES5
 for now, it's rather refreshing to be using modern JavaScript language features and not constantly worrying about
 backward-compatibility. 
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Nov 5, 2017*
 
 {% include machine.html id="ti57" config="json" %}

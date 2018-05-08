@@ -21,5 +21,5 @@ numerically, puts it squarely between the December 1986 and January 1987 issues.
 
 Happy reading!
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *May 20, 2015*

@@ -285,5 +285,5 @@ If that sounds like a joke, it's not.  This, however, is:
 
 > A man walks into a bar, asks the bartender for a fixup, and the bartender responds, "Absolutely!"
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Mar 21, 2017*

@@ -215,5 +215,5 @@ to use your imagination (or the thumbnail images printed on the ordering form) t
 
 Anyway, let's all wish Lite-Brite and its creators a very happy 50th anniversary and go [play](/devices/leds/litebrite/).
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Dec 10, 2017*

@@ -150,5 +150,5 @@ the registers, including the current base and limit values loaded into the segme
 
 {% include machine.html id="deskpro386" %}
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *April 16-19, 2015*

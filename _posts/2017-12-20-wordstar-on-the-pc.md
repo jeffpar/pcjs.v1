@@ -55,5 +55,5 @@ TI Programmable Calculator displays.
 
 {% include machine.html id="ibm5150" %}
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Dec 20, 2017*

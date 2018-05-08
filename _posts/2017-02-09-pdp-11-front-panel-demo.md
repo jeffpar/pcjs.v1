@@ -140,5 +140,5 @@ Step 18: Examine ADDRESS 300.
 At this point, the DATA register should display `070707`.  You can also use the PCjs Debugger's `rm` command to verify
 the contents of the DATA register, or use a Dump command (`dw 300 l1`) to dump memory location 300.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Feb 9, 2017*

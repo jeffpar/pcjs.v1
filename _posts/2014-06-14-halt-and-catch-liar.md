@@ -77,5 +77,5 @@ of sorts:
 Technically, a Googlewhack (a two-word search that yields exactly one result) must use two words found in an actual
 dictionary.  But dictionaries are so passé.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *June 14, 2014*

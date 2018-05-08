@@ -78,7 +78,7 @@ or (at your option) any later version.
 
 You are required to include the following copyright notice, with a link to [{{ site.pcjs.domain }}]({{ site.url }}/):
 
-> [PCjs]({{ site.url }}/) © 2012-2018 by [Jeff Parsons](mailto:Jeff@pcjs.org) ([@jeffpar](http://twitter.com/jeffpar))
+> [PCjs]({{ site.url }}/) © 2012-2018 by [Jeff Parsons](http://jeffpar.com)
 
 in every source code file of every copy or modified version of this work, and to display that notice on every web page
 or computer that runs any version of this software.
@@ -88,5 +88,5 @@ See [LICENSE](/LICENSE) for details.
 More Information
 ----------------
 
-If you have questions or run into any problems, feel free to [tweet](http://twitter.com/jeffpar) or
+If you have questions or run into any problems, feel free to [tweet](https://twitter.com/jeffpar) or
 [email](mailto:Jeff@pcjs.org).

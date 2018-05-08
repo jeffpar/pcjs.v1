@@ -58,5 +58,5 @@ now runs as intended.  Well, except for the awful sound it makes, which I'll be 
 For now, turn your volume down (and appreciate the fact that you *can* turn your volume down, because the speaker on
 an IBM PC had no such feature), and enjoy exploring the IBM Personal Computer.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Apr 1, 2018*

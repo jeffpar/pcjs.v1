@@ -55,5 +55,5 @@ so I'll be able to find the time to finish the rest of the PDP-10 opcode handler
 
 And then maybe we'll be able to run some *real* PDP-10 software in our browsers.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Feb 28, 2017*

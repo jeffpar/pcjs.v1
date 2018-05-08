@@ -478,5 +478,5 @@ exactly what I've done "below the fold".
 	C:\EGATEST>
 	C:\EGATEST>
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Jul 3, 2017*
