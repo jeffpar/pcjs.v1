@@ -18,18 +18,18 @@ The following table comes from pages 4-189 and 4-190 of the DeskPro 386/25 Techn
 
                                                  Landing
                                      Pre-comp.    Zone
-    Drive                    Max.    Cylinder    Cylinder   Sectors/   Capacity   
-    Type         Cylinders   Heads   (note 1)    (note 2)    Track       (MB)
-    -------------------------------------------------------------------------------
-      1 (note 3)    306       4        128         305        17        10.65
-      2 (note 3)    615       4        128         638        17        21.41       PC AT
-      3             615       6        128         615        17        32.12
+    Drive                    Max.    Cylinder    Cylinder   Sectors/   Capacity     Same as
+    Type         Cylinders   Heads   (note 1)    (note 2)    Track       (MB)       IBM PC AT
+    -----------------------------------------------------------------------------------------
+      1 (note 3)    306       4        128         305        17        10.65       yes
+      2 (note 3)    615       4        128         638        17        21.41       yes
+      3             615       6        128         615        17        32.12       yes
       4            1024       8        512        1023        17        71.30
-      5             940       6        512         939        17        49.09
+      5             940       6        512         939        17        49.09       yes
       6 (note 3)    697       5        128         696        17        30.33
-      7             462       8        256         511        17        32.17
+      7             462       8        256         511        17        32.17       yes
       8             925       5        128         924        17        40.26
-      9             900      15         -1         899        17       117.50
+      9             900      15         -1         899        17       117.50       yes
      10             980       5         -1         980        17        42.65
      11             925       7        128         924        17        56.36
      12 (note 3)    925       9        128         924        17        72.46
