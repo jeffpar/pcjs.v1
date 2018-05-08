@@ -12,7 +12,7 @@
 	<fdc ref="/disks/pcx86/library.xml" autoMount='{A: {name: "COMPAQ MS-DOS 3.31 (Disk 2)"}, B: {name: "COMPAQ MS-DOS 3.31 (Disk 3)"}}'/>
 	<hdc ref="/disks/pcx86/drives/47mb/unformatted-at5.xml"/>
 	<keyboard ref="/devices/pcx86/keyboard/us84-softkeys.xml"/>
-	<debugger id="debugger" messages="fault|int" commands=""/>
+	<debugger id="debugger" messages="fault" commands=""/>
 	<panel ref="/devices/pcx86/panel/wide386.xml"/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]" monitor="vga"/>
 	<serial id="com1" adapter="1"/>

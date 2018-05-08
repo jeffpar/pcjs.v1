@@ -6,11 +6,12 @@ machines:
   - id: deskpro386
     type: pcx86
     config: /devices/pcx86/machine/compaq/deskpro386/vga/2048kb/debugger/machine.xml
+    drives: '[{name:"10Mb Hard Disk",type:1,path:"/pcjs-games/pcx86/id/wolf3d/COMPAQ331-WOLF3D.json"}]'
     autoMount:
       A:
-        name: COMPAQ MS-DOS 3.31 (Disk 2)
+        name: None
       B:
-        name: Wolfenstein 3D 1.4
+        name: None
 ---
 
 Wolfenstein 3D
