@@ -7,7 +7,7 @@ permalink: /apps/c1p/BASIC/jeffpar/
 Jeff's Challenger 1P BASIC Programs
 -----------------------------------
 
-Below are BASIC programs written by [Jeff Parsons](https://twitter.com/jeffpar) from 1979 to 1980:
+Below are BASIC programs written by [Jeff Parsons](http://jeffpar.com) from 1979 to 1980:
 
 - [CHECKERS](checkers/)
 - [HANG WOMAN](hangwoman/)

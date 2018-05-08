@@ -36,7 +36,7 @@ along with live demonstrations.
 * [Unix](unix/)
 * [Windows](windows/)
 
-### Applications
+### Applications and Demos
 
 * [Ashton-Tate dBase II](apps/other/dbase2/)
 * [IBM Fantasy Land EGA Demo](apps/ibm/fland/)
@@ -84,11 +84,18 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 - [Unprotect Files](shareware/unprot/)
 * [More...](shareware/)
 
-### Diagnostics and More
+### Diagnostics and ROMs
 
 * [COMPAQ Diagnostics and Utilities](diags/compaq/)
 * [IBM Diagnostics and Utilities](diags/ibm/)
 * [IBM ROM BIOS Sources](roms/ibm/)
+
+### Personal Collections
+
+* [Personal Disk Collections](personal/)
+
+### Test Resources
+
 * [PCx86 TestMonitor Support](/tests/pcx86/testmon/)
 * [Michael Abrash's VGA "Black Book" Tests](/tests/pcx86/vga/)
 * [More...](/tests/pcx86/)

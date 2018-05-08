@@ -102,5 +102,5 @@ And who knows, maybe Vault Corporation (the company that Ashton-Tate used to pro
 dBASE III) wrote such sophisticated code that it was impossible to defeat so simply.  However, experience suggests
 that's unlikely. 
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Aug 11, 2017*

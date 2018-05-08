@@ -81,5 +81,5 @@ is also available.
 
 {% include machine.html id="vt100" %}
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Aug 19, 2016*

@@ -198,5 +198,5 @@ NOTE: It's possible I don't have the TI-55 Emulator properly clocked yet, becaus
 
 ---
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Nov 29, 2017*

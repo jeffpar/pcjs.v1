@@ -200,5 +200,5 @@ how to parse address expressions that use indirection and/or indexing, including
 Unfortunately, the Debugger failed to pass the fix-up information back to the MACRO-10 Mini-Assembler, because evaluation of the
 indexing expression was overwriting fix-up information, if any, from the preceding expression.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Mar 24, 2017*

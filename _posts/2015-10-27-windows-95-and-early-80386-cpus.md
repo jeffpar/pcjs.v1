@@ -214,5 +214,5 @@ In addition, on 80386 reset, we set the CPU revision number in DX to the appropr
 
 Support for additional 80286 and 80386 errata may be added over time, as interesting scenarios or test cases are discovered.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *October 27, 2015*

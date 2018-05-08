@@ -66,5 +66,5 @@ extensive use of:
 
 Those changes will come, but on a more piecemeal basis, as code is visited.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Jan 31, 2017*

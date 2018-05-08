@@ -136,5 +136,5 @@ There are currently no `parity`, `databits`, or `stopbits` overrides, so you sho
 
 {% include machine.html id="ibm5170" %}
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Mar 10, 2018*

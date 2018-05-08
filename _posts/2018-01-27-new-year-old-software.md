@@ -78,5 +78,5 @@ remap the `tilde` key to the `esc`  key.  This is because most (all?) web browse
 control of your mouse and/or screen.  So if you're running software *inside* a PCjs machine that uses the `esc` key,
 press the `tilde` key instead.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Jan 27, 2018*

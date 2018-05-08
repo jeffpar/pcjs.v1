@@ -31,5 +31,5 @@ reader.
 
 {% include machine.html id="test1120" %}
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Oct 21, 2016*

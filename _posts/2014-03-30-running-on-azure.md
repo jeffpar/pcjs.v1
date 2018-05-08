@@ -52,5 +52,5 @@ but it would NEVER display anything but deployment information.  Instead, I had 
 
 Sigh. But at least the site is up and fully operational now.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *March 30, 2014*

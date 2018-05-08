@@ -1,4 +1,4 @@
-<!-- author="Jeff Parsons (@jeffpar)" website="http://www.pcjs.org/" created="2012-05-05" modified="2014-02-23" license="http://www.gnu.org/licenses/gpl.html" -->
+<!-- author="Jeff Parsons (@jeffpar)" website="https://www.pcjs.org/" created="2012-05-05" modified="2014-02-23" license="http://www.gnu.org/licenses/gpl.html" -->
 <!-- XSLT understands these entities only: lt, gt, apos, quot, and amp. Other useful entities are defined below. -->
 <!-- Alas, Firefox doesn't support loading external entities, so the contents of this file must be pasted into every primary XSL file. -->
 <!ENTITY nbsp   "&#160;">

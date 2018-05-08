@@ -31,7 +31,7 @@ was rather slow to boot.  A similar configuration with [Color Display](/disks/pc
 PC DOS 0.90 files were distributed on one single-sided (160Kb) diskette.  A directory listing of the disk is
 provided below.
 
-### Directory of PC DOS 0.90 Diskette
+### Directory of PC DOS 0.90
 
 	 Volume in drive A has no label
 	 Directory of A:\

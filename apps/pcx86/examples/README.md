@@ -25,9 +25,9 @@ the "file:" or "http:" protocol.
 	- [example2.html](example2.html) and [example2.xml](example2.xml)
 	- [example3a.html](example3a.html) and [example3a.xml](example3a.xml)
 	- [example3b.html](example3b.html) and [example3b.xml](example3b.xml)
-+ Feel free to copy/paste additional components from other machine XML files on [pcjs.org](http://www.pcjs.org/).
++ Feel free to copy/paste additional components from other machine XML files on [pcjs.org](https://www.pcjs.org/).
 + Remember to display the appropriate attribution on anything you share publicly; e.g.:
-		[PCjs](http://pcjs.org) © 2012-2018 by [Jeff Parsons](mailto:Jeff@pcjs.org) ([@jeffpar](http://twitter.com/jeffpar))
+		[PCjs](https://www.pcjs.org) © 2012-2018 by [Jeff Parsons](http://jeffpar.com)
 + Stay in sync with the [PCjs Project](https://github.com/jeffpar/pcjs) repository on GitHub, to keep your copy of PCjs
 up-to-date.
 

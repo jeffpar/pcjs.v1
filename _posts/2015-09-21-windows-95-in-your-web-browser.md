@@ -39,5 +39,5 @@ The adventure continues.
 
 {% include machine.html id="deskpro386" %}
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *September 21, 2015*

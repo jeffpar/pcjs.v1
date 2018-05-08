@@ -35,5 +35,5 @@ tested exclusively on Compaq DeskPro 386 machines from late 1986, so it has some
 emulators use by default these days, did not exist in 1986.  The VGA was introduced in April 1987, when IBM
 unveiled their new PS/2 hardware line -- and announced OS/2.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *January 23, 2016*
