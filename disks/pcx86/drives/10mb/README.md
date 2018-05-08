@@ -33,9 +33,14 @@ will load the following PC XT controller configuration and disk image:
 <hdc id="hdcXT" type="XT" drives='[{name:"10Mb Hard Disk",type:3,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'/>
 ```
 
-Some of the 10Mb disk images have also been pre-configured for use in PC AT configurations:
+A machine's hard drive configuration can also be overridden with the *drives* property; e.g.:
+
+    drives: '[{name:"10Mb Hard Disk",type:3,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'
  
-* [MS-DOS 3.20 with Microsoft C 4.00 (PC AT Drive Type 1)](msdos320-c400-at1.xml)
+Two of the 10Mb disk images have also been pre-configured for use in PC AT configurations:
+ 
+* [Unformatted 10Mb Disk](unformatted-at1.xml)
+* [MS-DOS 3.20 with Microsoft C 4.00](msdos320-c400-at1.xml)
 
 The configuration must set the HDC's controller type to "AT" and select an appropriate AT
 drive type.  So, whereas the XT drive type for a 10Mb disk was 3, the corresponding AT drive type is 1.
@@ -51,6 +56,9 @@ will load the following PC AT controller configuration and disk image:
 ```xml
 <hdc id="hdcAT" type="AT" drives='[{name:"10Mb Hard Disk",type:1,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'/>
 ```
+
+PC AT Type 1 drives are also compatible with COMPAQ DeskPro 386 Type 1 drives.
+See the [COMPAQ DeskPro 386 Fixed Disk Drive Parameter Table Values](/pubs/pc/reference/compaq/deskpro386/#fixed-disk-drive-parameter-table-values) for more information.
 
 ### Notes Regarding 10Mb Disks
 
