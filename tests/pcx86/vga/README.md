@@ -38,8 +38,8 @@ tab stops.
 
 Development of PCjs VGA support began June 2015, and not everything here runs properly inside PCjs yet.  For example:
 
-- L29-4 doesn't actually blank the screen (then again, other emulators don't bother blanking it, either)
-- L30-1 and L30-2 require split-screen support
+- [L29-4](src/L29-4.ASM) doesn't actually blank the screen (then again, other emulators don't bother blanking it, either)
+- [L30-1](src/L30-1.ASM) and [L30-2](src/L30-2.ASM) require split-screen support
 
 ### VGA Black Book Test Machine
 
