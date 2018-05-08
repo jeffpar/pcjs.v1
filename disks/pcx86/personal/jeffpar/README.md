@@ -20,7 +20,7 @@ The @jeffpar Disk Collection
 [Below](#directory-of-jeffpar-disk001) is an assortment of disk images created by
 [@jeffpar](http://jeffpar.com) and archived here.
 
-DISCLAIMER: The author does not claim that any of these disks are or should be of any interest to anyone, nor of the
+DISCLAIMER: The author does not claim that any of these disks are or should be of any interest to anyone, or of the
 slightest significance, historically or otherwise.  They simply contain things that interested or amused him at the time. 
 
 {% include machine.html id="ibm5170" %}
@@ -49,4 +49,4 @@ slightest significance, historically or otherwise.  They simply contain things t
 personal use.  Presumably to make more room on the disk, I had moved off a few MS-DOS 3.20 files (BACKUP.EXE,
 RESTORE.EXE, SHARE.EXE, TREE.EXE, and XCOPY.EXE), updated DEBUG.EXE, added MASM.EXE (v4.00), and then included
 a few files of my own (eg, PCPAL.EXE and HDISK.ASM).  FYI, this particular copy of PCPAL.EXE was saved with **Alt-Esc**
-configured as the activation key sequence. *--@jeffpar*
+configured as the activation key sequence. *--[@jeffpar](http://jeffpar.com)*
