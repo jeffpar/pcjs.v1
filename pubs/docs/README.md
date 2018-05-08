@@ -23,10 +23,10 @@ Eventually, the project may also provide summaries of all supported CPU instruct
 
 {% endif %}
 
-We also have an eclectic collection of personal documents, ranging from early PC debugging notes to old program
-listings and more:
+We also have an eclectic collection of [Personal Documents](personal/), ranging from early PC debugging notes
+to old program listings and more:
 
-* [Personal Documents of Dubious Historical Interest](personal/)
+* [The @jeffpar Document Collection](personal/jeffpar/)
 
 Publication Archive
 -------------------

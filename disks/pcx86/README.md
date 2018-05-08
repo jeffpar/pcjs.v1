@@ -59,13 +59,12 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 
 ### Utilities
 
-* [Enhanced DEBUG](tools/other/enhdebug/)
 * [FlickerFree](tools/other/flickerfree/)
 * [Norton Utilities](tools/other/norton/)
 * [Omniview](tools/other/omniview/)
 * [PC Tools](tools/other/pctools/)
 * [QEMM-386](tools/other/qemm386/)
-* [SoftLogic](tools/softlogic/)
+* [SoftLogic Utilities](tools/softlogic/)
 * [Spacemaker](tools/other/spacemaker/)
 * [More...](tools/other/)
 

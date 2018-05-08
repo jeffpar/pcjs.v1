@@ -171,7 +171,7 @@
 		<disk path="/pcjs-disks/pcx86/dos/compaq/3.00/COMPAQ-DOS300-DISK2.json">COMPAQ MS-DOS 3.00 (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/compaq/3.10/COMPAQ-DOS310-DISK1.json">COMPAQ MS-DOS 3.10 (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/compaq/3.10/COMPAQ-DOS310-DISK2.json">COMPAQ MS-DOS 3.10 (Disk 2)</disk>
-		<disk path="/pcjs-disks/pcx86/dos/compaq/3.10/COMPAQ-DOS310-PERSONAL.json">COMPAQ MS-DOS 3.10 (Personal)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/compaq/3.10/COMPAQ-DOS310-PERSONAL.json">COMPAQ MS-DOS 3.10 (12-17-85)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/compaq/3.10/COMPAQ-PCDOS320-SUPP.json">COMPAQ PC DOS 3.20 Support</disk>
 		<disk path="/pcjs-disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK1.json">COMPAQ MS-DOS 3.31 (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json">COMPAQ MS-DOS 3.31 (Disk 2)</disk>
@@ -179,6 +179,7 @@
 		<disk path="/pcjs-disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK1.json">COMPAQ MS-DOS 3.31G (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK2.json">COMPAQ MS-DOS 3.31G (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-REVG-DISK3.json">COMPAQ MS-DOS 3.31G (Disk 3)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-1987.json">COMPAQ MS-DOS 3.31 (1987)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/3.31/DRDOS331.json">DR DOS 3.31</disk>
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/3.32/DRDOS332.json">DR DOS 3.32</disk>
 		<disk path="/pcjs-disks/pcx86/dos/dresearch/3.33/DRDOS333.json">DR DOS 3.33</disk>
