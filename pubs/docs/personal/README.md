@@ -19,5 +19,5 @@ adventures in PC debugging: decoding and disabling [dBASE III Copy-Protection](#
 
 NOTE: Copies of the [dBASE III](/disks/pcx86/apps/other/dbase3/1.0/) disks can be found in our [IBM PC Disk Library](/disks/pcx86/).
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Last Update: Aug 11, 2017*

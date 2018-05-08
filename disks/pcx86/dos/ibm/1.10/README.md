@@ -22,7 +22,7 @@ PC DOS 1.10 was released in May 1982 on one single-sided (160Kb) diskette.  See 
 "[Read This First](#read-this-first)" from the [PC DOS 1.10 Manual](/pubs/pc/software/dos/PCDOS110/)
 for important information about changes from [PC DOS 1.00](../1.00/).
 
-A [Feature Summary](#feature-summary), along with the disk's [Directory Listing](#directory-of-pc-dos-110-diskette)
+A [Feature Summary](#feature-summary), along with the disk's [Directory Listing](#directory-of-pc-dos-110)
 and [Boot Sector](#pc-dos-110-boot-sector), are provided below.
 
 {% include machine.html id="ibm5150-pcdos110" %}
@@ -219,7 +219,7 @@ enhanced functions. If you are not a former user, then
 read the book anyway; it will help you get started more
 quickly.
 
-### Directory of PC DOS 1.10 Diskette
+### Directory of PC DOS 1.10
 
 	IBMBIO    COM        1920  05-07-82
 	IBMDOS    COM        6400  05-07-82

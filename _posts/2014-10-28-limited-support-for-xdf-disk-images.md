@@ -19,5 +19,5 @@ format ever used 23 sectors/track, but in this case, by distributing the XDF tra
 sectors, the PC DOS 7.00 Setup code that reads XDF disks succeeds.  This was probably one of several fall-back options
 built into the PC DOS XDF code.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *October 28, 2014*

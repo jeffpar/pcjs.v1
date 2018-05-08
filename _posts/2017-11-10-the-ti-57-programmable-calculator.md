@@ -164,7 +164,7 @@ Since this emulator is still "hot off the press", don't be surprised if there ar
 bugs.  If you run into any, or you have a browser or device where it doesn't work as expected,
 [send me a note](mailto:Jeff@pcjs.org).  If your web browser is "old" though, please try a newer browser first.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Nov 10, 2017*
 
 ## PCjs TI-57 Emulator

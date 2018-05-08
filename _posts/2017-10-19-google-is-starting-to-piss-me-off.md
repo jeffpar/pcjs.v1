@@ -51,5 +51,5 @@ In both of these situations -- punishing me for using HTTP instead of HTTPS and 
 
 What hoops will Google decide I must jump through tomorrow?
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Oct 19, 2017*

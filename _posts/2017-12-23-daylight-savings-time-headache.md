@@ -98,5 +98,5 @@ may change in subtle, unexpected ways.
 
 It's an archivist's nightmare.  Well, OK, maybe nightmare is a bit extreme, but certainly an archivist's headache.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Dec 23, 2017*

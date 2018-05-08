@@ -74,5 +74,5 @@ keys.  The following keys have special meaning inside SET-UP Mode.
 - SHIFT-S: Save SET-UP Features
 - SHIFT-R: Restore SET-UP Features
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Dec 3, 2016*

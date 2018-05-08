@@ -327,5 +327,5 @@ Clearly, I still have some work to do if I want PCjs to faithfully simulate how 
 
 {% include machine.html id="ibm5160-msdos320" %}
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Sep 21, 2017*

@@ -206,5 +206,5 @@ Similarly, as soon as you perform any other bitwise operation on the number, eve
 n |= 0;                 // n is displayed as -2004318072 again
 ```
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *March 26, 2015*

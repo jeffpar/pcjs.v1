@@ -291,5 +291,5 @@ snapshot of mouse driver revision history that I recently unearthed.  Enjoy!
 	;         Vga640x480.
 	;------------------------------------------------------------------------------
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Aug 28, 2017*

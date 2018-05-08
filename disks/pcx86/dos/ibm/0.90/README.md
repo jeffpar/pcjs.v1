@@ -24,12 +24,12 @@ Below is an IBM PC (Model 5150) with an original IBM ROM BIOS and Color (CGA) Di
 The machine is configured to run at 4.77Mhz, so the ROM BIOS memory test has been disabled, since a PC with 256Kb
 was rather slow to boot.  A similar configuration with [Monochrome Display and Debugger](debugger/) is also available.
 
-PC DOS 0.90 files were distributed on one single-sided (160Kb) diskette.  A [Directory Listing](#directory-of-pc-dos-090-diskette)
+PC DOS 0.90 files were distributed on one single-sided (160Kb) diskette.  A [Directory Listing](#directory-of-pc-dos-090)
 of the disk is provided below.
 
 {% include machine.html id="ibm5150-pcdos090" %}
 
-### Directory of PC DOS 0.90 Diskette
+### Directory of PC DOS 0.90
 
 	 Volume in drive A has no label
 	 Directory of A:\

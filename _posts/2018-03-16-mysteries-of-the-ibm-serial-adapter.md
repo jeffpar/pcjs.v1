@@ -147,5 +147,5 @@ now, and I've since added a few related utilities, including [DOWNLOAD.COM](/tes
 which offers the rudimentary ability to "download" binary files onto my old IBM PC from my MacBook Pro via a 
 USB-to-serial adapter running at a blazing 9600 baud -- all thanks to this new set of interrupt-driven INT 14h services.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *Mar 16, 2018*

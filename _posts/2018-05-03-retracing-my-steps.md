@@ -129,5 +129,5 @@ characters needed to be redrawn after a font change.
 [Fantasy Land](/blog/2017/07/03/) wasn't a particularly well-known program, but it definitely has its place among
 historically significant PC software, and thanks to it, PCjs video emulation is now better for it.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *May 3, 2018*

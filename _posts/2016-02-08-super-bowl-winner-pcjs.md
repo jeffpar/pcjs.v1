@@ -53,5 +53,5 @@ first model 5150 and 5160 machines, respectively.  For more details, see [IBM PC
 I believe there was also a BASIC ROM version 1.20 released for IBM PCjr, but since PCjs does not yet emulate the PCjr,
 it has not been added to the project.
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+*[@jeffpar](http://jeffpar.com)*  
 *February 8, 2016*
