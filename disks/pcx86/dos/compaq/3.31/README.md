@@ -43,9 +43,8 @@ contains hidden MS-DOS 3.31 files dated September 1987.  The disk displays a dif
 making it clear that the diskette *is* a COMPAQ MS-DOS 3.31 diskette from 1987; all the other sources we've
 checked only have disks from 1988 or later.
 
-UPDATE: PCjs has since [unearthed](/disks/pcx86/personal/jeffpar/) another diskette,
-[COMPAQ MS-DOS 3.31 (1987)](#directory-of-compaq-ms-dos-331-1987), containing more of the original
-COMPAQ MS-DOS 3.31 binaries.
+**UPDATE**: PCjs has since [unearthed](/disks/pcx86/personal/jeffpar/) another diskette,
+[COMPAQ MS-DOS 3.31 (1987)](#directory-of-compaq-ms-dos-331-1987), containing more of the 1987 binaries.
 
 Later revisions of COMPAQ MS-DOS 3.31 were released as well.  We have archived three
 "[Rev. G](#compaq-ms-dos-331-rev-g)" disks obtained from [WinWorld](https://winworldpc.com/product/ms-dos/331)
@@ -62,16 +61,17 @@ COMPAQ MS-DOS 4.01 release, since COMPAQ states that the disk "supersedes earlie
 
 ### Directory of COMPAQ MS-DOS 3.31 (1987)
 
-This [personal disk image](/disks/pcx86/personal/jeffpar/) is, unfortunately, not an original distribution disk,
-but it's included here because it's the only available copy of the other COMPAQ MS-DOS 3.31 binaries first released
+This [disk image](/disks/pcx86/personal/jeffpar/) is, unfortunately, not an original distribution disk,
+but it's included here because it's the only available copy of the other COMPAQ MS-DOS 3.31 binaries released
 in 1987.
 
-The following binaries are not likely part of the original distribution:
+It's safe to say the following binaries were not part of the original distribution:
 
 - EXMM.SYS (ZSoft Extended Memory Manager)
 - HIMEM.SYS (DOS XMS Driver, Version 2.04 - 8/17/88)
 - SMARTDRV.SYS (Microsoft SMARTDrive Disk Cache v2.10)
 
+but we have decided to leave the disk as-is.
 
 	 Volume in drive A has no label
 
