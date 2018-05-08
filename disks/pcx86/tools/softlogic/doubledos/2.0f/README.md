@@ -2,10 +2,29 @@
 layout: page
 title: DoubleDOS 2.0F
 permalink: /disks/pcx86/tools/softlogic/doubledos/2.0f/
+machines:
+  - id: ibm5160-pcdos210
+    type: pcx86
+    config: /devices/pcx86/machine/5160/cga/256kb/machine.xml
+    resume: 1
+    autoMount:
+      A:
+        name: PC DOS 2.10 (Disk 1)
+      B:
+        name: DoubleDOS 2.0F
+    autoType: $date\r$time\r\B:\rDOUBLEDOS\r
 ---
 
 DoubleDOS 2.0F
 --------------
+
+This version of DoubleDOS was archived by [@jeffpar](/disks/pcx86/personal/jeffpar/) and likely patched as well (e.g.,
+to disable copy protection), since the date for `DOUBLEDO.EXE` is almost a year newer than the rest of the files.
+
+It also seems to be very DOS version-sensitive.  It crashes on PC DOS 2.00 but appears to work OK on PC DOS 2.10, so
+that's what we boot with here.  A directory listing of the 160Kb diskette is provided [below](#directory-of-doubledos-20f).
+
+{% include machine.html id="ibm5160-pcdos210" %}
 
 ### Directory of DoubleDOS 2.0F
 

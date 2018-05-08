@@ -17,13 +17,26 @@ machines:
 The @jeffpar Disk Collection
 ----------------------------
 
-[Below](#directory-of-jeffpar-disk001) is an assortment of disk images created by
-[@jeffpar](http://jeffpar.com) and archived here.
+Much like [The @jeffpar Document Collection](/docs/personal/jeffpar/), this is a random assortment of disk images
+that may or may not be of historical interest.
 
-DISCLAIMER: The author does not claim that any of these disks are or should be of any interest to anyone, or of the
-slightest significance, historically or otherwise.  They simply contain things that interested or amused him at the time. 
+The disks you'll find [below](#directory-listings) are primarily ones that don't neatly fit into another PCjs category,
+usually either because the disks have a pretty random assortment of files on them and/or because they contain personal
+content.
+
+Some disks from this collection *have* been archived elsewhere, including:
+
+* [COMPAQ Diagnostics 5.08](/disks/pcx86/diags/compaq/5.08/)
+* [COMPAQ DeskPro 386 (1986)](/disks/pcx86/diags/compaq/utilities/1986/)
+* [COMPAQ MS-DOS 3.10 (12-17-85)](/disks/pcx86/dos/compaq/3.10/#compaq-ms-dos-310-12-17-85)
+* [COMPAQ MS-DOS 3.31 (1987)](/disks/pcx86/dos/compaq/3.31/#directory-of-compaq-ms-dos-331-1987)
+* [DoubleDOS 2.0F](/disks/pcx86/tools/softlogic/doubledos/2.0f/)
+* [Multitasking MS-DOS 4.00](/disks/pcx86/dos/microsoft/4.0M/)
+* [Early OS/2 Prototypes](/disks/pcx86/os2/misc/) (eg, [CP-DOS](/disks/pcx86/os2/misc/cpdos/) and [FOOTBALL](/disks/pcx86/os2/misc/football/))
 
 {% include machine.html id="ibm5170" %}
+
+## Directory Listings
 
 ### Directory of JEFFPAR DISK001
 

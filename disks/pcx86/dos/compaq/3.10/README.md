@@ -27,7 +27,7 @@ However, the older release is not a distribution copy.  It is provided for histo
 
 All COMPAQ Supplemental User Programs, as well as diagnostics and setup utilities, are now filed under
 [COMPAQ Diagnostics and Utilities](/disks/pcx86/diags/compaq/).  The earliest known version of `CEMM` can be found on the
-[COMPAQ DeskPro 386 (1986)](/disks/pcx86/diags/compaq/utilities/1986/#compaq-deskpro-386-1986) diskette.
+[COMPAQ DeskPro 386 (1986)](/disks/pcx86/diags/compaq/utilities/1986/) diskette.
 
 {% include machine.html id="deskpro386" %}
 
@@ -169,7 +169,7 @@ COMPAQ MS-DOS 3.10 (12-17-85)
 
 This older 1985 release of COMPAQ MS-DOS 3.10 is from a 1.2Mb disk in our private collection.  Since this disk
 was created for personal use, it also contains files unrelated to COMPAQ MS-DOS 3.10.  A directory listing is provided
-[below](#directory-of-compaq-ms-dos-310-personal-disk).
+[below](#directory-of-compaq-ms-dos-310-12-17-85).
 
 This release displays the following messages on boot:
 
@@ -194,7 +194,7 @@ However, even though the drivers are different, they both display the same messa
 
 The ENHDISK.SYS file dated 08-14-86 is identical to ENHDISK.SYS dated 10-31-86 on the 3.10 distribution disks above.
 
-### Directory of COMPAQ MS-DOS 3.10 (Personal Disk)
+### Directory of COMPAQ MS-DOS 3.10 (12-17-85)
 
 	 Volume in drive A has no label
 
