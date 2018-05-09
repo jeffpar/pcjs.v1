@@ -17,8 +17,8 @@ machines:
 The @jeffpar Disk Collection
 ----------------------------
 
-Much like [The @jeffpar Document Collection](/docs/personal/jeffpar/), this is a random assortment of disk images
-that may or may not be of historical interest.
+Much like the [@jeffpar Document Collection](/docs/personal/jeffpar/), this is a random assortment of disk images
+archived by [@jeffpar](http://jeffpar.com) that may or may not be of historical interest.
 
 The disks you'll find [below](#directory-listings) are primarily ones that don't neatly fit into another PCjs category,
 usually either because the disks have a pretty random assortment of files on them and/or because they contain personal
