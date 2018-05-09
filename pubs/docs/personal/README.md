@@ -7,4 +7,4 @@ permalink: /docs/personal/
 Personal Documents
 ------------------
 
-* [The @jeffpar Document Collection](jeffpar/)
+* [PCjs Random Document Collection](random/)
