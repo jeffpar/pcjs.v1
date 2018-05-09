@@ -2670,11 +2670,11 @@ class Web {
             link.click();
             document.body.removeChild(link);
             sAlert = 'Check your Downloads folder for ' + sFileName + '.';
-            if (Web.isUserAgent("Chrome")) {
-                sAlert += '\n\nIn Chrome, after clicking OK, you may ALSO have to select the "Window" menu, choose "Downloads", and then locate this download and select "Keep".';
-                sAlert += '\n\nThis is part of Chrome\'s "Security By Jumping Through Extra Hoops" technology, which is much easier for Google to implement than actually checking for something malicious.';
-                sAlert += '\n\nAnd for the record, there is nothing malicious on the PCjs website.';
-            }
+            // if (Web.isUserAgent("Chrome")) {
+            //     sAlert += '\n\nIn Chrome, after clicking OK, you may ALSO have to select the "Window" menu, choose "Downloads", and then locate this download and select "Keep".';
+            //     sAlert += '\n\nThis is part of Chrome\'s "Security By Jumping Through Extra Hoops" technology, which is much easier for Google to implement than actually checking for something malicious.';
+            //     sAlert += '\n\nAnd for the record, there is nothing malicious on the PCjs website.';
+            // }
         } else {
             window.open(sURI);
             sAlert = 'Check your browser for a new window/tab containing the requested data' + (sFileName? (' (' + sFileName + ')') : '') + '.';
