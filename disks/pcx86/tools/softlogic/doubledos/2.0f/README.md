@@ -18,7 +18,7 @@ machines:
 DoubleDOS 2.0F
 --------------
 
-This version of DoubleDOS was archived by [@jeffpar](/disks/pcx86/personal/jeffpar/) and likely patched as well (e.g.,
+This version of DoubleDOS was archived by [@jeffpar](/disks/pcx86/personal/random/) and likely patched as well (e.g.,
 to disable copy protection), since the date for `DOUBLEDO.EXE` is almost a year newer than the rest of the files.
 
 It also seems to be very DOS version-sensitive.  It crashes on PC DOS 2.00 but appears to work OK on PC DOS 2.10, so
