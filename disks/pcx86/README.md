@@ -91,7 +91,7 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 
 ### Personal Collections
 
-* [The @jeffpar Disk Collection](personal/jeffpar/)
+* [PCjs Random Disk Collection](personal/random/)
 * [More...](personal/)
 
 ### Test Resources

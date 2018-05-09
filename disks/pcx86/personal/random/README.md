@@ -1,7 +1,7 @@
 ---
 layout: page
-title: The @jeffpar Disk Collection
-permalink: /disks/pcx86/personal/jeffpar/
+title: PCjs Random Disk Collection
+permalink: /disks/pcx86/personal/random/
 machines:
   - id: ibm5170
     type: pcx86
@@ -14,15 +14,11 @@ machines:
         name: JEFFPAR DISK001
 ---
 
-The @jeffpar Disk Collection
-----------------------------
+PCjs Random Disk Collection
+---------------------------
 
-Much like the [@jeffpar Document Collection](/docs/personal/jeffpar/), this is a random assortment of disk images
+Much like the [PCjs Random Document Collection](/docs/personal/random/), this is a random assortment of disk images
 archived by [@jeffpar](http://jeffpar.com) that may or may not be of historical interest.
-
-The disks you'll find [below](#directory-listings) are primarily ones that don't neatly fit into another PCjs category,
-usually either because the disks have a pretty random assortment of files on them and/or because they contain personal
-content.
 
 Some disks from this collection *have* been archived elsewhere, including:
 
@@ -33,6 +29,9 @@ Some disks from this collection *have* been archived elsewhere, including:
 * [DoubleDOS 2.0F](/disks/pcx86/tools/softlogic/doubledos/2.0f/)
 * [Multitasking MS-DOS 4.00](/disks/pcx86/dos/microsoft/4.0M/)
 * [Early OS/2 Prototypes](/disks/pcx86/os2/misc/) (eg, [CP-DOS](/disks/pcx86/os2/misc/cpdos/) and [FOOTBALL](/disks/pcx86/os2/misc/football/))
+
+Any other disks you see [below](#directory-listings) are primarily ones that don't neatly fit into another PCjs category,
+usually either because the disks contain a variety of unrelated files and/or unique content.
 
 {% include machine.html id="ibm5170" %}
 

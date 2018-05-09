@@ -26,7 +26,7 @@ Eventually, the project may also provide summaries of all supported CPU instruct
 We also have an eclectic collection of [Personal Documents](personal/), ranging from early PC debugging notes
 to old program listings and more:
 
-* [The @jeffpar Document Collection](personal/jeffpar/)
+* [PCjs Random Document Collection](personal/random/)
 
 Publication Archive
 -------------------

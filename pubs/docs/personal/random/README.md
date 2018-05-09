@@ -1,13 +1,13 @@
 ---
 layout: page
-title: The @jeffpar Document Collection
-permalink: /docs/personal/jeffpar/
+title: PCjs Random Document Collection
+permalink: /docs/personal/random/
 ---
 
-The @jeffpar Document Collection
---------------------------------
+PCjs Random Document Collection
+------------------------------
 
-Much like the [@jeffpar Disk Collection](/disks/pcx86/personal/jeffpar/), this is a random assortment of old
+Much like the [PCjs Random Disk Collection](/disks/pcx86/personal/random/), this is a random assortment of old
 documents archived by [@jeffpar](http://jeffpar.com) that may or may not be of historical interest.
 
 We're kicking off this new section of the site with a couple of documents created by [@jeffpar](http://jeffpar.com)
