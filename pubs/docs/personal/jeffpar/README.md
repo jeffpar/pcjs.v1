@@ -7,11 +7,11 @@ permalink: /docs/personal/jeffpar/
 The @jeffpar Document Collection
 --------------------------------
 
-Much like [The @jeffpar Disk Collection](/disks/pcx86/personal/jeffpar/), this is a random assortment of old
-documents that may or may not be of historical interest.
+Much like the [@jeffpar Disk Collection](/disks/pcx86/personal/jeffpar/), this is a random assortment of old
+documents archived by [@jeffpar](http://jeffpar.com) that may or may not be of historical interest.
 
 We're kicking off this new section of the site with a couple of documents created by [@jeffpar](http://jeffpar.com)
-in 1984, detailing his early adventures in PC debugging: decoding and disabling
+in 1984, detailing his early adventures in PC debugging: disassembling and disabling
 [dBASE III Copy-Protection](#dbase-iii-copy-protection).
 
 ---
