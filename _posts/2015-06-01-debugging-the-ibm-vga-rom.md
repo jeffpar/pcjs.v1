@@ -138,5 +138,5 @@ modes commonly used on the IBM VGA.  Here's that table:
 In addition, I've created a [VGA Tests](/tests/pcx86/vga/) directory to hold VGA test and sample code that PCjs can 
 now successfully run (for the most part).  See that directory for more details.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *June 1, 2015 (Updated July 9, 2015)*

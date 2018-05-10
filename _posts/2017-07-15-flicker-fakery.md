@@ -98,5 +98,5 @@ persistence" you prefer.
 
 You can thank me later.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *Jul 15, 2017*

@@ -43,5 +43,5 @@ sequence(s) are failing.  For now, this is the most serious unresolved PCjs bug 
 If you're having a problem (or trouble with a device) that I've not already mentioned, [let me know](mailto:Jeff@pcjs.org).
 Thanks.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *March 31, 2014*

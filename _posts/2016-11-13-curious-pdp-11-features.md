@@ -88,5 +88,5 @@ Moreover, PDPjs' JSON-encoded paper tape images support an *exec* property that 
 set, which will override any start address inside the image.  For these diagnostics, I have set the start address (usually 200)
 via the *exec* property.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *Nov 13, 2016*

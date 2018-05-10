@@ -43,5 +43,5 @@ but until they surface, this is all we have.
 
 [![IBM PC XENIX 2.0 Installation Disk]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/unix/ibm/xenix/2.0/IBM-XENIX-200-INSTALL.jpg)](/disks/pcx86/unix/ibm/xenix/2.0/)
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *Apr 2, 2018*

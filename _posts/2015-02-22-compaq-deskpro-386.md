@@ -26,5 +26,5 @@ using to test and debug my changes over the next few months.
 
 {% include machine.html id="deskpro386" %}
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *February 22, 2015*

@@ -238,5 +238,5 @@ insight into the active fonts and colors used by Fantasy Land and the EGA.
 
 ![Fantasy Land Legend](/disks/pcx86/apps/ibm/fland/fland-legend.png)
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *Apr 23, 2018*

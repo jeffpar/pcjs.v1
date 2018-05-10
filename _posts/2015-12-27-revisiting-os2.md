@@ -48,5 +48,5 @@ Our [IBM OS/2 1.0](/disks/pcx86/os2/ibm/1.0/) demo machine (shown below) has the
 
 {% include machine.html id="ibm5170" %}
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *December 27, 2015*

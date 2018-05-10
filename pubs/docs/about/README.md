@@ -9,8 +9,8 @@ permalink: /docs/about/
 ## About PCjs
 
 The [PCjs Project](https://github.com/jeffpar/pcjs) is a collection of computer simulations written in
-[JavaScript](/modules/).  It is an open-source project maintained and hosted on [GitHub](https://github.com/) as
-[{{ site.pcjs.domain }}]({{ site.url }}/).
+[JavaScript](/modules/).  It is an open-source project maintained on [GitHub](https://github.com/jeffpar) and
+hosted at [{{ site.pcjs.domain }}]({{ site.url }}/).
 
 The goals of the project are to create fast, full-featured simulations of classic computer hardware,
 help people understand how these early machines worked, make it easy to experiment with different machine
@@ -78,7 +78,7 @@ or (at your option) any later version.
 
 You are required to include the following links and copyright notice:
 
-> [PCjs](https://www.pcjs.org/) © 2012-2018 by [Jeff Parsons](http://jeffpar.com)
+> [PCjs](https://www.pcjs.org/) © 2012-2018 by [Jeff Parsons](https://jeffpar.com)
 
 in every copy or modified version of this work, and to display that notice on every web page or computer that it runs on.
 
