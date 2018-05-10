@@ -204,5 +204,5 @@ replacement.  Whatever the reason, it seems clear they didn't want to be bothere
 
 RIP, SYMDEB.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *Feb 25, 2018*

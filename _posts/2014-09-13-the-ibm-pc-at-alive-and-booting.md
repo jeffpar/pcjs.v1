@@ -67,5 +67,5 @@ unnecessarily.  And even though the test machine is configured with 640Kb of RAM
 
 Hmmmm.
  
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *September 13, 2014*

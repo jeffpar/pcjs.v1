@@ -152,5 +152,5 @@ I don't know the right answer, but I do know that the current situation adversel
 websites, who will probably get blank pages when they shouldn't, and other developers, who must all discover/debug/work-around
 this problem on their own.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *April 14, 2014*

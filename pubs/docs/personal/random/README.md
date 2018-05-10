@@ -8,9 +8,9 @@ PCjs Random Document Collection
 ------------------------------
 
 Much like the [PCjs Random Disk Collection](/disks/pcx86/personal/random/), this is a random assortment of old
-documents archived by [@jeffpar](http://jeffpar.com) that may or may not be of historical interest.
+documents archived by [@jeffpar](https://jeffpar.com) that may or may not be of historical interest.
 
-We're kicking off this new section of the site with a couple of documents created by [@jeffpar](http://jeffpar.com)
+We're kicking off this new section of the site with a couple of documents created by [@jeffpar](https://jeffpar.com)
 in 1984, detailing his early adventures in PC debugging: disassembling and disabling
 [dBASE III Copy-Protection](#dbase-iii-copy-protection).
 

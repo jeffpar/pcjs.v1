@@ -93,5 +93,5 @@ script for IBM's [TopView 1.01](/disks/pcx86/apps/ibm/topview/1.01/debugger/):
 The above script automatically "inserts" the [Microsoft Mouse 5.00](/disks/pcx86/tools/microsoft/mouse/5.00/) diskette
 into drive A:, loads the mouse driver, and then configures TopView for serial mouse support.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *Mar 22, 2018*

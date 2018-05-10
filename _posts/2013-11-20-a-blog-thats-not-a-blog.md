@@ -51,5 +51,5 @@ on the web server.
 This so-called blog is more of the same: **README.md** files in a series of folders.  The only question now:
 will this actually evolve into a series...?
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *November 20, 2013*

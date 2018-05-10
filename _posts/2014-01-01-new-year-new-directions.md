@@ -15,5 +15,5 @@ Initial goals for 2014 include
 
 I guess we'll learn more as the year progresses.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *January 20, 2014*

@@ -30,5 +30,5 @@ Strangely, unlike all previous and subsequent versions of Windows, there was no 
 
 At least there was no `LOSE` command.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *March 12, 2016*

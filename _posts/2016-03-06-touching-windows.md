@@ -44,5 +44,5 @@ as my Solitaire experiment demonstrates.  And there are still some open question
 support operations like *right drag*, since the current *mouse drag* operation is inherently *left drag*;
 one solution would be to rely on multi-touch and use two fingers to trigger right-button operations.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *March 6, 2016*

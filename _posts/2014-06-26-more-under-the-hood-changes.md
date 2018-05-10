@@ -14,5 +14,5 @@ To that end, there's a new [/pubs/](/pubs/) directory for old documents, and [/d
 more disk images, with more on the way.  I have a TON of old diskette images, and it has taken more time to organize
 them and create manifests than I would like.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *June 26, 2014*

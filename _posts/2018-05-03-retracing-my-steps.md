@@ -79,7 +79,7 @@ the lowly MDA and CGA cards to the much more powerful EGA and VGA cards, the wor
 
 For example, one of [Michael Abrash's VGA "Black Book" Tests](/tests/pcx86/vga/):
 
-- [L23-1.ASM: Animates four balls bouncing around a playfield by using page flipping and panning](/tests/pcx86/vga/L23-1.ASM)
+- [L23-1.ASM: Animates four balls bouncing around a playfield by using page flipping and panning](/tests/pcx86/vga/src/L23-1.ASM)
 
 relied on a couple of critical features of the EGA:
 
@@ -90,11 +90,11 @@ However, if we're just toggling the retrace bits "willy-nilly", then we're not r
 importantly, we're not helping ourselves know when we should honor (or not honor) the contents of registers like the
 CRT Controller Start Address.
 
-As a result, images initially produced by [L23-1.ASM](/tests/pcx86/vga/L23-1.ASM) would "jerk" horribly, until I
+As a result, images initially produced by [L23-1.ASM](/tests/pcx86/vga/src/L23-1.ASM) would "jerk" horribly, until I
 put some work-arounds in place.
 
 That was a few years ago.  Fast-forward to my recent efforts to run [Fantasy Land](/blog/2018/04/23/), which performed
-pixel-panning much like [L23-1.ASM](/tests/pcx86/vga/L23-1.ASM), but in text mode rather than graphics mode, and
+pixel-panning much like [L23-1.ASM](/tests/pcx86/vga/src/L23-1.ASM), but in text mode rather than graphics mode, and
 also required:
 
 - Programmable fonts
@@ -129,5 +129,5 @@ characters needed to be redrawn after a font change.
 [Fantasy Land](/blog/2017/07/03/) wasn't a particularly well-known program, but it definitely has its place among
 historically significant PC software, and thanks to it, PCjs video emulation is now better for it.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *May 3, 2018*

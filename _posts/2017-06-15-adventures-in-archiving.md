@@ -83,5 +83,5 @@ In addition, I would hope that anything the Internet Archive "archives" itself (
 is duplicated and preserved according to a *much* higher standard than any files, documents, etc, it has simply scraped
 from the Internet.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *Jun 15, 2017*

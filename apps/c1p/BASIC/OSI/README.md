@@ -15,5 +15,5 @@ OSI Challenger 1P BASIC Programs
 - [STAR WARS](starwars/)
 - [TRIG TUTOR](trigtutor/)
 
-The project also includes some of [Jeff's](http://jeffpar.com) [BASIC Programs](../jeffpar/) written
+The project also includes some of [Jeff's](https://jeffpar.com) [BASIC Programs](../jeffpar/) written
 from 1979 to 1980.

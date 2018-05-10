@@ -28,5 +28,5 @@ I'd be happy to buy them, scan them, and recycle them.
 
 Thanks.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *August 1, 2014*

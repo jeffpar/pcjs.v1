@@ -22,5 +22,5 @@ hasn't been ported to the newer **diskdump** Node module yet).
 Almost nothing has changed in the PCjs client-side code (which is where the emulator runs), except for changes to use
 the new **diskdump** API.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *April 12, 2014*
