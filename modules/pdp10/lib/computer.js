@@ -810,7 +810,7 @@ class ComputerPDP10 extends Component {
      */
     powerReport(stateComputer)
     {
-        if (Component.confirmUser("There may be a problem with your " + PDP10.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PDP10.APPNAME + " machine state to http://" + SITEHOST + ".")) {
+        if (Component.confirmUser("There may be a problem with your " + PDP10.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PDP10.APPNAME + " machine state to " + SITEURL + ".")) {
             Web.sendReport(PDP10.APPNAME, PDP10.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
         }
     }

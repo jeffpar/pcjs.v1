@@ -169,7 +169,7 @@ var PCX86 = {
     PREFETCH:    PREFETCH,
     PRIVATE:     PRIVATE,       // shared
     TYPEDARRAYS: TYPEDARRAYS,
-    SITEHOST:    SITEHOST,      // shared
+    SITEURL:     SITEURL,       // shared
     SYMBOLS:     SYMBOLS,
     XMLVERSION:  XMLVERSION     // shared
 };

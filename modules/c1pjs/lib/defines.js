@@ -67,6 +67,6 @@ var C1PJS = {
     DEBUGGER:    DEBUGGER,
     MAXDEBUG:    MAXDEBUG,      // shared
     PRIVATE:     PRIVATE,       // shared
-    SITEHOST:    SITEHOST,      // shared
+    SITEURL:     SITEURL,       // shared
     XMLVERSION:  XMLVERSION     // shared
 };

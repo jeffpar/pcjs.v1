@@ -119,7 +119,7 @@ var PDP11 = {
     TYPEDARRAYS:TYPEDARRAYS,
     MEMFAULT:   MEMFAULT,
     WORDBUS:    WORDBUS,
-    SITEHOST:   SITEHOST,       // shared
+    SITEURL:    SITEURL,        // shared
     XMLVERSION: XMLVERSION,     // shared
 
     /*

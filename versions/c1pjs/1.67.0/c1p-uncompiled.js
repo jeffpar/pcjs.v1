@@ -7,9 +7,9 @@
 /**
  * @define {string}
  */
-var APPVERSION = "";            // this @define is overridden by the Closure Compiler with the version in machines.json
+var APPVERSION = "";                    // this @define is overridden by the Closure Compiler with the version in machines.json
 
-var XMLVERSION = null;          // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
+var XMLVERSION = null;                  // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
 
 var COPYRIGHT = "Copyright © 2012-2018 Jeff Parsons <Jeff@pcjs.org>";
 
@@ -20,27 +20,27 @@ var CSSCLASS = "pcjs";
 /**
  * @define {string}
  */
-var SITEHOST = "localhost:8088";// this @define is overridden by the Closure Compiler with "www.pcjs.org"
+var SITEURL = "http://localhost:8088";  // this @define is overridden by the Closure Compiler with "https://www.pcjs.org"
 
 /**
  * @define {boolean}
  */
-var COMPILED = false;           // this @define is overridden by the Closure Compiler (to true)
+var COMPILED = false;                   // this @define is overridden by the Closure Compiler (to true)
 
 /**
  * @define {boolean}
  */
-var DEBUG = true;               // this @define is overridden by the Closure Compiler (to false) to remove DEBUG-only code
+var DEBUG = true;                       // this @define is overridden by the Closure Compiler (to false) to remove DEBUG-only code
 
 /**
  * @define {boolean}
  */
-var MAXDEBUG = false;           // this @define is overridden by the Closure Compiler (to false) to remove MAXDEBUG-only code
+var MAXDEBUG = false;                   // this @define is overridden by the Closure Compiler (to false) to remove MAXDEBUG-only code
 
 /**
  * @define {boolean}
  */
-var PRIVATE = false;            // this @define is overridden by the Closure Compiler (to false) to enable PRIVATE code
+var PRIVATE = false;                    // this @define is overridden by the Closure Compiler (to false) to enable PRIVATE code
 
 /*
  * RS-232 DB-25 Pin Definitions, mapped to bits 1-25 in a 32-bit status value.
@@ -1797,7 +1797,7 @@ class Web {
      * @param {string} sUser (ie, the user key, if any)
      * @param {string} sType (eg, "bug"); one of ReportAPI.TYPE.*
      * @param {string} sReport (eg, unparsed state data)
-     * @param {string} [sHostName] (default is http://SITEHOST)
+     * @param {string} [sHostName] (default is SITEURL)
      */
     static sendReport(sApp, sVer, sURL, sUser, sType, sReport, sHostName)
     {
@@ -1808,7 +1808,7 @@ class Web {
         dataPost[ReportAPI.QUERY.USER] = sUser;
         dataPost[ReportAPI.QUERY.TYPE] = sType;
         dataPost[ReportAPI.QUERY.DATA] = sReport;
-        let sReportURL = (sHostName? sHostName : "http://" + SITEHOST) + ReportAPI.ENDPOINT;
+        let sReportURL = (sHostName? sHostName : SITEURL) + ReportAPI.ENDPOINT;
         Web.getResource(sReportURL, dataPost, true);
     }
 
@@ -1819,7 +1819,7 @@ class Web {
      */
     static getHost()
     {
-        return ("http://" + (window? window.location.host : SITEHOST));
+        return (window? window.location.protocol + "//" + window.location.host : SITEURL);
     }
 
     /**
@@ -4004,7 +4004,7 @@ var C1PJS = {
     DEBUGGER:    DEBUGGER,
     MAXDEBUG:    MAXDEBUG,      // shared
     PRIVATE:     PRIVATE,       // shared
-    SITEHOST:    SITEHOST,      // shared
+    SITEURL:     SITEURL,       // shared
     XMLVERSION:  XMLVERSION     // shared
 };
 

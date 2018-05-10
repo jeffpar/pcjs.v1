@@ -9,7 +9,7 @@
         "window": true,
         "APPNAME": false,
         "APPVERSION": false,
-        "SITEHOST": false,
+        "SITEURL": false,
         "DEBUG": true,
         "MAXDEBUG": false,
         "C1PJSCLASS": true,
