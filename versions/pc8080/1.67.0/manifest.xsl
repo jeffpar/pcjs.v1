@@ -14,7 +14,7 @@
 	<xsl:template match="/manifest[@type = 'document']">
 		<html lang="en">
 			<head>
-				<title><xsl:value-of select="$SITEHOST"/></title>
+				<title>PCjs</title>
 				<xsl:call-template name="commonStyles"/>
 				<xsl:call-template name="componentStyles"/>
 			</head>
@@ -66,7 +66,7 @@
 		</xsl:variable>
 		<html lang="en">
 			<head>
-				<title><xsl:value-of select="$SITEHOST"/></title>
+				<title>PCjs</title>
 				<xsl:call-template name="commonStyles"/>
 				<xsl:call-template name="componentStyles"/>
 			</head>
