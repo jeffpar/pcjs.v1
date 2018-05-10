@@ -29,9 +29,9 @@ and assorted mobile browsers.
 
 {% include machine.html id="ibm5150" %}
 
-The PCjs [machine](/devices/pcx86/machine/5150/mda/64kb/) above uses [PCx86](/docs/pcx86/) configured with an Intel
-8088 running at 4.77Mhz, with 64Kb of RAM and an IBM Monochrome Display Adapter.  For more control, there are also
-[Control Panel](/devices/pcx86/machine/5150/mda/64kb/debugger/) featuring the built-in PCx86 Debugger.
+The PCjs [machine](/devices/pcx86/machine/5150/mda/64kb/) above uses [PCx86](/docs/pcx86/) configured with
+an Intel 8088 running at 4.77Mhz, with 64Kb of RAM and an IBM Monochrome Display Adapter.  The machine is also available
+with a [Control Panel](/devices/pcx86/machine/5150/mda/64kb/debugger/) featuring the built-in PCx86 Debugger.
 For even greater control, build your own PC. The [PCx86 Documentation](/docs/pcx86/) will help you get started.
 
 PCx86 has steadily evolved to support more classic x86-based machines, including the IBM PC XT, the 80286-based IBM PC AT,
@@ -80,14 +80,14 @@ and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/
 
 License
 -------
-The [PCjs Project](https://github.com/jeffpar/pcjs) is now an open-source project on [GitHub](http://github.com/).
+The [PCjs Project](https://github.com/jeffpar/pcjs) is now an open-source project on [GitHub](http://github.com/jeffpar).
 All published portions are free for redistribution and/or modification under the terms of the
 [GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
 
 You are required to include the following links and copyright notice:
 
-> [PCjs]({{ site.url }}/) © 2012-2018 by [Jeff Parsons](http://jeffpar.com)
+> [PCjs]({{ site.url }}/) © 2012-2018 by [Jeff Parsons](https://jeffpar.com)
 
 in every copy or modified version of this work, and to display that notice on every web page or computer that it runs on.
 
