@@ -141,7 +141,7 @@
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="style">
-			<xsl:if test="$component = 'machine'">overflow:auto;width:100%;</xsl:if>
+			<xsl:if test="$component = 'machine'">overflow:auto;</xsl:if>
 			<xsl:if test="@background">
 				<xsl:if test="@background = 'default'">background-color:<xsl:value-of select="$BGNDCOLOR"/>;</xsl:if>
 				<xsl:if test="@background != 'default'">background-color:<xsl:value-of select="@background"/>;</xsl:if>
