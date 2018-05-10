@@ -531,7 +531,7 @@ Computer.prototype.powerOn = function(resume)
             this.stateFailSafe.store();
 
             var fValidate = this.resume && !this.fServerState;
-            if (resume == Computer.RESUME_AUTO || web.confirmUser("Click OK to restore the previous " + Computer.APPNAME + " machine state, or CANCEL to reset the machine.")) {
+            if (resume == Computer.RESUME_AUTO || Component.confirmUser("Click OK to restore the previous " + Computer.APPNAME + " machine state, or CANCEL to reset the machine.")) {
                 fRestore = stateComputer.parse();
                 if (fRestore) {
                     var sCode = stateComputer.get(UserAPI.RES.CODE);
@@ -804,9 +804,15 @@ Computer.prototype.checkPower = function()
  */
 Computer.prototype.powerReport = function(stateComputer)
 {
-    if (web.confirmUser("There may be a problem with your " + Computer.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + Computer.APPNAME + " machine state to " + SITEURL + ".")) {
-        web.sendReport(Computer.APPNAME, Computer.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
-    }
+    //
+    // This is all we can realistically do for now.
+    //
+    web.onError("There may be a problem with your " + Computer.APPNAME + " machine.");
+    //
+    // if (Component.confirmUser("There may be a problem with your " + Computer.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + Computer.APPNAME + " machine state to " + SITEURL + ".")) {
+    //     web.sendReport(Computer.APPNAME, Computer.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
+    // }
+    //
 };
 
 /**
@@ -1033,9 +1039,9 @@ Computer.prototype.stop = function(ms, nCycles)
  * setBinding(sHTMLType, sBinding, control, sValue)
  *
  * @this {Computer}
- * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+ * @param {string} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
- * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
@@ -1150,7 +1156,7 @@ Computer.prototype.queryUserID = function(fPrompt)
                  * merely a precaution, because ordinarily, setBinding() should have already determined if we are
                  * running from pcjs.org and disabled any "Save" button.
                  */
-                sUserID = web.promptUser("Saving machine states on the pcjs.org server is currently unsupported.\n\nIf you're running your own server, enter your user ID below.");
+                sUserID = Component.promptUser("Saving machine states on the pcjs.org server is currently unsupported.\n\nIf you're running your own server, enter your user ID below.");
                 if (sUserID) {
                     sUserID = this.verifyUserID(sUserID);
                     if (!sUserID) this.notice("The user ID is invalid.");
@@ -1348,7 +1354,7 @@ Computer.prototype.onReset = function()
          * I used to bypass the prompt if this.resume == Computer.RESUME_AUTO, setting fSave to true automatically,
          * but that gives the user no means of resetting a resumable machine that contains errors in its resume state.
          */
-        var fSave = (/* this.resume == Computer.RESUME_AUTO || */ web.confirmUser("Click OK to save changes to this " + Computer.APPNAME + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
+        var fSave = (/* this.resume == Computer.RESUME_AUTO || */ Component.confirmUser("Click OK to save changes to this " + Computer.APPNAME + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
         this.powerOff(fSave, true);
         /*
          * Forcing the page to reload is an expedient option, but ugly. It's preferable to call powerOn()
