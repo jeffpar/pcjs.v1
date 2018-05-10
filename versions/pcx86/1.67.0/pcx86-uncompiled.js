@@ -64715,9 +64715,13 @@ class FDC extends Component {
             /*
              * WARNING: This conversion of drive number to drive letter, starting with A:, is very simplistic
              * and is not guaranteed to match the drive mapping that DOS ultimately uses.
+             *
+             * TODO: Consider adding support for non-modal notices that appear briefly over the machine and then fade,
+             * because these modal alerts quickly become annoying.  In the meantime, I now set fPrintOnly to true, on the
+             * theory no message is a good sign, while load errors in disk.js should continue to trigger notifications.
              */
             if (!fQuiet) {
-                this.notice("Drive " + String.fromCharCode(0x41 + iDrive) + " unloaded", fAutoUnload);
+                this.notice("Drive " + String.fromCharCode(0x41 + iDrive) + " unloaded", true /* fAutoUnload */);
             }
             /*
              * Try to avoid any unnecessary hysteresis regarding the diskette display if this unload is merely
