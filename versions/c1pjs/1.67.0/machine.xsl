@@ -44,6 +44,7 @@
 							</xsl:call-template>
 						</div>
 					</div>
+					<xsl:call-template name="displayMachine"/>
 					<xsl:call-template name="commonBottom"/>
 				</div>
 				<xsl:call-template name="componentScripts">
