@@ -71,7 +71,7 @@ of the project for the web is the preferred solution.
 License
 -------
 
-The [PCjs Project](https://github.com/jeffpar/pcjs) is now an open-source project on [GitHub](https://github.com).
+The [PCjs Project](https://github.com/jeffpar/pcjs) is now an open-source project on [GitHub](https://github.com/jeffpar).
 All published portions are free for redistribution and/or modification under the terms of the
 [GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.

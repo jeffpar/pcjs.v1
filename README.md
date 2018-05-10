@@ -86,7 +86,7 @@ and the original machine are available in the [C1Pjs Documentation](/pubs/docs/c
 Developer Notes
 ---------------
 
-The [PCjs repository](https://github.com/jeffpar/pcjs) on GitHub contains everything needed to run PCjs
+The [PCjs Repository](https://github.com/jeffpar/pcjs) on GitHub contains everything needed to run PCjs
 computer simulations.  All the PCjs emulators run in any modern web browser, with or without a web server,
 and examples are provided for both [local](/apps/pcx86/examples/) and [remote](https://www.pcjs.org) operation.
 
