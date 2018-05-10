@@ -1298,7 +1298,7 @@ class Input extends Device {
              * display are offset.
              */
             this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
-            
+
             /*
              * The 'buttonDelay' setting is only necessary for devices (ie, old calculator chips) that are either slow
              * to respond and/or have debouncing logic that would otherwise be defeated.
@@ -2072,7 +2072,7 @@ class LED extends Device {
          * to true by periodic display operations that call setLEDState(); we clear it after every
          * periodic drawBuffer(), so if the machine fails to execute a setBuffer() in a timely manner,
          * we will see that fBufferTickled hasn't been "tickled", and automatically blank the display.
-         * 
+         *
          * fDisplayOn is a global "on/off" switch for the entire display.
          */
         this.fBufferModified = this.fBufferTickled = false;
@@ -2161,9 +2161,9 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {boolean} [fForced] (if not set, this is a normal refresh call)
-     * @param {number} [t] (time value, if available)
+     * @param {number} [t] (time value, if available, from the requestAnimationFrame() callback)
      */
-    drawBuffer(fForced = false, t)
+    drawBuffer(fForced = false, t = 0)
     {
         if (this.fBufferModified || fForced) {
             if (this.type < LED.TYPE.DIGIT) {
@@ -2192,7 +2192,7 @@ class LED extends Device {
      * drawGrid(fForced)
      *
      * Used by drawBuffer() for LED.TYPE.ROUND, LED.TYPE.SQUARE, etc.
-     * 
+     *
      * If the buffer was recently shifted left (ie, nShiftedLeft is set), then we take advantage
      * of that knowledge to use drawImage() to shift the entire grid image left, and then redrawing
      * only the rightmost visible column.
@@ -2429,7 +2429,7 @@ class LED extends Device {
 
     /**
      * enableDisplay(on)
-     * 
+     *
      * @this {LED}
      * @param {boolean} [on]
      */
@@ -2440,7 +2440,7 @@ class LED extends Device {
             this.fBufferModified = true;
         }
     }
-    
+
     /**
      * getBuffer()
      *
@@ -2594,7 +2594,7 @@ class LED extends Device {
      * less than 1 is set).
      *
      * TODO: Cache frequently requested colors.
-     * 
+     *
      * @this {LED}
      * @param {Array.<number>} rgb
      * @returns {string}
@@ -2749,10 +2749,10 @@ class LED extends Device {
 
     /**
      * setContainerStyle(sAttr, sValue)
-     * 
+     *
      * @this {LED}
-     * @param {string} sAttr 
-     * @param {string} sValue 
+     * @param {string} sAttr
+     * @param {string} sValue
      */
     setContainerStyle(sAttr, sValue)
     {
@@ -3269,7 +3269,7 @@ class ROM extends Device {
      * loadState(state)
      *
      * If any saved values don't match (presumably overridden), abandon the given state and return false.
-     * 
+     *
      * @this {ROM}
      * @param {Array} state
      * @returns {boolean}
@@ -3413,7 +3413,7 @@ class Time extends Device {
             /*
              * When clocking exclusively by animation frames, setSpeed() calculates how many cycles
              * each animation frame should "deposit" in our cycle bank:
-             * 
+             *
              *      this.nCyclesDepositPerFrame = (nCyclesPerSecond / 60) + 0.00000001;
              *
              * After that amount is added to our "balance" (this.nCyclesDeposited), we make a "withdrawal"
@@ -4406,13 +4406,13 @@ class Chip extends Device {
         this.sRule = this.getDefaultString('rule', "");
         this.sPattern = this.getDefaultString('pattern', "");
         this.setMessage(this.sMessageInit = this.getDefaultString('message', ""));
-        
+
         /*
          * The 'toggleColor' property currently affects only grids that have a color palette: if true,
          * then only an LED's color is toggled; otherwise, only its state (ie, ON or OFF) is toggled.
          */
         this.fToggleColor = this.getDefaultBoolean('toggleColor', false);
-        
+
         /*
          * Since all bindings should have been completed by super(), we can make a preliminary call
          * to getCounts() to determine how many counts are stored per LED, to preallocate a count buffer.
@@ -4626,7 +4626,7 @@ class Chip extends Device {
      * doCounting()
      *
      * Implements rule LIFE1 (straight-forward implementation of Conway's Game of Life rule "B3/S23").
-     * 
+     *
      * This iterates row-by-row and column-by-column.  It takes advantage of the one-dimensional LED
      * buffer layout to move through the entire grid with a "master" cell index (iCell) and corresponding
      * indexes for all 8 "neighboring" cells (iNO, iNE, iEA, iSE, iSO, iSW, iWE, and iNW), incrementing
@@ -4664,7 +4664,7 @@ class Chip extends Device {
          * assumed, so we obtain it from the LED object, and use it to calculate the per-cell increment,
          * per-row increment, and per-grid increment; the latter gives us the offset of the LED buffer's
          * scratch row, which we rely upon when wrap is turned off.
-         * 
+         *
          * NOTE: Since we're only processing colsView, not cols, we must include nBufferIncExtra in nIncPerRow.
          */
         let nInc = leds.nBufferInc;
@@ -4825,11 +4825,11 @@ class Chip extends Device {
      * doShifting()
      *
      * Implements rule LEFT1 (shift left one cell).
-     * 
+     *
      * Some of the state we maintain outside of the LED array includes the number of columns of data remaining
      * in the "offscreen" portion of the array (nMessageCount).  Whenever we see that it's zero, we load it with the
      * next chuck of data (ie, the LED pattern for the next symbol in sMessage).
-     * 
+     *
      * @this {Chip}
      * @param {number} [shift] (default is 1, for a leftward shift of one cell)
      * @returns {number}
@@ -4874,7 +4874,7 @@ class Chip extends Device {
         let buffer = leds.getBuffer();
         let nInc = leds.nBufferInc * shift;
         let nIncPerRow = leds.nBufferInc * nCols;
-        
+
         let col = 0, nEmptyCols = 0, iCell = 0;
         this.nLeftEmpty = this.nRightEmpty = -1;
 
@@ -4920,15 +4920,15 @@ class Chip extends Device {
 
         leds.fBufferModified = true;
         leds.nShiftedLeft = shift;
-        
+
         return cActive;
     }
 
     /**
      * getCount(binding)
-     * 
+     *
      * @this {Chip}
-     * @param {string} binding 
+     * @param {string} binding
      * @returns {number}
      */
     getCount(binding)
@@ -4941,7 +4941,7 @@ class Chip extends Device {
         }
         return count;
     }
-    
+
     /**
      * getCounts()
      *
@@ -5098,9 +5098,9 @@ class Chip extends Device {
          * TODO: Cache these pattern splits.
          */
         let aTokens = sPattern.split(/([a-z$])/i);
-        
+
         if (!fOverwrite) leds.clearBuffer();
-        
+
         /*
          * We could add checks that verify that col and row stay within the bounds of the specified
          * width and height of the pattern, but it's possible that there are some legit patterns out
@@ -5172,12 +5172,12 @@ class Chip extends Device {
 
         return ((colMax -= (iCol - 1)) < 0? 0 : colMax);
     }
-    
+
     /**
      * loadState(state)
      *
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
-     * 
+     *
      * @this {Chip}
      * @param {Object|Array|null} state
      * @returns {boolean}
@@ -5279,7 +5279,7 @@ class Chip extends Device {
             leds.drawBuffer();
         }
     }
-    
+
     /**
      * onLoad()
      *
@@ -5340,7 +5340,7 @@ class Chip extends Device {
 
     /**
      * processMessageCmd(shift, cmd, count)
-     * 
+     *
      * @this {Chip}
      * @param {number} [shift]
      * @param {string} [cmd]
@@ -5398,10 +5398,10 @@ class Chip extends Device {
         if (!cmd) return this.processMessageSymbol(shift);
         return false;
     }
-    
+
     /**
      * processMessageSymbol(shift)
-     * 
+     *
      * @this {Chip}
      * @param {number} [shift]
      * @returns {boolean} (true if another message symbol loaded)
@@ -5453,7 +5453,7 @@ class Chip extends Device {
         this.sMessageCmd = Chip.MESSAGE_CMD.HALT;
         return false;
     }
-    
+
     /**
      * savePattern(fMinWidth, fMinHeight)
      *
@@ -5504,7 +5504,7 @@ class Chip extends Device {
 
         /**
          * flushRun(fEndRow)
-         * 
+         *
          * @param {boolean} [fEndRow]
          */
         let flushRun = function(fEndRow) {
@@ -5680,7 +5680,7 @@ class Chip extends Device {
         this.sMessageCmd = Chip.MESSAGE_CMD.LOAD;
         this.iMessageNext = this.nMessageCount = 0;
     }
-    
+
     /**
      * updateBackgroundImage(sImage)
      *
