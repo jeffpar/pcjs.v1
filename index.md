@@ -80,7 +80,7 @@ and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/
 
 License
 -------
-The [PCjs Project](https://github.com/jeffpar/pcjs) is now an open-source project on [GitHub](http://github.com/jeffpar).
+The [PCjs Project](https://github.com/jeffpar/pcjs) is now an open-source project on [GitHub](https://github.com/jeffpar).
 All published portions are free for redistribution and/or modification under the terms of the
 [GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
@@ -97,5 +97,5 @@ More Information
 ----------------
 Learn more about the [PCjs Project](/docs/about/) and [PCx86](/docs/about/pcx86/).  To
 create your own PCx86 machines, see the [PCx86 Documentation](/docs/pcx86/) for details.
-If you have questions or run into any problems, feel free to [tweet](http://twitter.com/jeffpar) or
+If you have questions or run into any problems, feel free to [tweet](https://twitter.com/jeffpar) or
 [email](mailto:Jeff@pcjs.org).
