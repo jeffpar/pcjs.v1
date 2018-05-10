@@ -3,7 +3,7 @@
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
- * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+ * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -18,7 +18,7 @@
  *
  * You are required to include the above copyright notice in every modified copy of this work
  * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <http://pcjs.org/modules/devices/machine.js>.
+ * <https://www.pcjs.org/modules/devices/machine.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -85,13 +85,13 @@ class Chip extends Device {
         this.sRule = this.getDefaultString('rule', "");
         this.sPattern = this.getDefaultString('pattern', "");
         this.setMessage(this.sMessageInit = this.getDefaultString('message', ""));
-        
+
         /*
          * The 'toggleColor' property currently affects only grids that have a color palette: if true,
          * then only an LED's color is toggled; otherwise, only its state (ie, ON or OFF) is toggled.
          */
         this.fToggleColor = this.getDefaultBoolean('toggleColor', false);
-        
+
         /*
          * Since all bindings should have been completed by super(), we can make a preliminary call
          * to getCounts() to determine how many counts are stored per LED, to preallocate a count buffer.
@@ -305,7 +305,7 @@ class Chip extends Device {
      * doCounting()
      *
      * Implements rule LIFE1 (straight-forward implementation of Conway's Game of Life rule "B3/S23").
-     * 
+     *
      * This iterates row-by-row and column-by-column.  It takes advantage of the one-dimensional LED
      * buffer layout to move through the entire grid with a "master" cell index (iCell) and corresponding
      * indexes for all 8 "neighboring" cells (iNO, iNE, iEA, iSE, iSO, iSW, iWE, and iNW), incrementing
@@ -343,7 +343,7 @@ class Chip extends Device {
          * assumed, so we obtain it from the LED object, and use it to calculate the per-cell increment,
          * per-row increment, and per-grid increment; the latter gives us the offset of the LED buffer's
          * scratch row, which we rely upon when wrap is turned off.
-         * 
+         *
          * NOTE: Since we're only processing colsView, not cols, we must include nBufferIncExtra in nIncPerRow.
          */
         let nInc = leds.nBufferInc;
@@ -504,11 +504,11 @@ class Chip extends Device {
      * doShifting()
      *
      * Implements rule LEFT1 (shift left one cell).
-     * 
+     *
      * Some of the state we maintain outside of the LED array includes the number of columns of data remaining
      * in the "offscreen" portion of the array (nMessageCount).  Whenever we see that it's zero, we load it with the
      * next chuck of data (ie, the LED pattern for the next symbol in sMessage).
-     * 
+     *
      * @this {Chip}
      * @param {number} [shift] (default is 1, for a leftward shift of one cell)
      * @returns {number}
@@ -553,7 +553,7 @@ class Chip extends Device {
         let buffer = leds.getBuffer();
         let nInc = leds.nBufferInc * shift;
         let nIncPerRow = leds.nBufferInc * nCols;
-        
+
         let col = 0, nEmptyCols = 0, iCell = 0;
         this.nLeftEmpty = this.nRightEmpty = -1;
 
@@ -599,15 +599,15 @@ class Chip extends Device {
 
         leds.fBufferModified = true;
         leds.nShiftedLeft = shift;
-        
+
         return cActive;
     }
 
     /**
      * getCount(binding)
-     * 
+     *
      * @this {Chip}
-     * @param {string} binding 
+     * @param {string} binding
      * @returns {number}
      */
     getCount(binding)
@@ -620,7 +620,7 @@ class Chip extends Device {
         }
         return count;
     }
-    
+
     /**
      * getCounts()
      *
@@ -777,9 +777,9 @@ class Chip extends Device {
          * TODO: Cache these pattern splits.
          */
         let aTokens = sPattern.split(/([a-z$])/i);
-        
+
         if (!fOverwrite) leds.clearBuffer();
-        
+
         /*
          * We could add checks that verify that col and row stay within the bounds of the specified
          * width and height of the pattern, but it's possible that there are some legit patterns out
@@ -851,12 +851,12 @@ class Chip extends Device {
 
         return ((colMax -= (iCol - 1)) < 0? 0 : colMax);
     }
-    
+
     /**
      * loadState(state)
      *
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
-     * 
+     *
      * @this {Chip}
      * @param {Object|Array|null} state
      * @returns {boolean}
@@ -958,7 +958,7 @@ class Chip extends Device {
             leds.drawBuffer();
         }
     }
-    
+
     /**
      * onLoad()
      *
@@ -1019,7 +1019,7 @@ class Chip extends Device {
 
     /**
      * processMessageCmd(shift, cmd, count)
-     * 
+     *
      * @this {Chip}
      * @param {number} [shift]
      * @param {string} [cmd]
@@ -1077,10 +1077,10 @@ class Chip extends Device {
         if (!cmd) return this.processMessageSymbol(shift);
         return false;
     }
-    
+
     /**
      * processMessageSymbol(shift)
-     * 
+     *
      * @this {Chip}
      * @param {number} [shift]
      * @returns {boolean} (true if another message symbol loaded)
@@ -1132,7 +1132,7 @@ class Chip extends Device {
         this.sMessageCmd = Chip.MESSAGE_CMD.HALT;
         return false;
     }
-    
+
     /**
      * savePattern(fMinWidth, fMinHeight)
      *
@@ -1183,7 +1183,7 @@ class Chip extends Device {
 
         /**
          * flushRun(fEndRow)
-         * 
+         *
          * @param {boolean} [fEndRow]
          */
         let flushRun = function(fEndRow) {
@@ -1359,7 +1359,7 @@ class Chip extends Device {
         this.sMessageCmd = Chip.MESSAGE_CMD.LOAD;
         this.iMessageNext = this.nMessageCount = 0;
     }
-    
+
     /**
      * updateBackgroundImage(sImage)
      *

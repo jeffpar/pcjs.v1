@@ -3,7 +3,7 @@
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
- * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+ * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -18,7 +18,7 @@
  *
  * You are required to include the above copyright notice in every modified copy of this work
  * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <http://pcjs.org/modules/devices/machine.js>.
+ * <https://www.pcjs.org/modules/devices/machine.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -242,7 +242,7 @@ class LED extends Device {
          * to true by periodic display operations that call setLEDState(); we clear it after every
          * periodic drawBuffer(), so if the machine fails to execute a setBuffer() in a timely manner,
          * we will see that fBufferTickled hasn't been "tickled", and automatically blank the display.
-         * 
+         *
          * fDisplayOn is a global "on/off" switch for the entire display.
          */
         this.fBufferModified = this.fBufferTickled = false;
@@ -362,7 +362,7 @@ class LED extends Device {
      * drawGrid(fForced)
      *
      * Used by drawBuffer() for LED.TYPE.ROUND, LED.TYPE.SQUARE, etc.
-     * 
+     *
      * If the buffer was recently shifted left (ie, nShiftedLeft is set), then we take advantage
      * of that knowledge to use drawImage() to shift the entire grid image left, and then redrawing
      * only the rightmost visible column.
@@ -599,7 +599,7 @@ class LED extends Device {
 
     /**
      * enableDisplay(on)
-     * 
+     *
      * @this {LED}
      * @param {boolean} [on]
      */
@@ -610,7 +610,7 @@ class LED extends Device {
             this.fBufferModified = true;
         }
     }
-    
+
     /**
      * getBuffer()
      *
@@ -764,7 +764,7 @@ class LED extends Device {
      * less than 1 is set).
      *
      * TODO: Cache frequently requested colors.
-     * 
+     *
      * @this {LED}
      * @param {Array.<number>} rgb
      * @returns {string}
@@ -919,10 +919,10 @@ class LED extends Device {
 
     /**
      * setContainerStyle(sAttr, sValue)
-     * 
+     *
      * @this {LED}
-     * @param {string} sAttr 
-     * @param {string} sValue 
+     * @param {string} sAttr
+     * @param {string} sValue
      */
     setContainerStyle(sAttr, sValue)
     {

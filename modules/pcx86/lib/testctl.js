@@ -3,7 +3,7 @@
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
- * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+ * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -18,7 +18,7 @@
  *
  * You are required to include the above copyright notice in every modified copy of this work
  * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <http://pcjs.org/modules/shared/lib/defines.js>.
+ * <https://www.pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -68,12 +68,12 @@ class TestController extends Component {
         this.tests = null;
         let fLoading = false;
         this.urlTests = parms['tests'];
-        
+
         this.consoleBuffer = "";
         this.controlBuffer = null;
         this.sendData = null;
         this.deliverData = this.deliverInput = this.deliverTests = null;
-        
+
         this.sBinding = parms['binding'];
         if (this.sBinding) {
             this.serialPort = Component.getComponentByID(this.sBinding, this.id);
@@ -112,9 +112,9 @@ class TestController extends Component {
         }, function(nState) {
             controller.println(sProgress, Component.PRINT.PROGRESS);
         });
-        
+
     }
-    
+
     /**
      * doneLoad(sURL, sTestData, nErrorCode)
      *
@@ -273,7 +273,7 @@ class TestController extends Component {
     printf(format, ...args)
     {
         let s = Str.sprintf(format, ...args);
-        
+
         if (this.controlBuffer != null) {
             if (s != '\r') {
                 if (s == '\b' || s == "\b \b") {
@@ -290,7 +290,7 @@ class TestController extends Component {
                 this.controlBuffer.scrollTop = this.controlBuffer.scrollHeight;
             }
         }
-        
+
         if (this.consoleBuffer != null) {
             let i = s.lastIndexOf('\n');
             if (i >= 0) {
@@ -320,7 +320,7 @@ class TestController extends Component {
             for (let i = 0; i < data.length; i++) this.deliverData(data[i]);
         }
     }
-    
+
     /**
      * TestController.init()
      *

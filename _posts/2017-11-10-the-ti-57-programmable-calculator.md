@@ -143,7 +143,7 @@ too, but if it's omitted, a transparent background is used.
 Even for configurations that have already been created, like the [TI-57](#pcjs-ti-57-emulator) on this page, any
 property listed in a device's *overrides* can be overridden with a URL parameter.  For example:
 
-	http://www.pcjs.org/devices/ti57/machine/?color=lime
+	https://www.pcjs.org/devices/ti57/machine/?color=lime
 
 Currently, the following properties may be overridden, within the given minimums and maximums:
 

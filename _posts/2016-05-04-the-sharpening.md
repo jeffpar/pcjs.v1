@@ -57,7 +57,7 @@ For some people, this might be a matter of taste, because less fuzziness necessa
 can see individual pixels more clearly), which becomes more noticeable when switching a machine **Full Screen**.
 So I've also added a URL *smoothing* parameter you can use to override a machine's default setting; eg:
 
-	http://www.pcjs.org/devices/pc8080/machine/invaders/?smoothing=true
+	https://www.pcjs.org/devices/pc8080/machine/invaders/?smoothing=true
 
 See for yourself, by clicking on each of the [Space Invaders](/devices/pc8080/machine/invaders/) images above and
 then clicking the **Full Screen** button; both images link to the same machine, but left one enables image smoothing,
@@ -79,7 +79,7 @@ containing one or more PCjs machines.
 
 For example:
 
-	http://www.pcjs.org/disks/pcx86/dos/ibm/1.00/?aspect=2.0
+	https://www.pcjs.org/disks/pcx86/dos/ibm/1.00/?aspect=2.0
 	
 will modify the height of the machine's screen to conform to the requested aspect ratio of 2.0. The screen should still
 be responsive to any browser resizing while still retaining that aspect ratio.
