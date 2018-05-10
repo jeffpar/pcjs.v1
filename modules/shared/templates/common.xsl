@@ -42,7 +42,7 @@
 				</ul>
 			</div>
 			<div class="common-top-right">
-				<p>Powered by <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">JavaScript</a>, <a href="http://vanilla-js.com/" target="_blank">Vanilla JS</a>, and <a href="http://github.com/jeffpar/pcjs" target="_blank">GitHub</a></p>
+				<p>Powered by <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">JavaScript</a>, <a href="http://vanilla-js.com/" target="_blank">Vanilla JS</a>, and <a href="https://github.com/jeffpar/pcjs" target="_blank">GitHub</a></p>
 			</div>
 		</div>
 	</xsl:template>
@@ -52,7 +52,7 @@
 			<p class="common-reference"></p>
 			<p class="common-copyright">
 				<span class="common-copyright"><a href="https://www.pcjs.org/">pcjs.org</a> © 2012-2018 by <a href="https://jeffpar.com">@jeffpar</a></span><br/>
-				<span class="common-copyright">The <a href="http://github.com/jeffpar/pcjs">PCjs Project</a> is released under <a href="http://gnu.org/licenses/gpl.html">GPLv3</a></span>
+				<span class="common-copyright">The <a href="https://github.com/jeffpar/pcjs">PCjs Project</a> is released under <a href="https://gnu.org/licenses/gpl.html">GPLv3</a></span>
 			</p>
 		</div>
 	</xsl:template>
