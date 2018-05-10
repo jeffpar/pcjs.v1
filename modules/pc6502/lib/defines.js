@@ -87,7 +87,7 @@ var PC6502 = {
     MAXDEBUG:    MAXDEBUG,      // shared
     PRIVATE:     PRIVATE,       // shared
     TYPEDARRAYS: TYPEDARRAYS,
-    SITEHOST:    SITEHOST,      // shared
+    SITEURL:     SITEURL,       // shared
     XMLVERSION:  XMLVERSION     // shared
 };
 

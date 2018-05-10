@@ -807,7 +807,7 @@ class Computer8080 extends Component {
      */
     powerReport(stateComputer)
     {
-        if (Component.confirmUser("There may be a problem with your " + PC8080.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PC8080.APPNAME + " machine state to http://" + SITEHOST + ".")) {
+        if (Component.confirmUser("There may be a problem with your " + PC8080.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PC8080.APPNAME + " machine state to " + SITEURL + ".")) {
             Web.sendReport(PC8080.APPNAME, PC8080.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
         }
     }

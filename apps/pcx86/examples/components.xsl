@@ -15,7 +15,7 @@
 	<xsl:variable name="APPCLASS">pcx86</xsl:variable>
 	<xsl:variable name="APPNAME">PCx86</xsl:variable>
 	<xsl:variable name="APPVERSION">1.40.0</xsl:variable>
-	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
+	<xsl:variable name="SITEURL">https://www.pcjs.org</xsl:variable>
 	<xsl:variable name="BGNDCOLOR">#FAEBD7</xsl:variable>
 
 	<xsl:template name="componentStyles">
@@ -257,7 +257,7 @@
 				</xsl:choose>
 				<xsl:if test="$APPCLASS = 'pcx86'"><div class="{$CSSCLASS}-reference" style="padding-left:8px">[<a href="#" onclick="savePC('{$machine}'); return false;">Save Machine</a>]</div></xsl:if>
 				<div class="{$CSSCLASS}-copyright">
-					<a href="http://{$SITEHOST}" target="_blank"><xsl:value-of select="$APPNAME"/></a> v<xsl:value-of select="$APPVERSION"/> © 2012-2018 by <a href="https://jeffpar.com" target="_blank">@jeffpar</a>
+					<a href="{$SITEURL}" target="_blank"><xsl:value-of select="$APPNAME"/></a> v<xsl:value-of select="$APPVERSION"/> © 2012-2018 by <a href="https://jeffpar.com" target="_blank">@jeffpar</a>
 				</div>
 				<div style="clear:both"> </div>
 			</xsl:if>

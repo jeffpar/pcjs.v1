@@ -12,7 +12,7 @@
     "APPCLASS": true,
     "APPNAME": false,
     "APPVERSION": false,
-    "SITEHOST": false,
+    "SITEURL": false,
     "COMPILED": true,
     "DEBUG": true,
     "MAXDEBUG": false,
