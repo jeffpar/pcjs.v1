@@ -67,5 +67,5 @@ like trying to account for an "invisible" blinking cursor.  Chrome certainly doe
 so unless I was the only person in the world who used "contenteditable" Canvases, this is probably something
 Safari will want to fix.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *December 5, 2014*

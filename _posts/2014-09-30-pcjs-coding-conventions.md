@@ -242,5 +242,5 @@ I've also made the following "weak warnings" instead of "warnings":
 because it's a useful warning, but I don't like being penalized for functions that have been "prototyped" a specific
 way but can't always be implemented exactly as prototyped.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *September 30, 2014*

@@ -18,7 +18,7 @@ PCjs Random Disk Collection
 ---------------------------
 
 Much like the [PCjs Random Document Collection](/docs/personal/random/), this is a random assortment of disk images
-archived by [@jeffpar](http://jeffpar.com) that may or may not be of historical interest.
+archived by [@jeffpar](https://jeffpar.com) that may or may not be of historical interest.
 
 Some disks from this collection *have* been archived elsewhere, including:
 
@@ -61,4 +61,4 @@ usually either because the disks contain a variety of unrelated files and/or uni
 personal use.  Presumably to make more room on the disk, I had moved off a few MS-DOS 3.20 files (BACKUP.EXE,
 RESTORE.EXE, SHARE.EXE, TREE.EXE, and XCOPY.EXE), updated DEBUG.EXE, added MASM.EXE (v4.00), and then included
 a few files of my own (eg, PCPAL.EXE and HDISK.ASM).  FYI, this particular copy of PCPAL.EXE was saved with **Alt-Esc**
-configured as the activation key sequence. *--[@jeffpar](http://jeffpar.com)*
+configured as the activation key sequence. *--[@jeffpar](https://jeffpar.com)*

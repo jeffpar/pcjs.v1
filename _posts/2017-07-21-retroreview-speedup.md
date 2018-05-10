@@ -256,5 +256,5 @@ or otherwise.  PCx86 will even execute real-mode instructions that wrap around a
 
 PCx86 does it all (except when it doesn't)!
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *Jul 21, 2017*

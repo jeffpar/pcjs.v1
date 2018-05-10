@@ -65,5 +65,5 @@ This PDP-11/70, of course.
 
 {% include machine.html id="test1170" %}
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *Jan 3, 2017*

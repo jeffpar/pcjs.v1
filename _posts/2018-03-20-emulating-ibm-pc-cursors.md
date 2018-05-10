@@ -193,5 +193,5 @@ which you can find on the PCjs diskette labelled "PC Magazine (Vol. 06 No. 20)".
 
 {% include machine.html id="ibm5160-msdos320" %}
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *Mar 20, 2018*

@@ -62,5 +62,5 @@ in the early IBM PC Technical Reference manuals.
 Check out the [VT100 Debugger Configuration](/devices/pc8080/machine/vt100/debugger/) for additional information about
 VT100 internals and links to other technical resources.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *Aug 3, 2016*

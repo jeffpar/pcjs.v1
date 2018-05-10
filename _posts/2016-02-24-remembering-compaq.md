@@ -91,5 +91,5 @@ Their all-caps practice also extended to product names (eg, `COMPAQ DESKPRO`), a
 Contemporary news stories, however, tended to lower-case the product name (eg, `COMPAQ Deskpro`).  I've decided to
 split the difference and use mixed-case where it seems appropriate (eg, `COMPAQ DeskPro`).
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *February 24, 2016*

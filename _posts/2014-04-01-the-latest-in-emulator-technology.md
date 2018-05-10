@@ -19,5 +19,5 @@ Disclaimer: InternetJS may not be suitable for everyone.  Ask your doctor if Int
 - Loss of appetite after eating large meals
 - Inability to forget things you never wanted to remember
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *April 1, 2014*

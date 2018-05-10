@@ -44,5 +44,5 @@ The &lt;video&gt; element also supports a *switches* attribute to specify the ty
 this attribute corresponds to the actual switch settings on the EGA card; our default *switches* setting is "0110",
 which selects an Enhanced Color Monitor, enabling the EGA's maximum resolution of 640x350.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *July 30, 2014*

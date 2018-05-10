@@ -127,5 +127,5 @@ a clever brute-force way of extracting all the raw text from the Programmer's Li
 that I used to create my small KB archive.  The only downside of that method of extraction is that all "hyperlinking"
 information was lost.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *Oct 13, 2017*

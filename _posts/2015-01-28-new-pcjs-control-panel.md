@@ -19,5 +19,5 @@ A preview of the layout is shown below.  There's not much to see yet, as this is
 
 {% include machine.html id="at-ega-1152k-rev3" %}
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *January 28, 2015*

@@ -54,5 +54,5 @@ off to the server every time you make a request.  **localStorage** is nothing mo
 cookie, but PCjs does *not* do that; the only exception is when PCjs detects a problem, and even then, you must
 first agree to submit your machine's state as part of the bug report.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *October 17, 2014*

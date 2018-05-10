@@ -195,5 +195,5 @@ Register.
 To be continued....  because I've barely scratched the surface of all the side-effects of EGA/VGA odd/even addressing,
 and I hope to do some testing on real hardware in the near future.
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *June 5, 2015*

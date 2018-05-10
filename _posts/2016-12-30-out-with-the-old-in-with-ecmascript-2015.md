@@ -235,5 +235,5 @@ Here's a sample run, from a macOS Terminal window:
 	BOOT> 
 	BOOT> alt-x detected, exiting...
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *Dec 30, 2016*

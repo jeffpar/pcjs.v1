@@ -91,5 +91,5 @@ That's all for now.  Work continues on the new [PC8080](/modules/pc8080/) emulat
 
 Until then, May the 4th be with you!
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *May 4, 2016*

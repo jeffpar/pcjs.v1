@@ -23,5 +23,5 @@ Note that you must also use a fairly new 80286 machine configuration, like this
 in order to use 1.44Mb diskette images; previous models did not support 3.5-inch diskette drives, unless they had been
 retrofitted with a newer [BIOS](/devices/pcx86/rom/5170/).
 
-*[@jeffpar](http://jeffpar.com)*  
+*[@jeffpar](https://jeffpar.com)*  
 *October 23, 2014*
