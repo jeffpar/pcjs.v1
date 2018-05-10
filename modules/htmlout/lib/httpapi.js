@@ -126,7 +126,8 @@ var aExternalRedirectPatterns = {
  * Feel free to use subgroups on the left-hand side, and references to them (eg, $1, $2, etc) on the right.
  */
 var aInternalRedirectPatterns = {
-//  "^/apps/pc/visicalc/":      "/apps/pcx86/1981/visicalc/",
+    "^/docs/(.*)":              "/pubs/docs/$1",
+    "^/apps/pc/visicalc/":      "/apps/pcx86/1981/visicalc/"
 //  "^/demos/pc/.*":            "/devices/pcx86/machine/"
 };
 
