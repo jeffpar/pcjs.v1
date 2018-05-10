@@ -125,7 +125,7 @@ Use the [PCjs TI-57 Emulator](#pcjs-ti-57-emulator) below to give it a try!
 The [PCjs TI-57 Emulator](#pcjs-ti-57-emulator) allows you to override a variety of configuration properties
 using URL parameters, including speed and color settings.  For example:
                                                    
-	http://www.pcjs.org/devices/ti57/machine/?color=lime
+	https://www.pcjs.org/devices/ti57/machine/?color=lime
 
 Currently, the following properties may be overridden, within the given minimums and maximums:
 

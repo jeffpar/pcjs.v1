@@ -90,7 +90,7 @@ Developer Notes
 
 The [PCjs repository](https://github.com/jeffpar/pcjs) on GitHub contains everything needed to run PCjs
 computer simulations.  All the PCjs emulators run in any modern web browser, with or without a web server,
-and examples are provided for both [local](/apps/pcx86/examples/) and [remote](https://www.pcjs.org/) operation.
+and examples are provided for both [local](/apps/pcx86/examples/) and [remote](https://www.pcjs.org) operation.
 
 The project includes:
 
@@ -154,7 +154,7 @@ quintessential "stuck in the past" project), but there's also no urgency to upda
 PCjs can also be used with [Jekyll](http://jekyllrb.com) and the Ruby WEBrick web server, now that a
 *[jekyll](https://github.com/jeffpar/pcjs/tree/jekyll)* branch has been created to work with
 [GitHub Pages](https://pages.github.com).  This is how the project is currently set up at
-[pcjs.org](https://www.pcjs.org/).
+[pcjs.org](https://www.pcjs.org).
 
 This isn't going to be a Jekyll "How To" guide, because that would unnecessarily repeat all the information available
 at [GitHub Pages](https://pages.github.com).  But we'll summarize the basic steps, which replace the `npm` and `node`
@@ -280,7 +280,7 @@ the command, then it's passed on to *eval()*, like a good little REPL.
 
 Use the "load" command to load a JSON machine configuration file.  A sample
 [ibm5150.json](modules/pcx86/bin/ibm5150.json) is provided in the *bin* directory, which is a "JSON-ified" version
-of the [machine.xml](devices/pcx86/machine/5150/mda/64kb/machine.xml) displayed on the [pcjs.org](https://www.pcjs.org/)
+of the [machine.xml](devices/pcx86/machine/5150/mda/64kb/machine.xml) displayed on the [pcjs.org](https://www.pcjs.org)
 home page.
 
 The command-line loader creates all the JSON-defined machine components in the same order that the browser creates
@@ -438,14 +438,14 @@ manually or with the `modules/htmlout/bin/delete_indexes.sh` script.
 License
 -------
 
-The [PCjs Project](https://github.com/jeffpar/pcjs) is now an open-source project on [GitHub](http://github.com/jeffpar).
+The [PCjs Project](https://github.com/jeffpar/pcjs) is now an open-source project on [GitHub](https://github.com/jeffpar).
 All published portions are free for redistribution and/or modification under the terms of the
 [GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
 
 You are required to include the following links and copyright notice:
 
-> [PCjs](https://www.pcjs.org/) © 2012-2018 by [Jeff Parsons](https://jeffpar.com)
+> [PCjs](https://www.pcjs.org) © 2012-2018 by [Jeff Parsons](https://jeffpar.com)
 
 in every copy or modified version of this work, and to display that notice on every web page or computer that it runs on.
 

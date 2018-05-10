@@ -39,8 +39,8 @@ should be, but that will be addressed in a future PCjs update.
 ### Description of Fantasy Land
 
 In the October 1986 issue of
-[PC Tech Journal](http://www.pcjs.org/pubs/pc/magazines/pctj/) contained an article by John T. Cockerham
-titled "[Evaluating the EGA: The EGA Standard](http://www.pcjs.org/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2053.pdf&page=53&total=228)",
+[PC Tech Journal](/pubs/pc/magazines/pctj/) contained an article by John T. Cockerham
+titled "[Evaluating the EGA: The EGA Standard](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2053.pdf&page=53&total=228)",
 which described IBM's Fantasy Land demo:
 
 > IBM wrote FantasyLand in 1984 in order to demonstrate some of the more obscure features of the EGA.

@@ -38,7 +38,7 @@
   "bugs": {
     "url": "https://github.com/jeffpar/pcjs/issues"
   },
-  "homepage": "http://www.pcjs.org/",
+  "homepage": "https://www.pcjs.org/",
   "dependencies": {
     "express": "^3.21.2",
     "express-slash": "^1.0.1",

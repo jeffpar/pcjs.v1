@@ -3,7 +3,7 @@
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
- * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+ * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -18,7 +18,7 @@
  *
  * You are required to include the above copyright notice in every modified copy of this work
  * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <http://pcjs.org/modules/shared/lib/defines.js>.
+ * <https://www.pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -31,19 +31,19 @@
 /*
  * Our "DiskDump API", such as it was, used to look like:
  *
- *      http://jsmachines.net/bin/convdisk.php?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
+ *      http://pcjs.org/bin/convdisk.php?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
  *
  * To make it (a bit) more "REST-like", the above request now looks like:
  *
- *      http://www.pcjs.org/api/v1/dump?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
+ *      https://www.pcjs.org/api/v1/dump?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
  *
  * Similarly, our "FileDump API" used to look like:
  *
- *      http://jsmachines.net/bin/convrom.php?rom=/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.rom&format=json
+ *      http://pcjs.org/bin/convrom.php?rom=/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.rom&format=json
  *
  * and that request now looks like:
  *
- *      http://www.pcjs.org/api/v1/dump?file=/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.rom&format=json
+ *      https://www.pcjs.org/api/v1/dump?file=/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.rom&format=json
  *
  * I don't think it makes sense to avoid "query" parameters, because blending the path of a disk image with the
  * the rest of the URL would be (a) confusing, and (b) more work to parse.

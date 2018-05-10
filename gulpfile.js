@@ -3,7 +3,7 @@
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
  * @copyright © Jeff Parsons 2012-2018
  *
- * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+ * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -129,7 +129,7 @@ for (let i = 0; i < machines.shared.externs.length; i++) {
 var sSiteHost = "www.pcjs.org";
 
 if (pkg.homepage) {
-    let match = pkg.homepage.match(/^http:\/\/([^\/]*)(.*)/);
+    let match = pkg.homepage.match(/^https?:\/\/([^\/]*)(.*)/);
     if (match) sSiteHost = match[1];
 }
 

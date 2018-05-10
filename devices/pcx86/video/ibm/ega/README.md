@@ -62,7 +62,7 @@ The symbol information in the MAP file will be automatically converted and appen
 
 The PCjs server's Dump API can be used as well:
 
-	http://www.pcjs.org/api/v1/dump?file=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/video/ibm/ega/1984-09-13/ibm-ega.rom&format=bytes&decimal=true
+	https://www.pcjs.org/api/v1/dump?file=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/video/ibm/ega/1984-09-13/ibm-ega.rom&format=bytes&decimal=true
 
 ### IBM EGA Font Information
 

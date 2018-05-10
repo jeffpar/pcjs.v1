@@ -3,7 +3,7 @@
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
- * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+ * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
  *
  * It has been adapted from the JavaScript PDP 11/70 Emulator written by Paul Nankervis
  * (paulnank@hotmail.com) at <http://skn.noip.me/pdp11/pdp11.html>.  This code may be used
@@ -22,7 +22,7 @@
  *
  * You are required to include the above copyright notice in every modified copy of this work
  * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <http://pcjs.org/modules/shared/lib/defines.js>.
+ * <https://www.pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs

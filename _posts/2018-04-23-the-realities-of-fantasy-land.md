@@ -35,7 +35,7 @@ and eventually the actual diskette.
 ![Fantasy Land]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/apps/ibm/fland/FLAND.jpg)
 
 Based on John T. Cockerham's October 1986 PC Tech Journal article
-"[Evaluating the EGA: The EGA Standard](http://www.pcjs.org/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2053.pdf&page=53&total=228)",
+"[Evaluating the EGA: The EGA Standard](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2053.pdf&page=53&total=228)",
 I knew the software would not run properly in PCjs, because it made use of programmable fonts, split screens,
 and text-mode pixel panning -- all features that PCjs did not support yet.  So I first tried running it on a genuine
 IBM PC with an original IBM EGA.

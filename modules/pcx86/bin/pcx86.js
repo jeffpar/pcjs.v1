@@ -4,7 +4,7 @@
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2018 Jeff Parsons
  *
- * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+ * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -19,7 +19,7 @@
  *
  * You are required to include the above copyright notice in every modified copy of this work
  * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <http://pcjs.org/modules/shared/lib/defines.js>.
+ * <https://www.pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -57,7 +57,7 @@ try {
 /*
  * We will build an array of components whose names will match the component names
  * used in a JSON machine definition file; eg:
- * 
+ *
  *  [
  *      {name: "chipset":
  *       Create: ChipSet,
@@ -65,10 +65,10 @@ try {
  *      },
  *      ...
  *  ]
- *  
+ *
  * Every component name comes from the component filename, minus the ".js" extension;
  * Create is the constructor returned by require().
- * 
+ *
  * TODO: Update the list of ignored (ie, ignorable) components.
  */
 var Component;
@@ -78,7 +78,7 @@ var asComponentsIgnore = ["panel", "embed", "save"];
 
 /*
  * A few of the components are subclasses of other classes (eg, "cpux86" is a subclass
- * of "cpu").  In those situations, we "hoist" the subclass constructor into the 
+ * of "cpu").  In those situations, we "hoist" the subclass constructor into the
  * corresponding superclass, because it is the name of the superclass that we rely on during
  * machine initialization.
  */
@@ -86,10 +86,10 @@ var aSubClasses = {
     "pcx86/lib/cpux86": "pcx86/lib/cpu",
     "pcx86/lib/debugger": "shared/lib/debugger"
 };
-    
+
 /**
  * loadComponents(asFiles)
- * 
+ *
  * @param {Array.<string>} asFiles
  */
 function loadComponents(asFiles)
@@ -159,7 +159,7 @@ function loadComponents(asFiles)
 
 /**
  * getComponentByName(sName)
- * 
+ *
  * @param sName
  * @return {*}
  */
@@ -182,7 +182,7 @@ function getComponentByName(sName)
 function getComponentByType(sType)
 {
     let component = null;
-    
+
     if (!Component) {
         Component = getComponentByName("component");
     }
@@ -194,14 +194,14 @@ function getComponentByType(sType)
 
 /**
  * loadMachine(sFile)
- * 
+ *
  * @param {string} sFile
  * @return {Object} representing the machine whose component objects have been loaded into aComponents
  */
 function loadMachine(sFile)
 {
     if (fDebug) console.log('loadMachine("' + sFile + '")');
-    
+
     /*
      * Clear any/all saved objects from any previous machine
      */
@@ -218,7 +218,7 @@ function loadMachine(sFile)
          * by the JSON Overlords, we can't use require() to load it, as we're able to do with "package.json".
          * Also note that require() assumes the same path as that of the requiring file, whereas fs.readFileSync()
          * assumes the path reported by process.cwd().
-         * 
+         *
          * TODO: I've since removed the comments from my sample "ibm5150.json" file, so we could try to reinstate
          * this code; however, there are still hex constants, which I find *much* preferable to the decimal equivalents.
          * JSON's restrictions continue to irritate me.
@@ -235,20 +235,20 @@ function loadMachine(sFile)
              * the browser, by walking the list of PCx86 components we loaded above and looking for matches.
              */
             let idMachine = "";
-            
+
             /*
              * 'machine' is a pseudo-component that is only used to define an ID for the entire machine;
              * if it exists, then that ID is prepended to every component ID, just as our XSLT code would
              * do for a machine XML file.  This relieves the JSON file from having to manually prepend
              * a machine ID to every component ID itself.
-             * 
+             *
              * This doesn't mean I anticipate a Node environment running multiple machines, as we do in
              * a browser; it only means that I'm trying to make both environments operate similarly.
              */
             if (machine['machine']) {
                 idMachine = machine['machine']['id'];
             }
-            
+
             for (i = 0; i < aComponents.length; i++) {
 
                 let component = aComponents[i];
@@ -269,26 +269,26 @@ function loadMachine(sFile)
                     let obj;
                     let parmsObj = aParms[j];
                     if (idMachine) parmsObj['id'] = idMachine + '.' + parmsObj['id'];
-                    
+
                     if (fDebug) {
                         console.log("creating " + component.name + "...");
                         console.log(parmsObj);
                     }
-                    
+
                     if (component.name == "cpu") {
                         parmsObj['autoStart'] = false;
                     }
-                    
+
                     try {
                         obj = new component.Create(parmsObj);
                     } catch(err) {
                         console.log("error creating " + component.name + ": " + err.message);
                         continue;
                     }
-                    
+
                     console.log(obj['id'] + " object created");
                     component.objects.push(obj);
-                    
+
                     if (obj.type == "Debugger") {
                         dbg = obj;
                     }
@@ -307,7 +307,7 @@ function loadMachine(sFile)
 
 /**
  * doCommand(sCmd)
- * 
+ *
  * @param {string} sCmd
  * @return {*}
  */
@@ -321,7 +321,7 @@ function doCommand(sCmd)
 
     let result = false;
     let aTokens = sCmd.split(' ');
-    
+
     switch(aTokens[0]) {
     case "cwd":
         result = process.cwd();
@@ -351,24 +351,24 @@ function doCommand(sCmd)
 
 /**
  * onCommand(cmd, context, filename, callback)
- * 
+ *
  * The Node docs (http://nodejs.org/api/repl.html) say that repl.start's "eval" option is:
- * 
+ *
  *      a function that will be used to eval each given line; defaults to an async wrapper for eval()
- *      
+ *
  * and it gives this example of such a function:
- * 
+ *
  *      function eval(cmd, context, filename, callback) {
  *          callback(null, result);
  *      }
- *      
+ *
  * but it defines NEITHER the parameters for the function NOR the parameters for the callback().
- * 
+ *
  * It's pretty clear that "result" is expected to return whatever "eval()" would return for the expression
  * in "cmd" (which is always parenthesized in preparation for a call to "eval()"), but it's not clear what
  * the first callback() parameter (represented by null) is supposed to be.  Should we assume it's an Error
  * object, in case we want to report an error?
- * 
+ *
  * @param {string} cmd
  * @param {Object} context
  * @param {string} filename
@@ -406,5 +406,5 @@ repl.start({
     prompt: "PCx86> ",
     input: process.stdin,
     output: process.stdout,
-    eval: onCommand 
+    eval: onCommand
 });

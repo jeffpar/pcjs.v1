@@ -2,8 +2,8 @@
      2                                  ;   trace.nasm
      3                                  ;   Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
      4                                  ;
-     5                                  ;   This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
-     6                                  ;   at <http://jsmachines.net/> and <http://pcjs.org/>.
+     5                                  ;   This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
+     6                                  ;
      7                                  ;
      8                                  ;   PCjs is free software: you can redistribute it and/or modify it under the terms of the
      9                                  ;   GNU General Public License as published by the Free Software Foundation, either version 3
@@ -61,7 +61,7 @@
     61                                  PS_ALL		equ	PS_CF | PS_PF | PS_AF | PS_ZF | PS_SF | PS_OF
     62                                  PS_ALL_BUT_AF	equ	PS_CF | PS_PF	      | PS_ZF | PS_SF | PS_OF
     63                                  PS_ALL_BUT_OF	equ	PS_CF | PS_PF | PS_AF | PS_ZF | PS_SF
-    64                                  
+    64
     65                                  %macro	openF	1
     66                                  	section .data
     67                                  %%name: db	%1,0
@@ -70,7 +70,7 @@
     70                                  	mov	ax,0x3D00
     71                                  	int	0x21
     72                                  %endmacro
-    73                                  
+    73
     74                                  %macro	readF	3
     75                                  	%ifnidni %1,bx
     76                                  	mov	bx,%1
@@ -84,7 +84,7 @@
     84                                  	mov	ah,0x3F
     85                                  	int	0x21
     86                                  %endmacro
-    87                                  
+    87
     88                                  %macro	print	1
     89                                  	%ifidni %1,line
     90                                  	push	ax
@@ -124,7 +124,7 @@
    124                                  	%endif
    125                                  	%endif
    126                                  %endmacro
-   127                                  
+   127
    128                                  %macro	exit	0-2
    129                                  	%ifstr %1
    130                                  	section .data
@@ -140,17 +140,17 @@
    140                                  	int	0x20
    141                                  %%ok:
    142                                  %endmacro
-   143                                  
+   143
    144                                  %macro	break	0
    145                                  ;
    146                                  ;   "int3" generates the 1-byte breakpoint instruction; "int 3" generates a 2-byte software interrupt
    147                                  ;
    148                                  	int3
    149                                  %endmacro
-   150                                  
+   150
    151                                  	org	0x100
    152                                  	section .text
-   153                                  
+   153
    154                                  	openF	"TRACE.TXT"
    155                              <1>  section .data
    156 00000000 54524143452E545854- <1> %%name: db %1,0
@@ -175,7 +175,7 @@
    175                              <1>  %endif
    176 00000011 CD20                <1>  int 0x20
    177                              <1> %%ok:
-   178                                  
+   178
    179 00000013 BF[2B00]                	mov	di,file_buffer
    180                                  	readF	ax,di,file_buffer_len
    181                              <1>  %ifnidni %1,bx
@@ -189,9 +189,9 @@
    189                              <1>  %endif
    190 0000001D B43F                <1>  mov ah,0x3F
    191 0000001F CD21                <1>  int 0x21
-   192                                  
+   192
    193                                  m1:	exit	"unable to read file",oncarry
-   194                              <1> m1: 
+   194                              <1> m1:
    195                              <1>  %ifstr %1
    196                              <1>  section .data
    197 0000001E 756E61626C6520746F- <1> %%msg: db %1,'$'
@@ -207,7 +207,7 @@
    207                              <1>  %endif
    208 0000002A CD20                <1>  int 0x20
    209                              <1> %%ok:
-   210                                  
+   210
    211 0000002C 85C0                    	test	ax,ax		; AX contains how many bytes were actually read
    212 0000002E 7509                    	jnz	m2
    213                                  	exit	"processing complete"
@@ -226,7 +226,7 @@
    226                              <1>  %endif
    227 00000037 CD20                <1>  int 0x20
    228                              <1> %%ok:
-   229                                  
+   229
    230 00000039 FC                      m2:	cld
    231 0000003A BE[2B00]                	mov	si,file_buffer
    232 0000003D 01C7                    	add	di,ax
@@ -264,11 +264,11 @@
    264                                  ;
    265                                  m4:
    266                                  ;	print	line
-   267                                  
+   267
    268 00000056 B420                    	mov	ah,' '
    269 00000058 E8CD03                  	call	skipTo
    270                                  m4err:	exit	"missing space",oncarry
-   271                              <1> m4err: 
+   271                              <1> m4err:
    272                              <1>  %ifstr %1
    273                              <1>  section .data
    274 00000046 6D697373696E672073- <1> %%msg: db %1,'$'
@@ -294,7 +294,7 @@
    294 00000073 B024                    m6:	mov	al,'$'
    295 00000075 AA                      	stosb
    296 00000076 5F                      	pop	di
-   297                                  
+   297
    298                                  	print	ins_name
    299                              <1>  %ifidni %1,line
    300                              <1>  push ax
@@ -371,7 +371,7 @@
    371 0000008C 5A                  <1>  pop dx
    372                              <1>  %endif
    373                              <1>  %endif
-   374                                  
+   374
    375 0000008D E80C03                  	call	getHex
    376 00000090 A3[0A00]                	mov	[dst_operand],ax
    377 00000093 8916[0C00]              	mov	[dst_operand+2],dx
@@ -415,14 +415,14 @@
    415 000000A8 5A                  <1>  pop dx
    416                              <1>  %endif
    417                              <1>  %endif
-   418                                  
+   418
    419 000000A9 46                      	inc	si
    420 000000AA E8EF02                  	call	getHex
    421 000000AD A3[1000]                	mov	[src_operand],ax
    422 000000B0 8916[1200]              	mov	[src_operand+2],dx
    423 000000B4 890E[1400]              	mov	[src_size],cx
    424 000000B8 E81803                  	call	printHex
-   425                                  
+   425
    426 000000BB 46                      	inc	si
    427 000000BC E8DD02                  	call	getHex
    428 000000BF 25D508                  	and	ax,PS_ALL
@@ -467,7 +467,7 @@
    467                              <1>  %endif
    468                              <1>  %endif
    469 000000D2 E8FE02                  	call	printHex
-   470                                  
+   470
    471 000000D5 B420                    m6b:	mov	ah,' '
    472 000000D7 E84E03                  	call	skipTo
    473 000000DA 7303E97CFF              	jc	m4err
@@ -553,7 +553,7 @@
    553 00000106 5A                  <1>  pop dx
    554                              <1>  %endif
    555                              <1>  %endif
-   556                                  
+   556
    557 00000107 46                      	inc	si
    558 00000108 E89102                  	call	getHex
    559 0000010B 25D508                  	and	ax,PS_ALL
@@ -709,7 +709,7 @@
    709                              <1>  %endif
    710 00000158 CD20                <1>  int 0x20
    711                              <1> %%ok:
-   712                                  
+   712
    713 0000015A 8B04                    m8:	mov	ax,[si]
    714 0000015C 8B0E[1E00]              	mov	cx,[result_size]
    715 00000160 BA[C501]                	mov	dx,compare8
@@ -849,14 +849,14 @@
    849                                  ;	call	skipTo
    850 000001C1 46                      	inc	si		; step over the LF (or '$', in case we printed the line before processing it)
    851 000001C2 E97AFE                  	jmp	m3
-   852                                  
+   852
    853                                  compare8:
    854 000001C5 8A26[1A00]              	mov	ah,[result_operand]
    855 000001C9 38E0                    	cmp	al,ah
    856 000001CB 7503                    	jne	c8err
    857 000001CD E9C600                  	jmp	compareFlags
    858                                  c8err:	print	"byte mismatch:"
-   859                              <1> c8err: 
+   859                              <1> c8err:
    860                              <1>  %ifidni %1,line
    861                              <1>  push ax
    862                              <1>  push cx
@@ -1027,14 +1027,14 @@
   1027                              <1>  %endif
   1028 00000207 CD20                <1>  int 0x20
   1029                              <1> %%ok:
-  1030                                  
+  1030
   1031                                  compare16:
   1032 00000209 8B16[1A00]              	mov	dx,[result_operand]
   1033 0000020D 39D0                    	cmp	ax,dx
   1034 0000020F 7503                    	jne	c16err
   1035 00000211 E98200                  	jmp	compareFlags
   1036                                  c16err: print	"word mismatch:"
-  1037                              <1> c16err: 
+  1037                              <1> c16err:
   1038                              <1>  %ifidni %1,line
   1039                              <1>  push ax
   1040                              <1>  push cx
@@ -1205,14 +1205,14 @@
   1205                              <1>  %endif
   1206 0000024A CD20                <1>  int 0x20
   1207                              <1> %%ok:
-  1208                                  
+  1208
   1209                                  compare32:
   1210 0000024C 3B06[1A00]              	cmp	ax,[result_operand]
   1211 00000250 7506                    	jne	c32err
   1212 00000252 3B16[1C00]              	cmp	dx,[result_operand+2]
   1213 00000256 743E                    	je	compareFlags
   1214                                  c32err: print	"dword mismatch:"
-  1215                              <1> c32err: 
+  1215                              <1> c32err:
   1216                              <1>  %ifidni %1,line
   1217                              <1>  push ax
   1218                              <1>  push cx
@@ -1384,7 +1384,7 @@
   1384                              <1>  %endif
   1385 00000294 CD20                <1>  int 0x20
   1386                              <1> %%ok:
-  1387                                  
+  1387
   1388                                  compareFlags:
   1389 00000296 8B16[2000]              	mov	dx,[result_flags]
   1390 0000029A 230E[1800]              	and	cx,[relevant_flags]
@@ -1564,117 +1564,117 @@
   1564 000002DD CD20                <1>  int 0x20
   1565                              <1> %%ok:
   1566 000002DF C3                      cfret:	ret
-  1567                                  
+  1567
   1568                                  testROL8:
   1569 000002E0 A0[0A00]                	mov	al,[dst_operand]
   1570 000002E3 8A0E[1000]              	mov	cl,[src_operand]
   1571 000002E7 D2C0                    	rol	al,cl
   1572 000002E9 C3                      	ret
-  1573                                  
+  1573
   1574                                  testROL16:
   1575 000002EA A1[0A00]                	mov	ax,[dst_operand]
   1576 000002ED 8A0E[1000]              	mov	cl,[src_operand]
   1577 000002F1 D3C0                    	rol	ax,cl
   1578 000002F3 C3                      	ret
-  1579                                  
+  1579
   1580                                  testROR8:
   1581 000002F4 A0[0A00]                	mov	al,[dst_operand]
   1582 000002F7 8A0E[1000]              	mov	cl,[src_operand]
   1583 000002FB D2C8                    	ror	al,cl
   1584 000002FD C3                      	ret
-  1585                                  
+  1585
   1586                                  testROR16:
   1587 000002FE A1[0A00]                	mov	ax,[dst_operand]
   1588 00000301 8A0E[1000]              	mov	cl,[src_operand]
   1589 00000305 D3C8                    	ror	ax,cl
   1590 00000307 C3                      	ret
-  1591                                  
+  1591
   1592                                  testRCL8:
   1593 00000308 A0[0A00]                	mov	al,[dst_operand]
   1594 0000030B 8A0E[1000]              	mov	cl,[src_operand]
   1595 0000030F D2D0                    	rcl	al,cl
   1596 00000311 C3                      	ret
-  1597                                  
+  1597
   1598                                  testRCL16:
   1599 00000312 A1[0A00]                	mov	ax,[dst_operand]
   1600 00000315 8A0E[1000]              	mov	cl,[src_operand]
   1601 00000319 D3D0                    	rcl	ax,cl
   1602 0000031B C3                      	ret
-  1603                                  
+  1603
   1604                                  testRCR8:
   1605 0000031C A0[0A00]                	mov	al,[dst_operand]
   1606 0000031F 8A0E[1000]              	mov	cl,[src_operand]
   1607 00000323 D2D8                    	rcr	al,cl
   1608 00000325 C3                      	ret
-  1609                                  
+  1609
   1610                                  testRCR16:
   1611 00000326 A1[0A00]                	mov	ax,[dst_operand]
   1612 00000329 8A0E[1000]              	mov	cl,[src_operand]
   1613 0000032D D3D8                    	rcr	ax,cl
   1614 0000032F C3                      	ret
-  1615                                  
+  1615
   1616                                  testSHL8:
   1617 00000330 A0[0A00]                	mov	al,[dst_operand]
   1618 00000333 8A0E[1000]              	mov	cl,[src_operand]
   1619 00000337 D2E0                    	shl	al,cl
   1620 00000339 C3                      	ret
-  1621                                  
+  1621
   1622                                  testSHL16:
   1623 0000033A A1[0A00]                	mov	ax,[dst_operand]
   1624 0000033D 8A0E[1000]              	mov	cl,[src_operand]
   1625 00000341 D3E0                    	shl	ax,cl
   1626 00000343 C3                      	ret
-  1627                                  
+  1627
   1628                                  testMUL16:
   1629 00000344 A0[0A00]                	mov	al,[dst_operand]
   1630 00000347 8A0E[1000]              	mov	cl,[src_operand]
   1631 0000034B F6E1                    	mul	cl
   1632 0000034D C3                      	ret
-  1633                                  
+  1633
   1634                                  testMUL32:
   1635 0000034E A1[0A00]                	mov	ax,[dst_operand]
   1636 00000351 8B0E[1000]              	mov	cx,[src_operand]
   1637 00000355 F7E1                    	mul	cx
   1638 00000357 C3                      	ret
-  1639                                  
+  1639
   1640                                  testIMUL16:
   1641 00000358 A0[0A00]                	mov	al,[dst_operand]
   1642 0000035B 8A0E[1000]              	mov	cl,[src_operand]
   1643 0000035F F6E9                    	imul	cl
   1644 00000361 C3                      	ret
-  1645                                  
+  1645
   1646                                  testIMUL32:
   1647 00000362 A1[0A00]                	mov	ax,[dst_operand]
   1648 00000365 8B0E[1000]              	mov	cx,[src_operand]
   1649 00000369 F7E9                    	imul	cx
   1650 0000036B C3                      	ret
-  1651                                  
+  1651
   1652                                  testDIV16:
   1653 0000036C A1[0A00]                	mov	ax,[dst_operand]
   1654 0000036F 8A0E[1000]              	mov	cl,[src_operand]
   1655 00000373 F6F1                    	div	cl
   1656 00000375 C3                      	ret
-  1657                                  
+  1657
   1658                                  testDIV32:
   1659 00000376 A1[0A00]                	mov	ax,[dst_operand]
   1660 00000379 8B16[0C00]              	mov	dx,[dst_operand+2]
   1661 0000037D 8B0E[1000]              	mov	cx,[src_operand]
   1662 00000381 F7F1                    	div	cx
   1663 00000383 C3                      	ret
-  1664                                  
+  1664
   1665                                  testIDIV16:
   1666 00000384 A1[0A00]                	mov	ax,[dst_operand]
   1667 00000387 8A0E[1000]              	mov	cl,[src_operand]
   1668 0000038B F6F9                    	idiv	cl
   1669 0000038D C3                      	ret
-  1670                                  
+  1670
   1671                                  testIDIV32:
   1672 0000038E A1[0A00]                	mov	ax,[dst_operand]
   1673 00000391 8B16[0C00]              	mov	dx,[dst_operand+2]
   1674 00000395 8B0E[1000]              	mov	cx,[src_operand]
   1675 00000399 F7F9                    	idiv	cx
   1676 0000039B C3                      	ret
-  1677                                  
+  1677
   1678                                  ;
   1679                                  ;   getHex: get value of hex string
   1680                                  ;
@@ -1725,7 +1725,7 @@
   1725 000003D0 93                      	xchg	ax,bx		; DX:AX now holds the final 32-bit result
   1726 000003D1 5B                      	pop	bx
   1727 000003D2 C3                      	ret
-  1728                                  
+  1728
   1729                                  ;
   1730                                  ;   printHex: print value in hex
   1731                                  ;
@@ -1814,7 +1814,7 @@
   1814 00000412 5B                      	pop	bx
   1815 00000413 58                      	pop	ax
   1816 00000414 C3                      	ret
-  1817                                  
+  1817
   1818                                  ;
   1819                                  ;   getLine: find the length of the current line
   1820                                  ;
@@ -1842,7 +1842,7 @@
   1842 00000424 75F2                    	jne	gl1
   1843 00000426 5E                      gl9:	pop	si
   1844 00000427 C3                      	ret
-  1845                                  
+  1845
   1846                                  ;
   1847                                  ;   skipTo: skip to the character in AH
   1848                                  ;
@@ -1865,48 +1865,48 @@
   1865 00000431 F9                      	stc
   1866 00000432 4E                      st9:	dec	si
   1867 00000433 C3                      	ret
-  1868                                  
+  1868
   1869                                  ;
   1870                                  ;   The following is "const" (read-only) data...
   1871                                  ;
   1872                                  	section .data
   1873 000000AD 524F4C00                ins_table	db	"ROL",0
   1874 000000B1 [E002][EA02]0000D5-     		dw	testROL8, testROL16, 0, PS_ALL_BUT_OF
-  1875 000000B8 00                 
+  1875 000000B8 00
   1876 000000B9 524F5200                		db	"ROR",0
   1877 000000BD [F402][FE02]0000D5-     		dw	testROR8, testROR16, 0, PS_ALL_BUT_OF
-  1878 000000C4 00                 
+  1878 000000C4 00
   1879 000000C5 52434C00                		db	"RCL",0
   1880 000000C9 [0803][1203]0000D5-     		dw	testRCL8, testRCL16, 0, PS_ALL_BUT_OF
-  1881 000000D0 00                 
+  1881 000000D0 00
   1882 000000D1 52435200                		db	"RCR",0
   1883 000000D5 [1C03][2603]0000D5-     		dw	testRCR8, testRCR16, 0, PS_ALL_BUT_OF
-  1884 000000DC 00                 
+  1884 000000DC 00
   1885 000000DD 53484C00                		db	"SHL",0
   1886 000000E1 [3003][3A03]0000C5-     		dw	testSHL8, testSHL16, 0, PS_ALL_BUT_AF
-  1887 000000E8 08                 
+  1887 000000E8 08
   1888 000000E9 4D554C00                		db	"MUL",0
   1889 000000ED 0000[4403][4E03]01-     		dw	0, testMUL16, testMUL32, PS_CF | PS_OF
-  1890 000000F4 08                 
+  1890 000000F4 08
   1891 000000F5 494D554C00              		db	"IMUL",0
   1892 000000FA 0000[5803][6203]01-     		dw	0, testIMUL16, testIMUL32, PS_CF | PS_OF
-  1893 00000101 08                 
+  1893 00000101 08
   1894 00000102 44495600                		db	"DIV",0
   1895 00000106 0000[6C03][7603]00-     		dw	0, testDIV16, testDIV32, PS_NONE
-  1896 0000010D 00                 
+  1896 0000010D 00
   1897 0000010E 494D554C00              		db	"IMUL",0
   1898 00000113 0000[8403][8E03]00-     		dw	0, testIDIV16, testIDIV32, PS_NONE
-  1899 0000011A 00                 
+  1899 0000011A 00
   1900 0000011B 00                      		db	0		; end of instruction table
-  1901                                  
+  1901
   1902 0000011C 0D0A24                  strCRLF		db	0x0D,0x0A,'$'
   1903 0000011F 3A24                    strColon	db	":$"
   1904 00000121 3D24                    strEquals	db	"=$"
   1905 00000123 2C24                    strComma	db	",$"
   1906 00000125 2061637475616C3D24      strActual	db	" actual=$"
   1907 0000012E 207265636F72646564-     strRecorded	db	" recorded=$"
-  1908 00000137 3D24               
-  1909                                  
+  1908 00000137 3D24
+  1909
   1910                                  ;
   1911                                  ;   We end with all the unitialized data (ie, data that doesn't need to be stored in the binary)
   1912                                  ;
@@ -1923,11 +1923,11 @@
   1923 0000001A <res 00000004>          result_operand	resw	2
   1924 0000001E <res 00000002>          result_size	resw	1
   1925 00000020 <res 00000002>          result_flags	resw	1
-  1926                                  
+  1926
   1927 00000022 <res 00000009>          hex_buffer	resb	9
   1928                                  hex_buffer_end	equ	$
   1929                                  hex_buffer_len	equ	hex_buffer_end - hex_buffer
-  1930                                  
+  1930
   1931 0000002B <res 00001000>          file_buffer	resb	0x1000
   1932                                  file_buffer_end equ	$
   1933                                  file_buffer_len equ	file_buffer_end - file_buffer
