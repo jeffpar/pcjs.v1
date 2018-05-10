@@ -12,7 +12,7 @@
 	<xsl:variable name="MACHINETYPE">c1p</xsl:variable>
 	<xsl:variable name="APPCLASS">c1pjs</xsl:variable>
 	<xsl:variable name="APPVERSION">1.67.0</xsl:variable>
-	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
+	<xsl:variable name="SITEURL">https://www.pcjs.org</xsl:variable>
 	<xsl:variable name="BGNDCOLOR">#FAEBD7</xsl:variable>
 
 	<xsl:template name="componentStyles">
@@ -175,7 +175,7 @@
 					<xsl:otherwise/>
 				</xsl:choose>
 				<div class="{$APPCLASS}-copyright">
-					<a href="http://{$SITEHOST}/{$APPCLASS}" target="_blank">C1Pjs</a> v<xsl:value-of select="$APPVERSION"/> © 2012-2018 by <a href="https://jeffpar.com" target="_blank">@jeffpar</a>
+					<a href="{$SITEURL}/{$APPCLASS}" target="_blank">C1Pjs</a> v<xsl:value-of select="$APPVERSION"/> © 2012-2018 by <a href="https://jeffpar.com" target="_blank">@jeffpar</a>
 				</div>
 				<div style="clear:both"> </div>
 			</xsl:if>
