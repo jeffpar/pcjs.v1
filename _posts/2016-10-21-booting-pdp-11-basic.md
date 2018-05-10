@@ -11,7 +11,7 @@ machines:
     config: /devices/pdp11/machine/1120/basic/debugger/machine.xml
 ---
 
-[PDPjs](http://www.pcjs.org/devices/pdp11/machine/) can now simulate a PDP-11/20.  It was one of the first PDP-11
+[PDPjs](/devices/pdp11/machine/) can now simulate a PDP-11/20.  It was one of the first PDP-11
 models, and since it had no MMU, it was limited to a maximum of 56Kb of RAM (or as DEC would say, 28K words), since
 the top 8Kb (or 4K words) of its 16-bit address space was reserved for UNIBUS devices.
 

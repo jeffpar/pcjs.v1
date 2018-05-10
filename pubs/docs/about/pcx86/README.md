@@ -87,19 +87,19 @@ Some of the features planned for future releases include:
 
 A more [complete list of releases](https://github.com/jeffpar/pcjs/releases) is on GitHub, but here are some highlights:
 
-+ v1.20 added 8087 coprocessor (FPU) support, [OS/2 improvements](http://www.pcjs.org/blog/2016/02/08/),
-and new Disk/Machine [Save Options](http://www.pcjs.org/blog/2016/02/17/).
++ v1.20 added 8087 coprocessor (FPU) support, [OS/2 improvements](/blog/2016/02/08/),
+and new Disk/Machine [Save Options](/blog/2016/02/17/).
 
-+ v1.19 improved 80386 compatibility and added support for [Windows 95](http://www.pcjs.org/blog/2015/09/21/).
++ v1.19 improved 80386 compatibility and added support for [Windows 95](/blog/2015/09/21/).
 
-+ v1.18 added basic 80386 CPU functionality and [COMPAQ DeskPro 386](http://www.pcjs.org/blog/2015/04/16/) emulation.
++ v1.18 added basic 80386 CPU functionality and [COMPAQ DeskPro 386](/blog/2015/04/16/) emulation.
 
-+ v1.16 added support for [OS/2 1.0](http://www.pcjs.org/blog/2014/12/04/), the Microsoft/IBM multitasking operating
++ v1.16 added support for [OS/2 1.0](/blog/2014/12/04/), the Microsoft/IBM multitasking operating
 system introduced in December 1987 for 80286-based machines.
 
-+ v1.15 introduced [IBM PC AT](http://www.pcjs.org/blog/2014/09/13/) (Model 5170) emulation.
++ v1.15 introduced [IBM PC AT](/blog/2014/09/13/) (Model 5170) emulation.
 
-+ v1.14 added basic [EGA Support](http://www.pcjs.org/blog/2014/07/30/) and the ability to run Windows 1.01
++ v1.14 added basic [EGA Support](/blog/2014/07/30/) and the ability to run Windows 1.01
 in color.
 
 + v1.13 introduced manifest files that describe software packages that can be used with PCx86. 

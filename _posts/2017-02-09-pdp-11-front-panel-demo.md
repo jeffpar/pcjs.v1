@@ -11,7 +11,7 @@ machines:
     sticky: top
 ---
 
-As I mentioned in the "[PDP-11 Tutorials](http://www.pcjs.org/blog/2017/01/03/)" blog post, I've been working on
+As I mentioned in the "[PDP-11 Tutorials](/blog/2017/01/03/)" blog post, I've been working on
 some methods for visually illustrating how machine components work.  And the PDP-11/70 Operator's Console,
 with its daunting number of lights and switches, seemed like a good candidate.
 
