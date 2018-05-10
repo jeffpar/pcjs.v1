@@ -328,19 +328,19 @@ DiskAPI.ATTR = {
 /*
  * Our "DiskDump API", such as it was, used to look like:
  *
- *      http://jsmachines.net/bin/convdisk.php?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
+ *      http://pcjs.org/bin/convdisk.php?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
  *
  * To make it (a bit) more "REST-like", the above request now looks like:
  *
- *      http://www.pcjs.org/api/v1/dump?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
+ *      https://www.pcjs.org/api/v1/dump?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
  *
  * Similarly, our "FileDump API" used to look like:
  *
- *      http://jsmachines.net/bin/convrom.php?rom=/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.rom&format=json
+ *      http://pcjs.org/bin/convrom.php?rom=/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.rom&format=json
  *
  * and that request now looks like:
  *
- *      http://www.pcjs.org/api/v1/dump?file=/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.rom&format=json
+ *      https://www.pcjs.org/api/v1/dump?file=/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.rom&format=json
  *
  * I don't think it makes sense to avoid "query" parameters, because blending the path of a disk image with the
  * the rest of the URL would be (a) confusing, and (b) more work to parse.
@@ -6200,7 +6200,7 @@ class PanelPDP11 extends Component {
 
             /*
              * Whenever the user presses 'LOAD' to load a new address, we want the next 'DEP' or 'EXAM'
-             * to NOT auto-increment.  The next 'DEP' or 'EXAM' will automatically re-enable auto-increment. 
+             * to NOT auto-increment.  The next 'DEP' or 'EXAM' will automatically re-enable auto-increment.
              */
             if (sBinding == PanelPDP11.SWITCH.LOAD) {
                 this.fAutoInc = false;
@@ -18193,12 +18193,12 @@ class SerialPortPDP11 extends Component {
              * then it specifies the name of that control with the 'binding' property.  The SerialPort constructor
              * will then call bindExternalControl(), which looks up the control, and then passes it to our own
              * setBinding() handler.
-             * 
+             *
              * For bindExternalControl() to succeed, it also need to know the target component; for now, that's
              * been hard-coded to "Panel", in part because that's one of the few components we can rely upon
              * initializing before we do, but it would be a simple matter to include a component type or ID as part
              * of the 'binding' property as well, if we need more flexibility later.
-             * 
+             *
              * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
              */
             Component.bindExternalControl(this, sBinding);
