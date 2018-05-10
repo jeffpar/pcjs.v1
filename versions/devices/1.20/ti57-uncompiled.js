@@ -1298,7 +1298,7 @@ class Input extends Device {
              * display are offset.
              */
             this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
-            
+
             /*
              * The 'buttonDelay' setting is only necessary for devices (ie, old calculator chips) that are either slow
              * to respond and/or have debouncing logic that would otherwise be defeated.
@@ -2072,7 +2072,7 @@ class LED extends Device {
          * to true by periodic display operations that call setLEDState(); we clear it after every
          * periodic drawBuffer(), so if the machine fails to execute a setBuffer() in a timely manner,
          * we will see that fBufferTickled hasn't been "tickled", and automatically blank the display.
-         * 
+         *
          * fDisplayOn is a global "on/off" switch for the entire display.
          */
         this.fBufferModified = this.fBufferTickled = false;
@@ -2161,9 +2161,9 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {boolean} [fForced] (if not set, this is a normal refresh call)
-     * @param {number} [t] (time value, if available)
+     * @param {number} [t] (time value, if available, from the requestAnimationFrame() callback)
      */
-    drawBuffer(fForced = false, t)
+    drawBuffer(fForced = false, t = 0)
     {
         if (this.fBufferModified || fForced) {
             if (this.type < LED.TYPE.DIGIT) {
@@ -2192,7 +2192,7 @@ class LED extends Device {
      * drawGrid(fForced)
      *
      * Used by drawBuffer() for LED.TYPE.ROUND, LED.TYPE.SQUARE, etc.
-     * 
+     *
      * If the buffer was recently shifted left (ie, nShiftedLeft is set), then we take advantage
      * of that knowledge to use drawImage() to shift the entire grid image left, and then redrawing
      * only the rightmost visible column.
@@ -2429,7 +2429,7 @@ class LED extends Device {
 
     /**
      * enableDisplay(on)
-     * 
+     *
      * @this {LED}
      * @param {boolean} [on]
      */
@@ -2440,7 +2440,7 @@ class LED extends Device {
             this.fBufferModified = true;
         }
     }
-    
+
     /**
      * getBuffer()
      *
@@ -2594,7 +2594,7 @@ class LED extends Device {
      * less than 1 is set).
      *
      * TODO: Cache frequently requested colors.
-     * 
+     *
      * @this {LED}
      * @param {Array.<number>} rgb
      * @returns {string}
@@ -2749,10 +2749,10 @@ class LED extends Device {
 
     /**
      * setContainerStyle(sAttr, sValue)
-     * 
+     *
      * @this {LED}
-     * @param {string} sAttr 
-     * @param {string} sValue 
+     * @param {string} sAttr
+     * @param {string} sValue
      */
     setContainerStyle(sAttr, sValue)
     {
@@ -3269,7 +3269,7 @@ class ROM extends Device {
      * loadState(state)
      *
      * If any saved values don't match (presumably overridden), abandon the given state and return false.
-     * 
+     *
      * @this {ROM}
      * @param {Array} state
      * @returns {boolean}
@@ -3413,7 +3413,7 @@ class Time extends Device {
             /*
              * When clocking exclusively by animation frames, setSpeed() calculates how many cycles
              * each animation frame should "deposit" in our cycle bank:
-             * 
+             *
              *      this.nCyclesDepositPerFrame = (nCyclesPerSecond / 60) + 0.00000001;
              *
              * After that amount is added to our "balance" (this.nCyclesDeposited), we make a "withdrawal"

@@ -328,19 +328,19 @@ DiskAPI.ATTR = {
 /*
  * Our "DiskDump API", such as it was, used to look like:
  *
- *      http://jsmachines.net/bin/convdisk.php?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
+ *      http://pcjs.org/bin/convdisk.php?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
  *
  * To make it (a bit) more "REST-like", the above request now looks like:
  *
- *      http://www.pcjs.org/api/v1/dump?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
+ *      https://www.pcjs.org/api/v1/dump?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
  *
  * Similarly, our "FileDump API" used to look like:
  *
- *      http://jsmachines.net/bin/convrom.php?rom=/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.rom&format=json
+ *      http://pcjs.org/bin/convrom.php?rom=/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.rom&format=json
  *
  * and that request now looks like:
  *
- *      http://www.pcjs.org/api/v1/dump?file=/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.rom&format=json
+ *      https://www.pcjs.org/api/v1/dump?file=/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.rom&format=json
  *
  * I don't think it makes sense to avoid "query" parameters, because blending the path of a disk image with the
  * the rest of the URL would be (a) confusing, and (b) more work to parse.
@@ -58593,12 +58593,12 @@ class TestController extends Component {
         this.tests = null;
         let fLoading = false;
         this.urlTests = parms['tests'];
-        
+
         this.consoleBuffer = "";
         this.controlBuffer = null;
         this.sendData = null;
         this.deliverData = this.deliverInput = this.deliverTests = null;
-        
+
         this.sBinding = parms['binding'];
         if (this.sBinding) {
             this.serialPort = Component.getComponentByID(this.sBinding, this.id);
@@ -58637,9 +58637,9 @@ class TestController extends Component {
         }, function(nState) {
             controller.println(sProgress, Component.PRINT.PROGRESS);
         });
-        
+
     }
-    
+
     /**
      * doneLoad(sURL, sTestData, nErrorCode)
      *
@@ -58798,7 +58798,7 @@ class TestController extends Component {
     printf(format, ...args)
     {
         let s = Str.sprintf(format, ...args);
-        
+
         if (this.controlBuffer != null) {
             if (s != '\r') {
                 if (s == '\b' || s == "\b \b") {
@@ -58815,7 +58815,7 @@ class TestController extends Component {
                 this.controlBuffer.scrollTop = this.controlBuffer.scrollHeight;
             }
         }
-        
+
         if (this.consoleBuffer != null) {
             let i = s.lastIndexOf('\n');
             if (i >= 0) {
@@ -58845,7 +58845,7 @@ class TestController extends Component {
             for (let i = 0; i < data.length; i++) this.deliverData(data[i]);
         }
     }
-    
+
     /**
      * TestController.init()
      *
