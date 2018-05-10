@@ -1074,7 +1074,7 @@ class Computer extends Component {
             //
             Web.onError("There may be a problem with your " + PCX86.APPNAME + " machine.");
             //
-            // if (Component.confirmUser("There may be a problem with your " + PCX86.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PCX86.APPNAME + " machine state to http://" + SITEHOST + ".")) {
+            // if (Component.confirmUser("There may be a problem with your " + PCX86.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PCX86.APPNAME + " machine state to " + SITEURL + ".")) {
             //     Web.sendReport(PCX86.APPNAME, PCX86.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
             // }
             //

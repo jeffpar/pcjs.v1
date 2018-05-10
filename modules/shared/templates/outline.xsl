@@ -22,7 +22,7 @@
 		</xsl:variable>
 		<html lang="en">
 			<head>
-				<title><xsl:value-of select="title"/><xsl:text> | </xsl:text><xsl:value-of select="$SITEHOST"/></title>
+				<title>PCjs<xsl:text> | </xsl:text><xsl:value-of select="title"/></title>
 				<xsl:call-template name="commonStyles"/>
 				<xsl:call-template name="documentStyles"/>
 				<xsl:call-template name="componentStyles"/>

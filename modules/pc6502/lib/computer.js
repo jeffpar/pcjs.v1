@@ -804,7 +804,7 @@ Computer.prototype.checkPower = function()
  */
 Computer.prototype.powerReport = function(stateComputer)
 {
-    if (web.confirmUser("There may be a problem with your " + Computer.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + Computer.APPNAME + " machine state to http://" + SITEHOST + ".")) {
+    if (web.confirmUser("There may be a problem with your " + Computer.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + Computer.APPNAME + " machine state to " + SITEURL + ".")) {
         web.sendReport(Computer.APPNAME, Computer.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
     }
 };

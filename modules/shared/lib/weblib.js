@@ -476,7 +476,7 @@ class Web {
      * @param {string} sUser (ie, the user key, if any)
      * @param {string} sType (eg, "bug"); one of ReportAPI.TYPE.*
      * @param {string} sReport (eg, unparsed state data)
-     * @param {string} [sHostName] (default is http://SITEHOST)
+     * @param {string} [sHostName] (default is SITEURL)
      */
     static sendReport(sApp, sVer, sURL, sUser, sType, sReport, sHostName)
     {
@@ -487,7 +487,7 @@ class Web {
         dataPost[ReportAPI.QUERY.USER] = sUser;
         dataPost[ReportAPI.QUERY.TYPE] = sType;
         dataPost[ReportAPI.QUERY.DATA] = sReport;
-        let sReportURL = (sHostName? sHostName : "http://" + SITEHOST) + ReportAPI.ENDPOINT;
+        let sReportURL = (sHostName? sHostName : SITEURL) + ReportAPI.ENDPOINT;
         Web.getResource(sReportURL, dataPost, true);
     }
 
@@ -498,7 +498,7 @@ class Web {
      */
     static getHost()
     {
-        return ("http://" + (window? window.location.host : SITEHOST));
+        return (window? window.location.protocol + "//" + window.location.host : SITEURL);
     }
 
     /**

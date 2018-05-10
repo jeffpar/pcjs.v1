@@ -29,7 +29,7 @@
       "COMPILED",
       "DEBUG",
       "DEBUGGER",
-      "SITEHOST"
+      "SITEURL"
     ],
     "folder": "c1pjs",
     "creator": "embedC1P",
@@ -103,7 +103,7 @@
       "COMPILED",
       "DEBUG",
       "DEBUGGER",
-      "SITEHOST"
+      "SITEURL"
     ],
     "folder": "pc8080",
     "creator": "embedPC8080",
@@ -147,7 +147,7 @@
       "COMPILED",
       "DEBUG",
       "DEBUGGER",
-      "SITEHOST",
+      "SITEURL",
       "BACKTRACK",
       "I386"
     ],
@@ -209,7 +209,7 @@
       "COMPILED",
       "DEBUG",
       "DEBUGGER",
-      "SITEHOST"
+      "SITEURL"
     ],
     "folder": "pdpjs",
     "creator": "embedPDP10",
@@ -251,7 +251,7 @@
       "COMPILED",
       "DEBUG",
       "DEBUGGER",
-      "SITEHOST"
+      "SITEURL"
     ],
     "folder": "pdpjs",
     "creator": "embedPDP11",

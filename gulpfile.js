@@ -126,10 +126,10 @@ for (let i = 0; i < machines.shared.externs.length; i++) {
     }
 }
 
-var sSiteHost = "www.pcjs.org";
+var sSiteHost = "https://www.pcjs.org";
 
 if (pkg.homepage) {
-    let match = pkg.homepage.match(/^https?:\/\/([^\/]*)(.*)/);
+    let match = pkg.homepage.match(/^(https?:\/\/[^\/]*)(.*)/);
     if (match) sSiteHost = match[1];
 }
 
@@ -164,7 +164,7 @@ aMachines.forEach(function(machineType) {
             case "VERSION":
                 machineDefines[define] = machineVersion;
                 break;
-            case "SITEHOST":
+            case "SITEURL":
                 machineDefines[define] = sSiteHost;
                 break;
             case "BACKTRACK":
