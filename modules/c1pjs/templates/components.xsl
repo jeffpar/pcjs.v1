@@ -590,4 +590,16 @@
 		type:'<xsl:value-of select="@type"/>',refID:'<xsl:value-of select="@refid"/>'<xsl:if test="@start">,start:<xsl:value-of select="@start"/>,end:<xsl:value-of select="@end"/></xsl:if>
 	</xsl:template>
 
+	<xsl:template name="displayAttr">
+		<xsl:for-each select="@*"><xsl:value-of select="concat(' ', name(), '=&quot;', ., '&quot;')"/></xsl:for-each>
+	</xsl:template>
+
+	<xsl:template name="displayXML"><xsl:param name="tag"/>&lt;<xsl:value-of select="$tag"/><xsl:call-template name="displayAttr"/>&gt;<xsl:apply-templates mode="display"/>&lt;/<xsl:value-of select="$tag"/>&gt;</xsl:template>
+
+	<xsl:template name="displayMachine">
+		<pre>&lt;machine<xsl:call-template name="displayAttr"/>&gt;<xsl:apply-templates mode="display"/>&lt;/machine&gt;</pre>
+	</xsl:template>
+
+	<xsl:template match="*" mode="display"><xsl:call-template name="displayXML"><xsl:with-param name="tag"><xsl:value-of select="name(.)"/></xsl:with-param></xsl:call-template></xsl:template>
+
 </xsl:stylesheet>
