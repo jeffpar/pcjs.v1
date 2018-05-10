@@ -8,11 +8,11 @@
  */
 body {
     margin: 0;
-    background: #202020;
+    background: #ffffff;
 }
 h1, h2 {
     margin-top: 0;
-    color: #cccccc;
+    /* color: #cccccc; */
 }
 h1, h2, h3, h4 {
     word-wrap: break-word;
@@ -23,7 +23,7 @@ h3 ~ *:not(h3) {
 }
 */
 h4 a {
-    color: #cccccc !important;
+    /* color: #cccccc !important; */
 }
 p {
     line-height: 1.5em;
@@ -35,7 +35,7 @@ a img {
     vertical-align: bottom;
 }
 pre, code {
-    color: #000000;
+    /* color: #000000; */
     background-color: #cccccc;
     font-family: Monaco, Consolas, "Lucida Console", monospace;
     font-size: 12px;
@@ -50,16 +50,16 @@ code {
     padding: 1px;
 }
 pre a, code a {
-    color: #006400 !important;
+    /* color: #006400 !important; */
 }
 .common {
     width: 100%;
     margin: 0 auto;
-    color: #cccccc;
+    /* color: #cccccc; */
 }
 .common a {
-  /*color: #80bd01;*/
-    color: #7fc07f;
+    /* color: #80bd01; */
+    /* color: #7fc07f; */
     text-decoration: none;
 }
 .common hr {
@@ -70,10 +70,10 @@ pre a, code a {
 }
 .common, .machine {
     font-family: "Titillium Web", "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif;
-    font-size: 15px;
+    font-size: 16px;
 }
 .machine {
-  /*margin: 15px;*/
+    /* margin: 15px; */
     overflow: hidden;
 }
 .c1pjs {
@@ -92,12 +92,12 @@ pre a, code a {
 .machine-sticky {
     position: fixed !important;
     z-index: 1 !important;
-    background-color: #404040 !important;
+    /* background-color: #404040 !important; */
     padding-right: 16px !important;
     top: 0 !important;
 }
 .common-top {
-    background: #202020;
+    /* background: #202020; */
     font-size: small;
 }
 .common-top-left {
@@ -134,7 +134,7 @@ pre a, code a {
 .common-middle {
     clear: both;
     padding: 1px 1em 1px 1em;
-    background: #404040;
+    /* background: #404040; */
 }
 .common-sidebar {
     float: left;
@@ -152,8 +152,8 @@ pre a, code a {
     padding-left: 0;
 }
 .common-list li {
-  /*font-variant: small-caps;*/
-    padding-bottom: 7px;
+    /* font-variant: small-caps; */
+    /* padding-bottom: 7px; */
 }
 .common-list-data {
     list-style-type: none;
@@ -200,7 +200,7 @@ pre a, code a {
     padding: 5px;
     border: 1px solid black;
     border-radius: 5px;
-    background-color: #FAEBD7;
+    /* background-color: #FAEBD7; */
 }
 .common-image-label {
     font-size: x-small;

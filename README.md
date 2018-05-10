@@ -83,8 +83,6 @@ and the original machine are available in the [C1Pjs Documentation](/pubs/docs/c
 
 <!--BEGIN:EXCLUDE-->
 
----
-
 Developer Notes
 ---------------
 
