@@ -52,11 +52,11 @@
 			<control type="button" binding="setSpeed">Fast</control>
 		</control>
 	</panel>
-	<fdc id="fdcNEC" autoMount='{A: {name: "PC-DOS 1.00", path: "PCDOS100.json"}, B: {name: "VisiCalc", path: "visicalc.json"}}' width="320px" pos="left" padTop="16px">
+	<fdc id="fdcNEC" autoMount='{A: {name: "PC DOS 1.00", path: "PCDOS100.json"}, B: {name: "VisiCalc", path: "visicalc.json"}}' width="320px" pos="left" padTop="16px">
 		<control type="container">
 			<control type="list" binding="listDrives"/>
 			<control type="list" binding="listDisks">
-				<disk path="PCDOS100.json">PC-DOS 1.00</disk>
+				<disk path="PCDOS100.json">PC DOS 1.00</disk>
 				<disk path="visicalc.json" href="http://www.bricklin.com/history/vclicense.htm" desc="VisiCalc License">VisiCalc</disk>
 			</control>
 			<control type="button" binding="loadDisk">Load</control>

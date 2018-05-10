@@ -13,11 +13,11 @@
 	<cpu id="cpu8088" model="8088" autostart="true" pos="left">
 		<control type="button" binding="run">Run</control>
 	</cpu>
-	<fdc id="fdcNEC" autoMount='{A: {name: "PC-DOS 1.00", path: "PCDOS100.json"}}' pos="left">
+	<fdc id="fdcNEC" autoMount='{A: {name: "PC DOS 1.00", path: "PCDOS100.json"}}' pos="left">
 		<control type="container">
 			<control type="list" binding="listDrives"/>
 			<control type="list" binding="listDisks">
-				<disk path="PCDOS100.json">PC-DOS 1.00</disk>
+				<disk path="PCDOS100.json">PC DOS 1.00</disk>
 			</control>
 			<control type="button" binding="loadDisk">Load</control>
 		</control>
