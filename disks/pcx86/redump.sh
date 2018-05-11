@@ -24,7 +24,7 @@ if [ ! -d "$1" ]; then
 	exit 1
 fi
 log=/Users/Jeff/Sites/pcjs/disks/pcx86/redump.log
-find -L $1 -name "manifest.xml" -exec grep -H -e "<disk.*img=" {} \; | sed -E "s/^([^:]*)\/manifest\.xml:.*img=\"([^\"]*)\".*href=\"([^\"]*)\".*/\1;\2;\3/" > disks
+find -L $1 -name "manifest.xml" -exec grep -H -e "<disk.*img=" {} \; | sed -E "s/^([^:]*)\/manifest\.xml:.*img=\"([^\"]*)\".*href=\"([^\"]*)\".*/\1;\2;\3/" > disks.lst
 while read line; do
 	dirManifest=`echo ${line} | sed -E "s/;.*//"`
 	imgFile=`echo ${line} | sed -E "s/.*;(.*);.*/\1/"`
@@ -89,5 +89,5 @@ while read line; do
 	echo diskdump --disk="${imgFile}" --format=json --output="${jsonFile}" --overwrite --manifest $2 >> ${log}
 	node ~/Sites/pcjs/modules/diskdump/bin/diskdump --disk="${imgFile}" --format=json --output="${jsonFile}" --overwrite --manifest $2 | tee -a ${log}
 	popd > /dev/null
-done < disks
-rm disks
+done < disks.lst
+rm disks.lst
