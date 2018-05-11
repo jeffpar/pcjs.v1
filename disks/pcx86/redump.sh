@@ -41,7 +41,7 @@ while read line; do
 	node ~/Sites/pcjs/modules/diskdump/bin/diskdump --disk="${img}" --format=json --output="${jsonTmp}" --forceBPB >> ${log}
 	if [ ! -f "${jsonTmp}" ]; then
 		echo "WARNING: diskdump failed to create ${jsonTmp}"
-		break
+		continue
 	fi
 	imgTmp="${dir}/${name}-TMP.img"
 	if [ -f "${imgTmp}" ]; then
