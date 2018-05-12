@@ -22,7 +22,7 @@ falls into these categories:
 Floating-point is the biggest chunk of work, which I'm going to save for last, with the hope that most PDP-10 software
 didn't use floating-point.  However, if all PDP-10 systems included floating-point hardware (which I haven't been able to
 confirm yet), I may have no choice.  Floating-point emulation in JavaScript isn't hard -- PCjs already includes
-[8087 Coprocessor Emulation](/modules/pcx86/lib/x86fpu.js) -- but getting all the details right is time-consuming.
+[8087 Coprocessor Emulation](/modules/pcx86/lib/fpux86.js) -- but getting all the details right is time-consuming.
 
 The PDP-10 has a lot of instructions, and I quickly had far more instructions than I was willing or able to write tests for.
 Besides, any tests I wrote would be based on the same potentially-flawed understandings that I had gleaned from DEC's
