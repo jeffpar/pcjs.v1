@@ -92,28 +92,38 @@ pre a, code a {
 .machine-sticky {
     position: fixed !important;
     z-index: 1 !important;
-    /* background-color: #404040 !important; */
+    background-color: #ffffff !important;
     padding-right: 16px !important;
     top: 0 !important;
 }
 .common-top {
     /* background: #202020; */
-    font-size: small;
+    padding: 1px 1em 1px 1em;
+}
+.common-top h2 {
+    margin: 8px 0px 8px 0px;
 }
 .common-top-left {
     float: left;
-    width: 60%;
 }
-.common-top-left ul {
-    line-height: 1.5em;
+.common-top-right {
+    float: right;
+    line-height: 56px;
+}
+.common-top-right p {
+    float: right;
+    margin: 0;
+    padding: 1em;
+}
+.common-top-right ul {
     list-style-type: none;
     margin: 0;
-    padding: 1em 1em 1em 9px;
     overflow: hidden;
 }
-.common-top-left ul li {
+.common-top-right ul li {
     display: block;
     float: left;
+    margin-left: 1em;
 }
 .common-top-left ul li a {
     border-right: 1px solid #6f6f6f;
@@ -121,15 +131,6 @@ pre a, code a {
 }
 .common-top-left ul li:last-child a {
     border-right: none;
-}
-.common-top-right {
-    float: right;
-    width: 40%;
-}
-.common-top-right p {
-    float: right;
-    margin: 0;
-    padding: 1em;
 }
 .common-middle {
     clear: both;
@@ -207,7 +208,7 @@ pre a, code a {
 }
 .common-bottom {
     clear: both;
-    padding-top: 1em;
+    padding: 1em 1em 1px 1em;
 }
 .common-bottom:after {
     content: '';

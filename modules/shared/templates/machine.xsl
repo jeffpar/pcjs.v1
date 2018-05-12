@@ -35,7 +35,6 @@
 				<div class="common">
 					<xsl:call-template name="commonTop"/>
 					<div class="common-middle">
-						<p></p>
 						<div id="{@id}" class="machine {$machineType} {$machineClass}">
 							<xsl:call-template name="component">
 								<xsl:with-param name="machine" select="@id"/>
