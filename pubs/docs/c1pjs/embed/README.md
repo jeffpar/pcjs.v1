@@ -21,13 +21,13 @@ If you want to read as little as possible, then just paste the following code on
 ```html
 <div id="myC1P"/></div><div style="clear:both"></div>
 <script type="text/javascript"
-    src="https://www.pcjs.org/versions/c1pjs/1.67.0/c1p.js">
+    src="https://www.pcjs.org/versions/c1pjs/1.68.0/c1p.js">
 </script>
 <script type="text/javascript">
     window.embedC1P(
         "myC1P",
         "https://www.pcjs.org/devices/c1p/machine/8kb/embed/machine.xml",
-        "https://www.pcjs.org/versions/c1pjs/1.67.0/components.xsl"
+        "https://www.pcjs.org/versions/c1pjs/1.68.0/components.xsl"
     );
 </script>
 ```
@@ -45,7 +45,7 @@ The order of the XML elements also determines the layout of the associated HTML 
 **&lt;keyboard&gt;** element appears before the **&lt;video&gt;** element, then the keyboard controls will be
 displayed *above* the video display instead of *below*. There's an extensive set of attributes that you can add
 to any of the elements below to style and position them, including the usual *style* attribute, but at present,
-there's no documentation beyond the sample XML files and the default [XML stylesheet](/versions/c1pjs/1.67.0/components.xsl).
+there's no documentation beyond the sample XML files and the default [XML stylesheet](/versions/c1pjs/1.68.0/components.xsl).
 
 The example at the top of this page uses an [XML file](/devices/c1p/machine/8kb/embed/machine.xml) that looks like:
 
@@ -82,7 +82,7 @@ Machine configuration files can also be "self-starting" if they contain the foll
 top of the file:
 
 ```xml
-<?xml-stylesheet type="text/xsl" href="https://www.pcjs.org/versions/c1pjs/1.67.0/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="https://www.pcjs.org/versions/c1pjs/1.68.0/machine.xsl"?>
 ```
 
 For example, here's a self-starting [machine.xml](/devices/c1p/machine/8kb/large/machine.xml) configuration.
@@ -133,11 +133,11 @@ Step 3: Add the C1Pjs Simulator to your web page
 Somewhere on your page, you need to add the following **&lt;script&gt;** element:
 
 ```html
-<script type="text/javascript" src="https://www.pcjs.org/versions/c1pjs/1.67.0/c1p.js"></script>
+<script type="text/javascript" src="https://www.pcjs.org/versions/c1pjs/1.68.0/c1p.js"></script>
 ```
 
-To include the C1Pjs Debugger, use [c1p-dbg.js](/versions/c1pjs/1.67.0/c1p-dbg.js) instead of
-[c1p.js](/versions/c1pjs/1.67.0/c1p.js), and include some additional definitions in your machine
+To include the C1Pjs Debugger, use [c1p-dbg.js](/versions/c1pjs/1.68.0/c1p-dbg.js) instead of
+[c1p.js](/versions/c1pjs/1.68.0/c1p.js), and include some additional definitions in your machine
 definition XML file:
 
 ```xml
@@ -175,7 +175,7 @@ The **embedC1P()** function accepts three parameters:
 - the *id* attribute of the HTML element that will contain the simulator (eg, 'myC1P');
 - the URL of your machine definition XML file (eg, 'embed.xml', since it's on the same server);
 - the URL of an XML stylesheet; unless you've created your own stylesheet, it's recommended you omit this
-parameter and use the default [XML stylesheet](/versions/c1pjs/1.67.0/components.xsl).
+parameter and use the default [XML stylesheet](/versions/c1pjs/1.68.0/components.xsl).
 
 Step 5: Enjoy!
 --------------
@@ -184,7 +184,7 @@ All I ask is that any page that embeds the simulator also includes attribution, 
 
 > [PCjs](https://www.pcjs.org) © 2012-2018 by [Jeff Parsons](https://jeffpar.com)
 
-If you use the default [XML stylesheet](/versions/c1pjs/1.67.0/components.xsl), attribution is automatically inserted,
+If you use the default [XML stylesheet](/versions/c1pjs/1.68.0/components.xsl), attribution is automatically inserted,
 which relieves you from including it yourself.
 
 Feel free to copy any or all of the files listed above to your own server (it's probably better to share the server

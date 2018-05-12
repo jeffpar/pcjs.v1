@@ -23,8 +23,8 @@ requires a patch in order to run.  However, if patching is necessary, we try to 
 involved; see [Lotus 1-2-3 Release 1A*](/disks/pcx86/apps/lotus/123/1as/) for an example.
 
 Any disk loaded into a PCjs machine can also be saved to your local machine, but be aware that any changes you
-made to the disk will be saved as well.  If it's a DOS disk, PCjs may also update the disk's BPB, to help ensure
-the disk can be mounted in modern operating systems; see the description of the
+made to the disk will be saved as well, and if it's a DOS disk, PCjs may also update the disk's signature and BPB,
+to help with disk identification and mounting; see the description of the
 [PC DOS 0.90 Boot Sector](/disks/pcx86/dos/ibm/0.90/#pc-dos-090-boot-sector) for an example.
 [macOS](http://www.apple.com/macos/) has built-in support for mounting *.IMG* disk images, and Windows can mount
 them with the help of third-party software like [OSFMount](http://www.osforensics.com/tools/mount-disk-images.html).
