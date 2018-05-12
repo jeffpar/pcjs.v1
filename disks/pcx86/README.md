@@ -14,6 +14,9 @@ IBM PC Disk Library
 Below is a list of disks available to the project's collection of [IBM PC Machines](/devices/pcx86/machine/).
 For non-PC software, see [Disk Libraries](/disks/).
 
+The focus here is on historically significant PC software from the early 1980s through the early 1990s, which
+required nothing more than a machine equipped with an 8088 (or 80286 or 80386) CPU and a standard IBM video card.
+
 Whenever possible, PCjs uses unmodified copies of the original software.  Exceptions include application
 "Demo Disks" that we've created for our [IBM PC Application Demos](/apps/pcx86/) and copy-protected software that
 requires a patch in order to run.  However, if patching is necessary, we try to identify and explain the patch
