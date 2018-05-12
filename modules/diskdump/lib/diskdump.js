@@ -514,26 +514,10 @@ DiskDump.aDefaultBPBs = [
     0x02, 0x00,                 // 0x1A: number of heads (2)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
-  // [                             // define BPB for 720Kb diskette (1 sector/cluster format used by PC-DOS 4.01)
-  //   0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-  //   0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
-  //   // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x34, 0x2E, 0x30,     // "IBM  4.0" (this is a real OEM signature)
-  //   0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
-  //   0x01,                       // 0x0D: sectors per cluster (1)
-  //   0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
-  //   0x02,                       // 0x10: FAT copies (2)
-  //   0x70, 0x00,                 // 0x11: root directory entries (0x70 or 112)  0x70 * 0x20 = 0xE00 (1 sector is 0x200 bytes, total of 7 sectors)
-  //   0xA0, 0x05,                 // 0x13: number of sectors (0x5A0 or 1440)
-  //   0xF9,                       // 0x15: media ID
-  //   0x05, 0x00,                 // 0x16: sectors per FAT (5)
-  //   0x09, 0x00,                 // 0x18: sectors per track (9)
-  //   0x02, 0x00,                 // 0x1A: number of heads (2)
-  //   0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
-  // ],
   [                             // define BPB for 720Kb diskette (2 sector/cluster format more commonly used)
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
     0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
-    // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x35, 0x2E, 0x30,     // "IBM  5.0" (this is a real OEM signature)
+    // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x35, 0x2E, 0x30,  // "IBM  5.0" (this is a real OEM signature)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x02,                       // 0x0D: sectors per cluster (2)
     0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
@@ -542,6 +526,22 @@ DiskDump.aDefaultBPBs = [
     0xA0, 0x05,                 // 0x13: number of sectors (0x5A0 or 1440)
     0xF9,                       // 0x15: media ID
     0x03, 0x00,                 // 0x16: sectors per FAT (3)
+    0x09, 0x00,                 // 0x18: sectors per track (9)
+    0x02, 0x00,                 // 0x1A: number of heads (2)
+    0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
+  ],
+  [                             // define BPB for 720Kb diskette (1 sector/cluster format used by PC-DOS 4.01)
+    0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
+    // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x34, 0x2E, 0x30,  // "IBM  4.0" (this is a real OEM signature)
+    0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
+    0x01,                       // 0x0D: sectors per cluster (1)
+    0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
+    0x02,                       // 0x10: FAT copies (2)
+    0x70, 0x00,                 // 0x11: root directory entries (0x70 or 112)  0x70 * 0x20 = 0xE00 (1 sector is 0x200 bytes, total of 7 sectors)
+    0xA0, 0x05,                 // 0x13: number of sectors (0x5A0 or 1440)
+    0xF9,                       // 0x15: media ID
+    0x05, 0x00,                 // 0x16: sectors per FAT (5)
     0x09, 0x00,                 // 0x18: sectors per track (9)
     0x02, 0x00,                 // 0x1A: number of heads (2)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
@@ -2866,8 +2866,16 @@ DiskDump.prototype.convertToJSON = function()
                 if (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.MEDIA_ID] == bMediaID) {
                     var cbDiskBPB = (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.TOTAL_SECS] + (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.TOTAL_SECS + 1] * 0x100)) * cbSector;
                     if (cbDiskBPB == cbDiskData) {
-                        iBPB = i;
-                        break;
+                        /*
+                         * This code was added to deal with variations in sectors/cluster.  Most software manufacturers
+                         * were happy with the defaults that FORMAT chooses for a given diskette size, but in a few cases
+                         * (eg, PC DOS 4.01 720K diskettes), the manufacturer (IBM) opted for a smaller cluster size.
+                         */
+                        var bClusterSecs = this.bufDisk.readUInt8(offBootSector + DiskAPI.BPB.CLUSTER_SECS);
+                        if (bClusterSecs == DiskDump.aDefaultBPBs[i][DiskAPI.BPB.CLUSTER_SECS]) {
+                            iBPB = i;
+                            break;
+                        }
                     }
                 }
             }
@@ -2889,8 +2897,8 @@ DiskDump.prototype.convertToJSON = function()
             }
             if (fBPBExists) {
                 /*
-                 * In deference to the PC-DOS 2.0 BPB behavior discussed above, we stop our BPB verification
-                 * after the first word of HIDDEN_SECS.
+                 * In deference to the PC-DOS 2.0 BPB behavior discussed above, we stop our BPB verification after
+                 * the first word of HIDDEN_SECS.
                  */
                 for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.HIDDEN_SECS + 2; i++) {
                     var bDefault = DiskDump.aDefaultBPBs[iBPB][i];
