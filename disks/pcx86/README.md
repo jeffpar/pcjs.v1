@@ -11,22 +11,25 @@ redirect_from:
 IBM PC Disk Library
 -------------------
 
-The [IBM PC Disk Library](/disks/pcx86/library.xml) lists all of our [Disk Manifests](#disk-manifests)
-and makes those disks available to the project's collection of [IBM PC Machines](/devices/pcx86/machine/).
+Below is a list of disks available to the project's collection of [IBM PC Machines](/devices/pcx86/machine/).
+For non-PC software, see [Disk Libraries](/disks/).
 
-For non-DOS diskettes, see [Disk Libraries](/disks/).
+Whenever possible, PCjs uses unmodified copies of the original software.  Exceptions include application
+"Demo Disks" that we've created for our [IBM PC Application Demos](/apps/pcx86/) and copy-protected software that
+requires a patch in order to run.  However, if patching is necessary, we try to identify and explain the patch
+involved; see [Lotus 1-2-3 Release 1A*](/disks/pcx86/apps/lotus/123/1as/) for an example.
 
-Whenever possible, PCjs archives copies of original distribution diskettes.  Exceptions include the application
-"Demo Disks" that we've created for our [IBM PC Application Demos](/apps/pcx86/).  PCjs may also include minor changes
-to a disk's boot sector, making it easier to mount the disk in modern operating systems.  See the description of the
+Any disk loaded into a PCjs machine can also be saved to your local machine, but be aware that any changes you
+made to the disk will be saved as well.  If it's a DOS disk, PCjs may also update the disk's BPB, to help ensure
+the disk can be mounted in modern operating systems; see the description of the
 [PC DOS 0.90 Boot Sector](/disks/pcx86/dos/ibm/0.90/#pc-dos-090-boot-sector) for an example.
 [macOS](http://www.apple.com/macos/) has built-in support for mounting *.IMG* disk images, and Windows can mount
 them with the help of third-party software like [OSFMount](http://www.osforensics.com/tools/mount-disk-images.html).
 
-The summary below is not a complete list of everything in the library, just highlights.  For some of the disks,
-we have provided more information about the software, and in some cases, machines that automatically run the software.
-Eventually, everything in the library will be listed here, with links to pages that describe the software in more detail,
-along with live demonstrations.
+The summary below is not a complete list of everything in our [Disk Manifests](#disk-manifests), just highlights.
+For some of the disks, we have provided more information about the software, and in some cases, machines that
+automatically run the software.  Eventually, everything in the library should be listed here, with links to pages
+that describe the software in more detail, along with live demonstrations.
 
 ### Operating Systems
 
@@ -111,8 +114,8 @@ Disk Manifests
 
 Typically, all the distribution disks for a single version of a piece of software are placed in a single
 folder, along with a **manifest.xml** file containing metadata about the software and a list of the individual
-disks.  This is generally referred to as a [Software Manifest](/apps/), but in the context of the Disk Library,
-it's simply known as a Disk Manifest.
+disks.  This is generally referred to as a [Software Manifest](/apps/), but when dealing specifically with disk images,
+it's also known as a Disk Manifest.  All Disk Manifests are then bundled into a [Disk Library](/disks/pcx86/library.xml).  
 
 A Disk Manifest can then be added to a *[Floppy Drive Controller (FDC)](/docs/pcx86/fdc/)* configuration file,
 making all its disks available to any machine loading that particular configuration file.
