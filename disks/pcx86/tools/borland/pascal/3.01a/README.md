@@ -25,7 +25,7 @@ compiler.  According to the 1986 Reference Manual, the BCD and 8087 versions wer
 - Turbo Pascal 3.01A with BCD (`TURBOBCD.COM`) 
 - Turbo Pascal 3.01A with 8087  (`TURBO-87.COM`)
 
-Additional files were also included the additional compilers: 
+Additional files were included with the additional compilers:
 
 	HILB     PAS      6124 03-18-85   3:28p
 	TEST     PAS      1447 03-18-85   3:27p
@@ -44,7 +44,7 @@ The following documentation is available online:
 	Directory of A:\
 
 	READ     ME       9622 04-17-85   8:11p
-	TURBO    COM     39671 01-01-80  12:01a
+	TURBO    COM     39671 04-17-85   8:14p
 	TURBO    MSG      1536 03-01-85   3:33a
 	TURBO-87 COM     38345 04-18-85   8:24a
 	TURBOBCD COM     39481 04-18-85   8:24a
