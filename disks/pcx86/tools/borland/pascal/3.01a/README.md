@@ -2,6 +2,17 @@
 layout: page
 title: Borland Turbo Pascal 3.01A
 permalink: /disks/pcx86/tools/borland/pascal/3.01a/
+machines:
+  - id: ibm5170-msdos320
+    type: pcx86
+    config: /devices/pcx86/machine/5170/ega/640kb/rev3/machine.xml
+    drives: '[{name:"10Mb Hard Disk",type:1,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'
+    autoMount:
+      A:
+        name: None
+      B:
+        name: Borland Turbo Pascal 3.01A
+    autoStart: true
 ---
 
 Borland Turbo Pascal 3.01A
@@ -14,7 +25,7 @@ compiler.  According to the 1986 Reference Manual, the BCD and 8087 versions wer
 - Turbo Pascal 3.01A with BCD (`TURBOBCD.COM`) 
 - Turbo Pascal 3.01A with 8087  (`TURBO-87.COM`)
 
-Additional files were also included the additional compilers: 
+Additional files were included with the additional compilers:
 
 	HILB     PAS      6124 03-18-85   3:28p
 	TEST     PAS      1447 03-18-85   3:27p
@@ -24,6 +35,8 @@ The following documentation is available online:
 
 - [Turbo Pascal Version 3.0 Reference Manual (1985)](http://bitsavers.org/pdf/borland/turbo_pascal/Turbo_Pascal_Version_3.0_Reference_Manual_1985.pdf)
 
+{% include machine.html id="ibm5170-msdos320" %}
+
 ### Directory of Borland Turbo Pascal 3.01A
 
 	 Volume in drive A has no label
@@ -31,7 +44,7 @@ The following documentation is available online:
 	Directory of A:\
 
 	READ     ME       9622 04-17-85   8:11p
-	TURBO    COM     39671 01-01-80  12:01a
+	TURBO    COM     39671 04-17-85   8:14p
 	TURBO    MSG      1536 03-01-85   3:33a
 	TURBO-87 COM     38345 04-18-85   8:24a
 	TURBOBCD COM     39481 04-18-85   8:24a
@@ -63,3 +76,7 @@ The following documentation is available online:
 	Total files listed:
 	       28 file(s)     276056 bytes
 	                       69632 bytes free
+
+---
+
+![Borland Turbo Pascal 3.01A]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/tools/borland/pascal/3.01a/TURBO-PASCAL-301A-8087-BCD.jpg)
