@@ -81,6 +81,6 @@ The MS-DOS Encyclopedia
 
       Figure H-1. Structure of the program segment prefix.
 
-{% endaw %}
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

@@ -11,8 +11,12 @@ PC-SIG Library 8th Edition CD-ROM (April 1990)
 ----------------------------------------------
 
 The machine below has access to all 2,121 diskette images from the PC-SIG Library 8th Edition CD-ROM (April 1990).
-The directory listings were generated from the following [manifest](https://jeffpar.github.io/pcjs-disks/pcx86/shareware/pcsig08/manifest.xml)
-using <a href="/modules/diskdump/bin/disklist" download="disklist.js">disklist</a>, a custom PCjs JavaScript utility.
+The directory listings were generated from our [PCSIG08 Disk Manifest](https://jeffpar.github.io/pcjs-disks/pcx86/shareware/pcsig08/manifest.xml)
+using the PCjs <a href="/modules/diskdump/bin/disklist.js">disklist</a> utility, which was much more expedient than
+using PC DOS to load and list every disk's contents.
+
+Preceding each directory listing is a **Load Disk** button that will automatically load the corresponding disk into
+the machine's drive A.  Make sure the machine has finished booting before loading any disks.
 
 The same machine is also available [with the PCjs Debugger](debugger/).
 
