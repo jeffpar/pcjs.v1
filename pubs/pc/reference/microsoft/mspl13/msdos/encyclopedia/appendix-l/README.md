@@ -7,11 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/msdos/encyclopedia/appendix-l/
 The MS-DOS Encyclopedia
 -----------------------
 
-### Appendix L
+### Appendix L: Intel Hexadecimal Object File Format
 
-	Appendix L: Intel Hexadecimal Object File Format
-	
-	
 	     The MCS-86 hexadecimal object file format provides a means of
 	     recording a program's binary (compiled or assembled) image in a text-
 	     only (printable) file format. This format makes it easy to transfer
@@ -262,5 +259,5 @@ The MS-DOS Encyclopedia
 	
 	
 	                                                   Keith Burgoyne
-	
+
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

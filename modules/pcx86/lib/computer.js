@@ -501,6 +501,26 @@ class Computer extends Component {
     }
 
     /**
+     * getMachineBoolean(sParm, fDefault)
+     *
+     * Boolean-specific version of getMachineParm().
+     *
+     * @this {Computer}
+     * @param {string} sParm
+     * @param {boolean} fDefault
+     * @return {boolean}
+     */
+    getMachineBoolean(sParm, fDefault)
+    {
+        let f = fDefault;
+        let s = this.getMachineParm(sParm);
+        if (s != undefined) {
+            f = (s == "true"? true : (s == "false"? false : !!s));
+        }
+        return f;
+    }
+
+    /**
      * getMachineParm(sParm, parmsComponent)
      *
      * If the machine parameter doesn't exist, we check for a matching component parameter (if parmsComponent

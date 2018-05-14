@@ -162,10 +162,7 @@ class CPU extends Component {
         /*
          * We've already saved the parmsCPU 'autoStart' setting, but there may be a machine (or URL) override.
          */
-        let sAutoStart = cmp.getMachineParm('autoStart');
-        if (sAutoStart != null) {
-            this.flags.autoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
-        }
+        this.flags.autoStart = cmp.getMachineBoolean('autoStart', this.flags.autoStart);
 
         this.timerYield = cpu.addTimer(this.id, function yieldTimer() {
             cpu.flags.yield = true;

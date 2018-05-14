@@ -7,11 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/msdos/encyclopedia/appendix-o/
 The MS-DOS Encyclopedia
 -----------------------
 
-### Appendix O
+### Appendix O: IBM PC ROM BIOS Calls
 
-	Appendix O: IBM PC ROM BIOS Calls
-	
-	
 	     To invoke an IBM PC ROM BIOS routine, set register AH to the desired
 	     function and execute the software interrupt (INT) for the desired
 	     routine.
@@ -808,5 +805,5 @@ The MS-DOS Encyclopedia
 	
 	Returns:
 	     Nothing
-	
+
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

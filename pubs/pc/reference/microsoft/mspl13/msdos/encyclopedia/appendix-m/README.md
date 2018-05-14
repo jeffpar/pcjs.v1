@@ -7,10 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/msdos/encyclopedia/appendix-m/
 The MS-DOS Encyclopedia
 -----------------------
 
-### Appendix M
+### Appendix M: 8086/8088 Software Compatibility Issues
 
-	Appendix M: 8086/8088 Software Compatibility Issues
-	
 	     In general, the Intel 80286 microprocessor running in real mode
 	     executes 8086/8088 software correctly. The following is a list of the
 	     actions to take to compensate for the minor differences between the
@@ -79,5 +77,5 @@ The MS-DOS Encyclopedia
 	
 	     ■  Do not use I/O ports 0F8-0FFH. These are reserved for controlling
 	        the 80287 and future microprocessor extensions.
-	
+
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

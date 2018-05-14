@@ -2,6 +2,18 @@
 layout: page
 title: PC Tech Journal Disks
 permalink: /disks/pcx86/shareware/pctj/
+machines:
+  - id: pctj
+    type: pcx86
+    config: /devices/pcx86/machine/5170/ega/640kb/rev1/machine.xml
+    testRAM: false
+    drives: '[{name:"10Mb Hard Disk",type:1,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'
+    sticky: top
+    autoMount:
+      A:
+        name: None
+      B:
+        name: None
 ---
 
 PC Tech Journal Disks
@@ -50,9 +62,11 @@ with that diskette loaded in drive B.
 Looking at the dates alone, you can tell that this collection is woefully incomplete, but perhaps more will surface
 over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
+{% include machine.html id="pctj" %}
+
 ### Directory of PC Tech Journal (1985-12)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281985-12%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1985-12)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8512   
 	 Directory of A:\
