@@ -9674,5 +9674,5 @@ The MS-DOS Encyclopedia
 	CLOSE SRCCNL                                  ' Close source file.
 	
 	END
-	
+
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)
