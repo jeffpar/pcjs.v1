@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Preface
 
+{% raw %}
+
     In the space of six years, MS-DOS has become the most widely used
     computer operating system in the world, running on more than 10
     million machines. It has grown, matured, and stabilized into a
@@ -174,5 +176,7 @@ The MS-DOS Encyclopedia
     MasterCard; please include your credit card number and expiration
     date. Allow 4 weeks for delivery. Please specify 5.25" disks or 3.5"
     disks.
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

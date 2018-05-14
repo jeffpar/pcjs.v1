@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Introduction
 
+{% raw %}
+
         The MS-DOS Encyclopedia is the most comprehensive reference work
         available on Microsoft's industry-standard operating system. Written
         for experienced microcomputer users and programmers, it contains
@@ -163,5 +165,7 @@ The MS-DOS Encyclopedia
         Text composition by Microsoft Press in Garamond with display in
         Garamond Bold using the Magna composition system and the Linotronic
         300 laser imagesetter.
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

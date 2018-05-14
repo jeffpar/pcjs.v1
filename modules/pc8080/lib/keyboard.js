@@ -1039,7 +1039,7 @@ class Keyboard8080 extends Component {
             this.bVT100Address = b;
             this.cpu.requestINTR(1);
         }
-        this.printMessageIO(port, null, addrFrom, "KBDUART.ADDRESS", b);
+        this.printMessageIO(port, undefined, addrFrom, "KBDUART.ADDRESS", b);
         return b;
     }
 

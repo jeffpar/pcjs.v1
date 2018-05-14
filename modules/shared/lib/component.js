@@ -1420,10 +1420,10 @@ class Component {
      *
      * @this {Component}
      * @param {number} port
-     * @param {number|null|*} bOut if an output operation
-     * @param {number|null|*} [addrFrom]
-     * @param {string|null|*} [name] of the port, if any
-     * @param {number|null|*} [bIn] is the input value, if known, on an input operation
+     * @param {number} [bOut] if an output operation
+     * @param {number} [addrFrom]
+     * @param {string} [name] of the port, if any
+     * @param {number} [bIn] is the input value, if known, on an input operation
      * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      */
     printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage)
@@ -1431,7 +1431,7 @@ class Component {
         if (DEBUGGER && this.dbg) {
             if (bitsMessage === true) {
                 bitsMessage = 0;
-            } else if (bitsMessage == null) {
+            } else if (bitsMessage == undefined) {
                 bitsMessage = this.bitsMessage;
             }
             this.dbg.messageIO(this, port, bOut, addrFrom, name, bIn, bitsMessage);

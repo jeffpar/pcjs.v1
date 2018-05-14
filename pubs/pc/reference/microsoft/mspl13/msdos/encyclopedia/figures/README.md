@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Figures
 
+{% raw %}
+
 	Figure 2-11.
 	A simple program to run an application as an MS-DOS shell.
 	
@@ -9674,5 +9676,7 @@ The MS-DOS Encyclopedia
 	CLOSE SRCCNL                                  ' Close source file.
 	
 	END
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

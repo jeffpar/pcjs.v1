@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Section III: User Commands
 
+{% raw %}
+
     INTRODUCTION
 
 
@@ -11678,5 +11680,7 @@ The MS-DOS Encyclopedia
         Unable to create directory
         A destination directory cannot have the same name as an existing file
         in the prospective parent directory.
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

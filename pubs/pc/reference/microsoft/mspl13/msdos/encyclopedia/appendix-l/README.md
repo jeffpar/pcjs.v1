@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Appendix L: Intel Hexadecimal Object File Format
 
+{% raw %}
+
 	     The MCS-86 hexadecimal object file format provides a means of
 	     recording a program's binary (compiled or assembled) image in a text-
 	     only (printable) file format. This format makes it easy to transfer
@@ -259,5 +261,7 @@ The MS-DOS Encyclopedia
 	
 	
 	                                                   Keith Burgoyne
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

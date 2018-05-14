@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Indexes
 
+{% raw %}
+
 	SUBJECT
 	
 	This index lists entries by subject only.
@@ -3920,5 +3922,7 @@ The MS-DOS Encyclopedia
 	VERIFY
 	VOL
 	XCOPY
-	
+
+{% endraw %}
+
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

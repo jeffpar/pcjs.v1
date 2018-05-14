@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Section I: The Development of MS-DOS
 
+{% raw %}
+
         To many people who use personal computers, MS-DOS is the key that
         unlocks the power of the machine. It is their most visible connection
         to the hardware hidden inside the cabinet, and it is through MS-DOS
@@ -1537,5 +1539,7 @@ The MS-DOS Encyclopedia
         its place in microcomputing history.
 
                                                     JoAnne Woodcock
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

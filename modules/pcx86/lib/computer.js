@@ -1728,7 +1728,7 @@ class Computer extends Component {
             /*
              * TODO: We need a mechanism to determine the "active" display, instead of hard-coding this to aVideo[0].
              */
-            this.aVideo[0].setFocus();
+            this.aVideo[0].setFocus(fScroll);
 
             if (!fScroll && window) {
                 window.scrollTo(x, y);

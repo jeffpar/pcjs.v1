@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Section II: Programming in the MS-DOS Environment
 
+{% raw %}
+
     Part A  Structure of MS-DOS
 
 
@@ -26957,5 +26959,7 @@ The MS-DOS Encyclopedia
         to more efficient programs.
 
                                                     Richard Wilton
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

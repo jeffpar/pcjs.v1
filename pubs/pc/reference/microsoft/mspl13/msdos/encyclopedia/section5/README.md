@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Section V: System Calls
 
+{% raw %}
+
     Introduction
 
 
@@ -11428,5 +11430,7 @@ The MS-DOS Encyclopedia
     Example
 
         None
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

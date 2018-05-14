@@ -1368,7 +1368,7 @@ class Bus extends Component {
             }
             else {
                 if (DEBUGGER && this.dbg) {
-                    this.dbg.messageIO(this, port, null, addrLIP);
+                    this.dbg.messageIO(this, port, undefined, addrLIP);
                     if (this.fPortInputBreakAll) this.dbg.checkPortInput(port, size, dataPort);
                 }
             }

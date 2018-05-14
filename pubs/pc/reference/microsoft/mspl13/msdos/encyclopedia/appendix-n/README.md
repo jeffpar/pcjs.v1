@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Appendix N: An Object Module Dump Utility
 
+{% raw %}
+
 	     The program OBJDUMP.C displays the contents of an object file as
 	     individual object records. It can be used to study the structure of
 	     object modules as well as to verify the output of a language
@@ -178,5 +180,7 @@ The MS-DOS Encyclopedia
 	
 	
 	                                                           Richard Wilton
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

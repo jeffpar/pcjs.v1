@@ -2880,13 +2880,20 @@ class Video extends Component {
     }
 
     /**
-     * setFocus()
+     * setFocus(fScroll)
      *
      * @this {Video}
+     * @param {boolean} [fScroll]
      */
-    setFocus()
+    setFocus(fScroll)
     {
-        if (this.inputScreen) this.inputScreen.focus();
+        if (this.inputScreen) {
+            this.inputScreen.focus();
+            if (fScroll) {
+                let element = document.getElementById(this.idMachine) || this.inputScreen;
+                element.scrollIntoView();
+            }
+        }
     }
 
     /**
@@ -6583,7 +6590,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regATCIndx;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.ATC.PORT, null, addrFrom, "ATC.INDX", b);
+            this.printMessageIO(Card.ATC.PORT, undefined, addrFrom, "ATC.INDX", b);
         }
         return b;
     }
@@ -6604,7 +6611,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regATCData[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK];
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.ATC.PORT, null, addrFrom, "ATC." + this.cardEGA.asATCRegs[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK], b);
+            this.printMessageIO(Card.ATC.PORT, undefined, addrFrom, "ATC." + this.cardEGA.asATCRegs[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK], b);
         }
         return b;
     }
@@ -6748,7 +6755,7 @@ class Video extends Component {
          * TODO: Figure out where Card.STATUS0.FEAT bits should come from....
          */
         this.cardEGA.regStatus0 = b;
-        this.printMessageIO(Card.STATUS0.PORT, null, addrFrom, "STATUS0", b);
+        this.printMessageIO(Card.STATUS0.PORT, undefined, addrFrom, "STATUS0", b);
         return b;
     }
 
@@ -6776,7 +6783,7 @@ class Video extends Component {
     inVGAEnable(port, addrFrom)
     {
         let b = this.cardEGA.regVGAEnable;
-        this.printMessageIO(Card.VGA_ENABLE.PORT, null, addrFrom, "VGA_ENABLE", b);
+        this.printMessageIO(Card.VGA_ENABLE.PORT, undefined, addrFrom, "VGA_ENABLE", b);
         return b;
     }
 
@@ -6805,7 +6812,7 @@ class Video extends Component {
     inSEQIndx(port, addrFrom)
     {
         let b = this.cardEGA.regSEQIndx;
-        this.printMessageIO(Card.SEQ.INDX.PORT, null, addrFrom, "SEQ.INDX", b);
+        this.printMessageIO(Card.SEQ.INDX.PORT, undefined, addrFrom, "SEQ.INDX", b);
         return b;
     }
 
@@ -6835,7 +6842,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regSEQData[this.cardEGA.regSEQIndx];
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.SEQ.DATA.PORT, null, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx], b);
+            this.printMessageIO(Card.SEQ.DATA.PORT, undefined, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx], b);
         }
         return b;
     }
@@ -6930,7 +6937,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regDACMask;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.MASK.PORT, null, addrFrom, "DAC.MASK", b);
+            this.printMessageIO(Card.DAC.MASK.PORT, undefined, addrFrom, "DAC.MASK", b);
         }
         return b;
     }
@@ -6965,7 +6972,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regDACState;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.STATE.PORT, null, addrFrom, "DAC.STATE", b);
+            this.printMessageIO(Card.DAC.STATE.PORT, undefined, addrFrom, "DAC.STATE", b);
         }
         return b;
     }
@@ -7018,7 +7025,7 @@ class Video extends Component {
     {
         let b = (this.cardEGA.regDACData[this.cardEGA.regDACAddr] >> this.cardEGA.regDACShift) & 0x3f;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.DATA.PORT, null, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]", b);
+            this.printMessageIO(Card.DAC.DATA.PORT, undefined, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]", b);
         }
         this.cardEGA.regDACShift += 6;
         if (this.cardEGA.regDACShift > 12) {
@@ -7065,7 +7072,7 @@ class Video extends Component {
     inVGAFeat(port, addrFrom)
     {
         let b = this.cardEGA.regFeat;
-        this.printMessageIO(Card.FEAT_CTRL.PORT_READ, null, addrFrom, "FEAT", b);
+        this.printMessageIO(Card.FEAT_CTRL.PORT_READ, undefined, addrFrom, "FEAT", b);
         return b;
     }
 
@@ -7099,7 +7106,7 @@ class Video extends Component {
     inVGAMisc(port, addrFrom)
     {
         let b = this.cardEGA.regMisc;
-        this.printMessageIO(Card.MISC.PORT_READ, null, addrFrom, "MISC", b);
+        this.printMessageIO(Card.MISC.PORT_READ, undefined, addrFrom, "MISC", b);
         return b;
     }
 
@@ -7136,7 +7143,7 @@ class Video extends Component {
     inGRCIndx(port, addrFrom)
     {
         let b = this.cardEGA.regGRCIndx;
-        this.printMessageIO(Card.GRC.INDX.PORT, null, addrFrom, "GRC.INDX", b);
+        this.printMessageIO(Card.GRC.INDX.PORT, undefined, addrFrom, "GRC.INDX", b);
         return b;
     }
 
@@ -7166,7 +7173,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regGRCData[this.cardEGA.regGRCIndx];
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.GRC.DATA.PORT, null, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.regGRCIndx], b);
+            this.printMessageIO(Card.GRC.DATA.PORT, undefined, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.regGRCIndx], b);
         }
         return b;
     }
@@ -7310,7 +7317,7 @@ class Video extends Component {
     {
         let b = this.cardColor.regColor;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(port /* this.cardColor.port + 5 */, null, addrFrom, this.cardColor.type + ".COLOR", b);
+            this.printMessageIO(port /* this.cardColor.port + 5 */, undefined, addrFrom, this.cardColor.type + ".COLOR", b);
         }
         return b;
     }
@@ -7370,7 +7377,7 @@ class Video extends Component {
          * it prefers (normally 0xff).
          */
         if (card.fActive) b = card.regCRTIndx;
-        this.printMessageIO(port, null, addrFrom, "CRTC.INDX", b);
+        this.printMessageIO(port, undefined, addrFrom, "CRTC.INDX", b);
         return b;
     }
 
@@ -7414,7 +7421,7 @@ class Video extends Component {
          */
         if (card.fActive && card.regCRTIndx < card.nCRTCRegs) b = card.regCRTData[card.regCRTIndx];
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(port /* card.port + 1 */, null, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx], b);
+            this.printMessageIO(port /* card.port + 1 */, undefined, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx], b);
         }
         return b;
     }
@@ -7520,7 +7527,7 @@ class Video extends Component {
     inCardMode(card, addrFrom)
     {
         let b = card.regMode;
-        this.printMessageIO(card.port + 4, null, addrFrom, "MODE", b);
+        this.printMessageIO(card.port + 4, undefined, addrFrom, "MODE", b);
         return b;
     }
 
@@ -7624,7 +7631,7 @@ class Video extends Component {
         }
 
         card.regStatus = b;
-        if (MAXDEBUG) this.printMessageIO(card.port + 6, null, addrFrom, (card === this.cardEGA? "STATUS1" : "STATUS"), b);
+        if (MAXDEBUG) this.printMessageIO(card.port + 6, undefined, addrFrom, (card === this.cardEGA? "STATUS1" : "STATUS"), b);
         return b;
     }
 

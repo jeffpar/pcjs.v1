@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Appendix M: 8086/8088 Software Compatibility Issues
 
+{% raw %}
+
 	     In general, the Intel 80286 microprocessor running in real mode
 	     executes 8086/8088 software correctly. The following is a list of the
 	     actions to take to compensate for the minor differences between the
@@ -77,5 +79,7 @@ The MS-DOS Encyclopedia
 	
 	     ■  Do not use I/O ports 0F8-0FFH. These are reserved for controlling
 	        the 80287 and future microprocessor extensions.
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Section IV: Programming Utilities
 
+{% raw %}
+
     INTRODUCTION
 
 
@@ -9750,5 +9752,7 @@ The MS-DOS Encyclopedia
         Wrong number of function arguments
         An incorrect number of parameters was specified when evaluating a
         function in a CodeView expression.
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)
