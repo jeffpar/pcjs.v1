@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "PC-SIG Library 8th Edition CD-ROM (April 1990): Disks 1501-2121"
-permalink: /disks/pcx86/shareware/pcsig08/
+permalink: /disks/pcx86/shareware/pcsig08/1501/
 machines:
   - id: pcsig08
     type: pcx86
