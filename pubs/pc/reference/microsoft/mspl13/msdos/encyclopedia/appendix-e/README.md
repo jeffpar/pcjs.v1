@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Appendix E: EBCDIC Character Set
 
+{% raw %}
+
     ╓┌───────────────┌───────┌───────────────────────────────────────────────────╖
                     Number
         Char     Dec       Hex
@@ -269,5 +271,7 @@ The MS-DOS Encyclopedia
                  253       FD
                  254       FE
         EO       255       FF
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

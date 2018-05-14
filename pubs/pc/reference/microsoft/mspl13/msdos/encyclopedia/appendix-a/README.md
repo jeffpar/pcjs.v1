@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Appendix A: MS-DOS Version 3.3
 
+{% raw %}
+
         For the MS-DOS user, version 3.3 incorporates some long-awaited
         capabilities, runs faster in places, and requires about 9 KB more
         memory than version 3.2. Its most apparent changes, however, relate to
@@ -1395,5 +1397,7 @@ The MS-DOS Encyclopedia
 
                                                                 Van Wolverton
                                                                     Ray Duncan
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

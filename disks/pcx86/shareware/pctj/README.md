@@ -85,7 +85,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1986-03)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1986-03)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1986-03)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8603   
 	 Directory of A:\
@@ -103,7 +103,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1986-10)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1986-10)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1986-10)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8610   
 	 Directory of A:\
@@ -133,7 +133,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1986-12)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1986-12)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1986-12)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8612   
 	 Directory of A:\
@@ -145,7 +145,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1987-02)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1987-02)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1987-02)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8702   
 	 Directory of A:\
@@ -181,7 +181,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1987-06)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1987-06)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1987-06)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8706   
 
@@ -206,7 +206,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1987-07)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1987-07)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1987-07)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8707   
 
@@ -233,7 +233,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1987-10)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1987-10)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1987-10)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8710   
 
@@ -253,7 +253,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1987-11)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1987-11)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1987-11)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8711   
 	 Directory of A:\
@@ -267,7 +267,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1988-04)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-04)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-04)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8804   
 	 Directory of A:\
@@ -287,7 +287,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1988-05)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-05)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-05)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8805   
 	 Directory of A:\
@@ -314,7 +314,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1988-06)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-06)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-06)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8806   
 	 Directory of A:\
@@ -330,7 +330,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1988-07)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-07)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-07)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8807   
 	 Directory of A:\
@@ -347,7 +347,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1988-08)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-08)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-08)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8808   
 	 Directory of A:\
@@ -366,7 +366,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1988-09)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-09)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-09)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8809   
 
@@ -395,7 +395,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1988-11)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-11)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-11)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8811   
 
@@ -418,7 +418,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1988-12)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-12)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-12)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8812   
 
@@ -431,7 +431,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1989-01)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1989-01)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1989-01)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8901   
 
@@ -444,7 +444,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (Benchmarks)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (Benchmarks)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (Benchmarks)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTBENCH   
 
@@ -491,7 +491,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (Best Of)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (Best Of)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (Best Of)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJBEST   
 

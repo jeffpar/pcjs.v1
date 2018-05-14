@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Appendix H: Program Segment Prefix (PSP) Structure
 
+{% raw %}
+
       Figure H-1 (memory block diagram) illustrates the structure of the
       program segment prefix (PSP).
 
@@ -78,5 +80,7 @@ The MS-DOS Encyclopedia
       FFH (255)     └──────────────────────────────────────────┘
 
       Figure H-1. Structure of the program segment prefix.
+
+{% endaw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

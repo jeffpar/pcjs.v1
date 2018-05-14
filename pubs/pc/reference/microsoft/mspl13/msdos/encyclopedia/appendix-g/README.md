@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Appendix G: File Control Block (FCB) Structure
 
+{% raw %}
+
       Figures G-1 and G-2 (memory block diagrams) and Tables G-1 and G-2
       describe the structure of normal and extended file control blocks
       (FCBs).
@@ -246,5 +248,7 @@ The MS-DOS Encyclopedia
               └──────────────────────────┘
 
       Figure G-2. Structure of an extended file control block.
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

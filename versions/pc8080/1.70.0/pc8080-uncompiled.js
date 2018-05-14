@@ -4121,10 +4121,10 @@ class Component {
      *
      * @this {Component}
      * @param {number} port
-     * @param {number|null|*} bOut if an output operation
-     * @param {number|null|*} [addrFrom]
-     * @param {string|null|*} [name] of the port, if any
-     * @param {number|null|*} [bIn] is the input value, if known, on an input operation
+     * @param {number} [bOut] if an output operation
+     * @param {number} [addrFrom]
+     * @param {string} [name] of the port, if any
+     * @param {number} [bIn] is the input value, if known, on an input operation
      * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      */
     printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage)
@@ -4132,7 +4132,7 @@ class Component {
         if (DEBUGGER && this.dbg) {
             if (bitsMessage === true) {
                 bitsMessage = 0;
-            } else if (bitsMessage == null) {
+            } else if (bitsMessage == undefined) {
                 bitsMessage = this.bitsMessage;
             }
             this.dbg.messageIO(this, port, bOut, addrFrom, name, bIn, bitsMessage);
@@ -12221,7 +12221,7 @@ class ChipSet8080 extends Component {
     inSIStatus0(port, addrFrom)
     {
         var b = this.bStatus0;
-        this.printMessageIO(port, null, addrFrom, "STATUS0", b, true);
+        this.printMessageIO(port, undefined, addrFrom, "STATUS0", b, true);
         return b;
     }
 
@@ -12236,7 +12236,7 @@ class ChipSet8080 extends Component {
     inSIStatus1(port, addrFrom)
     {
         var b = this.bStatus1;
-        this.printMessageIO(port, null, addrFrom, "STATUS1", b, true);
+        this.printMessageIO(port, undefined, addrFrom, "STATUS1", b, true);
         return b;
     }
 
@@ -12251,7 +12251,7 @@ class ChipSet8080 extends Component {
     inSIStatus2(port, addrFrom)
     {
         var b = this.bStatus2;
-        this.printMessageIO(port, null, addrFrom, "STATUS2", b, true);
+        this.printMessageIO(port, undefined, addrFrom, "STATUS2", b, true);
         return b;
     }
 
@@ -12266,7 +12266,7 @@ class ChipSet8080 extends Component {
     inSIShiftResult(port, addrFrom)
     {
         var b = (this.wShiftData >> (8 - this.bShiftCount)) & 0xff;
-        this.printMessageIO(port, null, addrFrom, "SHIFT.RESULT", b, true);
+        this.printMessageIO(port, undefined, addrFrom, "SHIFT.RESULT", b, true);
         return b;
     }
 
@@ -12280,7 +12280,7 @@ class ChipSet8080 extends Component {
      */
     outSIShiftCount(port, b, addrFrom)
     {
-        this.printMessageIO(port, b, addrFrom, "SHIFT.COUNT", null, true);
+        this.printMessageIO(port, b, addrFrom, "SHIFT.COUNT", undefined, true);
         this.bShiftCount = b;
     }
 
@@ -12294,7 +12294,7 @@ class ChipSet8080 extends Component {
      */
     outSISound1(port, b, addrFrom)
     {
-        this.printMessageIO(port, b, addrFrom, "SOUND1", null, true);
+        this.printMessageIO(port, b, addrFrom, "SOUND1", undefined, true);
         this.bSound1 = b;
     }
 
@@ -12308,7 +12308,7 @@ class ChipSet8080 extends Component {
      */
     outSIShiftData(port, b, addrFrom)
     {
-        this.printMessageIO(port, b, addrFrom, "SHIFT.DATA", null, true);
+        this.printMessageIO(port, b, addrFrom, "SHIFT.DATA", undefined, true);
         this.wShiftData = (b << 8) | (this.wShiftData >> 8);
     }
 
@@ -12322,7 +12322,7 @@ class ChipSet8080 extends Component {
      */
     outSISound2(port, b, addrFrom)
     {
-        this.printMessageIO(port, b, addrFrom, "SOUND2", null, true);
+        this.printMessageIO(port, b, addrFrom, "SOUND2", undefined, true);
         this.bSound2 = b;
     }
 
@@ -12336,7 +12336,7 @@ class ChipSet8080 extends Component {
      */
     outSIWatchdog(port, b, addrFrom)
     {
-        this.printMessageIO(port, b, addrFrom, "WATCHDOG", null, true);
+        this.printMessageIO(port, b, addrFrom, "WATCHDOG", undefined, true);
     }
 
     /**
@@ -12478,7 +12478,7 @@ class ChipSet8080 extends Component {
         }
 
         this.bFlags = b;
-        this.printMessageIO(port, null, addrFrom, "FLAGS", b);
+        this.printMessageIO(port, undefined, addrFrom, "FLAGS", b);
         return b;
     }
 
@@ -14693,7 +14693,7 @@ class Keyboard8080 extends Component {
             this.bVT100Address = b;
             this.cpu.requestINTR(1);
         }
-        this.printMessageIO(port, null, addrFrom, "KBDUART.ADDRESS", b);
+        this.printMessageIO(port, undefined, addrFrom, "KBDUART.ADDRESS", b);
         return b;
     }
 
@@ -16656,7 +16656,7 @@ Web.onInit(Video8080.init);
  * Besides, I'm not sure I want to get into documenting every property this way, for this or any/every other class,
  * let alone getting into which ones should be considered private or protected, because PCjs isn't really a library
  * for third-party apps.
- * 
+ *
  * @class SerialPort8080
  * @property {number} iAdapter
  * @property {number} portBase
@@ -16751,12 +16751,12 @@ class SerialPort8080 extends Component {
              * then it specifies the name of that control with the 'binding' property.  The SerialPort constructor
              * will then call bindExternalControl(), which looks up the control, and then passes it to our own
              * setBinding() handler.
-             * 
+             *
              * For bindExternalControl() to succeed, it also need to know the target component; for now, that's
              * been hard-coded to "Panel", in part because that's one of the few components we can rely upon
              * initializing before we do, but it would be a simple matter to include a component type or ID as part
              * of the 'binding' property as well, if we need more flexibility later.
-             * 
+             *
              * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
              */
             Component.bindExternalControl(this, sBinding);
@@ -16791,7 +16791,7 @@ class SerialPort8080 extends Component {
     setBinding(sHTMLType, sBinding, control, sValue)
     {
         var serial = this;
-        
+
         if (!sHTMLType || sHTMLType == "textarea") {
 
             this.bindings[sBinding] = this.controlBuffer = control;
@@ -16849,7 +16849,7 @@ class SerialPort8080 extends Component {
             control.removeAttribute("readonly");
             return true;
         }
-        
+
         if (sValue) {
             /*
              * Instead of just having a dedicated "test" control, we now treat any unrecognized control with
@@ -16886,7 +16886,7 @@ class SerialPort8080 extends Component {
             };
             return true;
         }
-        
+
         return false;
     }
 
@@ -17326,7 +17326,7 @@ class SerialPort8080 extends Component {
     inData(port, addrFrom)
     {
         var b = this.bDataIn;
-        this.printMessageIO(port, null, addrFrom, "DATA", b);
+        this.printMessageIO(port, undefined, addrFrom, "DATA", b);
         this.bStatus &= ~SerialPort8080.UART8251.STATUS.RECV_FULL;
         return b;
     }
@@ -17342,7 +17342,7 @@ class SerialPort8080 extends Component {
     inControl(port, addrFrom)
     {
         var b = this.bStatus;
-        this.printMessageIO(port, null, addrFrom, "STATUS", b);
+        this.printMessageIO(port, undefined, addrFrom, "STATUS", b);
         return b;
     }
 

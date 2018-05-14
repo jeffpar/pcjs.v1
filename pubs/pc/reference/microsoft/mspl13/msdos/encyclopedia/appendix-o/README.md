@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Appendix O: IBM PC ROM BIOS Calls
 
+{% raw %}
+
 	     To invoke an IBM PC ROM BIOS routine, set register AH to the desired
 	     function and execute the software interrupt (INT) for the desired
 	     routine.
@@ -805,5 +807,7 @@ The MS-DOS Encyclopedia
 	
 	Returns:
 	     Nothing
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)
