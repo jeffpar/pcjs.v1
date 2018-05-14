@@ -76,8 +76,6 @@ app.enable("strict routing");
 var appPort = args.argv['port'] || process.env.PORT || 8088;
 app.set('port', appPort);
 
-console.log('server on ' + appPort);
-
 /*
  * For more information about express.logger():
  *
@@ -127,7 +125,7 @@ app.use('/favicon.ico', express.static(path.join(sServerRoot, "versions/icons/cu
 app.use(slash());
 
 var server = http.createServer(app).listen(app.get('port'), function() {
-    if (fConsole) console.log('Express server listening on port ' + app.get('port'));
+    console.log('Express server listening on port ' + app.get('port'));
 });
 
 /*
