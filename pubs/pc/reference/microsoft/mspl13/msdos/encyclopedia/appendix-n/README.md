@@ -7,11 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/msdos/encyclopedia/appendix-n/
 The MS-DOS Encyclopedia
 -----------------------
 
-### Appendix N
+### Appendix N: An Object Module Dump Utility
 
-	Appendix N: An Object Module Dump Utility
-	
-	
 	     The program OBJDUMP.C displays the contents of an object file as
 	     individual object records. It can be used to study the structure of
 	     object modules as well as to verify the output of a language

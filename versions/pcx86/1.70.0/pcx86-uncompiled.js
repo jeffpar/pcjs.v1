@@ -12466,10 +12466,7 @@ class CPU extends Component {
         /*
          * We've already saved the parmsCPU 'autoStart' setting, but there may be a machine (or URL) override.
          */
-        let sAutoStart = cmp.getMachineParm('autoStart');
-        if (sAutoStart != null) {
-            this.flags.autoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
-        }
+        this.flags.autoStart = cmp.getMachineBoolean('autoStart', this.flags.autoStart);
 
         this.timerYield = cpu.addTimer(this.id, function yieldTimer() {
             cpu.flags.yield = true;
@@ -44928,6 +44925,8 @@ class RAM extends Component {
      *      size: amount of RAM, in bytes (default is 0, which means defer to motherboard switch settings)
      *      test: true (default) means don't interfere with any BIOS memory tests, false means "fake a warm boot"
      *
+     * The 'test' parm can also be overridden by the machine-specific 'testRAM' parm.
+     *
      * NOTE: We make a note of the specified size, but no memory is initially allocated for the RAM until the
      * Computer component calls powerUp().
      *
@@ -44941,7 +44940,7 @@ class RAM extends Component {
         this.addrRAM = parmsRAM['addr'];
         this.sizeRAM = parmsRAM['size'];
         this.fTestRAM = parmsRAM['test'];
-        this.fInstalled = (!!this.sizeRAM); // 0 is the default value for 'size' when none is specified
+        this.fInstalled = (!!this.sizeRAM);     // 0 is the default value for 'size' when none is specified
         this.fAllocated = false;
     }
 
@@ -44960,6 +44959,7 @@ class RAM extends Component {
         this.cpu = cpu;
         this.dbg = dbg;
         this.chipset = cmp.getMachineComponent("ChipSet");
+        this.fTestRAM = cmp.getMachineBoolean('testRAM', this.fTestRAM);
         this.setReady();
     }
 
@@ -78867,6 +78867,26 @@ class Computer extends Component {
             }
         }
         this.parmsMachine = parmsMachine;
+    }
+
+    /**
+     * getMachineBoolean(sParm, fDefault)
+     *
+     * Boolean-specific version of getMachineParm().
+     *
+     * @this {Computer}
+     * @param {string} sParm
+     * @param {boolean} fDefault
+     * @return {boolean}
+     */
+    getMachineBoolean(sParm, fDefault)
+    {
+        let f = fDefault;
+        let s = this.getMachineParm(sParm);
+        if (s != undefined) {
+            f = (s == "true"? true : (s == "false"? false : !!s));
+        }
+        return f;
     }
 
     /**
