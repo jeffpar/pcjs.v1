@@ -127,4 +127,4 @@ if (args.argc > 1) {
     process.exit(0);
 }
 
-printf("usage: disklist <manifest>\n");
+printf("usage: node disklist.js <manifest>\n");
