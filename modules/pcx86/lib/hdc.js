@@ -948,7 +948,7 @@ class HDC extends Component {
         if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.XTC);
         this.regStatus &= ~HDC.XTC.STATUS.INTERRUPT;
 
-        this.printMessageIO(port, null, addrFrom, "DATA[" + this.regDataIndex + "]", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "DATA[" + this.regDataIndex + "]", bIn);
         if (++this.regDataIndex >= this.regDataTotal) {
             this.regDataIndex = this.regDataTotal = 0;
             this.regStatus &= ~(HDC.XTC.STATUS.IOMODE | HDC.XTC.STATUS.BUS | HDC.XTC.STATUS.BUSY);
@@ -1001,7 +1001,7 @@ class HDC extends Component {
     inXTCStatus(port, addrFrom)
     {
         let b = this.regStatus;
-        this.printMessageIO(port, null, addrFrom, "STATUS", b);
+        this.printMessageIO(port, undefined, addrFrom, "STATUS", b);
         /*
          * HACK: The HDC BIOS will not finish the HDC.XTC.DATA.CMD.INIT_DRIVE sequence unless it sees XTC.STATUS.REQ set again, nor will
          * it read any of the XTC.DATA bytes returned from a HDC.XTC.DATA.CMD.REQUEST_SENSE command unless XTC.STATUS.REQ is set again, so
@@ -1042,7 +1042,7 @@ class HDC extends Component {
      */
     inXTCConfig(port, addrFrom)
     {
-        this.printMessageIO(port, null, addrFrom, "CONFIG", this.regConfig);
+        this.printMessageIO(port, undefined, addrFrom, "CONFIG", this.regConfig);
         return this.regConfig;
     }
 
@@ -1144,7 +1144,7 @@ class HDC extends Component {
                  * and last bytes of each sector.
                  */
                 if (this.messageEnabled(Messages.PORT | Messages.HDC)) {
-                    this.printMessageIO(port, null, addrFrom, "DATA[" + this.drive.ibSector + "]", bIn);
+                    this.printMessageIO(port, undefined, addrFrom, "DATA[" + this.drive.ibSector + "]", bIn);
                 }
                 if (this.drive.ibSector > 1) {      // in other words, if this.drive.ibSector == this.drive.cbSector...
                     if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
@@ -1316,7 +1316,7 @@ class HDC extends Component {
     inATCError(port, addrFrom)
     {
         let bIn = this.regError;
-        this.printMessageIO(port, null, addrFrom, "ERROR", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "ERROR", bIn);
         return bIn;
     }
 
@@ -1345,7 +1345,7 @@ class HDC extends Component {
     inATCSecCnt(port, addrFrom)
     {
         let bIn = this.regSecCnt;
-        this.printMessageIO(port, null, addrFrom, "SECCNT", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "SECCNT", bIn);
         return bIn;
     }
 
@@ -1374,7 +1374,7 @@ class HDC extends Component {
     inATCSecNum(port, addrFrom)
     {
         let bIn = this.regSecNum;
-        this.printMessageIO(port, null, addrFrom, "SECNUM", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "SECNUM", bIn);
         return bIn;
     }
 
@@ -1403,7 +1403,7 @@ class HDC extends Component {
     inATCCylLo(port, addrFrom)
     {
         let bIn = this.regCylLo;
-        this.printMessageIO(port, null, addrFrom, "CYLLO", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "CYLLO", bIn);
         return bIn;
     }
 
@@ -1432,7 +1432,7 @@ class HDC extends Component {
     inATCCylHi(port, addrFrom)
     {
         let bIn = this.regCylHi;
-        this.printMessageIO(port, null, addrFrom, "CYLHI", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "CYLHI", bIn);
         return bIn;
     }
 
@@ -1461,7 +1461,7 @@ class HDC extends Component {
     inATCDrvHd(port, addrFrom)
     {
         let bIn = this.regDrvHd;
-        this.printMessageIO(port, null, addrFrom, "DRVHD", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "DRVHD", bIn);
         return bIn;
     }
 
@@ -1515,7 +1515,7 @@ class HDC extends Component {
     inATCStatus(port, addrFrom)
     {
         let bIn = this.regStatus;
-        this.printMessageIO(port, null, addrFrom, "STATUS", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "STATUS", bIn);
         /*
          * Despite what IBM's documentation for the "Personal Computer AT Fixed Disk and Diskette Drive Adapter"
          * (August 31, 1984) says (ie, "A read of the status register clears interrupt request 14"), we cannot

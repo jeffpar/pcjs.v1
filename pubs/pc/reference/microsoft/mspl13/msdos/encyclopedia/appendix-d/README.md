@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Appendix D: ASCII Character Set and IBM Extended Character Set
 
+{% raw %}
+
     ╓┌──────────────┌────────┌─────────┌────────┌────────────────────────────────╖
         Char      Dec#     Hex#      Control
         ──────────────────────────────────────────────────────────────────
@@ -268,5 +270,7 @@ The MS-DOS Encyclopedia
         ²        253       FD
         ■        254       FE
                  255       FF
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

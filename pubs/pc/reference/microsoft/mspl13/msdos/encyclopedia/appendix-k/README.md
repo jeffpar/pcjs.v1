@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Appendix K: Segmented (New) .EXE File Header Format
 
+{% raw %}
+
 	     Microsoft Windows requires much more information about a program than
 	     is available in the format of the .EXE executable file supported by
 	     MS-DOS. For example, Windows needs to identify the various segments of
@@ -529,5 +531,7 @@ The MS-DOS Encyclopedia
 	     entry.
 	
 	                                                      Charles Petzold
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

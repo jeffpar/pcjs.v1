@@ -671,7 +671,7 @@ class SerialPort extends Component {
     inRBR(port, addrFrom)
     {
         let b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL & 0xff) : this.bRBR);
-        this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "RBR", b);
+        this.printMessageIO(port, undefined, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "RBR", b);
         this.bLSR &= ~SerialPort.LSR.DR;
         this.advanceRBR();
         return b;
@@ -688,7 +688,7 @@ class SerialPort extends Component {
     inIER(port, addrFrom)
     {
         let b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL >> 8) : this.bIER);
-        this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER", b);
+        this.printMessageIO(port, undefined, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER", b);
         return b;
     }
 
@@ -709,7 +709,7 @@ class SerialPort extends Component {
         if (b == SerialPort.IIR.INT_THR) {
             this.bIIR = SerialPort.IIR.NO_INT;
         }
-        this.printMessageIO(port, null, addrFrom, "IIR", b);
+        this.printMessageIO(port, undefined, addrFrom, "IIR", b);
         return b;
     }
 
@@ -724,7 +724,7 @@ class SerialPort extends Component {
     inLCR(port, addrFrom)
     {
         let b = this.bLCR;
-        this.printMessageIO(port, null, addrFrom, "LCR", b);
+        this.printMessageIO(port, undefined, addrFrom, "LCR", b);
         return b;
     }
 
@@ -739,7 +739,7 @@ class SerialPort extends Component {
     inMCR(port, addrFrom)
     {
         let b = this.bMCR;
-        this.printMessageIO(port, null, addrFrom, "MCR", b);
+        this.printMessageIO(port, undefined, addrFrom, "MCR", b);
         return b;
     }
 
@@ -754,7 +754,7 @@ class SerialPort extends Component {
     inLSR(port, addrFrom)
     {
         let b = this.bLSR;
-        this.printMessageIO(port, null, addrFrom, "LSR", b);
+        this.printMessageIO(port, undefined, addrFrom, "LSR", b);
         return b;
     }
 
@@ -770,7 +770,7 @@ class SerialPort extends Component {
     {
         let b = this.bMSR;
         this.bMSR &= ~(SerialPort.MSR.DCTS | SerialPort.MSR.DDSR);
-        this.printMessageIO(port, null, addrFrom, "MSR", b);
+        this.printMessageIO(port, undefined, addrFrom, "MSR", b);
         return b;
     }
 

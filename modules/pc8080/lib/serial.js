@@ -48,7 +48,7 @@ if (NODE) {
  * Besides, I'm not sure I want to get into documenting every property this way, for this or any/every other class,
  * let alone getting into which ones should be considered private or protected, because PCjs isn't really a library
  * for third-party apps.
- * 
+ *
  * @class SerialPort8080
  * @property {number} iAdapter
  * @property {number} portBase
@@ -143,12 +143,12 @@ class SerialPort8080 extends Component {
              * then it specifies the name of that control with the 'binding' property.  The SerialPort constructor
              * will then call bindExternalControl(), which looks up the control, and then passes it to our own
              * setBinding() handler.
-             * 
+             *
              * For bindExternalControl() to succeed, it also need to know the target component; for now, that's
              * been hard-coded to "Panel", in part because that's one of the few components we can rely upon
              * initializing before we do, but it would be a simple matter to include a component type or ID as part
              * of the 'binding' property as well, if we need more flexibility later.
-             * 
+             *
              * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
              */
             Component.bindExternalControl(this, sBinding);
@@ -183,7 +183,7 @@ class SerialPort8080 extends Component {
     setBinding(sHTMLType, sBinding, control, sValue)
     {
         var serial = this;
-        
+
         if (!sHTMLType || sHTMLType == "textarea") {
 
             this.bindings[sBinding] = this.controlBuffer = control;
@@ -241,7 +241,7 @@ class SerialPort8080 extends Component {
             control.removeAttribute("readonly");
             return true;
         }
-        
+
         if (sValue) {
             /*
              * Instead of just having a dedicated "test" control, we now treat any unrecognized control with
@@ -278,7 +278,7 @@ class SerialPort8080 extends Component {
             };
             return true;
         }
-        
+
         return false;
     }
 
@@ -718,7 +718,7 @@ class SerialPort8080 extends Component {
     inData(port, addrFrom)
     {
         var b = this.bDataIn;
-        this.printMessageIO(port, null, addrFrom, "DATA", b);
+        this.printMessageIO(port, undefined, addrFrom, "DATA", b);
         this.bStatus &= ~SerialPort8080.UART8251.STATUS.RECV_FULL;
         return b;
     }
@@ -734,7 +734,7 @@ class SerialPort8080 extends Component {
     inControl(port, addrFrom)
     {
         var b = this.bStatus;
-        this.printMessageIO(port, null, addrFrom, "STATUS", b);
+        this.printMessageIO(port, undefined, addrFrom, "STATUS", b);
         return b;
     }
 

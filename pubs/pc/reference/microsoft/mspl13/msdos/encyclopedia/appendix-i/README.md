@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Appendix I: 8086/8088/80286/80386 Instruction Sets
 
+{% raw %}
+
     The 8086/8088 Instruction Set
 
     ╓┌─────────────────────┌─────────────────────────────────────────────────────╖
@@ -464,5 +466,7 @@ The MS-DOS Encyclopedia
         XCHG             Exchange
         XLAT             Translate
         XOR              Exclusive OR
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Appendix C: Extended Error Codes
 
+{% raw %}
+
         The extended error codes used by Interrupt 21H functions consist of
         four separate codes in the AX, BH, BL, and CH registers. These codes
         give as much detail as possible about the error and suggest how the
@@ -169,5 +171,7 @@ The MS-DOS Encyclopedia
         error code.
 
         The Function 59H system call is available during Interrupt 24H.
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

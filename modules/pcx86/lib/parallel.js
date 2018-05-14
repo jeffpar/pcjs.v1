@@ -299,7 +299,7 @@ class ParallelPort extends Component {
     inData(port, addrFrom)
     {
         let b = this.bData;
-        this.printMessageIO(port, null, addrFrom, "DATA", b);
+        this.printMessageIO(port, undefined, addrFrom, "DATA", b);
         return b;
     }
 
@@ -315,7 +315,7 @@ class ParallelPort extends Component {
     {
         let b = this.bStatus;
         this.bStatus |= (ParallelPort.STATUS.NACK | ParallelPort.STATUS.NBUSY);
-        this.printMessageIO(port, null, addrFrom, "STAT", b);
+        this.printMessageIO(port, undefined, addrFrom, "STAT", b);
         this.updateIRR();
         return b;
     }
@@ -331,7 +331,7 @@ class ParallelPort extends Component {
     inControl(port, addrFrom)
     {
         let b = this.bControl;
-        this.printMessageIO(port, null, addrFrom, "CTRL", b);
+        this.printMessageIO(port, undefined, addrFrom, "CTRL", b);
         return b;
     }
 

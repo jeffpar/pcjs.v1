@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Appendix J: Common MS-DOS Filename Extensions
 
+{% raw %}
+
         The Microsoft systems programs and language products commonly use the
         following filename extensions:
 
@@ -72,5 +74,7 @@ The MS-DOS Encyclopedia
         .TRM         Windows             Terminal file
         .TXT         Generic             Text file or Windows Notepad file
         .WRI         Windows             Write file
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

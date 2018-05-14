@@ -2616,10 +2616,10 @@ class DebuggerX86 extends Debugger {
      * @this {DebuggerX86}
      * @param {Component} component
      * @param {number} port
-     * @param {number|null} bOut if an output operation
-     * @param {number|null} [addrFrom]
-     * @param {string|null} [name] of the port, if any
-     * @param {number|null} [bIn] is the input value, if known, on an input operation
+     * @param {number} [bOut] if an output operation
+     * @param {number} [addrFrom]
+     * @param {string} [name] of the port, if any
+     * @param {number} [bIn] is the input value, if known, on an input operation
      * @param {number} [bitsMessage] is one or more Messages category flag(s)
      */
     messageIO(component, port, bOut, addrFrom, name, bIn, bitsMessage)
@@ -2632,7 +2632,7 @@ class DebuggerX86 extends Debugger {
                 selFrom = this.cpu.getCS();
                 addrFrom -= this.cpu.segCS.base;
             }
-            this.message(component.idComponent + '.' + (bOut != null? "outPort" : "inPort") + '(' + Str.toHexWord(port) + ',' + (name? name : "unknown") + (bOut != null? ',' + Str.toHexByte(bOut) : "") + ')' + (bIn != null? (": " + Str.toHexByte(bIn)) : "") + (addrFrom != null? (" at " + this.toHexOffset(addrFrom, selFrom)) : ""));
+            this.message(component.idComponent + '.' + (bOut != undefined? "outPort" : "inPort") + '(' + Str.toHexWord(port) + ',' + (name? name : "unknown") + (bOut != undefined? ',' + Str.toHexByte(bOut) : "") + ')' + (bIn != undefined? (": " + Str.toHexByte(bIn)) : "") + (addrFrom != undefined? (" at " + this.toHexOffset(addrFrom, selFrom)) : ""));
         }
     }
 

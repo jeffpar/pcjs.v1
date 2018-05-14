@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Appendix F: ANSI.SYS Key and Extended Key Codes
 
+{% raw %}
+
         The following escape sequence allows redefinition of keyboard keys to
         a specified string:
 
@@ -90,5 +92,7 @@ The MS-DOS Encyclopedia
         =                  61        43        -         0;131
         Tab                9         0;15      -         -
         Null               0;3       -         -         -
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Foreword
 
+{% raw %}
+
     Microsoft's MS-DOS is the most popular piece of software in the world.
     It runs on more than 10 million personal computers worldwide and is
     the foundation for at least 20,000 applications--the largest set of
@@ -110,5 +112,7 @@ The MS-DOS Encyclopedia
     the future unfolds.
 
                                                 Bill Gates
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)

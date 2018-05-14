@@ -666,7 +666,7 @@ class Mouse extends Component {
     inBusData(port, addrFrom)
     {
         let b = 0;
-        this.printMessageIO(port, null, addrFrom, "DATA", b);
+        this.printMessageIO(port, undefined, addrFrom, "DATA", b);
         return b;
     }
 
@@ -681,7 +681,7 @@ class Mouse extends Component {
     inBusTPPI(port, addrFrom)
     {
         let b = 0;
-        this.printMessageIO(port, null, addrFrom, "TPPI", b);
+        this.printMessageIO(port, undefined, addrFrom, "TPPI", b);
         return b;
     }
 
@@ -696,7 +696,7 @@ class Mouse extends Component {
     inBusCtrl(port, addrFrom)
     {
         let b = 0;
-        this.printMessageIO(port, null, addrFrom, "CTRL", b);
+        this.printMessageIO(port, undefined, addrFrom, "CTRL", b);
         return b;
     }
 
@@ -711,7 +711,7 @@ class Mouse extends Component {
     inBusCPPI(port, addrFrom)
     {
         let b = 0;
-        this.printMessageIO(port, null, addrFrom, "CPPI", b);
+        this.printMessageIO(port, undefined, addrFrom, "CPPI", b);
         return b;
     }
 

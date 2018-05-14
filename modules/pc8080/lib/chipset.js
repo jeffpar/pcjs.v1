@@ -387,7 +387,7 @@ class ChipSet8080 extends Component {
     inSIStatus0(port, addrFrom)
     {
         var b = this.bStatus0;
-        this.printMessageIO(port, null, addrFrom, "STATUS0", b, true);
+        this.printMessageIO(port, undefined, addrFrom, "STATUS0", b, true);
         return b;
     }
 
@@ -402,7 +402,7 @@ class ChipSet8080 extends Component {
     inSIStatus1(port, addrFrom)
     {
         var b = this.bStatus1;
-        this.printMessageIO(port, null, addrFrom, "STATUS1", b, true);
+        this.printMessageIO(port, undefined, addrFrom, "STATUS1", b, true);
         return b;
     }
 
@@ -417,7 +417,7 @@ class ChipSet8080 extends Component {
     inSIStatus2(port, addrFrom)
     {
         var b = this.bStatus2;
-        this.printMessageIO(port, null, addrFrom, "STATUS2", b, true);
+        this.printMessageIO(port, undefined, addrFrom, "STATUS2", b, true);
         return b;
     }
 
@@ -432,7 +432,7 @@ class ChipSet8080 extends Component {
     inSIShiftResult(port, addrFrom)
     {
         var b = (this.wShiftData >> (8 - this.bShiftCount)) & 0xff;
-        this.printMessageIO(port, null, addrFrom, "SHIFT.RESULT", b, true);
+        this.printMessageIO(port, undefined, addrFrom, "SHIFT.RESULT", b, true);
         return b;
     }
 
@@ -446,7 +446,7 @@ class ChipSet8080 extends Component {
      */
     outSIShiftCount(port, b, addrFrom)
     {
-        this.printMessageIO(port, b, addrFrom, "SHIFT.COUNT", null, true);
+        this.printMessageIO(port, b, addrFrom, "SHIFT.COUNT", undefined, true);
         this.bShiftCount = b;
     }
 
@@ -460,7 +460,7 @@ class ChipSet8080 extends Component {
      */
     outSISound1(port, b, addrFrom)
     {
-        this.printMessageIO(port, b, addrFrom, "SOUND1", null, true);
+        this.printMessageIO(port, b, addrFrom, "SOUND1", undefined, true);
         this.bSound1 = b;
     }
 
@@ -474,7 +474,7 @@ class ChipSet8080 extends Component {
      */
     outSIShiftData(port, b, addrFrom)
     {
-        this.printMessageIO(port, b, addrFrom, "SHIFT.DATA", null, true);
+        this.printMessageIO(port, b, addrFrom, "SHIFT.DATA", undefined, true);
         this.wShiftData = (b << 8) | (this.wShiftData >> 8);
     }
 
@@ -488,7 +488,7 @@ class ChipSet8080 extends Component {
      */
     outSISound2(port, b, addrFrom)
     {
-        this.printMessageIO(port, b, addrFrom, "SOUND2", null, true);
+        this.printMessageIO(port, b, addrFrom, "SOUND2", undefined, true);
         this.bSound2 = b;
     }
 
@@ -502,7 +502,7 @@ class ChipSet8080 extends Component {
      */
     outSIWatchdog(port, b, addrFrom)
     {
-        this.printMessageIO(port, b, addrFrom, "WATCHDOG", null, true);
+        this.printMessageIO(port, b, addrFrom, "WATCHDOG", undefined, true);
     }
 
     /**
@@ -644,7 +644,7 @@ class ChipSet8080 extends Component {
         }
 
         this.bFlags = b;
-        this.printMessageIO(port, null, addrFrom, "FLAGS", b);
+        this.printMessageIO(port, undefined, addrFrom, "FLAGS", b);
         return b;
     }
 

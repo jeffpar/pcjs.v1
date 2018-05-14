@@ -13,11 +13,14 @@ PC-SIG Library 8th Edition CD-ROM (April 1990)
 The machine below has access to all 2,121 diskette images from the PC-SIG Library 8th Edition CD-ROM (April 1990).
 The directory listings were generated from the following [manifest](https://jeffpar.github.io/pcjs-disks/pcx86/shareware/pcsig08/manifest.xml)
 using <a href="/modules/diskdump/bin/disklist" download="disklist.js">disklist</a>, a custom PCjs JavaScript utility.
+
 The same machine is also available [with the PCjs Debugger](debugger/).
 
 {% include machine.html id="pcsig08" %}
 
 ### Directory of PCSIG08: DISK0001
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0001"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0001
 	 Directory of  A:\
@@ -51,6 +54,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0002
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0002"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0002
 	 Directory of  A:\
 	
@@ -78,6 +83,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0003
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0003"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0003
 	 Directory of  A:\
 	
@@ -92,6 +99,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TEST     RAT     2304  11-01-82   1:30a
 
 ### Directory of PCSIG08: DISK0004
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0004"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0004
 	 Directory of  A:\
@@ -117,6 +126,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0005
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0005"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0005
 	 Directory of  A:\
 	
@@ -124,6 +135,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0006
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0006"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0006
 	 Directory of  A:\
@@ -163,6 +176,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0007
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0007"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0007
 	 Directory of  A:\
 	
@@ -180,6 +195,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0008
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0008"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0008
 	 Directory of  A:\
 	
@@ -193,6 +210,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MONITOR  DOC    55168  12-03-82   4:59p
 
 ### Directory of PCSIG08: DISK0009
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0009"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0009
 	 Directory of  A:\
@@ -245,6 +264,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0010
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0010"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0010
 	 Directory of  A:\
 	
@@ -260,6 +281,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VPRINT   ARC    18437   3-23-88  12:56p
 
 ### Directory of PCSIG08: DISK0011
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0011"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0011
 	 Directory of  A:\
@@ -308,6 +331,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0012
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0012"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0012
 	 Directory of  A:\
 	
@@ -333,6 +358,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0013
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0013"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0013
 	 Directory of  A:\
 	
@@ -357,6 +384,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USATEMP  PIC    16512   1-01-10   9:40a
 
 ### Directory of PCSIG08: DISK0014
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0014"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0014
 	 Directory of  A:\
@@ -399,6 +428,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0015
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0015"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0015
 	 Directory of  A:\
 	
@@ -435,6 +466,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0016
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0016"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0016
 	 Directory of  A:\
 	
@@ -456,6 +489,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0017
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0017"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0017
 	 Directory of  A:\
 	
@@ -475,6 +510,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SURVIVAL BAS    19200   4-13-82   4:00p
 
 ### Directory of PCSIG08: DISK0018
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0018"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0018
 	 Directory of  A:\
@@ -506,6 +543,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0019
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0019"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0019
 	 Directory of  A:\
 	
@@ -531,6 +570,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0020
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0020"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0020
 	 Directory of  A:\
 	
@@ -553,6 +594,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0021
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0021"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0021
 	 Directory of  A:\
 	
@@ -566,6 +609,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PCMANHI  FIL      128   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK0022
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0022"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0022
 	 Directory of  A:\
@@ -583,6 +628,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0023
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0023"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0023
 	 Directory of  A:\
 	
@@ -594,6 +641,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540   3-10-90   7:13a
 
 ### Directory of PCSIG08: DISK0024
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0024"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0024
 	 Directory of  A:\
@@ -620,6 +669,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0025
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0025"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0025
 	 Directory of  A:\
 	
@@ -634,6 +685,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REPORTS  BAS    10496   1-01-10   9:40a
 
 ### Directory of PCSIG08: DISK0026
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0026"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0026
 	 Directory of  A:\
@@ -656,6 +709,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	START    BAT      128   1-13-83   3:36a
 
 ### Directory of PCSIG08: DISK0027
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0027"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0027
 	 Directory of  A:\
@@ -714,6 +769,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0028
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0028"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0028
 	 Directory of  A:\
 	
@@ -755,6 +812,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0029
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0029"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0029
 	 Directory of  A:\
 	
@@ -779,6 +838,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0030
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0030"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0030
 	 Directory of  A:\
 	
@@ -798,6 +859,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0031
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0031"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0031
 	 Directory of  A:\
 	
@@ -812,6 +875,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0032
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0032"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0032
 	 Directory of  A:\
 	
@@ -819,6 +884,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0033
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0033"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0033
 	 Directory of  A:\
@@ -882,6 +949,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0034
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0034"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0034
 	 Directory of  A:\
 	
@@ -908,6 +977,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XOFF     MRG     4448   4-24-83   1:53a
 
 ### Directory of PCSIG08: DISK0035
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0035"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0035
 	 Directory of  A:\
@@ -942,6 +1013,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZAP-EM   BAS     4431   5-19-82   5:34a
 
 ### Directory of PCSIG08: DISK0036
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0036"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0036
 	 Directory of  A:\
@@ -998,6 +1071,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0037
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0037"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0037
 	 Directory of  A:\
 	
@@ -1024,6 +1099,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZAP'EM   BAS     4224   1-01-80  12:24a
 
 ### Directory of PCSIG08: DISK0038
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0038"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0038
 	 Directory of  A:\
@@ -1059,6 +1136,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0039
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0039"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0039
 	 Directory of  A:\
 	
@@ -1072,6 +1151,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	OJETCRUZ EXE    49408   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK0040
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0040"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0040
 	 Directory of  A:\
@@ -1111,6 +1192,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0041
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0041"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0041
 	 Directory of  A:\
 	
@@ -1132,6 +1215,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README            565   4-11-85   6:12a
 
 ### Directory of PCSIG08: DISK0042
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0042"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0042
 	 Directory of  A:\
@@ -1156,6 +1241,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0043
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0043"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0043
 	 Directory of  A:\
 	
@@ -1171,6 +1258,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TEXT             1671   5-17-82   5:00p
 
 ### Directory of PCSIG08: DISK0044
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0044"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0044
 	 Directory of  A:\
@@ -1202,6 +1291,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USALIST  BAS     4608   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK0045
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0045"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0045
 	 Directory of  A:\
@@ -1240,6 +1331,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0046
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0046"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0046
 	 Directory of  A:\
 	
@@ -1276,6 +1369,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0047
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0047"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0047
 	 Directory of  A:\
 	
@@ -1300,6 +1395,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0048
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0048"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0048
 	 Directory of  A:\
 	
@@ -1323,6 +1420,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XX       HED      128   7-05-83   3:54a
 
 ### Directory of PCSIG08: DISK0049
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0049"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0049
 	 Directory of  A:\
@@ -1358,6 +1457,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0050
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0050"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0050
 	 Directory of  A:\
 	
@@ -1387,6 +1488,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0051
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0051"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0051
 	 Directory of  A:\
 	
@@ -1407,6 +1510,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TMDAY    BAS     6400   2-03-83   2:59p
 
 ### Directory of PCSIG08: DISK0052
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0052"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0052
 	 Directory of  A:\
@@ -1438,6 +1543,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UTSCAN   BAS     1024   8-22-82   1:39a
 
 ### Directory of PCSIG08: DISK0053
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0053"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0053
 	 Directory of  A:\
@@ -1483,6 +1590,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0054
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0054"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0054
 	 Directory of  A:\
 	
@@ -1499,6 +1608,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XMODEM   DOC     7621   3-29-83  10:35a
 
 ### Directory of PCSIG08: DISK0055
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0055"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0055
 	 Directory of  A:\
@@ -1526,6 +1637,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0056
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0056"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0056
 	 Directory of  A:\
 	
@@ -1547,6 +1660,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0057
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0057"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0057
 	 Directory of  A:\
 	
@@ -1560,6 +1675,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0058
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0058"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0058
 	 Directory of  A:\
 	
@@ -1571,6 +1688,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MACRO    EXE    32640   5-31-83   7:06a
 
 ### Directory of PCSIG08: DISK0059
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0059"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0059
 	 Directory of  A:\
@@ -1603,6 +1722,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0060
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0060"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0060
 	 Directory of  A:\
 	
@@ -1631,6 +1752,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0061
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0061"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0061
 	 Directory of  A:\
 	
@@ -1657,6 +1780,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0062
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0062"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0062
 	 Directory of  A:\
 	
@@ -1677,6 +1802,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0063
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0063"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0063
 	 Directory of  A:\
 	
@@ -1684,6 +1811,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0064
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0064"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0064
 	 Directory of  A:\
@@ -1697,6 +1826,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0065
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0065"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0065
 	 Directory of  A:\
 	
@@ -1707,6 +1838,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	INSTRUCT WKS   116480   7-17-83  12:55p
 
 ### Directory of PCSIG08: DISK0066
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0066"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0066
 	 Directory of  A:\
@@ -1773,6 +1906,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0067
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0067"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0067
 	 Directory of  A:\
 	
@@ -1801,6 +1936,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0068
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0068"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0068
 	 Directory of  A:\
 	
@@ -1808,6 +1945,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0069
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0069"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0069
 	 Directory of  A:\
@@ -1822,6 +1961,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VERBIAGE        49792   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK0070
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0070"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0070
 	 Directory of  A:\
@@ -1850,6 +1991,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0071
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0071"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0071
 	 Directory of  A:\
 	
@@ -1866,6 +2009,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZAP'EM   BAS     5888   5-19-82  12:00a
 
 ### Directory of PCSIG08: DISK0072
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0072"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0072
 	 Directory of  A:\
@@ -1885,6 +2030,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TICTACTO BAS    22528   8-21-82   8:00a
 
 ### Directory of PCSIG08: DISK0073
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0073"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0073
 	 Directory of  A:\
@@ -1914,6 +2061,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0074
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0074"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0074
 	 Directory of  A:\
 	
@@ -1939,6 +2088,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SLIB     INC     1372   8-29-83   6:17p
 
 ### Directory of PCSIG08: DISK0075
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0075"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0075
 	 Directory of  A:\
@@ -1966,6 +2117,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0076
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0076"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0076
 	 Directory of  A:\
 	
@@ -1973,6 +2126,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0077
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0077"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0077
 	 Directory of  A:\
@@ -1987,6 +2142,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SCRN            49719   8-01-83   3:33p
 
 ### Directory of PCSIG08: DISK0078
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0078"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0078
 	 Directory of  A:\
@@ -2005,6 +2162,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORKDISK BAT     6120   9-27-89  12:40p
 
 ### Directory of PCSIG08: DISK0079
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0079"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0079
 	 Directory of  A:\
@@ -2045,6 +2204,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SETPRTR  EXE     7296   1-01-80   2:33a
 
 ### Directory of PCSIG08: DISK0080
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0080"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0080
 	 Directory of  A:\
@@ -2099,6 +2260,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0081
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0081"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0081
 	 Directory of  A:\
 	
@@ -2118,6 +2281,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNWS     EXE     2816   8-17-82   3:32a
 
 ### Directory of PCSIG08: DISK0082
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0082"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0082
 	 Directory of  A:\
@@ -2170,6 +2335,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0083
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0083"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0083
 	 Directory of  A:\
 	
@@ -2197,6 +2364,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0084
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0084"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0084
 	 Directory of  A:\
 	
@@ -2222,6 +2391,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UPVC     DOC     2552   9-22-83  12:49a
 
 ### Directory of PCSIG08: DISK0085
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0085"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0085
 	 Directory of  A:\
@@ -2259,6 +2430,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0086
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0086"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0086
 	 Directory of  A:\
 	
@@ -2279,6 +2452,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0087
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0087"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0087
 	 Directory of  A:\
 	
@@ -2290,6 +2465,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PC       EXE    50176   3-18-84   3:21a
 
 ### Directory of PCSIG08: DISK0088
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0088"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0088
 	 Directory of  A:\
@@ -2331,6 +2508,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0089
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0089"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0089
 	 Directory of  A:\
 	
@@ -2356,6 +2535,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XUP      BAS     2048  10-08-83   5:32p
 
 ### Directory of PCSIG08: DISK0090
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0090"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0090
 	 Directory of  A:\
@@ -2395,6 +2576,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0091
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0091"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0091
 	 Directory of  A:\
 	
@@ -2414,6 +2597,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MUGGER   DAT     7296   4-12-84  10:43a
 
 ### Directory of PCSIG08: DISK0092
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0092"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0092
 	 Directory of  A:\
@@ -2440,6 +2625,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0093
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0093"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0093
 	 Directory of  A:\
 	
@@ -2458,6 +2645,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0094
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0094"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0094
 	 Directory of  A:\
 	
@@ -2465,6 +2654,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0095
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0095"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0095
 	 Directory of  A:\
@@ -2494,6 +2685,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0096
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0096"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0096
 	 Directory of  A:\
 	
@@ -2511,6 +2704,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	S-USERS  IBM    27392  11-27-83   5:30p
 
 ### Directory of PCSIG08: DISK0097
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0097"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0097
 	 Directory of  A:\
@@ -2539,6 +2734,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0098
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0098"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0098
 	 Directory of  A:\
 	
@@ -2550,6 +2747,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	S-PHONE  NOS    65408  11-27-83   3:39a
 
 ### Directory of PCSIG08: DISK0099
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0099"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0099
 	 Directory of  A:\
@@ -2564,6 +2763,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TBBS-NOS         6784  11-27-83   1:04a
 
 ### Directory of PCSIG08: DISK0100
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0100"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0100
 	 Directory of  A:\
@@ -2598,6 +2799,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0101
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0101"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0101
 	 Directory of  A:\
 	
@@ -2618,6 +2821,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SETDRIVE BAS     2065   5-23-84   7:44a
 
 ### Directory of PCSIG08: DISK0102
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0102"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0102
 	 Directory of  A:\
@@ -2688,6 +2893,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0103
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0103"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0103
 	 Directory of  A:\
 	
@@ -2705,6 +2912,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0104
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0104"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0104
 	 Directory of  A:\
 	
@@ -2716,6 +2925,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README            512  12-25-83   5:39p
 
 ### Directory of PCSIG08: DISK0105
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0105"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0105
 	 Directory of  A:\
@@ -2756,6 +2967,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0106
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0106"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0106
 	 Directory of  A:\
 	
@@ -2772,6 +2985,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	INVOICE  DC4     1976   2-26-85  10:28p
 
 ### Directory of PCSIG08: DISK0107
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0107"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0107
 	 Directory of  A:\
@@ -2790,6 +3005,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TAX1982  VC     42624   1-25-83   2:19p
 
 ### Directory of PCSIG08: DISK0108
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0108"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0108
 	 Directory of  A:\
@@ -2818,6 +3035,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0109
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0109"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0109
 	 Directory of  A:\
 	
@@ -2840,6 +3059,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UTILREAD ME      1241   1-11-84   4:34a
 
 ### Directory of PCSIG08: DISK0110
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0110"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0110
 	 Directory of  A:\
@@ -2878,6 +3099,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XT370    DOC    14534   1-07-84   9:11p
 
 ### Directory of PCSIG08: DISK0111
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0111"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0111
 	 Directory of  A:\
@@ -2934,6 +3157,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0112
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0112"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0112
 	 Directory of  A:\
 	
@@ -2986,6 +3211,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0113
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0113"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0113
 	 Directory of  A:\
 	
@@ -3029,6 +3256,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0114
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0114"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0114
 	 Directory of  A:\
 	
@@ -3056,6 +3285,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UASMLS   EXE    22656  12-11-83  11:55a
 
 ### Directory of PCSIG08: DISK0115
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0115"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0115
 	 Directory of  A:\
@@ -3085,6 +3316,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0116
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0116"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0116
 	 Directory of  A:\
 	
@@ -3102,6 +3335,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0117
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0117"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0117
 	 Directory of  A:\
 	
@@ -3112,6 +3347,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNWS     BAS      768   8-22-83  12:40p
 
 ### Directory of PCSIG08: DISK0118
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0118"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0118
 	 Directory of  A:\
@@ -3128,6 +3365,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	QSYS     EXE    55808   1-01-10   9:39a
 
 ### Directory of PCSIG08: DISK0119
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0119"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0119
 	 Directory of  A:\
@@ -3153,6 +3392,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0120
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0120"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0120
 	 Directory of  A:\
 	
@@ -3168,6 +3409,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PCCHESS  PRT    46080   4-17-86  12:33a
 
 ### Directory of PCSIG08: DISK0121
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0121"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0121
 	 Directory of  A:\
@@ -3197,6 +3440,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0122
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0122"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0122
 	 Directory of  A:\
 	
@@ -3219,6 +3464,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SOFT83   KEY     5738   1-27-84   2:32p
 
 ### Directory of PCSIG08: DISK0123
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0123"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0123
 	 Directory of  A:\
@@ -3245,6 +3492,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0124
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0124"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0124
 	 Directory of  A:\
 	
@@ -3259,6 +3508,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      617   6-12-87   5:28a
 
 ### Directory of PCSIG08: DISK0125
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0125"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0125
 	 Directory of  A:\
@@ -3278,6 +3529,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           4224   1-15-84  10:25p
 
 ### Directory of PCSIG08: DISK0126
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0126"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0126
 	 Directory of  A:\
@@ -3339,6 +3592,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0127
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0127"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0127
 	 Directory of  A:\
 	
@@ -3372,6 +3627,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0128
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0128"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0128
 	 Directory of  A:\
 	
@@ -3399,6 +3656,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0129
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0129"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0129
 	 Directory of  A:\
 	
@@ -3406,6 +3665,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0130
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0130"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0130
 	 Directory of  A:\
@@ -3444,6 +3705,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0131
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0131"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0131
 	 Directory of  A:\
 	
@@ -3459,6 +3722,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORDCNT  EXE    26624   9-06-83   1:17p
 
 ### Directory of PCSIG08: DISK0132
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0132"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0132
 	 Directory of  A:\
@@ -3576,6 +3841,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0133
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0133"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0133
 	 Directory of  A:\
 	
@@ -3600,6 +3867,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0134
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0134"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0134
 	 Directory of  A:\
 	
@@ -3621,6 +3890,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XLISP    EXE    43776   2-19-84   5:25p
 
 ### Directory of PCSIG08: DISK0135
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0135"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0135
 	 Directory of  A:\
@@ -3653,6 +3924,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0136
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0136"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0136
 	 Directory of  A:\
 	
@@ -3684,6 +3957,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0137
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0137"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0137
 	 Directory of  A:\
 	
@@ -3691,6 +3966,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0138
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0138"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0138
 	 Directory of  A:\
@@ -3726,6 +4003,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0139
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0139"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0139
 	 Directory of  A:\
 	
@@ -3760,6 +4039,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0140
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0140"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0140
 	 Directory of  A:\
 	
@@ -3787,6 +4068,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0141
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0141"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0141
 	 Directory of  A:\
 	
@@ -3804,6 +4087,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	W20      COM     3456   3-24-84   6:59p
 
 ### Directory of PCSIG08: DISK0142
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0142"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0142
 	 Directory of  A:\
@@ -3837,6 +4122,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0143
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0143"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0143
 	 Directory of  A:\
 	
@@ -3858,6 +4145,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0144
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0144"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0144
 	 Directory of  A:\
 	
@@ -3878,6 +4167,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USQ      DOC      637   3-27-84   8:38p
 
 ### Directory of PCSIG08: DISK0145
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0145"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0145
 	 Directory of  A:\
@@ -3910,6 +4201,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0146
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0146"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0146
 	 Directory of  A:\
 	
@@ -3929,6 +4222,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TEXT     TWO     1041   2-15-87   4:01a
 
 ### Directory of PCSIG08: DISK0147
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0147"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0147
 	 Directory of  A:\
@@ -3978,6 +4273,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0148
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0148"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0148
 	 Directory of  A:\
 	
@@ -3991,6 +4288,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XLISPSRC ARC    89943  12-02-86  12:02p
 
 ### Directory of PCSIG08: DISK0149
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0149"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0149
 	 Directory of  A:\
@@ -4015,6 +4314,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XC       EXE    19072   1-01-84   4:13a
 
 ### Directory of PCSIG08: DISK0150
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0150"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0150
 	 Directory of  A:\
@@ -4045,6 +4346,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0151
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0151"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0151
 	 Directory of  A:\
 	
@@ -4074,6 +4377,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORK     GLT     4558  12-31-88  12:00a
 
 ### Directory of PCSIG08: DISK0152
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0152"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0152
 	 Directory of  A:\
@@ -4111,6 +4416,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0153
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0153"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0153
 	 Directory of  A:\
 	
@@ -4135,6 +4442,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       43   3-10-89   1:19a
 
 ### Directory of PCSIG08: DISK0154
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0154"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0154
 	 Directory of  A:\
@@ -4189,6 +4498,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0155
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0155"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0155
 	 Directory of  A:\
 	
@@ -4232,6 +4543,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	X                  64   1-10-87   1:02a
 
 ### Directory of PCSIG08: DISK0156
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0156"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0156
 	 Directory of  A:\
@@ -4281,6 +4594,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0157
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0157"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0157
 	 Directory of  A:\
 	
@@ -4328,6 +4643,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	YOUNG    NL      3072   4-27-84   7:14a
 
 ### Directory of PCSIG08: DISK0158
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0158"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0158
 	 Directory of  A:\
@@ -4382,6 +4699,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0159
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0159"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0159
 	 Directory of  A:\
 	
@@ -4428,6 +4747,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0160
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0160"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0160
 	 Directory of  A:\
 	
@@ -4471,6 +4792,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0161
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0161"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0161
 	 Directory of  A:\
 	
@@ -4501,6 +4824,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0162
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0162"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0162
 	 Directory of  A:\
 	
@@ -4528,6 +4853,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XREF     EXE    26624   6-15-84   4:12a
 
 ### Directory of PCSIG08: DISK0163
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0163"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0163
 	 Directory of  A:\
@@ -4565,6 +4892,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0164
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0164"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0164
 	 Directory of  A:\
 	
@@ -4572,6 +4901,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0165
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0165"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0165
 	 Directory of  A:\
@@ -4589,6 +4920,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0166
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0166"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0166
 	 Directory of  A:\
 	
@@ -4596,6 +4929,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0167
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0167"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0167
 	 Directory of  A:\
@@ -4618,6 +4953,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TRS2PC   BAS     9728  11-27-83  10:13a
 
 ### Directory of PCSIG08: DISK0168
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0168"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0168
 	 Directory of  A:\
@@ -4652,6 +4989,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XXX              1408   5-22-84   2:08p
 
 ### Directory of PCSIG08: DISK0169
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0169"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0169
 	 Directory of  A:\
@@ -4692,6 +5031,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0170
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0170"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0170
 	 Directory of  A:\
 	
@@ -4716,6 +5057,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VOLKSWTR KEY      256   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK0171
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0171"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0171
 	 Directory of  A:\
@@ -4754,6 +5097,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0172
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0172"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0172
 	 Directory of  A:\
 	
@@ -4789,6 +5134,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0173
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0173"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0173
 	 Directory of  A:\
 	
@@ -4803,6 +5150,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XXX               453   6-12-84  12:52p
 
 ### Directory of PCSIG08: DISK0174
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0174"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0174
 	 Directory of  A:\
@@ -4838,6 +5187,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0175
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0175"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0175
 	 Directory of  A:\
 	
@@ -4863,6 +5214,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XXX               916   6-12-84   7:17p
 
 ### Directory of PCSIG08: DISK0176
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0176"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0176
 	 Directory of  A:\
@@ -4897,6 +5250,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0177
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0177"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0177
 	 Directory of  A:\
 	
@@ -4916,6 +5271,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0178
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0178"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0178
 	 Directory of  A:\
 	
@@ -4933,6 +5290,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XXX               768   5-28-84   5:31p
 
 ### Directory of PCSIG08: DISK0179
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0179"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0179
 	 Directory of  A:\
@@ -4974,6 +5333,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XXX      BAK     1176   5-28-84  11:06a
 
 ### Directory of PCSIG08: DISK0180
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0180"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0180
 	 Directory of  A:\
@@ -5036,6 +5397,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0181
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0181"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0181
 	 Directory of  A:\
 	
@@ -5058,6 +5421,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VENDOR   DOC     3922   6-16-89  11:22a
 
 ### Directory of PCSIG08: DISK0182
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0182"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0182
 	 Directory of  A:\
@@ -5095,6 +5460,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0183
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0183"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0183
 	 Directory of  A:\
 	
@@ -5129,6 +5496,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XXX              1423   6-12-84   7:47p
 
 ### Directory of PCSIG08: DISK0184
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0184"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0184
 	 Directory of  A:\
@@ -5197,6 +5566,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0185
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0185"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0185
 	 Directory of  A:\
 	
@@ -5225,6 +5596,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZUSQ     EXE    13696  11-23-83   3:11a
 
 ### Directory of PCSIG08: DISK0186
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0186"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0186
 	 Directory of  A:\
@@ -5274,6 +5647,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0187
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0187"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0187
 	 Directory of  A:\
 	
@@ -5292,6 +5667,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0188
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0188"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0188
 	 Directory of  A:\
 	
@@ -5306,6 +5683,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0189
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0189"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0189
 	 Directory of  A:\
 	
@@ -5319,6 +5698,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XXX               640   6-04-84   5:46p
 
 ### Directory of PCSIG08: DISK0190
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0190"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0190
 	 Directory of  A:\
@@ -5344,6 +5725,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XXXX     DAT        1   6-04-84  11:56p
 
 ### Directory of PCSIG08: DISK0191
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0191"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0191
 	 Directory of  A:\
@@ -5394,6 +5777,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0192
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0192"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0192
 	 Directory of  A:\
 	
@@ -5428,6 +5813,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0193
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0193"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0193
 	 Directory of  A:\
 	
@@ -5452,6 +5839,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WILL            12648   6-07-83   5:39a
 
 ### Directory of PCSIG08: DISK0194
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0194"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0194
 	 Directory of  A:\
@@ -5482,6 +5871,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TSTRKF45 PAS     4523   5-08-84   2:30p
 
 ### Directory of PCSIG08: DISK0195
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0195"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0195
 	 Directory of  A:\
@@ -5520,6 +5911,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0196
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0196"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0196
 	 Directory of  A:\
 	
@@ -5540,6 +5933,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0197
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0197"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0197
 	 Directory of  A:\
 	
@@ -5554,6 +5949,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TREKRUN  EXE    71168   6-19-84   7:34p
 
 ### Directory of PCSIG08: DISK0198
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0198"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0198
 	 Directory of  A:\
@@ -5570,6 +5967,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0199
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0199"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0199
 	 Directory of  A:\
 	
@@ -5581,6 +5980,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PKUNZIP  EXE    18208   6-16-89   8:19a
 
 ### Directory of PCSIG08: DISK0200
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0200"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0200
 	 Directory of  A:\
@@ -5630,6 +6031,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0201
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0201"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0201
 	 Directory of  A:\
 	
@@ -5650,6 +6053,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WS-DOS   BAS     4739   2-01-84   1:54a
 
 ### Directory of PCSIG08: DISK0202
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0202"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0202
 	 Directory of  A:\
@@ -5681,6 +6086,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0203
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0203"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0203
 	 Directory of  A:\
 	
@@ -5706,6 +6113,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XXX              1280   6-17-84   5:46p
 
 ### Directory of PCSIG08: DISK0204
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0204"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0204
 	 Directory of  A:\
@@ -5737,6 +6146,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0205
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0205"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0205
 	 Directory of  A:\
 	
@@ -5762,6 +6173,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0206
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0206"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0206
 	 Directory of  A:\
 	
@@ -5785,6 +6198,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0207
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0207"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0207
 	 Directory of  A:\
 	
@@ -5803,6 +6218,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0208
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0208"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0208
 	 Directory of  A:\
 	
@@ -5820,6 +6237,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0209
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0209"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0209
 	 Directory of  A:\
 	
@@ -5834,6 +6253,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0210
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0210"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0210
 	 Directory of  A:\
 	
@@ -5846,6 +6267,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SPACEVAD EXE     9216   1-28-84   1:46p
 
 ### Directory of PCSIG08: DISK0211
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0211"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0211
 	 Directory of  A:\
@@ -5865,6 +6288,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0212
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0212"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0212
 	 Directory of  A:\
 	
@@ -5877,6 +6302,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0213
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0213"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0213
 	 Directory of  A:\
 	
@@ -5884,6 +6311,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0214
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0214"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0214
 	 Directory of  A:\
@@ -5908,6 +6337,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TRANSFER BAS    17536   3-09-83   4:08p
 
 ### Directory of PCSIG08: DISK0215
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0215"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0215
 	 Directory of  A:\
@@ -5981,6 +6412,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0216
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0216"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0216
 	 Directory of  A:\
 	
@@ -6030,6 +6463,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0217
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0217"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0217
 	 Directory of  A:\
 	
@@ -6057,6 +6492,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0218
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0218"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0218
 	 Directory of  A:\
 	
@@ -6079,6 +6516,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     1542   9-20-87   2:10p
 
 ### Directory of PCSIG08: DISK0219
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0219"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0219
 	 Directory of  A:\
@@ -6108,6 +6547,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0220
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0220"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0220
 	 Directory of  A:\
 	
@@ -6127,6 +6568,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USMAP    PIC    16392   2-02-84  10:31a
 
 ### Directory of PCSIG08: DISK0221
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0221"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0221
 	 Directory of  A:\
@@ -6148,6 +6591,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0222
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0222"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0222
 	 Directory of  A:\
 	
@@ -6166,6 +6611,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USMAP    PIC    16392   2-02-84  10:31a
 
 ### Directory of PCSIG08: DISK0223
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0223"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0223
 	 Directory of  A:\
@@ -6220,6 +6667,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0224
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0224"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0224
 	 Directory of  A:\
 	
@@ -6239,6 +6688,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0225
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0225"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0225
 	 Directory of  A:\
 	
@@ -6251,6 +6702,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README            381   7-21-84   8:52a
 
 ### Directory of PCSIG08: DISK0226
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0226"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0226
 	 Directory of  A:\
@@ -6265,6 +6718,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0227
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0227"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0227
 	 Directory of  A:\
 	
@@ -6274,6 +6729,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       BAT      590   1-03-80   4:36p
 
 ### Directory of PCSIG08: DISK0228
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0228"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0228
 	 Directory of  A:\
@@ -6294,6 +6751,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VAMPIRE  BAS     7424   4-14-84   7:48p
 
 ### Directory of PCSIG08: DISK0229
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0229"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0229
 	 Directory of  A:\
@@ -6318,6 +6777,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0230
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0230"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0230
 	 Directory of  A:\
 	
@@ -6335,6 +6796,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0231
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0231"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0231
 	 Directory of  A:\
 	
@@ -6350,6 +6813,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REFLIST  EXE    72772   8-06-88   6:41a
 
 ### Directory of PCSIG08: DISK0232
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0232"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0232
 	 Directory of  A:\
@@ -6395,6 +6860,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0233
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0233"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0233
 	 Directory of  A:\
 	
@@ -6410,6 +6877,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0234
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0234"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0234
 	 Directory of  A:\
 	
@@ -6419,6 +6888,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TPNDOC          14181   9-03-84   5:31p
 
 ### Directory of PCSIG08: DISK0235
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0235"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0235
 	 Directory of  A:\
@@ -6437,6 +6908,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UTILITY  COM     8785  12-01-85   5:30a
 
 ### Directory of PCSIG08: DISK0236
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0236"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0236
 	 Directory of  A:\
@@ -6467,6 +6940,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0237
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0237"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0237
 	 Directory of  A:\
 	
@@ -6485,6 +6960,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MANUAL   BAT       53  12-21-86   1:47a
 
 ### Directory of PCSIG08: DISK0238
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0238"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0238
 	 Directory of  A:\
@@ -6511,6 +6988,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TKSOLVER UNP     5632   9-15-84   4:27p
 
 ### Directory of PCSIG08: DISK0239
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0239"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0239
 	 Directory of  A:\
@@ -6541,6 +7020,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0240
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0240"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0240
 	 Directory of  A:\
 	
@@ -6555,6 +7036,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       BAT      378   4-06-87   4:28p
 
 ### Directory of PCSIG08: DISK0241
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0241"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0241
 	 Directory of  A:\
@@ -6595,6 +7078,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0242
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0242"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0242
 	 Directory of  A:\
 	
@@ -6613,6 +7098,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0243
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0243"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0243
 	 Directory of  A:\
 	
@@ -6628,6 +7115,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TAGINST  BAT      690   8-15-84  10:09p
 
 ### Directory of PCSIG08: DISK0244
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0244"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0244
 	 Directory of  A:\
@@ -6651,6 +7140,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0245
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0245"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0245
 	 Directory of  A:\
 	
@@ -6665,6 +7156,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	U-OPT    EXE    25601  11-20-84   5:45p
 
 ### Directory of PCSIG08: DISK0246
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0246"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0246
 	 Directory of  A:\
@@ -6685,6 +7178,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0247
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0247"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0247
 	 Directory of  A:\
 	
@@ -6700,6 +7195,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ORDERFRM TXT     1792   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK0248
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0248"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0248
 	 Directory of  A:\
@@ -6718,6 +7215,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PRINTER  PAS     2077  11-11-84   1:54p
 
 ### Directory of PCSIG08: DISK0249
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0249"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0249
 	 Directory of  A:\
@@ -6738,6 +7237,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0250
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0250"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0250
 	 Directory of  A:\
 	
@@ -6745,6 +7246,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0251
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0251"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0251
 	 Directory of  A:\
@@ -6768,6 +7271,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0252
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0252"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0252
 	 Directory of  A:\
 	
@@ -6782,6 +7287,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	LOAD-US  DOC     2463   1-24-85   3:18p
 
 ### Directory of PCSIG08: DISK0253
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0253"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0253
 	 Directory of  A:\
@@ -6814,6 +7321,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REFSTYLE RFS    15360  10-24-88   3:27a
 
 ### Directory of PCSIG08: DISK0254
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0254"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0254
 	 Directory of  A:\
@@ -6970,6 +7479,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0255
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0255"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0255
 	 Directory of  A:\
 	
@@ -7029,6 +7540,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WHEREIS  COM      451   8-14-87   9:49a
 
 ### Directory of PCSIG08: DISK0256
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0256"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0256
 	 Directory of  A:\
@@ -7093,6 +7606,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0257
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0257"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0257
 	 Directory of  A:\
 	
@@ -7117,6 +7632,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SETUP    BAT      559   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK0258
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0258"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0258
 	 Directory of  A:\
@@ -7147,6 +7664,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	Z        COM      126   9-30-83   3:12p
 
 ### Directory of PCSIG08: DISK0259
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0259"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0259
 	 Directory of  A:\
@@ -7186,6 +7705,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0260
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0260"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0260
 	 Directory of  A:\
 	
@@ -7206,6 +7727,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TRONLC   EXE    26864  12-15-84   2:10a
 
 ### Directory of PCSIG08: DISK0261
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0261"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0261
 	 Directory of  A:\
@@ -7239,6 +7762,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SRTLAB   EXE     2944   5-20-84   2:21a
 
 ### Directory of PCSIG08: DISK0262
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0262"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0262
 	 Directory of  A:\
@@ -7282,6 +7807,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0263
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0263"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0263
 	 Directory of  A:\
 	
@@ -7299,6 +7826,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0264
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0264"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0264
 	 Directory of  A:\
 	
@@ -7308,6 +7837,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	META86   BLK    49280   9-11-80   5:24p
 
 ### Directory of PCSIG08: DISK0265
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0265"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0265
 	 Directory of  A:\
@@ -7333,6 +7864,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	THING    PLT     3624  12-17-83  12:58p
 
 ### Directory of PCSIG08: DISK0266
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0266"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0266
 	 Directory of  A:\
@@ -7362,6 +7895,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0267
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0267"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0267
 	 Directory of  A:\
 	
@@ -7380,6 +7915,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TAX              3328   1-01-10   9:35a
 
 ### Directory of PCSIG08: DISK0268
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0268"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0268
 	 Directory of  A:\
@@ -7423,6 +7960,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0269
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0269"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0269
 	 Directory of  A:\
 	
@@ -7448,6 +7987,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0270
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0270"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0270
 	 Directory of  A:\
 	
@@ -7466,6 +8007,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0271
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0271"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0271
 	 Directory of  A:\
 	
@@ -7483,6 +8026,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0272
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0272"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0272
 	 Directory of  A:\
 	
@@ -7493,6 +8038,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	LIB6     PAR      296  11-20-85   2:34p
 
 ### Directory of PCSIG08: DISK0273
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0273"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0273
 	 Directory of  A:\
@@ -7527,6 +8074,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0274
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0274"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0274
 	 Directory of  A:\
 	
@@ -7553,6 +8102,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0275
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0275"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0275
 	 Directory of  A:\
 	
@@ -7568,6 +8119,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PCCP     DAT      128   1-09-87  11:06p
 
 ### Directory of PCSIG08: DISK0276
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0276"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0276
 	 Directory of  A:\
@@ -7599,6 +8152,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	~~~~~~~~ ~~~        0   9-19-84   1:48a
 
 ### Directory of PCSIG08: DISK0277
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0277"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0277
 	 Directory of  A:\
@@ -7641,6 +8196,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0278
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0278"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0278
 	 Directory of  A:\
 	
@@ -7666,6 +8223,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME!     4291   2-05-85  10:37p
 
 ### Directory of PCSIG08: DISK0279
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0279"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0279
 	 Directory of  A:\
@@ -7748,6 +8307,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0280
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0280"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0280
 	 Directory of  A:\
 	
@@ -7767,6 +8328,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0281
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0281"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0281
 	 Directory of  A:\
 	
@@ -7783,6 +8346,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RECSHORT RPT      128   2-28-84   5:34p
 
 ### Directory of PCSIG08: DISK0282
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0282"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0282
 	 Directory of  A:\
@@ -7806,6 +8371,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	STKANALY SIS    12160   1-01-80  12:23a
 
 ### Directory of PCSIG08: DISK0283
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0283"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0283
 	 Directory of  A:\
@@ -7855,6 +8422,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0284
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0284"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0284
 	 Directory of  A:\
 	
@@ -7875,6 +8444,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MANUAL   BAT      147   1-19-89   1:21a
 
 ### Directory of PCSIG08: DISK0285
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0285"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0285
 	 Directory of  A:\
@@ -7924,6 +8495,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0286
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0286"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0286
 	 Directory of  A:\
 	
@@ -7939,6 +8512,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      6420   1-12-87  10:55p
 
 ### Directory of PCSIG08: DISK0287
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0287"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0287
 	 Directory of  A:\
@@ -7958,6 +8533,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RESPONSE         3618   1-25-89   4:28a
 
 ### Directory of PCSIG08: DISK0288
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0288"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0288
 	 Directory of  A:\
@@ -7979,6 +8556,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TUTORIAL SRT        6   1-25-89   4:28a
 
 ### Directory of PCSIG08: DISK0289
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0289"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0289
 	 Directory of  A:\
@@ -8005,6 +8584,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0290
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0290"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0290
 	 Directory of  A:\
 	
@@ -8018,6 +8599,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WHATSNEW DOC     2131   2-03-89   8:29a
 
 ### Directory of PCSIG08: DISK0291
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0291"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0291
 	 Directory of  A:\
@@ -8051,6 +8634,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0292
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0292"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0292
 	 Directory of  A:\
 	
@@ -8063,6 +8648,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SWH      EXE    25088  11-23-86  11:52a
 
 ### Directory of PCSIG08: DISK0293
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0293"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0293
 	 Directory of  A:\
@@ -8081,6 +8668,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PYRAMID  EXE    34176  12-02-84  12:27p
 
 ### Directory of PCSIG08: DISK0294
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0294"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0294
 	 Directory of  A:\
@@ -8139,6 +8728,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORDS    EXE     6656   1-02-87  12:45a
 
 ### Directory of PCSIG08: DISK0295
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0295"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0295
 	 Directory of  A:\
@@ -8255,6 +8846,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0296
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0296"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0296
 	 Directory of  A:\
 	
@@ -8280,6 +8873,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0297
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0297"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0297
 	 Directory of  A:\
 	
@@ -8298,6 +8893,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ORDER    FRM      768   4-05-88   8:12p
 
 ### Directory of PCSIG08: DISK0298
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0298"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0298
 	 Directory of  A:\
@@ -8329,6 +8926,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WATORMON PAS    10857   2-25-85   5:50a
 
 ### Directory of PCSIG08: DISK0299
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0299"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0299
 	 Directory of  A:\
@@ -8374,6 +8973,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TWOLINE  BAS      102   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK0300
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0300"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0300
 	 Directory of  A:\
@@ -8423,6 +9024,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0301
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0301"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0301
 	 Directory of  A:\
 	
@@ -8455,6 +9058,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TEXTDEMO WKS     6016   1-01-80  12:02a
 
 ### Directory of PCSIG08: DISK0302
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0302"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0302
 	 Directory of  A:\
@@ -8489,6 +9094,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0303
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0303"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0303
 	 Directory of  A:\
 	
@@ -8506,6 +9113,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WSFF4    TXT    19968   1-03-85   7:35p
 
 ### Directory of PCSIG08: DISK0304
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0304"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0304
 	 Directory of  A:\
@@ -8536,6 +9145,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	STC      WKS     9728   6-20-84   7:40a
 
 ### Directory of PCSIG08: DISK0305
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0305"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0305
 	 Directory of  A:\
@@ -8575,6 +9186,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0306
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0306"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0306
 	 Directory of  A:\
 	
@@ -8603,6 +9216,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UN1      WRK     4992   1-02-85   9:30p
 
 ### Directory of PCSIG08: DISK0307
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0307"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0307
 	 Directory of  A:\
@@ -8666,6 +9281,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0308
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0308"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0308
 	 Directory of  A:\
 	
@@ -8721,6 +9338,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WS-TO-VW ASM    10439   3-04-84  11:22a
 
 ### Directory of PCSIG08: DISK0309
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0309"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0309
 	 Directory of  A:\
@@ -8778,6 +9397,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0310
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0310"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0310
 	 Directory of  A:\
 	
@@ -8791,6 +9412,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TYPE_ME           292  10-05-89   4:10a
 
 ### Directory of PCSIG08: DISK0311
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0311"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0311
 	 Directory of  A:\
@@ -8825,6 +9448,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0312
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0312"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0312
 	 Directory of  A:\
 	
@@ -8850,6 +9475,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SDA      EXE    26324   4-17-86  12:33p
 
 ### Directory of PCSIG08: DISK0313
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0313"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0313
 	 Directory of  A:\
@@ -8878,6 +9505,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USERLOG  DOC    25108   1-14-85   6:46p
 
 ### Directory of PCSIG08: DISK0314
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0314"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0314
 	 Directory of  A:\
@@ -8927,6 +9556,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0315
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0315"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0315
 	 Directory of  A:\
 	
@@ -8962,12 +9593,16 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0316
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0316"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0316
 	 Directory of  A:\
 	
 	DISKO316 ZIP    85232   3-19-90   4:49p
 
 ### Directory of PCSIG08: DISK0317
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0317"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0317
 	 Directory of  A:\
@@ -9007,6 +9642,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WSJSTOCK FRM      256   8-07-82  12:00a
 
 ### Directory of PCSIG08: DISK0318
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0318"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0318
 	 Directory of  A:\
@@ -9097,6 +9734,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0319
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0319"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0319
 	 Directory of  A:\
 	
@@ -9158,6 +9797,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0320
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0320"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0320
 	 Directory of  A:\
 	
@@ -9196,6 +9837,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0321
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0321"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0321
 	 Directory of  A:\
 	
@@ -9226,6 +9869,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WEATHER  EXE    57170   6-26-89  12:00p
 
 ### Directory of PCSIG08: DISK0322
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0322"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0322
 	 Directory of  A:\
@@ -9278,6 +9923,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0323
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0323"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0323
 	 Directory of  A:\
 	
@@ -9300,6 +9947,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNISTOX  DJI     3072   3-16-87   1:50a
 
 ### Directory of PCSIG08: DISK0324
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0324"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0324
 	 Directory of  A:\
@@ -9354,6 +10003,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0325
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0325"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0325
 	 Directory of  A:\
 	
@@ -9379,6 +10030,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USELOG   RPT      154   1-08-85   9:48p
 
 ### Directory of PCSIG08: DISK0326
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0326"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0326
 	 Directory of  A:\
@@ -9423,6 +10076,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0327
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0327"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0327
 	 Directory of  A:\
 	
@@ -9431,6 +10086,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TRIVMACH EXE   114560   3-17-85   2:59a
 
 ### Directory of PCSIG08: DISK0328
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0328"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0328
 	 Directory of  A:\
@@ -9443,6 +10100,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TM       FNT     7168   3-17-85   2:59a
 
 ### Directory of PCSIG08: DISK0329
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0329"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0329
 	 Directory of  A:\
@@ -9466,6 +10125,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORDS    DAT     5632   3-17-85   7:01p
 
 ### Directory of PCSIG08: DISK0330
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0330"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0330
 	 Directory of  A:\
@@ -9499,6 +10160,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0331
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0331"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0331
 	 Directory of  A:\
 	
@@ -9516,6 +10179,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEWDOC  COM    11643   2-19-90   9:28a
 
 ### Directory of PCSIG08: DISK0332
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0332"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0332
 	 Directory of  A:\
@@ -9541,6 +10206,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0333
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0333"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0333
 	 Directory of  A:\
 	
@@ -9548,6 +10215,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0334
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0334"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0334
 	 Directory of  A:\
@@ -9559,6 +10228,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RBBS-EXT ZIP    68256   2-13-90  11:30p
 
 ### Directory of PCSIG08: DISK0335
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0335"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0335
 	 Directory of  A:\
@@ -9579,6 +10250,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SPD      COM      128   7-17-84   1:36a
 
 ### Directory of PCSIG08: DISK0336
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0336"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0336
 	 Directory of  A:\
@@ -9656,6 +10329,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0337
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0337"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0337
 	 Directory of  A:\
 	
@@ -9666,6 +10341,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MANUAL   EXE    34816   1-29-85   8:14p
 
 ### Directory of PCSIG08: DISK0338
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0338"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0338
 	 Directory of  A:\
@@ -9688,6 +10365,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0339
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0339"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0339
 	 Directory of  A:\
 	
@@ -9706,6 +10385,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REPORTOR BAS    14464  10-19-83   4:11a
 
 ### Directory of PCSIG08: DISK0340
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0340"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0340
 	 Directory of  A:\
@@ -9738,6 +10419,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REPORT   BAS     3933   5-21-84   1:19p
 
 ### Directory of PCSIG08: DISK0341
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0341"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0341
 	 Directory of  A:\
@@ -9776,6 +10459,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0342
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0342"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0342
 	 Directory of  A:\
 	
@@ -9791,6 +10476,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ROUNDPTR DAT      128   8-26-84   3:09a
 
 ### Directory of PCSIG08: DISK0343
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0343"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0343
 	 Directory of  A:\
@@ -9808,6 +10495,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WPK      EXE    48677  11-15-86   9:25a
 
 ### Directory of PCSIG08: DISK0344
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0344"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0344
 	 Directory of  A:\
@@ -9851,6 +10540,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SLIDEMO  BAT      983  10-18-88   8:27a
 
 ### Directory of PCSIG08: DISK0345
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0345"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0345
 	 Directory of  A:\
@@ -9906,6 +10597,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0346
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0346"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0346
 	 Directory of  A:\
 	
@@ -9941,6 +10634,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0347
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0347"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0347
 	 Directory of  A:\
 	
@@ -9962,6 +10657,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PROFILE  DEF     4224   1-15-84   4:47p
 
 ### Directory of PCSIG08: DISK0348
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0348"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0348
 	 Directory of  A:\
@@ -10006,6 +10703,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0349
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0349"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0349
 	 Directory of  A:\
 	
@@ -10033,6 +10732,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PLOGO82  COM     2132   1-28-84   9:45a
 
 ### Directory of PCSIG08: DISK0350
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0350"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0350
 	 Directory of  A:\
@@ -10069,6 +10770,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SOFT84B  KWD     4295  10-02-84   5:09p
 
 ### Directory of PCSIG08: DISK0351
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0351"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0351
 	 Directory of  A:\
@@ -10158,6 +10861,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0352
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0352"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0352
 	 Directory of  A:\
 	
@@ -10172,6 +10877,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MVPFORTH WDS     5476   1-28-87   7:11p
 
 ### Directory of PCSIG08: DISK0353
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0353"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0353
 	 Directory of  A:\
@@ -10211,6 +10918,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0354
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0354"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0354
 	 Directory of  A:\
 	
@@ -10243,6 +10952,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0355
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0355"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0355
 	 Directory of  A:\
 	
@@ -10251,6 +10962,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PC-ZAP20 EXE    42112   1-01-80   5:17a
 
 ### Directory of PCSIG08: DISK0356
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0356"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0356
 	 Directory of  A:\
@@ -10314,6 +11027,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0357
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0357"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0357
 	 Directory of  A:\
 	
@@ -10321,6 +11036,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0358
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0358"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0358
 	 Directory of  A:\
@@ -10335,6 +11052,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0359
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0359"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0359
 	 Directory of  A:\
 	
@@ -10346,6 +11065,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	STAR     REC    81675   3-12-85   2:35a
 
 ### Directory of PCSIG08: DISK0360
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0360"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0360
 	 Directory of  A:\
@@ -10375,6 +11096,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TAXES    TXT     7613   3-19-89  11:18p
 
 ### Directory of PCSIG08: DISK0361
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0361"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0361
 	 Directory of  A:\
@@ -10425,6 +11148,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0362
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0362"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0362
 	 Directory of  A:\
 	
@@ -10472,6 +11197,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0363
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0363"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0363
 	 Directory of  A:\
 	
@@ -10487,6 +11214,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SKELETON MNU      384   7-28-84   4:43a
 
 ### Directory of PCSIG08: DISK0364
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0364"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0364
 	 Directory of  A:\
@@ -10546,6 +11275,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0365
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0365"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0365
 	 Directory of  A:\
 	
@@ -10581,6 +11312,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TURBO    DOC     9344  11-17-84   7:03p
 
 ### Directory of PCSIG08: DISK0366
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0366"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0366
 	 Directory of  A:\
@@ -10626,6 +11359,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0367
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0367"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0367
 	 Directory of  A:\
 	
@@ -10636,6 +11371,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SFLAG             128   1-30-84   4:19p
 
 ### Directory of PCSIG08: DISK0368
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0368"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0368
 	 Directory of  A:\
@@ -10648,6 +11385,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SFLAG            6016   1-30-84   5:27p
 
 ### Directory of PCSIG08: DISK0369
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0369"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0369
 	 Directory of  A:\
@@ -10688,6 +11427,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0370
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0370"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0370
 	 Directory of  A:\
 	
@@ -10697,6 +11438,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SFLAG             128   1-30-84   4:19p
 
 ### Directory of PCSIG08: DISK0371
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0371"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0371
 	 Directory of  A:\
@@ -10753,6 +11496,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNP-IBM  EXE     1280   8-02-83   9:01a
 
 ### Directory of PCSIG08: DISK0372
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0372"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0372
 	 Directory of  A:\
@@ -10815,6 +11560,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UPCASE   BAS      768   4-19-85   8:42a
 
 ### Directory of PCSIG08: DISK0373
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0373"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0373
 	 Directory of  A:\
@@ -10879,6 +11626,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WAITTIME DOC      896  12-07-84   5:04p
 
 ### Directory of PCSIG08: DISK0374
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0374"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0374
 	 Directory of  A:\
@@ -10948,6 +11697,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0375
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0375"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0375
 	 Directory of  A:\
 	
@@ -11012,6 +11763,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UT-MOD90 INC     1379   9-11-84   3:39p
 
 ### Directory of PCSIG08: DISK0376
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0376"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0376
 	 Directory of  A:\
@@ -11110,6 +11863,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0377
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0377"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0377
 	 Directory of  A:\
 	
@@ -11158,6 +11913,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0378
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0378"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0378
 	 Directory of  A:\
 	
@@ -11186,6 +11943,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0379
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0379"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0379
 	 Directory of  A:\
 	
@@ -11210,6 +11969,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WSUNNUM  EXE    33024   9-14-84  10:46p
 
 ### Directory of PCSIG08: DISK0380
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0380"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0380
 	 Directory of  A:\
@@ -11286,6 +12047,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0381
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0381"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0381
 	 Directory of  A:\
 	
@@ -11301,6 +12064,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0382
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0382"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0382
 	 Directory of  A:\
 	
@@ -11314,6 +12079,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PCSWP110 COM    33536  11-09-84   8:02a
 
 ### Directory of PCSIG08: DISK0383
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0383"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0383
 	 Directory of  A:\
@@ -11332,6 +12099,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REQUEST  DOC     2051   8-14-85  11:49p
 
 ### Directory of PCSIG08: DISK0384
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0384"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0384
 	 Directory of  A:\
@@ -11352,6 +12121,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0385
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0385"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0385
 	 Directory of  A:\
 	
@@ -11369,6 +12140,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RANGE             384   6-20-88   2:24p
 
 ### Directory of PCSIG08: DISK0386
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0386"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0386
 	 Directory of  A:\
@@ -11413,6 +12186,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0387
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0387"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0387
 	 Directory of  A:\
 	
@@ -11436,6 +12211,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TODO     DAT      384   9-02-86   1:32p
 
 ### Directory of PCSIG08: DISK0388
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0388"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0388
 	 Directory of  A:\
@@ -11547,6 +12324,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0389
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0389"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0389
 	 Directory of  A:\
 	
@@ -11567,6 +12346,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0390
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0390"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0390
 	 Directory of  A:\
 	
@@ -11585,6 +12366,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SOVIET   DOC     2688   6-24-87   3:39a
 
 ### Directory of PCSIG08: DISK0391
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0391"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0391
 	 Directory of  A:\
@@ -11657,6 +12440,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XRAYDIF1 BAS     1664   1-01-80  12:19a
 
 ### Directory of PCSIG08: DISK0392
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0392"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0392
 	 Directory of  A:\
@@ -11746,6 +12531,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0393
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0393"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0393
 	 Directory of  A:\
 	
@@ -11760,6 +12547,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REGFORM          1626   1-25-90   5:40a
 
 ### Directory of PCSIG08: DISK0394
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0394"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0394
 	 Directory of  A:\
@@ -11778,6 +12567,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   COM    15346   2-06-90   4:01a
 
 ### Directory of PCSIG08: DISK0395
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0395"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0395
 	 Directory of  A:\
@@ -11816,6 +12607,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	YOURVOWN BAS    41735  11-21-85   9:18p
 
 ### Directory of PCSIG08: DISK0396
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0396"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0396
 	 Directory of  A:\
@@ -11858,6 +12651,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0397
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0397"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0397
 	 Directory of  A:\
 	
@@ -11874,6 +12669,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      848   8-11-88   2:25a
 
 ### Directory of PCSIG08: DISK0398
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0398"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0398
 	 Directory of  A:\
@@ -11899,6 +12696,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TUTOR           60767   7-06-86  12:42a
 
 ### Directory of PCSIG08: DISK0399
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0399"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0399
 	 Directory of  A:\
@@ -11927,6 +12726,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0400
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0400"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0400
 	 Directory of  A:\
 	
@@ -11943,6 +12744,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	URESP    TXT      195  11-30-87   9:01a
 
 ### Directory of PCSIG08: DISK0401
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0401"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0401
 	 Directory of  A:\
@@ -11982,6 +12785,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TEMPOR   TEM       11   7-06-85   6:13a
 
 ### Directory of PCSIG08: DISK0402
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0402"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0402
 	 Directory of  A:\
@@ -12025,6 +12830,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0403
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0403"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0403
 	 Directory of  A:\
 	
@@ -12055,6 +12862,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0404
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0404"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0404
 	 Directory of  A:\
 	
@@ -12066,6 +12875,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   COM     8334   7-05-89   9:17a
 
 ### Directory of PCSIG08: DISK0405
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0405"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0405
 	 Directory of  A:\
@@ -12100,6 +12911,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	STATES   PAD     1920   1-06-85   9:57a
 
 ### Directory of PCSIG08: DISK0406
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0406"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0406
 	 Directory of  A:\
@@ -12140,6 +12953,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0407
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0407"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0407
 	 Directory of  A:\
 	
@@ -12172,6 +12987,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0408
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0408"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0408
 	 Directory of  A:\
 	
@@ -12196,6 +13013,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WATERFOW BAS    11019   2-21-85   2:32a
 
 ### Directory of PCSIG08: DISK0409
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0409"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0409
 	 Directory of  A:\
@@ -12228,6 +13047,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	FBASICME SGS      128   7-22-84  10:44a
 
 ### Directory of PCSIG08: DISK0410
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0410"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0410
 	 Directory of  A:\
@@ -12262,6 +13083,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	F0VOCAB         10240   9-18-84   9:48a
 
 ### Directory of PCSIG08: DISK0411
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0411"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0411
 	 Directory of  A:\
@@ -12308,6 +13131,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0412
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0412"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0412
 	 Directory of  A:\
 	
@@ -12327,6 +13152,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TELEFONE COM    43008   6-06-85   3:20a
 
 ### Directory of PCSIG08: DISK0413
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0413"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0413
 	 Directory of  A:\
@@ -12358,6 +13185,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNSQ     COM     8064   3-17-85   2:53p
 
 ### Directory of PCSIG08: DISK0414
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0414"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0414
 	 Directory of  A:\
@@ -12444,6 +13273,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0415
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0415"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0415
 	 Directory of  A:\
 	
@@ -12470,6 +13301,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WED      SAL     1920   1-01-86   1:00a
 
 ### Directory of PCSIG08: DISK0416
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0416"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0416
 	 Directory of  A:\
@@ -12512,6 +13345,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0417
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0417"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0417
 	 Directory of  A:\
 	
@@ -12525,6 +13360,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0418
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0418"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0418
 	 Directory of  A:\
 	
@@ -12532,6 +13369,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0419
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0419"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0419
 	 Directory of  A:\
@@ -12547,6 +13386,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       37   4-24-89   3:25a
 
 ### Directory of PCSIG08: DISK0420
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0420"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0420
 	 Directory of  A:\
@@ -12594,6 +13435,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0421
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0421"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0421
 	 Directory of  A:\
 	
@@ -12632,6 +13475,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0422
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0422"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0422
 	 Directory of  A:\
 	
@@ -12646,6 +13491,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0423
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0423"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0423
 	 Directory of  A:\
 	
@@ -12656,6 +13503,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READPCPM ME      1079  12-06-87   5:47a
 
 ### Directory of PCSIG08: DISK0424
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0424"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0424
 	 Directory of  A:\
@@ -12674,6 +13523,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZELLER   PAS      768   8-20-85   3:29p
 
 ### Directory of PCSIG08: DISK0425
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0425"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0425
 	 Directory of  A:\
@@ -12739,6 +13590,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0426
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0426"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0426
 	 Directory of  A:\
 	
@@ -12757,6 +13610,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TURBHERC PAS     2560   2-25-85  12:58a
 
 ### Directory of PCSIG08: DISK0427
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0427"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0427
 	 Directory of  A:\
@@ -12791,6 +13646,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0428
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0428"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0428
 	 Directory of  A:\
 	
@@ -12813,6 +13670,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	STRNGLIB INC     8448   5-16-85   6:38p
 
 ### Directory of PCSIG08: DISK0429
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0429"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0429
 	 Directory of  A:\
@@ -12862,6 +13721,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0430
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0430"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0430
 	 Directory of  A:\
 	
@@ -12890,6 +13751,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0431
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0431"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0431
 	 Directory of  A:\
 	
@@ -12910,6 +13773,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZERO     EQE    10677   1-03-86   5:58a
 
 ### Directory of PCSIG08: DISK0432
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0432"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0432
 	 Directory of  A:\
@@ -12961,6 +13826,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0433
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0433"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0433
 	 Directory of  A:\
 	
@@ -12983,6 +13850,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0434
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0434"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0434
 	 Directory of  A:\
 	
@@ -13003,6 +13872,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MSZ100   HLP     2558  12-07-84   8:38p
 
 ### Directory of PCSIG08: DISK0435
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0435"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0435
 	 Directory of  A:\
@@ -13045,6 +13916,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0436
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0436"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0436
 	 Directory of  A:\
 	
@@ -13083,6 +13956,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VHF-YAGI BAS     2438   8-23-85  10:02p
 
 ### Directory of PCSIG08: DISK0437
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0437"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0437
 	 Directory of  A:\
@@ -13160,6 +14035,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0438
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0438"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0438
 	 Directory of  A:\
 	
@@ -13192,6 +14069,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0439
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0439"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0439
 	 Directory of  A:\
 	
@@ -13219,6 +14098,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNSQZ    COM     5576   4-13-85   4:58p
 
 ### Directory of PCSIG08: DISK0440
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0440"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0440
 	 Directory of  A:\
@@ -13258,6 +14139,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0441
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0441"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0441
 	 Directory of  A:\
 	
@@ -13268,6 +14151,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TEK      EXE     9490  12-01-86   4:00a
 
 ### Directory of PCSIG08: DISK0442
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0442"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0442
 	 Directory of  A:\
@@ -13288,6 +14173,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TIMEDATE PAS     1549  11-26-85   1:51p
 
 ### Directory of PCSIG08: DISK0443
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0443"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0443
 	 Directory of  A:\
@@ -13342,6 +14229,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0444
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0444"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0444
 	 Directory of  A:\
 	
@@ -13388,6 +14277,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0445
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0445"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0445
 	 Directory of  A:\
 	
@@ -13412,6 +14303,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0446
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0446"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0446
 	 Directory of  A:\
 	
@@ -13431,6 +14324,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZT16     DOC    11648   1-01-80  12:16a
 
 ### Directory of PCSIG08: DISK0447
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0447"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0447
 	 Directory of  A:\
@@ -13454,6 +14349,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0448
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0448"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0448
 	 Directory of  A:\
 	
@@ -13471,6 +14368,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0449
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0449"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0449
 	 Directory of  A:\
 	
@@ -13478,6 +14377,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0450
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0450"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0450
 	 Directory of  A:\
@@ -13494,6 +14395,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WALLST   BAS     6031   6-20-85   3:46a
 
 ### Directory of PCSIG08: DISK0451
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0451"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0451
 	 Directory of  A:\
@@ -13517,6 +14420,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0452
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0452"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0452
 	 Directory of  A:\
 	
@@ -13538,6 +14443,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0453
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0453"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0453
 	 Directory of  A:\
 	
@@ -13553,6 +14460,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0454
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0454"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0454
 	 Directory of  A:\
 	
@@ -13564,6 +14473,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORDS    DOC    93824   8-20-85   3:43p
 
 ### Directory of PCSIG08: DISK0455
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0455"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0455
 	 Directory of  A:\
@@ -13577,6 +14488,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME     12288   6-27-89  10:12a
 
 ### Directory of PCSIG08: DISK0456
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0456"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0456
 	 Directory of  A:\
@@ -13593,6 +14506,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	QUBERT   EXE    55296   4-26-85  11:17p
 
 ### Directory of PCSIG08: DISK0457
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0457"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0457
 	 Directory of  A:\
@@ -13616,6 +14531,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0458
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0458"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0458
 	 Directory of  A:\
 	
@@ -13623,6 +14540,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0459
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0459"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0459
 	 Directory of  A:\
@@ -13653,6 +14572,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0460
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0460"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0460
 	 Directory of  A:\
 	
@@ -13677,6 +14598,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0461
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0461"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0461
 	 Directory of  A:\
 	
@@ -13700,6 +14623,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WOODHEAT TXT    20352   3-15-85   5:09a
 
 ### Directory of PCSIG08: DISK0462
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0462"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0462
 	 Directory of  A:\
@@ -13729,6 +14654,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0463
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0463"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0463
 	 Directory of  A:\
 	
@@ -13737,6 +14664,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0464
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0464"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0464
 	 Directory of  A:\
 	
@@ -13744,6 +14673,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0465
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0465"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0465
 	 Directory of  A:\
@@ -13770,6 +14701,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USER-NO  EXE    21760   8-04-85  11:29a
 
 ### Directory of PCSIG08: DISK0466
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0466"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0466
 	 Directory of  A:\
@@ -13808,6 +14741,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0467
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0467"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0467
 	 Directory of  A:\
 	
@@ -13815,6 +14750,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0468
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0468"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0468
 	 Directory of  A:\
@@ -13837,6 +14774,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      4938   1-03-80   1:23a
 
 ### Directory of PCSIG08: DISK0469
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0469"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0469
 	 Directory of  A:\
@@ -13872,6 +14811,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0470
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0470"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0470
 	 Directory of  A:\
 	
@@ -13886,6 +14827,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	BILLTRL  TBC    14988   6-05-89  10:56a
 
 ### Directory of PCSIG08: DISK0471
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0471"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0471
 	 Directory of  A:\
@@ -13958,6 +14901,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0472
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0472"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0472
 	 Directory of  A:\
 	
@@ -13986,6 +14931,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0473
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0473"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0473
 	 Directory of  A:\
 	
@@ -13999,6 +14946,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0474
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0474"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0474
 	 Directory of  A:\
 	
@@ -14011,6 +14960,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WRITERS         51200   7-22-84   9:34a
 
 ### Directory of PCSIG08: DISK0475
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0475"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0475
 	 Directory of  A:\
@@ -14068,6 +15019,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0476
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0476"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0476
 	 Directory of  A:\
 	
@@ -14088,6 +15041,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SPACEVAD EXE     9216   1-28-84   9:46p
 
 ### Directory of PCSIG08: DISK0477
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0477"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0477
 	 Directory of  A:\
@@ -14114,6 +15069,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORDFONE COM    12408   5-25-86   4:39a
 
 ### Directory of PCSIG08: DISK0478
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0478"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0478
 	 Directory of  A:\
@@ -14182,6 +15139,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0479
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0479"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0479
 	 Directory of  A:\
 	
@@ -14228,6 +15187,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0480
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0480"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0480
 	 Directory of  A:\
 	
@@ -14235,6 +15196,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0481
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0481"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0481
 	 Directory of  A:\
@@ -14259,6 +15222,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XDOS     EXE    10547   4-22-85   5:18a
 
 ### Directory of PCSIG08: DISK0482
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0482"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0482
 	 Directory of  A:\
@@ -14293,6 +15258,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0483
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0483"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0483
 	 Directory of  A:\
 	
@@ -14311,6 +15278,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   TXT     1076   2-11-90   1:30a
 
 ### Directory of PCSIG08: DISK0484
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0484"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0484
 	 Directory of  A:\
@@ -14365,6 +15334,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0485
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0485"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0485
 	 Directory of  A:\
 	
@@ -14403,6 +15374,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0486
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0486"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0486
 	 Directory of  A:\
 	
@@ -14417,6 +15390,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TELISOL  EXE    89075  10-28-85   2:01p
 
 ### Directory of PCSIG08: DISK0487
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0487"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0487
 	 Directory of  A:\
@@ -14435,6 +15410,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TITLE    PIC    16392  10-25-85   3:18p
 
 ### Directory of PCSIG08: DISK0488
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0488"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0488
 	 Directory of  A:\
@@ -14462,6 +15439,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0489
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0489"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0489
 	 Directory of  A:\
 	
@@ -14471,6 +15450,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	JESUS    EXE    44398   1-23-86   1:34p
 
 ### Directory of PCSIG08: DISK0490
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0490"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0490
 	 Directory of  A:\
@@ -14509,6 +15490,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0491
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0491"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0491
 	 Directory of  A:\
 	
@@ -14542,6 +15525,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0492
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0492"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0492
 	 Directory of  A:\
 	
@@ -14549,6 +15534,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0493
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0493"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0493
 	 Directory of  A:\
@@ -14577,6 +15564,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VDB_EXPT DOC      512   6-29-87   5:06p
 
 ### Directory of PCSIG08: DISK0494
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0494"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0494
 	 Directory of  A:\
@@ -14610,6 +15599,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0495
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0495"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0495
 	 Directory of  A:\
 	
@@ -14625,6 +15616,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	E3       MPS    16520   1-16-86  12:50p
 
 ### Directory of PCSIG08: DISK0496
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0496"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0496
 	 Directory of  A:\
@@ -14643,6 +15636,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0497
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0497"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0497
 	 Directory of  A:\
 	
@@ -14650,6 +15645,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0498
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0498"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0498
 	 Directory of  A:\
@@ -14661,6 +15658,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       BAT      576   5-05-86   6:53a
 
 ### Directory of PCSIG08: DISK0499
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0499"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0499
 	 Directory of  A:\
@@ -14680,6 +15679,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0500
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0500"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0500
 	 Directory of  A:\
 	
@@ -14696,6 +15697,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TUTOR    DOC    12544   8-13-86   2:44p
 
 ### Directory of PCSIG08: DISK0501
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0501"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0501
 	 Directory of  A:\
@@ -14725,6 +15728,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SELL     OV2    95883   1-02-87   4:47a
 
 ### Directory of PCSIG08: DISK0502
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0502"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0502
 	 Directory of  A:\
@@ -14773,6 +15778,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0503
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0503"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0503
 	 Directory of  A:\
 	
@@ -14785,6 +15792,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      1024  11-21-88   3:43p
 
 ### Directory of PCSIG08: DISK0504
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0504"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0504
 	 Directory of  A:\
@@ -14818,6 +15827,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0505
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0505"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0505
 	 Directory of  A:\
 	
@@ -14825,6 +15836,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0506
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0506"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0506
 	 Directory of  A:\
@@ -14838,6 +15851,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           6266   2-01-88   6:18a
 
 ### Directory of PCSIG08: DISK0507
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0507"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0507
 	 Directory of  A:\
@@ -14860,6 +15875,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0508
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0508"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0508
 	 Directory of  A:\
 	
@@ -14868,6 +15885,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0509
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0509"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0509
 	 Directory of  A:\
 	
@@ -14875,6 +15894,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0510
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0510"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0510
 	 Directory of  A:\
@@ -14914,6 +15935,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORDS             512   8-08-85  11:13a
 
 ### Directory of PCSIG08: DISK0511
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0511"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0511
 	 Directory of  A:\
@@ -14958,6 +15981,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZONE2    SPR      128   2-13-86  10:01a
 
 ### Directory of PCSIG08: DISK0512
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0512"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0512
 	 Directory of  A:\
@@ -15046,6 +16071,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0513
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0513"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0513
 	 Directory of  A:\
 	
@@ -15081,6 +16108,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0514
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0514"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0514
 	 Directory of  A:\
 	
@@ -15106,6 +16135,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0515
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0515"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0515
 	 Directory of  A:\
 	
@@ -15121,6 +16152,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0516
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0516"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0516
 	 Directory of  A:\
 	
@@ -15128,6 +16161,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0517
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0517"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0517
 	 Directory of  A:\
@@ -15153,6 +16188,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0518
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0518"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0518
 	 Directory of  A:\
 	
@@ -15160,6 +16197,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0519
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0519"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0519
 	 Directory of  A:\
@@ -15183,6 +16222,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0520
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0520"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0520
 	 Directory of  A:\
 	
@@ -15203,6 +16244,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      1920   1-01-80   1:16a
 
 ### Directory of PCSIG08: DISK0521
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0521"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0521
 	 Directory of  A:\
@@ -15230,6 +16273,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0522
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0522"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0522
 	 Directory of  A:\
 	
@@ -15237,6 +16282,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0523
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0523"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0523
 	 Directory of  A:\
@@ -15251,6 +16298,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SIDEWRIT DOC    10240   3-22-87   4:05p
 
 ### Directory of PCSIG08: DISK0524
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0524"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0524
 	 Directory of  A:\
@@ -15267,6 +16316,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0525
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0525"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0525
 	 Directory of  A:\
 	
@@ -15282,6 +16333,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PRINTDOC BAT      768   2-16-90   8:10p
 
 ### Directory of PCSIG08: DISK0526
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0526"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0526
 	 Directory of  A:\
@@ -15305,6 +16358,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0527
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0527"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0527
 	 Directory of  A:\
 	
@@ -15322,6 +16377,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	QBV4     QLB    32397   7-15-88   3:05p
 
 ### Directory of PCSIG08: DISK0528
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0528"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0528
 	 Directory of  A:\
@@ -15346,6 +16403,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0529
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0529"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0529
 	 Directory of  A:\
 	
@@ -15353,6 +16412,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0530
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0530"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0530
 	 Directory of  A:\
@@ -15369,6 +16430,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      1846   7-25-86  10:09p
 
 ### Directory of PCSIG08: DISK0531
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0531"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0531
 	 Directory of  A:\
@@ -15393,6 +16456,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0532
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0532"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0532
 	 Directory of  A:\
 	
@@ -15413,6 +16478,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0533
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0533"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0533
 	 Directory of  A:\
 	
@@ -15431,6 +16498,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VENDOR   DOC    10932   1-26-90   4:00a
 
 ### Directory of PCSIG08: DISK0534
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0534"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0534
 	 Directory of  A:\
@@ -15462,6 +16531,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0535
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0535"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0535
 	 Directory of  A:\
 	
@@ -15490,6 +16561,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TRIVIA   C        105   9-01-85   3:12p
 
 ### Directory of PCSIG08: DISK0536
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0536"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0536
 	 Directory of  A:\
@@ -15530,6 +16603,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0537
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0537"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0537
 	 Directory of  A:\
 	
@@ -15540,6 +16615,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USRGROUP DOC     5164  10-13-89   3:08a
 
 ### Directory of PCSIG08: DISK0538
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0538"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0538
 	 Directory of  A:\
@@ -15572,6 +16649,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0539
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0539"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0539
 	 Directory of  A:\
 	
@@ -15587,6 +16666,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZORKTOOL DOC    10496   4-07-85   7:43p
 
 ### Directory of PCSIG08: DISK0540
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0540"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0540
 	 Directory of  A:\
@@ -15617,6 +16698,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0541
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0541"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0541
 	 Directory of  A:\
 	
@@ -15624,6 +16707,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0542
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0542"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0542
 	 Directory of  A:\
@@ -15648,6 +16733,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SCORE    DTA      256   5-30-86  12:56a
 
 ### Directory of PCSIG08: DISK0543
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0543"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0543
 	 Directory of  A:\
@@ -15715,6 +16802,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0544
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0544"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0544
 	 Directory of  A:\
 	
@@ -15740,6 +16829,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PCW84C   KWD     3769   1-15-85   3:45p
 
 ### Directory of PCSIG08: DISK0545
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0545"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0545
 	 Directory of  A:\
@@ -15779,6 +16870,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0546
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0546"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0546
 	 Directory of  A:\
 	
@@ -15800,6 +16893,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PCWK84D  KWD     6548   4-24-85  12:28p
 
 ### Directory of PCSIG08: DISK0547
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0547"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0547
 	 Directory of  A:\
@@ -15839,6 +16934,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0548
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0548"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0548
 	 Directory of  A:\
 	
@@ -15867,6 +16964,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0549
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0549"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0549
 	 Directory of  A:\
 	
@@ -15891,6 +16990,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0550
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0550"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0550
 	 Directory of  A:\
 	
@@ -15906,6 +17007,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PCWK85B  KWD    18193   9-22-85   4:19p
 
 ### Directory of PCSIG08: DISK0551
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0551"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0551
 	 Directory of  A:\
@@ -15942,6 +17045,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0552
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0552"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0552
 	 Directory of  A:\
 	
@@ -15949,6 +17054,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0553
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0553"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0553
 	 Directory of  A:\
@@ -15982,6 +17089,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SVDRS    FOR    33867   2-23-84   1:12p
 
 ### Directory of PCSIG08: DISK0554
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0554"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0554
 	 Directory of  A:\
@@ -16044,6 +17153,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0555
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0555"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0555
 	 Directory of  A:\
 	
@@ -16073,6 +17184,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SUD      LNK       78   4-30-84   4:19p
 
 ### Directory of PCSIG08: DISK0556
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0556"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0556
 	 Directory of  A:\
@@ -16119,6 +17232,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0557
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0557"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0557
 	 Directory of  A:\
 	
@@ -16130,6 +17245,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TWILZON2 COM    64512   5-23-86   4:14a
 
 ### Directory of PCSIG08: DISK0558
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0558"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0558
 	 Directory of  A:\
@@ -16157,6 +17274,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0559
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0559"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0559
 	 Directory of  A:\
 	
@@ -16164,6 +17283,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0560
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0560"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0560
 	 Directory of  A:\
@@ -16173,6 +17294,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0561
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0561"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0561
 	 Directory of  A:\
 	
@@ -16180,6 +17303,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0562
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0562"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0562
 	 Directory of  A:\
@@ -16200,6 +17325,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WHATSON  ARC    15841  12-27-87   7:25p
 
 ### Directory of PCSIG08: DISK0563
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0563"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0563
 	 Directory of  A:\
@@ -16238,6 +17365,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0564
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0564"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0564
 	 Directory of  A:\
 	
@@ -16267,6 +17396,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0565
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0565"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0565
 	 Directory of  A:\
 	
@@ -16288,6 +17419,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0566
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0566"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0566
 	 Directory of  A:\
 	
@@ -16307,6 +17440,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SURVEY   COM    34094   2-01-86   3:36a
 
 ### Directory of PCSIG08: DISK0567
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0567"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0567
 	 Directory of  A:\
@@ -16328,6 +17463,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	URUKHAI  DGN     8012  10-08-88   5:00a
 
 ### Directory of PCSIG08: DISK0568
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0568"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0568
 	 Directory of  A:\
@@ -16352,6 +17489,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WKS-FRMT TXT    36830  10-29-85   4:05p
 
 ### Directory of PCSIG08: DISK0569
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0569"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0569
 	 Directory of  A:\
@@ -16392,6 +17531,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0570
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0570"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0570
 	 Directory of  A:\
 	
@@ -16429,6 +17570,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0571
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0571"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0571
 	 Directory of  A:\
 	
@@ -16450,6 +17593,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TREND123 MAC     4224  12-11-83   6:32a
 
 ### Directory of PCSIG08: DISK0572
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0572"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0572
 	 Directory of  A:\
@@ -16494,6 +17639,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0573
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0573"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0573
 	 Directory of  A:\
 	
@@ -16511,6 +17658,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZPLEX    AWS    21870   3-14-86   4:51p
 
 ### Directory of PCSIG08: DISK0574
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0574"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0574
 	 Directory of  A:\
@@ -16530,6 +17679,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      1846   3-29-86  10:55p
 
 ### Directory of PCSIG08: DISK0575
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0575"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0575
 	 Directory of  A:\
@@ -16560,6 +17711,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0576
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0576"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0576
 	 Directory of  A:\
 	
@@ -16567,6 +17720,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0577
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0577"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0577
 	 Directory of  A:\
@@ -16595,6 +17750,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TABCONT  TXT     8404  11-10-89   4:00a
 
 ### Directory of PCSIG08: DISK0578
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0578"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0578
 	 Directory of  A:\
@@ -16722,6 +17879,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0579
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0579"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0579
 	 Directory of  A:\
 	
@@ -16751,6 +17910,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TABCONT  TXT    10034  12-01-89   4:00a
 
 ### Directory of PCSIG08: DISK0580
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0580"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0580
 	 Directory of  A:\
@@ -16889,6 +18050,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0581
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0581"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0581
 	 Directory of  A:\
 	
@@ -16912,12 +18075,16 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0582
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0582"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0582
 	 Directory of  A:\
 	
 	WRDFILE        362368   7-19-85   2:56p
 
 ### Directory of PCSIG08: DISK0583
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0583"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0583
 	 Directory of  A:\
@@ -16933,6 +18100,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WEEKRPT  WKS    28416   1-01-85  12:45p
 
 ### Directory of PCSIG08: DISK0584
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0584"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0584
 	 Directory of  A:\
@@ -16960,6 +18129,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0585
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0585"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0585
 	 Directory of  A:\
 	
@@ -16971,6 +18142,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USER     DOC    35525   6-09-86   4:05p
 
 ### Directory of PCSIG08: DISK0586
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0586"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0586
 	 Directory of  A:\
@@ -17006,6 +18179,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0587
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0587"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0587
 	 Directory of  A:\
 	
@@ -17038,6 +18213,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WRDPRF   WRK     5371   8-25-85   8:07a
 
 ### Directory of PCSIG08: DISK0588
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0588"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0588
 	 Directory of  A:\
@@ -17083,6 +18260,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0589
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0589"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0589
 	 Directory of  A:\
 	
@@ -17108,6 +18287,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PTOOLWIN PAS     4352   2-21-85  12:14p
 
 ### Directory of PCSIG08: DISK0590
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0590"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0590
 	 Directory of  A:\
@@ -17135,6 +18316,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0591
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0591"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0591
 	 Directory of  A:\
 	
@@ -17156,6 +18339,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0592
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0592"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0592
 	 Directory of  A:\
 	
@@ -17171,6 +18356,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USQ      EXE    16512   9-26-85   2:34p
 
 ### Directory of PCSIG08: DISK0593
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0593"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0593
 	 Directory of  A:\
@@ -17230,6 +18417,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0594
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0594"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0594
 	 Directory of  A:\
 	
@@ -17253,6 +18442,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VERIFILE          256   1-15-86   1:22a
 
 ### Directory of PCSIG08: DISK0595
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0595"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0595
 	 Directory of  A:\
@@ -17291,6 +18482,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0596
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0596"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0596
 	 Directory of  A:\
 	
@@ -17304,6 +18497,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PROJECT  WRK   115061   2-08-85   8:21p
 
 ### Directory of PCSIG08: DISK0597
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0597"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0597
 	 Directory of  A:\
@@ -17321,6 +18516,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PRODUCTS WRK    51781  12-30-84  10:20a
 
 ### Directory of PCSIG08: DISK0598
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0598"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0598
 	 Directory of  A:\
@@ -17342,6 +18539,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0599
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0599"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0599
 	 Directory of  A:\
 	
@@ -17355,6 +18554,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0600
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0600"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0600
 	 Directory of  A:\
 	
@@ -17365,6 +18566,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PARM     SYS       87   7-17-88   1:25a
 
 ### Directory of PCSIG08: DISK0601
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0601"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0601
 	 Directory of  A:\
@@ -17377,6 +18580,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0602
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0602"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0602
 	 Directory of  A:\
 	
@@ -17385,6 +18590,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0603
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0603"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0603
 	 Directory of  A:\
 	
@@ -17392,6 +18599,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0604
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0604"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0604
 	 Directory of  A:\
@@ -17405,6 +18614,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTES604 TXT     1626   8-27-86   9:44a
 
 ### Directory of PCSIG08: DISK0605
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0605"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0605
 	 Directory of  A:\
@@ -17422,6 +18633,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	URESP    TXT      195  11-30-87   9:01a
 
 ### Directory of PCSIG08: DISK0606
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0606"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0606
 	 Directory of  A:\
@@ -17450,6 +18663,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TRIP     CHR     7241   1-23-89   8:30p
 
 ### Directory of PCSIG08: DISK0607
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0607"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0607
 	 Directory of  A:\
@@ -17496,6 +18711,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0608
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0608"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0608
 	 Directory of  A:\
 	
@@ -17527,6 +18744,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0609
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0609"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0609
 	 Directory of  A:\
 	
@@ -17541,6 +18760,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ARCE     COM     5424   9-10-86  12:46p
 
 ### Directory of PCSIG08: DISK0610
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0610"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0610
 	 Directory of  A:\
@@ -17558,6 +18779,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TRANSDIR COM     3776  12-04-86   3:02p
 
 ### Directory of PCSIG08: DISK0611
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0611"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0611
 	 Directory of  A:\
@@ -17592,6 +18815,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0612
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0612"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0612
 	 Directory of  A:\
 	
@@ -17609,6 +18834,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SPANISH2 ARC    38912   2-22-86  11:43a
 
 ### Directory of PCSIG08: DISK0613
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0613"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0613
 	 Directory of  A:\
@@ -17653,6 +18880,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0614
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0614"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0614
 	 Directory of  A:\
 	
@@ -17663,6 +18892,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NEWYORK  EXE   123490   1-08-88   4:59p
 
 ### Directory of PCSIG08: DISK0615
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0615"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0615
 	 Directory of  A:\
@@ -17680,6 +18911,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       42   5-10-89   9:22a
 
 ### Directory of PCSIG08: DISK0616
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0616"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0616
 	 Directory of  A:\
@@ -17713,6 +18946,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0617
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0617"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0617
 	 Directory of  A:\
 	
@@ -17745,6 +18980,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0618
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0618"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0618
 	 Directory of  A:\
 	
@@ -17755,6 +18992,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MMD      EXE   173568   8-26-89  12:40p
 
 ### Directory of PCSIG08: DISK0619
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0619"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0619
 	 Directory of  A:\
@@ -17769,6 +19008,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0620
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0620"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0620
 	 Directory of  A:\
 	
@@ -17776,6 +19017,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0621
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0621"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0621
 	 Directory of  A:\
@@ -17789,6 +19032,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0622
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0622"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0622
 	 Directory of  A:\
 	
@@ -17800,6 +19045,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SK&J0704 ZIP   115328   7-09-89  12:34a
 
 ### Directory of PCSIG08: DISK0623
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0623"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0623
 	 Directory of  A:\
@@ -17814,6 +19061,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REGRESS  EXE    74352  12-17-88   3:34a
 
 ### Directory of PCSIG08: DISK0624
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0624"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0624
 	 Directory of  A:\
@@ -17840,6 +19089,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0625
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0625"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0625
 	 Directory of  A:\
 	
@@ -17860,6 +19111,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0626
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0626"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0626
 	 Directory of  A:\
 	
@@ -17873,6 +19126,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      1098  12-01-84   1:50a
 
 ### Directory of PCSIG08: DISK0627
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0627"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0627
 	 Directory of  A:\
@@ -17909,6 +19164,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0628
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0628"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0628
 	 Directory of  A:\
 	
@@ -17928,6 +19185,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README            322  10-08-89   2:37p
 
 ### Directory of PCSIG08: DISK0629
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0629"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0629
 	 Directory of  A:\
@@ -17954,6 +19213,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0630
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0630"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0630
 	 Directory of  A:\
 	
@@ -17961,6 +19222,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0631
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0631"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0631
 	 Directory of  A:\
@@ -17982,6 +19245,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UPDATE   BAT      794  12-14-89   3:54a
 
 ### Directory of PCSIG08: DISK0632
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0632"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0632
 	 Directory of  A:\
@@ -18006,6 +19271,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZERO     COM       12   3-27-86   3:11a
 
 ### Directory of PCSIG08: DISK0633
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0633"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0633
 	 Directory of  A:\
@@ -18049,6 +19316,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0634
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0634"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0634
 	 Directory of  A:\
 	
@@ -18056,6 +19325,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0635
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0635"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0635
 	 Directory of  A:\
@@ -18069,6 +19340,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WARNING           996   2-08-89  11:03p
 
 ### Directory of PCSIG08: DISK0636
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0636"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0636
 	 Directory of  A:\
@@ -18085,6 +19358,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WARNING           996   2-08-89  11:03p
 
 ### Directory of PCSIG08: DISK0637
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0637"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0637
 	 Directory of  A:\
@@ -18111,6 +19386,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0638
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0638"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0638
 	 Directory of  A:\
 	
@@ -18134,6 +19411,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0639
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0639"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0639
 	 Directory of  A:\
 	
@@ -18150,6 +19429,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0640
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0640"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0640
 	 Directory of  A:\
 	
@@ -18163,6 +19444,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     3588  10-10-86   1:37a
 
 ### Directory of PCSIG08: DISK0641
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0641"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0641
 	 Directory of  A:\
@@ -18189,6 +19472,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0642
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0642"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0642
 	 Directory of  A:\
 	
@@ -18209,6 +19494,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       44   9-06-89   6:49a
 
 ### Directory of PCSIG08: DISK0643
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0643"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0643
 	 Directory of  A:\
@@ -18236,6 +19523,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TASM_BBS DOC     1500  10-08-89  12:35a
 
 ### Directory of PCSIG08: DISK0644
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0644"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0644
 	 Directory of  A:\
@@ -18278,6 +19567,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0645
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0645"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0645
 	 Directory of  A:\
 	
@@ -18285,6 +19576,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0646
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0646"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0646
 	 Directory of  A:\
@@ -18311,6 +19604,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TRUCK1   PIC    16392   1-31-86   1:08a
 
 ### Directory of PCSIG08: DISK0647
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0647"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0647
 	 Directory of  A:\
@@ -18344,6 +19639,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TRUCK    PIC    16392   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK0648
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0648"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0648
 	 Directory of  A:\
@@ -18405,6 +19702,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0649
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0649"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0649
 	 Directory of  A:\
 	
@@ -18430,6 +19729,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0650
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0650"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0650
 	 Directory of  A:\
 	
@@ -18446,6 +19747,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0651
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0651"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0651
 	 Directory of  A:\
 	
@@ -18457,6 +19760,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TC810    ARC   155800   3-18-87   9:28a
 
 ### Directory of PCSIG08: DISK0652
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0652"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0652
 	 Directory of  A:\
@@ -18493,6 +19798,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0653
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0653"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0653
 	 Directory of  A:\
 	
@@ -18500,6 +19807,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0654
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0654"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0654
 	 Directory of  A:\
@@ -18520,6 +19829,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME       598  12-31-89   6:02p
 
 ### Directory of PCSIG08: DISK0655
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0655"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0655
 	 Directory of  A:\
@@ -18550,6 +19861,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0656
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0656"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0656
 	 Directory of  A:\
 	
@@ -18565,6 +19878,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SELLER   NTX     2048   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK0657
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0657"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0657
 	 Directory of  A:\
@@ -18612,6 +19927,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0658
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0658"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0658
 	 Directory of  A:\
 	
@@ -18627,6 +19944,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WC       EXE    16696   6-18-86   2:35p
 
 ### Directory of PCSIG08: DISK0659
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0659"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0659
 	 Directory of  A:\
@@ -18660,6 +19979,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0660
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0660"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0660
 	 Directory of  A:\
 	
@@ -18670,6 +19991,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK0661
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0661"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0661
 	 Directory of  A:\
@@ -18684,6 +20007,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0662
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0662"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0662
 	 Directory of  A:\
 	
@@ -18696,6 +20021,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      848   9-29-07   5:44a
 
 ### Directory of PCSIG08: DISK0663
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0663"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0663
 	 Directory of  A:\
@@ -18724,6 +20051,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	STRUCT          22290   5-12-87   5:41a
 
 ### Directory of PCSIG08: DISK0664
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0664"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0664
 	 Directory of  A:\
@@ -18756,6 +20085,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0665
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0665"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0665
 	 Directory of  A:\
 	
@@ -18778,6 +20109,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0666
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0666"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0666
 	 Directory of  A:\
 	
@@ -18793,6 +20126,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SPZENPIC ARC    30832   5-18-86   9:09a
 
 ### Directory of PCSIG08: DISK0667
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0667"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0667
 	 Directory of  A:\
@@ -18846,6 +20181,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0668
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0668"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0668
 	 Directory of  A:\
 	
@@ -18857,6 +20194,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORLD    EXE    75620   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK0669
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0669"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0669
 	 Directory of  A:\
@@ -18939,6 +20278,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0670
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0670"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0670
 	 Directory of  A:\
 	
@@ -18955,6 +20296,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TFR      GTZ      123   8-15-89   3:37a
 
 ### Directory of PCSIG08: DISK0671
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0671"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0671
 	 Directory of  A:\
@@ -18996,6 +20339,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0672
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0672"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0672
 	 Directory of  A:\
 	
@@ -19033,6 +20378,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TAXRATES          104   3-28-87   2:48p
 
 ### Directory of PCSIG08: DISK0673
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0673"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0673
 	 Directory of  A:\
@@ -19082,6 +20429,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VAT1     EXE    11008  10-23-86   5:33a
 
 ### Directory of PCSIG08: DISK0674
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0674"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0674
 	 Directory of  A:\
@@ -19134,6 +20483,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0675
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0675"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0675
 	 Directory of  A:\
 	
@@ -19157,6 +20508,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORDSTAR DOC    38144   1-02-87   5:00a
 
 ### Directory of PCSIG08: DISK0676
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0676"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0676
 	 Directory of  A:\
@@ -19265,6 +20618,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0677
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0677"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0677
 	 Directory of  A:\
 	
@@ -19366,6 +20721,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0678
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0678"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0678
 	 Directory of  A:\
 	
@@ -19389,6 +20746,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0679
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0679"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0679
 	 Directory of  A:\
 	
@@ -19405,6 +20764,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       38   3-08-89   4:58a
 
 ### Directory of PCSIG08: DISK0680
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0680"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0680
 	 Directory of  A:\
@@ -19430,6 +20791,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0681
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0681"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0681
 	 Directory of  A:\
 	
@@ -19439,6 +20802,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0682
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0682"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0682
 	 Directory of  A:\
 	
@@ -19447,6 +20812,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PCTDOC1  EXE   158417   4-21-89   2:34a
 
 ### Directory of PCSIG08: DISK0683
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0683"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0683
 	 Directory of  A:\
@@ -19459,6 +20826,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SAMERICA EXE    92324  10-31-86   5:00p
 
 ### Directory of PCSIG08: DISK0684
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0684"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0684
 	 Directory of  A:\
@@ -19482,6 +20851,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0685
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0685"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0685
 	 Directory of  A:\
 	
@@ -19495,6 +20866,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNPACK   BAT      861   1-12-87  12:17p
 
 ### Directory of PCSIG08: DISK0686
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0686"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0686
 	 Directory of  A:\
@@ -19596,6 +20969,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0687
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0687"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0687
 	 Directory of  A:\
 	
@@ -19606,6 +20981,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SALE-B27 ARC   162936   1-03-89   2:55p
 
 ### Directory of PCSIG08: DISK0688
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0688"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0688
 	 Directory of  A:\
@@ -19622,6 +20999,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0689
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0689"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0689
 	 Directory of  A:\
 	
@@ -19629,6 +21008,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0690
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0690"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0690
 	 Directory of  A:\
@@ -19648,6 +21029,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           3712   6-01-88  12:00p
 
 ### Directory of PCSIG08: DISK0691
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0691"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0691
 	 Directory of  A:\
@@ -19675,6 +21058,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0692
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0692"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0692
 	 Directory of  A:\
 	
@@ -19696,6 +21081,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SUBMOD   CHN    39545   2-25-87   2:17p
 
 ### Directory of PCSIG08: DISK0693
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0693"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0693
 	 Directory of  A:\
@@ -19721,6 +21108,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	STARCOM  NDX     2000  12-19-86   2:30p
 
 ### Directory of PCSIG08: DISK0694
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0694"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0694
 	 Directory of  A:\
@@ -19759,6 +21148,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0695
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0695"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0695
 	 Directory of  A:\
 	
@@ -19786,6 +21177,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0696
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0696"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0696
 	 Directory of  A:\
 	
@@ -19810,6 +21203,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0697
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0697"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0697
 	 Directory of  A:\
 	
@@ -19822,6 +21217,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UPDATE   BAT     4793   5-12-88   1:42p
 
 ### Directory of PCSIG08: DISK0698
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0698"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0698
 	 Directory of  A:\
@@ -19862,6 +21259,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0699
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0699"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0699
 	 Directory of  A:\
 	
@@ -19869,6 +21268,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0700
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0700"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0700
 	 Directory of  A:\
@@ -19896,6 +21297,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0701
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0701"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0701
 	 Directory of  A:\
 	
@@ -19907,6 +21310,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	INSTALL  BAT     2405  12-31-87   1:35p
 
 ### Directory of PCSIG08: DISK0702
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0702"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0702
 	 Directory of  A:\
@@ -19988,6 +21393,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0703
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0703"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0703
 	 Directory of  A:\
 	
@@ -19998,6 +21405,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       BAT       35   8-31-88   2:32a
 
 ### Directory of PCSIG08: DISK0704
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0704"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0704
 	 Directory of  A:\
@@ -20010,6 +21419,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       BAT       35   8-31-88   2:32a
 
 ### Directory of PCSIG08: DISK0705
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0705"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0705
 	 Directory of  A:\
@@ -20035,6 +21446,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0706
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0706"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0706
 	 Directory of  A:\
 	
@@ -20055,6 +21468,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0707
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0707"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0707
 	 Directory of  A:\
 	
@@ -20070,6 +21485,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     5072   2-03-89   6:11a
 
 ### Directory of PCSIG08: DISK0708
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0708"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0708
 	 Directory of  A:\
@@ -20105,6 +21522,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0709
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0709"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0709
 	 Directory of  A:\
 	
@@ -20122,6 +21541,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PC-CRYP2 EXE    40178   4-30-87   3:15p
 
 ### Directory of PCSIG08: DISK0710
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0710"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0710
 	 Directory of  A:\
@@ -20148,6 +21569,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0711
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0711"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0711
 	 Directory of  A:\
 	
@@ -20164,6 +21587,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   EXE    15933  10-12-89   2:25a
 
 ### Directory of PCSIG08: DISK0712
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0712"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0712
 	 Directory of  A:\
@@ -20199,6 +21624,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0713
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0713"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0713
 	 Directory of  A:\
 	
@@ -20211,6 +21638,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MANUAL   BAT      152   5-06-88   6:08a
 
 ### Directory of PCSIG08: DISK0714
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0714"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0714
 	 Directory of  A:\
@@ -20225,6 +21654,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0715
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0715"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0715
 	 Directory of  A:\
 	
@@ -20235,6 +21666,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      1071   4-30-87   8:09a
 
 ### Directory of PCSIG08: DISK0716
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0716"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0716
 	 Directory of  A:\
@@ -20247,6 +21680,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README            594   4-22-88   1:02p
 
 ### Directory of PCSIG08: DISK0717
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0717"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0717
 	 Directory of  A:\
@@ -20263,6 +21698,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SUPPORT          2289  10-22-86   6:56p
 
 ### Directory of PCSIG08: DISK0718
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0718"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0718
 	 Directory of  A:\
@@ -20320,6 +21757,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0719
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0719"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0719
 	 Directory of  A:\
 	
@@ -20335,6 +21774,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SUPPORT          1843   2-20-87   4:34p
 
 ### Directory of PCSIG08: DISK0720
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0720"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0720
 	 Directory of  A:\
@@ -20363,6 +21804,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0721
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0721"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0721
 	 Directory of  A:\
 	
@@ -20382,6 +21825,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WELCOME  PIC     4007   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK0722
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0722"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0722
 	 Directory of  A:\
@@ -20406,6 +21851,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0723
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0723"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0723
 	 Directory of  A:\
 	
@@ -20419,6 +21866,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZIPPER   COM    64512   1-01-10  10:12a
 
 ### Directory of PCSIG08: DISK0724
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0724"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0724
 	 Directory of  A:\
@@ -20448,6 +21897,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0725
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0725"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0725
 	 Directory of  A:\
 	
@@ -20460,6 +21911,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0726
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0726"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0726
 	 Directory of  A:\
 	
@@ -20467,6 +21920,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0727
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0727"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0727
 	 Directory of  A:\
@@ -20476,6 +21931,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0728
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0728"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0728
 	 Directory of  A:\
 	
@@ -20483,6 +21940,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0729
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0729"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0729
 	 Directory of  A:\
@@ -20492,6 +21951,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0730
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0730"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0730
 	 Directory of  A:\
 	
@@ -20499,6 +21960,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0731
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0731"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0731
 	 Directory of  A:\
@@ -20539,6 +22002,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0732
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0732"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0732
 	 Directory of  A:\
 	
@@ -20555,6 +22020,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WAIT     EXE    41384   9-17-86   2:26p
 
 ### Directory of PCSIG08: DISK0733
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0733"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0733
 	 Directory of  A:\
@@ -20573,6 +22040,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0734
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0734"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0734
 	 Directory of  A:\
 	
@@ -20580,6 +22049,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0735
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0735"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0735
 	 Directory of  A:\
@@ -20609,6 +22080,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0736
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0736"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0736
 	 Directory of  A:\
 	
@@ -20630,6 +22103,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0737
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0737"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0737
 	 Directory of  A:\
 	
@@ -20648,6 +22123,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XANADU   DOC    15827   3-21-87   7:32a
 
 ### Directory of PCSIG08: DISK0738
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0738"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0738
 	 Directory of  A:\
@@ -20694,6 +22171,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0739
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0739"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0739
 	 Directory of  A:\
 	
@@ -20733,6 +22212,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0740
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0740"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0740
 	 Directory of  A:\
 	
@@ -20760,6 +22241,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0741
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0741"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0741
 	 Directory of  A:\
 	
@@ -20774,6 +22257,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           1144   6-10-87  10:51a
 
 ### Directory of PCSIG08: DISK0742
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0742"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0742
 	 Directory of  A:\
@@ -20792,6 +22277,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0743
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0743"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0743
 	 Directory of  A:\
 	
@@ -20805,6 +22292,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      2346   3-17-87   1:26a
 
 ### Directory of PCSIG08: DISK0744
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0744"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0744
 	 Directory of  A:\
@@ -20875,6 +22364,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0745
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0745"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0745
 	 Directory of  A:\
 	
@@ -20890,6 +22381,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0746
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0746"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0746
 	 Directory of  A:\
 	
@@ -20903,6 +22396,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WCPGMS   EXE   153760  10-31-89   5:05p
 
 ### Directory of PCSIG08: DISK0747
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0747"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0747
 	 Directory of  A:\
@@ -20918,6 +22413,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PCSIG    TXT     1070   2-12-90   7:02p
 
 ### Directory of PCSIG08: DISK0748
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0748"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0748
 	 Directory of  A:\
@@ -20937,6 +22434,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SYSTEM   DSI        5   3-19-87   1:01p
 
 ### Directory of PCSIG08: DISK0749
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0749"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0749
 	 Directory of  A:\
@@ -20958,6 +22457,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0750
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0750"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0750
 	 Directory of  A:\
 	
@@ -20969,6 +22470,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README            622   5-13-89   1:46a
 
 ### Directory of PCSIG08: DISK0751
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0751"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0751
 	 Directory of  A:\
@@ -21000,6 +22503,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0752
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0752"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0752
 	 Directory of  A:\
 	
@@ -21012,6 +22517,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0753
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0753"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0753
 	 Directory of  A:\
 	
@@ -21023,6 +22530,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SQUEEZE  EXE    69802   5-15-87   4:14a
 
 ### Directory of PCSIG08: DISK0754
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0754"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0754
 	 Directory of  A:\
@@ -21076,6 +22585,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0755
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0755"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0755
 	 Directory of  A:\
 	
@@ -21111,6 +22622,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0756
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0756"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0756
 	 Directory of  A:\
 	
@@ -21121,6 +22634,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MEMOIRS5 EXE   143008   3-26-89  11:57a
 
 ### Directory of PCSIG08: DISK0757
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0757"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0757
 	 Directory of  A:\
@@ -21146,6 +22661,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0758
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0758"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0758
 	 Directory of  A:\
 	
@@ -21168,6 +22685,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0759
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0759"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0759
 	 Directory of  A:\
 	
@@ -21183,6 +22702,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           1162   1-11-90   9:18p
 
 ### Directory of PCSIG08: DISK0760
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0760"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0760
 	 Directory of  A:\
@@ -21208,6 +22729,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0761
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0761"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0761
 	 Directory of  A:\
 	
@@ -21224,6 +22747,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   TXT     1068   4-20-87   5:35a
 
 ### Directory of PCSIG08: DISK0762
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0762"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0762
 	 Directory of  A:\
@@ -21247,6 +22772,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TEMPLE   I3D     5310   9-28-89   4:45a
 
 ### Directory of PCSIG08: DISK0763
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0763"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0763
 	 Directory of  A:\
@@ -21283,6 +22810,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0764
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0764"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0764
 	 Directory of  A:\
 	
@@ -21295,6 +22824,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME       314   5-18-87  11:03a
 
 ### Directory of PCSIG08: DISK0765
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0765"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0765
 	 Directory of  A:\
@@ -21310,6 +22841,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0766
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0766"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0766
 	 Directory of  A:\
 	
@@ -21324,6 +22857,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0767
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0767"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0767
 	 Directory of  A:\
 	
@@ -21336,6 +22871,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	HARD     BAT      853   6-08-87   4:48a
 
 ### Directory of PCSIG08: DISK0768
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0768"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0768
 	 Directory of  A:\
@@ -21350,6 +22887,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0769
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0769"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0769
 	 Directory of  A:\
 	
@@ -21362,6 +22901,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	HARD     BAT      899   6-08-87   4:49a
 
 ### Directory of PCSIG08: DISK0770
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0770"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0770
 	 Directory of  A:\
@@ -21376,6 +22917,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0771
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0771"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0771
 	 Directory of  A:\
 	
@@ -21388,6 +22931,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	HARD     BAT      937   6-08-87   4:51a
 
 ### Directory of PCSIG08: DISK0772
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0772"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0772
 	 Directory of  A:\
@@ -21402,6 +22947,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0773
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0773"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0773
 	 Directory of  A:\
 	
@@ -21409,6 +22956,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0774
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0774"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0774
 	 Directory of  A:\
@@ -21441,6 +22990,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0775
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0775"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0775
 	 Directory of  A:\
 	
@@ -21465,6 +23016,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TEST     ASM       68   3-27-89  11:52a
 
 ### Directory of PCSIG08: DISK0776
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0776"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0776
 	 Directory of  A:\
@@ -21491,6 +23044,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0777
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0777"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0777
 	 Directory of  A:\
 	
@@ -21514,6 +23069,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SYN      ASM      240  11-02-86  10:03a
 
 ### Directory of PCSIG08: DISK0778
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0778"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0778
 	 Directory of  A:\
@@ -21540,6 +23097,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SYN      ASM      240  11-02-86  10:03a
 
 ### Directory of PCSIG08: DISK0779
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0779"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0779
 	 Directory of  A:\
@@ -21571,6 +23130,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0780
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0780"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0780
 	 Directory of  A:\
 	
@@ -21598,6 +23159,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0781
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0781"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0781
 	 Directory of  A:\
 	
@@ -21609,6 +23172,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           1224   5-01-88   1:00p
 
 ### Directory of PCSIG08: DISK0782
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0782"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0782
 	 Directory of  A:\
@@ -21623,6 +23188,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0783
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0783"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0783
 	 Directory of  A:\
 	
@@ -21634,6 +23201,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TC810    LZH   120872   6-26-89   3:32a
 
 ### Directory of PCSIG08: DISK0784
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0784"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0784
 	 Directory of  A:\
@@ -21653,6 +23222,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0785
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0785"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0785
 	 Directory of  A:\
 	
@@ -21671,6 +23242,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0786
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0786"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0786
 	 Directory of  A:\
 	
@@ -21687,6 +23260,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0787
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0787"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0787
 	 Directory of  A:\
 	
@@ -21695,6 +23270,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0788
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0788"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0788
 	 Directory of  A:\
 	
@@ -21702,6 +23279,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0789
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0789"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0789
 	 Directory of  A:\
@@ -21721,6 +23300,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0790
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0790"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0790
 	 Directory of  A:\
 	
@@ -21735,6 +23316,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0791
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0791"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0791
 	 Directory of  A:\
 	
@@ -21747,6 +23330,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ULTIMA21 EXE   134484   7-24-88   4:50a
 
 ### Directory of PCSIG08: DISK0792
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0792"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0792
 	 Directory of  A:\
@@ -21771,6 +23356,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0793
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0793"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0793
 	 Directory of  A:\
 	
@@ -21786,6 +23373,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WELCOME           822   6-13-87   2:16a
 
 ### Directory of PCSIG08: DISK0794
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0794"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0794
 	 Directory of  A:\
@@ -21813,6 +23402,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0795
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0795"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0795
 	 Directory of  A:\
 	
@@ -21834,6 +23425,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PC3270   BGI     6029   8-29-88   5:00a
 
 ### Directory of PCSIG08: DISK0796
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0796"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0796
 	 Directory of  A:\
@@ -21859,6 +23452,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0797
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0797"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0797
 	 Directory of  A:\
 	
@@ -21875,6 +23470,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TRAIN1   COM    17430   5-11-87   7:22a
 
 ### Directory of PCSIG08: DISK0798
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0798"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0798
 	 Directory of  A:\
@@ -21903,6 +23500,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0799
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0799"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0799
 	 Directory of  A:\
 	
@@ -21927,6 +23526,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TODO     SF      1585   3-22-87   1:08p
 
 ### Directory of PCSIG08: DISK0800
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0800"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0800
 	 Directory of  A:\
@@ -21956,6 +23557,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0801
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0801"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0801
 	 Directory of  A:\
 	
@@ -21963,6 +23566,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0802
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0802"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0802
 	 Directory of  A:\
@@ -21986,6 +23591,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0803
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0803"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0803
 	 Directory of  A:\
 	
@@ -21993,6 +23600,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0804
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0804"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0804
 	 Directory of  A:\
@@ -22005,6 +23614,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SPF      EXE    12859   6-28-89   3:52a
 
 ### Directory of PCSIG08: DISK0805
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0805"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0805
 	 Directory of  A:\
@@ -22022,6 +23633,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	URESP    TXT      195  11-30-87   9:01a
 
 ### Directory of PCSIG08: DISK0806
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0806"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0806
 	 Directory of  A:\
@@ -22082,6 +23695,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0807
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0807"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0807
 	 Directory of  A:\
 	
@@ -22105,6 +23720,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TGL      DOC    70656   7-07-87   4:43a
 
 ### Directory of PCSIG08: DISK0808
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0808"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0808
 	 Directory of  A:\
@@ -22163,6 +23780,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0809
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0809"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0809
 	 Directory of  A:\
 	
@@ -22189,6 +23808,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0810
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0810"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0810
 	 Directory of  A:\
 	
@@ -22205,6 +23826,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0811
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0811"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0811
 	 Directory of  A:\
 	
@@ -22215,6 +23838,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	IT       EXE   183168   5-12-87   4:18a
 
 ### Directory of PCSIG08: DISK0812
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0812"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0812
 	 Directory of  A:\
@@ -22228,6 +23853,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0813
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0813"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0813
 	 Directory of  A:\
 	
@@ -22240,6 +23867,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UPDATE   308     8435   8-22-89   4:47p
 
 ### Directory of PCSIG08: DISK0814
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0814"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0814
 	 Directory of  A:\
@@ -22270,6 +23899,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TABCONT  TXT     8950   1-18-89   4:00a
 
 ### Directory of PCSIG08: DISK0815
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0815"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0815
 	 Directory of  A:\
@@ -22392,6 +24023,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0816
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0816"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0816
 	 Directory of  A:\
 	
@@ -22419,6 +24052,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TABCONT  TXT     7723   2-01-88   4:00a
 
 ### Directory of PCSIG08: DISK0817
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0817"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0817
 	 Directory of  A:\
@@ -22522,6 +24157,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0818
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0818"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0818
 	 Directory of  A:\
 	
@@ -22534,6 +24171,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XCUTE    EXE    46051   5-21-87   4:54a
 
 ### Directory of PCSIG08: DISK0819
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0819"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0819
 	 Directory of  A:\
@@ -22569,6 +24208,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0820
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0820"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0820
 	 Directory of  A:\
 	
@@ -22583,6 +24224,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SEEKREAD ME     18176  11-25-87  11:39a
 
 ### Directory of PCSIG08: DISK0821
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0821"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0821
 	 Directory of  A:\
@@ -22608,6 +24251,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0822
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0822"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0822
 	 Directory of  A:\
 	
@@ -22615,6 +24260,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0823
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0823"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0823
 	 Directory of  A:\
@@ -22634,6 +24281,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0824
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0824"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0824
 	 Directory of  A:\
 	
@@ -22641,6 +24290,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0825
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0825"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0825
 	 Directory of  A:\
@@ -22657,6 +24308,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0826
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0826"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0826
 	 Directory of  A:\
 	
@@ -22664,6 +24317,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0827
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0827"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0827
 	 Directory of  A:\
@@ -22680,6 +24335,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	T-REFSCN EXE   107120   8-23-89   6:49p
 
 ### Directory of PCSIG08: DISK0828
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0828"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0828
 	 Directory of  A:\
@@ -22770,6 +24427,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0829
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0829"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0829
 	 Directory of  A:\
 	
@@ -22792,6 +24451,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0830
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0830"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0830
 	 Directory of  A:\
 	
@@ -22805,6 +24466,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0831
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0831"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0831
 	 Directory of  A:\
 	
@@ -22812,6 +24475,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0832
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0832"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0832
 	 Directory of  A:\
@@ -22840,6 +24505,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SPECIAL2        20485   1-01-80   8:11a
 
 ### Directory of PCSIG08: DISK0833
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0833"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0833
 	 Directory of  A:\
@@ -22874,6 +24541,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WAGES    GTD      125   2-23-86   5:23p
 
 ### Directory of PCSIG08: DISK0834
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0834"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0834
 	 Directory of  A:\
@@ -22913,6 +24582,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0835
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0835"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0835
 	 Directory of  A:\
 	
@@ -22929,6 +24600,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0836
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0836"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0836
 	 Directory of  A:\
 	
@@ -22936,6 +24609,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0837
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0837"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0837
 	 Directory of  A:\
@@ -22954,6 +24629,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0838
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0838"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0838
 	 Directory of  A:\
 	
@@ -22961,6 +24638,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0839
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0839"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0839
 	 Directory of  A:\
@@ -22977,6 +24656,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XMASCARD EXE    62062  11-08-85   3:01a
 
 ### Directory of PCSIG08: DISK0840
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0840"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0840
 	 Directory of  A:\
@@ -23005,6 +24686,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0841
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0841"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0841
 	 Directory of  A:\
 	
@@ -23030,6 +24713,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PRINTDOC BAT      527   5-30-89  12:36p
 
 ### Directory of PCSIG08: DISK0842
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0842"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0842
 	 Directory of  A:\
@@ -23061,6 +24746,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0843
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0843"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0843
 	 Directory of  A:\
 	
@@ -23081,6 +24768,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     1067   9-14-88   5:25p
 
 ### Directory of PCSIG08: DISK0844
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0844"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0844
 	 Directory of  A:\
@@ -23114,6 +24803,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0845
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0845"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0845
 	 Directory of  A:\
 	
@@ -23130,6 +24821,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      4123   9-01-87   2:57a
 
 ### Directory of PCSIG08: DISK0846
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0846"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0846
 	 Directory of  A:\
@@ -23150,6 +24843,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0847
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0847"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0847
 	 Directory of  A:\
 	
@@ -23162,6 +24857,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	LOTUS    DBD   326978   2-06-90   7:10a
 
 ### Directory of PCSIG08: DISK0848
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0848"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0848
 	 Directory of  A:\
@@ -23176,6 +24873,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	JUDYK    COM    59745   2-01-87   2:15a
 
 ### Directory of PCSIG08: DISK0849
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0849"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0849
 	 Directory of  A:\
@@ -23194,6 +24893,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0850
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0850"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0850
 	 Directory of  A:\
 	
@@ -23206,6 +24907,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	INSURE   EXE   124170   5-30-89   9:57a
 
 ### Directory of PCSIG08: DISK0851
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0851"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0851
 	 Directory of  A:\
@@ -23222,6 +24925,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0852
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0852"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0852
 	 Directory of  A:\
 	
@@ -23235,6 +24940,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SOLARSYS EXE    58062   7-22-89   3:56p
 
 ### Directory of PCSIG08: DISK0853
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0853"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0853
 	 Directory of  A:\
@@ -23264,6 +24971,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0854
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0854"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0854
 	 Directory of  A:\
 	
@@ -23284,6 +24993,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0855
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0855"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0855
 	 Directory of  A:\
 	
@@ -23294,6 +25005,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC      204   8-28-89   6:23a
 
 ### Directory of PCSIG08: DISK0856
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0856"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0856
 	 Directory of  A:\
@@ -23358,6 +25071,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0857
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0857"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0857
 	 Directory of  A:\
 	
@@ -23370,6 +25085,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PKXARC   COM    11482  12-14-86   4:00p
 
 ### Directory of PCSIG08: DISK0858
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0858"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0858
 	 Directory of  A:\
@@ -23429,6 +25146,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TRIG002  LST      403   8-31-87   5:00p
 
 ### Directory of PCSIG08: DISK0859
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0859"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0859
 	 Directory of  A:\
@@ -23498,6 +25217,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0860
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0860"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0860
 	 Directory of  A:\
 	
@@ -23531,6 +25252,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TYPERITE EXE     8192   3-30-85   5:54a
 
 ### Directory of PCSIG08: DISK0861
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0861"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0861
 	 Directory of  A:\
@@ -23571,6 +25294,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0862
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0862"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0862
 	 Directory of  A:\
 	
@@ -23607,6 +25332,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0863
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0863"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0863
 	 Directory of  A:\
 	
@@ -23622,6 +25349,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0864
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0864"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0864
 	 Directory of  A:\
 	
@@ -23635,6 +25364,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0865
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0865"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0865
 	 Directory of  A:\
 	
@@ -23645,6 +25376,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	HARD     BAT      804   2-09-90   1:41a
 
 ### Directory of PCSIG08: DISK0866
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0866"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0866
 	 Directory of  A:\
@@ -23665,6 +25398,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0867
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0867"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0867
 	 Directory of  A:\
 	
@@ -23680,6 +25415,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TEXT     TXT    61387  11-29-89   5:43a
 
 ### Directory of PCSIG08: DISK0868
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0868"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0868
 	 Directory of  A:\
@@ -23716,6 +25453,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0869
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0869"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0869
 	 Directory of  A:\
 	
@@ -23734,6 +25473,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PCM      PAK    42678   1-13-90   8:58a
 
 ### Directory of PCSIG08: DISK0870
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0870"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0870
 	 Directory of  A:\
@@ -23754,6 +25495,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0871
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0871"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0871
 	 Directory of  A:\
 	
@@ -23773,6 +25516,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   1ST      217   1-03-86   6:22a
 
 ### Directory of PCSIG08: DISK0872
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0872"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0872
 	 Directory of  A:\
@@ -23803,6 +25548,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0873
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0873"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0873
 	 Directory of  A:\
 	
@@ -23817,6 +25564,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      2007   1-30-90  12:13a
 
 ### Directory of PCSIG08: DISK0874
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0874"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0874
 	 Directory of  A:\
@@ -23841,6 +25590,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZZAPDEMO EXE    60385   8-15-87   2:11p
 
 ### Directory of PCSIG08: DISK0875
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0875"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0875
 	 Directory of  A:\
@@ -23900,6 +25651,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0876
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0876"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0876
 	 Directory of  A:\
 	
@@ -23921,6 +25674,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TK{0}    {!}      975   1-01-80  12:08a
 
 ### Directory of PCSIG08: DISK0877
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0877"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0877
 	 Directory of  A:\
@@ -23947,6 +25702,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNWS     EXE     2816   8-17-82   3:32a
 
 ### Directory of PCSIG08: DISK0878
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0878"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0878
 	 Directory of  A:\
@@ -23979,6 +25736,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0879
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0879"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0879
 	 Directory of  A:\
 	
@@ -23996,6 +25755,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     1792   7-22-87   6:41p
 
 ### Directory of PCSIG08: DISK0880
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0880"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0880
 	 Directory of  A:\
@@ -24024,6 +25785,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0881
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0881"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0881
 	 Directory of  A:\
 	
@@ -24046,6 +25809,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0882
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0882"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0882
 	 Directory of  A:\
 	
@@ -24060,6 +25825,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RELEASE          2219   9-07-88   4:14p
 
 ### Directory of PCSIG08: DISK0883
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0883"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0883
 	 Directory of  A:\
@@ -24099,6 +25866,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0884
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0884"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0884
 	 Directory of  A:\
 	
@@ -24112,6 +25881,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      542   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK0885
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0885"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0885
 	 Directory of  A:\
@@ -24136,6 +25907,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UCTURBO2 ARC    94208   7-13-87  10:37p
 
 ### Directory of PCSIG08: DISK0886
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0886"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0886
 	 Directory of  A:\
@@ -24207,6 +25980,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0887
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0887"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0887
 	 Directory of  A:\
 	
@@ -24214,6 +25989,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0888
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0888"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0888
 	 Directory of  A:\
@@ -24234,6 +26011,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REGISTER FRM     2432   9-09-87   3:11p
 
 ### Directory of PCSIG08: DISK0889
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0889"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0889
 	 Directory of  A:\
@@ -24257,6 +26036,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0890
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0890"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0890
 	 Directory of  A:\
 	
@@ -24275,6 +26056,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0891
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0891"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0891
 	 Directory of  A:\
 	
@@ -24292,6 +26075,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WHEEL    EXE   139820   8-11-89  12:06a
 
 ### Directory of PCSIG08: DISK0892
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0892"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0892
 	 Directory of  A:\
@@ -24315,6 +26100,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           4950   7-01-89   4:05p
 
 ### Directory of PCSIG08: DISK0893
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0893"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0893
 	 Directory of  A:\
@@ -24348,6 +26135,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0894
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0894"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0894
 	 Directory of  A:\
 	
@@ -24355,6 +26144,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0895
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0895"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0895
 	 Directory of  A:\
@@ -24387,6 +26178,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0896
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0896"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0896
 	 Directory of  A:\
 	
@@ -24399,6 +26192,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PN       DOC     6866   8-30-87   8:35a
 
 ### Directory of PCSIG08: DISK0897
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0897"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0897
 	 Directory of  A:\
@@ -24418,6 +26213,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0898
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0898"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0898
 	 Directory of  A:\
 	
@@ -24434,6 +26231,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TED23    ARC   121701   2-16-89   1:24a
 
 ### Directory of PCSIG08: DISK0899
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0899"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0899
 	 Directory of  A:\
@@ -24454,6 +26253,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0900
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0900"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0900
 	 Directory of  A:\
 	
@@ -24470,6 +26271,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0901
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0901"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0901
 	 Directory of  A:\
 	
@@ -24484,6 +26287,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      1046   5-28-87  12:12a
 
 ### Directory of PCSIG08: DISK0902
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0902"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0902
 	 Directory of  A:\
@@ -24514,6 +26319,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0903
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0903"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0903
 	 Directory of  A:\
 	
@@ -24530,6 +26337,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   BAT       23  12-20-89   1:15p
 
 ### Directory of PCSIG08: DISK0904
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0904"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0904
 	 Directory of  A:\
@@ -24551,6 +26360,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TUTOR    PCS    15254   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK0905
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0905"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0905
 	 Directory of  A:\
@@ -24587,6 +26398,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0906
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0906"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0906
 	 Directory of  A:\
 	
@@ -24621,6 +26434,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TYPEHEAD ARC      768   8-05-87   3:43p
 
 ### Directory of PCSIG08: DISK0907
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0907"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0907
 	 Directory of  A:\
@@ -24700,6 +26515,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0908
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0908"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0908
 	 Directory of  A:\
 	
@@ -24718,6 +26535,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0909
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0909"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0909
 	 Directory of  A:\
 	
@@ -24730,6 +26549,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0910
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0910"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0910
 	 Directory of  A:\
 	
@@ -24739,6 +26560,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      463   8-05-89   9:09p
 
 ### Directory of PCSIG08: DISK0911
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0911"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0911
 	 Directory of  A:\
@@ -24761,6 +26584,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     4216  10-25-87   4:25a
 
 ### Directory of PCSIG08: DISK0912
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0912"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0912
 	 Directory of  A:\
@@ -24787,6 +26612,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REGISTER FRM     3797  11-11-89   2:11p
 
 ### Directory of PCSIG08: DISK0913
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0913"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0913
 	 Directory of  A:\
@@ -24821,6 +26648,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0914
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0914"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0914
 	 Directory of  A:\
 	
@@ -24846,6 +26675,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0915
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0915"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0915
 	 Directory of  A:\
 	
@@ -24861,6 +26692,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MANUAL   BAT      147   3-02-89   2:00a
 
 ### Directory of PCSIG08: DISK0916
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0916"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0916
 	 Directory of  A:\
@@ -24881,6 +26714,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0917
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0917"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0917
 	 Directory of  A:\
 	
@@ -24892,6 +26727,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TODO17   EXE    93070   8-09-88   7:55a
 
 ### Directory of PCSIG08: DISK0918
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0918"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0918
 	 Directory of  A:\
@@ -24906,6 +26743,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	THORO    ARC    96653  10-20-87   7:18p
 
 ### Directory of PCSIG08: DISK0919
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0919"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0919
 	 Directory of  A:\
@@ -24941,6 +26780,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PC_EQUIP EXE     7880   4-12-86   7:44a
 
 ### Directory of PCSIG08: DISK0920
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0920"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0920
 	 Directory of  A:\
@@ -24997,6 +26838,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0921
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0921"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0921
 	 Directory of  A:\
 	
@@ -25027,6 +26870,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0922
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0922"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0922
 	 Directory of  A:\
 	
@@ -25047,6 +26892,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0923
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0923"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0923
 	 Directory of  A:\
 	
@@ -25064,6 +26911,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0924
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0924"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0924
 	 Directory of  A:\
 	
@@ -25071,6 +26920,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0925
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0925"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0925
 	 Directory of  A:\
@@ -25089,6 +26940,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0926
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0926"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0926
 	 Directory of  A:\
 	
@@ -25105,6 +26958,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0927
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0927"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0927
 	 Directory of  A:\
 	
@@ -25117,6 +26972,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0928
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0928"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0928
 	 Directory of  A:\
 	
@@ -25124,6 +26981,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SNOUTIL1 ARC   350100   6-04-88   4:31a
 
 ### Directory of PCSIG08: DISK0929
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0929"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0929
 	 Directory of  A:\
@@ -25162,6 +27021,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0930
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0930"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0930
 	 Directory of  A:\
 	
@@ -25177,6 +27038,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNDO     EXE    12688  12-27-88   6:41a
 
 ### Directory of PCSIG08: DISK0931
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0931"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0931
 	 Directory of  A:\
@@ -25205,6 +27068,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0932
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0932"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0932
 	 Directory of  A:\
 	
@@ -25228,6 +27093,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           8974   2-17-89  10:36a
 
 ### Directory of PCSIG08: DISK0933
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0933"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0933
 	 Directory of  A:\
@@ -25258,6 +27125,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0934
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0934"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0934
 	 Directory of  A:\
 	
@@ -25267,6 +27136,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TKLX     EXE   332980   9-14-89  12:06p
 
 ### Directory of PCSIG08: DISK0935
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0935"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0935
 	 Directory of  A:\
@@ -25291,6 +27162,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0936
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0936"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0936
 	 Directory of  A:\
 	
@@ -25308,6 +27181,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MZ       COM       16  11-17-86   6:25a
 
 ### Directory of PCSIG08: DISK0937
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0937"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0937
 	 Directory of  A:\
@@ -25331,6 +27206,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0938
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0938"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0938
 	 Directory of  A:\
 	
@@ -25349,6 +27226,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0939
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0939"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0939
 	 Directory of  A:\
 	
@@ -25366,6 +27245,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WESTUS   DAT   177776   1-22-89   1:41a
 
 ### Directory of PCSIG08: DISK0940
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0940"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0940
 	 Directory of  A:\
@@ -25388,6 +27269,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0941
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0941"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0941
 	 Directory of  A:\
 	
@@ -25399,6 +27282,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PCDOC220 EXE    67874  11-08-89  11:09a
 
 ### Directory of PCSIG08: DISK0942
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0942"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0942
 	 Directory of  A:\
@@ -25415,6 +27300,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MANUAL   BAT      147   1-19-89   1:21a
 
 ### Directory of PCSIG08: DISK0943
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0943"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0943
 	 Directory of  A:\
@@ -25434,6 +27321,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEWME            963   1-31-90  10:22a
 
 ### Directory of PCSIG08: DISK0944
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0944"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0944
 	 Directory of  A:\
@@ -25459,6 +27348,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0945
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0945"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0945
 	 Directory of  A:\
 	
@@ -25479,6 +27370,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WATOR    EXE    47222   3-29-87   7:17a
 
 ### Directory of PCSIG08: DISK0946
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0946"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0946
 	 Directory of  A:\
@@ -25523,6 +27416,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WSTARS            220   4-06-87  11:39a
 
 ### Directory of PCSIG08: DISK0947
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0947"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0947
 	 Directory of  A:\
@@ -25637,6 +27532,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0948
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0948"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0948
 	 Directory of  A:\
 	
@@ -25650,6 +27547,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      617  12-11-87   2:38a
 
 ### Directory of PCSIG08: DISK0949
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0949"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0949
 	 Directory of  A:\
@@ -25665,6 +27564,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	STATCONC COM    25678   8-05-87   8:57a
 
 ### Directory of PCSIG08: DISK0950
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0950"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0950
 	 Directory of  A:\
@@ -25689,6 +27590,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0951
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0951"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0951
 	 Directory of  A:\
 	
@@ -25705,6 +27608,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SETUP    EXE    44892   9-01-88   1:09p
 
 ### Directory of PCSIG08: DISK0952
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0952"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0952
 	 Directory of  A:\
@@ -25728,6 +27633,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0953
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0953"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0953
 	 Directory of  A:\
 	
@@ -25749,6 +27656,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0954
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0954"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0954
 	 Directory of  A:\
 	
@@ -25764,6 +27673,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MPMANUAL TXT   114164  11-03-88   9:58p
 
 ### Directory of PCSIG08: DISK0955
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0955"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0955
 	 Directory of  A:\
@@ -25789,6 +27700,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0956
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0956"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0956
 	 Directory of  A:\
 	
@@ -25806,6 +27719,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SSPATCH  EXE    19776   3-16-88   1:01a
 
 ### Directory of PCSIG08: DISK0957
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0957"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0957
 	 Directory of  A:\
@@ -25825,6 +27740,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           3849   9-05-88   6:20p
 
 ### Directory of PCSIG08: DISK0958
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0958"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0958
 	 Directory of  A:\
@@ -25859,6 +27776,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0959
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0959"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0959
 	 Directory of  A:\
 	
@@ -25879,6 +27798,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0960
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0960"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0960
 	 Directory of  A:\
 	
@@ -25895,6 +27816,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	THE_MENU EXE   125213   3-21-88   9:00a
 
 ### Directory of PCSIG08: DISK0961
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0961"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0961
 	 Directory of  A:\
@@ -25919,6 +27842,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WHLABELS BAS     1966   1-01-87   6:54a
 
 ### Directory of PCSIG08: DISK0962
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0962"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0962
 	 Directory of  A:\
@@ -25949,6 +27874,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SXU      HLP    13972   8-28-87   6:50a
 
 ### Directory of PCSIG08: DISK0963
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0963"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0963
 	 Directory of  A:\
@@ -25987,6 +27914,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0964
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0964"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0964
 	 Directory of  A:\
 	
@@ -26016,6 +27945,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0965
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0965"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0965
 	 Directory of  A:\
 	
@@ -26043,6 +27974,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TUTOR    PAS     8978   3-21-86   5:12a
 
 ### Directory of PCSIG08: DISK0966
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0966"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0966
 	 Directory of  A:\
@@ -26073,6 +28006,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0967
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0967"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0967
 	 Directory of  A:\
 	
@@ -26093,6 +28028,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0968
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0968"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0968
 	 Directory of  A:\
 	
@@ -26111,6 +28048,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0969
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0969"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0969
 	 Directory of  A:\
 	
@@ -26127,6 +28066,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TEST3    DBF     3754   6-04-87   5:44a
 
 ### Directory of PCSIG08: DISK0970
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0970"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0970
 	 Directory of  A:\
@@ -26163,6 +28104,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SURROGAT VO        18   9-09-87   2:08p
 
 ### Directory of PCSIG08: DISK0971
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0971"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0971
 	 Directory of  A:\
@@ -26205,6 +28148,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0972
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0972"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0972
 	 Directory of  A:\
 	
@@ -26231,6 +28176,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0973
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0973"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0973
 	 Directory of  A:\
 	
@@ -26251,6 +28198,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0974
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0974"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0974
 	 Directory of  A:\
 	
@@ -26268,6 +28217,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USER     DAT     1650   3-17-87  11:37p
 
 ### Directory of PCSIG08: DISK0975
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0975"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0975
 	 Directory of  A:\
@@ -26288,6 +28239,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0976
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0976"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0976
 	 Directory of  A:\
 	
@@ -26299,6 +28252,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNPACK   BAT      199  12-10-89   8:03a
 
 ### Directory of PCSIG08: DISK0977
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0977"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0977
 	 Directory of  A:\
@@ -26315,6 +28270,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       37   7-06-89   7:53a
 
 ### Directory of PCSIG08: DISK0978
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0978"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0978
 	 Directory of  A:\
@@ -26352,6 +28309,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0979
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0979"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0979
 	 Directory of  A:\
 	
@@ -26372,6 +28331,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           4418   5-17-88  10:24a
 
 ### Directory of PCSIG08: DISK0980
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0980"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0980
 	 Directory of  A:\
@@ -26417,6 +28378,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0981
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0981"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0981
 	 Directory of  A:\
 	
@@ -26429,6 +28392,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      1536   9-07-88   3:38a
 
 ### Directory of PCSIG08: DISK0982
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0982"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0982
 	 Directory of  A:\
@@ -26458,6 +28423,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TPWTHTAX EXE    45344   3-20-87   4:10a
 
 ### Directory of PCSIG08: DISK0983
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0983"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0983
 	 Directory of  A:\
@@ -26501,6 +28468,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	STATES            800   8-29-88   2:32a
 
 ### Directory of PCSIG08: DISK0984
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0984"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0984
 	 Directory of  A:\
@@ -26585,6 +28554,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0985
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0985"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0985
 	 Directory of  A:\
 	
@@ -26612,6 +28583,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0986
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0986"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0986
 	 Directory of  A:\
 	
@@ -26619,6 +28592,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0987
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0987"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0987
 	 Directory of  A:\
@@ -26678,6 +28653,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0988
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0988"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0988
 	 Directory of  A:\
 	
@@ -26710,6 +28687,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0989
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0989"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0989
 	 Directory of  A:\
 	
@@ -26733,6 +28712,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0990
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0990"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0990
 	 Directory of  A:\
 	
@@ -26752,6 +28733,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      386  12-16-87   8:33a
 
 ### Directory of PCSIG08: DISK0991
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0991"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0991
 	 Directory of  A:\
@@ -26773,6 +28756,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REVERSE  EXE    11702  12-09-87   4:00a
 
 ### Directory of PCSIG08: DISK0992
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0992"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0992
 	 Directory of  A:\
@@ -26831,6 +28816,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0993
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0993"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0993
 	 Directory of  A:\
 	
@@ -26860,6 +28847,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0994
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0994"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0994
 	 Directory of  A:\
 	
@@ -26876,6 +28865,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SPEEDSCR COM     5333  10-01-86   5:00a
 
 ### Directory of PCSIG08: DISK0995
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0995"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0995
 	 Directory of  A:\
@@ -26900,6 +28891,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SEP               320   4-22-88   2:51p
 
 ### Directory of PCSIG08: DISK0996
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0996"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0996
 	 Directory of  A:\
@@ -26926,6 +28919,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0997
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0997"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0997
 	 Directory of  A:\
 	
@@ -26939,6 +28934,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK0998
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0998"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK0998
 	 Directory of  A:\
 	
@@ -26946,6 +28943,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK0999
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK0999"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK0999
 	 Directory of  A:\
@@ -26989,6 +28988,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1000
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1000"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1000
 	 Directory of  A:\
 	
@@ -27002,6 +29003,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NETHACK2 ARC    45184  12-11-87   1:57a
 
 ### Directory of PCSIG08: DISK1001
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1001"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1001
 	 Directory of  A:\
@@ -27029,6 +29032,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1002
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1002"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1002
 	 Directory of  A:\
 	
@@ -27036,6 +29041,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PF       HLP    64602  11-19-89   3:48a
 
 ### Directory of PCSIG08: DISK1003
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1003"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1003
 	 Directory of  A:\
@@ -27080,6 +29087,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1004
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1004"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1004
 	 Directory of  A:\
 	
@@ -27106,6 +29115,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1005
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1005"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1005
 	 Directory of  A:\
 	
@@ -27129,6 +29140,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WSMODEL  MM      1152   5-20-87   2:50a
 
 ### Directory of PCSIG08: DISK1006
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1006"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1006
 	 Directory of  A:\
@@ -27174,6 +29187,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1007
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1007"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1007
 	 Directory of  A:\
 	
@@ -27202,6 +29217,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1008
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1008"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1008
 	 Directory of  A:\
 	
@@ -27216,6 +29233,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      3680  11-11-87   3:22p
 
 ### Directory of PCSIG08: DISK1009
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1009"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1009
 	 Directory of  A:\
@@ -27251,6 +29270,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1010
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1010"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1010
 	 Directory of  A:\
 	
@@ -27276,6 +29297,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1011
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1011"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1011
 	 Directory of  A:\
 	
@@ -27297,6 +29320,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WARD     FXZ     6471  10-25-87   7:53a
 
 ### Directory of PCSIG08: DISK1012
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1012"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1012
 	 Directory of  A:\
@@ -27327,6 +29352,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PLIC     EXE     4791   8-01-88   8:59a
 
 ### Directory of PCSIG08: DISK1013
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1013"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1013
 	 Directory of  A:\
@@ -27359,6 +29386,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XPLAINS  TXT     1195   1-20-89   6:53a
 
 ### Directory of PCSIG08: DISK1014
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1014"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1014
 	 Directory of  A:\
@@ -27446,6 +29475,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1015
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1015"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1015
 	 Directory of  A:\
 	
@@ -27453,6 +29484,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1016
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1016"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1016
 	 Directory of  A:\
@@ -27465,6 +29498,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VENDOR   DOC     1152   6-16-89   8:19a
 
 ### Directory of PCSIG08: DISK1017
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1017"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1017
 	 Directory of  A:\
@@ -27479,6 +29514,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1018
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1018"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1018
 	 Directory of  A:\
 	
@@ -27490,6 +29527,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      463   2-23-88   8:06a
 
 ### Directory of PCSIG08: DISK1019
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1019"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1019
 	 Directory of  A:\
@@ -27503,6 +29542,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PCPAY    DOC   113536   2-05-90   7:05p
 
 ### Directory of PCSIG08: DISK1020
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1020"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1020
 	 Directory of  A:\
@@ -27527,6 +29568,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1021
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1021"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1021
 	 Directory of  A:\
 	
@@ -27541,6 +29584,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1022
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1022"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1022
 	 Directory of  A:\
 	
@@ -27552,6 +29597,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	QMODEM   MDF    18412  10-04-89   9:10p
 
 ### Directory of PCSIG08: DISK1023
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1023"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1023
 	 Directory of  A:\
@@ -27586,6 +29633,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1024
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1024"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1024
 	 Directory of  A:\
 	
@@ -27612,6 +29661,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1025
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1025"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1025
 	 Directory of  A:\
 	
@@ -27625,6 +29676,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VENDOR   DOC     6549   9-01-89   5:00a
 
 ### Directory of PCSIG08: DISK1026
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1026"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1026
 	 Directory of  A:\
@@ -27645,6 +29698,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1027
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1027"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1027
 	 Directory of  A:\
 	
@@ -27660,6 +29715,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1028
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1028"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1028
 	 Directory of  A:\
 	
@@ -27673,6 +29730,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WS2ASCII EXE     6096   2-18-88  11:02a
 
 ### Directory of PCSIG08: DISK1029
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1029"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1029
 	 Directory of  A:\
@@ -27688,6 +29747,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   TXT     3678   2-12-89   5:17p
 
 ### Directory of PCSIG08: DISK1030
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1030"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1030
 	 Directory of  A:\
@@ -27710,6 +29771,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      386   4-12-88   1:19a
 
 ### Directory of PCSIG08: DISK1031
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1031"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1031
 	 Directory of  A:\
@@ -27734,6 +29797,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1032
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1032"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1032
 	 Directory of  A:\
 	
@@ -27749,6 +29814,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   _MN      394   2-08-90   6:07a
 
 ### Directory of PCSIG08: DISK1033
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1033"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1033
 	 Directory of  A:\
@@ -27769,6 +29836,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1034
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1034"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1034
 	 Directory of  A:\
 	
@@ -27784,6 +29853,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1035
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1035"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1035
 	 Directory of  A:\
 	
@@ -27798,6 +29869,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SSMAINA  BAT       26   2-10-89   9:32a
 
 ### Directory of PCSIG08: DISK1036
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1036"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1036
 	 Directory of  A:\
@@ -27826,6 +29899,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1037
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1037"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1037
 	 Directory of  A:\
 	
@@ -27852,6 +29927,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1038
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1038"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1038
 	 Directory of  A:\
 	
@@ -27871,6 +29948,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1039
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1039"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1039
 	 Directory of  A:\
 	
@@ -27887,6 +29966,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TREZORE  EXE   122869  10-21-86   1:33a
 
 ### Directory of PCSIG08: DISK1040
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1040"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1040
 	 Directory of  A:\
@@ -27917,6 +29998,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1041
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1041"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1041
 	 Directory of  A:\
 	
@@ -27935,6 +30018,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1042
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1042"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1042
 	 Directory of  A:\
 	
@@ -27950,6 +30035,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REGISTER TXT      178  11-30-87   4:00p
 
 ### Directory of PCSIG08: DISK1043
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1043"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1043
 	 Directory of  A:\
@@ -27969,6 +30056,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1044
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1044"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1044
 	 Directory of  A:\
 	
@@ -27984,6 +30073,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1045
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1045"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1045
 	 Directory of  A:\
 	
@@ -27996,6 +30087,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   BAT      907   9-13-89   1:59p
 
 ### Directory of PCSIG08: DISK1046
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1046"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1046
 	 Directory of  A:\
@@ -28013,6 +30106,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1047
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1047"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1047
 	 Directory of  A:\
 	
@@ -28026,6 +30121,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1048
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1048"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1048
 	 Directory of  A:\
 	
@@ -28036,6 +30133,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       BAT       81   5-15-89   4:56a
 
 ### Directory of PCSIG08: DISK1049
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1049"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1049
 	 Directory of  A:\
@@ -28052,6 +30151,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RECOVER  BAT       39  12-07-87   2:42p
 
 ### Directory of PCSIG08: DISK1050
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1050"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1050
 	 Directory of  A:\
@@ -28094,6 +30195,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1051
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1051"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1051
 	 Directory of  A:\
 	
@@ -28108,6 +30211,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1052
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1052"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1052
 	 Directory of  A:\
 	
@@ -28120,6 +30225,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PKXARC   COM    12242   4-26-87   5:00p
 
 ### Directory of PCSIG08: DISK1053
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1053"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1053
 	 Directory of  A:\
@@ -28201,6 +30308,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1054
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1054"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1054
 	 Directory of  A:\
 	
@@ -28223,6 +30332,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1055
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1055"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1055
 	 Directory of  A:\
 	
@@ -28243,6 +30354,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1056
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1056"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1056
 	 Directory of  A:\
 	
@@ -28256,6 +30369,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   MYF     6610   9-22-88   2:52p
 
 ### Directory of PCSIG08: DISK1057
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1057"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1057
 	 Directory of  A:\
@@ -28274,6 +30389,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WHATSNEW DOC     8094   3-11-90   8:03p
 
 ### Directory of PCSIG08: DISK1058
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1058"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1058
 	 Directory of  A:\
@@ -28310,6 +30427,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TUTORIAL GRF      375  11-30-87   5:04p
 
 ### Directory of PCSIG08: DISK1059
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1059"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1059
 	 Directory of  A:\
@@ -28353,6 +30472,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TYPECURV DAT      739   2-07-88   5:06a
 
 ### Directory of PCSIG08: DISK1060
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1060"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1060
 	 Directory of  A:\
@@ -28406,6 +30527,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1061
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1061"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1061
 	 Directory of  A:\
 	
@@ -28436,6 +30559,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VERBAR   BAS     2008   1-05-88   2:03p
 
 ### Directory of PCSIG08: DISK1062
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1062"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1062
 	 Directory of  A:\
@@ -28491,6 +30616,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1063
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1063"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1063
 	 Directory of  A:\
 	
@@ -28508,6 +30635,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1064
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1064"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1064
 	 Directory of  A:\
 	
@@ -28522,6 +30651,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1065
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1065"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1065
 	 Directory of  A:\
 	
@@ -28535,6 +30666,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1066
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1066"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1066
 	 Directory of  A:\
 	
@@ -28542,6 +30675,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1067
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1067"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1067
 	 Directory of  A:\
@@ -28554,6 +30689,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   EXE    35257  10-18-87   2:09a
 
 ### Directory of PCSIG08: DISK1068
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1068"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1068
 	 Directory of  A:\
@@ -28592,6 +30729,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1069
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1069"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1069
 	 Directory of  A:\
 	
@@ -28617,6 +30756,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	________ ___        4   5-27-88   1:57p
 
 ### Directory of PCSIG08: DISK1070
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1070"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1070
 	 Directory of  A:\
@@ -28645,6 +30786,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1071
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1071"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1071
 	 Directory of  A:\
 	
@@ -28659,6 +30802,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC      512  12-15-87   5:02p
 
 ### Directory of PCSIG08: DISK1072
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1072"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1072
 	 Directory of  A:\
@@ -28677,6 +30822,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1073
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1073"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1073
 	 Directory of  A:\
 	
@@ -28692,6 +30839,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	START    BAT     2239  12-25-89   5:00a
 
 ### Directory of PCSIG08: DISK1074
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1074"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1074
 	 Directory of  A:\
@@ -28714,6 +30863,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XWORD    EXE    36144   7-12-89   9:12p
 
 ### Directory of PCSIG08: DISK1075
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1075"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1075
 	 Directory of  A:\
@@ -28740,6 +30891,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TIMETRAV EXE   100802   2-15-89   6:48p
 
 ### Directory of PCSIG08: DISK1076
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1076"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1076
 	 Directory of  A:\
@@ -28779,6 +30932,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1077
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1077"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1077
 	 Directory of  A:\
 	
@@ -28815,6 +30970,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1078
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1078"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1078
 	 Directory of  A:\
 	
@@ -28837,6 +30994,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1079
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1079"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1079
 	 Directory of  A:\
 	
@@ -28857,6 +31016,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1080
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1080"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1080
 	 Directory of  A:\
 	
@@ -28870,6 +31031,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1081
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1081"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1081
 	 Directory of  A:\
 	
@@ -28880,6 +31043,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      386   6-27-89   8:59a
 
 ### Directory of PCSIG08: DISK1082
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1082"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1082
 	 Directory of  A:\
@@ -28899,6 +31064,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1083
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1083"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1083
 	 Directory of  A:\
 	
@@ -28912,6 +31079,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   CB      2522   3-01-89   2:41p
 
 ### Directory of PCSIG08: DISK1084
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1084"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1084
 	 Directory of  A:\
@@ -28928,6 +31097,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      1846   7-25-86  10:09p
 
 ### Directory of PCSIG08: DISK1085
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1085"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1085
 	 Directory of  A:\
@@ -28968,6 +31139,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1086
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1086"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1086
 	 Directory of  A:\
 	
@@ -28975,6 +31148,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1087
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1087"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1087
 	 Directory of  A:\
@@ -28991,6 +31166,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PRINTDOC BAT      167   6-16-89   1:22p
 
 ### Directory of PCSIG08: DISK1088
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1088"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1088
 	 Directory of  A:\
@@ -29014,6 +31191,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1089
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1089"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1089
 	 Directory of  A:\
 	
@@ -29021,6 +31200,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1090
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1090"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1090
 	 Directory of  A:\
@@ -29068,6 +31249,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1091
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1091"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1091
 	 Directory of  A:\
 	
@@ -29093,6 +31276,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           3719   1-01-90   4:00p
 
 ### Directory of PCSIG08: DISK1092
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1092"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1092
 	 Directory of  A:\
@@ -29120,6 +31305,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1093
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1093"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1093
 	 Directory of  A:\
 	
@@ -29134,6 +31321,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	JOBS31B2 ARC   160768   2-02-88  12:43p
 
 ### Directory of PCSIG08: DISK1094
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1094"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1094
 	 Directory of  A:\
@@ -29154,6 +31343,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      7936   3-24-88   7:44a
 
 ### Directory of PCSIG08: DISK1095
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1095"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1095
 	 Directory of  A:\
@@ -29250,6 +31441,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1096
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1096"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1096
 	 Directory of  A:\
 	
@@ -29263,6 +31456,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MANUAL   BAT      147   6-08-88   8:02a
 
 ### Directory of PCSIG08: DISK1097
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1097"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1097
 	 Directory of  A:\
@@ -29320,6 +31515,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1098
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1098"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1098
 	 Directory of  A:\
 	
@@ -29341,6 +31538,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SERVICE  WKS    21144   2-24-88   2:13p
 
 ### Directory of PCSIG08: DISK1099
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1099"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1099
 	 Directory of  A:\
@@ -29389,6 +31588,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1100
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1100"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1100
 	 Directory of  A:\
 	
@@ -29430,6 +31631,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1101
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1101"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1101
 	 Directory of  A:\
 	
@@ -29452,6 +31655,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	START    BAT       79   6-09-88   7:45a
 
 ### Directory of PCSIG08: DISK1102
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1102"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1102
 	 Directory of  A:\
@@ -29477,6 +31682,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	________ ___        5   6-10-88   8:50a
 
 ### Directory of PCSIG08: DISK1103
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1103"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1103
 	 Directory of  A:\
@@ -29548,6 +31755,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1104
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1104"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1104
 	 Directory of  A:\
 	
@@ -29572,6 +31781,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1105
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1105"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1105
 	 Directory of  A:\
 	
@@ -29579,6 +31790,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	DISK1105 ZIP    80172   3-26-90   4:26a
 
 ### Directory of PCSIG08: DISK1106
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1106"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1106
 	 Directory of  A:\
@@ -29595,6 +31808,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       43   6-20-89   1:52a
 
 ### Directory of PCSIG08: DISK1107
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1107"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1107
 	 Directory of  A:\
@@ -29623,6 +31838,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1108
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1108"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1108
 	 Directory of  A:\
 	
@@ -29649,6 +31866,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1109
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1109"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1109
 	 Directory of  A:\
 	
@@ -29666,6 +31885,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1110
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1110"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1110
 	 Directory of  A:\
 	
@@ -29673,6 +31894,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1111
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1111"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1111
 	 Directory of  A:\
@@ -29690,6 +31913,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1112
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1112"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1112
 	 Directory of  A:\
 	
@@ -29697,6 +31922,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1113
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1113"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1113
 	 Directory of  A:\
@@ -29710,6 +31937,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      386   4-18-89   8:43a
 
 ### Directory of PCSIG08: DISK1114
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1114"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1114
 	 Directory of  A:\
@@ -29733,6 +31962,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1115
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1115"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1115
 	 Directory of  A:\
 	
@@ -29749,6 +31980,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1116
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1116"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1116
 	 Directory of  A:\
 	
@@ -29757,6 +31990,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1117
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1117"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1117
 	 Directory of  A:\
 	
@@ -29764,6 +31999,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1118
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1118"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1118
 	 Directory of  A:\
@@ -29780,6 +32017,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TYPEDOC  EXE    36658   5-02-87   5:04a
 
 ### Directory of PCSIG08: DISK1119
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1119"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1119
 	 Directory of  A:\
@@ -29824,6 +32063,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1120
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1120"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1120
 	 Directory of  A:\
 	
@@ -29845,6 +32086,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1121
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1121"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1121
 	 Directory of  A:\
 	
@@ -29859,6 +32102,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           1304  11-02-89   5:14a
 
 ### Directory of PCSIG08: DISK1122
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1122"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1122
 	 Directory of  A:\
@@ -29880,6 +32125,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1123
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1123"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1123
 	 Directory of  A:\
 	
@@ -29887,6 +32134,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1124
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1124"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1124
 	 Directory of  A:\
@@ -29924,6 +32173,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TUTORIAL MCR      512   1-23-90   2:17p
 
 ### Directory of PCSIG08: DISK1125
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1125"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1125
 	 Directory of  A:\
@@ -29967,6 +32218,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1126
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1126"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1126
 	 Directory of  A:\
 	
@@ -29979,6 +32232,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   EXE     8032   8-12-89   6:00a
 
 ### Directory of PCSIG08: DISK1127
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1127"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1127
 	 Directory of  A:\
@@ -30002,6 +32257,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1128
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1128"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1128
 	 Directory of  A:\
 	
@@ -30012,6 +32269,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SNOUTIL2 ARC   339306   4-07-88   8:38a
 
 ### Directory of PCSIG08: DISK1129
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1129"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1129
 	 Directory of  A:\
@@ -30039,6 +32298,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UPDATE   FIX     5363   4-10-89   1:38p
 
 ### Directory of PCSIG08: DISK1130
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1130"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1130
 	 Directory of  A:\
@@ -30069,6 +32330,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1131
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1131"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1131
 	 Directory of  A:\
 	
@@ -30081,6 +32344,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PKUNZIP  EXE    21440   7-20-89   6:01p
 
 ### Directory of PCSIG08: DISK1132
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1132"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1132
 	 Directory of  A:\
@@ -30102,6 +32367,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SPRTBK7  INT    18400   2-21-87   2:16p
 
 ### Directory of PCSIG08: DISK1133
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1133"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1133
 	 Directory of  A:\
@@ -30205,6 +32472,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1134
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1134"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1134
 	 Directory of  A:\
 	
@@ -30225,6 +32494,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1135
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1135"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1135
 	 Directory of  A:\
 	
@@ -30232,6 +32503,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1136
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1136"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1136
 	 Directory of  A:\
@@ -30249,6 +32522,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UPDATE   DOC    12413  11-02-88   4:51p
 
 ### Directory of PCSIG08: DISK1137
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1137"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1137
 	 Directory of  A:\
@@ -30317,6 +32592,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1138
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1138"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1138
 	 Directory of  A:\
 	
@@ -30343,6 +32620,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1139
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1139"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1139
 	 Directory of  A:\
 	
@@ -30355,6 +32634,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PKXARC   DOC    14043  12-14-86   4:00p
 
 ### Directory of PCSIG08: DISK1140
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1140"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1140
 	 Directory of  A:\
@@ -30376,6 +32657,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1141
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1141"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1141
 	 Directory of  A:\
 	
@@ -30393,6 +32676,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1142
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1142"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1142
 	 Directory of  A:\
 	
@@ -30400,6 +32685,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1143
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1143"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1143
 	 Directory of  A:\
@@ -30442,6 +32729,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1144
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1144"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1144
 	 Directory of  A:\
 	
@@ -30460,6 +32749,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1145
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1145"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1145
 	 Directory of  A:\
 	
@@ -30471,6 +32762,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	INSTALL  EXE    52272  11-04-89   4:00p
 
 ### Directory of PCSIG08: DISK1146
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1146"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1146
 	 Directory of  A:\
@@ -30495,6 +32788,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1147
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1147"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1147
 	 Directory of  A:\
 	
@@ -30511,6 +32806,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1148
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1148"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1148
 	 Directory of  A:\
 	
@@ -30524,6 +32821,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1149
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1149"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1149
 	 Directory of  A:\
 	
@@ -30531,6 +32830,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1150
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1150"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1150
 	 Directory of  A:\
@@ -30567,6 +32868,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1151
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1151"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1151
 	 Directory of  A:\
 	
@@ -30585,6 +32888,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1152
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1152"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1152
 	 Directory of  A:\
 	
@@ -30600,6 +32905,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   BAT       20  10-07-88   3:22a
 
 ### Directory of PCSIG08: DISK1153
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1153"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1153
 	 Directory of  A:\
@@ -30620,6 +32927,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1154
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1154"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1154
 	 Directory of  A:\
 	
@@ -30632,6 +32941,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   1ST     6253   2-27-89   3:55a
 
 ### Directory of PCSIG08: DISK1155
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1155"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1155
 	 Directory of  A:\
@@ -30666,6 +32977,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VRSDEMO  CTL    26368   4-06-89   1:45a
 
 ### Directory of PCSIG08: DISK1156
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1156"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1156
 	 Directory of  A:\
@@ -30733,6 +33046,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1157
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1157"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1157
 	 Directory of  A:\
 	
@@ -30740,6 +33055,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1158
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1158"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1158
 	 Directory of  A:\
@@ -30759,6 +33076,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GRAMARCY URN    29696   7-16-88   2:27p
 
 ### Directory of PCSIG08: DISK1159
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1159"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1159
 	 Directory of  A:\
@@ -30782,6 +33101,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1160
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1160"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1160
 	 Directory of  A:\
 	
@@ -30800,6 +33121,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1161
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1161"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1161
 	 Directory of  A:\
 	
@@ -30808,6 +33131,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	FILE1161 TXT      784   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1162
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1162"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1162
 	 Directory of  A:\
@@ -30826,6 +33151,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1163
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1163"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1163
 	 Directory of  A:\
 	
@@ -30843,6 +33170,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SBO      FNT     4669   6-12-89   5:00a
 
 ### Directory of PCSIG08: DISK1164
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1164"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1164
 	 Directory of  A:\
@@ -30867,6 +33196,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1165
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1165"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1165
 	 Directory of  A:\
 	
@@ -30883,6 +33214,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1166
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1166"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1166
 	 Directory of  A:\
 	
@@ -30897,6 +33230,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   1ST     1404  10-29-89   2:57p
 
 ### Directory of PCSIG08: DISK1167
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1167"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1167
 	 Directory of  A:\
@@ -30913,6 +33248,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1168
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1168"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1168
 	 Directory of  A:\
 	
@@ -30921,6 +33258,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1169
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1169"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1169
 	 Directory of  A:\
 	
@@ -30928,6 +33267,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1170
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1170"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1170
 	 Directory of  A:\
@@ -30952,6 +33293,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1171
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1171"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1171
 	 Directory of  A:\
 	
@@ -30967,6 +33310,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1172
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1172"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1172
 	 Directory of  A:\
 	
@@ -30980,6 +33325,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540   3-12-90   2:01p
 
 ### Directory of PCSIG08: DISK1173
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1173"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1173
 	 Directory of  A:\
@@ -30997,6 +33344,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1174
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1174"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1174
 	 Directory of  A:\
 	
@@ -31011,6 +33360,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1175
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1175"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1175
 	 Directory of  A:\
 	
@@ -31021,6 +33372,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORTHY   EXE   186304  12-30-89   5:37a
 
 ### Directory of PCSIG08: DISK1176
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1176"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1176
 	 Directory of  A:\
@@ -31052,6 +33405,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1177
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1177"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1177
 	 Directory of  A:\
 	
@@ -31070,6 +33425,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SPIDER   DOC    30752  12-02-87   8:21a
 
 ### Directory of PCSIG08: DISK1178
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1178"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1178
 	 Directory of  A:\
@@ -31092,6 +33449,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UTILITY  EXE    53604   2-15-90  11:11a
 
 ### Directory of PCSIG08: DISK1179
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1179"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1179
 	 Directory of  A:\
@@ -31116,6 +33475,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1180
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1180"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1180
 	 Directory of  A:\
 	
@@ -31133,6 +33494,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PMINS3   BAT      180   7-07-88  11:15a
 
 ### Directory of PCSIG08: DISK1181
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1181"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1181
 	 Directory of  A:\
@@ -31168,6 +33531,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1182
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1182"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1182
 	 Directory of  A:\
 	
@@ -31182,6 +33547,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SURFACE  EXE    55466   8-07-88  11:45p
 
 ### Directory of PCSIG08: DISK1183
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1183"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1183
 	 Directory of  A:\
@@ -31201,6 +33568,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      1415   2-07-88   5:37p
 
 ### Directory of PCSIG08: DISK1184
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1184"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1184
 	 Directory of  A:\
@@ -31225,6 +33594,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1185
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1185"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1185
 	 Directory of  A:\
 	
@@ -31248,6 +33619,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1186
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1186"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1186
 	 Directory of  A:\
 	
@@ -31259,6 +33632,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SIMBASE  EXE   212690  10-10-88   6:00a
 
 ### Directory of PCSIG08: DISK1187
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1187"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1187
 	 Directory of  A:\
@@ -31302,6 +33677,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1188
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1188"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1188
 	 Directory of  A:\
 	
@@ -31319,6 +33696,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1189
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1189"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1189
 	 Directory of  A:\
 	
@@ -31330,6 +33709,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	INSTALL  BAT     5356   6-19-89  11:00p
 
 ### Directory of PCSIG08: DISK1190
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1190"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1190
 	 Directory of  A:\
@@ -31345,6 +33726,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WS       HLP    15499  10-31-89   4:00p
 
 ### Directory of PCSIG08: DISK1191
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1191"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1191
 	 Directory of  A:\
@@ -31363,6 +33746,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VERSIONS          448  12-19-88  12:51a
 
 ### Directory of PCSIG08: DISK1192
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1192"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1192
 	 Directory of  A:\
@@ -31415,6 +33800,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1193
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1193"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1193
 	 Directory of  A:\
 	
@@ -31435,6 +33822,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1194
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1194"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1194
 	 Directory of  A:\
 	
@@ -31450,6 +33839,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   1ST     4005   1-19-82   2:56p
 
 ### Directory of PCSIG08: DISK1195
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1195"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1195
 	 Directory of  A:\
@@ -31475,6 +33866,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1196
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1196"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1196
 	 Directory of  A:\
 	
@@ -31490,6 +33883,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1197
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1197"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1197
 	 Directory of  A:\
 	
@@ -31497,6 +33892,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1198
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1198"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1198
 	 Directory of  A:\
@@ -31510,6 +33907,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SCHEDULE DOC   162736  10-18-88   2:21p
 
 ### Directory of PCSIG08: DISK1199
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1199"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1199
 	 Directory of  A:\
@@ -31533,6 +33932,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READMEFI RST     1666   4-03-89   3:38p
 
 ### Directory of PCSIG08: DISK1200
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1200"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1200
 	 Directory of  A:\
@@ -31572,6 +33973,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1201
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1201"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1201
 	 Directory of  A:\
 	
@@ -31589,6 +33992,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   COM     7291   7-25-89   5:27p
 
 ### Directory of PCSIG08: DISK1202
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1202"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1202
 	 Directory of  A:\
@@ -31613,6 +34018,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1203
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1203"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1203
 	 Directory of  A:\
 	
@@ -31620,6 +34027,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1204
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1204"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1204
 	 Directory of  A:\
@@ -31635,6 +34044,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README2  DOC     1152   8-08-88   1:24p
 
 ### Directory of PCSIG08: DISK1205
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1205"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1205
 	 Directory of  A:\
@@ -31666,6 +34077,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1206
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1206"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1206
 	 Directory of  A:\
 	
@@ -31677,6 +34090,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   1       5659   2-01-89   4:00a
 
 ### Directory of PCSIG08: DISK1207
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1207"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1207
 	 Directory of  A:\
@@ -31719,6 +34134,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1208
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1208"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1208
 	 Directory of  A:\
 	
@@ -31734,6 +34151,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   NOW     3685   6-29-88   5:46p
 
 ### Directory of PCSIG08: DISK1209
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1209"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1209
 	 Directory of  A:\
@@ -31754,6 +34173,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1210
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1210"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1210
 	 Directory of  A:\
 	
@@ -31773,6 +34194,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SHOPREC  EXE     9216  11-22-85   3:24a
 
 ### Directory of PCSIG08: DISK1211
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1211"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1211
 	 Directory of  A:\
@@ -31802,6 +34225,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1212
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1212"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1212
 	 Directory of  A:\
 	
@@ -31830,6 +34255,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1213
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1213"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1213
 	 Directory of  A:\
 	
@@ -31848,6 +34275,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1214
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1214"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1214
 	 Directory of  A:\
 	
@@ -31864,6 +34293,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1215
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1215"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1215
 	 Directory of  A:\
 	
@@ -31876,6 +34307,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SUBMIT           1659  11-30-88   9:42p
 
 ### Directory of PCSIG08: DISK1216
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1216"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1216
 	 Directory of  A:\
@@ -31897,6 +34330,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1217
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1217"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1217
 	 Directory of  A:\
 	
@@ -31912,6 +34347,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REMINDER DOC    14336  11-21-88   3:46p
 
 ### Directory of PCSIG08: DISK1218
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1218"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1218
 	 Directory of  A:\
@@ -31929,6 +34366,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1219
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1219"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1219
 	 Directory of  A:\
 	
@@ -31939,6 +34378,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME       252   2-28-90   6:31a
 
 ### Directory of PCSIG08: DISK1220
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1220"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1220
 	 Directory of  A:\
@@ -31969,6 +34410,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1221
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1221"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1221
 	 Directory of  A:\
 	
@@ -31986,6 +34429,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1222
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1222"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1222
 	 Directory of  A:\
 	
@@ -32001,6 +34446,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   1ST    11348   4-25-88  11:26a
 
 ### Directory of PCSIG08: DISK1223
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1223"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1223
 	 Directory of  A:\
@@ -32031,6 +34478,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TEST     TXT      313  10-09-88   6:09a
 
 ### Directory of PCSIG08: DISK1224
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1224"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1224
 	 Directory of  A:\
@@ -32079,6 +34528,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1225
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1225"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1225
 	 Directory of  A:\
 	
@@ -32090,6 +34541,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MO       EXE   230973   6-07-89   3:35a
 
 ### Directory of PCSIG08: DISK1226
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1226"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1226
 	 Directory of  A:\
@@ -32108,6 +34561,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MANUAL   BAT      154  11-17-88   1:55a
 
 ### Directory of PCSIG08: DISK1227
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1227"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1227
 	 Directory of  A:\
@@ -32132,6 +34587,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PSWAP    EXE     5582   5-15-89   3:18p
 
 ### Directory of PCSIG08: DISK1228
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1228"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1228
 	 Directory of  A:\
@@ -32163,6 +34620,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1229
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1229"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1229
 	 Directory of  A:\
 	
@@ -32191,6 +34650,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1230
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1230"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1230
 	 Directory of  A:\
 	
@@ -32205,6 +34666,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1231
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1231"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1231
 	 Directory of  A:\
 	
@@ -32218,6 +34681,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNDE-SRC ARC    20377   6-10-87   8:21p
 
 ### Directory of PCSIG08: DISK1232
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1232"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1232
 	 Directory of  A:\
@@ -32242,6 +34707,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1233
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1233"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1233
 	 Directory of  A:\
 	
@@ -32265,6 +34732,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REGISTER DOC     1748  11-04-89  12:58a
 
 ### Directory of PCSIG08: DISK1234
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1234"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1234
 	 Directory of  A:\
@@ -32291,6 +34760,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1235
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1235"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1235
 	 Directory of  A:\
 	
@@ -32314,6 +34785,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1236
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1236"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1236
 	 Directory of  A:\
 	
@@ -32321,6 +34794,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1237
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1237"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1237
 	 Directory of  A:\
@@ -32330,6 +34805,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1238
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1238"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1238
 	 Directory of  A:\
 	
@@ -32337,6 +34814,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1239
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1239"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1239
 	 Directory of  A:\
@@ -32375,6 +34854,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1240
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1240"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1240
 	 Directory of  A:\
 	
@@ -32389,6 +34870,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1241
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1241"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1241
 	 Directory of  A:\
 	
@@ -32401,6 +34884,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	M2D      HDR       85  11-13-88  10:44a
 
 ### Directory of PCSIG08: DISK1242
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1242"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1242
 	 Directory of  A:\
@@ -32420,6 +34905,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1243
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1243"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1243
 	 Directory of  A:\
 	
@@ -32438,6 +34925,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TV       HLP    52197   5-31-89   1:10a
 
 ### Directory of PCSIG08: DISK1244
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1244"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1244
 	 Directory of  A:\
@@ -32460,6 +34949,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1245
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1245"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1245
 	 Directory of  A:\
 	
@@ -32478,6 +34969,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	THESPLUS TXT     2204   1-01-90   9:00a
 
 ### Directory of PCSIG08: DISK1246
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1246"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1246
 	 Directory of  A:\
@@ -32502,6 +34995,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	INVOICE  TXT     2371   2-26-90  12:03p
 
 ### Directory of PCSIG08: DISK1247
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1247"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1247
 	 Directory of  A:\
@@ -32532,6 +35027,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1248
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1248"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1248
 	 Directory of  A:\
 	
@@ -32550,6 +35047,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TODO     DIR     7168   2-21-89   9:23a
 
 ### Directory of PCSIG08: DISK1249
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1249"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1249
 	 Directory of  A:\
@@ -32579,6 +35078,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1250
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1250"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1250
 	 Directory of  A:\
 	
@@ -32595,6 +35096,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	STARBOOK MAN    47504   1-14-90  11:47a
 
 ### Directory of PCSIG08: DISK1251
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1251"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1251
 	 Directory of  A:\
@@ -32613,6 +35116,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1252
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1252"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1252
 	 Directory of  A:\
 	
@@ -32629,6 +35134,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1253
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1253"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1253
 	 Directory of  A:\
 	
@@ -32642,6 +35149,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PMS03007 EXE    42283   9-16-88  12:05p
 
 ### Directory of PCSIG08: DISK1254
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1254"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1254
 	 Directory of  A:\
@@ -32659,6 +35168,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PMS02004 EXE    37149  10-01-88   6:08a
 
 ### Directory of PCSIG08: DISK1255
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1255"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1255
 	 Directory of  A:\
@@ -32678,6 +35189,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1256
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1256"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1256
 	 Directory of  A:\
 	
@@ -32688,6 +35201,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	INSTALL  BAT      281   1-13-89   6:55a
 
 ### Directory of PCSIG08: DISK1257
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1257"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1257
 	 Directory of  A:\
@@ -32703,6 +35218,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     5446   2-13-89   4:00p
 
 ### Directory of PCSIG08: DISK1258
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1258"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1258
 	 Directory of  A:\
@@ -32734,6 +35251,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1259
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1259"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1259
 	 Directory of  A:\
 	
@@ -32747,6 +35266,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PALREAD  ME      1465   6-23-88   7:01p
 
 ### Directory of PCSIG08: DISK1260
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1260"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1260
 	 Directory of  A:\
@@ -32771,6 +35292,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1261
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1261"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1261
 	 Directory of  A:\
 	
@@ -32786,6 +35309,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WP2      DBD   161346  10-26-88   1:06p
 
 ### Directory of PCSIG08: DISK1262
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1262"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1262
 	 Directory of  A:\
@@ -32852,6 +35377,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1263
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1263"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1263
 	 Directory of  A:\
 	
@@ -32859,6 +35386,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1264
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1264"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1264
 	 Directory of  A:\
@@ -32868,6 +35397,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1265
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1265"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1265
 	 Directory of  A:\
 	
@@ -32875,6 +35406,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1266
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1266"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1266
 	 Directory of  A:\
@@ -32888,6 +35421,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      2368  10-28-88   5:00a
 
 ### Directory of PCSIG08: DISK1267
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1267"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1267
 	 Directory of  A:\
@@ -32906,6 +35441,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README            697   4-25-88   5:29a
 
 ### Directory of PCSIG08: DISK1268
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1268"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1268
 	 Directory of  A:\
@@ -32942,6 +35479,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1269
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1269"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1269
 	 Directory of  A:\
 	
@@ -32972,6 +35511,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1270
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1270"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1270
 	 Directory of  A:\
 	
@@ -32982,6 +35523,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PKUNZIP  EXE    18208   3-05-89   4:00p
 
 ### Directory of PCSIG08: DISK1271
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1271"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1271
 	 Directory of  A:\
@@ -32997,6 +35540,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1272
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1272"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1272
 	 Directory of  A:\
 	
@@ -33009,6 +35554,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RSCH     EXE   163392   7-14-89   7:49a
 
 ### Directory of PCSIG08: DISK1273
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1273"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1273
 	 Directory of  A:\
@@ -33028,6 +35575,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WS4      VDF      512   3-14-88   4:05a
 
 ### Directory of PCSIG08: DISK1274
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1274"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1274
 	 Directory of  A:\
@@ -33062,6 +35611,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1275
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1275"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1275
 	 Directory of  A:\
 	
@@ -33072,6 +35623,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   1ST      611  10-23-89  11:28a
 
 ### Directory of PCSIG08: DISK1276
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1276"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1276
 	 Directory of  A:\
@@ -33102,6 +35655,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1277
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1277"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1277
 	 Directory of  A:\
 	
@@ -33110,6 +35665,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PCMECH13 EXE   171712   1-01-90   9:21a
 
 ### Directory of PCSIG08: DISK1278
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1278"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1278
 	 Directory of  A:\
@@ -33126,6 +35683,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TREK1    EXE    61104   1-01-90   5:00a
 
 ### Directory of PCSIG08: DISK1279
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1279"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1279
 	 Directory of  A:\
@@ -33151,6 +35710,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIRUSCHK TXT    26240  10-02-88   6:06a
 
 ### Directory of PCSIG08: DISK1280
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1280"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1280
 	 Directory of  A:\
@@ -33195,6 +35756,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1281
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1281"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1281
 	 Directory of  A:\
 	
@@ -33215,6 +35778,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1282
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1282"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1282
 	 Directory of  A:\
 	
@@ -33232,6 +35797,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1283
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1283"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1283
 	 Directory of  A:\
 	
@@ -33247,6 +35814,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      9663  10-15-89   2:01a
 
 ### Directory of PCSIG08: DISK1284
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1284"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1284
 	 Directory of  A:\
@@ -33299,6 +35868,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1285
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1285"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1285
 	 Directory of  A:\
 	
@@ -33310,6 +35881,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      6463   6-24-88   1:34p
 
 ### Directory of PCSIG08: DISK1286
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1286"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1286
 	 Directory of  A:\
@@ -33341,6 +35914,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1287
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1287"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1287
 	 Directory of  A:\
 	
@@ -33361,6 +35936,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZR       EXE   194462   1-01-80   1:20a
 
 ### Directory of PCSIG08: DISK1288
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1288"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1288
 	 Directory of  A:\
@@ -33384,6 +35961,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USINGZR  ZRX    12288  12-19-88   1:17p
 
 ### Directory of PCSIG08: DISK1289
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1289"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1289
 	 Directory of  A:\
@@ -33434,6 +36013,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1290
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1290"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1290
 	 Directory of  A:\
 	
@@ -33483,6 +36064,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1291
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1291"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1291
 	 Directory of  A:\
 	
@@ -33516,6 +36099,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1292
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1292"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1292
 	 Directory of  A:\
 	
@@ -33535,6 +36120,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1293
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1293"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1293
 	 Directory of  A:\
 	
@@ -33552,6 +36139,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SLUG     EXE    46788   1-04-90   8:35a
 
 ### Directory of PCSIG08: DISK1294
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1294"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1294
 	 Directory of  A:\
@@ -33575,6 +36164,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1295
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1295"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1295
 	 Directory of  A:\
 	
@@ -33591,6 +36182,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORKDCA  BAT      437   6-23-87   9:26a
 
 ### Directory of PCSIG08: DISK1296
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1296"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1296
 	 Directory of  A:\
@@ -33622,6 +36215,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1297
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1297"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1297
 	 Directory of  A:\
 	
@@ -33636,6 +36231,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MANUAL1  NTX     6144   3-31-88   4:44a
 
 ### Directory of PCSIG08: DISK1298
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1298"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1298
 	 Directory of  A:\
@@ -33663,6 +36260,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README            880   1-23-89  11:35a
 
 ### Directory of PCSIG08: DISK1299
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1299"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1299
 	 Directory of  A:\
@@ -33705,6 +36304,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1300
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1300"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1300
 	 Directory of  A:\
 	
@@ -33725,6 +36326,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	T_ADDRS  DAT      373   5-10-89   7:17a
 
 ### Directory of PCSIG08: DISK1301
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1301"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1301
 	 Directory of  A:\
@@ -33754,6 +36357,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1302
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1302"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1302
 	 Directory of  A:\
 	
@@ -33773,6 +36378,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WHATSNEW DOC     9008  11-12-89   5:44p
 
 ### Directory of PCSIG08: DISK1303
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1303"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1303
 	 Directory of  A:\
@@ -33802,6 +36409,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1304
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1304"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1304
 	 Directory of  A:\
 	
@@ -33824,6 +36433,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XXL      HDR     2383   5-06-88   1:05p
 
 ### Directory of PCSIG08: DISK1305
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1305"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1305
 	 Directory of  A:\
@@ -33850,6 +36461,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1306
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1306"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1306
 	 Directory of  A:\
 	
@@ -33872,6 +36485,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           1843  11-10-89   1:38a
 
 ### Directory of PCSIG08: DISK1307
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1307"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1307
 	 Directory of  A:\
@@ -33906,6 +36521,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1308
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1308"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1308
 	 Directory of  A:\
 	
@@ -33932,6 +36549,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TODAY    SEP     7944   8-20-88   2:00a
 
 ### Directory of PCSIG08: DISK1309
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1309"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1309
 	 Directory of  A:\
@@ -33962,6 +36581,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1310
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1310"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1310
 	 Directory of  A:\
 	
@@ -33980,6 +36601,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	DISK1310 ZIP    10837   3-26-90   4:32a
 
 ### Directory of PCSIG08: DISK1311
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1311"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1311
 	 Directory of  A:\
@@ -34000,6 +36623,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTES    TXT      487  10-28-88   4:38p
 
 ### Directory of PCSIG08: DISK1312
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1312"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1312
 	 Directory of  A:\
@@ -34034,6 +36659,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1313
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1313"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1313
 	 Directory of  A:\
 	
@@ -34053,6 +36680,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      3975  10-31-88   4:01a
 
 ### Directory of PCSIG08: DISK1314
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1314"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1314
 	 Directory of  A:\
@@ -34096,6 +36725,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1315
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1315"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1315
 	 Directory of  A:\
 	
@@ -34121,6 +36752,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TIES     EXE    14610   9-23-88  12:16a
 
 ### Directory of PCSIG08: DISK1316
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1316"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1316
 	 Directory of  A:\
@@ -34163,6 +36796,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1317
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1317"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1317
 	 Directory of  A:\
 	
@@ -34181,6 +36816,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RISFILE  MEM       54   6-11-88   5:19p
 
 ### Directory of PCSIG08: DISK1318
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1318"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1318
 	 Directory of  A:\
@@ -34254,6 +36891,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1319
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1319"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1319
 	 Directory of  A:\
 	
@@ -34282,6 +36921,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1320
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1320"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1320
 	 Directory of  A:\
 	
@@ -34303,6 +36944,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VOLSER   COM     1152   2-14-88   5:29a
 
 ### Directory of PCSIG08: DISK1321
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1321"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1321
 	 Directory of  A:\
@@ -34355,6 +36998,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1322
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1322"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1322
 	 Directory of  A:\
 	
@@ -34371,6 +37016,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1323
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1323"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1323
 	 Directory of  A:\
 	
@@ -34384,6 +37031,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VREAD    ME      3501  10-01-88   1:00a
 
 ### Directory of PCSIG08: DISK1324
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1324"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1324
 	 Directory of  A:\
@@ -34402,6 +37051,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      3933   6-01-88   9:12a
 
 ### Directory of PCSIG08: DISK1325
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1325"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1325
 	 Directory of  A:\
@@ -34443,6 +37094,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1326
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1326"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1326
 	 Directory of  A:\
 	
@@ -34459,6 +37112,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SCI_CALC FMT     1479  10-18-87  11:22a
 
 ### Directory of PCSIG08: DISK1327
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1327"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1327
 	 Directory of  A:\
@@ -34482,6 +37137,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1328
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1328"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1328
 	 Directory of  A:\
 	
@@ -34497,6 +37154,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SOPWITH  DOC      455   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1329
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1329"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1329
 	 Directory of  A:\
@@ -34517,6 +37176,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	DISK1329 ZIP    19440   3-26-90   4:33a
 
 ### Directory of PCSIG08: DISK1330
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1330"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1330
 	 Directory of  A:\
@@ -34539,6 +37200,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1331
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1331"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1331
 	 Directory of  A:\
 	
@@ -34557,6 +37220,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1332
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1332"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1332
 	 Directory of  A:\
 	
@@ -34573,6 +37238,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       38   9-08-89   2:16a
 
 ### Directory of PCSIG08: DISK1333
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1333"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1333
 	 Directory of  A:\
@@ -34591,6 +37258,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC      868  12-11-88   7:20a
 
 ### Directory of PCSIG08: DISK1334
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1334"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1334
 	 Directory of  A:\
@@ -34615,6 +37284,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1335
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1335"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1335
 	 Directory of  A:\
 	
@@ -34629,6 +37300,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1336
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1336"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1336
 	 Directory of  A:\
 	
@@ -34639,6 +37312,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SD-161   EXE    76182   9-21-89  12:00a
 
 ### Directory of PCSIG08: DISK1337
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1337"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1337
 	 Directory of  A:\
@@ -34651,6 +37326,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PKXARC   COM    12242   2-28-87   5:25p
 
 ### Directory of PCSIG08: DISK1338
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1338"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1338
 	 Directory of  A:\
@@ -34667,6 +37344,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WP2      DBD   224865   1-12-89   1:48p
 
 ### Directory of PCSIG08: DISK1339
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1339"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1339
 	 Directory of  A:\
@@ -34686,6 +37365,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WRKBK3   TXT      345   4-30-89   8:52a
 
 ### Directory of PCSIG08: DISK1340
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1340"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1340
 	 Directory of  A:\
@@ -34708,6 +37389,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1341
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1341"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1341
 	 Directory of  A:\
 	
@@ -34720,6 +37403,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     5988   8-31-88  10:48a
 
 ### Directory of PCSIG08: DISK1342
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1342"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1342
 	 Directory of  A:\
@@ -34738,6 +37423,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1343
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1343"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1343
 	 Directory of  A:\
 	
@@ -34752,6 +37439,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   2       1187   2-01-89   4:00a
 
 ### Directory of PCSIG08: DISK1344
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1344"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1344
 	 Directory of  A:\
@@ -34815,6 +37504,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1345
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1345"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1345
 	 Directory of  A:\
 	
@@ -34832,6 +37523,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TWO      COM    23262  10-18-89   4:44a
 
 ### Directory of PCSIG08: DISK1346
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1346"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1346
 	 Directory of  A:\
@@ -34865,6 +37558,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1347
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1347"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1347
 	 Directory of  A:\
 	
@@ -34883,6 +37578,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REGISTER ME      3199   9-27-89   9:37a
 
 ### Directory of PCSIG08: DISK1348
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1348"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1348
 	 Directory of  A:\
@@ -34909,6 +37606,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1349
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1349"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1349
 	 Directory of  A:\
 	
@@ -34919,6 +37618,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1350
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1350"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1350
 	 Directory of  A:\
 	
@@ -34926,6 +37627,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1351
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1351"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1351
 	 Directory of  A:\
@@ -34936,6 +37639,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     3840  12-07-88  11:54a
 
 ### Directory of PCSIG08: DISK1352
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1352"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1352
 	 Directory of  A:\
@@ -34969,6 +37674,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1353
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1353"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1353
 	 Directory of  A:\
 	
@@ -34980,6 +37687,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TD1ARC   EXE   247060  12-31-89   3:59p
 
 ### Directory of PCSIG08: DISK1354
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1354"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1354
 	 Directory of  A:\
@@ -35018,6 +37727,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1355
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1355"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1355
 	 Directory of  A:\
 	
@@ -35041,6 +37752,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1356
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1356"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1356
 	 Directory of  A:\
 	
@@ -35059,6 +37772,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TITLENDX NTX     2048   7-09-89   9:19a
 
 ### Directory of PCSIG08: DISK1357
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1357"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1357
 	 Directory of  A:\
@@ -35079,6 +37794,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1358
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1358"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1358
 	 Directory of  A:\
 	
@@ -35097,6 +37814,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1359
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1359"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1359
 	 Directory of  A:\
 	
@@ -35114,6 +37833,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MANUAL   BAT      169   4-27-89   3:19a
 
 ### Directory of PCSIG08: DISK1360
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1360"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1360
 	 Directory of  A:\
@@ -35141,6 +37862,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WGCAP    COM     3544  11-12-88   6:25p
 
 ### Directory of PCSIG08: DISK1361
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1361"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1361
 	 Directory of  A:\
@@ -35179,6 +37902,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1362
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1362"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1362
 	 Directory of  A:\
 	
@@ -35189,6 +37914,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     1871   3-07-90   6:13a
 
 ### Directory of PCSIG08: DISK1363
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1363"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1363
 	 Directory of  A:\
@@ -35204,6 +37931,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1364
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1364"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1364
 	 Directory of  A:\
 	
@@ -35214,6 +37943,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           1827   9-30-89   6:02p
 
 ### Directory of PCSIG08: DISK1365
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1365"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1365
 	 Directory of  A:\
@@ -35230,6 +37961,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RUN      TXT      386   4-28-89   6:25a
 
 ### Directory of PCSIG08: DISK1366
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1366"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1366
 	 Directory of  A:\
@@ -35257,6 +37990,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1367
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1367"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1367
 	 Directory of  A:\
 	
@@ -35277,6 +38012,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SPCLMSTR DBF    23040   2-12-89   2:31a
 
 ### Directory of PCSIG08: DISK1368
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1368"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1368
 	 Directory of  A:\
@@ -35314,6 +38051,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1369
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1369"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1369
 	 Directory of  A:\
 	
@@ -35330,6 +38069,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WSASCII  DOC     3436   4-20-85   5:47p
 
 ### Directory of PCSIG08: DISK1370
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1370"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1370
 	 Directory of  A:\
@@ -35351,6 +38092,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1371
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1371"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1371
 	 Directory of  A:\
 	
@@ -35364,6 +38107,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       38   5-02-89   3:20a
 
 ### Directory of PCSIG08: DISK1372
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1372"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1372
 	 Directory of  A:\
@@ -35387,6 +38132,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1373
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1373"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1373
 	 Directory of  A:\
 	
@@ -35407,6 +38154,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1374
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1374"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1374
 	 Directory of  A:\
 	
@@ -35419,6 +38168,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       37   5-02-89   7:44a
 
 ### Directory of PCSIG08: DISK1375
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1375"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1375
 	 Directory of  A:\
@@ -35436,6 +38187,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       37   5-02-89   8:18a
 
 ### Directory of PCSIG08: DISK1376
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1376"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1376
 	 Directory of  A:\
@@ -35488,6 +38241,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1377
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1377"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1377
 	 Directory of  A:\
 	
@@ -35517,6 +38272,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1378
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1378"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1378
 	 Directory of  A:\
 	
@@ -35531,6 +38288,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VISFW    EXE   176016   2-08-90   5:26p
 
 ### Directory of PCSIG08: DISK1379
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1379"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1379
 	 Directory of  A:\
@@ -35581,6 +38340,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1380
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1380"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1380
 	 Directory of  A:\
 	
@@ -35593,6 +38354,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TMASTER  TXT     1768   2-13-90   3:26a
 
 ### Directory of PCSIG08: DISK1381
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1381"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1381
 	 Directory of  A:\
@@ -35609,6 +38372,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       44   5-04-89   2:05a
 
 ### Directory of PCSIG08: DISK1382
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1382"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1382
 	 Directory of  A:\
@@ -35633,6 +38398,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1383
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1383"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1383
 	 Directory of  A:\
 	
@@ -35647,6 +38414,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      2048  10-17-88   3:49a
 
 ### Directory of PCSIG08: DISK1384
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1384"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1384
 	 Directory of  A:\
@@ -35677,6 +38446,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1385
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1385"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1385
 	 Directory of  A:\
 	
@@ -35690,6 +38461,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       37   5-04-89   8:38a
 
 ### Directory of PCSIG08: DISK1386
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1386"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1386
 	 Directory of  A:\
@@ -35728,6 +38501,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1387
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1387"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1387
 	 Directory of  A:\
 	
@@ -35741,6 +38516,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NFLPOOL  EXE    57590   8-18-89   1:15a
 
 ### Directory of PCSIG08: DISK1388
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1388"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1388
 	 Directory of  A:\
@@ -35758,6 +38535,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1389
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1389"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1389
 	 Directory of  A:\
 	
@@ -35773,6 +38552,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1390
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1390"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1390
 	 Directory of  A:\
 	
@@ -35786,6 +38567,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       44   5-26-89   7:26a
 
 ### Directory of PCSIG08: DISK1391
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1391"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1391
 	 Directory of  A:\
@@ -35813,6 +38596,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1392
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1392"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1392
 	 Directory of  A:\
 	
@@ -35837,6 +38622,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1393
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1393"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1393
 	 Directory of  A:\
 	
@@ -35846,6 +38633,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      617   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1394
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1394"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1394
 	 Directory of  A:\
@@ -35859,6 +38648,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RMD!     EXE    77187   1-12-89   3:19p
 
 ### Directory of PCSIG08: DISK1395
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1395"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1395
 	 Directory of  A:\
@@ -35885,6 +38676,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1396
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1396"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1396
 	 Directory of  A:\
 	
@@ -35903,6 +38696,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       43   5-30-89  10:41a
 
 ### Directory of PCSIG08: DISK1397
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1397"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1397
 	 Directory of  A:\
@@ -35927,6 +38722,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1398
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1398"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1398
 	 Directory of  A:\
 	
@@ -35943,6 +38740,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       38   5-30-89   4:45a
 
 ### Directory of PCSIG08: DISK1399
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1399"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1399
 	 Directory of  A:\
@@ -35989,6 +38788,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1400
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1400"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1400
 	 Directory of  A:\
 	
@@ -36013,6 +38814,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1401
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1401"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1401
 	 Directory of  A:\
 	
@@ -36020,6 +38823,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1402
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1402"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1402
 	 Directory of  A:\
@@ -36035,6 +38840,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1403
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1403"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1403
 	 Directory of  A:\
 	
@@ -36046,6 +38853,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	LOVEDOS  EXE   178526   9-07-89   3:10a
 
 ### Directory of PCSIG08: DISK1404
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1404"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1404
 	 Directory of  A:\
@@ -36064,6 +38873,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	QDEL     EXE     9005   4-27-88   2:16p
 
 ### Directory of PCSIG08: DISK1405
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1405"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1405
 	 Directory of  A:\
@@ -36088,6 +38899,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1406
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1406"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1406
 	 Directory of  A:\
 	
@@ -36102,6 +38915,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       39   5-31-89   4:06a
 
 ### Directory of PCSIG08: DISK1407
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1407"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1407
 	 Directory of  A:\
@@ -36131,6 +38946,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1408
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1408"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1408
 	 Directory of  A:\
 	
@@ -36146,6 +38963,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ROMBAK   TXT    75648   9-04-88   1:29p
 
 ### Directory of PCSIG08: DISK1409
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1409"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1409
 	 Directory of  A:\
@@ -36164,6 +38983,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WARNING  TXT      191   2-07-90  10:18a
 
 ### Directory of PCSIG08: DISK1410
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1410"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1410
 	 Directory of  A:\
@@ -36191,6 +39012,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1411
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1411"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1411
 	 Directory of  A:\
 	
@@ -36205,6 +39028,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       39   6-01-89   8:53a
 
 ### Directory of PCSIG08: DISK1412
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1412"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1412
 	 Directory of  A:\
@@ -36226,6 +39051,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       43   6-01-89   2:02a
 
 ### Directory of PCSIG08: DISK1413
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1413"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1413
 	 Directory of  A:\
@@ -36251,6 +39078,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1414
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1414"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1414
 	 Directory of  A:\
 	
@@ -36275,6 +39104,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       38   6-01-89   3:05a
 
 ### Directory of PCSIG08: DISK1415
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1415"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1415
 	 Directory of  A:\
@@ -36316,6 +39147,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1416
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1416"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1416
 	 Directory of  A:\
 	
@@ -36334,6 +39167,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       43   6-01-89   3:25a
 
 ### Directory of PCSIG08: DISK1417
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1417"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1417
 	 Directory of  A:\
@@ -36413,6 +39248,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1418
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1418"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1418
 	 Directory of  A:\
 	
@@ -36427,6 +39264,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       39   6-01-89   4:00a
 
 ### Directory of PCSIG08: DISK1419
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1419"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1419
 	 Directory of  A:\
@@ -36444,6 +39283,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1420
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1420"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1420
 	 Directory of  A:\
 	
@@ -36458,6 +39299,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       38   6-01-89   4:24a
 
 ### Directory of PCSIG08: DISK1421
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1421"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1421
 	 Directory of  A:\
@@ -36475,6 +39318,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1422
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1422"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1422
 	 Directory of  A:\
 	
@@ -36490,6 +39335,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TUNER    EXE    29824  12-24-88   4:05a
 
 ### Directory of PCSIG08: DISK1423
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1423"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1423
 	 Directory of  A:\
@@ -36521,6 +39368,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       40   6-01-89   7:45a
 
 ### Directory of PCSIG08: DISK1424
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1424"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1424
 	 Directory of  A:\
@@ -36558,6 +39407,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1425
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1425"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1425
 	 Directory of  A:\
 	
@@ -36567,6 +39418,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      386   6-01-89   8:20a
 
 ### Directory of PCSIG08: DISK1426
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1426"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1426
 	 Directory of  A:\
@@ -36580,6 +39433,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SSR      EXE    28737   7-23-86   2:46a
 
 ### Directory of PCSIG08: DISK1427
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1427"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1427
 	 Directory of  A:\
@@ -36603,6 +39458,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1428
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1428"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1428
 	 Directory of  A:\
 	
@@ -36614,6 +39471,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      3070   1-07-89   4:52a
 
 ### Directory of PCSIG08: DISK1429
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1429"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1429
 	 Directory of  A:\
@@ -36632,6 +39491,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SYSTEM   RC       385   5-18-88   4:49p
 
 ### Directory of PCSIG08: DISK1430
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1430"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1430
 	 Directory of  A:\
@@ -36669,6 +39530,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	DISK1430 ZIP   191218   3-26-90   4:36a
 
 ### Directory of PCSIG08: DISK1431
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1431"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1431
 	 Directory of  A:\
@@ -36710,6 +39573,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1432
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1432"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1432
 	 Directory of  A:\
 	
@@ -36723,6 +39588,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       41   6-02-89   2:36a
 
 ### Directory of PCSIG08: DISK1433
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1433"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1433
 	 Directory of  A:\
@@ -36751,6 +39618,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1434
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1434"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1434
 	 Directory of  A:\
 	
@@ -36771,6 +39640,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1435
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1435"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1435
 	 Directory of  A:\
 	
@@ -36780,6 +39651,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      386   6-02-89   3:16a
 
 ### Directory of PCSIG08: DISK1436
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1436"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1436
 	 Directory of  A:\
@@ -36794,6 +39667,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PKUNZIP  EXE    21440   7-20-89   6:01p
 
 ### Directory of PCSIG08: DISK1437
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1437"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1437
 	 Directory of  A:\
@@ -36815,6 +39690,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       43   6-02-89   3:39a
 
 ### Directory of PCSIG08: DISK1438
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1438"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1438
 	 Directory of  A:\
@@ -36838,6 +39715,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1439
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1439"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1439
 	 Directory of  A:\
 	
@@ -36853,6 +39732,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1440
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1440"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1440
 	 Directory of  A:\
 	
@@ -36860,6 +39741,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1441
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1441"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1441
 	 Directory of  A:\
@@ -36869,6 +39752,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1442
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1442"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1442
 	 Directory of  A:\
 	
@@ -36876,6 +39761,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1443
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1443"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1443
 	 Directory of  A:\
@@ -36885,6 +39772,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1444
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1444"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1444
 	 Directory of  A:\
 	
@@ -36892,6 +39781,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1445
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1445"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1445
 	 Directory of  A:\
@@ -36901,6 +39792,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1446
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1446"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1446
 	 Directory of  A:\
 	
@@ -36908,6 +39801,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1447
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1447"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1447
 	 Directory of  A:\
@@ -36917,6 +39812,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1448
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1448"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1448
 	 Directory of  A:\
 	
@@ -36924,6 +39821,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1449
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1449"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1449
 	 Directory of  A:\
@@ -36940,6 +39839,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   BAT    10368  10-18-89   4:06p
 
 ### Directory of PCSIG08: DISK1450
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1450"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1450
 	 Directory of  A:\
@@ -37007,6 +39908,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1451
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1451"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1451
 	 Directory of  A:\
 	
@@ -37022,6 +39925,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       37   6-02-89   5:24a
 
 ### Directory of PCSIG08: DISK1452
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1452"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1452
 	 Directory of  A:\
@@ -37162,6 +40067,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1453
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1453"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1453
 	 Directory of  A:\
 	
@@ -37174,6 +40081,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1454
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1454"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1454
 	 Directory of  A:\
 	
@@ -37185,6 +40094,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	DISK1454 ZIP   256672   3-26-90   4:38a
 
 ### Directory of PCSIG08: DISK1455
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1455"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1455
 	 Directory of  A:\
@@ -37237,6 +40148,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1456
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1456"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1456
 	 Directory of  A:\
 	
@@ -37246,6 +40159,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      386   6-12-89   3:46a
 
 ### Directory of PCSIG08: DISK1457
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1457"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1457
 	 Directory of  A:\
@@ -37358,6 +40273,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1458
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1458"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1458
 	 Directory of  A:\
 	
@@ -37381,6 +40298,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1459
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1459"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1459
 	 Directory of  A:\
 	
@@ -37396,6 +40315,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1460
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1460"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1460
 	 Directory of  A:\
 	
@@ -37410,6 +40331,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       62   6-13-89   8:03a
 
 ### Directory of PCSIG08: DISK1461
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1461"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1461
 	 Directory of  A:\
@@ -37441,6 +40364,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1462
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1462"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1462
 	 Directory of  A:\
 	
@@ -37462,6 +40387,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORDPF51 COM    58858   1-31-90   1:00a
 
 ### Directory of PCSIG08: DISK1463
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1463"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1463
 	 Directory of  A:\
@@ -37487,6 +40414,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORDPF51 COM    38212   1-31-90   1:00a
 
 ### Directory of PCSIG08: DISK1464
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1464"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1464
 	 Directory of  A:\
@@ -37515,6 +40444,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1465
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1465"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1465
 	 Directory of  A:\
 	
@@ -37533,6 +40464,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USERLIB  EXE     7570   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1466
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1466"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1466
 	 Directory of  A:\
@@ -37554,6 +40487,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1467
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1467"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1467
 	 Directory of  A:\
 	
@@ -37568,6 +40503,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       64   6-21-89   7:15a
 
 ### Directory of PCSIG08: DISK1468
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1468"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1468
 	 Directory of  A:\
@@ -37593,6 +40530,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZIP      EXE   112165   2-02-90   6:40a
 
 ### Directory of PCSIG08: DISK1469
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1469"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1469
 	 Directory of  A:\
@@ -37671,6 +40610,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1470
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1470"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1470
 	 Directory of  A:\
 	
@@ -37694,6 +40635,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VENDOR   DOC     1560  12-01-89   1:01a
 
 ### Directory of PCSIG08: DISK1471
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1471"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1471
 	 Directory of  A:\
@@ -37738,6 +40681,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1472
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1472"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1472
 	 Directory of  A:\
 	
@@ -37762,6 +40707,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1473
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1473"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1473
 	 Directory of  A:\
 	
@@ -37782,6 +40729,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1474
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1474"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1474
 	 Directory of  A:\
 	
@@ -37796,6 +40745,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TUTOR2   TXT    30486   5-01-89   3:15a
 
 ### Directory of PCSIG08: DISK1475
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1475"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1475
 	 Directory of  A:\
@@ -37817,6 +40768,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1476
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1476"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1476
 	 Directory of  A:\
 	
@@ -37828,6 +40781,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      617   6-19-89   3:08a
 
 ### Directory of PCSIG08: DISK1477
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1477"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1477
 	 Directory of  A:\
@@ -37841,6 +40796,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1478
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1478"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1478
 	 Directory of  A:\
 	
@@ -37851,6 +40808,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	QIP      ZIP   316806   9-12-89   9:18a
 
 ### Directory of PCSIG08: DISK1479
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1479"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1479
 	 Directory of  A:\
@@ -37866,6 +40825,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1480
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1480"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1480
 	 Directory of  A:\
 	
@@ -37878,6 +40839,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SUPPORT           516   6-30-89   6:50a
 
 ### Directory of PCSIG08: DISK1481
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1481"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1481
 	 Directory of  A:\
@@ -37893,6 +40856,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1482
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1482"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1482
 	 Directory of  A:\
 	
@@ -37907,6 +40872,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1483
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1483"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1483
 	 Directory of  A:\
 	
@@ -37917,6 +40884,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	QMDOC          223869  10-25-89   3:47a
 
 ### Directory of PCSIG08: DISK1484
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1484"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1484
 	 Directory of  A:\
@@ -37933,6 +40902,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SHOW     EXE    74727   9-24-89   9:10p
 
 ### Directory of PCSIG08: DISK1485
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1485"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1485
 	 Directory of  A:\
@@ -37981,6 +40952,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1486
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1486"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1486
 	 Directory of  A:\
 	
@@ -37996,6 +40969,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1487
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1487"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1487
 	 Directory of  A:\
 	
@@ -38010,6 +40985,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       42   7-28-89   2:20a
 
 ### Directory of PCSIG08: DISK1488
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1488"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1488
 	 Directory of  A:\
@@ -38045,6 +41022,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1489
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1489"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1489
 	 Directory of  A:\
 	
@@ -38058,6 +41037,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       44   1-01-10  11:34a
 
 ### Directory of PCSIG08: DISK1490
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1490"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1490
 	 Directory of  A:\
@@ -38074,6 +41055,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VEGASPRO PKR      500   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1491
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1491"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1491
 	 Directory of  A:\
@@ -38092,6 +41075,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1492
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1492"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1492
 	 Directory of  A:\
 	
@@ -38105,6 +41090,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT     1079  12-14-89   5:47a
 
 ### Directory of PCSIG08: DISK1493
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1493"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1493
 	 Directory of  A:\
@@ -38139,6 +41126,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1494
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1494"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1494
 	 Directory of  A:\
 	
@@ -38153,6 +41142,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READTHIS BAT     6231   2-12-89   7:25a
 
 ### Directory of PCSIG08: DISK1495
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1495"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1495
 	 Directory of  A:\
@@ -38170,6 +41161,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WONDER2  EXE   118897   8-13-89   1:01a
 
 ### Directory of PCSIG08: DISK1496
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1496"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1496
 	 Directory of  A:\
@@ -38203,6 +41196,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1497
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1497"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1497
 	 Directory of  A:\
 	
@@ -38214,6 +41209,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README            998  11-19-89   5:05a
 
 ### Directory of PCSIG08: DISK1498
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1498"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1498
 	 Directory of  A:\
@@ -38263,6 +41260,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1499
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1499"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1499
 	 Directory of  A:\
 	
@@ -38270,6 +41269,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	FLOPPY1  DAT   308506   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1500
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1500"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1500
 	 Directory of  A:\
@@ -38288,6 +41289,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1501
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1501"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1501
 	 Directory of  A:\
 	
@@ -38295,6 +41298,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	FLOPPY3  DAT   356422   2-03-88   4:32p
 
 ### Directory of PCSIG08: DISK1502
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1502"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1502
 	 Directory of  A:\
@@ -38313,6 +41318,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	X16SHARE EXE    61579   2-28-89   7:00p
 
 ### Directory of PCSIG08: DISK1503
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1503"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1503
 	 Directory of  A:\
@@ -38339,6 +41346,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1504
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1504"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1504
 	 Directory of  A:\
 	
@@ -38348,6 +41357,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SIDEWAYS DTA     1628   1-01-90   2:47a
 
 ### Directory of PCSIG08: DISK1505
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1505"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1505
 	 Directory of  A:\
@@ -38366,6 +41377,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	START    BAT     1254   3-06-90  10:39a
 
 ### Directory of PCSIG08: DISK1506
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1506"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1506
 	 Directory of  A:\
@@ -38387,6 +41400,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VENDOR   DOC     1490   3-09-90  12:43a
 
 ### Directory of PCSIG08: DISK1507
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1507"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1507
 	 Directory of  A:\
@@ -38414,6 +41429,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XY_DEMO  MAM    17201   2-18-89   7:48a
 
 ### Directory of PCSIG08: DISK1508
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1508"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1508
 	 Directory of  A:\
@@ -38474,6 +41491,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1509
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1509"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1509
 	 Directory of  A:\
 	
@@ -38491,6 +41510,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZYACZ100 COM    43986   3-12-88   2:58p
 
 ### Directory of PCSIG08: DISK1510
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1510"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1510
 	 Directory of  A:\
@@ -38520,6 +41541,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1511
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1511"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1511
 	 Directory of  A:\
 	
@@ -38545,6 +41568,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1512
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1512"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1512
 	 Directory of  A:\
 	
@@ -38566,6 +41591,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1513
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1513"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1513
 	 Directory of  A:\
 	
@@ -38580,6 +41607,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1514
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1514"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1514
 	 Directory of  A:\
 	
@@ -38589,6 +41618,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	STARTUP  EXE    29968   5-08-89   2:40a
 
 ### Directory of PCSIG08: DISK1515
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1515"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1515
 	 Directory of  A:\
@@ -38611,6 +41642,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1516
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1516"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1516
 	 Directory of  A:\
 	
@@ -38628,6 +41661,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   EXE    25249   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1517
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1517"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1517
 	 Directory of  A:\
@@ -38648,6 +41683,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1518
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1518"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1518
 	 Directory of  A:\
 	
@@ -38667,6 +41704,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       43   8-07-89  10:47a
 
 ### Directory of PCSIG08: DISK1519
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1519"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1519
 	 Directory of  A:\
@@ -38692,6 +41731,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1520
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1520"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1520
 	 Directory of  A:\
 	
@@ -38704,6 +41745,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MAYANDOC COM    49368  10-29-89   2:47p
 
 ### Directory of PCSIG08: DISK1521
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1521"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1521
 	 Directory of  A:\
@@ -38718,6 +41761,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	STARTUP  EXE   174971   1-30-90   8:39a
 
 ### Directory of PCSIG08: DISK1522
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1522"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1522
 	 Directory of  A:\
@@ -38741,6 +41786,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1523
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1523"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1523
 	 Directory of  A:\
 	
@@ -38756,6 +41803,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	OTH      TXT     1024   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1524
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1524"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1524
 	 Directory of  A:\
@@ -38780,6 +41829,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1525
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1525"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1525
 	 Directory of  A:\
 	
@@ -38794,6 +41845,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   1ST     1432  10-29-89   2:37p
 
 ### Directory of PCSIG08: DISK1526
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1526"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1526
 	 Directory of  A:\
@@ -38863,6 +41916,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1527
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1527"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1527
 	 Directory of  A:\
 	
@@ -38878,6 +41933,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SUM      EXE    11677  12-05-88   2:26a
 
 ### Directory of PCSIG08: DISK1528
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1528"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1528
 	 Directory of  A:\
@@ -38896,6 +41953,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1529
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1529"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1529
 	 Directory of  A:\
 	
@@ -38905,6 +41964,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	INSTALL  EXE   289462   2-18-89  10:03a
 
 ### Directory of PCSIG08: DISK1530
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1530"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1530
 	 Directory of  A:\
@@ -38936,6 +41997,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1531
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1531"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1531
 	 Directory of  A:\
 	
@@ -38951,6 +42014,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       44   8-10-89   3:30a
 
 ### Directory of PCSIG08: DISK1532
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1532"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1532
 	 Directory of  A:\
@@ -38976,6 +42041,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIEW     BAT       40   8-10-89   3:45a
 
 ### Directory of PCSIG08: DISK1533
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1533"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1533
 	 Directory of  A:\
@@ -39023,6 +42090,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1534
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1534"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1534
 	 Directory of  A:\
 	
@@ -39042,6 +42111,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WP_LINK  DAT    21633   1-29-89   6:45p
 
 ### Directory of PCSIG08: DISK1535
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1535"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1535
 	 Directory of  A:\
@@ -39071,6 +42142,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SAMPLE   REF      102   2-22-90   8:20p
 
 ### Directory of PCSIG08: DISK1536
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1536"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1536
 	 Directory of  A:\
@@ -39103,6 +42176,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1537
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1537"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1537
 	 Directory of  A:\
 	
@@ -39131,6 +42206,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1538
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1538"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1538
 	 Directory of  A:\
 	
@@ -39156,6 +42233,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1539
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1539"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1539
 	 Directory of  A:\
 	
@@ -39177,6 +42256,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UTIL     PRN    18948   4-19-88  10:18a
 
 ### Directory of PCSIG08: DISK1540
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1540"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1540
 	 Directory of  A:\
@@ -39206,6 +42287,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1541
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1541"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1541
 	 Directory of  A:\
 	
@@ -39231,6 +42314,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1542
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1542"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1542
 	 Directory of  A:\
 	
@@ -39253,6 +42338,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1543
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1543"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1543
 	 Directory of  A:\
 	
@@ -39264,6 +42351,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540  12-14-89   6:21a
 
 ### Directory of PCSIG08: DISK1544
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1544"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1544
 	 Directory of  A:\
@@ -39278,6 +42367,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SLOT1    PBM    40920   7-21-89   7:36a
 
 ### Directory of PCSIG08: DISK1545
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1545"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1545
 	 Directory of  A:\
@@ -39296,6 +42387,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RUN      BAT       21  12-30-88   4:00p
 
 ### Directory of PCSIG08: DISK1546
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1546"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1546
 	 Directory of  A:\
@@ -39319,6 +42412,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1547
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1547"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1547
 	 Directory of  A:\
 	
@@ -39336,6 +42431,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RUN      BAT       21  12-30-88   4:00p
 
 ### Directory of PCSIG08: DISK1548
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1548"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1548
 	 Directory of  A:\
@@ -39360,6 +42457,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1549
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1549"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1549
 	 Directory of  A:\
 	
@@ -39370,6 +42469,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ST200B   LZH   129357   7-03-89  12:51a
 
 ### Directory of PCSIG08: DISK1550
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1550"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1550
 	 Directory of  A:\
@@ -39385,6 +42486,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NMAIL200 GGG   153075   6-26-89   5:10a
 
 ### Directory of PCSIG08: DISK1551
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1551"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1551
 	 Directory of  A:\
@@ -39405,6 +42508,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VERB     BAS       45   1-14-81  10:32p
 
 ### Directory of PCSIG08: DISK1552
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1552"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1552
 	 Directory of  A:\
@@ -39471,6 +42576,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1553
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1553"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1553
 	 Directory of  A:\
 	
@@ -39502,6 +42609,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1554
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1554"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1554
 	 Directory of  A:\
 	
@@ -39529,6 +42638,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1555
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1555"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1555
 	 Directory of  A:\
 	
@@ -39554,6 +42665,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1556
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1556"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1556
 	 Directory of  A:\
 	
@@ -39567,6 +42680,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TOTHELLO TXT     2845   8-03-88  12:34p
 
 ### Directory of PCSIG08: DISK1557
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1557"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1557
 	 Directory of  A:\
@@ -39599,6 +42714,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1558
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1558"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1558
 	 Directory of  A:\
 	
@@ -39617,6 +42734,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1559
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1559"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1559
 	 Directory of  A:\
 	
@@ -39632,6 +42751,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RUN      BAT       20   1-31-90   5:10p
 
 ### Directory of PCSIG08: DISK1560
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1560"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1560
 	 Directory of  A:\
@@ -39651,6 +42772,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SAMPLE   GLT     8970   1-31-90   5:10p
 
 ### Directory of PCSIG08: DISK1561
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1561"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1561
 	 Directory of  A:\
@@ -39718,6 +42841,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1562
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1562"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1562
 	 Directory of  A:\
 	
@@ -39732,6 +42857,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PKXARC   COM    12242   4-26-87   5:00p
 
 ### Directory of PCSIG08: DISK1563
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1563"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1563
 	 Directory of  A:\
@@ -39755,6 +42882,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1564
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1564"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1564
 	 Directory of  A:\
 	
@@ -39773,6 +42902,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      6158   7-06-88   5:32p
 
 ### Directory of PCSIG08: DISK1565
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1565"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1565
 	 Directory of  A:\
@@ -39795,6 +42926,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1566
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1566"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1566
 	 Directory of  A:\
 	
@@ -39815,6 +42948,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1567
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1567"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1567
 	 Directory of  A:\
 	
@@ -39822,6 +42957,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1568
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1568"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1568
 	 Directory of  A:\
@@ -39855,6 +42992,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UPGRADE  BAT     1708   2-06-90   9:58a
 
 ### Directory of PCSIG08: DISK1569
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1569"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1569
 	 Directory of  A:\
@@ -39890,6 +43029,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1570
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1570"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1570
 	 Directory of  A:\
 	
@@ -39901,6 +43042,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   1ST     6169   3-14-89   2:17p
 
 ### Directory of PCSIG08: DISK1571
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1571"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1571
 	 Directory of  A:\
@@ -39915,6 +43058,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1572
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1572"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1572
 	 Directory of  A:\
 	
@@ -39928,6 +43073,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1573
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1573"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1573
 	 Directory of  A:\
 	
@@ -39940,6 +43087,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SLOT     TXT     2176   6-07-89   8:41p
 
 ### Directory of PCSIG08: DISK1574
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1574"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1574
 	 Directory of  A:\
@@ -39997,6 +43146,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1575
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1575"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1575
 	 Directory of  A:\
 	
@@ -40010,6 +43161,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     4101   1-23-90   3:30a
 
 ### Directory of PCSIG08: DISK1576
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1576"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1576
 	 Directory of  A:\
@@ -40025,6 +43178,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORDSTAR DIC     5670   3-11-89   5:28p
 
 ### Directory of PCSIG08: DISK1577
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1577"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1577
 	 Directory of  A:\
@@ -40046,6 +43201,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1578
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1578"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1578
 	 Directory of  A:\
 	
@@ -40059,6 +43216,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ITEMSPTR DAT    18000   1-09-90   4:28p
 
 ### Directory of PCSIG08: DISK1579
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1579"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1579
 	 Directory of  A:\
@@ -40076,6 +43235,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1580
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1580"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1580
 	 Directory of  A:\
 	
@@ -40086,6 +43247,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	LOANSTAR EXE    61632  12-07-88   7:40p
 
 ### Directory of PCSIG08: DISK1581
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1581"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1581
 	 Directory of  A:\
@@ -40104,6 +43267,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WIPEOUT  BAT      389   2-18-90   5:39a
 
 ### Directory of PCSIG08: DISK1582
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1582"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1582
 	 Directory of  A:\
@@ -40128,6 +43293,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1583
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1583"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1583
 	 Directory of  A:\
 	
@@ -40144,6 +43311,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1584
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1584"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1584
 	 Directory of  A:\
 	
@@ -40156,6 +43325,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      848  10-18-89  11:04a
 
 ### Directory of PCSIG08: DISK1585
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1585"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1585
 	 Directory of  A:\
@@ -40218,6 +43389,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1586
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1586"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1586
 	 Directory of  A:\
 	
@@ -40228,6 +43401,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	START    EXE   320064   1-30-90   8:08p
 
 ### Directory of PCSIG08: DISK1587
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1587"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1587
 	 Directory of  A:\
@@ -40241,6 +43416,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1588
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1588"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1588
 	 Directory of  A:\
 	
@@ -40251,6 +43428,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VGAPRN   ARC    65823   6-13-88  12:58p
 
 ### Directory of PCSIG08: DISK1589
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1589"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1589
 	 Directory of  A:\
@@ -40266,6 +43445,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1590
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1590"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1590
 	 Directory of  A:\
 	
@@ -40278,6 +43459,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   1ST      472   6-27-89  10:07a
 
 ### Directory of PCSIG08: DISK1591
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1591"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1591
 	 Directory of  A:\
@@ -40292,6 +43475,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1592
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1592"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1592
 	 Directory of  A:\
 	
@@ -40301,6 +43486,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1593
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1593"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1593
 	 Directory of  A:\
 	
@@ -40309,6 +43496,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1594
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1594"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1594
 	 Directory of  A:\
 	
@@ -40316,6 +43505,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	KJV            360000  10-09-89   3:31p
 
 ### Directory of PCSIG08: DISK1595
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1595"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1595
 	 Directory of  A:\
@@ -40327,6 +43518,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1596
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1596"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1596
 	 Directory of  A:\
 	
@@ -40335,6 +43528,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1597
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1597"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1597
 	 Directory of  A:\
 	
@@ -40342,6 +43537,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VERSES         360000  10-09-89   3:33p
 
 ### Directory of PCSIG08: DISK1598
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1598"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1598
 	 Directory of  A:\
@@ -40352,6 +43549,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1599
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1599"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1599
 	 Directory of  A:\
 	
@@ -40360,6 +43559,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MISC     LZH   238557  10-09-89   3:35p
 
 ### Directory of PCSIG08: DISK1600
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1600"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1600
 	 Directory of  A:\
@@ -40376,6 +43577,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1601
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1601"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1601
 	 Directory of  A:\
 	
@@ -40383,6 +43586,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1602
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1602"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1602
 	 Directory of  A:\
@@ -40392,6 +43597,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1603
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1603"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1603
 	 Directory of  A:\
 	
@@ -40399,6 +43606,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1604
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1604"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1604
 	 Directory of  A:\
@@ -40413,6 +43622,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TOMMYS   DOC     6603  10-10-89  12:06a
 
 ### Directory of PCSIG08: DISK1605
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1605"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1605
 	 Directory of  A:\
@@ -40429,6 +43640,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1606
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1606"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1606
 	 Directory of  A:\
 	
@@ -40442,6 +43655,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1607
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1607"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1607
 	 Directory of  A:\
 	
@@ -40453,6 +43668,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README            812   3-14-89   5:03p
 
 ### Directory of PCSIG08: DISK1608
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1608"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1608
 	 Directory of  A:\
@@ -40495,6 +43712,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1609
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1609"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1609
 	 Directory of  A:\
 	
@@ -40518,6 +43737,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1610
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1610"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1610
 	 Directory of  A:\
 	
@@ -40532,6 +43753,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1611
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1611"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1611
 	 Directory of  A:\
 	
@@ -40542,6 +43765,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      694   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1612
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1612"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1612
 	 Directory of  A:\
@@ -40558,6 +43783,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1613
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1613"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1613
 	 Directory of  A:\
 	
@@ -40565,6 +43792,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1614
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1614"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1614
 	 Directory of  A:\
@@ -40591,6 +43820,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1615
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1615"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1615
 	 Directory of  A:\
 	
@@ -40605,6 +43836,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     IT      9997   1-20-89  11:55p
 
 ### Directory of PCSIG08: DISK1616
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1616"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1616
 	 Directory of  A:\
@@ -40627,6 +43860,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WV636    DBF     3272   6-08-89   2:06a
 
 ### Directory of PCSIG08: DISK1617
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1617"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1617
 	 Directory of  A:\
@@ -40655,6 +43890,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1618
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1618"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1618
 	 Directory of  A:\
 	
@@ -40666,6 +43903,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TEST     DBF      815   9-20-88  12:51a
 
 ### Directory of PCSIG08: DISK1619
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1619"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1619
 	 Directory of  A:\
@@ -40700,6 +43939,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1620
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1620"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1620
 	 Directory of  A:\
 	
@@ -40711,6 +43952,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REALTY   EXE   122368  10-15-88   4:57a
 
 ### Directory of PCSIG08: DISK1621
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1621"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1621
 	 Directory of  A:\
@@ -40734,6 +43977,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1622
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1622"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1622
 	 Directory of  A:\
 	
@@ -40745,6 +43990,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   1ST     4943   3-14-89   1:32p
 
 ### Directory of PCSIG08: DISK1623
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1623"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1623
 	 Directory of  A:\
@@ -40763,6 +44010,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1624
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1624"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1624
 	 Directory of  A:\
 	
@@ -40774,6 +44023,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MAIN     TBC    69808  10-22-88  10:22p
 
 ### Directory of PCSIG08: DISK1625
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1625"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1625
 	 Directory of  A:\
@@ -40802,6 +44053,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1626
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1626"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1626
 	 Directory of  A:\
 	
@@ -40816,6 +44069,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1627
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1627"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1627
 	 Directory of  A:\
 	
@@ -40828,6 +44083,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1628
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1628"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1628
 	 Directory of  A:\
 	
@@ -40835,6 +44092,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1629
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1629"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1629
 	 Directory of  A:\
@@ -40849,6 +44108,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	KINDER   TXT      855   5-21-89   1:55a
 
 ### Directory of PCSIG08: DISK1630
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1630"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1630
 	 Directory of  A:\
@@ -40878,6 +44139,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1631
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1631"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1631
 	 Directory of  A:\
 	
@@ -40906,6 +44169,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WHATSNEW DOC     1778   3-01-90   6:00a
 
 ### Directory of PCSIG08: DISK1632
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1632"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1632
 	 Directory of  A:\
@@ -40944,6 +44209,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1633
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1633"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1633
 	 Directory of  A:\
 	
@@ -40955,6 +44222,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TPR1     EXE    57646   2-10-89   5:45p
 
 ### Directory of PCSIG08: DISK1634
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1634"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1634
 	 Directory of  A:\
@@ -40977,6 +44246,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1635
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1635"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1635
 	 Directory of  A:\
 	
@@ -40991,6 +44262,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1636
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1636"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1636
 	 Directory of  A:\
 	
@@ -41002,6 +44275,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TWODISKS EXE    55056   2-11-89   5:41a
 
 ### Directory of PCSIG08: DISK1637
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1637"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1637
 	 Directory of  A:\
@@ -41023,6 +44298,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WMSTART  WMN    22016   4-07-89   1:00a
 
 ### Directory of PCSIG08: DISK1638
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1638"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1638
 	 Directory of  A:\
@@ -41055,6 +44332,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	YOURMENU EXE    68078  12-31-88  12:27a
 
 ### Directory of PCSIG08: DISK1639
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1639"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1639
 	 Directory of  A:\
@@ -41094,6 +44373,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1640
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1640"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1640
 	 Directory of  A:\
 	
@@ -41110,6 +44391,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TCODE    FIL      140   2-10-89  10:48a
 
 ### Directory of PCSIG08: DISK1641
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1641"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1641
 	 Directory of  A:\
@@ -41162,6 +44445,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1642
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1642"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1642
 	 Directory of  A:\
 	
@@ -41182,6 +44467,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1643
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1643"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1643
 	 Directory of  A:\
 	
@@ -41192,6 +44479,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   1ST     3256   3-29-89   4:55p
 
 ### Directory of PCSIG08: DISK1644
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1644"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1644
 	 Directory of  A:\
@@ -41209,6 +44498,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNO      EXE    52247   2-02-90   6:45p
 
 ### Directory of PCSIG08: DISK1645
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1645"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1645
 	 Directory of  A:\
@@ -41267,6 +44558,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1646
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1646"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1646
 	 Directory of  A:\
 	
@@ -41279,6 +44572,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   1ST     2287   6-29-89   2:51p
 
 ### Directory of PCSIG08: DISK1647
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1647"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1647
 	 Directory of  A:\
@@ -41293,6 +44588,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	IBR      BAT       21   7-23-89   7:43a
 
 ### Directory of PCSIG08: DISK1648
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1648"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1648
 	 Directory of  A:\
@@ -41312,6 +44609,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SHOPDOC  EXE    43153   9-23-88   2:23a
 
 ### Directory of PCSIG08: DISK1649
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1649"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1649
 	 Directory of  A:\
@@ -41363,6 +44662,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1650
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1650"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1650
 	 Directory of  A:\
 	
@@ -41376,6 +44677,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	HEXTODEC EXE    28416   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1651
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1651"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1651
 	 Directory of  A:\
@@ -41392,6 +44695,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WINTTT5  OBJ      257   1-30-89   4:00p
 
 ### Directory of PCSIG08: DISK1652
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1652"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1652
 	 Directory of  A:\
@@ -41410,6 +44715,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1653
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1653"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1653
 	 Directory of  A:\
 	
@@ -41422,6 +44729,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SCRDISK2 ARC   171209   6-13-89   4:09p
 
 ### Directory of PCSIG08: DISK1654
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1654"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1654
 	 Directory of  A:\
@@ -41444,6 +44753,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1655
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1655"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1655
 	 Directory of  A:\
 	
@@ -41453,6 +44764,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      771  12-01-89   3:59a
 
 ### Directory of PCSIG08: DISK1656
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1656"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1656
 	 Directory of  A:\
@@ -41464,6 +44777,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1657
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1657"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1657
 	 Directory of  A:\
 	
@@ -41473,6 +44788,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      771  12-01-89   4:03a
 
 ### Directory of PCSIG08: DISK1658
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1658"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1658
 	 Directory of  A:\
@@ -41498,6 +44815,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1659
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1659"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1659
 	 Directory of  A:\
 	
@@ -41509,6 +44828,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNPAKFNL BAT      136   6-28-89  12:35a
 
 ### Directory of PCSIG08: DISK1660
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1660"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1660
 	 Directory of  A:\
@@ -41525,6 +44846,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TRMAN    DBF     2579   1-18-88  11:42a
 
 ### Directory of PCSIG08: DISK1661
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1661"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1661
 	 Directory of  A:\
@@ -41547,6 +44870,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1662
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1662"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1662
 	 Directory of  A:\
 	
@@ -41560,6 +44885,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RSTPRINT EXE    37734   8-14-88   6:28p
 
 ### Directory of PCSIG08: DISK1663
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1663"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1663
 	 Directory of  A:\
@@ -41579,6 +44906,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT     1002  11-28-89   4:20a
 
 ### Directory of PCSIG08: DISK1664
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1664"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1664
 	 Directory of  A:\
@@ -41601,6 +44930,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1665
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1665"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1665
 	 Directory of  A:\
 	
@@ -41621,6 +44952,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1666
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1666"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1666
 	 Directory of  A:\
 	
@@ -41640,6 +44973,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	________            1   3-04-89  10:56a
 
 ### Directory of PCSIG08: DISK1667
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1667"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1667
 	 Directory of  A:\
@@ -41663,6 +44998,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1668
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1668"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1668
 	 Directory of  A:\
 	
@@ -41684,6 +45021,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1669
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1669"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1669
 	 Directory of  A:\
 	
@@ -41695,6 +45034,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WTHIST   DOC      378   9-23-89   8:06a
 
 ### Directory of PCSIG08: DISK1670
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1670"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1670
 	 Directory of  A:\
@@ -41730,6 +45071,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1671
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1671"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1671
 	 Directory of  A:\
 	
@@ -41743,6 +45086,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1672
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1672"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1672
 	 Directory of  A:\
 	
@@ -41752,6 +45097,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TGA      DOC   155868  12-31-89   7:00p
 
 ### Directory of PCSIG08: DISK1673
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1673"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1673
 	 Directory of  A:\
@@ -41781,6 +45128,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1674
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1674"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1674
 	 Directory of  A:\
 	
@@ -41792,6 +45141,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540  12-08-89   4:57a
 
 ### Directory of PCSIG08: DISK1675
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1675"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1675
 	 Directory of  A:\
@@ -41815,6 +45166,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1676
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1676"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1676
 	 Directory of  A:\
 	
@@ -41826,6 +45179,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      544   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1677
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1677"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1677
 	 Directory of  A:\
@@ -41845,6 +45200,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   CE     30436   3-11-89   5:07a
 
 ### Directory of PCSIG08: DISK1678
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1678"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1678
 	 Directory of  A:\
@@ -41869,6 +45226,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1679
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1679"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1679
 	 Directory of  A:\
 	
@@ -41883,6 +45242,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1680
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1680"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1680
 	 Directory of  A:\
 	
@@ -41892,6 +45253,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   TXT     9370   4-21-89   3:31a
 
 ### Directory of PCSIG08: DISK1681
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1681"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1681
 	 Directory of  A:\
@@ -41906,6 +45269,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PP       QST   293816   4-11-89   6:02a
 
 ### Directory of PCSIG08: DISK1682
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1682"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1682
 	 Directory of  A:\
@@ -41925,6 +45290,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1683
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1683"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1683
 	 Directory of  A:\
 	
@@ -41943,6 +45310,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SPEEDSCR COM     5333  10-01-86   5:00a
 
 ### Directory of PCSIG08: DISK1684
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1684"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1684
 	 Directory of  A:\
@@ -41966,6 +45335,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1685
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1685"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1685
 	 Directory of  A:\
 	
@@ -41978,6 +45349,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   BAT       13   2-21-86   3:28p
 
 ### Directory of PCSIG08: DISK1686
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1686"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1686
 	 Directory of  A:\
@@ -42009,6 +45382,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1687
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1687"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1687
 	 Directory of  A:\
 	
@@ -42024,6 +45399,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1688
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1688"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1688
 	 Directory of  A:\
 	
@@ -42036,6 +45413,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1689
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1689"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1689
 	 Directory of  A:\
 	
@@ -42045,6 +45424,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	STS26    EXE    88064   9-23-88   5:39a
 
 ### Directory of PCSIG08: DISK1690
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1690"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1690
 	 Directory of  A:\
@@ -42067,6 +45448,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1691
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1691"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1691
 	 Directory of  A:\
 	
@@ -42083,6 +45466,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1692
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1692"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1692
 	 Directory of  A:\
 	
@@ -42098,6 +45483,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1693
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1693"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1693
 	 Directory of  A:\
 	
@@ -42108,6 +45495,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     1263   5-06-89   2:08p
 
 ### Directory of PCSIG08: DISK1694
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1694"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1694
 	 Directory of  A:\
@@ -42132,6 +45521,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1695
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1695"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1695
 	 Directory of  A:\
 	
@@ -42145,6 +45536,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TEAM     DAT    17780   7-05-88  12:18p
 
 ### Directory of PCSIG08: DISK1696
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1696"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1696
 	 Directory of  A:\
@@ -42161,6 +45554,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1697
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1697"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1697
 	 Directory of  A:\
 	
@@ -42172,6 +45567,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PKXARC   COM    11482  12-14-86   4:00p
 
 ### Directory of PCSIG08: DISK1698
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1698"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1698
 	 Directory of  A:\
@@ -42200,6 +45597,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1699
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1699"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1699
 	 Directory of  A:\
 	
@@ -42226,6 +45625,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1700
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1700"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1700
 	 Directory of  A:\
 	
@@ -42244,6 +45645,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GSTART   BAT      653   7-08-89   1:54a
 
 ### Directory of PCSIG08: DISK1701
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1701"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1701
 	 Directory of  A:\
@@ -42264,6 +45667,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1702
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1702"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1702
 	 Directory of  A:\
 	
@@ -42275,6 +45680,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1703
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1703"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1703
 	 Directory of  A:\
 	
@@ -42285,6 +45692,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     1205   5-06-89   2:13p
 
 ### Directory of PCSIG08: DISK1704
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1704"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1704
 	 Directory of  A:\
@@ -42299,6 +45708,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PKUNZIP  EXE    21440   7-20-89   6:01p
 
 ### Directory of PCSIG08: DISK1705
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1705"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1705
 	 Directory of  A:\
@@ -42335,6 +45746,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1706
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1706"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1706
 	 Directory of  A:\
 	
@@ -42344,6 +45757,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SCTEM35  EXE   151125   6-13-89   9:41a
 
 ### Directory of PCSIG08: DISK1707
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1707"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1707
 	 Directory of  A:\
@@ -42357,6 +45772,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SUMSTAT  EXE    43392  12-17-88   3:07a
 
 ### Directory of PCSIG08: DISK1708
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1708"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1708
 	 Directory of  A:\
@@ -42404,6 +45821,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1709
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1709"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1709
 	 Directory of  A:\
 	
@@ -42416,6 +45835,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC      568  12-14-89   1:45a
 
 ### Directory of PCSIG08: DISK1710
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1710"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1710
 	 Directory of  A:\
@@ -42433,6 +45854,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	POSS     DBF       67  11-11-88   2:41p
 
 ### Directory of PCSIG08: DISK1711
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1711"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1711
 	 Directory of  A:\
@@ -42487,6 +45910,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1712
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1712"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1712
 	 Directory of  A:\
 	
@@ -42499,6 +45924,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RUNME1ST BAT     4062   9-01-89   5:00a
 
 ### Directory of PCSIG08: DISK1713
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1713"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1713
 	 Directory of  A:\
@@ -42527,6 +45954,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1714
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1714"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1714
 	 Directory of  A:\
 	
@@ -42544,6 +45973,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1715
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1715"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1715
 	 Directory of  A:\
 	
@@ -42555,6 +45986,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TAKOFF   ARC    31238   4-09-89   1:48p
 
 ### Directory of PCSIG08: DISK1716
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1716"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1716
 	 Directory of  A:\
@@ -42574,6 +46007,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TEST     IDX    15360   1-16-90  10:50a
 
 ### Directory of PCSIG08: DISK1717
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1717"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1717
 	 Directory of  A:\
@@ -42626,6 +46061,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1718
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1718"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1718
 	 Directory of  A:\
 	
@@ -42642,6 +46079,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1719
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1719"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1719
 	 Directory of  A:\
 	
@@ -42657,6 +46096,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UZIPFDXH BAT      904  11-12-89  10:40p
 
 ### Directory of PCSIG08: DISK1720
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1720"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1720
 	 Directory of  A:\
@@ -42690,6 +46131,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1721
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1721"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1721
 	 Directory of  A:\
 	
@@ -42710,6 +46153,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SETUP    DAT       21   9-08-89   6:00p
 
 ### Directory of PCSIG08: DISK1722
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1722"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1722
 	 Directory of  A:\
@@ -42733,6 +46178,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1723
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1723"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1723
 	 Directory of  A:\
 	
@@ -42744,6 +46191,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     BAT      468   2-25-90  12:06p
 
 ### Directory of PCSIG08: DISK1724
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1724"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1724
 	 Directory of  A:\
@@ -42758,6 +46207,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1725
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1725"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1725
 	 Directory of  A:\
@@ -42777,6 +46228,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1726
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1726"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1726
 	 Directory of  A:\
 	
@@ -42787,6 +46240,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PHONE    EXE    91096   5-06-89   9:57a
 
 ### Directory of PCSIG08: DISK1727
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1727"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1727
 	 Directory of  A:\
@@ -42811,6 +46266,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1728
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1728"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1728
 	 Directory of  A:\
 	
@@ -42830,6 +46287,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	YELLOWPG DAT     1127  10-23-89   1:17p
 
 ### Directory of PCSIG08: DISK1729
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1729"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1729
 	 Directory of  A:\
@@ -42855,6 +46314,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1730
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1730"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1730
 	 Directory of  A:\
 	
@@ -42877,6 +46338,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	YELLOWPG DAT     1127  10-23-89   1:17p
 
 ### Directory of PCSIG08: DISK1731
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1731"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1731
 	 Directory of  A:\
@@ -42909,6 +46372,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1732
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1732"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1732
 	 Directory of  A:\
 	
@@ -42916,6 +46381,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1733
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1733"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1733
 	 Directory of  A:\
@@ -42935,6 +46402,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PSTART   BAT      656   1-19-90   1:59p
 
 ### Directory of PCSIG08: DISK1734
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1734"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1734
 	 Directory of  A:\
@@ -42966,6 +46435,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1735
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1735"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1735
 	 Directory of  A:\
 	
@@ -42985,6 +46456,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1736
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1736"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1736
 	 Directory of  A:\
 	
@@ -42998,6 +46471,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1737
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1737"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1737
 	 Directory of  A:\
 	
@@ -43010,6 +46485,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1738
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1738"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1738
 	 Directory of  A:\
 	
@@ -43021,6 +46498,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	INSTALL  BAT      415   5-15-89   5:49a
 
 ### Directory of PCSIG08: DISK1739
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1739"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1739
 	 Directory of  A:\
@@ -43063,6 +46542,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1740
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1740"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1740
 	 Directory of  A:\
 	
@@ -43092,6 +46573,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	LICENSES AGR     1715  12-31-88   4:00p
 
 ### Directory of PCSIG08: DISK1741
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1741"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1741
 	 Directory of  A:\
@@ -43163,6 +46646,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1742
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1742"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1742
 	 Directory of  A:\
 	
@@ -43177,6 +46662,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1743
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1743"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1743
 	 Directory of  A:\
 	
@@ -43189,6 +46676,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PREPOSIT EXE    68244   5-10-89   3:30a
 
 ### Directory of PCSIG08: DISK1744
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1744"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1744
 	 Directory of  A:\
@@ -43205,6 +46694,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1745
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1745"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1745
 	 Directory of  A:\
 	
@@ -43214,6 +46705,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MT2      EXE   342394   9-14-89  11:59a
 
 ### Directory of PCSIG08: DISK1746
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1746"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1746
 	 Directory of  A:\
@@ -43225,6 +46718,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      3970   8-27-89   2:43p
 
 ### Directory of PCSIG08: DISK1747
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1747"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1747
 	 Directory of  A:\
@@ -43277,6 +46772,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1748
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1748"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1748
 	 Directory of  A:\
 	
@@ -43298,6 +46795,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1749
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1749"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1749
 	 Directory of  A:\
 	
@@ -43305,6 +46804,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1750
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1750"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1750
 	 Directory of  A:\
@@ -43323,6 +46824,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	LOTTO4   EXE    42688   2-16-89  10:05p
 
 ### Directory of PCSIG08: DISK1751
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1751"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1751
 	 Directory of  A:\
@@ -43353,6 +46856,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1752
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1752"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1752
 	 Directory of  A:\
 	
@@ -43367,6 +46872,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1753
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1753"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1753
 	 Directory of  A:\
 	
@@ -43379,6 +46886,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1754
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1754"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1754
 	 Directory of  A:\
 	
@@ -43386,6 +46895,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1755
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1755"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1755
 	 Directory of  A:\
@@ -43411,6 +46922,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1756
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1756"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1756
 	 Directory of  A:\
 	
@@ -43425,6 +46938,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1757
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1757"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1757
 	 Directory of  A:\
 	
@@ -43438,6 +46953,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      2450  10-29-89   5:43p
 
 ### Directory of PCSIG08: DISK1758
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1758"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1758
 	 Directory of  A:\
@@ -43455,6 +46972,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	POSTNET  DOC    18941   8-22-89   4:16a
 
 ### Directory of PCSIG08: DISK1759
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1759"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1759
 	 Directory of  A:\
@@ -43476,6 +46995,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1760
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1760"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1760
 	 Directory of  A:\
 	
@@ -43495,6 +47016,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	YESNO    COM       97  10-02-86   2:47p
 
 ### Directory of PCSIG08: DISK1761
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1761"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1761
 	 Directory of  A:\
@@ -43535,6 +47058,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1762
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1762"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1762
 	 Directory of  A:\
 	
@@ -43548,6 +47073,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	W211     BAS    14611   9-03-89  12:49p
 
 ### Directory of PCSIG08: DISK1763
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1763"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1763
 	 Directory of  A:\
@@ -43572,6 +47099,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1764
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1764"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1764
 	 Directory of  A:\
 	
@@ -43590,6 +47119,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1765
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1765"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1765
 	 Directory of  A:\
 	
@@ -43604,6 +47135,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ2ND  DOC      891   1-28-90   2:32a
 
 ### Directory of PCSIG08: DISK1766
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1766"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1766
 	 Directory of  A:\
@@ -43630,6 +47163,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1767
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1767"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1767
 	 Directory of  A:\
 	
@@ -43642,6 +47177,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZIPKEY   OVL   122038   9-01-89   9:40a
 
 ### Directory of PCSIG08: DISK1768
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1768"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1768
 	 Directory of  A:\
@@ -43658,6 +47195,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VADERS   TBC    72018   2-14-89   3:11a
 
 ### Directory of PCSIG08: DISK1769
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1769"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1769
 	 Directory of  A:\
@@ -43676,6 +47215,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1770
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1770"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1770
 	 Directory of  A:\
 	
@@ -43690,6 +47231,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           6166   3-26-89   4:01p
 
 ### Directory of PCSIG08: DISK1771
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1771"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1771
 	 Directory of  A:\
@@ -43712,6 +47255,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1772
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1772"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1772
 	 Directory of  A:\
 	
@@ -43724,6 +47269,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNIVERSE HLP    25295   7-29-89  12:16p
 
 ### Directory of PCSIG08: DISK1773
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1773"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1773
 	 Directory of  A:\
@@ -43744,6 +47291,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1774
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1774"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1774
 	 Directory of  A:\
 	
@@ -43761,6 +47310,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1775
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1775"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1775
 	 Directory of  A:\
 	
@@ -43775,6 +47326,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1776
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1776"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1776
 	 Directory of  A:\
 	
@@ -43784,6 +47337,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NW       EXE    76992   8-31-89   2:52p
 
 ### Directory of PCSIG08: DISK1777
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1777"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1777
 	 Directory of  A:\
@@ -43799,6 +47354,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SSSET    EXE    12448   7-19-89   7:49a
 
 ### Directory of PCSIG08: DISK1778
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1778"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1778
 	 Directory of  A:\
@@ -43824,6 +47381,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	~H                  7   8-15-89   1:24a
 
 ### Directory of PCSIG08: DISK1779
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1779"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1779
 	 Directory of  A:\
@@ -43853,6 +47412,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1780
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1780"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1780
 	 Directory of  A:\
 	
@@ -43867,6 +47428,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1781
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1781"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1781
 	 Directory of  A:\
 	
@@ -43878,6 +47441,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      617  12-20-89   5:13a
 
 ### Directory of PCSIG08: DISK1782
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1782"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1782
 	 Directory of  A:\
@@ -43892,6 +47457,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SAMPLE1  TXT     4096   7-30-89   8:41a
 
 ### Directory of PCSIG08: DISK1783
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1783"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1783
 	 Directory of  A:\
@@ -43908,6 +47475,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1784
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1784"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1784
 	 Directory of  A:\
 	
@@ -43921,6 +47490,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   EXE    48396  10-14-89   9:43a
 
 ### Directory of PCSIG08: DISK1785
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1785"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1785
 	 Directory of  A:\
@@ -43936,6 +47507,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SETUP    BAT      181   3-14-89   8:48a
 
 ### Directory of PCSIG08: DISK1786
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1786"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1786
 	 Directory of  A:\
@@ -43959,6 +47532,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1787
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1787"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1787
 	 Directory of  A:\
 	
@@ -43981,6 +47556,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1788
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1788"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1788
 	 Directory of  A:\
 	
@@ -43997,6 +47574,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1789
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1789"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1789
 	 Directory of  A:\
 	
@@ -44007,6 +47586,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1790
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1790"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1790
 	 Directory of  A:\
 	
@@ -44016,6 +47597,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PHOEBE5  EXE   218707   5-10-88   8:05a
 
 ### Directory of PCSIG08: DISK1791
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1791"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1791
 	 Directory of  A:\
@@ -44034,6 +47617,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1792
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1792"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1792
 	 Directory of  A:\
 	
@@ -44046,6 +47631,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TODO     TXT       38   7-09-89   7:05a
 
 ### Directory of PCSIG08: DISK1793
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1793"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1793
 	 Directory of  A:\
@@ -44066,6 +47653,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1794
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1794"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1794
 	 Directory of  A:\
@@ -44096,6 +47685,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VARITALE LST     1305  12-29-87  10:04a
 
 ### Directory of PCSIG08: DISK1795
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1795"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1795
 	 Directory of  A:\
@@ -44140,6 +47731,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1796
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1796"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1796
 	 Directory of  A:\
 	
@@ -44156,6 +47749,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TITLE    DAT     8274   8-01-89  10:51a
 
 ### Directory of PCSIG08: DISK1797
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1797"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1797
 	 Directory of  A:\
@@ -44179,6 +47774,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1798
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1798"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1798
 	 Directory of  A:\
 	
@@ -44195,6 +47792,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1799
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1799"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1799
 	 Directory of  A:\
 	
@@ -44205,6 +47804,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540   1-01-80   7:36a
 
 ### Directory of PCSIG08: DISK1800
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1800"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1800
 	 Directory of  A:\
@@ -44220,6 +47821,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1801
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1801"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1801
 	 Directory of  A:\
 	
@@ -44232,6 +47835,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SAMPLE   DAT      419   3-05-89   1:51a
 
 ### Directory of PCSIG08: DISK1802
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1802"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1802
 	 Directory of  A:\
@@ -44248,6 +47853,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1803
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1803"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1803
 	 Directory of  A:\
 	
@@ -44263,6 +47870,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1804
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1804"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1804
 	 Directory of  A:\
 	
@@ -44273,6 +47882,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540   3-03-90   4:01p
 
 ### Directory of PCSIG08: DISK1805
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1805"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1805
 	 Directory of  A:\
@@ -44291,6 +47902,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VIDPOP   COM    27328   6-18-87   7:58a
 
 ### Directory of PCSIG08: DISK1806
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1806"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1806
 	 Directory of  A:\
@@ -44324,6 +47937,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1807
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1807"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1807
 	 Directory of  A:\
 	
@@ -44337,6 +47952,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNARC    BAT      407   7-11-89  11:53p
 
 ### Directory of PCSIG08: DISK1808
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1808"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1808
 	 Directory of  A:\
@@ -44357,6 +47974,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1809
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1809"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1809
 	 Directory of  A:\
 	
@@ -44372,6 +47991,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RECIPE2  DTA      760   1-13-90   1:11p
 
 ### Directory of PCSIG08: DISK1810
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1810"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1810
 	 Directory of  A:\
@@ -44396,6 +48017,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1811
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1811"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1811
 	 Directory of  A:\
 	
@@ -44410,6 +48033,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1812
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1812"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1812
 	 Directory of  A:\
 	
@@ -44419,6 +48044,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      694   1-01-80  12:25a
 
 ### Directory of PCSIG08: DISK1813
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1813"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1813
 	 Directory of  A:\
@@ -44433,6 +48060,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REGISTER FRM     1284   8-18-89  10:56a
 
 ### Directory of PCSIG08: DISK1814
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1814"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1814
 	 Directory of  A:\
@@ -44453,6 +48082,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1815
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1815"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1815
 	 Directory of  A:\
 	
@@ -44468,6 +48099,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1816
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1816"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1816
 	 Directory of  A:\
 	
@@ -44479,6 +48112,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1817
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1817"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1817
 	 Directory of  A:\
 	
@@ -44489,6 +48124,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SCRIPT2  EXE   288998   7-31-89   6:34a
 
 ### Directory of PCSIG08: DISK1818
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1818"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1818
 	 Directory of  A:\
@@ -44504,6 +48141,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1819
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1819"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1819
 	 Directory of  A:\
 	
@@ -44515,6 +48154,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540  12-21-89   5:35a
 
 ### Directory of PCSIG08: DISK1820
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1820"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1820
 	 Directory of  A:\
@@ -44529,6 +48170,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540  12-21-89   5:16a
 
 ### Directory of PCSIG08: DISK1821
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1821"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1821
 	 Directory of  A:\
@@ -44563,6 +48206,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1822
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1822"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1822
 	 Directory of  A:\
 	
@@ -44592,6 +48237,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1823
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1823"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1823
 	 Directory of  A:\
 	
@@ -44606,6 +48253,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WOODBOX           996   1-09-89   6:11p
 
 ### Directory of PCSIG08: DISK1824
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1824"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1824
 	 Directory of  A:\
@@ -44657,6 +48306,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1825
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1825"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1825
 	 Directory of  A:\
 	
@@ -44685,6 +48336,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TURNCARD TXT     1792   9-01-89   3:31p
 
 ### Directory of PCSIG08: DISK1826
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1826"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1826
 	 Directory of  A:\
@@ -44761,6 +48414,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1827
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1827"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1827
 	 Directory of  A:\
 	
@@ -44773,6 +48428,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GOLF     TXT    11954   9-09-89   5:43a
 
 ### Directory of PCSIG08: DISK1828
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1828"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1828
 	 Directory of  A:\
@@ -44796,6 +48453,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1829
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1829"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1829
 	 Directory of  A:\
 	
@@ -44813,6 +48472,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1830
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1830"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1830
 	 Directory of  A:\
 	
@@ -44820,6 +48481,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1831
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1831"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1831
 	 Directory of  A:\
@@ -44832,6 +48495,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           1150  11-18-89   9:16a
 
 ### Directory of PCSIG08: DISK1832
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1832"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1832
 	 Directory of  A:\
@@ -44852,6 +48517,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1833
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1833"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1833
 	 Directory of  A:\
 	
@@ -44865,6 +48532,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SAPPH112 ARC    93700   7-31-89   8:39a
 
 ### Directory of PCSIG08: DISK1834
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1834"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1834
 	 Directory of  A:\
@@ -44892,6 +48561,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SEEMORE  COM    10738  10-01-89   9:47p
 
 ### Directory of PCSIG08: DISK1835
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1835"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1835
 	 Directory of  A:\
@@ -44929,6 +48600,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1836
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1836"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1836
 	 Directory of  A:\
 	
@@ -44946,6 +48619,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1837
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1837"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1837
 	 Directory of  A:\
 	
@@ -44962,6 +48637,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USERLIB  EXE     7570   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1838
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1838"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1838
 	 Directory of  A:\
@@ -44998,6 +48675,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1839
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1839"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1839
 	 Directory of  A:\
 	
@@ -45007,6 +48686,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SALBIZ   ARC   216954   7-13-89   8:18a
 
 ### Directory of PCSIG08: DISK1840
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1840"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1840
 	 Directory of  A:\
@@ -45021,6 +48702,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XMAS     EXE    42240   3-12-89   3:15a
 
 ### Directory of PCSIG08: DISK1841
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1841"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1841
 	 Directory of  A:\
@@ -45039,6 +48722,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1842
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1842"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1842
 	 Directory of  A:\
 	
@@ -45053,6 +48738,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1843
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1843"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1843
 	 Directory of  A:\
 	
@@ -45062,6 +48749,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      694   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1844
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1844"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1844
 	 Directory of  A:\
@@ -45073,6 +48762,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SPTSMGMT ZIP   136619   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1845
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1845"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1845
 	 Directory of  A:\
@@ -45086,6 +48777,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1846
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1846"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1846
 	 Directory of  A:\
 	
@@ -45093,6 +48786,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NOTE     TXT      289  10-24-88   1:21a
 
 ### Directory of PCSIG08: DISK1847
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1847"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1847
 	 Directory of  A:\
@@ -45123,6 +48818,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1848
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1848"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1848
 	 Directory of  A:\
 	
@@ -45151,6 +48848,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1849
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1849"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1849
 	 Directory of  A:\
 	
@@ -45178,6 +48877,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VOCAB    EXE    39198   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1850
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1850"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1850
 	 Directory of  A:\
@@ -45209,6 +48910,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1851
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1851"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1851
 	 Directory of  A:\
 	
@@ -45222,6 +48925,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   1ST      480   1-03-80   4:18p
 
 ### Directory of PCSIG08: DISK1852
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1852"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1852
 	 Directory of  A:\
@@ -45238,6 +48943,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UTG      HSR      896   9-01-89   5:00a
 
 ### Directory of PCSIG08: DISK1853
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1853"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1853
 	 Directory of  A:\
@@ -45274,6 +48981,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1854
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1854"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1854
 	 Directory of  A:\
 	
@@ -45291,6 +49000,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1855
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1855"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1855
 	 Directory of  A:\
 	
@@ -45302,6 +49013,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1856
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1856"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1856
 	 Directory of  A:\
 	
@@ -45311,6 +49024,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WYS-AR   ARC   209754   7-16-89   8:10p
 
 ### Directory of PCSIG08: DISK1857
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1857"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1857
 	 Directory of  A:\
@@ -45330,6 +49045,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1858
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1858"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1858
 	 Directory of  A:\
 	
@@ -45339,6 +49056,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PS421    ARC   125527   4-29-89   8:03a
 
 ### Directory of PCSIG08: DISK1859
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1859"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1859
 	 Directory of  A:\
@@ -45368,6 +49087,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USE      DOC    12711   8-11-89   2:00a
 
 ### Directory of PCSIG08: DISK1860
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1860"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1860
 	 Directory of  A:\
@@ -45423,6 +49144,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1861
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1861"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1861
 	 Directory of  A:\
 	
@@ -45437,6 +49160,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           1037   4-09-89   4:25a
 
 ### Directory of PCSIG08: DISK1862
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1862"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1862
 	 Directory of  A:\
@@ -45463,6 +49188,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1863
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1863"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1863
 	 Directory of  A:\
 	
@@ -45486,6 +49213,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SIMEQ6   SIM      109   8-04-88  11:30p
 
 ### Directory of PCSIG08: DISK1864
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1864"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1864
 	 Directory of  A:\
@@ -45517,6 +49246,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   5        860   9-29-88   5:36p
 
 ### Directory of PCSIG08: DISK1865
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1865"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1865
 	 Directory of  A:\
@@ -45551,6 +49282,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1866
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1866"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1866
 	 Directory of  A:\
 	
@@ -45563,6 +49296,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	DISK1866 ZIP   139384   3-28-90   5:38a
 
 ### Directory of PCSIG08: DISK1867
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1867"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1867
 	 Directory of  A:\
@@ -45585,6 +49320,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1868
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1868"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1868
 	 Directory of  A:\
 	
@@ -45600,6 +49337,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1869
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1869"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1869
 	 Directory of  A:\
 	
@@ -45614,6 +49353,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RES      EXE    22864   1-15-90  10:50a
 
 ### Directory of PCSIG08: DISK1870
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1870"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1870
 	 Directory of  A:\
@@ -45648,6 +49389,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1871
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1871"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1871
 	 Directory of  A:\
 	
@@ -45658,6 +49401,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540  12-27-89   7:27a
 
 ### Directory of PCSIG08: DISK1872
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1872"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1872
 	 Directory of  A:\
@@ -45704,6 +49449,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1873
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1873"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1873
 	 Directory of  A:\
 	
@@ -45715,6 +49462,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   COM     6217   2-12-90   6:00a
 
 ### Directory of PCSIG08: DISK1874
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1874"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1874
 	 Directory of  A:\
@@ -45728,6 +49477,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RUNCOB   EXE    62318   6-11-87   2:17p
 
 ### Directory of PCSIG08: DISK1875
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1875"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1875
 	 Directory of  A:\
@@ -45746,6 +49497,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RFP_TRAN         1161   5-03-89   2:27a
 
 ### Directory of PCSIG08: DISK1876
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1876"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1876
 	 Directory of  A:\
@@ -45790,6 +49543,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1877
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1877"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1877
 	 Directory of  A:\
 	
@@ -45800,6 +49555,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      694  12-27-89   7:58a
 
 ### Directory of PCSIG08: DISK1878
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1878"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1878
 	 Directory of  A:\
@@ -45814,6 +49571,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SHELLHLP EXE    98950   9-16-89   2:41a
 
 ### Directory of PCSIG08: DISK1879
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1879"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1879
 	 Directory of  A:\
@@ -45830,6 +49589,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1880
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1880"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1880
 	 Directory of  A:\
 	
@@ -45839,6 +49600,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TRACKER  ARC   110344   5-16-89   9:16a
 
 ### Directory of PCSIG08: DISK1881
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1881"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1881
 	 Directory of  A:\
@@ -45860,6 +49623,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REMHELP  COM     4992  10-03-87   8:22p
 
 ### Directory of PCSIG08: DISK1882
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1882"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1882
 	 Directory of  A:\
@@ -45885,6 +49650,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1883
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1883"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1883
 	 Directory of  A:\
 	
@@ -45903,6 +49670,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1884
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1884"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1884
 	 Directory of  A:\
 	
@@ -45915,6 +49684,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RESISTOR EXE    35184   6-03-89  12:06a
 
 ### Directory of PCSIG08: DISK1885
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1885"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1885
 	 Directory of  A:\
@@ -45936,6 +49707,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1886
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1886"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1886
 	 Directory of  A:\
 	
@@ -45951,6 +49724,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1887
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1887"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1887
 	 Directory of  A:\
 	
@@ -45964,6 +49739,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	KB0ZP    DOC    34560   5-02-89   1:15a
 
 ### Directory of PCSIG08: DISK1888
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1888"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1888
 	 Directory of  A:\
@@ -45991,6 +49768,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1889
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1889"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1889
 	 Directory of  A:\
 	
@@ -46008,6 +49787,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SAMSON   DAT      533   6-08-89   1:45a
 
 ### Directory of PCSIG08: DISK1890
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1890"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1890
 	 Directory of  A:\
@@ -46038,6 +49819,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1891
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1891"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1891
 	 Directory of  A:\
 	
@@ -46055,6 +49838,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WARNING  TXT     1416   2-10-90   4:00a
 
 ### Directory of PCSIG08: DISK1892
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1892"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1892
 	 Directory of  A:\
@@ -46080,6 +49865,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1893
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1893"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1893
 	 Directory of  A:\
 	
@@ -46089,6 +49876,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540  12-27-89   8:55a
 
 ### Directory of PCSIG08: DISK1894
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1894"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1894
 	 Directory of  A:\
@@ -46100,6 +49889,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SAMPLE   GPC       99   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1895
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1895"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1895
 	 Directory of  A:\
@@ -46115,6 +49906,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1896
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1896"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1896
 	 Directory of  A:\
 	
@@ -46127,6 +49920,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   TXT      374  10-19-89   5:57p
 
 ### Directory of PCSIG08: DISK1897
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1897"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1897
 	 Directory of  A:\
@@ -46149,6 +49944,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1898
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1898"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1898
 	 Directory of  A:\
 	
@@ -46158,6 +49955,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ROOM     EXE    43980  10-23-89   6:35a
 
 ### Directory of PCSIG08: DISK1899
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1899"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1899
 	 Directory of  A:\
@@ -46169,6 +49968,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README            169  10-27-89   4:51a
 
 ### Directory of PCSIG08: DISK1900
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1900"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1900
 	 Directory of  A:\
@@ -46186,6 +49987,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1901
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1901"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1901
 	 Directory of  A:\
 	
@@ -46197,6 +50000,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   SIG      540   3-20-90   3:13a
 
 ### Directory of PCSIG08: DISK1902
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1902"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1902
 	 Directory of  A:\
@@ -46212,6 +50017,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      2291   1-01-80   4:00p
 
 ### Directory of PCSIG08: DISK1903
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1903"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1903
 	 Directory of  A:\
@@ -46231,6 +50038,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WEATHER  TXT    59008   8-01-89   5:00a
 
 ### Directory of PCSIG08: DISK1904
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1904"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1904
 	 Directory of  A:\
@@ -46258,6 +50067,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1905
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1905"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1905
 	 Directory of  A:\
 	
@@ -46270,6 +50081,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	STATS    PFL    53043   5-12-89  11:57a
 
 ### Directory of PCSIG08: DISK1906
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1906"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1906
 	 Directory of  A:\
@@ -46288,6 +50101,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WHEEL7   SYS    19060   7-25-89   9:20p
 
 ### Directory of PCSIG08: DISK1907
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1907"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1907
 	 Directory of  A:\
@@ -46312,6 +50127,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1908
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1908"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1908
 	 Directory of  A:\
 	
@@ -46333,6 +50150,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1909
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1909"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1909
 	 Directory of  A:\
 	
@@ -46353,6 +50172,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1910
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1910"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1910
 	 Directory of  A:\
 	
@@ -46369,6 +50190,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1911
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1911"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1911
 	 Directory of  A:\
 	
@@ -46384,6 +50207,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           1943   9-24-89   8:37a
 
 ### Directory of PCSIG08: DISK1912
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1912"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1912
 	 Directory of  A:\
@@ -46405,6 +50230,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VOLAPUK  COM    23305  11-18-89  11:06a
 
 ### Directory of PCSIG08: DISK1913
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1913"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1913
 	 Directory of  A:\
@@ -46428,6 +50255,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1914
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1914"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1914
 	 Directory of  A:\
 	
@@ -46446,6 +50275,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1915
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1915"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1915
 	 Directory of  A:\
 	
@@ -46461,6 +50292,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1916
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1916"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1916
 	 Directory of  A:\
 	
@@ -46475,6 +50308,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1917
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1917"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1917
 	 Directory of  A:\
 	
@@ -46484,6 +50319,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZRECALL  EXE   154450  10-24-89   5:00a
 
 ### Directory of PCSIG08: DISK1918
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1918"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1918
 	 Directory of  A:\
@@ -46502,6 +50339,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1919
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1919"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1919
 	 Directory of  A:\
 	
@@ -46512,6 +50351,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      2960  11-22-89   1:09a
 
 ### Directory of PCSIG08: DISK1920
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1920"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1920
 	 Directory of  A:\
@@ -46529,6 +50370,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ROTARY   LBL     1034   2-16-89  12:00a
 
 ### Directory of PCSIG08: DISK1921
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1921"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1921
 	 Directory of  A:\
@@ -46553,6 +50396,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZIP-CODE HI      2894   2-16-89  12:00a
 
 ### Directory of PCSIG08: DISK1922
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1922"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1922
 	 Directory of  A:\
@@ -46584,6 +50429,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1923
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1923"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1923
 	 Directory of  A:\
 	
@@ -46609,6 +50456,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1924
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1924"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1924
 	 Directory of  A:\
 	
@@ -46622,6 +50471,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           2186   2-24-90   5:06a
 
 ### Directory of PCSIG08: DISK1925
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1925"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1925
 	 Directory of  A:\
@@ -46647,6 +50498,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1926
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1926"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1926
 	 Directory of  A:\
 	
@@ -46665,6 +50518,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     2432   1-12-89  12:48a
 
 ### Directory of PCSIG08: DISK1927
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1927"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1927
 	 Directory of  A:\
@@ -46689,6 +50544,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USERMSG  IX      2368   2-28-89   5:20p
 
 ### Directory of PCSIG08: DISK1928
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1928"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1928
 	 Directory of  A:\
@@ -46715,6 +50572,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1929
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1929"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1929
 	 Directory of  A:\
 	
@@ -46733,6 +50592,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      2292   3-19-89   3:52a
 
 ### Directory of PCSIG08: DISK1930
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1930"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1930
 	 Directory of  A:\
@@ -46776,6 +50637,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1931
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1931"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1931
 	 Directory of  A:\
 	
@@ -46804,6 +50667,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TWOWAY   DAT      128   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1932
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1932"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1932
 	 Directory of  A:\
@@ -46844,6 +50709,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1933
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1933"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1933
 	 Directory of  A:\
 	
@@ -46854,6 +50721,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1934
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1934"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1934
 	 Directory of  A:\
 	
@@ -46863,6 +50732,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1935
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1935"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1935
 	 Directory of  A:\
@@ -46878,6 +50749,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1936
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1936"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1936
 	 Directory of  A:\
 	
@@ -46889,6 +50762,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SAMPLE   EXE    48862   8-17-89   4:15p
 
 ### Directory of PCSIG08: DISK1937
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1937"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1937
 	 Directory of  A:\
@@ -46904,6 +50779,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XTAB     PRX    15656   5-31-89  10:51a
 
 ### Directory of PCSIG08: DISK1938
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1938"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1938
 	 Directory of  A:\
@@ -46937,6 +50814,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1939
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1939"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1939
 	 Directory of  A:\
 	
@@ -46947,6 +50826,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SUBMIT   TXT     1624   8-01-89   4:50p
 
 ### Directory of PCSIG08: DISK1940
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1940"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1940
 	 Directory of  A:\
@@ -46969,6 +50850,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1941
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1941"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1941
 	 Directory of  A:\
 	
@@ -46984,6 +50867,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1942
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1942"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1942
 	 Directory of  A:\
 	
@@ -46993,6 +50878,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TREEPCX  ARC   347494   6-01-89   2:33p
 
 ### Directory of PCSIG08: DISK1943
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1943"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1943
 	 Directory of  A:\
@@ -47011,6 +50898,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TMANUAL  DOC    25915   5-24-89  10:30a
 
 ### Directory of PCSIG08: DISK1944
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1944"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1944
 	 Directory of  A:\
@@ -47033,6 +50922,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1945
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1945"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1945
 	 Directory of  A:\
 	
@@ -47044,6 +50935,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README            624  11-18-89   7:46a
 
 ### Directory of PCSIG08: DISK1946
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1946"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1946
 	 Directory of  A:\
@@ -47064,6 +50957,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1947
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1947"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1947
 	 Directory of  A:\
 	
@@ -47082,6 +50977,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1948
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1948"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1948
 	 Directory of  A:\
 	
@@ -47096,6 +50993,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	USERGRP  COM     3506  11-26-89   7:47a
 
 ### Directory of PCSIG08: DISK1949
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1949"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1949
 	 Directory of  A:\
@@ -47121,6 +51020,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1950
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1950"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1950
 	 Directory of  A:\
 	
@@ -47132,6 +51033,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNZIPDP  EXE   240476  11-06-89   4:14a
 
 ### Directory of PCSIG08: DISK1951
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1951"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1951
 	 Directory of  A:\
@@ -47145,6 +51048,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      1271  11-02-89  12:50a
 
 ### Directory of PCSIG08: DISK1952
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1952"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1952
 	 Directory of  A:\
@@ -47163,6 +51068,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1953
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1953"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1953
 	 Directory of  A:\
 	
@@ -47178,6 +51085,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1954
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1954"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1954
 	 Directory of  A:\
 	
@@ -47192,6 +51101,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TED      COM    64853   2-17-87   2:10p
 
 ### Directory of PCSIG08: DISK1955
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1955"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1955
 	 Directory of  A:\
@@ -47213,6 +51124,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1956
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1956"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1956
 	 Directory of  A:\
 	
@@ -47232,6 +51145,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1957
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1957"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1957
 	 Directory of  A:\
 	
@@ -47248,6 +51163,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1958
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1958"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1958
 	 Directory of  A:\
 	
@@ -47259,6 +51176,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   LST     4001  11-27-89   6:21a
 
 ### Directory of PCSIG08: DISK1959
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1959"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1959
 	 Directory of  A:\
@@ -47274,6 +51193,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	QB4CREF  EXE    52917   5-27-89   2:03p
 
 ### Directory of PCSIG08: DISK1960
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1960"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1960
 	 Directory of  A:\
@@ -47293,6 +51214,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SPRLTRAN DAT     1536   2-26-89   8:41a
 
 ### Directory of PCSIG08: DISK1961
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1961"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1961
 	 Directory of  A:\
@@ -47315,6 +51238,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1962
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1962"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1962
 	 Directory of  A:\
 	
@@ -47334,6 +51259,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1963
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1963"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1963
 	 Directory of  A:\
 	
@@ -47349,6 +51276,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1964
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1964"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1964
 	 Directory of  A:\
 	
@@ -47361,6 +51290,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   CGM     1280   9-16-89   3:42a
 
 ### Directory of PCSIG08: DISK1965
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1965"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1965
 	 Directory of  A:\
@@ -47378,6 +51309,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MASTER   WRD     6021   9-03-89   5:00p
 
 ### Directory of PCSIG08: DISK1966
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1966"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1966
 	 Directory of  A:\
@@ -47398,6 +51331,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1967
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1967"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1967
 	 Directory of  A:\
 	
@@ -47410,6 +51345,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	ZGRAF    EXE   105878   1-16-90   1:43a
 
 ### Directory of PCSIG08: DISK1968
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1968"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1968
 	 Directory of  A:\
@@ -47424,6 +51361,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	CROSSREF EXE    96546   7-11-89   2:33p
 
 ### Directory of PCSIG08: DISK1969
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1969"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1969
 	 Directory of  A:\
@@ -47440,6 +51379,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1970
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1970"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1970
 	 Directory of  A:\
 	
@@ -47453,6 +51394,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WF       OVR    90508   2-19-90  11:42p
 
 ### Directory of PCSIG08: DISK1971
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1971"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1971
 	 Directory of  A:\
@@ -47512,6 +51455,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1972
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1972"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1972
 	 Directory of  A:\
 	
@@ -47526,12 +51471,16 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1973
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1973"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1973
 	 Directory of  A:\
 	
 	EGA      MGL   360534   6-30-89   6:00p
 
 ### Directory of PCSIG08: DISK1974
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1974"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1974
 	 Directory of  A:\
@@ -47608,6 +51557,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1975
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1975"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1975
 	 Directory of  A:\
 	
@@ -47644,6 +51595,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1976
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1976"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1976
 	 Directory of  A:\
 	
@@ -47660,6 +51613,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TITLE    DAT     8274   8-01-89  10:51a
 
 ### Directory of PCSIG08: DISK1977
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1977"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1977
 	 Directory of  A:\
@@ -47734,6 +51689,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1978
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1978"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1978
 	 Directory of  A:\
 	
@@ -47788,6 +51745,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1979
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1979"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1979
 	 Directory of  A:\
 	
@@ -47811,6 +51770,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WIRE     CHN    23417   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1980
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1980"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1980
 	 Directory of  A:\
@@ -47837,6 +51798,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1981
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1981"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1981
 	 Directory of  A:\
 	
@@ -47856,6 +51819,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1982
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1982"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1982
 	 Directory of  A:\
 	
@@ -47872,6 +51837,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1983
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1983"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1983
 	 Directory of  A:\
 	
@@ -47886,6 +51853,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MENUVER5 TPU    35600   7-06-89   4:18a
 
 ### Directory of PCSIG08: DISK1984
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1984"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1984
 	 Directory of  A:\
@@ -47906,6 +51875,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1985
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1985"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1985
 	 Directory of  A:\
 	
@@ -47915,6 +51886,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      694   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1986
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1986"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1986
 	 Directory of  A:\
@@ -47927,6 +51900,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1987
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1987"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1987
 	 Directory of  A:\
 	
@@ -47936,6 +51911,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      694   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1988
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1988"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1988
 	 Directory of  A:\
@@ -47985,6 +51962,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1989
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1989"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1989
 	 Directory of  A:\
 	
@@ -47998,6 +51977,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1990
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1990"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1990
 	 Directory of  A:\
 	
@@ -48009,6 +51990,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1991
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1991"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1991
 	 Directory of  A:\
@@ -48025,6 +52008,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1992
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1992"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1992
 	 Directory of  A:\
 	
@@ -48036,6 +52021,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	NEWLIFE  COM    17444   1-02-90   9:27p
 
 ### Directory of PCSIG08: DISK1993
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1993"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1993
 	 Directory of  A:\
@@ -48051,6 +52038,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README2  BAT     1869   2-12-90   8:05a
 
 ### Directory of PCSIG08: DISK1994
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1994"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1994
 	 Directory of  A:\
@@ -48087,6 +52076,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1995
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1995"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1995
 	 Directory of  A:\
 	
@@ -48097,6 +52088,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK1996
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1996"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK1996
 	 Directory of  A:\
@@ -48124,6 +52117,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1997
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1997"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1997
 	 Directory of  A:\
 	
@@ -48144,6 +52139,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1998
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1998"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1998
 	 Directory of  A:\
 	
@@ -48161,6 +52158,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK1999
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK1999"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK1999
 	 Directory of  A:\
 	
@@ -48170,6 +52169,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORDS    DOC   155113   9-05-89   3:42a
 
 ### Directory of PCSIG08: DISK2000
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2000"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2000
 	 Directory of  A:\
@@ -48196,6 +52197,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2001
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2001"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2001
 	 Directory of  A:\
 	
@@ -48209,6 +52212,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RETURN   EXE   110560   1-01-90   1:00p
 
 ### Directory of PCSIG08: DISK2002
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2002"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2002
 	 Directory of  A:\
@@ -48224,6 +52229,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2003
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2003"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2003
 	 Directory of  A:\
 	
@@ -48238,6 +52245,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SFCSW    EXE     9622   2-26-90  10:16a
 
 ### Directory of PCSIG08: DISK2004
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2004"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2004
 	 Directory of  A:\
@@ -48263,6 +52272,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2005
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2005"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2005
 	 Directory of  A:\
 	
@@ -48275,6 +52286,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MPFILES1 LST       44  12-03-89   3:05p
 
 ### Directory of PCSIG08: DISK2006
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2006"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2006
 	 Directory of  A:\
@@ -48294,6 +52307,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RELEASE2 11       163   3-01-89  10:38a
 
 ### Directory of PCSIG08: DISK2007
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2007"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2007
 	 Directory of  A:\
@@ -48325,6 +52340,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2008
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2008"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2008
 	 Directory of  A:\
 	
@@ -48343,6 +52360,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2009
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2009"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2009
 	 Directory of  A:\
 	
@@ -48357,6 +52376,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2010
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2010"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2010
 	 Directory of  A:\
 	
@@ -48368,6 +52389,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	OLORD    DOC    48128   9-29-89   1:18a
 
 ### Directory of PCSIG08: DISK2011
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2011"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2011
 	 Directory of  A:\
@@ -48387,6 +52410,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2012
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2012"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2012
 	 Directory of  A:\
 	
@@ -48399,6 +52424,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2013
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2013"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2013
 	 Directory of  A:\
 	
@@ -48409,6 +52436,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README           2023  11-24-89   3:18a
 
 ### Directory of PCSIG08: DISK2014
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2014"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2014
 	 Directory of  A:\
@@ -48430,6 +52459,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2015
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2015"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2015
 	 Directory of  A:\
 	
@@ -48447,6 +52478,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2016
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2016"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2016
 	 Directory of  A:\
 	
@@ -48463,6 +52496,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2017
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2017"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2017
 	 Directory of  A:\
 	
@@ -48475,6 +52510,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      540   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK2018
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2018"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2018
 	 Directory of  A:\
@@ -48500,6 +52537,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2019
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2019"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2019
 	 Directory of  A:\
 	
@@ -48515,6 +52554,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2020
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2020"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2020
 	 Directory of  A:\
 	
@@ -48528,6 +52569,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2021
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2021"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2021
 	 Directory of  A:\
 	
@@ -48539,6 +52582,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2022
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2022"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2022
 	 Directory of  A:\
 	
@@ -48548,6 +52593,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      463   1-10-90   3:58a
 
 ### Directory of PCSIG08: DISK2023
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2023"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2023
 	 Directory of  A:\
@@ -48561,6 +52608,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SAMPLE   PAK     2534   3-15-89   4:00a
 
 ### Directory of PCSIG08: DISK2024
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2024"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2024
 	 Directory of  A:\
@@ -48599,6 +52648,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2025
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2025"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2025
 	 Directory of  A:\
 	
@@ -48620,6 +52671,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UPGRADE  DOC     1651   8-25-89   6:43a
 
 ### Directory of PCSIG08: DISK2026
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2026"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2026
 	 Directory of  A:\
@@ -48649,6 +52702,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2027
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2027"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2027
 	 Directory of  A:\
 	
@@ -48656,6 +52711,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     1ST      215  10-05-88   1:37p
 
 ### Directory of PCSIG08: DISK2028
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2028"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2028
 	 Directory of  A:\
@@ -48694,6 +52751,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2029
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2029"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2029
 	 Directory of  A:\
 	
@@ -48709,6 +52768,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2030
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2030"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2030
 	 Directory of  A:\
 	
@@ -48723,6 +52784,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PKUNZIP  EXE    18208   3-05-89   4:00p
 
 ### Directory of PCSIG08: DISK2031
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2031"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2031
 	 Directory of  A:\
@@ -48755,6 +52818,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2032
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2032"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2032
 	 Directory of  A:\
 	
@@ -48771,6 +52836,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     3184  12-31-89   4:00p
 
 ### Directory of PCSIG08: DISK2033
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2033"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2033
 	 Directory of  A:\
@@ -48805,6 +52872,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2034
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2034"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2034
 	 Directory of  A:\
 	
@@ -48816,6 +52885,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	INSTALL  BAT     2048   5-11-89   4:16a
 
 ### Directory of PCSIG08: DISK2035
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2035"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2035
 	 Directory of  A:\
@@ -48840,6 +52911,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2036
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2036"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2036
 	 Directory of  A:\
 	
@@ -48855,6 +52928,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2037
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2037"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2037
 	 Directory of  A:\
 	
@@ -48867,6 +52942,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC    17057  12-12-89   9:15a
 
 ### Directory of PCSIG08: DISK2038
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2038"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2038
 	 Directory of  A:\
@@ -48905,6 +52982,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2039
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2039"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2039
 	 Directory of  A:\
 	
@@ -48921,6 +53000,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TICKER1  BIN      679  11-09-88   4:02a
 
 ### Directory of PCSIG08: DISK2040
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2040"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2040
 	 Directory of  A:\
@@ -48958,6 +53039,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2041
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2041"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2041
 	 Directory of  A:\
 	
@@ -48974,6 +53057,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TRNE21   NDX    11172   7-31-89   5:17a
 
 ### Directory of PCSIG08: DISK2042
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2042"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2042
 	 Directory of  A:\
@@ -49012,6 +53097,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2043
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2043"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2043
 	 Directory of  A:\
 	
@@ -49028,6 +53115,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TICKER4  BIN     3127  11-09-88  12:10p
 
 ### Directory of PCSIG08: DISK2044
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2044"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2044
 	 Directory of  A:\
@@ -49065,6 +53154,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2045
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2045"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2045
 	 Directory of  A:\
 	
@@ -49083,6 +53174,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TICKER22 BIN      929  11-09-88   4:11a
 
 ### Directory of PCSIG08: DISK2046
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2046"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2046
 	 Directory of  A:\
@@ -49117,6 +53210,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2047
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2047"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2047
 	 Directory of  A:\
 	
@@ -49133,6 +53228,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TICKER5  BIN     9411  11-09-88   4:05a
 
 ### Directory of PCSIG08: DISK2048
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2048"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2048
 	 Directory of  A:\
@@ -49161,6 +53258,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2049
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2049"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2049
 	 Directory of  A:\
 	
@@ -49179,6 +53278,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2050
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2050"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2050
 	 Directory of  A:\
 	
@@ -49192,6 +53293,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     5518  12-27-89   5:07a
 
 ### Directory of PCSIG08: DISK2051
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2051"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2051
 	 Directory of  A:\
@@ -49208,6 +53311,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	TOP20    TXT    19440  10-29-89   1:34p
 
 ### Directory of PCSIG08: DISK2052
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2052"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2052
 	 Directory of  A:\
@@ -49232,6 +53337,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2053
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2053"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2053
 	 Directory of  A:\
 	
@@ -49246,6 +53353,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2054
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2054"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2054
 	 Directory of  A:\
 	
@@ -49258,6 +53367,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      1232   6-02-89   3:41a
 
 ### Directory of PCSIG08: DISK2055
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2055"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2055
 	 Directory of  A:\
@@ -49283,6 +53394,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2056
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2056"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2056
 	 Directory of  A:\
 	
@@ -49304,6 +53417,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	UNIFORM  EXE    64626   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK2057
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2057"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2057
 	 Directory of  A:\
@@ -49341,6 +53456,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2058
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2058"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2058
 	 Directory of  A:\
 	
@@ -49362,6 +53479,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WT       HLP     1172   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK2059
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2059"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2059
 	 Directory of  A:\
@@ -49395,6 +53514,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2060
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2060"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2060
 	 Directory of  A:\
 	
@@ -49405,6 +53526,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2061
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2061"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2061
 	 Directory of  A:\
 	
@@ -49414,6 +53537,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PAC4-D   EXE   291696   2-14-90   9:52p
 
 ### Directory of PCSIG08: DISK2062
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2062"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2062
 	 Directory of  A:\
@@ -49439,6 +53564,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2063
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2063"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2063
 	 Directory of  A:\
 	
@@ -49453,6 +53580,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2064
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2064"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2064
 	 Directory of  A:\
 	
@@ -49464,6 +53593,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2065
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2065"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2065
 	 Directory of  A:\
 	
@@ -49473,6 +53604,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	READ     ME      7936   8-01-89   5:00a
 
 ### Directory of PCSIG08: DISK2066
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2066"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2066
 	 Directory of  A:\
@@ -49503,6 +53636,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2067
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2067"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2067
 	 Directory of  A:\
 	
@@ -49530,6 +53665,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WX4671   DEV      322   6-03-88   4:04p
 
 ### Directory of PCSIG08: DISK2068
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2068"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2068
 	 Directory of  A:\
@@ -49561,6 +53698,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2069
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2069"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2069
 	 Directory of  A:\
 	
@@ -49591,6 +53730,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2070
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2070"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2070
 	 Directory of  A:\
 	
@@ -49605,6 +53746,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2071
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2071"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2071
 	 Directory of  A:\
 	
@@ -49615,6 +53758,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	MDS2     ARC   291919  11-12-89   2:36p
 
 ### Directory of PCSIG08: DISK2072
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2072"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2072
 	 Directory of  A:\
@@ -49630,6 +53775,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	START2   EXE   160650   7-28-89   1:35p
 
 ### Directory of PCSIG08: DISK2073
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2073"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2073
 	 Directory of  A:\
@@ -49686,6 +53833,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2074
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2074"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2074
 	 Directory of  A:\
 	
@@ -49706,6 +53855,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	YANKS_36 DAT     2125   1-31-89   2:25p
 
 ### Directory of PCSIG08: DISK2075
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2075"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2075
 	 Directory of  A:\
@@ -49735,6 +53886,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2076
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2076"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2076
 	 Directory of  A:\
 	
@@ -49754,6 +53907,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2077
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2077"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2077
 	 Directory of  A:\
 	
@@ -49768,6 +53923,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2078
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2078"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2078
 	 Directory of  A:\
 	
@@ -49779,6 +53936,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   DOC     1011   1-01-80   8:47p
 
 ### Directory of PCSIG08: DISK2079
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2079"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2079
 	 Directory of  A:\
@@ -49797,6 +53956,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2080
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2080"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2080
 	 Directory of  A:\
 	
@@ -49812,6 +53973,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WCVARIAB DAT       99   9-20-87   2:59a
 
 ### Directory of PCSIG08: DISK2081
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2081"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2081
 	 Directory of  A:\
@@ -49902,6 +54065,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2082
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2082"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2082
 	 Directory of  A:\
 	
@@ -49916,6 +54081,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2083
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2083"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2083
 	 Directory of  A:\
 	
@@ -49925,6 +54092,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	PCF2     ZIP   286079   2-01-90  10:16a
 
 ### Directory of PCSIG08: DISK2084
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2084"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2084
 	 Directory of  A:\
@@ -49939,6 +54108,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	VENDOR   DOC     1920   1-28-90   9:00p
 
 ### Directory of PCSIG08: DISK2085
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2085"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2085
 	 Directory of  A:\
@@ -49959,6 +54130,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2086
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2086"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2086
 	 Directory of  A:\
 	
@@ -49972,6 +54145,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	REGISTER FRM     2770  12-01-89  12:43p
 
 ### Directory of PCSIG08: DISK2087
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2087"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2087
 	 Directory of  A:\
@@ -49987,6 +54162,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2088
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2088"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2088
 	 Directory of  A:\
 	
@@ -50000,6 +54177,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2089
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2089"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2089
 	 Directory of  A:\
 	
@@ -50009,6 +54188,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      501   3-28-90   7:28a
 
 ### Directory of PCSIG08: DISK2090
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2090"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2090
 	 Directory of  A:\
@@ -50030,6 +54211,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WORDS    MAS   110428   9-19-89  11:41a
 
 ### Directory of PCSIG08: DISK2091
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2091"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2091
 	 Directory of  A:\
@@ -50053,6 +54236,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2092
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2092"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2092
 	 Directory of  A:\
 	
@@ -50061,6 +54246,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	RFIX0227 ZIP    35460   2-28-90   8:29p
 
 ### Directory of PCSIG08: DISK2093
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2093"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2093
 	 Directory of  A:\
@@ -50092,6 +54279,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2094
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2094"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2094
 	 Directory of  A:\
 	
@@ -50111,6 +54300,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SAMPLE   REF      102   2-22-90   8:20p
 
 ### Directory of PCSIG08: DISK2095
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2095"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2095
 	 Directory of  A:\
@@ -50138,6 +54329,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2096
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2096"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2096
 	 Directory of  A:\
 	
@@ -50151,6 +54344,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	XARC     COM    12242   4-27-87   6:00a
 
 ### Directory of PCSIG08: DISK2097
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2097"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2097
 	 Directory of  A:\
@@ -50167,6 +54362,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2098
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2098"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2098
 	 Directory of  A:\
 	
@@ -50178,6 +54375,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	GO       TXT      859   1-01-80  12:00a
 
 ### Directory of PCSIG08: DISK2099
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2099"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2099
 	 Directory of  A:\
@@ -50191,6 +54390,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	SANS     CHR    13638   5-30-89   6:00p
 
 ### Directory of PCSIG08: DISK2100
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2100"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2100
 	 Directory of  A:\
@@ -50217,6 +54418,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2101
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2101"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2101
 	 Directory of  A:\
 	
@@ -50241,6 +54444,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   TXT      919  12-13-89   1:23p
 
 ### Directory of PCSIG08: DISK2102
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2102"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2102
 	 Directory of  A:\
@@ -50267,6 +54472,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2103
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2103"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2103
 	 Directory of  A:\
 	
@@ -50291,6 +54498,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   TXT      919  12-13-89   1:23p
 
 ### Directory of PCSIG08: DISK2104
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2104"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2104
 	 Directory of  A:\
@@ -50317,6 +54526,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2105
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2105"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2105
 	 Directory of  A:\
 	
@@ -50341,6 +54552,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   TXT      919  12-13-89   1:23p
 
 ### Directory of PCSIG08: DISK2106
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2106"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2106
 	 Directory of  A:\
@@ -50367,6 +54580,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2107
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2107"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2107
 	 Directory of  A:\
 	
@@ -50391,6 +54606,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   TXT      919  12-13-89   1:23p
 
 ### Directory of PCSIG08: DISK2108
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2108"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2108
 	 Directory of  A:\
@@ -50417,6 +54634,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2109
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2109"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2109
 	 Directory of  A:\
 	
@@ -50441,6 +54660,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   TXT      919  12-13-89   1:23p
 
 ### Directory of PCSIG08: DISK2110
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2110"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2110
 	 Directory of  A:\
@@ -50467,6 +54688,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2111
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2111"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2111
 	 Directory of  A:\
 	
@@ -50491,6 +54714,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   TXT      919  12-13-89   1:23p
 
 ### Directory of PCSIG08: DISK2112
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2112"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2112
 	 Directory of  A:\
@@ -50517,6 +54742,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2113
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2113"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2113
 	 Directory of  A:\
 	
@@ -50541,6 +54768,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   TXT      919  12-13-89   1:23p
 
 ### Directory of PCSIG08: DISK2114
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2114"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2114
 	 Directory of  A:\
@@ -50568,6 +54797,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2115
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2115"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2115
 	 Directory of  A:\
 	
@@ -50592,6 +54823,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	README   TXT      919  12-13-89   1:23p
 
 ### Directory of PCSIG08: DISK2116
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2116"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2116
 	 Directory of  A:\
@@ -50618,6 +54851,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2117
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2117"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2117
 	 Directory of  A:\
 	
@@ -50643,6 +54878,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2118
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2118"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2118
 	 Directory of  A:\
 	
@@ -50653,6 +54890,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WF_MAIN  DIC   251337   2-23-90  12:31a
 
 ### Directory of PCSIG08: DISK2119
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2119"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2119
 	 Directory of  A:\
@@ -50669,6 +54908,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 
 ### Directory of PCSIG08: DISK2120
 
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2120"; loadDisk FDC scroll' %}
+
 	 Volume in drive A is DISK2120
 	 Directory of  A:\
 	
@@ -50680,6 +54921,8 @@ The same machine is also available [with the PCjs Debugger](debugger/).
 	WYNDFLDS EXE   194339   7-31-89   5:00p
 
 ### Directory of PCSIG08: DISK2121
+
+{% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PCSIG08: DISK2121"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is DISK2121
 	 Directory of  A:\

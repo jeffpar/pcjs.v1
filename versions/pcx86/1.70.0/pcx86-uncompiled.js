@@ -4349,10 +4349,10 @@ class Component {
      *
      * @this {Component}
      * @param {number} port
-     * @param {number|null|*} bOut if an output operation
-     * @param {number|null|*} [addrFrom]
-     * @param {string|null|*} [name] of the port, if any
-     * @param {number|null|*} [bIn] is the input value, if known, on an input operation
+     * @param {number} [bOut] if an output operation
+     * @param {number} [addrFrom]
+     * @param {string} [name] of the port, if any
+     * @param {number} [bIn] is the input value, if known, on an input operation
      * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      */
     printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage)
@@ -4360,7 +4360,7 @@ class Component {
         if (DEBUGGER && this.dbg) {
             if (bitsMessage === true) {
                 bitsMessage = 0;
-            } else if (bitsMessage == null) {
+            } else if (bitsMessage == undefined) {
                 bitsMessage = this.bitsMessage;
             }
             this.dbg.messageIO(this, port, bOut, addrFrom, name, bIn, bitsMessage);
@@ -10155,7 +10155,7 @@ class Bus extends Component {
             }
             else {
                 if (DEBUGGER && this.dbg) {
-                    this.dbg.messageIO(this, port, null, addrLIP);
+                    this.dbg.messageIO(this, port, undefined, addrLIP);
                     if (this.fPortInputBreakAll) this.dbg.checkPortInput(port, size, dataPort);
                 }
             }
@@ -12587,12 +12587,7 @@ class CPU extends Component {
          * Start running automatically on power-up, assuming there's no Debugger.
          */
         if (this.flags.autoStart || this.flags.autoStart == null && !this.dbg) {
-            /*
-             * Automatically updating focus when calling startCPU() is a double-edged sword, potentially interfering
-             * with the user's attention, which is why we also set fQuiet, to try to prevent the page from "auto-scrolling"
-             * the newly focused machine into view.
-             */
-            return this.startCPU(true, true);
+            return this.startCPU(true);
         }
         return false;
     }
@@ -13585,7 +13580,7 @@ class CPU extends Component {
         if (controlRun) controlRun.textContent = "Halt";
         if (this.cmp) {
             this.cmp.updateStatus(true);
-            if (fUpdateFocus) this.cmp.updateFocus(!fQuiet);
+            if (fUpdateFocus) this.cmp.updateFocus();
             this.cmp.start(this.counts.msStartRun, this.getCycles());
         }
 
@@ -39941,7 +39936,7 @@ class ChipSet extends Component {
         let channel = controller.aChannels[iChannel];
         let b = channel.addrCurrent[controller.bIndex];
         if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-            this.printMessageIO(port, null, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".ADDR[" + controller.bIndex + "]", b, true);
+            this.printMessageIO(port, undefined, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".ADDR[" + controller.bIndex + "]", b, true);
         }
         controller.bIndex ^= 0x1;
         /*
@@ -39979,7 +39974,7 @@ class ChipSet extends Component {
     {
         let controller = this.aDMACs[iDMAC];
         if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".ADDR[" + controller.bIndex + "]", null, true);
+            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".ADDR[" + controller.bIndex + "]", undefined, true);
         }
         let channel = controller.aChannels[iChannel];
         channel.addrCurrent[controller.bIndex] = channel.addrInit[controller.bIndex] = bOut;
@@ -40002,7 +39997,7 @@ class ChipSet extends Component {
         let channel = controller.aChannels[iChannel];
         let b = channel.countCurrent[controller.bIndex];
         if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-            this.printMessageIO(port, null, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".COUNT[" + controller.bIndex + "]", b, true);
+            this.printMessageIO(port, undefined, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".COUNT[" + controller.bIndex + "]", b, true);
         }
         controller.bIndex ^= 0x1;
         /*
@@ -40044,7 +40039,7 @@ class ChipSet extends Component {
     {
         let controller = this.aDMACs[iDMAC];
         if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".COUNT[" + controller.bIndex + "]", null, true);
+            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".COUNT[" + controller.bIndex + "]", undefined, true);
         }
         let channel = controller.aChannels[iChannel];
         channel.countCurrent[controller.bIndex] = channel.countInit[controller.bIndex] = bOut;
@@ -40087,7 +40082,7 @@ class ChipSet extends Component {
         let b = controller.bStatus | ChipSet.DMA_STATUS.CH0_TC;
         controller.bStatus &= ~ChipSet.DMA_STATUS.ALL_TC;
         if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-            this.printMessageIO(port, null, addrFrom, "DMA" + iDMAC + ".STATUS", b, true);
+            this.printMessageIO(port, undefined, addrFrom, "DMA" + iDMAC + ".STATUS", b, true);
         }
         return b;
     }
@@ -40104,7 +40099,7 @@ class ChipSet extends Component {
     outDMACmd(iDMAC, port, bOut, addrFrom)
     {
         if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CMD", null, true);
+            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CMD", undefined, true);
         }
         this.aDMACs[iDMAC].bCmd = bOut;
     }
@@ -40132,7 +40127,7 @@ class ChipSet extends Component {
     {
         let controller = this.aDMACs[iDMAC];
         if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".REQ", null, true);
+            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".REQ", undefined, true);
         }
         /*
          * Bits 0-1 contain the channel number
@@ -40159,7 +40154,7 @@ class ChipSet extends Component {
     {
         let controller = this.aDMACs[iDMAC];
         if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".MASK", null, true);
+            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".MASK", undefined, true);
         }
         let iChannel = bOut & ChipSet.DMA_MASK.CHANNEL;
         let channel = controller.aChannels[iChannel];
@@ -40179,7 +40174,7 @@ class ChipSet extends Component {
     outDMAMode(iDMAC, port, bOut, addrFrom)
     {
         if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".MODE", null, true);
+            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".MODE", undefined, true);
         }
         let iChannel = bOut & ChipSet.DMA_MODE.CHANNEL;
         this.aDMACs[iDMAC].aChannels[iChannel].mode = bOut;
@@ -40200,7 +40195,7 @@ class ChipSet extends Component {
     outDMAResetFF(iDMAC, port, bOut, addrFrom)
     {
         if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".RESET_FF", null, true);
+            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".RESET_FF", undefined, true);
         }
         this.aDMACs[iDMAC].bIndex = 0;
     }
@@ -40231,7 +40226,7 @@ class ChipSet extends Component {
         let controller = this.aDMACs[iDMAC];
         let b = controller.bTemp;
         if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-            this.printMessageIO(port, null, addrFrom, "DMA" + iDMAC + ".TEMP", b, true);
+            this.printMessageIO(port, undefined, addrFrom, "DMA" + iDMAC + ".TEMP", b, true);
         }
         return b;
     }
@@ -40248,7 +40243,7 @@ class ChipSet extends Component {
     outDMAMasterClear(iDMAC, port, bOut, addrFrom)
     {
         if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".MASTER_CLEAR", null, true);
+            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".MASTER_CLEAR", undefined, true);
         }
         /*
          * The value written to this port doesn't matter; any write triggers a "master clear" operation
@@ -40275,7 +40270,7 @@ class ChipSet extends Component {
     {
         let bIn = this.aDMACs[iDMAC].aChannels[iChannel].bPage;
         if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-            this.printMessageIO(port, null, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".PAGE", bIn, true);
+            this.printMessageIO(port, undefined, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".PAGE", bIn, true);
         }
         return bIn;
     }
@@ -40293,7 +40288,7 @@ class ChipSet extends Component {
     outDMAPageReg(iDMAC, iChannel, port, bOut, addrFrom)
     {
         if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".PAGE", null, true);
+            this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".PAGE", undefined, true);
         }
         this.aDMACs[iDMAC].aChannels[iChannel].bPage = bOut;
     }
@@ -40311,7 +40306,7 @@ class ChipSet extends Component {
     {
         let bIn = this.abDMAPageSpare[iSpare];
         if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-            this.printMessageIO(port, null, addrFrom, "DMA.SPARE" + iSpare + ".PAGE", bIn, true);
+            this.printMessageIO(port, undefined, addrFrom, "DMA.SPARE" + iSpare + ".PAGE", bIn, true);
         }
         return bIn;
     }
@@ -40332,7 +40327,7 @@ class ChipSet extends Component {
          * it enables logging of all DeskPro 386 ROM checkpoint I/O to port 0x84.
          */
         if (this.messageEnabled(Messages.DMA | Messages.PORT) || DEBUG && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386 && port == 0x84) {
-            this.printMessageIO(port, bOut, addrFrom, "DMA.SPARE" + iSpare + ".PAGE", null, true);
+            this.printMessageIO(port, bOut, addrFrom, "DMA.SPARE" + iSpare + ".PAGE", undefined, true);
         }
         this.abDMAPageSpare[iSpare] = bOut;
     }
@@ -40618,7 +40613,7 @@ class ChipSet extends Component {
             }
         }
         if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
-            this.printMessageIO(pic.port, null, addrFrom, "PIC" + iPIC, b, true);
+            this.printMessageIO(pic.port, undefined, addrFrom, "PIC" + iPIC, b, true);
         }
         return b;
     }
@@ -40635,7 +40630,7 @@ class ChipSet extends Component {
     {
         let pic = this.aPICs[iPIC];
         if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
-            this.printMessageIO(pic.port, bOut, addrFrom, "PIC" + iPIC, null, true);
+            this.printMessageIO(pic.port, bOut, addrFrom, "PIC" + iPIC, undefined, true);
         }
         if (bOut & ChipSet.PIC_LO.ICW1) {
             /*
@@ -40781,7 +40776,7 @@ class ChipSet extends Component {
         let pic = this.aPICs[iPIC];
         let b = pic.bIMR;
         if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
-            this.printMessageIO(pic.port+1, null, addrFrom, "PIC" + iPIC, b, true);
+            this.printMessageIO(pic.port+1, undefined, addrFrom, "PIC" + iPIC, b, true);
         }
         return b;
     }
@@ -40798,7 +40793,7 @@ class ChipSet extends Component {
     {
         let pic = this.aPICs[iPIC];
         if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
-            this.printMessageIO(pic.port+1, bOut, addrFrom, "PIC" + iPIC, null, true);
+            this.printMessageIO(pic.port+1, bOut, addrFrom, "PIC" + iPIC, undefined, true);
         }
         if (pic.nICW < pic.aICW.length) {
             pic.aICW[pic.nICW++] = bOut;
@@ -41101,7 +41096,7 @@ class ChipSet extends Component {
             }
         }
         if (this.messageEnabled(Messages.TIMER | Messages.PORT)) {
-            this.printMessageIO(port, null, addrFrom, "PIT" + iPIT + ".TIMER" + iPITTimer, b, true);
+            this.printMessageIO(port, undefined, addrFrom, "PIT" + iPIT + ".TIMER" + iPITTimer, b, true);
         }
         return b;
     }
@@ -41128,7 +41123,7 @@ class ChipSet extends Component {
     outTimer(iPIT, iPITTimer, port, bOut, addrFrom)
     {
         if (this.messageEnabled(Messages.TIMER | Messages.PORT)) {
-            this.printMessageIO(port, bOut, addrFrom, "PIT" + iPIT + ".TIMER" + iPITTimer, null, true);
+            this.printMessageIO(port, bOut, addrFrom, "PIT" + iPIT + ".TIMER" + iPITTimer, undefined, true);
         }
 
         let iBaseTimer = (iPIT? 3 : 0);
@@ -41187,7 +41182,7 @@ class ChipSet extends Component {
      */
     inTimerCtrl(iPIT, port, addrFrom)
     {
-        this.printMessageIO(port, null, addrFrom, "PIT" + iPIT + ".CTRL", null, Messages.TIMER);
+        this.printMessageIO(port, undefined, addrFrom, "PIT" + iPIT + ".CTRL", undefined, Messages.TIMER);
         /*
          * NOTE: Even though reads to port 0x43 are undefined (I think), I'm going to "define" it
          * as returning the last value written, purely for the Debugger's benefit.
@@ -41206,7 +41201,7 @@ class ChipSet extends Component {
      */
     outTimerCtrl(iPIT, port, bOut, addrFrom)
     {
-        this.printMessageIO(port, bOut, addrFrom, "PIT" + iPIT + ".CTRL", null, Messages.TIMER);
+        this.printMessageIO(port, bOut, addrFrom, "PIT" + iPIT + ".CTRL", undefined, Messages.TIMER);
 
         /*
          * Extract the SC (Select Counter) bits.
@@ -41688,11 +41683,11 @@ class ChipSet extends Component {
                 b = this.aDIPSwitches[0][1];
             } else {
                 b = this.bKbdData;
-                this.printMessageIO(port, null, addrFrom, "PPI_A", b, Messages.KBD);
+                this.printMessageIO(port, undefined, addrFrom, "PPI_A", b, Messages.KBD);
                 return b;
             }
         }
-        this.printMessageIO(port, null, addrFrom, "PPI_A", b);
+        this.printMessageIO(port, undefined, addrFrom, "PPI_A", b);
         return b;
     }
 
@@ -41721,7 +41716,7 @@ class ChipSet extends Component {
     inPPIB(port, addrFrom)
     {
         let b = this.bPPIB;
-        this.printMessageIO(port, null, addrFrom, "PPI_B", b);
+        this.printMessageIO(port, undefined, addrFrom, "PPI_B", b);
         return b;
     }
 
@@ -41833,7 +41828,7 @@ class ChipSet extends Component {
          * The ROM BIOS polls this port incessantly during its memory tests, checking for memory parity errors
          * (which of course we never report), so you must use both Messages.PORT and Messages.CHIPSET.
          */
-        this.printMessageIO(port, null, addrFrom, "PPI_C", b, Messages.CHIPSET);
+        this.printMessageIO(port, undefined, addrFrom, "PPI_C", b, Messages.CHIPSET);
         return b;
     }
 
@@ -41862,7 +41857,7 @@ class ChipSet extends Component {
     inPPICtrl(port, addrFrom)
     {
         let b = this.bPPICtrl;
-        this.printMessageIO(port, null, addrFrom, "PPI_CTRL", b);
+        this.printMessageIO(port, undefined, addrFrom, "PPI_CTRL", b);
         return b;
     }
 
@@ -41891,7 +41886,7 @@ class ChipSet extends Component {
     in8041Kbd(port, addrFrom)
     {
         let b = this.bKbdData;
-        this.printMessageIO(port, null, addrFrom, "8041_KBD", b, Messages.KBD);
+        this.printMessageIO(port, undefined, addrFrom, "8041_KBD", b, Messages.KBD);
         this.b8041Status &= ~ChipSet.C8042.STATUS.OUTBUFF_FULL;
         return b;
     }
@@ -41921,7 +41916,7 @@ class ChipSet extends Component {
     in8041Ctrl(port, addrFrom)
     {
         let b = this.bPPIB;
-        this.printMessageIO(port, null, addrFrom, "8041_CTRL", b);
+        this.printMessageIO(port, undefined, addrFrom, "8041_CTRL", b);
         return b;
     }
 
@@ -41950,7 +41945,7 @@ class ChipSet extends Component {
     in8041Status(port, addrFrom)
     {
         let b = this.b8041Status;
-        this.printMessageIO(port, null, addrFrom, "8041_STATUS", b);
+        this.printMessageIO(port, undefined, addrFrom, "8041_STATUS", b);
         return b;
     }
 
@@ -41988,7 +41983,7 @@ class ChipSet extends Component {
     in8042OutBuff(port, addrFrom)
     {
         let b = this.b8042OutBuff;
-        this.printMessageIO(port, null, addrFrom, "8042_OUTBUFF", b, Messages.C8042);
+        this.printMessageIO(port, undefined, addrFrom, "8042_OUTBUFF", b, Messages.C8042);
         this.b8042Status &= ~(ChipSet.C8042.STATUS.OUTBUFF_FULL | ChipSet.C8042.STATUS.OUTBUFF_DELAY);
         if (this.kbd) this.kbd.checkBuffer(b);
         return b;
@@ -42008,7 +42003,7 @@ class ChipSet extends Component {
      */
     out8042InBuffData(port, bOut, addrFrom)
     {
-        this.printMessageIO(port, bOut, addrFrom, "8042_INBUF.DATA", null, Messages.C8042);
+        this.printMessageIO(port, bOut, addrFrom, "8042_INBUF.DATA", undefined, Messages.C8042);
 
         if (this.b8042Status & ChipSet.C8042.STATUS.CMD_FLAG) {
 
@@ -42135,7 +42130,7 @@ class ChipSet extends Component {
          * Thanks to the WAITF function, this has become a very "busy" port, so if this generates too
          * many messages, try adding Messages.WARN to the criteria.
          */
-        this.printMessageIO(port, null, addrFrom, "8042_RWREG", b, Messages.C8042 | Messages.WARN);
+        this.printMessageIO(port, undefined, addrFrom, "8042_RWREG", b, Messages.C8042 | Messages.WARN);
         return b;
     }
 
@@ -42149,7 +42144,7 @@ class ChipSet extends Component {
      */
     out8042RWReg(port, bOut, addrFrom)
     {
-        this.printMessageIO(port, bOut, addrFrom, "8042_RWREG", null, Messages.C8042);
+        this.printMessageIO(port, bOut, addrFrom, "8042_RWREG", undefined, Messages.C8042);
         this.updatePPIB(bOut);
     }
 
@@ -42163,7 +42158,7 @@ class ChipSet extends Component {
      */
     in8042Status(port, addrFrom)
     {
-        this.printMessageIO(port, null, addrFrom, "8042_STATUS", this.b8042Status, Messages.C8042);
+        this.printMessageIO(port, undefined, addrFrom, "8042_STATUS", this.b8042Status, Messages.C8042);
         let b = this.b8042Status & 0xff;
         /*
          * There's code in the 5170 BIOS (F000:03BF) that writes an 8042 command (0xAA), waits for
@@ -42213,7 +42208,7 @@ class ChipSet extends Component {
      */
     out8042InBuffCmd(port, bOut, addrFrom)
     {
-        this.printMessageIO(port, bOut, addrFrom, "8042_INBUFF.CMD", null, Messages.C8042);
+        this.printMessageIO(port, bOut, addrFrom, "8042_INBUFF.CMD", undefined, Messages.C8042);
 
         this.b8042InBuff = bOut;
 
@@ -42550,7 +42545,7 @@ class ChipSet extends Component {
     in6300DIPSwitches(iDIP, port, addrFrom)
     {
         let b = this.aDIPSwitches[iDIP][1];
-        this.printMessageIO(port, null, addrFrom, "DIPSW-" + iDIP, b, Messages.CHIPSET);
+        this.printMessageIO(port, undefined, addrFrom, "DIPSW-" + iDIP, b, Messages.CHIPSET);
         return b;
     }
 
@@ -42564,7 +42559,7 @@ class ChipSet extends Component {
      */
     inCMOSAddr(port, addrFrom)
     {
-        this.printMessageIO(port, null, addrFrom, "CMOS.ADDR", this.bCMOSAddr, Messages.CMOS);
+        this.printMessageIO(port, undefined, addrFrom, "CMOS.ADDR", this.bCMOSAddr, Messages.CMOS);
         return this.bCMOSAddr;
     }
 
@@ -42578,7 +42573,7 @@ class ChipSet extends Component {
      */
     outCMOSAddr(port, bOut, addrFrom)
     {
-        this.printMessageIO(port, bOut, addrFrom, "CMOS.ADDR", null, Messages.CMOS);
+        this.printMessageIO(port, bOut, addrFrom, "CMOS.ADDR", undefined, Messages.CMOS);
         this.bCMOSAddr = bOut;
         this.bNMI = (this.bNMI & ~ChipSet.NMI.ENABLE) | ((bOut & ChipSet.CMOS.ADDR.NMI_DISABLE)? 0 : ChipSet.NMI.ENABLE);
     }
@@ -42596,7 +42591,7 @@ class ChipSet extends Component {
         let bAddr = this.bCMOSAddr & ChipSet.CMOS.ADDR.MASK;
         let bIn = (bAddr <= ChipSet.CMOS.ADDR.STATUSD? this.getRTCByte(bAddr) : this.abCMOSData[bAddr]);
         if (this.messageEnabled(Messages.CMOS | Messages.PORT)) {
-            this.printMessageIO(port, null, addrFrom, "CMOS.DATA[" + Str.toHexByte(bAddr) + "]", bIn, true);
+            this.printMessageIO(port, undefined, addrFrom, "CMOS.DATA[" + Str.toHexByte(bAddr) + "]", bIn, true);
         }
         if (addrFrom != null) {
             if (bAddr == ChipSet.CMOS.ADDR.STATUSC) {
@@ -42631,7 +42626,7 @@ class ChipSet extends Component {
     {
         let bAddr = this.bCMOSAddr & ChipSet.CMOS.ADDR.MASK;
         if (this.messageEnabled(Messages.CMOS | Messages.PORT)) {
-            this.printMessageIO(port, bOut, addrFrom, "CMOS.DATA[" + Str.toHexByte(bAddr) + "]", null, true);
+            this.printMessageIO(port, bOut, addrFrom, "CMOS.DATA[" + Str.toHexByte(bAddr) + "]", undefined, true);
         }
         let bDelta = bOut ^ this.abCMOSData[bAddr];
         this.abCMOSData[bAddr] = (bAddr <= ChipSet.CMOS.ADDR.STATUSD? this.setRTCByte(bAddr, bOut) : bOut);
@@ -42660,7 +42655,7 @@ class ChipSet extends Component {
     inNMI(port, addrFrom)
     {
         let bIn = this.bNMI;
-        this.printMessageIO(port, null, addrFrom, "NMI", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "NMI", bIn);
         this.bNMI &= ~ChipSet.NMI.KBD_LATCH;
         return bIn;
     }
@@ -51324,13 +51319,20 @@ class Video extends Component {
     }
 
     /**
-     * setFocus()
+     * setFocus(fScroll)
      *
      * @this {Video}
+     * @param {boolean} [fScroll]
      */
-    setFocus()
+    setFocus(fScroll)
     {
-        if (this.inputScreen) this.inputScreen.focus();
+        if (this.inputScreen) {
+            this.inputScreen.focus();
+            if (fScroll) {
+                let element = document.getElementById(this.idMachine) || this.inputScreen;
+                element.scrollIntoView();
+            }
+        }
     }
 
     /**
@@ -55027,7 +55029,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regATCIndx;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.ATC.PORT, null, addrFrom, "ATC.INDX", b);
+            this.printMessageIO(Card.ATC.PORT, undefined, addrFrom, "ATC.INDX", b);
         }
         return b;
     }
@@ -55048,7 +55050,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regATCData[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK];
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.ATC.PORT, null, addrFrom, "ATC." + this.cardEGA.asATCRegs[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK], b);
+            this.printMessageIO(Card.ATC.PORT, undefined, addrFrom, "ATC." + this.cardEGA.asATCRegs[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK], b);
         }
         return b;
     }
@@ -55192,7 +55194,7 @@ class Video extends Component {
          * TODO: Figure out where Card.STATUS0.FEAT bits should come from....
          */
         this.cardEGA.regStatus0 = b;
-        this.printMessageIO(Card.STATUS0.PORT, null, addrFrom, "STATUS0", b);
+        this.printMessageIO(Card.STATUS0.PORT, undefined, addrFrom, "STATUS0", b);
         return b;
     }
 
@@ -55220,7 +55222,7 @@ class Video extends Component {
     inVGAEnable(port, addrFrom)
     {
         let b = this.cardEGA.regVGAEnable;
-        this.printMessageIO(Card.VGA_ENABLE.PORT, null, addrFrom, "VGA_ENABLE", b);
+        this.printMessageIO(Card.VGA_ENABLE.PORT, undefined, addrFrom, "VGA_ENABLE", b);
         return b;
     }
 
@@ -55249,7 +55251,7 @@ class Video extends Component {
     inSEQIndx(port, addrFrom)
     {
         let b = this.cardEGA.regSEQIndx;
-        this.printMessageIO(Card.SEQ.INDX.PORT, null, addrFrom, "SEQ.INDX", b);
+        this.printMessageIO(Card.SEQ.INDX.PORT, undefined, addrFrom, "SEQ.INDX", b);
         return b;
     }
 
@@ -55279,7 +55281,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regSEQData[this.cardEGA.regSEQIndx];
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.SEQ.DATA.PORT, null, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx], b);
+            this.printMessageIO(Card.SEQ.DATA.PORT, undefined, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx], b);
         }
         return b;
     }
@@ -55374,7 +55376,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regDACMask;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.MASK.PORT, null, addrFrom, "DAC.MASK", b);
+            this.printMessageIO(Card.DAC.MASK.PORT, undefined, addrFrom, "DAC.MASK", b);
         }
         return b;
     }
@@ -55409,7 +55411,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regDACState;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.STATE.PORT, null, addrFrom, "DAC.STATE", b);
+            this.printMessageIO(Card.DAC.STATE.PORT, undefined, addrFrom, "DAC.STATE", b);
         }
         return b;
     }
@@ -55462,7 +55464,7 @@ class Video extends Component {
     {
         let b = (this.cardEGA.regDACData[this.cardEGA.regDACAddr] >> this.cardEGA.regDACShift) & 0x3f;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.DATA.PORT, null, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]", b);
+            this.printMessageIO(Card.DAC.DATA.PORT, undefined, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]", b);
         }
         this.cardEGA.regDACShift += 6;
         if (this.cardEGA.regDACShift > 12) {
@@ -55509,7 +55511,7 @@ class Video extends Component {
     inVGAFeat(port, addrFrom)
     {
         let b = this.cardEGA.regFeat;
-        this.printMessageIO(Card.FEAT_CTRL.PORT_READ, null, addrFrom, "FEAT", b);
+        this.printMessageIO(Card.FEAT_CTRL.PORT_READ, undefined, addrFrom, "FEAT", b);
         return b;
     }
 
@@ -55543,7 +55545,7 @@ class Video extends Component {
     inVGAMisc(port, addrFrom)
     {
         let b = this.cardEGA.regMisc;
-        this.printMessageIO(Card.MISC.PORT_READ, null, addrFrom, "MISC", b);
+        this.printMessageIO(Card.MISC.PORT_READ, undefined, addrFrom, "MISC", b);
         return b;
     }
 
@@ -55580,7 +55582,7 @@ class Video extends Component {
     inGRCIndx(port, addrFrom)
     {
         let b = this.cardEGA.regGRCIndx;
-        this.printMessageIO(Card.GRC.INDX.PORT, null, addrFrom, "GRC.INDX", b);
+        this.printMessageIO(Card.GRC.INDX.PORT, undefined, addrFrom, "GRC.INDX", b);
         return b;
     }
 
@@ -55610,7 +55612,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regGRCData[this.cardEGA.regGRCIndx];
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.GRC.DATA.PORT, null, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.regGRCIndx], b);
+            this.printMessageIO(Card.GRC.DATA.PORT, undefined, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.regGRCIndx], b);
         }
         return b;
     }
@@ -55754,7 +55756,7 @@ class Video extends Component {
     {
         let b = this.cardColor.regColor;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(port /* this.cardColor.port + 5 */, null, addrFrom, this.cardColor.type + ".COLOR", b);
+            this.printMessageIO(port /* this.cardColor.port + 5 */, undefined, addrFrom, this.cardColor.type + ".COLOR", b);
         }
         return b;
     }
@@ -55814,7 +55816,7 @@ class Video extends Component {
          * it prefers (normally 0xff).
          */
         if (card.fActive) b = card.regCRTIndx;
-        this.printMessageIO(port, null, addrFrom, "CRTC.INDX", b);
+        this.printMessageIO(port, undefined, addrFrom, "CRTC.INDX", b);
         return b;
     }
 
@@ -55858,7 +55860,7 @@ class Video extends Component {
          */
         if (card.fActive && card.regCRTIndx < card.nCRTCRegs) b = card.regCRTData[card.regCRTIndx];
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(port /* card.port + 1 */, null, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx], b);
+            this.printMessageIO(port /* card.port + 1 */, undefined, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx], b);
         }
         return b;
     }
@@ -55964,7 +55966,7 @@ class Video extends Component {
     inCardMode(card, addrFrom)
     {
         let b = card.regMode;
-        this.printMessageIO(card.port + 4, null, addrFrom, "MODE", b);
+        this.printMessageIO(card.port + 4, undefined, addrFrom, "MODE", b);
         return b;
     }
 
@@ -56068,7 +56070,7 @@ class Video extends Component {
         }
 
         card.regStatus = b;
-        if (MAXDEBUG) this.printMessageIO(card.port + 6, null, addrFrom, (card === this.cardEGA? "STATUS1" : "STATUS"), b);
+        if (MAXDEBUG) this.printMessageIO(card.port + 6, undefined, addrFrom, (card === this.cardEGA? "STATUS1" : "STATUS"), b);
         return b;
     }
 
@@ -57131,7 +57133,7 @@ class ParallelPort extends Component {
     inData(port, addrFrom)
     {
         let b = this.bData;
-        this.printMessageIO(port, null, addrFrom, "DATA", b);
+        this.printMessageIO(port, undefined, addrFrom, "DATA", b);
         return b;
     }
 
@@ -57147,7 +57149,7 @@ class ParallelPort extends Component {
     {
         let b = this.bStatus;
         this.bStatus |= (ParallelPort.STATUS.NACK | ParallelPort.STATUS.NBUSY);
-        this.printMessageIO(port, null, addrFrom, "STAT", b);
+        this.printMessageIO(port, undefined, addrFrom, "STAT", b);
         this.updateIRR();
         return b;
     }
@@ -57163,7 +57165,7 @@ class ParallelPort extends Component {
     inControl(port, addrFrom)
     {
         let b = this.bControl;
-        this.printMessageIO(port, null, addrFrom, "CTRL", b);
+        this.printMessageIO(port, undefined, addrFrom, "CTRL", b);
         return b;
     }
 
@@ -58029,7 +58031,7 @@ class SerialPort extends Component {
     inRBR(port, addrFrom)
     {
         let b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL & 0xff) : this.bRBR);
-        this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "RBR", b);
+        this.printMessageIO(port, undefined, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "RBR", b);
         this.bLSR &= ~SerialPort.LSR.DR;
         this.advanceRBR();
         return b;
@@ -58046,7 +58048,7 @@ class SerialPort extends Component {
     inIER(port, addrFrom)
     {
         let b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL >> 8) : this.bIER);
-        this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER", b);
+        this.printMessageIO(port, undefined, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER", b);
         return b;
     }
 
@@ -58067,7 +58069,7 @@ class SerialPort extends Component {
         if (b == SerialPort.IIR.INT_THR) {
             this.bIIR = SerialPort.IIR.NO_INT;
         }
-        this.printMessageIO(port, null, addrFrom, "IIR", b);
+        this.printMessageIO(port, undefined, addrFrom, "IIR", b);
         return b;
     }
 
@@ -58082,7 +58084,7 @@ class SerialPort extends Component {
     inLCR(port, addrFrom)
     {
         let b = this.bLCR;
-        this.printMessageIO(port, null, addrFrom, "LCR", b);
+        this.printMessageIO(port, undefined, addrFrom, "LCR", b);
         return b;
     }
 
@@ -58097,7 +58099,7 @@ class SerialPort extends Component {
     inMCR(port, addrFrom)
     {
         let b = this.bMCR;
-        this.printMessageIO(port, null, addrFrom, "MCR", b);
+        this.printMessageIO(port, undefined, addrFrom, "MCR", b);
         return b;
     }
 
@@ -58112,7 +58114,7 @@ class SerialPort extends Component {
     inLSR(port, addrFrom)
     {
         let b = this.bLSR;
-        this.printMessageIO(port, null, addrFrom, "LSR", b);
+        this.printMessageIO(port, undefined, addrFrom, "LSR", b);
         return b;
     }
 
@@ -58128,7 +58130,7 @@ class SerialPort extends Component {
     {
         let b = this.bMSR;
         this.bMSR &= ~(SerialPort.MSR.DCTS | SerialPort.MSR.DDSR);
-        this.printMessageIO(port, null, addrFrom, "MSR", b);
+        this.printMessageIO(port, undefined, addrFrom, "MSR", b);
         return b;
     }
 
@@ -59960,7 +59962,7 @@ class Mouse extends Component {
     inBusData(port, addrFrom)
     {
         let b = 0;
-        this.printMessageIO(port, null, addrFrom, "DATA", b);
+        this.printMessageIO(port, undefined, addrFrom, "DATA", b);
         return b;
     }
 
@@ -59975,7 +59977,7 @@ class Mouse extends Component {
     inBusTPPI(port, addrFrom)
     {
         let b = 0;
-        this.printMessageIO(port, null, addrFrom, "TPPI", b);
+        this.printMessageIO(port, undefined, addrFrom, "TPPI", b);
         return b;
     }
 
@@ -59990,7 +59992,7 @@ class Mouse extends Component {
     inBusCtrl(port, addrFrom)
     {
         let b = 0;
-        this.printMessageIO(port, null, addrFrom, "CTRL", b);
+        this.printMessageIO(port, undefined, addrFrom, "CTRL", b);
         return b;
     }
 
@@ -60005,7 +60007,7 @@ class Mouse extends Component {
     inBusCPPI(port, addrFrom)
     {
         let b = 0;
-        this.printMessageIO(port, null, addrFrom, "CPPI", b);
+        this.printMessageIO(port, undefined, addrFrom, "CPPI", b);
         return b;
     }
 
@@ -63337,7 +63339,7 @@ class FDC extends Component {
          * settings that determine the number of drives and their characteristics (eg, 40-track vs. 80-track),
          * which it can then pass on to initDrive().
          */
-
+        this.fAutoScroll = false;
         this['exports'] = {
             'loadDisk':     this.loadSelectedDisk,
             'wait':         this.waitDrives
@@ -64249,20 +64251,22 @@ class FDC extends Component {
     }
 
     /**
-     * loadSelectedDisk()
+     * loadSelectedDisk(...args)
      *
      * NOTE: Since this can be called via script command (eg, 'loadDisk FDC'), additional parameters can be
-     * passed; use the arguments array to access them if necessary.
+     * passed; use the args array to access them if necessary.
      *
      * @this {FDC}
+     * @param {...} args
      * @return {boolean}
      */
-    loadSelectedDisk()
+    loadSelectedDisk(...args)
     {
         let controlDisks = this.bindings["listDisks"];
         if (controlDisks) {
             let sDisketteName = controlDisks.options[controlDisks.selectedIndex].text;
             let sDiskettePath = controlDisks.value;
+            this.fAutoScroll = (args[0] == "scroll");
             return this.loadSelectedDrive(sDisketteName, sDiskettePath);
         }
         return false;
@@ -64487,7 +64491,9 @@ class FDC extends Component {
              * because these modal alerts quickly become annoying.  In the meantime, I now set fPrintOnly to true, on the
              * theory no message is a good sign, while load errors in disk.js should continue to trigger notifications.
              */
-            if (!drive.fnCallReady) this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), true /* drive.fAutoMount || fAutoMount */);
+            if (!drive.fnCallReady) {
+                this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), true /* drive.fAutoMount || fAutoMount */);
+            }
 
             /*
              * Update the drive's current media parameters to match the disk's.
@@ -64500,7 +64506,7 @@ class FDC extends Component {
              * Since you usually want the Computer to have focus again after loading a new diskette, let's try automatically
              * updating the focus after a successful load.
              */
-            if (this.cmp) this.cmp.updateFocus();
+            if (this.cmp) this.cmp.updateFocus(this.fAutoScroll);
         }
         else {
             drive.fLocal = false;
@@ -64517,6 +64523,8 @@ class FDC extends Component {
             drive.fnCallReady();
             drive.fnCallReady = null;
         }
+
+        this.fAutoScroll = false;
     }
 
     /**
@@ -64956,7 +64964,7 @@ class FDC extends Component {
     inFDCDiagnostic(port, addrFrom)
     {
         let b = 0x50;       // we simply return the expected pattern (01010000B); see code excerpt above
-        this.printMessageIO(port, null, addrFrom, "DIAG", b);
+        this.printMessageIO(port, undefined, addrFrom, "DIAG", b);
         return b;
     }
 
@@ -64970,7 +64978,7 @@ class FDC extends Component {
      */
     inFDCStatus(port, addrFrom)
     {
-        this.printMessageIO(port, null, addrFrom, "STATUS", this.regStatus);
+        this.printMessageIO(port, undefined, addrFrom, "STATUS", this.regStatus);
         return this.regStatus;
     }
 
@@ -64995,7 +65003,7 @@ class FDC extends Component {
             if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.FDC);
         }
         if (this.messageEnabled()) {
-            this.printMessageIO(port, null, addrFrom, "DATA[" + this.regDataIndex + "]", bIn);
+            this.printMessageIO(port, undefined, addrFrom, "DATA[" + this.regDataIndex + "]", bIn);
         }
         if (++this.regDataIndex >= this.regDataTotal) {
             this.regStatus &= ~(FDC.REG_STATUS.READ_DATA | FDC.REG_STATUS.BUSY);
@@ -65050,7 +65058,7 @@ class FDC extends Component {
          * TODO: Determine when the DISK_CHANGE bit is *really* cleared (this is just a guess)
          */
         this.regInput &= ~FDC.REG_INPUT.DISK_CHANGE;
-        this.printMessageIO(port, null, addrFrom, "INPUT", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "INPUT", bIn);
         return bIn;
     }
 
@@ -66998,7 +67006,7 @@ class HDC extends Component {
         if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.XTC);
         this.regStatus &= ~HDC.XTC.STATUS.INTERRUPT;
 
-        this.printMessageIO(port, null, addrFrom, "DATA[" + this.regDataIndex + "]", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "DATA[" + this.regDataIndex + "]", bIn);
         if (++this.regDataIndex >= this.regDataTotal) {
             this.regDataIndex = this.regDataTotal = 0;
             this.regStatus &= ~(HDC.XTC.STATUS.IOMODE | HDC.XTC.STATUS.BUS | HDC.XTC.STATUS.BUSY);
@@ -67051,7 +67059,7 @@ class HDC extends Component {
     inXTCStatus(port, addrFrom)
     {
         let b = this.regStatus;
-        this.printMessageIO(port, null, addrFrom, "STATUS", b);
+        this.printMessageIO(port, undefined, addrFrom, "STATUS", b);
         /*
          * HACK: The HDC BIOS will not finish the HDC.XTC.DATA.CMD.INIT_DRIVE sequence unless it sees XTC.STATUS.REQ set again, nor will
          * it read any of the XTC.DATA bytes returned from a HDC.XTC.DATA.CMD.REQUEST_SENSE command unless XTC.STATUS.REQ is set again, so
@@ -67092,7 +67100,7 @@ class HDC extends Component {
      */
     inXTCConfig(port, addrFrom)
     {
-        this.printMessageIO(port, null, addrFrom, "CONFIG", this.regConfig);
+        this.printMessageIO(port, undefined, addrFrom, "CONFIG", this.regConfig);
         return this.regConfig;
     }
 
@@ -67194,7 +67202,7 @@ class HDC extends Component {
                  * and last bytes of each sector.
                  */
                 if (this.messageEnabled(Messages.PORT | Messages.HDC)) {
-                    this.printMessageIO(port, null, addrFrom, "DATA[" + this.drive.ibSector + "]", bIn);
+                    this.printMessageIO(port, undefined, addrFrom, "DATA[" + this.drive.ibSector + "]", bIn);
                 }
                 if (this.drive.ibSector > 1) {      // in other words, if this.drive.ibSector == this.drive.cbSector...
                     if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
@@ -67366,7 +67374,7 @@ class HDC extends Component {
     inATCError(port, addrFrom)
     {
         let bIn = this.regError;
-        this.printMessageIO(port, null, addrFrom, "ERROR", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "ERROR", bIn);
         return bIn;
     }
 
@@ -67395,7 +67403,7 @@ class HDC extends Component {
     inATCSecCnt(port, addrFrom)
     {
         let bIn = this.regSecCnt;
-        this.printMessageIO(port, null, addrFrom, "SECCNT", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "SECCNT", bIn);
         return bIn;
     }
 
@@ -67424,7 +67432,7 @@ class HDC extends Component {
     inATCSecNum(port, addrFrom)
     {
         let bIn = this.regSecNum;
-        this.printMessageIO(port, null, addrFrom, "SECNUM", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "SECNUM", bIn);
         return bIn;
     }
 
@@ -67453,7 +67461,7 @@ class HDC extends Component {
     inATCCylLo(port, addrFrom)
     {
         let bIn = this.regCylLo;
-        this.printMessageIO(port, null, addrFrom, "CYLLO", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "CYLLO", bIn);
         return bIn;
     }
 
@@ -67482,7 +67490,7 @@ class HDC extends Component {
     inATCCylHi(port, addrFrom)
     {
         let bIn = this.regCylHi;
-        this.printMessageIO(port, null, addrFrom, "CYLHI", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "CYLHI", bIn);
         return bIn;
     }
 
@@ -67511,7 +67519,7 @@ class HDC extends Component {
     inATCDrvHd(port, addrFrom)
     {
         let bIn = this.regDrvHd;
-        this.printMessageIO(port, null, addrFrom, "DRVHD", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "DRVHD", bIn);
         return bIn;
     }
 
@@ -67565,7 +67573,7 @@ class HDC extends Component {
     inATCStatus(port, addrFrom)
     {
         let bIn = this.regStatus;
-        this.printMessageIO(port, null, addrFrom, "STATUS", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "STATUS", bIn);
         /*
          * Despite what IBM's documentation for the "Personal Computer AT Fixed Disk and Diskette Drive Adapter"
          * (August 31, 1984) says (ie, "A read of the status register clears interrupt request 14"), we cannot
@@ -73104,10 +73112,10 @@ class DebuggerX86 extends Debugger {
      * @this {DebuggerX86}
      * @param {Component} component
      * @param {number} port
-     * @param {number|null} bOut if an output operation
-     * @param {number|null} [addrFrom]
-     * @param {string|null} [name] of the port, if any
-     * @param {number|null} [bIn] is the input value, if known, on an input operation
+     * @param {number} [bOut] if an output operation
+     * @param {number} [addrFrom]
+     * @param {string} [name] of the port, if any
+     * @param {number} [bIn] is the input value, if known, on an input operation
      * @param {number} [bitsMessage] is one or more Messages category flag(s)
      */
     messageIO(component, port, bOut, addrFrom, name, bIn, bitsMessage)
@@ -73120,7 +73128,7 @@ class DebuggerX86 extends Debugger {
                 selFrom = this.cpu.getCS();
                 addrFrom -= this.cpu.segCS.base;
             }
-            this.message(component.idComponent + '.' + (bOut != null? "outPort" : "inPort") + '(' + Str.toHexWord(port) + ',' + (name? name : "unknown") + (bOut != null? ',' + Str.toHexByte(bOut) : "") + ')' + (bIn != null? (": " + Str.toHexByte(bIn)) : "") + (addrFrom != null? (" at " + this.toHexOffset(addrFrom, selFrom)) : ""));
+            this.message(component.idComponent + '.' + (bOut != undefined? "outPort" : "inPort") + '(' + Str.toHexWord(port) + ',' + (name? name : "unknown") + (bOut != undefined? ',' + Str.toHexByte(bOut) : "") + ')' + (bIn != undefined? (": " + Str.toHexByte(bIn)) : "") + (addrFrom != undefined? (" at " + this.toHexOffset(addrFrom, selFrom)) : ""));
         }
     }
 
@@ -80097,7 +80105,7 @@ class Computer extends Component {
             /*
              * TODO: We need a mechanism to determine the "active" display, instead of hard-coding this to aVideo[0].
              */
-            this.aVideo[0].setFocus();
+            this.aVideo[0].setFocus(fScroll);
 
             if (!fScroll && window) {
                 window.scrollTo(x, y);

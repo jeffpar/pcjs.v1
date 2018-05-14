@@ -283,12 +283,7 @@ class CPU extends Component {
          * Start running automatically on power-up, assuming there's no Debugger.
          */
         if (this.flags.autoStart || this.flags.autoStart == null && !this.dbg) {
-            /*
-             * Automatically updating focus when calling startCPU() is a double-edged sword, potentially interfering
-             * with the user's attention, which is why we also set fQuiet, to try to prevent the page from "auto-scrolling"
-             * the newly focused machine into view.
-             */
-            return this.startCPU(true, true);
+            return this.startCPU(true);
         }
         return false;
     }
@@ -1281,7 +1276,7 @@ class CPU extends Component {
         if (controlRun) controlRun.textContent = "Halt";
         if (this.cmp) {
             this.cmp.updateStatus(true);
-            if (fUpdateFocus) this.cmp.updateFocus(!fQuiet);
+            if (fUpdateFocus) this.cmp.updateFocus();
             this.cmp.start(this.counts.msStartRun, this.getCycles());
         }
         this.assert(!this.idRunTimeout);

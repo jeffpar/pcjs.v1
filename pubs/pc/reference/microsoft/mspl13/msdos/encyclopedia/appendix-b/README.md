@@ -9,6 +9,8 @@ The MS-DOS Encyclopedia
 
 ### Appendix B: Critical Error Codes
 
+{% raw %}
+
         Critical errors are returned via Interrupt 24H. If register AL bit 7
         is 0, then the error was a disk error; if register AL bit 7 is 1, then
         the error was a nondisk error. The upper half of DI is undefined; the
@@ -31,5 +33,7 @@ The MS-DOS Encyclopedia
         0BH       Read fault
         0CH       General failure
         0FH       Invalid disk change
+
+{% endraw %}
 
 Return to [The MS-DOS Encyclopedia](../): [Contents](../#contents)
