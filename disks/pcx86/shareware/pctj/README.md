@@ -65,7 +65,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1985-12)
 
-{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1985-12)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1985-12)"; loadDisk FDC scroll' %}
 
 	 Volume in drive A is PCTJ8512   
 	 Directory of A:\

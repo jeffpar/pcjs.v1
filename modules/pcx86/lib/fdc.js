@@ -190,7 +190,7 @@ class FDC extends Component {
          * settings that determine the number of drives and their characteristics (eg, 40-track vs. 80-track),
          * which it can then pass on to initDrive().
          */
-
+        this.fAutoScroll = false;
         this['exports'] = {
             'loadDisk':     this.loadSelectedDisk,
             'wait':         this.waitDrives
@@ -1102,20 +1102,22 @@ class FDC extends Component {
     }
 
     /**
-     * loadSelectedDisk()
+     * loadSelectedDisk(...args)
      *
      * NOTE: Since this can be called via script command (eg, 'loadDisk FDC'), additional parameters can be
-     * passed; use the arguments array to access them if necessary.
+     * passed; use the args array to access them if necessary.
      *
      * @this {FDC}
+     * @param {...} args
      * @return {boolean}
      */
-    loadSelectedDisk()
+    loadSelectedDisk(...args)
     {
         let controlDisks = this.bindings["listDisks"];
         if (controlDisks) {
             let sDisketteName = controlDisks.options[controlDisks.selectedIndex].text;
             let sDiskettePath = controlDisks.value;
+            this.fAutoScroll = (args[0] == "scroll");
             return this.loadSelectedDrive(sDisketteName, sDiskettePath);
         }
         return false;
@@ -1355,7 +1357,7 @@ class FDC extends Component {
              * Since you usually want the Computer to have focus again after loading a new diskette, let's try automatically
              * updating the focus after a successful load.
              */
-            if (this.cmp) this.cmp.updateFocus(!drive.fAutoMount && !fAutoMount);
+            if (this.cmp) this.cmp.updateFocus(this.fAutoScroll);
         }
         else {
             drive.fLocal = false;
@@ -1372,6 +1374,8 @@ class FDC extends Component {
             drive.fnCallReady();
             drive.fnCallReady = null;
         }
+
+        this.fAutoScroll = false;
     }
 
     /**
