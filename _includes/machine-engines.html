@@ -92,6 +92,11 @@ The following optional machine properties will be added to the 'parms' property:
   {%- else -%}
     {%- capture machine_state -%},state:"{{ machine.state }}"{%- endcapture -%}
   {%- endif -%}
+  {%- if machine.testRAM == nil -%}
+    {%- assign machine_testRAM = "" -%}
+  {%- else -%}
+    {%- capture machine_testRAM -%},testRAM:{{ machine.testRAM }}{%- endcapture -%}
+  {%- endif -%}
   {%- if machine.commands == nil -%}
     {%- assign machine_commands = "" -%}
   {%- else -%}
@@ -121,7 +126,7 @@ The following optional machine properties will be added to the 'parms' property:
   {%- else -%}
     {%- assign machine_template = machine.template -%}
   {%- endunless -%}
-  {%- capture machine_parms -%}{{ site.left_brace }}{{ machine_autoMount }}{{ machine_autoScript }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_drives }}{{ machine_resume }}{{ machine_sound }}{{ machine_state }}{{ machine_commands }}{{ machine_messages }}{{ machine_connection }}{{ site.right_brace }}{%- endcapture -%}
+  {%- capture machine_parms -%}{{ site.left_brace }}{{ machine_autoMount }}{{ machine_autoScript }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_drives }}{{ machine_resume }}{{ machine_sound }}{{ machine_state }}{{ machine_testRAM }}{{ machine_commands }}{{ machine_messages }}{{ machine_connection }}{{ site.right_brace }}{%- endcapture -%}
   {%- if site.pcjs.compiled == true and machine.uncompiled != true -%}
     {% capture page_script %}
     <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/{{ machine_type }}.js"></script>

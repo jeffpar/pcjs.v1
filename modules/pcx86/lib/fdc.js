@@ -1340,7 +1340,9 @@ class FDC extends Component {
              * because these modal alerts quickly become annoying.  In the meantime, I now set fPrintOnly to true, on the
              * theory no message is a good sign, while load errors in disk.js should continue to trigger notifications.
              */
-            if (!drive.fnCallReady) this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), true /* drive.fAutoMount || fAutoMount */);
+            if (!drive.fnCallReady) {
+                this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), true /* drive.fAutoMount || fAutoMount */);
+            }
 
             /*
              * Update the drive's current media parameters to match the disk's.
@@ -1353,7 +1355,7 @@ class FDC extends Component {
              * Since you usually want the Computer to have focus again after loading a new diskette, let's try automatically
              * updating the focus after a successful load.
              */
-            if (this.cmp) this.cmp.updateFocus();
+            if (this.cmp) this.cmp.updateFocus(!drive.fAutoMount && !fAutoMount);
         }
         else {
             drive.fLocal = false;
@@ -1809,7 +1811,7 @@ class FDC extends Component {
     inFDCDiagnostic(port, addrFrom)
     {
         let b = 0x50;       // we simply return the expected pattern (01010000B); see code excerpt above
-        this.printMessageIO(port, null, addrFrom, "DIAG", b);
+        this.printMessageIO(port, undefined, addrFrom, "DIAG", b);
         return b;
     }
 
@@ -1823,7 +1825,7 @@ class FDC extends Component {
      */
     inFDCStatus(port, addrFrom)
     {
-        this.printMessageIO(port, null, addrFrom, "STATUS", this.regStatus);
+        this.printMessageIO(port, undefined, addrFrom, "STATUS", this.regStatus);
         return this.regStatus;
     }
 
@@ -1848,7 +1850,7 @@ class FDC extends Component {
             if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.FDC);
         }
         if (this.messageEnabled()) {
-            this.printMessageIO(port, null, addrFrom, "DATA[" + this.regDataIndex + "]", bIn);
+            this.printMessageIO(port, undefined, addrFrom, "DATA[" + this.regDataIndex + "]", bIn);
         }
         if (++this.regDataIndex >= this.regDataTotal) {
             this.regStatus &= ~(FDC.REG_STATUS.READ_DATA | FDC.REG_STATUS.BUSY);
@@ -1903,7 +1905,7 @@ class FDC extends Component {
          * TODO: Determine when the DISK_CHANGE bit is *really* cleared (this is just a guess)
          */
         this.regInput &= ~FDC.REG_INPUT.DISK_CHANGE;
-        this.printMessageIO(port, null, addrFrom, "INPUT", bIn);
+        this.printMessageIO(port, undefined, addrFrom, "INPUT", bIn);
         return bIn;
     }
 

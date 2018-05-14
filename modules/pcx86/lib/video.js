@@ -2880,13 +2880,20 @@ class Video extends Component {
     }
 
     /**
-     * setFocus()
+     * setFocus(fScroll)
      *
      * @this {Video}
+     * @param {boolean} [fScroll]
      */
-    setFocus()
+    setFocus(fScroll)
     {
-        if (this.inputScreen) this.inputScreen.focus();
+        if (this.inputScreen) {
+            this.inputScreen.focus();
+            if (fScroll) {
+                let element = document.getElementById(this.idMachine) || this.inputScreen;
+                element.scrollIntoView();
+            }
+        }
     }
 
     /**

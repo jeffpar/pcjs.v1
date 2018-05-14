@@ -8,7 +8,6 @@ machines:
     config: /devices/pcx86/machine/5170/ega/640kb/rev1/machine.xml
     testRAM: false
     drives: '[{name:"10Mb Hard Disk",type:1,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'
-    sticky: top
     autoMount:
       A:
         name: None
@@ -86,7 +85,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 ### Directory of PC Tech Journal (1986-03)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281986-03%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1986-03)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8603   
 	 Directory of A:\
@@ -104,7 +103,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1986-10)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281986-10%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1986-10)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8610   
 	 Directory of A:\
@@ -134,7 +133,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1986-12)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281986-12%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1986-12)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8612   
 	 Directory of A:\
@@ -146,7 +145,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1987-02)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281987-02%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1987-02)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8702   
 	 Directory of A:\
@@ -182,7 +181,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1987-06)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281987-06%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1987-06)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8706   
 
@@ -207,7 +206,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1987-07)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281987-07%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1987-07)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8707   
 
@@ -234,7 +233,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1987-10)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281987-10%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1987-10)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8710   
 
@@ -254,7 +253,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1987-11)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281987-11%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1987-11)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8711   
 	 Directory of A:\
@@ -268,7 +267,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1988-04)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-04%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-04)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8804   
 	 Directory of A:\
@@ -288,7 +287,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1988-05)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-05%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-05)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8805   
 	 Directory of A:\
@@ -315,7 +314,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1988-06)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-06%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-06)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8806   
 	 Directory of A:\
@@ -331,7 +330,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1988-07)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-07%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-07)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8807   
 	 Directory of A:\
@@ -348,7 +347,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1988-08)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-08%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-08)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8808   
 	 Directory of A:\
@@ -367,7 +366,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1988-09)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-09%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-09)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8809   
 
@@ -396,7 +395,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1988-11)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-11%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-11)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8811   
 
@@ -419,7 +418,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1988-12)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-12%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1988-12)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8812   
 
@@ -432,7 +431,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (1989-01)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281989-01%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (1989-01)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJ8901   
 
@@ -445,7 +444,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (Benchmarks)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %28Benchmarks%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (Benchmarks)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTBENCH   
 
@@ -492,7 +491,7 @@ Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"na
 
 ### Directory of PC Tech Journal (Best Of)
 
-Click [here](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %28Best Of%29"%7D%7D) to load the following diskette in an IBM PC AT.
+{% include machine-command.html type='button' label='Load Disk' machine='pctj' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Tech Journal (Best Of)"; loadDisk FDC' %}
 
 	 Volume in drive A is PCTJBEST   
 
