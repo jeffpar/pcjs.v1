@@ -12,18 +12,11 @@
 
 	<xsl:template name="commonStyles">
 		<meta charset="utf-8"/>
-		<link rel="apple-touch-icon" sizes="57x57" href="/versions/icons/current/pc-icon-57.png"/>
-		<link rel="apple-touch-icon" sizes="72x72" href="/versions/icons/current/pc-icon-72.png"/>
-		<link rel="apple-touch-icon" sizes="76x76" href="/versions/icons/current/pc-icon-76.png"/>
-		<link rel="apple-touch-icon" sizes="114x114" href="/versions/icons/current/pc-icon-114.png"/>
-		<link rel="apple-touch-icon" sizes="120x120" href="/versions/icons/current/pc-icon-120.png"/>
-		<link rel="apple-touch-icon" sizes="144x144" href="/versions/icons/current/pc-icon-144.png"/>
-		<link rel="apple-touch-icon" sizes="152x152" href="/versions/icons/current/pc-icon-152.png"/>
-		<link rel="apple-touch-icon" sizes="180x180" href="/versions/icons/current/pc-icon-180.png"/>
-		<link rel="apple-touch-icon" sizes="192x192" href="/versions/icons/current/pc-icon-192.png"/>
-		<link rel="apple-touch-icon" href="/versions/icons/current/apple-touch-icon.png"/>
-		<link rel="icon" type="image/png" sizes="192x192" href="/versions/icons/current/pc-icon-192.png"/>
-		<link rel="shortcut icon" type="image/x-icon" href="/versions/icons/current/favicon.ico"/>
+		<link rel="apple-touch-icon" sizes="180x180" href="/versions/icons/current/apple-touch-icon.png"/>
+		<link rel="icon" type="image/png" sizes="32x32" href="/versions/icons/current/favicon-32x32.png"/>
+		<link rel="icon" type="image/png" sizes="16x16" href="/versions/icons/current/favicon-16x16.png"/>
+		<link rel="shortcut icon" href="/versions/icons/current/favicon.ico"/>
+		<link rel="mask-icon" href="/versions/icons/current/safari-pinned-tab.svg" color="#5bbad5"/>
 		<link rel="stylesheet" type="text/css" href="/modules/shared/templates/common.css"/>
 		<link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet"/>
 	</xsl:template>
