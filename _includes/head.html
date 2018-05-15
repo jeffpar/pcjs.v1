@@ -6,13 +6,18 @@
     <meta name="description" content="{{ site.description | rstrip }}">
     {%- if page.iconTitle != nil %}
     <meta name="apple-mobile-web-app-title" content="{{ page.iconTitle }}">
+    {%- else %}
+    <meta name="apple-mobile-web-app-title" content="PCjs">
     {%- endif %}
     {%- if page.layout == "pwa" %}
     <meta name="apple-mobile-web-app-capable" content="yes">
     {%- endif %}
     {%- if page.preview != nil %}
     <meta property="og:image" content="{{ page.preview }}">
+    {%- else %}
+    <meta property="og:image" content="{{ site.baseurl }}/blog/images/home-page.png">
     {%- endif %}
+    <meta property="og:title" content="The Original IBM PC in a Web Browser">
     <link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet">
     <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}">
     <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
@@ -21,19 +26,13 @@
     <link rel="apple-touch-icon" sizes="{{ icon.size }}" href="{{ site.baseurl }}{{ icon.url }}">
       {%- endfor %}
     {%- else %}
-    <link rel="apple-touch-icon" sizes="57x57" href="{{ site.baseurl }}/versions/icons/current/pc-icon-57.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="{{ site.baseurl }}/versions/icons/current/pc-icon-72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="{{ site.baseurl }}/versions/icons/current/pc-icon-76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="{{ site.baseurl }}/versions/icons/current/pc-icon-114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="{{ site.baseurl }}/versions/icons/current/pc-icon-120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="{{ site.baseurl }}/versions/icons/current/pc-icon-144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="{{ site.baseurl }}/versions/icons/current/pc-icon-152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ site.baseurl }}/versions/icons/current/pc-icon-180.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="{{ site.baseurl }}/versions/icons/current/pc-icon-192.png">
-    <link rel="apple-touch-icon" href="{{ site.baseurl }}/versions/icons/current/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ site.baseurl }}/versions/icons/current/apple-touch-icon.png">
     {%- endif %}
-    <link rel="icon" type="image/png" sizes="192x192" href="{{ site.baseurl }}/versions/icons/current/pc-icon-192.png">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ site.baseurl }}/versions/icons/current/favicon.ico">
+    <link rel="icon" type="image/png" sizes="180x180" href="{{ site.baseurl }}/versions/icons/current/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ site.baseurl }}/versions/icons/current/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ site.baseurl }}/versions/icons/current/favicon-16x16.png">
+    <link rel="shortcut icon" href="{{ site.baseurl }}/versions/icons/current/favicon.ico">
+    <link rel="mask-icon" href="{{ site.baseurl }}/versions/icons/current/safari-pinned-tab.svg" color="#5bbad5">
     {%- include machine-styles.html %}
     {%- include page-styles.html %}
   </head>
