@@ -5,6 +5,7 @@ permalink: /versions/icons/
 ---
 
 Project Icons
----
+-------------
 
-* [Current Project Icons](current/)
+* [Current Project Icons](2018/)
+* [Previous Project Icons](previous/)
