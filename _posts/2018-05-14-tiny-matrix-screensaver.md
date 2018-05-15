@@ -59,8 +59,10 @@ the pitfalls of such an assumption: for example, the program won't work on any v
 also tested it on PC DOS 3.00, where it fails because several of the arithmetic flags are *not* clear.
 
 Third, if the program is loaded with `DEBUG`, most of the initial register values are completely different.
-`DEBUG` typically clears the AX, BX, CX, DX, BP, SI, DI, and Flags registers, and it typically sets the SP register
-to 0xFFFE.  Since this program assumes SI will contain a non-zero value (0x100), it is incompatible with `DEBUG`.
+`DEBUG` typically sets AL/AH to drive error codes (depending on whether the 2nd and 3rd command-line parameters
+are filenames), BX:CX to the size of the program, and SP to 0xFFFE (or the top of available memory minus 2).  It
+also clears the DX, BP, SI, DI, and Flags registers, and since this program assumes SI will contain a non-zero
+value (0x100), it is incompatible with `DEBUG`.
 
 Fourth, the program is writing through an entire 64K range starting at physical address 0xAB9F0 and ending at
 0xBB9EF, so if there are any memory-mapped devices or UMBs in that range (other than the usual MDA or CGA text-mode
