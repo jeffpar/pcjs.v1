@@ -5,6 +5,6 @@ permalink: /versions/icons/current/
 ---
 
 Current Project Icons
----
+---------------------
 
-![PC Icon](pc-icon-192.png)
+![PCjs Icon](apple-touch-icon.png)
