@@ -12,11 +12,11 @@
 
 	<xsl:template name="commonStyles">
 		<meta charset="utf-8"/>
-		<link rel="apple-touch-icon" sizes="180x180" href="/versions/icons/current/apple-touch-icon.png"/>
-		<link rel="icon" type="image/png" sizes="32x32" href="/versions/icons/current/favicon-32x32.png"/>
-		<link rel="icon" type="image/png" sizes="16x16" href="/versions/icons/current/favicon-16x16.png"/>
-		<link rel="shortcut icon" href="/versions/icons/current/favicon.ico"/>
-		<link rel="mask-icon" href="/versions/icons/current/safari-pinned-tab.svg" color="#5bbad5"/>
+		<link rel="apple-touch-icon" sizes="180x180" href="/versions/icons/2018/apple-touch-icon.png"/>
+		<link rel="icon" type="image/png" sizes="32x32" href="/versions/icons/2018/favicon-32x32.png"/>
+		<link rel="icon" type="image/png" sizes="16x16" href="/versions/icons/2018/favicon-16x16.png"/>
+		<link rel="shortcut icon" href="/versions/icons/2018/favicon.ico"/>
+		<link rel="mask-icon" href="/versions/icons/2018/safari-pinned-tab.svg" color="#5bbad5"/>
 		<link rel="stylesheet" type="text/css" href="/modules/shared/templates/common.css"/>
 		<link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet"/>
 	</xsl:template>

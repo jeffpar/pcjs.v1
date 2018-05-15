@@ -5,6 +5,6 @@ permalink: /versions/images/
 ---
 
 Project Images
----
+--------------
 
 * [Current Project Images](current/)
