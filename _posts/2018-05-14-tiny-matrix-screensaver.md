@@ -57,6 +57,8 @@ It expects the SI register to contain 0x100 and the Carry, Parity, Auxiliary Car
 to all be clear.  This [handy table](/blog/images/DOS_COM_Startup_Registers.pdf) of initial register values shows
 the pitfalls of such an assumption: for example, the program won't work on any version of DOS &lt; 2.00.  I've
 also tested it on PC DOS 3.00, where it fails because several of the arithmetic flags are *not* clear.
+It’s also not initializing the Direction flag, and if that flag happened to be set "down" instead of "up", the
+program would effectively do nothing; STOSW would modify the same word repeatedly.
 
 Third, if the program is loaded with `DEBUG`, most of the initial register values are completely different.
 `DEBUG` typically sets AL/AH to drive error codes (depending on whether the 2nd and 3rd command-line parameters
@@ -66,8 +68,7 @@ value (0x100), it is incompatible with `DEBUG`.
 
 Fourth, the program is writing through an entire 64K range starting at physical address 0xAB9F0 and ending at
 0xBB9EF, so if there are any memory-mapped devices or UMBs in that range (other than the usual MDA or CGA text-mode
-frame buffers), something bad could happen.  It's also not initializing the Direction flag, but that merely
-affects whether the entire 64K will be modified upward or downward.
+frame buffers), something bad could happen.
 
 The requirement that all the arithmetic flags be clear insures that AH will contain 0x02 after the LAHF instruction.
 Why doesn't LAHF set AH to 0x00 instead?  Because bit 1 of the Flags register is *always* set (it can't be cleared),
