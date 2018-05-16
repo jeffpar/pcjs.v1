@@ -1,7 +1,6 @@
 ---
 layout: page
 permalink: /
-preview: /disks/pcx86/os2/ibm/1.0/screenshot.png
 machines:
   - id: ibm5150
     type: pcx86
