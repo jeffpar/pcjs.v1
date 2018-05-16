@@ -13,6 +13,8 @@ machines:
     name: TI-57 Programmable Calculator
     config: ../rev0/ti57.json
 styles:
+  body:
+    background-color: black;
   .page-content:
     padding: 0;
   _ti57:
