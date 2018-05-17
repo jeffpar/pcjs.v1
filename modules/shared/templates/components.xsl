@@ -124,6 +124,8 @@
 		<xsl:param name="class" select="''"/>
 		<xsl:param name="parms" select="''"/>
 		<xsl:param name="url" select="''"/>
+		<xsl:param name="screenWidth" select="''"/>
+		<xsl:param name="screenHeight" select="''"/>
 		<xsl:variable name="id">
 			<xsl:choose>
 				<xsl:when test="$component = 'machine'"><xsl:value-of select="$machine"/>.machine</xsl:when>
@@ -239,7 +241,11 @@
 					<xsl:value-of select="$APPCLASS"/><xsl:text>-</xsl:text><xsl:value-of select="$class"/><xsl:text>-object</xsl:text><xsl:if test="$class = 'video'"><xsl:text> </xsl:text><xsl:value-of select="$CSSCLASS"/><xsl:text>-screen</xsl:text></xsl:if>
 				</xsl:variable>
 				<xsl:if test="$class != '' and $component != 'machine'">
-					<div class="{$objectClass}" data-value="{{id:'{$id}',name:'{$name}'{$comment}{$parms}}}"> </div>
+					<div class="{$objectClass}" data-value="{{id:'{$id}',name:'{$name}'{$comment}{$parms}}}">
+						<xsl:if test="$class = 'video'">
+							<canvas class="pcjs-canvas" width="{$screenWidth}" height="{$screenHeight}" style="height: auto; background-color: black;"></canvas>
+						</xsl:if>
+					</div>
 				</xsl:if>
 				<xsl:if test="control">
 					<div class="{$CSSCLASS}-controls">
@@ -1353,6 +1359,8 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">video</xsl:with-param>
+			<xsl:with-param name="screenWidth" select="$screenWidth"/>
+			<xsl:with-param name="screenHeight" select="$screenHeight"/>
 			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',mode:<xsl:value-of select="$mode"/>,screenWidth:<xsl:value-of select="$screenWidth"/>,screenHeight:<xsl:value-of select="$screenHeight"/>,screenColor:'<xsl:value-of select="$screenColor"/>',screenRotate:<xsl:value-of select="$screenRotate"/>,bufferAddr:<xsl:value-of select="$bufferAddr"/>,bufferRAM:<xsl:value-of select="$bufferRAM"/>,bufferFormat:'<xsl:value-of select="$bufferFormat"/>',bufferCols:<xsl:value-of select="$bufferCols"/>,bufferRows:<xsl:value-of select="$bufferRows"/>,bufferBits:<xsl:value-of select="$bufferBits"/>,bufferLeft:<xsl:value-of select="$bufferLeft"/>,bufferRotate:<xsl:value-of select="$bufferRotate"/>,memory:<xsl:value-of select="$memory"/>,switches:'<xsl:value-of select="$switches"/>',scale:<xsl:value-of select="$scale"/>,cellWidth:<xsl:value-of select="$cellWidth"/>,cellHeight:<xsl:value-of select="$cellHeight"/>,charCols:<xsl:value-of select="$charCols"/>,charRows:<xsl:value-of select="$charRows"/>,fontROM:'<xsl:value-of select="$fontROM"/>',fontColor:'<xsl:value-of select="$fontColor"/>',touchScreen:'<xsl:value-of select="$touchScreen"/>',autoLock:<xsl:value-of select="$autoLock"/>,aspectRatio:<xsl:value-of select="$aspectRatio"/>,smoothing:<xsl:value-of select="$smoothing"/>,interruptRate:<xsl:value-of select="$interruptRate"/>,refreshRate:<xsl:value-of select="$refreshRate"/>,flicker:<xsl:value-of select="$flicker"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
