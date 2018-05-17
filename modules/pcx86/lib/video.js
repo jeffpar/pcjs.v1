@@ -7697,18 +7697,31 @@ class Video extends Component {
     {
         let aElement = Component.getElementsByClass(document, PCX86.APPCLASS, "video");
         for (let iVideo = 0; iVideo < aElement.length; iVideo++) {
+
             let element = aElement[iVideo];
             let parmsVideo = Component.getComponentParms(element);
 
-            let canvas = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
-            if (canvas === undefined || !canvas.getContext) {
+            /*
+             * We used to create the canvas element ourselves:
+             *
+             *      let canvas = document.createElement("canvas");
+             *
+             * and then update its properties to match those specified in parmsVideo:
+             *
+             *      canvas.setAttribute("class", "pcjs-canvas");
+             *      canvas.setAttribute("width", parmsVideo['screenWidth']);
+             *      canvas.setAttribute("height", parmsVideo['screenHeight']);
+             *
+             * but now we prefer to let the XSL template create the canvas element for us, so that the HTML
+             * we inject into the page is as fully-formed as possible, keeping disruption of page layout to a
+             * minimum.
+             */
+            let aCanvas = Component.getElementsByClass(document, "pcjs-canvas");
+            if (!aCanvas || !aCanvas.length) {
                 element.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
                 return;
             }
-
-            canvas.setAttribute("class", "pcjs-canvas");
-            canvas.setAttribute("width", parmsVideo['screenWidth']);
-            canvas.setAttribute("height", parmsVideo['screenHeight']);
+            let canvas = aCanvas[0];
 
             /*
              * The "contenteditable" attribute on a canvas element NOTICEABLY slows down canvas drawing on
@@ -7725,7 +7738,6 @@ class Video extends Component {
              * The other reason it's good to keep this particular hack limited to IE9/IE10 is that most other
              * browsers don't actually support an 'onresize' handler on anything but the window object.
              */
-            canvas.style.height = "auto";
             if (Web.getUserAgent().indexOf("MSIE") >= 0) {
                 element.onresize = function(eParent, eChild, cx, cy) {
                     return function onResizeVideo() {
@@ -7734,6 +7746,7 @@ class Video extends Component {
                 }(element, canvas, parmsVideo['screenWidth'], parmsVideo['screenHeight']);
                 element.onresize(null);
             }
+
             /*
              * The following is a related hack that allows the user to force the screen to use a particular aspect
              * ratio if an 'aspect' attribute or URL parameter is set.  Initially, it's just for testing purposes
@@ -7741,6 +7754,7 @@ class Video extends Component {
              * sure we don't trample any other 'onresize' handler(s) attached to the window object.
              */
             let aspect = +(Web.getURLParm('aspect') || parmsVideo['aspect']);
+
             /*
              * No 'aspect' parameter yields NaN, which is falsey, and anything else must satisfy my arbitrary
              * constraints of 0.3 <= aspect <= 3.33, to prevent any useless (or worse, browser-blowing) results.
@@ -7765,7 +7779,6 @@ class Video extends Component {
                 }(element, canvas, aspect));
                 window['onresize']();
             }
-            element.appendChild(canvas);
 
             /*
              * HACK: Android-based browsers, like the Silk (Amazon) browser and Chrome for Android, don't honor the
@@ -7815,6 +7828,7 @@ class Video extends Component {
                  */
                 textarea.style.fontSize = "16px";
             }
+
             element.appendChild(textarea);
 
             /*

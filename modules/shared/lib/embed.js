@@ -509,13 +509,29 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                             /*
                              * This fails in Microsoft Edge...
                              *
-                            let machine = eFragment.getElementById(idMachine);
-                            if (!machine) {
-                                displayError("machine generation failed: " + idMachine);
-                            } else
-                            */
-                            if (eMachine.parentNode) {
-                                eMachine.parentNode.replaceChild(eFragment, eMachine);
+                             *      let machine = eFragment.getElementById(idMachine);
+                             *      if (!machine) {
+                             *          displayError("machine generation failed: " + idMachine);
+                             *      }
+                             */
+                            let element = eMachine.parentNode;
+                            if (element) {
+
+                                let x = 0, y = 0;
+                                let rectOld = eMachine.getBoundingClientRect();
+                                if (rectOld.bottom < 0) {
+                                    x = window.scrollX;
+                                    y = window.scrollY;
+                                }
+
+                                element.replaceChild(eFragment, eMachine);
+
+                                eMachine = document.getElementById(idMachine);
+                                if (eMachine && rectOld.bottom < 0) {
+                                    let rectNew = eMachine.getBoundingClientRect();
+                                    window.scrollTo(x, y + rectNew.height - rectOld.height);
+                                }
+
                                 doneMachine();
                             } else {
                                 /*
