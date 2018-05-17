@@ -16457,19 +16457,33 @@ class Video8080 extends Component {
     {
         var aeVideo = Component.getElementsByClass(document, PC8080.APPCLASS, "video");
         for (var iVideo = 0; iVideo < aeVideo.length; iVideo++) {
-            var eVideo = aeVideo[iVideo];
-            var parmsVideo = Component.getComponentParms(eVideo);
 
-            var eCanvas = document.createElement("canvas");
-            if (eCanvas === undefined || !eCanvas.getContext) {
-                eVideo.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
+            var element = aeVideo[iVideo];
+            var parmsVideo = Component.getComponentParms(element);
+
+            /*
+             * We used to create the canvas element ourselves:
+             *
+             *      let canvas = document.createElement("canvas");
+             *
+             * and then update its properties to match those specified in parmsVideo:
+             *
+             *      canvas.setAttribute("class", "pcjs-canvas");
+             *      canvas.setAttribute("width", parmsVideo['screenWidth']);
+             *      canvas.setAttribute("height", parmsVideo['screenHeight']);
+             *
+             * but now we prefer to let the XSL template create the canvas element for us, so that the HTML
+             * we inject into the page is as fully-formed as possible, keeping disruption of page layout to a
+             * minimum.
+             */
+            let aCanvas = Component.getElementsByClass(document, "pcjs-canvas");
+            if (!aCanvas || !aCanvas.length || !aCanvas[0].getContext) {
+                element.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
                 return;
             }
+            let canvas = aCanvas[0];
 
-            eCanvas.setAttribute("class", "pcjs-canvas");
-            eCanvas.setAttribute("width", parmsVideo['screenWidth']);
-            eCanvas.setAttribute("height", parmsVideo['screenHeight']);
-            eCanvas.style.backgroundColor = parmsVideo['screenColor'];
+            canvas.style.backgroundColor = parmsVideo['screenColor'];
 
             /*
              * The "contenteditable" attribute on a canvas element NOTICEABLY slows down canvas drawing on
@@ -16477,7 +16491,7 @@ class Video8080 extends Component {
              * up; click on the canvas, and drawing slows down).  So the "transparent textarea hack" that we
              * once employed as only a work-around for Android devices is now our default.
              *
-             *      eCanvas.setAttribute("contenteditable", "true");
+             *      canvas.setAttribute("contenteditable", "true");
              *
              * HACK: A canvas style of "auto" provides for excellent responsive canvas scaling in EVERY browser
              * except IE9/IE10, so I recalculate the appropriate CSS height every time the parent DIV is resized;
@@ -16486,15 +16500,15 @@ class Video8080 extends Component {
              * The other reason it's good to keep this particular hack limited to IE9/IE10 is that most other
              * browsers don't actually support an 'onresize' handler on anything but the window object.
              */
-            eCanvas.style.height = "auto";
             if (Web.getUserAgent().indexOf("MSIE") >= 0) {
-                eVideo.onresize = function(eParent, eChild, cx, cy) {
+                element.onresize = function(eParent, eChild, cx, cy) {
                     return function onResizeVideo() {
                         eChild.style.height = (((eParent.clientWidth * cy) / cx) | 0) + "px";
                     };
-                }(eVideo, eCanvas, parmsVideo['screenWidth'], parmsVideo['screenHeight']);
-                eVideo.onresize();
+                }(element, canvas, parmsVideo['screenWidth'], parmsVideo['screenHeight']);
+                element.onresize();
             }
+
             /*
              * The following is a related hack that allows the user to force the screen to use a particular aspect
              * ratio if an 'aspect' attribute or URL parameter is set.  Initially, it's just for testing purposes
@@ -16502,6 +16516,7 @@ class Video8080 extends Component {
              * sure we don't trample any other 'onresize' handler(s) attached to the window object.
              */
             var aspect = +(parmsVideo['aspect'] || Web.getURLParm('aspect'));
+
             /*
              * No 'aspect' parameter yields NaN, which is falsey, and anything else must satisfy my arbitrary
              * constraints of 0.3 <= aspect <= 3.33, to prevent any useless (or worse, browser-blowing) results.
@@ -16523,10 +16538,9 @@ class Video8080 extends Component {
                          */
                         eChild.style.height = ((eParent.clientWidth / aspectRatio)|0) + "px";
                     };
-                }(eVideo, eCanvas, aspect));
+                }(element, canvas, aspect));
                 window['onresize']();
             }
-            eVideo.appendChild(eCanvas);
 
             /*
              * HACK: Android-based browsers, like the Silk (Amazon) browser and Chrome for Android, don't honor the
@@ -16549,14 +16563,14 @@ class Video8080 extends Component {
              * clearly see the overlaid semi-transparent input field, but none of the input characters were passed along,
              * with the exception of the "Go" (Enter) key.
              *
-             *      var eInput = document.createElement("input");
-             *      eInput.setAttribute("type", "password");
-             *      eInput.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0.5");
-             *      eVideo.appendChild(eInput);
+             *      var input = document.createElement("input");
+             *      input.setAttribute("type", "password");
+             *      input.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0.5");
+             *      element.appendChild(input);
              *
              * See this Chromium issue for more information: https://code.google.com/p/chromium/issues/detail?id=118639
              */
-            var eTextArea = document.createElement("textarea");
+            var textarea = document.createElement("textarea");
 
             /*
              * As noted in keyboard.js, the keyboard on an iOS device tends to pop up with the SHIFT key depressed,
@@ -16564,8 +16578,8 @@ class Video8080 extends Component {
              * these "auto" attributes will help.
              */
             if (Web.isUserAgent("iOS")) {
-                eTextArea.setAttribute("autocapitalize", "off");
-                eTextArea.setAttribute("autocorrect", "off");
+                textarea.setAttribute("autocapitalize", "off");
+                textarea.setAttribute("autocorrect", "off");
                 /*
                  * One of the problems on iOS devices is that after a soft-key control is clicked, we need to give
                  * focus back to the above textarea, usually by calling cmp.updateFocus(), but in doing so, iOS may
@@ -16574,21 +16588,22 @@ class Video8080 extends Component {
                  * Googling reveals that another way to prevent those jarring unintentional zooms is to simply set the
                  * font-size of the text control to 16px.  So that's what we do.
                  */
-                eTextArea.style.fontSize = "16px";
+                textarea.style.fontSize = "16px";
             }
-            eVideo.appendChild(eTextArea);
+
+            element.appendChild(textarea);
 
             /*
              * Now we can create the Video object, record it, and wire it up to the associated document elements.
              */
-            var eContext = eCanvas.getContext("2d");
-            var video = new Video8080(parmsVideo, eCanvas, eContext, eTextArea /* || eInput */, eVideo);
+            var context = canvas.getContext("2d");
+            var video = new Video8080(parmsVideo, canvas, context, textarea /* || input */, element);
 
             /*
              * Bind any video-specific controls (eg, the Refresh button). There are no essential controls, however;
              * even the "Refresh" button is just a diagnostic tool, to ensure that the screen contents are up-to-date.
              */
-            Component.bindComponentControls(video, eVideo, PC8080.APPCLASS);
+            Component.bindComponentControls(video, element, PC8080.APPCLASS);
         }
     }
 }

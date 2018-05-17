@@ -56156,7 +56156,7 @@ class Video extends Component {
              * minimum.
              */
             let aCanvas = Component.getElementsByClass(document, "pcjs-canvas");
-            if (!aCanvas || !aCanvas.length) {
+            if (!aCanvas || !aCanvas.length || !aCanvas[0].getContext) {
                 element.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
                 return;
             }
