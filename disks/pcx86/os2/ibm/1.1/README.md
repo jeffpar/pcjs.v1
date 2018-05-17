@@ -36,7 +36,7 @@ Directory listings of the seven 1.44Mb distribution diskettes are provided below
 
 {% include machine.html id="ibm5170" %}
 
-### Directory of IBM OS/2 1.1 (1.44M Install)
+### Directory of IBM OS/2 1.1 (Install)
 
 	 Volume in drive A has no label
 	 Directory of A:\
@@ -107,7 +107,7 @@ Directory listings of the seven 1.44Mb distribution diskettes are provided below
 	       63 file(s)    1264028 bytes
 	                      176640 bytes free
 
-### Directory of IBM OS/2 1.1 (1.44M Disk 1)
+### Directory of IBM OS/2 1.1 (Disk 1)
 
 	 Volume in drive A is OS2 DISK 1 
 	 Directory of A:\
@@ -155,7 +155,7 @@ Directory listings of the seven 1.44Mb distribution diskettes are provided below
 	       40 file(s)     658113 bytes
 	                      789504 bytes free
 
-### Directory of IBM OS/2 1.1 (1.44M Disk 2)
+### Directory of IBM OS/2 1.1 (Disk 2)
 
 	 Volume in drive A is OS2 DISK 2 
 	 Directory of A:\
@@ -199,7 +199,7 @@ Directory listings of the seven 1.44Mb distribution diskettes are provided below
 	       36 file(s)     649819 bytes
 	                      800256 bytes free
 
-### Directory of IBM OS/2 1.1 (1.44M Disk 3)
+### Directory of IBM OS/2 1.1 (Disk 3)
 
 	 Volume in drive A is OS2 DISK 3 
 
@@ -244,7 +244,7 @@ Directory listings of the seven 1.44Mb distribution diskettes are provided below
 	       29 file(s)    1080045 bytes
 	                      370688 bytes free
 
-### Directory of IBM OS/2 1.1 (1.44M Disk 4)
+### Directory of IBM OS/2 1.1 (Disk 4)
 
 	 Volume in drive A is OS2 DISK 4 
 
@@ -285,7 +285,7 @@ Directory listings of the seven 1.44Mb distribution diskettes are provided below
 	       29 file(s)     911540 bytes
 	                      538624 bytes free
 
-### Directory of IBM OS/2 1.1 (1.44M Devices)
+### Directory of IBM OS/2 1.1 (Devices)
 
 	 Volume in drive A has no label
 
@@ -301,7 +301,7 @@ Directory listings of the seven 1.44Mb distribution diskettes are provided below
 	        4 file(s)     227638 bytes
 	                     1229824 bytes free
 
-### Directory of IBM OS/2 1.1 (1.44M Printer)
+### Directory of IBM OS/2 1.1 (Printer)
 
 	 Volume in drive A has no label
 

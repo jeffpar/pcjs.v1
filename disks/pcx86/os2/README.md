@@ -5,7 +5,7 @@ permalink: /disks/pcx86/os2/
 ---
 
 IBM OS/2 and Microsoft MS OS/2
----
+------------------------------
 
 Information is available for assorted versions of OS/2.
 
