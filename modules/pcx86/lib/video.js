@@ -8041,7 +8041,7 @@ Video.monitorSpecsXT[ChipSet.MONITOR.MONO] = {
 Video.monitorSpecs[ChipSet.MONITOR.EGACOLOR] = {
     nHorzPeriodsPerSec: 21850,
     nHorzPeriodsPerFrame: 364,
-    percentHorzActive: 85,
+    percentHorzActive: 80,
     percentVertActive: 96
 };
 
