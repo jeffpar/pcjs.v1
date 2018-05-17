@@ -163,7 +163,14 @@ class Keyboard extends Component {
          */
         this.aKeysActive = [];
 
-        this.msTransmit      = 10;          // minimum number of milliseconds between data transmissions
+        /*
+         * msTransmit was originally 10ms, but I was getting some warning "beeps" in this machine:
+         *
+         *      /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/machine.xml
+         *
+         * while typing very fast, so let's see if throttling transmissions a bit more helps with that.
+         */
+        this.msTransmit      = 15;          // minimum number of milliseconds between data transmissions
         this.msAutoRepeat    = 500;
         this.msNextRepeat    = 100;
         this.msAutoRelease   = 50;

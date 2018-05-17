@@ -25744,9 +25744,23 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                                 eMachine = document.getElementById(idMachine);
                                 if (eMachine && rectOld.bottom < 0) {
                                     let rectNew = eMachine.getBoundingClientRect();
-                                    window.scrollTo(x, y + rectNew.height - rectOld.height);
+                                    if (window.performance && window.performance.navigation.type == window.performance.navigation.TYPE_RELOAD) {
+                                        /*
+                                         * TODO: I'm not sure what to do in this case, because the browser tries to be clever
+                                         * on a reload and preserve the original scroll position, but there are multiple variables
+                                         * (ie, the presence of a hash ID in the URL, and the fact that we just inserted an HTML
+                                         * fragment) that can cause the browser to do the wrong thing.  I could look up any hash
+                                         * element and call scrollIntoView(), but that addresses only one scenario.
+                                         *
+                                         * If I do nothing, then each successive reload simply causes the scroll position to creep
+                                         * farther and farther down the page.  So, I'm electing to go to the top of the page instead.
+                                         */
+                                        y = 0;
+                                    } else {
+                                        y += Math.ceil(rectNew.height - rectOld.height);
+                                    }
+                                    window.scrollTo(x, y);
                                 }
-
                                 doneMachine();
                             } else {
                                 /*
