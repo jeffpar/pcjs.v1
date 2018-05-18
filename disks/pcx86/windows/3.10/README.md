@@ -2,6 +2,7 @@
 layout: page
 title: Microsoft Windows 3.10
 permalink: /disks/pcx86/windows/3.10/
+preview: /disks/pcx86/windows/3.10/screenshot.png
 redirect_from:
   - /disks/pc/windows/3.10/
 machines:

@@ -2,6 +2,7 @@
 layout: page
 title: "Microsoft Adventure (1981)"
 permalink: /disks/pcx86/games/microsoft/adventure/
+preview: /disks/pcx86/games/microsoft/adventure/screenshot.png
 redirect_from:
   - /disks/pc/games/microsoft/adventure/
 machines:

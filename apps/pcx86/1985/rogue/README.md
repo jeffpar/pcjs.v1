@@ -2,6 +2,7 @@
 layout: page
 title: "Rogue (1985)"
 permalink: /apps/pcx86/1985/rogue/
+preview: /apps/pcx86/1985/rogue/screenshot.png
 machines:
   - id: ibm5160-rogue
     type: pcx86

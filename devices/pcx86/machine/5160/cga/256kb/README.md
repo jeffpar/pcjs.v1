@@ -2,6 +2,7 @@
 layout: page
 title: IBM PC XT (Model 5160)
 permalink: /devices/pcx86/machine/5160/cga/256kb/
+preview: /devices/pcx86/machine/5160/cga/256kb/screenshot.png
 redirect_from:
   - /configs/pc/machines/5160/cga/256kb/
   - /configs/pc/machines/5160/cga/256kb/demo/

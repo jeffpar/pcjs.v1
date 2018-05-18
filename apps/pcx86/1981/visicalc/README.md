@@ -2,6 +2,7 @@
 layout: page
 title: "VisiCalc (1981)"
 permalink: /apps/pcx86/1981/visicalc/
+preview: /apps/pcx86/1981/visicalc/screenshot.png
 machines:
   - id: ibm5150-visicalc
     type: pcx86
