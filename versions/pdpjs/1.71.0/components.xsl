@@ -12,7 +12,7 @@
 
 	<xsl:variable name="MACHINETYPE">pc</xsl:variable>
 	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPCLASS">pdp11</xsl:variable>
+	<xsl:variable name="APPCLASS">pdp10</xsl:variable>
 	<xsl:variable name="APPNAME">PDPjs</xsl:variable>
 	<xsl:variable name="APPVERSION">1.71.0</xsl:variable>
 	<xsl:variable name="SITEURL">https://www.pcjs.org</xsl:variable>
@@ -26,10 +26,10 @@
 		<xsl:param name="component"/>
 		<xsl:choose>
 			<xsl:when test="$APPNAME = 'PDPjs'">
-				<script type="text/javascript" src="/versions/pdpjs/{$APPVERSION}/{$component}.js"> </script>
+				<script src="/versions/pdpjs/{$APPVERSION}/{$component}.js"> </script>
 			</xsl:when>
 			<xsl:otherwise>
-				<script type="text/javascript" src="/versions/{$APPCLASS}/{$APPVERSION}/{$component}.js"> </script>
+				<script src="/versions/{$APPCLASS}/{$APPVERSION}/{$component}.js"> </script>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>

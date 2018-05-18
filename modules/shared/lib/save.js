@@ -217,7 +217,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
         sAlert += ', copy it to your web server as "' + sScript + '", and then add the following to your web page:\n\n';
         sAlert += '<div id="' + idMachine + '"></div>\n';
         sAlert += '...\n';
-        sAlert += '<script type="text/javascript" src="' + sScript + '"></script>\n';
+        sAlert += '<script src="' + sScript + '"></script>\n';
 
         /*
          * I've updated embedMachine() in embed.js to use these defaults whenever the XML file is omitted, so if our
@@ -230,7 +230,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
             sXSLFile = ',"' + sXSLFile + '"';
         }
 
-        sAlert += '<script type="text/javascript">embedPCx86("' + idMachine + '"' + sXMLFile + sXSLFile + ');</script>\n\n';
+        sAlert += '<script>embedPCx86("' + idMachine + '"' + sXMLFile + sXSLFile + ');</script>\n\n';
         sAlert += 'The machine should appear where the <div> is located.';
         Component.alertUser(sAlert);
         return;

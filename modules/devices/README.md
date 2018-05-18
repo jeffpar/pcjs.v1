@@ -270,13 +270,13 @@ and then you need some HTML markup:
 
 and then you need to add the new scripts, preferably in the order shown above:
 
-	<script type="text/javascript" src="/modules/devices/device.js"></script>
-	<script type="text/javascript" src="/modules/devices/input.js"></script>
-	<script type="text/javascript" src="/modules/devices/led.js"></script>
-	<script type="text/javascript" src="/modules/devices/rom.js"></script>
-	<script type="text/javascript" src="/modules/devices/time.js"></script>
-	<script type="text/javascript" src="/modules/devices/tms1500.js"></script>
-	<script type="text/javascript" src="/modules/devices/machine.js"></script>
+	<script src="/modules/devices/device.js"></script>
+	<script src="/modules/devices/input.js"></script>
+	<script src="/modules/devices/led.js"></script>
+	<script src="/modules/devices/rom.js"></script>
+	<script src="/modules/devices/time.js"></script>
+	<script src="/modules/devices/tms1500.js"></script>
+	<script src="/modules/devices/machine.js"></script>
 
 and then you can create the machine:
 
