@@ -382,7 +382,7 @@ class Device {
 
     /**
      * doCommand(sText)
-     * 
+     *
      * @this {Device}
      * @param {string} sText
      */
@@ -396,7 +396,7 @@ class Device {
             this.sCommandPrev = "";
             sCommand = sCommand.trim();
             let aTokens = sCommand.split(' ');
-    
+
             switch(aTokens[0]) {
             case 'c':
                 let c = aTokens[1];
@@ -426,7 +426,7 @@ class Device {
             }
         }
     }
-    
+
     /**
      * findBinding(name, fAll)
      *
@@ -511,19 +511,19 @@ class Device {
 
     /**
      * getBindingID(name)
-     * 
+     *
      * Since this.bindings contains the actual elements, not their original IDs, we must delve back into
      * the original this.config['bindings'] to determine the original ID.
-     * 
+     *
      * @this {Device}
-     * @param {string} name 
+     * @param {string} name
      * @returns {string|undefined}
      */
     getBindingID(name)
     {
         return this.config['bindings'] && this.config['bindings'][name];
     }
-    
+
     /**
      * getBindingText(name)
      *
@@ -670,9 +670,10 @@ class Device {
      *
      * readyState comes from the request's 'readyState' property, and the operation should not be considered complete
      * until readyState is 4.
-     * 
+     *
      * If nErrorCode is zero, sResource should contain the requested data; otherwise, an error occurred.
      *
+     * @this {Device}
      * @param {string} sURL
      * @param {function(string,string,number,number)} done
      */
@@ -689,6 +690,7 @@ class Device {
             sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^\/]*)$/, "$2/archive/$3");
         }
 
+        let device = this;
         let xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
         xmlHTTP.onreadystatechange = function()
         {
@@ -696,7 +698,7 @@ class Device {
                 done(sURL, sResource, xmlHTTP.readyState, nErrorCode);
                 return;
             }
-            
+
             /*
              * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
              * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
@@ -707,12 +709,12 @@ class Device {
              *      xmlHTTP.onreadystatechange = undefined;
              */
             sResource = xmlHTTP.responseText;
-            
+
             /*
              * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
              * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
              */
-            if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && this.getHostProtocol() == "file:") {
+            if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && device.getHostProtocol() == "file:") {
                 // if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sResource.length + " bytes");
             }
             else {
@@ -720,7 +722,7 @@ class Device {
             }
             done(sURL, sResource, xmlHTTP.readyState, nErrorCode);
         };
-        
+
         xmlHTTP.open("GET", sURL, true);
         xmlHTTP.send();
     }
@@ -728,6 +730,7 @@ class Device {
     /**
      * getURLParms(sParms)
      *
+     * @this {Device}
      * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
      * @returns {Object} containing properties for each parameter found
      */
