@@ -17,6 +17,8 @@ styles:
     background-color: black;
   .page-content:
     padding: 0;
+  .site-footer:
+    border-top: 0;
   _ti57:
     position: relative;
     display: inline-block;
