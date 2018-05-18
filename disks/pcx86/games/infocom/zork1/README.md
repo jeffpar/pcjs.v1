@@ -2,6 +2,7 @@
 layout: page
 title: "Zork I: The Great Underground Empire"
 permalink: /disks/pcx86/games/infocom/zork1/
+preview: /disks/pcx86/games/infocom/zork1/screenshot.png
 redirect_from:
   - /disks/pc/games/infocom/zork1/
 machines:

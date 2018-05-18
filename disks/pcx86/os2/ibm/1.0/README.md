@@ -2,6 +2,7 @@
 layout: page
 title: IBM OS/2 1.0
 permalink: /disks/pcx86/os2/ibm/1.0/
+preview: /disks/pcx86/os2/ibm/1.0/screenshot.png
 machines:
   - id: ibm5170
     type: pcx86

@@ -2,6 +2,7 @@
 layout: page
 title: "DONKEY.BAS (1981)"
 permalink: /apps/pcx86/1981/donkey/
+preview: /apps/pcx86/1981/donkey/screenshot.png
 redirect_from:
   - /configs/pc/machines/5150/cga/64kb/donkey/
   - /configs/pc/machines/5150/cga/64kb/donkey/machine.xml/

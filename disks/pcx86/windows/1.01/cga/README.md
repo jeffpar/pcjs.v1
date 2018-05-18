@@ -2,6 +2,7 @@
 layout: page
 title: Microsoft Windows 1.01 with CGA Display
 permalink: /disks/pcx86/windows/1.01/cga/
+preview: /disks/pcx86/windows/1.01/cga/screenshot.png
 redirect_from:
   - /configs/pc/machines/5160/cga/win101/
   - /configs/pc/machines/5160/cga/256kb/win101/

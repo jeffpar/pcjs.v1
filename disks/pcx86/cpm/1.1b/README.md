@@ -2,6 +2,7 @@
 layout: page
 title: "IBM PC (Model 5150) running CP/M-86 1.1B"
 permalink: /disks/pcx86/cpm/1.1b/
+preview: /disks/pcx86/cpm/1.1b/screenshot.png
 machines:
   - id: cpm-mda-256k
     type: pcx86
