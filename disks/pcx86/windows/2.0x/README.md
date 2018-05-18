@@ -2,6 +2,7 @@
 layout: page
 title: Microsoft Windows/386 2.0x
 permalink: /disks/pcx86/windows/2.0x/
+preview: /disks/pcx86/windows/2.0x/screenshot.png
 machines:
   - id: deskpro386
     type: pcx86

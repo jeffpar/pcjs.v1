@@ -2,6 +2,7 @@
 layout: page
 title: "Microsoft Windows 95: First Retail Release"
 permalink: /disks/pcx86/windows/win95/4.00.950/
+preview: /disks/pcx86/windows/win95/4.00.950/screenshot.png
 redirect_from:
   - /disks/pc/windows/win95/4.00.950/
 machines:

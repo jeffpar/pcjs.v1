@@ -2,6 +2,7 @@
 layout: page
 title: Microsoft Windows 1.01
 permalink: /disks/pcx86/windows/1.01/
+preview: /disks/pcx86/windows/1.01/screenshot.png
 redirect_from:
   - /configs/pc/machines/5160/ega/640kb/win101/
   - /devices/pc/machine/5160/ega/640kb/win101/
