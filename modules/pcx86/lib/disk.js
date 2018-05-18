@@ -2036,6 +2036,22 @@ class Disk extends Component {
     }
 
     /**
+     * encodeAsBinary()
+     *
+     * @this {Disk}
+     * @return {Uint8Array}
+     */
+    encodeAsBinary() {
+        let s = [], pba = 0, sector;
+        while ((sector = this.getSector(pba++))) {
+            for (let off = 0, len = sector['length']; off < len; off++) {
+                s.push(this.getSectorData(sector, off, 1));
+            }
+        }
+        return new Uint8Array(s);
+    }
+
+    /**
      * save()
      *
      * The first array entry contains some disk information:

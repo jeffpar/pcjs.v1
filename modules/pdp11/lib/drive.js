@@ -240,7 +240,7 @@ class DriveController extends Component {
                         var disk = drive.disk;
                         if (disk) {
                             if (DEBUG) dc.println("saving disk " + disk.sDiskPath + "...");
-                            var sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
+                            var sAlert = Web.downloadFile(disk.encodeAsBinary(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
                             Component.alertUser(sAlert);
                         } else {
                             dc.notice("No disk loaded in drive.");

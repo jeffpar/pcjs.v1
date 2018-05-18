@@ -330,7 +330,7 @@ class FDC extends Component {
                         let disk = drive.disk;
                         if (disk) {
                             if (DEBUG) fdc.println("saving diskette " + disk.sDiskPath + "...");
-                            let sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
+                            let sAlert = Web.downloadFile(disk.encodeAsBinary(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
                             Component.alertUser(sAlert);
                         } else {
                             fdc.notice("No diskette loaded in drive.");
