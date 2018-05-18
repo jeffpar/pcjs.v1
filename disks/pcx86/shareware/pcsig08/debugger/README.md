@@ -2,7 +2,7 @@
 layout: page
 title: PC-SIG Library 8th Edition CD-ROM (April 1990) with Debugger
 permalink: /disks/pcx86/shareware/pcsig08/debugger/
-preview: https://jeffpar.github.io/pcjs-disks/pcx86/shareware/pcsig08/pcsig12.jpg
+preview: https://jeffpar.github.io/pcjs-disks/pcx86/shareware/pcsig12/CDROM.jpg
 machines:
   - id: pcsig08
     type: pcx86
