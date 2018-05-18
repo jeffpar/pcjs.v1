@@ -27,10 +27,10 @@
 		<xsl:param name="component"/>
 		<xsl:choose>
 			<xsl:when test="$APPNAME = 'PDPjs'">
-				<script type="text/javascript" src="/versions/pdpjs/{$APPVERSION}/{$component}.js"> </script>
+				<script src="/versions/pdpjs/{$APPVERSION}/{$component}.js"> </script>
 			</xsl:when>
 			<xsl:otherwise>
-				<script type="text/javascript" src="/versions/{$APPCLASS}/{$APPVERSION}/{$component}.js"> </script>
+				<script src="/versions/{$APPCLASS}/{$APPVERSION}/{$component}.js"> </script>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>

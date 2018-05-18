@@ -2,6 +2,7 @@
 layout: page
 title: "PC-SIG Library 8th Edition CD-ROM (April 1990): Disks 501-1000"
 permalink: /disks/pcx86/shareware/pcsig08/501/
+preview: https://jeffpar.github.io/pcjs-disks/pcx86/shareware/pcsig08/pcsig12.jpg
 machines:
   - id: pcsig08
     type: pcx86

@@ -74112,7 +74112,7 @@ class DebuggerX86 extends Debugger {
      * @this {DebuggerX86}
      * @param {DbgAddrX86} dbgAddr
      * @param {string} [sComment] is an associated comment
-     * @param {number|null} [nSequence] is an associated sequence number, null or undefined if none
+     * @param {number} [nSequence] is an associated sequence number, -1 or undefined if none
      * @return {string} (and dbgAddr is updated to the next instruction)
      */
     getInstruction(dbgAddr, sComment, nSequence)
@@ -74328,7 +74328,7 @@ class DebuggerX86 extends Debugger {
         if (sComment && fComplete) {
             sLine = Str.pad(sLine, dbgAddrIns.fAddr32? 74 : 62) + ';' + sComment;
             if (!this.cpu.flags.checksum) {
-                sLine += (nSequence != null? '=' + nSequence.toString() : "");
+                sLine += (nSequence >= 0? '=' + nSequence.toString() : "");
             } else {
                 let nCycles = this.cpu.getCycles();
                 sLine += "cycles=" + nCycles.toString() + " cs=" + Str.toHex(this.cpu.counts.nChecksum);
@@ -76893,8 +76893,8 @@ class DebuggerX86 extends Debugger {
 
         while (cb > 0 && n--) {
 
-            let nSequence = (this.isBusy(false) || this.nStep)? this.nCycles : null;
-            let sComment = (nSequence != null? "cycles" : null);
+            let nSequence = (this.isBusy(false) || this.nStep)? this.nCycles : -1;
+            let sComment = (nSequence >= 0? "cycles" : "");
             let aSymbol = this.findSymbol(dbgAddr);
 
             let addr = dbgAddr.addr;    // we snap dbgAddr.addr *after* calling findSymbol(), which re-evaluates it
@@ -76909,7 +76909,7 @@ class DebuggerX86 extends Debugger {
 
             if (aSymbol[3]) {
                 sComment = aSymbol[3];
-                nSequence = null;
+                nSequence = -1;
             }
 
             sInstruction = this.getInstruction(dbgAddr, sComment, nSequence);
@@ -81642,7 +81642,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
         sAlert += ', copy it to your web server as "' + sScript + '", and then add the following to your web page:\n\n';
         sAlert += '<div id="' + idMachine + '"></div>\n';
         sAlert += '...\n';
-        sAlert += '<script type="text/javascript" src="' + sScript + '"></script>\n';
+        sAlert += '<script src="' + sScript + '"></script>\n';
 
         /*
          * I've updated embedMachine() in embed.js to use these defaults whenever the XML file is omitted, so if our
@@ -81655,7 +81655,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
             sXSLFile = ',"' + sXSLFile + '"';
         }
 
-        sAlert += '<script type="text/javascript">embedPCx86("' + idMachine + '"' + sXMLFile + sXSLFile + ');</script>\n\n';
+        sAlert += '<script>embedPCx86("' + idMachine + '"' + sXMLFile + sXSLFile + ');</script>\n\n';
         sAlert += 'The machine should appear where the <div> is located.';
         Component.alertUser(sAlert);
         return;
