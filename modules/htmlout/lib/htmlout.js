@@ -32,10 +32,6 @@ var fs = require("fs");
 var path = require("path");
 var glob = require("glob");
 
-/**
- * @class exports
- * @property {function(string)} sync
- */
 var HTTPAPI = require("./httpapi");
 var defines = require("../../shared/lib/defines");
 var DumpAPI = require("../../shared/lib/dumpapi");
@@ -45,11 +41,6 @@ var proc    = require("../../shared/lib/proclib");
 var str     = require("../../shared/lib/strlib");
 var usr     = require("../../shared/lib/usrlib");
 
-/**
- * @class exports
- * @property {string} name
- * @property {string} version
- */
 var pkg = require("../../../package.json");
 var machines = require("../../../_data/machines.json");
 
@@ -1837,7 +1828,7 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
  */
 HTMLOut.prototype.getSocketScripts = function(sToken, sIndent, aParms)
 {
-    this.aTokens[sToken] = (fSockets? '<script type="text/javascript" src="/socket.io/socket.io.js"></script>\n' + sIndent + '<script type="text/javascript" src="/modules/shared/lib/sockets.js"></script>' : "");
+    this.aTokens[sToken] = (fSockets? '<script src="/socket.io/socket.io.js"></script>\n' + sIndent + '<script src="/modules/shared/lib/sockets.js"></script>' : "");
 };
 
 /**
@@ -1928,7 +1919,7 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         var sScriptEmbed = "";
         var sCreator = machineConfig['creator'];
         if (sCreator) {
-            sScriptEmbed = '<script type="text/javascript">';
+            sScriptEmbed = '<script>';
             if (sCreator.indexOf("new ") >= 0) {
                 sCreator = "new window." + sCreator.substr(4);
                 sScriptEmbed += sCreator + "('" + infoMachine['id'] + "','" + infoMachine['config'].replace(/\n/g, '\\n') + "');"
@@ -2011,14 +2002,14 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         if (infoMachine['sticky']) {
             asFiles = [];
             asFiles.push("/modules/shared/lib/sticky.js");
-            sScriptEmbed = '<script type="text/javascript">addStickyMachine("' + infoMachine['id'] + '")</script>';
+            sScriptEmbed = '<script>addStickyMachine("' + infoMachine['id'] + '")</script>';
             this.addFilesToHTML(asFiles, sScriptEmbed);
         }
 
         if (buildOptions.id) {
             asFiles = [];
             asFiles.push("/modules/build/lib/build.js");
-            sScriptEmbed = '<script type="text/javascript">buildPC("' + buildOptions.id + '")</script>';
+            sScriptEmbed = '<script>buildPC("' + buildOptions.id + '")</script>';
             this.addFilesToHTML(asFiles, sScriptEmbed);
         }
     }
@@ -2062,7 +2053,7 @@ HTMLOut.prototype.addFilesToHTML = function(asFiles, sScriptEmbed)
                             }
                         }
                         else if (sExt == ".js") {
-                            sInsert = '\n' + sIndent + '<script type="text/javascript" src="' + sFile + '"></script>';
+                            sInsert = '\n' + sIndent + '<script src="' + sFile + '"></script>';
                             if (sText.indexOf(sInsert) < 0) {
                                 sTextInsert += sInsert;
                             }

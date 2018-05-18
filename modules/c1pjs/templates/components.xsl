@@ -22,7 +22,7 @@
 
 	<xsl:template name="componentScripts">
 		<xsl:param name="component"/>
-		<script type="text/javascript" src="/versions/{$APPCLASS}/{$APPVERSION}/{$component}.js"> </script>
+		<script src="/versions/{$APPCLASS}/{$APPVERSION}/{$component}.js"> </script>
 	</xsl:template>
 
 	<xsl:template name="componentIncludes">
