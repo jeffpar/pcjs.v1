@@ -46380,11 +46380,12 @@ class Keyboard extends Component {
         this.bCmdPending = 0;       // when non-zero, a command is pending (eg, SET_LED or SET_RATE)
 
         /*
-         * The current (assumed) physical (and simulated) states of the various shift/lock keys.
+         * The current (assumed) physical (and simulated) modifier/lock key states, along with a set
+         * of (fake) modifier key states maintained by simulateKey() to keep track of faked modifiers.
          *
          * TODO: Determine how (or whether) we can query the browser's initial shift/lock key states.
          */
-        this.bitsState = this.bitsStateSim = 0;
+        this.bitsState = this.bitsStateSim = this.bitsStateFake = 0;
 
         /*
          * New scan codes are "pushed" onto abBuffer and then "shifted" off.
@@ -47035,7 +47036,7 @@ class Keyboard extends Component {
             if (key.simCode == simCode || key.simCode == Keys.SHIFTED_KEYCODES[simCode]) {
                 this.aKeysActive.splice(i, 1);
                 if (key.timer) clearTimeout(key.timer);
-                if (key.fDown && !fFlush) this.keySimulate(key.simCode, false);
+                if (key.fDown && !fFlush) this.simulateKey(key.simCode, false);
                 this.findBinding(simCode, "key", false);
                 fRemoved = true;
                 break;
@@ -47078,7 +47079,7 @@ class Keyboard extends Component {
             key.fDown = false;
         }
 
-        if (!this.keySimulate(key.simCode, key.fDown) || !key.nRepeat) {
+        if (!this.simulateKey(key.simCode, key.fDown) || !key.nRepeat) {
             /*
              * Why isn't there a simple return here? In order to set breakpoints on two different return conditions, of course!
              */
@@ -47449,14 +47450,14 @@ class Keyboard extends Component {
     }
 
     /**
-     * keySimulate(simCode, fDown)
+     * simulateKey(simCode, fDown)
      *
      * @this {Keyboard}
      * @param {number} simCode
      * @param {boolean} fDown
      * @return {boolean} true if successfully simulated, false if unrecognized/unsupported key
      */
-    keySimulate(simCode, fDown)
+    simulateKey(simCode, fDown)
     {
         let fSimulated = false;
 
@@ -47481,7 +47482,6 @@ class Keyboard extends Component {
             let fAlpha = (simCode >= Keys.ASCII.A && simCode <= Keys.ASCII.Z || simCode >= Keys.ASCII.a && simCode <= Keys.ASCII.z);
 
             while (wCode >>>= 8) {
-                let bShift = 0;
                 let bScan = wCode & 0xff;
                 /*
                  * TODO: The handling of SIMCODE entries with "extended" codes still needs to be tested, and
@@ -47492,29 +47492,52 @@ class Keyboard extends Component {
                     abScanCodes.push(bCode | (fDown? 0 : Keyboard.SCANCODE.BREAK));
                     continue;
                 }
+                let bitsFake = 0;
                 if (bScan == Keyboard.SCANCODE.SHIFT) {
                     if (!(this.bitsStateSim & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT))) {
                         if (!(this.bitsStateSim & Keyboard.STATE.CAPS_LOCK) || !fAlpha) {
-                            bShift = bScan;
+                            bitsFake |= Keyboard.STATE.SHIFT;
                         }
                     }
-                } else if (bScan == Keyboard.SCANCODE.CTRL) {
-                    if (!(this.bitsStateSim & (Keyboard.STATE.CTRL | Keyboard.STATE.RCTRL))) {
-                        bShift = bScan;
-                    }
-                } else if (bScan == Keyboard.SCANCODE.ALT) {
-                    if (!(this.bitsStateSim & (Keyboard.STATE.ALT | Keyboard.STATE.RALT))) {
-                        bShift = bScan;
-                    }
-                } else {
-                    abScanCodes.push(bCode | (fDown? 0 : Keyboard.SCANCODE.BREAK));
-
                 }
-                if (bShift) {
+                else if (bScan == Keyboard.SCANCODE.CTRL) {
+                    if (!(this.bitsStateSim & (Keyboard.STATE.CTRL | Keyboard.STATE.RCTRL))) {
+                        bitsFake |= Keyboard.STATE.CTRL;
+                    }
+                }
+                else if (bScan == Keyboard.SCANCODE.ALT) {
+                    if (!(this.bitsStateSim & (Keyboard.STATE.ALT | Keyboard.STATE.RALT))) {
+                        bitsFake |= Keyboard.STATE.ALT;
+                    }
+                }
+                else {
+                    abScanCodes.push(bCode | (fDown? 0 : Keyboard.SCANCODE.BREAK));
+                }
+                /*
+                 * If we have to fake a modifier key (eg, because some caller wants to simulate a modified key
+                 * for which the modifier is not currently down), then if the modified key is going DOWN, make a
+                 * note that the modifier is being faked, and if the modified key is going UP, make sure that
+                 * the modifier was actually faked before "unfaking" it.
+                 *
+                 * Otherwise, the BIOS may complain (ie, beep) if it sees an UP event for a modifier key that it
+                 * thinks is already up.  For example, if you press SHIFT, then press '?', then release SHIFT, then
+                 * release '?', since we didn't have to fake a SHIFT when pressing '?', we should also avoid faking
+                 * it when releasing '?'.
+                 */
+                if (bitsFake) {
+                    if (fDown) {
+                        this.bitsStateFake |= bitsFake;
+                    } else if (this.bitsStateFake & bitsFake) {
+                        this.bitsStateFake &= ~bitsFake;
+                    } else {
+                        bitsFake = 0;
+                    }
+                }
+                if (bitsFake) {
                     if (fDown)
-                        abScanCodes.unshift(bShift);
+                        abScanCodes.unshift(bScan);
                     else
-                        abScanCodes.push(bShift | Keyboard.SCANCODE.BREAK);
+                        abScanCodes.push(bScan | Keyboard.SCANCODE.BREAK);
                 }
             }
 
@@ -47526,7 +47549,7 @@ class Keyboard extends Component {
         }
 
         if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.KEY)) {
-            this.printMessage("keySimulate(" + simCode + "," + (fDown? "down" : "up") + "): " + (fSimulated? "true" : "false"), true);
+            this.printMessage("simulateKey(" + simCode + "," + (fDown? "down" : "up") + "): " + (fSimulated? "true" : "false"), true);
         }
 
         return fSimulated;
@@ -48071,7 +48094,7 @@ Keyboard.LEDSTATES = {
 /*
  * Maps SIMCODE (number) to SCANCODE (number(s)).
  *
- * This array is used by keySimulate() to lookup a given SIMCODE and convert it to a SCANCODE
+ * This array is used by simulateKey() to lookup a given SIMCODE and convert it to a SCANCODE
  * (lower byte), plus any required shift key SCANCODES (upper bytes).
  *
  * Using keyCodes from keyPress events proved to be more robust than using keyCodes from keyDown and
@@ -48082,7 +48105,7 @@ Keyboard.LEDSTATES = {
  * The other problem (which is more of a problem with keyboards like the C1P than any IBM keyboards) is
  * that the shift/modifier state for a character on the "source" keyboard may not match the shift/modifier
  * state for the same character on the "target" keyboard.  And since this code is inherited from C1Pjs,
- * we've inherited the same solution: keySimulate() has the ability to "undo" any states in bitsState
+ * we've inherited the same solution: simulateKey() has the ability to "undo" any states in bitsState
  * that conflict with the state(s) required for the character in question.
  */
 Keyboard.SIMCODES = {
