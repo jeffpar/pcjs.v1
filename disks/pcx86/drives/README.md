@@ -19,7 +19,7 @@ IBM PC XT Drive Types
 
 The IBM PC XT BIOS supported 4 predefined drive types:
 
-- Type 0: 306 cylinders, 2 heads, 17 sectors/track ( 5,326,848 bytes)
+- Type 0: 306 cylinders, 2 heads, 17 sectors/track (5,326,848 bytes)
 - Type 1: 375 cylinders, 8 heads, 17 sectors/track (26,112,000 bytes)
 - Type 2: 306 cylinders, 6 heads, 17 sectors/track (15,980,544 bytes)
 - Type 3: 306 cylinders, 4 heads, 17 sectors/track (10,653,696 bytes or ~[10Mb](10mb/))
