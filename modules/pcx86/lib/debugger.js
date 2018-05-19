@@ -1338,7 +1338,7 @@ class DebuggerX86 extends Debugger {
         if (dbgAddr.sel != undefined) {
             let seg = this.getSegment(dbgAddr.sel, dbgAddr.type);
             if (seg) {
-                let off = dbgAddr.off & seg.maskAddr;
+                let off = dbgAddr.off;
                 if (!seg.fExpDown) {
                     if ((off >>> 0) >= seg.offMax) {
                         return false;
@@ -1350,7 +1350,7 @@ class DebuggerX86 extends Debugger {
                     }
                 }
                 if (fUpdate) {
-                    dbgAddr.off = off;
+                    dbgAddr.off = off & seg.maskAddr;
                     dbgAddr.fData32 = (seg.sizeData == 4);
                     dbgAddr.fAddr32 = (seg.sizeAddr == 4);
                 }
