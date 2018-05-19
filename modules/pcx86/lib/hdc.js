@@ -171,7 +171,7 @@ class HDC extends Component {
                         if (i >= 0) sDiskName = sDiskName.substr(0, i);
                         sDiskName += ".img";
                         if (DEBUG) hdc.println("saving disk " + sDiskName + "...");
-                        let sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, sDiskName);
+                        let sAlert = Web.downloadFile(disk.encodeAsBinary(), "octet-stream", true, sDiskName);
                         Component.alertUser(sAlert);
                     } else {
                         hdc.notice("Hard drive " + iDrive + " is not available.");
