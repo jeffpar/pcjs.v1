@@ -8,7 +8,7 @@ permalink: /disks/pcx86/drives/10mb/
 -----------------------------------
 
 This folder contains a variety of 10Mb (PC XT Type 3) fixed disk configurations:
- 
+
 * [Unformatted 10Mb Disk](unformatted-xt3.xml)
 * [PC DOS 2.00 Formatted 10Mb Disk (Empty)](pcdos200-empty-xt3.xml)
 * [PC DOS 2.00 with Windows 1.01 for CGA](pcdos200-win101-cga-xt3.xml)
