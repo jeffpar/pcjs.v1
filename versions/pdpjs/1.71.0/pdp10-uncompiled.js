@@ -2426,7 +2426,12 @@ class Web {
         let link = null, sAlert;
         let sURI = "data:application/" + sType + (fBase64? ";base64" : "") + ",";
 
-        if (!Web.isUserAgent("Firefox")) {
+        if (typeof sData != 'string'
+            && typeof Blob == 'function' && typeof URL != 'undefined' && URL && typeof URL.createObjectURL == 'function') {
+            let blob = new Blob([sData], { type: 'application/octet-stream' });
+            sURI = URL.createObjectURL(blob);
+        }
+        else if (!Web.isUserAgent("Firefox")) {
             sURI += (fBase64? sData : encodeURI(sData));
         } else {
             sURI += (fBase64? sData : encodeURIComponent(sData));

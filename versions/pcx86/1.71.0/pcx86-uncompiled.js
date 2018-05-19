@@ -2654,7 +2654,12 @@ class Web {
         let link = null, sAlert;
         let sURI = "data:application/" + sType + (fBase64? ";base64" : "") + ",";
 
-        if (!Web.isUserAgent("Firefox")) {
+        if (typeof sData != 'string'
+            && typeof Blob == 'function' && typeof URL != 'undefined' && URL && typeof URL.createObjectURL == 'function') {
+            let blob = new Blob([sData], { type: 'application/octet-stream' });
+            sURI = URL.createObjectURL(blob);
+        }
+        else if (!Web.isUserAgent("Firefox")) {
             sURI += (fBase64? sData : encodeURI(sData));
         } else {
             sURI += (fBase64? sData : encodeURIComponent(sData));
@@ -62309,6 +62314,22 @@ class Disk extends Component {
     }
 
     /**
+     * encodeAsBinary()
+     *
+     * @this {Disk}
+     * @return {Uint8Array}
+     */
+    encodeAsBinary() {
+        let s = [], pba = 0, sector;
+        while ((sector = this.getSector(pba++))) {
+            for (let off = 0, len = sector['length']; off < len; off++) {
+                s.push(this.getSectorData(sector, off, 1));
+            }
+        }
+        return new Uint8Array(s);
+    }
+
+    /**
      * save()
      *
      * The first array entry contains some disk information:
@@ -63500,7 +63521,7 @@ class FDC extends Component {
                         let disk = drive.disk;
                         if (disk) {
                             if (DEBUG) fdc.println("saving diskette " + disk.sDiskPath + "...");
-                            let sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
+                            let sAlert = Web.downloadFile(disk.encodeAsBinary(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
                             Component.alertUser(sAlert);
                         } else {
                             fdc.notice("No diskette loaded in drive.");
@@ -66252,7 +66273,7 @@ class HDC extends Component {
                         if (i >= 0) sDiskName = sDiskName.substr(0, i);
                         sDiskName += ".img";
                         if (DEBUG) hdc.println("saving disk " + sDiskName + "...");
-                        let sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, sDiskName);
+                        let sAlert = Web.downloadFile(disk.encodeAsBinary(), "octet-stream", true, sDiskName);
                         Component.alertUser(sAlert);
                     } else {
                         hdc.notice("Hard drive " + iDrive + " is not available.");
