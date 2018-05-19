@@ -1182,7 +1182,7 @@ Card.CGA = {
         BORDER:             0x07,
         BRIGHT:             0x08,
         BGND_ALT:           0x10,       // alternate, intensified background colors in text mode
-        COLORSET2:          0x20        // selects aCGAColorSet2 colors for 320x200 graphics mode; aCGAColorSet1 otherwise
+        COLORSET1:          0x20        // selects aCGAColorSet1 colors for 320x200 graphics mode; aCGAColorSet0 otherwise
     },
     STATUS: {
         PORT:               0x3DA,      // read-only; same for EGA (although the EGA calls this STATUS1, to distinguish it from STATUS0)
@@ -3975,26 +3975,25 @@ class Video extends Component {
              * Of the 4 colors returned, the first color comes from regColor and the other 3 come from one of
              * the two hard-coded CGA color sets:
              *
-             *      Color Set 1             Color Set 2
-             *      -----------             -----------
+             *      Color Set 0             Color Set 1
+             *      -----------------       -----------------
              *      Background (0x00)       Background (0x00)
-             *      Green      (0x12)       Cyan       (0x13)
-             *      Red        (0x14)       Magenta    (0x15)
-             *      Brown      (0x16)       White      (0x17)
+             *      Green      (0x02)       Cyan       (0x03)
+             *      Red        (0x04)       Magenta    (0x05)
+             *      Brown      (0x06)       White      (0x07)
              *
              * The numbers in parentheses are the EGA ATC palette register values that the EGA BIOS uses for each
-             * color set; on an EGA, I synthesize a fake CGA regColor value, until I (TODO:) figure out exactly how
-             * the EGA simulates the CGA color palette.
+             * color set; I rely on those numbers to synthesize a fake CGA regColor value.
              */
             let regColor = this.cardActive.regColor;
             if (this.cardActive === this.cardEGA) {
                 let bBackground = this.cardEGA.regATCData[0];
                 regColor = bBackground & Card.CGA.COLOR.BORDER;
                 if (bBackground & Card.ATC.PALETTE.BRIGHT) regColor |= Card.CGA.COLOR.BRIGHT;
-                if (this.cardEGA.regATCData[1] != 0x12) regColor |= Card.CGA.COLOR.COLORSET2;
+                if ((this.cardEGA.regATCData[1] & 0x0f) == 0x03) regColor |= Card.CGA.COLOR.COLORSET1;
             }
             this.aRGB[0] = Video.aCGAColors[regColor & (Card.CGA.COLOR.BORDER | Card.CGA.COLOR.BRIGHT)];
-            let aColorSet = (regColor & Card.CGA.COLOR.COLORSET2)? Video.aCGAColorSet2 : Video.aCGAColorSet1;
+            let aColorSet = (regColor & Card.CGA.COLOR.COLORSET1)? Video.aCGAColorSet1 : Video.aCGAColorSet0;
             for (let iColor = 0; iColor < aColorSet.length; iColor++) {
                 this.aRGB[iColor + 1] = Video.aCGAColors[aColorSet[iColor]];
             }
@@ -8284,8 +8283,8 @@ Video.aCGAColors = [
     [0xff, 0xff, 0xff, 0xff]    // 0x0F: ATTR_FGND_WHITE   | ATTR_FGND_BRIGHT (aka white)
 ];
 
-Video.aCGAColorSet1 = [Video.ATTRS.FGND_GREEN, Video.ATTRS.FGND_RED,     Video.ATTRS.FGND_BROWN];
-Video.aCGAColorSet2 = [Video.ATTRS.FGND_CYAN,  Video.ATTRS.FGND_MAGENTA, Video.ATTRS.FGND_WHITE];
+Video.aCGAColorSet0 = [Video.ATTRS.FGND_GREEN, Video.ATTRS.FGND_RED,     Video.ATTRS.FGND_BROWN];
+Video.aCGAColorSet1 = [Video.ATTRS.FGND_CYAN,  Video.ATTRS.FGND_MAGENTA, Video.ATTRS.FGND_WHITE];
 
 /*
  * Here is the EGA BIOS default ATC palette register set for color text modes, from which getCardColors()
