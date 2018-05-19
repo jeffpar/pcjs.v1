@@ -28,21 +28,21 @@ the README.TXT and HISTORY.TXT files for v1.32b.
 ### Directory of Enhanced DEBUG 1.32b
 
 	 Volume in drive A is ENHDEBUG   
+	 Volume Serial Number is 0000-0000
 
 	Directory of A:\
 
 	DEBUG    ASM    230208 05-14-16  10:32a
 	DEBUG    COM     20788 05-14-16  10:32a
-	DEBUG    TXT     27998 04-12-16  11:44a
 	DEBUGX   COM     26164 05-14-16  10:32a
-	HISTORY  TXT     17574 05-14-16  10:04a
-	README   TXT      7095 05-10-16  10:44a
-	README   MD        278 05-05-18   2:39p
-	        7 file(s)     330105 bytes
+	DEBUGTBL INC     46060 05-10-16  10:44a
+	FPTOSTR  INC      7908 11-28-14   4:28p
+	DEBUG    TXT     27998 04-12-16  11:44a
+	        6 file(s)     359126 bytes
 
 	Total files listed:
-	        7 file(s)     330105 bytes
-	                       28672 bytes free
+	        6 file(s)     359126 bytes
+	                        1024 bytes free
 
 ### README.TXT
 
