@@ -1770,7 +1770,8 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
                 var sTitle = match[2];
                 match = sTitle.match(/<a [^>]*>([^<]*)<\/a>/);
                 if (match) sTitle = match[1];
-                obj.sHTML = obj.sHTML.replace(/(<title[^>]*>)([^|]*)\|[^<]*(<\/title>)/, "$1$2| " + sTitle + "$3");
+                var sReplacement = (sTitle.indexOf("PCjs") == 0? "$1" + sTitle + "$4" : "$1$2$3 " + sTitle + "$4");
+                obj.sHTML = obj.sHTML.replace(/(<title[^>]*>)([^:|]*?)( ?\||:)[^<]*(<\/title>)/, sReplacement);
             }
 
             /*
