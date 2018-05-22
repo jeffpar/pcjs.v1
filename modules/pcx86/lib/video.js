@@ -7715,7 +7715,7 @@ class Video extends Component {
              * we inject into the page is as fully-formed as possible, keeping disruption of page layout to a
              * minimum.
              */
-            let aCanvas = Component.getElementsByClass(document, "pcjs-canvas");
+            let aCanvas = Component.getElementsByClass(element, "pcjs-canvas");
             if (!aCanvas || !aCanvas.length || !aCanvas[0].getContext) {
                 element.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
                 return;
