@@ -1820,10 +1820,10 @@ class Web {
             return response;
         }
 
-        if (DEBUG || NODE || Web.getHostName() == "pcjs") {
+        if (Web.getHostName() == "pcjs" || NODE) {
             /*
              * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
-             * whenever the hostname is "pcjs"; otherwise, use "localhost" when debugging locally.
+             * whenever the hostname is "pcjs" (or NODE is true); otherwise, use "localhost" when debugging locally.
              *
              * NOTE: http://archive.pcjs.org is currently redirected to https://s3-us-west-2.amazonaws.com/archive.pcjs.org
              */

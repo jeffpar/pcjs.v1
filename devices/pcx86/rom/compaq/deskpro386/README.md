@@ -123,7 +123,7 @@ successfully reassembled:
 	nasm -f bin 1988-01-28.asm -l 1988-01-28.lst -o 1988-01-28.rom
 
 However, it does NOT produce a binary identical to the original ROM, in part because of instruction ambiguities (ie,
-instructions that can be assembled multiple ways). It's possible the reassembled ROM may still work, but more research
+instructions that can be assembled multiple ways).  It's possible the reassembled ROM may still work, but more research
 is required.
 
 One interesting section of the COMPAQ DeskPro ROM is this string at offset 0xE002:
