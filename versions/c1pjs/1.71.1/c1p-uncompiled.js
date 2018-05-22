@@ -1530,21 +1530,22 @@ class Web {
             return response;
         }
 
-        if (!DEBUG && !NODE) {
+        if (DEBUG || NODE || Web.getHostName() == "pcjs") {
+            /*
+             * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
+             * whenever the hostname is "pcjs"; otherwise, use "localhost" when debugging locally.
+             *
+             * NOTE: http://archive.pcjs.org is currently redirected to https://s3-us-west-2.amazonaws.com/archive.pcjs.org
+             */
+            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^\/]*)$/, "$2/archive/$3");
+            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-[a-z]+|private-[a-z]+)\/(.*)$/, "/$1/$2");
+        }
+        else {
             /*
              * TODO: Perhaps it's time for our code in netlib.js to finally add support for HTTPS; for now
              * though, it's just as well that the NODE environment assumes all resources are available locally.
              */
-            sURL = sURL.replace(/^\/(pcjs-disks|pcjs-games|private-disks)\//, "https://jeffpar.github.io/$1/");
-        }
-        else {
-            /*
-             * The larger resources we put on archive.pcjs.org should also be available locally.
-             *
-             * NOTE: "http://archive.pcjs.org" is now "https://s3-us-west-2.amazonaws.com/archive.pcjs.org"
-             */
-            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^\/]*)$/, "$2/archive/$3");
-            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-disks|pcjs-games|private-disks)\/(.*)$/, "/$1/$2");
+            sURL = sURL.replace(/^\/(pcjs-[a-z]+|private-[a-z]+)\//, "https://jeffpar.github.io/$1/");
         }
 
 
@@ -1820,6 +1821,16 @@ class Web {
     static getHost()
     {
         return (window? window.location.protocol + "//" + window.location.host : SITEURL);
+    }
+
+    /**
+     * getHostName()
+     *
+     * @return {string}
+     */
+    static getHostName()
+    {
+        return (window? window.location.hostname : "localhost");
     }
 
     /**

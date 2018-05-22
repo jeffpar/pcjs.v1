@@ -3194,6 +3194,7 @@
 		<disk path="/pcjs-games/pcx86/other/1984/wizardry1/WIZARDRY1-MASTER.json">Wizardry I - Master Disk</disk>
 		<disk path="/pcjs-games/pcx86/other/1984/wizardry1/WIZARDRY1-SCENARIO.json">Wizardry I - Scenario Disk</disk>
 		<disk path="/pcjs-games/pcx86/other/1988/gambling/TRUMP-CASTLE-120.json">Trump Castle 1.20 (1988)</disk>
+		<disk path="/pcjs-games/pcx86/other/1991/lemmings/LEMMINGS.json">Lemmings (1991)</disk>
 	</control>
 	<control type="button" binding="loadDisk">Load</control>
 	<control type="button" binding="saveDisk" padRight="8px">Save</control>
