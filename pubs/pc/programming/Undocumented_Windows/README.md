@@ -10,7 +10,7 @@ Undocumented Windows
 
 A directory listing of the *Undocumented Windows* diskette that accompanied the book is provided below.
 
-### Directory of Undocumented Windows diskette
+### Directory of Undocumented Windows
 
 	 Volume in drive A is PCJSDISK   
 

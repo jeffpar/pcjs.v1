@@ -10,7 +10,7 @@ by Frank van Gilluwe (December 1996)
 
 A directory listing of *The Undocumented PC* diskette that accompanied the book is provided below.
 
-### Directory of Undocumented PC diskette
+### Directory of Undocumented PC
 
 	 Volume in drive A is PCJSDISK   
 

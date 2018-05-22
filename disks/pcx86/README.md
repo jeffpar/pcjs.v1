@@ -95,16 +95,25 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 * [IBM Diagnostics and Utilities](diags/ibm/)
 * [IBM ROM BIOS Sources](roms/ibm/)
 
-### Personal Collections
+### Programming Guides
 
-* [PCjs Random Disk Collection](personal/random/)
-* [More...](personal/)
+* *[DOS Internals](/pubs/pc/programming/DOS_Internals/)* software by Geoff Chappell
+* *[Undocumented PC](/pubs/pc/programming/The_Undocumented_PC/)* software by Frank van Gilluwe
+* *[Unauthorized Windows 95](/pubs/pc/programming/Unauthorized_Windows_95/)* software by Andrew Schulman
+* *[Undocumented DOS](/pubs/pc/programming/Undocumented_DOS/)* software by Schulman, Michels, Kyle, Paterson, Maxey, Brown
+* *[Undocumented Windows](/pubs/pc/programming/Undocumented_Windows/)* software by Schulman, Maxey, Pietrek
+* [More...](/pubs/pc/programming/)
 
 ### Test Resources
 
-* [PCx86 TestMonitor Support](/tests/pcx86/testmon/)
 * [Michael Abrash's VGA "Black Book" Tests](/tests/pcx86/vga/)
+* [PCx86 TestMonitor Support](/tests/pcx86/testmon/)
 * [More...](/tests/pcx86/)
+
+### Miscellaneous Collections
+
+* [PCjs Random Disk Collection](personal/random/) courtesy of [@jeffpar](https://jeffpar.com)
+* [More...](personal/)
 
 ### Fixed Disks
 

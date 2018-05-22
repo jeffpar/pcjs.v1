@@ -10,7 +10,7 @@ by Geoff Chappell (January 1994)
 
 A directory listing of the *DOS Internals* diskette that accompanied the book is provided below.
 
-## Directory of DOS Internals diskette
+## Directory of DOS Internals
 
 	 Volume in drive A is PCJSDISK   
 

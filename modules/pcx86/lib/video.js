@@ -6456,7 +6456,7 @@ class Video extends Component {
             // this.printf("vertical retrace (%d cycles)\n", nCyclesElapsed);
         } else {
             let nCyclesHorzRemain = nCyclesElapsed % card.nCyclesHorzPeriod;
-            if (nCyclesHorzRemain > card.nCyclesHorzActive) {
+            if (nCyclesHorzRemain < card.nCyclesHorzPeriod - card.nCyclesHorzActive) {
                 b |= Card.CGA.STATUS.RETRACE;
                 // this.printf("horizontal retrace (%d cycles)\n", nCyclesElapsed);
             } else {
