@@ -14,7 +14,8 @@ machines:
 PC-SIG Library 8th Edition CD-ROM (April 1990) with Debugger
 ------------------------------------------------------------
 
-The machine below has access to all 2,121 diskette images from the PC-SIG Library 8th Edition CD-ROM (April 1990).
+The machine below has access to all 2,121 diskette images from the
+[PC-SIG Library 8th Edition CD-ROM (April 1990)](http://cd.textfiles.com/pcsig08).
 The same machine is also available [without the PCjs Debugger](../).
 
 {% include machine.html id="pcsig08" %}

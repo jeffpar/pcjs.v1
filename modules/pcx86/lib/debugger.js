@@ -63,8 +63,8 @@ if (DEBUGGER) {
  * @property {string}   [sCmd]
  * @property {Array.<string>} [aCmds]
  * @property {number}   [nCPUCycles]    (added to DbgAddrX86 objects stored in history buffer)
- * @property {number}   [nVideoCycles]  (added to DbgAddrX86 objects stored in history buffer)
- * @property {number}   [nVideoState]   (added to DbgAddrX86 objects stored in history buffer)
+ * @property {number}   [nDebugCycles]  (added to DbgAddrX86 objects stored in history buffer)
+ * @property {number}   [nDebugState]   (added to DbgAddrX86 objects stored in history buffer)
  */
 
 /*
@@ -247,8 +247,7 @@ class DebuggerX86 extends Debugger {
         this.mouse = cmp.getMachineComponent("Mouse");
 
         // this.video = cmp.getMachineComponent("Video");
-
-        if (MAXDEBUG) this.chipset = cmp.getMachineComponent("ChipSet");
+        // this.chipset = cmp.getMachineComponent("ChipSet");
 
         /*
          * Re-initialize Debugger message and command support as needed
@@ -2022,8 +2021,8 @@ class DebuggerX86 extends Debugger {
 
                 let sInstruction = this.getInstruction(dbgAddrNew, sComment, nSequence);
 
-                if (dbgAddr.nVideoCycles != null) {
-                    sInstruction += " (" + dbgAddr.nVideoCycles + "," + Str.toHexByte(dbgAddr.nVideoState) + ")";
+                if (dbgAddr.nDebugCycles != null) {
+                    sInstruction += " (" + dbgAddr.nDebugCycles + "," + Str.toHexByte(dbgAddr.nDebugState) + ")";
                 }
 
                 if (!aFilters.length || sInstruction.indexOf(aFilters[0]) >= 0) {
@@ -3102,17 +3101,26 @@ class DebuggerX86 extends Debugger {
                 this.setAddr(dbgAddr, cpu.getIP(), cpu.getCS());
                 dbgAddr.nCPUCycles = cpu.getCycles();
                 /*
+                 * For debugging timer issues, we can snap cycles remaining in the current burst, and the state of
+                 * TIMER0.
+                 */
+                if (this.chipset) {
+                    let timer = this.chipset.aTimers[0];
+                    dbgAddr.nDebugCycles = cpu.nStepCycles;
+                    dbgAddr.nDebugState = timer.countCurrent[0] | (timer.countCurrent[1] << 8);
+                }
+                /*
                  * For debugging video timing (eg, retrace) issues, it's helpful to record the state of the Video
                  * component's countdown timer.  timerVideo will be set to null if there's no Video component or the
                  * timer doesn't exist, so findTimer() should be called at most once.
                  */
-                if (this.video) {
+                else if (this.video) {
                     if (this.timerVideo === undefined) {
                         this.timerVideo = cpu.findTimer(this.video.id);
                     }
                     if (this.timerVideo) {
-                        dbgAddr.nVideoCycles = this.timerVideo[1];
-                        dbgAddr.nVideoState = this.video.getRetraceBits(this.video.cardActive);
+                        dbgAddr.nDebugCycles = this.timerVideo[1];
+                        dbgAddr.nDebugState = this.video.getRetraceBits(this.video.cardActive);
                     }
                 }
                 if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
