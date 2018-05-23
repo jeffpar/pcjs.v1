@@ -670,7 +670,10 @@ class Panel extends Component {
      */
     updateStatus(fForce)
     {
-        if (this.canvas) this.dumpRegisters();
+        if (this.canvas) {
+            this.dumpRegisters();
+            this.updateAnimation();
+        }
     }
 
     /**
