@@ -9,7 +9,7 @@ machines:
     type: pcx86
     debugger: true
     uncompiled: true
-    config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/machine.xml
+    config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/visual/machine.xml
 ---
 
 Most PCx86 machines on [{{ site.pcjs.domain }}](/) run with a compiled version of PCx86, which is produced
@@ -34,7 +34,7 @@ Here's what a typical Markdown file would look like:
 	    id: at-ega-1152k-rev3
 	    debugger: true
 	    uncompiled: true
-	    config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/backtrack/machine.xml
+	    config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/visual/machine.xml
 	---
 	...
 	{% include machine.html id="at-ega-1152k-rev3" %}

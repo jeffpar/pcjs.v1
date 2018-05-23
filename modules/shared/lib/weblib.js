@@ -1131,13 +1131,15 @@ Web.onPageEvent(Web.isUserAgent("iOS")? 'onpagehide' : (Web.isUserAgent("Opera")
 });
 
 /*
- * If this is DEBUG (eg, un-COMPILED) code, then allow the user to override DEBUG with a "?debug=false" embedded in
+ * If this is DEBUG (eg, un-COMPILED) code, then allow the user to override DEBUG with a "debug=false" embedded in
  * the URL; note that the Closure Compiler won't let us alter the DEBUG variable, because it's defined as a @define, which
  * implies @const as well, so we must resort to modifying it indirectly, using the global window object.
  *
  * TODO: Consider yet another embedXXX() parameter that would also allow DEBUG to be turned off on a page-by-page basis;
  * it's low priority, because it would only affect machines that explicitly request un-COMPILED code, and there are very
- * few such machines (eg, https://www.pcjs.org/blog/2015/04/16/).
+ * few such machines (eg, /_posts/2015-01-17-pcjs-uncompiled.md).
+ *
+ * Deal with Web.getURLParm("backtrack") in /modules/pcx86/lib/defines.js at the same time.
  */
 if (DEBUG && window) {
     let sDebug = Web.getURLParm("debug");

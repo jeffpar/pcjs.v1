@@ -14,5 +14,6 @@ and *[Keyboard](/docs/pcx86/keyboard/)* components and usually defined in a sepa
 The following predefined IBM PC *[Control Panel](/docs/pcx86/panel/)* XML configuration are currently available:
 
  - [default.xml](default.xml) (a simple layout for 8086/8088-based machines)
+ - [visual.xml](visual.xml) (a graphical layout, still under development)
  - [wide.xml](wide.xml) (a wide version of default.xml)
  - [wide386.xml](wide386.xml) (a wide version of default.xml for 80386-based machines)

@@ -46,14 +46,15 @@ var DumpAPI = require("../../shared/lib/dumpapi");
  * what the loadFile() function already does.
  *
  * @constructor
- * @param {string|undefined} sFormat should be one of "json"|"longs"|"hex"|"bytes"|"rom" (see the FORMAT constants)
- * @param {boolean|string|undefined} fComments enables comments and other readability enhancements in the JSON output
- * @param {boolean|string|undefined} fDecimal forces decimal output if not undefined
- * @param {number|string|undefined} offDump
- * @param {number|string|undefined} nWidthDump
+ * @param {string} [sFormat] should be one of "json"|"longs"|"hex"|"bytes"|"rom" (see the FORMAT constants)
+ * @param {boolean|string} [fComments] enables comments and other readability enhancements in the JSON output
+ * @param {boolean|string} [fDecimal] forces decimal output if not undefined
+ * @param {number|string} [offDump]
+ * @param {number|string} [lenDump]
+ * @param {number|string} [nWidthDump]
  * @param {string} [sServerRoot] (if omitted, we assume local operation)
  */
-function FileDump(sFormat, fComments, fDecimal, offDump, nWidthDump, sServerRoot)
+function FileDump(sFormat, fComments, fDecimal, offDump, lenDump, nWidthDump, sServerRoot)
 {
     this.fDebug = false;
     this.sFormat = (sFormat || DumpAPI.FORMAT.JSON);
@@ -63,6 +64,7 @@ function FileDump(sFormat, fComments, fDecimal, offDump, nWidthDump, sServerRoot
     this.sJSONWhitespace = (this.fJSONComments? " " : "");
     this.fDecimal = fDecimal;
     this.offDump = +offDump || 0;
+    this.lenDump = +lenDump || 0;
     this.nWidthDump = +nWidthDump || 16;
     this.fLocal = !sServerRoot;
     this.sServerRoot = sServerRoot || process.cwd();
@@ -97,14 +99,14 @@ FileDump.asBadExts = [
  *
  * Provides the command-line interface for the FileDump module.
  *
- * Usage
- * ---
+ * Usage:
+ *
  *      filedump --file=({path}|{URL}) [--merge=({path}|{url})] [--format=(json|longs|hex|octal|bytes|words|rom)]
  *                  [--comments] [--decimal] [--offset={number}] [--width={number}] [--load={number}] [--exec={number}]
  *                  [--output={path}] [--overwrite]
  *
- * Arguments
- * ---
+ * Arguments:
+ *
  *      The default format is "json", which generates an array of signed 32-bit decimal values; "hex" is an older
  *      text format that consists entirely of 2-character hex values (deprecated), and "bytes" is a JSON-like format
  *      that also uses hex values (but with "0x" prefixes) and is normally used only when comments are enabled (use
@@ -128,11 +130,11 @@ FileDump.asBadExts = [
  *      boolean, string, or undefined, since the user may have typed "--comments" or "--comments=foo" or nothing at all.
  *
  * Examples
- * ---
+ *
  *      filedump --file=devices/pc/video/ibm-ega.rom --format=bytes --decimal
  *
  * Notes
- * ---
+ *
  *      Originally, we had to specify `--format=bytes` because the onLoadROM() code in rom.js assumed the data was
  *      always byte-sized, but it has since been updated to support dword arrays, so the default format ("json")
  *      works fine as well.  Also, `--decimal` reduces the size of the output file significantly.
@@ -167,7 +169,7 @@ FileDump.CLI = function()
     }
 
     var sMergeFile, asMergeFiles = [];
-    var file = new FileDump(sFormat, argv['comments'], argv['decimal'], argv['offset'], argv['width']);
+    var file = new FileDump(sFormat, argv['comments'], argv['decimal'], argv['offset'], argv['length'], argv['width']);
     if (argv['merge']) {
         if (typeof argv['merge'] == "string") {
             asMergeFiles.push(argv['merge']);
@@ -457,7 +459,7 @@ FileDump.prototype.dumpLine = function(nIndent, sLine, sComment)
 };
 
 /**
- * dumpBuffer(sKey, buf, len, cbItem, offDump, nWidthDump)
+ * dumpBuffer(sKey, buf, len, cbItem, offDump, lenDump, nWidthDump)
  *
  * @this {FileDump}
  * @param {String} sKey is name of buffer data element
@@ -465,10 +467,11 @@ FileDump.prototype.dumpLine = function(nIndent, sLine, sComment)
  * @param {number} len is the number of bytes to dump
  * @param {number} cbItem is either 1 or 4, to dump bytes or dwords respectively
  * @param {number} [offDump] is a relative offset (default is 0; see constructor)
+ * @param {number} [lenDump] is a relative length (default is 0; see constructor)
  * @param {number} [nWidthDump] is an alternate width (default is 16; see constructor)
  * @return {string} hex (or decimal) representation of the data
  */
-FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidthDump)
+FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, lenDump, nWidthDump)
 {
     var chOpen = '', chClose = '', chSep = ' ', sHexPrefix = "";
 
@@ -485,6 +488,7 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidth
     }
 
     offDump = offDump || this.offDump;
+    lenDump = lenDump || this.lenDump || len;
     nWidthDump = nWidthDump || this.nWidthDump;
 
     var sDump = "";
@@ -503,7 +507,7 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidth
     var sASCII = "";
     var cMaxCols = nWidthDump * (cbItem == 2 && nBase == 8? 1 : cbItem);
 
-    for (var off = offDump; off < len; off += cbItem) {
+    for (var cb = 0, off = offDump; cb < lenDump; cb += cbItem, off += cbItem) {
 
         /*
          * WARNING: Whenever the following condition arises, you probably have a non-dword-granular

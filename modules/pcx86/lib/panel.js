@@ -265,10 +265,8 @@ class Panel extends Component {
         this.fMouseDown = false;
         this.xMouse = this.yMouse = -1;
         this.timer = -1;
-        if (BACKTRACK) {
-            this.busInfo = null;
-            this.fBackTrack = false;
-        }
+        this.busInfo = null;
+        this.fVisual = false;
     }
 
     /**
@@ -320,80 +318,73 @@ class Panel extends Component {
 
         if (!this.canvas && sHTMLType == "canvas") {
 
+            this.fVisual = true;
+            this.canvas = /** @type {HTMLCanvasElement} */ (control);
+            this.context = /** @type {CanvasRenderingContext2D} */ (this.canvas.getContext("2d"));
+
+            /*
+             * Employ the same gross onresize() hack for IE9/IE10 that we had to use for the Video canvas
+             */
+            if (Web.getUserAgent().indexOf("MSIE") >= 0) {
+                this.canvas.onresize = function(canvas, cx, cy) {
+                    return function onResizeVideo() {
+                        canvas.style.height = (((canvas.clientWidth * cy) / cx) | 0) + "px";
+                    };
+                }(this.canvas, this.canvas.width, this.canvas.height);
+                this.canvas.onresize(null);
+            }
+
+            this.xMem = this.yMem = 0;
+            this.cxMem = ((this.canvas.width * Panel.LIVEMEM.CX) / Panel.LIVECANVAS.CX) | 0;
+            this.cyMem = this.canvas.height;
+
+            this.xReg = this.cxMem;
+            this.yReg = 0;
+            this.cxReg = this.canvas.width - this.cxMem;
+            this.cyReg = this.canvas.height;
+
+            this.xDump = this.xReg;
+            this.yDump = ((this.canvas.height * (Panel.LIVEREGS.CY - Panel.LIVEDUMP.CY)) / Panel.LIVECANVAS.CY) | 0;
+            this.cxDump = this.cxReg;
+            this.cyDump = ((this.canvas.height * Panel.LIVEDUMP.CY) / Panel.LIVECANVAS.CY) | 0;
+
+            this.canvasLiveMem = document.createElement("canvas");
+            this.canvasLiveMem.width = Panel.LIVEMEM.CX;
+            this.canvasLiveMem.height = Panel.LIVEMEM.CY;
+            this.contextLiveMem = this.canvasLiveMem.getContext("2d");
+            this.imageLiveMem = this.contextLiveMem.createImageData(this.canvasLiveMem.width, this.canvasLiveMem.height);
+
+            this.canvasLiveRegs = document.createElement("canvas");
+            this.canvasLiveRegs.width = Panel.LIVEREGS.CX;
+            this.canvasLiveRegs.height = Panel.LIVEREGS.CY;
+            this.contextLiveRegs = this.canvasLiveRegs.getContext("2d");
+
             let panel = this;
-            let fPanel = false;
+            this.canvas.addEventListener(
+                'mousemove',
+                function onMouseMove(event) {
+                    panel.moveMouse(event);
+                },
+                false               // we'll specify false for the 'useCapture' parameter for now...
+            );
+            this.canvas.addEventListener(
+                'mousedown',
+                function onMouseDown(event) {
+                    panel.clickMouse(event, true);
+                },
+                false               // we'll specify false for the 'useCapture' parameter for now...
+            );
+            this.canvas.addEventListener(
+                'mouseup',
+                function onMouseUp(event) {
+                    panel.clickMouse(event, false);
+                },
+                false               // we'll specify false for the 'useCapture' parameter for now...
+            );
 
-            if (BACKTRACK && sBinding == "btpanel") {
-                this.fBackTrack = fPanel = true;
-            }
-
-            if (fPanel) {
-                this.canvas = /** @type {HTMLCanvasElement} */ (control);
-                this.context = /** @type {CanvasRenderingContext2D} */ (this.canvas.getContext("2d"));
-
-                /*
-                 * Employ the same gross onresize() hack for IE9/IE10 that we had to use for the Video canvas
-                 */
-                if (Web.getUserAgent().indexOf("MSIE") >= 0) {
-                    this.canvas.onresize = function(canvas, cx, cy) {
-                        return function onResizeVideo() {
-                            canvas.style.height = (((canvas.clientWidth * cy) / cx) | 0) + "px";
-                        };
-                    }(this.canvas, this.canvas.width, this.canvas.height);
-                    this.canvas.onresize(null);
-                }
-
-                this.xMem = this.yMem = 0;
-                this.cxMem = ((this.canvas.width * Panel.LIVEMEM.CX) / Panel.LIVECANVAS.CX) | 0;
-                this.cyMem = this.canvas.height;
-
-                this.xReg = this.cxMem;
-                this.yReg = 0;
-                this.cxReg = this.canvas.width - this.cxMem;
-                this.cyReg = this.canvas.height;
-
-                this.xDump = this.xReg;
-                this.yDump = ((this.canvas.height * (Panel.LIVEREGS.CY - Panel.LIVEDUMP.CY)) / Panel.LIVECANVAS.CY) | 0;
-                this.cxDump = this.cxReg;
-                this.cyDump = ((this.canvas.height * Panel.LIVEDUMP.CY) / Panel.LIVECANVAS.CY) | 0;
-
-                this.canvasLiveMem = document.createElement("canvas");
-                this.canvasLiveMem.width = Panel.LIVEMEM.CX;
-                this.canvasLiveMem.height = Panel.LIVEMEM.CY;
-                this.contextLiveMem = this.canvasLiveMem.getContext("2d");
-                this.imageLiveMem = this.contextLiveMem.createImageData(this.canvasLiveMem.width, this.canvasLiveMem.height);
-
-                this.canvasLiveRegs = document.createElement("canvas");
-                this.canvasLiveRegs.width = Panel.LIVEREGS.CX;
-                this.canvasLiveRegs.height = Panel.LIVEREGS.CY;
-                this.contextLiveRegs = this.canvasLiveRegs.getContext("2d");
-
-                this.canvas.addEventListener(
-                    'mousemove',
-                    function onMouseMove(event) {
-                        panel.moveMouse(event);
-                    },
-                    false               // we'll specify false for the 'useCapture' parameter for now...
-                );
-                this.canvas.addEventListener(
-                    'mousedown',
-                    function onMouseDown(event) {
-                        panel.clickMouse(event, true);
-                    },
-                    false               // we'll specify false for the 'useCapture' parameter for now...
-                );
-                this.canvas.addEventListener(
-                    'mouseup',
-                    function onMouseUp(event) {
-                        panel.clickMouse(event, false);
-                    },
-                    false               // we'll specify false for the 'useCapture' parameter for now...
-                );
-
-                this.fRedraw = true;
-                this.startTimer();
-                return true;
-            }
+            this.fRedraw = true;
+            this.startTimer();
+            return true;
         }
         return super.setBinding(sHTMLType, sBinding, control, sValue);
     }
@@ -591,7 +582,7 @@ class Panel extends Component {
     /**
      * updateAnimation()
      *
-     * If the given Control Panel contains a canvas requiring animation (eg, "btpanel"), then this is where that happens.
+     * If the given Control Panel contains a canvas requiring animation (eg, "vpanel"), then this is where that happens.
      *
      * @this {Panel}
      */
@@ -606,7 +597,7 @@ class Panel extends Component {
 
             this.initPen(10, Panel.LIVECANVAS.FONT.CY, this.canvasLiveMem, this.contextLiveMem, this.canvas.style.color);
 
-            if (this.fBackTrack) {
+            if (this.fVisual) {
                 if (DEBUG) this.log("begin scanMemory()");
                 this.busInfo = this.bus.scanMemory(this.busInfo);
                 /*
@@ -679,7 +670,10 @@ class Panel extends Component {
      */
     updateStatus(fForce)
     {
-        if (this.canvas) this.dumpRegisters();
+        if (this.canvas) {
+            this.dumpRegisters();
+            this.updateAnimation();
+        }
     }
 
     /**
