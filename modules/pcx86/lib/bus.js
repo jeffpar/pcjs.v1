@@ -885,8 +885,7 @@ class Bus extends Component {
                  *      at CPUX86.stepCPU (http://pcjs:8088/modules/pcx86/lib/cpux86.js:4637:37)
                  *      at CPUX86.CPU.runCPU (http://pcjs:8088/modules/pcx86/lib/cpu.js:1014:22)
                  *
-                 * TODO: Investigate.  For now, BACKTRACK is completely disabled (in part because it also needs
-                 * to be revamped for machines with paging enabled).
+                 * TODO: Investigate.  For now, disable BACKTRACK if you run into this or other problems.
                  */
                 this.assert(slot < Bus.BTINFO.SLOT_MAX);
                 this.ibtLastAlloc = slot;

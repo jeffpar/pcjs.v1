@@ -1323,7 +1323,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
 
         sMachineID = aMachineParms[0];
         sMachineXSLFile = aMachineParms[1] || "";
-        sMachineVersion = aMachineParms[2] || this.sMachineVersion;
+        sMachineVersion = aMachineParms[2] || sMachineVersion || this.sMachineVersion;
         sMachineOptions = aMachineParms[3] || "";
         sMachineParms = aMachineParms[4] || "";
         var aMachineOptions = sMachineOptions.split(',');
