@@ -146,6 +146,22 @@ var DESKPRO386 = I386;
 var PAGEBLOCKS = I386;
 
 /*
+ * If this is DEBUG (eg, un-COMPILED) code, then allow the user to override BACKTRACK with a "backtrack=false" embedded in
+ * the URL; note that the Closure Compiler won't let us alter the BACKTRACK variable, because it's defined as a @define, which
+ * implies @const as well, so we must resort to modifying it indirectly, using the global window object.
+ *
+ * TODO: Consider yet another embedXXX() parameter that would also allow BACKTRACK to be turned off on a page-by-page basis.
+ *
+ * Deal with Web.getURLParm("debug") in /modules/shared/lib/weblib.js at the same time.
+ */
+if (DEBUG && window) {
+    let sBackTrack = Web.getURLParm("backtrack");
+    if (sBackTrack == "false") {
+        window['BACKTRACK'] = false;
+    }
+}
+
+/*
  * Combine all the shared globals and machine-specific globals into one machine-specific global object,
  * which all machine components should start using; eg: "if (PCX86.DEBUG) ..." instead of "if (DEBUG) ...".
  */

@@ -8,7 +8,6 @@ machines:
   - id: deskpro386
     type: pcx86
     debugger: true
-    uncompiled: true
     config: /devices/pcx86/machine/compaq/deskpro386/ega/2048kb/debugger/machine.xml
 ---
 

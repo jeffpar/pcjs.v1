@@ -8,8 +8,7 @@ machines:
   - id: at-ega-1152k-rev3
     type: pcx86
     debugger: true
-    uncompiled: true
-    config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/backtrack/machine.xml
+    config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/visual/machine.xml
 ---
 
 A new PCx86 Control Panel is under development, featuring a new "Display Panel" that will provide a variety of

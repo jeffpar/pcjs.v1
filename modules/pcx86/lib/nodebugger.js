@@ -37,11 +37,13 @@
  *
  * However, when we're in "development mode" and running uncompiled code in debugger-less configurations,
  * I would still like to skip loading debugger.js altogether.  To do that, we must arrange for this additional file,
- * nodebugger.js, to be loaded immediately after defines.js, *explicitly* overriding the previously defined value
+ * nodebugger.js, to be loaded immediately after defines.js, explicitly overriding the previously defined value
  * of DEBUGGER with *false*.
  *
  * Additionally, we must update any globals that depend on DEBUGGER (currently, BACKTRACK and SYMBOLS).
+ *
+ * NOTE: Unlike the runtime tweaks of globals in both /modules/pcx86/lib/defines.js and /modules/shared/lib/weblib.js
+ * (see the calls to Web.getURLParm()), we can modify globals directly, because this file is not compiled by the
+ * Closure Compiler; it is dynamically added to pages by the Node web server only as needed.
  */
-DEBUGGER = false;
-BACKTRACK = !COMPILED && DEBUGGER;
-SYMBOLS = DEBUGGER;
+DEBUGGER = BACKTRACK = SYMBOLS = false;
