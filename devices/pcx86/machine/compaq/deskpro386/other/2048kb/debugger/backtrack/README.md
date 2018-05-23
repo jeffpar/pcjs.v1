@@ -6,7 +6,7 @@ machines:
   - id: deskpro386
     type: pcx86
     debugger: true
-    uncompiled: true	# for now, debugger and uncompiled must be true to enable BACKTRACK support
+    uncompiled: true    # this is required for DEBUG, and DEBUG and DEBUGGER must both be true to enable BACKTRACK
 ---
 
 {% include machine.html id="deskpro386" %}

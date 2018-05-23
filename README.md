@@ -207,13 +207,13 @@ OS X users may also need to preface this command with `sudo`:
 	npm install gulp-cli -g
 
 Now you can run `gulp` anywhere within the PCjs project to build an updated version.  If no command-line arguments
-are specified, `gulp` runs the "default" task defined by the project's [gulpfile](gulpfile.js); that task runs
+are specified, `gulp` runs the "default" task defined by the project's [gulpfile.js](gulpfile.js); that task runs
 Google's [Closure Compiler](https://developers.google.com/closure/compiler/) if any of the target files (eg, pcx86.js
 in the [versions](/versions/) directory) are out-of date.
 
 ### Using the JavaScript-based Closure Compiler
 
-The latest [gulpfile](gulpfile.js) now compiles all PCjs machine modules using
+The latest [gulpfile.js](gulpfile.js) now compiles all PCjs machine modules using
 Google's [JavaScript-based Closure Compiler](https://github.com/google/closure-compiler-js).
 
 Running `gulp` should build a complete set of "compiled" machine scripts in the [versions](/versions/) directory.

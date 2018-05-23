@@ -86,13 +86,11 @@ var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
  * BACKTRACK enables backtracking: a mechanism that allows us to tag every byte of incoming data and follow the
  * flow of that data.
  *
- * This is set to !COMPILED, disabling backtracking in all compiled versions, but we may eventually set it to
- * match the DEBUGGER setting -- unless it slows down machines using the built-in Debugger too much, in which case
- * we'll have to rethink that choice OR provide a Debugger command that dynamically enables/disables as much of
- * the backtracking support as possible.
+ * It is enabled only if DEBUG is set (implying an un-COMPILED build) and the DEBUGGER is enabled (since it's
+ * really only of use to someone using the built-in debugger).
  *
- * TODO: BACKTRACK support is currently completely disabled until we have a chance to investigate the problem
- * discussed in Bus.addBackTrackObject().
+ * TODO: BACKTRACK support may need to be disabled until we have a chance to investigate the problem discussed in
+ * Bus.addBackTrackObject(); BACKTRACK support also needs to be updated for the 80386 at some point.
  */
 var BACKTRACK = DEBUG && DEBUGGER;
 
