@@ -503,7 +503,7 @@ x82f5:	lodsb				; 000082F5  AC  '.'
 	mov	bx,err101		; 000082FF  BB5AB7  '.Z.'
 	mov	cx,err101_len		; 00008302  B90F00  '...'
 	call	xc745			; 00008305  E83D44  '.=D'
-x8308:	jmp	short x8308		; 00008308  EBFE	; Hang the machine
+x8308:	jmp	short x8308		; 00008308  EBFE		; HANG THE MACHINE
 
 x830a:	pop	ds			; 0000830A  1F  '.'
 	ret				; 0000830B  C3  '.'
@@ -641,13 +641,13 @@ x83f9:	push	cs			; 000083F9  0E  '.'
 	mov	al,0xa1			; 00008406  B0A1  '..'
 	out	0x84,al			; 00008408  E684  '..'
 	mov	bx,0x64			; 0000840A  BB6400  '.d.'
-	call	xc638			; 0000840D  E82842  '.(B'
+	call	xc638			; 0000840D  E82842  '.(B'	; CALL DELAY(BX)
 	mov	al,0xc			; 00008410  B00C  '..'
 	out	dx,al			; 00008412  EE  '.'
 	mov	al,0xa2			; 00008413  B0A2  '..'
 	out	0x84,al			; 00008415  E684  '..'
 	mov	bx,0x64			; 00008417  BB6400  '.d.'
-	call	xc638			; 0000841A  E81B42  '..B'
+	call	xc638			; 0000841A  E81B42  '..B'	; CALL DELAY(BX)
 	mov	si,0x849f		; 0000841D  BE9F84  '...'
 	mov	di,0x4			; 00008420  BF0400  '...'
 	call	x8d8d			; 00008423  E86709  '.g.'
@@ -661,7 +661,7 @@ x83f9:	push	cs			; 000083F9  0E  '.'
 x8434:	call	x8d8d			; 00008434  E85609  '.V.'
 	jc	x847c			; 00008437  7243  'rC'
 	mov	bx,0x1f4		; 00008439  BBF401  '...'
-	call	xc638			; 0000843C  E8F941  '..A'
+	call	xc638			; 0000843C  E8F941  '..A'	; CALL DELAY(BX)
 	call	x8d8d			; 0000843F  E84B09  '.K.'
 	jc	x847c			; 00008442  7238  'r8'
 	mov	cx,0x64			; 00008444  B96400  '.d.'
@@ -1283,7 +1283,7 @@ x895b:	inc	dx			; 0000895B  42  'B'
 
 x8961:	out	dx,al			; 00008961  EE  '.'
 	mov	bx,0x5			; 00008962  BB0500  '...'
-	call	xc638			; 00008965  E8D03C  '..<'
+	call	xc638			; 00008965  E8D03C  '..<'	; CALL DELAY(BX)
 	or	al,0x4			; 00008968  0C04  '..'
 x896a:	jmp	short x896c		; 0000896A  EB00  '..'
 
@@ -2469,7 +2469,10 @@ boot_prompt:
 boot_error:
 	db	0x0D,0x0A,'602-Diskette Boot Record Error',0x0D,0x0A,'$'
 
-x9380:	mov	bx,0x2			; 00009380  BB0200  '...'
+;
+; WAIT FOR RTC SECONDS TO *NOT* BE 0xFF
+;
+x9380:	mov	bx,0x2			; 00009380  BB0200  '...'	; WAIT BEGIN
 	mov	cx,0xfde8		; 00009383  B9E8FD  '...'
 x9386:	mov	al,0x80			; 00009386  B080  '..'
 	out	0x70,al			; 00009388  E670  '.p'
@@ -2481,8 +2484,7 @@ x9386:	mov	al,0x80			; 00009386  B080  '..'
 	jz	x939a			; 00009393  7405  't.'
 	mov	cx,0xfde8		; 00009395  B9E8FD  '...'
 	jmp	short x9386		; 00009398  EBEC  '..'
-
-x939a:	jmp	bp			; 0000939A  FFE5  '..'
+x939a:	jmp	bp			; 0000939A  FFE5  '..'		; WAIT END
 
 	db	0xFF			; 0000939C  FF  '.'
 	db	0xFF			; 0000939D  FF  '.'
@@ -3547,7 +3549,7 @@ x9ed8:	cmp	ax,[es:di]		; 00009ED8  263B05  '&;.'
 	mov	cx,0xc			; 00009EEF  B90C00  '...'
 	call	xa795			; 00009EF2  E8A008  '...'
 	mov	bx,0x1f4		; 00009EF5  BBF401  '...'
-	call	xc638			; 00009EF8  E83D27  '.=',0x27
+	call	xc638			; 00009EF8  E83D27  '.=',0x27	; CALL DELAY(BX)
 	add	dx,byte +0x4		; 00009EFB  83C204  '...'
 	mov	al,[0x65]		; 00009EFE  A06500  '.e.'
 	out	dx,al			; 00009F01  EE  '.'
@@ -4487,7 +4489,7 @@ xa758:	xor	di,di			; 0000A758  33FF  '3.'
 	test	byte [0x87],0x10	; 0000A76B  F606870010  '.....'
 	jz	xa778			; 0000A770  7406  't.'
 	mov	bx,0x1f4		; 0000A772  BBF401  '...'
-	call	xc638			; 0000A775  E8C01E  '...'
+	call	xc638			; 0000A775  E8C01E  '...'	; CALL DELAY(BX)
 xa778:	mov	al,[0x65]		; 0000A778  A06500  '.e.'
 	add	dx,byte +0x4		; 0000A77B  83C204  '...'
 	out	dx,al			; 0000A77E  EE  '.'
@@ -4733,11 +4735,11 @@ xa9e9:	cs	rep movsw		; 0000A9E9  F32EA5  '...'
 	mov	al,0x3b			; 0000A9F9  B03B  '.;'
 	out	0x84,al			; 0000A9FB  E684  '..'
 	call	xc259			; 0000A9FD  E85918  '.Y.'
-	;
-	;   Set bit 2 (reserved?) and bit 4 (memory size?) of ROM BIOS Video Mode Options byte @40:0087.
-	;   It would appear that COMPAQ had a different conception of this byte; however, in the case of an
-	;   adapter like the IBM VGA, it doesn't matter, since the IBM VGA ROM will rewrite this byte anyway.
-	;
+;
+;   Set bit 2 (reserved?) and bit 4 (memory size?) of ROM BIOS Video Mode Options byte @40:0087.
+;   It would appear that COMPAQ had a different conception of this byte; however, in the case of an
+;   adapter like the IBM VGA, it doesn't matter, since the IBM VGA ROM will rewrite this byte anyway.
+;
 	or	byte [0x87],0x14	; 0000AA00  800E870014  '.....'
 	mov	al,0x8e			; 0000AA05  B08E  '..'
 	call	xb544			; 0000AA07  E83A0B  '.:.'
@@ -5026,11 +5028,11 @@ xac45:	in	al,0x64			; 0000AC45  E464  '.d'
 	jnz	xac5b			; 0000AC49  7510  'u.'
 	loop	xac45			; 0000AC4B  E2F8  '..'
 
-xac4d:	mov	bx,0xb810		; 0000AC4D  BB10B8  '...'
+xac4d:	mov	bx,0xb810		; 0000AC4D  BB10B8  '...'	; BX -> '303-Keyboard Controller Error'
 	mov	cx,0x1d			; 0000AC50  B91D00  '...'
 	mov	bp,0xac59		; 0000AC53  BD59AC  '.Y.'
 	jmp	xc7f7			; 0000AC56  E99E1B  '...'
-xac59:	jmp	short xac59		; 0000AC59  EBFE	; Hang the machine
+xac59:	jmp	short xac59		; 0000AC59  EBFE		; HANG THE MACHINE
 
 xac5b:	in	al,0x60			; 0000AC5B  E460  '.`'
 	jmp	bp			; 0000AC5D  FFE5  '..'
@@ -6209,7 +6211,7 @@ xb665:	mov	bx,err201		; 0000B665  BBA6B6  '...'
 	mov	cx,err201_len		; 0000B668  B91100  '...'
 	mov	bp,0xb671		; 0000B66B  BD71B6  '.q.'
 	jmp	xc7f9			; 0000B66E  E98811  '...'
-xb671:	jmp	short xb671		; 0000B671  EBFE	; Hang the machine
+xb671:	jmp	short xb671		; 0000B671  EBFE		; HANG THE MACHINE
 
 xb673:	mov	al,[di+0x32]		; 0000B673  8A4532  '.E2'
 	and	al,0xfe			; 0000B676  24FE  '$.'
@@ -6258,7 +6260,7 @@ err101_len equ $-err101
 	db	' 301-Keyboard Error or Test Fixture Installed',0x0D,0x0A
 	db	' 301-Keyboard Error',0x0D,0x0A
 	db	' 304-Keyboard or System Unit Error',0x0D,0x0A
-	db	'303-Keyboard Controller Error',0x0D,0x0A
+xb810:	db	'303-Keyboard Controller Error',0x0D,0x0A
 	db	' 601-Diskette Controller Error',0x0D,0x0A
 	db	' 702-Coprocessor Detection Error, Please Check Installation',0x0D,0x0A
 	db	' 101-I/O ROM Error',0x0D,0x0A
@@ -6292,11 +6294,12 @@ xba86:	dw	0x03B8			; 0000BA86  B803	; +0x00: I/O address of Mode Select Register
 	dw	0xB000			; 0000BA8C  00B0	; +0x06: real-mode segment of video buffer
 	db	0x00,0x60,0x69,0xB7	; 0000BA8E  006069B7
 	db	0x21,0x00,0x10		; 0000BA92  210010
-
-	mov	bp,0xba9b		; 0000BA95  BD9BBA
-	jmp	x9380			; 0000BA98  E9E5D8
-
-	mov	al,0x8e			; 0000BA9B  B08E
+;
+; Entry point for both SHUTDOWN 0x00 and 0x01
+;
+xba95:	mov	bp,xba9b		; 0000BA95  BD9BBA
+	jmp	x9380			; 0000BA98  E9E5D8	; "CALL" to x9380 (WAIT FOR RTC SECONDS TO *NOT* BE 0xFF)
+xba9b:	mov	al,0x8e			; 0000BA9B  B08E
 	out	0x70,al			; 0000BA9D  E670
 	xor	ax,ax			; 0000BA9F  33C0
 	out	0x71,al			; 0000BAA1  E671
@@ -6426,7 +6429,7 @@ xbb95:	xor	ax,ax			; 0000BB95  33C0  '3.'
 	mov	cx,err102_len-2		; 0000BBAB  B91800  '...'
 	mov	bp,0xbbb4		; 0000BBAE  BDB4BB  '...'
 	jmp	xc7f7			; 0000BBB1  E9430C  '.C.'
-xbbb4:	jmp	short xbbb4		; 0000BBB4  EBFE	; Hang the machine
+xbbb4:	jmp	short xbbb4		; 0000BBB4  EBFE		; HANG THE MACHINE
 
 xbbb6:	mov	al,0x14			; 0000BBB6  B014  '..'
 	out	0x84,al			; 0000BBB8  E684  '..'
@@ -6484,47 +6487,56 @@ xbc06:	mov	al,0x17			; 0000BC06  B017  '..'
 	out	0x71,al			; 0000BC10  E671  '.q'
 	mov	al,0x18			; 0000BC12  B018  '..'
 	out	0x84,al			; 0000BC14  E684  '..'
+
+	;
+	; Fall through to BC1C, but only if [40:72] contains 0x1234 (or at least, the low byte is 0x34).
+	;
+	; This appears to be the only place where xb550 is invoked (it outputs checkpoint 0x40 to port 0x84,
+	; along with the low byte of [40:72] to port 0x80.
+	;
+	; If we do NOT fall through, then xb550 will take us, um, elsewhere.  Investigate that path if needed.
+	;
 	mov	bp,0xbc1c		; 0000BC16  BD1CBC  '...'
 	jmp	xb550			; 0000BC19  E934F9  '.4.'
 
-	in	al,0x61			; 0000BC1C  E461  '.a'
-	and	al,0xf3			; 0000BC1E  24F3  '$.'
-	out	0x61,al			; 0000BC20  E661  '.a'
+	in	al,0x61			; 0000BC1C  E461  '.a'		; READ 8042 RWREG
+	and	al,0xf3			; 0000BC1E  24F3  '$.'		; CLEAR BITS 2 AND 3 (ENABLE COMPAQ_FSNMI AND COMPAQ_IONMI)
+	out	0x61,al			; 0000BC20  E661  '.a'		; UPDATE 8042 RWREG
 	mov	ax,0x30			; 0000BC22  B83000  '.0.'
 	mov	ss,ax			; 0000BC25  8ED0  '..'
 	mov	sp,0x100		; 0000BC27  BC0001  '...'
 	mov	al,0x19			; 0000BC2A  B019  '..'
 	out	0x84,al			; 0000BC2C  E684  '..'
 	call	xa8ae			; 0000BC2E  E87DEC
-	mov	al,0xad			; 0000BC31  B0AD  '..'
+	mov	al,0xad			; 0000BC31  B0AD  '..'		; AL = DISABLE_KBD COMMAND
 	out	0x64,al			; 0000BC33  E664  '.d'
 	mov	cx,0xffff		; 0000BC35  B9FFFF  '...'
 xbc38:	in	al,0x64			; 0000BC38  E464  '.d'
 	test	al,0x2			; 0000BC3A  A802  '..'
 	jz	xbc4e			; 0000BC3C  7410  't.'
 	loop	xbc38			; 0000BC3E  E2F8  '..'
-	mov	bx,0xb810		; 0000BC40  BB10B8  '...'
+	mov	bx,0xb810		; 0000BC40  BB10B8  '...'	; BX -> '303-Keyboard Controller Error'
 	mov	cx,0x1d			; 0000BC43  B91D00  '...'
 	mov	bp,0xbc4c		; 0000BC46  BD4CBC  '.L.'
 	jmp	xc7f7			; 0000BC49  E9AB0B  '...'
 
-xbc4c:	jmp	short xbc4c		; 0000BC4C  EBFE	; Hang the machine
+xbc4c:	jmp	short xbc4c		; 0000BC4C  EBFE		; HANG THE MACHINE
 
 xbc4e:	mov	cx,0x2			; 0000BC4E  B90200  '...'
 xbc51:	in	al,0x60			; 0000BC51  E460  '.`'
 	push	cx			; 0000BC53  51  'Q'
-	mov	bx,0x1388		; 0000BC54  BB8813  '...'
-	call	xc638			; 0000BC57  E8DE09  '...'
+	mov	bx,0x1388		; 0000BC54  BB8813  '...'	; BX = 5000.
+	call	xc638			; 0000BC57  E8DE09  '...'	; CALL DELAY(BX) (10,000ms? REALLY?)
 	pop	cx			; 0000BC5A  59  'Y'
 	in	al,0x64			; 0000BC5B  E464  '.d'
 	test	al,0x1			; 0000BC5D  A801  '..'
 	jz	xbc71			; 0000BC5F  7410  't.'
 	loop	xbc51			; 0000BC61  E2EE  '..'
-	mov	bx,0xb810		; 0000BC63  BB10B8  '...'
+	mov	bx,0xb810		; 0000BC63  BB10B8  '...'	; BX -> '303-Keyboard Controller Error'
 	mov	cx,0x1d			; 0000BC66  B91D00  '...'
 	mov	bp,0xbc6f		; 0000BC69  BD6FBC  '.o.'
 	jmp	xc7f7			; 0000BC6C  E9880B  '...'
-xbc6f:	jmp	short xbc6f		; 0000BC6F  EBFE	; Hang the machine
+xbc6f:	jmp	short xbc6f		; 0000BC6F  EBFE		; HANG THE MACHINE
 
 xbc71:	call	xa3e0			; 0000BC71  E86CE7  '.l.'
 	call	xaa5a			; 0000BC74  E8E3ED  '...'
@@ -6672,9 +6684,11 @@ xbd6e:	in	al,0xa1			; 0000BD6E  E4A1  '..'
 	out	0x60,al			; 0000BD94  E660  '.`'
 	sti				; 0000BD96  FB  '.'
 	mov	cx,0xffff		; 0000BD97  B9FFFF  '...'
-	test	byte [0x96],0x20	; 0000BD9A  F606960020  '.... '
+
+xbd9a:	test	byte [0x96],0x20	; 0000BD9A  F606960020  '.... '
 	jz	xbda8			; 0000BD9F  7407  't.'
-	db	0xE2,0xF7
+	loop	xbd9a			; 0000BDA1  E2F7
+
 	mov	byte [0x96],0x0		; 0000BDA3  C606960000  '.....'
 xbda8:	in	al,0x86			; 0000BDA8  E486  '..'
 	cmp	word [0x72],0x1234	; 0000BDAA  813E72003412  '.>r.4.'
@@ -6697,7 +6711,7 @@ xbdcd:	test	al,0x40			; 0000BDCD  A840  '.@'
 	jnz	xbdd5			; 0000BDCF  7504  'u.'
 	test	al,0x80			; 0000BDD1  A880  '..'
 	jnz	xbddc			; 0000BDD3  7507  'u.'
-xbdd5:	call	xc79e			; 0000BDD5  E8C609  '...'
+xbdd5:	call	xc79e			; 0000BDD5  E8C609  '...'	; BEEP
 	mov	al,0x0			; 0000BDD8  B000  '..'
 	jmp	short xbded		; 0000BDDA  EB11  '..'
 
@@ -6710,6 +6724,7 @@ xbddc:	and	al,0x3f			; 0000BDDC  243F  '$?'
 
 xbde8:	call	xc79e			; 0000BDE8  E8B309  '...'
 	mov	al,0x0			; 0000BDEB  B000  '..'
+
 xbded:	push	ax			; 0000BDED  50  'P'
 	call	xf32b			; 0000BDEE  E83A35  '.:5'
 	cli				; 0000BDF1  FA  '.'
@@ -6896,7 +6911,7 @@ xbf85:	mov	bx,0x7d			; 0000BF85  BB7D00  '.}.'
 	cmp	al,0x9			; 0000BFB1  3C09  '<.'
 	jz	xbfc1			; 0000BFB3  740C  't.'
 	mov	bx,0x7d			; 0000BFB5  BB7D00  '.}.'
-	call	xc638			; 0000BFB8  E87D06  '.}.'
+	call	xc638			; 0000BFB8  E87D06  '.}.'	; CALL DELAY(BX)
 	mov	bx,0x7d			; 0000BFBB  BB7D00  '.}.'
 	call	xc7db			; 0000BFBE  E81A08  '...'
 xbfc1:	stc				; 0000BFC1  F9  '.'
@@ -7689,26 +7704,41 @@ xc61c:	pop	bp			; 0000C61C  5D  ']'
 
 xc62f:	push	bx			; 0000C62F  53  'S'
 	mov	bx,0x1			; 0000C630  BB0100  '...'
-	call	xc638			; 0000C633  E80200  '...'
+	call	xc638			; 0000C633  E80200  '...'	; CALL DELAY(BX)
 	pop	bx			; 0000C636  5B  '['
 	ret				; 0000C637  C3  '.'
 
 ;
-; Wrapper around delay function
+; DELAY(BX): Wrapper around _DELAY, which spins for 0x950 ticks (2ms) BX times
 ;
-xc638:	push	bp			; 0000C638  55  'U'
+; Modifies BX
+;
+xc638:	push	bp			; 0000C638  55  'U'		; DELAY() BEGIN
 	push	ax			; 0000C639  50  'P'
 	push	cx			; 0000C63A  51  'Q'
-	call	xc642			; 0000C63B  E80400  '...'
+	call	xc642			; 0000C63B  E80400  '...'	; CALL _DELAY(BX)
 	pop	cx			; 0000C63E  59  'Y'
 	pop	ax			; 0000C63F  58  'X'
-	pop	bp			; 0000C640  5D  ']'
-	ret				; 0000C641  C3  '.'
+	pop	bp			; 0000C640  5D  ']'		; NOTE: SAVE/RESTORE OF BP UNNECESSARY
+	ret				; 0000C641  C3  '.'		; DELAY() END
 
 ;
-; Delay function (delay based on BX)
+; _DELAY(BX): Spins for 0x950 ticks (2ms) BX times
 ;
-xc642:	mov	cx,bx			; 0000C642  8BCB  '..'
+; Modifies AX, BX, CX
+;
+; BX is immediately copied to CX and then replaced with a snapshot of TIMER0 from AX.  TIMER0 is
+; repeatedly snapped into AX, and when a delta of 0x950 ticks is observed between AX and BX, CX is
+; decremented and the process repeated until CX is zero.
+;
+; IBM compatibility dictates that TIMER0 ticks at a rate of 1193181.8181 times per second, and the
+; ratio of 0x950 (2384.) / 1193181.8181 works out to 2ms.
+;
+; The first call happens after about 1.5M instructions, and BX is 0x1388 (5000.), so that initial
+; delay is 10,000ms or 10 seconds.  The call comes from BC54.
+;
+;
+xc642:	mov	cx,bx			; 0000C642  8BCB  '..'		; _DELAY() BEGIN
 xc644:	pushf				; 0000C644  9C  '.'
 	cli				; 0000C645  FA  '.'
 	mov	al,0x0			; 0000C646  B000  '..'
@@ -7716,11 +7746,13 @@ xc644:	pushf				; 0000C644  9C  '.'
 	in	al,0x40			; 0000C64A  E440  '.@'
 	mov	ah,al			; 0000C64C  8AE0  '..'
 	in	al,0x40			; 0000C64E  E440  '.@'
-	push	cs			; 0000C650  0E  '.'
+
+	push	cs			; 0000C650  0E  '.'		; LIKELY A "POPF" MACRO LEFT OVER TO DEAL WITH THE 80286 POPF ERRATA
 	call	xc657			; 0000C651  E80300  '...'
 	jmp	short xc658		; 0000C654  EB02  '..'
 	nop				; 0000C656  90  '.'
 xc657:	iret				; 0000C657  CF  '.'
+
 xc658:	xchg	al,ah			; 0000C658  86C4  '..'
 	mov	bx,ax			; 0000C65A  8BD8  '..'
 xc65c:	pushf				; 0000C65C  9C  '.'
@@ -7730,11 +7762,13 @@ xc65c:	pushf				; 0000C65C  9C  '.'
 	in	al,0x40			; 0000C662  E440  '.@'
 	mov	ah,al			; 0000C664  8AE0  '..'
 	in	al,0x40			; 0000C666  E440  '.@'
-	push	cs			; 0000C668  0E  '.'
+
+	push	cs			; 0000C668  0E  '.'		; LIKELY A "POPF" MACRO LEFT OVER TO DEAL WITH THE 80286 POPF ERRATA
 	call	xc66f			; 0000C669  E80300  '...'
 	jmp	short xc670		; 0000C66C  EB02  '..'
 	nop				; 0000C66E  90  '.'
 xc66f:	iret				; 0000C66F  CF  '.'
+
 xc670:	xchg	al,ah			; 0000C670  86C4  '..'
 	push	bx			; 0000C672  53  'S'
 	sub	bx,ax			; 0000C673  2BD8  '+.'
@@ -7742,7 +7776,7 @@ xc670:	xchg	al,ah			; 0000C670  86C4  '..'
 	pop	bx			; 0000C679  5B  '['
 	jc	xc65c			; 0000C67A  72E0  'r.'
 	loop	xc644			; 0000C67C  E2C6  '..'
-	ret				; 0000C67E  C3  '.'
+	ret				; 0000C67E  C3  '.'		; _DELAY() END
 
 	mov	cx,bx			; 0000C67F  8BCB  '..'
 xc681:	mov	al,0x0			; 0000C681  B000  '..'
@@ -7911,19 +7945,19 @@ print_crlf:
 xc791:	mov	bx,0xfa			; 0000C791  BBFA00  '...'
 	call	xc7db			; 0000C794  E84400  '.D.'
 	mov	bx,0x100		; 0000C797  BB0001  '...'
-	call	xc638			; 0000C79A  E89BFE  '...'
+	call	xc638			; 0000C79A  E89BFE  '...'	; CALL DELAY(BX)
 	ret				; 0000C79D  C3  '.'
 
-xc79e:	mov	bx,0x7d			; 0000C79E  BB7D00  '.}.'
-	call	xc7db			; 0000C7A1  E83700  '.7.'
+xc79e:	mov	bx,0x7d			; 0000C79E  BB7D00  '.}.'	; BX = 125 (FOR 250ms BEEP)
+	call	xc7db			; 0000C7A1  E83700  '.7.'	; CALL BEEP(BX)
 	mov	bx,0x7d			; 0000C7A4  BB7D00  '.}.'
-	call	xc638			; 0000C7A7  E88EFE  '...'
+	call	xc638			; 0000C7A7  E88EFE  '...'	; CALL DELAY(BX)
 	ret				; 0000C7AA  C3  '.'
 
 xc7ab:	mov	bx,0x320		; 0000C7AB  BB2003  '. .'
 	call	xc7db			; 0000C7AE  E82A00  '.*.'
 	mov	bx,0x100		; 0000C7B1  BB0001  '...'
-	call	xc638			; 0000C7B4  E881FE  '...'
+	call	xc638			; 0000C7B4  E881FE  '...'	; CALL DELAY(BX)
 	ret				; 0000C7B7  C3  '.'
 
 xc7b8:	mov	ch,al			; 0000C7B8  8AE8  '..'
@@ -7947,8 +7981,10 @@ print_char:
 	mov	ah,0xe			; 0000C7D6  B40E  '..'
 	int	0x10			; 0000C7D8  CD10  '..'
 	ret				; 0000C7DA  C3  '.'
-
-xc7db:	mov	al,0xb6			; 0000C7DB  B0B6  '..'
+;
+; BEEP(BX)
+;
+xc7db:	mov	al,0xb6			; 0000C7DB  B0B6  '..'		; BEEP() BEGIN
 	out	0x43,al			; 0000C7DD  E643  '.C'
 	mov	al,0x38			; 0000C7DF  B038  '.8'
 	out	0x42,al			; 0000C7E1  E642  '.B'
@@ -7957,11 +7993,11 @@ xc7db:	mov	al,0xb6			; 0000C7DB  B0B6  '..'
 	in	al,0x61			; 0000C7E7  E461  '.a'
 	or	al,0x3			; 0000C7E9  0C03  '..'
 	out	0x61,al			; 0000C7EB  E661  '.a'
-	call	xc638			; 0000C7ED  E848FE  '.H.'
+	call	xc638			; 0000C7ED  E848FE  '.H.'	; CALL DELAY(BX)
 	in	al,0x61			; 0000C7F0  E461  '.a'
 	and	al,0xfc			; 0000C7F2  24FC  '$.'
 	out	0x61,al			; 0000C7F4  E661  '.a'
-	ret				; 0000C7F6  C3  '.'
+	ret				; 0000C7F6  C3  '.'		; BEEP() END
 
 xc7f7:	xor	di,di			; 0000C7F7  33FF  '3.'
 xc7f9:	cld				; 0000C7F9  FC  '.'
@@ -8156,27 +8192,27 @@ xc944:	ret				; 0000C944  C3  '.'
 xc955:	ret				; 0000C955  C3  '.'
 
 xc956:	cli				; 0000C956  FA  '.'
-	mov	byte [MOTOR_COUNT],0xff	; 0000C957  C6064000FF	; RESET TIME-OUT COUNTER FOR MOTOR(S)
+	mov	byte [MOTOR_COUNT],0xff	; 0000C957  C6064000FF		; RESET TIME-OUT COUNTER FOR MOTOR(S)
 	mov	al,0x10			; 0000C95C  B010
-	mov	cl,[bp+CALLER_DL]	; 0000C95E  8A4E06	; CL = DRIVE NUMBER
+	mov	cl,[bp+CALLER_DL]	; 0000C95E  8A4E06		; CL = DRIVE NUMBER
 	shl	al,cl			; 0000C961  D2E0
 	or	al,0xc			; 0000C963  0C0C
 	or	al,[bp+CALLER_DL]	; 0000C965  0A4606
-	mov	ah,[MOTOR_STATUS]	; 0000C968  8A263F00	; AH = MOTOR STATUS
+	mov	ah,[MOTOR_STATUS]	; 0000C968  8A263F00		; AH = MOTOR STATUS
 	shl	ah,0x4			; 0000C96C  C0E404
 	or	al,ah			; 0000C96F  0AC4
 	mov	dx,0x3f2		; 0000C971  BAF203
 	out	dx,al			; 0000C974  EE
 	mov	ah,al			; 0000C975  8AE0
-	mov	al,[0x8b]		; 0000C977  A08B00	; AL = LASTRATE (LAST DISKETTE DATA RATE SELECTED)
+	mov	al,[0x8b]		; 0000C977  A08B00		; AL = LASTRATE (LAST DISKETTE DATA RATE SELECTED)
 	shr	al,0x6			; 0000C97A  C0E806
-	mov	dx,0x3f7		; 0000C97D  BAF703	; DX = FDC DIGITAL INPUT REGISTER (READ-ONLY)
+	mov	dx,0x3f7		; 0000C97D  BAF703		; DX = FDC DIGITAL INPUT REGISTER (READ-ONLY)
 	out	dx,al			; 0000C980  EE
 	shr	ah,0x4			; 0000C981  C0EC04
-	mov	al,[MOTOR_STATUS]	; 0000C984  A03F00	; AL = MOTOR STATUS (BIT 3-0 = DRIVE 3-0 CURRENTLY RUNNING, BIT 7 = CURRENT OPERATION IS A WRITE)
+	mov	al,[MOTOR_STATUS]	; 0000C984  A03F00		; AL = MOTOR STATUS (BIT 3-0 = DRIVE 3-0 CURRENTLY RUNNING, BIT 7 = CURRENT OPERATION IS A WRITE)
 	and	al,0xf			; 0000C987  240F
 	cmp	al,ah			; 0000C989  3AC4
-	jz	xc9bd			; 0000C98B  7430	; NO DELAY
+	jz	xc9bd			; 0000C98B  7430		; NO DELAY
 	or	[MOTOR_STATUS],ah	; 0000C98D  08263F00
 	sti				; 0000C991  FB
 	clc				; 0000C992  F8
@@ -8184,19 +8220,19 @@ xc956:	cli				; 0000C956  FA  '.'
 	int	0x15			; 0000C996  CD15
 	jc	xc9bd			; 0000C998  7223
 	mov	al,0x7d			; 0000C99A  B07D
-	mov	cl,0x8			; 0000C99C  B108	; DEFAULT DELAY
+	mov	cl,0x8			; 0000C99C  B108		; DEFAULT DELAY
 	mov	bl,[es:si+0xa]		; 0000C99E  268A5C0A
-	cmp	byte [bp+CALLER_AH],0x3	; 0000C9A2  807E0103	; WRITE REQUEST?
-	jz	xc9b0			; 0000C9A6  7408	; YES
-	cmp	byte [bp+CALLER_AH],0x5	; 0000C9A8  807E0105	; FORMAT REQUEST?
-	jnz	xc9b0			; 0000C9AC  7502	; NO
-	mov	cl,0x5			; 0000C9AE  B105	; YES (SELECT SHORTER DELAY)
+	cmp	byte [bp+CALLER_AH],0x3	; 0000C9A2  807E0103		; WRITE REQUEST?
+	jz	xc9b0			; 0000C9A6  7408		; YES
+	cmp	byte [bp+CALLER_AH],0x5	; 0000C9A8  807E0105		; FORMAT REQUEST?
+	jnz	xc9b0			; 0000C9AC  7502		; NO
+	mov	cl,0x5			; 0000C9AE  B105		; YES (SELECT SHORTER DELAY)
 xc9b0:	cmp	bl,cl			; 0000C9B0  3AD9
 	jnc	xc9b6			; 0000C9B2  7302
 	xchg	bl,cl			; 0000C9B4  86D9
 xc9b6:	mul	bl			; 0000C9B6  F6E3
 	mov	bx,ax			; 0000C9B8  8BD8
-	call	xc638			; 0000C9BA  E87BFC
+	call	xc638			; 0000C9BA  E87BFC		; CALL DELAY(BX)
 xc9bd:	sti				; 0000C9BD  FB
 	ret				; 0000C9BE  C3
 
@@ -8563,7 +8599,7 @@ xcc5f:	cs	lodsb			; 0000CC5F  2EAC  '..'
 	mov	bx,err102		; 0000CC78  BB8CB6  '...'
 	mov	cx,err102_len		; 0000CC7B  B91A00  '...'
 	call	xc745			; 0000CC7E  E8C4FA  '...'
-xcc81:	jmp	short xcc81		; 0000CC81  EBFE	; Hang the machine
+xcc81:	jmp	short xcc81		; 0000CC81  EBFE		; HANG THE MACHINE
 
 xcc83:	mov	al,0x91			; 0000CC83  B091  '..'
 	out	0x84,al			; 0000CC85  E684  '..'
@@ -8665,7 +8701,7 @@ xcd2c:	mov	dx,0x0			; 0000CD2C  BA0000  '...'
 	mov	bx,err102		; 0000CD2F  BB8CB6  '...'
 	mov	cx,err102_len		; 0000CD32  B91A00  '...'
 	call	xc745			; 0000CD35  E80DFA  '.',0x0D,'.'
-xcd38:	jmp	short xcd38		; 0000CD38  EBFE	; Hang the machine
+xcd38:	jmp	short xcd38		; 0000CD38  EBFE		; HANG THE MACHINE
 
 xcd3a:	mov	al,0x95			; 0000CD3A  B095  '..'
 	out	0x84,al			; 0000CD3C  E684  '..'
@@ -8785,7 +8821,7 @@ xce0c:	push	es			; 0000CE0C  06  '.'
 	and	al,0xfe			; 0000CE29  24FE  '$.'
 	out	0x21,al			; 0000CE2B  E621  '.!'
 	mov	bx,0x3c			; 0000CE2D  BB3C00  '.<.'
-	call	xc638			; 0000CE30  E805F8  '...'
+	call	xc638			; 0000CE30  E805F8  '...'	; CALL DELAY(BX)
 	test	byte [0x6b],0x1		; 0000CE33  F6066B0001  '..k..'
 	jnz	xce48			; 0000CE38  750E
 
@@ -8793,7 +8829,7 @@ xce0c:	push	es			; 0000CE0C  06  '.'
 	mov	bx,err102		; 0000CE3D  BB8CB6  '...'
 	mov	cx,err102_len		; 0000CE40  B91A00  '...'
 	call	xc745			; 0000CE43  E8FFF8  '...'
-xce46:	jmp	short xce46		; 0000CE46  EBFE	; Hang the machine
+xce46:	jmp	short xce46		; 0000CE46  EBFE		; HANG THE MACHINE
 
 xce48:	mov	[es:0x20],bp		; 0000CE48  26892E2000  '&.. .'
 	and	byte [0x6b],0xfe	; 0000CE4D  80266B00FE  '.&k..'
@@ -8993,10 +9029,10 @@ xcfc6:	in	al,0x64			; 0000CFC6  E464  '.d'
 	jz	xcfdc			; 0000CFCA  7410  't.'
 	loop	xcfc6			; 0000CFCC  E2F8  '..'
 	mov	dx,0x0			; 0000CFCE  BA0000  '...'
-	mov	bx,0xb810		; 0000CFD1  BB10B8  '...'
+	mov	bx,0xb810		; 0000CFD1  BB10B8  '...'	; BX -> '303-Keyboard Controller Error'
 	mov	cx,0x1f			; 0000CFD4  B91F00  '...'
 	call	xc745			; 0000CFD7  E86BF7  '.k.'
-xcfda:	jmp	short xcfda		; 0000CFDA  EBFE	; Hang the machine
+xcfda:	jmp	short xcfda		; 0000CFDA  EBFE		; HANG THE MACHINE
 
 xcfdc:	ret				; 0000CFDC  C3  '.'
 
@@ -9035,10 +9071,10 @@ xd00f:	mov	al,0x82			; 0000D00F  B082  '..'
 xd019:	mov	al,0x83			; 0000D019  B083  '..'
 	out	0x84,al			; 0000D01B  E684  '..'
 	mov	dx,0x0			; 0000D01D  BA0000  '...'
-	mov	bx,0xb810		; 0000D020  BB10B8  '...'
+	mov	bx,0xb810		; 0000D020  BB10B8  '...'	; BX -> '303-Keyboard Controller Error'
 	mov	cx,0x1f			; 0000D023  B91F00  '...'
 	call	xc745			; 0000D026  E81CF7  '...'
-xd029:	jmp	short xd029		; 0000D029  EBFE	; Hang the machine
+xd029:	jmp	short xd029		; 0000D029  EBFE		; HANG THE MACHINE
 
 xd02b:	mov	al,0x84			; 0000D02B  B084  '..'
 	out	0x84,al			; 0000D02D  E684  '..'
@@ -10397,7 +10433,7 @@ xdb31:	pop	bx			; 0000DB31  5B  '['
 ;
 ;   There appears to be a fourth call (from xd82e), where AH is 0xF0 (the first 64Kb of the last 1Mb
 ;   of the first 16Mb); we place no memory there, and COMPAQ memory maps typically show no memory there,
-;   so I'm not sure what that's all about. -JP
+;   so I'm not sure what that's all about.
 ;
 xdb33:	push	bx			; 0000DB33  53  'S'
 	push	di			; 0000DB34  57  'W'
@@ -11044,7 +11080,7 @@ xe137:	mov	al,bl			; 0000E137  8AC3  '..'
 	mov	cx,err102_len-2		; 0000E151  B91800  '...'
 	mov	bp,0xe15a		; 0000E154  BD5AE1  '.Z.'
 	jmp	xc7f7			; 0000E157  E99DE6  '...'
-xe15a:	jmp	short xe15a		; 0000E15A  EBFE	; Hang the machine
+xe15a:	jmp	short xe15a		; 0000E15A  EBFE		; HANG THE MACHINE
 
 xe15c:	ret				; 0000E15C  C3  '.'
 
@@ -11510,7 +11546,7 @@ xe770:	test	dl,0x80			; 0000E770  F6C280  '...'
 
 	mov	si,boot_error		; 0000E78B  BE5D93  '.].'
 	call	print_str$		; 0000E78E  E83F00  '.?.'
-xe791:	jmp	short xe791		; 0000E791  EBFE	; Hang the machine
+xe791:	jmp	short xe791		; 0000E791  EBFE		; HANG THE MACHINE
 
 ;
 ;   Hard disk sector validation (as opposed to the preceding floppy disk sector validation)
@@ -11673,9 +11709,9 @@ xe8c7:	cmp	ah,0xd			; 0000E8C7  80FC0D  '..',0x0D
 	call	xdd09			; 0000E8CC  E83AF4  '.:.'
 	jmp	short xe8fc		; 0000E8CF  EB2B  '.+'
 
-xe8d1:	cmp	ah,0xeb			; 0000E8D1  80FCEB  '...'
-	jnz	xe8db			; 0000E8D4  7505  'u.'
-	call	xddaf			; 0000E8D6  E8D6F4  '...'
+xe8d1:	cmp	ah,0xeb			; 0000E8D1  80FCEB  '...'	; INT 0x16 AH=0xF0 (SET SYSTEM SPEED)?
+	jnz	xe8db			; 0000E8D4  7505  'u.'		; NO
+	call	xddaf			; 0000E8D6  E8D6F4  '...'	; YES
 	jmp	short xe8fc		; 0000E8D9  EB21  '.!'
 
 xe8db:	cmp	ah,0xec			; 0000E8DB  80FCEC  '...'
@@ -12422,7 +12458,7 @@ xeed6:	mov	cl,[bx+0x4]		; 0000EED6  8A4F04  '.O.'
 	mov	[bx+0x4],al		; 0000EEDF  884704  '.G.'
 	push	bx			; 0000EEE2  53  'S'
 	mov	bx,0x4			; 0000EEE3  BB0400  '...'
-	call	xc638			; 0000EEE6  E84FD7  '.O.'
+	call	xc638			; 0000EEE6  E84FD7  '.O.'	; CALL DELAY(BX)
 	pop	bx			; 0000EEE9  5B  '['
 	cli				; 0000EEEA  FA  '.'
 	mov	bh,0xf			; 0000EEEB  B70F  '..'
@@ -12456,7 +12492,7 @@ xef2a:	cmp	bl,al			; 0000EF2A  3AD8  ':.'
 	xchg	al,bl			; 0000EF2E  86C3  '..'
 xef30:	or	bx,bx			; 0000EF30  0BDB  '..'
 	jz	xef37			; 0000EF32  7403  't.'
-	call	xc638			; 0000EF34  E801D7  '...'
+	call	xc638			; 0000EF34  E801D7  '...'	; CALL DELAY(BX)
 xef37:	call	xef6f			; 0000EF37  E83500  '.5.'
 	test	al,0xc0			; 0000EF3A  A8C0  '..'
 	mov	ah,0x40			; 0000EF3C  B440  '.@'
@@ -12825,7 +12861,7 @@ xf326:	mov	al,ah			; 0000F326  8AC4  '..'
 xf32b:	push	ax			; 0000F32B  50  'P'
 	cli				; 0000F32C  FA  '.'
 	call	xec2e_wait_8042_ready	; 0000F32D  E8FEF8  '...'
-	mov	al,0xa3			; 0000F330  B0A3  '..'
+	mov	al,0xa3			; 0000F330  B0A3  '..'		; COMPAQ-SPECIFIC COMMAND: COMPAQ_SLOWD
 	out	0x64,al			; 0000F332  E664  '.d'
 	sti				; 0000F334  FB  '.'
 	pop	ax			; 0000F335  58  'X'
@@ -13480,7 +13516,7 @@ reset:	mov	al,0x0			; 0000F905  B000  '..'
 	in	al,0x64			; 0000F91C  E464  '.d'
 	test	al,0x4			; 0000F91E  A804  '..'
 	jnz	xf984			; 0000F920  7562  'ub'
-	mov	gs,dx			; 0000F922  8EEA  '..'
+	mov	gs,dx			; 0000F922  8EEA  '..'	; GS PRESERVES CPU ID (DH) AND REVISION (DL)
 	mov	al,0x1			; 0000F924  B001  '..'
 	out	0x84,al			; 0000F926  E684  '..'
 	mov	al,0xaa			; 0000F928  B0AA  '..'
