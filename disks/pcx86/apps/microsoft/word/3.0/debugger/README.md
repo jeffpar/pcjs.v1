@@ -7,7 +7,7 @@ machines:
     type: pcx86
     debugger: true
     uncompiled: true
-    commands: bp &060E:0005 "dh 3 3"
+    commands: bp &060E:0005 "dh;h"
     config: /devices/pcx86/machine/5160/ega/640kb/debugger/machine.xml
     autoMount:
       A:
@@ -28,7 +28,7 @@ Microsoft's `SPELL.COM` invokes the rarely-used DOS "CALL 5" interface:
     type: pcx86
     debugger: true
     uncompiled: true
-    commands: bp &060E:0005 "dh 3 3"
+    commands: bp &060E:0005 "dh;h"
     config: /devices/pcx86/machine/5160/ega/640kb/debugger/machine.xml
     autoMount:
       A:
@@ -39,7 +39,7 @@ Microsoft's `SPELL.COM` invokes the rarely-used DOS "CALL 5" interface:
     autoType: $date\r$time\rB:\rSPELL\r
 
 This establishes a breakpoint on the "CALL 5" entry point inside the application's Program Segment Prefix (PSP)
-set up by `COMMAND.COM`; instead of stopping, the breakpoint simply dumps the 3 previous instructions and continues.
+set up by `COMMAND.COM`; the breakpoint dumps the previous 10 instructions and then halts.
 The "uncompiled" version of PCx86 is being used so that [BackTrack](/modules/pcx86/#backtrack-support) information
 is available to the PCjs Debugger.
 
