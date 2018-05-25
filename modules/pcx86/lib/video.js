@@ -2665,7 +2665,7 @@ class Video extends Component {
         if (this.sFileURL) {
             let sFileExt = Str.getExtension(this.sFileURL);
             if (sFileExt != "json") {
-                this.sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFileURL + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
+                this.sFileURL = Web.getHostOrigin() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFileURL + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
             }
         }
 

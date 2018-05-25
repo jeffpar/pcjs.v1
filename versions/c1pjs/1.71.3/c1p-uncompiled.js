@@ -1530,7 +1530,7 @@ class Web {
             return response;
         }
 
-        if (Web.getHostName() == "pcjs" || NODE) {
+        if (Web.getHost() == "pcjs:8088" || NODE) {
             /*
              * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
              * whenever the hostname is "pcjs" (or NODE is true); otherwise, use "localhost" when debugging locally.
@@ -1816,11 +1816,13 @@ class Web {
     /**
      * getHost()
      *
+     * This is like getHostName() but with the port number, if any.
+     *
      * @return {string}
      */
     static getHost()
     {
-        return (window? window.location.protocol + "//" + window.location.host : SITEURL);
+        return (window? window.location.host : "localhost");
     }
 
     /**
@@ -1834,13 +1836,15 @@ class Web {
     }
 
     /**
-     * getHostURL()
+     * getHostOrigin()
      *
-     * @return {string|null}
+     * This could also be implemented with window.location.origin, but that wasn't originally available in all browsers.
+     *
+     * @return {string}
      */
-    static getHostURL()
+    static getHostOrigin()
     {
-        return (window? window.location.href : null);
+        return (window? window.location.protocol + "//" + window.location.host : SITEURL);
     }
 
     /**
@@ -1851,6 +1855,16 @@ class Web {
     static getHostProtocol()
     {
         return (window? window.location.protocol : "file:");
+    }
+
+    /**
+     * getHostURL()
+     *
+     * @return {string|null}
+     */
+    static getHostURL()
+    {
+        return (window? window.location.href : null);
     }
 
     /**
@@ -8062,7 +8076,7 @@ class C1PROM extends Component {
              */
             var sFileExt = Str.getExtension(this.sImage);
             if (sFileExt != DumpAPI.FORMAT.JSON && sFileExt != DumpAPI.FORMAT.HEX) {
-                sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sImage + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
+                sFileURL = Web.getHostOrigin() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sImage + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
             }
             var rom = this;
             Web.getResource(sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
@@ -11095,7 +11109,7 @@ class C1PDiskController extends Component {
                              *
                              * TODO: Convert this code to use the new shared Disk API definitions and weblib functions; eg:
                              *
-                             *      sDiskURL = Web.getHost() + DumpAPI.ENDPOINT + "?" + DumpAPI.QUERY.DISK + "=" + sDiskPath;
+                             *      sDiskURL = Web.getHostOrigin() + DumpAPI.ENDPOINT + "?" + DumpAPI.QUERY.DISK + "=" + sDiskPath;
                              */
                             sFileURL = "http://" + window.location.host + "/api/v1/dump?disk=" + sFilePath;
                         }

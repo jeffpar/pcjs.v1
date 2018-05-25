@@ -413,7 +413,7 @@ var ReportAPI = {
 /*
  * Examples of User API requests:
  *
- *      web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUser;
+ *      web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUser;
  */
 var UserAPI = {
     ENDPOINT:       "/api/v1/user",
@@ -2048,7 +2048,7 @@ class Web {
             return response;
         }
 
-        if (Web.getHostName() == "pcjs" || NODE) {
+        if (Web.getHost() == "pcjs:8088" || NODE) {
             /*
              * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
              * whenever the hostname is "pcjs" (or NODE is true); otherwise, use "localhost" when debugging locally.
@@ -2334,11 +2334,13 @@ class Web {
     /**
      * getHost()
      *
+     * This is like getHostName() but with the port number, if any.
+     *
      * @return {string}
      */
     static getHost()
     {
-        return (window? window.location.protocol + "//" + window.location.host : SITEURL);
+        return (window? window.location.host : "localhost");
     }
 
     /**
@@ -2352,13 +2354,15 @@ class Web {
     }
 
     /**
-     * getHostURL()
+     * getHostOrigin()
      *
-     * @return {string|null}
+     * This could also be implemented with window.location.origin, but that wasn't originally available in all browsers.
+     *
+     * @return {string}
      */
-    static getHostURL()
+    static getHostOrigin()
     {
-        return (window? window.location.href : null);
+        return (window? window.location.protocol + "//" + window.location.host : SITEURL);
     }
 
     /**
@@ -2369,6 +2373,16 @@ class Web {
     static getHostProtocol()
     {
         return (window? window.location.protocol : "file:");
+    }
+
+    /**
+     * getHostURL()
+     *
+     * @return {string|null}
+     */
+    static getHostURL()
+    {
+        return (window? window.location.href : null);
     }
 
     /**
@@ -44391,7 +44405,7 @@ class ROMX86 extends Component {
              */
             let sFileExt = Str.getExtension(sFileName);
             if (sFileExt != DumpAPI.FORMAT.JSON && sFileExt != DumpAPI.FORMAT.HEX) {
-                this.sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
+                this.sFileURL = Web.getHostOrigin() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
             }
         }
     }
@@ -51178,7 +51192,7 @@ class Video extends Component {
         if (this.sFileURL) {
             let sFileExt = Str.getExtension(this.sFileURL);
             if (sFileExt != "json") {
-                this.sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFileURL + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
+                this.sFileURL = Web.getHostOrigin() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFileURL + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
             }
         }
 
@@ -60867,7 +60881,7 @@ class Disk extends Component {
                 //     } else if (Str.endsWith(sDiskPath, '/')) {
                 //         sDiskParm = DumpAPI.QUERY.DIR;
                 //     }
-                //     sDiskURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + sDiskParm + '=' + encodeURIComponent(sDiskPath) + (this.fRemovable ? "" : sSizeParm) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
+                //     sDiskURL = Web.getHostOrigin() + DumpAPI.ENDPOINT + '?' + sDiskParm + '=' + encodeURIComponent(sDiskPath) + (this.fRemovable ? "" : sSizeParm) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
                 // }
             }
         }
@@ -61805,7 +61819,7 @@ class Disk extends Component {
         sParms += '&' + DiskAPI.QUERY.CHS + '=' + this.nCylinders + ':' + this.nHeads + ':' + this.nSectors + ':' + this.cbSector;
         sParms += '&' + DiskAPI.QUERY.MACHINE + '=' + this.controller.getMachineID();
         sParms += '&' + DiskAPI.QUERY.USER + '=' + this.controller.getUserID();
-        return Web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
+        return Web.getHostOrigin() + DiskAPI.ENDPOINT + '?' + sParms;
     }
 
     /**
@@ -61833,7 +61847,7 @@ class Disk extends Component {
             sParms += '&' + DiskAPI.QUERY.MACHINE + '=' + this.controller.getMachineID();
             sParms += '&' + DiskAPI.QUERY.USER + '=' + this.controller.getUserID();
             let disk = this;
-            let sDiskURL = Web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
+            let sDiskURL = Web.getHostOrigin() + DiskAPI.ENDPOINT + '?' + sParms;
             Web.getResource(sDiskURL, null, fAsync, function(sURL, sResponse, nErrorCode) {
                 disk.doneReadRemoteSectors(sURL, sResponse, nErrorCode, [iCylinder, iHead, iSector, nSectors, fAsync, done]);
             });
@@ -61936,7 +61950,7 @@ class Disk extends Component {
             dataPost[DiskAPI.QUERY.USER] = this.controller.getUserID();
             dataPost[DiskAPI.QUERY.DATA] = JSON.stringify(abSectors);
             let disk = this;
-            let sDiskURL = Web.getHost() + DiskAPI.ENDPOINT;
+            let sDiskURL = Web.getHostOrigin() + DiskAPI.ENDPOINT;
             Web.getResource(sDiskURL, dataPost, fAsync, function(sURL, sResponse, nErrorCode) {
                 disk.doneWriteRemoteSectors(sURL, sResponse, nErrorCode, [iCylinder, iHead, iSector, nSectors, fAsync]);
             });
@@ -61996,7 +62010,7 @@ class Disk extends Component {
             sParms += '&' + DiskAPI.QUERY.VOLUME + '=' + this.sDiskPath;
             sParms += '&' + DiskAPI.QUERY.MACHINE + '=' + this.controller.getMachineID();
             sParms += '&' + DiskAPI.QUERY.USER + '=' + this.controller.getUserID();
-            let sDiskURL = Web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
+            let sDiskURL = Web.getHostOrigin() + DiskAPI.ENDPOINT + '?' + sParms;
             Web.getResource(sDiskURL, null, true);
             this.fRemote = false;
         }
@@ -79849,7 +79863,7 @@ class Computer extends Component {
              * and since pcjs.org is no longer running a Node web server, we disable the feature for that
              * particular host.
              */
-            if (Str.endsWith(Web.getHost(), "pcjs.org")) {
+            if (Str.endsWith(Web.getHostName(), "pcjs.org")) {
                 if (DEBUG) this.log("Remote user API not available");
                 /*
                  * We could also simply hide the control; eg:
@@ -79957,7 +79971,7 @@ class Computer extends Component {
         this.sUserID = null;
         let fMessages = DEBUG && this.messageEnabled();
         if (fMessages) this.printMessage("verifyUserID(" + sUserID + ")");
-        let sRequest = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
+        let sRequest = Web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
         let response = Web.getResource(sRequest);
         let nErrorCode = response[0];
         let sResponse = response[1];
@@ -79993,7 +80007,7 @@ class Computer extends Component {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(Computer.STATE_USERID + " for load: " + this.sUserID);
             }
-            sStatePath = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, PCX86.APPVERSION);
+            sStatePath = Web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, PCX86.APPVERSION);
         } else {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(Computer.STATE_USERID + " unavailable");
@@ -80064,7 +80078,7 @@ class Computer extends Component {
         dataPost[UserAPI.QUERY.USER] = sUserID;
         dataPost[UserAPI.QUERY.STATE] = State.getKey(this, PCX86.APPVERSION);
         dataPost[UserAPI.QUERY.DATA] = sState;
-        let sRequest = Web.getHost() + UserAPI.ENDPOINT;
+        let sRequest = Web.getHostOrigin() + UserAPI.ENDPOINT;
         if (!fSync) {
             Web.getResource(sRequest, dataPost, true);
         } else {

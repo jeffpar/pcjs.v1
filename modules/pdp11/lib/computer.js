@@ -1138,7 +1138,7 @@ class ComputerPDP11 extends Component {
              * and since pcjs.org is no longer running a Node web server, we disable the feature for that
              * particular host.
              */
-            if (Str.endsWith(Web.getHost(), "pcjs.org")) {
+            if (Str.endsWith(Web.getHostName(), "pcjs.org")) {
                 if (DEBUG) this.log("Remote user API not available");
                 /*
                  * We could also simply hide the control; eg:
@@ -1246,7 +1246,7 @@ class ComputerPDP11 extends Component {
         this.sUserID = null;
         var fMessages = DEBUG && this.messageEnabled();
         if (fMessages) this.printMessage("verifyUserID(" + sUserID + ")");
-        var sRequest = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
+        var sRequest = Web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
         var response = Web.getResource(sRequest);
         var nErrorCode = response[0];
         var sResponse = response[1];
@@ -1282,7 +1282,7 @@ class ComputerPDP11 extends Component {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(ComputerPDP11.STATE_USERID + " for load: " + this.sUserID);
             }
-            sStatePath = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, PDP11.APPVERSION);
+            sStatePath = Web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, PDP11.APPVERSION);
         } else {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(ComputerPDP11.STATE_USERID + " unavailable");
@@ -1353,7 +1353,7 @@ class ComputerPDP11 extends Component {
         dataPost[UserAPI.QUERY.USER] = sUserID;
         dataPost[UserAPI.QUERY.STATE] = State.getKey(this, PDP11.APPVERSION);
         dataPost[UserAPI.QUERY.DATA] = sState;
-        var sRequest = Web.getHost() + UserAPI.ENDPOINT;
+        var sRequest = Web.getHostOrigin() + UserAPI.ENDPOINT;
         if (!fSync) {
             Web.getResource(sRequest, dataPost, true);
         } else {

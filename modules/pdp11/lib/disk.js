@@ -314,7 +314,7 @@ class DiskPDP11 extends Component {
                 } else if (Str.endsWith(sDiskPath, '/')) {
                     sDiskParm = DumpAPI.QUERY.DIR;
                 }
-                sDiskURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + sDiskParm + '=' + encodeURIComponent(sDiskPath) + (this.fRemovable ? "" : sSizeParm) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
+                sDiskURL = Web.getHostOrigin() + DumpAPI.ENDPOINT + '?' + sDiskParm + '=' + encodeURIComponent(sDiskPath) + (this.fRemovable ? "" : sSizeParm) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
             }
         }
         return !!Web.getResource(sDiskURL, null, true, function(sURL, sResponse, nErrorCode) {

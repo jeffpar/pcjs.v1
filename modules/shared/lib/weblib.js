@@ -199,7 +199,7 @@ class Web {
             return response;
         }
 
-        if (Web.getHostName() == "pcjs" || NODE) {
+        if (Web.getHost() == "pcjs:8088" || NODE) {
             /*
              * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
              * whenever the hostname is "pcjs" (or NODE is true); otherwise, use "localhost" when debugging locally.
@@ -495,11 +495,13 @@ class Web {
     /**
      * getHost()
      *
+     * This is like getHostName() but with the port number, if any.
+     *
      * @return {string}
      */
     static getHost()
     {
-        return (window? window.location.protocol + "//" + window.location.host : SITEURL);
+        return (window? window.location.host : "localhost");
     }
 
     /**
@@ -513,13 +515,15 @@ class Web {
     }
 
     /**
-     * getHostURL()
+     * getHostOrigin()
      *
-     * @return {string|null}
+     * This could also be implemented with window.location.origin, but that wasn't originally available in all browsers.
+     *
+     * @return {string}
      */
-    static getHostURL()
+    static getHostOrigin()
     {
-        return (window? window.location.href : null);
+        return (window? window.location.protocol + "//" + window.location.host : SITEURL);
     }
 
     /**
@@ -530,6 +534,16 @@ class Web {
     static getHostProtocol()
     {
         return (window? window.location.protocol : "file:");
+    }
+
+    /**
+     * getHostURL()
+     *
+     * @return {string|null}
+     */
+    static getHostURL()
+    {
+        return (window? window.location.href : null);
     }
 
     /**

@@ -698,7 +698,7 @@ class C1PDiskController extends Component {
                              *
                              * TODO: Convert this code to use the new shared Disk API definitions and weblib functions; eg:
                              *
-                             *      sDiskURL = Web.getHost() + DumpAPI.ENDPOINT + "?" + DumpAPI.QUERY.DISK + "=" + sDiskPath;
+                             *      sDiskURL = Web.getHostOrigin() + DumpAPI.ENDPOINT + "?" + DumpAPI.QUERY.DISK + "=" + sDiskPath;
                              */
                             sFileURL = "http://" + window.location.host + "/api/v1/dump?disk=" + sFilePath;
                         }

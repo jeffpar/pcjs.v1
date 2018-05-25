@@ -413,7 +413,7 @@ var ReportAPI = {
 /*
  * Examples of User API requests:
  *
- *      web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUser;
+ *      web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUser;
  */
 var UserAPI = {
     ENDPOINT:       "/api/v1/user",
@@ -2048,7 +2048,7 @@ class Web {
             return response;
         }
 
-        if (Web.getHostName() == "pcjs" || NODE) {
+        if (Web.getHost() == "pcjs:8088" || NODE) {
             /*
              * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
              * whenever the hostname is "pcjs" (or NODE is true); otherwise, use "localhost" when debugging locally.
@@ -2334,11 +2334,13 @@ class Web {
     /**
      * getHost()
      *
+     * This is like getHostName() but with the port number, if any.
+     *
      * @return {string}
      */
     static getHost()
     {
-        return (window? window.location.protocol + "//" + window.location.host : SITEURL);
+        return (window? window.location.host : "localhost");
     }
 
     /**
@@ -2352,13 +2354,15 @@ class Web {
     }
 
     /**
-     * getHostURL()
+     * getHostOrigin()
      *
-     * @return {string|null}
+     * This could also be implemented with window.location.origin, but that wasn't originally available in all browsers.
+     *
+     * @return {string}
      */
-    static getHostURL()
+    static getHostOrigin()
     {
-        return (window? window.location.href : null);
+        return (window? window.location.protocol + "//" + window.location.host : SITEURL);
     }
 
     /**
@@ -2369,6 +2373,16 @@ class Web {
     static getHostProtocol()
     {
         return (window? window.location.protocol : "file:");
+    }
+
+    /**
+     * getHostURL()
+     *
+     * @return {string|null}
+     */
+    static getHostURL()
+    {
+        return (window? window.location.href : null);
     }
 
     /**
@@ -17349,7 +17363,7 @@ class ROMPDP11 extends Component {
              */
             var sFileExt = Str.getExtension(this.sFileName);
             if (sFileExt != DumpAPI.FORMAT.JSON && sFileExt != DumpAPI.FORMAT.HEX) {
-                sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
+                sFileURL = Web.getHostOrigin() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
             }
             var rom = this;
             Web.getResource(sFileURL, null, true, function doneLoad(sURL, sResponse, nErrorCode) {
@@ -17698,7 +17712,7 @@ class RAMPDP11 extends Component {
              */
             var sFileExt = Str.getExtension(this.sFileName);
             if (sFileExt != DumpAPI.FORMAT.JSON && sFileExt != DumpAPI.FORMAT.HEX) {
-                sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
+                sFileURL = Web.getHostOrigin() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
             }
             var ram = this;
             Web.getResource(sFileURL, null, true, function doneLoad(sURL, sResponse, nErrorCode) {
@@ -19151,7 +19165,7 @@ class PC11 extends Component {
 
         case "mountTape":
             var controlInput = /** @type {Object} */ (control);
-            
+
             if (!this.fLocalTapes) {
                 if (DEBUG) this.log("Local tape support not available");
                 /*
@@ -19468,7 +19482,7 @@ class PC11 extends Component {
                 sTapeURL = encodeURI(sTapePath);
             } else {
                 var sTapeParm = DumpAPI.QUERY.PATH;
-                sTapeURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + sTapeParm + '=' + encodeURIComponent(sTapePath) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
+                sTapeURL = Web.getHostOrigin() + DumpAPI.ENDPOINT + '?' + sTapeParm + '=' + encodeURIComponent(sTapePath) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
             }
         }
 
@@ -20256,7 +20270,7 @@ class DiskPDP11 extends Component {
                 } else if (Str.endsWith(sDiskPath, '/')) {
                     sDiskParm = DumpAPI.QUERY.DIR;
                 }
-                sDiskURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + sDiskParm + '=' + encodeURIComponent(sDiskPath) + (this.fRemovable ? "" : sSizeParm) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
+                sDiskURL = Web.getHostOrigin() + DumpAPI.ENDPOINT + '?' + sDiskParm + '=' + encodeURIComponent(sDiskPath) + (this.fRemovable ? "" : sSizeParm) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
             }
         }
         return !!Web.getResource(sDiskURL, null, true, function(sURL, sResponse, nErrorCode) {
@@ -30924,7 +30938,7 @@ class ComputerPDP11 extends Component {
              * and since pcjs.org is no longer running a Node web server, we disable the feature for that
              * particular host.
              */
-            if (Str.endsWith(Web.getHost(), "pcjs.org")) {
+            if (Str.endsWith(Web.getHostName(), "pcjs.org")) {
                 if (DEBUG) this.log("Remote user API not available");
                 /*
                  * We could also simply hide the control; eg:
@@ -31032,7 +31046,7 @@ class ComputerPDP11 extends Component {
         this.sUserID = null;
         var fMessages = DEBUG && this.messageEnabled();
         if (fMessages) this.printMessage("verifyUserID(" + sUserID + ")");
-        var sRequest = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
+        var sRequest = Web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
         var response = Web.getResource(sRequest);
         var nErrorCode = response[0];
         var sResponse = response[1];
@@ -31068,7 +31082,7 @@ class ComputerPDP11 extends Component {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(ComputerPDP11.STATE_USERID + " for load: " + this.sUserID);
             }
-            sStatePath = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, PDP11.APPVERSION);
+            sStatePath = Web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, PDP11.APPVERSION);
         } else {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(ComputerPDP11.STATE_USERID + " unavailable");
@@ -31139,7 +31153,7 @@ class ComputerPDP11 extends Component {
         dataPost[UserAPI.QUERY.USER] = sUserID;
         dataPost[UserAPI.QUERY.STATE] = State.getKey(this, PDP11.APPVERSION);
         dataPost[UserAPI.QUERY.DATA] = sState;
-        var sRequest = Web.getHost() + UserAPI.ENDPOINT;
+        var sRequest = Web.getHostOrigin() + UserAPI.ENDPOINT;
         if (!fSync) {
             Web.getResource(sRequest, dataPost, true);
         } else {
