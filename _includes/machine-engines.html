@@ -100,7 +100,7 @@ The following optional machine properties will be added to the 'parms' property:
   {%- if machine.commands == nil -%}
     {%- assign machine_commands = "" -%}
   {%- else -%}
-    {%- capture machine_commands -%},commands:"{{ machine.commands | replace:"&":"&amp;" | replace:"#":"&#35;" }}"{%- endcapture -%}
+    {%- capture machine_commands -%},commands:"{{ machine.commands | replace:"&":"&amp;" | replace:"#":"&#35;" | replace:'"':"\\\\&quot;" }}"{%- endcapture -%}
   {%- endif -%}
   {%- if machine.messages == nil -%}
     {%- assign machine_messages = "" -%}
