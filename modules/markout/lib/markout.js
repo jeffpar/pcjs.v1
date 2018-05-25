@@ -526,7 +526,7 @@ MarkOut.prototype.convertMD = function(sIndent)
                             sValue = sValue.replace(/\\/g, "&#92;");    // automatically "double" any backslashes
                         }
                         if (sProp == 'commands') {
-                            sValue = sValue.replace(/&/g, "&amp;").replace(/#/g, "&#35;");
+                            sValue = sValue.replace(/&/g, "&amp;").replace(/#/g, "&#35;").replace(/"/g, '\\\\"');
                         }
                         if (!id && sProp == 'id') {
                             id = sValue;

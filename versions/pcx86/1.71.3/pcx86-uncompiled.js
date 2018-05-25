@@ -14841,7 +14841,9 @@ class CPUX86 extends CPU {
 
         if (I386 && this.model >= X86.MODEL_80386) {
             /*
-             * Here lies everything I currently know about 80386 stepping revision numbers...
+             * As explained above, EAX depends upon the results of the CPU's power-up self-test; however, the only
+             * documented value is zero, which indicates that the 80386 passed.  Additionally, DH is set to the CPU
+             * identifier (3) and DL is set to the revision level (stepping).
              */
             switch(this.stepping) {
             case X86.STEPPING_80386_B0:
@@ -14859,7 +14861,8 @@ class CPUX86 extends CPU {
                 this.regEDX = 0x0308;
                 break;
             default:
-                break;                      // in the absence of a specific stepping, we leave DX set to zero
+                this.regEDX = 0x0300;       // in the absence of a specific stepping, set revision (DL) to zero
+                break;
             }
             this.regCR0 = X86.CR0.ET;       // formerly MSW
             this.regCR1 = 0;                // reserved
@@ -40367,7 +40370,7 @@ class ChipSet extends Component {
          * TODO: Remove this DEBUG-only DESKPRO386 code once we're done debugging DeskPro 386 ROMs;
          * it enables logging of all DeskPro 386 ROM checkpoint I/O to port 0x84.
          */
-        if (this.messageEnabled(Messages.DMA | Messages.PORT) || DEBUG && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386 && port == 0x84) {
+        if (this.messageEnabled(Messages.DMA | Messages.PORT) || DEBUG && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386) {
             this.printMessageIO(port, bOut, addrFrom, "DMA.SPARE" + iSpare + ".PAGE", undefined, true);
         }
         this.abDMAPageSpare[iSpare] = bOut;
@@ -43837,7 +43840,7 @@ ChipSet.C8042 = {
         COMPAQ_NO80387: 0x04,   // 80387 coprocessor NOT installed; see COMPAQ 386/25 TechRef p2-106
         COMPAQ_NOWEITEK:0x08,   // Weitek coprocessor NOT installed; see COMPAQ 386/25 TechRef p2-106
         ENABLE_256KB:   0x10,   // enable 2nd 256Kb of system board RAM
-        COMPAQ_HISPEED: 0x10,   // high-speed enabled (0=auto); see COMPAQ 386/25 TechRef p2-106
+        COMPAQ_HISPEED: 0x10,   // high-speed enabled (0=AUTO, 1=HIGH); see COMPAQ 386/25 TechRef p2-106
         MFG_OFF:        0x20,   // manufacturing jumper not installed
         COMPAQ_DIP5OFF: 0x20,   // system board DIP switch #5 OFF (0=ON); see COMPAQ 386/25 TechRef p2-106
         MONO:           0x40,   // monochrome monitor is primary display
@@ -43876,7 +43879,7 @@ ChipSet.C8042 = {
         WRITE_CMD:      0x60,   // followed by a command byte written to C8042.DATA.PORT (see C8042.DATA.CMD)
         COMPAQ_SLOWD:   0xA3,   // enable system slow down; see COMPAQ 386/25 TechRef p2-111
         COMPAQ_TOGGLE:  0xA4,   // toggle speed-control bit; see COMPAQ 386/25 TechRef p2-111
-        COMPAQ_SPCREAD: 0xA5,   // special read of "port 2"; see COMPAQ 386/25 TechRef p2-111
+        COMPAQ_SREAD2:  0xA5,   // special read of "port 2"; see COMPAQ 386/25 TechRef p2-111
         SELF_TEST:      0xAA,   // self-test (C8042.DATA.SELF_TEST.OK is placed in the output buffer if no errors)
         INTF_TEST:      0xAB,   // interface test
         DIAG_DUMP:      0xAC,   // diagnostic dump
@@ -76839,7 +76842,7 @@ class DebuggerX86 extends Debugger {
                 let a = sCall.match(/[0-9A-F]+$/);
                 if (a) sSymbol = this.doList(a[0]);
             }
-            sCall = Str.pad(sCall, 50) + "  ;" + (sSymbol || "stack=" + this.toHexAddr(dbgAddrStack)); // + " return=" + this.toHexAddr(dbgAddrCall));
+            sCall = Str.pad(sCall, dbgAddrCall.fAddr32? 74 : 62) + ';' + (sSymbol || "stack=" + this.toHexAddr(dbgAddrStack)); // + " return=" + this.toHexAddr(dbgAddrCall));
             this.println(sCall);
             sCallPrev = sCall;
             cFrames++;

@@ -1136,7 +1136,9 @@ class CPUX86 extends CPU {
 
         if (I386 && this.model >= X86.MODEL_80386) {
             /*
-             * Here lies everything I currently know about 80386 stepping revision numbers...
+             * As explained above, EAX depends upon the results of the CPU's power-up self-test; however, the only
+             * documented value is zero, which indicates that the 80386 passed.  Additionally, DH is set to the CPU
+             * identifier (3) and DL is set to the revision level (stepping).
              */
             switch(this.stepping) {
             case X86.STEPPING_80386_B0:
@@ -1154,7 +1156,8 @@ class CPUX86 extends CPU {
                 this.regEDX = 0x0308;
                 break;
             default:
-                break;                      // in the absence of a specific stepping, we leave DX set to zero
+                this.regEDX = 0x0300;       // in the absence of a specific stepping, set revision (DL) to zero
+                break;
             }
             this.regCR0 = X86.CR0.ET;       // formerly MSW
             this.regCR1 = 0;                // reserved

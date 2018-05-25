@@ -86,14 +86,17 @@ To minimize ordering requirements, the init() handlers and constructors of all c
 referencing other components.  Device components should define an initBus() notification handler, which the
 *Computer* component will call after it has created/initialized the *Bus* component.
 
-Features
---------
+Major Features
+--------------
 
 [List of major existing features goes here]
 
+Experimental Features
+---------------------
+
 ### BackTrack Support
 
-One major PCjs feature is known as BackTrack Support, or simply BackTracks.  When BackTracks are enabled, every
+One experimental PCx86 feature is known as BackTrack Support, or simply BackTracks.  When BackTracks are enabled, every
 memory location (at the byte level) and every general-purpose byte register may have an optional link back to its
 source.  These links are called BackTrack indexes.
 
@@ -116,6 +119,16 @@ the drive controller (or DMA controller, if used) to create a BackTrack object r
 adding that object to the global BackTrack object array, and then associating the corresponding BackTrack index with
 the first byte of RAM where the sector was loaded.  Subsequent bytes of RAM containing the rest of the sector will refer
 to the same BackTrack object, using BackTrack indexes containing offsets 1-511.
+
+**WARNING**: BackTrack support is controlled by a global define (**BACKTRACK** in [defines.js](lib/defines.js)) which is
+*false* in the compiled version of PCx86, because it imposes a huge performance penalty.  The only way to use the feature
+is with a [machine](/blog/2015/01/17/) explicitly configured to use "uncompiled" source *and* with the PCjs Debugger
+enabled (since, without the debugger, the feature is more or less useless).
+
+Machines using "uncompiled" source also enable additional checks controlled by the global define **DEBUG**, which is
+another reason those machines are much slower.  And **DEBUG** must be *true* for **BACKTRACK** to be enabled.
+As an aside, you can selectively disable either of those settings at run-time, by adding *debug=false* or *backtrack=false*
+parameters to an "uncompiled" machine's URL; make sure there's also a *?* separating the original URL from any parameters.
 
 Resources
 ---------

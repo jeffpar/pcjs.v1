@@ -2,10 +2,23 @@
 layout: page
 title: Microsoft Word 3.0
 permalink: /disks/pcx86/apps/microsoft/word/3.0/
+machines:
+  - id: ibm5160
+    type: pcx86
+    config: /devices/pcx86/machine/5160/ega/640kb/machine.xml
+    autoMount:
+      A:
+        name: PC DOS 2.00 (Disk 1)
+      B:
+        name: MS Word 3.0 (Disk 1)
 ---
 
 Microsoft Word 3.0
 ------------------
+
+This machine is also available with the [PCjs Debugger](debugger/).
+
+{% include machine.html id="ibm5160" %}
 
 ### Directory of MS Word 3.0 (Disk 1)
 
