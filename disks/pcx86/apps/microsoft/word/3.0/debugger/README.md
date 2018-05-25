@@ -38,10 +38,9 @@ Microsoft's `SPELL.COM` invokes the rarely-used DOS "CALL 5" interface:
     autoStart: true
     autoType: $date\r$time\rB:\rSPELL\r
 
-This establishes a breakpoint on the "CALL 5" entry point inside the application's Program Segment Prefix (PSP)
-set up by `COMMAND.COM`; the breakpoint dumps the previous 10 instructions and then halts.
-The "uncompiled" version of PCx86 is being used so that [BackTrack](/modules/pcx86/#backtrack-support) information
-is available to the PCjs Debugger.
+This establishes a breakpoint on the "CALL 5" entry point inside the application's Program Segment Prefix (PSP);
+the breakpoint dumps the previous 10 instructions and then halts.  The "uncompiled" version of PCx86 is being used
+so that [BackTrack](/modules/pcx86/#backtrack-support) information is available to the PCjs Debugger.
 
 You can use the command `BC *` to clear all predefined breakpoints and allow the program to run normally.
 
