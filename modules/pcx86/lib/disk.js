@@ -528,7 +528,7 @@ class Disk extends Component {
                 //     } else if (Str.endsWith(sDiskPath, '/')) {
                 //         sDiskParm = DumpAPI.QUERY.DIR;
                 //     }
-                //     sDiskURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + sDiskParm + '=' + encodeURIComponent(sDiskPath) + (this.fRemovable ? "" : sSizeParm) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
+                //     sDiskURL = Web.getHostOrigin() + DumpAPI.ENDPOINT + '?' + sDiskParm + '=' + encodeURIComponent(sDiskPath) + (this.fRemovable ? "" : sSizeParm) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
                 // }
             }
         }
@@ -1466,7 +1466,7 @@ class Disk extends Component {
         sParms += '&' + DiskAPI.QUERY.CHS + '=' + this.nCylinders + ':' + this.nHeads + ':' + this.nSectors + ':' + this.cbSector;
         sParms += '&' + DiskAPI.QUERY.MACHINE + '=' + this.controller.getMachineID();
         sParms += '&' + DiskAPI.QUERY.USER + '=' + this.controller.getUserID();
-        return Web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
+        return Web.getHostOrigin() + DiskAPI.ENDPOINT + '?' + sParms;
     }
 
     /**
@@ -1494,7 +1494,7 @@ class Disk extends Component {
             sParms += '&' + DiskAPI.QUERY.MACHINE + '=' + this.controller.getMachineID();
             sParms += '&' + DiskAPI.QUERY.USER + '=' + this.controller.getUserID();
             let disk = this;
-            let sDiskURL = Web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
+            let sDiskURL = Web.getHostOrigin() + DiskAPI.ENDPOINT + '?' + sParms;
             Web.getResource(sDiskURL, null, fAsync, function(sURL, sResponse, nErrorCode) {
                 disk.doneReadRemoteSectors(sURL, sResponse, nErrorCode, [iCylinder, iHead, iSector, nSectors, fAsync, done]);
             });
@@ -1597,7 +1597,7 @@ class Disk extends Component {
             dataPost[DiskAPI.QUERY.USER] = this.controller.getUserID();
             dataPost[DiskAPI.QUERY.DATA] = JSON.stringify(abSectors);
             let disk = this;
-            let sDiskURL = Web.getHost() + DiskAPI.ENDPOINT;
+            let sDiskURL = Web.getHostOrigin() + DiskAPI.ENDPOINT;
             Web.getResource(sDiskURL, dataPost, fAsync, function(sURL, sResponse, nErrorCode) {
                 disk.doneWriteRemoteSectors(sURL, sResponse, nErrorCode, [iCylinder, iHead, iSector, nSectors, fAsync]);
             });
@@ -1657,7 +1657,7 @@ class Disk extends Component {
             sParms += '&' + DiskAPI.QUERY.VOLUME + '=' + this.sDiskPath;
             sParms += '&' + DiskAPI.QUERY.MACHINE + '=' + this.controller.getMachineID();
             sParms += '&' + DiskAPI.QUERY.USER + '=' + this.controller.getUserID();
-            let sDiskURL = Web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
+            let sDiskURL = Web.getHostOrigin() + DiskAPI.ENDPOINT + '?' + sParms;
             Web.getResource(sDiskURL, null, true);
             this.fRemote = false;
         }

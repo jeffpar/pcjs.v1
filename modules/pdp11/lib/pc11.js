@@ -200,7 +200,7 @@ class PC11 extends Component {
 
         case "mountTape":
             var controlInput = /** @type {Object} */ (control);
-            
+
             if (!this.fLocalTapes) {
                 if (DEBUG) this.log("Local tape support not available");
                 /*
@@ -517,7 +517,7 @@ class PC11 extends Component {
                 sTapeURL = encodeURI(sTapePath);
             } else {
                 var sTapeParm = DumpAPI.QUERY.PATH;
-                sTapeURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + sTapeParm + '=' + encodeURIComponent(sTapePath) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
+                sTapeURL = Web.getHostOrigin() + DumpAPI.ENDPOINT + '?' + sTapeParm + '=' + encodeURIComponent(sTapePath) + "&" + DumpAPI.QUERY.FORMAT + "=" + DumpAPI.FORMAT.JSON;
             }
         }
 

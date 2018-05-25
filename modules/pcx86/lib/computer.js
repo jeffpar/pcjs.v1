@@ -1359,7 +1359,7 @@ class Computer extends Component {
              * and since pcjs.org is no longer running a Node web server, we disable the feature for that
              * particular host.
              */
-            if (Str.endsWith(Web.getHost(), "pcjs.org")) {
+            if (Str.endsWith(Web.getHostName(), "pcjs.org")) {
                 if (DEBUG) this.log("Remote user API not available");
                 /*
                  * We could also simply hide the control; eg:
@@ -1467,7 +1467,7 @@ class Computer extends Component {
         this.sUserID = null;
         let fMessages = DEBUG && this.messageEnabled();
         if (fMessages) this.printMessage("verifyUserID(" + sUserID + ")");
-        let sRequest = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
+        let sRequest = Web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
         let response = Web.getResource(sRequest);
         let nErrorCode = response[0];
         let sResponse = response[1];
@@ -1503,7 +1503,7 @@ class Computer extends Component {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(Computer.STATE_USERID + " for load: " + this.sUserID);
             }
-            sStatePath = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, PCX86.APPVERSION);
+            sStatePath = Web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, PCX86.APPVERSION);
         } else {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage(Computer.STATE_USERID + " unavailable");
@@ -1574,7 +1574,7 @@ class Computer extends Component {
         dataPost[UserAPI.QUERY.USER] = sUserID;
         dataPost[UserAPI.QUERY.STATE] = State.getKey(this, PCX86.APPVERSION);
         dataPost[UserAPI.QUERY.DATA] = sState;
-        let sRequest = Web.getHost() + UserAPI.ENDPOINT;
+        let sRequest = Web.getHostOrigin() + UserAPI.ENDPOINT;
         if (!fSync) {
             Web.getResource(sRequest, dataPost, true);
         } else {

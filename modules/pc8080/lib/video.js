@@ -226,7 +226,7 @@ class Video8080 extends Component {
         if (this.sFontROM) {
             var sFileExt = Str.getExtension(this.sFontROM);
             if (sFileExt != "json") {
-                this.sFontROM = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFontROM + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
+                this.sFontROM = Web.getHostOrigin() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFontROM + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
             }
             Web.getResource(this.sFontROM, null, true, function(sURL, sResponse, nErrorCode) {
                 video.doneLoad(sURL, sResponse, nErrorCode);

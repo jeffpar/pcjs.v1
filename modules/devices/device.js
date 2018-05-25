@@ -629,23 +629,38 @@ class Device {
     /**
      * getHost()
      *
+     * This is like getHostName() but with the port number, if any.
+     *
      * @this {Device}
      * @return {string}
      */
     getHost()
     {
-        return ("http://" + (window? window.location.host : "localhost"));
+        return (window? window.location.host : "localhost");
     }
 
     /**
-     * getHostURL()
+     * getHostName()
      *
      * @this {Device}
-     * @return {string|null}
+     * @return {string}
      */
-    getHostURL()
+    getHostName()
     {
-        return (window? window.location.href : null);
+        return (window? window.location.hostname : "localhost");
+    }
+
+    /**
+     * getHostOrigin()
+     *
+     * This could also be implemented with window.location.origin, but that wasn't originally available in all browsers.
+     *
+     * @this {Device}
+     * @return {string}
+     */
+    getHostOrigin()
+    {
+        return (window? window.location.protocol + "//" + window.location.host : "localhost");
     }
 
     /**
@@ -657,6 +672,17 @@ class Device {
     getHostProtocol()
     {
         return (window? window.location.protocol : "file:");
+    }
+
+    /**
+     * getHostURL()
+     *
+     * @this {Device}
+     * @return {string|null}
+     */
+    getHostURL()
+    {
+        return (window? window.location.href : null);
     }
 
     /**
