@@ -11,6 +11,7 @@ machines:
         name: PC DOS 2.00 (Disk 1)
       B:
         name: MS Word 3.0 (Disk 1)
+    autoType: $date\r$time\rB:\rWORD\r
 ---
 
 Microsoft Word 3.0

@@ -21,7 +21,8 @@ machines:
 Microsoft Word 3.0 (with Debugger)
 ----------------------------------
 
-The [IBM PC (Model 5160)](/devices/pcx86/machine/5160/ega/640kb/debugger/) below is configured as follows:
+The [IBM PC (Model 5160)](/devices/pcx86/machine/5160/ega/640kb/debugger/) below is configured to illustrate how
+Microsoft's `SPELL.COM` invokes the rarely-used DOS "CALL 5" interface:
 
     id: ibm5160
     type: pcx86
@@ -37,9 +38,10 @@ The [IBM PC (Model 5160)](/devices/pcx86/machine/5160/ega/640kb/debugger/) below
     autoStart: true
     autoType: $date\r$time\rB:\rSPELL\r
 
-This establishes a breakpoint on the `SPELL.COM` "CALL 5" entry point; instead of stopping, the breakpoint
-simply dumps the 3 previous instructions and continues.  The "uncompiled" version of PCx86 is being used so that
-[BackTrack](/modules/pcx86/#backtrack-support) information is available to the PCjs Debugger.
+This establishes a breakpoint on the "CALL 5" entry point inside the application's Program Segment Prefix (PSP)
+set up by `COMMAND.COM`; instead of stopping, the breakpoint simply dumps the 3 previous instructions and continues.
+The "uncompiled" version of PCx86 is being used so that [BackTrack](/modules/pcx86/#backtrack-support) information
+is available to the PCjs Debugger.
 
 You can use the command `BC *` to clear all predefined breakpoints and allow the program to run normally.
 
