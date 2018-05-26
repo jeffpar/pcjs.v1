@@ -6,6 +6,7 @@ machines:
   - id: deskpro386
     type: pcx86
     debugger: true
+    uncompiled: true
 ---
 
 {% include machine.html id="deskpro386" %}

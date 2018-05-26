@@ -4845,15 +4845,15 @@ class DebuggerX86 extends Debugger {
             }
             sDumpers += ",state,symbols";
             this.println("dump memory commands:");
-            this.println("\tda [a] [#]    dump # ASCII chars at address");
-            this.println("\tdb [a] [#]    dump # bytes at address");
-            this.println("\tdw [a] [#]    dump # words at address");
-            this.println("\tdd [a] [#]    dump # dwords at address");
-            this.println("\tdh [#] [#]    dump # instructions from history");
+            this.println("\tda [a] [#]    dump # ASCII chars at address a");
+            this.println("\tdb [a] [#]    dump # bytes at address a");
+            this.println("\tdw [a] [#]    dump # words at address a");
+            this.println("\tdd [a] [#]    dump # dwords at address a");
+            this.println("\tdh [n] [#]    dump # instructions from history n");
             this.println("\tdi [#]        dump descriptor info for IDT #");
             this.println("\tds [#]        dump descriptor info for selector #");
             if (BACKTRACK) {
-                this.println("\tdt [a]        dump backtrack info for address");
+                this.println("\tdt [a]        dump backtrack info for address a");
             }
             this.println("\tdby,dwy,ddy   dump data in binary");
             if (sDumpers.length) this.println("dump extension commands:\n\t" + sDumpers);

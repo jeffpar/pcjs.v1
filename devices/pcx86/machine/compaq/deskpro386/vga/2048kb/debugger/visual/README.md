@@ -6,6 +6,7 @@ machines:
   - id: deskpro386
     type: pcx86
     debugger: true
+    uncompiled: true
 ---
 
 COMPAQ DeskPro 386 (2Mb) with IBM VGA and 47Mb Hard Disk (Unformatted)
