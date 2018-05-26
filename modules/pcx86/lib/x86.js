@@ -509,6 +509,7 @@ var X86 = {
         JMPF:       0xEA,       // opJMPF()
         JMPS:       0xEB,       // opJMPs()     (1-byte displacement)
         LOCK:       0xF0,       // opLOCK()
+        INT1:       0xF1,       // opINT1()
         REPNZ:      0xF2,       // opREPNZ()
         REPZ:       0xF3,       // opREPZ()
         GRP4W:      0xFF,

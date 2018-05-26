@@ -3526,7 +3526,7 @@ class DebuggerX86 extends Debugger {
                  * calling getAddr(), to force it to recalculate the linear address every time,
                  * unless this is a breakpoint on a linear address (as indicated by a null sel).
                  */
-                if (dbgAddrBreak.sel != null) dbgAddrBreak.addr = null;
+                if (dbgAddrBreak.sel != null) dbgAddrBreak.addr = undefined;
 
                 /*
                  * We used to calculate the linear address of the breakpoint at the time the
@@ -3802,7 +3802,7 @@ class DebuggerX86 extends Debugger {
         if (dbgAddrIns.addr !== X86.ADDR_INVALID && dbgAddr.addr !== X86.ADDR_INVALID) {
             do {
                 sBytes += Str.toHex(this.getByte(dbgAddrIns, 1), 2);
-                if (dbgAddrIns.addr == null) break;
+                if (dbgAddrIns.addr === X86.ADDR_INVALID || dbgAddrIns.addr == undefined) break;
             } while (dbgAddrIns.addr != dbgAddr.addr);
         }
 
@@ -6808,7 +6808,7 @@ if (DEBUGGER) {
     /*
      * CPU instruction ordinals
      *
-     * Note that individual instructions end with ordinal 162 and instruction groups begin with ordinal 163;
+     * Note that individual instructions end with ordinal 163 and instruction groups begin with ordinal 164;
      * the disassembler knows it's dealing with a group whenever the ordinal is not a valid index into INS_NAMES.
      *
      * NOTE: While this list started alphabetical, there are a few wrinkles; eg, POPA/POPF/PUSHF/PUSHA are
@@ -6820,24 +6820,24 @@ if (DEBUGGER) {
         BTS:    16,  CALL:   17,  CBW:    18,  CLC:    19,  CLD:    20,  CLI:    21,  CLTS:   22,  CMC:    23,
         CMP:    24,  CMPSB:  25,  CMPSW:  26,  CS:     27,  CWD:    28,  DAA:    29,  DAS:    30,  DEC:    31,
         DIV:    32,  DS:     33,  ENTER:  34,  ES:     35,  ESC:    36,  FS:     37,  GS:     38,  HLT:    39,
-        IBTS:   40,  IDIV:   41,  IMUL:   42,  IN:     43,  INC:    44,  INS:    45,  INT:    46,  INT3:   47,
-        INTO:   48,  IRET:   49,  JBE:    50,  JC:     51,  JCXZ:   52,  JG:     53,  JGE:    54,  JL:     55,
-        JLE:    56,  JMP:    57,  JA:     58,  JNC:    59,  JNO:    60,  JNP:    61,  JNS:    62,  JNZ:    63,
-        JO:     64,  JP:     65,  JS:     66,  JZ:     67,  LAHF:   68,  LAR:    69,  LDS:    70,  LEA:    71,
-        LEAVE:  72,  LES:    73,  LFS:    74,  LGDT:   75,  LGS:    76,  LIDT:   77,  LLDT:   78,  LMSW:   79,
-        LOADALL:80,  LOCK:   81,  LODSB:  82,  LODSW:  83,  LOOP:   84,  LOOPNZ: 85,  LOOPZ:  86,  LSL:    87,
-        LSS:    88,  LTR:    89,  MOV:    90,  MOVSB:  91,  MOVSW:  92,  MOVSX:  93,  MOVZX:  94,  MUL:    95,
-        NEG:    96,  NOP:    97,  NOT:    98,  OR:     99,  OS:     100, OUT:    101, OUTS:   102, POP:    103,
-        POPA:   104, POPF:   105, PUSHF:  106, PUSHA:  107, PUSH:   108, RCL:    109, RCR:    110, REPNZ:  111,
-        REPZ:   112, RET:    113, RETF:   114, ROL:    115, ROR:    116, SAHF:   117, SALC:   118, SAR:    119,
-        SBB:    120, SCASB:  121, SCASW:  122, SETBE:  123, SETC:   124, SETG:   125, SETGE:  126, SETL:   127,
-        SETLE:  128, SETNBE: 129, SETNC:  130, SETNO:  131, SETNP:  132, SETNS:  133, SETNZ:  134, SETO:   135,
-        SETP:   136, SETS:   137, SETZ:   138, SGDT:   139, SHL:    140, SHLD:   141, SHR:    142, SHRD:   143,
-        SIDT:   144, SLDT:   145, SMSW:   146, SS:     147, STC:    148, STD:    149, STI:    150, STOSB:  151,
-        STOSW:  152, STR:    153, SUB:    154, TEST:   155, VERR:   156, VERW:   157, WAIT:   158, XBTS:   159,
-        XCHG:   160, XLAT:   161, XOR:    162, GRP1B:  163, GRP1W:  164, GRP1SW: 165, GRP2B:  166, GRP2W:  167,
-        GRP2B1: 168, GRP2W1: 169, GRP2BC: 170, GRP2WC: 171, GRP3B:  172, GRP3W:  173, GRP4B:  174, GRP4W:  175,
-        OP0F:   176, GRP6:   177, GRP7:   178, GRP8:   179
+        IBTS:   40,  IDIV:   41,  IMUL:   42,  IN:     43,  INC:    44,  INS:    45,  INT:    46,  INT1:   47,
+        INT3:   48,  INTO:   49,  IRET:   50,  JBE:    51,  JC:     52,  JCXZ:   53,  JG:     54,  JGE:    55,
+        JL:     56,  JLE:    57,  JMP:    58,  JA:     59,  JNC:    60,  JNO:    61,  JNP:    62,  JNS:    63,
+        JNZ:    64,  JO:     65,  JP:     66,  JS:     67,  JZ:     68,  LAHF:   69,  LAR:    70,  LDS:    71,
+        LEA:    72,  LEAVE:  73,  LES:    74,  LFS:    75,  LGDT:   76,  LGS:    77,  LIDT:   78,  LLDT:   79,
+        LMSW:   80,  LOADALL:81,  LOCK:   82,  LODSB:  83,  LODSW:  84,  LOOP:   85,  LOOPNZ: 86,  LOOPZ:  87,
+        LSL:    88,  LSS:    89,  LTR:    90,  MOV:    91,  MOVSB:  92,  MOVSW:  93,  MOVSX:  94,  MOVZX:  95,
+        MUL:    96,  NEG:    97,  NOP:    98,  NOT:    99,  OR:     100, OS:     101, OUT:    102, OUTS:   103,
+        POP:    104, POPA:   105, POPF:   106, PUSHF:  107, PUSHA:  108, PUSH:   109, RCL:    110, RCR:    111,
+        REPNZ:  112, REPZ:   113, RET:    114, RETF:   115, ROL:    116, ROR:    117, SAHF:   118, SALC:   119,
+        SAR:    120, SBB:    121, SCASB:  122, SCASW:  123, SETBE:  124, SETC:   125, SETG:   126, SETGE:  127,
+        SETL:   128, SETLE:  129, SETNBE: 130, SETNC:  131, SETNO:  132, SETNP:  133, SETNS:  134, SETNZ:  135,
+        SETO:   136, SETP:   137, SETS:   138, SETZ:   139, SGDT:   140, SHL:    141, SHLD:   142, SHR:    143,
+        SHRD:   144, SIDT:   145, SLDT:   146, SMSW:   147, SS:     148, STC:    149, STD:    150, STI:    151,
+        STOSB:  152, STOSW:  153, STR:    154, SUB:    155, TEST:   156, VERR:   157, VERW:   158, WAIT:   159,
+        XBTS:   160, XCHG:   161, XLAT:   162, XOR:    163, GRP1B:  164, GRP1W:  165, GRP1SW: 166, GRP2B:  167,
+        GRP2W:  168, GRP2B1: 169, GRP2W1: 170, GRP2BC: 171, GRP2WC: 172, GRP3B:  173, GRP3W:  174, GRP4B:  175,
+        GRP4W:  176, OP0F:   177, GRP6:   178, GRP7:   179, GRP8:   180
     };
 
     /*
@@ -6849,22 +6849,22 @@ if (DEBUGGER) {
         "BTS",    "CALL",   "CBW",    "CLC",    "CLD",    "CLI",    "CLTS",   "CMC",
         "CMP",    "CMPSB",  "CMPSW",  "CS:",    "CWD",    "DAA",    "DAS",    "DEC",
         "DIV",    "DS:",    "ENTER",  "ES:",    "ESC",    "FS:",    "GS:",    "HLT",
-        "IBTS",   "IDIV",   "IMUL",   "IN",     "INC",    "INS",    "INT",    "INT3",
-        "INTO",   "IRET",   "JBE",    "JC",     "JCXZ",   "JG",     "JGE",    "JL",
-        "JLE",    "JMP",    "JA",     "JNC",    "JNO",    "JNP",    "JNS",    "JNZ",
-        "JO",     "JP",     "JS",     "JZ",     "LAHF",   "LAR",    "LDS",    "LEA",
-        "LEAVE",  "LES",    "LFS",    "LGDT",   "LGS",    "LIDT",   "LLDT",   "LMSW",
-        "LOADALL","LOCK",   "LODSB",  "LODSW",  "LOOP",   "LOOPNZ", "LOOPZ",  "LSL",
-        "LSS",    "LTR",    "MOV",    "MOVSB",  "MOVSW",  "MOVSX",  "MOVZX",  "MUL",
-        "NEG",    "NOP",    "NOT",    "OR",     "OS:",    "OUT",    "OUTS",   "POP",
-        "POPA",   "POPF",   "PUSHF",  "PUSHA",  "PUSH",   "RCL",    "RCR",    "REPNZ",
-        "REPZ",   "RET",    "RETF",   "ROL",    "ROR",    "SAHF",   "SALC",   "SAR",
-        "SBB",    "SCASB",  "SCASW",  "SETBE",  "SETC",   "SETG",   "SETGE",  "SETL",
-        "SETLE",  "SETNBE", "SETNC",  "SETNO",  "SETNP",  "SETNS",  "SETNZ",  "SETO",
-        "SETP",   "SETS",   "SETZ",   "SGDT",   "SHL",    "SHLD",   "SHR",    "SHRD",
-        "SIDT",   "SLDT",   "SMSW",   "SS:",    "STC",    "STD",    "STI",    "STOSB",
-        "STOSW",  "STR",    "SUB",    "TEST",   "VERR",   "VERW",   "WAIT",   "XBTS",
-        "XCHG",   "XLAT",   "XOR"
+        "IBTS",   "IDIV",   "IMUL",   "IN",     "INC",    "INS",    "INT",    "INT1",
+        "INT3",   "INTO",   "IRET",   "JBE",    "JC",     "JCXZ",   "JG",     "JGE",
+        "JL",     "JLE",    "JMP",    "JA",     "JNC",    "JNO",    "JNP",    "JNS",
+        "JNZ",    "JO",     "JP",     "JS",     "JZ",     "LAHF",   "LAR",    "LDS",
+        "LEA",    "LEAVE",  "LES",    "LFS",    "LGDT",   "LGS",    "LIDT",   "LLDT",
+        "LMSW",   "LOADALL","LOCK",   "LODSB",  "LODSW",  "LOOP",   "LOOPNZ", "LOOPZ",
+        "LSL",    "LSS",    "LTR",    "MOV",    "MOVSB",  "MOVSW",  "MOVSX",  "MOVZX",
+        "MUL",    "NEG",    "NOP",    "NOT",    "OR",     "OS:",    "OUT",    "OUTS",
+        "POP",    "POPA",   "POPF",   "PUSHF",  "PUSHA",  "PUSH",   "RCL",    "RCR",
+        "REPNZ",  "REPZ",   "RET",    "RETF",   "ROL",    "ROR",    "SAHF",   "SALC",
+        "SAR",    "SBB",    "SCASB",  "SCASW",  "SETBE",  "SETC",   "SETG",   "SETGE",
+        "SETL",   "SETLE",  "SETNBE", "SETNC",  "SETNO",  "SETNP",  "SETNS",  "SETNZ",
+        "SETO",   "SETP",   "SETS",   "SETZ",   "SGDT",   "SHL",    "SHLD",   "SHR",
+        "SHRD",   "SIDT",   "SLDT",   "SMSW",   "SS:",    "STC",    "STD",    "STI",
+        "STOSB",  "STOSW",  "STR",    "SUB",    "TEST",   "VERR",   "VERW",   "WAIT",
+        "XBTS",   "XCHG",   "XLAT",   "XOR"
     ];
 
     /*
@@ -7262,23 +7262,23 @@ if (DEBUGGER) {
     /* 0x5E */ [DebuggerX86.INS.POP,   DebuggerX86.TYPE_SI     | DebuggerX86.TYPE_OUT],
     /* 0x5F */ [DebuggerX86.INS.POP,   DebuggerX86.TYPE_DI     | DebuggerX86.TYPE_OUT],
 
-    /* 0x60 */ [DebuggerX86.INS.PUSHA, DebuggerX86.TYPE_NONE   | DebuggerX86.TYPE_80286],
-    /* 0x61 */ [DebuggerX86.INS.POPA,  DebuggerX86.TYPE_NONE   | DebuggerX86.TYPE_80286],
-    /* 0x62 */ [DebuggerX86.INS.BOUND, DebuggerX86.TYPE_REG    | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_IN   | DebuggerX86.TYPE_80286, DebuggerX86.TYPE_MODRM | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_IN],
-    /* 0x63 */ [DebuggerX86.INS.ARPL,  DebuggerX86.TYPE_MODRM  | DebuggerX86.TYPE_SHORT | DebuggerX86.TYPE_OUT,                           DebuggerX86.TYPE_REG   | DebuggerX86.TYPE_SHORT | DebuggerX86.TYPE_IN],
+    /* 0x60 */ [DebuggerX86.INS.PUSHA, DebuggerX86.TYPE_NONE   | DebuggerX86.TYPE_80186],
+    /* 0x61 */ [DebuggerX86.INS.POPA,  DebuggerX86.TYPE_NONE   | DebuggerX86.TYPE_80186],
+    /* 0x62 */ [DebuggerX86.INS.BOUND, DebuggerX86.TYPE_REG    | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_IN   | DebuggerX86.TYPE_80186, DebuggerX86.TYPE_MODRM | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_IN],
+    /* 0x63 */ [DebuggerX86.INS.ARPL,  DebuggerX86.TYPE_MODRM  | DebuggerX86.TYPE_SHORT | DebuggerX86.TYPE_OUT  | DebuggerX86.TYPE_80286, DebuggerX86.TYPE_REG   | DebuggerX86.TYPE_SHORT | DebuggerX86.TYPE_IN],
     /* 0x64 */ [DebuggerX86.INS.FS,    DebuggerX86.TYPE_PREFIX | DebuggerX86.TYPE_80386],
     /* 0x65 */ [DebuggerX86.INS.GS,    DebuggerX86.TYPE_PREFIX | DebuggerX86.TYPE_80386],
     /* 0x66 */ [DebuggerX86.INS.OS,    DebuggerX86.TYPE_PREFIX | DebuggerX86.TYPE_80386],
     /* 0x67 */ [DebuggerX86.INS.AS,    DebuggerX86.TYPE_PREFIX | DebuggerX86.TYPE_80386],
 
-    /* 0x68 */ [DebuggerX86.INS.PUSH,  DebuggerX86.TYPE_IMM    | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_IN   | DebuggerX86.TYPE_80286],
-    /* 0x69 */ [DebuggerX86.INS.IMUL,  DebuggerX86.TYPE_REG    | DebuggerX86.TYPE_SHORT | DebuggerX86.TYPE_BOTH | DebuggerX86.TYPE_80286, DebuggerX86.TYPE_MODRM | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_IN, DebuggerX86.TYPE_IMM | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_IN],
-    /* 0x6A */ [DebuggerX86.INS.PUSH,  DebuggerX86.TYPE_IMM    | DebuggerX86.TYPE_SBYTE | DebuggerX86.TYPE_IN   | DebuggerX86.TYPE_80286],
-    /* 0x6B */ [DebuggerX86.INS.IMUL,  DebuggerX86.TYPE_REG    | DebuggerX86.TYPE_SHORT | DebuggerX86.TYPE_OUT  | DebuggerX86.TYPE_80286, DebuggerX86.TYPE_MODRM | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_IN, DebuggerX86.TYPE_IMM | DebuggerX86.TYPE_BYTE  | DebuggerX86.TYPE_IN],
-    /* 0x6C */ [DebuggerX86.INS.INS,   DebuggerX86.TYPE_ESDI   | DebuggerX86.TYPE_BYTE  | DebuggerX86.TYPE_OUT  | DebuggerX86.TYPE_80286, DebuggerX86.TYPE_DX    | DebuggerX86.TYPE_IN],
-    /* 0x6D */ [DebuggerX86.INS.INS,   DebuggerX86.TYPE_ESDI   | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_OUT  | DebuggerX86.TYPE_80286, DebuggerX86.TYPE_DX    | DebuggerX86.TYPE_IN],
-    /* 0x6E */ [DebuggerX86.INS.OUTS,  DebuggerX86.TYPE_DX     | DebuggerX86.TYPE_IN    | DebuggerX86.TYPE_80286, DebuggerX86.TYPE_DSSI | DebuggerX86.TYPE_BYTE  | DebuggerX86.TYPE_IN],
-    /* 0x6F */ [DebuggerX86.INS.OUTS,  DebuggerX86.TYPE_DX     | DebuggerX86.TYPE_IN    | DebuggerX86.TYPE_80286, DebuggerX86.TYPE_DSSI | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_IN],
+    /* 0x68 */ [DebuggerX86.INS.PUSH,  DebuggerX86.TYPE_IMM    | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_IN   | DebuggerX86.TYPE_80186],
+    /* 0x69 */ [DebuggerX86.INS.IMUL,  DebuggerX86.TYPE_REG    | DebuggerX86.TYPE_SHORT | DebuggerX86.TYPE_BOTH | DebuggerX86.TYPE_80186, DebuggerX86.TYPE_MODRM | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_IN, DebuggerX86.TYPE_IMM | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_IN],
+    /* 0x6A */ [DebuggerX86.INS.PUSH,  DebuggerX86.TYPE_IMM    | DebuggerX86.TYPE_SBYTE | DebuggerX86.TYPE_IN   | DebuggerX86.TYPE_80186],
+    /* 0x6B */ [DebuggerX86.INS.IMUL,  DebuggerX86.TYPE_REG    | DebuggerX86.TYPE_SHORT | DebuggerX86.TYPE_OUT  | DebuggerX86.TYPE_80186, DebuggerX86.TYPE_MODRM | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_IN, DebuggerX86.TYPE_IMM | DebuggerX86.TYPE_BYTE  | DebuggerX86.TYPE_IN],
+    /* 0x6C */ [DebuggerX86.INS.INS,   DebuggerX86.TYPE_ESDI   | DebuggerX86.TYPE_BYTE  | DebuggerX86.TYPE_OUT  | DebuggerX86.TYPE_80186, DebuggerX86.TYPE_DX    | DebuggerX86.TYPE_IN],
+    /* 0x6D */ [DebuggerX86.INS.INS,   DebuggerX86.TYPE_ESDI   | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_OUT  | DebuggerX86.TYPE_80186, DebuggerX86.TYPE_DX    | DebuggerX86.TYPE_IN],
+    /* 0x6E */ [DebuggerX86.INS.OUTS,  DebuggerX86.TYPE_DX     | DebuggerX86.TYPE_IN    | DebuggerX86.TYPE_80186, DebuggerX86.TYPE_DSSI | DebuggerX86.TYPE_BYTE  | DebuggerX86.TYPE_IN],
+    /* 0x6F */ [DebuggerX86.INS.OUTS,  DebuggerX86.TYPE_DX     | DebuggerX86.TYPE_IN    | DebuggerX86.TYPE_80186, DebuggerX86.TYPE_DSSI | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_IN],
 
     /* 0x70 */ [DebuggerX86.INS.JO,    DebuggerX86.TYPE_IMMREL | DebuggerX86.TYPE_BYTE  | DebuggerX86.TYPE_IN],
     /* 0x71 */ [DebuggerX86.INS.JNO,   DebuggerX86.TYPE_IMMREL | DebuggerX86.TYPE_BYTE  | DebuggerX86.TYPE_IN],
@@ -7379,8 +7379,8 @@ if (DEBUGGER) {
     /* 0xC6 */ [DebuggerX86.INS.MOV,   DebuggerX86.TYPE_MODRM  | DebuggerX86.TYPE_BYTE  | DebuggerX86.TYPE_OUT,   DebuggerX86.TYPE_IMM     | DebuggerX86.TYPE_BYTE  | DebuggerX86.TYPE_IN],
     /* 0xC7 */ [DebuggerX86.INS.MOV,   DebuggerX86.TYPE_MODRM  | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_OUT,   DebuggerX86.TYPE_IMM     | DebuggerX86.TYPE_WORD  | DebuggerX86.TYPE_IN],
 
-    /* 0xC8 */ [DebuggerX86.INS.ENTER, DebuggerX86.TYPE_IMM    | DebuggerX86.TYPE_SHORT | DebuggerX86.TYPE_IN   | DebuggerX86.TYPE_80286,    DebuggerX86.TYPE_IMM   | DebuggerX86.TYPE_BYTE | DebuggerX86.TYPE_IN],
-    /* 0xC9 */ [DebuggerX86.INS.LEAVE, DebuggerX86.TYPE_NONE   | DebuggerX86.TYPE_80286],
+    /* 0xC8 */ [DebuggerX86.INS.ENTER, DebuggerX86.TYPE_IMM    | DebuggerX86.TYPE_SHORT | DebuggerX86.TYPE_IN   | DebuggerX86.TYPE_80186,    DebuggerX86.TYPE_IMM   | DebuggerX86.TYPE_BYTE | DebuggerX86.TYPE_IN],
+    /* 0xC9 */ [DebuggerX86.INS.LEAVE, DebuggerX86.TYPE_NONE   | DebuggerX86.TYPE_80186],
     /* 0xCA */ [DebuggerX86.INS.RETF,  DebuggerX86.TYPE_IMM    | DebuggerX86.TYPE_SHORT | DebuggerX86.TYPE_IN],
     /* 0xCB */ [DebuggerX86.INS.RETF],
     /* 0xCC */ [DebuggerX86.INS.INT3],
@@ -7425,7 +7425,7 @@ if (DEBUGGER) {
     /* 0xEF */ [DebuggerX86.INS.OUT,   DebuggerX86.TYPE_DX     | DebuggerX86.TYPE_SHORT | DebuggerX86.TYPE_IN,    DebuggerX86.TYPE_AX    | DebuggerX86.TYPE_IN],
 
     /* 0xF0 */ [DebuggerX86.INS.LOCK,  DebuggerX86.TYPE_PREFIX],
-    /* 0xF1 */ [DebuggerX86.INS.NONE],
+    /* 0xF1 */ [DebuggerX86.INS.INT1,  DebuggerX86.TYPE_NONE   | DebuggerX86.TYPE_80386],
     /* 0xF2 */ [DebuggerX86.INS.REPNZ, DebuggerX86.TYPE_PREFIX],
     /* 0xF3 */ [DebuggerX86.INS.REPZ,  DebuggerX86.TYPE_PREFIX],
     /* 0xF4 */ [DebuggerX86.INS.HLT],
