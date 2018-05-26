@@ -27,6 +27,7 @@ to *true*, overriding the value of `site.pcjs.compiled` in **_config.yml**.
 Here's what a typical Markdown file would look like:
 
 {% raw %}
+
 	---
 	...
 	machines:
@@ -38,6 +39,7 @@ Here's what a typical Markdown file would look like:
 	---
 	...
 	{% include machine.html id="at-ega-1152k-rev3" %}
+	
 {% endraw %}
 
 In fact, that's what we've done in the Markdown file you are reading right now. 
