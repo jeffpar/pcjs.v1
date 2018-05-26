@@ -21,6 +21,6 @@ of DOS could create partitions only up to 32Mb, and all partitions had to reside
 * [COMPAQ DeskPro 386 with 2Mb RAM and IBM EGA](ega/2048kb/) ([Debugger](ega/2048kb/debugger/))
 * [COMPAQ DeskPro 386 with 4Mb RAM and IBM EGA](ega/4096kb/) ([Debugger](ega/4096kb/debugger/))
 * [COMPAQ DeskPro 386 with 2Mb RAM and COMPAQ VGA (Debugger)](other/2048kb/debugger/), ([Visualizer](other/2048kb/debugger/visual/))
-* [COMPAQ DeskPro 386 with 2Mb RAM and IBM VGA](vga/2048kb/) ([Debugger](vga/2048kb/debugger/), ([Visualizer](vga/2048kb/debugger/visual/))
-* [COMPAQ DeskPro 386 with 4Mb RAM and IBM VGA](vga/4096kb/) ([Debugger](vga/4096kb/debugger/), ([Visualizer](vga/2048kb/debugger/visual/))
+* [COMPAQ DeskPro 386 with 2Mb RAM and IBM VGA](vga/2048kb/) ([Debugger](vga/2048kb/debugger/), [Visualizer](vga/2048kb/debugger/visual/))
+* [COMPAQ DeskPro 386 with 4Mb RAM and IBM VGA](vga/4096kb/) ([Debugger](vga/4096kb/debugger/), [Visualizer](vga/2048kb/debugger/visual/))
 * [COMPAQ DeskPro 386 with 4Mb RAM and IBM VGA running Windows 95](/disks/pcx86/windows/win95/4.00.950/) ([Debugger](/disks/pcx86/windows/win95/4.00.950/debugger/))
