@@ -18,8 +18,8 @@ All these machine configurations also include an unformatted "Type 5" [47Mb Hard
 create a single 47Mb partition, you must use [COMPAQ MS-DOS 3.31](/disks/pcx86/dos/compaq/3.31/) or newer; older versions
 of DOS could create partitions only up to 32Mb, and all partitions had to reside within the first 32Mb of disk space.
 
-In addition, all the **Visualizer** configurations are running the "uncompiled" version of PCx86, so that
-[BackTrack](/modules/pcx86/#backtrack-support) information is available to the PCjs Debugger.  As a result, those
+In addition, all the [Visualizer](/devices/pcx86/panel/) configurations are running the "uncompiled" version of PCx86,
+so that [BackTrack](/modules/pcx86/#backtrack-support) information is available to the PCjs Debugger.  As a result, those
 machines run much slower.  To reduce **DEBUG** or **BACKTRACK** overhead, you can add *debug=false* or *backtrack=false*
 to an uncompiled machine's URL; for example, this [DeskPro 386 with Visualizer](vga/2048kb/debugger/visual/?debug=false)
 will run much faster than the link provided below.
