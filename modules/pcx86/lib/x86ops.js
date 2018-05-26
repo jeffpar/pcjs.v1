@@ -4108,19 +4108,21 @@ X86.opLOCK = function()
 };
 
 /**
- * op=0xF1 (INT1; undocumented; 80186/80188 and up; TODO: Verify)
+ * op=0xF1 (INT1; undocumented; 80386 and up)
  *
- * Note that this handler is assigned to opcode 0xF1 only on 80186 processors and up, because on 8086/8086
- * processors, we treat that opcode as an alias for LOCK (0xF0).
+ * For the 8086/8088, we treat opcode 0xF1 as an alias for LOCK (0xF0).
  *
- * For the 80186 and up, and we treat it as undefined.  Starting with the 80386, this opcode is known as INT1
+ * For the 80186 and 80286, and we treat it as undefined.  Starting with the 80386, this opcode is known as INT1
  * or ICEBP, since it effectively performs an INT 0x01 but is normally only performed with an ICE.
  *
  * @this {CPUX86}
  */
 X86.opINT1 = function()
 {
-    X86.opUndefined.call(this);
+    /*
+     * TODO: Verify this instruction's behavior.
+     */
+    X86.helpTrap.call(this, X86.EXCEPTION.DB_EXC, this.cycleCounts.nOpCyclesInt3D);
 };
 
 /**
@@ -4478,7 +4480,8 @@ X86.aOps = [
     X86.opINDXb,            X86.opINDXw,            X86.opOUTDXb,           X86.opOUTDXw,       // 0xEC-0xEF
     /*
      * On an 8086/8088, opcode 0xF1 is believed to be an alias for 0xF0; in any case, it definitely behaves like
-     * a prefix on those processors, so we treat it as such.  On the 80186 and up, we treat as opINT1().
+     * a prefix on those processors, so we treat it as such.  On the 80186 and 80286, we treat it as opUndefined(),
+     * and on the 80386, it becomes opINT1().
      *
      * As of the Pentium, opcode 0xF1 is still marked "reserved".
      */

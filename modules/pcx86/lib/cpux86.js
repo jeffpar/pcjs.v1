@@ -836,7 +836,7 @@ class CPUX86 extends CPU {
             this.aOps[0xC1]                 = X86.opGRP2wn;     // 0xC1
             this.aOps[X86.OPCODE.ENTER]     = X86.opENTER;      // 0xC8
             this.aOps[X86.OPCODE.LEAVE]     = X86.opLEAVE;      // 0xC9
-            this.aOps[0xF1]                 = X86.opINT1;       // 0xF1
+            this.aOps[X86.OPCODE.INT1]      = X86.opUndefined;  // 0xF1
             this.aOpGrp4b[0x07]             = X86.fnGRPInvalid;
             this.aOpGrp4w[0x07]             = X86.fnGRPInvalid;
 
@@ -861,10 +861,11 @@ class CPUX86 extends CPU {
                         let bOpcode;
                         this.PS_CLEAR_RM = 0;   // NOTE: This allows the 80386 to modify X86.PS.NT in real-mode (which is presumably OK)
                         this.PS_DIRECT |= X86.PS.RF | X86.PS.VM;
-                        this.aOps[X86.OPCODE.FS] = X86.opFS;    // 0x64
-                        this.aOps[X86.OPCODE.GS] = X86.opGS;    // 0x65
-                        this.aOps[X86.OPCODE.OS] = X86.opOS;    // 0x66
-                        this.aOps[X86.OPCODE.AS] = X86.opAS;    // 0x67
+                        this.aOps[X86.OPCODE.FS]    = X86.opFS;     // 0x64
+                        this.aOps[X86.OPCODE.GS]    = X86.opGS;     // 0x65
+                        this.aOps[X86.OPCODE.OS]    = X86.opOS;     // 0x66
+                        this.aOps[X86.OPCODE.AS]    = X86.opAS;     // 0x67
+                        this.aOps[X86.OPCODE.INT1]  = X86.opINT1;   // 0xF1
                         for (bOpcode in X86.aOps0F386) {
                             this.aOps0F[+bOpcode] = X86.aOps0F386[+bOpcode];
                         }
