@@ -76190,14 +76190,16 @@ class DebuggerX86 extends Debugger {
     doMouse(sAction, sDelta)
     {
         if (this.mouse) {
-            let sign = 1;
-            if (sDelta.charAt(0) == '-') {
-                sign = -1;
-                sDelta = sDelta.substr(1);
+            let n = 0, sign = 1;
+            if (sDelta) {
+                if (sDelta.charAt(0) == '-') {
+                    sign = -1;
+                    sDelta = sDelta.substr(1);
+                }
+                let n = this.parseValue(sDelta, sAction);
+                if (n === undefined) return;
+                n = (n * sign)|0;
             }
-            let n = this.parseValue(sDelta, sAction);
-            if (n === undefined) return;
-            n = (n * sign)|0;
             switch(sAction) {
             case "x":
                 this.mouse.moveMouse(n, 0);
