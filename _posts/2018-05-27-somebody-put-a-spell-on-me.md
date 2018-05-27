@@ -67,7 +67,8 @@ Recently, a handful of people, like Michal over at the
 for examples for old software that used the CP/M-style "CALL 5" interface to DOS, instead of (or in addition to)
 the "INT 21h" interface.
 
-Here was a prime example, [SPELL.COM](#break-the-spell), just sitting in my "Inbox" for 30 years.
+Here was a prime example, [SPELL.COM](#break-the-spell), that I had found 30 years ago and completely forgotten
+about.
 
 And what about that `A20` program, you ask?  I found a copy of that, too.  The `PRO386` was probably the cheap
 80386-based PC clone I had bought in 1987, which had a few issues running OS/2.  Hence this utility, which apparently
