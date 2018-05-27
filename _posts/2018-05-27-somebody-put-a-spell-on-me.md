@@ -64,7 +64,7 @@ I barely noticed the last sentence:
     the only one I've run across so far is Word's SPELL utility.
 
 Recently, a handful of people, like Michal over at the
-[OS/2 Museum](http://www.os2museum.com/wp/the-a20-gate-it-wasnt-wordstar/), and myself, had been looking
+[OS/2 Museum](http://www.os2museum.com/wp/a-word-on-the-call-5-spell/), and myself, had been looking
 for examples for old software that used the CP/M-style "CALL 5" interface to DOS, instead of (or in addition to)
 the "INT 21h" interface.
 
