@@ -72,7 +72,7 @@ about.
 
 And what about that `A20` program, you ask?  I found a copy of that, too.  The `PRO386` was probably the cheap
 80386-based PC clone I had bought in 1987, which had a few issues running OS/2.  Hence this utility, which apparently
-I later adapted to help a resolve an issue with OS/2 compatibility testing.
+I later adapted to help resolve an issue with OS/2 compatibility testing.
 
 {% raw %}
 
