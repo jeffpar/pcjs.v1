@@ -68,7 +68,7 @@ Recently, a handful of people, like Michal over at the
 for examples for old software that used the CP/M-style "CALL 5" interface to DOS, instead of (or in addition to)
 the "INT 21h" interface.
 
-Here was a prime example just sitting in my "Inbox" for 30 years.
+Here was a prime example, [SPELL.COM](#break-the-spell), just sitting in my "Inbox" for 30 years.
 
 And what about that `A20` program, you ask?  I found a copy of that, too.  The `PRO386` was probably the cheap
 80386-based PC clone I had bought in 1987, which had a few issues running OS/2.  Hence this utility, which apparently
@@ -271,7 +271,9 @@ I later adapted to help a resolve an issue with OS/2 compatibility testing.
 
 {% endraw %}
 
-Last but not least, for your debugging pleasure, I've set up an [IBM PC (Model 5160)](/devices/pcx86/machine/5160/ega/640kb/debugger/)
+### Break The SPELL
+
+So, for your debugging pleasure, I've set up an [IBM PC (Model 5160)](/devices/pcx86/machine/5160/ega/640kb/debugger/)
 to demonstrate Microsoft's `SPELL.COM` use of "CALL 5".  It's configured as follows:
 
     id: ibm5160
