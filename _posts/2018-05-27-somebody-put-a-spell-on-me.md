@@ -16,7 +16,6 @@ machines:
         name: PC DOS 2.00 (Disk 1)
       B:
         name: MS Word 3.0 (Disk 2)
-    autoStart: true
     autoType: $date\r$time\rB:\rSPELL\r
 ---
 
@@ -287,13 +286,14 @@ to demonstrate Microsoft's `SPELL.COM` use of "CALL 5".  It's configured as foll
         name: PC DOS 2.00 (Disk 1)
       B:
         name: MS Word 3.0 (Disk 2)
-    autoStart: true
     autoType: $date\r$time\rB:\rSPELL\r
 
 This establishes a breakpoint on the "CALL 5" entry point inside the application's Program Segment Prefix (PSP);
 the breakpoint dumps the previous 10 instructions and then halts.  The "uncompiled" version of PCx86 is being used
 so that [BackTrack](/modules/pcx86/#backtrack-support)&trade; information is available to the PCjs Debugger.
 You can use the command `BC *` to clear all predefined breakpoints and allow the program to run normally.
+
+To start the machine, click "Run" or use the Debugger's `G` command.
 
 {% include machine.html id="ibm5160" %}
 
