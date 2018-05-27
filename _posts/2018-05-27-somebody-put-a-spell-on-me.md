@@ -3,7 +3,7 @@ layout: post
 title: Somebody Put a SPELL On Me
 date: 2018-05-27 10:00:00
 permalink: /blog/2018/05/27/
-preview: /blog/images/a-spell-on-you.jpg
+preview: /blog/images/microsoft-spell-30.jpg
 machines:
   - id: ibm5160
     type: pcx86
