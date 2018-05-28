@@ -35,6 +35,7 @@ merr:
         mov     ax,4c00h
         int     21h
 main    endp
+
 resize  proc
         add     bx,15
         mov     cl,4

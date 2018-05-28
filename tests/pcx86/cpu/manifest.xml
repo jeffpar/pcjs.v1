@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.71.4/manifest.xsl"?>
+<manifest type="software">
+	<title>PCjs CPU Tests</title>
+	<disk id="disk01" size="163840" chs="40:1:8" href="/tests/pcx86/cpu/CPUTESTS.json" md5="c757dbc2249bf7bcb10d8fbd880140ac" md5json="77a095f960bfd074469f9c7d02073eac">
+		<file size="19038" time="2016-08-09 11:53:31" attr="0x20" md5="73b9ab5db5794f516508946270dc5d14">CPUID.ASM</file>
+		<file size="2457" time="2018-05-27 14:37:58" attr="0x20" md5="53f13294e05a05cc4abdea5d900a9410">ID.ASM</file>
+		<file size="347" time="2018-05-28 12:17:11" attr="0x20" md5="66af9c7ec69604c1c7aeec015a523efd">ID.COM</file>
+		<file size="65276" time="2018-05-28 12:32:04" attr="0x20" md5="24a692f3533dc70b2485e5e7188a09c6">TEST386.COM</file>
+	</disk>
+</manifest>

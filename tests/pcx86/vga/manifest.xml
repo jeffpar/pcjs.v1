@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.60.3/manifest.xsl"?>
 <manifest type="software">
-	<title>PCjs Test Library</title>
-	<disk id="disk01" size="163840" chs="40:1:8" path="testmon/int14/INT14.ASM;INT14.COM;DOWNLOAD.ASM;DOWNLOAD.COM;FAKECTTY.ASM;FAKECTTY.COM;MK.BAT" href="/tests/pcx86/testmon/int14/INT14.json">
-		<name>PCjs INT14 Utilities</name>
-	</disk>
-	<disk id="disk02" size="163840" chs="40:1:8" dir="vga/bin" href="/tests/pcx86/vga/VGABIN.json" md5="418d4a425e9cfb5c1abdda77a70b6cff" md5json="f3e0cf31a0b0e0cd45b8fa2db77a9713">
+	<title>VGA Black Book Tests</title>
+	<disk id="disk01" size="163840" chs="40:1:8" dir="vga/bin" href="/tests/pcx86/vga/VGABIN.json" md5="418d4a425e9cfb5c1abdda77a70b6cff" md5json="f3e0cf31a0b0e0cd45b8fa2db77a9713">
 		<name>VGA Black Book Binaries</name>
 		<file size="2176" time="2015-07-05 13:12:04" attr="0x20" md5="a6039a2764f6118353a3f4288da798ca">L23-1.EXE</file>
 		<file size="1482" time="2015-06-27 11:56:06" attr="0x20" md5="6bf5ffe137dfb9dd841105aa7c02961e">L24-1.EXE</file>
@@ -38,7 +35,7 @@
 		<file size="3683" time="2015-07-07 12:42:37" attr="0x20" md5="2701123a9f12b9beb2ddfec99fe987ce">L47-6.EXE</file>
 		<file size="3923" time="2015-07-07 13:34:01" attr="0x20" md5="9a13fa60f7996af117efd2b5323e101e">L48-2.EXE</file>
 	</disk>
-	<disk id="disk03" size="327680" chs="40:2:8" dir="vga/src" href="/tests/pcx86/vga/VGASRC.json" md5="c2781eab7c17cc3707f234a84940ac22" md5json="4e9cbd21ec0761034e21dbf0c3ae4c16">
+	<disk id="disk02" size="327680" chs="40:2:8" dir="vga/src" href="/tests/pcx86/vga/VGASRC.json" md5="c2781eab7c17cc3707f234a84940ac22" md5json="4e9cbd21ec0761034e21dbf0c3ae4c16">
 		<name>VGA Black Book Sources</name>
 		<file size="14690" time="2016-08-09 11:53:31" attr="0x20" md5="56d252debe2dafc397491234eba9b78a">L23-1.ASM</file>
 		<file size="7243" time="2016-08-09 11:53:31" attr="0x20" md5="7207c03e33dec4e60448220c82a1e67a">L24-1.ASM</file>

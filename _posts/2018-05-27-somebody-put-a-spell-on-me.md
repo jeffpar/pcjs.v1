@@ -64,7 +64,7 @@ I barely noticed the last sentence:
 
 Recently, a handful of people, like Michal over at the
 [OS/2 Museum](http://www.os2museum.com/wp/a-word-on-the-call-5-spell/), and myself, had been looking
-for examples for old software that used the CP/M-style "CALL 5" interface to DOS, instead of (or in addition to)
+for examples of old software that used the CP/M-style "CALL 5" interface to DOS, instead of (or in addition to)
 the "INT 21h" interface.
 
 Here was a prime example, [SPELL.COM](#break-the-spell), that I had found 30 years ago and completely forgotten
