@@ -241,14 +241,12 @@ X86.helpINCreg = function(w)
  *
  * This is called by an 80386 control instruction (ie, MOV CR0,reg).
  *
- * TODO: Determine which CR0 bits, if any, cannot be modified by MOV CR0,reg.
- *
  * @this {CPUX86}
  * @param {number} l
  */
 X86.helpLoadCR0 = function(l)
 {
-    this.regCR0 = l;
+    this.regCR0 = l | X86.CR0.ON;
     this.setProtMode();
     if (this.regCR0 & X86.CR0.PG) {
         /*

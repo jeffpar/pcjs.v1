@@ -246,8 +246,6 @@ class DebuggerX86 extends Debugger {
         this.fpu = cmp.getMachineComponent("FPU");
         this.mouse = cmp.getMachineComponent("Mouse");
 
-        // this.video = cmp.getMachineComponent("Video");
-        // this.chipset = cmp.getMachineComponent("ChipSet");
 
         /*
          * Re-initialize Debugger message and command support as needed
@@ -255,6 +253,17 @@ class DebuggerX86 extends Debugger {
         let sMessages = cmp.getMachineParm('messages');
         if (sMessages) this.messageInit(sMessages);
         this.sCommandsInit = cmp.getMachineParm('commands') || this.sCommandsInit;
+
+        /*
+         * If CHIPSET or VIDEO messages are enabled at startup, we enable ChipSet or Video diagnostic info in the
+         * instruction history buffer as appropriate.
+         */
+        if (this.messageEnabled(Messages.CHIPSET)) {
+            this.chipset = cmp.getMachineComponent("ChipSet");
+        }
+        else if (this.messageEnabled(Messages.VIDEO)) {
+            this.video = cmp.getMachineComponent("Video");
+        }
 
         this.cchAddr = bus.getWidth() >> 2;
         this.maskAddr = bus.nBusLimit;
@@ -5576,7 +5585,7 @@ class DebuggerX86 extends Debugger {
                     sign = -1;
                     sDelta = sDelta.substr(1);
                 }
-                let n = this.parseValue(sDelta, sAction);
+                n = this.parseValue(sDelta, sAction);
                 if (n === undefined) return;
                 n = (n * sign)|0;
             }

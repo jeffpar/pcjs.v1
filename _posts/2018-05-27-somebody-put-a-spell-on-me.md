@@ -3,7 +3,7 @@ layout: post
 title: Somebody Put a SPELL On Me
 date: 2018-05-27 10:00:00
 permalink: /blog/2018/05/27/
-preview: /blog/images/a-spell-on-you.jpg
+preview: /blog/images/microsoft-spell-30.jpg
 machines:
   - id: ibm5160
     type: pcx86
@@ -16,7 +16,6 @@ machines:
         name: PC DOS 2.00 (Disk 1)
       B:
         name: MS Word 3.0 (Disk 2)
-    autoStart: true
     autoType: $date\r$time\rB:\rSPELL\r
 ---
 
@@ -64,15 +63,16 @@ I barely noticed the last sentence:
     the only one I've run across so far is Word's SPELL utility.
 
 Recently, a handful of people, like Michal over at the
-[OS/2 Museum](http://www.os2museum.com/wp/the-a20-gate-it-wasnt-wordstar/), and myself, had been looking
-for examples for old software that used the CP/M-style "CALL 5" interface to DOS, instead of (or in addition to)
+[OS/2 Museum](http://www.os2museum.com/wp/a-word-on-the-call-5-spell/), and myself, had been looking
+for examples of old software that used the CP/M-style "CALL 5" interface to DOS, instead of (or in addition to)
 the "INT 21h" interface.
 
-Here was a prime example, [SPELL.COM](#break-the-spell), just sitting in my "Inbox" for 30 years.
+Here was a prime example, [SPELL.COM](#break-the-spell), that I had found 30 years ago and completely forgotten
+about.
 
 And what about that `A20` program, you ask?  I found a copy of that, too.  The `PRO386` was probably the cheap
 80386-based PC clone I had bought in 1987, which had a few issues running OS/2.  Hence this utility, which apparently
-I later adapted to help a resolve an issue with OS/2 compatibility testing.
+I later adapted to help resolve an issue with OS/2 compatibility testing.
 
 {% raw %}
 
@@ -287,13 +287,14 @@ to demonstrate Microsoft's `SPELL.COM` use of "CALL 5".  It's configured as foll
         name: PC DOS 2.00 (Disk 1)
       B:
         name: MS Word 3.0 (Disk 2)
-    autoStart: true
     autoType: $date\r$time\rB:\rSPELL\r
 
 This establishes a breakpoint on the "CALL 5" entry point inside the application's Program Segment Prefix (PSP);
 the breakpoint dumps the previous 10 instructions and then halts.  The "uncompiled" version of PCx86 is being used
 so that [BackTrack](/modules/pcx86/#backtrack-support)&trade; information is available to the PCjs Debugger.
 You can use the command `BC *` to clear all predefined breakpoints and allow the program to run normally.
+
+To start the machine, click "Run" or use the Debugger's `G` command.
 
 {% include machine.html id="ibm5160" %}
 

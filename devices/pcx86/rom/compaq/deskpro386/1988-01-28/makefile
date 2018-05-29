@@ -5,10 +5,13 @@
 FILEDUMP=node ../../../../../../modules/filedump/bin/filedump
 TEXTOUT=node ../../../../../../modules/textout/bin/textout
 
-all: tmp tmp/1988-01-28-regen.rom
+all: tmp tmp/1988-01-28.lst tmp/1988-01-28-regen.rom
 
 tmp:
 	mkdir tmp
+
+tmp/1988-01-28.lst: 1988-01-28.asm
+	nasm -f bin 1988-01-28.asm -l tmp/1988-01-28.lst -o tmp/1988-01-28.rom
 
 tmp/1988-01-28.rom: 1988-01-28.json
 	$(FILEDUMP) --file=1988-01-28.json --output=tmp/1988-01-28.rom --format=rom

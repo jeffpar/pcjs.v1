@@ -154,7 +154,8 @@ var X86 = {
             MASK:   0xFFFF  // these are the only (MSW) bits that the 80286 can access (within CR0)
         },
         ET: 0x00000010,     // coprocessor type (80287 or 80387); always 1 on post-80386 CPUs
-        PG: 0x80000000|0    // 0: paging disabled
+        ON: 0x7FFFFFE0,     // CR0 bits that are always on
+        PG: 0x80000000|0,   // 0: paging disabled
     },
     DR7: {                  // Debug Control Register
         L0:     0x00000001,

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.60.3/manifest.xsl"?>
+<manifest type="software">
+	<title>VGA Black Book Tests</title>
+	<disk id="disk01" size="163840" chs="40:1:8" dir="vga/bin" href="/tests/pcx86/vga/VGABIN.json" md5="418d4a425e9cfb5c1abdda77a70b6cff" md5json="f3e0cf31a0b0e0cd45b8fa2db77a9713">
+		<name>VGA Black Book Binaries</name>
+		<file size="2176" time="2015-07-05 13:12:04" attr="0x20" md5="a6039a2764f6118353a3f4288da798ca">L23-1.EXE</file>
+		<file size="1482" time="2015-06-27 11:56:06" attr="0x20" md5="6bf5ffe137dfb9dd841105aa7c02961e">L24-1.EXE</file>
+		<file size="1253" time="2015-06-26 14:06:42" attr="0x20" md5="53291692973d53c8e2b74daecce2f4e1">L25-1.EXE</file>
+		<file size="1097" time="2015-06-26 14:06:42" attr="0x20" md5="da7c480ca32f7863550fd481e35dabf3">L25-2.EXE</file>
+		<file size="1131" time="2015-06-27 11:56:06" attr="0x20" md5="95df0744b7f9d4a1a0eb925b7f9c2a7f">L25-3.EXE</file>
+		<file size="1131" time="2015-07-07 12:45:31" attr="0x20" md5="83f1307a3cf5cd8f846b8836680e5b75">L25-4.EXE</file>
+		<file size="1322" time="2015-06-27 11:56:08" attr="0x20" md5="f144460b50f3c6b37d3b86a6836066e1">L26-1.EXE</file>
+		<file size="1334" time="2015-06-27 11:56:08" attr="0x20" md5="a1e828fd286d009e20257904004c7890">L26-2.EXE</file>
+		<file size="1327" time="2015-06-27 18:26:50" attr="0x20" md5="88b691a4ee09da7c6912d6c3ac6b5e65">L27-1.EXE</file>
+		<file size="1541" time="2015-06-27 18:26:50" attr="0x20" md5="8ee07824fc3762c751c3a55e9a64b095">L27-2.EXE</file>
+		<file size="13604" time="2015-06-27 18:26:50" attr="0x20" md5="063a8cafc229fe3ee7a8081cfa040c80">L27-3.EXE</file>
+		<file size="2279" time="2015-06-29 10:29:24" attr="0x20" md5="b5b0281dd53cc8e4b2551c6bf507725a">L28-1.EXE</file>
+		<file size="1173" time="2015-06-29 10:29:26" attr="0x20" md5="465f32721ecd29f6751c441a9117efe1">L28-2.EXE</file>
+		<file size="1109" time="2015-06-29 10:29:26" attr="0x20" md5="da8a51e956c37c028f498b241f69d74f">L28-3.EXE</file>
+		<file size="1400" time="2015-07-05 07:59:40" attr="0x20" md5="3ce0aa0c08c4d7f31b4c8cc6905dcdc9">L29-1.EXE</file>
+		<file size="1290" time="2015-07-05 07:59:42" attr="0x20" md5="0012d2284a639c29599c3f9303319977">L29-2.EXE</file>
+		<file size="1687" time="2015-07-05 07:59:42" attr="0x20" md5="760d5113bc96b599e6dde717f87607a6">L29-3.EXE</file>
+		<file size="1242" time="2015-07-05 07:59:42" attr="0x20" md5="afe0b05fadf8c40e72367b09c3a7313d">L29-4.EXE</file>
+		<file size="1391" time="2015-07-05 07:59:42" attr="0x20" md5="39785a1fac63efad81fc17fa094eb3fc">L30-1.EXE</file>
+		<file size="1351" time="2015-07-05 07:59:42" attr="0x20" md5="24d78faac534a3f33b09d3eb2e61d8af">L30-2.EXE</file>
+		<file size="1385" time="2015-07-06 14:11:02" attr="0x20" md5="fd220324891687fec2daa7df4c69b4ff">L31-1.EXE</file>
+		<file size="1245" time="2015-07-05 07:59:42" attr="0x20" md5="f712151640ec2e642a48ea3d9fe30d5f">L31-2.EXE</file>
+		<file size="1430" time="2015-07-05 11:26:24" attr="0x20" md5="ce6b7c9d285993cf846d2304c550376a">L33-1.EXE</file>
+		<file size="664" time="2015-07-05 13:12:04" attr="0x20" md5="99afd32e775e33fd61b1528a5fdd67bb">L34-1.EXE</file>
+		<file size="9185" time="2015-07-07 12:49:09" attr="0x20" md5="5a681bfb97c4090c31f997b42835a92e">L35-1.EXE</file>
+		<file size="8801" time="2015-07-06 15:32:24" attr="0x20" md5="b8dc38438e4bd9b9d7934432683c7931">L35-3.EXE</file>
+		<file size="3643" time="2015-07-06 15:33:46" attr="0x20" md5="68f57fe04f634158cbc688756688c33d">L47-4.EXE</file>
+		<file size="3707" time="2015-07-07 12:42:35" attr="0x20" md5="b8a573145afc437be6274aa7989024af">L47-5.EXE</file>
+		<file size="3683" time="2015-07-07 12:42:37" attr="0x20" md5="2701123a9f12b9beb2ddfec99fe987ce">L47-6.EXE</file>
+		<file size="3923" time="2015-07-07 13:34:01" attr="0x20" md5="9a13fa60f7996af117efd2b5323e101e">L48-2.EXE</file>
+	</disk>
+	<disk id="disk02" size="327680" chs="40:2:8" dir="vga/src" href="/tests/pcx86/vga/VGASRC.json" md5="c2781eab7c17cc3707f234a84940ac22" md5json="4e9cbd21ec0761034e21dbf0c3ae4c16">
+		<name>VGA Black Book Sources</name>
+		<file size="14690" time="2016-08-09 11:53:31" attr="0x20" md5="56d252debe2dafc397491234eba9b78a">L23-1.ASM</file>
+		<file size="7243" time="2016-08-09 11:53:31" attr="0x20" md5="7207c03e33dec4e60448220c82a1e67a">L24-1.ASM</file>
+		<file size="4872" time="2016-08-09 11:53:31" attr="0x20" md5="012d94d75af0aecc80a8223009ec55ee">L25-1.ASM</file>
+		<file size="1606" time="2016-08-09 11:53:31" attr="0x20" md5="b58f7287bc31a1917113815c54827c6d">L25-2.ASM</file>
+		<file size="2347" time="2016-08-09 11:53:31" attr="0x20" md5="415c7fbf207c3632a435eb73f143d996">L25-3.ASM</file>
+		<file size="2437" time="2016-08-09 11:53:31" attr="0x20" md5="4859b61ee97f09a265ed9bfb076bcc8e">L25-4.ASM</file>
+		<file size="6949" time="2016-08-09 11:53:31" attr="0x20" md5="d6465fc787c998c07db3eeaa4b71152b">L26-1.ASM</file>
+		<file size="7170" time="2016-08-09 11:53:31" attr="0x20" md5="34790d4533cf42ee04e15cccb8d39678">L26-2.ASM</file>
+		<file size="5766" time="2016-08-09 11:53:31" attr="0x20" md5="67ebd11cd2901453d9db2f68d3f75850">L27-1.ASM</file>
+		<file size="6055" time="2016-08-09 11:53:31" attr="0x20" md5="60fb97534429b84a36ed46b769f1f06c">L27-2.ASM</file>
+		<file size="3928" time="2016-08-09 11:53:31" attr="0x20" md5="10422ea64a991993d81236085b2000bc">L27-3.ASM</file>
+		<file size="5809" time="2016-08-09 11:53:31" attr="0x20" md5="4f3274c912572cd50d3e1d94d07abd4c">L28-1.ASM</file>
+		<file size="4436" time="2016-08-09 11:53:31" attr="0x20" md5="26da753033dc64fb23e2eac3cb806db6">L28-2.ASM</file>
+		<file size="2285" time="2016-08-09 11:53:31" attr="0x20" md5="eef0170e131e4d47ba99190454965c52">L28-3.ASM</file>
+		<file size="3262" time="2016-08-09 11:53:31" attr="0x20" md5="2ec71f3151dde174a50339a6b76a3a2d">L29-1.ASM</file>
+		<file size="2919" time="2016-08-09 11:53:31" attr="0x20" md5="6c0fbc264e9e36a7086494753c185675">L29-2.ASM</file>
+		<file size="5940" time="2016-08-09 11:53:31" attr="0x20" md5="183d79475011bb0d4a24ee78f3675e78">L29-3.ASM</file>
+		<file size="1614" time="2016-08-09 11:53:31" attr="0x20" md5="5a1201690e3d3f9ed06f8f910c3f2e44">L29-4.ASM</file>
+		<file size="10178" time="2016-08-09 11:53:31" attr="0x20" md5="3f10a110ed09315f5f5522bef3a12793">L30-1.ASM</file>
+		<file size="12499" time="2016-08-09 11:53:31" attr="0x20" md5="46ab57dac96ddfb0756845d2516c7ed8">L30-2.ASM</file>
+		<file size="8073" time="2016-08-09 11:53:31" attr="0x20" md5="e13d59ad3a12a3ebc88088673194cac8">L31-1.ASM</file>
+		<file size="6703" time="2016-08-09 11:53:31" attr="0x20" md5="40071aee13c1a4d5b3a4e947fbecc6dc">L31-2.ASM</file>
+		<file size="5493" time="2016-08-09 11:53:31" attr="0x20" md5="09ae533e3ba8e8a842c2fd23142ccafc">L32-1.ASM</file>
+		<file size="6000" time="2016-08-09 11:53:31" attr="0x20" md5="b4b0c80e508eb0a58b53a2bd1f262e21">L32-2.C</file>
+		<file size="4788" time="2016-08-09 11:53:31" attr="0x20" md5="19cdb0d1dc50b9c576ea4d677a9a77c8">L33-1.ASM</file>
+		<file size="9662" time="2016-08-09 11:53:31" attr="0x20" md5="6dd991d5feb0ac192f94d918674d05eb">L34-1.ASM</file>
+		<file size="6037" time="2016-08-09 11:53:31" attr="0x20" md5="1be8bd5bd98a1d8a134d85cb751224c3">L35-1.C</file>
+		<file size="2371" time="2016-08-09 11:53:31" attr="0x20" md5="d82a2873202dcd48c151e2c987ee0e85">L35-2.C</file>
+		<file size="9258" time="2016-08-09 11:53:31" attr="0x20" md5="4bd04c31cacd1c1bf786d46626ed256a">L35-3.ASM</file>
+		<file size="5353" time="2016-08-09 11:53:31" attr="0x20" md5="2f8a1ee2189b64ea5135964795d620e1">L42-1.C</file>
+		<file size="5294" time="2016-08-09 11:53:31" attr="0x20" md5="2e11bd9e1020f9c14466adb399bed4ea">L42-2.C</file>
+		<file size="715" time="2016-08-09 11:53:31" attr="0x20" md5="9c95c35832af0ef7b22c9cb86a9037fe">L42-3.C</file>
+		<file size="2288" time="2016-08-09 11:53:31" attr="0x20" md5="d1a326c8777a61a25f8d82c7d86754be">L42-4.C</file>
+		<file size="1263" time="2016-08-09 11:53:31" attr="0x20" md5="13171b3d971e03d69429e09b2c70f4c1">L42-5.C</file>
+		<file size="10098" time="2016-08-09 11:53:31" attr="0x20" md5="36a4080e3722642335dc7e289e36db10">L42-6.ASM</file>
+		<file size="2793" time="2016-08-09 11:53:31" attr="0x20" md5="b638400e466affd99564e268e86ddd44">L47-1.ASM</file>
+		<file size="1564" time="2016-08-09 11:53:31" attr="0x20" md5="11e443ca1be1760342b1a9a1c3933b7a">L47-2.ASM</file>
+		<file size="1453" time="2016-08-09 11:53:31" attr="0x20" md5="73b117eb9757c37c05269d7546a9f9f1">L47-3.ASM</file>
+		<file size="3192" time="2016-08-09 11:53:31" attr="0x20" md5="b6fd00764a521bebb7d6b41cb12d0569">L47-4.ASM</file>
+		<file size="4329" time="2016-08-09 11:53:31" attr="0x20" md5="5a54672137f831b2cef5cf561d3d99ae">L47-5.ASM</file>
+		<file size="3980" time="2016-08-09 11:53:31" attr="0x20" md5="166eea74cc457412d9182e47768e8908">L47-6.ASM</file>
+		<file size="680" time="2016-08-09 11:53:31" attr="0x20" md5="39978770c3027f30820e300c0fdb3b3e">L47-7.C</file>
+		<file size="1886" time="2016-08-09 11:53:31" attr="0x20" md5="de51e046955a364396c0708af05791a0">L48-1.C</file>
+		<file size="6563" time="2016-08-09 11:53:31" attr="0x20" md5="eb0113b58febcc5f38b31962d09dcdfd">L48-2.ASM</file>
+		<file size="6612" time="2016-08-09 11:53:31" attr="0x20" md5="46bc960a3c1a6b147ec4c5a9de0b1369">L48-3.ASM</file>
+		<file size="4515" time="2016-08-09 11:53:31" attr="0x20" md5="05d874a6317053c4b22e93e3bebbc63d">L48-4.ASM</file>
+		<file size="1011" time="2016-08-09 11:53:31" attr="0x20" md5="f0ac92719fb1c5c4c4e8984dadee2b9e">MAKEFILE</file>
+		<file size="662" time="2016-08-09 11:53:31" attr="0x20" md5="fdddc7fb001dddeab4149d1b1968a549">REGS.H</file>
+	</disk>
+</manifest>

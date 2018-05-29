@@ -986,6 +986,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
     i = sOutputFile.indexOf("/pcjs-");      // eg, "/pcjs-disks", "pcjs-games", and any similar future disk repos
     if (i < 0) i = sOutputFile.indexOf("/private-disks/");
     if (i < 0) i = sOutputFile.indexOf("/apps/");
+    if (i < 0) i = sOutputFile.indexOf("/tests/");
     if (i > 0) sOutputFile = sOutputFile.substr(i);
 
     var match = sXML.match(new RegExp('[ \t]*<disk ([^>]*href="' + sOutputFile + '"[^>]*?)(>[\\s\\S]*?</disk>|/>)[ \t]*\n?'));

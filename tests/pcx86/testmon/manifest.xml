@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.60.3/manifest.xsl"?>
+<manifest type="software">
+	<title>PCjs INT14 Utilities</title>
+	<disk id="disk01" size="163840" chs="40:1:8" href="/tests/pcx86/testmon/INT14.json" md5="965d8959da4c9413105ed350be563a9b" md5json="ecb8e69bf52c194a2345f97c19f2925d">
+		<file size="13186" time="2018-03-16 13:24:45" attr="0x20" md5="6bcf54c5ff6a1e5c6c7a8f7cb4350716">INT14.ASM</file>
+		<file size="2335" time="2018-03-16 13:24:45" attr="0x20" md5="a560bb968b0bbc7042ca1d58b545adcd">INT14.COM</file>
+		<file size="10462" time="2018-03-16 13:24:45" attr="0x20" md5="9a9a294c92ea5322f820dd492f4b049b">DOWNLOAD.ASM</file>
+		<file size="1826" time="2018-03-16 13:24:45" attr="0x20" md5="0b6372dd27249faf4dc2b0dc69e32119">DOWNLOAD.COM</file>
+		<file size="2950" time="2018-03-16 13:24:45" attr="0x20" md5="ece3f994a47290bdc27bcd276ef4627b">FAKECTTY.ASM</file>
+		<file size="307" time="2018-03-16 13:24:45" attr="0x20" md5="347775f20d096264ed6fd706bdb42f51">FAKECTTY.COM</file>
+		<file size="228" time="2018-03-16 13:24:45" attr="0x20" md5="04570ebda8736d760ae1fc19be40ba92">MK.BAT</file>
+	</disk>
+</manifest>
