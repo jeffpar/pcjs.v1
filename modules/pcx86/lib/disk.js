@@ -2932,19 +2932,17 @@ FileInfo.NE = {
  * TODO: Perhaps we should also maintain a failure count and stop trying to write sectors that reach a certain
  * threshold.  Error-handling, as usual, is the thorniest problem.
  *
- * @typedef {{
- *  sector:     number,
- *  length:     number,
- *  data:       Array.<number>,
- *  pattern:    (number|null),
- *  iCylinder:  number,
- *  iHead:      number,
- *  iModify:    number,
- *  cModify:    number,
- *  file:       FileInfo,
- *  offFile:    number
- * }}
+ * @typedef {Object} SectorInfo
+ * @property {number} sector
+ * @property {number} length
+ * @property {Array.<number>} data
+ * @property {number|null} pattern
+ * @property {number} iCylinder
+ * @property {number} iHead
+ * @property {number} iModify
+ * @property {number} cModify
+ * @property {FileInfo} file
+ * @property {number} offFile
  */
-var SectorInfo;
 
 if (NODE) module.exports = Disk;

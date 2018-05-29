@@ -42,6 +42,25 @@ if (NODE) {
 }
 
 /**
+ * @typedef {Object} Timer
+ * @property {Array.<number>} countInit
+ * @property {Array.<number>} countStart
+ * @property {Array.<number>} countCurrent
+ * @property {Array.<number>} countLatched
+ * @property {number}  bcd          (CTRL.BCD: bit 0)
+ * @property {number}  mode         (CTRL.MODE: bits 1-3)
+ * @property {number}  rw           (CTRL.RW: bits 4-5)
+ * @property {number}  countIndex
+ * @property {number}  countBytes
+ * @property {boolean} fOUT
+ * @property {boolean} fCountLatched
+ * @property {boolean} fCounting
+ * @property {number}  nCyclesStart
+ * @property {number}  bStatus
+ * @property {boolean} fStatusLatched
+ */
+
+/**
  * class ChipSet
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
@@ -376,7 +395,8 @@ class ChipSet extends Component {
          */
         this.bPIT0Ctrl = null;          // tracks writes to port 0x43
         this.bPIT1Ctrl = null;          // tracks writes to port 0x4B (MODEL_COMPAQ_DESKPRO386 only)
-        this.aTimers = new Array((this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386? 6 : 3);
+
+        this.aTimers = /** @type {Array.<Timer>} */ (new Array((this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386? 6 : 3));
         for (i = 0; i < this.aTimers.length; i++) {
             this.initTimer(i);
         }
@@ -3033,10 +3053,6 @@ class ChipSet extends Component {
      * don't update any of the timers until after we've finished a burst of CPU cycles, we must reduce the current
      * burst cycle count, so that the current instruction burst will end at the same time a timer interrupt is expected.
      *
-     * Note that in some cases, if the number of cycles remaining in the current burst is less than the target,
-     * this may have the effect of *lengthening* the current burst instead of shortening it, but stepCPU() should be
-     * OK with that.
-     *
      * @this {ChipSet}
      * @param {number} iPIT (0 or 1)
      * @param {number} iPITTimer (0, 1, or 2)
@@ -3388,7 +3404,7 @@ class ChipSet extends Component {
      *      1: DMA refresh
      *      2: Sound/Cassette
      * @param {boolean} [fCycleReset] is true if a cycle-count reset is about to occur
-     * @return {Object} timer
+     * @return {Timer}
      */
     updateTimer(iTimer, fCycleReset)
     {

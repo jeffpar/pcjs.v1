@@ -223,15 +223,19 @@ aMachines.forEach(function(machineType) {
                     .pipe(gulpReplace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, ""))
                     .pipe(gulpReplace(/[ \t]*if\s*\(NODE\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
                     .pipe(gulpReplace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
-                    .pipe(gulpReplace(/\/\*\*[^@]*@typedef\s*{[A-Z][A-Za-z0-9_]+}\s*(\S+)\s*([\s\S]*?)\*\//g, function(match, type, props) {
-                        let sType = "/** @typedef {{ ";
-                        let sProps = "";
+                    .pipe(gulpReplace(/\/\*\*[^@]*@typedef\s*{([A-Z][A-Za-z0-9_<>.]+)}\s*(\S+)\s*([\s\S]*?)\*\//g, function(match, def, type, props) {
+                        let sType = "/** @typedef {", sProps = "";
                         let reProps = /@property\s*{([^}]*)}\s*(\[|)([^\s\]]+)]?/g, matchProps;
                         while (matchProps = reProps.exec(props)) {
                             if (sProps) sProps += ", ";
-                            sProps += matchProps[3] + ": " + (matchProps[2]? ("(" + matchProps[1] + "|undefined)") : matchProps[1]);
+                            sProps += matchProps[3] + ": " + (matchProps[2]? ("(" + matchProps[1] + "|undefined)") : (matchProps[1].indexOf('|') < 0? matchProps[1] : "(" + matchProps[1] + ")"));
                         }
-                        sType += sProps + " }} */\nvar " + type + ";";
+                        if (!sProps) {
+                            sType += def;
+                        } else {
+                            sType += "{ " + sProps + " }";
+                        }
+                        sType += "} */\nvar " + type + ";";
                         return sType;
                     }))
                     .pipe(gulpReplace(/[ \t]*(if *\(DEBUG\) *|)[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
