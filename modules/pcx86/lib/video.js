@@ -452,47 +452,20 @@ class Card extends Controller {
                 this.initEGA(data[6], nMonitorType);
             }
 
-            let monitorSpecs;
-            /*
-             * This is only necessary for machines that apply this.cycleCounts.nWordCyclePenalty
-             * to getIPByte(); currently, we're not doing that, so this work-around is not required.
-             *
-             *  if (video.cpu.model <= X86.MODEL_8088) monitorSpecs = Video.monitorSpecsXT[nMonitorType];
-             */
-            if (!monitorSpecs) {
-                monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
-            }
+            let monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
 
             /*
-             * Let's look at an example of the calculations below for the COLOR monitor on an IBM PC:
-             *
-             *      nCyclesDefault:     4772727
-             *      nCyclesHorzPeriod:  (4772727 / 15700 nHorzPeriodsPerSec) = 303
-             *      nCyclesHorzActive:  (303 * 85%) = 257
-             *      nCyclesVertPeriod:  (303 * 208 nHorzPeriodsPerFrame) = 63024
-             *      nCyclesVertActive:  (63024 * 96%) = 60503
-             *
-             * getRetraceBits() calculated elapsedCycles % 63024 (nCyclesVertPeriod), and whenever that
-             * remainder was > 60503 (nCyclesVertActive), we were deemed in the "inactive" retrace period.
-             *
-             * That logic has been superseded by a startVerticalRetrace() timer that fires every nCyclesVertPeriod,
-             * which then snaps the current cycle count in nCyclesVertRetrace.  Whenever getRetraceBits() is called,
-             * it too examines the current cycle count, and when the cycle count delta exceeds nCyclesVertPeriod -
-             * nCyclesVertActive, vertical retrace has ended.
-             *
-             * Here's another example of the calculations below for the EGACOLOR monitor on an IBM PC:
-             *
-             *      nCyclesDefault:     4772727
-             *      nCyclesHorzPeriod:  (4772727 / 21850 nHorzPeriodsPerSec) = 218
-             *      nCyclesHorzActive:  (218 * 85%) = 185
-             *      nCyclesVertPeriod:  (218 * 364 nHorzPeriodsPerFrame) = 79352
-             *      nCyclesVertActive:  (79352 * 96%) = 76177
+             * nCyclesVertPeriod determines how frequently startVerticalRetrace() is called.  That function
+             * snaps the current cycle count in nCyclesVertRetrace.  Then whenever getRetraceBits() is called,
+             * it subtracts nCyclesVertRetrace from the current cycle count, and whenever the delta exceeds
+             * nCyclesVertPeriod - nCyclesVertActive, vertical retrace has ended.  Similarly, horizontal retrace
+             * ends whenever that delta MOD nCyclesHorzPeriod exceeds nCyclesHorzActive.
              */
             let nCyclesDefault = video.cpu.getBaseCyclesPerSecond();
             this.nCyclesHorzPeriod = (nCyclesDefault / monitorSpecs.nHorzPeriodsPerSec)|0;
             this.nCyclesHorzActive = (this.nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100)|0;
-            this.nCyclesVertPeriod = (this.nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame)|0;
-            this.nCyclesVertActive = (this.nCyclesVertPeriod * monitorSpecs.percentVertActive / 100)|0;
+            this.nCyclesVertActive = (this.nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame)|0;
+            this.nCyclesVertPeriod = (this.nCyclesVertActive / (monitorSpecs.percentVertActive / 100))|0;
             this.nCyclesVertRetrace = (data[7] || 0);
         }
     }
@@ -3473,7 +3446,9 @@ class Video extends Component {
                 this.timerRetrace = this.cpu.addTimer(this.id, function startVerticalRetrace() {
                     let card = video.cardActive;
                     card.nCyclesVertRetrace = video.cpu.getCycles();
-                    video.printf("vertical retrace timer fired (%d cycles)\n", card.nCyclesVertRetrace);
+                    if (video.messageEnabled(Messages.VIDEO | Messages.INT)) {
+                        video.printf("vertical retrace timer fired (%d cycles)\n", card.nCyclesVertRetrace);
+                    }
                     if (video.nIRQ) {
                         if (!(card.regCRTData[Card.CRTC.EGA.VREND.INDX] & Card.CRTC.EGA.VREND.DISABLE_VRINT)) {
                             if (video.chipset) video.chipset.setIRR(video.nIRQ);
@@ -3518,7 +3493,8 @@ class Video extends Component {
                             }
                         }
                         video.msUpdatePrev = msUpdate - (msDelta >= video.msUpdateInterval? 0 : msDelta);
-                    } else {
+                    }
+                    else if (video.messageEnabled(Messages.VIDEO | Messages.INT)) {
                         video.printf("skipping update (%dms too soon)\n", -msDelta);
                     }
                     video.latchStartAddress();
@@ -6451,12 +6427,13 @@ class Video extends Component {
             card.nCyclesVertRetrace = nCycles;
             nCyclesElapsed = 0;
         }
-        if (nCyclesElapsed < card.nCyclesVertPeriod - card.nCyclesVertActive) {
+        nCyclesElapsed -= card.nCyclesVertPeriod - card.nCyclesVertActive;
+        if (nCyclesElapsed < 0) {
             b |= Card.CGA.STATUS.VRETRACE | Card.CGA.STATUS.RETRACE;
             // this.printf("vertical retrace (%d cycles)\n", nCyclesElapsed);
         } else {
             let nCyclesHorzRemain = nCyclesElapsed % card.nCyclesHorzPeriod;
-            if (nCyclesHorzRemain < card.nCyclesHorzPeriod - card.nCyclesHorzActive) {
+            if (nCyclesHorzRemain > card.nCyclesHorzActive) {
                 b |= Card.CGA.STATUS.RETRACE;
                 // this.printf("horizontal retrace (%d cycles)\n", nCyclesElapsed);
             } else {
@@ -7985,84 +7962,57 @@ Video.MODEL = {
  * @property {number} nHorzPeriodsPerFrame
  * @property {number} percentHorzActive
  * @property {number} percentVertActive
- *
- * From these monitor specs, we calculate the following values for a given Card:
- *
- *      nCyclesDefault = cpu.getBaseCyclesPerSecond();          // eg, 4772727
- *      nCyclesHorzPeriod = (nCyclesDefault / monitorSpecs.nHorzPeriodsPerSec) | 0;
- *      nCyclesHorzActive = (nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100) | 0;
- *      nCyclesVertPeriod = nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame;
- *      nCyclesVertActive = (nCyclesVertPeriod * monitorSpecs.percentVertActive / 100) | 0;
  */
 
 /**
  * @type {Object}
  */
 Video.monitorSpecs = {};
-Video.monitorSpecsXT = {};
 
 /**
- * NOTE: Based on trial-and-error, 208 is the magic number of horizontal syncs per vertical sync that
- * yielded the necessary number of "horizontal enables" (200 or 0xC8) in the EGA ROM BIOS at C000:03D0.
+ * NOTE: The number of horizontal periods per frame (200) is dictated by the EGA ROM BIOS at C000:03D0.
  *
  * @type {MonitorSpecs}
  */
 Video.monitorSpecs[ChipSet.MONITOR.COLOR] = {
     nHorzPeriodsPerSec: 15700,
-    nHorzPeriodsPerFrame: 208,
-    percentHorzActive: 85,
+    nHorzPeriodsPerFrame: 200,
+    percentHorzActive: 75,
     percentVertActive: 96
 };
 
 /**
- * NOTE: Based on trial-and-error, 364 is the magic number of horizontal syncs per vertical sync that
- * yielded the necessary number of "horizontal enables" (350 or 0x15E) in the EGA ROM BIOS at C000:03D0.
+ * NOTE: The number of horizontal periods per frame (350) is dictated by the EGA ROM BIOS at C000:03D0.
  *
  * @type {MonitorSpecs}
  */
 Video.monitorSpecs[ChipSet.MONITOR.MONO] = {
     nHorzPeriodsPerSec: 18432,
-    nHorzPeriodsPerFrame: 364,
-    percentHorzActive: 85,
-    percentVertActive: 96
-};
-
-Video.monitorSpecsXT[ChipSet.MONITOR.MONO] = {
-    nHorzPeriodsPerSec: 18432,
-    nHorzPeriodsPerFrame: 365,
-    percentHorzActive: 77,
+    nHorzPeriodsPerFrame: 350,
+    percentHorzActive: 75,
     percentVertActive: 96
 };
 
 /**
+ * NOTE: The number of horizontal periods per frame (350) is dictated by the EGA ROM BIOS at C000:03D0.
+ *
  * @type {MonitorSpecs}
  */
 Video.monitorSpecs[ChipSet.MONITOR.EGACOLOR] = {
     nHorzPeriodsPerSec: 21850,
-    nHorzPeriodsPerFrame: 364,
-    percentHorzActive: 80,
+    nHorzPeriodsPerFrame: 350,
+    percentHorzActive: 75,
     percentVertActive: 96
 };
 
 /**
- * @type {MonitorSpecs}
- */
-Video.monitorSpecsXT[ChipSet.MONITOR.EGACOLOR] = {
-    nHorzPeriodsPerSec: 21850,
-    nHorzPeriodsPerFrame: 365,
-    percentHorzActive: 77,
-    percentVertActive: 96
-};
-
-/**
- * NOTE: As above, the following values are based purely on trial-and-error, to yield results that fall
- * squarely within the bounds of the IBM VGA ROM timing requirements; see the IBM VGA ROM code at C000:024A.
+ * NOTE: The number of horizontal periods per frame (410) is dictated by the IBM VGA ROM code at C000:024A.
  *
  * @type {MonitorSpecs}
  */
 Video.monitorSpecs[ChipSet.MONITOR.VGACOLOR] = {
     nHorzPeriodsPerSec: 16700,
-    nHorzPeriodsPerFrame: 480,
+    nHorzPeriodsPerFrame: 410,
     percentHorzActive: 85,
     percentVertActive: 83
 };

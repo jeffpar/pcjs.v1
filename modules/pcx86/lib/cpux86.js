@@ -1160,7 +1160,7 @@ class CPUX86 extends CPU {
                 this.regEDX = 0x0300;       // in the absence of a specific stepping, set revision (DL) to zero
                 break;
             }
-            this.regCR0 = X86.CR0.ET;       // formerly MSW
+            this.regCR0 = X86.CR0.ON | X86.CR0.ET;
             this.regCR1 = 0;                // reserved
             this.regCR2 = 0;                // page fault linear address (PFLA)
             this.regCR3 = 0;                // page directory base register (PDBR)
@@ -3791,17 +3791,11 @@ class CPUX86 extends CPU {
         let newLIP = this.checkIP(1);
         let b = (PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP));
         if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
-
         /*
          * With the following cycle penalty (which really only affects 8086/8088 CPUs), PC Tools 4.30
          * correctly reports an IBM PC-relative speed of 100% (assuming you're using a 4.77Mhz configuration).
-         *
-         * However, this creates monitor timing issues in the Video component; there's a work-around for that
-         * (see monitorSpecsXT) but this also slows the machine down much more than I would have expected, so
-         * for now, it's disabled.
          */
-        // this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
-
+        this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
         this.regLIP = newLIP;
         return b;
     }
