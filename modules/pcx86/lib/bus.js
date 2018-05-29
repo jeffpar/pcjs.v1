@@ -1678,54 +1678,33 @@ class Bus extends Component {
  */
 
 /**
- * @typedef {number}
+ * @typedef {number} BlockInfo
  */
-var BlockInfo;
-
-/**
- * This defines the BlockInfo bit fields used by scanMemory() when it creates the aBlocks array.
- *
- * @typedef {{
- *  num:    BitField,
- *  count:  BitField,
- *  btmod:  BitField,
- *  type:   BitField
- * }}
- */
-Bus.BlockInfo = Usr.defineBitFields({num:20, count:8, btmod:1, type:3});
 
 /**
  * BusInfo object definition (returned by scanMemory())
  *
- *  cbTotal:    total bytes allocated
- *  cBlocks:    total Memory blocks allocated
- *  aBlocks:    array of allocated Memory block numbers
- *
- * @typedef {{
- *  cbTotal:    number,
- *  cBlocks:    number,
- *  aBlocks:    Array.<BlockInfo>
- * }}
+ * @typedef {Object} BusInfo
+ * @property {number} cbTotal           (total bytes allocated)
+ * @property {number} cBlocks           (total Memory blocks allocated)
+ * @property Array.<BlockInfo> aBlocks  (array of allocated Memory block numbers)
  */
-var BusInfo;
+
+/*
+ * This defines the BlockInfo bit fields used by scanMemory() when it creates the aBlocks array.
+ */
+Bus.BlockInfo = Usr.defineBitFields({num:20, count:8, btmod:1, type:3});
 
 if (BACKTRACK) {
     /**
      * BackTrack object definition
      *
-     *  obj:        reference to the source object (eg, ROM object, Sector object)
-     *  off:        the offset within the source object that this object refers to
-     *  slot:       the slot (+1) in abtObjects which this object currently occupies
-     *  refs:       the number of memory references, as recorded by writeBackTrack()
-     *
-     * @typedef {{
-     *  obj:        Object,
-     *  off:        number,
-     *  slot:       number,
-     *  refs:       number
-     * }}
+     * @typedef {Object} BackTrack
+     * @property {Object} obj   (reference to the source object (eg, ROM object, Sector object))
+     * @property {number} off   (the offset within the source object that this object refers to)
+     * @property {number} slot  (the slot (+1) in abtObjects which this object currently occupies)
+     * @property {number} refs  (the number of memory references, as recorded by writeBackTrack())
      */
-    var BackTrack;
 
     /*
      * BackTrack indexes are 31-bit values, where bits 0-8 store an object offset (0-511) and bits 16-30 store

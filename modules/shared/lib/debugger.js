@@ -38,19 +38,12 @@ if (NODE) {
  *
  * This is the basic structure; other debuggers may extend it.
  *
- *      addr            address
- *      fTemporary      true if this is a temporary breakpoint address
- *      sCmd            set for breakpoint addresses if there's an associated command string
- *      aCmds           preprocessed commands (from sCmd)
- *
- * @typedef {{
- *      addr:(number|undefined),
- *      fTemporary:(boolean|undefined),
- *      sCmd:(string|undefined),
- *      aCmds:(Array.<string>|undefined)
- * }}
+ * @typedef {Object} DbgAddr
+ * @property {number}  [addr]
+ * @property {boolean} [fTemporary]     (true if this is a temporary breakpoint address)
+ * @property {string}  [sCmd]           (set for breakpoint addresses if there's an associated command string)
+ * @property {Array.<string>} [aCmds]   (preprocessed commands (from sCmd))
  */
-var DbgAddr;
 
 /**
  * Since the Closure Compiler treats ES6 classes as @struct rather than @dict by default,

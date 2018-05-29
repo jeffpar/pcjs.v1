@@ -1572,17 +1572,10 @@ Str.HexUpperCase = "0123456789ABCDEF";
  * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2018
  */
 
-/**
- * @typedef {{
- *  mask:       number,
- *  shift:      number
- * }}
- */
+/** @typedef {{ mask: number, shift: number }} */
 var BitField;
 
-/**
- * @typedef {Object.<BitField>}
- */
+/** @typedef {Object.<BitField>} */
 var BitFields;
 
 class Usr {
@@ -2669,45 +2662,54 @@ class Web {
     /**
      * downloadFile(sData, sType, fBase64, sFileName)
      *
-     * @param {string} sData
+     * @param {string|Uint8Array} sData
      * @param {string} sType
      * @param {boolean} [fBase64]
      * @param {string} [sFileName]
      */
     static downloadFile(sData, sType, fBase64, sFileName)
     {
-        let link = null, sAlert;
-        let sURI = "data:application/" + sType + (fBase64? ";base64" : "") + ",";
+        let link = null, sAlert, sURI;
 
-        if (typeof sData != 'string'
-            && typeof Blob == 'function' && typeof URL != 'undefined' && URL && typeof URL.createObjectURL == 'function') {
-            let blob = new Blob([sData], { type: 'application/octet-stream' });
-            sURI = URL.createObjectURL(blob);
+        if (typeof sData != 'string') {
+            if (typeof Blob == 'function' && typeof URL != 'undefined' && URL && typeof URL.createObjectURL == 'function') {
+                let blob = new Blob([sData], {type: 'application/octet-stream'});
+                sURI = URL.createObjectURL(blob);
+            }
         }
-        else if (!Web.isUserAgent("Firefox")) {
-            sURI += (fBase64? sData : encodeURI(sData));
-        } else {
-            sURI += (fBase64? sData : encodeURIComponent(sData));
+        else {
+            sURI = "data:application/" + sType + (fBase64? ";base64" : "") + ",";
+            if (!Web.isUserAgent("Firefox")) {
+                sURI += (fBase64? sData : encodeURI(sData));
+            } else {
+                sURI += (fBase64? sData : encodeURIComponent(sData));
+            }
         }
-        if (sFileName) {
-            link = document.createElement('a');
-            if (typeof link.download != 'string') link = null;
+        if (!sURI) {
+            sAlert = 'Operation unsupported by your browser.';
         }
-        if (link) {
-            link.href = sURI;
-            link.download = sFileName;
-            document.body.appendChild(link);    // Firefox allegedly requires the link to be in the body
-            link.click();
-            document.body.removeChild(link);
-            sAlert = 'Check your Downloads folder for ' + sFileName + '.';
-            // if (Web.isUserAgent("Chrome")) {
-            //     sAlert += '\n\nIn Chrome, after clicking OK, you may ALSO have to select the "Window" menu, choose "Downloads", and then locate this download and select "Keep".';
-            //     sAlert += '\n\nThis is part of Chrome\'s "Security By Jumping Through Extra Hoops" technology, which is much easier for Google to implement than actually checking for something malicious.';
-            //     sAlert += '\n\nAnd for the record, there is nothing malicious on the PCjs website.';
-            // }
-        } else {
-            window.open(sURI);
-            sAlert = 'Check your browser for a new window/tab containing the requested data' + (sFileName? (' (' + sFileName + ')') : '') + '.';
+        else {
+            if (sFileName) {
+                link = document.createElement('a');
+                if (typeof link.download != 'string') link = null;
+            }
+            if (link) {
+                link.href = sURI;
+                link.download = sFileName;
+                document.body.appendChild(link);    // Firefox allegedly requires the link to be in the body
+                link.click();
+                document.body.removeChild(link);
+                sAlert = 'Check your Downloads folder for ' + sFileName + '.';
+                // if (Web.isUserAgent("Chrome")) {
+                //     sAlert += '\n\nIn Chrome, after clicking OK, you may ALSO have to select the "Window" menu, choose "Downloads", and then locate this download and select "Keep".';
+                //     sAlert += '\n\nThis is part of Chrome\'s "Security By Jumping Through Extra Hoops" technology, which is much easier for Google to implement than actually checking for something malicious.';
+                //     sAlert += '\n\nAnd for the record, there is nothing malicious on the PCjs website.';
+                // }
+            }
+            else {
+                window.open(sURI);
+                sAlert = 'Check your browser for a new window/tab containing the requested data' + (sFileName? (' (' + sFileName + ')') : '') + '.';
+            }
         }
         return sAlert;
     }
@@ -7787,19 +7789,7 @@ Messages.CATEGORIES = {
  */
 
 
-/**
- * Region object definition
- *
- *  iBlock:     starting block number
- *  cBlocks:    number of blocks spanned by region
- *  type:       type of all blocks in the region (see Memory.TYPE.*)
- *
- * @typedef {{
- *  iBlock:     number,
- *  cBlocks:    number,
- *  type:       number
- * }} Region
- */
+/** @typedef {{ iBlock: number, cBlocks: number, type: number }} */
 var Region;
 
 class Color {
@@ -10523,54 +10513,20 @@ class Bus extends Component {
  */
 
 /**
- * @typedef {number}
+ * @typedef {number} BlockInfo
  */
-var BlockInfo;
 
-/**
+/** @typedef {{ cbTotal: number, cBlocks: number }} */
+var BusInfo;
+
+/*
  * This defines the BlockInfo bit fields used by scanMemory() when it creates the aBlocks array.
- *
- * @typedef {{
- *  num:    BitField,
- *  count:  BitField,
- *  btmod:  BitField,
- *  type:   BitField
- * }}
  */
 Bus.BlockInfo = Usr.defineBitFields({num:20, count:8, btmod:1, type:3});
 
-/**
- * BusInfo object definition (returned by scanMemory())
- *
- *  cbTotal:    total bytes allocated
- *  cBlocks:    total Memory blocks allocated
- *  aBlocks:    array of allocated Memory block numbers
- *
- * @typedef {{
- *  cbTotal:    number,
- *  cBlocks:    number,
- *  aBlocks:    Array.<BlockInfo>
- * }}
- */
-var BusInfo;
-
 if (BACKTRACK) {
-    /**
-     * BackTrack object definition
-     *
-     *  obj:        reference to the source object (eg, ROM object, Sector object)
-     *  off:        the offset within the source object that this object refers to
-     *  slot:       the slot (+1) in abtObjects which this object currently occupies
-     *  refs:       the number of memory references, as recorded by writeBackTrack()
-     *
-     * @typedef {{
-     *  obj:        Object,
-     *  off:        number,
-     *  slot:       number,
-     *  refs:       number
-     * }}
-     */
-    var BackTrack;
+    /** @typedef {{ obj: Object, off: number, slot: number, refs: number }} */
+var BackTrack;
 
     /*
      * BackTrack indexes are 31-bit values, where bits 0-8 store an object offset (0-511) and bits 16-30 store
@@ -38173,6 +38129,9 @@ X86.aOpGrp8 = [
  */
 
 
+/** @typedef {{ countInit: Array.<number>, countStart: Array.<number>, countCurrent: Array.<number>, countLatched: Array.<number>, bcd: number, mode: number, rw: number, countIndex: number, countBytes: number, fOUT: boolean, fCountLatched: boolean, fCounting: boolean, nCyclesStart: number, bStatus: number, fStatusLatched: boolean }} */
+var Timer;
+
 /**
  * class ChipSet
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
@@ -38508,7 +38467,8 @@ class ChipSet extends Component {
          */
         this.bPIT0Ctrl = null;          // tracks writes to port 0x43
         this.bPIT1Ctrl = null;          // tracks writes to port 0x4B (MODEL_COMPAQ_DESKPRO386 only)
-        this.aTimers = new Array((this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386? 6 : 3);
+
+        this.aTimers = /** @type {Array.<Timer>} */ (new Array((this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386? 6 : 3));
         for (i = 0; i < this.aTimers.length; i++) {
             this.initTimer(i);
         }
@@ -41165,10 +41125,6 @@ class ChipSet extends Component {
      * don't update any of the timers until after we've finished a burst of CPU cycles, we must reduce the current
      * burst cycle count, so that the current instruction burst will end at the same time a timer interrupt is expected.
      *
-     * Note that in some cases, if the number of cycles remaining in the current burst is less than the target,
-     * this may have the effect of *lengthening* the current burst instead of shortening it, but stepCPU() should be
-     * OK with that.
-     *
      * @this {ChipSet}
      * @param {number} iPIT (0 or 1)
      * @param {number} iPITTimer (0, 1, or 2)
@@ -41520,7 +41476,7 @@ class ChipSet extends Component {
      *      1: DMA refresh
      *      2: Sound/Cassette
      * @param {boolean} [fCycleReset] is true if a cycle-count reset is about to occur
-     * @return {Object} timer
+     * @return {Timer}
      */
     updateTimer(iTimer, fCycleReset)
     {
@@ -63211,49 +63167,7 @@ FileInfo.NE = {
      */
 };
 
-/**
- * Every Sector object (once loaded, parsed, and "normalized") should have ALL of the following named properties:
- *
- *      'sector':   sector number
- *      'length':   size of the sector, in bytes
- *      'data':     array of dwords
- *      'pattern':  dword pattern to use for empty or partial sectors (or null if sector still needs to be loaded)
- *
- * initSector() also sets the following properties, to help us quickly identify its location within aDiskData:
- *
- *      iCylinder
- *      iHead
- *
- * In addition, we will maintain the following information on a per-sector basis, as sectors are modified:
- *
- *      iModify:    index of first modified dword in sector
- *      cModify:    number of modified dwords in sector
- *      fDirty:     true if sector is dirty, false if clean (or cleaning in progress)
- *
- * fDirty is used in conjunction with "demandrw" disks; it is set to true whenever the sector is modified, and is
- * set to false whenever the sector has been sent to the server.  If the server write succeeds and fDirty is still
- * false, then the sector modifications are removed (cModify is set to zero).  If the write succeeds but fDirty was
- * set to true again in the meantime, then all the sector modifications (even those that were just written) remain
- * in place (since we don't keep track of more than one modification range within a sector).  And if the write failed,
- * then fDirty is set back to true and again all modifications remain in place; the best we can do is schedule another
- * write attempt.
- *
- * TODO: Perhaps we should also maintain a failure count and stop trying to write sectors that reach a certain
- * threshold.  Error-handling, as usual, is the thorniest problem.
- *
- * @typedef {{
- *  sector:     number,
- *  length:     number,
- *  data:       Array.<number>,
- *  pattern:    (number|null),
- *  iCylinder:  number,
- *  iHead:      number,
- *  iModify:    number,
- *  cModify:    number,
- *  file:       FileInfo,
- *  offFile:    number
- * }}
- */
+/** @typedef {{ sector: number, length: number, data: Array.<number>, pattern: (number|null), iCylinder: number, iHead: number, iModify: number, cModify: number, file: FileInfo, offFile: number }} */
 var SectorInfo;
 
 
@@ -69299,23 +69213,7 @@ Web.onInit(HDC.init);
  */
 
 
-/**
- * Debugger Address Object
- *
- * This is the basic structure; other debuggers may extend it.
- *
- *      addr            address
- *      fTemporary      true if this is a temporary breakpoint address
- *      sCmd            set for breakpoint addresses if there's an associated command string
- *      aCmds           preprocessed commands (from sCmd)
- *
- * @typedef {{
- *      addr:(number|undefined),
- *      fTemporary:(boolean|undefined),
- *      sCmd:(string|undefined),
- *      aCmds:(Array.<string>|undefined)
- * }}
- */
+/** @typedef {{ addr: (number|undefined), fTemporary: (boolean|undefined), sCmd: (string|undefined), aCmds: (Array.<string>|undefined) }} */
 var DbgAddr;
 
 /**

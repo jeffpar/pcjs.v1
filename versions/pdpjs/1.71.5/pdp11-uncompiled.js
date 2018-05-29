@@ -1572,17 +1572,10 @@ Str.HexUpperCase = "0123456789ABCDEF";
  * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2018
  */
 
-/**
- * @typedef {{
- *  mask:       number,
- *  shift:      number
- * }}
- */
+/** @typedef {{ mask: number, shift: number }} */
 var BitField;
 
-/**
- * @typedef {Object.<BitField>}
- */
+/** @typedef {Object.<BitField>} */
 var BitFields;
 
 class Usr {
@@ -2669,45 +2662,54 @@ class Web {
     /**
      * downloadFile(sData, sType, fBase64, sFileName)
      *
-     * @param {string} sData
+     * @param {string|Uint8Array} sData
      * @param {string} sType
      * @param {boolean} [fBase64]
      * @param {string} [sFileName]
      */
     static downloadFile(sData, sType, fBase64, sFileName)
     {
-        let link = null, sAlert;
-        let sURI = "data:application/" + sType + (fBase64? ";base64" : "") + ",";
+        let link = null, sAlert, sURI;
 
-        if (typeof sData != 'string'
-            && typeof Blob == 'function' && typeof URL != 'undefined' && URL && typeof URL.createObjectURL == 'function') {
-            let blob = new Blob([sData], { type: 'application/octet-stream' });
-            sURI = URL.createObjectURL(blob);
+        if (typeof sData != 'string') {
+            if (typeof Blob == 'function' && typeof URL != 'undefined' && URL && typeof URL.createObjectURL == 'function') {
+                let blob = new Blob([sData], {type: 'application/octet-stream'});
+                sURI = URL.createObjectURL(blob);
+            }
         }
-        else if (!Web.isUserAgent("Firefox")) {
-            sURI += (fBase64? sData : encodeURI(sData));
-        } else {
-            sURI += (fBase64? sData : encodeURIComponent(sData));
+        else {
+            sURI = "data:application/" + sType + (fBase64? ";base64" : "") + ",";
+            if (!Web.isUserAgent("Firefox")) {
+                sURI += (fBase64? sData : encodeURI(sData));
+            } else {
+                sURI += (fBase64? sData : encodeURIComponent(sData));
+            }
         }
-        if (sFileName) {
-            link = document.createElement('a');
-            if (typeof link.download != 'string') link = null;
+        if (!sURI) {
+            sAlert = 'Operation unsupported by your browser.';
         }
-        if (link) {
-            link.href = sURI;
-            link.download = sFileName;
-            document.body.appendChild(link);    // Firefox allegedly requires the link to be in the body
-            link.click();
-            document.body.removeChild(link);
-            sAlert = 'Check your Downloads folder for ' + sFileName + '.';
-            // if (Web.isUserAgent("Chrome")) {
-            //     sAlert += '\n\nIn Chrome, after clicking OK, you may ALSO have to select the "Window" menu, choose "Downloads", and then locate this download and select "Keep".';
-            //     sAlert += '\n\nThis is part of Chrome\'s "Security By Jumping Through Extra Hoops" technology, which is much easier for Google to implement than actually checking for something malicious.';
-            //     sAlert += '\n\nAnd for the record, there is nothing malicious on the PCjs website.';
-            // }
-        } else {
-            window.open(sURI);
-            sAlert = 'Check your browser for a new window/tab containing the requested data' + (sFileName? (' (' + sFileName + ')') : '') + '.';
+        else {
+            if (sFileName) {
+                link = document.createElement('a');
+                if (typeof link.download != 'string') link = null;
+            }
+            if (link) {
+                link.href = sURI;
+                link.download = sFileName;
+                document.body.appendChild(link);    // Firefox allegedly requires the link to be in the body
+                link.click();
+                document.body.removeChild(link);
+                sAlert = 'Check your Downloads folder for ' + sFileName + '.';
+                // if (Web.isUserAgent("Chrome")) {
+                //     sAlert += '\n\nIn Chrome, after clicking OK, you may ALSO have to select the "Window" menu, choose "Downloads", and then locate this download and select "Keep".';
+                //     sAlert += '\n\nThis is part of Chrome\'s "Security By Jumping Through Extra Hoops" technology, which is much easier for Google to implement than actually checking for something malicious.';
+                //     sAlert += '\n\nAnd for the record, there is nothing malicious on the PCjs website.';
+                // }
+            }
+            else {
+                window.open(sURI);
+                sAlert = 'Check your browser for a new window/tab containing the requested data' + (sFileName? (' (' + sFileName + ')') : '') + '.';
+            }
         }
         return sAlert;
     }
@@ -24206,23 +24208,7 @@ RX11.UNIBUS_IOTABLE = {
  */
 
 
-/**
- * Debugger Address Object
- *
- * This is the basic structure; other debuggers may extend it.
- *
- *      addr            address
- *      fTemporary      true if this is a temporary breakpoint address
- *      sCmd            set for breakpoint addresses if there's an associated command string
- *      aCmds           preprocessed commands (from sCmd)
- *
- * @typedef {{
- *      addr:(number|undefined),
- *      fTemporary:(boolean|undefined),
- *      sCmd:(string|undefined),
- *      aCmds:(Array.<string>|undefined)
- * }}
- */
+/** @typedef {{ addr: (number|undefined), fTemporary: (boolean|undefined), sCmd: (string|undefined), aCmds: (Array.<string>|undefined) }} */
 var DbgAddr;
 
 /**

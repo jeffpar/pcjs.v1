@@ -42,17 +42,11 @@ if (NODE) {
 /**
  * Region object definition
  *
- *  iBlock:     starting block number
- *  cBlocks:    number of blocks spanned by region
- *  type:       type of all blocks in the region (see Memory.TYPE.*)
- *
- * @typedef {{
- *  iBlock:     number,
- *  cBlocks:    number,
- *  type:       number
- * }} Region
+ * @typedef {Object} Region
+ * @property {number} iBlock    (starting block number)
+ * @property {number} cBlocks   (number of blocks spanned by region)
+ * @property {number} type      (type of all blocks in the region (see Memory.TYPE.*))
  */
-var Region;
 
 class Color {
     /**

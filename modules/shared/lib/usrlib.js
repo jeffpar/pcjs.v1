@@ -29,17 +29,14 @@
 "use strict";
 
 /**
- * @typedef {{
- *  mask:       number,
- *  shift:      number
- * }}
+ * @typedef {Object} BitField
+ * @property {number} mask
+ * @property {number} shift
  */
-var BitField;
 
 /**
- * @typedef {Object.<BitField>}
+ * @typedef {Object.<BitField>} BitFields
  */
-var BitFields;
 
 class Usr {
     /**
