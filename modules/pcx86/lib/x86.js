@@ -54,17 +54,14 @@ var X86 = {
 
     /*
      * This constant is used to mark points in the code where the physical address being returned
-     * is invalid and should not be used.  TODO: There are still functions that will use an invalid
-     * address, which is why we've tried to choose a value that causes the least harm, but ultimately,
-     * we must add checks to those functions or throw special JavaScript exceptions to bypass them.
+     * is invalid and should not be used.
      *
      * This value is also used to indicate non-existent EA address calculations, which are usually
-     * detected with "regEA === ADDR_INVALID" and "regEAWrite === ADDR_INVALID" tests.  In a 32-bit
-     * CPU, -1 (ie, 0xffffffff) could actually be a valid address, so consider changing ADDR_INVALID
-     * to NaN or null (which is also why all ADDR_INVALID tests should use strict equality operators).
-     *
-     * The main reason I'm NOT using NaN or null now is my concern that, by mixing non-numbers
-     * (specifically, values outside the range of signed 32-bit integers), performance may suffer.
+     * detected with "regEA === ADDR_INVALID" and "regEAWrite === ADDR_INVALID" tests.  Which means
+     * that, technically, we should not use any signed 32-bit value, such as -1 (0xffffffff), since
+     * that could also be a valid address on a 32-bit CPU.  So we also leave open the possibility of
+     * using a non-numeric value such undefined or null, which is why all ADDR_INVALID tests should
+     * use strict equality operators.
      *
      * WARNING: Like many of the properties defined here, ADDR_INVALID is a common constant, which the
      * Closure Compiler will happily inline (with or without @const annotations; in fact, I've yet to
@@ -450,7 +447,8 @@ var X86 = {
         INTR:       0x01,       // h/w interrupt requested
         TRAP:       0x02,       // trap (INT 0x01) requested
         HALT:       0x04,       // halt (HLT) requested
-        DMA:        0x08        // async DMA operation in progress
+        DMA:        0x08,       // async DMA operation in progress
+        DEBUGGER:   0x10        // debugger checks enabled
     },
     /*
      * Common opcodes (and/or any opcodes we need to refer to explicitly)
