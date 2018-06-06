@@ -2208,7 +2208,7 @@ class CPUX86 extends CPU {
     setLIP(addr)
     {
         this.regLIP = addr;
-        this.regLIPMax = (this.segCS.base >>> 0) + (this.segCS.limit >>> 0) + 1;
+        this.regLIPMax = ((this.segCS.base + this.segCS.limit) >>> 0) + 1;
 
         /*
          * TODO: Verify the proper source for CPL.  Should it come from segCS.cpl or segCS.dpl?
