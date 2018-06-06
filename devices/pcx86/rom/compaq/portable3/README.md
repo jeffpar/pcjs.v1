@@ -5,7 +5,7 @@ permalink: /devices/pcx86/rom/compaq/portable3/
 ---
 
 COMPAQ Portable III ROMs
----
+------------------------
 
 ### System ROM Locations
 

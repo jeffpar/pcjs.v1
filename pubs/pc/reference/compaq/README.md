@@ -14,3 +14,7 @@ The one bright spot is a copy of the [COMPAQ DeskPro 386/25 Technical Reference 
 found on **ebay** some years ago.  Sadly, Volume II is still nowhere to be found.
 
 * [COMPAQ DeskPro 386](deskpro386/)
+
+Thanks to the [OS/2 Museum](http://www.os2museum.com/wp/), we also have the following:
+
+* [COMPAQ Technical Reference Guide (1995)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/reference/compaq/various/COMPAQ+Technical+Reference+Guide+(1995).pdf)
