@@ -13,6 +13,7 @@
   "scripts": {
     "build": "gulp",
     "start": "node server.js",
+    "eslint": "eslint modules/pcx86/lib/hdc.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

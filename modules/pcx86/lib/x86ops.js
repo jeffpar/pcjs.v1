@@ -3723,7 +3723,7 @@ X86.opAAD = function()
 /**
  * op=0xD6 (SALC aka SETALC) (undocumented until Pentium Pro)
  *
- * Sets AL to 0xFF if CF=1, 0x00 otherwise; no flags are affected (similar to SBB AL,AL, but without side-effects)
+ * Sets AL to 0xFF if CF=1, 0x00 otherwise; no flags are affected (similar to SBB AL,AL, but without side-effects)
  *
  * WARNING: I have no idea how many clocks this instruction originally required, so for now, I'm going with a minimum of 2.
  *

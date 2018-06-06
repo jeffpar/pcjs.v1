@@ -796,7 +796,7 @@ class FDC extends Component {
         /*
          * If we have current media parameters, restore them; otherwise, default to the drive's physical parameters.
          */
-        if (drive.nDiskCylinders = a[6]) {
+        if ((drive.nDiskCylinders = a[6])) {
             drive.nDiskHeads = a[7];
             drive.nDiskSectors = a[8];
         } else {

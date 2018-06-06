@@ -122,9 +122,9 @@ class DebuggerX86 extends Debugger {
      */
     constructor(parmsDbg)
     {
-        if (DEBUGGER) {
+        super(parmsDbg);
 
-            super(parmsDbg);
+        if (DEBUGGER) {
 
             /*
              * Default number of hex chars in a register and a linear address (ie, for real-mode);
@@ -1603,7 +1603,7 @@ class DebuggerX86 extends Debugger {
                 sInfo = this.toHexAddr(dbgAddr) + ": " + (this.bus.getSymbol(addr, true) || sInfo);
             } else {
                 let component, componentPrev = null;
-                while (component = this.cmp.getMachineComponent("Disk", componentPrev)) {
+                while ((component = this.cmp.getMachineComponent("Disk", componentPrev))) {
                     let aInfo = component.getSymbolInfo(sAddr);
                     if (aInfo.length) {
                         sInfo = "";
@@ -2141,7 +2141,7 @@ class DebuggerX86 extends Debugger {
         let aSymbols = [];
         if (SYMBOLS) {
             let component, componentPrev = null;
-            while (component = this.cmp.getMachineComponent("Disk", componentPrev)) {
+            while ((component = this.cmp.getMachineComponent("Disk", componentPrev))) {
                 aSymbols = component.getModuleInfo(sModule, nSegment);
                 if (aSymbols.length) break;
                 componentPrev = component;
@@ -3557,7 +3557,7 @@ class DebuggerX86 extends Debugger {
                             this.findBreakpoint(aBreak, dbgAddrBreak, true, true);
                             fTempBreak = true;
                         }
-                        if (a = dbgAddrBreak.aCmds) {
+                        if ((a = dbgAddrBreak.aCmds)) {
                             /*
                              * When one or more commands are attached to a breakpoint, we don't halt by default.
                              * Instead, we set fBreak to true only if, at the completion of all the commands, the
@@ -3884,6 +3884,7 @@ class DebuggerX86 extends Debugger {
      */
     getImmOperand(type, dbgAddr)
     {
+        let aSymbol;
         let sOperand = ' ';
         let typeSize = type & DebuggerX86.TYPE_SIZE;
 
@@ -3913,7 +3914,7 @@ class DebuggerX86 extends Debugger {
         case DebuggerX86.TYPE_FARP:
             dbgAddr = this.newAddr(this.getWord(dbgAddr, true), this.getShort(dbgAddr, 2), undefined, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
             sOperand = this.toHexAddr(dbgAddr);
-            let aSymbol = this.findSymbol(dbgAddr);
+            aSymbol = this.findSymbol(dbgAddr);
             if (aSymbol[0]) sOperand += " (" + aSymbol[0] + ")";
             break;
         default:
@@ -5625,9 +5626,10 @@ class DebuggerX86 extends Debugger {
             this.println("\tsp #\t\tset speed multiplier to #");
             return;
         }
+
+        let nCycles;
         switch (asArgs[1]) {
         case "cs":
-            let nCycles;
             if (asArgs[3] !== undefined) nCycles = +asArgs[3];          // warning: decimal instead of hex conversion
             switch (asArgs[2]) {
                 case "int":
@@ -5744,7 +5746,7 @@ class DebuggerX86 extends Debugger {
                 let w = this.parseExpression(sValue);
                 if (w === undefined) return;
 
-                let fValid = true;
+                let fUnknown, fValid = true;
                 let sRegMatch = sReg.toUpperCase();
                 if (sRegMatch.charAt(0) == 'E' && this.cchReg <= 4) {
                     sRegMatch = null;
@@ -5862,7 +5864,7 @@ class DebuggerX86 extends Debugger {
                     if (w) this.cpu.setOF(); else this.cpu.clearOF();
                     break;
                 default:
-                    let fUnknown = true;
+                    fUnknown = true;
                     if (this.cpu.model >= X86.MODEL_80286) {
                         fUnknown = false;
                         switch(sRegMatch){

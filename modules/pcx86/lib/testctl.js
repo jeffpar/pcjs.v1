@@ -38,13 +38,14 @@ if (NODE) {
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var PCX86       = require("./defines");
+    var TestMonitor = require("./testmon");
 }
 
 /**
  * TestController class
  *
  * @class TestController
- * @property {string|undefined urlTests
+ * @property {string|undefined} urlTests
  * @property {Object|null} tests
  * @property {string|null} consoleBuffer
  * @property {HTMLTextAreaElement|null} controlBuffer
