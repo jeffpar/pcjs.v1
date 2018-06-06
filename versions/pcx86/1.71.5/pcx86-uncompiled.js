@@ -4724,17 +4724,14 @@ var X86 = {
 
     /*
      * This constant is used to mark points in the code where the physical address being returned
-     * is invalid and should not be used.  TODO: There are still functions that will use an invalid
-     * address, which is why we've tried to choose a value that causes the least harm, but ultimately,
-     * we must add checks to those functions or throw special JavaScript exceptions to bypass them.
+     * is invalid and should not be used.
      *
      * This value is also used to indicate non-existent EA address calculations, which are usually
-     * detected with "regEA === ADDR_INVALID" and "regEAWrite === ADDR_INVALID" tests.  In a 32-bit
-     * CPU, -1 (ie, 0xffffffff) could actually be a valid address, so consider changing ADDR_INVALID
-     * to NaN or null (which is also why all ADDR_INVALID tests should use strict equality operators).
-     *
-     * The main reason I'm NOT using NaN or null now is my concern that, by mixing non-numbers
-     * (specifically, values outside the range of signed 32-bit integers), performance may suffer.
+     * detected with "regEA === ADDR_INVALID" and "regEAWrite === ADDR_INVALID" tests.  Which means
+     * that, technically, we should not use any signed 32-bit value, such as -1 (0xffffffff), since
+     * that could also be a valid address on a 32-bit CPU.  So we also leave open the possibility of
+     * using a non-numeric value such undefined or null, which is why all ADDR_INVALID tests should
+     * use strict equality operators.
      *
      * WARNING: Like many of the properties defined here, ADDR_INVALID is a common constant, which the
      * Closure Compiler will happily inline (with or without @const annotations; in fact, I've yet to
@@ -5120,7 +5117,8 @@ var X86 = {
         INTR:       0x01,       // h/w interrupt requested
         TRAP:       0x02,       // trap (INT 0x01) requested
         HALT:       0x04,       // halt (HLT) requested
-        DMA:        0x08        // async DMA operation in progress
+        DMA:        0x08,       // async DMA operation in progress
+        DEBUGGER:   0x10        // debugger checks enabled
     },
     /*
      * Common opcodes (and/or any opcodes we need to refer to explicitly)
@@ -13707,7 +13705,7 @@ class CPU extends Component {
     }
 }
 
-CPU.YIELDS_PER_SECOND = 60;
+CPU.YIELDS_PER_SECOND = 30;
 
 CPU.BUTTONS = ["power", "reset"];
 
@@ -15105,31 +15103,34 @@ class CPUX86 extends CPU {
          * masks for isolating the (src) bits of an address and clearing the (dst) bits of an address.  Like the
          * OPERAND size properties, these are reset to their segCS counterparts at the start of every new instruction.
          */
-        this.sizeAddr = this.segCS.sizeAddr;
-        this.maskAddr = this.segCS.maskAddr;
+        if (this.sizeAddr != this.segCS.sizeAddr) {
+            this.sizeAddr = this.segCS.sizeAddr;
+            this.maskAddr = this.segCS.maskAddr;
 
-        /*
-         * It's also worth noting that instructions that implicitly use the stack also rely on STACK size,
-         * which is based on the BIG bit of the last descriptor loaded into SS; use the following segSS properties:
-         *
-         *      segSS.sizeAddr      (2 or 4)
-         *      segSS.maskAddr      (0xffff or 0xffffffff)
-         *
-         * As there is no STACK size instruction prefix override, there's no need to propagate these segSS properties
-         * to separate CPUX86 properties, as we do for the OPERAND size and ADDRESS size properties.
-         */
-
-        this.updateAddrSize();
+            /*
+             * It's also worth noting that instructions that implicitly use the stack also rely on STACK size,
+             * which is based on the BIG bit of the last descriptor loaded into SS; use the following segSS properties:
+             *
+             *      segSS.sizeAddr      (2 or 4)
+             *      segSS.maskAddr      (0xffff or 0xffffffff)
+             *
+             * As there is no STACK size instruction prefix override, there's no need to propagate these segSS properties
+             * to separate CPUX86 properties, as we do for the OPERAND size and ADDRESS size properties.
+             */
+            this.updateAddrSize();
+        }
 
         /*
          * The following contain the (default) OPERAND size (2 for 16 bits, 4 for 32 bits), and the corresponding masks
          * for isolating the (src) bits of an OPERAND and clearing the (dst) bits of an OPERAND.  These are reset to
          * their segCS counterparts at the start of every new instruction, but are also set here for documentation purposes.
          */
-        this.sizeData = this.segCS.sizeData;
-        this.maskData = this.segCS.maskData;
+        if (this.sizeData != this.segCS.sizeData) {
+            this.sizeData = this.segCS.sizeData;
+            this.maskData = this.segCS.maskData;
 
-        this.updateDataSize();
+            this.updateDataSize();
+        }
 
         this.opPrefixes &= ~(X86.OPFLAG.ADDRSIZE | X86.OPFLAG.DATASIZE);
     }
@@ -15189,7 +15190,7 @@ class CPUX86 extends CPU {
         }
         /*
          * The enabling of INT messages is one of the criteria that's also included in the Debugger's checksEnabled()
-         * function, and therefore included in fDebugCheck, so for maximum speed, we check fDebugCheck first.
+         * function, and therefore included in debugCheck, so for maximum speed, we check debugCheck first.
          *
          * NOTE: We've added MAXDEBUG to the test below, because onIntReturn() generates a lot of noise, via
          * dbg.messageIntReturn(), and because there's no way to be sure we'll catch the return (or for some interrupts,
@@ -15882,15 +15883,17 @@ class CPUX86 extends CPU {
     setLIP(addr)
     {
         this.regLIP = addr;
-        this.regLIPMax = (this.segCS.base >>> 0) + (this.segCS.limit >>> 0) + 1;
+        this.regLIPMax = ((this.segCS.base + this.segCS.limit) >>> 0) + 1;
 
         /*
          * TODO: Verify the proper source for CPL.  Should it come from segCS.cpl or segCS.dpl?
-         * Also, note that LOADALL386 wants it to come from segSS.dpl.
+         * Note that LOADALL386 wants it to come from segSS.dpl.
          */
         this.nCPL = this.segCS.cpl;             // cache the current CPL where it's more convenient
 
-        if (I386 && this.model >= X86.MODEL_80386) this.resetSizes();
+        if (I386 && this.model >= X86.MODEL_80386) {
+            this.resetSizes();
+        }
 
         /*
          * Here, we need to additionally test whether the prefetch buffer (adwPrefetch) has been allocated yet,
@@ -17152,6 +17155,27 @@ class CPUX86 extends CPU {
     }
 
     /**
+     * getEALongDataWrite(off)
+     *
+     * @this {CPUX86}
+     * @param {number} off is a segment-relative offset
+     * @return {number} long (32-bit) value at that address
+     */
+    getEALongDataWrite(off)
+    {
+        this.segEA = this.segData;
+        this.offEA = off & (I386? this.maskAddr : 0xffff);
+        this.regEAWrite = this.regEA = this.segEA.checkRead(this.offEA, 4);
+        if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+        let w = this.getLong(this.regEA);
+        if (BACKTRACK) {
+            this.backTrack.btiEALo = this.backTrack.btiMem0;
+            this.backTrack.btiEAHi = this.backTrack.btiMem1;
+        }
+        return w;
+    }
+
+    /**
      * getEALongStack(off)
      *
      * @this {CPUX86}
@@ -17163,6 +17187,27 @@ class CPUX86 extends CPU {
         this.segEA = this.segStack;
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = this.segEA.checkRead(this.offEA, 4);
+        if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+        let w = this.getLong(this.regEA);
+        if (BACKTRACK) {
+            this.backTrack.btiEALo = this.backTrack.btiMem0;
+            this.backTrack.btiEAHi = this.backTrack.btiMem1;
+        }
+        return w;
+    }
+
+    /**
+     * getEALongStackWrite(off)
+     *
+     * @this {CPUX86}
+     * @param {number} off is a segment-relative offset
+     * @return {number} long (32-bit) value at that address
+     */
+    getEALongStackWrite(off)
+    {
+        this.segEA = this.segStack;
+        this.offEA = off & (I386? this.maskAddr : 0xffff);
+        this.regEAWrite = this.regEA = this.segEA.checkRead(this.offEA, 4);
         if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
         let w = this.getLong(this.regEA);
         if (BACKTRACK) {
@@ -18005,12 +18050,17 @@ class CPUX86 extends CPU {
         this.flags.complete = true;
 
         /*
-         * fDebugCheck is true if we need to "check" every instruction with the Debugger.
+         * debugCheck is true if we need to "check" every instruction with the Debugger.
          */
-        let fDebugCheck = this.flags.debugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
+        this.flags.debugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
+        if (this.flags.debugCheck) {
+            this.intFlags |= X86.INTFLAG.DEBUGGER;
+        } else {
+            this.intFlags &= ~X86.INTFLAG.DEBUGGER;
+        }
 
         /*
-         * nDebugState is checked only when fDebugCheck is true, and its sole purpose is to tell the first call
+         * nDebugState is checked only when debugCheck is true, and its sole purpose is to tell the first call
          * to checkInstruction() that it can skip breakpoint checks, and that will be true ONLY when fStarting is
          * true OR nMinCycles is zero (the latter means the Debugger is single-stepping).
          *
@@ -18114,15 +18164,14 @@ class CPUX86 extends CPU {
                         X86.opHLT.call(this);
                         continue;
                     }
+                    if (this.intFlags & X86.INTFLAG.DEBUGGER) {
+                        if (this.dbg.checkInstruction(this.regLIP, nDebugState)) {
+                            this.stopCPU();
+                            break;
+                        }
+                        nDebugState = 1;
+                    }
                 }
-            }
-
-            if (DEBUGGER && fDebugCheck) {
-                if (this.dbg.checkInstruction(this.regLIP, nDebugState)) {
-                    this.stopCPU();
-                    break;
-                }
-                nDebugState = 1;
             }
 
             this.opFlags = 0;
@@ -18146,7 +18195,7 @@ class CPUX86 extends CPU {
              */
 
             /*
-            if (DEBUG) {
+            if (MAXDEBUG) {
                 //
                 // Make sure that every instruction is assessing a cycle cost, and that the cost is a net positive.
                 //
@@ -18163,47 +18212,6 @@ class CPUX86 extends CPU {
 
         return (this.flags.complete? this.nBurstCycles - this.nStepCycles : (this.flags.complete === undefined? 0 : -1));
     }
-
-    /**
-     * setAddrSize(size)
-     *
-     * This is used by opcodes that require a particular ADDRESS size, which we enforce by
-     * internally simulating an ADDRESS size override, if needed.
-     *
-     * @this {CPUX86}
-     * @param {number} size (2 for 2-byte/16-bit operands, or 4 for 4-byte/32-bit operands)
-     *
-     setAddrSize(size)
-     {
-         if (this.sizeAddr != size) {
-             this.opPrefixes |= X86.OPFLAG.ADDRSIZE;
-             this.sizeAddr = size;
-             this.maskAddr = (size == 2? 0xffff : (0xffffffff|0));
-             this.updateAddrSize();
-         }
-     }
-     */
-
-    /**
-     * getIPLong()
-     *
-     * @this {CPUX86}
-     * @return {number} long at the current IP; IP advanced by 4
-     *
-     getIPLong()
-     {
-         let newLIP = this.checkIP(4);
-         let l = (PREFETCH? this.getLongPrefetch() : this.getLong(this.regLIP));
-         if (BACKTRACK) {
-             this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
-             this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
-             this.bus.updateBackTrackCode(this.regLIP + 2, this.backTrack.btiMem2);
-             this.bus.updateBackTrackCode(this.regLIP + 3, this.backTrack.btiMem3);
-         }
-         this.regLIP = newLIP;
-         return l;
-     }
-     */
 
     /**
      * setDMA(fActive)
@@ -18251,8 +18259,8 @@ if (PREFETCH) {
      * NOTE: CPUX86.PFINFO.LENGTH must be set to a power of two, so that LENGTH - 1 will form a mask
      * (IP_MASK) we can use to create a sliding prefetch window of LENGTH bytes.  We also zero the low
      * 2 bits of IP_MASK so that the sliding window always starts on a 32-bit (long) boundary.  Finally,
-     * instead breaking breaking all the longs we prefetch into bytes, we simply store the longs as-is
-     * into every 4th element of the queue (the queue is sparse array).
+     * instead of breaking all the longs we prefetch into bytes, we simply store the longs as-is into
+     * every 4th element of the queue (the queue is a sparse array).
      */
     CPUX86.PFINFO = {
         LENGTH:     16              // 16 generates a 16-byte prefetch queue consisting of 4 32-bit entries
@@ -23034,7 +23042,6 @@ class SegX86 {
                 this.maskData = this.maskAddr = 0xffff;
                 this.limit = 0xffff;
                 this.offMax = this.limit + 1;
-                this.sizeAddr = this.sizeData;
                 this.addrDesc = X86.ADDR_INVALID;
                 this.fStackSwitch = false;
                 return;
@@ -31109,10 +31116,10 @@ X86.modGrpShort32 = function(afnGrp, fnSrc)
  */
 X86.modRegLong32 = function(fn)
 {
-    let dst, src;
-    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+    let dst, src, l;
+    let bModRM = this.bModRM = this.getIPByte();
 
-    switch(bModRM) {
+    switch(bModRM & 0xC7) {
     case 0x00:
         src = this.getEALongData(this.regEAX);
         break;
@@ -31187,137 +31194,85 @@ X86.modRegLong32 = function(fn)
         break;
     case 0xC0:
         src = this.regEAX;
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
-        }
+        if (BACKTRACK) {this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;}
         break;
     case 0xC1:
         src = this.regECX;
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
-        }
+        if (BACKTRACK) {this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;}
         break;
     case 0xC2:
         src = this.regEDX;
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
-        }
+        if (BACKTRACK) {this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;}
         break;
     case 0xC3:
         src = this.regEBX;
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
-        }
+        if (BACKTRACK) {this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;}
         break;
     case 0xC4:
         src = this.getSP();
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
-        }
+        if (BACKTRACK) {this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;}
         break;
     case 0xC5:
         src = this.regEBP;
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
-        }
+        if (BACKTRACK) {this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;}
         break;
     case 0xC6:
         src = this.regESI;
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
-        }
+        if (BACKTRACK) {this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;}
         break;
     case 0xC7:
         src = this.regEDI;
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
-        }
-        break;
-    default:
-        src = 0;
-
+        if (BACKTRACK) {this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;}
         break;
     }
 
-    let reg = (this.bModRM >> 3) & 0x7;
-
-    switch(reg) {
+    switch((bModRM >> 3) & 0x7) {
     case 0x0:
         dst = this.regEAX;
+        l = fn.call(this, dst, src);
+        this.regEAX = l;
+        if (BACKTRACK) {this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;}
         break;
     case 0x1:
         dst = this.regECX;
+        l = fn.call(this, dst, src);
+        this.regECX = l;
+        if (BACKTRACK) {this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;}
         break;
     case 0x2:
         dst = this.regEDX;
+        l = fn.call(this, dst, src);
+        this.regEDX = l;
+        if (BACKTRACK) {this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;}
         break;
     case 0x3:
         dst = this.regEBX;
+        l = fn.call(this, dst, src);
+        this.regEBX = l;
+        if (BACKTRACK) {this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;}
         break;
     case 0x4:
         dst = this.getSP();
-        break;
-    case 0x5:
-        dst = this.regEBP;
-        break;
-    case 0x6:
-        dst = this.regESI;
-        break;
-    case 0x7:
-        dst = this.regEDI;
-        break;
-    default:
-        dst = 0;
-        break;
-    }
-
-    let l = fn.call(this, dst, src);
-
-    switch(reg) {
-    case 0x0:
-        this.regEAX = l;
-        if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
-        }
-        break;
-    case 0x1:
-        this.regECX = l;
-        if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
-        }
-        break;
-    case 0x2:
-        this.regEDX = l;
-        if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
-        }
-        break;
-    case 0x3:
-        this.regEBX = l;
-        if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
-        }
-        break;
-    case 0x4:
+        l = fn.call(this, dst, src);
         this.setSP(l);
         break;
     case 0x5:
+        dst = this.regEBP;
+        l = fn.call(this, dst, src);
         this.regEBP = l;
-        if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
-        }
+        if (BACKTRACK) {this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;}
         break;
     case 0x6:
+        dst = this.regESI;
+        l = fn.call(this, dst, src);
         this.regESI = l;
-        if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
-        }
+        if (BACKTRACK) {this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;}
         break;
     case 0x7:
+        dst = this.regEDI;
+        l = fn.call(this, dst, src);
         this.regEDI = l;
-        if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
-        }
+        if (BACKTRACK) {this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;}
         break;
     }
 };
@@ -31331,104 +31286,80 @@ X86.modRegLong32 = function(fn)
 X86.modMemLong32 = function(fn)
 {
     let dst, src;
-    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+    let bModRM = this.bModRM = this.getIPByte();
 
-    switch(bModRM) {
+    switch(bModRM & 0xC7) {
     case 0x00:
-        dst = this.getEALongData(this.regEAX);
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEAX);
         break;
     case 0x01:
-        dst = this.getEALongData(this.regECX);
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regECX);
         break;
     case 0x02:
-        dst = this.getEALongData(this.regEDX);
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEDX);
         break;
     case 0x03:
-        dst = this.getEALongData(this.regEBX);
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEBX);
         break;
     case 0x04:
-        dst = this.getEALongData(X86.modSIB.call(this, 0));
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(X86.modSIB.call(this, 0));
         break;
     case 0x05:
-        dst = this.getEALongData(this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.getIPAddr());
         break;
     case 0x06:
-        dst = this.getEALongData(this.regESI);
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regESI);
         break;
     case 0x07:
-        dst = this.getEALongData(this.regEDI);
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEDI);
         break;
     case 0x40:
-        dst = this.getEALongData(this.regEAX + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEAX + this.getIPDisp());
         break;
     case 0x41:
-        dst = this.getEALongData(this.regECX + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regECX + this.getIPDisp());
         break;
     case 0x42:
-        dst = this.getEALongData(this.regEDX + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEDX + this.getIPDisp());
         break;
     case 0x43:
-        dst = this.getEALongData(this.regEBX + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEBX + this.getIPDisp());
         break;
     case 0x44:
-        dst = this.getEALongData(X86.modSIB.call(this, 1) + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(X86.modSIB.call(this, 1) + this.getIPDisp());
         break;
     case 0x45:
-        dst = this.getEALongStack(this.regEBP + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongStackWrite(this.regEBP + this.getIPDisp());
         break;
     case 0x46:
-        dst = this.getEALongData(this.regESI + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regESI + this.getIPDisp());
         break;
     case 0x47:
-        dst = this.getEALongData(this.regEDI + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEDI + this.getIPDisp());
         break;
     case 0x80:
-        dst = this.getEALongData(this.regEAX + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEAX + this.getIPAddr());
         break;
     case 0x81:
-        dst = this.getEALongData(this.regECX + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regECX + this.getIPAddr());
         break;
     case 0x82:
-        dst = this.getEALongData(this.regEDX + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEDX + this.getIPAddr());
         break;
     case 0x83:
-        dst = this.getEALongData(this.regEBX + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEBX + this.getIPAddr());
         break;
     case 0x84:
-        dst = this.getEALongData(X86.modSIB.call(this, 2) + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(X86.modSIB.call(this, 2) + this.getIPAddr());
         break;
     case 0x85:
-        dst = this.getEALongStack(this.regEBP + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongStackWrite(this.regEBP + this.getIPAddr());
         break;
     case 0x86:
-        dst = this.getEALongData(this.regESI + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regESI + this.getIPAddr());
         break;
     case 0x87:
-        dst = this.getEALongData(this.regEDI + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEDI + this.getIPAddr());
         break;
     case 0xC0:
         dst = this.regEAX;
@@ -31454,115 +31385,76 @@ X86.modMemLong32 = function(fn)
     case 0xC7:
         dst = this.regEDI;
         break;
-    default:
-        dst = 0;
-
-        break;
     }
 
-    let reg = (this.bModRM >> 3) & 0x7;
-
-    switch(reg) {
+    switch((bModRM >> 3) & 0x7) {
     case 0x0:
         src = this.regEAX;
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
-        }
+        if (BACKTRACK) {this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;}
         break;
     case 0x1:
         src = this.regECX;
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
-        }
+        if (BACKTRACK) {this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;}
         break;
     case 0x2:
         src = this.regEDX;
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
-        }
+        if (BACKTRACK) {this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;}
         break;
     case 0x3:
         src = this.regEBX;
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
-        }
+        if (BACKTRACK) {this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;}
         break;
     case 0x4:
         src = this.getSP();
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
-        }
+        if (BACKTRACK) {this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;}
         break;
     case 0x5:
         src = this.regEBP;
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
-        }
+        if (BACKTRACK) {this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;}
         break;
     case 0x6:
         src = this.regESI;
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
-        }
+        if (BACKTRACK) {this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;}
         break;
     case 0x7:
         src = this.regEDI;
-        if (BACKTRACK) {
-            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
-        }
-        break;
-    default:
-        src = 0;
+        if (BACKTRACK) {this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;}
         break;
     }
 
     let l = fn.call(this, dst, src);
 
-    switch(bModRM) {
+    switch(bModRM & 0xC7) {
     case 0xC0:
         this.regEAX = l;
-        if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
-        }
+        if (BACKTRACK) {this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;}
         break;
     case 0xC1:
         this.regECX = l;
-        if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
-        }
+        if (BACKTRACK) {this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;}
         break;
     case 0xC2:
         this.regEDX = l;
-        if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
-        }
+        if (BACKTRACK) {this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;}
         break;
     case 0xC3:
         this.regEBX = l;
-        if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
-        }
+        if (BACKTRACK) {this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;}
         break;
     case 0xC4:
         this.setSP(l);
         break;
     case 0xC5:
         this.regEBP = l;
-        if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
-        }
+        if (BACKTRACK) {this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;}
         break;
     case 0xC6:
         this.regESI = l;
-        if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
-        }
+        if (BACKTRACK) {this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;}
         break;
     case 0xC7:
         this.regEDI = l;
-        if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
-        }
+        if (BACKTRACK) {this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;}
         break;
     default:
         this.setEALong(l);
@@ -31580,104 +31472,80 @@ X86.modMemLong32 = function(fn)
 X86.modGrpLong32 = function(afnGrp, fnSrc)
 {
     let dst;
-    let bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
+    let bModRM = this.bModRM = this.getIPByte();
 
-    switch(bModRM) {
+    switch(bModRM & 0xC7) {
     case 0x00:
-        dst = this.getEALongData(this.regEAX);
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEAX);
         break;
     case 0x01:
-        dst = this.getEALongData(this.regECX);
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regECX);
         break;
     case 0x02:
-        dst = this.getEALongData(this.regEDX);
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEDX);
         break;
     case 0x03:
-        dst = this.getEALongData(this.regEBX);
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEBX);
         break;
     case 0x04:
-        dst = this.getEALongData(X86.modSIB.call(this, 0));
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(X86.modSIB.call(this, 0));
         break;
     case 0x05:
-        dst = this.getEALongData(this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.getIPAddr());
         break;
     case 0x06:
-        dst = this.getEALongData(this.regESI);
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regESI);
         break;
     case 0x07:
-        dst = this.getEALongData(this.regEDI);
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEDI);
         break;
     case 0x40:
-        dst = this.getEALongData(this.regEAX + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEAX + this.getIPDisp());
         break;
     case 0x41:
-        dst = this.getEALongData(this.regECX + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regECX + this.getIPDisp());
         break;
     case 0x42:
-        dst = this.getEALongData(this.regEDX + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEDX + this.getIPDisp());
         break;
     case 0x43:
-        dst = this.getEALongData(this.regEBX + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEBX + this.getIPDisp());
         break;
     case 0x44:
-        dst = this.getEALongData(X86.modSIB.call(this, 1) + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(X86.modSIB.call(this, 1) + this.getIPDisp());
         break;
     case 0x45:
-        dst = this.getEALongStack(this.regEBP + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongStackWrite(this.regEBP + this.getIPDisp());
         break;
     case 0x46:
-        dst = this.getEALongData(this.regESI + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regESI + this.getIPDisp());
         break;
     case 0x47:
-        dst = this.getEALongData(this.regEDI + this.getIPDisp());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEDI + this.getIPDisp());
         break;
     case 0x80:
-        dst = this.getEALongData(this.regEAX + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEAX + this.getIPAddr());
         break;
     case 0x81:
-        dst = this.getEALongData(this.regECX + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regECX + this.getIPAddr());
         break;
     case 0x82:
-        dst = this.getEALongData(this.regEDX + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEDX + this.getIPAddr());
         break;
     case 0x83:
-        dst = this.getEALongData(this.regEBX + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEBX + this.getIPAddr());
         break;
     case 0x84:
-        dst = this.getEALongData(X86.modSIB.call(this, 2) + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(X86.modSIB.call(this, 2) + this.getIPAddr());
         break;
     case 0x85:
-        dst = this.getEALongStack(this.regEBP + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongStackWrite(this.regEBP + this.getIPAddr());
         break;
     case 0x86:
-        dst = this.getEALongData(this.regESI + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regESI + this.getIPAddr());
         break;
     case 0x87:
-        dst = this.getEALongData(this.regEDI + this.getIPAddr());
-        this.regEAWrite = this.regEA;
+        dst = this.getEALongDataWrite(this.regEDI + this.getIPAddr());
         break;
     case 0xC0:
         dst = this.regEAX;
@@ -31703,17 +31571,11 @@ X86.modGrpLong32 = function(afnGrp, fnSrc)
     case 0xC7:
         dst = this.regEDI;
         break;
-    default:
-        dst = 0;
-
-        break;
     }
 
-    let reg = (this.bModRM >> 3) & 0x7;
+    let l = afnGrp[(bModRM >> 3) & 0x7].call(this, dst, fnSrc.call(this));
 
-    let l = afnGrp[reg].call(this, dst, fnSrc.call(this));
-
-    switch(bModRM) {
+    switch(bModRM & 0xC7) {
     case 0xC0:
         this.regEAX = l;
         break;

@@ -1428,31 +1428,34 @@ class CPUX86 extends CPU {
          * masks for isolating the (src) bits of an address and clearing the (dst) bits of an address.  Like the
          * OPERAND size properties, these are reset to their segCS counterparts at the start of every new instruction.
          */
-        this.sizeAddr = this.segCS.sizeAddr;
-        this.maskAddr = this.segCS.maskAddr;
+        if (this.sizeAddr != this.segCS.sizeAddr) {
+            this.sizeAddr = this.segCS.sizeAddr;
+            this.maskAddr = this.segCS.maskAddr;
 
-        /*
-         * It's also worth noting that instructions that implicitly use the stack also rely on STACK size,
-         * which is based on the BIG bit of the last descriptor loaded into SS; use the following segSS properties:
-         *
-         *      segSS.sizeAddr      (2 or 4)
-         *      segSS.maskAddr      (0xffff or 0xffffffff)
-         *
-         * As there is no STACK size instruction prefix override, there's no need to propagate these segSS properties
-         * to separate CPUX86 properties, as we do for the OPERAND size and ADDRESS size properties.
-         */
-
-        this.updateAddrSize();
+            /*
+             * It's also worth noting that instructions that implicitly use the stack also rely on STACK size,
+             * which is based on the BIG bit of the last descriptor loaded into SS; use the following segSS properties:
+             *
+             *      segSS.sizeAddr      (2 or 4)
+             *      segSS.maskAddr      (0xffff or 0xffffffff)
+             *
+             * As there is no STACK size instruction prefix override, there's no need to propagate these segSS properties
+             * to separate CPUX86 properties, as we do for the OPERAND size and ADDRESS size properties.
+             */
+            this.updateAddrSize();
+        }
 
         /*
          * The following contain the (default) OPERAND size (2 for 16 bits, 4 for 32 bits), and the corresponding masks
          * for isolating the (src) bits of an OPERAND and clearing the (dst) bits of an OPERAND.  These are reset to
          * their segCS counterparts at the start of every new instruction, but are also set here for documentation purposes.
          */
-        this.sizeData = this.segCS.sizeData;
-        this.maskData = this.segCS.maskData;
+        if (this.sizeData != this.segCS.sizeData) {
+            this.sizeData = this.segCS.sizeData;
+            this.maskData = this.segCS.maskData;
 
-        this.updateDataSize();
+            this.updateDataSize();
+        }
 
         this.opPrefixes &= ~(X86.OPFLAG.ADDRSIZE | X86.OPFLAG.DATASIZE);
     }
@@ -1512,7 +1515,7 @@ class CPUX86 extends CPU {
         }
         /*
          * The enabling of INT messages is one of the criteria that's also included in the Debugger's checksEnabled()
-         * function, and therefore included in fDebugCheck, so for maximum speed, we check fDebugCheck first.
+         * function, and therefore included in debugCheck, so for maximum speed, we check debugCheck first.
          *
          * NOTE: We've added MAXDEBUG to the test below, because onIntReturn() generates a lot of noise, via
          * dbg.messageIntReturn(), and because there's no way to be sure we'll catch the return (or for some interrupts,
@@ -2205,15 +2208,17 @@ class CPUX86 extends CPU {
     setLIP(addr)
     {
         this.regLIP = addr;
-        this.regLIPMax = (this.segCS.base >>> 0) + (this.segCS.limit >>> 0) + 1;
+        this.regLIPMax = ((this.segCS.base + this.segCS.limit) >>> 0) + 1;
 
         /*
          * TODO: Verify the proper source for CPL.  Should it come from segCS.cpl or segCS.dpl?
-         * Also, note that LOADALL386 wants it to come from segSS.dpl.
+         * Note that LOADALL386 wants it to come from segSS.dpl.
          */
         this.nCPL = this.segCS.cpl;             // cache the current CPL where it's more convenient
 
-        if (I386 && this.model >= X86.MODEL_80386) this.resetSizes();
+        if (I386 && this.model >= X86.MODEL_80386) {
+            this.resetSizes();
+        }
 
         /*
          * Here, we need to additionally test whether the prefetch buffer (adwPrefetch) has been allocated yet,
@@ -3475,6 +3480,27 @@ class CPUX86 extends CPU {
     }
 
     /**
+     * getEALongDataWrite(off)
+     *
+     * @this {CPUX86}
+     * @param {number} off is a segment-relative offset
+     * @return {number} long (32-bit) value at that address
+     */
+    getEALongDataWrite(off)
+    {
+        this.segEA = this.segData;
+        this.offEA = off & (I386? this.maskAddr : 0xffff);
+        this.regEAWrite = this.regEA = this.segEA.checkRead(this.offEA, 4);
+        if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+        let w = this.getLong(this.regEA);
+        if (BACKTRACK) {
+            this.backTrack.btiEALo = this.backTrack.btiMem0;
+            this.backTrack.btiEAHi = this.backTrack.btiMem1;
+        }
+        return w;
+    }
+
+    /**
      * getEALongStack(off)
      *
      * @this {CPUX86}
@@ -3486,6 +3512,27 @@ class CPUX86 extends CPU {
         this.segEA = this.segStack;
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = this.segEA.checkRead(this.offEA, 4);
+        if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+        let w = this.getLong(this.regEA);
+        if (BACKTRACK) {
+            this.backTrack.btiEALo = this.backTrack.btiMem0;
+            this.backTrack.btiEAHi = this.backTrack.btiMem1;
+        }
+        return w;
+    }
+
+    /**
+     * getEALongStackWrite(off)
+     *
+     * @this {CPUX86}
+     * @param {number} off is a segment-relative offset
+     * @return {number} long (32-bit) value at that address
+     */
+    getEALongStackWrite(off)
+    {
+        this.segEA = this.segStack;
+        this.offEA = off & (I386? this.maskAddr : 0xffff);
+        this.regEAWrite = this.regEA = this.segEA.checkRead(this.offEA, 4);
         if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
         let w = this.getLong(this.regEA);
         if (BACKTRACK) {
@@ -4328,12 +4375,17 @@ class CPUX86 extends CPU {
         this.flags.complete = true;
 
         /*
-         * fDebugCheck is true if we need to "check" every instruction with the Debugger.
+         * debugCheck is true if we need to "check" every instruction with the Debugger.
          */
-        let fDebugCheck = this.flags.debugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
+        this.flags.debugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
+        if (this.flags.debugCheck) {
+            this.intFlags |= X86.INTFLAG.DEBUGGER;
+        } else {
+            this.intFlags &= ~X86.INTFLAG.DEBUGGER;
+        }
 
         /*
-         * nDebugState is checked only when fDebugCheck is true, and its sole purpose is to tell the first call
+         * nDebugState is checked only when debugCheck is true, and its sole purpose is to tell the first call
          * to checkInstruction() that it can skip breakpoint checks, and that will be true ONLY when fStarting is
          * true OR nMinCycles is zero (the latter means the Debugger is single-stepping).
          *
@@ -4437,15 +4489,14 @@ class CPUX86 extends CPU {
                         X86.opHLT.call(this);
                         continue;
                     }
+                    if (this.intFlags & X86.INTFLAG.DEBUGGER) {
+                        if (this.dbg.checkInstruction(this.regLIP, nDebugState)) {
+                            this.stopCPU();
+                            break;
+                        }
+                        nDebugState = 1;
+                    }
                 }
-            }
-
-            if (DEBUGGER && fDebugCheck) {
-                if (this.dbg.checkInstruction(this.regLIP, nDebugState)) {
-                    this.stopCPU();
-                    break;
-                }
-                nDebugState = 1;
             }
 
             this.opFlags = 0;
@@ -4469,7 +4520,7 @@ class CPUX86 extends CPU {
              */
 
             /*
-            if (DEBUG) {
+            if (MAXDEBUG) {
                 //
                 // Make sure that every instruction is assessing a cycle cost, and that the cost is a net positive.
                 //
@@ -4486,47 +4537,6 @@ class CPUX86 extends CPU {
 
         return (this.flags.complete? this.nBurstCycles - this.nStepCycles : (this.flags.complete === undefined? 0 : -1));
     }
-
-    /**
-     * setAddrSize(size)
-     *
-     * This is used by opcodes that require a particular ADDRESS size, which we enforce by
-     * internally simulating an ADDRESS size override, if needed.
-     *
-     * @this {CPUX86}
-     * @param {number} size (2 for 2-byte/16-bit operands, or 4 for 4-byte/32-bit operands)
-     *
-     setAddrSize(size)
-     {
-         if (this.sizeAddr != size) {
-             this.opPrefixes |= X86.OPFLAG.ADDRSIZE;
-             this.sizeAddr = size;
-             this.maskAddr = (size == 2? 0xffff : (0xffffffff|0));
-             this.updateAddrSize();
-         }
-     }
-     */
-
-    /**
-     * getIPLong()
-     *
-     * @this {CPUX86}
-     * @return {number} long at the current IP; IP advanced by 4
-     *
-     getIPLong()
-     {
-         let newLIP = this.checkIP(4);
-         let l = (PREFETCH? this.getLongPrefetch() : this.getLong(this.regLIP));
-         if (BACKTRACK) {
-             this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
-             this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
-             this.bus.updateBackTrackCode(this.regLIP + 2, this.backTrack.btiMem2);
-             this.bus.updateBackTrackCode(this.regLIP + 3, this.backTrack.btiMem3);
-         }
-         this.regLIP = newLIP;
-         return l;
-     }
-     */
 
     /**
      * setDMA(fActive)
@@ -4574,8 +4584,8 @@ if (PREFETCH) {
      * NOTE: CPUX86.PFINFO.LENGTH must be set to a power of two, so that LENGTH - 1 will form a mask
      * (IP_MASK) we can use to create a sliding prefetch window of LENGTH bytes.  We also zero the low
      * 2 bits of IP_MASK so that the sliding window always starts on a 32-bit (long) boundary.  Finally,
-     * instead breaking breaking all the longs we prefetch into bytes, we simply store the longs as-is
-     * into every 4th element of the queue (the queue is sparse array).
+     * instead of breaking all the longs we prefetch into bytes, we simply store the longs as-is into
+     * every 4th element of the queue (the queue is a sparse array).
      */
     CPUX86.PFINFO = {
         LENGTH:     16              // 16 generates a 16-byte prefetch queue consisting of 4 32-bit entries

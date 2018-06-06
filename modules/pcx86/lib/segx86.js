@@ -1454,7 +1454,6 @@ class SegX86 {
                 this.maskData = this.maskAddr = 0xffff;
                 this.limit = 0xffff;
                 this.offMax = this.limit + 1;
-                this.sizeAddr = this.sizeData;
                 this.addrDesc = X86.ADDR_INVALID;
                 this.fStackSwitch = false;
                 return;

@@ -27,4 +27,4 @@ Information is available for assorted versions of Microsoft Windows:
 * [Microsoft Windows 3.10 (Demo)](/disks/pcx86/windows/3.10/)
 * [Microsoft Windows 3.11](/disks/pcx86/windows/3.11/)
 * [Microsoft Windows 95: Build 499 (Demo)](/disks/pcx86/windows/win95/4.00.499/)
-* [Microsoft Windows 95: First Retail Release (Demo)](/disks/pcx86/windows/win95/4.00.950/)
+* [Microsoft Windows 95: First Retail Release (Demo)](/disks/pcx86/windows/win95/4.00.950/) ([Debugger](/disks/pcx86/windows/win95/4.00.950/debugger/))
