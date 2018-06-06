@@ -2,14 +2,15 @@
 layout: page
 title: Compaq Portable Computer ROMs
 permalink: /devices/pcx86/rom/compaq/portable/
+preview: COMPAQ_Portable_System_Board.jpg
 ---
 
 Compaq Portable Computer ROMs
----
+-----------------------------
 
 The oldest COMPAQ Portable Computer ROM I have is an 8Kb [Rev C ROM](100666-001-REVC.json) from a REV D system board.
 
-[<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/reference/compaq/images/COMPAQ_Portable_System_Board.jpg" alt="Compaq Portable System Board REV D"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/reference/compaq/images/COMPAQ_Portable_System_Board-FULL.jpg)
+[<img src="COMPAQ_Portable_System_Board.jpg" alt="Compaq Portable System Board REV D"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/rom/compaq/portable/COMPAQ_Portable_System_Board-FULL.jpg)
 
 Printed on the back of the system board:
 
