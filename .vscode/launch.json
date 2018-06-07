@@ -44,266 +44,266 @@
 		  "name": "Apps: ThinkTank",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/apps/pcx86/1987/thinktank/",
+		  "url": "http://localhost:8088/apps/pcx86/1987/thinktank/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "Apps: TopView 1.01",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/apps/ibm/topview/1.01/",
+		  "url": "http://localhost:8088/disks/pcx86/apps/ibm/topview/1.01/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "Apps: WordStar 3.24",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/apps/other/wordstar/3.24/",
+		  "url": "http://localhost:8088/disks/pcx86/apps/other/wordstar/3.24/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "Apps: WordStar for PCjr",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/apps/other/wordstar/pcjr/",
+		  "url": "http://localhost:8088/disks/pcx86/apps/other/wordstar/pcjr/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "Devices: Game of Life",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/leds/life/",
+		  "url": "http://localhost:8088/devices/leds/life/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "Devices: Lite-Brite",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/leds/litebrite/",
+		  "url": "http://localhost:8088/devices/leds/litebrite/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "Devices: LED Scroller",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/leds/scroller/",
+		  "url": "http://localhost:8088/devices/leds/scroller/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "Devices: LED Symbols",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/leds/symbols/",
+		  "url": "http://localhost:8088/devices/leds/symbols/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "Devices: TI-42",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/ti42/machine/rev0/",
+		  "url": "http://localhost:8088/devices/ti42/machine/rev0/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "Devices: TI-55",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/ti55/machine/rev0/",
+		  "url": "http://localhost:8088/devices/ti55/machine/rev0/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "Devices: TI-57",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/ti57/machine/rev0/",
+		  "url": "http://localhost:8088/devices/ti57/machine/rev0/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "Disks: Private",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/private/",
+		  "url": "http://localhost:8088/disks/pcx86/private/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "Games: Wizardry I",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/games/other/wizardry1/",
+		  "url": "http://localhost:8088/disks/pcx86/games/other/wizardry1/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "COMPAQ DOS 1.11",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/compaq/1.11/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/compaq/1.11/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "COMPAQ DOS 1.12",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/compaq/1.12/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/compaq/1.12/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "COMPAQ DOS 2.12",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/compaq/2.12/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/compaq/2.12/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "COMPAQ DOS 3.00",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/compaq/3.00/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/compaq/3.00/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "COMPAQ DOS 3.10",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/compaq/3.10/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/compaq/3.10/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "COMPAQ DOS 3.31",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/compaq/3.31/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/compaq/3.31/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "MS-DOS 3.20",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/microsoft/3.20/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/microsoft/3.20/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "PC DOS 0.90",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/0.90/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/0.90/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "PC DOS 1.10 (NODEBUG)",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.10/?gort=nodebug",
+		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/1.10/?gort=nodebug",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "PC DOS 1.00",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.00/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/1.00/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "PC DOS 1.10",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/1.10/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/1.10/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "PC DOS 2.00",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/2.00/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/2.00/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "PC DOS 2.10",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/2.10/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/2.10/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "PC DOS 3.00",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/3.00/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/3.00/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "PC DOS 3.10",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/3.10/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/3.10/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "PC DOS 3.20",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/3.20/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/3.20/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "PC DOS 3.30",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/disks/pcx86/dos/ibm/3.30/",
+		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/3.30/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "Tests: VGA Black Book",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/tests/pcx86/vga/",
+		  "url": "http://localhost:8088/tests/pcx86/vga/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "IBM PCjr: CGA, 64Kb, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/pcx86/machine/4860/cga/64kb/debugger/",
+		  "url": "http://localhost:8088/devices/pcx86/machine/4860/cga/64kb/debugger/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "IBM PC: CGA, 64Kb, LPT1, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/64kb/debugger/",
+		  "url": "http://localhost:8088/devices/pcx86/machine/5150/cga/64kb/debugger/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "IBM PC: CGA, 256Kb",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/256kb/",
+		  "url": "http://localhost:8088/devices/pcx86/machine/5150/cga/256kb/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "IBM PC: CGA, 256Kb, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/256kb/debugger/?autoStart=true",
+		  "url": "http://localhost:8088/devices/pcx86/machine/5150/cga/256kb/debugger/?autoStart=true",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "IBM PC XT: CGA, 640Kb, 10Mb, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/pcx86/machine/5160/cga/640kb/debugger/",
+		  "url": "http://localhost:8088/devices/pcx86/machine/5160/cga/640kb/debugger/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "IBM PC AT: EGA, 640Kb, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/",
+		  "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/",
 		  "webRoot": "${workspaceFolder}"
 	  },
 	  {
 		  "name": "IBM PC AT: EGA, 2048Kb, COM2, Debugger",
 		  "type": "chrome",
 		  "request": "launch",
-		  "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/?autoMount={A:{name:%22PC DOS%205.00%20(Disk%201)%22}}",
+		  "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/?autoMount={A:{name:%22PC DOS%205.00%20(Disk%201)%22}}",
 		  "webRoot": "${workspaceFolder}"
 	  }
 	]
