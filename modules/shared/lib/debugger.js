@@ -86,9 +86,9 @@ class Debugger extends Component {
      */
     constructor(parmsDbg)
     {
-        if (DEBUGGER) {
+        super("Debugger", parmsDbg);
 
-            super("Debugger", parmsDbg);
+        if (DEBUGGER) {
 
             /*
              * Default base used to display all values; modified with the "s base" command.
@@ -946,7 +946,7 @@ class Debugger extends Component {
         let chEscape = (chOpen == '(' || chOpen == '{' || chOpen == '[')? '\\' : '';
         let chInnerEscape = (chOpen == '['? '\\' : '');
         let reSubExp = new RegExp(chEscape + chOpen + "([^" + chInnerEscape + chOpen + chInnerEscape + chClose + "]+)" + chEscape + chClose);
-        while (a = s.match(reSubExp)) {
+        while ((a = s.match(reSubExp))) {
             let value = this.parseExpression(a[1]);
             if (value === undefined) return undefined;
             let sSearch = chOpen + a[1] + chClose;
@@ -969,7 +969,7 @@ class Debugger extends Component {
             chEscape = (chOpen == '(' || chOpen == '{' || chOpen == '[')? '\\' : '';
             chInnerEscape = (chOpen == '['? '\\' : '');
             reSubExp = new RegExp(chEscape + chOpen + "([^" + chInnerEscape + chOpen + chInnerEscape + chClose + "]+)" + chEscape + chClose);
-            while (a = s.match(reSubExp)) {
+            while ((a = s.match(reSubExp))) {
                 s = this.parseAddrReference(s, a[1]);
             }
         }
@@ -990,7 +990,7 @@ class Debugger extends Component {
     parseSysVars(s)
     {
         let a;
-        while (a = s.match(/\$([a-z]+)/i)) {
+        while ((a = s.match(/\$([a-z]+)/i))) {
             let v = null;
             switch(a[1].toLowerCase()) {
             case "ops":
@@ -1024,6 +1024,7 @@ class Debugger extends Component {
     parseUnary(value, nUnary)
     {
         while (nUnary) {
+            let bit;
             switch(nUnary & 0o3) {
             case 1:
                 value = -this.truncate(value);
@@ -1032,7 +1033,7 @@ class Debugger extends Component {
                 value = this.evalXOR(value, -1);        // this is easier than adding an evalNOT()...
                 break;
             case 3:
-                let bit = 35;                           // simple left-to-right zero-bit-counting loop...
+                bit = 35;                               // simple left-to-right zero-bit-counting loop...
                 while (bit >= 0 && !this.evalAND(value, Math.pow(2, bit))) bit--;
                 value = 35 - bit;
                 break;

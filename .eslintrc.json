@@ -179,6 +179,7 @@
     "no-shadow": "off",
     "no-shadow-restricted-names": "error",
     "no-spaced-func": "error",
+    "no-sparse-arrays": "off",
     "no-sync": "off",
     "no-tabs": "off",
     "no-template-curly-in-string": "error",

@@ -408,9 +408,9 @@ class Int36 {
              * using division first.  We don't need to truncate the results, because the subsequent
              * bitwise operations perform truncation automatically.
              */
-            let e = 0;
+            let e = 0, v = 0, r = 0, o = 0;
             if (DEBUG) {
-                let v = this.value / Int36.INT_LIMIT, r = result / Int36.INT_LIMIT, o = operand / Int36.INT_LIMIT;
+                v = this.value / Int36.INT_LIMIT, r = result / Int36.INT_LIMIT, o = operand / Int36.INT_LIMIT;
                 e = ((v ^ r) & (o ^ (fSub? v : r))) & 1;
             }
             if ((result > Int36.INT_MASK) != (this.value > Int36.INT_MASK)) {

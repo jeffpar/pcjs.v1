@@ -1,27 +1,20 @@
 {
   "globals": {
+    "APPCLASS": true,
     "APPNAME": true,
     "APPVERSION": true,
-    "BACKTRACK": true,
-    "BUGS_8086": true,
-    "BYTEARRAYS": true,
     "COMPILED": true,
     "COPYRIGHT": true,
     "CSSCLASS": true,
     "DEBUG": true,
     "DEBUGGER": true,
-    "DESKPRO386": true,
-    "I386": true,
     "LICENSE": true,
     "MAXDEBUG": true,
     "NODE": true,
-    "PAGEBLOCKS": true,
-    "PREFETCH": true,
     "PRIVATE": true,
     "RS232": true,
     "SITEURL": true,
-    "SYMBOLS": true,
-    "TYPEDARRAYS": true,
-    "XMLVERSION": true
+    "XMLVERSION": true,
+    "resources": true
   }
 }
