@@ -1,5 +1,6 @@
 {
 	"editor.insertSpaces": true,
+	"editor.minimap.enabled": false,
 	"editor.rulers": [127],
 	"editor.tabSize": 4,
 	"editor.wordWrap": "off",
@@ -30,7 +31,6 @@
 	"[markdown]": {
 		"editor.wordWrap": "off"
 	},
-	"editor.minimap.enabled": false,
   "grunt.autoDetect": "off",
   "jake.autoDetect": "off",
   "gulp.autoDetect": "off",
