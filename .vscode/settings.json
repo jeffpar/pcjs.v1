@@ -1,3 +1,42 @@
 {
-
+	"editor.insertSpaces": true,
+	"editor.rulers": [127],
+	"editor.tabSize": 4,
+	"editor.wordWrap": "off",
+	"eslint.enable": true,
+	"eslint.workingDirectories": [
+		"./modules/c1pjs/lib", "./modules/pcx86/lib"
+	],
+	"explorer.confirmDragAndDrop": false,
+	"files.autoSave": "afterDelay",
+	"files.exclude": {
+		"**/._*": true,
+		"**/.DS_Store": true,
+		"**/index.html": true,
+		"node_modules/": true
+	},
+	"git.enableSmartCommit": true,
+	"javascript.validate.enable": true,
+	"markdownlint.config": {
+		"MD002": false,
+		"MD003": false,
+		"MD004": false,
+		"MD010": false,
+		"MD025": false,
+		"MD029": false,
+		"MD033": false,
+		"MD041": false
+	},
+	"[markdown]": {
+		"editor.wordWrap": "off"
+	},
+	"editor.minimap.enabled": false,
+  "grunt.autoDetect": "off",
+  "jake.autoDetect": "off",
+  "gulp.autoDetect": "off",
+  "npm.autoDetect": "off",
+  "typescript.tsc.autoDetect": "off",
+  "typescript.validate.enable": false,
+	"window.zoomLevel": 0,
+	"workbench.quickOpen.closeOnFocusLost": false
 }

@@ -2312,7 +2312,7 @@ if (DEBUGGER) {
                             this.findBreakpoint(aBreak, dbgAddrBreak, true, true);
                             fTemporary = true;
                         }
-                        if (a = dbgAddrBreak.aCmds) {
+                        if ((a = dbgAddrBreak.aCmds)) {
                             /*
                              * When one or more commands are attached to a breakpoint, we don't halt by default.
                              * Instead, we set fBreak to true only if, at the completion of all the commands, the

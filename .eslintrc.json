@@ -5,6 +5,12 @@
     "es6": true
   },
   "extends": "eslint:recommended",
+  "globals": {
+    "Buffer": true,
+    "process": true,
+    "__dirname": true,
+    "__filename": true
+  },
   "rules": {
     "accessor-pairs": "error",
     "array-bracket-newline": "off",
@@ -36,7 +42,7 @@
     "consistent-this": "off",
     "curly": "off",
     "default-case": "off",
-    "dot-location": "error",
+    "dot-location": "off",
     "dot-notation": "off",
     "eol-last": "error",
     "eqeqeq": "off",
@@ -159,7 +165,7 @@
     "no-param-reassign": "off",
     "no-path-concat": "error",
     "no-plusplus": "off",
-    "no-process-env": "error",
+    "no-process-env": "off",
     "no-process-exit": "off",
     "no-proto": "error",
     "no-prototype-builtins": "off",
