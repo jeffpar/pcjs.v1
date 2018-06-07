@@ -86,7 +86,7 @@ class Device {
      */
     addBinding(binding, element)
     {
-        let device = this;
+        let device = this, elementTextArea;
 
         switch (binding) {
 
@@ -97,7 +97,7 @@ class Device {
             break;
 
         case Device.BINDING.PRINT:
-            let elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
+            elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
             /*
              * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
              */
@@ -359,15 +359,15 @@ class Device {
         let afnHandlers = this.findHandlers(Device.HANDLER.COMMAND);
         if (afnHandlers) {
 
-            let i = sText.lastIndexOf('\n', sText.length - 2);
-            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev;
+            let c, i = sText.lastIndexOf('\n', sText.length - 2);
+            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev, sResult;
             this.sCommandPrev = "";
             sCommand = sCommand.trim();
             let aTokens = sCommand.split(' ');
 
             switch(aTokens[0]) {
             case 'c':
-                let c = aTokens[1];
+                c = aTokens[1];
                 if (c) {
                     this.println("set category '" + c + "'");
                     this.setCategory(c);
@@ -381,13 +381,13 @@ class Device {
                 }
                 break;
             case '?':
-                let sResult = "";
-                Device.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
+                sResult = "";
+                Device.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
                 if (sResult) this.println("default commands:" + sResult);
                 /* falls through */
             default:
                 aTokens.unshift(sCommand);
-                for (let i = 0; i < afnHandlers.length; i++) {
+                for (i = 0; i < afnHandlers.length; i++) {
                     if (afnHandlers[i](aTokens, this)) break;
                 }
                 break;
@@ -681,7 +681,7 @@ class Device {
              *
              * NOTE: "http://archive.pcjs.org" is now "https://s3-us-west-2.amazonaws.com/archive.pcjs.org"
              */
-            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^\/]*)$/, "$2/archive/$3");
+            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
         }
 
         let device = this;
@@ -3482,7 +3482,7 @@ class Time extends Device {
      */
     addBinding(binding, element)
     {
-        let time = this;
+        let time = this, elementInput;
 
         switch(binding) {
 
@@ -3499,7 +3499,7 @@ class Time extends Device {
             break;
 
         case Time.BINDING.THROTTLE:
-            let elementInput = /** @type {HTMLInputElement} */ (element);
+            elementInput = /** @type {HTMLInputElement} */ (element);
             elementInput.addEventListener("mousedown", function onThrottleStart() {
                 time.fThrottling = true;
             });
@@ -5243,7 +5243,9 @@ class Chip extends Device {
             sOperands = this.sprintf("0x%04x", v);
         }
         else if (opCode >= 0) {
+            let d, j, k, l, n;
             let mask = opCode & Chip.IW_MF.MASK;
+            let sMask, sOperator, sDst, sSrc, sStore;
 
             switch(mask) {
             case Chip.IW_MF.MMSD:   // 0x0000: Mantissa Most Significant Digit (D12)
@@ -5258,15 +5260,15 @@ class Chip extends Device {
             case Chip.IW_MF.DIGIT:  // 0x0a00: (D14-D15)
             case Chip.IW_MF.D13:    // 0x0d00: (D13)
             case Chip.IW_MF.D15:    // 0x0f00: (D15)
-                let sMask = this.toStringMask(mask);
-                let j = (opCode & Chip.IW_MF.J_MASK) >> Chip.IW_MF.J_SHIFT;
-                let k = (opCode & Chip.IW_MF.K_MASK) >> Chip.IW_MF.K_SHIFT;
-                let l = (opCode & Chip.IW_MF.L_MASK) >> Chip.IW_MF.L_SHIFT;
-                let n = (opCode & Chip.IW_MF.N_MASK);
+                sMask = this.toStringMask(mask);
+                j = (opCode & Chip.IW_MF.J_MASK) >> Chip.IW_MF.J_SHIFT;
+                k = (opCode & Chip.IW_MF.K_MASK) >> Chip.IW_MF.K_SHIFT;
+                l = (opCode & Chip.IW_MF.L_MASK) >> Chip.IW_MF.L_SHIFT;
+                n = (opCode & Chip.IW_MF.N_MASK);
 
                 sOp = "LOAD";
-                let sOperator = "";
-                let sDst = "?", sSrc = "?";
+                sOperator = "";
+                sDst = "?"; sSrc = "?";
 
                 if (!n) {
                     sOperator = (k == 5? "<<" : "+");
@@ -5335,12 +5337,12 @@ class Chip extends Device {
                     break;
                 }
                 sOperands = this.regsO[(opCode & Chip.IW_FF.J_MASK) >> Chip.IW_FF.J_SHIFT].name;
-                let d = ((opCode & Chip.IW_FF.D_MASK) >> Chip.IW_FF.D_SHIFT);
+                d = ((opCode & Chip.IW_FF.D_MASK) >> Chip.IW_FF.D_SHIFT);
                 sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opCode & Chip.IW_FF.B_MASK) >> Chip.IW_FF.B_SHIFT) + ']';
                 break;
 
             case Chip.IW_MF.PF:     // 0x0e00: (used for misc operations)
-                let sStore = "STORE";
+                sStore = "STORE";
                 switch(opCode & Chip.IW_PF.MASK) {
                 case Chip.IW_PF.STYA:   // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
                     sOp = sStore;
@@ -5400,7 +5402,7 @@ class Chip extends Device {
      * loadState(state)
      *
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
-     * 
+     *
      * @this {Chip}
      * @param {Object|Array|null} state
      * @returns {boolean}
@@ -5419,9 +5421,9 @@ class Chip extends Device {
                 return false;
             }
             try {
-                this.regsO.forEach(reg => reg.set(stateChip.shift()));
-                this.regsX.forEach(reg => reg.set(stateChip.shift()));
-                this.regsY.forEach(reg => reg.set(stateChip.shift()));
+                this.regsO.forEach((reg) => reg.set(stateChip.shift()));
+                this.regsX.forEach((reg) => reg.set(stateChip.shift()));
+                this.regsY.forEach((reg) => reg.set(stateChip.shift()));
                 this.regSupp.set(stateChip.shift());
                 this.regTemp.set(stateChip.shift());
                 this.base = stateChip.shift();
@@ -5464,11 +5466,12 @@ class Chip extends Device {
         let nWords = Number.parseInt(aTokens[3], 10) || 8;
 
         this.nStringFormat = Chip.SFORMAT.DEFAULT;
-        
+
+        let c, condition;
+
         switch(s[0]) {
         case 'b':
-            let c = s.substr(1);
-            let condition;
+            c = s.substr(1);
             if (c == 'l') {
                 for (c in Chip.BREAK) {
                     condition = Chip.BREAK[c];
@@ -5524,7 +5527,7 @@ class Chip extends Device {
 
         case '?':
             sResult = "additional commands:";
-            Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
+            Chip.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
             break;
 
         default:
@@ -5775,9 +5778,9 @@ class Chip extends Device {
         let stateChip = state[0];
         let stateROM = state[1];
         stateChip.push(Chip.VERSION);
-        this.regsO.forEach(reg => stateChip.push(reg.get()));
-        this.regsX.forEach(reg => stateChip.push(reg.get()));
-        this.regsY.forEach(reg => stateChip.push(reg.get()));
+        this.regsO.forEach((reg) => stateChip.push(reg.get()));
+        this.regsX.forEach((reg) => stateChip.push(reg.get()));
+        this.regsY.forEach((reg) => stateChip.push(reg.get()));
         stateChip.push(this.regSupp.get());
         stateChip.push(this.regTemp.get());
         stateChip.push(this.base);
@@ -5811,6 +5814,7 @@ class Chip extends Device {
             break;
         }
     }
+
     /**
      * status()
      *
@@ -5925,7 +5929,7 @@ class Chip extends Device {
         let element;
         let f2nd = on && (this.type == Chip.TYPE.TMS1501? !!(this.regC.digits[14] & 0x8) : !!(this.regB.digits[15] & 0x4));
         if (this.f2nd !== f2nd) {
-            if (element = this.bindings['2nd']) {
+            if ((element = this.bindings['2nd'])) {
                 element.style.opacity = f2nd? "1" : "0";
                 if (this.f2nd === undefined && this.led) element.style.color = this.led.color;
             }
@@ -5933,7 +5937,7 @@ class Chip extends Device {
         }
         let fINV = on && (this.type == Chip.TYPE.TMS1501? !!(this.regB.digits[15] & 0x4) : !!(this.regD.digits[15] & 0x8));
         if (this.fINV !== fINV) {
-            if (element = this.bindings['INV']) {
+            if ((element = this.bindings['INV'])) {
                 element.style.opacity = fINV? "1" : "0";
                 if (this.fINV === undefined && this.led) element.style.color = this.led.color;
             }
@@ -5942,15 +5946,15 @@ class Chip extends Device {
         let angleBits = (this.type == Chip.TYPE.TMS1501? (this.regsX[4].digits[15] >> 2) : this.regC.digits[15]);
         let angleMode = on? ((!angleBits)? Chip.ANGLEMODE.DEGREES : (angleBits == 1)? Chip.ANGLEMODE.RADIANS : Chip.ANGLEMODE.GRADIENTS) : Chip.ANGLEMODE.OFF;
         if (this.angleMode !== angleMode) {
-            if (element = this.bindings['Deg']) {
+            if ((element = this.bindings['Deg'])) {
                 element.style.opacity = (angleMode == Chip.ANGLEMODE.DEGREES)? "1" : "0";
                 if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
-            if (element = this.bindings['Rad']) {
+            if ((element = this.bindings['Rad'])) {
                 element.style.opacity = (angleMode == Chip.ANGLEMODE.RADIANS)? "1" : "0";
                 if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
-            if (element = this.bindings['Grad']) {
+            if ((element = this.bindings['Grad'])) {
                 element.style.opacity = (angleMode == Chip.ANGLEMODE.GRADIENTS)? "1" : "0";
                 if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
@@ -6141,11 +6145,11 @@ MACHINE = "TMS1500";
 class Machine extends Device {
     /**
      * Machine(idMachine, sConfig)
-     * 
+     *
      * If sConfig contains a JSON object definition, then we parse it immediately and save the result in this.config;
      * otherwise, we assume it's the URL of an JSON object definition, so we request the resource, and once it's loaded,
      * we parse it.
-     * 
+     *
      * Sample config:
      *
      *    {
@@ -6232,9 +6236,9 @@ class Machine extends Device {
         this.chip = null;
         this.sConfigFile = "";
         this.fConfigLoaded = this.fPageLoaded = false;
-        
+
         sConfig = sConfig.trim();
-        
+
         if (sConfig[0] == '{') {
             this.loadConfig(sConfig);
         } else {
@@ -6251,7 +6255,7 @@ class Machine extends Device {
                 }
             });
         }
-        
+
         /*
          * Device initialization is now deferred until after the page is fully loaded, for the benefit
          * of devices (eg, Input) that may be dependent on page resources.
@@ -6332,17 +6336,17 @@ class Machine extends Device {
 
     /**
      * killDevices()
-     * 
+     *
      * @this {Machine}
      */
     killDevices()
     {
         let chip;
-        if (chip = this.chip) {
+        if ((chip = this.chip)) {
             if (chip.onSave) chip.onSave();
             if (chip.onPower) chip.onPower(false);
         }
-        
+
     }
 
     /**

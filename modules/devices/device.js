@@ -118,7 +118,7 @@ class Device {
      */
     addBinding(binding, element)
     {
-        let device = this;
+        let device = this, elementTextArea;
 
         switch (binding) {
 
@@ -129,7 +129,7 @@ class Device {
             break;
 
         case Device.BINDING.PRINT:
-            let elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
+            elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
             /*
              * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
              */
@@ -391,15 +391,15 @@ class Device {
         let afnHandlers = this.findHandlers(Device.HANDLER.COMMAND);
         if (afnHandlers) {
 
-            let i = sText.lastIndexOf('\n', sText.length - 2);
-            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev;
+            let c, i = sText.lastIndexOf('\n', sText.length - 2);
+            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev, sResult;
             this.sCommandPrev = "";
             sCommand = sCommand.trim();
             let aTokens = sCommand.split(' ');
 
             switch(aTokens[0]) {
             case 'c':
-                let c = aTokens[1];
+                c = aTokens[1];
                 if (c) {
                     this.println("set category '" + c + "'");
                     this.setCategory(c);
@@ -413,13 +413,13 @@ class Device {
                 }
                 break;
             case '?':
-                let sResult = "";
-                Device.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
+                sResult = "";
+                Device.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
                 if (sResult) this.println("default commands:" + sResult);
                 /* falls through */
             default:
                 aTokens.unshift(sCommand);
-                for (let i = 0; i < afnHandlers.length; i++) {
+                for (i = 0; i < afnHandlers.length; i++) {
                     if (afnHandlers[i](aTokens, this)) break;
                 }
                 break;
@@ -713,7 +713,7 @@ class Device {
              *
              * NOTE: "http://archive.pcjs.org" is now "https://s3-us-west-2.amazonaws.com/archive.pcjs.org"
              */
-            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^\/]*)$/, "$2/archive/$3");
+            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
         }
 
         let device = this;

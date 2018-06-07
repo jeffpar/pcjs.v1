@@ -1439,7 +1439,7 @@ class CPUStatePDP11 extends CPUPDP11 {
             var bits = newPIR >> PDP11.PIR.SHIFT.BITS;
             do {
                 newPIR += PDP11.PIR.PIA_INC;
-            } while (bits >>= 1);
+            } while ((bits >>= 1));
             this.opFlags |= PDP11.OPFLAG.IRQ_DELAY;
         }
         this.regPIR = newPIR;

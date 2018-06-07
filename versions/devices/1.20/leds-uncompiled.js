@@ -86,7 +86,7 @@ class Device {
      */
     addBinding(binding, element)
     {
-        let device = this;
+        let device = this, elementTextArea;
 
         switch (binding) {
 
@@ -97,7 +97,7 @@ class Device {
             break;
 
         case Device.BINDING.PRINT:
-            let elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
+            elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
             /*
              * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
              */
@@ -359,15 +359,15 @@ class Device {
         let afnHandlers = this.findHandlers(Device.HANDLER.COMMAND);
         if (afnHandlers) {
 
-            let i = sText.lastIndexOf('\n', sText.length - 2);
-            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev;
+            let c, i = sText.lastIndexOf('\n', sText.length - 2);
+            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev, sResult;
             this.sCommandPrev = "";
             sCommand = sCommand.trim();
             let aTokens = sCommand.split(' ');
 
             switch(aTokens[0]) {
             case 'c':
-                let c = aTokens[1];
+                c = aTokens[1];
                 if (c) {
                     this.println("set category '" + c + "'");
                     this.setCategory(c);
@@ -381,13 +381,13 @@ class Device {
                 }
                 break;
             case '?':
-                let sResult = "";
-                Device.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
+                sResult = "";
+                Device.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
                 if (sResult) this.println("default commands:" + sResult);
                 /* falls through */
             default:
                 aTokens.unshift(sCommand);
-                for (let i = 0; i < afnHandlers.length; i++) {
+                for (i = 0; i < afnHandlers.length; i++) {
                     if (afnHandlers[i](aTokens, this)) break;
                 }
                 break;
@@ -681,7 +681,7 @@ class Device {
              *
              * NOTE: "http://archive.pcjs.org" is now "https://s3-us-west-2.amazonaws.com/archive.pcjs.org"
              */
-            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^\/]*)$/, "$2/archive/$3");
+            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
         }
 
         let device = this;
@@ -3482,7 +3482,7 @@ class Time extends Device {
      */
     addBinding(binding, element)
     {
-        let time = this;
+        let time = this, elementInput;
 
         switch(binding) {
 
@@ -3499,7 +3499,7 @@ class Time extends Device {
             break;
 
         case Time.BINDING.THROTTLE:
-            let elementInput = /** @type {HTMLInputElement} */ (element);
+            elementInput = /** @type {HTMLInputElement} */ (element);
             elementInput.addEventListener("mousedown", function onThrottleStart() {
                 time.fThrottling = true;
             });
@@ -4515,7 +4515,7 @@ class Chip extends Device {
      */
     addBinding(binding, element)
     {
-        let chip = this;
+        let chip = this, elementInput, patterns;
 
         switch(binding) {
         case Chip.BINDING.COLOR_PALETTE:
@@ -4565,7 +4565,7 @@ class Chip extends Device {
             break;
 
         case Chip.BINDING.SYMBOL_INPUT:
-            let elementInput = /** @type {HTMLInputElement} */ (element);
+            elementInput = /** @type {HTMLInputElement} */ (element);
             elementInput.onkeypress = function onChangeSymbol(event) {
                 elementInput.value = String.fromCharCode(event.charCode);
                 let elementPreview = chip.bindings[Chip.BINDING.SYMBOL_PREVIEW];
@@ -4585,7 +4585,7 @@ class Chip extends Device {
              * This code allows you to bind a specific control (ie, a button) to a specific pattern;
              * however, it's preferable to use the PATTERN_SELECTION binding above, and use a single list.
              */
-            let patterns = this.config[Chip.BINDING.PATTERN_SELECTION];
+            patterns = this.config[Chip.BINDING.PATTERN_SELECTION];
             if (patterns && patterns[binding]) {
                 element.onclick = function onClickPattern() {
                     chip.loadPattern(binding);
@@ -5266,7 +5266,7 @@ class Chip extends Device {
 
         case '?':
             sResult = "";
-            Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
+            Chip.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
             if (sResult) sResult = "additional commands:" + sResult;
             break;
 
@@ -6118,11 +6118,11 @@ MACHINE = "LEDs";
 class Machine extends Device {
     /**
      * Machine(idMachine, sConfig)
-     * 
+     *
      * If sConfig contains a JSON object definition, then we parse it immediately and save the result in this.config;
      * otherwise, we assume it's the URL of an JSON object definition, so we request the resource, and once it's loaded,
      * we parse it.
-     * 
+     *
      * Sample config:
      *
      *    {
@@ -6209,9 +6209,9 @@ class Machine extends Device {
         this.chip = null;
         this.sConfigFile = "";
         this.fConfigLoaded = this.fPageLoaded = false;
-        
+
         sConfig = sConfig.trim();
-        
+
         if (sConfig[0] == '{') {
             this.loadConfig(sConfig);
         } else {
@@ -6228,7 +6228,7 @@ class Machine extends Device {
                 }
             });
         }
-        
+
         /*
          * Device initialization is now deferred until after the page is fully loaded, for the benefit
          * of devices (eg, Input) that may be dependent on page resources.
@@ -6309,17 +6309,17 @@ class Machine extends Device {
 
     /**
      * killDevices()
-     * 
+     *
      * @this {Machine}
      */
     killDevices()
     {
         let chip;
-        if (chip = this.chip) {
+        if ((chip = this.chip)) {
             if (chip.onSave) chip.onSave();
             if (chip.onPower) chip.onPower(false);
         }
-        
+
     }
 
     /**

@@ -204,7 +204,7 @@ class Time extends Device {
      */
     addBinding(binding, element)
     {
-        let time = this;
+        let time = this, elementInput;
 
         switch(binding) {
 
@@ -221,7 +221,7 @@ class Time extends Device {
             break;
 
         case Time.BINDING.THROTTLE:
-            let elementInput = /** @type {HTMLInputElement} */ (element);
+            elementInput = /** @type {HTMLInputElement} */ (element);
             elementInput.addEventListener("mousedown", function onThrottleStart() {
                 time.fThrottling = true;
             });

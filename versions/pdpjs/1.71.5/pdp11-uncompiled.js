@@ -13136,7 +13136,7 @@ class CPUStatePDP11 extends CPUPDP11 {
             var bits = newPIR >> PDP11.PIR.SHIFT.BITS;
             do {
                 newPIR += PDP11.PIR.PIA_INC;
-            } while (bits >>= 1);
+            } while ((bits >>= 1));
             this.opFlags |= PDP11.OPFLAG.IRQ_DELAY;
         }
         this.regPIR = newPIR;
@@ -25566,9 +25566,9 @@ class DebuggerPDP11 extends Debugger {
      */
     constructor(parmsDbg)
     {
-        if (DEBUGGER) {
+        super(parmsDbg);
 
-            super(parmsDbg);
+        if (DEBUGGER) {
 
             /*
              * Since this Debugger doesn't use replaceRegs(), we can use parentheses instead of braces.
@@ -27382,7 +27382,7 @@ class DebuggerPDP11 extends Debugger {
                         this.findBreakpoint(aBreak, dbgAddrBreak, true, true);
                         fTemporary = true;
                     }
-                    if (a = dbgAddrBreak.aCmds) {
+                    if ((a = dbgAddrBreak.aCmds)) {
                         /*
                          * When one or more commands are attached to a breakpoint, we don't halt by default.
                          * Instead, we set fBreak to true only if, at the completion of all the commands, the

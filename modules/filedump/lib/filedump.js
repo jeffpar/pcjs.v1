@@ -306,7 +306,7 @@ FileDump.prototype.parseListing = function(sListing)
     var ab = [];
     var matchLine;
     var re = /^( [0-9 ]{8}|)([0-7]{6})[: ]+([0-7]+)[ ]*([0-7']+|)[ ]+([0-7']+|)[ ]+(.*)$/gm;
-    while (matchLine = re.exec(sListing)) {
+    while ((matchLine = re.exec(sListing))) {
         /*
          * matchLine[1]: line # (optional)
          * matchLine[2]: address

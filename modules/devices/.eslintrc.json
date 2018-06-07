@@ -1,0 +1,13 @@
+{
+  "globals": {
+    "Chip": true,
+    "Device": true,
+    "LED": true,
+    "Input": true,
+    "Machine": true,
+    "MACHINE": true,
+    "ROM": true,
+    "Time": true,
+    "VERSION": true
+  }
+}

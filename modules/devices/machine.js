@@ -39,11 +39,11 @@
 class Machine extends Device {
     /**
      * Machine(idMachine, sConfig)
-     * 
+     *
      * If sConfig contains a JSON object definition, then we parse it immediately and save the result in this.config;
      * otherwise, we assume it's the URL of an JSON object definition, so we request the resource, and once it's loaded,
      * we parse it.
-     * 
+     *
      * Sample config:
      *
      *    {
@@ -130,9 +130,9 @@ class Machine extends Device {
         this.chip = null;
         this.sConfigFile = "";
         this.fConfigLoaded = this.fPageLoaded = false;
-        
+
         sConfig = sConfig.trim();
-        
+
         if (sConfig[0] == '{') {
             this.loadConfig(sConfig);
         } else {
@@ -149,7 +149,7 @@ class Machine extends Device {
                 }
             });
         }
-        
+
         /*
          * Device initialization is now deferred until after the page is fully loaded, for the benefit
          * of devices (eg, Input) that may be dependent on page resources.
@@ -230,17 +230,17 @@ class Machine extends Device {
 
     /**
      * killDevices()
-     * 
+     *
      * @this {Machine}
      */
     killDevices()
     {
         let chip;
-        if (chip = this.chip) {
+        if ((chip = this.chip)) {
             if (chip.onSave) chip.onSave();
             if (chip.onPower) chip.onPower(false);
         }
-        
+
     }
 
     /**

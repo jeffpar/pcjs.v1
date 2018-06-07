@@ -503,7 +503,7 @@ MarkOut.prototype.convertMD = function(sIndent)
                      * extract them, and then remove them, to avoid any confusion later.
                      */
                     var reMulti = /([ \t]*)([^\s]+): \|\n((?:\1 +[^\n]*\n?)*)/g;
-                    while (aOptions = reMulti.exec(asMachines[iMachine])) {
+                    while ((aOptions = reMulti.exec(asMachines[iMachine]))) {
                         /*
                          * I would also like to "auto-quote" any unquoted property name at the start of any line.
                          */
@@ -513,7 +513,7 @@ MarkOut.prototype.convertMD = function(sIndent)
                         reMulti.lastIndex = 0;
                     }
                     var reOption = /([ \t]*)([^\s]+):[ \t]*([^\n]*)/g;
-                    while (aOptions = reOption.exec(asMachines[iMachine])) {
+                    while ((aOptions = reOption.exec(asMachines[iMachine]))) {
                         aaOptions.push(aOptions);
                     }
                     for (var iOption = 0; iOption < aaOptions.length; iOption++) {
@@ -1050,7 +1050,7 @@ MarkOut.prototype.convertMDLinks = function(sBlock)
     sBlock = sBlock.replace(/({)([{%])(.*?\2})/g, "<pre><code>$1$2$3</code></pre>");
 
     var aMatch;
-    var re = /\[([^\[\]]*)]\((.*?)(?:\s*"(.*?)"\)|\))/g;
+    var re = /\[([^[\]]*)]\((.*?)(?:\s*"(.*?)"\)|\))/g;
     while ((aMatch = re.exec(sBlock))) {
         var sTag = "a";
         var sType = "href";

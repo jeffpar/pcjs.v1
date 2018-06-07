@@ -1,0 +1,9 @@
+{
+  "globals": {
+    "BYTEARRAYS": true,
+    "MEMFAULT": true,
+    "PDP11": true,
+    "TYPEDARRAYS": true,
+    "WORDBUS": true
+  }
+}

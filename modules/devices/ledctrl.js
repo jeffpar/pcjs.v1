@@ -165,7 +165,7 @@ class Chip extends Device {
      */
     addBinding(binding, element)
     {
-        let chip = this;
+        let chip = this, elementInput, patterns;
 
         switch(binding) {
         case Chip.BINDING.COLOR_PALETTE:
@@ -215,7 +215,7 @@ class Chip extends Device {
             break;
 
         case Chip.BINDING.SYMBOL_INPUT:
-            let elementInput = /** @type {HTMLInputElement} */ (element);
+            elementInput = /** @type {HTMLInputElement} */ (element);
             elementInput.onkeypress = function onChangeSymbol(event) {
                 elementInput.value = String.fromCharCode(event.charCode);
                 let elementPreview = chip.bindings[Chip.BINDING.SYMBOL_PREVIEW];
@@ -235,7 +235,7 @@ class Chip extends Device {
              * This code allows you to bind a specific control (ie, a button) to a specific pattern;
              * however, it's preferable to use the PATTERN_SELECTION binding above, and use a single list.
              */
-            let patterns = this.config[Chip.BINDING.PATTERN_SELECTION];
+            patterns = this.config[Chip.BINDING.PATTERN_SELECTION];
             if (patterns && patterns[binding]) {
                 element.onclick = function onClickPattern() {
                     chip.loadPattern(binding);
@@ -916,7 +916,7 @@ class Chip extends Device {
 
         case '?':
             sResult = "";
-            Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
+            Chip.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
             if (sResult) sResult = "additional commands:" + sResult;
             break;
 

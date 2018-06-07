@@ -6896,7 +6896,7 @@ PDP10.GETHL = function(op, dst, src)
  */
 PDP10.SETHL = function(op, dst, src)
 {
-    if (op &= 0o600) {
+    if ((op &= 0o600)) {
         dst &= PDP10.HALF_MASK;
         switch(op) {
         case 0o400:
@@ -6951,7 +6951,7 @@ PDP10.GETHR = function(op, dst, src)
  */
 PDP10.SETHR = function(op, dst, src)
 {
-    if (op &= 0o600) {
+    if ((op &= 0o600)) {
         dst -= (dst & PDP10.HALF_MASK);
         switch(op) {
         case 0o400:

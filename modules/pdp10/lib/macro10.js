@@ -384,7 +384,7 @@ class Macro10 {
                  */
                 sText = "";
                 var match, re = /<pre>([\s\S]*?)<\/pre>/gi;
-                while (match = re.exec(sResource)) {
+                while ((match = re.exec(sResource))) {
                     var s = match[1];
                     if (s.indexOf('&') >= 0) s = s.replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&amp;/gi, '&');
                     sText += s;
@@ -676,7 +676,7 @@ class Macro10 {
          * Check the operands for any reserved symbols (ie, symbols with a trailing '#', such as "USER#").
          */
         var sSymbol;
-        while (sSymbol = this.getReserved(sOperands)) {
+        while ((sSymbol = this.getReserved(sOperands))) {
             sOperands = sOperands.replace(sSymbol, sSymbol.slice(0, -1));
         }
 
@@ -1090,7 +1090,7 @@ class Macro10 {
             var match;
             var sOperator = "";
             var sOperands = sEval;
-            if (match = sEval.match(/^([^\s]+)\s*(.*?)\s*$/)) {
+            if ((match = sEval.match(/^([^\s]+)\s*(.*?)\s*$/))) {
                 sOperator = match[1];
                 sOperands = match[2];
             }
@@ -1210,7 +1210,7 @@ class Macro10 {
     getReserved(sOperands)
     {
         var match, sReserved = null;
-        if (match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)#/i)) {
+        if ((match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)#/i))) {
             sReserved = match[0];
             var sLabel = match[1];
             var name = '?' + sLabel;
@@ -1685,7 +1685,7 @@ class Macro10 {
         var sOperand;
         var nBits = 0, nValue = 0, nBitsRemaining = 36;
 
-        while (sOperand = this.getExpression(sOperands)) {
+        while ((sOperand = this.getExpression(sOperands))) {
             sOperands = sOperands.substr(sOperand.length).trim();
             var sValue = sOperand;
             var match = sOperand.match(/^\((.*)\)\s*(.*)$/);
