@@ -41,5 +41,8 @@ pcjs:
 pcjs-disks:
   baseurl: "https://jeffpar.github.io"
 
+pcjs-games:
+  baseurl: "https://jeffpar.github.io"
+
 private-disks:
   baseurl: "https://jeffpar.github.io"
