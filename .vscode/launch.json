@@ -1,6 +1,6 @@
 {
-	"version": "0.1.0",
-	"configurations": [
+  "version": "0.1.0",
+  "configurations": [
     {
       "name": "Gulp",
       "type": "node",
@@ -10,13 +10,13 @@
       "cwd": "${workspaceFolder}",
       "stopOnEntry": true
     },
-	  {
-		  "name": "Launch index.html (disable sourcemaps)",
-		  "type": "chrome",
-		  "request": "launch",
-		  "sourceMaps": false,
-		  "file": "${workspaceFolder}"
-	  },
+    {
+      "name": "Launch index.html (disable sourcemaps)",
+      "type": "chrome",
+      "request": "launch",
+      "sourceMaps": false,
+      "file": "${workspaceFolder}"
+    },
     {
       "name": "Webserver (Debug)",
       "type": "node",
@@ -2223,5 +2223,5 @@
       "url": "http://localhost:8088/devices/ti57/tips/",
       "webRoot": "${workspaceFolder}"
     }
-	]
+  ]
 }
