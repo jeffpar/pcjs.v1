@@ -31,18 +31,18 @@
 /*
  * Overview
  * --------
- * 
+ *
  * TestMonitor monitors activity on the bound SerialPort and a user I/O device (eg, a terminal,
  * a console window, etc).  It operates in several modes:
- * 
+ *
  * 1) TERMINAL mode: all data received from the SerialPort is routed the user output device,
  * and all data received from the user input device is routed to the SerialPort.  No special actions
  * are taken, until/unless the ATTENTION key is detected from the user input device (ie, Ctrl-T).
- * 
+ *
  * 2) PROMPT mode: data from the SerialPort is monitored for specific prompts (eg, "A>"), and
  * when one of those prompts is detected, we enter COMMAND mode, with category set to the appropriate
  * collection of tests.
- * 
+ *
  * 3) COMMAND mode: CR-terminated lines of user input are checked against the current set of test
  * commands, and if a match is found, the corresponding request is sent to the SerialPort.
  */
@@ -82,7 +82,7 @@ class TestMonitor {
         /*
          * Operations are added to the following queue by addOperation(), which ensures that as soon as it
          * transitions from empty to non-empty, a timeout handler is established to begin draining the queue.
-         * 
+         *
          * While this approach is more complicated than simply sending operations (via sendData()) as they
          * arrive, it has at least one important advantage: special operations, such as "wait" (eg, wait for a
          * key to be pressed), are easier to implement, because control of the draining process can be switched
@@ -125,12 +125,12 @@ class TestMonitor {
     addCommand(commandLine)
     {
         if (!commandLine) return true;
-        
+
         let suite = this.tests[this.category];
         let commands = suite['commands'];
         let commandParts = commandLine.split(' ');
         let command = commandParts[0];
-        
+
         /*
          * Check for a matching command in the current "test suite" category.
          */
@@ -139,7 +139,7 @@ class TestMonitor {
             fExists = true;
             command = commands[command];
         }
-        
+
         let op, mode;
         if (typeof command == "string") {
             op = command;
@@ -151,7 +151,7 @@ class TestMonitor {
             op = command['op'];
             mode = command['mode'];
         }
-        
+
         if (op) {
             let errorMessage = "";
             op = op.replace(/([$%])([0-9]+)/g, function(match, p1, p2, offset, s) {
@@ -202,7 +202,7 @@ class TestMonitor {
 
     /**
      * addForLoop(commandLine)
-     * 
+     *
      * @this {TestMonitor}
      * @param {string} commandLine
      * @return {boolean}
@@ -234,7 +234,7 @@ class TestMonitor {
 
     /**
      * addOperation(op, mode)
-     * 
+     *
      * @this {TestMonitor}
      * @param {string} op
      * @param {string} [mode]
@@ -279,7 +279,7 @@ class TestMonitor {
         this.printf("done\n");
         return false;
     }
-    
+
     /**
      * removeOperation()
      *
@@ -325,10 +325,10 @@ class TestMonitor {
             this.nextOperation();
         }
     }
-    
+
     /**
      * setMode(mode, category)
-     * 
+     *
      * @this {TestMonitor}
      * @param {string} mode
      * @param {string} [category]
@@ -382,7 +382,7 @@ class TestMonitor {
             this.printf("mode: %s\n", this.category || this.mode);
         }
     }
-    
+
     /**
      * receiveTests(tests)
      *

@@ -1,0 +1,6 @@
+{
+  "globals": {
+    "PDP10": true,
+    "SIMH": true
+  }
+}

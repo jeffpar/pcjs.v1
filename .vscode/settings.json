@@ -1,20 +1,43 @@
 {
-    "cSpell.words": [
-        "Gosper",
-        "Trammell",
-        "bobo",
-        "brite",
-        "endcomment",
-        "filedump",
-        "haxrom",
-        "litebrite",
-        "pcjs",
-        "phooky's",
-        "printf",
-        "println",
-        "romhax"
-    ],
-    "favorites.resources": [
-        "pubs/pc/reference/ibm/4860"
-    ]
+	"editor.insertSpaces": true,
+	"editor.minimap.enabled": false,
+	"editor.rulers": [127],
+	"editor.tabSize": 4,
+	"editor.wordWrap": "off",
+	"eslint.enable": true,
+	"eslint.workingDirectories": [
+		"./modules/c1pjs/lib", "./modules/pcx86/lib"
+	],
+	"explorer.confirmDragAndDrop": false,
+	"files.autoSave": "afterDelay",
+	"files.exclude": {
+		"**/._*": true,
+		"**/.DS_Store": true,
+		"**/index.html": true,
+		"node_modules/": true
+	},
+	"git.enableSmartCommit": true,
+	"javascript.validate.enable": true,
+	"markdownlint.config": {
+		"MD002": false,
+		"MD003": false,
+		"MD004": false,
+		"MD009": false,
+		"MD010": false,
+		"MD025": false,
+		"MD029": false,
+		"MD033": false,
+		"MD041": false
+	},
+	"[markdown]": {
+		"editor.wordWrap": "off"
+	},
+  "grunt.autoDetect": "off",
+  "jake.autoDetect": "off",
+  "gulp.autoDetect": "off",
+  "npm.autoDetect": "off",
+  "typescript.tsc.autoDetect": "off",
+  "typescript.validate.enable": false,
+  "window.zoomLevel": 0,
+	"workbench.quickOpen.closeOnFocusLost": false
 }

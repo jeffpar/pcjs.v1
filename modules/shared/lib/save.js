@@ -162,7 +162,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
              * other machine resources, and remove those entries.
              */
             let matchDisk, reDisk = /[ \t]*<disk [^>]*path=(['"])(.*?)\1.*?<\/disk>\n?/g;
-            while (matchDisk = reDisk.exec(resOld[sName])) {
+            while ((matchDisk = reDisk.exec(resOld[sName]))) {
                 let path = matchDisk[2];
                 if (path) {
                     if (resOld[path]) {

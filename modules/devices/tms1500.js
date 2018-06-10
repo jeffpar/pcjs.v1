@@ -880,7 +880,9 @@ class Chip extends Device {
             sOperands = this.sprintf("0x%04x", v);
         }
         else if (opCode >= 0) {
+            let d, j, k, l, n;
             let mask = opCode & Chip.IW_MF.MASK;
+            let sMask, sOperator, sDst, sSrc, sStore;
 
             switch(mask) {
             case Chip.IW_MF.MMSD:   // 0x0000: Mantissa Most Significant Digit (D12)
@@ -895,15 +897,15 @@ class Chip extends Device {
             case Chip.IW_MF.DIGIT:  // 0x0a00: (D14-D15)
             case Chip.IW_MF.D13:    // 0x0d00: (D13)
             case Chip.IW_MF.D15:    // 0x0f00: (D15)
-                let sMask = this.toStringMask(mask);
-                let j = (opCode & Chip.IW_MF.J_MASK) >> Chip.IW_MF.J_SHIFT;
-                let k = (opCode & Chip.IW_MF.K_MASK) >> Chip.IW_MF.K_SHIFT;
-                let l = (opCode & Chip.IW_MF.L_MASK) >> Chip.IW_MF.L_SHIFT;
-                let n = (opCode & Chip.IW_MF.N_MASK);
+                sMask = this.toStringMask(mask);
+                j = (opCode & Chip.IW_MF.J_MASK) >> Chip.IW_MF.J_SHIFT;
+                k = (opCode & Chip.IW_MF.K_MASK) >> Chip.IW_MF.K_SHIFT;
+                l = (opCode & Chip.IW_MF.L_MASK) >> Chip.IW_MF.L_SHIFT;
+                n = (opCode & Chip.IW_MF.N_MASK);
 
                 sOp = "LOAD";
-                let sOperator = "";
-                let sDst = "?", sSrc = "?";
+                sOperator = "";
+                sDst = "?"; sSrc = "?";
 
                 if (!n) {
                     sOperator = (k == 5? "<<" : "+");
@@ -972,12 +974,12 @@ class Chip extends Device {
                     break;
                 }
                 sOperands = this.regsO[(opCode & Chip.IW_FF.J_MASK) >> Chip.IW_FF.J_SHIFT].name;
-                let d = ((opCode & Chip.IW_FF.D_MASK) >> Chip.IW_FF.D_SHIFT);
+                d = ((opCode & Chip.IW_FF.D_MASK) >> Chip.IW_FF.D_SHIFT);
                 sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opCode & Chip.IW_FF.B_MASK) >> Chip.IW_FF.B_SHIFT) + ']';
                 break;
 
             case Chip.IW_MF.PF:     // 0x0e00: (used for misc operations)
-                let sStore = "STORE";
+                sStore = "STORE";
                 switch(opCode & Chip.IW_PF.MASK) {
                 case Chip.IW_PF.STYA:   // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
                     sOp = sStore;
@@ -1037,7 +1039,7 @@ class Chip extends Device {
      * loadState(state)
      *
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
-     * 
+     *
      * @this {Chip}
      * @param {Object|Array|null} state
      * @returns {boolean}
@@ -1056,9 +1058,9 @@ class Chip extends Device {
                 return false;
             }
             try {
-                this.regsO.forEach(reg => reg.set(stateChip.shift()));
-                this.regsX.forEach(reg => reg.set(stateChip.shift()));
-                this.regsY.forEach(reg => reg.set(stateChip.shift()));
+                this.regsO.forEach((reg) => reg.set(stateChip.shift()));
+                this.regsX.forEach((reg) => reg.set(stateChip.shift()));
+                this.regsY.forEach((reg) => reg.set(stateChip.shift()));
                 this.regSupp.set(stateChip.shift());
                 this.regTemp.set(stateChip.shift());
                 this.base = stateChip.shift();
@@ -1101,11 +1103,12 @@ class Chip extends Device {
         let nWords = Number.parseInt(aTokens[3], 10) || 8;
 
         this.nStringFormat = Chip.SFORMAT.DEFAULT;
-        
+
+        let c, condition;
+
         switch(s[0]) {
         case 'b':
-            let c = s.substr(1);
-            let condition;
+            c = s.substr(1);
             if (c == 'l') {
                 for (c in Chip.BREAK) {
                     condition = Chip.BREAK[c];
@@ -1161,7 +1164,7 @@ class Chip extends Device {
 
         case '?':
             sResult = "additional commands:";
-            Chip.COMMANDS.forEach(cmd => {sResult += '\n' + cmd;});
+            Chip.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
             break;
 
         default:
@@ -1412,9 +1415,9 @@ class Chip extends Device {
         let stateChip = state[0];
         let stateROM = state[1];
         stateChip.push(Chip.VERSION);
-        this.regsO.forEach(reg => stateChip.push(reg.get()));
-        this.regsX.forEach(reg => stateChip.push(reg.get()));
-        this.regsY.forEach(reg => stateChip.push(reg.get()));
+        this.regsO.forEach((reg) => stateChip.push(reg.get()));
+        this.regsX.forEach((reg) => stateChip.push(reg.get()));
+        this.regsY.forEach((reg) => stateChip.push(reg.get()));
         stateChip.push(this.regSupp.get());
         stateChip.push(this.regTemp.get());
         stateChip.push(this.base);
@@ -1448,6 +1451,7 @@ class Chip extends Device {
             break;
         }
     }
+
     /**
      * status()
      *
@@ -1562,7 +1566,7 @@ class Chip extends Device {
         let element;
         let f2nd = on && (this.type == Chip.TYPE.TMS1501? !!(this.regC.digits[14] & 0x8) : !!(this.regB.digits[15] & 0x4));
         if (this.f2nd !== f2nd) {
-            if (element = this.bindings['2nd']) {
+            if ((element = this.bindings['2nd'])) {
                 element.style.opacity = f2nd? "1" : "0";
                 if (this.f2nd === undefined && this.led) element.style.color = this.led.color;
             }
@@ -1570,7 +1574,7 @@ class Chip extends Device {
         }
         let fINV = on && (this.type == Chip.TYPE.TMS1501? !!(this.regB.digits[15] & 0x4) : !!(this.regD.digits[15] & 0x8));
         if (this.fINV !== fINV) {
-            if (element = this.bindings['INV']) {
+            if ((element = this.bindings['INV'])) {
                 element.style.opacity = fINV? "1" : "0";
                 if (this.fINV === undefined && this.led) element.style.color = this.led.color;
             }
@@ -1579,15 +1583,15 @@ class Chip extends Device {
         let angleBits = (this.type == Chip.TYPE.TMS1501? (this.regsX[4].digits[15] >> 2) : this.regC.digits[15]);
         let angleMode = on? ((!angleBits)? Chip.ANGLEMODE.DEGREES : (angleBits == 1)? Chip.ANGLEMODE.RADIANS : Chip.ANGLEMODE.GRADIENTS) : Chip.ANGLEMODE.OFF;
         if (this.angleMode !== angleMode) {
-            if (element = this.bindings['Deg']) {
+            if ((element = this.bindings['Deg'])) {
                 element.style.opacity = (angleMode == Chip.ANGLEMODE.DEGREES)? "1" : "0";
                 if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
-            if (element = this.bindings['Rad']) {
+            if ((element = this.bindings['Rad'])) {
                 element.style.opacity = (angleMode == Chip.ANGLEMODE.RADIANS)? "1" : "0";
                 if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
-            if (element = this.bindings['Grad']) {
+            if ((element = this.bindings['Grad'])) {
                 element.style.opacity = (angleMode == Chip.ANGLEMODE.GRADIENTS)? "1" : "0";
                 if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }

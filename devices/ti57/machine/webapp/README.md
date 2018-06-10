@@ -1,6 +1,6 @@
 ---
 layout: pwa
-title: "TI-57 Programmable Calculator (with Original ROM)"
+title: "TI-57 Programmable Calculator"
 permalink: /devices/ti57/machine/webapp/
 preview: /devices/ti57/images/ti57.png
 iconList:

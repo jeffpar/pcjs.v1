@@ -653,6 +653,10 @@ class SegX86 {
             if (ext & X86.DESC.EXT.LIMITPAGES) limit = (limit << 12) | 0xfff;
         }
 
+        let rpl, dpl, fCall, typeTSS;
+        let sizeGate, selCode, cplOld, cplNew, fIDT;
+        let addrTSS, offSP, lenSP, regSPPrev, regSSPrev, regPSClear, regSP;
+
         switch (this.id) {
 
         case SegX86.ID.CODE:
@@ -661,7 +665,7 @@ class SegX86 {
              * NOTE: Since we are SegX86.ID.CODE, we can use this.cpl instead of the more convoluted
              * this.cpu.segCS.cpl.
              */
-            let fCall = this.fCall;
+            fCall = this.fCall;
             this.fStackSwitch = false;
 
             /*
@@ -692,11 +696,9 @@ class SegX86 {
                 }
             }
 
-            let rpl = sel & X86.SEL.RPL;
-            let dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
-
-            let sizeGate = -1, selCode, cplOld, cplNew, fIDT;
-            let addrTSS, offSP, lenSP, regSPPrev, regSSPrev, regPSClear, regSP;
+            rpl = sel & X86.SEL.RPL;
+            dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
+            sizeGate = -1;
 
             if (!selMasked) {
                 /*
@@ -1055,7 +1057,7 @@ class SegX86 {
             break;
 
         case SegX86.ID.TSS:
-            let typeTSS = type & ~X86.DESC.ACC.TYPE.TSS_BUSY;
+            typeTSS = type & ~X86.DESC.ACC.TYPE.TSS_BUSY;
             if (!selMasked || typeTSS != X86.DESC.ACC.TYPE.TSS286 && typeTSS != X86.DESC.ACC.TYPE.TSS386) {
                 X86.helpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
                 return X86.ADDR_INVALID;

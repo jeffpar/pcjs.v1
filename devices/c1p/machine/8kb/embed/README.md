@@ -1,6 +1,6 @@
 ---
 layout: page
-title: OSI Challenger 1P (8Kb) with Small Display
+title: OSI Challenger 1P (8Kb) with Small Embeddable Display
 permalink: /devices/c1p/machine/8kb/embed/
 machines:
   - id: c1pEmbed

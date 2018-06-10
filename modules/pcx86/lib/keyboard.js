@@ -231,7 +231,7 @@ class Keyboard extends Component {
     {
         let kbd = this;
         let className;
-        let id = sHTMLType + '-' + sBinding;
+        let id = sHTMLType + '-' + sBinding, sCode;
         let controlText = /** @type {HTMLTextAreaElement} */ (control);
 
         if (this.bindings[id] === undefined) {
@@ -336,7 +336,7 @@ class Keyboard extends Component {
                 /*
                  * Maintain support for older button codes; eg, map button code "ctrl-c" to CLICKCODE "CTRL_C"
                  */
-                let sCode = sBinding.toUpperCase().replace(/-/g, '_');
+                sCode = sBinding.toUpperCase().replace(/-/g, '_');
                 if (Keyboard.CLICKCODES[sCode] !== undefined && sHTMLType == "button") {
                     this.bindings[id] = controlText;
                     if (MAXDEBUG) console.log("binding click-code '" + sCode + "'");
@@ -1251,7 +1251,7 @@ class Keyboard extends Component {
     {
         if (sKeys) {
             let match, reSpecial = /(?:^|[^$])\$([a-z0-9][a-z0-9-]+)/g;
-            while (match = reSpecial.exec(sKeys)) {
+            while ((match = reSpecial.exec(sKeys))) {
                 let sReplace = "";
                 if (reSpecial.lastIndex) reSpecial.lastIndex--;
                 switch (match[1]) {
@@ -1699,12 +1699,12 @@ class Keyboard extends Component {
             }
         }
         else if (!!(this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT)) == fShifted) {
-            if (code = Keys.SHIFTED_KEYCODES[keyCode]) {
+            if ((code = Keys.SHIFTED_KEYCODES[keyCode])) {
                 simCode = code;
             }
         }
         else {
-            if (code = Keys.NONASCII_KEYCODES[keyCode]) {
+            if ((code = Keys.NONASCII_KEYCODES[keyCode])) {
                 simCode = code;
             }
         }
@@ -2044,7 +2044,7 @@ class Keyboard extends Component {
 
             let fAlpha = (simCode >= Keys.ASCII.A && simCode <= Keys.ASCII.Z || simCode >= Keys.ASCII.a && simCode <= Keys.ASCII.z);
 
-            while (wCode >>>= 8) {
+            while ((wCode >>>= 8)) {
                 let bScan = wCode & 0xff;
                 /*
                  * TODO: The handling of SIMCODE entries with "extended" codes still needs to be tested, and

@@ -28,6 +28,10 @@
 
 "use strict";
 
+if (NODE) {
+    var Web         = require("../../shared/lib/weblib");
+}
+
 /**
  * @define {string}
  */

@@ -2,10 +2,7 @@
 /**
  * @fileoverview Node command-line XML extraction tool
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @version 1.0
- * Created 2017-Jun-20
- *
- * Copyright © 2012-2018 Jeff Parsons <Jeff@pcjs.org>
+ * @copyright © 2012-2018 Jeff Parsons
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
  *
@@ -30,9 +27,11 @@
  * as to their contents.
  */
 
+"use strict";
+
 var fs = require("fs");
 var defines = require("../../shared/lib/defines");
-var Str = require("../../../modules/shared/lib/strlib");
+var Str = require("../../shared/lib/strlib");
 var Proc = require("../../shared/lib/proclib");
 var args = Proc.getArgs();
 
@@ -47,6 +46,11 @@ function printf(format, ...args)
     process.stdout.write(Str.sprintf(format, ...args));
 }
 
+/**
+ * processManifest(sManifest)
+ *
+ * @param {string} sManifest
+ */
 function processManifest(sManifest)
 {
     try {
@@ -127,4 +131,4 @@ if (args.argc > 1) {
     process.exit(0);
 }
 
-printf("usage: node disklist.js <manifest>\n");
+printf("usage: node manifest.js [manifest]\n");

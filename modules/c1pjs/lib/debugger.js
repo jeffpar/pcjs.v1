@@ -53,9 +53,9 @@ class C1PDebugger extends Component {
      */
     constructor(parmsDbg)
     {
-        if (DEBUGGER) {
+        super("C1PDebugger", parmsDbg);
 
-            super("C1PDebugger", parmsDbg);
+        if (DEBUGGER) {
 
             this.dbg = this;
             /*
@@ -516,7 +516,7 @@ class C1PDebugger extends Component {
                 };
             }(this, control);
             return true;
-            
+
         case "debugEnter":
             this.bindings[sBinding] = control;
             /*
@@ -542,7 +542,7 @@ class C1PDebugger extends Component {
                 }
             );
             return true;
-            
+
         case "step":
             this.bindings[sBinding] = control;
             Web.onClickRepeat(
@@ -558,7 +558,7 @@ class C1PDebugger extends Component {
                 }
             );
             return true;
-            
+
         default:
             break;
         }

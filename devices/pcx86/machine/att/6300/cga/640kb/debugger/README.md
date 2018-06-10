@@ -1,6 +1,6 @@
 ---
 layout: page
-title: AT&amp;T Personal Computer 6300 with Color Display
+title: AT&amp;T Personal Computer 6300 with Color Display and Debugger
 permalink: /devices/pcx86/machine/att/6300/cga/640kb/debugger/
 machines:
   - id: att6300

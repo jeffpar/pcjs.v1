@@ -3074,6 +3074,7 @@ class Video extends Component {
                      */
                     try {
                         let opts = Object.defineProperty({}, 'passive', {
+                            /* eslint getter-return: ["off"] */
                             get: function() {
                                 addPassive = true;
                             }
@@ -3547,6 +3548,7 @@ class Video extends Component {
             this.nCard = (nMonitorType == ChipSet.MONITOR.MONO? Video.CARD.MDA : Video.CARD.CGA);
         }
 
+        let aMonitors;
         this.nModeDefault = Video.MODE.CGA_80X25;
 
         switch (this.nCard) {
@@ -3555,7 +3557,7 @@ class Video extends Component {
             break;
 
         case Video.CARD.EGA:
-            let aMonitors = Video.aEGAMonitorSwitches[this.bEGASwitches];
+            aMonitors = Video.aEGAMonitorSwitches[this.bEGASwitches];
             /*
              * TODO: Figure out how to deal with aMonitors[2], the boolean which indicates
              * whether the EGA is driving the primary monitor (true) or the secondary monitor (false).
@@ -4124,6 +4126,8 @@ class Video extends Component {
                 aRGBColors = this.getCardColors();
             }
 
+            let cxChar, cyChar, offData, bitsBanks, cx, cy;
+
             switch (this.nCardFont) {
             case Video.CARD.MDA:
                 if (this.aFontOffsets[1] != null) {
@@ -4147,18 +4151,18 @@ class Video extends Component {
 
             case Video.CARD.EGA:
                 nFonts += 4;
-                let cxChar = this.cxFontChar || 8;
-                let cyChar = 14;
-                let offData = this.aFontOffsets[1];
-                let bitsBanks = 0;
-                let cx = (this.cardEGA.regSEQData[Card.SEQ.CLKMODE.INDX] & Card.SEQ.CLKMODE.DOTS8)? 8 : 9;
-                let cy = (this.cardEGA.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN]);
+                cxChar = this.cxFontChar || 8;
+                cyChar = 14;
+                offData = this.aFontOffsets[1];
+                bitsBanks = 0;
+                cx = (this.cardEGA.regSEQData[Card.SEQ.CLKMODE.INDX] & Card.SEQ.CLKMODE.DOTS8)? 8 : 9;
+                cy = (this.cardEGA.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN]);
                 if (cy++) {
                     cxChar = cx;
                     cyChar = cy;
                     offData = 0;
                     abFontData = null;
-                    if (bitsBanks = this.cardEGA.bitsDirtyBanks) {
+                    if ((bitsBanks = this.cardEGA.bitsDirtyBanks)) {
                         if (DEBUG) this.printf("buildFont(%s): dirty font data detected (0x%02X)\n", fRebuild, bitsBanks);
                         this.cardEGA.bitsDirtyBanks = 0;
                     }
@@ -6840,6 +6844,8 @@ class Video extends Component {
             this.cardEGA.regSEQData[this.cardEGA.regSEQIndx] = bOut;
         }
 
+        let nFontSelect;
+
         switch(this.cardEGA.regSEQIndx) {
 
         case Card.SEQ.MAPMASK.INDX:
@@ -6847,7 +6853,7 @@ class Video extends Component {
             break;
 
         case Card.SEQ.CHARMAP.INDX:
-            let nFontSelect = this.getSelectedFonts();
+            nFontSelect = this.getSelectedFonts();
             if (nFontSelect != this.nFontSelect) {
                 if (DEBUG) {
                     if ((nFontSelect & 0xff) == (nFontSelect >> 8)) {

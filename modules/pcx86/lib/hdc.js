@@ -1819,6 +1819,7 @@ class HDC extends Component {
          * So I've separated the commands into two groups: drive-ambivalent commands should be
          * processed in the first group, and all the rest should be processed in the second group.
          */
+        let i;
         switch (bCmd) {
 
         case HDC.XTC.DATA.CMD.REQUEST_SENSE:        // 0x03
@@ -1843,7 +1844,7 @@ class HDC extends Component {
              * Pop off all the extra "Initialize Drive Characteristics" bytes and store them, for the benefit of
              * other functions, like verifyDrive().
              */
-            let i = 0;
+            i = 0;
             while ((bParm = this.popCmd()) >= 0) {
                 if (drive && i < drive.abDriveParms.length) {
                     drive.abDriveParms[i++] = bParm;

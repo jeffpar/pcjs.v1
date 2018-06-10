@@ -1,0 +1,20 @@
+{
+  "globals": {
+    "APPCLASS": true,
+    "APPNAME": true,
+    "APPVERSION": true,
+    "COMPILED": true,
+    "COPYRIGHT": true,
+    "CSSCLASS": true,
+    "DEBUG": true,
+    "DEBUGGER": true,
+    "LICENSE": true,
+    "MAXDEBUG": true,
+    "NODE": true,
+    "PRIVATE": true,
+    "RS232": true,
+    "SITEURL": true,
+    "XMLVERSION": true,
+    "resources": true
+  }
+}

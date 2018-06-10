@@ -1318,7 +1318,7 @@ class Str {
                  * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
                  *
                  * Also, unlike the 'X' and 'x' hexadecimal cases, there's no need to explicitly check for a string
-                 * arguments, because the call to trunc() automatically coerces any string value to a (decimal) number.
+                 * arguments, because Math.trunc() automatically coerces any string value to a (decimal) number.
                  */
                 arg = Math.trunc(arg);
                 /* falls through */
@@ -1344,11 +1344,24 @@ class Str {
                 buffer += s;
                 break;
 
+            case 'j':
+                /*
+                 * 'j' is one of our non-standard extensions to the sprintf() interface; it signals that
+                 * the caller is providing an Object that should be rendered as JSON.  If a width is included
+                 * (eg, "%2j"), it's used as an indentation value; otherwise, no whitespace is added.
+                 */
+                buffer += JSON.stringify(arg, null, width || null);
+                break;
+
             case 'c':
                 arg = String.fromCharCode(arg);
                 /* falls through */
 
             case 's':
+                /*
+                 * 's' includes some non-standard behavior: if the argument is not actually a string, we
+                 * "coerce" it to a string, using its associated toString() method.
+                 */
                 if (typeof arg == "string") {
                     while (arg.length < width) {
                         if (flags.indexOf('-') >= 0) {
@@ -1394,7 +1407,7 @@ class Str {
 
             default:
                 /*
-                 * The supported ANSI C set of types: "dioxXucsfeEgGpn%"
+                 * For reference purposes, the standard ANSI C set of types is "dioxXucsfeEgGpn%"
                  */
                 buffer += "(unrecognized printf type %" + type + ")";
                 break;
@@ -2048,7 +2061,7 @@ class Web {
              *
              * NOTE: http://archive.pcjs.org is currently redirected to https://s3-us-west-2.amazonaws.com/archive.pcjs.org
              */
-            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^\/]*)$/, "$2/archive/$3");
+            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
             sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-[a-z]+|private-[a-z]+)\/(.*)$/, "/$1/$2");
         }
         else {
@@ -2228,10 +2241,10 @@ class Web {
                 resource.addrLoad = data['load'];
                 resource.addrExec = data['exec'];
 
-                if (a = data['bytes']) {
+                if ((a = data['bytes'])) {
                     resource.aBytes = a;
                 }
-                else if (a = data['words']) {
+                else if ((a = data['words'])) {
                     /*
                      * Convert all words into bytes
                      */
@@ -2242,7 +2255,7 @@ class Web {
 
                     }
                 }
-                else if (a = data['longs']) {
+                else if ((a = data['longs'])) {
                     /*
                      * Convert all dwords (longs) into bytes
                      */
@@ -2254,7 +2267,7 @@ class Web {
                         resource.aBytes[ib++] = (a[i] >> 24) & 0xff;
                     }
                 }
-                else if (a = data['data']) {
+                else if ((a = data['data'])) {
                     resource.aData = a;
                 }
                 else {
@@ -2844,7 +2857,7 @@ class Web {
                 };
             }
         }
-    };
+    }
 
     /**
      * onInit(fn)
@@ -2856,7 +2869,7 @@ class Web {
     static onInit(fn)
     {
         Web.aPageEventHandlers['init'].push(fn);
-    };
+    }
 
     /**
      * onShow(fn)
@@ -2868,7 +2881,7 @@ class Web {
     static onShow(fn)
     {
         Web.aPageEventHandlers['show'].push(fn);
-    };
+    }
 
     /**
      * onError(sMessage)
@@ -2890,7 +2903,7 @@ class Web {
     static onExit(fn)
     {
         Web.aPageEventHandlers['exit'].push(fn);
-    };
+    }
 
     /**
      * doPageEvent(afn)
@@ -2908,7 +2921,7 @@ class Web {
                 Web.onError("An unexpected error occurred: " + e.message);
             }
         }
-    };
+    }
 
     /**
      * enablePageEvents(fEnable)
@@ -4532,6 +4545,7 @@ if (!Function.prototype.bind) {
 /**
  * @copyright https://www.pcjs.org/modules/pcx86/lib/defines.js (C) Jeff Parsons 2012-2018
  */
+
 
 /**
  * @define {string}
@@ -22241,6 +22255,10 @@ class SegX86 {
             if (ext & X86.DESC.EXT.LIMITPAGES) limit = (limit << 12) | 0xfff;
         }
 
+        let rpl, dpl, fCall, typeTSS;
+        let sizeGate, selCode, cplOld, cplNew, fIDT;
+        let addrTSS, offSP, lenSP, regSPPrev, regSSPrev, regPSClear, regSP;
+
         switch (this.id) {
 
         case SegX86.ID.CODE:
@@ -22249,7 +22267,7 @@ class SegX86 {
              * NOTE: Since we are SegX86.ID.CODE, we can use this.cpl instead of the more convoluted
              * this.cpu.segCS.cpl.
              */
-            let fCall = this.fCall;
+            fCall = this.fCall;
             this.fStackSwitch = false;
 
             /*
@@ -22280,11 +22298,9 @@ class SegX86 {
                 }
             }
 
-            let rpl = sel & X86.SEL.RPL;
-            let dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
-
-            let sizeGate = -1, selCode, cplOld, cplNew, fIDT;
-            let addrTSS, offSP, lenSP, regSPPrev, regSSPrev, regPSClear, regSP;
+            rpl = sel & X86.SEL.RPL;
+            dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
+            sizeGate = -1;
 
             if (!selMasked) {
                 /*
@@ -22643,7 +22659,7 @@ class SegX86 {
             break;
 
         case SegX86.ID.TSS:
-            let typeTSS = type & ~X86.DESC.ACC.TYPE.TSS_BUSY;
+            typeTSS = type & ~X86.DESC.ACC.TYPE.TSS_BUSY;
             if (!selMasked || typeTSS != X86.DESC.ACC.TYPE.TSS286 && typeTSS != X86.DESC.ACC.TYPE.TSS386) {
                 X86.helpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
                 return X86.ADDR_INVALID;
@@ -35375,7 +35391,7 @@ X86.opAAD = function()
 /**
  * op=0xD6 (SALC aka SETALC) (undocumented until Pentium Pro)
  *
- * Sets AL to 0xFF if CF=1, 0x00 otherwise; no flags are affected (similar to SBB AL,AL, but without side-effects)
+ * Sets AL to 0xFF if CF=1, 0x00 otherwise; no flags are affected (similar to SBB AL,AL, but without side-effects)
  *
  * WARNING: I have no idea how many clocks this instruction originally required, so for now, I'm going with a minimum of 2.
  *
@@ -45537,7 +45553,7 @@ class Keyboard extends Component {
     {
         let kbd = this;
         let className;
-        let id = sHTMLType + '-' + sBinding;
+        let id = sHTMLType + '-' + sBinding, sCode;
         let controlText = /** @type {HTMLTextAreaElement} */ (control);
 
         if (this.bindings[id] === undefined) {
@@ -45642,7 +45658,7 @@ class Keyboard extends Component {
                 /*
                  * Maintain support for older button codes; eg, map button code "ctrl-c" to CLICKCODE "CTRL_C"
                  */
-                let sCode = sBinding.toUpperCase().replace(/-/g, '_');
+                sCode = sBinding.toUpperCase().replace(/-/g, '_');
                 if (Keyboard.CLICKCODES[sCode] !== undefined && sHTMLType == "button") {
                     this.bindings[id] = controlText;
                     if (MAXDEBUG) console.log("binding click-code '" + sCode + "'");
@@ -46557,7 +46573,7 @@ class Keyboard extends Component {
     {
         if (sKeys) {
             let match, reSpecial = /(?:^|[^$])\$([a-z0-9][a-z0-9-]+)/g;
-            while (match = reSpecial.exec(sKeys)) {
+            while ((match = reSpecial.exec(sKeys))) {
                 let sReplace = "";
                 if (reSpecial.lastIndex) reSpecial.lastIndex--;
                 switch (match[1]) {
@@ -47005,12 +47021,12 @@ class Keyboard extends Component {
             }
         }
         else if (!!(this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT)) == fShifted) {
-            if (code = Keys.SHIFTED_KEYCODES[keyCode]) {
+            if ((code = Keys.SHIFTED_KEYCODES[keyCode])) {
                 simCode = code;
             }
         }
         else {
-            if (code = Keys.NONASCII_KEYCODES[keyCode]) {
+            if ((code = Keys.NONASCII_KEYCODES[keyCode])) {
                 simCode = code;
             }
         }
@@ -47350,7 +47366,7 @@ class Keyboard extends Component {
 
             let fAlpha = (simCode >= Keys.ASCII.A && simCode <= Keys.ASCII.Z || simCode >= Keys.ASCII.a && simCode <= Keys.ASCII.z);
 
-            while (wCode >>>= 8) {
+            while ((wCode >>>= 8)) {
                 let bScan = wCode & 0xff;
                 /*
                  * TODO: The handling of SIMCODE entries with "extended" codes still needs to be tested, and
@@ -51417,6 +51433,7 @@ class Video extends Component {
                      */
                     try {
                         let opts = Object.defineProperty({}, 'passive', {
+                            /* eslint getter-return: ["off"] */
                             get: function() {
                                 addPassive = true;
                             }
@@ -51890,6 +51907,7 @@ class Video extends Component {
             this.nCard = (nMonitorType == ChipSet.MONITOR.MONO? Video.CARD.MDA : Video.CARD.CGA);
         }
 
+        let aMonitors;
         this.nModeDefault = Video.MODE.CGA_80X25;
 
         switch (this.nCard) {
@@ -51898,7 +51916,7 @@ class Video extends Component {
             break;
 
         case Video.CARD.EGA:
-            let aMonitors = Video.aEGAMonitorSwitches[this.bEGASwitches];
+            aMonitors = Video.aEGAMonitorSwitches[this.bEGASwitches];
             /*
              * TODO: Figure out how to deal with aMonitors[2], the boolean which indicates
              * whether the EGA is driving the primary monitor (true) or the secondary monitor (false).
@@ -52467,6 +52485,8 @@ class Video extends Component {
                 aRGBColors = this.getCardColors();
             }
 
+            let cxChar, cyChar, offData, bitsBanks, cx, cy;
+
             switch (this.nCardFont) {
             case Video.CARD.MDA:
                 if (this.aFontOffsets[1] != null) {
@@ -52490,18 +52510,18 @@ class Video extends Component {
 
             case Video.CARD.EGA:
                 nFonts += 4;
-                let cxChar = this.cxFontChar || 8;
-                let cyChar = 14;
-                let offData = this.aFontOffsets[1];
-                let bitsBanks = 0;
-                let cx = (this.cardEGA.regSEQData[Card.SEQ.CLKMODE.INDX] & Card.SEQ.CLKMODE.DOTS8)? 8 : 9;
-                let cy = (this.cardEGA.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN]);
+                cxChar = this.cxFontChar || 8;
+                cyChar = 14;
+                offData = this.aFontOffsets[1];
+                bitsBanks = 0;
+                cx = (this.cardEGA.regSEQData[Card.SEQ.CLKMODE.INDX] & Card.SEQ.CLKMODE.DOTS8)? 8 : 9;
+                cy = (this.cardEGA.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN]);
                 if (cy++) {
                     cxChar = cx;
                     cyChar = cy;
                     offData = 0;
                     abFontData = null;
-                    if (bitsBanks = this.cardEGA.bitsDirtyBanks) {
+                    if ((bitsBanks = this.cardEGA.bitsDirtyBanks)) {
                         if (DEBUG) this.printf("buildFont(%s): dirty font data detected (0x%02X)\n", fRebuild, bitsBanks);
                         this.cardEGA.bitsDirtyBanks = 0;
                     }
@@ -55183,6 +55203,8 @@ class Video extends Component {
             this.cardEGA.regSEQData[this.cardEGA.regSEQIndx] = bOut;
         }
 
+        let nFontSelect;
+
         switch(this.cardEGA.regSEQIndx) {
 
         case Card.SEQ.MAPMASK.INDX:
@@ -55190,7 +55212,7 @@ class Video extends Component {
             break;
 
         case Card.SEQ.CHARMAP.INDX:
-            let nFontSelect = this.getSelectedFonts();
+            nFontSelect = this.getSelectedFonts();
             if (nFontSelect != this.nFontSelect) {
                 if (DEBUG) {
                     if ((nFontSelect & 0xff) == (nFontSelect >> 8)) {
@@ -58446,7 +58468,7 @@ Web.onInit(SerialPort.init);
  * TestController class
  *
  * @class TestController
- * @property {string|undefined urlTests
+ * @property {string|undefined} urlTests
  * @property {Object|null} tests
  * @property {string|null} consoleBuffer
  * @property {HTMLTextAreaElement|null} controlBuffer
@@ -58757,18 +58779,18 @@ Web.onInit(TestController.init);
 /*
  * Overview
  * --------
- * 
+ *
  * TestMonitor monitors activity on the bound SerialPort and a user I/O device (eg, a terminal,
  * a console window, etc).  It operates in several modes:
- * 
+ *
  * 1) TERMINAL mode: all data received from the SerialPort is routed the user output device,
  * and all data received from the user input device is routed to the SerialPort.  No special actions
  * are taken, until/unless the ATTENTION key is detected from the user input device (ie, Ctrl-T).
- * 
+ *
  * 2) PROMPT mode: data from the SerialPort is monitored for specific prompts (eg, "A>"), and
  * when one of those prompts is detected, we enter COMMAND mode, with category set to the appropriate
  * collection of tests.
- * 
+ *
  * 3) COMMAND mode: CR-terminated lines of user input are checked against the current set of test
  * commands, and if a match is found, the corresponding request is sent to the SerialPort.
  */
@@ -58801,7 +58823,7 @@ class TestMonitor {
         /*
          * Operations are added to the following queue by addOperation(), which ensures that as soon as it
          * transitions from empty to non-empty, a timeout handler is established to begin draining the queue.
-         * 
+         *
          * While this approach is more complicated than simply sending operations (via sendData()) as they
          * arrive, it has at least one important advantage: special operations, such as "wait" (eg, wait for a
          * key to be pressed), are easier to implement, because control of the draining process can be switched
@@ -58844,12 +58866,12 @@ class TestMonitor {
     addCommand(commandLine)
     {
         if (!commandLine) return true;
-        
+
         let suite = this.tests[this.category];
         let commands = suite['commands'];
         let commandParts = commandLine.split(' ');
         let command = commandParts[0];
-        
+
         /*
          * Check for a matching command in the current "test suite" category.
          */
@@ -58858,7 +58880,7 @@ class TestMonitor {
             fExists = true;
             command = commands[command];
         }
-        
+
         let op, mode;
         if (typeof command == "string") {
             op = command;
@@ -58870,7 +58892,7 @@ class TestMonitor {
             op = command['op'];
             mode = command['mode'];
         }
-        
+
         if (op) {
             let errorMessage = "";
             op = op.replace(/([$%])([0-9]+)/g, function(match, p1, p2, offset, s) {
@@ -58921,7 +58943,7 @@ class TestMonitor {
 
     /**
      * addForLoop(commandLine)
-     * 
+     *
      * @this {TestMonitor}
      * @param {string} commandLine
      * @return {boolean}
@@ -58953,7 +58975,7 @@ class TestMonitor {
 
     /**
      * addOperation(op, mode)
-     * 
+     *
      * @this {TestMonitor}
      * @param {string} op
      * @param {string} [mode]
@@ -58998,7 +59020,7 @@ class TestMonitor {
         this.printf("done\n");
         return false;
     }
-    
+
     /**
      * removeOperation()
      *
@@ -59044,10 +59066,10 @@ class TestMonitor {
             this.nextOperation();
         }
     }
-    
+
     /**
      * setMode(mode, category)
-     * 
+     *
      * @this {TestMonitor}
      * @param {string} mode
      * @param {string} [category]
@@ -59101,7 +59123,7 @@ class TestMonitor {
             this.printf("mode: %s\n", this.category || this.mode);
         }
     }
-    
+
     /**
      * receiveTests(tests)
      *
@@ -63794,7 +63816,7 @@ class FDC extends Component {
         /*
          * If we have current media parameters, restore them; otherwise, default to the drive's physical parameters.
          */
-        if (drive.nDiskCylinders = a[6]) {
+        if ((drive.nDiskCylinders = a[6])) {
             drive.nDiskHeads = a[7];
             drive.nDiskSectors = a[8];
         } else {
@@ -67728,6 +67750,7 @@ class HDC extends Component {
          * So I've separated the commands into two groups: drive-ambivalent commands should be
          * processed in the first group, and all the rest should be processed in the second group.
          */
+        let i;
         switch (bCmd) {
 
         case HDC.XTC.DATA.CMD.REQUEST_SENSE:        // 0x03
@@ -67752,7 +67775,7 @@ class HDC extends Component {
              * Pop off all the extra "Initialize Drive Characteristics" bytes and store them, for the benefit of
              * other functions, like verifyDrive().
              */
-            let i = 0;
+            i = 0;
             while ((bParm = this.popCmd()) >= 0) {
                 if (drive && i < drive.abDriveParms.length) {
                     drive.abDriveParms[i++] = bParm;
@@ -69119,9 +69142,9 @@ class Debugger extends Component {
      */
     constructor(parmsDbg)
     {
-        if (DEBUGGER) {
+        super("Debugger", parmsDbg);
 
-            super("Debugger", parmsDbg);
+        if (DEBUGGER) {
 
             /*
              * Default base used to display all values; modified with the "s base" command.
@@ -69979,7 +70002,7 @@ class Debugger extends Component {
         let chEscape = (chOpen == '(' || chOpen == '{' || chOpen == '[')? '\\' : '';
         let chInnerEscape = (chOpen == '['? '\\' : '');
         let reSubExp = new RegExp(chEscape + chOpen + "([^" + chInnerEscape + chOpen + chInnerEscape + chClose + "]+)" + chEscape + chClose);
-        while (a = s.match(reSubExp)) {
+        while ((a = s.match(reSubExp))) {
             let value = this.parseExpression(a[1]);
             if (value === undefined) return undefined;
             let sSearch = chOpen + a[1] + chClose;
@@ -70002,7 +70025,7 @@ class Debugger extends Component {
             chEscape = (chOpen == '(' || chOpen == '{' || chOpen == '[')? '\\' : '';
             chInnerEscape = (chOpen == '['? '\\' : '');
             reSubExp = new RegExp(chEscape + chOpen + "([^" + chInnerEscape + chOpen + chInnerEscape + chClose + "]+)" + chEscape + chClose);
-            while (a = s.match(reSubExp)) {
+            while ((a = s.match(reSubExp))) {
                 s = this.parseAddrReference(s, a[1]);
             }
         }
@@ -70023,7 +70046,7 @@ class Debugger extends Component {
     parseSysVars(s)
     {
         let a;
-        while (a = s.match(/\$([a-z]+)/i)) {
+        while ((a = s.match(/\$([a-z]+)/i))) {
             let v = null;
             switch(a[1].toLowerCase()) {
             case "ops":
@@ -70057,6 +70080,7 @@ class Debugger extends Component {
     parseUnary(value, nUnary)
     {
         while (nUnary) {
+            let bit;
             switch(nUnary & 0o3) {
             case 1:
                 value = -this.truncate(value);
@@ -70065,7 +70089,7 @@ class Debugger extends Component {
                 value = this.evalXOR(value, -1);        // this is easier than adding an evalNOT()...
                 break;
             case 3:
-                let bit = 35;                           // simple left-to-right zero-bit-counting loop...
+                bit = 35;                               // simple left-to-right zero-bit-counting loop...
                 while (bit >= 0 && !this.evalAND(value, Math.pow(2, bit))) bit--;
                 value = 35 - bit;
                 break;
@@ -70453,9 +70477,9 @@ class DebuggerX86 extends Debugger {
      */
     constructor(parmsDbg)
     {
-        if (DEBUGGER) {
+        super(parmsDbg);
 
-            super(parmsDbg);
+        if (DEBUGGER) {
 
             /*
              * Default number of hex chars in a register and a linear address (ie, for real-mode);
@@ -71934,7 +71958,7 @@ class DebuggerX86 extends Debugger {
                 sInfo = this.toHexAddr(dbgAddr) + ": " + (this.bus.getSymbol(addr, true) || sInfo);
             } else {
                 let component, componentPrev = null;
-                while (component = this.cmp.getMachineComponent("Disk", componentPrev)) {
+                while ((component = this.cmp.getMachineComponent("Disk", componentPrev))) {
                     let aInfo = component.getSymbolInfo(sAddr);
                     if (aInfo.length) {
                         sInfo = "";
@@ -72472,7 +72496,7 @@ class DebuggerX86 extends Debugger {
         let aSymbols = [];
         if (SYMBOLS) {
             let component, componentPrev = null;
-            while (component = this.cmp.getMachineComponent("Disk", componentPrev)) {
+            while ((component = this.cmp.getMachineComponent("Disk", componentPrev))) {
                 aSymbols = component.getModuleInfo(sModule, nSegment);
                 if (aSymbols.length) break;
                 componentPrev = component;
@@ -73888,7 +73912,7 @@ class DebuggerX86 extends Debugger {
                             this.findBreakpoint(aBreak, dbgAddrBreak, true, true);
                             fTempBreak = true;
                         }
-                        if (a = dbgAddrBreak.aCmds) {
+                        if ((a = dbgAddrBreak.aCmds)) {
                             /*
                              * When one or more commands are attached to a breakpoint, we don't halt by default.
                              * Instead, we set fBreak to true only if, at the completion of all the commands, the
@@ -74215,6 +74239,7 @@ class DebuggerX86 extends Debugger {
      */
     getImmOperand(type, dbgAddr)
     {
+        let aSymbol;
         let sOperand = ' ';
         let typeSize = type & DebuggerX86.TYPE_SIZE;
 
@@ -74244,7 +74269,7 @@ class DebuggerX86 extends Debugger {
         case DebuggerX86.TYPE_FARP:
             dbgAddr = this.newAddr(this.getWord(dbgAddr, true), this.getShort(dbgAddr, 2), undefined, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
             sOperand = this.toHexAddr(dbgAddr);
-            let aSymbol = this.findSymbol(dbgAddr);
+            aSymbol = this.findSymbol(dbgAddr);
             if (aSymbol[0]) sOperand += " (" + aSymbol[0] + ")";
             break;
         default:
@@ -75956,9 +75981,10 @@ class DebuggerX86 extends Debugger {
             this.println("\tsp #\t\tset speed multiplier to #");
             return;
         }
+
+        let nCycles;
         switch (asArgs[1]) {
         case "cs":
-            let nCycles;
             if (asArgs[3] !== undefined) nCycles = +asArgs[3];          // warning: decimal instead of hex conversion
             switch (asArgs[2]) {
                 case "int":
@@ -76075,7 +76101,7 @@ class DebuggerX86 extends Debugger {
                 let w = this.parseExpression(sValue);
                 if (w === undefined) return;
 
-                let fValid = true;
+                let fUnknown, fValid = true;
                 let sRegMatch = sReg.toUpperCase();
                 if (sRegMatch.charAt(0) == 'E' && this.cchReg <= 4) {
                     sRegMatch = null;
@@ -76193,7 +76219,7 @@ class DebuggerX86 extends Debugger {
                     if (w) this.cpu.setOF(); else this.cpu.clearOF();
                     break;
                 default:
-                    let fUnknown = true;
+                    fUnknown = true;
                     if (this.cpu.model >= X86.MODEL_80286) {
                         fUnknown = false;
                         switch(sRegMatch){
@@ -81418,7 +81444,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
              * other machine resources, and remove those entries.
              */
             let matchDisk, reDisk = /[ \t]*<disk [^>]*path=(['"])(.*?)\1.*?<\/disk>\n?/g;
-            while (matchDisk = reDisk.exec(resOld[sName])) {
+            while ((matchDisk = reDisk.exec(resOld[sName]))) {
                 let path = matchDisk[2];
                 if (path) {
                     if (resOld[path]) {

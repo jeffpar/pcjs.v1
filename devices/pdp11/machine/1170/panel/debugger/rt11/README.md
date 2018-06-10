@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PDP-11/70 with Front Panel and Debugger
+title: PDP-11/70 for RT-11 with Front Panel and Debugger
 permalink: /devices/pdp11/machine/1170/panel/debugger/rt11/
 machines:
   - id: test1170

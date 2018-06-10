@@ -86,9 +86,9 @@ class Debugger8080 extends Debugger {
      */
     constructor(parmsDbg)
     {
-        if (DEBUGGER) {
+        super(parmsDbg);
 
-            super(parmsDbg);
+        if (DEBUGGER) {
 
             this.style = Debugger8080.STYLE_8080;
 
@@ -1832,7 +1832,7 @@ class Debugger8080 extends Debugger {
                             this.findBreakpoint(aBreak, dbgAddrBreak, true, true);
                             fTemporary = true;
                         }
-                        if (a = dbgAddrBreak.aCmds) {
+                        if ((a = dbgAddrBreak.aCmds)) {
                             /*
                              * When one or more commands are attached to a breakpoint, we don't halt by default.
                              * Instead, we set fBreak to true only if, at the completion of all the commands, the

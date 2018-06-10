@@ -1191,7 +1191,7 @@ HTMLOut.prototype.getBlog = function(sToken, sIndent, aParms)
 
     if (this.sExt == "md") return false;
 
-    if (this.sPath.match(/[\/\\]blog/)) {
+    if (this.sPath.match(/[/\\]blog/)) {
         /*
          * The original blog structure created for the Node web server organized posts within
          * date-based subdirectories under "/blog", but the new blog structure for GitHub Pages is
@@ -1288,9 +1288,9 @@ HTMLOut.prototype.getBlog = function(sToken, sIndent, aParms)
                                      *
                                      * We adhere to those forms because, when sorted, they produce a chronological listing.
                                      */
-                                    var asParts = sFile.match(/[\/\\](\d\d\d\d)[\/\\](\d\d)[\/\\]?(\d*)/);
+                                    var asParts = sFile.match(/[/\\](\d\d\d\d)[/\\](\d\d)[/\\]?(\d*)/);
                                     if (!asParts) {
-                                        asParts = sFile.match(/[\/\\](\d\d\d\d)-(\d+)-(\d+)-/)
+                                        asParts = sFile.match(/[/\\](\d\d\d\d)-(\d+)-(\d+)-/)
                                     }
                                     if (asParts) {
                                         var iYear = parseInt(asParts[1], 10);

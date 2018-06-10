@@ -1,6 +1,6 @@
 ---
 layout: page
-title: OSI Challenger 1P (8Kb) with Additional Software
+title: OSI Challenger 1P (8Kb) with Additional Software and Debugger
 permalink: /devices/c1p/machine/8kb/all/debugger/
 machines:
   - id: c1p8kb

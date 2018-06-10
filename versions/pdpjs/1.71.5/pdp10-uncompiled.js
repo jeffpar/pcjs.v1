@@ -1090,7 +1090,7 @@ class Str {
                  * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
                  *
                  * Also, unlike the 'X' and 'x' hexadecimal cases, there's no need to explicitly check for a string
-                 * arguments, because the call to trunc() automatically coerces any string value to a (decimal) number.
+                 * arguments, because Math.trunc() automatically coerces any string value to a (decimal) number.
                  */
                 arg = Math.trunc(arg);
                 /* falls through */
@@ -1116,11 +1116,24 @@ class Str {
                 buffer += s;
                 break;
 
+            case 'j':
+                /*
+                 * 'j' is one of our non-standard extensions to the sprintf() interface; it signals that
+                 * the caller is providing an Object that should be rendered as JSON.  If a width is included
+                 * (eg, "%2j"), it's used as an indentation value; otherwise, no whitespace is added.
+                 */
+                buffer += JSON.stringify(arg, null, width || null);
+                break;
+
             case 'c':
                 arg = String.fromCharCode(arg);
                 /* falls through */
 
             case 's':
+                /*
+                 * 's' includes some non-standard behavior: if the argument is not actually a string, we
+                 * "coerce" it to a string, using its associated toString() method.
+                 */
                 if (typeof arg == "string") {
                     while (arg.length < width) {
                         if (flags.indexOf('-') >= 0) {
@@ -1166,7 +1179,7 @@ class Str {
 
             default:
                 /*
-                 * The supported ANSI C set of types: "dioxXucsfeEgGpn%"
+                 * For reference purposes, the standard ANSI C set of types is "dioxXucsfeEgGpn%"
                  */
                 buffer += "(unrecognized printf type %" + type + ")";
                 break;
@@ -1820,7 +1833,7 @@ class Web {
              *
              * NOTE: http://archive.pcjs.org is currently redirected to https://s3-us-west-2.amazonaws.com/archive.pcjs.org
              */
-            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^\/]*)$/, "$2/archive/$3");
+            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
             sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-[a-z]+|private-[a-z]+)\/(.*)$/, "/$1/$2");
         }
         else {
@@ -2000,10 +2013,10 @@ class Web {
                 resource.addrLoad = data['load'];
                 resource.addrExec = data['exec'];
 
-                if (a = data['bytes']) {
+                if ((a = data['bytes'])) {
                     resource.aBytes = a;
                 }
-                else if (a = data['words']) {
+                else if ((a = data['words'])) {
                     /*
                      * Convert all words into bytes
                      */
@@ -2014,7 +2027,7 @@ class Web {
 
                     }
                 }
-                else if (a = data['longs']) {
+                else if ((a = data['longs'])) {
                     /*
                      * Convert all dwords (longs) into bytes
                      */
@@ -2026,7 +2039,7 @@ class Web {
                         resource.aBytes[ib++] = (a[i] >> 24) & 0xff;
                     }
                 }
-                else if (a = data['data']) {
+                else if ((a = data['data'])) {
                     resource.aData = a;
                 }
                 else {
@@ -2616,7 +2629,7 @@ class Web {
                 };
             }
         }
-    };
+    }
 
     /**
      * onInit(fn)
@@ -2628,7 +2641,7 @@ class Web {
     static onInit(fn)
     {
         Web.aPageEventHandlers['init'].push(fn);
-    };
+    }
 
     /**
      * onShow(fn)
@@ -2640,7 +2653,7 @@ class Web {
     static onShow(fn)
     {
         Web.aPageEventHandlers['show'].push(fn);
-    };
+    }
 
     /**
      * onError(sMessage)
@@ -2662,7 +2675,7 @@ class Web {
     static onExit(fn)
     {
         Web.aPageEventHandlers['exit'].push(fn);
-    };
+    }
 
     /**
      * doPageEvent(afn)
@@ -2680,7 +2693,7 @@ class Web {
                 Web.onError("An unexpected error occurred: " + e.message);
             }
         }
-    };
+    }
 
     /**
      * enablePageEvents(fEnable)
@@ -16260,7 +16273,7 @@ PDP10.GETHL = function(op, dst, src)
  */
 PDP10.SETHL = function(op, dst, src)
 {
-    if (op &= 0o600) {
+    if ((op &= 0o600)) {
         dst &= PDP10.HALF_MASK;
         switch(op) {
         case 0o400:
@@ -16315,7 +16328,7 @@ PDP10.GETHR = function(op, dst, src)
  */
 PDP10.SETHR = function(op, dst, src)
 {
-    if (op &= 0o600) {
+    if ((op &= 0o600)) {
         dst -= (dst & PDP10.HALF_MASK);
         switch(op) {
         case 0o400:
@@ -18310,9 +18323,9 @@ class Debugger extends Component {
      */
     constructor(parmsDbg)
     {
-        if (DEBUGGER) {
+        super("Debugger", parmsDbg);
 
-            super("Debugger", parmsDbg);
+        if (DEBUGGER) {
 
             /*
              * Default base used to display all values; modified with the "s base" command.
@@ -19170,7 +19183,7 @@ class Debugger extends Component {
         let chEscape = (chOpen == '(' || chOpen == '{' || chOpen == '[')? '\\' : '';
         let chInnerEscape = (chOpen == '['? '\\' : '');
         let reSubExp = new RegExp(chEscape + chOpen + "([^" + chInnerEscape + chOpen + chInnerEscape + chClose + "]+)" + chEscape + chClose);
-        while (a = s.match(reSubExp)) {
+        while ((a = s.match(reSubExp))) {
             let value = this.parseExpression(a[1]);
             if (value === undefined) return undefined;
             let sSearch = chOpen + a[1] + chClose;
@@ -19193,7 +19206,7 @@ class Debugger extends Component {
             chEscape = (chOpen == '(' || chOpen == '{' || chOpen == '[')? '\\' : '';
             chInnerEscape = (chOpen == '['? '\\' : '');
             reSubExp = new RegExp(chEscape + chOpen + "([^" + chInnerEscape + chOpen + chInnerEscape + chClose + "]+)" + chEscape + chClose);
-            while (a = s.match(reSubExp)) {
+            while ((a = s.match(reSubExp))) {
                 s = this.parseAddrReference(s, a[1]);
             }
         }
@@ -19214,7 +19227,7 @@ class Debugger extends Component {
     parseSysVars(s)
     {
         let a;
-        while (a = s.match(/\$([a-z]+)/i)) {
+        while ((a = s.match(/\$([a-z]+)/i))) {
             let v = null;
             switch(a[1].toLowerCase()) {
             case "ops":
@@ -19248,6 +19261,7 @@ class Debugger extends Component {
     parseUnary(value, nUnary)
     {
         while (nUnary) {
+            let bit;
             switch(nUnary & 0o3) {
             case 1:
                 value = -this.truncate(value);
@@ -19256,7 +19270,7 @@ class Debugger extends Component {
                 value = this.evalXOR(value, -1);        // this is easier than adding an evalNOT()...
                 break;
             case 3:
-                let bit = 35;                           // simple left-to-right zero-bit-counting loop...
+                bit = 35;                               // simple left-to-right zero-bit-counting loop...
                 while (bit >= 0 && !this.evalAND(value, Math.pow(2, bit))) bit--;
                 value = 35 - bit;
                 break;
@@ -19624,9 +19638,9 @@ class DebuggerPDP10 extends Debugger {
      */
     constructor(parmsDbg)
     {
-        if (DEBUGGER) {
+        super(parmsDbg);
 
-            super(parmsDbg);
+        if (DEBUGGER) {
 
             /*
              * Since this Debugger doesn't use replaceRegs(), we can use parentheses instead of braces.
@@ -21770,7 +21784,7 @@ class DebuggerPDP10 extends Debugger {
                         this.findBreakpoint(aBreak, dbgAddrBreak, true, true);
                         fTemporary = true;
                     }
-                    if (a = dbgAddrBreak.aCmds) {
+                    if ((a = dbgAddrBreak.aCmds)) {
                         /*
                          * When one or more commands are attached to a breakpoint, we don't halt by default.
                          * Instead, we set fBreak to true only if, at the completion of all the commands, the
@@ -23504,7 +23518,7 @@ class DebuggerPDP10 extends Debugger {
             this.aCommands = this.parseCommand(sCmds, fSave);
         }
         var sCmd;
-        while (sCmd = this.aCommands.shift()) {
+        while ((sCmd = this.aCommands.shift())) {
             if (!this.doCommand(sCmd)) return false;
         }
         return true;
@@ -24232,7 +24246,7 @@ class Macro10 {
                  */
                 sText = "";
                 var match, re = /<pre>([\s\S]*?)<\/pre>/gi;
-                while (match = re.exec(sResource)) {
+                while ((match = re.exec(sResource))) {
                     var s = match[1];
                     if (s.indexOf('&') >= 0) s = s.replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&amp;/gi, '&');
                     sText += s;
@@ -24524,7 +24538,7 @@ class Macro10 {
          * Check the operands for any reserved symbols (ie, symbols with a trailing '#', such as "USER#").
          */
         var sSymbol;
-        while (sSymbol = this.getReserved(sOperands)) {
+        while ((sSymbol = this.getReserved(sOperands))) {
             sOperands = sOperands.replace(sSymbol, sSymbol.slice(0, -1));
         }
 
@@ -24938,7 +24952,7 @@ class Macro10 {
             var match;
             var sOperator = "";
             var sOperands = sEval;
-            if (match = sEval.match(/^([^\s]+)\s*(.*?)\s*$/)) {
+            if ((match = sEval.match(/^([^\s]+)\s*(.*?)\s*$/))) {
                 sOperator = match[1];
                 sOperands = match[2];
             }
@@ -25058,7 +25072,7 @@ class Macro10 {
     getReserved(sOperands)
     {
         var match, sReserved = null;
-        if (match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)#/i)) {
+        if ((match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)#/i))) {
             sReserved = match[0];
             var sLabel = match[1];
             var name = '?' + sLabel;
@@ -25533,7 +25547,7 @@ class Macro10 {
         var sOperand;
         var nBits = 0, nValue = 0, nBitsRemaining = 36;
 
-        while (sOperand = this.getExpression(sOperands)) {
+        while ((sOperand = this.getExpression(sOperands))) {
             sOperands = sOperands.substr(sOperand.length).trim();
             var sValue = sOperand;
             var match = sOperand.match(/^\((.*)\)\s*(.*)$/);

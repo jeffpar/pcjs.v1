@@ -1,6 +1,6 @@
 ---
 layout: page
-title: DEC PDP-11 BASIC
+title: PDP-11 BASIC
 permalink: /apps/pdp11/tapes/basic/
 machines:
   - id: test1120

@@ -28,46 +28,46 @@
 
 /*
  * Tasks
- * 
+ *
  *      default (eg: `gulp` or `gulp default`)
- * 
+ *
  *          Recompiles all machine scripts in their respective version folder (under /versions) that
  *          are out-of-date with respect to the individual files (under /modules).  The target version
  *          comes from _data/machines.json:shared.version.
  *
  *          It does this by running the `concat`, `compile`, `copy`, and `disks` tasks for all machines,
  *          in that order.
- * 
+ *
  *      concat (eg: `gulp concat` or `gulp concat/{machine}`)
- * 
+ *
  *          Concatenates all the individual files (under /modules) that comprise the machines's compiled
  *          script; the resulting file (eg, pcx86-uncompiled.js) becomes the input file for the Closure
  *          Compiler, which is why each machine's `compile` task lists the corresponding `concat` task as a
  *          dependency/prerequisite.
- * 
+ *
  *      compile (eg: `gulp compile` `gulp compile/{machine}`)
- * 
+ *
  *          For example, `gulp compile/pcx86` will recompile the current version of pcx86-uncompiled.js
  *          if it's out of date.
- * 
+ *
  *      compile/devices
- * 
+ *
  *          This special task compiles all the newer machines that use Device classes; you can also compile
  *          them individually, just like any other machine (eg, `gulp compile/ti57`).
- * 
+ *
  *      copy (eg: `gulp copy` or `gulp copy/{machine}`)
- * 
+ *
  *          Copies any other individual resources files listed in machines.json (other than scripts) to the
  *          machine's current version folder.
- * 
+ *
  *      disks (eg: `gulp pcjs-disks`, `gulp private-disks`)
- * 
+ *
  *          Updates inlined disk manifests (eg, /disks/pcx86/library.xml) from the submodule manifests
  *          (eg, /pcjs-disks/pcx86/library.xml), which are actually "manifests of manifests" and therefore
  *          inherently slower to load.
- * 
+ *
  *      version
- * 
+ *
  *          Updates the version number in all project machine XML files to match the version contained in
  *          _data/machines.json:shared.version.
  *
@@ -75,6 +75,9 @@
  *
  *          Updates the copyright year in all project files to match the year contained in package.json.
  */
+
+ "use strict";
+
 var gulp = require("gulp");
 var gulpNewer = require("gulp-newer");
 var gulpConcat = require("gulp-concat");
@@ -129,7 +132,7 @@ for (let i = 0; i < machines.shared.externs.length; i++) {
 var sSiteHost = "https://www.pcjs.org";
 
 if (pkg.homepage) {
-    let match = pkg.homepage.match(/^(https?:\/\/[^\/]*)(.*)/);
+    let match = pkg.homepage.match(/^(https?:\/\/[^/]*)(.*)/);
     if (match) sSiteHost = match[1];
 }
 
@@ -180,7 +183,7 @@ aMachines.forEach(function(machineType) {
             }
         }
     }
-    
+
     let machineFiles = machineConfig.css || machines.shared.css;
     machineFiles = machineFiles.concat(machineConfig.xsl || machines.shared.xsl);
 
@@ -190,7 +193,7 @@ aMachines.forEach(function(machineType) {
      * with an incomplete stream, resulting in bogus errors.  My work-around is to compare filetimes
      * myself, marking the machine as "outdated" ONLY if the destination file is older, and then
      * change the appropriate "compile" tasks to simply ignore any machines that aren't outdated.
-     * 
+     *
      * Since this code runs *before* any of the actual tasks, the "outdated" machines array must
      * ALSO be updated by any "concat" task that recreates one of the uncompiled input files.
      */
@@ -226,7 +229,7 @@ aMachines.forEach(function(machineType) {
                     .pipe(gulpReplace(/\/\*\*[^@]*@typedef\s*{([A-Z][A-Za-z0-9_<>.]+)}\s*(\S+)\s*([\s\S]*?)\*\//g, function(match, def, type, props) {
                         let sType = "/** @typedef {", sProps = "";
                         let reProps = /@property\s*{([^}]*)}\s*(\[|)([^\s\]]+)]?/g, matchProps;
-                        while (matchProps = reProps.exec(props)) {
+                        while ((matchProps = reProps.exec(props))) {
                             if (sProps) sProps += ", ";
                             sProps += matchProps[3] + ": " + (matchProps[2]? ("(" + matchProps[1] + "|undefined)") : (matchProps[1].indexOf('|') < 0? matchProps[1] : "(" + matchProps[1] + ")"));
                         }
@@ -239,7 +242,7 @@ aMachines.forEach(function(machineType) {
                         return sType;
                     }))
                     .pipe(gulpReplace(/[ \t]*(if *\(DEBUG\) *|)[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
-                }))        
+                }))
             .pipe(gulpConcat(machineUncompiledFile))
             .pipe(gulpHeader('"use strict";\n\n'))
             .pipe(gulp.dest(machineReleaseDir));
@@ -384,7 +387,7 @@ gulp.task("disks", ["pcjs-disks", "private-disks"]);
 gulp.task("version", function() {
     let baseDir = "./";
     return gulp.src(["apps/**/*.xml", "devices/**/*.xml", "disks/**/*.xml", "pcjs-disks/**/*.xml", "pcjs-games/**/*.xml", "private-disks/**/*.xml", "pubs/**/*.xml"], {base: baseDir})
-        .pipe(gulpReplace(/href="\/versions\/([^\/]*)\/[0-9.]*\/(machine|manifest|outline)\.xsl"/g, 'href="/versions/$1/' + machines.shared.version + '/$2.xsl"'))
+        .pipe(gulpReplace(/href="\/versions\/([^/]*)\/[0-9.]*\/(machine|manifest|outline)\.xsl"/g, 'href="/versions/$1/' + machines.shared.version + '/$2.xsl"'))
         .pipe(gulp.dest(baseDir));
 });
 

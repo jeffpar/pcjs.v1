@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PDPjs PDP-10 Opcode Tests
+title: PDP-10 Opcode Tests
 permalink: /apps/pdp10/tests/opcodes/
 machines:
   - id: testka10
@@ -9,8 +9,8 @@ machines:
     debugger: true
 ---
 
-PDPjs PDP-10 Opcode Tests
--------------------------
+PDP-10 Opcode Tests
+-------------------
 
 The PDP-10 machine below loads the following PDPjs opcode test:
 

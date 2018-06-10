@@ -1,0 +1,7 @@
+{
+  "globals": {
+    "BYTEARRAYS": true,
+    "PC6502": true,
+    "TYPEDARRAYS": true
+  }
+}
