@@ -1,6 +1,6 @@
 ---
 layout: page
-title: OSI Challenger 1P (8Kb) with Large Display
+title: OSI Challenger 1P (8Kb) with Large Display and Debugger
 permalink: /devices/c1p/machine/8kb/large/debugger/
 machines:
   - id: c1p8kb

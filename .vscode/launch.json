@@ -39,271 +39,2189 @@
         "--rebuild"
       ]
     },
-	  {
-		  "name": "Apps: ThinkTank",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/apps/pcx86/1987/thinktank/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "Apps: TopView 1.01",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/apps/ibm/topview/1.01/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "Apps: WordStar 3.24",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/apps/other/wordstar/3.24/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "Apps: WordStar for PCjr",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/apps/other/wordstar/pcjr/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "Devices: Game of Life",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/devices/leds/life/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "Devices: Lite-Brite",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/devices/leds/litebrite/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "Devices: LED Scroller",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/devices/leds/scroller/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "Devices: LED Symbols",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/devices/leds/symbols/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "Devices: TI-42",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/devices/ti42/machine/rev0/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "Devices: TI-55",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/devices/ti55/machine/rev0/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "Devices: TI-57",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/devices/ti57/machine/rev0/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "Disks: Private",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/private/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "Games: Wizardry I",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/games/other/wizardry1/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "COMPAQ DOS 1.11",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/compaq/1.11/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "COMPAQ DOS 1.12",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/compaq/1.12/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "COMPAQ DOS 2.12",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/compaq/2.12/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "COMPAQ DOS 3.00",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/compaq/3.00/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "COMPAQ DOS 3.10",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/compaq/3.10/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "COMPAQ DOS 3.31",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/compaq/3.31/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "MS-DOS 3.20",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/microsoft/3.20/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "PC DOS 0.90",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/0.90/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "PC DOS 1.10 (NODEBUG)",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/1.10/?gort=nodebug",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "PC DOS 1.00",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/1.00/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "PC DOS 1.10",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/1.10/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "PC DOS 2.00",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/2.00/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "PC DOS 2.10",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/2.10/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "PC DOS 3.00",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/3.00/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "PC DOS 3.10",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/3.10/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "PC DOS 3.20",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/3.20/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "PC DOS 3.30",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/disks/pcx86/dos/ibm/3.30/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "Tests: VGA Black Book",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/tests/pcx86/vga/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "IBM PCjr: CGA, 64Kb, Debugger",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/devices/pcx86/machine/4860/cga/64kb/debugger/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "IBM PC: CGA, 64Kb, LPT1, Debugger",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/devices/pcx86/machine/5150/cga/64kb/debugger/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "IBM PC: CGA, 256Kb",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/devices/pcx86/machine/5150/cga/256kb/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "IBM PC: CGA, 256Kb, Debugger",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/devices/pcx86/machine/5150/cga/256kb/debugger/?autoStart=true",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "IBM PC XT: CGA, 640Kb, 10Mb, Debugger",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/devices/pcx86/machine/5160/cga/640kb/debugger/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "IBM PC AT: EGA, 640Kb, Debugger",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/",
-		  "webRoot": "${workspaceFolder}"
-	  },
-	  {
-		  "name": "IBM PC AT: EGA, 2048Kb, COM2, Debugger",
-		  "type": "chrome",
-		  "request": "launch",
-		  "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/?autoMount={A:{name:%22PC DOS%205.00%20(Disk%201)%22}}",
-		  "webRoot": "${workspaceFolder}"
-	  }
+    {
+      "name": "Apps: PC DOS 1.00 BASIC Samples",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pcx86/1981/basic/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: DONKEY.BAS (1981)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pcx86/1981/donkey/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: DONKEY.BAS (1981) with Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pcx86/1981/donkey/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: VisiCalc (1981)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pcx86/1981/visicalc/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: Executive Suite (1982)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pcx86/1982/esuite/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: RatBas (1982)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pcx86/1982/ratbas/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: Adventures in Math (1983)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pcx86/1983/adventmath/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: Logitech Modula-2/86 Compiler (1984)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pcx86/1984/modula2/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: Castle Adventure (1985)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pcx86/1985/castle_adventure/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: Rogue (1985)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pcx86/1985/rogue/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: ThinkTank (1987)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pcx86/1987/thinktank/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: The Dungeons of Moria (1992)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pcx86/1992/moria/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PCx86 Examples",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pcx86/examples/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 KA10 Basic Instruction Diagnostic #1",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/diags/ka10/dakaa/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 KA10 Basic Instruction Diagnostic #2",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/diags/ka10/dakab/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 KA10 Basic Instruction Diagnostic #3",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/diags/ka10/dakac/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 KA10 Basic Instruction Diagnostic #4",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/diags/ka10/dakad/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 KA10 Basic Instruction Diagnostic #5",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/diags/ka10/dakae/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 KA10 Basic Instruction Diagnostic #6",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/diags/ka10/dakaf/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 KA10 Basic Instruction Diagnostic #7",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/diags/ka10/dakag/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 KA10 Basic Instruction Diagnostic #8",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/diags/ka10/dakah/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 KA10 Basic Instruction Diagnostic #9",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/diags/ka10/dakai/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 KA10 Basic Instruction Diagnostic #10",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/diags/ka10/dakaj/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 KA10 Basic Instruction Diagnostic #11",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/diags/ka10/dakak/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 KA10 Basic Instruction Diagnostic #12",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/diags/ka10/dakal/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 KA10 Basic Instruction Diagnostic #13",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/diags/ka10/dakam/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 KA10 Basic Instruction Reliability Test #1",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/diags/ka10/dakba/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 MACRO-10 Mini-Assembler Tests",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/tests/macro10/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-10 Opcode Tests",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp10/tests/opcodes/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Apps: PDP-11 BASIC",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/apps/pdp11/tapes/basic/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Exploring the IBM Personal Computer 1.00 (Color Version)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/ibm/exploring/5150/cga/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Exploring the IBM Personal Computer 1.00 (Monochrome Version)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/ibm/exploring/5150/mda/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Exploring the IBM Personal Computer AT 1.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/ibm/exploring/5170/1.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Exploring the IBM Personal Computer AT 2.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/ibm/exploring/5170/2.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Fantasy Land EGA Demo and Utilities",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/ibm/fland/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM EGA Fantasy Land Demo with Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/ibm/fland/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM TopView 1.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/ibm/topview/1.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM TopView 1.00 (With Debugger)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/ibm/topview/1.00/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM TopView 1.01",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/ibm/topview/1.01/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM TopView 1.01 (With Debugger)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/ibm/topview/1.01/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM TopView 1.10",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/ibm/topview/1.10/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM TopView 1.10 (With Debugger)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/ibm/topview/1.10/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Lotus 1-2-3 Release 1A",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/lotus/123/1a/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Lotus 1-2-3 Release 1A*",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/lotus/123/1as/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft Word 3.0",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/microsoft/word/3.0/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft Word 3.0 (with Debugger)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/microsoft/word/3.0/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Sorcim SuperCalc2 1.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/other/sc2/1.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Sorcim SuperCalc3 1.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/other/sc3/1.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: MicroPro WordStar 3.20",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/other/wordstar/3.20/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: MicroPro WordStar 3.24",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/other/wordstar/3.24/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: MicroPro WordStar 3.30",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/other/wordstar/3.30/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: MicroPro WordStar for PCjr",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/apps/other/wordstar/pcjr/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: CP/M-86 1.00 for the IBM Personal Computer",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/cpm/1.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: CP/M-86 1.00 for the IBM Personal Computer (with Debugger)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/cpm/1.00/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC (Model 5150) running CP/M-86 1.1B",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/cpm/1.1b/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC (Model 5150) running CP/M-86 1.1B with Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/cpm/1.1b/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC (Model 5150) running IBM PC Advanced Diagnostics 1.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/diags/ibm/5150/1.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC (Model 5150) running IBM PC Diagnostics 1.02",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/diags/ibm/5150/1.02/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC (Model 5150) running IBM PC Advanced Diagnostics 1.02",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/diags/ibm/5150/1.02a/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC (Model 5150) running IBM PC Diagnostics 2.02",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/diags/ibm/5150/2.02/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC (Model 5150) running IBM PC Diagnostics 2.05",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/diags/ibm/5150/2.05/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC (Model 5150) running IBM PC Advanced Diagnostics 2.05",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/diags/ibm/5150/2.05a/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC (Model 5150) running IBM PC Diagnostics 2.07",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/diags/ibm/5150/2.07/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC (Model 5150) running IBM PC Advanced Diagnostics 2.20",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/diags/ibm/5150/2.20a/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC AT (Model 5170) running IBM PC AT Advanced Diagnostics 1.01",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/diags/ibm/5170/1.01a/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC AT (Model 5170) running IBM PC AT Diagnostics 1.02",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/diags/ibm/5170/1.02/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC AT (Model 5170) running IBM PC AT Diagnostics 2.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/diags/ibm/5170/2.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC AT (Model 5170) running IBM PC AT Advanced Diagnostics 2.07",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/diags/ibm/5170/2.07a/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: COMPAQ MS-DOS 1.11",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/compaq/1.11/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: COMPAQ MS-DOS 1.12",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/compaq/1.12/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: COMPAQ MS-DOS 2.11",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/compaq/2.11/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: COMPAQ MS-DOS 2.12",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/compaq/2.12/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: COMPAQ MS-DOS 3.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/compaq/3.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: COMPAQ MS-DOS 3.10",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/compaq/3.10/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: COMPAQ MS-DOS 3.31",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/compaq/3.31/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Digital Research DR DOS 3.31",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/dresearch/3.31/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Digital Research DR DOS 3.32",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/dresearch/3.32/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Digital Research DR DOS 3.33",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/dresearch/3.33/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Digital Research DR DOS 3.34",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/dresearch/3.34/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Digital Research DR DOS 3.40",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/dresearch/3.40/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Digital Research DR DOS 3.41",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/dresearch/3.41/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Digital Research DR DOS 5.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/dresearch/5.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Digital Research DR DOS 6.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/dresearch/6.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 0.90",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/0.90/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 0.90 with Monochrome Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/0.90/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 1.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/1.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 1.10",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/1.10/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 2.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/2.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 2.10",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/2.10/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 3.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/3.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 3.10",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/3.10/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 3.20",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/3.20/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 3.30",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/3.30/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 4.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/4.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 4.01",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/4.01/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 5.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/5.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 5.02",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/5.02/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 6.10",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/6.10/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 6.30",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/6.30/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC DOS 7.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/ibm/7.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft MS-DOS 3.20",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/3.20/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft MS-DOS 3.21",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/3.21/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft MS-DOS 3.30",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/3.30/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft MS-DOS 3.31",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/3.31/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft MS-DOS 4.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/4.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft MS-DOS 4.01",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/4.01/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Multitasking MS-DOS 4.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/4.0M/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft MS-DOS 5.00 (360K Disks)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/5.00/360K/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft MS-DOS 5.00 (720K Disks)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/5.00/720K/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft MS-DOS 6.00 (1.2M Disks)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/6.00/1200K/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft MS-DOS 6.00 (1.44M Disks)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/6.00/1440K/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft MS-DOS 6.20 (1.2M Disks)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/6.20/1200K/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft MS-DOS 6.20 (1.44M Disks)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/6.20/1440K/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft MS-DOS 6.22 (1.2M Disks)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/6.22/1200K/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft MS-DOS 6.22 (1.44M Disks)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/6.22/1440K/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: id Software: Wolfenstein 3D",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/games/id/wolf3d/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: The Hitchhiker's Guide to the Galaxy (1984)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/games/infocom/hhiker/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Leather Goddesses of Phobos (1986)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/games/infocom/phobos/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Planetfall (1983)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/games/infocom/planet/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Zork I: The Great Underground Empire",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/games/infocom/zork1/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Zork I: The Great Underground Empire (with Debugger)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/games/infocom/zork1/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Zork II: The Wizard of Frobozz",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/games/infocom/zork2/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Zork III: The Dungeon Master",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/games/infocom/zork3/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft Adventure (1981)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/games/microsoft/adventure/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Lemmings (1991)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/games/other/lemmings/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Wizardry I: Proving Grounds of the Mad Overlord",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/games/other/wizardry1/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM OS/2 1.0",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/os2/ibm/1.0/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM OS/2 1.1",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/os2/ibm/1.1/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: OS/2 1.0 Debugger Boot Disk",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/os2/misc/1.0/88286/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: OS/2 CP-DOS Boot Disk (v7.68)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/os2/misc/cpdos/86295/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: OS/2 SIZZLE Boot Disk (v7.68.18)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/os2/misc/cpdos/87007/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: OS/2 SIZZLE Boot Disk (v7.68.18 DEBUG)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/os2/misc/cpdos/87007/debug/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: OS/2 FOOTBALL Boot Disk (v7.68.17)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/os2/misc/football/87058/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: OS/2 FOOTBALL Boot Disk (v4.41.00)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/os2/misc/football/87357/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: PCjs Random Disk Collection",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/personal/random/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC ROM BIOS Sources",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/roms/ibm/5150/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC XT ROM BIOS Sources",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/roms/ibm/5160/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC AT ROM BIOS Sources",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/roms/ibm/5170/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: PC Magazine Disks",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/shareware/pcmag/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: PC Magazine Disks (with Debugger)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/shareware/pcmag/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: PC-SIG Library 8th Edition CD-ROM (April 1990): Disks 1001-1500",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/shareware/pcsig08/1001/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: PC-SIG Library 8th Edition CD-ROM (April 1990): Disks 1501-2121",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/shareware/pcsig08/1501/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: PC-SIG Library 8th Edition CD-ROM (April 1990): Disks 501-1000",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/shareware/pcsig08/501/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: PC-SIG Library 8th Edition CD-ROM (April 1990)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/shareware/pcsig08/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: PC-SIG Library 8th Edition CD-ROM (April 1990) with Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/shareware/pcsig08/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: PC Tech Journal Disks",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/shareware/pctj/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Borland Turbo Pascal 3.01A",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/tools/borland/pascal/3.01a/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Borland Turbo Pascal 5.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/tools/borland/pascal/5.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Logitech Modula-2/86 Compiler 1.10",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/tools/logitech/modula2/1.10/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft QuickPascal 1.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/tools/microsoft/pascal/quickpascal/1.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Enhanced DEBUG for PC DOS and MS-DOS",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/tools/other/enhdebug/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Enhanced DEBUG for PC DOS and MS-DOS (with PCjs Debugger)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/tools/other/enhdebug/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: FlickerFree 1.0",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/tools/other/flickerfree/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Omniview 386 4.30",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/tools/other/omniview/4.30/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: DoubleDOS 2.0F",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/tools/softlogic/doubledos/2.0f/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC XENIX 1.0",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/unix/ibm/xenix/1.0/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: IBM PC XENIX 2.0",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/unix/ibm/xenix/2.0/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: SCO Xenix System V Release 2.1.3 for i8086",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/unix/sco/xenix/086/2.1.3/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: SCO Xenix 286 v2.1.3",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/unix/sco/xenix/286/2.1.3/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: SCO Xenix 286 v2.2.1e",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/unix/sco/xenix/286/2.2.1e/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: SCO Xenix 286 v2.2.3b",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/unix/sco/xenix/286/2.2.3b/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: SCO Xenix 286 v2.3.2d",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/unix/sco/xenix/286/2.3.2d/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: SCO Xenix 386 v2.2.3b",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/unix/sco/xenix/386/2.2.3b/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: SCO Xenix 386 v2.3.2f",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/unix/sco/xenix/386/2.3.2f/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: SCO Xenix 386 v2.3.4h",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/unix/sco/xenix/386/2.3.4h/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft Windows 1.0",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/windows/1.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft Windows 1.01",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/windows/1.01/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft Windows 1.01 with CGA Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/windows/1.01/cga/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft Windows 1.01 with CGA Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/windows/1.01/cga/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft Windows 1.01 with Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/windows/1.01/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft Windows/386 2.0x",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/windows/2.0x/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft Windows 3.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/windows/3.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft Windows 3.10",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/windows/3.10/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft Windows 3.10 with Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/windows/3.10/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft Windows 95: Build 499",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/windows/win95/4.00.499/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft Windows 95: First Retail Release",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/windows/win95/4.00.950/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft Windows 95: First Retail Release (with Debugger)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/windows/win95/4.00.950/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: OSI Challenger 1P (32Kb) with Disk Support",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/c1p/machine/32kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: OSI Challenger 1P (8Kb) with Additional Software",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/c1p/machine/8kb/all/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: OSI Challenger 1P (8Kb) with Additional Software and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/c1p/machine/8kb/all/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: OSI Challenger 1P (8Kb) \"Server Array\"",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/c1p/machine/8kb/array/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: OSI Challenger 1P (8Kb) with Small Embeddable Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/c1p/machine/8kb/embed/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: OSI Challenger 1P (8Kb) with Large Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/c1p/machine/8kb/large/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: OSI Challenger 1P (8Kb) with Large Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/c1p/machine/8kb/large/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: OSI Challenger 1P (8Kb) with Small Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/c1p/machine/8kb/small/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: \"Game of Life\" Demo",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/leds/life/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: \"Game of Life\" Color Demo",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/leds/life/colors/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: \"Lite-Brite\" LED Simulation",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/leds/litebrite/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: LED Scroller",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/leds/scroller/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: LED Symbol Builder",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/leds/symbols/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: 8080 Exerciser Test Machine",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pc8080/machine/exerciser/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: Space Invaders (1978)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pc8080/machine/invaders/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: Space Invaders (1978) with Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pc8080/machine/invaders/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: DEC VT100 Terminal",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pc8080/machine/vt100/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: DEC VT100 Terminal with Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pc8080/machine/vt100/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: Dual VT100 Terminals",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pc8080/machine/vt100/dual/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: Dual VT100 Terminals with Debuggers",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pc8080/machine/vt100/dual/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PCjr (Model 4860) with 64Kb and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/4860/cga/64kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC (Model 5150, 256Kb) with Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5150/cga/256kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC (Model 5150, 256Kb) with Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5150/cga/256kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC (Model 5150, 384Kb) with Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5150/cga/384kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC (Model 5150, 64Kb) with Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5150/cga/64kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC (Model 5150, 64Kb) with Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5150/cga/64kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC (Model 5150, 64Kb) with Dual Displays",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5150/dual/64kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC (Model 5150, 256Kb) with Monochrome Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5150/mda/256kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC (Model 5150, 256Kb) with Monochrome Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5150/mda/256kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC (Model 5150, 64Kb) with Monochrome Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5150/mda/64kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC (Model 5150, 64Kb) with Monochrome Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5150/mda/64kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC (Model 5150) with Monochrome (MDA) Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5150/mda/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (Model 5160)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/cga/256kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (256K RAM, 10Mb Drive) Machine Array with Color Displays",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/cga/256kb/array/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (256K RAM, 10Mb Drive) with Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/cga/256kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (512K RAM, 10Mb Drive) with Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/cga/512kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (640K RAM, 10Mb Drive) with Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/cga/640kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (640K RAM, 10Mb Drive) with Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/cga/640kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (256K EGA, 256K RAM, 10Mb Drive) with Enhanced Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/ega/256kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (256K EGA, 256K RAM, 10Mb Drive) with Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/ega/256kb/color/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (256K EGA, 256K RAM, 10Mb Drive) with Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/ega/256kb/color/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (256K EGA, 256K RAM, 10Mb Drive) with Enhanced Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/ega/256kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (256K EGA, 256K RAM, 10Mb Drive) with Monochrome Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/ega/256kb/mono/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (256K EGA, 256K RAM, 10Mb Drive) with Monochrome Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/ega/256kb/mono/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (128K EGA, 640K RAM, 10Mb Drive) with Enhanced Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/ega/640kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (128K EGA, 640K RAM, 10Mb Drive) Machine Array with Enhanced Color Displays",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/ega/640kb/array/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (128K EGA, 640K RAM, 10Mb Drive) with Enhanced Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/ega/640kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (256K RAM, 10Mb Drive) with Monochrome Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/mda/256kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (256K RAM, 10Mb Drive) with Monochrome Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/mda/256kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (80188 CPU, 256K RAM) with Monochrome Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/mda/256kb/fake188/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (80188 CPU, 256K RAM) with Monochrome Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/mda/256kb/fake188/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (64K RAM, 10Mb Drive) with Monochrome Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5160/mda/64kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 640Kb) with CGA Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/cga/640kb/rev3/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 640Kb) with CGA Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/cga/640kb/rev3/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (6Mhz, 1152Kb, 20Mb Drive) with Enhanced Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/1152kb/rev1/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (6Mhz, 1152Kb, 20Mb Drive) with Enhanced Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/1152kb/rev1/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 1152Kb, 20Mb Drive) with Enhanced Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/1152kb/rev3/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 1152Kb, 20Mb Drive) with Enhanced Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 1152Kb, 20Mb Drive) with EGA Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/visual/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with Enhanced Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with Enhanced Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with EGA Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/visual/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with Enhanced Color Display, VT100, and Debuggers",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/vt100/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with Enhanced Color Display and VT100",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/vt100/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb, 47Mb Drive) with Enhanced Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/640kb/rev1/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb, 47Mb Drive) with Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/640kb/rev1/color/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb, 47Mb Drive) with Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/640kb/rev1/color/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb, 47Mb Drive) with Enhanced Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb, 47Mb Drive) with Monochrome Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/640kb/rev1/mono/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb, 47Mb Drive) with Monochrome Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/640kb/rev1/mono/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb, 47Mb Drive) with Enhanced Color Display and TestMonitor",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/640kb/rev1/testmon/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 640Kb, 47Mb Drive) with Enhanced Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/640kb/rev3/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 640Kb, 47Mb Drive) with Enhanced Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/ega/640kb/rev3/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 640Kb) with MDA Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/mda/640kb/rev3/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 640Kb) with MDA Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/mda/640kb/rev3/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with VGA Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/vga/2048kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with VGA Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/vga/2048kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 4Mb, 20Mb Drive) with VGA Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/vga/4096kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 4Mb, 20Mb Drive) with VGA Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/5170/vga/4096kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: AT&T Personal Computer 6300 with Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/att/6300/cga/640kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: AT&T Personal Computer 6300 with Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/att/6300/cga/640kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: Columbia Data Products MPC 1600 with Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/cdp/mpc1600/cga/640kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: Columbia Data Products MPC 1600 with Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/cdp/mpc1600/cga/640kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: COMPAQ DeskPro 386 (2Mb) with 128K IBM EGA",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/compaq/deskpro386/ega/2048kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: COMPAQ DeskPro 386 (2Mb) with 128K IBM EGA and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/compaq/deskpro386/ega/2048kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: COMPAQ DeskPro 386 (4Mb) with 128K IBM EGA",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/compaq/deskpro386/ega/4096kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: COMPAQ DeskPro 386 (4Mb) with 128K IBM EGA and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/compaq/deskpro386/ega/4096kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: COMPAQ DeskPro 386 (2Mb) with COMPAQ VGA and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/compaq/deskpro386/other/2048kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: COMPAQ DeskPro 386 (2Mb) with COMPAQ VGA and Visual Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/compaq/deskpro386/other/2048kb/debugger/visual/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: COMPAQ DeskPro 386 (2Mb) with IBM VGA",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/compaq/deskpro386/vga/2048kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: COMPAQ DeskPro 386 (2Mb) with IBM VGA and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/compaq/deskpro386/vga/2048kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: COMPAQ DeskPro 386 (2Mb) with IBM VGA and Visual Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/compaq/deskpro386/vga/2048kb/debugger/visual/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: COMPAQ DeskPro 386 (4Mb) with IBM VGA",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/compaq/deskpro386/vga/4096kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: COMPAQ DeskPro 386 (4Mb) with IBM VGA and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/compaq/deskpro386/vga/4096kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: COMPAQ DeskPro 386 (4Mb) with IBM VGA and Visual Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/compaq/deskpro386/vga/4096kb/debugger/visual/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: Build Your Own PC",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/custom/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: Zenith Z-150 with Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/zenith/z150/cga/640kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: Zenith Z-150 with Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/zenith/z150/cga/640kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-10 (Model KA10) Test Machine",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp10/machine/ka10/test/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-10 (Model KA10) Test Machine with Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp10/machine/ka10/test/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/20 BASIC Demo",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1120/basic/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/20 BASIC Demo with Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1120/basic/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/20 Bootstrap Loader Demo",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1120/bootstrap/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/20 Bootstrap Loader with Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1120/bootstrap/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/20 Boot Monitor ",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1120/monitor/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/20 Boot Monitor with Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1120/monitor/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/20 with Front Panel",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1120/panel/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/20 with Front Panel and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1120/panel/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/20 with Front Panel and TEST 14",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1120/panel/debugger/test14/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/45 with 256Kb and Front Panel",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1145/panel/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/45 with 256Kb, Front Panel, and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1145/panel/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/45 with VT100 Terminal",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1145/vt100/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/45 with VT100 Terminal and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1145/vt100/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/70 with 4Mb and Front Panel",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1170/4mb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/70 with 4Mb, Front Panel, and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1170/4mb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/70 \"Server Array\"",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1170/array/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/70 with 256Kb and Boot Monitor",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1170/monitor/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/70 with 256Kb, Boot Monitor, and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1170/monitor/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/70 with 256Kb and Front Panel",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1170/panel/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/70 with 256Kb, Front Panel, and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1170/panel/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/70 with 256Kb running CPU Exerciser",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1170/panel/debugger/cpuexer/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/70 for RSTS/E with Front Panel and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1170/panel/debugger/rsts/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/70 for RT-11 with Front Panel and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1170/panel/debugger/rt11/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/70 for XXDP+ with Front Panel and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1170/panel/debugger/xxdp/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/70 with VT100 Terminal",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1170/vt100/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: PDP-11/70 with VT100 Terminal and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pdp11/machine/1170/vt100/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: TI-42 Programmable Calculator (with Original ROM)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/ti42/machine/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: TI-42 Programmable Calculator (with Original ROM and Diagnostics)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/ti42/machine/diags/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: TI-55 Programmable Calculator (with Original ROM)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/ti55/machine/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: TI-55 Programmable Calculator (with Original ROM and Diagnostics)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/ti55/machine/diags/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: TI-57 Programmable Calculator (with Original ROM)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/ti57/machine/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: TI-57 Programmable Calculator (with Original ROM and Diagnostics)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/ti57/machine/rev0/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: TI-57 Programmable Calculator (with Revised ROM and Diagnostics)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/ti57/machine/rev1/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: TI-57 Programmable Calculator",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/ti57/machine/webapp/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: TI-57 Tips and Tricks",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/ti57/tips/",
+      "webRoot": "${workspaceFolder}"
+    }
 	]
 }

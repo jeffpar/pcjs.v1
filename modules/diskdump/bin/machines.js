@@ -60,6 +60,7 @@ function processMachines(sDir, fDebug)
     let asFiles = glob.sync(path.join(sDir, "**", "README.md"));
     for (let i = 0; i < asFiles.length; i++) {
         let sFile = asFiles[i], sMarkdown;
+        if (sFile.indexOf("/archive") >= 0 || sFile.indexOf("/private") >= 0 || sFile.indexOf("/unlisted") >= 0) continue;
         try {
             sMarkdown = fs.readFileSync(sFile, {encoding: "utf8"});
         } catch(err) {
@@ -79,10 +80,10 @@ function processMachines(sDir, fDebug)
          * Check the file for Front Matter (ie, a header at the top of the file delineated by "---" lines)
          * that includes both a "title" property and a "machines" section.
          */
-        let matchFM = sMarkdown.match(/^---[\s\S]*?\ntitle:\s*"?(.*?)"?\n[\s\S]*?machines:([\s\S]*?\n)\S/);
+        let matchFM = sMarkdown.match(/^---[\s\S]*?\ntitle:\s*(["']|)(.*?)\1\n[\s\S]*?machines:([\s\S]*?\n)\S/);
         if (matchFM) {
-            let sTitle = matchFM[1].replace(/&amp;/g, '&');
-            let asMachines = matchFM[2].split("\n  - ");
+            let sTitle = matchFM[2].replace(/&amp;/g, '&');
+            let asMachines = matchFM[3].split("\n  - ");
             for (let sMachine of asMachines) {
                 if (!sMachine) continue;
                 let machine = {};
@@ -91,6 +92,7 @@ function processMachines(sDir, fDebug)
                 machine.category = sCategory;
                 let aProps = sMachine.split("\n    ");
                 processProperties(machine, aProps, 0, "");
+                if (!machine.id) continue;
                 /*
                  * When no "config" property is provided, a "machine.xml" in the same directory is implied.
                  */
@@ -128,7 +130,7 @@ function processMachines(sDir, fDebug)
         entry.type = "chrome";
         entry.request = "launch";
         entry.url = "http://localhost:8088" + machine.directory;
-        entry.webroot = '$' + "{workspaceFolder}";
+        entry.webRoot = '$' + "{workspaceFolder}";
         launch.configurations.push(entry);
     }
     printf("%2j\n", launch);

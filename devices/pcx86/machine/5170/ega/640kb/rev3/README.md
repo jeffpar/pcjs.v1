@@ -1,6 +1,6 @@
 ---
 layout: page
-title: IBM PC AT (Model 5170, 640Kb, 47Mb Drive) with Enhanced Color Display
+title: IBM PC AT (8Mhz, 640Kb, 47Mb Drive) with Enhanced Color Display
 permalink: /devices/pcx86/machine/5170/ega/640kb/rev3/
 machines:
   - id: ibm5170

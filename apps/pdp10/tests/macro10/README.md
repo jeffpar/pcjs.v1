@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PDPjs MACRO-10 Mini-Assembler Tests
+title: PDP-10 MACRO-10 Mini-Assembler Tests
 permalink: /apps/pdp10/tests/macro10/
 machines:
   - id: testka10
@@ -10,8 +10,8 @@ machines:
     commands: a 100 TEXT.MAC; db 100 l4
 ---
 
-PDPjs MACRO-10 Mini-Assembler Tests
------------------------------------
+PDP-10 MACRO-10 Mini-Assembler Tests
+------------------------------------
 
 ### Nested Macro Test
 
