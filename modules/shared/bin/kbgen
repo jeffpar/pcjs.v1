@@ -61,7 +61,7 @@ function processFile(sFile) {
         let sText = fs.readFileSync(sFile, "binary");
         let re = /([0-9]+)\. *([^\n]*)\s*Product Version\(s\): *([^\n]*)\s*Operating System: *([^\n]*)\s*Flags: *([^\n]*)\s*Last Modified: *([0-9A-Z-]*)\s*ArticleIdent: *(Q[0-9]+)\n/g;
         let match, aMatches = [];
-        while (match = re.exec(sText)) {
+        while ((match = re.exec(sText))) {
             /*
              * match[1]: article number
              * match[2]: title
