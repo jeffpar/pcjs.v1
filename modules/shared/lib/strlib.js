@@ -646,7 +646,7 @@ class Str {
                  * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
                  *
                  * Also, unlike the 'X' and 'x' hexadecimal cases, there's no need to explicitly check for a string
-                 * arguments, because the call to trunc() automatically coerces any string value to a (decimal) number.
+                 * arguments, because Math.trunc() automatically coerces any string value to a (decimal) number.
                  */
                 arg = Math.trunc(arg);
                 /* falls through */
@@ -672,11 +672,24 @@ class Str {
                 buffer += s;
                 break;
 
+            case 'j':
+                /*
+                 * 'j' is one of our non-standard extensions to the sprintf() interface; it signals that
+                 * the caller is providing an Object that should be rendered as JSON.  If a width is included
+                 * (eg, "%2j"), it's used as an indentation value; otherwise, no whitespace is added.
+                 */
+                buffer += JSON.stringify(arg, null, width || null);
+                break;
+
             case 'c':
                 arg = String.fromCharCode(arg);
                 /* falls through */
 
             case 's':
+                /*
+                 * 's' includes some non-standard behavior: if the argument is not actually a string, we
+                 * "coerce" it to a string, using its associated toString() method.
+                 */
                 if (typeof arg == "string") {
                     while (arg.length < width) {
                         if (flags.indexOf('-') >= 0) {
@@ -722,7 +735,7 @@ class Str {
 
             default:
                 /*
-                 * The supported ANSI C set of types: "dioxXucsfeEgGpn%"
+                 * For reference purposes, the standard ANSI C set of types is "dioxXucsfeEgGpn%"
                  */
                 buffer += "(unrecognized printf type %" + type + ")";
                 break;

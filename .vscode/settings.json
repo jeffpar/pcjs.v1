@@ -22,6 +22,7 @@
 		"MD002": false,
 		"MD003": false,
 		"MD004": false,
+		"MD009": false,
 		"MD010": false,
 		"MD025": false,
 		"MD029": false,
@@ -37,6 +38,6 @@
   "npm.autoDetect": "off",
   "typescript.tsc.autoDetect": "off",
   "typescript.validate.enable": false,
-	"window.zoomLevel": 0,
+  "window.zoomLevel": 0,
 	"workbench.quickOpen.closeOnFocusLost": false
 }
