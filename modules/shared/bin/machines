@@ -32,9 +32,9 @@
 var fs = require("fs");
 var glob = require("glob");
 var path = require("path");
-var defines = require("../../shared/lib/defines");
-var Str = require("../..//shared/lib/strlib");
-var Proc = require("../../shared/lib/proclib");
+var defines = require("../lib/defines");
+var Str = require("../../lib/strlib");
+var Proc = require("../../lib/proclib");
 var args = Proc.getArgs();
 
 /**
@@ -169,4 +169,4 @@ if (args.argc > 1) {
     process.exit(0);
 }
 
-printf("usage: node machines.js [directory]\n");
+printf("usage: node machines [directory]\n");

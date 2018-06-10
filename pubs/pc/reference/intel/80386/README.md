@@ -5,10 +5,10 @@ permalink: /pubs/pc/reference/intel/80386/
 ---
 
 Intel 80386 CPU Information
----
+---------------------------
 
 80386 Errata
----
+------------
 
 * [A0 Stepping](#a0-stepping)
 * [A1 Stepping](#a1-stepping)
@@ -21,7 +21,7 @@ Intel 80386 CPU Information
 * [D2 Stepping](#d2-stepping)
 
 80386 Steppings
----
+---------------
 
 As the "INTEL 80386 PROGRAMMER'S REFERENCE MANUAL 1986", section 10.1, explains:
 
@@ -29,7 +29,7 @@ As the "INTEL 80386 PROGRAMMER'S REFERENCE MANUAL 1986", section 10.1, explains:
 externally by assertion of BUSY# at the end of RESET. The EAX register holds zero if the 80386 passed
 the test. A nonzero value in EAX after self-test indicates that the particular 80386 unit is faulty.
 If the self-test is not requested, the contents of EAX after RESET is undefined.
-
+>
 > DX holds a component identifier and revision number after RESET as Figure 10-1 illustrates. DH contains 3,
 which indicates an 80386 component. DL contains a unique identifier of the revision level.
 
@@ -814,7 +814,7 @@ Revision identifier: 0x08.
 Revision identifier: 0x08 (same as the D1 stepping).
 
 80386 Undocumented Instructions
----
+-------------------------------
 
 * [LOADALL](loadall/)
 * [IBTS and XBTS](ibts_xbts/)

@@ -5,10 +5,10 @@ permalink: /pubs/pc/reference/intel/80286/
 ---
 
 Intel 80286 CPU Information
----
+---------------------------
 
 80286 Errata
----
+------------
 
 * [Early Errata: A1 and B1 Steppings](early_errata/)
 * [ARPL Behavior](arpl/)
@@ -20,12 +20,12 @@ Intel 80286 CPU Information
 * [REP MOVS and REP INS Restartability](rep_restart/)
 
 80286 Undocumented Instructions
----
+-------------------------------
 
 * [LOADALL](loadall/)
 
 80286 Real-Mode Emulation Notes
----
+-------------------------------
 
 * [Executing Real Mode Programs in Protected Mode](real_mode/)
 * [Discrepancies from an iAPX 86/88 Using Emulation](real_mode/#discrepancies-from-an-iapx-86-88-using-emulation)
@@ -34,7 +34,7 @@ Intel 80286 CPU Information
 * [Exceptions from Undefined Opcodes and String Instructions](exceptions/)
 
 Assorted Publications
----
+---------------------
 
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/reference/intel/iAPX_286_Hardware_Reference--1983/thumbs/iAPX_286_Hardware_Reference--1983.jpg" width="200" height="260" alt="iAPX 286 Hardware Reference (1983)"/>](http://bitsavers.trailing-edge.com/pdf/intel/_dataBooks/1983_iAPX_286_Hardware_Reference.pdf)
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/reference/intel/iAPX_286_Operating_System_Writers_Guide--1983/thumbs/iAPX_286_Operating_System_Writers_Guide--1983.jpg" width="200" height="260" alt="iAPX 286 OS Writer's Guide (1983)"/>](http://bitsavers.trailing-edge.com/pdf/intel/_dataBooks/1983_iAPX_286_Operating_System_Writers_Guide.pdf)
