@@ -45,4 +45,4 @@ Excerpt from [http://www.rcollins.org/secrets/opcodes/AAD.html](http://www.rcoll
 
 The following related files were saved on February 16, 2015 from [http://www.rcollins.org](http://www.rcollins.org/):
 
-* [AAD.ASM](/docs/x86/ops/AAD/AAD.ASM)
+* [AAD.ASM](AAD.ASM)

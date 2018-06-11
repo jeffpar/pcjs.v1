@@ -14,7 +14,7 @@ machines:
 PCx86 Documentation
 -------------------
 
-[PCx86](/docs/about/pcx86/) is a full-featured [IBM PC and PC-compatible](/devices/pcx86/machine/) emulator written
+[PCx86](../about/pcx86/) is a full-featured [IBM PC and PC-compatible](/devices/pcx86/machine/) emulator written
 entirely in JavaScript.  It supports a variety of XT and AT class machines, with processors ranging from the 8088
 through the 80386.  The PCjs website provides a variety of "stock" configurations, featuring classic machines running
 at their original clock speed, or you can create your own, by mixing, matching, and reconfiguring any of the PCx86

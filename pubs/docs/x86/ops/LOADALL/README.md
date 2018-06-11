@@ -229,12 +229,12 @@ Excerpt from [http://www.rcollins.org/secrets/opcodes/LOADALL.html](http://www.r
 
 The following related files were saved on February 16, 2015 from [http://www.rcollins.org](http://www.rcollins.org/):
 
-* [The LOADALL Instruction](/docs/x86/ops/LOADALL/tspec_a3_doc.html)
-* [286LOAD.ASM](/docs/x86/ops/LOADALL/286load.asm)
-* [386LOAD.ASM](/docs/x86/ops/LOADALL/386load.asm)
-* [CPU_TYPE.ASM](/docs/x86/ops/LOADALL/cpu_type.asm)
-* [EMULOAD.ASM](/docs/x86/ops/LOADALL/emuload.asm)
-* [LOADFNS.286](/docs/x86/ops/LOADALL/loadfns.286.asm)
-* [LOADFNS.386](/docs/x86/ops/LOADALL/loadfns.386.asm)
-* [MACROS.286](/docs/x86/ops/LOADALL/macros.286.asm)
-* [MACROS.386](/docs/x86/ops/LOADALL/macros.386.asm)
+* [The LOADALL Instruction](tspec_a3_doc.html)
+* [286LOAD.ASM](286load.asm)
+* [386LOAD.ASM](386load.asm)
+* [CPU_TYPE.ASM](cpu_type.asm)
+* [EMULOAD.ASM](emuload.asm)
+* [LOADFNS.286](loadfns.286.asm)
+* [LOADFNS.386](loadfns.386.asm)
+* [MACROS.286](macros.286.asm)
+* [MACROS.386](macros.386.asm)

@@ -8,7 +8,7 @@ redirect_from:
 ---
 
 About PCx86
----
+-----------
 
 PCx86 is a IBM PC/XT/AT simulator written entirely in [JavaScript](/modules/pcx86/).  It's designed to load and run
 fast, it works well in all modern web browsers (both desktop and mobile), and it's easy to customize.  It is part of
@@ -24,7 +24,7 @@ demo of multiple monitor support, and [IBM PC XT "Server Array"](/devices/pcx86/
 + Build your own IBM PC, PC XT, and PC AT simulations using simple XML machine configuration files.
 You decide how much RAM you want, how many disk drives, which disk images to include (and which should be
 pre-loaded), what kind of video adapter (MDA, CGA, EGA or VGA), serial ports, mouse, and more. See the
-[Documentation](/docs/pcx86/) for details.
+[Documentation](../../pcx86/) for details.
 
 + Excellent IBM hardware compatibility ensures all the original IBM BIOS ROMs operate properly, and that the
 machines run at their original speed.  Even obsolete hardware, such as the original PC XT hard drive controller,
@@ -37,9 +37,9 @@ be specified, and in some cases, even specific CPU *steppings* (including specif
 only 8087 support is complete at this point.
 
 + The modular design allows you to specify which components to enable, and which external controls
-to display for each component. You can choose the size of the display window created by the [Video](/docs/pcx86/video/)
-component, add **Halt** or **Speed** buttons to the [CPU](/docs/pcx86/cpu/) component, display clickable "DIP Switches"
-for the [Chipset](/docs/pcx86/chipset/) component, or even design your own [Control Panel](/docs/pcx86/panel/).
+to display for each component. You can choose the size of the display window created by the [Video](../../pcx86/video/)
+component, add **Halt** or **Speed** buttons to the [CPU](../../pcx86/cpu/) component, display clickable "DIP Switches"
+for the [Chipset](../../pcx86/chipset/) component, or even design your own [Control Panel](../../pcx86/panel/).
 
 + The UI includes a responsive design that tailors itself to your browser and device, and support for touch events
 and soft keyboards means you get the best possible emulation experience -- better than any other browser-based
@@ -47,18 +47,18 @@ emulator currently available.  It almost feels like your DOS and Windows mouse-b
 to work with your iPad or iPhone -- almost.  Please note, however, that some mobile devices provide better support than
 others.
 
-+ A fully-integrated [Debugger](/docs/pcx86/debugger/) is available.  Disassemble code, set breakpoints on
++ A fully-integrated [Debugger](../../pcx86/debugger/) is available.  Disassemble code, set breakpoints on
 memory write/read/execution addresses, dump and edit memory, dump disk sectors, enable/disable categories of diagnostic
 messages, and view instruction history, cycle counts and more.  The Debugger does not rely on CPU breakpoint
 instructions or the trace flag, and does not alter the machine state in any way, allowing you to debug anything,
 including 8086 debuggers.
 
-+ Machines created with the [Computer](/docs/pcx86/computer/) *resume* property set will save their entire machine
++ Machines created with the [Computer](../../pcx86/computer/) *resume* property set will save their entire machine
 state using your browser's local storage, so that any changes are preserved when your browser closes, including
 disk modifications. Any files you create or modify *inside* the machine will still be there when you return.
 TIP: To restore a diskette's original contents, simply press the "Download" button again.
 
-+ Machine states can also be dumped (using the built-in [Debugger](/docs/pcx86/debugger/)), saved as JSON files, and
++ Machine states can also be dumped (using the built-in [Debugger](../../pcx86/debugger/)), saved as JSON files, and
 pre-loaded into a machine, bypassing the normal boot process.  You can even combine a pre-defined state with the
 "resume" feature, preserving any changes you make to the machine's original state.
 
@@ -112,8 +112,8 @@ for embedding C1Pjs and PCx86 machine files in Markdown documents and automatica
 files into "index.html" web pages.
 
 + v1.11 improved the *embedPC()* and *embedC1P()* functions, so now you can embed XML machine configuration files
-that reference other configuration files, such as an external [Keyboard](/docs/pcx86/keyboard/) or
-[Control Panel](/docs/pcx86/panel/) XML layout.  It does this by building the entire XML configuration internally,
+that reference other configuration files, such as an external [Keyboard](../../pcx86/keyboard/) or
+[Control Panel](../../pcx86/panel/) XML layout.  It does this by building the entire XML configuration internally,
 rather than relying on XSLT's *document()* function, which doesn't seem to work in all JavaScript XSLT processors.
 
 + v1.10 fixed embedding in Internet Explorer 11 (Microsoft removed "MSIE" from their default user-agent string).
@@ -125,7 +125,7 @@ machines that include a soft-keyboard.
 
 + v1.06c added support for user-defined diskette images.  Select "Remote Disk" from the diskette list, click
 "Download", and enter a URL at the prompt.  See **Creating PCx86-Compatible Disk Images** in the
-[PCx86 Documentation](/docs/pcx86/) for more information about supported disk images.
+[PCx86 Documentation](../../pcx86/) for more information about supported disk images.
 
 + v1.05b added support for webkitAudioContext, bringing your simulated IBM PC's speaker to life. Relive the thrill
 of running MUSIC.BAS and listening to those classic tunes.  *Sound support is still experimental*.
