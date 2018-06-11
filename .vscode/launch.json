@@ -250,6 +250,20 @@
       "webRoot": "${workspaceFolder}"
     },
     {
+      "name": "Blog: Somebody Put a SPELL On Me",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/blog/2018-05-27-somebody-put-a-spell-on-me.md",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Blog: Somebody Put a SPELL On Me (JEKYLL)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:4000/blog/2018/05/27/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
       "name": "Disks: Exploring the IBM Personal Computer 1.00 (Color Version)",
       "type": "chrome",
       "request": "launch",
