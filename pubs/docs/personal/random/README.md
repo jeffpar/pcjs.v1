@@ -18,7 +18,7 @@ in 1984, detailing his early adventures in PC debugging: disassembling and disab
 
 ### dBASE III Copy-Protection
 
-* [dBASE III Debugging Notes](/docs/personal/random/1984-09-16--DBASE_III_DEBUG.pdf)
-* [dBASE III Patching Procedure](/docs/personal/random/1984-09-25--DBASE_III_PATCH.pdf)
+* [dBASE III Debugging Notes](/pubs/docs/personal/random/1984-09-16--DBASE_III_DEBUG.pdf)
+* [dBASE III Patching Procedure](/pubs/docs/personal/random/1984-09-25--DBASE_III_PATCH.pdf)
 
 NOTE: Copies of the [dBASE III](/disks/pcx86/apps/other/dbase3/1.0/) disks can be found in our [IBM PC Disk Library](/disks/pcx86/).
