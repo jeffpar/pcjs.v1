@@ -939,11 +939,16 @@ class Str {
      * escapeHTML(sHTML)
      *
      * @param {string} sHTML
-     * @return {string} with HTML entities "escaped", similar to PHP's htmlspecialchars()
+     * @return {string} with special characters "escaped" as HTML entities, similar to PHP's htmlspecialchars()
      */
     static escapeHTML(sHTML)
     {
-        return sHTML.replace(/[&<>"']/g, function(m)
+        /*
+         * Most recently, '$' was added to the list to help avoid problems when callers use the resulting string
+         * as a replacement string for JavaScript's string replace() function, which treats '$' specially.  Technically,
+         * that's on the callers of replace(), not us, but this doesn't seem harmful, and it's definitely helpful.
+         */
+        return sHTML.replace(/[&<>"'$]/g, function(m)
         {
             return Str.HTMLEscapeMap[m];
         });
@@ -1248,7 +1253,8 @@ Str.HTMLEscapeMap = {
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',
-    "'": '&#039;'
+    "'": '&apos;',
+    '$': '&dollar;'
 };
 
 /*
