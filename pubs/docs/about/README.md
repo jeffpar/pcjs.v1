@@ -23,7 +23,7 @@ capabilities can be found in the [Documentation](/pubs/).
 
 ### Simulating the Challenger 1P
 
-The first PCjs simulation was [C1Pjs](/docs/c1pjs/), which emulates the
+The first PCjs simulation was [C1Pjs](../c1pjs/), which emulates the
 Challenger 1P, a 6502-based microcomputer introduced by Ohio Scientific in 1978.
 C1Pjs v1.0 was released in July 2012.  More information about the first release of C1Pjs was
 [posted](http://osiweb.org/osiforum/viewtopic.php?f=3&t=103) on the
@@ -31,16 +31,16 @@ C1Pjs v1.0 was released in July 2012.  More information about the first release 
 
 ### Simulating the IBM PC
 
-The next PCjs simulation was [PCx86](/docs/about/pcx86/), which emulates the original IBM PC, IBM PC XT,
+The next PCjs simulation was [PCx86](pcx86/), which emulates the original IBM PC, IBM PC XT,
 and IBM PC AT.  PCx86 v1.0 was released in late 2012.  Browse the source code [here](/modules/pcx86/) or on
 [GitHub](https://github.com/jeffpar/pcjs).
 
-[PCx86](/docs/about/pcx86/) emulates the Intel 8088, 80186, 80286 and 80386 CPUs, as well as IBM Monochrome Display
+[PCx86](pcx86/) emulates the Intel 8088, 80186, 80286 and 80386 CPUs, as well as IBM Monochrome Display
 Adapter (MDA), Color Graphics Adapter (CGA), Enhanced Graphics Adapter (EGA), and Video Graphics Array (VGA) video
 cards, along with assorted motherboard and expansion bus components.  It also includes an optional
-[Debugger](/docs/pcx86/debugger/) and a user-configurable [Control Panel](/docs/pcx86/panel/).
+[Debugger](../pcx86/debugger/) and a user-configurable [Control Panel](../pcx86/panel/).
 
-Read [About PCx86](/docs/about/pcx86/) to learn more about its history, features, and upcoming improvements.
+Read [About PCx86](pcx86/) to learn more about its history, features, and upcoming improvements.
 
 ### Migrating to Node
 

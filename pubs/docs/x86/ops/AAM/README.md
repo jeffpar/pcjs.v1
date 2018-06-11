@@ -61,4 +61,4 @@ Excerpt from [http://www.rcollins.org/secrets/opcodes/AAM.html](http://www.rcoll
 
 The following related files were saved on February 16, 2015 from [http://www.rcollins.org](http://www.rcollins.org/):
 
-* [AAM.ASM](/docs/x86/ops/AAM/AAM.ASM)
+* [AAM.ASM](AAM.ASM)
