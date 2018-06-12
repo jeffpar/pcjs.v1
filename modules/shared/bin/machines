@@ -165,7 +165,7 @@ function processMachines(sDir, fLaunch, fDebug)
         processLaunch(aMachines, fDebug);
         return;
     }
-    processXML(aMachines, "machines.csv", fDebug);
+    processXML(aMachines, "machines.json", fDebug);
 }
 
 /**
@@ -199,7 +199,7 @@ function processXML(aMachines, sNameCSV, fDebug)
             ++cXML;
             if (!err) {
                 if (fDebug) printf("XML config %d processed\n", cXML);
-                streamCSV.write(Str.sprintf("%2j\n", xml));
+                streamCSV.write(Str.sprintf("%s%2j\n", cXML > 1? ",\n" : "", xml));
             } else {
                 printf("error: %s\n", err.message);
             }
