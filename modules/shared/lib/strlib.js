@@ -704,7 +704,11 @@ class Str {
                         }
                     }
                 }
-                buffer += arg.toString();
+                if (typeof arg == "object") {
+                    buffer += arg.toString();
+                } else {
+                    buffer += arg;
+                }
                 break;
 
             case 'X':

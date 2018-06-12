@@ -32,9 +32,9 @@
 var fs = require("fs");
 var glob = require("glob");
 var path = require("path");
-var defines = require("../lib/defines");
-var Str = require("../../lib/strlib");
-var Proc = require("../../lib/proclib");
+var Defines = require("../lib/defines");
+var Str = require("../lib/strlib");
+var Proc = require("../lib/proclib");
 var args = Proc.getArgs();
 
 /**

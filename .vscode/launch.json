@@ -250,6 +250,15 @@
       "webRoot": "${workspaceFolder}"
     },
     {
+      "name": "Bin: bin2iso",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/modules/shared/bin/bin2iso",
+      "args": ["/Users/Jeff/Disks/CDs/Microsoft/TechNet/TechNet-CD012.iso", "test.iso", "--debug", "--overwrite"],
+      "cwd": "${workspaceFolder}/modules/shared/bin/",
+      "stopOnEntry": false
+    },
+    {
       "name": "Blog: Somebody Put a SPELL On Me",
       "type": "chrome",
       "request": "launch",
