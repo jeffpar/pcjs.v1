@@ -50,6 +50,32 @@ function printf(format, ...args)
 /**
  * convertBinToISO(sInput, sOutput, fDebug, fOverwrite)
  *
+ * We assume that the ".bin" file is a CD-ROM dump consisting of 2352-byte sectors.  Such a
+ * dump can be produced by the macOS `dd` utility, using the physical CD-ROM device; eg:
+ *
+ *      dd if=/dev/disk6 of=disk.bin
+ *
+ * To produce an ".iso" file with 2048-byte sectors, we must eliminate the extra “junk” (eg, sync
+ * and address bits, headers, error correction, etc) from each sector in the ".bin" file.
+ *
+ * We do this by extracting each 2352-byte sector from bufferBin, discarding the first 16 and the
+ * last 288 bytes, and writing a 2048-byte sector out.
+ *
+ * It probably goes without saying that if the ".bin" file is from anything other than a simple data
+ * CD-ROM with a single track of data, the resulting ".iso" will likely be unusable.  One warning
+ * sign that something is amiss is if the ".bin" file doesn't contain a perfect multiple of 2352-byte
+ * sectors.
+ *
+ * Note that you can *usually* create an ".iso" in a single step (without running this script) by
+ * simply dumping the logical device that macOS automatically creates:
+ *
+ *      dd if=/dev/disk6s0 of=disk.iso
+ *
+ * but if macOS isn't able to mount the disc, then that logical device won't exist, so you'll have
+ * to create a ".bin" instead and use this conversion script.
+ *
+ * Thanks to @mnecasek of the OS/2 Museum for his explanation of the required conversion process.
+ *
  * @param {string} sInput
  * @param {string} sOutput
  * @param {boolean} [fDebug]
@@ -62,19 +88,23 @@ function convertBinToISO(sInput, sOutput, fDebug, fOverwrite)
         printf("Reading '%s'...\n", sInput);
         bufferBin = fs.readFileSync(sInput);
     } catch(err) {
-        printf("unable to open '%s' (%s)\n", sInput, err.message);
+        printf("error: unable to open '%s' (%s)\n", sInput, err.message);
         process.exit(1);
     }
     let nSectors = bufferBin.length / 2352;
     printf("%d bytes (%f sectors) read\n", bufferBin.length, nSectors);
+    if (nSectors != (nSectors|0)) {
+        printf("warning: fractional sector, possible image error; aborting\n");
+        process.exit(1);
+    }
     if (!fOverwrite && fs.existsSync(sOutput)) {
-        printf("output file '%s' aready exists; use --overwrite\n", sOutput);
+        printf("warning: output file '%s' aready exists; use --overwrite\n", sOutput);
         process.exit(1);
     }
     try {
         streamISO = fs.createWriteStream(sOutput);
     } catch(err) {
-        printf("unable to create '%s' (%s)\n", sOutput, err.message);
+        printf("error: unable to create '%s' (%s)\n", sOutput, err.message);
         process.exit(1);
     }
     let cbSector = 2048, cbTotal = 0;

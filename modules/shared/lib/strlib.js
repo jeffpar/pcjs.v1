@@ -657,7 +657,7 @@ class Str {
                 /* falls through */
 
             case 'f':
-                s = Math.trunc(arg) + "";
+                s = arg + "";
                 if (precision > 0) {
                     width -= (precision + 1);
                 }

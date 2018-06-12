@@ -61,7 +61,7 @@ try {
 /*
  * We will build an array of components whose names will match the component names
  * used in a JSON machine definition file; eg:
- * 
+ *
  *  [
  *      {name: "panel",
  *       Create: Panel,
@@ -73,10 +73,10 @@ try {
  *      },
  *      ...
  *  ]
- *  
+ *
  * Every component name comes from the component filename, minus the ".js" extension;
  * Create is the constructor returned by require().
- * 
+ *
  * TODO: Update the list of ignored (ie, ignorable) components.
  */
 var Component;
@@ -96,7 +96,7 @@ var aSubClasses = {
 
 /**
  * loadComponents(asFiles)
- * 
+ *
  * @param {Array.<string>} asFiles
  */
 function loadComponents(asFiles)
@@ -166,7 +166,7 @@ function loadComponents(asFiles)
 
 /**
  * getComponentByName(sName)
- * 
+ *
  * @param sName
  * @return {*}
  */
@@ -189,7 +189,7 @@ function getComponentByName(sName)
 function getComponentByType(sType)
 {
     var component = null;
-    
+
     if (!Component) {
         Component = getComponentByName("component");
     }
@@ -307,7 +307,7 @@ function initMachine(xml)
 
 /**
  * loadMachine(sFile)
- * 
+ *
  * @param {string} sFile
  * @return {boolean}
  */
@@ -373,7 +373,7 @@ function readXML(xml, sNode, sFile, aTags, iTag, done)
 
 /**
  * doCommand(sCmd)
- * 
+ *
  * @param {string} sCmd
  * @return {*}
  */
@@ -384,10 +384,10 @@ function doCommand(sCmd)
     } else {
         sCmdPrev = sCmd;
     }
-    
+
     var result = false;
     var aTokens = sCmd.split(' ');
-    
+
     switch(aTokens[0]) {
     case "cwd":
         result = process.cwd();
@@ -420,19 +420,19 @@ function doCommand(sCmd)
 
 /**
  * onCommand(cmd, context, filename, callback)
- * 
+ *
  * The Node docs (http://nodejs.org/api/repl.html) say that repl.start's "eval" option is:
- * 
+ *
  *      a function that will be used to eval each given line; defaults to an async wrapper for eval()
- *      
+ *
  * and it gives this example of such a function:
- * 
+ *
  *      function eval(cmd, context, filename, callback) {
  *          callback(null, result);
  *      }
- *      
+ *
  * but it defines NEITHER the parameters for the function NOR the parameters for the callback().
- * 
+ *
  * It's pretty clear that "result" is expected to return whatever "eval()" would return for the expression
  * in "cmd" (which is always parenthesized in preparation for a call to "eval()"), but it's not clear what
  * the first callback() parameter (represented by null) is supposed to be.  Should we assume it's an Error
