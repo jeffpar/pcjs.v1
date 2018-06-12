@@ -1,5 +1,9 @@
 #!/bin/bash
-drive=disk6
+drive=`diskutil list | grep CD_partition_scheme | sed -E "s|.*(disk[0-9]*)$|\1|"`
+if [ -z "$drive" ]; then
+    echo "unknown CD-ROM drive"
+    exit 1
+fi
 diskID=$1
 if [ -z "$1" ]; then
     prev=`cat next`
