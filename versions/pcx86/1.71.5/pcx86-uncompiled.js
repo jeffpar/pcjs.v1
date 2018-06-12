@@ -56347,7 +56347,7 @@ Video.monitorSpecs = {};
 Video.monitorSpecs[ChipSet.MONITOR.COLOR] = {
     nHorzPeriodsPerSec: 15700,
     nHorzPeriodsPerFrame: 200,
-    percentHorzActive: 85,
+    percentHorzActive: 75,
     percentVertActive: 96
 };
 
@@ -56359,7 +56359,7 @@ Video.monitorSpecs[ChipSet.MONITOR.COLOR] = {
 Video.monitorSpecs[ChipSet.MONITOR.MONO] = {
     nHorzPeriodsPerSec: 18432,
     nHorzPeriodsPerFrame: 350,
-    percentHorzActive: 85,
+    percentHorzActive: 75,
     percentVertActive: 96
 };
 
@@ -56371,7 +56371,7 @@ Video.monitorSpecs[ChipSet.MONITOR.MONO] = {
 Video.monitorSpecs[ChipSet.MONITOR.EGACOLOR] = {
     nHorzPeriodsPerSec: 21850,
     nHorzPeriodsPerFrame: 350,
-    percentHorzActive: 85,
+    percentHorzActive: 75,
     percentVertActive: 96
 };
 
@@ -56384,7 +56384,7 @@ Video.monitorSpecs[ChipSet.MONITOR.VGACOLOR] = {
     nHorzPeriodsPerSec: 16700,
     nHorzPeriodsPerFrame: 410,
     percentHorzActive: 85,
-    percentVertActive: 96
+    percentVertActive: 83
 };
 
 /*
