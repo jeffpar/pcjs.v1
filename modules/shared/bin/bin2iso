@@ -1,0 +1,100 @@
+#!/usr/bin/env node
+/**
+ * @fileoverview Tool for converting binary CD dumps to ISOs
+ * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
+ * @copyright © 2012-2018 Jeff Parsons
+ * @suppress {missingProperties}
+ *
+ * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
+ *
+ * PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3
+ * of the License, or (at your option) any later version.
+ *
+ * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ * see <http://www.gnu.org/licenses/gpl.html>.
+ *
+ * You are required to include the above copyright notice in every modified copy of this work
+ * and to display that copyright notice when the software starts running; see COPYRIGHT in
+ * <https://www.pcjs.org/modules/shared/lib/defines.js>.
+ *
+ * Some PCjs files also attempt to load external resource files, such as character-image files,
+ * ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ * for purposes of the GNU General Public License, and the author does not claim any copyright
+ * as to their contents.
+ */
+
+"use strict";
+
+var fs = require("fs");
+var Defines = require("../lib/defines");
+var Str = require("../lib/strlib");
+var Proc = require("../lib/proclib");
+var args = Proc.getArgs();
+
+/**
+ * printf(format, ...args)
+ *
+ * @param {string} format
+ * @param {...} args
+ */
+function printf(format, ...args)
+{
+    process.stdout.write(Str.sprintf(format, ...args));
+}
+
+/**
+ * convertBinToISO(sInput, sOutput, fDebug, fOverwrite)
+ *
+ * @param {string} sInput
+ * @param {string} sOutput
+ * @param {boolean} [fDebug]
+ * @param {boolean} [fOverwrite]
+ */
+function convertBinToISO(sInput, sOutput, fDebug, fOverwrite)
+{
+    let bufferBin, streamISO;
+    try {
+        printf("Reading '%s'...\n", sInput);
+        bufferBin = fs.readFileSync(sInput);
+    } catch(err) {
+        printf("unable to open '%s' (%s)\n", sInput, err.message);
+        process.exit(1);
+    }
+    let nSectors = bufferBin.length / 2352;
+    printf("%d bytes (%f sectors) read\n", bufferBin.length, nSectors);
+    if (!fOverwrite && fs.existsSync(sOutput)) {
+        printf("output file '%s' aready exists; use --overwrite\n", sOutput);
+        process.exit(1);
+    }
+    try {
+        streamISO = fs.createWriteStream(sOutput);
+    } catch(err) {
+        printf("unable to create '%s' (%s)\n", sOutput, err.message);
+        process.exit(1);
+    }
+    let cbSector = 2048, cbTotal = 0;
+    for (let iSector = 0; iSector < nSectors; iSector++) {
+        let iBuffer = iSector * 2352 + 16;
+        let bufferSector = Buffer.alloc(cbSector);
+        bufferBin.copy(bufferSector, 0, iBuffer, iBuffer + cbSector);
+        streamISO.write(bufferSector);
+        cbTotal += cbSector;
+    }
+    streamISO.on('finish', function() {
+        printf("%d bytes written\n", cbTotal);
+        process.exit(0);
+    });
+    streamISO.end();
+}
+
+if (args.argc < 3) {
+    printf("usage: node bin2iso [input file] [output file] [options]\n");
+} else {
+    let argv = args.argv;
+    convertBinToISO(argv[1], argv[2], argv['debug'], argv['overwrite']);
+}
