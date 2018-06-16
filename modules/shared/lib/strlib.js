@@ -629,6 +629,15 @@ class Str {
         for (iPart = 0; iPart < aParts.length - 6; iPart += 6) {
 
             buffer += aParts[iPart];
+            let type = aParts[iPart+5];
+
+            /*
+             * Check for unrecognized types immediately, so we don't inadvertently pop any arguments.
+             */
+            if ("dfjcsXx".indexOf(type) < 0) {
+                buffer += aParts[iPart+1] + aParts[iPart+2] + aParts[iPart+3] + aParts[iPart+4] + type;
+                continue;
+            }
 
             let arg = args[iArg++];
             let flags = aParts[iPart+1];
@@ -642,7 +651,6 @@ class Str {
             let precision = aParts[iPart+3];
             precision = precision? +precision.substr(1) : -1;
             let prefix = aParts[iPart+4];
-            let type = aParts[iPart+5];
             let ach = null, s;
 
             switch(type) {
@@ -746,7 +754,7 @@ class Str {
                 /*
                  * For reference purposes, the standard ANSI C set of types is "dioxXucsfeEgGpn%"
                  */
-                buffer += "(unrecognized printf type %" + type + ")";
+                buffer += "(unimplemented printf type %" + type + ")";
                 break;
             }
         }

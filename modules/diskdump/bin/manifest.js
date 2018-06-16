@@ -47,11 +47,13 @@ function printf(format, ...args)
 }
 
 /**
- * processManifest(sManifest)
+ * processManifest(sManifest, iStart, iEnd)
  *
  * @param {string} sManifest
+ * @param {number} [iStart]
+ * @param {number} [iEnd]
  */
-function processManifest(sManifest)
+function processManifest(sManifest, iStart, iEnd)
 {
     try {
         var sXML = fs.readFileSync(sManifest, 'utf-8');
@@ -59,28 +61,41 @@ function processManifest(sManifest)
         printf("error: unable to read manifest: %s\n", sManifest);
         return;
     }
+
     var aMatchDisks = sXML.match(/<disk[^>]*>[\S\s]*?<\/disk>/g);
     if (!aMatchDisks) {
         printf("warning: no disks found in: %s\n", sManifest);
         return;
     }
-    var sDiskTitle;
-    var matchTitle = sXML.match(/<title>(.*?)<\/title>/);
-    var matchVersion = sXML.match(/<version>(.*?)<\/version>/);
-    if (matchTitle && matchVersion) sDiskTitle = matchTitle[1] + ' ' + matchVersion[1];
+
+    var sDiskTitle = "", sDiskPrefix = "";
+    var match = sXML.match(/<title(?: prefix="(.*)"|)>(.*?)<\/title>/);
+    if (match) {
+        sDiskTitle = match[2];
+        if (match[1]) sDiskPrefix = match[1] + ": ";
+    }
+
+    if (sDiskTitle) {
+        match = sXML.match(/<version>(.*?)<\/version>/);
+        if (match) sDiskTitle += ' ' + match[1];
+    }
+
     for (var iDisk = 0; iDisk < aMatchDisks.length; iDisk++) {
         var sDisk = aMatchDisks[iDisk];
-        var matchDir = sDisk.match(/dir="(.*?)"/);
-        var matchLink = sDisk.match(/href="(.*?)"/);
-        var matchDiskName = sDisk.match(/<name>(.*?)<\/name>/);
+        match = sDisk.match(/<name>(.*?)<\/name>/);
         var aMatchFiles = sDisk.match(/<file[^>]*>[\S\s]*?<\/file>/g);
-        var sDiskName = matchDiskName && matchDiskName[1] || sDiskTitle;
+        var sDiskName = match && match[1] || "";
+        if (sDiskName && iStart) {
+            var n = +sDiskName.substr(4);
+            if (n < iStart || iEnd && n > iEnd) continue;
+        }
         if (!aMatchFiles || !sDiskName) {
             printf("warning: no files in disk: %s\n", sDiskName);
             return;
         }
-        printf("### Directory of %s\n\n", sDiskName);
-        printf("     Volume in drive A %s\n", (matchDiskName? ("is " + matchDiskName[1]) : "has no label"));
+        printf("### Directory of %s%s\n\n", sDiskPrefix, sDiskName);
+        printf("{%% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives \"A:\"; select FDC listDisks \"%s%s\"; loadDisk FDC scroll' %%}\n\n", sDiskPrefix, sDiskName);
+        printf("     Volume in drive A %s\n", (sDiskName? ("is " + sDiskName) : "has no label"));
         printf("     Directory of  A:\\\n    \n");
         for (var iFile = 0; iFile < aMatchFiles.length; iFile++) {
             var sFile = aMatchFiles[iFile];
@@ -127,7 +142,8 @@ function processManifest(sManifest)
 }
 
 if (args.argc > 1) {
-    processManifest(args.argv[1]);
+    var argv = args.argv;
+    processManifest(argv[1], +argv[2], +argv[3]);
     process.exit(0);
 }
 

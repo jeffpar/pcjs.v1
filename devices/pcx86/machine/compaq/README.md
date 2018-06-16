@@ -62,8 +62,6 @@ COMPAQ Plus
 
 The COMPAQ Plus was essentially an "XT" version of the COMPAQ Portable; ie, a COMPAQ Portable with a 10Mb hard disk.
 
-On other sites, you may see references to "COMPAQ Portable ROM" vs. "COMPAQ [Portable] Plus ROM"  
-
 Reviewed in Byte Magazine, Jul 1984, pp. 247-251: "The Compaq Plus".
 
 
