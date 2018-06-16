@@ -989,7 +989,12 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
     if (i < 0) i = sOutputFile.indexOf("/tests/");
     if (i > 0) sOutputFile = sOutputFile.substr(i);
 
-    var match = sXML.match(new RegExp('[ \t]*<disk ([^>]*href="' + sOutputFile + '"[^>]*?)(>[\\s\\S]*?</disk>|/>)[ \t]*\n?'));
+    var match = sOutputFile.match(/^\/pcjs-disks\/(.*)\/archive(\/.*)/);
+    if (match) {
+        sOutputFile = "https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/" + match[1] + match[2];
+    }
+
+    match = sXML.match(new RegExp('[ \t]*<disk ([^>]*href="' + sOutputFile + '"[^>]*?)(>[\\s\\S]*?</disk>|/>)[ \t]*\n?'));
     if (match) {
         sMatchDisk = match[0];
         sIDDisk = DiskDump.getManifestAttr("id", match[1]);

@@ -1,50 +1,56 @@
 ---
 layout: page
-title: Compaq Portable Computer ROMs
+title: COMPAQ Portable Computer ROMs
 permalink: /devices/pcx86/rom/compaq/portable/
 preview: COMPAQ_Portable_System_Board.jpg
 ---
 
-Compaq Portable Computer ROMs
+COMPAQ Portable Computer ROMs
 -----------------------------
 
-The oldest COMPAQ Portable Computer ROM I have is an 8Kb [Rev C ROM](100666-001-REVC.json) from a REV D system board.
+The oldest COMPAQ Portable Computer ROM BIOS we originally had was an 8Kb [Rev C ROM](100666-001-REVC.json) from a
+000006-001 REV D system board purchased on ebay.
 
-[<img src="COMPAQ_Portable_System_Board.jpg" alt="Compaq Portable System Board REV D"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/rom/compaq/portable/COMPAQ_Portable_System_Board-FULL.jpg)
+[<img src="COMPAQ_Portable_System_Board.jpg" alt="COMPAQ Portable System Board REV D"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/rom/compaq/portable/COMPAQ_Portable_System_Board-FULL.jpg)
 
 Printed on the back of the system board:
 
 	(C) COMPAQ COMPUTER CORP. 1982
 	BOARD NO. 000006-001   REV D 84490
 
-Curiously, the system board contains two mask ROMs (AM9265DPC), both labeled `1000666-001 REV.C` but with two different
-identifiers: `34569 8350KME` on the ROM in socket U40, and `34569 8350LME` on the ROM the socket below U40.  However,
-when I dumped the ROMs with my homemade ROM reader, their contents were identical.
+Curiously, the system board contained two mask ROMs (AM9265DPC), both labeled `1000666-001 REV.C` but with two different
+identifiers: `34569 8350KME` on the ROM in socket U40, and `34569 8350LME` on the ROM the socket below U40.  However, when
+the chips from each socket were dumped, their contents were identical.  I later found another
+[copy](http://www.minuszerodegrees.net/rom/bin/Compaq/Compaq%20Portable%20Plus%20-%20BIOS%20-%20100666-001%20Rev%20C.zip)
+of the Rev C BIOS at [minuszerodegrees.net](http://www.minuszerodegrees.net/rom/rom.htm), with dumps of both the U40 and U47 ROMs,
+and again the contents of the chips were identical (to ours and to each other).
 
-I've seen pictures of other COMPAQ Portable system boards with only one mask ROM installed, so I'm puzzled as to why
-my board contains two.  Do the contents of the second ROM show up in a different part of the address space?  Unless
-I'm someday able to power and test this board, I may never know.
+I've seen pictures of other COMPAQ Portable system boards with only one mask ROM installed, so I was puzzled why my board
+contained two.  Did the contents of the second ROM show up in a different part of the address space, or was it merely a decoding
+convenience (e.g., one ROM for even addresses, and a second ROM for odd addresses)?  This
+[COMPAQ Portable/Plus Maintenance Guide (Excerpt)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/reference/compaq/portable/Compaq_Portable_Plus_Support_Discontinued.pdf)
+confirms that an older (000004 REV B) system board *did* require 2 ROMs, at locations U40 and U47, while later system boards required
+only 1 (Rev C or later) ROM at location U40, but there is no explanation for the requirement.
 
-Some clues can be found in this
-[COMPAQ Portable/Plus Maintenance Guide (Excerpt)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/reference/compaq/portable/Compaq_Portable_Plus_Support_Discontinued.pdf).
-Older (REV B) system boards apparently *did* require 2 ROMs, at locations U40 and U47.  REV C and later system boards
-required only 1 (REV C or later) ROM at location U40.
+NOTE: [minuszerodegrees.net](http://www.minuszerodegrees.net/rom/rom.htm) claims that its ROM dump was from a "Portable Plus",
+but the Rev C ROM BIOS was an update used in both the COMPAQ Portable *and* the COMPAQ Plus, so strictly speaking, that revision
+is not *just* a "Portable Plus" ROM.
 
-That's all well and good, but it still doesn't explain why my REV D system board contains 2 ROMs.  It just raises
-more questions.  For example, why did *older* system boards require 2 ROMs?  Were the earlier BIOS revisions larger
-or the ROMs smaller (eg, 4Kb instead of 8Kb)?
+Other differences between early (Portable) and later (Plus) system boards: the original board had two sets of DIP switches
+(just like the original IBM PC) while later boards had only one set (just like the IBM PC XT).  Although COMPAQ Plus systems were
+introduced to offer 10Mb of fixed disk storage and compete with the IBM PC XT, COMPAQ continued making and marketing the original
+Portable as well, so it would have made sense to standardize the boards, ROMs, etc, across both systems.
 
-Also, I've come across some other computer history sites that claim the COMPAQ Portable contained "12Kb" of ROM.
-Hmmm.
+See the March 6, 1984 issue of PC Magazine for an early COMPAQ Plus advertisement.
 
 ### System ROM Revisions
 
 Thanks to the aforementioned Maintenance Guide excerpt, we know that these other COMPAQ Portable ROM revisions existed;
-however, REV C is the only revision currently available here.
+however, only Rev B and Rev C are currently available.
 
 	Rev  ROM #       Size  Date
 	---  ----------  ----  ----
-	B    100518-001
+	B    100518-001   8Kb  None (http://www.minuszerodegrees.net/rom/rom.htm)
 	C    100666-001   8Kb  None
 	E    100298-004
 	F    100298-005

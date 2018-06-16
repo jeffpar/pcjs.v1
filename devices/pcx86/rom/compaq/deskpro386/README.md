@@ -22,16 +22,15 @@ April 22, 1987, using one of the early DeskPro 386 machines that Microsoft had p
 The only downside of my `Rev F` ROM image is that it was dumped using the DOS `DEBUG` utility, since I didn't have
 ROM reader hardware in those days.  Fortunately, since I wasn't sure how large the ROM actually was, I had dumped the
 entire 64Kb from F000:0000 through F000:FFFF.  As it turns out, that entire address range is actually write-protected
-RAM (since, at least in those days, RAM was much faster than ROM), where the first 32Kb contained a modified copy of the
-second.  For example, the first 32Kb contains some data structures that are updated by COMPAQ utilities such as `CEMM`
-to record "Built-in Memory" allocations.
+RAM (since RAM provided faster 32-bit access), where the first 32Kb contained a modified copy of the second.  For example,
+the first 32Kb contains some data structures that are updated by COMPAQ utilities such as `CEMM` to record "Built-in Memory"
+allocations.
 
 Sure enough, attempting to use the [first 32Kb](1986-09-04/1986-09-04-LO.json) as a DeskPro 386 ROM generated a
 "ROM Error", no doubt due to a checksum mismatch.  However, the [second 32Kb](1986-09-04/1986-09-04-HI.json) appeared
-to work fine.  I can't guarantee that its contents are identical to the original `Rev F` ROM, because the ROM may
-have been self-modifying, but it works, and it's all we've got.  All our EGA-based COMPAQ machine configurations
-(eg, [COMPAQ DeskPro 386 (2Mb) with IBM EGA (128Kb)](/devices/pcx86/machine/compaq/deskpro386/ega/2048kb/)) have been
-updated to use that ROM.
+to work fine.  I can't guarantee that its contents are identical to the original `Rev F` ROM, since it was not a direct
+copy of the physical ROM, but it's all we've got.  All our
+[EGA-based COMPAQ machine configurations](/devices/pcx86/machine/compaq/deskpro386/ega/) have been updated to use that ROM.
 
 This collection of COMPAQ DeskPro 386 ROMs still has several holes, but I'm very happy to have finally found one of the
 earliest (if not *the* earliest) ROMs commercially available for this line of COMPAQ computers.
