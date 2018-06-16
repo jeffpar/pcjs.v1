@@ -93,8 +93,8 @@ function processManifest(sManifest, iStart, iEnd)
             printf("warning: no files in disk: %s\n", sDiskName);
             return;
         }
-        printf("### Directory of %s%s\n\n", sDiskPrefix, sDiskName);
-        printf("{%% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives \"A:\"; select FDC listDisks \"%s%s\"; loadDisk FDC scroll' %%}\n\n", sDiskPrefix, sDiskName);
+        printf("### Directory of %s\n\n", sDiskName? sDiskPrefix + sDiskName : sDiskTitle);
+        printf("{%% include machine-command.html type='button' label='Load Disk' machine='pcsig08' command='script' value='select FDC listDrives \"A:\"; select FDC listDisks \"%s\"; loadDisk FDC scroll' %%}\n\n", sDiskName? sDiskPrefix + sDiskName : sDiskTitle);
         printf("     Volume in drive A %s\n", (sDiskName? ("is " + sDiskName) : "has no label"));
         printf("     Directory of  A:\\\n    \n");
         for (var iFile = 0; iFile < aMatchFiles.length; iFile++) {
