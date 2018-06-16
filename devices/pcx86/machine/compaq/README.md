@@ -11,15 +11,15 @@ PCjs currently supports the following COMPAQ machines:
 
  - [COMPAQ DeskPro 386](deskpro386/)
 
-Here is a roughly chronological list of COMPAQ machines from the 1980's which PCjs may eventually support:
+Here is a roughly chronological list of COMPAQ machines from the 1980s, which PCjs hopes to eventually support:
 
  - [COMPAQ Portable](#compaq-portable)
- - [COMPAQ [Portable] Plus](#compaq-portable-plus-aka-compaq-plus)
+ - [COMPAQ Plus](#compaq-plus)
  - [COMPAQ DeskPro](#compaq-deskpro)
  - [COMPAQ DeskPro 286](#compaq-deskpro-286)
  - [COMPAQ Portable 286](#compaq-portable-286)
  - [COMPAQ Portable II](#compaq-portable-ii)
- - **[COMPAQ DeskPro 386](#compaq-deskpro-386)**
+ - [COMPAQ DeskPro 386](#compaq-deskpro-386)
  - [COMPAQ Portable III](#compaq-portable-iii)
  - COMPAQ DeskPro 386/20
  - [COMPAQ Portable 386](#compaq-portable-386)
@@ -39,32 +39,36 @@ However, it seems that sometime between the release of [COMPAQ MS-DOS 3.10](/dis
 called themselves `The COMPAQ Personal Computer MS-DOS`, but in 3.31, the copyright string changed to
 `Compaq Computer Corp.`
 
-Their all-caps practice also extended to product names (eg, `COMPAQ DESKPRO`), at least in their marketing literature.
+Their all-caps practice also extended to product names (e.g., `COMPAQ DESKPRO`), at least in their marketing literature.
 Contemporary news stories, however, tended to lower-case the product name (eg, `COMPAQ Deskpro`).  I've decided to
-split the difference and use mixed-case where it seems appropriate (eg, `COMPAQ DeskPro`).
+split the difference and use mixed-case where it seems appropriate (e.g., `COMPAQ DeskPro`).
 
-The rest of this page will be used to collect information about the machines listed above.
+The rest of this page provides brief highlights (and PCjs resources where available) for each of the machines listed above.
 
 ---
 
 COMPAQ Portable
----
+---------------
 
-The PCjs Project now has a [ROM Dump](/devices/pcx86/rom/compaq/portable/) (REV C).
+PCjs now has [ROM Dumps](/devices/pcx86/rom/compaq/portable/) (Rev B and Rev C).
 
 Reviewed in Byte Magazine, Jan 1983.  Reprinted [here](http://blog.modernmechanix.com/byte-reviews-the-compaq-first-pc-clone/).
 
 Also see [Wikipedia](https://en.wikipedia.org/wiki/Compaq_Portable).
 
 
-COMPAQ Portable Plus (aka COMPAQ Plus)
----
+COMPAQ Plus
+-----------
+
+The COMPAQ Plus was essentially an "XT" version of the COMPAQ Portable; ie, a COMPAQ Portable with a 10Mb hard disk.
+
+On other sites, you may see references to "COMPAQ Portable ROM" vs. "COMPAQ [Portable] Plus ROM"  
 
 Reviewed in Byte Magazine, Jul 1984, pp. 247-251: "The Compaq Plus".
 
 
 COMPAQ DeskPro
----
+--------------
 
 Introduced June 28, 1984.  Reviewed in Byte Magazine, May 1985, pp. 260-267.  For use with MS-DOS 2.11.
 
@@ -77,9 +81,9 @@ Model 4   | $7195     | 4.77-7.14Mhz 8086 | 640Kb RAM, 1 FDD, 10Mb HDD, 10Mb Tap
           |           |                   |
 
 COMPAQ DeskPro 286
----
+------------------
 
-Released in 1985 at the same time as the [COMPAQ Portable 286](#compaq-portable-286).
+Announced on April 30, 1985 at Houston's Wyndham Hotel, along with the [COMPAQ Portable 286](#compaq-portable-286).
 
 Reviewed in [InfoWorld](https://books.google.com/books?id=2i4EAAAAMBAJ&lpg=PA15&dq=infoworld%20compaq%20deskpro%201985&pg=PA15#v=onepage&q&f=false),
 May 20, 1985: "Compaq Edges Past AT Speed and Memory: New Products Use Intel 80286 Processor For 30 Percent Speed Boost".
@@ -90,9 +94,9 @@ June 1987: "Compaq Brings 12-Mhz Machine to 286 Market"
 
 
 COMPAQ Portable 286
----
+-------------------
 
-Introduced in 1985.
+Announced on April 30, 1985 at Houston's Wyndham Hotel, along with the [COMPAQ DeskPro 286](#compaq-deskpro-286).
 
 **Model** | **Price** | **CPU**           | **Options**
 :-------- | :-------- | :---------------- | :----------------------------------------------------
@@ -114,7 +118,7 @@ at $6,254, compared to IBM's similarly equipped enhanced PC AT that offers only 
 
 
 COMPAQ Portable II
----
+------------------
 
 The COMPAQ Portable II ("slimmed-down version of the Portable 286", as described in Byte Magazine, Oct 1986) was
 released on February 20, 1986.  For use with MS-DOS 3.10. 
@@ -131,19 +135,19 @@ Also see [Wikipedia](https://en.wikipedia.org/wiki/Compaq_Portable_II).
 
 
 COMPAQ DeskPro 386
----
+------------------
 
 Released in late 1986.
 
 PCjs has detailed information about the [DeskPro 386 ROMs](/devices/pcx86/rom/compaq/deskpro386/) and system boards,
-along with a number of [DeskPro 386 Machines](/devices/pcx86/machine/compaq/deskpro386/).
+along with a number of [DeskPro 386 Machine Configurations](/devices/pcx86/machine/compaq/deskpro386/).
 
-I also have the hard-to-find **COMPAQ Technical Reference Guide** for the DeskPro 386/25 (Vol. 1), which I'll post
-at a later date.
+PCjs also has some hard-to-find [COMPAQ Reference Manuals](/pubs/pc/reference/compaq/), such as the
+[COMPAQ DeskPro 386/25 Technical Reference Guide (Volume I)](/pubs/pc/reference/compaq/deskpro386/).
 
 
 COMPAQ Portable III
----
+-------------------
 
 The PCjs Project now has a [ROM Dump](/devices/pcx86/rom/compaq/portable3/) (REV K, 1987-01-29).
 
@@ -157,19 +161,19 @@ Reportedly intended to be an 80386-based machine, the Portable III was first rel
 
 
 COMPAQ Portable 386
----
+-------------------
 
 [TBD]
 
 
 COMPAQ 386/20e
----
+--------------
 
 Released in late 1988.  For use with MS-DOS 3.31.
 
 
 COMPAQ SLT Series
----
+-----------------
 
 From [Wikipedia](https://en.wikipedia.org/wiki/History_of_laptops#Compaq_SLT.2F286): "The COMPAQ SLT/286 debuted
 in October 1988, being the first battery-powered laptop to support an internal hard disk drive and a VGA compatible
@@ -177,7 +181,7 @@ LCD screen. It weighed 14 lbs."
 
 
 COMPAQ LTE Series
----
+-----------------
 
 First model in 1989.
 

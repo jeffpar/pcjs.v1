@@ -10,8 +10,7 @@ COMPAQ ROMs
 Since the PCjs Project is focused on the 1980's, this roughly chronological list of COMPAQ machines is limited to
 that era:
 
- + [COMPAQ Portable](portable/)
- + COMPAQ [Portable] Plus
+ + [COMPAQ Portable and Portable Plus](portable/)
  + COMPAQ DeskPro
  + COMPAQ DeskPro 286
  + COMPAQ Portable 286
