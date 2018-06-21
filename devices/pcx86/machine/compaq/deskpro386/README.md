@@ -7,11 +7,11 @@ permalink: /devices/pcx86/machine/compaq/deskpro386/
 COMPAQ DeskPro 386 Machines
 ---------------------------
 
-All our EGA configurations use the `Rev F` [COMPAQ DeskPro 386 ROM](/devices/pcx86/rom/compaq/deskpro386/), dated
-September 4, 1986.  It is currently the oldest available DeskPro 386 ROM.  The VGA did not exist until 1987, so it
-makes sense to use the EGA with a contemporary ROM.
+All the CGA and EGA configurations use the `Rev F` [COMPAQ DeskPro 386 ROM](/devices/pcx86/rom/compaq/deskpro386/),
+dated September 4, 1986.  It is currently the oldest available DeskPro 386 ROM.  The VGA did not exist until 1987,
+so it makes sense to use the CGA and EGA with the older ROM.
 
-All our VGA configurations use the `Rev J.4` [COMPAQ DeskPro 386 ROM](/devices/pcx86/rom/compaq/deskpro386/), dated
+All the VGA configurations use the `Rev J.4` [COMPAQ DeskPro 386 ROM](/devices/pcx86/rom/compaq/deskpro386/), dated
 January 28, 1988.
 
 All these machine configurations also include an unformatted "Type 5" [47Mb Hard Disk](/disks/pcx86/drives/47mb/).  To
@@ -28,6 +28,7 @@ Since **DEBUG** support is automatically enabled in uncompiled code, you get aut
 (up to 100,000 instructions), which can then be dumped with the PCjs Debugger's "dh" command.  Instruction history is
 supported in the compiled version as well, but only up to 1,000 instructions and only if one or more breakpoints are set.  
 
+* [COMPAQ DeskPro 386 with 640Kb and IBM CGA](cga/640kb/) ([Debugger](cga/640kb/debugger/))
 * [COMPAQ DeskPro 386 with 2Mb RAM and IBM EGA](ega/2048kb/) ([Debugger](ega/2048kb/debugger/))
 * [COMPAQ DeskPro 386 with 4Mb RAM and IBM EGA](ega/4096kb/) ([Debugger](ega/4096kb/debugger/))
 * [COMPAQ DeskPro 386 with 2Mb RAM and COMPAQ VGA (Debugger)](other/2048kb/debugger/), ([Visualizer](other/2048kb/debugger/visual/))

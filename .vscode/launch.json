@@ -1892,6 +1892,20 @@
       "webRoot": "${workspaceFolder}"
     },
     {
+      "name": "Devices: COMPAQ DeskPro 386 (640Kb) with IBM CGA",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/compaq/deskpro386/cga/640kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: COMPAQ DeskPro 386 (640Kb) with IBM CGA and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/devices/pcx86/machine/compaq/deskpro386/cga/640kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
       "name": "Devices: COMPAQ DeskPro 386 (2Mb) with 128K IBM EGA",
       "type": "chrome",
       "request": "launch",
