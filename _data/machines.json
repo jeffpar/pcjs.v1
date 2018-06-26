@@ -83,6 +83,7 @@
     "folder": "devices",
     "creator": "new LEDs",
     "scripts": [
+      "./modules/devices/lib/stdio.js",
       "./modules/devices/device.js",
       "./modules/devices/input.js",
       "./modules/devices/led.js",
@@ -314,6 +315,7 @@
     "folder": "devices",
     "creator": "new TMS1500",
     "scripts": [
+      "./modules/devices/lib/stdio.js",
       "./modules/devices/device.js",
       "./modules/devices/input.js",
       "./modules/devices/led.js",

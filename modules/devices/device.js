@@ -68,7 +68,7 @@ var VERSION = "";
  * @property {Object} bindings [added by addBindings()]
  * @property {string} sCommandPrev
  */
-class Device {
+class Device extends StdIO {
     /**
      * Device()
      *
@@ -97,6 +97,7 @@ class Device {
      */
     constructor(idMachine, idDevice, version, config)
     {
+        super();
         this.config = config || {};
         this.idMachine = idMachine;
         this.idDevice = idDevice;
@@ -707,13 +708,15 @@ class Device {
     {
         let nErrorCode = 0, sResource = null;
 
-        if (DEBUG) {
+        if (this.getHost() == "pcjs:8088") {
             /*
-             * The larger resources we put on archive.pcjs.org should also be available locally.
+             * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
+             * whenever the hostname is "pcjs"; otherwise, use "localhost" when debugging locally.
              *
-             * NOTE: "http://archive.pcjs.org" is now "https://s3-us-west-2.amazonaws.com/archive.pcjs.org"
+             * NOTE: http://archive.pcjs.org is currently redirected to https://s3-us-west-2.amazonaws.com/archive.pcjs.org
              */
-            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
+            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
+            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-[a-z]+|private-[a-z]+)\/(.*)$/, "/$1/$2");
         }
 
         let device = this;
@@ -904,53 +907,21 @@ class Device {
      */
     print(s)
     {
-        if (this.isCategoryOn(Device.CATEGORY.BUFFER)) {
-            Device.PrintBuffer += s;
-            return;
-        }
-        let element = this.findBinding(Device.BINDING.PRINT, true);
-        if (element) {
-            element.value += s;
-            /*
-             * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-             */
-            if (!DEBUG && element.value.length > 8192) {
-                element.value = element.value.substr(element.value.length - 4096);
+        if (!this.isCategoryOn(Device.CATEGORY.BUFFER)) {
+            let element = this.findBinding(Device.BINDING.PRINT, true);
+            if (element) {
+                element.value += s;
+                /*
+                * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+                */
+                if (!DEBUG && element.value.length > 8192) {
+                    element.value = element.value.substr(element.value.length - 4096);
+                }
+                element.scrollTop = element.scrollHeight;
+                return;
             }
-            element.scrollTop = element.scrollHeight;
         }
-        if (DEBUG || !element) {
-            let i = s.lastIndexOf('\n');
-            if (i >= 0) {
-                console.log(Device.PrintBuffer + s.substr(0, i));
-                Device.PrintBuffer = "";
-                s = s.substr(i + 1);
-            }
-            Device.PrintBuffer += s;
-        }
-    }
-
-    /**
-     * println(s)
-     *
-     * @this {Device}
-     * @param {string} s
-     */
-    println(s)
-    {
-        this.print(s + '\n');
-    }
-
-    /**
-     * printf(format, ...args)
-     *
-     * @this {Device}
-     * @param {string} format
-     * @param {...} args
-     */
-    printf(format, ...args)
-    {
-        this.print(this.sprintf(format, ...args));
+        super.print(s);
     }
 
     /**
@@ -1042,106 +1013,6 @@ class Device {
         return cPrev;
     }
 
-    /**
-     * sprintf(format, ...args)
-     *
-     * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
-     *
-     * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
-     * specifiers that I use.
-     *
-     * @this {Device}
-     * @param {string} format
-     * @param {...} args
-     * @returns {string}
-     */
-    sprintf(format, ...args)
-    {
-        let buffer = "";
-        let aParts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
-
-        let iArg = 0, iPart;
-        for (iPart = 0; iPart < aParts.length - 7; iPart += 7) {
-
-            buffer += aParts[iPart];
-
-            let arg = args[iArg++];
-            let flags = aParts[iPart+1];
-            let minimum = +aParts[iPart+2] || 0;
-            let precision = +aParts[iPart+4] || 0;
-            let conversion = aParts[iPart+6];
-            let ach = null, s;
-
-            switch(conversion) {
-            case 'd':
-                /*
-                 * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
-                 */
-                arg = Math.trunc(arg);
-                /* falls through */
-
-            case 'f':
-                s = Math.trunc(arg) + "";
-                if (precision) {
-                    minimum -= (precision + 1);
-                }
-                if (s.length < minimum) {
-                    if (flags == '0') {
-                        if (arg < 0) minimum--;
-                        s = ("0000000000" + Math.abs(arg)).slice(-minimum);
-                        if (arg < 0) s = '-' + s;
-                    } else {
-                        s = ("          " + s).slice(-minimum);
-                    }
-                }
-                if (precision) {
-                    arg = Math.round((arg - Math.trunc(arg)) * Math.pow(10, precision));
-                    s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
-                }
-                buffer += s;
-                break;
-
-            case 'c':
-                arg = String.fromCharCode(arg);
-                /* falls through */
-
-            case 's':
-                while (arg.length < minimum) {
-                    if (flags == '-') {
-                        arg += ' ';
-                    } else {
-                        arg = ' ' + arg;
-                    }
-                }
-                buffer += arg;
-                break;
-
-            case 'X':
-                ach = Device.HexUpperCase;
-                /* falls through */
-
-            case 'x':
-                if (!ach) ach = Device.HexLowerCase;
-                s = "";
-                do {
-                    s = ach[arg & 0xf] + s;
-                    arg >>>= 4;
-                } while (--minimum > 0 || arg);
-                buffer += s;
-                break;
-
-            default:
-                /*
-                 * The supported ANSI C set of conversions: "dioxXucsfeEgGpn%"
-                 */
-                buffer += "(unrecognized printf conversion %" + conversion + ")";
-                break;
-            }
-        }
-
-        buffer += aParts[iPart];
-        return buffer;
-    }
 }
 
 Device.BINDING = {
@@ -1192,23 +1063,3 @@ Device.Handlers = {};
  * @type {Object}
  */
 Device.Machines = {};
-
-/**
- * Category is a global string that contains zero or more Device.CATEGORY strings; see setCategory().
- *
- * @type {string}
- */
-Device.Category = "";
-
-/**
- * PrintBuffer is a global string that buffers partial lines for our print services when using console.log().
- *
- * @type {string}
- */
-Device.PrintBuffer = "";
-
-/*
- * Handy global constants
- */
-Device.HexLowerCase = "0123456789abcdef";
-Device.HexUpperCase = "0123456789ABCDEF";
