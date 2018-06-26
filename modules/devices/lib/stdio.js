@@ -31,23 +31,180 @@
 /**
  * @class {StdIO}
  * @unrestricted
+ * @property {string} bufferPrint
  */
 class StdIO {
     /**
-     * print(s)
+     * StdIO()
+     *
+     * @this {StdIO}
+     */
+    constructor()
+    {
+        this.bufferPrint = "";
+    }
+
+    /**
+     * getHost()
+     *
+     * This is like getHostName() but with the port number, if any.
+     *
+     * @this {StdIO}
+     * @return {string}
+     */
+    getHost()
+    {
+        return (window? window.location.host : "localhost");
+    }
+
+    /**
+     * getHostName()
+     *
+     * @this {StdIO}
+     * @return {string}
+     */
+    getHostName()
+    {
+        return (window? window.location.hostname : "localhost");
+    }
+
+    /**
+     * getHostOrigin()
+     *
+     * This could also be implemented with window.location.origin, but that wasn't originally available in all browsers.
+     *
+     * @this {StdIO}
+     * @return {string}
+     */
+    getHostOrigin()
+    {
+        return (window? window.location.protocol + "//" + window.location.host : "localhost");
+    }
+
+    /**
+     * getHostProtocol()
+     *
+     * @this {StdIO}
+     * @return {string}
+     */
+    getHostProtocol()
+    {
+        return (window? window.location.protocol : "file:");
+    }
+
+    /**
+     * getHostURL()
+     *
+     * @this {StdIO}
+     * @return {string|null}
+     */
+    getHostURL()
+    {
+        return (window? window.location.href : null);
+    }
+
+    /**
+     * getResource(sURL, done)
+     *
+     * Request the specified resource, and once the request is complete, notify done().
+     *
+     * done() is passed four parameters:
+     *
+     *      done(sURL, sResource, readyState, nErrorCode)
+     *
+     * readyState comes from the request's 'readyState' property, and the operation should not be considered complete
+     * until readyState is 4.
+     *
+     * If nErrorCode is zero, sResource should contain the requested data; otherwise, an error occurred.
+     *
+     * @this {StdIO}
+     * @param {string} sURL
+     * @param {function(string,string,number,number)} done
+     */
+    getResource(sURL, done)
+    {
+        let nErrorCode = 0, sResource = null;
+
+        if (this.getHost() == "pcjs:8088") {
+            /*
+             * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
+             * whenever the hostname is "pcjs"; otherwise, use "localhost" when debugging locally.
+             *
+             * NOTE: http://archive.pcjs.org is currently redirected to https://s3-us-west-2.amazonaws.com/archive.pcjs.org
+             */
+            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
+            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-[a-z]+|private-[a-z]+)\/(.*)$/, "/$1/$2");
+        }
+
+        let obj = this;
+        let xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
+        xmlHTTP.onreadystatechange = function()
+        {
+            if (xmlHTTP.readyState !== 4) {
+                done(sURL, sResource, xmlHTTP.readyState, nErrorCode);
+                return;
+            }
+
+            /*
+             * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
+             * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
+             * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
+             * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
+             * happening are mis-notifications rather than redundant notifications.
+             *
+             *      xmlHTTP.onreadystatechange = undefined;
+             */
+            sResource = xmlHTTP.responseText;
+
+            /*
+             * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
+             * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
+             */
+            if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && obj.getHostProtocol() == "file:") {
+                // if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sResource.length + " bytes");
+            }
+            else {
+                nErrorCode = xmlHTTP.status || -1;
+            }
+            done(sURL, sResource, xmlHTTP.readyState, nErrorCode);
+        };
+
+        xmlHTTP.open("GET", sURL, true);
+        xmlHTTP.send();
+    }
+
+    /**
+     * hex(n)
+     *
+     * This is a helper function intended for use in a debugging console, allowing you to display
+     * numbers as hex by evaluating the expression "this.hex(n)".
+     *
+     * @this {StdIO}
+     * @param {number} n
+     */
+    hex(n)
+    {
+        return this.sprintf("%x", n);
+    }
+
+    /**
+     * print(s, fBuffer)
      *
      * @this {StdIO}
      * @param {string} s
+     * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
      */
-    print(s)
+    print(s, fBuffer)
     {
-        let i = s.lastIndexOf('\n');
-        if (i >= 0) {
-            console.log(StdIO.PrintBuffer + s.substr(0, i));
-            StdIO.PrintBuffer = "";
-            s = s.substr(i + 1);
+        if (!fBuffer) {
+            let i = s.lastIndexOf('\n');
+            if (i >= 0) {
+                console.log(this.bufferPrint + s.substr(0, i));
+                this.bufferPrint = "";
+                s = s.substr(i + 1);
+            }
         }
-        StdIO.PrintBuffer += s;
+        this.bufferPrint += s;
     }
 
     /**
@@ -166,8 +323,8 @@ class StdIO {
 
             case 's':
                 /*
-                 * 's' includes some non-standard behavior: if the argument is not actually a string, we
-                 * "coerce" it to a string, using its associated toString() method.
+                 * 's' includes some non-standard behavior: if the argument is not actually a string, we allow
+                 * JavaScript to "coerce" it to a string, using its associated toString() method.
                  */
                 if (typeof arg == "string") {
                     while (arg.length < width) {
@@ -231,10 +388,3 @@ class StdIO {
  */
 StdIO.HexLowerCase = "0123456789abcdef";
 StdIO.HexUpperCase = "0123456789ABCDEF";
-
-/**
- * PrintBuffer is a global string that buffers partial lines for our print services when using console.log().
- *
- * @type {string}
- */
-StdIO.PrintBuffer = "";

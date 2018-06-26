@@ -66,6 +66,7 @@ var VERSION = "";
  * @property {string} idDevice
  * @property {Config} config
  * @property {Object} bindings [added by addBindings()]
+ * @property {string} categories
  * @property {string} sCommandPrev
  */
 class Device extends StdIO {
@@ -103,6 +104,7 @@ class Device extends StdIO {
         this.idDevice = idDevice;
         this.version = version || 0;
         this.bindings = {};
+        this.categories = "";
         this.addDevice();
         this.checkVersion(this.config);
         this.checkOverrides(this.config);
@@ -628,135 +630,6 @@ class Device extends StdIO {
     }
 
     /**
-     * getHost()
-     *
-     * This is like getHostName() but with the port number, if any.
-     *
-     * @this {Device}
-     * @return {string}
-     */
-    getHost()
-    {
-        return (window? window.location.host : "localhost");
-    }
-
-    /**
-     * getHostName()
-     *
-     * @this {Device}
-     * @return {string}
-     */
-    getHostName()
-    {
-        return (window? window.location.hostname : "localhost");
-    }
-
-    /**
-     * getHostOrigin()
-     *
-     * This could also be implemented with window.location.origin, but that wasn't originally available in all browsers.
-     *
-     * @this {Device}
-     * @return {string}
-     */
-    getHostOrigin()
-    {
-        return (window? window.location.protocol + "//" + window.location.host : "localhost");
-    }
-
-    /**
-     * getHostProtocol()
-     *
-     * @this {Device}
-     * @return {string}
-     */
-    getHostProtocol()
-    {
-        return (window? window.location.protocol : "file:");
-    }
-
-    /**
-     * getHostURL()
-     *
-     * @this {Device}
-     * @return {string|null}
-     */
-    getHostURL()
-    {
-        return (window? window.location.href : null);
-    }
-
-    /**
-     * getResource(sURL, done)
-     *
-     * Request the specified resource, and once the request is complete, notify done().
-     *
-     * done() is passed four parameters:
-     *
-     *      done(sURL, sResource, readyState, nErrorCode)
-     *
-     * readyState comes from the request's 'readyState' property, and the operation should not be considered complete
-     * until readyState is 4.
-     *
-     * If nErrorCode is zero, sResource should contain the requested data; otherwise, an error occurred.
-     *
-     * @this {Device}
-     * @param {string} sURL
-     * @param {function(string,string,number,number)} done
-     */
-    getResource(sURL, done)
-    {
-        let nErrorCode = 0, sResource = null;
-
-        if (this.getHost() == "pcjs:8088") {
-            /*
-             * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
-             * whenever the hostname is "pcjs"; otherwise, use "localhost" when debugging locally.
-             *
-             * NOTE: http://archive.pcjs.org is currently redirected to https://s3-us-west-2.amazonaws.com/archive.pcjs.org
-             */
-            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
-            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-[a-z]+|private-[a-z]+)\/(.*)$/, "/$1/$2");
-        }
-
-        let device = this;
-        let xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
-        xmlHTTP.onreadystatechange = function()
-        {
-            if (xmlHTTP.readyState !== 4) {
-                done(sURL, sResource, xmlHTTP.readyState, nErrorCode);
-                return;
-            }
-
-            /*
-             * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
-             * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
-             * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
-             * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
-             * happening are mis-notifications rather than redundant notifications.
-             *
-             *      xmlHTTP.onreadystatechange = undefined;
-             */
-            sResource = xmlHTTP.responseText;
-
-            /*
-             * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
-             * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
-             */
-            if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && device.getHostProtocol() == "file:") {
-                // if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sResource.length + " bytes");
-            }
-            else {
-                nErrorCode = xmlHTTP.status || -1;
-            }
-            done(sURL, sResource, xmlHTTP.readyState, nErrorCode);
-        };
-
-        xmlHTTP.open("GET", sURL, true);
-        xmlHTTP.send();
-    }
-
-    /**
      * getURLParms(sParms)
      *
      * @this {Device}
@@ -820,22 +693,6 @@ class Device extends StdIO {
     }
 
     /**
-     * hex(n)
-     *
-     * This is a helper function intended for use in a debugging console, allowing you to display
-     * numbers as hex by evaluating the expression "this.hex(n)".  Technically, this should be a static
-     * method, since there's nothing instance-specific about it, but "this.hex()" is easier to type than
-     * "Device.hex()".
-     *
-     * @this {Device}
-     * @param {number} n
-     */
-    hex(n)
-    {
-        return this.sprintf("%x", n);
-    }
-
-    /**
      * isCategory(category)
      *
      * Use this function to enable/disable any code (eg, print() calls) based on 1) whether specific
@@ -846,7 +703,7 @@ class Device extends StdIO {
      */
     isCategoryOn(category)
     {
-        return (Device.Category && Device.Category.indexOf(category) >= 0);
+        return (this.categories.indexOf(category) >= 0);
     }
 
     /**
@@ -902,12 +759,16 @@ class Device extends StdIO {
     /**
      * print(s)
      *
+     * This overrides StdIO.print(), in case the device has a PRINT binding that should be used instead.
+     *
      * @this {Device}
      * @param {string} s
      */
     print(s)
     {
+        let fBuffer = true;
         if (!this.isCategoryOn(Device.CATEGORY.BUFFER)) {
+            fBuffer = false;
             let element = this.findBinding(Device.BINDING.PRINT, true);
             if (element) {
                 element.value += s;
@@ -921,7 +782,7 @@ class Device extends StdIO {
                 return;
             }
         }
-        super.print(s);
+        super.print(s, fBuffer);
     }
 
     /**
@@ -1002,12 +863,12 @@ class Device extends StdIO {
      */
     setCategory(category = "")
     {
-        let cPrev = Device.Category;
+        let cPrev = this.categories;
         let fFlush = (!category && this.isCategoryOn(Device.CATEGORY.BUFFER));
-        Device.Category = category;
+        this.categories = category;
         if (fFlush) {
-            let sBuffer = Device.PrintBuffer;
-            Device.PrintBuffer = "";
+            let sBuffer = this.bufferPrint;
+            this.bufferPrint = "";
             this.print(sBuffer);
         }
         return cPrev;
