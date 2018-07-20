@@ -11,7 +11,7 @@ machines:
         name: PC DOS 1.10
       B:
         name: RatBas 2.13
-    autoType: $date\r$time\rB:\rRT\r$15TEST;\r
+    autoType: $date\r$time\rB:\rRT\r$25TEST;\r
 ---
 
 RatBas (1982)
