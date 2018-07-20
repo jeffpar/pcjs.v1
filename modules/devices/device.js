@@ -66,9 +66,10 @@ var VERSION = "";
  * @property {string} idDevice
  * @property {Config} config
  * @property {Object} bindings [added by addBindings()]
+ * @property {string} categories
  * @property {string} sCommandPrev
  */
-class Device {
+class Device extends StdIO {
     /**
      * Device()
      *
@@ -97,11 +98,13 @@ class Device {
      */
     constructor(idMachine, idDevice, version, config)
     {
+        super();
         this.config = config || {};
         this.idMachine = idMachine;
         this.idDevice = idDevice;
         this.version = version || 0;
         this.bindings = {};
+        this.categories = "";
         this.addDevice();
         this.checkVersion(this.config);
         this.checkOverrides(this.config);
@@ -627,133 +630,6 @@ class Device {
     }
 
     /**
-     * getHost()
-     *
-     * This is like getHostName() but with the port number, if any.
-     *
-     * @this {Device}
-     * @return {string}
-     */
-    getHost()
-    {
-        return (window? window.location.host : "localhost");
-    }
-
-    /**
-     * getHostName()
-     *
-     * @this {Device}
-     * @return {string}
-     */
-    getHostName()
-    {
-        return (window? window.location.hostname : "localhost");
-    }
-
-    /**
-     * getHostOrigin()
-     *
-     * This could also be implemented with window.location.origin, but that wasn't originally available in all browsers.
-     *
-     * @this {Device}
-     * @return {string}
-     */
-    getHostOrigin()
-    {
-        return (window? window.location.protocol + "//" + window.location.host : "localhost");
-    }
-
-    /**
-     * getHostProtocol()
-     *
-     * @this {Device}
-     * @return {string}
-     */
-    getHostProtocol()
-    {
-        return (window? window.location.protocol : "file:");
-    }
-
-    /**
-     * getHostURL()
-     *
-     * @this {Device}
-     * @return {string|null}
-     */
-    getHostURL()
-    {
-        return (window? window.location.href : null);
-    }
-
-    /**
-     * getResource(sURL, done)
-     *
-     * Request the specified resource, and once the request is complete, notify done().
-     *
-     * done() is passed four parameters:
-     *
-     *      done(sURL, sResource, readyState, nErrorCode)
-     *
-     * readyState comes from the request's 'readyState' property, and the operation should not be considered complete
-     * until readyState is 4.
-     *
-     * If nErrorCode is zero, sResource should contain the requested data; otherwise, an error occurred.
-     *
-     * @this {Device}
-     * @param {string} sURL
-     * @param {function(string,string,number,number)} done
-     */
-    getResource(sURL, done)
-    {
-        let nErrorCode = 0, sResource = null;
-
-        if (DEBUG) {
-            /*
-             * The larger resources we put on archive.pcjs.org should also be available locally.
-             *
-             * NOTE: "http://archive.pcjs.org" is now "https://s3-us-west-2.amazonaws.com/archive.pcjs.org"
-             */
-            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/s3-us-west-2\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
-        }
-
-        let device = this;
-        let xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
-        xmlHTTP.onreadystatechange = function()
-        {
-            if (xmlHTTP.readyState !== 4) {
-                done(sURL, sResource, xmlHTTP.readyState, nErrorCode);
-                return;
-            }
-
-            /*
-             * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
-             * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
-             * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
-             * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
-             * happening are mis-notifications rather than redundant notifications.
-             *
-             *      xmlHTTP.onreadystatechange = undefined;
-             */
-            sResource = xmlHTTP.responseText;
-
-            /*
-             * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
-             * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
-             */
-            if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && device.getHostProtocol() == "file:") {
-                // if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sResource.length + " bytes");
-            }
-            else {
-                nErrorCode = xmlHTTP.status || -1;
-            }
-            done(sURL, sResource, xmlHTTP.readyState, nErrorCode);
-        };
-
-        xmlHTTP.open("GET", sURL, true);
-        xmlHTTP.send();
-    }
-
-    /**
      * getURLParms(sParms)
      *
      * @this {Device}
@@ -817,22 +693,6 @@ class Device {
     }
 
     /**
-     * hex(n)
-     *
-     * This is a helper function intended for use in a debugging console, allowing you to display
-     * numbers as hex by evaluating the expression "this.hex(n)".  Technically, this should be a static
-     * method, since there's nothing instance-specific about it, but "this.hex()" is easier to type than
-     * "Device.hex()".
-     *
-     * @this {Device}
-     * @param {number} n
-     */
-    hex(n)
-    {
-        return this.sprintf("%x", n);
-    }
-
-    /**
      * isCategory(category)
      *
      * Use this function to enable/disable any code (eg, print() calls) based on 1) whether specific
@@ -843,7 +703,7 @@ class Device {
      */
     isCategoryOn(category)
     {
-        return (Device.Category && Device.Category.indexOf(category) >= 0);
+        return (this.categories.indexOf(category) >= 0);
     }
 
     /**
@@ -899,58 +759,30 @@ class Device {
     /**
      * print(s)
      *
+     * This overrides StdIO.print(), in case the device has a PRINT binding that should be used instead.
+     *
      * @this {Device}
      * @param {string} s
      */
     print(s)
     {
-        if (this.isCategoryOn(Device.CATEGORY.BUFFER)) {
-            Device.PrintBuffer += s;
-            return;
-        }
-        let element = this.findBinding(Device.BINDING.PRINT, true);
-        if (element) {
-            element.value += s;
-            /*
-             * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-             */
-            if (!DEBUG && element.value.length > 8192) {
-                element.value = element.value.substr(element.value.length - 4096);
+        let fBuffer = true;
+        if (!this.isCategoryOn(Device.CATEGORY.BUFFER)) {
+            fBuffer = false;
+            let element = this.findBinding(Device.BINDING.PRINT, true);
+            if (element) {
+                element.value += s;
+                /*
+                * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+                */
+                if (!DEBUG && element.value.length > 8192) {
+                    element.value = element.value.substr(element.value.length - 4096);
+                }
+                element.scrollTop = element.scrollHeight;
+                return;
             }
-            element.scrollTop = element.scrollHeight;
         }
-        if (DEBUG || !element) {
-            let i = s.lastIndexOf('\n');
-            if (i >= 0) {
-                console.log(Device.PrintBuffer + s.substr(0, i));
-                Device.PrintBuffer = "";
-                s = s.substr(i + 1);
-            }
-            Device.PrintBuffer += s;
-        }
-    }
-
-    /**
-     * println(s)
-     *
-     * @this {Device}
-     * @param {string} s
-     */
-    println(s)
-    {
-        this.print(s + '\n');
-    }
-
-    /**
-     * printf(format, ...args)
-     *
-     * @this {Device}
-     * @param {string} format
-     * @param {...} args
-     */
-    printf(format, ...args)
-    {
-        this.print(this.sprintf(format, ...args));
+        super.print(s, fBuffer);
     }
 
     /**
@@ -1031,117 +863,17 @@ class Device {
      */
     setCategory(category = "")
     {
-        let cPrev = Device.Category;
+        let cPrev = this.categories;
         let fFlush = (!category && this.isCategoryOn(Device.CATEGORY.BUFFER));
-        Device.Category = category;
+        this.categories = category;
         if (fFlush) {
-            let sBuffer = Device.PrintBuffer;
-            Device.PrintBuffer = "";
+            let sBuffer = this.bufferPrint;
+            this.bufferPrint = "";
             this.print(sBuffer);
         }
         return cPrev;
     }
 
-    /**
-     * sprintf(format, ...args)
-     *
-     * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
-     *
-     * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
-     * specifiers that I use.
-     *
-     * @this {Device}
-     * @param {string} format
-     * @param {...} args
-     * @returns {string}
-     */
-    sprintf(format, ...args)
-    {
-        let buffer = "";
-        let aParts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
-
-        let iArg = 0, iPart;
-        for (iPart = 0; iPart < aParts.length - 7; iPart += 7) {
-
-            buffer += aParts[iPart];
-
-            let arg = args[iArg++];
-            let flags = aParts[iPart+1];
-            let minimum = +aParts[iPart+2] || 0;
-            let precision = +aParts[iPart+4] || 0;
-            let conversion = aParts[iPart+6];
-            let ach = null, s;
-
-            switch(conversion) {
-            case 'd':
-                /*
-                 * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
-                 */
-                arg = Math.trunc(arg);
-                /* falls through */
-
-            case 'f':
-                s = Math.trunc(arg) + "";
-                if (precision) {
-                    minimum -= (precision + 1);
-                }
-                if (s.length < minimum) {
-                    if (flags == '0') {
-                        if (arg < 0) minimum--;
-                        s = ("0000000000" + Math.abs(arg)).slice(-minimum);
-                        if (arg < 0) s = '-' + s;
-                    } else {
-                        s = ("          " + s).slice(-minimum);
-                    }
-                }
-                if (precision) {
-                    arg = Math.round((arg - Math.trunc(arg)) * Math.pow(10, precision));
-                    s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
-                }
-                buffer += s;
-                break;
-
-            case 'c':
-                arg = String.fromCharCode(arg);
-                /* falls through */
-
-            case 's':
-                while (arg.length < minimum) {
-                    if (flags == '-') {
-                        arg += ' ';
-                    } else {
-                        arg = ' ' + arg;
-                    }
-                }
-                buffer += arg;
-                break;
-
-            case 'X':
-                ach = Device.HexUpperCase;
-                /* falls through */
-
-            case 'x':
-                if (!ach) ach = Device.HexLowerCase;
-                s = "";
-                do {
-                    s = ach[arg & 0xf] + s;
-                    arg >>>= 4;
-                } while (--minimum > 0 || arg);
-                buffer += s;
-                break;
-
-            default:
-                /*
-                 * The supported ANSI C set of conversions: "dioxXucsfeEgGpn%"
-                 */
-                buffer += "(unrecognized printf conversion %" + conversion + ")";
-                break;
-            }
-        }
-
-        buffer += aParts[iPart];
-        return buffer;
-    }
 }
 
 Device.BINDING = {
@@ -1192,23 +924,3 @@ Device.Handlers = {};
  * @type {Object}
  */
 Device.Machines = {};
-
-/**
- * Category is a global string that contains zero or more Device.CATEGORY strings; see setCategory().
- *
- * @type {string}
- */
-Device.Category = "";
-
-/**
- * PrintBuffer is a global string that buffers partial lines for our print services when using console.log().
- *
- * @type {string}
- */
-Device.PrintBuffer = "";
-
-/*
- * Handy global constants
- */
-Device.HexLowerCase = "0123456789abcdef";
-Device.HexUpperCase = "0123456789ABCDEF";

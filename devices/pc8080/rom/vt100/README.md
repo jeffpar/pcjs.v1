@@ -27,7 +27,7 @@ He then describes the memory map as follows:
 	E52       H         H             L             0x0800
 	E56       H         L             L             0x0000
 
-The above PCB chip locations correspond to the following [DEC ROMs](/devices/roms/dec/):
+The above PCB chip locations correspond to the following [DEC ROMs](/devices/dec/rom/):
 
 * E56: [23-061E2.bin](https://web.archive.org/web/20140723115846/http://www.dunnington.u-net.com/public/DECROMs/23-061E2.bin)
 * E52: [23-032E2.bin](https://web.archive.org/web/20140723115846/http://www.dunnington.u-net.com/public/DECROMs/23-032E2.bin)

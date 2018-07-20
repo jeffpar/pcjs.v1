@@ -1144,8 +1144,8 @@ class Str {
 
             case 's':
                 /*
-                 * 's' includes some non-standard behavior: if the argument is not actually a string, we
-                 * "coerce" it to a string, using its associated toString() method.
+                 * 's' includes some non-standard behavior: if the argument is not actually a string, we allow
+                 * JavaScript to "coerce" it to a string, using its associated toString() method.
                  */
                 if (typeof arg == "string") {
                     while (arg.length < width) {
@@ -1156,11 +1156,7 @@ class Str {
                         }
                     }
                 }
-                if (typeof arg == "object") {
-                    buffer += arg.toString();
-                } else {
-                    buffer += arg;
-                }
+                buffer += arg;
                 break;
 
             case 'X':

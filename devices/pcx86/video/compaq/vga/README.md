@@ -5,7 +5,8 @@ permalink: /devices/pcx86/video/compaq/vga/
 ---
 
 COMPAQ Video Graphics Controller (VGA)
----
+--------------------------------------
+
 This is the COMPAQ Video Graphics Controller Board, one of the earliest VGA boards COMPAQ released
 for its DeskPro 386 line.
 
