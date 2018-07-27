@@ -250,20 +250,29 @@
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Bin: bin2iso",
+      "name": "Bin: bin2iso.js",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/modules/shared/bin/bin2iso",
-      "args": ["/Users/Jeff/Disks/CDs/Microsoft/TechNet/TechNet-CD020-TN9908.iso", "test.iso", "--debug", "--overwrite"],
+      "program": "${workspaceFolder}/modules/shared/bin/bin2iso.js",
+      "args": ["/Volumes/Data/OneDrive/Software/Microsoft/TechNet/TechNet-CD020-TN9908.iso", "test.iso", "--debug", "--overwrite"],
       "cwd": "${workspaceFolder}/modules/shared/bin/",
       "stopOnEntry": false
     },
     {
-      "name": "Bin: machines",
+      "name": "Bin: machines.js",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/modules/shared/bin/machines",
+      "program": "${workspaceFolder}/modules/shared/bin/machines.js",
       "args": ["../../../devices", "--debug"],
+      "cwd": "${workspaceFolder}/modules/shared/bin/",
+      "stopOnEntry": false
+    },
+    {
+      "name": "Bin: printf.js",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/modules/shared/bin/printf.js",
+      "args": [],
       "cwd": "${workspaceFolder}/modules/shared/bin/",
       "stopOnEntry": false
     },

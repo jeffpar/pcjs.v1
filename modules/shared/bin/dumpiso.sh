@@ -10,6 +10,7 @@ if grep -q -e "^/dev" disk; then
     vol=`grep -o -e "/Volumes/.*" disk`
     ls -alRT "$vol" > $diskname.txt
     hdiutil unmount "$vol" > /dev/null
+    hashiso.sh $diskname.iso
 else
     echo "error: unable to mount $diskname.iso"
 fi
