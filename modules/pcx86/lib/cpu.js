@@ -1390,7 +1390,7 @@ class CPU extends Component {
     }
 }
 
-CPU.YIELDS_PER_SECOND = 30;
+CPU.YIELDS_PER_SECOND = 60;
 
 CPU.BUTTONS = ["power", "reset"];
 

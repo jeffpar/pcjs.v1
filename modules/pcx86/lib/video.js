@@ -2355,6 +2355,8 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.PAIRS] = Card.ACCESS.writeBytePairs;
  * @class Video
  * @property {CPUX86} cpu
  * @property {DebuggerX86} dbg
+ * @property {number} cUpdates
+ * @property {number} msUpdatePrev
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class Video extends Component {
