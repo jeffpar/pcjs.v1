@@ -658,6 +658,7 @@
 		<disk path="/pcjs-disks/pcx86/tools/ibm/basic/compiler/1.00/BASCOM100-DISK1.json">IBM BASIC Compiler 1.00 (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/ibm/basic/compiler/1.00/BASCOM100-DISK2.json">IBM BASIC Compiler 1.00 (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/ibm/basic/compiler/2.00/BASCOM200-DISK1.json">IBM BASIC Compiler 2.00</disk>
+		<disk path="/pcjs-disks/pcx86/tools/ibm/debug/1.00/IBM-DEBUG-100.json">IBM Professional Debug Facility 1.00</disk>
 		<disk path="/pcjs-disks/pcx86/tools/ibm/masm/1.00/IBM-MASM-100.json">IBM Macro Assembler 1.00</disk>
 		<disk path="/pcjs-disks/pcx86/tools/ibm/masm/2.00/IBM-MASM-200.json">IBM Macro Assembler 2.00</disk>
 		<disk path="/pcjs-disks/pcx86/tools/ibm/pascal/1.00/PASCAL100-DISK1.json">IBM Pascal 1.00 (Disk 1)</disk>

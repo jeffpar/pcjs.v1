@@ -300,7 +300,7 @@ function readXML(xml, sNode, sFile, aTags, iTag, done, fDebug)
 }
 
 if (args.argc < 2) {
-    printf("usage: node machines.js [directory]\n");
+    printf("usage: node machines [directory]\n");
 } else {
     let argv = args.argv;
     processMachines(argv[1], argv['launch'], argv['debug']);
