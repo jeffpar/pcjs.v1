@@ -838,6 +838,8 @@
 		<disk path="/pcjs-disks/pcx86/tools/other/norton/3.10/1986-01-21/NU310-1986-01-21.json">Norton Utilities 3.10 (1986-01-21)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/norton/4.00/NU400-STD-DISK1.json">Norton Utilities 4.00 (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/norton/4.00/NU400-STD-DISK2.json">Norton Utilities 4.00 (Disk 2)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/other/norton/4.00/NU400-ADV-DISK1.json">Norton Utilities 4.00 Advanced (Disk 1)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/other/norton/4.00/NU400-ADV-DISK2.json">Norton Utilities 4.00 Advanced (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/norton/4.50/NU450-ADV-DISK1.json">Norton Utilities 4.50 (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/norton/4.50/NU450-ADV-DISK2.json">Norton Utilities 4.50 (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/norton/4.50/NU450-ADV-DISK3.json">Norton Utilities 4.50 (Disk 3)</disk>
