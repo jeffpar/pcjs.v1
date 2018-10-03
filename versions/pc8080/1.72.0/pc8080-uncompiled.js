@@ -1910,7 +1910,7 @@ class Web {
                     let match = sURL.match(/(^https?:\/\/[^\/]+)(.*)/);
                     if (match) {
                         Web.fAdBlockerWarning = true;
-                        Component.alertUser("PCjs was unable to perform a cross-origin resource request.\n\nIf you are running an ad blocker, add '" + match[1] + "' to your whitelist.");
+                        Component.alertUser("PCjs was unable to perform a cross-origin resource request to '" + match[1] + "'.\n\nIf you're running an ad blocker, try adding '" + Web.getHostOrigin() + "' to your whitelist (or get a smarter ad blocker, because there are NO ads on this website).");
                     }
                 }
             }
