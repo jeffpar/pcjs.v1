@@ -19,9 +19,17 @@ reported:
     ring binders--Operator's Guide, BASIC Reference Guide, and DOS Reference Guide--are very well presented, and
     are in many ways an improvement in both writing and organization over the originals.
 
-The [COMPAQ MS-DOS 1.10](/disks/pcx86/dos/compaq/1.10/) diskette included with the manuals was also in excellent
-condition.  Most of its files were dated January 20, 1983, with the exception of BASICA.EXE, which was dated
-February 8, 1983.
+I have scanned all three manuals and filed them under [COMPAQ MS-DOS 1.10 Documentation](/pubs/pc/software/dos/compaq/1.10/).
+
+FYI, our [DOS Documentation](/pubs/pc/software/dos/) now includes copies of the three manuals for
+[COMPAQ MS-DOS Version 2](/pubs/pc/software/dos/compaq/2.xx) as well.  Sadly, no disk(s) were included
+with the Version 2 manuals.  The manuals were released in October 1984 and many screenshots were edited to
+display the DOS version as "2.XX", so it's unclear exactly which version of MS-DOS might have been included
+with them.
+
+The [COMPAQ MS-DOS 1.10](/disks/pcx86/dos/compaq/1.10/) diskette included with the Version 1.10 manuals was also
+in excellent condition.  Most of its files were dated January 20, 1983, with the exception of BASICA.EXE, which
+was dated February 8, 1983.
 
 [![COMPAQ MS-DOS 1.10 Diskette](/blog/images/COMPAQ-DOS110-Diskette.jpg)](/disks/pcx86/dos/compaq/1.10/)
 

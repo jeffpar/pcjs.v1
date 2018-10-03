@@ -1,7 +1,7 @@
 ---
 layout: page
 title: COMPAQ MS-DOS Version 2 Documentation
-permalink: /pubs/pc/software/dos/compaq/2.00/
+permalink: /pubs/pc/software/dos/compaq/2.xx/
 redirect_from:
   - /pubs/pc/software/dos/COMPAQ200/
 ---
