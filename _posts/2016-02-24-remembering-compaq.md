@@ -51,7 +51,7 @@ all we have are the memories.
 
 In particular, Read-Only Memories: we have precious few of those, too.  I finally obtained
 a [ROM Dump](/devices/pcx86/rom/compaq/portable/) from COMPAQ's first machine, the COMPAQ Portable, but I had to buy
-a system board on ebay to get it.  Considering all the effort (and money) that COMPAQ invested in writing that code,
+a system board on eBay to get it.  Considering all the effort (and money) that COMPAQ invested in writing that code,
 it's a bit depressing that these things haven't been properly preserved and memorialized.
 
 Looking ahead to the day when PCjs will be able to simulate the original COMPAQ Portable, I thought it would be a good

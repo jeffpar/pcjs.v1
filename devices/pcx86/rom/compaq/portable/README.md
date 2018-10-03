@@ -9,7 +9,7 @@ COMPAQ Portable Computer ROMs
 -----------------------------
 
 The oldest COMPAQ Portable Computer ROM BIOS we originally had was an 8Kb [Rev C ROM](100666-001-REVC.json) from a
-000006-001 REV D system board purchased on ebay.
+000006-001 REV D system board purchased on eBay.
 
 [<img src="COMPAQ_Portable_System_Board.jpg" alt="COMPAQ Portable System Board REV D"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/rom/compaq/portable/COMPAQ_Portable_System_Board-FULL.jpg)
 

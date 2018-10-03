@@ -275,6 +275,13 @@ class Web {
             else {
                 nErrorCode = request.status || -1;
                 Web.log("xmlHTTPRequest(" + sURL + "): error code " + nErrorCode);
+                if (!request.status && !Web.fAdBlockerWarning) {
+                    let match = sURL.match(/(^https?:\/\/[^\/]+)(.*)/);
+                    if (match) {
+                        Web.fAdBlockerWarning = true;
+                        Component.alertUser("PCjs was unable to perform a cross-origin resource request.\n\nIf you are running an ad blocker, add '" + match[1] + "' to your whitelist.");
+                    }
+                }
             }
             if (progress) progress(2);
             if (done) done(sURL, resource, nErrorCode);
@@ -1122,6 +1129,7 @@ Web.asBrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
 Web.fPageLoaded = false;        // set once the page's first 'onload' event has occurred
 Web.fPageShowed = false;        // set once the page's first 'onpageshow' event has occurred
 Web.fPageEventsEnabled = true;  // default is true, set to false (or true) by enablePageEvents()
+Web.fAdBlockerWarning = false;
 
 /**
  * fLocalStorage

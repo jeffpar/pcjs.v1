@@ -2875,7 +2875,7 @@ DiskDump.prototype.convertToJSON = function()
                          * (eg, PC DOS 4.01 720K diskettes), the manufacturer (IBM) opted for a smaller cluster size.
                          */
                         var bClusterSecs = this.bufDisk.readUInt8(offBootSector + DiskAPI.BPB.CLUSTER_SECS);
-                        if (bClusterSecs == DiskDump.aDefaultBPBs[i][DiskAPI.BPB.CLUSTER_SECS]) {
+                        if (bMediaID != DiskAPI.FAT.MEDIA_720KB || bClusterSecs == DiskDump.aDefaultBPBs[i][DiskAPI.BPB.CLUSTER_SECS]) {
                             iBPB = i;
                             break;
                         }

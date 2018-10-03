@@ -37,4 +37,4 @@ For general historical interest, the project includes a Publication Archive that
 [<img src="/pubs/images/Graphics_for_the_IBM_PC-thumb.jpg" width="200" height="260" alt="Graphics for the IBM PC"/>](pc/programming/Graphics_for_the_IBM_PC/)
 [<img src="/pubs/images/IBM-5150-TECHREF-thumb.jpg" width="200" height="260" alt="IBM 5150 Technical Reference (August 1981)"/>](pc/reference/ibm/)
 [<img src="/pubs/images/80286_and_80287_Programmers_Reference_Manual_1987-thumb.jpg" width="200" height="260" alt="80286 and 80287 Programmer's Reference"/>](pc/reference/intel/)
-[<img src="/pubs/images/PCDOS100-thumb.jpg" width="200" height="260" alt="IBM PC Disk Operating System v1.00"/>](pc/software/)
+[<img src="/pubs/images/PCDOS100-thumb.jpg" width="200" height="260" alt="IBM PC Disk Operating System 1.00"/>](pc/software/)
