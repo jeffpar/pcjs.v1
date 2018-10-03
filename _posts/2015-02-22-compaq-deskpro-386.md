@@ -12,7 +12,7 @@ machines:
 ---
 
 I finally dumped the [COMPAQ DeskPro 386/16 ROMs](/devices/pcx86/rom/compaq/deskpro386/) from the motherboard I bought
-on ebay last year, so I'm ready to begin adding 80386 support to PCx86.
+on eBay last year, so I'm ready to begin adding 80386 support to PCx86.
 
 I'd also like to locate a copy of the "COMPAQ DeskPro 386 Technical Reference Guide, Volumes 1 and 2".  It's not hard
 to find COMPAQ Maintenance and Service guides online, but their Technical Reference guides are much rarer, perhaps because

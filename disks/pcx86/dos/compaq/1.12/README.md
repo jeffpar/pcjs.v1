@@ -5,8 +5,7 @@ permalink: /disks/pcx86/dos/compaq/1.12/
 machines:
   - id: ibm5150-compaq112
     type: pcx86
-    config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
-    resume: 1
+    config: /devices/pcx86/machine/5150/mda/256kb/machine.xml
     autoMount:
       A:
         name: COMPAQ MS-DOS 1.12
@@ -108,7 +107,7 @@ The boot sector of the COMPAQ MS-DOS 1.12 disk image contains the following byte
 	000001e0  00 00 00 00 00 00 00 e7  01 00 00 00 00 00 00 00  |................|
 	000001f0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 
-It is identical to the [COMPAQ MS-DOS 1.11 Boot Sector](../1.11/#compaq-ms-dos-111-boot-sector),
-so refer to that page for more information. 
+It is identical to the [COMPAQ MS-DOS 1.10 Boot Sector](../1.10/#compaq-ms-dos-110-boot-sector),
+so refer to that page for more information.
 
 [Return to [COMPAQ MS-DOS Disks](/disks/pcx86/dos/compaq/)]

@@ -165,6 +165,7 @@
 		<disk path="/pcjs-disks/pcx86/dos/microsoft/6.22/1440K/MSDOS622-DISK2.json">MS-DOS 6.22 (1.44M Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/microsoft/6.22/1440K/MSDOS622-DISK3.json">MS-DOS 6.22 (1.44M Disk 3)</disk>
 		<disk path="/pcjs-disks/pcx86/dos/microsoft/6.22/1440K/MSDOS622-SUPPDISK.json">MS-DOS 6.22 (1.44M Supp)</disk>
+		<disk path="/pcjs-disks/pcx86/dos/compaq/1.10/COMPAQ-DOS110.json">COMPAQ MS-DOS 1.10</disk>
 		<disk path="/pcjs-disks/pcx86/dos/compaq/1.11/COMPAQ-DOS111.json">COMPAQ MS-DOS 1.11</disk>
 		<disk path="/pcjs-disks/pcx86/dos/compaq/1.12/COMPAQ-DOS112.json">COMPAQ MS-DOS 1.12</disk>
 		<disk path="/pcjs-disks/pcx86/dos/compaq/2.11/COMPAQ-DOS211.json">COMPAQ MS-DOS 2.11</disk>
