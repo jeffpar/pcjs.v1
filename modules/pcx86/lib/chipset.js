@@ -5530,15 +5530,25 @@ ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.FLOPNUM] = {
     LABEL: "Number of Floppy Drives"
 };
 /*
- * NOTE: Both the Aug 1981 and the Apr 1984 IBM 5150 Technical Reference Manuals list SW1[2] as "RESERVED",
- * but the Aug 1981 edition (p. 2-28) also says SW1[2] "MUST BE ON (RESERVED FOR CO-PROCESSOR)".  Contemporary
- * articles discussing 8087 support in early PCs all indicate that switch SW1[2] must OFF if a coprocessor
- * is installed, and the 1984 5150 Guide to Operations (p. 5-34) confirms it.
+ * Notes on the 8087 Math Coprocessor (FPU)
  *
- * The Aug 1981 5150 TechRef makes no further mention of coprocessor support, whereas the Apr 1984 5150 TechRef
- * discusses it in a fair bit of detail, including the fact that 8087 exceptions generate an NMI, despite Intel's
- * warning in their iAPX 86,88 User's Manual, p. S-27, that "[t]he 8087 should not be tied to the CPU's NMI
- * (non-maskable interrupt) line.")
+ * The August 1981 Technical Reference Manual lists SW1[2] as "RESERVED" and also says that SW1[2]
+ * "MUST BE ON (RESERVED FOR CO-PROCESSOR)" (p. 2-28), suggesting that the math coprocessor wasn't
+ * quite ready for the initial release of the IBM PC.
+ *
+ * The April 1983 TechRef adds a section on the "IBM Personal Computer Math Coprocessor" (p. 1-33)
+ * and makes it clearer that SW1[2] must be OFF when a math coprocessor is installed, but then it
+ * muddies the waters in a new appendix of switch tables, where it erroneously claims that SW1[2]
+ * must be ON when using a coprocessor (p. G-7).
+ *
+ * The April 1984 TechRef eliminates the confusion by eliminating the appendix (actually, it was
+ * simply corrected and moved to the 1984 Guide to Operations; see p. 5-10).  Early magazine articles
+ * discussing 8087 support also indicated that switch SW1[2] must OFF when a coprocessor is installed.
+ *
+ * While the August 1981 TechRef makes almost no mention of coprocessor support, the April 1984 TechRef
+ * discusses it in a fair bit of detail, including the fact that 8087 exceptions generate an NMI,
+ * despite Intel's warning in their iAPX 86,88 User's Manual, p. S-27, that "[t]he 8087 should not be
+ * tied to the CPU's NMI (non-maskable interrupt) line."
  */
 ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.FPU] = {
     MASK:       0x02,
