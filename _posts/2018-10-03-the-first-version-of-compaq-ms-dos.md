@@ -72,5 +72,14 @@ the original [COMPAQ Portable ROM](/devices/pcx86/rom/compaq/portable) or added 
 graphics adapter, which combined capabilities of both IBM's MDA and CGA adapters.  I hope to add PCjs support
 for COMPAQ's ROM and VDU in the near future.
 
+### October 5, 2018 Update
+
+I just added a [COMPAQ Portable](/devices/pcx86/machine/compaq/portable/vdu/128kb/debugger/) machine configuration
+with built-in PCjs debugger.  It's using the oldest original COMPAQ ROM BIOS we have ([Rev B](/devices/pcx86/rom/compaq/portable/))
+along with COMPAQ MS-DOS 1.10.
+
+Although there are still issues to work through, such as fixing a POST keyboard error (301) and adding full COMPAQ video
+(VDU) compatibility, things seem to be off to a good start.
+
 *[@jeffpar](https://jeffpar.com)*  
 *Oct 3, 2018*
