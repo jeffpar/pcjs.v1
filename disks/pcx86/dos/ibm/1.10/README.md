@@ -19,7 +19,7 @@ IBM PC DOS 1.10
 ---------------
 
 PC DOS 1.10 was released in May 1982 on one single-sided (160Kb) diskette.  See IBM's
-"[Read This First](#read-this-first)" from the [PC DOS 1.10 Manual](/pubs/pc/software/dos/PCDOS110/)
+"[Read This First](#read-this-first)" from the [PC DOS 1.10 Manual](/pubs/pc/software/dos/ibm/1.10/)
 for important information about changes from [PC DOS 1.00](../1.00/).
 
 A [Feature Summary](#feature-summary), along with the disk's [Directory Listing](#directory-of-pc-dos-110)
@@ -496,4 +496,4 @@ The next chunk of code is identical to `check_sys_files` in the [PC DOS 1.00 Boo
 	&0000:7D19 F9              STC     
 	&0000:7D1A C3              RET     
 
-See [PC DOS 1.10 Documentation](/pubs/pc/software/dos/PCDOS110/) for more information.
+See [PC DOS 1.10 Documentation](/pubs/pc/software/dos/ibm/1.10/) for more information.

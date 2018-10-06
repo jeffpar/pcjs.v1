@@ -25,7 +25,7 @@ when IBM introduced the original IBM PC (Model 5150).  It was released on one si
 The disk's [Directory Listing](#directory-of-pc-dos-100) and [Boot Sector](#pc-dos-100-boot-sector)
 are provided below.
 
-To learn how to use PC DOS 1.00, see the [Documentation](/pubs/pc/software/dos/PCDOS100/).
+To learn how to use PC DOS 1.00, see the [Documentation](/pubs/pc/software/dos/ibm/1.00/).
 
 {% include machine.html id="ibm5150-pcdos100" %}
 
