@@ -4,6 +4,11 @@ title: The First Version of COMPAQ MS-DOS
 date: 2018-10-03 10:00:00
 permalink: /blog/2018/10/03/
 preview: /blog/images/COMPAQ-DOS110-Diskette.jpg
+machines:
+  - id: compaq-portable-128kb
+    type: pcx86
+    config: /devices/pcx86/machine/compaq/portable/vdu/128kb/machine.xml
+    autoType: \r\r$20demo\r
 ---
 
 A few weeks ago, I found a pristine set of all three manuals that COMPAQ shipped with their very first portable,
@@ -72,14 +77,16 @@ the original [COMPAQ Portable ROM](/devices/pcx86/rom/compaq/portable) or added 
 graphics adapter, which combined capabilities of both IBM's MDA and CGA adapters.  I hope to add PCjs support
 for COMPAQ's ROM and VDU in the near future.
 
-### October 5, 2018 Update
+### October 6, 2018 Update
 
-I just added a [COMPAQ Portable](/devices/pcx86/machine/compaq/portable/vdu/128kb/debugger/) machine configuration
+I recently added a [COMPAQ Portable](/devices/pcx86/machine/compaq/portable/vdu/128kb/debugger/) machine configuration
 with built-in PCjs debugger.  It's using the oldest original COMPAQ ROM BIOS we have ([Rev B](/devices/pcx86/rom/compaq/portable/))
 along with COMPAQ MS-DOS 1.10.
 
-Although there are still issues to work through, such as fixing a POST keyboard error (301) and adding full COMPAQ video
-(VDU) compatibility, things seem to be off to a good start.
+Adding full COMPAQ video (VDU) compatibility, including support for monochrome graphics, will come later.  For now,
+imagine this is a COMPAQ Portable connected to an external IBM Color Graphics Monitor.
+
+{% include machine.html id="compaq-portable-128kb" %}
 
 *[@jeffpar](https://jeffpar.com)*  
 *Oct 3, 2018*
