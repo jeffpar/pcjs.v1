@@ -45522,7 +45522,7 @@ class Keyboard extends Component {
          *
          *      /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/machine.xml
          *
-         * while typing very fast, so let's see if throttling transmissions a bit more helps with that.
+         * while typing very fast, so I bumped it to 15ms. Then the COMPAQ Portable BIOS required another bump to 25ms.
          */
         this.msTransmit      = 25;          // minimum number of milliseconds between data transmissions
         this.msAutoRepeat    = 500;
@@ -81454,7 +81454,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
      * Note that the "resources" variable has been added to our externs.js, to prevent it from being renamed
      * by the Closure Compiler.
      */
-    matchScript = sPCJS.match(/^(\s*\(function\(\){)([\s\S]*)(}\)\(\);)/);
+    matchScript = sPCJS.match(/^(\s*\(function\(\){)([\s\S]*)(}\)\(\);?)/);
     if (!matchScript) {
         /*
          * If the match failed, we assume that a DEBUG (uncompiled) script is being used,

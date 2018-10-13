@@ -3,7 +3,7 @@
 <machine id="ibm5160" type="pcx86" border="1" pos="center" background="default">
 	<name pos="center">IBM PC XT, Color Display, 256K RAM, 10Mb Drive</name>
 	<computer id="xt-cga-256k" name="IBM PC XT"/>
-	<ram id="ramLow" addr="0x00000"/>
+	<ram id="ramLow" addr="0x00000" test="false"/>
 	<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pcx86/hdc/ibm-xebec-1982.json"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5160/basic/BASIC110.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5160/1982-11-08/XTBIOS-REV1.json"/>

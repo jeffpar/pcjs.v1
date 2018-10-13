@@ -20,7 +20,7 @@ PCjs also supports IBM PC-compatibles such as:
 
 * [AT&amp;T](/devices/pcx86/machine/att/) ([AT&amp;T 6300](/devices/pcx86/machine/att/6300/))
 * [Columbia Data Products](/devices/pcx86/machine/cdp/) ([MPC 1600](/devices/pcx86/machine/cdp/mpc1600/cga/640kb/))
-* [COMPAQ](/devices/pcx86/machine/compaq/) ([DeskPro 386](/devices/pcx86/machine/compaq/deskpro386/))
+* [COMPAQ](/devices/pcx86/machine/compaq/) ([Portable](/devices/pcx86/machine/compaq/portable/), [DeskPro 386](/devices/pcx86/machine/compaq/deskpro386/))
 * [Zenith Data Systems](/devices/pcx86/machine/zenith/) ([Z-150](/devices/pcx86/machine/zenith/z150/cga/640kb/))
 
 ### Ready-To-Run App Demos
