@@ -138,7 +138,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
      * Note that the "resources" variable has been added to our externs.js, to prevent it from being renamed
      * by the Closure Compiler.
      */
-    matchScript = sPCJS.match(/^(\s*\(function\(\){)([\s\S]*)(}\)\(\);)/);
+    matchScript = sPCJS.match(/^(\s*\(function\(\){)([\s\S]*)(}\)\(\);?)/);
     if (!matchScript) {
         /*
          * If the match failed, we assume that a DEBUG (uncompiled) script is being used,

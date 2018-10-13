@@ -18,7 +18,7 @@ PCjs includes device configurations for the following machines:
 * [8088](pcx86/) [IBM PC](pcx86/machine/5150/) and [Compatibles](pcx86/machine/)
 * [8088](pcx86/) [IBM PC XT](pcx86/machine/5160/)
 * [80286](pcx86/) [IBM PC AT](pcx86/machine/5170/)
-* [80386](pcx86/) [COMPAQ DeskPro 386](pcx86/machine/compaq/)
+* [COMPAQ](pcx86/machine/compaq) [Portable](pcx86/machine/compaq/portable/) and [DeskPro 386](pcx86/machine/compaq/deskpro386/)
 * [PDP-10](pdp10/) (e.g., [Model KA10](pdp10/machine/ka10/))
 * [PDP-11](pdp11/) (e.g., [PDP-11/20](pdp11/machine/1120/), [PDP-11/45](pdp11/machine/1145/), and [PDP-11/70](pdp11/machine/1170/))
 
