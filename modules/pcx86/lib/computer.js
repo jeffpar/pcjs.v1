@@ -587,7 +587,7 @@ class Computer extends Component {
         if (value === undefined && parmsComponent) {
             value = parmsComponent[sParm];
         }
-        if (value === undefined && typeof resources == 'object' && resources[sParm]) {
+        if (!value && typeof resources == 'object' && resources[sParm]) {
             value = sParm;
         }
         return value;
@@ -626,6 +626,7 @@ class Computer extends Component {
     doneLoad(sURL, sStateData, nErrorCode)
     {
         if (!nErrorCode) {
+            Component.addMachineResource(this.idMachine, sURL, sStateData);
             this.sStateData = sStateData;
             this.fStateData = true;
             if (DEBUG && this.messageEnabled()) {
