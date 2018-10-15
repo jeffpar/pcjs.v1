@@ -121,11 +121,11 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
      *
      * at the top and:
      *
-     *      ...})();
+     *      ...})()
      *
      * at the bottom, thanks to the following Closure Compiler option:
      *
-     *      --output_wrapper "(function(){%output%})();"
+     *      --output_wrapper "(function(){%output%})()"
      *
      * NOTE: There may also be a source map comment appended to the script, which we now ignore; eg:
      *
@@ -216,7 +216,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
 
         sAlert += ', copy it to your web server as "' + sScript + '", and then add the following to your web page:\n\n';
         sAlert += '<div id="' + idMachine + '"></div>\n';
-        sAlert += '...\n';
+        // sAlert += '...\n';
         sAlert += '<script src="' + sScript + '"></script>\n';
 
         /*
