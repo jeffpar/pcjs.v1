@@ -587,8 +587,19 @@ class Computer extends Component {
         if (value === undefined && parmsComponent) {
             value = parmsComponent[sParm];
         }
-        if (!value && typeof resources == 'object' && resources[sParm]) {
-            value = sParm;
+        if (!value && typeof resources == 'object') {
+            if (resources[sParm]) {
+                value = sParm;
+            }
+            else {
+                try {
+                    let parms = JSON.parse(resources['parms']);
+                    value = parms[sParm];
+                }
+                catch(err) {
+                    Component.error(err.message + " (" + resources['parms'] + ")");
+                }
+            }
         }
         return value;
     }

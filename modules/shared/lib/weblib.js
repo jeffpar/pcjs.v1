@@ -192,13 +192,13 @@ class Web {
             return [resource, nErrorCode];
         }
         else if (fAsync && typeof resources == 'function') {
-            resources(sURL, function(resource, nErrorCode)
-            {
+            resources(sURL, function(resource, nErrorCode) {
                 if (done) done(sURL, resource, nErrorCode);
             });
             return response;
         }
 
+        let sURLRedirect = sURL;
         if (Web.getHost() == "pcjs:8088" || NODE) {
             /*
              * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
@@ -206,15 +206,15 @@ class Web {
              *
              * NOTE: http://archive.pcjs.org is currently redirected to https://s3-us-west-2.amazonaws.com/archive.pcjs.org
              */
-            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
-            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-[a-z]+|private-[a-z]+)\/(.*)$/, "/$1/$2");
+            sURLRedirect = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
+            sURLRedirect = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-[a-z]+|private-[a-z]+)\/(.*)$/, "/$1/$2");
         }
         else {
             /*
              * TODO: Perhaps it's time for our code in netlib.js to finally add support for HTTPS; for now
              * though, it's just as well that the NODE environment assumes all resources are available locally.
              */
-            sURL = sURL.replace(/^\/(pcjs-[a-z]+|private-[a-z]+)\//, "https://jeffpar.github.io/$1/");
+            sURLRedirect = sURL.replace(/^\/(pcjs-[a-z]+|private-[a-z]+)\//, "https://jeffpar.github.io/$1/");
         }
 
         if (NODE) {
@@ -225,7 +225,7 @@ class Web {
              *      if (!Component) Component = require("./component");
              */
             let Net = require("./netlib");
-            return Net.getResource(sURL, type, fAsync, done);
+            return Net.getResource(sURLRedirect, type, fAsync, done);
         }
 
         let request = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
@@ -263,23 +263,23 @@ class Web {
             try {
                 resource = fArrayBuffer? request.response : request.responseText;
             } catch(err) {
-                if (MAXDEBUG) Web.log("xmlHTTPRequest(" + sURL + ") exception: " + err.message);
+                if (MAXDEBUG) Web.log("xmlHTTPRequest(" + sURLRedirect + ") exception: " + err.message);
             }
             /*
              * The normal "success" case is a non-null resource and an HTTP status code of 200, but when loading files from the
              * local file system (ie, when using the "file:" protocol), we have to be a bit more flexible.
              */
             if (resource != null && (request.status == 200 || !request.status && resource.length && Web.getHostProtocol() == "file:")) {
-                if (MAXDEBUG) Web.log("xmlHTTPRequest(" + sURL + "): returned " + resource.length + " bytes");
+                if (MAXDEBUG) Web.log("xmlHTTPRequest(" + sURLRedirect + "): returned " + resource.length + " bytes");
             }
             else {
                 nErrorCode = request.status || -1;
-                Web.log("xmlHTTPRequest(" + sURL + "): error code " + nErrorCode);
+                Web.log("xmlHTTPRequest(" + sURLRedirect + "): error code " + nErrorCode);
                 if (!request.status && !Web.fAdBlockerWarning) {
-                    let match = sURL.match(/(^https?:\/\/[^\/]+)(.*)/);
+                    let match = sURLRedirect.match(/(^https?:\/\/[^\/]+)(.*)/);
                     if (match) {
                         Web.fAdBlockerWarning = true;
-                        Component.alertUser("PCjs was unable to perform a cross-origin resource request to '" + match[1] + "'.\n\nIf you're running an ad blocker, try adding '" + Web.getHostOrigin() + "' to your whitelist (or get a smarter ad blocker, because there are NO ads on this website).");
+                        Component.alertUser("PCjs was unable to perform a cross-origin resource request to '" + match[1] + "'.\n\nIf you're running an ad blocker, try adding '" + Web.getHostOrigin() + "' to your whitelist (or find a smarter ad blocker).");
                     }
                 }
             }
@@ -302,13 +302,13 @@ class Web {
                 sPost += p + '=' + encodeURIComponent(type[p]);
             }
             sPost = sPost.replace(/%20/g, '+');
-            if (MAXDEBUG) Web.log("Web.getResource(POST " + sURL + "): " + sPost.length + " bytes");
-            request.open("POST", sURL, fAsync);
+            if (MAXDEBUG) Web.log("Web.getResource(POST " + sURLRedirect + "): " + sPost.length + " bytes");
+            request.open("POST", sURLRedirect, fAsync);
             request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             request.send(sPost);
         } else {
-            if (MAXDEBUG) Web.log("Web.getResource(GET " + sURL + ")");
-            request.open("GET", sURL, fAsync);
+            if (MAXDEBUG) Web.log("Web.getResource(GET " + sURLRedirect + ")");
+            request.open("GET", sURLRedirect, fAsync);
             if (type == "arraybuffer") {
                 if (fXHR2) {
                     fArrayBuffer = true;
