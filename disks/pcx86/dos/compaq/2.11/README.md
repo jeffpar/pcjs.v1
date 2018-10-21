@@ -26,7 +26,6 @@ Released in 1984 by COMPAQ Computer Corp, this early version of MS-DOS displays 
     (C) Copyright Microsoft 1981, 82, 83                                            
 
 A directory listing of the diskette is provided [below](#directory-of-compaq-ms-dos-211).
-
 We also have copies of the original [COMPAQ MS-DOS Version 2 Documentation](/pubs/pc/software/dos/COMPAQ200/).
 
 {% include machine.html id="ibm5160-compaq211" %}

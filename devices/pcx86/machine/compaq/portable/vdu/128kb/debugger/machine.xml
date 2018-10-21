@@ -5,7 +5,7 @@
 	<computer id="compaq-vdu-128k" name="COMPAQ Portable"/>
 	<ram id="ramLow" addr="0x00000"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/compaq/portable/100518-001-REVB.json"/>
-	<video ref="/devices/pcx86/video/ibm/cga/ibm-cga.xml" flicker="0"/>
+	<video ref="/devices/pcx86/video/compaq/vdu/compaq-vdu.xml"/>
 	<fdc ref="/disks/pcx86/library.xml" autoMount='{A:{name:"COMPAQ MS-DOS 1.10"}, B:{name:"None"}}'/>
 	<cpu id="cpu8088" model="8088"/>
 	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>

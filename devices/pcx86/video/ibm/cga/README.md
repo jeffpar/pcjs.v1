@@ -22,9 +22,9 @@ visual indicators), display behaviors (eg, touchscreen support, mouse pointer lo
 Here's what *ibm-cga.xml* currently looks like:
 
 ```xml
-<video id="videoCGA" screenwidth="960" screenheight="480" scale="true" charset="/devices/pcx86/video/ibm/cga/ibm-cga.json" pos="center" padding="8px">
+<video id="videoCGA" screenWidth="1280" screenHeight="800" fontROM="/devices/pcx86/video/ibm/cga/ibm-cga.json" pos="center" padding="8px">
     <menu>
-        <title>Color Display</title>
+        <title>IBM Color Display</title>
         <control type="container" pos="right">
             <control type="led" label="Caps" binding="caps-lock" padleft="8px"/>
             <control type="led" label="Num" binding="num-lock" padleft="8px"/>

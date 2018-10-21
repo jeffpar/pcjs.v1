@@ -1151,7 +1151,7 @@ Card.CGA = {
         BLINK_ENABLE:       0x20        // same as MDA.MODE.BLINK_ENABLE
     },
     COLOR: {
-        PORT:               0x3D9,      // write-only
+        PORT:               0x3D9,      // Color Select Register, aka Overscan Register (write-only)
         BORDER:             0x07,
         BRIGHT:             0x08,
         BGND_ALT:           0x10,       // alternate, intensified background colors in text mode
@@ -2423,9 +2423,9 @@ class Video extends Component {
         this.bindingsExternal = [];
 
         /*
-         * This records the model specified (eg, "mda", "cga", "ega", "vga" or "" if none specified);
-         * when a model is specified, it overrides whatever model we infer from the ChipSet's switches
-         * (since those motherboard switches tell us only the type of monitor, not the type of card).
+         * This records the model specified (eg, "mda", "cga", "ega", "vga", "vdu", or "" if no model
+         * is specified); when a model is specified, it overrides whatever model we infer from the ChipSet's
+         * switches (since those motherboard switches tell us only the type of monitor, not the type of card).
          */
         this.model = parmsVideo['model'];
         let aModelDefaults = Video.MODEL[this.model] || Video.MODEL['mda'];
@@ -3546,7 +3546,7 @@ class Video extends Component {
          * switch settings.  Conversely, when no model is specified, the nCard setting is considered provisional,
          * so the monitor switch settings, if any, are allowed to determine the card type.
          */
-        if (!this.model) {
+        if (!Video.MODEL[this.model]) {
             this.nCard = (nMonitorType == ChipSet.MONITOR.MONO? Video.CARD.MDA : Video.CARD.CGA);
         }
 
@@ -7400,10 +7400,16 @@ class Video extends Component {
          * VGA ROM's logic requires it, so now we also check fActive.  However, we ignore only CTRC reads;
          * we retain any writes in case that information proves useful later.
          *
+         * For the COMPAQ VDU, we must make an exception, because regardless which "half" of the VDU is currently
+         * active (the text side or the graphics side), the COMPAQ Portable ROM expects both halves to always respond;
+         * set a breakpoint at F000:E48D to see their code in action.
+         *
          * Note that returning an undefined value now signals the Bus component to return whatever default value
          * it prefers (normally 0xff).
          */
-        if (card.fActive && card.regCRTIndx < card.nCRTCRegs) b = card.regCRTData[card.regCRTIndx];
+        if ((card.fActive || card.video.model == "vdu") && card.regCRTIndx < card.nCRTCRegs) {
+            b = card.regCRTData[card.regCRTIndx];
+        }
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(port /* card.port + 1 */, undefined, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx], b);
         }
