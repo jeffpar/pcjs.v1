@@ -22,22 +22,22 @@ visual indicators), display behaviors (eg, touchscreen support, mouse pointer lo
 Here's what *ibm-mda.xml* currently looks like:
 
 ```xml
-<video id="videoMDA" screenWidth="1440" screenHeight="900" scale="true" smoothing="false" fontROM="/devices/pcx86/video/ibm/mda/ibm-mda.json" pos="center" padding="8px">
+<video id="videoMDA" screenWidth="1440" screenHeight="900" fontROM="/devices/pcx86/video/ibm/mda/ibm-mda.json" pos="center" padding="8px">
     <menu>
-    <title>Monochrome Display</title>
-    <control type="container" pos="right">
-        <control type="led" label="Caps" binding="caps-lock" padleft="8px"/>
-        <control type="led" label="Num" binding="num-lock" padleft="8px"/>
-        <control type="led" label="Scroll" binding="scroll-lock" padleft="8px"/>
-    </control>
+        <title>IBM Monochrome Display</title>
+        <control type="container" pos="right">
+            <control type="led" label="Caps" binding="caps-lock" padleft="8px"/>
+            <control type="led" label="Num" binding="num-lock" padleft="8px"/>
+            <control type="led" label="Scroll" binding="scroll-lock" padleft="8px"/>
+        </control>
     </menu>
 </video>
 ```
 
 The following IBM MDA configuration files are currently available:
 
- - [ibm-mda.xml](ibm-mda.xml)
- - [ibm-mda-dual.xml](ibm-mda-dual.xml)
+- [ibm-mda.xml](ibm-mda.xml)
+- [ibm-mda-dual.xml](ibm-mda-dual.xml)
 
 The only difference between the first (single display) configuration and the second (dual display) configuration is
 that the *model* attribute is explicitly set to "mda" in the latter.  This informs the machine that it cannot dynamically

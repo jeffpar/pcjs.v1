@@ -1151,7 +1151,7 @@ Card.CGA = {
         BLINK_ENABLE:       0x20        // same as MDA.MODE.BLINK_ENABLE
     },
     COLOR: {
-        PORT:               0x3D9,      // write-only
+        PORT:               0x3D9,      // Color Select Register, aka Overscan Register (write-only)
         BORDER:             0x07,
         BRIGHT:             0x08,
         BGND_ALT:           0x10,       // alternate, intensified background colors in text mode
@@ -2423,9 +2423,9 @@ class Video extends Component {
         this.bindingsExternal = [];
 
         /*
-         * This records the model specified (eg, "mda", "cga", "ega", "vga" or "" if none specified);
-         * when a model is specified, it overrides whatever model we infer from the ChipSet's switches
-         * (since those motherboard switches tell us only the type of monitor, not the type of card).
+         * This records the model specified (eg, "mda", "cga", "ega", "vga", "vdu", or "" if no model
+         * is specified); when a model is specified, it overrides whatever model we infer from the ChipSet's
+         * switches (since those motherboard switches tell us only the type of monitor, not the type of card).
          */
         this.model = parmsVideo['model'];
         let aModelDefaults = Video.MODEL[this.model] || Video.MODEL['mda'];
@@ -2498,6 +2498,16 @@ class Video extends Component {
          * 1 to 0 briefly, alternately revealing and hiding the underlying container element, to simulate
          * screen "flicker".
          */
+        this.colorFont = parmsVideo['fontColor'];
+        if (this.colorFont) {
+            this.rgbFont = [0xff, 0xff, 0xff, 0xff];
+            let i = 0, j = 0, s;
+            if (this.colorFont[i] == '#') i++;
+            while ((s = this.colorFont.substr(i, 2))) {
+                this.rgbFont[j++] = Number.parseInt(s, 16);
+                i += 2;
+            }
+        }
         this.colorScreen = parmsVideo['screenColor'] || "black";
         this.opacityFlicker = (1 - (Web.getURLParm('flicker') || parmsVideo['flicker'] || 0)).toString();
         this.fOpacityReduced = false;
@@ -3546,7 +3556,7 @@ class Video extends Component {
          * switch settings.  Conversely, when no model is specified, the nCard setting is considered provisional,
          * so the monitor switch settings, if any, are allowed to determine the card type.
          */
-        if (!this.model) {
+        if (!Video.MODEL[this.model]) {
             this.nCard = (nMonitorType == ChipSet.MONITOR.MONO? Video.CARD.MDA : Video.CARD.CGA);
         }
 
@@ -3946,7 +3956,7 @@ class Video extends Component {
              * Only 2 total colors.
              */
             this.aRGB[0] = Video.aCGAColors[Video.ATTRS.FGND_BLACK];
-            this.aRGB[1] = Video.aCGAColors[Video.ATTRS.FGND_WHITE];
+            this.aRGB[1] = this.getFontColor(Video.aCGAColors, Video.ATTRS.FGND_WHITE);
             return this.aRGB;
         }
 
@@ -3972,19 +3982,19 @@ class Video extends Component {
                 if (bBackground & Card.ATC.PALETTE.BRIGHT) regColor |= Card.CGA.COLOR.BRIGHT;
                 if ((this.cardEGA.regATCData[1] & 0x0f) == 0x03) regColor |= Card.CGA.COLOR.COLORSET1;
             }
-            this.aRGB[0] = Video.aCGAColors[regColor & (Card.CGA.COLOR.BORDER | Card.CGA.COLOR.BRIGHT)];
+            this.aRGB[0] = this.getFontColor(Video.aCGAColors, regColor & (Card.CGA.COLOR.BORDER | Card.CGA.COLOR.BRIGHT));
             let aColorSet = (regColor & Card.CGA.COLOR.COLORSET1)? Video.aCGAColorSet1 : Video.aCGAColorSet0;
             for (let iColor = 0; iColor < aColorSet.length; iColor++) {
-                this.aRGB[iColor + 1] = Video.aCGAColors[aColorSet[iColor]];
+                this.aRGB[iColor + 1] = this.getFontColor(Video.aCGAColors, aColorSet[iColor]);
             }
             return this.aRGB;
         }
 
         if (this.cardColor === this.cardCGA) {
-            /*
-             * There's no need to update this.aRGB if we simply want to return a hard-coded set of 16 colors.
-             */
-            return Video.aCGAColors;
+            for (let iColor = 0; iColor < Video.aCGAColors.length; iColor++) {
+                this.aRGB[iColor] = this.getFontColor(Video.aCGAColors, iColor);
+            }
+            return this.aRGB;
         }
 
         this.assert(this.cardColor === this.cardEGA);
@@ -4057,6 +4067,57 @@ class Video extends Component {
         }
 
         return this.aRGB;
+    }
+
+    /**
+     * getFontColor(aColors, iColor)
+     *
+     * If no 'fontColor' property override was specified, then this function simply returns the iColor entry
+     * in aColors.
+     *
+     * Otherwise, we convert iColor to a signed value, where zero represents fontColor, negative values represent
+     * darker shades, and positive values represent lighter shades.  Next, since rgbFont already contains the RGB
+     * values from 'fontColor', we find the smallest and largest values in rgbFont (NOTE: these min and max values
+     * should really be cached).  Those values tell us how many times we can decrement or increment all the RGB
+     * values in unison, changing the intensity of the color without changing the hue.  We then calculate an RGB
+     * value corresponding to iColor.
+     *
+     * @this {Video}
+     * @param {Array} aColors
+     * @param {number} iColor
+     * @return {Array}
+     */
+    getFontColor(aColors, iColor)
+    {
+        if (!this.colorFont) {
+            return aColors[iColor];
+        }
+        let nColors = aColors.length;
+        let nRange = (nColors >> 1);
+        /*
+         * When nColors is 16, nRange is 8, and iColor (originally 0-15) is now -7 to 8
+         */
+        iColor = (iColor + 1) - nRange;
+        if (!iColor) {
+            return this.rgbFont;
+        }
+        let rgb = [0x00, 0x00, 0x00, 0xff];
+        let i, nDelta, nMin = 0xff, nMax = 0;
+        for (i = 0; i < 3; i++) {
+            if (nMin > this.rgbFont[i]) nMin = this.rgbFont[i];
+            if (nMax < this.rgbFont[i]) nMax = this.rgbFont[i];
+        }
+        if (iColor < 0) {
+            nDelta = nMax / (nRange - 1);       // NOTE: Since I now use nMax instead of nMin here, we could just drop nMin
+        } else {
+            nDelta = (0x100 - nMax) / nRange;
+        }
+        for (i = 0; i < 3; i++) {
+            rgb[i] = (this.rgbFont[i] + nDelta * iColor)|0;
+            if (rgb[i] < 0) rgb[i] = 0;
+            if (rgb[i] > 0xff) rgb[i] = 0xff;
+        }
+        return rgb;
     }
 
     /**
@@ -5003,7 +5064,12 @@ class Video extends Component {
                  * font is stored in plane 2, so if the card is "newer" than the default font, update the default
                  * to match the card.
                  */
-                if (this.nCard > this.nCardFont) this.nCardFont = this.nCard;
+                if (this.model == "vdu") {
+                    this.nCardFont = Video.CARD.MDA;
+                }
+                else if (this.nCard > this.nCardFont) {
+                    this.nCardFont = this.nCard;
+                }
                 this.buildFont();           // this also updates nActiveFont and nAlternateFont
                 let font = this.aFonts[this.nActiveFont];
                 if (font) {
@@ -7400,10 +7466,16 @@ class Video extends Component {
          * VGA ROM's logic requires it, so now we also check fActive.  However, we ignore only CTRC reads;
          * we retain any writes in case that information proves useful later.
          *
+         * For the COMPAQ VDU, we must make an exception, because regardless which "half" of the VDU is currently
+         * active (the text side or the graphics side), the COMPAQ Portable ROM expects both halves to always respond;
+         * set a breakpoint at F000:E48D to see their code in action.
+         *
          * Note that returning an undefined value now signals the Bus component to return whatever default value
          * it prefers (normally 0xff).
          */
-        if (card.fActive && card.regCRTIndx < card.nCRTCRegs) b = card.regCRTData[card.regCRTIndx];
+        if ((card.fActive || card.video.model == "vdu") && card.regCRTIndx < card.nCRTCRegs) {
+            b = card.regCRTData[card.regCRTIndx];
+        }
         if (!addrFrom || this.messageEnabled()) {
             this.printMessageIO(port /* card.port + 1 */, undefined, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx], b);
         }
