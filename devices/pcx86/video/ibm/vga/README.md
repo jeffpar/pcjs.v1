@@ -39,8 +39,8 @@ Here's what *ibm-vga-autolockfs.xml* currently looks like:
 
 The following IBM VGA configuration files are currently available:
 
- - [ibm-vga-autolockfs.xml](1986-10-27/ibm-vga-autolockfs.xml)
- - [ibm-vga-lockfs.xml](1986-10-27/ibm-vga-lockfs.xml)
+- [ibm-vga-autolockfs.xml](1986-10-27/ibm-vga-autolockfs.xml)
+- [ibm-vga-lockfs.xml](1986-10-27/ibm-vga-lockfs.xml)
 
 ### IBM VGA ROM
 

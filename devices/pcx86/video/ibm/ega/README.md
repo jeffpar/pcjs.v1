@@ -38,17 +38,17 @@ Here's what *ibm-ega-5154-64k.xml* currently looks like:
 
 The following IBM EGA configuration files are currently available:
 
- - [ibm-ega-5151-256k.xml](1984-09-13/ibm-ega-5151-256k.xml)
- - [ibm-ega-5153-256k.xml](1984-09-13/ibm-ega-5153-256k.xml)
- - [ibm-ega-5154-64k.xml](1984-09-13/ibm-ega-5154-64k.xml)
- - [ibm-ega-5154-128k.xml](1984-09-13/ibm-ega-5154-128k.xml)
- - [ibm-ega-5154-128k-autolock640.xml](1984-09-13/ibm-ega-5154-128k-autolock640.xml)
- - [ibm-ega-5154-128k-autolockfs.xml](1984-09-13/ibm-ega-5154-128k-autolockfs.xml)
- - [ibm-ega-5154-128k-lockfs.xml](1984-09-13/ibm-ega-5154-128k-lockfs.xml)
- - [ibm-ega-5154-256k.xml](1984-09-13/ibm-ega-5154-256k.xml)
- - [ibm-ega-5154-256k-autolock640.xml](1984-09-13/ibm-ega-5154-256k-autolock640.xml)
- - [ibm-ega-5154-256k-autolockfs.xml](1984-09-13/ibm-ega-5154-256k-autolockfs.xml)
- - [ibm-ega-5154-256k-lockfs.xml](1984-09-13/ibm-ega-5154-256k-lockfs.xml)
+- [ibm-ega-5151-256k.xml](1984-09-13/ibm-ega-5151-256k.xml)
+- [ibm-ega-5153-256k.xml](1984-09-13/ibm-ega-5153-256k.xml)
+- [ibm-ega-5154-64k.xml](1984-09-13/ibm-ega-5154-64k.xml)
+- [ibm-ega-5154-128k.xml](1984-09-13/ibm-ega-5154-128k.xml)
+- [ibm-ega-5154-128k-autolock640.xml](1984-09-13/ibm-ega-5154-128k-autolock640.xml)
+- [ibm-ega-5154-128k-autolockfs.xml](1984-09-13/ibm-ega-5154-128k-autolockfs.xml)
+- [ibm-ega-5154-128k-lockfs.xml](1984-09-13/ibm-ega-5154-128k-lockfs.xml)
+- [ibm-ega-5154-256k.xml](1984-09-13/ibm-ega-5154-256k.xml)
+- [ibm-ega-5154-256k-autolock640.xml](1984-09-13/ibm-ega-5154-256k-autolock640.xml)
+- [ibm-ega-5154-256k-autolockfs.xml](1984-09-13/ibm-ega-5154-256k-autolockfs.xml)
+- [ibm-ega-5154-256k-lockfs.xml](1984-09-13/ibm-ega-5154-256k-lockfs.xml)
 
 ### IBM EGA ROM
 

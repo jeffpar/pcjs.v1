@@ -36,6 +36,6 @@ Here's what *compaq-vdu.xml* currently looks like:
 
 The following COMPAQ VDU configuration files are currently available:
 
- - [compaq-vdu.xml](compaq-vdu.xml)
+- [compaq-vdu.xml](compaq-vdu.xml)
 
 Until we can dump an original COMPAQ VDU character ROM, our configurations are using the [IBM MDA Character ROM](../../ibm/mda/#ibm-mda-character-rom).

@@ -36,10 +36,10 @@ Here's what *ibm-cga.xml* currently looks like:
 
 The following IBM CGA configuration files are currently available:
 
- - [ibm-cga.xml](ibm-cga.xml)
- - [ibm-cga-dual.xml](ibm-cga-dual.xml)
- - [ibm-cga-keygrid.xml](ibm-cga-keygrid.xml)
- - [ibm-cga-lock.xml](ibm-cga-lock.xml)
+- [ibm-cga.xml](ibm-cga.xml)
+- [ibm-cga-dual.xml](ibm-cga-dual.xml)
+- [ibm-cga-keygrid.xml](ibm-cga-keygrid.xml)
+- [ibm-cga-lock.xml](ibm-cga-lock.xml)
 
 ### IBM CGA Character ROM
 

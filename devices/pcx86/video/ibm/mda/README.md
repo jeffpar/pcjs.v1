@@ -36,8 +36,8 @@ Here's what *ibm-mda.xml* currently looks like:
 
 The following IBM MDA configuration files are currently available:
 
- - [ibm-mda.xml](ibm-mda.xml)
- - [ibm-mda-dual.xml](ibm-mda-dual.xml)
+- [ibm-mda.xml](ibm-mda.xml)
+- [ibm-mda-dual.xml](ibm-mda-dual.xml)
 
 The only difference between the first (single display) configuration and the second (dual display) configuration is
 that the *model* attribute is explicitly set to "mda" in the latter.  This informs the machine that it cannot dynamically
