@@ -21,7 +21,7 @@ However, when I booted the machine, the BIOS displayed error 501 in the top left
 error down to the following code, which sets the CGA Mode register to 0x21 (instead of the normal 0x2D),
 programs the CRTC's CURSORLO/CURSORHI registers to a large value (0xAA55 is masked with 0x3FFF yielding
 0x2A55), then reads CURSORHI, expecting 0x2A, and then finally verifies the existence of video memory at
-B800:0000; ie, it expects the frame buffer to be addressible at both MDA and CGA addresses.
+B800:0000; it seems to expect the frame buffer to be addressible at both MDA and CGA addresses.
 
     &F000:E48D C70672003412     MOV      [0072],1234              ;history=4
     &F000:E493 A06500           MOV      AL,[0065]                ;history=3
@@ -86,9 +86,8 @@ B800:0000; ie, it expects the frame buffer to be addressible at both MDA and CGA
 A [1986 COMPAQ Maintenance and Service Guide](http://www.minuszerodegrees.net/manuals/Compaq%20Portable_Plus_286%20-%20Maintenance%20and%20Service%20Guide.pdf)
 indicated that error 501 was a "Display Controller Failure (Video Display or Video Controller Board)".
 And the [1982 COMPAQ Operations Guide](/pubs/pc/software/dos/compaq/1.10) contained some information on switch
-settings on p. 18 of the "320-KBYTE DISK DRIVE" manual (p. 259 of the entire PDF).
-
-COMPAQ documented only two values for the SW1 monitor switches:
+settings on p. 18 of the "320-KBYTE DISK DRIVE" manual (p. 259 of the entire PDF), where it documents only two
+values for the SW1 monitor switches:
 
 - `10`: COMPAQ VIDEO BOARD (DEFAULT)
 - `00`: COMPAQ VIDEO & IBM MONOCHROME BOARDS
@@ -105,24 +104,15 @@ COMPAQ's descriptions were a bit cryptic, but since I had already tried `00`, th
 On this new boot attempt, there was no cursor initially, and two different errors were displayed: 301
 and 401.  But then the COMPAQ MS-DOS 1.10 date and time prompts appeared -- success!
 
-I never expected this machine to work the first time, or even the second time, because I had never executed
-a COMPAQ Portable ROM before, and the PCx86 [Video](/modules/pcx86/lib/video.js) component doesn't yet know how
-to properly emulator a COMPAQ video (VDU) board, which is capable of mimicking both MDA and CGA adapters.
-
-I had assumed that a COMPAQ Portable would prefer to boot up in a monochrome mode, since the boot process is
-text-based, and monochrome text looks better than color graphics text.  And that may still be true.  The BIOS
-may simply be confused by how the video card is responding, and it may be falling back to some default behavior
-that is less "fatal" than my first attempt.
-
-Ignoring VDU compatibility for the moment, the next order of business was to isolate the cause of other errors:
-301 ("Keyboard Error") and 401 ("Printer Error").
+Ignoring the SW1 monitor error for the moment, the next order of business was to isolate the cause of other
+errors: 301 ("Keyboard Error") and 401 ("Printer Error").
 
 It turned out that the printer issue was easily resolved by changing the parallel port's adapter number from 2 to 1,
 which changes the port's base I/O address from 0x378 to 0x3BC.  The latter is what's normally used by the built-in
 parallel port on an IBM monochrome adapter, so either COMPAQ used the same default address *or* the BIOS assumed that
 a monochrome card was installed.  Or something like that.
 
-Next, I'll work on figuring out the keyboard error, and then I'll start analyzing how the COMPAQ BIOS detects and
+Next, I'll work on figuring out the keyboard error, and then I'll take a look at how the COMPAQ BIOS detects and
 initializes the video hardware.
 
 Keyboard Error
@@ -353,11 +343,11 @@ component's *msTransmit* value up from 15ms to 25ms.
 
 So that's what I did, and happily, it seems to have cured the 301 keyboard error.
 
-Studying the COMPAQ VDU
------------------------
+Revisiting the COMPAQ VDU
+-------------------------
 
-As a baseline, let's look at all [IBM 5150 MDA](/devices/pcx86/machine/5150/mda/64kb/debugger/) I/O performed during
-ROM POST:
+For a baseline, I first looked at all [IBM 5150 MDA](/devices/pcx86/machine/5150/mda/64kb/debugger/) I/O performed by
+the IBM ROM:
 
     videoMDA.outPort(0x03D8,MODE,0x00) at F000:E0C3
     videoMDA.outPort(0x03B8,MODE,0x01) at F000:E0C9
@@ -473,14 +463,15 @@ ROM POST:
     bus.inPort(0x0278,unknown) at F000:E5C1
     bus.inPort(0x0201,unknown) at F000:E605
 
-NOTE: The writes to port 3B9 is from code that initializes the Color Select (aka Overscan) register, which doesn't
+NOTE: The writes to port 3B9 are from code that initializes the Color Select (aka Overscan) register, which doesn't
 exist on an MDA; on a CGA, the port is 3D9.  Similarly, MDA port 3BC corresponds to CGA port 3DC (Light Pen), but like
 3B9, MDA ports 3BC and 3BD do not exist.
 
 One of things we see from the above programming patterns is that the ROM first writes 0x01 to the Mode register,
 then reprograms the CRTC, and finally writes 0x29 to the Mode register.
 
-Now let's look at how COMPAQ programs its VDU, when SW1 monitor switches, SW1[5] and SW1[6], are set to `10`:
+Now let's look at how COMPAQ programs its VDU, when SW1 monitor switches SW1[5] and SW1[6] are set to `00`, indicating
+a monochrome monitor:
 
     PCx86 v1.72.3
     Copyright © 2012-2018 Jeff Parsons <Jeff@pcjs.org>
