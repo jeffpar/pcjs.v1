@@ -8018,7 +8018,7 @@ Video.MODEL = {
  * whereas only 5% of the MDA's 370 maximum represents non-visible lines; is there really that much "overscan"
  * on the CGA?
  *
- * For each monitor type, there's a Video.monitorSpecs object that describes the horizontal and vertical
+ * For each monitor type, there's a MonitorSpecs object that describes the horizontal and vertical
  * timings, along with my assumptions about the percentage of time that drawing is "active" within those periods,
  * and then based on the selected monitor type, I compute the number of CPU cycles that each period lasts,
  * as well as the number of CPU cycles that drawing lasts within each period, so that the horizontal and vertical
