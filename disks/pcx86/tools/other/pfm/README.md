@@ -11,7 +11,7 @@ machines:
       A:
         name: PC DOS 2.00 (Disk 1)
       B:
-        name: PFM (Paul's File Manager)
+        name: PFM (Paul&apos;s File Manager) 3.14
     autoType: $date\r$time\r
 ---
 
@@ -31,19 +31,22 @@ In October 2018, I contacted the author, Paul Culley, who provided a brief histo
 > TI Personal computer (in some ways similar to the IBM PC) I wanted to be able to use MSDOS a bit easier,
 > so in my spare time I began work on PFM.  When I left TI, they claimed everything I wrote belonged to
 > them, so I had to start over, when I started working for Compaq.  I think the rewrite worked out much better.
->
+
 > It evolved over the early years a bit but stagnated when Windows XP became popular.  Since it is based on
 > MSDOS, it only runs on MSDOS VMs or 32-bit versions of Windows that still have the MSDOS compatibility layer
 > (XP did, so did versions up to Vista).
->
+
 > I'm attaching the manual.  I guess you could have the source code if you wanted it as well, let me know.
->
+
 > FYI; Ted Emerson (still works for HP in Houston) took the source code and adapted it to the win32 APIs and
 > created a version that runs on Windows, the last time I spoke with him he said he still uses it to this day.
 > I never had a copy though.  I don't think he distributed it widely.
 
 The manual was a Microsoft Word document.  Using a modern version of Word, I was able to load the file in Compatibility
 Mode and then save it as plain text, which I've pasted below and modified slightly for proper rendering.
+
+`PFM.COM` is version 3.14 with an internal date of February 14, 1991, and according to Microsoft Word, `PFM.DOC`
+was last modified on January 2, 1997.
 
 {% include machine.html id="ibm5160-pcdos200" %}
 

@@ -1166,6 +1166,13 @@
       "webRoot": "${workspaceFolder}"
     },
     {
+      "name": "Disks: PFM (Paul's File Manager) 3.14",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/tools/other/pfm/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
       "name": "Disks: DoubleDOS 2.0F",
       "type": "chrome",
       "request": "launch",
