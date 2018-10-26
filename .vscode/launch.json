@@ -557,6 +557,13 @@
       "webRoot": "${workspaceFolder}"
     },
     {
+      "name": "Disks: COMPAQ MS-DOS 1.10",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/compaq/1.10/#compaq-portable-128kb",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
       "name": "Disks: COMPAQ MS-DOS 1.11",
       "type": "chrome",
       "request": "launch",
@@ -1156,6 +1163,13 @@
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:8088/disks/pcx86/tools/other/omniview/4.30/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: PFM (Paul's File Manager) 3.14",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/tools/other/pfm/",
       "webRoot": "${workspaceFolder}"
     },
     {

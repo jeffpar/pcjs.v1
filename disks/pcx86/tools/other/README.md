@@ -14,6 +14,7 @@ Information is available for these additional PC utilities.
 * [Norton Utilities](norton/)
 * [Omniview](omniview/)
 * [PC Tools](pctools/)
+* [PFM (Paul's File Manager)](pfm/)
 * [QEMM-386](qemm386/)
 * [Spacemaker](spacemaker/)
 * [UNP (Executable Unpacker)](unp/)

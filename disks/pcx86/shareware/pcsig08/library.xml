@@ -651,7 +651,6 @@
 		<disk path="/pcjs-disks/pcx86/tools/borland/pascal/6.00/TURBO-PASCAL-600-DISK2.json">Borland Turbo Pascal 6.00 (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/borland/pascal/6.00/TURBO-PASCAL-600-DISK3.json">Borland Turbo Pascal 6.00 (Disk 3)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/borland/pascal/6.00/TURBO-PASCAL-600-DISK4.json">Borland Turbo Pascal 6.00 (Disk 4)</disk>
-		<disk path="/pcjs-disks/pcx86/tools/compaq/pfm/COMPAQ-PFM.json">COMPAQ PFM 3.14</disk>
 		<disk path="/pcjs-disks/pcx86/tools/dresearch/pascal/3.11/PASCALMT311-DISK1.json">DR Pascal/MT+ 3.11 (Disk 1)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/dresearch/pascal/3.11/PASCALMT311-DISK2.json">DR Pascal/MT+ 3.11 (Disk 2)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/dresearch/pascal/3.11/PASCALMT311-DISK3.json">DR Pascal/MT+ 3.11 (Disk 3)</disk>
@@ -861,6 +860,7 @@
 		<disk path="/pcjs-disks/pcx86/tools/other/omniview/4.30/OMNIVIEW386-430.json">Omniview 386 4.30</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/pctools/1.03/PCTOOLS103.json">Central Point PC Tools 1.03</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/pctools/4.30/PCTOOLS430.json">Central Point PC Tools 4.30</disk>
+		<disk path="/pcjs-disks/pcx86/tools/other/pfm/COMPAQ-PFM.json">PFM (Paul&apos;s File Manager) 3.14</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/qemm386/4.10/QEMM386-410.json">QEMM-386 4.10</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/qemm386/4.23/QEMM386-423.json">QEMM-386 4.23</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/qemm386/5.13/QEMM386-513.json">QEMM-386 5.13</disk>
