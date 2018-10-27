@@ -12,7 +12,7 @@ machines:
         name: PC DOS 2.00 (Disk 1)
       B:
         name: PFM (Paul&apos;s File Manager) 3.14
-    autoType: $date\r$time\r
+    autoType: $date\r$time\r$10B:\rDIR\r
 ---
 
 PFM (Paul's File Manager)
@@ -43,7 +43,7 @@ In October 2018, I contacted the author, Paul Culley, who provided a brief histo
 > I never had a copy though.  I don't think he distributed it widely.
 
 The manual was a Microsoft Word document.  Using a modern version of Word, I was able to load the file in Compatibility
-Mode and then save it as plain text, which I've pasted below and modified slightly for proper rendering.
+Mode and then save it as plain text, which I've pasted below and modified slightly for the proper display on the website.
 
 `PFM.COM` is version 3.14 with an internal date of February 14, 1991, and according to Microsoft Word, `PFM.DOC`
 was last modified on January 2, 1997.
@@ -83,11 +83,11 @@ Then begin executing PFM as a command.
 
 EXAMPLE: `c:pfm`
 
-When PFM starts up for the first time, it will display a sign-on message and instruct you to enter the location where PFM has been placed.  If you do not want to run PFM at this time, just hit [ESC] on the keyboard to exit.  If you do, you should enter the entire pathname, including the drive letter, the path and the filename of PFM itself.  For example; if you placed PFM in the root directory on drive C: your response would be;
+When PFM starts up for the first time, it will display a sign-on message and instruct you to enter the location where PFM has been placed.  If you do not want to run PFM at this time, just hit **ESC** on the keyboard to exit.  If you do, you should enter the entire pathname, including the drive letter, the path and the filename of PFM itself.  For example; if you placed PFM in the root directory on drive C: your response would be;
 
 	Enter the complete new pathname of PFM:  c:\pfm.com
 
-Note that the cursor, [Ins], and [Del] keys work for changing the response.  PFM must remain in the drive where it is installed in order for correct operation of the "Help" and "Configuration" facilities.  If you move PFM or attempt to restart it from another drive, it will ask the installation questions again.
+Note that the cursor, **Ins**, and **Del** keys work for changing the response.  PFM must remain in the drive where it is installed in order for correct operation of the "Help" and "Configuration" facilities.  If you move PFM or attempt to restart it from another drive, it will ask the installation questions again.
 
 ### 4 UPDATE INSTALLATION
 
@@ -105,7 +105,7 @@ Then begin executing PFM as a command.
 
 EXAMPLE: `c:\temp\pfm`
 
-When PFM starts up for the first time, it will display a sign-on message and instruct you to enter the location where PFM has been placed.  If you do not want to run PFM at this time, just hit [ESC] on the keyboard to exit.  If you do, you should enter the entire pathname, including the drive letter, the path and the filename of the OLD version of PFM.  For example; if you placed the update PFM in the temp directory on drive C: and your old version was at the root, your response would be;
+When PFM starts up for the first time, it will display a sign-on message and instruct you to enter the location where PFM has been placed.  If you do not want to run PFM at this time, just hit **ESC** on the keyboard to exit.  If you do, you should enter the entire pathname, including the drive letter, the path and the filename of the OLD version of PFM.  For example; if you placed the update PFM in the temp directory on drive C: and your old version was at the root, your response would be;
 
 	Enter the complete new pathname of PFM:  c:\pfm.com
 
@@ -113,11 +113,11 @@ The update PFM will first examine your old PFM, pick up your configured 'Y' comm
 
 ### 5 AFTER THE INSTALLATION
 
-PFM will then put up it's title message and a prompt line asking for you to hit one of the characters [H] for help, [E] for editor name, [C] for color, [U] for cUrsor, [Y] for Your commands, or [ESC] to exit from this menu.
+PFM will then put up it's title message and a prompt line asking for you to hit one of the characters **H** for help, **E** for editor name, **C** for color, **U** for cUrsor, **Y** for Your commands, or **ESC** to exit from this menu.
 
 #### 5.1 Help
 
-If you enter "H" a help screen will appear which will remind you how to answer the other questions and configuration information.  (To exit HELP, hit the [F10], [Enter], or [ESC] keys).
+If you enter "H" a help screen will appear which will remind you how to answer the other questions and configuration information.  (To exit HELP, hit the **F10**, **Enter**, or **ESC** keys).
 
 #### 5.2 Editor name
 
@@ -145,13 +145,13 @@ If you enter a "C" for color choice, then PFM will put up several lines of text 
 
 The remaining configuration item is "Y" for Your commands.  This refers to the setup of your own special commands.  This is described in detail in a later section (YOUR COMMANDS).  If you decide to try it now, then you can get out by just hitting the "ESC" key.
 
-EXAMPLE: `ESC or Your command Char?  [ESC]`
+EXAMPLE: `ESC or Your command Char?  **ESC**`
 
-#### 5.6 [ESC], [Enter] begin normal operation
+#### 5.6 **ESC**, **Enter** begin normal operation
 
-If all of the other configuration items are to your liking, then hit [ESC] or [Enter] from the menu line.  PFM then asks is if the above configuration answers are correct. The answers to all these questions and other settings will be saved with PFM if you answer "Y".  If you don't answer "Y", then the answers will only last until you quit.  (You can come back and change your mind later before you quit).
+If all of the other configuration items are to your liking, then hit **ESC** or **Enter** from the menu line.  PFM then asks is if the above configuration answers are correct. The answers to all these questions and other settings will be saved with PFM if you answer "Y".  If you don't answer "Y", then the answers will only last until you quit.  (You can come back and change your mind later before you quit).
 
-PFM will now begin normal operation by displaying the sign-on advertisement.  Hit [F10], [Enter], or [ESC] to begin operation and PFM will display the main directory and menu screen.
+PFM will now begin normal operation by displaying the sign-on advertisement.  Hit **F10**, **Enter**, or **ESC** to begin operation and PFM will display the main directory and menu screen.
 
 ### 6 OPERATION OF PFM (MAIN MENU)
 
@@ -175,13 +175,13 @@ On the right side of the screen is some other miscellaneous information about th
 
 ### 7 MAIN MENU SINGLE FILE COMMANDS
 
-Following are the commands which are activated from the main menu. In general they will involve the file name that the cursor is pointing to when the command is hit.  At this point I should note that if you start something that you do not want to finish, just hit the [ESC] key.  This will get you back to the main menu.
+Following are the commands which are activated from the main menu. In general they will involve the file name that the cursor is pointing to when the command is hit.  At this point I should note that if you start something that you do not want to finish, just hit the **ESC** key.  This will get you back to the main menu.
 
 Many of the commands require some kind of typed in response.  To make this easier, PFM supplies an initial input or saves your last input to the response to save typing.  To edit these responses see the section on LINE EDITING.
 
-#### 7.1 Copy [FILES]
+#### 7.1 Copy **FILES**
 
-Copy the pointed file to somewhere.  If the cursor is pointing to a file, the following applies.  PFM will prompt you for a "destination".  This prompt may be answered with a complete pathname (drive, path, file, ext) or just some of these. If an element is missing, then PFM will assume the current pathname component for the missing element.  You can also use wildcards ("?" or "*") as DOS does in the file or extension portion of the pathname.  PFM behaves much like DOS in all these examples.  Other keys available are [F1] (name; same as "*" at beginning of filename), [F2] (name.ext; same as "*.*"), [F3] (current directory), [F4] (current drive), [F5] (swap drive), and [F7] (extension; same as "*" after the ".").  The PFM [F5] key allows you to use the full pathname of the most recently referred to "SWAP" directory (see [F7] key).  This option is used by hitting the [F5] key in place of a drive and path.  PFM will then automatically replace the funny character (up/down arrow) with the drive and pathname of the swap directory.
+Copy the pointed file to somewhere.  If the cursor is pointing to a file, the following applies.  PFM will prompt you for a "destination".  This prompt may be answered with a complete pathname (drive, path, file, ext) or just some of these. If an element is missing, then PFM will assume the current pathname component for the missing element.  You can also use wildcards ("?" or "*") as DOS does in the file or extension portion of the pathname.  PFM behaves much like DOS in all these examples.  Other keys available are **F1** (name; same as "*" at beginning of filename), **F2** (name.ext; same as "*.*"), **F3** (current directory), **F4** (current drive), **F5** (swap drive), and **F7** (extension; same as "*" after the ".").  The PFM **F5** key allows you to use the full pathname of the most recently referred to "SWAP" directory (see **F7** key).  This option is used by hitting the **F5** key in place of a drive and path.  PFM will then automatically replace the funny character (up/down arrow) with the drive and pathname of the swap directory.
 
 If the destination of the copy is an explicit directory (the destination string ends in "\") then the file will be placed there if the directory exists.  If the destination is not explicit, then PFM checks to see if it is a directory.  If it is, the file is copied with the same name as the source to the destination directory.  If the destination is not a directory, the file will be copied to the destination with a new file name (the last part of the destination).
 
@@ -197,16 +197,16 @@ In the following examples we will copy the file "test.123" from the current driv
 	a:\*		(to a:\test.123)
 	?z*.?4?		(to c:\exam\tzst.143)
 	*.*		(to itself {an error})
-	[F1]		(to c:\exam\test.)
-	a:[F2]		(to a:\xxx\test.123 if last dir accessed on a: was "xxx")
-	a:[F3]		(to a:\exam\test.123 if directory "exam" exists on drive a:)
-	[F4]\		(to c:\test.123)
-	[F5]		(to a:\test.123 if the last accessed swap directory was a:\)
-	[F7]		(to c:\exam\123.)
+	**F1**		(to c:\exam\test.)
+	a:**F2**		(to a:\xxx\test.123 if last dir accessed on a: was "xxx")
+	a:**F3**		(to a:\exam\test.123 if directory "exam" exists on drive a:)
+	**F4**\		(to c:\test.123)
+	**F5**		(to a:\test.123 if the last accessed swap directory was a:\)
+	**F7**		(to c:\exam\123.)
 
 When the destination has been fully specified, a return will cause the file to be copied.  The destination file name will be displayed on the second line of the screen and a "C" will appear where the cursor was in the main part of the screen.  If an error occurs it will be displayed at the top of the screen.  Note: Since copying a file to itself would erase most of the file, PFM considers this an error and does it's best to prevent this occurrence.  PFM saves the last several copy destinations for you.  To use them, hit the uparrow and/or downarrow keys to find the one you want.
 
-#### 7.2 Copy [DIRECTORIES]
+#### 7.2 Copy **DIRECTORIES**
 
 Copy the pointed directory to somewhere.  If the cursor is pointing to a Directory when you hit "C" for copy, then the following applies.  PFM will prompt you for a "destination".  This prompt may be answered with a complete directory pathname (drive and path) or just the drive or path. If an element is missing, then PFM will assume the current pathname component for the missing element.
 
@@ -214,23 +214,23 @@ The entire directory will be copied from the current location to the destination
 
 If the destination of the copy is an explicit directory (the destination string ends in "\") then the copied directory will be placed there if the destination directory exists.  If the destination is not explicit, then PFM checks to see if it is a directory.  If it is, the source directory is copied with it's original name to the destination directory.  If the destination is not a directory, the source directory will be copied to the destination with a new name (the last part of the destination).
 
-PFM's directory copy behaves much like the DOS XCOPY command.  Some special keys available are [F1] (dir name), [F2] (name.ext), [F3] (current directory), [F4] (current drive), [F5] (swap drive), and [F7] (extension).  The PFM [F5] key allows you to use the full pathname of the most recently referred to "SWAP" directory (see main menu [F7] key).  This option is used by hitting the [F5] key in place of a drive and path.  PFM will then automatically replace the funny character (up/down arrow) with the drive and pathname of the swap directory.  In the following examples we will copy the directory "test.123" from the current drive/directory "c:\exam\" to several different places;
+PFM's directory copy behaves much like the DOS XCOPY command.  Some special keys available are **F1** (dir name), **F2** (name.ext), **F3** (current directory), **F4** (current drive), **F5** (swap drive), and **F7** (extension).  The PFM **F5** key allows you to use the full pathname of the most recently referred to "SWAP" directory (see main menu **F7** key).  This option is used by hitting the **F5** key in place of a drive and path.  PFM will then automatically replace the funny character (up/down arrow) with the drive and pathname of the swap directory.  In the following examples we will copy the directory "test.123" from the current drive/directory "c:\exam\" to several different places;
 
 	a:		(to a:\xxx\test.123 if last dir accessed on a: was "xxx")
 	a:\		(to a:\test.123)
 	\ouch		(to c:\ouch if c: does not contain a dir called ouch)
 	\ouch		(to c:\ouch\test.123 if c: does contain a dir called ouch)
 	\ouch\		(to c:\ouch\test.123)
-	[F1]		(to c:\exam\test.)
-	a:[F2]		(to a:\xxx\test.123 if last dir accessed on a: was "xxx")
-	a:[F3]		(to a:\exam\test.123 if directory "exam" exists on drive a:)
-	[F4]\		(to c:\test.123)
-	[F5]		(to a:\test.123 if the last accessed swap directory was a:\)
-	[F7]		(to c:\exam\123.)
+	**F1**		(to c:\exam\test.)
+	a:**F2**		(to a:\xxx\test.123 if last dir accessed on a: was "xxx")
+	a:**F3**		(to a:\exam\test.123 if directory "exam" exists on drive a:)
+	**F4**\		(to c:\test.123)
+	**F5**		(to a:\test.123 if the last accessed swap directory was a:\)
+	**F7**		(to c:\exam\123.)
 
 When the destination has been fully specified, a return will cause the directory to be copied.  The destination directory and file name will be displayed on the second line of the screen and a "C" will appear where the cursor was in the main part of the screen.  If an error occurs it will be displayed at the top of the screen.  PFM saves the last several copy destinations for you.  To use them, hit the uparrow and/or downarrow keys to find the one you want.
 
-Note: DOS and PFM only allow a directory tree to go to a certain depth, the depth that can be displayed in 63 characters.  In addition PFM limits the number of directories in a tree to 12 deep.  Attempts to create (via directory copy) trees deeper than this will result in PFM producing an error [8] "Insufficient memory".  The tree will be copied up to the point of failure.
+Note: DOS and PFM only allow a directory tree to go to a certain depth, the depth that can be displayed in 63 characters.  In addition PFM limits the number of directories in a tree to 12 deep.  Attempts to create (via directory copy) trees deeper than this will result in PFM producing an error **8** "Insufficient memory".  The tree will be copied up to the point of failure.
 
 For example; if the directory "c:\wxyz" contains the subdirectories
 
@@ -266,11 +266,11 @@ Change the file's date and time.  The date and time of a file are displayed in t
 
 You cannot change the date or time of a write protected file.  If a file is write protected (a "W" in the attributes column) then an error will occur.  In this case use the Attribute command to first un-protect the file.
 
-#### 7.7 Delete [FILES] (use "D" key or "Delete" key)
+#### 7.7 Delete **FILES** (use "D" key or "Delete" key)
 
 Delete a pointed file.  You must answer the "Are you sure" prompt with a "Y" to actually delete the file.  If a file is write protected (a "W" in the attributes column) then an error will occur.  In this case use the Attribute command to first un-protect the file.
 
-#### 7.8 Delete [DIRECTORIES] (use "D" key or "Delete" key)
+#### 7.8 Delete **DIRECTORIES** (use "D" key or "Delete" key)
 
 Delete a pointed directory.  You must answer the "Are you sure" prompt with a "Y" to actually delete the directory.  If the directory contains files, an additional question is asked "Totally erase a Non-empty directory [Affirmative/Negative]?"  You must respond with an "A" if you really want to delete it.  If the directory contains any subdirectories, they will also be deleted.  Deleting the special directory "." results in deleting all of the files at the current directory level as well as any subdirectories.  Deleting the special directory ".." does nothing (for protection against unwanted deletes).
 
@@ -278,7 +278,7 @@ Warning: Deleting the "." directory in the root of a drive (i.e. C:\) will remov
 
 Note: even if files in the directory or subdirectory are WRITE-PROTECTED, they will still be DELETED!
 
-Note: DOS and PFM only allow a directory tree to go to a certain depth, the depth that can be displayed in 63 characters.  In addition PFM limits the number of directories in a tree to 12 deep.  Attempts to delete (via directory delete) trees deeper than this will result in PFM producing an error [8] "Insufficient memory".  The files in the tree will be deleted up to the point of failure, continuing to delete the unfinished directories past this point will eventually allow a complete delete.
+Note: DOS and PFM only allow a directory tree to go to a certain depth, the depth that can be displayed in 63 characters.  In addition PFM limits the number of directories in a tree to 12 deep.  Attempts to delete (via directory delete) trees deeper than this will result in PFM producing an error **8** "Insufficient memory".  The files in the tree will be deleted up to the point of failure, continuing to delete the unfinished directories past this point will eventually allow a complete delete.
 
 #### 7.9 cOmmand
 
@@ -288,19 +288,19 @@ Allows the execution of DOS commands.  PFM prompts for the text of the DOS comma
 
 After hitting the ESC key PFM returns to normal operation.
 
-When entering the command string, you can specify portions of the current (pointed to) pathname by entering on of the keys [F1] to [F4].  Use the [F1] key for the first part of a filename, and the [F2] key for the entire file name and the [F7] key for the extension.  If you want to include the current path or drive in the command string, use the [F3] and/or [F4] keys.  The [F5] key is used to refer to the "SWAP" directory path (the last directory you looked at with the [F7] key).  If you do not want to see a "Hit any key to continue" message after the command, use the [F6] key.
+When entering the command string, you can specify portions of the current (pointed to) pathname by entering on of the keys **F1** to **F4**.  Use the **F1** key for the first part of a filename, and the **F2** key for the entire file name and the **F7** key for the extension.  If you want to include the current path or drive in the command string, use the **F3** and/or **F4** keys.  The **F5** key is used to refer to the "SWAP" directory path (the last directory you looked at with the **F7** key).  If you do not want to see a "Hit any key to continue" message after the command, use the **F6** key.
 
 When you do this, strange characters will be entered on the command line which will later be replaced by their corresponding pathname parts.  When you complete the command, PFM will execute it just as DOS would.  When the command is finished running, a message "Hit any key to continue" will appear.  When you strike a key, the system will return to PFM.  In the following examples the current drive/directory is "c:\exam", the file name is "test.asm", and the swap directory is "a:\xxx\";
 
-* `type [F4][F3][F2]` results in `"type C:\EXAM\TEST.ASM"`
-* `[F1]` results in executing the command `"TEST"`.
+* `type **F4****F3****F2**` results in `"type C:\EXAM\TEST.ASM"`
+* `**F1**` results in executing the command `"TEST"`.
 * `xtalk` results in executing the command `"xtalk"`.
-* `masm [F1],[F1],[F1];` results in `"masm TEST,TEST,TEST;"`.
-* `comp [F5][F2] [F2]` results in `"comp A:\XXX\TEST.ASM TEST.ASM"`.
+* `masm **F1**,**F1**,**F1**;` results in `"masm TEST,TEST,TEST;"`.
+* `comp **F5****F2** **F2**` results in `"comp A:\XXX\TEST.ASM TEST.ASM"`.
 
 The command line also has the ability to remember the last several commands that you have used.  To look at and use them, use the cursor down arrow and/or up arrow to find the one you want.
 
-#### 7.10 Go or [Enter]
+#### 7.10 Go or **Enter**
 
 Allows the execution of DOS commands.  PFM uses the name portion of the pointed file as the command.  If you try to run a "TSR" (Terminate and Stay Resident) program from PFM, then PFM will have to remove it before continuing.  It will give you the following message before removing the command however;
 
@@ -316,13 +316,13 @@ If you want more than one copy of the item being printed, set the number of copi
 
 PFM expands TAB characters to every eighth column, recognizes Carriage return (CR), Line Feed (LF), and Form Feed (FF) characters.  All other characters are sent to the printer unchanged.  Note that PFM PRINT command should not be used to print files containing graphics or formatting commands from more sophisticated programs (Word processors, Spreadsheets, Windows etc.) these should only be sent to the printer directly by the package or via the DOS "copy /b file lpt1" type of command.
 
-#### 7.12 Rename [FILES]
+#### 7.12 Rename **FILES**
 
 Change the name of the file or move file to a different directory on the same drive.  The pathname and filename syntax is the same as that for the copy command.
 
 If the destination of the rename is an explicit directory (the destination string ends in "\") then the source file will be moved there if the destination directory exists.  If the destination is not explicit, then PFM checks to see if it is a directory.  If it is, the source file is moved with it's original name to the destination directory.  If the destination is not a directory, the source file will be moved to the destination with a new name (the last part of the destination).
 
-#### 7.13 Rename [DIRECTORIES]
+#### 7.13 Rename **DIRECTORIES**
 
 Change the name of the directory or move it to a different directory on the same drive.  The pathname and filename syntax is the same as that for the copy command.
 
@@ -332,7 +332,7 @@ Attempting to rename (move) a directory from one drive to another is illegal; yo
 
 If the destination of the copy is an explicit directory (the destination string ends in "\") then the source directory will be moved there if the destination directory exists.  If the destination is not explicit, then PFM checks to see if it is a directory.  If it is, the source directory is moved with it's original name to the destination directory.  If the destination is not a directory, the source directory will be moved to the destination with a new name (the last part of the destination).
 
-Note: DOS and PFM only allow a directory tree to go to a certain depth, the depth that can be displayed in 63 characters.  In addition PFM limits the number of directories in a tree to 12 deep.  Attempts to rename trees deeper than this will result in PFM producing an error [8] "Insufficient memory".  The files in the tree will be renamed up to the point of failure, continuing to rename the unfinished directories past this point will eventually allow a complete rename.
+Note: DOS and PFM only allow a directory tree to go to a certain depth, the depth that can be displayed in 63 characters.  In addition PFM limits the number of directories in a tree to 12 deep.  Attempts to rename trees deeper than this will result in PFM producing an error **8** "Insufficient memory".  The files in the tree will be renamed up to the point of failure, continuing to rename the unfinished directories past this point will eventually allow a complete rename.
 
 #### 7.14 Show
 
@@ -342,7 +342,7 @@ Displays the contents of the current file or directory on the screen.  If you ar
 
 Like "O" command above, except uses your pre-configured commands.  See the More Config command section for details on how to configure your own commands.
 
-#### 7.16 siZe [DIRECTORIES]
+#### 7.16 siZe **DIRECTORIES**
 
 This command calculates the size of a directory and all of it's subdirectories.  The size is rounded to the allocated unit size of the disk, a strict addition of file sizes, would in general result in a smaller number.
 
@@ -364,7 +364,7 @@ PFM allows you to define other unused standard keys and most of the control (CTR
 * F4: up.  This key moves the pointer upward through the directory listing by 10 lines.
 * F5: reread dir.  This key causes the current directory to be reread to update the screen.  This is done automatically after each PFM command unless files are marked (see MULTIFILE operations). This can be used when a disk has been changed or you are finished with any marks on the screen.  If files are marked, you will be prompted "Are You Sure".
 * F6: sort.  This key allows you to resort the directory listing.  See the section on SORTING for more details.
-* F7: swap display.   PFM has the ability to keep all the information about the directory that you are currently viewing (the primary display) while showing an entirely different drive or directory (the secondary display).  I call the process of saving the current display and switching to the new "swapping displays".  When you hit [F7] the first time, PFM prompts you for a new drive/path to display.  When this is done, the third line of the screen changes to reverse video to indicate that you are using the secondary display. You can do anything while the secondary display is shown that you can do normally.  To return to the primary display, hit [F7] again. When switching back, the original contents are displayed unchanged.  The last several directories that you referred to can be accessed by the cursor up and down arrows.
+* F7: swap display.   PFM has the ability to keep all the information about the directory that you are currently viewing (the primary display) while showing an entirely different drive or directory (the secondary display).  I call the process of saving the current display and switching to the new "swapping displays".  When you hit **F7** the first time, PFM prompts you for a new drive/path to display.  When this is done, the third line of the screen changes to reverse video to indicate that you are using the secondary display. You can do anything while the secondary display is shown that you can do normally.  To return to the primary display, hit **F7** again. When switching back, the original contents are displayed unchanged.  The last several directories that you referred to can be accessed by the cursor up and down arrows.
 * F8: in/exclude.  This key toggles the include flag on an individual file.  See the MULTIFILE section for more information.
 * F9: backup directory tree.  This shows the "parent" directory of the current directory (the one closer to the "root"). If you at the "root" (x:\), this just rereads the current directory.
 * F10: multi.  This key is used to switch between singlefile and multifile mode.  See the MULTIFILE section for more information.
@@ -389,7 +389,7 @@ PFM has the ability to do operations on more than one file at one time.  This I 
 
 In PFM, to copy these files, you can simply mark the files you want in one of several ways and then switch to multifile mode and hit "C" for the copy command.
 
-One way of marking files is with the [F8] key.  You just move the cursor (pointer) to the file you want and hit [F8].  This will put an asterisk "*" next to the file.  If the file is already marked, then [F8] will remove the mark.  This can be used if you have only a few files or they are very different in name.
+One way of marking files is with the **F8** key.  You just move the cursor (pointer) to the file you want and hit **F8**.  This will put an asterisk "*" next to the file.  If the file is already marked, then **F8** will remove the mark.  This can be used if you have only a few files or they are very different in name.
 
 #### 9.1 Include/Exclude
 
@@ -489,7 +489,7 @@ This command allows you to edit a file that you specify.   Enter the file name i
 
 This command allows the creation of a new subdirectory.   The path should not be terminated by a "\".  The new directory will be displayed.
 
-Note: DOS and PFM only allow a directory tree to go to a certain depth, the depth that can be displayed in 63 characters.  In addition PFM limits the number of directories in a tree to 12 deep.  Attempts to create (via MKDIR) trees deeper than this may result in PFM producing an error [8] "Insufficent memory".
+Note: DOS and PFM only allow a directory tree to go to a certain depth, the depth that can be displayed in 63 characters.  In addition PFM limits the number of directories in a tree to 12 deep.  Attempts to create (via MKDIR) trees deeper than this may result in PFM producing an error **8** "Insufficent memory".
 
 #### 10.5 siZe
 
@@ -497,7 +497,7 @@ This command calculates the size of all directories and all of their subdirector
 
 ### 11 SORTING
 
-The sort command [F6] is used to sort the directory listing in some useful order.  Unless the directory is left unsorted, any subdirectories present in a directory are placed at the top of the display and any files that are marked to be included in a multifile operation are placed next.  Beyond that, the following orders are provided:
+The sort command **F6** is used to sort the directory listing in some useful order.  Unless the directory is left unsorted, any subdirectories present in a directory are placed at the top of the display and any files that are marked to be included in a multifile operation are placed next.  Beyond that, the following orders are provided:
 
 #### 11.1 Name
 
@@ -517,15 +517,15 @@ The directory list is sorted in reverse order of the file date and time.  The ne
 
 #### 11.5 Don't sort
 
-Files are left in their unsorted order (the order that they are on the disk.)  Since PFM default is to sort files, you must use [F5] to reread the directory in order to see the files in the original order after you first select this sort method.
+Files are left in their unsorted order (the order that they are on the disk.)  Since PFM default is to sort files, you must use **F5** to reread the directory in order to see the files in the original order after you first select this sort method.
 
 ### 12 PFM CONFIGURATION
 
-To change some of the configurable items for PFM, use the "More Config" ("MC" characters) from the main PFM screen.  PFM will then put up it's title message and a prompt line asking for you to hit one of the characters [H] for help, [E] for editor name, [C] for color, [U] for cUrsor, [Y] for Your commands, or [ESC] to exit from this menu.
+To change some of the configurable items for PFM, use the "More Config" ("MC" characters) from the main PFM screen.  PFM will then put up it's title message and a prompt line asking for you to hit one of the characters **H** for help, **E** for editor name, **C** for color, **U** for cUrsor, **Y** for Your commands, or **ESC** to exit from this menu.
 
 #### 12.1 Help
 
-If you enter "H" a help screen will appear which will remind you how to answer the other questions and configuration information.  (To exit HELP, hit the [F10], [Enter], or [ESC] keys).
+If you enter "H" a help screen will appear which will remind you how to answer the other questions and configuration information.  (To exit HELP, hit the **F10**, **Enter**, or **ESC** keys).
 
 #### 12.2 Editor name
 
@@ -553,15 +553,15 @@ If you enter a "C" for color choice, then PFM will put up several lines of text 
 
 The remaining configuration item is "Y" for Your commands.  This refers to the setup of your own special commands.  This is described in detail in a later section (YOUR COMMANDS).  If you decide to try it now, then you can get out by just hitting the "ESC" key.
 
-EXAMPLE: `ESC or Your command Char?  [ESC]`
+EXAMPLE: `ESC or Your command Char?  **ESC**`
 
-#### 12.6 [ESC], [Enter] begin normal operation
+#### 12.6 **ESC**, **Enter** begin normal operation
 
-If all of the other configuration items are to your liking, then hit [ESC] or [Enter] from the menu line.  PFM then asks is if the above configuration answers are correct. The answers to all these questions and other settings will be saved with PFM if you answer "Y".  If you don't answer "Y", then the answers will only last until you quit.  (You can come back and change your mind later before you quit).
+If all of the other configuration items are to your liking, then hit **ESC** or **Enter** from the menu line.  PFM then asks is if the above configuration answers are correct. The answers to all these questions and other settings will be saved with PFM if you answer "Y".  If you don't answer "Y", then the answers will only last until you quit.  (You can come back and change your mind later before you quit).
 
-PFM will begin normal operation by displaying the sign-on advertisement.  Hit [F10], [Enter], or [ESC] to begin operation and PFM will display the main directory and menu screen.
+PFM will begin normal operation by displaying the sign-on advertisement.  Hit **F10**, **Enter**, or **ESC** to begin operation and PFM will display the main directory and menu screen.
 
-Note: PFM saves several items other than those listed above when it is configured.  These include the cOmmand line stack; the Copy and Rename stack; the More Show directory and [F7] Swap directory stack; the show file Show mode, Line size, [F6] search stack, and + or - line count; the Print options; Include or eXclude options and filename stack; most recently used Attribute input, and Time/date input.  When you configure PFM, you might make sure that these are set to desirable settings because each time you restart PFM it will come up with the same settings.  If you have been working with PFM for a while and many of these settings have been changed, it might be easier to quit and restart PFM before doing the configure than to reset them.
+Note: PFM saves several items other than those listed above when it is configured.  These include the cOmmand line stack; the Copy and Rename stack; the More Show directory and **F7** Swap directory stack; the show file Show mode, Line size, **F6** search stack, and + or - line count; the Print options; Include or eXclude options and filename stack; most recently used Attribute input, and Time/date input.  When you configure PFM, you might make sure that these are set to desirable settings because each time you restart PFM it will come up with the same settings.  If you have been working with PFM for a while and many of these settings have been changed, it might be easier to quit and restart PFM before doing the configure than to reset them.
 
 ### 13 SHOW FILE
 
@@ -650,7 +650,7 @@ To set up or change your own "Y" commands, use the "M", "C", "Y" (More Configure
 
 	ESC or Your command Char? 
 
-If you do not want to enter or change your own commands, hit [ESC]. Otherwise you will then be prompted for the text of your command. Enter as you would on the usual command line, including the [F1] to [F7] keys.  Delete everything on the line if you want to remove an old command.  When you are finished entering the command hit return.  If you have more commands to enter, repeat the process.  When you are done, hit [ESC] twice and you will be prompted with an "OK (Y/N)?".  Your configured commands and other changeable settings will be saved with PFM if you answer "Y" to the OK? at the end of the configuration. If you don't answer "Y", then the new settings will only last until you quit.
+If you do not want to enter or change your own commands, hit **ESC**. Otherwise you will then be prompted for the text of your command. Enter as you would on the usual command line, including the **F1** to **F7** keys.  Delete everything on the line if you want to remove an old command.  When you are finished entering the command hit return.  If you have more commands to enter, repeat the process.  When you are done, hit **ESC** twice and you will be prompted with an "OK (Y/N)?".  Your configured commands and other changeable settings will be saved with PFM if you answer "Y" to the OK? at the end of the configuration. If you don't answer "Y", then the new settings will only last until you quit.
 
 ### 15 LINE EDITING
 
@@ -683,16 +683,16 @@ Following are the keys and what they do:
 
 The following function key usage is only applicable when entering or viewing a cOmmand, Copy, or Rename input line.
 
-* [F1]: This produces an open face character while editing the input which will be replaced with the name portion of the pointed file.
-* [F2]: This produces a closed face character while editing the input which will be replaced with the name and extension (name.ext) portion of the pointed file.
-* [F3]: This produces a heart character while editing the input which will be replaced with the currently viewed directory.  The directory is listed in the lower left corner of the screen along with the drive letter.
-* [F4]: This produces a diamond character while editing the input which will be replaced with the currently viewed drive.  The drive is listed in the lower left corner of the screen along with the current directory.
-* [F5]: This produces a up/down arrow character while editing the input which will be replaced with the swap drive and directory.  This is listed in the lower right corner of the screen.
-* [F6]: This key (only useful for commands) prevents PFM from asking for you to 'Hit any key to continue' when the command is finished executing.  It produces a paragraph character when editing.
-* [F7]: This produces a club character while editing the input which will be replaced with the extension portion of the pointed file.
-* [F10]: Help.  This key is actives this help screen.
+* **F1**: This produces an open face character while editing the input which will be replaced with the name portion of the pointed file.
+* **F2**: This produces a closed face character while editing the input which will be replaced with the name and extension (name.ext) portion of the pointed file.
+* **F3**: This produces a heart character while editing the input which will be replaced with the currently viewed directory.  The directory is listed in the lower left corner of the screen along with the drive letter.
+* **F4**: This produces a diamond character while editing the input which will be replaced with the currently viewed drive.  The drive is listed in the lower left corner of the screen along with the current directory.
+* **F5**: This produces a up/down arrow character while editing the input which will be replaced with the swap drive and directory.  This is listed in the lower right corner of the screen.
+* **F6**: This key (only useful for commands) prevents PFM from asking for you to 'Hit any key to continue' when the command is finished executing.  It produces a paragraph character when editing.
+* **F7**: This produces a club character while editing the input which will be replaced with the extension portion of the pointed file.
+* **F10**: Help.  This key is actives this help screen.
 
-The keys [F1] to [F7] will put special characters into the entry which will only be meaningful in cOmmands, Copy, and Rename.  At other times, they may cause strange errors.  Other special keys will be ignored.
+The keys **F1** to **F7** will put special characters into the entry which will only be meaningful in cOmmands, Copy, and Rename.  At other times, they may cause strange errors.  Other special keys will be ignored.
 
 ### 16 ERRORS
 
@@ -719,7 +719,7 @@ PFM tries to make error handling as easy as possible.  If an error occurs during
 * 22: Cannot copy a file to itself.  Since this would generally destroy the file, PFM will not let you do this.
 * 23: Cannot show an empty file.
 * 24: Cannot load a permanent memory resident task from PFM. Some programs (like PFM) leave parts of themselves in memory all the time after they are loaded.  An example is the DOS PRINT utility. Since PFM uses memory in a simple minded way, programs such as these can not be run from PFM.  Sometimes programs such as the PRINT utility can be loaded once before starting PFM (like in an AUTOEXEC.BAT) and will then run normally when called by PFM afterwards.  PFM will remove the program from memory when you "Hit any key".
-* 55: Operator abort of a disk error operation.  If you get a disk error and specify the "abort" or "ignore" choices, then you will also get this error message.  Just hit the [Esc] key and keep going.
+* 55: Operator abort of a disk error operation.  If you get a disk error and specify the "abort" or "ignore" choices, then you will also get this error message.  Just hit the **Esc** key and keep going.
 
 ### 17 REVISION HISTORY
 
@@ -727,7 +727,7 @@ The following items have changed since version 2.22 of PFM:
 
 2.23  If screen modes are switched by a command, the message "Hit any key to continue" is not properly displayed. (fixed).
 
-2.24  Would like to be able to rename directories.  (Directory rename added [but not Move])
+2.24  Would like to be able to rename directories.  (Directory rename added **but not Move**)
 
 2.25  Would like to be able to refer to the other (swap) directory from where I am in the copy, rename, and command operations.  (added F5 function to Command, Copy, Rename) 
 
