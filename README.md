@@ -14,6 +14,7 @@ machines:
 
 PCjs Machines
 -------------
+
 Welcome to PCjs, home of [PCx86](/pubs/docs/pcx86/), the original IBM PC simulation that runs in your web browser.  It is
 one of several JavaScript Machines in the [PCjs Project](https://github.com/jeffpar/pcjs), an open-source project that
 includes:
@@ -45,6 +46,7 @@ machine configurations, and provide a platform for running and analyzing old com
 
 Demos
 -----
+
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, OS/2, and other assorted software.
 
 ![IBM PC AT w/EGA, OS/2 1.0](/disks/pcx86/os2/ibm/1.0/thumbnail.jpg "link:/disks/pcx86/os2/ibm/1.0/:200:120")
@@ -73,6 +75,7 @@ and [EGA Displays](/devices/pcx86/machine/5160/ega/640kb/array/).
 
 C1Pjs
 -----
+
 Below is the [OSI Challenger C1P](/pubs/docs/c1pjs/), another simulation in the PCjs Project.
 It simulates Ohio Scientific's 6502-based microcomputer, released in 1978.  More details about this simulation
 and the original machine are available in the [C1Pjs Documentation](/pubs/docs/c1pjs/).
@@ -121,8 +124,7 @@ no problem following along.  There are some prerequisites:
 Some additional (optional) tools are also recommended:
 
 - Python (included with OS X; separate download required for [Windows](https://www.python.org/downloads/windows/))
-- GitHub (useful for getting Git set up on [Windows](https://windows.github.com/); also available for
-[OS X](https://mac.github.com/)) 
+- GitHub (useful for getting Git set up on [Windows](https://windows.github.com/); also available for [OS X](https://mac.github.com/))
 
 Once you have the prerequisites, open a command-line window, `cd` to the directory where you'd like to install PCjs,
 and type the following commands:
@@ -134,12 +136,11 @@ and type the following commands:
 
 Now open a web browser and go to `http://localhost:8088/`.  You're done!
  
-The current version of Node ([0.10.32](http://nodejs.org/dist/v0.10.32/node-v0.10.32.pkg) at the time of this
-writing) should work fine, but version [0.10.26](http://nodejs.org/dist/v0.10.26/node-v0.10.26.pkg)
-is what's been used to develop and test PCjs so far.
+At the time of this writing, the recommended version of Node is [8.12.0](https://nodejs.org/dist/latest-v8.x/);
+I've had issues running Gulp 3.x in conjunction with Node 10.x.
 
-Also, [server.js](server.js) was originally written using [Express](http://expressjs.com/) v3.  Since then,
-Express v4 has been released, but the `npm install` command above will make sure that v3 is installed locally.
+Also, [server.js](server.js) was originally written using [Express](http://expressjs.com/) 3.x.  Since then,
+Express 4.x has been released, but the `npm install` command above should ensure that 3.x is installed locally.
 
 The plan is to eventually move development to a newer version of Node, and migrate the PCjs server to a newer
 version of Express; there's no desire to remain stuck in the past (well, ignoring the fact that PCjs is the
@@ -200,9 +201,11 @@ then you should re-run it *without* the `--production` option:
 
 	npm install
 
-to get all the development dependencies, including Gulp.  You'll probably also want to install the command-line
-interface to Gulp.  You can install that locally as well, but it's recommended you install it globally with *-g*;
-OS X users may also need to preface this command with `sudo`:
+to get all the development dependencies, including Gulp.  NOTE: PCjs currently requires Gulp 3.x; it has not been
+upgraded to use Gulp 4.x.
+
+You'll probably also want to install the command-line interface to Gulp.  You can install that locally as well, but
+it's recommended you install it globally with *-g*; OS X users may also need to preface this command with `sudo`:
 
 	npm install gulp-cli -g
 

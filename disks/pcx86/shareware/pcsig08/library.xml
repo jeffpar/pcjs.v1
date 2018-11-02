@@ -722,7 +722,12 @@
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/c/5.10-os2/MSC510-DISK13-LIBOS2.json">MS C 5.10-OS/2 (LIBOS2)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/c/5.10-os2/MSC510-DISK14-CVOS2.json">MS C 5.10-OS/2 (CVOS2)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/dos/mgr/1.00/MSDOSMGR100.json">MS-DOS Manager 1.00</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/masm/1.00-1981/MASM100-1981.json">MS Macro Assembler 1.00 (1981)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/masm/1.00/MASM100.json">MS Macro Assembler 1.00</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/masm/1.10/MASM110.json">MS Macro Assembler 1.10</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/masm/1.12/MASM112.json">MS Macro Assembler 1.12</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/masm/1.25/MASM125.json">MS Macro Assembler 1.25</disk>
+		<disk path="/pcjs-disks/pcx86/tools/microsoft/masm/2.04/MASM204.json">MS Macro Assembler 2.04</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/masm/3.00/MASM-016014-300.json">MS Macro Assembler 3.00</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/masm/3.01/MASM-016014-301.json">MS Macro Assembler 3.01</disk>
 		<disk path="/pcjs-disks/pcx86/tools/microsoft/masm/4.00/MASM-016014-400.json">MS Macro Assembler 4.00</disk>
