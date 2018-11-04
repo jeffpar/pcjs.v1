@@ -358,6 +358,13 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, sSize, sServerRoot, 
     this.fJSONComments = fComments;
     this.sJSONWhitespace = (this.fJSONComments? " " : "");
     this.fXDFSupport = (argv && argv['xdf']);
+    /*
+     * Specifying a label of "none" will suppress volume LABEL generation as well as ARCHIVE
+     * file attributes for normal files; this is useful when generating PC DOS 1.x-compatible
+     * disk images (ie, 160K disks for PC DOS 1.00 or 320K disks for PC DOS 1.10), because PC
+     * DOS 1.x understands neither the LABEL nor the ARCHIVE attribute bits (in fact, PC DOS 1.x
+     * CHKDSK misinterprets the ARCHIVE bit, treating it as if the HIDDEN bit was set instead).
+     */
     this.sLabel = (argv && argv['label']);
     this.forceBPB = (argv && argv['forceBPB']);
     this.fNormalize = fNormalize || (argv && argv['normalize']);
@@ -530,7 +537,7 @@ DiskDump.aDefaultBPBs = [
     0x02, 0x00,                 // 0x1A: number of heads (2)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
-  [                             // define BPB for 720Kb diskette (1 sector/cluster format used by PC-DOS 4.01)
+  [                             // define BPB for 720Kb diskette (1 sector/cluster format used by PC DOS 4.01)
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
     0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
     // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x34, 0x2E, 0x30,  // "IBM  4.0" (this is a real OEM signature)
@@ -620,8 +627,8 @@ DiskDump.aDefaultBPBs = [
     0x11, 0x00,                 // 0x18: sectors per track (17)
     0x04, 0x00,                 // 0x1A: number of heads (4)
       //
-      // PC-DOS 2.0 actually stored 0x01, 0x00, 0x80, 0x00 here, so you can't rely on more than the first word.
-      // TODO: Investigate PC-DOS 2.0 BPB behavior (ie, what did the 0x80 mean)?
+      // PC DOS 2.0 actually stored 0x01, 0x00, 0x80, 0x00 here, so you can't rely on more than the first word.
+      // TODO: Investigate PC DOS 2.0 BPB behavior (ie, what did the 0x80 mean)?
       //
     0x01, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ]
@@ -1554,7 +1561,7 @@ DiskDump.prototype.validateTime = function(dateTime)
         /*
          * The year in a DOS modification date occupies 7 bits and is interpreted as a non-negative value (0-127)
          * that is added to the base year of 1980, so the range of valid years is 1980-2107.  However, it's worth
-         * noting that in PC-DOS 2.0, I observed a date with the largest possible year value (127) displayed as
+         * noting that in PC DOS 2.0, I observed a date with the largest possible year value (127) displayed as
          * "12-31-:7" (an ASCII ':' is the next highest character after '0').  While that DOES distinguish the year
          * 2007 from the year 2107, we probably shouldn't allow any year > 2099, to eliminate confusion.
          *
@@ -1563,7 +1570,7 @@ DiskDump.prototype.validateTime = function(dateTime)
          */
         if (year < 1980) {
             year = 1980; month = 0; day = 1;
-            hours = 0; minutes = 0; seconds = 2;        // PC-DOS 2.0 won't display times that are completely zero
+            hours = 0; minutes = 0; seconds = 2;        // PC DOS 2.0 won't display times that are completely zero
             fModified = true;
         } else if (year > 2099) {
             year = 2099; month = 11; day = 31;
@@ -1642,7 +1649,7 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
                 fileInfo.FILE_PATH = sFile;
                 fileInfo.FILE_NAME = path.basename(sFile);
                 var stats = fs.statSync(sFile);
-                fileInfo.FILE_ATTR = stats.isDirectory()? DiskAPI.ATTR.SUBDIR : DiskAPI.ATTR.ARCHIVE;
+                fileInfo.FILE_ATTR = stats.isDirectory()? DiskAPI.ATTR.SUBDIR : (this.sLabel == "none"? 0 : DiskAPI.ATTR.ARCHIVE);
                 fileInfo.FILE_SIZE = stats.size;
                 fileInfo.FILE_TIME = this.getDSTAdjustedTime(stats.mtime);
                 this.validateTime(fileInfo.FILE_TIME);
@@ -1732,7 +1739,8 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
      * 11 characters or less (after we remove any numeric prefix that we may have added to indicate
      * disk order, that is).
      *
-     * From the command-line, you can override this by passing --label=<somelabel>.
+     * From the command-line, you can override this by passing --label=<somelabel>.  Specifying
+     * --label=none disables the volume label.
      */
     if (fRoot) {
         fileInfo = this.buildVolLabel(this.sLabel || sDir);
@@ -1812,7 +1820,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
                             });
                             return;
                         } else {
-                            fileInfo.FILE_ATTR = DiskAPI.ATTR.ARCHIVE;
+                            fileInfo.FILE_ATTR = (obj.sLabel == "none"? 0 : DiskAPI.ATTR.ARCHIVE);
                             fileInfo.FILE_SIZE = stats.size;
                             if (obj.isTextFile(fileInfo.FILE_NAME)) {
                                 fs.readFile(fileInfo.FILE_PATH, {encoding: "utf8"}, function doneReadDirEntry(err, sData) {
@@ -1942,7 +1950,7 @@ DiskDump.prototype.readPath = function(sPath, done)
                         });
                         return;
                     } else {
-                        fileInfo.FILE_ATTR = DiskAPI.ATTR.ARCHIVE;
+                        fileInfo.FILE_ATTR = (obj.sLabel == "none"? 0 : DiskAPI.ATTR.ARCHIVE);
                         fileInfo.FILE_SIZE = stats.size;
                         if (obj.isTextFile(fileInfo.FILE_NAME)) {
                             DiskDump.readFile(sFilePath, "utf8", function doneReadPathEntry(err, sData) {
@@ -2049,7 +2057,7 @@ DiskDump.prototype.buildVolLabel = function(sDir)
          */
         sVolume = DiskDump.PCJS_LABEL;
     }
-    if (sVolume) {
+    if (sVolume && sVolume != "none") {
         fileInfo = {};
         fileInfo.FILE_NAME = this.buildShortName(sVolume, true);
         fileInfo.FILE_ATTR = DiskAPI.ATTR.LABEL;
@@ -2539,16 +2547,16 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      * TODO: For now, the code that chooses a default BPB starts with entry #3 instead of #0, because Windows 95
      * (at least when running under VMware) fails to read the contents of such disks correctly.  Whether that's my
      * fault or Windows 95's fault is still TBD (although it's probably mine -- perhaps 160Kb diskettes aren't
-     * supposed to have BPBs?)  The simple work-around is to avoid creating 160Kb diskette images used by PC-DOS 1.0.
-     * To play it safe, I also skip the 320Kb format (added for PC-DOS 1.1).  360Kb was the most commonly used format
-     * after PC-DOS 2.0 introduced it.  PC-DOS 2.0 also introduced 180Kb (a single-sided version of the 360Kb
+     * supposed to have BPBs?)  The simple work-around is to avoid creating 160Kb diskette images used by PC DOS 1.0.
+     * To play it safe, I also skip the 320Kb format (added for PC DOS 1.1).  360Kb was the most commonly used format
+     * after PC DOS 2.0 introduced it.  PC DOS 2.0 also introduced 180Kb (a single-sided version of the 360Kb
      * double-sided format), but it's less commonly used.
      *
      * UPDATE: I've undone the above change, because when creating a disk image for an old application like:
      *
      *      /apps/pcx86/1983/adventmath ["Adventures in Math (1983)"]
      *
-     * it's important to create a disk image that will work with PC-DOS 1.0, which didn't understand 180Kb and 360Kb
+     * it's important to create a disk image that will work with PC DOS 1.0, which didn't understand 180Kb and 360Kb
      * disk images.
      */
     for (var iBPB = 0; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
@@ -2653,7 +2661,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     var cEntries = this.buildDir(abRoot, aFiles);
 
     /*
-     * PC-DOS 1.0 requires ALL unused directory entries to start with 0xE5; 0x00 isn't good enough,
+     * PC DOS 1.0 requires ALL unused directory entries to start with 0xE5; 0x00 isn't good enough,
      * so we must loop through all the remaining directory entries and zap them with 0xE5.
      */
     var offRoot = cEntries * DiskAPI.DIRENT.LENGTH;
@@ -2900,7 +2908,7 @@ DiskDump.prototype.convertToJSON = function()
             }
             if (fBPBExists) {
                 /*
-                 * In deference to the PC-DOS 2.0 BPB behavior discussed above, we stop our BPB verification after
+                 * In deference to the PC DOS 2.0 BPB behavior discussed above, we stop our BPB verification after
                  * the first word of HIDDEN_SECS.
                  */
                 for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.HIDDEN_SECS + 2; i++) {
@@ -2915,8 +2923,8 @@ DiskDump.prototype.convertToJSON = function()
             else if (bByte0 == X86.OPCODE.JMPS && bByte1 >= 0x22 || this.forceBPB) {
                 /*
                  * I'm going to stick my neck out here and slam a BPB into this disk image, since it doesn't appear
-                 * to have one, which should make it more "mountable" on modern operating systems.  PC-DOS 1.x (and
-                 * the recently unearthed PC-DOS 0.x) are OK with this, because they don't put anything important in
+                 * to have one, which should make it more "mountable" on modern operating systems.  PC DOS 1.x (and
+                 * the recently unearthed PC DOS 0.x) are OK with this, because they don't put anything important in
                  * the BPB byte range (0x00B-0x023), just a 9-byte date string (eg, " 7-May-81") at 0x008-0x010,
                  * followed by zero bytes at 0x011-0x030.
                  *

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.72.4/machine.xsl"?>
-<machine id="ibm5160" type="pcx86" border="1" pos="center" background="default">
-	<name pos="center">IBM PC XT, 128K EGA, 640K RAM, 10Mb Hard Disk (Formatted)</name>
-	<computer id="xt-ega-640k" name="IBM PC XT"/>
-	<ram id="ramLow" addr="0x00000" test="false" size="0xa0000" comment="0xa0000 (640Kb) size overrides SW1|ROM BIOS memory test has been disabled"/>
+<machine id="pcsig08" type="pcx86" border="1" pos="center" background="default">
+	<name pos="center">IBM PC XT, 128K EGA, 512K RAM, 10Mb Hard Disk (Formatted)</name>
+	<computer id="xt-ega-512k" name="IBM PC XT"/>
+	<ram id="ramLow" addr="0x00000" test="false" size="0x80000" comment="0x80000 (512Kb) size overrides SW1|ROM BIOS memory test has been disabled"/>
 	<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pcx86/hdc/ibm-xebec-1982.json"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5160/basic/BASIC110.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5160/1982-11-08/XTBIOS-REV1.json"/>

@@ -12,6 +12,6 @@ All our Enhanced Graphics Adapter (EGA) configurations of the IBM PC XT (Model 5
 * [IBM PC XT (256K RAM, 256K EGA, 10Mb Drive) with Monochrome Display](/devices/pcx86/machine/5160/ega/256kb/mono/) ([Debugger](/devices/pcx86/machine/5160/ega/256kb/mono/debugger/))
 * [IBM PC XT (256K RAM, 256K EGA, 10Mb Drive) with Color Display](/devices/pcx86/machine/5160/ega/256kb/color/) ([Debugger](/devices/pcx86/machine/5160/ega/256kb/color/debugger/))
 * [IBM PC XT (256K RAM, 256K EGA, 10Mb Drive) with Enhanced Color Display](/devices/pcx86/machine/5160/ega/256kb/) ([Debugger](/devices/pcx86/machine/5160/ega/256kb/debugger/))
-
+* [IBM PC XT (512K RAM, 128K EGA, 10Mb Drive) with Enhanced Color Display](/devices/pcx86/machine/5160/ega/512kb/) ([Debugger](/devices/pcx86/machine/5160/ega/512kb/debugger/))
 * [IBM PC XT (640K RAM, 128K EGA, 10Mb Drive) with Enhanced Color Display](/devices/pcx86/machine/5160/ega/640kb/) ([Debugger](/devices/pcx86/machine/5160/ega/640kb/debugger/))
 * [IBM PC XT (640K RAM, 128K EGA, 10Mb Drive) Machine Array with Enhanced Color Displays](/devices/pcx86/machine/5160/ega/640kb/array/)
