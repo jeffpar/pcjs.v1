@@ -259,12 +259,12 @@
       "stopOnEntry": false
     },
     {
-      "name": "Bin: diskdump MS Macro Assembler 1.00 (1981)",
+      "name": "Bin: diskdump MS Macro Assembler 1.00 (1982)",
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/modules/diskdump/bin/diskdump",
-      "args": ["--dir=archive/MASM100-1981/", "--format=json", "--output=MASM100-1981.json", "--overwrite", "--manifest"],
-      "cwd": "${workspaceFolder}/pcjs-disks/pcx86/tools/microsoft/masm/1.00-1981/",
+      "args": ["--disk=archive/MASM100.img", "--format=json", "--output=MASM100.json", "--overwrite", "--manifest"],
+      "cwd": "${workspaceFolder}/pcjs-disks/pcx86/tools/microsoft/masm/1.00/",
       "stopOnEntry": false
     },
     {

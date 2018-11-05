@@ -1640,7 +1640,11 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
         var sDir = sImage.replace(/\.(img|json)/, "");
         if (sDir != sImage) {
             sDir += path.sep;
-            var asFiles = glob.sync(sDir + "**");
+            try {
+                var asFiles = glob.sync(sDir + "**");
+            } catch(err) {
+                console.log(err.message);
+            }
             for (var i = 0; i < asFiles.length; i++) {
                 var sFile = asFiles[i];
                 if (!sFile.substr(sDir.length)) continue;
@@ -1652,6 +1656,10 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
                 fileInfo.FILE_ATTR = stats.isDirectory()? DiskAPI.ATTR.SUBDIR : (this.sLabel == "none"? 0 : DiskAPI.ATTR.ARCHIVE);
                 fileInfo.FILE_SIZE = stats.size;
                 fileInfo.FILE_TIME = this.getDSTAdjustedTime(stats.mtime);
+                if (!(fileInfo.FILE_ATTR & DiskAPI.ATTR.SUBDIR)) {
+                    var bufData = fs.readFileSync(sFile);
+                    fileInfo.FILE_MD5 = crypto.createHash('md5').update(bufData).digest('hex');
+                }
                 this.validateTime(fileInfo.FILE_TIME);
                 this.addManifestInfo(fileInfo);
             }
