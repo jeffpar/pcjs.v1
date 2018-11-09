@@ -268,6 +268,15 @@
       "stopOnEntry": false
     },
     {
+      "name": "Bin: diskdump MS-DOS Sources",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/modules/diskdump/bin/diskdump",
+      "args": ["--dir=archive/src/all/", "--format=json", "--label=MSDOSSRC", "--normalize", "--output=MSDOSSRC.json", "--size=10000"],
+      "cwd": "${workspaceFolder}/pcjs-disks/pcx86/dos/microsoft/2.00/",
+      "stopOnEntry": false
+    },
+    {
       "name": "Bin: machines.js",
       "type": "node",
       "request": "launch",

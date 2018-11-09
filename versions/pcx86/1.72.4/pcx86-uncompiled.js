@@ -63671,6 +63671,10 @@ class FDC extends Component {
     reset()
     {
         /*
+         * Force ChipSet switch (re)interrogation, by throwing away any old drive information first.
+         */
+        this.aDrives = undefined;
+        /*
          * NOTE: The controller is also initialized by the constructor, to assist with auto-mount support,
          * so think about whether we can skip powerUp initialization.
          */
@@ -63760,8 +63764,10 @@ class FDC extends Component {
         if (aDiskHistory != null) this.aDiskHistory = aDiskHistory;
 
         if (this.aDrives === undefined) {
-            this.nDrives = 4;                       // default to the maximum number of drives
-            if (this.chipset) this.nDrives = this.chipset.getDIPFloppyDrives();
+            /*
+             * Default to the maximum number of drives unless ChipSet can give us a specific number of drives.
+             */
+            this.nDrives = this.chipset? this.chipset.getDIPFloppyDrives() : 4;
             /*
              * I would prefer to allocate only nDrives, but as discussed in the handling of the FDC.REG_DATA.CMD.SENSE_INT
              * command, we're faced with situations where the controller must respond to any drive in the range 0-3, regardless
