@@ -272,7 +272,7 @@
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/modules/diskdump/bin/diskdump",
-      "args": ["--dir=archive/src/all/", "--format=json", "--label=MSDOSSRC", "--normalize", "--output=MSDOSSRC.json", "--size=10000"],
+      "args": ["--dir=archive/src/all/", "--format=json", "--output=MSDOS200-SRC.json", "--label=MSDOS200SRC", "--size=10000", "--normalize", "--overwrite"],
       "cwd": "${workspaceFolder}/pcjs-disks/pcx86/dos/microsoft/2.00/",
       "stopOnEntry": false
     },
@@ -1790,6 +1790,13 @@
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:8088/disks/pcx86/dos/ibm/7.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Microsoft MS-DOS 2.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8088/disks/pcx86/dos/microsoft/2.00/",
       "webRoot": "${workspaceFolder}"
     },
     {
