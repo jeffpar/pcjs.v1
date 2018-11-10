@@ -50812,6 +50812,7 @@ class Video extends Component {
         let video = this, sProp, sEvent;
         this.fGecko = Web.isUserAgent("Gecko/");
         this.bindingsExternal = [];
+        this.parmsVideo = parmsVideo;
 
         /*
          * This records the model specified (eg, "mda", "cga", "ega", "vga", "vdu", or "" if no model
@@ -50889,16 +50890,6 @@ class Video extends Component {
          * 1 to 0 briefly, alternately revealing and hiding the underlying container element, to simulate
          * screen "flicker".
          */
-        this.colorFont = parmsVideo['fontColor'];
-        if (this.colorFont) {
-            this.rgbFont = [0xff, 0xff, 0xff, 0xff];
-            let i = 0, j = 0, s;
-            if (this.colorFont[i] == '#') i++;
-            while ((s = this.colorFont.substr(i, 2))) {
-                this.rgbFont[j++] = Number.parseInt(s, 16);
-                i += 2;
-            }
-        }
         this.colorScreen = parmsVideo['screenColor'] || "black";
         this.opacityFlicker = (1 - (Web.getURLParm('flicker') || parmsVideo['flicker'] || 0)).toString();
         this.fOpacityReduced = false;
@@ -51084,6 +51075,17 @@ class Video extends Component {
 
         let nRandomize = +cmp.getMachineParm('randomize');
         if (nRandomize >= 0 && nRandomize <= 1) this.nRandomize = nRandomize;
+
+        this.colorFont = cmp.getMachineParm('fontColor', this.parmsVideo);
+        if (this.colorFont) {
+            this.rgbFont = [0xff, 0xff, 0xff, 0xff];
+            let i = 0, j = 0, s;
+            if (this.colorFont[i] == '#') i++;
+            while ((s = this.colorFont.substr(i, 2))) {
+                this.rgbFont[j++] = Number.parseInt(s, 16);
+                i += 2;
+            }
+        }
 
         /*
          * nCard will be undefined if no model was explicitly set (whereas this.nCard is ALWAYS defined).
@@ -52574,7 +52576,28 @@ class Video extends Component {
 
             let aRGBColors, aColorMap;
             if (this.nCardFont == Video.CARD.MDA || this.nMonitorType == ChipSet.MONITOR.MONO) {
-                aRGBColors = Video.aMDAColors;
+                if (!this.colorFont) {
+                    aRGBColors = Video.aMDAColors;
+                } else {
+                    /*
+                     * When overriding MDA colors, we take rgbFont to be the "normal" color (aMDAColors indices 1 and 2);
+                     * to calculate the MDA's corresponding "intense" color (aMDAColors indices 3 and 4), we locate the index
+                     * (k) of the highest-intensity "dominating" component (j) of rgbFont, and then bump that index to 0xff.
+                     *
+                     * Now obviously, if you set the 'fontColor' property to something like "#33FF00", where the largest RGB
+                     * component (G) is already at max (0xff), there will be no difference between normal and intense colors.
+                     * So, if you want there to be a difference, don't do that.
+                     */
+                    aRGBColors = Video.aMDAColors.slice();
+                    aRGBColors[1] = aRGBColors[2] = this.rgbFont;
+                    let j = 0, k = 0;
+                    for (let i = 0; i < 3; i++) {
+                        if (j < this.rgbFont[i]) j = this.rgbFont[k = i];
+                    }
+                    let rgbIntense = this.rgbFont.slice();
+                    rgbIntense[k] = 0xff;
+                    aRGBColors[3] = aRGBColors[4] = rgbIntense;
+                }
                 aColorMap = Video.aMDAColorMap;
             } else {
                 aRGBColors = this.getCardColors();
@@ -56650,25 +56673,42 @@ Video.ATTRS.BGND_MAGENTA    = 0x50;
 Video.ATTRS.BGND_BROWN      = 0x60;
 
 /*
- * For the MDA, the number of unique "colors" is 5, based on the following supported FGND attribute values:
+ * For the MDA, there are currently three distinct "colors": off, normal, and intense.  There are
+ * also two variations of normal and intense: with and without underlining.  Technically, underlining
+ * makes no difference in the actual color, but because different fonts must be built for each, and
+ * because the presence of underlining is determined by character's attribute (aka "color") bits, we
+ * use separate color indices for each variation; so ODD color indices are used for underlining and
+ * EVEN indices are not.
  *
- *      0x0: black font (attribute value 0x8 is mapped to 0x0)
- *      0x1: green font with underline
- *      0x7: green font without underline (attribute values 0x2-0x6 are mapped to 0x7)
- *      0x9: bright green font with underline
- *      0xf: bright green font without underline (attribute values 0xa-0xe are mapped to 0xf)
- *
- * I'm still not sure about 0x8 (dark green?); for now, I'm mapping it to 0x0, but it may become a 6th supported color.
- *
- * MDA attributes form an index into aMDAColorMap, which in turn provides an index (0-4) into aMDAColors.
+ * I'm still not sure about dark green (see comments above); if it exists on a standard IBM monitor
+ * (model 5151), then I may need to support another "color": dark.  For now, the attributes that may
+ * require dark (ie, 0x78 and 0xF8) have their foreground attribute (0x8) mapped to 0x0 (off) instead.
  */
 Video.aMDAColors = [
-    [0x00, 0x00, 0x00, 0xff],
-    [0x7f, 0xc0, 0x7f, 0xff],
-    [0x7f, 0xc0, 0x7f, 0xff],
-    [0x7f, 0xff, 0x7f, 0xff],
-    [0x7f, 0xff, 0x7f, 0xff]
+    [0x00, 0x00, 0x00, 0xff],       // 0: off
+    [0x7f, 0xc0, 0x7f, 0xff],       // 1: normal (with underlining)
+    [0x7f, 0xc0, 0x7f, 0xff],       // 2: normal
+    [0x7f, 0xff, 0x7f, 0xff],       // 3: intense (with underlining)
+    [0x7f, 0xff, 0x7f, 0xff]        // 4: intense
 ];
+// Video.aMDAColors = [
+//     [0x00, 0x00, 0x00, 0xff],       // 0: off
+//     [0x26, 0xbf, 0x00, 0xff],       // 1: normal (with underlining)
+//     [0x26, 0xbf, 0x00, 0xff],       // 2: normal
+//     [0x33, 0xff, 0x00, 0xff],       // 3: intense (with underlining)
+//     [0x33, 0xff, 0x00, 0xff]        // 4: intense
+// ];
+/*
+ * Each of the following FGND attribute values are mapped to one of the above "colors":
+ *
+ *      0x0: black font (per above, attribute value 0x8 is also mapped to attribute 0x0)
+ *      0x1: green font with underlining
+ *      0x7: green font without underlining (attribute values 0x2-0x6 are mapped to attribute 0x7)
+ *      0x9: bright green font with underlining
+ *      0xf: bright green font without underlining (attribute values 0xa-0xe are mapped to attribute 0xf)
+ *
+ * MDA attributes form an index into aMDAColorMap, which in turn provides an index into aMDAColors.
+ */
 Video.aMDAColorMap = [0x0, 0x1, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x0, 0x3, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4];
 
 Video.aCGAColors = [
@@ -63617,31 +63657,6 @@ class FDC extends Component {
             } else {
                 if (!this.restore(data)) return false;
             }
-            /*
-             * Populate the HTML controls to match the actual (well, um, specified) number of floppy drives.
-             */
-            let controlDrives;
-            if ((controlDrives = this.bindings['listDrives'])) {
-                while (controlDrives.firstChild) {
-                    controlDrives.removeChild(controlDrives.firstChild);
-                }
-                controlDrives.value = "";
-                for (let iDrive = 0; iDrive < this.nDrives; iDrive++) {
-                    let controlOption = document.createElement("option");
-                    controlOption.value = iDrive.toString();
-                    /*
-                     * TODO: This conversion of drive number to drive letter, starting with A:, is very simplistic
-                     * and will NOT match the drive mappings that DOS ultimately uses.  We'll need to spiff this up at
-                     * some point.
-                     */
-                    controlOption.text = String.fromCharCode(0x41 + iDrive) + ":";
-                    controlDrives.appendChild(controlOption);
-                }
-                if (this.nDrives > 0) {
-                    controlDrives.value = "0";
-                    this.displayDiskette(0);
-                }
-            }
         }
         return true;
     }
@@ -63663,8 +63678,8 @@ class FDC extends Component {
      * reset()
      *
      * NOTE: initController() establishes the maximum possible number of drives, but it's not until
-     * we interrogate the current SW1 settings that we will have an ACTUAL number of drives (nDrives),
-     * at which point we can also update the contents of the "listDrives" HTML control, if any.
+     * initController() interrogates the current SW1 settings that we will have an ACTUAL number of drives
+     * (nDrives), at which point we can also update the contents of the "listDrives" HTML control, if any.
      *
      * @this {FDC}
      */
@@ -63675,6 +63690,41 @@ class FDC extends Component {
          * so think about whether we can skip powerUp initialization.
          */
         this.initController();
+        this.resetDriveList();
+    }
+
+    /**
+     * resetDriveList()
+     *
+     * @this {FDC}
+     */
+    resetDriveList()
+    {
+        /*
+         * Populate the HTML controls to match the actual (well, um, specified) number of floppy drives.
+         */
+        let controlDrives;
+        if ((controlDrives = this.bindings['listDrives'])) {
+            while (controlDrives.firstChild) {
+                controlDrives.removeChild(controlDrives.firstChild);
+            }
+            controlDrives.value = "";
+            for (let iDrive = 0; iDrive < this.nDrives; iDrive++) {
+                let controlOption = document.createElement("option");
+                controlOption.value = iDrive.toString();
+                /*
+                 * TODO: This conversion of drive number to drive letter, starting with A:, is very simplistic
+                 * and will NOT match the drive mappings that DOS ultimately uses.  We'll need to spiff this up at
+                 * some point.
+                 */
+                controlOption.text = String.fromCharCode(0x41 + iDrive) + ":";
+                controlDrives.appendChild(controlOption);
+            }
+            if (this.nDrives > 0) {
+                controlDrives.value = "0";
+                this.displayDiskette(0);
+            }
+        }
     }
 
     /**
@@ -63759,15 +63809,18 @@ class FDC extends Component {
         let aDiskHistory = data[i++];
         if (aDiskHistory != null) this.aDiskHistory = aDiskHistory;
 
+        /*
+         * Default to the maximum number of drives unless ChipSet can give us a specific number of drives.
+         */
+        this.nDrives = this.chipset? this.chipset.getDIPFloppyDrives() : 4;
+
+        /*
+         * I would prefer to allocate only nDrives, but as discussed in the handling of the FDC.REG_DATA.CMD.SENSE_INT
+         * command, we're faced with situations where the controller must respond to any drive in the range 0-3, regardless
+         * how many drives are actually installed.  We still rely upon nDrives to determine the number of drives displayed
+         * to the user, however.
+         */
         if (this.aDrives === undefined) {
-            this.nDrives = 4;                       // default to the maximum number of drives
-            if (this.chipset) this.nDrives = this.chipset.getDIPFloppyDrives();
-            /*
-             * I would prefer to allocate only nDrives, but as discussed in the handling of the FDC.REG_DATA.CMD.SENSE_INT
-             * command, we're faced with situations where the controller must respond to any drive in the range 0-3, regardless
-             * how many drives are actually installed.  We still rely upon nDrives to determine the number of drives displayed
-             * to the user, however.
-             */
             this.aDrives = new Array(4);
         }
 

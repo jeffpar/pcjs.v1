@@ -8,8 +8,9 @@
 	"eslint.workingDirectories": [
 		"./modules/c1pjs/lib", "./modules/pcx86/lib"
 	],
-	"explorer.confirmDragAndDrop": false,
-	"files.autoSave": "afterDelay",
+  "explorer.autoReveal": false,
+  "explorer.confirmDragAndDrop": false,
+  "files.autoSave": "off",
 	"files.exclude": {
 		"**/._*": true,
 		"**/.DS_Store": true,

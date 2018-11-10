@@ -479,7 +479,7 @@ class FDC extends Component {
     {
         if (!fRepower) {
             if (!data) {
-                this.reset();
+                this.reset(true);
                 if (this.cmp.fReload) {
                     /*
                      * If the computer's fReload flag is set, we're required to toss all currently
@@ -491,31 +491,7 @@ class FDC extends Component {
             } else {
                 if (!this.restore(data)) return false;
             }
-            /*
-             * Populate the HTML controls to match the actual (well, um, specified) number of floppy drives.
-             */
-            let controlDrives;
-            if ((controlDrives = this.bindings['listDrives'])) {
-                while (controlDrives.firstChild) {
-                    controlDrives.removeChild(controlDrives.firstChild);
-                }
-                controlDrives.value = "";
-                for (let iDrive = 0; iDrive < this.nDrives; iDrive++) {
-                    let controlOption = document.createElement("option");
-                    controlOption.value = iDrive.toString();
-                    /*
-                     * TODO: This conversion of drive number to drive letter, starting with A:, is very simplistic
-                     * and will NOT match the drive mappings that DOS ultimately uses.  We'll need to spiff this up at
-                     * some point.
-                     */
-                    controlOption.text = String.fromCharCode(0x41 + iDrive) + ":";
-                    controlDrives.appendChild(controlOption);
-                }
-                if (this.nDrives > 0) {
-                    controlDrives.value = "0";
-                    this.displayDiskette(0);
-                }
-            }
+            this.resetDriveList();
         }
         return true;
     }
@@ -537,18 +513,52 @@ class FDC extends Component {
      * reset()
      *
      * NOTE: initController() establishes the maximum possible number of drives, but it's not until
-     * we interrogate the current SW1 settings that we will have an ACTUAL number of drives (nDrives),
-     * at which point we can also update the contents of the "listDrives" HTML control, if any.
+     * initController() interrogates the current SW1 settings that we will have an ACTUAL number of drives
+     * (nDrives), at which point we can also update the contents of the "listDrives" HTML control, if any.
      *
      * @this {FDC}
+     * @param {boolean} [fPowerUp] (this isn't set by a computer reset(), only by our powerUp() handler)
      */
-    reset()
+    reset(fPowerUp)
     {
         /*
          * NOTE: The controller is also initialized by the constructor, to assist with auto-mount support,
          * so think about whether we can skip powerUp initialization.
          */
         this.initController();
+        /*
+         * Don't bother resetting the drive list if we're being called by powerUp(), because powerUp() will.
+         */
+        if (!fPowerUp) this.resetDriveList();
+    }
+
+    /**
+     * resetDriveList()
+     *
+     * @this {FDC}
+     */
+    resetDriveList()
+    {
+        /*
+         * Populate the HTML controls to match the actual (well, um, specified) number of floppy drives.
+         */
+        let controlDrives;
+        if ((controlDrives = this.bindings['listDrives'])) {
+            while (controlDrives.firstChild) {
+                controlDrives.removeChild(controlDrives.firstChild);
+            }
+            controlDrives.value = "";
+            for (let iDrive = 0; iDrive < this.nDrives; iDrive++) {
+                let controlOption = document.createElement("option");
+                controlOption.value = iDrive.toString();
+                controlOption.text = String.fromCharCode(0x41 + iDrive) + ":";
+                controlDrives.appendChild(controlOption);
+            }
+            if (this.nDrives > 0) {
+                controlDrives.value = "0";
+                this.displayDiskette(0);
+            }
+        }
     }
 
     /**
@@ -633,15 +643,18 @@ class FDC extends Component {
         let aDiskHistory = data[i++];
         if (aDiskHistory != null) this.aDiskHistory = aDiskHistory;
 
+        /*
+         * Default to the maximum number of drives unless ChipSet can give us a specific number of drives.
+         */
+        this.nDrives = this.chipset? this.chipset.getDIPFloppyDrives() : 4;
+
+        /*
+         * I would prefer to allocate only nDrives, but as discussed in the handling of the FDC.REG_DATA.CMD.SENSE_INT
+         * command, we're faced with situations where the controller must respond to any drive in the range 0-3, regardless
+         * how many drives are actually installed.  We still rely upon nDrives to determine the number of drives displayed
+         * to the user, however.
+         */
         if (this.aDrives === undefined) {
-            this.nDrives = 4;                       // default to the maximum number of drives
-            if (this.chipset) this.nDrives = this.chipset.getDIPFloppyDrives();
-            /*
-             * I would prefer to allocate only nDrives, but as discussed in the handling of the FDC.REG_DATA.CMD.SENSE_INT
-             * command, we're faced with situations where the controller must respond to any drive in the range 0-3, regardless
-             * how many drives are actually installed.  We still rely upon nDrives to determine the number of drives displayed
-             * to the user, however.
-             */
             this.aDrives = new Array(4);
         }
 
@@ -1337,9 +1350,6 @@ class FDC extends Component {
              * With the addition of notify(), users are now "alerted" whenever a diskette has finished loading;
              * notify() is selective about its output, using print() if a print window is open, alert() otherwise.
              *
-             * WARNING: This conversion of drive number to drive letter, starting with A:, is very simplistic
-             * and will not match the drive mappings that DOS ultimately uses (ie, for drives beyond B:).
-             *
              * TODO: Consider adding support for non-modal notices that appear briefly over the machine and then fade,
              * because these modal alerts quickly become annoying.  In the meantime, I now set fPrintOnly to true, on the
              * theory no message is a good sign, while load errors in disk.js should continue to trigger notifications.
@@ -1574,9 +1584,6 @@ class FDC extends Component {
             this.regInput |= FDC.REG_INPUT.DISK_CHANGE;
 
             /*
-             * WARNING: This conversion of drive number to drive letter, starting with A:, is very simplistic
-             * and is not guaranteed to match the drive mapping that DOS ultimately uses.
-             *
              * TODO: Consider adding support for non-modal notices that appear briefly over the machine and then fade,
              * because these modal alerts quickly become annoying.  In the meantime, I now set fPrintOnly to true, on the
              * theory no message is a good sign, while load errors in disk.js should continue to trigger notifications.

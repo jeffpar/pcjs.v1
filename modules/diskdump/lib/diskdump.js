@@ -1640,7 +1640,11 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
         var sDir = sImage.replace(/\.(img|json)/, "");
         if (sDir != sImage) {
             sDir += path.sep;
-            var asFiles = glob.sync(sDir + "**");
+            try {
+                var asFiles = glob.sync(sDir + "**");
+            } catch(err) {
+                console.log(err.message);
+            }
             for (var i = 0; i < asFiles.length; i++) {
                 var sFile = asFiles[i];
                 if (!sFile.substr(sDir.length)) continue;
@@ -1652,6 +1656,10 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
                 fileInfo.FILE_ATTR = stats.isDirectory()? DiskAPI.ATTR.SUBDIR : (this.sLabel == "none"? 0 : DiskAPI.ATTR.ARCHIVE);
                 fileInfo.FILE_SIZE = stats.size;
                 fileInfo.FILE_TIME = this.getDSTAdjustedTime(stats.mtime);
+                if (!(fileInfo.FILE_ATTR & DiskAPI.ATTR.SUBDIR)) {
+                    var bufData = fs.readFileSync(sFile);
+                    fileInfo.FILE_MD5 = crypto.createHash('md5').update(bufData).digest('hex');
+                }
                 this.validateTime(fileInfo.FILE_TIME);
                 this.addManifestInfo(fileInfo);
             }
@@ -2538,7 +2546,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     }
 
     var abBoot, cbSector, cSectorsPerCluster, cbCluster, cFATs, cFATSectors;
-    var cRootEntries, cRootSectors, cTotalSectors, cSectorsPerTrack, cHeads, cDataSectors, cbAvail;
+    var cRootEntries, cRootSectors, cTotalSectors, cHiddenSectors, cSectorsPerTrack, cHeads, cDataSectors, cbAvail;
 
     /*
      * Find or build a BPB with enough capacity, and at the same time, calculate all the other values we'll need,
@@ -2577,11 +2585,12 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
         cFATSectors = abBoot[DiskAPI.BPB.FAT_SECS] | (abBoot[DiskAPI.BPB.FAT_SECS + 1] << 8);
         cRootSectors = (((cRootEntries * DiskAPI.DIRENT.LENGTH) + cbSector - 1) / cbSector) | 0;
         cTotalSectors = abBoot[DiskAPI.BPB.TOTAL_SECS] | (abBoot[DiskAPI.BPB.TOTAL_SECS + 1] << 8);
+        cHiddenSectors = abBoot[DiskAPI.BPB.HIDDEN_SECS] | (abBoot[DiskAPI.BPB.HIDDEN_SECS + 1] << 8);
         cSectorsPerTrack = abBoot[DiskAPI.BPB.TRACK_SECS] | (abBoot[DiskAPI.BPB.TRACK_SECS + 1] << 8);
         cHeads = abBoot[DiskAPI.BPB.TOTAL_HEADS] | (abBoot[DiskAPI.BPB.TOTAL_HEADS + 1] << 8);
         cDataSectors = cTotalSectors - (cRootSectors + cFATs * cFATSectors + 1);
         cbAvail = cDataSectors * cbSector;
-        if (!nTargetSectors) {
+        if (!nTargetSectors || cHiddenSectors) {
             if (cbTotal <= cbAvail) {
                 var cb = this.calcFileSizes(aFiles, cSectorsPerCluster);
                 if (cb <= cbAvail) {
@@ -2603,6 +2612,11 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     var abSector;
     var offDisk = 0;
     var cbDisk = cTotalSectors * cbSector;
+    /*
+     * If the disk is actually a partition on a larger drive, calculate how much larger the image should be
+     * (ie, hidden sectors plus an entire cylinder reserved for diagnostics, head parking, etc).
+     */
+    var cbDrive = (cHiddenSectors? (cHiddenSectors + cSectorsPerTrack * cHeads) * cbSector : 0) + cbDisk;
 
     /*
      * TODO: Consider doing what convertToIMG() does, which is deferring setting this.bufDisk until the
@@ -2610,7 +2624,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      * functions that prefer not passing around temporary buffers.  In the meantime, perhaps any catastrophic
      * failures should set bufDisk back to null?
      */
-    this.bufDisk = new BufferPF(cbDisk);
+    this.bufDisk = new BufferPF(cbDrive);
 
     /*
      * WARNING: Buffers are NOT zero-initialized, so we need explicitly fill bufDisk with zeros (this seems
@@ -2619,11 +2633,11 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     this.bufDisk.fill(0);
 
     /*
-     * Output a Master Boot Record (MBR), if a hard drive image was requested.
+     * Output a Master Boot Record (MBR) if this is a hard drive image.
      */
-    if (this.kbTarget >= 10000) {
+    if (cHiddenSectors) {
         abSector = this.buildMBR(cHeads, cSectorsPerTrack, cbSector, cTotalSectors);
-        offDisk += this.copyData(offDisk, abSector);
+        offDisk += this.copyData(offDisk, abSector) * cHiddenSectors;
     }
 
     /*
