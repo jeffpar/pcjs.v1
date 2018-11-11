@@ -1199,7 +1199,7 @@ class DebuggerX86 extends Debugger {
     }
 
     /**
-     * setShort(dbgAddr, w, inc)
+     * setShort(dbgAddr, w, inc, fFast)
      *
      * NOTE: If you need to patch a ROM, you MUST use the ROM location's physical address.
      *
@@ -1210,8 +1210,9 @@ class DebuggerX86 extends Debugger {
      * @param {DbgAddrX86} dbgAddr
      * @param {number} w
      * @param {number} [inc]
+     * @param {boolean} [fFast]
      */
-    setShort(dbgAddr, w, inc)
+    setShort(dbgAddr, w, inc, fFast)
     {
         let addr = this.getAddr(dbgAddr, true, 2);
         if (addr !== X86.ADDR_INVALID) {
@@ -1221,7 +1222,7 @@ class DebuggerX86 extends Debugger {
                 this.bus.setShortDirect(addr, w);
             }
             if (inc) this.incAddr(dbgAddr, inc);
-            this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
+            if (!fFast) this.cpu.updateCPU(true);       // we set fForce to true in case video memory was the target
         }
     }
 
@@ -5078,9 +5079,9 @@ class DebuggerX86 extends Debugger {
             for (let i = 0; i < 256; i++) {
                 let sHex = Str.toHex(i, 2);
                 if (i && !(i & 0xf)) this.incAddr(dbgAddr, 64);
-                this.setShort(dbgAddr, (i << 8) | sHex.charCodeAt(0), 2);
-                this.setShort(dbgAddr, (i << 8) | sHex.charCodeAt(1), 2);
-                this.setShort(dbgAddr, 0x0720, 2);
+                this.setShort(dbgAddr, (i << 8) | sHex.charCodeAt(0), 2, true);
+                this.setShort(dbgAddr, (i << 8) | sHex.charCodeAt(1), 2, true);
+                this.setShort(dbgAddr, 0x0720, 2, i < 255);
             }
             return;
         }
