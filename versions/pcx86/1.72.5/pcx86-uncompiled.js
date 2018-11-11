@@ -52514,6 +52514,30 @@ class Video extends Component {
     }
 
     /**
+     * getIntenseColor(rgb)
+     *
+     * Determine the maximum amount we can adjust all RGB entries by without overflowing, and return a new RGB array.
+     *
+     * @this {Video}
+     * @param {Array} rgb
+     * @return {Array}
+     */
+    getIntenseColor(rgb)
+    {
+        let rgbIntense = rgb.slice();
+        let i, j = 0;
+        for (i = 0; i < 3; i++) {
+            if (j < rgb[i]) {
+                j = rgb[i];
+            }
+        }
+        for (i = 0; i < 3; i++) {
+            rgbIntense[i] += 0xff - j;
+        }
+        return rgbIntense;
+    }
+
+    /**
      * getSelectedFonts()
      *
      * @this {Video}
@@ -52580,23 +52604,12 @@ class Video extends Component {
                     aRGBColors = Video.aMDAColors;
                 } else {
                     /*
-                     * When overriding MDA colors, we take rgbFont to be the "normal" color (aMDAColors indices 1 and 2);
-                     * to calculate the MDA's corresponding "intense" color (aMDAColors indices 3 and 4), we locate the index
-                     * (k) of the highest-intensity "dominating" component (j) of rgbFont, and then bump that index to 0xff.
-                     *
-                     * Now obviously, if you set the 'fontColor' property to something like "#33FF00", where the largest RGB
-                     * component (G) is already at max (0xff), there will be no difference between normal and intense colors.
-                     * So, if you want there to be a difference, don't do that.
+                     * When overriding MDA colors, we take rgbFont to be the "normal" color (aMDAColors indices 1 and 2), and
+                     * then calculate the MDA's corresponding "intense" color (aMDAColors indices 3 and 4) using getIntenseColor().
                      */
-                    aRGBColors = Video.aMDAColors.slice();
+                    aRGBColors = Video.aMDAColors.slice();              // start with a copy of aMDAColors
                     aRGBColors[1] = aRGBColors[2] = this.rgbFont;
-                    let j = 0, k = 0;
-                    for (let i = 0; i < 3; i++) {
-                        if (j < this.rgbFont[i]) j = this.rgbFont[k = i];
-                    }
-                    let rgbIntense = this.rgbFont.slice();
-                    rgbIntense[k] = 0xff;
-                    aRGBColors[3] = aRGBColors[4] = rgbIntense;
+                    aRGBColors[3] = aRGBColors[4] = this.getIntenseColor(this.rgbFont);
                 }
                 aColorMap = Video.aMDAColorMap;
             } else {
@@ -54060,16 +54073,33 @@ class Video extends Component {
             font = this.aFonts[this.nAlternateFont];
             bAttr &= ~0x08;
         }
-        let iFgnd = bAttr & 0x0f;
-        if (font.aColorMap) iFgnd = font.aColorMap[iFgnd];
 
         /*
          * Just as aColorMap maps the foreground attribute to the appropriate foreground character grid,
          * it also maps the background attribute to the appropriate background color.
+         *
+         * Unfortunately, the MDA card is an exception: the background is always black (color index 0)
+         * UNLESS 1) attribute & 0xf7 == 0x70 (color index 2) or 2) attribute & 0xf7 == 0xf0 (color index 4).
+         *
+         * Similarly, the foreground is NEVER black UNLESS attribute & 0x77 == 0x00 (ie, the attribute is one
+         * of 0x00, 0x08, 0x80, or 0x88).
          */
         let xDst, yDst;
+        let iFgnd = bAttr & 0x0f;
         let iBgnd = (bAttr >> 4) & 0x0f;
-        if (font.aColorMap) iBgnd = font.aColorMap[iBgnd];
+        if (font.aColorMap) {
+            if (!(bAttr & 0x7) && (bAttr & 0x70)) {
+                iFgnd |= 0x7;
+            }
+            let b = bAttr & 0xf7;
+            if (b == 0x70 || b == 0xf0) {
+                iFgnd = 0x0;
+            } else {
+                iBgnd = 0x0;
+            }
+            iFgnd = font.aColorMap[iFgnd];
+            iBgnd = font.aColorMap[iBgnd];
+        }
 
         if (context) {
             xDst = col * font.cxCell;
@@ -75562,6 +75592,30 @@ class DebuggerX86 extends Debugger {
      */
     doEdit(asArgs)
     {
+        let sAddr = asArgs[1];
+        if (sAddr == null) {
+            this.println("edit memory commands:");
+            this.println("\teb [a] [...]  edit bytes at address a");
+            this.println("\tew [a] [...]  edit words at address a");
+            return;
+        }
+        let dbgAddr = this.parseAddr(sAddr);
+        if (!dbgAddr) return;
+
+        /*
+         * Use "ev b000:0000" to fill MDA video memory with test data
+         */
+        if (asArgs[0] == "ev") {
+            for (let i = 0; i < 256; i++) {
+                let sHex = Str.toHex(i, 2);
+                if (i && !(i & 0xf)) this.incAddr(dbgAddr, 64);
+                this.setShort(dbgAddr, (i << 8) | sHex.charCodeAt(0), 2);
+                this.setShort(dbgAddr, (i << 8) | sHex.charCodeAt(1), 2);
+                this.setShort(dbgAddr, 0x0720, 2);
+            }
+            return;
+        }
+
         let size = 1;
         let mask = 0xff;
         let fnGet = this.getByte;
@@ -75572,19 +75626,8 @@ class DebuggerX86 extends Debugger {
             fnGet = this.getShort;
             fnSet = this.setShort;
         }
+
         let cch = size << 1;
-
-        let sAddr = asArgs[1];
-        if (sAddr == null) {
-            this.println("edit memory commands:");
-            this.println("\teb [a] [...]  edit bytes at address a");
-            this.println("\tew [a] [...]  edit words at address a");
-            return;
-        }
-
-        let dbgAddr = this.parseAddr(sAddr);
-        if (!dbgAddr) return;
-
         let fASCII = false;
         for (let i = 2; i < asArgs.length; i++) {
             let sArg = asArgs[i];

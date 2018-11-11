@@ -5061,6 +5061,30 @@ class DebuggerX86 extends Debugger {
      */
     doEdit(asArgs)
     {
+        let sAddr = asArgs[1];
+        if (sAddr == null) {
+            this.println("edit memory commands:");
+            this.println("\teb [a] [...]  edit bytes at address a");
+            this.println("\tew [a] [...]  edit words at address a");
+            return;
+        }
+        let dbgAddr = this.parseAddr(sAddr);
+        if (!dbgAddr) return;
+
+        /*
+         * Use "ev b000:0000" to fill MDA video memory with test data
+         */
+        if (asArgs[0] == "ev") {
+            for (let i = 0; i < 256; i++) {
+                let sHex = Str.toHex(i, 2);
+                if (i && !(i & 0xf)) this.incAddr(dbgAddr, 64);
+                this.setShort(dbgAddr, (i << 8) | sHex.charCodeAt(0), 2);
+                this.setShort(dbgAddr, (i << 8) | sHex.charCodeAt(1), 2);
+                this.setShort(dbgAddr, 0x0720, 2);
+            }
+            return;
+        }
+
         let size = 1;
         let mask = 0xff;
         let fnGet = this.getByte;
@@ -5071,19 +5095,8 @@ class DebuggerX86 extends Debugger {
             fnGet = this.getShort;
             fnSet = this.setShort;
         }
+
         let cch = size << 1;
-
-        let sAddr = asArgs[1];
-        if (sAddr == null) {
-            this.println("edit memory commands:");
-            this.println("\teb [a] [...]  edit bytes at address a");
-            this.println("\tew [a] [...]  edit words at address a");
-            return;
-        }
-
-        let dbgAddr = this.parseAddr(sAddr);
-        if (!dbgAddr) return;
-
         let fASCII = false;
         for (let i = 2; i < asArgs.length; i++) {
             let sArg = asArgs[i];
