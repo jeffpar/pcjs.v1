@@ -1,7 +1,7 @@
 ---
 layout: page
 title: PCjs DOS Documentation
-permalink: /pubs/pc/software/dos/pcjs
+permalink: /pubs/pc/software/dos/pcjs/
 ---
 
 PCjs DOS Documentation
