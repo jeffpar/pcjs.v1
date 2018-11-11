@@ -7651,6 +7651,9 @@ class Video extends Component {
     outCardMode(card, bOut, addrFrom)
     {
         this.printMessageIO(card.port + 4, bOut, addrFrom, "MODE");
+        if ((card.regMode ^ bOut) & Card.MDA.MODE.BLINK_ENABLE) {
+            card.video.iCellCacheValid = 0;
+        }
         card.regMode = bOut;
         this.checkMode();
     }
