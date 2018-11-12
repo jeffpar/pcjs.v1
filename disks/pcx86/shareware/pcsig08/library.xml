@@ -854,6 +854,8 @@
 		<disk path="/pcjs-disks/pcx86/tools/other/norton/6.01/NU601-DISK6OF8.json">Norton Utilities 6.01 (Utility 3)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/norton/6.01/NU601-DISK7OF8.json">Norton Utilities 6.01 (Utility 4)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/norton/6.01/NU601-DISK8OF8.json">Norton Utilities 6.01 (Utility 5)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/other/objasm/OBJASM-BIN.json">OBJASM 2.0 (Bin)</disk>
+		<disk path="/pcjs-disks/pcx86/tools/other/objasm/OBJASM-SRC.json">OBJASM 2.0 (Src)</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/omniview/4.30/OMNIVIEW386-430.json">Omniview 386 4.30</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/pctools/1.03/PCTOOLS103.json">Central Point PC Tools 1.03</disk>
 		<disk path="/pcjs-disks/pcx86/tools/other/pctools/4.30/PCTOOLS430.json">Central Point PC Tools 4.30</disk>

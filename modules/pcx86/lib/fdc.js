@@ -1239,7 +1239,7 @@ class FDC extends Component {
              */
             sDiskettePath = sDiskettePath.replace("/disks/pc/", "/disks/pcx86/");
             sDiskettePath = sDiskettePath.replace("/disks/pcx86/private/", "/private-disks/pcx86/");
-            if (sDiskettePath.indexOf("archive.pcjs.org") < 0 || DEBUG) {
+            if (sDiskettePath.indexOf("archive.pcjs.org") < 0) {
                 sDiskettePath = sDiskettePath.replace("/disks/pcx86/", "/pcjs-disks/pcx86/");
             }
             sDiskettePath = sDiskettePath.replace("/pcjs-disks/pcx86/games/", "/pcjs-games/pcx86/");
