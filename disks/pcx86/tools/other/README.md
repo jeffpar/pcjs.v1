@@ -12,6 +12,7 @@ Information is available for these additional PC utilities.
 * [Enhanced DEBUG](enhdebug/)
 * [FlickerFree](flickerfree/)
 * [Norton Utilities](norton/)
+* [OBJASM](objasm/)
 * [Omniview](omniview/)
 * [PC Tools](pctools/)
 * [PFM (Paul's File Manager)](pfm/)

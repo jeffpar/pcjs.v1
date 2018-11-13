@@ -49,8 +49,8 @@ snapshot of the code used to build MS-DOS 2.11, so we refer to this collection a
 [re-released](https://blogs.msdn.microsoft.com/commandline/2018/09/28/re-open-sourcing-ms-dos-1-25-and-2-0/)
 the MS-DOS 1.x and 2.x source files on [GitHub](https://github.com/microsoft/ms-dos).  The files are identical to the
 original CHM release, so no effort was made to improve the previous release, remove irrelevant files, organize them by
-original diskette, etc.  And one downside of storing the files in a Git repository is that all the original file modification
-timestamps are gone.
+original diskette, etc.  And while I'm a big fan of GitHub, one downside to using a Git repository to "archive" old files
+is that all the original file modification dates and times are lost.
 
 Microsoft's sole improvement of the 2018 re-release was to quietly relax restrictions on the reuse of the source code,
 by releasing it under an [MIT License](https://en.wikipedia.org/wiki/MIT_License), instead of the older and much more restrictive

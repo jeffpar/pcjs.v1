@@ -2075,8 +2075,7 @@ class Web {
              *
              * NOTE: http://archive.pcjs.org is currently redirected to https://s3-us-west-2.amazonaws.com/archive.pcjs.org
              */
-            sURLRedirect = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
-            sURLRedirect = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-[a-z]+|private-[a-z]+)\/(.*)$/, "/$1/$2");
+            sURLRedirect = sURL.replace(/^(http:\/\/archive\.pcjs\.org\/|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org\/)(.*?)\/([^/]*)$/, "/pcjs-$2/archive/$3").replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-[a-z]+|private-[a-z]+)\/(.*)$/, "/$1/$2");
         }
         else {
             /*

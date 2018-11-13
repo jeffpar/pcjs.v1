@@ -2075,8 +2075,7 @@ class Web {
              *
              * NOTE: http://archive.pcjs.org is currently redirected to https://s3-us-west-2.amazonaws.com/archive.pcjs.org
              */
-            sURLRedirect = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
-            sURLRedirect = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-[a-z]+|private-[a-z]+)\/(.*)$/, "/$1/$2");
+            sURLRedirect = sURL.replace(/^(http:\/\/archive\.pcjs\.org\/|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org\/)(.*?)\/([^/]*)$/, "/pcjs-$2/archive/$3").replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-[a-z]+|private-[a-z]+)\/(.*)$/, "/$1/$2");
         }
         else {
             /*
@@ -64431,7 +64430,7 @@ class FDC extends Component {
              */
             sDiskettePath = sDiskettePath.replace("/disks/pc/", "/disks/pcx86/");
             sDiskettePath = sDiskettePath.replace("/disks/pcx86/private/", "/private-disks/pcx86/");
-            if (sDiskettePath.indexOf("archive.pcjs.org") < 0 || DEBUG) {
+            if (sDiskettePath.indexOf("archive.pcjs.org") < 0) {
                 sDiskettePath = sDiskettePath.replace("/disks/pcx86/", "/pcjs-disks/pcx86/");
             }
             sDiskettePath = sDiskettePath.replace("/pcjs-disks/pcx86/games/", "/pcjs-games/pcx86/");
