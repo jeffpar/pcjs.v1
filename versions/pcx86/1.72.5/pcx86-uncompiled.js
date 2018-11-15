@@ -52899,10 +52899,10 @@ class Video extends Component {
 
                 /*
                  * fUnderline should be true only in the FONT_MDA case, and only for the odd color variations
-                 * (1 and 3, out of variations 0 to 4), and only for the two bottom-most rows of the character cell
-                 * (which I still need to confirm).
+                 * (1 and 3, out of variations 0 to 4), and only for the second-from-bottom row of the character cell
+                 * (based on images from actual MDA hardware).
                  */
-                let fUnderline = (font.aColorMap && (iColor & 0x1) && y >= cyChar - 2);
+                let fUnderline = (font.aColorMap && (iColor & 0x1) && y == cyChar - 2);
                 let offScan = (y < cyLimit? offChar + y : offSplit + iChar * cyLimit + y - cyLimit);
 
                 /*
@@ -56718,10 +56718,10 @@ Video.ATTRS.BGND_BROWN      = 0x60;
  */
 Video.aMDAColors = [
     [0x00, 0x00, 0x00, 0xff],       // 0: off
-    [0x7f, 0xc0, 0x7f, 0xff],       // 1: normal (with underlining)
-    [0x7f, 0xc0, 0x7f, 0xff],       // 2: normal
-    [0x7f, 0xff, 0x7f, 0xff],       // 3: intense (with underlining)
-    [0x7f, 0xff, 0x7f, 0xff]        // 4: intense
+    [0x09, 0xcc, 0x50, 0xff],       // 1: normal (with underlining)
+    [0x09, 0xcc, 0x50, 0xff],       // 2: normal
+    [0x3c, 0xff, 0x83, 0xff],       // 3: intense (with underlining)
+    [0x3c, 0xff, 0x83, 0xff]        // 4: intense
 ];
 /*
  * Each of the following FGND attribute values are mapped to one of the above "colors":
