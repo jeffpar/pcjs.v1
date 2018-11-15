@@ -5073,7 +5073,7 @@ class DebuggerX86 extends Debugger {
         if (!dbgAddr) return;
 
         /*
-         * Use "ev b000:0000" to fill MDA video memory with test data
+         * Use "ev b000:0000" to fill MDA video memory with test data (and "ev b800:0000" to fill CGA video memory).
          */
         if (asArgs[0] == "ev") {
             for (let i = 0; i < 256; i++) {
@@ -5081,7 +5081,7 @@ class DebuggerX86 extends Debugger {
                 if (i && !(i & 0xf)) this.incAddr(dbgAddr, 64);
                 this.setShort(dbgAddr, (i << 8) | sHex.charCodeAt(0), 2, true);
                 this.setShort(dbgAddr, (i << 8) | sHex.charCodeAt(1), 2, true);
-                this.setShort(dbgAddr, 0x0720, 2, i < 255);
+                this.setShort(dbgAddr, (i << 8) | 0x20, 2, i < 255);
             }
             return;
         }
