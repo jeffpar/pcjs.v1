@@ -4510,7 +4510,7 @@ class Video extends Component {
                 /*
                  * fUnderline should be true only in the FONT_MDA case, and only for the odd color variations
                  * (1 and 3, out of variations 0 to 4), and only for the second-from-bottom row of the character cell
-                 * (based on visual comparisons with images ffrom actual MDA hardware).
+                 * (based on images from actual MDA hardware).
                  */
                 let fUnderline = (font.aColorMap && (iColor & 0x1) && y == cyChar - 2);
                 let offScan = (y < cyLimit? offChar + y : offSplit + iChar * cyLimit + y - cyLimit);
