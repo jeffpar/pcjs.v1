@@ -1946,7 +1946,7 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
             }
         }
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
+    if (DEBUG && card.video.messageEnabled(Messages.VIDEO | Messages.MEM)) {
         card.video.printf("writeByteMode0(0x%08X): 0x%02X -> 0x%08X%s\n", addr, b, dw);
     }
 };
@@ -5878,10 +5878,12 @@ class Video extends Component {
         }
 
         /*
-         * If cBlinks is "enabled" (ie, >= 0), then advance it once every 10 updateScreen() calls;
-         * this assumes an updateScreen() frequency of 60 per second; see Video.UPDATES_PER_SECOND.
+         * If this is a hardware update (as opposed to, say, a debugger-triggered update, where fForce is set),
+         * and cBlinks is "enabled" (ie, >= 0), then advance cBlinks once every 10 updateScreen() calls.
          *
-         * We assume that the CPU is calling us whenever fForce is undefined.
+         * Assuming an updateScreen() frequency of roughly 60 times per second (Video.UPDATES_PER_SECOND), performing
+         * a "blink update" every 10 times is reasonably close to the hardware blink rate.  However, the effective blink
+         * rate will also depend on other factors as well, such as the monitorSpecs for the video hardware being simulated.
          */
         let fBlinkUpdate = false;
         if (!fForce && !(++this.cUpdates % 10) && this.cBlinks >= 0) {
@@ -7980,12 +7982,12 @@ Video.TRAPALL = true;           // monitor all I/O by default (not just deltas)
  *
  * Additional notes from the IBM EGA Manual (p.5):
  *
- *     "In alphanumeric modes, characters are formed from one of two ROM (Read Only Memory) character
+ *      In alphanumeric modes, characters are formed from one of two ROM (Read Only Memory) character
  *      generators on the adapter. One character generator defines 7x9 characters in a 9x14 character box.
  *      For Enhanced Color Display support, the 9x14 character set is modified to provide an 8x14 character set.
  *      The second character generator defines 7x7 characters in an 8x8 character box. These generators contain
  *      dot patterns for 256 different characters. The character sets are identical to those provided by the
- *      IBM Monochrome Display Adapter and the IBM Color/Graphics Monitor Adapter."
+ *      IBM Monochrome Display Adapter and the IBM Color/Graphics Monitor Adapter.
  */
 Video.CARD = {
     MDA:    1,          // uses 9x14 monochrome font
@@ -8147,7 +8149,7 @@ Video.monitorSpecs[ChipSet.MONITOR.EGACOLOR] = {
  * @type {MonitorSpecs}
  */
 Video.monitorSpecs[ChipSet.MONITOR.VGACOLOR] = {
-    nHorzPeriodsPerSec: 16700,
+    nHorzPeriodsPerSec: 31500,
     nHorzPeriodsPerFrame: 410,
     percentHorzActive: 85,
     percentVertActive: 83
