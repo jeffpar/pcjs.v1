@@ -509,7 +509,7 @@ MarkOut.prototype.convertMD = function(sIndent)
                              * For multi-line autoType sequences, treat each newline (and the end of the entire sequence)
                              * as an implied "carriage return".
                              */
-                            aOptions[3] = aOptions[3].trim().replace(/(\n[ \t]+|$)/g, "\\r").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\\([0-9])/g, "\\\\$1");
+                            aOptions[3] = aOptions[3].trim().replace(/(\n[ \t]+|$)/g, "\\r").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
                         } else {
                             /*
                              * I would also like to "auto-quote" any unquoted property name at the start of any line.
