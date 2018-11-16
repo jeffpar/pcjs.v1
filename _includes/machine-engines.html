@@ -70,7 +70,7 @@ The following optional machine properties will be added to the 'parms' property:
   {%- if machine.autoType == nil -%}
     {%- assign machine_autoType = "" -%}
   {%- else -%}
-    {%- capture machine_autoType -%},autoType:"{{ machine.autoType | replace:"\r":"\\\\r" | replace:"\n":"\\\\n" | replace:"\t":"\\\\t" | replace:"\x":"\\\\x" }}"{%- endcapture -%}
+    {%- capture machine_autoType -%},autoType:"{{ machine.autoType | replace:"\\":"\\\\\\\\" | replace:"\r":"\\\\r" | newline_to_br | replace:"<br />":"\\\\r" | strip_newlines | replace:"\n":"\\\\n" | replace:"\t":"\\\\t" | replace:"\x":"\\\\x" | replace:"&":"&amp;" | replace:"<":"&lt;" | replace:">":"&gt;" }}"{%- endcapture -%}
   {%- endif -%}
   {%- if machine.class == nil -%}
     {%- assign machine_class = "" -%}
