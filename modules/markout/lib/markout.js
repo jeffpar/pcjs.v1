@@ -504,10 +504,19 @@ MarkOut.prototype.convertMD = function(sIndent)
                      */
                     var reMulti = /([ \t]*)([^\s]+): \|\n((?:\1 +[^\n]*\n?)*)/g;
                     while ((aOptions = reMulti.exec(asMachines[iMachine]))) {
-                        /*
-                         * I would also like to "auto-quote" any unquoted property name at the start of any line.
-                         */
-                        aOptions[3] = aOptions[3].replace(/^(\s+)([^":\s]+):/gm, '$1"$2":');
+                        if (aOptions[2] == "autoType") {
+                            /*
+                             * For multi-line autoType sequences, treat each newline (and the end of the entire sequence)
+                             * as an implied "carriage return".
+                             */
+                            aOptions[3] = aOptions[3].trim().replace(/(\n[ \t]+|$)/g, "\\r").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\\([0-9])/g, "\\\\$1");
+                        } else {
+                            /*
+                             * I would also like to "auto-quote" any unquoted property name at the start of any line.
+                             * TODO: Why did I add this?  Multi-line properties are normally just strings, not objects. -JP
+                             */
+                            aOptions[3] = aOptions[3].replace(/^(\s+)([^":\s]+):/gm, '$1"$2":');
+                        }
                         aaOptions.push(aOptions);
                         asMachines[iMachine] = asMachines[iMachine].replace(aOptions[0], "");
                         reMulti.lastIndex = 0;
