@@ -2,7 +2,12 @@
 	"editor.insertSpaces": true,
 	"editor.minimap.enabled": false,
 	"editor.rulers": [127],
-	"editor.tabSize": 4,
+  "editor.tabSize": 4,
+  "[asm]": {
+    "editor.tabSize": 8,
+    "editor.insertSpaces": false,
+    "editor.detectIndentation": false
+  },
 	"editor.wordWrap": "off",
 	"eslint.enable": true,
 	"eslint.workingDirectories": [
