@@ -5,13 +5,13 @@ permalink: /disks/pcx86/dos/microsoft/2.00/
 machines:
   - id: ibm5160
     type: pcx86
-    config: /devices/pcx86/machine/5160/mda/256kb/debugger/machine.xml
-    drives: '[{name:"10Mb Hard Disk",type:3,path:"/pcjs-disks/pcx86/dos/microsoft/2.00/MSDOS2X-SRC.json"}]'
+    config: /devices/pcx86/machine/5160/cga/512kb/debugger/machine.xml
+    drives: '[{name:"PC-DOS 2.00 w/Tools (10Mb)",type:3,path:"/pcjs-disks/pcx86/drives/10mb/PCDOS200-C400.json"},{name:"MS-DOS 2.X Source (10Mb)",type:3,path:"/pcjs-disks/pcx86/dos/microsoft/2.00/MSDOS2X-SRC.json"}]'
     autoMount:
       A:
-        name: PC DOS 2.00 (Disk 1)
+        name: None
       B:
-        name: PC DOS 2.00 (Disk 2)
+        name: None
     autoStart: true
     autoType: $date\r$time\r
 ---
@@ -61,7 +61,7 @@ Building MS-DOS 2.x Source Code
 
 For the machine below, a 10Mb hard disk image was built containing all the MS-DOS 2.x sources:
 
-    diskdump --dir=archive/src/ --format=json --output=MSDOS2X-SRC.json --label=MSDOS.SRC --size=10000 --normalize --overwrite
+    diskdump --dir=src --format=json --output=MSDOS2X-SRC.json --label=MSDOS2X --size=10000 --normalize --overwrite
 
 Tips for building MS-DOS 2.x binaries, along with some live demonstrations, will be coming at a later date.
 

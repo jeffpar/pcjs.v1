@@ -635,11 +635,15 @@ DiskDump.aDefaultBPBs = [
 ];
 
 DiskDump.asExclusions = [".*", ".IMG"];
+
 /*
- * NOTE: This list used to include .BAS files, but they aren't always ASCII, so that extension has been removed;
- * also, a warning is now displayed whenever we replace line endings in *any* file being copied to a disk image.
+ * List of text file types to convert line endings from LF to CR+LF when "--normalize" is specified.
+ * A warning is always displayed when we replace line endings in any file being copied to a disk image.
+ *
+ * NOTE: Some files, like ".BAS" files, aren't always ASCII, which is why we now call isASCII() on all
+ * these file contents first.
  */
-DiskDump.asTextFileExts = [".MD", ".ME", ".BAT", ".ASM", ".TXT", ".XML"];
+DiskDump.asTextFileExts = [".MD", ".ME", ".BAS", ".BAT", ".ASM", ".LRF", ".MAK", ".TXT", ".XML"];
 
 /*
  * Class methods
@@ -1710,6 +1714,22 @@ DiskDump.prototype.getDSTAdjustedTime = function(time)
 };
 
 /**
+ * isASCII(sData)
+ *
+ * @this {DiskDump}
+ * @param {string} sData
+ * @return {boolean} true if sData is entirely ASCII (ie, no bytes with bit 7 set)
+ */
+DiskDump.prototype.isASCII = function(sData)
+{
+    for (var i = 0; i < sData.length; i++) {
+        var b = sData.charCodeAt(i);
+        if (b & 0x80) return false;
+    }
+    return true;
+};
+
+/**
  * isTextFile(sFileName)
  *
  * @this {DiskDump}
@@ -1833,10 +1853,14 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
                             if (obj.isTextFile(fileInfo.FILE_NAME)) {
                                 fs.readFile(fileInfo.FILE_PATH, {encoding: "utf8"}, function doneReadDirEntry(err, sData) {
                                     if (!err) {
-                                        var sNew = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
-                                        if (sNew != sData) DiskDump.logWarning("replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
-                                        fileInfo.FILE_DATA = sNew;
-                                        fileInfo.FILE_SIZE = sNew.length;
+                                        if (obj.isASCII(sData)) {
+                                            var sNew = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
+                                            if (sNew != sData) DiskDump.logWarning("replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
+                                            fileInfo.FILE_DATA = sNew;
+                                            fileInfo.FILE_SIZE = sNew.length;
+                                        } else {
+                                            DiskDump.logWarning("non-ASCII data in " + fileInfo.FILE_NAME + " (line endings unchanged)");
+                                        }
                                     } else {
                                         if (!errSave) errSave = err;
                                     }
@@ -1963,11 +1987,15 @@ DiskDump.prototype.readPath = function(sPath, done)
                         if (obj.isTextFile(fileInfo.FILE_NAME)) {
                             DiskDump.readFile(sFilePath, "utf8", function doneReadPathEntry(err, sData) {
                                 if (!err) {
-                                    var sNew = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
-                                    if (sNew != sData) DiskDump.logWarning("replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
-                                    fileInfo.FILE_DATA = sNew;
-                                    fileInfo.FILE_SIZE = sNew.length;
-                                    // obj.addManifestInfo(fileInfo);
+                                    if (obj.isASCII(sData)) {
+                                        var sNew = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
+                                        if (sNew != sData) DiskDump.logWarning("replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
+                                        fileInfo.FILE_DATA = sNew;
+                                        fileInfo.FILE_SIZE = sNew.length;
+                                        // obj.addManifestInfo(fileInfo);
+                                    } else {
+                                        DiskDump.logWarning("non-ASCII data in " + fileInfo.FILE_NAME + " (line endings unchanged)");
+                                    }
                                 } else {
                                     if (!errSave) errSave = err;
                                 }
