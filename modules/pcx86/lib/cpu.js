@@ -164,6 +164,9 @@ class CPU extends Component {
          */
         this.flags.autoStart = cmp.getMachineBoolean('autoStart', this.flags.autoStart);
 
+        let nMultiplier = cmp.getMachineParm('multiplier');
+        if (nMultiplier) this.counts.nBaseMultiplier = +nMultiplier;
+
         this.timerYield = cpu.addTimer(this.id, function yieldTimer() {
             cpu.flags.yield = true;
         }, this.counts.msPerYield);
