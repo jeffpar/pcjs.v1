@@ -13,7 +13,7 @@ machines:
       B:
         name: None
     autoStart: true
-    autoType: $date\r$time\rD:\r
+    autoType: $date\r$time\rD:\rMODE COM1:9600,N,8,1\r
 ---
 
 Microsoft MS-DOS 2.00
@@ -43,7 +43,7 @@ To underscore the confusion, some [WordStar 3.20](/disks/pcx86/apps/other/wordst
 included.
 
 Finally, it isn't entirely correct to describe these files as the sources for "MS-DOS 2.0".  It's actually a much later
-snapshot of the code used to build MS-DOS 2.11, so we refer to this collection as MS-DOS 2.x source code.
+snapshot of source code used to build MS-DOS 2.11, so the collection should be referred to as MS-DOS 2.x.
 
 **UPDATE**: On September 28, 2018, Microsoft
 [re-released](https://blogs.msdn.microsoft.com/commandline/2018/09/28/re-open-sourcing-ms-dos-1-25-and-2-0/)
@@ -59,11 +59,11 @@ by releasing it under an [MIT License](https://en.wikipedia.org/wiki/MIT_License
 Building MS-DOS 2.x Source Code
 -------------------------------
 
-For the machine below, we built a 10Mb hard disk image with all the MS-DOS 2.x sources:
+For the machine below, a 10Mb hard disk image was created with all the MS-DOS 2.x sources:
 
     diskdump --dir=src --format=json --output=MSDOS2X-SRC.json --label=MSDOS2X --size=10000 --normalize --overwrite
 
-We started with the source files from the CHM release, which had preserved the original file times:
+The source files were copied from the CHM release, which had preserved the original file times:
 
       11648 Aug 18 14:26:36 1983 ALLOC.ASM
        6784 Jan 27 14:31:32 1983 ANSI.TXT
@@ -181,11 +181,12 @@ We started with the source files from the CHM release, which had preserved the o
       25984 Jan  3 05:57:14 1980 XENIX.ASM
       17792 Aug 18 14:51:18 1983 XENIX2.ASM
 
-Next, we organized all the source files into folders that correspond to their respective components, and created
+Next, all the source files were organized into folders corresponding to their respective binaries, along with
 makefiles where appropriate
 (eg, [MSDOS.MAK](https://github.com/jeffpar/pcjs-disks/blob/master/pcx86/dos/microsoft/2.00/src/MSDOS/MSDOS.MAK)).
-Also, in the [INC](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/src/INC) folder, we copied
-`DOSMAC.211` to `DOSMAC.ASM`, and `DOSSYM.211` to `DOSSYM.ASM`, since the sources are primarily a snapshot of MS-DOS 2.11.
+Also, in the [INC](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/src/INC) folder,
+`DOSMAC.211` was copied to `DOSMAC.ASM`, and `DOSSYM.211` was copied to `DOSSYM.ASM`, since the rest of the sources
+appear to be from MS-DOS 2.11 as well.
 
 - [CHKDSK](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/src/CHKDSK)
 - [COMMAND](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/src/COMMAND)
@@ -208,30 +209,56 @@ Also, in the [INC](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/m
 - [SORT](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/src/SORT)
 - [SYS](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/src/SYS)
 
-Then we supplemented the [MSDOS](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/src/MSDOS)
-folder with reconstructed
+Then the [MSDOS](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/src/MSDOS)
+folder was supplemented with reconstructed
 [IO.ASM](https://jeffpar.github.io/pcjs-disks/pcx86/dos/microsoft/2.00/src/MSDOS/IO.ASM) and
 [IO2.ASM](https://jeffpar.github.io/pcjs-disks/pcx86/dos/microsoft/2.00/src/MSDOS/IO2.ASM) files from
 [John Elliott](http://www.seasip.info/DOS/).
 
-In the machine below, all the above files, along with a
-[MK.BAT](https://github.com/jeffpar/pcjs-disks/blob/master/pcx86/dos/microsoft/2.00/src/MK.BAT)
-batch file, are on drive D.  Drive C contains a bootable copy of PC DOS 2.00, along with Microsoft MASM 4.00
-and other assorted tools.
+The resulting files, along with a [MK.BAT](https://github.com/jeffpar/pcjs-disks/blob/master/pcx86/dos/microsoft/2.00/src/MK.BAT)
+batch file, were installed in the machine below on drive D.  Drive C contains a bootable copy of PC DOS 2.00, along with
+Microsoft MASM 4.00 and other assorted tools.
 
 If `MK.BAT` is invoked with the name of one of the folders (eg, `MK COMMAND`), it will run `MAKE` in that
-folder; otherwise, it will run `MAKE` in all the folders containing a makefile.
+folder; to build all the folders, use `MK ALL`.
+
+`MK.BAT` also accepts optional "OEM" and "VER" parameters.  For example, `MK MSDOS IBM 200` will build the **MSDOS**
+folder with symbols **OEMIBM** and **VER200** defined.  Over time, the PCjs Project will be using those symbols to
+gradually tweak the source files, in order to produce binaries that match the corresponding original release.
+
+[DOSSYM.ASM](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/src/INC/DOSSYM.ASM) has been
+updated to check for "OEM" and "VER" symbols, and to display messages indicating the current build selection, alerting
+you that the resulting binaries may differ from those produced by the original source code snapshot.
+
+For example, files built using `MK ALL IBM 200` should display these messages:
+
+    IBM release selected 
+    VERSION 2.00 selected 
+
+However, you will sometimes see these messages:
+
+    IBM release pre-selected 
+    VERSION 2.00 selected 
+
+which means that another file, such as
+[COMSW.ASM](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/src/COMMAND/COMSW.ASM) or
+[STDSW.ASM](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/src/MSDOS/STDSW.ASM),
+defined **IBM** before including
+[DOSSYM.ASM](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/src/INC/DOSSYM.ASM).
+And sometimes a file will set **IBM** itself, such as
+[GETSET.ASM](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/src/MSDOS/GETSET.ASM).
+The "pre-selected" messages help you catch any build discrepancies due to these oddities.
 
 Finally, a word about speed: the typical PC in the early 1980s was still a 4.77Mhz 8088-based machine, so it took
-a considerable amount of time to rebuild MS-DOS 2.x.  If you're impatient, you can load the machine on this page with a
-higher speed multiplier (eg, [multiplier=8](https://www.pcjs.org/disks/pcx86/dos/microsoft/2.00/?multiplier=8)) or click
-the *Speed* button below until it's running at speed that you prefer (and that your browser supports).
+a considerable amount of time to assemble all the MS-DOS 2.x sources.  If you're impatient, you can load the machine
+on this page with a higher speed multiplier (eg, [multiplier=8](https://www.pcjs.org/disks/pcx86/dos/microsoft/2.00/?multiplier=8))
+or click the *Speed* button below until it's running at speed that you prefer (and that your browser supports).
 
 {% include machine.html id="ibm5160" %}
 
-The results of running `MK.BAT` are shown below:
+The results of running `MK ALL IBM 200` are shown below:
 
-    D:\>mk
+    D:\>MK ALL IBM 200
 
     D:\>ECHO OFF
 
@@ -241,22 +268,24 @@ The results of running `MK.BAT` are shown below:
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
     make : target does not exist 'EXE2BIN.OBJ'
-            MASM /I..\INC EXE2BIN,EXE2BIN.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC EXE2BIN.ASM,EXE2BIN.OBJ,EXE2BIN.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    21946 Bytes symbol space free
+    21402 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'EXEMES.OBJ'
-            MASM /I..\INC EXEMES,EXEMES.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC EXEMES.ASM,EXEMES.OBJ,EXEMES.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
 
-    50044 Bytes symbol space free
+    49490 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
@@ -273,32 +302,38 @@ The results of running `MK.BAT` are shown below:
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
     make : target does not exist 'CHKDSK.OBJ'
-            MASM /I..\INC CHKDSK,CHKDSK.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC CHKDSK.ASM,CHKDSK.OBJ,CHKDSK.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    18020 Bytes symbol space free
+    17514 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'CHKMES.OBJ'
-            MASM /I..\INC CHKMES,CHKMES.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC CHKMES.ASM,CHKMES.OBJ,CHKMES.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    20368 Bytes symbol space free
+    19854 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'CHKPROC.OBJ'
-            MASM /I..\INC CHKPROC,CHKPROC.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC CHKPROC.ASM,CHKPROC.OBJ,CHKPROC.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    15346 Bytes symbol space free
+    14794 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
@@ -318,178 +353,188 @@ The results of running `MK.BAT` are shown below:
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
     make : target does not exist 'COMMAND.OBJ'
-            MASM /I..\INC COMMAND,COMMAND.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC COMMAND.ASM,COMMAND.OBJ,COMMAND.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    12880 Bytes symbol space free
+    12368 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'RUCODE.OBJ'
-            MASM /I..\INC RUCODE,RUCODE.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC RUCODE.ASM,RUCODE.OBJ,RUCODE.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    19282 Bytes symbol space free
+    18744 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'RDATA.OBJ'
-            MASM /I..\INC RDATA,RDATA.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC RDATA.ASM,RDATA.OBJ,RDATA.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
 
-    45370 Bytes symbol space free
+    44820 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'INIT.OBJ'
-            MASM /I..\INC INIT,INIT.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC INIT.ASM,INIT.OBJ,INIT.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    17374 Bytes symbol space free
+    16858 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'UINIT.OBJ'
-            MASM /I..\INC UINIT,UINIT.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC UINIT.ASM,UINIT.OBJ,UINIT.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
 
-    51054 Bytes symbol space free
+    49500 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'TCODE.OBJ'
-            MASM /I..\INC TCODE,TCODE.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC TCODE.ASM,TCODE.OBJ,TCODE.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    14100 Bytes symbol space free
+    13556 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'TCODE2.OBJ'
-            MASM /I..\INC TCODE2,TCODE2.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC TCODE2.ASM,TCODE2.OBJ,TCODE2.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    17362 Bytes symbol space free
+    16854 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'TCODE3.OBJ'
-            MASM /I..\INC TCODE3,TCODE3.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC TCODE3.ASM,TCODE3.OBJ,TCODE3.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    16260 Bytes symbol space free
+    15546 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'TCODE4.OBJ'
-            MASM /I..\INC TCODE4,TCODE4.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC TCODE4.ASM,TCODE4.OBJ,TCODE4.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    13102 Bytes symbol space free
+    12576 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'TCODE5.OBJ'
-            MASM /I..\INC TCODE5,TCODE5.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC TCODE5.ASM,TCODE5.OBJ,TCODE5.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    14090 Bytes symbol space free
+    13546 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'TUCODE.OBJ'
-            MASM /I..\INC TUCODE,TUCODE.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC TUCODE.ASM,TUCODE.OBJ,TUCODE.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    19282 Bytes symbol space free
+    18744 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'COPY.OBJ'
-            MASM /I..\INC COPY,COPY.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC COPY.ASM,COPY.OBJ,COPY.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    16298 Bytes symbol space free
+    15590 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'COPYPROC.OBJ'
-            MASM /I..\INC COPYPROC,COPYPROC.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC COPYPROC.ASM,COPYPROC.OBJ,COPYPROC.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    17416 Bytes symbol space free
+    16726 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'CPARSE.OBJ'
-            MASM /I..\INC CPARSE,CPARSE.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC CPARSE.ASM,CPARSE.OBJ,CPARSE.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    19306 Bytes symbol space free
+    18780 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'TDATA.OBJ'
-            MASM /I..\INC TDATA,TDATA.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC TDATA.ASM,TDATA.OBJ,TDATA.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
 
-    45970 Bytes symbol space free
+    45422 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'TSPC.OBJ'
-            MASM /I..\INC TSPC,TSPC.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC TSPC.ASM,TSPC.OBJ,TSPC.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    IBM version 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    18940 Bytes symbol space free
+    18440 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
@@ -512,82 +557,98 @@ The results of running `MK.BAT` are shown below:
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
     make : target does not exist 'DEBUG.OBJ'
-            MASM /I..\INC DEBUG,DEBUG.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC DEBUG.ASM,DEBUG.OBJ,DEBUG.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    20370 Bytes symbol space free
+    19858 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'DEBASM.OBJ'
-            MASM /I..\INC DEBASM,DEBASM.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC DEBASM.ASM,DEBASM.OBJ,DEBASM.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    16420 Bytes symbol space free
+    15906 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'DEBUASM.OBJ'
-            MASM /I..\INC DEBUASM,DEBUASM.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC DEBUASM.ASM,DEBUASM.OBJ,DEBUASM.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    17414 Bytes symbol space free
+    16890 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'DEBCOM1.OBJ'
-            MASM /I..\INC DEBCOM1,DEBCOM1.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC DEBCOM1.ASM,DEBCOM1.OBJ,DEBCOM1.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    20312 Bytes symbol space free
+    19788 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'DEBCOM2.OBJ'
-            MASM /I..\INC DEBCOM2,DEBCOM2.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC DEBCOM2.ASM,DEBCOM2.OBJ,DEBCOM2.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    16016 Bytes symbol space free
+    15286 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'DEBCONST.OBJ'
-            MASM /I..\INC DEBCONST,DEBCONST.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC DEBCONST.ASM,DEBCONST.OBJ,DEBCONST.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    15354 Bytes symbol space free
+    14794 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'DEBDATA.OBJ'
-            MASM /I..\INC DEBDATA,DEBDATA.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC DEBDATA.ASM,DEBDATA.OBJ,DEBDATA.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    21978 Bytes symbol space free
+    21416 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'DEBMES.OBJ'
-            MASM /I..\INC DEBMES,DEBMES.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC DEBMES.ASM,DEBMES.OBJ,DEBMES.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    23450 Bytes symbol space free
+    22898 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
@@ -610,22 +671,26 @@ The results of running `MK.BAT` are shown below:
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
     make : target does not exist 'DISKCOPY.OBJ'
-            MASM /I..\INC DISKCOPY,DISKCOPY.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC DISKCOPY.ASM,DISKCOPY.OBJ,DISKCOPY.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    22368 Bytes symbol space free
+    21816 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'DISKMES.OBJ'
-            MASM /I..\INC DISKMES,DISKMES.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC DISKMES.ASM,DISKMES.OBJ,DISKMES.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    22372 Bytes symbol space free
+    21844 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
@@ -641,24 +706,170 @@ The results of running `MK.BAT` are shown below:
 
 
     D:\>ECHO OFF
-    Invalid directory
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
-    EDCOMMAND.MAK(1) : make : EDCOMMAND.MAK - No such file or directory
+    make : target does not exist 'EDLIN.OBJ'
+            MASM /DOEMIBM /DVER200 /I..\INC EDLIN.ASM,EDLIN.OBJ,EDLIN.LST;
+    Microsoft (R) Macro Assembler  Version 4.00
+    Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    Invalid directory
+    IBM release selected 
+    VERSION 2.00 selected 
+
+    11962 Bytes symbol space free
+
+        0 Warning Errors
+        0 Severe  Errors
+    make : target does not exist 'EDLMES.OBJ'
+            MASM /DOEMIBM /DVER200 /I..\INC EDLMES.ASM,EDLMES.OBJ,EDLMES.LST;
+    Microsoft (R) Macro Assembler  Version 4.00
+    Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
+
+    IBM release selected 
+    VERSION 2.00 selected 
+
+    22866 Bytes symbol space free
+
+        0 Warning Errors
+        0 Severe  Errors
+    make : target does not exist 'EDLPROC.OBJ'
+            MASM /DOEMIBM /DVER200 /I..\INC EDLPROC.ASM,EDLPROC.OBJ,EDLPROC.LST;
+    Microsoft (R) Macro Assembler  Version 4.00
+    Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
+
+    IBM release selected 
+    VERSION 2.00 selected 
+
+    21766 Bytes symbol space free
+
+        0 Warning Errors
+        0 Severe  Errors
+    make : target does not exist 'EDLIN.EXE'
+            LINK EDLIN.OBJ EDLMES.OBJ EDLPROC.OBJ,EDLIN.EXE,EDLIN.MAP/M;
+    Microsoft (R) Overlay Linker  Version 3.51
+    Copyright (C) Microsoft Corp 1983, 1984, 1985, 1986.  All rights reserved.
+
+    Warning: no stack segment
+    make : target does not exist 'EDLIN.COM'
+            EXE2BIN EDLIN.EXE EDLIN.COM
 
 
 
     D:\>ECHO OFF
-    Invalid directory
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
-    T.MAK(1) : make : T.MAK - No such file or directory
+    make : target does not exist 'FC.OBJ'
+            MASM /DOEMIBM /DVER200 /I..\INC FC.ASM,FC.OBJ,FC.LST;
+    Microsoft (R) Macro Assembler  Version 4.00
+    Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
-    Invalid directory
+    IBM release selected 
+    VERSION 2.00 selected 
+
+    16068 Bytes symbol space free
+
+        0 Warning Errors
+        0 Severe  Errors
+    make : target does not exist 'FCMES.OBJ'
+            MASM /DOEMIBM /DVER200 /I..\INC FCMES.ASM,FCMES.OBJ,FCMES.LST;
+    Microsoft (R) Macro Assembler  Version 4.00
+    Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
+
+
+    49468 Bytes symbol space free
+
+        0 Warning Errors
+        0 Severe  Errors
+    make : target does not exist 'FC.EXE'
+            LINK FC.OBJ FCMES.OBJ,FC.EXE,FC.MAP/M;
+    Microsoft (R) Overlay Linker  Version 3.51
+    Copyright (C) Microsoft Corp 1983, 1984, 1985, 1986.  All rights reserved.
+
+
+
+
+    D:\>ECHO OFF
+    Microsoft (R) Program Maintenance Utility  Version 4.02
+    Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
+
+    make : target does not exist 'FIND.OBJ'
+            MASM /DOEMIBM /DVER200 /I..\INC FIND.ASM,FIND.OBJ,FIND.LST;
+    Microsoft (R) Macro Assembler  Version 4.00
+    Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
+
+
+    46076 Bytes symbol space free
+
+        0 Warning Errors
+        0 Severe  Errors
+    make : target does not exist 'FINDMES.OBJ'
+            MASM /DOEMIBM /DVER200 /I..\INC FINDMES.ASM,FINDMES.OBJ,FINDMES.LST;
+    Microsoft (R) Macro Assembler  Version 4.00
+    Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
+
+
+    49456 Bytes symbol space free
+
+        0 Warning Errors
+        0 Severe  Errors
+    make : target does not exist 'FIND.EXE'
+            LINK FIND.OBJ FINDMES.OBJ,FIND.EXE,FIND.MAP/M;
+    Microsoft (R) Overlay Linker  Version 3.51
+    Copyright (C) Microsoft Corp 1983, 1984, 1985, 1986.  All rights reserved.
+
+
+
+
+    D:\>ECHO OFF
+    Microsoft (R) Program Maintenance Utility  Version 4.02
+    Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
+
+    make : target does not exist 'FORMAT.OBJ'
+            MASM /DOEMIBM /DVER200 /I..\INC FORMAT.ASM,FORMAT.OBJ,FORMAT.LST;
+    Microsoft (R) Macro Assembler  Version 4.00
+    Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
+
+    IBM release selected 
+    VERSION 2.00 selected 
+
+    15052 Bytes symbol space free
+
+        0 Warning Errors
+        0 Severe  Errors
+    make : target does not exist 'FORMES.OBJ'
+            MASM /DOEMIBM /DVER200 /I..\INC FORMES.ASM,FORMES.OBJ,FORMES.LST;
+    Microsoft (R) Macro Assembler  Version 4.00
+    Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
+
+    IBM release selected 
+    VERSION 2.00 selected 
+
+    22864 Bytes symbol space free
+
+        0 Warning Errors
+        0 Severe  Errors
+    make : target does not exist 'GENFOR.OBJ'
+            MASM /DOEMIBM /DVER200 /I..\INC GENFOR.ASM,GENFOR.OBJ,GENFOR.LST;
+    Microsoft (R) Macro Assembler  Version 4.00
+    Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
+
+    IBM release selected 
+    VERSION 2.00 selected 
+
+    22864 Bytes symbol space free
+
+        0 Warning Errors
+        0 Severe  Errors
+    make : target does not exist 'FORMAT.EXE'
+            LINK FORMAT.OBJ FORMES.OBJ GENFOR.OBJ,FORMAT.EXE,FORMAT.MAP/M;
+    Microsoft (R) Overlay Linker  Version 3.51
+    Copyright (C) Microsoft Corp 1983, 1984, 1985, 1986.  All rights reserved.
+
+    Warning: no stack segment
+    make : target does not exist 'FORMAT.COM'
+            EXE2BIN FORMAT.EXE FORMAT.COM
 
 
 
@@ -667,22 +878,24 @@ The results of running `MK.BAT` are shown below:
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
     make : target does not exist 'MORE.OBJ'
-            MASM /I..\INC MORE,MORE.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC MORE.ASM,MORE.OBJ,MORE.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    24610 Bytes symbol space free
+    23942 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'MOREMES.OBJ'
-            MASM /I..\INC MOREMES,MOREMES.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC MOREMES.ASM,MOREMES.OBJ,MOREMES.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
 
-    51012 Bytes symbol space free
+    50456 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
@@ -702,212 +915,254 @@ The results of running `MK.BAT` are shown below:
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
     make : target does not exist 'ALLOC.OBJ'
-            MASM /I..\INC ALLOC,ALLOC.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC ALLOC.ASM,ALLOC.OBJ,ALLOC.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    20614 Bytes symbol space free
+    20102 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'DIRCALL.OBJ'
-            MASM /I..\INC DIRCALL,DIRCALL.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC DIRCALL.ASM,DIRCALL.OBJ,DIRCALL.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    19576 Bytes symbol space free
+    19132 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'DEV.OBJ'
-            MASM /I..\INC DEV,DEV.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC DEV.ASM,DEV.OBJ,DEV.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    20592 Bytes symbol space free
+    20088 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'DIR.OBJ'
-            MASM /I..\INC DIR,DIR.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC DIR.ASM,DIR.OBJ,DIR.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    17746 Bytes symbol space free
+    17244 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'DISK.OBJ'
-            MASM /I..\INC DISK,DISK.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC DISK.ASM,DISK.OBJ,DISK.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    15774 Bytes symbol space free
+    15100 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'DOSMES.OBJ'
-            MASM /I..\INC DOSMES,DOSMES.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC DOSMES.ASM,DOSMES.OBJ,DOSMES.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    22918 Bytes symbol space free
+    22406 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'FAT.OBJ'
-            MASM /I..\INC FAT,FAT.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC FAT.ASM,FAT.OBJ,FAT.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    20494 Bytes symbol space free
+    20026 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'GETSET.OBJ'
-            MASM /I..\INC GETSET,GETSET.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC GETSET.ASM,GETSET.OBJ,GETSET.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    19604 Bytes symbol space free
+    19094 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'MISC.OBJ'
-            MASM /I..\INC MISC,MISC.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC MISC.ASM,MISC.OBJ,MISC.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    18586 Bytes symbol space free
+    18074 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'MSCODE.OBJ'
-            MASM /I..\INC MSCODE,MSCODE.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC MSCODE.ASM,MSCODE.OBJ,MSCODE.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    16688 Bytes symbol space free
+    16170 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'MSDOS.OBJ'
-            MASM /I..\INC MSDOS,MSDOS.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC MSDOS.ASM,MSDOS.OBJ,MSDOS.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    14256 Bytes symbol space free
+    13722 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'ROM.OBJ'
-            MASM /I..\INC ROM,ROM.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC ROM.ASM,ROM.OBJ,ROM.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    19590 Bytes symbol space free
+    19150 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'STDBUF.OBJ'
-            MASM /I..\INC STDBUF,STDBUF.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC STDBUF.ASM,STDBUF.OBJ,STDBUF.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    20544 Bytes symbol space free
+    19026 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'STDCALL.OBJ'
-            MASM /I..\INC STDCALL,STDCALL.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC STDCALL.ASM,STDCALL.OBJ,STDCALL.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    18604 Bytes symbol space free
+    18092 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'STDCTRLC.OBJ'
-            MASM /I..\INC STDCTRLC,STDCTRLC.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC STDCTRLC.ASM,STDCTRLC.OBJ,STDCTRLC.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    19566 Bytes symbol space free
+    19052 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'STDFCB.OBJ'
-            MASM /I..\INC STDFCB,STDFCB.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC STDFCB.ASM,STDFCB.OBJ,STDFCB.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    19676 Bytes symbol space free
+    19162 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'STDIO.OBJ'
-            MASM /I..\INC STDIO,STDIO.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC STDIO.ASM,STDIO.OBJ,STDIO.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    18688 Bytes symbol space free
+    18146 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'STDPROC.OBJ'
-            MASM /I..\INC STDPROC,STDPROC.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC STDPROC.ASM,STDPROC.OBJ,STDPROC.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    21602 Bytes symbol space free
+    20076 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'TIME.OBJ'
-            MASM /I..\INC TIME,TIME.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC TIME.ASM,TIME.OBJ,TIME.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    21550 Bytes symbol space free
+    21026 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'XENIX.OBJ'
-            MASM /I..\INC XENIX,XENIX.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC XENIX.ASM,XENIX.OBJ,XENIX.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    16698 Bytes symbol space free
+    16200 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'XENIX2.OBJ'
-            MASM /I..\INC XENIX2,XENIX2.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC XENIX2.ASM,XENIX2.OBJ,XENIX2.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    18574 Bytes symbol space free
+    18066 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
@@ -930,12 +1185,14 @@ The results of running `MK.BAT` are shown below:
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
     make : target does not exist 'PRINT.OBJ'
-            MASM /I..\INC PRINT,PRINT.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC PRINT.ASM,PRINT.OBJ,PRINT.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release pre-selected 
+    VERSION 2.00 selected 
 
-    14168 Bytes symbol space free
+    13654 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
@@ -955,22 +1212,26 @@ The results of running `MK.BAT` are shown below:
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
     make : target does not exist 'RECOVER.OBJ'
-            MASM /I..\INC RECOVER,RECOVER.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC RECOVER.ASM,RECOVER.OBJ,RECOVER.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    20228 Bytes symbol space free
+    19706 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'RECMES.OBJ'
-            MASM /I..\INC RECMES,RECMES.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC RECMES.ASM,RECMES.OBJ,RECMES.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    23348 Bytes symbol space free
+    21816 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
@@ -990,22 +1251,24 @@ The results of running `MK.BAT` are shown below:
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
     make : target does not exist 'SORT.OBJ'
-            MASM /I..\INC SORT,SORT.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC SORT.ASM,SORT.OBJ,SORT.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    23196 Bytes symbol space free
+    22646 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'SORTMES.OBJ'
-            MASM /I..\INC SORTMES,SORTMES.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC SORTMES.ASM,SORTMES.OBJ,SORTMES.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
 
-    50010 Bytes symbol space free
+    49456 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
@@ -1026,22 +1289,26 @@ The results of running `MK.BAT` are shown below:
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
     make : target does not exist 'SYS.OBJ'
-            MASM /I..\INC SYS,SYS.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC SYS.ASM,SYS.OBJ,SYS.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    21892 Bytes symbol space free
+    21358 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
     make : target does not exist 'SYSMES.OBJ'
-            MASM /I..\INC SYSMES,SYSMES.OBJ;
+            MASM /DOEMIBM /DVER200 /I..\INC SYSMES.ASM,SYSMES.OBJ,SYSMES.LST;
     Microsoft (R) Macro Assembler  Version 4.00
     Copyright (C) Microsoft Corp 1981, 1983, 1984, 1985.  All rights reserved.
 
+    IBM release selected 
+    VERSION 2.00 selected 
 
-    24632 Bytes symbol space free
+    23962 Bytes symbol space free
 
         0 Warning Errors
         0 Severe  Errors
