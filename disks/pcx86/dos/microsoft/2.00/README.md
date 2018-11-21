@@ -24,8 +24,7 @@ including:
 
 * [COMPAQ MS-DOS 2.12](/disks/pcx86/dos/compaq/2.12/)
 
-MS-DOS 2.00 Source Code
------------------------
+### MS-DOS 2.00 Source Code
 
 On March 25, 2014, the source code upon which OEMs based their MS-DOS 1.x and 2.x releases was made available to the
 public by the [Computer History Museum](http://www.computerhistory.org/atchm/microsoft-ms-dos-early-source-code/),
@@ -43,27 +42,26 @@ To underscore the confusion, some [WordStar 3.20](/disks/pcx86/apps/other/wordst
 included.
 
 Finally, it isn't entirely correct to describe these files as the sources for "MS-DOS 2.0".  It's actually a much later
-snapshot of source code used to build MS-DOS 2.11, so the collection should be referred to as MS-DOS 2.x.
+snapshot of source code used to build MS-DOS 2.11, so at best, the collection should be referred to as MS-DOS 2.x.
 
 **UPDATE**: On September 28, 2018, Microsoft
 [re-released](https://blogs.msdn.microsoft.com/commandline/2018/09/28/re-open-sourcing-ms-dos-1-25-and-2-0/)
 the MS-DOS 1.x and 2.x source files on [GitHub](https://github.com/microsoft/ms-dos).  The files are identical to the
 original CHM release, so no effort was made to improve the previous release, remove irrelevant files, organize them by
-original diskette, etc.  While GitHub is a great resource, one downside to using a Git repository to "archive" old files
-is that all the original file modification dates and times are lost.
+original diskette, etc.  And while GitHub is a great way to save and share files, Git repositories don't preserve original
+file modification dates and times, unfortunately.
 
 Microsoft's sole improvement of the 2018 re-release was to quietly relax restrictions on the reuse of the source code,
 by releasing it under an [MIT License](https://en.wikipedia.org/wiki/MIT_License), instead of the older and much more restrictive
 [Microsoft Research License Agreement](http://www.computerhistory.org/atchm/microsoft-research-license-agreement-msdos-v1-1-v2-0/).
 
-Building MS-DOS 2.x Source Code
--------------------------------
+### Building MS-DOS 2.x Source Code
 
 For the machine below, a 10Mb hard disk image was created with all the MS-DOS 2.x sources:
 
     diskdump --dir=src --format=json --output=MSDOS2X-SRC.json --label=MSDOS2X --size=10000 --normalize --overwrite
 
-The source files were copied from the CHM release, which had preserved the original file times:
+The source files were copied from the CHM release, only because they had preserved the original file timestamps:
 
       11648 Aug 18 14:26:36 1983 ALLOC.ASM
        6784 Jan 27 14:31:32 1983 ANSI.TXT
@@ -223,11 +221,11 @@ If `MK.BAT` is invoked with the name of one of the folders (eg, `MK COMMAND`), i
 folder; to build all the folders, use `MK ALL`.
 
 `MK.BAT` also accepts optional "OEM" and "VER" parameters.  For example, `MK MSDOS IBM 200` will build the **MSDOS**
-folder with symbols **OEMIBM** and **VER200** defined.  Over time, the PCjs Project will be using those symbols to
-gradually tweak the source files, in order to produce binaries that match the corresponding original release.
+folder with symbols **OEMIBM** and **VER200** defined.  Over time, the PCjs Project will use those symbols to
+tweak the source files, in order to produce binaries that match the corresponding original release.
 
 [DOSSYM.ASM](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/src/INC/DOSSYM.ASM) has been
-updated to check for "OEM" and "VER" symbols, and to display messages indicating the current build selection, alerting
+modified to check for "OEM" and "VER" symbols, and to display messages indicating the current build selection, alerting
 you that the resulting binaries may differ from those produced by the original source code snapshot.
 
 For example, files built using `MK ALL IBM 200` should display these messages:
@@ -249,10 +247,23 @@ And sometimes a file will set **IBM** itself, such as
 [GETSET.ASM](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/src/MSDOS/GETSET.ASM).
 The "pre-selected" messages help you catch any build discrepancies due to these oddities.
 
+Other files have been modified here as well, primarily to eliminate extraneous characters that caused warnings or
+errors during the build process.  Which raises the question: which version of MASM was originally used to build
+these sources?  The MASM.EXE that was bundled with this snapshot is dated Feb 1, 1983 and reports:
+
+    The Microsoft MACRO Assembler
+    Version 1.10, Copyright (C) Microsoft Inc. 1981,82
+
+However, it's rather buggy, so it almost certainly was *not* used.  For that matter, it's unclear if this snapshot
+of MS-DOS 2.11 represents a finished product or a work-in-progress.  Sadly, no one at Microsoft seems interested in
+finding or sharing the answers.
+
 Finally, a word about speed: the typical PC in the early 1980s was still a 4.77Mhz 8088-based machine, so it took
 a considerable amount of time to assemble all the MS-DOS 2.x sources.  If you're impatient, you can load the machine
 on this page with a higher speed multiplier (eg, [multiplier=8](https://www.pcjs.org/disks/pcx86/dos/microsoft/2.00/?multiplier=8))
 or click the *Speed* button below until it's running at speed that you prefer (and that your browser supports).
+
+### MS-DOS 2.x Build Machine
 
 {% include machine.html id="ibm5160" %}
 
