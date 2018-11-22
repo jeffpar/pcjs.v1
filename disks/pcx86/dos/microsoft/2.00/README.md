@@ -266,6 +266,11 @@ a considerable amount of time to assemble all the MS-DOS 2.x sources.  If you're
 on this page with a higher speed multiplier (eg, [multiplier=8](https://www.pcjs.org/disks/pcx86/dos/microsoft/2.00/?multiplier=8))
 or click the *Speed* button below until it's running at speed that you prefer (and that your browser supports).
 
+In addition, all the build products (**OBJ**, **EXE**, **COM**, **LST**, and **MAP** files) from a successful
+`MK ALL` command have also been saved in the [pcjs-disks](https://github.com/jeffpar/pcjs-disks) repository, in the
+[/pcx86/dos/microsoft/2.00/built](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/built)
+folder.
+
 {% include machine.html id="ibm5160" %}
 
 The results of running `MK ALL` are shown below:
