@@ -21,7 +21,7 @@ The [PCjs Disk Library](/disks/pcx86/) now includes a snapshot of the [MS-DOS 2.
 from Microsoft's [September 28, 2018 re-release](https://blogs.msdn.microsoft.com/commandline/2018/09/28/re-open-sourcing-ms-dos-1-25-and-2-0/)
 of MS-DOS source files on [GitHub](https://github.com/microsoft/ms-dos), along with a
 [pre-configured machine](/disks/pcx86/dos/microsoft/2.00/#ms-dos-2x-build-machine) ready to build the MS-DOS 2.x sources.
-A similar machine (without the PCjs debugger) is provided [below](#ms-dos-2x-build-machine).
+A similar machine (without the PCjs debugger) is provided [below](https://www.pcjs.org/blog/2018/11/21/#ms-dos-2x-build-machine).
 
 Attempting to build the sources raises several questions, including:
 
@@ -29,11 +29,10 @@ Attempting to build the sources raises several questions, including:
 - Are they a work-in-progress or a final distribution?
 
 If you look at the pictures that the [Computer History Museum](http://www.computerhistory.org/) originally
-[posted](http://www.computerhistory.org/atchm/microsoft-ms-dos-early-source-code/) when these files were first shared:
+[posted](http://www.computerhistory.org/atchm/microsoft-ms-dos-early-source-code/) when these files were first shared,
+you'd get the impression that two of those questions have already been answered: DOS 2.00, final distribution.
 
 ![MS-DOS 2.00]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/dos/microsoft/2.00/MSDOS200-DISKS.jpg)
-
-you get the impression that two of those questions have already been answered: DOS 2.00, final distribution.
 
 Not so fast.
 
@@ -53,12 +52,15 @@ And Microsoft's re-release on [GitHub](https://github.com/microsoft/ms-dos) chan
 that all the files can now be used according to a more relaxed [MIT License](https://en.wikipedia.org/wiki/MIT_License).
 
 And when was this snapshot made?  Was work on MS-DOS 2.11 substantially finished, or was it still a work-in-progress?
+Why, for example, do the CHKDSK *sources* contain the string "Ver 2.30", while the CHKDSK *binary* distributed with the source
+code contains the string "Ver 2.10"?  Were these sources modified *after* work on 2.11 was complete?
 
-And why do the CHKDSK *sources* contain the string "Ver 2.30", while the CHKDSK *binary* distributed with the source
-code contains the string "Ver 2.10"?  This implies that the sources may have been modified *after* work on 2.11 was complete.
+On the other hand, an inspection of CHKDSK.COM in the [COMPAQ MS-DOS 2.11](/disks/pcx86/dos/compaq/2.11/) distribution ALSO
+shows the string "Ver 2.30", and in fact, the CHKDSK.COM from COMPAQ MS-DOS 2.11 matches the
+[CHKDSK.COM](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/built/CHKDSK)
+built from the MS-DOS 2.x sources *perfectly*.
 
-On the other hand, an inspection of CHKDSK.COM in the COMPAQ MS-DOS 2.11 distribution ALSO shows the string "Ver 2.30",
-and in fact, the CHKDSK.COM from COMPAQ MS-DOS 2.11 matches the CHKDSK.COM built from the MS-DOS 2.x sources *perfectly*.
+Go figure.
 
 ### The MASM Question
 
@@ -194,7 +196,7 @@ on this page with a higher speed multiplier (eg, [multiplier=8](https://www.pcjs
 or click the *Speed* button below until it's running at speed that you prefer (and that your browser supports).
 
 In addition, all the build products (**OBJ**, **EXE**, **COM**, **LST**, and **MAP** files) from a successful
-`MK ALL` command have also been saved in the [pcjs-disks](https://github.com/jeffpar/pcjs-disks) repository, in the
+`MK ALL` command have already been saved in the [pcjs-disks](https://github.com/jeffpar/pcjs-disks) repository, in the
 [/pcx86/dos/microsoft/2.00/built](https://github.com/jeffpar/pcjs-disks/tree/master/pcx86/dos/microsoft/2.00/built)
 folder.
 
