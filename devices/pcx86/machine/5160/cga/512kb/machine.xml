@@ -3,7 +3,6 @@
 <machine id="ibm5160" type="pcx86" border="1" width="1000px" pos="center" background="default">
 	<name pos="center">IBM PC XT, Color Display, 512K RAM, 10Mb Drive</name>
 	<computer id="xt-cga-512k" name="IBM PC XT"/>
-	<cpu id="cpu8088" model="8088" autostart="true"/>
 	<ram id="ramLow" addr="0x00000" test="false" size="0x80000" comment="0x80000 (512Kb) size overrides SW1|ROM BIOS memory test has been disabled"/>
 	<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pcx86/hdc/ibm-xebec-1982.json"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5160/basic/BASIC110.json"/>
@@ -11,6 +10,11 @@
 	<video ref="/devices/pcx86/video/ibm/cga/ibm-cga-lock.xml"/>
 	<fdc ref="/disks/pcx86/library.xml"/>
 	<hdc ref="/disks/pcx86/drives/10mb/pcdos200-empty2-xt3.xml"/>
+	<cpu id="cpu8088" model="8088" pos="left" padLeft="8px" padBottom="8px">
+		<control type="button" binding="run">Run</control>
+		<control type="button" binding="reset">Reset</control>
+		<control type="button" binding="setSpeed">Speed</control>
+	</cpu>
 	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
 	<chipset id="chipset" model="5160" sw1="01001001"/>
 	<serial id="com1" adapter="1"/>
