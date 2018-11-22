@@ -307,13 +307,14 @@ class FDC extends Component {
             if (!this.fLocalDisks) {
                 if (DEBUG) this.log("Local disk support not available");
                 /*
-                 * We could also simply hide the control; eg:
+                 * We could also simply remove the control; eg:
                  *
-                 *      control.style.display = "none";
+                 *      control.parentNode.removeChild(@type {Node} (control));
                  *
-                 * but removing the control altogether seems better.
+                 * but as long as the parentNode remains, with its accompanying style, the visual layout of the machine
+                 * could look odd.  So let's change the parent's style instead.
                  */
-                control.parentNode.removeChild(/** @type {Node} */ (control));
+                control.parentNode.style.display = "none";
                 return false;
             }
             this.bindings[sBinding] = control;
