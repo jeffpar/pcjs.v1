@@ -13,5 +13,5 @@ All our Color Graphics (CGA) configurations of the IBM PC XT (Model 5160) are lo
 
 * [IBM PC XT (256K RAM, 10Mb Drive) with Color Display](/devices/pcx86/machine/5160/cga/256kb/) ([Debugger](/devices/pcx86/machine/5160/cga/256kb/debugger/))
 * [IBM PC XT (256K RAM, 10Mb Drive) Machine Array with CGA Displays](/devices/pcx86/machine/5160/cga/256kb/array/)
-* [IBM PC XT (512K RAM, 10Mb Drive) with Color Display and Debugger](/devices/pcx86/machine/5160/cga/512kb/debugger/)
+* [IBM PC XT (512K RAM, 10Mb Drive) with Color Display](/devices/pcx86/machine/5160/cga/512kb/) ([Debugger](/devices/pcx86/machine/5160/cga/512kb/debugger/))
 * [IBM PC XT (640K RAM, 10Mb Drive) with Color Display](/devices/pcx86/machine/5160/cga/640kb/) ([Debugger](/devices/pcx86/machine/5160/cga/640kb/debugger/))

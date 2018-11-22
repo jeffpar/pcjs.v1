@@ -83,7 +83,7 @@ day.  For now, enjoy PCjs' improved IBM compatibility.
 
 {% include machine.html id="ibm5150" %}
 
-NOTE: To change the adapter's *blink* setting, you can either use PCjs Debugger commands to *enable* (`0 3b8 29`)
+NOTE: To change the adapter's *blink* setting, you can either use PCjs Debugger commands to *enable* (`o 3b8 29`)
 or *disable* (`o 3b8 9`) blinking, or you can use a BASIC command, such as:
 
     OUT &H3B8,&29
