@@ -100,7 +100,7 @@ Disaster strikes at this instruction:
     &1048:0203 C707FFFF         MOV      [BX],FFFF
 
 because whereas the first free (of the DTA) preserves the BX register, the second free (of the FCB) does not, so a
-crtitical memory location is overwritten with 0xFFFF.  However, even after I patched that code:
+critical memory location is overwritten with 0xFFFF.  However, even after I patched the EXE:
 
     &1048:01F5 8B3F             MOV      DI,[BX]
     &1048:01F7 47               INC      DI

@@ -81,10 +81,8 @@ for COMPAQ's ROM and VDU in the near future.
 
 I recently added a [COMPAQ Portable](/devices/pcx86/machine/compaq/portable/vdu/128kb/debugger/) machine configuration
 with built-in PCjs debugger.  It's using the oldest original COMPAQ ROM BIOS we have ([Rev B](/devices/pcx86/rom/compaq/portable/))
-along with COMPAQ MS-DOS 1.10.
-
-Adding full COMPAQ video (VDU) compatibility, including support for monochrome graphics, will come later.  For now,
-imagine this is a COMPAQ Portable connected to an external IBM Color Graphics Monitor.
+along with COMPAQ MS-DOS 1.10.  And limited support for COMPAQ's video (VDU) board is now available, including monochrome graphics.
+Enjoy COMPAQ's "laser" demonstration below.
 
 {% include machine.html id="compaq-portable-128kb" %}
 
