@@ -1847,6 +1847,7 @@ class Web {
              *
              * NOTE: http://archive.pcjs.org is currently redirected to https://s3-us-west-2.amazonaws.com/archive.pcjs.org
              */
+         // sURLRedirect = sURL.replace(/^(http:\/\/archive\.pcjs\.org\/|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org\/)(.*?)\/([^/]*)$/, "/system-$2/archive/$3").replace(/^https:\/\/([a-z0-9]+)-disks\.pcjs\.org\/(.*)$/, "/disks-$1/$2");
             sURLRedirect = sURL.replace(/^(http:\/\/archive\.pcjs\.org\/|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org\/)(.*?)\/([^/]*)$/, "/pcjs-$2/archive/$3").replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-[a-z]+|private-[a-z]+)\/(.*)$/, "/$1/$2").replace(/^https:\/\/system-disks\.pcjs\.org\/(.*)$/, "/pcjs-disks/$1").replace(/^https:\/\/game-disks\.pcjs\.org\/(.*)$/, "/pcjs-games/$1").replace(/^https:\/\/([a-z0-9]+-disks)\.pcjs\.org\/(.*)$/, "/$1/$2");
         }
         else {
@@ -1854,7 +1855,7 @@ class Web {
              * TODO: Perhaps it's time for our code in netlib.js to finally add support for HTTPS; for now
              * though, it's just as well that the NODE environment assumes all resources are available locally.
              */
-            // sURLRedirect = sURL.replace(/^\/(pcjs-[a-z]+|private-[a-z]+)\//, "https://jeffpar.github.io/$1/");
+         // sURLRedirect = sURL.replace(/^\/(pcjs-[a-z]+|private-[a-z]+)\//, "https://jeffpar.github.io/$1/");
             sURLRedirect = sURL.replace(/^\/pcjs-disks\//, "https://system-disks.pcjs.org/").replace(/^\/pcjs-games\//, "https://game-disks.pcjs.org/").replace(/^\/([a-z0-9]+-disks)\//, "https://$1.pcjs.org/");
         }
 
