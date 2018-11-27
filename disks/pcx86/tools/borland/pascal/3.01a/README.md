@@ -79,4 +79,4 @@ The following documentation is available online:
 
 ---
 
-![Borland Turbo Pascal 3.01A]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/tools/borland/pascal/3.01a/TURBO-PASCAL-301A-8087-BCD.jpg)
+![Borland Turbo Pascal 3.01A]({{ site.system-disks.baseurl }}/pcx86/tools/borland/pascal/3.01a/TURBO-PASCAL-301A-8087-BCD.jpg)
