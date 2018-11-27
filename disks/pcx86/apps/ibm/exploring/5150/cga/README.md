@@ -18,4 +18,4 @@ For more information about this software, see the [PCjs blog](/blog/2018/04/01/)
 
 {% include machine.html id="ibm5150" %}
 
-![Exploring the IBM PC 1.00 (CGA)]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/apps/ibm/exploring/5150/cga/EXPLORING-THE-IBM-PC-100-CGA.jpg)
+![Exploring the IBM PC 1.00 (CGA)]({{ site.system-disks.baseurl }}/pcx86/apps/ibm/exploring/5150/cga/EXPLORING-THE-IBM-PC-100-CGA.jpg)

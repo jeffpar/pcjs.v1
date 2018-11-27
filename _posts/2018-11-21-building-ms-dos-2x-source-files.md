@@ -32,7 +32,7 @@ If you look at the pictures that the [Computer History Museum](http://www.comput
 [posted](http://www.computerhistory.org/atchm/microsoft-ms-dos-early-source-code/) when these files were first shared,
 you'd get the impression that two of those questions have already been answered: DOS 2.00, final distribution.
 
-![MS-DOS 2.00]({{ site.pcjs-disks.baseurl }}/pcjs-disks/pcx86/dos/microsoft/2.00/MSDOS200-DISKS.jpg)
+![MS-DOS 2.00]({{ site.system-disks.baseurl }}/pcx86/dos/microsoft/2.00/MSDOS200-DISKS.jpg)
 
 Not so fast.
 

@@ -1142,6 +1142,7 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
          * page's Front Matter; however, unless/until we start using Node again to host the public site,
          * that's low priority.
          */
+        aMatch[2] = aMatch[2].replace(/{{\s*site\.([^.]+)-disks\.baseurl\s*}}/g, "/disks-$1");
         aMatch[2] = aMatch[2].replace(/{{.*?}}/g, "");
 
         var sImage = '<img src="' + net.encodeURL(aMatch[2], this.req, this.fDebug) + '" alt="' + aMatch[1] + '"';
