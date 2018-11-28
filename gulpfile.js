@@ -60,10 +60,10 @@
  *          Copies any other individual resources files listed in machines.json (other than scripts) to the
  *          machine's current version folder.
  *
- *      disks (eg: `gulp pcjs-disks`, `gulp private-disks`)
+ *      disks (eg: `gulp disks-demo`, `gulp disks-private`)
  *
  *          Updates inlined disk manifests (eg, /disks/pcx86/library.xml) from the submodule manifests
- *          (eg, /pcjs-disks/pcx86/library.xml), which are actually "manifests of manifests" and therefore
+ *          (eg, /disks-demo/pcx86/library.xml), which are actually "manifests of manifests" and therefore
  *          inherently slower to load.
  *
  *      version
@@ -357,36 +357,36 @@ let matchRef = function(match, sIndent, sFile) {
     return sDisks;
 };
 
-gulp.task("pcjs-disks", function() {
+gulp.task("disks-demo", function() {
     let replaceRefs = gulpReplace(/([ \t]+)<manifest.*? ref="(.*?)".*?\/>/g, matchRef);
     return gulp.src([
-            "pcjs-disks/pcx86/library.xml",
-            "pcjs-disks/pcx86/samples.xml",
-            "pcjs-disks/pcx86/shareware/pcsig08/library.xml",
-        ], {base: "pcjs-disks/pcx86/"})
+            "disks-demo/pcx86/library.xml",
+            "disks-demo/pcx86/samples.xml",
+            "disks-demo/pcx86/shareware/pcsig08/library.xml",
+        ], {base: "disks-demo/pcx86/"})
         .pipe(replaceRefs)
         .pipe(gulp.dest("disks/pcx86/")
     );
 });
 
-gulp.task("private-disks", function() {
+gulp.task("disks-private", function() {
     let replaceRefs = gulpReplace(/([ \t]+)<manifest.*? ref="(.*?)".*?\/>/g, matchRef);
     return gulp.src([
-            "private-disks/pcx86/**/library.xml",
-            "private-disks/pcx86/**/manifest.xml",
-            "private-disks/pcx86/**/machine.xml",
-            "private-disks/pcx86/**/README.md"
-        ], {base: "private-disks/pcx86/"})
+            "disks-private/pcx86/**/library.xml",
+            "disks-private/pcx86/**/manifest.xml",
+            "disks-private/pcx86/**/machine.xml",
+            "disks-private/pcx86/**/README.md"
+        ], {base: "disks-private/pcx86/"})
         .pipe(replaceRefs)
         .pipe(gulp.dest("disks/pcx86/private/")
     );
 });
 
-gulp.task("disks", ["pcjs-disks", "private-disks"]);
+gulp.task("disks", ["disks-demo", "disks-private"]);
 
 gulp.task("version", function() {
     let baseDir = "./";
-    return gulp.src(["apps/**/*.xml", "devices/**/*.xml", "disks/**/*.xml", "pcjs-disks/**/*.xml", "pcjs-games/**/*.xml", "private-disks/**/*.xml", "pubs/**/*.xml"], {base: baseDir})
+    return gulp.src(["apps/**/*.xml", "devices/**/*.xml", "disks/**/*.xml", "disks-demo/**/*.xml", "disks-game/**/*.xml", "disks-private/**/*.xml", "pubs/**/*.xml"], {base: baseDir})
         .pipe(gulpReplace(/href="\/versions\/([^/]*)\/[0-9.]*\/(machine|manifest|outline)\.xsl"/g, 'href="/versions/$1/' + machines.shared.version + '/$2.xsl"'))
         .pipe(gulp.dest(baseDir));
 });
