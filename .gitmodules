@@ -1,9 +1,9 @@
-[submodule "pcjs-disks"]
-	path = pcjs-disks
-	url = https://github.com/jeffpar/pcjs-disks.git
-[submodule "pcjs-games"]
-	path = pcjs-games
-	url = https://github.com/jeffpar/pcjs-games.git
-[submodule "private-disks"]
-	path = private-disks
-	url = https://github.com/jeffpar/private-disks.git
+[submodule "disks-demo"]
+	path = disks-demo
+	url = https://github.com/jeffpar/pcjs-demo-disks.git
+[submodule "disks-game"]
+	path = disks-game
+	url = https://github.com/jeffpar/pcjs-game-disks.git
+[submodule "disks-private"]
+	path = disks-private
+	url = https://github.com/jeffpar/pcjs-private-disks.git
