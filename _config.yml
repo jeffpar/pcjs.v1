@@ -38,10 +38,10 @@ pcjs:
   compiled: true      # by default, the compiled pcjs.version scripts will be used (eg, pcx86.js, pc8080.js, etc)
   domain: pcjs.org    # whereas site.url is used for linking purposes, site.pcjs.domain is used for display purposes
 
-pcjs-disks:
+demo-disks:
   baseurl: "https://demo-disks.pcjs.org"
 
-pcjs-games:
+game-disks:
   baseurl: "https://game-disks.pcjs.org"
 
 private-disks:
