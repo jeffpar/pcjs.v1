@@ -324,7 +324,7 @@ BufferPF.prototype.toString = function(format)
 /**
  * DiskDump()
  *
- * TODO: If sServerRoot is set, make sure sDiskPath refers to something in either /apps/ or /system-disks/,
+ * TODO: If sServerRoot is set, make sure sDiskPath refers to something in either /apps/ or /demo-disks/,
  * to prevent random enumeration of other server resources.
  *
  * @constructor
@@ -994,12 +994,12 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         sXML += '</manifest>';
     }
 
-    i = sOutputFile.search(/\/[a-z0-9]+-disks/);  // eg, "/system-disks", "/game-disks", and any similar future disk repos
+    i = sOutputFile.search(/\/[a-z0-9]+-disks/);  // eg, "/demo-disks", "/game-disks", and any similar future disk repos
     if (i < 0) i = sOutputFile.indexOf("/apps/");
     if (i < 0) i = sOutputFile.indexOf("/tests/");
     if (i > 0) sOutputFile = sOutputFile.substr(i);
 
-    var match = sOutputFile.match(/^\/system-disks\/(.*)\/archive(\/.*)/);
+    var match = sOutputFile.match(/^\/demo-disks\/(.*)\/archive(\/.*)/);
     if (match) {
         sOutputFile = "https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/" + match[1] + match[2];
     }
