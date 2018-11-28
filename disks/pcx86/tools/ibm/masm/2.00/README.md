@@ -41,4 +41,4 @@ Directory listing of the 320Kb distribution diskette is provided below.
     SAMPLE2  BAT     4864   7-18-84  12:01p
            25 File(s)      8192 bytes free
 
-![IBM Macro Assembler 2.00]({{ site.system-disks.baseurl }}/pcx86/tools/ibm/masm/2.00/IBM-MASM-200.jpg)
+![IBM Macro Assembler 2.00]({{ site.demo-disks.baseurl }}/pcx86/tools/ibm/masm/2.00/IBM-MASM-200.jpg)

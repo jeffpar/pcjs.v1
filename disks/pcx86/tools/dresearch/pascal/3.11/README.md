@@ -85,4 +85,4 @@ Digital Research Pascal/MT+ 3.11
     OVLMGRPC I86    19251  10-28-83   9:50a
             9 File(s)      7680 bytes free
 
-![DR Pascal/MT+ 3.11 (Disk 1)]({{ site.system-disks.baseurl }}/pcx86/tools/dresearch/pascal/3.11/PASCALMT311-DISK1.jpg)
+![DR Pascal/MT+ 3.11 (Disk 1)]({{ site.demo-disks.baseurl }}/pcx86/tools/dresearch/pascal/3.11/PASCALMT311-DISK1.jpg)

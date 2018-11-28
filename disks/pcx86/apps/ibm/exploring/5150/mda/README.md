@@ -19,4 +19,4 @@ For more information about this software, see the [PCjs blog](/blog/2018/04/01/)
 
 {% include machine.html id="ibm5150" %}
 
-![Exploring the IBM PC 1.00 (MDA)]({{ site.system-disks.baseurl }}/pcx86/apps/ibm/exploring/5150/mda/EXPLORING-THE-IBM-PC-100-MDA.jpg)
+![Exploring the IBM PC 1.00 (MDA)]({{ site.demo-disks.baseurl }}/pcx86/apps/ibm/exploring/5150/mda/EXPLORING-THE-IBM-PC-100-MDA.jpg)

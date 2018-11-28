@@ -72,4 +72,4 @@ From `README.CPQ`:
             34 file(s)        213,019 bytes
              0 dir(s)          45,056 bytes free
 
-![COMPAQ User Programs (1987)]({{ site.system-disks.baseurl }}/pcx86/diags/compaq/utilities/1987/COMPAQ-UTILS-506-110387-REVG.jpg)
+![COMPAQ User Programs (1987)]({{ site.demo-disks.baseurl }}/pcx86/diags/compaq/utilities/1987/COMPAQ-UTILS-506-110387-REVG.jpg)

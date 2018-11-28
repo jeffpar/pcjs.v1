@@ -13,4 +13,4 @@ Spacemaker was an EXE compression utility created by Realia Inc.
 
 The following advertisement appeared in PC Magazine, August 1983 (p. 498).
 
-![Realia Spacemaker 1983]({{ site.system-disks.baseurl }}/pcx86/tools/other/spacemaker/PC-Magazine-1983-08-p498.jpg)
+![Realia Spacemaker 1983]({{ site.demo-disks.baseurl }}/pcx86/tools/other/spacemaker/PC-Magazine-1983-08-p498.jpg)
