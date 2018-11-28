@@ -38,4 +38,4 @@ an interesting review/rant from 1983 on this and other versions of WordStar for 
 	        5 file(s)     111360 bytes
 	                       48128 bytes free
 
-![WordStar 3.24 Diskette]({{ site.system-disks.baseurl }}/pcx86/apps/other/wordstar/3.24/WS324.jpg)
+![WordStar 3.24 Diskette]({{ site.demo-disks.baseurl }}/pcx86/apps/other/wordstar/3.24/WS324.jpg)

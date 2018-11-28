@@ -31,7 +31,7 @@ On March 25, 2014, the source code upon which OEMs based their MS-DOS 1.x and 2.
 public by the [Computer History Museum](http://www.computerhistory.org/atchm/microsoft-ms-dos-early-source-code/),
 with the permission of Microsoft.
 
-![MS-DOS 2.00]({{ site.system-disks.baseurl }}/pcx86/dos/microsoft/2.00/MSDOS200-DISKS.jpg)
+![MS-DOS 2.00]({{ site.demo-disks.baseurl }}/pcx86/dos/microsoft/2.00/MSDOS200-DISKS.jpg)
 
 Unfortunately, the Computer History Museum decided not to share the precise contents of the diskettes in its possession.
 Instead, they released a ZIP archive that aggregated the contents of the MS-DOS 2.x diskettes into two folders, `v20object`

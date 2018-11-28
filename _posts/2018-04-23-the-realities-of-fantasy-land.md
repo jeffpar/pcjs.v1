@@ -32,7 +32,7 @@ called "[Fantasy Land](/disks/pcx86/apps/ibm/fland/)":
 Eric then went out of his way to have the disk professionally duplicated, after which he sent me a disk image
 and eventually the actual diskette.
 
-![Fantasy Land]({{ site.system-disks.baseurl }}/pcx86/apps/ibm/fland/FLAND.jpg)
+![Fantasy Land]({{ site.demo-disks.baseurl }}/pcx86/apps/ibm/fland/FLAND.jpg)
 
 Based on John T. Cockerham's October 1986 PC Tech Journal article
 "[Evaluating the EGA: The EGA Standard](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2053.pdf&page=53&total=228)",

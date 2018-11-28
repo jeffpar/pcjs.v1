@@ -616,14 +616,14 @@ Digital Research DR DOS 6.00
 
 ---
 
-![DR DOS 6.00 StartUp Disk]({{ site.system-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-STARTUP.jpg)
+![DR DOS 6.00 StartUp Disk]({{ site.demo-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-STARTUP.jpg)
 
-![DR DOS 6.00 ViewMAX Disk]({{ site.system-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-VIEWMAX.jpg)
+![DR DOS 6.00 ViewMAX Disk]({{ site.demo-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-VIEWMAX.jpg)
 
-![DR DOS 6.00 1991 Update Disk 1]({{ site.system-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-1991-UPDATE1.jpg)
+![DR DOS 6.00 1991 Update Disk 1]({{ site.demo-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-1991-UPDATE1.jpg)
 
-![DR DOS 6.00 1991 Update Disk 2]({{ site.system-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-1991-UPDATE2.jpg)
+![DR DOS 6.00 1991 Update Disk 2]({{ site.demo-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-1991-UPDATE2.jpg)
 
-![DR DOS 6.00 1992 Update Disk 1]({{ site.system-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-1992-UPDATE1.jpg)
+![DR DOS 6.00 1992 Update Disk 1]({{ site.demo-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-1992-UPDATE1.jpg)
 
-![DR DOS 6.00 1992 Update Disk 2]({{ site.system-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-1992-UPDATE2.jpg)
+![DR DOS 6.00 1992 Update Disk 2]({{ site.demo-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-1992-UPDATE2.jpg)

@@ -18,4 +18,4 @@ For more information about this software, see the [PCjs blog](/blog/2018/04/01/)
 
 {% include machine.html id="ibm5170" %}
 
-![Exploring the IBM PC AT 1.00]({{ site.system-disks.baseurl }}/pcx86/apps/ibm/exploring/5170/1.00/EXPLORING-THE-IBM-PC-AT-100.jpg)
+![Exploring the IBM PC AT 1.00]({{ site.demo-disks.baseurl }}/pcx86/apps/ibm/exploring/5170/1.00/EXPLORING-THE-IBM-PC-AT-100.jpg)
