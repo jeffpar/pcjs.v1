@@ -39,7 +39,7 @@ pcjs:
   domain: pcjs.org    # whereas site.url is used for linking purposes, site.pcjs.domain is used for display purposes
 
 pcjs-disks:
-  baseurl: "https://system-disks.pcjs.org"
+  baseurl: "https://demo-disks.pcjs.org"
 
 pcjs-games:
   baseurl: "https://game-disks.pcjs.org"
