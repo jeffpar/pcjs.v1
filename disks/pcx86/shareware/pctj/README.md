@@ -7,7 +7,7 @@ machines:
     type: pcx86
     config: /devices/pcx86/machine/5170/ega/640kb/rev1/machine.xml
     testRAM: false
-    drives: '[{name:"10Mb Hard Disk",type:1,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'
+    drives: '[{name:"10Mb Hard Disk",type:1,path:"/disks-demo/pcx86/drives/10mb/MSDOS320-C400.json"}]'
     autoMount:
       A:
         name: None

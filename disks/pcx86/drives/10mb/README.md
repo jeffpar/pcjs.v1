@@ -30,12 +30,12 @@ For example, a PC XT machine using this HDC XML reference:
 will load the following PC XT controller configuration and disk image:
 
 ```xml
-<hdc id="hdcXT" type="XT" drives='[{name:"10Mb Hard Disk",type:3,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'/>
+<hdc id="hdcXT" type="XT" drives='[{name:"10Mb Hard Disk",type:3,path:"/disks-demo/pcx86/drives/10mb/MSDOS320-C400.json"}]'/>
 ```
 
 A machine's hard drive configuration can also be overridden with the *drives* property; e.g.:
 
-    drives: '[{name:"10Mb Hard Disk",type:3,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'
+    drives: '[{name:"10Mb Hard Disk",type:3,path:"/disks-demo/pcx86/drives/10mb/MSDOS320-C400.json"}]'
  
 Two of the 10Mb disk images have also been pre-configured for use in PC AT configurations:
  
@@ -54,7 +54,7 @@ So, a PC AT machine using this HDC XML reference:
 will load the following PC AT controller configuration and disk image:
 
 ```xml
-<hdc id="hdcAT" type="AT" drives='[{name:"10Mb Hard Disk",type:1,path:"/pcjs-disks/pcx86/drives/10mb/MSDOS320-C400.json"}]'/>
+<hdc id="hdcAT" type="AT" drives='[{name:"10Mb Hard Disk",type:1,path:"/disks-demo/pcx86/drives/10mb/MSDOS320-C400.json"}]'/>
 ```
 
 PC AT Type 1 drives are also compatible with COMPAQ DeskPro 386 Type 1 drives.
