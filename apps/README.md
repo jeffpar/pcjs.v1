@@ -126,7 +126,7 @@ be re-generated.
 ### Example: CP/M-86
 
 CPM-86 is stored as two disk images in a [/disks folder](/disks/pcx86/cpm/1.1b/). The disk images are described in that
-folder's [manifest](https://jeffpar.github.io/pcjs-disks/pcx86/cpm/1.1b/manifest.xml):
+folder's [manifest](https://demo-disks.pcjs.org/pcx86/cpm/1.1b/manifest.xml):
 
 ```xml
 <manifest>
@@ -138,10 +138,10 @@ folder's [manifest](https://jeffpar.github.io/pcjs-disks/pcx86/cpm/1.1b/manifest
     <publisher href="http://en.wikipedia.org/wiki/Eagle_Computer">Eagle Computer</publisher>
     <releaseDate>May 20, 1983</releaseDate>
     <machine href="/disks/pcx86/cpm/1.00/machine.xml"/>
-    <disk id="disk01" href="/pcjs-disks/pcx86/cpm/1.1b/CPM86-DISK1.json">
+    <disk id="disk01" href="/disks-demo/pcx86/cpm/1.1b/CPM86-DISK1.json">
         <name>CP/M-86 1.1B (Disk 1)</name>
     </disk>
-    <disk id="disk02" href="/pcjs-disks/pcx86/cpm/1.1b/CPM86-DISK2.json">
+    <disk id="disk02" href="/disks-demo/pcx86/cpm/1.1b/CPM86-DISK2.json">
         <name>CP/M-86 1.1B (Disk 2)</name>
     </disk>
 </manifest>
@@ -156,12 +156,12 @@ the disk images.
 If a machine file wanted to use only the first disk, then it would specify:
 
 ```xml
-<manifest ref="/pcjs-disks/pcx86/cpm/1.1b/manifest.xml" disk="disk01"/>
+<manifest ref="/disks-demo/pcx86/cpm/1.1b/manifest.xml" disk="disk01"/>
 ```
 
 and if it wanted to use all the disks listed in the manifest, it could simply omit the *disk* attribute or
 use an asterisk; e.g.:
 
 ```xml
-<manifest ref="/pcjs-disks/pcx86/cpm/1.1b/manifest.xml" disk="*"/>
+<manifest ref="/disks-demo/pcx86/cpm/1.1b/manifest.xml" disk="*"/>
 ```

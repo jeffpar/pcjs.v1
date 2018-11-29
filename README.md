@@ -378,7 +378,7 @@ Other parameters that can be passed via the URL:
 
 - *drives*: overrides the machine's hard drive settings; e.g.:
 
-        http://localhost:8088/?drives=[{name:"10Mb Hard Disk",type:3,path:"/pcjs-disks/pcx86/drives/10mb/PCDOS200-WIN101-EGA.json"}]
+        http://localhost:8088/?drives=[{name:"10Mb Hard Disk",type:3,path:"/disks-demo/pcx86/drives/10mb/PCDOS200-WIN101-EGA.json"}]
 
 - *autoType*: a string of keys to inject into the machine after booting; e.g.:
 

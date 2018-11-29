@@ -7,7 +7,7 @@ machines:
     type: pcx86
     debugger: true
     config: /devices/pcx86/machine/5170/vga/2048kb/debugger/machine.xml
-    drives: '[{name:"20Mb Hard Disk",type:2,path:"/pcjs-disks/pcx86/drives/20mb/PCDOS330-WIN310-VGA.json"}]'
+    drives: '[{name:"20Mb Hard Disk",type:2,path:"/disks-demo/pcx86/drives/20mb/PCDOS330-WIN310-VGA.json"}]'
     autoMount:
       A:
         name: None
