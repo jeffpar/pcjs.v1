@@ -733,7 +733,7 @@ DiskDump.CLI = function()
 
         var sOutput = "";
         var sOutputFile = argv['output'];
-        if (typeof sOutputFile == "string" && !str.endsWith(sOutputFile, ".img") && !str.endsWith(sOutputFile, ".json")) {
+        if (typeof sOutputFile == "string" && sOutputFile.lastIndexOf('.') < 0) {
             sOutput = sOutputFile;
             sOutputFile = true;
         }
@@ -741,10 +741,7 @@ DiskDump.CLI = function()
             if (sDir || sDisk) {
                 sOutput = path.join(sOutput, path.basename(sDir || sDisk));
                 var i = sOutput.lastIndexOf('.');
-                if (i > 0) {
-                    var sExt = sOutput.substr(i);
-                    if (sExt == ".img" || sExt == ".json") sOutput = sOutput.substr(0, i);
-                }
+                if (i > 0) sOutput = sOutput.substr(0, i);
             } else {
                 sOutput = "disk";
             }

@@ -616,9 +616,9 @@ Digital Research DR DOS 6.00
 
 ---
 
-![DR DOS 6.00 StartUp Disk]({{ site.demo-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-STARTUP.jpg)
+![DR DOS 6.00 Disk 1]({{ site.demo-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-STARTUP.jpg)
 
-![DR DOS 6.00 ViewMAX Disk]({{ site.demo-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-VIEWMAX.jpg)
+![DR DOS 6.00 Disk 2]({{ site.demo-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-VIEWMAX.jpg)
 
 ![DR DOS 6.00 1991 Update Disk 1]({{ site.demo-disks.baseurl }}/pcx86/dos/dresearch/6.00/DRDOS-600-1991-UPDATE1.jpg)
 
