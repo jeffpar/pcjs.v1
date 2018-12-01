@@ -2660,6 +2660,12 @@ class Video extends Component {
                 }
             }
         }
+
+        /*
+         * Allocate image and canvas caches.
+         */
+        this.imageCache = {};
+        this.canvasCache = {};
     }
 
     /**
@@ -3461,7 +3467,7 @@ class Video extends Component {
                 this.timerRetrace = this.cpu.addTimer(this.id, function startVerticalRetrace() {
                     let card = video.cardActive;
                     card.nCyclesVertRetrace = video.cpu.getCycles();
-                    if (video.messageEnabled(Messages.VIDEO | Messages.INT)) {
+                    if (DEBUG && video.messageEnabled(Messages.VIDEO | Messages.INT)) {
                         video.printf("vertical retrace timer fired (%d cycles)\n", card.nCyclesVertRetrace);
                     }
                     if (video.nIRQ) {
@@ -3509,7 +3515,7 @@ class Video extends Component {
                         }
                         video.msUpdatePrev = msUpdate - (msDelta >= video.msUpdateInterval? 0 : msDelta);
                     }
-                    else if (video.messageEnabled(Messages.VIDEO | Messages.INT)) {
+                    else if (DEBUG && video.messageEnabled(Messages.VIDEO | Messages.INT)) {
                         video.printf("skipping update (%dms too soon)\n", -msDelta);
                     }
                     video.latchStartAddress();
@@ -4377,7 +4383,7 @@ class Video extends Component {
             }
             if (fChanged) {
                 if (!this.createFontColor(font, iColor, rgbColor, nDouble, offData, offSplit, cxChar, cyChar, abFontData)) {
-                    this.printf("createFont(%d): no font data found\n", nFont);
+                    if (DEBUG) this.printf("createFont(%d): no font data found\n", nFont);
                     this.assert(!fChanges);     // the lack of any font data should be detected on the very first color
                     font = null;
                     break;
@@ -4463,22 +4469,13 @@ class Video extends Component {
      */
     createFontColor(font, iColor, rgbColor, nDouble, offData, offSplit, cxChar, cyChar, abFontData)
     {
-        let rgbOff = [0x00, 0x00, 0x00, 0x00];
-        let canvasFont = document.createElement("canvas");
-        canvasFont.width = font.cxCell << 4;
-        canvasFont.height = (font.cyCell << 4);
-        let contextFont = canvasFont.getContext("2d");
-
-        let imageChar = contextFont.createImageData(font.cxCell, font.cyCell);
-
         /*
          * If abFontData is null, we will use font data from plane 2 of video memory, which has a "hard-wired" layout
          * of 32 bytes per character (which, for 256 characters, amounts to 8Kb).  Note that on an EGA, up to 4 font
          * "banks" can be stored in plane 2, since each EGA font bank has a "hard-wired" length of 16Kb, whereas on a VGA,
-         * up to 8 font banks can be stored in plane 2, since each VGA font bank has a "hard-wired" length of 8Kb.
-         *
-         * Note that for backward compatibility with the EGA, the VGA's additional 4 font banks are interleaved with the
-         * EGA's original 4.
+         * up to 8 font banks can be stored in plane 2, since each VGA font bank has a "hard-wired" length of 8Kb;
+         * for backward compatibility with the EGA, the VGA's additional 4 font banks are interleaved with the EGA's
+         * original 4 font banks.
          */
         let iChar, y, x;
         let cyLimit = 32;
@@ -4491,6 +4488,11 @@ class Video extends Component {
              * When font data must be extracted from VRAM (instead of the supplied abFontData), we first do a "pre-scan"
              * to see if any font data actually exists.  For example. the video card's BIOS might zero ALL the font banks
              * (thereby making them "dirty") but then load only the first bank.
+             *
+             * NOTE: While this might also be a good time compare the font data to a cached copy, to see if anything has
+             * actually changed, hopefully that won't be necessary, because we should already be skipping the entire font
+             * creation process if the font bank (as indicated by offData) hasn't been marked "dirty" and nothing else
+             * about the font (eg, shape, color) has changed either.
              */
             for (iChar = 0; iChar < 256; iChar++) {
                 let offChar = offData + iChar * cyLimit;
@@ -4500,13 +4502,28 @@ class Video extends Component {
                 }
                 if (y < cyChar) break;
             }
-            if (iChar == 256) return false;
+            if (iChar == 256) {
+                return false;
+            }
         }
+
+        let rgbOff = [0x00, 0x00, 0x00, 0x00];
+
+        /*
+         * Let's take a moment to see if we already have a suitable canvasFont that we can simply reuse.
+         */
+        let canvasFont = font.aCanvas[iColor];
+        if (!canvasFont || canvasFont.width != font.cxCell << 4 || canvasFont.height != font.cyCell << 4) {
+            canvasFont = document.createElement("canvas");
+            canvasFont.width = font.cxCell << 4;
+            canvasFont.height = font.cyCell << 4;
+        }
+        let contextFont = canvasFont.getContext("2d");
+        let imageChar = contextFont.createImageData(font.cxCell, font.cyCell);
 
         for (iChar = 0; iChar < 256; iChar++) {
             let offChar = offData + iChar * cyLimit;
             for (y = 0; y < cyChar; y++) {
-
                 /*
                  * fUnderline should be true only in the FONT_MDA case, and only for the odd color variations
                  * (1 and 3, out of variations 0 to 4), and only for the second-from-bottom row of the character cell
@@ -4544,7 +4561,6 @@ class Video extends Component {
              */
             contextFont.putImageData(imageChar, x = (iChar & 0xf) * font.cxCell, y = (iChar >> 4) * font.cyCell);
         }
-
         /*
          * The colors for cell backgrounds and cursor elements must be converted to CSS color strings.
          */
@@ -4778,9 +4794,9 @@ class Video extends Component {
              *      if (this.nCard == Video.CARD.EGA) {
              *          if (bCursorMax == 7 && bCursorStart == 4 && !bCursorEnd) bCursorEnd = 7;
              *      }
-            /*
-             * Here's another strange EGA anomaly: if CURSCAN == CURSCANB mod 16, then it's treated the same as if
-             * CURSCAN == CURSCANB.  For example, if you set (CURSCAN,CURSCANB) to either the decimal values
+             *
+             * And here's a strange EGA hardware anomaly: if CURSCAN == CURSCANB mod 16, then it's treated the same
+             * as if CURSCAN == CURSCANB.  For example, if you set (CURSCAN,CURSCANB) to either the decimal values
              * (4,19) or (4,21), you'll get a full block cursor, but if you set it to (4,20), you get a single line
              * cursor at row 4.  Go figure!
              */
@@ -4817,14 +4833,21 @@ class Video extends Component {
         let iCellCursor = Math.trunc(offCursor / this.nColsLogical) * (this.nColsBuffer) + (offCursor % this.nColsLogical);
 
         if (this.iCellCursor != iCellCursor) {
-            //
-            // let rowFrom = (this.iCellCursor / this.nCols)|0;
-            // let colFrom = (this.iCellCursor % this.nCols);
-            // let rowTo = (iCellCursor / this.nCols)|0;
-            // let colTo = (iCellCursor % this.nCols);
-            // if (DEBUG) this.printf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo);
-            // this.removeCursor();
-            //
+            if (DEBUG) {
+                let rowFrom = (this.iCellCursor / this.nCols)|0;
+                let colFrom = (this.iCellCursor % this.nCols);
+                let rowTo = (iCellCursor / this.nCols)|0;
+                let colTo = (iCellCursor % this.nCols);
+                this.printf("checkCursor(): cursor moved from %d,%d to %d,%d\n", rowFrom, colFrom, rowTo, colTo);
+            }
+            /*
+             * I commented out this call on Feb 12, 2018 ("More cursor visibility fixes, especially when dealing with
+             * non-zero video buffer start addresses") when I was debugging some Xenix issues, at the same time that I
+             * also commented out the above printf(); in hindsight, I'm not sure if I intended to comment both out,
+             * but with the change to cBlinkVisible below, I'm assuming removeCursor() really is no longer required here.
+             *
+             *      this.removeCursor();
+             */
             this.iCellCursor = iCellCursor;
             /*
              * We invalidate cBlinkVisible on a cursor position change to ensure the cursor will be redrawn on the
@@ -4843,7 +4866,8 @@ class Video extends Component {
          * cyCursor values are relative to when it's time to scale them.
          */
         if (this.yCursor !== bCursorStart || this.cyCursor !== bCursorSize || this.cyCursorWrap !== bCursorWrap) {
-            if (DEBUG) this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d (0x%02X-0x%02X)\n", this.yCursor, this.cyCursor, bCursorStart, bCursorSize, oCursorStart, oCursorEnd);
+            if (DEBUG) this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d (0x%02X-0x%02X)\n",
+                                    this.yCursor, this.cyCursor, bCursorStart, bCursorSize, oCursorStart, oCursorEnd);
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
             this.cyCursorWrap = bCursorWrap;
@@ -5164,12 +5188,21 @@ class Video extends Component {
         }
 
         /*
-         * Allocate the off-screen buffers
+         * Allocate the off-screen buffers, unless a previous setMode() already cached buffers of the required size.
          */
-        this.imageBuffer = this.contextScreen.createImageData(this.cxBuffer, this.cyBuffer);
-        this.canvasBuffer = document.createElement("canvas");
-        this.canvasBuffer.width = this.cxBuffer;
-        this.canvasBuffer.height = this.cyBuffer;
+        if (this.imageCache[this.cxBuffer] && this.imageCache[this.cxBuffer][this.cyBuffer]) {
+            this.imageBuffer = this.imageCache[this.cxBuffer][this.cyBuffer];
+            this.canvasBuffer = this.canvasCache[this.cxBuffer][this.cyBuffer];
+        } else {
+            this.imageBuffer = this.contextScreen.createImageData(this.cxBuffer, this.cyBuffer);
+            this.canvasBuffer = document.createElement("canvas");
+            this.canvasBuffer.width = this.cxBuffer;
+            this.canvasBuffer.height = this.cyBuffer;
+                if (!this.imageCache[this.cxBuffer]) this.imageCache[this.cxBuffer] = {};
+            this.imageCache[this.cxBuffer][this.cyBuffer] = this.imageBuffer;
+            if (!this.canvasCache[this.cxBuffer]) this.canvasCache[this.cxBuffer] = {};
+            this.canvasCache[this.cxBuffer][this.cyBuffer] = this.canvasBuffer;
+        }
         this.contextBuffer = this.canvasBuffer.getContext("2d");
 
         /*
@@ -6557,14 +6590,14 @@ class Video extends Component {
         nCyclesElapsed -= card.nCyclesVertPeriod - card.nCyclesVertActive;
         if (nCyclesElapsed < 0) {
             b |= Card.CGA.STATUS.VRETRACE | Card.CGA.STATUS.RETRACE;
-            // this.printf("vertical retrace (%d cycles)\n", nCyclesElapsed);
+            // if (DEBUG) this.printf("vertical retrace (%d cycles)\n", nCyclesElapsed);
         } else {
             let nCyclesHorzRemain = nCyclesElapsed % card.nCyclesHorzPeriod;
             if (nCyclesHorzRemain > card.nCyclesHorzActive) {
                 b |= Card.CGA.STATUS.RETRACE;
-                // this.printf("horizontal retrace (%d cycles)\n", nCyclesElapsed);
+                // if (DEBUG) this.printf("horizontal retrace (%d cycles)\n", nCyclesElapsed);
             } else {
-                // this.printf("no retrace (%d cycles)\n", nCyclesElapsed);
+                // if (DEBUG) this.printf("no retrace (%d cycles)\n", nCyclesElapsed);
             }
         }
         return b;
@@ -7018,10 +7051,10 @@ class Video extends Component {
                  * call the the CPU flushPageBlocks() function.  With that change in place, the window now stays in sync
                  * with the buffer.
                  *
-                 * However, calling updateScreen() here still seems like a good idea, and it shouldn't hurt performance,
-                 * since we're doing it only when setCardAccess() indicates a change, so I'm leaving this addition in place.
+                 * And while calling updateScreen() here might still seem like a good idea, it CAN hurt performance, even
+                 * if we're doing it only when setCardAccess() indicates a change, so I'm commenting the call out.
                  */
-                this.updateScreen(true);
+                // this.updateScreen(true);
             }
             break;
 
