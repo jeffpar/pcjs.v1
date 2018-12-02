@@ -8,7 +8,7 @@ Microsoft Multiplan 2.01
 ------------------------
 
 NOTE: The Microsoft Multiplan 2.01 disks below are *not* original distribution disks.  They were obtained from
-[VETUSWARE](http://vetusware.com/download/Multiplan%20Version%202/?id=5148).  Unlike older versions of Multiplan
+[VETUSWARE](https://vetusware.com/download/Multiplan%20Version%202/?id=5148).  Unlike older versions of Multiplan
 found online, this copy *does* include installation files, so we have attempted to recreate the `INSTALL` and
 `PROGRAM` as they originally existed.  However, this means that before you can run `MP.COM` on the `PROGRAM` disk,
 you must run the installation program to properly "install" `MP.COM` for the machine currently being used.

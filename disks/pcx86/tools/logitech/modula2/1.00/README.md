@@ -13,7 +13,7 @@ Links to [Modula-2/86 Documentation](http://www.bitsavers.org/pdf/logitech/modul
 - [Logitech Modula-2/86 v2.0 Manual](http://www.bitsavers.org/pdf/logitech/modula-2/Modula-2_86_Ver_2.00_Users_Manual_Apr86.pdf)
 
 NOTE: We do not have copies of the original distribution disks.  These disks have been rebuilt from ZIP archives obtained
-from [VETUSWARE](http://vetusware.com/download/MODULE%202%20_SETUP_DEBUG_COMPILER.DISCS%201.0/?id=11456).
+from [VETUSWARE](https://vetusware.com/download/MODULE%202%20_SETUP_DEBUG_COMPILER.DISCS%201.0/?id=11456).
 
 ### Directory of Modula-2/86 1.00 (1-System)
 

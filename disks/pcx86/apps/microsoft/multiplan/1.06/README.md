@@ -8,7 +8,7 @@ Microsoft Multiplan 1.06
 ------------------------
 
 NOTE: The Microsoft Multiplan 1.06 disk below is *not* an original distribution disk.  It was obtained from
-[VETUSWARE](http://vetusware.com/download/Multiplan%203.0%201.0/?id=8608) and contains a pre-installed copy of
+[VETUSWARE](https://vetusware.com/download/Multiplan%203.0%201.0/?id=8608) and contains a pre-installed copy of
 `MP.COM` (the original `MP.COM` may have been preserved as `MPBARE.COM`).  No installation files were included
 with the disk.
 
