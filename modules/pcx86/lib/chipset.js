@@ -3695,11 +3695,50 @@ class ChipSet extends Component {
      */
     updatePPIB(bOut)
     {
-        let fNewSpeaker = !!(bOut & ChipSet.PPI_B.SPK_TIMER2);
-        let fOldSpeaker = !!(this.bPPIB & ChipSet.PPI_B.SPK_TIMER2);
+        let toggled = (bOut ^ this.bPPIB);
+        if (toggled & ChipSet.PPI_B.CLK_TIMER2) {
+            /*
+             * If TIMER2 is about to be "declocked", then we should update the timer NOW, because any attempt to read
+             * timer's count AFTER it has been declocked will not trigger an update.  This was a problem for the following
+             * code in SUPERPCK.EXE from DR DOS 6.00:
+             *
+             *      &10AE:C863 E461             IN       AL,61
+             *      &10AE:C865 24FC             AND      AL,FC
+             *      &10AE:C867 8AE0             MOV      AH,AL
+             *      &10AE:C869 E661             OUT      61,AL              ; PPI_B: disable CLK_TIMER2 and SPK_TIMER2
+             *      &10AE:C86B B0B4             MOV      AL,B4
+             *      &10AE:C86D E643             OUT      43,AL              : PIT_CTRL: MODE2, RW_BOTH, SC_CTR2
+             *      &10AE:C86F 32C0             XOR      AL,AL
+             *      &10AE:C871 E642             OUT      42,AL
+             *      &10AE:C873 EB00             JMP      C875 (SUPERPCK.EXE+0x745B)
+             *      &10AE:C875 E642             OUT      42,AL
+             *      &10AE:C877 B90010           MOV      CX,1000
+             *      &10AE:C87A 8AC4             MOV      AL,AH
+             *      &10AE:C87C 0C01             OR       AL,01
+             *      &10AE:C87E E661             OUT      61,AL              ; PPI_B: enable CLK_TIMER2
+             *      &10AE:C880 E2FE             LOOP     C880 (SUPERPCK.EXE+0x7469)
+             *      &10AE:C882 8AC4             MOV      AL,AH
+             *      &10AE:C884 E661             OUT      61,AL              ; PPI_B: disable CLK_TIMER2 again
+             *      &10AE:C886 E442             IN       AL,42              ; PIT_TIMER2: read count (without, um, latching)
+             *      &10AE:C888 8AE0             MOV      AH,AL
+             *      &10AE:C88A E442             IN       AL,42
+             *      &10AE:C88C 86C4             XCHG     AL,AH
+             *      &10AE:C88E F7D8             NEG      AX
+             *      &10AE:C890 8BD8             MOV      BX,AX
+             *      &10AE:C892 B80010           MOV      AX,1000
+             *      &10AE:C895 33D2             XOR      DX,DX
+             *      &10AE:C897 F7F3             DIV      BX                 ; potential divide-by-zero if TIMER2 count was zero
+             *
+             * Another interesting but unrelated problem is that DR DOS's divide-by-zero exception handler was pointing
+             * to 0F71:258C at this point, which contained invalid code.  The code was valid when the handler was first set,
+             * but it was later discarded or relocated and then overwritten.
+             */
+            if (!(bOut & ChipSet.PPI_B.CLK_TIMER2)) {
+                this.updateTimer(ChipSet.PIT0.TIMER2);
+            }
+        }
         this.bPPIB = bOut;
-        if (this.kbd) this.kbd.setEnabled(!(bOut & ChipSet.PPI_B.CLEAR_KBD), !!(bOut & ChipSet.PPI_B.CLK_KBD));
-        if (fNewSpeaker != fOldSpeaker) {
+        if (toggled & ChipSet.PPI_B.SPK_TIMER2) {
             /*
              * Originally, this code didn't catch the "ERROR_BEEP" case @F000:EC34, which first turns both PPI_B.CLK_TIMER2 (0x01)
              * and PPI_B.SPK_TIMER2 (0x02) off, then turns on only PPI_B.SPK_TIMER2 (0x02), then restores the original port value.
@@ -3707,8 +3746,9 @@ class ChipSet extends Component {
              * So, when the ROM BIOS keyboard buffer got full, we didn't issue a BEEP alert.  I've fixed that by limiting the test
              * to PPI_B.SPK_TIMER2 and ignoring PPI_B.CLK_TIMER2.
              */
-            this.setSpeaker(fNewSpeaker);
+            this.setSpeaker(bOut & ChipSet.PPI_B.SPK_TIMER2);
         }
+        if (this.kbd) this.kbd.setEnabled(!(bOut & ChipSet.PPI_B.CLEAR_KBD), !!(bOut & ChipSet.PPI_B.CLK_KBD));
     }
 
     /**
@@ -4701,16 +4741,16 @@ class ChipSet extends Component {
     }
 
     /**
-     * setSpeaker(fEnable)
+     * setSpeaker(enable)
      *
      * @this {ChipSet}
-     * @param {boolean} [fEnable] true to enable speaker, false to disable it, otherwise update it as appropriate
+     * @param {number} [enable] (non-zero to enable speaker, zero to disable it; otherwise, update as appropriate)
      */
-    setSpeaker(fEnable)
+    setSpeaker(enable)
     {
         let fOn;
-        if (fEnable !== undefined) {
-            fOn = fEnable;
+        if (enable !== undefined) {
+            fOn = !!enable;
             if (fOn != this.fSpeakerEnabled) {
                 //
                 // Yielding doesn't seem to help the simulation of sound via rapid speaker toggling.
@@ -6014,12 +6054,12 @@ ChipSet.aTimerInit = [[0,0], [0,0], [0,0], [0,0]];
  * Port input notification tables, starting with the one that's common to all models (aPortInput)
  */
 ChipSet.aPortInput = {
-    0x20: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICLo(ChipSet.PIC0.INDEX, addrFrom); },
-    0x21: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICHi(ChipSet.PIC0.INDEX, addrFrom); },
-    0x40: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER0, port, addrFrom); },
-    0x41: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER1, port, addrFrom); },
-    0x42: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER2, port, addrFrom); },
-    0x43: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimerCtrl(ChipSet.PIT0.INDEX, port, addrFrom); },
+    0x20: /** @this {ChipSet} */ function inPort20(port, addrFrom) { return this.inPICLo(ChipSet.PIC0.INDEX, addrFrom); },
+    0x21: /** @this {ChipSet} */ function inPort21(port, addrFrom) { return this.inPICHi(ChipSet.PIC0.INDEX, addrFrom); },
+    0x40: /** @this {ChipSet} */ function inPort40(port, addrFrom) { return this.inTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER0, port, addrFrom); },
+    0x41: /** @this {ChipSet} */ function inPort41(port, addrFrom) { return this.inTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER1, port, addrFrom); },
+    0x42: /** @this {ChipSet} */ function inPort42(port, addrFrom) { return this.inTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER2, port, addrFrom); },
+    0x43: /** @this {ChipSet} */ function inPort43(port, addrFrom) { return this.inTimerCtrl(ChipSet.PIT0.INDEX, port, addrFrom); },
 };
 
 ChipSet.aPortInput4860 = {
@@ -6038,20 +6078,20 @@ ChipSet.aPortInput5150 = {
 };
 
 ChipSet.aPortInput5xxx = {
-    0x00: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA0.INDEX, 0, port, addrFrom); },
-    0x01: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA0.INDEX, 0, port, addrFrom); },
-    0x02: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA0.INDEX, 1, port, addrFrom); },
-    0x03: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA0.INDEX, 1, port, addrFrom); },
-    0x04: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA0.INDEX, 2, port, addrFrom); },
-    0x05: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA0.INDEX, 2, port, addrFrom); },
-    0x06: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA0.INDEX, 3, port, addrFrom); },
-    0x07: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA0.INDEX, 3, port, addrFrom); },
-    0x08: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAStatus(ChipSet.DMA0.INDEX, port, addrFrom); },
-    0x0D: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMATemp(ChipSet.DMA0.INDEX, port, addrFrom); },
-    0x81: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 2, port, addrFrom); },
-    0x82: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 3, port, addrFrom); },
-    0x83: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 1, port, addrFrom); },
-    0x87: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 0, port, addrFrom); }
+    0x00: /** @this {ChipSet} */ function inPort00(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA0.INDEX, 0, port, addrFrom); },
+    0x01: /** @this {ChipSet} */ function inPort01(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA0.INDEX, 0, port, addrFrom); },
+    0x02: /** @this {ChipSet} */ function inPort02(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA0.INDEX, 1, port, addrFrom); },
+    0x03: /** @this {ChipSet} */ function inPort03(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA0.INDEX, 1, port, addrFrom); },
+    0x04: /** @this {ChipSet} */ function inPort04(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA0.INDEX, 2, port, addrFrom); },
+    0x05: /** @this {ChipSet} */ function inPort05(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA0.INDEX, 2, port, addrFrom); },
+    0x06: /** @this {ChipSet} */ function inPort06(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA0.INDEX, 3, port, addrFrom); },
+    0x07: /** @this {ChipSet} */ function inPort07(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA0.INDEX, 3, port, addrFrom); },
+    0x08: /** @this {ChipSet} */ function inPort08(port, addrFrom) { return this.inDMAStatus(ChipSet.DMA0.INDEX, port, addrFrom); },
+    0x0D: /** @this {ChipSet} */ function inPort0D(port, addrFrom) { return this.inDMATemp(ChipSet.DMA0.INDEX, port, addrFrom); },
+    0x81: /** @this {ChipSet} */ function inPort81(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 2, port, addrFrom); },
+    0x82: /** @this {ChipSet} */ function inPort82(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 3, port, addrFrom); },
+    0x83: /** @this {ChipSet} */ function inPort83(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 1, port, addrFrom); },
+    0x87: /** @this {ChipSet} */ function inPort87(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 0, port, addrFrom); }
 };
 
 ChipSet.aPortInput5170 = {
@@ -6060,46 +6100,46 @@ ChipSet.aPortInput5170 = {
     0x64: ChipSet.prototype.in8042Status,
     0x70: ChipSet.prototype.inCMOSAddr,
     0x71: ChipSet.prototype.inCMOSData,
-    0x80: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageSpare(7, port, addrFrom); },
-    0x84: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageSpare(0, port, addrFrom); },
-    0x85: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageSpare(1, port, addrFrom); },
-    0x86: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageSpare(2, port, addrFrom); },
-    0x88: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageSpare(3, port, addrFrom); },
-    0x89: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA1.INDEX, 2, port, addrFrom); },
-    0x8A: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA1.INDEX, 3, port, addrFrom); },
-    0x8B: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA1.INDEX, 1, port, addrFrom); },
-    0x8C: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageSpare(4, port, addrFrom); },
-    0x8D: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageSpare(5, port, addrFrom); },
-    0x8E: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageSpare(6, port, addrFrom); },
-    0x8F: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA1.INDEX, 0, port, addrFrom); },
-    0xA0: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICLo(ChipSet.PIC1.INDEX, addrFrom); },
-    0xA1: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICHi(ChipSet.PIC1.INDEX, addrFrom); },
-    0xC0: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA1.INDEX, 0, port, addrFrom); },
-    0xC2: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA1.INDEX, 0, port, addrFrom); },
-    0xC4: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA1.INDEX, 1, port, addrFrom); },
-    0xC6: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA1.INDEX, 1, port, addrFrom); },
-    0xC8: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA1.INDEX, 2, port, addrFrom); },
-    0xCA: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA1.INDEX, 2, port, addrFrom); },
-    0xCC: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA1.INDEX, 3, port, addrFrom); },
-    0xCE: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA1.INDEX, 3, port, addrFrom); },
-    0xD0: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAStatus(ChipSet.DMA1.INDEX, port, addrFrom); },
-    0xDA: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMATemp(ChipSet.DMA1.INDEX, port, addrFrom); }
+    0x80: /** @this {ChipSet} */ function inPort80(port, addrFrom) { return this.inDMAPageSpare(7, port, addrFrom); },
+    0x84: /** @this {ChipSet} */ function inPort84(port, addrFrom) { return this.inDMAPageSpare(0, port, addrFrom); },
+    0x85: /** @this {ChipSet} */ function inPort85(port, addrFrom) { return this.inDMAPageSpare(1, port, addrFrom); },
+    0x86: /** @this {ChipSet} */ function inPort86(port, addrFrom) { return this.inDMAPageSpare(2, port, addrFrom); },
+    0x88: /** @this {ChipSet} */ function inPort88(port, addrFrom) { return this.inDMAPageSpare(3, port, addrFrom); },
+    0x89: /** @this {ChipSet} */ function inPort89(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA1.INDEX, 2, port, addrFrom); },
+    0x8A: /** @this {ChipSet} */ function inPort8A(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA1.INDEX, 3, port, addrFrom); },
+    0x8B: /** @this {ChipSet} */ function inPort8B(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA1.INDEX, 1, port, addrFrom); },
+    0x8C: /** @this {ChipSet} */ function inPort8C(port, addrFrom) { return this.inDMAPageSpare(4, port, addrFrom); },
+    0x8D: /** @this {ChipSet} */ function inPort8D(port, addrFrom) { return this.inDMAPageSpare(5, port, addrFrom); },
+    0x8E: /** @this {ChipSet} */ function inPort8E(port, addrFrom) { return this.inDMAPageSpare(6, port, addrFrom); },
+    0x8F: /** @this {ChipSet} */ function inPort8F(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA1.INDEX, 0, port, addrFrom); },
+    0xA0: /** @this {ChipSet} */ function inPortA0(port, addrFrom) { return this.inPICLo(ChipSet.PIC1.INDEX, addrFrom); },
+    0xA1: /** @this {ChipSet} */ function inPortA1(port, addrFrom) { return this.inPICHi(ChipSet.PIC1.INDEX, addrFrom); },
+    0xC0: /** @this {ChipSet} */ function inPortC0(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA1.INDEX, 0, port, addrFrom); },
+    0xC2: /** @this {ChipSet} */ function inPortC2(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA1.INDEX, 0, port, addrFrom); },
+    0xC4: /** @this {ChipSet} */ function inPortC4(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA1.INDEX, 1, port, addrFrom); },
+    0xC6: /** @this {ChipSet} */ function inPortC6(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA1.INDEX, 1, port, addrFrom); },
+    0xC8: /** @this {ChipSet} */ function inPortC8(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA1.INDEX, 2, port, addrFrom); },
+    0xCA: /** @this {ChipSet} */ function inPortCA(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA1.INDEX, 2, port, addrFrom); },
+    0xCC: /** @this {ChipSet} */ function inPortCC(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA1.INDEX, 3, port, addrFrom); },
+    0xCE: /** @this {ChipSet} */ function inPortCE(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA1.INDEX, 3, port, addrFrom); },
+    0xD0: /** @this {ChipSet} */ function inPortD0(port, addrFrom) { return this.inDMAStatus(ChipSet.DMA1.INDEX, port, addrFrom); },
+    0xDA: /** @this {ChipSet} */ function inPortDA(port, addrFrom) { return this.inDMATemp(ChipSet.DMA1.INDEX, port, addrFrom); }
 };
 
 ChipSet.aPortInput6300 = {
     0x60: ChipSet.prototype.in8041Kbd,
     0x61: ChipSet.prototype.in8041Ctrl,
     0x64: ChipSet.prototype.in8041Status,
-    0x66: /** @this {ChipSet} */ function(port, addrFrom) { return this.in6300DIPSwitches(0, port, addrFrom); },
-    0x67: /** @this {ChipSet} */ function(port, addrFrom) { return this.in6300DIPSwitches(1, port, addrFrom); }
+    0x66: /** @this {ChipSet} */ function inPort66(port, addrFrom) { return this.in6300DIPSwitches(0, port, addrFrom); },
+    0x67: /** @this {ChipSet} */ function inPort67(port, addrFrom) { return this.in6300DIPSwitches(1, port, addrFrom); }
 };
 
 if (DESKPRO386) {
     ChipSet.aPortInputDeskPro386 = {
-        0x48: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER3, port, addrFrom); },
-        0x49: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER4, port, addrFrom); },
-        0x4A: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER5, port, addrFrom); },
-        0x4B: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimerCtrl(ChipSet.PIT1.INDEX, port, addrFrom); }
+        0x48: /** @this {ChipSet} */ function inPort48(port, addrFrom) { return this.inTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER3, port, addrFrom); },
+        0x49: /** @this {ChipSet} */ function inPort49(port, addrFrom) { return this.inTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER4, port, addrFrom); },
+        0x4A: /** @this {ChipSet} */ function inPort4A(port, addrFrom) { return this.inTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER5, port, addrFrom); },
+        0x4B: /** @this {ChipSet} */ function inPort4B(port, addrFrom) { return this.inTimerCtrl(ChipSet.PIT1.INDEX, port, addrFrom); }
     };
 }
 
@@ -6107,12 +6147,12 @@ if (DESKPRO386) {
  * Port output notification tables, starting with the one that's common to all models (aPortOutput)
  */
 ChipSet.aPortOutput = {
-    0x20: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICLo(ChipSet.PIC0.INDEX, bOut, addrFrom); },
-    0x21: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICHi(ChipSet.PIC0.INDEX, bOut, addrFrom); },
-    0x40: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER0, port, bOut, addrFrom); },
-    0x41: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER1, port, bOut, addrFrom); },
-    0x42: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER2, port, bOut, addrFrom); },
-    0x43: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimerCtrl(ChipSet.PIT0.INDEX, port, bOut, addrFrom); },
+    0x20: /** @this {ChipSet} */ function outPort20(port, bOut, addrFrom) { this.outPICLo(ChipSet.PIC0.INDEX, bOut, addrFrom); },
+    0x21: /** @this {ChipSet} */ function outPort21(port, bOut, addrFrom) { this.outPICHi(ChipSet.PIC0.INDEX, bOut, addrFrom); },
+    0x40: /** @this {ChipSet} */ function outPort40(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER0, port, bOut, addrFrom); },
+    0x41: /** @this {ChipSet} */ function outPort41(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER1, port, bOut, addrFrom); },
+    0x42: /** @this {ChipSet} */ function outPort42(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER2, port, bOut, addrFrom); },
+    0x43: /** @this {ChipSet} */ function outPort43(port, bOut, addrFrom) { this.outTimerCtrl(ChipSet.PIT0.INDEX, port, bOut, addrFrom); },
 };
 
 ChipSet.aPortOutput4860 = {
@@ -6133,24 +6173,24 @@ ChipSet.aPortOutput5150 = {
 };
 
 ChipSet.aPortOutput5xxx = {
-    0x00: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA0.INDEX, 0, port, bOut, addrFrom); },
-    0x01: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA0.INDEX, 0, port, bOut, addrFrom); },
-    0x02: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA0.INDEX, 1, port, bOut, addrFrom); },
-    0x03: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA0.INDEX, 1, port, bOut, addrFrom); },
-    0x04: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA0.INDEX, 2, port, bOut, addrFrom); },
-    0x05: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA0.INDEX, 2, port, bOut, addrFrom); },
-    0x06: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA0.INDEX, 3, port, bOut, addrFrom); },
-    0x07: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA0.INDEX, 3, port, bOut, addrFrom); },
-    0x08: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMACmd(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
-    0x09: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAReq(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
-    0x0A: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMask(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
-    0x0B: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMode(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
-    0x0C: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAResetFF(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
-    0x0D: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMasterClear(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
-    0x81: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 2, port, bOut, addrFrom); },
-    0x82: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 3, port, bOut, addrFrom); },
-    0x83: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 1, port, bOut, addrFrom); },
-    0x87: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 0, port, bOut, addrFrom); }
+    0x00: /** @this {ChipSet} */ function outPort00(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA0.INDEX, 0, port, bOut, addrFrom); },
+    0x01: /** @this {ChipSet} */ function outPort01(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA0.INDEX, 0, port, bOut, addrFrom); },
+    0x02: /** @this {ChipSet} */ function outPort02(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA0.INDEX, 1, port, bOut, addrFrom); },
+    0x03: /** @this {ChipSet} */ function outPort03(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA0.INDEX, 1, port, bOut, addrFrom); },
+    0x04: /** @this {ChipSet} */ function outPort04(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA0.INDEX, 2, port, bOut, addrFrom); },
+    0x05: /** @this {ChipSet} */ function outPort05(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA0.INDEX, 2, port, bOut, addrFrom); },
+    0x06: /** @this {ChipSet} */ function outPort06(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA0.INDEX, 3, port, bOut, addrFrom); },
+    0x07: /** @this {ChipSet} */ function outPort07(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA0.INDEX, 3, port, bOut, addrFrom); },
+    0x08: /** @this {ChipSet} */ function outPort08(port, bOut, addrFrom) { this.outDMACmd(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
+    0x09: /** @this {ChipSet} */ function outPort09(port, bOut, addrFrom) { this.outDMAReq(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
+    0x0A: /** @this {ChipSet} */ function outPort0A(port, bOut, addrFrom) { this.outDMAMask(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
+    0x0B: /** @this {ChipSet} */ function outPort0B(port, bOut, addrFrom) { this.outDMAMode(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
+    0x0C: /** @this {ChipSet} */ function outPort0C(port, bOut, addrFrom) { this.outDMAResetFF(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
+    0x0D: /** @this {ChipSet} */ function outPort0D(port, bOut, addrFrom) { this.outDMAMasterClear(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
+    0x81: /** @this {ChipSet} */ function outPort81(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 2, port, bOut, addrFrom); },
+    0x82: /** @this {ChipSet} */ function outPort82(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 3, port, bOut, addrFrom); },
+    0x83: /** @this {ChipSet} */ function outPort83(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 1, port, bOut, addrFrom); },
+    0x87: /** @this {ChipSet} */ function outPort87(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 0, port, bOut, addrFrom); }
 };
 
 ChipSet.aPortOutput5170 = {
@@ -6159,34 +6199,34 @@ ChipSet.aPortOutput5170 = {
     0x64: ChipSet.prototype.out8042InBuffCmd,
     0x70: ChipSet.prototype.outCMOSAddr,
     0x71: ChipSet.prototype.outCMOSData,
-    0x80: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageSpare(7, port, bOut, addrFrom); },
-    0x84: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageSpare(0, port, bOut, addrFrom); },
-    0x85: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageSpare(1, port, bOut, addrFrom); },
-    0x86: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageSpare(2, port, bOut, addrFrom); },
-    0x88: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageSpare(3, port, bOut, addrFrom); },
-    0x89: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA1.INDEX, 2, port, bOut, addrFrom); },
-    0x8A: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA1.INDEX, 3, port, bOut, addrFrom); },
-    0x8B: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA1.INDEX, 1, port, bOut, addrFrom); },
-    0x8C: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageSpare(4, port, bOut, addrFrom); },
-    0x8D: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageSpare(5, port, bOut, addrFrom); },
-    0x8E: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageSpare(6, port, bOut, addrFrom); },
-    0x8F: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA1.INDEX, 0, port, bOut, addrFrom); },
-    0xA0: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICLo(ChipSet.PIC1.INDEX, bOut, addrFrom); },
-    0xA1: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICHi(ChipSet.PIC1.INDEX, bOut, addrFrom); },
-    0xC0: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA1.INDEX, 0, port, bOut, addrFrom); },
-    0xC2: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA1.INDEX, 0, port, bOut, addrFrom); },
-    0xC4: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA1.INDEX, 1, port, bOut, addrFrom); },
-    0xC6: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA1.INDEX, 1, port, bOut, addrFrom); },
-    0xC8: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA1.INDEX, 2, port, bOut, addrFrom); },
-    0xCA: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA1.INDEX, 2, port, bOut, addrFrom); },
-    0xCC: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA1.INDEX, 3, port, bOut, addrFrom); },
-    0xCE: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA1.INDEX, 3, port, bOut, addrFrom); },
-    0xD0: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMACmd(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
-    0xD2: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAReq(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
-    0xD4: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMask(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
-    0xD6: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMode(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
-    0xD8: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAResetFF(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
-    0xDA: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMasterClear(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
+    0x80: /** @this {ChipSet} */ function outPort80(port, bOut, addrFrom) { this.outDMAPageSpare(7, port, bOut, addrFrom); },
+    0x84: /** @this {ChipSet} */ function outPort84(port, bOut, addrFrom) { this.outDMAPageSpare(0, port, bOut, addrFrom); },
+    0x85: /** @this {ChipSet} */ function outPort85(port, bOut, addrFrom) { this.outDMAPageSpare(1, port, bOut, addrFrom); },
+    0x86: /** @this {ChipSet} */ function outPort86(port, bOut, addrFrom) { this.outDMAPageSpare(2, port, bOut, addrFrom); },
+    0x88: /** @this {ChipSet} */ function outPort88(port, bOut, addrFrom) { this.outDMAPageSpare(3, port, bOut, addrFrom); },
+    0x89: /** @this {ChipSet} */ function outPort89(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA1.INDEX, 2, port, bOut, addrFrom); },
+    0x8A: /** @this {ChipSet} */ function outPort8A(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA1.INDEX, 3, port, bOut, addrFrom); },
+    0x8B: /** @this {ChipSet} */ function outPort8B(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA1.INDEX, 1, port, bOut, addrFrom); },
+    0x8C: /** @this {ChipSet} */ function outPort8C(port, bOut, addrFrom) { this.outDMAPageSpare(4, port, bOut, addrFrom); },
+    0x8D: /** @this {ChipSet} */ function outPort8D(port, bOut, addrFrom) { this.outDMAPageSpare(5, port, bOut, addrFrom); },
+    0x8E: /** @this {ChipSet} */ function outPort8E(port, bOut, addrFrom) { this.outDMAPageSpare(6, port, bOut, addrFrom); },
+    0x8F: /** @this {ChipSet} */ function outPort8F(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA1.INDEX, 0, port, bOut, addrFrom); },
+    0xA0: /** @this {ChipSet} */ function outPortA0(port, bOut, addrFrom) { this.outPICLo(ChipSet.PIC1.INDEX, bOut, addrFrom); },
+    0xA1: /** @this {ChipSet} */ function outPortA1(port, bOut, addrFrom) { this.outPICHi(ChipSet.PIC1.INDEX, bOut, addrFrom); },
+    0xC0: /** @this {ChipSet} */ function outPortC0(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA1.INDEX, 0, port, bOut, addrFrom); },
+    0xC2: /** @this {ChipSet} */ function outPortC2(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA1.INDEX, 0, port, bOut, addrFrom); },
+    0xC4: /** @this {ChipSet} */ function outPortC4(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA1.INDEX, 1, port, bOut, addrFrom); },
+    0xC6: /** @this {ChipSet} */ function outPortC6(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA1.INDEX, 1, port, bOut, addrFrom); },
+    0xC8: /** @this {ChipSet} */ function outPortC8(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA1.INDEX, 2, port, bOut, addrFrom); },
+    0xCA: /** @this {ChipSet} */ function outPortCA(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA1.INDEX, 2, port, bOut, addrFrom); },
+    0xCC: /** @this {ChipSet} */ function outPortCC(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA1.INDEX, 3, port, bOut, addrFrom); },
+    0xCE: /** @this {ChipSet} */ function outPortCE(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA1.INDEX, 3, port, bOut, addrFrom); },
+    0xD0: /** @this {ChipSet} */ function outPortD0(port, bOut, addrFrom) { this.outDMACmd(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
+    0xD2: /** @this {ChipSet} */ function outPortD2(port, bOut, addrFrom) { this.outDMAReq(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
+    0xD4: /** @this {ChipSet} */ function outPortD4(port, bOut, addrFrom) { this.outDMAMask(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
+    0xD6: /** @this {ChipSet} */ function outPortD6(port, bOut, addrFrom) { this.outDMAMode(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
+    0xD8: /** @this {ChipSet} */ function outPortD8(port, bOut, addrFrom) { this.outDMAResetFF(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
+    0xDA: /** @this {ChipSet} */ function outPortDA(port, bOut, addrFrom) { this.outDMAMasterClear(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
     0xF0: ChipSet.prototype.outFPUClear,
     0xF1: ChipSet.prototype.outFPUReset
 };
@@ -6199,10 +6239,10 @@ ChipSet.aPortOutput6300 = {
 
 if (DESKPRO386) {
     ChipSet.aPortOutputDeskPro386 = {
-        0x48: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER3, port, bOut, addrFrom); },
-        0x49: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER4, port, bOut, addrFrom); },
-        0x4A: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER5, port, bOut, addrFrom); },
-        0x4B: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimerCtrl(ChipSet.PIT1.INDEX, port, bOut, addrFrom); }
+        0x48: /** @this {ChipSet} */ function outPort48(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER3, port, bOut, addrFrom); },
+        0x49: /** @this {ChipSet} */ function outPort49(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER4, port, bOut, addrFrom); },
+        0x4A: /** @this {ChipSet} */ function outPort4A(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER5, port, bOut, addrFrom); },
+        0x4B: /** @this {ChipSet} */ function outPort4B(port, bOut, addrFrom) { this.outTimerCtrl(ChipSet.PIT1.INDEX, port, bOut, addrFrom); }
     };
 }
 
