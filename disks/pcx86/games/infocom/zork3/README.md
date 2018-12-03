@@ -28,8 +28,8 @@ Related
 References
 ----------
 
-[MobyGames](http://www.mobygames.com/game/zork-iii-the-dungeon-master)
+[MobyGames](https://www.mobygames.com/game/zork-iii-the-dungeon-master)
 
-![Front Cover](http://www.mobygames.com/images/covers/l/2879-zork-iii-the-dungeon-master-dos-front-cover.jpg)
+![Front Cover](https://www.mobygames.com/images/covers/l/2879-zork-iii-the-dungeon-master-dos-front-cover.jpg)
 
-![Back Cover](http://www.mobygames.com/images/covers/l/2880-zork-iii-the-dungeon-master-dos-back-cover.jpg)
+![Back Cover](https://www.mobygames.com/images/covers/l/2880-zork-iii-the-dungeon-master-dos-back-cover.jpg)

@@ -8,7 +8,7 @@ Microsoft Pascal Compiler 4.00
 ------------------------------
 
 We do not have copies of the original distribution disks, but using the archive
-[Microsoft Pascal.ver.4.00.English.zip](http://vetusware.com/download/Microsoft%20Pascal%20Compiler%204.0/?id=11015)
+[Microsoft Pascal.ver.4.00.English.zip](https://vetusware.com/download/Microsoft%20Pascal%20Compiler%204.0/?id=11015)
 and the disk contents described in PACKING.LST, we were able to recreate the nine original 360Kb disk images.  All that
 was missing from the archive was the contents of the PATCH32 directory on Disk 9, which we were able to retrieve from the
 PATCH directory of the COMPILER1 disk from the [Microsoft C Compiler 5.10 for DOS and OS/2](/disks/pcx86/tools/microsoft/c/5.10-os2/).

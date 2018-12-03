@@ -18,7 +18,7 @@ machines:
 Leather Goddesses of Phobos (1986)
 ----------------------------------
 
-From [MobyGames](http://www.mobygames.com/game/dos/leather-goddesses-of-phobos):
+From [MobyGames](https://www.mobygames.com/game/dos/leather-goddesses-of-phobos):
 
 > The year is 1936, and suddenly the protagonist is abducted by the Leather Goddesses for the final testing in the plan which will enslave every man and woman on earth. These Leather Goddesses of Phobos are just finishing up their plans for the invasion of Earth. If the hero fails to escape and save humanity, the Leather Goddesses will turn the Earth into their pleasure dome.
   
@@ -31,10 +31,10 @@ For more classic PC software, see the PCjs collection of [IBM PC Application Dem
 References
 ----------
 
-[MobyGames](http://www.mobygames.com/game/dos/leather-goddesses-of-phobos)
+[MobyGames](https://www.mobygames.com/game/dos/leather-goddesses-of-phobos)
 
 [Internet Archive: Leather Goddesses of Phobos: Manual](https://archive.org/download/Leather_Goddesses_of_Phobos/Leather_Goddesses_of_Phobos.pdf)
 
 [Internet Archive: Leather Goddesses of Phobos: Internal Documents](https://archive.org/download/InfocomCabinetLeatherGoddessesOfPhobos/Infocom_Cabinet_Leather_Goddesses_of_Phobos.pdf)
 
-[Internet Archive: TOSEC: The Old School Emulation Center: IBM PC Compatibles: Leather Goddesses of Phobos: Disk Image](http://archive.org/download/IBM_PC_Compatibles_TOSEC_2012_04_23/IBM_PC_Compatibles_TOSEC_2012_04_23.zip/IBM%20PC%20Compatibles%20%5BTOSEC%5D%2FIBM%20PC%20Compatibles%20-%20Diskimages%20-%205.25%27%27%20%28TOSEC-v2009-09-01_CM%29%2FLeather%20Goddesses%20of%20Phobos%20%281986%29%28Infocom%29.zip)
+[Internet Archive: TOSEC: The Old School Emulation Center: IBM PC Compatibles: Leather Goddesses of Phobos: Disk Image](https://archive.org/download/IBM_PC_Compatibles_TOSEC_2012_04_23/IBM_PC_Compatibles_TOSEC_2012_04_23.zip/IBM%20PC%20Compatibles%20%5BTOSEC%5D%2FIBM%20PC%20Compatibles%20-%20Diskimages%20-%205.25%27%27%20%28TOSEC-v2009-09-01_CM%29%2FLeather%20Goddesses%20of%20Phobos%20%281986%29%28Infocom%29.zip)

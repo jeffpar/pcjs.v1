@@ -22,8 +22,8 @@ For more classic PC software, see the PCjs collection of [IBM PC Application Dem
 References
 ----------
 
-[MobyGames](http://www.mobygames.com/game/planetfall)
+[MobyGames](https://www.mobygames.com/game/planetfall)
 
-![Front Cover](http://www.mobygames.com/images/covers/l/1657-planetfall-dos-front-cover.jpg)
+![Front Cover](https://www.mobygames.com/images/covers/l/1657-planetfall-dos-front-cover.jpg)
 
-![Back Cover](http://www.mobygames.com/images/covers/l/1658-planetfall-dos-back-cover.jpg)
+![Back Cover](https://www.mobygames.com/images/covers/l/1658-planetfall-dos-back-cover.jpg)

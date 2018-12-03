@@ -2,42 +2,25 @@
   "version": "0.1.0",
   "configurations": [
     {
-      "name": "Gulp",
-      "type": "node",
+      "name": "Website (Debug)",
+      "type": "chrome",
       "request": "launch",
-      "program": "${workspaceFolder}/node_modules/gulp/bin/gulp.js",
-      "args": [],
-      "cwd": "${workspaceFolder}",
-      "stopOnEntry": true
+      "url": "http://pcjs:8088/?gort=debug",
+      "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Launch index.html (disable sourcemaps)",
+      "name": "Website (Release)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/?gort=release",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Website (Local)",
       "type": "chrome",
       "request": "launch",
       "sourceMaps": false,
       "file": "${workspaceFolder}"
-    },
-    {
-      "name": "Webserver (Debug)",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/server.js",
-      "args": [
-        "--cache",
-        "--console",
-        "--debug"
-      ]
-    },
-    {
-      "name": "Webserver (Release)",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/server.js",
-      "args": [
-        "--cache",
-        "--console",
-        "--rebuild"
-      ]
     },
     {
       "name": "Apps: PC DOS 1.00 BASIC Samples",
@@ -248,51 +231,6 @@
       "request": "launch",
       "url": "http://pcjs:8088/apps/pdp11/tapes/basic/",
       "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Bin: bin2iso.js",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/modules/shared/bin/bin2iso.js",
-      "args": ["/Volumes/Data/OneDrive/Software/Microsoft/TechNet/TechNet-CD020-TN9908.iso", "test.iso", "--debug", "--overwrite"],
-      "cwd": "${workspaceFolder}/modules/shared/bin/",
-      "stopOnEntry": false
-    },
-    {
-      "name": "Bin: diskdump MS Macro Assembler 1.00 (1982)",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/modules/diskdump/bin/diskdump",
-      "args": ["--disk=archive/MASM100.img", "--format=json", "--output=MASM100.json", "--overwrite", "--manifest"],
-      "cwd": "${workspaceFolder}/pcjs-disks/pcx86/tools/microsoft/masm/1.00/",
-      "stopOnEntry": false
-    },
-    {
-      "name": "Bin: diskdump MS-DOS Sources",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/modules/diskdump/bin/diskdump",
-      "args": ["--dir=archive/src/all/", "--format=json", "--output=MSDOS200-SRC.json", "--label=MSDOS200SRC", "--size=10000", "--normalize", "--overwrite"],
-      "cwd": "${workspaceFolder}/pcjs-disks/pcx86/dos/microsoft/2.00/",
-      "stopOnEntry": false
-    },
-    {
-      "name": "Bin: machines.js",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/modules/shared/bin/machines.js",
-      "args": ["../../../devices", "--debug"],
-      "cwd": "${workspaceFolder}/modules/shared/bin/",
-      "stopOnEntry": false
-    },
-    {
-      "name": "Bin: printf.js",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/modules/shared/bin/printf.js",
-      "args": [],
-      "cwd": "${workspaceFolder}/modules/shared/bin/",
-      "stopOnEntry": false
     },
     {
       "name": "Blog: Somebody Put a SPELL On Me",
@@ -2351,6 +2289,82 @@
       "request": "launch",
       "url": "http://pcjs:8088/disks/pcx86/windows/win95/4.00.950/debugger/",
       "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Node: bin2iso.js",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/modules/shared/bin/bin2iso.js",
+      "args": ["/Volumes/Data/OneDrive/Software/Microsoft/TechNet/TechNet-CD020-TN9908.iso", "test.iso", "--debug", "--overwrite"],
+      "cwd": "${workspaceFolder}/modules/shared/bin/",
+      "stopOnEntry": false
+    },
+    {
+      "name": "Node: diskdump [MS Macro Assembler 1.00 (1982)]",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/modules/diskdump/bin/diskdump",
+      "args": ["--disk=archive/MASM100.img", "--format=json", "--output=MASM100.json", "--overwrite", "--manifest"],
+      "cwd": "${workspaceFolder}/disks-demo/pcx86/tools/microsoft/masm/1.00/",
+      "stopOnEntry": false
+    },
+    {
+      "name": "Node: diskdump [MS-DOS Sources]",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/modules/diskdump/bin/diskdump",
+      "args": ["--dir=src", "--format=json", "--output=MSDOS2X-SRC.json", "--label=MSDOS2X", "--size=10000", "--normalize", "--overwrite"],
+      "cwd": "${workspaceFolder}/disks-demo/pcx86/dos/microsoft/2.00/",
+      "stopOnEntry": false
+    },
+    {
+      "name": "Node: gulp.js",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/gulp/bin/gulp.js",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "stopOnEntry": true
+    },
+    {
+      "name": "Node: machines.js",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/modules/shared/bin/machines.js",
+      "args": ["../../../devices", "--debug"],
+      "cwd": "${workspaceFolder}/modules/shared/bin/",
+      "stopOnEntry": false
+    },
+    {
+      "name": "Node: printf.js",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/modules/shared/bin/printf.js",
+      "args": [],
+      "cwd": "${workspaceFolder}/modules/shared/bin/",
+      "stopOnEntry": false
+    },
+    {
+      "name": "Node: server (debug)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.js",
+      "args": [
+        "--cache",
+        "--console",
+        "--debug"
+      ]
+    },
+    {
+      "name": "Node: server (release)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.js",
+      "args": [
+        "--cache",
+        "--console",
+        "--rebuild"
+      ]
     }
   ]
 }

@@ -8,7 +8,7 @@ Microsoft Multiplan 2.00
 ------------------------
 
 NOTE: The Microsoft Multiplan 2.00 disk below is *not* an original distribution disk.  It was obtained from
-[VETUSWARE](http://vetusware.com/download/Multiplan%202%20FR/?id=3417) and contains a pre-installed copy of
+[VETUSWARE](https://vetusware.com/download/Multiplan%202%20FR/?id=3417) and contains a pre-installed copy of
 `MP.COM`.  No installation files were included with the disk.
 
 The disk also includes [Microsoft Mouse 4.00](/disks/pcx86/tools/microsoft/mouse/4.00/) driver files.  They match

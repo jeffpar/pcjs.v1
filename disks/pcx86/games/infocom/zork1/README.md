@@ -31,8 +31,8 @@ Related
 References
 ----------
 
-[MobyGames](http://www.mobygames.com/game/zork-the-great-underground-empire)
+[MobyGames](https://www.mobygames.com/game/zork-the-great-underground-empire)
 
-![Front Cover](http://www.mobygames.com/images/covers/l/2934-zork-the-great-underground-empire-dos-front-cover.jpg)
+![Front Cover](https://www.mobygames.com/images/covers/l/2934-zork-the-great-underground-empire-dos-front-cover.jpg)
 
-![Back Cover](http://www.mobygames.com/images/covers/l/1742-zork-the-great-underground-empire-dos-back-cover.jpg)
+![Back Cover](https://www.mobygames.com/images/covers/l/1742-zork-the-great-underground-empire-dos-back-cover.jpg)
