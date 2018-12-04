@@ -354,7 +354,7 @@ MarkOut.aHTMLEntities = {
  *      'template' (eg, "machine.xsl")
  *      'uncompiled' (eg, true)
  *      'autoMount' (eg, {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pcx86/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}})
- *      'drives' (eg, [{name:"68Mb Hard Drive",type:4,path:"http://archive.pcjs.org/disks/pcx86/fixed/68mb/win95.json"}])
+ *      'drives' (eg, [{name:"68Mb Hard Drive",type:4,path:"http://archive.pcjs.org/disks/pcx86/fixed/68mb/WIN95.json"}])
  *      'parms'
  *
  * Non-reserved properties include:
@@ -383,7 +383,7 @@ MarkOut.aFMBooleanMachineProps = {
     'autostart': "autoStart",
     'sound': "sound"
 };
-MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'class', 'config', 'template', 'uncompiled', 'autoMount', 'drives', 'parms', 'sticky'];
+MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'class', 'config', 'template', 'uncompiled', 'autoMount', 'floppyDrives', 'drives', 'parms', 'sticky'];
 
 /**
  * convertMD()
@@ -581,7 +581,7 @@ MarkOut.prototype.convertMD = function(sIndent)
                     /*
                      * Any "non-reserved" properties are now merged into the 'parms' property; 'autoMount'
                      * is treated as reserved only because it must be encoded as an object rather than a string.
-                     * Ditto for 'drives'.
+                     * Ditto for all driveProps.
                      */
                     machine['parms'] = '{';
                     for (sProp in machine) {
@@ -603,19 +603,25 @@ MarkOut.prototype.convertMD = function(sIndent)
                             machine['parms'] += sProp + ':"' + sValue + '",';
                         }
                     }
-                    var sDrives = machine['drives'];
-                    if (sDrives) {
-                        var matchQuotes = sDrives.match(/(['"])(.*)\1/);
-                        if (matchQuotes) {
-                            sDrives = matchQuotes[2];
-                            if (!sDrives) {
-                                sDrives = '[]';
-                            } else {
-                                sDrives = sDrives.replace(/'/g, '"');
+                    machine['parms'] += 'autoMount:' + (machine['autoMount'] || "null");
+                    var driveProps = ['drives','floppyDrives'];
+                    for (iProp = 0; iProp < driveProps.length; iProp++) {
+                        sProp = driveProps[iProp];
+                        var sDrives = machine[sProp];
+                        if (sDrives) {
+                            var matchQuotes = sDrives.match(/(['"])(.*)\1/);
+                            if (matchQuotes) {
+                                sDrives = matchQuotes[2];
+                                if (!sDrives) {
+                                    sDrives = '[]';
+                                } else {
+                                    sDrives = sDrives.replace(/'/g, '"');
+                                }
                             }
                         }
+                        machine['parms'] += ',' + sProp + ':' + (sDrives || "null");
                     }
-                    machine['parms'] += 'autoMount:' + (machine['autoMount'] || "null") + ',drives:' + (sDrives || "null") + '}';
+                    machine['parms'] += '}';
                     if (id) this.aMachineDefs[id] = machine;
                 }
             }

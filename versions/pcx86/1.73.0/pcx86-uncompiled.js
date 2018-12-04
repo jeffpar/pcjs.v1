@@ -40275,6 +40275,23 @@ class ChipSet extends Component {
     }
 
     /**
+     * checkDMA(iDMAChannel)
+     *
+     * @param {number} iDMAChannel
+     * @return {number} (current transfer address; may be used by the FDC for bootstrapping tests)
+     */
+    checkDMA(iDMAChannel)
+    {
+        let iDMAC = iDMAChannel >> 2;
+        let controller = this.aDMACs[iDMAC];
+
+        let iChannel = iDMAChannel & 0x3;
+        let channel = controller.aChannels[iChannel];
+
+        return (channel.bPage << 16) | (channel.addrCurrent[1] << 8) | channel.addrCurrent[0];
+    }
+
+    /**
      * connectDMA(iDMAChannel, component, sFunction, obj)
      *
      * @param {number} iDMAChannel
@@ -63390,8 +63407,16 @@ var SectorInfo;
  *                                      are read and compared
  */
 
+/** @typedef {{ heads: number, tracks: number, boot: boolean }} */
+var DriveType;
+
+ /** @typedef {{ iDrive: number, name: string, nCylinders: number, nHeads: number, nSectors: number, cbSector: number, fBusy: boolean, fLocal: boolean, fBootable: boolean, fRemovable: boolean, nDiskCylinders: number, nDiskHeads: number, nDiskSectors: number, bHead: number, bCylinder: number, bCylinderSeek: number, bSector: number, bSectorEnd: number, nBytes: number, ibSector: number }} */
+var DriveInfo;
+
 /**
  * class FDC
+ * @property {Array.<DriveInfo>} aDrives
+ * @property {Array.<DriveType>|null} aDriveTypes
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class FDC extends Component {
@@ -63402,7 +63427,7 @@ class FDC extends Component {
      * component-specific property:
      *
      *      autoMount: one or more JSON-encoded objects, each containing 'name' and 'path' properties
-     *
+     *      drives: an array of DriveType objects, each containing 'heads', 'tracks', and 'boot' properties
      *      sortBy: "name" to sort disks by name, "path" to sort by path, or "none" to leave as-is (default is "name")
      *
      * Regarding early diskette drives: the IBM PC Model 5150 originally shipped with single-sided drives,
@@ -63439,6 +63464,15 @@ class FDC extends Component {
         this['dmaRead'] = FDC.prototype.doDMARead;
         this['dmaWrite'] = FDC.prototype.doDMAWrite;
         this['dmaFormat'] = FDC.prototype.doDMAFormat;
+
+        this.aDriveTypes = null;
+
+        /*
+         * We don't eval() sDriveTypes until initBus() is called, so that we can check for any machine overrides;
+         * note that the override, if any, must be named 'floppyDrives' to avoid conflicting with the HDC's 'drives'
+         * setting.
+         */
+        this.sDriveTypes = parmsFDC['drives'];
 
         /*
          * We record any 'autoMount' object now, but we no longer parse it until initBus(), because the Computer's
@@ -63695,6 +63729,28 @@ class FDC extends Component {
         this.dbg = dbg;
         this.cmp = cmp;
 
+        let aDriveTypes = cmp.getMachineParm('floppyDrives');
+        if (aDriveTypes) {
+            if (typeof aDriveTypes == "string") {
+                this.sDriveTypes = aDriveTypes;
+            } else {
+                this.aDriveTypes = aDriveTypes;
+                this.sDriveTypes = "";
+            }
+        }
+
+        if (this.sDriveTypes) {
+            try {
+                /*
+                 * We must take care when parsing user-supplied JSON-encoded drive data.
+                 */
+                this.aDriveTypes = eval("(" + this.sDriveTypes + ")");
+                this.sDriveTypes = "";
+            } catch (e) {
+                Component.error("FDC drive configuration error: " + e.message + " (" + this.sDriveTypes + ")");
+            }
+        }
+
         this.chipset = cmp.getMachineComponent("ChipSet");
         this.parseConfig(this.cmp.getMachineParm('autoMount'), this.configMount);
 
@@ -63940,7 +63996,7 @@ class FDC extends Component {
         /*
          * Default to the maximum number of drives unless ChipSet can give us a specific number of drives.
          */
-        this.nDrives = this.chipset? this.chipset.getDIPFloppyDrives() : 4;
+        this.nDrives = this.aDriveTypes? this.aDriveTypes.length : (this.chipset? this.chipset.getDIPFloppyDrives() : 4);
 
         /*
          * I would prefer to allocate only nDrives, but as discussed in the handling of the FDC.REG_DATA.CMD.SENSE_INT
@@ -63987,7 +64043,7 @@ class FDC extends Component {
                     break;
                 }
             }
-            if (!this.initDrive(drive, iDrive, dataDrives[iDrive])) {
+            if (!this.initDrive(drive, iDrive, this.aDriveTypes? this.aDriveTypes[iDrive] : null, dataDrives[iDrive])) {
                 fSuccess = false;
             }
         }
@@ -64034,19 +64090,20 @@ class FDC extends Component {
     }
 
     /**
-     * initDrive(drive, iDrive, data)
+     * initDrive(drive, iDrive, driveType, data)
      *
      * TODO: Consider a separate Drive class that both FDC and HDC can use, since there's a lot of commonality
      * between the drive objects created by both controllers.  This will clean up overall drive management and allow
      * us to factor out some common Drive methods (eg, advanceSector()).
      *
      * @this {FDC}
-     * @param {Object} drive
+     * @param {DriveInfo} drive
      * @param {number} iDrive
+     * @param {DriveType|null} driveType
      * @param {Array|undefined} data
      * @return {boolean} true if successful, false if failure
      */
-    initDrive(drive, iDrive, data)
+    initDrive(drive, iDrive, driveType, data)
     {
         let i = 0;
         let fSuccess = true;
@@ -64054,6 +64111,9 @@ class FDC extends Component {
         drive.iDrive = iDrive;
         drive.fBusy = drive.fLocal = false;
         drive.fnCallReady = null;
+
+        drive.fBootable = driveType && driveType['boot'];
+        if (drive.fBootable == null) drive.fBootable = true;
 
         if (data === undefined) {
             /*
@@ -65292,12 +65352,12 @@ class FDC extends Component {
             this.popCmd(FDC.TERMS.GPL);                     // GPL (spacing between sectors, excluding VCO Sync Field; 3)
             this.popCmd(FDC.TERMS.DTL);                     // DTL (when N is 0, DTL stands for the data length to read out or write into the sector)
             this.setLED(ledState);
-            if (bCmdMasked == FDC.REG_DATA.CMD.READ_DATA)
-                this.doRead(drive);
-            else
-                this.doWrite(drive);
+            if (bCmdMasked == FDC.REG_DATA.CMD.READ_DATA) {
+                fIRQ = this.doRead(drive);
+            } else {
+                fIRQ = this.doWrite(drive);
+            }
             this.pushResults(drive, bCmd, bHead, c, h, r, n);
-            fIRQ = true;
             break;
 
         case FDC.REG_DATA.CMD.RECALIBRATE:                  // 0x07
@@ -65713,6 +65773,7 @@ class FDC extends Component {
      *
      * @this {FDC}
      * @param {Object} drive
+     * @return {boolean}
      */
     doRead(drive)
     {
@@ -65730,10 +65791,16 @@ class FDC extends Component {
             drive.sector = null;
             drive.resCode = FDC.REG_DATA.RES.NONE;
             if (this.chipset) {
+                if (!drive.fBootable && !drive.bCylinder && !drive.bHead && drive.bSector == 1) {
+                    if (this.chipset.checkDMA(ChipSet.DMA_FDC) == 0x7C00) {
+                        return false;
+                    }
+                }
                 this.chipset.connectDMA(ChipSet.DMA_FDC, this, 'dmaRead', drive);
                 this.chipset.requestDMA(ChipSet.DMA_FDC);
             }
         }
+        return true;
     }
 
     /**
@@ -65741,6 +65808,7 @@ class FDC extends Component {
      *
      * @this {FDC}
      * @param {Object} drive
+     * @return {boolean}
      */
     doWrite(drive)
     {
@@ -65752,7 +65820,7 @@ class FDC extends Component {
             }
             if (drive.disk.fWriteProtected) {
                 drive.resCode = FDC.REG_DATA.RES.NOT_WRITABLE | FDC.REG_DATA.RES.INCOMPLETE;
-                return;
+                return true;
             }
             drive.sector = null;
             drive.resCode = FDC.REG_DATA.RES.NONE;
@@ -65761,6 +65829,7 @@ class FDC extends Component {
                 this.chipset.requestDMA(ChipSet.DMA_FDC);
             }
         }
+        return true;
     }
 
     /**
@@ -66244,8 +66313,12 @@ Web.onInit(FDC.init);
  */
 
 
+/** @typedef {{ name: string, path: string, type: string, size: number, mode: string }} */
+var DriveConfig;
+
 /**
- * class HDC
+ * @class HDC
+ * @property {Array.<DriveConfig>} aDriveConfigs
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class HDC extends Component {
@@ -66259,7 +66332,7 @@ class HDC extends Component {
      *
      * HDC supports the following component-specific properties:
      *
-     *      drives: an array of driveConfig objects, each containing 'name', 'path', 'size' and 'type' properties
+     *      drives: an array of DriveConfig objects, each containing 'name', 'path', 'type' and 'size' properties
      *      type:   either 'XT' (for the PC XT Xebec controller) or 'AT' (for the PC AT Western Digital controller)
      *
      * The 'type' parameter defaults to 'XT'.  All ports for the PC XT controller are referred to as XTC ports,
@@ -66730,7 +66803,7 @@ class HDC extends Component {
      * @this {HDC}
      * @param {number} iDrive
      * @param {Object} drive
-     * @param {Object} driveConfig (contains one or more of the following properties: 'name', 'path', 'size', 'type')
+     * @param {DriveConfig} driveConfig
      * @param {Array} [data]
      * @param {boolean} [fHard] true if a machine reset (not just a controller reset)
      * @return {boolean} true if successful, false if failure

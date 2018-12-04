@@ -1015,6 +1015,12 @@
 				<xsl:otherwise><xsl:value-of select="@autoMount"/></xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="drives">
+			<xsl:choose>
+				<xsl:when test="@drives"><xsl:value-of select="@drives"/></xsl:when>
+				<xsl:otherwise/>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:variable name="sortBy">
 			<xsl:choose>
 				<xsl:when test="@sortBy"><xsl:value-of select="@sortBy"/></xsl:when>
@@ -1024,7 +1030,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">fdc</xsl:with-param>
-			<xsl:with-param name="parms">,autoMount:'<xsl:value-of select="$autoMount"/>',sortBy:'<xsl:value-of select="$sortBy"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,autoMount:'<xsl:value-of select="$autoMount"/>',drives:'<xsl:value-of select="$drives"/>',sortBy:'<xsl:value-of select="$sortBy"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
