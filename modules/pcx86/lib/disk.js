@@ -1826,8 +1826,11 @@ class Disk extends Component {
             /*
              * The following code allows a single-sided diskette image to be reformatted (ie, "expanded")
              * as a double-sided image, provided the drive has more than one head (see drive.nHeads).
+             *
+             * NOTE: Strangely, we must ignore the number of drive heads both here and in doFormat(); otherwise,
+             * PC DOS 1.10 "FORMAT /1" will fail, even though "/1" means format it as a single-sided diskette.
              */
-            if (!track && drive.bFormatting && iHead < drive.nHeads) {
+            if (!track && drive.bFormatting && iHead < 2 /* drive.nHeads */) {
                 track = cylinder[iHead] = new Array(drive.bSectorEnd);
                 for (i = 0; i < track.length; i++) {
                     track[i] = this.initSector(null, iCylinder, iHead, i + 1, drive.nBytes, 0);

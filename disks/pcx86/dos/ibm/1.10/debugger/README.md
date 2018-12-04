@@ -6,7 +6,7 @@ machines:
   - id: ibm5150-256k
     type: pcx86
     config: /devices/pcx86/machine/5150/mda/256kb/debugger/machine.xml
-    resume: 1
+    floppyDrives: '[{heads:2},{heads:2}]'
     autoMount:
       A:
         name: PC DOS 1.10
