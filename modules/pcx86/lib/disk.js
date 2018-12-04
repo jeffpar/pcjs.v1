@@ -1828,10 +1828,11 @@ class Disk extends Component {
              * as a double-sided image, provided the drive has more than one head (see drive.nHeads).
              *
              * NOTE: Strangely, we must ignore the number of drive heads both here and in doFormat(); otherwise,
-             * PC DOS 1.10 "FORMAT /1" will fail, even though "/1" means format it as a single-sided diskette.
+             * PC DOS 1.10 "FORMAT /1" will fail.  Even though "/1" means format as a single-sided diskette, FORMAT
+             * still attempts to format the first track with head 1.
              */
             if (!track && drive.bFormatting && iHead < 2 /* drive.nHeads */) {
-                track = cylinder[iHead] = new Array(drive.bSectorEnd);
+                track = new Array(drive.bSectorEnd);
                 for (i = 0; i < track.length; i++) {
                     track[i] = this.initSector(null, iCylinder, iHead, i + 1, drive.nBytes, 0);
                 }
@@ -1840,7 +1841,10 @@ class Disk extends Component {
                  * will receive the same "expanded" treatment, but functions like getSector() rely on instance
                  * properties (eg, this.nHeads), on the assumption that the disk's geometry is homogeneous.
                  */
-                if (this.nHeads <= iHead) this.nHeads = iHead + 1;
+                if (iHead < drive.nHeads) {
+                    cylinder[iHead] = track;
+                    this.nHeads = iHead + 1;
+                }
             }
             if (track) {
                 for (i = 0; i < track.length; i++) {
