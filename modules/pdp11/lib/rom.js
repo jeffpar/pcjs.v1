@@ -280,7 +280,7 @@ class ROMPDP11 extends Component {
                 [addr]: [ROMPDP11.prototype.readROMByte, ROMPDP11.prototype.writeROMByte, null, null, null, this.sizeROM >> 1]
             };
             if (this.bus.addIOTable(this, IOTable)) {
-                this.status("Added " + this.sizeROM + "-byte ROM at " + Str.toOct(addr));
+                this.status("Added %d-byte ROM at %o", this.sizeROM, addr);
                 this.fRetainROM = true;
                 return true;
             }
