@@ -26,6 +26,7 @@ The following optional machine properties will be added to the 'parms' property:
     'autoStart' (eg: true)
     'autoType' (eg: $date\r$time\r)
     'drives' (eg: '[{name:"68Mb Hard Disk",type:4,path:"/disks-demo/pcx86/drives/68mb/WIN95.json"}]')
+    'floppyDrives' (eg: '[{boot:false}]')
     'resume' (eg: 1)
     'sound' (eg: true)
     'state' (eg: state.json)
@@ -116,6 +117,15 @@ The following optional machine properties will be added to the 'parms' property:
   {%- else -%}
     {%- assign machine_drives = "" -%}
   {%- endif -%}
+  {%- if machine.floppyDrives != nil -%}
+    {%- if machine.floppyDrives == "" -%}
+      {%- assign machine_floppies = ",floppyDrives:[]" -%}
+    {%- else -%}
+      {%- capture machine_floppies -%},floppyDrives:{{ machine.floppyDrives }}{%- endcapture -%}
+    {%- endif -%}
+  {%- else -%}
+    {%- assign machine_floppies = "" -%}
+  {%- endif -%}
   {%- if machine.connection == nil -%}
     {%- assign machine_connection = "" -%}
   {%- else -%}
@@ -126,7 +136,7 @@ The following optional machine properties will be added to the 'parms' property:
   {%- else -%}
     {%- assign machine_template = machine.template -%}
   {%- endunless -%}
-  {%- capture machine_parms -%}{{ site.left_brace }}{{ machine_autoMount }}{{ machine_autoScript }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_drives }}{{ machine_resume }}{{ machine_sound }}{{ machine_state }}{{ machine_testRAM }}{{ machine_commands }}{{ machine_messages }}{{ machine_connection }}{{ site.right_brace }}{%- endcapture -%}
+  {%- capture machine_parms -%}{{ site.left_brace }}{{ machine_autoMount }}{{ machine_autoScript }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_floppies }}{{ machine_drives }}{{ machine_resume }}{{ machine_sound }}{{ machine_state }}{{ machine_testRAM }}{{ machine_commands }}{{ machine_messages }}{{ machine_connection }}{{ site.right_brace }}{%- endcapture -%}
   {%- if site.pcjs.compiled == true and machine.uncompiled != true -%}
     {% capture page_script %}
     <script src="{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/{{ machine_type }}.js"></script>
