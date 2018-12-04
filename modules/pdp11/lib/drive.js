@@ -776,7 +776,7 @@ class DriveController extends Component {
             sDiskPath = window.prompt("Enter the URL of a remote disk image.", "") || "";
             if (!sDiskPath) return false;
             sDiskName = Str.getBaseName(sDiskPath);
-            this.status("Attempting to load " + sDiskPath + " as \"" + sDiskName + "\"");
+            this.status('Attempting to load %s as "%s"', sDiskPath, sDiskName);
             this.sDiskSource = DriveController.SOURCE.REMOTE;
         }
         else {
@@ -870,7 +870,7 @@ class DriveController extends Component {
                 this.notice(this.type + " busy");
             }
             else {
-                // this.status("disk queued: " + sDiskName);
+                // this.status("disk queued: %s", sDiskName);
                 drive.fBusy = true;
                 if (fAutoMount) {
                     drive.fAutoMount = true;

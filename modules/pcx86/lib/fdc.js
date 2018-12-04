@@ -719,7 +719,9 @@ class FDC extends Component {
          * how many drives are actually installed.  We still rely upon nDrives to determine the number of drives displayed
          * to the user, however.
          */
+        let fInit = false;
         if (this.aDrives === undefined) {
+            fInit = true;
             this.aDrives = new Array(4);
         }
 
@@ -758,7 +760,7 @@ class FDC extends Component {
                     break;
                 }
             }
-            if (!this.initDrive(drive, iDrive, this.aDriveTypes? this.aDriveTypes[iDrive] : null, dataDrives[iDrive])) {
+            if (!this.initDrive(drive, iDrive, this.aDriveTypes? this.aDriveTypes[iDrive] : null, dataDrives[iDrive], fInit)) {
                 fSuccess = false;
             }
         }
@@ -774,9 +776,8 @@ class FDC extends Component {
         this.regInput = data[i++] || 0;                             // TODO: Determine if we should default to FDC.REG_INPUT.DISK_CHANGE instead of 0
         this.regControl = data[i] || FDC.REG_CONTROL.RATE500K;      // default to maximum data rate
 
-        if (DEBUG && this.messageEnabled()) {
-            this.printMessage("FDC initialized for " + this.aDrives.length + " drive(s)");
-        }
+        if (DEBUG) this.printf("FDC initialized for %d drive(s)\n", this.aDrives.length);
+
         return fSuccess;
     }
 
@@ -805,7 +806,7 @@ class FDC extends Component {
     }
 
     /**
-     * initDrive(drive, iDrive, driveType, data)
+     * initDrive(drive, iDrive, driveType, data, fInit)
      *
      * TODO: Consider a separate Drive class that both FDC and HDC can use, since there's a lot of commonality
      * between the drive objects created by both controllers.  This will clean up overall drive management and allow
@@ -816,9 +817,10 @@ class FDC extends Component {
      * @param {number} iDrive
      * @param {DriveType|null} driveType
      * @param {Array|undefined} data
+     * @param {boolean} fInit
      * @return {boolean} true if successful, false if failure
      */
-    initDrive(drive, iDrive, driveType, data)
+    initDrive(drive, iDrive, driveType, data, fInit)
     {
         let i = 0;
         let fSuccess = true;
@@ -829,6 +831,7 @@ class FDC extends Component {
 
         drive.fBootable = driveType && driveType['boot'];
         if (drive.fBootable == null) drive.fBootable = true;
+        if (fInit && !drive.fBootable) this.status("drive %d set non-bootable", iDrive);
 
         if (data === undefined) {
             /*
@@ -1318,7 +1321,7 @@ class FDC extends Component {
                 if (fAutoMount) {
                     drive.fAutoMount = true;
                     this.cAutoMount++;
-                    if (this.messageEnabled()) this.printMessage("loading diskette '" + sDisketteName + "'");
+                    this.printf("loading diskette '%s'\n", sDisketteName);
                 }
                 drive.fLocal = !!file;
                 let disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
@@ -1692,15 +1695,11 @@ class FDC extends Component {
         for (i = 0; i < this.aDiskHistory.length; i++) {
             if (this.aDiskHistory[i][1] == sDiskettePath) {
                 let nChanges = disk.restore(this.aDiskHistory[i][2]);
-                if (DEBUG && this.messageEnabled()) {
-                    this.printMessage("disk '" + sDisketteName + "' restored from history (" + nChanges + " changes)");
-                }
+                if (DEBUG) this.printf("disk '%s' restored from history (%d changes)\n", sDisketteName, nChanges);
                 return;
             }
         }
-        if (DEBUG && this.messageEnabled()) {
-            this.printMessage("disk '" + sDisketteName + "' added to history (nothing to restore)");
-        }
+        if (DEBUG) this.printf("disk '%s' added to history (nothing to restore)\n", sDisketteName);
         this.aDiskHistory[i] = [sDisketteName, sDiskettePath, []];
     }
 
@@ -1717,15 +1716,11 @@ class FDC extends Component {
         for (i = 0; i < this.aDiskHistory.length; i++) {
             if (this.aDiskHistory[i][1] == sDiskettePath) {
                 this.aDiskHistory.splice(i, 1);
-                if (DEBUG && this.messageEnabled()) {
-                    this.printMessage("disk '" + sDisketteName + "' removed from history");
-                }
+                if (DEBUG) this.printf("disk '%s' removed from history\n", sDisketteName);
                 return;
             }
         }
-        if (DEBUG && this.messageEnabled()) {
-            this.printMessage("unable to remove disk '" + sDisketteName + "' from history (" + sDiskettePath + ")");
-        }
+        if (DEBUG) this.printf("unable to remove disk '%s' from history (%s)\n", sDisketteName, sDiskettePath);
     }
 
     /**
@@ -1742,9 +1737,7 @@ class FDC extends Component {
         for (i = 0; i < this.aDiskHistory.length; i++) {
             if (this.aDiskHistory[i][1] == sDiskettePath) {
                 this.aDiskHistory[i][2] = disk.save();
-                if (DEBUG && this.messageEnabled()) {
-                    this.printMessage("disk '" + sDisketteName + "' updated in history");
-                }
+                if (DEBUG) this.printf("disk '%s' updated in history\n", sDisketteName);
                 return;
             }
         }
@@ -1754,9 +1747,7 @@ class FDC extends Component {
          * unload, and then reload/remount.  And since unloadDrive's normal behavior is to call updateDiskHistory()
          * before unloading, the fact that the disk is no longer listed here can't be treated as an error.
          */
-        if (DEBUG && this.messageEnabled()) {
-            this.printMessage("unable to update disk '" + sDisketteName + "' in history (" + sDiskettePath + ")");
-        }
+        if (DEBUG) this.printf("unable to update disk '%s' in history (%s)\n", sDisketteName, sDiskettePath);
     }
 
     /**
@@ -1957,8 +1948,8 @@ class FDC extends Component {
             }
             return;
         }
-        if (DEBUG && this.messageEnabled()) {
-            this.printMessage("unsupported FDC command: " + Str.toHexByte(bCmd));
+        if (DEBUG) {
+            this.printf("unsupported FDC command: %02x\n", bCmd);
             if (MAXDEBUG) this.dbg.stopCPU();
         }
     }
@@ -2192,8 +2183,8 @@ class FDC extends Component {
             break;
 
         default:
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage("unsupported FDC operation: " + Str.toHexByte(bCmd));
+            if (DEBUG) {
+                this.printf("unsupported FDC operation: %02x\n", bCmd);
                 if (MAXDEBUG) this.dbg.stopCPU();
             }
             break;
@@ -2441,7 +2432,7 @@ class FDC extends Component {
         /*
          * The DMA controller should be ASKING for data, not GIVING us data; this suggests an internal DMA miscommunication
          */
-        if (DEBUG) this.printMessage(this.idComponent + ".doDMARead(): invalid DMA acknowledgement");
+        if (DEBUG) this.printf("%s.doDMARead(): invalid DMA acknowledgement\n", this.idComponent);
         done(-1, false);
     }
 
@@ -2460,7 +2451,7 @@ class FDC extends Component {
         /*
          * The DMA controller should be GIVING us data, not ASKING for data; this suggests an internal DMA miscommunication
          */
-        if (DEBUG) this.printMessage(this.idComponent + ".doDMAWrite(): invalid DMA acknowledgement");
+        if (DEBUG) this.printf("%s.doDMAWrite(): invalid DMA acknowledgement\n", this.idComponent);
         return -1;
     }
 
@@ -2479,7 +2470,7 @@ class FDC extends Component {
         /*
          * The DMA controller should be GIVING us data, not ASKING for data; this suggests an internal DMA miscommunication
          */
-        if (DEBUG) this.printMessage(this.idComponent + ".doDMAFormat(): invalid DMA acknowledgement");
+        if (DEBUG) this.printf("%s.doDMAFormat(): invalid DMA acknowledgement\n", this.idComponent);
         return -1;
     }
 
@@ -2500,8 +2491,10 @@ class FDC extends Component {
         drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
 
         if (drive.disk) {
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage(this.idComponent + ".doRead(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",PBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
+            if (DEBUG) {
+                this.printf("%s.doRead(drive=%d,CHS=%x:%x:%x,PBA=%d)\n",
+                            this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector,
+                            (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1));
             }
             drive.sector = null;
             drive.resCode = FDC.REG_DATA.RES.NONE;
@@ -2530,8 +2523,10 @@ class FDC extends Component {
         drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
 
         if (drive.disk) {
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage(this.idComponent + ".doWrite(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",PBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
+            if (DEBUG) {
+                this.printf("%s.doWrite(drive=%d,CHS=%x:%x:%x,PBA=%d)\n",
+                            this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector,
+                            (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1));
             }
             if (drive.disk.fWriteProtected) {
                 drive.resCode = FDC.REG_DATA.RES.NOT_WRITABLE | FDC.REG_DATA.RES.INCOMPLETE;
@@ -2734,8 +2729,9 @@ class FDC extends Component {
             drive.bSector = drive.abFormat[2];      // R
             drive.nBytes = 128 << drive.abFormat[3];// N (0 => 128, 1 => 256, 2 => 512, 3 => 1024)
             drive.cbFormat = 0;
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage(this.idComponent + ".writeFormat(head=" + Str.toHexByte(drive.bHead) + ",cyl=" + Str.toHexByte(drive.bCylinder) + ",sec=" + Str.toHexByte(drive.bSector) + ",len=" + Str.toHexWord(drive.nBytes) + ")");
+            if (DEBUG) {
+                this.printf("%s.writeFormat(drive=%d,CHS=%x:%x:%x,len=%d)\n",
+                            this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector, drive.nBytes);
             }
             for (let i = 0; i < drive.nBytes; i++) {
                 if (this.writeData(drive, drive.bFiller) < 0) {

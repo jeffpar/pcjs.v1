@@ -227,7 +227,7 @@ class RAMPDP11 extends Component {
                 if (!this.abInit) return;
 
                 if (this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM)) {
-                    this.status('Loaded image "' + this.sFileName + '"');
+                    this.status('Loaded image "%s"', this.sFileName);
                 } else {
                     this.notice('Error loading image "' + this.sFileName + '"');
                 }

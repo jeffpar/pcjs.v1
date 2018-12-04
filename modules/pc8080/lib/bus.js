@@ -277,7 +277,7 @@ class Bus8080 extends Component {
         }
 
         if (sizeLeft <= 0) {
-            this.status(Math.floor(size / 1024) + "Kb " + Memory8080.TYPE.NAMES[type] + " at " + Str.toHexWord(addr));
+            this.status("%dKb %s at 0x%04X", Math.floor(size / 1024), Memory8080.TYPE.NAMES[type], addr);
             return true;
         }
 

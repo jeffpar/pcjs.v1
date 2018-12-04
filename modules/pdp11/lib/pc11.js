@@ -413,7 +413,7 @@ class PC11 extends Component {
             sTapePath = window.prompt("Enter the URL of a remote tape image.", "") || "";
             if (!sTapePath) return;
             sTapeName = Str.getBaseName(sTapePath);
-            this.status("Attempting to load " + sTapePath + " as \"" + sTapeName + "\"");
+            this.status('Attempting to load %s as "%s"', sTapePath, sTapeName);
             this.sTapeSource = PC11.SOURCE.REMOTE;
         }
         else {
@@ -449,7 +449,7 @@ class PC11 extends Component {
                 this.notice("PC11 busy");
             }
             else {
-                // this.status("tape queued: " + sTapeName);
+                // this.status("tape queued: %s", sTapeName);
                 if (fAutoMount) {
                     this.cAutoMount++;
                     if (this.messageEnabled()) this.printMessage("auto-loading tape: " + sTapeName);
@@ -728,7 +728,7 @@ class PC11 extends Component {
                 this.notice('No valid memory address for tape "' + sTapeName + '"');
                 return;
             }
-            this.status('Read tape "' + sTapeName + '"');
+            this.status('Read tape "%s"', sTapeName);
             return;
         }
 
@@ -736,7 +736,7 @@ class PC11 extends Component {
         this.aTapeData = aBytes;
         this.regPRS &= ~PDP11.PC11.PRS.ERROR;
 
-        this.status('Loaded tape "' + sTapeName + '" (' + aBytes.length + " bytes)");
+        this.status('Loaded tape "%s" (%d bytes)', sTapeName, aBytes.length);
         this.displayProgress(0);
     }
 

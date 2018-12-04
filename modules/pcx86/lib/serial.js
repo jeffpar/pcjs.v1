@@ -411,7 +411,7 @@ class SerialPort extends Component {
                             if (this.sendData) {
                                 this.fNullModem = fNullModem;
                                 this.updateStatus = exports['receiveStatus'];
-                                this.status("Connected " + this.idMachine + '.' + sSourceID + " to " + sTargetID);
+                                this.status("Connected %s.%s to %s", this.idMachine, sSourceID, sTargetID);
                                 return;
                             }
                         }
@@ -420,7 +420,7 @@ class SerialPort extends Component {
                 /*
                  * Changed from notice() to status() because sometimes a connection fails simply because one of us is a laggard.
                  */
-                this.status("Unable to establish connection: " + sConnection);
+                this.status("Unable to establish connection: %s", sConnection);
             }
         }
     }

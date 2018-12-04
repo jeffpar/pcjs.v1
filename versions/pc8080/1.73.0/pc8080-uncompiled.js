@@ -3941,17 +3941,18 @@ class Component {
     }
 
     /**
-     * status(s)
+     * status(format, ...args)
      *
      * status() is like println() but it also includes information about the component (ie, the component type),
      * which is why there is no corresponding Component.status() function.
      *
      * @this {Component}
-     * @param {string} s is the message text
+     * @param {string} format
+     * @param {...} args
      */
-    status(s)
+    status(format, ...args)
     {
-        this.println(this.type + ": " + s);
+        this.println(this.type + ": " + Str.sprintf(format, ...args));
     }
 
     /**
@@ -4994,7 +4995,7 @@ class Bus8080 extends Component {
         }
 
         if (sizeLeft <= 0) {
-            this.status(Math.floor(size / 1024) + "Kb " + Memory8080.TYPE.NAMES[type] + " at " + Str.toHexWord(addr));
+            this.status("%dKb %s at 0x%04X", Math.floor(size / 1024), Memory8080.TYPE.NAMES[type], addr);
             return true;
         }
 
@@ -17139,7 +17140,7 @@ class SerialPort8080 extends Component {
                             if (this.sendData) {
                                 this.fNullModem = fNullModem;
                                 this.updateStatus = exports['receiveStatus'];
-                                this.status("Connected " + this.idMachine + '.' + sSourceID + " to " + sTargetID);
+                                this.status("Connected %s.%s to %s", this.idMachine, sSourceID, sTargetID);
                                 return;
                             }
                         }
@@ -17148,7 +17149,7 @@ class SerialPort8080 extends Component {
                 /*
                  * Changed from notice() to status() because sometimes a connection fails simply because one of us is a laggard.
                  */
-                this.status("Unable to establish connection: " + sConnection);
+                this.status("Unable to establish connection: %s", sConnection);
             }
         }
     }

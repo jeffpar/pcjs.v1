@@ -1132,17 +1132,18 @@ class Component {
     }
 
     /**
-     * status(s)
+     * status(format, ...args)
      *
      * status() is like println() but it also includes information about the component (ie, the component type),
      * which is why there is no corresponding Component.status() function.
      *
      * @this {Component}
-     * @param {string} s is the message text
+     * @param {string} format
+     * @param {...} args
      */
-    status(s)
+    status(format, ...args)
     {
-        this.println(this.type + ": " + s);
+        this.println(this.type + ": " + Str.sprintf(format, ...args));
     }
 
     /**

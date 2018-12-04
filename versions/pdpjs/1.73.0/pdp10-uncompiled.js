@@ -3941,17 +3941,18 @@ class Component {
     }
 
     /**
-     * status(s)
+     * status(format, ...args)
      *
      * status() is like println() but it also includes information about the component (ie, the component type),
      * which is why there is no corresponding Component.status() function.
      *
      * @this {Component}
-     * @param {string} s is the message text
+     * @param {string} format
+     * @param {...} args
      */
-    status(s)
+    status(format, ...args)
     {
-        this.println(this.type + ": " + s);
+        this.println(this.type + ": " + Str.sprintf(format, ...args));
     }
 
     /**
@@ -17580,7 +17581,7 @@ class RAMPDP10 extends Component {
                 if (!this.aData) return;
 
                 if (this.loadImage(this.aData, this.addrLoad, this.addrExec, this.addrRAM)) {
-                    this.status('Loaded image "' + this.sFileName + '"');
+                    this.status('Loaded image "%s"', this.sFileName);
                 } else {
                     this.notice('Error loading image "' + this.sFileName + '"');
                 }
@@ -18002,7 +18003,7 @@ class SerialPortPDP10 extends Component {
                             if (this.sendData) {
                                 this.fNullModem = fNullModem;
                                 this.updateStatus = exports['receiveStatus'];
-                                this.status("Connected " + this.idMachine + '.' + sSourceID + " to " + sTargetID);
+                                this.status("Connected %s.%s to %s", this.idMachine, sSourceID, sTargetID);
                                 return;
                             }
                         }
@@ -18011,7 +18012,7 @@ class SerialPortPDP10 extends Component {
                 /*
                  * Changed from notice() to status() because sometimes a connection fails simply because one of us is a laggard.
                  */
-                this.status("Unable to establish connection: " + sConnection);
+                this.status("Unable to establish connection: %s", sConnection);
             }
         }
     }

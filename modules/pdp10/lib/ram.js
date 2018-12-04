@@ -222,7 +222,7 @@ class RAMPDP10 extends Component {
                 if (!this.aData) return;
 
                 if (this.loadImage(this.aData, this.addrLoad, this.addrExec, this.addrRAM)) {
-                    this.status('Loaded image "' + this.sFileName + '"');
+                    this.status('Loaded image "%s"', this.sFileName);
                 } else {
                     this.notice('Error loading image "' + this.sFileName + '"');
                 }

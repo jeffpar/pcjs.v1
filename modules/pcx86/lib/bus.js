@@ -358,8 +358,8 @@ class Bus extends Component {
             this.cpu.flushPageBlocks();
             if (!this.cpu.isRunning()) {        // allocation messages at "run time" are bit too much
                 let kb = (size / 1024)|0;
-                let sb = kb? (kb + "Kb ") : (size + " bytes ");
-                this.status(sb + Memory.TYPE.NAMES[type] + " at " + Str.toHex(addr));
+                let sb = kb? (kb + "Kb") : (size + " bytes");
+                this.status("%s %s at 0x%X", sb, Memory.TYPE.NAMES[type], addr);
             }
             return true;
         }

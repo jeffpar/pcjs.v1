@@ -261,7 +261,7 @@ class CPUStatePDP11 extends CPUPDP11 {
      */
     reset()
     {
-        this.status("Model " + this.model);
+        this.status("Model %d", this.model);
         if (this.flags.running) this.stopCPU();
         this.initCPU();
         this.resetCycles();
