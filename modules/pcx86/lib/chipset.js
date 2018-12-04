@@ -2277,6 +2277,23 @@ class ChipSet extends Component {
     }
 
     /**
+     * checkDMA(iDMAChannel)
+     *
+     * @param {number} iDMAChannel
+     * @return {number} (current transfer address; may be used by the FDC for bootstrapping tests)
+     */
+    checkDMA(iDMAChannel)
+    {
+        let iDMAC = iDMAChannel >> 2;
+        let controller = this.aDMACs[iDMAC];
+
+        let iChannel = iDMAChannel & 0x3;
+        let channel = controller.aChannels[iChannel];
+
+        return (channel.bPage << 16) | (channel.addrCurrent[1] << 8) | channel.addrCurrent[0];
+    }
+
+    /**
      * connectDMA(iDMAChannel, component, sFunction, obj)
      *
      * @param {number} iDMAChannel

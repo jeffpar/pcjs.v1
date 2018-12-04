@@ -42,7 +42,17 @@ if (NODE) {
 }
 
 /**
- * class HDC
+ * @typedef {Object} DriveConfig
+ * @property {string} name
+ * @property {string} path
+ * @property {string} type
+ * @property {number} size (for custom disk geometries; not yet implemented)
+ * @property {string} mode (for enabling on-demand disk I/O with special server APIs; not currently used)
+ */
+
+/**
+ * @class HDC
+ * @property {Array.<DriveConfig>} aDriveConfigs
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
 class HDC extends Component {
@@ -56,7 +66,7 @@ class HDC extends Component {
      *
      * HDC supports the following component-specific properties:
      *
-     *      drives: an array of driveConfig objects, each containing 'name', 'path', 'size' and 'type' properties
+     *      drives: an array of DriveConfig objects, each containing 'name', 'path', 'type' and 'size' properties
      *      type:   either 'XT' (for the PC XT Xebec controller) or 'AT' (for the PC AT Western Digital controller)
      *
      * The 'type' parameter defaults to 'XT'.  All ports for the PC XT controller are referred to as XTC ports,
@@ -527,7 +537,7 @@ class HDC extends Component {
      * @this {HDC}
      * @param {number} iDrive
      * @param {Object} drive
-     * @param {Object} driveConfig (contains one or more of the following properties: 'name', 'path', 'size', 'type')
+     * @param {DriveConfig} driveConfig
      * @param {Array} [data]
      * @param {boolean} [fHard] true if a machine reset (not just a controller reset)
      * @return {boolean} true if successful, false if failure

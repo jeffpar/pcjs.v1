@@ -7,11 +7,12 @@ machines:
     type: pcx86
     config: /devices/pcx86/machine/5170/ega/1152kb/rev1/machine.xml
     drives: '[{name:"DR DOS 6.00 (20Mb)",type:2,path:"/disks-demo/pcx86/drives/20mb/DRDOS600.json"}]'
+    floppyDrives: '[{boot:false}]'
     autoMount:
       A:
-        name: None
+        name: DR DOS 6.00 (1.2M Disk 1)
       B:
-        name: None
+        name: DR DOS 6.00 (1.2M Disk 2)
 ---
 
 Digital Research DR DOS 6.00
