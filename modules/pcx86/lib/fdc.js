@@ -116,6 +116,7 @@ if (NODE) {
   * @property {boolean} fLocal
   * @property {boolean} fBootable
   * @property {boolean} fRemovable
+  * @property {boolean} fWritable
   * @property {number} nDiskCylinders
   * @property {number} nDiskHeads
   * @property {number} nDiskSectors
@@ -329,7 +330,7 @@ class FDC extends Component {
              */
             controlSelect.onchange = function onChangeListDrives(event) {
                 let iDrive = Str.parseInt(controlSelect.value, 10);
-                if (iDrive != null) fdc.displayDiskette(iDrive);
+                if (iDrive != null) fdc.displayDiskette(iDrive, true);
             };
             return true;
 
@@ -618,10 +619,18 @@ class FDC extends Component {
                 controlOption.value = iDrive.toString();
                 controlOption.text = String.fromCharCode(0x41 + iDrive) + ":";
                 controlDrives.appendChild(controlOption);
+                /*
+                 * Add a second element for the drive that will automatically "write-protect" the selected diskette.
+                 */
+                controlOption = document.createElement("option");
+                controlOption.value = iDrive.toString();
+                controlOption.text = String.fromCharCode(0x41 + iDrive) + "*";
+                controlOption.title = "write-protected";        // NOTE: this "tooltip" attribute does not work on all browsers (eg, Chrome)
+                controlDrives.appendChild(controlOption);
             }
             if (this.nDrives > 0) {
                 controlDrives.value = "0";
-                this.displayDiskette(0);
+                this.displayDiskette(0, false);
             }
         }
     }
@@ -719,19 +728,19 @@ class FDC extends Component {
          * how many drives are actually installed.  We still rely upon nDrives to determine the number of drives displayed
          * to the user, however.
          */
-        let fInit = false;
         if (this.aDrives === undefined) {
-            fInit = true;
             this.aDrives = new Array(4);
         }
 
         for (iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+            let fInit = false;
             let drive = this.aDrives[iDrive];
             if (drive === undefined) {
                 /*
                  * The first time each drive is initialized, we query its capacity (based on switches or CMOS) and set
                  * the drive's physical limits accordingly (ie, max tracks, max heads, and max sectors/track).
                  */
+                fInit = true;
                 drive = this.aDrives[iDrive] = {};
                 let nKb = (this.chipset? this.chipset.getDIPFloppyDriveSize(iDrive) : 0);
                 switch(nKb) {
@@ -829,16 +838,21 @@ class FDC extends Component {
         drive.fBusy = drive.fLocal = false;
         drive.fnCallReady = null;
 
+        let nHeads = driveType && driveType['heads'] || 2;
         drive.fBootable = driveType && driveType['boot'];
         if (drive.fBootable == null) drive.fBootable = true;
-        if (fInit && !drive.fBootable) this.status("drive %d set non-bootable", iDrive);
+
+        if (fInit) {
+            drive.fWritable = true;
+            if (!drive.fBootable) this.status("drive %d set non-bootable", iDrive);
+        }
 
         if (data === undefined) {
             /*
              * We set a default of two heads (MODEL_5150 PCs originally shipped with single-sided drives,
              * but the ROM BIOS appears to have always supported both drive types).
              */
-            data = [FDC.REG_DATA.RES.RESET, true, 0, 2, 0];
+            data = [FDC.REG_DATA.RES.RESET, true, 0, nHeads, 0];
         }
 
         if (typeof data[1] == "boolean") {
@@ -931,18 +945,16 @@ class FDC extends Component {
         drive.nBytes = data[i++];
 
         /*
-         * We no longer reinitialize drive.disk, in order to retain previously mounted diskette across resets.
-         */
-
-        /*
          * The next group of properties are managed by worker functions (eg, doRead()) to maintain state across DMA requests.
          */
         drive.ibSector = data[i++];             // location of the next byte to be accessed in the current sector
         drive.sector = null;
 
-        if (!drive.disk) {
-            drive.sDiskettePath = "";           // ensure this is initialized to a default that displayDiskette() can deal with
-        }
+        /*
+         * We no longer reinitialize drive.disk, in order to retain previously mounted diskette across resets;
+         * however, we do ensure that sDiskettePath is initialized to a default that displayDiskette() can deal with.
+         */
+        if (!drive.disk) drive.sDiskettePath = "";
 
         let deltas = data[i++];
         if (deltas == 102) deltas = false;      // v1.02 backward-compatibility
@@ -950,7 +962,8 @@ class FDC extends Component {
         if (typeof deltas == "boolean") {
             let fLocal = deltas;
             let sDisketteName = data[i++];
-            let sDiskettePath = data[i];
+            let sDiskettePath = data[i++];
+            if (data[i] != null) drive.fWritable = data[i];
             /*
              * If we're restoring a local disk image, then the entire disk contents should be captured in aDiskHistory,
              * so all we have to do is mount a blank diskette and let disk.restore() do the rest; ie, there's nothing to
@@ -1052,7 +1065,8 @@ class FDC extends Component {
          */
         data[i++] = drive.fLocal;
         data[i++] = drive.sDisketteName;
-        data[i] = drive.sDiskettePath;
+        data[i++] = drive.sDiskettePath;
+        data[i] = drive.fWritable;
         if (DEBUG && !drive.sDiskettePath && drive.disk && drive.disk.sDiskPath) {
             Component.warning("Disk '" + drive.disk.sDiskName + "' not saved properly in drive " + drive.iDrive);
         }
@@ -1526,13 +1540,13 @@ class FDC extends Component {
     }
 
     /**
-     * displayDiskette(iDrive, fUpdateDrive)
+     * displayDiskette(iDrive, fDriveChange)
      *
      * @this {FDC}
      * @param {number} iDrive (unvalidated)
-     * @param {boolean} [fUpdateDrive] is true to update the drive list to match the specified drive (eg, the auto-mount case)
+     * @param {boolean} [fDriveChange] (true if selected drive was changed, false if selected drive should be updated)
      */
-    displayDiskette(iDrive, fUpdateDrive)
+    displayDiskette(iDrive, fDriveChange)
     {
         /*
          * First things first: validate iDrive.
@@ -1562,13 +1576,29 @@ class FDC extends Component {
                     }
                     if (i == controlDisks.options.length) controlDisks.selectedIndex = 0;
                 }
-                if (fUpdateDrive) {
+                if (fDriveChange === false) {
+                    /*
+                     * Update the selected drive to match the specified drive (and its write-protected state).
+                     */
                     for (i = 0; i < controlDrives.options.length; i++) {
                         if (Str.parseInt(controlDrives.options[i].value, 10) == drive.iDrive) {
                             if (controlDrives.selectedIndex != i) {
                                 controlDrives.selectedIndex = i;
                             }
+                            if (!drive.fWritable) controlDrives.selectedIndex++;
                             break;
+                        }
+                    }
+                }
+                else if (fDriveChange === true) {
+                    /*
+                     * Odd drive entries are asterisked (eg, "A*" rather than "A:"), providing the user with a mechanism for
+                     * automatically write-protecting all disk images mounted in the drive.
+                     */
+                    if (controlDrives.selectedIndex >= 0) {
+                        drive.fWritable = !(controlDrives.selectedIndex & 0x1);
+                        if (!drive.fWritable) {
+                            this.notice("Any diskette loaded in this drive will now be write-protected.")
                         }
                     }
                 }
@@ -2489,12 +2519,15 @@ class FDC extends Component {
          * error message is not triggered by anything we return here, but simply by BIOS commands timing out.
          */
         drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
-
         if (drive.disk) {
             if (DEBUG) {
                 this.printf("%s.doRead(drive=%d,CHS=%x:%x:%x,PBA=%d)\n",
                             this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector,
                             (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1));
+            }
+            if (drive.bHead > drive.nHeads - 1) {
+                drive.resCode = FDC.REG_DATA.RES.NO_DATA | FDC.REG_DATA.RES.INCOMPLETE;
+                return true;
             }
             drive.sector = null;
             drive.resCode = FDC.REG_DATA.RES.NONE;
@@ -2521,14 +2554,17 @@ class FDC extends Component {
     doWrite(drive)
     {
         drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
-
         if (drive.disk) {
             if (DEBUG) {
                 this.printf("%s.doWrite(drive=%d,CHS=%x:%x:%x,PBA=%d)\n",
                             this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector,
                             (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1));
             }
-            if (drive.disk.fWriteProtected) {
+            if (drive.bHead > drive.nHeads - 1) {
+                drive.resCode = FDC.REG_DATA.RES.NO_DATA | FDC.REG_DATA.RES.INCOMPLETE;
+                return true;
+            }
+            if (!drive.fWritable || drive.disk.fWriteProtected) {
                 drive.resCode = FDC.REG_DATA.RES.NOT_WRITABLE | FDC.REG_DATA.RES.INCOMPLETE;
                 return true;
             }
@@ -2560,7 +2596,15 @@ class FDC extends Component {
     doFormat(drive)
     {
         drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
-
+        /*
+         * NOTE: Strangely, we must ignore the number of drive heads both here and in seek(); otherwise,
+         * PC DOS 1.10 "FORMAT /1" will fail, even though "/1" means format it as a single-sided diskette.
+         *
+         *      if (drive.bHead > drive.nHeads - 1) {
+         *          drive.resCode = FDC.REG_DATA.RES.NO_DATA | FDC.REG_DATA.RES.INCOMPLETE;
+         *          return;
+         *      }
+         */
         if (drive.disk) {
             drive.sector = null;
             drive.resCode = FDC.REG_DATA.RES.NONE;
