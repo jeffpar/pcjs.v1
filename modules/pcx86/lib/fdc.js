@@ -838,13 +838,14 @@ class FDC extends Component {
         drive.fBusy = drive.fLocal = false;
         drive.fnCallReady = null;
 
-        let nHeads = driveType && driveType['heads'] || 2;
+        let nHeads = driveType && driveType['heads'];
         drive.fBootable = driveType && driveType['boot'];
         if (drive.fBootable == null) drive.fBootable = true;
 
         if (fInit) {
             drive.fWritable = true;
-            if (!drive.fBootable) this.status("drive %d set non-bootable", iDrive);
+            if (nHeads) this.status("drive %d configured with %d head%s", iDrive, nHeads, nHeads > 1? 's' : '');
+            if (!drive.fBootable) this.status("drive %d configured as non-bootable", iDrive);
         }
 
         if (data === undefined) {
@@ -852,7 +853,7 @@ class FDC extends Component {
              * We set a default of two heads (MODEL_5150 PCs originally shipped with single-sided drives,
              * but the ROM BIOS appears to have always supported both drive types).
              */
-            data = [FDC.REG_DATA.RES.RESET, true, 0, nHeads, 0];
+            data = [FDC.REG_DATA.RES.RESET, true, 0, nHeads || 2, 0];
         }
 
         if (typeof data[1] == "boolean") {
