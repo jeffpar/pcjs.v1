@@ -788,7 +788,7 @@ class Str {
             /*
              * Check for unrecognized types immediately, so we don't inadvertently pop any arguments.
              */
-            if ("dfjcsXx".indexOf(type) < 0) {
+            if ("dfjcsoXx".indexOf(type) < 0) {
                 buffer += aParts[iPart+1] + aParts[iPart+2] + aParts[iPart+3] + aParts[iPart+4] + type;
                 continue;
             }
@@ -805,7 +805,7 @@ class Str {
             let precision = aParts[iPart+3];
             precision = precision? +precision.substr(1) : -1;
             let prefix = aParts[iPart+4];
-            let ach = null, s;
+            let ach = null, s, radix = 0;
 
             switch(type) {
             case 'd':
@@ -869,13 +869,18 @@ class Str {
                 buffer += arg;
                 break;
 
+            case 'o':
+                radix = 8;
+                /* falls through */
+
             case 'X':
                 ach = Str.HexUpperCase;
                 /* falls through */
 
             case 'x':
-                if (!ach) ach = Str.HexLowerCase;
                 s = "";
+                if (!radix) radix = 16;
+                if (!ach) ach = Str.HexLowerCase;
                 if (typeof arg == "string") {
                     /*
                      * Since we're advised to ALWAYS pass a radix to parseInt(), we must detect explicitly
@@ -889,8 +894,8 @@ class Str {
                     arg = Number.parseInt(arg, arg.match(/(^0x|[a-f])/i)? 16 : 10);
                 }
                 do {
-                    let d = arg & 0xf;
-                    arg >>>= 4;
+                    let d = arg & (radix - 1);
+                    arg >>>= (radix == 16? 4 : 3);
                     if (flags.indexOf('0') >= 0 || s == "" || d || arg) {
                         s = ach[d] + s;
                     } else if (width) {
@@ -3651,17 +3656,18 @@ class Component {
     }
 
     /**
-     * status(s)
+     * status(format, ...args)
      *
      * status() is like println() but it also includes information about the component (ie, the component type),
      * which is why there is no corresponding Component.status() function.
      *
      * @this {Component}
-     * @param {string} s is the message text
+     * @param {string} format
+     * @param {...} args
      */
-    status(s)
+    status(format, ...args)
     {
-        this.println(this.type + ": " + s);
+        this.println(this.type + ": " + Str.sprintf(format, ...args));
     }
 
     /**

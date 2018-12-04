@@ -245,7 +245,7 @@ Bus.prototype.addMemory = function(addr, size, type)
     }
 
     if (sizeLeft <= 0) {
-        this.status(Math.floor(size / 1024) + "Kb " + Memory.TYPE.NAMES[type] + " at " + str.toHexWord(addr));
+        this.status("%dKb %s at 0x%04X", Math.floor(size / 1024), Memory.TYPE.NAMES[type], addr);
         return true;
     }
 

@@ -308,7 +308,7 @@ class BusPDP10 extends Component {
         }
 
         if (sizeLeft <= 0) {
-            this.status("Added " + (size >> 10) + "Kb " + MemoryPDP10.TYPE_NAMES[type] + " at " + Str.toOct(addr));
+            this.status("Added %dKb %s at %o", (size >> 10), MemoryPDP10.TYPE_NAMES[type], addr);
             return true;
         }
 

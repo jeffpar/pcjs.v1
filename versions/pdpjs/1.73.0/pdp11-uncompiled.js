@@ -1306,7 +1306,7 @@ class Str {
             /*
              * Check for unrecognized types immediately, so we don't inadvertently pop any arguments.
              */
-            if ("dfjcsXx".indexOf(type) < 0) {
+            if ("dfjcsoXx".indexOf(type) < 0) {
                 buffer += aParts[iPart+1] + aParts[iPart+2] + aParts[iPart+3] + aParts[iPart+4] + type;
                 continue;
             }
@@ -1323,7 +1323,7 @@ class Str {
             let precision = aParts[iPart+3];
             precision = precision? +precision.substr(1) : -1;
             let prefix = aParts[iPart+4];
-            let ach = null, s;
+            let ach = null, s, radix = 0;
 
             switch(type) {
             case 'd':
@@ -1387,13 +1387,18 @@ class Str {
                 buffer += arg;
                 break;
 
+            case 'o':
+                radix = 8;
+                /* falls through */
+
             case 'X':
                 ach = Str.HexUpperCase;
                 /* falls through */
 
             case 'x':
-                if (!ach) ach = Str.HexLowerCase;
                 s = "";
+                if (!radix) radix = 16;
+                if (!ach) ach = Str.HexLowerCase;
                 if (typeof arg == "string") {
                     /*
                      * Since we're advised to ALWAYS pass a radix to parseInt(), we must detect explicitly
@@ -1407,8 +1412,8 @@ class Str {
                     arg = Number.parseInt(arg, arg.match(/(^0x|[a-f])/i)? 16 : 10);
                 }
                 do {
-                    let d = arg & 0xf;
-                    arg >>>= 4;
+                    let d = arg & (radix - 1);
+                    arg >>>= (radix == 16? 4 : 3);
                     if (flags.indexOf('0') >= 0 || s == "" || d || arg) {
                         s = ach[d] + s;
                     } else if (width) {
@@ -4169,17 +4174,18 @@ class Component {
     }
 
     /**
-     * status(s)
+     * status(format, ...args)
      *
      * status() is like println() but it also includes information about the component (ie, the component type),
      * which is why there is no corresponding Component.status() function.
      *
      * @this {Component}
-     * @param {string} s is the message text
+     * @param {string} format
+     * @param {...} args
      */
-    status(s)
+    status(format, ...args)
     {
-        this.println(this.type + ": " + s);
+        this.println(this.type + ": " + Str.sprintf(format, ...args));
     }
 
     /**
@@ -7367,7 +7373,7 @@ class BusPDP11 extends Component {
         }
 
         if (sizeLeft <= 0) {
-            this.status("Added " + (size >> 10) + "Kb " + MemoryPDP11.TYPE_NAMES[type] + " at " + Str.toOct(addr));
+            this.status("Added %dKb %s at %o", (size >> 10), MemoryPDP11.TYPE_NAMES[type], addr);
             return true;
         }
 
@@ -12016,7 +12022,7 @@ class CPUStatePDP11 extends CPUPDP11 {
      */
     reset()
     {
-        this.status("Model " + this.model);
+        this.status("Model %d", this.model);
         if (this.flags.running) this.stopCPU();
         this.initCPU();
         this.resetCycles();
@@ -17605,7 +17611,7 @@ class ROMPDP11 extends Component {
                 [addr]: [ROMPDP11.prototype.readROMByte, ROMPDP11.prototype.writeROMByte, null, null, null, this.sizeROM >> 1]
             };
             if (this.bus.addIOTable(this, IOTable)) {
-                this.status("Added " + this.sizeROM + "-byte ROM at " + Str.toOct(addr));
+                this.status("Added %d-byte ROM at %o", this.sizeROM, addr);
                 this.fRetainROM = true;
                 return true;
             }
@@ -17908,7 +17914,7 @@ class RAMPDP11 extends Component {
                 if (!this.abInit) return;
 
                 if (this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM)) {
-                    this.status('Loaded image "' + this.sFileName + '"');
+                    this.status('Loaded image "%s"', this.sFileName);
                 } else {
                     this.notice('Error loading image "' + this.sFileName + '"');
                 }
@@ -18536,7 +18542,7 @@ class SerialPortPDP11 extends Component {
                             if (this.sendData) {
                                 this.fNullModem = fNullModem;
                                 this.updateStatus = exports['receiveStatus'];
-                                this.status("Connected " + this.idMachine + '.' + sSourceID + " to " + sTargetID);
+                                this.status("Connected %s.%s to %s", this.idMachine, sSourceID, sTargetID);
                                 return;
                             }
                         }
@@ -18545,7 +18551,7 @@ class SerialPortPDP11 extends Component {
                 /*
                  * Changed from notice() to status() because sometimes a connection fails simply because one of us is a laggard.
                  */
-                this.status("Unable to establish connection: " + sConnection);
+                this.status("Unable to establish connection: %s", sConnection);
             }
         }
     }
@@ -19438,7 +19444,7 @@ class PC11 extends Component {
             sTapePath = window.prompt("Enter the URL of a remote tape image.", "") || "";
             if (!sTapePath) return;
             sTapeName = Str.getBaseName(sTapePath);
-            this.status("Attempting to load " + sTapePath + " as \"" + sTapeName + "\"");
+            this.status('Attempting to load %s as "%s"', sTapePath, sTapeName);
             this.sTapeSource = PC11.SOURCE.REMOTE;
         }
         else {
@@ -19474,7 +19480,7 @@ class PC11 extends Component {
                 this.notice("PC11 busy");
             }
             else {
-                // this.status("tape queued: " + sTapeName);
+                // this.status("tape queued: %s", sTapeName);
                 if (fAutoMount) {
                     this.cAutoMount++;
                     if (this.messageEnabled()) this.printMessage("auto-loading tape: " + sTapeName);
@@ -19753,7 +19759,7 @@ class PC11 extends Component {
                 this.notice('No valid memory address for tape "' + sTapeName + '"');
                 return;
             }
-            this.status('Read tape "' + sTapeName + '"');
+            this.status('Read tape "%s"', sTapeName);
             return;
         }
 
@@ -19761,7 +19767,7 @@ class PC11 extends Component {
         this.aTapeData = aBytes;
         this.regPRS &= ~PDP11.PC11.PRS.ERROR;
 
-        this.status('Loaded tape "' + sTapeName + '" (' + aBytes.length + " bytes)");
+        this.status('Loaded tape "%s" (%d bytes)', sTapeName, aBytes.length);
         this.displayProgress(0);
     }
 
@@ -22002,7 +22008,7 @@ class DriveController extends Component {
             sDiskPath = window.prompt("Enter the URL of a remote disk image.", "") || "";
             if (!sDiskPath) return false;
             sDiskName = Str.getBaseName(sDiskPath);
-            this.status("Attempting to load " + sDiskPath + " as \"" + sDiskName + "\"");
+            this.status('Attempting to load %s as "%s"', sDiskPath, sDiskName);
             this.sDiskSource = DriveController.SOURCE.REMOTE;
         }
         else {
@@ -22096,7 +22102,7 @@ class DriveController extends Component {
                 this.notice(this.type + " busy");
             }
             else {
-                // this.status("disk queued: " + sDiskName);
+                // this.status("disk queued: %s", sDiskName);
                 drive.fBusy = true;
                 if (fAutoMount) {
                     drive.fAutoMount = true;
