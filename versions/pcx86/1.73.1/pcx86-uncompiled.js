@@ -64894,9 +64894,11 @@ class FDC extends Component {
                      * automatically write-protecting all disk images mounted in the drive.
                      */
                     if (controlDrives.selectedIndex >= 0) {
-                        drive.fWritable = !(controlDrives.selectedIndex & 0x1);
-                        if (!drive.fWritable) {
-                            this.notice("Any diskette loaded in this drive will now be write-protected.")
+                        if (drive.fWritable != !(controlDrives.selectedIndex & 0x1)) {
+                            drive.fWritable = !drive.fWritable;
+                            if (!drive.fWritable) {
+                                this.notice("Any diskette loaded in this drive will now be write-protected.")
+                            }
                         }
                     }
                 }
