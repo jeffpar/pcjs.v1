@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.73.1/machine.xsl"?>
 <machine id="compaq-portable-128kb" type="pcx86" border="1" pos="center" background="default">
-	<name pos="center">COMPAQ Portable with 128K</name>
+	<name pos="center">COMPAQ Portable with 128Kb RAM</name>
 	<computer id="compaq-vdu-128k" name="COMPAQ Portable"/>
 	<ram id="ramLow" addr="0x00000" test="false"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/compaq/portable/100518-001-REVB.json"/>

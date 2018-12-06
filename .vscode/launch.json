@@ -1843,6 +1843,13 @@
       "webRoot": "${workspaceFolder}"
     },
     {
+      "name": "Disks: id Software: Commander Keen",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/disks/pcx86/games/id/commander_keen/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
       "name": "Disks: id Software: Wolfenstein 3D",
       "type": "chrome",
       "request": "launch",
