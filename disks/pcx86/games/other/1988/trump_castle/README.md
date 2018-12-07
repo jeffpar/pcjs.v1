@@ -10,7 +10,7 @@ machines:
       A:
         name: PC DOS 3.30 (Disk 1)
       B:
-        name: Trump Castle 1.20 (1988)
+        name: None
     resume: 1
     autoScript: startMouse
 machineScripts:
@@ -25,7 +25,11 @@ machineScripts:
     wait FDC;
     type Keyboard "MOUSE\r";
     sleep 5000;
-    type Keyboard "B:\rTRUMP\r";
+    select FDC listDrives "A:";
+    select FDC listDisks "Trump Castle 1.20 (1988)";
+    loadDisk FDC;
+    wait FDC;
+    type Keyboard "TRUMP\r";
 ---
 
 Trump Castle (1988)
