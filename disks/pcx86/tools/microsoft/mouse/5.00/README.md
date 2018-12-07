@@ -2,6 +2,16 @@
 layout: page
 title: Microsoft Mouse 5.00
 permalink: /disks/pcx86/tools/microsoft/mouse/5.00/
+machines:
+  - id: ibm5170
+    type: pcx86
+    config: /devices/pcx86/machine/5170/ega/640kb/rev1/enhanced/machine.xml
+    autoMount:
+      A:
+        name: PC DOS 3.30 (Disk 1)
+      B:
+        name: MS Mouse 5.00 (SYSTEM)
+    autoType: \r\rB:\rMOUSE\r$40PIANO\r
 ---
 
 Microsoft Mouse 5.00
@@ -14,6 +24,8 @@ In particular, the [MS Mouse 5.00 (PROGRAM)](#directory-of-ms-mouse-500-program)
 subdirectory with a mouse driver that displays:
 
 	--- Installing Microsoft MOUSE    Device Driver v6.b4 test ---
+
+{% include machine.html id="ibm5170" %}
 
 ### Directory of MS Mouse 5.00 (SYSTEM)
 

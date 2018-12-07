@@ -42,4 +42,4 @@ is provided below.  The disk image was obtained from [WinWorld](https://winworld
 	MPMS     DEF     7261  12-31-83  12:00p
 	       25 File(s)     93184 bytes free
 
-![MS Mouse 2.00 Diskette](MSMOUSE-200--1983-12-31.jpg)
+![MS Mouse 2.00 Diskette]({{ site.demo-disks.baseurl }}/pcx86/tools/microsoft/mouse/2.00/MSMOUSE-200--1983-12-31.jpg)

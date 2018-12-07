@@ -1,17 +1,17 @@
 ---
 layout: page
-title: "PC-SIG Library 8th Edition CD-ROM (April 1990): Disks 501-1000"
-permalink: /disks/pcx86/shareware/pcsig08/501/
+title: "PC-SIG Library 8th Edition CD-ROM (April 1990): Disks 0501-1000"
+permalink: /disks/pcx86/shareware/pcsig08/0501/
 preview: https://demo-disks.pcjs.org/pcx86/shareware/pcsig12/CDROM.jpg
 machines:
   - id: pcsig08
     type: pcx86
-    config: ../machine.xml
+    config: /disks/pcx86/shareware/pcsig08/machine.xml
     resume: 1
 ---
 
-PC-SIG Library 8th Edition CD-ROM (April 1990): Disks 501-1000
---------------------------------------------------------------
+PC-SIG Library 8th Edition CD-ROM (April 1990): Disks 0501-1000
+---------------------------------------------------------------
 
 The machine below has access to all 2,121 diskette images from the PC-SIG Library 8th Edition CD-ROM (April 1990).
 The directory listings were generated from our [PCSIG08 Disk Manifest](https://demo-disks.pcjs.org/pcx86/shareware/pcsig08/manifest.xml)

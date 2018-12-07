@@ -26,7 +26,7 @@ machineScripts:
     loadDisk FDC;
     wait FDC;
     type Keyboard "MOUSE\r";
-    sleep 7000;
+    sleep 10000;
     type Keyboard "B:\rSETUP\r$50.3\r$20n\r$20y\r$20\r$20\r$20.1\r";
 ---
 
