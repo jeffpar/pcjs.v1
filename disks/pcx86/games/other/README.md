@@ -11,8 +11,16 @@ The following games have been archived for use with PCjs.
 
 ### 1984
 
-* [Wizardry I: Proving Grounds of the Mad Overlord](wizardry1/)
+* [Wizardry I: Proving Grounds of the Mad Overlord](1984/wizardry1/)
+
+### 1988
+
+* [Trump Castle](1988/trump_castle/)
+
+### 1990
+
+* [The Oregon Trail](1990/oregon_trail/)
 
 ### 1991
 
-* [Lemmings](lemmings/)
+* [Lemmings](1991/lemmings/)

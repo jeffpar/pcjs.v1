@@ -39,6 +39,7 @@ var Proc = require("../lib/proclib");
 var args = Proc.getArgs();
 
 var idAttrs = '@';
+var sRootDir = "../../..";
 
 /**
  * @typedef {Object} Machine
@@ -98,10 +99,18 @@ function processLaunch(aMachines, fDebug)
         if (machine.category) entry.name = machine.category + ": " + entry.name;
         entry.type = "chrome";
         entry.request = "launch";
-        entry.url = "http://localhost:8088" + machine.directory;
+        entry.url = "http://pcjs:8088" + machine.directory;
         entry.webRoot = '$' + "{workspaceFolder}";
         launch.configurations.push(entry);
     }
+    launch.configurations.sort(function compare(a,b) {
+        let fixName = function(s) {
+            return s.toLowerCase().replace(/^([a-z]+:) (a|an|the) (.*)$/, "$1 $3");
+        };
+        let s1 = fixName(a.name);
+        let s2 = fixName(b.name);
+        return s1 < s2? -1 : s1 > s2? 1 : 0;
+    });
     printf("%2j\n", launch);
 }
 
@@ -185,11 +194,13 @@ function processXML(aMachines, sNameCSV, fDebug)
         return;
     }
     let aConfigs = [];
+    let aMachineRefs = [];
     for (let i = 0; i < aMachines.length; i++) {
         let machine = aMachines[i];
-        let sFile = "../../.." + machine.config;
+        let sFile = sRootDir + machine.config;
         if (sFile.indexOf(".xml") > 0 && aConfigs.indexOf(sFile) < 0) {
             aConfigs.push(sFile);
+            aMachineRefs.push(i);
         }
     }
     for (let i = 0; i < aConfigs.length; i++) {
@@ -202,6 +213,7 @@ function processXML(aMachines, sNameCSV, fDebug)
                 streamCSV.write(Str.sprintf("%s%2j\n", cXML > 1? ",\n" : "", xml));
             } else {
                 printf("error: %s\n", err.message);
+                printf("  reference: %s%s%s\n", sRootDir, aMachines[aMachineRefs[i]].directory, "README.md");
             }
             if (cXML == aConfigs.length) {
                 streamCSV.end();
@@ -279,7 +291,7 @@ function readXML(xml, sNode, sFile, aTags, iTag, done, fDebug)
                         if (attrs) {
                             for (var attr in attrs) {
                                 if (attr == "ref") {
-                                    var sFileXML = "../../.." + attrs[attr];
+                                    var sFileXML = sRootDir + attrs[attr];
                                     readXML(xml, sTag, sFileXML, aTagsXML, iTagXML, done, fDebug);
                                 }
                             }

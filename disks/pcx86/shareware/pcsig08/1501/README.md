@@ -6,7 +6,7 @@ preview: https://demo-disks.pcjs.org/pcx86/shareware/pcsig12/CDROM.jpg
 machines:
   - id: pcsig08
     type: pcx86
-    config: ../machine.xml
+    config: /disks/pcx86/shareware/pcsig08/machine.xml
     resume: 1
 ---
 
@@ -23,7 +23,7 @@ the machine's drive A.  Make sure the machine has finished booting before loadin
 available [with the PCjs Debugger](debugger/).
 
 - Disks [PCSIG08: DISK0001](../) through [DISK0500](../#directory-of-pcsig08-disk0500) 
-- Disks [PCSIG08: DISK0501](../501/) through [DISK1000](../501/#directory-of-pcsig08-disk1000) 
+- Disks [PCSIG08: DISK0501](../0501/) through [DISK1000](../0501/#directory-of-pcsig08-disk1000) 
 - Disks [PCSIG08: DISK1001](../1001/) through [DISK1500](../1001/#directory-of-pcsig08-disk1500) 
 - Disks [PCSIG08: DISK1501](#directory-of-pcsig08-disk1501) through [DISK2121](#directory-of-pcsig08-disk2121) 
 
