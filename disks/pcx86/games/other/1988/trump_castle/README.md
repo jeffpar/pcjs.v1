@@ -5,7 +5,7 @@ permalink: /disks/pcx86/games/other/1988/trump_castle/
 machines:
   - id: ibm5170-trump120
     type: pcx86
-    config: /devices/pcx86/machine/5170/ega/640kb/rev1/enhanced/debugger/machine.xml
+    config: /devices/pcx86/machine/5170/ega/640kb/rev1/enhanced/machine.xml
     autoMount:
       A:
         name: PC DOS 3.30 (Disk 1)
@@ -20,11 +20,11 @@ machineScripts:
     wait Keyboard;
     sleep 1000;
     select FDC listDrives "A:";
-    select FDC listDisks "MS Mouse 5.00 (SYSTEM)";
+    select FDC listDisks "MS Mouse 6.14 (SETUP)";
     loadDisk FDC;
     wait FDC;
     type Keyboard "MOUSE\r";
-    sleep 5000;
+    sleep 2000;
     select FDC listDrives "A:";
     select FDC listDisks "Trump Castle 1.20 (1988)";
     loadDisk FDC;
