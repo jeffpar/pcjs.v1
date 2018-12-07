@@ -27,7 +27,7 @@ machineScripts:
     wait FDC;
     type Keyboard "MOUSE\r";
     sleep 10000;
-    type Keyboard "B:\rSETUP\r$50.3\r$20n\r$20y\r$20\r$20\r$20.1\r";
+    type Keyboard "B:\rSETUP\r$70.3\r$30n\r$30y\r$30\r$30\r$30\r";
 ---
 
 IBM TopView 1.00

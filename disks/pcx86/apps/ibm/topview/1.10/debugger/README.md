@@ -11,7 +11,7 @@ machines:
         name: PC DOS 2.00 (Disk 1)
       B:
         name: IBM TopView 1.10
-    autoType: $date\r$time\rB:\rSETUP\r$30$15y \r$15.1\r
+    autoType: $date\r$time\rB:\rSETUP\r$70y \r$20.1\r
 ---
 
 IBM TopView 1.10 (With Debugger)
