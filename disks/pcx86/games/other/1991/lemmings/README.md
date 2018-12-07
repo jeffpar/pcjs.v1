@@ -1,7 +1,9 @@
 ---
 layout: page
-title: Lemmings (1991)
-permalink: /disks/pcx86/games/other/lemmings/
+title: "Lemmings (1991)"
+permalink: /disks/pcx86/games/other/1991/lemmings/
+redirect_from:
+  - /disks/pcx86/games/other/lemmings/
 machines:
   - id: deskpro386
     type: pcx86

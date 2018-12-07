@@ -1078,7 +1078,8 @@
 		<disk path="/disks-game/pcx86/microsoft/flightsim/1984/FLIGHTSIM-1984.json">MS Flight Simulator (1984)</disk>
 		<disk path="/disks-game/pcx86/other/1984/wizardry1/WIZARDRY1-MASTER.json">Wizardry I - Master Disk</disk>
 		<disk path="/disks-game/pcx86/other/1984/wizardry1/WIZARDRY1-SCENARIO.json">Wizardry I - Scenario Disk</disk>
-		<disk path="/disks-game/pcx86/other/1988/gambling/TRUMP-CASTLE-120.json">Trump Castle 1.20 (1988)</disk>
+		<disk path="/disks-game/pcx86/other/1988/trump_castle/TRUMP-CASTLE-120.json">Trump Castle 1.20 (1988)</disk>
+		<disk path="/disks-game/pcx86/other/1990/oregon_trail/OREGON_TRAIL-210.json">Oregon Trail 2.1 (1990)</disk>
 		<disk path="/disks-game/pcx86/other/1991/lemmings/LEMMINGS.json">Lemmings (1991)</disk>
 	</control>
 	<control type="button" binding="loadDisk">Load</control>
