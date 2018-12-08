@@ -4,14 +4,16 @@ title: Norton Utilities 4.00
 permalink: /disks/pcx86/tools/other/norton/4.00/
 ---
 
+[Norton Utilities 4.00 (Advanced Edition)](#directory-of-norton-utilities-400-adv-disk-1) is from the PCjs private
+disk collection.  Pictures of the diskettes are provided [below](#disk-images).
+
 Norton Utilities 4.00 (Standard Edition)
 ----------------------------------------
 
 ### Directory of Norton Utilities 4.00 (Disk 1)
 
 	 Volume in drive A is NU v4.00 #1
-
-	Directory of A:\
+	 Directory of A:\
 
 	READ     ME        599 03-01-87   4:00p
 	ASK      EXE      1184 03-01-87   4:00p
@@ -40,16 +42,12 @@ Norton Utilities 4.00 (Standard Edition)
 	FILE1    BAT     11306 03-01-87   4:00p
 	MARY               618 03-01-87   4:00p
 	       26 file(s)     276696 bytes
-
-	Total files listed:
-	       26 file(s)     276696 bytes
 	                       69632 bytes free
 
 ### Directory of Norton Utilities 4.00 (Disk 2)
 
 	 Volume in drive A is NU v4.00 #2
-
-	Directory of A:\
+	 Directory of A:\
 
 	NU       EXE    102383 03-01-87   4:00p
 	QU       EXE     14552 03-01-87   4:00p
@@ -58,7 +56,61 @@ Norton Utilities 4.00 (Standard Edition)
 	NCDEMO   EXE     36490 03-01-87   4:00p
 	_FILE_0  DBD     48712 03-01-87   4:00p
 	        6 file(s)     213948 bytes
-
-	Total files listed:
-	        6 file(s)     213948 bytes
 	                      146432 bytes free
+
+Norton Utilities 4.00 (Advanced Edition)
+----------------------------------------
+
+### Directory of Norton Utilities 4.00 Adv (Disk 1)
+
+	 Volume in drive A is NU v4.00 #1
+	 Directory of A:\
+
+	ASK      EXE      1184 05-15-87   4:00p
+	BEEP     EXE      6108 05-15-87   4:00p
+	DS       EXE     26672 05-15-87   4:00p
+	DT       EXE     17782 05-15-87   4:00p
+	FA       EXE      7346 05-15-87   4:00p
+	FF       EXE      7940 05-15-87   4:00p
+	FI       EXE     15178 05-15-87   4:00p
+	FS       EXE      8560 05-15-87   4:00p
+	LD       EXE      8804 05-15-87   4:00p
+	LP       EXE     11722 05-15-87   4:00p
+	NCD      EXE     20438 05-15-87   4:00p
+	NI       EXE     36546 05-15-87   4:00p
+	SA       EXE      4504 05-15-87   4:00p
+	SI       EXE     14944 05-15-87   4:00p
+	TM       EXE      6232 05-15-87   4:00p
+	TS       EXE     17378 05-15-87   4:00p
+	UD       EXE     15788 05-15-87   4:00p
+	VL       EXE      7454 05-15-87   4:00p
+	WIPEDISK EXE     10710 05-15-87   4:00p
+	WIPEFILE EXE     11578 05-15-87   4:00p
+	NU       HLP     10897 05-15-87   4:00p
+	FILEINFO FI       2678 05-15-87   4:00p
+	NUDEMO   BAT      4912 05-15-87   4:00p
+	FILE1    BAT     11306 05-15-87   4:00p
+	MARY               618 05-15-87   4:00p
+	READ     ME       1986 05-15-87   4:00p
+	       26 file(s)     289265 bytes
+	                       60416 bytes free
+
+### Directory of Norton Utilities 4.00 Adv (Disk 2)
+
+	 Volume in drive A is NU v4.00 #2
+	 Directory of A:\
+
+	NU       EXE    107278 05-15-87   4:00p
+	QU       EXE     14546 05-15-87   4:00p
+	NU       HLP     10897 05-15-87   4:00p
+	NCDEMO   EXE     36490 05-15-87   4:00p
+	_FILE_0  DBD     48712 05-15-87   4:00p
+	TUTORIAL NTS       914 05-15-87   4:00p
+	        6 file(s)     218837 bytes
+	                      141312 bytes free
+
+### Disk Images
+
+![Norton Utilities 4.00 Adv (Disk 1)]({{ site.demo-disks.baseurl }}/pcx86/tools/other/norton/4.00/NU400-ADV-DISK1.jpg)
+
+![Norton Utilities 4.00 Adv (Disk 2)]({{ site.demo-disks.baseurl }}/pcx86/tools/other/norton/4.00/NU400-ADV-DISK2.jpg)

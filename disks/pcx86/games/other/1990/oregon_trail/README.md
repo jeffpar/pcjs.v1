@@ -5,13 +5,12 @@ permalink: /disks/pcx86/games/other/1990/oregon_trail/
 machines:
   - id: ibm5170-oregon21
     type: pcx86
-    config: /devices/pcx86/machine/5170/ega/640kb/rev1/enhanced/machine.xml
+    config: /devices/pcx86/machine/5170/vga/2048kb/debugger/machine.xml
     autoMount:
       A:
         name: PC DOS 3.30 (Disk 1)
       B:
         name: Oregon Trail 2.1 (1990)
-    resume: 1
     autoType: \r\rB:\rOREGON\r
 ---
 
