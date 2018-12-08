@@ -467,6 +467,7 @@ class Card extends Controller {
             this.nCyclesVertActive = (this.nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame)|0;
             this.nCyclesVertPeriod = (this.nCyclesVertActive / (monitorSpecs.percentVertActive / 100))|0;
             this.nCyclesVertRetrace = (data[7] || 0);
+            this.nCountVertRetrace = 0;
         }
     }
 
@@ -1431,7 +1432,7 @@ Card.ATC = {
 if (DEBUGGER) {
     Card.ATC.REGS = [
         "ATC00","ATC01","ATC02","ATC03","ATC04","ATC05","ATC06","ATC07",
-        "ATC08","ATC09","ATC0A","ATC0B","ATC0C","ATC0D","ATC0E","ATC0F", "ATCMODE","OVERSCAN","PLANES","HPAN"];
+        "ATC08","ATC09","ATC0A","ATC0B","ATC0C","ATC0D","ATC0E","ATC0F", "ATCMODE","OVERSCAN","PLANES","HPAN","COLORSEL"];
 }
 
 /*
@@ -3466,6 +3467,27 @@ class Video extends Component {
                 let video = this;
                 this.timerRetrace = this.cpu.addTimer(this.id, function startVerticalRetrace() {
                     let card = video.cardActive;
+                    /*
+                     * The following code is a work-around for IBM's VGA diagnostic code starting at C000:01E5,
+                     * which expects an entire screen refresh (ie, 400 horizontal retraces followed by 1 vertical
+                     * retrace) to take roughly 1/30 of a second instead of 1/60.  The longer vertical retrace
+                     * period may be due to some idiosyncrasy of how they programmed the card beforehand, I'm not
+                     * sure.  But I do know that they've turned on the SEQ.CLKMODE.SCREEN_OFF bit, so I use that
+                     * bit to trigger this work-around, which involves skipping every other (odd) vertical retrace
+                     * timeout here, and cutting the corresponding number of elapsed cycles in getRetraceBits()
+                     * by half.
+                     *
+                     * If we don't do this, then the card generates an annoying series of beeps every time the
+                     * machine resets.  TODO: Figure out why the VGA diagnostic takes more time on real hardware.
+                     */
+                    card.nCountVertRetrace++;
+                    if (card.nCard === Video.CARD.VGA) {
+                        if (card.regSEQData[Card.SEQ.CLKMODE.INDX] & Card.SEQ.CLKMODE.SCREEN_OFF) {
+                            if (card.nCountVertRetrace & 1) {
+                                return;
+                            }
+                        }
+                    }
                     card.nCyclesVertRetrace = video.cpu.getCycles();
                     if (DEBUG && video.messageEnabled(Messages.VIDEO | Messages.INT)) {
                         video.printf("vertical retrace timer fired (%d cycles)\n", card.nCyclesVertRetrace);
@@ -6583,21 +6605,31 @@ class Video extends Component {
         let b = 0;
         let nCycles = this.cpu.getCycles();
         let nCyclesElapsed = nCycles - card.nCyclesVertRetrace;
-        if (nCyclesElapsed < 0) {       // perhaps the CPU decided to reset its cycle count?
+        /*
+         * The following code is a work-around for IBM's VGA diagnostic code starting at C000:01E5,
+         * which expects an entire screen refresh (ie, 400 horizontal retraces followed by 1 vertical
+         * retrace) to take roughly 1/30 of a second instead of 1/60.  The longer vertical retrace
+         * period may be due to some idiosyncrasy of how they programmed the card beforehand, I'm not
+         * sure.  But I do know that they've turned on the SEQ.CLKMODE.SCREEN_OFF bit, so I use that
+         * bit to trigger this work-around, which involves cutting the number of elapsed cycles in half,
+         * as well as skipping every other (odd) vertical retrace in startVerticalRetrace().
+         */
+        if (card.nCard === Video.CARD.VGA) {
+            if (card.regSEQData[Card.SEQ.CLKMODE.INDX] & Card.SEQ.CLKMODE.SCREEN_OFF) {
+                nCyclesElapsed >>>= 1;
+            }
+        }
+        if (nCyclesElapsed < 0) {       // presumably the CPU cycle count was reset since our last call
             card.nCyclesVertRetrace = nCycles;
             nCyclesElapsed = 0;
         }
         nCyclesElapsed -= card.nCyclesVertPeriod - card.nCyclesVertActive;
         if (nCyclesElapsed < 0) {
             b |= Card.CGA.STATUS.VRETRACE | Card.CGA.STATUS.RETRACE;
-            // if (DEBUG) this.printf("vertical retrace (%d cycles)\n", nCyclesElapsed);
         } else {
             let nCyclesHorzRemain = nCyclesElapsed % card.nCyclesHorzPeriod;
             if (nCyclesHorzRemain > card.nCyclesHorzActive) {
                 b |= Card.CGA.STATUS.RETRACE;
-                // if (DEBUG) this.printf("horizontal retrace (%d cycles)\n", nCyclesElapsed);
-            } else {
-                // if (DEBUG) this.printf("no retrace (%d cycles)\n", nCyclesElapsed);
             }
         }
         return b;
@@ -8177,13 +8209,13 @@ Video.monitorSpecs[ChipSet.MONITOR.EGACOLOR] = {
 };
 
 /**
- * NOTE: The number of horizontal periods per frame (410) is dictated by the IBM VGA ROM code at C000:024A.
+ * NOTE: The number of horizontal periods per frame (400) is dictated by the IBM VGA ROM code at C000:024A.
  *
  * @type {MonitorSpecs}
  */
 Video.monitorSpecs[ChipSet.MONITOR.VGACOLOR] = {
     nHorzPeriodsPerSec: 31500,
-    nHorzPeriodsPerFrame: 410,
+    nHorzPeriodsPerFrame: 400,
     percentHorzActive: 85,
     percentVertActive: 83
 };

@@ -221,7 +221,7 @@ x1e5:	mov	dx,[0x463]		; 000001E5  8B166304  '..c.'
 
 	mov	ah,0x2			; 000001F7  B402  '..'
 ;
-;   Verify that VERT_RETRACE (bit 3) is clear occassionally...
+;   Verify that VERT_RETRACE (bit 3) is clear occasionally...
 ;
 x1f9:	xor	cx,cx			; 000001F9  33C9  '3.'
 x1fb:	in	al,dx			; 000001FB  EC  '.'
@@ -231,7 +231,7 @@ x1fb:	in	al,dx			; 000001FB  EC  '.'
 	jmp	x2aa			; 00000202  Error: VERT_RETRACE remained set
 
 ;
-;   Verify that VERT_RETRACE (bit 3) is also set occassionally...
+;   Verify that VERT_RETRACE (bit 3) is also set occasionally...
 ;
 x205:	cli				; 00000205  FA  '.'
 x206:	in	al,dx			; 00000206  EC  '.'
