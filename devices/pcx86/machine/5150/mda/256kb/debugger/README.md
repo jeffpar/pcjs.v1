@@ -1,6 +1,6 @@
 ---
 layout: page
-title: IBM PC (Model 5150, 256Kb) with Monochrome Display and Debugger
+title: IBM PC (Model 5150, 256Kb RAM) with Monochrome Display and Debugger
 permalink: /devices/pcx86/machine/5150/mda/256kb/debugger/
 machines:
   - id: ibm5150

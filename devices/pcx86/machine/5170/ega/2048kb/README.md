@@ -9,5 +9,5 @@ redirect_from:
 IBM PC AT with 2Mb RAM and Enhanced Graphics Adapter (EGA)
 ----------------------------------------------------------
 
-* [IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with Enhanced Color Display](/devices/pcx86/machine/5170/ega/2048kb/rev3/) ([Debugger](/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/), [Visualizer](/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/visual/))
-* [IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with Enhanced Color Display and VT100](/devices/pcx86/machine/5170/ega/2048kb/rev3/vt100/) ([Debuggers](/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/vt100/))
+* [IBM PC AT (8Mhz, 2Mb RAM, 20Mb Hard Disk) with Enhanced Color Display](/devices/pcx86/machine/5170/ega/2048kb/rev3/) ([Debugger](/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/), [Visualizer](/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/visual/))
+* [IBM PC AT (8Mhz, 2Mb RAM, 20Mb Hard Disk) with Enhanced Color Display and VT100](/devices/pcx86/machine/5170/ega/2048kb/rev3/vt100/) ([Debuggers](/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/vt100/))

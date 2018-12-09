@@ -4,13 +4,16 @@ title: Norton Utilities 4.00
 permalink: /disks/pcx86/tools/other/norton/4.00/
 ---
 
-[Norton Utilities 4.00 (Advanced Edition)](#directory-of-norton-utilities-400-adv-disk-1) is from the PCjs private
+Norton Utilities 4.00
+---------------------
+
+[Norton Utilities 4.00 (1987-05-15)](#directory-of-norton-utilities-400-1987-05-15-1) is from the PCjs private
 disk collection.  Pictures of the diskettes are provided [below](#disk-images).
 
-Norton Utilities 4.00 (Standard Edition)
-----------------------------------------
+Both 4.00 variations (March 1, 1987 and May 15, 1987) are Standard Edition.  The Advanced Edition included a Speed Disk
+utility and an "unformat" feature.
 
-### Directory of Norton Utilities 4.00 (Disk 1)
+### Directory of Norton Utilities 4.00 (1987-03-01 #1)
 
 	 Volume in drive A is NU v4.00 #1
 	 Directory of A:\
@@ -44,7 +47,7 @@ Norton Utilities 4.00 (Standard Edition)
 	       26 file(s)     276696 bytes
 	                       69632 bytes free
 
-### Directory of Norton Utilities 4.00 (Disk 2)
+### Directory of Norton Utilities 4.00 (1987-03-01 #2)
 
 	 Volume in drive A is NU v4.00 #2
 	 Directory of A:\
@@ -58,10 +61,7 @@ Norton Utilities 4.00 (Standard Edition)
 	        6 file(s)     213948 bytes
 	                      146432 bytes free
 
-Norton Utilities 4.00 (Advanced Edition)
-----------------------------------------
-
-### Directory of Norton Utilities 4.00 Adv (Disk 1)
+### Directory of Norton Utilities 4.00 (1987-05-15 #1)
 
 	 Volume in drive A is NU v4.00 #1
 	 Directory of A:\
@@ -95,7 +95,7 @@ Norton Utilities 4.00 (Advanced Edition)
 	       26 file(s)     289265 bytes
 	                       60416 bytes free
 
-### Directory of Norton Utilities 4.00 Adv (Disk 2)
+### Directory of Norton Utilities 4.00 (1987-05-15 #2)
 
 	 Volume in drive A is NU v4.00 #2
 	 Directory of A:\
@@ -111,6 +111,6 @@ Norton Utilities 4.00 (Advanced Edition)
 
 ### Disk Images
 
-![Norton Utilities 4.00 Adv (Disk 1)]({{ site.demo-disks.baseurl }}/pcx86/tools/other/norton/4.00/NU400-ADV-DISK1.jpg)
+![Norton Utilities 4.00 (1987-05-15 #1)]({{ site.demo-disks.baseurl }}/pcx86/tools/other/norton/4.00/NU400-1987-05-15-DISK1.jpg)
 
-![Norton Utilities 4.00 Adv (Disk 2)]({{ site.demo-disks.baseurl }}/pcx86/tools/other/norton/4.00/NU400-ADV-DISK2.jpg)
+![Norton Utilities 4.00 (1987-05-15 #2)]({{ site.demo-disks.baseurl }}/pcx86/tools/other/norton/4.00/NU400-1987-05-15-DISK2.jpg)

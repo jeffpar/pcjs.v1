@@ -457,10 +457,24 @@
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC (Model 5150, 256Kb) with Color Display",
+      "name": "Devices: IBM PC (Model 5150, 256Kb RAM) with Color Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/256kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC (Model 5150, 256Kb RAM) with Monochrome Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5150/mda/256kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC (Model 5150, 256Kb RAM) with Monochrome Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5150/mda/256kb/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
@@ -471,402 +485,402 @@
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC (Model 5150, 256Kb) with Monochrome Display",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://pcjs:8088/devices/pcx86/machine/5150/mda/256kb/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Devices: IBM PC (Model 5150, 256Kb) with Monochrome Display and Debugger",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://pcjs:8088/devices/pcx86/machine/5150/mda/256kb/debugger/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Devices: IBM PC (Model 5150, 384Kb) with Color Display and Debugger",
+      "name": "Devices: IBM PC (Model 5150, 384Kb RAM) with Color Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/384kb/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC (Model 5150, 64Kb) with Color Display",
+      "name": "Devices: IBM PC (Model 5150, 64Kb RAM) with Color Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/64kb/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC (Model 5150, 64Kb) with Color Display and Debugger",
+      "name": "Devices: IBM PC (Model 5150, 64Kb RAM) with Color Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5150/cga/64kb/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC (Model 5150, 64Kb) with Dual Displays",
+      "name": "Devices: IBM PC (Model 5150, 64Kb RAM) with Dual Displays",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5150/dual/64kb/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC (Model 5150, 64Kb) with Monochrome Display",
+      "name": "Devices: IBM PC (Model 5150, 64Kb RAM) with Monochrome Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5150/mda/64kb/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC (Model 5150, 64Kb) with Monochrome Display and Debugger",
+      "name": "Devices: IBM PC (Model 5150, 64Kb RAM) with Monochrome Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5150/mda/64kb/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (6Mhz, 1152Kb, 20Mb Drive) with Enhanced Color Display",
+      "name": "Devices: IBM PC AT (6Mhz, 1152Kb RAM, 20Mb Hard Disk) with Enhanced Color Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/1152kb/rev1/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (6Mhz, 1152Kb, 20Mb Drive) with Enhanced Color Display and Debugger",
+      "name": "Devices: IBM PC AT (6Mhz, 1152Kb RAM, 20Mb Hard Disk) with Enhanced Color Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/1152kb/rev1/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (6Mhz, 640Kb, 47Mb Drive) with Color Display",
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb RAM, 47Mb Hard Disk, 128Kb EGA) with Color Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev1/color/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (6Mhz, 640Kb, 47Mb Drive) with Color Display and Debugger",
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb RAM, 47Mb Hard Disk, 128Kb EGA) with Color Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev1/color/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (6Mhz, 640Kb, 47Mb Drive) with Enhanced Color Display",
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb RAM, 47Mb Hard Disk, 128Kb EGA) with Enhanced Color Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev1/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (6Mhz, 640Kb, 47Mb Drive) with Enhanced Color Display and Debugger",
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb RAM, 47Mb Hard Disk, 128Kb EGA) with Enhanced Color Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (6Mhz, 640Kb, 47Mb Drive) with Enhanced Color Display and TestMonitor",
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb RAM, 47Mb Hard Disk, 128Kb EGA) with Enhanced Color Display and TestMonitor",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev1/testmon/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (6Mhz, 640Kb, 47Mb Drive) with Monochrome Display",
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb RAM, 47Mb Hard Disk, 128Kb EGA) with Monochrome Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev1/mono/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (6Mhz, 640Kb, 47Mb Drive) with Monochrome Display and Debugger",
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb RAM, 47Mb Hard Disk, 128Kb EGA) with Monochrome Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev1/mono/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 1152Kb, 20Mb Drive) with EGA Display and Debugger",
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb RAM, 47Mb Hard Disk, 256Kb EGA) with Enhanced Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev1/enhanced/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (6Mhz, 640Kb RAM, 47Mb Hard Disk, 256Kb EGA) with Enhanced Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev1/enhanced/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC AT (8Mhz, 1152Kb RAM, 20Mb Hard Disk) with EGA Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/visual/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 1152Kb, 20Mb Drive) with Enhanced Color Display",
+      "name": "Devices: IBM PC AT (8Mhz, 1152Kb RAM, 20Mb Hard Disk) with Enhanced Color Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/1152kb/rev3/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 1152Kb, 20Mb Drive) with Enhanced Color Display and Debugger",
+      "name": "Devices: IBM PC AT (8Mhz, 1152Kb RAM, 20Mb Hard Disk) with Enhanced Color Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with EGA Display and Debugger",
+      "name": "Devices: IBM PC AT (8Mhz, 2Mb RAM, 20Mb Hard Disk) with EGA Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/visual/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with Enhanced Color Display",
+      "name": "Devices: IBM PC AT (8Mhz, 2Mb RAM, 20Mb Hard Disk) with Enhanced Color Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with Enhanced Color Display and Debugger",
+      "name": "Devices: IBM PC AT (8Mhz, 2Mb RAM, 20Mb Hard Disk) with Enhanced Color Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with Enhanced Color Display and VT100",
+      "name": "Devices: IBM PC AT (8Mhz, 2Mb RAM, 20Mb Hard Disk) with Enhanced Color Display and VT100",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/vt100/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with Enhanced Color Display, VT100, and Debuggers",
+      "name": "Devices: IBM PC AT (8Mhz, 2Mb RAM, 20Mb Hard Disk) with Enhanced Color Display, VT100, and Debuggers",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/vt100/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with VGA Display",
+      "name": "Devices: IBM PC AT (8Mhz, 2Mb RAM, 20Mb Hard Disk) with VGA Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/vga/2048kb/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with VGA Display and Debugger",
+      "name": "Devices: IBM PC AT (8Mhz, 2Mb RAM, 20Mb Hard Disk) with VGA Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/vga/2048kb/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 4Mb, 20Mb Drive) with VGA Display",
+      "name": "Devices: IBM PC AT (8Mhz, 4Mb RAM, 20Mb Hard Disk) with VGA Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/vga/4096kb/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 4Mb, 20Mb Drive) with VGA Display and Debugger",
+      "name": "Devices: IBM PC AT (8Mhz, 4Mb RAM, 20Mb Hard Disk) with VGA Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/vga/4096kb/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 640Kb) with CGA Display",
+      "name": "Devices: IBM PC AT (8Mhz, 640Kb RAM) with CGA Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/cga/640kb/rev3/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 640Kb) with CGA Display and Debugger",
+      "name": "Devices: IBM PC AT (8Mhz, 640Kb RAM) with CGA Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/cga/640kb/rev3/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 640Kb) with MDA Display",
+      "name": "Devices: IBM PC AT (8Mhz, 640Kb RAM) with MDA Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/mda/640kb/rev3/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 640Kb) with MDA Display and Debugger",
+      "name": "Devices: IBM PC AT (8Mhz, 640Kb RAM) with MDA Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/mda/640kb/rev3/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 640Kb, 47Mb Drive) with Enhanced Color Display",
+      "name": "Devices: IBM PC AT (8Mhz, 640Kb RAM, 47Mb Hard Disk) with Enhanced Color Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev3/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC AT (8Mhz, 640Kb, 47Mb Drive) with Enhanced Color Display and Debugger",
+      "name": "Devices: IBM PC AT (8Mhz, 640Kb RAM, 47Mb Hard Disk, 128Kb EGA) with Enhanced Color Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5170/ega/640kb/rev3/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC XT (128K EGA, 512K RAM, 10Mb Drive) with Enhanced Color Display",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/512kb/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Devices: IBM PC XT (128K EGA, 512K RAM, 10Mb Drive) with Enhanced Color Display and Debugger",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/512kb/debugger/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Devices: IBM PC XT (128K EGA, 640K RAM, 10Mb Drive) Machine Array with Enhanced Color Displays",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/640kb/array/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Devices: IBM PC XT (128K EGA, 640K RAM, 10Mb Drive) with Enhanced Color Display",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/640kb/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Devices: IBM PC XT (128K EGA, 640K RAM, 10Mb Drive) with Enhanced Color Display and Debugger",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/640kb/debugger/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Devices: IBM PC XT (256K EGA, 256K RAM, 10Mb Drive) with Color Display",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/256kb/color/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Devices: IBM PC XT (256K EGA, 256K RAM, 10Mb Drive) with Color Display and Debugger",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/256kb/color/debugger/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Devices: IBM PC XT (256K EGA, 256K RAM, 10Mb Drive) with Enhanced Color Display",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/256kb/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Devices: IBM PC XT (256K EGA, 256K RAM, 10Mb Drive) with Enhanced Color Display and Debugger",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/256kb/debugger/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Devices: IBM PC XT (256K EGA, 256K RAM, 10Mb Drive) with Monochrome Display",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/256kb/mono/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Devices: IBM PC XT (256K EGA, 256K RAM, 10Mb Drive) with Monochrome Display and Debugger",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/256kb/mono/debugger/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Devices: IBM PC XT (256K RAM, 10Mb Drive) Machine Array with Color Displays",
+      "name": "Devices: IBM PC XT (256Kb RAM, 10Mb Hard Disk) Machine Array with Color Displays",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5160/cga/256kb/array/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC XT (256K RAM, 10Mb Drive) with Color Display and Debugger",
+      "name": "Devices: IBM PC XT (256Kb RAM, 10Mb Hard Disk) with Color Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5160/cga/256kb/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC XT (256K RAM, 10Mb Drive) with Monochrome Display",
+      "name": "Devices: IBM PC XT (256Kb RAM, 10Mb Hard Disk) with Monochrome Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5160/mda/256kb/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC XT (256K RAM, 10Mb Drive) with Monochrome Display and Debugger",
+      "name": "Devices: IBM PC XT (256Kb RAM, 10Mb Hard Disk) with Monochrome Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5160/mda/256kb/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC XT (512K RAM, 10Mb Drive) with Color Display",
+      "name": "Devices: IBM PC XT (256Kb RAM, 10Mb Hard Disk, 256Kb EGA) with Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/256kb/color/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (256Kb RAM, 10Mb Hard Disk, 256Kb EGA) with Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/256kb/color/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (256Kb RAM, 256Kb EGA, 10Mb Hard Disk) with Enhanced Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/256kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (256Kb RAM, 256Kb EGA, 10Mb Hard Disk) with Enhanced Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/256kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (256Kb RAM, 256Kb EGA, 10Mb Hard Disk) with Monochrome Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/256kb/mono/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (256Kb RAM, 256Kb EGA, 10Mb Hard Disk) with Monochrome Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/256kb/mono/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (512Kb RAM, 10Mb Hard Disk) with Color Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5160/cga/512kb/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC XT (512K RAM, 10Mb Drive) with Color Display and Debugger",
+      "name": "Devices: IBM PC XT (512Kb RAM, 10Mb Hard Disk) with Color Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5160/cga/512kb/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC XT (640K RAM, 10Mb Drive) with Color Display",
+      "name": "Devices: IBM PC XT (512Kb RAM, 10Mb Hard Disk, 128Kb EGA) with Enhanced Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/512kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (512Kb RAM, 128Kb EGA, 10Mb Hard Disk) with Enhanced Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/512kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (640Kb RAM, 10Mb Hard Disk) with Color Display",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5160/cga/640kb/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC XT (640K RAM, 10Mb Drive) with Color Display and Debugger",
+      "name": "Devices: IBM PC XT (640Kb RAM, 10Mb Hard Disk) with Color Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5160/cga/640kb/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC XT (64K RAM, 10Mb Drive) with Monochrome Display and Debugger",
+      "name": "Devices: IBM PC XT (640Kb RAM, 10Mb Hard Disk, 128Kb EGA) Machine Array with Enhanced Color Displays",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/640kb/array/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (640Kb RAM, 10Mb Hard Disk, 128Kb EGA) with Enhanced Color Display and Debugger",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/640kb/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (640Kb RAM, 128Kb EGA, 10Mb Hard Disk) with Enhanced Color Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5160/ega/640kb/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (64Kb RAM, 10Mb Hard Disk) with Monochrome Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5160/mda/64kb/debugger/",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Devices: IBM PC XT (80188 CPU, 256K RAM) with Monochrome Display",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://pcjs:8088/devices/pcx86/machine/5160/mda/256kb/fake188/",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Devices: IBM PC XT (80188 CPU, 256K RAM) with Monochrome Display and Debugger",
+      "name": "Devices: IBM PC XT (80188 CPU, 256Kb RAM) with Monochrome Display and Debugger",
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/devices/pcx86/machine/5160/mda/256kb/fake188/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Devices: IBM PC XT (80188 CPU, 256Kb RAM, 10Mb Hard Disk) with Monochrome Display",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/devices/pcx86/machine/5160/mda/256kb/fake188/",
       "webRoot": "${workspaceFolder}"
     },
     {
