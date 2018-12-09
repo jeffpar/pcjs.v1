@@ -7,6 +7,6 @@ redirect_from:
 ---
 
 IBM PC with Dual Displays
----
+-------------------------
 
 * [IBM PC with Dual Displays (Monochrome and Color)](64kb/)

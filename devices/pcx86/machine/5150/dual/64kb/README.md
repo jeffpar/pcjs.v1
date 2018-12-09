@@ -1,6 +1,6 @@
 ---
 layout: page
-title: IBM PC (Model 5150, 64Kb) with Dual Displays
+title: IBM PC (Model 5150, 64Kb RAM) with Dual Displays
 permalink: /devices/pcx86/machine/5150/dual/64kb/
 machines:
   - id: ibm5150
@@ -10,8 +10,8 @@ machines:
         name: PC DOS 3.00 (Disk 1)
 ---
 
-IBM PC (Model 5150, 64Kb) with Dual Displays
---------------------------------------------
+IBM PC (Model 5150, 64Kb RAM) with Dual Displays
+------------------------------------------------
 
 The original IBM PC supported multiple display adapters.  This page demonstrates a PCjs hardware configuration with
 both a Monochrome Display connected to an MDA (Monochrome Display Adapter) and a Color Display connected to a CGA

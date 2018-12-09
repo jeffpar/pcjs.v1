@@ -1,6 +1,6 @@
 ---
 layout: page
-title: IBM PC AT (8Mhz, 1152Kb, 20Mb Drive) with Enhanced Color Display and Debugger
+title: IBM PC AT (8Mhz, 1152Kb RAM, 20Mb Hard Disk) with Enhanced Color Display and Debugger
 permalink: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/
 machines:
   - id: ibm5170

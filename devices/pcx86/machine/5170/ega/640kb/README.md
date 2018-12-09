@@ -9,8 +9,7 @@ redirect_from:
 IBM PC AT with 640Kb RAM and Enhanced Graphics Adapter (EGA)
 ------------------------------------------------------------
 
-* [IBM PC AT (6Mhz, 640Kb, Dual Floppy) with Monochrome Display](/devices/pcx86/machine/5170/ega/640kb/rev1/mono/) ([Debugger](/devices/pcx86/machine/5170/ega/640kb/rev1/mono/debugger/))
-* [IBM PC AT (6Mhz, 640Kb, Dual Floppy) with Color Display](/devices/pcx86/machine/5170/ega/640kb/rev1/color/) ([Debugger](/devices/pcx86/machine/5170/ega/640kb/rev1/color/debugger/))
-* [IBM PC AT (6Mhz, 640Kb, Dual Floppy) with Enhanced Color Display](/devices/pcx86/machine/5170/ega/640kb/rev1/) ([Debugger](/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/), [TestMonitor](/devices/pcx86/machine/5170/ega/640kb/rev1/testmon/))
-
-* [IBM PC AT (8Mhz, 640Kb, Dual Floppy) with Enhanced Color Display](/devices/pcx86/machine/5170/ega/640kb/rev3/) ([Debugger](/devices/pcx86/machine/5170/ega/640kb/rev3/debugger/))
+* [IBM PC AT (6Mhz, 640Kb RAM, Dual Floppy) with Monochrome Display](/devices/pcx86/machine/5170/ega/640kb/rev1/mono/) ([Debugger](/devices/pcx86/machine/5170/ega/640kb/rev1/mono/debugger/))
+* [IBM PC AT (6Mhz, 640Kb RAM, Dual Floppy) with Color Display](/devices/pcx86/machine/5170/ega/640kb/rev1/color/) ([Debugger](/devices/pcx86/machine/5170/ega/640kb/rev1/color/debugger/))
+* [IBM PC AT (6Mhz, 640Kb RAM, Dual Floppy) with Enhanced Color Display](/devices/pcx86/machine/5170/ega/640kb/rev1/) ([Debugger](/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/), [TestMonitor](/devices/pcx86/machine/5170/ega/640kb/rev1/testmon/))
+* [IBM PC AT (8Mhz, 640Kb RAM, Dual Floppy) with Enhanced Color Display](/devices/pcx86/machine/5170/ega/640kb/rev3/) ([Debugger](/devices/pcx86/machine/5170/ega/640kb/rev3/debugger/))

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: IBM PC XT (256K EGA, 256K RAM, 10Mb Drive) with Monochrome Display and Debugger
+title: IBM PC XT (256Kb RAM, 256Kb EGA, 10Mb Hard Disk) with Monochrome Display and Debugger
 permalink: /devices/pcx86/machine/5160/ega/256kb/mono/debugger/
 machines:
   - id: ibm5160
