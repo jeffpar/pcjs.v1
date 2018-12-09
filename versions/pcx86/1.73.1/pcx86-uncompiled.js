@@ -5397,21 +5397,21 @@ var X86 = {
         nOpCyclesMovAM:             10,
         nOpCyclesMovMA:             10,
         nOpCyclesDivBR:             80,     // range of 80-90
-        nOpCyclesDivWR:             144,    // range of 144-162
+        nOpCyclesDivWR:             124,    // range of 144-162 (lowered to produce a Norton SI performance index of 1.0)
         nOpCyclesDivBM:             86,     // range of 86-96
-        nOpCyclesDivWM:             154,    // range of 154-172
+        nOpCyclesDivWM:             134,    // range of 154-172 (lowered to produce a Norton SI performance index of 1.0)
         nOpCyclesIDivBR:            101,    // range of 101-112
-        nOpCyclesIDivWR:            165,    // range of 165-184
+        nOpCyclesIDivWR:            145,    // range of 165-184 (lowered to produce a Norton SI performance index of 1.0)
         nOpCyclesIDivBM:            107,    // range of 107-118
-        nOpCyclesIDivWM:            171,    // range of 171-190
+        nOpCyclesIDivWM:            151,    // range of 171-190 (lowered to produce a Norton SI performance index of 1.0)
         nOpCyclesMulBR:             70,     // range of 70-77
-        nOpCyclesMulWR:             113,    // range of 113-118
+        nOpCyclesMulWR:             93,     // range of 113-118 (lowered to produce a Norton SI performance index of 1.0)
         nOpCyclesMulBM:             76,     // range of 76-83
-        nOpCyclesMulWM:             124,    // range of 124-139
+        nOpCyclesMulWM:             104,    // range of 124-139 (lowered to produce a Norton SI performance index of 1.0)
         nOpCyclesIMulBR:            80,     // range of 80-98
-        nOpCyclesIMulWR:            128,    // range of 128-154
+        nOpCyclesIMulWR:            108,    // range of 128-154 (lowered to produce a Norton SI performance index of 1.0)
         nOpCyclesIMulBM:            86,     // range of 86-104
-        nOpCyclesIMulWM:            134,    // range of 134-160
+        nOpCyclesIMulWM:            114,    // range of 134-160 (lowered to produce a Norton SI performance index of 1.0)
         nOpCyclesNegR:              3,      // NEG reg, NOT reg
         nOpCyclesNegM:              16,     // NEG mem, NOT mem
         nOpCyclesOutP:              10,
