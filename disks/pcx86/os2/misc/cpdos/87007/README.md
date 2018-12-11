@@ -6,7 +6,7 @@ machines:
   - id: ibm5170
     type: pcx86
     debugger: true
-    config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/machine.xml
+    config: /devices/pcx86/machine/5170/ega/1024kb/rev3/debugger/machine.xml
     autoMount:
       A:
         name: OS/2 SIZZLE (v7.68.18)

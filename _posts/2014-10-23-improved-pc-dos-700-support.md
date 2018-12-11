@@ -19,7 +19,7 @@ PC DOS 7.00 still can't be setup from its specially-formatted 1.84Mb
 through "PC DOS 7.00 (Disk 5)", so your best bet is to boot from the 1.44Mb "PC DOS 7.00 (1.44M Boot)".
 
 Note that you must also use a fairly new 80286 machine configuration, like this
-[8Mhz IBM PC AT](/devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/),
+[8Mhz IBM PC AT](/devices/pcx86/machine/5170/ega/1024kb/rev3/debugger/),
 in order to use 1.44Mb diskette images; previous models did not support 3.5-inch diskette drives, unless they had been
 retrofitted with a newer [BIOS](/devices/pcx86/rom/5170/).
 

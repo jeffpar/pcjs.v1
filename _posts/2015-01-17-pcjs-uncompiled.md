@@ -5,11 +5,11 @@ date: 2015-01-17 11:00:00
 category: Features
 permalink: /blog/2015/01/17/
 machines:
-  - id: at-ega-1152k-rev3
+  - id: at-ega-1024k-rev3
     type: pcx86
     debugger: true
     uncompiled: true
-    config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/visual/machine.xml
+    config: /devices/pcx86/machine/5170/ega/1024kb/rev3/debugger/visual/machine.xml
 ---
 
 Most PCx86 machines on [{{ site.pcjs.domain }}](/) run with a compiled version of PCx86, which is produced
@@ -32,19 +32,19 @@ Here's what a typical Markdown file would look like:
 	...
 	machines:
 	  - type: pcx86
-	    id: at-ega-1152k-rev3
+	    id: at-ega-1024k-rev3
 	    debugger: true
 	    uncompiled: true
-	    config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/visual/machine.xml
+	    config: /devices/pcx86/machine/5170/ega/1024kb/rev3/debugger/visual/machine.xml
 	---
 	...
-	{% include machine.html id="at-ega-1152k-rev3" %}
+	{% include machine.html id="at-ega-1024k-rev3" %}
 	
 {% endraw %}
 
 In fact, that's what we've done in the Markdown file you are reading right now. 
 
-{% include machine.html id="at-ega-1152k-rev3" %}
+{% include machine.html id="at-ega-1024k-rev3" %}
 
 *[@jeffpar](https://jeffpar.com)*  
 *January 17, 2015 (Updated December 10, 2015 to reflect the new `uncompiled` property)*
