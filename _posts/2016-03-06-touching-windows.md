@@ -10,7 +10,7 @@ Yesterday, I fired up [Windows 3.1](/disks/pcx86/windows/3.10/) and played a com
 but it worked.
 
 {% comment %}[<img src="/blog/images/ipad-solitaire-small.jpg" alt="Windows Solitaire on iPad"/>](/blog/images/ipad-solitaire.jpg){% endcomment %}
-{% include screenshot.html src="/blog/images/ipad-solitaire-small.jpg" title="iPad running Solitaire on Windows 3.10" link="/blog/images/ipad-solitaire.jpg" %}
+{% include gallery-image.html src="/blog/images/ipad-solitaire-small.jpg" title="iPad running Solitaire on Windows 3.10" link="/blog/images/ipad-solitaire.jpg" %}
 
 The basic touch events are:
 

@@ -35,7 +35,7 @@ For purposes of this blog post, the term "cursor" refers to the blinking cursor 
 cards display in a text mode.  It's also known as the "hardware cursor", because the video hardware automatically
 draws it, erases it, and redraws it multiple times per second, all without any assistance from the processor.
 
-{% include screenshot.html src="/blog/images/mda-cursor-fast.gif" width="104" height="88" title="MDA Cursor (Normal Blink)" %}
+{% include gallery-image.html src="/blog/images/mda-cursor-fast.gif" width="104" height="88" title="MDA Cursor (Normal Blink)" %}
 
 However, by writing to the appropriate video card registers, the processor *does* have the ability to:
  
@@ -69,8 +69,10 @@ at least one scan line before deciding whether to draw more.
 
 Below are screenshots of the default (11-12) MDA cursor, along with a thinner (11-11) cursor.
 
-{% include screenshot.html src="/blog/images/mda-cursor-11-12.png" width="156" height="82" title="MDA Cursor 11-12" %}
-{% include screenshot.html src="/blog/images/mda-cursor-11-11.png" width="156" height="82" title="MDA Cursor 11-11" %}
+{% include gallery-begin.html %}
+{% include gallery-image.html src="/blog/images/mda-cursor-11-12.png" width="156" height="82" title="MDA Cursor 11-12" %}
+{% include gallery-image.html src="/blog/images/mda-cursor-11-11.png" width="156" height="82" title="MDA Cursor 11-11" %}
+{% include gallery-end.html %}
 
 ### Cursor Visibility
 
@@ -98,7 +100,7 @@ equal to the *Cursor Start* register, then the cursor is drawn as if *Cursor Sta
 For example, if you set *Cursor Start* to 4 and *Cursor End* to 20, since 20 mod 16 == 4, the cursor will be only
 one scan line thick -- again, only on an EGA.
 
-{% include screenshot.html src="/blog/images/mda-cursor-11-14.png" width="156" height="82" title="MDA Block Cursor 11-14" %}
+{% include gallery-image.html src="/blog/images/mda-cursor-11-14.png" width="156" height="82" title="MDA Block Cursor 11-14" %}
 
 ### Cursor Wrap Around with Split
 
@@ -112,7 +114,7 @@ And once again, there is slight difference between the EGA and the older cards: 
 settings on older cards will result in a solid cursor, since they draw scan lines up to *and including* the line at
 *Cursor End*.
 
-{% include screenshot.html src="/blog/images/mda-cursor-11-04.png" width="156" height="82" title="MDA Split Cursor 11-04" %}
+{% include gallery-image.html src="/blog/images/mda-cursor-11-04.png" width="156" height="82" title="MDA Split Cursor 11-04" %}
 
 ### Order Matters
 
@@ -158,7 +160,7 @@ So, it's not really accurate to say that bit 5 is the "blink" bit, unless you en
 
 Here's what the slower blinking cursor looks like:
 
-{% include screenshot.html src="/blog/images/mda-cursor-slow.gif" width="104" height="88" title="MDA Cursor (Slower Blink)" %}
+{% include gallery-image.html src="/blog/images/mda-cursor-slow.gif" width="104" height="88" title="MDA Cursor (Slower Blink)" %}
 
 EGA and later cards don't use the original Motorola 6845, so their treatment of these bits is, um, a bit different.
 In particular, the EGA Technical Reference Manual says simply that the "blink" bits are `NOT USED`, and the IBM EGA BIOS
