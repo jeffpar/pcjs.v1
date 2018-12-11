@@ -49,9 +49,8 @@ Demos
 
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, OS/2, and other assorted software.
 
-<div style="text-align: center">
-![IBM PC AT w/EGA, OS/2 1.0](disks/pcx86/os2/ibm/1.0/thumbnail.jpg "link:/disks/pcx86/os2/ibm/1.0/:200:120")
-![IBM PC running VisiCalc](apps/pcx86/1981/visicalc/thumbnail.jpg)
+![IBM PC AT w/EGA, OS/2 1.0](/disks/pcx86/os2/ibm/1.0/thumbnail.jpg "link:/disks/pcx86/os2/ibm/1.0/:200:120")
+![IBM PC running VisiCalc](/apps/pcx86/1981/visicalc/thumbnail.jpg "link:/apps/pcx86/1981/visicalc/:200:120")
 ![IBM PC running DONKEY.BAS](/apps/pcx86/1981/donkey/thumbnail.jpg "link:/apps/pcx86/1981/donkey/:200:120")
 ![IBM PC XT w/EGA, Windows 1.0](/disks/pcx86/windows/1.00/thumbnail.jpg "link:/disks/pcx86/windows/1.00/:200:120")
 ![IBM PC XT w/CGA, Windows 1.01](/disks/pcx86/windows/1.01/cga/thumbnail.jpg "link:/disks/pcx86/windows/1.01/cga/:200:120")
@@ -68,7 +67,6 @@ Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, 
 ![Adventures in Math (1983)](/apps/pcx86/1983/adventmath/thumbnail.jpg "link:/apps/pcx86/1983/adventmath/:200:120")
 ![Fantasy Land (1984)](/disks/pcx86/apps/ibm/fland/thumbnail.jpg "link:/disks/pcx86/apps/ibm/fland/:200:120")
 ![Rogue (1985)](/apps/pcx86/1985/rogue/thumbnail.jpg "link:/apps/pcx86/1985/rogue/:200:120")
-</div>
 
 There are many more [PCx86 Demos](/devices/pcx86/machine/#ready-to-run-app-demos), including an
 [IBM PC with Dual Displays](/devices/pcx86/machine/5150/dual/64kb/) demonstrating early multi-monitor support,
