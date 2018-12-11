@@ -4,25 +4,15 @@ title: Norton Utilities Revisited
 date: 2018-12-08 10:00:00
 permalink: /blog/2018/12/08/
 preview: /blog/images/pcmag-1982-12-user-to-user.jpg
-machines:
-  - id: ibm5150
-    type: pcx86
-    config: /devices/pcx86/machine/5150/mda/256kb/machine.xml
-    floppyDrives: '[{heads:1},{heads:1}]'
-    autoMount:
-      A:
-        name: PC DOS 1.00
-      B:
-        name: Empty Diskette (160K)
-    autoType: $date\r
 ---
 
-Let's take a walk through the history of the Norton Utilities.
+Selected Magazine Articles on The Norton Utilities
+--------------------------------------------------
 
 ### July 1983
 
-In PC Magazine's July 1983 "Letters to PC", Peter Norton writes a "letter" that was probably intended
-as more of a free advertisement:
+In PC Magazine's July 1983 "Letters to PC", Peter Norton writes a "letter" that was more like a
+free advertisement:
 
 > **Save That File!**
 
