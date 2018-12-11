@@ -50,8 +50,10 @@ So I've added a new [Video](/docs/pcx86/video/) property named *smoothing* that 
 and I've set it to "false" for most machines in the project.  If *smoothing* is not set, your browser continues to
 use its default interpolation method.
 
-{% include screenshot.html src="/blog/images/si1978-fuzzier.png" width="339" height="388" title="Space Invaders (Fuzzier)" link="/devices/pc8080/machine/invaders/?smoothing=true" %}
-{% include screenshot.html src="/blog/images/si1978-sharper.png" width="339" height="388" title="Space Invaders (Sharper)" link="/devices/pc8080/machine/invaders/?smoothing=false" %}
+{% include gallery-begin.html %}
+{% include gallery-image.html src="/blog/images/si1978-fuzzier.png" width="339" height="388" title="Space Invaders (Fuzzier)" link="/devices/pc8080/machine/invaders/?smoothing=true" %}
+{% include gallery-image.html src="/blog/images/si1978-sharper.png" width="339" height="388" title="Space Invaders (Sharper)" link="/devices/pc8080/machine/invaders/?smoothing=false" %}
+{% include gallery-end.html %}
 
 For some people, this might be a matter of taste, because less fuzziness necessarily means more pixelation (ie, you
 can see individual pixels more clearly), which becomes more noticeable when switching a machine **Full Screen**.
