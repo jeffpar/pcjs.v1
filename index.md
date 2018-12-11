@@ -43,26 +43,29 @@ machine configurations, and provide a platform for running and analyzing old com
 
 Demos
 -----
+
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, OS/2, and other assorted software.
 
-{% include screenshot.html src="/disks/pcx86/os2/ibm/1.0/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/EGA, OS/2 1.0" link="/disks/pcx86/os2/ibm/1.0/" %}
-{% include screenshot.html src="/apps/pcx86/1981/visicalc/thumbnail.jpg" width="200" height="120" title="IBM PC running VisiCalc" link="/apps/pcx86/1981/visicalc/" %}
-{% include screenshot.html src="/apps/pcx86/1981/donkey/thumbnail.jpg" width="200" height="120" title="IBM PC running DONKEY.BAS" link="/apps/pcx86/1981/donkey/" %}
-{% include screenshot.html src="/disks/pcx86/windows/1.00/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/EGA, Windows 1.0" link="/disks/pcx86/windows/1.00/" %}
-{% include screenshot.html src="/disks/pcx86/windows/1.01/cga/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/CGA, Windows 1.01" link="/disks/pcx86/windows/1.01/cga/" %}
-{% include screenshot.html src="/disks/pcx86/windows/1.01/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/EGA, Windows 1.01" link="/disks/pcx86/windows/1.01/" %}
-{% include screenshot.html src="/disks/pcx86/windows/2.0x/thumbnail.jpg" width="200" height="120" title="COMPAQ DeskPro 386, Windows/386 2.01" link="/disks/pcx86/windows/2.0x/" %}
-{% include screenshot.html src="/disks/pcx86/windows/3.00/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/EGA, Windows 3.00" link="/disks/pcx86/windows/3.00/" %}
-{% include screenshot.html src="/disks/pcx86/windows/3.10/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/VGA, Windows 3.10" link="/disks/pcx86/windows/3.10/" %}
-{% include screenshot.html src="/disks/pcx86/windows/win95/4.00.950/thumbnail.jpg" width="200" height="120" title="COMPAQ DeskPro 386, Windows 95" link="/disks/pcx86/windows/win95/4.00.950/" %}
-{% include screenshot.html src="/disks/pcx86/cpm/1.1b/thumbnail.jpg" width="200" height="120" title="IBM PC w/MDA, CP/M-86" link="/disks/pcx86/cpm/1.1b/" %}
-{% include screenshot.html src="/disks/pcx86/games/microsoft/adventure/thumbnail.jpg" width="200" height="120" title="Microsoft Adventure (1981)" link="/disks/pcx86/games/microsoft/adventure/" %}
-{% include screenshot.html src="/apps/pcx86/1982/esuite/thumbnail.jpg" width="200" height="120" title="Executive Suite (1982)" link="/apps/pcx86/1982/esuite/" %}
-{% include screenshot.html src="/disks/pcx86/games/infocom/zork1/thumbnail.jpg" width="200" height="120" title="Zork I (1982)" link="/disks/pcx86/games/infocom/zork1/" %}
-{% include screenshot.html src="/disks/pcx86/apps/ibm/exploring/5150/mda/thumbnail.jpg" width="200" height="120" title="Exploring the IBM PC (1983)" link="/disks/pcx86/apps/ibm/exploring/5150/mda/" %}
-{% include screenshot.html src="/apps/pcx86/1983/adventmath/thumbnail.jpg" width="200" height="120" title="Adventures in Math (1983)" link="/apps/pcx86/1983/adventmath/" %}
-{% include screenshot.html src="/disks/pcx86/apps/ibm/fland/thumbnail.jpg" width="200" height="120" title="Fantasy Land (1984)" link="/disks/pcx86/apps/ibm/fland/" %}
-{% include screenshot.html src="/apps/pcx86/1985/rogue/thumbnail.jpg" width="200" height="120" title="Rogue (1985)" link="/apps/pcx86/1985/rogue/" %}
+{% include gallery-begin.html %}
+{% include gallery-image.html src="/disks/pcx86/os2/ibm/1.0/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/EGA, OS/2 1.0" link="/disks/pcx86/os2/ibm/1.0/" %}
+{% include gallery-image.html src="/apps/pcx86/1981/visicalc/thumbnail.jpg" width="200" height="120" title="IBM PC running VisiCalc" link="/apps/pcx86/1981/visicalc/" %}
+{% include gallery-image.html src="/apps/pcx86/1981/donkey/thumbnail.jpg" width="200" height="120" title="IBM PC running DONKEY.BAS" link="/apps/pcx86/1981/donkey/" %}
+{% include gallery-image.html src="/disks/pcx86/windows/1.00/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/EGA, Windows 1.0" link="/disks/pcx86/windows/1.00/" %}
+{% include gallery-image.html src="/disks/pcx86/windows/1.01/cga/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/CGA, Windows 1.01" link="/disks/pcx86/windows/1.01/cga/" %}
+{% include gallery-image.html src="/disks/pcx86/windows/1.01/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/EGA, Windows 1.01" link="/disks/pcx86/windows/1.01/" %}
+{% include gallery-image.html src="/disks/pcx86/windows/2.0x/thumbnail.jpg" width="200" height="120" title="COMPAQ DeskPro 386, Windows/386 2.01" link="/disks/pcx86/windows/2.0x/" %}
+{% include gallery-image.html src="/disks/pcx86/windows/3.00/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/EGA, Windows 3.00" link="/disks/pcx86/windows/3.00/" %}
+{% include gallery-image.html src="/disks/pcx86/windows/3.10/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/VGA, Windows 3.10" link="/disks/pcx86/windows/3.10/" %}
+{% include gallery-image.html src="/disks/pcx86/windows/win95/4.00.950/thumbnail.jpg" width="200" height="120" title="COMPAQ DeskPro 386, Windows 95" link="/disks/pcx86/windows/win95/4.00.950/" %}
+{% include gallery-image.html src="/disks/pcx86/cpm/1.1b/thumbnail.jpg" width="200" height="120" title="IBM PC w/MDA, CP/M-86" link="/disks/pcx86/cpm/1.1b/" %}
+{% include gallery-image.html src="/disks/pcx86/games/microsoft/adventure/thumbnail.jpg" width="200" height="120" title="Microsoft Adventure (1981)" link="/disks/pcx86/games/microsoft/adventure/" %}
+{% include gallery-image.html src="/apps/pcx86/1982/esuite/thumbnail.jpg" width="200" height="120" title="Executive Suite (1982)" link="/apps/pcx86/1982/esuite/" %}
+{% include gallery-image.html src="/disks/pcx86/games/infocom/zork1/thumbnail.jpg" width="200" height="120" title="Zork I (1982)" link="/disks/pcx86/games/infocom/zork1/" %}
+{% include gallery-image.html src="/disks/pcx86/apps/ibm/exploring/5150/mda/thumbnail.jpg" width="200" height="120" title="Exploring the IBM PC (1983)" link="/disks/pcx86/apps/ibm/exploring/5150/mda/" %}
+{% include gallery-image.html src="/apps/pcx86/1983/adventmath/thumbnail.jpg" width="200" height="120" title="Adventures in Math (1983)" link="/apps/pcx86/1983/adventmath/" %}
+{% include gallery-image.html src="/disks/pcx86/apps/ibm/fland/thumbnail.jpg" width="200" height="120" title="Fantasy Land (1984)" link="/disks/pcx86/apps/ibm/fland/" %}
+{% include gallery-image.html src="/apps/pcx86/1985/rogue/thumbnail.jpg" width="200" height="120" title="Rogue (1985)" link="/apps/pcx86/1985/rogue/" %}
+{% include gallery-end.html %}
 
 There are many more [PCx86 Demos](/devices/pcx86/machine/#ready-to-run-app-demos), including an
 [IBM PC with Dual Displays](/devices/pcx86/machine/5150/dual/64kb/) demonstrating early multi-monitor support,
@@ -71,6 +74,7 @@ and [EGA Displays](/devices/pcx86/machine/5160/ega/640kb/array/).
 
 C1Pjs
 -----
+
 Below is the [OSI Challenger C1P](/docs/c1pjs/), another simulation in the PCjs Project.
 It simulates Ohio Scientific's 6502-based microcomputer, released in 1978.  More details about this simulation
 and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/).
@@ -79,6 +83,7 @@ and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/
 
 License
 -------
+
 The [PCjs Project](https://github.com/jeffpar/pcjs) is now an open-source project on [GitHub](https://github.com/jeffpar).
 All published portions are free for redistribution and/or modification under the terms of the
 [GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
@@ -94,6 +99,7 @@ See [LICENSE](/LICENSE) for details.
 
 More Information
 ----------------
+
 Learn more about the [PCjs Project](/docs/about/) and [PCx86](/docs/about/pcx86/).  To
 create your own PCx86 machines, see the [PCx86 Documentation](/docs/pcx86/) for details.
 If you have questions or run into any problems, feel free to [tweet](https://twitter.com/jeffpar) or
