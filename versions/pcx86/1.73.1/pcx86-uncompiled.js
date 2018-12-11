@@ -53663,11 +53663,10 @@ class Video extends Component {
         }
         this.nCells = (this.nColsBuffer * this.nRowsBuffer) | 0;
         this.nCellCache = (this.nCells / this.nPointsPerCell) | 0;
-        this.cbScreen = this.nCellCache;
+        this.cbScreen = (this.nCells / this.nPointsPerByte) | 0;
         this.cbSplit = 0;
 
         if (cbPadding !== undefined) {
-            this.cbScreen <<= 1;
             this.cbScreen = (this.cbScreen + cbPadding) | 0;
             this.cbSplit = (this.cbScreen + cbPadding) >> 1;
         }

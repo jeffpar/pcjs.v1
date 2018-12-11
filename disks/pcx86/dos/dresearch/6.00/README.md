@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/dresearch/6.00/
 machines:
   - id: ibm5170-drdos600
     type: pcx86
-    config: /devices/pcx86/machine/5170/ega/1152kb/rev1/machine.xml
+    config: /devices/pcx86/machine/5170/ega/1024kb/rev1/machine.xml
     drives: '[{name:"DR DOS 6.00 (20Mb)",type:2,path:"/disks-demo/pcx86/drives/20mb/DRDOS600.json"}]'
     floppyDrives: '[{boot:false}]'
     autoMount:

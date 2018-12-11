@@ -11,5 +11,5 @@ IBM PC XT (Model 5160) with Monochrome Display Adapter (MDA)
 
 All our Monochrome (MDA) configurations of the IBM PC XT (Model 5160) are located here, including:
 
-* [IBM PC XT (64Kb, 10Mb Hard Disk) with Monochrome Display and Debugger](/devices/pcx86/machine/5160/mda/64kb/debugger/)
-* [IBM PC XT (256Kb, 10Mb Hard Disk) with Monochrome Display](/devices/pcx86/machine/5160/mda/256kb/) ([Debugger](/devices/pcx86/machine/5160/mda/256kb/debugger/))
+* [IBM PC XT (64Kb RAM, 10Mb Hard Disk) with Monochrome Display and Debugger](/devices/pcx86/machine/5160/mda/64kb/debugger/)
+* [IBM PC XT (256Kb RAM, 10Mb Hard Disk) with Monochrome Display](/devices/pcx86/machine/5160/mda/256kb/) ([Debugger](/devices/pcx86/machine/5160/mda/256kb/debugger/))
