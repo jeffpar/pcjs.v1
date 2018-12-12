@@ -5405,13 +5405,17 @@ class Video extends Component {
                                      * always SET bit 8 and CLEAR bit 9, so examining only bits 0-7 is sorta OK.
                                      */
                                     if (card.regCRTData[Card.CRTC.EGA.VDEND] <= 0x8F) {
-                                        nMode = Video.MODE.VGA_320X200;
+                                        if (card.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.CHAIN4) {
+                                            nMode = Video.MODE.VGA_320X200;
+                                        } else {
+                                            nMode = Video.MODE.VGA_320X200P;
+                                        }
                                     }
                                     else { /* (card.regCRTData[Card.CRTC.EGA.VDEND] == 0xDF) */
-                                        nMode = Video.MODE.VGA_320X240;
+                                        nMode = Video.MODE.VGA_320X240P;
                                     }
                                 } else {
-                                    nMode = Video.MODE.VGA_320X400;
+                                    nMode = Video.MODE.VGA_320X400P;
                                 }
                             }
                             else if ((nCRTCMaxScan & Card.CRTC.EGA.MAXSCAN.CONVERT400) || nCRTCVertTotal < 350) {
@@ -8097,8 +8101,9 @@ Video.MODE = {
      * The remaining mode identifiers are for internal use only; there is no correlation with any
      * publicly defined BIOS modes, and overlap with any third-party mode numbers is purely coincidental.
      */
-    VGA_320X240:        0x14,   // mapped at A000:0000, color, 8bpp, planar ("Mode X")
-    VGA_320X400:        0x15,   // mapped at A000:0000, color, 8bpp, planar
+    VGA_320X200P:       0x14,   // mapped at A000:0000, color, 8bpp, planar
+    VGA_320X240P:       0x15,   // mapped at A000:0000, color, 8bpp, planar ("Mode X")
+    VGA_320X400P:       0x16,   // mapped at A000:0000, color, 8bpp, planar
     /*
      * Here's where we might assign additional identifiers to certain unique combinations, like the
      * fTextGraphicsHybrid 320x400 mode that Windows 95 uses (ie, when the buffer is mapped to B800:0000
@@ -8301,8 +8306,9 @@ Video.aModeParms[Video.MODE.EGA_640X350]        = [640, 350,  8,   8];          
 Video.aModeParms[Video.MODE.VGA_640X480_MONO]   = [640, 480,  8,   8];                              // 0x11
 Video.aModeParms[Video.MODE.VGA_640X480]        = [640, 480,  8,   8];                              // 0x12
 Video.aModeParms[Video.MODE.VGA_320X200]        = [320, 200,  4,   1];                              // 0x13
-Video.aModeParms[Video.MODE.VGA_320X240]        = [320, 240,  4,   4];                              // 0x14
-Video.aModeParms[Video.MODE.VGA_320X400]        = [320, 400,  4,   4];                              // 0x15
+Video.aModeParms[Video.MODE.VGA_320X200P]       = [320, 200,  4,   4];                              // 0x14
+Video.aModeParms[Video.MODE.VGA_320X240P]       = [320, 240,  4,   4];                              // 0x15
+Video.aModeParms[Video.MODE.VGA_320X400P]       = [320, 400,  4,   4];                              // 0x16
 Video.aModeParms[Video.MODE.CGA_40X25_BW]       = Video.aModeParms[Video.MODE.CGA_40X25];           // 0x00
 Video.aModeParms[Video.MODE.CGA_80X25_BW]       = Video.aModeParms[Video.MODE.CGA_80X25];           // 0x02
 Video.aModeParms[Video.MODE.CGA_320X200_BW]     = Video.aModeParms[Video.MODE.CGA_320X200];         // 0x05
