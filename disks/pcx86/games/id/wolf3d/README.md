@@ -5,13 +5,15 @@ permalink: /disks/pcx86/games/id/wolf3d/
 machines:
   - id: deskpro386
     type: pcx86
-    config: /devices/pcx86/machine/compaq/deskpro386/vga/2048kb/debugger/machine.xml
+    config: /devices/pcx86/machine/compaq/deskpro386/vga/2048kb/machine.xml
     drives: '[{name:"10Mb Hard Disk",type:1,path:"/disks-game/pcx86/id/wolf3d/COMPAQ331-WOLF3D.json"}]'
+    floppyDrives: '[{boot:false},{boot:false}]'
     autoMount:
       A:
-        name: None
-      B:
         name: Wolfenstein 3D 1.4
+      B:
+        name: None
+    autoType: \r\rCD WOLF3D\rWOLF3D\r
 ---
 
 Wolfenstein 3D
