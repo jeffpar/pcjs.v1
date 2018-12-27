@@ -1,7 +1,7 @@
 [
   {
     "Application": [
-      "Productivity",
+      "Productivity"
     ],
     "Diagnostic": [
       "Hardware Tests"
@@ -12,7 +12,7 @@
     "Game": [
       "Educational",
       "Simulation",
-      "Text Adventure",
+      "Text Adventure"
     ],
     "Operating System": [
       "CP/M",
