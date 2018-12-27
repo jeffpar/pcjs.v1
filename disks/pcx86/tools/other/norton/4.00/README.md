@@ -1,17 +1,18 @@
 ---
 layout: page
-title: Norton Utilities 4.00
+title: Norton Utilities 4.00 (Standard Edition)
 permalink: /disks/pcx86/tools/other/norton/4.00/
 ---
 
-Norton Utilities 4.00
----------------------
+Norton Utilities 4.00 (Standard Edition)
+----------------------------------------
 
-[Norton Utilities 4.00 (1987-05-15)](#directory-of-norton-utilities-400-1987-05-15-1) is from the PCjs private
-disk collection.  Pictures of the diskettes are provided [below](#disk-images).
+Two variations of Norton Utilities 4.00 (Standard Edition) are currently available:
+[March 1, 1987](#directory-of-norton-utilities-400-1987-03-01-1) from [WinWorld](https://winworldpc.com/product/norton-utilities/40)
+and [May 15, 1987](#directory-of-norton-utilities-400-1987-05-15-1) from the [PCjs Personal Disk Collection](/disks/pcx86/personal/).
+Pictures of the Standard Edition diskettes are provided [below](#disk-images).
 
-Both 4.00 variations (March 1, 1987 and May 15, 1987) are Standard Edition.  The Advanced Edition included a Speed Disk
-utility and an "unformat" feature.
+We also have a copy of the [Advanced Edition](advanced/), which contains a Speed Disk utility and an "unformat" feature.
 
 ### Directory of Norton Utilities 4.00 (1987-03-01 #1)
 

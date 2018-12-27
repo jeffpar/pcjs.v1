@@ -7,10 +7,42 @@ permalink: /disks/pcx86/tools/other/norton/3.00/
 Norton Utilities 3.00
 ---------------------
 
-[Norton Utilities 3.00 (1984-12-07)](#directory-of-norton-utilities-300-1984-12-07) is from the PCjs private
-disk collection and predates any previously known copies of version 3.00.  Pictures of the diskette and accompanying
-note from Peter Norton are provided [below](#disk-images).  Coincidentally, we acquired the diskette on December 7, 2018,
-exactly 34 years after the files were created.
+[Norton Utilities 3.00 (1984-12-07)](#directory-of-norton-utilities-300-1984-12-07) is from the
+[PCjs Personal Disk Collection](/disks/pcx86/personal/) and predates previously known copies of version 3.00.
+Pictures of the diskette and accompanying note from Peter Norton are provided [below](#disk-images).
+Coincidentally, we acquired the diskette on December 7, 2018, exactly 34 years after the files were created.
+
+One or both of the newer releases of version 3.00 were probably a response, at least in part, to the [notice](#disk-images)
+that Peter Norton included with the original release:
+
+    I'm sorry to intrude with a last-minute warning,
+    but even after extensive testing, a significant
+    problem has been discovered after the enclosed
+    disk and documentation were prepared.
+
+    We've received reports that one of the programs
+    in this set, the Directory Sort program, called
+    DS, has malfunctioned on a few hard disks.
+
+    We've tested and used the DS program literally
+    thousands of times on many differen disk formats
+    without encountering any problems.  Nevertheless,
+    a few customers have reported difficulties.
+
+    I would recommend that you exercise caution in
+    using DS.
+
+    Peter Norton
+
+However, there are a number of other differences between the disks.  For examples, the utilities
+on the [first disk](#directory-of-norton-utilities-300-1985-12-07) have their traditional short names,
+along with `LONG.BAT` and `SHORT.BAT` batch files to switch between long and short names, whereas the
+[second disk](#directory-of-norton-utilities-300-1985-01-14) uses long names and no batch files,
+and on the [third disk](#directory-of-norton-utilities-300-1985-01-21), the batch files reappear.
+
+While it's possible that some files on these disks were removed or renamed at some point, `DEMO.BAT`
+on the first disk assumes short names, while `DEMO.BAT` on the third disk assumes long names,
+so it seems the file names as they presently exist are correct.
 
 ### Directory of Norton Utilities 3.00 (1984-12-07)
 
