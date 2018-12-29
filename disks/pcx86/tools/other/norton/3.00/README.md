@@ -2,6 +2,18 @@
 layout: page
 title: Norton Utilities 3.00
 permalink: /disks/pcx86/tools/other/norton/3.00/
+machines:
+  - id: ibm5160
+    type: pcx86
+    config: /devices/pcx86/machine/5160/cga/512kb/debugger/machine.xml
+    drives: '[{name:"PC-DOS 2.00 w/Tools (10Mb)",type:3,path:"/disks-demo/pcx86/drives/10mb/PCDOS200-C400.json"},{name:"MS-DOS 2.x Source (10Mb)",type:3,path:"/disks-demo/pcx86/dos/microsoft/2.00/MSDOS2X-SRC.json"}]'
+    autoMount:
+      A:
+        name: None
+      B:
+        name: "Norton Utilities 3.00 (1984-12-07)"
+    autoStart: true
+    autoType: $date\r$time\rB:\rDIR\r
 ---
 
 Norton Utilities 3.00
@@ -43,6 +55,8 @@ and on the [third disk](#directory-of-norton-utilities-300-1985-01-21), the batc
 While it's possible that some files on these disks were removed or renamed at some point, `DEMO.BAT`
 on the first disk assumes short names, while `DEMO.BAT` on the third disk assumes long names,
 so it seems the file names as they presently exist are correct.
+
+{% include machine.html id="ibm5160" %}
 
 ### Directory of Norton Utilities 3.00 (1984-12-07)
 
