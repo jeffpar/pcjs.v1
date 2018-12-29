@@ -136,15 +136,11 @@ and type the following commands:
 
 Now open a web browser and go to `http://localhost:8088/`.  You're done!
  
-At the time of this writing, the recommended version of Node is [8.12.0](https://nodejs.org/dist/latest-v8.x/);
-I've had issues running Gulp 3.x in conjunction with Node 10.x.
+At the time of this writing, the recommended version of [Node](https://nodejs.org) was **10.14.2**.
 
 Also, [server.js](server.js) was originally written using [Express](http://expressjs.com/) 3.x.  Since then,
-Express 4.x has been released, but the `npm install` command above should ensure that 3.x is installed locally.
-
-The plan is to eventually move development to a newer version of Node, and migrate the PCjs server to a newer
-version of Express; there's no desire to remain stuck in the past (well, ignoring the fact that PCjs is the
-quintessential "stuck in the past" project), but there's also no urgency to update.
+Express 4.x has been released, but [server.js](server.js) has not been updated; the `npm install` command above
+should ensure that Express 3.x is installed locally.
 
 ### Installing PCjs with Jekyll
 
@@ -201,8 +197,7 @@ then you should re-run it *without* the `--production` option:
 
 	npm install
 
-to get all the development dependencies, including Gulp.  NOTE: PCjs currently requires Gulp 3.x; it has not been
-upgraded to use Gulp 4.x.
+to get all the development dependencies, including Gulp 4.x.
 
 You'll probably also want to install the command-line interface to Gulp.  You can install that locally as well, but
 it's recommended you install it globally with *-g*; OS X users may also need to preface this command with `sudo`:

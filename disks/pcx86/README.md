@@ -112,8 +112,7 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 
 ### Miscellaneous Collections
 
-* [PCjs Random Disk Collection](personal/random/) courtesy of [@jeffpar](https://jeffpar.com)
-* [More...](personal/)
+* [PCjs Personal Disk Collection](personal/) courtesy of [@jeffpar](https://jeffpar.com)
 
 ### Fixed Disks
 

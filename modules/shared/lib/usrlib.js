@@ -103,12 +103,12 @@ class Usr {
     /**
      * getMonthDays(nMonth, nYear)
      *
-     * Note that if we're being called on behalf of the RTC, its year is always truncated to two digits (mod 100),
+     * NOTE: If we're being called on behalf of the PCx86 RTC, its year is always truncated to two digits (mod 100),
      * so we have no idea what century the year 0 might refer to.  When using the normal leap-year formula, 0 fails
      * the mod 100 test but passes the mod 400 test, so as far as the RTC is concerned, every century year is a leap
      * year.  Since we're most likely dealing with the year 2000, that's fine, since 2000 was also a leap year.
      *
-     * TODO: There IS a separate CMOS byte that's supposed to be set to CMOS_ADDR.CENTURY_DATE; it's always BCD,
+     * TODO: There IS a separate RTC CMOS byte that's supposed to be set to CMOS_ADDR.CENTURY_DATE; it's always BCD,
      * so theoretically it will contain values like 0x19 or 0x20 (for the 20th and 21st centuries, respectively), and
      * we could add that as another parameter to this function, to improve the accuracy, but that would go beyond what
      * a real RTC actually does.
@@ -129,97 +129,155 @@ class Usr {
     }
 
     /**
-     * formatDate(sFormat, date)
+     * formatDate(format, date, fUTC)
      *
-     * @param {string} sFormat (eg, "F j, Y", "Y-m-d H:i:s")
-     * @param {Date} [date] (default is the current time)
-     * @return {string}
-     *
-     * Supported identifiers in sFormat include:
+     * Supported identifiers in format include:
      *
      *      a:  lowercase ante meridiem and post meridiem (am or pm)
-     *      d:  day of the month, 2 digits with leading zeros (01,02,...,31)
-     *      D:  3-letter day of the week ("Sun","Mon",...,"Sat")
-     *      F:  month ("January","February",...,"December")
-     *      g:  hour in 12-hour format, without leading zeros (1,2,...,12)
-     *      h:  hour in 24-hour format, without leading zeros (0,1,...,23)
-     *      H:  hour in 24-hour format, with leading zeros (00,01,...,23)
-     *      i:  minutes, with leading zeros (00,01,...,59)
-     *      j:  day of the month, without leading zeros (1,2,...,31)
-     *      l:  day of the week ("Sunday","Monday",...,"Saturday")
-     *      m:  month, with leading zeros (01,02,...,12)
-     *      M:  3-letter month ("Jan","Feb",...,"Dec")
-     *      n:  month, without leading zeros (1,2,...,12)
-     *      s:  seconds, with leading zeros (00,01,...,59)
+     *      d:  day of the month, 2 digits with leading zeros (01, 02, ..., 31)
+     *      D:  3-letter day of the week ("Sun", "Mon", ..., "Sat")
+     *      F:  month ("January", "February", ..., "December")
+     *      g:  hour in 12-hour format, without leading zeros (1, 2, ..., 12)
+     *      h:  hour in 24-hour format, without leading zeros (0, 1, ..., 23)
+     *      H:  hour in 24-hour format, with leading zeros (00, 01, ..., 23)
+     *      i:  minutes, with leading zeros (00, 01, ..., 59)
+     *      j:  day of the month, without leading zeros (1, 2, ..., 31)
+     *      l:  day of the week ("Sunday", "Monday", ..., "Saturday")
+     *      m:  month, with leading zeros (01, 02, ..., 12)
+     *      M:  3-letter month ("Jan", "Feb", ..., "Dec")
+     *      n:  month, without leading zeros (1, 2, ..., 12)
+     *      s:  seconds, with leading zeros (00, 01, ..., 59)
      *      y:  2-digit year (eg, 14)
      *      Y:  4-digit year (eg, 2014)
      *
      * For more inspiration, see: http://php.net/manual/en/function.date.php (of which we support ONLY a subset).
+     *
+     * NOTE: MDN documentation for JavaScript's Date constructor says:
+     *
+     *      Support for ISO 8601 formats differs in that date-only strings (e.g. "1970-01-01") are treated as UTC, not local.
+     *
+     * Unfortunately, Date objects don't record whether they were created with UTC or local times, so if you pass in
+     * a date-only value, be sure to set fUTC to true, so that only UTC functions are used below, for consistency.
+     *
+     * @param {string} format (eg, "F j, Y", "Y-m-d H:i:s")
+     * @param {Date|string|number} [date] (default is the current time)
+     * @param {boolean} [fUTC] (default is false, for local time)
+     * @return {string}
      */
-    static formatDate(sFormat, date)
+    static formatDate(format, date, fUTC)
     {
-        let sDate = "";
-        if (!date) date = new Date();
-        let iHour = date.getHours();
-        let iDay = date.getDate();
-        let iMonth = date.getMonth() + 1;
-        for (let i = 0; i < sFormat.length; i++) {
-            let ch;
-            switch ((ch = sFormat.charAt(i))) {
-            case 'a':
-                sDate += (iHour < 12 ? "am" : "pm");
-                break;
-            case 'd':
-                sDate += ('0' + iDay).slice(-2);
-                break;
-            case 'D':
-                sDate += Usr.asDays[date.getDay()].substr(0, 3);
-                break;
-            case 'F':
-                sDate += Usr.asMonths[iMonth - 1];
-                break;
-            case 'g':
-                sDate += (!iHour ? 12 : (iHour > 12 ? iHour - 12 : iHour));
-                break;
-            case 'h':
-                sDate += iHour;
-                break;
-            case 'H':
-                sDate += ('0' + iHour).slice(-2);
-                break;
-            case 'i':
-                sDate += ('0' + date.getMinutes()).slice(-2);
-                break;
-            case 'j':
-                sDate += iDay;
-                break;
-            case 'l':
-                sDate += Usr.asDays[date.getDay()];
-                break;
-            case 'm':
-                sDate += ('0' + iMonth).slice(-2);
-                break;
-            case 'M':
-                sDate += Usr.asMonths[iMonth - 1].substr(0, 3);
-                break;
-            case 'n':
-                sDate += iMonth;
-                break;
-            case 's':
-                sDate += ('0' + date.getSeconds()).slice(-2);
-                break;
-            case 'y':
-                sDate += ("" + date.getFullYear()).slice(-2);
-                break;
-            case 'Y':
-                sDate += date.getFullYear();
-                break;
-            default:
-                sDate += ch;
-                break;
+        if (!date) {
+            if (!fUTC) {
+                date = new Date();
+            } else {
+                date = new Date(Date.now());
             }
+        } else if (typeof date != "object") {
+            if (typeof date == "string" && date.length <= 10) {
+                if (fUTC === undefined) fUTC = true;
+            }
+            date = new Date(date);
+        }
+        let sDate = "";
+        if (!isNaN(date.getTime())) {
+            let iHour = fUTC? date.getUTCHours() : date.getHours();
+            let iMinutes = fUTC? date.getUTCMinutes() : date.getMinutes();
+            let iSeconds = fUTC? date.getUTCSeconds() : date.getSeconds();
+            let iDayOfWeek = fUTC? date.getUTCDay() : date.getDay();
+            let iDay = fUTC? date.getUTCDate() : date.getDate();
+            let iMonth = (fUTC? date.getUTCMonth() : date.getMonth())+ 1;
+            let iYear = fUTC? date.getUTCFullYear() : date.getFullYear();
+            for (let i = 0; i < format.length; i++) {
+                let ch;
+                switch ((ch = format.charAt(i))) {
+                case 'a':
+                    sDate += (iHour < 12 ? "am" : "pm");
+                    break;
+                case 'd':
+                    sDate += ('0' + iDay).slice(-2);
+                    break;
+                case 'D':
+                    sDate += Usr.asDays[iDayOfWeek].substr(0, 3);
+                    break;
+                case 'F':
+                    sDate += Usr.asMonths[iMonth - 1];
+                    break;
+                case 'g':
+                    sDate += (!iHour ? 12 : (iHour > 12 ? iHour - 12 : iHour));
+                    break;
+                case 'h':
+                    sDate += iHour;
+                    break;
+                case 'H':
+                    sDate += ('0' + iHour).slice(-2);
+                    break;
+                case 'i':
+                    sDate += ('0' + iMinutes).slice(-2);
+                    break;
+                case 'j':
+                    sDate += iDay;
+                    break;
+                case 'l':
+                    sDate += Usr.asDays[iDayOfWeek];
+                    break;
+                case 'm':
+                    sDate += ('0' + iMonth).slice(-2);
+                    break;
+                case 'M':
+                    sDate += Usr.asMonths[iMonth - 1].substr(0, 3);
+                    break;
+                case 'n':
+                    sDate += iMonth;
+                    break;
+                case 's':
+                    sDate += ('0' + iSeconds).slice(-2);
+                    break;
+                case 'y':
+                    sDate += ("" + iYear).slice(-2);
+                    break;
+                case 'Y':
+                    sDate += iYear;
+                    break;
+                default:
+                    sDate += ch;
+                    break;
+                }
+            }
+        } else {
+            sDate = "unknown";
         }
         return sDate;
+    }
+
+    /**
+     * adjustDate(date, days)
+     *
+     * Although the setDate() method compensates for day-of-month values outside the current month:
+     *
+     *      > let d = new Date('11/4/2012');d
+     *      2012-11-04T07:00:00.000Z
+     *      > new Date(d.setDate(d.getDate() + 365))
+     *      2014-11-04T08:00:00.000Z
+     *
+     * notice the discrepancy in the time-of-day.  Even if there is some technical reason (eg, a DayLight
+     * Savings Time side-effect) why that answer is correct, it doesn't satisfy my goal of adjusting ONLY the
+     * day, not the time-of-day.
+     *
+     * By comparison, the method below (multiplying the number of milliseconds in a day by the number of days)
+     * works just fine, without any unexpected side-effects:
+     *
+     *      > let d = new Date('11/4/2012');d
+     *      2012-11-04T07:00:00.000Z
+     *      > new Date(d.getTime() + 365 * 86400000)
+     *      2013-11-04T07:00:00.000Z
+     *
+     * @param {Date} date
+     * @param {number} days (+/-)
+     * @return {Date}
+     */
+    static adjustDate(date, days)
+    {
+        return new Date(date.getTime() + days * 86400000);
     }
 
     /**

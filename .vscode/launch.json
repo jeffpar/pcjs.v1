@@ -2109,6 +2109,27 @@
       "webRoot": "${workspaceFolder}"
     },
     {
+      "name": "Disks: Norton Utilities 3.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/disks/pcx86/tools/other/norton/3.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Norton Utilities 4.00 (Standard Edition)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/disks/pcx86/tools/other/norton/4.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Norton Utilities 4.00 (Advanced Edition)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/disks/pcx86/tools/other/norton/4.00/advanced/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
       "name": "Disks: OBJASM: An Object Module Disassembler",
       "type": "chrome",
       "request": "launch",

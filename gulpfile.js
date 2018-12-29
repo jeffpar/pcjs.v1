@@ -85,7 +85,6 @@ var gulpForEach = require("gulp-foreach");
 var gulpHeader = require("gulp-header");
 var gulpReplace = require("gulp-replace");
 var gulpClosureCompiler = require('google-closure-compiler-js').gulp();
-var gulpSequence = require("run-sequence");
 var gulpSourceMaps = require('gulp-sourcemaps');
 var merge = require('merge-stream');
 
@@ -250,7 +249,7 @@ aMachines.forEach(function(machineType) {
 
     let taskCompile = "compile/" + machineType;
     aCompileTasks.push(taskCompile);
-    gulp.task(taskCompile, ["concat/" + machineType], function() {
+    gulp.task(taskCompile, function() {
         let stream = gulp.src(srcFile /*, {base: './'} */);
         if (aMachinesOutdated.indexOf(machineType) >= 0) {
             stream.pipe(gulpSourceMaps.init())
@@ -272,33 +271,27 @@ aMachines.forEach(function(machineType) {
         return stream;
     });
 
-    let taskCopy = "copy/" + machineType;
-    aCopyTasks.push(taskCopy);
-    gulp.task(taskCopy, function() {
-        return gulp.src(machineFiles)
-            .pipe(gulpNewer(machineReleaseDir))
-            .pipe(gulpReplace(/(<xsl:variable name="APPCLASS">)[^<]*(<\/xsl:variable>)/g, '$1' + machineClass + '$2'))
-            .pipe(gulpReplace(/(<xsl:variable name="APPNAME">)[^<]*(<\/xsl:variable>)/g, '$1' + machineName + '$2'))
-            .pipe(gulpReplace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + machineVersion + "$2"))
-            .pipe(gulpReplace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"' + machineReleaseDir.substr(1) + '/$1"'))
-            .pipe(gulpReplace(/[ \t]*\/\*[^*][\s\S]*?\*\//g, ""))
-            .pipe(gulpReplace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, ""))
-            .pipe(gulp.dest(machineReleaseDir));
-    });
+    if (machineFiles.length) {
+        let taskCopy = "copy/" + machineType;
+        aCopyTasks.push(taskCopy);
+        gulp.task(taskCopy, function() {
+            return gulp.src(machineFiles)
+                .pipe(gulpNewer(machineReleaseDir))
+                .pipe(gulpReplace(/(<xsl:variable name="APPCLASS">)[^<]*(<\/xsl:variable>)/g, '$1' + machineClass + '$2'))
+                .pipe(gulpReplace(/(<xsl:variable name="APPNAME">)[^<]*(<\/xsl:variable>)/g, '$1' + machineName + '$2'))
+                .pipe(gulpReplace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + machineVersion + "$2"))
+                .pipe(gulpReplace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"' + machineReleaseDir.substr(1) + '/$1"'))
+                .pipe(gulpReplace(/[ \t]*\/\*[^*][\s\S]*?\*\//g, ""))
+                .pipe(gulpReplace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, ""))
+                .pipe(gulp.dest(machineReleaseDir));
+        });
+    }
 });
 
-gulp.task("concat", aConcatTasks);
-
-gulp.task("compile", aCompileTasks);
-
-gulp.task("compile/devices", [
-    "compile/leds",
-    "compile/ti42",
-    "compile/ti55",
-    "compile/ti57"
-]);
-
-gulp.task("copy", aCopyTasks);
+gulp.task("concat", gulp.parallel(...aConcatTasks));
+gulp.task("compile", gulp.parallel(...aCompileTasks));
+gulp.task("compile/devices", gulp.parallel("compile/leds", "compile/ti42", "compile/ti55", "compile/ti57"));
+gulp.task("copy", gulp.series(...aCopyTasks));
 
 let matchRef = function(match, sIndent, sFile) {
     /*
@@ -382,7 +375,7 @@ gulp.task("disks-private", function() {
     );
 });
 
-gulp.task("disks", ["disks-demo", "disks-private"]);
+gulp.task("disks", gulp.parallel("disks-demo", "disks-private"));
 
 gulp.task("version", function() {
     let baseDir = "./";
@@ -391,7 +384,7 @@ gulp.task("version", function() {
         .pipe(gulp.dest(baseDir));
 });
 
-gulp.task("copyright", function() {
+gulp.task("copyright", function(done) {
     let baseDir = "./";
     /*
      * TODO: Although I've added the 'skipBinary' option to gulpReplace(), to avoid mucking up files like ATT4425.ttf,
@@ -404,8 +397,4 @@ gulp.task("copyright", function() {
         .pipe(gulp.dest(baseDir));
 });
 
-gulp.task("default", function() {
-    gulpSequence(
-        "concat", "compile", "copy", "disks"
-    );
-});
+gulp.task("default", gulp.series("concat", "compile", "copy", "disks"));
