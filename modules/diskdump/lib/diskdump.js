@@ -107,8 +107,19 @@ function BufferPF(init, start, end)
         if (start === undefined) {
             if (typeof init == "object" && init instanceof Buffer) {
                 this.buf = init;
-            } else {
-                this.buf = new Buffer(init);
+            }
+            else {
+                /*
+                 * The following code replaces the now-deprecated code:
+                 *
+                 *      this.buf = new Buffer(init);
+                 */
+                if (typeof init == "number") {
+                    this.buf = Buffer.alloc(init);
+                }
+                else {
+                    this.buf = Buffer.from(init);
+                }
             }
         } else {
             this.buf = init.buf.slice(start, end);
