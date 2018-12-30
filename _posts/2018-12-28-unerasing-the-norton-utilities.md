@@ -17,7 +17,7 @@ could dive back in time and locate lost software.  There are almost certainly co
 peacefully on diskettes somewhere, in closets or attics or basements, which makes their disappearance even more
 exasperating.
 
-We know that Norton originally sold at least four utilties:
+We know that Norton originally sold these four utilities:
 
 - DISKLOOK — reveals hidden files, erased files, shows everything on diskette ($20)
 - UNERASE — recovers erased files ($20)
@@ -58,7 +58,7 @@ gears toward file recovery:
 Apparently there wasn't much demand for **PASFOR**.
 
 According to [Wikipedia](https://en.wikipedia.org/wiki/Norton_Utilities), "Version 1.0" of Norton Utilities consisted
-of 14 utilties on three disks for a total of $80:
+of 14 utilities on three disks for a total of $80:
 
 - UNERASE - recovers erased files
 - FILEFIX - repairs damaged files
@@ -92,7 +92,7 @@ see the article titled "Tinkering With DOS 2.00".  The article doesn't actually 
 provides some examples of how you can patch utilities in PC DOS 2.00 to customize their behavior.  What's noteworthy to me
 about the article is that he demonstrates the patching process without providing any insight into *how*
 he found the patch addresses, let alone how to debug software in general.  This is one of the problems with
-having a commercial developer write articles for a publication -- if the developer views it as an opportunity
+a commercial developer writing articles for a publication -- if the developer sees it as an opportunity
 to gain exposure for himself and his products, that may create some disincentive for them to delve too deeply
 into areas where they feel they have unique expertise or a competitive edge.  It also underscores the value
 of having a tight association between your name and your products.  But I digress.
@@ -118,8 +118,8 @@ the oldest version we have been able to locate so far, expanded the list of util
 - WIPEFILE
 
 The `UNERASE` feature was still there, but it was now part of the `NORTON` program (aka `NU` if you ran `SHORT.BAT`
-to shorten all the filenames), effectively stamping his signature feature with his own name.  Brand recognition was
-important to Peter Norton, as evidenced not only by the "selfie" on his [diskette sleeves](#version-300-disk-scan)
+to shorten all the filenames), effectively stamping his signature feature with his own name.  The importance of brand
+recognition was not lost on Peter Norton, as evidenced not only by the "selfie" on his [diskette sleeves](#version-300-disk-scan)
 but also most of his print ads, book covers, etc.
 
 Some all-new utilities included `VOLABEL` (since volume labels hadn't existed prior to DOS 2.0), `WIPEDISK` and `WIPEFILE`,
@@ -136,7 +136,11 @@ You can, however, play with newer versions of [The Norton Utilities](/disks/pcx8
 - [Version 4.00 Standard Edition (1987)](/disks/pcx86/tools/other/norton/4.00/)
 - [Version 4.00 Advanced Edition (1987)](/disks/pcx86/tools/other/norton/4.00/advanced/)
 
-So for now, we'll end this blog post with some old magazine articles.
+The 1984 release of Version 3.00, as well as the Version 4.00 Advanced Edition, are recent PCjs acquisitions, but
+I'm still on the lookout for older versions, so please [contact me](mailto:Jeff@pcjs.org) if you have anything that
+predates Version 3.00.
+
+In the meantime, we'll end this blog post with some old magazine articles.
 
 Selected Magazine Articles on The Norton Utilities
 --------------------------------------------------
@@ -363,8 +367,8 @@ Utilities are.
 
 ---
 
-In PC Magazine's July 1983 "Letters to PC", Peter Norton writes a letter that might be considered more
-promotional than informational:
+Also in July 1983, PC Magazine's "Letters to PC" contained a letter from Peter Norton, perhaps more
+promotional than informational, but interesting nonetheless:
 
 > **Save That File!**
 
@@ -410,7 +414,7 @@ he writes:
 > I solved the label problem by writing a label program that can add, change, or delete volume labels in any format of disk.
 (I added the label command to my utilities set.)
 
-It's also worth noting that the September 1983 issue unveiled a new column, "The Norton Chronicles", described as:
+And in the September 1983 issue, PC Magazine unveiled a new column, "The Norton Chronicles", described as:
 
 > A monthly column by Peter Norton, perhaps the best-known authority on the internal architecture of the
 IBM PC and PC-DOS.
@@ -527,7 +531,7 @@ to say about Norton Utilities 4.0:
 > utilities and their functions. The other tells you more than you might ever need to know about how DOS works.
 > All in all, *The Norton Utilities* is still the most feature-packed, most polished DOS enhancement available.
 
-And *The Norton Utilties, Version 4.0* shared PC Magazine's "Editor's Choice" award with *PC Tools* and SafetyNet*:
+And *The Norton Utilities, Version 4.0* shared PC Magazine's "Editor's Choice" award with *PC Tools* and SafetyNet*:
 
 > The venerable *Norton Utilities* still earns a tip of our hat, too. The package provides the most functions--all
 > of them so useful you’ll wonder how you did without them--and it gives you the best documentation and the slickest
