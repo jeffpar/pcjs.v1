@@ -31,6 +31,7 @@ Some disks from this collection *have* been archived elsewhere, including:
 * [DoubleDOS 2.0F](/disks/pcx86/tools/softlogic/doubledos/2.0f/)
 * [Multitasking MS-DOS 4.00](/disks/pcx86/dos/microsoft/4.0M/)
 * [The Norton Utilities 3.00 (1984-12-07)](/disks/pcx86/tools/other/norton/3.00/)
+* [The Norton Utilities 4.00 (Standard Edition)](/disks/pcx86/tools/other/norton/4.00/)
 * [The Norton Utilities 4.00 (Advanced Edition)](/disks/pcx86/tools/other/norton/4.00/advanced/)
 * [Early OS/2 Prototypes](/disks/pcx86/os2/misc/) (eg, [CP-DOS](/disks/pcx86/os2/misc/cpdos/) and [FOOTBALL](/disks/pcx86/os2/misc/football/))
 

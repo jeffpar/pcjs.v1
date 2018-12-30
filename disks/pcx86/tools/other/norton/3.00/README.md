@@ -21,11 +21,11 @@ Norton Utilities 3.00
 
 [Norton Utilities 3.00 (1984-12-07)](#directory-of-norton-utilities-300-1984-12-07) is from the
 [PCjs Personal Disk Collection](/disks/pcx86/personal/) and predates previously known copies of version 3.00.
-Pictures of the diskette and accompanying note from Peter Norton are provided [below](#disk-images).
+Scans of the diskette and accompanying note from Peter Norton are provided [below](#diskette-scans).
 Coincidentally, we acquired the diskette on December 7, 2018, exactly 34 years after the files were created.
 
-One or both of the newer releases of version 3.00 were probably a response, at least in part, to the [notice](#disk-images)
-that Peter Norton included with the original release:
+One or both of the newer releases of version 3.00 were probably a response, at least in part, to the
+[notice](#diskette-scans) that Peter Norton included with the original release:
 
     I'm sorry to intrude with a last-minute warning,
     but even after extensive testing, a significant
@@ -37,7 +37,7 @@ that Peter Norton included with the original release:
     DS, has malfunctioned on a few hard disks.
 
     We've tested and used the DS program literally
-    thousands of times on many differen disk formats
+    thousands of times on many different disk formats
     without encountering any problems.  Nevertheless,
     a few customers have reported difficulties.
 
@@ -141,7 +141,7 @@ so it seems the file names as they presently exist are correct.
 	       20 file(s)     126070 bytes
 	                      229376 bytes free
 
-### Disk Images
+### Diskette Scans
 
 ![Norton Utilities 3.00 (1984-12-07)]({{ site.demo-disks.baseurl }}/pcx86/tools/other/norton/3.00/1984-12-07/NU300-1984-12-07.jpg)
 
