@@ -414,7 +414,9 @@ he writes:
 > I solved the label problem by writing a label program that can add, change, or delete volume labels in any format of disk.
 (I added the label command to my utilities set.)
 
-And in the September 1983 issue, PC Magazine unveiled a new column, "The Norton Chronicles", described as:
+### September 1983
+
+In the September 1983 issue, PC Magazine unveiled a new column, "The Norton Chronicles", described as:
 
 > A monthly column by Peter Norton, perhaps the best-known authority on the internal architecture of the
 IBM PC and PC-DOS.
