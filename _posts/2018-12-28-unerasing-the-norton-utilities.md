@@ -70,7 +70,7 @@ of 14 utilities on three disks for a total of $80:
 - SCRATR - sets DOS to work in any colors
 - REVERSE - work in black on white
 - CLEAR - clears the screen for clarity
-- FILESORT - keeps floppy disk files by date or name
+- FILESORT - sorts floppy disk files by date or name
 - DISKOPT - speeds floppy disk access
 - BEEP - causes the PC speaker to beep
 - PRINT - prints files

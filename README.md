@@ -439,7 +439,7 @@ or (at your option) any later version.
 
 You are required to include the following links and copyright notice:
 
-> [PCjs](https://www.pcjs.org) © 2012-2018 by [Jeff Parsons](https://jeffpar.com)
+> [PCjs](https://www.pcjs.org) © 2012-2019 by [Jeff Parsons](https://jeffpar.com)
 
 in every copy or modified version of this work, and to display that notice on every web page or computer that it runs on.
 

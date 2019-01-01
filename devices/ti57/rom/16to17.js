@@ -2,7 +2,7 @@
 /**
  * @fileoverview Tool for converting 16-column data to 17-column data
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @copyright © 2012-2018 Jeff Parsons
+ * @copyright © 2012-2019 Jeff Parsons
  * @suppress {missingProperties}
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
@@ -44,7 +44,7 @@ function processFile(sFileIn, sFileOut) {
         let aWords = sInput.match(/[0-9a-z]{4}/g);
         let sOutput = "";
         let cWordsPerLine = 0;
-        aWords.forEach(word => {
+        aWords.forEach((word) => {
             if (cWordsPerLine) {
                 sOutput += ' ';
             }

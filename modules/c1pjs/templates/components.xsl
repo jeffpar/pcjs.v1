@@ -176,7 +176,7 @@
 					<xsl:otherwise/>
 				</xsl:choose>
 				<div class="{$APPCLASS}-copyright">
-					<a href="{$SITEURL}/{$APPCLASS}" target="_blank">C1Pjs</a> v<xsl:value-of select="$APPVERSION"/> © 2012-2018 by <a href="https://jeffpar.com" target="_blank">@jeffpar</a>
+					<a href="{$SITEURL}/{$APPCLASS}" target="_blank">C1Pjs</a> v<xsl:value-of select="$APPVERSION"/> © 2012-2019 by <a href="https://jeffpar.com" target="_blank">@jeffpar</a>
 				</div>
 				<div style="clear:both"> </div>
 			</xsl:if>
