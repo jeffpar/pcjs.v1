@@ -6,7 +6,7 @@
  * @suppress {missingProperties}
  * Created 2015-Apr-04
  *
- * Copyright © 2012-2018 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
  *
@@ -32,6 +32,7 @@
  */
 
 "use strict";
+
 var path = require("path");
 var fs = require("fs");
 var lib = path.join(path.dirname(fs.realpathSync(__filename)), "../lib/");
