@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.74.0/machine.xsl"?>
 <machine id="ibm5160" type="pcx86" border="1" width="1000px" pos="center" background="default">
-	<name pos="center">IBM PC XT, 512Kb RAM, 10Mb Hard Disk, Color Display</name>
+	<name pos="center">IBM PC XT, 512Kb RAM, 10Mb Hard Disk, Color Display, Coprocessor</name>
 	<computer id="xt-cga-512k" name="IBM PC XT"/>
 	<ram id="ramLow" addr="0x00000" test="false" size="0x80000" comment="0x80000 (512Kb) size overrides SW1|ROM BIOS memory test has been disabled"/>
 	<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pcx86/hdc/ibm-xebec-1982.json"/>
@@ -15,8 +15,9 @@
 		<control type="button" binding="reset">Reset</control>
 		<control type="button" binding="setSpeed">Speed</control>
 	</cpu>
+	<fpu id="fpu8087" model="8087"/>
 	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
-	<chipset id="chipset" model="5160" sw1="01001001"/>
+	<chipset id="chipset" model="5160" sw1="00001001"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2"/>
 	<mouse serial="com2"/>
