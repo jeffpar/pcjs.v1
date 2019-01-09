@@ -1472,6 +1472,13 @@
       "webRoot": "${workspaceFolder}"
     },
     {
+      "name": "Disks: IBM APL 1.00",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/disks/pcx86/tools/ibm/apl/1.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
       "name": "Disks: IBM EGA Fantasy Land Demo with Debugger",
       "type": "chrome",
       "request": "launch",
@@ -2113,6 +2120,13 @@
       "type": "chrome",
       "request": "launch",
       "url": "http://pcjs:8088/disks/pcx86/tools/other/norton/3.00/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: Norton Utilities 3.10",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/disks/pcx86/tools/other/norton/3.10/",
       "webRoot": "${workspaceFolder}"
     },
     {

@@ -622,24 +622,29 @@ class Str {
      */
     static sprintf(format, ...args)
     {
-        let buffer = "";
+        let text = "";
         let aParts = format.split(/%([-+ 0#]*)([0-9]*|\*)(\.[0-9]+|)([hlL]?)([A-Za-z%])/);
 
         let iArg = 0, iPart;
         for (iPart = 0; iPart < aParts.length - 6; iPart += 6) {
 
-            buffer += aParts[iPart];
+            text += aParts[iPart];
             let type = aParts[iPart+5];
 
             /*
-             * Check for unrecognized types immediately, so we don't inadvertently pop any arguments.
+             * Check for unrecognized types immediately, so we don't inadvertently pop any arguments;
+             * the first 12 ("ACDFHIMNSTWY") are for our non-standard Date extensions (see below).
+             *
+             * For reference purposes, the standard ANSI C set of format types is: "dioxXucsfeEgGpn%".
              */
-            if ("dfjcsoXx".indexOf(type) < 0) {
-                buffer += aParts[iPart+1] + aParts[iPart+2] + aParts[iPart+3] + aParts[iPart+4] + type;
+            let iType = "ACDFHIMNSTWYdfjcsoXx%".indexOf(type);
+            if (iType < 0) {
+                text += '%' + aParts[iPart+1] + aParts[iPart+2] + aParts[iPart+3] + aParts[iPart+4] + type;
                 continue;
             }
 
-            let arg = args[iArg++];
+            let arg = args[iArg];
+            if (type != '%') iArg++;
             let flags = aParts[iPart+1];
             let width = aParts[iPart+2];
             if (width == '*') {
@@ -650,8 +655,126 @@ class Str {
             }
             let precision = aParts[iPart+3];
             precision = precision? +precision.substr(1) : -1;
-            let prefix = aParts[iPart+4];
-            let ach = null, s, radix = 0;
+            // let length = aParts[iPart+4];       // eg, 'h', 'l' or 'L' (all currently ignored)
+            let hash = flags.indexOf('#') >= 0;
+            let ach = null, s, radix = 0, p, prefix = "";
+
+            /*
+             * The following non-standard sprintf() format codes provide handy alternatives to the
+             * PHP date() format codes that we used to use with the old usrlib.formatDate() function:
+             *
+             *      a:  lowercase ante meridiem and post meridiem (am or pm)                %A
+             *      d:  day of the month, 2 digits with leading zeros (01, 02, ..., 31)     %02D
+             *      D:  3-letter day of the week ("Sun", "Mon", ..., "Sat")                 %.3W
+             *      F:  month ("January", "February", ..., "December")                      %F
+             *      g:  hour in 12-hour format, without leading zeros (1, 2, ..., 12)       %I
+             *      h:  hour in 24-hour format, without leading zeros (0, 1, ..., 23)       %H
+             *      H:  hour in 24-hour format, with leading zeros (00, 01, ..., 23)        %02H
+             *      i:  minutes, with leading zeros (00, 01, ..., 59)                       %02N
+             *      j:  day of the month, without leading zeros (1, 2, ..., 31)             %D
+             *      l:  day of the week ("Sunday", "Monday", ..., "Saturday")               %W
+             *      m:  month, with leading zeros (01, 02, ..., 12)                         %02M
+             *      M:  3-letter month ("Jan", "Feb", ..., "Dec")                           %.3F
+             *      n:  month, without leading zeros (1, 2, ..., 12)                        %M
+             *      s:  seconds, with leading zeros (00, 01, ..., 59)                       %02S
+             *      y:  2-digit year (eg, 14)                                               %0.2Y
+             *      Y:  4-digit year (eg, 2014)                                             %Y
+             *
+             * We also support a few custom format codes:
+             *
+             *      C:  calendar output (equivalent to: %W, %F %D, %Y)
+             *      T:  timestamp output (equivalent to: %Y-%02M-%02D %02H:%02N:%02S)
+             *
+             * Use the optional '#' flag with any of the above '%' format codes to produce UTC results;
+             * eg, '%#I' instead of '%I'.
+             *
+             * The %A, %F, and %W types act as strings (which support the '-' left justification flag, as well as
+             * the width and precision options), and the rest act as integers (which support the '0' padding flag
+             * and the width option).  Also, while %Y does act as an integer, it also supports truncation using the
+             * precision option (normally, integers do not); this enables a variable number of digits for the year.
+             *
+             * So old code like this:
+             *
+             *      printf("%s\n", formatDate("l, F j, Y", date));
+             *
+             * can now be written like this:
+             *
+             *      printf("%W, %F %D, %Y\n", date, date, date, date);
+             *
+             * or even more succinctly, as:
+             *
+             *      printf("%C\n", date);
+             */
+            let ch, date = /** @type {Date} */ (iType < 12 && typeof arg != "object"? new Date(arg) : arg);
+
+            switch(type) {
+            case 'C':
+                ch = hash? '#' : '';
+                text += Str.sprintf(Str.sprintf("%%%sW, %%%sF %%%sD, %%%sY", ch, ch, ch, ch), date, date, date, date);
+                continue;
+
+            case 'D':
+                arg = hash? date.getUTCDate() : date.getDate();
+                type = 'd';
+                break;
+
+            case 'A':
+            case 'H':
+            case 'I':
+                arg = hash? date.getUTCHours() : date.getHours();
+                if (type == 'A') {
+                    arg = (arg < 12 ? "am" : "pm");
+                    type = 's';
+                }
+                else {
+                    if (type == 'I') {
+                        arg = (!arg? 12 : (arg > 12 ? arg - 12 : arg));
+                    }
+                    type = 'd';
+                }
+                break;
+
+            case 'F':
+            case 'M':
+                arg = hash? date.getUTCMonth() : date.getMonth();
+                if (type == 'F') {
+                    arg = Str.NamesOfMonths[arg];
+                    type = 's';
+                } else {
+                    arg++;
+                    type = 'd';
+                }
+                break;
+
+            case 'N':
+                arg = hash? date.getUTCMinutes() : date.getMinutes();
+                type = 'd';
+                break;
+
+            case 'S':
+                arg = hash? date.getUTCSeconds() : date.getSeconds();
+                type = 'd'
+                break;
+
+            case 'T':
+                ch = hash? '#' : '';
+                text += Str.sprintf(Str.sprintf("%%%sY-%%%s02M-%%%s02D %%%s02H:%%%s02N:%%%s02S", ch, ch, ch, ch, ch, ch), date, date, date, date, date, date);
+                continue;
+
+            case 'W':
+                arg = Str.NamesOfDays[hash? date.getUTCDay() : date.getDay()];
+                type = 's';
+                break;
+
+            case 'Y':
+                arg = hash? date.getUTCFullYear() : date.getFullYear();
+                if (precision > 0) {
+                    arg = arg % (Math.pow(10, precision));
+                    precision = -1;
+                }
+                type = 'd';
+                break;
+            }
 
             switch(type) {
             case 'd':
@@ -682,7 +805,7 @@ class Str {
                     arg = Math.round((arg - Math.trunc(arg)) * Math.pow(10, precision));
                     s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
                 }
-                buffer += s;
+                text += s;
                 break;
 
             case 'j':
@@ -691,7 +814,7 @@ class Str {
                  * the caller is providing an Object that should be rendered as JSON.  If a width is included
                  * (eg, "%2j"), it's used as an indentation value; otherwise, no whitespace is added.
                  */
-                buffer += JSON.stringify(arg, null, width || null);
+                text += JSON.stringify(arg, null, width || null);
                 break;
 
             case 'c':
@@ -700,10 +823,16 @@ class Str {
 
             case 's':
                 /*
-                 * 's' includes some non-standard behavior: if the argument is not actually a string, we allow
-                 * JavaScript to "coerce" it to a string, using its associated toString() method.
+                 * 's' includes some non-standard behavior: if the argument is not actually a string, we coerce
+                 * it to a string first.
                  */
-                if (typeof arg == "string") {
+                if (arg !== undefined) {
+                    if (typeof arg != "string") {
+                        arg = arg.toString();
+                    }
+                    if (precision >= 0) {
+                        arg = arg.substr(0, precision);
+                    }
                     while (arg.length < width) {
                         if (flags.indexOf('-') >= 0) {
                             arg += ' ';
@@ -712,20 +841,23 @@ class Str {
                         }
                     }
                 }
-                buffer += arg;
+                text += arg;
                 break;
 
             case 'o':
                 radix = 8;
+                if (hash) prefix = "0";
                 /* falls through */
 
             case 'X':
                 ach = Str.HexUpperCase;
+                if (hash) prefix = "0X";
                 /* falls through */
 
             case 'x':
                 s = "";
                 if (!radix) radix = 16;
+                if (!prefix && hash) prefix = "0x";
                 if (!ach) ach = Str.HexLowerCase;
                 if (typeof arg == "string") {
                     /*
@@ -739,29 +871,36 @@ class Str {
                      */
                     arg = Number.parseInt(arg, arg.match(/(^0x|[a-f])/i)? 16 : 10);
                 }
+                p = width? "" : prefix;
                 do {
                     let d = arg & (radix - 1);
                     arg >>>= (radix == 16? 4 : 3);
                     if (flags.indexOf('0') >= 0 || s == "" || d || arg) {
                         s = ach[d] + s;
                     } else if (width) {
-                        s = ' ' + s;
+                        if (!prefix) {
+                            s = ' ' + s;
+                        } else {
+                            s = prefix.slice(-1) + s;
+                            prefix = prefix.slice(0, -1);
+                        }
                     }
                 } while (--width > 0 || arg);
-                buffer += s;
+                text += p + s;
+                break;
+
+            case '%':
+                text += '%';
                 break;
 
             default:
-                /*
-                 * For reference purposes, the standard ANSI C set of types is "dioxXucsfeEgGpn%"
-                 */
-                buffer += "(unimplemented printf type %" + type + ")";
+                text += "(unimplemented printf type %" + type + ")";
                 break;
             }
         }
 
-        buffer += aParts[iPart];
-        return buffer;
+        text += aParts[iPart];
+        return text;
     }
 
     /**
@@ -925,5 +1064,7 @@ Str.TYPES = {
 
 Str.HexLowerCase = "0123456789abcdef";
 Str.HexUpperCase = "0123456789ABCDEF";
+Str.NamesOfDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+Str.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 if (NODE) module.exports = Str;

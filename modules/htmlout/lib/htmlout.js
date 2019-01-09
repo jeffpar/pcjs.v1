@@ -1296,7 +1296,8 @@ HTMLOut.prototype.getBlog = function(sToken, sIndent, aParms)
                                         var iYear = parseInt(asParts[1], 10);
                                         var iMonth = parseInt(asParts[2], 10) - 1;
                                         var iDay = asParts[3]? parseInt(asParts[3], 10) : 1;
-                                        var sDate = usr.formatDate(asParts[3]? "F j, Y" : "F Y", new Date(iYear, iMonth, iDay));
+                                        var date = new Date(iYear, iMonth, iDay);
+                                        var sDate = str.sprintf(asParts[3]? "%M %D, %Y" : "%M %Y", date, date, date);
                                         sPost = sPost.replace(/^([^\n]*\n[^\n]*\n)/, '$1<p style="font-size:x-small;margin-top:-12px">' + sDate + '</p>\n\n');
                                     }
                                     aExcerpts[iPath].excerpt = sPost + "[Read more](" + sURL + ")...";

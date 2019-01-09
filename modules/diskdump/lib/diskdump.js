@@ -1090,7 +1090,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
             var sDir = path.dirname(fileInfo.FILE_PATH) + path.sep;
             if (sBaseDir === null) sBaseDir = sDir;
             sAttrs += ' size="' + fileInfo.FILE_SIZE + '"';
-            sAttrs += ' time="' + usr.formatDate("Y-m-d H:i:s", fileInfo.FILE_TIME) + '"';
+            sAttrs += ' time="' + str.sprintf("%T", fileInfo.FILE_TIME) + '"';
             sAttrs += ' attr="0x' + fileInfo.FILE_ATTR.toString(16) + '"';
             if (fileInfo.FILE_MD5) sAttrs += ' md5="' + fileInfo.FILE_MD5 + '"';
             if (!sDir.indexOf(sBaseDir)) {

@@ -77,14 +77,14 @@ Similar to `POP CS`, this instruction was of limited value when the selected *se
 
 Note that *segreg* is encoded as a 3-bit value in the second byte of the instruction, where:
 
- * 0 = ES
- * 1 = CS (invalid on 80286 and later)
- * 2 = SS
- * 3 = DS
- * 4 = ES (invalid on 80286, FS on 80386 and later)
- * 5 = CS (invalid on 80286, GS on 80386 and later)
- * 6 = SS (invalid on 80286 and later)
- * 7 = DS (invalid on 80286 and later)
+* 0 = ES
+* 1 = CS (invalid on 80286 and later)
+* 2 = SS
+* 3 = DS
+* 4 = ES (invalid on 80286, FS on 80386 and later)
+* 5 = CS (invalid on 80286, GS on 80386 and later)
+* 6 = SS (invalid on 80286 and later)
+* 7 = DS (invalid on 80286 and later)
  
 On the 8086/8088/80186/80188, values 0-3 were treated the same as values 4-7, and all values were allowed.
 
