@@ -1250,16 +1250,17 @@ class Keyboard extends Component {
     parseKeys(sKeys)
     {
         if (sKeys) {
+            let date = new Date();
             let match, reSpecial = /(?:^|[^$])\$([a-z0-9][a-z0-9-]+)/g;
             while ((match = reSpecial.exec(sKeys))) {
                 let sReplace = "";
                 if (reSpecial.lastIndex) reSpecial.lastIndex--;
                 switch (match[1]) {
                 case 'date':
-                    sReplace = Usr.formatDate("n-j-Y");
+                    sReplace = Str.sprintf("%M-%D-%Y", date, date, date);
                     break;
                 case 'time':
-                    sReplace = Usr.formatDate("h:i:s");
+                    sReplace = Str.sprintf("%H:%N:%S", date, date, date);
                     break;
                 default:
                     continue;

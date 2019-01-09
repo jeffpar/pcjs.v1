@@ -1,12 +1,12 @@
 (function(){/*
- https://www.pcjs.org/modules/devices/lib/stdio.js (C) Jeff Parsons 2012-2018
- https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2018
- https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2018
- https://www.pcjs.org/modules/devices/led.js (C) Jeff Parsons 2012-2018
- https://www.pcjs.org/modules/devices/rom.js (C) Jeff Parsons 2012-2018
- https://www.pcjs.org/modules/devices/time.js (C) Jeff Parsons 2012-2018
- https://www.pcjs.org/modules/devices/ledctrl.js (C) Jeff Parsons 2012-2018
- https://www.pcjs.org/modules/devices/machine.js (C) Jeff Parsons 2012-2018
+ https://www.pcjs.org/modules/devices/lib/stdio.js (C) Jeff Parsons 2012-2019
+ https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2019
+ https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2019
+ https://www.pcjs.org/modules/devices/led.js (C) Jeff Parsons 2012-2019
+ https://www.pcjs.org/modules/devices/rom.js (C) Jeff Parsons 2012-2019
+ https://www.pcjs.org/modules/devices/time.js (C) Jeff Parsons 2012-2019
+ https://www.pcjs.org/modules/devices/ledctrl.js (C) Jeff Parsons 2012-2019
+ https://www.pcjs.org/modules/devices/machine.js (C) Jeff Parsons 2012-2019
 */
 var t,aa="function"==typeof Object.create?Object.create:function(a){function b(){}b.prototype=a;return new b},ba;if("function"==typeof Object.setPrototypeOf)ba=Object.setPrototypeOf;else{var ca;a:{var da={gb:!0},ea={};try{ea.__proto__=da;ca=ea.gb;break a}catch(a){}ca=!1}ba=ca?function(a,b){a.__proto__=b;if(a.__proto__!==b)throw new TypeError(a+" is not extensible");return a}:null}var ha=ba;
 function w(a,b){a.prototype=aa(b.prototype);a.prototype.constructor=a;if(ha)ha(a,b);else for(var c in b)if("prototype"!=c)if(Object.defineProperties){var d=Object.getOwnPropertyDescriptor(b,c);d&&Object.defineProperty(a,c,d)}else a[c]=b[c];a.mb=b.prototype}var ia="function"==typeof Object.defineProperties?Object.defineProperty:function(a,b,c){a!=Array.prototype&&a!=Object.prototype&&(a[b]=c.value)},z="undefined"!=typeof window&&window===this?this:"undefined"!=typeof global&&null!=global?global:this;
@@ -112,5 +112,5 @@ function Xc(a,b){G.call(this,a,a,Yc);var c=this;this.aa=null;this.ba="";this.ca=
 function $c(a){if(a.ca&&a.da){for(var b=0;b<ad.length;b++)for(var c in a.ka){var d=void 0;try{var e=a.ka[c],f="";var m=e["class"];if(m==ad[b]){switch(m){case bd:d=new gc(a.oa,c,e);a.aa=d;break;case nc:new N(a.oa,c,e);break;case lc:new jb(a.oa,c,e);break;case cd:d=new Ib(a.oa,c,e);d.ka.revision&&(f="revision "+d.ka.revision);break;case O:new Z(a.oa,c,e);break;case dd:a.Ha("PCjs %s v%3.2f\n",e.name,Yc);E(a,ed);E(a,fd);a.ba&&E(a,"Configuration: "+a.ba);continue;default:E(a,"unrecognized device class: "+
 m);continue}E(a,m+" device initialized"+(f?" ("+f+")":""))}}catch(h){a:{E(a,"error initializing "+m+" device '"+c+"':\n"+h.message),d=void 0;f=c;var k=H[a.oa];if(k)for(d in k)if(k[d].Wa==f){k.splice(d,1);break a}}}}if(b=a.aa)b.ab&&a.ea&&b.ab(),b.Oa&&a.fa&&b.Oa(!0)}}
 function Zc(a,b){try{a.ka=JSON.parse(b);var c=a.ka[a.oa];ua(a,c);va(a,c);wa(a,c.bindings);a.fa=!1!==c.autoStart;a.ea=!1!==c.autoRestore;a.ca=!0}catch(e){c=e.message;var d=c.match(/position ([0-9]+)/);d&&(c+=" ('"+b.substr(+d[1],40).replace(/\s+/g," ")+"...')");E(a,"machine '"+a.oa+"' initialization error: "+c)}}
-var bd="Chip",nc="Input",lc="LED",dd="Machine",cd="ROM",O="Time",ad=[dd,O,lc,nc,cd,bd],ed="Copyright \u00a9 2012-2018 Jeff Parsons \x3cJeff@pcjs.org\x3e",fd="License: GPL version 3 or later \x3chttp://gnu.org/licenses/gpl.html\x3e",Yc=1.2;window[ta]=Xc;})()
+var bd="Chip",nc="Input",lc="LED",dd="Machine",cd="ROM",O="Time",ad=[dd,O,lc,nc,cd,bd],ed="Copyright \u00a9 2012-2019 Jeff Parsons \x3cJeff@pcjs.org\x3e",fd="License: GPL version 3 or later \x3chttp://gnu.org/licenses/gpl.html\x3e",Yc=1.2;window[ta]=Xc;})()
 //# sourceMappingURL=leds.js.map

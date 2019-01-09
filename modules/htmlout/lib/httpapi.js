@@ -896,8 +896,9 @@ HTTPAPI.processReportAPI = function(req, res)
          * non-zero, convert to base 36, and chop off the leading digit and "decimal" point.
          */
         var sRemoteIP = req? req.ip : "";
-        var sDataFile = "/logs/" + sType + "s/" + usr.formatDate("Ymd") + '-' + (Math.random() + 0.1).toString(36).substr(2,8) + ".json";
-        var sReport = "<p>" + sApp + ' v' + sVer + ' ' + usr.formatDate("Y-m-d H:i:s") + ' ' + sRemoteIP + ' <a href="' + sURL + '?state=' + sDataFile + (sUser? '&user=' + sUser : '') + '">' + sDataFile + "</a></p>\n";
+        var date = new Date();
+        var sDataFile = "/logs/" + sType + "s/" + str.sprintf("%Y%02M%02D", date, date, date) + '-' + (Math.random() + 0.1).toString(36).substr(2,8) + ".json";
+        var sReport = "<p>" + sApp + ' v' + sVer + ' ' + str.sprintf("%T", date) + ' ' + sRemoteIP + ' <a href="' + sURL + '?state=' + sDataFile + (sUser? '&user=' + sUser : '') + '">' + sDataFile + "</a></p>\n";
         sDataFile = path.join(sServerRoot, sDataFile);
         fs.writeFile(sDataFile, sData);
         var sTypeFile = path.join(sServerRoot, "/logs/" + sType + "s.html");

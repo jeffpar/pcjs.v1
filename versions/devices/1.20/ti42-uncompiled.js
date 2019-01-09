@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/lib/stdio.js (C) Jeff Parsons 2012-2018
+ * @copyright https://www.pcjs.org/modules/devices/lib/stdio.js (C) Jeff Parsons 2012-2019
  */
 
 /**
@@ -366,7 +366,7 @@ StdIO.HexLowerCase = "0123456789abcdef";
 StdIO.HexUpperCase = "0123456789ABCDEF";
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2018
+ * @copyright https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2019
  */
 
 /**
@@ -1259,7 +1259,7 @@ Device.Handlers = {};
 Device.Machines = {};
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2018
+ * @copyright https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2019
  */
 
 /** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), location: Array.<number>, map: (Array.<Array.<number>>|undefined), drag: (boolean|undefined), scroll: (boolean|undefined), hexagonal: (boolean|undefined), buttonDelay: (number|undefined) }} */
@@ -1979,7 +1979,7 @@ Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure betw
 Input.VERSION = +VERSION || 1.20;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/led.js (C) Jeff Parsons 2012-2018
+ * @copyright https://www.pcjs.org/modules/devices/led.js (C) Jeff Parsons 2012-2019
  */
 
 /** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), type: number, width: (number|undefined), height: (number|undefined), cols: (number|undefined), colsExtra: (number|undefined), rows: (number|undefined), rowsExtra: (number|undefined), color: (string|undefined), backgroundColor: (string|undefined), fixed: (boolean|undefined), hexagonal: (boolean|undefined), highlight: (boolean|undefined), persistent: (boolean|undefined) }} */
@@ -3227,7 +3227,7 @@ LED.SYMBOL_SEGMENTS = {
 LED.VERSION = +VERSION || 1.20;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/rom.js (C) Jeff Parsons 2012-2018
+ * @copyright https://www.pcjs.org/modules/devices/rom.js (C) Jeff Parsons 2012-2019
  */
 
 /** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), wordSize: number, valueSize: number, valueTotal: number, littleEndian: boolean, file: string, reference: string, chipID: string, revision: (number|undefined), colorROM: (string|undefined), backgroundColorROM: (string|undefined), values: Array.<number> }} */
@@ -3427,7 +3427,7 @@ ROM.BINDING = {
 ROM.VERSION = +VERSION || 1.20;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/time.js (C) Jeff Parsons 2012-2018
+ * @copyright https://www.pcjs.org/modules/devices/time.js (C) Jeff Parsons 2012-2019
  */
 
 /** @typedef {{ id: string, callBack: function(), msAuto: number, nCyclesLeft: number }} */
@@ -4465,7 +4465,7 @@ Time.YIELDS_PER_UPDATE = 60;
 Time.VERSION = +VERSION || 1.20;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/tms1500.js (C) Jeff Parsons 2012-2018
+ * @copyright https://www.pcjs.org/modules/devices/tms1500.js (C) Jeff Parsons 2012-2019
  */
 
 /**
@@ -6208,7 +6208,7 @@ Chip.VERSION = +VERSION || 1.20;
 MACHINE = "TMS1500";
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/machine.js (C) Jeff Parsons 2012-2018
+ * @copyright https://www.pcjs.org/modules/devices/machine.js (C) Jeff Parsons 2012-2019
  */
 
 /**
@@ -6472,7 +6472,7 @@ Machine.CLASSORDER = [
     Machine.CLASS.CHIP
 ];
 
-Machine.COPYRIGHT = "Copyright © 2012-2018 Jeff Parsons <Jeff@pcjs.org>";
+Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 Machine.VERSION = +VERSION || 1.20;

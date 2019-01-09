@@ -647,6 +647,7 @@
 		<disk path="/disks-demo/pcx86/tools/dresearch/pascal/3.11/PASCALMT311-DISK2.json">DR Pascal/MT+ 3.11 (Disk 2)</disk>
 		<disk path="/disks-demo/pcx86/tools/dresearch/pascal/3.11/PASCALMT311-DISK3.json">DR Pascal/MT+ 3.11 (Disk 3)</disk>
 		<disk path="/disks-demo/pcx86/tools/dresearch/pascal/3.11/PASCALMT311-DISK4.json">DR Pascal/MT+ 3.11 (Disk 4)</disk>
+		<disk path="/disks-demo/pcx86/tools/ibm/apl/1.00/APL-100.json">IBM APL 1.00</disk>
 		<disk path="/disks-demo/pcx86/tools/ibm/basic/compiler/1.00/BASCOM100-DISK1.json">IBM BASIC Compiler 1.00 (Disk 1)</disk>
 		<disk path="/disks-demo/pcx86/tools/ibm/basic/compiler/1.00/BASCOM100-DISK2.json">IBM BASIC Compiler 1.00 (Disk 2)</disk>
 		<disk path="/disks-demo/pcx86/tools/ibm/basic/compiler/2.00/BASCOM200-DISK1.json">IBM BASIC Compiler 2.00</disk>
@@ -880,6 +881,13 @@
 		<disk path="/disks-demo/pcx86/roms/ibm/IBM-BIOS-SRC-5170V1.json">IBM PC AT BIOS Sources (V1)</disk>
 		<disk path="/disks-demo/pcx86/roms/ibm/IBM-BIOS-SRC-5170V2.json">IBM PC AT BIOS Sources (V2)</disk>
 		<disk path="/disks-demo/pcx86/roms/ibm/IBM-BIOS-SRC-5170V3.json">IBM PC AT BIOS Sources (V3)</disk>
+		<disk path="/disks-demo/pcx86/shareware/pcdiskmag/PCDISKMAG-DISK1.json">PC Disk Magazine (Disk 1)</disk>
+		<disk path="/disks-demo/pcx86/shareware/pcdiskmag/PCDISKMAG-DISK2.json">PC Disk Magazine (Disk 2)</disk>
+		<disk path="/disks-demo/pcx86/shareware/pcdiskmag/PCDISKMAG-DISK3.json">PC Disk Magazine (Disk 3)</disk>
+		<disk path="/disks-demo/pcx86/shareware/pcdiskmag/PCDISKMAG-DISK4.json">PC Disk Magazine (Disk 4)</disk>
+		<disk path="/disks-demo/pcx86/shareware/pcdiskmag/PCDISKMAG-DISK5.json">PC Disk Magazine (Disk 5)</disk>
+		<disk path="/disks-demo/pcx86/shareware/pcdiskmag/PCDISKMAG-DISK6.json">PC Disk Magazine (Disk 6)</disk>
+		<disk path="/disks-demo/pcx86/shareware/pcdiskmag/PCDISKMAG-DISK7.json">PC Disk Magazine (Disk 7)</disk>
 		<disk path="/disks-demo/pcx86/shareware/pcmag/disks/VOL06N08.json">PC Magazine (Vol. 06 No. 08)</disk>
 		<disk path="/disks-demo/pcx86/shareware/pcmag/disks/VOL06N09.json">PC Magazine (Vol. 06 No. 09)</disk>
 		<disk path="/disks-demo/pcx86/shareware/pcmag/disks/VOL06N10.json">PC Magazine (Vol. 06 No. 10)</disk>
