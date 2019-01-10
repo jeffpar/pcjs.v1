@@ -1082,6 +1082,7 @@
 		<disk path="/disks-demo/pcx86/shareware/pctj/disks/PCTJ8901.json">PC Tech Journal (1989-01)</disk>
 		<disk path="/disks-demo/pcx86/shareware/pctj/disks/PCTBENCH.json">PC Tech Journal (Benchmarks)</disk>
 		<disk path="/disks-demo/pcx86/shareware/pctj/disks/PCTJBEST.json">PC Tech Journal (Best Of)</disk>
+		<disk path="/disks-demo/pcx86/shareware/scbc/SCBC-1990.json">Small Computer Book Club (1990)</disk>
 		<disk path="/disks-demo/pcx86/shareware/unprot/disks/UNPROT-1-2.json">Unprotect Files (UNPROT 1 &amp; 2)</disk>
 		<disk path="/disks-game/pcx86/id/commander_keen/episode1/KEEN1-V11.json">Commander Keen: Episode One</disk>
 		<disk path="/disks-game/pcx86/id/wolf3d/1WOLF14.json">Wolfenstein 3D 1.4</disk>

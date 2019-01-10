@@ -1,19 +1,22 @@
 ---
 layout: page
-title: Magazines
+title: PC Magazines
 permalink: /pubs/pc/magazines/
 ---
 
-Magazines
----------
+PC Magazines
+------------
 
 Browse our collection of PC-related magazines.
 
-[<img src="/pubs/images/BYTE-1975-11-thumb.jpg" width="200" height="260" alt= "Byte Magazine"/>](byte/)
-[<img src="/pubs/images/MSJ-1986-10-thumb.jpg" width="200" height="260" alt= "Microsoft Systems Journal"/>](msj/)
-[<img src="/pubs/images/PCTJ-1983-07-thumb.jpg" width="200" height="260" alt= "PC Tech Journal"/>](pctj/)
+{% include gallery-begin.html %}
+{% include gallery-image.html src="/pubs/images/BYTE-1975-11-thumb.jpg" width="200" height="260" title="Byte Magazine" link="byte/" %}
+{% include gallery-image.html src="/pubs/images/MSJ-1986-10-thumb.jpg" width="200" height="260" title="Microsoft Systems Journal" link="msj/" %}
+{% include gallery-image.html src="https://demo-disks.pcjs.org/pcx86/shareware/pcdiskmag/PC-DISK-MAG-VOL1-NO1.jpg" width="200" height="260" title="PC Disk Magazine" link="pcdiskmag/" %}
+{% include gallery-image.html src="/pubs/images/PCTJ-1983-07-thumb.jpg" width="200" height="260" title="PC Tech Journal" link="pctj/" %}
+{% include gallery-end.html %}
 
-From [PC Tech Journal](/pubs/pc/magazines/pctj/), we also have all the [Microsoft Languages NewsLetters](/disks/pcx86/tools/microsoft/).
+From [PC Tech Journal](pctj/), we also have all the [Microsoft Languages NewsLetters](/disks/pcx86/tools/microsoft/).
 
 And we have an assortment of selected articles:
 

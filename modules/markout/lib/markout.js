@@ -1112,13 +1112,12 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
      * Before we start looking for Markdown-style image links, see if there are any Liquid-style images,
      * (in case this Markdown file is part of a Jekyll installation) and convert them to Markdown-style links.
      */
-    var aMatch;
-    var reIncludes = /{%\s*include\s+(screenshot|gallery-image)\.html\s+(.*?)\s*%}/g;
+    var aMatch, reIncludes = /{%\s*include\s+(screenshot|gallery-image)\.html\s+(.*?)\s*%}/g;
 
     while ((aMatch = reIncludes.exec(sBlock))) {
         var option, aOptions = {};
         var reOptions = /([^\s]+)=(['"])(.*?)\2/g;
-        while ((option = reOptions.exec(aMatch[1]))) {
+        while ((option = reOptions.exec(aMatch[2]))) {
             aOptions[option[1]] = option[3];
         }
         var sReplacement = "![" + aOptions['title'] + "](" + aOptions['src'] + ' "link:' + (aOptions['link'] || "") + ':' + aOptions['width'] + ':' + aOptions['height'] + '")';

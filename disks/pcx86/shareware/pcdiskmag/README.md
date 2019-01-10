@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC Disk Magazine
+title: PC Disk Magazine Software
 permalink: /disks/pcx86/shareware/pcdiskmag/
 machines:
   - id: pcdiskmag
@@ -16,11 +16,11 @@ machines:
     autoType: $date\r$time\rB:\rDIR\r
 ---
 
-PC Disk Magazine
-----------------
+PC Disk Magazine Software
+-------------------------
 
-In addition to [Directory Listings](#pc-disk-magazine-disk-1) and [Diskette Scans](#diskette-scans) of the first seven
-diskettes of PC Disk Magazine, we have scans of the first seven miniature "issues", too.
+In addition to [Directory Listings](#pc-disk-magazine-disk-1) and [Diskette Scans](#diskette-scans) of the first 7
+diskettes of PC Disk Magazine, we have the [print issues](/pubs/pc/magazines/pcdiskmag/) that accompanied those diskettes.
 
 {% include gallery-begin.html %}
 {% include gallery-image.html src="https://demo-disks.pcjs.org/pcx86/shareware/pcdiskmag/PC-DISK-MAG-VOL1-NO1.jpg" width="120" height="190" title="PC Disk Magazine Vol. 1 No. 1" link="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pcdiskmag/PC-DISK-MAG-VOL1-NO1.pdf" %}
