@@ -87,7 +87,6 @@ Also see our collection of selected [IBM PC Application Demos](/apps/pcx86/).
 * [PC Disk Magazine (Disks 1-7)](shareware/pcdiskmag/)
 * [PC Magazine (Vols. 6-14)](shareware/pcmag/)
 * [PC Tech Journal (1985-1989)](shareware/pctj/)
-* [Unprotect Files](shareware/unprot/)
 * [More...](shareware/)
 
 ### Diagnostics and ROMs

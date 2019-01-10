@@ -28,13 +28,17 @@
 		"MD002": false,
 		"MD003": false,
 		"MD004": false,
+		"MD006": false,
+		"MD007": false,
 		"MD009": false,
 		"MD010": false,
 		"MD025": false,
 		"MD026": false,
 		"MD028": false,
 		"MD029": false,
+		"MD032": false,
 		"MD033": false,
+		"MD034": false,
 		"MD041": false
 	},
 	"[markdown]": {

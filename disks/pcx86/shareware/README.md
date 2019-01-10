@@ -11,4 +11,5 @@ Shareware Disks
 - [PC Disk Magazine (Disks 1-7)](/disks/pcx86/shareware/pcdiskmag/)
 - [PC Magazine (Vols. 6-14)](/disks/pcx86/shareware/pcmag/)
 - [PC Tech Journal (1985-1989)](/disks/pcx86/shareware/pctj/)
+- [Small Computer Book Club (1990)](/disks/pcx86/shareware/scbc/)
 - [Unprotect Files](/disks/pcx86/shareware/unprot/)
