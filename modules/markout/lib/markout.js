@@ -1392,7 +1392,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             'version':  sMachineVersion,// eg, "1.10", "*" to select the current version, or "uncompiled"; "*" is the default
             'debugger': fDebugger,      // eg, true or false; false is the default
             'sticky':   fSticky,        // eg, true or false; false is the default
-            'parms':    sMachineParms}
+            'parms':    sMachineParms.replace(/&#92;/g, "\\\\")}    // this replace() isn't strictly necessary, but it brings some consistency between Node and Jekyll-generated output
         );
     }
 
