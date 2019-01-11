@@ -6,8 +6,8 @@ machines:
   - id: pcmag
     type: pcx86
     config: /devices/pcx86/machine/5160/ega/640kb/machine.xml
-    resume: 1
     drives: '[{name:"10Mb Hard Disk",type:3,path:"/disks-demo/pcx86/drives/10mb/MSDOS320-C400.json"}]'
+    resume: 1
     autoMount:
       A:
         name: None
