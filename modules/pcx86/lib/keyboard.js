@@ -2531,6 +2531,7 @@ Keyboard.SOFTCODES = {
     /* 11 */    '0':            Keys.ASCII['0'],
     /* 12 */    '-':            Keys.ASCII['-'],
     /* 13 */    '=':            Keys.ASCII['='],
+    /* 43 */    'bslash':       Keys.ASCII['\\'],               // listed before 'bs' so that injectKeys() doesn't mismatch
     /* 14 */    'bs':           Keyboard.SIMCODE.BS,
     /* 15 */    'tab':          Keyboard.SIMCODE.TAB,
     /* 16 */    'q':            Keys.ASCII.q,
@@ -2576,6 +2577,7 @@ Keyboard.SOFTCODES = {
     /* 56 */    'alt':          Keyboard.SIMCODE.ALT,
     /* 57 */    'space':        Keyboard.SIMCODE.SPACE,
     /* 58 */    'caps-lock':    Keyboard.SIMCODE.CAPS_LOCK,
+    /* 68 */    'f10':          Keyboard.SIMCODE.F10,           // listed before 'f1' so that injectKeys() doesn't mismatch
     /* 59 */    'f1':           Keyboard.SIMCODE.F1,
     /* 60 */    'f2':           Keyboard.SIMCODE.F2,
     /* 61 */    'f3':           Keyboard.SIMCODE.F3,
@@ -2585,7 +2587,6 @@ Keyboard.SOFTCODES = {
     /* 65 */    'f7':           Keyboard.SIMCODE.F7,
     /* 66 */    'f8':           Keyboard.SIMCODE.F8,
     /* 67 */    'f9':           Keyboard.SIMCODE.F9,
-    /* 68 */    'f10':          Keyboard.SIMCODE.F10,
     /* 69 */    'num-lock':     Keyboard.SIMCODE.NUM_LOCK,
     /* 70 */    'scroll-lock':  Keyboard.SIMCODE.SCROLL_LOCK,   // TODO: 0xe046 on 101-key keyboards?
 
