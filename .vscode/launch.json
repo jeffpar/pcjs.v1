@@ -2207,6 +2207,20 @@
       "webRoot": "${workspaceFolder}"
     },
     {
+      "name": "Disks: PC Disk Magazine Software",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/disks/pcx86/shareware/pcdiskmag/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Disks: PC Disk Magazine Software (with Debugger)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://pcjs:8088/disks/pcx86/shareware/pcdiskmag/debugger/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
       "name": "Disks: PC Magazine Disks",
       "type": "chrome",
       "request": "launch",
@@ -2263,10 +2277,10 @@
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Disks: PCjs Random Disk Collection",
+      "name": "Disks: PCjs Personal Disk Collection",
       "type": "chrome",
       "request": "launch",
-      "url": "http://pcjs:8088/disks/pcx86/personal/random/",
+      "url": "http://pcjs:8088/disks/pcx86/personal/",
       "webRoot": "${workspaceFolder}"
     },
     {

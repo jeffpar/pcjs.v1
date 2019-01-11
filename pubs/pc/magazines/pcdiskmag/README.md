@@ -7,8 +7,8 @@ permalink: /pubs/pc/magazines/pcdiskmag/
 PC Disk Magazine
 ----------------
 
-In addition to the PC Disk Magazine [Diskettes](/disks/pcx86/shareware/pcdiskmag/), we have the following print issues
-that accompanied those diskettes.
+In addition to a set of [PC Disk Magazine Diskettes](/disks/pcx86/shareware/pcdiskmag/), we also have the
+User Guides that accompanied those diskettes.
 
 {% include gallery-begin.html %}
 {% include gallery-image.html src="https://demo-disks.pcjs.org/pcx86/shareware/pcdiskmag/PC-DISK-MAG-VOL1-NO1.jpg" width="120" height="190" title="PC Disk Magazine Vol. 1 No. 1" link="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pcdiskmag/PC-DISK-MAG-VOL1-NO1.pdf" %}

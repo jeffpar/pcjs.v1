@@ -1,11 +1,11 @@
 ---
 layout: page
-title: PC Disk Magazine Diskettes
-permalink: /disks/pcx86/shareware/pcdiskmag/
+title: PC Disk Magazine Diskettes (with Debugger)
+permalink: /disks/pcx86/shareware/pcdiskmag/debugger/
 machines:
   - id: pcdiskmag
     type: pcx86
-    config: /devices/pcx86/machine/5160/ega/640kb/machine.xml
+    config: /devices/pcx86/machine/5160/ega/640kb/debugger/machine.xml
     resume: 1
     drives: '[{name:"10Mb Hard Disk",type:3,path:"/disks-demo/pcx86/drives/10mb/MSDOS320-C400.json"}]'
     autoMount:
@@ -31,9 +31,6 @@ diskettes of PC Disk Magazine, we also have the [User Guides](/pubs/pc/magazines
 {% include gallery-image.html src="https://demo-disks.pcjs.org/pcx86/shareware/pcdiskmag/PC-DISK-MAG-VOL1-NO6.jpg" width="120" height="190" title="PC Disk Magazine Vol. 1 No. 6" link="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pcdiskmag/PC-DISK-MAG-VOL1-NO6.pdf" %}
 {% include gallery-image.html src="https://demo-disks.pcjs.org/pcx86/shareware/pcdiskmag/PC-DISK-MAG-VOL1-NO7.jpg" width="120" height="190" title="PC Disk Magazine Vol. 1 No. 7" link="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pcdiskmag/PC-DISK-MAG-VOL1-NO7.pdf" %}
 {% include gallery-end.html %}
-
-You can examine the disks, starting with "PC Disk Magazine (Disk 1)", in the machine below
-(also available with the [PCjs Debugger](debugger/)).
 
 {% include machine.html id="pcdiskmag" %}
 
