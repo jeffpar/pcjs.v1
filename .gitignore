@@ -12,6 +12,7 @@ index.html
 .project
 .settings
 .sass-cache
+.vscode
 node_modules
 tmp
 /blog/*.html

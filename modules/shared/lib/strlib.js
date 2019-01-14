@@ -781,7 +781,7 @@ class Str {
                 /*
                  * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
                  *
-                 * Also, unlike the 'X' and 'x' hexadecimal cases, there's no need to explicitly check for a string
+                 * Also, unlike the 'X' and 'x' hexadecimal cases, there's no need to explicitly check for string
                  * arguments, because Math.trunc() automatically coerces any string value to a (decimal) number.
                  */
                 arg = Math.trunc(arg);
