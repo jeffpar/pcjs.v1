@@ -2511,7 +2511,7 @@ X86.opCALLF = function()
  */
 X86.opWAIT = function()
 {
-    if (!this.fpu || !this.fpu.opWAIT()) {
+    if (!this.fpuActive || !this.fpuActive.opWAIT()) {
         this.nStepCycles -= 3;     // FPUX86.opWAIT() is required to charge some number of cycles if it returns true
     }
 };

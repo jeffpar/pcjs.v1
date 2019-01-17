@@ -149,6 +149,7 @@ class CPU extends Component {
             if (control) this.cmp.setBinding("", CPU.BUTTONS[i], control);
         }
 
+        this.fpuActive = null;
         this.fpu = cmp.getMachineComponent("FPU");
 
         /*

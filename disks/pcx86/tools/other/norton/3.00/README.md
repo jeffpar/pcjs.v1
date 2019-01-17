@@ -46,7 +46,7 @@ One or both of the newer releases of version 3.00 were probably a response, at l
 
     Peter Norton
 
-However, there are a number of other differences between the disks.  For examples, the utilities
+However, there are a number of other differences between the disks.  For example, the utilities
 on the [first disk](#directory-of-norton-utilities-300-1985-12-07) have their traditional short names,
 along with `LONG.BAT` and `SHORT.BAT` batch files to switch between long and short names, whereas the
 [second disk](#directory-of-norton-utilities-300-1985-01-14) uses long names and no batch files,

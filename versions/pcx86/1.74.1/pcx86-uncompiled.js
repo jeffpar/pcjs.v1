@@ -13,7 +13,7 @@ var XMLVERSION = null;                  // this is set in non-COMPILED builds by
 
 var COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 
-var LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
+var LICENSE = "License: GPL version 3 or later (http://gnu.org/licenses/gpl.html)";
 
 var CSSCLASS = "pcjs";
 
@@ -1453,7 +1453,7 @@ class Str {
                 /*
                  * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
                  *
-                 * Also, unlike the 'X' and 'x' hexadecimal cases, there's no need to explicitly check for a string
+                 * Also, unlike the 'X' and 'x' hexadecimal cases, there's no need to explicitly check for string
                  * arguments, because Math.trunc() automatically coerces any string value to a (decimal) number.
                  */
                 arg = Math.trunc(arg);
@@ -12608,7 +12608,7 @@ class CPU extends Component {
             if (control) this.cmp.setBinding("", CPU.BUTTONS[i], control);
         }
 
-        this.fpu = cmp.getMachineComponent("FPU");
+        this.fpu = this.fpuActive = cmp.getMachineComponent("FPU");
 
         /*
          * Attach the ChipSet component to the CPU so that it can obtain the IDT vector number
@@ -14717,9 +14717,29 @@ class CPUX86 extends CPU {
      */
     reset()
     {
+        this.resetFPU();
         this.resetRegs();
         this.resetCycles();
         this.clearError();      // clear any fatal error/exception that setError() may have flagged
+    }
+
+    /**
+     * resetFPU()
+     *
+     * @this {CPUX86}
+     */
+    resetFPU()
+    {
+        if (this.chipset) {
+            if (this.chipset.getDIPCoprocessor()) {
+                if (!this.fpu) {
+                    this.fpu = new FPUX86();
+                }
+                this.fpuActive = this.fpu;
+            } else {
+                this.fpuActive = null;
+            }
+        }
     }
 
     /**
@@ -18471,20 +18491,20 @@ class FPUX86 extends Component {
      *      stepping: a string (eg, "B1") that should match one of the X86.FPU.STEPPING values (default is "")
      *
      * @this {FPUX86}
-     * @param {Object} parmsFPU
+     * @param {Object} [parmsFPU]
      */
     constructor(parmsFPU)
     {
         super("FPU", parmsFPU);
 
-        this.model = parmsFPU['model'] || X86.FPU.MODEL_8087;
+        this.model = this.parms['model'] || X86.FPU.MODEL_8087;
 
         /*
          * We take the 'stepping' value, convert it to a hex value, and then add that to the model to provide
          * a single value that's unique for any given CPU stepping.  If no stepping is provided, then stepping
          * is equal to model.
          */
-        let stepping = parmsFPU['stepping'];
+        let stepping = this.parms['stepping'];
         this.stepping = this.model + (stepping? Str.parseInt(stepping, 16) : 0);
 
         /*
@@ -24119,8 +24139,8 @@ X86.fnDIVw = function(dst, src)
  */
 X86.fnESC = function(dst, src)
 {
-    if (this.fpu) {
-        this.fpu.opFPU(this.bOpcode, this.bModRM, dst, src);
+    if (this.fpuActive) {
+        this.fpuActive.opFPU(this.bOpcode, this.bModRM, dst, src);
     }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 2 : 8);
     return dst;
@@ -34312,7 +34332,7 @@ X86.opCALLF = function()
  */
 X86.opWAIT = function()
 {
-    if (!this.fpu || !this.fpu.opWAIT()) {
+    if (!this.fpuActive || !this.fpuActive.opWAIT()) {
         this.nStepCycles -= 3;     // FPUX86.opWAIT() is required to charge some number of cycles if it returns true
     }
 };
@@ -38300,8 +38320,8 @@ class ChipSet extends Component {
         this.dbg = dbg;
         this.cmp = cmp;
 
-        this.fpu = cmp.getMachineComponent("FPU");
-        this.setDIPSwitches(ChipSet.SWITCH_TYPE.FPU, this.fpu? 1 : 0, true);
+        this.fpuActive = cmp.getMachineComponent("FPU");
+        this.setDIPSwitches(ChipSet.SWITCH_TYPE.FPU, this.fpuActive? 1 : 0, true);
 
         this.kbd = cmp.getMachineComponent("Keyboard");
 
@@ -38419,6 +38439,9 @@ class ChipSet extends Component {
             } else {
                 if (!this.restore(data)) return false;
             }
+            if (this.cpu) {
+                this.fpuActive = this.cpu.fpuActive;
+            }
         }
         return true;
     }
@@ -38450,6 +38473,12 @@ class ChipSet extends Component {
          */
         let i;
         this.updateDIPSwitches();
+
+        /*
+         * If the CPU is reset first, its resetFPU() function call to getDIPCoprocessor() may return
+         * stale information, so now that DIP switches have been updated, we call resetFPU() from here as well.
+         */
+        if (this.cpu) this.cpu.resetFPU();
 
         /*
          * DMA (Direct Memory Access) Controller initialization
@@ -42770,7 +42799,7 @@ class ChipSet extends Component {
     {
         this.printMessageIO(port, bOut, addrFrom, "FPU.CLEAR");
 
-        if (this.fpu) this.fpu.clearBusy();
+        if (this.fpuActive) this.fpuActive.clearBusy();
     }
 
     /**
@@ -42787,7 +42816,7 @@ class ChipSet extends Component {
     {
         this.printMessageIO(port, bOut, addrFrom, "FPU.RESET");
 
-        if (this.fpu) this.fpu.resetFPU();
+        if (this.fpuActive) this.fpuActive.resetFPU();
     }
 
     /**
@@ -71110,9 +71139,7 @@ class DebuggerX86 extends Debugger {
         this.cmp = cmp;
         this.fdc = cmp.getMachineComponent("FDC");
         this.hdc = cmp.getMachineComponent("HDC");
-        this.fpu = cmp.getMachineComponent("FPU");
         this.mouse = cmp.getMachineComponent("Mouse");
-
 
         /*
          * Re-initialize Debugger message and command support as needed
@@ -73723,6 +73750,8 @@ class DebuggerX86 extends Debugger {
             if (data && this.restore) {
                 if (!this.restore(data)) return false;
             }
+
+            this.fpuActive = this.cpu.fpuActive;
         }
         return true;
     }
@@ -76590,7 +76619,7 @@ class DebuggerX86 extends Debugger {
         if (asArgs && asArgs[1] == '?') {
             this.println("register commands:");
             this.println("\tr\tdump registers");
-            if (this.fpu) this.println("\trfp\tdump floating-point registers");
+            if (this.fpuActive) this.println("\trfp\tdump floating-point registers");
             this.println("\trp\tdump all registers");
             this.println("\trx [#]\tset flag or register x to [#]");
             return;
@@ -76601,7 +76630,7 @@ class DebuggerX86 extends Debugger {
 
         if (asArgs != null && asArgs.length > 1) {
             let sReg = asArgs[1];
-            if (this.fpu && sReg == "fp") {
+            if (this.fpuActive && sReg == "fp") {
                 this.doFPURegisters(asArgs);
                 return;
             }
@@ -76860,7 +76889,7 @@ class DebuggerX86 extends Debugger {
      */
     doFPURegisters(asArgs)
     {
-        let fpu = this.fpu;
+        let fpu = this.fpuActive;
 
         let wStatus = fpu.getStatus(), wControl = fpu.getControl();
         for (let i = 0; i < 8; i++) {

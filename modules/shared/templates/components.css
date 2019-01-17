@@ -6,9 +6,16 @@
    @license http://www.gnu.org/licenses/gpl.html
  */
 
+/*
+ * The following was probably a work-around for some problem that I've since forgotten about (and
+ * perhaps only on Mobile Safari, but again, I don't remember).  However, it's kind of annoying because
+ * it means that, on Safari, you can't select most text on any of the pages.  Let's disable it and see
+ * what happens.
+ *
 *:not(input,textarea) {
     -webkit-user-select: none;
 }
+*/
 .pcjs-embed {
 }
 .pcjs-embed:after {

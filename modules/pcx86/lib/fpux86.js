@@ -82,20 +82,20 @@ class FPUX86 extends Component {
      *      stepping: a string (eg, "B1") that should match one of the X86.FPU.STEPPING values (default is "")
      *
      * @this {FPUX86}
-     * @param {Object} parmsFPU
+     * @param {Object} [parmsFPU]
      */
     constructor(parmsFPU)
     {
         super("FPU", parmsFPU);
 
-        this.model = parmsFPU['model'] || X86.FPU.MODEL_8087;
+        this.model = this.parms['model'] || X86.FPU.MODEL_8087;
 
         /*
          * We take the 'stepping' value, convert it to a hex value, and then add that to the model to provide
          * a single value that's unique for any given CPU stepping.  If no stepping is provided, then stepping
          * is equal to model.
          */
-        let stepping = parmsFPU['stepping'];
+        let stepping = this.parms['stepping'];
         this.stepping = this.model + (stepping? Str.parseInt(stepping, 16) : 0);
 
         /*
