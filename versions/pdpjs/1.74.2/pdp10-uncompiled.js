@@ -1049,6 +1049,52 @@ class Str {
     }
 
     /**
+     * parseDate(date)
+     * parseDate(date, time)
+     * parseDate(year, month, day, hour, minute, second)
+     *
+     * Produces a UTC date when ONLY a date (no time) is provided; otherwise, it combines the date and
+     * and time, producing a date that is either UTC or local, depending on the presence (or lack) of time
+     * zone information.  Finally, if numeric inputs are provided, then Date.UTC() is called to generate
+     * a UTC time.
+     *
+     * In general, you should use this instead of new Date(s), because the Date constructor implicitly calls
+     * Date.parse(s), which behaves inconsistently.  For example, ISO date-only strings (e.g. "1970-01-01")
+     * generate a UTC time, but non-ISO date-only strings (eg, "10/1/1945" or "October 1, 1945") generate a
+     * local time.
+     *
+     * @param {...} args
+     * @return {Date} (UTC unless a time string with a non-GMT timezone is explicitly provided)
+     */
+    static parseDate(...args)
+    {
+        let date;
+        if (args[0] === undefined) {
+            date = new Date(Date.now());
+        }
+        else if (typeof args[0] === "string") {
+            date = new Date(args[0] + ' ' + (args[1] || "00:00:00 GMT"));
+        }
+        else if (args[1] === undefined) {
+            date = new Date(args[0]);
+        } else {
+            date = new Date(Date.UTC(...args));
+        }
+        return date;
+    }
+
+    /**
+     * isValidDate(date)
+     *
+     * @param {Date} date
+     * @return {boolean}
+     */
+    static isValidDate(date)
+    {
+        return !isNaN(date.getTime());
+    }
+
+    /**
      * sprintf(format, ...args)
      *
      * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
@@ -1073,7 +1119,7 @@ class Str {
         for (iPart = 0; iPart < aParts.length - 6; iPart += 6) {
 
             text += aParts[iPart];
-            let type = aParts[iPart+5];
+            let arg, type = aParts[iPart+5];
 
             /*
              * Check for unrecognized types immediately, so we don't inadvertently pop any arguments;
@@ -1087,13 +1133,21 @@ class Str {
                 continue;
             }
 
-            let arg = args[iArg];
-            if (type != '%') iArg++;
+            if (iArg < args.length) {
+                arg = args[iArg];
+                if (type != '%') iArg++;
+            } else {
+                arg = args[args.length-1];
+            }
             let flags = aParts[iPart+1];
             let width = aParts[iPart+2];
             if (width == '*') {
                 width = arg;
-                arg = args[iArg++];
+                if (iArg < args.length) {
+                    arg = args[iArg++];
+                } else {
+                    arg = args[args.length-1];
+                }
             } else {
                 width = +width || 0;
             }
@@ -1105,7 +1159,7 @@ class Str {
 
             /*
              * The following non-standard sprintf() format codes provide handy alternatives to the
-             * PHP date() format codes that we used to use with the old usrlib.formatDate() function:
+             * PHP date() format codes that we used to use with the old datelib.formatDate() function:
              *
              *      a:  lowercase ante meridiem and post meridiem (am or pm)                %A
              *      d:  day of the month, 2 digits with leading zeros (01, 02, ..., 31)     %02D
@@ -1126,11 +1180,11 @@ class Str {
              *
              * We also support a few custom format codes:
              *
-             *      C:  calendar output (equivalent to: %W, %F %D, %Y)
-             *      T:  timestamp output (equivalent to: %Y-%02M-%02D %02H:%02N:%02S)
+             *      %C:  calendar output (equivalent to: %W, %F %D, %Y)
+             *      %T:  timestamp output (equivalent to: %Y-%02M-%02D %02H:%02N:%02S)
              *
-             * Use the optional '#' flag with any of the above '%' format codes to produce UTC results;
-             * eg, '%#I' instead of '%I'.
+             * Use the optional '#' flag with any of the above '%' format codes to produce UTC results
+             * (eg, '%#I' instead of '%I').
              *
              * The %A, %F, and %W types act as strings (which support the '-' left justification flag, as well as
              * the width and precision options), and the rest act as integers (which support the '0' padding flag
@@ -1149,12 +1203,12 @@ class Str {
              *
              *      printf("%C\n", date);
              */
-            let ch, date = /** @type {Date} */ (iType < 12 && typeof arg != "object"? new Date(arg) : arg);
+            let ch, date = /** @type {Date} */ (iType < 12 && typeof arg != "object"? Str.parseDate(arg) : arg), dateUndefined;
 
             switch(type) {
             case 'C':
                 ch = hash? '#' : '';
-                text += Str.sprintf(Str.sprintf("%%%sW, %%%sF %%%sD, %%%sY", ch, ch, ch, ch), date, date, date, date);
+                text += (Str.isValidDate(date)? Str.sprintf(Str.sprintf("%%%sW, %%%sF %%%sD, %%%sY", ch), date) : dateUndefined);
                 continue;
 
             case 'D':
@@ -1202,7 +1256,7 @@ class Str {
 
             case 'T':
                 ch = hash? '#' : '';
-                text += Str.sprintf(Str.sprintf("%%%sY-%%%s02M-%%%s02D %%%s02H:%%%s02N:%%%s02S", ch, ch, ch, ch, ch, ch), date, date, date, date, date, date);
+                text += (Str.isValidDate(date)? Str.sprintf(Str.sprintf("%%%sY-%%%s02M-%%%s02D %%%s02H:%%%s02N:%%%s02S", ch), date) : dateUndefined);
                 continue;
 
             case 'W':
@@ -1262,13 +1316,12 @@ class Str {
                 break;
 
             case 'c':
-                arg = String.fromCharCode(arg);
+                arg = typeof arg == "string"? arg[0] : String.fromCharCode(arg);
                 /* falls through */
 
             case 's':
                 /*
-                 * 's' includes some non-standard behavior: if the argument is not actually a string, we coerce
-                 * it to a string first.
+                 * 's' includes some non-standard behavior, such as coercing non-strings to strings first.
                  */
                 if (arg !== undefined) {
                     if (typeof arg != "string") {
@@ -1616,7 +1669,7 @@ class Usr {
     }
 
     /**
-     * adjustDate(date, days)
+     * adjustDays(date, days)
      *
      * Although the setDate() method compensates for day-of-month values outside the current month:
      *
@@ -1641,9 +1694,23 @@ class Usr {
      * @param {number} days (+/-)
      * @return {Date}
      */
-    static adjustDate(date, days)
+    static adjustDays(date, days)
     {
         return new Date(date.getTime() + days * 86400000);
+    }
+
+    /**
+     * subtractDays(date1, date2)
+     *
+     * @param {Date|string} date1
+     * @param {Date|string} date2
+     * @return {number} (date1 - date2, returned as a signed integer number of days)
+     */
+    static subtractDays(date1, date2)
+    {
+        if (typeof date1 == "string") date1 = new Date(date1);
+        if (typeof date2 == "string") date2 = new Date(date2);
+        return Math.round((date1.getTime() - date2.getTime()) / 86400000);
     }
 
     /**
