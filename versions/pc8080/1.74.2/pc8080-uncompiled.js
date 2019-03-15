@@ -13,7 +13,7 @@ var XMLVERSION = null;                  // this is set in non-COMPILED builds by
 
 var COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 
-var LICENSE = "License: GPL version 3 or later (http://gnu.org/licenses/gpl.html)";
+var LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 var CSSCLASS = "pcjs";
 
