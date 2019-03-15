@@ -8,6 +8,7 @@
 index.html
 .DS_Store
 .buildpath
+.history
 .idea
 .project
 .settings

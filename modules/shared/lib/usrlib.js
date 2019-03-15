@@ -134,7 +134,7 @@ class Usr {
     }
 
     /**
-     * adjustDate(date, days)
+     * adjustDays(date, days)
      *
      * Although the setDate() method compensates for day-of-month values outside the current month:
      *
@@ -159,9 +159,23 @@ class Usr {
      * @param {number} days (+/-)
      * @return {Date}
      */
-    static adjustDate(date, days)
+    static adjustDays(date, days)
     {
         return new Date(date.getTime() + days * 86400000);
+    }
+
+    /**
+     * subtractDays(date1, date2)
+     *
+     * @param {Date|string} date1
+     * @param {Date|string} date2
+     * @return {number} (date1 - date2, returned as a signed integer number of days)
+     */
+    static subtractDays(date1, date2)
+    {
+        if (typeof date1 == "string") date1 = new Date(date1);
+        if (typeof date2 == "string") date2 = new Date(date2);
+        return Math.round((date1.getTime() - date2.getTime()) / 86400000);
     }
 
     /**
