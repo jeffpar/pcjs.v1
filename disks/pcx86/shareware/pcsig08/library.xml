@@ -537,6 +537,8 @@
 		<disk path="/disks-demo/pcx86/apps/ibm/exploring/5170/2.00/EXPLORING-THE-IBM-PC-AT-200.json">Exploring the IBM PC AT (2.00)</disk>
 		<disk path="/disks-demo/pcx86/apps/ibm/fland/FLAND.json">IBM EGA Fantasy Land Demo</disk>
 		<disk path="/disks-demo/pcx86/apps/ibm/fland/EGA-UTILS.json">IBM EGA Utilities</disk>
+		<disk path="/disks-demo/pcx86/apps/ibm/multiplan/1.00/MULTIPLAN-IBM100-PROGRAM.json">IBM Multiplan 1.00 (Program)</disk>
+		<disk path="/disks-demo/pcx86/apps/ibm/multiplan/1.00/MULTIPLAN-IBM100-TUTORIAL.json">IBM Multiplan 1.00 (Tutorial)</disk>
 		<disk path="/disks-demo/pcx86/apps/ibm/tobias/1.00/TOBIAS100-PCJR-DISK1.json">Andrew Tobias Money 1.00 (Disk 1)</disk>
 		<disk path="/disks-demo/pcx86/apps/ibm/tobias/1.00/TOBIAS100-PCJR-DISK2.json">Andrew Tobias Money 1.00 (Disk 2)</disk>
 		<disk path="/disks-demo/pcx86/apps/ibm/topview/1.00/TOPVIEW100-PROGRAM.json">IBM TopView 1.00 (Program)</disk>
