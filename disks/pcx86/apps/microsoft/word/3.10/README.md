@@ -1,13 +1,15 @@
 ---
 layout: page
-title: Microsoft Word 3.1 (for DOS)
-permalink: /disks/pcx86/apps/microsoft/word/3.1/
+title: Microsoft Word 3.10 (for DOS)
+permalink: /disks/pcx86/apps/microsoft/word/3.10/
+redirect_from:
+  - /disks/pcx86/apps/microsoft/word/3.1/
 ---
 
-Microsoft Word 3.1
-------------------
+Microsoft Word 3.10
+-------------------
 
-### Directory of MS Word 3.1 (Disk 1)
+### Directory of MS Word 3.10 (Disk 1)
 
 	 Volume in drive A is WORD PROGRM
 
@@ -25,7 +27,7 @@ Microsoft Word 3.1
 	        6 file(s)     355104 bytes
 	                        5120 bytes free
 
-### Directory of MS Word 3.1 (Disk 2)
+### Directory of MS Word 3.10 (Disk 2)
 
 	 Volume in drive A is SPELL DISK 
 
@@ -50,7 +52,7 @@ Microsoft Word 3.1
 	       13 file(s)     315829 bytes
 	                       39936 bytes free
 
-### Directory of MS Word 3.1 (Disk 3)
+### Directory of MS Word 3.10 (Disk 3)
 
 	 Volume in drive A is THESAURUS  
 
@@ -63,7 +65,7 @@ Microsoft Word 3.1
 	        1 file(s)     325440 bytes
 	                       36864 bytes free
 
-### Directory of MS Word 3.1 (Disk 4)
+### Directory of MS Word 3.10 (Disk 4)
 
 	 Volume in drive A is UTILITIES  
 
@@ -98,7 +100,7 @@ Microsoft Word 3.1
 	       23 file(s)     332842 bytes
 	                       16384 bytes free
 
-### Directory of MS Word 3.1 (Disk 5)
+### Directory of MS Word 3.10 (Disk 5)
 
 	 Volume in drive A is PRINTERS1  
 
@@ -186,7 +188,7 @@ Microsoft Word 3.1
 	       76 file(s)     321514 bytes
 	                           0 bytes free
 
-### Directory of MS Word 3.1 (Disk 6)
+### Directory of MS Word 3.10 (Disk 6)
 
 	 Volume in drive A is PRINTERS2  
 
@@ -263,7 +265,7 @@ Microsoft Word 3.1
 	       65 file(s)     299951 bytes
 	                       30720 bytes free
 
-### Directory of MS Word 3.1 (Disk 7)
+### Directory of MS Word 3.10 (Disk 7)
 
 	 Volume in drive A is LEARN MOUSE
 
@@ -280,7 +282,7 @@ Microsoft Word 3.1
 	        5 file(s)     355073 bytes
 	                        5120 bytes free
 
-### Directory of MS Word 3.1 (Disk 8)
+### Directory of MS Word 3.10 (Disk 8)
 
 	 Volume in drive A is LEARN KEYBD
 

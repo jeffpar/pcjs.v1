@@ -9,9 +9,10 @@ Microsoft Word
 
 Information is available for these versions of [Microsoft Word](https://en.wikipedia.org/wiki/Microsoft_Word):
 
-* [Microsoft Word 3.0](3.0/)
-* [Microsoft Word 3.1](3.1/)
-* [Microsoft Word 5.0](5.0/)
+* [Microsoft Word 1.15](1.15/)
+* [Microsoft Word 3.00](3.00/)
+* [Microsoft Word 3.10](3.10/)
+* [Microsoft Word 5.00](5.00/)
 
 Microsoft Word for Windows
 --------------------------

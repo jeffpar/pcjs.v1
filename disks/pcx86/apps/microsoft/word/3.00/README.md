@@ -1,7 +1,9 @@
 ---
 layout: page
-title: Microsoft Word 3.0
-permalink: /disks/pcx86/apps/microsoft/word/3.0/
+title: Microsoft Word 3.00
+permalink: /disks/pcx86/apps/microsoft/word/3.00/
+redirect_from:
+  - /disks/pcx86/apps/microsoft/word/3.0/
 machines:
   - id: ibm5160
     type: pcx86
@@ -10,18 +12,18 @@ machines:
       A:
         name: PC DOS 2.00 (Disk 1)
       B:
-        name: MS Word 3.0 (Disk 1)
+        name: MS Word 3.00 (Disk 1)
     autoType: $date\r$time\rB:\rWORD\r
 ---
 
-Microsoft Word 3.0
-------------------
+Microsoft Word 3.00
+-------------------
 
-This machine is also available with the [PCjs Debugger](debugger/).
+The machine below is also available with the [PCjs Debugger](debugger/).
 
 {% include machine.html id="ibm5160" %}
 
-### Directory of MS Word 3.0 (Disk 1)
+### Directory of MS Word 3.00 (Disk 1)
 
 	 Volume in drive A is WORD PROGRM
 
@@ -38,7 +40,7 @@ This machine is also available with the [PCjs Debugger](debugger/).
 	        5 file(s)     328378 bytes
 	                       31744 bytes free
 
-### Directory of MS Word 3.0 (Disk 2)
+### Directory of MS Word 3.00 (Disk 2)
 
 	 Volume in drive A is SPELL DISK 
 
@@ -63,7 +65,7 @@ This machine is also available with the [PCjs Debugger](debugger/).
 	       13 file(s)     315836 bytes
 	                       39936 bytes free
 
-### Directory of MS Word 3.0 (Disk 3)
+### Directory of MS Word 3.00 (Disk 3)
 
 	 Volume in drive A is UTILITIES  
 
@@ -98,7 +100,7 @@ This machine is also available with the [PCjs Debugger](debugger/).
 	       23 file(s)     348215 bytes
 	                        3072 bytes free
 
-### Directory of MS Word 3.0 (Disk 4)
+### Directory of MS Word 3.00 (Disk 4)
 
 	 Volume in drive A has no label
 
@@ -217,7 +219,7 @@ This machine is also available with the [PCjs Debugger](debugger/).
 	      107 file(s)     308076 bytes
 	                           0 bytes free
 
-### Directory of MS Word 3.0 (Disk 5)
+### Directory of MS Word 3.00 (Disk 5)
 
 	 Volume in drive A is LEARN MOUSE
 
@@ -235,7 +237,7 @@ This machine is also available with the [PCjs Debugger](debugger/).
 	        6 file(s)     357798 bytes
 	                        2048 bytes free
 
-### Directory of MS Word 3.0 (Disk 6)
+### Directory of MS Word 3.00 (Disk 6)
 
 	 Volume in drive A is LEARN KEYBD
 

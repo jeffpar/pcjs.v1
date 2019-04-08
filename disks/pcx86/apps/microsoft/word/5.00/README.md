@@ -1,13 +1,15 @@
 ---
 layout: page
-title: Microsoft Word 5.0 (for DOS)
-permalink: /disks/pcx86/apps/microsoft/word/5.0/
+title: Microsoft Word 5.00 (for DOS)
+permalink: /disks/pcx86/apps/microsoft/word/5.00/
+redirect_from:
+  - /disks/pcx86/apps/microsoft/word/5.0/
 ---
 
-Microsoft Word 5.0
-------------------
+Microsoft Word 5.00
+-------------------
 
-### Directory of MS Word 5.0 (Program 1)
+### Directory of MS Word 5.00 (Program 1)
 
 	 Volume in drive A is PROG1_V50  
 
@@ -27,7 +29,7 @@ Microsoft Word 5.0
 	        8 file(s)     329275 bytes
 	                       29696 bytes free
 
-### Directory of MS Word 5.0 (Program 2)
+### Directory of MS Word 5.00 (Program 2)
 
 	 Volume in drive A is PROG2_V50  
 
@@ -40,7 +42,7 @@ Microsoft Word 5.0
 	        1 file(s)     354105 bytes
 	                        8192 bytes free
 
-### Directory of MS Word 5.0 (Spell)
+### Directory of MS Word 5.00 (Spell)
 
 	 Volume in drive A is SPELL_V50  
 
@@ -59,7 +61,7 @@ Microsoft Word 5.0
 	        7 file(s)     353179 bytes
 	                        6144 bytes free
 
-### Directory of MS Word 5.0 (Thesaurus)
+### Directory of MS Word 5.00 (Thesaurus)
 
 	 Volume in drive A is THESAUR_V50
 
@@ -72,7 +74,7 @@ Microsoft Word 5.0
 	        1 file(s)     326976 bytes
 	                       34816 bytes free
 
-### Directory of MS Word 5.0 (Utilities 1)
+### Directory of MS Word 5.00 (Utilities 1)
 
 	 Volume in drive A is UTIL1_V50  
 
@@ -92,7 +94,7 @@ Microsoft Word 5.0
 	        8 file(s)     352538 bytes
 	                        4096 bytes free
 
-### Directory of MS Word 5.0 (Utilities 2)
+### Directory of MS Word 5.00 (Utilities 2)
 
 	 Volume in drive A is UTIL2_V50  
 
@@ -154,7 +156,7 @@ Microsoft Word 5.0
 	       50 file(s)     339258 bytes
 	                        3072 bytes free
 
-### Directory of MS Word 5.0 (Utilities 3)
+### Directory of MS Word 5.00 (Utilities 3)
 
 	 Volume in drive A is UTIL3_V50  
 
@@ -175,7 +177,7 @@ Microsoft Word 5.0
 	        9 file(s)     357462 bytes
 	                           0 bytes free
 
-### Directory of MS Word 5.0 (Utilities/Print)
+### Directory of MS Word 5.00 (Utilities/Print)
 
 	 Volume in drive A is UTL_PRN_V50
 
@@ -223,7 +225,7 @@ Microsoft Word 5.0
 	       36 file(s)     342374 bytes
 	                        1024 bytes free
 
-### Directory of MS Word 5.0 (Printers 1)
+### Directory of MS Word 5.00 (Printers 1)
 
 	 Volume in drive A is PRINTER1_V5
 
@@ -291,7 +293,7 @@ Microsoft Word 5.0
 	       56 file(s)     335504 bytes
 	                        1024 bytes free
 
-### Directory of MS Word 5.0 (Printers 2)
+### Directory of MS Word 5.00 (Printers 2)
 
 	 Volume in drive A is PRINTER2_V5
 
@@ -362,7 +364,7 @@ Microsoft Word 5.0
 	       59 file(s)     332245 bytes
 	                           0 bytes free
 
-### Directory of MS Word 5.0 (Learning Kbd)
+### Directory of MS Word 5.00 (Learning Kbd)
 
 	 Volume in drive A is LRNKBD_V50 
 
@@ -379,7 +381,7 @@ Microsoft Word 5.0
 	        5 file(s)     317079 bytes
 	                       43008 bytes free
 
-### Directory of MS Word 5.0 (Learning Mouse)
+### Directory of MS Word 5.00 (Learning Mouse)
 
 	 Volume in drive A is LRNMOUS_V50
 
@@ -396,7 +398,7 @@ Microsoft Word 5.0
 	        5 file(s)     316604 bytes
 	                       44032 bytes free
 
-### Directory of MS Word 5.0 (Learning Adv)
+### Directory of MS Word 5.00 (Learning Adv)
 
 	 Volume in drive A is LRNADV_V50 
 
