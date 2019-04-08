@@ -11,5 +11,5 @@ Information is available for the following IBM applications.
 
 * [Exploring the IBM Personal Computer](exploring/)
 * [Fantasy Land EGA Demo and Utilities](fland/)
-* [Multiplan 1.00 (by Microsoft)](multiplan/)
+* [Multiplan](multiplan/)
 * [TopView](topview/)
