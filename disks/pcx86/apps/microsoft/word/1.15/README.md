@@ -40,14 +40,12 @@ The machine below is also available with the [PCjs Debugger](debugger/).
 	EXAMPLE  DOC      4352 09-18-84  12:00p
 	MWCOPY2  BAT       292 09-18-84  12:00p
 	MW       PGM     72848 09-18-84  12:00p
-	MW       HLP     58750 10-16-84  12:06p
+	MW       HLP     58169 09-18-84  12:00p
 	TTY      PRD       820 09-18-84  12:00p
 	PLAIN    PRD       896 09-18-84  12:00p
 	DEFAULT  STY       768 09-18-84  12:00p
-	MW011294 TMP      1024 01-01-80  12:01a
-	MW       INI        54 01-01-80   1:37a
-	       20 file(s)     282435 bytes
-	                       63488 bytes free
+	       18 file(s)     280776 bytes
+	                       66560 bytes free
 
 ### Directory of MS Word 1.15 (Utilities)
 
