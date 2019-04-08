@@ -356,6 +356,7 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, sSize, sServerRoot, 
      * command-line, sServerRoot is a bit of a misnomer: it's basically blank if sDiskPath begins
      * with a slash, and process.cwd() otherwise.
      */
+    this.argv = argv || {};
     this.sServerRoot = sServerRoot;
     this.sDiskPath = sDiskPath;
     if (this.sServerRoot && !net.isRemote(sDiskPath) && sDiskPath.indexOf(';') < 0) {
@@ -368,7 +369,7 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, sSize, sServerRoot, 
     this.nJSONIndent = 0;
     this.fJSONComments = fComments;
     this.sJSONWhitespace = (this.fJSONComments? " " : "");
-    this.fXDFSupport = (argv && argv['xdf']);
+    this.fXDFSupport = this.argv['xdf'];
     /*
      * Specifying a label of "none" will suppress volume LABEL generation as well as ARCHIVE
      * file attributes for normal files; this is useful when generating PC DOS 1.x-compatible
@@ -376,9 +377,9 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, sSize, sServerRoot, 
      * DOS 1.x understands neither the LABEL nor the ARCHIVE attribute bits (in fact, PC DOS 1.x
      * CHKDSK misinterprets the ARCHIVE bit, treating it as if the HIDDEN bit was set instead).
      */
-    this.sLabel = (argv && argv['label']);
-    this.forceBPB = (argv && argv['forceBPB']);
-    this.fNormalize = fNormalize || (argv && argv['normalize']);
+    this.sLabel = this.argv['label'];
+    this.forceBPB = this.argv['forceBPB'];
+    this.fNormalize = fNormalize || this.argv['normalize'];
 
     /*
      * The dump operation itself doesn't care about sManifestFile, but we DO need some indication
@@ -3155,7 +3156,7 @@ DiskDump.prototype.convertToJSON = function()
                     for (var iSector=1, offSector=0; iSector <= nSectorsThisTrack && offSector < cbTrack; iSector++, offSector += cbSectorThisTrack) {
 
                         var sector = {};
-                        var nSector = iSector;
+                        var sectorID = iSector;
 
                         if (fXDFOutput && iCylinder) {
                             if (!iHead) {
@@ -3163,7 +3164,27 @@ DiskDump.prototype.convertToJSON = function()
                             } else {
                                 cbSectorThisTrack = (iSector == 1? 8192 : (iSector == 2? 2048 : (iSector == 3? 1024 : 512)));
                             }
-                            nSector = (cbSectorThisTrack == 512? 2 : (cbSectorThisTrack == 1024? 3 : (cbSectorThisTrack == 2048? 4 : 6)));
+                            sectorID = (cbSectorThisTrack == 512? 2 : (cbSectorThisTrack == 1024? 3 : (cbSectorThisTrack == 2048? 4 : 6)));
+                        }
+
+                        /*
+                         * Check for any sector ID edits that must be applied to the disk (eg, "--sectorID=C:H:S:ID").
+                         *
+                         * For example, when building the IBM Multiplan 1.00 Program disk, "--sectorID=11:0:8:61" must be specified.
+                         */
+                        var sectorIDs = this.argv['sectorID'];
+                        if (sectorIDs) {
+                            var aSectorIDs = (typeof sectorIDs == "string")? [sectorIDs] : sectorIDs;
+                            for (i = 0; i < aSectorIDs.length; i++) {
+                                var aParts = aSectorIDs[i].split(":");
+                                if (+aParts[0] === iCylinder && +aParts[1] === iHead && +aParts[2] === sectorID) {
+                                    var n = +aParts[3];
+                                    if (!isNaN(n)) {
+                                        sectorID = n;
+                                        DiskDump.logConsole(str.sprintf("changing %d:%d:%d sectorID to %d", +aParts[0], +aParts[1], +aParts[2], sectorID));
+                                    }
+                                }
+                            }
                         }
 
                         bufSector = bufTrack.slice(offSector, offSector + cbSectorThisTrack);
@@ -3180,13 +3201,13 @@ DiskDump.prototype.convertToJSON = function()
                         var postComma = (fOptimize? '' : ',');
 
                         if (this.fJSONNative) {
-                            sector['sector'] = nSector;
+                            sector['sector'] = sectorID;
                             if (!fOptimize || cbSectorThisTrack != 512) {
                                 sector['length'] = cbSectorThisTrack;
                             }
                         } else {
                             json += (iSector == 1? this.dumpLine(2, "{") : "");
-                            json += this.dumpLine(0, '"sector":' + this.sJSONWhitespace + nSector + postComma);
+                            json += this.dumpLine(0, '"sector":' + this.sJSONWhitespace + sectorID + postComma);
                             if (!fOptimize || cbSectorThisTrack != 512) {
                                 json += preComma + this.dumpLine(0, '"length":' + this.sJSONWhitespace + cbSectorThisTrack + postComma);
                             }

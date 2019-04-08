@@ -1394,7 +1394,9 @@ class Disk extends Component {
         let iSector = (nSectorsRemaining % this.nSectors);
         let cylinder, head, sector;
         if ((cylinder = this.aDiskData[iCylinder]) && (head = cylinder[iHead]) && (sector = head[iSector])) {
-            this.assert(sector['sector'] == iSector +1);
+            if (sector['sector'] != iSector + 1) {
+                if (DEBUG) this.printf("warning: %d:%d:%d has non-standard sector ID %d; see file %s\n", iCylinder, iHead, iSector + 1, sector['sector'], file.sPath);
+            }
             if (sector['file']) {
                 if (DEBUG && this.messageEnabled()) {
                     this.printMessage('"' + sector['file'].sPath + '" cross-linked at offset ' + sector['file'].offFile + ' with "' + file.sPath + '" at offset ' + off);
