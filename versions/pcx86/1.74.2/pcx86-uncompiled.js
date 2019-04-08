@@ -66152,6 +66152,10 @@ class FDC extends Component {
                     drive.resCode = FDC.REG_DATA.RES.NO_DATA | FDC.REG_DATA.RES.INCOMPLETE;
                     break;
                 }
+                if (drive.sector.dataError) {
+                    drive.resCode = FDC.REG_DATA.RES.CRC_ERROR | FDC.REG_DATA.RES.INCOMPLETE;
+                    break;
+                }
                 drive.ibSector = 0;
                 /*
                  * We "pre-advance" bSector et al now, instead of waiting to advance it right before the seek().
