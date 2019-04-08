@@ -9,6 +9,7 @@ Other PC Utilities
 
 Information is available for these additional PC utilities.
 
+* [DESQview](desqview/)
 * [Enhanced DEBUG](enhdebug/)
 * [FlickerFree](flickerfree/)
 * [Norton Utilities](norton/)
