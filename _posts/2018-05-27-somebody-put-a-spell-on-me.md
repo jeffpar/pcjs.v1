@@ -15,7 +15,7 @@ machines:
       A:
         name: PC DOS 2.00 (Disk 1)
       B:
-        name: MS Word 3.0 (Disk 2)
+        name: MS Word 3.00 (Disk 2)
     autoType: $date\r$time\rB:\rSPELL\r
 ---
 
@@ -286,7 +286,7 @@ to demonstrate Microsoft's `SPELL.COM` use of "CALL 5".  It's configured as foll
       A:
         name: PC DOS 2.00 (Disk 1)
       B:
-        name: MS Word 3.0 (Disk 2)
+        name: MS Word 3.00 (Disk 2)
     autoType: $date\r$time\rB:\rSPELL\r
 
 This establishes a breakpoint on the "CALL 5" entry point inside the application's Program Segment Prefix (PSP);

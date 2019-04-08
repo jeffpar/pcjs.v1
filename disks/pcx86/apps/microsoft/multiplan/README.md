@@ -9,6 +9,7 @@ Microsoft Multiplan
 
 Information is available for the following versions of [Microsoft Multiplan](https://en.wikipedia.org/wiki/Multiplan).
 
+* [Multiplan (IBM Releases)](../../ibm/multiplan)
 * [Microsoft Multiplan 1.06](1.06/)
 * [Microsoft Multiplan 2.00](2.00/)
 * [Microsoft Multiplan 2.01](2.01/)
