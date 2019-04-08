@@ -2746,6 +2746,64 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
 };
 
 /**
+ * readSuppData()
+ *
+ * Returns supplemental data for disk, if any.
+ *
+ * @this {DiskDump}
+ * @return {object}
+ */
+DiskDump.prototype.readSuppData = function()
+{
+    let suppData = {}
+    if (this.argv['suppData']) {
+        let sData;
+        try {
+            sData = fs.readFileSync(this.argv['suppData'], {encoding: "utf8"});
+        } catch(err) {
+            DiskDump.logError(err);
+        }
+        if (sData) {
+            let aSectorData = sData.split(/[ \t]*MFM Sector\s*\n/);
+            for (let i = 1; i < aSectorData.length; i++) {
+                let metaData = aSectorData[i].match(/Sector ID:([0-9]+)[\s\S]*?Track ID:([0-9]+)[\s\S]*?Side ID:([0-9]+)[\s\S]*?Size:([0-9]+)[\s\S]*?DataMark:0x([0-9A-F]+)[\s\S]*?Head CRC:0x([0-9A-F]+)\s+\(([^)]*)\)[\s\S]*?Data CRC:0x([0-9A-F]+)\s+\(([^)]*)\)/);
+                if (metaData) {
+                    let data = [];
+                    let sectorID = +metaData[1];
+                    let trackID = +metaData[2];
+                    let headID = +metaData[3];
+                    let sectorSize = +metaData[4];
+                    let dataMark = parseInt(metaData[5], 16);
+                    let headCRC = parseInt(metaData[6], 16);
+                    let headError = metaData[7].toLowerCase() != "ok";
+                    let dataCRC = parseInt(metaData[8], 16)
+                    let dataError = metaData[9].toLowerCase() != "ok";
+                    let matchData, reData = /([0-9A-F]+)\|([^|]*)\|/g;
+                    while ((matchData = reData.exec(aSectorData[i]))) {
+                        let shift = 0, dw = 0;
+                        let matchByte, reByte = /\s+([0-9A-F]+)/g;
+                        while ((matchByte = reByte.exec(matchData[2]))) {
+                            dw |= +matchByte[1] << shift;
+                            shift += 8;
+                            if (shift == 32) {
+                                data.push(dw);
+                                shift = dw = 0;
+                            }
+                        }
+                        if (shift) data.push(dw);
+                    }
+                    if (!suppData[trackID]) suppData[trackID] = {};
+                    if (!suppData[trackID][headID]) suppData[trackID][headID] = [];
+                    let sector = {sector: sectorID, dataMark, headCRC, headError, dataCRC, dataError, data};
+                    suppData[trackID][headID].push(sector);
+                }
+            }
+        }
+    }
+    return suppData;
+};
+
+/**
  * convertToJSON()
  *
  * Converts the disk image data to JSON.
@@ -2768,6 +2826,8 @@ DiskDump.prototype.convertToJSON = function()
         this.jsonDisk = "[\n  /**\n   * " + DiskDump.sNotice + "\n   * " + DiskDump.sUsage + "\n   */\n]";
         return this.jsonDisk;
     }
+
+    var suppData = this.readSuppData();
 
     var json = null;
     var fOptimize = !this.fJSONComments;    // if true, leave out any properties that are defaults
@@ -3153,7 +3213,8 @@ DiskDump.prototype.convertToJSON = function()
                      */
                     if (fXDFOutput) nSectorsThisTrack = (iCylinder? 4 : 19);
 
-                    for (var iSector=1, offSector=0; iSector <= nSectorsThisTrack && offSector < cbTrack; iSector++, offSector += cbSectorThisTrack) {
+                    var suppTrack = null;
+                    for (var iSector=1, offSector=0; iSector <= nSectorsThisTrack && (offSector < cbTrack || suppTrack); iSector++, offSector += cbSectorThisTrack) {
 
                         var sector = {};
                         var sectorID = iSector;
@@ -3213,25 +3274,47 @@ DiskDump.prototype.convertToJSON = function()
                             }
                         }
 
-                        var aTrim = this.trimSector(bufSector, cbSectorThisTrack);
-                        var dwPattern = aTrim[0];
+                        var suppSector = null;
+                        if (suppData[iCylinder]) {
+                            suppTrack = suppData[iCylinder][iHead];
+                            if (suppTrack) {
+                                suppSector = suppTrack[iSector-1];
+                                nSectorsThisTrack = suppTrack.length;
+                            }
+                        }
+
                         var cbBuffer = cbSectorThisTrack;
-                        if (dwPattern !== null) {
-                            cbBuffer = aTrim[1];
-                            if (!fOptimize || dwPattern) {
-                                if (this.fJSONNative) {
-                                    sector['pattern'] = dwPattern;
-                                } else {
-                                    json += preComma + this.dumpLine(0, '"pattern":' + this.sJSONWhitespace + dwPattern + postComma);
+                        if (!suppSector) {
+                            var aTrim = this.trimSector(bufSector, cbSectorThisTrack);
+                            var dwPattern = aTrim[0];
+                            if (dwPattern !== null) {
+                                cbBuffer = aTrim[1];
+                                if (!fOptimize || dwPattern) {
+                                    if (this.fJSONNative) {
+                                        sector['pattern'] = dwPattern;
+                                    } else {
+                                        json += preComma + this.dumpLine(0, '"pattern":' + this.sJSONWhitespace + dwPattern + postComma);
+                                    }
                                 }
                             }
                         }
+
                         if (this.fJSONNative) {
                             if (!fOptimize || cbBuffer) {
-                                var dataSector = [];
-                                sector['data'] = dataSector;
-                                for (var off = 0; off < cbBuffer; off += 4) {
-                                    dataSector.push(bufSector.readInt32LE(off));
+                                if (suppSector) {
+                                    sector['sector'] = suppSector['sector'];
+                                    sector['dataMark'] = suppSector['dataMark'];
+                                    sector['headCRC'] = suppSector['headCRC'];
+                                    if (suppSector['headError']) sector['headError'] = true;
+                                    sector['dataCRC'] = suppSector['dataCRC'];
+                                    if (suppSector['dataError']) sector['dataError'] = true;
+                                    sector['data'] = suppSector['data'];
+                                } else {
+                                    var dataSector = [];
+                                    for (var off = 0; off < cbBuffer; off += 4) {
+                                        dataSector.push(bufSector.readInt32LE(off));
+                                    }
+                                    sector['data'] = dataSector;
                                 }
                             }
                             aSectors[iSector - 1] = sector;
