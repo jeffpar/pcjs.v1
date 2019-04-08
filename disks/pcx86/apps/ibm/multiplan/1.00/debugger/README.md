@@ -11,6 +11,7 @@ machines:
         name: PC DOS 1.10
       B:
         name: IBM Multiplan 1.00 (Program)
+    autoType: $date\r$time\rB:\rMP80\r
 ---
 
 IBM Multiplan 1.00 (with Debugger)
