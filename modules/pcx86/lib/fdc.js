@@ -2524,7 +2524,7 @@ class FDC extends Component {
         drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
         if (drive.disk) {
             if (DEBUG) {
-                this.printf("%s.doRead(drive=%d,CHS=%x:%x:%x,PBA=%d)\n",
+                this.printf("%s.doRead(drive=%d,CHS=%d:%d:%d,PBA=%d)\n",
                             this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector,
                             (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1));
             }
@@ -2559,7 +2559,7 @@ class FDC extends Component {
         drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
         if (drive.disk) {
             if (DEBUG) {
-                this.printf("%s.doWrite(drive=%d,CHS=%x:%x:%x,PBA=%d)\n",
+                this.printf("%s.doWrite(drive=%d,CHS=%d:%d:%d,PBA=%d)\n",
                             this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector,
                             (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1));
             }
@@ -2777,7 +2777,7 @@ class FDC extends Component {
             drive.nBytes = 128 << drive.abFormat[3];// N (0 => 128, 1 => 256, 2 => 512, 3 => 1024)
             drive.cbFormat = 0;
             if (DEBUG) {
-                this.printf("%s.writeFormat(drive=%d,CHS=%x:%x:%x,len=%d)\n",
+                this.printf("%s.writeFormat(drive=%d,CHS=%d:%d:%d,len=%d)\n",
                             this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector, drive.nBytes);
             }
             for (let i = 0; i < drive.nBytes; i++) {

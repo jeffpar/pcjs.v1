@@ -62024,7 +62024,9 @@ class Disk extends Component {
         let iSector = (nSectorsRemaining % this.nSectors);
         let cylinder, head, sector;
         if ((cylinder = this.aDiskData[iCylinder]) && (head = cylinder[iHead]) && (sector = head[iSector])) {
-
+            if (sector['sector'] != iSector + 1) {
+                if (DEBUG) this.printf("warning: %d:%d:%d has non-standard sector ID %d; see file %s\n", iCylinder, iHead, iSector + 1, sector['sector'], file.sPath);
+            }
             if (sector['file']) {
                 if (DEBUG && this.messageEnabled()) {
                     this.printMessage('"' + sector['file'].sPath + '" cross-linked at offset ' + sector['file'].offFile + ' with "' + file.sPath + '" at offset ' + off);
@@ -66006,7 +66008,7 @@ class FDC extends Component {
         drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
         if (drive.disk) {
             if (DEBUG) {
-                this.printf("%s.doRead(drive=%d,CHS=%x:%x:%x,PBA=%d)\n",
+                this.printf("%s.doRead(drive=%d,CHS=%d:%d:%d,PBA=%d)\n",
                             this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector,
                             (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1));
             }
@@ -66041,7 +66043,7 @@ class FDC extends Component {
         drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
         if (drive.disk) {
             if (DEBUG) {
-                this.printf("%s.doWrite(drive=%d,CHS=%x:%x:%x,PBA=%d)\n",
+                this.printf("%s.doWrite(drive=%d,CHS=%d:%d:%d,PBA=%d)\n",
                             this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector,
                             (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1));
             }
@@ -66259,7 +66261,7 @@ class FDC extends Component {
             drive.nBytes = 128 << drive.abFormat[3];// N (0 => 128, 1 => 256, 2 => 512, 3 => 1024)
             drive.cbFormat = 0;
             if (DEBUG) {
-                this.printf("%s.writeFormat(drive=%d,CHS=%x:%x:%x,len=%d)\n",
+                this.printf("%s.writeFormat(drive=%d,CHS=%d:%d:%d,len=%d)\n",
                             this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector, drive.nBytes);
             }
             for (let i = 0; i < drive.nBytes; i++) {

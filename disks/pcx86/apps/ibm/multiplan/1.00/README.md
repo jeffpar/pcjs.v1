@@ -16,6 +16,8 @@ machines:
 IBM Multiplan 1.00
 ------------------
 
+The machine below is also available with the [PCjs Debugger](debugger/).
+
 {% include machine.html id="ibm5150" %}
 
 ### Directory of IBM Multiplan 1.00 (Program)
