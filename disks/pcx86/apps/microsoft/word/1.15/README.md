@@ -11,7 +11,7 @@ machines:
         name: PC DOS 2.00 (Disk 1)
       B:
         name: MS Word 1.15 (Program)
-    autoType: $date\r$time\rB:\rWORD\r
+    autoType: $date\r$time\rB:\rDIR\r
 ---
 
 Microsoft Word 1.15
