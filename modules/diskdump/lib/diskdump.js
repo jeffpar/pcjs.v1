@@ -2783,7 +2783,7 @@ DiskDump.prototype.readSuppData = function()
                         let shift = 0, dw = 0;
                         let matchByte, reByte = /\s+([0-9A-F]+)/g;
                         while ((matchByte = reByte.exec(matchData[2]))) {
-                            dw |= +matchByte[1] << shift;
+                            dw |= parseInt(matchByte[1], 16) << shift;
                             shift += 8;
                             if (shift == 32) {
                                 data.push(dw);
