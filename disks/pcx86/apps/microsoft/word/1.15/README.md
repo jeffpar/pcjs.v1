@@ -5,7 +5,7 @@ permalink: /disks/pcx86/apps/microsoft/word/1.15/
 machines:
   - id: ibm5160
     type: pcx86
-    config: /devices/pcx86/machine/5160/ega/640kb/machine.xml
+    config: /devices/pcx86/machine/5160/cga/512kb/machine.xml
     autoMount:
       A:
         name: PC DOS 2.00 (Disk 1)
