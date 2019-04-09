@@ -40573,11 +40573,16 @@ class ChipSet extends Component {
                                     channel.fWarning = true;
                                 }
                                 /*
-                                 * TODO: Determine whether to abort, as we do for DMA_MODE.TYPE_READ.
+                                 * TODO: Determine whether to abort, as we do for DMA_MODE.TYPE_READ.  For now, I'm being
+                                 * cautious and triggering an error only when the FDC indicates certain errors (eg, CRC error).
                                  */
-                                b = 0xff;
+                                if (b == -1) {
+                                    b = 0xff;
+                                } else {
+                                    channel.fError = true;
+                                }
                             }
-                            if (!channel.masked) {
+                            if (!channel.masked && !channel.fError) {
                                 chipset.bus.setByte(addrCur, b);
                                 /*
                                  * WARNING: Do NOT assume that obj is valid; if the sector data was not found, there will be no obj.
@@ -66154,6 +66159,7 @@ class FDC extends Component {
                 }
                 if (drive.sector.dataError) {
                     drive.resCode = FDC.REG_DATA.RES.CRC_ERROR | FDC.REG_DATA.RES.INCOMPLETE;
+                    b = -2;
                     break;
                 }
                 drive.ibSector = 0;
