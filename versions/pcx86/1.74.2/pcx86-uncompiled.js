@@ -40573,14 +40573,9 @@ class ChipSet extends Component {
                                     channel.fWarning = true;
                                 }
                                 /*
-                                 * TODO: Determine whether to abort, as we do for DMA_MODE.TYPE_READ.  For now, I'm being
-                                 * cautious and triggering an error only when the FDC indicates certain errors (eg, CRC error).
+                                 * TODO: Determine whether to abort, as we do for DMA_MODE.TYPE_READ.
                                  */
-                                if (b == -1) {
-                                    b = 0xff;
-                                } else {
-                                    channel.fError = true;
-                                }
+                                b = 0xff;
                             }
                             if (!channel.masked && !channel.fError) {
                                 chipset.bus.setByte(addrCur, b);
@@ -61403,7 +61398,6 @@ class Disk extends Component {
                                 if (length === undefined) {     // provide backward-compatibility with older JSON...
                                     length = sector['length'] = 512;
                                 }
-                                length >>= 2;                   // convert length from a byte-length to a dword-length
                                 let dwPattern = sector['pattern'];
                                 if (dwPattern === undefined) {
                                     dwPattern = sector['pattern'] = 0;
@@ -61433,9 +61427,8 @@ class Disk extends Component {
                                          * to fully "inflate" the sector, eliminating the possibility of partial dwords and
                                          * saving any code downstream from dealing with byte-size patterns.
                                          */
-                                        let cb = length << 2;
 
-                                        for (let ib = ab.length; ib < cb; ib++) {
+                                        for (let ib = ab.length; ib < length; ib++) {
                                             ab[ib] = dwPattern;         // the pattern for byte-arrays was only a byte
                                         }
                                         this.fill(sector, ab, 0);
@@ -62047,11 +62040,11 @@ class Disk extends Component {
     }
 
     /**
-     * initSector(sector, iCylinder, iHead, iSector, cbSector, dwPattern)
+     * initSector(sector, iCylinder, iHead, sectorID, cbSector, dwPattern)
      *
      * Ensures every sector has ALL the properties of a proper Sector object; ie:
      *
-     *      'sector':   sector number
+     *      'sector':   sector ID
      *      'length':   size of the sector, in bytes
      *      'data':     array of dwords
      *      'pattern':  dword pattern to use for empty or partial sectors (null for unread remote sectors)
@@ -62067,15 +62060,15 @@ class Disk extends Component {
      * @param {Object} sector
      * @param {number} iCylinder
      * @param {number} iHead
-     * @param {number} [iSector]
+     * @param {number} [sectorID]
      * @param {number} [cbSector]
      * @param {number|null} [dwPattern]
      * @return {Object}
      */
-    initSector(sector, iCylinder, iHead, iSector, cbSector, dwPattern)
+    initSector(sector, iCylinder, iHead, sectorID, cbSector, dwPattern)
     {
         if (!sector) {
-            sector = {'sector': iSector, 'length': cbSector, 'data': [], 'pattern': dwPattern};
+            sector = {'sector': sectorID, 'length': cbSector, 'data': [], 'pattern': dwPattern};
         }
         sector.iCylinder = iCylinder;
         sector.iHead = iHead;
@@ -66140,7 +66133,23 @@ class FDC extends Component {
         let b = -1;
         let obj = null, off = 0;    // these variables are purely for BACKTRACK purposes
 
-        if (!drive.resCode && drive.disk) {
+        /*
+         * Our JSON-encoded disk images now support certain copy-protection-related features, such as sectors
+         * with non-standard sizes (ie, other than 512), non-sequential sector IDs (see IBM Multiplan 1.00), and
+         * sectors with forced CRC errors (see Microsoft Word 1.15).
+         *
+         * The latter requires that we check our sectors for the optional "dataError" property and set resCode
+         * accordingly; logically, that probably shouldn't happen until just after the last byte of the sector
+         * has been transferred, but we don't really know when that happens, since we're just calling disk.read()
+         * as many times as the DMA controller count indicates.
+         *
+         * So we simply set resCode to CRC_ERROR as soon as we notice a sector with "dataError" set, and we no
+         * longer bypass the entire operation simply because resCode has been set to that value.
+         *
+         * TODO: Someday all possible FDC error conditions need to be tested on a real controller, because this
+         * code is becoming a bit too crufty.
+         */
+        if ((!drive.resCode || drive.resCode == (FDC.REG_DATA.RES.CRC_ERROR | FDC.REG_DATA.RES.INCOMPLETE)) && drive.disk) {
             do {
                 if (drive.sector) {
                     off = drive.ibSector;
@@ -66159,8 +66168,6 @@ class FDC extends Component {
                 }
                 if (drive.sector.dataError) {
                     drive.resCode = FDC.REG_DATA.RES.CRC_ERROR | FDC.REG_DATA.RES.INCOMPLETE;
-                    b = -2;
-                    break;
                 }
                 drive.ibSector = 0;
                 /*

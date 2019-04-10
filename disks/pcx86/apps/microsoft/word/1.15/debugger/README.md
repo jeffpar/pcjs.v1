@@ -30,9 +30,9 @@ Microsoft Word 1.15 (with Debugger)
     DataMark:0xFB
     Head CRC:0xAB5F (Ok)
     Data CRC:0xE3B6 (Ok)
-    Start Sector cell:2569
-    Start Sector Data cell:3273
-    End Sector cell:7465
+    Start Sector cell:2608
+    Start Sector Data cell:3312
+    End Sector cell:7504
     Number of cells:4896
 
     0000| 43 6F 70 79 72 69 67 68 | Copyrigh
@@ -77,9 +77,9 @@ Microsoft Word 1.15 (with Debugger)
     DataMark:0xFB
     Head CRC:0xFE0C (Ok)
     Data CRC:0x45DB (Ok)
-    Start Sector cell:7817
-    Start Sector Data cell:8521
-    End Sector cell:12713
+    Start Sector cell:7856
+    Start Sector Data cell:8560
+    End Sector cell:12752
     Number of cells:4896
 
     0000| 53 74 65 61 6C 69 6E 67 | Stealing
@@ -124,9 +124,9 @@ Microsoft Word 1.15 (with Debugger)
     DataMark:0xFB
     Head CRC:0xCD3D (Ok)
     Data CRC:0x76B4 (Ok)
-    Start Sector cell:13065
-    Start Sector Data cell:13769
-    End Sector cell:17961
+    Start Sector cell:13104
+    Start Sector Data cell:13808
+    End Sector cell:18000
     Number of cells:4896
 
     0000| 6C 65 20 63 61 6E 20 75 | le can u
@@ -171,9 +171,9 @@ Microsoft Word 1.15 (with Debugger)
     DataMark:0xFB
     Head CRC:0x54AA (Ok)
     Data CRC:0x4C75 (Ok)
-    Start Sector cell:18313
-    Start Sector Data cell:19017
-    End Sector cell:23209
+    Start Sector cell:18352
+    Start Sector Data cell:19056
+    End Sector cell:23248
     Number of cells:4896
 
     0000| 57 65 20 77 69 6C 6C 20 | We will 
@@ -217,10 +217,10 @@ Microsoft Word 1.15 (with Debugger)
     Size:01024 (ID:0x03)
     DataMark:0xFB
     Head CRC:0x47D9 (Ok)
-    Data CRC:0x0000 (BAD CRC!)
-    Start Sector cell:23561
-    Start Sector Data cell:24265
-    End Sector cell:40745
+    Data CRC:0xEDED (BAD CRC!)
+    Start Sector cell:23600
+    Start Sector Data cell:24304
+    End Sector cell:40784
     Number of cells:17184
 
     0000| F6 F6 F6 F6 F6 F6 F6 F6 | ........
@@ -262,95 +262,95 @@ Microsoft Word 1.15 (with Debugger)
     0120| 32 C8 4E 4E 4E 4E 4E 4E | 2.NNNNNN
     0128| 4E 4E 4E 4E 4E 4E 4E 4E | NNNNNNNN
     0130| 4E 4E 4E 4E 4E 4E 4E 4E | NNNNNNNN
-    0138| 07 FF FF FF FF FF FF FF | ........
-    0140| FF FF FF FF F0 A0 A0 A0 | ........
-    0148| 01 C0 00 78 20 48 20 80 | ...x H .
-    0150| 38 1C FC FC 64 24 3C 44 | 8...d$<D
-    0158| F8 C8 24 F9 00 20 C0 48 | ..$.. .H
-    0160| 00 40 00 88 1F 07 08 00 | .@......
-    0168| 00 48 9C F9 88 48 80 80 | .H...H..
-    0170| 98 00 04 F9 88 20 80 38 | ..... .8
-    0178| 18 80 48 44 0F 07 08 48 | ..HD...H
-    0180| 20 C0 38 E0 48 9C F9 C8 |  .8.H...
-    0188| 48 00 98 20 87 07 09 08 | H.. ....
-    0190| E0 C8 84 F9 C8 18 00 00 | ........
-    0198| 80 08 18 38 E0 1F 07 09 | ...8....
-    01A0| 08 80 88 8C F9 38 E0 48 | .....8.H
-    01A8| C8 80 48 47 07 09 98 00 | ..HG....
-    01B0| 00 84 F9 00 18 00 08 98 | ........
-    01B8| 80 4F 07 09 C8 48 00 C0 | .O...H..
-    01C0| 84 F9 18 80 E0 07 07 09 | ........
-    01C8| 88 48 E0 08 04 F9 18 20 | .H..... 
-    01D0| E0 08 87 07 09 C0 E0 48 | .......H
-    01D8| 1C F9 00 C1 C0 00 08 08 | ........
-    01E0| 80 18 1F 07 09 98 E0 08 | ........
-    01E8| 20 9C F8 78 E0 18 00 80 |  ..x....
-    01F0| 4F 07 09 C0 38 48 20 44 | O...8H D
-    01F8| F8 78 80 18 80 48 47 07 | .x...HG.
-    0200| 09 08 80 88 8C F8 48 E0 | ......H.
-    0208| 20 00 80 47 07 08 18 00 |  ..G....
-    0210| 04 F8 48 80 80 08 87 07 | ..H.....
-    0218| 09 00 80 0C F8 40 38 E0 | .....@8.
-    0220| 78 20 48 07 07 09 C0 38 | x H....8
-    0228| E0 48 18 80 44 F8 40 20 | .H..D.@ 
-    0230| 00 00 08 20 27 07 09 80 | ... '...
-    0238| 48 80 84 F9 C0 00 3F 07 | H.....?.
-    0240| 08 78 E0 1C F8 18 3F FF | .x....?.
-    0248| C0 0E 01 0E 12 12 12 12 | ........
-    0250| 12 12 12 12 1F FF FF FF | ........
-    0258| FF FF FF FF FF FF FF FF | ........
-    0260| E1 41 41 40 19 0F CF 0F | .AA@....
-    0268| CF C0 42 12 12 12 12 12 | ..B.....
-    0270| 12 12 12 12 12 12 12 12 | ........
-    0278| 12 12 12 12 12 12 12 12 | ........
-    0280| 1F FF FF FF FF FF FF FF | ........
-    0288| FF FF FF FF E1 41 41 40 | .....AA@
-    0290| 00 00 00 00 00 00 00 00 | ........
-    0298| 00 00 00 00 00 00 00 00 | ........
-    02A0| 00 00 00 00 00 00 00 00 | ........
-    02A8| 00 00 00 00 00 00 00 00 | ........
-    02B0| 00 00 00 00 00 00 00 00 | ........
-    02B8| 00 00 00 00 00 00 00 00 | ........
-    02C0| 00 00 00 00 00 00 00 00 | ........
-    02C8| 00 00 00 00 00 00 00 00 | ........
-    02D0| 00 00 00 00 00 00 00 00 | ........
-    02D8| 00 00 00 00 00 00 00 00 | ........
-    02E0| 00 00 00 00 00 00 00 00 | ........
-    02E8| 00 00 00 00 00 00 00 00 | ........
-    02F0| 00 00 00 00 00 00 00 00 | ........
-    02F8| 00 00 00 00 00 00 00 00 | ........
-    0300| 00 00 00 00 00 00 00 00 | ........
-    0308| 00 00 00 00 00 00 00 00 | ........
-    0310| 00 00 00 00 00 00 00 00 | ........
-    0318| 00 00 00 00 00 00 00 00 | ........
-    0320| 00 00 00 00 00 00 00 00 | ........
-    0328| 00 00 00 00 00 00 00 00 | ........
-    0330| 00 00 00 00 00 00 00 00 | ........
-    0338| 00 00 00 00 00 00 00 00 | ........
-    0340| 00 00 00 00 00 00 00 00 | ........
-    0348| 00 00 00 00 00 00 00 00 | ........
-    0350| 00 00 00 00 00 00 00 00 | ........
-    0358| 00 00 00 00 00 00 00 00 | ........
-    0360| 00 00 00 00 00 00 00 00 | ........
-    0368| 00 00 00 00 00 00 00 00 | ........
-    0370| 00 00 00 00 00 00 00 00 | ........
-    0378| 00 00 00 00 00 00 00 00 | ........
-    0380| 00 00 00 00 00 00 00 00 | ........
-    0388| 00 00 00 00 00 00 00 00 | ........
-    0390| 02 00 02 12 12 12 12 12 | ........
-    0398| 12 12 12 12 1F FF FF FF | ........
-    03A0| FF FF FF FF FF FF FF FF | ........
-    03A8| E1 41 41 40 19 0F CE 7F | .AA@....
-    03B0| CC C3 02 12 12 12 12 12 | ........
-    03B8| 12 12 12 12 12 12 12 12 | ........
-    03C0| 12 12 12 12 12 12 12 12 | ........
-    03C8| 1F FF FF FF FF FF FF FF | ........
-    03D0| FF FF FF FF E1 41 41 40 | .....AA@
-    03D8| 00 00 00 00 00 00 00 00 | ........
-    03E0| 00 00 00 00 00 00 00 00 | ........
-    03E8| 00 00 00 00 00 00 00 00 | ........
-    03F0| 00 00 00 00 00 00 00 00 | ........
-    03F8| 00 00 00 00 00 00 00 00 | ........
+    0138| 00 00 00 00 00 00 00 00 | ........
+    0140| 00 00 00 00 0A 1A 1A 1F | ........
+    0148| B4 36 F7 07 97 26 96 76 | .6...&.v
+    0150| 87 42 02 03 13 93 83 32 | .B.....2
+    0158| 06 27 92 04 D6 96 37 26 | .'....7&
+    0160| F7 36 F6 67 40 D0 A5 76 | .6.g@..v
+    0168| F7 26 42 04 67 26 56 56 | .&B.g&VV
+    0170| 46 F6 D2 04 66 96 76 87 | F...f.v.
+    0178| 46 57 27 33 A0 D0 A5 26 | FW'3...&
+    0180| 96 36 86 17 26 42 04 27 | .6..&B.'
+    0188| 26 F6 46 96 50 D0 A4 A6 | &.F.P...
+    0190| 16 26 52 04 26 C7 56 D6 | .&R.&.V.
+    0198| 56 E7 46 86 16 C0 D0 A4 | V.F.....
+    01A0| A6 56 66 62 04 86 17 26 | .Vfb...&
+    01A8| 26 57 27 30 D0 A4 46 F7 | &W'0..F.
+    01B0| 56 72 04 B6 C7 56 E6 46 | Vr...V.F
+    01B8| 57 20 D0 A4 27 27 56 36 | W ..''V6
+    01C0| 52 04 C6 56 16 B0 D0 A4 | R..V....
+    01C8| 67 26 16 E6 B2 04 C6 96 | g&......
+    01D0| 16 E6 70 D0 A4 36 17 26 | ..p..6.&
+    01D8| C2 04 D6 34 36 F6 E6 E6 | ...46...
+    01E0| 56 C6 C0 D0 A4 46 17 66 | V....F.f
+    01E8| 96 42 05 06 16 C6 D6 57 | .B.....W
+    01F0| 20 D0 A4 36 87 26 97 32 |  ..6.&.2
+    01F8| 05 06 57 46 57 27 30 D0 | ..WFW'0.
+    0200| A4 A6 56 66 62 05 26 16 | ..Vfb.&.
+    0208| 96 B6 57 30 D0 A5 46 F6 | ..W0..F.
+    0210| D2 05 26 56 57 66 50 D0 | ..&VWfP.
+    0218| A4 B6 56 E2 05 36 86 17 | ..V..6..
+    0220| 06 97 26 F0 D0 A4 36 86 | ..&...6.
+    0228| 17 26 C6 57 32 05 36 96 | .&.W2.6.
+    0230| D6 F6 E7 96 90 D0 A4 77 | .......w
+    0238| 26 56 72 04 36 F7 80 D0 | &Vr.6...
+    0240| A5 06 17 42 05 46 80 00 | ...B.F..
+    0248| 3B 61 B4 EC 9C 9C 9C 9C | ;a......
+    0250| 9C 9C 9C 9C 9C 00 00 00 | ........
+    0258| 00 00 00 00 00 00 00 00 | ........
+    0260| 01 43 43 43 FC 4E 02 0E | .CCC.N..
+    0268| 02 03 F2 9C 9C 9C 9C 9C | ........
+    0270| 9C 9C 9C 9C 9C 9C 9C 9C | ........
+    0278| 9C 9C 9C 9C 9C 9C 9C 9C | ........
+    0280| 9C 00 00 00 00 00 00 00 | ........
+    0288| 00 00 00 00 01 43 43 43 | .....CCC
+    0290| F7 ED ED ED ED ED ED ED | ........
+    0298| ED ED ED ED ED ED ED ED | ........
+    02A0| ED ED ED ED ED ED ED ED | ........
+    02A8| ED ED ED ED ED ED ED ED | ........
+    02B0| ED ED ED ED ED ED ED ED | ........
+    02B8| ED ED ED ED ED ED ED ED | ........
+    02C0| ED ED ED ED ED ED ED ED | ........
+    02C8| ED ED ED ED ED ED ED ED | ........
+    02D0| ED ED ED ED ED ED ED ED | ........
+    02D8| ED ED ED ED ED ED ED ED | ........
+    02E0| ED ED ED ED ED ED ED ED | ........
+    02E8| ED ED ED ED ED ED ED ED | ........
+    02F0| ED ED ED ED ED ED ED ED | ........
+    02F8| ED ED ED ED ED ED ED ED | ........
+    0300| ED ED ED ED ED ED ED ED | ........
+    0308| ED ED ED ED ED ED ED ED | ........
+    0310| ED ED ED ED ED ED ED ED | ........
+    0318| ED ED ED ED ED ED ED ED | ........
+    0320| ED ED ED ED ED ED ED ED | ........
+    0328| ED ED ED ED ED ED ED ED | ........
+    0330| ED ED ED ED ED ED ED ED | ........
+    0338| ED ED ED ED ED ED ED ED | ........
+    0340| ED ED ED ED ED ED ED ED | ........
+    0348| ED ED ED ED ED ED ED ED | ........
+    0350| ED ED ED ED ED ED ED ED | ........
+    0358| ED ED ED ED ED ED ED ED | ........
+    0360| ED ED ED ED ED ED ED ED | ........
+    0368| ED ED ED ED ED ED ED ED | ........
+    0370| ED ED ED ED ED ED ED ED | ........
+    0378| ED ED ED ED ED ED ED ED | ........
+    0380| ED ED ED ED ED ED ED ED | ........
+    0388| ED ED ED ED ED ED ED ED | ........
+    0390| ED 95 6E 9C 9C 9C 9C 9C | ..n.....
+    0398| 9C 9C 9C 9C 9C 00 00 00 | ........
+    03A0| 00 00 00 00 00 00 00 00 | ........
+    03A8| 01 43 43 43 FC 4E 02 10 | .CCC.N..
+    03B0| 02 23 8E 9C 9C 9C 9C 9C | .#......
+    03B8| 9C 9C 9C 9C 9C 9C 9C 9C | ........
+    03C0| 9C 9C 9C 9C 9C 9C 9C 9C | ........
+    03C8| 9C 00 00 00 00 00 00 00 | ........
+    03D0| 00 00 00 00 01 43 43 43 | .....CCC
+    03D8| F7 ED ED ED ED ED ED ED | ........
+    03E0| ED ED ED ED ED ED ED ED | ........
+    03E8| ED ED ED ED ED ED ED ED | ........
+    03F0| ED ED ED ED ED ED ED ED | ........
+    03F8| ED ED ED ED ED ED ED ED | ........
 
     ---
 
@@ -361,10 +361,10 @@ Microsoft Word 1.15 (with Debugger)
     DataMark:0xFB
     Head CRC:0x32C8 (Ok)
     Data CRC:0xB61B (Ok)
-    Start Sector cell:28809
-    Start Sector Data cell:29522
-    End Sector cell:33714
-    Number of cells:4905
+    Start Sector cell:28848
+    Start Sector Data cell:29560
+    End Sector cell:33752
+    Number of cells:4904
 
     0000| 43 6F 70 79 72 69 67 68 | Copyrigh
     0008| 74 20 20 31 39 38 33 20 | t  1983 
@@ -408,9 +408,9 @@ Microsoft Word 1.15 (with Debugger)
     DataMark:0xFB
     Head CRC:0x01F9 (Ok)
     Data CRC:0xCAB7 (Ok)
-    Start Sector cell:34064
-    Start Sector Data cell:34768
-    End Sector cell:38960
+    Start Sector cell:34110
+    Start Sector Data cell:34814
+    End Sector cell:39006
     Number of cells:4896
 
     0000| F6 F6 F6 F6 F6 F6 F6 F6 | ........
@@ -455,9 +455,9 @@ Microsoft Word 1.15 (with Debugger)
     DataMark:0xFB
     Head CRC:0x11C7 (Ok)
     Data CRC:0xCAB7 (Ok)
-    Start Sector cell:39312
-    Start Sector Data cell:40016
-    End Sector cell:44208
+    Start Sector cell:39358
+    Start Sector Data cell:40062
+    End Sector cell:44254
     Number of cells:4896
 
     0000| F6 F6 F6 F6 F6 F6 F6 F6 | ........
@@ -502,9 +502,9 @@ Microsoft Word 1.15 (with Debugger)
     DataMark:0xFB
     Head CRC:0x22F6 (Ok)
     Data CRC:0x9569 (Ok)
-    Start Sector cell:44560
-    Start Sector Data cell:45264
-    End Sector cell:49456
+    Start Sector cell:44606
+    Start Sector Data cell:45310
+    End Sector cell:49502
     Number of cells:4896
 
     0000| 54 68 69 73 20 70 72 6F | This pro
@@ -549,9 +549,9 @@ Microsoft Word 1.15 (with Debugger)
     DataMark:0xFB
     Head CRC:0x77A5 (Ok)
     Data CRC:0x7545 (Ok)
-    Start Sector cell:49808
-    Start Sector Data cell:50512
-    End Sector cell:54704
+    Start Sector cell:49854
+    Start Sector Data cell:50558
+    End Sector cell:54750
     Number of cells:4896
 
     0000| 2E 2E 2E 2E 2E 2E 2E 2E | ........
@@ -596,9 +596,9 @@ Microsoft Word 1.15 (with Debugger)
     DataMark:0xFB
     Head CRC:0x4494 (Ok)
     Data CRC:0x7545 (Ok)
-    Start Sector cell:55056
-    Start Sector Data cell:55760
-    End Sector cell:59952
+    Start Sector cell:55102
+    Start Sector Data cell:55806
+    End Sector cell:59998
     Number of cells:4896
 
     0000| 2E 2E 2E 2E 2E 2E 2E 2E | ........
@@ -643,9 +643,9 @@ Microsoft Word 1.15 (with Debugger)
     DataMark:0xFB
     Head CRC:0xDD03 (Ok)
     Data CRC:0x7545 (Ok)
-    Start Sector cell:60304
-    Start Sector Data cell:61008
-    End Sector cell:65200
+    Start Sector cell:60350
+    Start Sector Data cell:61054
+    End Sector cell:65246
     Number of cells:4896
 
     0000| 2E 2E 2E 2E 2E 2E 2E 2E | ........
@@ -688,156 +688,9 @@ Microsoft Word 1.15 (with Debugger)
     Track format :
     ISOIBM_MFM_ENCODING
 
-    Track len : 100160 cells
+    Track len : 100308 cells
     Number of side : 2
 
     Interface mode:
     GENERIC_SHUGART_DD_FLOPPYMODE
     Shugart Interface
-
-### Debugging Information
-
-    PCx86 v1.74.2
-    Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>
-    License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>
-    Loading /devices/pcx86/hdc/ibm-xebec-1982.json.......
-    Loading /devices/pcx86/rom/5160/basic/BASIC110.json.......
-    Loading /devices/pcx86/rom/5160/1982-11-08/XTBIOS-REV1.json.......
-    Loading /devices/pcx86/video/ibm/cga/ibm-cga.json.......
-    Loading /disks-demo/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json.......
-    Loading /disks-demo/pcx86/apps/microsoft/word/1.15/MSWORD-115-PROGRAM.json........
-    HDC: Type 3 "10Mb Hard Disk 0" is fixed disk 0
-    HDC: Type 3 "10Mb Hard Disk 1" is fixed disk 1
-    Loading /disks-demo/pcx86/drives/10mb/PCDOS200-EMPTY.json............
-    Bus: 8Kb ROM at 0xC8000
-    Bus: 8Kb ROM at 0xFE000
-    Bus: 32Kb ROM at 0xF6000
-    HDC: Mounted disk "10Mb Hard Disk 0" in drive C
-    HDC: Mounted disk "10Mb Hard Disk 1" in drive D
-    FDC: Mounted diskette "PC DOS 2.00 (Disk 1)" in drive A
-    FDC: Mounted diskette "MS Word 1.15 (Program)" in drive B
-    Bus: 512Kb RAM at 0x0
-    RAM: 0x80000 (512Kb) size overrides SW1
-    RAM: ROM BIOS memory test has been disabled
-    Bus: 16Kb VIDEO at 0xB8000
-    Type ? for help with PCx86 Debugger commands
-    AX=0000 BX=0000 CX=0000 DX=0000 SP=0000 BP=0000 SI=0000 DI=0000 
-    SS=0000 DS=0000 ES=0000 PS=F002 V0 D0 I0 T0 S0 Z0 A0 P0 C0 
-    &FFFF:0000 EA5BE000F0       JMP      &F000:E05B (romBIOS+0x005B)
-    running
-    >> h
-    stopped (1806277 opcodes, 37295707 cycles, 1554776090679 ms, 0 hz)
-    AX=2901 BX=00E5 CX=FF00 DX=2B06 SP=2F4B BP=0000 SI=2B8F DI=006C 
-    SS=7CB0 DS=054A ES=7CB0 PS=F003 V0 D0 I0 T0 S0 Z0 A0 P0 C1 
-    &00E5:0C4E 89262E00         MOV      [002E],SP
-    >> m fdc on
-    messages on:  fdc
-    >> m dos on
-    messages on:  dos
-    >> m int on
-    messages on:  int
-    >> g
-    running
-    INT 0x21: AH=0x47 at 7CB0:134D get current directory (DS:SI) for drive 00
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (00:00:02,01) into 0528:0010
-    fdcNEC.doRead(drive=1,CHS=0:0:2,PBA=1)
-    INT 0x21: AH=0x1A at 7CB0:049A set disk transfer area (DTA=7CB0:2D55)
-    INT 0x21: AH=0x11 at 7CB0:04C1 find first matching file using FCB 7CB0:2CD9 "WORD    ???"
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (00:00:02,01) into 00E5:401F
-    fdcNEC.doRead(drive=1,CHS=0:0:2,PBA=1)
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (00:00:06,01) into 0528:0010
-    fdcNEC.doRead(drive=1,CHS=0:0:6,PBA=5)
-    INT 0x21: AH=0x3B at 7CB0:0D54 set current directory 7CB0:2C0C "B:\"
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (00:00:02,01) into 00E5:401F
-    fdcNEC.doRead(drive=1,CHS=0:0:2,PBA=1)
-    INT 0x21: AH=0x49 at 7CB0:06D5 free memory segment 0613
-    INT 0x21: AH=0x4B at 054A:028A load program 7CB0:2C4F "B:WORD.COM" using parameter block 054A:0B1C
-    INT 0x21: AH=0x48 at 054A:01AF allocate memory segment with FFFF paragraphs
-    INT 0x21: AH=0x48 at 054A:01B9 allocate memory segment with 79ED paragraphs
-    INT 0x21: AH=0x49 at 054A:01D1 free memory segment 0613
-    INT 0x21: AH=0x33 at 7FA7:0005 extended break check
-    INT 0x21: AH=0x33 at 7FA7:0010 extended break check
-    INT 0x21: AH=0x51 at 7FA7:0014 get current PSP (bx)
-    INT 0x21: AH=0x19 at 7FA7:002D get current default drive (AL)
-    INT 0x21: AH=0x0E at 7FA7:0033 select default drive 01
-    INT 0x21: AH=0x3D at 7FA7:007D open file 7CB0:2C4F "B:WORD.COM" with mode 00
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (00:00:06,01) into 0528:0010
-    fdcNEC.doRead(drive=1,CHS=0:0:6,PBA=5)
-    INT 0x21: AH=0x44 at 7FA7:008A get device information (IOCTL)
-    INT 0x21: AH=0x48 at 7FA7:00E2 allocate memory segment with 0002 paragraphs
-    INT 0x21: AH=0x3F at 7FA7:0117 read 001E bytes from file 0005 into buffer 7FA7:0568
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (0E:00:07,01) into 00E5:401F
-    fdcNEC.doRead(drive=1,CHS=14:0:7,PBA=258)
-    INT 0x21: AH=0x48 at 7FA7:031C allocate memory segment with FFFF paragraphs
-    INT 0x21: AH=0x48 at 7FA7:0329 allocate memory segment with 79EA paragraphs
-    INT 0x21: AH=0x42 at 7FA7:0368 set position 0000:0000 of file 0005 relative to 00
-    INT 0x21: AH=0x3F at 7FA7:037D read FFFF bytes from file 0005 into buffer 0626:0000
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (00:00:02,01) into 0528:0010
-    fdcNEC.doRead(drive=1,CHS=0:0:2,PBA=1)
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (0E:00:07,03) into 0626:0000
-    fdcNEC.doRead(drive=1,CHS=14:0:7,PBA=258)
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (0E:01:01,01) into 0626:0600
-    fdcNEC.doRead(drive=1,CHS=14:1:1,PBA=261)
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (0E:01:02,01) into 0528:0010
-    fdcNEC.doRead(drive=1,CHS=14:1:2,PBA=262)
-    INT 0x21: AH=0x3E at 7FA7:03BE close file 0005
-    INT 0x21: AH=0x55 at 7FA7:03EF create child PSP at segment 0616
-    INT 0x21: AH=0x1A at 7FA7:0492 set disk transfer area (DTA=0616:0080)
-    INT 0x21: AH=0x33 at 7FA7:0549 extended break check
-    INT 0x21: AH=0x30 at 0736:01B7 get DOS version (AL=major, AH=minor)
-    INT 0x21: AH=0x1C at 0736:01C4 get allocation information for specific drive 00
-    INT 0x21: AH=0x19 at 0736:01ED get current default drive (AL)
-    INT 0x21: AH=0x1C at 0736:01F7 get allocation information for specific drive 00
-    INT 0x21: AH=0x0F at 0736:0205 open file using FCB 0736:08E2 ""
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (00:00:06,01) into 00E5:401F
-    fdcNEC.doRead(drive=1,CHS=0:0:6,PBA=5)
-    INT 0x21: AH=0x25 at 0736:04CE set address 0736:0107 of interrupt vector 1E
-    INT 0x13: AH=0x02 at 0736:03B4 read drive 01 (27:01:05,01) into 0736:090E
-    fdcNEC.doRead(drive=1,CHS=39:1:5,PBA=715)
-    INT 0x13: AH=0x02 at 0736:0433 read drive 01 (27:01:06,01) into 0736:090E
-    fdcNEC.doRead(drive=1,CHS=39:1:6,PBA=716)
-    INT 0x21: AH=0x25 at 0736:045B set address 0000:0522 of interrupt vector 1E
-    INT 0x21: AH=0x1A at 0736:054E set disk transfer area (DTA=0736:0A2E)
-    INT 0x21: AH=0x27 at 0736:0558 random block read from file using FCB 0736:08E2 ""
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (00:00:02,01) into 0528:0010
-    fdcNEC.doRead(drive=1,CHS=0:0:2,PBA=1)
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (04:01:08,02) into 0736:0A2E
-    fdcNEC.doRead(drive=1,CHS=4:1:8,PBA=88)
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (05:00:01,07) into 0736:0E2E
-    fdcNEC.doRead(drive=1,CHS=5:0:1,PBA=90)
-    INT 0x21: AH=0x1A at 0856:054E set disk transfer area (DTA=0856:0A2E)
-    INT 0x21: AH=0x27 at 0856:0558 random block read from file using FCB 0856:08E2 ""
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (05:00:08,02) into 0856:0A2E
-    fdcNEC.doRead(drive=1,CHS=5:0:8,PBA=97)
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (05:01:01,07) into 0856:0E2E
-    fdcNEC.doRead(drive=1,CHS=5:1:1,PBA=99)
-    INT 0x21: AH=0x1A at 0976:054E set disk transfer area (DTA=0976:0A2E)
-    INT 0x21: AH=0x27 at 0976:0558 random block read from file using FCB 0976:08E2 ""
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (05:01:08,02) into 0976:0A2E
-    fdcNEC.doRead(drive=1,CHS=5:1:8,PBA=106)
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (06:00:01,07) into 0976:0E2E
-    fdcNEC.doRead(drive=1,CHS=6:0:1,PBA=108)
-    INT 0x21: AH=0x1A at 0A96:054E set disk transfer area (DTA=0A96:0A2E)
-    INT 0x21: AH=0x27 at 0A96:0558 random block read from file using FCB 0A96:08E2 ""
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (06:00:08,02) into 0A96:0A2E
-    fdcNEC.doRead(drive=1,CHS=6:0:8,PBA=115)
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (06:01:01,07) into 0A96:0E2E
-    fdcNEC.doRead(drive=1,CHS=6:1:1,PBA=117)
-    INT 0x21: AH=0x1A at 0BB6:054E set disk transfer area (DTA=0BB6:0A2E)
-    INT 0x21: AH=0x27 at 0BB6:0558 random block read from file using FCB 0BB6:08E2 ""
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (06:01:08,02) into 0BB6:0A2E
-    fdcNEC.doRead(drive=1,CHS=6:1:8,PBA=124)
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (07:00:01,07) into 0BB6:0E2E
-    fdcNEC.doRead(drive=1,CHS=7:0:1,PBA=126)
-    INT 0x21: AH=0x1A at 0CD6:054E set disk transfer area (DTA=0CD6:0A2E)
-    INT 0x21: AH=0x27 at 0CD6:0558 random block read from file using FCB 0CD6:08E2 ""
-    INT 0x13: AH=0x02 at 0070:05D1 read drive 01 (07:00:08,01) into 00E5:401F
-    fdcNEC.doRead(drive=1,CHS=7:0:8,PBA=133)
-    INT 0x21: AH=0x1A at 0DF6:054E set disk transfer area (DTA=0DF6:0A2E)
-    INT 0x21: AH=0x27 at 0DF6:0558 random block read from file using FCB 0DF6:08E2 ""
-    INT 0x21: AH=0x10 at 0DF6:05CB close file using FCB 0DF6:08E2 ""
-    suspicious opcode: 0x00 0x00
-    stopped (397510 opcodes, 8974165 cycles, 1554776115378 ms, 0 hz)
-    AX=0000 BX=0000 CX=FFFF DX=0000 SP=FFFE BP=0000 SI=0146 DI=0020 
-    SS=0616 DS=0616 ES=0616 PS=F282 V0 D0 I1 T0 S1 Z0 A0 P0 C0 
-    &0616:00C2 0000             ADD      [BX+SI],AL

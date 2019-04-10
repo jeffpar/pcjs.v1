@@ -2772,7 +2772,7 @@ DiskDump.prototype.readSuppData = function()
                     let sectorID = +metaData[1];
                     let trackID = +metaData[2];
                     let headID = +metaData[3];
-                    let sectorSize = +metaData[4];
+                    let length = +metaData[4];
                     let dataMark = parseInt(metaData[5], 16);
                     let headCRC = parseInt(metaData[6], 16);
                     let headError = metaData[7].toLowerCase() != "ok";
@@ -2794,7 +2794,7 @@ DiskDump.prototype.readSuppData = function()
                     }
                     if (!suppData[trackID]) suppData[trackID] = {};
                     if (!suppData[trackID][headID]) suppData[trackID][headID] = [];
-                    let sector = {sector: sectorID, dataMark, headCRC, headError, dataCRC, dataError, data};
+                    let sector = {sectorID, length, dataMark, headCRC, headError, dataCRC, dataError, data};
                     suppData[trackID][headID].push(sector);
                 }
             }
@@ -3302,11 +3302,12 @@ DiskDump.prototype.convertToJSON = function()
                         if (this.fJSONNative) {
                             if (!fOptimize || cbBuffer) {
                                 if (suppSector) {
-                                    sector['sector'] = suppSector['sector'];
-                                    sector['dataMark'] = suppSector['dataMark'];
-                                    sector['headCRC'] = suppSector['headCRC'];
+                                    sector['sector'] = suppSector['sectorID'];
+                                    if (suppSector['length']) sector['length'] = suppSector['length'];
+                                    if (suppSector['dataMark']) sector['dataMark'] = suppSector['dataMark'];
+                                    if (suppSector['headCRC']) sector['headCRC'] = suppSector['headCRC'];
                                     if (suppSector['headError']) sector['headError'] = true;
-                                    sector['dataCRC'] = suppSector['dataCRC'];
+                                    if (suppSector['dataCRC']) sector['dataCRC'] = suppSector['dataCRC'];
                                     if (suppSector['dataError']) sector['dataError'] = true;
                                     sector['data'] = suppSector['data'];
                                 } else {
