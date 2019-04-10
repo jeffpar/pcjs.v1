@@ -2423,14 +2423,9 @@ class ChipSet extends Component {
                                     channel.fWarning = true;
                                 }
                                 /*
-                                 * TODO: Determine whether to abort, as we do for DMA_MODE.TYPE_READ.  For now, I'm being
-                                 * cautious and triggering an error only when the FDC indicates certain errors (eg, CRC error).
+                                 * TODO: Determine whether to abort, as we do for DMA_MODE.TYPE_READ.
                                  */
-                                if (b == -1) {
-                                    b = 0xff;
-                                } else {
-                                    channel.fError = true;
-                                }
+                                b = 0xff;
                             }
                             if (!channel.masked && !channel.fError) {
                                 chipset.bus.setByte(addrCur, b);
