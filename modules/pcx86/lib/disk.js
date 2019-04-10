@@ -2942,6 +2942,11 @@ FileInfo.NE = {
  * @typedef {Object} SectorInfo
  * @property {number} sector
  * @property {number} length
+ * @property {number} dataMark
+ * @property {number} headCRC
+ * @property {boolean} headError
+ * @property {number} dataCRC
+ * @property {boolean} dataError
  * @property {Array.<number>} data
  * @property {number|null} pattern
  * @property {number} iCylinder
