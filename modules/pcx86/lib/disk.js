@@ -768,7 +768,6 @@ class Disk extends Component {
                                 if (length === undefined) {     // provide backward-compatibility with older JSON...
                                     length = sector['length'] = 512;
                                 }
-                                length >>= 2;                   // convert length from a byte-length to a dword-length
                                 let dwPattern = sector['pattern'];
                                 if (dwPattern === undefined) {
                                     dwPattern = sector['pattern'] = 0;
@@ -798,9 +797,8 @@ class Disk extends Component {
                                          * to fully "inflate" the sector, eliminating the possibility of partial dwords and
                                          * saving any code downstream from dealing with byte-size patterns.
                                          */
-                                        let cb = length << 2;
                                         this.assert((dwPattern & 0xff) == dwPattern);
-                                        for (let ib = ab.length; ib < cb; ib++) {
+                                        for (let ib = ab.length; ib < length; ib++) {
                                             ab[ib] = dwPattern;         // the pattern for byte-arrays was only a byte
                                         }
                                         this.fill(sector, ab, 0);
@@ -1412,11 +1410,11 @@ class Disk extends Component {
     }
 
     /**
-     * initSector(sector, iCylinder, iHead, iSector, cbSector, dwPattern)
+     * initSector(sector, iCylinder, iHead, sectorID, cbSector, dwPattern)
      *
      * Ensures every sector has ALL the properties of a proper Sector object; ie:
      *
-     *      'sector':   sector number
+     *      'sector':   sector ID
      *      'length':   size of the sector, in bytes
      *      'data':     array of dwords
      *      'pattern':  dword pattern to use for empty or partial sectors (null for unread remote sectors)
@@ -1432,15 +1430,15 @@ class Disk extends Component {
      * @param {Object} sector
      * @param {number} iCylinder
      * @param {number} iHead
-     * @param {number} [iSector]
+     * @param {number} [sectorID]
      * @param {number} [cbSector]
      * @param {number|null} [dwPattern]
      * @return {Object}
      */
-    initSector(sector, iCylinder, iHead, iSector, cbSector, dwPattern)
+    initSector(sector, iCylinder, iHead, sectorID, cbSector, dwPattern)
     {
         if (!sector) {
-            sector = {'sector': iSector, 'length': cbSector, 'data': [], 'pattern': dwPattern};
+            sector = {'sector': sectorID, 'length': cbSector, 'data': [], 'pattern': dwPattern};
         }
         sector.iCylinder = iCylinder;
         sector.iHead = iHead;
