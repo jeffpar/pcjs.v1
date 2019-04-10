@@ -2684,7 +2684,7 @@ class FDC extends Component {
                     drive.resCode = FDC.REG_DATA.RES.NO_DATA | FDC.REG_DATA.RES.INCOMPLETE;
                     break;
                 }
-                if (drive.sector.dataError) {
+                if (drive.sector['dataError']) {
                     drive.resCode = FDC.REG_DATA.RES.CRC_ERROR | FDC.REG_DATA.RES.INCOMPLETE;
                 }
                 drive.ibSector = 0;
