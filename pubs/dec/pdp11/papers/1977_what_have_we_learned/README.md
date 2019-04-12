@@ -5,7 +5,7 @@ permalink: /pubs/dec/pdp11/papers/1977_what_have_we_learned/
 ---
 
 What Have We Learned From The PDP-11?
----
+-------------------------------------
 
 By C. Gordon Bell  
 1977

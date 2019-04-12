@@ -7,7 +7,8 @@ redirect_from:
 ---
 
 6502 Assembler/Disassembler
----
+---------------------------
+
 By Jeff Parsons
 
 The "source code" listing below from June 19, 1980 is for the first piece of software I sold, right around the
@@ -33,7 +34,7 @@ hand-written notes (which I may still have somewhere).
 
 Here it is, many decades later, for your amusement.
 
-[<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/apps/c1p/6502/jeffpar/assembler/thumbs/OSI_Assembler-Disassembler_Listing-thumb.jpg" width="200" height="260" alt="6502 Disassembler Listing (by Jeff Parsons, June 1980)"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/apps/c1p/6502/jeffpar/assembler/pdfs/OSI_Assembler-Disassembler_Listing.pdf)
+[<img src="https://1drv.ms/u/s!ArcO_mFRe1Z9gpMzV3_bIGD1KepGZg" width="200" height="260" alt="6502 Disassembler Listing (by Jeff Parsons, June 1980)"/>](https://1drv.ms/b/s!ArcO_mFRe1Z9gpM3XnzS74DR-GIgTA)
 
 NOTE: Even though the "source code" listing was based on the 8K version, it more closely resembles the
 [4K version](ASSEMBLER-4K.json), because the [8K version](ASSEMBLER-8K.json) I originally located appears to be

@@ -25,13 +25,14 @@ Resources for this diagnostic include:
 - [History](#dakaehst)
 - [Source Code](#dakaemac)
 - [MACRO-10 Listing](DAKAE.LST.txt)
-- [Additional Information](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/apps/pdp10/diags/ka10/dakae/DAKAE.SEQ.txt)
+- [Additional Information](https://1drv.ms/t/s!ArcO_mFRe1Z9gp09JVtW4RZmSIZrqA)
 
 {% include machine.html id="testka10" %}
 
 The Debugger's assemble ("a") command can be used to test the new built-in
 [MACRO-10 Mini-Assembler](/modules/pdp10/lib/macro10.js), which supports a subset
-of the [MACRO-10](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
+of the [MACRO-10](https://1drv.ms/b/s!ArcO_mFRe1Z9gp1mkis_mCVuT1x1pQ) assembly language.
+
 This command:
 
 	a 30706 DAKAE.MAC

@@ -14,6 +14,7 @@ index.html
 .settings
 .sass-cache
 .vscode
+archive
 node_modules
 package-lock.json
 tmp
@@ -26,5 +27,4 @@ c64/
 ecp/
 private/
 unlisted/
-archive/
 !/archive
