@@ -5,7 +5,7 @@ permalink: /pubs/dec/pdp11/papers/1975_what_have_we_learned/
 ---
 
 Computer Structures: What Have We Learned From The PDP-11?
----
+----------------------------------------------------------
 
 By Gordon Bell, William D. Strecker  
 November 8, 1975
