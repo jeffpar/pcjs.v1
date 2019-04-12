@@ -61,10 +61,12 @@ Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, 
 ![COMPAQ DeskPro 386, Windows 95](/disks/pcx86/windows/win95/4.00.950/thumbnail.jpg "link:/disks/pcx86/windows/win95/4.00.950/:200:120")
 ![IBM PC w/MDA, CP/M-86](/disks/pcx86/cpm/1.1b/thumbnail.jpg "link:/disks/pcx86/cpm/1.1b/:200:120")
 ![Microsoft Adventure (1981)](/disks/pcx86/games/microsoft/adventure/thumbnail.jpg "link:/disks/pcx86/games/microsoft/adventure/:200:120")
+![IBM Multiplan (1982)](/disks/pcx86/apps/ibm/multiplan/1.00/thumbnail.jpg "link:/disks/pcx86/apps/ibm/multiplan/1.00/:200:120")
 ![Executive Suite (1982)](/apps/pcx86/1982/esuite/thumbnail.jpg "link:/apps/pcx86/1982/esuite/:200:120")
 ![Zork I (1982)](/disks/pcx86/games/infocom/zork1/thumbnail.jpg "link:/disks/pcx86/games/infocom/zork1/:200:120")
 ![Exploring the IBM PC (1983)](/disks/pcx86/apps/ibm/exploring/5150/mda/thumbnail.jpg "link:/disks/pcx86/apps/ibm/exploring/5150/mda/:200:120")
 ![Adventures in Math (1983)](/apps/pcx86/1983/adventmath/thumbnail.jpg "link:/apps/pcx86/1983/adventmath/:200:120")
+![Microsoft Word (1984)](/disks/pcx86/apps/microsoft/word/1.15/thumbnail.jpg "link:/disks/pcx86/apps/microsoft/word/1.15/:200:120")
 ![Fantasy Land (1984)](/disks/pcx86/apps/ibm/fland/thumbnail.jpg "link:/disks/pcx86/apps/ibm/fland/:200:120")
 ![Rogue (1985)](/apps/pcx86/1985/rogue/thumbnail.jpg "link:/apps/pcx86/1985/rogue/:200:120")
 

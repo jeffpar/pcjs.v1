@@ -5,7 +5,7 @@ permalink: /pubs/dec/pdp11/papers/
 ---
 
 Assorted PDP-11 Research Papers
----
+-------------------------------
 
 The following is an assortment of research papers by [Gordon Bell](http://research.microsoft.com/~gbell/) and others:
 
