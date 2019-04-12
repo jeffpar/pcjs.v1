@@ -59,10 +59,12 @@ Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, 
 {% include gallery-image.html src="/disks/pcx86/windows/win95/4.00.950/thumbnail.jpg" width="200" height="120" title="COMPAQ DeskPro 386, Windows 95" link="/disks/pcx86/windows/win95/4.00.950/" %}
 {% include gallery-image.html src="/disks/pcx86/cpm/1.1b/thumbnail.jpg" width="200" height="120" title="IBM PC w/MDA, CP/M-86" link="/disks/pcx86/cpm/1.1b/" %}
 {% include gallery-image.html src="/disks/pcx86/games/microsoft/adventure/thumbnail.jpg" width="200" height="120" title="Microsoft Adventure (1981)" link="/disks/pcx86/games/microsoft/adventure/" %}
+{% include gallery-image.html src="/disks/pcx86/apps/ibm/multiplan/1.00/thumbnail.jpg" width="200" height="120" title="IBM Multiplan (1982)" link="/disks/pcx86/apps/ibm/multiplan/1.00/" %}
 {% include gallery-image.html src="/apps/pcx86/1982/esuite/thumbnail.jpg" width="200" height="120" title="Executive Suite (1982)" link="/apps/pcx86/1982/esuite/" %}
 {% include gallery-image.html src="/disks/pcx86/games/infocom/zork1/thumbnail.jpg" width="200" height="120" title="Zork I (1982)" link="/disks/pcx86/games/infocom/zork1/" %}
 {% include gallery-image.html src="/disks/pcx86/apps/ibm/exploring/5150/mda/thumbnail.jpg" width="200" height="120" title="Exploring the IBM PC (1983)" link="/disks/pcx86/apps/ibm/exploring/5150/mda/" %}
 {% include gallery-image.html src="/apps/pcx86/1983/adventmath/thumbnail.jpg" width="200" height="120" title="Adventures in Math (1983)" link="/apps/pcx86/1983/adventmath/" %}
+{% include gallery-image.html src="/disks/pcx86/apps/microsoft/word/1.15/thumbnail.jpg" width="200" height="120" title="Microsoft Word (1984)" link="/disks/pcx86/apps/microsoft/word/1.15/" %}
 {% include gallery-image.html src="/disks/pcx86/apps/ibm/fland/thumbnail.jpg" width="200" height="120" title="Fantasy Land (1984)" link="/disks/pcx86/apps/ibm/fland/" %}
 {% include gallery-image.html src="/apps/pcx86/1985/rogue/thumbnail.jpg" width="200" height="120" title="Rogue (1985)" link="/apps/pcx86/1985/rogue/" %}
 {% include gallery-end.html %}
