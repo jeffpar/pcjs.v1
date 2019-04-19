@@ -4,9 +4,7 @@ title: "DosGetNews(&quot;August 31, 1988&quot;)"
 permalink: /pubs/pc/magazines/dgn/1988-08-31/
 ---
 
-[DosGetNews("August 31, 1988")](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/dgn/1988-08-31/DosGetNews--1988-08-31.pdf)
----
+DosGetNews("August 31, 1988")
+-----------------------------
 
-[<img id="page-1" src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/dgn/1988-08-31/thumbs/DosGetNews--1988-08-31 1.jpeg" width="200" height="260" alt="Page 1"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/dgn/1988-08-31/pages/DosGetNews--1988-08-31 1.pdf&page=1&total=3)
-[<img id="page-2" src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/dgn/1988-08-31/thumbs/DosGetNews--1988-08-31 2.jpeg" width="200" height="260" alt="Page 2"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/dgn/1988-08-31/pages/DosGetNews--1988-08-31 2.pdf&page=2&total=3)
-[<img id="page-3" src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/dgn/1988-08-31/thumbs/DosGetNews--1988-08-31 3.jpeg" width="200" height="260" alt="Page 3"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/dgn/1988-08-31/pages/DosGetNews--1988-08-31 3.pdf&page=3&total=3)
+{% include embed.html src="https://onedrive.live.com/embed?cid=7D567B5161FE0EB7&resid=7D567B5161FE0EB7%2136926&authkey=AJp4EhYnrLZYDfg&em=2" %}

@@ -10,20 +10,20 @@ PC Magazines
 Browse our collection of PC-related magazines.
 
 {% include gallery-begin.html %}
-{% include gallery-image.html src="/pubs/images/BYTE-1975-11-thumb.jpg" width="200" height="260" title="Byte Magazine" link="byte/" %}
-{% include gallery-image.html src="/pubs/images/MSJ-1986-10-thumb.jpg" width="200" height="260" title="Microsoft Systems Journal" link="msj/" %}
+{% include gallery-image.html src="/pubs/pc/magazines/byte/BYTE-1975-11/cover.jpg" width="200" height="260" title="Byte Magazine" link="byte/" %}
+{% include gallery-image.html src="/pubs/pc/magazines/msj/MSJ-1986-10/cover.jpg" width="200" height="260" title="Microsoft Systems Journal" link="msj/" %}
 {% include gallery-image.html src="https://demo-disks.pcjs.org/pcx86/shareware/pcdiskmag/PC-DISK-MAG-VOL1-NO1.jpg" width="200" height="260" title="PC Disk Magazine" link="pcdiskmag/" %}
-{% include gallery-image.html src="/pubs/images/PCTJ-1983-07-thumb.jpg" width="200" height="260" title="PC Tech Journal" link="pctj/" %}
+{% include gallery-image.html src="/pubs/pc/magazines/pctj/PCTJ-1983-07/cover.jpg" width="200" height="260" title="PC Tech Journal" link="pctj/" %}
 {% include gallery-end.html %}
 
 From [PC Tech Journal](pctj/), we also have all the [Microsoft Languages NewsLetters](/disks/pcx86/tools/microsoft/).
 
 And we have an assortment of selected articles:
 
-- [Graphic Enhancement: IBM's Enhanced Graphics Adapter](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1985-04/pages/PCTJ-1985-04%2060.pdf&page=60&total=204) by Thomas Hoffmann, PC Tech Journal, April 1985
-- [Exploring the EGA](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pcmag/PCMAG-1986-08/PCMAG-1986-08-Exploring_The_EGA.pdf) by Charles Petzold, PC Magazine, August 1986
-- [Software Sprites](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1986-08/PCTJ-1986-08-Software_Sprites.pdf) by Michael Abrash and Dan Illowsky, PC Tech Journal, August, 1986
-- [Evaluating the EGA](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2053.pdf&page=53&total=228) by John Cockerham, PC Tech Journal, October 1986
-- [Inside The EGA](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pj/PJ-1987-01/PJ-1987-01-Inside_The_EGA.pdf) by Michael Abrash, Programmer's Journal, 1987-1988
-- [VGA: Evolutionary Half-Step](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1987-08/PCTJ-1987-08-VGA_Evolutionary_Half-Step.pdf) by John Cockerham, PC Tech Journal, August, 1987
-- [Creating a DPMI-Based DOS Extender](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pcmag/PCMAG-1991-03/PCMAG-1991-03-Creating_A-DPMI-Based_DOS_Extender.pdf) by Ray Duncan, PC Magazine, March 12, 1991
+- [Graphic Enhancement: IBM's Enhanced Graphics Adapter](/pubs/pc/magazines/pctj/PCTJ-1985-04/) by Thomas Hoffmann, PC Tech Journal, April 1985
+- [Exploring the EGA](https://1drv.ms/b/s!ArcO_mFRe1Z9gqB36n_2vo8S1d6g-w) by Charles Petzold, PC Magazine, August 1986
+- [Software Sprites](/pubs/pc/magazines/pctj/PCTJ-1986-08/) by Michael Abrash and Dan Illowsky, PC Tech Journal, August, 1986
+- [Evaluating the EGA](/pubs/pc/magazines/pctj/PCTJ-1986-10/) by John Cockerham, PC Tech Journal, October 1986
+- [Inside The EGA](https://1drv.ms/b/s!ArcO_mFRe1Z9gqBMF74XWd0EJdcSsQ) by Michael Abrash, Programmer's Journal, 1987-1988
+- [VGA: Evolutionary Half-Step](/pubs/pc/magazines/pctj/PCTJ-1987-08/) by John Cockerham, PC Tech Journal, August, 1987
+- [Creating a DPMI-Based DOS Extender](https://1drv.ms/b/s!ArcO_mFRe1Z9gqB4ybwVb8TGhX-Q7g) by Ray Duncan, PC Magazine, March 12, 1991

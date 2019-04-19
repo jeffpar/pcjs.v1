@@ -6,6 +6,7 @@ permalink: /pubs/pc/programming/The_Undocumented_PC/
 
 *The Undocumented PC*
 ---------------------
+
 by Frank van Gilluwe (December 1996)
 
 A directory listing of *The Undocumented PC* diskette that accompanied the book is provided below.
@@ -89,3 +90,5 @@ A directory listing of *The Undocumented PC* diskette that accompanied the book 
 	Total files listed:
 	       68 file(s)     996481 bytes
 	                      200192 bytes free
+
+{% include embed.html src="https://onedrive.live.com/embed?cid=7D567B5161FE0EB7&resid=7D567B5161FE0EB7%2136982&authkey=AGBgodjA3pTpptQ&em=2" %}
