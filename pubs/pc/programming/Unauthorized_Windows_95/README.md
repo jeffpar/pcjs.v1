@@ -6,6 +6,7 @@ permalink: /pubs/pc/programming/Unauthorized_Windows_95/
 
 Unauthorized Windows 95
 -----------------------
+
 by Andrew Schulman
 
 Directory listings of disks containing software that accompanied *Unauthorized Windows 95* are provided below.
