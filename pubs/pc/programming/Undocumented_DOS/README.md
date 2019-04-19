@@ -6,6 +6,7 @@ permalink: /pubs/pc/programming/Undocumented_DOS/
 
 Undocumented DOS (1st Edition)
 ------------------------------
+
 by Schulman, Michels, Kyle, Paterson, Maxey, Brown
 	
 * [READ.ME](#read-me-1st-edition)
@@ -15,6 +16,7 @@ by Schulman, Michels, Kyle, Paterson, Maxey, Brown
 
 Undocumented DOS (2nd Edition)
 ------------------------------
+
 by Schulman, Brown, Maxey, Michels, Kyle
 
 * [Directory of Undocumented DOS, 2nd Ed. (BIN)](#directory-of-undocumented-dos-2nd-ed-bin)
@@ -22,7 +24,6 @@ by Schulman, Brown, Maxey, Michels, Kyle
 * [Errata (2nd Edition)](#errata-2nd-edition)
 
 ### READ.ME (1st Edition)
-
 
 	                                        27 September 1990
 	                                        updated: 15 May 1991

@@ -16,7 +16,7 @@ Selected Live Demos from [Graphics for the IBM PC](../)
 
 All of the machine demos below are halted by default.  Click the machine's **Run** button to start it running.
 
-From [Page 46](/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graphics_for_the_IBM_PC/pages/Graphics_for_the_IBM_PC 48.pdf&page=48&total=320):
+From [Page 46](../):
 
 > **A KALEIDOSCOPE PROGRAM**
 
@@ -29,14 +29,14 @@ From [Page 46](/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graph
 > programs out of memory before typing the new program.
 > Enter RUN to execute the program, noting the wide
 > range of colors available on the IBM PC. A typical display
-> is shown in [Fig. 4](/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graphics_for_the_IBM_PC/pages/Graphics_for_the_IBM_PC%20164.pdf&page=164&total=320)
+> is shown in [Fig. 4](../)
 > in the color photograph section. Note that good effects
 > can be produced with only a few program
 > lines thanks to the power of Advanced BASIC.
     
 {% include machine.html id="xt-cga-256k-1" %}
 
-From [Page 58](/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graphics_for_the_IBM_PC/pages/Graphics_for_the_IBM_PC 60.pdf&page=60&total=320):
+From [Page 58](../):
 
 > **Medium-Resolution Color Selection**
 
@@ -45,7 +45,7 @@ From [Page 58](/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graph
 > only in certain combinations. The background color (that
 > is, the color to which the screen and border default and
 > which graphics are typically set against) can be any of the
-> 16 colors available on the PC, as shown in [Table 4-1](/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graphics_for_the_IBM_PC/pages/Graphics_for_the_IBM_PC%2061.pdf&page=61&total=320).
+> 16 colors available on the PC, as shown in [Table 4-1](../)
 > The other three colors available at any one time consist of one
 > of two sets. The sets are called palettes because, like
 > painters' palettes, each is a group of colors from which the
@@ -62,7 +62,7 @@ From [Page 58](/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graph
 > which are, respectively, colors 1, 2, and 3 (Table 4-2).
 > Cyan is a light blue, and magenta is a light red. These colors
 > aren't as vivid on an RGB monitor as those in the other
-> palette (See [Fig. 5B](/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graphics_for_the_IBM_PC/pages/Graphics_for_the_IBM_PC%20164.pdf&page=164&total=320)
+> palette (See [Fig. 5B](../)
 > in the color photograph section), and
 > can look somewhat washed out if screen brightness is
 > high. However, the colors in palette 1 look just about as
