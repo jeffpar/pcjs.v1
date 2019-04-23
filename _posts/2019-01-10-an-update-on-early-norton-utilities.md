@@ -36,8 +36,8 @@ the diskettes imaged and [User Guides](/pubs/pc/magazines/pcdiskmag/) scanned, I
 Peter Norton had made some contributions to the first two volumes:
 
 {% include gallery-begin.html %}
-{% include gallery-image.html src="https://demo-disks.pcjs.org/pcx86/shareware/pcdiskmag/PC-DISK-MAG-VOL1-NO1.jpg" width="120" height="190" title="PC Disk Magazine Vol. 1 No. 1" link="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pcdiskmag/PC-DISK-MAG-VOL1-NO1.pdf" %}
-{% include gallery-image.html src="https://demo-disks.pcjs.org/pcx86/shareware/pcdiskmag/PC-DISK-MAG-VOL1-NO2.jpg" width="120" height="190" title="PC Disk Magazine Vol. 1 No. 2" link="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pcdiskmag/PC-DISK-MAG-VOL1-NO2.pdf" %}
+{% include gallery-image.html src="https://demo-disks.pcjs.org/pcx86/shareware/pcdiskmag/PC-DISK-MAG-VOL1-NO1.jpg" width="120" height="190" title="PC Disk Magazine Vol. 1 No. 1" link="https://1drv.ms/b/s!ArcO_mFRe1Z9gqAtZqAKOZbLXS2ZdQ" %}
+{% include gallery-image.html src="https://demo-disks.pcjs.org/pcx86/shareware/pcdiskmag/PC-DISK-MAG-VOL1-NO2.jpg" width="120" height="190" title="PC Disk Magazine Vol. 1 No. 2" link="https://1drv.ms/b/s!ArcO_mFRe1Z9gqAsBTOJdiBIUKuxAQ" %}
 {% include gallery-end.html %}
 
 The first program, `DISKMAP`, was described by Peter Norton in the accompanying User Guide as
