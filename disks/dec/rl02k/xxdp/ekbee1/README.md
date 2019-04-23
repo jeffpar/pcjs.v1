@@ -8,7 +8,7 @@ EKBEE1: 11/70 MEMORY MANAGEMENT DIAGNOSTIC
 ------------------------------------------
 
 From the
-[PDP-11 Diagnostic Handbook (1988)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/diags/PDP11_DiagnosticHandbook_1988.pdf),
+[PDP-11 Diagnostic Handbook (1988)](https://1drv.ms/b/s!ArcO_mFRe1Z9gp4d3zhflWyJp07i9g),
 p. 1-10:
 
 	11/70 MEMORY MANAGEMENT TEST
@@ -44,8 +44,8 @@ p. 1-10:
 	    ...
 
 The closest we have to a source code listing of the EKBEE1 diagnostic comes from some
-[scanned microfiche](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/diags/AC-7975E-MC_CEKBEE0_1170_MEM_MGMT_May80.pdf)
-on [bitsavers.org](http://bitsavers.trailing-edge.com/pdf/dec/pdp11/microfiche/ftp.j-hoppe.de/bw/gh/) for:
+[scanned microfiche](https://1drv.ms/b/s!ArcO_mFRe1Z9gp5Sc2Uv0TMEj2GOHQ)
+on [bitsavers.org](http://bitsavers.org/pdf/dec/pdp11/microfiche/ftp.j-hoppe.de/bw/gh/) for:
 
 	PRODUCT CODE: AC-7975E-MC
 	PRODUCT NAME: CEKBEE0 11/70 MEM MGMT
