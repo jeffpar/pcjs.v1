@@ -22,8 +22,8 @@ Microsoft QuickPascal 1.00
 
 PCjs has copies of the following documentation:
 
-- [QuickPascal: Up and Running](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL-100-Up_and_Running.pdf)
-- [QuickPascal: Pascal by Example](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/tools/microsoft/pascal/quickpascal/1.00/QUICKPASCAL-100-Pascal_by_Example.pdf)
+- [QuickPascal: Up and Running](https://1drv.ms/b/s!ArcO_mFRe1Z9gqFOML1HOTUKRFZLEQ)
+- [QuickPascal: Pascal by Example](https://1drv.ms/b/s!ArcO_mFRe1Z9gqFVsisy9Gka2J_GxA)
 
 Directory listings of the diskettes are provided [below](#directory-of-ms-quickpascal-100-360k-disk-1-setuputilities).
 
