@@ -3332,7 +3332,7 @@ DiskDump.prototype.convertToJSON = function()
                                     if (suppSector['headCRC']) sector['headCRC'] = suppSector['headCRC'];
                                     if (suppSector['headError']) sector['headError'] = true;
                                     if (suppSector['dataCRC']) sector['dataCRC'] = suppSector['dataCRC'];
-                                    if (suppSector['dataError']) sector['dataError'] = suppSector['dataError'];
+                                    if (!sectorError) sectorError = suppSector['dataError'];
                                     sector['data'] = suppSector['data'];
                                 } else {
                                     var dataSector = [];
@@ -3340,9 +3340,9 @@ DiskDump.prototype.convertToJSON = function()
                                         dataSector.push(bufSector.readInt32LE(off));
                                     }
                                     sector['data'] = dataSector;
-                                    if (sectorError) sector['dataError'] = sectorError;
                                 }
                             }
+                            if (sectorError) sector['dataError'] = sectorError;
                             aSectors[iSector - 1] = sector;
                         } else {
                             if (!fOptimize || cbBuffer) {

@@ -114,17 +114,27 @@ dBASE III v1.0 (with Debugger)
     GENERIC_SHUGART_DD_FLOPPYMODE
     Shugart Interface
 
-The following *diskdump* command was used to reflect the above error in our disk image:
+The following *diskdump* command was used to reflect the above error in our "dBASE III 1.0 (Disk 1)" disk image:
 
-    diskdump --disk=archive/DBIII-100-DISK1-KF.img --format=json --output=DBIII-100-DISK1.json --sectorError=39:0:5:272 --overwrite --manifest
+    diskdump --disk=archive/DBIII-100-DISK1-KF.img --format=json --output=DBIII-100-DISK1.json --sectorError=39:0:5:272
 
 Note that we used an IMG built from the Kryoflux stream files instead of the IMG provided by WinWorld.  However, the
 only difference was in the 512-byte sector at offset 0x58400, which corresponds precisely to the bad sector at 39:0:5
 (shown above).
 
-It's unclear at this point how important the original contents of that sector are to dBASE III's copy-protection logic.
+It was initially unclear whether the original contents of the bad sector mattered to dBASE III's copy-protection logic.
 During the copy-protection check, the sector is read, an error is expected, and then the sector is rewritten, read again,
 and only about the first 272 (+/-10) bytes must change for the copy-protection test to pass.
+
+Also, it seems that not all dBASE III 1.0 files/disks were the same, because in order to run the "unpatched" copy
+of dBASE III that I restored onto the "dBASE III 1.0 (Locked)" disk image, sector 2 (not sector 5) on track 39 must be
+the damaged sector, and the point of damage must occur at approximately byte 204 rather than 272.  So I updated that
+disk image as follows:
+
+    diskdump --disk=archive/DBIII-100-LOCKED.img --format=json --output=DBIII-100-LOCKED.json --sectorError=39:0:2:204
+
+I didn't have the original contents of the bad sector, but since that copy of DBASE.EXE now runs, it's safe to say that
+the copy-protection code doesn't actually care about the sector's initial state.
 
 ### Debugging Notes
 
