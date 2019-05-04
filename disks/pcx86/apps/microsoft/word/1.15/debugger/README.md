@@ -694,3 +694,7 @@ Microsoft Word 1.15 (with Debugger)
     Interface mode:
     GENERIC_SHUGART_DD_FLOPPYMODE
     Shugart Interface
+
+The following *diskdump* command was used to reflect the above data in our disk image:
+
+    diskdump --disk=archive/MSWORD-115-PROGRAM-BACKUP.img --format=json --output=MSWORD-115-PROGRAM.json --suppData=/disks/pcx86/apps/microsoft/word/1.15/debugger/README.md --overwrite --manifest
