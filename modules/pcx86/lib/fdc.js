@@ -2524,9 +2524,10 @@ class FDC extends Component {
         drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
         if (drive.disk) {
             if (DEBUG) {
-                this.printf("%s.doRead(drive=%d,CHS=%d:%d:%d,PBA=%d)\n",
+                this.printf("%s.doRead(drive=%d,CHS=%d:%d:%d,PBA=%d,addr=0x%x)\n",
                             this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector,
-                            (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1));
+                            (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1),
+                            this.chipset.checkDMA(ChipSet.DMA_FDC));
             }
             if (drive.bHead > drive.nHeads - 1) {
                 drive.resCode = FDC.REG_DATA.RES.NO_DATA | FDC.REG_DATA.RES.INCOMPLETE;
@@ -2559,9 +2560,10 @@ class FDC extends Component {
         drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
         if (drive.disk) {
             if (DEBUG) {
-                this.printf("%s.doWrite(drive=%d,CHS=%d:%d:%d,PBA=%d)\n",
+                this.printf("%s.doWrite(drive=%d,CHS=%d:%d:%d,PBA=%d,addr=0x%x)\n",
                             this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector,
-                            (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1));
+                            (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1),
+                            this.chipset.checkDMA(ChipSet.DMA_FDC));
             }
             if (drive.bHead > drive.nHeads - 1) {
                 drive.resCode = FDC.REG_DATA.RES.NO_DATA | FDC.REG_DATA.RES.INCOMPLETE;
@@ -2656,12 +2658,12 @@ class FDC extends Component {
          * with non-standard sizes (ie, other than 512), non-sequential sector IDs (see IBM Multiplan 1.00), and
          * sectors with forced CRC errors (see Microsoft Word 1.15).
          *
-         * The latter requires that we check our sectors for the optional "dataError" property and set resCode
+         * The latter requires that we check our sectors for the optional *dataError* property and set resCode
          * accordingly; logically, that probably shouldn't happen until just after the last byte of the sector
          * has been transferred, but we don't really know when that happens, since we're just calling disk.read()
          * as many times as the DMA controller count indicates.
          *
-         * So we simply set resCode to CRC_ERROR as soon as we notice a sector with "dataError" set, and we no
+         * So we simply set resCode to CRC_ERROR as soon as we notice a sector with *dataError* set, and we no
          * longer bypass the entire operation simply because resCode has been set to that value.
          *
          * TODO: Someday all possible FDC error conditions need to be tested on a real controller, because this
@@ -2727,8 +2729,10 @@ class FDC extends Component {
         if (drive.resCode || !drive.disk) return -1;
         do {
             if (drive.sector) {
-                if (drive.disk.write(drive.sector, drive.ibSector++, b))
+                if (drive.sector['dataError'] && drive.ibSector >= drive.sector['dataError']) {
                     break;
+                }
+                if (drive.disk.write(drive.sector, drive.ibSector++, b)) break;
             }
             /*
              * Locate the next sector, and then try writing again.
