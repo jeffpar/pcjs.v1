@@ -24,6 +24,8 @@ immediately fail with:
 
 	Unauthorized Duplicate
 
+More information on dBASE III copy-protection is available on the [dBASE III v1.0 (with Debugger)](debugger/) page.
+
 Another variation of the dBASE III disks come from the [WinWorld](https://winworldpc.com/product/dbase/iii-v10) archive:
 
 - [dBASE III 1.0 (Disk 1)](#directory-of-dbase-iii-10-disk-1)

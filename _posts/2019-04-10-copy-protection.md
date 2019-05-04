@@ -117,7 +117,7 @@ First, set a write breakpoint on address 0000:0004:
 which will stop execution at the point where WORD.COM is zeroing the single-step vector.  Note that WORD tries
 to do this very inconspicuously, by zeroing the vector using an address (F800:8004) that wraps around to 0000:0004.
 
-Anway, after it's been zeroed, simply write some non-zero values back to the vector:
+Anyway, after it's been zeroed, simply write some non-zero values back to the vector:
 
     EW 0:4 1 2
 

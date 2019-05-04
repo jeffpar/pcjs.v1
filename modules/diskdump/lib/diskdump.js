@@ -536,7 +536,7 @@ DiskDump.aDefaultBPBs = [
   [                             // define BPB for 720Kb diskette (2 sector/cluster format more commonly used)
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
     0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
-    // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x35, 0x2E, 0x30,  // "IBM  5.0" (this is a real OEM signature)
+ // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x35, 0x2E, 0x30,     // "IBM  5.0" (this is a real OEM signature)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x02,                       // 0x0D: sectors per cluster (2)
     0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
@@ -552,7 +552,7 @@ DiskDump.aDefaultBPBs = [
   [                             // define BPB for 720Kb diskette (1 sector/cluster format used by PC DOS 4.01)
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
     0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
-    // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x34, 0x2E, 0x30,  // "IBM  4.0" (this is a real OEM signature)
+ // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x34, 0x2E, 0x30,     // "IBM  4.0" (this is a real OEM signature)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x01,                       // 0x0D: sectors per cluster (1)
     0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
@@ -887,13 +887,14 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
             if (sOutputFile) {
 
                 var fUnchanged;
-                var md5Disk = null, md5JSON = null;
+                var md5Disk = disk.hashDisk, md5JSON = null;
                 if (disk.sManifestFile) {
                     if (typeof data == "string") {
                         md5JSON = crypto.createHash('md5').update(data).digest('hex');
                     }
-                    if (disk.bufDisk) {
-                        md5Disk = crypto.createHash('md5').update(disk.bufDisk.buf || disk.bufDisk).digest('hex');
+                    if (!md5Disk && disk.bufDisk) {
+                        var buf = disk.bufDisk.buf || disk.bufDisk;
+                        md5Disk = crypto.createHash('md5').update(buf).digest('hex');
                     }
                     /*
                      * Before calling updateManifest(), see if we have any aManifestInfo entries, and if not, see if
@@ -2748,7 +2749,9 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
 /**
  * readSuppData()
  *
- * Returns supplemental data for disk, if any.
+ * Returns supplemental data for disk, if any.  Data is specified with the "--suppData" command-line option; eg:
+ *
+ *      --suppData=disks/pcx86/apps/microsoft/word/1.15/debugger/README.md
  *
  * @this {DiskDump}
  * @return {object}
@@ -2777,7 +2780,7 @@ DiskDump.prototype.readSuppData = function()
                     let headCRC = parseInt(metaData[6], 16);
                     let headError = metaData[7].toLowerCase() != "ok";
                     let dataCRC = parseInt(metaData[8], 16)
-                    let dataError = metaData[9].toLowerCase() != "ok";
+                    let dataError = (metaData[9].toLowerCase() == "ok")? 0 : -1;
                     let matchData, reData = /([0-9A-F]+)\|([^|]*)\|/g;
                     while ((matchData = reData.exec(aSectorData[i]))) {
                         let shift = 0, dw = 0;
@@ -2826,6 +2829,12 @@ DiskDump.prototype.convertToJSON = function()
         this.jsonDisk = "[\n  /**\n   * " + DiskDump.sNotice + "\n   * " + DiskDump.sUsage + "\n   */\n]";
         return this.jsonDisk;
     }
+
+    /*
+     * Save the original disk hash (ie, before we insert a missing BPB or modify an existing one)
+     */
+    var buf = this.bufDisk.buf || this.bufDisk;
+    this.hashDisk = crypto.createHash('md5').update(buf).digest('hex');
 
     var suppData = this.readSuppData();
 
@@ -3233,16 +3242,31 @@ DiskDump.prototype.convertToJSON = function()
                          *
                          * For example, when building the IBM Multiplan 1.00 Program disk, "--sectorID=11:0:8:61" must be specified.
                          */
-                        var sectorIDs = this.argv['sectorID'];
+                        var sectorIDs = this.argv['sectorID'], aParts, n;
                         if (sectorIDs) {
                             var aSectorIDs = (typeof sectorIDs == "string")? [sectorIDs] : sectorIDs;
                             for (i = 0; i < aSectorIDs.length; i++) {
-                                var aParts = aSectorIDs[i].split(":");
+                                aParts = aSectorIDs[i].split(":");
                                 if (+aParts[0] === iCylinder && +aParts[1] === iHead && +aParts[2] === sectorID) {
-                                    var n = +aParts[3];
+                                    n = +aParts[3];
                                     if (!isNaN(n)) {
                                         sectorID = n;
                                         DiskDump.logConsole(str.sprintf("changing %d:%d:%d sectorID to %d", +aParts[0], +aParts[1], +aParts[2], sectorID));
+                                    }
+                                }
+                            }
+                        }
+                        var sectorError = 0;
+                        var sectorErrors = this.argv['sectorError'];
+                        if (sectorErrors) {
+                            var aSectorErrors = (typeof sectorErrors == "string")? [sectorErrors] : sectorErrors;
+                            for (i = 0; i < aSectorErrors.length; i++) {
+                                aParts = aSectorErrors[i].split(":");
+                                if (+aParts[0] === iCylinder && +aParts[1] === iHead && +aParts[2] === sectorID) {
+                                    n = +aParts[3] || -1;
+                                    if (n) {
+                                        sectorError = n;
+                                        DiskDump.logConsole(str.sprintf("forcing error for sector %d:%d:%d at %d bytes", +aParts[0], +aParts[1], +aParts[2], sectorError));
                                     }
                                 }
                             }
@@ -3308,7 +3332,7 @@ DiskDump.prototype.convertToJSON = function()
                                     if (suppSector['headCRC']) sector['headCRC'] = suppSector['headCRC'];
                                     if (suppSector['headError']) sector['headError'] = true;
                                     if (suppSector['dataCRC']) sector['dataCRC'] = suppSector['dataCRC'];
-                                    if (suppSector['dataError']) sector['dataError'] = true;
+                                    if (!sectorError) sectorError = suppSector['dataError'];
                                     sector['data'] = suppSector['data'];
                                 } else {
                                     var dataSector = [];
@@ -3318,6 +3342,7 @@ DiskDump.prototype.convertToJSON = function()
                                     sector['data'] = dataSector;
                                 }
                             }
+                            if (sectorError) sector['dataError'] = sectorError;
                             aSectors[iSector - 1] = sector;
                         } else {
                             if (!fOptimize || cbBuffer) {
