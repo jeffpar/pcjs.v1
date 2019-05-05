@@ -1,6 +1,6 @@
 ---
 layout: page
-title: dBASE III v1.0 (with Debugger)
+title: dBASE III 1.0 with Debugger
 permalink: /disks/pcx86/apps/other/dbase3/1.0/debugger/
 machines:
   - id: ibm5160
@@ -16,8 +16,11 @@ machines:
     autoType: $date\r$time\rB:\rDBASE\r
 ---
 
-dBASE III v1.0 (with Debugger)
-------------------------------
+dBASE III 1.0 with Debugger
+---------------------------
+
+The machine below is configured to run the original, unmodified, copy-protected [dBASE III 1.0](../)
+software.  More information on dBASE III copy-protection is available [below](#copy-protection-information).
 
 {% include machine.html id="ibm5160" %}
 
@@ -184,7 +187,7 @@ disk to disk, since the midpoint of that range (0xEF) comes from a word at DS:01
     ...
 
 So, to simulate failure at just the "write" point, I added the following hard-coded logic to the *writeData()* function
-in [fdc.js](/modules/lib/pcx86/fdc.js):
+in [fdc.js](/modules/pcx86/lib/fdc.js):
 
 ```js
     if (drive.sector['dataError'] && drive.ibSector >= 266) {

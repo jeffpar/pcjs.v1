@@ -44,7 +44,7 @@ that describe the software in more detail, along with live demonstrations.
 
 ### Applications and Demos
 
-* [Ashton-Tate dBase II](apps/other/dbase2/)
+* [Ashton-Tate dBase III](apps/other/dbase3/1.0/)
 * [IBM Fantasy Land EGA Demo](apps/ibm/fland/)
 * [IBM TopView](apps/ibm/topview/)
 * [Lotus 1-2-3](apps/lotus/123/)
