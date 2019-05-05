@@ -37,11 +37,9 @@ in our collection of [Personal Documents of Dubious Historical Interest](/docs/p
 along with this [blog post](/blog/2017/08/11/).
 
 Also, for completeness, the original `DBASE.EXE` has been recreated by "unpatching" it and saving it on the
-[Locked](#directory-of-dbase-iii-10-locked) disk image.  However, we don't have the original distribution disk, which
-would include additional copy-protection characteristics, so running the original (locked) version of `DBASE.EXE` will
-immediately fail with:
-
-	Unauthorized Duplicate
+[Locked](#directory-of-dbase-iii-10-locked) disk image.  Even though we no longer have the original distribution disk,
+we have "annotated" our disk image to simulate the same damaged sector that the original disk contained, so the original
+program runs as well.
 
 Another variation of the dBASE III disks come from the [WinWorld](https://winworldpc.com/product/dbase/iii-v10) archive:
 
