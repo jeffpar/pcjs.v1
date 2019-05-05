@@ -1,18 +1,37 @@
 ---
 layout: page
-title: dBASE III v1.0
+title: dBASE III 1.0
 permalink: /disks/pcx86/apps/other/dbase3/1.0/
+machines:
+  - id: ibm5160
+    type: pcx86
+    config: /devices/pcx86/machine/5160/cga/512kb/machine.xml
+    autoMount:
+      A:
+        name: PC DOS 2.00 (Disk 1)
+      B:
+        name: dBASE III 1.0 (Disk 1)
+    autoStart: true
+    autoType: $date\r$time\rB:\rDBASE\r
 ---
 
-dBASE III v1.0
---------------
+dBASE III 1.0
+-------------
+
+The machine below is configured to run the original, unmodified, copy-protected software from
+[dBASE III 1.0 (Disk 1)](#dbase-iii-disk-information).  More information on dBASE III copy-protection
+is available on the [dBASE III 1.0 with Debugger](debugger/) page.
+
+{% include machine.html id="ibm5160" %}
+
+### dBASE III Disk Information
 
 Two of the PCjs disks shown below:
 
 - [dBASE III 1.0 (Patched)](#directory-of-dbase-iii-10-patched)
 - [dBASE III 1.0 (Samples)](#directory-of-dbase-iii-10-samples)
 
-are from our private collection and should be exact copies of the original dBASE III v1.0 distribution disks, with the
+are from our private collection and should be exact copies of the original dBASE III 1.0 distribution disks, with the
 exception of `DBASE.EXE`, which was patched to eliminate copy-protection checks.  Details of that patch are available
 in our collection of [Personal Documents of Dubious Historical Interest](/docs/personal/#dbase-iii-copy-protection),
 along with this [blog post](/blog/2017/08/11/).
@@ -23,8 +42,6 @@ would include additional copy-protection characteristics, so running the origina
 immediately fail with:
 
 	Unauthorized Duplicate
-
-More information on dBASE III copy-protection is available on the [dBASE III v1.0 (with Debugger)](debugger/) page.
 
 Another variation of the dBASE III disks come from the [WinWorld](https://winworldpc.com/product/dbase/iii-v10) archive:
 
