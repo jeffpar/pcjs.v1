@@ -181,23 +181,25 @@ FileDump.CLI = function()
     file.addrLoad = str.parseInt(argv['load']);
     file.addrExec = str.parseInt(argv['exec']);
 
-    var cMergesPending = asMergeFiles.length;
-    var iStart = 0, nSkip = cMergesPending;
+    var cMergesPending = asMergeFiles.length, iStart = 0, nSkip = cMergesPending;
+
     file.loadFile(sFile, iStart++, nSkip, function(err) {
+        var cErrors = 0;
+        var convert = function(merge=0) {
+            cMergesPending -= merge;
+            if (!cMergesPending) {
+                if (argv['checksum']) console.log(str.sprintf("checksum: 0x%02X", file.getChecksum()));
+                if (!cErrors) file.convertToFile(sOutputFile, fOverwrite);
+            }
+        };
         if (!err) {
-            var cErrors = 0;
             while ((sMergeFile = asMergeFiles.shift())) {
                 file.loadFile(sMergeFile, iStart++, nSkip, function(err) {
                     if (err) cErrors++;
-                    if (!--cMergesPending) {
-                        if (!cErrors) file.convertToFile(sOutputFile, fOverwrite);
-                    }
+                    convert(1);
                 });
             }
-            if (!cMergesPending) {
-                if (argv['checksum']) console.log("checksum: " + file.getChecksum());
-                file.convertToFile(sOutputFile, fOverwrite);
-            }
+            convert();
         }
     });
 };
@@ -390,13 +392,13 @@ FileDump.prototype.setData = function(buf, iStart, nSkip, sExt)
          * If we didn't recognize the data, then simply return, leaving this.buf undefined.
          */
         if (!ab.length) return;
-        buf = new Buffer(ab);
+        buf = Buffer.from(ab);
     }
     if (!this.buf) {
         if (!nSkip) {
             this.buf = buf;
         } else {
-            this.buf = new Buffer(buf.length * (nSkip + 1));
+            this.buf = Buffer.alloc(buf.length * (nSkip + 1));
         }
     }
     if (nSkip) {

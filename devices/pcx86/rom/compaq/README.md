@@ -16,6 +16,7 @@ that era:
  + COMPAQ Portable 286
  + COMPAQ Portable II
  + [COMPAQ DeskPro 386](deskpro386/)
+ + [COMPAQ DeskPro 386/20e](deskpro386/20e/)
  + [COMPAQ Portable III](portable3/)
  + COMPAQ Portable 386
  + COMPAQ SLT Series

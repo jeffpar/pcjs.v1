@@ -89,11 +89,11 @@ In the case of software like dBASE III, our choices appear to be:
 - Use [patched binaries](/disks/pcx86/apps/other/dbase3/1.0/#dbase-iii-disk-information)
 - Find or build specialized hardware that can recreate specific disk anomalies
 
-It's also unclear how well the "annotated disk image" approach that PCjs uses can be automated.  For a PROLok-style
-diskette, one can imagine a procedure where every sector that reports a CRC error is also written with modified data,
-so that the "annotation" process can note the extent to which new bytes can still be written to the sector.  But all
-we'd be doing is "copying" the PROLok logic, which might work great for PROLok diskettes but not so great for
-other kinds of physical modifications.
+It's also unclear how well the "annotated disk image" approach that PCjs uses could be automated.  For a PROLok-style
+diskette, one can imagine a duplication process that doesn't simply read every sector, but also writes modified data
+to every sector, in order to determine to what extent, if any, each sector can be modified.  But all we'd be doing is
+"copying" the PROLok logic, which might work great for PROLok diskettes but not so great for other kinds of physical
+modifications.
 
 Another concern is that such a process could be inadvertently destructive.  There's something inherently disturbing
 about a duplication process that involves writing modifications to the original diskette.
