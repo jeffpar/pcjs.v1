@@ -243,6 +243,18 @@ BufferPF.prototype.readUInt16LE = function(off)
 };
 
 /**
+ * readUInt32BE(off)
+ *
+ * @this {BufferPF}
+ * @param {number} off
+ * @return {number}
+ */
+BufferPF.prototype.readUInt32BE = function(off)
+{
+    return (NODE? this.buf.readUInt32BE(off) : this.dv.getUint32(off));
+};
+
+/**
  * readUInt32LE(off)
  *
  * @this {BufferPF}
@@ -252,6 +264,18 @@ BufferPF.prototype.readUInt16LE = function(off)
 BufferPF.prototype.readUInt32LE = function(off)
 {
     return (NODE? this.buf.readUInt32LE(off) : this.dv.getUint32(off, true));
+};
+
+/**
+ * readInt32BE(off)
+ *
+ * @this {BufferPF}
+ * @param {number} off
+ * @return {number}
+ */
+BufferPF.prototype.readInt32BE = function(off)
+{
+    return (NODE? this.buf.readInt32BE(off) : this.dv.getInt32(off));
 };
 
 /**
@@ -2836,6 +2860,14 @@ DiskDump.prototype.convertToJSON = function()
     var buf = this.bufDisk.buf || this.bufDisk;
     this.hashDisk = crypto.createHash('md5').update(buf).digest('hex');
 
+    /*
+     * Originally, all we dealt with here were basically IMG files, but now we want to support PSI files, too.
+     */
+    var sExt = path.extname(this.sDiskPath).toLowerCase();
+    if (sExt == ".psi") {
+        return this.convertPSItoJSON();
+    }
+
     var suppData = this.readSuppData();
 
     var json = null;
@@ -3389,6 +3421,118 @@ DiskDump.prototype.convertToJSON = function()
     }
     return this.jsonDisk;
 };
+
+/**
+ * convertPSItoJSON()
+ *
+ * Converts PSI image data to JSON.
+ *
+ * PSI files are PCE Sector Image files; see https://github.com/jeffpar/pce/blob/master/doc/psi-format.txt for details.
+ *
+ * @this {DiskDump}
+ * @return {string|null} containing a JSON representation of the disk image, or null if unrecognized/malformed
+ */
+DiskDump.prototype.convertPSItoJSON = function()
+{
+    var data = [];
+    var chunkOffset = 0;
+    var buf = this.bufDisk;
+    var chunkEnd = buf.length;
+    var chunkID, chunkSize = 0, chunkData;
+    var CHUNK_PSI = 0x50534920;
+    var CHUNK_END = 0x454e4420;
+    var CHUNK_SECT = 0x53454354;
+    var CHUNK_DATA = 0x44415441;
+    var getCRC = function(bufData, start, end) {
+		var crc = 0;
+		for (var i = start; i < end; i++) {
+			crc ^= bufData.readUInt8(i) << 24;
+			for (var j = 0; j < 8; j++) {
+				if (crc & 0x80000000) {
+                    crc = (crc << 1) ^ 0x1edc6f41;
+                } else {
+                    crc = crc << 1;
+                }
+			}
+		}
+		return crc|0;
+    };
+    var getNextChunk = function() {
+        if (chunkSize) chunkOffset += chunkSize + 12;
+        chunkID = buf.readUInt32BE(chunkOffset);
+        chunkSize = buf.readUInt32BE(chunkOffset + 4);
+        var chunkCRC = buf.readInt32BE(chunkOffset + 8 + chunkSize);
+        var myCRC = getCRC(buf, chunkOffset, chunkOffset + 8 + chunkSize);
+        if (chunkCRC == myCRC) {
+            chunkData = buf.slice(chunkOffset + 8, chunkOffset + 8 + chunkSize);
+        } else {
+            DiskDump.logConsole(str.sprintf("chunk 0x%x at 0x%x: CRC 0x%x != calculated CRC 0x%x", chunkID, chunkOffset, chunkCRC, myCRC));
+            chunkID = CHUNK_END;
+        }
+    };
+    getNextChunk();
+    if (chunkID != CHUNK_PSI) {
+        DiskDump.logConsole("missing PSI header");
+        chunkEnd = 0;
+    }
+    var fileFormat = chunkData.readUInt16BE(0);
+    var sectorFormat = chunkData.readUInt16BE(2);
+    // DiskDump.logConsole(str.sprintf("file format: 0x%04x\nsector format: 0x%02x 0x%02x", fileFormat, sectorFormat >> 8, sectorFormat & 0xff));
+    while (chunkOffset < chunkEnd) {
+        var cylinder, head, sectorID, size, flags, pattern, sector, sectorIndex;
+        getNextChunk();
+        switch(chunkID) {
+        case CHUNK_SECT:
+            cylinder = chunkData.readUInt16BE(0);
+            head = chunkData.readUInt8(2);
+            sectorID = chunkData.readUInt8(3);
+            size = chunkData.readUInt16BE(4);
+            flags = chunkData.readUInt8(6);
+            pattern = chunkData.readUInt8(7);
+            sector = {'cylinder': cylinder, 'head': head, 'sector': sectorID, 'length': size, 'data': new Array(size >> 2)};
+            sectorIndex = 0;
+            // DiskDump.logConsole(str.sprintf("SECT: %d:%d:%d %d bytes, flags 0x%x, pattern 0x%02x", cylinder, head, sectorID, size, flags, pattern));
+            while (data.length < cylinder + 1) {
+                data.push([]);
+            }
+            while (data[cylinder].length < head + 1) {
+                data[cylinder].push([]);
+            }
+            data[cylinder][head].push(sector);
+            if (flags & 0x1) {
+                sector['pattern'] = pattern | (pattern << 8) | (pattern << 16) | (pattern << 24);
+                sector['data'].fill(pattern);
+            }
+            if (flags & 0x4) {
+                sector['dataError'] = -1;
+            }
+            if (flags & ~(0x1 | 0x4)) {
+                DiskDump.logConsole(str.sprintf("unsupported flags: 0x%x", flags));
+            }
+            break;
+        case CHUNK_DATA:
+            // DiskDump.logConsole(str.sprintf("DATA: %d bytes", chunkData.length));
+            for (var off = 0; off < chunkData.length; off += 4) {
+                if (sectorIndex >= sector['data'].length) {
+                    DiskDump.logConsole(str.sprintf("warning: data for sector offset %d exceeds sector length", sectorIndex * 4, sector['data'].length));
+                }
+                sector['data'][sectorIndex++] = chunkData.readUInt8(off) | (chunkData.readUInt8(off+1) << 8) | (chunkData.readUInt8(off+2) << 16) | (chunkData.readUInt8(off+3) << 24);
+            }
+            if (sectorIndex < sector['data'].length) {
+                DiskDump.logConsole(str.sprintf("warning: sector data stops at offset %d instead of %d", sectorIndex * 4, sector['data'].length));
+            }
+            break;
+        case CHUNK_END:
+            chunkID = 0;
+            break;
+        default:
+            DiskDump.logConsole(str.sprintf("unrecognized chunk at 0x%x: 0x%08x", chunkOffset, chunkID));
+            chunkID = 0;
+        }
+        if (!chunkID) break;
+    }
+    return data.length && JSON.stringify(data) || null;
+}
 
 /**
  * convertOSIDiskToJSON()

@@ -17,6 +17,9 @@ Planetfall (1983)
 
 {% include machine.html id="ibm5150-planet" %}
 
+NOTE: You cannot use the PCjs "Save" feature to save a copy of a copy-protected diskette, because PCjs can save
+only IMG disk images, which do not support copy protection.
+
 For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
 
 References

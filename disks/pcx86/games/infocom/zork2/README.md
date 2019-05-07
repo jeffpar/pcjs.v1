@@ -17,6 +17,9 @@ Zork II: The Wizard of Frobozz
 
 {% include machine.html id="ibm5150-zork2" %}
 
+NOTE: You cannot use the PCjs "Save" feature to save a copy of a copy-protected diskette, because PCjs can save
+only IMG disk images, which do not support copy protection.
+
 For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
 
 Related
