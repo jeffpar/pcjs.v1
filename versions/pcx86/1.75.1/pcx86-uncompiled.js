@@ -64267,7 +64267,7 @@ class FDC extends Component {
         this.regInput = data[i++] || 0;                             // TODO: Determine if we should default to FDC.REG_INPUT.DISK_CHANGE instead of 0
         this.regControl = data[i] || FDC.REG_CONTROL.RATE500K;      // default to maximum data rate
 
-        if (DEBUG) this.printf("FDC initialized for %d drive(s)\n", this.aDrives.length);
+        if (this.messageEnabled()) this.printf("FDC initialized for %d drive(s)\n", this.aDrives.length);
 
         return fSuccess;
     }
@@ -65463,7 +65463,7 @@ class FDC extends Component {
             }
             return;
         }
-        if (DEBUG) {
+        if (this.messageEnabled()) {
             this.printf("unsupported FDC command: %02x\n", bCmd);
             if (MAXDEBUG) this.dbg.stopCPU();
         }
@@ -65698,7 +65698,7 @@ class FDC extends Component {
             break;
 
         default:
-            if (DEBUG) {
+            if (this.messageEnabled()) {
                 this.printf("unsupported FDC operation: %02x\n", bCmd);
                 if (MAXDEBUG) this.dbg.stopCPU();
             }
@@ -66005,7 +66005,7 @@ class FDC extends Component {
          */
         drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
         if (drive.disk) {
-            if (DEBUG) {
+            if (this.messageEnabled()) {
                 this.printf("%s.doRead(drive=%d,CHS=%d:%d:%d,PBA=%d,addr=0x%x)\n",
                             this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector,
                             (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1),
@@ -66041,7 +66041,7 @@ class FDC extends Component {
     {
         drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
         if (drive.disk) {
-            if (DEBUG) {
+            if (this.messageEnabled()) {
                 this.printf("%s.doWrite(drive=%d,CHS=%d:%d:%d,PBA=%d,addr=0x%x)\n",
                             this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector,
                             (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1),
@@ -66281,7 +66281,7 @@ class FDC extends Component {
             drive.bSector = drive.abFormat[2];      // R
             drive.nBytes = 128 << drive.abFormat[3];// N (0 => 128, 1 => 256, 2 => 512, 3 => 1024)
             drive.cbFormat = 0;
-            if (DEBUG) {
+            if (this.messageEnabled()) {
                 this.printf("%s.writeFormat(drive=%d,CHS=%d:%d:%d,len=%d)\n",
                             this.idComponent, drive.iDrive, drive.bCylinder, drive.bHead, drive.bSector, drive.nBytes);
             }
