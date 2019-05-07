@@ -3489,7 +3489,7 @@ DiskDump.prototype.convertPSItoJSON = function()
             size = chunkData.readUInt16BE(4);
             flags = chunkData.readUInt8(6);
             pattern = chunkData.readUInt8(7);
-            sector = {'cylinder': cylinder, 'head': head, 'sector': sectorID, 'length': size, 'data': new Array(size >> 2)};
+            sector = {'cylinder': cylinder, 'head': head, 'sector': sectorID, 'length': size};
             sectorIndex = 0;
             // DiskDump.logConsole(str.sprintf("SECT: %d:%d:%d %d bytes, flags 0x%x, pattern 0x%02x", cylinder, head, sectorID, size, flags, pattern));
             while (data.length < cylinder + 1) {
@@ -3501,7 +3501,6 @@ DiskDump.prototype.convertPSItoJSON = function()
             data[cylinder][head].push(sector);
             if (flags & 0x1) {
                 sector['pattern'] = pattern | (pattern << 8) | (pattern << 16) | (pattern << 24);
-                sector['data'].fill(pattern);
             }
             if (flags & 0x4) {
                 sector['dataError'] = -1;
@@ -3512,6 +3511,7 @@ DiskDump.prototype.convertPSItoJSON = function()
             break;
         case CHUNK_DATA:
             // DiskDump.logConsole(str.sprintf("DATA: %d bytes", chunkData.length));
+            sector['data'] = new Array(size >> 2);
             for (var off = 0; off < chunkData.length; off += 4) {
                 if (sectorIndex >= sector['data'].length) {
                     DiskDump.logConsole(str.sprintf("warning: data for sector offset %d exceeds sector length", sectorIndex * 4, sector['data'].length));
