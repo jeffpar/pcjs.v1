@@ -197,13 +197,13 @@ The machine on this page is configured with the following "autoType" sequence:
 
 which translates to:
 
-	<today's data>      [enter an arbitrary date]
+	<today's date>      [enter an arbitrary date]
 	B:                  [switch to drive B:]
 	A:BASICA CASTLE     [run BASICA on drive A: and load CASTLE.BAS on drive B:]
 
 This is one of the preferred methods of demonstrating software in PCjs: loading unmodified disk images into machines
 that match the software's system requirements as closely as possible, powering the machine, and then automatically
-executing a series of commands that that hardware and software combination would have required.
+executing a series of commands appropriate for the hardware and software combination.
 
 The other preferred method is to use a machine state file, which restores the machine to a state where the software
 is already running.  That's the quickest method for starting the software, and it's useful when the software has an
