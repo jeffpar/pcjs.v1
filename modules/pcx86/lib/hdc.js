@@ -67,10 +67,16 @@ class HDC extends Component {
      * HDC supports the following component-specific properties:
      *
      *      drives: an array of DriveConfig objects, each containing 'name', 'path', 'type' and 'size' properties
-     *      type:   either 'XT' (for the PC XT Xebec controller) or 'AT' (for the PC AT Western Digital controller)
+     *      type: either "XT" (for the PC XT Xebec controller), or "AT" (for the PC AT Western Digital controller)
      *
-     * The 'type' parameter defaults to 'XT'.  All ports for the PC XT controller are referred to as XTC ports,
+     * The 'type' parameter defaults to "XT".  All ports for the PC XT controller are referred to as XTC ports,
      * and similarly, all PC AT controller ports are referred to as ATC ports.
+     *
+     * Choosing the "AT" controller type enables ATA compatibility, and by default, the primary ATA interface is
+     * enabled (ie, "AT" is equivalent to "AT1"); if you want to enable the secondary ATA interface, specify "AT2".
+     *
+     * If you want to connect an ATAPI (eg, CD-ROM) drive to the controller, specify "ATAPI" instead of "AT"; unlike
+     * "AT", "ATAPI" defaults to secondary interface (ie, "ATAPI" is equivalent to "ATAPI2").
      *
      * If 'path' is empty, a scratch disk image is created; otherwise, we make a note of the path, but we will NOT
      * pre-load it like we do for floppy disk images.
@@ -110,8 +116,19 @@ class HDC extends Component {
          * defaults.  For example, the default XT drive type is 3 (for a 10Mb disk drive), whereas the default
          * AT drive type is 2 (for a 20Mb disk drive).
          */
-        let sType = parmsHDC['type'];
-        this.fATC = sType && sType.toUpperCase() == "AT" || false;
+        this.fATC = this.fATAPI = false;
+        this.sType = (parmsHDC['type'] || "XT").toUpperCase();
+        if (this.sType.slice(0, 2) == "AT") {
+            this.fATC = true;
+            this.fATAPI = (this.sType == "ATAPI");
+        }
+        this.nInterface = (this.fATAPI? 1 : 0);     // default to the secondary interface if type is "ATAPI"
+        let nInterface = this.sType.slice(-1);
+        if (nInterface == '1') {
+            this.nInterface = 0;
+        } else if (nInterface == '2') {
+            this.nInterface = 1;
+        }
 
         /*
          * Support for local disk images is currently limited to desktop browsers with FileReader support;
@@ -245,8 +262,16 @@ class HDC extends Component {
         this.iDriveTable = 0;
         this.iDriveTypeDefault = 3;
 
-        bus.addPortInputTable(this, this.fATC? HDC.aATCPortInput : HDC.aXTCPortInput);
-        bus.addPortOutputTable(this, this.fATC? HDC.aATCPortOutput : HDC.aXTCPortOutput);
+        if (!this.fATC) {
+            bus.addPortInputTable(this, HDC.aXTCPortInput);
+            bus.addPortOutputTable(this, HDC.aXTCPortOutput);
+        } else if (!this.nInterface) {
+            bus.addPortInputTable(this, HDC.aATCPortInputPrimary);
+            bus.addPortOutputTable(this, HDC.aATCPortOutputPrimary);
+        } else {
+            bus.addPortInputTable(this, HDC.aATCPortInputSecondary);
+            bus.addPortOutputTable(this, HDC.aATCPortOutputSecondary);
+        }
 
         if (this.fATC) {
             this.iDriveTable++;
@@ -1219,7 +1244,7 @@ class HDC extends Component {
      * Wrapper around inATCByte() to treat this as a 16-bit port; see addPortInputWidth(HDC.ATC.DATA.PORT, 2).
      *
      * @this {HDC}
-     * @param {number} port (0x1F0)
+     * @param {number} port (0x1F0,0x170)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port data
      */
@@ -1232,7 +1257,7 @@ class HDC extends Component {
      * outATCByte(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F0)
+     * @param {number} port (0x1F0,0x170)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1299,7 +1324,7 @@ class HDC extends Component {
      * Wrapper around outATCByte() to treat this as a 16-bit port; see addPortOutputWidth(HDC.ATC.DATA.PORT, 2)
      *
      * @this {HDC}
-     * @param {number} port (0x1F0)
+     * @param {number} port (0x1F0,0x170)
      * @param {number} data
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1313,7 +1338,7 @@ class HDC extends Component {
      * inATCError(port, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F1)
+     * @param {number} port (0x1F1,0x171)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port value
      */
@@ -1328,7 +1353,7 @@ class HDC extends Component {
      * outATCWPreC(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F1)
+     * @param {number} port (0x1F1,0x171)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1342,7 +1367,7 @@ class HDC extends Component {
      * inATCSecCnt(port, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F2)
+     * @param {number} port (0x1F2,0x172)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port value
      */
@@ -1357,7 +1382,7 @@ class HDC extends Component {
      * outATCSecCnt(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F2)
+     * @param {number} port (0x1F2,0x172)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1371,7 +1396,7 @@ class HDC extends Component {
      * inATCSecNum(port, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F3)
+     * @param {number} port (0x1F3,0x173)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port value
      */
@@ -1386,7 +1411,7 @@ class HDC extends Component {
      * outATCSecNum(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F3)
+     * @param {number} port (0x1F3,0x173)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1400,7 +1425,7 @@ class HDC extends Component {
      * inATCCylLo(port, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F4)
+     * @param {number} port (0x1F4,0x174)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port value
      */
@@ -1415,7 +1440,7 @@ class HDC extends Component {
      * outATCCylLo(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F4)
+     * @param {number} port (0x1F4,0x174)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1429,7 +1454,7 @@ class HDC extends Component {
      * inATCCylHi(port, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F5)
+     * @param {number} port (0x1F5,0x175)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port value
      */
@@ -1444,7 +1469,7 @@ class HDC extends Component {
      * outATCCylHi(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F5)
+     * @param {number} port (0x1F5,0x175)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1458,7 +1483,7 @@ class HDC extends Component {
      * inATCDrvHd(port, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F6)
+     * @param {number} port (0x1F6,0x176)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port value
      */
@@ -1473,7 +1498,7 @@ class HDC extends Component {
      * outATCDrvHd(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F6)
+     * @param {number} port (0x1F6,0x176)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1512,7 +1537,7 @@ class HDC extends Component {
      * inATCStatus(port, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F7)
+     * @param {number} port (0x1F7,0x177)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port value
      */
@@ -1536,7 +1561,7 @@ class HDC extends Component {
          * interrupt at (4) never happens.  So, maybe there are SOME situations where IRR should be cleared on
          * a read, but I don't know what they are.
          *
-         *      if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.ATC);
+         *      if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.ATC1 + this.nInterface);
          */
         if (this.regStatus & HDC.ATC.STATUS.READY) this.regStatus &= ~HDC.ATC.STATUS.BUSY;
         return bIn;
@@ -1546,7 +1571,7 @@ class HDC extends Component {
      * outATCCommand(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F7)
+     * @param {number} port (0x1F7,0x177)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1554,17 +1579,17 @@ class HDC extends Component {
     {
         this.printMessageIO(port, bOut, addrFrom, "COMMAND");
         this.regCommand = bOut;
-        if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.ATC);
+        if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.ATC1 + this.nInterface);
         this.doATC();
     }
 
     /**
      * outATCFDR(port, bOut, addrFrom)
      *
-     * This is referred to in IBM's docs as the "Fixed Disk Register" (write-only)
+     * This is referred to in IBM's docs as the "Fixed Disk Register" (write-only); aka "Device Control Register".
      *
      * @this {HDC}
-     * @param {number} port (0x3F6)
+     * @param {number} port (0x3F6,0x376)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1772,7 +1797,7 @@ class HDC extends Component {
                  * on the setIRR() call here (120), and the problem vanished, so it seems likely that the OS/2 disk driver
                  * has a low tolerance for fast controller interrupts during multi-sector operations.
                  */
-                this.chipset.setIRR(ChipSet.IRQ.ATC, 120);
+                this.chipset.setIRR(ChipSet.IRQ.ATC1 + this.nInterface, 120);
                 if (DEBUG) this.printMessage(this.idComponent + ".setATCIRR(): enabled", Messages.PIC | Messages.HDC);
             } else {
                 if (DEBUG) this.printMessage(this.idComponent + ".setATCIRR(): disabled", Messages.PIC | Messages.HDC);
@@ -2897,7 +2922,7 @@ HDC.ATC = {
         SET_MASK:    0xE0,
         SET_BITS:    0xA0       // for whatever reason, these bits must always be set
     },
-    STATUS: {                   // this.regStatus (read-only; reading clears IRQ.ATC)
+    STATUS: {                   // this.regStatus (read-only; reading clears IRQ.ATC1)
         PORT:       0x1F7,
         ERROR:       0x01,      // set when the previous command ended in an error; one or more bits are set in the ERROR register (the next command to the controller resets the ERROR bit)
         INDEX:       0x02,      // set once for every revolution of the disk
@@ -3116,7 +3141,7 @@ HDC.aXTCPortInput = {
  * port 0x5F7, but I have no documentation on it, and failure to respond is non-fatal.  See the discussion of the
  * FDC diagnostic register in inFDCDiagnostic() for more details.
  */
-HDC.aATCPortInput = {
+HDC.aATCPortInputPrimary = {
     0x1F0:  HDC.prototype.inATCData,
     0x1F1:  HDC.prototype.inATCError,
     0x1F2:  HDC.prototype.inATCSecCnt,
@@ -3125,6 +3150,17 @@ HDC.aATCPortInput = {
     0x1F5:  HDC.prototype.inATCCylHi,
     0x1F6:  HDC.prototype.inATCDrvHd,
     0x1F7:  HDC.prototype.inATCStatus
+};
+
+HDC.aATCPortInputSecondary = {
+    0x170:  HDC.prototype.inATCData,
+    0x171:  HDC.prototype.inATCError,
+    0x172:  HDC.prototype.inATCSecCnt,
+    0x173:  HDC.prototype.inATCSecNum,
+    0x174:  HDC.prototype.inATCCylLo,
+    0x175:  HDC.prototype.inATCCylHi,
+    0x176:  HDC.prototype.inATCDrvHd,
+    0x177:  HDC.prototype.inATCStatus
 };
 
 /*
@@ -3147,7 +3183,7 @@ HDC.aXTCPortOutput = {
     0x32F:  HDC.prototype.outXTCNoise
 };
 
-HDC.aATCPortOutput = {
+HDC.aATCPortOutputPrimary = {
     0x1F0:  HDC.prototype.outATCData,
     0x1F1:  HDC.prototype.outATCWPreC,
     0x1F2:  HDC.prototype.outATCSecCnt,
@@ -3157,6 +3193,18 @@ HDC.aATCPortOutput = {
     0x1F6:  HDC.prototype.outATCDrvHd,
     0x1F7:  HDC.prototype.outATCCommand,
     0x3F6:  HDC.prototype.outATCFDR
+};
+
+HDC.aATCPortOutputSecondary = {
+    0x170:  HDC.prototype.outATCData,
+    0x171:  HDC.prototype.outATCWPreC,
+    0x172:  HDC.prototype.outATCSecCnt,
+    0x173:  HDC.prototype.outATCSecNum,
+    0x174:  HDC.prototype.outATCCylLo,
+    0x175:  HDC.prototype.outATCCylHi,
+    0x176:  HDC.prototype.outATCDrvHd,
+    0x177:  HDC.prototype.outATCCommand,
+    0x376:  HDC.prototype.outATCFDR
 };
 
 /*
