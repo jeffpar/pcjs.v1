@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Messages    = require("./messages");
     var X86         = require("./x86");
@@ -1701,4 +1701,4 @@ SegX86.ID = {
 
 SegX86.CALLBREAK_SEL = 0x0001;
 
-if (NODE) module.exports = SegX86;
+if (typeof module !== "undefined") module.exports = SegX86;

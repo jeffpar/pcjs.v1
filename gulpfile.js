@@ -74,6 +74,11 @@
  *      copyright
  *
  *          Updates the copyright year in all project files to match the year contained in package.json.
+ *
+ * Options
+ *
+ *      --rebuild will force the "compile" task to recompile the code for any or all the machines, even if the
+ *      compiled code is up-to-date.
  */
 
  "use strict";
@@ -84,13 +89,16 @@ var gulpConcat = require("gulp-concat");
 var gulpForEach = require("gulp-foreach");
 var gulpHeader = require("gulp-header");
 var gulpReplace = require("gulp-replace");
-var gulpClosureCompiler = require('google-closure-compiler-js').gulp();
+var gulpClosureCompiler = require('google-closure-compiler').gulp();
 var gulpSourceMaps = require('gulp-sourcemaps');
-var merge = require('merge-stream');
 
 var fs = require("fs");
 var path = require("path");
 var pkg = require("./package.json");
+
+var proc = require("./modules/shared/lib/proclib.js");
+var args = proc.getArgs();
+var argv = args.argv;
 
 /**
  * @typedef {Object} MachineConfig
@@ -112,27 +120,11 @@ var pkg = require("./package.json");
  * @type {Object.<string,MachineConfig>}
  */
 var machines = require("./_data/machines.json");
-
-var sExterns = "";
-
-for (let i = 0; i < machines.shared.externs.length; i++) {
-    let sContents = "";
-    try {
-        sContents = fs.readFileSync(machines.shared.externs[i], "utf8");
-    } catch(err) {
-        console.log(err.message);
-    }
-    if (sContents) {
-        if (sExterns) sExterns += '\n';
-        sExterns += sContents;
-    }
-}
-
-var sSiteHost = "https://www.pcjs.org";
+var siteHost = "https://www.pcjs.org";
 
 if (pkg.homepage) {
     let match = pkg.homepage.match(/^(https?:\/\/[^/]*)(.*)/);
-    if (match) sSiteHost = match[1];
+    if (match) siteHost = match[1];
 }
 
 var aMachines = Object.keys(machines);
@@ -152,34 +144,35 @@ aMachines.forEach(function(machineType) {
         machineConfig = machines[machineConfig.alias];
     }
 
+    let machineDefines = [];
     let machineVersion = machineConfig.version || machines.shared.version;
     let machineReleaseDir = "./versions/" + machineConfig['folder'] + "/" + machineVersion;
     let machineReleaseFile  = machineType + ".js";
     let machineUncompiledFile  = machineType + "-uncompiled.js";
-    let machineDefines = {};
 
     if (machineConfig.defines) {
         for (let i = 0; i < machineConfig.defines.length; i++) {
-            let define = machineConfig.defines[i];
+            let define = machineConfig.defines[i], value = undefined;
             switch(define) {
             case "APPVERSION":
             case "VERSION":
-                machineDefines[define] = machineVersion;
+                value = machineVersion;
                 break;
             case "SITEURL":
-                machineDefines[define] = sSiteHost;
+                value = siteHost;
                 break;
             case "BACKTRACK":
             case "DEBUG":
-                machineDefines[define] = false;
+                value = false;
                 break;
             case "COMPILED":
             case "DEBUGGER":
             case "I386":
             default:
-                machineDefines[define] = true;
+                value = true;
                 break;
             }
+            machineDefines.push(define + '=' + value);
         }
     }
 
@@ -204,7 +197,7 @@ aMachines.forEach(function(machineType) {
         let dstStat = fs.statSync(dstFile);
         let srcTime = new Date(srcStat.mtime);
         let dstTime = new Date(dstStat.mtime);
-        if (dstTime < srcTime) aMachinesOutdated.push(machineType);
+        if (dstTime < srcTime || argv['rebuild']) aMachinesOutdated.push(machineType);
     } catch(err) {
         // console.log(err.message);
     }
@@ -224,7 +217,7 @@ aMachines.forEach(function(machineType) {
                     .pipe(gulpReplace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*[^;]*;/gm, ""))
                     .pipe(gulpReplace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, ""))
                     .pipe(gulpReplace(/[ \t]*if\s*\(NODE\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
-                    .pipe(gulpReplace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
+                    .pipe(gulpReplace(/[ \t]*if\s*\(typeof\s+module\s*!==?\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, ""))
                     .pipe(gulpReplace(/\/\*\*[^@]*@typedef\s*{([A-Z][A-Za-z0-9_<>.]+)}\s*(\S+)\s*([\s\S]*?)\*\//g, function(match, def, type, props) {
                         let sType = "/** @typedef {", sProps = "";
                         let reProps = /@property\s*{([^}]*)}\s*(\[|)([^\s\]]+)]?/g, matchProps;
@@ -254,16 +247,16 @@ aMachines.forEach(function(machineType) {
         if (aMachinesOutdated.indexOf(machineType) >= 0) {
             stream.pipe(gulpSourceMaps.init())
                   .pipe(gulpClosureCompiler({
-                    assumeFunctionWrapper: true,
-                    compilationLevel: 'ADVANCED',
-                    defines: machineDefines,
-                    externs: [{src: sExterns}],
-                    warningLevel: 'VERBOSE',
-                    languageIn: "ES6",                          // this is now the default, just documenting our requirements
-                    languageOut: "ES5",                         // this is also the default
-                    outputWrapper: '(function(){%output%})()',
-                    jsOutputFile: machineReleaseFile,           // NOTE: if we go back to doing debugger/non-debugger releases, this must be updated
-                    createSourceMap: true
+                    assume_function_wrapper: true,
+                    compilation_level: 'ADVANCED',
+                    define: machineDefines,
+                    externs: machines.shared.externs,
+                    warning_level: 'VERBOSE',
+                    language_in: 'ES6',                          // this is now the default, just documenting our requirements
+                    language_out: 'ES5',                         // this is also the default
+                    output_wrapper: '(function(){%output%})()',
+                    js_output_file: machineReleaseFile,           // NOTE: if we go back to doing debugger/non-debugger releases, this must be updated
+                    create_source_map: true
                   }))
                   .pipe(gulpSourceMaps.write('./'))             // gulp-sourcemaps automatically adds the sourcemap url comment
                   .pipe(gulp.dest(machineReleaseDir));

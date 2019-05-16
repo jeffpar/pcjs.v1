@@ -87,11 +87,6 @@ var RS232 = {
     }
 };
 
-/*
- * NODE should be true if we're running under NodeJS (eg, command-line), false if not (eg, web browser)
- */
-var NODE = false;
-
 
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2019
@@ -153,7 +148,6 @@ DumpAPI.asDiskCommands = [DumpAPI.QUERY.DIR, DumpAPI.QUERY.DISK, DumpAPI.QUERY.P
 DumpAPI.asFileCommands = [DumpAPI.QUERY.FILE];
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2019
  */
@@ -175,7 +169,6 @@ var ReportAPI = {
         OK:         "Thank you"
     }
 };
-
 
 
 /**
@@ -218,7 +211,6 @@ var UserAPI = {
         BADSTORE:   "unable to save machine state"
     }
 };
-
 
 
 /**
@@ -465,7 +457,6 @@ Keys.SHIFTED_KEYCODES[Keys.KEYCODE.QUOTE]  = Keys.ASCII['"'];
 Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_DASH]   = Keys.ASCII['_'];
 Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_EQUALS] = Keys.ASCII['+'];
 Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_SEMI]   = Keys.ASCII[':'];
-
 
 
 /**
@@ -1565,7 +1556,6 @@ Str.NamesOfDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frid
 Str.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2019
  */
@@ -1818,7 +1808,6 @@ Usr.aMonthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 Usr.getTime = Date.now || function() { return +new Date(); };
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2019
  */
@@ -1990,7 +1979,7 @@ class Web {
         }
 
         let sURLRedirect = sURL;
-        if (Web.getHost() == "pcjs:8088" || NODE) {
+        if (Web.getHost() == "pcjs:8088" || typeof module !== "undefined") {
             /*
              * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
              * whenever the hostname is "pcjs" (or NODE is true); otherwise, use "localhost" when debugging locally.
@@ -2983,7 +2972,6 @@ if (DEBUG && window) {
         window['DEBUG'] = false;
     }
 }
-
 
 
 /**
@@ -4510,7 +4498,6 @@ if (!Function.prototype.bind) {
 }
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pdp10/lib/defines.js (C) Jeff Parsons 2012-2019
  */
@@ -4847,7 +4834,6 @@ MessagesPDP10.CATEGORIES = {
     "buffer":   MessagesPDP10.BUFFER,
     "halt":     MessagesPDP10.HALT
 };
-
 
 
 /**
@@ -6063,7 +6049,6 @@ PanelPDP10.SWITCH = {
 Web.onInit(PanelPDP10.init);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pdp10/lib/bus.js (C) Jeff Parsons 2012-2019
  */
@@ -6791,7 +6776,6 @@ BusPDP10.ERROR = {
 };
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pdp10/lib/device.js (C) Jeff Parsons 2012-2019
  */
@@ -6926,7 +6910,6 @@ class DevicePDP10 extends Component {
  * Initialize all the DevicePDP10 modules on the page.
  */
 Web.onInit(DevicePDP10.init);
-
 
 
 /**
@@ -7437,7 +7420,6 @@ MemoryPDP10.afnChecked = [
     MemoryPDP10.prototype.readWordChecked,
     MemoryPDP10.prototype.writeWordChecked
 ];
-
 
 
 /**
@@ -8649,7 +8631,6 @@ CPUPDP10.YIELDS_PER_STATUS      = 15;           // every 15 yields (ie, twice pe
 CPUPDP10.BUTTONS = ["power", "reset"];
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pdp10/lib/cpustate.js (C) Jeff Parsons 2012-2019
  */
@@ -9600,7 +9581,6 @@ class CPUStatePDP10 extends CPUPDP10 {
  * Initialize every CPU module on the page
  */
 Web.onInit(CPUStatePDP10.init);
-
 
 
 /**
@@ -17542,7 +17522,6 @@ class ROMPDP10 extends Component {
 Web.onInit(ROMPDP10.init);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pdp10/lib/ram.js (C) Jeff Parsons 2012-2019
  */
@@ -17840,7 +17819,6 @@ class RAMPDP10 extends Component {
  * Initialize all the RAMPDP10 modules on the page.
  */
 Web.onInit(RAMPDP10.init);
-
 
 
 /**
@@ -18468,7 +18446,6 @@ class SerialPortPDP10 extends Component {
  * Initialize every SerialPort module on the page.
  */
 Web.onInit(SerialPortPDP10.init);
-
 
 
 /**
@@ -19787,7 +19764,6 @@ if (DEBUGGER) {
     Debugger.TWO_POW32 = Math.pow(2, 32);
 
 }   // endif DEBUGGER
-
 
 
 /**
@@ -21513,7 +21489,7 @@ class DebuggerPDP10 extends Debugger {
 
                 for (var i = 0; i < aOperands.length; i++) {
 
-                    var sOperand = aOperands[i].trim();
+                    var operand, sOperand = aOperands[i].trim();
                     if (!sOperand) continue;
 
                     var match = sOperand.match(/(@?)([^(]*)\(?([^)]*)\)?/);
@@ -21573,7 +21549,7 @@ class DebuggerPDP10 extends Debugger {
                         }
                     }
 
-                    var operand = this.parseExpression(sOperand, aUndefined);
+                    operand = this.parseExpression(sOperand, aUndefined);
                     if (operand == undefined) {
                         opCode = -1;
                         break;
@@ -24089,7 +24065,6 @@ if (DEBUGGER) {
 }   // endif DEBUGGER
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pdp10/lib/macro10.js (C) Jeff Parsons 2012-2019
  */
@@ -26335,8 +26310,12 @@ class ComputerPDP10 extends Component {
          * OVERRIDES everything; it overrides any 'state' Computer parameter AND it disables resume of any saved state in
          * localStorage (in other words, it prevents fAllowResume from being true, and forcing resume off).
          */
-        var fAllowResume;
-        var sState = this.getMachineParm('state') || (fAllowResume = true) && parmsComputer['state'];
+        var fAllowResume = false;
+        var sState = this.getMachineParm('state');
+        if (!sState) {
+            fAllowResume = true;
+            sState = parmsComputer['state'];
+        }
 
         if (sState) {
             this.sStatePath = sStatePath = sState;
@@ -26367,7 +26346,7 @@ class ComputerPDP10 extends Component {
             this.setReady();
         } else {
             var cmp = this;
-            Web.getResource(sStatePath, null, true, function doneStateLoad(sURL, sResource, nErrorCode) {
+            Web.getResource(/** @type {string} */ (sStatePath), null, true, function doneStateLoad(sURL, sResource, nErrorCode) {
                 cmp.finishStateLoad(sURL, sResource, nErrorCode);
             });
         }
@@ -27789,7 +27768,6 @@ Web.onShow(ComputerPDP10.show);
 Web.onExit(ComputerPDP10.exit);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2019
  */
@@ -28153,7 +28131,6 @@ class State {
         return aDst;
     }
 }
-
 
 
 /**

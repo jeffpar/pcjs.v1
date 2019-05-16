@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Web = require("../../shared/lib/weblib");
     var DiskAPI = require("../../shared/lib/diskapi");
@@ -1362,4 +1362,4 @@ DriveController.SOURCE = {
     REMOTE: "??"
 };
 
-if (NODE) module.exports = DriveController;
+if (typeof module !== "undefined") module.exports = DriveController;

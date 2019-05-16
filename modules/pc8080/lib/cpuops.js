@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var CPUDef8080 = require("./CPUDef");
     var Messages8080 = require("./messages");
 }

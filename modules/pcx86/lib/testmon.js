@@ -47,7 +47,7 @@
  * commands, and if a match is found, the corresponding request is sent to the SerialPort.
  */
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Keys        = require("../../shared/lib/keys");
     var Str         = require("../../shared/lib/strlib");
     var Web         = require("../../shared/lib/weblib");
@@ -483,4 +483,4 @@ TestMonitor.COMMANDS = [
     TestMonitor.COMMAND.WAIT
 ];
 
-if (NODE) module.exports = TestMonitor;
+if (typeof module !== "undefined") module.exports = TestMonitor;

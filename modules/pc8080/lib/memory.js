@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Component = require("../../shared/lib/component");
     var CPUDef8080 = require("./cpudef");
@@ -917,4 +917,4 @@ if (TYPEDARRAYS) {
     ];
 }
 
-if (NODE) module.exports = Memory8080;
+if (typeof module !== "undefined") module.exports = Memory8080;

@@ -29,7 +29,7 @@
 "use strict";
 
 if (DEBUGGER) {
-    if (NODE) {
+    if (typeof module !== "undefined") {
         var str         = require("../../shared/lib/strlib");
         var usr         = require("../../shared/lib/usrlib");
         var web         = require("../../shared/lib/weblib");
@@ -4371,4 +4371,4 @@ if (DEBUGGER) {
 
 }   // endif DEBUGGER
 
-if (NODE) module.exports = Debugger;
+if (typeof module !== "undefined") module.exports = Debugger;

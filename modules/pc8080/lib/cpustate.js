@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Web = require("../../shared/lib/weblib");
     var Component = require("../../shared/lib/component");
     var State = require("../../shared/lib/state");
@@ -1176,4 +1176,4 @@ class CPUState8080 extends CPU8080 {
  */
 Web.onInit(CPUState8080.init);
 
-if (NODE) module.exports = CPUState8080;
+if (typeof module !== "undefined") module.exports = CPUState8080;

@@ -87,11 +87,6 @@ var RS232 = {
     }
 };
 
-/*
- * NODE should be true if we're running under NodeJS (eg, command-line), false if not (eg, web browser)
- */
-var NODE = false;
-
 
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/diskapi.js (C) Jeff Parsons 2012-2019
@@ -320,7 +315,6 @@ DiskAPI.ATTR = {
 };
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2019
  */
@@ -381,7 +375,6 @@ DumpAPI.asDiskCommands = [DumpAPI.QUERY.DIR, DumpAPI.QUERY.DISK, DumpAPI.QUERY.P
 DumpAPI.asFileCommands = [DumpAPI.QUERY.FILE];
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2019
  */
@@ -403,7 +396,6 @@ var ReportAPI = {
         OK:         "Thank you"
     }
 };
-
 
 
 /**
@@ -446,7 +438,6 @@ var UserAPI = {
         BADSTORE:   "unable to save machine state"
     }
 };
-
 
 
 /**
@@ -693,7 +684,6 @@ Keys.SHIFTED_KEYCODES[Keys.KEYCODE.QUOTE]  = Keys.ASCII['"'];
 Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_DASH]   = Keys.ASCII['_'];
 Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_EQUALS] = Keys.ASCII['+'];
 Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_SEMI]   = Keys.ASCII[':'];
-
 
 
 /**
@@ -1793,7 +1783,6 @@ Str.NamesOfDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frid
 Str.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2019
  */
@@ -2046,7 +2035,6 @@ Usr.aMonthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 Usr.getTime = Date.now || function() { return +new Date(); };
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2019
  */
@@ -2218,7 +2206,7 @@ class Web {
         }
 
         let sURLRedirect = sURL;
-        if (Web.getHost() == "pcjs:8088" || NODE) {
+        if (Web.getHost() == "pcjs:8088" || typeof module !== "undefined") {
             /*
              * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
              * whenever the hostname is "pcjs" (or NODE is true); otherwise, use "localhost" when debugging locally.
@@ -3211,7 +3199,6 @@ if (DEBUG && window) {
         window['DEBUG'] = false;
     }
 }
-
 
 
 /**
@@ -4738,7 +4725,6 @@ if (!Function.prototype.bind) {
 }
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pdp11/lib/defines.js (C) Jeff Parsons 2012-2019
  */
@@ -5794,7 +5780,6 @@ MessagesPDP11.CATEGORIES = {
     "warn":     MessagesPDP11.WARN,
     "halt":     MessagesPDP11.HALT
 };
-
 
 
 /**
@@ -7097,7 +7082,6 @@ PanelPDP11.UNIBUS_IOTABLE = {
  * Initialize every Panel module on the page.
  */
 Web.onInit(PanelPDP11.init);
-
 
 
 /**
@@ -8525,7 +8509,6 @@ BusPDP11.IOController = {
 };
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pdp11/lib/device.js (C) Jeff Parsons 2012-2019
  */
@@ -9753,7 +9736,6 @@ DevicePDP11.UNIBUS_IOTABLE = {
 Web.onInit(DevicePDP11.init);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pdp11/lib/memory.js (C) Jeff Parsons 2012-2019
  */
@@ -10738,7 +10720,6 @@ var littleEndian = (TYPEDARRAYS? (function() {
     new DataView(buffer).setUint16(0, 256, true);
     return new Uint16Array(buffer)[0] === 256;
 })() : false);
-
 
 
 /**
@@ -11943,7 +11924,6 @@ CPUPDP11.YIELDS_PER_SECOND      = 30;           // just a gut feeling for the MI
 CPUPDP11.YIELDS_PER_STATUS      = 15;           // every 15 yields (ie, twice per second), perform CPU status updates
 
 CPUPDP11.BUTTONS = ["power", "reset"];
-
 
 
 /**
@@ -14997,7 +14977,6 @@ class CPUStatePDP11 extends CPUPDP11 {
 Web.onInit(CPUStatePDP11.init);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pdp11/lib/cpuops.js (C) Jeff Parsons 2012-2019
  */
@@ -17865,7 +17844,6 @@ class ROMPDP11 extends Component {
 Web.onInit(ROMPDP11.init);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pdp11/lib/ram.js (C) Jeff Parsons 2012-2019
  */
@@ -18251,7 +18229,6 @@ class RAMPDP11 extends Component {
 Web.onInit(RAMPDP11.init);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pdp11/lib/keyboard.js (C) Jeff Parsons 2012-2019
  */
@@ -18327,7 +18304,6 @@ KeyboardPDP11.MINPRESSTIME = 100;            // 100ms
  * Initialize every Keyboard module on the page.
  */
 Web.onInit(KeyboardPDP11.init);
-
 
 
 /**
@@ -19207,7 +19183,6 @@ SerialPortPDP11.UNIBUS_IOTABLE = {
  * Initialize every SerialPort module on the page.
  */
 Web.onInit(SerialPortPDP11.init);
-
 
 
 /**
@@ -20197,7 +20172,6 @@ PC11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.PPS]:     /* 177554 */    [null, null, PC11.prototype.readPPS,    PC11.prototype.writePPS,    "PPS"],
     [PDP11.UNIBUS.PPB]:     /* 177556 */    [null, null, PC11.prototype.readPPB,    PC11.prototype.writePPB,    "PPB"]
 };
-
 
 
 /**
@@ -21409,7 +21383,6 @@ class DiskPDP11 extends Component {
  * A global disk count, used to form unique Disk component IDs (totally optional; for debugging purposes only)
  */
 DiskPDP11.nDisks = 0;
-
 
 
 /**
@@ -22741,7 +22714,6 @@ DriveController.SOURCE = {
 };
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pdp11/lib/rk11.js (C) Jeff Parsons 2012-2019
  */
@@ -23329,7 +23301,6 @@ RK11.UNIBUS_IOTABLE = {
 };
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pdp11/lib/rl11.js (C) Jeff Parsons 2012-2019
  */
@@ -23852,7 +23823,6 @@ RL11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.RLMP]:     /* 174406 */    [null, null, RL11.prototype.readRLMP,  RL11.prototype.writeRLMP,   "RLMP"],
     [PDP11.UNIBUS.RLBE]:     /* 174410 */    [null, null, RL11.prototype.readRLBE,  RL11.prototype.writeRLBE,   "RLBE"]
 };
-
 
 
 /**
@@ -24410,7 +24380,6 @@ RX11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.RXCS]:     /* 177170 */    [null, null, RX11.prototype.readRXCS,  RX11.prototype.writeRXCS,   "RXCS"],
     [PDP11.UNIBUS.RXDB]:     /* 177172 */    [null, null, RX11.prototype.readRXDB,  RX11.prototype.writeRXDB,   "RXDB"]
 };
-
 
 
 /**
@@ -25729,7 +25698,6 @@ if (DEBUGGER) {
     Debugger.TWO_POW32 = Math.pow(2, 32);
 
 }   // endif DEBUGGER
-
 
 
 /**
@@ -30032,7 +30000,6 @@ if (DEBUGGER) {
 }   // endif DEBUGGER
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pdp11/lib/computer.js (C) Jeff Parsons 2012-2019
  */
@@ -30221,8 +30188,12 @@ class ComputerPDP11 extends Component {
          * OVERRIDES everything; it overrides any 'state' Computer parameter AND it disables resume of any saved state in
          * localStorage (in other words, it prevents fAllowResume from being true, and forcing resume off).
          */
-        var fAllowResume;
-        var sState = this.getMachineParm('state') || (fAllowResume = true) && parmsComputer['state'];
+        var fAllowResume = false;
+        var sState = this.getMachineParm('state');
+        if (!sState) {
+            fAllowResume = true;
+            sState = parmsComputer['state'];
+        }
 
         if (sState) {
             this.sStatePath = sStatePath = sState;
@@ -30253,7 +30224,7 @@ class ComputerPDP11 extends Component {
             this.setReady();
         } else {
             var cmp = this;
-            Web.getResource(sStatePath, null, true, function doneStateLoad(sURL, sResource, nErrorCode) {
+            Web.getResource(/** @type {string} */ (sStatePath), null, true, function doneStateLoad(sURL, sResource, nErrorCode) {
                 cmp.finishStateLoad(sURL, sResource, nErrorCode);
             });
         }
@@ -31677,7 +31648,6 @@ Web.onShow(ComputerPDP11.show);
 Web.onExit(ComputerPDP11.exit);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2019
  */
@@ -32041,7 +32011,6 @@ class State {
         return aDst;
     }
 }
-
 
 
 /**

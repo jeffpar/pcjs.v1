@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");

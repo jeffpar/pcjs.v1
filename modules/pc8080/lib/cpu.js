@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Component = require("../../shared/lib/component");
     var Messages8080 = require("./messages");
@@ -1280,4 +1280,4 @@ CPU8080.YIELDS_PER_STATUS       = 15;           // every 15 yields (ie, twice pe
 
 CPU8080.BUTTONS = ["power", "reset"];
 
-if (NODE) module.exports = CPU8080;
+if (typeof module !== "undefined") module.exports = CPU8080;

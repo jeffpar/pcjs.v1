@@ -69,8 +69,8 @@
     "async": "^0.6.2",
     "editorconfig": "^0.15.2",
     "eslint": "^4.19.1",
-    "google-closure-compiler-js": "^20180506.0.0",
-    "gulp": "^4.0.0",
+    "google-closure-compiler": "^20190415.0.0",
+    "gulp": "^4.0.2",
     "gulp-concat": "^2.6.1",
     "gulp-foreach": "^0.1.0",
     "gulp-header": "^1.8.12",
@@ -80,7 +80,7 @@
     "merge-stream": "^1.0.1",
     "replace": "^0.3.0",
     "serialport": "^6.2.2",
-    "unzip": "^0.1.9",
+    "unzip": "^0.1.11",
     "xml2js": "^0.4.19"
   }
 }

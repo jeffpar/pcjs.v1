@@ -130,4 +130,4 @@ Messages.CATEGORIES = {
     "buffer":   Messages.BUFFER
 };
 
-if (NODE) module.exports = Messages;
+if (typeof module !== "undefined") module.exports = Messages;

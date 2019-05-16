@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var str         = require("../../shared/lib/strlib");
     var usr         = require("../../shared/lib/usrlib");
     var Component   = require("../../shared/lib/component");
@@ -1121,4 +1121,4 @@ CPU.prototype.yieldCPU = function()
     this.updateCPU();
 };
 
-if (NODE) module.exports = CPU;
+if (typeof module !== "undefined") module.exports = CPU;

@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Web         = require("../../shared/lib/weblib");
     var DumpAPI     = require("../../shared/lib/dumpapi");
@@ -668,4 +668,4 @@ ROMX86.BIOS = {
  */
 Web.onInit(ROMX86.init);
 
-if (NODE) module.exports = ROMX86;
+if (typeof module !== "undefined") module.exports = ROMX86;

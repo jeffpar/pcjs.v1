@@ -87,11 +87,6 @@ var RS232 = {
     }
 };
 
-/*
- * NODE should be true if we're running under NodeJS (eg, command-line), false if not (eg, web browser)
- */
-var NODE = false;
-
 
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/diskapi.js (C) Jeff Parsons 2012-2019
@@ -320,7 +315,6 @@ DiskAPI.ATTR = {
 };
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2019
  */
@@ -381,7 +375,6 @@ DumpAPI.asDiskCommands = [DumpAPI.QUERY.DIR, DumpAPI.QUERY.DISK, DumpAPI.QUERY.P
 DumpAPI.asFileCommands = [DumpAPI.QUERY.FILE];
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2019
  */
@@ -403,7 +396,6 @@ var ReportAPI = {
         OK:         "Thank you"
     }
 };
-
 
 
 /**
@@ -446,7 +438,6 @@ var UserAPI = {
         BADSTORE:   "unable to save machine state"
     }
 };
-
 
 
 /**
@@ -693,7 +684,6 @@ Keys.SHIFTED_KEYCODES[Keys.KEYCODE.QUOTE]  = Keys.ASCII['"'];
 Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_DASH]   = Keys.ASCII['_'];
 Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_EQUALS] = Keys.ASCII['+'];
 Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_SEMI]   = Keys.ASCII[':'];
-
 
 
 /**
@@ -1793,7 +1783,6 @@ Str.NamesOfDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frid
 Str.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2019
  */
@@ -2046,7 +2035,6 @@ Usr.aMonthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 Usr.getTime = Date.now || function() { return +new Date(); };
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2019
  */
@@ -2218,7 +2206,7 @@ class Web {
         }
 
         let sURLRedirect = sURL;
-        if (Web.getHost() == "pcjs:8088" || NODE) {
+        if (Web.getHost() == "pcjs:8088" || typeof module !== "undefined") {
             /*
              * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
              * whenever the hostname is "pcjs" (or NODE is true); otherwise, use "localhost" when debugging locally.
@@ -3211,7 +3199,6 @@ if (DEBUG && window) {
         window['DEBUG'] = false;
     }
 }
-
 
 
 /**
@@ -4738,7 +4725,6 @@ if (!Function.prototype.bind) {
 }
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pcx86/lib/defines.js (C) Jeff Parsons 2012-2019
  */
@@ -5772,7 +5758,6 @@ X86.PS_SAHF = (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF);
  * preceded them.
  */
 X86.OPFLAG_PREFIXES = (X86.OPFLAG.SEG | X86.OPFLAG.LOCK | X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ | X86.OPFLAG.DATASIZE | X86.OPFLAG.ADDRSIZE);
-
 
 
 /**
@@ -7884,7 +7869,6 @@ if (DEBUGGER) {
  */
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pcx86/lib/messages.js (C) Jeff Parsons 2012-2019
  */
@@ -7990,7 +7974,6 @@ Messages.CATEGORIES = {
     "halt":     Messages.HALT,
     "buffer":   Messages.BUFFER
 };
-
 
 
 /**
@@ -9073,7 +9056,6 @@ Panel.UPDATES_PER_SECOND = 10;
  * Initialize every Panel module on the page.
  */
 Web.onInit(Panel.init);
-
 
 
 /**
@@ -10795,7 +10777,6 @@ Bus.ERROR = {
     SET_MEM_BADRANGE:   4,
     REM_MEM_BADRANGE:   5
 };
-
 
 
 /**
@@ -12555,7 +12536,6 @@ if (TYPEDARRAYS) {
 }
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pcx86/lib/cpu.js (C) Jeff Parsons 2012-2019
  */
@@ -13922,7 +13902,6 @@ class CPU extends Component {
 CPU.YIELDS_PER_SECOND = 60;
 
 CPU.BUTTONS = ["power", "reset"];
-
 
 
 /**
@@ -18490,7 +18469,6 @@ CPUX86.PAGEBLOCKS_CACHE = 512;      // TODO: This seems adequate for 4Mb of RAM,
 Web.onInit(CPUX86.init);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pcx86/lib/fpux86.js (C) Jeff Parsons 2012-2019
  */
@@ -21830,7 +21808,6 @@ FPUX86.afnPreserveExceptions = [
 Web.onInit(FPUX86.init);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pcx86/lib/segx86.js (C) Jeff Parsons 2012-2019
  */
@@ -23502,7 +23479,6 @@ SegX86.ID = {
 };
 
 SegX86.CALLBREAK_SEL = 0x0001;
-
 
 
 /**
@@ -44420,7 +44396,6 @@ if (DESKPRO386) {
 Web.onInit(ChipSet.init);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pcx86/lib/rom.js (C) Jeff Parsons 2012-2019
  */
@@ -45058,7 +45033,6 @@ ROMX86.BIOS = {
 Web.onInit(ROMX86.init);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pcx86/lib/ram.js (C) Jeff Parsons 2012-2019
  */
@@ -45624,7 +45598,6 @@ CompaqController.ACCESS = [CompaqController.readByte, null, null, CompaqControll
  * Initialize all the RAM modules on the page.
  */
 Web.onInit(RAM.init);
-
 
 
 /**
@@ -48665,7 +48638,6 @@ Keyboard.INJECTION = {
  * Initialize every Keyboard module on the page.
  */
 Web.onInit(Keyboard.init);
-
 
 
 /**
@@ -57245,7 +57217,6 @@ Video.aVGAPortOutput = {
 Web.onInit(Video.init);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pcx86/lib/parallel.js (C) Jeff Parsons 2012-2019
  */
@@ -57769,7 +57740,6 @@ ParallelPort.aPortOutput = {
  * Initialize every ParallelPort module on the page.
  */
 Web.onInit(ParallelPort.init);
-
 
 
 /**
@@ -58935,7 +58905,6 @@ SerialPort.aPortOutput = {
 Web.onInit(SerialPort.init);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pcx86/lib/testctl.js (C) Jeff Parsons 2012-2019
  */
@@ -59251,7 +59220,6 @@ class TestController extends Component {
  * Initialize every TestController module on the page.
  */
 Web.onInit(TestController.init);
-
 
 
 /**
@@ -59705,7 +59673,6 @@ TestMonitor.COMMANDS = [
     TestMonitor.COMMAND.PRINTF,
     TestMonitor.COMMAND.WAIT
 ];
-
 
 
 /**
@@ -60661,7 +60628,6 @@ Mouse.SERIAL = {
  * Initialize every Mouse module on the page.
  */
 Web.onInit(Mouse.init);
-
 
 
 /**
@@ -63542,7 +63508,6 @@ FileInfo.NE = {
 
 /** @typedef {{ sector: number, length: number, dataMark: number, headCRC: number, headError: boolean, dataCRC: number, dataError: boolean, data: Array.<number>, pattern: (number|null), iCylinder: number, iHead: number, iModify: number, cModify: number, file: FileInfo, offFile: number }} */
 var SectorInfo;
-
 
 
 /**
@@ -66571,7 +66536,6 @@ FDC.aPortOutput = {
 Web.onInit(FDC.init);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pcx86/lib/hdc.js (C) Jeff Parsons 2012-2019
  */
@@ -66653,7 +66617,7 @@ class HDC extends Component {
             this.fATAPI = (this.sType == "ATAPI");
         }
         this.nInterface = (this.fATAPI? 1 : 0);     // default to the secondary interface if type is "ATAPI"
-        let nInterface = this.sType.slice(-1);
+        let nInterface = this.sType.slice(-1);      // but if an interface is specified (eg, "AT2", "ATAPI1"), honor it
         if (nInterface == '1') {
             this.nInterface = 0;
         } else if (nInterface == '2') {
@@ -66795,20 +66759,21 @@ class HDC extends Component {
         if (!this.fATC) {
             bus.addPortInputTable(this, HDC.aXTCPortInput);
             bus.addPortOutputTable(this, HDC.aXTCPortOutput);
-        } else if (!this.nInterface) {
-            bus.addPortInputTable(this, HDC.aATCPortInputPrimary);
-            bus.addPortOutputTable(this, HDC.aATCPortOutputPrimary);
         } else {
-            bus.addPortInputTable(this, HDC.aATCPortInputSecondary);
-            bus.addPortOutputTable(this, HDC.aATCPortOutputSecondary);
-        }
-
-        if (this.fATC) {
+            if (!this.nInterface) {
+                bus.addPortInputTable(this, HDC.aATCPortInputPrimary);
+                bus.addPortOutputTable(this, HDC.aATCPortOutputPrimary);
+                bus.addPortInputWidth(HDC.ATC.DATA.PORT1, 2);
+                bus.addPortOutputWidth(HDC.ATC.DATA.PORT1, 2);
+            } else {
+                bus.addPortInputTable(this, HDC.aATCPortInputSecondary);
+                bus.addPortOutputTable(this, HDC.aATCPortOutputSecondary);
+                bus.addPortInputWidth(HDC.ATC.DATA.PORT2, 2);
+                bus.addPortOutputWidth(HDC.ATC.DATA.PORT2, 2);
+            }
             this.iDriveTable++;
             if (this.chipset && this.chipset.model == ChipSet.MODEL_COMPAQ_DESKPRO386) this.iDriveTable++;
             this.iDriveTypeDefault = 2;
-            bus.addPortInputWidth(HDC.ATC.DATA.PORT, 2);
-            bus.addPortOutputWidth(HDC.ATC.DATA.PORT, 2);
         }
 
         cpu.addIntNotify(Interrupts.DISK, this.intBIOSDisk.bind(this));
@@ -67771,7 +67736,7 @@ class HDC extends Component {
     /**
      * inATCData(port, addrFrom)
      *
-     * Wrapper around inATCByte() to treat this as a 16-bit port; see addPortInputWidth(HDC.ATC.DATA.PORT, 2).
+     * Wrapper around inATCByte() to treat this as a 16-bit port; see addPortInputWidth(HDC.ATC.DATA.PORT1, 2).
      *
      * @this {HDC}
      * @param {number} port (0x1F0,0x170)
@@ -67851,7 +67816,7 @@ class HDC extends Component {
     /**
      * outATCData(port, data, addrFrom)
      *
-     * Wrapper around outATCByte() to treat this as a 16-bit port; see addPortOutputWidth(HDC.ATC.DATA.PORT, 2)
+     * Wrapper around outATCByte() to treat this as a 16-bit port; see addPortOutputWidth(HDC.ATC.DATA.PORT1, 2)
      *
      * @this {HDC}
      * @param {number} port (0x1F0,0x170)
@@ -68358,7 +68323,7 @@ class HDC extends Component {
         let b3 = this.popCmd();
         let wCylinder = ((b2 << 2) & 0x300) | b3;
         let bSector = b2 & 0x3f;
-        let bCount = this.popCmd();             // block count or interleave count, depending on the command
+        let bCount = this.popCmd();                 // block count or interleave count, depending on the command
         let bControl = this.popCmd();
         let bParm, bDataStatus;
 
@@ -69077,17 +69042,16 @@ class HDC extends Component {
      *
      * @this {HDC}
      * @param {number} iDrive
-     *
-     unloadDrive(iDrive)
-     {
-        this.aDrives[iDrive].disk = null;
-        //
-        // WARNING: This conversion of drive number to drive letter, starting with "C:" (0x43), is very simplistic
-        // and is not guaranteed to match the drive mapping that DOS ultimately uses.
-        //
-        this.notice("Drive " + String.fromCharCode(0x43 + iDrive) + " unloaded");
-    }
      */
+    // unloadDrive(iDrive)
+    // {
+    //     this.aDrives[iDrive].disk = null;
+    //     //
+    //     // WARNING: This conversion of drive number to drive letter, starting with "C:" (0x43), is very simplistic
+    //     // and is not guaranteed to match the drive mapping that DOS ultimately uses.
+    //     //
+    //     this.notice("Drive " + String.fromCharCode(0x43 + iDrive) + " unloaded");
+    // }
 
     /**
      * doFormat(drive, done)
@@ -69106,45 +69070,44 @@ class HDC extends Component {
      * @this {HDC}
      * @param {Object} drive
      * @param {function(number)} done (dataStatus is XTC.DATA.STATUS.OK or XTC.DATA.STATUS.ERROR; if error, then drive.errorCode should be set as well)
-     *
-     doFormat(drive, done)
-     {
-         drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
-
-         if (drive.disk) {
-             drive.sector = null;
-             if (this.chipset) {
-                 drive.cbFormat = 0;
-                 drive.abFormat = new Array(4);
-                 drive.bFormatting = true;
-                 drive.cSectorsFormatted = 0;
-                 //
-                 // We need to reverse the original logic, and default to success unless/until an actual error occurs;
-                 // otherwise doDMAWriteFormat() will bail on us.  The original approach would work because requestDMA()
-                 // would immediately call us back with fComplete set to true EVEN if the DMA channel was not yet unmasked;
-                 // now the callback is deferred until the DMA channel has been unmasked and the DMA request has finished.
-                 //
-                 drive.errorCode = HDC.XTC.DATA.ERR.NONE;
-                 this.chipset.connectDMA(ChipSet.DMA_HDC, this, 'dmaWriteFormat', drive);
-                 this.chipset.requestDMA(ChipSet.DMA_HDC, function onDMAFormat(fComplete) {
-                     if (!fComplete) {
-                         //
-                         // If an incomplete request wasn't triggered by an explicit error, then let's make explicit
-                         // (ie, revert to the default failure code that we originally set above).
-                         //
-                         if (drive.errorCode == HDC.XTC.DATA.ERR.NONE) {
-                             drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
-                         }
-                     }
-                     drive.bFormatting = false;
-                     done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
-                 });
-                 return;
-             }
-         }
-         done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
-     }
      */
+    // doFormat(drive, done)
+    // {
+    //     drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
+    //
+    //     if (drive.disk) {
+    //         drive.sector = null;
+    //         if (this.chipset) {
+    //             drive.cbFormat = 0;
+    //             drive.abFormat = new Array(4);
+    //             drive.bFormatting = true;
+    //             drive.cSectorsFormatted = 0;
+    //             //
+    //             // We need to reverse the original logic, and default to success unless/until an actual error occurs;
+    //             // otherwise doDMAWriteFormat() will bail on us.  The original approach would work because requestDMA()
+    //             // would immediately call us back with fComplete set to true EVEN if the DMA channel was not yet unmasked;
+    //             // now the callback is deferred until the DMA channel has been unmasked and the DMA request has finished.
+    //             //
+    //             drive.errorCode = HDC.XTC.DATA.ERR.NONE;
+    //             this.chipset.connectDMA(ChipSet.DMA_HDC, this, 'dmaWriteFormat', drive);
+    //             this.chipset.requestDMA(ChipSet.DMA_HDC, function onDMAFormat(fComplete) {
+    //                 if (!fComplete) {
+    //                     //
+    //                     // If an incomplete request wasn't triggered by an explicit error, then let's make explicit
+    //                     // (ie, revert to the default failure code that we originally set above).
+    //                     //
+    //                     if (drive.errorCode == HDC.XTC.DATA.ERR.NONE) {
+    //                         drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
+    //                     }
+    //                 }
+    //                 drive.bFormatting = false;
+    //                 done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
+    //             });
+    //             return;
+    //         }
+    //     }
+    //     done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
+    // }
 
     /**
      * HDC.init()
@@ -69418,9 +69381,13 @@ HDC.aDriveTypes = [
  * diskette drives, because if none of the "MULTIPLE DATA RATE" tests succeed, a "601-Diskette Error" always occurs.
  */
 HDC.ATC = {
-    DATA:   { PORT: 0x1F0},     // no register (read-write)
+    DATA:   {                   // no register (read-write)
+        PORT1:      0x1F0,      // data port address for primary interface
+        PORT2:      0x170       // data port address for secondary interface
+    },
     DIAG:   {                   // this.regError (read-only)
-        PORT:       0x1F1,
+        PORT1:      0x1F1,
+        PORT2:      0x171,
         NO_ERROR:    0x01,
         CTRL_ERROR:  0x02,
         SEC_ERROR:   0x03,
@@ -69428,7 +69395,8 @@ HDC.ATC = {
         PROC_ERROR:  0x05
     },
     ERROR: {                    // this.regError (read-only)
-        PORT:       0x1F1,
+        PORT1:      0x1F1,
+        PORT2:      0x171,
         NONE:        0x00,
         NO_DAM:      0x01,      // Data Address Mark (DAM) not found
         NO_TRK0:     0x02,      // Track 0 not detected
@@ -69437,23 +69405,38 @@ HDC.ATC = {
         ECC_ERR:     0x40,      // Data ECC Error
         BAD_BLOCK:   0x80       // Bad Block Detect
     },
-    WPREC:  { PORT: 0x1F1},     // this.regWPreC (write-only)
-    SECCNT: { PORT: 0x1F2},     // this.regSecCnt (read-write; 0 implies a 256-sector request)
-    SECNUM: { PORT: 0x1F3},     // this.regSecNum (read-write)
-    CYLLO:  { PORT: 0x1F4},     // this.regCylLo (read-write; all 8 bits are used)
+    WPREC:  {                   // this.regWPreC (write-only)
+        PORT1:      0x1F1,
+        PORT2:      0x171
+    },
+    SECCNT: {                   // this.regSecCnt (read-write; 0 implies a 256-sector request)
+        PORT1:      0x1F2,
+        PORT2:      0x172
+    },
+    SECNUM: {                   // this.regSecNum (read-write)
+        PORT1:      0x1F3,
+        PORT2:      0x173
+    },
+    CYLLO:  {                   // this.regCylLo (read-write; all 8 bits are used)
+        PORT1:      0x1F4,
+        PORT2:      0x174
+    },
     CYLHI:  {                   // this.regCylHi (read-write; only bits 0-1 are used, for a total of 10 bits, or 1024 max cylinders)
-        PORT:       0x1F5,
+        PORT1:      0x1F5,
+        PORT2:      0x175,
         MASK:        0x03
     },
     DRVHD:  {                   // this.regDrvHd (read-write)
-        PORT:       0x1F6,
+        PORT1:      0x1F6,
+        PORT2:      0x176,
         HEAD_MASK:   0x0F,      // set this to the max number of heads before issuing a SET PARAMETERS command
         DRIVE_MASK:  0x10,
         SET_MASK:    0xE0,
         SET_BITS:    0xA0       // for whatever reason, these bits must always be set
     },
     STATUS: {                   // this.regStatus (read-only; reading clears IRQ.ATC1)
-        PORT:       0x1F7,
+        PORT1:      0x1F7,
+        PORT2:      0x177,
         ERROR:       0x01,      // set when the previous command ended in an error; one or more bits are set in the ERROR register (the next command to the controller resets the ERROR bit)
         INDEX:       0x02,      // set once for every revolution of the disk
         CORRECTED:   0x04,
@@ -69464,26 +69447,115 @@ HDC.ATC = {
         BUSY:        0x80       // if this is set, no other STATUS bits are valid
     },
     COMMAND: {                  // this.regCommand (write-only)
-        PORT:       0x1F7,
-        RESTORE:     0x10,      // low nibble x 500us equal stepping rate (except for 0, which corresponds to 35us) (aka RECALIBRATE)
-        READ_DATA:   0x20,      // also supports NO_RETRIES and WITH_ECC
-        WRITE_DATA:  0x30,      // also supports NO_RETRIES and WITH_ECC
-        READ_VERF:   0x40,      // also supports NO_RETRIES
+        PORT1:      0x1F7,
+        PORT2:      0x177,
+        NO_RETRY:    0x01,      // optional bit for READ_DATA, WRITE_DATA, and READ_VERF commands
+        WITH_ECC:    0x02,      // optional bit for READ_DATA and WRITE_DATA commands
+        /*
+         * The following 8 commands comprised the original PC AT command set.  You may see other later command set
+         * definitions that show "mandatory" commands, such as READ_MULT (0xC4) or WRITE_MULT (0xC5), but those didn't
+         * exist until the introduction of later enhancements (eg, "IDE", "ATA", "EIDE", "ATAPI", etc).
+         */
+        RESTORE:     0x10,      // aka RECALIBRATE: low nibble x 500us equal stepping rate (except for 0, which corresponds to 35us)
+        READ_DATA:   0x20,      // also supports NO_RETRY and/or WITH_ECC
+        WRITE_DATA:  0x30,      // also supports NO_RETRY and/or WITH_ECC
+        READ_VERF:   0x40,      // also supports NO_RETRY
         FORMAT_TRK:  0x50,      // TODO
         SEEK:        0x70,      // low nibble x 500us equal stepping rate (except for 0, which corresponds to 35us)
         DIAGNOSE:    0x90,
         SETPARMS:    0x91,
-        NO_RETRIES:  0x01,
-        WITH_ECC:    0x02,
-        MASK:        0xF0
+        MASK:        0xF0,
+        /*
+         * Additional IDE/ATA/ATAPI commands go here.  As for which command(s) were introduced as part of
+         * which enhancement, or when, is not something I'm going to try to get into here (as least not yet).
+         */
+        IDENTIFY:   0xEC
     },
     FDR: {                      // this.regFDR
-        PORT:       0x3F6,
+        PORT1:      0x3F6,
+        PORT2:      0x376,
         INT_DISABLE: 0x02,      // a logical 0 enables fixed disk interrupts
         RESET:       0x04,      // a logical 1 enables reset fixed disk function
         HS3:         0x08,      // a logical 1 enables head select 3 (a logical 0 enables reduced write current)
         RESERVED:    0xF1
     }
+};
+
+/*
+ * Much of the following IDENTIFY structure information comes from a Seagate ATA Reference Manual,
+ * 36111-001, Rev. C, dated 21 May 1993 (111-1c.pdf).  All words are stored little-endian; also note
+ * some definitions of CUR_CAPACITY define it as two 16-bit words, since as a 32-bit dword, it would
+ * be misaligned if the structure began on a dword boundary (and, of course, if it did NOT begin on
+ * a dword boundary, then LBA_CAPACITY would be misaligned).  Alignment considerations are of no
+ * particular concern here, however.
+ */
+HDC.ATC.IDENTIFY = {
+    CONFIG: {                   // WORD: GENERAL_CONFIG
+        OFFSET:         0x00,
+        ATA_RESERVED:   0x0001, // always clear (ATA reserved)
+        HARD_SECTORED:  0x0002, // set if hard sectored
+        SOFT_SECTORED:  0x0004, // set if soft sectored
+        NOT_MFM:        0x0008, // set if not MFM encoded
+        HDSW_15MS:      0x0010, // set if head switch time > 15usec
+        SPINDLE_OPT:    0x0020, // set if spindle motor control option implemented
+        FIXED:          0x0040, // set if fixed drive
+        REMOVABLE:      0x0080, // set if removable cartridge drive
+        RATE_5MBIT:     0x0100, // set if disk transfer rate <= 5Mbit/sec
+        RATE_10MBIT:    0x0200, // set if disk transfer rate <= 10Mbit/sec and > 5Mbit/sec
+        RATE_FASTER:    0x0400, // set if disk transfer rate > 10Mbit/sec
+        ROT_TOLERANCE:  0x0800, // set if rotational speed tolerance is > 0.5%
+        STROBE_OPT:     0x1000, // set if data strobe offset option available
+        TRACK_OPT:      0x2000, // set if track offset option available
+        FMT_TOLERANCE:  0x4000, // set if format speed tolerance gap required
+        NM_RESERVED:    0x8000  // always clear (reserved for non-magnetic drives)
+    },
+    CYLS:               0x02,   // WORD: number of physical cylinders
+    CONFIG2:            0x04,   // WORD: SPECIFIC_CONFIG
+    HEADS:              0x06,   // WORD: number of physical heads
+    TRACK_BYTES:        0x08,   // WORD: bytes per track
+    SECTOR_BYTES:       0x0A,   // WORD: bytes per sector
+    SECTORS:            0x0C,   // WORD: sectors per track
+                                // (reserved words at 0x0E, 0x10, and 0x12)
+    SERIAL_NUMBER:      0x14,   // CHAR: 20 ASCII characters
+    BUFFER_TYPE:        0x28,   // WORD: 0=unspecified, 1=single, 2=dual, 3=caching
+    BUFFER_SIZE:        0x2A,   // WORD: 512-byte increments
+    ECC_BYTES:          0x2C,   // WORD: number of ECC bytes on read/write long commands
+    FIRMWARE_REV:       0x2E,   // CHAR: 8 ASCII characters
+    MODEL_NUMBER:       0x36,   // CHAR: 40 ASCII characters
+    MAX_MULTISEC:       0x5E,   // BYTE: if non-zero, number of transferable sectors per interrupt
+                                // (reserved byte at 0x5F)
+    DWORD_IO:           0x60,   // WORD: 0x0001 if double-word I/O supported, 0x0000 if not
+                                // (reserved byte at 0x62)
+    CAPABILITY:         0x63,   // BYTE: bit0=DMA, bit1=LBA, bit2=IORDYsw, bit3=IORDYsup
+                                // (reserved word at 0x64; reserved byte at 0x66)
+    PIO_TIMING:         0x67,   // BYTE: 0=slow, 1=medium, 2=fast
+                                // (reserved byte at 0x68)
+    DMA_TIMING:         0x69,   // BYTE: 0=slow, 1=medium, 2=fast
+    NEXT5_VALID:        0x6A,   // WORD: bit0=1 if next 5 words are valid, 0 if not
+    CUR_CYLS:           0x6C,   // WORD: number of logical cylinders
+    CUR_HEADS:          0x6E,   // WORD: number of logical heads
+    CUR_SECTORS:        0x70,   // WORD: number of logical sectors per track
+    CUR_CAPACITY:       0x72,   // LONG: logical capacity in sectors
+    MULTISECT:          0x76,   // BYTE: current mutiple sector count
+    MULTISECT_VALID:    0x77,   // BYTE: bit0=1 if MULTSECT is valid, 0 if not
+    LBA_CAPACITY:       0x78,   // LONG: total number of sectors
+    DMA_SINGLE:         0x7C,   // BYTE
+    DMA_SINGLE_ACTIVE:  0x7D,   // BYTE
+    DMA_MULTI:          0x7E,   // BYTE
+    DMA_MULTI_ACTIVE:   0x7F,   // BYTE
+    /*
+     * The rest of this 512-byte structure (words 64 through 255) was reserved at the time of the
+     * aforementioned Seagate 1993 specification, so I will not delve any deeper into this structure now.
+     *
+     * Further details can be found at:
+     *
+     *      https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/ata/ns-ata-_identify_device_data
+     *      https://chromium.googlesource.com/chromiumos/third_party/u-boot-next/+/master/include/ata.h
+     *
+     * Regrettably, most modern documents don't bother mentioning at what point any fields were added
+     * to the specification, and they treat some of the fields as too old to warrant any explanation at all,
+     * calling them simply "Retired" or "Obsolete".  Not particularly helpful.
+     */
 };
 
 /*
@@ -69533,7 +69605,7 @@ HDC.XTC = {
          *      maximum ECC data burst length
          *
          * Note that the 3 word values above are stored in "big-endian" format (high byte followed by low byte),
-         * rather than the more typical "little-endian" format (low byte followed by high byte).
+         * rather than the "little-endian" format (low byte followed by high byte) you typically find on Intel machines.
          */
         CMD: {
             TEST_READY:     0x00,       // Test Drive Ready
@@ -69741,7 +69813,6 @@ HDC.aATCPortOutputSecondary = {
  * Initialize every Hard Drive Controller (HDC) module on the page.
  */
 Web.onInit(HDC.init);
-
 
 
 /**
@@ -71060,7 +71131,6 @@ if (DEBUGGER) {
     Debugger.TWO_POW32 = Math.pow(2, 32);
 
 }   // endif DEBUGGER
-
 
 
 /**
@@ -78956,7 +79026,6 @@ if (DEBUGGER) {
 }   // endif DEBUGGER
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pcx86/lib/computer.js (C) Jeff Parsons 2012-2019
  */
@@ -80892,7 +80961,6 @@ Web.onShow(Computer.show);
 Web.onExit(Computer.exit);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2019
  */
@@ -81256,7 +81324,6 @@ class State {
         return aDst;
     }
 }
-
 
 
 /**

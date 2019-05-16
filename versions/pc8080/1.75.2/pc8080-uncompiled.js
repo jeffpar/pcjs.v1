@@ -87,11 +87,6 @@ var RS232 = {
     }
 };
 
-/*
- * NODE should be true if we're running under NodeJS (eg, command-line), false if not (eg, web browser)
- */
-var NODE = false;
-
 
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2019
@@ -153,7 +148,6 @@ DumpAPI.asDiskCommands = [DumpAPI.QUERY.DIR, DumpAPI.QUERY.DISK, DumpAPI.QUERY.P
 DumpAPI.asFileCommands = [DumpAPI.QUERY.FILE];
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2019
  */
@@ -175,7 +169,6 @@ var ReportAPI = {
         OK:         "Thank you"
     }
 };
-
 
 
 /**
@@ -218,7 +211,6 @@ var UserAPI = {
         BADSTORE:   "unable to save machine state"
     }
 };
-
 
 
 /**
@@ -465,7 +457,6 @@ Keys.SHIFTED_KEYCODES[Keys.KEYCODE.QUOTE]  = Keys.ASCII['"'];
 Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_DASH]   = Keys.ASCII['_'];
 Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_EQUALS] = Keys.ASCII['+'];
 Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_SEMI]   = Keys.ASCII[':'];
-
 
 
 /**
@@ -1565,7 +1556,6 @@ Str.NamesOfDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frid
 Str.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2019
  */
@@ -1818,7 +1808,6 @@ Usr.aMonthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 Usr.getTime = Date.now || function() { return +new Date(); };
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2019
  */
@@ -1990,7 +1979,7 @@ class Web {
         }
 
         let sURLRedirect = sURL;
-        if (Web.getHost() == "pcjs:8088" || NODE) {
+        if (Web.getHost() == "pcjs:8088" || typeof module !== "undefined") {
             /*
              * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
              * whenever the hostname is "pcjs" (or NODE is true); otherwise, use "localhost" when debugging locally.
@@ -2983,7 +2972,6 @@ if (DEBUG && window) {
         window['DEBUG'] = false;
     }
 }
-
 
 
 /**
@@ -4510,7 +4498,6 @@ if (!Function.prototype.bind) {
 }
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pc8080/lib/defines.js (C) Jeff Parsons 2012-2019
  */
@@ -4680,7 +4667,6 @@ CPUDef8080.PS.RESULT    =   (CPUDef8080.PS.CF | CPUDef8080.PS.PF | CPUDef8080.PS
 CPUDef8080.PS.SET       =   (CPUDef8080.PS.BIT1);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pc8080/lib/messages.js (C) Jeff Parsons 2012-2019
  */
@@ -4745,7 +4731,6 @@ Messages8080.CATEGORIES = {
     "warn":     Messages8080.WARN,
     "halt":     Messages8080.HALT
 };
-
 
 
 /**
@@ -4898,7 +4883,6 @@ class Panel8080 extends Component {
  * Initialize every Panel module on the page.
  */
 Web.onInit(Panel8080.init);
-
 
 
 /**
@@ -5931,7 +5915,6 @@ Bus8080.BlockInfo = Usr.defineBitFields({num:20, count:8, btmod:1, type:3});
 var BusInfo8080;
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pc8080/lib/memory.js (C) Jeff Parsons 2012-2019
  */
@@ -6818,7 +6801,6 @@ if (TYPEDARRAYS) {
         Memory8080.prototype.writeShortLE
     ];
 }
-
 
 
 /**
@@ -8073,7 +8055,6 @@ CPU8080.YIELDS_PER_STATUS       = 15;           // every 15 yields (ie, twice pe
 CPU8080.BUTTONS = ["power", "reset"];
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pc8080/lib/cpustate.js (C) Jeff Parsons 2012-2019
  */
@@ -9215,7 +9196,6 @@ class CPUState8080 extends CPU8080 {
  * Initialize every CPU module on the page
  */
 Web.onInit(CPUState8080.init);
-
 
 
 /**
@@ -13232,7 +13212,6 @@ ChipSet8080.VT100.portsOutput = {
 Web.onInit(ChipSet8080.init);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pc8080/lib/rom.js (C) Jeff Parsons 2012-2019
  */
@@ -13583,7 +13562,6 @@ class ROM8080 extends Component {
  * Initialize all the ROM8080 modules on the page.
  */
 Web.onInit(ROM8080.init);
-
 
 
 /**
@@ -13945,7 +13923,6 @@ RAM8080.CPM.VECTORS = [RAM8080.CPM.BIOS.VECTOR, RAM8080.CPM.BDOS.VECTOR];
  * Initialize all the RAM8080 modules on the page.
  */
 Web.onInit(RAM8080.init);
-
 
 
 /**
@@ -15380,7 +15357,6 @@ Keyboard8080.VT100.portsOutput = {
  * Initialize every Keyboard module on the page.
  */
 Web.onInit(Keyboard8080.init);
-
 
 
 /**
@@ -16914,7 +16890,6 @@ Video8080.VT100 = {
 Web.onInit(Video8080.init);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pc8080/lib/serial.js (C) Jeff Parsons 2012-2019
  */
@@ -17838,7 +17813,6 @@ SerialPort8080.aPortOutput = {
  * Initialize every SerialPort8080 module on the page.
  */
 Web.onInit(SerialPort8080.init);
-
 
 
 /**
@@ -19157,7 +19131,6 @@ if (DEBUGGER) {
     Debugger.TWO_POW32 = Math.pow(2, 32);
 
 }   // endif DEBUGGER
-
 
 
 /**
@@ -23487,7 +23460,6 @@ if (DEBUGGER) {
 }   // endif DEBUGGER
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/pc8080/lib/computer.js (C) Jeff Parsons 2012-2019
  */
@@ -23686,8 +23658,12 @@ class Computer8080 extends Component {
          * OVERRIDES everything; it overrides any 'state' Computer parameter AND it disables resume of any saved state in
          * localStorage (in other words, it prevents fAllowResume from being true, and forcing resume off).
          */
-        var fAllowResume;
-        var sState = this.getMachineParm('state') || (fAllowResume = true) && parmsComputer['state'];
+        var fAllowResume = false;
+        var sState = this.getMachineParm('state');
+        if (!sState) {
+            fAllowResume = true;
+            sState = parmsComputer['state'];
+        }
 
         if (sState) {
             sStatePath = this.sStatePath = sState;
@@ -23718,7 +23694,7 @@ class Computer8080 extends Component {
             this.setReady();
         } else {
             var cmp = this;
-            Web.getResource(sStatePath, null, true, function(sURL, sResource, nErrorCode) {
+            Web.getResource(/** @type {string} */ (sStatePath), null, true, function(sURL, sResource, nErrorCode) {
                 cmp.doneLoad(sURL, sResource, nErrorCode);
             });
         }
@@ -25122,7 +25098,6 @@ Web.onShow(Computer8080.show);
 Web.onExit(Computer8080.exit);
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2019
  */
@@ -25486,7 +25461,6 @@ class State {
         return aDst;
     }
 }
-
 
 
 /**

@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Component = require("../../shared/lib/component");
 }
@@ -1354,4 +1354,4 @@ if (DEBUGGER) {
 
 }   // endif DEBUGGER
 
-if (NODE) module.exports = Debugger;
+if (typeof module !== "undefined") module.exports = Debugger;

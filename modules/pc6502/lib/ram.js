@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
@@ -190,4 +190,4 @@ RAM.init = function()
  */
 web.onInit(RAM.init);
 
-if (NODE) module.exports = RAM;
+if (typeof module !== "undefined") module.exports = RAM;

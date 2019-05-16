@@ -87,11 +87,6 @@ var RS232 = {
     }
 };
 
-/*
- * NODE should be true if we're running under NodeJS (eg, command-line), false if not (eg, web browser)
- */
-var NODE = false;
-
 
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2019
@@ -153,7 +148,6 @@ DumpAPI.asDiskCommands = [DumpAPI.QUERY.DIR, DumpAPI.QUERY.DISK, DumpAPI.QUERY.P
 DumpAPI.asFileCommands = [DumpAPI.QUERY.FILE];
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2019
  */
@@ -175,7 +169,6 @@ var ReportAPI = {
         OK:         "Thank you"
     }
 };
-
 
 
 /**
@@ -1275,7 +1268,6 @@ Str.NamesOfDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frid
 Str.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2019
  */
@@ -1528,7 +1520,6 @@ Usr.aMonthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 Usr.getTime = Date.now || function() { return +new Date(); };
 
 
-
 /**
  * @copyright https://www.pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2019
  */
@@ -1700,7 +1691,7 @@ class Web {
         }
 
         let sURLRedirect = sURL;
-        if (Web.getHost() == "pcjs:8088" || NODE) {
+        if (Web.getHost() == "pcjs:8088" || typeof module !== "undefined") {
             /*
              * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
              * whenever the hostname is "pcjs" (or NODE is true); otherwise, use "localhost" when debugging locally.
@@ -2693,7 +2684,6 @@ if (DEBUG && window) {
         window['DEBUG'] = false;
     }
 }
-
 
 
 /**
@@ -4218,7 +4208,6 @@ if (!Function.prototype.bind) {
         return fnBound;
     };
 }
-
 
 
 /**

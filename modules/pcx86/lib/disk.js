@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Usr         = require("../../shared/lib/usrlib");
     var Web         = require("../../shared/lib/weblib");
@@ -2957,4 +2957,4 @@ FileInfo.NE = {
  * @property {number} offFile
  */
 
-if (NODE) module.exports = Disk;
+if (typeof module !== "undefined") module.exports = Disk;

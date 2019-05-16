@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Usr         = require("../../shared/lib/usrlib");
     var Component   = require("../../shared/lib/component");
@@ -1765,4 +1765,4 @@ Bus.ERROR = {
     REM_MEM_BADRANGE:   5
 };
 
-if (NODE) module.exports = {Bus, Controller};
+if (typeof module !== "undefined") module.exports = {Bus, Controller};

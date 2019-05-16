@@ -227,9 +227,9 @@ var asFilesNonServed = [
 ];
 
 /*
- * Maximum blog entries increased from 20 to 100 for the new blog format.
+ * Maximum blog entries increased from 20 to 200 for the new blog format.
  */
-var nBlogExcerpts = 100;
+var nBlogExcerpts = 200;
 
 /**
  * HTMLOut()
@@ -488,6 +488,7 @@ HTMLOut.filter = function(req, res, next)
                 sData = sData.replace(/^([ \t]*export\s+default\s+\S+;)/gm, "// $1");
                 sData = sData.replace(/^([ \t]*var\s+\S+\s*=\s*require\(['"].*?['"]\)[^;]*;)/gm, "// $1");
                 sData = sData.replace(/^([ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*[^;]*;)/gm, "// $1");
+                sData = sData.replace(/^([ \t]*(if\s+\(typeof\s+module\s*!==?\s*['"]undefined['"]\)\s*|)module\.exports\s*=\s*[^;]*;)/gm, "// $1");
                 res.set("Content-Type", "application/javascript");
                 res.status(200).send(sData);
             }

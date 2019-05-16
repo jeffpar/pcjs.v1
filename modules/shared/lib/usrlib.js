@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
 }
 
@@ -282,4 +282,4 @@ Usr.aMonthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
  */
 Usr.getTime = Date.now || function() { return +new Date(); };
 
-if (NODE) module.exports = Usr;
+if (typeof module !== "undefined") module.exports = Usr;

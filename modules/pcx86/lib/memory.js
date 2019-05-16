@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Component   = require("../../shared/lib/component");
     var Messages    = require("./messages");
@@ -1786,4 +1786,4 @@ if (TYPEDARRAYS) {
     ];
 }
 
-if (NODE) module.exports = Memory;
+if (typeof module !== "undefined") module.exports = Memory;

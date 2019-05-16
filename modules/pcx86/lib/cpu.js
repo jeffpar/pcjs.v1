@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Usr         = require("../../shared/lib/usrlib");
     var Component   = require("../../shared/lib/component");
@@ -1397,4 +1397,4 @@ CPU.YIELDS_PER_SECOND = 60;
 
 CPU.BUTTONS = ["power", "reset"];
 
-if (NODE) module.exports = CPU;
+if (typeof module !== "undefined") module.exports = CPU;

@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Usr = require("../../shared/lib/usrlib");
     var Web = require("../../shared/lib/weblib");
@@ -234,8 +234,12 @@ class Computer8080 extends Component {
          * OVERRIDES everything; it overrides any 'state' Computer parameter AND it disables resume of any saved state in
          * localStorage (in other words, it prevents fAllowResume from being true, and forcing resume off).
          */
-        var fAllowResume;
-        var sState = this.getMachineParm('state') || (fAllowResume = true) && parmsComputer['state'];
+        var fAllowResume = false;
+        var sState = this.getMachineParm('state');
+        if (!sState) {
+            fAllowResume = true;
+            sState = parmsComputer['state'];
+        }
 
         if (sState) {
             sStatePath = this.sStatePath = sState;
@@ -266,7 +270,7 @@ class Computer8080 extends Component {
             this.setReady();
         } else {
             var cmp = this;
-            Web.getResource(sStatePath, null, true, function(sURL, sResource, nErrorCode) {
+            Web.getResource(/** @type {string} */ (sStatePath), null, true, function(sURL, sResource, nErrorCode) {
                 cmp.doneLoad(sURL, sResource, nErrorCode);
             });
         }
@@ -1669,4 +1673,4 @@ Web.onInit(Computer8080.init);
 Web.onShow(Computer8080.show);
 Web.onExit(Computer8080.exit);
 
-if (NODE) module.exports = Computer8080;
+if (typeof module !== "undefined") module.exports = Computer8080;

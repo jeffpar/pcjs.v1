@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var PDP11 = require("./defines");
 }
 

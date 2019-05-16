@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Usr = require("../../shared/lib/usrlib");
     var Web = require("../../shared/lib/weblib");
@@ -1761,7 +1761,7 @@ class DebuggerPDP10 extends Debugger {
 
                 for (var i = 0; i < aOperands.length; i++) {
 
-                    var sOperand = aOperands[i].trim();
+                    var operand, sOperand = aOperands[i].trim();
                     if (!sOperand) continue;
 
                     var match = sOperand.match(/(@?)([^(]*)\(?([^)]*)\)?/);
@@ -1821,7 +1821,7 @@ class DebuggerPDP10 extends Debugger {
                         }
                     }
 
-                    var operand = this.parseExpression(sOperand, aUndefined);
+                    operand = this.parseExpression(sOperand, aUndefined);
                     if (operand == undefined) {
                         opCode = -1;
                         break;
@@ -4336,4 +4336,4 @@ if (DEBUGGER) {
 
 }   // endif DEBUGGER
 
-if (NODE) module.exports = DebuggerPDP10;
+if (typeof module !== "undefined") module.exports = DebuggerPDP10;

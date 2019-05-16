@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Web         = require("../../shared/lib/weblib");
     var DiskAPI     = require("../../shared/lib/diskapi");
@@ -3087,4 +3087,4 @@ FDC.aPortOutput = {
  */
 Web.onInit(FDC.init);
 
-if (NODE) module.exports = FDC;
+if (typeof module !== "undefined") module.exports = FDC;

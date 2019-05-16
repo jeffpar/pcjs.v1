@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var fs = require("fs");
     var http = require("http");
     var path = require("path");
@@ -399,4 +399,4 @@ Net.REVEAL_PDFS     = "pdfs";
 Net.asPropagate     = [Net.GORT_COMMAND, "autostart"];
 Net.sServerRoot     = null;
 
-if (NODE) module.exports = Net;
+if (typeof module !== "undefined") module.exports = Net;

@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Usr         = require("../../shared/lib/usrlib");
     var Web         = require("../../shared/lib/weblib");
@@ -6269,4 +6269,4 @@ if (DESKPRO386) {
  */
 Web.onInit(ChipSet.init);
 
-if (NODE) module.exports = ChipSet;
+if (typeof module !== "undefined") module.exports = ChipSet;

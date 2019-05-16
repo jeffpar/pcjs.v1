@@ -91,7 +91,7 @@ var PC8080 = {
     XMLVERSION:  XMLVERSION     // shared
 };
 
-if (NODE) {
+if (typeof module !== "undefined") {
     global.APPCLASS    = APPCLASS;
     global.APPNAME     = APPNAME;
     global.DEBUGGER    = DEBUGGER;
