@@ -77,7 +77,7 @@
  *
  * Options
  *
- *      --rebuild will force the "compile" task to recompile the code for any or all the machines, even if the
+ *      --rebuild will force the "compile" tasks to recompile the code for the specified machines, even if the
  *      compiled code is up-to-date.
  */
 
