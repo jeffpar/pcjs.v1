@@ -126,7 +126,7 @@ if (typeof module !== "undefined") {
   * @property {number} bSector
   * @property {number} bSectorEnd
   * @property {number} nBytes
-  * @property {number} ibSector
+  * @property {number} iByte
   */
 
 /**
@@ -948,7 +948,7 @@ class FDC extends Component {
         /*
          * The next group of properties are managed by worker functions (eg, doRead()) to maintain state across DMA requests.
          */
-        drive.ibSector = data[i++];             // location of the next byte to be accessed in the current sector
+        drive.iByte = data[i++];                // location of the next byte to be accessed in the current sector
         drive.sector = null;
 
         /*
@@ -1008,7 +1008,7 @@ class FDC extends Component {
          * will have merely "queued up" the load request and drive.disk won't be ready yet, so figure out how/when
          * we can properly restore drive.sector in that case.
          */
-        if (fSuccess && drive.disk && drive.ibSector !== undefined) {
+        if (fSuccess && drive.disk && drive.iByte !== undefined) {
             drive.sector = drive.disk.seek(drive.bCylinder, drive.bHead, drive.bSector);
         }
         return fSuccess;
@@ -1053,7 +1053,7 @@ class FDC extends Component {
         data[i++] = drive.bSector;
         data[i++] = drive.bSectorEnd;
         data[i++] = drive.nBytes;
-        data[i++] = drive.ibSector;
+        data[i++] = drive.iByte;
         /*
          * Now we deviate from the 1.01a save format: instead of next storing all the deltas for the
          * currently mounted disk (if any), we store only the name and path of the currently mounted disk
@@ -2672,8 +2672,8 @@ class FDC extends Component {
         if ((!drive.resCode || drive.resCode == (FDC.REG_DATA.RES.CRC_ERROR | FDC.REG_DATA.RES.INCOMPLETE)) && drive.disk) {
             do {
                 if (drive.sector) {
-                    off = drive.ibSector;
-                    if ((b = drive.disk.read(drive.sector, drive.ibSector++)) >= 0) {
+                    off = drive.iByte;
+                    if ((b = drive.disk.read(drive.sector, drive.iByte++)) >= 0) {
                         obj = drive.sector;
                         break;
                     }
@@ -2689,7 +2689,7 @@ class FDC extends Component {
                 if (drive.sector['dataError']) {
                     drive.resCode = FDC.REG_DATA.RES.CRC_ERROR | FDC.REG_DATA.RES.INCOMPLETE;
                 }
-                drive.ibSector = 0;
+                drive.iByte = 0;
                 /*
                  * We "pre-advance" bSector et al now, instead of waiting to advance it right before the seek().
                  * This allows the initial call to readData() to perform a seek without triggering an unwanted advance.
@@ -2729,10 +2729,10 @@ class FDC extends Component {
         if (drive.resCode || !drive.disk) return -1;
         do {
             if (drive.sector) {
-                if (drive.sector['dataError'] && drive.ibSector >= drive.sector['dataError']) {
+                if (drive.sector['dataError'] && drive.iByte >= drive.sector['dataError']) {
                     break;
                 }
-                if (drive.disk.write(drive.sector, drive.ibSector++, b)) break;
+                if (drive.disk.write(drive.sector, drive.iByte++, b)) break;
             }
             /*
              * Locate the next sector, and then try writing again.
@@ -2746,7 +2746,7 @@ class FDC extends Component {
                 b = -1;
                 break;
             }
-            drive.ibSector = 0;
+            drive.iByte = 0;
             /*
              * We "pre-advance" bSector et al now, instead of waiting to advance it right before the seek().
              * This allows the initial call to writeData() to perform a seek without triggering an unwanted advance.

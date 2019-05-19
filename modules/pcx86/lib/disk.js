@@ -94,7 +94,7 @@ if (typeof module !== "undefined") {
  * initial state.
  *
  * Practice
- * ---
+ *
  * Let's first look at what we *already* do for the HDC component:
  *
  *  1) Creating new (empty) disk images
@@ -162,6 +162,54 @@ if (typeof module !== "undefined") {
  * and potentially leaving a disk image in an inconsistent state, premature revocation is the least of
  * our problems.  Since a real hard drive could suffer the same fate if the machine's power was turned off
  * at the wrong time, you could say that we're simply providing a faithful simulation of reality.
+ */
+
+/**
+ * Every Sector object (once loaded, parsed, and "normalized") should have ALL of the following named properties:
+ *
+ *      'sector':   sector number
+ *      'length':   size of the sector, in bytes
+ *      'data':     array of dwords
+ *      'pattern':  dword pattern to use for empty or partial sectors (or null if sector still needs to be loaded)
+ *
+ * initSector() also sets the following properties, to help us quickly identify its location within aDiskData:
+ *
+ *      iCylinder
+ *      iHead
+ *
+ * In addition, we will maintain the following information on a per-sector basis, as sectors are modified:
+ *
+ *      iModify:    index of first modified dword in sector
+ *      cModify:    number of modified dwords in sector
+ *      fDirty:     true if sector is dirty, false if clean (or cleaning in progress)
+ *
+ * fDirty is used in conjunction with "demandrw" disks; it is set to true whenever the sector is modified, and is
+ * set to false whenever the sector has been sent to the server.  If the server write succeeds and fDirty is still
+ * false, then the sector modifications are removed (cModify is set to zero).  If the write succeeds but fDirty was
+ * set to true again in the meantime, then all the sector modifications (even those that were just written) remain
+ * in place (since we don't keep track of more than one modification range within a sector).  And if the write failed,
+ * then fDirty is set back to true and again all modifications remain in place; the best we can do is schedule another
+ * write attempt.
+ *
+ * TODO: Perhaps we should also maintain a failure count and stop trying to write sectors that reach a certain
+ * threshold.  Error-handling, as usual, is the thorniest problem.
+ *
+ * @typedef {Object} Sector
+ * @property {number} sector
+ * @property {number} length
+ * @property {number} dataMark
+ * @property {number} headCRC
+ * @property {boolean} headError
+ * @property {number} dataCRC
+ * @property {boolean} dataError
+ * @property {Array.<number>} data
+ * @property {number|null} pattern
+ * @property {number} iCylinder
+ * @property {number} iHead
+ * @property {number} iModify
+ * @property {number} cModify
+ * @property {FileInfo} file
+ * @property {number} offFile
  */
 
 /**
@@ -917,7 +965,6 @@ class Disk extends Component {
 
             dir.cbSector = this.getSectorData(sectorBoot, DiskAPI.BPB.SECTOR_BYTES, 2);
 
-            let fValid = true;
             if (dir.cbSector != this.cbSector) {
                 /*
                  * When the first sector doesn't appear to contain a valid BPB, the most likely explanations are:
@@ -929,7 +976,6 @@ class Disk extends Component {
                  * To start, if this is an 160Kb disk (circa DOS 1.00) or a 320Kb disk (circa DOS 1.10), then we'll
                  * assume it's a 12-bit FAT, set assorted BPB values accordingly, and see if our assumption holds up.
                  */
-                fValid = false;
                 dir.lbaFAT = 1;
                 dir.nFATBits = 12;
                 dir.lbaRoot = dir.lbaFAT + 2;   // both 160Kb and 320Kb disks contained 2 FATs, each containing 1 sector
@@ -939,14 +985,12 @@ class Disk extends Component {
                 if (cbDisk == 160 * 1024 && this.getClusterEntry(dir, 0, 0) == DiskAPI.FAT.MEDIA_160KB) {
                     dir.lbaTotal = 320;
                     dir.nEntries = 64;
-                    fValid = true;
                 }
                 else if (cbDisk == 320 * 1024 && this.getClusterEntry(dir, 0, 0) == DiskAPI.FAT.MEDIA_320KB) {
                     dir.lbaTotal = 640;
                     dir.nEntries = 112;
                     this.assert(this.nHeads == 2);
                     dir.nClusterSecs++;         // 320Kb disks use 2 sectors/cluster
-                    fValid = true;
                 }
                 else {
                     /*
@@ -959,15 +1003,17 @@ class Disk extends Component {
                         if (bStatus == DiskAPI.MBR.PARTITIONS.STATUS.ACTIVE) {
                             dir.pbaVolume = this.getSectorData(sectorBoot, off + DiskAPI.MBR.PARTITIONS.ENTRY.LBA_FIRST, 4);
                             sectorBoot = this.getSector(dir.pbaVolume);
-                            if (sectorBoot && this.getSectorData(sectorBoot, DiskAPI.BPB.SECTOR_BYTES, 2) == this.cbSector) {
-                                fValid = true;
+                            if (sectorBoot) {
+                                if (this.getSectorData(sectorBoot, DiskAPI.BPB.SECTOR_BYTES, 2) != this.cbSector) {
+                                    sectorBoot = null;
+                                }
                             }
                             break;
                         }
                         off += DiskAPI.MBR.PARTITIONS.ENTRY_LENGTH;
                     }
                 }
-                if (!fValid) {
+                if (!sectorBoot) {
                     if (DEBUG && this.messageEnabled()) {
                         this.printMessage("buildFileTable(): unrecognized " + cbDisk + "-byte disk image with " + this.cbSector + "-byte sectors");
                     }
@@ -1301,7 +1347,7 @@ class Disk extends Component {
      *
      * @this {Disk}
      * @param {number} pba (physical block address)
-     * @return {Object|null} sector
+     * @return {Sector|null} sector
      */
     getSector(pba)
     {
@@ -1329,7 +1375,7 @@ class Disk extends Component {
      * only used by buildFileTable() and its progeny, it's not clear that we need to be superfast anyway.
      *
      * @this {Disk}
-     * @param {Object} sector
+     * @param {Sector} sector
      * @param {number} off (byte offset)
      * @param {number} len (1 to 4 bytes)
      * @return {number}
@@ -1356,7 +1402,7 @@ class Disk extends Component {
      * WARNING: This function is restricted to reading a string contained ENTIRELY within the specified sector.
      *
      * @this {Disk}
-     * @param {Object} sector
+     * @param {Sector} sector
      * @param {number} off (byte offset)
      * @param {number} len (use -1 to read a null-terminated string)
      * @return {string}
@@ -1427,18 +1473,18 @@ class Disk extends Component {
      *      fDirty:     true if sector is dirty, false if clean (or cleaning in progress)
      *
      * @this {Disk}
-     * @param {Object} sector
+     * @param {Sector|null} sector
      * @param {number} iCylinder
      * @param {number} iHead
      * @param {number} [sectorID]
      * @param {number} [cbSector]
      * @param {number|null} [dwPattern]
-     * @return {Object}
+     * @return {Sector}
      */
     initSector(sector, iCylinder, iHead, sectorID, cbSector, dwPattern)
     {
         if (!sector) {
-            sector = {'sector': sectorID, 'length': cbSector, 'data': [], 'pattern': dwPattern};
+            sector = /** @type {Sector} */ ({'sector': sectorID, 'length': cbSector, 'data': [], 'pattern': dwPattern});
         }
         sector.iCylinder = iCylinder;
         sector.iHead = iHead;
@@ -1676,7 +1722,7 @@ class Disk extends Component {
      * sectors that follow it, even if those additional sectors were written less than 2 seconds ago.
      *
      * @this {Disk}
-     * @param {Object} sector
+     * @param {Sector} sector
      * @param {boolean} fAsync (true to update write timer, false to not)
      * @return {boolean} true if write timer set, false if not
      */
@@ -1812,8 +1858,8 @@ class Disk extends Component {
      * @param {number} iHead
      * @param {number} iSector
      * @param {boolean} [fWrite]
-     * @param {function(Object,boolean)} [done]
-     * @return {Object|null} is the requested sector, or null if not found (or not available yet)
+     * @param {function(Sector,boolean)} [done]
+     * @return {Sector|null} is the requested sector, or null if not found (or not available yet)
      */
     seek(iCylinder, iHead, iSector, fWrite, done)
     {
@@ -1904,7 +1950,7 @@ class Disk extends Component {
      * fill(sector, ab, off)
      *
      * @this {Disk}
-     * @param {Object} sector
+     * @param {Sector} sector
      * @param {*} ab (technically, this should be typed as Array.<number> but I'm having trouble coercing JSON.parse() to that)
      * @param {number} off
      */
@@ -1927,7 +1973,7 @@ class Disk extends Component {
      * toBytes(sector)
      *
      * @this {Disk}
-     * @param {Object} sector
+     * @param {Sector} sector
      * @return {Array.<number>} is an array of bytes
      */
     toBytes(sector)
@@ -1949,55 +1995,55 @@ class Disk extends Component {
     }
 
     /**
-     * read(sector, ibSector, fCompare)
+     * read(sector, iByte, fCompare)
      *
      * @this {Disk}
-     * @param {Object} sector (returned from a previous seek)
-     * @param {number} ibSector a byte index within the given sector
+     * @param {Sector} sector (returned from a previous seek)
+     * @param {number} iByte (byte index within the given sector)
      * @param {boolean} [fCompare] is true if this write-compare read
      * @return {number} the specified (unsigned) byte, or -1 if no more data in the sector
      */
-    read(sector, ibSector, fCompare)
+    read(sector, iByte, fCompare)
     {
         let b = -1;
         if (sector) {
-            if (DEBUG && !ibSector && !fCompare && this.messageEnabled()) {
+            if (DEBUG && !iByte && !fCompare && this.messageEnabled()) {
                 this.printMessage('read("' + this.sDiskFile + '",CHS=' + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + ')');
             }
-            if (ibSector < sector['length']) {
+            if (iByte < sector['length']) {
                 let adw = sector['data'];
-                let idw = ibSector >> 2;
+                let idw = iByte >> 2;
                 let dw = (idw < adw.length ? adw[idw] : sector['pattern']);
-                b = ((dw >> ((ibSector & 0x3) << 3)) & 0xff);
+                b = ((dw >> ((iByte & 0x3) << 3)) & 0xff);
             }
         }
         return b;
     }
 
     /**
-     * write(sector, ibSector, b)
+     * write(sector, iByte, b)
      *
      * @this {Disk}
-     * @param {Object} sector (returned from a previous seek)
-     * @param {number} ibSector a byte index within the given sector
+     * @param {Sector} sector (returned from a previous seek)
+     * @param {number} iByte (byte index within the given sector)
      * @param {number} b the byte value to write
      * @return {boolean|null} true if write successful, false if write-protected, null if out of bounds
      */
-    write(sector, ibSector, b)
+    write(sector, iByte, b)
     {
         if (this.fWriteProtected)
             return false;
 
-        if (DEBUG && !ibSector && this.messageEnabled()) {
+        if (DEBUG && !iByte && this.messageEnabled()) {
             this.printMessage('write("' + this.sDiskFile + '",CHS=' + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + ')');
         }
 
-        if (ibSector < sector['length']) {
-            if (b != this.read(sector, ibSector, true)) {
+        if (iByte < sector['length']) {
+            if (b != this.read(sector, iByte, true)) {
                 let adw = sector['data'];
                 let dwPattern = sector['pattern'];
-                let idw = ibSector >> 2;
-                let nShift = (ibSector & 0x3) << 3;
+                let idw = iByte >> 2;
+                let nShift = (iByte & 0x3) << 3;
 
                 /*
                  * Ensure every byte up to the specified byte is properly initialized.
@@ -2319,7 +2365,7 @@ class Disk extends Component {
      * This is just the first revision: it currently looks only at fully inflated sectors.
      *
      * @this {Disk}
-     * @param {Object} sector
+     * @param {Sector} sector
      */
     deflateSector(sector)
     {
@@ -2343,7 +2389,7 @@ class Disk extends Component {
      * dumpSector(sector, pba, sDesc)
      *
      * @this {Disk}
-     * @param {Object} sector (returned from a previous seek)
+     * @param {Sector|null} sector (returned from a previous seek)
      * @param {number} [pba]
      * @param {string} [sDesc]
      * @return {string}
@@ -2908,53 +2954,5 @@ FileInfo.NE = {
      * 0x37 through 0x3F is reserved.
      */
 };
-
-/**
- * Every Sector object (once loaded, parsed, and "normalized") should have ALL of the following named properties:
- *
- *      'sector':   sector number
- *      'length':   size of the sector, in bytes
- *      'data':     array of dwords
- *      'pattern':  dword pattern to use for empty or partial sectors (or null if sector still needs to be loaded)
- *
- * initSector() also sets the following properties, to help us quickly identify its location within aDiskData:
- *
- *      iCylinder
- *      iHead
- *
- * In addition, we will maintain the following information on a per-sector basis, as sectors are modified:
- *
- *      iModify:    index of first modified dword in sector
- *      cModify:    number of modified dwords in sector
- *      fDirty:     true if sector is dirty, false if clean (or cleaning in progress)
- *
- * fDirty is used in conjunction with "demandrw" disks; it is set to true whenever the sector is modified, and is
- * set to false whenever the sector has been sent to the server.  If the server write succeeds and fDirty is still
- * false, then the sector modifications are removed (cModify is set to zero).  If the write succeeds but fDirty was
- * set to true again in the meantime, then all the sector modifications (even those that were just written) remain
- * in place (since we don't keep track of more than one modification range within a sector).  And if the write failed,
- * then fDirty is set back to true and again all modifications remain in place; the best we can do is schedule another
- * write attempt.
- *
- * TODO: Perhaps we should also maintain a failure count and stop trying to write sectors that reach a certain
- * threshold.  Error-handling, as usual, is the thorniest problem.
- *
- * @typedef {Object} SectorInfo
- * @property {number} sector
- * @property {number} length
- * @property {number} dataMark
- * @property {number} headCRC
- * @property {boolean} headError
- * @property {number} dataCRC
- * @property {boolean} dataError
- * @property {Array.<number>} data
- * @property {number|null} pattern
- * @property {number} iCylinder
- * @property {number} iHead
- * @property {number} iModify
- * @property {number} cModify
- * @property {FileInfo} file
- * @property {number} offFile
- */
 
 if (typeof module !== "undefined") module.exports = Disk;
