@@ -540,7 +540,7 @@ class HDC extends Component {
             this.drive = this.aDrives[this.iDrive];
         }
 
-        if (DEBUG && this.messageEnabled()) {
+        if (this.messageEnabled()) {
             this.printMessage("HDC initialized for " + this.aDrives.length + " drive(s)");
         }
         return fSuccess;
@@ -1699,7 +1699,7 @@ class HDC extends Component {
         this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
         let drive = this.aDrives[iDrive];
 
-        if (DEBUG && this.messageEnabled(Messages.HDC)) {
+        if (this.messageEnabled(Messages.HDC)) {
             this.printMessage(this.idComponent + ".doATC(" + Str.toHexByte(bCmd) + "): " + HDC.aATCCommands[bCmd] + (drive? "" : " (drive " + iDrive + " not present)"), true, true);
         }
 
@@ -1750,7 +1750,7 @@ class HDC extends Component {
             /* falls through */
 
         case HDC.ATC.COMMAND.READ_DATA:             // 0x20 (ATA)
-            if (DEBUG && this.messageEnabled(Messages.HDC) && !drive.useBuffer) {
+            if (this.messageEnabled(Messages.HDC) && !drive.useBuffer) {
                 this.printMessage(this.idComponent + ".doATCRead(" + iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + nSectors + ")", true);
             }
             /*
@@ -1790,7 +1790,7 @@ class HDC extends Component {
             /* falls through */
 
         case HDC.ATC.COMMAND.WRITE_DATA:            // 0x30 (ATA)
-            if (DEBUG && this.messageEnabled(Messages.HDC) && !drive.useBuffer) {
+            if (this.messageEnabled(Messages.HDC) && !drive.useBuffer) {
                 this.printMessage(this.idComponent + ".doATCWrite(" + iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + nSectors + ")", true);
             }
             this.regStatus = HDC.ATC.STATUS.DATA_REQ;
@@ -1851,7 +1851,7 @@ class HDC extends Component {
         } else {
             this.regStatus = HDC.ATC.STATUS.ERROR;
             this.regError = HDC.ATC.ERROR.CMD_ABORT;
-            if (DEBUG && this.messageEnabled()) {
+            if (this.messageEnabled()) {
                 this.printMessage(this.idComponent + ".doATC(" + Str.toHexByte(this.regCommand) + "): unsupported operation");
                 if (MAXDEBUG) this.dbg.stopCPU();
             }
@@ -2052,7 +2052,7 @@ class HDC extends Component {
 
             default:
                 this.beginResult(HDC.XTC.DATA.STATUS.ERROR | bDrive);
-                if (DEBUG && this.messageEnabled()) {
+                if (this.messageEnabled()) {
                     this.printMessage(this.idComponent + ".doXTC(" + Str.toHexByte(bCmdOrig) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
                     if (MAXDEBUG && bCmd >= 0) this.dbg.stopCPU();
                 }
@@ -2202,7 +2202,7 @@ class HDC extends Component {
     {
         drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
 
-        if (DEBUG && this.messageEnabled()) {
+        if (this.messageEnabled()) {
             this.printMessage(this.idComponent + ".doRead(" + drive.iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + ((drive.nBytes / drive.cbSector)|0) + ")");
         }
 
@@ -2246,7 +2246,7 @@ class HDC extends Component {
     {
         drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
 
-        if (DEBUG && this.messageEnabled()) {
+        if (this.messageEnabled()) {
             this.printMessage(this.idComponent + ".doWrite(" + drive.iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + ((drive.nBytes / drive.cbSector)|0) + ")");
         }
 
@@ -2561,7 +2561,7 @@ class HDC extends Component {
             drive.nBytes = 128 << drive.abFormat[3];// N (0 => 128, 1 => 256, 2 => 512, 3 => 1024)
             drive.cbFormat = 0;
 
-            if (DEBUG && this.messageEnabled()) {
+            if (this.messageEnabled()) {
                 this.printMessage(this.idComponent + ".writeFormat(" + drive.wCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
             }
 
@@ -2665,7 +2665,7 @@ class HDC extends Component {
             setByte(offset + 1, value);
         };
 
-        if (DEBUG && this.messageEnabled(Messages.HDC)) {
+        if (this.messageEnabled(Messages.HDC)) {
             this.printMessage(this.idComponent + ".packet(" + Str.toHexByte(bPacketCmd) + "): " + HDC.aPacketCommands[bPacketCmd] + " (drive " + drive.iDrive + ")", true);
         }
 
@@ -3579,48 +3579,48 @@ HDC.XTC = {
  * HDC.XTC.DATA.CMD.INIT_DRIVE) and fixed-length response sequences (well, OK, except for HDC.XTC.DATA.CMD.REQUEST_SENSE),
  * so a table of byte-lengths isn't much use, but having names for all the commands is still handy for debugging.
  */
-if (DEBUG) {
-    HDC.aATCCommands = {
-        0x08: "Device Reset",           // ATAPI
-        0x10: "Restore (Recalibrate)",  // ATA
-        0x20: "Read",                   // ATA
-        0x30: "Write",                  // ATA
-        0x40: "Read Verify",            // ATA
-        0x50: "Format Track",           // ATA
-        0x70: "Seek",                   // ATA
-        0x90: "Diagnose",               // ATA
-        0x91: "Set Parameters",         // ATA
-        0xA0: "Packet",                 // ATAPI
-        0xEC: "Identify Drive"          // ATA-1
-    };
-    HDC.aPacketCommands = {
-        [HDC.ATC.PACKET.COMMAND.TEST_UNIT]:     "Test Unit Ready",
-        [HDC.ATC.PACKET.COMMAND.INQUIRY]:       "Inquiry",
-        [HDC.ATC.PACKET.COMMAND.SEEK]:          "Seek",
-        [HDC.ATC.PACKET.COMMAND.MODE_SENSE]:    "Mode Sense",
-    };
-    HDC.aXTCCommands = {
-        0x00: "Test Drive Ready",
-        0x01: "Recalibrate",
-        0x03: "Request Sense Status",
-        0x04: "Format Drive",
-        0x05: "Read Verify",
-        0x06: "Format Track",
-        0x07: "Format Bad Track",
-        0x08: "Read",
-        0x0A: "Write",
-        0x0B: "Seek",
-        0x0C: "Initialize Drive Characteristics",
-        0x0D: "Read ECC Burst Error Length",
-        0x0E: "Read Data from Sector Buffer",
-        0x0F: "Write Data to Sector Buffer",
-        0xE0: "RAM Diagnostic",
-        0xE3: "Drive Diagnostic",
-        0xE4: "Controller Diagnostic",
-        0xE5: "Read Long",
-        0xE6: "Write Long"
-    };
-}
+HDC.aATCCommands = {
+    0x08: "Device Reset",           // ATAPI
+    0x10: "Restore (Recalibrate)",  // ATA
+    0x20: "Read",                   // ATA
+    0x30: "Write",                  // ATA
+    0x40: "Read Verify",            // ATA
+    0x50: "Format Track",           // ATA
+    0x70: "Seek",                   // ATA
+    0x90: "Diagnose",               // ATA
+    0x91: "Set Parameters",         // ATA
+    0xA0: "Packet",                 // ATAPI
+    0xEC: "Identify Drive"          // ATA-1
+};
+
+HDC.aPacketCommands = {
+    [HDC.ATC.PACKET.COMMAND.TEST_UNIT]:     "Test Unit Ready",
+    [HDC.ATC.PACKET.COMMAND.INQUIRY]:       "Inquiry",
+    [HDC.ATC.PACKET.COMMAND.SEEK]:          "Seek",
+    [HDC.ATC.PACKET.COMMAND.MODE_SENSE]:    "Mode Sense",
+};
+
+HDC.aXTCCommands = {
+    0x00: "Test Drive Ready",
+    0x01: "Recalibrate",
+    0x03: "Request Sense Status",
+    0x04: "Format Drive",
+    0x05: "Read Verify",
+    0x06: "Format Track",
+    0x07: "Format Bad Track",
+    0x08: "Read",
+    0x0A: "Write",
+    0x0B: "Seek",
+    0x0C: "Initialize Drive Characteristics",
+    0x0D: "Read ECC Burst Error Length",
+    0x0E: "Read Data from Sector Buffer",
+    0x0F: "Write Data to Sector Buffer",
+    0xE0: "RAM Diagnostic",
+    0xE3: "Drive Diagnostic",
+    0xE4: "Controller Diagnostic",
+    0xE5: "Read Long",
+    0xE6: "Write Long"
+};
 
 /*
  * Port input notification tables
