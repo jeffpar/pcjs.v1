@@ -179,7 +179,7 @@ class Web {
      * @param {string} sURL
      * @param {string|Object|null} [type] (object for POST request, otherwise type of GET request)
      * @param {boolean} [fAsync] is true for an asynchronous request; false otherwise (MUST be set for IE)
-     * @param {function(string,string,number)} [done]
+     * @param {function(string,string,number)|function(string,ArrayBuffer,number)} [done]
      * @param {function(number)} [progress]
      * @return {Array|null} Array containing [resource, nErrorCode], or null if no response available (yet)
      */
@@ -207,14 +207,14 @@ class Web {
              * NOTE: http://archive.pcjs.org is currently redirected to https://s3-us-west-2.amazonaws.com/archive.pcjs.org
              */
             sURLRedirect = sURL.replace(/^(http:\/\/archive\.pcjs\.org\/|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org\/)([^/]*)\/(.*?)\/([^/]*)$/, "/$2-demo/$3/archive/$4");
-            sURLRedirect = sURLRedirect.replace(/^https:\/\/([a-z0-9]+)-disks\.pcjs\.org\/(.*)$/, "/disks-$1/$2");
+            sURLRedirect = sURLRedirect.replace(/^https:\/\/([a-z0-9]+)-disks\.pcjs\.org\/(.*)$/, "/disks-$1/$2").replace(/^https:\/\/(cds[0-9]+)\.pcjs\.org\/(.*)$/, "/disks-cds/$1/$2");
         }
         else {
             /*
              * TODO: Perhaps it's time for our code in netlib.js to finally add support for HTTPS; for now
              * though, it's just as well that the NODE environment assumes all resources are available locally.
              */
-            sURLRedirect = sURL.replace(/^\/disks-([a-z0-9]+)\//, "https://$1-disks.pcjs.org/");
+            sURLRedirect = sURL.replace(/^\/disks-cds\/([^/]*)\//, "https://$1.pcjs.org/").replace(/^\/disks-([a-z0-9]+)\//, "https://$1-disks.pcjs.org/");
         }
 
         if (typeof module !== "undefined") {
@@ -476,8 +476,8 @@ class Web {
     /**
      * redirectResource(sPath)
      *
-     * The following replacements should only be necessary for (old) saved states, since all our disk manifests
-     * should no longer be using any of these old paths.
+     * The following replacements should only be necessary for (old) saved states; none of our disk manifests
+     * should be using any of these deprecated paths anymore.
      *
      * @param {string} sPath
      * @return {string}
