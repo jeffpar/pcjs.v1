@@ -2699,7 +2699,7 @@ class HDC extends Component {
         };
         let readChunk = function(iChunk, offChunk, lenChunk, offBuffer) {
             nChunks++;
-            Web.getResource(Str.sprintf("/disks-cds/cds001/microsoft/leisure/MSLEISURE-CD010-PANDORA/x%05d", iChunk), "arraybuffer", true, function(url, data, error) {
+            Web.getResource(Str.sprintf("/disks-cds/cds001/microsoft/leisure/MSLEISURE-CD001-PANDORA/x%05d", iChunk), "arraybuffer", true, function(url, data, error) {
                 if (data) {
                     let bytes = new Uint8Array(data);
                     while (offChunk < bytes.byteLength && lenChunk--) {
