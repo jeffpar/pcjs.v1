@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var PDP11 = require("./defines");
     var MessagesPDP11 = require("./messages");
@@ -590,4 +590,4 @@ RX11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.RXDB]:     /* 177172 */    [null, null, RX11.prototype.readRXDB,  RX11.prototype.writeRXDB,   "RXDB"]
 };
 
-if (NODE) module.exports = RX11;
+if (typeof module !== "undefined") module.exports = RX11;

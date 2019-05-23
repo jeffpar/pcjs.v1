@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
@@ -1427,4 +1427,4 @@ CPUState.init = function()
  */
 web.onInit(CPUState.init);
 
-if (NODE) module.exports = CPUState;
+if (typeof module !== "undefined") module.exports = CPUState;

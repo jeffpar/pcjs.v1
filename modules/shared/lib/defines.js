@@ -111,15 +111,7 @@ var RS232 = {
     }
 };
 
-/*
- * NODE should be true if we're running under NodeJS (eg, command-line), false if not (eg, web browser)
- */
-var NODE = false;
-if (typeof module !== 'undefined') {
-    NODE = true;
-}
-
-if (NODE) {
+if (typeof module !== "undefined") {
     global.window       = false;        // provides an alternative "if (typeof window === 'undefined')" (ie, "if (window) ...")
     global.APPVERSION   = APPVERSION;
     global.XMLVERSION   = XMLVERSION;
@@ -132,7 +124,6 @@ if (NODE) {
     global.MAXDEBUG     = MAXDEBUG;
     global.PRIVATE      = PRIVATE;
     global.RS232        = RS232;
-    global.NODE         = NODE;
     /*
      * TODO: When we're "required" by Node, should we return anything via module.exports?
      */

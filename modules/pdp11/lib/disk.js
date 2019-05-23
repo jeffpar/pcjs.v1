@@ -45,7 +45,7 @@
  *  to further reduce some of the duplication between them, but the above functionality is a good start.
  */
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Web = require("../../shared/lib/weblib");
     var DiskAPI = require("../../shared/lib/diskapi");
@@ -1242,4 +1242,4 @@ class DiskPDP11 extends Component {
  */
 DiskPDP11.nDisks = 0;
 
-if (NODE) module.exports = DiskPDP11;
+if (typeof module !== "undefined") module.exports = DiskPDP11;

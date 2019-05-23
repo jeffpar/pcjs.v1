@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Web = require("../../shared/lib/weblib");
     var Component = require("../../shared/lib/component");
@@ -1467,4 +1467,4 @@ Keyboard8080.VT100.portsOutput = {
  */
 Web.onInit(Keyboard8080.init);
 
-if (NODE) module.exports = Keyboard8080;
+if (typeof module !== "undefined") module.exports = Keyboard8080;

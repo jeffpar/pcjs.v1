@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var web       = require("./../../shared/lib/weblib");
     var Component = require("./../../shared/lib/component");
     var Messages  = require("./messages");
@@ -390,4 +390,4 @@ State.prototype = {
     }
 };
 
-if (NODE) module.exports = State;
+if (typeof module !== "undefined") module.exports = State;

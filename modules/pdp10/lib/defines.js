@@ -283,7 +283,7 @@ PDP10.APPNAME           = APPNAME;
 PDP10.DEBUGGER          = DEBUGGER;
 PDP10.SIMH              = SIMH;
 
-if (NODE) {
+if (typeof module !== "undefined") {
     global.APPCLASS     = APPCLASS;
     global.APPNAME      = APPNAME;
     global.DEBUGGER     = DEBUGGER;

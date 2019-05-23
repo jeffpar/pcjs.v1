@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Web = require("../../shared/lib/weblib");
     var Component = require("../../shared/lib/component");
     var PC8080 = require("./defines");
@@ -183,4 +183,4 @@ class Panel8080 extends Component {
  */
 Web.onInit(Panel8080.init);
 
-if (NODE) module.exports = Panel8080;
+if (typeof module !== "undefined") module.exports = Panel8080;

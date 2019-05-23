@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Usr         = require("../../shared/lib/usrlib");
     var Web         = require("../../shared/lib/weblib");
@@ -4911,7 +4911,7 @@ class ChipSet extends Component {
             bitsMessage |= Messages.FDC;
         } else if (nIRQ == ChipSet.IRQ.RTC) {   // IRQ 8 (MODEL_5170 and up)
             bitsMessage |= Messages.RTC;
-        } else if (nIRQ == ChipSet.IRQ.ATC) {   // IRQ 14 (MODEL_5170 and up)
+        } else if (nIRQ == ChipSet.IRQ.ATC1 || nIRQ == ChipSet.IRQ.ATC2) {      // IRQ 14 or 15 (MODEL_5170 and up)
             bitsMessage |= Messages.HDC;
         }
         return bitsMessage;
@@ -5329,7 +5329,8 @@ ChipSet.IRQ = {
     RTC:                0x08,   // MODEL_5170
     IRQ2:               0x09,   // MODEL_5170
     FPU:                0x0D,   // MODEL_5170
-    ATC:                0x0E    // MODEL_5170 uses IRQ 14 for HDC (ATC version)
+    ATC1:               0x0E,   // MODEL_5170 uses IRQ 14 for primary ATC controller interrupts
+    ATC2:               0x0F    // MODEL_5170 *can* use IRQ 15 for secondary ATC controller interrupts
 };
 
 /*
@@ -6268,4 +6269,4 @@ if (DESKPRO386) {
  */
 Web.onInit(ChipSet.init);
 
-if (NODE) module.exports = ChipSet;
+if (typeof module !== "undefined") module.exports = ChipSet;

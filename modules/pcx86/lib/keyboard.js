@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Usr         = require("../../shared/lib/usrlib");
     var Web         = require("../../shared/lib/weblib");
@@ -3076,4 +3076,4 @@ Keyboard.INJECTION = {
  */
 Web.onInit(Keyboard.init);
 
-if (NODE) module.exports = Keyboard;
+if (typeof module !== "undefined") module.exports = Keyboard;

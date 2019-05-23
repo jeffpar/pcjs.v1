@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Usr = require("../../shared/lib/usrlib");
     var Component = require("../../shared/lib/component");
@@ -1461,4 +1461,4 @@ BusPDP11.IOController = {
     }
 };
 
-if (NODE) module.exports = BusPDP11;
+if (typeof module !== "undefined") module.exports = BusPDP11;

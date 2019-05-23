@@ -48,6 +48,22 @@ function printf(format, ...args)
 }
 
 /**
+ * dumpBytes(buffer, offset, length)
+ *
+ * @param {Buffer} buffer
+ * @param {number} offset
+ * @param {number} length
+ */
+function dumpBytes(buffer, offset, length)
+{
+    let line = "", off = offset;
+    while (length-- > 0) {
+        line += Str.sprintf("%02x ", buffer[off++]);
+    }
+    printf("%08x: %s\n", offset, line);
+}
+
+/**
  * convertBinToISO(sInput, sOutput, fDebug, fOverwrite)
  *
  * We assume that the ".bin" file is a CD-ROM dump consisting of 2352-byte sectors.  Such a
@@ -94,8 +110,8 @@ function convertBinToISO(sInput, sOutput, fDebug, fOverwrite)
     let nSectors = bufferBin.length / 2352;
     printf("%d bytes (%f sectors) read\n", bufferBin.length, nSectors);
     if (nSectors != (nSectors|0)) {
-        printf("warning: fractional sector, possible image error; aborting\n");
-        process.exit(1);
+        printf("warning: fractional sector, possible image error\n");
+        // process.exit(1);
     }
     if (!fOverwrite && fs.existsSync(sOutput)) {
         printf("warning: output file '%s' aready exists; use --overwrite\n", sOutput);
@@ -109,8 +125,10 @@ function convertBinToISO(sInput, sOutput, fDebug, fOverwrite)
     }
     let cbSector = 2048, cbTotal = 0;
     for (let iSector = 0; iSector < nSectors; iSector++) {
-        let iBuffer = iSector * 2352 + 16;
+        let iBuffer = iSector * 2352;
         let bufferSector = Buffer.alloc(cbSector);
+        dumpBytes(bufferBin, iBuffer, 16);
+        iBuffer += 16;
         bufferBin.copy(bufferSector, 0, iBuffer, iBuffer + cbSector);
         streamISO.write(bufferSector);
         cbTotal += cbSector;

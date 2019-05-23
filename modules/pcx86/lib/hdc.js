@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Web         = require("../../shared/lib/weblib");
     var DiskAPI     = require("../../shared/lib/diskapi");
@@ -51,6 +51,36 @@ if (NODE) {
  */
 
 /**
+ * @typedef {Object} Drive
+ * @property {number} iDrive
+ * @property {number} errorCode
+ * @property {number} senseCode
+ * @property {boolean} fRemovable
+ * @property {Array.<number>} abDriveParms
+ * @property {Array.<number>} buffer (BYTE array)
+ * @property {number} bHead
+ * @property {number} nHeads
+ * @property {number} wCylinder
+ * @property {number} nCylinders
+ * @property {number} bSector
+ * @property {number} bSectorEnd
+ * @property {number} nBytes
+ * @property {number} bSectorBias
+ * @property {string} name (from DriveConfig.name)
+ * @property {string} path (from DriveConfig.path)
+ * @property {string} mode (from DriveConfig.mode)
+ * @property {string} type (from DriveConfig.type)
+ * @property {number} nSectors
+ * @property {number} cbSector
+ * @property {number} cbTransfer (normally the same as cbSector, except for PACKET commands)
+ * @property {Disk|null} disk
+ * @property {Sector|null} sector
+ * @property {number} iByte
+ * @property {boolean} useBuffer (true if buffer rather than sector must be used; make sure initBuffer() has been called)
+ * @property {Array} chunkCache
+ */
+
+/**
  * @class HDC
  * @property {Array.<DriveConfig>} aDriveConfigs
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
@@ -67,10 +97,20 @@ class HDC extends Component {
      * HDC supports the following component-specific properties:
      *
      *      drives: an array of DriveConfig objects, each containing 'name', 'path', 'type' and 'size' properties
-     *      type:   either 'XT' (for the PC XT Xebec controller) or 'AT' (for the PC AT Western Digital controller)
+     *      type: either "XT" (for the PC XT Xebec controller), or "AT" (for the PC AT Western Digital controller)
      *
-     * The 'type' parameter defaults to 'XT'.  All ports for the PC XT controller are referred to as XTC ports,
-     * and similarly, all PC AT controller ports are referred to as ATC ports.
+     * The 'type' parameter defaults to "XT", enabling support for the PC XT controller.  All ports for the
+     * PC XT controller are referred to as XTC ports.  We may also say that the XTC implements the XTA interface,
+     * to differentiate it from ATA controllers, which came later.
+     *
+     * Choosing "AT" as the controller type enables ATA compatibility, and by default, the primary ATA interface is
+     * enabled (ie, "AT" is equivalent to "AT1"); if you want to enable the secondary ATA interface, specify "AT2".
+     * PC AT controller ports are referred to as ATC ports, and the ATC implements the ATA interface (along with
+     * ATAPI, if requested).
+     *
+     * If you want to connect an ATAPI (CD-ROM) drive to the controller, specify "ATAPI" instead of "AT"; unlike
+     * "AT", "ATAPI" defaults to secondary interface (ie, "ATAPI" is equivalent to "ATAPI2"), but you can override
+     * the default (e.g., "ATAPI1").
      *
      * If 'path' is empty, a scratch disk image is created; otherwise, we make a note of the path, but we will NOT
      * pre-load it like we do for floppy disk images.
@@ -110,8 +150,19 @@ class HDC extends Component {
          * defaults.  For example, the default XT drive type is 3 (for a 10Mb disk drive), whereas the default
          * AT drive type is 2 (for a 20Mb disk drive).
          */
-        let sType = parmsHDC['type'];
-        this.fATC = sType && sType.toUpperCase() == "AT" || false;
+        this.fATC = this.fATAPI = false;
+        this.sType = (parmsHDC['type'] || "XT").toUpperCase();
+        if (this.sType.slice(0, 2) == "AT") {
+            this.fATC = true;
+            this.fATAPI = (this.sType == "ATAPI");
+        }
+        this.nInterface = (this.fATAPI? 1 : 0);     // default to the secondary interface if type is "ATAPI"
+        let nInterface = this.sType.slice(-1);      // but if an interface is specified (e.g., "AT2", "ATAPI1"), honor it
+        if (nInterface == '1') {
+            this.nInterface = 0;
+        } else if (nInterface == '2') {
+            this.nInterface = 1;
+        }
 
         /*
          * Support for local disk images is currently limited to desktop browsers with FileReader support;
@@ -129,9 +180,9 @@ class HDC extends Component {
      * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {HDC}
-     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
-     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listDisks")
-     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {string} sHTMLType is the type of the HTML control (e.g., "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (e.g., "listDisks")
+     * @param {HTMLElement} control is the HTML control DOM object (e.g., HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -174,7 +225,7 @@ class HDC extends Component {
                          * a disk, whereas an HDC always contains a disk.  However, the contents of an HDC's disk may
                          * never have been initialized with the contents of an external disk image, and therefore the
                          * disk's sDiskFile/sDiskPath properties may be undefined.  sDiskName should always be defined
-                         * though, defaulting to the name of the drive (eg, "10Mb Hard Disk").
+                         * though, defaulting to the name of the drive (e.g., "10Mb Hard Disk").
                          */
                         let disk = drive.disk;
                         let sDiskName = disk.sDiskFile || disk.sDiskName;
@@ -245,15 +296,24 @@ class HDC extends Component {
         this.iDriveTable = 0;
         this.iDriveTypeDefault = 3;
 
-        bus.addPortInputTable(this, this.fATC? HDC.aATCPortInput : HDC.aXTCPortInput);
-        bus.addPortOutputTable(this, this.fATC? HDC.aATCPortOutput : HDC.aXTCPortOutput);
-
-        if (this.fATC) {
+        if (!this.fATC) {
+            bus.addPortInputTable(this, HDC.aXTCPortInput);
+            bus.addPortOutputTable(this, HDC.aXTCPortOutput);
+        } else {
+            if (!this.nInterface) {
+                bus.addPortInputTable(this, HDC.aATCPortInputPrimary);
+                bus.addPortOutputTable(this, HDC.aATCPortOutputPrimary);
+                bus.addPortInputWidth(HDC.ATC.DATA.PORT1, 2);
+                bus.addPortOutputWidth(HDC.ATC.DATA.PORT1, 2);
+            } else {
+                bus.addPortInputTable(this, HDC.aATCPortInputSecondary);
+                bus.addPortOutputTable(this, HDC.aATCPortOutputSecondary);
+                bus.addPortInputWidth(HDC.ATC.DATA.PORT2, 2);
+                bus.addPortOutputWidth(HDC.ATC.DATA.PORT2, 2);
+            }
             this.iDriveTable++;
             if (this.chipset && this.chipset.model == ChipSet.MODEL_COMPAQ_DESKPRO386) this.iDriveTable++;
             this.iDriveTypeDefault = 2;
-            bus.addPortInputWidth(HDC.ATC.DATA.PORT, 2);
-            bus.addPortOutputWidth(HDC.ATC.DATA.PORT, 2);
         }
 
         cpu.addIntNotify(Interrupts.DISK, this.intBIOSDisk.bind(this));
@@ -261,7 +321,7 @@ class HDC extends Component {
 
         /*
          * The following code used to be performed in the HDC constructor, but now we need to wait for information
-         * about the Computer to be available (eg, getMachineID() and getUserID()) before we start loading and/or
+         * about the Computer to be available (e.g., getMachineID() and getUserID()) before we start loading and/or
          * connecting to disk images.
          *
          * If we didn't need auto-mount support, we could defer controller initialization until we received a powerUp()
@@ -431,7 +491,7 @@ class HDC extends Component {
                 this.iDrive = a[1];
             }
             /*
-             * Additional state is maintained by the Drive object (eg, abSector, ibSector)
+             * Additional state is maintained by the Drive object (e.g., buffer, iByte)
              */
         } else {
             if (data == null) data = [0, HDC.XTC.STATUS.NONE, new Array(14), 0, 0];
@@ -485,7 +545,7 @@ class HDC extends Component {
             this.drive = this.aDrives[this.iDrive];
         }
 
-        if (DEBUG && this.messageEnabled()) {
+        if (this.messageEnabled()) {
             this.printMessage("HDC initialized for " + this.aDrives.length + " drive(s)");
         }
         return fSuccess;
@@ -528,11 +588,27 @@ class HDC extends Component {
     }
 
     /**
+     * initBuffer(drive, length)
+     *
+     * @this {HDC}
+     * @param {Object} drive
+     * @param {number} [length]
+     */
+    initBuffer(drive, length=drive.nBytes)
+    {
+        if (!drive.buffer || drive.buffer.length < length) {
+            drive.buffer = new Array(length);
+        }
+        drive.buffer.fill(0, 0, length);
+        drive.iByte = 0;
+    }
+
+    /**
      * initDrive(iDrive, drive, driveConfig, data, fHard)
      *
      * TODO: Consider a separate Drive class that both FDC and HDC can use, since there's a lot of commonality
      * between the drive objects created by both controllers.  This will clean up overall drive management and allow
-     * us to factor out some common Drive methods (eg, advanceSector()).
+     * us to factor out some common Drive methods (e.g., advanceSector()).
      *
      * @this {HDC}
      * @param {number} iDrive
@@ -552,8 +628,8 @@ class HDC extends Component {
 
         /*
          * errorCode could be an HDC global, but in order to insulate HDC state from the operation of various functions
-         * that operate on drive objects (eg, readData and writeData), I've made it a per-drive variable.  This choice may
-         * be contrary to how the actual hardware works, but I prefer this approach, as long as it doesn't expose any
+         * that operate on drive objects (e.g., readData and writeData), I've made it a per-drive variable.  This choice
+         * may be contrary to how the actual hardware works, but I prefer this approach, as long as it doesn't expose any
          * incompatibilities that any software actually cares about.
          */
         drive.errorCode = data[i++];
@@ -562,10 +638,10 @@ class HDC extends Component {
         drive.abDriveParms = data[i++];         // captures drive parameters programmed via HDC.XTC.DATA.CMD.INIT_DRIVE
 
         /*
-         * TODO: Make abSector a DWORD array rather than a BYTE array (we could even allocate a Memory block for it);
+         * TODO: Make buffer a DWORD array rather than a BYTE array (we could even allocate a Memory block for it);
          * alternatively, eliminate the buffer entirely and re-establish a reference to the appropriate Disk sector object.
          */
-        drive.abSector = data[i++];
+        drive.buffer = data[i++];
 
         /*
          * The next group of properties are set by various HDC command sequences.
@@ -600,8 +676,8 @@ class HDC extends Component {
         if (drive.type === undefined || HDC.aDriveTypes[this.iDriveTable][drive.type] === undefined) drive.type = this.iDriveTypeDefault;
 
         let driveType = HDC.aDriveTypes[this.iDriveTable][drive.type];
-        drive.nSectors = driveType[2] || 17;    // sectors/track
-        drive.cbSector = driveType[3] || 512;   // bytes/sector (default is 512 if unspecified in the table)
+        drive.nSectors = driveType[2] || 17;                        // sectors/track
+        drive.cbSector = drive.cbTransfer = driveType[3] || 512;    // bytes/sector (default is 512 if unspecified in the table)
 
         /*
          * On a full machine reset, pass the current drive type to setCMOSDriveType() (a no-op on pre-CMOS machines)
@@ -629,17 +705,19 @@ class HDC extends Component {
         this.verifyDrive(drive);
 
         /*
-         * The next group of properties are managed by worker functions (eg, doRead()) to maintain state across DMA requests.
+         * The next group of properties are managed by worker functions (e.g., doRead()) to maintain state across DMA requests.
          */
-        drive.ibSector = data[i++];             // location of the next byte to be accessed in the above sector
+        drive.iByte = data[i++];                // location of the next byte to be accessed in the above sector
         drive.sector = null;                    // initialized to null by worker, and then set to the next sector satisfying the request
+        drive.useBuffer = false;
+        drive.chunkCache = [];
 
         if (drive.disk) {
             let deltas = data[i];
             if (deltas !== undefined && drive.disk.restore(deltas) < 0) {
                 fSuccess = false;
             }
-            if (fSuccess && drive.ibSector !== undefined) {
+            if (fSuccess && drive.iByte !== undefined) {
                 drive.sector = drive.disk.seek(drive.wCylinder, drive.bHead, drive.bSector + drive.bSectorBias);
             }
         }
@@ -676,14 +754,14 @@ class HDC extends Component {
         data[i++] = drive.senseCode;
         data[i++] = drive.fRemovable;
         data[i++] = drive.abDriveParms;
-        data[i++] = drive.abSector;
+        data[i++] = drive.buffer;
         data[i++] = drive.bHead;
         data[i++] = drive.nHeads;
         data[i++] = drive.wCylinder;
         data[i++] = drive.bSector;
         data[i++] = drive.bSectorEnd;
         data[i++] = drive.nBytes;
-        data[i++] = drive.ibSector;
+        data[i++] = drive.iByte;
         data[i] = drive.disk? drive.disk.save() : null;
         return data;
     }
@@ -772,7 +850,7 @@ class HDC extends Component {
      * seekDrive(drive, iSector, nSectors)
      *
      * The HDC doesn't need this function, since all HDC requests from the CPU are handled by doXTCmd().  This function
-     * is used by other components (eg, Debugger) to mimic an HDC request, using a drive object obtained from copyDrive(),
+     * is used by other components (e.g., Debugger) to mimic an HDC request, using a drive object obtained from copyDrive(),
      * to avoid disturbing the internal state of the HDC's drive objects.
      *
      * Also note that in an actual HDC request, drive.nBytes is initialized to the size of a single sector; the extent
@@ -1115,18 +1193,19 @@ class HDC extends Component {
     inATCByte(port, addrFrom)
     {
         let bIn = -1;
+        let drive = this.drive;
 
-        if (this.drive) {
+        if (drive) {
             /*
              * We use the synchronous form of readData() at this point because we have no choice; an I/O instruction
-             * has just occurred and cannot be delayed.  The good news is that doATCommand() should have already primed
+             * has just occurred and cannot be delayed.  The good news is that doATC() should have already primed
              * the pump; all we can do is assert that the pump has something in it.  If bIn is inexplicably negative,
              * well, then the caller will get 0xff.
              */
             let hdc = this;
-            bIn = this.readData(this.drive, function onATCReadData(b, fAsync, obj, off) {
+            bIn = this.readData(drive, function onATCReadData(b, fAsync, obj, off) {
                 hdc.assert(!fAsync);
-                if (BACKTRACK) {
+                if (BACKTRACK && obj) {
                     if (!off && obj.file && hdc.messageEnabled(Messages.DISK)) {
                         hdc.printMessage("loading " + obj.file.sPath + '[' + obj.offFile + "] via port " + Str.toHexWord(port), true);
                     }
@@ -1142,36 +1221,36 @@ class HDC extends Component {
             });
             this.assert(bIn >= 0);
 
-            if (this.drive.ibSector == 1 || this.drive.ibSector == this.drive.cbSector) {
+            if (drive.iByte == 1 || drive.iByte == drive.cbTransfer) {
                 /*
                  * printMessageIO() calls, if enabled, can be overwhelming for this port, so limit them to the first
                  * and last bytes of each sector.
                  */
                 if (this.messageEnabled(Messages.PORT | Messages.HDC)) {
-                    this.printMessageIO(port, undefined, addrFrom, "DATA[" + this.drive.ibSector + "]", bIn);
+                    this.printMessageIO(port, undefined, addrFrom, "DATA[" + drive.iByte + "]", bIn);
                 }
-                if (this.drive.ibSector > 1) {      // in other words, if this.drive.ibSector == this.drive.cbSector...
+                if (drive.iByte > 1) {          // in other words, if drive.iByte == drive.cbTransfer...
                     if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
-                        let sDump = this.drive.disk.dumpSector(this.drive.sector);
+                        let sDump = drive.disk.dumpSector(drive.sector);
                         if (sDump) this.dbg.message(sDump);
                     }
                     /*
                      * Now that we've supplied a full sector of data, see if the caller's expecting additional sectors;
                      * if so, prime the pump again.  The caller should not poll us again until another interrupt's delivered.
                      */
-                    this.drive.nBytes -= this.drive.cbSector;
+                    drive.nBytes -= drive.cbTransfer;
                     this.regSecCnt = (this.regSecCnt - 1) & 0xff;
                     /*
                      * TODO: If the WITH_ECC bit is set in the READ_DATA command, then we need to support "stuffing" 4
                      * additional bytes into the inATCByte() stream.  And we must first set DATA_REQ in the STATUS register.
                      */
-                    if (this.drive.nBytes >= this.drive.cbSector) {
+                    if (drive.nBytes >= drive.cbTransfer) {
                         /*
                          * FYI, with regard to regStatus, I'm simply aping what the ATC.COMMAND.READ_DATA setup code does
                          * for the first sector, which may not strictly be necessary for subsequent sectors....
                          */
                         hdc.regStatus = HDC.ATC.STATUS.BUSY;
-                        this.readData(this.drive, function onATCReadDataNext(b, fAsync) {
+                        this.readData(drive, function onATCReadDataNext(b, fAsync) {
                             if (b >= 0) {
                                 hdc.setATCIRR();
                                 /*
@@ -1204,8 +1283,14 @@ class HDC extends Component {
                             }
                         }, false);
                     } else {
-                        this.assert(!this.drive.nBytes);
-                        this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
+                        this.assert(!drive.nBytes);
+                        this.regStatus = HDC.ATC.STATUS.READY;
+                        if (!drive.useBuffer) {
+                            this.regStatus |= HDC.ATC.STATUS.SEEK_OK;   // TODO: Necessary?
+                        } else {
+                            this.regSecCnt = HDC.ATC.SECCNT.PACKET_IO | HDC.ATC.SECCNT.PACKET_CD;
+                            this.setATCIRR();
+                        }
                     }
                 }
             }
@@ -1216,10 +1301,10 @@ class HDC extends Component {
     /**
      * inATCData(port, addrFrom)
      *
-     * Wrapper around inATCByte() to treat this as a 16-bit port; see addPortInputWidth(HDC.ATC.DATA.PORT, 2).
+     * Wrapper around inATCByte() to treat this as a 16-bit port; see addPortInputWidth(HDC.ATC.DATA.PORT1, 2).
      *
      * @this {HDC}
-     * @param {number} port (0x1F0)
+     * @param {number} port (0x1F0,0x170)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port data
      */
@@ -1232,15 +1317,16 @@ class HDC extends Component {
      * outATCByte(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F0)
+     * @param {number} port (0x1F0,0x170)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
     outATCByte(port, bOut, addrFrom)
     {
-        if (this.drive) {
-            if (this.drive.nBytes >= this.drive.cbSector) {
-                if (this.writeData(this.drive, bOut) < 0) {
+        let drive = this.drive;
+        if (drive) {
+            if (drive.nBytes >= drive.cbTransfer) {
+                if (this.writeData(drive, bOut) < 0) {
                     /*
                      * TODO: It would be nice to be a bit more specific about the error (if any) that just occurred.
                      * Consult drive.errorCode (it uses older XTC error codes, but mapping those codes should be trivial).
@@ -1251,28 +1337,32 @@ class HDC extends Component {
                         this.printMessage(this.idComponent + ".outATCByte(" + Str.toHexByte(bOut) + "): write failed");
                     }
                 }
-                else if (this.drive.ibSector == 1 || this.drive.ibSector == this.drive.cbSector) {
+                else if (drive.iByte == 1 || drive.iByte == drive.cbTransfer) {
                     /*
                      * printMessageIO() calls, if enabled, can be overwhelming for this port, so limit them to the first
                      * and last bytes of each sector.
                      */
                     if (this.messageEnabled(Messages.PORT | Messages.HDC)) {
-                        this.printMessageIO(port, bOut, addrFrom, "DATA[" + this.drive.ibSector + "]");
+                        this.printMessageIO(port, bOut, addrFrom, "DATA[" + drive.iByte + "]");
                     }
-                    if (this.drive.ibSector > 1) {      // in other words, if this.drive.ibSector == this.drive.cbSector...
+                    if (drive.iByte > 1) {          // in other words, if drive.iByte == drive.cbTransfer...
                         if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
-                            let sDump = this.drive.disk.dumpSector(this.drive.sector);
+                            let sDump = drive.disk.dumpSector(drive.sector);
                             if (sDump) this.dbg.message(sDump);
                         }
-                        this.drive.nBytes -= this.drive.cbSector;
+                        drive.nBytes -= drive.cbTransfer;
                         this.regSecCnt = (this.regSecCnt - 1) & 0xff;
-                        this.setATCIRR(true);
                         this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
-                        if (this.drive.nBytes >= this.drive.cbSector) {
+                        if (drive.nBytes >= drive.cbTransfer) {
                             this.regStatus |= HDC.ATC.STATUS.DATA_REQ;
                         } else {
-                            this.assert(!this.drive.nBytes);
+                            this.assert(!drive.nBytes);
+                            if (drive.useBuffer) {
+                                this.processPacket(drive);
+                                return;
+                            }
                         }
+                        this.setATCIRR(true);
                     }
                 }
             } else {
@@ -1296,10 +1386,10 @@ class HDC extends Component {
     /**
      * outATCData(port, data, addrFrom)
      *
-     * Wrapper around outATCByte() to treat this as a 16-bit port; see addPortOutputWidth(HDC.ATC.DATA.PORT, 2)
+     * Wrapper around outATCByte() to treat this as a 16-bit port; see addPortOutputWidth(HDC.ATC.DATA.PORT1, 2)
      *
      * @this {HDC}
-     * @param {number} port (0x1F0)
+     * @param {number} port (0x1F0,0x170)
      * @param {number} data
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1313,7 +1403,7 @@ class HDC extends Component {
      * inATCError(port, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F1)
+     * @param {number} port (0x1F1,0x171)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port value
      */
@@ -1328,7 +1418,7 @@ class HDC extends Component {
      * outATCWPreC(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F1)
+     * @param {number} port (0x1F1,0x171)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1342,7 +1432,7 @@ class HDC extends Component {
      * inATCSecCnt(port, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F2)
+     * @param {number} port (0x1F2,0x172)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port value
      */
@@ -1357,7 +1447,7 @@ class HDC extends Component {
      * outATCSecCnt(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F2)
+     * @param {number} port (0x1F2,0x172)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1371,7 +1461,7 @@ class HDC extends Component {
      * inATCSecNum(port, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F3)
+     * @param {number} port (0x1F3,0x173)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port value
      */
@@ -1386,7 +1476,7 @@ class HDC extends Component {
      * outATCSecNum(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F3)
+     * @param {number} port (0x1F3,0x173)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1400,7 +1490,7 @@ class HDC extends Component {
      * inATCCylLo(port, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F4)
+     * @param {number} port (0x1F4,0x174)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port value
      */
@@ -1415,7 +1505,7 @@ class HDC extends Component {
      * outATCCylLo(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F4)
+     * @param {number} port (0x1F4,0x174)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1429,7 +1519,7 @@ class HDC extends Component {
      * inATCCylHi(port, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F5)
+     * @param {number} port (0x1F5,0x175)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port value
      */
@@ -1444,7 +1534,7 @@ class HDC extends Component {
      * outATCCylHi(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F5)
+     * @param {number} port (0x1F5,0x175)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1458,7 +1548,7 @@ class HDC extends Component {
      * inATCDrvHd(port, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F6)
+     * @param {number} port (0x1F6,0x176)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port value
      */
@@ -1473,7 +1563,7 @@ class HDC extends Component {
      * outATCDrvHd(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F6)
+     * @param {number} port (0x1F6,0x176)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1512,7 +1602,7 @@ class HDC extends Component {
      * inATCStatus(port, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F7)
+     * @param {number} port (0x1F7,0x177)
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
      * @return {number} simulated port value
      */
@@ -1536,7 +1626,7 @@ class HDC extends Component {
          * interrupt at (4) never happens.  So, maybe there are SOME situations where IRR should be cleared on
          * a read, but I don't know what they are.
          *
-         *      if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.ATC);
+         *      if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.ATC1 + this.nInterface);
          */
         if (this.regStatus & HDC.ATC.STATUS.READY) this.regStatus &= ~HDC.ATC.STATUS.BUSY;
         return bIn;
@@ -1546,7 +1636,7 @@ class HDC extends Component {
      * outATCCommand(port, bOut, addrFrom)
      *
      * @this {HDC}
-     * @param {number} port (0x1F7)
+     * @param {number} port (0x1F7,0x177)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1554,17 +1644,17 @@ class HDC extends Component {
     {
         this.printMessageIO(port, bOut, addrFrom, "COMMAND");
         this.regCommand = bOut;
-        if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.ATC);
+        if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.ATC1 + this.nInterface);
         this.doATC();
     }
 
     /**
      * outATCFDR(port, bOut, addrFrom)
      *
-     * This is referred to in IBM's docs as the "Fixed Disk Register" (write-only)
+     * This is referred to in IBM's docs as the "Fixed Disk Register" (write-only); aka "Device Control Register".
      *
      * @this {HDC}
-     * @param {number} port (0x3F6)
+     * @param {number} port (0x3F6,0x376)
      * @param {number} bOut
      * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
      */
@@ -1583,15 +1673,31 @@ class HDC extends Component {
     /**
      * doATC()
      *
-     * Handles ATC (AT Controller) commands
+     * Handles ATC (AT Controller) commands.  Initially, just PC AT (ATA) commands were supported,
+     * but in order to work with CD-ROM devices, selected (ATA-1 and ATAPI) commands have been added.
+     * However, the configuration must request that support; eg:
+     *
+     *      	<hdc id="cdrom" type="ATAPI" drives='[{name:"CD-ROM Drive"}]'/>
+     *
+     * in order to set the fATAPI property and enable that support.
      *
      * @this {HDC}
      */
     doATC()
     {
         let hdc = this;
-        let fInterrupt = false;
+        let fInterrupt = false, fProcessed = false;
+
         let bCmd = this.regCommand;
+        let bCmdMasked = bCmd & ~HDC.ATC.COMMAND.STEP_RATE;
+        if (bCmdMasked == HDC.ATC.COMMAND.RESTORE || bCmdMasked == HDC.ATC.COMMAND.SEEK) {
+            bCmd = bCmdMasked;
+        } else if (bCmdMasked == HDC.ATC.COMMAND.READ_DATA || bCmdMasked == HDC.ATC.COMMAND.WRITE_DATA) {
+            bCmd &= ~(HDC.ATC.COMMAND.NO_RETRY | HDC.ATC.COMMAND.WITH_ECC);
+        } else if (bCmdMasked == HDC.ATC.COMMAND.READ_VERF) {
+            bCmd &= ~(HDC.ATC.COMMAND.NO_RETRY);
+        }
+
         let iDrive = (this.regDrvHd & HDC.ATC.DRVHD.DRIVE_MASK? 1 : 0);
         let nHead = this.regDrvHd & HDC.ATC.DRVHD.HEAD_MASK;
         let nCylinder = this.regCylLo | ((this.regCylHi & HDC.ATC.CYLHI.MASK) << 8);
@@ -1602,50 +1708,60 @@ class HDC extends Component {
         this.drive = null;
         this.regError = HDC.ATC.ERROR.NONE;
         this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
-
         let drive = this.aDrives[iDrive];
-        if (!drive) {
-            bCmd = -1;
-        } else {
-            /*
-             * Update the Drive object with the new positional information associated with this command.
-             */
-            drive.wCylinder = nCylinder;
-            drive.bHead = nHead;
-            drive.bSector = nSector;
-            drive.nBytes = nSectors * drive.cbSector;
-            bCmd = (bCmd >= HDC.ATC.COMMAND.DIAGNOSE? bCmd : (bCmd & HDC.ATC.COMMAND.MASK));
-            /*
-             * Since the ATC doesn't use DMA, we must now set some additional Drive state for the benefit of any
-             * follow-up I/O instructions.  For example, any subsequent inATCByte() and outATCByte() calls need to
-             * know which drive to talk to ("this.drive"), to issue their own readData() and writeData() calls.
-             *
-             * The XTC didn't need this, because it used doRead(), doWrite(), doFormat() helper functions,
-             * which reset the current drive's "sector" and "errorCode" properties themselves and then used DMA
-             * functions that delivered drive data with direct calls to readData() and writeData().
-             */
-            drive.sector = null;
-            drive.ibSector = 0;
-            drive.errorCode = 0;
-            this.iDrive = iDrive;
-            this.drive = drive;
+
+        if (this.messageEnabled(Messages.HDC)) {
+            this.printMessage(this.idComponent + ".doATC(" + Str.toHexByte(bCmd) + "): " + HDC.aATACommands[bCmd] + (drive? "" : " (drive " + iDrive + " not present)"), true, true);
         }
 
-        if (DEBUG && this.messageEnabled(Messages.HDC)) {
-            this.printMessage(this.idComponent + ".doATC(" + Str.toHexByte(bCmd) + "): " + HDC.aATCCommands[bCmd], true);
-        }
+        if (!drive) return;
+        this.iDrive = iDrive;
+        this.drive = drive;
 
-        switch (bCmd & HDC.ATC.COMMAND.MASK) {
+        /*
+         * Update the Drive object with the new positional information associated with this command.
+         */
+        drive.wCylinder = nCylinder;
+        drive.bHead = nHead;
+        drive.bSector = nSector;
+        drive.nBytes = nSectors * (drive.cbTransfer = drive.cbSector);
 
-        case HDC.ATC.COMMAND.RESTORE:               // 0x10
+        /*
+         * Since the (original) ATC doesn't use DMA, we must now set some additional Drive state for the benefit
+         * of any follow-up I/O instructions.  For example, any subsequent inATCByte() and outATCByte() calls need
+         * to know which drive to talk to ("this.drive"), to issue their own readData() and writeData() calls.
+         *
+         * The XTC didn't need this, because it used doRead(), doWrite(), doFormat() helper functions, which reset
+         * the current drive's "sector" and "errorCode" properties themselves and then used DMA functions that delivered
+         * drive data with direct calls to readData() and writeData().
+         */
+        drive.sector = null;
+        drive.iByte = 0;
+        drive.errorCode = 0;
+        drive.useBuffer = false;
+
+        switch (bCmd) {
+
+        case HDC.ATC.COMMAND.RESET:                 // 0x08 (ATAPI)
+            if (this.fATAPI) {
+                this.resetDevice();
+                fProcessed = true;
+            }
+            break;
+
+        case HDC.ATC.COMMAND.RESTORE:               // 0x10 (ATA)
             /*
              * Physically, this retracts the heads to cylinder 0, but logically, there isn't anything to do.
              */
-            fInterrupt = true;
+            fInterrupt = fProcessed = true;
             break;
 
-        case HDC.ATC.COMMAND.READ_DATA:             // 0x20
-            if (DEBUG && this.messageEnabled(Messages.HDC)) {
+        case HDC.ATC.COMMAND.IDENTIFY:              // 0xEC (ATA-1)
+            if (!this.processIdentify(drive)) break;
+            /* falls through */
+
+        case HDC.ATC.COMMAND.READ_DATA:             // 0x20 (ATA)
+            if (this.messageEnabled(Messages.HDC) && !drive.useBuffer) {
                 this.printMessage(this.idComponent + ".doATCRead(" + iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + nSectors + ")", true);
             }
             /*
@@ -1653,7 +1769,7 @@ class HDC extends Component {
              * byte of the next sector, we can signal an interrupt without also consuming the first byte, allowing
              * inATCByte() to begin with that byte.
              */
-            hdc.regStatus = HDC.ATC.STATUS.BUSY;
+            this.regStatus = HDC.ATC.STATUS.BUSY;
             this.readData(drive, function onATCReadDataFirst(b, fAsync) {
                 if (b >= 0 && hdc.chipset) {
                     hdc.setATCIRR();
@@ -1674,38 +1790,47 @@ class HDC extends Component {
                     hdc.regError = HDC.ATC.ERROR.NO_CHS;
                 }
             }, false);
+            fProcessed = true;
             break;
 
-        case HDC.ATC.COMMAND.WRITE_DATA:            // 0x30
-            if (DEBUG && this.messageEnabled(Messages.HDC)) {
+        case HDC.ATC.COMMAND.PACKET:                // 0xA0 (ATAPI)
+            this.initBuffer(drive);
+            drive.useBuffer = true;
+            drive.nBytes = drive.cbTransfer = 12;
+            this.regSecCnt = HDC.ATC.SECCNT.PACKET_CD;
+            /* falls through */
+
+        case HDC.ATC.COMMAND.WRITE_DATA:            // 0x30 (ATA)
+            if (this.messageEnabled(Messages.HDC) && !drive.useBuffer) {
                 this.printMessage(this.idComponent + ".doATCWrite(" + iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + nSectors + ")", true);
             }
             this.regStatus = HDC.ATC.STATUS.DATA_REQ;
+            fProcessed = true;
             break;
 
-        case HDC.ATC.COMMAND.READ_VERF:             // 0x40
+        case HDC.ATC.COMMAND.READ_VERF:             // 0x40 (ATA)
             /*
              * Since the READ VERIFY command returns no data, once again, logically, there isn't much we HAVE to
              * to do, but... TODO: Verify that all the disk parameters are valid, and return an error if they're not.
              */
-            fInterrupt = true;
+            fInterrupt = fProcessed = true;
             break;
 
-        case HDC.ATC.COMMAND.SEEK:                  // 0x70
+        case HDC.ATC.COMMAND.SEEK:                  // 0x70 (ATA)
             /*
              * Physically, this moves the head(s) to the requested cylinder, but logically, there isn't anything to do;
              * in fact, we didn't even need this command for the MODEL_5170 ROM BIOS (the COMPAQ DeskPro 386 ROM BIOS was
              * another story).
              */
-            fInterrupt = true;
+            fInterrupt = fProcessed = true;
             break;
 
-        case HDC.ATC.COMMAND.DIAGNOSE:              // 0x90
+        case HDC.ATC.COMMAND.DIAGNOSE:              // 0x90 (ATA)
             this.regError = HDC.ATC.DIAG.NO_ERROR;
-            fInterrupt = true;
+            fInterrupt = fProcessed = true;
             break;
 
-        case HDC.ATC.COMMAND.SETPARMS:              // 0x91
+        case HDC.ATC.COMMAND.SETPARMS:              // 0x91 (ATA)
             /*
              * The documentation implies that the only parameters this command really affects are the number
              * of heads (from regDrvHd) and sectors/track (from regSecCnt) -- this despite the fact that the BIOS
@@ -1724,18 +1849,24 @@ class HDC extends Component {
             this.assert(drive.nSectors == nSectors);
             drive.nHeads = nHead + 1;
             drive.nSectors = nSectors;
-            fInterrupt = true;
+            fInterrupt = fProcessed = true;
             break;
 
-        default:
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage(this.idComponent + ".doATC(" + Str.toHexByte(this.regCommand) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
-                if (MAXDEBUG && bCmd >= 0) this.dbg.stopCPU();
-            }
-            break;
+        /*
+         * We don't need a 'default' case because any command that declined to set fProcessed will be dealt with below.
+         */
         }
 
-        if (fInterrupt) this.setATCIRR();
+        if (fProcessed) {
+            if (fInterrupt) this.setATCIRR();
+        } else {
+            this.regStatus = HDC.ATC.STATUS.ERROR;
+            this.regError = HDC.ATC.ERROR.CMD_ABORT;
+            if (this.messageEnabled()) {
+                this.printMessage(this.idComponent + ".doATC(" + Str.toHexByte(this.regCommand) + "): unsupported operation");
+                if (MAXDEBUG) this.dbg.stopCPU();
+            }
+        }
     }
 
     /**
@@ -1772,7 +1903,7 @@ class HDC extends Component {
                  * on the setIRR() call here (120), and the problem vanished, so it seems likely that the OS/2 disk driver
                  * has a low tolerance for fast controller interrupts during multi-sector operations.
                  */
-                this.chipset.setIRR(ChipSet.IRQ.ATC, 120);
+                this.chipset.setIRR(ChipSet.IRQ.ATC1 + this.nInterface, 120);
                 if (DEBUG) this.printMessage(this.idComponent + ".setATCIRR(): enabled", Messages.PIC | Messages.HDC);
             } else {
                 if (DEBUG) this.printMessage(this.idComponent + ".setATCIRR(): disabled", Messages.PIC | Messages.HDC);
@@ -1803,7 +1934,7 @@ class HDC extends Component {
         let b3 = this.popCmd();
         let wCylinder = ((b2 << 2) & 0x300) | b3;
         let bSector = b2 & 0x3f;
-        let bCount = this.popCmd();             // block count or interleave count, depending on the command
+        let bCount = this.popCmd();                 // block count or interleave count, depending on the command
         let bControl = this.popCmd();
         let bParm, bDataStatus;
 
@@ -1932,7 +2063,7 @@ class HDC extends Component {
 
             default:
                 this.beginResult(HDC.XTC.DATA.STATUS.ERROR | bDrive);
-                if (DEBUG && this.messageEnabled()) {
+                if (this.messageEnabled()) {
                     this.printMessage(this.idComponent + ".doXTC(" + Str.toHexByte(bCmdOrig) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
                     if (MAXDEBUG && bCmd >= 0) this.dbg.stopCPU();
                 }
@@ -1953,8 +2084,8 @@ class HDC extends Component {
         let bCmdIndex = this.regDataIndex;
         if (bCmdIndex < this.regDataTotal) {
             bCmd = this.regDataArray[this.regDataIndex++];
-            if (DEBUG && this.messageEnabled((bCmdIndex > 0? Messages.PORT : 0) | Messages.HDC)) {
-                this.printMessage(this.idComponent + ".popCmd(" + bCmdIndex + "): " + Str.toHexByte(bCmd) + (!bCmdIndex && HDC.aXTCCommands[bCmd]? (" (" + HDC.aXTCCommands[bCmd] + ")") : ""), true);
+            if (this.messageEnabled((bCmdIndex > 0? Messages.PORT : 0) | Messages.HDC)) {
+                this.printMessage(this.idComponent + ".popCmd(" + bCmdIndex + "): " + Str.toHexByte(bCmd) + (!bCmdIndex && HDC.aXTACommands[bCmd]? (" (" + HDC.aXTACommands[bCmd] + ")") : ""), true);
             }
         }
         return bCmd;
@@ -1971,7 +2102,7 @@ class HDC extends Component {
         this.regDataIndex = this.regDataTotal = 0;
         if (bResult !== undefined) this.pushResult(bResult);
         /*
-         * After the Execution phase (eg, DMA Terminal Count has occurred, or the EOT sector has been read/written),
+         * After the Execution phase (e.g., DMA Terminal Count has occurred, or the EOT sector has been read/written),
          * an interrupt is supposed to occur, signaling the beginning of the Result Phase.  Once the data "status byte"
          * has been read from XTC.DATA, the interrupt is cleared (see inXTCData).
          */
@@ -2082,7 +2213,7 @@ class HDC extends Component {
     {
         drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
 
-        if (DEBUG && this.messageEnabled()) {
+        if (this.messageEnabled()) {
             this.printMessage(this.idComponent + ".doRead(" + drive.iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + ((drive.nBytes / drive.cbSector)|0) + ")");
         }
 
@@ -2126,7 +2257,7 @@ class HDC extends Component {
     {
         drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
 
-        if (DEBUG && this.messageEnabled()) {
+        if (this.messageEnabled()) {
             this.printMessage(this.idComponent + ".doWrite(" + drive.iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + ((drive.nBytes / drive.cbSector)|0) + ")");
         }
 
@@ -2179,10 +2310,8 @@ class HDC extends Component {
 
         if (DEBUG) this.printMessage(this.idComponent + ".doWriteBuffer()");
 
-        if (!drive.abSector || drive.abSector.length != drive.nBytes) {
-            drive.abSector = new Array(drive.nBytes);
-        }
-        drive.ibSector = 0;
+        this.initBuffer(drive);
+
         if (this.chipset) {
             /*
              * We need to reverse the original logic, and default to success unless/until an actual error occurs;
@@ -2244,10 +2373,18 @@ class HDC extends Component {
 
         let inc = (fAutoInc !== false? 1 : 0);
 
+        if (drive.useBuffer) {
+            if (drive.iByte < drive.buffer.length) {
+                b = drive.buffer[drive.iByte];
+                drive.iByte += inc;
+            }
+            return b;
+        }
+
         if (drive.sector) {
-            off = drive.ibSector;
-            b = drive.disk.read(drive.sector, drive.ibSector);
-            drive.ibSector += inc;
+            off = drive.iByte;
+            b = drive.disk.read(drive.sector, drive.iByte);
+            drive.iByte += inc;
             if (b >= 0) {
                 obj = drive.sector;
                 if (done) done(b, false, obj, off);
@@ -2268,14 +2405,14 @@ class HDC extends Component {
                 drive.disk.seek(drive.wCylinder, drive.bHead, drive.bSector + drive.bSectorBias, false, function onReadDataSeek(sector, fAsync) {
                     if ((drive.sector = sector)) {
                         obj = sector;
-                        off = drive.ibSector = 0;
+                        off = drive.iByte = 0;
                         /*
                          * We "pre-advance" bSector et al now, instead of waiting to advance it right before the seek().
                          * This allows the initial call to readData() to perform a seek without triggering an unwanted advance.
                          */
                         hdc.advanceSector(drive);
-                        b = drive.disk.read(drive.sector, drive.ibSector);
-                        drive.ibSector += inc;
+                        b = drive.disk.read(drive.sector, drive.iByte);
+                        drive.iByte += inc;
                     } else {
                         drive.errorCode = HDC.XTC.DATA.ERR.NO_SECTOR;
                     }
@@ -2315,8 +2452,15 @@ class HDC extends Component {
     {
         if (drive.errorCode) return -1;
         do {
+            if (drive.useBuffer) {
+                if (drive.iByte < drive.buffer.length) {
+                    drive.buffer[drive.iByte++] = b;
+                    return b;
+                }
+                return -1;
+            }
             if (drive.sector) {
-                if (drive.disk.write(drive.sector, drive.ibSector++, b))
+                if (drive.disk.write(drive.sector, drive.iByte++, b))
                     break;
             }
             /*
@@ -2336,7 +2480,7 @@ class HDC extends Component {
                 b = -1;
                 break;
             }
-            drive.ibSector = 0;
+            drive.iByte = 0;
             /*
              * We "pre-advance" bSector et al now, instead of waiting to advance it right before the seek().
              * This allows the initial call to writeData() to perform a seek without triggering an unwanted advance.
@@ -2372,6 +2516,12 @@ class HDC extends Component {
                 drive.bHead = 0;
                 drive.wCylinder++;
             }
+            /*
+             * ATA Note: It's unclear just from reading specs whether the original PC AT adapter updated
+             * the Drive/Head register to reflect the current head at the end of a command.  Since later adapters
+             * apparently did, and since the risk of always updating it seems mininal, that's what we'll do.
+             */
+            this.regDrvHd = (this.regDrvHd & ~HDC.ATC.DRVHD.HEAD_MASK) | (drive.bHead & HDC.ATC.DRVHD.HEAD_MASK);
         }
     }
 
@@ -2391,8 +2541,8 @@ class HDC extends Component {
      */
     writeBuffer(drive, b)
     {
-        if (drive.ibSector < drive.abSector.length) {
-            drive.abSector[drive.ibSector++] = b;
+        if (drive.iByte < drive.buffer.length) {
+            drive.buffer[drive.iByte++] = b;
         } else {
             /*
              * TODO: Determine the proper error code to return here.
@@ -2422,7 +2572,7 @@ class HDC extends Component {
             drive.nBytes = 128 << drive.abFormat[3];// N (0 => 128, 1 => 256, 2 => 512, 3 => 1024)
             drive.cbFormat = 0;
 
-            if (DEBUG && this.messageEnabled()) {
+            if (this.messageEnabled()) {
                 this.printMessage(this.idComponent + ".writeFormat(" + drive.wCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
             }
 
@@ -2435,6 +2585,326 @@ class HDC extends Component {
         }
         if (drive.cSectorsFormatted >= drive.bSectorEnd) b = -1;
         return b;
+    }
+
+    /**
+     * processIdentify(drive)
+     *
+     * Worker for the IDENTIFY (ATA-1) command.  However, at this time, we support it only for ATAPI devices.
+     *
+     * @this {HDC}
+     * @param {Drive} drive
+     * @return {boolean}
+     */
+    processIdentify(drive)
+    {
+        if (this.fATAPI) {
+            this.initBuffer(drive);
+            /*
+             * NOTE: The IDENTIFY DRIVE data is stored little-endian, and since LE is normally assumed,
+             * we don't bother with LE in these function signatures.  processPacket() is a different story.
+             */
+            let setByte = function(offset, value) {
+                drive.buffer[offset] = value & 0xff;
+            };
+            let setWord = function(offset, value) {
+                setByte(offset, value);
+                setByte(offset + 1, value >> 8);
+            };
+            let setLong = function(offset, value) {
+                setWord(offset, value);
+                setWord(offset + 2, value >> 16);
+            };
+            /*
+             * TODO: There is MUCH work left to do here.  What, for example, does a real-world CD-ROM device report?
+             */
+            setWord(HDC.ATC.IDENTIFY.CONFIG.OFFSET, HDC.ATC.IDENTIFY.CONFIG.SOFT_SECTORED);
+            setWord(HDC.ATC.IDENTIFY.CYLS, drive.nCylinders);
+            setWord(HDC.ATC.IDENTIFY.HEADS, drive.nHeads);
+            drive.useBuffer = true;
+            if (DEBUG) this.dbg.stopCPU();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * processPacket(drive)
+     *
+     * @this {HDC}
+     * @param {Drive} drive
+     */
+    processPacket(drive)
+    {
+        let hdc = this;
+        let limit = drive.buffer.length;
+        let format, lba, num, page = 0, pageCode, pageControl;
+        let bPacketCmd, off, iChunk, offChunk, lenChunk, lenTotal, offBuffer, nChunks;
+        /*
+         * NOTE: Packet data is typically stored big-endian, and since BE is not normally assumed,
+         * we include BE in the appropriate function signatures.  processIdentify() is a different story.
+         */
+        let getBits = function(offset, bit, length) {
+            return (drive.buffer[offset] >> bit) & ((1 << length) - 1);
+        };
+        let getByte = function(offset) {
+            return drive.buffer[offset] & 0xff;
+        };
+        let getWordBE = function(offset) {
+            return (getByte(offset) << 8) | getByte(offset + 1);
+        };
+        let getLongBE = function(offset) {
+            return (getWordBE(offset) << 16) | getWordBE(offset + 2);
+        };
+        let getLength = function(offset) {
+            let length = getWordBE(offset);
+            if (length > limit) length = limit;
+            return length;
+        };
+        let setByte = function(offset, value) {
+            if (offset < limit) {
+                drive.buffer[offset] = value & 0xff;
+            }
+        };
+        let setBytes = function(offset, value, length) {
+            while (length--) setByte(offset++, value);
+        };
+        let setString = function(offset, value, length) {
+            if (!value) value = "";
+            for (let i = 0; i < length; i++) {
+                setByte(offset + i, i < value.length? value.charCodeAt(i) : 0);
+            }
+        };
+        let setWordBE = function(offset, value) {
+            setByte(offset, value >> 8);
+            setByte(offset + 1, value);
+        };
+        let setLongBE = function(offset, value) {
+            setWordBE(offset, value >> 16);
+            setWordBE(offset + 2, value);
+        };
+        let done = function(fData) {
+            if (!fData) {
+                hdc.regStatus = HDC.ATC.STATUS.READY;
+                hdc.regSecCnt = HDC.ATC.SECCNT.PACKET_IO | HDC.ATC.SECCNT.PACKET_CD;
+            } else {
+                drive.iByte = 0;
+                drive.nBytes = drive.cbTransfer = limit;
+                hdc.regCylLo = limit & 0xff;
+                hdc.regCylHi = (limit >> 8) & 0xff;
+                hdc.regStatus = (hdc.regStatus & ~HDC.ATC.STATUS.BUSY) | HDC.ATC.STATUS.DATA_REQ;
+                hdc.regSecCnt = HDC.ATC.SECCNT.PACKET_IO;
+            }
+            hdc.setATCIRR(true);
+        };
+        let readChunk = function(iChunk, offChunk, lenChunk, offBuffer) {
+            nChunks++;
+            Web.getResource(Str.sprintf("/disks-cds/cds001/microsoft/leisure/MSLEISURE-CD010-PANDORA/x%05d", iChunk), "arraybuffer", true, function(url, data, error) {
+                if (data) {
+                    let bytes = new Uint8Array(data);
+                    while (offChunk < bytes.byteLength && lenChunk--) {
+                        setByte(offBuffer++, bytes[offChunk++]);
+                    }
+                    if (!--nChunks) done(true);
+                }
+            });
+        };
+
+        bPacketCmd = getByte(0);
+
+        if (this.messageEnabled(Messages.HDC)) {
+            this.printMessage(this.idComponent + ".packet(" + Str.toHexByte(bPacketCmd) + "): " + HDC.aATAPICommands[bPacketCmd] + " (drive " + drive.iDrive + ")", true);
+        }
+
+        switch(bPacketCmd) {
+        case HDC.ATC.PACKET.COMMAND.TEST_UNIT:
+            /*
+             * If the TEST UNIT READY command status is GOOD, then there is no further response;
+             * otherwise, we have a CHECK CONDITION, which will require adding the REQUEST SENSE command.
+             * TODO: Worry about that later.
+             *
+             * NOTE: This was a 12-byte packet circa 2001, with nothing but a Logical Unit Number (LUN) in
+             * bits 5-7 of byte 1, but it was apparently "reduced" to a 6-byte packet circa 2010 with no LUN
+             * and a CONTROL value in byte 5.
+             */
+            bPacketCmd = 0;             // nothing to return, so we can wrap up this command now
+            break;
+
+        case HDC.ATC.PACKET.COMMAND.INQUIRY:
+            limit = getLength(3);       // in ATAPI circa 2001, length was simply drive.buffer[4]; e.g., 36 (0x24) bytes
+            setByte(0, 0x05);           // 0x05 (bits 0-4, the Peripheral Device Type, is 0x05 for CD-ROM devices)
+            setByte(1, 0x80);           // 0x80 (bit 7, the RMB or Removable Media Bit, must be set for CD-ROM devices)
+            setByte(2, 0x00);           // 0x00 (bits 0-2 == ANSI version, bits 3-5 == ECMA version, bits 6-7 == ISO version)
+            setByte(3, 0x21);           // 0x21 (bits 0-3 == Response Data Format (1), bits 4-7 == ATAPI version (2))
+            setByte(4, 31);             // number of additional bytes following this one
+            setBytes(5, 0, 3);          // these bytes have meanings in later specs, but we're sticking with circa 2001 for now
+            setString(8, "PCJS.ORG", 8);
+            setString(16, drive.name, 16);
+            setString(32, "1.0", 4);
+            break;
+
+        case HDC.ATC.PACKET.COMMAND.READ:
+            lba = getLongBE(2);         // LBA
+            num = getWordBE(7);         // number of blocks
+            off = lba << 11;            // shift left 11 bits to multiply by 2Kb
+            limit = num << 11;
+            this.initBuffer(drive, limit);
+            nChunks = 1;                // preset chunk request count to 1
+            iChunk = off >>> 15;        // iChunk is the starting 32Kb chunk
+            offChunk = off & 0x7fff;    // offChunk is the starting offset within that chunk
+            lenTotal = limit;           // lenTotal is number of bytes left to read
+            offBuffer = 0;
+            while (lenTotal > 0) {
+                lenChunk = 32768 - offChunk;
+                if (lenChunk > lenTotal) lenChunk = lenTotal;
+                readChunk(iChunk, offChunk, lenChunk, offBuffer);
+                offBuffer += lenChunk;
+                lenTotal -= lenChunk;
+                offChunk = 0;
+                iChunk++;
+            }
+            if (!--nChunks) done(true); // if chunk request count drops to zero immediately, all chunks must have been cached
+            bPacketCmd = -1;
+            break;
+
+        case HDC.ATC.PACKET.COMMAND.SEEK:
+            lba = getLongBE(2);         // TODO: Do something with the Logical Block Address
+            bPacketCmd = 0;             // nothing to return, so we can wrap up this command now
+            break;
+
+        case HDC.ATC.PACKET.COMMAND.READ_TOC:
+            limit = getLength(7);
+            format = getBits(2, 0, 4);
+            switch(format) {
+            case 0x0:                   // track/session number (starting track number for which the data will be returned)
+                setWordBE(0, 10);       // 0-1: TOC data length
+                setByte(2, 1);          // 2: first track number
+                setByte(3, 1);          // 3: last track number
+                                        // beginning of TOC track descriptor(s)
+                setByte(4, 0);          // 4: reserved
+                setByte(5, 0x14);       // 5: bits 7-4 = ADR.CUR_POS; bits 3-0 = CONTROL.DATA_TRACK
+                setByte(6, 1);          // 6: track number
+                setByte(7, 0);          // 7: reserved
+                setLongBE(8, 0);        // 8-11: LBA
+                break;
+
+            default:
+                if (this.messageEnabled(Messages.HDC)) {
+                    this.printMessage(this.idComponent + ".packet(" + Str.toHexByte(bPacketCmd) + "): unsupported format " + format, true);
+                }
+                if (DEBUG) this.dbg.stopCPU();
+                bPacketCmd = -1;        // TODO: Add support for other READ_TOC formats
+                break;
+            }
+            break;
+
+        case HDC.ATC.PACKET.COMMAND.MODE_SENSE:
+            limit = getLength(7);
+            pageCode = getBits(2, 0, 6);
+            pageControl = getBits(2, 6, 2);
+            /*
+                Sample response:
+
+                0b8c:000000f8: 00 26 00 00 00 00 00 00-2a 1e 08 00 71 00 29 00  .&......*...q.).
+                0b8c:00000108: 16 00 00 02 00 80 16 00-00 00 00 00 00 00 00 00  ................
+                0b8c:00000118: 00 00 00 01 00 00 00 00
+
+                The first 8 bytes are a Mode Parameter Header.  The first word (0x0026) is the number of bytes
+                in the entire response (excluding the first word).  There are some other bits that can be set in
+                the MPH that we'll worry about later.
+
+                The first (and in this case only) "page" begins at the 9th byte with a Page Code (0x2A) followed by
+                a length byte (0x1E) indicating the number of bytes in the rest of the "page".  Deciphering the above
+                sample, we have the following 32 bytes:
+
+                Byte    Value   Bit 7   Bit 6   Bit 5   Bit 4   Bit 3   Bit 2   Bit 1   Bit 0
+                ----    -----   -----   -----   -----   -----   -----   -----   -----   -----
+                   0     2Ah    (Page Code)
+                   1     1Eh    (Number of following bytes)
+                   2     08h                                            Method2 CDRW-R  CDR-R
+                   3     00h                                            TestW   CDRW-W  CDR-W
+                   4     71h            MultiS  Mode2-2 Mode2-1 DP-2    DP-1    Comp.   Audio
+                   5     00h    BarCode UPC     ISRC    C2      R-W     R-W     CD-DA   CD-DA
+                   6     29h    -----Loading Type----   Res.    Eject   PJ      LockS   Lock
+                   7     00h    ----------Reserved-----------   SS      DPR     SCM     SVL
+                   8     16h    ----------Maximum Read Speed Supported (KBps) MSB------------
+                   9     00h
+                  10     00h    ----------Number of Volume Levels Supported MSB--------------
+                  11     02h
+                  12     00h    ----------Buffer Size Supported by Drive (KB) MSB------------
+                  13     80h
+                  14     16h    ----------Current Read Speed Selected (KBps) MSB-------------
+                  15     00h
+                  16     00h
+                  17     00h
+                  18     00h
+                  19     00h
+                  20     00h
+                  21     00h
+                  22     00h    (From this point on, I'm not sure what any of these bytes are)
+                  23     00h
+                  24     00h
+                  25     00h
+                  26     00h
+                  27     01h    (Not sure what this is about, either)
+                  28     00h
+                  29     00h
+                  30     00h
+                  31     00h
+             */
+            switch(pageCode) {
+            case HDC.ATC.PACKET.PAGECODE.CD_STATUS:
+                setBytes(0, 0, 30);
+                setWordBE(0, 30-2);
+                page = 8;
+                setByte(page, pageCode);
+                setByte(page+1, 22-2);
+                setByte(page+2, 0x08);
+                setByte(page+4, 0x71);
+                setByte(page+6, 0x29);
+                setWordBE(page+8,  0x1600);
+                setWordBE(page+10, 0x0002);
+                setWordBE(page+12, 0x0080);
+                setWordBE(page+14, 0x1600);
+                break;
+
+            default:
+                if (this.messageEnabled(Messages.HDC)) {
+                    this.printMessage(this.idComponent + ".packet(" + Str.toHexByte(bPacketCmd) + "): unsupported page code " + pageCode, true);
+                }
+                if (DEBUG) this.dbg.stopCPU();
+                bPacketCmd = -1;        // TODO: Add support for other Page Codes
+                break;
+            }
+            break;
+
+        default:
+            if (DEBUG) this.dbg.stopCPU();
+            bPacketCmd = -1;            // TODO: Not sure what to do, so currently we choose to do nothing
+            break;
+        }
+        if (bPacketCmd >= 0) done(bPacketCmd > 0);
+    }
+
+    /**
+     * resetDevice()
+     *
+     * Worker for the DEVICE RESET (ATAPI) command, as well as other operations that are supposed to
+     * store "signature" bytes in the device registers, based on the level of PACKET (ATAPI) command support.
+     *
+     * @this {HDC}
+     */
+    resetDevice()
+    {
+        this.regSecCnt = 0x01;
+        this.regSecNum = 0x01;
+        if (this.fATAPI) {
+            this.regCylLo = 0x14;
+            this.regCylHi = 0xEB;
+        } else {
+            this.regCylLo = this.regCylHi = 0;
+        }
+        this.regDrvHd = 0;
     }
 
     /**
@@ -2485,7 +2955,7 @@ class HDC extends Component {
      * and whenever someone calls INT 0x13 with a drive number < 0x80, invoke the original INT 0x13 diskette
      * code via INT 0x40 and return via RET 2.
      *
-     * Unfortunately, not all original INT 0x13 functions required a drive number in DL (eg, the "reset"
+     * Unfortunately, not all original INT 0x13 functions required a drive number in DL (e.g., the "reset"
      * function, where AH=0).  And the HDC BIOS knew this, which is why, in the case of the "reset" function,
      * the HDC BIOS performs BOTH an INT 0x40 diskette reset AND an HDC reset -- it can't be sure which
      * controller the caller really wants to reset.
@@ -2522,17 +2992,16 @@ class HDC extends Component {
      *
      * @this {HDC}
      * @param {number} iDrive
-     *
-     unloadDrive(iDrive)
-     {
-        this.aDrives[iDrive].disk = null;
-        //
-        // WARNING: This conversion of drive number to drive letter, starting with "C:" (0x43), is very simplistic
-        // and is not guaranteed to match the drive mapping that DOS ultimately uses.
-        //
-        this.notice("Drive " + String.fromCharCode(0x43 + iDrive) + " unloaded");
-    }
      */
+    // unloadDrive(iDrive)
+    // {
+    //     this.aDrives[iDrive].disk = null;
+    //     //
+    //     // WARNING: This conversion of drive number to drive letter, starting with "C:" (0x43), is very simplistic
+    //     // and is not guaranteed to match the drive mapping that DOS ultimately uses.
+    //     //
+    //     this.notice("Drive " + String.fromCharCode(0x43 + iDrive) + " unloaded");
+    // }
 
     /**
      * doFormat(drive, done)
@@ -2551,45 +3020,44 @@ class HDC extends Component {
      * @this {HDC}
      * @param {Object} drive
      * @param {function(number)} done (dataStatus is XTC.DATA.STATUS.OK or XTC.DATA.STATUS.ERROR; if error, then drive.errorCode should be set as well)
-     *
-     doFormat(drive, done)
-     {
-         drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
-
-         if (drive.disk) {
-             drive.sector = null;
-             if (this.chipset) {
-                 drive.cbFormat = 0;
-                 drive.abFormat = new Array(4);
-                 drive.bFormatting = true;
-                 drive.cSectorsFormatted = 0;
-                 //
-                 // We need to reverse the original logic, and default to success unless/until an actual error occurs;
-                 // otherwise doDMAWriteFormat() will bail on us.  The original approach would work because requestDMA()
-                 // would immediately call us back with fComplete set to true EVEN if the DMA channel was not yet unmasked;
-                 // now the callback is deferred until the DMA channel has been unmasked and the DMA request has finished.
-                 //
-                 drive.errorCode = HDC.XTC.DATA.ERR.NONE;
-                 this.chipset.connectDMA(ChipSet.DMA_HDC, this, 'dmaWriteFormat', drive);
-                 this.chipset.requestDMA(ChipSet.DMA_HDC, function onDMAFormat(fComplete) {
-                     if (!fComplete) {
-                         //
-                         // If an incomplete request wasn't triggered by an explicit error, then let's make explicit
-                         // (ie, revert to the default failure code that we originally set above).
-                         //
-                         if (drive.errorCode == HDC.XTC.DATA.ERR.NONE) {
-                             drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
-                         }
-                     }
-                     drive.bFormatting = false;
-                     done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
-                 });
-                 return;
-             }
-         }
-         done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
-     }
      */
+    // doFormat(drive, done)
+    // {
+    //     drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
+    //
+    //     if (drive.disk) {
+    //         drive.sector = null;
+    //         if (this.chipset) {
+    //             drive.cbFormat = 0;
+    //             drive.abFormat = new Array(4);
+    //             drive.bFormatting = true;
+    //             drive.cSectorsFormatted = 0;
+    //             //
+    //             // We need to reverse the original logic, and default to success unless/until an actual error occurs;
+    //             // otherwise doDMAWriteFormat() will bail on us.  The original approach would work because requestDMA()
+    //             // would immediately call us back with fComplete set to true EVEN if the DMA channel was not yet unmasked;
+    //             // now the callback is deferred until the DMA channel has been unmasked and the DMA request has finished.
+    //             //
+    //             drive.errorCode = HDC.XTC.DATA.ERR.NONE;
+    //             this.chipset.connectDMA(ChipSet.DMA_HDC, this, 'dmaWriteFormat', drive);
+    //             this.chipset.requestDMA(ChipSet.DMA_HDC, function onDMAFormat(fComplete) {
+    //                 if (!fComplete) {
+    //                     //
+    //                     // If an incomplete request wasn't triggered by an explicit error, then let's make explicit
+    //                     // (ie, revert to the default failure code that we originally set above).
+    //                     //
+    //                     if (drive.errorCode == HDC.XTC.DATA.ERR.NONE) {
+    //                         drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
+    //                     }
+    //                 }
+    //                 drive.bFormatting = false;
+    //                 done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
+    //             });
+    //             return;
+    //         }
+    //     }
+    //     done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
+    // }
 
     /**
      * HDC.init()
@@ -2693,7 +3161,7 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
 
 /*
  * Drive type tables differed across IBM controller models (XTC drive types don't match ATC drive types) and across OEMs
- * (eg, COMPAQ drive types only match a few IBM drive types), so you must use iDriveTable to index the correct table type
+ * (e.g., COMPAQ drive types only match a few IBM drive types), so you must use iDriveTable to index the correct table type
  * inside both aDriveTables and aDriveTypes.
  */
 HDC.aDriveTables = ["XTC", "ATC", "COMPAQ"];
@@ -2836,7 +3304,7 @@ HDC.aDriveTypes = [
  * portion of the card is compatible with the existing FDC component, so that component continues to be responsible
  * for all diskette operations.
  *
- * ATC ports default to their primary addresses; secondary port addresses are 0x80 lower (eg, 0x170 instead of 0x1F0).
+ * ATC ports default to their primary addresses; secondary port addresses are 0x80 lower (e.g., 0x170 instead of 0x1F0).
  *
  * It's important to know that the MODEL_5170 BIOS has a special relationship with the "Combo Hard File/Diskette
  * (HFCOMBO) Card" (see @F000:144C).  Initially, the ChipSet component intercepted reads for HFCOMBO's STATUS port
@@ -2853,7 +3321,7 @@ HDC.aDriveTypes = [
  * immediately obvious to anyone creating a 5170 machine configuration with the FDC component but no HDC component.
  *
  * TODO: Investigate what a MODEL_5170 can do, if anything, with diskettes if an "HFCOMBO card" was NOT installed;
- * eg, was there Diskette-only Controller that could be installed, and if so, did it support high-capacity diskette
+ * e.g., was there Diskette-only Controller that could be installed, and if so, did it support high-capacity diskette
  * drives?  Also, consider making the FDC component able to detect when the HDC is missing and provide the same minimal
  * HFCOMBO port intercepts that ChipSet once provided (this is not a requirement, just a usability improvement).
  *
@@ -2863,9 +3331,13 @@ HDC.aDriveTypes = [
  * diskette drives, because if none of the "MULTIPLE DATA RATE" tests succeed, a "601-Diskette Error" always occurs.
  */
 HDC.ATC = {
-    DATA:   { PORT: 0x1F0},     // no register (read-write)
+    DATA:   {                   // no register (read-write)
+        PORT1:      0x1F0,      // data port address for primary interface
+        PORT2:      0x170       // data port address for secondary interface
+    },
     DIAG:   {                   // this.regError (read-only)
-        PORT:       0x1F1,
+        PORT1:      0x1F1,
+        PORT2:      0x171,
         NO_ERROR:    0x01,
         CTRL_ERROR:  0x02,
         SEC_ERROR:   0x03,
@@ -2873,7 +3345,8 @@ HDC.ATC = {
         PROC_ERROR:  0x05
     },
     ERROR: {                    // this.regError (read-only)
-        PORT:       0x1F1,
+        PORT1:      0x1F1,
+        PORT2:      0x171,
         NONE:        0x00,
         NO_DAM:      0x01,      // Data Address Mark (DAM) not found
         NO_TRK0:     0x02,      // Track 0 not detected
@@ -2882,23 +3355,40 @@ HDC.ATC = {
         ECC_ERR:     0x40,      // Data ECC Error
         BAD_BLOCK:   0x80       // Bad Block Detect
     },
-    WPREC:  { PORT: 0x1F1},     // this.regWPreC (write-only)
-    SECCNT: { PORT: 0x1F2},     // this.regSecCnt (read-write; 0 implies a 256-sector request)
-    SECNUM: { PORT: 0x1F3},     // this.regSecNum (read-write)
-    CYLLO:  { PORT: 0x1F4},     // this.regCylLo (read-write; all 8 bits are used)
+    WPREC:  {                   // this.regWPreC (write-only)
+        PORT1:      0x1F1,
+        PORT2:      0x171
+    },
+    SECCNT: {                   // this.regSecCnt (read-write; 0 implies a 256-sector request)
+        PORT1:      0x1F2,
+        PORT2:      0x172,
+        PACKET_CD:   0x01,      // for PACKET command, bit 0 set upon transfer of packet command
+        PACKET_IO:   0x02       // for PACKET command, bit 1 set upon transfer of packet response
+    },
+    SECNUM: {                   // this.regSecNum (read-write)
+        PORT1:      0x1F3,
+        PORT2:      0x173
+    },
+    CYLLO:  {                   // this.regCylLo (read-write; all 8 bits are used)
+        PORT1:      0x1F4,
+        PORT2:      0x174
+    },
     CYLHI:  {                   // this.regCylHi (read-write; only bits 0-1 are used, for a total of 10 bits, or 1024 max cylinders)
-        PORT:       0x1F5,
+        PORT1:      0x1F5,
+        PORT2:      0x175,
         MASK:        0x03
     },
     DRVHD:  {                   // this.regDrvHd (read-write)
-        PORT:       0x1F6,
+        PORT1:      0x1F6,
+        PORT2:      0x176,
         HEAD_MASK:   0x0F,      // set this to the max number of heads before issuing a SET PARAMETERS command
         DRIVE_MASK:  0x10,
         SET_MASK:    0xE0,
         SET_BITS:    0xA0       // for whatever reason, these bits must always be set
     },
-    STATUS: {                   // this.regStatus (read-only; reading clears IRQ.ATC)
-        PORT:       0x1F7,
+    STATUS: {                   // this.regStatus (read-only; reading clears IRQ.ATC1 or IRQ.ATC2 as appropriate)
+        PORT1:      0x1F7,
+        PORT2:      0x177,
         ERROR:       0x01,      // set when the previous command ended in an error; one or more bits are set in the ERROR register (the next command to the controller resets the ERROR bit)
         INDEX:       0x02,      // set once for every revolution of the disk
         CORRECTED:   0x04,
@@ -2909,25 +3399,147 @@ HDC.ATC = {
         BUSY:        0x80       // if this is set, no other STATUS bits are valid
     },
     COMMAND: {                  // this.regCommand (write-only)
-        PORT:       0x1F7,
-        RESTORE:     0x10,      // low nibble x 500us equal stepping rate (except for 0, which corresponds to 35us) (aka RECALIBRATE)
-        READ_DATA:   0x20,      // also supports NO_RETRIES and WITH_ECC
-        WRITE_DATA:  0x30,      // also supports NO_RETRIES and WITH_ECC
-        READ_VERF:   0x40,      // also supports NO_RETRIES
+        PORT1:      0x1F7,
+        PORT2:      0x177,
+        NO_RETRY:    0x01,      // optional bit for READ_DATA, WRITE_DATA, and READ_VERF commands
+        WITH_ECC:    0x02,      // optional bit for READ_DATA and WRITE_DATA commands
+        STEP_RATE:   0x0F,      // optional bits for stepping rate used with RESTORE and SEEK commands
+                                // (low nibble x 500us equals stepping rate, except for 0, which corresponds to 35us)
+        /*
+         * The following 8 commands comprised the original PC AT (ATA) command set.  You may see other later command
+         * set definitions that show "mandatory" commands, such as READ_MULT (0xC4) or WRITE_MULT (0xC5), but those didn't
+         * exist until the introduction of later interface enhancements (e.g., ATA-1, ATA-2, IDE, EIDE, ATAPI, etc).
+         */
+        RESTORE:     0x10,      // aka RECALIBRATE
+        READ_DATA:   0x20,      // also supports NO_RETRY and/or WITH_ECC
+        WRITE_DATA:  0x30,      // also supports NO_RETRY and/or WITH_ECC
+        READ_VERF:   0x40,      // also supports NO_RETRY
         FORMAT_TRK:  0x50,      // TODO
-        SEEK:        0x70,      // low nibble x 500us equal stepping rate (except for 0, which corresponds to 35us)
-        DIAGNOSE:    0x90,
-        SETPARMS:    0x91,
-        NO_RETRIES:  0x01,
-        WITH_ECC:    0x02,
-        MASK:        0xF0
+        SEEK:        0x70,      //
+        DIAGNOSE:    0x90,      //
+        SETPARMS:    0x91,      //
+        /*
+         * Additional commands go here.  As for when these commands were introduced, I may try to include
+         * that information parenthetically, but I'm not going to pretend this is in any way authoritative.
+         */
+        IDENTIFY:    0xEC,      // (ATA-1)
+        RESET:       0x08,      // (ATAPI)
+        PACKET:      0xA0       // (ATAPI)
     },
     FDR: {                      // this.regFDR
-        PORT:       0x3F6,
+        PORT1:      0x3F6,
+        PORT2:      0x376,
         INT_DISABLE: 0x02,      // a logical 0 enables fixed disk interrupts
         RESET:       0x04,      // a logical 1 enables reset fixed disk function
         HS3:         0x08,      // a logical 1 enables head select 3 (a logical 0 enables reduced write current)
         RESERVED:    0xF1
+    }
+};
+
+/*
+ * Much of the following IDENTIFY structure information came from a Seagate ATA Reference Manual,
+ * 36111-001, Rev. C, dated 21 May 1993 (111-1c.pdf), a specification which I believe later became known
+ * as ATA-1.
+ *
+ * All words are stored little-endian; also note some definitions of CUR_CAPACITY define it as two
+ * 16-bit words, since as a 32-bit dword, it would be misaligned if the structure began on a dword boundary
+ * (and, of course, if it did NOT begin on a dword boundary, then LBA_CAPACITY would be misaligned).
+ * Alignment considerations are of no great concern on Intel platforms, however.
+ */
+HDC.ATC.IDENTIFY = {
+    CONFIG: {                   // WORD: GENERAL_CONFIG
+        OFFSET:         0x00,
+        ATA_RESERVED:   0x0001, // always clear (ATA reserved)
+        HARD_SECTORED:  0x0002, // set if hard sectored
+        SOFT_SECTORED:  0x0004, // set if soft sectored
+        NOT_MFM:        0x0008, // set if not MFM encoded
+        HDSW_15MS:      0x0010, // set if head switch time > 15usec
+        SPINDLE_OPT:    0x0020, // set if spindle motor control option implemented
+        FIXED:          0x0040, // set if fixed drive
+        REMOVABLE:      0x0080, // set if removable cartridge drive
+        RATE_5MBIT:     0x0100, // set if disk transfer rate <= 5Mbit/sec
+        RATE_10MBIT:    0x0200, // set if disk transfer rate <= 10Mbit/sec and > 5Mbit/sec
+        RATE_FASTER:    0x0400, // set if disk transfer rate > 10Mbit/sec
+        ROT_TOLERANCE:  0x0800, // set if rotational speed tolerance is > 0.5%
+        STROBE_OPT:     0x1000, // set if data strobe offset option available
+        TRACK_OPT:      0x2000, // set if track offset option available
+        FMT_TOLERANCE:  0x4000, // set if format speed tolerance gap required
+        NM_RESERVED:    0x8000  // always clear (reserved for non-magnetic drives)
+    },
+    CYLS:               0x02,   // WORD: number of physical cylinders
+    CONFIG2:            0x04,   // WORD: SPECIFIC_CONFIG
+    HEADS:              0x06,   // WORD: number of physical heads
+    TRACK_BYTES:        0x08,   // WORD: bytes per track
+    SECTOR_BYTES:       0x0A,   // WORD: bytes per sector
+    SECTORS:            0x0C,   // WORD: sectors per track
+                                // (reserved words at 0x0E, 0x10, and 0x12)
+    SERIAL_NUMBER:      0x14,   // CHAR: 20 ASCII characters
+    BUFFER_TYPE:        0x28,   // WORD: 0=unspecified, 1=single, 2=dual, 3=caching
+    BUFFER_SIZE:        0x2A,   // WORD: 512-byte increments
+    ECC_BYTES:          0x2C,   // WORD: number of ECC bytes on read/write long commands
+    FIRMWARE_REV:       0x2E,   // CHAR: 8 ASCII characters
+    MODEL_NUMBER:       0x36,   // CHAR: 40 ASCII characters
+    MAX_MULTISEC:       0x5E,   // BYTE: if non-zero, number of transferable sectors per interrupt
+                                // (reserved byte at 0x5F)
+    DWORD_IO:           0x60,   // WORD: 0x0001 if double-word I/O supported, 0x0000 if not
+                                // (reserved byte at 0x62)
+    CAPABILITY:         0x63,   // BYTE: bit0=DMA, bit1=LBA, bit2=IORDYsw, bit3=IORDYsup
+                                // (reserved word at 0x64; reserved byte at 0x66)
+    PIO_TIMING:         0x67,   // BYTE: 0=slow, 1=medium, 2=fast
+                                // (reserved byte at 0x68)
+    DMA_TIMING:         0x69,   // BYTE: 0=slow, 1=medium, 2=fast
+    NEXT5_VALID:        0x6A,   // WORD: bit0=1 if next 5 words are valid, 0 if not
+    CUR_CYLS:           0x6C,   // WORD: number of logical cylinders
+    CUR_HEADS:          0x6E,   // WORD: number of logical heads
+    CUR_SECTORS:        0x70,   // WORD: number of logical sectors per track
+    CUR_CAPACITY:       0x72,   // LONG: logical capacity in sectors
+    MULTISECT:          0x76,   // BYTE: current mutiple sector count
+    MULTISECT_VALID:    0x77,   // BYTE: bit0=1 if MULTSECT is valid, 0 if not
+    LBA_CAPACITY:       0x78,   // LONG: total number of sectors
+    DMA_SINGLE:         0x7C,   // BYTE
+    DMA_SINGLE_ACTIVE:  0x7D,   // BYTE
+    DMA_MULTI:          0x7E,   // BYTE
+    DMA_MULTI_ACTIVE:   0x7F,   // BYTE
+    /*
+     * The rest of this 512-byte structure (words 64 through 255) was reserved at the time of the ATA-1 spec,
+     * so I will not delve any deeper into this structure now.
+     *
+     * Further details can be found at:
+     *
+     *      https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/ata/ns-ata-_identify_device_data
+     *      https://chromium.googlesource.com/chromiumos/third_party/u-boot-next/+/master/include/ata.h
+     *
+     * Regrettably, those more modern documents don't bother mentioning at what point any fields were added
+     * to the specification, and they treat some of the early obsolete fields as too old to warrant any explanation,
+     * calling them simply "Retired" or "Obsolete".  Not particularly helpful to anyone who cares about history.
+     */
+};
+
+HDC.ATC.PACKET = {
+    COMMAND: {
+        TEST_UNIT:      0x00,   // Test Unit Ready
+        INQUIRY:        0x12,   // Inquiry
+        READ:           0x28,   // Read
+        SEEK:           0x2B,   // Seek
+        READ_TOC:       0x43,   // Read TOC (Table of Contents), PMA (Program Memory Area), and ATIP (Absolute Time in Pre-Groove)
+        MODE_SENSE:     0x5A    // Mode Sense
+    },
+    /*
+     * Finding a succinct list of all the (SCSI) Page Codes in old ATAPI/SCSI specs is surprisingly hard,
+     * but there is a nice summary on Wikipedia (https://en.wikipedia.org/wiki/SCSI_mode_page).  For details
+     * on Page Code contents, check out the ANSI X3.304-1997 spec (e.g., page 72 for Page Code 0x2A).
+     */
+    PAGECODE: {
+        CD_STATUS:      0x2A    // CD Capabilities and Mechanical Status Page
+    },
+    ADR: {                      // ADR Q sub-channel values (0x4-0xF reserved)
+        NONE:           0x0,
+        CUR_POS:        0x1,
+        MEDIA_CAT_NO:   0x2,
+        ISRC:           0x3
+    },
+    CONTROL: {                  // CONTROL Q sub-channel values
+        DATA_TRACK:     0x4
     }
 };
 
@@ -2978,7 +3590,7 @@ HDC.XTC = {
          *      maximum ECC data burst length
          *
          * Note that the 3 word values above are stored in "big-endian" format (high byte followed by low byte),
-         * rather than the more typical "little-endian" format (low byte followed by high byte).
+         * rather than the "little-endian" format (low byte followed by high byte) you typically find on Intel machines.
          */
         CMD: {
             TEST_READY:     0x00,       // Test Drive Ready
@@ -3068,39 +3680,50 @@ HDC.XTC = {
  * HDC.XTC.DATA.CMD.INIT_DRIVE) and fixed-length response sequences (well, OK, except for HDC.XTC.DATA.CMD.REQUEST_SENSE),
  * so a table of byte-lengths isn't much use, but having names for all the commands is still handy for debugging.
  */
-if (DEBUG) {
-    HDC.aATCCommands = {
-        0x10: "Restore (Recalibrate)",
-        0x20: "Read",
-        0x30: "Write",
-        0x40: "Read Verify",
-        0x50: "Format Track",
-        0x70: "Seek",
-        0x90: "Diagnose",
-        0x91: "Set Parameters"
-    };
-    HDC.aXTCCommands = {
-        0x00: "Test Drive Ready",
-        0x01: "Recalibrate",
-        0x03: "Request Sense Status",
-        0x04: "Format Drive",
-        0x05: "Read Verify",
-        0x06: "Format Track",
-        0x07: "Format Bad Track",
-        0x08: "Read",
-        0x0A: "Write",
-        0x0B: "Seek",
-        0x0C: "Initialize Drive Characteristics",
-        0x0D: "Read ECC Burst Error Length",
-        0x0E: "Read Data from Sector Buffer",
-        0x0F: "Write Data to Sector Buffer",
-        0xE0: "RAM Diagnostic",
-        0xE3: "Drive Diagnostic",
-        0xE4: "Controller Diagnostic",
-        0xE5: "Read Long",
-        0xE6: "Write Long"
-    };
-}
+HDC.aATACommands = {
+    0x08: "Device Reset",           // ATAPI
+    0x10: "Restore (Recalibrate)",  // ATA
+    0x20: "Read",                   // ATA
+    0x30: "Write",                  // ATA
+    0x40: "Read Verify",            // ATA
+    0x50: "Format Track",           // ATA
+    0x70: "Seek",                   // ATA
+    0x90: "Diagnose",               // ATA
+    0x91: "Set Parameters",         // ATA
+    0xA0: "Packet",                 // ATAPI
+    0xEC: "Identify Drive"          // ATA-1
+};
+
+HDC.aATAPICommands = {
+    [HDC.ATC.PACKET.COMMAND.TEST_UNIT]:     "Test Unit Ready",
+    [HDC.ATC.PACKET.COMMAND.INQUIRY]:       "Inquiry",
+    [HDC.ATC.PACKET.COMMAND.READ]:          "Read",
+    [HDC.ATC.PACKET.COMMAND.SEEK]:          "Seek",
+    [HDC.ATC.PACKET.COMMAND.READ_TOC]:      "Read TOC",
+    [HDC.ATC.PACKET.COMMAND.MODE_SENSE]:    "Mode Sense",
+};
+
+HDC.aXTACommands = {
+    0x00: "Test Drive Ready",
+    0x01: "Recalibrate",
+    0x03: "Request Sense Status",
+    0x04: "Format Drive",
+    0x05: "Read Verify",
+    0x06: "Format Track",
+    0x07: "Format Bad Track",
+    0x08: "Read",
+    0x0A: "Write",
+    0x0B: "Seek",
+    0x0C: "Initialize Drive Characteristics",
+    0x0D: "Read ECC Burst Error Length",
+    0x0E: "Read Data from Sector Buffer",
+    0x0F: "Write Data to Sector Buffer",
+    0xE0: "RAM Diagnostic",
+    0xE3: "Drive Diagnostic",
+    0xE4: "Controller Diagnostic",
+    0xE5: "Read Long",
+    0xE6: "Write Long"
+};
 
 /*
  * Port input notification tables
@@ -3116,7 +3739,7 @@ HDC.aXTCPortInput = {
  * port 0x5F7, but I have no documentation on it, and failure to respond is non-fatal.  See the discussion of the
  * FDC diagnostic register in inFDCDiagnostic() for more details.
  */
-HDC.aATCPortInput = {
+HDC.aATCPortInputPrimary = {
     0x1F0:  HDC.prototype.inATCData,
     0x1F1:  HDC.prototype.inATCError,
     0x1F2:  HDC.prototype.inATCSecCnt,
@@ -3125,6 +3748,17 @@ HDC.aATCPortInput = {
     0x1F5:  HDC.prototype.inATCCylHi,
     0x1F6:  HDC.prototype.inATCDrvHd,
     0x1F7:  HDC.prototype.inATCStatus
+};
+
+HDC.aATCPortInputSecondary = {
+    0x170:  HDC.prototype.inATCData,
+    0x171:  HDC.prototype.inATCError,
+    0x172:  HDC.prototype.inATCSecCnt,
+    0x173:  HDC.prototype.inATCSecNum,
+    0x174:  HDC.prototype.inATCCylLo,
+    0x175:  HDC.prototype.inATCCylHi,
+    0x176:  HDC.prototype.inATCDrvHd,
+    0x177:  HDC.prototype.inATCStatus
 };
 
 /*
@@ -3147,7 +3781,7 @@ HDC.aXTCPortOutput = {
     0x32F:  HDC.prototype.outXTCNoise
 };
 
-HDC.aATCPortOutput = {
+HDC.aATCPortOutputPrimary = {
     0x1F0:  HDC.prototype.outATCData,
     0x1F1:  HDC.prototype.outATCWPreC,
     0x1F2:  HDC.prototype.outATCSecCnt,
@@ -3159,9 +3793,21 @@ HDC.aATCPortOutput = {
     0x3F6:  HDC.prototype.outATCFDR
 };
 
+HDC.aATCPortOutputSecondary = {
+    0x170:  HDC.prototype.outATCData,
+    0x171:  HDC.prototype.outATCWPreC,
+    0x172:  HDC.prototype.outATCSecCnt,
+    0x173:  HDC.prototype.outATCSecNum,
+    0x174:  HDC.prototype.outATCCylLo,
+    0x175:  HDC.prototype.outATCCylHi,
+    0x176:  HDC.prototype.outATCDrvHd,
+    0x177:  HDC.prototype.outATCCommand,
+    0x376:  HDC.prototype.outATCFDR
+};
+
 /*
  * Initialize every Hard Drive Controller (HDC) module on the page.
  */
 Web.onInit(HDC.init);
 
-if (NODE) module.exports = HDC;
+if (typeof module !== "undefined") module.exports = HDC;

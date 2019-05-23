@@ -7,12 +7,18 @@ permalink: /disks/pcx86/drives/
 IBM PC Hard Drive (Fixed Disk) Images
 -------------------------------------
 
-Pre-built fixed disk images with the following sizes are available:
+Pre-built fixed disk images are available in the following sizes:
 
 * [10Mb](10mb/)
 * [20Mb](20mb/)
 * [47Mb](47mb/)
 * [68Mb](68mb/)
+
+Support is also being added for ATAPI CD-ROM drives.  Since ATAPI support was
+built on top of the ATA specification (originally introduced with the IBM PC AT), it requires a
+PC AT (or newer) machine configuration.
+
+* [PC AT with ATAPI CD-ROM Support](cdrom/)
 
 IBM PC XT Drive Types
 ---------------------

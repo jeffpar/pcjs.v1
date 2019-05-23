@@ -46,4 +46,4 @@ var ReportAPI = {
     }
 };
 
-if (NODE) module.exports = ReportAPI;
+if (typeof module !== "undefined") module.exports = ReportAPI;

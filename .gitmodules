@@ -7,3 +7,6 @@
 [submodule "disks-private"]
 	path = disks-private
 	url = https://github.com/jeffpar/pcjs-private-disks.git
+[submodule "disks-cds/cds001"]
+	path = disks-cds/cds001
+	url = https://github.com/jeffpar/pcjs-cds001.git

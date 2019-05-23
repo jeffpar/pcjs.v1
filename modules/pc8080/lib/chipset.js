@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Usr = require("../../shared/lib/usrlib");
     var Web = require("../../shared/lib/weblib");
@@ -1137,4 +1137,4 @@ ChipSet8080.VT100.portsOutput = {
  */
 Web.onInit(ChipSet8080.init);
 
-if (NODE) module.exports = ChipSet8080;
+if (typeof module !== "undefined") module.exports = ChipSet8080;

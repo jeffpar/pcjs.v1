@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Component = require("../../shared/lib/component");
     var PDP10 = require("./defines");
     var MessagesPDP10 = require("./messages");
@@ -538,4 +538,4 @@ MemoryPDP10.afnChecked = [
     MemoryPDP10.prototype.writeWordChecked
 ];
 
-if (NODE) module.exports = MemoryPDP10;
+if (typeof module !== "undefined") module.exports = MemoryPDP10;

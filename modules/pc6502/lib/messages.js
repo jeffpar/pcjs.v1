@@ -47,4 +47,4 @@ var Messages = {
     HALT:       0x80000000|0
 };
 
-if (NODE) module.exports = Messages;
+if (typeof module !== "undefined") module.exports = Messages;
