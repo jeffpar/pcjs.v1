@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Web = require("../../shared/lib/weblib");
     var DumpAPI = require("../../shared/lib/dumpapi");
@@ -1021,4 +1021,4 @@ PC11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.PPB]:     /* 177556 */    [null, null, PC11.prototype.readPPB,    PC11.prototype.writePPB,    "PPB"]
 };
 
-if (NODE) module.exports = PC11;
+if (typeof module !== "undefined") module.exports = PC11;

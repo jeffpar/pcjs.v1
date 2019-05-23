@@ -1120,4 +1120,4 @@ Str.HexUpperCase = "0123456789ABCDEF";
 Str.NamesOfDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 Str.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-if (NODE) module.exports = Str;
+if (typeof module !== "undefined") module.exports = Str;

@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var str         = require("../../shared/lib/strlib");
     var usr         = require("../../shared/lib/usrlib");
     var web         = require("../../shared/lib/weblib");
@@ -178,4 +178,4 @@ Panel.init = function()
  */
 web.onInit(Panel.init);
 
-if (NODE) module.exports = Panel;
+if (typeof module !== "undefined") module.exports = Panel;

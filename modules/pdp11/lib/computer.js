@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Usr = require("../../shared/lib/usrlib");
     var Web = require("../../shared/lib/weblib");
@@ -224,8 +224,12 @@ class ComputerPDP11 extends Component {
          * OVERRIDES everything; it overrides any 'state' Computer parameter AND it disables resume of any saved state in
          * localStorage (in other words, it prevents fAllowResume from being true, and forcing resume off).
          */
-        var fAllowResume;
-        var sState = this.getMachineParm('state') || (fAllowResume = true) && parmsComputer['state'];
+        var fAllowResume = false;
+        var sState = this.getMachineParm('state');
+        if (!sState) {
+            fAllowResume = true;
+            sState = parmsComputer['state'];
+        }
 
         if (sState) {
             this.sStatePath = sStatePath = sState;
@@ -256,7 +260,7 @@ class ComputerPDP11 extends Component {
             this.setReady();
         } else {
             var cmp = this;
-            Web.getResource(sStatePath, null, true, function doneStateLoad(sURL, sResource, nErrorCode) {
+            Web.getResource(/** @type {string} */ (sStatePath), null, true, function doneStateLoad(sURL, sResource, nErrorCode) {
                 cmp.finishStateLoad(sURL, sResource, nErrorCode);
             });
         }
@@ -1679,4 +1683,4 @@ Web.onInit(ComputerPDP11.init);
 Web.onShow(ComputerPDP11.show);
 Web.onExit(ComputerPDP11.exit);
 
-if (NODE) module.exports = ComputerPDP11;
+if (typeof module !== "undefined") module.exports = ComputerPDP11;

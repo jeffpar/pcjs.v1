@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Web = require("../../shared/lib/weblib");
     var Component = require("../../shared/lib/component");
 }
@@ -392,4 +392,4 @@ class State {
     }
 }
 
-if (NODE) module.exports = State;
+if (typeof module !== "undefined") module.exports = State;

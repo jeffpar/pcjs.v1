@@ -86,4 +86,4 @@ class Proc {
     }
 }
 
-if (NODE) module.exports = Proc;
+if (typeof module !== "undefined") module.exports = Proc;

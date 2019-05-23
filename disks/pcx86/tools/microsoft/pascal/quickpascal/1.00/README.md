@@ -69,7 +69,6 @@ Directory listings of the diskettes are provided [below](#directory-of-ms-quickp
 	       24 file(s)     245286 bytes
 	                      105472 bytes free
 
-
 ![MS QuickPascal 1.00 (360K Disk 1)]({{ site.demo-disks.baseurl }}/pcx86/tools/microsoft/pascal/quickpascal/1.00/360K/QUICKPASCAL-100-DISK1.jpg)
 
 ### Directory of MS QuickPascal 1.00 (360K Disk 2) ("Libraries")

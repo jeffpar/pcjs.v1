@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Usr = require("../../shared/lib/usrlib");
     var Component = require("../../shared/lib/component");
@@ -1061,4 +1061,4 @@ Bus8080.BlockInfo = Usr.defineBitFields({num:20, count:8, btmod:1, type:3});
  */
 var BusInfo8080;
 
-if (NODE) module.exports = Bus8080;
+if (typeof module !== "undefined") module.exports = Bus8080;

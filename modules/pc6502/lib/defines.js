@@ -91,7 +91,7 @@ var PC6502 = {
     XMLVERSION:  XMLVERSION     // shared
 };
 
-if (NODE) {
+if (typeof module !== "undefined") {
     global.APPCLASS = APPCLASS;
     global.DEBUGGER = DEBUGGER;
     global.BYTEARRAYS = BYTEARRAYS;

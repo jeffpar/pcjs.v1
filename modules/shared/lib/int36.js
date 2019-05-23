@@ -1379,4 +1379,4 @@ Int36.INT_LIMIT  = Math.pow(2, 35);     //  34,359,738,368   (400000 000000): si
 Int36.WORD_MASK  = Math.pow(2, 36) - 1; //  68,719,476,735   (777777 777777): unsigned word mask
 Int36.WORD_LIMIT = Math.pow(2, 36);     //  68,719,476,736 (1 000000 000000): unsigned word limit
 
-if (NODE) module.exports = Int36;
+if (typeof module !== "undefined") module.exports = Int36;

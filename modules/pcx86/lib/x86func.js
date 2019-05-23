@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Messages    = require("./messages");
     var X86         = require("./x86");
 }

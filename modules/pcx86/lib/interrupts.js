@@ -2132,4 +2132,4 @@ if (DEBUGGER) {
  *            entries for 16 segments.
  */
 
-if (NODE) module.exports = Interrupts;
+if (typeof module !== "undefined") module.exports = Interrupts;

@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Web = require("../../shared/lib/weblib");
     var DumpAPI = require("../../shared/lib/dumpapi");
@@ -417,4 +417,4 @@ class RAMPDP11 extends Component {
  */
 Web.onInit(RAMPDP11.init);
 
-if (NODE) module.exports = RAMPDP11;
+if (typeof module !== "undefined") module.exports = RAMPDP11;

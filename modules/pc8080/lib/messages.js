@@ -89,4 +89,4 @@ Messages8080.CATEGORIES = {
     "halt":     Messages8080.HALT
 };
 
-if (NODE) module.exports = Messages8080;
+if (typeof module !== "undefined") module.exports = Messages8080;

@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Web = require("../../shared/lib/weblib");
     var Component = require("../../shared/lib/component");
@@ -986,4 +986,4 @@ class CPUStatePDP10 extends CPUPDP10 {
  */
 Web.onInit(CPUStatePDP10.init);
 
-if (NODE) module.exports = CPUStatePDP10;
+if (typeof module !== "undefined") module.exports = CPUStatePDP10;

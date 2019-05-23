@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var str         = require("../../shared/lib/strlib");
     var usr         = require("../../shared/lib/usrlib");
     var Component   = require("../../shared/lib/component");
@@ -714,4 +714,4 @@ Bus.prototype.reportError = function(op, addr, size, fQuiet)
     return false;
 };
 
-if (NODE) module.exports = Bus;
+if (typeof module !== "undefined") module.exports = Bus;

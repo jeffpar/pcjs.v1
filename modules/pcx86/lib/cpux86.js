@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
@@ -4617,4 +4617,4 @@ CPUX86.PAGEBLOCKS_CACHE = 512;      // TODO: This seems adequate for 4Mb of RAM,
  */
 Web.onInit(CPUX86.init);
 
-if (NODE) module.exports = CPUX86;
+if (typeof module !== "undefined") module.exports = CPUX86;

@@ -31,7 +31,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
@@ -3373,4 +3373,4 @@ FPUX86.afnPreserveExceptions = [
  */
 Web.onInit(FPUX86.init);
 
-if (NODE) module.exports = FPUX86;
+if (typeof module !== "undefined") module.exports = FPUX86;

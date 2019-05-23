@@ -101,4 +101,4 @@ MessagesPDP10.CATEGORIES = {
     "halt":     MessagesPDP10.HALT
 };
 
-if (NODE) module.exports = MessagesPDP10;
+if (typeof module !== "undefined") module.exports = MessagesPDP10;

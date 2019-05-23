@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Web = require("../../shared/lib/weblib");
     var Component = require("../../shared/lib/component");
     var PDP11 = require("./defines");
@@ -106,4 +106,4 @@ KeyboardPDP11.MINPRESSTIME = 100;            // 100ms
  */
 Web.onInit(KeyboardPDP11.init);
 
-if (NODE) module.exports = KeyboardPDP11;
+if (typeof module !== "undefined") module.exports = KeyboardPDP11;

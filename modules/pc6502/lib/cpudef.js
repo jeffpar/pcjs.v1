@@ -85,4 +85,4 @@ var CPUDef = {
     }
 };
 
-if (NODE) module.exports = CPUDef;
+if (typeof module !== "undefined") module.exports = CPUDef;

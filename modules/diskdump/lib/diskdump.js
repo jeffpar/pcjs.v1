@@ -33,6 +33,7 @@
 "use strict";
 
 if (typeof module != "undefined") {     // we can't simply test for NODE, since defines.js hasn't been loaded yet
+    var NODE    = true;
     var fs      = require("fs");
     var path    = require("path");
     var glob    = require("glob");

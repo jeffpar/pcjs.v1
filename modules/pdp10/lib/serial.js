@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Web = require("../../shared/lib/weblib");
     var Component = require("../../shared/lib/component");
@@ -659,4 +659,4 @@ class SerialPortPDP10 extends Component {
  */
 Web.onInit(SerialPortPDP10.init);
 
-if (NODE) module.exports = SerialPortPDP10;
+if (typeof module !== "undefined") module.exports = SerialPortPDP10;

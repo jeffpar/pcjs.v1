@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Web         = require("../../shared/lib/weblib");
 }
 
@@ -192,7 +192,7 @@ var PCX86 = {
     XMLVERSION:  XMLVERSION     // shared
 };
 
-if (NODE) {
+if (typeof module !== "undefined") {
     global.APPCLASS    = APPCLASS;
     global.APPNAME     = APPNAME;
     global.DEBUGGER    = DEBUGGER;

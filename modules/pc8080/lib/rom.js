@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Web = require("../../shared/lib/weblib");
     var DumpAPI = require("../../shared/lib/dumpapi");
@@ -383,4 +383,4 @@ class ROM8080 extends Component {
  */
 Web.onInit(ROM8080.init);
 
-if (NODE) module.exports = ROM8080;
+if (typeof module !== "undefined") module.exports = ROM8080;

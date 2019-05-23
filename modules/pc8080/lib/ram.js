@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Web = require("../../shared/lib/weblib");
     var DumpAPI = require("../../shared/lib/dumpapi");
@@ -394,4 +394,4 @@ RAM8080.CPM.VECTORS = [RAM8080.CPM.BIOS.VECTOR, RAM8080.CPM.BDOS.VECTOR];
  */
 Web.onInit(RAM8080.init);
 
-if (NODE) module.exports = RAM8080;
+if (typeof module !== "undefined") module.exports = RAM8080;

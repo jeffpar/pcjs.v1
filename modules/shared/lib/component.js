@@ -49,7 +49,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
 }
 
@@ -1549,4 +1549,4 @@ if (!Function.prototype.bind) {
     };
 }
 
-if (NODE) module.exports = Component;
+if (typeof module !== "undefined") module.exports = Component;

@@ -28,7 +28,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module !== "undefined") {
     var Str = require("../../shared/lib/strlib");
     var Component = require("../../shared/lib/component");
     var MessagesPDP10 = require("./messages");
@@ -1237,4 +1237,4 @@ CPUPDP10.YIELDS_PER_STATUS      = 15;           // every 15 yields (ie, twice pe
 
 CPUPDP10.BUTTONS = ["power", "reset"];
 
-if (NODE) module.exports = CPUPDP10;
+if (typeof module !== "undefined") module.exports = CPUPDP10;

@@ -994,7 +994,7 @@ PDP11.TYPEDARRAYS       = TYPEDARRAYS;
 PDP11.MEMFAULT          = MEMFAULT;
 PDP11.WORDBUS           = WORDBUS;
 
-if (NODE) {
+if (typeof module !== "undefined") {
     global.APPCLASS     = APPCLASS;
     global.APPNAME      = APPNAME;
     global.DEBUGGER     = DEBUGGER;
