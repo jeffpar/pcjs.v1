@@ -228,6 +228,14 @@ class FDC extends Component {
         this.fLocalDisks = (!Web.isMobile() && window && 'FileReader' in window);
 
         /*
+         * If the HDC component is configured for removable discs (ie, if it's configured as a CD-ROM drive),
+         * it may prefer to overload our drive control for easier disc selection, in which case this will contain
+         * drive name properties mapped to external disc lists.
+         */
+        this.externalDrives = {};
+        this.externalActive = null;
+
+        /*
          * The remainder of FDC initialization now takes place in our initBus() handler, largely because we
          * want initController() to have access to the ChipSet component, so that it can query switches and/or CMOS
          * settings that determine the number of drives and their characteristics (eg, 40-track vs. 80-track),
@@ -337,7 +345,12 @@ class FDC extends Component {
         case "loadDisk":
             this.bindings[sBinding] = control;
             control.onclick = function onClickLoadDisk(event) {
-                fdc.loadSelectedDisk();
+                if (!fdc.externalActive) {
+                    fdc.loadSelectedDisk();
+                } else {
+                    let externalDrive = fdc.externalDrives[fdc.externalActive];
+                    externalDrive.controller.loadSelectedDisk(externalDrive.iDrive, externalDrive.controlDisks);
+                }
             };
             return true;
 
@@ -599,6 +612,20 @@ class FDC extends Component {
     }
 
     /**
+     * addDrive(name, iDrive, controller, controlDisks)
+     *
+     * @this {FDC}
+     * @param {string} name
+     * @param {number} iDrive
+     * @param {Component} controller
+     * @param {HTMLSelectElement} controlDisks
+     */
+    addDrive(name, iDrive, controller, controlDisks)
+    {
+        this.externalDrives[name] = {iDrive, controller, controlDisks};
+    }
+
+    /**
      * resetDriveList()
      *
      * @this {FDC}
@@ -613,8 +640,9 @@ class FDC extends Component {
             while (controlDrives.firstChild) {
                 controlDrives.removeChild(controlDrives.firstChild);
             }
+            let iDrive = 0;
             controlDrives.value = "";
-            for (let iDrive = 0; iDrive < this.nDrives; iDrive++) {
+            while (iDrive < this.nDrives) {
                 let controlOption = document.createElement("option");
                 controlOption.value = iDrive.toString();
                 controlOption.text = String.fromCharCode(0x41 + iDrive) + ":";
@@ -627,6 +655,14 @@ class FDC extends Component {
                 controlOption.text = String.fromCharCode(0x41 + iDrive) + "*";
                 controlOption.title = "write-protected";        // NOTE: this "tooltip" attribute does not work on all browsers (eg, Chrome)
                 controlDrives.appendChild(controlOption);
+                iDrive++;
+            }
+            for (let name in this.externalDrives) {
+                let controlOption = document.createElement("option");
+                controlOption.value = iDrive.toString();
+                controlOption.text = name;
+                controlDrives.appendChild(controlOption);
+                iDrive++;
             }
             if (this.nDrives > 0) {
                 controlDrives.value = "0";
@@ -1541,6 +1577,90 @@ class FDC extends Component {
     }
 
     /**
+     * getDiskList(controlDrives)
+     *
+     * In "the old days", the HTML control containing the list of all available diskettes was stored in:
+     *
+     *      this.bindings["listDisks"]
+     *
+     * and it still is.  But now, if the HDC component decides to overload our drive list with one or more
+     * of its own drives (eg, "CD"), then our drive/diskette controls must be thought of as general-purpose
+     * "Removable Media" controls that the FDC just happens to manage for historical reasons.  This avoids
+     * cluttering the UI with multiple drop-downs when there are multiple types of removable disk drives.
+     *
+     * To detect that situation, the name of the selected drive must be checked against the list of external
+     * drives, and if there's a match, then we "swap" the disks control normally used by the FDC with the one
+     * provided by the HDC; similarly, if there's no longer a match BUT externalActive is set, when we know
+     * that a swap is still active and that we must "unswap" them, putting the FDC's original diskette control
+     * back in place.
+     *
+     * TODO: It would be nice to generalize this someday, and support separate diskette lists for separate
+     * diskette drive types; for example, if a machine wants to have a 1.2Mb floppy drive for A: and a 360Kb
+     * or 1.44Mb floppy drive for B:, it would be nice to have the diskettes segregated by type as well.
+     * The FDC will try to alert you whenever you attempt to mount a diskette in a drive that can't support it,
+     * but it would be even better if those diskette images weren't listed for that drive in the first place.
+     *
+     * @this {FDC}
+     * @param {HTMLSelectElement} controlDrives
+     * @return {HTMLSelectElement|undefined}
+     */
+    getDiskList(controlDrives)
+    {
+        let controlDisks1, controlDisks2;
+        if (controlDrives && controlDrives.options) {
+            controlDisks1 = this.bindings["listDisks"];
+            let option = controlDrives.options[controlDrives.selectedIndex];
+            if (option) {
+                let driveName = option.textContent;
+                if (this.externalDrives[driveName]) {
+                    if (!this.externalActive) {
+                        controlDisks2 = this.externalDrives[driveName].controlDisks;
+                        this.externalActive = driveName;
+                    }
+                } else {
+                    if (this.externalActive) {
+                        controlDisks2 = controlDisks1;
+                        controlDisks1 = this.externalDrives[this.externalActive].controlDisks;
+                        this.externalActive = null;
+                    }
+                }
+            }
+        }
+        if (controlDisks1 && controlDisks2) {
+            // swap controlDisks1 and controlDisks2
+            // save the location of controlDisks2
+            let next2 = controlDisks2.nextSibling;
+            let parent2 = controlDisks2.parentNode;
+            // special case for controlDisks1 is the next sibling of controlDisks2
+            if (next2 === controlDisks1) {
+                // just put controlDisks1 before controlDisks2
+                parent2.insertBefore(controlDisks1, controlDisks2);
+            } else {
+                // insert controlDisks2 right before controlDisks1
+                controlDisks1.parentNode.insertBefore(controlDisks2, controlDisks1);
+                // now insert controlDisks1 where controlDisks2 was
+                if (next2) {
+                    // if there was an element after controlDisks2, then insert controlDisks1 right before that
+                    parent2.insertBefore(controlDisks1, next2);
+                } else {
+                    // otherwise, just append as last child
+                    parent2.appendChild(controlDisks1);
+                }
+            }
+            /*
+             * Propagate the actual width (scrollWidth) of the currently visible control to the control we're about
+             * to make visible in its place, so that there's no detectable change in the overall layout.
+             */
+            controlDisks2.style.width = controlDisks1.scrollWidth + "px";
+            controlDisks1.style.display = "none";
+            controlDisks2.style.display = "inline-block";
+            controlDisks1 = controlDisks2;
+        }
+        if (!controlDisks1.options) controlDisks1 = undefined;
+        return controlDisks1;
+    }
+
+    /**
      * displayDiskette(iDrive, fDriveChange)
      *
      * @this {FDC}
@@ -1554,12 +1674,9 @@ class FDC extends Component {
          */
         if (iDrive >= 0 && iDrive < this.aDrives.length) {
             let drive = this.aDrives[iDrive];
-            let controlDisks = this.bindings["listDisks"];
             let controlDrives = this.bindings["listDrives"];
-            /*
-             * Next, make sure controls for both drives and disks exist.
-             */
-            if (controlDisks && controlDrives && controlDisks.options && controlDrives.options) {
+            let controlDisks = this.getDiskList(controlDrives);
+            if (controlDisks) {
                 /*
                  * Next, make sure the drive whose disk we're updating is the currently selected drive.
                  */

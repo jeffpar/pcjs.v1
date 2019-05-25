@@ -13,7 +13,11 @@
 	<debugger id="debugger" messages="fault" commands=""/>
 	<panel ref="/devices/pcx86/panel/wide.xml"/>
 	<hdc ref="/disks/pcx86/drives/20mb/pcdos330-empty-at2.xml"/>
-	<hdc id="cdrom" type="ATAPI" drives='[{name:"CD-ROM"}]'/>
+	<hdc id="cdrom" type="ATAPI" drives='[{name:"CD",path:"/disks-cds/cds001/microsoft/leisure/PandorasBox/cdrom"}]'>
+		<control type="list" binding="listDisks" style="display:none">
+			<disk path="/disks-cds/cds001/microsoft/leisure/PandorasBox/cdrom">Pandora's Box</disk>
+		</control>
+	</hdc>
 	<chipset id="chipset" model="5170" floppies="[1440,1200]"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2" binding="print"/>

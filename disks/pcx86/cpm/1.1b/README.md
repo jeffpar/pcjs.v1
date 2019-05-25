@@ -21,13 +21,17 @@ This is an OEM version of CP/M-86 by Eagle Computer.  On startup, it reports:
 
 	Eagle CP/M-86 Ver 1.1B 05/20/83                                                 
 
-The PCjs Disk Archives include the two Eagle Computer distribution diskettes, along with two related disks from our
-private collection that contain [Useful CP/M-86 Utilities](#useful-cpm-86-utilities).  [Directory Listings](#directory-listings)
-are provided below.
+The [PCjs Disk Library](/disks/pcx86/) includes the two Eagle Computer distribution diskettes,
+along with two related disks from our private collection:
 
-The machine below is also available with a [Debugger](debugger/).
+- [PCjs CP/M-86 (Disk 1)](#directory-of-pcjs-cpm-86-disk-1)
+- [PCjs CP/M-86 (Disk 2)](#directory-of-pcjs-cpm-86-disk-2)
+
+which contain assorted [Useful CP/M-86 Utilities](#useful-cpm-86-utilities).  [Directory Listings](#directory-listings) are provided below.
 
 {% include machine.html id="cpm-mda-256k" %}
+
+The above machine is also available with a [Debugger](debugger/).
 
 Directory Listings
 ------------------
@@ -208,4 +212,3 @@ Useful CP/M-86 Utilities
 
 	8086/8088 WORDMASTER Release 1.00  serial # WM9999XX                            
 	 COPYRIGHT (C) 1981  MICROPRO INTERNATIONAL CORPORATION                         
-

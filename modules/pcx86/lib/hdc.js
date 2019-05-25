@@ -192,6 +192,10 @@ class HDC extends Component {
 
         switch (sBinding) {
 
+        case "listDisks":
+            this.bindings[sBinding] = control;
+            break;
+
         case "saveHD0":
         case "saveHD1":
             /*
@@ -314,6 +318,14 @@ class HDC extends Component {
             this.iDriveTable++;
             if (this.chipset && this.chipset.model == ChipSet.MODEL_COMPAQ_DESKPRO386) this.iDriveTable++;
             this.iDriveTypeDefault = 2;
+        }
+
+        this.fdc = cmp.getMachineComponent("FDC");
+        if (this.fdc && this.bindings["listDisks"]) {
+            for (let iDrive = 0; iDrive < this.aDriveConfigs.length; iDrive++) {
+                let driveConfig = this.aDriveConfigs[iDrive];
+                this.fdc.addDrive(driveConfig['name'], iDrive, this, this.bindings["listDisks"]);
+            }
         }
 
         cpu.addIntNotify(Interrupts.DISK, this.intBIOSDisk.bind(this));
@@ -971,6 +983,19 @@ class HDC extends Component {
         sDiskPath = Web.redirectResource(sDiskPath);
         disk.load(sDiskName, sDiskPath, null, this.doneLoadDisk);
         return false;
+    }
+
+    /**
+     * loadSelectedDisk(iDrive, controlDisks)
+     *
+     * @this {HDC}
+     * @param {number} iDrive
+     * @param {HTMLSelectElement} controlDisks
+     */
+    loadSelectedDisk(iDrive, controlDisks)
+    {
+        let drive = this.aDrives[iDrive];
+        drive.path = controlDisks.options[controlDisks.selectedIndex].value;
     }
 
     /**
@@ -2699,7 +2724,7 @@ class HDC extends Component {
         };
         let readChunk = function(iChunk, offChunk, lenChunk, offBuffer) {
             nChunks++;
-            Web.getResource(Str.sprintf("/disks-cds/cds001/microsoft/leisure/MSLEISURE-CD001-PANDORA/x%05d", iChunk), "arraybuffer", true, function(url, data, error) {
+            Web.getResource(Str.sprintf("%s/x%05d", drive.path, iChunk), "arraybuffer", true, function(url, data, error) {
                 if (data) {
                     let bytes = new Uint8Array(data);
                     while (offChunk < bytes.byteLength && lenChunk--) {
