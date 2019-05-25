@@ -3219,8 +3219,13 @@ LED.SYMBOL_SEGMENTS = {
     '7':        ['A','B','C'],
     '8':        ['A','B','C','D','E','F','G'],
     '9':        ['A','B','C','D','F','G'],
-    '-':        ['G'],
+    'A':        ['A','B','C','E','F','G'],
+    'B':        ['C','D','E','F','G'],      // NOTE: this shape is a lower-case 'b', but 'B' must be distinguishable from '8'
+    'C':        ['A','D','E','F'],
+    'D':        ['B','C','D','E','G'],      // NOTE: this shape is a lower-case 'd', but 'D' must be distinguishable from '0'
     'E':        ['A','D','E','F','G'],
+    'F':        ['A','E','F','G'],
+    '-':        ['G'],
     '.':        ['P']
 };
 
