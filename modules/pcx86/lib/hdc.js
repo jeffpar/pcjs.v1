@@ -70,6 +70,7 @@ if (typeof module !== "undefined") {
  * @property {string} path (from DriveConfig.path)
  * @property {string} mode (from DriveConfig.mode)
  * @property {string} type (from DriveConfig.type)
+ * @property {string} sDiskPath (initialized to path, but can change if media removable; eg, ATAPI CD-ROM drive)
  * @property {number} nSectors
  * @property {number} cbSector
  * @property {number} cbTransfer (normally the same as cbSector, except for PACKET commands)
@@ -320,14 +321,6 @@ class HDC extends Component {
             this.iDriveTypeDefault = 2;
         }
 
-        this.fdc = cmp.getMachineComponent("FDC");
-        if (this.fdc && this.bindings["listDisks"]) {
-            for (let iDrive = 0; iDrive < this.aDriveConfigs.length; iDrive++) {
-                let driveConfig = this.aDriveConfigs[iDrive];
-                this.fdc.addDrive(driveConfig['name'], iDrive, this, this.bindings["listDisks"]);
-            }
-        }
-
         cpu.addIntNotify(Interrupts.DISK, this.intBIOSDisk.bind(this));
         cpu.addIntNotify(Interrupts.ALT_DISK, this.intBIOSDiskette.bind(this));
 
@@ -341,6 +334,14 @@ class HDC extends Component {
          * in that case, all we'd need to do here is call setReady().
          */
         this.reset();
+
+        this.fdc = cmp.getMachineComponent("FDC");
+        if (this.fdc && this.bindings["listDisks"]) {
+            for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+                let drive = this.aDrives[iDrive];
+                this.fdc.addDrive(drive, this, this.bindings["listDisks"]);
+            }
+        }
 
         if (!this.autoMount()) this.setReady();
     }
@@ -668,7 +669,7 @@ class HDC extends Component {
 
         drive.name = driveConfig['name'];
         if (drive.name === undefined) drive.name = HDC.DEFAULT_DRIVE_NAME;
-        drive.path = driveConfig['path'];
+        drive.path = drive.sDiskPath = driveConfig['path'];
 
         /*
          * If no 'mode' is specified, we fall back to the original behavior, which is to completely preload
@@ -932,7 +933,7 @@ class HDC extends Component {
 
         for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
             let drive = this.aDrives[iDrive];
-            if (drive.name && drive.path) {
+            if (drive.name && drive.sDiskPath) {
 
                 if (fRemount && drive.disk && drive.disk.isRemote()) {
                     /*
@@ -944,7 +945,7 @@ class HDC extends Component {
                     continue;
                 }
 
-                if (!this.loadDisk(iDrive, drive.name, drive.path, true) && fRemount)
+                if (!this.loadDisk(iDrive, drive.name, drive.sDiskPath, true) && fRemount)
                     this.setReady(false);
                 continue;
             }
@@ -968,6 +969,13 @@ class HDC extends Component {
      */
     loadDisk(iDrive, sDiskName, sDiskPath, fAutoMount)
     {
+        /*
+         * For now, if we're being initialized with ATAPI support, we assume a CD-ROM configuration,
+         * which doesn't preload disk images, so we pretend all is OK.  TODO: Consider "probing" the
+         * disk image to make sure something is out there.
+         */
+        if (this.fATAPI) return true;
+
         let drive = this.aDrives[iDrive];
         if (drive.fBusy) {
             this.notice("Drive " + iDrive + " busy");
@@ -995,7 +1003,7 @@ class HDC extends Component {
     loadSelectedDisk(iDrive, controlDisks)
     {
         let drive = this.aDrives[iDrive];
-        drive.path = controlDisks.options[controlDisks.selectedIndex].value;
+        drive.sDiskPath = controlDisks.options[controlDisks.selectedIndex].value;
     }
 
     /**
@@ -2724,7 +2732,7 @@ class HDC extends Component {
         };
         let readChunk = function(iChunk, offChunk, lenChunk, offBuffer) {
             nChunks++;
-            Web.getResource(Str.sprintf("%s/x%05d", drive.path, iChunk), "arraybuffer", true, function(url, data, error) {
+            Web.getResource(Str.sprintf("%s/x%05d", drive.sDiskPath, iChunk), "arraybuffer", true, function(url, data, error) {
                 if (data) {
                     let bytes = new Uint8Array(data);
                     while (offChunk < bytes.byteLength && lenChunk--) {

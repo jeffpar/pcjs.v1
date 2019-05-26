@@ -232,6 +232,7 @@ class FDC extends Component {
          * it may prefer to overload our drive control for easier disc selection, in which case this will contain
          * drive name properties mapped to external disc lists.
          */
+        this.driveActive = null;
         this.externalDrives = {};
         this.externalActive = null;
 
@@ -349,7 +350,7 @@ class FDC extends Component {
                     fdc.loadSelectedDisk();
                 } else {
                     let externalDrive = fdc.externalDrives[fdc.externalActive];
-                    externalDrive.controller.loadSelectedDisk(externalDrive.iDrive, externalDrive.controlDisks);
+                    externalDrive.controller.loadSelectedDisk(externalDrive.drive.iDrive, externalDrive.controlDisks);
                 }
             };
             return true;
@@ -425,9 +426,9 @@ class FDC extends Component {
             controlForm.onsubmit = function onSubmitMountDisk(event) {
                 let file = event.currentTarget[1].files[0];
                 if (file) {
-                    let sDiskettePath = file.name;
-                    let sDisketteName = Str.getBaseName(sDiskettePath, true);
-                    fdc.loadSelectedDrive(sDisketteName, sDiskettePath, file);
+                    let sDiskPath = file.name;
+                    let sDiskName = Str.getBaseName(sDiskPath, true);
+                    fdc.loadSelectedDrive(sDiskName, sDiskPath, file);
                 }
                 /*
                  * Prevent reloading of web page after form submission
@@ -612,17 +613,16 @@ class FDC extends Component {
     }
 
     /**
-     * addDrive(name, iDrive, controller, controlDisks)
+     * addDrive(drive, controller, controlDisks)
      *
      * @this {FDC}
-     * @param {string} name
-     * @param {number} iDrive
+     * @param {DriveInfo} drive
      * @param {Component} controller
      * @param {HTMLSelectElement} controlDisks
      */
-    addDrive(name, iDrive, controller, controlDisks)
+    addDrive(drive, controller, controlDisks)
     {
-        this.externalDrives[name] = {iDrive, controller, controlDisks};
+        this.externalDrives[drive.name] = {drive, controller, controlDisks};
     }
 
     /**
@@ -989,17 +989,17 @@ class FDC extends Component {
 
         /*
          * We no longer reinitialize drive.disk, in order to retain previously mounted diskette across resets;
-         * however, we do ensure that sDiskettePath is initialized to a default that displayDiskette() can deal with.
+         * however, we do ensure that sDiskPath is initialized to a default that displayDiskette() can deal with.
          */
-        if (!drive.disk) drive.sDiskettePath = "";
+        if (!drive.disk) drive.sDiskPath = "";
 
         let deltas = data[i++];
         if (deltas == 102) deltas = false;      // v1.02 backward-compatibility
 
         if (typeof deltas == "boolean") {
             let fLocal = deltas;
-            let sDisketteName = data[i++];
-            let sDiskettePath = data[i++];
+            let sDiskName = data[i++];
+            let sDiskPath = data[i++];
             if (data[i] != null) drive.fWritable = data[i];
             /*
              * If we're restoring a local disk image, then the entire disk contents should be captured in aDiskHistory,
@@ -1014,14 +1014,14 @@ class FDC extends Component {
              * finally powering the CPU.
              */
             if (fLocal) {
-                this.mountDrive(iDrive, sDisketteName, sDiskettePath);
+                this.mountDrive(iDrive, sDiskName, sDiskPath);
             }
-            else if (this.loadDrive(iDrive, sDisketteName, sDiskettePath, true)) {
+            else if (this.loadDrive(iDrive, sDiskName, sDiskPath, true)) {
                 if (drive.disk) {
-                    if (sDiskettePath) {
-                        this.addDiskHistory(sDisketteName, sDiskettePath, drive.disk);
+                    if (sDiskPath) {
+                        this.addDiskHistory(sDiskName, sDiskPath, drive.disk);
                     } else {
-                        if (MAXDEBUG) Component.warning("Disk '" + (drive.disk.sDiskName || sDisketteName) + "' not recorded properly in drive " + iDrive);
+                        if (MAXDEBUG) Component.warning("Disk '" + (drive.disk.sDiskName || sDiskName) + "' not recorded properly in drive " + iDrive);
                     }
                 }
             } else {
@@ -1101,10 +1101,10 @@ class FDC extends Component {
          * if that boolean is not present, then the restore code will know it's dealing with a pre-v1.02 state.
          */
         data[i++] = drive.fLocal;
-        data[i++] = drive.sDisketteName;
-        data[i++] = drive.sDiskettePath;
+        data[i++] = drive.sDiskName;
+        data[i++] = drive.sDiskPath;
         data[i] = drive.fWritable;
-        if (DEBUG && !drive.sDiskettePath && drive.disk && drive.disk.sDiskPath) {
+        if (DEBUG && !drive.sDiskPath && drive.disk && drive.disk.sDiskPath) {
             Component.warning("Disk '" + drive.disk.sDiskName + "' not saved properly in drive " + drive.iDrive);
         }
         return data;
@@ -1128,7 +1128,7 @@ class FDC extends Component {
         for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
             let drive = this.aDrives[iDrive];
             if (drive.disk) {
-                this.updateDiskHistory(drive.sDisketteName, drive.sDiskettePath, drive.disk);
+                this.updateDiskHistory(drive.sDiskName, drive.sDiskPath, drive.disk);
             }
         }
         return this.aDiskHistory;
@@ -1217,16 +1217,16 @@ class FDC extends Component {
         if (!fRemount) this.cAutoMount = 0;
         for (let sDrive in this.configMount) {
             let configDrive = this.configMount[sDrive];
-            let sDiskettePath = configDrive['path'] || this.findDisketteByName(configDrive['name']);
-            if (sDiskettePath) {
+            let sDiskPath = configDrive['path'] || this.findDisketteByName(configDrive['name']);
+            if (sDiskPath) {
                 /*
                  * WARNING: This conversion of drive letter to drive number, starting with A:, is very simplistic
                  * and is not guaranteed to match the drive mapping that DOS ultimately uses.
                  */
                 let iDrive = sDrive.charCodeAt(0) - 0x41;
                 if (iDrive >= 0 && iDrive < this.aDrives.length) {
-                    let sDisketteName = configDrive['name'] || this.findDisketteByPath(sDiskettePath) || Str.getBaseName(sDiskettePath, true);
-                    if (!this.loadDrive(iDrive, sDisketteName, sDiskettePath, true) && fRemount) {
+                    let sDiskName = configDrive['name'] || this.findDisketteByPath(sDiskPath) || Str.getBaseName(sDiskPath, true);
+                    if (!this.loadDrive(iDrive, sDiskName, sDiskPath, true) && fRemount) {
                         this.setReady(false);
                     }
                     continue;
@@ -1251,35 +1251,35 @@ class FDC extends Component {
     {
         let controlDisks = this.bindings["listDisks"];
         if (controlDisks) {
-            let sDisketteName = controlDisks.options[controlDisks.selectedIndex].text;
-            let sDiskettePath = controlDisks.value;
+            let sDiskName = controlDisks.options[controlDisks.selectedIndex].text;
+            let sDiskPath = controlDisks.value;
             this.fAutoScroll = (args[0] == "scroll");
-            return this.loadSelectedDrive(sDisketteName, sDiskettePath);
+            return this.loadSelectedDrive(sDiskName, sDiskPath);
         }
         return false;
     }
 
     /**
-     * loadSelectedDrive(sDisketteName, sDiskettePath, file)
+     * loadSelectedDrive(sDiskName, sDiskPath, file)
      *
      * @this {FDC}
-     * @param {string} sDisketteName
-     * @param {string} sDiskettePath
+     * @param {string} sDiskName
+     * @param {string} sDiskPath
      * @param {File} [file] is set if there's an associated File object
      * @return {boolean}
      */
-    loadSelectedDrive(sDisketteName, sDiskettePath, file)
+    loadSelectedDrive(sDiskName, sDiskPath, file)
     {
         let iDrive;
         let controlDrives = this.bindings["listDrives"];
         if (controlDrives && !isNaN(iDrive = Str.parseInt(controlDrives.value, 10)) && iDrive >= 0 && iDrive < this.aDrives.length) {
 
-            if (!sDiskettePath) {
+            if (!sDiskPath) {
                 this.unloadDrive(iDrive);
                 return true;
             }
 
-            if (sDiskettePath == "?") {
+            if (sDiskPath == "?") {
                 this.notice('Use "Choose File" and "Mount" to select and load a local disk.');
                 return false;
             }
@@ -1293,14 +1293,14 @@ class FDC extends Component {
              * I should do, like dynamically updating "listDisks" to include new entries, and adding new entries
              * to the save/restore data.
              */
-            if (sDiskettePath == "??") {
-                sDiskettePath = window.prompt("Enter the URL of a remote disk image.", "") || "";
-                if (!sDiskettePath) return false;
-                sDisketteName = Str.getBaseName(sDiskettePath);
-                if (DEBUG) this.println("Attempting to load " + sDiskettePath + " as \"" + sDisketteName + "\"");
+            if (sDiskPath == "??") {
+                sDiskPath = window.prompt("Enter the URL of a remote disk image.", "") || "";
+                if (!sDiskPath) return false;
+                sDiskName = Str.getBaseName(sDiskPath);
+                if (DEBUG) this.println("Attempting to load " + sDiskPath + " as \"" + sDiskName + "\"");
             }
 
-            while (this.loadDrive(iDrive, sDisketteName, sDiskettePath, false, file) < 0) {
+            while (this.loadDrive(iDrive, sDiskName, sDiskPath, false, file) < 0) {
                 if (!window.confirm("Click OK to reload the original disk and discard any changes.")) {
                     if (DEBUG) this.println("load cancelled");
                     return false;
@@ -1313,7 +1313,7 @@ class FDC extends Component {
                  * loadDrive() should NEVER return true the second time, since no disk is loaded. In other words,
                  * this isn't really a loop so much as a one-time retry operation.
                  */
-                this.removeDiskHistory(sDisketteName, sDiskettePath);
+                this.removeDiskHistory(sDiskName, sDiskPath);
                 this.unloadDrive(iDrive, false, true);
             }
             return true;
@@ -1323,46 +1323,46 @@ class FDC extends Component {
     }
 
     /**
-     * mountDrive(iDrive, sDisketteName, sDiskettePath)
+     * mountDrive(iDrive, sDiskName, sDiskPath)
      *
      * @this {FDC}
      * @param {number} iDrive
-     * @param {string} sDisketteName
-     * @param {string} sDiskettePath
+     * @param {string} sDiskName
+     * @param {string} sDiskPath
      */
-    mountDrive(iDrive, sDisketteName, sDiskettePath)
+    mountDrive(iDrive, sDiskName, sDiskPath)
     {
         let drive = this.aDrives[iDrive];
         this.unloadDrive(iDrive, true, true);
         drive.fLocal = true;
         let disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
-        this.doneLoadDrive(drive, disk, sDisketteName, sDiskettePath, true);
+        this.doneLoadDrive(drive, disk, sDiskName, sDiskPath, true);
     }
 
     /**
-     * loadDrive(iDrive, sDisketteName, sDiskettePath, fAutoMount, file)
+     * loadDrive(iDrive, sDiskName, sDiskPath, fAutoMount, file)
      *
-     * NOTE: If sDiskettePath is already loaded in the drive, nothing needs to be done.
+     * NOTE: If sDiskPath is already loaded in the drive, nothing needs to be done.
      *
      * @this {FDC}
      * @param {number} iDrive
-     * @param {string} sDisketteName
-     * @param {string} sDiskettePath
+     * @param {string} sDiskName
+     * @param {string} sDiskPath
      * @param {boolean} [fAutoMount]
      * @param {File} [file] is set if there's an associated File object
      * @return {number} 1 if diskette loaded, 0 if queued up (or busy), -1 if already loaded
      */
-    loadDrive(iDrive, sDisketteName, sDiskettePath, fAutoMount, file)
+    loadDrive(iDrive, sDiskName, sDiskPath, fAutoMount, file)
     {
         let drive = this.aDrives[iDrive];
-        if (sDiskettePath) {
-            sDiskettePath = Web.redirectResource(sDiskettePath);
+        if (sDiskPath) {
+            sDiskPath = Web.redirectResource(sDiskPath);
             /*
              * TODO: Machines with saved states may be using lower-case disk image names, whereas we now use
              * UPPER-CASE names for disk images, so we lower-case both before comparing.  The only problem with
              * removing these hacks is that we can never be sure when all saved states in the wild have been updated.
              */
-            if (drive.sDiskettePath.toLowerCase() != sDiskettePath.toLowerCase()) {
+            if (drive.sDiskPath.toLowerCase() != sDiskPath.toLowerCase()) {
                 this.unloadDrive(iDrive, fAutoMount, true);
                 if (drive.fBusy) {
                     this.notice("Drive " + iDrive + " busy");
@@ -1372,11 +1372,11 @@ class FDC extends Component {
                 if (fAutoMount) {
                     drive.fAutoMount = true;
                     this.cAutoMount++;
-                    this.printf("loading diskette '%s'\n", sDisketteName);
+                    this.printf("loading diskette '%s'\n", sDiskName);
                 }
                 drive.fLocal = !!file;
                 let disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
-                if (!disk.load(sDisketteName, sDiskettePath, file, this.doneLoadDrive)) {
+                if (!disk.load(sDiskName, sDiskPath, file, this.doneLoadDrive)) {
                     return 0;
                 }
                 return 1;
@@ -1386,16 +1386,16 @@ class FDC extends Component {
     }
 
     /**
-     * doneLoadDrive(drive, disk, sDisketteName, sDiskettePath, fAutoMount)
+     * doneLoadDrive(drive, disk, sDiskName, sDiskPath, fAutoMount)
      *
      * @this {FDC}
      * @param {Object} drive
      * @param {Disk} disk is set if the disk was successfully loaded, null if not
-     * @param {string} sDisketteName
-     * @param {string} sDiskettePath
+     * @param {string} sDiskName
+     * @param {string} sDiskPath
      * @param {boolean} [fAutoMount]
      */
-    doneLoadDrive(drive, disk, sDisketteName, sDiskettePath, fAutoMount)
+    doneLoadDrive(drive, disk, sDiskName, sDiskPath, fAutoMount)
     {
         let aDiskInfo;
 
@@ -1412,22 +1412,22 @@ class FDC extends Component {
              */
             aDiskInfo = disk.info();
             if (disk && aDiskInfo[0] > drive.nCylinders || aDiskInfo[1] > drive.nHeads /* || aDiskInfo[2] > drive.nSectors */) {
-                this.notice("Diskette \"" + sDisketteName + "\" too large for drive " + String.fromCharCode(0x41 + drive.iDrive));
+                this.notice("Diskette \"" + sDiskName + "\" too large for drive " + String.fromCharCode(0x41 + drive.iDrive));
                 disk = null;
             }
         }
 
         if (disk) {
             drive.disk = disk;
-            drive.sDisketteName = sDisketteName;
-            drive.sDiskettePath = sDiskettePath;
+            drive.sDiskName = sDiskName;
+            drive.sDiskPath = sDiskPath;
 
             /*
              * Since we allow a diskette image to be auto-mounted even if it isn't in the machine's list of disks,
              * let's add it to the list now, since the disk apparently exists.
              */
-            if (!this.findDisketteByPath(sDiskettePath)) {
-                this.addDiskette(sDisketteName, sDiskettePath);
+            if (!this.findDisketteByPath(sDiskPath)) {
+                this.addDiskette(sDiskName, sDiskPath);
             }
 
             /*
@@ -1436,13 +1436,13 @@ class FDC extends Component {
              * happen, for security reasons; local disk images can ONLY be loaded via the "Mount" button after
              * the user has selected them via the "Choose File" button.
              *
-             *      this.addDiskette(sDisketteName, sDiskettePath);
+             *      this.addDiskette(sDiskName, sDiskPath);
              *
              * So we're going to take a different approach: when displayDiskette() is asked to display the name
              * of a local disk image, it will map all such disks to "Local Disk", and any attempt to "Mount" such
              * a disk, will essentially result in a "Disk not found" error.
              */
-            this.addDiskHistory(sDisketteName, sDiskettePath, disk);
+            this.addDiskHistory(sDiskName, sDiskPath, disk);
 
             /*
              * For a local disk (ie, one loaded via mountDrive()), the disk.restore() performed by addDiskHistory()
@@ -1469,7 +1469,7 @@ class FDC extends Component {
              * theory no message is a good sign, while load errors in disk.js should continue to trigger notifications.
              */
             if (!drive.fnCallReady) {
-                this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), true /* drive.fAutoMount || fAutoMount */);
+                this.notice("Mounted diskette \"" + sDiskName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), true /* drive.fAutoMount || fAutoMount */);
             }
 
             /*
@@ -1601,62 +1601,73 @@ class FDC extends Component {
      * but it would be even better if those diskette images weren't listed for that drive in the first place.
      *
      * @this {FDC}
-     * @param {HTMLSelectElement} controlDrives
+     * @param {number} iDrive
      * @return {HTMLSelectElement|undefined}
      */
-    getDiskList(controlDrives)
+    getDiskList(iDrive)
     {
+        let drive;
         let controlDisks1, controlDisks2;
+        let controlDrives = this.bindings["listDrives"];
         if (controlDrives && controlDrives.options) {
-            controlDisks1 = this.bindings["listDisks"];
             let option = controlDrives.options[controlDrives.selectedIndex];
             if (option) {
                 let driveName = option.textContent;
+                controlDisks1 = this.bindings["listDisks"];
                 if (this.externalDrives[driveName]) {
                     if (!this.externalActive) {
                         controlDisks2 = this.externalDrives[driveName].controlDisks;
                         this.externalActive = driveName;
                     }
+                    drive = this.externalDrives[driveName].drive;
                 } else {
                     if (this.externalActive) {
                         controlDisks2 = controlDisks1;
                         controlDisks1 = this.externalDrives[this.externalActive].controlDisks;
                         this.externalActive = null;
                     }
+                    drive = this.aDrives[iDrive];
                 }
             }
         }
-        if (controlDisks1 && controlDisks2) {
-            // swap controlDisks1 and controlDisks2
-            // save the location of controlDisks2
-            let next2 = controlDisks2.nextSibling;
+        if (controlDisks1 && controlDisks2) {           // swap controlDisks1 and controlDisks2
+            let next2 = controlDisks2.nextSibling;      // save the location of controlDisks2
             let parent2 = controlDisks2.parentNode;
-            // special case for controlDisks1 is the next sibling of controlDisks2
-            if (next2 === controlDisks1) {
-                // just put controlDisks1 before controlDisks2
-                parent2.insertBefore(controlDisks1, controlDisks2);
-            } else {
-                // insert controlDisks2 right before controlDisks1
-                controlDisks1.parentNode.insertBefore(controlDisks2, controlDisks1);
-                // now insert controlDisks1 where controlDisks2 was
-                if (next2) {
-                    // if there was an element after controlDisks2, then insert controlDisks1 right before that
+            if (next2 === controlDisks1) {              // if controlDisks1 is the next sibling of controlDisks2,
+                parent2.insertBefore(                   // just put controlDisks1 before controlDisks2
+                    controlDisks1, controlDisks2
+                );
+            } else {                                    // otherwise, insert controlDisks2 right before controlDisks1
+                controlDisks1.parentNode.insertBefore(  // and insert controlDisks1 where controlDisks2 was
+                    controlDisks2, controlDisks1
+                );
+                if (next2) {                            // if there was an element after controlDisks2, insert controlDisks1 right before that
                     parent2.insertBefore(controlDisks1, next2);
-                } else {
-                    // otherwise, just append as last child
+                } else {                                // otherwise, just append as last child
                     parent2.appendChild(controlDisks1);
                 }
             }
             /*
-             * Propagate the actual width (scrollWidth) of the currently visible control to the control we're about
-             * to make visible in its place, so that there's no detectable change in the overall layout.
+             * Propagate the actual width (scrollWidth) of the currently visible control to the control we're
+             * about to make visible in its place, so that there's no discernable change in the overall layout.
              */
             controlDisks2.style.width = controlDisks1.scrollWidth + "px";
             controlDisks1.style.display = "none";
             controlDisks2.style.display = "inline-block";
             controlDisks1 = controlDisks2;
         }
-        if (!controlDisks1.options) controlDisks1 = undefined;
+        /*
+         * We need to return multiple values: the requested disk list (controlDisks1) AND the associated drive,
+         * since both may now be managed by the HDC; we cheat and return the drive as an FDC property (driveActive).
+         *
+         * The "Active" designations are a bit of a misnomer; externalActive and driveActive refer only to the
+         * drive that's currently displayed in the drive list.  Let's just say they're being "actively" displayed.
+         */
+        if (drive) {
+            this.driveActive = drive;
+        } else {
+            controlDisks1 = undefined;
+        }
         return controlDisks1;
     }
 
@@ -1669,56 +1680,52 @@ class FDC extends Component {
      */
     displayDiskette(iDrive, fDriveChange)
     {
-        /*
-         * First things first: validate iDrive.
-         */
-        if (iDrive >= 0 && iDrive < this.aDrives.length) {
-            let drive = this.aDrives[iDrive];
+        let controlDisks = this.getDiskList(iDrive);
+        if (controlDisks) {
+            /*
+             * Next, make sure the drive whose disk we're updating is the currently selected drive.
+             */
+            let drive = this.driveActive;
             let controlDrives = this.bindings["listDrives"];
-            let controlDisks = this.getDiskList(controlDrives);
-            if (controlDisks) {
+            let i, iDriveSelected = Str.parseInt(controlDrives.value, 10);
+            let sTargetPath = (drive.fLocal? "?" : drive.sDiskPath);
+            if (!isNaN(iDriveSelected) && iDriveSelected == iDrive) {
+                for (i = 0; i < controlDisks.options.length; i++) {
+                    if (controlDisks.options[i].value == sTargetPath) {
+                        if (controlDisks.selectedIndex != i) {
+                            controlDisks.selectedIndex = i;
+                        }
+                        break;
+                    }
+                }
+                if (i == controlDisks.options.length) controlDisks.selectedIndex = 0;
+            }
+            if (fDriveChange === false) {
                 /*
-                 * Next, make sure the drive whose disk we're updating is the currently selected drive.
+                 * Update the selected drive to match the specified drive (and its write-protected state, if any).
                  */
-                let i;
-                let iDriveSelected = Str.parseInt(controlDrives.value, 10);
-                let sTargetPath = (drive.fLocal? "?" : drive.sDiskettePath);
-                if (!isNaN(iDriveSelected) && iDriveSelected == iDrive) {
-                    for (i = 0; i < controlDisks.options.length; i++) {
-                        if (controlDisks.options[i].value == sTargetPath) {
-                            if (controlDisks.selectedIndex != i) {
-                                controlDisks.selectedIndex = i;
-                            }
-                            break;
+                for (i = 0; i < controlDrives.options.length; i++) {
+                    if (+controlDrives.options[i].value == drive.iDrive) {
+                        if (controlDrives.selectedIndex != i) {
+                            controlDrives.selectedIndex = i;
                         }
-                    }
-                    if (i == controlDisks.options.length) controlDisks.selectedIndex = 0;
-                }
-                if (fDriveChange === false) {
-                    /*
-                     * Update the selected drive to match the specified drive (and its write-protected state).
-                     */
-                    for (i = 0; i < controlDrives.options.length; i++) {
-                        if (Str.parseInt(controlDrives.options[i].value, 10) == drive.iDrive) {
-                            if (controlDrives.selectedIndex != i) {
-                                controlDrives.selectedIndex = i;
-                            }
-                            if (!drive.fWritable) controlDrives.selectedIndex++;
-                            break;
-                        }
+                        if (drive.fWritable === false) controlDrives.selectedIndex++;
+                        break;
                     }
                 }
-                else if (fDriveChange === true) {
-                    /*
-                     * Odd drive entries are asterisked (eg, "A*" rather than "A:"), providing the user with a mechanism for
-                     * automatically write-protecting all disk images mounted in the drive.
-                     */
-                    if (controlDrives.selectedIndex >= 0) {
-                        if (drive.fWritable != !(controlDrives.selectedIndex & 0x1)) {
-                            drive.fWritable = !drive.fWritable;
-                            if (!drive.fWritable) {
-                                this.notice("Any diskette loaded in this drive will now be write-protected.")
-                            }
+            }
+            else if (fDriveChange === true && drive.fWritable !== undefined) {
+                /*
+                 * Odd drive entries are asterisked (eg, "A*" rather than "A:"), providing the user with a mechanism for
+                 * automatically write-protecting all disk images mounted in the drive.  External drives (eg, CD-ROM drives)
+                 * don't define fWritable, not because the drive's writability isn't known but rather because we don't want
+                 * separate (write-protected) drive entries defined for them.
+                 */
+                if (controlDrives.selectedIndex >= 0) {
+                    if (drive.fWritable != !(controlDrives.selectedIndex & 0x1)) {
+                        drive.fWritable = !drive.fWritable;
+                        if (!drive.fWritable) {
+                            this.notice("Any diskette loaded in this drive will now be write-protected.")
                         }
                     }
                 }
@@ -1788,9 +1795,9 @@ class FDC extends Component {
             /*
              * Before we toss the disk's information, capture any deltas that may have occurred.
              */
-            this.updateDiskHistory(drive.sDisketteName, drive.sDiskettePath, drive.disk);
-            drive.sDisketteName = "";
-            drive.sDiskettePath = "";
+            this.updateDiskHistory(drive.sDiskName, drive.sDiskPath, drive.disk);
+            drive.sDiskName = "";
+            drive.sDiskPath = "";
             drive.disk = null;
             drive.fLocal = false;
 
@@ -1831,63 +1838,63 @@ class FDC extends Component {
     }
 
     /**
-     * addDiskHistory(sDisketteName, sDiskettePath, disk)
+     * addDiskHistory(sDiskName, sDiskPath, disk)
      *
      * @this {FDC}
-     * @param {string} sDisketteName
-     * @param {string} sDiskettePath
+     * @param {string} sDiskName
+     * @param {string} sDiskPath
      * @param {Disk} disk containing corresponding disk image
      */
-    addDiskHistory(sDisketteName, sDiskettePath, disk)
+    addDiskHistory(sDiskName, sDiskPath, disk)
     {
         let i;
-        // this.assert(!!sDiskettePath);
+        // this.assert(!!sDiskPath);
         for (i = 0; i < this.aDiskHistory.length; i++) {
-            if (this.aDiskHistory[i][1] == sDiskettePath) {
+            if (this.aDiskHistory[i][1] == sDiskPath) {
                 let nChanges = disk.restore(this.aDiskHistory[i][2]);
-                if (DEBUG) this.printf("disk '%s' restored from history (%d changes)\n", sDisketteName, nChanges);
+                if (DEBUG) this.printf("disk '%s' restored from history (%d changes)\n", sDiskName, nChanges);
                 return;
             }
         }
-        if (DEBUG) this.printf("disk '%s' added to history (nothing to restore)\n", sDisketteName);
-        this.aDiskHistory[i] = [sDisketteName, sDiskettePath, []];
+        if (DEBUG) this.printf("disk '%s' added to history (nothing to restore)\n", sDiskName);
+        this.aDiskHistory[i] = [sDiskName, sDiskPath, []];
     }
 
     /**
-     * removeDiskHistory(sDisketteName, sDiskettePath)
+     * removeDiskHistory(sDiskName, sDiskPath)
      *
      * @this {FDC}
-     * @param {string} sDisketteName
-     * @param {string} sDiskettePath
+     * @param {string} sDiskName
+     * @param {string} sDiskPath
      */
-    removeDiskHistory(sDisketteName, sDiskettePath)
+    removeDiskHistory(sDiskName, sDiskPath)
     {
         let i;
         for (i = 0; i < this.aDiskHistory.length; i++) {
-            if (this.aDiskHistory[i][1] == sDiskettePath) {
+            if (this.aDiskHistory[i][1] == sDiskPath) {
                 this.aDiskHistory.splice(i, 1);
-                if (DEBUG) this.printf("disk '%s' removed from history\n", sDisketteName);
+                if (DEBUG) this.printf("disk '%s' removed from history\n", sDiskName);
                 return;
             }
         }
-        if (DEBUG) this.printf("unable to remove disk '%s' from history (%s)\n", sDisketteName, sDiskettePath);
+        if (DEBUG) this.printf("unable to remove disk '%s' from history (%s)\n", sDiskName, sDiskPath);
     }
 
     /**
-     * updateDiskHistory(sDisketteName, sDiskettePath, disk)
+     * updateDiskHistory(sDiskName, sDiskPath, disk)
      *
      * @this {FDC}
-     * @param {string} sDisketteName
-     * @param {string} sDiskettePath
+     * @param {string} sDiskName
+     * @param {string} sDiskPath
      * @param {Disk} disk containing corresponding disk image, with possible deltas
      */
-    updateDiskHistory(sDisketteName, sDiskettePath, disk)
+    updateDiskHistory(sDiskName, sDiskPath, disk)
     {
         let i;
         for (i = 0; i < this.aDiskHistory.length; i++) {
-            if (this.aDiskHistory[i][1] == sDiskettePath) {
+            if (this.aDiskHistory[i][1] == sDiskPath) {
                 this.aDiskHistory[i][2] = disk.save();
-                if (DEBUG) this.printf("disk '%s' updated in history\n", sDisketteName);
+                if (DEBUG) this.printf("disk '%s' updated in history\n", sDiskName);
                 return;
             }
         }
@@ -1897,7 +1904,7 @@ class FDC extends Component {
          * unload, and then reload/remount.  And since unloadDrive's normal behavior is to call updateDiskHistory()
          * before unloading, the fact that the disk is no longer listed here can't be treated as an error.
          */
-        if (DEBUG) this.printf("unable to update disk '%s' in history (%s)\n", sDisketteName, sDiskettePath);
+        if (DEBUG) this.printf("unable to update disk '%s' in history (%s)\n", sDiskName, sDiskPath);
     }
 
     /**
