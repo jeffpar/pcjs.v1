@@ -78,7 +78,8 @@ if (typeof module !== "undefined") {
  * @property {Sector|null} sector
  * @property {number} iByte
  * @property {boolean} useBuffer (true if buffer rather than sector must be used; make sure initBuffer() has been called)
- * @property {Array} chunkCache
+ * @property {Array} chunksCached (sparse array of cached chunks)
+ * @property {Array} chunksMRU (array of cached chunk indexes, starting with the most-recently-used; capped at 128 entries)
  */
 
 /**
@@ -723,7 +724,8 @@ class HDC extends Component {
         drive.iByte = data[i++];                // location of the next byte to be accessed in the above sector
         drive.sector = null;                    // initialized to null by worker, and then set to the next sector satisfying the request
         drive.useBuffer = false;
-        drive.chunkCache = [];
+        drive.chunksCached = [];
+        drive.chunksMRU = [];
 
         if (drive.disk) {
             let deltas = data[i];
@@ -1004,6 +1006,8 @@ class HDC extends Component {
     {
         let drive = this.aDrives[iDrive];
         drive.sDiskPath = controlDisks.options[controlDisks.selectedIndex].value;
+        drive.chunksCached = [];
+        drive.chunksMRU = [];
     }
 
     /**
@@ -2672,7 +2676,7 @@ class HDC extends Component {
         let hdc = this;
         let limit = drive.buffer.length;
         let format, lba, num, page = 0, pageCode, pageControl;
-        let bPacketCmd, off, iChunk, offChunk, lenChunk, lenTotal, offBuffer, nChunks;
+        let bPacketCmd, off, iChunk, offChunk, lenChunk, lenTotal, offBuffer, nChunks, nChunkErrors;
         /*
          * NOTE: Packet data is typically stored big-endian, and since BE is not normally assumed,
          * we include BE in the appropriate function signatures.  processIdentify() is a different story.
@@ -2716,7 +2720,11 @@ class HDC extends Component {
             setWordBE(offset, value >> 16);
             setWordBE(offset + 2, value);
         };
-        let done = function(fData) {
+        let done = function(fData, error=0) {
+            /*
+             * TODO: Deal with errors.  In addition, if nChunkErrors is non-zero, then at least one of the
+             * requested chunks returned an error (or simply failed to return any data), so deal with that, too.
+             */
             if (!fData) {
                 hdc.regStatus = HDC.ATC.STATUS.READY;
                 hdc.regSecCnt = HDC.ATC.SECCNT.PACKET_IO | HDC.ATC.SECCNT.PACKET_CD;
@@ -2730,16 +2738,41 @@ class HDC extends Component {
             }
             hdc.setATCIRR(true);
         };
+        let copyChunk = function(data, iChunk, offChunk, lenChunk, offBuffer) {
+            let dataCached = drive.chunksCached[iChunk];
+            if (data) {
+                hdc.assert(!dataCached);
+            } else {
+                if (!dataCached) return false;
+                data = dataCached;
+            }
+            let i = -1;
+            if (dataCached) {
+                i = drive.chunksMRU.indexOf(iChunk);
+                hdc.assert(i >= 0);
+                if (i > 0) drive.chunksMRU.splice(i, 1);
+            } else {
+                drive.chunksCached[iChunk] = data;
+            }
+            if (drive.chunksMRU.length >= 128) drive.chunksMRU.pop();
+            if (i) drive.chunksMRU.unshift(iChunk);
+            let bytes = new Uint8Array(data);
+            while (offChunk < bytes.byteLength && lenChunk--) {
+                setByte(offBuffer++, bytes[offChunk++]);
+            }
+            if (!--nChunks) done(true);
+            return true;
+        };
         let readChunk = function(iChunk, offChunk, lenChunk, offBuffer) {
             nChunks++;
+            if (copyChunk(null, iChunk, offChunk, lenChunk, offBuffer)) return;
             Web.getResource(Str.sprintf("%s/x%05d", drive.sDiskPath, iChunk), "arraybuffer", true, function(url, data, error) {
-                if (data) {
-                    let bytes = new Uint8Array(data);
-                    while (offChunk < bytes.byteLength && lenChunk--) {
-                        setByte(offBuffer++, bytes[offChunk++]);
-                    }
-                    if (!--nChunks) done(true);
+                if (data && !error) {
+                    copyChunk(data, iChunk, offChunk, lenChunk, offBuffer);
+                    return;
                 }
+                nChunkErrors++;
+                if (!--nChunks) done(false, error);
             });
         };
 
@@ -2756,21 +2789,21 @@ class HDC extends Component {
              * otherwise, we have a CHECK CONDITION, which will require adding the REQUEST SENSE command.
              * TODO: Worry about that later.
              *
-             * NOTE: This was a 12-byte packet circa 2001, with nothing but a Logical Unit Number (LUN) in
-             * bits 5-7 of byte 1, but it was apparently "reduced" to a 6-byte packet circa 2010 with no LUN
+             * NOTE: This was a 12-byte packet (circa 2001) with nothing but a Logical Unit Number (LUN)
+             * in bits 5-7 of byte 1, but it was later spec'ed (circa 2010) as a 6-byte packet with no LUN
              * and a CONTROL value in byte 5.
              */
             bPacketCmd = 0;             // nothing to return, so we can wrap up this command now
             break;
 
         case HDC.ATC.PACKET.COMMAND.INQUIRY:
-            limit = getLength(3);       // in ATAPI circa 2001, length was simply drive.buffer[4]; e.g., 36 (0x24) bytes
+            limit = getLength(3);       // in ATAPI (circa 2001), length was simply drive.buffer[4]; e.g., 36 (0x24) bytes
             setByte(0, 0x05);           // 0x05 (bits 0-4, the Peripheral Device Type, is 0x05 for CD-ROM devices)
             setByte(1, 0x80);           // 0x80 (bit 7, the RMB or Removable Media Bit, must be set for CD-ROM devices)
             setByte(2, 0x00);           // 0x00 (bits 0-2 == ANSI version, bits 3-5 == ECMA version, bits 6-7 == ISO version)
             setByte(3, 0x21);           // 0x21 (bits 0-3 == Response Data Format (1), bits 4-7 == ATAPI version (2))
             setByte(4, 31);             // number of additional bytes following this one
-            setBytes(5, 0, 3);          // these bytes have meanings in later specs, but we're sticking with circa 2001 for now
+            setBytes(5, 0, 3);          // these bytes were defined in later specs, but we're sticking with earlier (circa 2001) specs for now
             setString(8, "PCJS.ORG", 8);
             setString(16, drive.name, 16);
             setString(32, "1.0", 4);
@@ -2783,6 +2816,7 @@ class HDC extends Component {
             limit = num << 11;
             this.initBuffer(drive, limit);
             nChunks = 1;                // preset chunk request count to 1
+            nChunkErrors = 0;
             iChunk = off >>> 15;        // iChunk is the starting 32Kb chunk
             offChunk = off & 0x7fff;    // offChunk is the starting offset within that chunk
             lenTotal = limit;           // lenTotal is number of bytes left to read

@@ -6,7 +6,6 @@ machines:
   - id: ibm5170
     type: pcx86
     debugger: true
-    messages: hdc
 ---
 
 IBM PC AT with ATAPI CD-ROM Support
