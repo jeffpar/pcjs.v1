@@ -13,3 +13,6 @@
 [submodule "disks-cds/cds005"]
 	path = disks-cds/cds005
 	url = https://github.com/jeffpar/pcjs-cds005.git
+[submodule "disks-cds/cds002"]
+	path = disks-cds/cds002
+	url = https://github.com/jeffpar/pcjs-cds002.git
