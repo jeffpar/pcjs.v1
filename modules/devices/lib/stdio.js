@@ -252,36 +252,48 @@ class StdIO {
         for (iPart = 0; iPart < aParts.length - 6; iPart += 6) {
 
             buffer += aParts[iPart];
-            let type = aParts[iPart+5];
+            let arg, type = aParts[iPart+5];
 
             /*
              * Check for unrecognized types immediately, so we don't inadvertently pop any arguments.
+             *
+             * For reference purposes, the standard ANSI C set of format types is: "dioxXucsfeEgGpn%".
              */
-            if ("dfjcsXx".indexOf(type) < 0) {
+            if ("dfjcsoXx%".indexOf(type) < 0) {
                 buffer += aParts[iPart+1] + aParts[iPart+2] + aParts[iPart+3] + aParts[iPart+4] + type;
                 continue;
             }
 
-            let arg = args[iArg++];
+            if (iArg < args.length) {
+                arg = args[iArg];
+                if (type != '%') iArg++;
+            } else {
+                arg = args[args.length-1];
+            }
             let flags = aParts[iPart+1];
             let width = aParts[iPart+2];
             if (width == '*') {
                 width = arg;
-                arg = args[iArg++];
+                if (iArg < args.length) {
+                    arg = args[iArg++];
+                } else {
+                    arg = args[args.length-1];
+                }
             } else {
                 width = +width || 0;
             }
             let precision = aParts[iPart+3];
             precision = precision? +precision.substr(1) : -1;
-            let prefix = aParts[iPart+4];
-            let ach = null, s;
+            // let length = aParts[iPart+4];       // eg, 'h', 'l' or 'L' (all currently ignored)
+            let hash = flags.indexOf('#') >= 0;
+            let ach = null, s, radix = 0, p, prefix = ""
 
             switch(type) {
             case 'd':
                 /*
                  * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
                  *
-                 * Also, unlike the 'X' and 'x' hexadecimal cases, there's no need to explicitly check for a string
+                 * Also, unlike the 'X' and 'x' hexadecimal cases, there's no need to explicitly check for string
                  * arguments, because Math.trunc() automatically coerces any string value to a (decimal) number.
                  */
                 arg = Math.trunc(arg);
@@ -289,21 +301,20 @@ class StdIO {
 
             case 'f':
                 s = arg + "";
-                if (precision > 0) {
-                    width -= (precision + 1);
+                if (precision >= 0) {
+                    s = arg.toFixed(precision);
                 }
                 if (s.length < width) {
                     if (flags.indexOf('0') >= 0) {
-                        if (arg < 0) width--;
-                        s = ("0000000000" + Math.abs(arg)).slice(-width);
+                        if (arg < 0) {
+                            width--;
+                            s = s.substr(1);
+                        }
+                        s = ("0000000000" + s).slice(-width);
                         if (arg < 0) s = '-' + s;
                     } else {
                         s = ("          " + s).slice(-width);
                     }
-                }
-                if (precision > 0) {
-                    arg = Math.round((arg - Math.trunc(arg)) * Math.pow(10, precision));
-                    s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
                 }
                 buffer += s;
                 break;
@@ -318,15 +329,20 @@ class StdIO {
                 break;
 
             case 'c':
-                arg = String.fromCharCode(arg);
+                arg = typeof arg == "string"? arg[0] : String.fromCharCode(arg);
                 /* falls through */
 
             case 's':
                 /*
-                 * 's' includes some non-standard behavior: if the argument is not actually a string, we allow
-                 * JavaScript to "coerce" it to a string, using its associated toString() method.
+                 * 's' includes some non-standard behavior, such as coercing non-strings to strings first.
                  */
-                if (typeof arg == "string") {
+                if (arg !== undefined) {
+                    if (typeof arg != "string") {
+                        arg = arg.toString();
+                    }
+                    if (precision >= 0) {
+                        arg = arg.substr(0, precision);
+                    }
                     while (arg.length < width) {
                         if (flags.indexOf('-') >= 0) {
                             arg += ' ';
@@ -338,13 +354,21 @@ class StdIO {
                 buffer += arg;
                 break;
 
+            case 'o':
+                radix = 8;
+                if (hash) prefix = "0";
+                /* falls through */
+
             case 'X':
                 ach = StdIO.HexUpperCase;
+                if (hash) prefix = "0X";
                 /* falls through */
 
             case 'x':
-                if (!ach) ach = StdIO.HexLowerCase;
                 s = "";
+                if (!radix) radix = 16;
+                if (!prefix && hash) prefix = "0x";
+                if (!ach) ach = StdIO.HexLowerCase;
                 if (typeof arg == "string") {
                     /*
                      * Since we're advised to ALWAYS pass a radix to parseInt(), we must detect explicitly
@@ -357,22 +381,29 @@ class StdIO {
                      */
                     arg = Number.parseInt(arg, arg.match(/(^0x|[a-f])/i)? 16 : 10);
                 }
+                p = width? "" : prefix;
                 do {
-                    let d = arg & 0xf;
-                    arg >>>= 4;
+                    let d = arg & (radix - 1);
+                    arg >>>= (radix == 16? 4 : 3);
                     if (flags.indexOf('0') >= 0 || s == "" || d || arg) {
                         s = ach[d] + s;
                     } else if (width) {
-                        s = ' ' + s;
+                        if (!prefix) {
+                            s = ' ' + s;
+                        } else {
+                            s = prefix.slice(-1) + s;
+                            prefix = prefix.slice(0, -1);
+                        }
                     }
                 } while (--width > 0 || arg);
-                buffer += s;
+                buffer += p + s;
+                break;
+
+            case '%':
+                buffer += '%';
                 break;
 
             default:
-                /*
-                 * For reference purposes, the standard ANSI C set of types is "dioxXucsfeEgGpn%"
-                 */
                 buffer += "(unimplemented printf type %" + type + ")";
                 break;
             }
