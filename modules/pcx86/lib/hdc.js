@@ -45,7 +45,7 @@ if (typeof module !== "undefined") {
  * @typedef {Object} DriveConfig
  * @property {string} name
  * @property {string} path
- * @property {string} type
+ * @property {number} type
  * @property {number} size (for custom disk geometries; not yet implemented)
  * @property {string} mode (for enabling on-demand disk I/O with special server APIs; not currently used)
  */
@@ -69,7 +69,7 @@ if (typeof module !== "undefined") {
  * @property {string} name (from DriveConfig.name)
  * @property {string} path (from DriveConfig.path)
  * @property {string} mode (from DriveConfig.mode)
- * @property {string} type (from DriveConfig.type)
+ * @property {number} type (from DriveConfig.type)
  * @property {string} sDiskPath (initialized to path, but can change if media removable; eg, ATAPI CD-ROM drive)
  * @property {number} nSectors
  * @property {number} cbSector
@@ -156,7 +156,7 @@ class HDC extends Component {
         this.sType = (parmsHDC['type'] || "XT").toUpperCase();
         if (this.sType.slice(0, 2) == "AT") {
             this.fATC = true;
-            this.fATAPI = (this.sType == "ATAPI");
+            this.fATAPI = (this.sType.slice(0, 5) == "ATAPI");
         }
         this.nInterface = (this.fATAPI? 1 : 0);     // default to the secondary interface if type is "ATAPI"
         let nInterface = this.sType.slice(-1);      // but if an interface is specified (e.g., "AT2", "ATAPI1"), honor it
@@ -267,13 +267,18 @@ class HDC extends Component {
         this.dbg = dbg;
         this.cmp = cmp;
 
-        let aDriveConfigs = cmp.getMachineParm('drives');
-        if (aDriveConfigs) {
-            if (typeof aDriveConfigs == "string") {
-                this.sDriveConfigs = aDriveConfigs;
-            } else {
-                this.aDriveConfigs = aDriveConfigs;
-                this.sDriveConfigs = "";
+        /*
+         * Any machine-specific 'drives' settings apply only the first HDC interface.
+         */
+        if (!this.nInterface) {
+            let aDriveConfigs = cmp.getMachineParm('drives');
+            if (aDriveConfigs) {
+                if (typeof aDriveConfigs == "string") {
+                    this.sDriveConfigs = aDriveConfigs;
+                } else {
+                    this.aDriveConfigs = aDriveConfigs;
+                    this.sDriveConfigs = "";
+                }
             }
         }
 
@@ -337,10 +342,10 @@ class HDC extends Component {
         this.reset();
 
         this.fdc = cmp.getMachineComponent("FDC");
-        if (this.fdc && this.bindings["listDisks"]) {
+        if (this.fdc && this.fATAPI && this.bindings["listDisks"]) {
             for (let iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
                 let drive = this.aDrives[iDrive];
-                this.fdc.addDrive(drive, this, this.bindings["listDisks"]);
+                if (!drive.type) this.fdc.addDrive(drive, this, this.bindings["listDisks"]);
             }
         }
 
@@ -605,7 +610,7 @@ class HDC extends Component {
      * initBuffer(drive, length)
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {number} [length]
      */
     initBuffer(drive, length=drive.nBytes)
@@ -626,7 +631,7 @@ class HDC extends Component {
      *
      * @this {HDC}
      * @param {number} iDrive
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {DriveConfig} driveConfig
      * @param {Array} [data]
      * @param {boolean} [fHard] true if a machine reset (not just a controller reset)
@@ -694,10 +699,10 @@ class HDC extends Component {
         drive.cbSector = drive.cbTransfer = driveType[3] || 512;    // bytes/sector (default is 512 if unspecified in the table)
 
         /*
-         * On a full machine reset, pass the current drive type to setCMOSDriveType() (a no-op on pre-CMOS machines)
+         * On a full machine reset, pass the current drive type to setCMOSDriveType() (a no-op on pre-CMOS machines).
          */
         if (fHard && this.chipset) {
-            this.chipset.setCMOSDriveType(iDrive, drive.type);
+            this.chipset.setCMOSDriveType(this.nInterface*2+iDrive, drive.type);
         }
 
         /*
@@ -810,7 +815,7 @@ class HDC extends Component {
      * associated with that type.
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {number} [type] to create a disk of the specified type, if no disk exists yet
      */
     verifyDrive(drive, type)
@@ -876,7 +881,7 @@ class HDC extends Component {
      * Since seekDrive() is for use with non-DMA requests, we use nBytes to specify the length of the entire transfer.
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {number} iSector (a "logical" sector number, relative to the entire disk, NOT a physical sector number)
      * @param {number} nSectors
      * @return {boolean} true if successful, false if invalid position request
@@ -971,14 +976,8 @@ class HDC extends Component {
      */
     loadDisk(iDrive, sDiskName, sDiskPath, fAutoMount)
     {
-        /*
-         * For now, if we're being initialized with ATAPI support, we assume a CD-ROM configuration,
-         * which doesn't preload disk images, so we pretend all is OK.  TODO: Consider "probing" the
-         * disk image to make sure something is out there.
-         */
-        if (this.fATAPI) return true;
-
         let drive = this.aDrives[iDrive];
+        if (!drive.type) return true;
         if (drive.fBusy) {
             this.notice("Drive " + iDrive + " busy");
             return true;
@@ -1016,7 +1015,7 @@ class HDC extends Component {
      * This is a callback issued by the Disk component once the load() operation has finished.
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {Disk} disk is set if the disk was successfully mounted, null if not
      * @param {string} sDiskName
      * @param {string} sDiskPath
@@ -1123,7 +1122,7 @@ class HDC extends Component {
         this.printMessageIO(port, undefined, addrFrom, "STATUS", b);
         /*
          * HACK: The HDC BIOS will not finish the HDC.XTC.DATA.CMD.INIT_DRIVE sequence unless it sees XTC.STATUS.REQ set again, nor will
-         * it read any of the XTC.DATA bytes returned from a HDC.XTC.DATA.CMD.REQUEST_SENSE command unless XTC.STATUS.REQ is set again, so
+         * it read any of the XTC.DATA bytes returned from a HDC.XTC.DATA.CMD.REQ_SENSE command unless XTC.STATUS.REQ is set again, so
          * we turn it back on if there are unprocessed data bytes.
          */
         if (this.regDataIndex < this.regDataTotal) {
@@ -1748,7 +1747,7 @@ class HDC extends Component {
         let drive = this.aDrives[iDrive];
 
         if (this.messageEnabled(Messages.HDC)) {
-            this.printMessage(this.idComponent + ".doATC(" + Str.toHexByte(bCmd) + "): " + HDC.aATACommands[bCmd] + (drive? "" : " (drive " + iDrive + " not present)"), true, true);
+            this.printMessage(this.idComponent + ".doATC(" + (this.nInterface*2+iDrive) + "," + Str.toHexByte(bCmd) + "): " + HDC.aATACommands[bCmd] + (drive? "" : " (drive " + iDrive + " not present)"), true, true);
         }
 
         if (!drive) return;
@@ -1780,8 +1779,7 @@ class HDC extends Component {
         switch (bCmd) {
 
         case HDC.ATC.COMMAND.RESET:                 // 0x08 (ATAPI)
-            if (this.fATAPI) {
-                this.resetDevice();
+            if (this.processReset(drive)) {
                 fProcessed = true;
             }
             break;
@@ -1793,8 +1791,9 @@ class HDC extends Component {
             fInterrupt = fProcessed = true;
             break;
 
-        case HDC.ATC.COMMAND.IDENTIFY:              // 0xEC (ATA-1)
-            if (!this.processIdentify(drive)) break;
+        case HDC.ATC.COMMAND.IDPACKET:              // 0xA1 (ATAPI)
+        case HDC.ATC.COMMAND.IDDEVICE:              // 0xEC (ATA-1)
+            if (!this.processIdentify(drive, bCmd)) break;
             /* falls through */
 
         case HDC.ATC.COMMAND.READ_DATA:             // 0x20 (ATA)
@@ -1994,7 +1993,7 @@ class HDC extends Component {
         let i;
         switch (bCmd) {
 
-        case HDC.XTC.DATA.CMD.REQUEST_SENSE:        // 0x03
+        case HDC.XTC.DATA.CMD.REQ_SENSE:        // 0x03
             this.beginResult(drive? drive.errorCode : HDC.XTC.DATA.ERR.NOT_READY);
             this.pushResult(b1);
             this.pushResult(b2);
@@ -2004,8 +2003,8 @@ class HDC extends Component {
              * also follows the 4 "sense bytes".  Interestingly, The HDC BIOS checks that data status byte for
              * XTC.DATA.STATUS.ERROR, but I have to wonder if it would have ever been set for this command....
              *
-             * The whole point of the HDC.XTC.DATA.CMD.REQUEST_SENSE command is to obtain details about a
-             * previous error, so if HDC.XTC.DATA.CMD.REQUEST_SENSE itself reports an error, what would that mean?
+             * The whole point of the HDC.XTC.DATA.CMD.REQ_SENSE command is to obtain details about a
+             * previous error, so if HDC.XTC.DATA.CMD.REQ_SENSE itself reports an error, what would that mean?
              */
             this.pushResult(HDC.XTC.DATA.STATUS.OK | bDrive);
             bCmd = -1;                              // mark the command as complete
@@ -2165,7 +2164,7 @@ class HDC extends Component {
      * doDMARead(drive, b, done)
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {number} b
      * @param {function(number,boolean)} done
      */
@@ -2186,7 +2185,7 @@ class HDC extends Component {
      * doDMAWrite(drive, b)
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {number} b
      * @return {number}
      */
@@ -2205,7 +2204,7 @@ class HDC extends Component {
      * doDMAWriteBuffer(drive, b)
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {number} b
      * @return {number}
      */
@@ -2224,7 +2223,7 @@ class HDC extends Component {
      * doDMAWriteFormat(drive, b)
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {number} b
      * @returns {number}
      */
@@ -2243,7 +2242,7 @@ class HDC extends Component {
      * doRead(drive, done)
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {function(number)} done (dataStatus is XTC.DATA.STATUS.OK or XTC.DATA.STATUS.ERROR; if error, then drive.errorCode should be set as well)
      */
     doRead(drive, done)
@@ -2287,7 +2286,7 @@ class HDC extends Component {
      * doWrite(drive, done)
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {function(number)} done (dataStatus is XTC.DATA.STATUS.OK or XTC.DATA.STATUS.ERROR; if error, then drive.errorCode should be set as well)
      */
     doWrite(drive, done)
@@ -2338,7 +2337,7 @@ class HDC extends Component {
      * doWriteBuffer(drive, done)
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {function(number)} done (dataStatus is XTC.DATA.STATUS.OK or XTC.DATA.STATUS.ERROR; if error, then drive.errorCode should be set as well)
      */
     doWriteBuffer(drive, done)
@@ -2393,7 +2392,7 @@ class HDC extends Component {
      * until the current track (or, in the case of a multi-track request, the current cylinder) has been exhausted.
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {function(number,boolean,Object,number)} [done] (number is next available byte from drive, or -1 if no more bytes available)
      * @param {boolean} [fAutoInc] (default is true to auto-increment)
      * @return {number} the requested byte, or -1 if unavailable
@@ -2414,6 +2413,7 @@ class HDC extends Component {
             if (drive.iByte < drive.buffer.length) {
                 b = drive.buffer[drive.iByte];
                 drive.iByte += inc;
+                if (done) done(b, false, obj, off);
             }
             return b;
         }
@@ -2481,7 +2481,7 @@ class HDC extends Component {
      * until the current track (or, in the case of a multi-track request, the current cylinder) has been exhausted.
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {number} b containing next byte to write
      * @return {number} (b unchanged; return -1 if command should be terminated)
      */
@@ -2539,7 +2539,7 @@ class HDC extends Component {
      * limit for bSector is (nSectors + bSectorStart).
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      */
     advanceSector(drive)
     {
@@ -2572,7 +2572,7 @@ class HDC extends Component {
      * tests required.
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {number} b containing next byte to write
      * @return {number} (b unchanged; return -1 if command should be terminated)
      */
@@ -2594,7 +2594,7 @@ class HDC extends Component {
      * writeFormat(drive, b)
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {number} b containing a format command byte
      * @return {number} (b if successful, -1 if command should be terminated)
      */
@@ -2625,21 +2625,34 @@ class HDC extends Component {
     }
 
     /**
-     * processIdentify(drive)
+     * processIdentify(drive, bCmd)
      *
-     * Worker for the IDENTIFY (ATA-1) command.  However, at this time, we support it only for ATAPI devices.
+     * Worker for the IDDEVICE (ATA-1) and IDPACKET (ATAPI) commands.
      *
      * @this {HDC}
      * @param {Drive} drive
-     * @return {boolean}
+     * @param {number} bCmd
+     * @return {boolean} (true if processed, false otherwise)
      */
-    processIdentify(drive)
+    processIdentify(drive, bCmd)
     {
         if (this.fATAPI) {
+
+            if (drive.type && bCmd == HDC.ATC.COMMAND.IDPACKET) {
+                return false;
+            }
+
+            if (!drive.type && bCmd == HDC.ATC.COMMAND.IDDEVICE) {
+                this.processReset(drive);
+                return false;
+            }
+
             this.initBuffer(drive);
+
             /*
-             * NOTE: The IDENTIFY DRIVE data is stored little-endian, and since LE is normally assumed,
-             * we don't bother with LE in these function signatures.  processPacket() is a different story.
+             * NOTE: The data for both IDENTIFY commands is stored little-endian, with one unusual exception: string data
+             * is returned with every even/odd byte pair swapped.  setString() takes this into account, by XOR'ing bit 0 of
+             * each character offset with 0x1.
              */
             let setByte = function(offset, value) {
                 drive.buffer[offset] = value & 0xff;
@@ -2652,14 +2665,30 @@ class HDC extends Component {
                 setWord(offset, value);
                 setWord(offset + 2, value >> 16);
             };
+            let setString = function(offset, value, length) {
+                if (!value) value = "";
+                for (let i = 0; i < length; i++) {
+                    setByte(offset + (i ^ 0x1), i < value.length? value.charCodeAt(i) : 0x20);
+                }
+            };
             /*
-             * TODO: There is MUCH work left to do here.  What, for example, does a real-world CD-ROM device report?
+             * TODO: Filling out a complete IDENTIFY response packet requires more work; hopefully this is good enough for now.
              */
-            setWord(HDC.ATC.IDENTIFY.CONFIG.OFFSET, HDC.ATC.IDENTIFY.CONFIG.SOFT_SECTORED);
-            setWord(HDC.ATC.IDENTIFY.CYLS, drive.nCylinders);
-            setWord(HDC.ATC.IDENTIFY.HEADS, drive.nHeads);
+            setWord(HDC.ATC.IDENTIFY.CONFIG.OFFSET, drive.type? HDC.ATC.IDENTIFY.CONFIG.FIXED : 0x8580);
+            if (drive.type) {
+                setWord(HDC.ATC.IDENTIFY.CYLS, drive.nCylinders);
+                setWord(HDC.ATC.IDENTIFY.HEADS, drive.nHeads);
+                setWord(HDC.ATC.IDENTIFY.SECTOR_BYTES, drive.cbSector);
+                setWord(HDC.ATC.IDENTIFY.SECTORS, drive.nSectors);
+            }
+            setString(HDC.ATC.IDENTIFY.SERIAL_NUMBER, "PCJS-20190528", 20);
+            setWord(HDC.ATC.IDENTIFY.BUFFER_TYPE, 3);
+            setWord(HDC.ATC.IDENTIFY.BUFFER_SIZE, 512);
+            setString(HDC.ATC.IDENTIFY.FIRMWARE_REV, "0.1", 8);
+            setString(HDC.ATC.IDENTIFY.MODEL_NUMBER, "PCJS CD-ROM", 40);
+            if (!drive.type) setByte(HDC.ATC.IDENTIFY.CAPABILITY, 0x0B);
             drive.useBuffer = true;
-            if (DEBUG) this.dbg.stopCPU();
+            if (MAXDEBUG) this.dbg.stopCPU();
             return true;
         }
         return false;
@@ -2674,12 +2703,12 @@ class HDC extends Component {
     processPacket(drive)
     {
         let hdc = this;
-        let limit = drive.buffer.length;
+        let limit = drive.buffer.length, error = 0;
         let format, lba, num, page = 0, pageCode, pageControl;
         let bPacketCmd, off, iChunk, offChunk, lenChunk, lenTotal, offBuffer, nChunks, nChunkErrors;
         /*
          * NOTE: Packet data is typically stored big-endian, and since BE is not normally assumed,
-         * we include BE in the appropriate function signatures.  processIdentify() is a different story.
+         * we include BE in the appropriate function signatures.
          */
         let getBits = function(offset, bit, length) {
             return (drive.buffer[offset] >> bit) & ((1 << length) - 1);
@@ -2709,7 +2738,7 @@ class HDC extends Component {
         let setString = function(offset, value, length) {
             if (!value) value = "";
             for (let i = 0; i < length; i++) {
-                setByte(offset + i, i < value.length? value.charCodeAt(i) : 0);
+                setByte(offset + i, i < value.length? value.charCodeAt(i) : 0x20);
             }
         };
         let setWordBE = function(offset, value) {
@@ -2725,7 +2754,10 @@ class HDC extends Component {
              * TODO: Deal with errors.  In addition, if nChunkErrors is non-zero, then at least one of the
              * requested chunks returned an error (or simply failed to return any data), so deal with that, too.
              */
-            if (!fData) {
+            if (error) {
+                hdc.regStatus = HDC.ATC.STATUS.ERROR;
+            }
+            else if (!fData) {
                 hdc.regStatus = HDC.ATC.STATUS.READY;
                 hdc.regSecCnt = HDC.ATC.SECCNT.PACKET_IO | HDC.ATC.SECCNT.PACKET_CD;
             } else {
@@ -2783,7 +2815,7 @@ class HDC extends Component {
         }
 
         switch(bPacketCmd) {
-        case HDC.ATC.PACKET.COMMAND.TEST_UNIT:
+        case HDC.ATC.PACKET.COMMAND.TEST_UNIT:  // 0x00
             /*
              * If the TEST UNIT READY command status is GOOD, then there is no further response;
              * otherwise, we have a CHECK CONDITION, which will require adding the REQUEST SENSE command.
@@ -2793,33 +2825,37 @@ class HDC extends Component {
              * in bits 5-7 of byte 1, but it was later spec'ed (circa 2010) as a 6-byte packet with no LUN
              * and a CONTROL value in byte 5.
              */
-            bPacketCmd = 0;             // nothing to return, so we can wrap up this command now
+            bPacketCmd = 0;                     // nothing to return, so we can wrap up this command now
             break;
 
-        case HDC.ATC.PACKET.COMMAND.INQUIRY:
-            limit = getLength(3);       // in ATAPI (circa 2001), length was simply drive.buffer[4]; e.g., 36 (0x24) bytes
-            setByte(0, 0x05);           // 0x05 (bits 0-4, the Peripheral Device Type, is 0x05 for CD-ROM devices)
-            setByte(1, 0x80);           // 0x80 (bit 7, the RMB or Removable Media Bit, must be set for CD-ROM devices)
-            setByte(2, 0x00);           // 0x00 (bits 0-2 == ANSI version, bits 3-5 == ECMA version, bits 6-7 == ISO version)
-            setByte(3, 0x21);           // 0x21 (bits 0-3 == Response Data Format (1), bits 4-7 == ATAPI version (2))
-            setByte(4, 31);             // number of additional bytes following this one
-            setBytes(5, 0, 3);          // these bytes were defined in later specs, but we're sticking with earlier (circa 2001) specs for now
+        case HDC.ATC.PACKET.COMMAND.REQ_SENSE:  // 0x03
+            limit = 0;                          // TODO
+            break;
+
+        case HDC.ATC.PACKET.COMMAND.INQUIRY:    // 0x12
+            limit = getLength(3);               // in ATAPI (circa 2001), length was simply drive.buffer[4]; e.g., 36 (0x24) bytes
+            setByte(0, 0x05);                   // 0x05 (bits 0-4, the Peripheral Device Type, is 0x05 for CD-ROM devices)
+            setByte(1, 0x80);                   // 0x80 (bit 7, the RMB or Removable Media Bit, must be set for CD-ROM devices)
+            setByte(2, 0x00);                   // 0x00 (bits 0-2 == ANSI version, bits 3-5 == ECMA version, bits 6-7 == ISO version)
+            setByte(3, 0x21);                   // 0x21 (bits 0-3 == Response Data Format (1), bits 4-7 == ATAPI version (2))
+            setByte(4, 31);                     // number of additional bytes following this one
+            setBytes(5, 0, 3);                  // these bytes were defined in later specs, but we're sticking with earlier (circa 2001) specs for now
             setString(8, "PCJS.ORG", 8);
             setString(16, drive.name, 16);
             setString(32, "1.0", 4);
             break;
 
-        case HDC.ATC.PACKET.COMMAND.READ:
-            lba = getLongBE(2);         // LBA
-            num = getWordBE(7);         // number of blocks
-            off = lba << 11;            // shift left 11 bits to multiply by 2Kb
+        case HDC.ATC.PACKET.COMMAND.READ:       // 0x28
+            lba = getLongBE(2);                 // LBA
+            num = getWordBE(7);                 // number of blocks
+            off = lba << 11;                    // shift left 11 bits to multiply by 2Kb
             limit = num << 11;
             this.initBuffer(drive, limit);
-            nChunks = 1;                // preset chunk request count to 1
+            nChunks = 1;                        // preset chunk request count to 1
             nChunkErrors = 0;
-            iChunk = off >>> 15;        // iChunk is the starting 32Kb chunk
-            offChunk = off & 0x7fff;    // offChunk is the starting offset within that chunk
-            lenTotal = limit;           // lenTotal is number of bytes left to read
+            iChunk = off >>> 15;                // iChunk is the starting 32Kb chunk
+            offChunk = off & 0x7fff;            // offChunk is the starting offset within that chunk
+            lenTotal = limit;                   // lenTotal is number of bytes left to read
             offBuffer = 0;
             while (lenTotal > 0) {
                 lenChunk = 32768 - offChunk;
@@ -2830,59 +2866,113 @@ class HDC extends Component {
                 offChunk = 0;
                 iChunk++;
             }
-            if (!--nChunks) done(true); // if chunk request count drops to zero immediately, all chunks must have been cached
+            if (!--nChunks) done(true);         // if chunk request count drops to zero immediately, all chunks must have been cached
             bPacketCmd = -1;
             break;
 
-        case HDC.ATC.PACKET.COMMAND.SEEK:
-            lba = getLongBE(2);         // TODO: Do something with the Logical Block Address
-            bPacketCmd = 0;             // nothing to return, so we can wrap up this command now
+        case HDC.ATC.PACKET.COMMAND.SEEK:       // 0x2B
+            lba = getLongBE(2);                 // TODO: Do something with the Logical Block Address
+            bPacketCmd = 0;                     // nothing to return, so we can wrap up this command now
             break;
 
-        case HDC.ATC.PACKET.COMMAND.READ_TOC:
+        case HDC.ATC.PACKET.COMMAND.READ_TOC:   // 0x43
+            /*
+                Sample requests:
+
+                    1) 0030:c13d65b0 43 02 00 00 00 00 00 03-24 40 00 00 00 00 00 00
+                    2) 0030:c13d65b0 43 02 00 00 00 00 00 03-24 00 00 00 00 00 00 00
+
+                Sample responses:
+
+                    1) 0030:c1a05f6c 00 0a 01 01 00 14 01 00-00 00 02 00 (6 words)
+                    2) 0030:c1a05f6c 00 12 01 01 00 14 01 00-00 00 02 00 00 14 aa 00 00 3f 2c 42 (10 words)
+             */
             limit = getLength(7);
             format = getBits(2, 0, 4);
             switch(format) {
-            case 0x0:                   // track/session number (starting track number for which the data will be returned)
-                setWordBE(0, 10);       // 0-1: TOC data length
-                setByte(2, 1);          // 2: first track number
-                setByte(3, 1);          // 3: last track number
-                                        // beginning of TOC track descriptor(s)
-                setByte(4, 0);          // 4: reserved
-                setByte(5, 0x14);       // 5: bits 7-4 = ADR.CUR_POS; bits 3-0 = CONTROL.DATA_TRACK
-                setByte(6, 1);          // 6: track number
-                setByte(7, 0);          // 7: reserved
-                setLongBE(8, 0);        // 8-11: LBA
+            case 0x0:                           // track/session number (starting track number for which the data will be returned)
+                setWordBE(0, 10);               // 0-1: TOC data length
+                setByte(2, 1);                  // 2: first track number
+                setByte(3, 1);                  // 3: last track number
+                                                // beginning of TOC track descriptor(s)
+                setByte(4, 0);                  // 4: reserved
+                setByte(5, 0x14);               // 5: bits 7-4 = ADR.CUR_POS; bits 3-0 = CONTROL.DATA_TRACK
+                setByte(6, 1);                  // 6: track number
+                setByte(7, 0);                  // 7: reserved
+                setLongBE(8, 0);                // 8-11: LBA
                 break;
 
             default:
                 if (this.messageEnabled(Messages.HDC)) {
                     this.printMessage(this.idComponent + ".packet(" + Str.toHexByte(bPacketCmd) + "): unsupported format " + format, true);
                 }
-                if (DEBUG) this.dbg.stopCPU();
-                bPacketCmd = -1;        // TODO: Add support for other READ_TOC formats
+                if (MAXDEBUG) this.dbg.stopCPU();
+                bPacketCmd = -1;                // TODO: Add support for other READ_TOC formats
                 break;
             }
             break;
 
-        case HDC.ATC.PACKET.COMMAND.MODE_SENSE:
+        case HDC.ATC.PACKET.COMMAND.PLAY_AUDIO: // 0x45
+            /*
+                Sample request:
+
+                0030:c13d65b0 45 00 00 00 00 96 00 00-00 00 00 00 00 00 00 00 E...............
+             */
+            bPacketCmd = 0;                     // nothing to return, so we can wrap up this command now
+            // error = -1;
+            break;
+
+        case HDC.ATC.PACKET.COMMAND.MODE_SENSE: // 0x5A
             limit = getLength(7);
             pageCode = getBits(2, 0, 6);
             pageControl = getBits(2, 6, 2);
+            switch(pageCode) {
+            case HDC.ATC.PACKET.PAGECODE.RW_ERRREC:     // 0x01
             /*
+                Sample requests:
+
+                    1) 0030:c13d65b0 5a 00 01 00 00 00 00 00-10 00 00 00 00 00 00 00 Z...............
+                    2) 0030:c13d65b0 5a 00 41 00 00 00 00 00-10 00 00 00 00 00 00 00 Z.A.............
+
+                The word at offset 7 specifies a Parameter List Length (aka limit) of 0x0010, so we'll
+                restrict our reponse to that many bytes.
+
+                Sample responses (0x10 bytes):
+
+                    1) 0030:c1a06294 00 0e 01 00 00 00 00 00-01 06 00 01 00 00 00 00 ................
+                    2) 0030:c1a06294 00 0e 01 00 00 00 00 00-01 06 00 00 00 00 00 00 ................
+             */
+                setBytes(0, 0, limit);
+                setWordBE(0, limit-2);
+                setByte(2, 1);          // Medium Type Code (vendor-specific. so I'm not sure what this means)
+                page = 8;
+                setByte(page, pageCode);
+                setByte(page+1, limit-8-2);
+                break;
+
+            case HDC.ATC.PACKET.PAGECODE.CD_STATUS:     // 0x2A
+            /*
+                Sample request:
+
+                    0030:c13d7ba8 5a 00 2a 00 00 00 00 00-1c 00 00 00 00 00 00 00 Z.*.............
+
+                The word at offset 7 specifies a Parameter List Length (aka limit) of 0x001C, so we should
+                restrict our reponse to that many bytes; however, the sample VirtualBox response below didn't
+                appear to honor that limit (unless I'm misunderstanding how it's interpreted).
+
                 Sample response:
 
-                0b8c:000000f8: 00 26 00 00 00 00 00 00-2a 1e 08 00 71 00 29 00  .&......*...q.).
-                0b8c:00000108: 16 00 00 02 00 80 16 00-00 00 00 00 00 00 00 00  ................
-                0b8c:00000118: 00 00 00 01 00 00 00 00
+                    0b8c:000000f8: 00 26 00 00 00 00 00 00-2a 1e 08 00 71 00 29 00  .&......*...q.).
+                    0b8c:00000108: 16 00 00 02 00 80 16 00-00 00 00 00 00 00 00 00  ................
+                    0b8c:00000118: 00 00 00 01 00 00 00 00
 
                 The first 8 bytes are a Mode Parameter Header.  The first word (0x0026) is the number of bytes
                 in the entire response (excluding the first word).  There are some other bits that can be set in
                 the MPH that we'll worry about later.
 
-                The first (and in this case only) "page" begins at the 9th byte with a Page Code (0x2A) followed by
+                The first (and in this case only) "page" begins at offset 8 with a Page Code (0x2A) followed by
                 a length byte (0x1E) indicating the number of bytes in the rest of the "page".  Deciphering the above
-                sample, we have the following 32 bytes:
+                sample, here are the first 16 bytes (I'm not sure what the rest of the bytes beyond that point are).
 
                 Byte    Value   Bit 7   Bit 6   Bit 5   Bit 4   Bit 3   Bit 2   Bit 1   Bit 0
                 ----    -----   -----   -----   -----   -----   -----   -----   -----   -----
@@ -2902,30 +2992,12 @@ class HDC extends Component {
                   13     80h
                   14     16h    ----------Current Read Speed Selected (KBps) MSB-------------
                   15     00h
-                  16     00h
-                  17     00h
-                  18     00h
-                  19     00h
-                  20     00h
-                  21     00h
-                  22     00h    (From this point on, I'm not sure what any of these bytes are)
-                  23     00h
-                  24     00h
-                  25     00h
-                  26     00h
-                  27     01h    (Not sure what this is about, either)
-                  28     00h
-                  29     00h
-                  30     00h
-                  31     00h
              */
-            switch(pageCode) {
-            case HDC.ATC.PACKET.PAGECODE.CD_STATUS:
-                setBytes(0, 0, 30);
-                setWordBE(0, 30-2);
+                setBytes(0, 0, limit);          // previously hard-coded to 30
+                setWordBE(0, limit-2);          // previously hard-coded to 30-2
                 page = 8;
                 setByte(page, pageCode);
-                setByte(page+1, 22-2);
+                setByte(page+1, limit-8-2);     // previously hard-coded to 22-2
                 setByte(page+2, 0x08);
                 setByte(page+4, 0x71);
                 setByte(page+6, 0x29);
@@ -2939,39 +3011,46 @@ class HDC extends Component {
                 if (this.messageEnabled(Messages.HDC)) {
                     this.printMessage(this.idComponent + ".packet(" + Str.toHexByte(bPacketCmd) + "): unsupported page code " + pageCode, true);
                 }
-                if (DEBUG) this.dbg.stopCPU();
+                if (MAXDEBUG) this.dbg.stopCPU();
                 bPacketCmd = -1;        // TODO: Add support for other Page Codes
                 break;
             }
             break;
 
         default:
-            if (DEBUG) this.dbg.stopCPU();
+            if (MAXDEBUG) this.dbg.stopCPU();
             bPacketCmd = -1;            // TODO: Not sure what to do, so currently we choose to do nothing
             break;
         }
-        if (bPacketCmd >= 0) done(bPacketCmd > 0);
+        if (bPacketCmd >= 0) done(bPacketCmd > 0, error);
     }
 
     /**
-     * resetDevice()
+     * processReset(drive)
      *
      * Worker for the DEVICE RESET (ATAPI) command, as well as other operations that are supposed to
-     * store "signature" bytes in the device registers, based on the level of PACKET (ATAPI) command support.
+     * store "signature" bytes in the device registers, based on the level of packet (ATAPI) command support.
      *
      * @this {HDC}
+     * @param {Drive} drive
+     * @return {boolean}
      */
-    resetDevice()
+    processReset(drive)
     {
-        this.regSecCnt = 0x01;
-        this.regSecNum = 0x01;
         if (this.fATAPI) {
-            this.regCylLo = 0x14;
-            this.regCylHi = 0xEB;
-        } else {
-            this.regCylLo = this.regCylHi = 0;
+            this.regSecCnt = 0x01;
+            this.regSecNum = 0x01;
+            if (!drive.type) {
+                this.regCylLo = 0x14;
+                this.regCylHi = 0xEB;
+            } else {
+                this.regCylLo = this.regCylHi = 0;
+            }
+            this.regDrvHd = 0;
+            if (MAXDEBUG) this.dbg.stopCPU();
+            return true;
         }
-        this.regDrvHd = 0;
+        return false;
     }
 
     /**
@@ -3085,7 +3164,7 @@ class HDC extends Component {
      * NOTE: This function is not currently used.
      *
      * @this {HDC}
-     * @param {Object} drive
+     * @param {Drive} drive
      * @param {function(number)} done (dataStatus is XTC.DATA.STATUS.OK or XTC.DATA.STATUS.ERROR; if error, then drive.errorCode should be set as well)
      */
     // doFormat(drive, done)
@@ -3276,6 +3355,7 @@ HDC.aDriveTypes = [
      *  23   306    4   no  336
      */
     {
+         0: [1024,16,21,2048],  // arbitrary (reserved for CD-ROMs)
          1: [306,  4],          // 10Mb (10.16Mb:  306*4*17*512 or 10,653,696 bytes)
          2: [615,  4],          // 20Mb (20.42Mb:  615*4*17*512 or 21,411,840 bytes) (default ATC drive type)
          3: [615,  6],          // 31Mb (30.63Mb:  615*6*17*512 or 32,117,760 bytes)
@@ -3310,6 +3390,7 @@ HDC.aDriveTypes = [
      * otherwise, use drive type 35 (0x23), which uses the drive's full capacity of 34 sectors per track.
      */
     {
+         0: [1024,16,21,2048],  // arbitrary (reserved for CD-ROMs)
          1: [306,  4],          // 10Mb (10.16Mb:  306*4*17*512 or 10,653,696 bytes) (same as IBM)
          2: [615,  4],          // 20Mb (20.42Mb:  615*4*17*512 or 21,411,840 bytes) (same as IBM)
          3: [615,  6],          // 31Mb (30.63Mb:  615*6*17*512 or 32,117,760 bytes) (same as IBM)
@@ -3489,9 +3570,10 @@ HDC.ATC = {
          * Additional commands go here.  As for when these commands were introduced, I may try to include
          * that information parenthetically, but I'm not going to pretend this is in any way authoritative.
          */
-        IDENTIFY:    0xEC,      // (ATA-1)
-        RESET:       0x08,      // (ATAPI)
-        PACKET:      0xA0       // (ATAPI)
+        RESET:       0x08,      // Device Reset (ATAPI)
+        PACKET:      0xA0,      // Packet Request (ATAPI)
+        IDPACKET:    0xA1,      // Identify Packet Device (ATAPI)
+        IDDEVICE:    0xEC       // Identify Device (ATA-1)
     },
     FDR: {                      // this.regFDR
         PORT1:      0x3F6,
@@ -3585,10 +3667,12 @@ HDC.ATC.IDENTIFY = {
 HDC.ATC.PACKET = {
     COMMAND: {
         TEST_UNIT:      0x00,   // Test Unit Ready
+        REQ_SENSE:      0x03,   // Request Sense
         INQUIRY:        0x12,   // Inquiry
         READ:           0x28,   // Read
         SEEK:           0x2B,   // Seek
         READ_TOC:       0x43,   // Read TOC (Table of Contents), PMA (Program Memory Area), and ATIP (Absolute Time in Pre-Groove)
+        PLAY_AUDIO:     0x45,   // Play Audio
         MODE_SENSE:     0x5A    // Mode Sense
     },
     /*
@@ -3597,6 +3681,7 @@ HDC.ATC.PACKET = {
      * on Page Code contents, check out the ANSI X3.304-1997 spec (e.g., page 72 for Page Code 0x2A).
      */
     PAGECODE: {
+        RW_ERRREC:      0x01,   // Read-Write Error Recovery Page
         CD_STATUS:      0x2A    // CD Capabilities and Mechanical Status Page
     },
     ADR: {                      // ADR Q sub-channel values (0x4-0xF reserved)
@@ -3662,7 +3747,7 @@ HDC.XTC = {
         CMD: {
             TEST_READY:     0x00,       // Test Drive Ready
             RECALIBRATE:    0x01,       // Recalibrate
-            REQUEST_SENSE:  0x03,       // Request Sense Status
+            REQ_SENSE:      0x03,       // Request Sense Status
             FORMAT_DRIVE:   0x04,       // Format Drive
             READ_VERF:      0x05,       // Read Verify
             FORMAT_TRK:     0x06,       // Format Track
@@ -3744,7 +3829,7 @@ HDC.XTC = {
  * HDC Command Sequences
  *
  * Unlike the FDC, all the HDC commands have fixed-length command request sequences (well, OK, except for
- * HDC.XTC.DATA.CMD.INIT_DRIVE) and fixed-length response sequences (well, OK, except for HDC.XTC.DATA.CMD.REQUEST_SENSE),
+ * HDC.XTC.DATA.CMD.INIT_DRIVE) and fixed-length response sequences (well, OK, except for HDC.XTC.DATA.CMD.REQ_SENSE),
  * so a table of byte-lengths isn't much use, but having names for all the commands is still handy for debugging.
  */
 HDC.aATACommands = {
@@ -3757,16 +3842,19 @@ HDC.aATACommands = {
     0x70: "Seek",                   // ATA
     0x90: "Diagnose",               // ATA
     0x91: "Set Parameters",         // ATA
-    0xA0: "Packet",                 // ATAPI
-    0xEC: "Identify Drive"          // ATA-1
+    0xA0: "Packet Request",         // ATAPI
+    0xA1: "Identify Packet Device", // ATAPI
+    0xEC: "Identify Device"         // ATA-1
 };
 
 HDC.aATAPICommands = {
     [HDC.ATC.PACKET.COMMAND.TEST_UNIT]:     "Test Unit Ready",
+    [HDC.ATC.PACKET.COMMAND.REQ_SENSE]:     "Request Sense",
     [HDC.ATC.PACKET.COMMAND.INQUIRY]:       "Inquiry",
     [HDC.ATC.PACKET.COMMAND.READ]:          "Read",
     [HDC.ATC.PACKET.COMMAND.SEEK]:          "Seek",
     [HDC.ATC.PACKET.COMMAND.READ_TOC]:      "Read TOC",
+    [HDC.ATC.PACKET.COMMAND.PLAY_AUDIO]:    "Play Audio",
     [HDC.ATC.PACKET.COMMAND.MODE_SENSE]:    "Mode Sense",
 };
 
