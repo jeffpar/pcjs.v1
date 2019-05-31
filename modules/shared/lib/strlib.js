@@ -843,21 +843,20 @@ class Str {
 
             case 'f':
                 s = arg + "";
-                if (precision > 0) {
-                    width -= (precision + 1);
+                if (precision >= 0) {
+                    s = arg.toFixed(precision);
                 }
                 if (s.length < width) {
                     if (flags.indexOf('0') >= 0) {
-                        if (arg < 0) width--;
-                        s = ("0000000000" + Math.abs(arg)).slice(-width);
+                        if (arg < 0) {
+                            width--;
+                            s = s.substr(1);
+                        }
+                        s = ("0000000000" + s).slice(-width);
                         if (arg < 0) s = '-' + s;
                     } else {
                         s = ("          " + s).slice(-width);
                     }
-                }
-                if (precision > 0) {
-                    arg = Math.round((arg - Math.trunc(arg)) * Math.pow(10, precision));
-                    s += '.' + ("0000000000" + Math.abs(arg)).slice(-precision);
                 }
                 text += s;
                 break;
