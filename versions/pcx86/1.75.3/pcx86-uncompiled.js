@@ -66856,15 +66856,13 @@ class HDC extends Component {
         /*
          * Any machine-specific 'drives' settings apply only the first HDC interface.
          */
-        if (!this.nInterface) {
-            let aDriveConfigs = cmp.getMachineParm('drives');
-            if (aDriveConfigs) {
-                if (typeof aDriveConfigs == "string") {
-                    this.sDriveConfigs = aDriveConfigs;
-                } else {
-                    this.aDriveConfigs = aDriveConfigs;
-                    this.sDriveConfigs = "";
-                }
+        let aDriveConfigs = cmp.getMachineParm(this.nInterface? 'cdromDrives' : 'drives');
+        if (aDriveConfigs) {
+            if (typeof aDriveConfigs == "string") {
+                this.sDriveConfigs = aDriveConfigs;
+            } else {
+                this.aDriveConfigs = aDriveConfigs;
+                this.sDriveConfigs = "";
             }
         }
 

@@ -4,10 +4,6 @@ title: "More Old CD-ROMs and Gotchas"
 date: 2019-06-01 10:00:00
 permalink: /blog/2019/06/01/
 preview: https://cds005.pcjs.org/microsoft/reference/Bookshelf-Windows-1991/BSWIN91.png
-machines:
-  - id: ibm5170
-    type: pcx86
-    config: /disks/pcx86/drives/cdrom/machine.xml
 ---
 
 Before acquiring a copy of the 1988 [Microsoft Programmer's Library 1.0 CD-ROM](/blog/2019/05/31/),
@@ -33,9 +29,9 @@ And initially, things looked very promising:
 
 ![Bookshelf for Windows 1991 - Install 4 of 4](/blog/images/BSWIN31-Install4of4.png)
 
-And of course, my first reaction was: what just went wrong with my new CD-ROM emulation?
+My first reaction to the "Fatal Error": what just went wrong with my new CD-ROM emulation?
 
-But even though this was a 27-year-old error message, I decided to [Google It](https://www.google.com/search?q=CloseFontProgress+%22error+writing+to+the+system+setup+file%22),
+Even though this was a 27-year-old error message, I decided to [Google It](https://www.google.com/search?q=CloseFontProgress+%22error+writing+to+the+system+setup+file%22),
 and I got back exactly ONE hit... on my OWN website:
 
 [![CloseFontProgress "error writing to the system setup file"](/blog/images/Google-Q101464.png)](https://jeffpar.github.io/kbarchive/kb/101/Q101464/)
@@ -52,9 +48,10 @@ was successful.
 
 ![Bookshelf for Windows 1991 - Install Done](/blog/images/BSWIN31-InstallDone.png)
 
-You can give it a try yourself in the [machine](#ibm-pc-at-with-atapi-cd-rom-support) below.  I did not
-preinstall **Bookshelf for Windows**, because I wouldn't want to deprive you of the authentic experience
-of installing buggy software from 1992 and choosing whichever work-around works best for you.
+You can give it a try yourself in this [IBM PC AT with ATAPI CD-ROM Support](/disks/pcx86/drives/cdrom/).
+I did not preinstall **Bookshelf for Windows** in that machine, because I wouldn't want to deprive you
+of the authentic experience of installing buggy software from 1992 and choosing whichever "Fatal Error"
+work-around works best for you.
 
 ## Pandora's Box (1999)
 
@@ -98,7 +95,7 @@ main executable to PANDORA.ICD and calling the SafeDisc loader PANDORA.EXE.  It 
 ## The Art of Software Preservation
 
 **Pandora's Box** illustrates more than just the obvious principle that "copy-protected software is hard to
-copy", to which I've already [alluded](/blog/2019/05/05/#the-software-preservation-quandry)".
+copy", to which I've already [alluded](/blog/2019/05/05/#the-software-preservation-quandry).
 
 More than that, it shows that there's more to preservation than simply figuring out how to "copy the bits".
 There is also a history associated with each piece of software that needs to be researched, captured, and
@@ -106,7 +103,7 @@ preserved as well.  And that history may span a variety of obsolete media, inclu
 articles, advertisements, newsletters, etc) and online media (product pages and support articles that have
 been deleted, FTP servers that have been decomissioned, etc).
 
-The worst-case scenario is software that required a live server to authenticate users or provide some sort
+The worst-case scenario is software that requires a live server to authenticate users or provide some sort
 of virtual environment -- a scenario that has tended to get more attention and hand-wringing lately, with the
 recent rise and fall of various Internet-enabled games.
 
@@ -130,9 +127,8 @@ their snapshots to the Internet Archive.  So with a bit more work, it's possible
 download the patch for **Pandora's Box**, eliminate the copy protection, and preserve another fine piece of software
 for many puzzle-loving generations to come.
 
-## IBM PC AT with ATAPI CD-ROM Support
-
-{% include machine.html id="ibm5170" %}
+NOTE: **Pandora's Box** does not run in any PCjs machines at this time.  The machine running [Windows 95](/disks/pcx86/windows/win95/4.00.950/)
+is the best candidate, but PCjs ATAPI CD-ROM support isn't quite up to the job yet.
 
 *[@jeffpar](https://jeffpar.com)*  
 *June 1, 2019*
