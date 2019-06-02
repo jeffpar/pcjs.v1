@@ -21,6 +21,9 @@ to support ATAPI commands was the simplest way to [connect a simulated CD-ROM dr
 ## Bookshelf for Windows (1991)
 
 Once I had CD-ROM support limping along, I decided to try **Bookshelf for Windows** on Windows 3.1.
+
+![Bookshelf for Windows 1991](https://cds005.pcjs.org/microsoft/reference/Bookshelf-Windows-1991/BSWIN91.png)
+
 And initially, things looked very promising:
 
 ![Bookshelf for Windows 1991 - Install 1 of 4](/blog/images/BSWIN31-Install1of4.png)
@@ -56,15 +59,18 @@ work-around works best for you.
 ## Pandora's Box (1999)
 
 In other recent, coincidental, and entirely unrelated news, a friend was trying to create a preservation
-copy of a 20-year-old Microsoft CD-ROM entertainment title called **Pandora's Box**.  There were no problems
-cloning the CD-ROM, and the software would install fine from the clone, but when it was run, it would either
-crash or display "Please insert the correct CD-ROM....", depending on the machine and operating system
+copy of a 20-year-old Microsoft CD-ROM entertainment title called **Pandora's Box**.
+
+![Pandora's Box](https://cds001.pcjs.org/microsoft/games/Pandoras-Box/Pandoras-Box.png)
+
+There were no problems cloning the CD-ROM, and the software would install fine from the clone, but when it was run,
+it would either crash or display "Please insert the correct CD-ROM....", depending on the machine and operating system
 being used.
 
 ![Pandora's Box - Unpatched](https://cds001.pcjs.org/microsoft/games/Pandoras-Box/WindowsXP-PandorasBox-ISO-Unpatched.png)
 
 This led one to believe there was something wrong with the copy -- and there was, because it turns out
-that **Pandora's Box** was one many software titles from the late 1990s that used a third-party copy-protection
+that **Pandora's Box** was one of many software titles from the late 1990s that used a third-party copy-protection
 technology called "SafeDisc".  Suffice to say that if the game's EXE file was accompanied by an ICD file,
 along with other files such as CLOKSPL.EXE, then it's a safe bet the CD-ROM was protected by SafeDisc.
 
@@ -107,7 +113,7 @@ The worst-case scenario is software that requires a live server to authenticate 
 of virtual environment -- a scenario that has tended to get more attention and hand-wringing lately, with the
 recent rise and fall of various Internet-enabled games.
 
-In the case of **Pandora's Box**, the [CD insert](https://cds001.pcjs.org/microsoft/games/Pandoras-Box/Pandoras_Box.pdf)
+In the case of **Pandora's Box**, the [CD insert](https://cds001.pcjs.org/microsoft/games/Pandoras-Box/Pandoras-Box.pdf)
 said to visit [http://www.microsoft.com/games/pandorasbox](http://www.microsoft.com/games/pandorasbox).
 
 That's a dead end now, but at least it's a starting point.  The problem I ran into with **Bookshelf
