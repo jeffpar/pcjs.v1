@@ -7,7 +7,7 @@ preview: https://cds005.pcjs.org/microsoft/reference/Bookshelf-Windows-1991/BSWI
 machines:
   - id: ibm5170
     type: pcx86
-    config: disks/pcx86/drives/cdrom/machine.xml
+    config: /disks/pcx86/drives/cdrom/machine.xml
 ---
 
 Before obtaining a copy of the [Microsoft Programmer's Library 1.0 CD-ROM](/blog/2019/05/31/),
@@ -61,7 +61,7 @@ You can give it a try yourself in the [machine](#ibm-pc-at-with-atapi-cd-rom-sup
 In other recent, coincidental, and entirely unrelated news, a friend was trying to create a preservation
 copy of a 20-year-old Microsoft CD-ROM entertainment title called "Pandora's Box".  There were no problems
 cloning the CD-ROM, and the software would install OK from the clone, but when it was run, it would either
-crash or say "Please insert the correct CD-ROM....", depending on the machine and operating system being used:
+crash or say "Please insert the correct CD-ROM....", depending on the machine and operating system being used.
 
 ![Pandora's Box - Unpatched](https://cds001.pcjs.org/microsoft/games/Pandoras-Box/WindowsXP-PandorasBox-ISO-Unpatched.png)
 
@@ -87,7 +87,7 @@ website:
 > If you do not have a computer with a Pentium III processor and do not recieve this error upon startup,
 > then there is no need to patch your existing setup.
 
-One important side-effect of the patch: the copy-protection was removed.  Now whether that's because the
+One important side-effect of the patch: the copy-protection was removed.  Whether that's because the
 copy-protection itself was responsible in some way for the bug, or because the copy-protection simply
 made a conventional patch too difficult to perform, is unclear.  If the latter, then the makers of
 "SafeDisc" (or Microsoft) must not have thought through the implications of encrypting and renaming the
@@ -97,26 +97,31 @@ main executable to PANDORA.ICD and calling the SafeDisc loader PANDORA.EXE.  It 
 ## The Art of Software Preservation
 
 Pandora's Box illustrates more than just the obvious principle that "copy-protected software is hard to
-copy", which I've already alluded to in "[Copy Protection and Preservation](/blog/2019/05/05/#the-software-preservation-quandry)".
-It also shows that there's more to preservation than simply figuring out how "copy the bits".  There is
-usually also a history associated with software that needs to be researched, captured, and preserved
-as well.  And that history may span a variety of obsolete media, including print media (magazine articles,
-advertisements, newsletters, etc) and online media (product pages and support articles that have been deleted,
-FTP servers that have been decomissioned, etc).
+copy", to which I've already [alluded](/blog/2019/05/05/#the-software-preservation-quandry)".
+
+More than that, it shows that there's more to preservation than simply figuring out how to "copy the bits".
+There is also a history associated with each piece of software that needs to be researched, captured, and
+preserved as well.  And that history may span a variety of obsolete media, including print media (magazine
+articles, advertisements, newsletters, etc) and online media (product pages and support articles that have
+been deleted, FTP servers that have been decomissioned, etc).
+
+The worst-case scenario is software that required a live server to authenticate users or provide some sort
+of virtual environment -- a scenario that has tended to get more attention and hand-wringing lately, with the
+recent rise and fall of various Internet-enabled games.
 
 In the case of Pandora's Box, the [CD insert](https://cds001.pcjs.org/microsoft/games/Pandoras-Box/Pandoras_Box.pdf)
 said to visit [http://www.microsoft.com/games/pandorasbox](http://www.microsoft.com/games/pandorasbox).
 
-Well, that may be a dead end now, but at least it's *something*.  Whereas the problem I ran into with
-Bookshelf for Windows not only predated websites, but even if websites *had* existed at that time, it's
-unlikely that a "Bookshelf for Windows" web page would have linked to any KB articles.  Companies
-don't like mixing Product Support with Marketing, because that might make you think their software is
-less than perfect.
+That's a dead end now, but at least it's starting point.  The problem I ran into with Bookshelf
+for Windows is that it predated websites, and even if websites had existed at the time, it's
+unlikely that a "Bookshelf for Windows" web page would have mentioned any relevant KB articles.
+Companies don't like mixing Product Support with Marketing, because that might make you think their
+software is less than perfect.
 
-Thanks to the Internet Archive's "Wayback Machine", all hope is not lost when it comes to web pages,
-so it's still possible to access the old web pages for [Pandora's Box](https://web.archive.org/web/2018*/http://www.microsoft.com/games/pandorasbox),
-including the [Downloads](https://web.archive.org/web/20000815060252/http://www.microsoft.com/games/pandorasbox/downloads.htm)
-where the aforementioned patch is located.
+Thanks to the Internet Archive's "Wayback Machine", all hope is not lost when it comes to old websites,
+and it's still possible to access the web pages for [Pandora's Box](https://web.archive.org/web/2018*/http://www.microsoft.com/games/pandorasbox),
+including the [Downloads](https://web.archive.org/web/20000815060252/http://www.microsoft.com/games/pandorasbox/downloads.htm) page,
+where the previously mentioned patch is described.
 
 Unfortunately, the patch is located on Microsoft's decomissioned FTP server, which the Internet Archive
 apparently didn't snapshot.  But other people did, and some of them even [uploaded](https://archive.org/details/ftp.microsoft.com)
