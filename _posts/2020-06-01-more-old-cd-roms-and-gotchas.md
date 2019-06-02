@@ -10,12 +10,12 @@ machines:
     config: /disks/pcx86/drives/cdrom/machine.xml
 ---
 
-Before obtaining a copy of the [Microsoft Programmer's Library 1.0 CD-ROM](/blog/2019/05/31/),
-one the oldest Microsoft CD-ROMs I owned was the 1991 edition of Bookshelf for Windows.
+Before acquiring a copy of the 1988 [Microsoft Programmer's Library 1.0 CD-ROM](/blog/2019/05/31/),
+the oldest Microsoft CD-ROM I owned was the 1991 edition of Bookshelf for Windows.
 
 ![Bookshelf for Windows 1991 - Case](https://cds005.pcjs.org/microsoft/reference/Bookshelf-Windows-1991/BSWIN91-Case.png)
 
-I had recently decided to add [CD-ROM support](/blog/2019/05/31/#introducing-pcjs-cd-rom-support) to PCjs,
+I recently decided to add [CD-ROM support](/blog/2019/05/31/#introducing-pcjs-cd-rom-support) to PCjs,
 starting with the venerable IBM PC AT.  Early IBM PC-compatible CD-ROM drives would come with their own ISA
 controller boards, but I had no desire to emulate the hardware of old third-party controllers that probably
 also had very little existing documentation.  The advantage of starting with the IBM PC AT is that
@@ -24,14 +24,12 @@ to support ATAPI commands was the simplest way to [connect a simulated CD-ROM dr
 
 ## Bookshelf for Windows (1991)
 
-Once I had CD-ROM support limping along, I gave **Bookshelf for Windows** a try.  And initially, things looked
-very promising:
+Once I had CD-ROM support limping along, I decided to try **Bookshelf for Windows** on Windows 3.1.
+And initially, things looked very promising:
 
 ![Bookshelf for Windows 1991 - Install 1 of 4](/blog/images/BSWIN31-Install1of4.png)
 
 ![Bookshelf for Windows 1991 - Install 2 of 4](/blog/images/BSWIN31-Install2of4.png)
-
-![Bookshelf for Windows 1991 - Install 3 of 4](/blog/images/BSWIN31-Install3of4.png)
 
 ![Bookshelf for Windows 1991 - Install 4 of 4](/blog/images/BSWIN31-Install4of4.png)
 
@@ -45,34 +43,37 @@ and I got back exactly ONE hit... on my OWN website:
 The good news: this was a known problem (and fortunately not *my* problem).
 
 The bad news: as I [lamented](/blog/2017/10/13/) a couple years ago, Microsoft is *still* a crappy archivist.
-I suppose I should be happy that early KnowledgeBase articles are now the tiniest bit *less* hard to find, but
-that's certainly not thanks to Microsoft.
+I suppose I should be happy that early KnowledgeBase articles are now the tiniest bit easier to find, thanks to
+an archive that I helped create, but I would still rather see Microsoft take some responsibility for this.
 
 So, back to the story.  The KB article provided three work-arounds, so I opted #2, which involved opening SETUP.INF
 in WRITE.EXE, searching for large comment blocks, and deleting them.  After that, Bookshelf for Windows setup
-was successful:
+was successful.
 
 ![Bookshelf for Windows 1991 - Install Done](/blog/images/BSWIN31-InstallDone.png)
 
-You can give it a try yourself in the [machine](#ibm-pc-at-with-atapi-cd-rom-support) below.
+You can give it a try yourself in the [machine](#ibm-pc-at-with-atapi-cd-rom-support) below.  I did not
+preinstall **Bookshelf for Windows**, because I wouldn't want to deprive you of the authentic experience
+of installing buggy software from 1992 and choosing whichever work-around works best for you.
 
 ## Pandora's Box (1999)
 
 In other recent, coincidental, and entirely unrelated news, a friend was trying to create a preservation
-copy of a 20-year-old Microsoft CD-ROM entertainment title called "Pandora's Box".  There were no problems
-cloning the CD-ROM, and the software would install OK from the clone, but when it was run, it would either
-crash or say "Please insert the correct CD-ROM....", depending on the machine and operating system being used.
+copy of a 20-year-old Microsoft CD-ROM entertainment title called **Pandora's Box**.  There were no problems
+cloning the CD-ROM, and the software would install fine from the clone, but when it was run, it would either
+crash or display "Please insert the correct CD-ROM....", depending on the machine and operating system
+being used.
 
 ![Pandora's Box - Unpatched](https://cds001.pcjs.org/microsoft/games/Pandoras-Box/WindowsXP-PandorasBox-ISO-Unpatched.png)
 
 This led one to believe there was something wrong with the copy -- and there was, because it turns out
-that Pandora's Box was one many software titles from the late 1990s that used a third-party copy-protection
+that **Pandora's Box** was one many software titles from the late 1990s that used a third-party copy-protection
 technology called "SafeDisc".  Suffice to say that if the game's EXE file was accompanied by an ICD file,
 along with other files such as CLOKSPL.EXE, then it's a safe bet the CD-ROM was protected by SafeDisc.
 
-In the case of Pandora's Box, however, the plot thickens.  It's possible that this copy-protection feature
+In the case of **Pandora's Box**, however, the plot thickens.  It's possible that this copy-protection feature
 created problems for users with certain processors and/or operating systems, because in early 2000, less than
-one year after Pandora's Box was released, Microsoft issued a patch, along with the following notes on their
+one year after the software's release, Microsoft issued a patch, along with the following notes on their
 website:
 
 > NEW! Pandora's Box Update
@@ -96,7 +97,7 @@ main executable to PANDORA.ICD and calling the SafeDisc loader PANDORA.EXE.  It 
 
 ## The Art of Software Preservation
 
-Pandora's Box illustrates more than just the obvious principle that "copy-protected software is hard to
+**Pandora's Box** illustrates more than just the obvious principle that "copy-protected software is hard to
 copy", to which I've already [alluded](/blog/2019/05/05/#the-software-preservation-quandry)".
 
 More than that, it shows that there's more to preservation than simply figuring out how to "copy the bits".
@@ -109,11 +110,11 @@ The worst-case scenario is software that required a live server to authenticate 
 of virtual environment -- a scenario that has tended to get more attention and hand-wringing lately, with the
 recent rise and fall of various Internet-enabled games.
 
-In the case of Pandora's Box, the [CD insert](https://cds001.pcjs.org/microsoft/games/Pandoras-Box/Pandoras_Box.pdf)
+In the case of **Pandora's Box**, the [CD insert](https://cds001.pcjs.org/microsoft/games/Pandoras-Box/Pandoras_Box.pdf)
 said to visit [http://www.microsoft.com/games/pandorasbox](http://www.microsoft.com/games/pandorasbox).
 
-That's a dead end now, but at least it's starting point.  The problem I ran into with Bookshelf
-for Windows is that it predated websites, and even if websites had existed at the time, it's
+That's a dead end now, but at least it's a starting point.  The problem I ran into with **Bookshelf
+for Windows** is that it predated websites, and even if websites had existed at the time, it's
 unlikely that a "Bookshelf for Windows" web page would have mentioned any relevant KB articles.
 Companies don't like mixing Product Support with Marketing, because that might make you think their
 software is less than perfect.
@@ -126,7 +127,7 @@ where the previously mentioned patch is described.
 Unfortunately, the patch is located on Microsoft's decomissioned FTP server, which the Internet Archive
 apparently didn't snapshot.  But other people did, and some of them even [uploaded](https://archive.org/details/ftp.microsoft.com)
 their snapshots to the Internet Archive.  So with a bit more work, it's possible to eventually locate and
-download the patch for Pandora's Box, eliminate the copy protection, and preserve another fine piece of software
+download the patch for **Pandora's Box**, eliminate the copy protection, and preserve another fine piece of software
 for many puzzle-loving generations to come.
 
 ## IBM PC AT with ATAPI CD-ROM Support
