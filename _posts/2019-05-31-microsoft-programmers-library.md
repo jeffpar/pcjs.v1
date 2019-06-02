@@ -49,7 +49,7 @@ which sound like real yawners by comparison.  According to the March 14, 1989 is
 Interestingly, those old CD-ROMs can still be purchased on eBay for around $100 each, so maybe they've actually
 held their value better than Microsoft Programmer's Library, but they certainly hold no interest for me.
 
-![Microsoft Programmer's Library 1.0](https://cds002.pcjs.org/microsoft/tools/MSPL10/MSPL10-CD.png)
+![Microsoft Programmer's Library 1.0](https://cds002.pcjs.org/microsoft/tools/MSPL10/MSPL10.png)
 
 Described on the back of the box as "[t]he single source for answers to most programming questions,"
 the Microsoft Programmer's Library CD-ROM contained:
