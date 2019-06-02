@@ -7,7 +7,7 @@ preview: https://cds002.pcjs.org/microsoft/tools/MSPL10/MSPL10.png
 machines:
   - id: ibm5170
     type: pcx86
-    config: disks/pcx86/drives/cdrom/machine.xml
+    config: /disks/pcx86/drives/cdrom/machine.xml
 ---
 
 I recently obtained a copy of Microsoft Programmer's Library 1.0, a CD-ROM released in 1988.
