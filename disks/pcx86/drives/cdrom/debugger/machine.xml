@@ -10,6 +10,8 @@
 	<video ref="/devices/pcx86/video/ibm/vga/1986-10-27/ibm-vga-autolockfs.xml"/>
 	<fdc ref="/disks/pcx86/library.xml" autoMount='{A:{name:"None"}, B:{name:"None"}}'/>
 	<keyboard ref="/devices/pcx86/keyboard/us84-softkeys.xml"/>
+	<debugger id="debugger"/>
+	<panel ref="/devices/pcx86/panel/wide.xml"/>
 	<hdc ref="/disks/pcx86/drives/20mb/pcdos330-win310-vga-at2.xml"/>
 	<hdc ref="/disks/pcx86/drives/cdrom/library-atapi.xml"/>
 	<chipset id="chipset" model="5170" floppies="[1440,1200]"/>
