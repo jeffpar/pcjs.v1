@@ -1,6 +1,6 @@
 ---
 layout: post
-title: More Copy Protection
+title: Copy Protection and Preservation
 date: 2019-05-05 10:00:00
 permalink: /blog/2019/05/05/
 preview: /blog/images/dbase-iii-disk-image.png
