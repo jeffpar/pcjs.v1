@@ -383,7 +383,7 @@ MarkOut.aFMBooleanMachineProps = {
     'autostart': "autoStart",
     'sound': "sound"
 };
-MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'class', 'config', 'template', 'uncompiled', 'autoMount', 'floppyDrives', 'drives', 'parms', 'sticky'];
+MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'class', 'config', 'template', 'uncompiled', 'autoMount', 'cdromDrives', 'floppyDrives', 'drives', 'parms', 'sticky'];
 
 /**
  * convertMD()
@@ -604,7 +604,7 @@ MarkOut.prototype.convertMD = function(sIndent)
                         }
                     }
                     machine['parms'] += 'autoMount:' + (machine['autoMount'] || "null");
-                    var driveProps = ['drives','floppyDrives'];
+                    var driveProps = ['drives','floppyDrives','cdromDrives'];
                     for (iProp = 0; iProp < driveProps.length; iProp++) {
                         sProp = driveProps[iProp];
                         var sDrives = machine[sProp];

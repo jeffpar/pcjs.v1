@@ -8,6 +8,7 @@ machines:
   - id: ibm5170
     type: pcx86
     config: /disks/pcx86/drives/cdrom/machine.xml
+    cdromDrives: '[{name:"CD",type:0,path:"/disks-cds/cds002/microsoft/tools/MSPL10/cdrom"}]'
 ---
 
 I recently obtained a copy of Microsoft Programmer's Library 1.0, a CD-ROM released in 1988.
