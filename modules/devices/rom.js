@@ -99,14 +99,14 @@ class ROM extends Device {
 
         /*
          * If an "array" binding has been supplied, then create an LED array sufficiently large to represent the
-         * entire ROM.  If the power-of-two is odd, then we will favor a slightly wider array over a taller one,
-         * by virtue of using Math.ceil() for cols and Math.floor() for rows.
+         * entire ROM.  If data.length is an odd power-of-two, then we will favor a slightly wider array over a taller
+         * one, by virtue of using Math.ceil() instead of Math.floor() for the columns calculation.
          */
         if (this.bindings[ROM.BINDING.ARRAY]) {
             let rom = this;
             let addrLines = Math.log2(this.data.length) / 2;
             this.cols = Math.pow(2, Math.ceil(addrLines));
-            this.rows = Math.pow(2, Math.floor(addrLines));
+            this.rows = (this.data.length / this.cols)|0;
             let configLEDs = {
                 "class":            "LED",
                 "bindings":         {"container": this.getBindingID(ROM.BINDING.ARRAY)},
