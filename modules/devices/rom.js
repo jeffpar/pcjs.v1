@@ -196,16 +196,49 @@ class ROM extends Device {
      */
     loadState(state)
     {
+        let length, success = true;
         let buffer = state.shift();
         if (buffer && this.ledArray) {
-            this.assert(this.ledArray.buffer.length == buffer.length);
-            if (this.ledArray.buffer.length == buffer.length) {
+            length = buffer.length;
+            this.assert(this.ledArray.buffer.length == length);
+            if (this.ledArray.buffer.length == length) {
                 this.ledArray.buffer = buffer;
                 this.ledArray.drawBuffer(true);
-                return true;
+            } else {
+                this.printf("inconsistent saved LED state (%d), unable to load\n", length);
+                success = false;
             }
         }
-        return false;
+        /*
+         * Version 1.21 and up also saves the ROM contents, since our "mini-debugger" has been updated
+         * with an edit command ("e") to enable ROM patching.  However, we prefer to detect improvements
+         * in saved state based on the length of the array, not the version number.
+         */
+        if (state.length) {
+            let data = state.shift();
+            let length = data && data.length || -1;
+            if (this.data.length == length) {
+                this.data = data;
+            } else {
+                this.printf("inconsistent saved ROM state (%d), unable to load\n", length);
+                success = false;
+            }
+        }
+        return success;
+    }
+
+    /**
+     * reset()
+     *
+     * Called by the Chip (eg, TMS1500) onReset() handler.  Originally, there was no need for this
+     * handler, until we added the min-debugger's ability to edit ROM locations via setData().  So this
+     * gives the user the ability to revert back to the original ROM if they want to undo any modifications.
+     *
+     * @this {ROM}
+     */
+    reset()
+    {
+        this.data = this.config['values'];
     }
 
     /**
@@ -218,6 +251,7 @@ class ROM extends Device {
     {
         if (this.ledArray) {
             state.push(this.ledArray.buffer);
+            state.push(this.data);
         }
     }
 
@@ -231,6 +265,24 @@ class ROM extends Device {
     {
         this.chip = chip;
     }
+
+    /**
+     * setData(addr, value)
+     *
+     * @this {ROM}
+     * @param {number} addr
+     * @param {number} value
+     * @return {number|undefined} (previous value, if available)
+     */
+    setData(addr, value)
+    {
+        let prev;
+        if (addr >= 0 && addr < this.data.length) {
+            prev = this.data[addr];
+            this.data[addr] = value;
+        }
+        return prev;
+    }
 }
 
 ROM.BINDING = {
@@ -238,4 +290,4 @@ ROM.BINDING = {
     CELLDESC:   "cellDesc"
 };
 
-ROM.VERSION = +VERSION || 1.20;
+ROM.VERSION = +VERSION || 1.00;

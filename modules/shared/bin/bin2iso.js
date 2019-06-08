@@ -64,7 +64,7 @@ function dumpBytes(buffer, offset, length)
 }
 
 /**
- * convertBinToISO(sInput, sOutput, fDebug, fOverwrite)
+ * convertBinToISO(sInput, sOutput, fDebug, fOverwrite, fVerbose)
  *
  * We assume that the ".bin" file is a CD-ROM dump consisting of 2352-byte sectors.  Such a
  * dump can be produced by the macOS `dd` utility, using the physical CD-ROM device; eg:
@@ -96,8 +96,9 @@ function dumpBytes(buffer, offset, length)
  * @param {string} sOutput
  * @param {boolean} [fDebug]
  * @param {boolean} [fOverwrite]
+ * @param {boolean} [fVerbose]
  */
-function convertBinToISO(sInput, sOutput, fDebug, fOverwrite)
+function convertBinToISO(sInput, sOutput, fDebug, fOverwrite, fVerbose)
 {
     let bufferBin, streamISO;
     try {
@@ -127,7 +128,7 @@ function convertBinToISO(sInput, sOutput, fDebug, fOverwrite)
     for (let iSector = 0; iSector < nSectors; iSector++) {
         let iBuffer = iSector * 2352;
         let bufferSector = Buffer.alloc(cbSector);
-        dumpBytes(bufferBin, iBuffer, 16);
+        if (fVerbose) dumpBytes(bufferBin, iBuffer, 16);
         iBuffer += 16;
         bufferBin.copy(bufferSector, 0, iBuffer, iBuffer + cbSector);
         streamISO.write(bufferSector);
@@ -144,5 +145,5 @@ if (args.argc < 3) {
     printf("usage: node bin2iso [input file] [output file] [options]\n");
 } else {
     let argv = args.argv;
-    convertBinToISO(argv[1], argv[2], argv['debug'], argv['overwrite']);
+    convertBinToISO(argv[1], argv[2], argv['debug'], argv['overwrite'], argv['verbose']);
 }

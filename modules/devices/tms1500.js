@@ -877,7 +877,7 @@ class Chip extends Device {
                 sOp = "CALL";
                 v = opCode & 0x07FF;
             }
-            sOperands = this.sprintf("0x%04x", v);
+            sOperands = this.sprintf("%#06x", v);
         }
         else if (opCode >= 0) {
             let d, j, k, l, n;
@@ -1032,7 +1032,7 @@ class Chip extends Device {
                 break;
             }
         }
-        return this.sprintf(fCompact? "%03X %04X\n" : "0x%04x: 0x%04x  %-8s%s\n", addr, opCode, sOp, sOperands);
+        return this.sprintf(fCompact? "%03X %04X\n" : "%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
     }
 
     /**
@@ -1049,12 +1049,12 @@ class Chip extends Device {
         if (state) {
             let stateChip = state['stateChip'] || state[0];
             if (!stateChip || !stateChip.length) {
-                this.println("Invalid saved state");
+                this.println("invalid saved state");
                 return false;
             }
             let version = stateChip.shift();
             if ((version|0) !== (Chip.VERSION|0)) {
-                this.printf("Saved state version mismatch: %3.2f\n", version);
+                this.printf("saved state version mismatch: %3.2f\n", version);
                 return false;
             }
             try {
@@ -1071,7 +1071,7 @@ class Chip extends Device {
                 this.stack = stateChip.shift();
                 this.regKey = stateChip.shift();
             } catch(err) {
-                this.println("Chip state error: " + err.message);
+                this.println("chip state error: " + err.message);
                 return false;
             }
             let stateROM = state['stateROM'] || state[1];
@@ -1097,14 +1097,17 @@ class Chip extends Device {
     onCommand(aTokens, machine)
     {
         let sResult = "";
+        let c, condition, count = 0, values = [];
         let s = aTokens[1];
         let addr = Number.parseInt(aTokens[2], 16);
         if (isNaN(addr)) addr = -1;
         let nWords = Number.parseInt(aTokens[3], 10) || 8;
 
-        this.nStringFormat = Chip.SFORMAT.DEFAULT;
+        for (let i = 3; i < aTokens.length; i++) {
+            values.push(Number.parseInt(aTokens[i], 16));
+        }
 
-        let c, condition;
+        this.nStringFormat = Chip.SFORMAT.DEFAULT;
 
         switch(s[0]) {
         case 'b':
@@ -1123,6 +1126,17 @@ class Chip extends Device {
             } else {
                 if (c) sResult = "unrecognized break option '" + c + "'";
             }
+            break;
+
+        case 'e':
+            for (let i = 0; i < values.length; i++) {
+                let prev = this.rom.setData(addr, values[i]);
+                if (prev == undefined) break;
+                sResult += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
+                count++;
+                addr++;
+            }
+            sResult += this.sprintf("%d locations updated\n", count);
             break;
 
         case 'g':
@@ -1251,6 +1265,7 @@ class Chip extends Device {
     {
         this.println("reset");
         this.regPC = 0;
+        this.rom.reset();
         this.clearDisplays();
         if (!this.time.isRunning()) {
             this.status();
@@ -1504,9 +1519,9 @@ class Chip extends Device {
         }
         s += "COND=" + (this.fCOND? 1 : 0);
         s += " BASE=" + this.base;
-        s += " R5=" + this.sprintf("0x%02x", this.regR5);
+        s += " R5=" + this.sprintf("%#04x", this.regR5);
         s += " RAB=" + this.regRAB + ' ';
-        this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=0x%04x ", i, addr & 0xffff);});
+        this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=%#06x ", i, addr & 0xffff);});
         if (this.rom) {
             s += '\n' + this.disassemble(this.rom.getData(this.regPC, true), this.regPC);
         }
@@ -1756,6 +1771,7 @@ Chip.OP_INPUTS = ["A","B","C","D","1","?","R5L","R5"];
 Chip.COMMANDS = [
     "b[c]\t\tbreak on condition c",
     "bl\t\tlist break conditions",
+    "e [addr] ...\tedit ROM locations",
     "g [addr]\trun (to addr)",
     "h\t\thalt",
     "r[a]\t\tdump (all) registers",
@@ -1763,6 +1779,6 @@ Chip.COMMANDS = [
     "u [addr] [n]\tdisassemble (at addr)"
 ];
 
-Chip.VERSION = +VERSION || 1.20;
+Chip.VERSION = +VERSION || 1.00;
 
 MACHINE = "TMS1500";

@@ -51,6 +51,6 @@ There is also a ["Game of Life" Color Demo](colors/) that allows you to change L
 </div>
 <div id="diagsLife">
   <div>
-    <textarea id="printLife" cols="78" rows="16"></textarea>
+    <textarea id="printLife" cols="78" rows="16" spellcheck="false"></textarea>
   </div>
 </div>

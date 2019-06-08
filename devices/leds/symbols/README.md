@@ -54,7 +54,7 @@ This page helps you build new LED symbols by displaying characters underneath th
 </div>
 <div class="diags">
   <div>
-    <textarea id="printSymbol" class="print" cols="78" rows="16"></textarea>
+    <textarea id="printSymbol" class="print" cols="78" rows="16" spellcheck="false"></textarea>
   </div>
   Symbol: <input id="inputSymbol" type="text" value="A"/>
   <button id="saveSymbol">Save</button>

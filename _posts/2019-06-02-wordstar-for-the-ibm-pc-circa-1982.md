@@ -13,7 +13,7 @@ including:
 {% include gallery-begin.html %}
 {% include gallery-image.html src="https://demo-disks.pcjs.org/pcx86/apps/other/wordstar/3.20/WS320-ORIG.png" width="320" height="320" title="WordStar 3.20 Disk 1" link="/disks/pcx86/apps/other/wordstar/3.20/" %}
 {% include gallery-image.html src="https://demo-disks.pcjs.org/pcx86/apps/other/wordstar/3.20/MM320-ORIG.png" width="320" height="320" title="WordStar 3.20 Disk 2" link="/disks/pcx86/apps/other/wordstar/3.20/" %}
-{% include gallery-image.html src="/disks/pcx86/apps/other/wordstar/3.20/WordStar32-Binder.png" width="320" height="460" title="WordStar 3.0 Training Guide" link="https://1drv.ms/u/s!ArcO_mFRe1Z9gqlTMVtF-s8OxtSNpA" %}
+{% include gallery-image.html src="/disks/pcx86/apps/other/wordstar/3.20/WordStar32-Binder.png" width="320" height="460" title="WordStar Binder" link="https://1drv.ms/u/s!ArcO_mFRe1Z9gqlTMVtF-s8OxtSNpA" %}
 {% include gallery-image.html src="/disks/pcx86/apps/other/wordstar/3.20/WordStar30-Training-Guide.png" width="320" height="460" title="WordStar 3.0 Training Guide" link="https://1drv.ms/b/s!ArcO_mFRe1Z9gqlYINZ_GQ3Y6NVSUA?e=cUZyft" %}
 {% include gallery-image.html src="/disks/pcx86/apps/other/wordstar/3.20/WordStar32-General-Information.png" width="320" height="460" title="WordStar 3.2 General Information" link="https://1drv.ms/b/s!ArcO_mFRe1Z9gqkVkrQ_SzATTmls_Q?e=D3kVDU" %}
 {% include gallery-image.html src="/disks/pcx86/apps/other/wordstar/3.20/WordStar32-Reference-Manual.png" width="320" height="460" title="WordStar 3.2 Reference Manual" link="https://1drv.ms/b/s!ArcO_mFRe1Z9gqkWhsTCHW7gkQ2W7A?e=VLlYyf" %}
