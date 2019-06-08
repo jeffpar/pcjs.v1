@@ -54,6 +54,6 @@ Using [PCjs Devices](/modules/devices/), here's a simple demo of
 </div>
 <div id="diagsLife">
   <div>
-    <textarea id="printLife" cols="78" rows="16"></textarea>
+    <textarea id="printLife" cols="78" rows="16" spellcheck="false"></textarea>
   </div>
 </div>

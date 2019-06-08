@@ -37,7 +37,7 @@ You can enter new messages in the Diagnostics window using the `s` command (eg, 
 </div>
 <div class="diags">
   <div>
-    <textarea id="printScroll" class="print" cols="78" rows="16"></textarea>
+    <textarea id="printScroll" class="print" cols="78" rows="16" spellcheck="false"></textarea>
   </div>
   <button id="runScroll">Run</button>
   <button id="stepScroll">Step</button>

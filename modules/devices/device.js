@@ -46,7 +46,7 @@ var MACHINE = "Machine";
 /**
  * @define {string}
  */
-var VERSION = "";
+var VERSION = "1.21";
 
 /**
  * The following properties are the standard set of properties a Device's config object may contain.

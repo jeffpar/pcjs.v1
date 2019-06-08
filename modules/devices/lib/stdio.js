@@ -279,14 +279,13 @@ class StdIO {
                 } else {
                     arg = args[args.length-1];
                 }
-            } else {
-                width = +width || 0;
             }
+            width = +width || 0;
             let precision = aParts[iPart+3];
             precision = precision? +precision.substr(1) : -1;
             // let length = aParts[iPart+4];       // eg, 'h', 'l' or 'L' (all currently ignored)
             let hash = flags.indexOf('#') >= 0;
-            let ach = null, s, radix = 0, p, prefix = ""
+            let ach = null, s, radix = 0, prefix = ""
 
             switch(type) {
             case 'd':
@@ -325,7 +324,7 @@ class StdIO {
                  * the caller is providing an Object that should be rendered as JSON.  If a width is included
                  * (eg, "%2j"), it's used as an indentation value; otherwise, no whitespace is added.
                  */
-                buffer += JSON.stringify(arg, null, width || null);
+                buffer += JSON.stringify(arg, null, width || undefined);
                 break;
 
             case 'c':
@@ -381,22 +380,21 @@ class StdIO {
                      */
                     arg = Number.parseInt(arg, arg.match(/(^0x|[a-f])/i)? 16 : 10);
                 }
-                p = width? "" : prefix;
+                width -= prefix.length;
                 do {
                     let d = arg & (radix - 1);
                     arg >>>= (radix == 16? 4 : 3);
-                    if (flags.indexOf('0') >= 0 || s == "" || d || arg) {
+                    if (flags.indexOf('0') >= 0 || !s || d || arg) {
                         s = ach[d] + s;
-                    } else if (width) {
-                        if (!prefix) {
-                            s = ' ' + s;
-                        } else {
-                            s = prefix.slice(-1) + s;
-                            prefix = prefix.slice(0, -1);
+                    } else {
+                        if (prefix) {
+                            s = prefix + s;
+                            prefix = "";
                         }
+                        if (width > 0) s = ' ' + s;
                     }
                 } while (--width > 0 || arg);
-                buffer += p + s;
+                buffer += prefix + s;
                 break;
 
             case '%':
