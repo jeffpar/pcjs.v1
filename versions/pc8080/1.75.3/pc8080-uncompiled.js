@@ -1146,7 +1146,7 @@ class Str {
             precision = precision? +precision.substr(1) : -1;
             // let length = aParts[iPart+4];       // eg, 'h', 'l' or 'L' (all currently ignored)
             let hash = flags.indexOf('#') >= 0;
-            let ach = null, s, radix = 0, p, prefix = "";
+            let ach = null, s, radix = 0, prefix = "";
 
             /*
              * The following non-standard sprintf() format codes provide handy alternatives to the
@@ -1302,7 +1302,7 @@ class Str {
                  * the caller is providing an Object that should be rendered as JSON.  If a width is included
                  * (eg, "%2j"), it's used as an indentation value; otherwise, no whitespace is added.
                  */
-                text += JSON.stringify(arg, null, width || null);
+                text += JSON.stringify(arg, null, width || undefined);
                 break;
 
             case 'c':
@@ -1358,22 +1358,21 @@ class Str {
                      */
                     arg = Number.parseInt(arg, arg.match(/(^0x|[a-f])/i)? 16 : 10);
                 }
-                p = width? "" : prefix;
+                width -= prefix.length;
                 do {
                     let d = arg & (radix - 1);
                     arg >>>= (radix == 16? 4 : 3);
-                    if (flags.indexOf('0') >= 0 || s == "" || d || arg) {
+                    if (flags.indexOf('0') >= 0 || !s || d || arg) {
                         s = ach[d] + s;
-                    } else if (width) {
-                        if (!prefix) {
-                            s = ' ' + s;
-                        } else {
-                            s = prefix.slice(-1) + s;
-                            prefix = prefix.slice(0, -1);
+                    } else {
+                        if (prefix) {
+                            s = prefix + s;
+                            prefix = "";
                         }
+                        if (width > 0) s = ' ' + s;
                     }
                 } while (--width > 0 || arg);
-                text += p + s;
+                text += prefix + s;
                 break;
 
             case '%':
