@@ -43,8 +43,8 @@ styles:
     font-family: Monaco,"Lucida Console",monospace;
   _romArrayTI42:
     display: inline-block;
+    line-height: 0;
     max-width: 512px;
-    max-height: 256px;
   _romCellTI42:
     font-family: Monaco,"Lucida Console",monospace;
   .regRow:
