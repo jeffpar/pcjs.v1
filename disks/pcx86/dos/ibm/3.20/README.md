@@ -22,7 +22,33 @@ PC DOS 3.20 was first announced on March 18, 1986 and released April 1986.  Read
 [PC Magazine Review](#pc-magazine-review) below.
 
 A [Feature Summary](#feature-summary), along with [Directory Listings](#directory-of-pc-dos-320-disk-1) of the two
-360Kb distribution diskettes, are provided below.  This version of PC DOS was also available on one 720Kb diskette.
+360Kb distribution diskettes, are provided below.  This version of PC DOS was also available on one [720Kb Diskette](#directory-of-pc-dos-320-720k).
+
+### IBM PC DOS 3.21
+
+Most copies of IBM PC DOS you'll find these days actually say "3.21" on the DOS diskette and "3.20" on the Supplemental
+Programs diskette.  This is because shortly after 3.20 was released, a problem was discovered with IBM's newest keyboard.
+The August 1986 issue of PC Magazine ("First Looks", p.54) explains:
+
+> IBM Corp. released **PC DOS 3.21** in the form of a patch to DOS 3.2. Some users get an error when cursor keys
+> on the new IBM keyboard (with 12 function keys) won't respond in BASICA edit mode. The patch fix is available free
+> from dealers where users purchased DOS 3.2.
+
+Even though the DOS diskette was labeled "3.21", the operating system version was not actually modified; the system still
+reported itself as version 3.20.  However, since BASIC and BASICA had been updated, their displayed versions were changed
+to "D3.21" and "A3.21", respectively.
+
+IBM apparently decided to slip a few other last-minute changes into the same release, as you can see from the
+file timestamps on the 360K diskette (the 720K diskette contains the original files).  The additional modifications
+include:
+
+- DISKCOPY.COM
+- KEYBFR.COM
+- KEYBGR.COM
+
+Changes to KEYBFR.COM and KEYGR.COM are not surprising, since IBM's new 12-function-key keyboard
+would have likely affected those programs as well.  However, the reasons for changing DISKCOPY.COM are unclear and
+we're unaware of any public explanation from IBM.
 
 {% include machine.html id="ibm5170-pcdos320" %}
 
@@ -56,6 +82,74 @@ New functions:
 - INT 21h functions 440Ch-440Fh, 64h
 - INT 2Fh multiplex functions 08h (IBMBIO/DRIVER.SYS), 13h (IBMBIO)
 - Device driver command codes 13h, 17h, 18h
+
+### Directory of PC DOS 3.20 (720K)
+
+	 Volume in drive A has no label
+	 Directory of A:\
+
+	IBMBIO   COM     16369 12-30-85  12:00p
+	IBMDOS   COM     28477 12-30-85  12:00p
+	ANSI     SYS      1651 12-30-85  12:00p
+	ASSIGN   COM      1536 12-30-85  12:00p
+	ATTRIB   EXE      8247 12-30-85  12:00p
+	BACKUP   COM      6234 12-30-85  12:00p
+	BASIC    COM     19298 12-30-85  12:00p
+	BASICA   COM     36396 12-30-85  12:00p
+	CHKDSK   COM      9832 12-30-85  12:00p
+	COMMAND  COM     23791 12-30-85  12:00p
+	COMP     COM      4184 12-30-85  12:00p
+	DISKCOMP COM      5792 12-30-85  12:00p
+	DISKCOPY COM      6224 12-30-85  12:00p
+	DRIVER   SYS      1115 12-30-85  12:00p
+	EDLIN    COM      7508 12-30-85  12:00p
+	FDISK    COM      8173 12-30-85  12:00p
+	FIND     EXE      6416 12-30-85  12:00p
+	FORMAT   COM     11135 12-30-85  12:00p
+	GRAFTABL COM      1169 12-30-85  12:00p
+	GRAPHICS COM      3220 12-30-85  12:00p
+	JOIN     EXE      8955 12-30-85  12:00p
+	KEYBFR   COM      3291 12-30-85  12:00p
+	KEYBGR   COM      3274 12-30-85  12:00p
+	KEYBIT   COM      3060 12-30-85  12:00p
+	KEYBSP   COM      3187 12-30-85  12:00p
+	KEYBUK   COM      3036 12-30-85  12:00p
+	LABEL    COM      2346 12-30-85  12:00p
+	MODE     COM      6864 12-30-85  12:00p
+	MORE     COM       295 12-30-85  12:00p
+	PRINT    COM      8976 12-30-85  12:00p
+	RECOVER  COM      4297 12-30-85  12:00p
+	REPLACE  EXE     11650 12-30-85  12:00p
+	RESTORE  COM      6012 12-30-85  12:00p
+	SELECT   COM      3826 12-30-85  12:00p
+	SHARE    EXE      8580 12-30-85  12:00p
+	SORT     EXE      1911 12-30-85  12:00p
+	SUBST    EXE      9911 12-30-85  12:00p
+	SYS      COM      4620 12-30-85  12:00p
+	TREE     COM      3357 12-30-85  12:00p
+	VDISK    SYS      3307 12-30-85  12:00p
+	XCOPY    EXE     11200 12-30-85  12:00p
+	ART      BAS      1879 12-30-85  12:00p
+	BALL     BAS      1966 12-30-85  12:00p
+	BASIC    PIF       369 12-30-85  12:00p
+	BASICA   PIF       369 12-30-85  12:00p
+	CIRCLE   BAS      1643 12-30-85  12:00p
+	COLORBAR BAS      1427 12-30-85  12:00p
+	COMM     BAS      4254 12-30-85  12:00p
+	DEBUG    COM     15799 12-30-85  12:00p
+	DONKEY   BAS      3572 12-30-85  12:00p
+	EXE2BIN  EXE      3063 12-30-85  12:00p
+	LINK     EXE     39076 12-30-85  12:00p
+	MORTGAGE BAS      6178 12-30-85  12:00p
+	MUSIC    BAS      8575 12-30-85  12:00p
+	MUSICA   BAS     13431 12-30-85  12:00p
+	PIECHART BAS      2180 12-30-85  12:00p
+	SAMPLES  BAS      2363 12-30-85  12:00p
+	SPACE    BAS      1851 12-30-85  12:00p
+	VDISK    LST    136315 12-30-85  12:00p
+	VENDOR-# DO1         0 07-04-83  12:00a
+	       60 file(s)     563032 bytes
+	                      135168 bytes free
 
 ### Directory of PC DOS 3.20 (Disk 1)
 

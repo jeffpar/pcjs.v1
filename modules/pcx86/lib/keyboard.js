@@ -1257,10 +1257,10 @@ class Keyboard extends Component {
                 if (reSpecial.lastIndex) reSpecial.lastIndex--;
                 switch (match[1]) {
                 case 'date':
-                    sReplace = Str.sprintf("%M-%D-%Y", date, date, date);
+                    sReplace = Str.sprintf("%M-%02D-%04Y", date);
                     break;
                 case 'time':
-                    sReplace = Str.sprintf("%H:%N:%S", date, date, date);
+                    sReplace = Str.sprintf("%H:%02N:%02S", date);
                     break;
                 default:
                     continue;
