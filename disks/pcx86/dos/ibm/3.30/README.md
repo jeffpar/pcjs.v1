@@ -150,3 +150,17 @@ New functions:
 	BASICA   PIF      369   3-17-87  12:00p
 	MORTGAGE BAS     6251   3-17-87  12:00p
 	       32 File(s)     43008 bytes free
+
+### Directory of PC DOS 3.30 (TechRef)
+
+	 Volume in drive A has no label
+	 Directory of A:\
+
+	DEBUG    COM     15897 03-17-87  12:00a
+	EXE2BIN  EXE      3081 03-17-87  12:00a
+	LIB      EXE     22912 03-17-87  12:00a
+	LINK     EXE     39076 03-17-87  12:00a
+	VDISK    ASM     75284 03-17-87  12:00a
+	VENDOR-# DO1         0 07-04-83  12:00a
+	        6 file(s)     156250 bytes
+	                      202752 bytes free

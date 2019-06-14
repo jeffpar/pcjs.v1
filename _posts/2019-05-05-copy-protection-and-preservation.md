@@ -39,7 +39,7 @@ analysis failed, the application would report:
 
     Unauthorized Duplicate
 
-and terminate.  In the Kryoflux visualization below, this "hole" appears on the **dBASE III 1.0 (Disk 1)**
+and terminate.  In the KryoFlux visualization below, this "hole" appears on the **dBASE III 1.0 (Disk 1)**
 on track 39, sector 5 -- the orange arc immediately to the left of the two red rings.
 
 ![dBASE III 1.0](/blog/images/dbase-iii-disk-image.png)
@@ -99,7 +99,7 @@ Another concern is that such a process could be inadvertently destructive.  Ther
 about a duplication process that involves writing modifications to the original diskette.
 
 I didn't have to wrestle with that concern, however, because I no longer have an original diskette.  All I had was a
-Kryoflux dump, which doesn't tell you much about the physical condition of the diskette.  So I resorted to
+KryoFlux dump, which doesn't tell you much about the physical condition of the diskette.  So I resorted to
 [debugging](/disks/pcx86/apps/other/dbase3/1.0/debugger/#debugging-notes) the software again (as I did [35 years ago](/docs/personal/)),
 watching the reads and writes, observing what PROLok's expectations were, inferring that one of the 512-byte sectors
 must have been physically damaged within +/-10 bytes of the 272nd byte, and then recording that in my annotated disk image.

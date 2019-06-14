@@ -1420,6 +1420,12 @@ class Str {
              * or even more succinctly, as:
              *
              *      printf("%C\n", date);
+             *
+             * In fact, even the previous example can be written more succinctly as:
+             *
+             *      printf("%W, %F %D, %Y\n", date);
+             *
+             * because unlike the C runtime, we reuse the final parameter omce the format string has exhausted all parameters.
              */
             let ch, date = /** @type {Date} */ (iType < 12 && typeof arg != "object"? Str.parseDate(arg) : arg), dateUndefined;
 
@@ -46818,10 +46824,10 @@ class Keyboard extends Component {
                 if (reSpecial.lastIndex) reSpecial.lastIndex--;
                 switch (match[1]) {
                 case 'date':
-                    sReplace = Str.sprintf("%M-%D-%Y", date, date, date);
+                    sReplace = Str.sprintf("%M-%02D-%04Y", date);
                     break;
                 case 'time':
-                    sReplace = Str.sprintf("%H:%N:%S", date, date, date);
+                    sReplace = Str.sprintf("%H:%02N:%02S", date);
                     break;
                 default:
                     continue;
@@ -61553,15 +61559,14 @@ class Disk extends Component {
                         if (bStatus == DiskAPI.MBR.PARTITIONS.STATUS.ACTIVE) {
                             dir.pbaVolume = this.getSectorData(sectorBoot, off + DiskAPI.MBR.PARTITIONS.ENTRY.LBA_FIRST, 4);
                             sectorBoot = this.getSector(dir.pbaVolume);
-                            if (sectorBoot) {
-                                if (this.getSectorData(sectorBoot, DiskAPI.BPB.SECTOR_BYTES, 2) != this.cbSector) {
-                                    sectorBoot = null;
-                                }
+                            if (sectorBoot && this.getSectorData(sectorBoot, DiskAPI.BPB.SECTOR_BYTES, 2) != this.cbSector) {
+                                sectorBoot = null;
                             }
                             break;
                         }
                         off += DiskAPI.MBR.PARTITIONS.ENTRY_LENGTH;
                     }
+                    if (i == 4) sectorBoot = null;
                 }
                 if (!sectorBoot) {
                     if (DEBUG && this.messageEnabled()) {
