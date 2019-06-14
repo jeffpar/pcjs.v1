@@ -22,7 +22,7 @@ A copy of the [Manual]({{ site.game-disks.baseurl }}/pcx86/microsoft/adventure/A
 
 {% include machine.html id="ibm5150" %}
 
-NOTE: You cannot use the PCjs "Save" feature to save a copy of a copy-protected diskette, because PCjs can save
-only standard DOS-formatted disk images.
+NOTE: The PCjs "Save" feature will not create a usable copy of a copy-protected diskette.  That feature
+works only with standard disk formats.
 
 For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
