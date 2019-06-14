@@ -12,13 +12,13 @@ disk images, where all the sectors are 512 bytes, all the sector IDs are consecu
 
 Previously, the only way PCjs could run copy-protected software was to use patched binaries that bypassed any
 copy-protection checks, so that's what I used in a few cases (e.g., [Lotus 1-2-3](/disks/pcx86/apps/lotus/123/1as/)).
-But last year, I acquired a [Kryoflux](https://www.kryoflux.com/) device, which reads (and writes) all kinds of
+But last year, I acquired a [KryoFlux](https://www.kryoflux.com/) device, which reads (and writes) all kinds of
 diskettes, and -- in theory -- captures everything you need to know to reproduce a diskette.
 
-I've only used the Kryoflux software a few times, because most of the diskettes I've collected aren't
+I've only used the KryoFlux software a few times, because most of the diskettes I've collected aren't
 copy-protected and can be perfectly reproduced with programs like [WinImage](http://www.winimage.com/download.htm).
 But I did use it last year to read a set of original copy-protected [IBM Multiplan 1.00](/disks/pcx86/apps/ibm/multiplan/1.00/)
-disks.  And by using another program called [HxC](https://hxc2001.com/), I was able to inspect Kryoflux's raw data
+disks.  And by using another program called [HxC](https://hxc2001.com/), I was able to inspect KryoFlux's raw data
 from IBM's Multiplan Program disk and discover what was unusual about it:
 
 ![HxC IBM Multiplan 1.00](/blog/images/hxc-multiplan-program.png)
@@ -41,7 +41,7 @@ In the case of IBM's Multiplan, all I had to do was to change the appropriate Se
 ### Microsoft Word 1.15
 
 Early versions of Microsoft Word were also copy-protected, and since
-[Kryoflux dumps](https://winworldpc.com/product/microsoft-word/1x-dos) of the original disks are available,
+[KryoFlux dumps](https://winworldpc.com/product/microsoft-word/1x-dos) of the original disks are available,
 I took a closer look with HxC:
 
 ![HxC Microsoft Word 1.15](/blog/images/word115-disk-image.png)

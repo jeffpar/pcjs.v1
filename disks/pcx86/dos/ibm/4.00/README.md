@@ -219,3 +219,17 @@ New functions:
 	DOS04L   400         0 06-17-88  12:00p
 	       11 file(s)     349966 bytes
 	                        9216 bytes free
+
+### Directory of PC DOS 4.00 (TechRef)
+
+	 Volume in drive A has no label
+	 Volume Serial Number is 18BD-1F2B
+	 Directory of A:\
+
+	DEBUG    COM     21606 06-17-88  12:00p
+	EXE2BIN  EXE      7973 06-17-88  12:00p
+	LIB      EXE     47107 06-17-88  12:00p
+	LINK     EXE    105406 06-17-88  12:00p
+	VDISK    ASM     75571 06-17-88  12:00p
+	        5 file(s)     257663 bytes
+	                      102400 bytes free

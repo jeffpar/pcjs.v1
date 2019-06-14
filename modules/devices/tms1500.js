@@ -650,13 +650,23 @@ class Chip extends Device {
     {
         if (opCode & 0x1000) {
             if (opCode & 0x0800) {  // BRC/BRNC
+                /*
+                 * As TI patent 4078251 states:
+                 *
+                 *      There being only ten bits in the address for the “branch on condition” instruction, when the
+                 *      branch is executed only the ten least significant bits are loaded into the 11 bit address register
+                 *      of program counter 32a. The most significant bit in the program counter remains unchanged.
+                 */
                 if (!!(opCode & 0x0400) == this.fCOND) {
-                    /*
-                     * TODO: Determine whether to use bit 10 from the original PC (addr) or the incremented PC (regPC)
-                     */
-                    this.regPC = (addr & 0x0400) | (opCode & 0x03FF);
+                    this.regPC = (this.regPC & 0x0400) | (opCode & 0x03FF);
                 }
             } else {                // CALL
+                /*
+                 * As TI patent 4078251 states:
+                 *
+                 *      Since the “branch unconditionally” address contains 11 bits and since the program counter 32a
+                 *      contains 11 bits, the “branch unconditionally” instruction can cause the branch anywhere within ROM.
+                 */
                 this.push(this.regPC);
                 this.regPC = opCode & 0x07FF;
             }
