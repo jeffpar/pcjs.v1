@@ -758,6 +758,12 @@ class Str {
              * or even more succinctly, as:
              *
              *      printf("%C\n", date);
+             *
+             * In fact, even the previous example can be written more succinctly as:
+             *
+             *      printf("%W, %F %D, %Y\n", date);
+             *
+             * because unlike the C runtime, we reuse the final parameter omce the format string has exhausted all parameters.
              */
             let ch, date = /** @type {Date} */ (iType < 12 && typeof arg != "object"? Str.parseDate(arg) : arg), dateUndefined;
 
