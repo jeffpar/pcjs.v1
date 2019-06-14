@@ -20,8 +20,8 @@ Zork I: The Great Underground Empire
 
 {% include machine.html id="ibm5150-zork1" %}
 
-NOTE: You cannot use the PCjs "Save" feature to save a copy of a copy-protected diskette, because PCjs can save
-only IMG disk images, which do not support copy protection.
+NOTE: The PCjs "Save" feature will not create a usable copy of a copy-protected diskette.  That feature
+works only with standard disk formats.
 
 For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
 
