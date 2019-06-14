@@ -5,10 +5,13 @@ date: 2019-06-13 10:00:00
 permalink: /blog/2019/06/13/
 preview: https://game-disks.pcjs.org/pcx86/microsoft/adventure/Adventure_Booklet_Cover.jpg
 machines:
-  - id: ibm5150
+  - id: ibm5150-msadvent
     type: pcx86
-    config: /disks/pcx86/games/microsoft/adventure/machine.xml
     resume: 1
+    config: /disks/pcx86/games/microsoft/adventure/machine.xml
+    autoMount:
+      A:
+        name: Microsoft Adventure (Unmodified)
 ---
 
 Thanks to a contribution from a PCjs user, I was able to examine a KryoFlux dump of an original
@@ -60,7 +63,7 @@ there may be some historical or diagnostic value in keeping both versions.
 
 OK, enough with the boring blog post.  Time to play!
 
-{% include machine.html id="ibm5150" %}
+{% include machine.html id="ibm5150-msadvent" %}
 
 *[@jeffpar](https://jeffpar.com)*  
 *June 13, 2019*
