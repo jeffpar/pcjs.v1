@@ -28,9 +28,10 @@ allocations.
 
 Sure enough, attempting to use the [first 32Kb](1986-09-04/1986-09-04-LO.json) as a DeskPro 386 ROM generated a
 "ROM Error", no doubt due to a checksum mismatch.  However, the [second 32Kb](1986-09-04/1986-09-04-HI.json) appeared
-to work fine.  I can't guarantee that its contents are identical to the original `Rev F` ROM, since it was not a direct
-copy of the physical ROM, but it's all we've got.  All our
-[EGA-based COMPAQ machine configurations](/devices/pcx86/machine/compaq/deskpro386/ega/) have been updated to use that ROM.
+to work fine.  I can't guarantee that its contents are identical to the original `Rev F` ROM, since it was not a
+direct copy of the physical ROM, but it's all we've got.  All the PCjs
+[EGA-based COMPAQ machine configurations](/devices/pcx86/machine/compaq/deskpro386/ega/) have now been updated
+to use that ROM.
 
 This collection of COMPAQ DeskPro 386 ROMs still has several holes, but I'm very happy to have finally found one of the
 earliest (if not *the* earliest) ROMs commercially available for this line of COMPAQ computers.
@@ -126,9 +127,91 @@ However, it does NOT produce a binary identical to the original ROM, in part bec
 instructions that can be assembled multiple ways).  It's possible the reassembled ROM may still work, but more research
 is required.
 
+### Authors of the COMPAQ DeskPro 386 ROM
+
 One interesting section of the COMPAQ DeskPro ROM is this string at offset 0xE002:
  
 	db	'AUTHORS CAB93GLB93RWS93DJC93NPB(C)Copyright COMPAQ Computer Corporation 1982,83,84,85,86'
 
-which appears to list the initials of 5 authors: **CAB**, **GLB**, **RWS**, **DJC**, and **NPB**.  The meaning of the
-"93" sequences is unknown; they may have simply been a form of obfuscation.
+which presumably contains the initials of 5 authors: **CAB**, **GLB**, **RWS**, **DJC**, and **NPB**.
+
+This was later confirmed by HPE firmware engineer Thomas Palmer, who still works at the location
+of COMPAQ's headquarters in Houston, Texas.  On June 19, 2018, Thomas arranged a reunion for the authors
+and as many other COMPAQ engineers as he could locate, all who worked on early COMPAQ products and still
+lived in the area.
+
+Thanks to Thomas, I was able to attend the reunion, and the engineers who worked on the DeskPro 386 were
+gracious enough to sign my copy of the COMPAQ DeskPro 386 Technical Reference:
+
+- Monty McGraw
+- Mike Perez
+- Carrie Boone (**CAB**)
+- Norm Brown (**NPB**)
+- Randy Spurlock (**RWS**)
+- Darren Cepulis (**DJC**)
+
+[![COMPAQ DeskPro 386-25 Technical Reference Guide - Volume 1 - 1988-08 - Signatures](/pubs/pc/reference/compaq/deskpro386/COMPAQ_DeskPro_386-25_Technical_Reference_Guide-Vol1-1988-08-Signatures.png)](/pubs/pc/reference/compaq/deskpro386/)
+
+Of the 5 people whose initials are embedded in the original DeskPro 386 ROM, only **GLB** was unable to attend.
+
+The meaning of the "93" sequences in the ROM was originally unclear -- I thought they were likely some form
+of obfuscation -- until I saw this snippet of COMPAQ ROM source code and we were able to talk to Mike Perez about it:
+
+      page  58,132
+    title CMESG Copyright (c) 1982,83,84,85,86,87 COMPAQ Computer Corp.
+    ;******************************************************************************
+    ;
+    ;  Name:  CMESG - Copyright Message
+    ;
+    ;  Group: ROM
+    ;
+    ;  Revision:  A
+    ;
+    ;  Date:  November 6, 1987
+    ;
+    ;  Authors: Mike Perez
+    ;
+    ;******************************************************************************
+    ;
+    ;  CHANGES:
+    ;
+    ;    DATE     REVISION      DESCRIPTION
+    ;  --------   --------   ------------------------------------------------------
+    ;  12/31/87   Original    Adapted from DESKPRO 386 Revision J.1/G ROM.
+    ;
+    ;******************************************************************************
+    ;
+    ;  FUNCTIONAL DESCRIPTION:
+    ;
+    ; This module supplies the Copyright and notice in the ROM.  This
+    ; module must start at F000:E000 on COMPAQ, COMPAQ PLUS, DESKPRO
+    ; and Magnum.  On Magnum, however, this is not the first module in
+    ; the ROM, since it is composed of a single 32kx8 ROM doubly-mapped
+    ; at F000:0 and F800:0.  On the COMPAQs and DESKPRO, the system ROM
+    ; is an 8kx8 ROM that starts at F000:E000.
+    ;
+    ; The sum of the words at F000:E008, E00A, E00C, E00E, and E010
+    ; must equal 2457h for "Exploring the PC"  and possibly other
+    ; programs to work.
+    ;
+    ;******************************************************************************
+    ;
+    ; Public Declarations
+    ;
+      public  _CMESG      ; ...So it shows up in the link map
+      PUBLIC  _INIT     ; CRTL-ALT-DEL entry point
+      public  COMPAQ    ; For general use
+    ;
+      extrn bas_main:far    ; BAS_MAIN Entry to BASIC intercept
+    ;
+    ROM SEGMENT BYTE PUBLIC 'ROM'
+      ASSUME  CS:ROM
+    ;
+    ; External References
+
+Mike explained that an IBM program called "[Exploring the IBM Personal Computer](/disks/pcx86/apps/ibm/exploring/)"
+contained some code that checksummed the first few bytes of the ROM and would refuse to run if the result didn't match
+that of a genuine IBM PC.  So one of the COMPAQ engineers simply inserted a series of characters ("93") between their
+initials which, when checksummed, yielded the same result.
+
+This was one of the many hallmarks of COMPAQ's devotion to compatibility.
