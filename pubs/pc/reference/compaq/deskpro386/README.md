@@ -7,12 +7,19 @@ permalink: /pubs/pc/reference/compaq/deskpro386/
 COMPAQ DeskPro 386 Reference Manuals
 ------------------------------------
 
-* [COMPAQ DeskPro 386/25 Technical Reference Guide (Volume I)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/reference/compaq/deskpro386/Compaq_DeskPro_386-25_TechRefVol1.pdf)
+* [COMPAQ DeskPro 386/25 Technical Reference Guide (Volume I)](https://1drv.ms/b/s!ArcO_mFRe1Z9gq5BThwmEpfyp0EBdA)
+
+NOTE: As the page on [COMPAQ DeskPro 386 ROMs](/devices/pcx86/rom/compaq/deskpro386/#authors-of-the-compaq-deskpro-386-rom)
+explains, 5 COMPAQ engineers had their initials "engraved" in the original DeskPro 386 ROM.  In June 2018, I was
+fortunate enough to meet 4 of them, and they were all kind enough to sign my copy of the DeskPro 386 Technical Reference
+Guide.  This "signature page", shown below, has since been added to the PDF.
+
+![COMPAQ DeskPro 386-25 Technical Reference Guide - Volume 1 - 1988-08 - Signatures](/pubs/pc/reference/compaq/deskpro386/COMPAQ_DeskPro_386-25_Technical_Reference_Guide-Vol1-1988-08-Signatures.png)
 
 COMPAQ DeskPro 386 Reference Highlights
 ---------------------------------------
 
-#### Fixed Disk Drive Parameter Table Values
+### Fixed Disk Drive Parameter Table Values
 
 The following table comes from pages 4-189 and 4-190 of the DeskPro 386/25 Technical Reference Guide (Volume I).
 
@@ -75,4 +82,3 @@ The following table comes from pages 4-189 and 4-190 of the DeskPro 386/25 Techn
                at power-down.
            3.  Drive types supported by Compaq.
     -------------------------------------------------------------------------------
-           

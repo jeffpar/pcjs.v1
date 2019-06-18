@@ -3,7 +3,7 @@ layout: post
 title: The First Version of COMPAQ MS-DOS
 date: 2018-10-03 10:00:00
 permalink: /blog/2018/10/03/
-preview: /blog/images/COMPAQ-DOS110-Diskette.jpg
+preview: /blog/images/compaq/COMPAQ-DOS110-Diskette.jpg
 machines:
   - id: compaq-portable-128kb
     type: pcx86
@@ -15,7 +15,7 @@ A few weeks ago, I found a pristine set of all three manuals that COMPAQ shipped
 along with an original COMPAQ MS-DOS 1.10 diskette.  They are all "first editions".  The Operations Guide is dated
 November 1982 and the rest are dated December 1982. 
 
-[![COMPAQ MS-DOS 1.10 Manuals](/blog/images/COMPAQ-DOS110-Manuals.jpg)](/pubs/pc/software/dos/compaq/1.10/)
+[![COMPAQ MS-DOS 1.10 Manuals](/blog/images/compaq/COMPAQ-DOS110-Manuals.jpg)](/pubs/pc/software/dos/compaq/1.10/)
 
 These manuals are unlike any other COMPAQ manuals I've seen before.  As the June 1983 issue of
 [PC Magazine](https://books.google.com/books?id=14Kfbrc6cbAC&lpg=PA188&dq=pc%20magazine%20Compaq%20DOS%201.10&pg=PA186#v=onepage&q&f=false)
@@ -33,7 +33,7 @@ The [COMPAQ MS-DOS 1.10](/disks/pcx86/dos/compaq/1.10/) diskette included with t
 also in excellent condition.  Most of its files were dated January 20, 1983, with the exception of BASICA.EXE,
 which was dated February 8, 1983.
 
-[![COMPAQ MS-DOS 1.10 Diskette](/blog/images/COMPAQ-DOS110-Diskette.jpg)](/disks/pcx86/dos/compaq/1.10/)
+[![COMPAQ MS-DOS 1.10 Diskette](/blog/images/compaq/COMPAQ-DOS110-Diskette.jpg)](/disks/pcx86/dos/compaq/1.10/)
 
 Until now, I don't think a copy of this version of MS-DOS was available online, which may also explain why
 [Wikipedia](https://en.wikipedia.org/wiki/Compaq_Portable) got it wrong when they claimed that:
