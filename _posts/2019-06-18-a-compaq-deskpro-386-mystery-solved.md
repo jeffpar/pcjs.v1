@@ -75,7 +75,7 @@ done and they forgot to order the cover--the binder. So the binder was the last 
 he just passed away about maybe a month ago--he was in charge of the documentation and we would go there and rake him through
 the coals.
 
-> The most controversial part of that book was the errata, beause we had to work with Intel. There was some errata that we
+> The most controversial part of that book was the errata, because we had to work with Intel. There was some errata that we
 fixed in code or in hardware... so I put it in there that it was fixed.
 
 > JEFF: Usually Intel was very tight-lipped about the errata, so I'm surprised they let you publish it.
