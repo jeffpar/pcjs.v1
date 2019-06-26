@@ -4,15 +4,3 @@
 [submodule "disks-game"]
 	path = disks-game
 	url = https://github.com/jeffpar/pcjs-game-disks.git
-[submodule "disks-private"]
-	path = disks-private
-	url = https://github.com/jeffpar/pcjs-private-disks.git
-[submodule "disks-cds/cds001"]
-	path = disks-cds/cds001
-	url = https://github.com/jeffpar/pcjs-cds001.git
-[submodule "disks-cds/cds005"]
-	path = disks-cds/cds005
-	url = https://github.com/jeffpar/pcjs-cds005.git
-[submodule "disks-cds/cds002"]
-	path = disks-cds/cds002
-	url = https://github.com/jeffpar/pcjs-cds002.git
