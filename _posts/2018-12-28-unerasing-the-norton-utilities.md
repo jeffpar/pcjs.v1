@@ -138,7 +138,7 @@ You can, however, play with newer versions of [The Norton Utilities](/disks/pcx8
 
 The 1984 release of Version 3.00, as well as the Version 4.00 Advanced Edition, are recent PCjs acquisitions, but
 I'm still on the lookout for older versions, so please [contact me](mailto:Jeff@pcjs.org) if you have anything that
-predates Version 3.00.
+predates version 3.
 
 In the meantime, we'll end this blog post with some old magazine articles.
 

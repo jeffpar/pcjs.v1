@@ -7,8 +7,8 @@ permalink: /pubs/pc/software/apps/micropro/wordstar/
 MicroPro WordStar Manuals
 -------------------------
 
-* [WordStar 3.00 (CP/M)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/apps/micropro/wordstar/3.00/Wordstar_3.0_Reference_Manual_May81.pdf)
-* [WordStar 3.20 (DOS)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/apps/micropro/wordstar/3.20/Wordstar_for_the_IBM_Personal_Computer_Version_3.2_1982.pdf)
-* [WordStar 3.30 (DOS) Installation](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/apps/micropro/wordstar/3.30/Wordstar_3.3_Installation_Manual_1983.pdf)
-* [WordStar 3.30 (DOS) Reference](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/apps/micropro/wordstar/3.30/Wordstar_3.3_Reference_Manual_1983.pdf)
-* [WordStar 3.30 (DOS) Training](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/apps/micropro/wordstar/3.30/Wordstar_Training_Guide_2ed_Feb83.pdf)
+* [WordStar 3.00 (CP/M)](https://1drv.ms/b/s!ArcO_mFRe1Z9gqIOCaN-ARjcPwyAdA?e=R7PnqQ)
+* [WordStar 3.20 (DOS)](https://1drv.ms/b/s!ArcO_mFRe1Z9gqISXzx5m8MMHLh1Rg?e=Rk9Hwk)
+* [WordStar 3.30 (DOS) Installation](https://1drv.ms/b/s!ArcO_mFRe1Z9gqIQiAUohk_z6yW_2w?e=YJKg7X)
+* [WordStar 3.30 (DOS) Reference](https://1drv.ms/b/s!ArcO_mFRe1Z9gqITjSe8O5PbfSPYJw?e=5T4Ekb)
+* [WordStar 3.30 (DOS) Training](https://1drv.ms/b/s!ArcO_mFRe1Z9gqIUgLZq7FrCzqawKA?e=UR9aRV)
