@@ -7,4 +7,4 @@ permalink: /pubs/pc/software/tools/microsoft/masm/3.00/
 Microsoft Macro Assembler 3.00 Manuals
 --------------------------------------
 
-* [MASM 3.00 Reference](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/tools/microsoft/masm/3.00/Microsoft+Macro+Assembler+Reference+Manual+(1984).pdf)
+* [MASM 3.00 Reference](https://1drv.ms/b/s!ArcO_mFRe1Z9gt4TMtBw579j2buNcw?e=xCqimJ)

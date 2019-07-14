@@ -15,7 +15,7 @@ DEC PDP-11 BASIC
 
 [![DEC-11-AJPB-PB](DEC-11-AJPB-PB.jpg)](DEC-11-AJPB-PB.json)
 
-According to the [PDP-11/20 Handbook (1971)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/1120/PDP1120_Handbook_1971.pdf),
+According to the [PDP-11/20 Handbook (1971)](https://1drv.ms/b/s!ArcO_mFRe1Z9gp5O19e4cBRGbdaWgw?e=yh41hu),
 p. 160, notable features of PDP-11 BASIC included:
 
 - Use of BASIC statements in immediate mode (no line number)
@@ -33,8 +33,8 @@ PDP-11 BASIC has been loaded into the [PDP-11/20](/devices/pdp11/machine/1120/ba
 We have archived the following DEC PDP-11 BASIC resources:
 
 - [BASIC (Single User) Tape Image](DEC-11-AJPB-PB.json)
-- [LISTING OF BASIC/PTS (March 1974)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/basic/BASIC_PTS_Listing_Mar77.pdf)
-- [PDP-11 BASIC PROGRAMMING MANUAL (December 1970)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/basic/BASIC_Programming_Manual_Dec70.pdf) 
+- [LISTING OF BASIC/PTS (March 1974)](https://1drv.ms/b/s!ArcO_mFRe1Z9gp5MAsiyvxS9IriR_w?e=RJiknG)
+- [PDP-11 BASIC PROGRAMMING MANUAL (December 1970)](https://1drv.ms/b/s!ArcO_mFRe1Z9gp4hZ_ESc_wYWccLhg?e=G6YRsh) 
 
 Third-party resources include:
 

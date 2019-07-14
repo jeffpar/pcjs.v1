@@ -11,7 +11,7 @@ COMPAQ Portable Computer ROMs
 The oldest COMPAQ Portable Computer ROM BIOS we originally had was an 8Kb [Rev C ROM](100666-001-REVC.json) from a
 000006-001 REV D system board purchased on eBay.
 
-[<img src="COMPAQ_Portable_System_Board.jpg" alt="COMPAQ Portable System Board REV D"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/rom/compaq/portable/COMPAQ_Portable_System_Board-FULL.jpg)
+[<img src="COMPAQ_Portable_System_Board.jpg" alt="COMPAQ Portable System Board REV D"/>](COMPAQ_Portable_System_Board-FULL.jpg)
 
 Printed on the back of the system board:
 
@@ -28,7 +28,7 @@ and again the contents of the chips were identical (to ours and to each other).
 I've seen pictures of other COMPAQ Portable system boards with only one mask ROM installed, so I was puzzled why my board
 contained two.  Did the contents of the second ROM show up in a different part of the address space, or was it merely a decoding
 convenience (e.g., one ROM for even addresses, and a second ROM for odd addresses)?  This
-[COMPAQ Portable/Plus Maintenance Guide (Excerpt)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/reference/compaq/portable/Compaq_Portable_Plus_Support_Discontinued.pdf)
+[COMPAQ Portable/Plus Maintenance Guide (Excerpt)](https://1drv.ms/b/s!ArcO_mFRe1Z9gt4Suatb4VvNGCHEZQ?e=OSWyfN)
 confirms that an older (000004 REV B) system board *did* require 2 ROMs, at locations U40 and U47, while later system boards required
 only 1 (Rev C or later) ROM at location U40, but there is no explanation for the requirement.
 
