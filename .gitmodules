@@ -7,3 +7,9 @@
 [submodule "disks-pdp11"]
 	path = disks-pdp11
 	url = https://github.com/jeffpar/pcjs-pdp11-disks.git
+[submodule "disks-pcsig8a"]
+	path = disks-pcsig8a
+	url = https://github.com/jeffpar/pcjs-pcsig8a-disks.git
+[submodule "disks-pcsig8b"]
+	path = disks-pcsig8b
+	url = https://github.com/jeffpar/pcjs-pcsig8b-disks.git
