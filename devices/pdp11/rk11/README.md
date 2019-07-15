@@ -34,12 +34,12 @@ used to control the device, such as choosing which disks should be "auto-mounted
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<device id="rk11" type="rk11" autoMount='{RK0:{path:"https://pdp11-disks.pcjs.org/dec/rk03/RK03-XXDP.json"}}' pos="left" width="35%" padLeft="8px" padBottom="8px">
+<device id="rk11" type="rk11" autoMount='{RK0:{path:"/disks-pdp11/dec/rk03/RK03-XXDP.json"}}' pos="left" width="35%" padLeft="8px" padBottom="8px">
     <name>Disk Drive Controls</name>
     <control type="container">
         <control type="list" binding="listDrives"/>
         <control type="list" binding="listDisks">
-            <disk id="disk01" name="XXDP+ Diagnostics" path="https://pdp11-disks.pcjs.org/dec/rk03/RK03-XXDP.json"/>
+            <disk id="disk01" name="XXDP+ Diagnostics" path="/disks-pdp11/dec/rk03/RK03-XXDP.json"/>
         </control>
         <control type="button" binding="loadDisk">Load</control>
         <control type="button" binding="bootDisk">Boot</control>

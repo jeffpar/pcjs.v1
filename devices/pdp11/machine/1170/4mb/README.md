@@ -7,7 +7,7 @@ machines:
     type: pdp11
     autoMount:
       RL0:
-        path: https://pdp11-disks.pcjs.org/dec/rl01k/RL01K-RSTS-V70.json
+        path: /disks-pdp11/dec/rl01k/RL01K-RSTS-V70.json
 ---
 
 {% include machine.html id="test1170" %}

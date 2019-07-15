@@ -10,9 +10,9 @@ machines:
     autoStart: true
     autoMount:
       RK0:
-        path: https://pdp11-disks.pcjs.org/dec/rk03/RK03-RT11-V40.json
+        path: /disks-pdp11/dec/rk03/RK03-RT11-V40.json
       RL0:
-        path: https://pdp11-disks.pcjs.org/dec/rl02k/RL02K-XXDP.json
+        path: /disks-pdp11/dec/rl02k/RL02K-XXDP.json
       PTR:
         path: /apps/pdp11/tapes/absloader/DEC-11-L2PC-PO.json
 ---
