@@ -50,12 +50,12 @@ machines, *not* PS/2 machines.
 
 To (re)build the JSON-encoded IBM VGA ROM with symbols, run the following command:
 
-	filedump --file=archive/ibm-vga.rom --format=bytes --decimal
-	
+    filedump --file=archive/ibm-vga.rom --format=bytes --decimal
+
 The symbol information in the MAP file will be automatically converted and appended to the dump of the ROM file. 
 
 The PCjs server's Dump API can be used as well:
 
-	https://www.pcjs.org/api/v1/dump?file=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/video/ibm/vga/1986-10-27/ibm-vga.rom&format=bytes&decimal=true
+    https://www.pcjs.org/api/v1/dump?file=https://www.pcjs.org/devices/pcx86/video/ibm/vga/1986-10-27/ibm-vga.rom&format=bytes&decimal=true
 
 The disassembled contents of the 1986-10-27 ROM from the IBM PS/2 Display Adapter is available [here](1986-10-27/ibm-vga.asm).

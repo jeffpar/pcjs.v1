@@ -7,13 +7,13 @@ permalink: /pubs/pc/software/cpm/cpm86/
 CP/M-86 1.0 Documentation
 -------------------------
 
-* [CP/M-86 (IBM Release, March 1982)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/cpm/cpm86/CPM86_Operating_System_Mar82.pdf)
+* [CP/M-86 (IBM Release, March 1982)](https://1drv.ms/b/s!ArcO_mFRe1Z9gqIFoBxukaudGwJMCQ?e=0Me0X8)
 
 CP/M-86 1.1 Documentation
 -------------------------
 
-* [CP/M-86 Command Summary](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/cpm/cpm86/CPM86-110-COMMAND-SUMMARY.pdf)
-* [CP/M-86 Programmer's Guide](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/cpm/cpm86/CPM86-110-PROGRAMMERS-GUIDE.pdf)
-* [CP/M-86 Release Notes](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/cpm/cpm86/CPM86-110-RELEASE-NOTES.pdf)
-* [CP/M-86 System Guide](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/cpm/cpm86/CPM86-110-SYSTEM-GUIDE.pdf)
-* [CP/M-86 User's Guide](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/cpm/cpm86/CPM86-110-USERS-GUIDE.pdf)
+* [CP/M-86 Command Summary](https://1drv.ms/b/s!ArcO_mFRe1Z9gqIIUhw-QaKr4RbMQA?e=dCKqG0)
+* [CP/M-86 Programmer's Guide](https://1drv.ms/b/s!ArcO_mFRe1Z9gqILbw-ZydV5vt4qwQ?e=xDHOLW)
+* [CP/M-86 Release Notes](https://1drv.ms/b/s!ArcO_mFRe1Z9gqIJmnAfXFAxrdn1fQ?e=GtivdG)
+* [CP/M-86 System Guide](https://1drv.ms/b/s!ArcO_mFRe1Z9gqIPKmG91jIjdniBOA?e=WzxkVB)
+* [CP/M-86 User's Guide](https://1drv.ms/b/s!ArcO_mFRe1Z9gqIRZHE36_JbO9uPFg?e=7wktlY)

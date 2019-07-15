@@ -11,7 +11,7 @@ COMPAQ DeskPro 386 ROMs
 Originally, the oldest COMPAQ DeskPro 386 ROM I had was a `Rev J.4` ROM from a "Version 2" motherboard designed
 in 1987, released in 1988, and purchased on eBay in October 2014.
 
-[<img src="Compaq_DeskPro_386-16_System_Board_V2-640.jpg" alt="Compaq DeskPro 386 System Board Version 2"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/rom/compaq/deskpro386/Compaq_DeskPro_386-16_System_Board_V2.jpg)
+[<img src="Compaq_DeskPro_386-16_System_Board_V2-640.jpg" alt="Compaq DeskPro 386 System Board Version 2"/>](Compaq_DeskPro_386-16_System_Board_V2.jpg)
 
 And thanks to folks on the [Vintage Computer](http://www.vintage-computer.com/) forums, I was later able to add
 the `Rev N.1` ROM from 1989 to this collection.  And when I obtained a DeskPro 386/25 from eBay in March 2015, I was
@@ -87,9 +87,9 @@ Arduino-compatible prototyping board, and capturing the serial port output on my
 by [NYC Resistor](http://www.nycresistor.com/) contributor [phooky](http://www.nycresistor.com/author/phooky/).
 
 The DeskPro 386 ROMs were P27128A-2 chips, so I wired my Uno32 based on this
-[27128A](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/datasheets/27128A.pdf) datasheet -- the closest match I could find online.
+[27128A](https://1drv.ms/b/s!ArcO_mFRe1Z9gqEu9pZaLgq772i_fQ?e=LZxxHU) datasheet -- the closest match I could find online.
 
-![<img src="Compaq_DeskPro_386-16_System_ROM_V2_Breadboard-640.jpg" alt="Compaq DeskPro 386 System ROM Version 2"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/rom/compaq/deskpro386/Compaq_DeskPro_386-16_System_ROM_V2_Breadboard.jpg)
+![<img src="Compaq_DeskPro_386-16_System_ROM_V2_Breadboard-640.jpg" alt="Compaq DeskPro 386 System ROM Version 2"/>](Compaq_DeskPro_386-16_System_ROM_V2_Breadboard.jpg)
 
 On my first dump attempt, every ROM address returned 0xFF.  After looking at the 27128A datasheet more closely,
 I noticed the DEVICE OPERATION table indicated that, for a READ operation, /CE and /OE pins should be connected to

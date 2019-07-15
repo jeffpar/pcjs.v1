@@ -100,12 +100,12 @@ Alternatively, if you're running the PCjs Node [web server](/server.js), then yo
 
 For example, if you wanted to convert **PCDOS100.img**:
 
-	https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.img
+	https://archive.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.img
 
 you could issue the following request, save the resulting JSON file to a folder on your server, and then update your
 machine XML file(s) to use **PCDOS100.json**:
 
-	{{ site.url }}/api/v1/dump?disk=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.img&format=json
+	{{ site.url }}/api/v1/dump?disk=https://archive.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.img&format=json
 
 Although PCx86 will accept IMG disk image files, it must call the [DiskDump API](/api/v1/dump) to convert the
 image every time it's loaded, which is slower than using pre-converted JSON-encoded disk images and will only work

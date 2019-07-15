@@ -50,4 +50,4 @@ locate both Volume I for the 80286 *and* Volume II for the 80386, and we'll fina
 
 I also want to thank the [OS/2 Museum](http://www.os2museum.com/wp/) for the following:
 
-* [COMPAQ Technical Reference Guide (1995)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/reference/compaq/various/COMPAQ+Technical+Reference+Guide+(1995).pdf)
+* [COMPAQ Technical Reference Guide (1995)](https://1drv.ms/b/s!ArcO_mFRe1Z9gt4UVUaaBnhX_UhPjg?e=UJJpRB)

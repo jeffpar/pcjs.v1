@@ -7,5 +7,5 @@ permalink: /pubs/pc/software/tools/softlogic/doubledos/
 SoftLogic DoubleDOS
 -------------------
 
-* [DoubleDOS Manual](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/tools/softlogic/doubledos/DOUBLEDOS-MANUAL.pdf)
-* [DoubleDOS Notices](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/tools/softlogic/doubledos/DOUBLEDOS-NOTICES.pdf)
+* [DoubleDOS Manual](https://1drv.ms/b/s!ArcO_mFRe1Z9gqIHAd7pD_wsCgQfRQ?e=1Di3B5)
+* [DoubleDOS Notices](https://1drv.ms/b/s!ArcO_mFRe1Z9gqICdfLlD58HB76ynA?e=0ctPC4)
