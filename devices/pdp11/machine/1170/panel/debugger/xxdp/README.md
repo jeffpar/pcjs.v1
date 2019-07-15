@@ -10,7 +10,7 @@ machines:
     autoStart: true
     autoMount:
       RL0:
-        path: https://pdp11-disks.pcjs.org/dec/rl02k/RL02K-XXDP.json
+        path: /disks-pdp11/dec/rl02k/RL02K-XXDP.json
     sticky: top
 machineScripts:
   runEKBAD0: |
