@@ -7,4 +7,4 @@ permalink: /pubs/pc/software/tools/other/desqview/
 DESQview Manuals
 ----------------
 
-* [DESQview 1.02 (AST Edition)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/software/tools/other/desqview/DESQVIEW-102-AST.pdf)
+* [DESQview 1.02 (AST Edition)](https://1drv.ms/b/s!ArcO_mFRe1Z9gqF0lnH5iJKNMTatvA?e=QD3Sxl)

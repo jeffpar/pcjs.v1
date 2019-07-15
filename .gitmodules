@@ -4,3 +4,6 @@
 [submodule "disks-game"]
 	path = disks-game
 	url = https://github.com/jeffpar/pcjs-game-disks.git
+[submodule "disks-pdp11"]
+	path = disks-pdp11
+	url = https://github.com/jeffpar/pcjs-pdp11-disks.git

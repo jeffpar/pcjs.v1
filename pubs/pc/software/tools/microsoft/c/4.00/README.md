@@ -5,7 +5,7 @@ permalink: /pubs/pc/software/tools/microsoft/c/4.00/
 ---
 
 Microsoft C Compiler 4.0 Documentation
----
+--------------------------------------
 
 The **Microsoft C Compiler (v4.0) for the MS-DOS Operating System** shipped with the following documents:
 

@@ -5,7 +5,7 @@ permalink: /pubs/pc/reference/intel/80286/early_errata/
 ---
 
 Early 80286 Errata of Interest
----
+------------------------------
 
 [The following information is from an undated 15-page Intel document titled "Undocumented iAPX 286 Test Instruction",
 p. 15]

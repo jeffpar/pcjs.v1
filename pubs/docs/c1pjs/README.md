@@ -156,8 +156,10 @@ the &lt;canvas&gt; tag until IE9.
 
 ---
 
-### Challenger 1P Reference Manuals
+### Challenger 1P Technical Reference Manuals
 
-[<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/c1p/techref/thumbs/OSI_BASIC-IN-ROM_Reference_Manual-thumb.jpg" width="200" height="260" alt="OSI BASIC-IN-ROM Manual"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/c1p/techref/pdfs/OSI_BASIC-IN-ROM_Reference_Manual.pdf)
-[<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/c1p/techref/thumbs/OSI_C1P_Character_Graphics_Reference_Manual-thumb.jpg" width="200" height="260" alt="OSI C1P Graphics Manual"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/c1p/techref/pdfs/OSI_C1P_Character_Graphics_Reference_Manual.pdf)
-[<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/c1p/techref/thumbs/OSI_C1P_Users_Manual-thumb.jpg" width="200" height="260" alt="OSI C1P Users Manual"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/c1p/techref/pdfs/OSI_C1P_Users_Manual.pdf)
+An assortment of [Challenger 1P Technical Reference Manuals](/pubs/c1p/techref/) are available below.
+
+[<img src="/pubs/c1p/techref/covers/OSI_BASIC-IN-ROM_Reference_Manual.jpg" width="200" height="260" alt="OSI BASIC-IN-ROM Manual"/>](https://1drv.ms/b/s!ArcO_mFRe1Z9gt4LfVeqHp1eNX_xsA?e=ochWkV)
+[<img src="/pubs/c1p/techref/covers/OSI_C1P_Character_Graphics_Reference_Manual.jpg" width="200" height="260" alt="OSI C1P Graphics Manual"/>](https://1drv.ms/b/s!ArcO_mFRe1Z9gt4M_mo_3EnvSCoo_Q?e=Ft2NMa)
+[<img src="/pubs/c1p/techref/covers/OSI_C1P_Users_Manual.jpg" width="200" height="260" alt="OSI C1P Users Manual"/>](https://1drv.ms/b/s!ArcO_mFRe1Z9gt4N9BbxGdyef1BQWQ?e=6bbg4c)

@@ -82,7 +82,7 @@ As noted in [cpuops.js](/modules/pdp10/lib/cpuops.js), in the *doMUL()* function
 
 	05=000000000001 06=000000000000
 
-> The answer can be found in the [DECSYSTEM-10 and DECSYSTEM-20 Processor Reference Manual (June 1982)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp10/kl10/AA-H391A-TK_DECsystem-10_DECSYSTEM-20_Processor_Reference_Jun1982.pdf),
+> The answer can be found in the [DECSYSTEM-10 and DECSYSTEM-20 Processor Reference Manual (June 1982)](https://1drv.ms/b/s!ArcO_mFRe1Z9gp1jncpU_jALLLkWbQ?e=bdqCTy),
 in the description of the MUL instruction:
 
 	CAUTION: In the KA10, an AC operand of 2^35 is treated as though it were +2^35, producing the
