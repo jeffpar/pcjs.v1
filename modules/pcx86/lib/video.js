@@ -2420,9 +2420,9 @@ class Video extends Component {
         super("Video", parmsVideo, Messages.VIDEO);
 
         let video = this, sProp, sEvent;
-        this.fGecko = Web.isUserAgent("Gecko/");
         this.bindingsExternal = [];
         this.parmsVideo = parmsVideo;
+        this.fStyleCanvasFullScreen = document.fullscreenEnabled || Web.isUserAgent("Edge/");   // formerly fGecko = Web.isUserAgent("Gecko/");
 
         /*
          * This records the model specified (eg, "mda", "cga", "ega", "vga", "vdu", or "" if no model
@@ -2953,12 +2953,12 @@ class Video extends Component {
                     }
                     // TODO: We may need to someday consider the case of a physical screen with an aspect ratio < 1.0....
                 }
-                if (!this.fGecko) {
+                if (!this.fStyleCanvasFullScreen) {
                     this.container.style.width = sWidth;
                     this.container.style.height = sHeight;
                 } else {
                     /*
-                     * Sadly, the above code doesn't work for Firefox, because as:
+                     * Sadly, the above code doesn't work for Firefox (nor for Chrome, as of Chrome 75 or so), because as:
                      *
                      *      http://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode
                      *
@@ -2977,7 +2977,7 @@ class Video extends Component {
                      *      the inner element to match the appearance you want.'
                      */
                     this.canvasScreen.style.width = sWidth;
-                    this.canvasScreen.style.width = sWidth;
+                    this.canvasScreen.style.height = sHeight;
                     this.canvasScreen.style.display = "block";
                     this.canvasScreen.style.margin = "auto";
                 }
@@ -2999,7 +2999,7 @@ class Video extends Component {
     notifyFullScreen(fFullScreen)
     {
         if (!fFullScreen && this.container) {
-            if (!this.fGecko) {
+            if (!this.fStyleCanvasFullScreen) {
                 this.container.style.width = this.container.style.height = "";
             } else {
                 this.canvasScreen.style.width = this.canvasScreen.style.height = "";

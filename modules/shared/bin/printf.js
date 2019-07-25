@@ -63,6 +63,9 @@ var onCommand = function (cmd, context, filename, callback)
     if (callback) callback(null, result);
 };
 
+printf("Pi='%8.2f'", 3.14159);
+printf("Pi='%.2f'", 3.14159);
+printf("Pi='%.02f'", 3.14159);
 onCommand("%s%s=%d,foo,bar,33");
 
 repl.start({
