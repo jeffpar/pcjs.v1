@@ -7,6 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/msdos/dosref33/
 MS-DOS Version 3.3 Programmer's Reference
 -----------------------------------------
 
+{% raw %}
+
 	TITLE PAGE
 	
 	
@@ -19547,4 +19549,5 @@ MS-DOS Version 3.3 Programmer's Reference
 	X
 	──────────────────────────────────────────────────────────────────────────
 	XENIX, 8086 object language
-	
+
+{% endraw %}

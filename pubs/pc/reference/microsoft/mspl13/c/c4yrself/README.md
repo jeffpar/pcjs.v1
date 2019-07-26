@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/c/c4yrself/
 QuickC 2.5 C for Yourself
 -------------------------
 
-	
+{% raw %}
+
 	Microsoft QuickC Compiler - C FOR YOURSELF
 	
 	
@@ -20696,5 +20697,5 @@ QuickC 2.5 C for Yourself
 	
 	window coordinates:
 	The coordinate system defined by the programmer.
-	
-	
+
+{% endraw %}

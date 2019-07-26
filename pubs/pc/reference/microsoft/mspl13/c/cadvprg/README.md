@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/c/cadvprg/
 MS C 6.0 Advanced Programming Techniques
 ----------------------------------------
 
-	
+{% raw %}
+
 	Microsoft  C - Advanced Programming Techniques
 	
 	
@@ -22202,5 +22203,5 @@ MS C 6.0 Advanced Programming Techniques
 	  Range of floating-point
 	  Significance of
 	  Storage requirements for
-	
-	
+
+{% endraw %}

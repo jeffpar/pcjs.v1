@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/basic/qblearn/
 Learning to Use MS QuickBASIC 4.5
 ---------------------------------
 
-	
+{% raw %}
+
 	Microsoft QuickBASIC: Learning to Use Microsoft QuickBASIC
 	
 	
@@ -14524,4 +14525,5 @@ Learning to Use MS QuickBASIC 4.5
 	  watch
 	    described
 	WordStar-style command indicator, illus.
-	
+
+{% endraw %}

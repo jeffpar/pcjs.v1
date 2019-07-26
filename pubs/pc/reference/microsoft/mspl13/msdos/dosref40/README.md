@@ -7,6 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/msdos/dosref40/
 MS-DOS Version 4.0 Programmer's Reference
 -----------------------------------------
 	
+{% raw %}
+
 	Microsoft MS-DOS Programmer's Reference
 	
 	
@@ -19310,4 +19312,5 @@ MS-DOS Version 4.0 Programmer's Reference
 	X
 	
 	XENIX, 8086 object language
-	
+
+{% endraw %}

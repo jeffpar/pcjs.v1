@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/c/mspqc/
 MS QuickC Programming
 ---------------------
 
-	
+{% raw %}
+
 	Microsoft QuickC Programming
 	
 	
@@ -30862,3 +30863,4 @@ MS QuickC Programming
 	XENIX system 328
 	XMAS.C program 194, 195
 	
+{% endraw %}

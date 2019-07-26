@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/masm/minstall/
 Installing and Using MS MASM 6.0
 --------------------------------
 
-	
+{% raw %}
+
 	Microsoft  Macro Assembler - Installing and Using
 	                    the Professional Development System
 	
@@ -3333,5 +3334,5 @@ Installing and Using MS MASM 6.0
 	    using
 	  QuickHelp, using
 	Writing and saving procedures
-	
-	
+
+{% endraw %}

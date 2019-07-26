@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/basic/b7prog/
 MS BASIC 7.1 Programming Guide
 ------------------------------
 
-	
+{% raw %}
+
 	Microsoft BASIC Programmer's Reference
 	
 	
@@ -30607,4 +30608,5 @@ MS BASIC 7.1 Programming Guide
 	
 	For more information, refer to the section "Linking with Overlays" in
 	Chapter 18, "Using LINK and LIB."
-	
+
+{% endraw %}
