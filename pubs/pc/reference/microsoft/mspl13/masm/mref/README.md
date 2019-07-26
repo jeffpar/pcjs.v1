@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/masm/mref/
 MS MASM 6.0 Reference
 ---------------------
 
-	
+{% raw %}
+
 	Microsoft(R) Macro Assembler Reference
 	
 	
@@ -5707,5 +5708,5 @@ MS MASM 6.0 Reference
 	is popped once, and the result, Z, replaces Y in ST. X must be in the range
 	0  |X| < (1 - (2 / 2)). Y must be in the range
 	- < Y < .
-	
-	
+
+{% endraw %}

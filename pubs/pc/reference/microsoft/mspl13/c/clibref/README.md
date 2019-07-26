@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/c/clibref/
 MS C 6.0 Run-Time Library Reference
 -----------------------------------
 
-	
+{% raw %}
+
 	Microsoft  C - RUN-TIME LIBRARY REFERENCE
 	
 	
@@ -43327,4 +43328,5 @@ MS C 6.0 Run-Time Library Reference
 	_y0l, _y1l, _ynl
 	_y1l
 	_ynl
-	
+
+{% endraw %}

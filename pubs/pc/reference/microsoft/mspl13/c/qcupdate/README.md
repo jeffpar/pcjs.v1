@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/c/qcupdate/
 QuickC 2.5 Update
 -----------------
 
-	
+{% raw %}
+
 	Microsoft  QuickC  Compiler - UPDATE
 	
 	
@@ -4127,6 +4128,5 @@ QuickC 2.5 Update
 	                                  Reuse of this name caused the earlier
 	                                  file to be overwritten. This will
 	                                  probably cause unexpected results.
-	
-	
-	
+
+{% endraw %}

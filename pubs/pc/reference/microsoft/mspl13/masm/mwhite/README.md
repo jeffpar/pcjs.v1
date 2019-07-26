@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/masm/mwhite/
 MS MASM 6.0 White Paper
 -----------------------
 
-	
+{% raw %}
+
 	Microsoft  Macro Assembler - White Paper
 	
 	
@@ -828,5 +829,5 @@ MS MASM 6.0 White Paper
 	      5.25-inch drive; a 360K, 5.25-inch drive; or a 720K, 3.5-inch drive.
 	      (1.2 megabyte disks and 720K floppy disks are shipped in separate
 	      boxes. 360K floppy disks are available on request.)
-	
-	
+
+{% endraw %}

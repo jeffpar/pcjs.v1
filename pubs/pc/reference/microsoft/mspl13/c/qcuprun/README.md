@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/c/qcuprun/
 QuickC 2.5 Up and Running
 -------------------------
 
-	
+{% raw %}
+
 	Microsoft  QuickC  Compiler - UP AND RUNNING
 	
 	
@@ -3036,5 +3037,5 @@ QuickC 2.5 Up and Running
 	  ■   To maintain ANSI compatibility and portability between QuickC and
 	      other systems, QuickC now supports trigraphs such as  ??=  equivalent
 	      to  #.
-	
-	
+
+{% endraw %}

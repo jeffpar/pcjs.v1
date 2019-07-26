@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/basic/qblang/
 MS QB 4.5 Language Reference
 ----------------------------
 
-	
+{% raw %}
+
 	Microsoft QuickBASIC: Language Reference
 	
 	
@@ -23410,4 +23411,5 @@ MS QB 4.5 Language Reference
 	WINDOW statement
 	WRITE # statement
 	WRITE statement
-	
+
+{% endraw %}

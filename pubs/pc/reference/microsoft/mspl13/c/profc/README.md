@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/c/profc/
 Proficient C
 ------------
 
-	
+{% raw %}
+
 	Proficient C
 	
 	
@@ -22577,5 +22578,5 @@ Proficient C
 	      control program (cc)
 	      getopt() error
 	      portability
-	
-	
+
+{% endraw %}

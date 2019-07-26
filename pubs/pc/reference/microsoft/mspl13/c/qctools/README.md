@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/c/qctools/
 QuickC 2.5 Tool Kit
 -------------------
 
-	
+{% raw %}
+
 	Microsoft QuickC Compiler - TOOL KIT
 	
 	
@@ -20812,5 +20813,5 @@ QuickC 2.5 Tool Kit
 	/Zp option (QCL)
 	/Zr option (QCL)
 	/Zs option (QCL)
-	
-	
+
+{% endraw %}

@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/masm/qaprog/
 QuickAssembler 2.01 Programmer's Guide
 --------------------------------------
 
-	
+{% raw %}
+
 	Microsoft(R) QuickAssembler Programmer's Guide Version 2.01
 	
 	
@@ -20656,4 +20657,5 @@ QuickAssembler 2.01 Programmer's Guide
 	Z
 	
 	Zero flag
-	
+
+{% endraw %}

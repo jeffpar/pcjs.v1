@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/masm/mpguide/
 MS MASM 6.0 Programmer's Guide
 ------------------------------
 
-	
+{% raw %}
+
 	Microsoft  Macro Assembler - Programmer's Guide
 	
 	
@@ -46690,5 +46691,5 @@ MS MASM 6.0 Programmer's Guide
 	ZERO? operand
 	/Zm command-line option, ML
 	/Zp command-line option, ML
-	
-	
+
+{% endraw %}

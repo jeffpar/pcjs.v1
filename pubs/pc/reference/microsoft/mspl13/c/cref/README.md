@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/c/cref/
 MS C 6.0 Reference
 ------------------
 
-	
+{% raw %}
+
 	Microsoft  C - REFERENCE
 	
 	
@@ -21087,5 +21088,5 @@ MS C 6.0 Reference
 	LDBL_MIN_EXP       Minimum binary exponent     -16,381
 	
 	─────────────────────────────────────────────────────────────────────────────
-	
-	
+
+{% endraw %}

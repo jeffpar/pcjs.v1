@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/c/cinstall/
 Installing and Using MS C 6.0
 -----------------------------
 
-	
+{% raw %}
+
 	Microsoft  C - Installing and Using the Professional Development System
 	
 	
@@ -3002,5 +3003,5 @@ Installing and Using MS C 6.0
 	      get information about it
 	
 	  ■   Refer to the C Reference guide for a list of QuickHelp options
-	
-	
+
+{% endraw %}
