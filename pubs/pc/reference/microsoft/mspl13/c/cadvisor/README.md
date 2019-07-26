@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/c/cadvisor/
 MS Professional Advisor - Library Reference
 -------------------------------------------
 
-	
+{% raw %}
+
 	Microsoft  Professional Advisor - LIBRARY REFERENCE
 	
 	
@@ -2588,5 +2589,5 @@ MS Professional Advisor - Library Reference
 	Topic Index
 	A number corresponding to a sequential topic entry in the help file. Also,
 	the table that maps these numbers to actual file positions.
-	
-	
+
+{% endraw %}

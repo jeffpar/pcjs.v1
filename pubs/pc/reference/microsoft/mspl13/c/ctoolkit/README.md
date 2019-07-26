@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/c/ctoolkit/
 MS C 6.0 Developer's Toolkit Reference
 --------------------------------------
 
-	
+{% raw %}
+
 	Microsoft  C - DEVELOPER'S TOOLKIT REFERENCE
 	
 	
@@ -5370,5 +5371,5 @@ MS C 6.0 Developer's Toolkit Reference
 	This article originally appeared in TECH Specialist, August 1990, page 57.
 	It is reprinted with permission of R&D Publications, Inc., 2601 Iowa,
 	Lawrence, KS 66046, (913) 841-1631.
-	
-	
+
+{% endraw %}

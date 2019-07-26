@@ -7,12 +7,31 @@ permalink: /pubs/pc/reference/compaq/deskpro386/
 COMPAQ DeskPro 386 Reference Manuals
 ------------------------------------
 
+So far, I've found only the first volume of the **COMPAQ DeskPro 386/25 Technical Reference Guide**:
+
 * [COMPAQ DeskPro 386/25 Technical Reference Guide (Volume I)](https://1drv.ms/b/s!ArcO_mFRe1Z9gq5BThwmEpfyp0EBdA)
+
+The table of contents in Volume I gives us a taste of what's in Volume II:
+
+- Chapter 5 KEYBOARD
+- Chapter 6 POWER SUPPLY
+- Chapter 7 MULTIPURPOSE FIXED DISK DRIVE CONTROLLER BOARDS
+- Chapter 8 DISKETTE DRIVES
+- Chapter 9 FIXED DISK DRIVE SYSTEMS
+- Chapter 10 FIXED DISK DRIVE BACKUP SYSTEMS
+- Chapter 11 VIDEO DISPLAY CONTROLLER BOARDS
+- Chapter 12 MONITORS
+- Chapter 13 ASYNCHRONOUS COMMUNICATIONS/PARALLEL PRINTER BOARD
+- Chapter 14 COMPAQ 300-/600-MEGABYTE FIXED DISK DRIVE EXPANSION UNIT
+- Appendix A INTERNATIONAL KEYBOARDS
+- Appendix B ERROR MESSAGES 
+
+[![COMPAQ DeskPro 386/25 Technical Reference Guide (Volume I)](/pubs/pc/reference/compaq/deskpro386/COMPAQ_DeskPro_386-25_Technical_Reference_Guide-Vol1-1988-08.png)](https://1drv.ms/b/s!ArcO_mFRe1Z9gq5BThwmEpfyp0EBdA)
 
 NOTE: As the page on [COMPAQ DeskPro 386 ROMs](/devices/pcx86/rom/compaq/deskpro386/#authors-of-the-compaq-deskpro-386-rom)
 explains, 5 COMPAQ engineers had their initials "engraved" in the original DeskPro 386 ROM.  In June 2018, I was
 fortunate enough to meet 4 of them, and they were all kind enough to sign my copy of the DeskPro 386 Technical Reference
-Guide.  This "signature page", shown below, has since been added to the PDF.
+Guide.  This "signature page", shown below, has since been added to the PDF above.
 
 ![COMPAQ DeskPro 386-25 Technical Reference Guide - Volume 1 - 1988-08 - Signatures](/pubs/pc/reference/compaq/deskpro386/COMPAQ_DeskPro_386-25_Technical_Reference_Guide-Vol1-1988-08-Signatures.png)
 

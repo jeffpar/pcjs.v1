@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/basic/qbprog/
 MS QB 4.5 Programming in BASIC
 ------------------------------
 
-	
+{% raw %}
+
 	Microsoft QuickBASIC:  Programming in BASIC
 	
 	
@@ -24294,4 +24295,5 @@ MS QB 4.5 Programming in BASIC
 	
 	/ZD option (BC)
 	/ZI option (BC)
-	
+
+{% endraw %}

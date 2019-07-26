@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/basic/b7start/
 MS BASIC 7.1 Getting Started
 ----------------------------
 
-	
+{% raw %}
+
 	BASIC Version 7.1 Getting Started
 	
 	
@@ -4480,5 +4481,5 @@ MS BASIC 7.1 Getting Started
 	CodeView will not use overlays smaller than 16K nor larger than 128K.
 	Therefore, the minimum effective value for  buffersize
 	 is 16 and the maximum is 128.
-	
-	
+
+{% endraw %}

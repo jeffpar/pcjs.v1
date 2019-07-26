@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/basic/qbtools/
 MS QB Programmer's Toolbox
 --------------------------
 
-	
+{% raw %}
+
 	Microsoft QuickBASIC Programmer's Toolbox
 	
 	
@@ -21347,4 +21348,4 @@ MS QB Programmer's Toolbox
 	  family in Eagle River, Alaska, where he is a programmer for ARCO Alaska,
 	  Inc.
 	
-	
+{% endraw %}

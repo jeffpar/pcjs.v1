@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/basic/b7lang/
 MS BASIC 7.1 Language Reference
 -------------------------------
 
-	
+{% raw %}
+
 	BASIC Language Reference
 	
 	
@@ -34558,4 +34559,5 @@ MS BASIC 7.1 Language Reference
 	Generally, these routines are quite flexible and can certainly add
 	functionality to your programs, as well as conversion capability from one
 	platform to the other.
-	
+
+{% endraw %}

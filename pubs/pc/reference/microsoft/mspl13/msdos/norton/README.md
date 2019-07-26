@@ -7,6 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/msdos/norton/
 The New Peter Norton Programmer's Guide to the IBM PC and PS/2
 --------------------------------------------------------------
 	
+{% raw %}
+
 	The New Peter Norton Programmer's Guide to the IBM(R) PC and PS/2(R)
 	
 	
@@ -24161,4 +24163,5 @@ The New Peter Norton Programmer's Guide to the IBM PC and PS/2
 	volume label 344, 497
 	volume serial number 497
 	windowing environments 95, 98
-	
+
+{% endraw %}
