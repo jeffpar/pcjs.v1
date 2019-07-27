@@ -2,10 +2,26 @@
 layout: page
 title: Microsoft QuickBASIC 4.50
 permalink: /disks/pcx86/tools/microsoft/basic/quickbasic/4.50/
+machines:
+  - id: ibm5170-msdos320
+    type: pcx86
+    config: /devices/pcx86/machine/5170/ega/640kb/rev3/machine.xml
+    drives: '[{name:"10Mb Hard Disk",type:1,path:"/disks-demo/pcx86/drives/10mb/MSDOS320-C400.json"}]'
+    floppyDrives: '[{boot:false},{}]'
+    autoMount:
+      A:
+        name: MS QuickBASIC 4.50 (Disk 1)
+      B:
+        name: None
 ---
 
 Microsoft QuickBASIC 4.50
 -------------------------
+
+A machine with QuickBASIC 4.50 (Disk 1) loaded in drive A: is provided below, along with
+[Directory Listings](#directory-of-ms-quickbasic-450-disk-1) of the original 720Kb diskettes.
+
+{% include machine.html id="ibm5170-msdos320" %}
 
 ### Directory of MS QuickBASIC 4.50 (Disk 1)
 

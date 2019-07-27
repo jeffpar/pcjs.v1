@@ -2,10 +2,26 @@
 layout: page
 title: Microsoft QuickBASIC 2.01
 permalink: /disks/pcx86/tools/microsoft/basic/quickbasic/2.01/
+machines:
+  - id: ibm5160-msdos320
+    type: pcx86
+    config: /devices/pcx86/machine/5160/ega/512kb/machine.xml
+    drives: '[{name:"10Mb Hard Disk",type:3,path:"/disks-demo/pcx86/drives/10mb/MSDOS320-C400.json"}]'
+    floppyDrives: '[{boot:false},{}]'
+    autoMount:
+      A:
+        name: MS QuickBASIC 2.01 (Disk 1)
+      B:
+        name: MS QuickBASIC 2.01 (Disk 2)
 ---
 
 Microsoft QuickBASIC 2.01
 -------------------------
+
+A machine with QuickBASIC 2.01 diskettes loaded in drives A: and B: is provided below,
+along with [Directory Listings](#directory-of-ms-quickbasic-201-disk-1) of the original 360Kb diskettes.
+
+{% include machine.html id="ibm5160-msdos320" %}
 
 ### Directory of MS QuickBASIC 2.01 (Disk 1)
 
