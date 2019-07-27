@@ -2,48 +2,64 @@
 layout: page
 title: Microsoft QuickBASIC 4.50
 permalink: /disks/pcx86/tools/microsoft/basic/quickbasic/4.50/
+machines:
+  - id: ibm5170-msdos320
+    type: pcx86
+    config: /devices/pcx86/machine/5170/ega/640kb/rev3/machine.xml
+    drives: '[{name:"10Mb Hard Disk",type:1,path:"/disks-demo/pcx86/drives/10mb/MSDOS320-C400.json"}]'
+    floppyDrives: '[{boot:false},{}]'
+    autoMount:
+      A:
+        name: MS QuickBASIC 4.50 (Disk 1)
+      B:
+        name: None
 ---
 
 Microsoft QuickBASIC 4.50
 -------------------------
 
+A machine with QuickBASIC 4.50 (Disk 1) loaded in drive A: is provided below, along with
+[Directory Listings](#directory-of-ms-quickbasic-450-disk-1) of the original 720Kb diskettes.
+
+{% include machine.html id="ibm5170-msdos320" %}
+
 ### Directory of MS QuickBASIC 4.50 (Disk 1)
 
-	 Volume in drive A is DISK1      
+	 Volume in drive A has no label
 
 	Directory of A:\
 
-	BC       EX$     83456 08-20-90  11:00a
-	BX       PGM     22560 08-20-90  11:00a
-	DEMO1    BA$      1037 08-20-90  11:00a
-	DEMO2    BA$       970 08-20-90  11:00a
-	DEMO3    BA$       947 08-20-90  11:00a
-	EXAMPLES     <DIR>     12-05-02   6:26p
+	READTHIS NOW      1023 08-20-90  11:00a
+	SETUP    EXE     59689 08-20-90  11:00a
+	README   DOC     20025 08-20-90  11:00a
+	PACKING  LST     12068 08-20-90  11:00a
 	LEARN    COM     29264 08-20-90  11:00a
 	LEARN    PIF       369 08-20-90  11:00a
-	LINK     EX$     48331 08-20-90  11:00a
-	PACKING  LST     12068 08-20-90  11:00a
-	QB       BI$       792 08-20-90  11:00a
-	QB       EX$    225655 08-20-90  11:00a
-	QB       PI$       115 08-20-90  11:00a
-	QB45QCK  HL$     67635 08-20-90  11:00a
 	QBCBT    CTX     24547 08-20-90  11:00a
 	QBCBT    SCN      8610 08-20-90  11:00a
 	QBCBT    SOB      8930 08-20-90  11:00a
+	BX       PGM     22560 08-20-90  11:00a
+	QB       BI$       792 08-20-90  11:00a
 	QCARDS   BA$     16553 08-20-90  11:00a
 	QCARDS   DA$      1274 08-20-90  11:00a
-	README   DOC     20025 08-20-90  11:00a
-	READTHIS NOW      1023 08-20-90  11:00a
 	REMLINE  BA$      5996 08-20-90  11:00a
-	SETUP    EXE     59689 08-20-90  11:00a
 	SORTDEMO BA$     10830 08-20-90  11:00a
 	TORUS    BA$     13525 08-20-90  11:00a
+	DEMO1    BA$      1037 08-20-90  11:00a
+	DEMO2    BA$       970 08-20-90  11:00a
+	DEMO3    BA$       947 08-20-90  11:00a
+	QB45QCK  HL$     67635 08-20-90  11:00a
+	QB       EX$    225655 08-20-90  11:00a
+	QB       PI$       115 08-20-90  11:00a
+	BC       EX$     83456 08-20-90  11:00a
+	LINK     EX$     48331 08-20-90  11:00a
+	EXAMPLES     <DIR>     08-20-90  11:00a
 	       25 file(s)     664201 bytes
 
 	Directory of A:\EXAMPLES
 
-	.            <DIR>     12-05-02   6:26p
-	..           <DIR>     12-05-02   6:26p
+	.            <DIR>     08-20-90  11:00a
+	..           <DIR>     08-20-90  11:00a
 	BALLPSET BA$      1615 08-20-90  11:00a
 	BALLXOR  BA$      1111 08-20-90  11:00a
 	BAR      BA$      2582 08-20-90  11:00a
@@ -71,37 +87,37 @@ Microsoft QuickBASIC 4.50
 
 	Total files listed:
 	       50 file(s)     698173 bytes
-	                      502272 bytes free
+	                        7168 bytes free
 
 ### Directory of MS QuickBASIC 4.50 (Disk 2)
 
-	 Volume in drive A is DISK2      
+	 Volume in drive A has no label
 
 	Directory of A:\
 
-	ADVR_EX      <DIR>     12-05-02   6:26p
-	BCOM45   LI$    149360 08-20-90  11:00a
-	BQLB45   LI$     15009 08-20-90  11:00a
+	UNPACK   EXE     22003 08-20-90  11:00a
+	LIB      EX$     25375 08-20-90  11:00a
 	BRUN45   EX$     64969 08-20-90  11:00a
 	BRUN45   LI$     15782 08-20-90  11:00a
-	FIXSHIFT CO$       621 08-20-90  11:00a
-	LIB      EX$     25375 08-20-90  11:00a
-	MOUSE    CO$     10839 08-20-90  11:00a
-	MSHERC   CO$      4277 08-20-90  11:00a
-	NOEM     OB$      2257 08-20-90  11:00a
-	PATCH87  EX$      3205 08-20-90  11:00a
+	BQLB45   LI$     15009 08-20-90  11:00a
+	BCOM45   LI$    149360 08-20-90  11:00a
 	QB       LI$      1057 08-20-90  11:00a
 	QB       QL$      4567 08-20-90  11:00a
-	QB45ADVR HL$    318871 08-20-90  11:00a
 	QB45ENER HL$     47135 08-20-90  11:00a
+	NOEM     OB$      2257 08-20-90  11:00a
 	SMALLERR OB$       355 08-20-90  11:00a
-	UNPACK   EXE     22003 08-20-90  11:00a
+	PATCH87  EX$      3205 08-20-90  11:00a
+	FIXSHIFT CO$       621 08-20-90  11:00a
+	MSHERC   CO$      4277 08-20-90  11:00a
+	MOUSE    CO$     10839 08-20-90  11:00a
+	QB45ADVR HL$    318871 08-20-90  11:00a
+	ADVR_EX      <DIR>     08-20-90  11:00a
 	       17 file(s)     685682 bytes
 
 	Directory of A:\ADVR_EX
 
-	.            <DIR>     12-05-02   6:26p
-	..           <DIR>     12-05-02   6:26p
+	.            <DIR>     08-20-90  11:00a
+	..           <DIR>     08-20-90  11:00a
 	CALL_EX  BA$      1126 08-20-90  11:00a
 	CHR_EX   BA$       567 08-20-90  11:00a
 	CMD_EX   BA$      1013 08-20-90  11:00a
@@ -126,4 +142,4 @@ Microsoft QuickBASIC 4.50
 
 	Total files listed:
 	       39 file(s)     697347 bytes
-	                      505856 bytes free
+	                       12288 bytes free
