@@ -2,6 +2,17 @@
 layout: page
 title: Microsoft QuickBASIC 2.00
 permalink: /disks/pcx86/tools/microsoft/basic/quickbasic/2.00/
+machines:
+  - id: ibm5160-msdos320
+    type: pcx86
+    config: /devices/pcx86/machine/5160/ega/512kb/machine.xml
+    drives: '[{name:"10Mb Hard Disk",type:3,path:"/disks-demo/pcx86/drives/10mb/MSDOS320-C400.json"}]'
+    floppyDrives: '[{boot:false},{}]'
+    autoMount:
+      A:
+        name: MS QuickBASIC 2.00 (Disk 1)
+      B:
+        name: MS QuickBASIC 2.00 (Personal)
 ---
 
 Microsoft QuickBASIC 2.00
@@ -13,6 +24,8 @@ to be an original distribution disk; unfortunately, Disk 2 was not included.
 The [MS QuickBASIC 2.00 (Personal)](#directory-of-ms-quickbasic-200-personal) disk is from the
 [PCjs Personal Disk Collection](/disks/pcx86/personal/) and is not an original distribution disk; however, it
 contains an identical `QB.EXE` and presumably a corresponding `BCOM20.LIB`.
+
+{% include machine.html id="ibm5160-msdos320" %}
 
 ### Directory of MS QuickBASIC 2.00 (Disk 1)
 
