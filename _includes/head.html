@@ -13,15 +13,17 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     {%- endif %}
     {%- if page.preview != nil %}
-    <meta property="og:image" content="{{ page.preview }}">
+    <meta name="twitter:image" property="og:image" content="{{ page.preview }}">
     {%- else %}
-    <meta property="og:image" content="{{ site.baseurl }}/versions/images/current/home-page.png">
+    <meta name="twitter:image" property="og:image" content="{{ site.baseurl }}/versions/images/current/home-page.png">
     {%- endif %}
     {%- if page.title != nil %}
-    <meta property="og:title" content="{{ page.title }}">
+    <meta name="twitter:title" property="og:title" content="{{ page.title }}">
     {%- else %}
-    <meta property="og:title" content="The Original IBM PC in a Web Browser">
+    <meta name="twitter:title" property="og:title" content="The Original IBM PC in a Web Browser">
     {%- endif %}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@jeffpar">
     <link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet">
     <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}">
     <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
