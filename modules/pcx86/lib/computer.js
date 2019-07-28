@@ -418,7 +418,11 @@ class Computer extends Component {
                          * it makes Safari on iOS over-zoom whenever the textarea receives focus).
                          */
                         if (Web.isUserAgent("MSIE")) control.style.fontSize = "0";
-                        control.value = "";
+                        /*
+                         * We no longer clear the text, to give the user/system a chance to copy it to the clipboard.
+                         *
+                         *      control.value = "";
+                         */
                     }
                 }
             }

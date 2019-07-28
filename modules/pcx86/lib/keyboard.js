@@ -284,6 +284,24 @@ class Keyboard extends Component {
                  */
                 if (sHTMLType == "textarea") {
                     this.controlTextKeyboard = controlText;
+                    this.controlTextKeyboard.addEventListener(
+                        'copy',
+                        function onKeyCopy(event) {
+                            kbd.onCopy(event);
+                        }
+                    );
+                    this.controlTextKeyboard.addEventListener(
+                        'cut',
+                        function onKeyCut(event) {
+                            kbd.onCut(event);
+                        }
+                    );
+                    this.controlTextKeyboard.addEventListener(
+                        'paste',
+                        function onKeyPaste(event) {
+                            kbd.onPaste(event);
+                        }
+                    );
                 }
                 controlText.onkeydown = function onKeyDown(event) {
                     return kbd.onKeyChange(event, true);
@@ -518,6 +536,7 @@ class Keyboard extends Component {
         let softKeys = cmp.getMachineParm('softKeys');
         if (softKeys) this.enableSoftKeyboard(softKeys != "false");
 
+        this.video = cmp.getMachineComponent("Video");
         cpu.addIntNotify(Interrupts.DOS, this.intDOS.bind(this));
     }
 
@@ -526,10 +545,27 @@ class Keyboard extends Component {
      *
      * Notification from the Computer that it's starting.
      *
+     * We take advantage of the fact that this notification occurs AFTER the Computer component has disabled the
+     * textarea overlay for diagnostic purposes; we must partially "re-enable" it in order for the browser to send
+     * us "paste" events.  In particular, while setting lineHeight to zero was a good way to ensure the textarea
+     * was completely invisible (as well as disabling any blinking cursor/caret whenever the textarea had focus),
+     * it turns out that lineHeight must NOT be zero to allow paste events.  Obvious, eh?
+     *
+     * I tried setting lineHeight on-demand (eg, inside an "oncontextmenu" event handler), but that was too late,
+     * at least for the first time you right-clicked.  Moreover, that wouldn't have helped with paste events triggered
+     * by keyboard shortcut (eg, Cmd+V), or with machines where mouse events were being captured as well.
+     *
      * @this {Keyboard}
      */
     start()
     {
+        if (this.controlTextKeyboard) {
+            // this.controlTextKeyboard.setAttribute("contenteditable", "");
+            // this.controlTextKeyboard.setAttribute("readonly", "readonly");
+            this.controlTextKeyboard.style.lineHeight = "normal";
+            this.controlTextKeyboard.focus();
+            this.controlTextKeyboard.select();
+        }
         this.injectInit(Keyboard.INJECTION.ON_START);
     }
 
@@ -1752,8 +1788,10 @@ class Keyboard extends Component {
             return false;
         }
 
-        if (fDown) this.cKeysPressed++;
-        this.sInjectBuffer = "";                        // actual key events should stop any injection in progress
+        if (fDown) {
+            this.cKeysPressed++;
+            this.sInjectBuffer = "";                    // actual key DOWN (not UP) events should also stop any injection in progress
+        }
         Component.processScript(this.idMachine);        // and any script, too
 
         /*
@@ -1977,7 +2015,7 @@ class Keyboard extends Component {
         }
 
         this.cKeysPressed++;
-        this.sInjectBuffer = "";        // actual key events should stop any injection currently in progress
+        this.sInjectBuffer = "";        // actual key PRESS events should stop any injection currently in progress
 
         if (this.fAllDown) {
             let simCode = this.checkActiveKey();
@@ -2011,6 +2049,73 @@ class Keyboard extends Component {
         }
 
         return fPass;
+    }
+
+    /**
+     * onCopy(event)
+     *
+     * @this {Keyboard}
+     * @param {Object} event
+     */
+    onCopy(event)
+    {
+        if (event.stopPropagation) event.stopPropagation();
+        if (event.preventDefault) event.preventDefault();
+        var clipboardData = event.clipboardData || window.clipboardData;
+        if (clipboardData && this.video) {
+            clipboardData.setData("text/plain", this.video.getTextData());
+        }
+    }
+
+    /**
+     * onCut(event)
+     *
+     * @this {Keyboard}
+     * @param {Object} event
+     */
+    onCut(event)
+    {
+        if (event.stopPropagation) event.stopPropagation();
+        if (event.preventDefault) event.preventDefault();
+        var clipboardData = event.clipboardData || window.clipboardData;
+        if (clipboardData) {
+            clipboardData.setData("text/plain", this.controlTextKeyboard.value);
+        }
+    }
+
+    /**
+     * onPaste(event)
+     *
+     * @this {Keyboard}
+     * @param {Object} event
+     */
+    onPaste(event)
+    {
+        if (event.stopPropagation) event.stopPropagation();
+        if (event.preventDefault) event.preventDefault();
+        var clipboardData = event.clipboardData || window.clipboardData;
+        if (clipboardData) {
+            let s = clipboardData.getData("text/plain");
+            /*
+             * We replace every '$' with '$$' to ensure there's no misinterpretation of a character sequence as one
+             * of our special macro/key/delay sequences; see parseKeys() for a list.  The assumption here is that,
+             * normally, the user will want pasted data injected exactly as-is.  But, there are always exceptions,
+             * so if the pasted data ends with a '$', we will strip that trailing '$' and leave the rest of the string
+             * as-is, allowing any special macros/keys/delays defined with '$' to pass through.
+             *
+             * And last but not least, an exception to the exception: if you need the pasted data to be treated as-is
+             * AND to end with a '$', use TWO '$' at the end.
+             */
+            let end = s.slice(-1);
+            if (end == '$') {
+                s = s.slice(0, -1);
+                if (s.slice(-1) == '$') end = '';
+            }
+            if (end != '$') {
+                s = s.replace(/\$/g, '$$$$');   // remember, replace() treats '$' special; '$$' is really just one '$'
+            }
+            this.injectKeys(s.replace(/\r\n/g, '\r'));
+        }
     }
 
     /**
