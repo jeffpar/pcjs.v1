@@ -2919,6 +2919,35 @@ class Video extends Component {
     }
 
     /**
+     * getTextData()
+     *
+     * This is an interface used by the Keyboard component, to obtain a plain-text copy of any currently visible text.
+     *
+     * To keep the function simple and relieve ourselves of some tedious calculations, such as the current visible start
+     * address within the frame buffer, we rely on the cell cache, which conveniently mirrors all visible cells as of the
+     * last screen refresh.  The only caveat is that the cell cache may be over-buffering by one entire column and row,
+     * but that's easily accounted for (eg, every row must step through nColsBuffer -- not merely nCols -- of cell data).
+     *
+     * @this {Video}
+     * @return {string}
+     */
+    getTextData()
+    {
+        let s = "", i = 0;
+        if (this.nCardFont) {
+            for (let row = 0; row < this.nRows; row++) {
+                let line = "";
+                for (let col = 0; col < this.nColsBuffer; col++) {
+                    if (col < this.nCols) line += String.fromCharCode(this.aCellCache[i] & 0xff);
+                    i++;
+                }
+                s += line.replace(/\s*$/, "\n");
+            }
+        }
+        return s;
+    }
+
+    /**
      * goFullScreen()
      *
      * @this {Video}
