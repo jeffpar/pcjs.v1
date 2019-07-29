@@ -21,8 +21,8 @@ As of v1.75.5, it should now be possible to right-click on a PCx86 screen and ch
 your browser's Copy/Paste shortcut keys, or both.  The browser's right-click context menu won't always be available
 if the machine inside is expecting to receive right-clicks itself, but hopefully your browser's keyboard shortcuts
 will still work.  Pasting works by injecting keystrokes into the machine, much like you could already do with the
-*autoType* URL parameter.  Consider this a "beta" release of Copy/Paste support, because I haven't test every browser
-yet, I'm sure it could use some refinements, and I'm sure people won't be shy about complaining if something doesn't work.
+*autoType* URL parameter.  Consider this a "beta" release of Copy/Paste support, because I haven't tested every browser
+yet, and I'm sure people won't be shy about complaining if something doesn't work.
 
 I've also been working on weaning PCjs off of Amazon Web Services.  I was using S3 cloud storage for many of the
 documents I've scanned over the years, but since I was also paying for OneDrive, it seemed silly to pay extra for AWS,
@@ -35,9 +35,8 @@ still served by AWS, but I plan to address that in the near future.
 
 I'd also like to spend some time playing with the old versions of [QuickBASIC](/disks/pcx86/tools/microsoft/basic/quickbasic/).
 The diskettes I picked up didn't come with any manuals, but I do have a copy of "Microsoft QuickBASIC" by Douglas Hergert
-from Microsoft Press (1987).
-
-I'm thinking about mailing in a request for the "Companion Disk", too.  I'll let you know if Microsoft Press comes through.
+from Microsoft Press (1987).  I'm thinking about mailing in a request for the "Companion Disk", too.  I'll let you know if
+Microsoft Press comes through.
 
 [![Microsoft QuickBASIC (1987)](/pubs/pc/programming/Microsoft_QuickBASIC/Microsoft_QuickBASIC-Cover.jpg)](https://1drv.ms/b/s!ArcO_mFRe1Z9gvA_O6gyOmFPqAMhDw?e=GaqGs8)
 
