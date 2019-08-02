@@ -25,6 +25,8 @@ The [MS QuickBASIC 2.00 (Personal)](#directory-of-ms-quickbasic-200-personal) di
 [PCjs Personal Disk Collection](/disks/pcx86/personal/) and is not an original distribution disk; however, it
 contains an identical `QB.EXE` and presumably a corresponding `BCOM20.LIB`.
 
+The machine below is also available with the [PCjs Debugger](debugger/).
+
 {% include machine.html id="ibm5160-msdos320" %}
 
 ### Directory of MS QuickBASIC 2.00 (Disk 1)

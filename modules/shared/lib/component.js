@@ -1338,31 +1338,73 @@ class Component {
     }
 
     /**
+     * clearBits(num, bits)
+     *
+     * Helper function for clearing bits in numbers with more than 32 bits.
+     *
+     * @param {number} num
+     * @param {number} bits
+     * @return {number}
+     */
+    clearBits(num, bits)
+    {
+        let shift = Math.pow(2, 32);
+        let numHi = (num / shift)|0;
+        let bitsHi = (bits / shift)|0;
+        return (num & ~bits) + (numHi & ~bitsHi) * shift;
+    }
+
+    /**
+     * setBits(num, bits)
+     *
+     * Helper function for setting bits in numbers with more than 32 bits.
+     *
+     * @param {number} num
+     * @param {number} bits
+     * @return {number}
+     */
+    setBits(num, bits)
+    {
+        let shift = Math.pow(2, 32);
+        let numHi = (num / shift)|0;
+        let bitsHi = (bits / shift)|0;
+        return (num | bits) + (numHi | bitsHi) * shift;
+    }
+
+    /**
+     * testBits(num, bits)
+     *
+     * Helper function for testing bits in numbers with more than 32 bits.
+     *
+     * @param {number} num
+     * @param {number} bits
+     * @return {boolean}
+     */
+    testBits(num, bits)
+    {
+        let shift = Math.pow(2, 32);
+        let numHi = (num / shift)|0;
+        let bitsHi = (bits / shift)|0;
+        return ((num & bits) == (bits|0) && (numHi & bitsHi) == bitsHi);
+    }
+
+    /**
      * messageEnabled(bitsMessage)
      *
-     * If bitsMessage is not specified, the component's MESSAGE category is used.
+     * If bitsMessage is not specified, the component's default Messages category is used.
+     *
+     * If bitsMessage is Messages.DEFAULT (0), then the component's Messages category is used,
+     * and if it's Messages.ALL (-1), then the message is always displayed, regardless what's enabled.
      *
      * @this {Component}
-     * @param {number} [bitsMessage] is zero or more MESSAGE_* category flag(s)
+     * @param {number} [bitsMessage] is zero or more Message flags
      * @return {boolean} true if all specified message enabled, false if not
      */
     messageEnabled(bitsMessage = 0)
     {
         if (DEBUGGER && this.dbg) {
-            if (this !== this.dbg) {
-                bitsMessage = bitsMessage || this.bitsMessage;
-            }
-            let bitsEnabled = this.dbg.bitsMessage & bitsMessage;
-            /*
-             * This next "bit" of logic is for PCx86 and any other machine where we've expanded the set of
-             * messages by reusing bits in the low nibbles in combination with different bits in the high nibble.
-             * If the input bits adhere to that format, then the mask we just produced must adhere to it as well,
-             * and if it doesn't, zero the mask, ensuring that the test will return false.
-             */
-            if ((bitsMessage & 0xf0000000) && (bitsMessage & 0x0fffffff)) {
-                if (!(bitsEnabled & 0xf0000000) || !(bitsEnabled & 0x0fffffff)) bitsEnabled = 0;
-            }
-            if (bitsMessage && bitsEnabled === bitsMessage) {
+            bitsMessage = bitsMessage || this.bitsMessage;
+            if ((bitsMessage|0) == -1 || this.testBits(this.dbg.bitsMessage, (bitsMessage % 2)? bitsMessage - 1 : bitsMessage)) {
                 return true;
             }
         }
@@ -1372,14 +1414,22 @@ class Component {
     /**
      * printf(format, ...args)
      *
+     * If format is a number, then it's treated as one or more Messages flags, and the real format
+     * string is the first arg.
+     *
      * @this {Component}
-     * @param {string} format
+     * @param {string|number} format
      * @param {...} args
      */
     printf(format, ...args)
     {
         if (DEBUGGER && this.dbg) {
-            if (this.messageEnabled()) {
+            let bitsMessage = 0;
+            if (typeof format == "number") {
+                bitsMessage = format;
+                format = args.shift();
+            }
+            if (this.messageEnabled(bitsMessage)) {
                 let s = Str.sprintf(format, ...args);
                 /*
                  * Since dbg.message() calls println(), we strip any ending linefeed.
@@ -1388,7 +1438,7 @@ class Component {
                  * the benefits of debugger messages (eg, automatic buffering, halting, yielding, etc).
                  */
                 if (s.slice(-1) == '\n') s = s.slice(0, -1);
-                this.dbg.message(s);
+                this.dbg.message(s, !!(bitsMessage % 2));   // pass true for fAddress if Messages.ADDRESS is set
             }
         }
     }
@@ -1396,18 +1446,21 @@ class Component {
     /**
      * printMessage(sMessage, bitsMessage, fAddress)
      *
-     * If bitsMessage is not specified, the component's MESSAGE category is used.
-     * If bitsMessage is true, the message is displayed regardless.
+     * If bitsMessage is not specified, the component's Messages category is used, and if bitsMessage is true,
+     * the message is displayed regardless.
      *
      * @this {Component}
      * @param {string} sMessage is any caller-defined message string
-     * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
+     * @param {number|boolean} [bitsMessage] is zero or more Messages flag(s)
      * @param {boolean} [fAddress] is true to display the current address
      */
     printMessage(sMessage, bitsMessage, fAddress)
     {
         if (DEBUGGER && this.dbg) {
-            if (bitsMessage === true || this.messageEnabled(bitsMessage | 0)) {
+            if (typeof bitsMessage == "boolean") {
+                bitsMessage = bitsMessage? -1 : 0;
+            }
+            if (this.messageEnabled(bitsMessage)) {
                 this.dbg.message(sMessage, fAddress);
             }
         }
@@ -1416,8 +1469,8 @@ class Component {
     /**
      * printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage)
      *
-     * If bitsMessage is not specified, the component's MESSAGE category is used.
-     * If bitsMessage is true, the message is displayed as long as MESSAGE.PORT is enabled.
+     * If bitsMessage is not specified, the component's Messages category is used,
+     * and if bitsMessage is true, the message is displayed if Messages.PORT is enabled also.
      *
      * @this {Component}
      * @param {number} port
@@ -1425,7 +1478,7 @@ class Component {
      * @param {number} [addrFrom]
      * @param {string} [name] of the port, if any
      * @param {number} [bIn] is the input value, if known, on an input operation
-     * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
+     * @param {number|boolean} [bitsMessage] is zero or more Messages flag(s)
      */
     printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage)
     {
