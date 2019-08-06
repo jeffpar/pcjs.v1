@@ -704,7 +704,7 @@ class Keyboard extends Component {
     {
         let b = -1;
 
-        if (!COMPILED) this.printf("receiveCmd(%#02X)\n", this.bCmdPending || bCmd);
+        if (!COMPILED) this.printf("receiveCmd(%#04X)\n", this.bCmdPending || bCmd);
 
         switch(this.bCmdPending || bCmd) {
 
@@ -815,7 +815,7 @@ class Keyboard extends Component {
     {
         if (this.chipset) {
             this.abBuffer.unshift(b);
-            if (!COMPILED) this.printf("keyboard response %#02X buffered\n", b);
+            if (!COMPILED) this.printf("keyboard response %#04X buffered\n", b);
             this.transmitData();
         }
     }
@@ -841,7 +841,7 @@ class Keyboard extends Component {
                  */
                 let b = this.abBuffer.length? this.abBuffer[0] : 0;
                 if (this.chipset.receiveKbdData(b)) {
-                    if (!COMPILED) this.printf("keyboard data %#02X delivered\n", b);
+                    if (!COMPILED) this.printf("keyboard data %#04X delivered\n", b);
                     this.abBuffer.shift();
                 }
                 if (b) this.cpu.setTimer(this.timerTransmit, this.msTransmit);
@@ -1086,7 +1086,7 @@ class Keyboard extends Component {
                     }
                 }
                 this.abBuffer.push(bScan);
-                if (!COMPILED) this.printf("keyboard data %#02X buffered\n", bScan);
+                if (!COMPILED) this.printf("keyboard data %#04X buffered\n", bScan);
                 this.transmitData();
                 return;
             }

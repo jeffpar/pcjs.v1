@@ -1403,8 +1403,9 @@ class Component {
     messageEnabled(bitsMessage = 0)
     {
         if (DEBUGGER && this.dbg) {
+            if (bitsMessage % 2) bitsMessage--;
             bitsMessage = bitsMessage || this.bitsMessage;
-            if ((bitsMessage|0) == -1 || this.testBits(this.dbg.bitsMessage, (bitsMessage % 2)? bitsMessage - 1 : bitsMessage)) {
+            if ((bitsMessage|1) == -1 || this.testBits(this.dbg.bitsMessage, bitsMessage)) {
                 return true;
             }
         }

@@ -1650,7 +1650,7 @@ class Str {
 
             case 'X':
                 ach = Str.HexUpperCase;
-                if (hash) prefix = "0X";
+                // if (hash) prefix = "0X";     // I don't like that %X uppercases both the prefix and the value
                 /* falls through */
 
             case 'x':
@@ -4675,8 +4675,9 @@ class Component {
     messageEnabled(bitsMessage = 0)
     {
         if (DEBUGGER && this.dbg) {
+            if (bitsMessage % 2) bitsMessage--;
             bitsMessage = bitsMessage || this.bitsMessage;
-            if ((bitsMessage|0) == -1 || this.testBits(this.dbg.bitsMessage, (bitsMessage % 2)? bitsMessage - 1 : bitsMessage)) {
+            if ((bitsMessage|1) == -1 || this.testBits(this.dbg.bitsMessage, bitsMessage)) {
                 return true;
             }
         }
@@ -8033,43 +8034,43 @@ var Messages = {
     NONE:       0x000000000000,
     DEFAULT:    0x000000000000,
     ADDRESS:    0x000000000001,
-    WARN:       0x000000000002,
-    HALT:       0x000000000004,
-    CPU:        0x000000000008,
-    SEG:        0x000000000010,
-    DESC:       0x000000000020,
-    TSS:        0x000000000040,
-    PORT:       0x000000000080,
-    IOPM:       0x000000000100,
-    NMI:        0x000000000200,
-    TRAP:       0x000000000400,
-    FAULT:      0x000000000800,
-    INT:        0x000000001000,
-    IRQ:        0x000000002000,
-    BUS:        0x000000004000,
-    MEM:        0x000000008000,
-    DMA:        0x000000010000,
-    FDC:        0x000000020000,
-    HDC:        0x000000040000,
-    DISK:       0x000000080000,
-    PIC:        0x000000100000,
-    TIMER:      0x000000200000,
-    CMOS:       0x000000400000,
-    RTC:        0x000000800000,
-    C8042:      0x000001000000,
-    KBD:        0x000002000000,
-    PARALLEL:   0x000004000000,
-    SERIAL:     0x000008000000,
-    MOUSE:      0x000010000000,
-    SPEAKER:    0x000020000000,
-    CHIPSET:    0x000040000000,
-    VIDEO:      0x000080000000,
-    COMPUTER:   0x000100000000,
-    DATA:       0x000200000000,
-    DOS:        0x000400000000,
-    EVENT:      0x000800000000,
-    KEY:        0x001000000000,
-    BUFFER:     0x800000000000,
+    CPU:        0x000000000002,
+    SEG:        0x000000000004,
+    DESC:       0x000000000008,
+    TSS:        0x000000000010,
+    PORT:       0x000000000020,
+    IOPM:       0x000000000040,
+    NMI:        0x000000000080,
+    TRAP:       0x000000000100,
+    FAULT:      0x000000000200,
+    INT:        0x000000000400,
+    IRQ:        0x000000000800,
+    BUS:        0x000000001000,
+    MEM:        0x000000002000,
+    DMA:        0x000000004000,
+    FDC:        0x000000008000,
+    HDC:        0x000000010000,
+    DISK:       0x000000020000,
+    PIC:        0x000000040000,
+    TIMER:      0x000000080000,
+    CMOS:       0x000000100000,
+    RTC:        0x000000200000,
+    C8042:      0x000000400000,
+    KBD:        0x000000800000,
+    PARALLEL:   0x000001000000,
+    SERIAL:     0x000002000000,
+    MOUSE:      0x000004000000,
+    SPEAKER:    0x000008000000,
+    CHIPSET:    0x000010000000,
+    VIDEO:      0x000020000000,
+    COMPUTER:   0x000040000000,
+    DATA:       0x000080000000,
+    DOS:        0x000100000000,
+    EVENT:      0x000200000000,
+    KEY:        0x000400000000,
+    WARN:       0x100000000000,
+    HALT:       0x200000000000,
+    BUFFER:     0x400000000000,
     ALL:        0xffffffffffff
 };
 
@@ -11585,7 +11586,7 @@ class Memory {
      */
     readNone(off, addr)
     {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.CPU | Messages.MEM) /* && !off */) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.CPU + Messages.MEM) /* && !off */) {
             this.dbg.message("attempt to read invalid block %" + Str.toHex(addr), true);
         }
         return 0xff;
@@ -11601,7 +11602,7 @@ class Memory {
      */
     writeNone(off, v, addr)
     {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.CPU | Messages.MEM) /* && !off */) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.CPU + Messages.MEM) /* && !off */) {
             this.dbg.message("attempt to write " + Str.toHexWord(v) + " to invalid block %" + Str.toHex(addr), true);
         }
     }
@@ -13772,14 +13773,14 @@ class CPU extends Component {
             if (timer[1] < 0) continue;
             timer[1] -= nCycles;
             if (timer[1] <= 0) {
-                if (DEBUG && this.messageEnabled(Messages.CPU | Messages.TIMER)) {      // CPU TIMER message (as opposed to CHIPSET TIMER message)
+                if (DEBUG && this.messageEnabled(Messages.CPU + Messages.TIMER)) {      // CPU TIMER message (as opposed to CHIPSET TIMER message)
                     this.printMessage("updateTimer(" + nCycles + "): firing " + timer[0] + " with only " + (timer[1] + nCycles) + " cycles left");
                 }
                 timer[1] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
                 timer[3]();         // safe to invoke the callback function now
                 if (timer[2]) {
                     this.setTimer(iTimer, timer[2]);
-                    if (DEBUG && this.messageEnabled(Messages.CPU | Messages.TIMER)) {  // CPU TIMER message (as opposed to CHIPSET TIMER message)
+                    if (DEBUG && this.messageEnabled(Messages.CPU + Messages.TIMER)) {  // CPU TIMER message (as opposed to CHIPSET TIMER message)
                         this.printMessage("updateTimer(" + nCycles + "): rearming " + timer[0] + " for " + timer[2] + "ms (" + timer[1] + " cycles)");
                     }
                 }
@@ -27945,7 +27946,7 @@ X86.helpCheckFault = function(nFault, nError, fHalt)
      * However, the foregoing notwithstanding, if MESSAGE.HALT is enabled along with all the other required
      * MESSAGE bits, then we want to halt regardless.
      */
-    if (this.messageEnabled(bitsMessage | Messages.HALT)) {
+    if (this.messageEnabled(bitsMessage + Messages.HALT)) {
         fHalt = true;
     }
 
@@ -36172,7 +36173,7 @@ X86.opHLT = function()
      * If a Debugger is present and both the CPU and HALT message categories are enabled, then we
      * REALLY halt the CPU, on the theory that whoever's using the Debugger would like to see HLTs.
      */
-    if (DEBUGGER && this.dbg && this.messageEnabled(Messages.CPU | Messages.HALT)) {
+    if (DEBUGGER && this.dbg && this.messageEnabled(Messages.CPU + Messages.HALT)) {
         this.resetIP();         // this is purely for the Debugger's benefit, to show the HLT
         this.dbg.stopCPU();
         return;
@@ -38975,19 +38976,13 @@ class ChipSet extends Component {
             let nCyclesUpdate = this.nRTCCyclesNextUpdate - this.cpu.getCycles(this.fScaleTimers);
             if (nCyclesUpdate > 0) {
                 if (nCycles > nCyclesUpdate) {
-                    if (DEBUG && this.messageEnabled(Messages.RTC)) {
-                        this.printMessage("getRTCCycleLimit(" + nCycles + "): reduced to " + nCyclesUpdate + " cycles", true);
-                    }
+                    if (DEBUG) this.printf(Messages.RTC, "getRTCCycleLimit(%d): reduced to %d cycles\n", nCycles, nCyclesUpdate);
                     nCycles = nCyclesUpdate;
                 } else {
-                    if (DEBUG && this.messageEnabled(Messages.RTC)) {
-                        this.printMessage("getRTCCycleLimit(" + nCycles + "): already less than " + nCyclesUpdate + " cycles", true);
-                    }
+                    if (DEBUG) this.printf(Messages.RTC, "getRTCCycleLimit(%d): already less than %d cycles\n", nCycles, nCyclesUpdate);
                 }
             } else {
-                if (DEBUG && this.messageEnabled(Messages.RTC)) {
-                    this.printMessage("RTC next update has passed by " + nCyclesUpdate + " cycles", true);
-                }
+                if (DEBUG) this.printf(Messages.RTC, "RTC next update has passed by %d cycles\n", nCyclesUpdate);
             }
         }
         return nCycles;
@@ -39044,9 +39039,9 @@ class ChipSet extends Component {
                 if (DEBUG) {
                     if (nCyclesUpdate - this.nRTCCyclesNextUpdate > this.nRTCCyclesPerPeriod) {
                         if (bPrev & ChipSet.CMOS.STATUSC.PF) {
-                            this.printMessage("RTC interrupt handler failed to clear STATUSC", Messages.RTC);
+                            this.printf(Messages.RTC, "RTC interrupt handler failed to clear STATUSC\n");
                         } else {
-                            this.printMessage("CPU took too long trigger new RTC periodic interrupt", Messages.RTC);
+                            this.printf(Messages.RTC, "CPU took too long trigger new RTC periodic interrupt\n");
                         }
                     }
                 }
@@ -40164,7 +40159,7 @@ class ChipSet extends Component {
         let controller = this.aDMACs[iDMAC];
         let channel = controller.aChannels[iChannel];
         let b = channel.addrCurrent[controller.bIndex];
-        if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT)) {
             this.printMessageIO(port, undefined, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".ADDR[" + controller.bIndex + "]", b, true);
         }
         controller.bIndex ^= 0x1;
@@ -40202,7 +40197,7 @@ class ChipSet extends Component {
     outDMAChannelAddr(iDMAC, iChannel, port, bOut, addrFrom)
     {
         let controller = this.aDMACs[iDMAC];
-        if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT)) {
             this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".ADDR[" + controller.bIndex + "]", undefined, true);
         }
         let channel = controller.aChannels[iChannel];
@@ -40225,7 +40220,7 @@ class ChipSet extends Component {
         let controller = this.aDMACs[iDMAC];
         let channel = controller.aChannels[iChannel];
         let b = channel.countCurrent[controller.bIndex];
-        if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT)) {
             this.printMessageIO(port, undefined, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".COUNT[" + controller.bIndex + "]", b, true);
         }
         controller.bIndex ^= 0x1;
@@ -40267,7 +40262,7 @@ class ChipSet extends Component {
     outDMAChannelCount(iDMAC, iChannel, port, bOut, addrFrom)
     {
         let controller = this.aDMACs[iDMAC];
-        if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT)) {
             this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".COUNT[" + controller.bIndex + "]", undefined, true);
         }
         let channel = controller.aChannels[iChannel];
@@ -40310,7 +40305,7 @@ class ChipSet extends Component {
         let controller = this.aDMACs[iDMAC];
         let b = controller.bStatus | ChipSet.DMA_STATUS.CH0_TC;
         controller.bStatus &= ~ChipSet.DMA_STATUS.ALL_TC;
-        if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT)) {
             this.printMessageIO(port, undefined, addrFrom, "DMA" + iDMAC + ".STATUS", b, true);
         }
         return b;
@@ -40327,7 +40322,7 @@ class ChipSet extends Component {
      */
     outDMACmd(iDMAC, port, bOut, addrFrom)
     {
-        if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT)) {
             this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CMD", undefined, true);
         }
         this.aDMACs[iDMAC].bCmd = bOut;
@@ -40355,7 +40350,7 @@ class ChipSet extends Component {
     outDMAReq(iDMAC, port, bOut, addrFrom)
     {
         let controller = this.aDMACs[iDMAC];
-        if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT)) {
             this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".REQ", undefined, true);
         }
         /*
@@ -40382,7 +40377,7 @@ class ChipSet extends Component {
     outDMAMask(iDMAC, port, bOut, addrFrom)
     {
         let controller = this.aDMACs[iDMAC];
-        if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT)) {
             this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".MASK", undefined, true);
         }
         let iChannel = bOut & ChipSet.DMA_MASK.CHANNEL;
@@ -40402,7 +40397,7 @@ class ChipSet extends Component {
      */
     outDMAMode(iDMAC, port, bOut, addrFrom)
     {
-        if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT)) {
             this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".MODE", undefined, true);
         }
         let iChannel = bOut & ChipSet.DMA_MODE.CHANNEL;
@@ -40423,7 +40418,7 @@ class ChipSet extends Component {
      */
     outDMAResetFF(iDMAC, port, bOut, addrFrom)
     {
-        if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT)) {
             this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".RESET_FF", undefined, true);
         }
         this.aDMACs[iDMAC].bIndex = 0;
@@ -40454,7 +40449,7 @@ class ChipSet extends Component {
     {
         let controller = this.aDMACs[iDMAC];
         let b = controller.bTemp;
-        if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT)) {
             this.printMessageIO(port, undefined, addrFrom, "DMA" + iDMAC + ".TEMP", b, true);
         }
         return b;
@@ -40471,7 +40466,7 @@ class ChipSet extends Component {
      */
     outDMAMasterClear(iDMAC, port, bOut, addrFrom)
     {
-        if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT)) {
             this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".MASTER_CLEAR", undefined, true);
         }
         /*
@@ -40498,7 +40493,7 @@ class ChipSet extends Component {
     inDMAPageReg(iDMAC, iChannel, port, addrFrom)
     {
         let bIn = this.aDMACs[iDMAC].aChannels[iChannel].bPage;
-        if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT)) {
             this.printMessageIO(port, undefined, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".PAGE", bIn, true);
         }
         return bIn;
@@ -40516,7 +40511,7 @@ class ChipSet extends Component {
      */
     outDMAPageReg(iDMAC, iChannel, port, bOut, addrFrom)
     {
-        if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT)) {
             this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".PAGE", undefined, true);
         }
         this.aDMACs[iDMAC].aChannels[iChannel].bPage = bOut;
@@ -40534,7 +40529,7 @@ class ChipSet extends Component {
     inDMAPageSpare(iSpare, port, addrFrom)
     {
         let bIn = this.abDMAPageSpare[iSpare];
-        if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT)) {
             this.printMessageIO(port, undefined, addrFrom, "DMA.SPARE" + iSpare + ".PAGE", bIn, true);
         }
         return bIn;
@@ -40555,7 +40550,7 @@ class ChipSet extends Component {
          * TODO: Remove this DEBUG-only DESKPRO386 code once we're done debugging DeskPro 386 ROMs;
          * it enables logging of all DeskPro 386 ROM checkpoint I/O to port 0x84.
          */
-        if (this.messageEnabled(Messages.DMA | Messages.PORT) || DEBUG && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386) {
+        if (this.messageEnabled(Messages.DMA + Messages.PORT) || DEBUG && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386) {
             this.printMessageIO(port, bOut, addrFrom, "DMA.SPARE" + iSpare + ".PAGE", undefined, true);
         }
         this.abDMAPageSpare[iSpare] = bOut;
@@ -40619,9 +40614,7 @@ class ChipSet extends Component {
         let channel = controller.aChannels[iChannel];
 
         if (!channel.component || !channel.fnTransfer || !channel.obj) {
-            if (DEBUG && this.messageEnabled(Messages.DMA | Messages.DATA)) {
-                this.printMessage("requestDMA(" + iDMAChannel + "): not connected to a component", true);
-            }
+            if (DEBUG) this.printf(Messages.DMA + Messages.DATA, "requestDMA(%d): not connected to a component\n", iDMAChannel);
             if (done) done(true);
             return;
         }
@@ -40636,9 +40629,7 @@ class ChipSet extends Component {
         if (done) channel.done = done;
 
         if (channel.masked) {
-            if (DEBUG && this.messageEnabled(Messages.DMA | Messages.DATA)) {
-                this.printMessage("requestDMA(" + iDMAChannel + "): channel masked, request queued", true);
-            }
+            if (DEBUG) this.printf(Messages.DMA + Messages.DATA, "requestDMA(%d): channel masked, request queued\n", iDMAChannel);
             return;
         }
 
@@ -40691,9 +40682,9 @@ class ChipSet extends Component {
                 let addr = (channel.bPage << 16) | (channel.addrCurrent[1] << 8) | channel.addrCurrent[0];
                 if (DEBUG && DEBUGGER && channel.sAddrDebug === null) {
                     channel.sAddrDebug = Str.toHex(addr >> 4, 4) + ":" + Str.toHex(addr & 0xf, 4);
-                    if (this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.type != ChipSet.DMA_MODE.TYPE_WRITE) {
-                        this.printMessage("advanceDMA(" + iDMAChannel + ") transferring " + channel.cbDebug + " bytes from " + channel.sAddrDebug, true);
-                        this.dbg.doDump(["db", channel.sAddrDebug, 'l', channel.cbDebug]);
+                    if (channel.type != ChipSet.DMA_MODE.TYPE_WRITE && this.messageEnabled(this.messageBitsDMA(iDMAChannel))) {
+                        this.printf(Messages.ALL, "advanceDMA(%d) transferring %d bytes from %s\n", iDMAChannel, channel.cbDebug, channel.sAddrDebug);
+                        this.dbg.doDump(["db", channel.sAddrDebug, "l" + channel.cbDebug]);
                     }
                 }
                 if (channel.type == ChipSet.DMA_MODE.TYPE_WRITE) {
@@ -40702,9 +40693,7 @@ class ChipSet extends Component {
                         channel.fnTransfer.call(channel.component, channel.obj, -1, function onTransferDMA(b, fAsync, obj, off) {
                             if (b < 0) {
                                 if (!channel.fWarning) {
-                                    if (DEBUG && chipset.messageEnabled(Messages.DMA)) {
-                                        chipset.printMessage("advanceDMA(" + iDMAChannel + ") ran out of data, assuming 0xff", true);
-                                    }
+                                    if (DEBUG) chipset.printf(Messages.DMA, "advanceDMA(%d) ran out of data, assuming 0xff\n", iDMAChannel);
                                     channel.fWarning = true;
                                 }
                                 /*
@@ -40719,9 +40708,7 @@ class ChipSet extends Component {
                                  */
                                 if (BACKTRACK && obj) {
                                     if (!off && obj.file) {
-                                        if (chipset.messageEnabled(Messages.DISK)) {
-                                            chipset.printMessage("loading " + obj.file.sPath + '[' + obj.offFile + "] at %" + Str.toHex(addrCur), true);
-                                        }
+                                        chipset.printf(Messages.DISK, "loading %s[%d] at %%%0X\n", obj.file.sPath, obj.offFile, addrCur);
                                         /*
                                         if (obj.file.sPath == "\\SYSBAS.EXE" && obj.offFile == 512) {
                                             chipset.cpu.stopCPU();
@@ -40761,9 +40748,7 @@ class ChipSet extends Component {
                      */
                 }
                 else {
-                    if (DEBUG && this.messageEnabled(Messages.DMA | Messages.WARN)) {
-                        this.printMessage("advanceDMA(" + iDMAChannel + ") unsupported transfer type: " + Str.toHexWord(channel.type), true);
-                    }
+                    if (DEBUG) this.printf(Messages.DMA + Messages.WARN, "advanceDMA(%d) unsupported transfer type %#06X\n", iDMAChannel, channel.type);
                     channel.fError = true;
                 }
             }
@@ -40816,9 +40801,9 @@ class ChipSet extends Component {
             channel.component = channel.obj = null;
         }
 
-        if (DEBUG && this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.type == ChipSet.DMA_MODE.TYPE_WRITE && channel.sAddrDebug) {
-            this.printMessage("updateDMA(" + iDMAChannel + ") transferred " + channel.cbDebug + " bytes to " + channel.sAddrDebug, true);
-            this.dbg.doDump(["db", channel.sAddrDebug, 'l', channel.cbDebug]);
+        if (DEBUG && channel.type == ChipSet.DMA_MODE.TYPE_WRITE && channel.sAddrDebug && this.messageEnabled(this.messageBitsDMA(iDMAChannel))) {
+            this.printf(Messages.ALL, "updateDMA(%d) transferred %d bytes to %s\n", iDMAChannel, channel.cbDebug, channel.sAddrDebug);
+            this.dbg.doDump(["db", channel.sAddrDebug, "l" + channel.cbDebug]);
         }
 
         if (channel.done) {
@@ -40858,7 +40843,7 @@ class ChipSet extends Component {
                     break;
             }
         }
-        if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
+        if (this.messageEnabled(Messages.PIC + Messages.PORT)) {
             this.printMessageIO(pic.port, undefined, addrFrom, "PIC" + iPIC, b, true);
         }
         return b;
@@ -40875,7 +40860,7 @@ class ChipSet extends Component {
     outPICLo(iPIC, bOut, addrFrom)
     {
         let pic = this.aPICs[iPIC];
-        if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
+        if (this.messageEnabled(Messages.PIC + Messages.PORT)) {
             this.printMessageIO(pic.port, bOut, addrFrom, "PIC" + iPIC, undefined, true);
         }
         if (bOut & ChipSet.PIC_LO.ICW1) {
@@ -40959,14 +40944,12 @@ class ChipSet extends Component {
                 }
                 let nIRQ = (nIRL == null? undefined : pic.nIRQBase + nIRL);
                 if (pic.bISR & bIREnd) {
-                    if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ))) {
-                        this.printMessage("outPIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): IRQ " + nIRQ + " ending @" + this.dbg.toHexOffset(this.cpu.getIP(), this.cpu.getCS()) + " stack=" + this.dbg.toHexOffset(this.cpu.getSP(), this.cpu.getSS()), true);
-                    }
+                    if (DEBUG && this.dbg) this.printf(this.messageBitsIRQ(nIRQ), "outPIC%d(%#04X): IRQ %d ending @%s stack=%s\n",  iPIC, pic.port, nIRQ, this.dbg.toHexOffset(this.cpu.getIP(), this.cpu.getCS()), this.dbg.toHexOffset(this.cpu.getSP(), this.cpu.getSS()));
                     pic.bISR &= ~bIREnd;
                     this.checkIRR();
                 } else {
-                    if (DEBUG && this.messageEnabled(Messages.PIC | Messages.WARN)) {
-                        this.printMessage("outPIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unexpected EOI for IRQ " + nIRQ, true, true);
+                    if (DEBUG) {
+                        this.printf(Messages.PIC + Messages.WARN + Messages.ADDRESS, "outPIC%d(%#04X): unexpected EOI for IRQ %d\n", iPIC, pic.port, nIRQ);
                         if (MAXDEBUG) this.dbg.stopCPU();
                     }
                 }
@@ -40974,9 +40957,7 @@ class ChipSet extends Component {
                  * TODO: Support EOI commands with automatic rotation (eg, ChipSet.PIC_LO.OCW2_EOI_ROT and ChipSet.PIC_LO.OCW2_EOI_ROTSPEC)
                  */
                 if (bOCW2 & ChipSet.PIC_LO.OCW2_SET_ROTAUTO) {
-                    if (this.messageEnabled(Messages.PIC | Messages.WARN)) {
-                        this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW2 rotate " + Str.toHexByte(bOut), true, true);
-                    }
+                    this.printf(Messages.PIC + Messages.WARN + Messages.ADDRESS, "outPIC%d(%#04X): unsupported OCW2 rotate %#04X\n", iPIC, pic.port, bOut);
                 }
             }
             else  if (bOCW2 == ChipSet.PIC_LO.OCW2_SET_PRI) {
@@ -40989,9 +40970,7 @@ class ChipSet extends Component {
                 /*
                  * TODO: Remaining commands to support: ChipSet.PIC_LO.OCW2_SET_ROTAUTO and ChipSet.PIC_LO.OCW2_CLR_ROTAUTO
                  */
-                if (this.messageEnabled(Messages.PIC | Messages.WARN)) {
-                    this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI " + Str.toHexByte(bOut), true, true);
-                }
+                this.printf(Messages.PIC + Messages.WARN + Messages.ADDRESS, "outPIC%d(%#04X): unsupported OCW2 automatic rotate %#04X\n", iPIC, pic.port, bOut);
             }
         } else {
             /*
@@ -41001,9 +40980,7 @@ class ChipSet extends Component {
              * that's unfortunate, because I don't support them yet.
              */
             if (bOut & (ChipSet.PIC_LO.OCW3_POLL_CMD | ChipSet.PIC_LO.OCW3_SMM_CMD)) {
-                if (this.messageEnabled(Messages.PIC | Messages.WARN)) {
-                    this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW3 " + Str.toHexByte(bOut), true, true);
-                }
+                this.printf(Messages.PIC + Messages.WARN + Messages.ADDRESS, "outPIC%d(%#04X): unsupported OCW3 %#04X\n", iPIC, pic.port, bOut);
             }
             pic.bOCW3 = bOut;
         }
@@ -41021,7 +40998,7 @@ class ChipSet extends Component {
     {
         let pic = this.aPICs[iPIC];
         let b = pic.bIMR;
-        if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
+        if (this.messageEnabled(Messages.PIC + Messages.PORT)) {
             this.printMessageIO(pic.port+1, undefined, addrFrom, "PIC" + iPIC, b, true);
         }
         return b;
@@ -41038,7 +41015,7 @@ class ChipSet extends Component {
     outPICHi(iPIC, bOut, addrFrom)
     {
         let pic = this.aPICs[iPIC];
-        if (this.messageEnabled(Messages.PIC | Messages.PORT)) {
+        if (this.messageEnabled(Messages.PIC + Messages.PORT)) {
             this.printMessageIO(pic.port+1, bOut, addrFrom, "PIC" + iPIC, undefined, true);
         }
         if (pic.nICW < pic.aICW.length) {
@@ -41097,7 +41074,7 @@ class ChipSet extends Component {
         let bIRR = (1 << nIRL);
         if (!(pic.bIRR & bIRR)) {
             pic.bIRR |= bIRR;
-            if (this.messageEnabled(this.messageBitsIRQ(nIRQ))) this.printMessage("set IRQ " + nIRQ, true);
+            this.printf(this.messageBitsIRQ(nIRQ), "set IRQ %d\n", nIRQ);
             pic.nDelay = nDelay || 0;
             this.checkIRR();
         }
@@ -41117,7 +41094,7 @@ class ChipSet extends Component {
         let bIRR = (1 << nIRL);
         if (pic.bIRR & bIRR) {
             pic.bIRR &= ~bIRR;
-            if (this.messageEnabled(this.messageBitsIRQ(nIRQ))) this.printMessage("clear IRQ " + nIRQ, true);
+            this.printf(this.messageBitsIRQ(nIRQ), "clear IRQ %d\n", nIRQ);
             this.checkIRR();
         }
     }
@@ -41250,12 +41227,8 @@ class ChipSet extends Component {
                         pic.bIRR &= ~bIRNext;
 
                         let nIRQ = pic.nIRQBase + nIRL;
-                        if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ))) {
-                            this.printMessage("getIRRVector(): IRQ " + nIRQ + " interrupting stack " + this.dbg.toHexOffset(this.cpu.getSP(), this.cpu.getSS()), true, true);
-                        }
-                        if (MAXDEBUG && DEBUGGER) {
-                            this.acInterrupts[nIRQ]++;
-                        }
+                        if (DEBUG && this.dbg) this.printf(this.messageBitsIRQ(nIRQ) + Messages.ADDRESS, "getIRRVector(): IRQ %d interrupting stack %s\n", nIRQ, this.dbg.toHexOffset(this.cpu.getSP(), this.cpu.getSS()));
+                        if (MAXDEBUG && DEBUGGER) this.acInterrupts[nIRQ]++;
                     }
                     break;
                 }
@@ -41341,7 +41314,7 @@ class ChipSet extends Component {
                 b = timer.countCurrent[timer.countIndex++];
             }
         }
-        if (this.messageEnabled(Messages.TIMER | Messages.PORT)) {
+        if (this.messageEnabled(Messages.TIMER + Messages.PORT)) {
             this.printMessageIO(port, undefined, addrFrom, "PIT" + iPIT + ".TIMER" + iPITTimer, b, true);
         }
         return b;
@@ -41364,7 +41337,7 @@ class ChipSet extends Component {
      */
     outTimer(iPIT, iPITTimer, port, bOut, addrFrom)
     {
-        if (this.messageEnabled(Messages.TIMER | Messages.PORT)) {
+        if (this.messageEnabled(Messages.TIMER + Messages.PORT)) {
             this.printMessageIO(port, bOut, addrFrom, "PIT" + iPIT + ".TIMER" + iPITTimer, undefined, true);
         }
 
@@ -41537,9 +41510,7 @@ class ChipSet extends Component {
                     timer.countStart[0] = timer.countInit[0];
                     timer.countStart[1] = timer.countInit[1];
                     timer.nCyclesStart = this.cpu.getCycles(this.fScaleTimers);
-                    if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                        this.printMessage("PIT0.TIMER0 count reset @" + timer.nCyclesStart + " cycles", true);
-                    }
+                    if (DEBUG) this.printf(Messages.TIMER, "PIT0.TIMER0 count reset @%d cycles\n", timer.nCyclesStart);
                 }
             }
         }
@@ -41757,9 +41728,7 @@ class ChipSet extends Component {
             let ticksElapsed = ((nCycles - timer.nCyclesStart) / this.nTicksDivisor) | 0;
 
             if (ticksElapsed < 0) {
-                if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                    this.printMessage("updateTimer(" + iTimer + "): negative tick count (" + ticksElapsed + ")", true);
-                }
+                if (DEBUG) this.printf(Messages.TIMER, "updateTimer(%d): negative tick count (%d)\n", iTimer, ticksElapsed);
                 timer.nCyclesStart = nCycles;
                 ticksElapsed = 0;
             }
@@ -41777,9 +41746,7 @@ class ChipSet extends Component {
              */
             if (timer.mode == ChipSet.PIT_CTRL.MODE0) {
                 if (count <= 0) count = 0;
-                if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                    this.printMessage("updateTimer(" + iTimer + "): MODE0 timer count=" + count, true);
-                }
+                if (DEBUG) this.printf(Messages.TIMER, "updateTimer(%d): MODE0 timer count=%d\n" + iTimer, count);
                 if (!count) {
                     timer.fOUT = true;
                     timer.fCounting = false;
@@ -41814,9 +41781,7 @@ class ChipSet extends Component {
                         /*
                          * TODO: Consider whether we ever care about TIMER1 or TIMER2 underflow
                          */
-                        if (DEBUG && this.messageEnabled(Messages.TIMER) && !iTimer) {
-                            this.printMessage("updateTimer(" + iTimer + "): mode=2, underflow=" + count, true);
-                        }
+                        if (DEBUG && !iTimer) this.printf(Messages.TIMER, "updateTimer(%d): mode=2, underflow=%d\n", iTimer, count);
                         count = countInit;
                     }
                     timer.countStart[0] = count & 0xff;
@@ -41848,9 +41813,7 @@ class ChipSet extends Component {
                         /*
                          * TODO: Consider whether we ever care about TIMER1 or TIMER2 underflow
                          */
-                        if (DEBUG && this.messageEnabled(Messages.TIMER) && !iTimer) {
-                            this.printMessage("updateTimer(" + iTimer + "): mode=3, underflow=" + count, true);
-                        }
+                        if (DEBUG && !iTimer) this.printf(Messages.TIMER, "updateTimer(%d): mode=3, underflow=%d\n", iTimer, count);
                         count = countInit;
                     }
                     if (MAXDEBUG && DEBUGGER && !iTimer) {
@@ -41869,7 +41832,7 @@ class ChipSet extends Component {
                 }
             }
 
-            if (MAXDEBUG && this.messageEnabled(Messages.TIMER | Messages.WARN)) {
+            if (MAXDEBUG && this.messageEnabled(Messages.TIMER + Messages.WARN)) {
                 this.log("TIMER" + iTimer + " count: " + count + ", ticks: " + ticksElapsed + ", fired: " + (fFired? "true" : "false"));
             }
 
@@ -42412,7 +42375,7 @@ class ChipSet extends Component {
          * Thanks to the WAITF function, this has become a very "busy" port, so if this generates too
          * many messages, try adding Messages.WARN to the criteria.
          */
-        this.printMessageIO(port, undefined, addrFrom, "8042_RWREG", b, Messages.C8042 | Messages.WARN);
+        this.printMessageIO(port, undefined, addrFrom, "8042_RWREG", b, Messages.C8042 + Messages.WARN);
         return b;
     }
 
@@ -42518,7 +42481,7 @@ class ChipSet extends Component {
 
         case ChipSet.C8042.CMD.DISABLE_KBD:     // 0xAD
             this.set8042CmdData(this.b8042CmdData | ChipSet.C8042.DATA.CMD.NO_CLOCK);
-            if (!COMPILED) this.printMessage("keyboard disabled", Messages.KBD | Messages.PORT);
+            if (!COMPILED) this.printf(Messages.KBD + Messages.PORT, "keyboard disabled\n");
             /*
              * NOTE: The MODEL_5170 BIOS calls "KBD_RESET" (F000:17D2) while the keyboard interface is disabled,
              * yet we must still deliver the Keyboard's CMDRES.BAT_OK response code?  Seems like an odd thing for
@@ -42528,14 +42491,14 @@ class ChipSet extends Component {
 
         case ChipSet.C8042.CMD.ENABLE_KBD:      // 0xAE
             this.set8042CmdData(this.b8042CmdData & ~ChipSet.C8042.DATA.CMD.NO_CLOCK);
-            if (!COMPILED) this.printMessage("keyboard re-enabled", Messages.KBD | Messages.PORT);
+            if (!COMPILED) this.printf(Messages.KBD + Messages.PORT, "keyboard re-enabled\n");
             if (this.kbd) this.kbd.checkBuffer();
             break;
 
         case ChipSet.C8042.CMD.SELF_TEST:       // 0xAA
             if (this.kbd) this.kbd.flushBuffer();
             this.set8042CmdData(this.b8042CmdData | ChipSet.C8042.DATA.CMD.NO_CLOCK);
-            if (!COMPILED) this.printMessage("keyboard disabled on reset", Messages.KBD | Messages.PORT);
+            if (!COMPILED) this.printf(Messages.KBD + Messages.PORT, "keyboard disabled on reset\n");
             this.set8042OutBuff(ChipSet.C8042.DATA.SELF_TEST.OK);
             this.set8042OutPort(ChipSet.C8042.OUTPORT.NO_RESET | ChipSet.C8042.OUTPORT.A20_ON);
             break;
@@ -42577,8 +42540,8 @@ class ChipSet extends Component {
             break;
 
         default:
-            if (!COMPILED && this.messageEnabled(Messages.C8042)) {
-                this.printMessage("unrecognized 8042 command: " + Str.toHexByte(this.b8042InBuff), true);
+            if (!COMPILED) {
+                this.printf(Messages.C8042, "unrecognized 8042 command: %#04X\n", this.b8042InBuff);
                 this.dbg.stopCPU();
             }
             break;
@@ -42646,9 +42609,7 @@ class ChipSet extends Component {
                 this.b8042Status &= ~ChipSet.C8042.STATUS.OUTBUFF_FULL;
                 this.b8042Status |= ChipSet.C8042.STATUS.OUTBUFF_DELAY;
             }
-            if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
-                this.printMessage("chipset.set8042OutBuff(" + Str.toHexByte(b) + ',' + (fNoDelay? "no" : "") + "delay)", true);
-            }
+            if (!COMPILED) this.printf(Messages.KBD + Messages.PORT, "chipset.set8042OutBuff(%#04X,delay=%b)\n", b, !fNoDelay);
         }
     }
 
@@ -42674,8 +42635,8 @@ class ChipSet extends Component {
              * C8042.CMD.PULSE_OUTPORT command, so if a RESET is detected via this command, we should try to
              * determine if that's what the caller intended.
              */
-            if (!COMPILED && this.messageEnabled(Messages.C8042)) {
-                this.printMessage("unexpected 8042 output port reset: " + Str.toHexByte(b), true);
+            if (!COMPILED) {
+                this.printf(Messages.C8042, "unexpected 8042 output port reset: %#04X\n", b);
                 this.dbg.stopCPU();
             }
             this.cpu.resetRegs();
@@ -42763,9 +42724,7 @@ class ChipSet extends Component {
      */
     receiveKbdData(b)
     {
-        if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
-            this.printMessage("chipset.receiveKbdData(" + Str.toHexByte(b) + ')', true);
-        }
+        if (!COMPILED) this.printf(Messages.KBD + Messages.PORT, "chipset.receiveKbdData(%#04X)\n", b);
         if (this.model == ChipSet.MODEL_4860) {
             if (!(this.bNMI & ChipSet.NMI.KBD_LATCH)) {
                 this.bNMI |= ChipSet.NMI.KBD_LATCH;
@@ -42803,14 +42762,10 @@ class ChipSet extends Component {
                     this.setIRR(ChipSet.IRQ.KBD, 120);
                     return true;
                 }
-                if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
-                    this.printMessage("chipset.receiveKbdData(" + Str.toHexByte(b) + "): output buffer full", true);
-                }
+                if (!COMPILED) this.printf(Messages.KBD + Messages.PORT, "chipset.receiveKbdData(%#04X): output buffer full\n", b);
                 return false;
             }
-            if (!COMPILED && this.messageEnabled(Messages.KBD | Messages.PORT)) {
-                this.printMessage("chipset.receiveKbdData(" + Str.toHexByte(b) + "): disabled", true);
-            }
+            if (!COMPILED) this.printf(Messages.KBD + Messages.PORT, "chipset.receiveKbdData(%#04X): disabled\n", b);
         }
         return false;
     }
@@ -42872,7 +42827,7 @@ class ChipSet extends Component {
     {
         let bAddr = this.bCMOSAddr & ChipSet.CMOS.ADDR.MASK;
         let bIn = (bAddr <= ChipSet.CMOS.ADDR.STATUSD? this.getRTCByte(bAddr) : this.abCMOSData[bAddr]);
-        if (this.messageEnabled(Messages.CMOS | Messages.PORT)) {
+        if (this.messageEnabled(Messages.CMOS + Messages.PORT)) {
             this.printMessageIO(port, undefined, addrFrom, "CMOS.DATA[" + Str.toHexByte(bAddr) + "]", bIn, true);
         }
         if (addrFrom != null) {
@@ -42888,7 +42843,7 @@ class ChipSet extends Component {
                  * occurs in a timely manner, too.
                  */
                 if ((bIn & ChipSet.CMOS.STATUSC.PF) && (this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.PIE)) {
-                    if (!COMPILED) this.printMessage("RTC periodic interrupt cleared", Messages.RTC);
+                    if (!COMPILED) this.printf(Messages.RTC, "RTC periodic interrupt cleared\n");
                     this.setRTCCycleLimit();
                 }
             }
@@ -42907,17 +42862,17 @@ class ChipSet extends Component {
     outCMOSData(port, bOut, addrFrom)
     {
         let bAddr = this.bCMOSAddr & ChipSet.CMOS.ADDR.MASK;
-        if (this.messageEnabled(Messages.CMOS | Messages.PORT)) {
+        if (this.messageEnabled(Messages.CMOS + Messages.PORT)) {
             this.printMessageIO(port, bOut, addrFrom, "CMOS.DATA[" + Str.toHexByte(bAddr) + "]", undefined, true);
         }
         let bDelta = bOut ^ this.abCMOSData[bAddr];
         this.abCMOSData[bAddr] = (bAddr <= ChipSet.CMOS.ADDR.STATUSD? this.setRTCByte(bAddr, bOut) : bOut);
         if (bAddr == ChipSet.CMOS.ADDR.STATUSB && (bDelta & ChipSet.CMOS.STATUSB.PIE)) {
             if (bOut & ChipSet.CMOS.STATUSB.PIE) {
-                if (!COMPILED) this.printMessage("RTC periodic interrupts enabled", Messages.RTC);
+                if (!COMPILED) this.printf(Messages.RTC, "RTC periodic interrupts enabled\n");
                 this.setRTCCycleLimit();
             } else {
-                if (!COMPILED) this.printMessage("RTC periodic interrupts disabled", Messages.RTC);
+                if (!COMPILED) this.printf(Messages.RTC, "RTC periodic interrupts disabled\n");
             }
         }
     }
@@ -43087,13 +43042,13 @@ class ChipSet extends Component {
                 this.oscillatorAudio['frequency']['setValueAtTime'](freq, 0);
                 // this.volumeAudio['gain']['value'] = this.volumeInit;
                 this.volumeAudio['gain']['setValueAtTime'](this.volumeInit, 0);
-                if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
+                this.printf(Messages.SPEAKER, "speaker on at  %dhz\n", freq);
             } else if (this.volumeAudio) {
                 this.volumeAudio['gain']['setValueAtTime'](0, 0);
-                if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
+                this.printf(Messages.SPEAKER, "speaker off at %dhz\n", freq);
             }
         } else if (fOn && this.fSpeakerOn != fOn) {
-            this.printMessage("BEEP", Messages.SPEAKER);
+            this.printf(Messages.SPEAKER, "BEEP\n");
         }
         this.fSpeakerOn = fOn;
     }
@@ -43164,9 +43119,9 @@ class ChipSet extends Component {
         if (DEBUG) {
             bitsMessage = Messages.DATA;
             if (iChannel == ChipSet.DMA_FDC) {
-                bitsMessage |= Messages.FDC;
+                bitsMessage += Messages.FDC;
             } else if (iChannel == ChipSet.DMA_HDC) {
-                bitsMessage |= Messages.HDC;
+                bitsMessage += Messages.HDC;
             }
         }
         return bitsMessage;
@@ -46426,7 +46381,7 @@ class Keyboard extends Component {
     {
         let b = -1;
 
-        if (!COMPILED) this.printf("receiveCmd(%#02X)\n", this.bCmdPending || bCmd);
+        if (!COMPILED) this.printf("receiveCmd(%#04X)\n", this.bCmdPending || bCmd);
 
         switch(this.bCmdPending || bCmd) {
 
@@ -46537,7 +46492,7 @@ class Keyboard extends Component {
     {
         if (this.chipset) {
             this.abBuffer.unshift(b);
-            if (!COMPILED) this.printf("keyboard response %#02X buffered\n", b);
+            if (!COMPILED) this.printf("keyboard response %#04X buffered\n", b);
             this.transmitData();
         }
     }
@@ -46563,7 +46518,7 @@ class Keyboard extends Component {
                  */
                 let b = this.abBuffer.length? this.abBuffer[0] : 0;
                 if (this.chipset.receiveKbdData(b)) {
-                    if (!COMPILED) this.printf("keyboard data %#02X delivered\n", b);
+                    if (!COMPILED) this.printf("keyboard data %#04X delivered\n", b);
                     this.abBuffer.shift();
                 }
                 if (b) this.cpu.setTimer(this.timerTransmit, this.msTransmit);
@@ -46808,7 +46763,7 @@ class Keyboard extends Component {
                     }
                 }
                 this.abBuffer.push(bScan);
-                if (!COMPILED) this.printf("keyboard data %#02X buffered\n", bScan);
+                if (!COMPILED) this.printf("keyboard data %#04X buffered\n", bScan);
                 this.transmitData();
                 return;
             }
@@ -49668,7 +49623,7 @@ class Card extends Controller {
     {
         if (DEBUGGER) {
             if (!aRegs) {
-                this.dbg.println(sName + ": " + Str.toHex(iReg, 2));
+                this.dbg.printf("%s: %02X\n", sName, iReg);
                 return;
             }
             let i, s = "";
@@ -49679,11 +49634,10 @@ class Card extends Controller {
                  * the extended bits of certain registers, so that we don't have to "mentally" concatenate them.
                  */
                 let reg = (aRegs === this.regCRTData)? this.getCRTCReg(i) : aRegs[i];
-                if (s) s += '\n';
                 let sRegName = (asRegs? asRegs[i] : sName.substr(1) + Str.toDec(i, 3));
-                s += Str.sprintf("%s[%02X]: %-12s %*X%s (%*d)", sName, i, sRegName, (asRegs? 4 : 6), reg, (i === iReg? '*' : ' '), (asRegs? 4 : 6), reg);
+                s += Str.sprintf("%s[%02X]: %-12s %*X%s (%*d)\n", sName, i, sRegName, (asRegs? 4 : 6), reg, (i === iReg? '*' : ' '), (asRegs? 4 : 6), reg);
             }
-            this.dbg.println(s);
+            this.dbg.printf("%s", s);
         }
     }
 
@@ -49705,7 +49659,7 @@ class Card extends Controller {
                 this.dumpRegs(" SEQ", this.regSEQIndx, this.regSEQData, this.asSEQRegs);
                 this.dumpRegs(" ATC", this.regATCIndx, this.regATCData, this.asATCRegs);
                 this.dumpRegs(" ATCINDX", this.regATCIndx);
-                this.dbg.println(" ATCDATA: " + this.fATCData);
+                this.dbg.printf(" ATCDATA: %b\n", this.fATCData);
                 this.dumpRegs("    FEAT", this.regFeat);
                 this.dumpRegs("    MISC", this.regMisc);
                 this.dumpRegs(" STATUS0", this.regStatus0);
@@ -49732,10 +49686,10 @@ class Card extends Controller {
             }
 
             if (this.nCard >= Video.CARD.EGA) {
-                this.dbg.println(" LATCHES: " + Str.toHex(this.latches));
-                this.dbg.println("  ACCESS: " + Str.toHex(this.nAccess, 4));
-                this.dbg.println("  PLANE2: " + Str.toHex(this.bitsDirtyBanks, 2));
-                this.dbg.println("Use 'd video [addr]' to dump video memory");
+                this.dbg.printf(" LATCHES: %0X\n", this.latches);
+                this.dbg.printf("  ACCESS: %04X\n",  this.nAccess);
+                this.dbg.printf("  PLANE2: %02X\n", this.bitsDirtyBanks);
+                this.dbg.printf("Use 'd video [addr]' to dump video memory\n");
                 /*
                  * There are few more EGA regs we could dump, like GRCPos1, GRCPos2, but does anyone care?
                  */
@@ -49789,7 +49743,7 @@ class Card extends Controller {
     {
         if (DEBUGGER) {
             if (!this.adwMemory) {
-                this.dbg.println("no buffer");
+                this.dbg.printf("no buffer\n");
                 return;
             }
 
@@ -49824,7 +49778,7 @@ class Card extends Controller {
                     if (j < w) w = j;
                     break;
                 default:
-                    this.dbg.println("unrecognized argument: " + s);
+                    this.dbg.printf("unrecognized argument: %s\n", s);
                     break;
                 }
             }
@@ -49843,11 +49797,10 @@ class Card extends Controller {
                     sData += ' ' + ((p < 0)? Str.toHex(dw, 8) : Str.toBin((dw >> (p << 3)), 8));
                 }
                 if (fColAdjust) idw += w - n;
-                if (sDump) sDump += "\n";
-                sDump += sData;
+                sDump += sData + "\n";
             }
 
-            if (sDump) this.dbg.println(sDump);
+            if (sDump) this.dbg.printf("%s", sDump);
             this.prevDump = idw;
         }
     }
@@ -50842,15 +50795,11 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
             let bitDirtyBank = (1 << ((idw >> 13) & 7));
             if (!(card.bitsDirtyBanks & bitDirtyBank)) {
                 card.bitsDirtyBanks |= bitDirtyBank;
-                if (DEBUG && card.video.messageEnabled(Messages.VIDEO)) {
-                    card.video.printf("writeByteMode0(0x%08X): modified font bank 0x%02X\n", addr, bitDirtyBank);
-                }
+                if (DEBUG) card.video.printf(Messages.VIDEO, "writeByteMode0(%#010X): modified font bank %#04X\n", addr, bitDirtyBank);
             }
         }
     }
-    if (DEBUG && card.video.messageEnabled(Messages.VIDEO | Messages.MEM)) {
-        card.video.printf("writeByteMode0(0x%08X): 0x%02X -> 0x%08X%s\n", addr, b, dw);
-    }
+    if (DEBUG) card.video.printf(Messages.VIDEO + Messages.MEM, "writeByteMode0(%#10X): %#04X -> %#10X\n", addr, b, dw);
 };
 
 /**
@@ -50902,9 +50851,7 @@ Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode0Chain4(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode0Chain4(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -50931,9 +50878,7 @@ Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode0EvenOdd(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode0EvenOdd(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -50957,9 +50902,7 @@ Card.ACCESS.writeByteMode0Rot = function writeByteMode0Rot(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode0Rot(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode0Rot(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -50984,9 +50927,7 @@ Card.ACCESS.writeByteMode0And = function writeByteMode0And(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode0And(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode0And(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -51011,9 +50952,7 @@ Card.ACCESS.writeByteMode0Or = function writeByteMode0Or(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode0Or(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode0Or(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -51038,9 +50977,7 @@ Card.ACCESS.writeByteMode0Xor = function writeByteMode0Xor(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode0Xor(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode0Xor(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -51060,9 +50997,7 @@ Card.ACCESS.writeByteMode1 = function writeByteMode1(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode1(" + Str.toHexLong(addr) + "): " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode1(%#010X): %#010X\n", addr, dw);
 };
 
 /**
@@ -51090,9 +51025,7 @@ Card.ACCESS.writeByteMode1EvenOdd = function writeByteMode1EvenOdd(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode1EvenOdd(" + Str.toHexLong(addr) + "): " + Str.toHexByte(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode1EvenOdd(%#010X): %#010X\n", addr, dw);
 };
 
 /**
@@ -51114,9 +51047,7 @@ Card.ACCESS.writeByteMode2 = function writeByteMode2(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode2(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode2(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -51139,9 +51070,7 @@ Card.ACCESS.writeByteMode2And = function writeByteMode2And(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode2And(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode2And(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -51164,9 +51093,7 @@ Card.ACCESS.writeByteMode2Or = function writeByteMode2Or(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode2Or(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode2Or(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -51189,9 +51116,7 @@ Card.ACCESS.writeByteMode2Xor = function writeByteMode2Xor(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode2Xor(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode2Xor(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -51221,9 +51146,7 @@ Card.ACCESS.writeByteMode3 = function writeByteMode3(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode3(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode3(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /*
@@ -51736,7 +51659,7 @@ class Video extends Component {
             case "fullScreen":
                 if (this.container && this.container.doFullScreen) {
                     control.onclick = function onClickFullScreen() {
-                        if (DEBUG) video.printMessage("fullScreen()");
+                        if (DEBUG) video.printf("fullScreen()\n");
                         video.goFullScreen();
                     };
                 } else {
@@ -51749,7 +51672,7 @@ class Video extends Component {
                 this.sLockMessage = control.textContent;
                 if (this.inputScreen && this.inputScreen.lockPointer) {
                     control.onclick = function onClickLockPointer() {
-                        if (DEBUG) video.printMessage("lockPointer()");
+                        if (DEBUG) video.printf("lockPointer()\n");
                         video.lockPointer(true);
                     };
                 } else {
@@ -51760,7 +51683,7 @@ class Video extends Component {
 
             case "refresh":
                 control.onclick = function onClickRefresh() {
-                    if (DEBUG) video.printMessage("refreshScreen()");
+                    if (DEBUG) video.printf("refreshScreen()\n");
                     video.updateScreen(true);
                 };
                 return true;
@@ -51935,7 +51858,7 @@ class Video extends Component {
                 this.canvasScreen.style.width = this.canvasScreen.style.height = "";
             }
         }
-        if (DEBUG) this.printMessage("notifyFullScreen(" + fFullScreen + ")", true);
+        if (DEBUG) this.printf(Messages.ALL, "notifyFullScreen(%b)\n", fFullScreen);
         if (this.kbd) this.kbd.notifyEscape(fFullScreen == true);
     }
 
@@ -52150,7 +52073,7 @@ class Video extends Component {
      */
     onTouchStart(event)
     {
-        if (DEBUG) this.printMessage("onTouchStart()");
+        if (DEBUG) this.printf("onTouchStart()\n");
         this.chipset.startAudio(event);
         if (this.nTouchConfig == Video.TOUCH.DEFAULT) return;
         this.processTouchEvent(event, true);
@@ -52164,7 +52087,7 @@ class Video extends Component {
      */
     onTouchMove(event)
     {
-        if (DEBUG) this.printMessage("onTouchMove()");
+        if (DEBUG) this.printf("onTouchMove()\n");
         this.processTouchEvent(event);
     }
 
@@ -52176,7 +52099,7 @@ class Video extends Component {
      */
     onTouchEnd(event)
     {
-        if (DEBUG) this.printMessage("onTouchEnd()");
+        if (DEBUG) this.printf("onTouchEnd()\n");
         this.processTouchEvent(event, false);
     }
 
@@ -52290,13 +52213,12 @@ class Video extends Component {
                         this.hLongTouch = null;
                     }
                 }
+
                 if (fStart === undefined) {
                     this.fTouchDefault = false;
                 }
 
-                if (DEBUG) {
-                    this.log("processTouchEvent(" + (fStart? "touchStart" : (fStart === false? "touchEnd" : "touchMove")) + "," + timeDelta + "ms," + fTouchDefault + ")");
-                }
+                if (DEBUG) this.printf("processTouchEvent(%s,%dms,%b)\n", (fStart? "touchStart" : (fStart === false? "touchEnd" : "touchMove")), timeDelta, fTouchDefault);
 
                 if (!fTouchDefault) {
                     event.preventDefault();
@@ -52330,7 +52252,7 @@ class Video extends Component {
                 let yDelta = Math.round(yTouch - this.yTouch);
                 this.xTouch = xTouch;
                 this.yTouch = yTouch;
-                // this.println("moveMouse(" + xDelta + "," + yDelta + ")");
+                // this.printf("moveMouse(%d,%d)\n", xDelta, yDelta);
                 this.mouse.moveMouse(xDelta, yDelta, this.xTouch, this.yTouch);
             }
         }
@@ -52419,9 +52341,7 @@ class Video extends Component {
                         }
                     }
                     card.nCyclesVertRetrace = video.cpu.getCycles();
-                    if (DEBUG && video.messageEnabled(Messages.VIDEO | Messages.INT)) {
-                        video.printf("vertical retrace timer fired (%d cycles)\n", card.nCyclesVertRetrace);
-                    }
+                    if (DEBUG) video.printf(Messages.VIDEO + Messages.INT, "vertical retrace timer fired (%d cycles)\n", card.nCyclesVertRetrace);
                     if (video.nIRQ) {
                         if (!(card.regCRTData[Card.CRTC.EGA.VREND.INDX] & Card.CRTC.EGA.VREND.DISABLE_VRINT)) {
                             if (video.chipset) video.chipset.setIRR(video.nIRQ);
@@ -52467,8 +52387,8 @@ class Video extends Component {
                         }
                         video.msUpdatePrev = msUpdate - (msDelta >= video.msUpdateInterval? 0 : msDelta);
                     }
-                    else if (DEBUG && video.messageEnabled(Messages.VIDEO | Messages.INT)) {
-                        video.printf("skipping update (%dms too soon)\n", -msDelta);
+                    else if (DEBUG) {
+                        video.printf(Messages.VIDEO + Messages.INT, "skipping update (%dms too soon)\n", -msDelta);
                     }
                     video.latchStartAddress();
                 }, -this.cardActive.nCyclesVertPeriod);
@@ -52843,7 +52763,7 @@ class Video extends Component {
              * TODO: Unlike the MDA/CGA font data, we may want to hang onto this data, so that we can
              * regenerate the color font(s) whenever the foreground and/or background colors have changed.
              */
-            if (DEBUG) this.printMessage("onROMLoad(): EGA fonts loaded");
+            if (DEBUG) this.printf("onROMLoad(): EGA fonts loaded\n");
             /*
              * For EGA cards, in the absence of any parameters, we assume that we're receiving the original
              * IBM EGA ROM, which stores its 8x14 font data at 0x2230 as one continuous sequence; the total size
@@ -52865,7 +52785,7 @@ class Video extends Component {
             this.setFontData(abROM, aParms || [0x3160, 0x2230], 8);
         }
         else if (this.nCard == Video.CARD.VGA) {
-            if (DEBUG) this.printMessage("onROMLoad(): VGA fonts loaded");
+            if (DEBUG) this.printf("onROMLoad(): VGA fonts loaded\n");
             /*
              * For VGA cards, in the absence of any parameters, we assume that we're receiving the original
              * IBM VGA ROM, which contains an 8x14 font at 0x3F8D (and corresponding supplemental table at 0x4D8D)
@@ -53220,7 +53140,7 @@ class Video extends Component {
                     offData = 0;
                     abFontData = null;
                     if ((bitsBanks = this.cardEGA.bitsDirtyBanks)) {
-                        if (DEBUG) this.printf("buildFont(%s): dirty font data detected (0x%02X)\n", fRebuild, bitsBanks);
+                        if (DEBUG) this.printf("buildFont(%b): dirty font data detected (%#04X)\n", fRebuild, bitsBanks);
                         this.cardEGA.bitsDirtyBanks = 0;
                     }
                     this.nFontSelect = this.getSelectedFonts();
@@ -53261,7 +53181,7 @@ class Video extends Component {
                 this.cBlinkVisible = 0; // no visible blinking characters (yet)
             }
 
-            if (DEBUG && fChanges) this.printf("buildFont(%s): font changes detected\n", fRebuild);
+            if (DEBUG && fChanges) this.printf("buildFont(%b): font changes detected\n", fRebuild);
         }
 
         return fChanges;
@@ -53818,7 +53738,7 @@ class Video extends Component {
          * cyCursor values are relative to when it's time to scale them.
          */
         if (this.yCursor !== bCursorStart || this.cyCursor !== bCursorSize || this.cyCursorWrap !== bCursorWrap) {
-            if (DEBUG) this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d (0x%02X-0x%02X)\n",
+            if (DEBUG) this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d (%#04X-%#04X)\n",
                                     this.yCursor, this.cyCursor, bCursorStart, bCursorSize, oCursorStart, oCursorEnd);
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
@@ -53959,9 +53879,7 @@ class Video extends Component {
                     }
                     break;
                 default:
-                    if (DEBUG && this.messageEnabled()) {
-                        this.printMessage("getCardAccess(): invalid GRC mode (" + Str.toHexByte(regGRCMode) + ")");
-                    }
+                    if (DEBUG) this.printf("getCardAccess(): invalid GRC mode (%#04X)\n", regGRCMode);
                     break;
                 }
                 if (regGRCMode & Card.GRC.MODE.READ.MODE1) {
@@ -54025,7 +53943,7 @@ class Video extends Component {
         let card = this.cardActive;
         if (card && nAccess != card.nAccess) {
 
-            if (DEBUG) this.printf("setCardAccess(0x%04X)\n", nAccess);
+            if (DEBUG) this.printf("setCardAccess(%#06X)\n", nAccess);
 
             card.setMemoryAccess(nAccess);
 
@@ -54353,9 +54271,7 @@ class Video extends Component {
                             } else if (nCRTCVertTotal >= 480) {
                                 nMode = (this.nMonitorType == ChipSet.MONITOR.MONO? Video.MODE.VGA_640X480_MONO : Video.MODE.VGA_640X480);
                             }
-                            if (DEBUG && this.messageEnabled()) {
-                                this.printMessage("checkMode(): nCRTCVertTotal=" + nCRTCVertTotal + ", mode=" + Str.toHexByte(nMode));
-                            }
+                            if (DEBUG) this.printf("checkMode(%#04X): nCRTCVertTotal=%d\n", nMode, nCRTCVertTotal);
                         }
                     }
                 }
@@ -54437,9 +54353,7 @@ class Video extends Component {
         let fReset = nMode != null && (nMode != this.nMode || fForce);
         if (fReset || fRemap) {
 
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage("setMode(" + Str.toHexByte(nMode) + (fForce? ",force" : "") + ")", true, true);
-            }
+            if (DEBUG) this.printf("setMode(%#04X,%b)\n", nMode, fForce);
 
             this.cUpdates = 0;      // count updateScreen() calls as a means of driving blink updates
             this.nMode = nMode;
@@ -54464,7 +54378,7 @@ class Video extends Component {
 
                 if (this.addrBuffer) {
 
-                    if (DEBUG) this.printf("setMode(0x%02X): removing 0x%08X bytes from 0x%08X\n", nMode, this.sizeBuffer, this.addrBuffer);
+                    if (DEBUG) this.printf("setMode(%#04X): removing %#010X bytes from %#010X\n", nMode, this.sizeBuffer, this.addrBuffer);
 
                     if (!this.bus.removeMemory(this.addrBuffer, this.sizeBuffer)) {
                         /*
@@ -54481,7 +54395,7 @@ class Video extends Component {
                 this.addrBuffer = card.addrBuffer;
                 this.sizeBuffer = card.sizeBuffer;
 
-                if (DEBUG) this.printf("setMode(0x%02X): adding 0x%08X bytes to 0x%08X\n", nMode, this.sizeBuffer, this.addrBuffer);
+                if (DEBUG) this.printf("setMode(%#04X): adding %#010X bytes to %#010X\n", nMode, this.sizeBuffer, this.addrBuffer);
 
                 if (!this.bus.addMemory(card.addrBuffer, card.sizeBuffer, Memory.TYPE.VIDEO, card)) {
                     /*
@@ -54710,9 +54624,7 @@ class Video extends Component {
             this.contextScreen.fillRect(xDst, yDst, this.cxScreenCell, this.cyScreenCell);
         }
 
-        if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.BUFFER)) {
-            this.log("updateCharBgnd(" + col + "," + row + "," + bChar + "): filled " + xDst + "," + yDst);
-        }
+        if (MAXDEBUG) this.printf(Messages.VIDEO + Messages.BUFFER, "updateCharBgnd(%d,%d,%d): filled %d,%d\n", col, row, bChar, xDst, yDst);
 
         if (bAttr & Video.ATTRS.DRAW_FGND) {
             /*
@@ -54721,9 +54633,7 @@ class Video extends Component {
             let xSrcFgnd = (bChar & 0xf) * font.cxCell;
             let ySrcFgnd = (bChar >> 4) * font.cyCell;
 
-            if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.BUFFER)) {
-                this.log("updateCharFgnd(" + col + "," + row + "," + bChar + "): draw from " + xSrcFgnd + "," + ySrcFgnd + " (" + font.cxCell + "," + font.cyCell + ") to " + xDst + "," + yDst);
-            }
+            if (MAXDEBUG) this.printf(Messages.VIDEO + Messages.BUFFER, "updateCharFgnd(%d,%d,%d): draw from %d,%d (%d,%d) to %d,%d\n", col, row , bChar, xSrcFgnd, ySrcFgnd, font.cxCell, font.cyCell, xDst, yDst);
 
             if (context) {
                 context.drawImage(font.aCanvas[iFgnd], xSrcFgnd, ySrcFgnd, font.cxCell, font.cyCell, xDst, yDst, font.cxCell, font.cyCell);
@@ -55691,7 +55601,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regATCIndx;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.ATC.PORT, undefined, addrFrom, "ATC.INDX", b);
+            this.printMessageIO(Card.ATC.PORT, undefined, addrFrom, "ATC.INDX", b, true);
         }
         return b;
     }
@@ -55712,7 +55622,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regATCData[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK];
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.ATC.PORT, undefined, addrFrom, "ATC." + this.cardEGA.asATCRegs[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK], b);
+            this.printMessageIO(Card.ATC.PORT, undefined, addrFrom, "ATC." + this.cardEGA.asATCRegs[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK], b, true);
         }
         return b;
     }
@@ -55775,7 +55685,7 @@ class Video extends Component {
                 let fModified = (card.regATCData[iReg] !== bOut);
                 if (Video.TRAPALL || fModified) {
                     if (!addrFrom || this.messageEnabled()) {
-                        this.printMessageIO(port, bOut, addrFrom, "ATC." + card.asATCRegs[iReg]);
+                        this.printMessageIO(port, bOut, addrFrom, "ATC." + card.asATCRegs[iReg], undefined, true);
                     }
                 }
                 if (fModified) {
@@ -55943,7 +55853,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regSEQData[this.cardEGA.regSEQIndx];
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.SEQ.DATA.PORT, undefined, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx], b);
+            this.printMessageIO(Card.SEQ.DATA.PORT, undefined, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx], b, true);
         }
         return b;
     }
@@ -55960,7 +55870,7 @@ class Video extends Component {
     {
         if (Video.TRAPALL || this.cardEGA.regSEQData[this.cardEGA.regSEQIndx] !== bOut) {
             if (!addrFrom || this.messageEnabled()) {
-                this.printMessageIO(Card.SEQ.DATA.PORT, bOut, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx]);
+                this.printMessageIO(Card.SEQ.DATA.PORT, bOut, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx], undefined, true);
             }
             this.cardEGA.regSEQData[this.cardEGA.regSEQIndx] = bOut;
         }
@@ -55978,11 +55888,11 @@ class Video extends Component {
             if (nFontSelect != this.nFontSelect) {
                 if (DEBUG) {
                     if ((nFontSelect & 0xff) == (nFontSelect >> 8)) {
-                        if (this.messageEnabled(Messages.VIDEO | Messages.PORT)) {
-                            this.printf("outSEQData(0x%02X): font selection changing from 0x%04X to 0x%04X\n", bOut, this.nFontSelect, nFontSelect);
+                        if (this.messageEnabled(Messages.VIDEO + Messages.PORT)) {
+                            this.printf("outSEQData(%#04X): font selection changing from %#06X to %#06X\n", bOut, this.nFontSelect, nFontSelect);
                         }
                     } else {
-                        this.printf("outSEQData(0x%02X): low font (0x%02X) differs from high font (0x%02X)\n", bOut, nFontSelect & 0xff, nFontSelect >> 8);
+                        this.printf("outSEQData(%#04X): low font (%#04X) differs from high font (%#04X)\n", bOut, nFontSelect & 0xff, nFontSelect >> 8);
                         this.cpu.stopCPU();
                     }
                 }
@@ -56040,7 +55950,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regDACMask;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.MASK.PORT, undefined, addrFrom, "DAC.MASK", b);
+            this.printMessageIO(Card.DAC.MASK.PORT, undefined, addrFrom, "DAC.MASK", b, true);
         }
         return b;
     }
@@ -56057,7 +55967,7 @@ class Video extends Component {
     {
         if (Video.TRAPALL || this.cardEGA.regDACMask !== bOut) {
             if (!addrFrom || this.messageEnabled()) {
-                this.printMessageIO(Card.DAC.MASK.PORT, bOut, addrFrom, "DAC.MASK");
+                this.printMessageIO(Card.DAC.MASK.PORT, bOut, addrFrom, "DAC.MASK", undefined, true);
             }
             this.cardEGA.regDACMask = bOut;
         }
@@ -56075,7 +55985,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regDACState;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.STATE.PORT, undefined, addrFrom, "DAC.STATE", b);
+            this.printMessageIO(Card.DAC.STATE.PORT, undefined, addrFrom, "DAC.STATE", b, true);
         }
         return b;
     }
@@ -56091,7 +56001,7 @@ class Video extends Component {
     outDACRead(port, bOut, addrFrom)
     {
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.ADDR.PORT_READ, bOut, addrFrom, "DAC.READ");
+            this.printMessageIO(Card.DAC.ADDR.PORT_READ, bOut, addrFrom, "DAC.READ", undefined, true);
         }
         this.cardEGA.regDACAddr = bOut;
         this.cardEGA.regDACState = Card.DAC.STATE.MODE_READ;
@@ -56109,7 +56019,7 @@ class Video extends Component {
     outDACWrite(port, bOut, addrFrom)
     {
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.ADDR.PORT_WRITE, bOut, addrFrom, "DAC.WRITE");
+            this.printMessageIO(Card.DAC.ADDR.PORT_WRITE, bOut, addrFrom, "DAC.WRITE", undefined, true);
         }
         this.cardEGA.regDACAddr = bOut;
         this.cardEGA.regDACState = Card.DAC.STATE.MODE_WRITE;
@@ -56128,7 +56038,7 @@ class Video extends Component {
     {
         let b = (this.cardEGA.regDACData[this.cardEGA.regDACAddr] >> this.cardEGA.regDACShift) & 0x3f;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.DATA.PORT, undefined, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]", b);
+            this.printMessageIO(Card.DAC.DATA.PORT, undefined, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]", b, true);
         }
         this.cardEGA.regDACShift += 6;
         if (this.cardEGA.regDACShift > 12) {
@@ -56150,7 +56060,7 @@ class Video extends Component {
     {
         let dw = this.cardEGA.regDACData[this.cardEGA.regDACAddr];
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.DATA.PORT, bOut, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]");
+            this.printMessageIO(Card.DAC.DATA.PORT, bOut, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]", undefined, true);
         }
         let dwNew = (dw & ~(0x3f << this.cardEGA.regDACShift)) | ((bOut & 0x3f) << this.cardEGA.regDACShift);
         if (dw !== dwNew) {
@@ -56530,7 +56440,7 @@ class Video extends Component {
             b = card.regCRTData[card.regCRTIndx];
         }
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(port /* card.port + 1 */, undefined, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx], b);
+            this.printMessageIO(port /* card.port + 1 */, undefined, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx], b, true);
         }
         return b;
     }
@@ -56560,7 +56470,7 @@ class Video extends Component {
                 if (bCur > bMax) {
                     bCur = card.regCRTData[card.regCRTIndx ^ 0x1] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
                     if (bCur > bMax) {
-                        if (DEBUG) this.printf("outCRTCData(0x%02X): ignoring write to CRTC[0x%02X] since 0x%02X > 0x%02X\n", bOut, card.regCRTIndx, bCur, bMax);
+                        if (DEBUG) this.printf("outCRTCData(%#04X): ignoring write to CRTC[%#04X] since %#04X > %#04X\n", bOut, card.regCRTIndx, bCur, bMax);
                         return;
                     }
                 }
@@ -56621,7 +56531,7 @@ class Video extends Component {
             }
         }
         else if (DEBUG) {
-            this.printf("outCRTCData(0x%02X): ignoring unexpected write to CRTC[0x%02X]\n", bOut, card.regCRTIndx);
+            this.printf("outCRTCData(%#04X): ignoring unexpected write to CRTC[%#04X]\n", bOut, card.regCRTIndx);
         }
     }
 
@@ -56758,15 +56668,15 @@ class Video extends Component {
         if (DEBUGGER) {
             let component = /** @type {Component} */ (this.dbg);
             if (!this.cardActive) {
-                component.println("no active video card");
+                component.printf("no active video card\n");
                 return;
             }
             if (asArgs[0]) {
                 this.cardActive.dumpVideoBuffer(asArgs);
                 return;
             }
-            component.println("    MODE: " + Str.toHexByte(this.nMode));
-            component.println("  BUFFER: " + Str.toHexLong(this.cardActive.addrBuffer));
+            component.printf("    MODE: %#04X\n", this.nMode);
+            component.printf("  BUFFER: %#010X\n", this.cardActive.addrBuffer);
             this.cardActive.dumpVideoCard();
         }
     }
@@ -56926,6 +56836,10 @@ class Video extends Component {
              * As noted in keyboard.js, the keyboard on an iOS device tends to pop up with the SHIFT key depressed,
              * which is not the initial keyboard state that the Keyboard component expects, so hopefully turning off
              * these "auto" attributes will help.
+             *
+             * TODO: Determine if there's any reason we shouldn't set all these attributes (and perhaps others, such as
+             * "autocomplete") for ALL browsers.  Unfortunately, in my limited testing, none of them seem to have any effect
+             * on the way Chrome/webkit converts "compose" key sequences (eg, "Alt-E") into dead keys (keyCode 229).
              */
             if (Web.isUserAgent("iOS")) {
                 textarea.setAttribute("autocapitalize", "off");
@@ -61666,7 +61580,7 @@ class Disk extends Component {
                  * conversion to a forward-compatible 'data' array.
                  */
                 else {
-                    if (DEBUG && this.messageEnabled(Messages.DISK | Messages.DATA)) {
+                    if (DEBUG && this.messageEnabled(Messages.DISK + Messages.DATA)) {
                         let sCylinders = aDiskData.length + " track" + (aDiskData.length > 1 ? "s" : "");
                         let nHeads = aDiskData[0].length;
                         let sHeads = nHeads + " head" + (nHeads > 1 ? "s" : "");
@@ -62070,7 +61984,7 @@ class Disk extends Component {
                 }
                 if (dir.sName == null || dir.sName == "." || dir.sName == "..") continue;
                 let sPath = dir.sDir + dir.sName;
-                if (DEBUG && this.messageEnabled(Messages.DISK | Messages.DATA)) {
+                if (DEBUG && this.messageEnabled(Messages.DISK + Messages.DATA)) {
                     this.printMessage('"' + sPath + '" size=' + dir.cbSize + ' cluster=' + dir.iCluster + ' sectors=' + JSON.stringify(dir.apba));
                     if (dir.apba.length) this.printMessage(this.dumpSector(this.getSector(dir.apba[0]), dir.apba[0], sPath));
                 }
@@ -62127,7 +62041,7 @@ class Disk extends Component {
         if (!dir.sectorDirCache || !dir.pbaDirCache || dir.pbaDirCache != pba) {
             dir.pbaDirCache = pba;
             dir.sectorDirCache = this.getSector(dir.pbaDirCache);
-            if (DEBUG && this.messageEnabled(Messages.DISK | Messages.DATA)) {
+            if (DEBUG && this.messageEnabled(Messages.DISK + Messages.DATA)) {
                 this.printMessage(this.dumpSector(dir.sectorDirCache, dir.pbaDirCache, dir.sDir));
             }
         }
@@ -63457,7 +63371,7 @@ class FileInfo {
         this.aSegments = [];
         this.aOrdinals = [];                // this is an optional array for quick ordinal-to-segment lookup
 
-        if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+        if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
             this.disk.printMessage("loadSegmentTable(" + this.sPath + "," + Str.toHexLong(offEntries) + "," + Str.toHexWord(nEntries) + ")");
         }
 
@@ -63466,7 +63380,7 @@ class FileInfo {
             if (offSegment) {
                 let lenSegment = this.loadValue(offEntries + 2) || 0x10000;       // 0 means 64K
 
-                if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
                     this.disk.printMessage("segment " + iSegment + ": offStart=" + Str.toHexLong(offSegment) + " offEnd=" + Str.toHexLong(offSegment + lenSegment));
                 }
 
@@ -63510,7 +63424,7 @@ class FileInfo {
     {
         let iOrdinal = 1;
 
-        if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+        if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
             this.disk.printMessage("loadEntryTable(" + Str.toHexLong(offEntries) + "," + Str.toHexLong(offEntriesEnd) + ")");
         }
 
@@ -63521,7 +63435,7 @@ class FileInfo {
             if (!bEntries) break;
             let bSegment = w >> 8, iSegment;
 
-            if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+            if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
                 this.disk.printMessage("bundle for segment " + bSegment + ": " + bEntries + " entries @" + Str.toHex(offEntries));
             }
 
@@ -63558,12 +63472,12 @@ class FileInfo {
                     offEntries += 6;
                 }
                 if (!this.aSegments[iSegment]) {
-                    if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                    if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
                         this.disk.printMessage("invalid segment: " + iSegment);
                     }
                 } else {
                     this.aSegments[iSegment].aEntries[iOrdinal] = [offEntry];
-                    if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                    if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
                         this.disk.printMessage("ordinal " + iOrdinal + ": segment=" + iSegment + " offset=" + Str.toHexLong(offEntry) + " @" + Str.toHex(offDebug));
                     }
                 }
@@ -63588,7 +63502,7 @@ class FileInfo {
     {
         let cNames = 0;
 
-        if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+        if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
             this.disk.printMessage("loadNameTable(" + Str.toHexLong(offEntries) + (offEntriesEnd? ("," + Str.toHexLong(offEntriesEnd)) : "") + ")");
         }
 
@@ -63618,16 +63532,16 @@ class FileInfo {
                         let aEntries = this.aSegments[iSegment].aEntries[iOrdinal];
 
                         aEntries.push(sSymbol);
-                        if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                        if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
                             this.disk.printMessage("segment " + iSegment + " offset " + Str.toHexWord(aEntries[0]) + " ordinal " + iOrdinal + ": " + sSymbol + " @" + Str.toHex(offDebug));
                         }
                     } else {
-                        if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                        if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
                             this.disk.printMessage(this.sPath + ": cannot find segment " + iSegment + " (offset " + Str.toHexWord(tuple[1]) + ") for symbol " + sSymbol + " with ordinal " + iOrdinal + " @" + Str.toHex(offDebug));
                         }
                     }
                 } else {
-                    if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                    if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
                         this.disk.printMessage(this.sPath + ": cannot find ordinal " + iOrdinal + " for symbol " + sSymbol + " @" + Str.toHex(offDebug));
                     }
                 }
@@ -66225,7 +66139,7 @@ class FDC extends Component {
     {
 
         let bCmd = this.regDataArray[this.regDataIndex];
-        if (DEBUG && this.messageEnabled(Messages.PORT | Messages.FDC)) {
+        if (DEBUG && this.messageEnabled(Messages.PORT + Messages.FDC)) {
             let bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
             if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
             this.printMessage(this.idComponent + ".popCmd(" + (name || this.regDataIndex) + "): " + Str.toHexByte(bCmd), true);
@@ -66295,7 +66209,7 @@ class FDC extends Component {
      */
     pushResult(bResult, name)
     {
-        if (DEBUG && this.messageEnabled(Messages.PORT | Messages.FDC)) {
+        if (DEBUG && this.messageEnabled(Messages.PORT + Messages.FDC)) {
             this.printMessage(this.idComponent + ".pushResult(" + (name || this.regDataTotal) + "): " + Str.toHexByte(bResult), true);
         }
 
@@ -68175,11 +68089,11 @@ class HDC extends Component {
                  * printMessageIO() calls, if enabled, can be overwhelming for this port, so limit them to the first
                  * and last bytes of each sector.
                  */
-                if (this.messageEnabled(Messages.PORT | Messages.HDC)) {
+                if (this.messageEnabled(Messages.PORT + Messages.HDC)) {
                     this.printMessageIO(port, undefined, addrFrom, "DATA[" + drive.iByte + "]", bIn);
                 }
                 if (drive.iByte > 1) {          // in other words, if drive.iByte == drive.cbTransfer...
-                    if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
+                    if (this.messageEnabled(Messages.DATA + Messages.HDC)) {
                         let sDump = drive.disk.dumpSector(drive.sector);
                         if (sDump) this.dbg.message(sDump);
                     }
@@ -68291,11 +68205,11 @@ class HDC extends Component {
                      * printMessageIO() calls, if enabled, can be overwhelming for this port, so limit them to the first
                      * and last bytes of each sector.
                      */
-                    if (this.messageEnabled(Messages.PORT | Messages.HDC)) {
+                    if (this.messageEnabled(Messages.PORT + Messages.HDC)) {
                         this.printMessageIO(port, bOut, addrFrom, "DATA[" + drive.iByte + "]");
                     }
                     if (drive.iByte > 1) {          // in other words, if drive.iByte == drive.cbTransfer...
-                        if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
+                        if (this.messageEnabled(Messages.DATA + Messages.HDC)) {
                             let sDump = drive.disk.dumpSector(drive.sector);
                             if (sDump) this.dbg.message(sDump);
                         }
@@ -68853,9 +68767,9 @@ class HDC extends Component {
                  * has a low tolerance for fast controller interrupts during multi-sector operations.
                  */
                 this.chipset.setIRR(ChipSet.IRQ.ATC1 + this.nInterface, 120);
-                if (DEBUG) this.printMessage(this.idComponent + ".setATCIRR(): enabled", Messages.PIC | Messages.HDC);
+                if (DEBUG) this.printMessage(this.idComponent + ".setATCIRR(): enabled", Messages.PIC + Messages.HDC);
             } else {
-                if (DEBUG) this.printMessage(this.idComponent + ".setATCIRR(): disabled", Messages.PIC | Messages.HDC);
+                if (DEBUG) this.printMessage(this.idComponent + ".setATCIRR(): disabled", Messages.PIC + Messages.HDC);
             }
         }
     }
@@ -69033,7 +68947,7 @@ class HDC extends Component {
         let bCmdIndex = this.regDataIndex;
         if (bCmdIndex < this.regDataTotal) {
             bCmd = this.regDataArray[this.regDataIndex++];
-            if (this.messageEnabled((bCmdIndex > 0? Messages.PORT : 0) | Messages.HDC)) {
+            if (this.messageEnabled((bCmdIndex > 0? Messages.PORT : 0) + Messages.HDC)) {
                 this.printMessage(this.idComponent + ".popCmd(" + bCmdIndex + "): " + Str.toHexByte(bCmd) + (!bCmdIndex && HDC.aXTACommands[bCmd]? (" (" + HDC.aXTACommands[bCmd] + ")") : ""), true);
             }
         }
@@ -69067,7 +68981,7 @@ class HDC extends Component {
      */
     pushResult(bResult)
     {
-        if (DEBUG && this.messageEnabled((this.regDataTotal > 0? Messages.PORT : 0) | Messages.HDC)) {
+        if (DEBUG && this.messageEnabled((this.regDataTotal > 0? Messages.PORT : 0) + Messages.HDC)) {
             this.printMessage(this.idComponent + ".pushResult(" + this.regDataTotal + "): " + Str.toHexByte(bResult), true);
         }
         this.regDataArray[this.regDataTotal++] = bResult;
@@ -74738,7 +74652,7 @@ class DebuggerX86 extends Debugger {
              * checkIntNotify() at the moment.
              */
             addr -= 2;
-            this.printf("INT %#02X: AH=%#02X at %s %s\n",  nInt, AH, this.toHexOffset(addr - this.cpu.segCS.base, this.cpu.getCS()), sFunc);
+            this.printf("INT %#04X: AH=%#04X at %s %s\n",  nInt, AH, this.toHexOffset(addr - this.cpu.segCS.base, this.cpu.getCS()), sFunc);
         }
         return fMessage;
     }
@@ -74754,7 +74668,7 @@ class DebuggerX86 extends Debugger {
      */
     messageIntReturn(nInt, nLevel, nCycles, sResult)
     {
-        this.printf("INT %#02X: C=%d%s (cycles=%d%s)\n", nInt, (this.cpu.getCF()? 1 : 0), (sResult || ""), nCycles, (nLevel? ",level=" + (nLevel+1) : ""));
+        this.printf("INT %#04X: C=%d%s (cycles=%d%s)\n", nInt, (this.cpu.getCF()? 1 : 0), (sResult || ""), nCycles, (nLevel? ",level=" + (nLevel+1) : ""));
     }
 
     /**
@@ -74788,9 +74702,9 @@ class DebuggerX86 extends Debugger {
                 sFrom = "at " + this.toHexOffset(addrFrom, selFrom);
             }
             if (bOut == undefined) {
-                this.printf("%s.inPort(%#04X,%s): %#%02X %s\n", component.idComponent, port, name || "unknown", bIn, sFrom);
+                this.printf("%s.inPort(%#06X,%s): %#04X %s\n", component.idComponent, port, name || "unknown", bIn, sFrom);
             } else {
-                this.printf("%s.outPort(%#04X,%s,%#02X) %s\n", component.idComponent, port, name || "unknown", bOut, sFrom);
+                this.printf("%s.outPort(%#06X,%s,%#04X) %s\n", component.idComponent, port, name || "unknown", bOut, sFrom);
             }
         }
     }
@@ -75670,7 +75584,7 @@ class DebuggerX86 extends Debugger {
              * stop on INT3 whenever both the INT and HALT message bits are set; a simple "g" command allows you
              * to continue.
              */
-            if (this.messageEnabled(Messages.INT | Messages.HALT)) {
+            if (this.messageEnabled(Messages.INT + Messages.HALT)) {
                 if (this.cpu.probeAddr(addr) == X86.OPCODE.INT3) {
                     fBreak = true;
                 }
@@ -80305,7 +80219,7 @@ class Computer extends Component {
 
         this.println(PCX86.APPNAME + " v" + (XMLVERSION || PCX86.APPVERSION) + "\n" + COPYRIGHT + "\n" + LICENSE);
 
-        if (DEBUG && this.messageEnabled()) this.printMessage("PREFETCH: " + PREFETCH + ", TYPEDARRAYS: " + TYPEDARRAYS);
+        if (DEBUG) this.printf("PREFETCH: %b, TYPEDARRAYS: %b\n", PREFETCH, TYPEDARRAYS);
 
         /*
          * Iterate through all the components again and call their initBus() handler, if any
@@ -80707,9 +80621,7 @@ class Computer extends Component {
             Component.addMachineResource(this.idMachine, sURL, sStateData);
             this.sStateData = sStateData;
             this.fStateData = true;
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage("loaded state file " + sURL.replace(this.sUserID || "xxx", "xxx"));
-            }
+            if (DEBUG) this.printf("loaded state file %s\n", sURL.replace(this.sUserID || "xxx", "xxx"));
         } else {
             this.sResumePath = null;
             this.fServerState = false;
@@ -80749,7 +80661,7 @@ class Computer extends Component {
                 return;
             }
         }
-        if (DEBUG && this.messageEnabled()) this.printMessage("Computer.wait(ready)");
+        if (DEBUG) this.printf("Computer.wait(ready)\n");
         fn.call(this, parms);
     }
 
@@ -80774,9 +80686,7 @@ class Computer extends Component {
                 fValid = false;
                 if (!stateComputer) stateValidate.clear();
             } else {
-                if (DEBUG && this.messageEnabled()) {
-                    this.printMessage("Last state: " + sTimestampComputer + " (validate: " + sTimestampValidate + ")");
-                }
+                if (DEBUG) this.printf("Last state: %s (validate: %s)\n", sTimestampComputer, sTimestampValidate);
             }
         }
         return fValid;
@@ -80796,9 +80706,7 @@ class Computer extends Component {
             resume = this.resume || (this.sStateData? Computer.RESUME_AUTO : Computer.RESUME_NONE);
         }
 
-        if (DEBUG && this.messageEnabled()) {
-            this.printMessage("Computer.powerOn(" + (resume == Computer.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")) + ")");
-        }
+        if (DEBUG) this.printf("Computer.powerOn(%s)\n", (resume == Computer.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")));
 
         if (this.nPowerChange) {
             return;
@@ -81052,9 +80960,7 @@ class Computer extends Component {
             this.flags.initDone = true;
         }
 
-        if (DEBUG && this.flags.powered && this.messageEnabled()) {
-            this.printMessage("Computer.donePowerOn(): redundant");
-        }
+        if (DEBUG && this.flags.powered) this.printf("Computer.donePowerOn(): redundant\n");
 
         let stateComputer = aParms[0];
         let fRepower = (aParms[1] < 0);
@@ -81218,9 +81124,7 @@ class Computer extends Component {
         let data;
         let sState = "none";
 
-        if (DEBUG && this.messageEnabled()) {
-            this.printMessage("Computer.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
-        }
+        if (DEBUG) this.printf("Computer.powerOff(%s%s)\n", (fSave? "save" : "nosave"), (fShutdown? ",shutdown" : ""));
 
         if (this.nPowerChange) {
             return null;
@@ -81336,14 +81240,14 @@ class Computer extends Component {
     reset()
     {
         if (this.bus && this.bus.reset) {
-            this.printMessage("Resetting " + this.bus.type);
+            this.printf("Resetting %s\n", this.bus.type);
             this.bus.reset();
         }
         let aComponents = Component.getComponents(this.id);
         for (let iComponent = 0; iComponent < aComponents.length; iComponent++) {
             let component = aComponents[iComponent];
             if (component !== this && component !== this.bus && component.reset) {
-                this.printMessage("Resetting " + component.type);
+                this.printf("Resetting %s\n", component.type);
                 component.reset();
             }
         }
@@ -81544,8 +81448,7 @@ class Computer extends Component {
     verifyUserID(sUserID)
     {
         this.sUserID = null;
-        let fMessages = DEBUG && this.messageEnabled();
-        if (fMessages) this.printMessage("verifyUserID(" + sUserID + ")");
+        if (DEBUG) this.printf("verifyUserID(%s)\n", sUserID);
         let sRequest = Web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
         let response = Web.getResource(sRequest);
         let nErrorCode = response[0];
@@ -81555,16 +81458,16 @@ class Computer extends Component {
                 response = eval("(" + sResponse + ")"); // jshint ignore:line
                 if (response.code && response.code == UserAPI.CODE.OK) {
                     Web.setLocalStorageItem(Computer.STATE_USERID, response.data);
-                    if (fMessages) this.printMessage(Computer.STATE_USERID + " updated: " + response.data);
+                    if (DEBUG) this.printf("%s updated: %s\n" + Computer.STATE_USERID, response.data);
                     this.sUserID = response.data;
                 } else {
-                    if (fMessages) this.printMessage(response.code + ": " + response.data);
+                    if (DEBUG) this.printf("%s: %s\n", response.code, response.data);
                 }
             } catch(err) {
                 Component.error(err.message + " (" + sResponse + ")");
             }
         } else {
-            if (fMessages) this.printMessage("invalid response (error " + nErrorCode + ")");
+            if (DEBUG) this.printf("invalid response (error %d)\n", nErrorCode);
         }
         return this.sUserID;
     }
@@ -81579,14 +81482,10 @@ class Computer extends Component {
     {
         let sStatePath = null;
         if (this.sUserID) {
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage(Computer.STATE_USERID + " for load: " + this.sUserID);
-            }
+            if (DEBUG) this.printf("%s for load: %s\n", Computer.STATE_USERID, this.sUserID);
             sStatePath = Web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, PCX86.APPVERSION);
         } else {
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage(Computer.STATE_USERID + " unavailable");
-            }
+            if (DEBUG) this.printf("%s unavailable\n", Computer.STATE_USERID);
         }
         return sStatePath;
     }
@@ -81607,9 +81506,7 @@ class Computer extends Component {
          * tend to blow off alerts() and the like when closing down.
          */
         if (sState) {
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage("size of server state: " + sState.length + " bytes");
-            }
+            if (DEBUG) this.printf("size of server state: %d bytes\n", sState.length);
             let response = this.storeServerState(sUserID, sState, true);
             if (response && response[UserAPI.RES.CODE] == UserAPI.CODE.OK) {
                 this.notice("Machine state saved to server");
@@ -81624,9 +81521,7 @@ class Computer extends Component {
                 this.resetUserID();
             }
         } else {
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage("no state to store");
-            }
+            if (DEBUG) this.printf("no state to store\n");
         }
     }
 
@@ -81641,9 +81536,7 @@ class Computer extends Component {
      */
     storeServerState(sUserID, sState, fSync)
     {
-        if (DEBUG && this.messageEnabled()) {
-            this.printMessage(Computer.STATE_USERID + " for store: " + sUserID);
-        }
+        if (DEBUG) this.printf("%s for store: %s\n", Computer.STATE_USERID, sUserID);
         /*
          * TODO: Determine whether or not any browsers cancel our request if we're called during a browser "shutdown" event,
          * and whether or not it matters if we do an async request (currently, we're not, to try to ensure the request goes through).
@@ -81667,7 +81560,7 @@ class Computer extends Component {
                 }
                 sResponse = '{"' + UserAPI.RES.CODE + '":' + response[1] + ',"' + UserAPI.RES.DATA + '":"' + sResponse + '"}';
             }
-            if (DEBUG && this.messageEnabled()) this.printMessage(sResponse);
+            if (DEBUG) this.printMessage(sResponse);
             return JSON.parse(sResponse);
         }
         return null;
@@ -81895,9 +81788,7 @@ class Computer extends Component {
                  */
                 let computer = new Computer(parmsComputer, parmsMachine, true);
 
-                if (DEBUG && computer.messageEnabled()) {
-                    computer.printMessage("onInit(" + computer.flags.powered + ")");
-                }
+                if (DEBUG) computer.printf("onInit(%b)\n", computer.flags.powered);
 
                 /*
                  * Bind any "power", "reset" and "save" buttons.  An "erase" button was also considered,
@@ -81937,9 +81828,7 @@ class Computer extends Component {
                  */
                 computer.flags.unloading = false;
 
-                if (DEBUG && computer.messageEnabled()) {
-                    computer.printMessage("onShow(" + computer.flags.initDone + "," + computer.flags.powered + ")");
-                }
+                if (DEBUG) computer.printf("onShow(%b,%b)\n", computer.flags.initDone, computer.flags.powered);
 
                 if (computer.flags.initDone && !computer.flags.powered) {
                     /*
@@ -81991,9 +81880,7 @@ class Computer extends Component {
                  */
                 computer.flags.unloading = true;
 
-                if (DEBUG && computer.messageEnabled()) {
-                    computer.printMessage("onExit(" + computer.flags.powered + ")");
-                }
+                if (DEBUG) computer.printf("onExit(%b)\n", computer.flags.powered);
 
                 if (computer.flags.powered) {
                     /**

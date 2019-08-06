@@ -767,7 +767,7 @@ class Card extends Controller {
     {
         if (DEBUGGER) {
             if (!aRegs) {
-                this.dbg.println(sName + ": " + Str.toHex(iReg, 2));
+                this.dbg.printf("%s: %02X\n", sName, iReg);
                 return;
             }
             let i, s = "";
@@ -778,11 +778,10 @@ class Card extends Controller {
                  * the extended bits of certain registers, so that we don't have to "mentally" concatenate them.
                  */
                 let reg = (aRegs === this.regCRTData)? this.getCRTCReg(i) : aRegs[i];
-                if (s) s += '\n';
                 let sRegName = (asRegs? asRegs[i] : sName.substr(1) + Str.toDec(i, 3));
-                s += Str.sprintf("%s[%02X]: %-12s %*X%s (%*d)", sName, i, sRegName, (asRegs? 4 : 6), reg, (i === iReg? '*' : ' '), (asRegs? 4 : 6), reg);
+                s += Str.sprintf("%s[%02X]: %-12s %*X%s (%*d)\n", sName, i, sRegName, (asRegs? 4 : 6), reg, (i === iReg? '*' : ' '), (asRegs? 4 : 6), reg);
             }
-            this.dbg.println(s);
+            this.dbg.printf("%s", s);
         }
     }
 
@@ -804,7 +803,7 @@ class Card extends Controller {
                 this.dumpRegs(" SEQ", this.regSEQIndx, this.regSEQData, this.asSEQRegs);
                 this.dumpRegs(" ATC", this.regATCIndx, this.regATCData, this.asATCRegs);
                 this.dumpRegs(" ATCINDX", this.regATCIndx);
-                this.dbg.println(" ATCDATA: " + this.fATCData);
+                this.dbg.printf(" ATCDATA: %b\n", this.fATCData);
                 this.dumpRegs("    FEAT", this.regFeat);
                 this.dumpRegs("    MISC", this.regMisc);
                 this.dumpRegs(" STATUS0", this.regStatus0);
@@ -831,10 +830,10 @@ class Card extends Controller {
             }
 
             if (this.nCard >= Video.CARD.EGA) {
-                this.dbg.println(" LATCHES: " + Str.toHex(this.latches));
-                this.dbg.println("  ACCESS: " + Str.toHex(this.nAccess, 4));
-                this.dbg.println("  PLANE2: " + Str.toHex(this.bitsDirtyBanks, 2));
-                this.dbg.println("Use 'd video [addr]' to dump video memory");
+                this.dbg.printf(" LATCHES: %0X\n", this.latches);
+                this.dbg.printf("  ACCESS: %04X\n",  this.nAccess);
+                this.dbg.printf("  PLANE2: %02X\n", this.bitsDirtyBanks);
+                this.dbg.printf("Use 'd video [addr]' to dump video memory\n");
                 /*
                  * There are few more EGA regs we could dump, like GRCPos1, GRCPos2, but does anyone care?
                  */
@@ -888,7 +887,7 @@ class Card extends Controller {
     {
         if (DEBUGGER) {
             if (!this.adwMemory) {
-                this.dbg.println("no buffer");
+                this.dbg.printf("no buffer\n");
                 return;
             }
 
@@ -923,7 +922,7 @@ class Card extends Controller {
                     if (j < w) w = j;
                     break;
                 default:
-                    this.dbg.println("unrecognized argument: " + s);
+                    this.dbg.printf("unrecognized argument: %s\n", s);
                     break;
                 }
             }
@@ -942,11 +941,10 @@ class Card extends Controller {
                     sData += ' ' + ((p < 0)? Str.toHex(dw, 8) : Str.toBin((dw >> (p << 3)), 8));
                 }
                 if (fColAdjust) idw += w - n;
-                if (sDump) sDump += "\n";
-                sDump += sData;
+                sDump += sData + "\n";
             }
 
-            if (sDump) this.dbg.println(sDump);
+            if (sDump) this.dbg.printf("%s", sDump);
             this.prevDump = idw;
         }
     }
@@ -1941,15 +1939,11 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
             let bitDirtyBank = (1 << ((idw >> 13) & 7));
             if (!(card.bitsDirtyBanks & bitDirtyBank)) {
                 card.bitsDirtyBanks |= bitDirtyBank;
-                if (DEBUG && card.video.messageEnabled(Messages.VIDEO)) {
-                    card.video.printf("writeByteMode0(0x%08X): modified font bank 0x%02X\n", addr, bitDirtyBank);
-                }
+                if (DEBUG) card.video.printf(Messages.VIDEO, "writeByteMode0(%#010X): modified font bank %#04X\n", addr, bitDirtyBank);
             }
         }
     }
-    if (DEBUG && card.video.messageEnabled(Messages.VIDEO | Messages.MEM)) {
-        card.video.printf("writeByteMode0(0x%08X): 0x%02X -> 0x%08X%s\n", addr, b, dw);
-    }
+    if (DEBUG) card.video.printf(Messages.VIDEO + Messages.MEM, "writeByteMode0(%#10X): %#04X -> %#10X\n", addr, b, dw);
 };
 
 /**
@@ -2001,9 +1995,7 @@ Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode0Chain4(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode0Chain4(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -2030,9 +2022,7 @@ Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode0EvenOdd(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode0EvenOdd(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -2056,9 +2046,7 @@ Card.ACCESS.writeByteMode0Rot = function writeByteMode0Rot(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode0Rot(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode0Rot(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -2083,9 +2071,7 @@ Card.ACCESS.writeByteMode0And = function writeByteMode0And(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode0And(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode0And(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -2110,9 +2096,7 @@ Card.ACCESS.writeByteMode0Or = function writeByteMode0Or(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode0Or(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode0Or(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -2137,9 +2121,7 @@ Card.ACCESS.writeByteMode0Xor = function writeByteMode0Xor(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode0Xor(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode0Xor(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -2159,9 +2141,7 @@ Card.ACCESS.writeByteMode1 = function writeByteMode1(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode1(" + Str.toHexLong(addr) + "): " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode1(%#010X): %#010X\n", addr, dw);
 };
 
 /**
@@ -2189,9 +2169,7 @@ Card.ACCESS.writeByteMode1EvenOdd = function writeByteMode1EvenOdd(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode1EvenOdd(" + Str.toHexLong(addr) + "): " + Str.toHexByte(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode1EvenOdd(%#010X): %#010X\n", addr, dw);
 };
 
 /**
@@ -2213,9 +2191,7 @@ Card.ACCESS.writeByteMode2 = function writeByteMode2(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode2(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode2(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -2238,9 +2214,7 @@ Card.ACCESS.writeByteMode2And = function writeByteMode2And(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode2And(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode2And(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -2263,9 +2237,7 @@ Card.ACCESS.writeByteMode2Or = function writeByteMode2Or(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode2Or(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode2Or(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -2288,9 +2260,7 @@ Card.ACCESS.writeByteMode2Xor = function writeByteMode2Xor(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode2Xor(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode2Xor(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /**
@@ -2320,9 +2290,7 @@ Card.ACCESS.writeByteMode3 = function writeByteMode3(off, b, addr)
         this.adw[idw] = dw;
         this.flags |= Memory.FLAGS.DIRTY;
     }
-    if (DEBUG && card.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
-        card.video.printMessage("writeByteMode3(" + Str.toHexLong(addr) + "): " + Str.toHexByte(b) + " -> " + Str.toHexLong(dw));
-    }
+    if (DEBUG) card.video.printf(Messages.MEM + Messages.VIDEO, "writeByteMode3(%#010X): %#04X -> %#010X\n", addr, b, dw);
 };
 
 /*
@@ -2835,7 +2803,7 @@ class Video extends Component {
             case "fullScreen":
                 if (this.container && this.container.doFullScreen) {
                     control.onclick = function onClickFullScreen() {
-                        if (DEBUG) video.printMessage("fullScreen()");
+                        if (DEBUG) video.printf("fullScreen()\n");
                         video.goFullScreen();
                     };
                 } else {
@@ -2848,7 +2816,7 @@ class Video extends Component {
                 this.sLockMessage = control.textContent;
                 if (this.inputScreen && this.inputScreen.lockPointer) {
                     control.onclick = function onClickLockPointer() {
-                        if (DEBUG) video.printMessage("lockPointer()");
+                        if (DEBUG) video.printf("lockPointer()\n");
                         video.lockPointer(true);
                     };
                 } else {
@@ -2859,7 +2827,7 @@ class Video extends Component {
 
             case "refresh":
                 control.onclick = function onClickRefresh() {
-                    if (DEBUG) video.printMessage("refreshScreen()");
+                    if (DEBUG) video.printf("refreshScreen()\n");
                     video.updateScreen(true);
                 };
                 return true;
@@ -3034,7 +3002,7 @@ class Video extends Component {
                 this.canvasScreen.style.width = this.canvasScreen.style.height = "";
             }
         }
-        if (DEBUG) this.printMessage("notifyFullScreen(" + fFullScreen + ")", true);
+        if (DEBUG) this.printf(Messages.ALL, "notifyFullScreen(%b)\n", fFullScreen);
         if (this.kbd) this.kbd.notifyEscape(fFullScreen == true);
     }
 
@@ -3249,7 +3217,7 @@ class Video extends Component {
      */
     onTouchStart(event)
     {
-        if (DEBUG) this.printMessage("onTouchStart()");
+        if (DEBUG) this.printf("onTouchStart()\n");
         this.chipset.startAudio(event);
         if (this.nTouchConfig == Video.TOUCH.DEFAULT) return;
         this.processTouchEvent(event, true);
@@ -3263,7 +3231,7 @@ class Video extends Component {
      */
     onTouchMove(event)
     {
-        if (DEBUG) this.printMessage("onTouchMove()");
+        if (DEBUG) this.printf("onTouchMove()\n");
         this.processTouchEvent(event);
     }
 
@@ -3275,7 +3243,7 @@ class Video extends Component {
      */
     onTouchEnd(event)
     {
-        if (DEBUG) this.printMessage("onTouchEnd()");
+        if (DEBUG) this.printf("onTouchEnd()\n");
         this.processTouchEvent(event, false);
     }
 
@@ -3389,13 +3357,12 @@ class Video extends Component {
                         this.hLongTouch = null;
                     }
                 }
+
                 if (fStart === undefined) {
                     this.fTouchDefault = false;
                 }
 
-                if (DEBUG) {
-                    this.log("processTouchEvent(" + (fStart? "touchStart" : (fStart === false? "touchEnd" : "touchMove")) + "," + timeDelta + "ms," + fTouchDefault + ")");
-                }
+                if (DEBUG) this.printf("processTouchEvent(%s,%dms,%b)\n", (fStart? "touchStart" : (fStart === false? "touchEnd" : "touchMove")), timeDelta, fTouchDefault);
 
                 if (!fTouchDefault) {
                     event.preventDefault();
@@ -3429,7 +3396,7 @@ class Video extends Component {
                 let yDelta = Math.round(yTouch - this.yTouch);
                 this.xTouch = xTouch;
                 this.yTouch = yTouch;
-                // this.println("moveMouse(" + xDelta + "," + yDelta + ")");
+                // this.printf("moveMouse(%d,%d)\n", xDelta, yDelta);
                 this.mouse.moveMouse(xDelta, yDelta, this.xTouch, this.yTouch);
             }
         }
@@ -3518,9 +3485,7 @@ class Video extends Component {
                         }
                     }
                     card.nCyclesVertRetrace = video.cpu.getCycles();
-                    if (DEBUG && video.messageEnabled(Messages.VIDEO | Messages.INT)) {
-                        video.printf("vertical retrace timer fired (%d cycles)\n", card.nCyclesVertRetrace);
-                    }
+                    if (DEBUG) video.printf(Messages.VIDEO + Messages.INT, "vertical retrace timer fired (%d cycles)\n", card.nCyclesVertRetrace);
                     if (video.nIRQ) {
                         if (!(card.regCRTData[Card.CRTC.EGA.VREND.INDX] & Card.CRTC.EGA.VREND.DISABLE_VRINT)) {
                             if (video.chipset) video.chipset.setIRR(video.nIRQ);
@@ -3566,8 +3531,8 @@ class Video extends Component {
                         }
                         video.msUpdatePrev = msUpdate - (msDelta >= video.msUpdateInterval? 0 : msDelta);
                     }
-                    else if (DEBUG && video.messageEnabled(Messages.VIDEO | Messages.INT)) {
-                        video.printf("skipping update (%dms too soon)\n", -msDelta);
+                    else if (DEBUG) {
+                        video.printf(Messages.VIDEO + Messages.INT, "skipping update (%dms too soon)\n", -msDelta);
                     }
                     video.latchStartAddress();
                 }, -this.cardActive.nCyclesVertPeriod);
@@ -3942,7 +3907,7 @@ class Video extends Component {
              * TODO: Unlike the MDA/CGA font data, we may want to hang onto this data, so that we can
              * regenerate the color font(s) whenever the foreground and/or background colors have changed.
              */
-            if (DEBUG) this.printMessage("onROMLoad(): EGA fonts loaded");
+            if (DEBUG) this.printf("onROMLoad(): EGA fonts loaded\n");
             /*
              * For EGA cards, in the absence of any parameters, we assume that we're receiving the original
              * IBM EGA ROM, which stores its 8x14 font data at 0x2230 as one continuous sequence; the total size
@@ -3964,7 +3929,7 @@ class Video extends Component {
             this.setFontData(abROM, aParms || [0x3160, 0x2230], 8);
         }
         else if (this.nCard == Video.CARD.VGA) {
-            if (DEBUG) this.printMessage("onROMLoad(): VGA fonts loaded");
+            if (DEBUG) this.printf("onROMLoad(): VGA fonts loaded\n");
             /*
              * For VGA cards, in the absence of any parameters, we assume that we're receiving the original
              * IBM VGA ROM, which contains an 8x14 font at 0x3F8D (and corresponding supplemental table at 0x4D8D)
@@ -4319,7 +4284,7 @@ class Video extends Component {
                     offData = 0;
                     abFontData = null;
                     if ((bitsBanks = this.cardEGA.bitsDirtyBanks)) {
-                        if (DEBUG) this.printf("buildFont(%s): dirty font data detected (0x%02X)\n", fRebuild, bitsBanks);
+                        if (DEBUG) this.printf("buildFont(%b): dirty font data detected (%#04X)\n", fRebuild, bitsBanks);
                         this.cardEGA.bitsDirtyBanks = 0;
                     }
                     this.nFontSelect = this.getSelectedFonts();
@@ -4360,7 +4325,7 @@ class Video extends Component {
                 this.cBlinkVisible = 0; // no visible blinking characters (yet)
             }
 
-            if (DEBUG && fChanges) this.printf("buildFont(%s): font changes detected\n", fRebuild);
+            if (DEBUG && fChanges) this.printf("buildFont(%b): font changes detected\n", fRebuild);
         }
 
         return fChanges;
@@ -4917,7 +4882,7 @@ class Video extends Component {
          * cyCursor values are relative to when it's time to scale them.
          */
         if (this.yCursor !== bCursorStart || this.cyCursor !== bCursorSize || this.cyCursorWrap !== bCursorWrap) {
-            if (DEBUG) this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d (0x%02X-0x%02X)\n",
+            if (DEBUG) this.printf("checkCursor(): cursor shape changed from %d,%d to %d,%d (%#04X-%#04X)\n",
                                     this.yCursor, this.cyCursor, bCursorStart, bCursorSize, oCursorStart, oCursorEnd);
             this.yCursor = bCursorStart;
             this.cyCursor = bCursorSize;
@@ -5058,9 +5023,7 @@ class Video extends Component {
                     }
                     break;
                 default:
-                    if (DEBUG && this.messageEnabled()) {
-                        this.printMessage("getCardAccess(): invalid GRC mode (" + Str.toHexByte(regGRCMode) + ")");
-                    }
+                    if (DEBUG) this.printf("getCardAccess(): invalid GRC mode (%#04X)\n", regGRCMode);
                     break;
                 }
                 if (regGRCMode & Card.GRC.MODE.READ.MODE1) {
@@ -5124,7 +5087,7 @@ class Video extends Component {
         let card = this.cardActive;
         if (card && nAccess != card.nAccess) {
 
-            if (DEBUG) this.printf("setCardAccess(0x%04X)\n", nAccess);
+            if (DEBUG) this.printf("setCardAccess(%#06X)\n", nAccess);
 
             card.setMemoryAccess(nAccess);
 
@@ -5452,9 +5415,7 @@ class Video extends Component {
                             } else if (nCRTCVertTotal >= 480) {
                                 nMode = (this.nMonitorType == ChipSet.MONITOR.MONO? Video.MODE.VGA_640X480_MONO : Video.MODE.VGA_640X480);
                             }
-                            if (DEBUG && this.messageEnabled()) {
-                                this.printMessage("checkMode(): nCRTCVertTotal=" + nCRTCVertTotal + ", mode=" + Str.toHexByte(nMode));
-                            }
+                            if (DEBUG) this.printf("checkMode(%#04X): nCRTCVertTotal=%d\n", nMode, nCRTCVertTotal);
                         }
                     }
                 }
@@ -5536,9 +5497,7 @@ class Video extends Component {
         let fReset = nMode != null && (nMode != this.nMode || fForce);
         if (fReset || fRemap) {
 
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage("setMode(" + Str.toHexByte(nMode) + (fForce? ",force" : "") + ")", true, true);
-            }
+            if (DEBUG) this.printf("setMode(%#04X,%b)\n", nMode, fForce);
 
             this.cUpdates = 0;      // count updateScreen() calls as a means of driving blink updates
             this.nMode = nMode;
@@ -5563,7 +5522,7 @@ class Video extends Component {
 
                 if (this.addrBuffer) {
 
-                    if (DEBUG) this.printf("setMode(0x%02X): removing 0x%08X bytes from 0x%08X\n", nMode, this.sizeBuffer, this.addrBuffer);
+                    if (DEBUG) this.printf("setMode(%#04X): removing %#010X bytes from %#010X\n", nMode, this.sizeBuffer, this.addrBuffer);
 
                     if (!this.bus.removeMemory(this.addrBuffer, this.sizeBuffer)) {
                         /*
@@ -5580,7 +5539,7 @@ class Video extends Component {
                 this.addrBuffer = card.addrBuffer;
                 this.sizeBuffer = card.sizeBuffer;
 
-                if (DEBUG) this.printf("setMode(0x%02X): adding 0x%08X bytes to 0x%08X\n", nMode, this.sizeBuffer, this.addrBuffer);
+                if (DEBUG) this.printf("setMode(%#04X): adding %#010X bytes to %#010X\n", nMode, this.sizeBuffer, this.addrBuffer);
 
                 if (!this.bus.addMemory(card.addrBuffer, card.sizeBuffer, Memory.TYPE.VIDEO, card)) {
                     /*
@@ -5809,9 +5768,7 @@ class Video extends Component {
             this.contextScreen.fillRect(xDst, yDst, this.cxScreenCell, this.cyScreenCell);
         }
 
-        if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.BUFFER)) {
-            this.log("updateCharBgnd(" + col + "," + row + "," + bChar + "): filled " + xDst + "," + yDst);
-        }
+        if (MAXDEBUG) this.printf(Messages.VIDEO + Messages.BUFFER, "updateCharBgnd(%d,%d,%d): filled %d,%d\n", col, row, bChar, xDst, yDst);
 
         if (bAttr & Video.ATTRS.DRAW_FGND) {
             /*
@@ -5820,9 +5777,7 @@ class Video extends Component {
             let xSrcFgnd = (bChar & 0xf) * font.cxCell;
             let ySrcFgnd = (bChar >> 4) * font.cyCell;
 
-            if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.BUFFER)) {
-                this.log("updateCharFgnd(" + col + "," + row + "," + bChar + "): draw from " + xSrcFgnd + "," + ySrcFgnd + " (" + font.cxCell + "," + font.cyCell + ") to " + xDst + "," + yDst);
-            }
+            if (MAXDEBUG) this.printf(Messages.VIDEO + Messages.BUFFER, "updateCharFgnd(%d,%d,%d): draw from %d,%d (%d,%d) to %d,%d\n", col, row , bChar, xSrcFgnd, ySrcFgnd, font.cxCell, font.cyCell, xDst, yDst);
 
             if (context) {
                 context.drawImage(font.aCanvas[iFgnd], xSrcFgnd, ySrcFgnd, font.cxCell, font.cyCell, xDst, yDst, font.cxCell, font.cyCell);
@@ -6790,7 +6745,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regATCIndx;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.ATC.PORT, undefined, addrFrom, "ATC.INDX", b);
+            this.printMessageIO(Card.ATC.PORT, undefined, addrFrom, "ATC.INDX", b, true);
         }
         return b;
     }
@@ -6811,7 +6766,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regATCData[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK];
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.ATC.PORT, undefined, addrFrom, "ATC." + this.cardEGA.asATCRegs[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK], b);
+            this.printMessageIO(Card.ATC.PORT, undefined, addrFrom, "ATC." + this.cardEGA.asATCRegs[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK], b, true);
         }
         return b;
     }
@@ -6874,7 +6829,7 @@ class Video extends Component {
                 let fModified = (card.regATCData[iReg] !== bOut);
                 if (Video.TRAPALL || fModified) {
                     if (!addrFrom || this.messageEnabled()) {
-                        this.printMessageIO(port, bOut, addrFrom, "ATC." + card.asATCRegs[iReg]);
+                        this.printMessageIO(port, bOut, addrFrom, "ATC." + card.asATCRegs[iReg], undefined, true);
                     }
                 }
                 if (fModified) {
@@ -7042,7 +6997,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regSEQData[this.cardEGA.regSEQIndx];
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.SEQ.DATA.PORT, undefined, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx], b);
+            this.printMessageIO(Card.SEQ.DATA.PORT, undefined, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx], b, true);
         }
         return b;
     }
@@ -7059,7 +7014,7 @@ class Video extends Component {
     {
         if (Video.TRAPALL || this.cardEGA.regSEQData[this.cardEGA.regSEQIndx] !== bOut) {
             if (!addrFrom || this.messageEnabled()) {
-                this.printMessageIO(Card.SEQ.DATA.PORT, bOut, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx]);
+                this.printMessageIO(Card.SEQ.DATA.PORT, bOut, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx], undefined, true);
             }
             this.cardEGA.regSEQData[this.cardEGA.regSEQIndx] = bOut;
         }
@@ -7077,11 +7032,11 @@ class Video extends Component {
             if (nFontSelect != this.nFontSelect) {
                 if (DEBUG) {
                     if ((nFontSelect & 0xff) == (nFontSelect >> 8)) {
-                        if (this.messageEnabled(Messages.VIDEO | Messages.PORT)) {
-                            this.printf("outSEQData(0x%02X): font selection changing from 0x%04X to 0x%04X\n", bOut, this.nFontSelect, nFontSelect);
+                        if (this.messageEnabled(Messages.VIDEO + Messages.PORT)) {
+                            this.printf("outSEQData(%#04X): font selection changing from %#06X to %#06X\n", bOut, this.nFontSelect, nFontSelect);
                         }
                     } else {
-                        this.printf("outSEQData(0x%02X): low font (0x%02X) differs from high font (0x%02X)\n", bOut, nFontSelect & 0xff, nFontSelect >> 8);
+                        this.printf("outSEQData(%#04X): low font (%#04X) differs from high font (%#04X)\n", bOut, nFontSelect & 0xff, nFontSelect >> 8);
                         this.cpu.stopCPU();
                     }
                 }
@@ -7139,7 +7094,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regDACMask;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.MASK.PORT, undefined, addrFrom, "DAC.MASK", b);
+            this.printMessageIO(Card.DAC.MASK.PORT, undefined, addrFrom, "DAC.MASK", b, true);
         }
         return b;
     }
@@ -7156,7 +7111,7 @@ class Video extends Component {
     {
         if (Video.TRAPALL || this.cardEGA.regDACMask !== bOut) {
             if (!addrFrom || this.messageEnabled()) {
-                this.printMessageIO(Card.DAC.MASK.PORT, bOut, addrFrom, "DAC.MASK");
+                this.printMessageIO(Card.DAC.MASK.PORT, bOut, addrFrom, "DAC.MASK", undefined, true);
             }
             this.cardEGA.regDACMask = bOut;
         }
@@ -7174,7 +7129,7 @@ class Video extends Component {
     {
         let b = this.cardEGA.regDACState;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.STATE.PORT, undefined, addrFrom, "DAC.STATE", b);
+            this.printMessageIO(Card.DAC.STATE.PORT, undefined, addrFrom, "DAC.STATE", b, true);
         }
         return b;
     }
@@ -7190,7 +7145,7 @@ class Video extends Component {
     outDACRead(port, bOut, addrFrom)
     {
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.ADDR.PORT_READ, bOut, addrFrom, "DAC.READ");
+            this.printMessageIO(Card.DAC.ADDR.PORT_READ, bOut, addrFrom, "DAC.READ", undefined, true);
         }
         this.cardEGA.regDACAddr = bOut;
         this.cardEGA.regDACState = Card.DAC.STATE.MODE_READ;
@@ -7208,7 +7163,7 @@ class Video extends Component {
     outDACWrite(port, bOut, addrFrom)
     {
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.ADDR.PORT_WRITE, bOut, addrFrom, "DAC.WRITE");
+            this.printMessageIO(Card.DAC.ADDR.PORT_WRITE, bOut, addrFrom, "DAC.WRITE", undefined, true);
         }
         this.cardEGA.regDACAddr = bOut;
         this.cardEGA.regDACState = Card.DAC.STATE.MODE_WRITE;
@@ -7227,7 +7182,7 @@ class Video extends Component {
     {
         let b = (this.cardEGA.regDACData[this.cardEGA.regDACAddr] >> this.cardEGA.regDACShift) & 0x3f;
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.DATA.PORT, undefined, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]", b);
+            this.printMessageIO(Card.DAC.DATA.PORT, undefined, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]", b, true);
         }
         this.cardEGA.regDACShift += 6;
         if (this.cardEGA.regDACShift > 12) {
@@ -7249,7 +7204,7 @@ class Video extends Component {
     {
         let dw = this.cardEGA.regDACData[this.cardEGA.regDACAddr];
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(Card.DAC.DATA.PORT, bOut, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]");
+            this.printMessageIO(Card.DAC.DATA.PORT, bOut, addrFrom, "DAC.DATA[" + Str.toHexByte(this.cardEGA.regDACAddr) + "][" + Str.toHexByte(this.cardEGA.regDACShift) + "]", undefined, true);
         }
         let dwNew = (dw & ~(0x3f << this.cardEGA.regDACShift)) | ((bOut & 0x3f) << this.cardEGA.regDACShift);
         if (dw !== dwNew) {
@@ -7629,7 +7584,7 @@ class Video extends Component {
             b = card.regCRTData[card.regCRTIndx];
         }
         if (!addrFrom || this.messageEnabled()) {
-            this.printMessageIO(port /* card.port + 1 */, undefined, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx], b);
+            this.printMessageIO(port /* card.port + 1 */, undefined, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx], b, true);
         }
         return b;
     }
@@ -7659,7 +7614,7 @@ class Video extends Component {
                 if (bCur > bMax) {
                     bCur = card.regCRTData[card.regCRTIndx ^ 0x1] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
                     if (bCur > bMax) {
-                        if (DEBUG) this.printf("outCRTCData(0x%02X): ignoring write to CRTC[0x%02X] since 0x%02X > 0x%02X\n", bOut, card.regCRTIndx, bCur, bMax);
+                        if (DEBUG) this.printf("outCRTCData(%#04X): ignoring write to CRTC[%#04X] since %#04X > %#04X\n", bOut, card.regCRTIndx, bCur, bMax);
                         return;
                     }
                 }
@@ -7720,7 +7675,7 @@ class Video extends Component {
             }
         }
         else if (DEBUG) {
-            this.printf("outCRTCData(0x%02X): ignoring unexpected write to CRTC[0x%02X]\n", bOut, card.regCRTIndx);
+            this.printf("outCRTCData(%#04X): ignoring unexpected write to CRTC[%#04X]\n", bOut, card.regCRTIndx);
         }
     }
 
@@ -7857,15 +7812,15 @@ class Video extends Component {
         if (DEBUGGER) {
             let component = /** @type {Component} */ (this.dbg);
             if (!this.cardActive) {
-                component.println("no active video card");
+                component.printf("no active video card\n");
                 return;
             }
             if (asArgs[0]) {
                 this.cardActive.dumpVideoBuffer(asArgs);
                 return;
             }
-            component.println("    MODE: " + Str.toHexByte(this.nMode));
-            component.println("  BUFFER: " + Str.toHexLong(this.cardActive.addrBuffer));
+            component.printf("    MODE: %#04X\n", this.nMode);
+            component.printf("  BUFFER: %#010X\n", this.cardActive.addrBuffer);
             this.cardActive.dumpVideoCard();
         }
     }
@@ -8025,6 +7980,10 @@ class Video extends Component {
              * As noted in keyboard.js, the keyboard on an iOS device tends to pop up with the SHIFT key depressed,
              * which is not the initial keyboard state that the Keyboard component expects, so hopefully turning off
              * these "auto" attributes will help.
+             *
+             * TODO: Determine if there's any reason we shouldn't set all these attributes (and perhaps others, such as
+             * "autocomplete") for ALL browsers.  Unfortunately, in my limited testing, none of them seem to have any effect
+             * on the way Chrome/webkit converts "compose" key sequences (eg, "Alt-E") into dead keys (keyCode 229).
              */
             if (Web.isUserAgent("iOS")) {
                 textarea.setAttribute("autocapitalize", "off");

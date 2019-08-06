@@ -2598,7 +2598,7 @@ class DebuggerX86 extends Debugger {
              * checkIntNotify() at the moment.
              */
             addr -= 2;
-            this.printf("INT %#02X: AH=%#02X at %s %s\n",  nInt, AH, this.toHexOffset(addr - this.cpu.segCS.base, this.cpu.getCS()), sFunc);
+            this.printf("INT %#04X: AH=%#04X at %s %s\n",  nInt, AH, this.toHexOffset(addr - this.cpu.segCS.base, this.cpu.getCS()), sFunc);
         }
         return fMessage;
     }
@@ -2614,7 +2614,7 @@ class DebuggerX86 extends Debugger {
      */
     messageIntReturn(nInt, nLevel, nCycles, sResult)
     {
-        this.printf("INT %#02X: C=%d%s (cycles=%d%s)\n", nInt, (this.cpu.getCF()? 1 : 0), (sResult || ""), nCycles, (nLevel? ",level=" + (nLevel+1) : ""));
+        this.printf("INT %#04X: C=%d%s (cycles=%d%s)\n", nInt, (this.cpu.getCF()? 1 : 0), (sResult || ""), nCycles, (nLevel? ",level=" + (nLevel+1) : ""));
     }
 
     /**
@@ -2648,9 +2648,9 @@ class DebuggerX86 extends Debugger {
                 sFrom = "at " + this.toHexOffset(addrFrom, selFrom);
             }
             if (bOut == undefined) {
-                this.printf("%s.inPort(%#04X,%s): %#%02X %s\n", component.idComponent, port, name || "unknown", bIn, sFrom);
+                this.printf("%s.inPort(%#06X,%s): %#04X %s\n", component.idComponent, port, name || "unknown", bIn, sFrom);
             } else {
-                this.printf("%s.outPort(%#04X,%s,%#02X) %s\n", component.idComponent, port, name || "unknown", bOut, sFrom);
+                this.printf("%s.outPort(%#06X,%s,%#04X) %s\n", component.idComponent, port, name || "unknown", bOut, sFrom);
             }
         }
     }
@@ -3530,7 +3530,7 @@ class DebuggerX86 extends Debugger {
              * stop on INT3 whenever both the INT and HALT message bits are set; a simple "g" command allows you
              * to continue.
              */
-            if (this.messageEnabled(Messages.INT | Messages.HALT)) {
+            if (this.messageEnabled(Messages.INT + Messages.HALT)) {
                 if (this.cpu.probeAddr(addr) == X86.OPCODE.INT3) {
                     fBreak = true;
                 }

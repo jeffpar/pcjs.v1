@@ -1650,7 +1650,7 @@ class Str {
 
             case 'X':
                 ach = Str.HexUpperCase;
-                if (hash) prefix = "0X";
+                // if (hash) prefix = "0X";     // I don't like that %X uppercases both the prefix and the value
                 /* falls through */
 
             case 'x':
@@ -4675,8 +4675,9 @@ class Component {
     messageEnabled(bitsMessage = 0)
     {
         if (DEBUGGER && this.dbg) {
+            if (bitsMessage % 2) bitsMessage--;
             bitsMessage = bitsMessage || this.bitsMessage;
-            if ((bitsMessage|0) == -1 || this.testBits(this.dbg.bitsMessage, (bitsMessage % 2)? bitsMessage - 1 : bitsMessage)) {
+            if ((bitsMessage|1) == -1 || this.testBits(this.dbg.bitsMessage, bitsMessage)) {
                 return true;
             }
         }
@@ -5847,35 +5848,39 @@ PDP11.WORDBUS           = WORDBUS;
  */
 
 var MessagesPDP11 = {
-    CPU:        0x00000001,
-    TRAP:       0x00000002,
-    FAULT:      0x00000004,
-    INT:        0x00000008,
-    BUS:        0x00000010,
-    MEMORY:     0x00000020,
-    MMU:        0x00000040,
-    ROM:        0x00000080,
-    DEVICE:     0x00000100,
-    PANEL:      0x00000200,
-    KEYBOARD:   0x00000400,
-    KEYS:       0x00000800,
-    PC11:       0x00001000,
-    PAPER:      0x00001000,
-    DISK:       0x00002000,
-    READ:       0x00004000,
-    WRITE:      0x00008000,
-    RK11:       0x00010000,
-    RL11:       0x00020000,
-    RX11:       0x00040000,
-    DL11:       0x00100000,
-    SERIAL:     0x00100000,
-    KW11:       0x00200000,
-    TIMER:      0x00200000,
-    SPEAKER:    0x01000000,
-    COMPUTER:   0x02000000,
-    BUFFER:     0x20000000,
-    WARN:       0x40000000,
-    HALT:       0x80000000|0
+    NONE:       0x00000000,
+    DEFAULT:    0x00000000,
+    ADDRESS:    0x00000001,
+    CPU:        0x00000002,
+    TRAP:       0x00000004,
+    FAULT:      0x00000008,
+    INT:        0x00000010,
+    BUS:        0x00000020,
+    MEMORY:     0x00000040,
+    MMU:        0x00000080,
+    ROM:        0x00000100,
+    DEVICE:     0x00000200,
+    PANEL:      0x00000400,
+    KEYBOARD:   0x00000800,
+    KEYS:       0x00001000,
+    PC11:       0x00002000,
+    PAPER:      0x00004000,
+    DISK:       0x00008000,
+    READ:       0x00010000,
+    WRITE:      0x00020000,
+    RK11:       0x00040000,
+    RL11:       0x00080000,
+    RX11:       0x00100000,
+    DL11:       0x00200000,
+    SERIAL:     0x00400000,
+    KW11:       0x00800000,
+    TIMER:      0x01000000,
+    SPEAKER:    0x02000000,
+    COMPUTER:   0x04000000,
+    WARN:       0x10000000,
+    HALT:       0x20000000,
+    BUFFER:     0x40000000,
+    ALL:        0xffffffff|0
 };
 
 /*
@@ -5919,6 +5924,7 @@ MessagesPDP11.CATEGORIES = {
     "timer":    MessagesPDP11.TIMER,
     "speaker":  MessagesPDP11.SPEAKER,
     "computer": MessagesPDP11.COMPUTER,
+    "warn":     MessagesPDP11.WARN,
     /*
      * Now we turn to message actions rather than message types; for example, setting "halt"
      * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
@@ -5926,9 +5932,8 @@ MessagesPDP11.CATEGORIES = {
      * Similarly, "m buffer on" turns on message buffering, deferring the display of all messages
      * until "m buffer off" is issued.
      */
-    "buffer":   MessagesPDP11.BUFFER,
-    "warn":     MessagesPDP11.WARN,
-    "halt":     MessagesPDP11.HALT
+    "halt":     MessagesPDP11.HALT,
+    "buffer":   MessagesPDP11.BUFFER
 };
 
 
