@@ -184,7 +184,55 @@ class StdIO {
      */
     hex(n)
     {
-        return this.sprintf("%x", n);
+        return this.sprintf("%#x", n);
+    }
+
+    /**
+     * isValidDate(date)
+     *
+     * @this {StdIO}
+     * @param {Date} date
+     * @return {boolean}
+     */
+    isValidDate(date)
+    {
+        return !isNaN(date.getTime());
+    }
+
+    /**
+     * parseDate(date)
+     * parseDate(date, time)
+     * parseDate(year, month, day, hour, minute, second)
+     *
+     * Produces a UTC date when ONLY a date (no time) is provided; otherwise, it combines the date and
+     * and time, producing a date that is either UTC or local, depending on the presence (or lack) of time
+     * zone information.  Finally, if numeric inputs are provided, then Date.UTC() is called to generate
+     * a UTC time.
+     *
+     * In general, you should use this instead of new Date(s), because the Date constructor implicitly calls
+     * Date.parse(s), which behaves inconsistently.  For example, ISO date-only strings (e.g. "1970-01-01")
+     * generate a UTC time, but non-ISO date-only strings (eg, "10/1/1945" or "October 1, 1945") generate a
+     * local time.
+     *
+     * @this {StdIO}
+     * @param {...} args
+     * @return {Date} (UTC unless a time string with a non-GMT timezone is explicitly provided)
+     */
+    parseDate(...args)
+    {
+        let date;
+        if (args[0] === undefined) {
+            date = new Date(Date.now());
+        }
+        else if (typeof args[0] === "string") {
+            date = new Date(args[0] + ' ' + (args[1] || "00:00:00 GMT"));
+        }
+        else if (args[1] === undefined) {
+            date = new Date(args[0]);
+        } else {
+            date = new Date(Date.UTC(...args));
+        }
+        return date;
     }
 
     /**
@@ -255,12 +303,14 @@ class StdIO {
             let arg, type = aParts[iPart+5];
 
             /*
-             * Check for unrecognized types immediately, so we don't inadvertently pop any arguments.
+             * Check for unrecognized types immediately, so we don't inadvertently pop any arguments;
+             * the first 12 ("ACDFHIMNSTWY") are for our non-standard Date extensions (see below).
              *
              * For reference purposes, the standard ANSI C set of format types is: "dioxXucsfeEgGpn%".
              */
-            if ("dfjcsoXx%".indexOf(type) < 0) {
-                buffer += aParts[iPart+1] + aParts[iPart+2] + aParts[iPart+3] + aParts[iPart+4] + type;
+            let iType = "ACDFHIMNSTWYbdfjcsoXx%".indexOf(type);
+            if (iType < 0) {
+                buffer += '%' + aParts[iPart+1] + aParts[iPart+2] + aParts[iPart+3] + aParts[iPart+4] + type;
                 continue;
             }
 
@@ -279,15 +329,147 @@ class StdIO {
                 } else {
                     arg = args[args.length-1];
                 }
+            } else {
+                width = +width || 0;
             }
-            width = +width || 0;
             let precision = aParts[iPart+3];
             precision = precision? +precision.substr(1) : -1;
             // let length = aParts[iPart+4];       // eg, 'h', 'l' or 'L' (all currently ignored)
             let hash = flags.indexOf('#') >= 0;
+            let zeroPad = flags.indexOf('0') >= 0;
             let ach = null, s, radix = 0, prefix = ""
 
+            /*
+             * The following non-standard sprintf() format codes provide handy alternatives to the
+             * PHP date() format codes that we used to use with the old datelib.formatDate() function:
+             *
+             *      a:  lowercase ante meridiem and post meridiem (am or pm)                %A
+             *      d:  day of the month, 2 digits with leading zeros (01, 02, ..., 31)     %02D
+             *      D:  3-letter day of the week ("Sun", "Mon", ..., "Sat")                 %.3W
+             *      F:  month ("January", "February", ..., "December")                      %F
+             *      g:  hour in 12-hour format, without leading zeros (1, 2, ..., 12)       %I
+             *      h:  hour in 24-hour format, without leading zeros (0, 1, ..., 23)       %H
+             *      H:  hour in 24-hour format, with leading zeros (00, 01, ..., 23)        %02H
+             *      i:  minutes, with leading zeros (00, 01, ..., 59)                       %02N
+             *      j:  day of the month, without leading zeros (1, 2, ..., 31)             %D
+             *      l:  day of the week ("Sunday", "Monday", ..., "Saturday")               %W
+             *      m:  month, with leading zeros (01, 02, ..., 12)                         %02M
+             *      M:  3-letter month ("Jan", "Feb", ..., "Dec")                           %.3F
+             *      n:  month, without leading zeros (1, 2, ..., 12)                        %M
+             *      s:  seconds, with leading zeros (00, 01, ..., 59)                       %02S
+             *      y:  2-digit year (eg, 14)                                               %0.2Y
+             *      Y:  4-digit year (eg, 2014)                                             %Y
+             *
+             * We also support a few custom format codes:
+             *
+             *      %C:  calendar output (equivalent to: %W, %F %D, %Y)
+             *      %T:  timestamp output (equivalent to: %Y-%02M-%02D %02H:%02N:%02S)
+             *
+             * Use the optional '#' flag with any of the above '%' format codes to produce UTC results
+             * (eg, '%#I' instead of '%I').
+             *
+             * The %A, %F, and %W types act as strings (which support the '-' left justification flag, as well as
+             * the width and precision options), and the rest act as integers (which support the '0' padding flag
+             * and the width option).  Also, while %Y does act as an integer, it also supports truncation using the
+             * precision option (normally, integers do not); this enables a variable number of digits for the year.
+             *
+             * So old code like this:
+             *
+             *      printf("%s\n", formatDate("l, F j, Y", date));
+             *
+             * can now be written like this:
+             *
+             *      printf("%W, %F %D, %Y\n", date, date, date, date);
+             *
+             * or even more succinctly, as:
+             *
+             *      printf("%C\n", date);
+             *
+             * In fact, even the previous example can be written more succinctly as:
+             *
+             *      printf("%W, %F %D, %Y\n", date);
+             *
+             * because unlike the C runtime, we reuse the final parameter once the format string has exhausted all parameters.
+             */
+            let ch, date = /** @type {Date} */ (iType < 12 && typeof arg != "object"? this.parseDate(arg) : arg), dateUndefined;
+
             switch(type) {
+            case 'C':
+                ch = hash? '#' : '';
+                buffer += (this.isValidDate(date)? this.sprintf(this.sprintf("%%%sW, %%%sF %%%sD, %%%sY", ch), date) : dateUndefined);
+                continue;
+
+            case 'D':
+                arg = hash? date.getUTCDate() : date.getDate();
+                type = 'd';
+                break;
+
+            case 'A':
+            case 'H':
+            case 'I':
+                arg = hash? date.getUTCHours() : date.getHours();
+                if (type == 'A') {
+                    arg = (arg < 12 ? "am" : "pm");
+                    type = 's';
+                }
+                else {
+                    if (type == 'I') {
+                        arg = (!arg? 12 : (arg > 12 ? arg - 12 : arg));
+                    }
+                    type = 'd';
+                }
+                break;
+
+            case 'F':
+            case 'M':
+                arg = hash? date.getUTCMonth() : date.getMonth();
+                if (type == 'F') {
+                    arg = StdIO.NamesOfMonths[arg];
+                    type = 's';
+                } else {
+                    arg++;
+                    type = 'd';
+                }
+                break;
+
+            case 'N':
+                arg = hash? date.getUTCMinutes() : date.getMinutes();
+                type = 'd';
+                break;
+
+            case 'S':
+                arg = hash? date.getUTCSeconds() : date.getSeconds();
+                type = 'd'
+                break;
+
+            case 'T':
+                ch = hash? '#' : '';
+                buffer += (this.isValidDate(date)? this.sprintf(this.sprintf("%%%sY-%%%s02M-%%%s02D %%%s02H:%%%s02N:%%%s02S", ch), date) : dateUndefined);
+                continue;
+
+            case 'W':
+                arg = StdIO.NamesOfDays[hash? date.getUTCDay() : date.getDay()];
+                type = 's';
+                break;
+
+            case 'Y':
+                arg = hash? date.getUTCFullYear() : date.getFullYear();
+                if (precision > 0) {
+                    arg = arg % (Math.pow(10, precision));
+                    precision = -1;
+                }
+                type = 'd';
+                break;
+            }
+
+            switch(type) {
+            case 'b':
+                /*
+                 * This is a non-standard format specifier that seems handy.
+                 */
+                buffer += (arg? "true" : "false");
+                break;
+
             case 'd':
                 /*
                  * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
@@ -304,7 +486,7 @@ class StdIO {
                     s = arg.toFixed(precision);
                 }
                 if (s.length < width) {
-                    if (flags.indexOf('0') >= 0) {
+                    if (zeroPad) {
                         if (arg < 0) {
                             width--;
                             s = s.substr(1);
@@ -360,7 +542,7 @@ class StdIO {
 
             case 'X':
                 ach = StdIO.HexUpperCase;
-                if (hash) prefix = "0X";
+                // if (hash) prefix = "0X";     // I don't like that %X uppercases both the prefix and the value
                 /* falls through */
 
             case 'x':
@@ -380,11 +562,25 @@ class StdIO {
                      */
                     arg = Number.parseInt(arg, arg.match(/(^0x|[a-f])/i)? 16 : 10);
                 }
+                if (zeroPad && !width) {
+                    /*
+                     * Here we replicate a bit of logic from toHex(), which selects a width based on the value, and
+                     * is triggered by the format specification "%0x", where zero-padding is requested without a width.
+                     */
+                    let v = Math.abs(arg);
+                    if (v <= 0xffff) {
+                        width = 4;
+                    } else if (v <= 0xffffffff) {
+                        width = 8;
+                    } else {
+                        width = 9;
+                    }
+                }
                 width -= prefix.length;
                 do {
                     let d = arg & (radix - 1);
                     arg >>>= (radix == 16? 4 : 3);
-                    if (flags.indexOf('0') >= 0 || !s || d || arg) {
+                    if (zeroPad || !s || d || arg) {
                         s = ach[d] + s;
                     } else {
                         if (prefix) {
@@ -417,3 +613,5 @@ class StdIO {
  */
 StdIO.HexLowerCase = "0123456789abcdef";
 StdIO.HexUpperCase = "0123456789ABCDEF";
+StdIO.NamesOfDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+StdIO.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];

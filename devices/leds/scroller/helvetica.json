@@ -3,7 +3,7 @@
     "class": "Machine",
     "type": "leds",
     "name": "LED Scroller",
-    "version": 1.20,
+    "version": 2.00,
     "autoStart": true,
     "bindings": {
       "clear": "clearScroll",

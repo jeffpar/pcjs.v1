@@ -150,33 +150,34 @@ class Time extends Device {
         this.onAnimationFrame = this.animate.bind(this);
         this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
 
-        /*
-         * When fClockByFrame is true, we rely exclusively on requestAnimationFrame() instead of setTimeout()
-         * to drive the clock, which means we automatically yield after every frame, so no yield timer is required.
-         */
-        if (!this.fClockByFrame) {
+        if (this.fClockByFrame) {
+            /*
+            * When clocking exclusively by animation frames, setSpeed() calculates how many cycles
+            * each animation frame should "deposit" in our cycle bank:
+            *
+            *      this.nCyclesDepositPerFrame = (nCyclesPerSecond / 60) + 0.00000001;
+            *
+            * After that amount is added to our "balance" (this.nCyclesDeposited), we make a "withdrawal"
+            * whenever the balance is >= 1.0 and call all our clocking functions with the maximum number
+            * of cycles we were able to withdraw.
+            *
+            * setSpeed() also adds a tiny amount of "interest" to each "deposit" (0.00000001); otherwise
+            * you can end up in situations where the deposit amount is, say, 0.2499999 instead of 0.25,
+            * and four such deposits would still fall short of the 1-cycle threshold.
+            */
+            this.nCyclesDeposited = this.nCyclesDepositPerFrame = 0;
+        }
+        else {
+            /*
+            * When fClockByFrame is true, we rely exclusively on requestAnimationFrame() instead of setTimeout()
+            * to drive the clock, which means we automatically yield after every frame, so no yield timer is required.
+            */
             let time = this;
             this.timerYield = this.addTimer("timerYield", function onYield() {
                 time.onYield();
             }, this.msYield);
         }
-        else {
-            /*
-             * When clocking exclusively by animation frames, setSpeed() calculates how many cycles
-             * each animation frame should "deposit" in our cycle bank:
-             *
-             *      this.nCyclesDepositPerFrame = (nCyclesPerSecond / 60) + 0.00000001;
-             *
-             * After that amount is added to our "balance" (this.nCyclesDeposited), we make a "withdrawal"
-             * whenever the balance is >= 1.0 and call all our clocking functions with the maximum number
-             * of cycles we were able to withdraw.
-             *
-             * setSpeed() also adds a tiny amount of "interest" to each "deposit" (0.00000001); otherwise
-             * you can end up in situations where the deposit amount is, say, 0.2499999 instead of 0.25,
-             * and four such deposits would still fall short of the 1-cycle threshold.
-             */
-            this.nCyclesDeposited = this.nCyclesDepositPerFrame = 0;
-        }
+
         this.resetSpeed();
     }
 
@@ -435,7 +436,7 @@ class Time extends Device {
         if (this.fClockByFrame) {
             this.nCyclesDeposited -= nCycles;
             if (this.nCyclesDeposited < 1) {
-                this.fYield = true;
+                this.onYield();
             }
         }
         this.nCyclesBurst = this.nCyclesRemain = 0;
@@ -482,26 +483,33 @@ class Time extends Device {
     }
 
     /**
-     * getCyclesPerFrame()
+     * getCyclesPerFrame(nMinCycles)
      *
      * This tells us how many cycles to execute per frame (assuming fClockByFrame).
      *
      * @this {Time}
+     * @param {number} [nMinCycles]
      * @returns {number} (the maximum number of cycles we should execute in the next burst)
      */
-    getCyclesPerFrame()
+    getCyclesPerFrame(nMinCycles=0)
     {
-        let nCycles = (this.nCyclesDeposited += this.nCyclesDepositPerFrame);
-        if (nCycles < 1) {
-            nCycles = 0;
+        let nCycles;
+        if (nMinCycles) {
+            nCycles = nMinCycles;
+            this.nCyclesDeposited += nMinCycles;
         } else {
-            nCycles |= 0;
-            for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
-                let timer = this.aTimers[iTimer-1];
-                this.assert(!isNaN(timer.nCyclesLeft));
-                if (timer.nCyclesLeft < 0) continue;
-                if (nCycles > timer.nCyclesLeft) {
-                    nCycles = timer.nCyclesLeft;
+            nCycles = (this.nCyclesDeposited += this.nCyclesDepositPerFrame);
+            if (nCycles < 1) {
+                nCycles = 0;
+            } else {
+                nCycles |= 0;
+                for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
+                    let timer = this.aTimers[iTimer-1];
+                    this.assert(!isNaN(timer.nCyclesLeft));
+                    if (timer.nCyclesLeft < 0) continue;
+                    if (nCycles > timer.nCyclesLeft) {
+                        nCycles = timer.nCyclesLeft;
+                    }
                 }
             }
         }
@@ -748,13 +756,13 @@ class Time extends Device {
     /**
      * setSpeed(nMultiplier)
      *
-     * @this {Time}
-     * @param {number} [nMultiplier] is the new proposed multiplier (reverts to default if target was too high)
-     * @returns {boolean} true if successful, false if not
-     *
      * @desc Whenever the speed is changed, the running cycle count and corresponding start time must be reset,
      * so that the next effective speed calculation obtains sensible results.  In fact, when run() initially calls
      * setSpeed() with no parameters, that's all this function does (it doesn't change the current speed setting).
+     *
+     * @this {Time}
+     * @param {number} [nMultiplier] is the new proposed multiplier (reverts to default if target was too high)
+     * @returns {boolean} true if successful, false if not
      */
     setSpeed(nMultiplier)
     {
@@ -992,9 +1000,8 @@ class Time extends Device {
                 /*
                  * Execute a minimum-cycle burst and then update all timers.
                  */
-                let nCycles = (this.fClockByFrame? (this.getCyclesPerFrame() || 1) : 1);
                 this.nStepping--;
-                this.updateTimers(this.endBurst(this.doBurst(nCycles)));
+                this.updateTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame(1))));
                 this.updateStatus();
                 if (this.nStepping) {
                     let time = this;
@@ -1044,7 +1051,7 @@ class Time extends Device {
     {
         if (fTransition) {
             if (this.fRunning) {
-                this.println("starting (" + this.getSpeedTarget() + " target by " + (this.fClockByFrame? "frame" : "timer") + ")");
+                this.println("starting with " + this.getSpeedTarget() + " target" + (DEBUG? " using " + (this.fClockByFrame? "requestAnimationFrame()" : "setTimeout()") : ""));
                 fTransition = false;
             } else {
                 this.println("stopping");
@@ -1107,4 +1114,4 @@ Time.BINDING = {
 Time.YIELDS_PER_SECOND = 120;
 Time.YIELDS_PER_UPDATE = 60;
 
-Time.VERSION = +VERSION || 1.00;
+Time.VERSION = +VERSION || 2.00;

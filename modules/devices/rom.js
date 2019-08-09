@@ -90,6 +90,7 @@ class ROM extends Device {
         super(idMachine, idDevice, ROM.VERSION, config);
 
         this.data = config['values'];
+        if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
 
         /*
          * This addrMask calculation assumes that the data array length is a power-of-two (which we assert).
@@ -290,4 +291,4 @@ ROM.BINDING = {
     CELLDESC:   "cellDesc"
 };
 
-ROM.VERSION = +VERSION || 1.00;
+ROM.VERSION = +VERSION || 2.00;

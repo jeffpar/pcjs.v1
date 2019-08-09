@@ -197,25 +197,22 @@ class Machine extends Device {
                             break;
                         case Machine.CLASS.ROM:
                             device = new ROM(this.idMachine, idDevice, config);
-                            if (device.config['revision']) sStatus = "revision " + device.config['revision'];
                             break;
                         case Machine.CLASS.TIME:
                             device = new Time(this.idMachine, idDevice, config);
                             break;
                         case Machine.CLASS.MACHINE:
-                            this.printf("PCjs %s v%3.2f\n", config['name'], Machine.VERSION);
-                            this.println(Machine.COPYRIGHT);
-                            this.println(Machine.LICENSE);
-                            if (this.sConfigFile) this.println("Configuration: " + this.sConfigFile);
+                            this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], Machine.VERSION, Machine.COPYRIGHT, Machine.LICENSE);
+                            if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                             continue;
                         default:
-                            this.println("unrecognized device class: " + sClass);
+                            this.printf("unrecognized device class: %s\n", sClass);
                             continue;
                         }
-                        this.println(sClass + " device initialized" + (sStatus? " (" + sStatus + ")" : ""));
+                        this.printf("%s device: %s\n", sClass, device.status);
                     }
                     catch (err) {
-                        this.println("error initializing " + sClass + " device '" + idDevice + "':\n" + err.message);
+                        this.printf("error initializing %s device '%s':\n%s\n", sClass, idDevice, err.message);
                         this.removeDevice(idDevice);
                     }
                 }
@@ -292,6 +289,6 @@ Machine.CLASSORDER = [
 Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
-Machine.VERSION = +VERSION || 1.00;
+Machine.VERSION = +VERSION || 2.00;
 
 window[MACHINE] = Machine;

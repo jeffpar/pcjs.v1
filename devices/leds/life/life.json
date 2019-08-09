@@ -3,7 +3,7 @@
     "class": "Machine",
     "type": "leds",
     "name": "Game of Life Demo",
-    "version": 1.20,
+    "version": 2.00,
     "autoStart": false,
     "bindings": {
       "clear": "clearLife",

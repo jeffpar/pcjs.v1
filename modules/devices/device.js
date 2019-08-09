@@ -36,7 +36,7 @@ var COMPILED = false;
 /**
  * @define {boolean}
  */
-var DEBUG = true; // (window.location.hostname == "pcjs" || window.location.hostname == "jeffpar.local");
+var DEBUG = true;
 
 /**
  * @type {string}
@@ -46,7 +46,7 @@ var MACHINE = "Machine";
 /**
  * @define {string}
  */
-var VERSION = "1.21";
+var VERSION = "2.00";
 
 /**
  * The following properties are the standard set of properties a Device's config object may contain.
@@ -56,6 +56,7 @@ var VERSION = "1.21";
  * @property {string} [class]
  * @property {Object} [bindings]
  * @property {number} [version]
+ * @property {string} [status]
  * @property {Array.<string>} [overrides]
  */
 
@@ -103,6 +104,7 @@ class Device extends StdIO {
         this.idMachine = idMachine;
         this.idDevice = idDevice;
         this.version = version || 0;
+        this.status = "OK";
         this.bindings = {};
         this.categories = "";
         this.addDevice();
@@ -415,11 +417,13 @@ class Device extends StdIO {
                     }
                 }
                 break;
+
             case '?':
                 sResult = "";
                 Device.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
                 if (sResult) this.println("default commands:" + sResult);
                 /* falls through */
+
             default:
                 aTokens.unshift(sCommand);
                 for (i = 0; i < afnHandlers.length; i++) {

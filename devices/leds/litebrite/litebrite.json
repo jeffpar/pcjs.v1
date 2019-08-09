@@ -3,7 +3,7 @@
     "class": "Machine",
     "type": "leds",
     "name": "Lite-Brite Demo",
-    "version": 1.20,
+    "version": 2.00,
     "autoStart": false,
     "bindings": {
       "clear": "clearLB",

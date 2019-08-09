@@ -1270,7 +1270,7 @@ class Str {
              *
              *      printf("%W, %F %D, %Y\n", date);
              *
-             * because unlike the C runtime, we reuse the final parameter omce the format string has exhausted all parameters.
+             * because unlike the C runtime, we reuse the final parameter once the format string has exhausted all parameters.
              */
             let ch, date = /** @type {Date} */ (iType < 12 && typeof arg != "object"? Str.parseDate(arg) : arg), dateUndefined;
 
