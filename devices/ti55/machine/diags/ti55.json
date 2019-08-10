@@ -9,8 +9,8 @@
       "print": "printTI55"
     }
   },
-  "chip": {
-    "class": "Chip",
+  "cpu": {
+    "class": "CPU",
     "type": "TMS-1503",
     "input": "buttons",
     "output": "display",

@@ -9,8 +9,8 @@
       "print": "printTI42"
     }
   },
-  "chip": {
-    "class": "Chip",
+  "cpu": {
+    "class": "CPU",
     "type": "TMS-1502",
     "input": "buttons",
     "output": "display",

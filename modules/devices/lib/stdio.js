@@ -542,7 +542,7 @@ class StdIO {
 
             case 'X':
                 ach = StdIO.HexUpperCase;
-                // if (hash) prefix = "0X";     // I don't like that %X uppercases both the prefix and the value
+                // if (hash) prefix = "0X";     // I don't like that %#X uppercases both the prefix and the value
                 /* falls through */
 
             case 'x':

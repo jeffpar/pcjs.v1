@@ -13,10 +13,10 @@ a variety of newer (late 2017) PCjs Machines:
 * [Device](device.js)
 * [Input](input.js)
 * [LED](led.js)
-* [LED Controller "Chip"](ledctrl.js)
+* [LED Controller](ledctrl.js)
 * [ROM](rom.js)
 * [Time](time.js)
-* [TMS-1500 Calculator "Chip"](tms1500.js)
+* [TMS-1500 Calculator CPU](tms1500.js)
 * [Machine](machine.js)
 
 which, in turn, build on a simple set of library classes:
@@ -58,8 +58,8 @@ Alternatively, a JSON configuration blob can be embedded directly in the machine
 	            "print": "printTI57"
 	          }
 	        },
-	        "chip": {
-	          "class": "Chip",
+	        "cpu": {
+	          "class": "CPU",
 	          "type": "TMS-1500"
 	        },
 	        "clock": {

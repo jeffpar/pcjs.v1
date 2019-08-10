@@ -31,7 +31,7 @@
 /**
  * @class {Machine}
  * @unrestricted
- * @property {Chip} chip
+ * @property {CPU} cpu
  * @property {string} sConfigFile
  * @property {boolean} fConfigLoaded
  * @property {boolean} fPageLoaded
@@ -59,8 +59,8 @@ class Machine extends Device {
      *          "print": "printTI57"
      *        }
      *      },
-     *      "chip": {
-     *        "class": "Chip",
+     *      "cpu": {
+     *        "class": "CPU",
      *        "type": "TMS-1500",
      *        "input": "buttons",
      *        "output": "display"
@@ -127,7 +127,7 @@ class Machine extends Device {
         super(idMachine, idMachine, Machine.VERSION);
 
         let machine = this;
-        this.chip = null;
+        this.cpu = null;
         this.sConfigFile = "";
         this.fConfigLoaded = this.fPageLoaded = false;
 
@@ -177,29 +177,24 @@ class Machine extends Device {
     initDevices()
     {
         if (this.fConfigLoaded && this.fPageLoaded) {
-            for (let iClass = 0; iClass < Machine.CLASSORDER.length; iClass++) {
+            for (let iClass = 0; iClass < Machine.CLASS_ORDER.length; iClass++) {
                 for (let idDevice in this.config) {
                     let device, sClass;
                     try {
                         let config = this.config[idDevice], sStatus = "";
                         sClass = config['class'];
-                        if (sClass != Machine.CLASSORDER[iClass]) continue;
+                        if (sClass != Machine.CLASS_ORDER[iClass]) continue;
                         switch (sClass) {
+                        case Machine.CLASS.CPU:
                         case Machine.CLASS.CHIP:
-                            device = new Chip(this.idMachine, idDevice, config);
-                            this.chip = device;
+                            device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
+                            this.cpu = device;
                             break;
                         case Machine.CLASS.INPUT:
-                            device = new Input(this.idMachine, idDevice, config);
-                            break;
                         case Machine.CLASS.LED:
-                            device = new LED(this.idMachine, idDevice, config);
-                            break;
                         case Machine.CLASS.ROM:
-                            device = new ROM(this.idMachine, idDevice, config);
-                            break;
                         case Machine.CLASS.TIME:
-                            device = new Time(this.idMachine, idDevice, config);
+                            device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
                             break;
                         case Machine.CLASS.MACHINE:
                             this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], Machine.VERSION, Machine.COPYRIGHT, Machine.LICENSE);
@@ -212,15 +207,15 @@ class Machine extends Device {
                         this.printf("%s device: %s\n", sClass, device.status);
                     }
                     catch (err) {
-                        this.printf("error initializing %s device '%s':\n%s\n", sClass, idDevice, err.message);
+                        this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
                         this.removeDevice(idDevice);
                     }
                 }
             }
-            let chip = this.chip;
-            if (chip) {
-                if (chip.onLoad && this.fAutoRestore) chip.onLoad();
-                if (chip.onPower && this.fAutoStart) chip.onPower(true);
+            let cpu = this.cpu;
+            if (cpu) {
+                if (cpu.onLoad && this.fAutoRestore) cpu.onLoad();
+                if (cpu.onPower && this.fAutoStart) cpu.onPower(true);
             }
         }
     }
@@ -232,10 +227,10 @@ class Machine extends Device {
      */
     killDevices()
     {
-        let chip;
-        if ((chip = this.chip)) {
-            if (chip.onSave) chip.onSave();
-            if (chip.onPower) chip.onPower(false);
+        let cpu;
+        if ((cpu = this.cpu)) {
+            if (cpu.onSave) cpu.onSave();
+            if (cpu.onPower) cpu.onPower(false);
         }
 
     }
@@ -269,6 +264,7 @@ class Machine extends Device {
 }
 
 Machine.CLASS = {
+    CPU:        "CPU",
     CHIP:       "Chip",
     INPUT:      "Input",
     LED:        "LED",
@@ -277,18 +273,28 @@ Machine.CLASS = {
     TIME:       "Time"
 };
 
-Machine.CLASSORDER = [
+Machine.CLASS_ORDER = [
     Machine.CLASS.MACHINE,
     Machine.CLASS.TIME,
     Machine.CLASS.LED,
     Machine.CLASS.INPUT,
     Machine.CLASS.ROM,
-    Machine.CLASS.CHIP
+    Machine.CLASS.CHIP,
+    Machine.CLASS.CPU
 ];
+
+Machine.CLASSES = {};
+if (typeof CPU != "undefined") Machine.CLASSES[Machine.CLASS.CPU] = CPU;
+if (typeof Chip != "undefined") Machine.CLASSES[Machine.CLASS.CHIP] = Chip;
+if (typeof Input != "undefined") Machine.CLASSES[Machine.CLASS.INPUT] = Input;
+if (typeof LED != "undefined") Machine.CLASSES[Machine.CLASS.LED] = LED;
+if (typeof Machine != "undefined") Machine.CLASSES[Machine.CLASS.MACHINE] = Machine;
+if (typeof ROM != "undefined") Machine.CLASSES[Machine.CLASS.ROM] = ROM;
+if (typeof Time != "undefined") Machine.CLASSES[Machine.CLASS.TIME] = Time;
+
+window[MACHINE] = Machine;
 
 Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 Machine.VERSION = +VERSION || 2.00;
-
-window[MACHINE] = Machine;
