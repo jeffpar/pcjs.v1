@@ -620,7 +620,7 @@ var VERSION = "2.00";
 /*
  * List of standard message groups.
  *
- * NOTE: Since we want to support more than 32 message groups, be sure to use "+", not "|", when concatenating.
+ * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
 var MESSAGES = {
     NONE:       0x000000000000,
@@ -989,7 +989,7 @@ class Device extends StdIO {
             switch(aTokens[0]) {
             case 'm':
                 token = aTokens[aTokens.length-1].toLowerCase();
-                on = (token == "true"? true : (token == "false"? false : undefined));
+                on = (token == "true" || token == "on"? true : (token == "false" || token == "off"? false : undefined));
                 if (on != undefined) {
                     aTokens.pop();
                 } else {
@@ -1924,8 +1924,10 @@ class Input extends Device {
                 let activeElement = document.activeElement;
                 if (activeElement == input.bindings[Input.BINDING.POWER]) {
                     let keyCode = event.which || event.keyCode;
-                    let ch = Input.KEYCODE[keyCode];
-                    if (ch && input.onKeyPress(ch)) event.preventDefault();
+                    let ch = Input.KEYCODE[keyCode], used = false;
+                    if (ch) used = input.onKeyActive(ch);
+                    input.printf(MESSAGES.KEY + MESSAGES.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
+                    if (used) event.preventDefault();
                 }
             }
         );
@@ -1934,8 +1936,21 @@ class Input extends Device {
             function onKeyPress(event) {
                 event = event || window.event;
                 let charCode = event.which || event.charCode;
-                let ch = String.fromCharCode(charCode);
-                if (ch && input.onKeyPress(ch)) event.preventDefault();
+                let ch = String.fromCharCode(charCode), used = false;
+                if (ch) used = input.onKeyActive(ch);
+                input.printf(MESSAGES.KEY + MESSAGES.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
+                if (used) event.preventDefault();
+            }
+        );
+        element.addEventListener(
+            'keyup',
+            function onKeyUp(event) {
+                event = event || window.event;
+                let activeElement = document.activeElement;
+                if (activeElement == input.bindings[Input.BINDING.POWER]) {
+                    let keyCode = event.which || event.keyCode;
+                    input.printf(MESSAGES.KEY + MESSAGES.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
+                }
             }
         );
     }
@@ -2050,13 +2065,13 @@ class Input extends Device {
     }
 
     /**
-     * onKeyPress(ch)
+     * onKeyActive(ch)
      *
      * @this {Input}
      * @param {string} ch
      * @returns {boolean} (true if processed, false if not)
      */
-    onKeyPress(ch)
+    onKeyActive(ch)
     {
         for (let row = 0; row < this.map.length; row++) {
             let rowMap = this.map[row];
@@ -2095,7 +2110,7 @@ class Input extends Device {
         } else {
             this.keyState = 0;
             if (this.keysPressed.length) {
-                this.onKeyPress(this.keysPressed.shift());
+                this.onKeyActive(this.keysPressed.shift());
             }
         }
     }

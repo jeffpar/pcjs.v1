@@ -51,7 +51,7 @@ var VERSION = "2.00";
 /*
  * List of standard message groups.
  *
- * NOTE: Since we want to support more than 32 message groups, be sure to use "+", not "|", when concatenating.
+ * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
 var MESSAGES = {
     NONE:       0x000000000000,
@@ -429,7 +429,7 @@ class Device extends StdIO {
             switch(aTokens[0]) {
             case 'm':
                 token = aTokens[aTokens.length-1].toLowerCase();
-                on = (token == "true"? true : (token == "false"? false : undefined));
+                on = (token == "true" || token == "on"? true : (token == "false" || token == "off"? false : undefined));
                 if (on != undefined) {
                     aTokens.pop();
                 } else {

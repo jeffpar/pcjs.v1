@@ -30,7 +30,7 @@ Attempting to build the sources raises several questions, including:
 
 If you look at the pictures that the [Computer History Museum](http://www.computerhistory.org/) originally
 [posted](http://www.computerhistory.org/atchm/microsoft-ms-dos-early-source-code/) when these files were first shared,
-you'd get the impression that two of those questions have already been answered: DOS 2.00, final distribution.
+you'd get the impression that one of those questions had already been answered: DOS 2.00, final distribution.
 
 ![MS-DOS 2.00]({{ site.demo-disks.baseurl }}/pcx86/dos/microsoft/2.00/MSDOS200-DISKS.jpg)
 
