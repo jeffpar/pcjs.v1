@@ -28,10 +28,11 @@
 
 "use strict";
 
+var PrintBuffer = "";
+
 /**
  * @class {StdIO}
  * @unrestricted
- * @property {string} bufferPrint
  */
 class StdIO {
     /**
@@ -41,7 +42,6 @@ class StdIO {
      */
     constructor()
     {
-        this.bufferPrint = "";
     }
 
     /**
@@ -247,23 +247,24 @@ class StdIO {
         if (!fBuffer) {
             let i = s.lastIndexOf('\n');
             if (i >= 0) {
-                console.log(this.bufferPrint + s.substr(0, i));
-                this.bufferPrint = "";
+                console.log(PrintBuffer + s.substr(0, i));
+                PrintBuffer = "";
                 s = s.substr(i + 1);
             }
         }
-        this.bufferPrint += s;
+        PrintBuffer += s;
     }
 
     /**
-     * println(s)
+     * println(s, fBuffer)
      *
      * @this {StdIO}
      * @param {string} s
+     * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
      */
-    println(s)
+    println(s, fBuffer)
     {
-        this.print(s + '\n');
+        this.print(s + '\n', fBuffer);
     }
 
     /**

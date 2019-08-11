@@ -4663,8 +4663,6 @@ class Component {
     /**
      * messageEnabled(bitsMessage)
      *
-     * If bitsMessage is not specified, the component's default Messages category is used.
-     *
      * If bitsMessage is Messages.DEFAULT (0), then the component's Messages category is used,
      * and if it's Messages.ALL (-1), then the message is always displayed, regardless what's enabled.
      *
@@ -8027,7 +8025,7 @@ if (DEBUGGER) {
 /*
  * Machine message flags.
  *
- * NOTE: Because this machine defines more than 32 message categpries, some of these message flags
+ * NOTE: Because this machine defines more than 32 message categories, some of these message flags
  * exceed 32 bits, so when concatenating, be sure to use "+", not "|".
  */
 var Messages = {

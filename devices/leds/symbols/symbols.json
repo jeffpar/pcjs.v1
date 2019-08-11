@@ -11,15 +11,6 @@
     },
     "overrides": ["autoStart"]
   },
-  "symbolChip": {
-    "class": "Chip",
-    "bindings": {
-      "save": "saveSymbol",
-      "symbolInput": "inputSymbol",
-      "symbolPreview": "previewSymbol"
-    },
-    "overrides": ["backgroundImage"]
-  },
   "symbolDisplay": {
     "class": "LED",
     "type": 1,
@@ -38,5 +29,14 @@
     "bindings": {
       "reset": "resetSymbol"
     }
+  },
+  "symbolChip": {
+    "class": "Chip",
+    "bindings": {
+      "save": "saveSymbol",
+      "symbolInput": "inputSymbol",
+      "symbolPreview": "previewSymbol"
+    },
+    "overrides": ["backgroundImage"]
   }
 }

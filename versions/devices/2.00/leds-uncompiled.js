@@ -4,10 +4,11 @@
  * @copyright https://www.pcjs.org/modules/devices/lib/stdio.js (C) Jeff Parsons 2012-2019
  */
 
+var PrintBuffer = "";
+
 /**
  * @class {StdIO}
  * @unrestricted
- * @property {string} bufferPrint
  */
 class StdIO {
     /**
@@ -17,7 +18,6 @@ class StdIO {
      */
     constructor()
     {
-        this.bufferPrint = "";
     }
 
     /**
@@ -223,23 +223,24 @@ class StdIO {
         if (!fBuffer) {
             let i = s.lastIndexOf('\n');
             if (i >= 0) {
-                console.log(this.bufferPrint + s.substr(0, i));
-                this.bufferPrint = "";
+                console.log(PrintBuffer + s.substr(0, i));
+                PrintBuffer = "";
                 s = s.substr(i + 1);
             }
         }
-        this.bufferPrint += s;
+        PrintBuffer += s;
     }
 
     /**
-     * println(s)
+     * println(s, fBuffer)
      *
      * @this {StdIO}
      * @param {string} s
+     * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
      */
-    println(s)
+    println(s, fBuffer)
     {
-        this.print(s + '\n');
+        this.print(s + '\n', fBuffer);
     }
 
     /**
@@ -616,6 +617,27 @@ var MACHINE = "Machine";
  */
 var VERSION = "2.00";
 
+/*
+ * List of standard message groups.
+ *
+ * NOTE: Since we want to support more than 32 message groups, be sure to use "+", not "|", when concatenating.
+ */
+var MESSAGES = {
+    NONE:       0x000000000000,
+    DEFAULT:    0x000000000000,
+    ADDRESS:    0x000000000001,
+    CPU:        0x000000000002,
+    TIMER:      0x000000080000,
+    EVENT:      0x000200000000,
+    KEY:        0x000400000000,
+    WARN:       0x100000000000,
+    HALT:       0x200000000000,
+    BUFFER:     0x400000000000,
+    ALL:        0xffffffffffff
+};
+
+var Messages = MESSAGES.NONE;
+
 /** @typedef {{ class: (string|undefined), bindings: (Object|undefined), version: (number|undefined), status: (string|undefined), overrides: (Array.<string>|undefined) }} */
 var Config;
 
@@ -626,7 +648,7 @@ var Config;
  * @property {string} idDevice
  * @property {Config} config
  * @property {Object} bindings [added by addBindings()]
- * @property {string} categories
+ * @property {number} messages
  * @property {string} sCommandPrev
  */
 class Device extends StdIO {
@@ -664,8 +686,8 @@ class Device extends StdIO {
         this.idDevice = idDevice;
         this.version = version || 0;
         this.status = "OK";
+        this.messages = 0;
         this.bindings = {};
-        this.categories = "";
         this.addDevice();
         this.checkVersion(this.config);
         this.checkOverrides(this.config);
@@ -947,6 +969,8 @@ class Device extends StdIO {
     /**
      * doCommand(sText)
      *
+     * NOTE: To ensure that this function's messages are displayed, use super.println with fBuffer set to false.
+     *
      * @this {Device}
      * @param {string} sText
      */
@@ -955,32 +979,43 @@ class Device extends StdIO {
         let afnHandlers = this.findHandlers(Device.HANDLER.COMMAND);
         if (afnHandlers) {
 
-            let c, i = sText.lastIndexOf('\n', sText.length - 2);
+            let i = sText.lastIndexOf('\n', sText.length - 2);
             let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev, sResult;
             this.sCommandPrev = "";
             sCommand = sCommand.trim();
             let aTokens = sCommand.split(' ');
+            let token, message, on;
 
             switch(aTokens[0]) {
-            case 'c':
-                c = aTokens[1];
-                if (c) {
-                    this.println("set category '" + c + "'");
-                    this.setCategory(c);
+            case 'm':
+                token = aTokens[aTokens.length-1].toLowerCase();
+                on = (token == "true"? true : (token == "false"? false : undefined));
+                if (on != undefined) {
+                    aTokens.pop();
                 } else {
-                    c = this.setCategory();
-                    if (c) {
-                        this.println("cleared category '" + c + "'");
-                    } else {
-                        this.println("no category set");
+                    if (aTokens.length <= 1) {
+                        aTokens = Object.keys(MESSAGES);
+                        aTokens.shift(); aTokens.shift(); aTokens.pop();
                     }
+                }
+                for (i = 1; i < aTokens.length; i++) {
+                    token = aTokens[i].toUpperCase();
+                    message = MESSAGES[token];
+                    if (!message) {
+                        super.println("unrecognized message group: " + token, false);
+                        break;
+                    }
+                    if (on != undefined) {
+                        this.setMessages(message, on);
+                    }
+                    super.println(token + ": " + this.isMessageOn(message), false);
                 }
                 break;
 
             case '?':
                 sResult = "";
                 Device.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
-                if (sResult) this.println("default commands:" + sResult);
+                if (sResult) super.println("default commands:" + sResult, false);
                 /* falls through */
 
             default:
@@ -1109,7 +1144,7 @@ class Device extends StdIO {
      * getBounded(n, min, max)
      *
      * Restricts n to the bounds defined by min and max.  A side-effect is ensuring that the return
-     * value is ALWAYS a number, even n is not.
+     * value is ALWAYS a number, even if n is not.
      *
      * @this {Device}
      * @param {number} n
@@ -1256,17 +1291,23 @@ class Device extends StdIO {
     }
 
     /**
-     * isCategory(category)
+     * isMessageOn(messages)
      *
-     * Use this function to enable/disable any code (eg, print() calls) based on 1) whether specific
-     * categories are required, and 2) whether the specified category is one of them.
+     * If messages is MESSAGES.DEFAULT (0), then the device's default message group(s) are used,
+     * and if it's MESSAGES.ALL (-1), then the message is always displayed, regardless what's enabled.
      *
      * @this {Device}
-     * @param {string} category
+     * @param {number} [messages] is zero or more MESSAGE flags
+     * @return {boolean} true if all specified message enabled, false if not
      */
-    isCategoryOn(category)
+    isMessageOn(messages = 0)
     {
-        return (this.categories.indexOf(category) >= 0);
+        if (messages % 2) messages--;
+        messages = messages || this.messages;
+        if ((messages|1) == -1 || this.testBits(Messages, messages)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -1322,22 +1363,25 @@ class Device extends StdIO {
     /**
      * print(s)
      *
-     * This overrides StdIO.print(), in case the device has a PRINT binding that should be used instead.
+     * This overrides StdIO.print(), in case the device has a PRINT binding that should be used instead,
+     * or if all printing should be buffered.
      *
      * @this {Device}
      * @param {string} s
+     * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
      */
-    print(s)
+    print(s, fBuffer)
     {
-        let fBuffer = true;
-        if (!this.isCategoryOn(Device.CATEGORY.BUFFER)) {
-            fBuffer = false;
+        if (fBuffer == undefined) {
+            fBuffer = this.isMessageOn(MESSAGES.BUFFER);
+        }
+        if (!fBuffer) {
             let element = this.findBinding(Device.BINDING.PRINT, true);
             if (element) {
                 element.value += s;
                 /*
-                * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-                */
+                 * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+                 */
                 if (!DEBUG && element.value.length > 8192) {
                     element.value = element.value.substr(element.value.length - 4096);
                 }
@@ -1346,6 +1390,29 @@ class Device extends StdIO {
             }
         }
         super.print(s, fBuffer);
+    }
+
+
+    /**
+     * printf(format, ...args)
+     *
+     * This overrides StdIO.printf(), to add support for MESSAGES; if format is a number, then it's treated
+     * as one or more MESSAGES flags, and the real format string is the first arg.
+     *
+     * @this {Device}
+     * @param {string|number} format
+     * @param {...} args
+     */
+    printf(format, ...args)
+    {
+        let messages = 0;
+        if (typeof format == "number") {
+            messages = format;
+            format = args.shift();
+        }
+        if (this.isMessageOn(messages)) {
+            super.printf(format, ...args);
+        }
     }
 
     /**
@@ -1405,38 +1472,87 @@ class Device extends StdIO {
     }
 
     /**
-     * setCategory(category)
+     * setMessages(messages, on)
      *
-     * Use this function to set/clear categories.  Generally, these are thought of as print categories,
-     * allowing code to use isCategoryOn() to decide whether to print a certain category of messages, but
-     * it can be used to control any functionality related to a given category, not just printing.
+     * Use this function to set/clear message groups.  Use isMessageOn() to decide whether to print
+     * messages that are part of a group.
      *
-     * You usually want to use one of the predefined category strings in Device.CATEGORIES, but in reality,
-     * the category string can be anything you want.
-     *
-     * If you want to enable multiple categories, specify them all in a single string (eg, "time|buffer",
-     * or Device.CATEGORY.TIME + Device.CATEGORY.BUFFER).
-     *
-     * Device.CATEGORY.BUFFER is special, causing all print calls to be buffered; the print buffer will be
-     * dumped as soon as setCategory() clears Device.CATEGORY.BUFFER.
+     * MESSAGES.BUFFER is special, causing all print calls to be buffered; the print buffer will be dumped
+     * as soon as setMessages() clears MESSAGES.BUFFER.
      *
      * @this {Device}
-     * @param {string} [category] (if undefined, clear previous category)
-     * @returns {string}
+     * @param {number} messages
+     * @param {boolean} on (true to set, false to clear)
      */
-    setCategory(category = "")
+    setMessages(messages, on)
     {
-        let cPrev = this.categories;
-        let fFlush = (!category && this.isCategoryOn(Device.CATEGORY.BUFFER));
-        this.categories = category;
-        if (fFlush) {
-            let sBuffer = this.bufferPrint;
-            this.bufferPrint = "";
-            this.print(sBuffer);
+        let flush = false;
+        if (on) {
+            Messages = this.setBits(Messages, messages);
+        } else {
+            flush = (this.testBits(Messages, MESSAGES.BUFFER) && this.testBits(messages, MESSAGES.BUFFER));
+            Messages = this.clearBits(Messages, messages);
         }
-        return cPrev;
+        if (flush) {
+            let buffer = PrintBuffer;
+            PrintBuffer = "";
+            this.print(buffer);
+        }
     }
 
+    /**
+     * clearBits(num, bits)
+     *
+     * Helper function for clearing bits in numbers with more than 32 bits.
+     *
+     * @this {Device}
+     * @param {number} num
+     * @param {number} bits
+     * @return {number}
+     */
+    clearBits(num, bits)
+    {
+        let shift = Math.pow(2, 32);
+        let numHi = (num / shift)|0;
+        let bitsHi = (bits / shift)|0;
+        return (num & ~bits) + (numHi & ~bitsHi) * shift;
+    }
+
+    /**
+     * setBits(num, bits)
+     *
+     * Helper function for setting bits in numbers with more than 32 bits.
+     *
+     * @this {Device}
+     * @param {number} num
+     * @param {number} bits
+     * @return {number}
+     */
+    setBits(num, bits)
+    {
+        let shift = Math.pow(2, 32);
+        let numHi = (num / shift)|0;
+        let bitsHi = (bits / shift)|0;
+        return (num | bits) + (numHi | bitsHi) * shift;
+    }
+
+    /**
+     * testBits(num, bits)
+     *
+     * Helper function for testing bits in numbers with more than 32 bits.
+     *
+     * @this {Device}
+     * @param {number} num
+     * @param {number} bits
+     * @return {boolean}
+     */
+    testBits(num, bits)
+    {
+        let shift = Math.pow(2, 32);
+        let numHi = (num / shift)|0;
+        let bitsHi = (bits / shift)|0;
+        return ((num & bits) == (bits|0) && (numHi & bitsHi) == bitsHi);
+    }
 }
 
 Device.BINDING = {
@@ -1444,19 +1560,8 @@ Device.BINDING = {
     PRINT:      "print"
 };
 
-/*
- * List of standard categories.
- *
- * Device.CATEGORY.BUFFER is special, causing all print calls to be buffered; the print buffer will be
- * dumped as soon as setCategory() clears Device.CATEGORY.BUFFER.
- */
-Device.CATEGORY = {
-    TIME:       "time",
-    BUFFER:     "buffer"
-};
-
 Device.COMMANDS = [
-    "c\t\tset category"
+    "m\t\tenable messages"
 ];
 
 Device.HANDLER = {
@@ -4584,9 +4689,7 @@ class Time extends Device {
 
         this.msEndRun += msRemainsThisRun;
 
-        if (this.isCategoryOn(Device.CATEGORY.TIME)) {
-            this.printf("after running %d cycles, resting for %dms\n", this.nCyclesThisRun, msRemainsThisRun);
-        }
+        this.printf(MESSAGES.TIMER, "after running %d cycles, resting for %dms\n", this.nCyclesThisRun, msRemainsThisRun);
 
         return msRemainsThisRun;
     }
@@ -6495,6 +6598,10 @@ class Machine extends Device {
      * otherwise, we assume it's the URL of an JSON object definition, so we request the resource, and once it's loaded,
      * we parse it.
      *
+     * One important change in v2: the order of the device objects in the JSON file determines creation/initialization order.
+     * In general, the Machine object should always be first (it's always created first anyway), and the Time object should
+     * be listed next, so that its services are available to any other device when they're created/initialized.
+     *
      * Sample config:
      *
      *    {
@@ -6509,12 +6616,6 @@ class Machine extends Device {
      *          "clear": "clearTI57",
      *          "print": "printTI57"
      *        }
-     *      },
-     *      "cpu": {
-     *        "class": "CPU",
-     *        "type": "TMS-1500",
-     *        "input": "buttons",
-     *        "output": "display"
      *      },
      *      "clock": {
      *        "class": "Time",
@@ -6566,6 +6667,12 @@ class Machine extends Device {
      *        "reference": "",
      *        "values": [
      *        ]
+     *      },
+     *      "cpu": {
+     *        "class": "CPU",
+     *        "type": "TMS-1500",
+     *        "input": "buttons",
+     *        "output": "display"
      *      }
      *    }
      *
@@ -6628,39 +6735,33 @@ class Machine extends Device {
     initDevices()
     {
         if (this.fConfigLoaded && this.fPageLoaded) {
-            for (let iClass = 0; iClass < Machine.CLASS_ORDER.length; iClass++) {
-                for (let idDevice in this.config) {
-                    let device, sClass;
-                    try {
-                        let config = this.config[idDevice], sStatus = "";
-                        sClass = config['class'];
-                        if (sClass != Machine.CLASS_ORDER[iClass]) continue;
-                        switch (sClass) {
-                        case Machine.CLASS.CPU:
-                        case Machine.CLASS.CHIP:
-                            device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
-                            this.cpu = device;
-                            break;
-                        case Machine.CLASS.INPUT:
-                        case Machine.CLASS.LED:
-                        case Machine.CLASS.ROM:
-                        case Machine.CLASS.TIME:
-                            device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
-                            break;
-                        case Machine.CLASS.MACHINE:
-                            this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], Machine.VERSION, Machine.COPYRIGHT, Machine.LICENSE);
-                            if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
-                            continue;
-                        default:
-                            this.printf("unrecognized device class: %s\n", sClass);
-                            continue;
+            for (let idDevice in this.config) {
+                let device, sClass;
+                try {
+                    let config = this.config[idDevice], sStatus = "";
+                    sClass = config['class'];
+                    if (!Machine.CLASSES[sClass]) {
+                        this.printf("unrecognized device class: %s\n", sClass);
+                    }
+                    else if (sClass == Machine.CLASS.MACHINE) {
+                        this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], Machine.VERSION, Machine.COPYRIGHT, Machine.LICENSE);
+                        if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
+                    } else {
+                        device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
+                        if (sClass == Machine.CLASS.CPU || sClass == Machine.CLASS.CHIP) {
+                            if (!this.cpu) {
+                                this.cpu = device;
+                            } else {
+                                this.printf("too many CPU devices: %s\n", idDevice);
+                                continue;
+                            }
                         }
                         this.printf("%s device: %s\n", sClass, device.status);
                     }
-                    catch (err) {
-                        this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
-                        this.removeDevice(idDevice);
-                    }
+                }
+                catch (err) {
+                    this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
+                    this.removeDevice(idDevice);
                 }
             }
             let cpu = this.cpu;
@@ -6723,16 +6824,6 @@ Machine.CLASS = {
     ROM:        "ROM",
     TIME:       "Time"
 };
-
-Machine.CLASS_ORDER = [
-    Machine.CLASS.MACHINE,
-    Machine.CLASS.TIME,
-    Machine.CLASS.LED,
-    Machine.CLASS.INPUT,
-    Machine.CLASS.ROM,
-    Machine.CLASS.CHIP,
-    Machine.CLASS.CPU
-];
 
 Machine.CLASSES = {};
 if (typeof CPU != "undefined") Machine.CLASSES[Machine.CLASS.CPU] = CPU;

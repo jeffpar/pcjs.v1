@@ -44,6 +44,10 @@ class Machine extends Device {
      * otherwise, we assume it's the URL of an JSON object definition, so we request the resource, and once it's loaded,
      * we parse it.
      *
+     * One important change in v2: the order of the device objects in the JSON file determines creation/initialization order.
+     * In general, the Machine object should always be first (it's always created first anyway), and the Time object should
+     * be listed next, so that its services are available to any other device when they're created/initialized.
+     *
      * Sample config:
      *
      *    {
@@ -58,12 +62,6 @@ class Machine extends Device {
      *          "clear": "clearTI57",
      *          "print": "printTI57"
      *        }
-     *      },
-     *      "cpu": {
-     *        "class": "CPU",
-     *        "type": "TMS-1500",
-     *        "input": "buttons",
-     *        "output": "display"
      *      },
      *      "clock": {
      *        "class": "Time",
@@ -115,6 +113,12 @@ class Machine extends Device {
      *        "reference": "",
      *        "values": [
      *        ]
+     *      },
+     *      "cpu": {
+     *        "class": "CPU",
+     *        "type": "TMS-1500",
+     *        "input": "buttons",
+     *        "output": "display"
      *      }
      *    }
      *
@@ -177,39 +181,33 @@ class Machine extends Device {
     initDevices()
     {
         if (this.fConfigLoaded && this.fPageLoaded) {
-            for (let iClass = 0; iClass < Machine.CLASS_ORDER.length; iClass++) {
-                for (let idDevice in this.config) {
-                    let device, sClass;
-                    try {
-                        let config = this.config[idDevice], sStatus = "";
-                        sClass = config['class'];
-                        if (sClass != Machine.CLASS_ORDER[iClass]) continue;
-                        switch (sClass) {
-                        case Machine.CLASS.CPU:
-                        case Machine.CLASS.CHIP:
-                            device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
-                            this.cpu = device;
-                            break;
-                        case Machine.CLASS.INPUT:
-                        case Machine.CLASS.LED:
-                        case Machine.CLASS.ROM:
-                        case Machine.CLASS.TIME:
-                            device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
-                            break;
-                        case Machine.CLASS.MACHINE:
-                            this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], Machine.VERSION, Machine.COPYRIGHT, Machine.LICENSE);
-                            if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
-                            continue;
-                        default:
-                            this.printf("unrecognized device class: %s\n", sClass);
-                            continue;
+            for (let idDevice in this.config) {
+                let device, sClass;
+                try {
+                    let config = this.config[idDevice], sStatus = "";
+                    sClass = config['class'];
+                    if (!Machine.CLASSES[sClass]) {
+                        this.printf("unrecognized device class: %s\n", sClass);
+                    }
+                    else if (sClass == Machine.CLASS.MACHINE) {
+                        this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], Machine.VERSION, Machine.COPYRIGHT, Machine.LICENSE);
+                        if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
+                    } else {
+                        device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
+                        if (sClass == Machine.CLASS.CPU || sClass == Machine.CLASS.CHIP) {
+                            if (!this.cpu) {
+                                this.cpu = device;
+                            } else {
+                                this.printf("too many CPU devices: %s\n", idDevice);
+                                continue;
+                            }
                         }
                         this.printf("%s device: %s\n", sClass, device.status);
                     }
-                    catch (err) {
-                        this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
-                        this.removeDevice(idDevice);
-                    }
+                }
+                catch (err) {
+                    this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
+                    this.removeDevice(idDevice);
                 }
             }
             let cpu = this.cpu;
@@ -272,16 +270,6 @@ Machine.CLASS = {
     ROM:        "ROM",
     TIME:       "Time"
 };
-
-Machine.CLASS_ORDER = [
-    Machine.CLASS.MACHINE,
-    Machine.CLASS.TIME,
-    Machine.CLASS.LED,
-    Machine.CLASS.INPUT,
-    Machine.CLASS.ROM,
-    Machine.CLASS.CHIP,
-    Machine.CLASS.CPU
-];
 
 Machine.CLASSES = {};
 if (typeof CPU != "undefined") Machine.CLASSES[Machine.CLASS.CPU] = CPU;

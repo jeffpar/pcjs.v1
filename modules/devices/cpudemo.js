@@ -73,7 +73,6 @@ class CPU extends Device {
          * Get access to the Input device, so we can add our click functions.
          */
         this.input = /** @type {Input} */ (this.findDevice(this.config['input']));
-        this.input.addInput(this.onInput.bind(this));
         this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
 
         /*
@@ -90,13 +89,6 @@ class CPU extends Device {
             this.time.addClocker(this.clocker.bind(this));
             this.time.addUpdater(this.updateStatus.bind(this));
         }
-
-        /*
-         * To add support for indicators like "2nd" and "INV", I use a set of flags to reflect
-         * the state of the external indicator.  They are initially undefined and will be updated
-         * by updateIndicators() whenever the internal and external states differ.
-         */
-        this.f2nd = this.fINV = this.angleMode = undefined;
 
         /*
          * The following set of properties are all debugger-related; see onCommand().
@@ -177,25 +169,6 @@ class CPU extends Device {
      * disassemble(opCode, addr)
      *
      * Returns a string representation of the selected instruction.
-     *
-     * The TI-57 patents suggest mnemonics for some of the instructions, but not all, so I've taken
-     * some liberties in the interests of clarity and familiarity.  Special-purpose instructions like
-     * "BCDS" and "BCDR" are displayed as-is, but for more general-purpose instructions, I've adopted
-     * the following format:
-     *
-     *      operation   destination,input(s)[,mask]
-     *
-     * Instructions that the patent refers to as "STYA", "STAY", "STXA", and "STAX" are all displayed
-     * as "STORE" instructions; eg, instead of "STAX", I use:
-     *
-     *      STORE       X[RAB],A
-     *
-     * Instructions that use masks are displayed as either "LOAD", "MOVE", or "XCHG".  If the result
-     * of the operation is suppressed, the destination will be displayed as "NUL" instead of a register.
-     * And if the inputs are being added, subtracted, shifted left, or shifted right, they will be
-     * displayed with "+", "-", "<<", or ">>", respectively.  Finally, the 16-digit mask is displayed,
-     * as a series of hex digits rather than the unmemorable names used in the patents (eg, MMSD, FMAEX,
-     * etc).  I do use the patent nomenclature internally, just not for display purposes.
      *
      * @this {CPU}
      * @param {number|undefined} opCode
@@ -336,29 +309,6 @@ class CPU extends Device {
         }
         if (sResult) this.println(sResult.trim());
         return true;
-    }
-
-    /**
-     * onInput(col, row)
-     *
-     * Called by the Input device to provide notification of key presses and releases.
-     *
-     * Converts a logical (col,row), where the top left keyboard position is (0,0), into an 8-bit physical
-     * location value, where bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).  Moreover,
-     * if either col or row is negative, then all bits are cleared.
-     *
-     * @this {CPU}
-     * @param {number} col
-     * @param {number} row
-     */
-    onInput(col, row)
-    {
-        let b = 0;
-        if (col >= 0 && row >= 0) {
-            this.assert(col < 5 && row < 8);
-            b = row | ((col + 1) << 4);
-        }
-        this.regKey = b;
     }
 
     /**

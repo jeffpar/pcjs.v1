@@ -9,19 +9,6 @@
       "print": "printTI55"
     }
   },
-  "cpu": {
-    "class": "CPU",
-    "type": "TMS-1503",
-    "input": "buttons",
-    "output": "display",
-    "bindings": {
-      "2nd": "ind2nd",
-      "INV": "indINV",
-      "Deg": "indDeg",
-      "Rad": "indRad",
-      "Grad": "indGrad"
-    }
-  },
   "clock": {
     "class": "Time",
     "cyclesPerSecond": 650000,
@@ -208,5 +195,18 @@
       800,1312,6570,3094,769,8169,801,3093,8175,1313,8174,613,3343,7140,39,3236,
       6692,6095,808,7133,6130,808,7134,6136,808,7135,808,7136,6138,6136,6104,3587
     ]
+  },
+  "cpu": {
+    "class": "CPU",
+    "type": "TMS-1503",
+    "input": "buttons",
+    "output": "display",
+    "bindings": {
+      "2nd": "ind2nd",
+      "INV": "indINV",
+      "Deg": "indDeg",
+      "Rad": "indRad",
+      "Grad": "indGrad"
+    }
   }
 }

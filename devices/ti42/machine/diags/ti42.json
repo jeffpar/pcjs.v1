@@ -9,15 +9,6 @@
       "print": "printTI42"
     }
   },
-  "cpu": {
-    "class": "CPU",
-    "type": "TMS-1502",
-    "input": "buttons",
-    "output": "display",
-    "bindings": {
-      "2nd": "ind2ndTI42"
-    }
-  },
   "clock": {
     "class": "Time",
     "cyclesPerSecond": 650000,
@@ -204,5 +195,14 @@
       800,3587,6096,808,7132,808,7133,6120,808,7134,808,7135,808,7136,6138,808,
       6106,6135,7148,6138,808,6120,7153,6055,6055,7079,1863,1793,7144,0,0,0
     ]
+  },
+  "cpu": {
+    "class": "CPU",
+    "type": "TMS-1502",
+    "input": "buttons",
+    "output": "display",
+    "bindings": {
+      "2nd": "ind2ndTI42"
+    }
   }
 }

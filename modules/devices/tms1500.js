@@ -1197,7 +1197,7 @@ class CPU extends Device {
             }
             break;
         }
-        if (sResult) this.println(sResult.trim());
+        if (sResult) this.println(sResult.trim(), false);
         return true;
     }
 

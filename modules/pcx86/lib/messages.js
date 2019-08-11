@@ -31,7 +31,7 @@
 /*
  * Machine message flags.
  *
- * NOTE: Because this machine defines more than 32 message categpries, some of these message flags
+ * NOTE: Because this machine defines more than 32 message categories, some of these message flags
  * exceed 32 bits, so when concatenating, be sure to use "+", not "|".
  */
 var Messages = {

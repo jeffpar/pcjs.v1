@@ -941,9 +941,7 @@ class Time extends Device {
 
         this.msEndRun += msRemainsThisRun;
 
-        if (this.isCategoryOn(Device.CATEGORY.TIME)) {
-            this.printf("after running %d cycles, resting for %dms\n", this.nCyclesThisRun, msRemainsThisRun);
-        }
+        this.printf(MESSAGES.TIMER, "after running %d cycles, resting for %dms\n", this.nCyclesThisRun, msRemainsThisRun);
 
         return msRemainsThisRun;
     }
