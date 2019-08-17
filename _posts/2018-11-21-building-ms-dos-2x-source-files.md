@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Building MS-DOS 2.x Source Files
+title: Building MS-DOS Source Files
 date: 2018-11-21 10:00:00
 permalink: /blog/2018/11/21/
 preview: https://demo-disks.pcjs.org/pcx86/dos/microsoft/2.00/MSDOS200-DISKS.jpg
@@ -8,7 +8,7 @@ machines:
   - id: ibm5160
     type: pcx86
     config: /devices/pcx86/machine/5160/cga/512kb/machine.xml
-    drives: '[{name:"PC-DOS 2.00 w/Tools (10Mb)",type:3,path:"/disks-demo/pcx86/drives/10mb/PCDOS200-C400.json"},{name:"MS-DOS 2.x Source (10Mb)",type:3,path:"/disks-demo/pcx86/dos/microsoft/2.00/MSDOS2X-SRC.json"}]'
+    drives: '[{name:"PC-DOS 2.00 w/Tools (10Mb)",type:3,path:"/disks-demo/pcx86/drives/10mb/PCDOS200-C400.json"},{name:"MS-DOS 1.x/2.x Source (10Mb)",type:3,path:"/disks-demo/pcx86/dos/microsoft/2.00/MSDOS-SRC.json"}]'
     autoMount:
       A:
         name: None
@@ -17,11 +17,11 @@ machines:
     autoType: $date\r$time\rD:\r
 ---
 
-The [PCjs Disk Library](/disks/pcx86/) now includes a snapshot of the [MS-DOS 2.x Source Files](/disks/pcx86/dos/microsoft/2.00/)
+The [PCjs Disk Library](/disks/pcx86/) now includes a snapshot of the [MS-DOS 1.x/2.x Source Files](/disks/pcx86/dos/microsoft/2.00/)
 from Microsoft's [September 28, 2018 re-release](https://blogs.msdn.microsoft.com/commandline/2018/09/28/re-open-sourcing-ms-dos-1-25-and-2-0/)
 of MS-DOS source files on [GitHub](https://github.com/microsoft/ms-dos), along with a
-[pre-configured machine](/disks/pcx86/dos/microsoft/2.00/#ms-dos-2x-build-machine) ready to build the MS-DOS 2.x sources.
-A similar machine (without the PCjs debugger) is provided [below](https://www.pcjs.org/blog/2018/11/21/#ms-dos-2x-build-machine).
+[pre-configured machine](/disks/pcx86/dos/microsoft/2.00/#ms-dos-source-build-machine) ready to build the MS-DOS 2.x sources.
+A similar machine (without the PCjs debugger) is provided [below](https://www.pcjs.org/blog/2018/11/21/#ms-dos-source-build-machine).
 
 Attempting to build the sources raises several questions, including:
 
@@ -30,7 +30,7 @@ Attempting to build the sources raises several questions, including:
 
 If you look at the pictures that the [Computer History Museum](http://www.computerhistory.org/) originally
 [posted](http://www.computerhistory.org/atchm/microsoft-ms-dos-early-source-code/) when these files were first shared,
-you'd get the impression that two of those questions have already been answered: DOS 2.00, final distribution.
+you'd get the impression that one of those questions had already been answered: DOS 2.00, final distribution.
 
 ![MS-DOS 2.00]({{ site.demo-disks.baseurl }}/pcx86/dos/microsoft/2.00/MSDOS200-DISKS.jpg)
 
@@ -188,7 +188,7 @@ The "pre-selected" messages help you catch any build discrepancies due to these 
 Other files have been modified as well, but only to eliminate extraneous characters (eg, multiple EOF characters)
 that caused warnings or errors during the build process.
 
-### MS-DOS 2.x Build Machine
+### MS-DOS Source Build Machine
 
 A quick note about speed: the typical PC in the early 1980s was still a 4.77Mhz 8088-based machine, so it took
 a considerable amount of time to assemble all the MS-DOS 2.x sources.  If you're impatient, you can load the machine

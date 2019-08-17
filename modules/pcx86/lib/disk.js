@@ -785,7 +785,7 @@ class Disk extends Component {
                  * conversion to a forward-compatible 'data' array.
                  */
                 else {
-                    if (DEBUG && this.messageEnabled(Messages.DISK | Messages.DATA)) {
+                    if (DEBUG && this.messageEnabled(Messages.DISK + Messages.DATA)) {
                         let sCylinders = aDiskData.length + " track" + (aDiskData.length > 1 ? "s" : "");
                         let nHeads = aDiskData[0].length;
                         let sHeads = nHeads + " head" + (nHeads > 1 ? "s" : "");
@@ -1189,7 +1189,7 @@ class Disk extends Component {
                 }
                 if (dir.sName == null || dir.sName == "." || dir.sName == "..") continue;
                 let sPath = dir.sDir + dir.sName;
-                if (DEBUG && this.messageEnabled(Messages.DISK | Messages.DATA)) {
+                if (DEBUG && this.messageEnabled(Messages.DISK + Messages.DATA)) {
                     this.printMessage('"' + sPath + '" size=' + dir.cbSize + ' cluster=' + dir.iCluster + ' sectors=' + JSON.stringify(dir.apba));
                     if (dir.apba.length) this.printMessage(this.dumpSector(this.getSector(dir.apba[0]), dir.apba[0], sPath));
                 }
@@ -1246,7 +1246,7 @@ class Disk extends Component {
         if (!dir.sectorDirCache || !dir.pbaDirCache || dir.pbaDirCache != pba) {
             dir.pbaDirCache = pba;
             dir.sectorDirCache = this.getSector(dir.pbaDirCache);
-            if (DEBUG && this.messageEnabled(Messages.DISK | Messages.DATA)) {
+            if (DEBUG && this.messageEnabled(Messages.DISK + Messages.DATA)) {
                 this.printMessage(this.dumpSector(dir.sectorDirCache, dir.pbaDirCache, dir.sDir));
             }
         }
@@ -2576,7 +2576,7 @@ class FileInfo {
         this.aSegments = [];
         this.aOrdinals = [];                // this is an optional array for quick ordinal-to-segment lookup
 
-        if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+        if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
             this.disk.printMessage("loadSegmentTable(" + this.sPath + "," + Str.toHexLong(offEntries) + "," + Str.toHexWord(nEntries) + ")");
         }
 
@@ -2585,7 +2585,7 @@ class FileInfo {
             if (offSegment) {
                 let lenSegment = this.loadValue(offEntries + 2) || 0x10000;       // 0 means 64K
 
-                if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
                     this.disk.printMessage("segment " + iSegment + ": offStart=" + Str.toHexLong(offSegment) + " offEnd=" + Str.toHexLong(offSegment + lenSegment));
                 }
 
@@ -2629,7 +2629,7 @@ class FileInfo {
     {
         let iOrdinal = 1;
 
-        if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+        if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
             this.disk.printMessage("loadEntryTable(" + Str.toHexLong(offEntries) + "," + Str.toHexLong(offEntriesEnd) + ")");
         }
 
@@ -2640,7 +2640,7 @@ class FileInfo {
             if (!bEntries) break;
             let bSegment = w >> 8, iSegment;
 
-            if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+            if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
                 this.disk.printMessage("bundle for segment " + bSegment + ": " + bEntries + " entries @" + Str.toHex(offEntries));
             }
 
@@ -2677,12 +2677,12 @@ class FileInfo {
                     offEntries += 6;
                 }
                 if (!this.aSegments[iSegment]) {
-                    if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                    if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
                         this.disk.printMessage("invalid segment: " + iSegment);
                     }
                 } else {
                     this.aSegments[iSegment].aEntries[iOrdinal] = [offEntry];
-                    if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                    if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
                         this.disk.printMessage("ordinal " + iOrdinal + ": segment=" + iSegment + " offset=" + Str.toHexLong(offEntry) + " @" + Str.toHex(offDebug));
                     }
                 }
@@ -2707,7 +2707,7 @@ class FileInfo {
     {
         let cNames = 0;
 
-        if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+        if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
             this.disk.printMessage("loadNameTable(" + Str.toHexLong(offEntries) + (offEntriesEnd? ("," + Str.toHexLong(offEntriesEnd)) : "") + ")");
         }
 
@@ -2737,16 +2737,16 @@ class FileInfo {
                         let aEntries = this.aSegments[iSegment].aEntries[iOrdinal];
                         this.disk.assert(aEntries && aEntries.length == 1);
                         aEntries.push(sSymbol);
-                        if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                        if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
                             this.disk.printMessage("segment " + iSegment + " offset " + Str.toHexWord(aEntries[0]) + " ordinal " + iOrdinal + ": " + sSymbol + " @" + Str.toHex(offDebug));
                         }
                     } else {
-                        if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                        if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
                             this.disk.printMessage(this.sPath + ": cannot find segment " + iSegment + " (offset " + Str.toHexWord(tuple[1]) + ") for symbol " + sSymbol + " with ordinal " + iOrdinal + " @" + Str.toHex(offDebug));
                         }
                     }
                 } else {
-                    if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                    if (DEBUG && this.disk.messageEnabled(Messages.DISK + Messages.DATA)) {
                         this.disk.printMessage(this.sPath + ": cannot find ordinal " + iOrdinal + " for symbol " + sSymbol + " @" + Str.toHex(offDebug));
                     }
                 }

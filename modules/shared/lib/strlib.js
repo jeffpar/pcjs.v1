@@ -683,7 +683,7 @@ class Str {
              *
              * For reference purposes, the standard ANSI C set of format types is: "dioxXucsfeEgGpn%".
              */
-            let iType = "ACDFHIMNSTWYdfjcsoXx%".indexOf(type);
+            let iType = "ACDFHIMNSTWYbdfjcsoXx%".indexOf(type);
             if (iType < 0) {
                 text += '%' + aParts[iPart+1] + aParts[iPart+2] + aParts[iPart+3] + aParts[iPart+4] + type;
                 continue;
@@ -711,6 +711,7 @@ class Str {
             precision = precision? +precision.substr(1) : -1;
             // let length = aParts[iPart+4];       // eg, 'h', 'l' or 'L' (all currently ignored)
             let hash = flags.indexOf('#') >= 0;
+            let zeroPad = flags.indexOf('0') >= 0;
             let ach = null, s, radix = 0, prefix = "";
 
             /*
@@ -763,7 +764,7 @@ class Str {
              *
              *      printf("%W, %F %D, %Y\n", date);
              *
-             * because unlike the C runtime, we reuse the final parameter omce the format string has exhausted all parameters.
+             * because unlike the C runtime, we reuse the final parameter once the format string has exhausted all parameters.
              */
             let ch, date = /** @type {Date} */ (iType < 12 && typeof arg != "object"? Str.parseDate(arg) : arg), dateUndefined;
 
@@ -837,6 +838,13 @@ class Str {
             }
 
             switch(type) {
+            case 'b':
+                /*
+                 * This is a non-standard format specifier that seems handy.
+                 */
+                text += (arg? "true" : "false");
+                break;
+
             case 'd':
                 /*
                  * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
@@ -853,7 +861,7 @@ class Str {
                     s = arg.toFixed(precision);
                 }
                 if (s.length < width) {
-                    if (flags.indexOf('0') >= 0) {
+                    if (zeroPad) {
                         if (arg < 0) {
                             width--;
                             s = s.substr(1);
@@ -909,7 +917,7 @@ class Str {
 
             case 'X':
                 ach = Str.HexUpperCase;
-                if (hash) prefix = "0X";
+                // if (hash) prefix = "0X";     // I don't like that %#X uppercases both the prefix and the value
                 /* falls through */
 
             case 'x':
@@ -929,11 +937,25 @@ class Str {
                      */
                     arg = Number.parseInt(arg, arg.match(/(^0x|[a-f])/i)? 16 : 10);
                 }
+                if (zeroPad && !width) {
+                    /*
+                     * Here we replicate a bit of logic from toHex(), which selects a width based on the value, and
+                     * is triggered by the format specification "%0x", where zero-padding is requested without a width.
+                     */
+                    let v = Math.abs(arg);
+                    if (v <= 0xffff) {
+                        width = 4;
+                    } else if (v <= 0xffffffff) {
+                        width = 8;
+                    } else {
+                        width = 9;
+                    }
+                }
                 width -= prefix.length;
                 do {
                     let d = arg & (radix - 1);
                     arg >>>= (radix == 16? 4 : 3);
-                    if (flags.indexOf('0') >= 0 || !s || d || arg) {
+                    if (zeroPad || !s || d || arg) {
                         s = ach[d] + s;
                     } else {
                         if (prefix) {

@@ -15,6 +15,7 @@ information (errata, disks, etc) is provided where available.
 * [Graphics for the IBM PC](Graphics_for_the_IBM_PC/) by Dan Illowsky and Michael Abrash
 * [Graphics Programming Black Book](https://github.com/jeffpar/abrash-black-book/) by Michael Abrash
 * [Graphics Programming Black Book](https://github.com/jeffpar/abrash-black-book/) by Michael Abrash
+* [Microsoft QuickBASIC](Microsoft_QuickBASIC/) by Douglas Hergert
 * [PC Magazine Programmer's Technical Reference: The Processor and Coprocessor](PC_Magazine_Programmers_Technical_Reference/) by Robert L. Hummel
 * [Programmer's Guide to the EGA, VGA, and Super VGA Cards (3rd Edition)](Programmers_Guide_to_the_EGA_VGA_and_Super_VGA_Cards/) by Richard F. Ferraro
 * [Programming the 8086 and 8088](Programming_the_8086_and_8088/) by James W. Coffron
@@ -28,6 +29,7 @@ information (errata, disks, etc) is provided where available.
 * [Undocumented Windows](Undocumented_Windows/) (Covers Windows 3.1 and 3.0) by Schulman, Maxey, Pietrek
 
 [<img src="Graphics_for_the_IBM_PC/cover.jpg" width="200" height="260" alt="Graphics for the IBM PC"/>](Graphics_for_the_IBM_PC/)
+[<img src="Microsoft_QuickBASIC/cover.jpg" width="200" height="260" alt="Microsoft QuickBASIC"/>](Microsoft_QuickBASIC/)
 [<img src="PC_Magazine_Programmers_Technical_Reference/cover.jpg" width="200" height="260" alt="PC Magazine Programmer's Technical Reference: The Processor and Coprocessor"/>](PC_Magazine_Programmers_Technical_Reference/)
 [<img src="Programmers_Guide_to_the_EGA_VGA_and_Super_VGA_Cards/cover.jpg" width="200" height="260" alt="Programmer's Guide to the EGA, VGA, and Super VGA Cards"/>](Programmers_Guide_to_the_EGA_VGA_and_Super_VGA_Cards/)
 [<img src="Programming_the_8086_and_8088/cover.jpg" width="200" height="260" alt="Programming the 8086 and 8088"/>](Programming_the_8086_and_8088/)

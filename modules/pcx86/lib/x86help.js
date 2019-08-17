@@ -968,7 +968,7 @@ X86.helpCheckFault = function(nFault, nError, fHalt)
      * However, the foregoing notwithstanding, if MESSAGE.HALT is enabled along with all the other required
      * MESSAGE bits, then we want to halt regardless.
      */
-    if (this.messageEnabled(bitsMessage | Messages.HALT)) {
+    if (this.messageEnabled(bitsMessage + Messages.HALT)) {
         fHalt = true;
     }
 

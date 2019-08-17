@@ -268,12 +268,12 @@ class TestController extends Component {
      * printf(format, ...args)
      *
      * @this {TestController}
-     * @param {string} format
+     * @param {string|number} format
      * @param {...} args
      */
     printf(format, ...args)
     {
-        let s = Str.sprintf(format, ...args);
+        let s = Str.sprintf(format.toString(), ...args);
 
         if (this.controlBuffer != null) {
             if (s != '\r') {

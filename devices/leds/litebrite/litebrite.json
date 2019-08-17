@@ -3,13 +3,46 @@
     "class": "Machine",
     "type": "leds",
     "name": "Lite-Brite Demo",
-    "version": 1.20,
+    "version": 2.00,
     "autoStart": false,
     "bindings": {
       "clear": "clearLB",
       "print": "printLB"
     },
     "overrides": ["autoStart"]
+  },
+  "lbClock": {
+    "class": "Time",
+    "cyclesPerSecond": 1,
+    "cyclesMinimum": 1,
+    "cyclesMaximum": 120,
+    "bindings": {
+      "run": "runLB",
+      "speed": "speedLB",
+      "step": "stepLB",
+      "throttle": "throttleLB"
+    },
+    "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","requestAnimationFrame"]
+  },
+  "lbDisplay": {
+    "class": "LED",
+    "type": 1,
+    "cols": 45,
+    "rows": 39,
+    "backgroundColor": "black",
+    "hexagonal": true,
+    "highlight": false,
+    "bindings": {
+      "container": "displayLB"
+    },
+    "overrides": ["color","backgroundColor"]
+  },
+  "lbInput": {
+    "class": "Input",
+    "drag": true,
+    "bindings": {
+      "reset": "resetLB"
+    }
   },
   "lbChip": {
     "class": "Chip",
@@ -46,38 +79,5 @@
       }
     },
     "overrides": ["blue","green","violet","red","orange","pink","yellow","white","wrap","backgroundImage","pattern"]
-  },
-  "lbClock": {
-    "class": "Time",
-    "cyclesPerSecond": 1,
-    "cyclesMinimum": 1,
-    "cyclesMaximum": 120,
-    "bindings": {
-      "run": "runLB",
-      "speed": "speedLB",
-      "step": "stepLB",
-      "throttle": "throttleLB"
-    },
-    "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","requestAnimationFrame"]
-  },
-  "lbDisplay": {
-    "class": "LED",
-    "type": 1,
-    "cols": 45,
-    "rows": 39,
-    "backgroundColor": "black",
-    "hexagonal": true,
-    "highlight": false,
-    "bindings": {
-      "container": "displayLB"
-    },
-    "overrides": ["color","backgroundColor"]
-  },
-  "lbInput": {
-    "class": "Input",
-    "drag": true,
-    "bindings": {
-      "reset": "resetLB"
-    }
   }
 }

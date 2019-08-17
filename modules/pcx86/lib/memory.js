@@ -677,7 +677,7 @@ class Memory {
      */
     readNone(off, addr)
     {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.CPU | Messages.MEM) /* && !off */) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.CPU + Messages.MEM) /* && !off */) {
             this.dbg.message("attempt to read invalid block %" + Str.toHex(addr), true);
         }
         return 0xff;
@@ -693,7 +693,7 @@ class Memory {
      */
     writeNone(off, v, addr)
     {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.CPU | Messages.MEM) /* && !off */) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.CPU + Messages.MEM) /* && !off */) {
             this.dbg.message("attempt to write " + Str.toHexWord(v) + " to invalid block %" + Str.toHex(addr), true);
         }
     }

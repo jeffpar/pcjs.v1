@@ -251,7 +251,7 @@ class Computer extends Component {
 
         this.println(PCX86.APPNAME + " v" + (XMLVERSION || PCX86.APPVERSION) + "\n" + COPYRIGHT + "\n" + LICENSE);
 
-        if (DEBUG && this.messageEnabled()) this.printMessage("PREFETCH: " + PREFETCH + ", TYPEDARRAYS: " + TYPEDARRAYS);
+        if (DEBUG) this.printf("PREFETCH: %b, TYPEDARRAYS: %b\n", PREFETCH, TYPEDARRAYS);
 
         /*
          * Iterate through all the components again and call their initBus() handler, if any
@@ -653,9 +653,7 @@ class Computer extends Component {
             Component.addMachineResource(this.idMachine, sURL, sStateData);
             this.sStateData = sStateData;
             this.fStateData = true;
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage("loaded state file " + sURL.replace(this.sUserID || "xxx", "xxx"));
-            }
+            if (DEBUG) this.printf("loaded state file %s\n", sURL.replace(this.sUserID || "xxx", "xxx"));
         } else {
             this.sResumePath = null;
             this.fServerState = false;
@@ -695,7 +693,7 @@ class Computer extends Component {
                 return;
             }
         }
-        if (DEBUG && this.messageEnabled()) this.printMessage("Computer.wait(ready)");
+        if (DEBUG) this.printf("Computer.wait(ready)\n");
         fn.call(this, parms);
     }
 
@@ -720,9 +718,7 @@ class Computer extends Component {
                 fValid = false;
                 if (!stateComputer) stateValidate.clear();
             } else {
-                if (DEBUG && this.messageEnabled()) {
-                    this.printMessage("Last state: " + sTimestampComputer + " (validate: " + sTimestampValidate + ")");
-                }
+                if (DEBUG) this.printf("Last state: %s (validate: %s)\n", sTimestampComputer, sTimestampValidate);
             }
         }
         return fValid;
@@ -742,9 +738,7 @@ class Computer extends Component {
             resume = this.resume || (this.sStateData? Computer.RESUME_AUTO : Computer.RESUME_NONE);
         }
 
-        if (DEBUG && this.messageEnabled()) {
-            this.printMessage("Computer.powerOn(" + (resume == Computer.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")) + ")");
-        }
+        if (DEBUG) this.printf("Computer.powerOn(%s)\n", (resume == Computer.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")));
 
         if (this.nPowerChange) {
             return;
@@ -998,9 +992,7 @@ class Computer extends Component {
             this.flags.initDone = true;
         }
 
-        if (DEBUG && this.flags.powered && this.messageEnabled()) {
-            this.printMessage("Computer.donePowerOn(): redundant");
-        }
+        if (DEBUG && this.flags.powered) this.printf("Computer.donePowerOn(): redundant\n");
 
         let stateComputer = aParms[0];
         let fRepower = (aParms[1] < 0);
@@ -1164,9 +1156,7 @@ class Computer extends Component {
         let data;
         let sState = "none";
 
-        if (DEBUG && this.messageEnabled()) {
-            this.printMessage("Computer.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
-        }
+        if (DEBUG) this.printf("Computer.powerOff(%s%s)\n", (fSave? "save" : "nosave"), (fShutdown? ",shutdown" : ""));
 
         if (this.nPowerChange) {
             return null;
@@ -1282,14 +1272,14 @@ class Computer extends Component {
     reset()
     {
         if (this.bus && this.bus.reset) {
-            this.printMessage("Resetting " + this.bus.type);
+            this.printf("Resetting %s\n", this.bus.type);
             this.bus.reset();
         }
         let aComponents = Component.getComponents(this.id);
         for (let iComponent = 0; iComponent < aComponents.length; iComponent++) {
             let component = aComponents[iComponent];
             if (component !== this && component !== this.bus && component.reset) {
-                this.printMessage("Resetting " + component.type);
+                this.printf("Resetting %s\n", component.type);
                 component.reset();
             }
         }
@@ -1490,8 +1480,7 @@ class Computer extends Component {
     verifyUserID(sUserID)
     {
         this.sUserID = null;
-        let fMessages = DEBUG && this.messageEnabled();
-        if (fMessages) this.printMessage("verifyUserID(" + sUserID + ")");
+        if (DEBUG) this.printf("verifyUserID(%s)\n", sUserID);
         let sRequest = Web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
         let response = Web.getResource(sRequest);
         let nErrorCode = response[0];
@@ -1501,16 +1490,16 @@ class Computer extends Component {
                 response = eval("(" + sResponse + ")"); // jshint ignore:line
                 if (response.code && response.code == UserAPI.CODE.OK) {
                     Web.setLocalStorageItem(Computer.STATE_USERID, response.data);
-                    if (fMessages) this.printMessage(Computer.STATE_USERID + " updated: " + response.data);
+                    if (DEBUG) this.printf("%s updated: %s\n" + Computer.STATE_USERID, response.data);
                     this.sUserID = response.data;
                 } else {
-                    if (fMessages) this.printMessage(response.code + ": " + response.data);
+                    if (DEBUG) this.printf("%s: %s\n", response.code, response.data);
                 }
             } catch(err) {
                 Component.error(err.message + " (" + sResponse + ")");
             }
         } else {
-            if (fMessages) this.printMessage("invalid response (error " + nErrorCode + ")");
+            if (DEBUG) this.printf("invalid response (error %d)\n", nErrorCode);
         }
         return this.sUserID;
     }
@@ -1525,14 +1514,10 @@ class Computer extends Component {
     {
         let sStatePath = null;
         if (this.sUserID) {
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage(Computer.STATE_USERID + " for load: " + this.sUserID);
-            }
+            if (DEBUG) this.printf("%s for load: %s\n", Computer.STATE_USERID, this.sUserID);
             sStatePath = Web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, PCX86.APPVERSION);
         } else {
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage(Computer.STATE_USERID + " unavailable");
-            }
+            if (DEBUG) this.printf("%s unavailable\n", Computer.STATE_USERID);
         }
         return sStatePath;
     }
@@ -1553,9 +1538,7 @@ class Computer extends Component {
          * tend to blow off alerts() and the like when closing down.
          */
         if (sState) {
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage("size of server state: " + sState.length + " bytes");
-            }
+            if (DEBUG) this.printf("size of server state: %d bytes\n", sState.length);
             let response = this.storeServerState(sUserID, sState, true);
             if (response && response[UserAPI.RES.CODE] == UserAPI.CODE.OK) {
                 this.notice("Machine state saved to server");
@@ -1570,9 +1553,7 @@ class Computer extends Component {
                 this.resetUserID();
             }
         } else {
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage("no state to store");
-            }
+            if (DEBUG) this.printf("no state to store\n");
         }
     }
 
@@ -1587,9 +1568,7 @@ class Computer extends Component {
      */
     storeServerState(sUserID, sState, fSync)
     {
-        if (DEBUG && this.messageEnabled()) {
-            this.printMessage(Computer.STATE_USERID + " for store: " + sUserID);
-        }
+        if (DEBUG) this.printf("%s for store: %s\n", Computer.STATE_USERID, sUserID);
         /*
          * TODO: Determine whether or not any browsers cancel our request if we're called during a browser "shutdown" event,
          * and whether or not it matters if we do an async request (currently, we're not, to try to ensure the request goes through).
@@ -1613,7 +1592,7 @@ class Computer extends Component {
                 }
                 sResponse = '{"' + UserAPI.RES.CODE + '":' + response[1] + ',"' + UserAPI.RES.DATA + '":"' + sResponse + '"}';
             }
-            if (DEBUG && this.messageEnabled()) this.printMessage(sResponse);
+            if (DEBUG) this.printMessage(sResponse);
             return JSON.parse(sResponse);
         }
         return null;
@@ -1841,9 +1820,7 @@ class Computer extends Component {
                  */
                 let computer = new Computer(parmsComputer, parmsMachine, true);
 
-                if (DEBUG && computer.messageEnabled()) {
-                    computer.printMessage("onInit(" + computer.flags.powered + ")");
-                }
+                if (DEBUG) computer.printf("onInit(%b)\n", computer.flags.powered);
 
                 /*
                  * Bind any "power", "reset" and "save" buttons.  An "erase" button was also considered,
@@ -1883,9 +1860,7 @@ class Computer extends Component {
                  */
                 computer.flags.unloading = false;
 
-                if (DEBUG && computer.messageEnabled()) {
-                    computer.printMessage("onShow(" + computer.flags.initDone + "," + computer.flags.powered + ")");
-                }
+                if (DEBUG) computer.printf("onShow(%b,%b)\n", computer.flags.initDone, computer.flags.powered);
 
                 if (computer.flags.initDone && !computer.flags.powered) {
                     /*
@@ -1937,9 +1912,7 @@ class Computer extends Component {
                  */
                 computer.flags.unloading = true;
 
-                if (DEBUG && computer.messageEnabled()) {
-                    computer.printMessage("onExit(" + computer.flags.powered + ")");
-                }
+                if (DEBUG) computer.printf("onExit(%b)\n", computer.flags.powered);
 
                 if (computer.flags.powered) {
                     /**

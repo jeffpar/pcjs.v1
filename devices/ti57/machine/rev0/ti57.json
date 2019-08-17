@@ -3,28 +3,16 @@
     "class": "Machine",
     "type": "TI57",
     "name": "TI-57 Emulator",
-    "version": 1.20,
+    "version": 2.00,
     "bindings": {
       "clear": "clearTI57",
       "print": "printTI57"
     }
   },
-  "chip": {
-    "class": "Chip",
-    "type": "TMS-1501",
-    "input": "buttons",
-    "output": "display",
-    "bindings": {
-      "2nd": "ind2nd",
-      "INV": "indINV",
-      "Deg": "indDeg",
-      "Rad": "indRad",
-      "Grad": "indGrad"
-    }
-  },
   "clock": {
     "class": "Time",
     "cyclesPerSecond": 650000,
+    "clockByFrame": true,
     "bindings": {
       "run": "runTI57",
       "speed": "speedTI57",
@@ -48,14 +36,14 @@
     "buttonDelay": 50,
     "location": [45, 316, 372, 478, 0.34, 0.5, 459, 832, 322, 168, 75, 38],
     "map": [
-      ["2nd",  "inv",  "lnx",  "\\b",  "clr"],
+      ["2nd",  "inv",  "lnx",  "\b",   "clr"],
       ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
       ["sst",  "sto",  "rcl",  "sum",  "ypow"],
       ["bst",  "ee",   "(",    ")",    "/"],
       ["gto",  "7",    "8",    "9",    "*"],
       ["sbr",  "4",    "5",    "6",    "-"],
       ["rst",  "1",    "2",    "3",    "+"],
-      ["r/s",  "0",    ".",    "+/-",  "=|\\r"]
+      ["r/s",  "0",    ".",    "+/-",  "=|\r"]
     ],
     "bindings": {
       "surface": "imageTI57",
@@ -208,5 +196,18 @@
       808,800,800,800,800,800,800,800,800,1312,6597,3094,769,8177,801,3093,
       8183,1313,8182,613,3343,7148,39,3188,6561,3130,3090,7165,3188,3587,0,0
     ]
+  },
+  "cpu": {
+    "class": "CPU",
+    "type": "TMS-1501",
+    "input": "buttons",
+    "output": "display",
+    "bindings": {
+      "2nd": "ind2nd",
+      "INV": "indINV",
+      "Deg": "indDeg",
+      "Rad": "indRad",
+      "Grad": "indGrad"
+    }
   }
 }

@@ -1260,11 +1260,11 @@ class HDC extends Component {
                  * printMessageIO() calls, if enabled, can be overwhelming for this port, so limit them to the first
                  * and last bytes of each sector.
                  */
-                if (this.messageEnabled(Messages.PORT | Messages.HDC)) {
+                if (this.messageEnabled(Messages.PORT + Messages.HDC)) {
                     this.printMessageIO(port, undefined, addrFrom, "DATA[" + drive.iByte + "]", bIn);
                 }
                 if (drive.iByte > 1) {          // in other words, if drive.iByte == drive.cbTransfer...
-                    if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
+                    if (this.messageEnabled(Messages.DATA + Messages.HDC)) {
                         let sDump = drive.disk.dumpSector(drive.sector);
                         if (sDump) this.dbg.message(sDump);
                     }
@@ -1376,11 +1376,11 @@ class HDC extends Component {
                      * printMessageIO() calls, if enabled, can be overwhelming for this port, so limit them to the first
                      * and last bytes of each sector.
                      */
-                    if (this.messageEnabled(Messages.PORT | Messages.HDC)) {
+                    if (this.messageEnabled(Messages.PORT + Messages.HDC)) {
                         this.printMessageIO(port, bOut, addrFrom, "DATA[" + drive.iByte + "]");
                     }
                     if (drive.iByte > 1) {          // in other words, if drive.iByte == drive.cbTransfer...
-                        if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
+                        if (this.messageEnabled(Messages.DATA + Messages.HDC)) {
                             let sDump = drive.disk.dumpSector(drive.sector);
                             if (sDump) this.dbg.message(sDump);
                         }
@@ -1938,9 +1938,9 @@ class HDC extends Component {
                  * has a low tolerance for fast controller interrupts during multi-sector operations.
                  */
                 this.chipset.setIRR(ChipSet.IRQ.ATC1 + this.nInterface, 120);
-                if (DEBUG) this.printMessage(this.idComponent + ".setATCIRR(): enabled", Messages.PIC | Messages.HDC);
+                if (DEBUG) this.printMessage(this.idComponent + ".setATCIRR(): enabled", Messages.PIC + Messages.HDC);
             } else {
-                if (DEBUG) this.printMessage(this.idComponent + ".setATCIRR(): disabled", Messages.PIC | Messages.HDC);
+                if (DEBUG) this.printMessage(this.idComponent + ".setATCIRR(): disabled", Messages.PIC + Messages.HDC);
             }
         }
     }
@@ -2118,7 +2118,7 @@ class HDC extends Component {
         let bCmdIndex = this.regDataIndex;
         if (bCmdIndex < this.regDataTotal) {
             bCmd = this.regDataArray[this.regDataIndex++];
-            if (this.messageEnabled((bCmdIndex > 0? Messages.PORT : 0) | Messages.HDC)) {
+            if (this.messageEnabled((bCmdIndex > 0? Messages.PORT : 0) + Messages.HDC)) {
                 this.printMessage(this.idComponent + ".popCmd(" + bCmdIndex + "): " + Str.toHexByte(bCmd) + (!bCmdIndex && HDC.aXTACommands[bCmd]? (" (" + HDC.aXTACommands[bCmd] + ")") : ""), true);
             }
         }
@@ -2152,7 +2152,7 @@ class HDC extends Component {
      */
     pushResult(bResult)
     {
-        if (DEBUG && this.messageEnabled((this.regDataTotal > 0? Messages.PORT : 0) | Messages.HDC)) {
+        if (DEBUG && this.messageEnabled((this.regDataTotal > 0? Messages.PORT : 0) + Messages.HDC)) {
             this.printMessage(this.idComponent + ".pushResult(" + this.regDataTotal + "): " + Str.toHexByte(bResult), true);
         }
         this.regDataArray[this.regDataTotal++] = bResult;

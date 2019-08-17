@@ -86,7 +86,7 @@ class Debugger extends Component {
      */
     constructor(parmsDbg)
     {
-        super("Debugger", parmsDbg);
+        super("Debugger", parmsDbg, -1);
 
         if (DEBUGGER) {
 

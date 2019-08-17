@@ -90,6 +90,7 @@ class ROM extends Device {
         super(idMachine, idDevice, ROM.VERSION, config);
 
         this.data = config['values'];
+        if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
 
         /*
          * This addrMask calculation assumes that the data array length is a power-of-two (which we assert).
@@ -127,13 +128,13 @@ class ROM extends Device {
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
             this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC);
             this.ledInput.addHover(function onROMHover(col, row) {
-                if (rom.chip) {
+                if (rom.cpu) {
                     let sDesc = rom.sCellDesc;
                     if (col >= 0 && row >= 0) {
                         let addr = row * rom.cols + col;
                         this.assert(addr >= 0 && addr < rom.data.length);
                         let opCode = rom.data[addr];
-                        sDesc = rom.chip.disassemble(opCode, addr);
+                        sDesc = rom.cpu.disassemble(opCode, addr);
                     }
                     rom.setBindingText(ROM.BINDING.CELLDESC, sDesc);
                 }
@@ -230,7 +231,7 @@ class ROM extends Device {
     /**
      * reset()
      *
-     * Called by the Chip (eg, TMS1500) onReset() handler.  Originally, there was no need for this
+     * Called by the CPU (eg, TMS1500) onReset() handler.  Originally, there was no need for this
      * handler, until we added the min-debugger's ability to edit ROM locations via setData().  So this
      * gives the user the ability to revert back to the original ROM if they want to undo any modifications.
      *
@@ -256,14 +257,14 @@ class ROM extends Device {
     }
 
     /**
-     * setChip()
+     * setCPU()
      *
      * @this {ROM}
-     * @param {Chip} chip
+     * @param {*} cpu
      */
-    setChip(chip)
+    setCPU(cpu)
     {
-        this.chip = chip;
+        this.cpu = cpu;
     }
 
     /**
@@ -290,4 +291,4 @@ ROM.BINDING = {
     CELLDESC:   "cellDesc"
 };
 
-ROM.VERSION = +VERSION || 1.00;
+ROM.VERSION = +VERSION || 2.00;

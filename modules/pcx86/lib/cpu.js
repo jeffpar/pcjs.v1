@@ -1108,14 +1108,14 @@ class CPU extends Component {
             if (timer[1] < 0) continue;
             timer[1] -= nCycles;
             if (timer[1] <= 0) {
-                if (DEBUG && this.messageEnabled(Messages.CPU | Messages.TIMER)) {      // CPU TIMER message (as opposed to CHIPSET TIMER message)
+                if (DEBUG && this.messageEnabled(Messages.CPU + Messages.TIMER)) {      // CPU TIMER message (as opposed to CHIPSET TIMER message)
                     this.printMessage("updateTimer(" + nCycles + "): firing " + timer[0] + " with only " + (timer[1] + nCycles) + " cycles left");
                 }
                 timer[1] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
                 timer[3]();         // safe to invoke the callback function now
                 if (timer[2]) {
                     this.setTimer(iTimer, timer[2]);
-                    if (DEBUG && this.messageEnabled(Messages.CPU | Messages.TIMER)) {  // CPU TIMER message (as opposed to CHIPSET TIMER message)
+                    if (DEBUG && this.messageEnabled(Messages.CPU + Messages.TIMER)) {  // CPU TIMER message (as opposed to CHIPSET TIMER message)
                         this.printMessage("updateTimer(" + nCycles + "): rearming " + timer[0] + " for " + timer[2] + "ms (" + timer[1] + " cycles)");
                     }
                 }
